@@ -1,0 +1,180 @@
+# ============================================================
+# 🧊 "기대가 식은 자리" v2.5 — 듀얼 트리거 백테스트 설정
+# ============================================================
+# 핵심 철학 v2.5:
+#   1. 조정이 끝나는 자리(Zone)를 먼저 찾는다       → BES 스코어링
+#   2. 시동 신호(Impulse)에서 일부 선취한다          → Trigger-1
+#   3. 확정 신호(Confirm)에서 비중을 늘린다          → Trigger-2
+#   4. 가짜 시동은 손절로 비용 처리한다              → 모드별 손절
+#   5. 손익비와 승률을 '모드별'로 관리한다           → 분리 통계
+# ============================================================
+
+strategy:
+  name: "cooled_zone_v2.5_dual"
+
+  # === Pre-screening ===
+  min_revenue_억: 1000
+  min_daily_trading_value_억: 5
+  min_consecutive_profit_quarters: 2
+
+  # === ATR 설정 ===
+  atr_period: 14
+  atr_pullback_ranges:
+    noise: [0, 1.0]        # 0.0점
+    shallow: [1.0, 1.5]    # 0.4점
+    healthy: [1.5, 2.0]    # 0.7점
+    sweet_spot: [2.0, 2.5] # 1.0점 ★
+    deep: [2.5, 3.5]       # 0.7점
+    structural: [3.5, 999] # 0.4점
+  atr_stop_multiplier: 2.0
+  atr_target_multiplier: 5.0
+
+  # === 밸류에이션 ===
+  value_discount_threshold: 0.9
+  eps_revision_lookback_months: 3
+  forward_value_ranges:
+    deep_discount: [0, 0.7]
+    discount: [0.7, 0.9]
+    fair: [0.9, 1.1]
+    premium: [1.1, 1.3]
+    expensive: [1.3, 999]
+
+  # === 모멘텀/수급 ===
+  rsi_period: 14
+  rsi_sweet_spot: [38, 45]
+  stoch_rsi_threshold: 25
+  volume_ma_period: 20
+
+  # === 추세 필터 ===
+  sma_short: 60
+  sma_long: 120
+  sma_trend: 200
+  adx_threshold: 20
+
+  # === 분배 리스크 ===
+  drs_max_threshold: 0.60
+  drs_lookback: 20
+  drs_weights:
+    obv_slope: 0.30
+    volume_pattern: 0.25
+    institutional_flow: 0.25
+    bounce_strength: 0.20
+
+  # === BES 가중치 ===
+  weights:
+    atr_pullback: 0.35
+    forward_value: 0.35
+    supply_demand: 0.30
+
+  # === 등급 기준 ===
+  grades:
+    A: { min_bes: 0.85, position_ratio: 1.00 }
+    B: { min_bes: 0.70, position_ratio: 0.67 }
+    C: { min_bes: 0.55, position_ratio: 0.33 }
+
+  # ============================================================
+  # 🔥 2단계 트리거 엔진 (Impulse + Confirm)
+  # ============================================================
+  triggers:
+    # ── Trigger-1: 시동 트리거 (공격형, 급등 초입 선점) ──
+    # 3개 조건 중 2개 이상 충족 시 발동
+    impulse:
+      min_conditions: 2          # 3개 중 최소 충족 수
+      prev_high_breakout: true   # 전일 고가 돌파 마감
+      volume_surge_mult: 1.5     # 거래량 >= 20일 평균 × 1.5
+      close_above_ma5: true      # 종가 > 5MA
+      # 추가 확인: Higher Low (최근 2개 저점 비교)
+      higher_low_check: true
+      # 시동 트리거 전용 리스크
+      stop_loss_pct: 0.03        # -3% 즉시 손절 (가짜 시동 빠른 컷)
+      swing_low_stop: true       # 또는 스윙 저점 이탈 시 즉시 컷
+
+    # ── Trigger-2: 확인 트리거 (보수형, 안전 진입) ──
+    confirm:
+      ma20_recovery_days: 2      # 20MA 위 복귀 후 2일 연속 유지
+      volume_maintain: true      # 거래량 증가/유지
+      no_new_low: true           # 저점 갱신 없음
+      rsi_above: 50              # RSI > 50 회복
+      # 확인 트리거 전용 리스크
+      stop_loss_pct: 0.05        # -5% 손절 (확인 후 진입이라 여유)
+
+    # ── 분할 매수 비중 ──
+    staged_entry:
+      stage1_impulse_pct: 0.40   # 1차: 시동 트리거 → 40%
+      stage2_confirm_pct: 0.40   # 2차: 확인 트리거 → 40%
+      stage3_breakout_pct: 0.20  # 3차: 전고점 돌파 + 거래량 1.5배 → 20%
+      breakout_volume_mult: 1.5  # 3차 진입 거래량 조건
+
+  # ============================================================
+  # 🔥 듀얼 트리거 시스템 (v2.5 신규)
+  # ============================================================
+  dual_trigger:
+    enabled: true
+
+    # ── Trigger-1: 시동 트리거 (Impulse) ──
+    trigger_1:
+      name: "impulse"
+      min_conditions: 2
+      volume_surge_mult: 1.5
+      higher_low_days: 3
+      volume_contraction: 0.7
+      lower_tail_ratio: 0.6
+      stop_loss_atr_mult: 1.5    # 타이트 손절
+      target_atr_mult: 4.0
+      position_pct: 0.40
+
+    # ── Trigger-2: 확인 트리거 (Confirm) ──
+    trigger_2:
+      name: "confirm"
+      above_sma20_days: 2
+      no_new_low_days: 5
+      rsi_above: 50
+      stop_loss_atr_mult: 2.0    # 여유 손절
+      target_atr_mult: 5.0
+      position_pct: 0.40
+
+    # ── Trigger-3: 돌파 추가 (Breakout Add) ──
+    trigger_3:
+      name: "breakout_add"
+      new_high_days: 10
+      volume_surge_mult: 1.5
+      stop_loss_atr_mult: 2.0
+      target_atr_mult: 6.0
+      position_pct: 0.20
+
+# ============================================================
+# 백테스트 설정
+# ============================================================
+backtest:
+  start_date: "2019-01-01"
+  end_date: "2024-12-31"
+  initial_capital: 50000000
+  max_risk_pct: 0.015
+  max_positions: 4
+  max_single_position_pct: 0.40
+  max_portfolio_risk_pct: 0.06
+  commission_rate: 0.0015
+  slippage_rate: 0.001
+  trailing_stop_atr_mult: 2.0
+  partial_take_profit_pct: 0.50
+  trend_exit_consecutive_days: 3
+
+# ============================================================
+# 업종별 Forward PER 참고 범위
+# ============================================================
+sector_per:
+  반도체: 15.0
+  자동차: 7.0
+  배터리: 25.0
+  바이오: 30.0
+  은행: 5.5
+  증권: 8.0
+  화학: 10.0
+  철강: 6.0
+  유통: 12.0
+  IT: 18.0
+  건설: 7.0
+  조선: 12.0
+  통신: 10.0
+  식품: 14.0
+  기타: 11.0

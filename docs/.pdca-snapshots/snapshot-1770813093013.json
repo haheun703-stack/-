@@ -1,0 +1,272 @@
+{
+  "timestamp": "2026-02-11T12:31:33.012Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-02-11T12:28:02.885Z",
+    "activeFeatures": [
+      "주식분석-서브에이전트",
+      "sub-agent-project",
+      "entities",
+      "use_cases",
+      "adapters",
+      "agents"
+    ],
+    "primaryFeature": "주식분석-서브에이전트",
+    "features": {
+      "주식분석-서브에이전트": {
+        "phase": "plan",
+        "matchRate": null,
+        "iterationCount": 0,
+        "startedAt": "2026-02-11T11:15:00.000Z",
+        "tasks": {
+          "plan": "completed"
+        }
+      },
+      "sub-agent-project": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-11T11:10:53.007Z",
+          "lastUpdated": "2026-02-11T12:28:02.885Z"
+        },
+        "lastFile": "d:\\sub-agent-project\\main.py"
+      },
+      "entities": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-11T11:10:54.223Z",
+          "lastUpdated": "2026-02-11T11:13:57.986Z"
+        },
+        "lastFile": "d:\\sub-agent-project\\src\\entities\\models.py"
+      },
+      "use_cases": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-11T11:10:55.433Z",
+          "lastUpdated": "2026-02-11T11:14:44.961Z"
+        },
+        "lastFile": "d:\\sub-agent-project\\src\\use_cases\\stock_analysis.py"
+      },
+      "adapters": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-11T11:10:56.676Z",
+          "lastUpdated": "2026-02-11T12:25:39.801Z"
+        },
+        "lastFile": "d:\\sub-agent-project\\src\\adapters\\kis_stock_data_adapter.py"
+      },
+      "agents": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-11T11:10:57.923Z",
+          "lastUpdated": "2026-02-11T12:03:29.769Z"
+        },
+        "lastFile": "d:\\sub-agent-project\\src\\agents\\condition_judge.py"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 1,
+      "level": "Dynamic",
+      "phaseHistory": []
+    },
+    "session": {
+      "startedAt": "2026-02-11T10:58:34.349Z",
+      "onboardingCompleted": true,
+      "lastActivity": "2026-02-11T12:28:02.885Z"
+    },
+    "history": [
+      {
+        "action": "plan_created",
+        "feature": "주식분석-서브에이전트",
+        "timestamp": "2026-02-11T11:15:00.000Z"
+      },
+      {
+        "timestamp": "2026-02-11T11:10:53.007Z",
+        "feature": "sub-agent-project",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:10:54.223Z",
+        "feature": "entities",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:10:55.433Z",
+        "feature": "use_cases",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:10:56.676Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:10:57.923Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:13:57.986Z",
+        "feature": "entities",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:14:20.741Z",
+        "feature": "use_cases",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:14:44.961Z",
+        "feature": "use_cases",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:15:05.037Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:15:27.297Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:15:44.390Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:16:01.870Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:16:24.964Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:17:02.734Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:17:33.027Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:17:59.492Z",
+        "feature": "sub-agent-project",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:25:10.142Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:48:49.196Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:49:02.980Z",
+        "feature": "sub-agent-project",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T11:49:09.145Z",
+        "feature": "sub-agent-project",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:02:52.007Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:03:05.168Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:03:12.674Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:03:18.857Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:03:29.769Z",
+        "feature": "agents",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:25:39.801Z",
+        "feature": "adapters",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-11T12:28:02.885Z",
+        "feature": "sub-agent-project",
+        "phase": "do",
+        "action": "updated"
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.claude/
+.bkit/
+
+# 데이터/캐시
+stock_data_daily/
+data/
+results/
+*.dat
+nul
+
+# 빌드/압축
+*.zip
+*.tar.gz
+
+# IDE
+.vscode/
+
+# 리포트 (로컬 생성물)
+backtest_report_*.html
+backtest.log
