@@ -100,6 +100,14 @@ class RegimeGate:
     # Public API
     # ──────────────────────────────────────────────
 
+    def set_sa_floor(self, floor: float) -> None:
+        """SA Floor 동적 조정 (공매도 체제에 따라 비대칭 적용).
+
+        공매도 활발: floor=0.30 → hostile 도달 가능
+        공매도 금지: floor=0.55 → 사망나선 방지
+        """
+        self.sa_floor = max(0.0, min(1.0, floor))
+
     def update_trade_outcome(self, is_win: bool) -> None:
         """거래 완료 후 승패 기록. backtest_engine에서 호출."""
         self._recent_trades.append(1 if is_win else 0)

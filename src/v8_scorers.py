@@ -351,13 +351,13 @@ class ScoringEngine:
     # S5: 수급/스마트머니 스코어 (가중치 0.15)
     # ═══════════════════════════════════════════════════════
     def score_smart_money(self, row: pd.Series) -> ScoreResult:
-        """기관 매집 감지 — OBV 다이버전스 + 기관 순매수"""
+        """기관 매집 감지 — OBV 다이버전스 + 기관수급 + DRS"""
         w = self.weights.get('smart_money', 0.15)
         cfg = self.cfg.get('smart_money', {})
         score = 0.0
         bd = {}
 
-        # (a) OBV 다이버전스
+        # (a) OBV 다이버전스 (0.40)
         price_trend = row.get('price_trend_5d', 0)
         obv_trend = row.get('obv_trend_5d', 0)
 
@@ -370,18 +370,18 @@ class ScoringEngine:
         score += obv_score
         bd['obv_divergence'] = round(obv_score, 3)
 
-        # (b) 기관/외국인 순매수
+        # (b) 기관/외국인 순매수 (0.30)
         inst_net = row.get('institutional_net_buy_5d', 0)
         if inst_net > 0:
             inst_score = 0.30
         elif inst_net == 0:
-            inst_score = 0.10
+            inst_score = 0.10  # 데이터 없음 → 중립 보너스
         else:
             inst_score = 0.0
         score += inst_score
         bd['institutional'] = round(inst_score, 3)
 
-        # (c) 분배 리스크 (DRS) — 낮을수록 좋음
+        # (c) 분배 리스크 (DRS) — 낮을수록 좋음 (0.30)
         drs = row.get('distribution_risk_score', row.get('smart_z', 0.5))
         drs_safe = cfg.get('drs_safe_threshold', 0.3)
         drs_neutral = cfg.get('drs_neutral_threshold', 0.5)
@@ -389,7 +389,7 @@ class ScoringEngine:
         if drs < drs_safe:
             drs_score = 0.30
         elif drs <= drs_neutral:
-            drs_score = 0.15  # 경계값 포함 (0.5 = 중립)
+            drs_score = 0.15
         else:
             drs_score = 0.0
         score += drs_score

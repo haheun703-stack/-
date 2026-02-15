@@ -117,6 +117,15 @@ class BacktestEngine:
         self.regime_gate = RegimeGate(self.config)
         self.regime_log: list[dict] = []  # 체제 변화 추적용
 
+        # v8.3: 공매도 캘린더 + Regime Profile
+        self._short_calendar = self._parse_short_calendar(
+            self.config.get("short_selling_calendar", [])
+        )
+        self._regime_profiles = self.config.get("regime_profiles", {})
+        self._base_max_positions = self.max_positions
+        self._base_max_hold_days = self.max_hold_days
+        self._current_short_status = None  # 캐시
+
         # v4.1: 적응형 청산
         adaptive_cfg = self.config.get("adaptive_exit", {})
         self.adaptive_exit_enabled = adaptive_cfg.get("enabled", False)
@@ -181,6 +190,64 @@ class BacktestEngine:
             data[fpath.stem] = pd.read_parquet(fpath)
         logger.info(f"데이터 로딩: {len(data)}종목")
         return data
+
+    # ──────────────────────────────────────────────
+    # v8.3: 공매도 캘린더 / Regime Profile
+    # ──────────────────────────────────────────────
+
+    @staticmethod
+    def _parse_short_calendar(calendar_list: list) -> list:
+        """공매도 캘린더 파싱 → (start_date, end_date, status) 리스트"""
+        from datetime import datetime
+        parsed = []
+        for entry in calendar_list:
+            start = datetime.strptime(str(entry["start"]), "%Y-%m-%d").date()
+            end = datetime.strptime(str(entry["end"]), "%Y-%m-%d").date()
+            parsed.append((start, end, entry["status"]))
+        return parsed
+
+    def _get_short_status(self, date_str: str) -> str:
+        """날짜 기준 공매도 상태 반환: 'active' or 'banned'"""
+        from datetime import datetime
+        d = datetime.strptime(date_str, "%Y-%m-%d").date()
+        for start, end, status in self._short_calendar:
+            if start <= d <= end:
+                return status
+        return "active"  # 캘린더에 없으면 기본 active
+
+    def _apply_regime_profile(self, date_str: str) -> dict:
+        """날짜 기준 공매도 체제 프로파일 적용. 변경된 파라미터 반환."""
+        status = self._get_short_status(date_str)
+
+        # 상태 변화 시에만 적용 (매일 반복 방지)
+        if status == self._current_short_status:
+            return {}
+
+        self._current_short_status = status
+        profile_key = f"short_selling_{status}"
+        profile = self._regime_profiles.get(profile_key, {})
+
+        if not profile:
+            return {}
+
+        # SA Floor 비대칭 적용
+        sa_floor = profile.get("sa_floor", 0.55)
+        self.regime_gate.set_sa_floor(sa_floor)
+
+        # max_positions 조정
+        pos_scale = profile.get("max_positions_scale", 1.0)
+        self.max_positions = max(1, int(self._base_max_positions * pos_scale))
+
+        # max_hold_days 조정
+        hold_scale = profile.get("max_hold_days_scale", 1.0)
+        self.max_hold_days = max(5, int(self._base_max_hold_days * hold_scale))
+
+        logger.info(
+            "  공매도 체제 전환: %s → max_pos=%d, max_hold=%d, sa_floor=%.2f",
+            status, self.max_positions, self.max_hold_days, sa_floor,
+        )
+
+        return profile
 
     # ──────────────────────────────────────────────
     # 동적 슬리피지 계산
@@ -578,6 +645,9 @@ class BacktestEngine:
         for idx in tqdm(range(start_idx, len(all_dates)), desc="v3.0 backtest"):
             date_str = str(all_dates[idx].date()) if hasattr(all_dates[idx], "date") else str(all_dates[idx])
 
+            # ── 0. 공매도 체제 프로파일 적용 (v8.3) ──
+            short_profile = self._apply_regime_profile(date_str)
+
             # ── 1. 보유 종목 관리 ──
             self._manage_positions(data_dict, idx, date_str)
 
@@ -649,19 +719,20 @@ class BacktestEngine:
                     if sig["ticker"] in held_tickers:
                         continue
 
-                    # Impulse: 손익비 1.5 이상이면 OK (빠른 진입)
-                    # Confirm: 손익비 2.0 이상 (안전 진입)
-                    min_rr = 1.5 if sig["trigger_type"] == "impulse" else 2.0
-                    if sig["risk_reward_ratio"] < min_rr:
+                    # 손익비 기준: 공매도 체제에 따라 상향 가능 (v8.3)
+                    profile_min_rr = short_profile.get("min_rr_ratio", 1.5)
+                    base_min_rr = max(profile_min_rr, 1.5 if sig["trigger_type"] == "impulse" else 2.0)
+                    if sig["risk_reward_ratio"] < base_min_rr:
                         continue
 
                     if idx + 1 < len(all_dates):
                         next_df = data_dict.get(sig["ticker"])
                         if next_df is not None and idx + 1 < len(next_df):
                             next_open = next_df["open"].iloc[idx + 1]
-                            # 체제 스케일 반영: neutral/caution시 포지션 축소
+                            # 체제 스케일 반영: regime + 공매도 프로파일 (v8.3)
+                            pos_mult = short_profile.get("position_scale_mult", 1.0)
                             base_stage = sig.get("entry_stage_pct", 0.40)
-                            scaled_stage = base_stage * regime.position_scale
+                            scaled_stage = base_stage * regime.position_scale * pos_mult
                             self._execute_buy(
                                 sig, next_open,
                                 stage_pct=scaled_stage,

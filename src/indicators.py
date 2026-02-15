@@ -427,6 +427,49 @@ class IndicatorEngine:
         # 58. RSI 전일값 (T2 RSI 상향돌파 감지)
         result["rsi_prev"] = result["rsi_14"].shift(1)
 
+        # ──────────────────────────────────────────────
+        # v8.3 수급 6-Layer 지표 (59~62)
+        # 외국인합계 → 파생 지표 (S5 SmartMoney 강화)
+        # ──────────────────────────────────────────────
+
+        # 외국인 수급 컬럼 탐색
+        foreign_col = None
+        for fc in ["외국인합계", "foreign_net"]:
+            if fc in result.columns:
+                foreign_col = fc
+                break
+
+        if foreign_col is not None:
+            fnet = result[foreign_col].fillna(0)
+
+            # 59. 외국인 5일 누적 순매수 (S5 기관매집 감지)
+            result["foreign_net_5d"] = fnet.rolling(5, min_periods=1).sum()
+
+            # 60. 외국인 20일 누적 순매수 (장기 수급 추세)
+            result["foreign_net_20d"] = fnet.rolling(20, min_periods=1).sum()
+
+            # 61. 외국인 연속 순매수 일수 (매집 강도)
+            consec = []
+            count = 0
+            for val in fnet:
+                if val > 0:
+                    count += 1
+                else:
+                    count = 0
+                consec.append(count)
+            result["foreign_consecutive_buy"] = consec
+
+            # 62. 외국인+거래량 복합 신호 (수급 확인)
+            #     외국인 순매수 + 거래량 평균 이상 → 강한 매집
+            vol_above_avg = (df["volume"] > result["volume_ma20"]).astype(int)
+            foreign_buying = (fnet > 0).astype(int)
+            result["foreign_vol_confirm"] = vol_above_avg * foreign_buying
+        else:
+            result["foreign_net_5d"] = 0
+            result["foreign_net_20d"] = 0
+            result["foreign_consecutive_buy"] = 0
+            result["foreign_vol_confirm"] = 0
+
         return result
 
     # ──────────────────────────────────────────────
