@@ -880,13 +880,19 @@ class SignalEngine:
             grade = "F"
         result["grade"] = grade
 
-        # grade_blocked 추적 (Claude 채팅 버그 수정)
-        grade_passed = grade != "F"
+        # grade_blocked 추적 (v7.1: B등급 이상만 통과, C등급 차단)
+        min_grade = self.strategy.get("min_entry_grade", "B")
+        if min_grade == "B":
+            grade_passed = grade in ("A", "B")
+            block_reason = f"grade_{grade}" if not grade_passed else ""
+        else:
+            grade_passed = grade != "F"
+            block_reason = "grade_F" if not grade_passed else ""
         diag.add_layer(LayerResult(
             name="L0_grade",
             passed=grade_passed,
-            block_reason="grade_F" if not grade_passed else "",
-            details={"zone_score": zone_score, "grade": grade},
+            block_reason=block_reason,
+            details={"zone_score": zone_score, "grade": grade, "min_grade": min_grade},
         ))
         consensus_votes.append(LayerVote("L0_grade", grade_passed, zone_score))
         if not grade_passed:

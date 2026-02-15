@@ -102,6 +102,7 @@ strategy:
     min_rising_factors: 3            # 동시 상승 필요 팩터 수
 
   # === 등급 기준 ===
+  min_entry_grade: "B"           # v7.1: B등급 이상만 진입 허용 (C등급 차단)
   grades:
     A: { min_bes: 0.85, position_ratio: 1.00 }
     B: { min_bes: 0.70, position_ratio: 0.67 }
@@ -209,10 +210,10 @@ quant_engine:
   # ── OU 프로세스 필터 (OU+BB 논문) ──
   ou:
     window: 60
-    z_entry: -1.2              # OU z-score 진입 (완화: Claude 채팅 권고)
+    z_entry: -0.8              # OU z-score 진입 (v7.1: -1.2→-0.8 완화, 더 넓은 진입 구간)
     half_life_min: 2           # 최소 반감기 (일)
-    half_life_max: 25          # 최대 반감기 (일)
-    snr_min: 0.15              # Signal-to-Noise 최소
+    half_life_max: 50          # 최대 반감기 (v7.1: 25→50 완화, 느린 회귀도 허용)
+    snr_min: 0.08              # Signal-to-Noise (v7.1: 0.15→0.08 완화)
 
   # ── 모멘텀 레이어 ──
   momentum:
@@ -269,7 +270,7 @@ quant_engine:
 backtest:
   start_date: "2019-01-01"
   end_date: "2024-12-31"
-  initial_capital: 50000000
+  initial_capital: 30000000      # 3천만원 (사용자 설정)
   max_risk_pct: 0.015
   max_positions: 4
   max_single_position_pct: 0.40
@@ -509,7 +510,7 @@ live_trading:
     max_positions: 4
     max_single_pct: 0.40            # 단일 종목 최대 40%
     max_portfolio_risk_pct: 0.06
-    initial_capital: 50000000       # 5천만원
+    initial_capital: 30000000       # 3천만원 (사용자 설정)
 
   # 안전장치
   safety:
@@ -617,9 +618,9 @@ martin_momentum:
   enabled: true
   n_fast: 8                           # Fast EMA 기간
   n_slow: 24                          # Slow EMA 기간
-  epsilon: 0.6                        # Dead Zone 임계값 (|ema2_norm| < ε → 무시)
+  epsilon: 0.05                       # Dead Zone 임계값 (v7.1b: 0.3→0.05, 평균회귀 전략과 dead zone 충돌 해소)
   sigmoid_k: 5.0                      # Sigmoid 민감도
-  min_confidence: 0.3                 # 최소 신뢰도 (이하 차단)
+  min_confidence: 0.15                # 최소 신뢰도 (v7.1: 0.3→0.15 완화)
   vol_normalization:
     enabled: true
     target_sigma: 0.02                # 목표 일간 변동성 (2%)

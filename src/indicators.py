@@ -352,7 +352,7 @@ class IndicatorEngine:
         result["ema2_norm"] = result["ema2_martin"] / df["close"].replace(0, np.nan) * 100
 
         # 45. Dead Zone 플래그 (|ema2_norm| < 0.6 → 신호 무시)
-        result["martin_dead_zone"] = (result["ema2_norm"].abs() < 0.6).astype(int)
+        result["martin_dead_zone"] = (result["ema2_norm"].abs() < 0.05).astype(int)
 
         # 46. 일간 실현 변동성 (20일, 변동성 정규화 포지션용)
         result["daily_sigma"] = result["ret1"].rolling(20, min_periods=10).std()
