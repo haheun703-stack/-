@@ -801,3 +801,50 @@ v8_hybrid:
     target_atr_A: 5.0            # A등급 타겟: +5 ATR
     target_atr_B: 3.5            # B등급 타겟: +3.5 ATR
     min_rr_ratio: 1.5            # 최소 손익비
+
+# ════════════════════════════════════════════════════════════
+# Phase 1: 장중 실시간 데이터 수집 파이프라인
+# ════════════════════════════════════════════════════════════
+intraday_monitor:
+  enabled: true
+
+  # ─── 수집 주기 ───
+  tick_interval_sec: 60          # 1분: 보유종목 현재가 틱
+  candle_interval_min: 5         # 5분: 5분봉 + 시장지수
+  flow_interval_min: 10          # 10분: 투자자수급 + 업종시세
+
+  # ─── 시장 시간 ───
+  market_hours:
+    premarket_start: "08:30"     # 프리마켓 (시장지수만)
+    regular_start: "09:00"       # 정규장 시작
+    regular_end: "15:30"         # 정규장 마감
+    closing_snapshot: "15:35"    # 마감 확정 데이터
+
+  # ─── DB 설정 ───
+  db_path: "data/intraday.db"    # SQLite 파일 경로
+  cleanup_days: 30               # 30일 이전 데이터 자동 삭제
+
+  # ─── API Rate Limit ───
+  rate_limit:
+    max_calls_per_sec: 16        # KIS API 초당 최대 호출
+    min_interval_ms: 60          # 호출 간 최소 간격 (ms)
+
+  # ─── Phase 2: 상황보고서 ───
+  situation_report:
+    interval_min: 30               # 정기 보고 주기 (분)
+    emergency_threshold: 0.03      # 3% 급변 시 긴급 보고
+    closing_time: "15:35"          # 마감 보고서 생성 시각
+
+  # ─── Phase 3: AI 판단 (예정) ───
+  # ai_judgment:
+  #   model: "claude-sonnet-4-5-20250929"
+  #   max_daily_calls: 50        # 일일 최대 호출
+  #   regular_calls: 30          # 정기 판단 (6회/종목 × 5종목)
+  #   emergency_budget: 20       # 긴급 판단 예산
+
+  # ─── Phase 4: 텔레그램 알림 (예정) ───
+  # telegram_alerts:
+  #   green_interval_min: 240    # 정기 보고 (4시간)
+  #   yellow_immediate: true     # 주의 즉시 전송
+  #   red_immediate: true        # 매도 즉시 전송
+  #   blue_immediate: true       # 추매 즉시 전송

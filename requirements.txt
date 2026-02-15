@@ -18,3 +18,4 @@ pytest>=7.4
 scikit-learn>=1.3
 hmmlearn>=0.3
 lxml>=4.9
+apscheduler>=3.10

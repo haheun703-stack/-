@@ -244,3 +244,93 @@ class AnchorPort(ABC):
     def save(self) -> None:
         """앵커 DB 저장"""
         ...
+
+
+# ─── Phase 1: 장중 데이터 수집 포트 ─────────────────────
+
+class IntradayDataPort(ABC):
+    """장중 실시간 데이터 수집 포트 — KIS API 등 외부 데이터 소스 추상화"""
+
+    @abstractmethod
+    def fetch_tick(self, ticker: str) -> dict:
+        """1분 단위 현재가/체결 데이터 조회"""
+        ...
+
+    @abstractmethod
+    def fetch_minute_candles(self, ticker: str, period: int = 5) -> list[dict]:
+        """N분봉 캔들 데이터 조회"""
+        ...
+
+    @abstractmethod
+    def fetch_investor_flow(self, ticker: str) -> dict:
+        """투자자별 매매동향 조회"""
+        ...
+
+    @abstractmethod
+    def fetch_market_index(self) -> dict:
+        """시장 지수 (KOSPI/KOSDAQ) 조회"""
+        ...
+
+    @abstractmethod
+    def fetch_sector_prices(self) -> list[dict]:
+        """업종별 시세 조회"""
+        ...
+
+
+class IntradayStorePort(ABC):
+    """장중 데이터 저장소 포트 — SQLite/PostgreSQL 등 영속화 추상화"""
+
+    @abstractmethod
+    def save_tick(self, tick: dict) -> None:
+        """1분 틱 데이터 저장"""
+        ...
+
+    @abstractmethod
+    def save_candle(self, candle: dict) -> None:
+        """5분봉 캔들 저장"""
+        ...
+
+    @abstractmethod
+    def save_investor_flow(self, flow: dict) -> None:
+        """투자자별 매매동향 저장"""
+        ...
+
+    @abstractmethod
+    def save_market_context(self, ctx: dict) -> None:
+        """시장 컨텍스트 저장"""
+        ...
+
+    @abstractmethod
+    def save_sector_price(self, sector: dict) -> None:
+        """업종별 시세 저장"""
+        ...
+
+    @abstractmethod
+    def get_recent_ticks(self, ticker: str, minutes: int = 60) -> list[dict]:
+        """최근 N분간 틱 데이터 조회"""
+        ...
+
+    @abstractmethod
+    def get_today_candles(self, ticker: str) -> list[dict]:
+        """오늘 5분봉 전체 조회"""
+        ...
+
+    @abstractmethod
+    def get_latest_market_context(self) -> dict | None:
+        """최신 시장 컨텍스트 조회"""
+        ...
+
+    @abstractmethod
+    def get_today_investor_flow(self, ticker: str) -> list[dict]:
+        """오늘 투자자 수급 전체 조회"""
+        ...
+
+    @abstractmethod
+    def get_today_sector_prices(self) -> list[dict]:
+        """오늘 업종 시세 최신 스냅샷"""
+        ...
+
+    @abstractmethod
+    def cleanup_old_data(self, days: int = 30) -> int:
+        """N일 이전 데이터 정리"""
+        ...
