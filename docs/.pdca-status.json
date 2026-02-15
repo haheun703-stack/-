@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-12T12:23:52.753Z",
+  "lastUpdated": "2026-02-15T10:23:10.257Z",
   "activeFeatures": [
     "주식분석-서브에이전트",
     "sub-agent-project",
@@ -8,7 +8,8 @@
     "use_cases",
     "adapters",
     "agents",
-    "scripts"
+    "scripts",
+    "tests"
   ],
   "primaryFeature": "주식분석-서브에이전트",
   "features": {
@@ -30,9 +31,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T11:10:53.007Z",
-        "lastUpdated": "2026-02-12T12:23:52.753Z"
+        "lastUpdated": "2026-02-15T09:54:21.546Z"
       },
-      "lastFile": "d:\\sub-agent-project\\main.py"
+      "lastFile": "d:\\sub-agent-project\\src\\signal_engine.py"
     },
     "entities": {
       "phase": "do",
@@ -43,9 +44,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T11:10:54.223Z",
-        "lastUpdated": "2026-02-11T14:09:42.597Z"
+        "lastUpdated": "2026-02-14T09:04:08.490Z"
       },
-      "lastFile": "d:\\sub-agent-project\\src\\entities\\models.py"
+      "lastFile": "d:\\sub-agent-project\\src\\entities\\volatility_models.py"
     },
     "use_cases": {
       "phase": "do",
@@ -56,9 +57,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T11:10:55.433Z",
-        "lastUpdated": "2026-02-11T14:11:21.537Z"
+        "lastUpdated": "2026-02-14T09:38:31.462Z"
       },
-      "lastFile": "d:\\sub-agent-project\\src\\use_cases\\realtime_monitor.py"
+      "lastFile": "d:\\sub-agent-project\\src\\use_cases\\consensus_engine.py"
     },
     "adapters": {
       "phase": "do",
@@ -69,9 +70,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T11:10:56.676Z",
-        "lastUpdated": "2026-02-11T14:12:00.698Z"
+        "lastUpdated": "2026-02-15T09:18:26.748Z"
       },
-      "lastFile": "d:\\sub-agent-project\\src\\adapters\\console_output.py"
+      "lastFile": "d:\\sub-agent-project\\src\\adapters\\dart_adapter.py"
     },
     "agents": {
       "phase": "do",
@@ -95,9 +96,22 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T12:39:18.803Z",
-        "lastUpdated": "2026-02-11T13:49:16.905Z"
+        "lastUpdated": "2026-02-15T10:23:10.257Z"
       },
-      "lastFile": "d:\\sub-agent-project\\scripts\\run_monitor.py"
+      "lastFile": "d:\\sub-agent-project\\scripts\\parse_dart_local.py"
+    },
+    "tests": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-14T06:12:06.936Z",
+        "lastUpdated": "2026-02-15T09:52:37.190Z"
+      },
+      "lastFile": "d:\\sub-agent-project\\tests\\test_master_controller.py"
     }
   },
   "pipeline": {
@@ -108,7 +122,7 @@
   "session": {
     "startedAt": "2026-02-11T10:58:34.349Z",
     "onboardingCompleted": true,
-    "lastActivity": "2026-02-12T12:23:52.753Z"
+    "lastActivity": "2026-02-15T10:23:10.257Z"
   },
   "history": [
     {
@@ -629,6 +643,2028 @@
     {
       "timestamp": "2026-02-12T12:23:52.753Z",
       "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:23:21.591Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:23:40.802Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:23:50.424Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:26:50.423Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:27:34.733Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:28:22.060Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:28:46.871Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:29:06.357Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:29:52.891Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:30:05.816Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:30:16.522Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:31:10.833Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:31:42.845Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:31:49.264Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:32:01.616Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:32:13.787Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:32:22.980Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:32:51.814Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:33:11.037Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:33:19.943Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:33:25.163Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:33:34.154Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:34:49.985Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:34:58.831Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:35:12.648Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:35:30.039Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:35:55.449Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:36:02.472Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:36:23.313Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:40:59.440Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:41:14.459Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:41:36.726Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:50:24.082Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:50:57.987Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:51:23.236Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:51:35.714Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:52:02.181Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:52:10.221Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:52:21.592Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:56:06.214Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:56:07.330Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:56:08.438Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:56:15.849Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T13:56:30.832Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-12T14:10:43.906Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:39:52.961Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:43:21.834Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:43:46.070Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:44:31.662Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:45:00.553Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:45:34.895Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:46:00.766Z",
+      "feature": "adapters",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:46:46.664Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:47:18.437Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:47:37.865Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:47:52.177Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:48:06.876Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:48:32.110Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:48:38.463Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:48:47.322Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:49:10.839Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:49:27.171Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:49:34.091Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:52:14.270Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:52:23.014Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:52:54.671Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:53:03.711Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:53:20.105Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:53:28.919Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:53:42.447Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:53:50.150Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:54:04.520Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:54:27.560Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:55:03.951Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:55:22.539Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:55:31.843Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:55:41.272Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T09:55:59.719Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:21:18.763Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:21:30.814Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:21:52.042Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:22:28.721Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:22:47.406Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:34:47.433Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:35:27.534Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:35:40.449Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:36:39.916Z",
+      "feature": "adapters",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:37:54.949Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:38:28.299Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:39:35.211Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:41:34.521Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:42:17.913Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:43:02.755Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:46:29.579Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T11:46:37.792Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:10:18.859Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:10:40.464Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:10:49.511Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:10:58.669Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:11:03.304Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:11:34.371Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:12:17.027Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:28:34.933Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:41:57.232Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:42:56.568Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:43:38.613Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:44:51.535Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:49:46.360Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:50:29.494Z",
+      "feature": "adapters",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:50:58.138Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:51:27.084Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:52:20.515Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:52:33.500Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:52:45.086Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:53:06.221Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:54:43.656Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T12:59:16.067Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:00:59.723Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:01:20.615Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:01:32.060Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:01:48.889Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:13:15.214Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:13:41.693Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:15:18.819Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:16:49.866Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:17:55.302Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:18:07.775Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:18:31.069Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:18:52.254Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:19:03.961Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:19:11.100Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:19:46.683Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:19:53.890Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:20:03.483Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:20:32.398Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:22:14.531Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:22:55.377Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:23:27.453Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:24:01.841Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T13:26:11.132Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:04:49.925Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:22:38.556Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:22:49.449Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:22:59.514Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:23:10.828Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:23:42.186Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:30:14.881Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:32:53.364Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-13T14:50:27.233Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T03:56:29.873Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T03:59:37.612Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T04:37:50.104Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:18:19.464Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:18:46.227Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:19:52.197Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:20:15.711Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:20:23.663Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:20:39.262Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:21:32.911Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:22:49.011Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:22:58.761Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:23:06.008Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:23:23.101Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:23:33.757Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:23:44.762Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:23:52.860Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:43:14.932Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:43:30.717Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:43:52.270Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:44:01.476Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T05:44:14.204Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:08:51.224Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:09:28.449Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:09:34.159Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:09:43.312Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:10:04.784Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:12:06.936Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:17:12.256Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:20:12.802Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:20:42.985Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:38:04.155Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:38:14.258Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:38:41.156Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:39:32.263Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:39:46.982Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:40:02.254Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T06:40:57.120Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:04:22.327Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:06:39.633Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:07:17.716Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:08:15.161Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:09:10.201Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:11:28.948Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:12:52.983Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:13:07.442Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:14:16.497Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:24:10.739Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:24:21.754Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:24:50.813Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T07:24:54.564Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:05:16.372Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:06:10.676Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:06:52.598Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:07:16.839Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:07:45.878Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:07:55.122Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:02.160Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:10.331Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:18.546Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:25.366Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:31.880Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:40.091Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:08:48.023Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:09:08.533Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:09:15.433Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:09:26.005Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:09:35.821Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:09:53.173Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:10:41.884Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:11:00.622Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:11:26.113Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:11:31.499Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:11:41.976Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:11:56.779Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:13:13.071Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:16:18.109Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:16:26.012Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:16:35.480Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:57:54.721Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:58:20.607Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:58:55.696Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:59:13.686Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:59:24.470Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T08:59:44.554Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:00:12.831Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:00:34.789Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:00:43.064Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:01:47.914Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:02:14.246Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:02:24.864Z",
+      "feature": "adapters",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:02:45.248Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:02:54.456Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:03:13.137Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:04:08.490Z",
+      "feature": "entities",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:04:40.273Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:04:55.262Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:05:05.632Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:05:17.373Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:05:33.390Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:06:18.254Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:06:26.056Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:06:39.325Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:08:51.545Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:10:07.578Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:10:16.864Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:10:24.665Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:10:31.853Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:11:41.768Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:12:15.164Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:12:54.588Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:13:05.750Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:13:40.893Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:13:54.898Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:14:20.937Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:14:30.220Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:14:53.579Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:15:05.217Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:26:44.297Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:27:00.319Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:27:24.737Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:27:32.147Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:27:44.376Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:27:54.089Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:28:19.982Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:29:29.070Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:12.359Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:20.188Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:27.295Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:45.353Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:52.714Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:37:57.459Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:38:17.024Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:38:25.874Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:38:31.462Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:38:56.279Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:39:20.113Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:39:42.103Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:39:53.872Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:39:59.423Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:40:12.484Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:40:44.331Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:40:53.265Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:41:00.329Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:41:16.468Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:42:34.553Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:55:11.371Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:55:52.150Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:57:14.397Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:59:03.468Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:59:13.031Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-14T09:59:21.394Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:48:26.177Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:49:01.102Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:49:31.742Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:49:58.312Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:51:54.021Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:54:32.529Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:54:37.251Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:54:44.473Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:54:49.974Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:54:54.652Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T08:55:01.539Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:18:26.748Z",
+      "feature": "adapters",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:19:18.658Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:26:52.194Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:27:14.264Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:27:23.984Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:27:40.049Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:27:50.130Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:28:00.464Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:49:53.705Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:50:01.934Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:50:10.503Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:50:55.318Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:51:26.011Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:52:09.938Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:52:37.190Z",
+      "feature": "tests",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:53:38.285Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:53:44.168Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:54:01.679Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T09:54:21.546Z",
+      "feature": "sub-agent-project",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:08:06.330Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:17:33.976Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:17:48.648Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:17:57.373Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:22:42.337Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-15T10:23:10.257Z",
+      "feature": "scripts",
       "phase": "do",
       "action": "updated"
     }
