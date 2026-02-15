@@ -7,7 +7,7 @@ indicators.py compute_all()에서 계산된 TRIX/RSI/볼린저/MACD/OBV 컬럼�
 순수 함수 — DataFrame row(dict)만 받으며 외부 의존성 없음.
 """
 import math
-from typing import Dict, Any
+from typing import Any
 
 
 class TGCIScorer:
@@ -22,7 +22,7 @@ class TGCIScorer:
     """
 
     @staticmethod
-    def score(row: Dict[str, Any], config: dict = None) -> Dict[str, Any]:
+    def score(row: dict[str, Any], config: dict = None) -> dict[str, Any]:
         """TGCI 점수 계산.
 
         Args:

@@ -1,7 +1,8 @@
 """v8.0 Scoring Engine 단위 테스트"""
-import pytest
 import pandas as pd
-from src.v8_scorers import ScoringEngine, ScoreResult, GradeResult
+import pytest
+
+from src.v8_scorers import ScoringEngine
 
 
 @pytest.fixture

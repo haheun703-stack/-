@@ -15,7 +15,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from .ou_estimator import OUEstimator
-from .smart_money import calc_smart_money_z, calc_institutional_streak
+from .smart_money import calc_institutional_streak, calc_smart_money_z
 
 logger = logging.getLogger(__name__)
 

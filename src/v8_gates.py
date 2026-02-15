@@ -5,9 +5,9 @@ Quantum Master v8.0 — Phase 1: Hard Gates
 3개의 필수 게이트: 하나라도 미달이면 즉시 탈락 (AND 조건)
 """
 
-import pandas as pd
 from dataclasses import dataclass
-from typing import Dict, Tuple
+
+import pandas as pd
 
 
 @dataclass
@@ -16,7 +16,7 @@ class GateResult:
     passed: bool
     gate_name: str
     reason: str = ""
-    values: Dict = None
+    values: dict = None
 
     def __post_init__(self):
         if self.values is None:
@@ -30,7 +30,7 @@ class GateEngine:
         v8_cfg = config.get('v8_hybrid', {})
         self.cfg = v8_cfg.get('gates', {})
 
-    def run_all_gates(self, row: pd.Series) -> Tuple[bool, list]:
+    def run_all_gates(self, row: pd.Series) -> tuple[bool, list]:
         """
         모든 게이트를 순차 실행.
         Returns: (통과 여부, [GateResult 리스트])

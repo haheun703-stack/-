@@ -10,17 +10,17 @@ v6.1 통합 파이프라인 테스트 — 모듈 간 연결 검증
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.use_cases.rttp_news_processor import RttpNewsProcessor
-from src.use_cases.risk_normalizer import RiskBudgetNormalizer
-from src.extreme_volatility import ExtremeVolatilityDetector
 from src.entities.news_models import (
-    NewsGateResult, NewsGrade, EventDrivenAction, NewsItem,
+    EventDrivenAction,
+    NewsGateResult,
+    NewsGrade,
+    NewsItem,
 )
 from src.entities.rttp_models import RttpEnhancement, SourceTier
-from src.entities.volatility_models import ExtremeVolatilityResult
-
+from src.extreme_volatility import ExtremeVolatilityDetector
+from src.use_cases.risk_normalizer import RiskBudgetNormalizer
+from src.use_cases.rttp_news_processor import RttpNewsProcessor
 
 # ── 공통 헬퍼 ──
 

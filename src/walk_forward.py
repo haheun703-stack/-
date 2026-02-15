@@ -222,7 +222,7 @@ class WalkForwardValidator:
             return
 
         logger.info(f"\n{'='*60}")
-        logger.info(f"Walk-Forward 검증 리포트")
+        logger.info("Walk-Forward 검증 리포트")
         logger.info(f"{'='*60}")
         logger.info(f"  윈도우: {results['n_windows']}개 "
                      f"(Train {self.train_days}일 / Test {self.test_days}일)")
@@ -607,23 +607,23 @@ class MonteCarloSimulator:
         logger.info(f"Monte Carlo Simulation ({r.n_simulations}회, {r.n_trades}건)")
         logger.info(f"{'='*60}")
 
-        logger.info(f"  [에쿼티 분포]")
+        logger.info("  [에쿼티 분포]")
         logger.info(f"    평균: {r.final_equity_mean:,.0f}원")
         logger.info(f"    중앙값: {r.final_equity_median:,.0f}원")
         logger.info(f"    5th percentile (worst): {r.final_equity_p5:,.0f}원")
         logger.info(f"    95th percentile (best): {r.final_equity_p95:,.0f}원")
 
-        logger.info(f"  [수익률 분포]")
+        logger.info("  [수익률 분포]")
         logger.info(f"    평균: {r.return_mean_pct:+.2f}%")
         logger.info(f"    5th~95th: [{r.return_p5_pct:+.2f}%, {r.return_p95_pct:+.2f}%]")
         logger.info(f"    양수 수익 비율: {r.positive_pct:.1f}%")
 
-        logger.info(f"  [MDD 분포]")
+        logger.info("  [MDD 분포]")
         logger.info(f"    평균 MDD: {r.mdd_mean_pct:.2f}%")
         logger.info(f"    중앙값 MDD: {r.mdd_median_pct:.2f}%")
         logger.info(f"    95th worst-case MDD: {r.mdd_p95_pct:.2f}%")
 
-        logger.info(f"  [파산 확률]")
+        logger.info("  [파산 확률]")
         logger.info(f"    임계값: 자본 {r.ruin_threshold_pct:.0f}% 이하")
         logger.info(f"    파산 확률: {r.ruin_probability:.2f}%")
 
@@ -633,7 +633,7 @@ class MonteCarloSimulator:
         elif r.ruin_probability > 5:
             logger.warning(f"    파산 확률 {r.ruin_probability:.1f}% > 5%: 주의 필요")
         else:
-            logger.info(f"    파산 확률 양호 (<= 5%)")
+            logger.info("    파산 확률 양호 (<= 5%)")
 
         if r.mdd_p95_pct < -30:
             logger.warning(f"    worst-case MDD {r.mdd_p95_pct:.1f}% < -30%: 심각한 하락 가능")

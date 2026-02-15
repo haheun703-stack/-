@@ -13,14 +13,12 @@ Sci-CoE 논문의 3축 기하학적 보상을 퀀텀전략 파이프라인에 �
 
 import logging
 import math
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 from src.entities.consensus_models import (
     AnchorDatabase,
     ConsensusResult,
-    LayerVote,
 )
 
 
@@ -31,8 +29,8 @@ class ConsensusVerifier:
         self,
         tau: float = 0.8,
         min_voters: int = 4,
-        grade_thresholds: Optional[dict] = None,
-        anchor_db: Optional[AnchorDatabase] = None,
+        grade_thresholds: dict | None = None,
+        anchor_db: AnchorDatabase | None = None,
     ):
         self.tau = tau
         self.min_voters = min_voters
@@ -46,7 +44,7 @@ class ConsensusVerifier:
     def verify(
         self,
         votes: list,
-        geo_indicators: Optional[dict] = None,
+        geo_indicators: dict | None = None,
     ) -> ConsensusResult:
         """
         3축 합의 판정 수행.
@@ -154,7 +152,7 @@ class ConsensusVerifier:
     def calc_diversity(
         self,
         votes: list,
-        geo_indicators: Optional[dict] = None,
+        geo_indicators: dict | None = None,
     ) -> float:
         """
         축 ③: 다양성 — 지표 신호 각도 분산 + 레이어 카테고리 분산.
@@ -170,7 +168,7 @@ class ConsensusVerifier:
 
         return 0.6 * indicator_div + 0.4 * layer_div
 
-    def _indicator_diversity(self, geo_indicators: Optional[dict]) -> float:
+    def _indicator_diversity(self, geo_indicators: dict | None) -> float:
         """10지표 신호 다양성 (정보 엔트로피 기반)"""
         if not geo_indicators:
             return 0.5  # 데이터 없으면 중립

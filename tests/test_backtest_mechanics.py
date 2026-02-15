@@ -12,13 +12,8 @@ v6.3 BacktestEngine 핵심 메커니즘 단위 테스트
 
 from unittest.mock import Mock
 
-import numpy as np
-import pandas as pd
-import pytest
-
-from src.backtest_engine import BacktestEngine, Position, Trade
+from src.backtest_engine import BacktestEngine, Position
 from src.position_sizer import PositionSizer
-
 
 # ── 헬퍼 ──
 

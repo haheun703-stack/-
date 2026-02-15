@@ -8,8 +8,8 @@ from __future__ import annotations
 from src.agents.base import BaseAgent
 from src.entities.macro_models import (
     MacroRegimeAnalysis,
-    SectorRotation,
     MarketBreadth,
+    SectorRotation,
 )
 from src.use_cases.ports import MacroAnalystPort
 

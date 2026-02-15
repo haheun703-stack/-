@@ -9,22 +9,22 @@ v2.1 → v3.0 변경:
 """
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 import pandas as pd
 import yaml
 from tqdm import tqdm
 
-from .signal_engine import SignalEngine, TriggerType
 from .position_sizer import PositionSizer
-from .quant_metrics import calc_full_metrics, print_metrics, assess_reliability
-from .walk_forward import BootstrapValidator, MonteCarloSimulator
+from .quant_metrics import assess_reliability, calc_full_metrics, print_metrics
+from .regime_gate import RegimeGate
+from .signal_engine import SignalEngine
 from .use_cases.adaptive_exit import AdaptiveExitManager
 from .use_cases.anchor_learner import AnchorLearner
 from .use_cases.daily_hold_scorer import DailyHoldScorer
+from .walk_forward import BootstrapValidator, MonteCarloSimulator
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class BacktestEngine:
     """v3.0 퀀트 백테스트 엔진"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
 
         bt = self.config["backtest"]
@@ -85,6 +85,10 @@ class BacktestEngine:
         self.max_positions = bt["max_positions"]
         self.commission_rate = bt["commission_rate"]
         self.slippage_rate = bt["slippage_rate"]
+        self.tax_rate = bt.get("tax_rate", 0.0018)  # 증권거래세 0.18% (매도 시만)
+        # 동적 슬리피지: 저가주일수록 슬리피지 증가 (호가단위 영향)
+        self.dynamic_slippage = bt.get("dynamic_slippage", True)
+        self.slippage_price_ref = bt.get("slippage_price_ref", 10000)  # 기준가
         self.partial_tp_pct = bt.get("partial_take_profit_pct", 0.50)
         self.trend_exit_days = bt["trend_exit_consecutive_days"]
         self.atr_stop_mult = bt["trailing_stop_atr_mult"]
@@ -108,6 +112,10 @@ class BacktestEngine:
 
         self.signal_engine = SignalEngine(config_path)
         self.position_sizer = PositionSizer(self.config)
+
+        # v8.2: 7D 시장 체제 감지 Gate
+        self.regime_gate = RegimeGate(self.config)
+        self.regime_log: list[dict] = []  # 체제 변화 추적용
 
         # v4.1: 적응형 청산
         adaptive_cfg = self.config.get("adaptive_exit", {})
@@ -153,8 +161,9 @@ class BacktestEngine:
             logger.warning("Config: %s", w)
 
         logger.info(
-            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d",
+            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s",
             self.risk_norm_enabled, self.max_hold_days,
+            self.tax_rate * 100, self.dynamic_slippage,
         )
 
         # 상태
@@ -174,17 +183,34 @@ class BacktestEngine:
         return data
 
     # ──────────────────────────────────────────────
+    # 동적 슬리피지 계산
+    # ──────────────────────────────────────────────
+
+    def _effective_slippage(self, price: float) -> float:
+        """가격대별 실효 슬리피지 계산.
+
+        저가주(호가단위 큰 종목)의 실제 체결 슬리피지를 반영.
+        - 10,000원 이상: base slippage 그대로
+        - 5,000원: 2배
+        - 3,000원: ~3.3배
+        """
+        if not self.dynamic_slippage or price <= 0:
+            return self.slippage_rate
+        scale = max(1.0, self.slippage_price_ref / price)
+        return self.slippage_rate * scale
+
+    # ──────────────────────────────────────────────
     # 매수 (분할 매수 지원)
     # ──────────────────────────────────────────────
 
     def _execute_buy(self, signal: dict, next_open: float,
                      stage_pct: float = 1.0,
-                     df: pd.DataFrame = None, idx: int = 0) -> Optional[Position]:
+                     df: pd.DataFrame = None, idx: int = 0) -> Position | None:
         """
         시그널 기반 매수.
         stage_pct: 이 단계에서 사용할 비중 (Impulse=0.4, Confirm=0.4, Breakout=0.2)
         """
-        entry_price = next_open * (1 + self.slippage_rate)
+        entry_price = next_open * (1 + self._effective_slippage(next_open))
 
         current_risk = sum(
             p.shares * (p.entry_price - p.stop_loss)
@@ -271,7 +297,7 @@ class BacktestEngine:
             return
 
         next_open = df["open"].iloc[idx + 1]
-        entry_price = next_open * (1 + self.slippage_rate)
+        entry_price = next_open * (1 + self._effective_slippage(next_open))
 
         # 추가 매수 수량 계산 (전체 포지션의 stage_pct만큼)
         add_amount = self.cash * 0.3 * stage_pct  # 잔고의 30% × stage_pct
@@ -306,16 +332,22 @@ class BacktestEngine:
     # ──────────────────────────────────────────────
 
     def _execute_sell(self, pos: Position, exit_price: float,
-                      exit_date: str, reason: str, shares: Optional[int] = None):
-        """포지션 매도"""
+                      exit_date: str, reason: str, shares: int | None = None):
+        """포지션 매도 (증권거래세 + 동적 슬리피지 반영)"""
         sell_shares = shares if shares else pos.shares
-        actual_price = exit_price * (1 - self.slippage_rate)
-        commission = actual_price * sell_shares * self.commission_rate
+        actual_price = exit_price * (1 - self._effective_slippage(exit_price))
+        sell_commission = actual_price * sell_shares * self.commission_rate
+        buy_commission = pos.entry_price * sell_shares * self.commission_rate
+        # 증권거래세: 매도 금액 × tax_rate (매도 시만 부과)
+        tax = actual_price * sell_shares * self.tax_rate
         gross_pnl = (actual_price - pos.entry_price) * sell_shares
-        net_pnl = gross_pnl - commission - (pos.entry_price * sell_shares * self.commission_rate)
+        net_pnl = gross_pnl - sell_commission - buy_commission - tax
         pnl_pct = (actual_price / pos.entry_price - 1) * 100
 
-        self.cash += actual_price * sell_shares - commission
+        self.cash += actual_price * sell_shares - sell_commission - tax
+
+        # v8.2.1: Self-Adaptive 체제 감지 피드백
+        self.regime_gate.update_trade_outcome(is_win=(net_pnl > 0))
 
         hold_days = 0
         try:
@@ -336,7 +368,7 @@ class BacktestEngine:
             exit_reason=reason,
             grade=pos.grade,
             bes_score=pos.bes_score,
-            commission=round(commission),
+            commission=round(sell_commission + buy_commission + tax),
             trigger_type=pos.trigger_type,
         )
         self.trades.append(trade)
@@ -565,8 +597,32 @@ class BacktestEngine:
                             stage_pct=bo["trigger"].entry_stage_pct,
                         )
 
+            # ── 2.5 시장 체제 감지 (7D Regime Gate) ──
+            regime = self.regime_gate.detect(data_dict, idx)
+
+            # 체제 변화 로깅 (매일이 아닌 변화 시점만)
+            if not self.regime_log or self.regime_log[-1]["regime"] != regime.regime:
+                self.regime_log.append({
+                    "date": date_str,
+                    "regime": regime.regime,
+                    "scale": regime.position_scale,
+                    "composite": regime.composite_score,
+                    "details": regime.details,
+                })
+                if len(self.regime_log) > 1:
+                    prev = self.regime_log[-2]["regime"]
+                    logger.info(f"  체제 전환: {prev} → {regime.regime} ({date_str}) {regime.details}")
+
             # ── 3. 신규 진입 (Trigger-1 또는 Trigger-2) ──
-            if len(self.positions) < self.max_positions:
+            # hostile 체제에서는 신규 진입 차단
+            effective_max_pos = self.max_positions
+            if regime.position_scale <= 0:
+                effective_max_pos = 0  # 신규 진입 불가
+            elif regime.position_scale < 1.0:
+                # neutral/caution: 최대 포지션 수 축소
+                effective_max_pos = max(1, int(self.max_positions * regime.position_scale))
+
+            if len(self.positions) < effective_max_pos:
                 signals = self.signal_engine.scan_universe(
                     data_dict, idx, held_positions=self.positions
                 )
@@ -581,12 +637,14 @@ class BacktestEngine:
                         "trigger_confidence": sig.get("trigger_confidence", 0),
                         "entry_price": sig["entry_price"],
                         "rr_ratio": sig["risk_reward_ratio"],
+                        "regime": regime.regime,
+                        "regime_scale": regime.position_scale,
                     })
 
                 held_tickers = {p.ticker for p in self.positions}
 
                 for sig in signals:
-                    if len(self.positions) >= self.max_positions:
+                    if len(self.positions) >= effective_max_pos:
                         break
                     if sig["ticker"] in held_tickers:
                         continue
@@ -601,9 +659,12 @@ class BacktestEngine:
                         next_df = data_dict.get(sig["ticker"])
                         if next_df is not None and idx + 1 < len(next_df):
                             next_open = next_df["open"].iloc[idx + 1]
+                            # 체제 스케일 반영: neutral/caution시 포지션 축소
+                            base_stage = sig.get("entry_stage_pct", 0.40)
+                            scaled_stage = base_stage * regime.position_scale
                             self._execute_buy(
                                 sig, next_open,
-                                stage_pct=sig.get("entry_stage_pct", 0.40),
+                                stage_pct=scaled_stage,
                                 df=next_df, idx=idx,
                             )
                             held_tickers.add(sig["ticker"])
@@ -635,12 +696,18 @@ class BacktestEngine:
         trades_df = pd.DataFrame([t.__dict__ for t in self.trades])
         equity_df = pd.DataFrame(self.equity_curve)
         signals_df = pd.DataFrame(self.signal_log)
+        regime_df = pd.DataFrame(self.regime_log)
 
         results_dir = Path("results")
         results_dir.mkdir(exist_ok=True)
 
         if not trades_df.empty:
             trades_df.to_csv(results_dir / "trades_log.csv", index=False, encoding="utf-8-sig")
+        if not regime_df.empty:
+            regime_df.to_csv(results_dir / "regime_log.csv", index=False, encoding="utf-8-sig")
+            logger.info(f"체제 전환 이력: {len(regime_df)}건")
+            for _, row in regime_df.iterrows():
+                logger.info(f"  {row['date']}: {row['regime']} (score={row['composite']:.2f})")
         if not equity_df.empty:
             equity_df.to_csv(results_dir / "daily_equity.csv", index=False, encoding="utf-8-sig")
         if not signals_df.empty:
@@ -704,6 +771,7 @@ class BacktestEngine:
             "trades_df": trades_df,
             "equity_df": equity_df,
             "signals_df": signals_df,
+            "regime_df": regime_df,
             "diagnostic": self.signal_engine.diagnostic.summarize(),
             "bootstrap": bootstrap_results,
             "monte_carlo": monte_carlo_results,

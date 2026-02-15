@@ -1,7 +1,7 @@
 """v8.0 Pipeline 통합 테스트"""
-import pytest
 import pandas as pd
-import yaml
+import pytest
+
 from src.v8_pipeline import QuantumPipelineV8
 
 

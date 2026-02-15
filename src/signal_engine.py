@@ -24,31 +24,31 @@ Pipeline:
 """
 
 import logging
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 import numpy as np
 import pandas as pd
 import yaml
 
-from .fundamental import FundamentalEngine
-from .screener import Screener
-from .regime_detector import RegimeDetector
-from .ou_estimator import OUEstimator
-from .smart_money import check_smart_money_gate
-from .signal_diagnostic import SignalDiagnostic, LayerResult
+from src.entities.consensus_models import LayerVote
+from src.entities.news_models import EventDrivenAction, NewsGateResult, NewsGrade
+from src.use_cases.consensus_engine import ConsensusVerifier
+
 from .accumulation_detector import AccumulationDetector
 from .divergence_scanner import DivergenceScanner
-from .probability_gate import ProbabilityGate
-from .sector_classifier import SectorClassifier
-from src.entities.news_models import NewsGateResult, NewsGrade, EventDrivenAction
+from .extreme_volatility import ExtremeVolatilityDetector
+from .fundamental import FundamentalEngine
 from .geometric_engine import GeometricQuantEngine
 from .martin_momentum import MartinMomentumEngine
-from .extreme_volatility import ExtremeVolatilityDetector
-from src.entities.consensus_models import LayerVote, ConsensusResult
-from src.use_cases.consensus_engine import ConsensusVerifier
-from .tgci_scorer import TGCIScorer
 from .master_controller import MasterController
+from .ou_estimator import OUEstimator
+from .probability_gate import ProbabilityGate
+from .screener import Screener
+from .sector_classifier import SectorClassifier
+from .signal_diagnostic import LayerResult, SignalDiagnostic
+from .smart_money import check_smart_money_gate
+from .tgci_scorer import TGCIScorer
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class SignalEngine:
     """BES v3.0 6-Layer Pipeline 스코어링 + 시그널 생성"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
 
         self.strategy = self.config["strategy"]

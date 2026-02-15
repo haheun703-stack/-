@@ -14,7 +14,6 @@ Sci-CoE 논문의 Stage 1 (Anchored Learning) 개념 적용:
 import json
 import logging
 import os
-from typing import Optional
 
 from src.entities.consensus_models import AnchorCase, AnchorDatabase
 
@@ -151,14 +150,14 @@ class AnchorLearner:
             len(self.db.cases), self.db_path,
         )
 
-    def load(self) -> Optional[AnchorDatabase]:
+    def load(self) -> AnchorDatabase | None:
         """앵커 DB를 JSON 파일에서 로드"""
         if not os.path.exists(self.db_path):
             logger.info("앵커 DB 파일 없음: %s", self.db_path)
             return None
 
         try:
-            with open(self.db_path, "r", encoding="utf-8") as f:
+            with open(self.db_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             self.db = AnchorDatabase(

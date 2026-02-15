@@ -17,7 +17,6 @@ KISBOT v4.3 스타일 참조:
 
 from datetime import datetime
 
-
 # ============================================================
 # 기호 참조 맵 (KISBOT 스타일 + 우리 시스템 확장)
 # ============================================================
@@ -358,7 +357,7 @@ def format_backtest_report(results: dict, scan_date: str = None) -> str:
     diagnostic = results.get("diagnostic", {})
 
     # signals_df에서 최근 시그널 추출
-    signals_df = results.get("signals_df", None)
+    signals_df = results.get("signals_df")
     recent_signals = []
     if signals_df is not None and not signals_df.empty:
         # 마지막 날짜 시그널만
@@ -632,11 +631,11 @@ def format_emergency_alert(reason: str) -> str:
         f"{_icon('WARN')}{_icon('WARN')}{_icon('WARN')} [긴급 알림]",
         ICONS["LINE"],
         f"  사유: {reason}",
-        f"  조치: 전종목 시장가 청산 실행",
-        f"  STOP.signal 생성됨",
+        "  조치: 전종목 시장가 청산 실행",
+        "  STOP.signal 생성됨",
         ICONS["LINE"],
-        f"  수동 해제: STOP.signal 파일 삭제",
-        f"  자동 해제: 00:00 일일 리셋",
+        "  수동 해제: STOP.signal 파일 삭제",
+        "  자동 해제: 00:00 일일 리셋",
         ICONS["LINE"],
     ]
     return "\n".join(parts)

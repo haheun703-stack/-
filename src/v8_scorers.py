@@ -6,9 +6,9 @@ Quantum Master v8.0 — Phase 2: Scoring Engine
 v7.0의 L2(OU), L3(Momentum) 게이트를 스코어로 전환한 핵심 모듈
 """
 
-import pandas as pd
 from dataclasses import dataclass
-from typing import Dict
+
+import pandas as pd
 
 
 @dataclass
@@ -18,7 +18,7 @@ class ScoreResult:
     score: float           # 0.0 ~ 1.0
     weight: float
     weighted: float = 0.0  # score * weight
-    breakdown: Dict = None
+    breakdown: dict = None
 
     def __post_init__(self):
         self.weighted = self.score * self.weight

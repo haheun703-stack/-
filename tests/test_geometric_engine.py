@@ -4,31 +4,31 @@ Bug #7 수정: print 기반 → assert 기반 검증
 v2.0: 신규 7지표 + 프로파일 + 하위호환 테스트 추가
 """
 
+import os
+import sys
+
 import numpy as np
 import pandas as pd
-import sys
-import os
 
 # 프로젝트 루트를 path에 추가
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.geometric_engine import (
-    GeometricQuantEngine,
-    PivotDetector,
-    HarmonicDetector,
-    ElliottWaveAnalyzer,
-    SlopeAnalyzer,
-    SqueezeDetector,
-    CurvatureAnalyzer,
-    SlopeMomentumAnalyzer,
-    ConfluenceAnalyzer,
-    MeanReversionAnalyzer,
-    VolumeClimaxDetector,
-    BandBreachDetector,
-    IndicatorResult,
     WEIGHT_PROFILES,
+    BandBreachDetector,
+    ConfluenceAnalyzer,
+    CurvatureAnalyzer,
+    ElliottWaveAnalyzer,
+    GeometricQuantEngine,
+    HarmonicDetector,
+    IndicatorResult,
+    MeanReversionAnalyzer,
+    PivotDetector,
+    SlopeAnalyzer,
+    SlopeMomentumAnalyzer,
+    SqueezeDetector,
+    VolumeClimaxDetector,
 )
-
 
 # =============================================================================
 # 테스트 데이터 생성

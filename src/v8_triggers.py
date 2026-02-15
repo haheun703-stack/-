@@ -5,9 +5,9 @@ Quantum Master v8.0 — Phase 3: Entry Triggers
 3가지 독립 트리거 — OR 조건 (하나 이상 발동 시 진입)
 """
 
-import pandas as pd
 from dataclasses import dataclass
-from typing import List
+
+import pandas as pd
 
 
 @dataclass
@@ -26,7 +26,7 @@ class TriggerEngine:
         v8_cfg = config.get('v8_hybrid', {})
         self.cfg = v8_cfg.get('triggers', {})
 
-    def check_all(self, row: pd.Series) -> List[TriggerResult]:
+    def check_all(self, row: pd.Series) -> list[TriggerResult]:
         """
         모든 트리거를 체크합니다.
         Returns: 발동된 트리거 리스트 (빈 리스트 = 미발동 → 대기)

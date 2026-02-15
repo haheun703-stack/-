@@ -1,7 +1,8 @@
 """v8.0 Gate Engine 단위 테스트"""
-import pytest
 import pandas as pd
-from src.v8_gates import GateEngine, GateResult
+import pytest
+
+from src.v8_gates import GateEngine
 
 
 @pytest.fixture

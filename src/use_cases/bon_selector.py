@@ -9,9 +9,8 @@ Sci-CoE 논문의 BoN(Best-of-N) 개념 적용:
 """
 
 import logging
-from typing import Optional
 
-from src.entities.consensus_models import ConsensusResult, LayerVote
+from src.entities.consensus_models import LayerVote
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +103,7 @@ class BoNSelector:
 
         return best_profile, best_geo, best_consensus
 
-    def invalidate_cache(self, ticker: Optional[str] = None) -> None:
+    def invalidate_cache(self, ticker: str | None = None) -> None:
         """캐시 무효화"""
         if ticker:
             self._cache.pop(ticker, None)

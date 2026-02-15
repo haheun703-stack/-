@@ -12,19 +12,20 @@ v6.2 견고성 테스트 — edge case + 방어 코드 검증
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.martin_momentum import MartinMomentumEngine
-from src.extreme_volatility import ExtremeVolatilityDetector
-from src.use_cases.rttp_news_processor import RttpNewsProcessor
-from src.use_cases.consensus_engine import ConsensusVerifier
 from src.config_validator import ConfigValidator
-from src.entities.consensus_models import ConsensusResult, LayerVote
+from src.entities.consensus_models import LayerVote
 from src.entities.news_models import (
-    NewsGateResult, NewsGrade, EventDrivenAction, NewsItem,
+    EventDrivenAction,
+    NewsGateResult,
+    NewsGrade,
+    NewsItem,
 )
 from src.entities.rttp_models import RttpEnhancement
-
+from src.extreme_volatility import ExtremeVolatilityDetector
+from src.martin_momentum import MartinMomentumEngine
+from src.use_cases.consensus_engine import ConsensusVerifier
+from src.use_cases.rttp_news_processor import RttpNewsProcessor
 
 # ── 공통 헬퍼 ──
 

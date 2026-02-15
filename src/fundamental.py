@@ -16,7 +16,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import yaml
 
@@ -27,7 +26,7 @@ class FundamentalEngine:
     """재무 데이터 로딩 + 밸류에이션 점수 계산"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
 
         self.sector_per = self.config.get("sector_per", {})
@@ -116,9 +115,7 @@ class FundamentalEngine:
         ratio = current_per / sector_avg_per
 
         ranges = self.config["strategy"]["forward_value_ranges"]
-        if ratio <= ranges["deep_discount"][1]:
-            return 1.0
-        elif ratio <= ranges["discount"][1]:
+        if ratio <= ranges["deep_discount"][1] or ratio <= ranges["discount"][1]:
             return 1.0
         elif ratio <= ranges["fair"][1]:
             return 0.5

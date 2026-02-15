@@ -16,10 +16,10 @@ import logging
 
 import pandas as pd
 
+from .holding_horizon import HoldingHorizonClassifier
 from .v8_gates import GateEngine
 from .v8_scorers import ScoringEngine
 from .v8_triggers import TriggerEngine
-from .holding_horizon import HoldingHorizonClassifier
 
 logger = logging.getLogger(__name__)
 

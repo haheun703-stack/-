@@ -11,19 +11,18 @@ Step 8: report_generator.py — 백테스트 결과 HTML 리포트 생성
 """
 
 import logging
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # plotly는 선택적 (없으면 matplotlib로 대체)
 try:
+    import plotly.express as px
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
-    import plotly.express as px
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
@@ -31,8 +30,8 @@ except ImportError:
 try:
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
     MPL_AVAILABLE = True
 except ImportError:
     MPL_AVAILABLE = False
@@ -192,7 +191,8 @@ class ReportGenerator:
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:,.0f}'))
         plt.tight_layout()
 
-        import io, base64
+        import base64
+        import io
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=100)
         buf.seek(0)

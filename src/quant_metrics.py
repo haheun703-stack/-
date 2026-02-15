@@ -11,6 +11,7 @@
 """
 
 import logging
+
 import numpy as np
 import pandas as pd
 
@@ -346,7 +347,7 @@ def print_metrics(metrics: dict):
     log = logging.getLogger(__name__)
 
     log.info(f"\n{'='*60}")
-    log.info(f"v4.6 Quant Metrics Report")
+    log.info("v4.6 Quant Metrics Report")
     log.info(f"{'='*60}")
 
     # v4.6: 표본수 경고
@@ -380,7 +381,7 @@ def print_metrics(metrics: dict):
     # 트리거별
     tb = metrics.get("trigger_breakdown", {})
     if tb:
-        log.info(f"  [트리거별]")
+        log.info("  [트리거별]")
         for ttype, stats in tb.items():
             log.info(f"    {ttype:10s}: {stats['count']}건 "
                      f"승률={stats['win_rate']:.1f}% "
@@ -390,7 +391,7 @@ def print_metrics(metrics: dict):
     # 등급별
     gb = metrics.get("grade_breakdown", {})
     if gb:
-        log.info(f"  [등급별]")
+        log.info("  [등급별]")
         for grade, stats in gb.items():
             log.info(f"    {grade}등급: {stats['count']}건 "
                      f"승률={stats['win_rate']:.1f}% "

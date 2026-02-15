@@ -20,9 +20,8 @@ Dependencies: numpy, pandas, scipy
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -78,7 +77,7 @@ class IndicatorResult:
     signal: str     # BUY / SELL / HOLD
     score: float    # 0~100
     detail: str     # 한줄 설명
-    meta: Dict      # 상세 메타데이터
+    meta: dict      # 상세 메타데이터
 
 
 # =============================================================================
@@ -166,7 +165,7 @@ class PivotDetector:
         zigzag_pct = max(2.0, min(10.0, (atr / price) * 100 * atr_mult))
         return cls(zigzag_pct=zigzag_pct, min_bars=min_bars)
 
-    def find_pivots_zigzag(self, prices: np.ndarray) -> List[Dict]:
+    def find_pivots_zigzag(self, prices: np.ndarray) -> list[dict]:
         """ZigZag 알고리즘으로 고점/저점 추출"""
         if len(prices) < 3:
             return []
@@ -237,7 +236,7 @@ class PivotDetector:
 
     def find_pivots_scipy(
         self, prices: np.ndarray, prominence: float = None, distance: int = 10
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """scipy.signal.find_peaks 기반 피벗 추출 (보조용)"""
         if prominence is None:
             prominence = np.std(prices) * 0.5
@@ -286,8 +285,8 @@ class HarmonicPattern:
     """감지된 하모닉 패턴 정보"""
     pattern_type: HarmonicPatternType
     direction: str
-    points: Dict
-    ratios: Dict
+    points: dict
+    ratios: dict
     score: float
     prz_low: float
     prz_high: float
@@ -341,7 +340,7 @@ class HarmonicDetector:
         self.tolerance = tolerance
         self.pivot_detector = PivotDetector(zigzag_pct=zigzag_pct, min_bars=min_bars)
 
-    def _check_ratio(self, actual: float, min_r: float, max_r: float) -> Tuple[bool, float]:
+    def _check_ratio(self, actual: float, min_r: float, max_r: float) -> tuple[bool, float]:
         expanded_min = min_r * (1 - self.tolerance)
         expanded_max = max_r * (1 + self.tolerance)
         ideal = (min_r + max_r) / 2
@@ -352,7 +351,7 @@ class HarmonicDetector:
         return False, 999.0
 
     def _calculate_ratios(self, X: float, A: float, B: float,
-                          C: float, D: float) -> Dict[str, float]:
+                          C: float, D: float) -> dict[str, float]:
         xa = abs(A - X)
         ab = abs(B - A)
         bc = abs(C - B)
@@ -369,7 +368,7 @@ class HarmonicDetector:
             "AD_XA": ad / xa,
         }
 
-    def _calculate_score(self, ratios: Dict[str, float],
+    def _calculate_score(self, ratios: dict[str, float],
                          pattern_type: HarmonicPatternType) -> float:
         pattern_def = self.PATTERNS[pattern_type]
         total_deviation = 0
@@ -389,7 +388,7 @@ class HarmonicDetector:
         return round(score, 1)
 
     def detect_patterns(self, df: pd.DataFrame,
-                        lookback: int = 100) -> List[HarmonicPattern]:
+                        lookback: int = 100) -> list[HarmonicPattern]:
         """하모닉 패턴 감지 메인 함수"""
         prices = df["close"].values[-lookback:]
         pivots = self.pivot_detector.find_pivots_zigzag(prices)
@@ -486,12 +485,12 @@ class ElliottWave:
     """감지된 엘리어트 파동 정보"""
     wave_type: WaveType
     direction: str
-    waves: Dict
+    waves: dict
     current_wave: str
     confidence: float
-    rules_passed: List[str]
-    rules_failed: List[str]
-    fib_targets: Dict
+    rules_passed: list[str]
+    rules_failed: list[str]
+    fib_targets: dict
 
 
 class ElliottWaveAnalyzer:
@@ -505,7 +504,7 @@ class ElliottWaveAnalyzer:
     def __init__(self, zigzag_pct: float = 3.0, min_bars: int = 3):
         self.pivot_detector = PivotDetector(zigzag_pct=zigzag_pct, min_bars=min_bars)
 
-    def _validate_impulse_rules(self, waves: Dict) -> Tuple[List[str], List[str]]:
+    def _validate_impulse_rules(self, waves: dict) -> tuple[list[str], list[str]]:
         """충격파 3대 절대 규칙 검증"""
         passed = []
         failed = []
@@ -571,7 +570,7 @@ class ElliottWaveAnalyzer:
 
         return passed, failed
 
-    def _calculate_fib_targets(self, waves: Dict) -> Dict:
+    def _calculate_fib_targets(self, waves: dict) -> dict:
         """파동 기반 피보나치 목표가 계산"""
         targets = {}
 
@@ -603,8 +602,8 @@ class ElliottWaveAnalyzer:
 
         return targets
 
-    def _try_impulse(self, pivots_6: List[Dict], prices: np.ndarray,
-                     expected_start_type: str) -> Optional[ElliottWave]:
+    def _try_impulse(self, pivots_6: list[dict], prices: np.ndarray,
+                     expected_start_type: str) -> ElliottWave | None:
         """6개 피벗으로 충격파 5파 구성 시도"""
         # 교대 패턴 검증
         for i, p in enumerate(pivots_6):
@@ -672,7 +671,7 @@ class ElliottWaveAnalyzer:
             fib_targets=fib_targets,
         )
 
-    def analyze(self, df: pd.DataFrame, lookback: int = 200) -> Optional[ElliottWave]:
+    def analyze(self, df: pd.DataFrame, lookback: int = 200) -> ElliottWave | None:
         """
         엘리어트 파동 분석 (Bug #2: 슬라이딩 윈도우 탐색)
         여러 피벗 조합을 시도하여 최적의 파동 구조를 찾음
@@ -737,7 +736,7 @@ class SlopeAnalyzer:
         "overshoot": (70, 90),
     }
 
-    def __init__(self, lookback_periods: List[int] = None):
+    def __init__(self, lookback_periods: list[int] = None):
         self.lookback_periods = lookback_periods or [5, 10, 20, 60]
 
     def calculate_normalized_angle(self, prices: np.ndarray,
@@ -758,7 +757,7 @@ class SlopeAnalyzer:
         angle = np.degrees(np.arctan2(norm_price_change, norm_time_change))
         return round(angle, 2)
 
-    def classify_trend(self, angle: float) -> Tuple[str, str]:
+    def classify_trend(self, angle: float) -> tuple[str, str]:
         abs_angle = abs(angle)
 
         for strength, (low, high) in self.THRESHOLDS.items():
@@ -771,7 +770,7 @@ class SlopeAnalyzer:
 
         return "weak", "neutral"
 
-    def analyze(self, df: pd.DataFrame) -> List[SlopeAnalysis]:
+    def analyze(self, df: pd.DataFrame) -> list[SlopeAnalysis]:
         prices = df["close"].values
         results = []
 
@@ -809,7 +808,7 @@ class SlopeAnalyzer:
 
     def detect_slope_divergence(self, prices: np.ndarray,
                                  short_period: int = 5,
-                                 long_period: int = 20) -> Optional[str]:
+                                 long_period: int = 20) -> str | None:
         if len(prices) < long_period:
             return None
 
@@ -1198,9 +1197,7 @@ class MeanReversionAnalyzer:
             recent_ma = _ema_np(prices, min(20, longest_p))
             dev_3ago = (prices[-3] - recent_ma[-3]) / recent_ma[-3] * 100 if recent_ma[-3] > 0 else 0
             dev_now = (prices[-1] - recent_ma[-1]) / recent_ma[-1] * 100 if recent_ma[-1] > 0 else 0
-            if extreme_type in ("extreme_oversold", "oversold") and dev_now > dev_3ago:
-                recovery_signal = True
-            elif extreme_type in ("extreme_overbought", "overbought") and dev_now < dev_3ago:
+            if extreme_type in ("extreme_oversold", "oversold") and dev_now > dev_3ago or extreme_type in ("extreme_overbought", "overbought") and dev_now < dev_3ago:
                 recovery_signal = True
 
         short_dev = deviations.get("ema_20", 0)
@@ -1466,10 +1463,10 @@ class GeometricSignal:
     ticker: str
     action: str
     confidence: float
-    harmonic: Optional[Dict]
-    elliott: Optional[Dict]
-    slope: Optional[Dict]
-    reasoning: List[str]
+    harmonic: dict | None
+    elliott: dict | None
+    slope: dict | None
+    reasoning: list[str]
 
 
 class GeometricQuantEngine:
@@ -1486,7 +1483,7 @@ class GeometricQuantEngine:
     APPROACH_B = ("squeeze", "curvature", "slope_mom", "confluence")
     APPROACH_C = ("mean_rev", "vol_climax", "band_breach")
 
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: dict = None):
         self.config = config or {}
 
         # Approach A: 기존 지표 (버그 수정 코드 유지)
@@ -1558,7 +1555,7 @@ class GeometricQuantEngine:
                 self.weights[key] = self.config[legacy_key]
 
     def _run_approach_a(self, df: pd.DataFrame, ticker: str
-                        ) -> Tuple[Dict, Dict, Dict, List[str], Dict[str, float]]:
+                        ) -> tuple[dict, dict, dict, list[str], dict[str, float]]:
         """Approach A: 구조적 패턴 (harmonic, elliott, slope)"""
         reasoning = []
         scores = {"buy": 0.0, "sell": 0.0}
@@ -1667,7 +1664,7 @@ class GeometricQuantEngine:
         return harmonic_result, elliott_result, slope_result, reasoning, scores
 
     def _run_approach_bc(self, df: pd.DataFrame, ticker: str
-                         ) -> Tuple[Dict[str, IndicatorResult], List[str], Dict[str, float]]:
+                         ) -> tuple[dict[str, IndicatorResult], list[str], dict[str, float]]:
         """Approach B+C: 에너지 수렴 + 극단 회귀 (7개 신규 지표)"""
         reasoning = []
         scores = {"buy": 0.0, "sell": 0.0}
@@ -1756,7 +1753,7 @@ class GeometricQuantEngine:
             reasoning=reasoning,
         )
 
-    def get_indicator_votes(self, df: pd.DataFrame, ticker: str = "UNKNOWN") -> Dict:
+    def get_indicator_votes(self, df: pd.DataFrame, ticker: str = "UNKNOWN") -> dict:
         """
         v5.0: 10지표 개별 투표 결과 반환 (Diversity 계산용).
 
@@ -1816,7 +1813,7 @@ class GeometricQuantEngine:
 
     def run_with_profile(
         self, df: pd.DataFrame, ticker: str, profile: str
-    ) -> Dict:
+    ) -> dict:
         """
         v5.0: 지정 프로파일로 분석 실행 (BoN 선택기용).
 
@@ -1836,7 +1833,7 @@ class GeometricQuantEngine:
             self.profile = original_profile
             self.weights = original_weights
 
-    def generate_l7_result(self, df: pd.DataFrame, ticker: str = "UNKNOWN") -> Dict:
+    def generate_l7_result(self, df: pd.DataFrame, ticker: str = "UNKNOWN") -> dict:
         """
         L7 보조 레이어용 결과 반환 (v2.0: 10지표 + 프로파일).
         하위호환: 기존 geo_* 필드 모두 유지.

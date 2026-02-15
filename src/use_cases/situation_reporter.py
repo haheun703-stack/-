@@ -33,7 +33,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from src.entities.intraday_models import (
@@ -406,11 +405,11 @@ class SituationReporter:
                 return
 
             # parquet에 v8 결과가 없으면 지표 기반 간이 판정
+            import yaml
+
             from src.v8_gates import GateEngine
             from src.v8_scorers import ScoringEngine
             from src.v8_triggers import TriggerEngine
-
-            import yaml
             cfg_path = Path("config/settings.yaml")
             with open(cfg_path, encoding="utf-8") as f:
                 config = yaml.safe_load(f)

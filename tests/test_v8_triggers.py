@@ -1,7 +1,8 @@
 """v8.0 Trigger Engine 단위 테스트"""
-import pytest
 import pandas as pd
-from src.v8_triggers import TriggerEngine, TriggerResult
+import pytest
+
+from src.v8_triggers import TriggerEngine
 
 
 @pytest.fixture

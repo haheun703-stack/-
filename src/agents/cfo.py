@@ -10,7 +10,6 @@ from src.entities.cfo_models import (
     CapitalAllocation,
     DrawdownAnalysis,
     PortfolioHealthCheck,
-    PortfolioRiskBudget,
 )
 from src.use_cases.ports import CFOPort
 

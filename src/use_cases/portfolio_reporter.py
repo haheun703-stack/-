@@ -243,8 +243,20 @@ class PortfolioReporter:
                 }
                 contexts.append(ctx)
 
-            # asyncio 실행
-            results = asyncio.run(agent.batch_analyze(contexts))
+            # asyncio 실행 (기존 이벤트루프 존재 시 안전 처리)
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+            if loop and loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    results = pool.submit(
+                        asyncio.run, agent.batch_analyze(contexts)
+                    ).result()
+            else:
+                results = asyncio.run(agent.batch_analyze(contexts))
 
             for stock, game in zip(stocks, results):
                 stock.game_analysis = game

@@ -12,18 +12,16 @@ C-Suite 에이전트 테스트 — CFO, Risk Sentinel, Macro Analyst
   - TestAgentImports: 에이전트 패키지 import 검증 (3개)
 """
 
-import pytest
 
 # ═══════════════════════════════════════════════
 # 1. CFO 엔티티 모델 테스트
 # ═══════════════════════════════════════════════
 
 from src.entities.cfo_models import (
-    RiskLevel,
-    PortfolioRiskBudget,
     CapitalAllocation,
     PortfolioHealthCheck,
-    DrawdownAnalysis,
+    PortfolioRiskBudget,
+    RiskLevel,
 )
 
 
@@ -89,11 +87,10 @@ class TestCFOEntities:
 # ═══════════════════════════════════════════════
 
 from src.entities.risk_models import (
-    ThreatLevel,
-    TailRiskAlert,
-    CorrelationRegime,
-    StressTestResult,
     RiskDashboard,
+    StressTestResult,
+    TailRiskAlert,
+    ThreatLevel,
 )
 
 
@@ -156,12 +153,11 @@ class TestRiskEntities:
 # ═══════════════════════════════════════════════
 
 from src.entities.macro_models import (
+    MacroDashboard,
+    MacroRegimeAnalysis,
     MarketRegime,
     SectorMomentum,
-    MacroRegimeAnalysis,
     SectorRotation,
-    MarketBreadth,
-    MacroDashboard,
 )
 
 
@@ -221,8 +217,7 @@ class TestMacroEntities:
 # 4. 포트 인터페이스 준수 테스트
 # ═══════════════════════════════════════════════
 
-from abc import ABC
-from src.use_cases.ports import CFOPort, RiskSentinelPort, MacroAnalystPort
+from src.use_cases.ports import CFOPort, MacroAnalystPort, RiskSentinelPort
 
 
 class TestPortInterfaces:
@@ -264,8 +259,8 @@ class TestPortInterfaces:
 
 from src.agents.cfo import (
     _format_allocation_input,
-    _format_health_input,
     _format_drawdown_input,
+    _format_health_input,
 )
 
 
@@ -339,10 +334,11 @@ class TestCFOPromptFormatting:
 # ═══════════════════════════════════════════════
 
 from src.agents.risk_sentinel import (
-    _format_market_data as risk_format_market_data,
-    _format_returns_matrix,
-    _format_stress_scenarios,
     DEFAULT_SCENARIOS,
+    _format_returns_matrix,
+)
+from src.agents.risk_sentinel import (
+    _format_market_data as risk_format_market_data,
 )
 
 
@@ -400,10 +396,9 @@ class TestRiskSentinelFormatting:
 # ═══════════════════════════════════════════════
 
 from src.agents.macro_analyst import (
-    _format_market_data as macro_format_market_data,
-    _format_sector_data,
-    _format_breadth_data,
     SECTORS,
+    _format_breadth_data,
+    _format_sector_data,
 )
 
 

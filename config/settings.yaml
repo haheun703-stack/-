@@ -269,15 +269,18 @@ quant_engine:
 # ============================================================
 backtest:
   start_date: "2019-01-01"
-  end_date: "2024-12-31"
+  end_date: "2026-02-14"
   initial_capital: 30000000      # 3천만원 (사용자 설정)
-  max_risk_pct: 0.015
-  max_positions: 4
+  max_risk_pct: 0.02             # v8.1: 1.5%→2.0% (균형 최적)
+  max_positions: 5               # v8.1: 4→5 (동시 포지션 확대)
   max_single_position_pct: 0.40
-  max_portfolio_risk_pct: 0.06
-  # 거래 비용 (Adaptive Strategy 반영)
-  commission_rate: 0.0015       # 수수료 0.15% (매수+매도 각각)
-  slippage_rate: 0.001          # 슬리피지 0.10% (Adaptive 0.05%보다 보수적 유지)
+  max_portfolio_risk_pct: 0.08   # v8.1: 6%→8% (균형 최적)
+  # 거래 비용 (현실 반영 v8.2)
+  commission_rate: 0.00015      # 수수료 0.015% (매수+매도 각각, 온라인 할인 증권사)
+  slippage_rate: 0.001          # 슬리피지 0.10% (기본, 저가주는 동적 증가)
+  tax_rate: 0.0018              # 증권거래세 0.18% (매도 시만, 2025년 기준)
+  dynamic_slippage: true        # 저가주 동적 슬리피지 (가격 역비례)
+  slippage_price_ref: 10000     # 기준가 1만원 (이하 슬리피지 증가)
   trailing_stop_atr_mult: 2.0
   partial_take_profit_pct: 0.50
   trend_exit_consecutive_days: 3
@@ -727,7 +730,48 @@ master_controller:
     aggressive: 2                # 공격적 진입 최소 서브시스템 수
 
 # ════════════════════════════════════════════════════════════
-# v8.0 Gate + Score Hybrid Pipeline
+# v8.2 Market Regime Gate (7D 시장 체제 감지)
+# "지금이 우리 시스템이 작동하는 시장인가?"
+# ════════════════════════════════════════════════════════════
+regime_gate:
+  enabled: true
+  lookback: 20                     # 체제 판단 기본 lookback (일)
+
+  # 1. Market Breadth (추세 정렬 종목 비율)
+  breadth:
+    favorable_pct: 0.55            # 55%+ 종목 추세 정렬 → favorable
+    hostile_pct: 0.35              # 35%- → hostile
+
+  # 2. Foreign Flow (외국인 수급 방향)
+  foreign_flow:
+    lookback: 20                   # 외국인 방향 판단 기간
+    strong_buy_ratio: 0.60         # 60%+ 종목 외국인 순매수 → buy day
+    weak_sell_ratio: 0.40          # 40%- → sell day
+
+  # 3. Volatility Regime (변동성 환경)
+  volatility:
+    short_lookback: 10             # 단기 변동성 기간
+    long_lookback: 60              # 장기 변동성 기준
+    spike_threshold: 1.5           # 단기/장기 비율 1.5x+ → hostile
+
+  # 4. Self-Adaptive (곱셈 계수 — 최근 거래 성공률)
+  self_adaptive:
+    window: 15                     # 최근 15거래 롤링 (빠른 반응/회복)
+    min_trades: 8                  # 8건 이상 쌓여야 활성화
+    floor: 0.55                    # SA=0일 때 base의 55% 반영 (caution 유지, 사망나선 방지)
+    hostile_winrate: 0.25          # 25% 이하 → SA=0.0 (×0.30)
+    caution_winrate: 0.35          # 35% 이하 → caution 방향
+    neutral_winrate: 0.50          # 50% 이하 → neutral 방향
+
+  # 체제 판정 임계값 (composite = base × sa_mult, 0~3 범위)
+  thresholds:
+    favorable: 2.2                 # >= 2.2: 전체 포지션 (scale=1.0)
+    neutral: 1.5                   # >= 1.5: 75% 포지션
+    caution: 0.8                   # >= 0.8: 50% 포지션
+                                   # < 0.8: 신규 진입 차단 (scale=0.0)
+
+# ════════════════════════════════════════════════════════════
+# v8.1 Gate + Score Hybrid Pipeline (Tuned)
 # "포물선 초점에 진입하여 추세를 먹는다"
 # ════════════════════════════════════════════════════════════
 v8_hybrid:
@@ -738,13 +782,13 @@ v8_hybrid:
     trend:
       ma_fast: 60                # MA60 > MA120 (중기 > 장기)
       ma_slow: 120
-      adx_min: 18                # v7.0: 20 → v8.0: 18 (약한 추세 초기도 포착)
+      adx_min: 18                # v8.0 원본 유지 (검증된 필터)
     pullback:
-      min_atr_pullback: 0.8      # v7.0: 1.0 → v8.0: 0.8 (한국 대형주 눌림 포착)
-      max_atr_pullback: 4.0      # 추세 전환 의심 상한
+      min_atr_pullback: 0.8      # v8.0 원본 유지
+      max_atr_pullback: 4.0      # v8.0 원본 유지
       high_lookback_days: 20
     overheat:
-      max_52w_ratio: 0.92        # v7.0: 0.95 → v8.0: 0.92 (더 보수적)
+      max_52w_ratio: 0.92        # v8.0 원본 유지
 
   # ─── Phase 2: Scoring Engine (가중합) ───
   scoring:
@@ -801,6 +845,46 @@ v8_hybrid:
     target_atr_A: 5.0            # A등급 타겟: +5 ATR
     target_atr_B: 3.5            # B등급 타겟: +3.5 ATR
     min_rr_ratio: 1.5            # 최소 손익비
+
+# ════════════════════════════════════════════════════════════
+# 수급 이면 데이터 레이어 (6개)
+# "가격이 오르는 이유가 진짜인지 가짜인지 구분"
+# ════════════════════════════════════════════════════════════
+supply_demand:
+  enabled: true
+  collection_time: "16:30"          # 장마감 후 수집 시각
+
+  # ── L1: 공매도 ──
+  short_selling:
+    spike_threshold: 2.0            # 40일 평균 대비 배수 → 위험
+    balance_danger_pct: 3.0         # 상장주식수 대비 3%+ → 모니터링
+    lending_increase_warn: 20       # 대차잔고 5일 변화율 20%+ → 경고
+    overheated_halt: true           # 과열종목 지정 시 자동매매 중단
+
+  # ── L3: 체결강도 (Phase 2) ──
+  execution:
+    strength_weak: 50               # 체결강도 50 미만 → 매도세 우위
+    large_trade_multiple: 10        # 평균의 10배+ → 대량 체결
+
+  # ── L5: 기관/외인 수급 ──
+  investor_flow:
+    foreign_consecutive_strong: 5   # 5일+ 연속 순매수 → 추세 형성
+    foreign_consecutive_weak: 3     # 3일+ → 관심
+    institution_20d_positive: true  # 기관 20일 누적 양전환 → 매집
+
+  # ── 함정률 v2.0 가중치 ──
+  trap_weights:
+    crowd_heat: 0.25                # 군중 과열도
+    short_risk: 0.20                # 공매도 위험도
+    spoofing: 0.20                  # 허수호가 빈도 (Phase 3)
+    execution_reverse: 0.15         # 체결강도 역전
+    wash_trade: 0.10                # 자전거래 의심
+    program_pressure: 0.10          # 프로그램 매도 압력
+
+  # ── 구현 로드맵 ──
+  # Phase 1 (즉시): pykrx 공매도 + 수급 → L1, L5
+  # Phase 2 (2~3주): KIS 실시간 체결강도 + 프로그램 → L3, L4
+  # Phase 3 (1~2개월): 호가창 허수호가 + 옵션 → L2, L6
 
 # ════════════════════════════════════════════════════════════
 # Phase 1: 장중 실시간 데이터 수집 파이프라인
