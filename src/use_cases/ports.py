@@ -334,3 +334,67 @@ class IntradayStorePort(ABC):
     def cleanup_old_data(self, days: int = 30) -> int:
         """N일 이전 데이터 정리"""
         ...
+
+
+# ─── C-Suite Agent Ports ─────────────────────────
+
+
+class CFOPort(ABC):
+    """CFO 에이전트 포트 — 포트폴리오 리스크 관리 및 자본 배분"""
+
+    @abstractmethod
+    async def allocate_capital(
+        self, signal: dict, portfolio: dict, risk_budget: dict
+    ) -> dict:
+        """신규 진입 시 자본 배분 결정"""
+        ...
+
+    @abstractmethod
+    async def health_check(self, portfolio: dict, market_context: dict) -> dict:
+        """포트폴리오 건강 진단"""
+        ...
+
+    @abstractmethod
+    async def drawdown_analysis(
+        self, equity_curve: list, current_positions: list
+    ) -> dict:
+        """낙폭 분석 및 대응 방안"""
+        ...
+
+
+class RiskSentinelPort(ABC):
+    """Risk Sentinel 포트 — 꼬리 리스크 감시 및 스트레스 테스트"""
+
+    @abstractmethod
+    async def scan_tail_risk(self, market_data: dict, portfolio: dict) -> dict:
+        """꼬리 리스크 스캔 (VKOSPI, 상관관계 급등, 외국인 이탈 등)"""
+        ...
+
+    @abstractmethod
+    async def analyze_correlation(self, returns_matrix: dict) -> dict:
+        """포트폴리오 상관관계 레짐 분석"""
+        ...
+
+    @abstractmethod
+    async def stress_test(self, portfolio: dict, scenarios: list) -> list:
+        """스트레스 시나리오별 포트폴리오 영향 분석"""
+        ...
+
+
+class MacroAnalystPort(ABC):
+    """Macro Analyst 포트 — 시장 레짐, 섹터 로테이션, 시장 폭 분석"""
+
+    @abstractmethod
+    async def analyze_regime(self, market_data: dict) -> dict:
+        """현재 시장 레짐 판별 (bull/recovery/sideways/correction/bear/crisis)"""
+        ...
+
+    @abstractmethod
+    async def analyze_sector_rotation(self, sector_data: dict) -> dict:
+        """14개 섹터 모멘텀 및 로테이션 시그널 분석"""
+        ...
+
+    @abstractmethod
+    async def analyze_breadth(self, breadth_data: dict) -> dict:
+        """시장 폭(Market Breadth) 내부 건전성 진단"""
+        ...
