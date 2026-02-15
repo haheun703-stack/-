@@ -195,9 +195,18 @@ class SignalEngine:
         for w in config_warnings:
             logger.warning("Config: %s", w)
 
+        # v8.0: Gate + Score Hybrid 파이프라인
+        v8_cfg = self.config.get("v8_hybrid", {})
+        self.v8_mode = v8_cfg.get("enabled", False)
+        if self.v8_mode:
+            from .v8_pipeline import QuantumPipelineV8
+            self.v8_pipeline = QuantumPipelineV8(self.config)
+        else:
+            self.v8_pipeline = None
+
         logger.info(
-            "SignalEngine v6.2: martin=%s, rttp=%s, extreme_vol=%s, consensus=%s",
-            self.martin_enabled, self.rttp_enabled,
+            "SignalEngine v8.0: v8_mode=%s, martin=%s, rttp=%s, extreme_vol=%s, consensus=%s",
+            self.v8_mode, self.martin_enabled, self.rttp_enabled,
             self.extreme_vol_enabled, self.consensus_mode,
         )
 
@@ -715,6 +724,7 @@ class SignalEngine:
     def calculate_signal(self, ticker: str, df: pd.DataFrame, idx: int) -> dict:
         """
         v3.1 Pipeline 시그널 계산.
+        v8.0: v8_hybrid.enabled=true이면 Gate+Score Hybrid 파이프라인으로 위임.
 
         [v3.1] L-1_news_gate → 뉴스 등급(A/B/C) → 파라미터 조정
         L0_pre_gate   → Pre-screening (매출/거래대금/수익성)
@@ -726,6 +736,12 @@ class SignalEngine:
         L5_risk       → 손익비 (A급: 1.7→1.2)
         L6_trigger    → Impulse/Confirm/Breakout
         """
+        # v8.0: Gate + Score Hybrid 모드
+        if self.v8_mode and self.v8_pipeline:
+            row = df.iloc[idx]
+            date_str = str(df.index[idx].date()) if hasattr(df.index[idx], "date") else str(df.index[idx])
+            return self.v8_pipeline.scan_single(row, ticker=ticker, date=date_str)
+
         row = df.iloc[idx]
         date = df.index[idx] if hasattr(df.index[idx], "strftime") else str(df.index[idx])
 

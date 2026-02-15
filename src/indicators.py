@@ -33,6 +33,17 @@ class IndicatorEngine:
     # ──────────────────────────────────────────────
 
     @staticmethod
+    def calc_linreg_slope(series: pd.Series, window: int) -> pd.Series:
+        """Rolling 선형회귀 기울기 (가격 대비 정규화)"""
+        def _slope(arr):
+            if len(arr) < window or np.isnan(arr).any():
+                return np.nan
+            x = np.arange(len(arr))
+            slope = np.polyfit(x, arr, 1)[0]
+            return slope / arr[-1] if arr[-1] != 0 else 0.0
+        return series.rolling(window, min_periods=window).apply(_slope, raw=True)
+
+    @staticmethod
     def calc_atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
         """
         ATR(Average True Range) 계산
@@ -382,6 +393,39 @@ class IndicatorEngine:
         result["rsi_zscore"] = (
             (result["rsi_14"] - rsi_ma) / rsi_std.replace(0, np.nan)
         )
+
+        # ──────────────────────────────────────────────
+        # v8.0 Gate+Score Hybrid 지표 (51~58)
+        # ──────────────────────────────────────────────
+
+        # 51. 선형회귀 기울기 20일 (S4 모멘텀 감속용)
+        result["linreg_slope_20"] = self.calc_linreg_slope(df["close"], 20)
+
+        # 52. 선형회귀 기울기 5일 (S4 단기 감속 비교용)
+        result["linreg_slope_5"] = self.calc_linreg_slope(df["close"], 5)
+
+        # 53. EMA 곡률 (EMA20의 2차 미분 — S4 변곡점 탐지 핵심)
+        ema20 = df["close"].ewm(span=20, min_periods=20).mean()
+        ema20_diff1 = ema20.diff()
+        ema20_diff2 = ema20_diff1.diff()
+        result["ema_curvature"] = ema20_diff2 / df["close"].replace(0, np.nan)
+        result["ema_curvature_prev"] = result["ema_curvature"].shift(1)
+
+        # 54. 가격 5일 추세 (S5 OBV 다이버전스 비교용)
+        result["price_trend_5d"] = df["close"].pct_change(5)
+
+        # 55. OBV 5일 추세 (S5 매집 감지)
+        result["obv_trend_5d"] = result["obv"].pct_change(5)
+
+        # 56. MACD 히스토그램 전일값 (S4 감속 감지)
+        result["macd_histogram_prev"] = result["macd_histogram"].shift(1)
+
+        # 57. TRIX 전일값 / TRIX Signal 전일값 (T1 골든크로스 감지)
+        result["trix_prev"] = result["trix"].shift(1)
+        result["trix_signal_prev"] = result["trix_signal"].shift(1)
+
+        # 58. RSI 전일값 (T2 RSI 상향돌파 감지)
+        result["rsi_prev"] = result["rsi_14"].shift(1)
 
         return result
 
