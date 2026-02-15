@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 5D/6D 분석 — 자비스</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0a0e1a; color: #e0e6ed; padding: 20px; line-height: 1.6; }
+  h1 { text-align: center; font-size: 1.6em; margin-bottom: 4px; background: linear-gradient(90deg, #00d2ff, #7b2ff7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #6b7b8d; font-size: 0.85em; margin-bottom: 24px; }
+
+  /* 포트폴리오 요약 */
+  .summary-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .summary-card { flex: 1; min-width: 130px; background: #131a2b; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #1e2a3d; }
+  .summary-card .label { font-size: 0.7em; color: #6b7b8d; text-transform: uppercase; }
+  .summary-card .value { font-size: 1.3em; font-weight: 700; color: #00d2ff; }
+  .summary-card .value.green { color: #00e676; }
+  .summary-card .value.red { color: #ff5252; }
+
+  /* 종합 순위 테이블 */
+  .section-title { font-size: 1.1em; font-weight: 700; margin: 20px 0 10px; padding-left: 8px; border-left: 3px solid #7b2ff7; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8em; }
+  th { background: #1a2235; color: #8899aa; font-weight: 600; padding: 8px 6px; text-align: center; border-bottom: 2px solid #2a3a5d; }
+  td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #1a2235; }
+  tr:hover { background: #131a2b; }
+  .rank { font-size: 1.2em; font-weight: 700; }
+  .rank.gold { color: #ffd700; }
+  .rank.silver { color: #c0c0c0; }
+  .rank.bronze { color: #cd7f32; }
+  .score-num { font-weight: 700; }
+  .green { color: #00e676; }
+  .yellow { color: #ffea00; }
+  .orange { color: #ff9800; }
+  .red { color: #ff5252; }
+  .blue { color: #448aff; }
+
+  /* 5D vs 6D 비교 */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+
+  /* 종목 상세 카드 */
+  .stock-card { background: #131a2b; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #1e2a3d; }
+  .stock-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .stock-name { font-size: 1.1em; font-weight: 700; }
+  .stock-action { padding: 4px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 600; }
+  .action-green { background: rgba(0,230,118,0.15); color: #00e676; }
+  .action-yellow { background: rgba(255,234,0,0.15); color: #ffea00; }
+  .action-orange { background: rgba(255,152,0,0.15); color: #ff9800; }
+  .action-red { background: rgba(255,82,82,0.15); color: #ff5252; }
+  .stock-meta { font-size: 0.75em; color: #6b7b8d; margin-bottom: 10px; }
+  .score-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .score-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72em; background: #1a2235; }
+  .catalyst-box { background: #0d1420; border-left: 3px solid #7b2ff7; padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.78em; margin-bottom: 8px; }
+  .d6-box { background: #0d1420; border-left: 3px solid #ff9800; padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.78em; }
+  .d6-label { color: #ff9800; font-weight: 600; font-size: 0.72em; }
+
+  .forecast-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; }
+  .forecast-up { background: rgba(0,230,118,0.12); color: #00e676; }
+  .forecast-flat { background: rgba(255,234,0,0.12); color: #ffea00; }
+  .forecast-down { background: rgba(255,82,82,0.12); color: #ff5252; }
+
+  .disclaimer { text-align: center; color: #3a4a5d; font-size: 0.65em; margin-top: 20px; padding-top: 12px; border-top: 1px solid #1a2235; }
+</style>
+</head>
+<body>
+
+<h1>{{ header_emoji }} 자비스 포트폴리오 분석</h1>
+<p class="subtitle">5D/6D 프레임워크 &middot; {{ report.report_date }} 기준 &middot; 총 평가 {{ "₩{:,.0f}".format(report.total_eval) }}</p>
+
+<!-- 포트폴리오 요약 -->
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="label">총 평가금</div>
+    <div class="value">₩{{ "{:,.0f}".format(report.total_eval / 1000000) }}M</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">종목 수</div>
+    <div class="value">{{ report.stock_count }}종목</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">전체 평균 수익</div>
+    <div class="value {{ 'green' if report.avg_return_pct >= 0 else 'red' }}">{{ "{:+.2f}".format(report.avg_return_pct) }}%</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">6D 최고점수</div>
+    <div class="value">{{ report.top_6d_name }} {{ "{:.1f}".format(report.top_6d_score) }}</div>
+  </div>
+</div>
+
+<!-- 종합 순위표 -->
+<div class="section-title">6D 종합 순위 (높을수록 유리)</div>
+<table>
+  <tr>
+    <th>#</th>
+    <th>종목</th>
+    <th>현재가</th>
+    <th>수익률</th>
+    <th>5D점수</th>
+    <th>6D점수</th>
+    <th>1개월 전망</th>
+    <th>행동</th>
+  </tr>
+  {% for s in report.stocks %}
+  <tr>
+    <td><span class="rank {{ 'gold' if s.rank == 1 else 'silver' if s.rank == 2 else 'bronze' if s.rank == 3 else '' }}">{{ s.rank }}</span></td>
+    <td style="text-align:left; font-weight:600;">{{ s.name }}</td>
+    <td>₩{{ "{:,.0f}".format(s.current_price) }}</td>
+    <td class="{{ 'green' if s.return_pct >= 0 else 'red' }}">{{ "{:+.2f}".format(s.return_pct) }}%</td>
+    <td><span class="score-num blue">{{ "{:.1f}".format(s.dimensions.total_5d) }}</span></td>
+    <td><span class="score-num {{ score_color(s.dimensions.total_6d) }}">{{ "{:.1f}".format(s.dimensions.total_6d) }}</span></td>
+    <td><span class="forecast-tag forecast-{{ s.forecast_class }}">{{ forecast_emoji(s.forecast_class) }} {{ s.forecast }}</span></td>
+    <td>{{ action_emoji(s.action_color) }} {{ s.action }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<!-- 차원별 점수 비교표 -->
+<div class="section-title">차원별 점수 비교 (5D vs 6D)</div>
+<table>
+  <tr>
+    <th>차원</th>
+    <th>의미</th>
+    {% for s in report.stocks %}
+    <th>{{ s.name }}</th>
+    {% endfor %}
+  </tr>
+  <tr>
+    <td style="color:#7b2ff7; font-weight:600;">1D 가격</td>
+    <td style="text-align:left; font-size:0.72em;">52주 위치(%)</td>
+    {% for s in report.stocks %}
+    <td>{{ "{:.1f}".format(s.dimensions.d1_price_pct) }}%</td>
+    {% endfor %}
+  </tr>
+  <tr>
+    <td style="color:#7b2ff7; font-weight:600;">2D 가치</td>
+    <td style="text-align:left; font-size:0.72em;">목표가 괴리(%)</td>
+    {% for s in report.stocks %}
+    <td class="{{ 'green' if s.dimensions.d2_target_gap_pct > 10 else 'yellow' if s.dimensions.d2_target_gap_pct > 0 else 'red' }}">{{ "{:+.1f}".format(s.dimensions.d2_target_gap_pct) }}%</td>
+    {% endfor %}
+  </tr>
+  <tr>
+    <td style="color:#7b2ff7; font-weight:600;">3D 멀티팩터</td>
+    <td style="text-align:left; font-size:0.72em;">카탈·펀더·리스크</td>
+    {% for s in report.stocks %}
+    <td class="{{ score_color(s.dimensions.d3_multifactor) }}">{{ "{:.1f}".format(s.dimensions.d3_multifactor) }}</td>
+    {% endfor %}
+  </tr>
+  <tr>
+    <td style="color:#7b2ff7; font-weight:600;">4D 타이밍</td>
+    <td style="text-align:left; font-size:0.72em;">나선시계</td>
+    {% for s in report.stocks %}
+    <td class="{{ 'green' if s.dimensions.d4_timing_score >= 70 else 'red' if s.dimensions.d4_timing_score < 40 else '' }}">{{ "{:.0f}".format(s.dimensions.d4_timing_score) }} <small>({{ "{:.1f}".format(s.dimensions.d4_clock_hour) }}시)</small></td>
+    {% endfor %}
+  </tr>
+  <tr>
+    <td style="color:#7b2ff7; font-weight:600;">5D 메타게임</td>
+    <td style="text-align:left; font-size:0.72em;">군중역발상</td>
+    {% for s in report.stocks %}
+    <td class="{{ 'green' if s.dimensions.d5_metagame_score >= 70 else 'red' if s.dimensions.d5_metagame_score < 40 else '' }}">{{ "{:.0f}".format(s.dimensions.d5_metagame_score) }} <small>({{ "{:.0f}".format(s.dimensions.d5_neglect_pct) }}%)</small></td>
+    {% endfor %}
+  </tr>
+  <tr style="background:#1a2235;">
+    <td style="color:#ff9800; font-weight:700;">6D 게임설계</td>
+    <td style="text-align:left; font-size:0.72em;">설계자·역할·함정</td>
+    {% for s in report.stocks %}
+    <td class="{{ score_color(s.dimensions.d6_game_score) }}">{{ "{:.0f}".format(s.dimensions.d6_game_score) }} <small>(함정{{ "{:.0f}".format(s.dimensions.d6_trap_pct) }}%)</small></td>
+    {% endfor %}
+  </tr>
+  <tr style="background:#0d1420; font-weight:700;">
+    <td colspan="2" style="color:#00d2ff;">종합 6D 점수</td>
+    {% for s in report.stocks %}
+    <td class="{{ score_color(s.dimensions.total_6d) }}">{{ "{:.1f}".format(s.dimensions.total_6d) }}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+<!-- 종목별 상세 카드 -->
+<div class="section-title">종목별 6D 상세 분석</div>
+
+{% for s in report.stocks %}
+<div class="stock-card">
+  <div class="stock-header">
+    <div>
+      <span class="stock-name">{{ rank_emoji(s.rank) }} {{ s.name }}</span>
+      <span style="color:#6b7b8d; font-size:0.8em;"> {{ s.ticker }} &middot; {{ s.shares }}주 &middot; ₩{{ "{:,.0f}".format(s.investment) }}</span>
+    </div>
+    <span class="stock-action action-{{ s.action_color }}">{{ action_emoji(s.action_color) }} {{ s.action }}</span>
+  </div>
+  <div class="score-row">
+    <span class="score-badge">수익 <span class="{{ 'green' if s.return_pct >= 0 else 'red' }}">{{ "{:+.2f}".format(s.return_pct) }}%</span></span>
+    {% if s.dimensions.d2_target_gap_pct != 0 %}
+    <span class="score-badge">목표가 {{ "{:+.1f}".format(s.dimensions.d2_target_gap_pct) }}%</span>
+    {% endif %}
+    <span class="score-badge">나선 {{ "{:.1f}".format(s.dimensions.d4_clock_hour) }}시</span>
+    <span class="score-badge">군중 {{ "{:.0f}".format(s.dimensions.d5_neglect_pct) }}%</span>
+  </div>
+  {% if s.catalyst %}
+  <div class="catalyst-box">
+    <strong>카탈리스트:</strong> {{ s.catalyst }}
+  </div>
+  {% endif %}
+  {% if s.game_analysis %}
+  <div class="d6-box">
+    <div class="d6-label">6D 게임 분석{% if s.dimensions.d6_trap_pct >= 50 %} — 주의 종목{% endif %}</div>
+    <strong>설계자:</strong> {{ s.game_analysis.designer }}<br>
+    <strong>우리 역할:</strong> {{ s.game_analysis.our_role }}<br>
+    <strong>엣지:</strong> {{ s.game_analysis.edge }}<br>
+    <strong>함정:</strong> {% if s.dimensions.d6_trap_pct >= 50 %}<span class="red">{{ "{:.0f}".format(s.dimensions.d6_trap_pct) }}%</span>{% elif s.dimensions.d6_trap_pct >= 30 %}<span class="orange">{{ "{:.0f}".format(s.dimensions.d6_trap_pct) }}%</span>{% else %}<span class="green">{{ "{:.0f}".format(s.dimensions.d6_trap_pct) }}%</span>{% endif %} &rarr; {{ s.game_analysis.trap_description }}
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- 종합 판단 & 행동 플랜 -->
+<div class="section-title">자비스 종합 판단 & 행동 플랜</div>
+<div class="stock-card" style="border-color: #7b2ff7;">
+  <table style="font-size:0.82em;">
+    <tr><th>종목</th><th>행동</th><th>근거 (한 줄)</th></tr>
+    {% for s in report.stocks %}
+    <tr>
+      <td style="font-weight:700;">{{ s.name }}</td>
+      <td class="{{ s.action_color }}">{{ action_emoji(s.action_color) }} {{ s.action }}</td>
+      <td style="text-align:left;">{{ s.action_reason }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<p class="disclaimer">
+  본 분석은 자비스 5D/6D 프레임워크 기반 정량 모델이며 투자 조언이 아닙니다.<br>
+  실제 투자 결정은 본인 판단하에 진행하세요. 분석일: {{ report.report_date }}
+</p>
+
+</body>
+</html>

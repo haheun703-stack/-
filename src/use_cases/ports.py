@@ -12,7 +12,6 @@ from src.entities.models import (
     FlowPrediction,
     InvestorFlow,
     Stock,
-    SupplyDemandZone,
     TechnicalIndicators,
     TechnicalPattern,
     VolumeAnalysis,
@@ -378,6 +377,20 @@ class RiskSentinelPort(ABC):
     @abstractmethod
     async def stress_test(self, portfolio: dict, scenarios: list) -> list:
         """스트레스 시나리오별 포트폴리오 영향 분석"""
+        ...
+
+
+class GameAnalystPort(ABC):
+    """Game Analyst 포트 — 6D 게임 설계 분석"""
+
+    @abstractmethod
+    async def analyze_game(self, stock_context: dict) -> dict:
+        """종목의 6D 게임 구조 분석 (설계자/역할/함정)"""
+        ...
+
+    @abstractmethod
+    async def batch_analyze(self, stock_contexts: list[dict]) -> list:
+        """여러 종목 6D 게임 분석"""
         ...
 
 

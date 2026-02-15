@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-v4.0 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
+v4.1 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
 
 일일 스케줄:
   00:00  Phase 1 — 일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
   07:00  Phase 2 — 매크로 수집
   07:10  Phase 3 — 뉴스/리포트 (Grok API)
   08:20  Phase 4 — 매매 준비 (토큰 갱신 → 공휴일 체크 → 시그널 스캔)
+  08:25  Phase 4.5 — 장전 포트폴리오 5D/6D 분석 리포트
   09:02  Phase 5 — 개별종목 매수 실행
   09:10  Phase 6 — 장중 모니터링 시작 (1분 간격, 15:20까지)
   15:25  Phase 7 — 매도 실행 (장마감 전)
   15:35  Phase 8 — 장마감 파이프라인 (9단계)
+  16:30  Phase 9 — 장마감 업무일지 생성
 
 안전장치:
   STOP.signal — 매수/매도/모니터링 중단
@@ -20,7 +22,7 @@ v4.0 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
 사용법:
   python scripts/daily_scheduler.py               # 스케줄러 시작
   python scripts/daily_scheduler.py --dry-run      # 스케줄 확인만 (실행 안함)
-  python scripts/daily_scheduler.py --run-now 8    # 특정 Phase 즉시 실행
+  python scripts/daily_scheduler.py --run-now 9    # 특정 Phase 즉시 실행 (1~9)
 """
 
 from __future__ import annotations
@@ -184,6 +186,28 @@ class DailyScheduler:
             df = df[df["date"] == latest_date]
 
         self._buy_signals = df.to_dict("records")
+
+    # ──────────────────────────────────────────
+    # Phase 4.5: 장전 포트폴리오 분석 리포트 (08:25)
+    # ──────────────────────────────────────────
+
+    def phase_morning_report(self) -> None:
+        """5D/6D 포트폴리오 분석 HTML 리포트 생성 + 텔레그램 발송"""
+        logger.info("[Phase 4.5] 장전 리포트 시작")
+        try:
+            from src.use_cases.portfolio_reporter import PortfolioReporter
+            reporter = PortfolioReporter(self.config)
+            save_path = reporter.generate()
+
+            if save_path:
+                logger.info("[Phase 4.5] 리포트 생성 완료: %s", save_path)
+                self._notify(f"Phase 4.5 완료: 장전 5D/6D 리포트 생성\n{save_path}")
+            else:
+                logger.info("[Phase 4.5] 보유 포지션 없음 — 리포트 생략")
+                self._notify("Phase 4.5: 보유 포지션 없음")
+        except Exception as e:
+            logger.error("[Phase 4.5] 리포트 생성 실패: %s", e)
+            self._notify(f"Phase 4.5 오류: {e}")
 
     # ──────────────────────────────────────────
     # Phase 5: 매수 실행 (09:02)
@@ -387,6 +411,27 @@ class DailyScheduler:
             logger.error("[Phase 8-9] 성과 리포트 실패: %s", e)
 
     # ──────────────────────────────────────────
+    # Phase 9: 장마감 업무일지 (16:30)
+    # ──────────────────────────────────────────
+
+    def phase_eod_journal(self) -> None:
+        """일일 업무일지 HTML 생성 + 텔레그램 발송"""
+        logger.info("[Phase 9] 업무일지 생성 시작")
+        try:
+            from src.use_cases.daily_journal import DailyJournalWriter
+            writer = DailyJournalWriter(self.config)
+            save_path = writer.generate()
+
+            if save_path:
+                logger.info("[Phase 9] 업무일지 저장: %s", save_path)
+                self._notify(f"Phase 9 완료: 일일 업무일지 생성\n{save_path}")
+            else:
+                logger.info("[Phase 9] 업무일지 생성 실패")
+        except Exception as e:
+            logger.error("[Phase 9] 업무일지 생성 실패: %s", e)
+            self._notify(f"Phase 9 오류: {e}")
+
+    # ──────────────────────────────────────────
     # 헬퍼
     # ──────────────────────────────────────────
 
@@ -433,6 +478,9 @@ class DailyScheduler:
         schedule.every().day.at(self.schedule.get("trade_prep", "08:20")).do(
             self._safe_run, self.phase_trade_prep
         )
+        schedule.every().day.at(self.schedule.get("morning_report", "08:25")).do(
+            self._safe_run, self.phase_morning_report
+        )
         schedule.every().day.at(self.schedule.get("buy_execution", "09:02")).do(
             self._safe_run, self.phase_buy_execution
         )
@@ -444,6 +492,9 @@ class DailyScheduler:
         )
         schedule.every().day.at(self.schedule.get("close_pipeline", "15:35")).do(
             self._safe_run, self.phase_close_pipeline
+        )
+        schedule.every().day.at(self.schedule.get("eod_journal", "16:30")).do(
+            self._safe_run, self.phase_eod_journal
         )
 
         logger.info("등록된 스케줄:")
@@ -499,10 +550,12 @@ class DailyScheduler:
             (self.schedule.get("macro_collect", "07:00"), "Phase 2", "매크로 수집 (KOSPI/환율/금리)"),
             (self.schedule.get("news_briefing", "07:10"), "Phase 3", "뉴스/리포트 (Grok API 뉴스 스캔)"),
             (self.schedule.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰→공휴일→시그널 스캔)"),
+            (self.schedule.get("morning_report", "08:25"), "Phase 4.5", "장전 5D/6D 포트폴리오 분석 리포트"),
             (self.schedule.get("buy_execution", "09:02"), "Phase 5", "개별종목 매수 실행"),
             (self.schedule.get("monitor_start", "09:10"), "Phase 6", "장중 모니터링 (1분간격 → 15:20)"),
             (self.schedule.get("sell_execution", "15:25"), "Phase 7", "매도 실행 (장마감 전)"),
             (self.schedule.get("close_pipeline", "15:35"), "Phase 8", "장마감 파이프라인 (9단계)"),
+            (self.schedule.get("eod_journal", "16:30"), "Phase 9", "장마감 일일 업무일지"),
         ]
         for t, name, desc in entries:
             print(f"  {t:>5}  {name:<10}  {desc}")
@@ -561,8 +614,8 @@ if __name__ == "__main__":
         help="스케줄 확인만 (실행 안함)",
     )
     parser.add_argument(
-        "--run-now", type=int, choices=range(1, 9), metavar="N",
-        help="특정 Phase를 즉시 실행 (1~8)",
+        "--run-now", type=int, choices=range(1, 10), metavar="N",
+        help="특정 Phase를 즉시 실행 (1~9)",
     )
     args = parser.parse_args()
 
@@ -582,6 +635,7 @@ if __name__ == "__main__":
             6: scheduler.phase_intraday_monitor,
             7: scheduler.phase_sell_execution,
             8: scheduler.phase_close_pipeline,
+            9: scheduler.phase_eod_journal,
         }
         func = phases.get(args.run_now)
         if func:

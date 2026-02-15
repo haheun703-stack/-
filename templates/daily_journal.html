@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일일 업무일지 — 자비스</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #0a0e1a; color: #e0e6ed; padding: 20px; line-height: 1.6; }
+  h1 { text-align: center; font-size: 1.6em; margin-bottom: 4px; background: linear-gradient(90deg, #ff9800, #ff5252); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #6b7b8d; font-size: 0.85em; margin-bottom: 24px; }
+
+  .section-title { font-size: 1.1em; font-weight: 700; margin: 20px 0 10px; padding-left: 8px; border-left: 3px solid #ff9800; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.8em; }
+  th { background: #1a2235; color: #8899aa; font-weight: 600; padding: 8px 6px; text-align: center; border-bottom: 2px solid #2a3a5d; }
+  td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #1a2235; }
+  tr:hover { background: #131a2b; }
+  .green { color: #00e676; }
+  .red { color: #ff5252; }
+  .yellow { color: #ffea00; }
+  .orange { color: #ff9800; }
+  .blue { color: #448aff; }
+
+  .summary-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .summary-card { flex: 1; min-width: 130px; background: #131a2b; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #1e2a3d; }
+  .summary-card .label { font-size: 0.7em; color: #6b7b8d; text-transform: uppercase; }
+  .summary-card .value { font-size: 1.3em; font-weight: 700; color: #00d2ff; }
+  .summary-card .value.green { color: #00e676; }
+  .summary-card .value.red { color: #ff5252; }
+
+  .journal-card { background: #131a2b; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #1e2a3d; }
+  .journal-card h3 { font-size: 0.95em; margin-bottom: 8px; color: #ff9800; }
+  .journal-card p { font-size: 0.82em; color: #b0bec5; }
+  .journal-card ul { font-size: 0.82em; color: #b0bec5; padding-left: 20px; }
+  .journal-card li { margin-bottom: 4px; }
+
+  .trade-row-buy { border-left: 3px solid #00e676; }
+  .trade-row-sell { border-left: 3px solid #ff5252; }
+
+  .phase-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72em; font-weight: 600; margin-right: 4px; }
+  .phase-ok { background: rgba(0,230,118,0.12); color: #00e676; }
+  .phase-skip { background: rgba(255,234,0,0.12); color: #ffea00; }
+  .phase-fail { background: rgba(255,82,82,0.12); color: #ff5252; }
+
+  .disclaimer { text-align: center; color: #3a4a5d; font-size: 0.65em; margin-top: 20px; padding-top: 12px; border-top: 1px solid #1a2235; }
+</style>
+</head>
+<body>
+
+<h1>일일 업무일지</h1>
+<p class="subtitle">{{ journal.date }} &middot; {{ journal.day_type }} &middot; KOSPI {{ journal.kospi_str }}</p>
+
+<!-- 일일 요약 -->
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="label">총 평가금</div>
+    <div class="value">₩{{ "{:,.0f}".format(journal.total_eval / 1000000) }}M</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">일일 손익</div>
+    <div class="value {{ 'green' if journal.daily_pnl >= 0 else 'red' }}">{{ "{:+,.0f}".format(journal.daily_pnl) }}원</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">일일 수익률</div>
+    <div class="value {{ 'green' if journal.daily_pnl_pct >= 0 else 'red' }}">{{ "{:+.2f}".format(journal.daily_pnl_pct) }}%</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">거래 건수</div>
+    <div class="value">{{ journal.trade_count }}건</div>
+  </div>
+</div>
+
+<!-- 스케줄러 실행 결과 -->
+<div class="section-title">스케줄러 실행 이력</div>
+<div class="journal-card">
+  <table>
+    <tr><th>시간</th><th>Phase</th><th>결과</th><th>비고</th></tr>
+    {% for p in journal.phases %}
+    <tr>
+      <td>{{ p.time }}</td>
+      <td>{{ p.name }}</td>
+      <td><span class="phase-badge phase-{{ p.status }}">{{ p.status_label }}</span></td>
+      <td style="text-align:left; font-size:0.75em;">{{ p.note }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<!-- 보유 포지션 현황 -->
+<div class="section-title">보유 포지션 현황</div>
+<table>
+  <tr>
+    <th>종목</th>
+    <th>수량</th>
+    <th>진입가</th>
+    <th>현재가</th>
+    <th>수익률</th>
+    <th>보유일</th>
+    <th>등급</th>
+  </tr>
+  {% for pos in journal.positions %}
+  <tr>
+    <td style="text-align:left; font-weight:600;">{{ pos.name }} <small style="color:#6b7b8d;">{{ pos.ticker }}</small></td>
+    <td>{{ pos.shares }}주</td>
+    <td>₩{{ "{:,.0f}".format(pos.entry_price) }}</td>
+    <td>₩{{ "{:,.0f}".format(pos.current_price) }}</td>
+    <td class="{{ 'green' if pos.pnl_pct >= 0 else 'red' }}">{{ "{:+.2f}".format(pos.pnl_pct) }}%</td>
+    <td>{{ pos.hold_days }}일</td>
+    <td class="{{ 'green' if pos.grade == 'A' else 'yellow' if pos.grade == 'B' else 'orange' }}">{{ pos.grade }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% if journal.trades %}
+<!-- 오늘 거래 내역 -->
+<div class="section-title">오늘 거래 내역</div>
+<table>
+  <tr><th>시간</th><th>종목</th><th>방향</th><th>수량</th><th>가격</th><th>사유</th></tr>
+  {% for t in journal.trades %}
+  <tr class="trade-row-{{ t.direction }}">
+    <td>{{ t.time }}</td>
+    <td style="text-align:left;">{{ t.name }}</td>
+    <td class="{{ 'green' if t.direction == 'buy' else 'red' }}">{{ t.direction_label }}</td>
+    <td>{{ t.shares }}주</td>
+    <td>₩{{ "{:,.0f}".format(t.price) }}</td>
+    <td style="text-align:left; font-size:0.75em;">{{ t.reason }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if journal.signals %}
+<!-- 내일 매수 후보 -->
+<div class="section-title">내일 매수 후보</div>
+<table>
+  <tr><th>종목</th><th>등급</th><th>Zone점수</th><th>트리거</th><th>진입가</th><th>손절가</th><th>R:R</th></tr>
+  {% for sig in journal.signals %}
+  <tr>
+    <td style="text-align:left; font-weight:600;">{{ sig.name }} <small style="color:#6b7b8d;">{{ sig.ticker }}</small></td>
+    <td class="{{ 'green' if sig.grade == 'A' else 'yellow' if sig.grade == 'B' else '' }}">{{ sig.grade }}</td>
+    <td>{{ "{:.3f}".format(sig.zone_score) }}</td>
+    <td>{{ sig.trigger }}</td>
+    <td>₩{{ "{:,.0f}".format(sig.entry_price) }}</td>
+    <td>₩{{ "{:,.0f}".format(sig.stop_loss) }}</td>
+    <td>{{ "{:.1f}".format(sig.rr_ratio) }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<!-- 오늘의 교훈/메모 -->
+{% if journal.lessons %}
+<div class="section-title">오늘의 교훈</div>
+<div class="journal-card">
+  <ul>
+    {% for lesson in journal.lessons %}
+    <li>{{ lesson }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<p class="disclaimer">
+  자비스 일일 업무일지 &middot; 자동 생성 &middot; {{ journal.date }} {{ journal.generated_time }}
+</p>
+
+</body>
+</html>
