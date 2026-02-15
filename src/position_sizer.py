@@ -28,6 +28,7 @@ class PositionSizer:
         grade_ratio: float,
         current_portfolio_risk: float = 0.0,
         stage_pct: float = 1.0,
+        vol_normalized_weight: float = 1.0,
     ) -> dict:
         """
         매수 수량 계산.
@@ -39,6 +40,7 @@ class PositionSizer:
             grade_ratio: 등급별 비율 (A=1.0, B=0.67, C=0.33)
             current_portfolio_risk: 현재 포트폴리오 리스크 금액 합계
             stage_pct: 분할 매수 비중 (Impulse=0.4, Confirm=0.4, Breakout=0.2)
+            vol_normalized_weight: v6.0 Martin 변동성 정규화 비중 (1/σ, 0.3~2.0)
 
         Returns:
             {shares, investment, risk_amount, stop_loss, target, pct_of_account}
@@ -54,6 +56,10 @@ class PositionSizer:
 
         # 등급별 조정 × 분할 비중 조정
         adjusted_shares = int(raw_shares * grade_ratio * stage_pct)
+
+        # v6.0: Martin 변동성 정규화 (position ∝ 1/σ)
+        if vol_normalized_weight != 1.0:
+            adjusted_shares = int(adjusted_shares * vol_normalized_weight)
 
         # 최대 투입 한도 (계좌의 40%)
         max_by_pct = int(account_balance * self.max_single_pct / entry_price)

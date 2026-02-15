@@ -204,18 +204,80 @@ class Screener:
         return passed, drs
 
     # ──────────────────────────────────────────────
+    # v6.4 Gate 4: ATR Pullback Gate
+    # ──────────────────────────────────────────────
+
+    def check_atr_pullback_gate(self, df: pd.DataFrame, idx: int) -> tuple:
+        """
+        Gate 4: ATR 조정폭이 충분한지 확인.
+        pullback_atr >= min_pullback_atr 이어야 통과.
+        너무 얕은 조정(노이즈)에서의 진입을 차단.
+
+        Returns:
+            (passed, pullback_atr_value)
+        """
+        gates_cfg = self.strategy.get("gates", {})
+        atr_gate_cfg = gates_cfg.get("atr_pullback_gate", {})
+        if not atr_gate_cfg.get("enabled", False):
+            return True, 0.0
+
+        min_pullback = atr_gate_cfg.get("min_pullback_atr", 1.0)
+        row = df.iloc[idx]
+        pullback_atr = row.get("pullback_atr", np.nan)
+
+        if pd.isna(pullback_atr):
+            return True, 0.0  # 데이터 없으면 통과
+
+        passed = pullback_atr >= min_pullback
+        return passed, round(float(pullback_atr), 3)
+
+    # ──────────────────────────────────────────────
+    # v6.4 Gate 5: 52주 신고가 필터
+    # ──────────────────────────────────────────────
+
+    def check_52w_high_gate(self, df: pd.DataFrame, idx: int) -> tuple:
+        """
+        Gate 5: 52주 신고가 근접 종목 필터링.
+        현재가가 52주 최고가의 max_pct(기본 95%) 이상이면 차단.
+        고점 추격 매수를 방지.
+
+        Returns:
+            (passed, pct_of_52w_high)
+        """
+        gates_cfg = self.strategy.get("gates", {})
+        high_gate_cfg = gates_cfg.get("high_52w_gate", {})
+        if not high_gate_cfg.get("enabled", False):
+            return True, 0.0
+
+        max_pct = high_gate_cfg.get("max_pct_of_52w_high", 0.95)
+        row = df.iloc[idx]
+        pct_of_high = row.get("pct_of_52w_high", np.nan)
+
+        if pd.isna(pct_of_high):
+            return True, 0.0  # 데이터 없으면 통과
+
+        passed = pct_of_high < max_pct
+        return passed, round(float(pct_of_high), 4)
+
+    # ──────────────────────────────────────────────
     # 종합 Gate 체크
     # ──────────────────────────────────────────────
 
     def check_all_gates(self, ticker: str, df: pd.DataFrame, idx: int) -> dict:
         """
         모든 Gate를 종합 체크.
+        v6.4: Gate 4 (ATR Pullback) + Gate 5 (52주 신고가) 추가
+
         반환: {
             "passed": bool,
             "pre_screen": bool,
             "trend_gate": bool,
             "drs_gate": bool,
             "drs_value": float,
+            "atr_pullback_gate": bool,
+            "atr_pullback_value": float,
+            "high_52w_gate": bool,
+            "pct_of_52w_high": float,
             "fail_reason": str or None,
         }
         """
@@ -225,6 +287,10 @@ class Screener:
             "trend_gate": False,
             "drs_gate": False,
             "drs_value": 0.0,
+            "atr_pullback_gate": False,
+            "atr_pullback_value": 0.0,
+            "high_52w_gate": False,
+            "pct_of_52w_high": 0.0,
             "fail_reason": None,
         }
 
@@ -247,6 +313,22 @@ class Screener:
             result["fail_reason"] = f"drs_too_high({drs_val:.2f})"
             return result
         result["drs_gate"] = True
+
+        # 4. ATR Pullback Gate (v6.4)
+        atr_passed, atr_val = self.check_atr_pullback_gate(df, idx)
+        result["atr_pullback_value"] = atr_val
+        if not atr_passed:
+            result["fail_reason"] = f"atr_pullback_shallow({atr_val:.2f})"
+            return result
+        result["atr_pullback_gate"] = True
+
+        # 5. 52주 신고가 Gate (v6.4)
+        high_passed, high_pct = self.check_52w_high_gate(df, idx)
+        result["pct_of_52w_high"] = high_pct
+        if not high_passed:
+            result["fail_reason"] = f"near_52w_high({high_pct:.1%})"
+            return result
+        result["high_52w_gate"] = True
 
         result["passed"] = True
         return result

@@ -22,3 +22,23 @@ nul
 # 리포트 (로컬 생성물)
 backtest_report_*.html
 backtest.log
+
+# 개인 자료/참고 문서 (버전관리 불필요)
+26.02.14 논문모음/
+교수님들 논문/
+골든크로스,그록최신뉴스,스마트머니/
+DART 재무정보_*/
+Adaptive_Regime_Sector_Strategy.md
+grok-stock-news-crawler.md
+v3.1-news-gate-spec.md
+PHASE_REPORT.md
+geoquant.py
+geoquant_quickstart.py
+analyze_sj_group.py
+strategy_config.json
+
+# 임시 폴더
+_tmp_files*/
+
+# PDCA 스냅샷 (자동 생성, 대량)
+docs/.pdca-snapshots/

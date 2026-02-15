@@ -14,6 +14,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from .ou_estimator import OUEstimator
+from .smart_money import calc_smart_money_z, calc_institutional_streak
+
 logger = logging.getLogger(__name__)
 
 
@@ -225,6 +228,160 @@ class IndicatorEngine:
                 count = 0
             streaks.append(count)
         result["days_above_sma20"] = streaks
+
+        # ──────────────────────────────────────────────
+        # v3.0 퀀트 레이어 지표 (10개 추가)
+        # ──────────────────────────────────────────────
+
+        # 20. 일간 수익률 (ret1) — 레짐 감지 HMM 입력
+        result["ret1"] = df["close"].pct_change()
+
+        # 21. ATR 비율 (ATR_pct) — 변동성 정규화
+        result["ATR_pct"] = result["atr_14"] / df["close"] * 100
+
+        # 22. 거래량 Z-score (vol_z) — 60일 기준 거래량 이상치 탐지
+        vol_ma60 = df["volume"].rolling(60).mean()
+        vol_std60 = df["volume"].rolling(60).std()
+        result["vol_z"] = (df["volume"] - vol_ma60) / vol_std60.replace(0, np.nan)
+        result["vol_z"] = result["vol_z"].fillna(0)
+
+        # 23. MA60 기울기 (slope_ma60) — 추세 방향성 (L3 모멘텀)
+        sma60_series = result["sma_60"]
+        result["slope_ma60"] = sma60_series.pct_change(10) * 100  # 10일 변화율(%)
+
+        # 24-29. OU 프로세스 파라미터 (kappa, mu, sigma, half_life, ou_z, snr)
+        try:
+            ou = OUEstimator(window=60)
+            ou_params = ou.estimate_rolling(df["close"])
+            for col in ["kappa", "mu", "sigma", "half_life", "ou_z", "snr"]:
+                result[col] = ou_params[col]
+        except Exception as e:
+            logger.debug(f"OU 추정 실패: {e}")
+            for col in ["kappa", "mu", "sigma", "half_life", "ou_z", "snr"]:
+                result[col] = np.nan
+
+        # 30. Smart Money Z-score
+        result["smart_z"] = calc_smart_money_z(result)
+
+        # ──────────────────────────────────────────────
+        # v3.1 추가 지표 (TRIX / 볼린저 / MACD / streak / gap)
+        # ──────────────────────────────────────────────
+
+        # 31. TRIX(12,9) — Triple EMA 모멘텀
+        ema1 = df["close"].ewm(span=12, min_periods=12).mean()
+        ema2 = ema1.ewm(span=12, min_periods=12).mean()
+        ema3 = ema2.ewm(span=12, min_periods=12).mean()
+        result["trix"] = ema3.pct_change() * 100
+        result["trix_signal"] = result["trix"].ewm(span=9, min_periods=9).mean()
+        result["trix_golden_cross"] = (
+            (result["trix"] > result["trix_signal"]) &
+            (result["trix"].shift(1) <= result["trix_signal"].shift(1))
+        ).astype(int)
+
+        # 32. 볼린저 밴드 (20일, 2σ)
+        bb_mid = df["close"].rolling(20).mean()
+        bb_std = df["close"].rolling(20).std()
+        result["bb_upper"] = bb_mid + bb_std * 2
+        result["bb_lower"] = bb_mid - bb_std * 2
+        bb_width = result["bb_upper"] - result["bb_lower"]
+        result["bb_width"] = bb_width / bb_mid.replace(0, np.nan)
+        result["bb_position"] = (df["close"] - result["bb_lower"]) / bb_width.replace(0, np.nan)
+
+        # 33. MACD(12,26,9)
+        ema_fast = df["close"].ewm(span=12, min_periods=12).mean()
+        ema_slow = df["close"].ewm(span=26, min_periods=26).mean()
+        result["macd"] = ema_fast - ema_slow
+        result["macd_signal"] = result["macd"].ewm(span=9, min_periods=9).mean()
+        result["macd_histogram"] = result["macd"] - result["macd_signal"]
+
+        # 34. 기관/외국인 연속 순매수 일수
+        for col_name in ["inst_net", "foreign_net"]:
+            if col_name in result.columns:
+                result[f"{col_name}_streak"] = calc_institutional_streak(
+                    result[col_name].fillna(0)
+                )
+
+        # 35. 갭업 비율 (전일 종가 대비 시가)
+        result["gap_up_pct"] = (df["open"] - df["close"].shift(1)) / df["close"].shift(1).replace(0, np.nan) * 100
+
+        # ──────────────────────────────────────────────
+        # v4.5 Dynamic RSI (변동성 적응형 과매도 기준)
+        # ──────────────────────────────────────────────
+
+        # 36. ATR/Price 비율 (변동성 정규화 기준)
+        atr_p = result["atr_14"] / df["close"].replace(0, np.nan)
+        atr_p_ma = atr_p.rolling(60, min_periods=20).mean()
+        atr_p_norm = atr_p / atr_p_ma.replace(0, np.nan)
+
+        # 37. Dynamic RSI Oversold Threshold
+        #     T = clip(base - k * (norm - 1), min, max)
+        #     변동성↑ → norm>1 → T↓ (엄격), 변동성↓ → norm<1 → T↑ (관대)
+        result["dynamic_rsi_oversold"] = np.clip(
+            30 - 10 * (atr_p_norm.fillna(1.0) - 1.0), 20, 40
+        )
+
+        # 38. RSI EMA(9) — 반전 확인용
+        result["rsi_ema9"] = result["rsi_14"].ewm(span=9, min_periods=9).mean()
+
+        # 39. RSI 상승 전환 (오늘 RSI > 어제 RSI)
+        result["rsi_rising"] = (result["rsi_14"] > result["rsi_14"].shift(1)).astype(int)
+
+        # 40. Dynamic RSI 과매도 진입 신호
+        #     RSI <= Dynamic Threshold AND RSI 상승 전환 AND RSI > EMA(RSI,9)
+        result["dynamic_rsi_signal"] = (
+            (result["rsi_14"] <= result["dynamic_rsi_oversold"]) &
+            (result["rsi_rising"] == 1) &
+            (result["rsi_14"] > result["rsi_ema9"])
+        ).astype(int)
+
+        # ──────────────────────────────────────────────
+        # v6.0 Martin Momentum 지표 (41~46)
+        # Martin(2023) 논문: EMA2 필터 + Dead Zone + 변동성 정규화
+        # ──────────────────────────────────────────────
+
+        # 41. EMA(8) — Martin fast EMA
+        result["ema_8"] = df["close"].ewm(span=8, min_periods=8).mean()
+
+        # 42. EMA(24) — Martin slow EMA
+        result["ema_24"] = df["close"].ewm(span=24, min_periods=24).mean()
+
+        # 43. EMA2 = fast - slow (Martin 모멘텀 핵심 신호)
+        result["ema2_martin"] = result["ema_8"] - result["ema_24"]
+
+        # 44. EMA2 정규화 (% 단위, Dead Zone 비교용)
+        result["ema2_norm"] = result["ema2_martin"] / df["close"].replace(0, np.nan) * 100
+
+        # 45. Dead Zone 플래그 (|ema2_norm| < 0.6 → 신호 무시)
+        result["martin_dead_zone"] = (result["ema2_norm"].abs() < 0.6).astype(int)
+
+        # 46. 일간 실현 변동성 (20일, 변동성 정규화 포지션용)
+        result["daily_sigma"] = result["ret1"].rolling(20, min_periods=10).std()
+
+        # ──────────────────────────────────────────────
+        # v6.4 Gate 강화 지표 (47~50)
+        # files.zip BES v2.2 → Gate 4/5 + Z-Score 표준화
+        # ──────────────────────────────────────────────
+
+        # 47. 52주(252거래일) 최고가
+        result["high_252"] = df["high"].rolling(252, min_periods=60).max()
+
+        # 48. 현재가 대비 52주 최고가 비율 (1.0 = 신고가)
+        result["pct_of_52w_high"] = df["close"] / result["high_252"].replace(0, np.nan)
+
+        # 49. BES 구성 요소 Z-Score (유니버스 비교용은 아니지만 시계열 정규화)
+        #     pullback_atr의 60일 Z-Score
+        pa_ma = result["pullback_atr"].rolling(60, min_periods=20).mean()
+        pa_std = result["pullback_atr"].rolling(60, min_periods=20).std()
+        result["pullback_atr_zscore"] = (
+            (result["pullback_atr"] - pa_ma) / pa_std.replace(0, np.nan)
+        )
+
+        # 50. RSI Z-Score (14일 RSI의 60일 정규화)
+        rsi_ma = result["rsi_14"].rolling(60, min_periods=20).mean()
+        rsi_std = result["rsi_14"].rolling(60, min_periods=20).std()
+        result["rsi_zscore"] = (
+            (result["rsi_14"] - rsi_ma) / rsi_std.replace(0, np.nan)
+        )
 
         return result
 

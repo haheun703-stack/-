@@ -1,0 +1,231 @@
+"""
+텔레그램 봇 메시지 송출 모듈
+
+.env에서 TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID 로드.
+텔레그램 Bot API를 직접 호출 (python-telegram-bot 불필요).
+"""
+
+import logging
+import os
+from pathlib import Path
+
+import requests
+from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
+
+# .env 로드
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+API_BASE = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
+
+# 텔레그램 메시지 최대 길이
+MAX_MESSAGE_LENGTH = 4096
+
+
+def send_message(text: str, chat_id: str = None, parse_mode: str = None) -> bool:
+    """
+    텔레그램 메시지 전송.
+
+    Args:
+        text: 전송할 메시지 (4096자 초과 시 자동 분할)
+        chat_id: 대상 채팅 ID (없으면 .env 값 사용)
+        parse_mode: "HTML" / "MarkdownV2" / None (plain text)
+
+    Returns:
+        True if all parts sent successfully
+    """
+    if not TELEGRAM_BOT_TOKEN:
+        logger.error("TELEGRAM_BOT_TOKEN이 설정되지 않았습니다 (.env 확인)")
+        return False
+
+    target_chat = chat_id or TELEGRAM_CHAT_ID
+    if not target_chat:
+        logger.error("TELEGRAM_CHAT_ID가 설정되지 않았습니다 (.env 확인)")
+        return False
+
+    # 메시지 분할 (4096자 제한)
+    chunks = _split_message(text, MAX_MESSAGE_LENGTH)
+
+    success = True
+    for i, chunk in enumerate(chunks):
+        payload = {
+            "chat_id": target_chat,
+            "text": chunk,
+        }
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
+
+        try:
+            resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
+            if resp.status_code == 200 and resp.json().get("ok"):
+                if len(chunks) > 1:
+                    logger.debug(f"텔레그램 전송 성공 ({i+1}/{len(chunks)})")
+            else:
+                logger.error(f"텔레그램 전송 실패: {resp.status_code} {resp.text}")
+                success = False
+        except requests.RequestException as e:
+            logger.error(f"텔레그램 전송 오류: {e}")
+            success = False
+
+    if success:
+        logger.info(f"텔레그램 메시지 전송 완료 ({len(chunks)}건)")
+
+    return success
+
+
+def send_backtest_report(results: dict, scan_date: str = None) -> bool:
+    """
+    백테스트 결과를 텔레그램으로 전송.
+
+    Args:
+        results: BacktestEngine._compile_results() 반환값
+        scan_date: 스캔 날짜
+    """
+    from .telegram_formatter import format_backtest_report
+
+    message = format_backtest_report(results, scan_date)
+    return send_message(message)
+
+
+def send_trade_alert(signal: dict, action: str = "BUY") -> bool:
+    """
+    실시간 매매 알림 전송.
+
+    Args:
+        signal: 시그널 dict
+        action: "BUY" / "SELL"
+    """
+    from .telegram_formatter import format_trade_alert
+
+    message = format_trade_alert(signal, action)
+    return send_message(message)
+
+
+def send_news_alert(
+    ticker: str,
+    grade: str,
+    action: str,
+    reason: str = "",
+    news_text: str = "",
+    param_overrides: dict = None,
+    entry_price: float = 0,
+    target_price: float = 0,
+    stop_loss: float = 0,
+    pipeline_passed: bool = False,
+) -> bool:
+    """v3.1 뉴스 등급 알림 전송."""
+    from .telegram_formatter import format_news_alert
+
+    message = format_news_alert(
+        ticker=ticker, grade=grade, action=action, reason=reason,
+        news_text=news_text, param_overrides=param_overrides,
+        entry_price=entry_price, target_price=target_price,
+        stop_loss=stop_loss, pipeline_passed=pipeline_passed,
+    )
+    return send_message(message)
+
+
+def send_accumulation_alert(
+    ticker: str,
+    phase: int,
+    confidence: float = 0,
+    bonus_score: int = 0,
+    inst_streak: int = 0,
+    foreign_streak: int = 0,
+    obv_divergence: str = "",
+    description: str = "",
+) -> bool:
+    """v3.1 매집 단계 알림 전송."""
+    from .telegram_formatter import format_accumulation_alert
+
+    message = format_accumulation_alert(
+        ticker=ticker, phase=phase, confidence=confidence,
+        bonus_score=bonus_score, inst_streak=inst_streak,
+        foreign_streak=foreign_streak, obv_divergence=obv_divergence,
+        description=description,
+    )
+    return send_message(message)
+
+
+def send_scan_result(
+    stats: dict,
+    signals: list[dict] = None,
+    diagnostic: dict = None,
+    scan_date: str = None,
+) -> bool:
+    """
+    스캔 결과 전체 메시지 전송.
+    """
+    from .telegram_formatter import format_scan_result
+
+    message = format_scan_result(stats, signals, diagnostic, scan_date)
+    return send_message(message)
+
+
+def send_order_result(order, action: str = "BUY") -> bool:
+    """주문 체결/실패 알림 전송."""
+    from .telegram_formatter import format_order_result
+
+    message = format_order_result(order, action)
+    return send_message(message)
+
+
+def send_position_summary(positions: list) -> bool:
+    """보유종목 현황 전송."""
+    from .telegram_formatter import format_position_summary
+
+    message = format_position_summary(positions)
+    return send_message(message)
+
+
+def send_daily_performance(perf) -> bool:
+    """일일 성과 리포트 전송."""
+    from .telegram_formatter import format_daily_performance
+
+    message = format_daily_performance(perf)
+    return send_message(message)
+
+
+def send_emergency_alert(reason: str) -> bool:
+    """긴급 알림 전송."""
+    from .telegram_formatter import format_emergency_alert
+
+    message = format_emergency_alert(reason)
+    return send_message(message)
+
+
+def send_scheduler_status(phase: str, status: str, detail: str = "") -> bool:
+    """스케줄러 상태 전송."""
+    from .telegram_formatter import format_scheduler_status
+
+    message = format_scheduler_status(phase, status, detail)
+    return send_message(message)
+
+
+def _split_message(text: str, max_length: int) -> list[str]:
+    """
+    텔레그램 최대 메시지 길이(4096) 기준 분할.
+    줄바꿈 단위로 자연스럽게 분할.
+    """
+    if len(text) <= max_length:
+        return [text]
+
+    chunks = []
+    current = ""
+
+    for line in text.split("\n"):
+        if len(current) + len(line) + 1 > max_length:
+            if current:
+                chunks.append(current)
+            current = line
+        else:
+            current = f"{current}\n{line}" if current else line
+
+    if current:
+        chunks.append(current)
+
+    return chunks

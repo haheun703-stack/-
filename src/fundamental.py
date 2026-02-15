@@ -1,15 +1,19 @@
 """
 Step 3: fundamental.py — 재무 데이터 관리
 
+v6.5: DART OpenAPI 연동으로 실제 매출/영업이익 데이터 사용.
+DART_API_KEY가 없으면 기존 sector_map 기반 fallback 유지.
+
 백테스트에서는 Look-ahead bias 방지를 위해:
 - Forward PER → pykrx Trailing PER로 대체 (과거 시점 Forward PER 확보 어려움)
 - EPS 리비전 → EPS 3개월 변화율로 근사
-- 매출액/영업이익 → 가장 최근 공시 기준
+- 매출액/영업이익 → DART API (실시간) 또는 가장 최근 공시 기준
 
-실시간(Q2)에서는 FnGuide 크롤링으로 Forward PER 사용 예정.
+실시간에서는 DART API로 분기별 재무제표 직접 조회.
 """
 
 import logging
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +35,57 @@ class FundamentalEngine:
 
         # 종목-업종 매핑 로드
         self.sector_map = self._load_sector_map()
+
+        # DART 재무 캐시 (fundamentals_all.csv)
+        self._fund_cache = self._load_fundamentals_cache()
+
+        # DART 어댑터 (Lazy 초기화)
+        self._dart = None
+        self._dart_initialized = False
+
+    def _load_fundamentals_cache(self) -> dict:
+        """
+        data/dart_cache/fundamentals_all.csv 로딩.
+        ticker → {revenue_억, op_income_억, net_income_억, op_margin_pct, profitable}
+        """
+        cache_file = Path("data/dart_cache/fundamentals_all.csv")
+        if not cache_file.exists():
+            return {}
+
+        try:
+            df = pd.read_csv(cache_file, dtype={"ticker": str})
+            df["ticker"] = df["ticker"].str.zfill(6)
+            cache = {}
+            for _, row in df.iterrows():
+                cache[row["ticker"]] = {
+                    "revenue": row.get("revenue_억"),
+                    "operating_income": row.get("op_income_억"),
+                    "net_income": row.get("net_income_억"),
+                    "operating_margin": row.get("op_margin_pct"),
+                    "profitable": row.get("profitable"),
+                }
+            logger.info(f"DART 재무 캐시 로드: {len(cache)}종목 (fundamentals_all.csv)")
+            return cache
+        except Exception as e:
+            logger.warning(f"DART 재무 캐시 로드 실패: {e}")
+            return {}
+
+    @property
+    def dart(self):
+        """DART 어댑터 Lazy 로딩 (API 키 없으면 None)"""
+        if not self._dart_initialized:
+            self._dart_initialized = True
+            try:
+                from src.adapters.dart_adapter import DartAdapter
+                adapter = DartAdapter()
+                if adapter.is_available:
+                    self._dart = adapter
+                    logger.info("DART API 어댑터 초기화 완료")
+                else:
+                    logger.info("DART_API_KEY 미설정 — sector_map fallback 사용")
+            except Exception as e:
+                logger.warning(f"DART 어댑터 로드 실패: {e}")
+        return self._dart
 
     def _load_sector_map(self) -> dict:
         """ticker → sector 매핑"""
@@ -115,30 +170,141 @@ class FundamentalEngine:
         """밸류 종합 점수 = PER 비율 × 0.6 + EPS 리비전 × 0.4"""
         return per_score * 0.6 + eps_score * 0.4
 
+    # ──────────────────────────────────────────────
+    # Pre-screening 필터 (DART 연동)
+    # ──────────────────────────────────────────────
+
     def check_revenue_filter(self, ticker: str,
                               min_revenue_억: float = 1000) -> bool:
         """
-        매출 1,000억 이상 필터.
-        샘플 데이터에서는 대형주 리스트에 포함된 것만 통과.
-        실전에서는 FnGuide/DART 크롤링으로 실제 매출 확인.
+        매출 필터: 매출 >= min_revenue_억 (기본 1,000억원)
+
+        우선순위:
+        1. fundamentals_all.csv 캐시 (API 호출 없이 즉시)
+        2. DART API 실시간 조회
+        3. Fallback: sector_map에 있으면 통과 (기존 동작)
         """
-        # 대형주 리스트에 있으면 통과 (샘플 데이터용)
+        # 1. CSV 캐시에서 조회 (가장 빠름)
+        cached = self._fund_cache.get(ticker.zfill(6))
+        if cached and pd.notna(cached.get("revenue")):
+            revenue = cached["revenue"]
+            passed = revenue >= min_revenue_억
+            if not passed:
+                logger.debug(
+                    f"{ticker}: 매출 {revenue:.0f}억 < {min_revenue_억}억 → 필터 차단 (캐시)"
+                )
+            return passed
+
+        # 2. DART API 실시간
+        if self.dart is not None:
+            year = datetime.now().year
+            financials = self.dart.get_key_financials(ticker, year)
+            revenue = financials.get("revenue")
+            if revenue is not None:
+                passed = revenue >= min_revenue_억
+                if not passed:
+                    logger.debug(
+                        f"{ticker}: 매출 {revenue:.0f}억 < {min_revenue_억}억 → 필터 차단"
+                    )
+                return passed
+
+        # 3. Fallback: sector_map 기반
         if ticker in self.sector_map:
             return True
         return False
 
-    def check_profitability(self, df: pd.DataFrame, idx: int) -> bool:
-        """최근 2분기 연속 영업이익 > 0 (EPS > 0으로 근사)"""
+    def check_profitability(self, df: pd.DataFrame, idx: int,
+                            ticker: str | None = None) -> bool:
+        """
+        수익성 필터: 영업이익 > 0
+
+        우선순위:
+        1. CSV 캐시 profitable 필드
+        2. Fallback: EPS > 0으로 근사 (기존 백테스트 동작)
+        """
+        # 1. CSV 캐시 (ticker가 넘어온 경우)
+        if ticker:
+            cached = self._fund_cache.get(ticker.zfill(6))
+            if cached and cached.get("profitable") is not None:
+                return bool(cached["profitable"])
+
+        # 2. Fallback: EPS 기반 (백테스트 및 DART 없을 때)
         if "fund_EPS" not in df.columns:
-            return True  # 데이터 없으면 통과 (보수적이지 않지만 백테스트 진행 위해)
+            return True
 
         current_eps = df["fund_EPS"].iloc[idx]
-        prev_eps = df["fund_EPS"].iloc[max(0, idx - 60)]  # ~3개월 전
+        prev_eps = df["fund_EPS"].iloc[max(0, idx - 60)]
 
         if pd.isna(current_eps) or pd.isna(prev_eps):
             return True
 
         return current_eps > 0 and prev_eps > 0
+
+    def check_profitability_dart(self, ticker: str, quarters: int = 2) -> bool | None:
+        """
+        DART API 기반 연속 흑자 확인 (실시간 스캐너용).
+
+        Returns:
+            True/False: 판정 결과
+            None: DART 데이터 없음 (fallback 필요)
+        """
+        if self.dart is None:
+            return None
+
+        year = datetime.now().year
+        return self.dart.check_consecutive_profit(ticker, year, quarters)
+
+    # ──────────────────────────────────────────────
+    # DART 재무 데이터 직접 접근 (스캐너/리포트용)
+    # ──────────────────────────────────────────────
+
+    def get_financials(self, ticker: str, year: int | None = None) -> dict:
+        """
+        종목 핵심 재무지표 조회.
+
+        우선순위: CSV 캐시 → DART API → fallback
+
+        Returns:
+            {
+                "revenue": 매출(억원),
+                "operating_income": 영업이익(억원),
+                "net_income": 순이익(억원),
+                "operating_margin": 영업이익률(%),
+                "profitable": 흑자 여부,
+                "source": "cache" | "dart" | "fallback",
+            }
+        """
+        if year is None:
+            year = datetime.now().year
+
+        # 1. CSV 캐시
+        cached = self._fund_cache.get(ticker.zfill(6))
+        if cached and pd.notna(cached.get("revenue")):
+            return {
+                "revenue": cached["revenue"],
+                "operating_income": cached["operating_income"],
+                "net_income": cached["net_income"],
+                "operating_margin": cached["operating_margin"],
+                "profitable": cached["profitable"],
+                "source": "cache",
+            }
+
+        # 2. DART API 실시간
+        if self.dart is not None:
+            result = self.dart.get_key_financials(ticker, year)
+            if result.get("revenue") is not None:
+                result["source"] = "dart"
+                return result
+
+        # 3. Fallback
+        return {
+            "revenue": None,
+            "operating_income": None,
+            "net_income": None,
+            "operating_margin": None,
+            "profitable": ticker in self.sector_map,
+            "source": "fallback",
+        }
 
 
 if __name__ == "__main__":
@@ -146,3 +312,4 @@ if __name__ == "__main__":
     engine = FundamentalEngine()
     print(f"업종 PER 맵: {engine.sector_per}")
     print(f"종목-업종 매핑: {len(engine.sector_map)}종목")
+    print(f"DART API: {'연결됨' if engine.dart else '미연결'}")

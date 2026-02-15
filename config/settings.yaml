@@ -1,16 +1,18 @@
 # ============================================================
-# 🧊 "기대가 식은 자리" v2.5 — 듀얼 트리거 백테스트 설정
+# "Quantum Master" v7.0 — 7-Layer Pipeline + Master Controller
 # ============================================================
-# 핵심 철학 v2.5:
-#   1. 조정이 끝나는 자리(Zone)를 먼저 찾는다       → BES 스코어링
-#   2. 시동 신호(Impulse)에서 일부 선취한다          → Trigger-1
-#   3. 확정 신호(Confirm)에서 비중을 늘린다          → Trigger-2
-#   4. 가짜 시동은 손절로 비용 처리한다              → 모드별 손절
-#   5. 손익비와 승률을 '모드별'로 관리한다           → 분리 통계
+# v7.0 핵심:
+#   1. 7-Layer Signal Pipeline (레짐/OU/모멘텀/수급 게이트)
+#   2. 4단계 부분청산 (Price Action 논문: 2R/4R/8R/10R)
+#   3. HMM 레짐 감지 (동적 적응 전략 논문)
+#   4. OU 필터 (평균회귀 종목 선별)
+#   5. Walk-Forward 검증 (과최적화 방지)
+#   6. TGCI 독립 스코어링 (TRIX Golden Cross Indicator)
+#   7. Master Controller 가중 합산 (서브시스템 종합 판정)
 # ============================================================
 
 strategy:
-  name: "cooled_zone_v2.5_dual"
+  name: "quantum_master_v7.0"
 
   # === Pre-screening ===
   min_revenue_억: 1000
@@ -45,6 +47,18 @@ strategy:
   stoch_rsi_threshold: 25
   volume_ma_period: 20
 
+  # === Dynamic RSI (변동성 적응형 과매도 기준) ===
+  # T = clip(base - k * (ATR/P_norm - 1), min, max)
+  # 변동성 높으면 기준 ↓ (엄격), 낮으면 ↑ (관대)
+  dynamic_rsi:
+    enabled: true
+    base: 30                  # 기본 과매도 기준
+    min: 20                   # 최소 (고변동성)
+    max: 40                   # 최대 (저변동성)
+    k: 10                     # 민감도 계수
+    lookback: 60              # ATR/P 정규화 기간
+    rsi_ema_period: 9         # RSI EMA (반전 확인용)
+
   # === 추세 필터 ===
   sma_short: 60
   sma_long: 120
@@ -65,6 +79,27 @@ strategy:
     atr_pullback: 0.35
     forward_value: 0.35
     supply_demand: 0.30
+
+  # === v6.4 Gate 4/5 (BES v2.2 패치) ===
+  gates:
+    atr_pullback_gate:
+      enabled: true
+      min_pullback_atr: 1.0          # ATR 조정폭 >= 1.0 (노이즈 차단)
+    high_52w_gate:
+      enabled: true
+      max_pct_of_52w_high: 0.95      # 52주 최고가 95% 미만만 통과
+
+  # === v6.4 Consensus Bonus (팩터 수렴 보너스) ===
+  consensus_bonus:
+    enabled: true
+    full_bonus_pct: 0.15             # 3팩터 전부 양호 → +15%
+    strong_bonus_pct: 0.08           # 2팩터 양호 → +8%
+
+  # === v6.4 포물선 초점 탐지 ===
+  focus_point:
+    enabled: true
+    lookback_days: 5                 # 추세 분석 기간
+    min_rising_factors: 3            # 동시 상승 필요 팩터 수
 
   # === 등급 기준 ===
   grades:
@@ -142,6 +177,92 @@ strategy:
       target_atr_mult: 6.0
       position_pct: 0.20
 
+    # ── Trigger-4: 추세 지속 (Trend Continuation) ──
+    # Grade F 우회: MA20 위에서 강한 상승 추세가 확인되면 보수적 진입 허용
+    trend_continuation:
+      enabled: true
+      min_conditions: 5            # 7개 중 최소 충족 수
+      # --- 조건 ---
+      adx_min: 25                  # ADX >= 25 (강한 추세)
+      rsi_range: [50, 72]          # RSI 50~72 (과매수 직전까지)
+      macd_above_signal: true      # MACD > Signal (모멘텀 유지)
+      volume_min_ratio: 0.8        # 거래량 >= 20일평균 x 0.8
+      obv_rising_days: 5           # OBV 5일 변화 > 0
+      price_above_ma60: true       # 종가 > MA60 (중기 추세)
+      plus_di_above_minus: true    # +DI > -DI (방향성)
+      # --- 리스크 (보수적) ---
+      stop_loss_pct: 0.03          # -3% 타이트 손절
+      target_atr_mult: 3.0         # 목표 ATR x 3 (풀백보다 보수적)
+      position_pct: 0.50           # 정상 대비 50% 비중
+      max_rsi: 72                  # RSI 72 초과 시 진입 금지 (과매수)
+
+# ============================================================
+# v3.0 Quant Engine (논문 기반 파라미터)
+# ============================================================
+quant_engine:
+  # ── HMM 레짐 감지 (동적 적응 전략 논문) ──
+  regime:
+    n_states: 3
+    p_accum_entry: 0.40        # Accumulation 확률 최소 40%
+    features: ["ret1", "ATR_pct", "vol_z", "smart_z"]
+
+  # ── OU 프로세스 필터 (OU+BB 논문) ──
+  ou:
+    window: 60
+    z_entry: -1.2              # OU z-score 진입 (완화: Claude 채팅 권고)
+    half_life_min: 2           # 최소 반감기 (일)
+    half_life_max: 25          # 최대 반감기 (일)
+    snr_min: 0.15              # Signal-to-Noise 최소
+
+  # ── 모멘텀 레이어 ──
+  momentum:
+    vol_surge_min: 1.2         # 거래량 서지 최소 배수
+    slope_ma60_min: -0.5       # MA60 기울기 최소 (%)
+
+  # ── Smart Money (참조 코드) ──
+  smart_money:
+    foreign_weight: 0.6
+    inst_weight: 0.4
+    rolling_sum: 3
+    ma_period: 60
+    min_smart_z: 0.0           # Smart Z 최소
+
+  # ── 4단계 부분청산 (Price Action 논문) ──
+  exit:
+    partial_exit_r: [2, 4, 8, 10]    # R배수 목표 (25%씩)
+    partial_exit_pct: 0.25           # 각 단계 청산 비율
+    max_hold_days: 20                # 최대 보유일 (사용자 설정: 20일)
+    trailing_stop_after_partial: true
+
+  # ── v4.5 Rolling Probability Gate (Adaptive Strategy) ──
+  probability_model:
+    enabled: true
+    rolling_window: 200          # 200일 롤링 윈도우
+    threshold: 0.65              # 성공 확률 >= 65% 통과
+    lookahead_bars: 12           # 12일간 평균 수익률 기준
+    min_avg_return: 0.01         # 1% 이상이면 "성공"
+
+  # ── Walk-Forward 검증 (데이터 스누핑 논문) ──
+  walk_forward:
+    train_days: 504            # 2년
+    test_days: 126             # 6개월
+    step_days: 126             # 6개월씩 이동
+
+  # ── v4.5 Bootstrap 검증 (Adaptive Strategy) ──
+  bootstrap:
+    enabled: true
+    n_iterations: 1000           # Bootstrap 반복 횟수
+    block_size: 10               # Block Bootstrap 블록 크기
+    seed: 42                     # 재현성 시드
+    metrics: ["sharpe", "total_return", "win_rate"]
+
+  # ── v4.6 Monte Carlo 시뮬레이션 ──
+  monte_carlo:
+    enabled: true
+    n_simulations: 1000          # 시뮬레이션 횟수
+    ruin_threshold_pct: -50.0    # 파산 임계값 (자본 -50%)
+    seed: 42                     # 재현성 시드
+
 # ============================================================
 # 백테스트 설정
 # ============================================================
@@ -153,8 +274,9 @@ backtest:
   max_positions: 4
   max_single_position_pct: 0.40
   max_portfolio_risk_pct: 0.06
-  commission_rate: 0.0015
-  slippage_rate: 0.001
+  # 거래 비용 (Adaptive Strategy 반영)
+  commission_rate: 0.0015       # 수수료 0.15% (매수+매도 각각)
+  slippage_rate: 0.001          # 슬리피지 0.10% (Adaptive 0.05%보다 보수적 유지)
   trailing_stop_atr_mult: 2.0
   partial_take_profit_pct: 0.50
   trend_exit_consecutive_days: 3
@@ -178,3 +300,427 @@ sector_per:
   통신: 10.0
   식품: 14.0
   기타: 11.0
+
+# ============================================================
+# v4.5 섹터 분류 체계 (Adaptive Strategy — 15개 섹터)
+# ============================================================
+sector_classification:
+  enabled: true
+  max_per_sector: 1               # 동일 섹터 최대 1종목 (분산 투자)
+
+  # 15개 섹터 정의 + 대표 키워드/업종명 매핑
+  # 종목의 업종명이 keywords 중 하나를 포함하면 해당 섹터로 분류
+  sectors:
+    반도체:
+      keywords: ["반도체", "메모리", "파운드리", "팹리스"]
+    자동차:
+      keywords: ["자동차", "완성차", "자동차부품"]
+    배터리:
+      keywords: ["배터리", "2차전지", "이차전지", "양극재", "음극재", "전해질", "분리막"]
+    바이오:
+      keywords: ["바이오", "제약", "의약", "신약", "진단"]
+    금융:
+      keywords: ["은행", "증권", "보험", "금융", "캐피탈", "카드"]
+    화학:
+      keywords: ["화학", "석유화학", "정유", "화학물질"]
+    철강금속:
+      keywords: ["철강", "비철금속", "금속", "알루미늄"]
+    유통소비:
+      keywords: ["유통", "백화점", "면세", "여행", "항공", "호텔", "음식료", "식품"]
+    IT_SW:
+      keywords: ["소프트웨어", "IT서비스", "클라우드", "SaaS", "플랫폼", "게임", "인터넷"]
+    IT_HW:
+      keywords: ["전자부품", "디스플레이", "통신장비", "광학", "LED", "PCB"]
+    건설:
+      keywords: ["건설", "토목", "건축", "시멘트", "레미콘"]
+    조선해운:
+      keywords: ["조선", "해운", "선박"]
+    통신미디어:
+      keywords: ["통신", "미디어", "방송", "엔터테인먼트", "콘텐츠"]
+    에너지:
+      keywords: ["전력", "가스", "에너지", "태양광", "풍력", "신재생"]
+    기타:
+      keywords: []                # 어디에도 매칭 안 되면 기타
+
+  # 섹터별 비중 배분 (Adaptive Strategy)
+  allocation:
+    best: 0.45                    # 1순위 종목
+    reserve1: 0.30                # 2순위 종목
+    reserve2: 0.25                # 3순위 종목
+
+# ============================================================
+# v3.1 News Gate (L-1 이벤트 드리븐 레이어)
+# ============================================================
+news_gate:
+  enabled: true
+  version: "v3.2"
+
+  # ── v3.2 뉴스 스코어 부스트 (Zone Score 가산) ──
+  score_boost:
+    grade_a: 0.15              # A급 확정 공시 → +0.15
+    grade_b: 0.08              # B급 신뢰 루머 → +0.08
+    living_issue_high: 0.05    # 고영향(8+) 살아있는 이슈 → +0.05/건
+    living_issue_normal: 0.03  # 중영향(5~7) 살아있는 이슈 → +0.03/건
+    earnings_beat: 0.08        # 어닝 서프라이즈 예상(beat) → +0.08
+    earnings_growth: 0.05      # 고성장(YoY 20%+) in_line → +0.05
+    pre_earnings_window: 0.05  # 실적 발표 30일 이내 → +0.05
+    positive_cluster: 0.03     # 긍정 뉴스 3건+ → +0.03
+    max_boost: 0.30            # 최대 부스트 한도
+
+  # ── 뉴스 부스트 + Trend Continuation 연동 ──
+  trend_cont_integration:
+    boost_threshold_relax: 0.08   # 이 부스트 이상이면 TC min_conditions -1
+    boost_threshold_ratio_up: 0.10 # 이 부스트 이상이면 TC 비중 x1.4
+    boost_threshold_rr_relax: 0.10 # 이 부스트 이상이면 TC RR 1.2→1.0
+
+  # ── A등급: 확정 공시 → 파라미터 조정 후 즉시 필터 ──
+  grade_a:
+    rr_min: 1.2                    # 손익비 1.7 → 1.2로 완화
+    rsi_entry_max: 65              # RSI 70 → 65로 완화
+    position_size_pct: 3           # 대형주 3%
+    position_size_pct_small_cap: 2 # 소형주 2%
+    max_gap_up_pct: 15             # 갭업 15% 이상 추격 금지
+    max_hold_days: 3               # 이벤트 포지션 최대 3일
+    settlement_strength_floor: 95  # 체결강도 95 미만 시 청산
+    max_concurrent_positions: 2    # 동시 이벤트 포지션 2개 이하
+
+  # ── B등급: 루머/미확인 → 관찰 리스트 ──
+  grade_b:
+    action: "watchlist"
+    monitor_days: 14
+    upgrade_trigger: "grade_a"     # 확정 시 A등급 승격
+
+  # ── C등급: 추측/테마 → 무시 ──
+  grade_c:
+    action: "ignore"
+
+  # ── 목표가 계산 ──
+  target:
+    target_1_rr: 1.0               # 반익 (RR 1:1)
+    target_2_rr: 2.0               # 전량 청산 (RR 1:2)
+    stop_loss_method: "atr"        # atr / fixed_pct
+    stop_loss_atr_mult: 1.5
+
+# ============================================================
+# v3.1 Smart Money v2 (매집 3단계 + OBV 다이버전스)
+# ============================================================
+smart_money_v2:
+  # ── 매집 단계 임계값 ──
+  inst_net_buy_days: 5             # 기관 순매수 최소 연속일 (Phase2)
+  foreign_net_buy_days: 5          # 외국인 순매수 최소 연속일 (Phase2)
+  inst_net_buy_strong_days: 10     # 기관+외국인 동시 순매수 (Phase3)
+  phase3_vol_ratio: 3.0            # Phase3 거래량 폭발 배수
+  ma120_support_buffer: 0.03       # 120MA 지지 확인 버퍼 (3%)
+
+  # ── OBV 다이버전스 ──
+  obv_divergence_lookback: 30      # 다이버전스 스캔 기간 (일)
+  obv_slope_threshold: 0.0         # 기울기 판정 최소값
+
+  # ── SmartZ 점수 가감 ──
+  bonus_phase1: 5                  # Phase1 (초기 매집): +5
+  bonus_phase2: 10                 # Phase2 (중기 매집): +10
+  bonus_phase3: 15                 # Phase3 (점화): +15
+  penalty_dump: -20                # 투매 감지: -20
+  penalty_mild: -10                # 경미한 이탈: -10
+
+# ============================================================
+# v4.1 적응형 청산 시스템 (Adaptive Exit)
+# ============================================================
+# 문제: Impulse -3% 고정 손절이 건강한 조정도 잘라버림
+# 해결: 조정 건강도 평가 → 동적 손절 조정
+adaptive_exit:
+  enabled: true
+
+  # ── 조정 건강도 배점 (총 100점) ──
+  weight_ma20_support: 15       # MA20 지지
+  weight_ma60_support: 10       # MA60 지지
+  weight_adx_trending: 12       # ADX >= 25
+  weight_di_positive: 10        # +DI > -DI
+  weight_obv_intact: 15         # OBV 유지/상승
+  weight_volume_declining: 10   # 거래량 감소
+  weight_inst_flow: 8           # 기관 수급
+  weight_foreign_flow: 8        # 외국인 수급
+  weight_rsi_healthy: 7         # RSI 30~70
+  weight_pullback_depth: 5      # 조정 깊이
+
+  # ── 분류 임계값 ──
+  healthy_threshold: 65         # >= 65: 건강한 조정 → 손절 완화
+  caution_threshold: 40         # >= 40: 주의 → 현행 유지
+  dangerous_threshold: 25       # >= 25: 위험 → 즉시 청산
+  # < 25: 긴급 → 시장가 청산
+
+  # ── 적응형 손절 파라미터 ──
+  healthy_stop_mult: 2.0        # 건강: ATR*2 기반 넓은 손절
+  caution_stop_mult: 1.5        # 주의: ATR*1.5
+  dangerous_stop_pct: 0.02      # 위험: -2% 타이트
+  ma20_stop_buffer: 0.015       # MA20 아래 1.5% 버퍼
+  max_healthy_pullback_pct: 0.08  # 건강한 조정 최대 허용 -8%
+
+# ============================================================
+# v4.1 일일 보유 점수 (Daily Hold Scorer)
+# ============================================================
+daily_hold_scorer:
+  enabled: true
+
+  # ── 판단 임계값 ──
+  strong_hold_threshold: 70     # >= 70: 강력 보유
+  hold_threshold: 50            # >= 50: 보유 유지
+  tighten_threshold: 30         # >= 30: 경계 (손절 강화)
+  # < 30: 청산
+
+  # ── strong_hold 시 파라미터 조정 ──
+  strong_hold_stop_mult: 1.5    # 손절 1.5배 완화
+  strong_hold_days_bonus: 5     # 보유일 +5일 연장
+  strong_hold_trailing_mult: 1.3  # 트레일링 1.3배 넓게
+
+  # ── tighten 시 파라미터 조정 ──
+  tighten_stop_mult: 0.6        # 손절 0.6배 강화
+  tighten_trailing_mult: 0.7    # 트레일링 0.7배 타이트
+
+# ============================================================
+# v4.0 라이브 트레이딩 설정
+# ============================================================
+live_trading:
+  enabled: false                    # true로 변경 시 실주문 활성화
+  mode: "paper"                     # "paper" (모의) / "real" (실전)
+
+  # 일일 스케줄 (KST)
+  schedule:
+    daily_reset: "00:00"
+    macro_collect: "07:00"
+    news_briefing: "07:10"
+    trade_prep: "08:20"
+    buy_execution: "09:02"
+    monitor_start: "09:10"
+    monitor_end: "15:20"
+    sell_execution: "15:25"
+    close_pipeline: "15:35"
+
+  # 주문 설정
+  order:
+    default_type: "limit"           # limit / market
+    slippage_ticks: 2               # 지정가 슬리피지 (2틱 위/아래)
+    max_retry: 3                    # 주문 실패 시 재시도
+    retry_delay_sec: 5
+    cancel_unfilled_after_sec: 300  # 5분 미체결 시 취소
+
+  # 포지션 제한
+  position:
+    max_positions: 4
+    max_single_pct: 0.40            # 단일 종목 최대 40%
+    max_portfolio_risk_pct: 0.06
+    initial_capital: 50000000       # 5천만원
+
+  # 안전장치
+  safety:
+    max_daily_loss_pct: -0.03       # 일일 -3% 매매 중단
+    max_total_loss_pct: -0.10       # 총 -10% 긴급 청산
+    stop_signal_file: "STOP.signal"
+    reboot_trigger_file: "reboot.trigger"
+    emergency_sell_type: "market"   # 긴급 청산은 시장가
+
+  # 모니터링
+  monitor:
+    interval_sec: 60                # 1분 간격
+    trailing_check: true
+    partial_exit_check: true
+    kis_sync_interval_sec: 1800     # 30분마다 KIS 실잔고 동기화
+    forced_liquidation_before: "15:15"  # 만기(max_hold_days) 도래 종목 장 마감 전 강제청산
+
+  # 주간 보고
+  weekly_report:
+    enabled: true
+    day: "friday"                   # 금요일 장마감 후 주간 성과 텔레그램 발송
+
+# ============================================================
+# v4.7 기하학적 퀀트 보조 레이어 (L7 Geometric v2.0)
+# ============================================================
+# 10지표 × 7프로파일 체제. Approach A/B/C 3계층.
+# 기존 파이프라인의 보조 확인 레이어로 사용.
+geometric_engine:
+  enabled: true
+  profile: "default"                # default/reversal/breakout/capitulation/bull/bear/sideways
+
+  # ── Approach A: 구조적 패턴 ──
+  harmonic_tolerance: 0.03          # 피보나치 비율 허용 오차 (3%)
+  zigzag_pct: 3.0                   # ZigZag 전환 기준 (%)
+  min_bars: 5                       # 피벗 간 최소 봉 수
+  elliott_zigzag_pct: 3.0           # 엘리어트용 ZigZag
+  elliott_min_bars: 3               # 엘리어트용 최소 봉 수
+  slope_periods: [5, 10, 20, 60]    # 각도 분석 기간 리스트
+
+  # ── Approach B: 에너지 수렴 ──
+  squeeze:
+    bb_period: 20
+    bb_std: 2.0
+    kc_period: 20
+    kc_mult: 1.5
+
+  curvature:
+    ema_span: 20
+    window: 10
+
+  confluence:
+    zigzag_pct: 5.0
+    bin_pct: 0.5
+    min_count: 3
+
+  # ── Approach C: 극단 회귀 ──
+  mean_reversion:
+    periods: [20, 60, 120]
+
+  volume_climax:
+    spike_mult: 3.0
+    exhaust_bars: 5
+
+  band_breach:
+    bb_period: 20
+    bb_std: 2.0
+    lookback: 25
+
+  # ── L7 보조 레이어 파라미터 ──
+  lookback: 200                     # 분석 구간 (봉 수)
+  min_confidence: 30                # 시그널 발생 최소 신뢰도 (%)
+  confidence_boost: 0.10            # 매수 확인 시 trigger_confidence +10%
+  confidence_penalty: 0.05          # 매도 경고 시 trigger_confidence -5%
+
+# ============================================================
+# v5.0 Sci-CoE 합의 엔진 (Consensus Engine)
+# ============================================================
+# Sci-CoE 논문(2026.02.13)의 기하학적 합의 개념 적용.
+# 기존 AND 파이프라인은 100% 유지, consensus_mode로 토글.
+consensus_engine:
+  enabled: true                       # 합의 모드 활성화
+  tau: 0.8                            # 합의 임계값 (80% 이상 통과 = 고합의)
+  min_voters: 4                       # 최소 투표 레이어 수
+  grade_thresholds:
+    strong: 0.6                       # >= 0.6: strong
+    moderate: 0.4                     # >= 0.4: moderate
+    weak: 0.2                         # >= 0.2: weak
+                                      # < 0.2: reject
+  anchor:
+    enabled: true                     # 앵커 학습 활성화
+    db_path: "data/anchors.json"      # 앵커 DB 파일 경로
+    min_success_pnl_pct: 3.0          # 성공 사례 최소 수익률 (%)
+    min_failure_pnl_pct: -2.0         # 실패 사례 최소 손실률 (%)
+    auto_update: true                 # 백테스트 후 자동 앵커 업데이트
+
+  bon_selector:
+    enabled: true                     # BoN 프로파일 자동 선택
+    cache_ttl_bars: 20                # 캐시 유효 봉 수
+
+# ============================================================
+# v6.0 Martin Momentum (논문: Richard J. Martin, 2023)
+# ============================================================
+# EMA2 필터 + Dead Zone + Sigmoid 활성화 + 변동성 정규화
+martin_momentum:
+  enabled: true
+  n_fast: 8                           # Fast EMA 기간
+  n_slow: 24                          # Slow EMA 기간
+  epsilon: 0.6                        # Dead Zone 임계값 (|ema2_norm| < ε → 무시)
+  sigmoid_k: 5.0                      # Sigmoid 민감도
+  min_confidence: 0.3                 # 최소 신뢰도 (이하 차단)
+  vol_normalization:
+    enabled: true
+    target_sigma: 0.02                # 목표 일간 변동성 (2%)
+    max_weight: 2.0                   # 최대 비중 배수
+    min_weight: 0.3                   # 최소 비중 배수
+  optimal_hold:
+    enabled: true
+    max_days: 30                      # 최적 보유기간 상한
+    min_days: 5                       # 최적 보유기간 하한
+
+# ============================================================
+# v6.0 RTTP 뉴스 신호 (논문: Hui et al., WWW '26)
+# ============================================================
+# 소스 권위 가중 + 인게이지먼트 깊이 5단계 + LLM 합성
+rttp_news:
+  enabled: true
+  source_weights:
+    DART: 1.0
+    BLOOMBERG: 0.95
+    BROKERAGE: 0.80
+    NEWSPAPER: 0.70
+    PORTAL: 0.50
+    COMMUNITY: 0.15
+  engagement_levels:
+    L5_inst: 5.0                      # 기관 순매수
+    L4_volume: 3.5                    # 거래량 급증
+    L3_report: 2.0                    # 증권사 리포트
+    L2_search: 1.0                    # 검색량 증가
+    L1_sns: 0.3                       # SNS/커뮤니티
+  recall_monitoring:
+    enabled: true
+    threshold: 0.5                    # Recall@K 50% 미만 → 재조정
+    window: 100                       # 모니터링 윈도우
+  llm_synthesis:
+    enabled: false                    # 기본 비활성화 (Claude API 비용)
+    model: "claude-sonnet-4-5-20250929"
+    max_beneficiaries: 5
+    daily_call_limit: 100
+
+# ============================================================
+# v6.0 극한 변동성 탐지 (논문: Alparslan & Kim, 2021)
+# ============================================================
+# ATR/거래량/일간 범위로 극한 변동성 탐지 + 방향 판별
+extreme_volatility:
+  enabled: true
+  atr_ratio_threshold: 3.0           # 현재 ATR / 60일 평균 ATR
+  vol_ratio_threshold: 5.0           # 현재 거래량 / 60일 평균 거래량
+  daily_range_threshold: 10.0        # (고가-저가)/종가 * 100 (%)
+  capitulation:
+    min_down_days: 3                  # 투매 판정 최소 연속 하락일
+    volume_climax_mult: 3.0           # 거래량 클라이맥스 배수
+    rsi_extreme: 20                   # RSI 극단 과매도
+    min_score: 70                     # Capitulation 최소 점수
+  allow_ambiguous: false              # ambiguous 방향 시 시그널 허용 여부
+
+# ============================================================
+# v6.0 WaveLSFormer 정규화 (논문: WaveLSFormer, 2024)
+# ============================================================
+# 리스크 예산 정규화 + Sharpe 보유점수 + Peer 분석
+wavelsformer:
+  risk_normalization:
+    enabled: true
+    target_daily_vol: 0.02              # 목표 일간 변동성 (2%)
+    lookback: 60                        # 실현 변동성 계산 기간
+    max_scale: 2.0                      # 최대 포지션 스케일
+    min_scale: 0.3                      # 최소 포지션 스케일
+  sharpe_hold_scoring:
+    enabled: true
+    bonus_threshold: 1.5                # Sharpe > 1.5 → +3점
+    moderate_threshold: 0.5             # Sharpe > 0.5 → +1.5점
+    penalty_threshold: -0.5             # Sharpe < -0.5 → -2점
+    lookback: 20                        # Sharpe 계산 기간
+  peer_analysis:
+    enabled: false                      # 기본 비활성화 (연산 비용)
+
+# ============================================================
+# v7.0 TGCI (TRIX Golden Cross Indicator)
+# ============================================================
+tgci:
+  golden_cross_pts: 35           # TRIX 골든크로스 기본 점수
+  slope_bonus_max: 8             # 기울기 보너스 최대
+  rsi_optimal_range: [40, 60]    # RSI 최적 매수 구간
+  volume_explosion_mult: 2.5     # 거래량 폭발 기준 배수
+  bb_overheat_threshold: 0.95    # 볼린저 과열 임계값
+  setup_min_score: 55            # SETUP 시그널 최소 TGCI 점수
+
+# ============================================================
+# v7.0 Master Controller (서브시스템 가중합산)
+# ============================================================
+master_controller:
+  weights:
+    pipeline: 0.40               # 7-Layer 파이프라인 통과 점수
+    tgci: 0.20                   # TGCI 독립 점수
+    smart_money: 0.15            # 수급 분석 점수
+    regime: 0.15                 # 레짐 적합성 점수
+    geometric: 0.10              # 기하학 엔진 점수
+  thresholds:
+    strong_buy: 75               # STRONG_BUY 최소 점수
+    buy_conservative: 65         # BUY(보수적) 최소 점수
+    buy_aggressive: 50           # BUY(공격적) 최소 점수
+    watch: 40                    # WATCH 최소 점수
+  min_contributing_systems:
+    conservative: 3              # 보수적 진입 최소 서브시스템 수
+    aggressive: 2                # 공격적 진입 최소 서브시스템 수

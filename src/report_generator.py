@@ -295,7 +295,7 @@ class ReportGenerator:
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>🧊 기대가 식은 자리 v2.0 — 백테스트 리포트</title>
+    <title>🧊 퀀텀전략 v2.0 — 백테스트 리포트</title>
     <style>
         body {{ font-family: -apple-system, 'Malgun Gothic', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f5; }}
         .header {{ background: linear-gradient(135deg, #1a237e, #0d47a1); color: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; }}
@@ -317,7 +317,7 @@ class ReportGenerator:
 </head>
 <body>
     <div class="header">
-        <h1>🧊 "기대가 식은 자리" v2.0 — 백테스트 리포트</h1>
+        <h1>🧊 "퀀텀전략" v2.0 — 백테스트 리포트</h1>
         <p>생성일시: {datetime.now().strftime("%Y-%m-%d %H:%M")} | 기간: {stats.get('period', '2019~2024')}</p>
     </div>
 
@@ -410,7 +410,7 @@ class ReportGenerator:
 
     <div class="card" style="text-align: center; color: #666; font-size: 12px;">
         <p>이 리포트는 교육 목적의 참고자료입니다. 모든 투자 판단은 본인의 책임입니다.</p>
-        <p>🧊 "기대가 식은 자리" v2.1 듀얼 트리거 백테스트 시스템</p>
+        <p>🧊 "퀀텀전략" v2.1 듀얼 트리거 백테스트 시스템</p>
     </div>
 </body>
 </html>"""

@@ -1,11 +1,11 @@
 """
-Step 6: backtest_engine.py — v2.1 듀얼 트리거 백테스트 엔진
+Step 6: backtest_engine.py — v3.0 퀀트 백테스트 엔진
 
-v2.0 → v2.1 변경:
-- 분할 매수: Impulse(40%) → Confirm(40%) → Breakout(20%)
-- 모드별 손절: Impulse(-3% 빠른 컷) vs Confirm(-5% 여유)
-- 보유 종목 돌파 시 추가 매수 (Trigger-3)
-- 거래 로그에 trigger_type 기록
+v2.1 → v3.0 변경:
+- 4단계 부분청산: 25%씩 2R/4R/8R/10R (Price Action 논문)
+- 레짐 기반 포지션 축소 (Distribution 레짐 시)
+- 최대 보유 10일 제한 (OU+BB 논문)
+- 진단 리포트 + Quant Metrics 통합
 """
 
 import logging
@@ -20,6 +20,11 @@ from tqdm import tqdm
 
 from .signal_engine import SignalEngine, TriggerType
 from .position_sizer import PositionSizer
+from .quant_metrics import calc_full_metrics, print_metrics, assess_reliability
+from .walk_forward import BootstrapValidator, MonteCarloSimulator
+from .use_cases.adaptive_exit import AdaptiveExitManager
+from .use_cases.anchor_learner import AnchorLearner
+from .use_cases.daily_hold_scorer import DailyHoldScorer
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +49,9 @@ class Position:
     # 분할 매수 추적
     total_stages_entered: int = 1   # 몇 차 매수까지 들어갔나
     max_investment: float = 0.0     # 최대 투입 가능 금액
+    # v3.0: 4단계 부분청산 추적
+    partial_exits_done: int = 0     # 완료된 부분청산 횟수 (0~4)
+    initial_shares: int = 0         # 최초 매수 수량 (부분청산 비율 계산용)
 
 
 @dataclass
@@ -66,7 +74,7 @@ class Trade:
 
 
 class BacktestEngine:
-    """v2.1 듀얼 트리거 백테스트 엔진"""
+    """v3.0 퀀트 백테스트 엔진"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
         with open(config_path, "r", encoding="utf-8") as f:
@@ -77,12 +85,77 @@ class BacktestEngine:
         self.max_positions = bt["max_positions"]
         self.commission_rate = bt["commission_rate"]
         self.slippage_rate = bt["slippage_rate"]
-        self.partial_tp_pct = bt["partial_take_profit_pct"]
+        self.partial_tp_pct = bt.get("partial_take_profit_pct", 0.50)
         self.trend_exit_days = bt["trend_exit_consecutive_days"]
         self.atr_stop_mult = bt["trailing_stop_atr_mult"]
 
+        # v3.0: 4단계 부분청산 설정
+        exit_cfg = self.config.get("quant_engine", {}).get("exit", {})
+        self.partial_exit_r = exit_cfg.get("partial_exit_r", [2, 4, 8, 10])
+        self.partial_exit_pct = exit_cfg.get("partial_exit_pct", 0.25)
+        self.max_hold_days = exit_cfg.get("max_hold_days", 10)
+
+        # v6.0: Martin 최적 보유기간 연동
+        martin_cfg = self.config.get("martin_momentum", {})
+        martin_hold_cfg = martin_cfg.get("optimal_hold", {})
+        if martin_cfg.get("enabled", False) and martin_hold_cfg.get("enabled", True):
+            n_fast = martin_cfg.get("n_fast", 8)
+            n_slow = martin_cfg.get("n_slow", 24)
+            optimal = int(1.7 * (n_fast + n_slow))
+            min_days = martin_hold_cfg.get("min_days", 5)
+            max_days = martin_hold_cfg.get("max_days", 30)
+            self.max_hold_days = max(min_days, min(optimal, max_days))
+
         self.signal_engine = SignalEngine(config_path)
         self.position_sizer = PositionSizer(self.config)
+
+        # v4.1: 적응형 청산
+        adaptive_cfg = self.config.get("adaptive_exit", {})
+        self.adaptive_exit_enabled = adaptive_cfg.get("enabled", False)
+        if self.adaptive_exit_enabled:
+            self.adaptive_exit = AdaptiveExitManager(config_path)
+            self.hold_scorer = DailyHoldScorer(config_path)
+        else:
+            self.adaptive_exit = None
+            self.hold_scorer = None
+
+        # v5.0: 앵커 학습 (auto_update 설정 시)
+        anchor_cfg = self.config.get("consensus_engine", {}).get("anchor", {})
+        self.anchor_auto_update = anchor_cfg.get("auto_update", False)
+        if self.anchor_auto_update:
+            self.anchor_learner = AnchorLearner(
+                db_path=anchor_cfg.get("db_path", "data/anchors.json"),
+                min_success_pnl_pct=anchor_cfg.get("min_success_pnl_pct", 3.0),
+                min_failure_pnl_pct=anchor_cfg.get("min_failure_pnl_pct", -2.0),
+            )
+        else:
+            self.anchor_learner = None
+
+        # v6.1: WaveLSFormer 리스크 예산 정규화
+        wavels_cfg = self.config.get("wavelsformer", {})
+        risk_norm_cfg = wavels_cfg.get("risk_normalization", {})
+        self.risk_norm_enabled = risk_norm_cfg.get("enabled", False)
+        if self.risk_norm_enabled:
+            from .use_cases.risk_normalizer import RiskBudgetNormalizer
+            self.risk_normalizer = RiskBudgetNormalizer(
+                target_daily_vol=risk_norm_cfg.get("target_daily_vol", 0.02),
+                lookback=risk_norm_cfg.get("lookback", 60),
+                max_scale=risk_norm_cfg.get("max_scale", 2.0),
+                min_scale=risk_norm_cfg.get("min_scale", 0.3),
+            )
+        else:
+            self.risk_normalizer = None
+
+        # v6.2: Config 범위 검증
+        from .config_validator import ConfigValidator
+        config_warnings = ConfigValidator.validate(self.config)
+        for w in config_warnings:
+            logger.warning("Config: %s", w)
+
+        logger.info(
+            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d",
+            self.risk_norm_enabled, self.max_hold_days,
+        )
 
         # 상태
         self.cash = self.initial_capital
@@ -105,7 +178,8 @@ class BacktestEngine:
     # ──────────────────────────────────────────────
 
     def _execute_buy(self, signal: dict, next_open: float,
-                     stage_pct: float = 1.0) -> Optional[Position]:
+                     stage_pct: float = 1.0,
+                     df: pd.DataFrame = None, idx: int = 0) -> Optional[Position]:
         """
         시그널 기반 매수.
         stage_pct: 이 단계에서 사용할 비중 (Impulse=0.4, Confirm=0.4, Breakout=0.2)
@@ -117,6 +191,12 @@ class BacktestEngine:
             for p in self.positions
         )
 
+        # v6.0: Martin 변동성 정규화 비중
+        vol_weight = 1.0
+        martin_data = signal.get("martin_momentum")
+        if martin_data:
+            vol_weight = martin_data.get("vol_weight", 1.0)
+
         sizing = self.position_sizer.calculate(
             account_balance=self.cash,
             entry_price=entry_price,
@@ -124,7 +204,20 @@ class BacktestEngine:
             grade_ratio=signal["position_ratio"],
             current_portfolio_risk=current_risk,
             stage_pct=stage_pct,  # 분할 비중 전달
+            vol_normalized_weight=vol_weight,
         )
+
+        # v6.1: WaveLSFormer 리스크 예산 정규화
+        if self.risk_norm_enabled and self.risk_normalizer and df is not None:
+            try:
+                normalized = self.risk_normalizer.normalize_position(
+                    df, idx, sizing["shares"], entry_price,
+                )
+                if normalized != sizing["shares"] and normalized > 0:
+                    sizing["shares"] = normalized
+                    sizing["investment"] = normalized * entry_price
+            except Exception as e:
+                logger.warning("Risk normalization failed: %s", e)
 
         if sizing["shares"] <= 0:
             return None
@@ -162,6 +255,7 @@ class BacktestEngine:
             stop_loss_pct=stop_pct,
             highest_price=entry_price,
             trailing_stop=entry_price - signal["atr_value"] * self.atr_stop_mult,
+            initial_shares=sizing["shares"],
         )
         self.positions.append(pos)
 
@@ -262,7 +356,7 @@ class BacktestEngine:
     # ──────────────────────────────────────────────
 
     def _manage_positions(self, data_dict: dict, idx: int, date_str: str):
-        """모드별 손절/익절/트레일링 체크"""
+        """v4.1 포지션 관리: 적응형 청산 + 4단계 부분청산 + 일일 보유 판단"""
         for pos in list(self.positions):
             if pos.ticker not in data_dict:
                 continue
@@ -275,32 +369,130 @@ class BacktestEngine:
             high = row["high"]
             low = row["low"]
 
-            # 1. 모드별 손절 체크
-            #    Impulse: 스윙 저점 or -3% (타이트)
-            #    Confirm: ATR 스탑 or -5% (여유)
+            # 0. 보유일 계산
+            hold_days = 0
+            try:
+                hold_days = (pd.Timestamp(date_str) - pd.Timestamp(pos.entry_date)).days
+            except Exception:
+                pass
+
+            # 0-1. 최고가 갱신 (적응형 청산에 필요)
+            if high > pos.highest_price:
+                pos.highest_price = high
+
+            # v6.1: 극한 변동성 시 포지션 긴급 관리
+            if (hasattr(self.signal_engine, 'extreme_vol_detector')
+                    and self.signal_engine.extreme_vol_enabled
+                    and self.signal_engine.extreme_vol_detector):
+                try:
+                    evol_result = self.signal_engine.extreme_vol_detector.detect(df, idx)
+                    if evol_result.is_extreme:
+                        pct_loss = (close / pos.entry_price - 1)
+                        if evol_result.direction == "bearish_breakdown":
+                            self._execute_sell(pos, close, date_str, "extreme_vol_bearish")
+                            continue
+                        elif evol_result.direction == "capitulation" and pct_loss < -0.03:
+                            self._execute_sell(pos, close, date_str, "extreme_vol_capitulation")
+                            continue
+                except Exception as e:
+                    logger.warning("Extreme vol position check failed for %s: %s", pos.ticker, e)
+
+            # 0-2. 일일 보유 점수 + 최대 보유일 (일일 점수로 연장 가능)
+            effective_max_hold = self.max_hold_days
+            hold_result = None
+            if self.adaptive_exit_enabled and self.hold_scorer and hold_days >= 2:
+                hold_result = self.hold_scorer.score(
+                    df, idx, pos.entry_price, pos.highest_price,
+                    trigger_type=pos.trigger_type, hold_days=hold_days,
+                )
+                effective_max_hold += hold_result.hold_days_adjustment
+
+                # 일일 점수 EXIT → 즉시 청산
+                if hold_result.action == "exit":
+                    self._execute_sell(pos, close, date_str, "hold_score_exit")
+                    continue
+
+            if hold_days >= effective_max_hold:
+                self._execute_sell(pos, close, date_str, "max_hold_days")
+                continue
+
+            # 1. 절대 손절 (ATR 기반 — 건강도와 무관)
             if low <= pos.stop_loss:
                 self._execute_sell(pos, pos.stop_loss, date_str, f"stop_loss_{pos.trigger_type}")
                 continue
 
-            # 퍼센트 기반 손절도 별도 체크 (당일 종가 기준)
+            # 2. 퍼센트 손절 — 적응형 또는 고정
             pct_loss = (close / pos.entry_price - 1)
-            if pct_loss <= -pos.stop_loss_pct:
-                self._execute_sell(pos, close, date_str, f"pct_stop_{pos.trigger_type}")
-                continue
 
-            # 2. 목표가 도달 → 50% 익절
-            if not pos.partial_sold and high >= pos.target_price:
-                partial_shares = pos.shares // 2
-                if partial_shares > 0:
-                    self._execute_sell(pos, pos.target_price, date_str,
-                                       "partial_target", shares=partial_shares)
+            if self.adaptive_exit_enabled and self.adaptive_exit:
+                # v4.1: 조정 건강도 평가 후 동적 손절
+                health = self.adaptive_exit.evaluate_pullback(
+                    df, idx, pos.entry_price, pos.highest_price, pos.trigger_type,
+                )
 
-            # 3. 트레일링 스탑 갱신
+                if health.classification == "critical":
+                    # 긴급 → 즉시 청산
+                    self._execute_sell(pos, close, date_str, "adaptive_critical")
+                    continue
+                elif health.classification == "dangerous":
+                    # 위험 → 타이트 손절 적용
+                    if pct_loss <= -health.adjusted_stop_pct:
+                        self._execute_sell(pos, close, date_str, "adaptive_dangerous")
+                        continue
+                elif health.classification == "healthy":
+                    # 건강 → 넓은 손절 (MA20 기반)
+                    if health.adjusted_stop_price > 0 and low <= health.adjusted_stop_price:
+                        self._execute_sell(pos, health.adjusted_stop_price, date_str, "adaptive_healthy_stop")
+                        continue
+                else:
+                    # caution → 기존 로직 유지
+                    if pct_loss <= -pos.stop_loss_pct:
+                        self._execute_sell(pos, close, date_str, f"pct_stop_{pos.trigger_type}")
+                        continue
+            else:
+                # 기존 고정 손절
+                if pct_loss <= -pos.stop_loss_pct:
+                    self._execute_sell(pos, close, date_str, f"pct_stop_{pos.trigger_type}")
+                    continue
+
+            # 2. 4단계 부분청산 (Price Action 논문: 25%씩 2R/4R/8R/10R)
+            if pos.partial_exits_done < len(self.partial_exit_r):
+                risk_per_share = pos.entry_price - pos.stop_loss
+                if risk_per_share > 0:
+                    next_r = self.partial_exit_r[pos.partial_exits_done]
+                    target_r_price = pos.entry_price + risk_per_share * next_r
+
+                    if high >= target_r_price:
+                        exit_shares = max(
+                            1,
+                            int(pos.initial_shares * self.partial_exit_pct),
+                        )
+                        exit_shares = min(exit_shares, pos.shares)
+
+                        if exit_shares > 0:
+                            self._execute_sell(
+                                pos, target_r_price, date_str,
+                                f"partial_{next_r}R",
+                                shares=exit_shares,
+                            )
+                            pos.partial_exits_done += 1
+                            pos.partial_sold = True
+
+                            # 부분청산 후 잔여 포지션 없으면 다음으로
+                            if pos not in self.positions:
+                                continue
+
+            # 3. 트레일링 스탑 갱신 (v4.1: hold_scorer에 따른 조정)
+            trailing_mult = self.atr_stop_mult
+            if hold_result is not None:
+                trailing_mult *= hold_result.trailing_tightness
+            trailing_mult = max(trailing_mult, 0.5)  # v6.2: 최소 0.5배 ATR
+
             if high > pos.highest_price:
                 pos.highest_price = high
-                pos.trailing_stop = high - pos.atr_value * self.atr_stop_mult
+            pos.trailing_stop = pos.highest_price - pos.atr_value * trailing_mult
 
-            # 4. 트레일링 스탑 히트
+            # 4. 트레일링 스탑 히트 (부분청산 시작 후)
             if pos.partial_sold and low <= pos.trailing_stop:
                 self._execute_sell(pos, pos.trailing_stop, date_str, "trailing_stop")
                 continue
@@ -348,10 +540,10 @@ class BacktestEngine:
         all_dates = data_dict[first_ticker].index
         start_idx = 200
 
-        logger.info(f"백테스트 v2.1 시작: {all_dates[start_idx]} ~ {all_dates[-1]}")
-        logger.info(f"  초기자본: {self.initial_capital:,}원 | 종목수: {len(data_dict)} | 듀얼트리거 ON")
+        logger.info(f"백테스트 v3.0 시작: {all_dates[start_idx]} ~ {all_dates[-1]}")
+        logger.info(f"  초기자본: {self.initial_capital:,}원 | 종목수: {len(data_dict)} | 6-Layer Pipeline")
 
-        for idx in tqdm(range(start_idx, len(all_dates)), desc="🧪 백테스트 v2.1"):
+        for idx in tqdm(range(start_idx, len(all_dates)), desc="v3.0 backtest"):
             date_str = str(all_dates[idx].date()) if hasattr(all_dates[idx], "date") else str(all_dates[idx])
 
             # ── 1. 보유 종목 관리 ──
@@ -375,7 +567,9 @@ class BacktestEngine:
 
             # ── 3. 신규 진입 (Trigger-1 또는 Trigger-2) ──
             if len(self.positions) < self.max_positions:
-                signals = self.signal_engine.scan_universe(data_dict, idx)
+                signals = self.signal_engine.scan_universe(
+                    data_dict, idx, held_positions=self.positions
+                )
 
                 for sig in signals:
                     self.signal_log.append({
@@ -410,6 +604,7 @@ class BacktestEngine:
                             self._execute_buy(
                                 sig, next_open,
                                 stage_pct=sig.get("entry_stage_pct", 0.40),
+                                df=next_df, idx=idx,
                             )
                             held_tickers.add(sig["ticker"])
 
@@ -451,31 +646,74 @@ class BacktestEngine:
         if not signals_df.empty:
             signals_df.to_csv(results_dir / "signals_log.csv", index=False, encoding="utf-8-sig")
 
-        stats = self._calc_stats(trades_df, equity_df)
+        # v3.0: Quant Metrics 사용
+        stats = calc_full_metrics(
+            trades_df, equity_df,
+            initial_capital=self.initial_capital,
+        )
+        print_metrics(stats)
 
-        logger.info(f"\n{'='*60}")
-        logger.info(f"✅ 백테스트 v2.1 완료!")
-        logger.info(f"   총 거래: {stats['total_trades']}건")
-        logger.info(f"   ├ Impulse: {stats['trigger_breakdown'].get('impulse', {}).get('count', 0)}건 "
-                     f"(승률 {stats['trigger_breakdown'].get('impulse', {}).get('win_rate', 0):.1f}%)")
-        logger.info(f"   └ Confirm: {stats['trigger_breakdown'].get('confirm', {}).get('count', 0)}건 "
-                     f"(승률 {stats['trigger_breakdown'].get('confirm', {}).get('win_rate', 0):.1f}%)")
-        logger.info(f"   승률: {stats['win_rate']:.1f}%")
-        logger.info(f"   평균 손익비: 1:{stats['avg_rr_ratio']:.2f}")
-        logger.info(f"   총 수익률: {stats['total_return_pct']:.1f}%")
-        logger.info(f"   CAGR: {stats['cagr_pct']:.1f}%")
-        logger.info(f"   MDD: {stats['max_drawdown_pct']:.1f}%")
-        logger.info(f"   Sharpe: {stats['sharpe_ratio']:.2f}")
-        logger.info(f"{'='*60}")
+        # 6-Layer 진단 리포트
+        self.signal_engine.diagnostic.print_summary()
+
+        # v4.5: Bootstrap 검증
+        bootstrap_cfg = self.config.get("quant_engine", {}).get("bootstrap", {})
+        bootstrap_results = None
+        if bootstrap_cfg.get("enabled", False) and not trades_df.empty:
+            bs_validator = BootstrapValidator(
+                n_iterations=bootstrap_cfg.get("n_iterations", 1000),
+                block_size=bootstrap_cfg.get("block_size", 10),
+                seed=bootstrap_cfg.get("seed", 42),
+            )
+            bootstrap_results = bs_validator.run(trades_df)
+            bs_validator.print_results(bootstrap_results)
+
+        # v4.6: Monte Carlo 시뮬레이션
+        mc_cfg = self.config.get("quant_engine", {}).get("monte_carlo", {})
+        monte_carlo_results = None
+        if mc_cfg.get("enabled", False) and not trades_df.empty:
+            mc_simulator = MonteCarloSimulator(
+                n_simulations=mc_cfg.get("n_simulations", 1000),
+                ruin_threshold_pct=mc_cfg.get("ruin_threshold_pct", -50.0),
+                seed=mc_cfg.get("seed", 42),
+            )
+            monte_carlo_results = mc_simulator.run(trades_df, self.initial_capital)
+            mc_simulator.print_results(monte_carlo_results)
+
+        # v4.6: Bootstrap 결과 반영하여 통계적 신뢰도 재평가
+        if bootstrap_results:
+            stats["statistical_reliability"] = assess_reliability(
+                n_trades=len(trades_df),
+                bootstrap_results=bootstrap_results,
+            )
+
+        # v5.0: 앵커 DB 자동 업데이트
+        if self.anchor_auto_update and self.anchor_learner and not trades_df.empty:
+            trade_dicts = trades_df.to_dict("records")
+            self.anchor_learner.learn_from_trades(trade_dicts)
+            self.anchor_learner.save()
+            logger.info(
+                "앵커 DB 자동 업데이트: %d cases (성공: %d, 실패: %d)",
+                len(self.anchor_learner.db.cases),
+                sum(1 for c in self.anchor_learner.db.cases if c.outcome == "success"),
+                sum(1 for c in self.anchor_learner.db.cases if c.outcome == "failure"),
+            )
 
         return {
             "stats": stats,
             "trades_df": trades_df,
             "equity_df": equity_df,
             "signals_df": signals_df,
+            "diagnostic": self.signal_engine.diagnostic.summarize(),
+            "bootstrap": bootstrap_results,
+            "monte_carlo": monte_carlo_results,
         }
 
-    def _calc_stats(self, trades_df: pd.DataFrame, equity_df: pd.DataFrame) -> dict:
+    def _calc_stats(self, trades_df: pd.DataFrame, equity_df: pd.DataFrame) -> dict:  # noqa: C901
+        """하위호환용 — calc_full_metrics로 위임"""
+        return calc_full_metrics(trades_df, equity_df, self.initial_capital)
+
+    def _calc_stats_legacy(self, trades_df: pd.DataFrame, equity_df: pd.DataFrame) -> dict:
         stats = {
             "total_trades": 0, "win_rate": 0.0, "avg_rr_ratio": 0.0,
             "total_return_pct": 0.0, "cagr_pct": 0.0, "max_drawdown_pct": 0.0,
