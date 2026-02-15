@@ -1,16 +1,15 @@
 """
-Quantum Master v8.0 — Main Pipeline
-"포물선 초점에 진입하여 추세를 먹는다"
+Quantum Master v8.1 — Main Pipeline
+"포물선의 초점에 진입하여 추세를 먹는다"
 
-Architecture: Gate + Score Hybrid
+Architecture: Gate + Score Hybrid + Horizon
   Phase 1: Hard Gates (AND) -> 자격 없는 종목 빠른 제거
   Phase 2: Scoring (가중합) -> 초점 근접도 측정 -> 등급 결정
   Phase 3: Triggers (OR) -> B등급+ 종목 진입 타이밍
+  Phase 4: Horizon (v8.1) -> 단기/중기/장기 보유기간 판정
 
-v7.0 -> v8.0 핵심 변경:
-  - L2 OU: Gate -> Score (98% 차단 문제 해결)
-  - L3 Momentum: martin_dead_zone 제거 -> 곡률 전환 감지
-  - C등급: 진입 불가 (워치리스트만)
+v8.0 -> v8.1 변경:
+  - HoldingHorizonClassifier 추가 (OU half_life + ADX + 곡률 + MA 배열)
 """
 
 import logging
@@ -20,6 +19,7 @@ import pandas as pd
 from .v8_gates import GateEngine
 from .v8_scorers import ScoringEngine
 from .v8_triggers import TriggerEngine
+from .holding_horizon import HoldingHorizonClassifier
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ class QuantumPipelineV8:
         self.gate_engine = GateEngine(config)
         self.scoring_engine = ScoringEngine(config)
         self.trigger_engine = TriggerEngine(config)
+        self.horizon_classifier = HoldingHorizonClassifier(config)
 
         v8_cfg = config.get('v8_hybrid', {})
         pos_cfg = v8_cfg.get('position', {})
@@ -156,6 +157,14 @@ class QuantumPipelineV8:
 
             # martin_momentum 호환 (backtest_engine.py에서 vol_weight 참조)
             result["martin_momentum"] = {"vol_weight": 1.0}
+
+            # ═══ Phase 4: Holding Horizon (v8.1) ═══
+            horizon = self.horizon_classifier.classify(row)
+            result["holding_horizon"] = horizon.horizon
+            result["holding_horizon_days"] = horizon.horizon_days
+            result["holding_horizon_confidence"] = horizon.confidence
+            result["holding_horizon_label"] = self.horizon_classifier.horizon_label(horizon.horizon)
+            result["holding_horizon_factors"] = horizon.factors
         else:
             # B등급+이지만 트리거 대기
             result["v8_action"] = "WATCH"
