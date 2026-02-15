@@ -10,17 +10,13 @@ v6.0 RTTP 뉴스 프로세서 단위 테스트
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.use_cases.rttp_news_processor import RttpNewsProcessor
+from src.entities.news_models import EventDrivenAction, NewsGateResult, NewsGrade, NewsItem
 from src.entities.rttp_models import (
-    DEFAULT_SOURCE_WEIGHTS,
-    DEFAULT_ENGAGEMENT_WEIGHTS,
     RecallTracker,
     SourceTier,
 )
-from src.entities.news_models import NewsItem, NewsGateResult, NewsGrade, EventDrivenAction
-
+from src.use_cases.rttp_news_processor import RttpNewsProcessor
 
 # ── 헬퍼 ──
 

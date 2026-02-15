@@ -6,7 +6,7 @@ import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from src.entities.models import FlowAlert, AlertType, InvestorFlow, SignalStrength
+from src.entities.models import InvestorFlow
 from src.use_cases.ports import InvestorFlowPort, OutputPort, StockDataPort
 
 

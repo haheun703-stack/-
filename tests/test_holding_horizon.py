@@ -1,7 +1,8 @@
 """v8.1 Holding Horizon 분류기 테스트"""
-import pytest
 import pandas as pd
-from src.holding_horizon import HoldingHorizonClassifier, HorizonResult
+import pytest
+
+from src.holding_horizon import HoldingHorizonClassifier
 
 
 @pytest.fixture

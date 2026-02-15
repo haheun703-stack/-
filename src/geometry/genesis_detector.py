@@ -24,11 +24,10 @@ import logging
 import numpy as np
 import pandas as pd
 
-from .phase_transition import PhaseTransitionDetector
-from .neglect_score import NeglectScorer
-from .kelly_sizer import KellySizer
 from .cycle_clock import CycleClock
-from .confluence_scorer import ConfluenceScorer
+from .kelly_sizer import KellySizer
+from .neglect_score import NeglectScorer
+from .phase_transition import PhaseTransitionDetector
 
 logger = logging.getLogger(__name__)
 

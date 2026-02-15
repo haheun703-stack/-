@@ -10,7 +10,6 @@ RTTP 논문의 LLM 합성 신호 생성:
 """
 
 import logging
-from typing import Optional
 
 from src.entities.rttp_models import BeneficiarySignal
 

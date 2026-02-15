@@ -11,15 +11,12 @@ v6.0 Martin Momentum Engine 단위 테스트
   7. 종합 evaluate: signal_type + confidence
 """
 
-import math
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.martin_momentum import MartinMomentumEngine
 from src.entities.momentum_models import MartinMomentumResult
-
+from src.martin_momentum import MartinMomentumEngine
 
 # ── 헬퍼 ──
 

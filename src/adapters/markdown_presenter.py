@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.entities.models import AnalysisReport, AnalysisScore, ConditionType
+from src.entities.models import AnalysisReport, ConditionType
 from src.use_cases.ports import ReportPresenterPort
 
 

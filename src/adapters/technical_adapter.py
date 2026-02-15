@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.entities.models import ChartData, OHLCV, TechnicalIndicators
+from src.entities.models import OHLCV, ChartData, TechnicalIndicators
 from src.use_cases.ports import TechnicalAnalysisPort
 
 

@@ -13,7 +13,6 @@ import pytest
 
 from src.indicators import IndicatorEngine
 
-
 # ── 헬퍼 ──
 
 def make_ohlcv(n=300, trend=0.001, seed=42):

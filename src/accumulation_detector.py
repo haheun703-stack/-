@@ -11,9 +11,10 @@ Dumping: 기관+외국인 동시 5일+ 순매도 → -20점 (최우선 체크)
 
 from __future__ import annotations
 
-import yaml
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import yaml
 
 from src.entities.news_models import AccumulationSignal
 

@@ -19,8 +19,8 @@ import os
 import time
 from datetime import datetime
 
-import requests
 import mojito
+import requests
 
 from src.use_cases.ports import IntradayDataPort
 

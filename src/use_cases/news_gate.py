@@ -23,8 +23,8 @@ from src.entities.news_models import (
     NewsGrade,
     NewsItem,
 )
-from src.news_classifier import NewsClassifier
 from src.event_position import EventPositionManager
+from src.news_classifier import NewsClassifier
 
 logger = logging.getLogger(__name__)
 

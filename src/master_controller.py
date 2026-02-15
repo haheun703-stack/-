@@ -7,7 +7,7 @@ Master Controller — 서브시스템 가중합산 컨트롤러
 순수 계산 클래스 — sub_scores dict만 받으며 외부 의존성 없음.
 """
 from enum import Enum
-from typing import Dict, Any
+from typing import Any
 
 
 class Action(str, Enum):
@@ -55,7 +55,7 @@ class MasterController:
             "min_contributing_systems", DEFAULT_MIN_CONTRIBUTING
         )
 
-    def evaluate(self, sub_scores: Dict[str, float]) -> Dict[str, Any]:
+    def evaluate(self, sub_scores: dict[str, float]) -> dict[str, Any]:
         """서브시스템 점수를 가중 합산하여 최종 판정.
 
         Args:

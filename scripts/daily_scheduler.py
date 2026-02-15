@@ -461,7 +461,7 @@ class DailyScheduler:
         import schedule
 
         logger.info("=" * 60)
-        logger.info("  v4.0 일일 스케줄러 시작")
+        logger.info("  v4.1 일일 스케줄러 시작")
         logger.info("  모드: %s | 실주문: %s", self.mode, "ON" if self.enabled else "OFF")
         logger.info("=" * 60)
 
@@ -541,7 +541,7 @@ class DailyScheduler:
         """스케줄 표 출력 (--dry-run)"""
         print()
         print("=" * 60)
-        print("  v4.0 일일 스케줄 (dry-run)")
+        print("  v4.1 일일 스케줄 (dry-run)")
         print("=" * 60)
         print(f"  모드: {self.mode} | 실주문: {'ON' if self.enabled else 'OFF'}")
         print()

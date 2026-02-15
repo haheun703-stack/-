@@ -125,6 +125,7 @@ class BacktestEngine:
         self._base_max_positions = self.max_positions
         self._base_max_hold_days = self.max_hold_days
         self._current_short_status = None  # 캐시
+        self._current_short_profile = {}  # 현재 활성 프로파일 캐시
 
         # v4.1: 적응형 청산
         adaptive_cfg = self.config.get("adaptive_exit", {})
@@ -216,19 +217,20 @@ class BacktestEngine:
         return "active"  # 캘린더에 없으면 기본 active
 
     def _apply_regime_profile(self, date_str: str) -> dict:
-        """날짜 기준 공매도 체제 프로파일 적용. 변경된 파라미터 반환."""
+        """날짜 기준 공매도 체제 프로파일 적용. 현재 활성 프로파일 반환."""
         status = self._get_short_status(date_str)
 
-        # 상태 변화 시에만 적용 (매일 반복 방지)
+        # 상태 변화 시에만 재적용 (매일 반복 방지)
         if status == self._current_short_status:
-            return {}
+            return self._current_short_profile
 
         self._current_short_status = status
         profile_key = f"short_selling_{status}"
         profile = self._regime_profiles.get(profile_key, {})
+        self._current_short_profile = profile
 
         if not profile:
-            return {}
+            return profile
 
         # SA Floor 비대칭 적용
         sa_floor = profile.get("sa_floor", 0.55)
@@ -685,8 +687,10 @@ class BacktestEngine:
 
             # ── 3. 신규 진입 (Trigger-1 또는 Trigger-2) ──
             # hostile 체제에서는 신규 진입 차단
+            # v8.3.1: 공매도 프로파일의 min_regime_scale 적용
+            min_regime = short_profile.get("min_regime_scale", 0.0)
             effective_max_pos = self.max_positions
-            if regime.position_scale <= 0:
+            if regime.position_scale <= 0 or regime.position_scale < min_regime:
                 effective_max_pos = 0  # 신규 진입 불가
             elif regime.position_scale < 1.0:
                 # neutral/caution: 최대 포지션 수 축소

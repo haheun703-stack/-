@@ -20,8 +20,8 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 try:
-    from sklearn.preprocessing import StandardScaler
     from hmmlearn.hmm import GaussianHMM
+    from sklearn.preprocessing import StandardScaler
 
     HMM_AVAILABLE = True
 except ImportError:

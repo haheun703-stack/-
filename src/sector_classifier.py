@@ -8,7 +8,6 @@ Adaptive Regime Sector Strategy 기반:
 """
 
 import logging
-from pathlib import Path
 
 import yaml
 
@@ -19,7 +18,7 @@ class SectorClassifier:
     """종목 섹터 분류 + 섹터 제한 관리"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
         sc_cfg = config.get("sector_classification", {})

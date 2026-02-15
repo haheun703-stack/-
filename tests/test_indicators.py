@@ -12,10 +12,8 @@ v6.3 IndicatorEngine 단위 테스트
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from src.indicators import IndicatorEngine
-
 
 # ── 헬퍼 ──
 

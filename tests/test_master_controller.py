@@ -1,6 +1,5 @@
 """Master Controller 단위 테스트."""
-import pytest
-from src.master_controller import MasterController, Action, EntryMode, DEFAULT_WEIGHTS
+from src.master_controller import DEFAULT_WEIGHTS, Action, EntryMode, MasterController
 
 
 def _all_scores(val):

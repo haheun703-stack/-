@@ -14,7 +14,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -25,7 +25,6 @@ from src.entities.intraday_models import (
     StockSituation,
 )
 from src.use_cases.situation_reporter import SituationReporter
-
 
 # ═══════════════════════════════════════════════════
 # 1. 엔티티 모델 테스트

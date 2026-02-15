@@ -10,13 +10,11 @@ Phase 3-A 기하학 엔진 단위 테스트
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.geometry.confluence_scorer import ConfluenceScorer, FACTOR_DEFS
+from src.geometry.confluence_scorer import ConfluenceScorer
 from src.geometry.cycle_clock import CycleClock
 from src.geometry.divergence_detector import DivergenceDetector
 from src.geometry.engine import GeometryEngine
-
 
 # ═══════════════════════════════════════════════════
 # 테스트 데이터 헬퍼

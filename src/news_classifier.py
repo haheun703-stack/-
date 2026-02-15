@@ -12,8 +12,9 @@ v3.1 → v3.2 변경:
 
 from __future__ import annotations
 
-import yaml
 from pathlib import Path
+
+import yaml
 
 from src.entities.news_models import (
     EarningsEstimate,

@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
 
-
 # ─── 기본 열거형 ────────────────────────────────────────────
 
 class Market(Enum):

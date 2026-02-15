@@ -24,15 +24,14 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from .confluence_scorer import ConfluenceScorer
 from .cycle_clock import CycleClock
 from .divergence_detector import DivergenceDetector
 from .genesis_detector import GenesisDetector
-from .phase_transition import PhaseTransitionDetector
 from .neglect_score import NeglectScorer
+from .phase_transition import PhaseTransitionDetector
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +183,7 @@ class GeometryEngine:
             mid_clock = mid.get("clock", 0)
             if 5 <= mid_clock <= 7:
                 buy_zone.append(sr.get("ticker", ""))
-            elif 10 <= mid_clock or mid_clock <= 1:
+            elif mid_clock >= 10 or mid_clock <= 1:
                 sell_zone.append(sr.get("ticker", ""))
 
         if buy_zone:

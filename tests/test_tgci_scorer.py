@@ -1,7 +1,5 @@
 """TGCI (TRIX Golden Cross Indicator) 독립 스코어러 단위 테스트."""
-import pytest
-import math
-from src.tgci_scorer import TGCIScorer, _score_to_grade, _safe_get
+from src.tgci_scorer import TGCIScorer, _score_to_grade
 
 
 def _base_row(**overrides):

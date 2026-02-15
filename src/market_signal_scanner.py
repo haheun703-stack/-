@@ -164,8 +164,8 @@ class MarketSignalScanner:
                             signal_type="golden_cross_120_confirmed",
                             title="장기 골든크로스 확정! (MA20×MA120)",
                             description=(
-                                f"MA20이 MA120을 상향 돌파. "
-                                f"장기 추세 전환 확인. 강력 매수 시그널."
+                                "MA20이 MA120을 상향 돌파. "
+                                "장기 추세 전환 확인. 강력 매수 시그널."
                             ),
                             importance="critical",
                             confidence=90,

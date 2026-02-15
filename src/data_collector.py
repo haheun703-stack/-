@@ -6,11 +6,9 @@ Step 1: data_collector.py — KOSPI/KOSDAQ 전종목 OHLCV + 투자자 매매동
 저장: data/raw/{ticker}.parquet
 """
 
-import os
-import time
 import logging
+import time
 from pathlib import Path
-from datetime import datetime, timedelta
 
 import pandas as pd
 import yaml
@@ -31,7 +29,7 @@ class DataCollector:
     """KRX에서 전종목 OHLCV, 투자자 매매동향, 기본 펀더멘탈 수집"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
 
         self.start_date = self.config["backtest"]["start_date"].replace("-", "")

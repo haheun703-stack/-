@@ -12,11 +12,9 @@ v6.0 극한 변동성 탐지 단위 테스트
 
 import numpy as np
 import pandas as pd
-import pytest
 
+from src.entities.volatility_models import ExtremeVolatilityResult
 from src.extreme_volatility import ExtremeVolatilityDetector
-from src.entities.volatility_models import ExtremeVolatilityResult, CapitulationProfile
-
 
 # ── 헬퍼 ──
 

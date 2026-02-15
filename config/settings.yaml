@@ -734,15 +734,15 @@ master_controller:
 # "공매도 재개/금지에 따라 전략 파라미터를 동적 조정"
 # ════════════════════════════════════════════════════════════
 short_selling_calendar:
-  # status: "banned" = 공매도 금지, "active" = 공매도 허용
+  # status: "active" = 정상 공매도, "banned" = 금지, "reopened" = 금지 후 재개장
   - { start: "2019-01-01", end: "2020-03-15", status: "active" }
   - { start: "2020-03-16", end: "2021-05-02", status: "banned" }    # COVID 금지
   - { start: "2021-05-03", end: "2023-11-05", status: "active" }
   - { start: "2023-11-06", end: "2025-03-30", status: "banned" }    # 전면 금지
-  - { start: "2025-03-31", end: "2099-12-31", status: "active" }    # 재개장
+  - { start: "2025-03-31", end: "2099-12-31", status: "reopened" }   # 재개장 (별도 프로파일)
 
 regime_profiles:
-  # 공매도 활발 시 (방어적 파라미터)
+  # 정상 공매도 시 (과거 검증된 파라미터)
   short_selling_active:
     max_positions_scale: 0.6        # max_positions × 0.6 (5→3)
     min_rr_ratio: 2.0               # 손익비 하한 상향 (1.5→2.0)
@@ -750,6 +750,7 @@ regime_profiles:
     stop_loss_scale: 0.8            # 손절 20% 타이트
     max_hold_days_scale: 0.6        # 최대 보유일 축소 (30→18)
     sa_floor: 0.30                  # SA floor 낮춤 → hostile 도달 가능
+    min_regime_scale: 0.0           # hostile만 차단 (정상장 caution 진입 허용)
 
   # 공매도 금지 시 (기본 파라미터 유지)
   short_selling_banned:
@@ -759,6 +760,17 @@ regime_profiles:
     stop_loss_scale: 1.0
     max_hold_days_scale: 1.0
     sa_floor: 0.55                  # 기존 높은 floor 유지
+    min_regime_scale: 0.0           # hostile만 차단
+
+  # 재개장 (금지 후 공매도 재개 — 최고 방어 모드)
+  short_selling_reopened:
+    max_positions_scale: 0.6        # max_positions × 0.6 (5→3)
+    min_rr_ratio: 2.0               # 손익비 하한 상향
+    position_scale_mult: 0.7        # 포지션 크기 70%
+    stop_loss_scale: 0.8            # 손절 20% 타이트
+    max_hold_days_scale: 0.6        # 최대 보유일 축소
+    sa_floor: 0.30                  # hostile 도달 가능
+    min_regime_scale: 0.75          # neutral 이상만 진입 (caution 차단)
 
 # ════════════════════════════════════════════════════════════
 # v8.2 Market Regime Gate (7D 시장 체제 감지)

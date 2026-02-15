@@ -143,7 +143,7 @@ class SignalDiagnostic:
             return
 
         logger.info(f"\n{'='*60}")
-        logger.info(f"6-Layer Pipeline 진단 리포트")
+        logger.info("6-Layer Pipeline 진단 리포트")
         logger.info(f"{'='*60}")
         logger.info(f"총 평가: {summary['total_evaluations']}건")
         logger.info(f"최종 시그널: {summary['final_signals']}건 "

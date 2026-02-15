@@ -15,6 +15,7 @@ import logging
 import numpy as np
 import pandas as pd
 
+from src.entities.news_models import NewsGateResult, NewsItem
 from src.entities.rttp_models import (
     DEFAULT_ENGAGEMENT_WEIGHTS,
     DEFAULT_SOURCE_WEIGHTS,
@@ -22,7 +23,6 @@ from src.entities.rttp_models import (
     RttpEnhancement,
     SourceTier,
 )
-from src.entities.news_models import NewsGateResult, NewsItem
 
 logger = logging.getLogger(__name__)
 

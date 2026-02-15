@@ -7,9 +7,7 @@ Phase 1: 장중 데이터 수집 파이프라인 단위 테스트
   3. 수집 오케스트레이터 (intraday_collector) — Mock 데이터 포트
 """
 
-import os
 import sys
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -18,19 +16,15 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.adapters.sqlite_intraday_store import SqliteIntradayStore
 from src.entities.intraday_models import (
     AIJudgment,
     AlertLevel,
     Candle5Min,
-    InvestorFlowIntraday,
     MarketContext,
-    NewsEvent,
-    SectorPrice,
     TickData,
 )
-from src.adapters.sqlite_intraday_store import SqliteIntradayStore
 from src.use_cases.intraday_collector import IntradayCollector
-
 
 # ═══════════════════════════════════════════════════
 # 1. 엔티티 모델 테스트

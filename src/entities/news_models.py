@@ -1,9 +1,7 @@
 """v3.1 뉴스 도메인 엔티티 — 외부 의존 없는 순수 데이터 객체"""
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
-
 
 # ============================================================
 # Enums

@@ -11,8 +11,9 @@ v3.1 이벤트 드리븐 포지션 관리
 
 from __future__ import annotations
 
-import yaml
 from pathlib import Path
+
+import yaml
 
 from src.entities.news_models import EventPosition, NewsGrade
 

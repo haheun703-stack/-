@@ -18,9 +18,7 @@ Phase 2 (상황보고서):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
-
 
 # ─── 알림 등급 (Phase 4 미리 정의) ────────────────────
 

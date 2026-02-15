@@ -19,10 +19,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.geometry.phase_transition import PhaseTransitionDetector
-from src.geometry.neglect_score import NeglectScorer
 from src.geometry.kelly_sizer import KellySizer
-
+from src.geometry.neglect_score import NeglectScorer
+from src.geometry.phase_transition import PhaseTransitionDetector
 
 # ═══════════════════════════════════════════════
 # 합성 데이터 생성기

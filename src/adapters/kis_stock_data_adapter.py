@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 
 import mojito
 
-from src.entities.models import ChartData, InvestorFlow, Market, OHLCV, Stock, TechnicalIndicators
+from src.entities.models import OHLCV, ChartData, InvestorFlow, Market, Stock, TechnicalIndicators
 from src.use_cases.ports import StockDataPort
 
 

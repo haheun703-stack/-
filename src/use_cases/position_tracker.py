@@ -20,16 +20,14 @@ from pathlib import Path
 import pandas as pd
 
 from src.entities.trading_models import (
-    DailyPerformance,
     ExitReason,
     LivePosition,
     Order,
-    OrderSide,
     OrderStatus,
 )
-from src.use_cases.ports import CurrentPricePort
 from src.use_cases.adaptive_exit import AdaptiveExitManager
 from src.use_cases.daily_hold_scorer import DailyHoldScorer
+from src.use_cases.ports import CurrentPricePort
 
 logger = logging.getLogger(__name__)
 

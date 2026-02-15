@@ -210,7 +210,7 @@ class DailyJournalWriter:
         try:
             log_text = SCHEDULER_LOG.read_text(encoding="utf-8", errors="ignore")
             for line in log_text.split("\n"):
-                if today not in line and datetime.now().strftime("%H:") not in line:
+                if today not in line:
                     continue
 
                 # [Phase N] 패턴 매칭

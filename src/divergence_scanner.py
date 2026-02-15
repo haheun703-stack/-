@@ -10,10 +10,11 @@ v3.1 OBV/주가 다이버전스 스캐너
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import yaml
-from pathlib import Path
 
 from src.entities.news_models import DivergenceSignal
 

@@ -8,10 +8,8 @@ v6.3 PositionSizer 단위 테스트
 - 결과 구조: 필수 필드 존재
 """
 
-import pytest
 
 from src.position_sizer import PositionSizer
-
 
 # ── 테스트용 config ──
 

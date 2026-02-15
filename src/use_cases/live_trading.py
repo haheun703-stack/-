@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime
-from pathlib import Path
 
 import yaml
 
@@ -426,7 +425,7 @@ def create_live_engine(config_path: str = "config/settings.yaml") -> LiveTrading
     """설정 파일로부터 LiveTradingEngine 인스턴스 생성"""
     from src.adapters.kis_order_adapter import KisOrderAdapter
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     adapter = KisOrderAdapter()

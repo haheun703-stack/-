@@ -63,7 +63,7 @@ class DimensionScores:
         """5D/6D 종합 점수 계산"""
         # 5D 가중평균 (1D:15%, 2D:20%, 3D:25%, 4D:20%, 5D:20%)
         self.total_5d = (
-            self.d1_price_pct * 0.15 * 0.01 * 100
+            self.d1_price_pct * 0.15
             + min(self.d2_target_gap_pct, 100) * 0.20
             + self.d3_multifactor * 0.25
             + self.d4_timing_score * 0.20

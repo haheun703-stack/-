@@ -11,7 +11,6 @@ v5.0 ConsensusVerifier 단위 테스트
   7. 등급 경계값 테스트
 """
 
-import pytest
 
 from src.entities.consensus_models import (
     AnchorDatabase,
@@ -19,7 +18,6 @@ from src.entities.consensus_models import (
     LayerVote,
 )
 from src.use_cases.consensus_engine import ConsensusVerifier
-
 
 # ── 헬퍼 ──
 

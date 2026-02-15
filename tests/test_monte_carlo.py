@@ -2,8 +2,9 @@
 v4.6 Monte Carlo + 표본수 경고 + 통계적 신뢰도 테스트
 """
 
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
@@ -12,9 +13,6 @@ import pandas as pd
 from src.quant_metrics import (
     assess_reliability,
     calc_full_metrics,
-    MIN_TRADES_CRITICAL,
-    MIN_TRADES_WARNING,
-    MIN_TRADES_RELIABLE,
 )
 from src.walk_forward import MonteCarloSimulator
 
