@@ -4,14 +4,19 @@
 3D~5D 분석 모듈을 통합하여 단일 인터페이스로 제공.
 Phase 2 SituationReporter와 연동하여 Claude API 프롬프트에 기하학 분석을 주입.
 
-현재 활성 (Phase 3-A):
-  ⑦ Confluence Scorer  — N팩터 조합 적중률
-  ⑧ Cycle Clock        — 3주파수 사이클 위치
+Phase 3-A (활성):
+  ⑦ Confluence Scorer   — N팩터 조합 적중률
+  ⑧ Cycle Clock         — 3주파수 사이클 위치
   ⑨ Divergence Detector — 팩터간 발산 감지
 
-향후 활성 (Phase 3-B/C):
-  ⑩ Simultaneity Meter, ⑪ Dynamic Equilibrium
-  ⑫ Crowd Meter, ⑬ Strategy Health, ⑭ Scenario Engine
+Phase 3-B (활성):
+  ⑩ Phase Transition    — 상전이 5대 전조 감지
+  ⑫ Neglect Scorer      — 군중 무관심 프록시
+  Genesis Detector       — 포물선 시작점 통합 감지기
+  Kelly Sizer            — Kelly Criterion 포지션 사이저
+
+향후 활성 (Phase 3-C):
+  ⑬ Strategy Health, ⑭ Scenario Engine
 """
 
 from __future__ import annotations
@@ -25,22 +30,30 @@ import pandas as pd
 from .confluence_scorer import ConfluenceScorer
 from .cycle_clock import CycleClock
 from .divergence_detector import DivergenceDetector
+from .genesis_detector import GenesisDetector
+from .phase_transition import PhaseTransitionDetector
+from .neglect_score import NeglectScorer
 
 logger = logging.getLogger(__name__)
 
 
 class GeometryEngine:
-    """Phase 3 통합 기하학 분석 엔진"""
+    """Phase 3 통합 기하학 분석 엔진 (3-A + 3-B)"""
 
     def __init__(self, config: dict | None = None, parquet_dir: str | Path | None = None):
         self.config = config or {}
         self.enabled = self.config.get("geometry", {}).get("enabled", True)
         self.parquet_dir = Path(parquet_dir) if parquet_dir else Path("data/processed")
 
-        # 3D 엔진 초기화
+        # Phase 3-A: 3D 엔진
         self.confluence = ConfluenceScorer(config)
         self.cycle = CycleClock(config)
         self.divergence = DivergenceDetector(config)
+
+        # Phase 3-B: 시작점 엔진
+        self.genesis = GenesisDetector(config)
+        self.phase_transition = PhaseTransitionDetector(config)
+        self.neglect = NeglectScorer(config)
 
         # 종목별 적중률 DB 캐시
         self._confluence_cache: dict[str, bool] = {}  # ticker → DB 구축 여부
@@ -102,6 +115,24 @@ class GeometryEngine:
             logger.debug("Divergence 분석 실패 [%s]: %s", ticker, e)
             result["divergence"] = {"directions": {}, "divergences": [], "risk_count": 0, "opportunity_count": 0, "confirm_count": 0, "net_signal": 0}
 
+        # ⑩ Phase Transition + Genesis Detector
+        try:
+            if df is not None and len(df) >= 60:
+                prices = df["close"].values
+                volumes = df["volume"].values if "volume" in df.columns else None
+                current_row = row or (df.iloc[-1].to_dict() if df is not None else {})
+                result["genesis"] = self.genesis.detect(
+                    prices=prices,
+                    volumes=volumes,
+                    row=current_row,
+                    df=df,
+                )
+            else:
+                result["genesis"] = GenesisDetector._empty_result("데이터 부족")
+        except Exception as e:
+            logger.debug("Genesis 분석 실패 [%s]: %s", ticker, e)
+            result["genesis"] = GenesisDetector._empty_result(str(e))
+
         # 통합 프롬프트 텍스트
         result["prompt_text"] = self._build_prompt_text(result)
 
@@ -119,7 +150,7 @@ class GeometryEngine:
         Returns:
             Claude 프롬프트용 요약 텍스트
         """
-        lines = ["### 기하학 분석 요약 (3D)"]
+        lines = ["### 기하학 분석 요약 (3D+Genesis)"]
 
         # 최고 적중률 트리플
         best_triple = None
@@ -172,6 +203,19 @@ class GeometryEngine:
         if risk_stocks:
             lines.append(f"  다중 위험 발산: {', '.join(risk_stocks)}")
 
+        # Genesis Alert (시작점 감지)
+        genesis_alerts = []
+        for sr in stock_results:
+            geo = sr.get("geometry", {})
+            gen = geo.get("genesis", {})
+            if gen.get("genesis_alert"):
+                genesis_alerts.append(
+                    f"{sr.get('ticker', '')} (Class {gen.get('signal_class', '?')},"
+                    f" 점수 {gen.get('composite_score', 0):.2f})"
+                )
+        if genesis_alerts:
+            lines.append(f"  GENESIS ALERT: {', '.join(genesis_alerts)}")
+
         if len(lines) == 1:
             lines.append("  특이 사항 없음")
 
@@ -204,11 +248,16 @@ class GeometryEngine:
             self._confluence_cache[ticker] = True
 
     def _build_prompt_text(self, result: dict) -> str:
-        """3개 모듈 결과를 통합 프롬프트로"""
+        """Phase 3-A/B 모듈 결과를 통합 프롬프트로"""
         parts = []
+        # Phase 3-A
         parts.append(ConfluenceScorer.to_prompt_text(result.get("confluence", {})))
         parts.append(CycleClock.to_prompt_text(result.get("cycle", {})))
         parts.append(DivergenceDetector.to_prompt_text(result.get("divergence", {})))
+        # Phase 3-B
+        genesis = result.get("genesis", {})
+        if genesis.get("genesis_alert") or genesis.get("signal_class", "NONE") != "NONE":
+            parts.append(GenesisDetector.to_prompt_text(genesis))
         return "\n".join(parts)
 
     @staticmethod
@@ -217,5 +266,6 @@ class GeometryEngine:
             "confluence": {"active_factors": [], "active_triples": [], "best_hit_rate": 0, "triple_count": 0},
             "cycle": CycleClock._empty_result("비활성"),
             "divergence": {"directions": {}, "divergences": [], "risk_count": 0, "opportunity_count": 0, "confirm_count": 0, "net_signal": 0},
+            "genesis": GenesisDetector._empty_result("비활성"),
             "prompt_text": "[기하학 분석 비활성]",
         }
