@@ -161,6 +161,15 @@ class ScoringEngine:
         score += bb_score
         bd['bollinger'] = round(bb_score, 3)
 
+        # (d) 센티먼트 바닥 보너스 (L5, 0.10)
+        if row.get('sentiment_extreme', 0) == 1:
+            sent_score = 0.10  # 토론실 비관 극단 → 역발상 매수
+        else:
+            sent_score = 0.0
+        score += sent_score
+        if sent_score > 0:
+            bd['panic_sentiment'] = round(sent_score, 3)
+
         return ScoreResult(name="S1_Energy", score=min(score, 1.0), weight=w, breakdown=bd)
 
     # ═══════════════════════════════════════════════════════
@@ -219,6 +228,12 @@ class ScoringEngine:
             fwd_score = 0.0
         score += fwd_score
         bd['forward_per'] = round(fwd_score, 3)
+
+        # (d) QoQ 턴어라운드 보너스 (L3 DART, 0.20)
+        if row.get('earnings_surprise', 0) == 1:
+            turn_score = 0.20  # 적자→흑자 전환
+            bd['turnaround'] = round(turn_score, 3)
+            score += turn_score
 
         return ScoreResult(name="S2_Valuation", score=min(score, 1.0), weight=w, breakdown=bd)
 
@@ -381,7 +396,7 @@ class ScoringEngine:
         score += inst_score
         bd['institutional'] = round(inst_score, 3)
 
-        # (c) 분배 리스크 (DRS) — 낮을수록 좋음 (0.30)
+        # (c) 분배 리스크 (DRS) — 낮을수록 좋음 (0.30, v8.3.1 원본)
         drs = row.get('distribution_risk_score', row.get('smart_z', 0.5))
         drs_safe = cfg.get('drs_safe_threshold', 0.3)
         drs_neutral = cfg.get('drs_neutral_threshold', 0.5)
@@ -394,5 +409,35 @@ class ScoringEngine:
             drs_score = 0.0
         score += drs_score
         bd['drs'] = round(drs_score, 3)
+
+        # (d) 공매도 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
+        # 데이터 없는 기간(short_ratio=0)은 보너스 0 → v8.3.1 동일 동작
+        short_ratio = row.get('short_ratio', 0)
+        has_short_data = not pd.isna(short_ratio) and short_ratio > 0
+
+        if has_short_data:
+            short_cover = row.get('short_cover_signal', 0)
+            short_spike = row.get('short_spike', 1.0)
+
+            if short_cover:
+                short_score = 0.10  # 숏커버링 → 최대 부스트
+            elif short_spike < 0.5:
+                short_score = 0.07  # 공매도 감소 추세
+            elif short_spike > 2.0:
+                short_score = 0.0   # 공매도 급증 → 위험
+            else:
+                short_score = 0.03  # 정상 수준
+            score += short_score
+            bd['short_selling'] = round(short_score, 3)
+
+        # (e) 연기금 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
+        if row.get('pension_top_buyer', 0) == 1:
+            pension_score = 0.10  # 연기금 TOP20 순매수
+            score += pension_score
+            bd['pension'] = round(pension_score, 3)
+        elif row.get('pension_net_5d', 0) > 0:
+            pension_score = 0.05  # 연기금 5일 누적 양전
+            score += pension_score
+            bd['pension'] = round(pension_score, 3)
 
         return ScoreResult(name="S5_SmartMoney", score=min(score, 1.0), weight=w, breakdown=bd)

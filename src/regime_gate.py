@@ -1,18 +1,19 @@
 """
-7D Market Regime Gate v3 — 시장 체제 감지
+7D Market Regime Gate v3.1 — 시장 체제 감지
 
 "지금이 우리 시스템이 작동하는 시장인가?"를 판단.
 개별 종목이 아닌 유니버스 전체의 cross-sectional 신호를 사용.
 
-3가지 시장 신호 + 1가지 메타 신호(승률 곱셈 계수):
-  Base Signal (additive, 0~3):
+4가지 시장 신호 + 1가지 메타 신호(승률 곱셈 계수):
+  Base Signal (additive, 0~4):
     1. Market Breadth: 추세 정렬 종목 비율 (0~1)
     2. Foreign Flow: 외국인 수급 방향성 (0~1, 정규화)
     3. Volatility Regime: 변동성 환경 변화 (0~1)
+    4. Global Macro: VIX/환율/반도체 복합 (0~1) — v3.1 신규
   Meta Signal (multiplicative):
-    4. Self-Adaptive: 최근 거래 성공률 (sa_mult 0.3~1.0)
+    5. Self-Adaptive: 최근 거래 성공률 (sa_mult 0.3~1.0)
 
-composite = base * sa_mult → 0~3 범위
+composite = base * sa_mult → 0~4 범위
 
 출력: RegimeState (position_scale 0.0~1.0)
   - favorable (1.0): 전체 포지션 허용
@@ -20,11 +21,10 @@ composite = base * sa_mult → 0~3 범위
   - caution   (0.50): 포지션 50%
   - hostile   (0.0): 신규 진입 차단
 
-v3 변경 (v2 대비):
-  - SA를 additive → multiplicative로 전환 (사망 나선 방지)
-  - sa_floor=0.30 (최악 시에도 base의 30% 반영 → hostile 진입 가능)
-  - SA window 20→15 (빠른 반응/회복)
-  - 임계값 원복: favorable≥2.2, neutral≥1.5, caution≥0.8 (0~3 범위)
+v3.1 변경 (v3 대비):
+  - L4 Global Macro 신호 추가 (VIX Z-score + USD/KRW + SOXX)
+  - Base 범위 0~3 → 0~4, threshold v8.3.1+0.1 (2.3/1.6/0.8)
+  - 매크로는 가산 보너스 역할: 좋으면 favorable 도달 용이, 나쁘면 기존과 유사
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ class RegimeState:
     breadth_score: float        # 0.0 ~ 1.0 (추세 정렬 비율)
     foreign_score: float        # 0.0 ~ 1.0 (외국인 방향, 정규화)
     volatility_score: float     # 0.0 ~ 1.0 (변동성 안정도)
-    composite_score: float      # 0.0 ~ 3.0 (합산 점수)
+    composite_score: float      # 0.0 ~ 4.0 (합산 점수, v3.1 macro 포함)
     details: str = ""
 
 
@@ -86,10 +86,11 @@ class RegimeGate:
         self.sa_neutral_winrate = sa_cfg.get("neutral_winrate", 0.50)
         self._recent_trades: deque[int] = deque(maxlen=self.sa_window)
 
-        # 체제 임계값 (0~3 범위, SA multiplier 적용 후)
+        # 체제 임계값 (0~4 범위, SA multiplier 적용 후)
+        # v8.3.1 대비 +0.1 — 매크로 가산 보너스 반영, 매크로 나쁘면 기존과 유사
         thresholds = cfg.get("thresholds", {})
-        self.favorable_min = thresholds.get("favorable", 2.2)
-        self.neutral_min = thresholds.get("neutral", 1.5)
+        self.favorable_min = thresholds.get("favorable", 2.3)
+        self.neutral_min = thresholds.get("neutral", 1.6)
         self.caution_min = thresholds.get("caution", 0.8)
 
         # 캐시 (같은 날 반복 계산 방지)
@@ -129,19 +130,20 @@ class RegimeGate:
         breadth = self._calc_breadth(data_dict, idx)
         foreign_raw = self._calc_foreign_flow(data_dict, idx)
         volatility = self._calc_volatility(data_dict, idx)
+        macro = self._calc_macro_regime(data_dict, idx)
         sa_raw = self._calc_self_adaptive()
 
         # foreign을 0~1로 정규화: -1→0, 0→0.5, +1→1.0
         foreign_norm = (foreign_raw + 1.0) / 2.0
 
-        # Base signal (0~3)
-        base = breadth + foreign_norm + volatility
+        # Base signal (0~4, macro 추가)
+        base = breadth + foreign_norm + volatility + macro
 
         # SA multiplier: sa_floor ~ 1.0
         # SA=0.0 → mult=0.30, SA=0.5 → mult=0.65, SA=1.0 → mult=1.0
         sa_mult = self.sa_floor + (1.0 - self.sa_floor) * sa_raw
 
-        # Final composite (0~3)
+        # Final composite (0~4)
         composite = base * sa_mult
 
         # 체제 판정
@@ -156,7 +158,8 @@ class RegimeGate:
 
         details = (
             f"breadth={breadth:.2f} foreign={foreign_norm:.2f} "
-            f"vol={volatility:.2f} sa={sa_raw:.2f}(×{sa_mult:.2f}) "
+            f"vol={volatility:.2f} macro={macro:.2f} "
+            f"sa={sa_raw:.2f}(×{sa_mult:.2f}) "
             f"base={base:.2f} → {composite:.2f} [{regime}]"
         )
 
@@ -320,7 +323,68 @@ class RegimeGate:
             return 1.0
 
     # ──────────────────────────────────────────────
-    # Signal 4: Self-Adaptive (multiplicative 계수)
+    # Signal 4: Global Macro (L4)
+    # ──────────────────────────────────────────────
+
+    def _calc_macro_regime(self, data_dict: dict, idx: int) -> float:
+        """VIX + 환율 + SOXX 복합 매크로 환경. Returns 0.0~1.0.
+
+        매크로 데이터가 없으면 중립(0.5) 반환.
+        """
+        # 아무 종목이나 하나에서 매크로 컬럼을 읽음 (모든 종목에 동일 값)
+        sample_row = None
+        for ticker, df in data_dict.items():
+            if idx < len(df) and "vix_zscore" in df.columns:
+                sample_row = df.iloc[idx]
+                break
+
+        if sample_row is None:
+            return 0.5  # 매크로 데이터 없음 → 중립
+
+        macro_score = 0.0
+        components = 0
+
+        # VIX Z-score: 낮을수록 우호적
+        vix_z = sample_row.get("vix_zscore", 0)
+        if not pd.isna(vix_z):
+            if vix_z < -0.5:
+                macro_score += 0.35  # VIX 평균 이하 → 매우 우호
+            elif vix_z < 0.5:
+                macro_score += 0.20  # VIX 정상
+            elif vix_z < 1.5:
+                macro_score += 0.05  # VIX 높음
+            # else: 0 (VIX 스파이크)
+            components += 1
+
+        # USD/KRW 20일 추세: 원화 강세(음수)가 우호적
+        usdkrw = sample_row.get("usdkrw_trend_20d", 0)
+        if not pd.isna(usdkrw):
+            if usdkrw < -1.0:
+                macro_score += 0.35  # 원화 강세
+            elif usdkrw < 1.0:
+                macro_score += 0.20  # 중립
+            elif usdkrw < 3.0:
+                macro_score += 0.05  # 원화 약세
+            components += 1
+
+        # SOXX 20일 추세: 양수가 우호적
+        soxx = sample_row.get("soxx_trend_20d", 0)
+        if not pd.isna(soxx):
+            if soxx > 5.0:
+                macro_score += 0.30  # 반도체 강세
+            elif soxx > 0:
+                macro_score += 0.20  # 반도체 양호
+            elif soxx > -5.0:
+                macro_score += 0.10  # 반도체 약보합
+            components += 1
+
+        if components == 0:
+            return 0.5
+
+        return min(macro_score, 1.0)
+
+    # ──────────────────────────────────────────────
+    # Signal 5: Self-Adaptive (multiplicative 계수)
     # ──────────────────────────────────────────────
 
     def _calc_self_adaptive(self) -> float:

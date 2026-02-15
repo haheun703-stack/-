@@ -64,14 +64,17 @@ class TriggerEngine:
             strength=strength,
         )
 
-    # ─── T2: 거래량 + RSI 돌파 ───
+    # ─── T2: 거래량 + RSI 조건 ───
     def trigger_volume_rsi(self, row: pd.Series) -> TriggerResult:
         """
-        거래량 > 20MA * 1.5 AND RSI 45 상향돌파
-        에너지 유입과 강도 회복을 동시에 확인
+        v8.1: 완화 — 거래량 유지 + RSI 범위 조건 (OR)
+        - 거래량 >= 20MA * vol_multiplier (서지 확인)
+        - RSI가 rsi_range 내 (과매도 회복~중립)
+        둘 중 하나만 충족해도 발동 (강도 차이)
         """
         cfg = self.cfg.get('volume_rsi', {})
         vol_mult = cfg.get('vol_multiplier', 1.5)
+        rsi_range = cfg.get('rsi_range', [35, 55])
         rsi_thresh = cfg.get('rsi_threshold', 45)
 
         volume = row.get('volume', 0)
@@ -80,18 +83,32 @@ class TriggerEngine:
         rsi_prev = row.get('rsi_prev', rsi)
 
         vol_surge = volume > vol_20ma * vol_mult
+        rsi_in_range = rsi_range[0] <= rsi <= rsi_range[1]
         rsi_cross = rsi > rsi_thresh and rsi_prev <= rsi_thresh
 
-        fired = vol_surge and rsi_cross
+        # OR 조건: 둘 다 충족 시 강, 하나만 충족 시 약
+        fired = vol_surge or rsi_in_range
 
         strength = 0.0
-        if fired:
+        if vol_surge and (rsi_cross or rsi_in_range):
             vol_ratio = volume / max(vol_20ma, 1)
-            strength = min((vol_ratio - vol_mult) / vol_mult + 0.5, 1.0)
+            strength = min((vol_ratio - vol_mult) / vol_mult + 0.6, 1.0)
+        elif vol_surge:
+            strength = 0.5
+        elif rsi_in_range:
+            # RSI 범위 내: 중심(45)에 가까울수록 강
+            center = (rsi_range[0] + rsi_range[1]) / 2
+            dist = abs(rsi - center) / (rsi_range[1] - rsi_range[0]) * 2
+            strength = max(0.3, 0.6 - dist * 0.3)
 
         reason = ""
         if fired:
-            reason = f"Vol({volume:.0f}) > 20MA*{vol_mult}({vol_20ma*vol_mult:.0f}), RSI {rsi_prev:.1f}->{rsi:.1f}"
+            parts = []
+            if vol_surge:
+                parts.append(f"Vol({volume:.0f})>{vol_20ma*vol_mult:.0f}")
+            if rsi_in_range:
+                parts.append(f"RSI({rsi:.1f}) in [{rsi_range[0]},{rsi_range[1]}]")
+            reason = ", ".join(parts)
 
         return TriggerResult(
             fired=fired,

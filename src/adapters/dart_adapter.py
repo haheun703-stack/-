@@ -322,6 +322,70 @@ class DartAdapter:
         return profit_count >= quarters
 
     # ──────────────────────────────────────────────
+    # L3 QoQ 턴어라운드 감지
+    # ──────────────────────────────────────────────
+
+    def get_qoq_turnaround(self, ticker: str, year: int) -> dict:
+        """분기별 영업이익 비교 → 적자→흑자 / 감익→증익 감지
+
+        Returns:
+            {
+                "turnaround": bool,      # 적자→흑자 전환
+                "qoq_oi_growth": float,  # 분기 영업이익 성장률 (%)
+                "current_oi": float,     # 현재 영업이익 (억원)
+                "prev_oi": float,        # 직전 분기 영업이익 (억원)
+            }
+        """
+        result = {
+            "turnaround": False,
+            "qoq_oi_growth": 0.0,
+            "current_oi": None,
+            "prev_oi": None,
+        }
+
+        if not self.is_available:
+            return result
+
+        # 최신 2개 분기 영업이익 비교
+        quarters = [
+            (year, "11014"),    # Q3
+            (year, "11012"),    # 반기
+            (year, "11013"),    # Q1
+            (year - 1, "11011"),  # 전년 연간
+            (year - 1, "11014"),  # 전년 Q3
+        ]
+
+        oi_list = []  # (year, reprt_code, operating_income)
+        for yr, rc in quarters:
+            df = self.fetch_financial_statement(ticker, yr, rc)
+            oi = self._extract_account(df, "영업이익") if df is not None else None
+            if oi is not None:
+                oi_list.append((yr, rc, oi))
+            if len(oi_list) >= 2:
+                break
+
+        if len(oi_list) < 2:
+            return result
+
+        current_oi = oi_list[0][2]
+        prev_oi = oi_list[1][2]
+
+        result["current_oi"] = round(current_oi / 1e8, 1)
+        result["prev_oi"] = round(prev_oi / 1e8, 1)
+
+        # 적자→흑자 전환
+        if prev_oi <= 0 and current_oi > 0:
+            result["turnaround"] = True
+
+        # QoQ 성장률
+        if prev_oi != 0:
+            result["qoq_oi_growth"] = round(
+                (current_oi - prev_oi) / abs(prev_oi) * 100, 2
+            )
+
+        return result
+
+    # ──────────────────────────────────────────────
     # 다중회사 일괄 조회 (스캐너용)
     # ──────────────────────────────────────────────
 

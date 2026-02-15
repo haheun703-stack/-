@@ -656,3 +656,204 @@ def format_scheduler_status(phase: str, status: str, detail: str = "") -> str:
         parts.append(f"  상세: {detail}")
 
     return "\n".join(parts)
+
+
+# ============================================================
+# v8.4 장시작/장마감 통합 분석 보고서
+# ============================================================
+
+_REGIME_ICONS = {
+    "favorable": "\U0001f7e2",   # 🟢
+    "neutral": "\U0001f7e1",     # 🟡
+    "caution": "\U0001f7e0",     # 🟠
+    "hostile": "\U0001f534",     # 🔴
+    "unknown": "\u26aa",         # ⚪
+}
+
+_IMPORTANCE_ICONS = {
+    "critical": "\U0001f525",    # 🔥
+    "high": "\U0001f4c8",        # 📈
+    "medium": "\U0001f4ca",      # 📊
+    "low": "\U0001f4dd",         # 📝
+}
+
+_REPORT_TYPE_LABELS = {
+    "morning": "장시작 분석",
+    "closing": "장마감 분석",
+}
+
+
+def format_market_analysis(data: dict) -> str:
+    """
+    장시작/장마감 통합 분석 보고서 포맷.
+
+    Args:
+        data: MarketAnalysisReporter.generate() 반환값
+    """
+    parts = []
+
+    parts.append(_format_ma_header(data))
+    parts.append(_format_ma_regime(data.get("regime", {})))
+    parts.append(_format_ma_macro(data.get("macro", {})))
+    parts.append(_format_ma_candidates(data.get("candidates", [])))
+    parts.append(_format_ma_positions(
+        data.get("positions", []),
+        data.get("portfolio_summary", {}),
+    ))
+
+    # 시장 시그널 (장마감 only)
+    signals = data.get("market_signals", [])
+    if signals:
+        parts.append(_format_ma_signals(signals))
+
+    parts.append(_format_ma_footer(data))
+
+    return "\n".join(parts)
+
+
+def _format_ma_header(data: dict) -> str:
+    report_date = data.get("date", datetime.now().strftime("%Y-%m-%d"))
+    label = _REPORT_TYPE_LABELS.get(data.get("report_type", "morning"), "분석")
+    return (
+        f"{_icon('CHART')} [\ud000\ud140\uc804\ub7b5] {report_date} {label}\n"
+        f"{ICONS['LINE']}"
+    )
+
+
+def _format_ma_regime(regime: dict) -> str:
+    state = regime.get("state", "unknown")
+    regime_icon = _REGIME_ICONS.get(state, "\u26aa")
+    composite = regime.get("composite", 0)
+    scale = regime.get("position_scale", 0)
+    breadth = regime.get("breadth", 0)
+    foreign = regime.get("foreign", 0)
+    volatility = regime.get("volatility", 0)
+    macro = regime.get("macro", 0)
+
+    scale_pct = int(scale * 100)
+
+    lines = [
+        f"\n\U0001f3db\ufe0f [ \uc2dc\uc7a5 \uccb4\uc81c ]",
+        f"  \uc0c1\ud0dc: {regime_icon} {state.upper()} ({composite:.2f}/4.0)",
+        f"  \ud3ec\uc9c0\uc158 \uc2a4\ucf00\uc77c: {scale_pct}%",
+        f"  \u251c \ucd94\uc138\uc815\ub82c: {breadth:.0f}% | \uc678\uad6d\uc778: {foreign:.0f}%",
+        f"  \u2514 \ubcc0\ub3d9\uc131: {volatility:.0f}% | \ub9e4\ud06c\ub85c: {macro:.0f}%",
+    ]
+    return "\n".join(lines)
+
+
+def _format_ma_macro(macro: dict) -> str:
+    vix = macro.get("vix", 0)
+    vix_chg = macro.get("vix_change", 0)
+    usdkrw = macro.get("usdkrw", 0)
+    usdkrw_chg = macro.get("usdkrw_change", 0)
+    kospi = macro.get("kospi", 0)
+    kospi_chg = macro.get("kospi_change", 0)
+    soxx = macro.get("soxx", 0)
+    soxx_chg = macro.get("soxx_change", 0)
+
+    lines = [
+        f"\n{ICONS['LINE']}",
+        f"\U0001f30d [ \uae00\ub85c\ubc8c \ub9e4\ud06c\ub85c ]",
+        f"  VIX:     {vix:>8.2f} ({_sign(vix_chg)}%)",
+        f"  USD/KRW: {usdkrw:>8,.2f} ({_sign(usdkrw_chg)}%)",
+        f"  KOSPI:   {kospi:>8.2f} ({_sign(kospi_chg)}%)",
+        f"  SOXX:    {soxx:>8.2f} ({_sign(soxx_chg)}%)",
+    ]
+    return "\n".join(lines)
+
+
+def _format_ma_candidates(candidates: list[dict]) -> str:
+    count = len(candidates)
+    header = f"\n{ICONS['LINE']}\n{_icon('RANK_1')} [ \ub9e4\uc218 \ud6c4\ubcf4 {count}\uc885\ubaa9 ]"
+
+    if not candidates:
+        return f"{header}\n  \ud574\ub2f9 \uc5c6\uc74c"
+
+    lines = [header]
+    for i, c in enumerate(candidates, 1):
+        grade = c.get("grade", "C")
+        trigger = c.get("trigger", "confirm").upper()
+        grade_icon = _icon(grade)
+        trigger_icon = _icon(trigger)
+        zone = c.get("zone_score", 0)
+        entry = c.get("entry", 0)
+        stop = c.get("stop", 0)
+        target = c.get("target", 0)
+
+        lines.append(
+            f"  {i}. {c['ticker']} {grade_icon}{grade} "
+            f"{trigger_icon}{trigger} BES={zone:.2f}"
+        )
+        lines.append(
+            f"     \uc9c4\uc785 {_comma(entry)} | \uc190\uc808 {_comma(stop)} | \ubaa9\ud45c {_comma(target)}"
+        )
+
+    return "\n".join(lines)
+
+
+def _format_ma_positions(positions: list[dict], summary: dict) -> str:
+    count = summary.get("count", len(positions))
+    header = f"\n{ICONS['LINE']}\n{_icon('MONEY')} [ \ubcf4\uc720 \ud3ec\uc9c0\uc158 {count}\uc885\ubaa9 ]"
+
+    if not positions:
+        return f"{header}\n  \ubcf4\uc720 \uc885\ubaa9 \uc5c6\uc74c"
+
+    lines = [header]
+    for p in positions:
+        pnl = p.get("pnl_pct", 0)
+        pnl_icon = _icon("ADVANCE") if pnl >= 0 else _icon("DISTRIB")
+        name = p.get("name", p.get("ticker", "?"))
+        ticker = p.get("ticker", "?")
+        shares = p.get("shares", 0)
+        entry = p.get("entry_price", 0)
+        current = p.get("current_price", 0)
+        hold = p.get("hold_days", 0)
+        partial = p.get("partial_exits", 0)
+
+        lines.append(f"  {name} ({ticker}) {_comma(shares)}\uc8fc")
+        lines.append(
+            f"    {pnl_icon} {_sign(pnl)}% | "
+            f"{_comma(entry)}\u2192{_comma(current)} | "
+            f"{hold}\uc77c\ucc28 | \uccad\uc0b0 {partial}/4"
+        )
+
+    # 포트폴리오 총평가
+    total_eval = summary.get("total_eval", 0)
+    total_pnl = summary.get("total_pnl_pct", 0)
+    total_icon = _icon("ADVANCE") if total_pnl >= 0 else _icon("DISTRIB")
+
+    lines.append(
+        f"  \u2500\u2500 \ucd1d\ud3c9\uac00: {_comma(total_eval)}\uc6d0 "
+        f"({total_icon} {_sign(total_pnl)}%)"
+    )
+
+    return "\n".join(lines)
+
+
+def _format_ma_signals(signals: list[dict]) -> str:
+    lines = [
+        f"\n{ICONS['LINE']}",
+        f"\U0001f50d [ \uc2dc\uc7a5 \uc2dc\uadf8\ub110 ]",
+    ]
+
+    for sig in signals[:8]:
+        importance = sig.get("importance", "low")
+        imp_icon = _IMPORTANCE_ICONS.get(importance, "\U0001f4dd")
+        ticker = sig.get("ticker", "?")
+        category = sig.get("category", "?")
+        confidence = sig.get("confidence", 0)
+
+        lines.append(
+            f"  {imp_icon} {ticker}: {category} (\uc2e0\ub8b0\ub3c4 {confidence:.0f}%)"
+        )
+
+    return "\n".join(lines)
+
+
+def _format_ma_footer(data: dict) -> str:
+    time_str = data.get("time", datetime.now().strftime("%H:%M"))
+    return (
+        f"\n{ICONS['LINE']}\n"
+        f"{_icon('CLOCK')} {time_str} | \ud000\ud140\uc804\ub7b5 v8.4"
+    )

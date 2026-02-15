@@ -206,6 +206,14 @@ def send_scheduler_status(phase: str, status: str, detail: str = "") -> bool:
     return send_message(message)
 
 
+def send_market_analysis(data: dict) -> bool:
+    """장시작/장마감 분석 보고서 전송."""
+    from .telegram_formatter import format_market_analysis
+
+    message = format_market_analysis(data)
+    return send_message(message)
+
+
 def _split_message(text: str, max_length: int) -> list[str]:
     """
     텔레그램 최대 메시지 길이(4096) 기준 분할.

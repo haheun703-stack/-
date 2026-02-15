@@ -470,11 +470,145 @@ class IndicatorEngine:
             result["foreign_consecutive_buy"] = 0
             result["foreign_vol_confirm"] = 0
 
+        # ──────────────────────────────────────────────
+        # v8.4 L2 공매도 레이어 지표 (63~67)
+        # 숏커버링 = 포물선 연료
+        # ──────────────────────────────────────────────
+
+        if "short_ratio" in result.columns:
+            sr = result["short_ratio"].fillna(0)
+
+            # 63. 공매도 비중 40일 이동평균
+            result["short_ratio_ma40"] = sr.rolling(40, min_periods=10).mean()
+
+            # 64. 공매도 스파이크 (현재 / 40일 평균, 1.0=정상, 2.0=스파이크)
+            sr_ma40 = result["short_ratio_ma40"].replace(0, np.nan)
+            result["short_spike"] = sr / sr_ma40
+            result["short_spike"] = result["short_spike"].fillna(1.0)
+        else:
+            result["short_ratio_ma40"] = 0.0
+            result["short_spike"] = 1.0
+
+        if "short_balance" in result.columns:
+            sb = result["short_balance"].fillna(0)
+
+            # 65. 공매도 잔고 5일 변화율 (%)
+            sb_5d = sb.shift(5).replace(0, np.nan)
+            result["short_balance_chg_5d"] = ((sb - sb_5d) / sb_5d * 100).fillna(0)
+        else:
+            result["short_balance_chg_5d"] = 0.0
+
+        if "lending_balance" in result.columns:
+            lb = result["lending_balance"].fillna(0)
+
+            # 66. 대차잔고 5일 변화율 (%)
+            lb_5d = lb.shift(5).replace(0, np.nan)
+            result["lending_balance_chg_5d"] = ((lb - lb_5d) / lb_5d * 100).fillna(0)
+        else:
+            result["lending_balance_chg_5d"] = 0.0
+
+        # 67. 숏커버링 신호 (공매도 잔고 5일 -20% 이상 감소)
+        result["short_cover_signal"] = (
+            result["short_balance_chg_5d"] < -20
+        ).astype(int)
+
+        # ──────────────────────────────────────────────
+        # v8.4 L4 글로벌 매크로 지표 (68~71)
+        # VIX/환율/SOXX → 시장 체제 보조 신호
+        # ──────────────────────────────────────────────
+
+        if "vix_close" in result.columns:
+            vix = result["vix_close"].ffill()
+
+            # 68. VIX Z-score (60일 기준)
+            vix_ma60 = vix.rolling(60, min_periods=20).mean()
+            vix_std60 = vix.rolling(60, min_periods=20).std()
+            result["vix_zscore"] = (
+                (vix - vix_ma60) / vix_std60.replace(0, np.nan)
+            ).fillna(0)
+        else:
+            result["vix_zscore"] = 0.0
+
+        if "usdkrw_close" in result.columns:
+            usdkrw = result["usdkrw_close"].ffill()
+
+            # 69. 원/달러 20일 변화율 (원화 강세 = 음수)
+            usdkrw_20d = usdkrw.shift(20).replace(0, np.nan)
+            result["usdkrw_trend_20d"] = (
+                (usdkrw - usdkrw_20d) / usdkrw_20d * 100
+            ).fillna(0)
+        else:
+            result["usdkrw_trend_20d"] = 0.0
+
+        if "soxx_close" in result.columns:
+            soxx = result["soxx_close"].ffill()
+
+            # 70. SOXX 20일 수익률 (%)
+            soxx_20d = soxx.shift(20).replace(0, np.nan)
+            result["soxx_trend_20d"] = (
+                (soxx - soxx_20d) / soxx_20d * 100
+            ).fillna(0)
+        else:
+            result["soxx_trend_20d"] = 0.0
+
+        # 71. 매크로 우호 신호 복합 (VIX 낮음 + 원화 강세 + 반도체 상승)
+        result["macro_favorable"] = (
+            (result["vix_zscore"] < -0.5) &
+            (result["usdkrw_trend_20d"] < 0) &
+            (result["soxx_trend_20d"] > 0)
+        ).astype(int)
+
+        # ──────────────────────────────────────────────
+        # v8.4 L5 센티먼트 지표 (72~73)
+        # 비관 극단 → 역발상 매수 신호
+        # ──────────────────────────────────────────────
+
+        if "sentiment_pessimism" in result.columns:
+            sp = result["sentiment_pessimism"].fillna(0.5)
+            # 72. 센티먼트 비관도 (0~1)
+            result["sentiment_pessimism"] = sp
+
+            # 73. 비관 극단 신호 (비관도 > 0.4 = 40%+ 비관 게시글)
+            result["sentiment_extreme"] = (sp > 0.4).astype(int)
+        else:
+            result["sentiment_pessimism"] = 0.5
+            result["sentiment_extreme"] = 0
+
+        # ──────────────────────────────────────────────
+        # v8.4 L6 연기금 지표 (74~75)
+        # 연기금 순매수 = 장기 스마트머니 신호
+        # ──────────────────────────────────────────────
+
+        if "pension_net" in result.columns:
+            pn = result["pension_net"].fillna(0)
+
+            # 74. 연기금 5일 누적 순매수
+            result["pension_net_5d"] = pn.rolling(5, min_periods=1).sum()
+        else:
+            result["pension_net_5d"] = 0
+
+        # 75. pension_top_buyer는 backfill에서 직접 추가됨 (0/1 플래그)
+        if "pension_top_buyer" not in result.columns:
+            result["pension_top_buyer"] = 0
+
         return result
 
     # ──────────────────────────────────────────────
     # 전종목 일괄 처리
     # ──────────────────────────────────────────────
+
+    def _load_macro_data(self) -> pd.DataFrame | None:
+        """글로벌 매크로 데이터 로드 (없으면 None)"""
+        macro_path = Path("data/macro/global_indices.parquet")
+        if macro_path.exists():
+            try:
+                df = pd.read_parquet(macro_path)
+                df.index = pd.to_datetime(df.index)
+                logger.info(f"매크로 데이터 로드: {len(df)}일, {list(df.columns)}")
+                return df
+            except Exception as e:
+                logger.warning(f"매크로 데이터 로드 실패: {e}")
+        return None
 
     def process_all(self) -> int:
         """raw 디렉토리의 모든 parquet을 처리하여 processed에 저장"""
@@ -482,6 +616,9 @@ class IndicatorEngine:
         if not raw_files:
             logger.error("data/raw에 parquet 파일이 없습니다")
             return 0
+
+        # L4 매크로 데이터 사전 로드
+        macro_df = self._load_macro_data()
 
         processed_count = 0
         for fpath in tqdm(raw_files, desc="📈 지표 계산"):
@@ -491,6 +628,14 @@ class IndicatorEngine:
                 if len(df) < 200:  # 200일 미만 데이터는 지표 계산 불가
                     logger.debug(f"{ticker}: 데이터 부족 ({len(df)}일), 건너뜀")
                     continue
+
+                # L4 매크로 데이터 merge (날짜 기준)
+                if macro_df is not None:
+                    df.index = pd.to_datetime(df.index)
+                    for col in macro_df.columns:
+                        if col not in df.columns:
+                            df = df.join(macro_df[[col]], how="left")
+                    df = df.ffill()
 
                 result = self.compute_all(df)
                 save_path = self.processed_dir / f"{ticker}.parquet"

@@ -1,10 +1,13 @@
 """
-전체 종목 매수 후보 스캔 -> 3축 종합순위 -> 텔레그램 발송
+전체 종목 매수 후보 스캔 -> 4축 종합순위 -> 텔레그램 발송
 
-v4.3: 3축 점수체계 (100점 만점)
-  - Quant Score (퀀텀전략): 40점
-  - Supply/Demand (수급):   30점
-  - News Score (뉴스):      30점
+v5.0: SignalEngine 통합 + 4축 점수체계 (100점 만점)
+  - Quant Score (퀀텀전략): 30점
+  - Supply/Demand (수급):   25점
+  - News Score (뉴스):      25점
+  - Consensus (Sci-CoE):    20점
+
+config/settings.yaml 파라미터를 SignalEngine을 통해 반영.
 
 사용법:
     python scripts/scan_buy_candidates.py              # Grade A만 + Grok뉴스 + 텔레그램
@@ -30,16 +33,11 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="repla
 
 from src.market_signal_scanner import MarketSignalScanner
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "stock_data_daily"
-
-# -- 최소 필터 (사전 스크리닝) --
-MIN_TRADING_VALUE = 5_0000_0000   # 일거래대금 5억 이상
-MIN_PRICE = 1000                   # 최소 주가 1,000원
-MIN_DATA_ROWS = 120                # 최소 120거래일 데이터
+PROCESSED_DIR = Path(__file__).resolve().parent.parent / "data" / "processed"
 
 
 # =========================================================
-# 3축 점수 체계 (100점)
+# 4축 점수 체계 (100점)
 # =========================================================
 
 def calc_composite_score(sig: dict) -> dict:
@@ -61,13 +59,21 @@ def calc_composite_score(sig: dict) -> dict:
     scores = {}
 
     # ── 1. Quant Score (30점) ──
-    q_zone = min(sig.get("zone_score", 0) / 65 * 15, 15)
+    q_zone = min(sig.get("zone_score", 0) * 15, 15)  # 0~1 float → 0~15
 
     # Trigger 품질 (6점)
-    if sig.get("trigger_type") == "impulse":
+    trigger_type = sig.get("trigger_type", "none")
+    confidence = sig.get("confidence", 0)
+    if trigger_type == "impulse":
         q_trigger = 6 if sig.get("impulse_met", 0) >= 4 else 5
-    elif sig.get("trigger_type") == "confirm":
+    elif trigger_type == "confirm":
         q_trigger = 4 if sig.get("confirm_met", 0) >= 4 else 3
+    elif trigger_type.startswith("T1_"):
+        # v8 T1_TRIX_Golden: 모멘텀 전환 → impulse급
+        q_trigger = 6 if confidence >= 0.7 else 5
+    elif trigger_type.startswith("T2_") or trigger_type.startswith("T3_"):
+        # v8 T2_Volume_RSI, T3_Curvature_OBV → confirm급
+        q_trigger = 4 if confidence >= 0.6 else 3
     else:
         q_trigger = 0
 
@@ -311,35 +317,96 @@ def fetch_grok_news(name: str, ticker: str) -> dict | None:
 
 
 # =========================================================
-# 종목 로드 + Pipeline
+# 데이터 로드 + SignalEngine Pipeline
 # =========================================================
 
-def load_all_stocks() -> list[tuple[str, str, Path]]:
-    """stock_data_daily에서 전체 종목 로드 (스팩/채권 제외)."""
-    files = list(DATA_DIR.glob("*.csv"))
-    stocks = []
-    for f in files:
-        name = f.stem
-        if name.startswith("Stock_") or name.startswith("_"):
-            continue
-        match = re.search(r"_(\d{6})$", name)
-        if not match:
-            continue
-        ticker = match.group(1)
-        stock_name = name[: name.rfind("_")]
-        if "스팩" in stock_name:
-            continue
-        stocks.append((stock_name, ticker, f))
-    return stocks
+def load_all_parquets() -> dict[str, pd.DataFrame]:
+    """data/processed/*.parquet 로드 → {ticker: DataFrame}"""
+    data = {}
+    for pq in sorted(PROCESSED_DIR.glob("*.parquet")):
+        df = pd.read_parquet(pq)
+        if len(df) >= 200:
+            data[pq.stem] = df
+    return data
 
 
-def compute_extra(df: pd.DataFrame) -> pd.DataFrame:
-    """분석에 필요한 추가 지표 계산."""
-    df["volume_surge_ratio"] = df["Volume"] / df["Volume"].rolling(20).mean()
-    if "MA60" in df.columns:
-        df["slope_ma60"] = df["MA60"].pct_change(5) * 100
-    df["atr_14"] = df.get("ATR", pd.Series(0, index=df.index))
-    return df
+def load_name_map() -> dict:
+    """stock_data_daily CSV 파일명에서 종목명 추출."""
+    name_map = {}
+    csv_dir = Path(__file__).resolve().parent.parent / "stock_data_daily"
+    if csv_dir.exists():
+        for f in csv_dir.glob("*.csv"):
+            match = re.search(r"_(\d{6})$", f.stem)
+            if match:
+                ticker = match.group(1)
+                name = f.stem[: f.stem.rfind("_")]
+                name_map[ticker] = name
+    return name_map
+
+
+def _calc_di(df: pd.DataFrame, idx: int, period: int = 14) -> tuple[float, float]:
+    """ADX의 +DI, -DI를 직접 계산 (parquet에 미포함이므로)."""
+    if len(df) < period + 2 or idx < period + 1:
+        return 0.0, 0.0
+
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+
+    plus_dm = (high - high.shift(1)).clip(lower=0)
+    minus_dm = (low.shift(1) - low).clip(lower=0)
+    # 상대적으로 큰 쪽만 살림
+    mask_plus = plus_dm < minus_dm
+    mask_minus = minus_dm < plus_dm
+    plus_dm = plus_dm.where(~mask_plus, 0)
+    minus_dm = minus_dm.where(~mask_minus, 0)
+
+    prev_close = close.shift(1)
+    tr = pd.concat([
+        (high - low),
+        (high - prev_close).abs(),
+        (low - prev_close).abs(),
+    ], axis=1).max(axis=1)
+
+    atr = tr.ewm(span=period, min_periods=period).mean()
+    p_di = 100 * plus_dm.ewm(span=period, min_periods=period).mean() / atr
+    m_di = 100 * minus_dm.ewm(span=period, min_periods=period).mean() / atr
+
+    return float(p_di.iloc[idx] or 0), float(m_di.iloc[idx] or 0)
+
+
+def _classify_trend(row) -> str:
+    """이평선 기반 추세 분류."""
+    close = row.get("close", 0) or 0
+    ma5 = row.get("sma_5", 0) or 0
+    ma20 = row.get("sma_20", 0) or 0
+    ma60 = row.get("sma_60", 0) or 0
+    if close > ma5 and close > ma20 and close > ma60:
+        return "strong_up"
+    elif close > ma5 and close > ma20:
+        return "up"
+    elif close > ma60:
+        return "neutral"
+    return "down"
+
+
+def _fit_regime(data_dict: dict):
+    """전종목에 HMM 레짐 확률 추가 (main.py와 동일 패턴)."""
+    try:
+        from src.regime_detector import RegimeDetector
+        detector = RegimeDetector()
+        for ticker, df in data_dict.items():
+            try:
+                regime_proba = detector.fit_predict(df)
+                for col in ["P_Advance", "P_Distrib", "P_Accum"]:
+                    data_dict[ticker][col] = regime_proba[col]
+            except Exception:
+                for col in ["P_Advance", "P_Distrib", "P_Accum"]:
+                    data_dict[ticker][col] = 1 / 3
+    except ImportError:
+        for df in data_dict.values():
+            for col in ["P_Advance", "P_Distrib", "P_Accum"]:
+                df[col] = 1 / 3
 
 
 def _calc_streak(series: pd.Series) -> int:
@@ -361,225 +428,6 @@ def _calc_streak(series: pd.Series) -> int:
     return count * direction
 
 
-def quick_pipeline(df: pd.DataFrame, idx: int) -> dict | None:
-    """
-    빠른 6-Layer Pipeline 판정.
-    통과 시 시그널 dict 반환, 실패 시 None.
-    """
-    if idx < 60:
-        return None
-
-    row = df.iloc[idx]
-    prev = df.iloc[idx - 1]
-    close = row["Close"]
-
-    # -- L0 Pre-Gate: 일거래대금 --
-    avg_vol_20 = df["Volume"].iloc[max(0, idx - 19) : idx + 1].mean()
-    avg_trading_val = avg_vol_20 * close
-    if avg_trading_val < MIN_TRADING_VALUE:
-        return None
-    if close < MIN_PRICE:
-        return None
-
-    # -- L0 Grade --
-    atr = row.get("ATR", 0)
-    if pd.isna(atr) or atr <= 0:
-        return None
-    ma20 = row.get("MA20", close)
-    if pd.isna(ma20):
-        ma20 = close
-
-    pullback_atr = (ma20 - close) / atr if atr > 0 else 0
-
-    if 0.5 <= pullback_atr <= 1.5:
-        atr_score = 30
-    elif 0.25 <= pullback_atr < 0.5 or 1.5 < pullback_atr <= 2.0:
-        atr_score = 20
-    elif 0 <= pullback_atr < 0.25:
-        atr_score = 10
-    else:
-        atr_score = 5
-
-    rsi = row.get("RSI", 50)
-    if pd.isna(rsi):
-        rsi = 50
-    if 30 <= rsi <= 45:
-        rsi_score = 20
-    elif 45 < rsi <= 55:
-        rsi_score = 15
-    elif rsi < 30:
-        rsi_score = 10
-    else:
-        rsi_score = 5
-
-    stoch_k = row.get("Stoch_K", 50)
-    if pd.isna(stoch_k):
-        stoch_k = 50
-    if stoch_k < 20:
-        stoch_score = 15
-    elif stoch_k < 40:
-        stoch_score = 10
-    else:
-        stoch_score = 5
-
-    zone_score = atr_score + rsi_score + stoch_score
-    if zone_score >= 55:
-        grade = "A"
-    elif zone_score >= 40:
-        grade = "B"
-    elif zone_score >= 25:
-        grade = "C"
-    else:
-        grade = "F"
-
-    if grade == "F":
-        return None
-
-    # -- L3 Momentum --
-    vol_surge = row.get("volume_surge_ratio", 1.0)
-    slope_60 = row.get("slope_ma60", 0)
-    if pd.isna(vol_surge):
-        vol_surge = 1.0
-    if pd.isna(slope_60):
-        slope_60 = 0
-    if vol_surge < 1.2 and slope_60 < -0.5:
-        return None
-
-    # -- L4 Smart Money --
-    obv_now = row.get("OBV", 0)
-    obv_20ago = df.iloc[max(0, idx - 19)].get("OBV", obv_now)
-    if pd.isna(obv_now):
-        obv_now = 0
-    if pd.isna(obv_20ago):
-        obv_20ago = obv_now
-    obv_trend = "up" if obv_now > obv_20ago else "down"
-    if obv_trend == "down" and close < ma20:
-        return None
-
-    # -- L5 Risk --
-    swing_low = df["Low"].iloc[max(0, idx - 9) : idx + 1].min()
-    stop_price = max(swing_low * 0.995, close * 0.97)
-    target_price = close + atr * 3
-    risk = close - stop_price
-    reward = target_price - close
-    rr_ratio = reward / risk if risk > 0 else 0
-    if rr_ratio < 1.5:
-        return None
-
-    # -- L6 Trigger --
-    ma5 = row.get("MA5", 0)
-    if pd.isna(ma5):
-        ma5 = 0
-    macd = row.get("MACD", 0)
-    macd_sig = row.get("MACD_Signal", 0)
-    if pd.isna(macd):
-        macd = 0
-    if pd.isna(macd_sig):
-        macd_sig = 0
-    hist = macd - macd_sig
-    prev_rsi = prev.get("RSI", 50) if not pd.isna(prev.get("RSI", np.nan)) else 50
-    prev_hist = prev.get("MACD", 0) - prev.get("MACD_Signal", 0)
-    if pd.isna(prev_hist):
-        prev_hist = 0
-
-    stoch_d = row.get("Stoch_D", 50)
-    if pd.isna(stoch_d):
-        stoch_d = 50
-
-    imp_conds = {
-        "close>MA5": close > ma5 if ma5 > 0 else False,
-        "RSI_up": rsi > prev_rsi and rsi < 70,
-        "MACD_hist_up": hist > prev_hist,
-        "vol_surge": vol_surge > 1.2 if not pd.isna(vol_surge) else False,
-        "stoch_GC": stoch_k > stoch_d,
-    }
-    imp_met = sum(imp_conds.values())
-
-    adx = row.get("ADX", 0)
-    if pd.isna(adx):
-        adx = 0
-    plus_di = row.get("Plus_DI", 0)
-    minus_di = row.get("Minus_DI", 0)
-    if pd.isna(plus_di):
-        plus_di = 0
-    if pd.isna(minus_di):
-        minus_di = 0
-
-    conf_conds = {
-        "close>MA20": close > ma20,
-        "RSI>50": rsi > 50,
-        "ADX>20": adx > 20,
-        "+DI>-DI": plus_di > minus_di,
-    }
-    conf_met = sum(conf_conds.values())
-
-    if imp_met >= 3:
-        trigger_type = "impulse"
-        confidence = imp_met / 5
-    elif conf_met >= 3:
-        trigger_type = "confirm"
-        confidence = conf_met / 4
-    else:
-        return None
-
-    # -- Trend --
-    ma60 = row.get("MA60", 0)
-    if pd.isna(ma60):
-        ma60 = 0
-    ma120 = row.get("MA120", 0)
-    if pd.isna(ma120):
-        ma120 = 0
-
-    if close > ma5 and close > ma20 and close > ma60:
-        trend = "strong_up"
-    elif close > ma5 and close > ma20:
-        trend = "up"
-    elif close > ma60:
-        trend = "neutral"
-    else:
-        trend = "down"
-
-    # -- 수급 데이터 추출 --
-    foreign_streak = 0
-    inst_streak = 0
-    foreign_amount_5d = 0
-    inst_amount_5d = 0
-
-    if "Foreign_Net" in df.columns:
-        f_series = df["Foreign_Net"].iloc[max(0, idx - 19) : idx + 1].fillna(0)
-        foreign_streak = _calc_streak(f_series)
-        foreign_amount_5d = int(df["Foreign_Net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
-
-    if "Inst_Net" in df.columns:
-        i_series = df["Inst_Net"].iloc[max(0, idx - 19) : idx + 1].fillna(0)
-        inst_streak = _calc_streak(i_series)
-        inst_amount_5d = int(df["Inst_Net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
-
-    return {
-        "grade": grade,
-        "zone_score": zone_score,
-        "trigger_type": trigger_type,
-        "confidence": confidence,
-        "entry_price": int(close),
-        "stop_loss": int(stop_price),
-        "target_price": int(target_price),
-        "risk_reward": round(rr_ratio, 2),
-        "rsi": round(rsi, 1),
-        "adx": round(adx, 1),
-        "plus_di": round(plus_di, 1),
-        "minus_di": round(minus_di, 1),
-        "vol_surge": round(vol_surge, 2),
-        "obv_trend": obv_trend,
-        "trend": trend,
-        "avg_trading_val": round(avg_trading_val / 1e8, 1),
-        "impulse_met": imp_met,
-        "confirm_met": conf_met,
-        # 수급 데이터
-        "foreign_streak": foreign_streak,
-        "inst_streak": inst_streak,
-        "foreign_amount_5d": foreign_amount_5d,
-        "inst_amount_5d": inst_amount_5d,
-    }
 
 
 # =========================================================
@@ -590,16 +438,29 @@ def scan_all(
     grade_filter: str = "A",
     use_news: bool = True,
 ) -> tuple[list[dict], dict]:
-    """전 종목 스캔 -> Grade 필터 -> 3축 점수 -> 순위 반환."""
-    stocks = load_all_stocks()
-    print(f"scan: {len(stocks)} stocks | grade={grade_filter} | news={'ON' if use_news else 'OFF'}")
+    """전 종목 스캔 -> Grade 필터 -> 4축 점수 -> 순위 반환.
 
+    SignalEngine(config/settings.yaml)을 사용하여 모든 파라미터를 config에서 읽는다.
+    """
+    from src.signal_engine import SignalEngine
+
+    # 데이터 로드 (parquet)
+    data_dict = load_all_parquets()
+    name_map = load_name_map()
+    print(f"scan: {len(data_dict)} stocks (parquet) | grade={grade_filter} | news={'ON' if use_news else 'OFF'}")
+
+    # HMM 레짐 피팅
+    print("HMM regime fitting...")
+    _fit_regime(data_dict)
+
+    # SignalEngine 초기화
+    engine = SignalEngine("config/settings.yaml")
     scanner = MarketSignalScanner()
+
     candidates = []
     stats = {
-        "total": len(stocks),
+        "total": len(data_dict),
         "loaded": 0,
-        "filtered_data": 0,
         "passed_pipeline": 0,
         "trigger_impulse": 0,
         "trigger_confirm": 0,
@@ -611,58 +472,109 @@ def scan_all(
 
     t0 = time.time()
 
-    for i, (name, ticker, fpath) in enumerate(stocks):
-        if (i + 1) % 500 == 0:
+    for i, (ticker, df) in enumerate(data_dict.items()):
+        if (i + 1) % 200 == 0:
             elapsed = time.time() - t0
-            print(f"  {i+1}/{len(stocks)} ({elapsed:.1f}s)")
+            print(f"  {i+1}/{len(data_dict)} ({elapsed:.1f}s)")
+
+        stats["loaded"] += 1
+        idx = len(df) - 1
 
         try:
-            df = pd.read_csv(fpath, index_col="Date", parse_dates=True)
+            result = engine.calculate_signal(ticker, df, idx)
         except Exception:
             continue
 
-        stats["loaded"] += 1
-
-        if len(df) < MIN_DATA_ROWS:
-            stats["filtered_data"] += 1
+        if not result["signal"]:
             continue
 
-        df = compute_extra(df)
-        idx = len(df) - 1
-
-        signal = quick_pipeline(df, idx)
-        if signal is None:
-            continue
-
-        signal["ticker"] = ticker
-        signal["name"] = name
-
+        grade = result["grade"]
         stats["passed_pipeline"] += 1
 
-        if signal["trigger_type"] == "impulse":
+        trigger_type = result.get("trigger_type", "none")
+        if trigger_type == "impulse":
             stats["trigger_impulse"] += 1
-        elif signal["trigger_type"] == "confirm":
+        elif trigger_type == "confirm":
             stats["trigger_confirm"] += 1
 
-        grade_key = f"grade_{signal['grade']}"
+        grade_key = f"grade_{grade}"
         stats[grade_key] = stats.get(grade_key, 0) + 1
 
-        if signal["grade"] not in grade_filter:
+        if grade not in grade_filter:
             continue
 
         stats["after_grade_filter"] += 1
 
+        # DataFrame에서 4축 점수 계산용 필드 추출
+        row = df.iloc[idx]
+        name = name_map.get(ticker, ticker)
+
+        # 수급 streak 계산
+        foreign_streak = 0
+        inst_streak = 0
+        foreign_amount_5d = 0
+        inst_amount_5d = 0
+
+        if "foreign_net" in df.columns:
+            f_series = df["foreign_net"].iloc[max(0, idx - 19) : idx + 1].fillna(0)
+            foreign_streak = _calc_streak(f_series)
+            foreign_amount_5d = int(df["foreign_net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
+
+        if "inst_net" in df.columns:
+            i_series = df["inst_net"].iloc[max(0, idx - 19) : idx + 1].fillna(0)
+            inst_streak = _calc_streak(i_series)
+            inst_amount_5d = int(df["inst_net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
+
+        sig = {
+            "ticker": ticker,
+            "name": name,
+            "grade": grade,
+            "zone_score": result["zone_score"],
+            "trigger_type": trigger_type,
+            "confidence": result.get("trigger_confidence", 0),
+            "entry_price": result["entry_price"],
+            "stop_loss": result["stop_loss"],
+            "target_price": result["target_price"],
+            "risk_reward": result.get("risk_reward_ratio", 0),
+            # DataFrame에서 직접 추출
+            "rsi": float(row.get("rsi_14", 50) or 50),
+            "adx": float(row.get("adx_14", 0) or 0),
+            "plus_di": 0.0,  # 아래에서 _calc_di로 계산
+            "minus_di": 0.0,
+            "vol_surge": float(row.get("volume_surge_ratio", 1.0) or 1.0),
+            "obv_trend": (
+                "up" if (row.get("obv", 0) or 0) > (df.iloc[max(0, idx - 20)].get("obv", 0) or 0)
+                else "down"
+            ),
+            "trend": _classify_trend(row),
+            # 수급
+            "foreign_streak": foreign_streak,
+            "inst_streak": inst_streak,
+            "foreign_amount_5d": foreign_amount_5d,
+            "inst_amount_5d": inst_amount_5d,
+            # SignalEngine 고급 필드
+            "consensus": result.get("consensus"),
+        }
+
+        # +DI/-DI 직접 계산 (parquet에 미포함)
+        try:
+            p_di, m_di = _calc_di(df, idx)
+            sig["plus_di"] = p_di
+            sig["minus_di"] = m_di
+        except Exception:
+            pass
+
         # Market Signal Scanner
         try:
             market_signals = scanner.scan_all(df, idx)
-            signal["market_signals"] = [
+            sig["market_signals"] = [
                 {"title": s.title, "importance": s.importance, "confidence": s.confidence}
                 for s in market_signals
             ] if market_signals else []
         except Exception:
-            signal["market_signals"] = []
+            sig["market_signals"] = []
 
-        candidates.append(signal)
+        candidates.append(sig)
 
     scan_elapsed = time.time() - t0
     stats["scan_sec"] = round(scan_elapsed, 1)
@@ -700,7 +612,7 @@ def scan_all(
 
 
 # =========================================================
-# 텔레그램 메시지 포맷 (KISBOT v4.3 스타일)
+# 텔레그램 메시지 포맷 (KISBOT v5.0 스타일)
 # =========================================================
 
 LINE = "\u2500" * 28  # ────────────────────────────
@@ -729,15 +641,16 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     lines = []
 
     # -- Header --
-    lines.append(f"[Quant v4.3] {now} 3-Axis \uc2a4\uce94")
+    lines.append(f"[Quant v5.0] {now} 4-Axis \uc2a4\uce94")
     lines.append("")
 
     # -- 점수 체계 --
     lines.append("[ \uc810\uc218 \uccb4\uacc4 ]")
-    lines.append("3\ucd95: Quant(40) + \uc218\uae09(30) + \ub274\uc2a4(30) = 100")
-    lines.append("  Q: Zone(20)+\ud2b8\ub9ac\uac70(8)+\uc190\uc775\ube44(7)+\ucd94\uc138(5)")
-    lines.append("  SD: \uc678\uad6d\uc778(10)+\uae30\uad00(10)+OBV(5)+ADX(5)")
+    lines.append("4\ucd95: Quant(30) + \uc218\uae09(25) + \ub274\uc2a4(25) + Consensus(20) = 100")
+    lines.append("  Q: Zone(15)+\ud2b8\ub9ac\uac70(6)+\uc190\uc775\ube44(5)+\ucd94\uc138(4)")
+    lines.append("  SD: \uc678\uad6d\uc778(10)+\uae30\uad00(10)+OBV/\uac70\ub798\ub7c9(5)")
     lines.append("  N: \uac10\uc131(8)+\uc601\ud5a5(8)+\uc774\uc288(7)+\uc2e4\uc801(7)")
+    lines.append("  C: Reward(10)+Consist(4)+Rely(3)+Diver(3)")
     lines.append("")
 
     # -- 스캔 통계 --
@@ -899,15 +812,16 @@ def _collect_warnings(sig: dict) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="3-Axis Score Buy Scan v4.3")
+    parser = argparse.ArgumentParser(description="4-Axis Score Buy Scan v5.0 (SignalEngine)")
     parser.add_argument("--no-send", action="store_true", help="No telegram send")
     parser.add_argument("--grade", type=str, default="A", help="Grade filter (A, AB, ABC)")
     parser.add_argument("--no-news", action="store_true", help="Skip Grok news")
+    parser.add_argument("--no-html", action="store_true", help="Skip HTML report")
     args = parser.parse_args()
 
     print("=" * 50)
-    print("  [Quant v4.3] 3-Axis Score Buy Scan")
-    print("  Quant(40) + Supply/Demand(30) + News(30) = 100")
+    print("  [Quant v5.0] 4-Axis Score Buy Scan (SignalEngine)")
+    print("  Quant(30) + SD(25) + News(25) + Consensus(20) = 100")
     print("=" * 50)
 
     candidates, stats = scan_all(
@@ -918,14 +832,34 @@ def main():
     msg = format_telegram_message(candidates, stats)
     print("\n" + msg)
 
+    # HTML 보고서 생성 + PNG 변환
+    png_path = None
+    if not args.no_html and candidates:
+        try:
+            from src.html_report import generate_premarket_report
+            print("\nHTML 보고서 생성 중...")
+            html_path, png_path = generate_premarket_report(candidates, stats)
+            print(f"HTML: {html_path}")
+            if png_path:
+                print(f"PNG:  {png_path}")
+        except Exception as e:
+            print(f"HTML 보고서 생성 실패: {e}")
+
     if not args.no_send:
         from src.telegram_sender import send_message
-        print("\nSending to Telegram...")
+
+        # 1) PNG 이미지 전송 (보고서)
+        if png_path and png_path.exists():
+            from src.html_report import send_report_to_telegram
+            print("\nSending report image to Telegram...")
+            caption = f"[Quant v5.0] 장시작전 분석 | {len(candidates)}종목 | Grade {args.grade.upper()}"
+            img_ok = send_report_to_telegram(png_path, caption)
+            print("OK - Report image sent" if img_ok else "FAIL - Image send")
+
+        # 2) 텍스트 메시지 전송
+        print("Sending text to Telegram...")
         success = send_message(msg)
-        if success:
-            print("OK - Telegram sent")
-        else:
-            print("FAIL - Check .env")
+        print("OK - Text sent" if success else "FAIL - Check .env")
     else:
         print("\n(--no-send: skipped)")
 

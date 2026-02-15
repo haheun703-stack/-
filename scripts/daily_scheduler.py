@@ -192,22 +192,35 @@ class DailyScheduler:
     # ──────────────────────────────────────────
 
     def phase_morning_report(self) -> None:
-        """5D/6D 포트폴리오 분석 HTML 리포트 생성 + 텔레그램 발송"""
+        """5D/6D 포트폴리오 분석 HTML 리포트 생성 + 텔레그램 장시작 분석 보고서"""
         logger.info("[Phase 4.5] 장전 리포트 시작")
+
+        # 기존 HTML 리포트 (유지)
         try:
             from src.use_cases.portfolio_reporter import PortfolioReporter
             reporter = PortfolioReporter(self.config)
             save_path = reporter.generate()
 
             if save_path:
-                logger.info("[Phase 4.5] 리포트 생성 완료: %s", save_path)
-                self._notify(f"Phase 4.5 완료: 장전 5D/6D 리포트 생성\n{save_path}")
+                logger.info("[Phase 4.5] HTML 리포트 생성 완료: %s", save_path)
             else:
-                logger.info("[Phase 4.5] 보유 포지션 없음 — 리포트 생략")
-                self._notify("Phase 4.5: 보유 포지션 없음")
+                logger.info("[Phase 4.5] 보유 포지션 없음 — HTML 리포트 생략")
         except Exception as e:
-            logger.error("[Phase 4.5] 리포트 생성 실패: %s", e)
-            self._notify(f"Phase 4.5 오류: {e}")
+            logger.error("[Phase 4.5] HTML 리포트 생성 실패: %s", e)
+
+        # 텔레그램 장시작 분석 보고서 (신규)
+        try:
+            from src.use_cases.market_analysis_reporter import MarketAnalysisReporter
+            from src.telegram_sender import send_market_analysis
+
+            ma_reporter = MarketAnalysisReporter(self.config)
+            data = ma_reporter.generate(report_type="morning")
+            send_market_analysis(data)
+            logger.info("[Phase 4.5] 텔레그램 장시작 보고서 전송 완료")
+        except Exception as e:
+            logger.error("[Phase 4.5] 텔레그램 보고서 전송 실패: %s", e)
+
+        self._notify("Phase 4.5 완료: 장전 리포트")
 
     # ──────────────────────────────────────────
     # Phase 5: 매수 실행 (09:02)
@@ -383,32 +396,17 @@ class DailyScheduler:
             shutil.copy2(signals_path, archive_dir / f"signals_{today}.csv")
 
     def _close_step_9_report(self) -> None:
-        """일일 성과 리포트 생성 + 텔레그램 발송"""
+        """장마감 분석 보고서 생성 + 텔레그램 발송"""
         try:
-            from src.use_cases.position_tracker import PositionTracker
-            tracker = PositionTracker(self.config)
-            summary = tracker.get_summary()
+            from src.use_cases.market_analysis_reporter import MarketAnalysisReporter
+            from src.telegram_sender import send_market_analysis
 
-            report = (
-                f"=== 일일 성과 리포트 ===\n"
-                f"날짜: {datetime.now().strftime('%Y-%m-%d')}\n"
-                f"보유 종목: {summary['count']}개\n"
-                f"총 투입: {summary['total_investment']:,}원\n"
-                f"총 평가: {summary['total_eval']:,}원\n"
-                f"수익률: {summary['total_pnl_pct']:.1f}%\n"
-            )
-
-            for p in summary.get("positions", []):
-                report += (
-                    f"\n  {p['ticker']} {p['name']}: "
-                    f"{p['shares']}주 @ {p['entry_price']:,.0f}원 "
-                    f"→ {p['current_price']:,.0f}원 ({p['pnl_pct']:+.1f}%)"
-                )
-
-            logger.info(report)
-            self._notify(report)
+            reporter = MarketAnalysisReporter(self.config)
+            data = reporter.generate(report_type="closing")
+            send_market_analysis(data)
+            logger.info("[Phase 8-9] 텔레그램 장마감 보고서 전송 완료")
         except Exception as e:
-            logger.error("[Phase 8-9] 성과 리포트 실패: %s", e)
+            logger.error("[Phase 8-9] 장마감 보고서 실패: %s", e)
 
     # ──────────────────────────────────────────
     # Phase 9: 장마감 업무일지 (16:30)
