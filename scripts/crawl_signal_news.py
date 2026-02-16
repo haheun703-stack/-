@@ -1,11 +1,11 @@
 """91건 시작점 뉴스/공시 크롤링 — 촉매 vs 소음 분류
 
 signal_points.csv의 각 시작점 전후 5영업일 뉴스를 수집하고,
-촉매(선행)/소음(후행)/무관으로 분류한 후 패턴을 분석한다.
+규칙 기반으로 촉매(선행)/소음(후행)/무관으로 분류한 후 패턴을 분석한다.
+(GPT/OpenAI 제거됨 — 환각 리스크 + Grok 중복)
 
 사용법:
     python scripts/crawl_signal_news.py
-    python scripts/crawl_signal_news.py --classify   # GPT 분류 포함
     python scripts/crawl_signal_news.py --analyze     # 분석만 (크롤링 스킵)
 """
 
@@ -221,76 +221,13 @@ def classify_news_rule_based(title: str) -> tuple[str, str]:
     return "unknown", ""
 
 
-# ─── GPT 기반 촉매 추론 (네이버 크롤링 실패/부족 시 보조) ───
-
-def infer_catalyst_with_gpt(
-    stock_name: str,
-    stock_code: str,
-    signal_date: str,
-    notes: str,
-) -> dict:
-    """GPT-4o-mini로 시작점 촉매 추론.
-
-    네이버 크롤링이 대형주 뉴스량 초과로 실패할 때 사용.
-    GPT의 학습 데이터 기반으로 해당 시점의 촉매를 추론.
-    """
-    try:
-        from openai import OpenAI
-    except ImportError:
-        return {"status": "error", "reason": "openai not installed"}
-
-    client = OpenAI()
-
-    prompt = f"""한국 주식 종목의 특정 날짜 전후 촉매(catalyst)를 분석해주세요.
-
-종목: {stock_name} ({stock_code})
-시작점 날짜: {signal_date}
-참고: {notes}
-
-이 날짜 전후 5영업일에 해당 종목에 영향을 줄 수 있었던 뉴스/공시/이벤트를 분석해주세요.
-
-다음 JSON 형식으로 답변해주세요:
-{{
-  "catalysts": [
-    {{"type": "실적/수주/정책/M&A/신사업/자사주/배당/공매도/테마/기타", "title": "촉매 제목", "timing": "before/after/same_day", "confidence": "high/medium/low"}}
-  ],
-  "noise": [
-    {{"type": "급등해설/목표가/수급보도/기타", "title": "소음 제목"}}
-  ],
-  "summary": "한줄 요약",
-  "catalyst_timing": "before/after/none"
-}}
-
-주의:
-- 확실하지 않은 정보는 confidence를 "low"로 표시
-- 촉매가 없었다면 catalysts를 빈 리스트로
-- 기술적 상승이었다면 summary에 "기술적 상승 (촉매 없음)" 기재"""
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=500,
-            response_format={"type": "json_object"},
-        )
-        content = response.choices[0].message.content
-        return json.loads(content)
-    except Exception as e:
-        logger.warning(f"  GPT 추론 실패: {e}")
-        return {"status": "error", "reason": str(e)}
-
-
 # ─── 메인 실행 ───
 
-def run_crawling(signal_csv: str, output_dir: str, gpt_only: bool = False) -> dict:
-    """91건 시작점 뉴스 수집 + 분류.
-
-    Args:
-        gpt_only: True면 네이버 크롤링 스킵, GPT 추론만 사용
+def run_crawling(signal_csv: str, output_dir: str) -> dict:
+    """91건 시작점 뉴스 수집 + 분류 (네이버 크롤링 + 규칙 기반 분류).
 
     Returns:
-        {"signal_news": [...], "summary": {...}}
+        {"results": [...], "analysis": {...}}
     """
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -312,33 +249,14 @@ def run_crawling(signal_csv: str, output_dir: str, gpt_only: bool = False) -> di
 
         logger.info(f"[{i+1}/{len(signals)}] {stock_name}({stock_code}) {signal_date}")
 
-        # 네이버 크롤링 (gpt_only가 아닐 때만)
-        news = []
-        if not gpt_only:
-            news = collect_news_for_signal(stock_code, signal_date)
-            naver_count = len(news)
-            if naver_count > 0:
-                logger.info(f"  → 네이버 뉴스 {naver_count}건")
+        # 네이버 크롤링
+        news = collect_news_for_signal(stock_code, signal_date)
+        naver_count = len(news)
+        if naver_count > 0:
+            logger.info(f"  → 네이버 뉴스 {naver_count}건")
 
-        # GPT 추론 (항상 실행 — 네이버가 부족해도 GPT로 보완)
-        gpt_result = infer_catalyst_with_gpt(
-            stock_name, stock_code, signal_date, sig.get("notes", "")
-        )
-        gpt_status = gpt_result.get("status", "ok")
-        if gpt_status == "error":
-            logger.warning(f"  → GPT 추론 실패: {gpt_result.get('reason', '')}")
-        else:
-            gpt_cat_count = len(gpt_result.get("catalysts", []))
-            logger.info(f"  → GPT 촉매 {gpt_cat_count}건: {gpt_result.get('summary', '')[:50]}")
-
-        if not news and gpt_status == "error":
+        if not news:
             failed_count += 1
-
-        # GPT 결과에서 촉매/소음 뉴스 아이템 생성
-        gpt_catalysts = gpt_result.get("catalysts", [])
-        gpt_noises = gpt_result.get("noise", [])
-        gpt_summary = gpt_result.get("summary", "")
-        gpt_timing = gpt_result.get("catalyst_timing", "none")
 
         # 규칙 기반 분류 (네이버 뉴스)
         catalysts = []
@@ -360,28 +278,13 @@ def run_crawling(signal_csv: str, output_dir: str, gpt_only: bool = False) -> di
             else:
                 unknowns.append(n)
 
-        # GPT 추론 촉매를 추가 (네이버에서 못 찾은 경우)
-        for gc in gpt_catalysts:
-            catalysts.append({
-                "title": gc.get("title", ""),
-                "category": "catalyst",
-                "sub_category": gc.get("type", "기타"),
-                "source": "GPT추론",
-                "timing": gc.get("timing", "unknown"),
-                "confidence": gc.get("confidence", "low"),
-                "news_date": signal_date,
-                "days_diff": 0,
-            })
-
         # 선행 촉매 (시작점 전)
-        pre_catalysts = [c for c in catalysts if c["timing"] in ("before", "same_day")]
-        post_catalysts = [c for c in catalysts if c["timing"] == "after"]
+        pre_catalysts = [c for c in catalysts if c.get("timing") in ("before", "same_day")]
+        post_catalysts = [c for c in catalysts if c.get("timing") == "after"]
 
-        # GPT timing을 우선 사용 (네이버 뉴스가 없을 때)
         effective_timing = (
             "before" if pre_catalysts else
             "after" if post_catalysts else
-            gpt_timing if gpt_timing != "none" else
             "none"
         )
 
@@ -398,12 +301,9 @@ def run_crawling(signal_csv: str, output_dir: str, gpt_only: bool = False) -> di
             "pre_catalyst_count": len(pre_catalysts),
             "post_catalyst_count": len(post_catalysts),
             "top_catalyst": pre_catalysts[0]["title"] if pre_catalysts else (
-                post_catalysts[0]["title"] if post_catalysts else
-                gpt_summary if gpt_summary else ""
+                post_catalysts[0]["title"] if post_catalysts else ""
             ),
             "catalyst_timing": effective_timing,
-            "gpt_summary": gpt_summary,
-            "gpt_catalysts": gpt_catalysts,
             "news_items": news,
         }
         all_results.append(result)
@@ -539,7 +439,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="91건 시작점 뉴스 크롤링")
     parser.add_argument("--analyze", action="store_true", help="분석만 실행 (크롤링 스킵)")
-    parser.add_argument("--gpt-only", action="store_true", help="GPT 추론만 (네이버 크롤링 스킵)")
     parser.add_argument("--signal-csv", default="data/signal_points.csv")
     parser.add_argument("--output-dir", default="data/signal_news")
     args = parser.parse_args()
@@ -555,5 +454,5 @@ if __name__ == "__main__":
         analysis = _analyze_patterns(results)
         print_analysis(analysis)
     else:
-        result = run_crawling(args.signal_csv, args.output_dir, gpt_only=args.gpt_only)
+        result = run_crawling(args.signal_csv, args.output_dir)
         print_analysis(result["analysis"])

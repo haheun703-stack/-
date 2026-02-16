@@ -508,7 +508,9 @@ class BacktestEngine:
         tax = actual_price * sell_shares * self.tax_rate
         gross_pnl = (actual_price - pos.entry_price) * sell_shares
         net_pnl = gross_pnl - sell_commission - buy_commission - tax
-        pnl_pct = (actual_price / pos.entry_price - 1) * 100
+        # v8.6: pnl_pct에 수수료+세금 반영 (기존: gross → 수정: net 기준)
+        net_per_share = actual_price - (sell_commission + buy_commission + tax) / sell_shares
+        pnl_pct = (net_per_share / pos.entry_price - 1) * 100
 
         sell_proceeds = actual_price * sell_shares - sell_commission - tax
         self.cash += sell_proceeds
@@ -755,8 +757,6 @@ class BacktestEngine:
 
             trailing_mult = max(trailing_mult, 0.5)  # v6.2: 최소 0.5배 ATR
 
-            if high > pos.highest_price:
-                pos.highest_price = high
             pos.trailing_stop = pos.highest_price - pos.atr_value * trailing_mult
 
             # 4. 트레일링 스탑 히트 (부분청산 시작 후)
