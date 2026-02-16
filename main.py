@@ -80,7 +80,7 @@ def step_indicators():
     logger.info(f"[Step 2] 지표 계산 완료: {count}종목 (35개 지표 + OU/SmartMoney/TRIX/볼린저/MACD)")
 
 
-def step_backtest(use_sample: bool = False):
+def step_backtest(use_sample: bool = False, use_v9: bool = False):
     """Step 3~7: v3.0 6-Layer Pipeline 백테스트"""
     from src.backtest_engine import BacktestEngine
 
@@ -90,7 +90,7 @@ def step_backtest(use_sample: bool = False):
     if use_sample:
         _relax_sample_params(config_path)
 
-    engine = BacktestEngine(config_path)
+    engine = BacktestEngine(config_path, use_v9=use_v9)
     data = engine.load_data()
 
     if not data:
@@ -99,6 +99,9 @@ def step_backtest(use_sample: bool = False):
 
     # HMM 레짐 감지 (전종목 피팅)
     _fit_regime(data)
+
+    if use_v9:
+        logger.info("[Backtest] v9.0 C+E Kill 필터 활성화")
 
     results = engine.run(data)
 
@@ -715,6 +718,11 @@ if __name__ == "__main__":
         action="store_true",
         help="전종목 매집 단계 스캔 (Smart Money v2)",
     )
+    parser.add_argument(
+        "--v9",
+        action="store_true",
+        help="v9.0 C+E Kill 필터 적용 (백테스트/스캔)",
+    )
 
     args = parser.parse_args()
 
@@ -744,7 +752,7 @@ if __name__ == "__main__":
         elif args.step == "indicators":
             step_indicators()
         elif args.step == "backtest":
-            step_backtest()
+            step_backtest(use_v9=args.v9)
         elif args.step == "report":
             step_report()
         if args.telegram:

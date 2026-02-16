@@ -76,9 +76,11 @@ class Trade:
 class BacktestEngine:
     """v3.0 퀀트 백테스트 엔진"""
 
-    def __init__(self, config_path: str = "config/settings.yaml"):
+    def __init__(self, config_path: str = "config/settings.yaml", use_v9: bool = False):
         with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
+
+        self.use_v9 = use_v9
 
         bt = self.config["backtest"]
         self.initial_capital = bt["initial_capital"]
@@ -215,6 +217,57 @@ class BacktestEngine:
             if start <= d <= end:
                 return status
         return "active"  # 캘린더에 없으면 기본 active
+
+    def _v9_kill_check(
+        self, sig: dict, date_str: str, data_dict: dict, idx: int,
+    ) -> tuple[bool, list[str]]:
+        """v9.0 Kill Filters — 하나라도 걸리면 (True, reasons) 반환.
+
+        K1: Zone < regime threshold
+        K2: R:R < regime threshold
+        K3: Trigger D (미발동 — 이미 signal=True 통과했으므로 사실상 미적용)
+        K4: 20일 평균 거래대금 < 10억
+        K5: 52주 고점 대비 -5% 이내
+        """
+        kills = []
+        status = self._get_short_status(date_str)
+
+        if status in ("active", "reopened"):
+            zone_th, rr_th = 7 / 15, 2.0
+        else:
+            zone_th, rr_th = 5 / 15, 1.5
+
+        # K1: Zone
+        zone = sig.get("zone_score", 0)
+        if zone < zone_th:
+            kills.append(f"K1:Zone({zone:.2f}<{zone_th:.2f})")
+
+        # K2: R:R
+        rr = sig.get("risk_reward_ratio", 0)
+        if rr < rr_th:
+            kills.append(f"K2:RR({rr:.1f}<{rr_th:.1f})")
+
+        # K3: Trigger (scan_universe는 signal=True만 반환하므로 거의 안 걸림)
+        trigger = sig.get("trigger_type", "none")
+        if trigger in ("none", "waiting", "setup"):
+            kills.append(f"K3:Trigger({trigger})")
+
+        # K4: 20일 평균 거래대금 < 10억
+        ticker = sig.get("ticker", "")
+        df = data_dict.get(ticker)
+        if df is not None and idx < len(df):
+            tv = (df["close"] * df["volume"]).iloc[max(0, idx - 19) : idx + 1]
+            avg_tv = float(tv.mean()) if len(tv) > 0 else 0
+            if avg_tv < 1_000_000_000:
+                kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억)")
+
+        # K5: 52주 고점 대비 -5% 이내
+        if df is not None and idx < len(df):
+            pct_high = float(df.iloc[idx].get("pct_of_52w_high", 0) or 0)
+            if pct_high > 0.95:
+                kills.append(f"K5:고점({pct_high:.1%})")
+
+        return len(kills) > 0, kills
 
     def _apply_regime_profile(self, date_str: str) -> dict:
         """날짜 기준 공매도 체제 프로파일 적용. 현재 활성 프로파일 반환."""
@@ -722,6 +775,14 @@ class BacktestEngine:
                         break
                     if sig["ticker"] in held_tickers:
                         continue
+
+                    # v9.0 Kill 필터 (--v9 모드 시)
+                    if self.use_v9:
+                        killed, kill_reasons = self._v9_kill_check(
+                            sig, date_str, data_dict, idx
+                        )
+                        if killed:
+                            continue
 
                     # 손익비 기준: 공매도 체제에 따라 상향 가능 (v8.3)
                     profile_min_rr = short_profile.get("min_rr_ratio", 1.5)
