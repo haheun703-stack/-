@@ -420,13 +420,18 @@ def run_v9_pipeline(
         zone = sig.get("zone_score", 0)
         rr = sig.get("risk_reward", 0)
 
-        # 촉매 부스트
+        # 촉매 부스트 (Grok 뉴스 실적 서프라이즈)
         catalyst_boost = 1.0
         news_data = sig.get("news_data")
         if news_data:
             earnings = news_data.get("earnings_estimate", {})
             if earnings.get("surprise_direction") == "beat":
                 catalyst_boost = 1.10
+
+        # DART 공시 촉매 부스트 (×1.10, 중복 시 최대 ×1.21)
+        dart = sig.get("dart_analysis", {})
+        if dart.get("catalyst_type") == "catalyst" and dart.get("confidence", 0) >= 0.7:
+            catalyst_boost *= 1.10
 
         sig["v9_rank_score"] = round(rr * zone * catalyst_boost, 4)
         sig["v9_catalyst_boost"] = catalyst_boost
@@ -607,6 +612,7 @@ def scan_all(
     grade_filter: str = "A",
     use_news: bool = True,
     use_v9: bool = False,
+    use_dart: bool = False,
 ) -> tuple[list[dict], dict]:
     """전 종목 스캔 -> Grade 필터 -> 점수/Kill -> 순위 반환.
 
@@ -775,6 +781,34 @@ def scan_all(
             sig["news_data"] = None
         stats["news_sec"] = 0
 
+    # -- DART 공시 분류 (ChatGPT = 공시 담당, Grok = 뉴스 담당) --
+    if use_dart and candidates:
+        try:
+            from src.adapters.dart_adapter import DartAdapter
+            from src.adapters.openai_classifier import classify_batch
+
+            print(f"\nDART 공시 분류 ({len(candidates)} stocks)...")
+            dart = DartAdapter()
+            dart_results = classify_batch(candidates, dart)
+
+            dart_catalyst_count = 0
+            for sig in candidates:
+                dr = dart_results.get(sig["ticker"], {})
+                sig["dart_analysis"] = dr
+                if dr.get("catalyst_type") == "catalyst" and dr.get("confidence", 0) >= 0.7:
+                    dart_catalyst_count += 1
+                    print(f"  촉매 발견: {sig['name']}({sig['ticker']}) — "
+                          f"{dr.get('catalyst_category','')} ({dr.get('reason','')[:40]})")
+
+            stats["dart_catalyst_count"] = dart_catalyst_count
+            stats["dart_total"] = len(dart_results)
+            print(f"  DART 분류 완료: {dart_catalyst_count}/{len(dart_results)} 촉매 발견")
+        except Exception as e:
+            print(f"  DART 공시 분류 실패 (fail-safe 계속): {e}")
+            stats["dart_catalyst_count"] = 0
+    else:
+        stats["dart_catalyst_count"] = 0
+
     # -- 점수 계산 + 정렬 --
     if use_v9:
         survivors, killed, trapped = run_v9_pipeline(candidates)
@@ -789,6 +823,13 @@ def scan_all(
     else:
         for sig in candidates:
             sig["scores"] = calc_composite_score(sig)
+            # DART 공시 촉매 부스트: total 점수에 ×1.10 반영
+            dart = sig.get("dart_analysis", {})
+            if dart.get("catalyst_type") == "catalyst" and dart.get("confidence", 0) >= 0.7:
+                sig["scores"]["total"] = round(sig["scores"]["total"] * 1.10, 1)
+                sig["scores"]["dart_boost"] = True
+            else:
+                sig["scores"]["dart_boost"] = False
         candidates.sort(key=lambda s: s["scores"]["total"], reverse=True)
         stats["elapsed_sec"] = round(time.time() - t0, 1)
         return candidates, stats
@@ -1111,16 +1152,18 @@ def main():
     parser.add_argument("--no-news", action="store_true", help="Skip Grok news")
     parser.add_argument("--no-html", action="store_true", help="Skip HTML report")
     parser.add_argument("--v9", action="store_true", help="v9.0 C+E Hybrid Pipeline")
+    parser.add_argument("--dart", action="store_true", help="DART 공시 + OpenAI 촉매 분류")
     args = parser.parse_args()
 
+    dart_label = " + DART" if args.dart else ""
     if args.v9:
         print("=" * 50)
-        print("  [Quant v9.0] C+E Hybrid Kill\u2192Rank\u2192Tag")
-        print("  Kill(5) \u2192 Trap(6D) \u2192 Rank(R:R\u00d7Zone) \u2192 Tag")
+        print(f"  [Quant v9.0] C+E Hybrid Kill\u2192Rank\u2192Tag{dart_label}")
+        print(f"  Kill(5) \u2192 Trap(6D) \u2192 Rank(R:R\u00d7Zone) \u2192 Tag")
         print("=" * 50)
     else:
         print("=" * 50)
-        print("  [Quant v5.0] 4-Axis Score Buy Scan (SignalEngine)")
+        print(f"  [Quant v5.0] 4-Axis Score Buy Scan{dart_label}")
         print("  Quant(30) + SD(25) + News(25) + Consensus(20) = 100")
         print("=" * 50)
 
@@ -1128,6 +1171,7 @@ def main():
         grade_filter=args.grade.upper(),
         use_news=not args.no_news,
         use_v9=args.v9,
+        use_dart=args.dart,
     )
 
     if args.v9:

@@ -386,6 +386,74 @@ class DartAdapter:
         return result
 
     # ──────────────────────────────────────────────
+    # 공시 목록 조회 (촉매 분류용)
+    # ──────────────────────────────────────────────
+
+    def fetch_recent_disclosures(
+        self,
+        ticker: str,
+        days: int = 30,
+    ) -> list[dict]:
+        """최근 N일간 공시 목록 조회.
+
+        Args:
+            ticker: 종목코드 (6자리)
+            days: 조회 기간 (기본 30일)
+
+        Returns:
+            [{"title": "...", "date": "2026-02-15", "rcept_no": "...", "type": "..."}, ...]
+        """
+        if not self.is_available:
+            return []
+
+        corp_code = self.get_corp_code(ticker)
+        if not corp_code:
+            return []
+
+        from datetime import date, timedelta
+
+        end_date = date.today()
+        start_date = end_date - timedelta(days=days)
+
+        url = f"{DART_BASE_URL}/list.json"
+        params = {
+            "crtfc_key": self.api_key,
+            "corp_code": corp_code,
+            "bgn_de": start_date.strftime("%Y%m%d"),
+            "end_de": end_date.strftime("%Y%m%d"),
+            "page_no": "1",
+            "page_count": "30",
+        }
+
+        try:
+            time.sleep(0.1)
+            resp = requests.get(url, params=params, timeout=15)
+            self._api_calls += 1
+            data = resp.json()
+
+            if data.get("status") != "000":
+                logger.debug(
+                    f"DART 공시 목록: {data.get('message')} (ticker={ticker})"
+                )
+                return []
+
+            filings = []
+            for item in data.get("list", []):
+                dt = item.get("rcept_dt", "")
+                filings.append({
+                    "title": item.get("report_nm", ""),
+                    "date": f"{dt[:4]}-{dt[4:6]}-{dt[6:8]}" if len(dt) == 8 else dt,
+                    "rcept_no": item.get("rcept_no", ""),
+                    "filer": item.get("flr_nm", ""),
+                    "remark": item.get("rm", ""),
+                })
+            return filings
+
+        except Exception as e:
+            logger.error(f"DART 공시 목록 조회 오류: {ticker} - {e}")
+            return []
+
+    # ──────────────────────────────────────────────
     # 다중회사 일괄 조회 (스캐너용)
     # ──────────────────────────────────────────────
 
