@@ -1,20 +1,13 @@
 """
-전체 종목 매수 후보 스캔 -> 4축 종합순위 -> 텔레그램 발송
+전체 종목 매수 후보 스캔 -> 순위 -> 텔레그램 발송
 
-v5.0: SignalEngine 통합 + 4축 점수체계 (100점 만점)
-  - Quant Score (퀀텀전략): 30점
-  - Supply/Demand (수급):   25점
-  - News Score (뉴스):      25점
-  - Consensus (Sci-CoE):    20점
-
-config/settings.yaml 파라미터를 SignalEngine을 통해 반영.
+v5.0: 4축 100점 (Quant 30 + SD 25 + News 25 + Consensus 20)
+v9.0: C+E Hybrid Kill→Rank→Tag (선행 100%, 후행 0%)
 
 사용법:
-    python scripts/scan_buy_candidates.py              # Grade A만 + Grok뉴스 + 텔레그램
-    python scripts/scan_buy_candidates.py --no-send    # 스캔만 (발송 안함)
-    python scripts/scan_buy_candidates.py --grade A    # Grade A만 (기본)
-    python scripts/scan_buy_candidates.py --grade AB   # Grade A+B
-    python scripts/scan_buy_candidates.py --no-news    # Grok 뉴스 건너뛰기
+    python scripts/scan_buy_candidates.py --grade AB                     # v5.0 (4축 100점)
+    python scripts/scan_buy_candidates.py --v9 --grade AB                # v9.0 C+E Hybrid
+    python scripts/scan_buy_candidates.py --v9 --grade AB --no-news --no-send  # 빠른 테스트
 """
 
 import argparse
@@ -273,6 +266,182 @@ def _calc_news_score(news_data: dict) -> tuple[float, dict]:
 
 
 # =========================================================
+# v9.0 C+E 하이브리드 파이프라인
+# =========================================================
+
+def detect_regime_v9() -> dict:
+    """Layer 0: 7D 레짐 Gate — 공매도 상태에 따라 Kill 기준값 결정."""
+    import yaml
+    from datetime import date
+
+    with open("config/settings.yaml", "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    today = date.today()
+    calendar = cfg.get("short_selling_calendar", [])
+    status = "active"
+
+    for period in calendar:
+        start = date.fromisoformat(str(period["start"]))
+        end = date.fromisoformat(str(period["end"]))
+        if start <= today <= end:
+            status = period["status"]
+            break
+
+    # 공매도 허용/재개: 엄격, 금지: 완화
+    if status in ("active", "reopened"):
+        return {"status": status, "zone_th": 7 / 15, "rr_th": 2.0}
+    else:  # banned
+        return {"status": status, "zone_th": 5 / 15, "rr_th": 1.5}
+
+
+def kill_filters_v9(sig: dict, regime: dict) -> tuple[bool, list[str]]:
+    """Layer 1: Kill Filters (5개, 하나라도 걸리면 탈락)."""
+    kills = []
+
+    # K1: Zone < regime.zone_threshold
+    zone = sig.get("zone_score", 0)
+    if zone < regime["zone_th"]:
+        kills.append(f"K1:Zone({zone:.2f}<{regime['zone_th']:.2f})")
+
+    # K2: R:R < regime.rr_threshold
+    rr = sig.get("risk_reward", 0)
+    if rr < regime["rr_th"]:
+        kills.append(f"K2:RR({rr:.1f}<{regime['rr_th']:.1f})")
+
+    # K3: Trigger 등급 D (미발동)
+    trigger = sig.get("trigger_type", "none")
+    if trigger in ("none", "waiting", "setup"):
+        kills.append(f"K3:Trigger({trigger})")
+
+    # K4: 20일 평균 거래대금 < 10억
+    avg_tv = sig.get("avg_trading_value_20d", 0)
+    if avg_tv < 1_000_000_000:
+        kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억<10억)")
+
+    # K5: 52주 고점 대비 -5% 이내
+    pct_high = sig.get("pct_of_52w_high", 0)
+    if pct_high > 0.95:
+        kills.append(f"K5:고점근접({pct_high:.1%})")
+
+    return len(kills) == 0, kills
+
+
+def trap_filter_v9(sig: dict) -> tuple[bool, str]:
+    """Layer 2: 6D 함정 필터 — 기술적 근거 없이 수급+뉴스만 좋은 종목 탈락."""
+    scores = sig.get("scores", {})
+    quant = scores.get("quant", 0)
+    sd = scores.get("supply_demand", 0)
+    news = scores.get("news", 0)
+
+    if quant < 18 and sd >= 20 and news >= 15:
+        return True, f"TRAPPED(Q{quant:.0f}<18 & SD{sd:.0f}>=20 & N{news:.0f}>=15)"
+    return False, ""
+
+
+def generate_v9_tags(sig: dict) -> list[str]:
+    """Layer 4: 정보 태그 (순위에 영향 없음, tiebreaker만)."""
+    tags = []
+    scores = sig.get("scores", {})
+
+    # SD 태그
+    sd = scores.get("supply_demand", 0)
+    if sd >= 20:
+        tags.append("수급전환")
+    elif sd >= 10:
+        tags.append("초기전환")
+    elif sd >= 5:
+        tags.append("수급미약")
+
+    # News 태그
+    news = scores.get("news", 0)
+    if news >= 15:
+        tags.append("이슈+실적")
+    elif news >= 5:
+        tags.append("이슈존재")
+
+    # Consensus 태그
+    cons = scores.get("consensus", 0)
+    if cons >= 15:
+        tags.append("강한상향")
+    elif cons >= 10:
+        tags.append("상향")
+
+    # 외국인/기관 연속 매수
+    f_streak = sig.get("foreign_streak", 0)
+    i_streak = sig.get("inst_streak", 0)
+    if f_streak >= 5:
+        tags.append(f"외{f_streak}D연속")
+    if i_streak >= 5:
+        tags.append(f"기{i_streak}D연속")
+
+    return tags
+
+
+def run_v9_pipeline(
+    candidates: list[dict],
+) -> tuple[list[dict], list[dict], list[dict]]:
+    """v9.0 C+E 하이브리드 파이프라인 오케스트레이터.
+
+    Layer 0 → 1 → 2 → 3(순위) → 4(태그).
+    반환: (survivors, killed_list, trapped_list)
+    """
+    # Layer 0: 레짐 감지
+    regime = detect_regime_v9()
+    print(f"  v9 Regime: {regime['status']} (zone_th={regime['zone_th']:.3f}, rr_th={regime['rr_th']:.1f})")
+
+    # 4축 점수 계산 (함정 필터용)
+    for sig in candidates:
+        sig["scores"] = calc_composite_score(sig)
+
+    killed_list = []
+    trapped_list = []
+    survivors = []
+
+    for sig in candidates:
+        # Layer 1: Kill Filters
+        passed, kill_reasons = kill_filters_v9(sig, regime)
+        if not passed:
+            sig["v9_kill_reasons"] = kill_reasons
+            killed_list.append(sig)
+            continue
+
+        # Layer 2: 6D 함정 필터
+        is_trapped, trap_reason = trap_filter_v9(sig)
+        if is_trapped:
+            sig["v9_trap_reason"] = trap_reason
+            trapped_list.append(sig)
+            continue
+
+        survivors.append(sig)
+
+    # Layer 3: 최종 순위 (rank = R:R × zone_score × catalyst_boost)
+    for sig in survivors:
+        zone = sig.get("zone_score", 0)
+        rr = sig.get("risk_reward", 0)
+
+        # 촉매 부스트
+        catalyst_boost = 1.0
+        news_data = sig.get("news_data")
+        if news_data:
+            earnings = news_data.get("earnings_estimate", {})
+            if earnings.get("surprise_direction") == "beat":
+                catalyst_boost = 1.10
+
+        sig["v9_rank_score"] = round(rr * zone * catalyst_boost, 4)
+        sig["v9_catalyst_boost"] = catalyst_boost
+
+    # Layer 4: 태그
+    for sig in survivors:
+        sig["v9_tags"] = generate_v9_tags(sig)
+
+    # 순위 정렬
+    survivors.sort(key=lambda s: s["v9_rank_score"], reverse=True)
+
+    return survivors, killed_list, trapped_list
+
+
+# =========================================================
 # Grok 뉴스 검색
 # =========================================================
 
@@ -437,10 +606,12 @@ def _calc_streak(series: pd.Series) -> int:
 def scan_all(
     grade_filter: str = "A",
     use_news: bool = True,
+    use_v9: bool = False,
 ) -> tuple[list[dict], dict]:
-    """전 종목 스캔 -> Grade 필터 -> 4축 점수 -> 순위 반환.
+    """전 종목 스캔 -> Grade 필터 -> 점수/Kill -> 순위 반환.
 
-    SignalEngine(config/settings.yaml)을 사용하여 모든 파라미터를 config에서 읽는다.
+    use_v9=True: v9.0 C+E Kill→Rank→Tag 파이프라인
+    use_v9=False: 기존 v8.1 4축 100점 합산
     """
     from src.signal_engine import SignalEngine
 
@@ -554,6 +725,11 @@ def scan_all(
             "inst_amount_5d": inst_amount_5d,
             # SignalEngine 고급 필드
             "consensus": result.get("consensus"),
+            # v9 필수 필드
+            "avg_trading_value_20d": float(
+                (df["close"] * df["volume"]).iloc[max(0, idx - 19) : idx + 1].mean()
+            ),
+            "pct_of_52w_high": float(row.get("pct_of_52w_high", 0) or 0),
         }
 
         # +DI/-DI 직접 계산 (parquet에 미포함)
@@ -599,16 +775,23 @@ def scan_all(
             sig["news_data"] = None
         stats["news_sec"] = 0
 
-    # -- 종합 점수 계산 --
-    for sig in candidates:
-        sig["scores"] = calc_composite_score(sig)
-
-    # -- 종합 점수 기준 정렬 --
-    candidates.sort(key=lambda s: s["scores"]["total"], reverse=True)
-
-    stats["elapsed_sec"] = round(time.time() - t0, 1)
-
-    return candidates, stats
+    # -- 점수 계산 + 정렬 --
+    if use_v9:
+        survivors, killed, trapped = run_v9_pipeline(candidates)
+        stats["v9_killed"] = len(killed)
+        stats["v9_trapped"] = len(trapped)
+        stats["v9_survivors"] = len(survivors)
+        stats["elapsed_sec"] = round(time.time() - t0, 1)
+        # v9: killed/trapped 정보를 stats에 저장 (텔레그램/HTML용)
+        stats["v9_killed_list"] = killed
+        stats["v9_trapped_list"] = trapped
+        return survivors, stats
+    else:
+        for sig in candidates:
+            sig["scores"] = calc_composite_score(sig)
+        candidates.sort(key=lambda s: s["scores"]["total"], reverse=True)
+        stats["elapsed_sec"] = round(time.time() - t0, 1)
+        return candidates, stats
 
 
 # =========================================================
@@ -731,6 +914,116 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     return "\n".join(lines)
 
 
+def format_telegram_message_v9(candidates: list[dict], stats: dict) -> str:
+    """v9.0 C+E 하이브리드 텔레그램 메시지 포맷."""
+    from datetime import datetime
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    lines = []
+
+    # -- Header --
+    lines.append(f"[Quant v9.0] {now} C+E Hybrid")
+    lines.append("")
+
+    # -- 파이프라인 설명 --
+    lines.append("[ 파이프라인 ]")
+    lines.append("Kill(5) \u2192 Trap(6D) \u2192 Rank(R:R\u00d7Zone) \u2192 Tag")
+    lines.append("  \u00b7 선행 100%: Zone + R:R + Trigger")
+    lines.append("  \u00b7 후행 0%: SD/News/Consensus \u2192 태그만")
+    lines.append("")
+
+    # -- 스캔 통계 --
+    killed = stats.get("v9_killed", 0)
+    trapped = stats.get("v9_trapped", 0)
+    survivors = stats.get("v9_survivors", 0)
+    lines.append("[ 스캔 통계 ]")
+    lines.append(
+        f"전체: {stats['total']:,}종목 > Pipeline: {stats['passed_pipeline']}종목"
+    )
+    lines.append(
+        f"등급: A:{stats.get('grade_A',0)} B:{stats.get('grade_B',0)} "
+        f"C:{stats.get('grade_C',0)} | 필터 후: {stats.get('after_grade_filter',0)}종목"
+    )
+    lines.append(f"Kill: {killed}종목 | Trap: {trapped}종목 | 생존: {survivors}종목")
+    lines.append(f"소요: 스캔 {stats.get('scan_sec',0)}초 + 뉴스 {stats.get('news_sec',0)}초")
+    lines.append("")
+
+    if not candidates:
+        lines.append("v9 Kill 필터 통과 종목 없음")
+        # Kill/Trap 상세를 보여주고 종료
+        killed_list = stats.get("v9_killed_list", [])
+        trapped_list = stats.get("v9_trapped_list", [])
+        if killed_list:
+            lines.append("")
+            lines.append(f"[ Kill ({len(killed_list)}종목) ]")
+            for sig in killed_list:
+                reasons = ", ".join(sig.get("v9_kill_reasons", []))
+                lines.append(f"  {sig['name']}({sig['ticker']}): {reasons}")
+        if trapped_list:
+            lines.append("")
+            lines.append(f"[ Trap ({len(trapped_list)}종목) ]")
+            for sig in trapped_list:
+                lines.append(f"  {sig['name']}({sig['ticker']}): {sig.get('v9_trap_reason','')}")
+        return "\n".join(lines)
+
+    # -- 1순위 추천 매수 --
+    top = candidates[0]
+    top_trigger = "확인매수" if top["trigger_type"] == "confirm" else "IMP"
+    top_tags = ", ".join(top.get("v9_tags", []))
+    boost = top.get("v9_catalyst_boost", 1.0)
+    boost_str = " x1.10촉매" if boost > 1.0 else ""
+
+    lines.append("[ 1순위 추천 매수 ]")
+    lines.append(f"{top['name']} ({top['ticker']}) [{top_trigger}]")
+    lines.append(
+        f"Rank {top['v9_rank_score']:.3f} = "
+        f"R:R({top['risk_reward']:.1f}) x Zone({top['zone_score']:.2f}){boost_str}"
+    )
+    lines.append(
+        f"현재 {top['entry_price']:,}원 | "
+        f"목표 {top['target_price']:,} (+{((top['target_price']/top['entry_price'])-1)*100:.1f}%) | "
+        f"손절 {top['stop_loss']:,} ({((top['stop_loss']/top['entry_price'])-1)*100:.1f}%)"
+    )
+    if top_tags:
+        lines.append(f"태그: {top_tags}")
+
+    # -- 나머지 후보 --
+    if len(candidates) > 1:
+        lines.append("")
+        lines.append(f"[ 매수 후보 ({len(candidates)-1}개) ]")
+        for i, sig in enumerate(candidates[1:], start=2):
+            tags = ", ".join(sig.get("v9_tags", []))
+            b = sig.get("v9_catalyst_boost", 1.0)
+            b_str = " x1.10" if b > 1.0 else ""
+            lines.append(
+                f"{i}. {sig['name']}({sig['ticker']}) "
+                f"Rank {sig['v9_rank_score']:.3f} "
+                f"RR:{sig['risk_reward']:.1f} Zone:{sig['zone_score']:.2f}{b_str}"
+            )
+            if tags:
+                lines.append(f"   [{tags}]")
+
+    # -- Kill/Trap 요약 --
+    killed_list = stats.get("v9_killed_list", [])
+    trapped_list = stats.get("v9_trapped_list", [])
+    if killed_list:
+        lines.append("")
+        lines.append(f"[ Kill ({len(killed_list)}종목) ]")
+        for sig in killed_list[:5]:
+            reasons = ", ".join(sig.get("v9_kill_reasons", []))
+            lines.append(f"  {sig['name']}({sig['ticker']}): {reasons}")
+        if len(killed_list) > 5:
+            lines.append(f"  ... +{len(killed_list)-5}종목")
+
+    if trapped_list:
+        lines.append("")
+        lines.append(f"[ Trap ({len(trapped_list)}종목) ]")
+        for sig in trapped_list:
+            lines.append(f"  {sig['name']}({sig['ticker']}): {sig.get('v9_trap_reason','')}")
+
+    return "\n".join(lines)
+
+
 def _format_supply_tag(sig: dict) -> str:
     """수급 태그 문자열 생성. 예: ' [외+기+]', ' [외-기-]'"""
     f_streak = sig.get("foreign_streak", 0)
@@ -812,24 +1105,35 @@ def _collect_warnings(sig: dict) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="4-Axis Score Buy Scan v5.0 (SignalEngine)")
+    parser = argparse.ArgumentParser(description="Quant Buy Scan (SignalEngine)")
     parser.add_argument("--no-send", action="store_true", help="No telegram send")
     parser.add_argument("--grade", type=str, default="A", help="Grade filter (A, AB, ABC)")
     parser.add_argument("--no-news", action="store_true", help="Skip Grok news")
     parser.add_argument("--no-html", action="store_true", help="Skip HTML report")
+    parser.add_argument("--v9", action="store_true", help="v9.0 C+E Hybrid Pipeline")
     args = parser.parse_args()
 
-    print("=" * 50)
-    print("  [Quant v5.0] 4-Axis Score Buy Scan (SignalEngine)")
-    print("  Quant(30) + SD(25) + News(25) + Consensus(20) = 100")
-    print("=" * 50)
+    if args.v9:
+        print("=" * 50)
+        print("  [Quant v9.0] C+E Hybrid Kill\u2192Rank\u2192Tag")
+        print("  Kill(5) \u2192 Trap(6D) \u2192 Rank(R:R\u00d7Zone) \u2192 Tag")
+        print("=" * 50)
+    else:
+        print("=" * 50)
+        print("  [Quant v5.0] 4-Axis Score Buy Scan (SignalEngine)")
+        print("  Quant(30) + SD(25) + News(25) + Consensus(20) = 100")
+        print("=" * 50)
 
     candidates, stats = scan_all(
         grade_filter=args.grade.upper(),
         use_news=not args.no_news,
+        use_v9=args.v9,
     )
 
-    msg = format_telegram_message(candidates, stats)
+    if args.v9:
+        msg = format_telegram_message_v9(candidates, stats)
+    else:
+        msg = format_telegram_message(candidates, stats)
     print("\n" + msg)
 
     # HTML 보고서 생성 + PNG 변환
@@ -852,7 +1156,8 @@ def main():
         if png_path and png_path.exists():
             from src.html_report import send_report_to_telegram
             print("\nSending report image to Telegram...")
-            caption = f"[Quant v5.0] 장시작전 분석 | {len(candidates)}종목 | Grade {args.grade.upper()}"
+            ver = "v9.0" if args.v9 else "v5.0"
+            caption = f"[Quant {ver}] 장시작전 분석 | {len(candidates)}종목 | Grade {args.grade.upper()}"
             img_ok = send_report_to_telegram(png_path, caption)
             print("OK - Report image sent" if img_ok else "FAIL - Image send")
 

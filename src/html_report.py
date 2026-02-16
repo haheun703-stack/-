@@ -32,7 +32,12 @@ def generate_premarket_report(
     date_str = now.strftime("%Y-%m-%d")
     time_str = now.strftime("%H:%M")
 
-    html = _build_html(candidates, stats, date_str, time_str)
+    # v9 감지: 후보에 v9_rank_score 키가 있으면 v9 모드
+    is_v9 = candidates and "v9_rank_score" in candidates[0]
+    if is_v9:
+        html = _build_html_v9(candidates, stats, date_str, time_str)
+    else:
+        html = _build_html(candidates, stats, date_str, time_str)
 
     html_path = output_dir / f"장시작전_분석_{date_str}.html"
     html_path.write_text(html, encoding="utf-8")
@@ -480,6 +485,338 @@ def _build_html(
 
 <div class="footer">
     Quantum Master v5.0 | SignalEngine + Grok News + 4-Axis Scoring<br>
+    자동 생성 보고서 — 투자 판단은 본인 책임
+</div>
+
+</body>
+</html>"""
+
+
+def _build_html_v9(
+    candidates: list[dict],
+    stats: dict,
+    date_str: str,
+    time_str: str,
+) -> str:
+    """v9.0 C+E 하이브리드 보고서 HTML 생성."""
+
+    # Kill/Trap 통계
+    killed = stats.get("v9_killed", 0)
+    trapped = stats.get("v9_trapped", 0)
+    survivors = stats.get("v9_survivors", 0)
+
+    # 종목 카드 HTML
+    cards_html = ""
+    for i, sig in enumerate(candidates, start=1):
+        rank_score = sig.get("v9_rank_score", 0)
+        zone = sig.get("zone_score", 0)
+        rr = sig.get("risk_reward", 0)
+        boost = sig.get("v9_catalyst_boost", 1.0)
+        tags = sig.get("v9_tags", [])
+        grade = sig.get("grade", "?")
+        trigger = sig.get("trigger_type", "?")
+
+        entry = sig.get("entry_price", 0)
+        target = sig.get("target_price", 0)
+        stop = sig.get("stop_loss", 0)
+        upside = ((target / entry) - 1) * 100 if entry else 0
+        downside = ((stop / entry) - 1) * 100 if entry else 0
+
+        # Rank Score 바 (최대값 기준 스케일링)
+        max_rank = candidates[0].get("v9_rank_score", 1) if candidates else 1
+        rank_pct = min(rank_score / max(max_rank, 0.01) * 100, 100)
+
+        boost_html = ' <span class="catalyst-badge">x1.10 촉매</span>' if boost > 1.0 else ""
+        tags_html = "".join(f'<span class="tag-badge">{t}</span>' for t in tags)
+
+        rank_class = "rank-1" if i == 1 else ""
+
+        cards_html += f"""
+        <div class="stock-card {rank_class}">
+            <div class="card-header">
+                <div class="rank">#{i}</div>
+                <div class="stock-info">
+                    <div class="stock-name">{sig.get('name', sig['ticker'])}</div>
+                    <div class="stock-code">{sig['ticker']} | Grade {grade} | {trigger}</div>
+                </div>
+                <div class="rank-score">{rank_score:.3f}</div>
+            </div>
+
+            <div class="rank-formula">
+                R:R({rr:.1f}) &times; Zone({zone:.2f}){boost_html} = {rank_score:.3f}
+            </div>
+
+            <div class="score-bars">
+                <div class="score-row">
+                    <span class="score-label">Rank</span>
+                    <div class="bar-container">
+                        <div class="bar bar-rank" style="width:{rank_pct:.0f}%"></div>
+                    </div>
+                    <span class="score-value">{rank_score:.3f}</span>
+                </div>
+            </div>
+
+            <div class="price-row">
+                <div class="current-price">{entry:,}원</div>
+                <div class="price-targets">
+                    <span class="target-up">목표 {target:,} (+{upside:.1f}%)</span>
+                    <span class="target-down">손절 {stop:,} ({downside:.1f}%)</span>
+                </div>
+                <div class="rr-badge">RR 1:{rr:.1f}</div>
+            </div>
+
+            <div class="indicators-row">
+                <span class="indicator">RSI {sig.get('rsi', 0):.0f}</span>
+                <span class="indicator">ADX {sig.get('adx', 0):.0f}</span>
+                <span class="indicator">Zone {zone:.2f}</span>
+            </div>
+
+            <div class="tags-row">{tags_html}</div>
+        </div>
+        """
+
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v9.0 C+E 장시작전 분석 - {date_str}</title>
+<style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }}
+
+    .report-header {{
+        text-align: center;
+        padding: 24px 0 16px;
+        border-bottom: 2px solid #f0883e;
+        margin-bottom: 20px;
+    }}
+    .report-title {{
+        font-size: 22px;
+        font-weight: 700;
+        color: #f0883e;
+        letter-spacing: 1px;
+    }}
+    .report-subtitle {{
+        font-size: 13px;
+        color: #8b949e;
+        margin-top: 6px;
+    }}
+
+    .stats-bar {{
+        display: flex;
+        justify-content: space-around;
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }}
+    .stat-item {{ text-align: center; }}
+    .stat-value {{ font-size: 20px; font-weight: 700; color: #f0883e; }}
+    .stat-label {{ color: #8b949e; margin-top: 2px; }}
+
+    .pipeline-info {{
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        color: #8b949e;
+        line-height: 1.6;
+    }}
+    .pipeline-info strong {{ color: #f0883e; }}
+
+    .stock-card {{
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+    }}
+    .stock-card.rank-1 {{
+        border-color: #f0883e;
+        box-shadow: 0 0 12px rgba(240, 136, 62, 0.15);
+    }}
+
+    .card-header {{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }}
+    .rank {{
+        font-size: 16px;
+        font-weight: 800;
+        color: #8b949e;
+        min-width: 32px;
+    }}
+    .rank-1 .rank {{ color: #f0883e; font-size: 20px; }}
+    .stock-name {{ font-size: 17px; font-weight: 700; }}
+    .stock-code {{ font-size: 12px; color: #8b949e; }}
+    .rank-score {{
+        margin-left: auto;
+        font-size: 28px;
+        font-weight: 800;
+        color: #f0883e;
+    }}
+
+    .rank-formula {{
+        font-size: 12px;
+        color: #8b949e;
+        margin-bottom: 10px;
+        padding: 6px 10px;
+        background: #1a1e26;
+        border-radius: 6px;
+    }}
+    .catalyst-badge {{
+        background: #3fb950;
+        color: #0d1117;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }}
+
+    .price-row {{
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }}
+    .current-price {{ font-size: 18px; font-weight: 700; }}
+    .price-targets {{ display: flex; flex-direction: column; gap: 2px; }}
+    .target-up {{ color: #3fb950; }}
+    .target-down {{ color: #f85149; }}
+    .rr-badge {{
+        margin-left: auto;
+        background: #1f2937;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #79c0ff;
+    }}
+
+    .indicators-row {{
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+    }}
+    .indicator {{
+        font-size: 11px;
+        background: #1f2937;
+        padding: 3px 8px;
+        border-radius: 4px;
+        color: #c9d1d9;
+    }}
+
+    .tags-row {{
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }}
+    .tag-badge {{
+        font-size: 10px;
+        background: #1a2a3a;
+        color: #79c0ff;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+    }}
+
+    .score-bars {{ margin-bottom: 10px; }}
+    .score-row {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+    }}
+    .score-label {{
+        font-size: 11px;
+        font-weight: 600;
+        min-width: 56px;
+        color: #8b949e;
+    }}
+    .bar-container {{
+        flex: 1;
+        height: 10px;
+        background: #21262d;
+        border-radius: 5px;
+        overflow: hidden;
+    }}
+    .bar {{
+        height: 100%;
+        border-radius: 5px;
+    }}
+    .bar-rank {{ background: linear-gradient(90deg, #f0883e, #ffa657); }}
+    .score-value {{
+        font-size: 11px;
+        font-weight: 600;
+        min-width: 50px;
+        text-align: right;
+        color: #c9d1d9;
+    }}
+
+    .footer {{
+        text-align: center;
+        padding: 16px 0;
+        font-size: 11px;
+        color: #484f58;
+        border-top: 1px solid #21262d;
+        margin-top: 8px;
+    }}
+</style>
+</head>
+<body>
+
+<div class="report-header">
+    <div class="report-title">Quant v9.0 C+E Hybrid</div>
+    <div class="report-subtitle">{date_str} {time_str} | Kill &rarr; Rank &rarr; Tag</div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">{stats.get('after_grade_filter', 0)}</div>
+        <div class="stat-label">후보</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{killed}</div>
+        <div class="stat-label">Kill</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{trapped}</div>
+        <div class="stat-label">Trap</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{survivors}</div>
+        <div class="stat-label">생존</div>
+    </div>
+</div>
+
+<div class="pipeline-info">
+    <strong>v9.0 C+E Pipeline</strong><br>
+    Kill(5): Zone &lt; th | R:R &lt; th | Trigger D | 유동성 &lt; 10억 | 52주고점 근접<br>
+    Trap(6D): Quant&lt;18 &amp; SD&ge;20 &amp; News&ge;15<br>
+    Rank = R:R &times; Zone &times; 촉매부스트(1.10)<br>
+    Tag: SD/News/Consensus &rarr; 참고 태그 (순위 영향 0%)
+</div>
+
+{cards_html}
+
+<div class="footer">
+    Quantum Master v9.0 C+E | Kill &rarr; Rank &rarr; Tag<br>
     자동 생성 보고서 — 투자 판단은 본인 책임
 </div>
 

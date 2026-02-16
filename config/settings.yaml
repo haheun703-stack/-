@@ -268,7 +268,7 @@ quant_engine:
 # 백테스트 설정
 # ============================================================
 backtest:
-  start_date: "2019-01-01"
+  start_date: "2023-02-16"
   end_date: "2026-02-14"
   initial_capital: 30000000      # 3천만원 (사용자 설정)
   max_risk_pct: 0.02             # v8.1: 1.5%→2.0% (균형 최적)
@@ -826,13 +826,13 @@ v8_hybrid:
     trend:
       ma_fast: 60                # MA60 > MA120 (중기 > 장기)
       ma_slow: 120
-      adx_min: 13                # v8.1 완화 (18→13, 약추세 허용)
+      adx_min: 18                # v8.1 원복 (13→18, 추세 확인 강화)
     pullback:
-      min_atr_pullback: 0.3      # v8.1 완화 (0.8→0.3, 얕은 조정 허용)
+      min_atr_pullback: 0.8      # v8.1 원복 (0.3→0.8, 적절한 조정 깊이 요구)
       max_atr_pullback: 4.0      # v8.0 원본 유지
       high_lookback_days: 20
     overheat:
-      max_52w_ratio: 0.96        # v8.1 완화 (0.92→0.96, 고점 근처 허용)
+      max_52w_ratio: 0.92        # v8.1 원복 (0.96→0.92, 고점 과열 차단)
 
   # ─── Phase 2: Scoring Engine (가중합) ───
   scoring:
@@ -872,7 +872,7 @@ v8_hybrid:
 
     grade_cutoffs:
       A: 0.65                    # 풀 사이즈 진입 (fundamental 미존재 보정)
-      B: 0.42                    # v8.1 완화 (0.50→0.42, B등급 진입 완화)
+      B: 0.50                    # v8.1 원복 (0.42→0.50, B등급 기준 강화)
       C: 0.35                    # 워치리스트만 (진입 불가)
 
   # ─── Phase 3: Triggers (OR) ───
