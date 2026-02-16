@@ -149,6 +149,11 @@ class BacktestEngine:
         self._current_short_status = None  # 캐시
         self._current_short_profile = {}  # 현재 활성 프로파일 캐시
 
+        # v8.5.1: 동시 손실 한도 (Portfolio Stop)
+        ps_cfg = self.config.get("portfolio_stop", {})
+        self.portfolio_stop_enabled = ps_cfg.get("enabled", False)
+        self.portfolio_stop_threshold = ps_cfg.get("avg_pnl_threshold", -0.03)
+
         # v4.1: 적응형 청산
         adaptive_cfg = self.config.get("adaptive_exit", {})
         self.adaptive_exit_enabled = adaptive_cfg.get("enabled", False)
@@ -824,6 +829,26 @@ class BacktestEngine:
             # ── 0. 공매도 체제 프로파일 적용 (v8.3) ──
             short_profile = self._apply_regime_profile(date_str)
 
+            # ── 0.5 동시 손실 한도 (Portfolio Stop) ──
+            # 포지션 관리(손절 청산) 전에 체크해야 실제 포트폴리오 상태 반영
+            # "오늘 아침 내 포트폴리오가 안 좋으면 신규 진입하지 않는다"
+            portfolio_stopped = False
+            if self.portfolio_stop_enabled and self.positions:
+                unrealized_pcts = []
+                for p in self.positions:
+                    p_df = data_dict.get(p.ticker)
+                    if p_df is not None and idx < len(p_df):
+                        cur_price = p_df["close"].iloc[idx]
+                        unrealized_pcts.append((cur_price - p.entry_price) / p.entry_price)
+                if unrealized_pcts:
+                    avg_unrealized = sum(unrealized_pcts) / len(unrealized_pcts)
+                    if avg_unrealized < self.portfolio_stop_threshold:
+                        portfolio_stopped = True
+                        logger.debug(
+                            f"  Portfolio Stop: avg={avg_unrealized:.2%} < "
+                            f"{self.portfolio_stop_threshold:.0%} ({date_str})"
+                        )
+
             # ── 1. 보유 종목 관리 ──
             self._manage_positions(data_dict, idx, date_str)
 
@@ -864,7 +889,9 @@ class BacktestEngine:
             # v8.3.1: 공매도 프로파일의 min_regime_scale 적용
             min_regime = short_profile.get("min_regime_scale", 0.0)
             effective_max_pos = self.max_positions
-            if regime.position_scale <= 0 or regime.position_scale < min_regime:
+            if portfolio_stopped:
+                effective_max_pos = 0  # 포트폴리오 동시 손실 → 신규 진입 불가
+            elif regime.position_scale <= 0 or regime.position_scale < min_regime:
                 effective_max_pos = 0  # 신규 진입 불가
             elif regime.position_scale < 1.0:
                 # neutral/caution: 최대 포지션 수 축소
