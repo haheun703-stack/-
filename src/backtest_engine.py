@@ -76,11 +76,22 @@ class Trade:
 class BacktestEngine:
     """v3.0 퀀트 백테스트 엔진"""
 
-    def __init__(self, config_path: str = "config/settings.yaml", use_v9: bool = False):
+    def __init__(
+        self,
+        config_path: str = "config/settings.yaml",
+        use_v9: bool = False,
+        use_parabola: bool = False,
+        bt_start: str | None = None,
+        bt_end: str | None = None,
+    ):
         with open(config_path, encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
 
         self.use_v9 = use_v9
+        self.use_parabola = use_parabola
+        self.max_parabola_positions = 1  # Mode B 최대 동시 보유 (별도 슬롯)
+        self.bt_start = bt_start  # 백테스트 시작일 (YYYY-MM-DD)
+        self.bt_end = bt_end      # 백테스트 종료일 (YYYY-MM-DD)
 
         bt = self.config["backtest"]
         self.initial_capital = bt["initial_capital"]
@@ -334,6 +345,8 @@ class BacktestEngine:
         """
         entry_price = next_open * (1 + self._effective_slippage(next_open))
 
+        available_cash = self.cash
+
         current_risk = sum(
             p.shares * (p.entry_price - p.stop_loss)
             for p in self.positions
@@ -346,7 +359,7 @@ class BacktestEngine:
             vol_weight = martin_data.get("vol_weight", 1.0)
 
         sizing = self.position_sizer.calculate(
-            account_balance=self.cash,
+            account_balance=available_cash,
             entry_price=entry_price,
             atr_value=signal["atr_value"],
             grade_ratio=signal["position_ratio"],
@@ -373,8 +386,8 @@ class BacktestEngine:
         commission = entry_price * sizing["shares"] * self.commission_rate
         total_cost = sizing["investment"] + commission
 
-        if total_cost > self.cash:
-            affordable = int((self.cash - commission) / entry_price)
+        if total_cost > available_cash:
+            affordable = int((available_cash - commission) / entry_price)
             if affordable <= 0:
                 return None
             sizing["shares"] = affordable
@@ -466,7 +479,8 @@ class BacktestEngine:
         net_pnl = gross_pnl - sell_commission - buy_commission - tax
         pnl_pct = (actual_price / pos.entry_price - 1) * 100
 
-        self.cash += actual_price * sell_shares - sell_commission - tax
+        sell_proceeds = actual_price * sell_shares - sell_commission - tax
+        self.cash += sell_proceeds
 
         # v8.2.1: Self-Adaptive 체제 감지 피드백
         self.regime_gate.update_trade_outcome(is_win=(net_pnl > 0))
@@ -509,6 +523,63 @@ class BacktestEngine:
     # 보유 종목 관리
     # ──────────────────────────────────────────────
 
+    def _manage_parabola_position(self, pos, df, idx: int, date_str: str):
+        """Mode B 전용 청산: 포물선 시작점 홀딩 로직.
+
+        - trend_exit 비활성화
+        - 손절: 베이스 하단 고정 (pos.stop_loss)
+        - 1차 익절: 베이스 높이 × 2 → 50% 매도
+        - 2차 익절: 베이스 높이 × 3 → 전량 매도
+        - 시간 손절: 20일 후 베이스 높이 × 1 미도달 → 탈출
+        """
+        row = df.iloc[idx]
+        close = row["close"]
+        high = row["high"]
+        low = row["low"]
+
+        hold_days = 0
+        try:
+            hold_days = (pd.Timestamp(date_str) - pd.Timestamp(pos.entry_date)).days
+        except Exception:
+            pass
+
+        # 베이스 높이 역산 (target = entry + base_height × 3)
+        base_height = (pos.target_price - pos.entry_price) / 3.0
+        if base_height <= 0:
+            base_height = pos.atr_value * 2  # fallback
+
+        # 최고가 갱신
+        if high > pos.highest_price:
+            pos.highest_price = high
+
+        # 1. 절대 손절 (베이스 하단 고정)
+        if low <= pos.stop_loss:
+            self._execute_sell(pos, pos.stop_loss, date_str, "stop_loss_parabola")
+            return
+
+        # 2. 2차 익절: 베이스 높이 × 3 → 전량 매도
+        base_3x = pos.entry_price + base_height * 3.0
+        if high >= base_3x:
+            self._execute_sell(pos, base_3x, date_str, "target_3x_parabola")
+            return
+
+        # 3. 1차 익절: 베이스 높이 × 2 → 50% 매도
+        base_2x = pos.entry_price + base_height * 2.0
+        if high >= base_2x and not pos.partial_sold:
+            exit_shares = max(1, pos.shares // 2)
+            self._execute_sell(
+                pos, base_2x, date_str, "partial_2x_parabola",
+                shares=exit_shares,
+            )
+            pos.partial_sold = True
+            return
+
+        # 4. 시간 손절: 20일 경과 + 베이스 높이 × 1 미도달
+        base_1x = pos.entry_price + base_height
+        if hold_days >= 20 and close < base_1x:
+            self._execute_sell(pos, close, date_str, "time_exit_parabola")
+            return
+
     def _manage_positions(self, data_dict: dict, idx: int, date_str: str):
         """v4.1 포지션 관리: 적응형 청산 + 4단계 부분청산 + 일일 보유 판단"""
         for pos in list(self.positions):
@@ -516,6 +587,11 @@ class BacktestEngine:
                 continue
             df = data_dict[pos.ticker]
             if idx >= len(df):
+                continue
+
+            # Mode B 전용 청산 (trend_exit 등 비활성화)
+            if pos.trigger_type == "parabola":
+                self._manage_parabola_position(pos, df, idx, date_str)
                 continue
 
             row = df.iloc[idx]
@@ -692,12 +768,25 @@ class BacktestEngine:
         """
         first_ticker = list(data_dict.keys())[0]
         all_dates = data_dict[first_ticker].index
-        start_idx = 200
+        start_idx = 200  # 최소 워밍업
 
-        logger.info(f"백테스트 v3.0 시작: {all_dates[start_idx]} ~ {all_dates[-1]}")
+        # 날짜 기반 구간 설정
+        if self.bt_start:
+            ts = pd.Timestamp(self.bt_start)
+            candidates = np.where(all_dates >= ts)[0]
+            if len(candidates) > 0:
+                start_idx = max(start_idx, int(candidates[0]))
+        end_idx = len(all_dates)
+        if self.bt_end:
+            ts = pd.Timestamp(self.bt_end)
+            candidates = np.where(all_dates <= ts)[0]
+            if len(candidates) > 0:
+                end_idx = int(candidates[-1]) + 1
+
+        logger.info(f"백테스트 v3.0 시작: {all_dates[start_idx]} ~ {all_dates[min(end_idx-1, len(all_dates)-1)]}")
         logger.info(f"  초기자본: {self.initial_capital:,}원 | 종목수: {len(data_dict)} | 6-Layer Pipeline")
 
-        for idx in tqdm(range(start_idx, len(all_dates)), desc="v3.0 backtest"):
+        for idx in tqdm(range(start_idx, end_idx), desc="v3.0 backtest"):
             date_str = str(all_dates[idx].date()) if hasattr(all_dates[idx], "date") else str(all_dates[idx])
 
             # ── 0. 공매도 체제 프로파일 적용 (v8.3) ──
@@ -749,7 +838,10 @@ class BacktestEngine:
                 # neutral/caution: 최대 포지션 수 축소
                 effective_max_pos = max(1, int(self.max_positions * regime.position_scale))
 
-            if len(self.positions) < effective_max_pos:
+            # Mode A 포지션 수 (Mode B 제외하여 슬롯 독립)
+            mode_a_count = sum(1 for p in self.positions if p.trigger_type != "parabola")
+
+            if mode_a_count < effective_max_pos:
                 signals = self.signal_engine.scan_universe(
                     data_dict, idx, held_positions=self.positions
                 )
@@ -771,7 +863,8 @@ class BacktestEngine:
                 held_tickers = {p.ticker for p in self.positions}
 
                 for sig in signals:
-                    if len(self.positions) >= effective_max_pos:
+                    mode_a_count = sum(1 for p in self.positions if p.trigger_type != "parabola")
+                    if mode_a_count >= effective_max_pos:
                         break
                     if sig["ticker"] in held_tickers:
                         continue
@@ -805,6 +898,51 @@ class BacktestEngine:
                             )
                             held_tickers.add(sig["ticker"])
 
+            # ── 3b. Mode B: 포물선 탐지 (--parabola, 별도 슬롯) ──
+            if self.use_parabola:
+                from .parabola_detector import scan_parabola_universe
+
+                held_tickers = {p.ticker for p in self.positions}
+                para_held = sum(1 for p in self.positions if p.trigger_type == "parabola")
+                if para_held >= self.max_parabola_positions:
+                    para_signals = []
+                else:
+                    para_signals = scan_parabola_universe(data_dict, idx, held_tickers)
+
+                for sig in para_signals:
+                    para_held = sum(1 for p in self.positions if p.trigger_type == "parabola")
+                    if para_held >= self.max_parabola_positions:
+                        break
+
+                    self.signal_log.append({
+                        "date": date_str,
+                        "ticker": sig["ticker"],
+                        "zone_score": sig["zone_score"],
+                        "grade": sig["grade"],
+                        "trigger_type": sig["trigger_type"],
+                        "trigger_confidence": sig.get("trigger_confidence", 0),
+                        "entry_price": sig["entry_price"],
+                        "rr_ratio": sig["risk_reward_ratio"],
+                        "regime": regime.regime,
+                        "regime_scale": regime.position_scale,
+                    })
+
+                    if idx + 1 < len(all_dates):
+                        next_df = data_dict.get(sig["ticker"])
+                        if next_df is not None and idx + 1 < len(next_df):
+                            next_open = next_df["open"].iloc[idx + 1]
+                            # Mode B: 전체 자본의 15% 상한 (단일 종목)
+                            max_para_pct = 0.15
+                            base_stage = min(sig.get("entry_stage_pct", 0.30), max_para_pct)
+                            pos_mult = short_profile.get("position_scale_mult", 1.0)
+                            scaled_stage = base_stage * regime.position_scale * pos_mult
+                            self._execute_buy(
+                                sig, next_open,
+                                stage_pct=scaled_stage,
+                                df=next_df, idx=idx,
+                            )
+                            held_tickers.add(sig["ticker"])
+
             # ── 4. 에쿼티 커브 ──
             portfolio_value = self._calc_portfolio_value(data_dict, idx)
             self.equity_curve.append({
@@ -816,10 +954,13 @@ class BacktestEngine:
             })
 
         # ── 잔여 포지션 강제 청산 ──
-        last_date = str(all_dates[-1].date()) if hasattr(all_dates[-1], "date") else str(all_dates[-1])
+        last_idx = min(end_idx - 1, len(all_dates) - 1)
+        last_date = str(all_dates[last_idx].date()) if hasattr(all_dates[last_idx], "date") else str(all_dates[last_idx])
         for pos in list(self.positions):
             if pos.ticker in data_dict:
-                close = data_dict[pos.ticker]["close"].iloc[-1]
+                df_t = data_dict[pos.ticker]
+                close_idx = min(last_idx, len(df_t) - 1)
+                close = df_t["close"].iloc[close_idx]
                 self._execute_sell(pos, close, last_date, "backtest_end")
 
         return self._compile_results()

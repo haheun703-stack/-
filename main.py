@@ -80,7 +80,13 @@ def step_indicators():
     logger.info(f"[Step 2] 지표 계산 완료: {count}종목 (35개 지표 + OU/SmartMoney/TRIX/볼린저/MACD)")
 
 
-def step_backtest(use_sample: bool = False, use_v9: bool = False):
+def step_backtest(
+    use_sample: bool = False,
+    use_v9: bool = False,
+    use_parabola: bool = False,
+    bt_start: str | None = None,
+    bt_end: str | None = None,
+):
     """Step 3~7: v3.0 6-Layer Pipeline 백테스트"""
     from src.backtest_engine import BacktestEngine
 
@@ -90,7 +96,10 @@ def step_backtest(use_sample: bool = False, use_v9: bool = False):
     if use_sample:
         _relax_sample_params(config_path)
 
-    engine = BacktestEngine(config_path, use_v9=use_v9)
+    engine = BacktestEngine(
+        config_path, use_v9=use_v9, use_parabola=use_parabola,
+        bt_start=bt_start, bt_end=bt_end,
+    )
     data = engine.load_data()
 
     if not data:
@@ -102,6 +111,8 @@ def step_backtest(use_sample: bool = False, use_v9: bool = False):
 
     if use_v9:
         logger.info("[Backtest] v9.0 C+E Kill 필터 활성화")
+    if use_parabola:
+        logger.info("[Backtest] Mode B 포물선 탐지 활성화")
 
     results = engine.run(data)
 
@@ -723,6 +734,23 @@ if __name__ == "__main__":
         action="store_true",
         help="v9.0 C+E Kill 필터 적용 (백테스트/스캔)",
     )
+    parser.add_argument(
+        "--parabola",
+        action="store_true",
+        help="Mode B 포물선 탐지 활성화 (백테스트)",
+    )
+    parser.add_argument(
+        "--bt-start",
+        type=str,
+        default=None,
+        help="백테스트 시작일 (YYYY-MM-DD)",
+    )
+    parser.add_argument(
+        "--bt-end",
+        type=str,
+        default=None,
+        help="백테스트 종료일 (YYYY-MM-DD)",
+    )
 
     args = parser.parse_args()
 
@@ -752,7 +780,10 @@ if __name__ == "__main__":
         elif args.step == "indicators":
             step_indicators()
         elif args.step == "backtest":
-            step_backtest(use_v9=args.v9)
+            step_backtest(
+                use_v9=args.v9, use_parabola=args.parabola,
+                bt_start=args.bt_start, bt_end=args.bt_end,
+            )
         elif args.step == "report":
             step_report()
         if args.telegram:
