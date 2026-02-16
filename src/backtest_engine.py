@@ -318,11 +318,17 @@ class BacktestEngine:
         stop_scale = profile.get("stop_loss_scale", 1.0)
         self.atr_stop_mult = self._base_atr_stop_mult * stop_scale
 
+        # G4 공매도 압력 게이트 활성화 (v10.0)
+        short_gate_active = status in ("active", "reopened")
+        if self.signal_engine.v8_pipeline:
+            self.signal_engine.v8_pipeline.gate_engine.set_short_gate_active(short_gate_active)
+
         logger.info(
             "  공매도 체제 전환: %s → max_pos=%d, max_hold=%d, sa_floor=%.2f, "
-            "pullback_max=%s, stop_scale=%.2f",
+            "pullback_max=%s, stop_scale=%.2f, G4=%s",
             status, self.max_positions, self.max_hold_days, sa_floor,
             pullback_max or "default", stop_scale,
+            "ON" if short_gate_active else "OFF",
         )
 
         return profile

@@ -1,8 +1,9 @@
 """
-Quantum Master v8.0 — Phase 1: Hard Gates
+Quantum Master v10.0 — Phase 1: Hard Gates
 "자격 없는 종목을 빠르게 제거한다"
 
-3개의 필수 게이트: 하나라도 미달이면 즉시 탈락 (AND 조건)
+4개의 필수 게이트: 하나라도 미달이면 즉시 탈락 (AND 조건)
+G1: 추세 | G2: 조정폭 | G3: 과열 방지 | G4: 공매도 압력 (레짐별 활성)
 """
 
 from dataclasses import dataclass
@@ -31,10 +32,15 @@ class GateEngine:
         self.cfg = v8_cfg.get('gates', {})
         # 동적 오버라이드 (레짐 프로파일에서 설정)
         self._pullback_max_override: float | None = None
+        self._short_gate_active: bool = False  # G4는 공매도 활성기에만 작동
 
     def set_pullback_max(self, value: float | None):
         """공매도 체제에 따라 G2 pullback 상한을 동적 조정."""
         self._pullback_max_override = value
+
+    def set_short_gate_active(self, active: bool):
+        """공매도 체제에 따라 G4 활성/비활성."""
+        self._short_gate_active = active
 
     def run_all_gates(self, row: pd.Series) -> tuple[bool, list]:
         """
@@ -56,6 +62,11 @@ class GateEngine:
         g3 = self.gate_overheat(row)
         results.append(g3)
         if not g3.passed:
+            return False, results
+
+        g4 = self.gate_short_pressure(row)
+        results.append(g4)
+        if not g4.passed:
             return False, results
 
         return True, results
@@ -168,4 +179,45 @@ class GateEngine:
             gate_name="G3_Overheat",
             reason=reason,
             values={'ratio_52w': ratio, 'high_52w': high_52w}
+        )
+
+    # ─── G4: 공매도 압력 게이트 ───
+    def gate_short_pressure(self, row: pd.Series) -> GateResult:
+        """
+        공매도 집중 + 증가 중인 종목 제거 — 공매도 재개기에만 활성.
+
+        조건: short_interest_pct > 5% AND short_balance_chg_5d > 0
+        공매도 금지기에는 자동 통과 (self._short_gate_active=False).
+        """
+        if not self._short_gate_active:
+            return GateResult(
+                passed=True,
+                gate_name="G4_ShortPressure",
+                reason="공매도 금지기 — 게이트 비활성",
+            )
+
+        cfg = self.cfg.get('short_pressure', {})
+        max_short_pct = cfg.get('max_short_pct', 5.0)
+
+        short_pct = row.get('short_interest_pct', 0) or 0
+        short_chg = row.get('short_balance_chg_5d', 0) or 0
+
+        # 공매도 5% 이상 + 증가 중 = 진입 금지
+        blocked = short_pct > max_short_pct and short_chg > 0
+
+        if blocked:
+            reason = (
+                f"공매도 압력: {short_pct:.2f}% > {max_short_pct}% "
+                f"& 5D 변화 +{short_chg:.1f}%"
+            )
+        elif short_pct > max_short_pct:
+            reason = f"공매도 {short_pct:.2f}% (높지만 감소 중)"
+        else:
+            reason = f"공매도 {short_pct:.2f}%"
+
+        return GateResult(
+            passed=not blocked,
+            gate_name="G4_ShortPressure",
+            reason=reason,
+            values={'short_pct': short_pct, 'short_chg_5d': short_chg}
         )

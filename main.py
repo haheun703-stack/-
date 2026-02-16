@@ -106,8 +106,8 @@ def step_backtest(
         logger.error("[Step 3] processed 디렉토리에 데이터 없음. 먼저 collect + indicators 실행 필요")
         return None
 
-    # HMM 레짐 감지 (전종목 피팅)
-    _fit_regime(data)
+    # HMM 레짐 감지 비활성화 (v10.0: 성과 영향 0% 확인 → 제거)
+    # L1_regime 레이어는 P_Accum=NaN → 자동 통과
 
     if use_v9:
         logger.info("[Backtest] v9.0 C+E Kill 필터 활성화")
@@ -751,7 +751,6 @@ if __name__ == "__main__":
         default=None,
         help="백테스트 종료일 (YYYY-MM-DD)",
     )
-
     args = parser.parse_args()
 
     # v4.0 subcommand 분기
