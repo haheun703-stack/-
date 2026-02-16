@@ -747,7 +747,7 @@ regime_profiles:
     max_positions_scale: 0.6        # max_positions × 0.6 (5→3)
     min_rr_ratio: 2.0               # 손익비 하한 상향 (1.5→2.0)
     position_scale_mult: 0.7        # 포지션 크기 70%
-    stop_loss_scale: 0.8            # 손절 20% 타이트
+    stop_loss_scale: 1.0            # 손절 유지 (기존 dead code였으므로 1.0이 baseline)
     max_hold_days_scale: 0.6        # 최대 보유일 축소 (30→18)
     sa_floor: 0.30                  # SA floor 낮춤 → hostile 도달 가능
     min_regime_scale: 0.0           # hostile만 차단 (정상장 caution 진입 허용)
@@ -771,6 +771,7 @@ regime_profiles:
     max_hold_days_scale: 0.6        # 최대 보유일 축소
     sa_floor: 0.30                  # hostile 도달 가능
     min_regime_scale: 0.75          # neutral 이상만 진입 (caution 차단)
+    pullback_max: 2.5               # G2 상한 축소 (4.0→2.5) — deep pullback 차단
 
 # ════════════════════════════════════════════════════════════
 # v8.2 Market Regime Gate (7D 시장 체제 감지)

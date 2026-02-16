@@ -137,6 +137,7 @@ class BacktestEngine:
         self._regime_profiles = self.config.get("regime_profiles", {})
         self._base_max_positions = self.max_positions
         self._base_max_hold_days = self.max_hold_days
+        self._base_atr_stop_mult = self.atr_stop_mult
         self._current_short_status = None  # 캐시
         self._current_short_profile = {}  # 현재 활성 프로파일 캐시
 
@@ -308,9 +309,20 @@ class BacktestEngine:
         hold_scale = profile.get("max_hold_days_scale", 1.0)
         self.max_hold_days = max(5, int(self._base_max_hold_days * hold_scale))
 
+        # G2 pullback 상한 동적 조정 (v8.4.1)
+        pullback_max = profile.get("pullback_max")
+        if self.signal_engine.v8_pipeline:
+            self.signal_engine.v8_pipeline.gate_engine.set_pullback_max(pullback_max)
+
+        # stop_loss_scale 적용 (v8.4.1 — dead code 활성화)
+        stop_scale = profile.get("stop_loss_scale", 1.0)
+        self.atr_stop_mult = self._base_atr_stop_mult * stop_scale
+
         logger.info(
-            "  공매도 체제 전환: %s → max_pos=%d, max_hold=%d, sa_floor=%.2f",
+            "  공매도 체제 전환: %s → max_pos=%d, max_hold=%d, sa_floor=%.2f, "
+            "pullback_max=%s, stop_scale=%.2f",
             status, self.max_positions, self.max_hold_days, sa_floor,
+            pullback_max or "default", stop_scale,
         )
 
         return profile

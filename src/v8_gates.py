@@ -29,6 +29,12 @@ class GateEngine:
     def __init__(self, config: dict):
         v8_cfg = config.get('v8_hybrid', {})
         self.cfg = v8_cfg.get('gates', {})
+        # 동적 오버라이드 (레짐 프로파일에서 설정)
+        self._pullback_max_override: float | None = None
+
+    def set_pullback_max(self, value: float | None):
+        """공매도 체제에 따라 G2 pullback 상한을 동적 조정."""
+        self._pullback_max_override = value
 
     def run_all_gates(self, row: pd.Series) -> tuple[bool, list]:
         """
@@ -104,7 +110,7 @@ class GateEngine:
         """
         cfg = self.cfg.get('pullback', {})
         min_atr = cfg.get('min_atr_pullback', 0.8)
-        max_atr = cfg.get('max_atr_pullback', 4.0)
+        max_atr = self._pullback_max_override or cfg.get('max_atr_pullback', 4.0)
         lookback = cfg.get('high_lookback_days', 20)
 
         high_recent = row.get(f'high_{lookback}d', row.get(f'high_{lookback}', 0))
