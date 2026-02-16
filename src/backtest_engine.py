@@ -112,6 +112,14 @@ class BacktestEngine:
         self.partial_exit_pct = exit_cfg.get("partial_exit_pct", 0.25)
         self.max_hold_days = exit_cfg.get("max_hold_days", 10)
 
+        # v8.5: 시간 감쇠 청산 모델 (Sinc-inspired)
+        # trailing_stop = highest - ATR_mult × decay_factor
+        # decay_factor = 1 / (1 + decay_rate × days_held)
+        decay_cfg = exit_cfg.get("time_decay", {})
+        self.time_decay_enabled = decay_cfg.get("enabled", False)
+        self.time_decay_rate = decay_cfg.get("decay_rate", 0.05)
+        self.time_decay_min_days = decay_cfg.get("min_days", 2)  # 감쇠 시작일
+
         # v6.0: Martin 최적 보유기간 연동
         martin_cfg = self.config.get("martin_momentum", {})
         martin_hold_cfg = martin_cfg.get("optimal_hold", {})
@@ -730,10 +738,16 @@ class BacktestEngine:
                             if pos not in self.positions:
                                 continue
 
-            # 3. 트레일링 스탑 갱신 (v4.1: hold_scorer에 따른 조정)
+            # 3. 트레일링 스탑 갱신 (v4.1 + v8.5 시간 감쇠)
             trailing_mult = self.atr_stop_mult
             if hold_result is not None:
                 trailing_mult *= hold_result.trailing_tightness
+
+            # v8.5: 시간 감쇠 — 보유일 증가 시 ATR 승수 축소
+            if self.time_decay_enabled and hold_days >= self.time_decay_min_days:
+                decay_factor = 1.0 / (1.0 + self.time_decay_rate * hold_days)
+                trailing_mult *= decay_factor
+
             trailing_mult = max(trailing_mult, 0.5)  # v6.2: 최소 0.5배 ATR
 
             if high > pos.highest_price:
