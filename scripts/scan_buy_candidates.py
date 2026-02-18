@@ -1671,19 +1671,27 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
                 f"{guide['shares']}주 \u00d7 {guide['price']:,}원"
             )
 
-        # 수급 정보
+        # 수급 정보 (streak + 5일 순매수 금액)
         f_streak = sig.get("foreign_streak", 0)
         i_streak = sig.get("inst_streak", 0)
-        if f_streak != 0 or i_streak != 0:
+        f_amt = sig.get("foreign_amount_5d", 0)
+        i_amt = sig.get("inst_amount_5d", 0)
+        if f_streak != 0 or i_streak != 0 or f_amt != 0 or i_amt != 0:
             supply_parts = []
             if f_streak > 0:
-                supply_parts.append(f"\uc678\uad6d\uc778 {f_streak}D\uc5f0\uc18d\ub9e4\uc218")
+                supply_parts.append(f"\uc678\uc778 {f_streak}D\uc5f0\uc18d\ub9e4\uc218")
             elif f_streak < 0:
-                supply_parts.append(f"\uc678\uad6d\uc778 {abs(f_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
+                supply_parts.append(f"\uc678\uc778 {abs(f_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
+            if f_amt != 0:
+                f_sign = "+" if f_amt > 0 else ""
+                supply_parts.append(f"\uc678\uc778\u0035D {f_sign}{f_amt/1e4:,.0f}\ub9cc")
             if i_streak > 0:
                 supply_parts.append(f"\uae30\uad00 {i_streak}D\uc5f0\uc18d\ub9e4\uc218")
             elif i_streak < 0:
                 supply_parts.append(f"\uae30\uad00 {abs(i_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
+            if i_amt != 0:
+                i_sign = "+" if i_amt > 0 else ""
+                supply_parts.append(f"\uae30\uad00\u0035D {i_sign}{i_amt/1e4:,.0f}\ub9cc")
             lines.append(f"\uc218\uae09: {' | '.join(supply_parts)}")
 
         # 태그
@@ -1709,6 +1717,14 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
             lines.append(f"  {sig['name']}({sig['ticker']}): {reasons}")
         if len(killed_list) > 5:
             lines.append(f"  ... +{len(killed_list)-5}\uc885\ubaa9")
+
+    # -- 공시 체크 리마인더 --
+    if candidates:
+        lines.append("")
+        lines.append("\u2550\u2550 \ub9e4\uc218 \uc804 \uccb4\ud06c\ub9ac\uc2a4\ud2b8 \u2550\u2550")
+        lines.append("\u2610 DART \uacf5\uc2dc \ud655\uc778 (\uc720\uc0c1\uc99d\uc790/\ud68c\uc0dd\uc808\ucc28/\uc2e4\uc801\uacbd\uace0)")
+        lines.append("\u2610 \uc218\uae09 \ud750\ub984 \ud655\uc778 (\uc678\uc778+\uae30\uad00 \uc21c\ub9e4\uc218)")
+        lines.append("\u2610 \ud504\ub85c\uadf8\ub7a8 \ub9e4\ub9e4 \ud655\uc778 (15:30 \uc774\ud6c4)")
 
     # -- Footer --
     lines.append("")
