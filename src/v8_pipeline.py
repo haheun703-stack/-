@@ -146,7 +146,7 @@ class QuantumPipelineV8:
             "trigger_type": "none",
             "trigger_confidence": 0.0,
             "entry_price": int(close),
-            "stop_loss": int(close - atr * self.stop_loss_atr),
+            "stop_loss": max(int(close - atr * self.stop_loss_atr), 1),
             "target_price": int(close + atr * self.target_atr_B),
             "risk_reward_ratio": 0.0,
             "atr_value": round(float(atr), 1),
@@ -205,13 +205,15 @@ class QuantumPipelineV8:
 
         # 등급별 타겟 설정
         target_atr_mult = self.target_atr_A if grade_result.grade == "A" else self.target_atr_B
-        stop_price = close - atr * self.stop_loss_atr
+        stop_price = max(close - atr * self.stop_loss_atr, 1)
         target_price = close + atr * target_atr_mult
 
         # RR 비율 체크
         risk = close - stop_price
         if risk <= 0:
-            risk = 1
+            result["v8_action"] = "SKIP"
+            result["v8_skip_reason"] = f"Risk <= 0: close({int(close)}) <= stop({int(stop_price)})"
+            return result
         rr_ratio = (target_price - close) / risk
 
         if rr_ratio < self.min_rr_ratio:
