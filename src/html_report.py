@@ -15,6 +15,21 @@ logger = logging.getLogger(__name__)
 REPORT_DIR = Path("D:/클로드 HTML 보고서")
 
 
+def _position_guide_html(sig: dict) -> str:
+    """포지션 사이징 가이드 HTML 생성."""
+    guide = sig.get("position_guide")
+    if not guide or guide.get("shares", 0) <= 0:
+        return ""
+    label = guide.get("label", "대기")
+    bg = "#238636" if label == "매수" else "#6e7681"
+    return f"""
+            <div class="position-guide" style="background:{bg}22; border: 1px solid {bg}; border-radius:6px; padding:8px 12px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:{bg}; font-weight:bold;">{label}</span>
+                <span>{guide['alloc']/1e4:,.0f}만원 ({guide['pct']}%)</span>
+                <span>{guide['shares']}주 &times; {guide['price']:,}원</span>
+            </div>"""
+
+
 def generate_premarket_report(
     candidates: list[dict],
     stats: dict,
@@ -685,6 +700,7 @@ def _build_html_v9(
                 <span class="indicator">Zone {zone:.2f}</span>
             </div>
 
+            {_position_guide_html(sig)}
             {"<div class='supply-row'>" + supply_html + "</div>" if supply_html else ""}
             {news_html}
             <div class="tags-row">{tags_html}</div>

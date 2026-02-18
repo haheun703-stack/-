@@ -29,6 +29,107 @@ from src.market_signal_scanner import MarketSignalScanner
 
 PROCESSED_DIR = Path(__file__).resolve().parent.parent / "data" / "processed"
 CSV_DIR = Path(__file__).resolve().parent.parent / "stock_data_daily"
+POSITIONS_FILE = Path(__file__).resolve().parent.parent / "data" / "positions.json"
+
+# ── 포지션 사이징 설정 ──
+CAPITAL = 100_000_000       # 1억 (사용자 수정 가능)
+MAX_POSITIONS = 5           # 최대 동시 보유
+MAX_DAILY_ENTRY = 2         # 일일 최대 신규 진입
+
+
+# =========================================================
+# 포지션 관리 (positions.json)
+# =========================================================
+
+import json
+from datetime import date as _date
+
+
+def _tick_size(price: float) -> int:
+    """한국 주식 호가 단위 반환."""
+    if price < 2_000: return 1
+    if price < 5_000: return 5
+    if price < 20_000: return 10
+    if price < 50_000: return 50
+    if price < 200_000: return 100
+    if price < 500_000: return 500
+    return 1_000
+
+
+def load_positions() -> dict:
+    """positions.json 로드. 없으면 초기 구조 반환."""
+    default = {
+        "capital": CAPITAL,
+        "positions": [],
+        "daily_entries_today": 0,
+        "last_entry_date": "",
+    }
+    if POSITIONS_FILE.exists():
+        try:
+            data = json.loads(POSITIONS_FILE.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and "positions" in data:
+                return data
+            # 구 포맷(배열 등) → 마이그레이션
+            if isinstance(data, list):
+                default["positions"] = data
+                return default
+        except Exception:
+            pass
+    return default
+
+
+def save_positions(data: dict):
+    """positions.json 저장."""
+    POSITIONS_FILE.parent.mkdir(exist_ok=True)
+    POSITIONS_FILE.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+
+
+def calc_position_guide(sig: dict, capital: float, held_count: int) -> dict:
+    """포지션 사이징 가이드 계산.
+
+    Returns:
+        {"alloc": 금액, "pct": 비율, "shares": 수량, "label": "매수"/"대기"}
+    """
+    base = capital / MAX_POSITIONS
+
+    # Grade 가중
+    grade_mult = {"S": 1.2, "A": 1.0, "B": 0.8}.get(
+        sig.get("position_grade", "B"), 0.8
+    )
+
+    # Freshness 가중 (counter 기반)
+    counter = sig.get("trix_counter", 0)
+    if counter <= 3:
+        fresh_mult = 1.0
+    elif counter <= 7:
+        fresh_mult = 0.8
+    else:
+        fresh_mult = 0.5
+
+    alloc = base * grade_mult * fresh_mult
+    alloc = min(alloc, capital * 0.30)  # 30% 상한
+
+    price = sig.get("entry_price", 0)
+    if price <= 0:
+        return {"alloc": 0, "pct": 0, "shares": 0, "label": "N/A"}
+
+    tick = _tick_size(price)
+    shares = int(alloc / price)
+    # 호가 단위에 맞추기 (1주 단위이므로 shares 자체는 정수면 OK)
+    actual_cost = shares * price
+
+    return {
+        "alloc": int(actual_cost),
+        "pct": round(actual_cost / capital * 100, 1),
+        "shares": shares,
+        "price": price,
+        "grade_mult": grade_mult,
+        "fresh_mult": fresh_mult,
+        "label": "",  # scan_all에서 설정
+    }
 
 
 # =========================================================
@@ -961,6 +1062,25 @@ def scan_all(
     """
     from src.signal_engine import SignalEngine
 
+    # 포지션 상태 로드
+    pos_data = load_positions()
+    held_tickers = {p["ticker"] for p in pos_data.get("positions", [])}
+    held_count = len(held_tickers)
+    available_slots = MAX_POSITIONS - held_count
+
+    # 일일 진입 카운트 (날짜 리셋)
+    today_str = str(_date.today())
+    if pos_data.get("last_entry_date", "") != today_str:
+        pos_data["daily_entries_today"] = 0
+        pos_data["last_entry_date"] = today_str
+    daily_entries_used = pos_data.get("daily_entries_today", 0)
+    daily_entries_left = MAX_DAILY_ENTRY - daily_entries_used
+
+    if held_tickers:
+        held_names = [p.get("name", p["ticker"]) for p in pos_data["positions"]]
+        print(f"  보유 중: {', '.join(held_names)} ({held_count}/{MAX_POSITIONS}슬롯)")
+    print(f"  가용 슬롯: {available_slots} | 금일 진입 여유: {daily_entries_left}")
+
     # 데이터 신선도 검증 (대책 D)
     freshness = validate_data_freshness()
     print(f"  데이터 신선도: {freshness['msg']}")
@@ -1275,6 +1395,36 @@ def scan_all(
     else:
         stats["dart_catalyst_count"] = 0
 
+    # -- 보유 종목 제외 + 포지션 사이징 가이드 --
+    if held_tickers:
+        before = len(survivors)
+        survivors = [s for s in survivors if s["ticker"] not in held_tickers]
+        excluded = before - len(survivors)
+        if excluded:
+            print(f"\n보유 중 제외: {excluded}종목")
+        stats["held_excluded"] = excluded
+
+    capital = pos_data.get("capital", CAPITAL)
+    entry_idx = 0
+    for sig in survivors:
+        # position_grade: S=1위, A=2위, B=3위 이하
+        rank = survivors.index(sig) + 1
+        sig["position_grade"] = {1: "S", 2: "A"}.get(rank, "B")
+        guide = calc_position_guide(sig, capital, held_count)
+
+        if entry_idx < daily_entries_left and entry_idx < available_slots:
+            guide["label"] = "매수"
+            entry_idx += 1
+        else:
+            guide["label"] = "대기"
+
+        sig["position_guide"] = guide
+
+    stats["available_slots"] = available_slots
+    stats["daily_entries_left"] = daily_entries_left
+    stats["held_count"] = held_count
+    stats["capital"] = capital
+
     stats["elapsed_sec"] = round(time.time() - t0, 1)
     return survivors, stats
 
@@ -1301,8 +1451,8 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     lines = []
 
     # -- Header --
-    lines.append(f"[Quantum Master v10.0] {now}")
-    lines.append("Kill \u2192 Rank \u2192 Tag | S/A/B/C/D 등급제")
+    lines.append(f"[Quantum Master v10.1] {now}")
+    lines.append("Kill \u2192 Rank \u2192 Tag + Position | S/A/B/C/D")
     lines.append("")
 
     # -- US Overnight --
@@ -1349,6 +1499,19 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     if stats.get("news_sec", 0) > 0:
         scan_time += f" +뉴스 {stats['news_sec']:.0f}s"
     lines.append(f"소요: {scan_time}")
+    lines.append("")
+
+    # -- 포지션 상태 --
+    held_n = stats.get("held_count", 0)
+    avail = stats.get("available_slots", MAX_POSITIONS)
+    daily_left = stats.get("daily_entries_left", MAX_DAILY_ENTRY)
+    cap = stats.get("capital", CAPITAL)
+    lines.append(f"\u2550\u2550 포지션 ({held_n}/{MAX_POSITIONS}) \u2550\u2550")
+    lines.append(f"자본 {cap/1e8:.1f}억 | 가용 {avail}슬롯 | 금일 진입여유 {daily_left}건")
+    if held_n > 0:
+        pos_data = load_positions()
+        for p in pos_data.get("positions", []):
+            lines.append(f"  보유: {p.get('name', p['ticker'])} ({p.get('entry_date','')}~)")
     lines.append("")
 
     if not candidates:
@@ -1430,6 +1593,16 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
             f"RSI {rsi:.0f} | ADX {adx:.0f} | {di_dir} | \uac70\ub798\ub7c9 \u00d7{vol_s:.1f}"
         )
 
+        # 포지션 가이드
+        guide = sig.get("position_guide")
+        if guide and guide.get("shares", 0) > 0:
+            label_icon = "\U0001f7e2" if guide["label"] == "매수" else "\u23f8"
+            lines.append(
+                f"{label_icon} {guide['label']} | "
+                f"{guide['alloc']/1e4:,.0f}만원 ({guide['pct']}%) | "
+                f"{guide['shares']}주 \u00d7 {guide['price']:,}원"
+            )
+
         # 수급 정보
         f_streak = sig.get("foreign_streak", 0)
         i_streak = sig.get("inst_streak", 0)
@@ -1471,7 +1644,7 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
 
     # -- Footer --
     lines.append("")
-    lines.append("\u26a0 \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master v10.0")
+    lines.append("\u26a0 \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master v10.1")
 
     return "\n".join(lines)
 
@@ -1486,12 +1659,55 @@ def main():
     parser.add_argument("--universe", type=str, default="parquet",
                         choices=["parquet", "all"],
                         help="parquet: 101종목만 | all: 전체 KOSPI/KOSDAQ CSV 포함")
+    parser.add_argument("--buy", type=str, default="",
+                        help="매수 확정 (종목코드, 쉼표 구분: '012330,005930')")
+    parser.add_argument("--sell", type=str, default="",
+                        help="매도 확정 (종목코드, 쉼표 구분)")
+    parser.add_argument("--capital", type=int, default=0,
+                        help="자본금 설정 (0이면 기존값 유지)")
+    parser.add_argument("--show-positions", action="store_true",
+                        help="보유 종목 현황만 표시")
     args = parser.parse_args()
+
+    # -- 보유 현황 조회 --
+    if args.show_positions:
+        pos_data = load_positions()
+        positions = pos_data.get("positions", [])
+        cap = pos_data.get("capital", CAPITAL)
+        print(f"자본: {cap/1e4:,.0f}만원 | 보유: {len(positions)}/{MAX_POSITIONS}")
+        for p in positions:
+            print(f"  {p['name']}({p['ticker']}) | {p.get('entry_date','')} | "
+                  f"{p.get('shares',0)}주 × {p.get('entry_price',0):,}원 = "
+                  f"{p.get('amount',0)/1e4:,.0f}만원")
+        if not positions:
+            print("  (보유 종목 없음)")
+        return
+
+    # -- 자본금 업데이트 --
+    if args.capital > 0:
+        pos_data = load_positions()
+        pos_data["capital"] = args.capital
+        save_positions(pos_data)
+        print(f"자본금 설정: {args.capital/1e4:,.0f}만원")
+
+    # -- 매도 처리 --
+    if args.sell:
+        sell_tickers = [t.strip() for t in args.sell.split(",") if t.strip()]
+        pos_data = load_positions()
+        before = len(pos_data["positions"])
+        pos_data["positions"] = [
+            p for p in pos_data["positions"] if p["ticker"] not in sell_tickers
+        ]
+        removed = before - len(pos_data["positions"])
+        save_positions(pos_data)
+        print(f"매도 처리: {removed}종목 제거")
+        if not any([args.grade != "A", not args.no_send]):
+            return
 
     dart_label = " + DART" if args.dart else ""
     uni_label = " [전종목]" if args.universe == "all" else ""
     print("=" * 50)
-    print(f"  [Quant v10.0] Kill\u2192Rank\u2192Tag{dart_label}{uni_label}")
+    print(f"  [Quant v10.1] Kill\u2192Rank\u2192Tag + Position{dart_label}{uni_label}")
     print(f"  Kill(K3~K12) \u2192 Rank(R:R\u00d7Zone\u00d7Freshness) \u2192 Tag")
     print("=" * 50)
 
@@ -1525,7 +1741,7 @@ def main():
         if png_path and png_path.exists():
             from src.html_report import send_report_to_telegram
             print("\nSending report image to Telegram...")
-            caption = f"[Quantum Master v10.0] 장시작전 분석 | {len(candidates)}종목 S/A/B/C/D"
+            caption = f"[Quantum Master v10.1] 장시작전 분석 | {len(candidates)}종목 S/A/B/C/D"
             img_ok = send_report_to_telegram(png_path, caption)
             print("OK - Report image sent" if img_ok else "FAIL - Image send")
 
@@ -1540,6 +1756,45 @@ def main():
     output_path.parent.mkdir(exist_ok=True)
     output_path.write_text(msg, encoding="utf-8")
     print(f"Saved: {output_path}")
+
+    # -- 매수 확정 처리 --
+    if args.buy and candidates:
+        buy_tickers = [t.strip() for t in args.buy.split(",") if t.strip()]
+        pos_data = load_positions()
+        today_str = str(_date.today())
+        added = 0
+
+        for sig in candidates:
+            if sig["ticker"] not in buy_tickers:
+                continue
+            guide = sig.get("position_guide", {})
+            if guide.get("shares", 0) <= 0:
+                print(f"  {sig['name']}: 포지션 계산 불가, 건너뜀")
+                continue
+
+            # 중복 체크
+            if any(p["ticker"] == sig["ticker"] for p in pos_data["positions"]):
+                print(f"  {sig['name']}: 이미 보유 중, 건너뜀")
+                continue
+
+            pos_data["positions"].append({
+                "ticker": sig["ticker"],
+                "name": sig["name"],
+                "entry_date": today_str,
+                "entry_price": sig["entry_price"],
+                "shares": guide["shares"],
+                "amount": guide["alloc"],
+                "grade": sig.get("position_grade", "B"),
+                "trix_counter_at_entry": sig.get("trix_counter", 0),
+            })
+            added += 1
+            print(f"  매수 기록: {sig['name']} | {guide['shares']}주 × "
+                  f"{sig['entry_price']:,}원 = {guide['alloc']/1e4:,.0f}만원")
+
+        pos_data["daily_entries_today"] = pos_data.get("daily_entries_today", 0) + added
+        pos_data["last_entry_date"] = today_str
+        save_positions(pos_data)
+        print(f"\npositions.json 업데이트: +{added}종목 (총 {len(pos_data['positions'])}종목)")
 
 
 if __name__ == "__main__":
