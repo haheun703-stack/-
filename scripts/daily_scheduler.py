@@ -90,6 +90,7 @@ class DailyScheduler:
         self._is_holiday = False
         self._buy_signals: list[dict] = []
         self._supply_snapshots: list[dict] = []  # 장중 수급 스냅샷 누적
+        self._cmd_bot = None  # 텔레그램 명령 봇
 
         logger.info(
             "DailyScheduler v5.0 초기화 (enabled=%s, mode=%s)",
@@ -823,7 +824,15 @@ class DailyScheduler:
         for job in sched.get_jobs():
             logger.info("  %s", job)
 
-        self._notify("v5.0 스케줄러 시작됨")
+        # 텔레그램 명령 봇 시작 (백그라운드 스레드)
+        try:
+            from src.telegram_command_handler import TelegramCommandBot
+            self._cmd_bot = TelegramCommandBot(scheduler=self)
+            self._cmd_bot.start()
+        except Exception as e:
+            logger.warning("[스케줄러] 텔레그램 명령 봇 시작 실패: %s", e)
+
+        self._notify("v5.0 스케줄러 시작됨 (명령봇 활성)")
 
         while True:
             try:
@@ -833,11 +842,15 @@ class DailyScheduler:
                 if guard.check_reboot_trigger():
                     logger.info("[스케줄러] reboot.trigger 감지 — 재시작")
                     self._notify("스케줄러 재시작 중...")
+                    if self._cmd_bot:
+                        self._cmd_bot.stop()
                     time.sleep(10)
                     self.__init__()
                     continue
             except KeyboardInterrupt:
                 logger.info("[스케줄러] Ctrl+C — 종료")
+                if self._cmd_bot:
+                    self._cmd_bot.stop()
                 self._notify("스케줄러 종료됨")
                 break
             except Exception as e:
