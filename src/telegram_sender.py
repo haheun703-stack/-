@@ -26,7 +26,12 @@ API_BASE = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 MAX_MESSAGE_LENGTH = 4096
 
 
-def send_message(text: str, chat_id: str = None, parse_mode: str = None) -> bool:
+def send_message(
+    text: str,
+    chat_id: str = None,
+    parse_mode: str = None,
+    reply_markup: dict = None,
+) -> bool:
     """
     텔레그램 메시지 전송.
 
@@ -34,6 +39,7 @@ def send_message(text: str, chat_id: str = None, parse_mode: str = None) -> bool
         text: 전송할 메시지 (4096자 초과 시 자동 분할)
         chat_id: 대상 채팅 ID (없으면 .env 값 사용)
         parse_mode: "HTML" / "MarkdownV2" / None (plain text)
+        reply_markup: ReplyKeyboardMarkup / InlineKeyboardMarkup dict
 
     Returns:
         True if all parts sent successfully
@@ -58,6 +64,9 @@ def send_message(text: str, chat_id: str = None, parse_mode: str = None) -> bool
         }
         if parse_mode:
             payload["parse_mode"] = parse_mode
+        # reply_markup은 마지막 청크에만 첨부
+        if reply_markup and i == len(chunks) - 1:
+            payload["reply_markup"] = reply_markup
 
         try:
             resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
@@ -75,6 +84,49 @@ def send_message(text: str, chat_id: str = None, parse_mode: str = None) -> bool
         logger.info(f"텔레그램 메시지 전송 완료 ({len(chunks)}건)")
 
     return success
+
+
+def answer_callback_query(
+    callback_query_id: str, text: str = "", show_alert: bool = False,
+) -> bool:
+    """InlineKeyboard 버튼 클릭 응답 (토스트 메시지)."""
+    payload: dict = {"callback_query_id": callback_query_id}
+    if text:
+        payload["text"] = text
+    if show_alert:
+        payload["show_alert"] = True
+    try:
+        resp = requests.post(f"{API_BASE}/answerCallbackQuery", json=payload, timeout=10)
+        return resp.status_code == 200 and resp.json().get("ok", False)
+    except requests.RequestException as e:
+        logger.error(f"answerCallbackQuery 오류: {e}")
+        return False
+
+
+def edit_message_text(
+    chat_id: str,
+    message_id: int,
+    text: str,
+    reply_markup: dict = None,
+    parse_mode: str = None,
+) -> bool:
+    """기존 메시지 텍스트 수정 (확인/취소 후 결과 업데이트)."""
+    target_chat = chat_id or TELEGRAM_CHAT_ID
+    payload: dict = {
+        "chat_id": target_chat,
+        "message_id": message_id,
+        "text": text,
+    }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
+    try:
+        resp = requests.post(f"{API_BASE}/editMessageText", json=payload, timeout=10)
+        return resp.status_code == 200 and resp.json().get("ok", False)
+    except requests.RequestException as e:
+        logger.error(f"editMessageText 오류: {e}")
+        return False
 
 
 def send_backtest_report(results: dict, scan_date: str = None) -> bool:
