@@ -146,13 +146,9 @@ class TelegramCommandBot:
             self._reply_kb("\u274c 취소되었습니다.")
             return
 
-        # 대화 진행 중이면 FSM으로 위임
-        if not self._conv.is_idle():
-            self._handle_conversation(text)
-            return
-
-        # /슬래시 명령어
+        # /슬래시 명령어 (FSM보다 우선)
         if text.startswith("/"):
+            self._conv.reset()  # 슬래시 명령 시 대화 초기화
             parts = text.split()
             cmd = parts[0].lower().split("@")[0]
             args = parts[1:]
@@ -167,19 +163,26 @@ class TelegramCommandBot:
                 self._reply_kb(f"\u2753 알 수 없는 명령: {cmd}\n하단 버튼을 사용하세요.")
             return
 
-        # 키보드 버튼 텍스트 (첫 단어로 라우팅)
+        # 키보드 버튼 텍스트 (FSM보다 우선 — 첫 단어로 매칭)
         parts = text.split()
         btn_cmd = parts[0]
         btn_args = parts[1:]
         handler = TEXT_COMMANDS.get(btn_cmd)
         if handler:
+            self._conv.reset()  # 버튼 명령 시 대화 초기화
             try:
                 handler(self, btn_args)
             except Exception as e:
                 logger.error("[명령봇] %s 오류: %s", btn_cmd, e)
                 self._reply_kb(f"\u274c 오류: {e}")
-        else:
-            self._reply_kb(f"\u2753 알 수 없는 입력: {text}\n하단 버튼을 사용하세요.")
+            return
+
+        # 대화 진행 중이면 FSM으로 위임
+        if not self._conv.is_idle():
+            self._handle_conversation(text)
+            return
+
+        self._reply_kb(f"\u2753 알 수 없는 입력: {text}\n하단 버튼을 사용하세요.")
 
     # ══════════════════════════════════════════
     # 응답 헬퍼
