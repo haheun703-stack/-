@@ -492,18 +492,65 @@ def _build_html(
 </html>"""
 
 
+def _rank_to_grade(rank: int) -> str:
+    """순위 → 등급 변환 (1=S, 2=A, 3=B, 4=C, 5+=D)."""
+    return {1: "S", 2: "A", 3: "B", 4: "C"}.get(rank, "D")
+
+
+def _grade_color(grade: str) -> str:
+    """등급별 강조 색상."""
+    return {"S": "#f0883e", "A": "#58a6ff", "B": "#3fb950", "C": "#8b949e", "D": "#484f58"}.get(grade, "#8b949e")
+
+
 def _build_html_v9(
     candidates: list[dict],
     stats: dict,
     date_str: str,
     time_str: str,
 ) -> str:
-    """v9.0 C+E 하이브리드 보고서 HTML 생성."""
+    """v10.0 Kill→Rank→Tag 보고서 HTML (S/A/B/C/D 등급제)."""
+    import json
 
-    # Kill/Trap 통계
+    # Kill 통계
     killed = stats.get("v9_killed", 0)
-    trapped = stats.get("v9_trapped", 0)
     survivors = stats.get("v9_survivors", 0)
+
+    # US Overnight Signal 로드
+    us_html = ""
+    try:
+        signal_path = Path("data/us_market/overnight_signal.json")
+        if signal_path.exists():
+            with open(signal_path, "r", encoding="utf-8") as f:
+                us_signal = json.load(f)
+            us_grade = us_signal.get("grade", "NEUTRAL")
+            us_combined = us_signal.get("combined_score_100", 0)
+            idx_dir = us_signal.get("index_direction", {})
+            spy_r = idx_dir.get("SPY", {}).get("ret_1d", 0)
+            qqq_r = idx_dir.get("QQQ", {}).get("ret_1d", 0)
+            ewy_r = idx_dir.get("EWY", {}).get("ret_1d", 0)
+            us_vix = us_signal.get("vix", {})
+            vix_level = us_vix.get("level", "?")
+            vix_status = us_vix.get("status", "?")
+
+            # 등급별 색상
+            us_color = "#f85149" if "BEAR" in us_grade else "#3fb950" if "BULL" in us_grade else "#d29922"
+
+            us_html = f"""
+    <div class="us-overnight">
+        <div class="us-header">
+            <span class="us-label">US Overnight</span>
+            <span class="us-grade" style="color:{us_color}">{us_grade}</span>
+            <span class="us-score" style="color:{us_color}">{us_combined:+.1f}</span>
+        </div>
+        <div class="us-detail">
+            <span class="us-item {'up' if ewy_r >= 0 else 'down'}">EWY {ewy_r:+.1f}%</span>
+            <span class="us-item {'up' if spy_r >= 0 else 'down'}">SPY {spy_r:+.1f}%</span>
+            <span class="us-item {'up' if qqq_r >= 0 else 'down'}">QQQ {qqq_r:+.1f}%</span>
+            <span class="us-item">VIX {vix_level} [{vix_status}]</span>
+        </div>
+    </div>"""
+    except Exception:
+        pass
 
     # 종목 카드 HTML
     cards_html = ""
@@ -512,9 +559,12 @@ def _build_html_v9(
         zone = sig.get("zone_score", 0)
         rr = sig.get("risk_reward", 0)
         boost = sig.get("v9_catalyst_boost", 1.0)
+        us_m = sig.get("v9_us_mult", 1.0)
+        den_m = sig.get("v9_density_mult", 1.0)
         tags = sig.get("v9_tags", [])
-        grade = sig.get("grade", "?")
+        pipe_grade = sig.get("grade", "?")
         trigger = sig.get("trigger_type", "?")
+        trigger_label = {"confirm": "확인매수", "impulse": "IMP", "setup": "SETUP"}.get(trigger, trigger)
 
         entry = sig.get("entry_price", 0)
         target = sig.get("target_price", 0)
@@ -526,31 +576,93 @@ def _build_html_v9(
         max_rank = candidates[0].get("v9_rank_score", 1) if candidates else 1
         rank_pct = min(rank_score / max(max_rank, 0.01) * 100, 100)
 
-        boost_html = ' <span class="catalyst-badge">x1.10 촉매</span>' if boost > 1.0 else ""
+        # 등급 + 색상
+        grade_label = _rank_to_grade(i)
+        g_color = _grade_color(grade_label)
+
+        fresh_m = sig.get("v9_freshness_mult", 1.0)
+        counter = sig.get("trix_counter", 0)
+        counter_label = f"GC+{counter}" if counter > 0 else f"DC{counter}"
+
+        # 배수 정보
+        fresh_html = f' <span class="fresh-badge">F&times;{fresh_m:.2f}</span>' if fresh_m != 1.0 else ""
+        boost_html = ' <span class="catalyst-badge">&times;1.10 촉매</span>' if boost > 1.0 else ""
+        us_html_mod = f' <span class="us-mod">US{us_m:.2f}</span>' if us_m != 1.0 else ""
+        den_label = "저밀도&uarr;" if den_m > 1.0 else "고밀도&darr;" if den_m < 1.0 else ""
+        den_html = f' <span class="den-mod">{den_label}</span>' if den_label else ""
         tags_html = "".join(f'<span class="tag-badge">{t}</span>' for t in tags)
 
-        rank_class = "rank-1" if i == 1 else ""
+        # 수급 정보
+        f_streak = sig.get("foreign_streak", 0)
+        i_streak = sig.get("inst_streak", 0)
+        supply_parts = []
+        if f_streak > 0:
+            supply_parts.append(f'<span class="supply-buy">외국인 {f_streak}D 연속매수</span>')
+        elif f_streak < 0:
+            supply_parts.append(f'<span class="supply-sell">외국인 {abs(f_streak)}D 연속매도</span>')
+        if i_streak > 0:
+            supply_parts.append(f'<span class="supply-buy">기관 {i_streak}D 연속매수</span>')
+        elif i_streak < 0:
+            supply_parts.append(f'<span class="supply-sell">기관 {abs(i_streak)}D 연속매도</span>')
+        supply_html = " ".join(supply_parts)
+
+        # DI 방향
+        plus_di = sig.get("plus_di", 0)
+        minus_di = sig.get("minus_di", 0)
+        di_dir = "매수세" if plus_di > minus_di else "매도세"
+        di_class = "positive" if plus_di > minus_di else "negative"
+
+        # 뉴스 요약
+        news_html = ""
+        news_data = sig.get("news_data")
+        if news_data:
+            sentiment = news_data.get("overall_sentiment", "중립")
+            if sentiment in ("긍정", "positive"):
+                s_badge = '<span class="badge positive">긍정</span>'
+            elif sentiment in ("부정", "negative"):
+                s_badge = '<span class="badge negative">부정</span>'
+            else:
+                s_badge = '<span class="badge neutral">중립</span>'
+            takeaway = news_data.get("key_takeaway", "")[:80]
+            news_html = f"""
+            <div class="news-row">
+                <span class="news-label">뉴스</span> {s_badge}
+                {"<span class='takeaway'>" + takeaway + "</span>" if takeaway else ""}
+            </div>"""
+
+        rank_class = "rank-s" if i == 1 else ""
+
+        # 시총 표시
+        mcap = sig.get("market_cap", 0)
+        mcap_str = f"{mcap / 1e12:.1f}조" if mcap >= 1e12 else f"{mcap / 1e8:,.0f}억" if mcap > 0 else ""
+        avg_tv = sig.get("avg_trading_value_20d", 0)
+        size_str = f" | 시총 {mcap_str}" if mcap_str else ""
+        size_str += f" | 거래대금 {avg_tv / 1e8:.0f}억/일" if avg_tv > 0 else ""
 
         cards_html += f"""
-        <div class="stock-card {rank_class}">
+        <div class="stock-card {rank_class}" style="border-left: 4px solid {g_color}">
             <div class="card-header">
-                <div class="rank">#{i}</div>
+                <div class="grade-badge" style="background:{g_color}">{grade_label}</div>
                 <div class="stock-info">
                     <div class="stock-name">{sig.get('name', sig['ticker'])}</div>
-                    <div class="stock-code">{sig['ticker']} | Grade {grade} | {trigger}</div>
+                    <div class="stock-code">{sig['ticker']} | {trigger_label}{size_str}</div>
                 </div>
-                <div class="rank-score">{rank_score:.3f}</div>
+                <div class="rank-score" style="color:{g_color}">{rank_score:.3f}</div>
             </div>
 
             <div class="rank-formula">
-                R:R({rr:.1f}) &times; Zone({zone:.2f}){boost_html} = {rank_score:.3f}
+                R:R({rr:.1f}) &times; Zone({zone:.2f}){fresh_html}{boost_html}{us_html_mod}{den_html} = {rank_score:.3f}
+            </div>
+            <div class="trix-row">
+                <span class="indicator">TRIX {counter_label}일</span>
+                <span class="indicator">Freshness &times;{fresh_m:.2f}</span>
             </div>
 
             <div class="score-bars">
                 <div class="score-row">
                     <span class="score-label">Rank</span>
                     <div class="bar-container">
-                        <div class="bar bar-rank" style="width:{rank_pct:.0f}%"></div>
+                        <div class="bar" style="width:{rank_pct:.0f}%; background: linear-gradient(90deg, {g_color}88, {g_color})"></div>
                     </div>
                     <span class="score-value">{rank_score:.3f}</span>
                 </div>
@@ -568,9 +680,13 @@ def _build_html_v9(
             <div class="indicators-row">
                 <span class="indicator">RSI {sig.get('rsi', 0):.0f}</span>
                 <span class="indicator">ADX {sig.get('adx', 0):.0f}</span>
+                <span class="indicator badge {di_class}">{di_dir}</span>
+                <span class="indicator">거래량 &times;{sig.get('vol_surge', 1.0):.1f}</span>
                 <span class="indicator">Zone {zone:.2f}</span>
             </div>
 
+            {"<div class='supply-row'>" + supply_html + "</div>" if supply_html else ""}
+            {news_html}
             <div class="tags-row">{tags_html}</div>
         </div>
         """
@@ -580,7 +696,7 @@ def _build_html_v9(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>v9.0 C+E 장시작전 분석 - {date_str}</title>
+<title>Quantum Master v10.0 장시작전 분석 - {date_str}</title>
 <style>
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
     body {{
@@ -599,8 +715,8 @@ def _build_html_v9(
         margin-bottom: 20px;
     }}
     .report-title {{
-        font-size: 22px;
-        font-weight: 700;
+        font-size: 24px;
+        font-weight: 800;
         color: #f0883e;
         letter-spacing: 1px;
     }}
@@ -610,6 +726,42 @@ def _build_html_v9(
         margin-top: 6px;
     }}
 
+    .us-overnight {{
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }}
+    .us-header {{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 6px;
+    }}
+    .us-label {{
+        font-size: 12px;
+        font-weight: 600;
+        color: #8b949e;
+    }}
+    .us-grade {{
+        font-size: 16px;
+        font-weight: 800;
+    }}
+    .us-score {{
+        font-size: 20px;
+        font-weight: 700;
+        margin-left: auto;
+    }}
+    .us-detail {{
+        display: flex;
+        gap: 16px;
+        font-size: 13px;
+    }}
+    .us-item.up {{ color: #3fb950; }}
+    .us-item.down {{ color: #f85149; }}
+    .us-item {{ color: #8b949e; }}
+
     .stats-bar {{
         display: flex;
         justify-content: space-around;
@@ -617,7 +769,7 @@ def _build_html_v9(
         border: 1px solid #30363d;
         border-radius: 8px;
         padding: 12px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         font-size: 13px;
     }}
     .stat-item {{ text-align: center; }}
@@ -628,13 +780,13 @@ def _build_html_v9(
         background: #161b22;
         border: 1px solid #30363d;
         border-radius: 8px;
-        padding: 12px 16px;
+        padding: 10px 14px;
         margin-bottom: 20px;
-        font-size: 12px;
-        color: #8b949e;
+        font-size: 11px;
+        color: #6e7681;
         line-height: 1.6;
     }}
-    .pipeline-info strong {{ color: #f0883e; }}
+    .pipeline-info strong {{ color: #8b949e; }}
 
     .stock-card {{
         background: #161b22;
@@ -643,7 +795,7 @@ def _build_html_v9(
         padding: 16px;
         margin-bottom: 14px;
     }}
-    .stock-card.rank-1 {{
+    .stock-card.rank-s {{
         border-color: #f0883e;
         box-shadow: 0 0 12px rgba(240, 136, 62, 0.15);
     }}
@@ -654,20 +806,24 @@ def _build_html_v9(
         gap: 12px;
         margin-bottom: 8px;
     }}
-    .rank {{
-        font-size: 16px;
-        font-weight: 800;
-        color: #8b949e;
-        min-width: 32px;
+    .grade-badge {{
+        font-size: 18px;
+        font-weight: 900;
+        color: #0d1117;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        flex-shrink: 0;
     }}
-    .rank-1 .rank {{ color: #f0883e; font-size: 20px; }}
     .stock-name {{ font-size: 17px; font-weight: 700; }}
     .stock-code {{ font-size: 12px; color: #8b949e; }}
     .rank-score {{
         margin-left: auto;
         font-size: 28px;
         font-weight: 800;
-        color: #f0883e;
     }}
 
     .rank-formula {{
@@ -678,9 +834,41 @@ def _build_html_v9(
         background: #1a1e26;
         border-radius: 6px;
     }}
+    .fresh-badge {{
+        background: #da3633;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }}
+    .trix-row {{
+        padding: 4px 0;
+        font-size: 11px;
+        color: #8b949e;
+    }}
+    .trix-row .indicator {{
+        margin-right: 12px;
+    }}
     .catalyst-badge {{
         background: #3fb950;
         color: #0d1117;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }}
+    .us-mod {{
+        background: #1f6feb;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }}
+    .den-mod {{
+        background: #8957e5;
+        color: #fff;
         padding: 2px 6px;
         border-radius: 4px;
         font-size: 10px;
@@ -721,6 +909,47 @@ def _build_html_v9(
         border-radius: 4px;
         color: #c9d1d9;
     }}
+    .badge {{ font-weight: 600; }}
+    .badge.positive {{ background: #1a3a2a; color: #3fb950; }}
+    .badge.negative {{ background: #3a1a1a; color: #f85149; }}
+    .badge.neutral {{ background: #2a2a1a; color: #d29922; }}
+
+    .supply-row {{
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+    }}
+    .supply-buy {{
+        font-size: 11px;
+        color: #3fb950;
+        background: #1a3a2a;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }}
+    .supply-sell {{
+        font-size: 11px;
+        color: #f85149;
+        background: #3a1a1a;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }}
+
+    .news-row {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 11px;
+    }}
+    .news-label {{
+        font-weight: 600;
+        color: #8b949e;
+    }}
+    .takeaway {{
+        color: #c9d1d9;
+        font-style: italic;
+    }}
 
     .tags-row {{
         display: flex;
@@ -760,7 +989,6 @@ def _build_html_v9(
         height: 100%;
         border-radius: 5px;
     }}
-    .bar-rank {{ background: linear-gradient(90deg, #f0883e, #ffa657); }}
     .score-value {{
         font-size: 11px;
         font-weight: 600;
@@ -782,22 +1010,24 @@ def _build_html_v9(
 <body>
 
 <div class="report-header">
-    <div class="report-title">Quant v9.0 C+E Hybrid</div>
-    <div class="report-subtitle">{date_str} {time_str} | Kill &rarr; Rank &rarr; Tag</div>
+    <div class="report-title">Quantum Master v10.0</div>
+    <div class="report-subtitle">{date_str} {time_str} | Kill &rarr; Rank &rarr; Tag | S/A/B/C/D</div>
 </div>
+
+{us_html}
 
 <div class="stats-bar">
     <div class="stat-item">
-        <div class="stat-value">{stats.get('after_grade_filter', 0)}</div>
-        <div class="stat-label">후보</div>
+        <div class="stat-value">{stats.get('total', 0)}</div>
+        <div class="stat-label">스캔</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{stats.get('passed_pipeline', 0)}</div>
+        <div class="stat-label">Pipeline</div>
     </div>
     <div class="stat-item">
         <div class="stat-value">{killed}</div>
         <div class="stat-label">Kill</div>
-    </div>
-    <div class="stat-item">
-        <div class="stat-value">{trapped}</div>
-        <div class="stat-label">Trap</div>
     </div>
     <div class="stat-item">
         <div class="stat-value">{survivors}</div>
@@ -806,18 +1036,17 @@ def _build_html_v9(
 </div>
 
 <div class="pipeline-info">
-    <strong>v9.0 C+E Pipeline</strong><br>
-    Kill(5): Zone &lt; th | R:R &lt; th | Trigger D | 유동성 &lt; 10억 | 52주고점 근접<br>
-    Trap(6D): Quant&lt;18 &amp; SD&ge;20 &amp; News&ge;15<br>
-    Rank = R:R &times; Zone &times; 촉매부스트(1.10)<br>
-    Tag: SD/News/Consensus &rarr; 참고 태그 (순위 영향 0%)
+    <strong>Kill &rarr; Rank &rarr; Tag Pipeline</strong><br>
+    Kill: K3(Trigger) + K4(&lt;50억) + K5(시총&lt;5000억) + K6(&lt;5000원) + K7(스팩/리츠/우선주) + K8(TRIX DC) + K9(폭락&gt;20%) + K10(MA120&lt;)<br>
+    Rank = R:R &times; Zone &times; 촉매 &times; US부스트 &times; 밀도 | 눌림목 확인 매수 전략<br>
+    등급: S(1위) &gt; A(2위) &gt; B(3위) &gt; C(4위) &gt; D(5위+)
 </div>
 
 {cards_html}
 
 <div class="footer">
-    Quantum Master v9.0 C+E | Kill &rarr; Rank &rarr; Tag<br>
-    자동 생성 보고서 — 투자 판단은 본인 책임
+    Quantum Master v10.0 | Kill &rarr; Rank &rarr; Tag | S/A/B/C/D<br>
+    자동 생성 보고서 &mdash; 투자 판단은 본인 책임
 </div>
 
 </body>

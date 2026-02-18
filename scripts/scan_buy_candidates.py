@@ -2,7 +2,7 @@
 전체 종목 매수 후보 스캔 -> Kill→Rank→Tag -> 텔레그램 발송
 
 v10.0: 4축 100점 제거, Kill 중복 제거, Trap 제거
-  - Kill: K3(트리거) + K4(유동성) — K1/K2/K5는 v8 Gate G1/G2/G3과 중복이므로 제거
+  - Kill: K3(트리거) + K4(유동성) + K5(시총) + K6(저가주) + K7(종목유형) + K8(TRIX) + K9(폭락) + K10(대추세)
   - Rank: R:R × Zone × Catalyst (선행 100%)
   - Tag: 수급 streak 기반 (Part 2에서 5D 교차필터로 확장 예정)
 
@@ -161,6 +161,30 @@ def _calc_streak_csv(series: pd.Series) -> int:
     return count * direction
 
 
+def _calc_trix_counter_csv(df: pd.DataFrame, idx: int) -> int:
+    """CSV용 TRIX counter (컬럼명: TRIX, TRIX_Signal)."""
+    if "TRIX" not in df.columns or "TRIX_Signal" not in df.columns:
+        return 0
+    counter = 0
+    t_now = df["TRIX"].iloc[idx]
+    s_now = df["TRIX_Signal"].iloc[idx]
+    if pd.isna(t_now) or pd.isna(s_now):
+        return 0
+    current_above = t_now > s_now
+    for i in range(idx, max(idx - 60, -1), -1):
+        t = df["TRIX"].iloc[i]
+        s = df["TRIX_Signal"].iloc[i]
+        if pd.isna(t) or pd.isna(s):
+            break
+        if current_above and t > s:
+            counter += 1
+        elif not current_above and t <= s:
+            counter -= 1
+        else:
+            break
+    return counter
+
+
 def quick_csv_score(df: pd.DataFrame, idx: int) -> dict | None:
     """CSV 37컬럼 기반 간이 스코어링.
 
@@ -177,8 +201,8 @@ def quick_csv_score(df: pd.DataFrame, idx: int) -> dict | None:
     if pd.isna(close) or close <= 0:
         return None
 
-    # 동전주 제외 (2,000원 미만)
-    if close < 2000:
+    # 저가주 제외 (5,000원 미만)
+    if close < 5000:
         return None
 
     # --- Zone Score (0~1) ---
@@ -359,12 +383,106 @@ def quick_csv_score(df: pd.DataFrame, idx: int) -> dict | None:
         "consensus": None,
         "market_signals": [],
         "grade": "CSV",
+        # 눌림목 판정 필드
+        "trix": float(trix if not pd.isna(trix) else 0),
+        "trix_signal": float(trix_sig if not pd.isna(trix_sig) else 0),
+        "slope_ma60": 0.0,
+        "above_ma60": bool(not pd.isna(ma60) and close > ma60),
+        "above_ma120": bool(not pd.isna(ma120) and close > ma120),
+        "drawdown_from_high": round((close / h252 - 1) * 100, 1) if h252 > 0 else 0,
+        "vol_contraction": float(vol_surge),
+        "trix_counter": _calc_trix_counter_csv(df, idx),
     }
 
 
 # =========================================================
 # Kill→Rank→Tag 파이프라인
 # =========================================================
+
+
+def calc_trix_counter(df: pd.DataFrame, idx: int) -> int:
+    """TRIX 골든크로스/데드크로스 연속 일수.
+
+    양수: GC N일차 (+1 = 어제 크로스), 음수: DC N일차.
+    """
+    trix_col = df.get("trix")
+    sig_col = df.get("trix_signal")
+    if trix_col is None or sig_col is None:
+        return 0
+
+    counter = 0
+    t_now = trix_col.iloc[idx]
+    s_now = sig_col.iloc[idx]
+    if pd.isna(t_now) or pd.isna(s_now):
+        return 0
+
+    current_above = t_now > s_now
+
+    for i in range(idx, max(idx - 60, -1), -1):
+        t = trix_col.iloc[i]
+        s = sig_col.iloc[i]
+        if pd.isna(t) or pd.isna(s):
+            break
+        if current_above:
+            if t > s:
+                counter += 1
+            else:
+                break
+        else:
+            if t <= s:
+                counter -= 1
+            else:
+                break
+
+    return counter
+
+
+def calc_freshness_mult(counter: int, rsi: float, vol_contraction: float) -> float:
+    """3축 Freshness 배수 (counter × RSI × Vol).
+
+    Returns: 배수 (0이면 Kill 대상)
+    """
+    # --- Kill 조건 (0 반환) ---
+    if counter <= 0:
+        return 0.0  # DC → Gate Kill
+    if counter >= 16:
+        return 0.0  # 과열 Kill
+    if vol_contraction > 2.0:
+        return 0.0  # 투매 Kill
+
+    # --- Counter 축 ---
+    if counter <= 3:
+        c_mult = 1.15  # 최적: 막 돌아선 자리
+    elif counter <= 7:
+        c_mult = 1.00  # 정상: 추세 초기
+    else:  # 8~15
+        c_mult = 0.70  # 늦음: 포지션 축소
+
+    # --- RSI 축 ---
+    if rsi < 35:
+        r_mult = 1.00  # 과매도 (반등 기대하지만 불확실)
+    elif rsi <= 55:
+        r_mult = 1.00  # 저평가 구간 (최적)
+    elif rsi <= 65:
+        r_mult = 0.90  # 중립
+    else:  # 65+
+        r_mult = 0.75  # 과열 시작
+
+    # --- Vol 축 ---
+    if vol_contraction < 0.7:
+        v_mult = 1.05  # 거래량 수축 (매도 소진 확인)
+    elif vol_contraction <= 1.3:
+        v_mult = 1.00  # 보통
+    else:  # 1.3~2.0
+        v_mult = 0.85  # 거래량 증가 (주의)
+
+    # --- 복합 판정 ---
+    # counter 8~15 + RSI 65+ = Kill (너무 늦은 과열 진입)
+    if counter >= 8 and rsi > 65:
+        return 0.0
+
+    return round(c_mult * r_mult * v_mult, 3)
+
 
 def detect_regime() -> dict:
     """공매도 상태 판정 (로깅 + 향후 G4용)."""
@@ -389,9 +507,16 @@ def detect_regime() -> dict:
 
 
 def kill_filters(sig: dict) -> tuple[bool, list[str]]:
-    """Kill Filters — K3(트리거) + K4(유동성).
+    """Kill Filters — K3~K10.
 
-    K1(Zone), K2(R:R), K5(고점근접)은 v8 Gate G1/G2/G3과 중복 → 제거.
+    K3: 트리거 미발동
+    K4: 유동성 < 50억
+    K5: 시총 < 5,000억
+    K6: 저가주 < 5,000원
+    K7: 스팩/리츠/우선주
+    K8: TRIX 데드크로스 (필수 방향 필터)
+    K9: 고점 대비 -20% 이상 폭락 (추세 붕괴)
+    K10: 대추세 붕괴 (MA120 아래)
     """
     kills = []
 
@@ -400,12 +525,79 @@ def kill_filters(sig: dict) -> tuple[bool, list[str]]:
     if trigger in ("none", "waiting", "setup"):
         kills.append(f"K3:Trigger({trigger})")
 
-    # K4: 20일 평균 거래대금 < 10억
+    # K4: 20일 평균 거래대금 < 50억
     avg_tv = sig.get("avg_trading_value_20d", 0)
-    if avg_tv < 1_000_000_000:
-        kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억<10억)")
+    if avg_tv < 5_000_000_000:
+        kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억<50억)")
+
+    # K5: 시가총액 < 5,000억 (소형주 제외)
+    market_cap = sig.get("market_cap", 0)
+    if market_cap > 0 and market_cap < 500_000_000_000:
+        kills.append(f"K5:시총({market_cap / 1e8:.0f}억<5000억)")
+
+    # K6: 종가 < 5,000원 (저가주 제외)
+    price = sig.get("entry_price", 0)
+    if price > 0 and price < 5000:
+        kills.append(f"K6:저가주({price:.0f}원<5,000원)")
+
+    # K7: 스팩/리츠/우선주 (투자 부적격 종목 제거)
+    name = sig.get("name", "")
+    ticker = sig.get("ticker", "")
+    if _is_excluded_stock(name, ticker):
+        kills.append(f"K7:투자부적격({name})")
+
+    # K8~K10: Freshness 3축 판정 (TRIX counter × RSI × Vol)
+    counter = sig.get("trix_counter", 0)
+    rsi = sig.get("rsi", 50)
+    vol_c = sig.get("vol_contraction", 1.0)
+    freshness = calc_freshness_mult(counter, rsi, vol_c)
+    sig["freshness_mult"] = freshness
+
+    if freshness == 0.0:
+        # Kill 사유 상세화
+        if counter <= 0:
+            kills.append(f"K8:TRIX_DC({counter:+d}일차)")
+        elif counter >= 16:
+            kills.append(f"K8:TRIX과열(GC+{counter}일)")
+        if vol_c > 2.0:
+            kills.append(f"K9:투매(거래량{vol_c:.1f}x)")
+        if counter >= 8 and rsi > 65:
+            kills.append(f"K10:늦은과열(GC+{counter},RSI{rsi:.0f})")
+
+    # K11: 52주 고점 대비 -20% 이상 → 추세 붕괴/폭락
+    drawdown = sig.get("drawdown_from_high", 0)
+    if drawdown < -20:
+        kills.append(f"K11:폭락({drawdown:.0f}%)")
+
+    # K12: 현재가 < MA120 → 장기 대추세 붕괴
+    if not sig.get("above_ma120", True):
+        kills.append(f"K12:MA120하회")
 
     return len(kills) == 0, kills
+
+
+def _is_excluded_stock(name: str, ticker: str) -> bool:
+    """스팩/리츠/우선주 등 투자 부적격 종목 판별."""
+    # 종목명 패턴 — 완전 일치 키워드
+    if "스팩" in name or "SPAC" in name:
+        return True
+
+    # 리츠: "리츠"로 끝나는 종목만 (메리츠금융지주, 블리츠웨이 등 오탐 방지)
+    if name.endswith("리츠") or "REIT" in name:
+        return True
+
+    # 종목코드 기반 우선주 판별 (6자리 숫자 기준)
+    if len(ticker) == 6 and ticker.isdigit():
+        if ticker[-1] == "5":  # 우선주
+            return True
+        if ticker[-1] in ("6", "7", "8", "9"):  # 2우선주 등
+            return True
+
+    # 코드에 K/L 포함 (2우선주 코드)
+    if any(c in ticker for c in ("K", "L")):
+        return True
+
+    return False
 
 
 def generate_tags(sig: dict) -> list[str]:
@@ -501,7 +693,7 @@ def run_pipeline(
     survivors = []
 
     for sig in candidates:
-        # Kill Filters (K3 + K4)
+        # Kill Filters (K3~K7)
         passed, kill_reasons = kill_filters(sig)
         if not passed:
             sig["v9_kill_reasons"] = kill_reasons
@@ -602,11 +794,15 @@ def run_pipeline(
             if global_cap < 1.0:
                 us_mult = min(us_mult, global_cap)
 
-        sig["v9_rank_score"] = round(rr * zone * catalyst_boost * sd_mult * density_mult * us_mult, 4)
+        freshness = sig.get("freshness_mult", 1.0)
+        sig["v9_rank_score"] = round(
+            rr * zone * catalyst_boost * sd_mult * density_mult * us_mult * freshness, 4
+        )
         sig["v9_catalyst_boost"] = catalyst_boost
         sig["v9_sd_mult"] = sd_mult
         sig["v9_density_mult"] = density_mult
         sig["v9_us_mult"] = round(us_mult, 3)
+        sig["v9_freshness_mult"] = freshness
 
     # US 섹터 Kill된 종목을 killed_list로 이동
     us_killed = [s for s in survivors if s.get("us_sector_killed")]
@@ -888,7 +1084,30 @@ def scan_all(
                 (df["close"] * df["volume"]).iloc[max(0, idx - 19) : idx + 1].mean()
             ),
             "pct_of_52w_high": float(row.get("pct_of_52w_high", 0) or 0),
+            # 눌림목 판정 필드
+            "trix": float(row.get("trix", 0) or 0),
+            "trix_signal": float(row.get("trix_signal", 0) or 0),
+            "slope_ma60": float(row.get("slope_ma60", 0) or 0),
+            "above_ma60": bool(
+                float(row.get("close", 0) or 0) > float(row.get("sma_60", 0) or 0)
+            ),
+            "above_ma120": bool(
+                float(row.get("close", 0) or 0) > float(row.get("sma_120", 0) or 0)
+            ),
+            "drawdown_from_high": float(
+                (float(row.get("close", 0) or 0)
+                 / df["high"].iloc[max(0, idx - 252) : idx + 1].max() - 1) * 100
+                if df["high"].iloc[max(0, idx - 252) : idx + 1].max() > 0 else 0
+            ),
+            "vol_contraction": float(
+                df["volume"].iloc[max(0, idx - 4) : idx + 1].mean()
+                / df["volume"].iloc[max(0, idx - 19) : idx + 1].mean()
+                if df["volume"].iloc[max(0, idx - 19) : idx + 1].mean() > 0 else 1.0
+            ),
         }
+
+        # TRIX counter 계산
+        sig["trix_counter"] = calc_trix_counter(df, idx)
 
         # +DI/-DI 직접 계산 (parquet에 미포함)
         try:
@@ -949,6 +1168,32 @@ def scan_all(
         stats["csv_scan_sec"] = round(csv_elapsed, 1)
         print(f"  CSV 스캔 완료: {stats['csv_passed']}종목 통과 ({csv_elapsed:.1f}s)")
 
+    # -- 시가총액 조회 (pykrx, 후보 종목만) --
+    if candidates:
+        try:
+            from pykrx import stock as pykrx_stock
+            from datetime import date, timedelta
+
+            # 최근 거래일 기준 시총 조회
+            cap_date = freshness.get("last_data_date", date.today().isoformat()).replace("-", "")
+            cap_tickers = [s["ticker"] for s in candidates]
+            print(f"\n시가총액 조회 ({len(cap_tickers)}종목, {cap_date})...")
+            for sig in candidates:
+                try:
+                    cap_df = pykrx_stock.get_market_cap(cap_date, cap_date, sig["ticker"])
+                    if len(cap_df) > 0:
+                        sig["market_cap"] = int(cap_df.iloc[-1].get("시가총액", 0))
+                    else:
+                        sig["market_cap"] = 0
+                except Exception:
+                    sig["market_cap"] = 0
+            cap_ok = sum(1 for s in candidates if s.get("market_cap", 0) > 0)
+            print(f"  시총 조회 완료: {cap_ok}/{len(candidates)}종목")
+        except ImportError:
+            print("  pykrx 미설치 — 시총 필터 건너뜀")
+            for sig in candidates:
+                sig["market_cap"] = 0
+
     # 뉴스/DART 초기화
     for sig in candidates:
         sig["news_data"] = None
@@ -994,7 +1239,8 @@ def scan_all(
                         * boost
                         * sig.get("v9_sd_mult", 1.0)
                         * sig.get("v9_density_mult", 1.0)
-                        * sig.get("v9_us_mult", 1.0),
+                        * sig.get("v9_us_mult", 1.0)
+                        * sig.get("v9_freshness_mult", 1.0),
                         4,
                     )
         survivors.sort(key=lambda s: s["v9_rank_score"], reverse=True)
@@ -1037,58 +1283,71 @@ def scan_all(
 # 텔레그램 메시지 포맷
 # =========================================================
 
+def _rank_to_grade(rank: int) -> str:
+    """순위 → 등급 변환 (1=S, 2=A, 3=B, 4=C, 5+=D)."""
+    return {1: "S", 2: "A", 3: "B", 4: "C"}.get(rank, "D")
+
+
+def _trigger_label(trigger_type: str) -> str:
+    """트리거 타입 → 한글 라벨."""
+    return {"confirm": "확인매수", "impulse": "IMP", "setup": "SETUP"}.get(trigger_type, trigger_type)
+
+
 def format_telegram_message(candidates: list[dict], stats: dict) -> str:
-    """Kill→Rank→Tag 텔레그램 메시지 포맷."""
+    """Kill→Rank→Tag 텔레그램 메시지 포맷 (S/A/B/C/D 등급제)."""
     from datetime import datetime
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = []
 
     # -- Header --
-    lines.append(f"[Quant v10.0] {now} Kill\u2192Rank\u2192Tag")
+    lines.append(f"[Quantum Master v10.0] {now}")
+    lines.append("Kill \u2192 Rank \u2192 Tag | S/A/B/C/D 등급제")
     lines.append("")
 
     # -- US Overnight --
     us_signal = load_overnight_signal()
     us_comp = us_signal.get("composite", "neutral").upper()
     us_sc = us_signal.get("score", 0.0)
+    us_grade = us_signal.get("grade", "NEUTRAL")
+    us_combined = us_signal.get("combined_score_100", us_sc * 100)
     us_vix = us_signal.get("vix", {})
-    if us_comp != "NEUTRAL" or abs(us_sc) > 0.05:
-        lines.append(f"[ US Overnight: {us_comp} ({us_sc:+.2f}) ]")
-        idx = us_signal.get("index_direction", {})
-        spy_r = idx.get("SPY", {}).get("ret_1d", 0)
-        qqq_r = idx.get("QQQ", {}).get("ret_1d", 0)
-        lines.append(f"  SPY {spy_r:+.1f}% QQQ {qqq_r:+.1f}% | VIX {us_vix.get('level','?')} [{us_vix.get('status','?')}]")
-        lines.append("")
-
-    # -- 파이프라인 설명 --
-    lines.append("[ 파이프라인 ]")
-    lines.append("Kill(K3+K4) \u2192 Rank(R:R\u00d7Zone\u00d7US\u00d7Den) \u2192 Tag")
-    lines.append("  \u00b7 선행: Zone + R:R + Trigger")
-    lines.append("  \u00b7 US Overnight: 섹터별 부스트")
-    lines.append("  \u00b7 밀도: 고밀도(-5%), 저밀도(+5%)")
+    idx_dir = us_signal.get("index_direction", {})
+    lines.append(f"\u2550\u2550 US Overnight: {us_grade} ({us_combined:+.1f}) \u2550\u2550")
+    spy_r = idx_dir.get("SPY", {}).get("ret_1d", 0)
+    qqq_r = idx_dir.get("QQQ", {}).get("ret_1d", 0)
+    ewy_r = idx_dir.get("EWY", {}).get("ret_1d", 0)
+    vix_level = us_vix.get("level", "?")
+    vix_status = us_vix.get("status", "?")
+    lines.append(f"  EWY {ewy_r:+.1f}% | SPY {spy_r:+.1f}% QQQ {qqq_r:+.1f}% | VIX {vix_level} [{vix_status}]")
+    # 섹터 Kill / 특수룰
+    us_rules = us_signal.get("special_rules", [])
+    us_kills_map = us_signal.get("sector_kills", {})
+    killed_sectors = [s for s, v in us_kills_map.items() if v.get("killed")]
+    if killed_sectors:
+        lines.append(f"  \u26a0 섹터Kill: {', '.join(killed_sectors)}")
+    for r in us_rules:
+        lines.append(f"  \u2022 {r['name']}: {r['desc']}")
     lines.append("")
 
     # -- 스캔 통계 --
     killed = stats.get("v9_killed", 0)
     survivors = stats.get("v9_survivors", 0)
-    lines.append("[ 스캔 통계 ]")
+    lines.append(f"\u2550\u2550 스캔 통계 \u2550\u2550")
     lines.append(
-        f"Parquet: {stats['total']:,}종목 > Pipeline: {stats['passed_pipeline']}종목"
+        f"{stats['total']:,}종목 \u2192 Pipeline {stats['passed_pipeline']} "
+        f"\u2192 Grade필터 {stats.get('after_grade_filter',0)} "
+        f"\u2192 Kill {killed} \u2192 생존 {survivors}"
     )
     if stats.get("csv_total"):
         lines.append(
-            f"CSV 전종목: {stats['csv_total']:,}종목 > 통과: {stats.get('csv_passed', 0)}종목"
+            f"CSV 전종목: {stats['csv_total']:,} \u2192 통과: {stats.get('csv_passed', 0)}"
         )
-    lines.append(
-        f"등급: A:{stats.get('grade_A',0)} B:{stats.get('grade_B',0)} "
-        f"C:{stats.get('grade_C',0)} | 필터 후: {stats.get('after_grade_filter',0)}종목"
-    )
-    lines.append(f"Kill: {killed}종목 | 생존: {survivors}종목")
-    scan_time = f"스캔 {stats.get('scan_sec',0)}초"
+    scan_time = f"{stats.get('scan_sec',0):.0f}s"
     if stats.get("csv_scan_sec"):
-        scan_time += f" + CSV {stats['csv_scan_sec']}초"
-    scan_time += f" + 뉴스 {stats.get('news_sec',0)}초"
+        scan_time += f" +CSV {stats['csv_scan_sec']:.0f}s"
+    if stats.get("news_sec", 0) > 0:
+        scan_time += f" +뉴스 {stats['news_sec']:.0f}s"
     lines.append(f"소요: {scan_time}")
     lines.append("")
 
@@ -1097,75 +1356,122 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
         killed_list = stats.get("v9_killed_list", [])
         if killed_list:
             lines.append("")
-            lines.append(f"[ Kill ({len(killed_list)}종목) ]")
+            lines.append(f"\u2550\u2550 Kill ({len(killed_list)}종목) \u2550\u2550")
             for sig in killed_list:
                 reasons = ", ".join(sig.get("v9_kill_reasons", []))
                 lines.append(f"  {sig['name']}({sig['ticker']}): {reasons}")
         return "\n".join(lines)
 
-    # -- 1순위 추천 매수 --
-    top = candidates[0]
-    top_trigger = "확인매수" if top["trigger_type"] == "confirm" else ("IMP" if top["trigger_type"] == "impulse" else "SETUP")
-    top_tags = ", ".join(top.get("v9_tags", []))
-    boost = top.get("v9_catalyst_boost", 1.0)
-    us_m = top.get("v9_us_mult", 1.0)
-    den_m = top.get("v9_density_mult", 1.0)
-    mods = []
-    if boost > 1.0:
-        mods.append("촉매")
-    if us_m != 1.0:
-        mods.append(f"US{us_m:.2f}")
-    if den_m != 1.0:
-        mods.append(f"밀도{den_m:.2f}")
-    mod_str = f" [{','.join(mods)}]" if mods else ""
+    # -- 종목별 등급 카드 --
+    for rank, sig in enumerate(candidates, start=1):
+        grade_label = _rank_to_grade(rank)
+        trigger = _trigger_label(sig["trigger_type"])
+        tags = sig.get("v9_tags", [])
+        boost = sig.get("v9_catalyst_boost", 1.0)
+        us_m = sig.get("v9_us_mult", 1.0)
+        den_m = sig.get("v9_density_mult", 1.0)
+        csv_mark = " [CSV]" if sig.get("grade") == "CSV" else ""
 
-    lines.append("[ 1순위 추천 매수 ]")
-    csv_mark = " [CSV]" if top.get("grade") == "CSV" else ""
-    lines.append(f"{top['name']} ({top['ticker']}) [{top_trigger}]{csv_mark}")
-    lines.append(
-        f"Rank {top['v9_rank_score']:.3f} = "
-        f"R:R({top['risk_reward']:.1f}) x Zone({top['zone_score']:.2f}){mod_str}"
-    )
-    lines.append(
-        f"현재 {top['entry_price']:,}원 | "
-        f"목표 {top['target_price']:,} (+{((top['target_price']/top['entry_price'])-1)*100:.1f}%) | "
-        f"손절 {top['stop_loss']:,} ({((top['stop_loss']/top['entry_price'])-1)*100:.1f}%)"
-    )
-    if top_tags:
-        lines.append(f"태그: {top_tags}")
+        fresh_m = sig.get("v9_freshness_mult", 1.0)
+        counter = sig.get("trix_counter", 0)
 
-    # -- 나머지 후보 (상위 20개까지 표시) --
-    DISPLAY_LIMIT = 20
-    if len(candidates) > 1:
-        display = candidates[1:DISPLAY_LIMIT]
-        remaining = len(candidates) - DISPLAY_LIMIT
+        # 배수 정보 조합
+        mods = []
+        if fresh_m != 1.0:
+            mods.append(f"F{fresh_m:.2f}")
+        if boost > 1.0:
+            mods.append(f"\u00d71.10촉매")
+        if us_m != 1.0:
+            mods.append(f"US{us_m:.2f}")
+        if den_m != 1.0:
+            density_tag = "\u2191저밀도" if den_m > 1.0 else "\u2193고밀도"
+            mods.append(density_tag)
+        mod_str = f" [{', '.join(mods)}]" if mods else ""
+
+        entry = sig["entry_price"]
+        target = sig["target_price"]
+        stop = sig["stop_loss"]
+        upside = ((target / entry) - 1) * 100 if entry else 0
+        downside = ((stop / entry) - 1) * 100 if entry else 0
+
+        if rank == 1:
+            lines.append("\u2550" * 25)
+            lines.append(f"\u2605 S\ub4f1\uae09 \u2014 {sig['name']} ({sig['ticker']}) [{trigger}]{csv_mark}")
+            lines.append("\u2550" * 25)
+        else:
+            lines.append(f"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")
+            lines.append(f"{grade_label}\ub4f1\uae09 \u2014 {sig['name']} ({sig['ticker']}) [{trigger}]{csv_mark}")
+
+        counter_label = f"GC+{counter}" if counter > 0 else f"DC{counter}"
+        lines.append(
+            f"Rank {sig['v9_rank_score']:.3f} = "
+            f"R:R({sig['risk_reward']:.1f}) \u00d7 Zone({sig['zone_score']:.2f}){mod_str}"
+        )
+        lines.append(f"TRIX {counter_label}일 | Freshness \u00d7{fresh_m:.2f}")
+        # 시총 + 거래대금
+        mcap = sig.get("market_cap", 0)
+        avg_tv = sig.get("avg_trading_value_20d", 0)
+        mcap_str = f"{mcap / 1e12:.1f}\uc870" if mcap >= 1e12 else f"{mcap / 1e8:,.0f}\uc5b5" if mcap > 0 else "?"
+        lines.append(f"\uc2dc\ucd1d {mcap_str} | \uac70\ub798\ub300\uae08 {avg_tv / 1e8:.0f}\uc5b5/\uc77c")
+        lines.append(
+            f"\ud604\uc7ac {entry:,}\uc6d0 | "
+            f"\ubaa9\ud45c {target:,} (+{upside:.1f}%) | "
+            f"\uc190\uc808 {stop:,} ({downside:.1f}%)"
+        )
+
+        # 기술지표 한줄
+        rsi = sig.get("rsi", 0)
+        adx = sig.get("adx", 0)
+        plus_di = sig.get("plus_di", 0)
+        minus_di = sig.get("minus_di", 0)
+        di_dir = "\ub9e4\uc218\uc138" if plus_di > minus_di else "\ub9e4\ub3c4\uc138"
+        vol_s = sig.get("vol_surge", 1.0)
+        lines.append(
+            f"RSI {rsi:.0f} | ADX {adx:.0f} | {di_dir} | \uac70\ub798\ub7c9 \u00d7{vol_s:.1f}"
+        )
+
+        # 수급 정보
+        f_streak = sig.get("foreign_streak", 0)
+        i_streak = sig.get("inst_streak", 0)
+        if f_streak != 0 or i_streak != 0:
+            supply_parts = []
+            if f_streak > 0:
+                supply_parts.append(f"\uc678\uad6d\uc778 {f_streak}D\uc5f0\uc18d\ub9e4\uc218")
+            elif f_streak < 0:
+                supply_parts.append(f"\uc678\uad6d\uc778 {abs(f_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
+            if i_streak > 0:
+                supply_parts.append(f"\uae30\uad00 {i_streak}D\uc5f0\uc18d\ub9e4\uc218")
+            elif i_streak < 0:
+                supply_parts.append(f"\uae30\uad00 {abs(i_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
+            lines.append(f"\uc218\uae09: {' | '.join(supply_parts)}")
+
+        # 태그
+        if tags:
+            lines.append(f"#{' #'.join(tags)}")
+
+        # 뉴스 요약 (S/A등급만 표시)
+        news_data = sig.get("news_data")
+        if news_data and rank <= 2:
+            sentiment = news_data.get("overall_sentiment", "?")
+            takeaway = news_data.get("key_takeaway", "")[:60]
+            if takeaway:
+                lines.append(f"[NEWS {sentiment}] {takeaway}")
+
         lines.append("")
-        lines.append(f"[ 매수 후보 ({len(candidates)-1}개) ]")
-        for i, sig in enumerate(display, start=2):
-            tags = ", ".join(sig.get("v9_tags", []))
-            b = sig.get("v9_catalyst_boost", 1.0)
-            b_str = " x1.10" if b > 1.0 else ""
-            csv_m = " [CSV]" if sig.get("grade") == "CSV" else ""
-            lines.append(
-                f"{i}. {sig['name']}({sig['ticker']}) "
-                f"Rank {sig['v9_rank_score']:.3f} "
-                f"RR:{sig['risk_reward']:.1f} Zone:{sig['zone_score']:.2f}{b_str}{csv_m}"
-            )
-            if tags:
-                lines.append(f"   [{tags}]")
-        if remaining > 0:
-            lines.append(f"  ... +{remaining}종목 (scan_result.txt 참조)")
 
     # -- Kill 요약 --
     killed_list = stats.get("v9_killed_list", [])
     if killed_list:
-        lines.append("")
-        lines.append(f"[ Kill ({len(killed_list)}종목) ]")
+        lines.append(f"\u2550\u2550 Kill ({len(killed_list)}\uc885\ubaa9) \u2550\u2550")
         for sig in killed_list[:5]:
             reasons = ", ".join(sig.get("v9_kill_reasons", []))
             lines.append(f"  {sig['name']}({sig['ticker']}): {reasons}")
         if len(killed_list) > 5:
-            lines.append(f"  ... +{len(killed_list)-5}종목")
+            lines.append(f"  ... +{len(killed_list)-5}\uc885\ubaa9")
+
+    # -- Footer --
+    lines.append("")
+    lines.append("\u26a0 \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master v10.0")
 
     return "\n".join(lines)
 
@@ -1186,7 +1492,7 @@ def main():
     uni_label = " [전종목]" if args.universe == "all" else ""
     print("=" * 50)
     print(f"  [Quant v10.0] Kill\u2192Rank\u2192Tag{dart_label}{uni_label}")
-    print(f"  Kill(K3+K4) \u2192 Rank(R:R\u00d7Zone) \u2192 Tag")
+    print(f"  Kill(K3~K12) \u2192 Rank(R:R\u00d7Zone\u00d7Freshness) \u2192 Tag")
     print("=" * 50)
 
     candidates, stats = scan_all(
@@ -1219,7 +1525,7 @@ def main():
         if png_path and png_path.exists():
             from src.html_report import send_report_to_telegram
             print("\nSending report image to Telegram...")
-            caption = f"[Quant v10.0] 장시작전 분석 | {len(candidates)}종목 | Grade {args.grade.upper()}"
+            caption = f"[Quantum Master v10.0] 장시작전 분석 | {len(candidates)}종목 S/A/B/C/D"
             img_ok = send_report_to_telegram(png_path, caption)
             print("OK - Report image sent" if img_ok else "FAIL - Image send")
 
