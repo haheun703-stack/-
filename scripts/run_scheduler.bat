@@ -24,7 +24,7 @@ if not exist logs mkdir logs
 REM 스케줄러 시작
 echo  모드: 실제 스케줄러 실행 (텔레그램 명령봇 포함)
 echo  종료: Ctrl+C
-echo  텔레그램 명령: /ping, /help, /status, /stop ...
+echo  텔레그램 명령: /연결, /명령어, /상태, /정지 ...
 echo  ────────────────────────────────────────
 echo.
 

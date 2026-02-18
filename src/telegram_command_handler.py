@@ -1,7 +1,7 @@
 """
 텔레그램 양방향 명령 봇 — long-polling 기반.
 
-사용자가 텔레그램에서 /help, /status 등 명령을 보내면
+사용자가 텔레그램에서 /명령어, /상태 등 한글 명령을 보내면
 봇이 처리하고 결과를 메시지로 응답.
 
 DailyScheduler의 백그라운드 스레드로 실행됨.
@@ -148,7 +148,7 @@ class TelegramCommandBot:
         else:
             self._reply(
                 f"\u2753 알 수 없는 명령: {cmd}\n"
-                f"/help 로 명령어 목록을 확인하세요."
+                f"/명령어 로 사용 가능한 명령을 확인하세요."
             )
 
     def _reply(self, text: str) -> None:
@@ -161,7 +161,7 @@ class TelegramCommandBot:
     # ══════════════════════════════════════════
 
     def _cmd_ping(self, args: list) -> None:
-        """/ping — alive 체크"""
+        """/연결 — alive 체크"""
         now = datetime.now().strftime("%H:%M:%S")
         uptime = datetime.now() - self._start_time
         hours = int(uptime.total_seconds() // 3600)
@@ -169,31 +169,32 @@ class TelegramCommandBot:
         self._reply(f"\U0001f3d3 pong! | {now}\n\u23f1 uptime: {hours}시간 {mins}분")
 
     def _cmd_help(self, args: list) -> None:
-        """/help — 명령어 목록"""
+        """/명령어 — 명령어 목록"""
         lines = [
             "\U0001f4cb Quantum Master 명령어",
             "\u2501" * 24,
             "",
-            "\U0001f4ca 조회",
-            "  /ping — 연결 확인",
-            "  /status — 스케줄러 상태",
-            "  /positions — 보유 종목 현황",
-            "  /scan — 매수 후보 조회",
+            "\U0001f50d [조회]",
+            "  /연결 — 봇 연결 확인",
+            "  /상태 — 스케줄러 상태",
+            "  /잔고 — 보유 종목 현황",
+            "  /후보 — 매수 후보 조회",
+            "  /스케줄 — 오늘 Phase 시간표",
             "",
-            "\U0001f4e4 즉시 실행",
-            "  /briefing — 장전 브리핑 발송",
-            "  /supply — 수급 스냅샷 수집",
-            "  /phase N — Phase 즉시 실행",
-            "    (예: /phase 3b, /phase 10b)",
+            "\U0001f4e4 [실행]",
+            "  /브리핑 — 장전 브리핑 즉시",
+            "  /수급 — 수급 스냅샷 수집",
+            "  /실행 N — Phase 즉시 실행",
+            "    (예: /실행 3b, /실행 10b)",
             "",
-            "\u26a0\ufe0f 제어",
-            "  /stop — 매매 중단",
-            "  /resume — 매매 재개",
+            "\u26a0\ufe0f [제어]",
+            "  /정지 — 매매 중단",
+            "  /재개 — 매매 재개",
         ]
         self._reply("\n".join(lines))
 
     def _cmd_status(self, args: list) -> None:
-        """/status — 스케줄러 상태 + 다음 Phase"""
+        """/상태 — 스케줄러 상태 + 다음 Phase"""
         now = datetime.now()
         lines = [
             f"\U0001f4e1 스케줄러 상태 | {now.strftime('%H:%M:%S')}",
@@ -236,8 +237,29 @@ class TelegramCommandBot:
 
         self._reply("\n".join(lines))
 
+    def _cmd_schedule(self, args: list) -> None:
+        """/스케줄 — 오늘 Phase 시간표"""
+        if not self._scheduler:
+            self._reply("\u274c 스케줄러 미연결 (독립 실행)")
+            return
+
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+        schedule = self._scheduler.schedule
+        sorted_phases = sorted(schedule.items(), key=lambda x: x[1])
+
+        lines = [
+            f"\U0001f4c5 오늘 스케줄 | {now.strftime('%m/%d %H:%M')}",
+            "\u2500" * 24,
+        ]
+        for name, time_str in sorted_phases:
+            marker = "\u25b6" if time_str > current_time else "\u2705"
+            lines.append(f"  {marker} {time_str} — {name}")
+
+        self._reply("\n".join(lines))
+
     def _cmd_positions(self, args: list) -> None:
-        """/positions — 보유 종목 현황"""
+        """/잔고 — 보유 종목 현황"""
         pos_path = PROJECT_ROOT / "data" / "positions.json"
         if not pos_path.exists():
             self._reply("\U0001f4bc 보유 종목 없음 (positions.json 없음)")
@@ -274,7 +296,7 @@ class TelegramCommandBot:
         self._reply("\n".join(lines))
 
     def _cmd_scan(self, args: list) -> None:
-        """/scan — 최신 매수 후보 조회"""
+        """/후보 — 최신 매수 후보 조회"""
         import pandas as pd
 
         sig_path = PROJECT_ROOT / "results" / "signals_log.csv"
@@ -322,7 +344,7 @@ class TelegramCommandBot:
         self._reply("\n".join(lines))
 
     def _cmd_briefing(self, args: list) -> None:
-        """/briefing — 장전 브리핑 즉시 발송"""
+        """/브리핑 — 장전 브리핑 즉시 발송"""
         self._reply("\u23f3 장전 브리핑 생성 중...")
         try:
             from scripts.send_market_briefing import build_briefing_message
@@ -332,7 +354,7 @@ class TelegramCommandBot:
             self._reply(f"\u274c 브리핑 생성 실패: {e}")
 
     def _cmd_supply(self, args: list) -> None:
-        """/supply — 수급 스냅샷 즉시 수집"""
+        """/수급 — 수급 스냅샷 즉시 수집"""
         if not self._scheduler:
             self._reply("\u274c 스케줄러 미연결 — 독립 실행 불가")
             return
@@ -345,7 +367,7 @@ class TelegramCommandBot:
             self._reply(f"\u274c 수급 수집 실패: {e}")
 
     def _cmd_stop(self, args: list) -> None:
-        """/stop — 매매 중단 (STOP.signal 생성)"""
+        """/정지 — 매매 중단 (STOP.signal 생성)"""
         stop_path = PROJECT_ROOT / "STOP.signal"
         stop_path.write_text(
             f"STOPPED by telegram command at {datetime.now().isoformat()}",
@@ -354,26 +376,26 @@ class TelegramCommandBot:
         self._reply(
             "\U0001f6d1 매매 중단됨\n"
             "STOP.signal 생성 완료\n"
-            "재개: /resume"
+            "재개: /재개"
         )
-        logger.warning("[명령봇] /stop 명령으로 매매 중단")
+        logger.warning("[명령봇] /정지 명령으로 매매 중단")
 
     def _cmd_resume(self, args: list) -> None:
-        """/resume — 매매 재개 (STOP.signal 삭제)"""
+        """/재개 — 매매 재개 (STOP.signal 삭제)"""
         stop_path = PROJECT_ROOT / "STOP.signal"
         if stop_path.exists():
             stop_path.unlink()
             self._reply("\U0001f7e2 매매 재개됨\nSTOP.signal 삭제 완료")
-            logger.info("[명령봇] /resume 명령으로 매매 재개")
+            logger.info("[명령봇] /재개 명령으로 매매 재개")
         else:
             self._reply("\U0001f7e2 이미 정상 운영 중 (STOP.signal 없음)")
 
     def _cmd_phase(self, args: list) -> None:
-        """/phase N — 특정 Phase 즉시 실행"""
+        """/실행 N — 특정 Phase 즉시 실행"""
         if not args:
             self._reply(
-                "\u2753 사용법: /phase <번호>\n"
-                "예: /phase 3b, /phase 10b, /phase 1\n"
+                "\u2753 사용법: /실행 <번호>\n"
+                "예: /실행 3b, /실행 10b, /실행 1\n"
                 "가능: 0~11, 3b, snap1~4, 8-2~8-5, 10b"
             )
             return
@@ -448,16 +470,20 @@ class TelegramCommandBot:
 # ══════════════════════════════════════════
 
 COMMANDS = {
-    "/ping": TelegramCommandBot._cmd_ping,
-    "/help": TelegramCommandBot._cmd_help,
-    "/status": TelegramCommandBot._cmd_status,
-    "/positions": TelegramCommandBot._cmd_positions,
-    "/scan": TelegramCommandBot._cmd_scan,
-    "/briefing": TelegramCommandBot._cmd_briefing,
-    "/supply": TelegramCommandBot._cmd_supply,
-    "/stop": TelegramCommandBot._cmd_stop,
-    "/resume": TelegramCommandBot._cmd_resume,
-    "/phase": TelegramCommandBot._cmd_phase,
+    # ── 조회 ──
+    "/연결": TelegramCommandBot._cmd_ping,
+    "/명령어": TelegramCommandBot._cmd_help,
+    "/상태": TelegramCommandBot._cmd_status,
+    "/잔고": TelegramCommandBot._cmd_positions,
+    "/후보": TelegramCommandBot._cmd_scan,
+    "/스케줄": TelegramCommandBot._cmd_schedule,
+    # ── 실행 ──
+    "/브리핑": TelegramCommandBot._cmd_briefing,
+    "/수급": TelegramCommandBot._cmd_supply,
+    "/실행": TelegramCommandBot._cmd_phase,
+    # ── 제어 ──
+    "/정지": TelegramCommandBot._cmd_stop,
+    "/재개": TelegramCommandBot._cmd_resume,
 }
 
 
@@ -477,7 +503,7 @@ if __name__ == "__main__":
 
     print("=" * 50)
     print("  텔레그램 명령 봇 (독립 실행)")
-    print("  텔레그램에서 /ping 을 보내 연결을 확인하세요")
+    print("  텔레그램에서 /연결 을 보내 연결을 확인하세요")
     print("  Ctrl+C 로 종료")
     print("=" * 50)
 
