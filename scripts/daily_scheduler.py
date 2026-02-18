@@ -1,18 +1,37 @@
 #!/usr/bin/env python3
 """
-v4.1 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
+v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
 
-일일 스케줄:
-  00:00  Phase 1 — 일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
-  07:00  Phase 2 — 매크로 수집 + US Overnight Signal
-  07:10  Phase 3 — 뉴스/리포트 (Grok API)
-  08:20  Phase 4 — 매매 준비 (토큰 갱신 → 공휴일 체크 → 시그널 스캔)
-  08:25  Phase 4.5 — 장전 포트폴리오 5D/6D 분석 리포트
-  09:02  Phase 5 — 개별종목 매수 실행
-  09:10  Phase 6 — 장중 모니터링 시작 (1분 간격, 15:20까지)
-  15:25  Phase 7 — 매도 실행 (장마감 전)
-  15:35  Phase 8 — 장마감 파이프라인 (9단계)
-  16:30  Phase 9 — 장마감 업무일지 생성
+일일 스케줄 (KST):
+  === 미장 마감 + 한국장 준비 ===
+  00:00  Phase 0  — 일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
+  06:10  Phase 1  — 미장 마감 데이터 수집 (yfinance: SPY,QQQ,EWY,VIX,SOX)
+  07:00  Phase 2  — 한국 매크로 수집 (KOSPI/환율/금리)
+  07:20  Phase 3  — 뉴스 스캔 (Grok API)
+  07:30  Phase 3B — 📱 1발: 장전 마켓 브리핑 (상승/하락 확률 + S/A/B/C)
+  08:20  Phase 4  — 매매 준비 (토큰 갱신 → 공휴일 체크 → 매수 후보 확정)
+
+  === 한국장 운영 + 장중 수급 모니터링 ===
+  09:02  Phase 5  — 매수 실행
+  09:10  Phase 6  — 장중 모니터링 (1분 간격, 15:20까지)
+  09:30  📸 수급 스냅샷 1차 (개장 30분)
+  11:00  📸 수급 스냅샷 2차 (오전장 마무리)
+  13:30  📸 수급 스냅샷 3차 (오후장 전환)
+  15:00  📸 수급 스냅샷 4차 (마감 직전)
+  15:25  Phase 7  — 매도 실행 (장마감 전)
+
+  === 장마감 + 데이터 업데이트 ===
+  15:40  Phase 8-1 — 종가 데이터 수집 (pykrx)
+  16:00  Phase 8-2 — CSV 업데이트 (FDR 37개 지표)
+  16:10  Phase 8-3 — parquet 증분 업데이트
+  16:20  Phase 8-4 — 기술적 지표 재계산 (35개)
+  16:30  Phase 8-5 — 데이터 검증 (NaN 체크)
+
+  === 수급 확정 + 스캔 + 리포트 ===
+  18:20  Phase 9  — 수급 최종 확정 수집 (18:10 이후)
+  18:40  Phase 10 — 내일 매수 후보 스캔 (Kill→Rank→Tag)
+  19:00  Phase 10B— 📱 2발: 장마감 리포트 (결과 + 내일 후보 + 수급 히스토리)
+  19:30  Phase 11 — 업무일지 + 추천기록 아카이브
 
 안전장치:
   STOP.signal — 매수/매도/모니터링 중단
@@ -21,13 +40,14 @@ v4.1 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
 
 사용법:
   python scripts/daily_scheduler.py               # 스케줄러 시작
-  python scripts/daily_scheduler.py --dry-run      # 스케줄 확인만 (실행 안함)
-  python scripts/daily_scheduler.py --run-now 9    # 특정 Phase 즉시 실행 (1~9)
+  python scripts/daily_scheduler.py --dry-run      # 스케줄 확인만
+  python scripts/daily_scheduler.py --run-now 10   # 특정 Phase 즉시 실행 (0~11)
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import sys
@@ -48,9 +68,13 @@ import yaml
 
 logger = logging.getLogger("scheduler")
 
+# 수급 스냅샷 저장 디렉토리
+SUPPLY_SNAPSHOT_DIR = PROJECT_ROOT / "data" / "supply_snapshots"
+SUPPLY_SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+
 
 class DailyScheduler:
-    """사용자 스케줄표 기반 일일 자동 실행"""
+    """v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
         with open(config_path, "r", encoding="utf-8") as f:
@@ -60,26 +84,26 @@ class DailyScheduler:
         self.schedule = live_cfg.get("schedule", {})
         self.enabled = live_cfg.get("enabled", False)
         self.mode = live_cfg.get("mode", "paper")
+        self.supply_cfg = live_cfg.get("supply_monitor", {})
 
-        # 오늘 휴일 여부 (Phase 4에서 갱신)
+        # 상태
         self._is_holiday = False
-
-        # 시그널 결과 캐시 (Phase 4 → Phase 5 전달)
         self._buy_signals: list[dict] = []
+        self._supply_snapshots: list[dict] = []  # 장중 수급 스냅샷 누적
 
         logger.info(
-            "DailyScheduler 초기화 (enabled=%s, mode=%s)",
+            "DailyScheduler v5.0 초기화 (enabled=%s, mode=%s)",
             self.enabled, self.mode,
         )
 
-    # ──────────────────────────────────────────
-    # Phase 1: 일일 리셋 (00:00)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # Phase 0: 일일 리셋 (00:00)
+    # ══════════════════════════════════════════
 
     def phase_daily_reset(self) -> None:
         """STOP.signal 삭제 + 로그 로테이션 + 일일 초기화"""
         logger.info("=" * 50)
-        logger.info("[Phase 1] 일일 리셋 시작 — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
+        logger.info("[Phase 0] 일일 리셋 — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
         logger.info("=" * 50)
 
         from src.use_cases.safety_guard import SafetyGuard
@@ -88,61 +112,89 @@ class DailyScheduler:
 
         self._is_holiday = False
         self._buy_signals = []
+        self._supply_snapshots = []
 
-        logger.info("[Phase 1] 일일 리셋 완료")
-        self._notify("Phase 1 완료: 일일 리셋")
+        logger.info("[Phase 0] 일일 리셋 완료")
+        self._notify("Phase 0 완료: 일일 리셋")
 
-    # ──────────────────────────────────────────
-    # Phase 2: 매크로 수집 (07:00)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # Phase 1: 미장 마감 데이터 수집 (06:10)
+    # ══════════════════════════════════════════
+
+    def phase_us_close_collect(self) -> None:
+        """미장 마감 후 yfinance 데이터 수집 + US Overnight Signal 생성"""
+        logger.info("[Phase 1] 미장 마감 데이터 수집 시작")
+        try:
+            from scripts.us_overnight_signal import update_latest, generate_signal
+            df = update_latest()
+            signal = generate_signal(df)
+            grade = signal.get("grade", "NEUTRAL")
+            score = signal.get("combined_score_100", 0)
+            logger.info("[Phase 1] US Overnight: %s (%+.1f)", grade, score)
+            self._notify(f"Phase 1 완료: US {grade} ({score:+.1f})")
+        except Exception as e:
+            logger.error("[Phase 1] 미장 데이터 수집 실패: %s", e)
+            self._notify(f"Phase 1 오류: {e}")
+
+    # ══════════════════════════════════════════
+    # Phase 2: 한국 매크로 수집 (07:00)
+    # ══════════════════════════════════════════
 
     def phase_macro_collect(self) -> None:
-        """KOSPI/KOSDAQ/환율/금리 등 매크로 데이터 수집 + US Overnight Signal"""
-        logger.info("[Phase 2] 매크로 수집 시작")
+        """KOSPI/KOSDAQ/환율/금리 매크로 데이터 수집"""
+        logger.info("[Phase 2] 한국 매크로 수집 시작")
         try:
             from scripts.update_daily_data import update_all
             update_all()
             logger.info("[Phase 2] 매크로 수집 완료")
         except Exception as e:
             logger.error("[Phase 2] 매크로 수집 실패: %s", e)
+        self._notify("Phase 2 완료: 한국 매크로 수집")
 
-        # US Overnight Signal (yfinance 최신 → 신호 생성)
-        try:
-            from scripts.us_overnight_signal import update_latest, generate_signal
-            df = update_latest()
-            signal = generate_signal(df)
-            logger.info("[Phase 2] US Overnight: %s (%.2f)", signal.get("composite"), signal.get("score", 0))
-        except Exception as e:
-            logger.error("[Phase 2] US Overnight 실패: %s", e)
-
-        self._notify("Phase 2 완료: 매크로 + US Overnight")
-
-    # ──────────────────────────────────────────
-    # Phase 3: 뉴스/리포트 (07:10)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # Phase 3: 뉴스 스캔 (07:20)
+    # ══════════════════════════════════════════
 
     def phase_news_briefing(self) -> None:
-        """Grok API 뉴스 스캔 + 등급 판정"""
+        """Grok API 뉴스 스캔 + 감정 분석"""
         logger.info("[Phase 3] 뉴스/리포트 수집 시작")
         try:
-            # main.py의 step_news_scan 직접 호출
-            sys.path.insert(0, str(PROJECT_ROOT))
             from main import step_news_scan
-            step_news_scan(send_telegram=True)
+            step_news_scan(send_telegram=False)  # 별도 브리핑에서 통합 발송
             logger.info("[Phase 3] 뉴스 스캔 완료")
         except Exception as e:
             logger.error("[Phase 3] 뉴스 스캔 실패: %s", e)
-        self._notify("Phase 3 완료: 뉴스/리포트")
+        self._notify("Phase 3 완료: 뉴스 스캔")
 
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # Phase 3B: 📱 1발 장전 마켓 브리핑 (07:30)
+    # ══════════════════════════════════════════
+
+    def phase_morning_briefing(self) -> None:
+        """장전 마켓 브리핑 텔레그램 발송 (상승/하락 확률 + S/A/B/C)"""
+        logger.info("[Phase 3B] 📱 장전 마켓 브리핑 시작")
+        try:
+            from scripts.send_market_briefing import build_briefing_message
+            from src.telegram_sender import send_message
+
+            msg = build_briefing_message()
+            ok = send_message(msg)
+            if ok:
+                logger.info("[Phase 3B] 📱 1발 장전 브리핑 전송 완료 (%d자)", len(msg))
+            else:
+                logger.error("[Phase 3B] 📱 1발 전송 실패")
+        except Exception as e:
+            logger.error("[Phase 3B] 장전 브리핑 실패: %s", e)
+            self._notify(f"Phase 3B 오류: {e}")
+
+    # ══════════════════════════════════════════
     # Phase 4: 매매 준비 (08:20)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
 
     def phase_trade_prep(self) -> None:
-        """토큰 갱신 → 공휴일 체크 → 시그널 스캔 → 매수 후보 확정"""
+        """토큰 갱신 → 공휴일 체크 → 매수 후보 확정"""
         logger.info("[Phase 4] 매매 준비 시작")
 
-        # 1. 공휴일 체크
         from src.use_cases.safety_guard import SafetyGuard
         guard = SafetyGuard(self.config)
         self._is_holiday = guard.check_holiday()
@@ -152,260 +204,333 @@ class DailyScheduler:
             self._notify("Phase 4: 공휴일 감지 — 매매 스킵")
             return
 
-        # 2. STOP.signal 체크
         if guard.check_stop_signal():
             logger.warning("[Phase 4] STOP.signal 활성 — 매매 스킵")
             self._notify("Phase 4: STOP.signal 활성 — 매매 스킵")
             return
 
-        # 3. 한투 API 토큰 갱신 (어댑터 초기화 시 자동)
         try:
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
             balance = adapter.get_available_cash()
-            logger.info("[Phase 4] 한투 API 토큰 갱신 완료 (예수금: %s원)", f"{balance:,.0f}")
+            logger.info("[Phase 4] 한투 API 토큰 OK (예수금: %s원)", f"{balance:,.0f}")
         except Exception as e:
             logger.error("[Phase 4] 한투 API 연결 실패: %s", e)
-            self._notify(f"Phase 4 경고: 한투 API 연결 실패 — {e}")
+            self._notify(f"Phase 4 경고: 한투 API 실패 — {e}")
             return
 
-        # 4. 시그널 스캔 (step_backtest 결과 로드)
         try:
             self._load_signals()
             logger.info("[Phase 4] 매수 후보 %d종목 확정", len(self._buy_signals))
         except Exception as e:
-            logger.error("[Phase 4] 시그널 스캔 실패: %s", e)
+            logger.error("[Phase 4] 시그널 로드 실패: %s", e)
 
-        self._notify(f"Phase 4 완료: 매매 준비 (후보 {len(self._buy_signals)}종목)")
+        self._notify(f"Phase 4 완료: 매수 후보 {len(self._buy_signals)}종목")
 
     def _load_signals(self) -> None:
         """저장된 시그널 결과 로드"""
+        import pandas as pd
         signals_path = Path("results/signals_log.csv")
         if not signals_path.exists():
-            logger.warning("[Phase 4] signals_log.csv 없음 — 시그널 0건")
             self._buy_signals = []
             return
-
-        import pandas as pd
         df = pd.read_csv(signals_path)
-        # signal=True인 최신 데이터만
         if "signal" in df.columns:
             df = df[df["signal"] == True]
         if "date" in df.columns:
-            latest_date = df["date"].max()
-            df = df[df["date"] == latest_date]
-
+            df = df[df["date"] == df["date"].max()]
         self._buy_signals = df.to_dict("records")
 
-    # ──────────────────────────────────────────
-    # Phase 4.5: 장전 포트폴리오 분석 리포트 (08:25)
-    # ──────────────────────────────────────────
-
-    def phase_morning_report(self) -> None:
-        """5D/6D 포트폴리오 분석 HTML 리포트 생성 + 텔레그램 장시작 분석 보고서"""
-        logger.info("[Phase 4.5] 장전 리포트 시작")
-
-        # 기존 HTML 리포트 (유지)
-        try:
-            from src.use_cases.portfolio_reporter import PortfolioReporter
-            reporter = PortfolioReporter(self.config)
-            save_path = reporter.generate()
-
-            if save_path:
-                logger.info("[Phase 4.5] HTML 리포트 생성 완료: %s", save_path)
-            else:
-                logger.info("[Phase 4.5] 보유 포지션 없음 — HTML 리포트 생략")
-        except Exception as e:
-            logger.error("[Phase 4.5] HTML 리포트 생성 실패: %s", e)
-
-        # 텔레그램 장시작 분석 보고서 (신규)
-        try:
-            from src.use_cases.market_analysis_reporter import MarketAnalysisReporter
-            from src.telegram_sender import send_market_analysis
-
-            ma_reporter = MarketAnalysisReporter(self.config)
-            data = ma_reporter.generate(report_type="morning")
-            send_market_analysis(data)
-            logger.info("[Phase 4.5] 텔레그램 장시작 보고서 전송 완료")
-        except Exception as e:
-            logger.error("[Phase 4.5] 텔레그램 보고서 전송 실패: %s", e)
-
-        self._notify("Phase 4.5 완료: 장전 리포트")
-
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
     # Phase 5: 매수 실행 (09:02)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
 
     def phase_buy_execution(self) -> None:
-        """v4 결과 기반 매수 실행"""
+        """매수 후보 기반 주문 실행"""
         if self._is_holiday:
-            logger.info("[Phase 5] 공휴일 — 스킵")
             return
-
-        logger.info("[Phase 5] 매수 실행 시작 (후보 %d종목)", len(self._buy_signals))
-
+        logger.info("[Phase 5] 매수 실행 (후보 %d종목)", len(self._buy_signals))
         if not self._buy_signals:
-            logger.info("[Phase 5] 매수 후보 없음")
             self._notify("Phase 5: 매수 후보 없음")
             return
-
         if not self.enabled:
-            logger.info("[Phase 5] live_trading.enabled=false — 모의 모드 (주문 안함)")
             self._notify("Phase 5: 모의 모드 — 실주문 안함")
             return
-
         try:
             from src.use_cases.live_trading import create_live_engine
             engine = create_live_engine()
-
-            # 시그널 최대 5분 대기 (이미 로드됨)
             results = engine.execute_buy_signals(self._buy_signals)
-
-            success_count = sum(1 for r in results if r.get("success"))
-            logger.info("[Phase 5] 매수 완료: %d/%d 성공", success_count, len(results))
-            self._notify(f"Phase 5 완료: {success_count}종목 매수 성공")
+            ok = sum(1 for r in results if r.get("success"))
+            self._notify(f"Phase 5 완료: {ok}종목 매수 성공")
         except Exception as e:
-            logger.error("[Phase 5] 매수 실행 오류: %s", e)
+            logger.error("[Phase 5] 매수 오류: %s", e)
             self._notify(f"Phase 5 오류: {e}")
 
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
     # Phase 6: 장중 모니터링 (09:10 ~ 15:20)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
 
     def phase_intraday_monitor(self) -> None:
         """장중 실시간 모니터링 (1분 간격)"""
-        if self._is_holiday:
-            logger.info("[Phase 6] 공휴일 — 스킵")
+        if self._is_holiday or not self.enabled:
             return
-
-        if not self.enabled:
-            logger.info("[Phase 6] live_trading.enabled=false — 모니터링 스킵")
-            return
-
         logger.info("[Phase 6] 장중 모니터링 시작 (09:10 ~ 15:20)")
         self._notify("Phase 6 시작: 장중 모니터링")
-
         try:
             from src.use_cases.live_trading import create_live_engine
             engine = create_live_engine()
-            engine.monitor_loop()  # 15:20 자동 종료
-            logger.info("[Phase 6] 장중 모니터링 종료")
+            engine.monitor_loop()
         except Exception as e:
             logger.error("[Phase 6] 모니터링 오류: %s", e)
             self._notify(f"Phase 6 오류: {e}")
 
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # 📸 수급 스냅샷 (09:30, 11:00, 13:30, 15:00)
+    # ══════════════════════════════════════════
+
+    def phase_supply_snapshot(self, snapshot_num: int = 0) -> None:
+        """장중 수급 스냅샷 수집 + 급변 알림"""
+        if self._is_holiday:
+            return
+
+        labels = {1: "개장30분", 2: "오전장", 3: "오후장전환", 4: "마감직전"}
+        label = labels.get(snapshot_num, f"#{snapshot_num}")
+        logger.info("[📸 수급 %d차] %s 스냅샷 수집 시작", snapshot_num, label)
+
+        try:
+            from src.adapters.kis_intraday_adapter import KisIntradayAdapter
+            adapter = KisIntradayAdapter(self.config)
+
+            # 수집 대상: 보유종목 + 관심종목 (전일 스캔 결과)
+            tickers = self._get_supply_tickers()
+            if not tickers:
+                logger.info("[📸 수급 %d차] 수집 대상 없음 — 스킵", snapshot_num)
+                return
+
+            now_str = datetime.now().strftime("%H:%M")
+            snapshot = {
+                "snapshot_num": snapshot_num,
+                "label": label,
+                "time": now_str,
+                "timestamp": datetime.now().isoformat(),
+                "stocks": {},
+            }
+
+            for ticker in tickers:
+                try:
+                    flow = adapter.fetch_investor_flow(ticker)
+                    snapshot["stocks"][ticker] = {
+                        "foreign_net": flow.get("foreign_net_buy", 0),
+                        "inst_net": flow.get("inst_net_buy", 0),
+                        "individual_net": flow.get("individual_net_buy", 0),
+                    }
+                except Exception as e:
+                    logger.warning("[📸] %s 수급 조회 실패: %s", ticker, e)
+
+            # 저장
+            self._supply_snapshots.append(snapshot)
+            today = datetime.now().strftime("%Y%m%d")
+            snap_path = SUPPLY_SNAPSHOT_DIR / f"{today}_snap{snapshot_num}.json"
+            with open(snap_path, "w", encoding="utf-8") as f:
+                json.dump(snapshot, f, ensure_ascii=False, indent=2)
+
+            logger.info(
+                "[📸 수급 %d차] %d종목 수집 완료 → %s",
+                snapshot_num, len(snapshot["stocks"]), snap_path.name,
+            )
+
+            # 급변 알림 체크 (2차부터)
+            if snapshot_num >= 2:
+                self._check_supply_alert(snapshot)
+
+        except Exception as e:
+            logger.error("[📸 수급 %d차] 오류: %s", snapshot_num, e)
+
+    def _get_supply_tickers(self) -> list[str]:
+        """수급 수집 대상 종목 리스트"""
+        tickers = set()
+
+        # 1. 보유 종목
+        try:
+            pos_path = Path("data/positions.json")
+            if pos_path.exists():
+                with open(pos_path, encoding="utf-8") as f:
+                    pos_data = json.load(f)
+                for p in pos_data.get("positions", []):
+                    tickers.add(p["ticker"])
+        except Exception:
+            pass
+
+        # 2. 전일 스캔 후보 (watchlist)
+        try:
+            import pandas as pd
+            sig_path = Path("results/signals_log.csv")
+            if sig_path.exists():
+                df = pd.read_csv(sig_path)
+                if "ticker" in df.columns:
+                    for t in df["ticker"].unique():
+                        tickers.add(str(t).zfill(6))
+        except Exception:
+            pass
+
+        return list(tickers)[:20]  # 최대 20종목 (API 부하 방지)
+
+    def _check_supply_alert(self, current: dict) -> None:
+        """이전 스냅샷 대비 수급 급변 알림"""
+        if len(self._supply_snapshots) < 2:
+            return
+
+        prev = self._supply_snapshots[-2]
+        alerts = []
+
+        for ticker, cur_data in current.get("stocks", {}).items():
+            prev_data = prev.get("stocks", {}).get(ticker)
+            if not prev_data:
+                continue
+
+            cur_f = cur_data["foreign_net"]
+            prev_f = prev_data["foreign_net"]
+            cur_i = cur_data["inst_net"]
+            prev_i = prev_data["inst_net"]
+
+            # 외국인 방향 전환 (매수→매도 or 매도→매수)
+            if self.supply_cfg.get("alert_conditions", {}).get("direction_flip"):
+                if prev_f > 0 and cur_f < 0:
+                    alerts.append(f"🔴 {ticker}: 외국인 매수→매도 전환!")
+                elif prev_f < 0 and cur_f > 0:
+                    alerts.append(f"🟢 {ticker}: 외국인 매도→매수 전환!")
+
+            # 외국인+기관 동시 순매도
+            threshold = self.supply_cfg.get("alert_conditions", {}).get("dual_sell_threshold", 100000)
+            if cur_f < -threshold and cur_i < -threshold:
+                alerts.append(
+                    f"🚨 {ticker}: 외국인({cur_f:+,})+기관({cur_i:+,}) 동시 대량매도!"
+                )
+
+        if alerts:
+            snap_num = current["snapshot_num"]
+            msg = f"⚡ 수급 급변 알림 ({snap_num}차 스냅샷)\n" + "\n".join(alerts)
+            logger.warning(msg)
+            try:
+                from src.telegram_sender import send_message
+                send_message(msg)
+            except Exception:
+                pass
+
+    # ══════════════════════════════════════════
     # Phase 7: 매도 실행 (15:25)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
 
     def phase_sell_execution(self) -> None:
         """장마감 전 청산 대상 매도"""
-        if self._is_holiday:
-            logger.info("[Phase 7] 공휴일 — 스킵")
+        if self._is_holiday or not self.enabled:
             return
-
-        if not self.enabled:
-            logger.info("[Phase 7] live_trading.enabled=false — 스킵")
-            return
-
         logger.info("[Phase 7] 매도 실행 시작")
         try:
             from src.use_cases.live_trading import create_live_engine
             engine = create_live_engine()
             results = engine.execute_sell_signals()
-
             sell_count = sum(1 for r in results if r.get("success"))
-            logger.info("[Phase 7] 매도 완료: %d건 실행", sell_count)
             self._notify(f"Phase 7 완료: {sell_count}건 매도")
         except Exception as e:
             logger.error("[Phase 7] 매도 오류: %s", e)
             self._notify(f"Phase 7 오류: {e}")
 
-    # ──────────────────────────────────────────
-    # Phase 8: 장마감 파이프라인 (15:35)
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
+    # Phase 8: 장마감 데이터 업데이트 (15:40~16:30, 5단계)
+    # ══════════════════════════════════════════
 
-    def phase_close_pipeline(self) -> None:
-        """
-        장마감 9단계 파이프라인:
-        1. 일일 데이터 수집
-        2. 종목 필터 (지표 계산)
-        3. 매크로 데이터 수집 + 정제
-        4. 매크로 NaN 검증
-        5. 전일 추천 결과 업데이트
-        6. 다음날 매수 후보 스캔
-        7. 오늘 추천 기록 저장
-        8. ML 재학습 (향후 확장)
-        9. 일일 성과 리포트
-        """
-        logger.info("=" * 50)
-        logger.info("[Phase 8] 장마감 파이프라인 시작")
-        logger.info("=" * 50)
+    def phase_close_data_collect(self) -> None:
+        """8-1: 종가 데이터 수집 (pykrx)"""
+        logger.info("[Phase 8-1] 종가 데이터 수집 시작")
+        try:
+            from scripts.update_daily_data import update_all
+            update_all()
+            logger.info("[Phase 8-1] 종가 데이터 수집 완료")
+        except Exception as e:
+            logger.error("[Phase 8-1] 종가 수집 실패: %s", e)
 
-        # Step 1: 일일 데이터 수집
-        self._run_step("8-1", "일일 데이터 수집", self._close_step_1_collect)
+    def phase_csv_update(self) -> None:
+        """8-2: CSV 업데이트 (FinanceDataReader + 37개 지표)"""
+        logger.info("[Phase 8-2] CSV 업데이트 시작")
+        try:
+            from scripts.update_daily_data import update_all
+            update_all()
+            logger.info("[Phase 8-2] CSV 업데이트 완료")
+        except Exception as e:
+            logger.error("[Phase 8-2] CSV 업데이트 실패: %s", e)
 
-        # Step 2: 종목 필터 (지표 계산)
-        self._run_step("8-2", "지표 계산", self._close_step_2_indicators)
-
-        # Step 3: 매크로 수집
-        self._run_step("8-3", "매크로 수집", self._close_step_3_macro)
-
-        # Step 4: NaN 검증
-        self._run_step("8-4", "데이터 검증", self._close_step_4_verify)
-
-        # Step 5: 전일 추천 결과 업데이트 (향후)
-        logger.info("[Phase 8-5] 전일 추천 결과 업데이트 — 향후 구현 예정")
-
-        # Step 6: 다음날 매수 후보 스캔
-        self._run_step("8-6", "매수 후보 스캔", self._close_step_6_scan)
-
-        # Step 7: 오늘 추천 기록 저장
-        self._run_step("8-7", "추천 기록 저장", self._close_step_7_save)
-
-        # Step 8: US-KR 패턴DB 학습 루프 (일일 누적)
-        self._run_step("8-8", "US-KR 패턴DB 업데이트", self._close_step_8_uskr)
-
-        # Step 9: 일일 성과 리포트
-        self._run_step("8-9", "성과 리포트", self._close_step_9_report)
-
-        logger.info("[Phase 8] 장마감 파이프라인 완료")
-        self._notify("Phase 8 완료: 장마감 파이프라인 (9단계)")
-
-    def _close_step_1_collect(self) -> None:
-        """8-1: CSV 업데이트 + parquet 증분 업데이트"""
-        from scripts.update_daily_data import update_all
-        update_all()
-
-        # P2 fix: raw parquet 증분 업데이트 (pykrx)
-        # 이 단계가 없으면 raw가 구버전 → 8-2 지표 계산도 구버전
+    def phase_parquet_update(self) -> None:
+        """8-3: parquet 증분 업데이트"""
+        logger.info("[Phase 8-3] parquet 증분 업데이트 시작")
         try:
             from scripts.extend_parquet_data import main as extend_main
             extend_main()
+            logger.info("[Phase 8-3] parquet 증분 완료")
         except Exception as e:
-            logger.error("[Phase 8-1] parquet 증분 업데이트 실패: %s", e)
+            logger.error("[Phase 8-3] parquet 증분 실패: %s", e)
 
-    def _close_step_2_indicators(self) -> None:
-        from main import step_indicators
-        step_indicators()
-
-    def _close_step_3_macro(self) -> None:
-        # 매크로 수집 재실행 (장마감 데이터 반영)
-        self.phase_macro_collect()
-
-    def _close_step_4_verify(self) -> None:
-        from scripts.update_daily_data import verify_all_data
+    def phase_indicator_calc(self) -> None:
+        """8-4: 기술적 지표 재계산 (35개)"""
+        logger.info("[Phase 8-4] 지표 재계산 시작")
         try:
+            from main import step_indicators
+            step_indicators()
+            logger.info("[Phase 8-4] 지표 재계산 완료")
+        except Exception as e:
+            logger.error("[Phase 8-4] 지표 계산 실패: %s", e)
+
+    def phase_data_verify(self) -> None:
+        """8-5: 데이터 검증 (NaN 체크)"""
+        logger.info("[Phase 8-5] 데이터 검증 시작")
+        try:
+            from scripts.update_daily_data import verify_all_data
             verify_all_data()
+            logger.info("[Phase 8-5] 데이터 검증 완료")
         except (ImportError, AttributeError):
-            logger.info("[Phase 8-4] verify_all_data 없음 — 스킵")
+            logger.info("[Phase 8-5] verify_all_data 없음 — 스킵")
+        except Exception as e:
+            logger.error("[Phase 8-5] 검증 실패: %s", e)
 
-    def _close_step_6_scan(self) -> None:
-        from main import step_backtest
-        step_backtest(use_sample=False)
+    # ══════════════════════════════════════════
+    # Phase 9: 수급 최종 확정 수집 (18:20)
+    # ══════════════════════════════════════════
 
-    def _close_step_7_save(self) -> None:
-        """오늘 시그널 결과를 날짜별로 저장"""
+    def phase_supply_final(self) -> None:
+        """18:10 이후 확정된 외국인/기관/공매도 수급 수집"""
+        logger.info("[Phase 9] 수급 최종 확정 수집 시작")
+        try:
+            from scripts.collect_supply_data import main as collect_supply
+            collect_supply()
+            logger.info("[Phase 9] 수급 최종 확정 수집 완료")
+        except Exception as e:
+            logger.error("[Phase 9] 수급 확정 수집 실패: %s", e)
+
+        # US-KR 패턴DB 업데이트
+        try:
+            from scripts.update_us_kr_daily import main as update_uskr
+            update_uskr()
+            logger.info("[Phase 9] US-KR 패턴DB 업데이트 완료")
+        except Exception as e:
+            logger.error("[Phase 9] US-KR 패턴DB 실패: %s", e)
+
+        self._notify("Phase 9 완료: 수급 확정 수집")
+
+    # ══════════════════════════════════════════
+    # Phase 10: 내일 매수 후보 스캔 (18:40)
+    # ══════════════════════════════════════════
+
+    def phase_evening_scan(self) -> None:
+        """수급 반영된 최신 데이터로 내일 매수 후보 스캔"""
+        logger.info("[Phase 10] 내일 매수 후보 스캔 시작")
+        try:
+            from main import step_backtest
+            step_backtest(use_sample=False)
+            logger.info("[Phase 10] 매수 후보 스캔 완료")
+        except Exception as e:
+            logger.error("[Phase 10] 스캔 실패: %s", e)
+
+        # 추천 기록 아카이브
         import shutil
         signals_path = Path("results/signals_log.csv")
         if signals_path.exists():
@@ -414,133 +539,303 @@ class DailyScheduler:
             archive_dir.mkdir(parents=True, exist_ok=True)
             shutil.copy2(signals_path, archive_dir / f"signals_{today}.csv")
 
-    def _close_step_8_uskr(self) -> None:
-        """8-8: US-KR 패턴DB 일일 누적 (학습 루프)"""
-        from scripts.update_us_kr_daily import main as update_uskr_main
-        update_uskr_main()
+        self._notify("Phase 10 완료: 내일 후보 스캔")
 
-    def _close_step_9_report(self) -> None:
-        """장마감 분석 보고서 생성 + 텔레그램 발송"""
+    # ══════════════════════════════════════════
+    # Phase 10B: 📱 2발 장마감 리포트 (19:00)
+    # ══════════════════════════════════════════
+
+    def phase_evening_briefing(self) -> None:
+        """장마감 리포트 텔레그램 발송 (결과 + 내일 후보 + 수급 히스토리)"""
+        logger.info("[Phase 10B] 📱 장마감 리포트 시작")
         try:
-            from src.use_cases.market_analysis_reporter import MarketAnalysisReporter
-            from src.telegram_sender import send_market_analysis
-
-            reporter = MarketAnalysisReporter(self.config)
-            data = reporter.generate(report_type="closing")
-            send_market_analysis(data)
-            logger.info("[Phase 8-9] 텔레그램 장마감 보고서 전송 완료")
+            msg = self._build_evening_message()
+            from src.telegram_sender import send_message
+            ok = send_message(msg)
+            if ok:
+                logger.info("[Phase 10B] 📱 2발 장마감 리포트 전송 완료 (%d자)", len(msg))
+            else:
+                logger.error("[Phase 10B] 📱 2발 전송 실패")
         except Exception as e:
-            logger.error("[Phase 8-9] 장마감 보고서 실패: %s", e)
+            logger.error("[Phase 10B] 장마감 리포트 실패: %s", e)
+            self._notify(f"Phase 10B 오류: {e}")
 
-    # ──────────────────────────────────────────
-    # Phase 9: 장마감 업무일지 (16:30)
-    # ──────────────────────────────────────────
+    def _build_evening_message(self) -> str:
+        """장마감 리포트 메시지 생성 (📱2발)"""
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+        lines = []
+
+        lines.append(f"\U0001f319 Quantum Master v10.3 | {now}")
+        lines.append("\u2501" * 28)
+        lines.append("")
+
+        # ── 오늘 매매 결과 ──
+        lines.append("\U0001f4b0 오늘 매매 결과")
+        lines.append("\u2500" * 28)
+        try:
+            pos_path = Path("data/positions.json")
+            if pos_path.exists():
+                with open(pos_path, encoding="utf-8") as f:
+                    pos_data = json.load(f)
+                positions = pos_data.get("positions", [])
+                if positions:
+                    for p in positions:
+                        name = p.get("name", p.get("ticker", "?"))
+                        pnl = p.get("unrealized_pnl_pct", 0)
+                        pnl_emoji = "\U0001f7e2" if pnl >= 0 else "\U0001f534"
+                        lines.append(
+                            f"  {pnl_emoji} {name} | {pnl:+.1f}%"
+                        )
+                    lines.append(f"  \U0001f4cb 보유: {len(positions)}종목")
+                else:
+                    lines.append("  보유 종목 없음")
+            else:
+                lines.append("  보유 종목 없음")
+        except Exception:
+            lines.append("  포지션 데이터 로드 실패")
+        lines.append("")
+
+        # ── 수급 히스토리 (4회 스냅샷) ──
+        lines.append("\U0001f4ca 장중 수급 흐름 (4회 스냅샷)")
+        lines.append("\u2500" * 28)
+        if self._supply_snapshots:
+            for snap in self._supply_snapshots:
+                label = snap["label"]
+                t = snap["time"]
+                stocks = snap.get("stocks", {})
+                if not stocks:
+                    continue
+                total_f = sum(s["foreign_net"] for s in stocks.values())
+                total_i = sum(s["inst_net"] for s in stocks.values())
+                f_emoji = "\U0001f7e2" if total_f > 0 else "\U0001f534"
+                i_emoji = "\U0001f7e2" if total_i > 0 else "\U0001f534"
+                lines.append(
+                    f"  {t} {label}: "
+                    f"{f_emoji}외 {total_f:+,} | "
+                    f"{i_emoji}기 {total_i:+,}"
+                )
+            # 수급 트렌드 요약
+            if len(self._supply_snapshots) >= 2:
+                first = self._supply_snapshots[0]
+                last = self._supply_snapshots[-1]
+                f_first = sum(s["foreign_net"] for s in first.get("stocks", {}).values())
+                f_last = sum(s["foreign_net"] for s in last.get("stocks", {}).values())
+                if f_first > 0 and f_last > 0:
+                    lines.append("  \u2514 \U0001f7e2 외국인 종일 매수 우위")
+                elif f_first < 0 and f_last < 0:
+                    lines.append("  \u2514 \U0001f534 외국인 종일 매도 우위")
+                elif f_first > 0 and f_last < 0:
+                    lines.append("  \u2514 \u26a0\ufe0f 외국인 매수\u2192매도 전환")
+                elif f_first < 0 and f_last > 0:
+                    lines.append("  \u2514 \U0001f7e2 외국인 매도\u2192매수 전환")
+        else:
+            lines.append("  스냅샷 데이터 없음 (장중 수집 안됨)")
+        lines.append("")
+
+        # ── 내일 매수 후보 ──
+        lines.append("\U0001f525 내일 매수 후보")
+        lines.append("\u2501" * 28)
+        try:
+            import pandas as pd
+            sig_path = Path("results/signals_log.csv")
+            if sig_path.exists():
+                df = pd.read_csv(sig_path)
+                if "date" in df.columns:
+                    df = df[df["date"] == df["date"].max()]
+                if "zone_score" in df.columns:
+                    df = df.sort_values("zone_score", ascending=False)
+                if len(df) > 0:
+                    grade_map = {
+                        0: ("\U0001f525", "S"),
+                        1: ("\u2b50", "A"),
+                        2: ("\U0001f539", "B"),
+                        3: ("\u26d4", "C"),
+                    }
+                    for rank, (_, row) in enumerate(df.head(5).iterrows()):
+                        emoji, g = grade_map.get(rank, ("\u2796", "D"))
+                        ticker = str(row.get("ticker", "?")).zfill(6)
+                        # 종목명 조회
+                        name = ticker
+                        stock_dir = Path("stock_data_daily")
+                        if stock_dir.exists():
+                            for csv in stock_dir.glob(f"*_{ticker}.csv"):
+                                name = csv.stem.rsplit("_", 1)[0]
+                                break
+                        entry = row.get("entry_price", 0)
+                        rr = row.get("rr_ratio", 0)
+                        zone = row.get("zone_score", 0)
+                        trigger = row.get("trigger_type", "")
+                        lines.append(
+                            f"{emoji} {g}등급 {name} ({ticker})"
+                        )
+                        lines.append(
+                            f"  진입 {entry:,.0f}원 | "
+                            f"R:R {rr:.1f}배 | Zone {zone:.2f}"
+                        )
+                        lines.append(f"  트리거: {trigger}")
+                        lines.append("")
+                else:
+                    lines.append("  Kill 필터 통과 종목 없음")
+                    lines.append("")
+            else:
+                lines.append("  스캔 결과 없음")
+                lines.append("")
+        except Exception:
+            lines.append("  스캔 결과 로드 실패")
+            lines.append("")
+
+        # ── 내일 주의사항 ──
+        lines.append("\U0001f4cb 내일 체크리스트")
+        lines.append("\u2500" * 28)
+        # US overnight signal 읽기
+        try:
+            sig_path = Path("data/us_market/overnight_signal.json")
+            if sig_path.exists():
+                with open(sig_path, encoding="utf-8") as f:
+                    us_sig = json.load(f)
+                grade = us_sig.get("grade", "NEUTRAL")
+                combined = us_sig.get("combined_score_100", 0)
+                lines.append(f"  \u251c US Signal: {grade} ({combined:+.1f})")
+            kills = us_sig.get("sector_kills", {}) if sig_path.exists() else {}
+            killed = [s for s, v in kills.items() if v.get("killed")]
+            if killed:
+                lines.append(f"  \u251c \U0001f6a8 섹터Kill: {', '.join(killed)}")
+            specials = us_sig.get("special_rules", []) if sig_path.exists() else []
+            if specials:
+                for rule in specials[:2]:
+                    lines.append(f"  \u251c \u26a0\ufe0f {rule}")
+        except Exception:
+            pass
+        lines.append(f"  \u2514 07:30 장전 브리핑에서 최종 확률 확인")
+        lines.append("")
+
+        lines.append("\u26a0\ufe0f 투자 판단은 본인 책임 | Quantum Master v10.3")
+        return "\n".join(lines)
+
+    # ══════════════════════════════════════════
+    # Phase 11: 업무일지 (19:30)
+    # ══════════════════════════════════════════
 
     def phase_eod_journal(self) -> None:
-        """일일 업무일지 HTML 생성 + 텔레그램 발송"""
-        logger.info("[Phase 9] 업무일지 생성 시작")
+        """일일 업무일지 HTML 생성"""
+        logger.info("[Phase 11] 업무일지 생성 시작")
         try:
             from src.use_cases.daily_journal import DailyJournalWriter
             writer = DailyJournalWriter(self.config)
             save_path = writer.generate()
-
             if save_path:
-                logger.info("[Phase 9] 업무일지 저장: %s", save_path)
-                self._notify(f"Phase 9 완료: 일일 업무일지 생성\n{save_path}")
-            else:
-                logger.info("[Phase 9] 업무일지 생성 실패")
+                logger.info("[Phase 11] 업무일지 저장: %s", save_path)
+            self._notify("Phase 11 완료: 업무일지")
         except Exception as e:
-            logger.error("[Phase 9] 업무일지 생성 실패: %s", e)
-            self._notify(f"Phase 9 오류: {e}")
+            logger.error("[Phase 11] 업무일지 실패: %s", e)
+            self._notify(f"Phase 11 오류: {e}")
 
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
     # 헬퍼
-    # ──────────────────────────────────────────
-
-    def _run_step(self, step_id: str, name: str, func) -> None:
-        """개별 스텝 실행 (에러 격리)"""
-        logger.info("[Phase %s] %s 시작", step_id, name)
-        try:
-            func()
-            logger.info("[Phase %s] %s 완료", step_id, name)
-        except Exception as e:
-            logger.error("[Phase %s] %s 실패: %s", step_id, name, e)
+    # ══════════════════════════════════════════
 
     def _notify(self, message: str) -> None:
-        """텔레그램 알림 (실패해도 무시)"""
+        """텔레그램 상태 알림 (실패 무시)"""
         try:
             from src.telegram_sender import send_message
-            send_message(f"[스케줄러] {message}")
+            send_message(f"[\uc2a4\ucf00\uc904\ub7ec] {message}")
         except Exception:
             pass
 
-    # ──────────────────────────────────────────
+    def _safe_run(self, func, *args) -> None:
+        """예외 격리 실행"""
+        try:
+            func(*args)
+        except Exception as e:
+            logger.error("[스케줄러] %s 오류: %s", func.__name__, e)
+            self._notify(f"오류: {func.__name__} — {e}")
+
+    # ══════════════════════════════════════════
     # 메인 루프
-    # ──────────────────────────────────────────
+    # ══════════════════════════════════════════
 
     def run(self) -> None:
-        """스케줄러 메인 루프 (schedule 라이브러리 사용)"""
-        import schedule
+        """v5.0 스케줄러 메인 루프"""
+        import schedule as sched
 
         logger.info("=" * 60)
-        logger.info("  v4.1 일일 스케줄러 시작")
+        logger.info("  v5.0 일일 스케줄러 시작")
         logger.info("  모드: %s | 실주문: %s", self.mode, "ON" if self.enabled else "OFF")
         logger.info("=" * 60)
 
-        # 스케줄 등록
-        schedule.every().day.at(self.schedule.get("daily_reset", "00:00")).do(
-            self._safe_run, self.phase_daily_reset
-        )
-        schedule.every().day.at(self.schedule.get("macro_collect", "07:00")).do(
-            self._safe_run, self.phase_macro_collect
-        )
-        schedule.every().day.at(self.schedule.get("news_briefing", "07:10")).do(
-            self._safe_run, self.phase_news_briefing
-        )
-        schedule.every().day.at(self.schedule.get("trade_prep", "08:20")).do(
-            self._safe_run, self.phase_trade_prep
-        )
-        schedule.every().day.at(self.schedule.get("morning_report", "08:25")).do(
-            self._safe_run, self.phase_morning_report
-        )
-        schedule.every().day.at(self.schedule.get("buy_execution", "09:02")).do(
-            self._safe_run, self.phase_buy_execution
-        )
-        schedule.every().day.at(self.schedule.get("monitor_start", "09:10")).do(
-            self._safe_run, self.phase_intraday_monitor
-        )
-        schedule.every().day.at(self.schedule.get("sell_execution", "15:25")).do(
-            self._safe_run, self.phase_sell_execution
-        )
-        schedule.every().day.at(self.schedule.get("close_pipeline", "15:35")).do(
-            self._safe_run, self.phase_close_pipeline
-        )
-        schedule.every().day.at(self.schedule.get("eod_journal", "16:30")).do(
-            self._safe_run, self.phase_eod_journal
-        )
+        S = self.schedule  # shorthand
 
-        logger.info("등록된 스케줄:")
-        for job in schedule.get_jobs():
+        # === 미장 마감 + 한국장 준비 ===
+        sched.every().day.at(S.get("daily_reset", "00:00")).do(
+            self._safe_run, self.phase_daily_reset)
+        sched.every().day.at(S.get("us_close_collect", "06:10")).do(
+            self._safe_run, self.phase_us_close_collect)
+        sched.every().day.at(S.get("macro_collect", "07:00")).do(
+            self._safe_run, self.phase_macro_collect)
+        sched.every().day.at(S.get("news_briefing", "07:20")).do(
+            self._safe_run, self.phase_news_briefing)
+        sched.every().day.at(S.get("morning_briefing", "07:30")).do(
+            self._safe_run, self.phase_morning_briefing)
+        sched.every().day.at(S.get("trade_prep", "08:20")).do(
+            self._safe_run, self.phase_trade_prep)
+
+        # === 한국장 운영 ===
+        sched.every().day.at(S.get("buy_execution", "09:02")).do(
+            self._safe_run, self.phase_buy_execution)
+        sched.every().day.at(S.get("monitor_start", "09:10")).do(
+            self._safe_run, self.phase_intraday_monitor)
+
+        # === 장중 수급 스냅샷 4회 ===
+        sched.every().day.at(S.get("supply_snapshot_1", "09:30")).do(
+            self._safe_run, self.phase_supply_snapshot, 1)
+        sched.every().day.at(S.get("supply_snapshot_2", "11:00")).do(
+            self._safe_run, self.phase_supply_snapshot, 2)
+        sched.every().day.at(S.get("supply_snapshot_3", "13:30")).do(
+            self._safe_run, self.phase_supply_snapshot, 3)
+        sched.every().day.at(S.get("supply_snapshot_4", "15:00")).do(
+            self._safe_run, self.phase_supply_snapshot, 4)
+
+        # === 매도 + 장마감 데이터 ===
+        sched.every().day.at(S.get("sell_execution", "15:25")).do(
+            self._safe_run, self.phase_sell_execution)
+        sched.every().day.at(S.get("close_data_collect", "15:40")).do(
+            self._safe_run, self.phase_close_data_collect)
+        sched.every().day.at(S.get("csv_update", "16:00")).do(
+            self._safe_run, self.phase_csv_update)
+        sched.every().day.at(S.get("parquet_update", "16:10")).do(
+            self._safe_run, self.phase_parquet_update)
+        sched.every().day.at(S.get("indicator_calc", "16:20")).do(
+            self._safe_run, self.phase_indicator_calc)
+        sched.every().day.at(S.get("data_verify", "16:30")).do(
+            self._safe_run, self.phase_data_verify)
+
+        # === 수급 확정 + 스캔 + 리포트 ===
+        sched.every().day.at(S.get("supply_final", "18:20")).do(
+            self._safe_run, self.phase_supply_final)
+        sched.every().day.at(S.get("evening_scan", "18:40")).do(
+            self._safe_run, self.phase_evening_scan)
+        sched.every().day.at(S.get("evening_briefing", "19:00")).do(
+            self._safe_run, self.phase_evening_briefing)
+        sched.every().day.at(S.get("eod_journal", "19:30")).do(
+            self._safe_run, self.phase_eod_journal)
+
+        logger.info("등록된 스케줄 (%d건):", len(sched.get_jobs()))
+        for job in sched.get_jobs():
             logger.info("  %s", job)
 
-        self._notify("스케줄러 시작됨")
+        self._notify("v5.0 스케줄러 시작됨")
 
-        # 무한 루프
         while True:
             try:
-                schedule.run_pending()
-
-                # reboot.trigger 체크
+                sched.run_pending()
                 from src.use_cases.safety_guard import SafetyGuard
                 guard = SafetyGuard(self.config)
                 if guard.check_reboot_trigger():
-                    logger.info("[스케줄러] reboot.trigger 감지 — 10초 후 재시작")
+                    logger.info("[스케줄러] reboot.trigger 감지 — 재시작")
                     self._notify("스케줄러 재시작 중...")
                     time.sleep(10)
-                    # 재초기화
                     self.__init__()
                     continue
-
             except KeyboardInterrupt:
                 logger.info("[스케줄러] Ctrl+C — 종료")
                 self._notify("스케줄러 종료됨")
@@ -548,57 +843,79 @@ class DailyScheduler:
             except Exception as e:
                 logger.error("[스케줄러] 오류: %s", e)
                 self._notify(f"스케줄러 오류: {e}")
-
             time.sleep(1)
 
-    def _safe_run(self, func) -> None:
-        """예외 격리 실행"""
-        try:
-            func()
-        except Exception as e:
-            logger.error("[스케줄러] %s 실행 오류: %s", func.__name__, e)
-            self._notify(f"스케줄러 오류: {func.__name__} — {e}")
+    # ══════════════════════════════════════════
+    # dry-run 출력
+    # ══════════════════════════════════════════
 
     def print_schedule(self) -> None:
-        """스케줄 표 출력 (--dry-run)"""
+        """v5.0 스케줄 표 출력"""
+        S = self.schedule
         print()
-        print("=" * 60)
-        print("  v4.1 일일 스케줄 (dry-run)")
-        print("=" * 60)
+        print("=" * 65)
+        print("  v5.0 일일 스케줄 (한국장 준비 ~ 미장 마감)")
+        print("=" * 65)
         print(f"  모드: {self.mode} | 실주문: {'ON' if self.enabled else 'OFF'}")
         print()
-        entries = [
-            (self.schedule.get("daily_reset", "00:00"), "Phase 1", "일일 리셋 (STOP.signal 삭제 + 로그 로테이션)"),
-            (self.schedule.get("macro_collect", "07:00"), "Phase 2", "매크로 수집 + US Overnight Signal"),
-            (self.schedule.get("news_briefing", "07:10"), "Phase 3", "뉴스/리포트 (Grok API 뉴스 스캔)"),
-            (self.schedule.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰→공휴일→시그널 스캔)"),
-            (self.schedule.get("morning_report", "08:25"), "Phase 4.5", "장전 5D/6D 포트폴리오 분석 리포트"),
-            (self.schedule.get("buy_execution", "09:02"), "Phase 5", "개별종목 매수 실행"),
-            (self.schedule.get("monitor_start", "09:10"), "Phase 6", "장중 모니터링 (1분간격 → 15:20)"),
-            (self.schedule.get("sell_execution", "15:25"), "Phase 7", "매도 실행 (장마감 전)"),
-            (self.schedule.get("close_pipeline", "15:35"), "Phase 8", "장마감 파이프라인 (9단계)"),
-            (self.schedule.get("eod_journal", "16:30"), "Phase 9", "장마감 일일 업무일지"),
+
+        sections = [
+            ("\U0001f1fa\U0001f1f8 미장 마감 + \U0001f1f0\U0001f1f7 한국장 준비", [
+                (S.get("daily_reset", "00:00"), "Phase 0", "일일 리셋"),
+                (S.get("us_close_collect", "06:10"), "Phase 1", "미장 마감 데이터 수집 (yfinance)"),
+                (S.get("macro_collect", "07:00"), "Phase 2", "한국 매크로 수집"),
+                (S.get("news_briefing", "07:20"), "Phase 3", "뉴스 스캔 (Grok API)"),
+                (S.get("morning_briefing", "07:30"), "Phase 3B", "\U0001f4f1 1발: 장전 마켓 브리핑"),
+                (S.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰+공휴일+확정)"),
+            ]),
+            ("\U0001f1f0\U0001f1f7 한국장 운영 + 수급 모니터링", [
+                (S.get("buy_execution", "09:02"), "Phase 5", "매수 실행"),
+                (S.get("monitor_start", "09:10"), "Phase 6", "장중 모니터링 (~15:20)"),
+                (S.get("supply_snapshot_1", "09:30"), "\U0001f4f8 1차", "개장 30분 외국인 방향"),
+                (S.get("supply_snapshot_2", "11:00"), "\U0001f4f8 2차", "오전장 수급 중간점검"),
+                (S.get("supply_snapshot_3", "13:30"), "\U0001f4f8 3차", "오후장 전환 체크"),
+                (S.get("supply_snapshot_4", "15:00"), "\U0001f4f8 4차", "마감 직전 최종 수급"),
+                (S.get("sell_execution", "15:25"), "Phase 7", "매도 실행"),
+            ]),
+            ("\U0001f1f0\U0001f1f7 장마감 + 데이터 업데이트", [
+                (S.get("close_data_collect", "15:40"), "Phase 8-1", "종가 데이터 수집 (pykrx)"),
+                (S.get("csv_update", "16:00"), "Phase 8-2", "CSV 업데이트 (FDR)"),
+                (S.get("parquet_update", "16:10"), "Phase 8-3", "parquet 증분"),
+                (S.get("indicator_calc", "16:20"), "Phase 8-4", "지표 재계산 (35개)"),
+                (S.get("data_verify", "16:30"), "Phase 8-5", "데이터 검증 (NaN)"),
+            ]),
+            ("\U0001f319 수급 확정 + 스캔 + 리포트", [
+                (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정 (18:10 후)"),
+                (S.get("evening_scan", "18:40"), "Phase 10", "내일 매수 후보 스캔"),
+                (S.get("evening_briefing", "19:00"), "Phase 10B", "\U0001f4f1 2발: 장마감 리포트"),
+                (S.get("eod_journal", "19:30"), "Phase 11", "업무일지 + 아카이브"),
+            ]),
         ]
-        for t, name, desc in entries:
-            print(f"  {t:>5}  {name:<10}  {desc}")
-        print()
-        print("  장마감 파이프라인 상세:")
-        print("    8-1. 일일 데이터 수집 (update_daily_data)")
-        print("    8-2. 지표 계산 (35개 + OU/SmartMoney/TRIX)")
-        print("    8-3. 매크로 수집 + 정제")
-        print("    8-4. 데이터 NaN 검증")
-        print("    8-5. 전일 추천 결과 D+1~D+5 업데이트")
-        print("    8-6. 다음날 매수 후보 스캔 (6-Layer Pipeline)")
-        print("    8-7. 오늘 추천 기록 저장")
-        print("    8-8. US-KR 패턴DB 일일 누적 (학습 루프)")
-        print("    8-9. 일일 성과 리포트 (텔레그램)")
-        print()
+
+        for title, entries in sections:
+            print(f"  --- {title} ---")
+            for t, name, desc in entries:
+                print(f"  {t:>5}  {name:<10}  {desc}")
+            print()
+
+        # 안전장치
+        safety = self.config.get("live_trading", {}).get("safety", {})
         print("  안전장치:")
-        print(f"    STOP.signal:     {self.config.get('live_trading', {}).get('safety', {}).get('stop_signal_file', 'STOP.signal')}")
-        print(f"    reboot.trigger:  {self.config.get('live_trading', {}).get('safety', {}).get('reboot_trigger_file', 'reboot.trigger')}")
-        print(f"    일일 손실 한도:  {self.config.get('live_trading', {}).get('safety', {}).get('max_daily_loss_pct', -0.03) * 100:.0f}%")
-        print(f"    총 손실 한도:    {self.config.get('live_trading', {}).get('safety', {}).get('max_total_loss_pct', -0.10) * 100:.0f}%")
-        print("=" * 60)
+        print(f"    STOP.signal:    {safety.get('stop_signal_file', 'STOP.signal')}")
+        print(f"    reboot.trigger: {safety.get('reboot_trigger_file', 'reboot.trigger')}")
+        print(f"    일일 손실 한도: {safety.get('max_daily_loss_pct', -0.03) * 100:.0f}%")
+        print(f"    총 손실 한도:   {safety.get('max_total_loss_pct', -0.10) * 100:.0f}%")
+        print()
+
+        # 수급 모니터링
+        sup = self.config.get("live_trading", {}).get("supply_monitor", {})
+        print("  수급 모니터링:")
+        print(f"    활성: {sup.get('enabled', False)}")
+        print(f"    대상: {sup.get('snapshot_tickers', 'watchlist')}")
+        alert = sup.get("alert_conditions", {})
+        print(f"    방향전환 알림: {alert.get('direction_flip', False)}")
+        print(f"    동시매도 임계: {alert.get('dual_sell_threshold', 100000):,}주")
+        print("=" * 65)
 
 
 def setup_logging():
@@ -609,14 +926,12 @@ def setup_logging():
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 
-    # 콘솔
     console = logging.StreamHandler(sys.stdout)
     console.setFormatter(logging.Formatter(
         "%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
     ))
     root_logger.addHandler(console)
 
-    # 파일 (로테이션: 10MB, 5개 백업)
     file_handler = RotatingFileHandler(
         log_dir / "scheduler.log",
         maxBytes=10 * 1024 * 1024,
@@ -630,37 +945,50 @@ def setup_logging():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="v4.0 일일 스케줄러")
+    parser = argparse.ArgumentParser(description="v5.0 일일 스케줄러")
+    parser.add_argument("--dry-run", action="store_true", help="스케줄 확인만")
     parser.add_argument(
-        "--dry-run", action="store_true",
-        help="스케줄 확인만 (실행 안함)",
-    )
-    parser.add_argument(
-        "--run-now", type=int, choices=range(1, 10), metavar="N",
-        help="특정 Phase를 즉시 실행 (1~9)",
+        "--run-now", type=str, metavar="PHASE",
+        help="Phase 즉시 실행 (0~11, 3b, snap1~4, 10b)",
     )
     args = parser.parse_args()
 
     setup_logging()
-
     scheduler = DailyScheduler()
 
     if args.dry_run:
         scheduler.print_schedule()
-    elif args.run_now:
+    elif args.run_now is not None:
         phases = {
-            1: scheduler.phase_daily_reset,
-            2: scheduler.phase_macro_collect,
-            3: scheduler.phase_news_briefing,
-            4: scheduler.phase_trade_prep,
-            5: scheduler.phase_buy_execution,
-            6: scheduler.phase_intraday_monitor,
-            7: scheduler.phase_sell_execution,
-            8: scheduler.phase_close_pipeline,
-            9: scheduler.phase_eod_journal,
+            "0": scheduler.phase_daily_reset,
+            "1": scheduler.phase_us_close_collect,
+            "2": scheduler.phase_macro_collect,
+            "3": scheduler.phase_news_briefing,
+            "3b": scheduler.phase_morning_briefing,
+            "4": scheduler.phase_trade_prep,
+            "5": scheduler.phase_buy_execution,
+            "6": scheduler.phase_intraday_monitor,
+            "snap1": lambda: scheduler.phase_supply_snapshot(1),
+            "snap2": lambda: scheduler.phase_supply_snapshot(2),
+            "snap3": lambda: scheduler.phase_supply_snapshot(3),
+            "snap4": lambda: scheduler.phase_supply_snapshot(4),
+            "7": scheduler.phase_sell_execution,
+            "8": scheduler.phase_close_data_collect,
+            "8-2": scheduler.phase_csv_update,
+            "8-3": scheduler.phase_parquet_update,
+            "8-4": scheduler.phase_indicator_calc,
+            "8-5": scheduler.phase_data_verify,
+            "9": scheduler.phase_supply_final,
+            "10": scheduler.phase_evening_scan,
+            "10b": scheduler.phase_evening_briefing,
+            "11": scheduler.phase_eod_journal,
         }
-        func = phases.get(args.run_now)
+        key = args.run_now.lower()
+        func = phases.get(key)
         if func:
             func()
+        else:
+            print(f"알 수 없는 Phase: {key}")
+            print(f"사용 가능: {', '.join(sorted(phases.keys()))}")
     else:
         scheduler.run()

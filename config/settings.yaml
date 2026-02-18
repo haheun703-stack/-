@@ -496,17 +496,51 @@ live_trading:
   enabled: false                    # true로 변경 시 실주문 활성화
   mode: "paper"                     # "paper" (모의) / "real" (실전)
 
-  # 일일 스케줄 (KST)
+  # v5.0 일일 스케줄 (KST) — 한국장 준비 ~ 미장 마감
   schedule:
+    # 🇺🇸 미장 마감 + 🇰🇷 한국장 준비
     daily_reset: "00:00"
-    macro_collect: "07:00"
-    news_briefing: "07:10"
-    trade_prep: "08:20"
+    us_close_collect: "06:10"       # 미장 마감 데이터 수집 (yfinance)
+    macro_collect: "07:00"          # 한국 매크로 수집
+    news_briefing: "07:20"          # 뉴스 스캔 (Grok API)
+    morning_briefing: "07:30"       # 📱 1발: 장전 마켓 브리핑
+    trade_prep: "08:20"             # 매매 준비 (토큰+공휴일+확정)
+
+    # 🇰🇷 한국장 운영
     buy_execution: "09:02"
     monitor_start: "09:10"
     monitor_end: "15:20"
     sell_execution: "15:25"
-    close_pipeline: "15:35"
+
+    # 📊 장중 수급 스냅샷 (1일 4회)
+    supply_snapshot_1: "09:30"      # 개장 30분 외국인 방향
+    supply_snapshot_2: "11:00"      # 오전장 수급 중간점검
+    supply_snapshot_3: "13:30"      # 오후장 전환 체크
+    supply_snapshot_4: "15:00"      # 마감 직전 최종 수급
+
+    # 🇰🇷 장마감 + 데이터 업데이트
+    close_data_collect: "15:40"     # 종가 데이터 수집 (pykrx)
+    csv_update: "16:00"             # CSV 업데이트 (FDR)
+    parquet_update: "16:10"         # parquet 증분
+    indicator_calc: "16:20"         # 기술적 지표 재계산
+    data_verify: "16:30"            # 데이터 검증 (NaN)
+
+    # 🌙 수급 확정 + 스캔 + 리포트
+    supply_final: "18:20"           # 수급 최종 확정 (18:10 후)
+    evening_scan: "18:40"           # 내일 매수 후보 스캔
+    evening_briefing: "19:00"       # 📱 2발: 장마감 리포트
+    eod_journal: "19:30"            # 업무일지 + 아카이브
+
+  # 장중 수급 모니터링 설정
+  supply_monitor:
+    enabled: true
+    snapshot_tickers: "watchlist"    # "held" / "watchlist" / "all_pipeline"
+    alert_enabled: true
+    alert_conditions:
+      direction_flip: true          # 외국인 매수→매도 전환 시 알림
+      large_volume_pct: 0.001       # 시총 대비 0.1% 이상 순매수/매도
+      dual_sell_threshold: 100000   # 외국인+기관 동시 순매도 10만주
+      snapshot_change_pct: 50       # 이전 스냅샷 대비 50% 급변
 
   # 주문 설정
   order:
