@@ -322,6 +322,10 @@ def scan_signals(data_dict, day_idx_map):
         # Grade (간이)
         grade = "S" if counter <= 3 else ("A" if counter <= 7 else "B")
 
+        # PER/PBR (펀더멘탈 백필 데이터)
+        per_val = float(row.get("fund_PER", 0) or 0)
+        pbr_val = float(row.get("fund_PBR", 0) or 0)
+
         signals.append({
             "ticker": ticker,
             "close": close,
@@ -335,6 +339,8 @@ def scan_signals(data_dict, day_idx_map):
             "freshness": freshness,
             "rsi": rsi,
             "atr": atr,
+            "per": per_val,
+            "pbr": pbr_val,
         })
 
     signals.sort(key=lambda s: s["rank"], reverse=True)
@@ -364,7 +370,7 @@ def calc_position_size(capital, grade, freshness, mode):
     return base
 
 
-def run_backtest(data_dict, name_map, mode="D", kospi_df=None):
+def run_backtest(data_dict, name_map, mode="D", kospi_df=None, per_filter=None):
     """
     mode:
       A = 리스크 없음 (기존 방식, 자본 무한)
@@ -372,6 +378,12 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None):
       C = B + US 레짐 캡 (레거시)
       C_new = B + KOSPI 레짐 캡 (MA20/MA60 + RV)
       D = C + 고급 익절/손절
+
+    per_filter: PER/PBR 필터 모드
+      None = 필터 없음 (기존)
+      "kill_negative" = PER ≤ 0 (적자) 제거
+      "kill_extreme" = PER ≤ 0 OR PER > 50 제거
+      "kill_full" = kill_extreme + PBR > 5 제거
     """
     ref_ticker = "005930"  # 삼성전자 (날짜 기준)
     ref_df = data_dict[ref_ticker]
@@ -540,6 +552,23 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None):
                 if sig["ticker"] in held_tickers:
                     continue
 
+                # PER/PBR 필터
+                if per_filter:
+                    sig_per = sig.get("per", 0)
+                    sig_pbr = sig.get("pbr", 0)
+                    if per_filter in ("kill_negative", "kill_extreme", "kill_full"):
+                        # PER 데이터 있는데 적자인 경우 스킵
+                        if sig_per < 0:
+                            continue
+                    if per_filter in ("kill_extreme", "kill_full"):
+                        # PER > 50 극단 고평가 스킵 (데이터 있을 때만)
+                        if sig_per > 50:
+                            continue
+                    if per_filter == "kill_full":
+                        # PBR > 5 극단값 스킵
+                        if sig_pbr > 5:
+                            continue
+
                 ticker = sig["ticker"]
                 df = data_dict[ticker]
                 idx = day_idx_map[ticker]
@@ -707,6 +736,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--universe-check", action="store_true",
                         help="유니버스 생존자 편향 검증 모드")
+    parser.add_argument("--per-compare", action="store_true",
+                        help="PER/PBR 필터 효과 비교 모드")
     args = parser.parse_args()
 
     if args.universe_check:
@@ -739,6 +770,46 @@ def main():
             print(f"    {r_name:>8} ({slots}슬롯): {cnt:>4}일 ({pct:>5.1f}%)")
 
     results = []
+
+    if args.per_compare:
+        # PER/PBR 필터 효과 비교: C_new 기준으로 필터 유무 비교
+        per_modes = [
+            (None, "C_new) 기준 (PER 필터 없음)"),
+            ("kill_negative", "C_new+PER) 적자 제거 (PER<0)"),
+            ("kill_extreme", "C_new+PER) 적자+고평가 제거 (PER<0 or >50)"),
+            ("kill_full", "C_new+PER) 적자+고평가+고PBR (PER<0 or >50, PBR>5)"),
+        ]
+        for pf_mode, label in per_modes:
+            print(f"\n[C_new, per={pf_mode}] {label} 실행 중...")
+            trades, daily = run_backtest(data_dict, name_map, "C_new",
+                                         kospi_df=kospi_df, per_filter=pf_mode)
+            r = report(trades, daily, label, "C_new")
+            if r:
+                results.append(r)
+
+        if len(results) >= 2:
+            print(f"\n{'=' * 75}")
+            print(f"  PER/PBR 필터 효과 비교 (C_new 기준)")
+            print(f"{'=' * 75}")
+            print(f"  {'모드':<50} {'거래':>5} {'승률':>6} {'PF':>6} {'수익률':>8} {'MDD':>8}")
+            print(f"  {'-' * 73}")
+            for r in results:
+                print(f"  {r['label']:<50} {r['trades']:>5} "
+                      f"{r['win_rate']:>5.1f}% {r['pf']:>6.2f} "
+                      f"{r['total_return']:>+7.1f}% {r['mdd']:>7.1f}%")
+
+            base = results[0]
+            print(f"\n  기준 대비 변화:")
+            for r in results[1:]:
+                diff_t = r['trades'] - base['trades']
+                diff_wr = r['win_rate'] - base['win_rate']
+                diff_pf = r['pf'] - base['pf']
+                diff_ret = r['total_return'] - base['total_return']
+                diff_mdd = r['mdd'] - base['mdd']
+                print(f"    {r['label'][:45]}")
+                print(f"      거래 {diff_t:+d} | 승률 {diff_wr:+.1f}%p | PF {diff_pf:+.2f} | "
+                      f"수익률 {diff_ret:+.1f}%p | MDD {diff_mdd:+.1f}%p")
+        return
 
     for mode, label in [
         ("B", "B) 포지션 사이징 (5종목, 레짐 없음)"),

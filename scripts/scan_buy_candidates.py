@@ -1287,6 +1287,10 @@ def scan_all(
             ),
         }
 
+        # PER/PBR (pykrx 펀더멘탈)
+        sig["per"] = float(row.get("fund_PER", 0) or 0)
+        sig["pbr"] = float(row.get("fund_PBR", 0) or 0)
+
         # TRIX counter 계산
         sig["trix_counter"] = calc_trix_counter(df, idx)
 
@@ -1643,7 +1647,14 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
         mcap = sig.get("market_cap", 0)
         avg_tv = sig.get("avg_trading_value_20d", 0)
         mcap_str = f"{mcap / 1e12:.1f}\uc870" if mcap >= 1e12 else f"{mcap / 1e8:,.0f}\uc5b5" if mcap > 0 else "?"
-        lines.append(f"\uc2dc\ucd1d {mcap_str} | \uac70\ub798\ub300\uae08 {avg_tv / 1e8:.0f}\uc5b5/\uc77c")
+        per_val = sig.get("per", 0)
+        pbr_val = sig.get("pbr", 0)
+        val_parts = [f"\uc2dc\ucd1d {mcap_str}", f"\uac70\ub798\ub300\uae08 {avg_tv / 1e8:.0f}\uc5b5/\uc77c"]
+        if per_val > 0 or pbr_val > 0:
+            per_str = f"{per_val:.1f}" if per_val > 0 else "-"
+            pbr_str = f"{pbr_val:.2f}" if pbr_val > 0 else "-"
+            val_parts.append(f"PER {per_str} PBR {pbr_str}")
+        lines.append(" | ".join(val_parts))
         lines.append(
             f"\ud604\uc7ac {entry:,}\uc6d0 | "
             f"\ubaa9\ud45c {target:,} (+{upside:.1f}%) | "
