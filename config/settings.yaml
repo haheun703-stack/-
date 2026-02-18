@@ -14,6 +14,10 @@
 strategy:
   name: "quantum_master_v7.0"
 
+  # === 유니버스 설정 ===
+  min_market_cap_조: 1.5       # 시총 하한 (조 단위) — rebuild_universe.py 기준
+  universe_count: 279           # 현재 유니버스 종목수 (2026-02-19 기준)
+
   # === Pre-screening ===
   min_revenue_억: 1000
   min_daily_trading_value_억: 5
