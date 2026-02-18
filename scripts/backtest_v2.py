@@ -5,18 +5,16 @@ v11.0 백테스트 v2 — 현실적 자본 시뮬레이션
   - 초기 자본 1억, 종목당 배분
   - 최대 동시 보유 5종목
   - 일일 최대 신규 진입 2종목
-  - 슬리피지 0.3%
+  - 슬리피지 0.5%
   - 포지션 사이징 (Grade × Freshness)
-  - US Overnight 레짐 연동 (가용 슬롯 제한)
+  - KOSPI 레짐 연동 (MA20/MA60 + 실현변동성)
   - 익절: +10% 반매도 + 트레일링 -5%
   - 손절: max(ATR×2, -7%), 캡 -10%
   - 시간 손절: 10일 내 +3% 미도달 시 청산
 
 비교:
-  A) v10.1 시그널 + 리스크 없음 (기존 방식)
   B) v10.1 시그널 + 포지션 사이징
-  C) v10.1 시그널 + 포지션 사이징 + 레짐 캡
-  D) v10.1 시그널 + 포지션 사이징 + 레짐 캡 + 고급 익절/손절
+  C_new) B + KOSPI 레짐 캡 (MA20/MA60 + RV)
 """
 
 import sys
@@ -69,12 +67,14 @@ class DayResult:
     daily_pnl: float = 0.0
 
 
-def load_parquets():
+def load_parquets(whitelist=None):
     pq_dir = Path("data/processed")
     data = {}
     for f in sorted(pq_dir.glob("*.parquet")):
         ticker = f.stem
         if len(ticker) == 6 and ticker.isdigit():
+            if whitelist and ticker not in whitelist:
+                continue
             df = pd.read_parquet(f)
             if len(df) > 252:
                 data[ticker] = df
@@ -138,7 +138,7 @@ def calc_di(df, idx, period=14):
 
 
 def get_us_regime(df_ref, idx):
-    """US Overnight 레짐 (간이: 전일 수익률 기반)"""
+    """US Overnight 레짐 (간이: 전일 수익률 기반) — 레거시, C 모드용"""
     if idx < 5:
         return "NEUTRAL"
     closes = df_ref["close"].values
@@ -161,6 +161,77 @@ REGIME_SLOTS = {
     "NEUTRAL": 3,
     "BEAR": 2,
     "STRONG_BEAR": 0,
+}
+
+
+# ── KOSPI 레짐 (Phase 3) ──
+
+def load_kospi_index():
+    """KOSPI 지수 로드 + MA20/MA60/RV20 전처리"""
+    kospi_path = Path("data/kospi_index.csv")
+    if not kospi_path.exists():
+        return None
+    df = pd.read_csv(kospi_path, index_col="Date", parse_dates=True)
+    df = df.sort_index()
+
+    # MA20, MA60
+    df["ma20"] = df["close"].rolling(20).mean()
+    df["ma60"] = df["close"].rolling(60).mean()
+
+    # 실현변동성 (20일 로그수익률 표준편차, 연율화)
+    log_ret = np.log(df["close"] / df["close"].shift(1))
+    df["rv20"] = log_ret.rolling(20).std() * np.sqrt(252) * 100  # %단위
+
+    # RV 252일 백분위 (0~1)
+    df["rv20_pct"] = df["rv20"].rolling(252, min_periods=60).apply(
+        lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False
+    )
+    return df
+
+
+def get_kospi_regime(kospi_df, date):
+    """
+    KOSPI 레짐 판정 (전일 데이터 사용 → look-ahead bias 방지)
+
+    규칙:
+      BULL (5슬롯):    KOSPI > MA20 AND RV20 < 50th %ile
+      CAUTION (3슬롯): KOSPI > MA20 AND RV20 >= 50th %ile
+      BEAR (2슬롯):    KOSPI < MA20 AND KOSPI > MA60
+      CRISIS (0슬롯):  KOSPI < MA60
+    """
+    if kospi_df is None:
+        return "CAUTION", 3  # fallback
+
+    # 전일 데이터 사용 (look-ahead bias 방지)
+    prev = kospi_df[kospi_df.index < date]
+    if len(prev) < 60:
+        return "CAUTION", 3
+
+    row = prev.iloc[-1]
+    close = row["close"]
+    ma20 = row["ma20"]
+    ma60 = row["ma60"]
+    rv_pct = row.get("rv20_pct", 0.5)
+
+    if pd.isna(ma20) or pd.isna(ma60):
+        return "CAUTION", 3
+
+    if close > ma20:
+        if not pd.isna(rv_pct) and rv_pct < 0.50:
+            return "BULL", 5
+        else:
+            return "CAUTION", 3
+    elif close > ma60:
+        return "BEAR", 2
+    else:
+        return "CRISIS", 0
+
+
+KOSPI_REGIME_SLOTS = {
+    "BULL": 5,
+    "CAUTION": 3,
+    "BEAR": 2,
+    "CRISIS": 0,
 }
 
 
@@ -288,17 +359,18 @@ def calc_position_size(capital, grade, freshness, mode):
     else:
         fresh_mult = 0.5
 
-    if mode in ("B", "C", "D", "D_old"):
+    if mode in ("B", "C", "C_new", "D", "D_old"):
         return base * grade_mult * fresh_mult
     return base
 
 
-def run_backtest(data_dict, name_map, mode="D"):
+def run_backtest(data_dict, name_map, mode="D", kospi_df=None):
     """
     mode:
       A = 리스크 없음 (기존 방식, 자본 무한)
       B = 포지션 사이징만
-      C = B + 레짐 캡
+      C = B + US 레짐 캡 (레거시)
+      C_new = B + KOSPI 레짐 캡 (MA20/MA60 + RV)
       D = C + 고급 익절/손절
     """
     ref_ticker = "005930"  # 삼성전자 (날짜 기준)
@@ -444,7 +516,9 @@ def run_backtest(data_dict, name_map, mode="D"):
         held_tickers = {p.ticker for p in positions}
 
         # 레짐 캡
-        if mode in ("C", "D", "D_old"):
+        if mode == "C_new":
+            regime, max_slots = get_kospi_regime(kospi_df, date)
+        elif mode in ("C", "D", "D_old"):
             ref_idx = day_idx_map.get(ref_ticker, 0)
             regime = get_us_regime(ref_df, ref_idx)
             max_slots = REGIME_SLOTS.get(regime, 3)
@@ -626,22 +700,49 @@ def report(trades, daily_results, label, mode):
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--universe-check", action="store_true",
+                        help="유니버스 생존자 편향 검증 모드")
+    args = parser.parse_args()
+
+    if args.universe_check:
+        return universe_bias_check()
+
     print("데이터 로딩...")
     data_dict = load_parquets()
     name_map = load_name_map()
+    kospi_df = load_kospi_index()
     print(f"  {len(data_dict)}종목 로드")
+    if kospi_df is not None:
+        print(f"  KOSPI 지수: {kospi_df.index[0].strftime('%Y-%m-%d')} ~ {kospi_df.index[-1].strftime('%Y-%m-%d')} ({len(kospi_df)}일)")
     print(f"  기간: {START_DATE} ~ {END_DATE}")
     print(f"  초기 자본: {INITIAL_CAPITAL / 1e8:.1f}억")
+
+    # KOSPI 레짐 분포 미리 보기
+    if kospi_df is not None:
+        regime_counts = {"BULL": 0, "CAUTION": 0, "BEAR": 0, "CRISIS": 0}
+        ref_df = data_dict["005930"]
+        test_dates = ref_df.index[(ref_df.index >= START_DATE) & (ref_df.index <= END_DATE)]
+        for d in test_dates:
+            r, _ = get_kospi_regime(kospi_df, d)
+            regime_counts[r] += 1
+        total_days = sum(regime_counts.values())
+        print(f"\n  KOSPI 레짐 분포 ({total_days}일):")
+        for r_name in ["BULL", "CAUTION", "BEAR", "CRISIS"]:
+            cnt = regime_counts[r_name]
+            pct = cnt / total_days * 100 if total_days > 0 else 0
+            slots = KOSPI_REGIME_SLOTS[r_name]
+            print(f"    {r_name:>8} ({slots}슬롯): {cnt:>4}일 ({pct:>5.1f}%)")
 
     results = []
 
     for mode, label in [
-        ("B", "B) 포지션 사이징 (5종목, 2일진입)"),
-        ("D_old", "D_old) B+레짐+익절손절 (trail-5%, time10d)"),
-        ("D", "D) B+레짐+익절손절 튜닝 (trail-8%, time15d)"),
+        ("B", "B) 포지션 사이징 (5종목, 레짐 없음)"),
+        ("C_new", "C_new) B + KOSPI 레짐 캡 (MA20/MA60+RV)"),
     ]:
         print(f"\n[{mode}] {label} 실행 중...")
-        trades, daily = run_backtest(data_dict, name_map, mode)
+        trades, daily = run_backtest(data_dict, name_map, mode, kospi_df=kospi_df)
         r = report(trades, daily, label, mode)
         if r:
             results.append(r)
@@ -649,26 +750,129 @@ def main():
     # 비교 테이블
     if len(results) >= 2:
         print(f"\n{'=' * 70}")
-        print(f"  종합 비교")
+        print(f"  종합 비교: B vs C_new (KOSPI 레짐)")
         print(f"{'=' * 70}")
-        print(f"  {'모드':<42} {'거래':>5} {'승률':>6} {'PF':>6} {'수익률':>8} {'MDD':>8}")
-        print(f"  {'-' * 65}")
+        print(f"  {'모드':<45} {'거래':>5} {'승률':>6} {'PF':>6} {'수익률':>8} {'MDD':>8}")
+        print(f"  {'-' * 68}")
         for r in results:
-            print(f"  {r['label']:<42} {r['trades']:>5} "
+            print(f"  {r['label']:<45} {r['trades']:>5} "
                   f"{r['win_rate']:>5.1f}% {r['pf']:>6.2f} "
                   f"{r['total_return']:>+7.1f}% {r['mdd']:>7.1f}%")
 
-        if len(results) >= 3:
-            b, d_old, d = results[0], results[1], results[2]
-            print(f"\n  슬리피지: 0.5% (현실적 한국 중형주 기준)")
-            print(f"\n  B vs D_old vs D 비교:")
-            print(f"    B:     수익률 {b['total_return']:+.1f}%, MDD {b['mdd']:.1f}%, PF {b['pf']:.2f}")
-            print(f"    D_old: 수익률 {d_old['total_return']:+.1f}%, MDD {d_old['mdd']:.1f}%, PF {d_old['pf']:.2f}")
-            print(f"    D:     수익률 {d['total_return']:+.1f}%, MDD {d['mdd']:.1f}%, PF {d['pf']:.2f}")
-            print(f"\n  D_old→D 튜닝 효과:")
-            print(f"    PF:     {d_old['pf']:.2f} → {d['pf']:.2f} ({d['pf']-d_old['pf']:+.2f})")
-            print(f"    MDD:    {d_old['mdd']:.1f}% → {d['mdd']:.1f}% ({d['mdd']-d_old['mdd']:+.1f}%p)")
-            print(f"    수익률: {d_old['total_return']:.1f}% → {d['total_return']:.1f}%")
+        b, c = results[0], results[1]
+        print(f"\n  슬리피지: 0.5% (현실적 한국 중형주 기준)")
+        print(f"\n  B → C_new 변화:")
+        print(f"    거래:   {b['trades']} → {c['trades']} ({c['trades']-b['trades']:+d}건)")
+        print(f"    승률:   {b['win_rate']:.1f}% → {c['win_rate']:.1f}% ({c['win_rate']-b['win_rate']:+.1f}%p)")
+        print(f"    PF:     {b['pf']:.2f} → {c['pf']:.2f} ({c['pf']-b['pf']:+.2f})")
+        print(f"    수익률: {b['total_return']:+.1f}% → {c['total_return']:+.1f}% ({c['total_return']-b['total_return']:+.1f}%p)")
+        print(f"    MDD:    {b['mdd']:.1f}% → {c['mdd']:.1f}% ({c['mdd']-b['mdd']:+.1f}%p)")
+
+        # 판정
+        pf_ok = c["pf"] >= 1.70
+        mdd_ok = c["mdd"] >= -5.0
+        ret_ok = c["total_return"] >= 18.0
+        print(f"\n  목표 달성 체크:")
+        print(f"    PF >= 1.70:     {'✓' if pf_ok else '✗'} ({c['pf']:.2f})")
+        print(f"    MDD >= -5.0%:   {'✓' if mdd_ok else '✗'} ({c['mdd']:.1f}%)")
+        print(f"    수익률 >= 18%:  {'✓' if ret_ok else '✗'} ({c['total_return']:+.1f}%)")
+
+        if pf_ok and mdd_ok:
+            print(f"\n  판정: PASS — C_new 레짐 캡 채택 가능")
+        elif c["pf"] > b["pf"] or c["mdd"] > b["mdd"]:
+            print(f"\n  판정: 부분 개선 — 파라미터 튜닝 필요")
+        else:
+            print(f"\n  판정: FAIL — 레짐 캡이 오히려 성과 악화")
+
+
+def universe_bias_check():
+    """유니버스 생존자 편향 검증: 전체 101 vs 교집합 84."""
+    mech_file = Path("data/mechanical_universe_20250301.txt")
+    if not mech_file.exists():
+        print("ERROR: data/mechanical_universe_20250301.txt 없음")
+        return
+
+    mech_tickers = set(mech_file.read_text().strip().split("\n"))
+    name_map = load_name_map()
+
+    print("=" * 60)
+    print("  유니버스 생존자 편향 검증")
+    print("=" * 60)
+    print(f"  기계적 유니버스: {len(mech_tickers)}종목 (K4+K5+K6+K7, 2025-03-01)")
+    print(f"  기간: {START_DATE} ~ {END_DATE} | 슬리피지 {SLIPPAGE*100}%")
+
+    # 1) 전체 101종목
+    print("\n[1] 전체 101종목 (수동 유니버스) 로딩...")
+    data_all = load_parquets()
+    print(f"  {len(data_all)}종목 로드")
+
+    # 2) 교집합 (기계적 ∩ parquet)
+    intersection = set(data_all.keys()) & mech_tickers
+    print(f"\n[2] 교집합 {len(intersection)}종목 (기계적 기준 충족분만) 로딩...")
+    data_mech = load_parquets(whitelist=intersection)
+    print(f"  {len(data_mech)}종목 로드")
+
+    # 3) 기준 미달 17종목만
+    outlier_tickers = set(data_all.keys()) - mech_tickers
+    print(f"\n[3] 기준 미달 {len(outlier_tickers)}종목 (수동으로만 들어간 종목)")
+    for tk in sorted(outlier_tickers):
+        print(f"  {name_map.get(tk, tk)} ({tk})")
+
+    results = []
+
+    # B 모드: 전체 101
+    print(f"\n백테스트 A: 전체 {len(data_all)}종목...")
+    trades_all, daily_all = run_backtest(data_all, name_map, "B")
+    r_all = report(trades_all, daily_all, f"전체 {len(data_all)}종목", "B")
+    if r_all:
+        results.append(r_all)
+
+    # B 모드: 교집합 84
+    print(f"\n백테스트 B: 교집합 {len(data_mech)}종목...")
+    trades_mech, daily_mech = run_backtest(data_mech, name_map, "B")
+    r_mech = report(trades_mech, daily_mech, f"교집합 {len(data_mech)}종목 (기계적)", "B")
+    if r_mech:
+        results.append(r_mech)
+
+    # 비교
+    if len(results) == 2:
+        a, b = results
+        print(f"\n{'=' * 60}")
+        print(f"  편향 검증 결과")
+        print(f"{'=' * 60}")
+        print(f"  {'항목':<20} {'전체 101':>12} {'교집합 84':>12} {'차이':>10}")
+        print(f"  {'-' * 54}")
+        print(f"  {'유니버스':<20} {a['trades']:>10}건 {b['trades']:>10}건 {b['trades']-a['trades']:>+8}건")
+        print(f"  {'승률':<20} {a['win_rate']:>10.1f}% {b['win_rate']:>10.1f}% {b['win_rate']-a['win_rate']:>+8.1f}%p")
+        print(f"  {'PF':<20} {a['pf']:>10.2f} {b['pf']:>10.2f} {b['pf']-a['pf']:>+8.2f}")
+        print(f"  {'수익률':<20} {a['total_return']:>+9.1f}% {b['total_return']:>+9.1f}% {b['total_return']-a['total_return']:>+8.1f}%p")
+        print(f"  {'MDD':<20} {a['mdd']:>10.1f}% {b['mdd']:>10.1f}% {b['mdd']-a['mdd']:>+8.1f}%p")
+
+        diff_ret = abs(b["total_return"] - a["total_return"])
+        if diff_ret <= 3:
+            verdict = "편향 없음 — 시그널 실력 확인"
+        elif b["total_return"] < a["total_return"] - 5:
+            verdict = "편향 존재 — 유니버스 선별 효과 큼"
+        elif b["total_return"] > a["total_return"]:
+            verdict = "현재 유니버스 보수적 — 확대 검토 가능"
+        else:
+            verdict = "경미한 편향 — 허용 범위"
+
+        print(f"\n  판정: {verdict}")
+        print(f"  (수익률 차이 {diff_ret:.1f}%p, 기준: ±3%p 이내=무편향, 5%p+=편향)")
+
+    # 기준 미달 17종목이 생성한 거래 분석
+    outlier_trades = [t for t in trades_all if t["ticker"] in outlier_tickers]
+    if outlier_trades:
+        o_pnls = [t["pnl_pct"] for t in outlier_trades]
+        o_wins = [p for p in o_pnls if p > 0]
+        o_losses = [p for p in o_pnls if p <= 0]
+        o_total = sum(o_pnls) * 100
+        print(f"\n  기준 미달 17종목의 거래 분석:")
+        print(f"    거래 {len(outlier_trades)}건 | 승 {len(o_wins)} 패 {len(o_losses)}")
+        print(f"    순기여 수익: {o_total:+.1f}%p")
+        for t in sorted(outlier_trades, key=lambda x: x["pnl_pct"], reverse=True)[:5]:
+            print(f"    {t['name']}({t['ticker']}): {t['pnl_pct']*100:+.1f}% ({t['exit']})")
 
 
 if __name__ == "__main__":

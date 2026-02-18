@@ -10,6 +10,9 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
 logger = logging.getLogger(__name__)
 
 REPORT_DIR = Path("D:/클로드 HTML 보고서")
@@ -567,6 +570,54 @@ def _build_html_v9(
     except Exception:
         pass
 
+    # KOSPI 레짐 정보
+    kospi_html = ""
+    try:
+        kospi_path = Path("data/kospi_index.csv")
+        if kospi_path.exists():
+            kdf = pd.read_csv(kospi_path, index_col="Date", parse_dates=True).sort_index()
+            kdf["ma20"] = kdf["close"].rolling(20).mean()
+            kdf["ma60"] = kdf["close"].rolling(60).mean()
+            log_ret = np.log(kdf["close"] / kdf["close"].shift(1))
+            kdf["rv20"] = log_ret.rolling(20).std() * np.sqrt(252) * 100
+            kdf["rv20_pct"] = kdf["rv20"].rolling(252, min_periods=60).apply(
+                lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False
+            )
+            kr = kdf.iloc[-1]
+            k_close = float(kr["close"])
+            k_ma20 = float(kr["ma20"]) if not pd.isna(kr["ma20"]) else 0
+            k_ma60 = float(kr["ma60"]) if not pd.isna(kr["ma60"]) else 0
+            k_rv = float(kr.get("rv20_pct", 0.5)) if not pd.isna(kr.get("rv20_pct", 0.5)) else 0.5
+
+            if k_ma20 > 0 and k_close > k_ma20:
+                k_regime = "BULL" if k_rv < 0.50 else "CAUTION"
+            elif k_ma60 > 0 and k_close > k_ma60:
+                k_regime = "BEAR"
+            elif k_ma60 > 0:
+                k_regime = "CRISIS"
+            else:
+                k_regime = "CAUTION"
+
+            k_slots = {"BULL": 5, "CAUTION": 3, "BEAR": 2, "CRISIS": 0}[k_regime]
+            k_color = {"BULL": "#3fb950", "CAUTION": "#d29922", "BEAR": "#f85149", "CRISIS": "#ff0000"}[k_regime]
+
+            kospi_html = f"""
+    <div class="us-overnight" style="margin-top:8px">
+        <div class="us-header">
+            <span class="us-label">KOSPI \ub808\uc9d0</span>
+            <span class="us-grade" style="color:{k_color}">{k_regime}</span>
+            <span class="us-score" style="color:{k_color}">{k_slots}\uc2ac\ub86f</span>
+        </div>
+        <div class="us-detail">
+            <span class="us-item">KOSPI {k_close:,.0f}</span>
+            <span class="us-item {'up' if k_close > k_ma20 else 'down'}">MA20 {k_ma20:,.0f}</span>
+            <span class="us-item {'up' if k_close > k_ma60 else 'down'}">MA60 {k_ma60:,.0f}</span>
+            <span class="us-item">RV%ile {k_rv:.0%}</span>
+        </div>
+    </div>"""
+    except Exception:
+        pass
+
     # 종목 카드 HTML
     cards_html = ""
     for i, sig in enumerate(candidates, start=1):
@@ -1031,6 +1082,7 @@ def _build_html_v9(
 </div>
 
 {us_html}
+{kospi_html}
 
 <div class="stats-bar">
     <div class="stat-item">

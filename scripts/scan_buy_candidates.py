@@ -737,6 +737,45 @@ def generate_tags(sig: dict) -> list[str]:
     return tags
 
 
+def get_kospi_regime() -> dict:
+    """KOSPI 레짐 판정 (MA20/MA60 + 실현변동성).
+
+    반환: {"regime": str, "slots": int, "close": float, "ma20": float, "ma60": float, "rv_pct": float}
+    """
+    kospi_path = Path(__file__).resolve().parent.parent / "data" / "kospi_index.csv"
+    if not kospi_path.exists():
+        return {"regime": "CAUTION", "slots": 3, "close": 0, "ma20": 0, "ma60": 0, "rv_pct": 0.5}
+
+    df = pd.read_csv(kospi_path, index_col="Date", parse_dates=True).sort_index()
+    df["ma20"] = df["close"].rolling(20).mean()
+    df["ma60"] = df["close"].rolling(60).mean()
+    log_ret = np.log(df["close"] / df["close"].shift(1))
+    df["rv20"] = log_ret.rolling(20).std() * np.sqrt(252) * 100
+    df["rv20_pct"] = df["rv20"].rolling(252, min_periods=60).apply(
+        lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False
+    )
+
+    if len(df) < 60:
+        return {"regime": "CAUTION", "slots": 3, "close": 0, "ma20": 0, "ma60": 0, "rv_pct": 0.5}
+
+    row = df.iloc[-1]
+    close = float(row["close"])
+    ma20 = float(row["ma20"]) if not pd.isna(row["ma20"]) else 0
+    ma60 = float(row["ma60"]) if not pd.isna(row["ma60"]) else 0
+    rv_pct = float(row.get("rv20_pct", 0.5)) if not pd.isna(row.get("rv20_pct", 0.5)) else 0.5
+
+    if ma20 == 0 or ma60 == 0:
+        regime, slots = "CAUTION", 3
+    elif close > ma20:
+        regime, slots = ("BULL", 5) if rv_pct < 0.50 else ("CAUTION", 3)
+    elif close > ma60:
+        regime, slots = "BEAR", 2
+    else:
+        regime, slots = "CRISIS", 0
+
+    return {"regime": regime, "slots": slots, "close": close, "ma20": ma20, "ma60": ma60, "rv_pct": rv_pct}
+
+
 def load_overnight_signal() -> dict:
     """US Overnight Signal JSON 로드. 없으면 neutral 반환."""
     import json
@@ -1451,7 +1490,7 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     lines = []
 
     # -- Header --
-    lines.append(f"[Quantum Master v10.1] {now}")
+    lines.append(f"[Quantum Master v10.2] {now}")
     lines.append("Kill \u2192 Rank \u2192 Tag + Position | S/A/B/C/D")
     lines.append("")
 
@@ -1478,6 +1517,13 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
         lines.append(f"  \u26a0 섹터Kill: {', '.join(killed_sectors)}")
     for r in us_rules:
         lines.append(f"  \u2022 {r['name']}: {r['desc']}")
+    lines.append("")
+
+    # -- KOSPI 레짐 --
+    kr = get_kospi_regime()
+    regime_emoji = {"BULL": "\u2601", "CAUTION": "\u26a0", "BEAR": "\u274c", "CRISIS": "\U0001f6a8"}.get(kr["regime"], "?")
+    lines.append(f"\u2550\u2550 KOSPI \ub808\uc9d0: {kr['regime']} {regime_emoji} ({kr['slots']}\uc2ac\ub86f) \u2550\u2550")
+    lines.append(f"  KOSPI {kr['close']:,.0f} | MA20 {kr['ma20']:,.0f} | MA60 {kr['ma60']:,.0f} | RV%ile {kr['rv_pct']:.0%}")
     lines.append("")
 
     # -- 스캔 통계 --
@@ -1644,7 +1690,7 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
 
     # -- Footer --
     lines.append("")
-    lines.append("\u26a0 \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master v10.1")
+    lines.append("\u26a0 \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master v10.2")
 
     return "\n".join(lines)
 
@@ -1741,7 +1787,7 @@ def main():
         if png_path and png_path.exists():
             from src.html_report import send_report_to_telegram
             print("\nSending report image to Telegram...")
-            caption = f"[Quantum Master v10.1] 장시작전 분석 | {len(candidates)}종목 S/A/B/C/D"
+            caption = f"[Quantum Master v10.2] 장시작전 분석 | {len(candidates)}종목 S/A/B/C/D"
             img_ok = send_report_to_telegram(png_path, caption)
             print("OK - Report image sent" if img_ok else "FAIL - Image send")
 
