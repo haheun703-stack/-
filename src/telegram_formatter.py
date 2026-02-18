@@ -532,29 +532,37 @@ def format_accumulation_alert(
 # v4.0 라이브 트레이딩 포맷
 # ──────────────────────────────────────────
 
-def format_order_result(order, action: str = "BUY") -> str:
-    """주문 체결/실패 알림 포맷."""
-    icon = _icon("BUY") if action == "BUY" else _icon("SELL")
-    status_icon = _icon("ADVANCE") if order.status.value in ("filled", "partial") else _icon("WARN")
+def format_order_result(order, action: str = "BUY", name: str = "") -> str:
+    """주문 체결/실패 알림 포맷.
 
-    parts = [
-        f"{icon} [{action}] 주문 결과",
-        ICONS["LINE"],
-        f"  종목: {order.ticker}",
-        f"  상태: {status_icon} {order.status.value.upper()}",
-        f"  주문가: {order.price:,}원",
-        f"  수량: {order.quantity:,}주",
-    ]
+    잼블랙 스타일: 이케아에서 간단히 확인 가능한 간결 알림.
+    """
+    filled = order.status.value in ("filled", "partial")
 
-    if order.filled_quantity > 0:
-        parts.append(f"  체결: {order.filled_quantity:,}주 @ {order.filled_price:,.0f}원")
-        parts.append(f"  체결금액: {order.filled_quantity * order.filled_price:,.0f}원")
+    if action == "BUY":
+        icon = "\U0001f7e2"   # 🟢
+        verb = "매수"
+    else:
+        icon = "\U0001f534"   # 🔴
+        verb = "매도"
 
-    if order.order_id:
-        parts.append(f"  주문번호: {order.order_id}")
+    stock_label = f"{name}({order.ticker})" if name else order.ticker
 
-    parts.append(ICONS["LINE"])
-    return "\n".join(parts)
+    if filled and order.filled_quantity > 0:
+        price = order.filled_price
+        qty = order.filled_quantity
+        amount = qty * price
+        return (
+            f"{icon} {verb} 체결 | {stock_label}\n"
+            f"  {qty:,}주 x {price:,.0f}원 = {amount:,.0f}원"
+        )
+    else:
+        status_icon = _icon("WARN")
+        return (
+            f"{status_icon} {verb} 실패 | {stock_label}\n"
+            f"  상태: {order.status.value.upper()}\n"
+            f"  주문: {order.quantity:,}주 x {order.price:,.0f}원"
+        )
 
 
 def format_position_summary(positions: list) -> str:

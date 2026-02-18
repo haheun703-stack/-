@@ -218,11 +218,11 @@ def send_scan_result(
     return send_message(message)
 
 
-def send_order_result(order, action: str = "BUY") -> bool:
+def send_order_result(order, action: str = "BUY", name: str = "") -> bool:
     """주문 체결/실패 알림 전송."""
     from .telegram_formatter import format_order_result
 
-    message = format_order_result(order, action)
+    message = format_order_result(order, action, name=name)
     return send_message(message)
 
 
@@ -256,6 +256,13 @@ def send_scheduler_status(phase: str, status: str, detail: str = "") -> bool:
 
     message = format_scheduler_status(phase, status, detail)
     return send_message(message)
+
+
+def send_mdd_alert(alert_message: str) -> bool:
+    """MDD 모니터 알림 전송."""
+    if not alert_message:
+        return False
+    return send_message(alert_message)
 
 
 def send_market_analysis(data: dict) -> bool:

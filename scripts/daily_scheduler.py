@@ -596,6 +596,44 @@ class DailyScheduler:
             lines.append("  포지션 데이터 로드 실패")
         lines.append("")
 
+        # ── MDD 모니터 (잼블랙 인사이트) ──
+        try:
+            from src.mdd_monitor import MDDMonitor
+            mdd_mon = MDDMonitor()
+            # 현재 자산 계산 (현금 + 보유 평가)
+            try:
+                pos_path_mdd = Path("data/positions.json")
+                if pos_path_mdd.exists():
+                    with open(pos_path_mdd, encoding="utf-8") as f:
+                        pd_mdd = json.load(f)
+                    capital = pd_mdd.get("capital", 100_000_000)
+                    pos_list = pd_mdd.get("positions", [])
+                    eval_total = sum(
+                        p.get("current_price", p.get("entry_price", 0)) * p.get("shares", 0)
+                        for p in pos_list
+                    )
+                    invested = sum(
+                        p.get("entry_price", 0) * p.get("shares", 0)
+                        for p in pos_list
+                    )
+                    current_equity = capital - invested + eval_total
+                else:
+                    current_equity = 100_000_000
+            except Exception:
+                current_equity = 100_000_000
+
+            mdd_result = mdd_mon.update(current_equity)
+            lines.append(f"  {mdd_mon.format_status_line()}")
+            lines.append("")
+
+            # MDD 알림이 있으면 별도 발송
+            alert = mdd_mon.get_alert()
+            if alert:
+                from src.telegram_sender import send_mdd_alert
+                send_mdd_alert(alert)
+        except Exception as e:
+            logger.debug("[Phase 10B] MDD 모니터 오류: %s", e)
+
         # ── 수급 히스토리 (4회 스냅샷) ──
         lines.append("\U0001f4ca 장중 수급 흐름 (4회 스냅샷)")
         lines.append("\u2500" * 28)

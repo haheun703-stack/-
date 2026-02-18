@@ -1139,6 +1139,21 @@ def scan_all(
     engine = SignalEngine("config/settings.yaml")
     scanner = MarketSignalScanner()
 
+    # 수동 블랙리스트 로드 (잼블랙 인사이트: 시스템 추천이라도 수동 제외)
+    import yaml
+    blacklist_set = set()
+    try:
+        with open("config/settings.yaml", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        bl = cfg.get("strategy", {}).get("blacklist") or []
+        for item in bl:
+            if isinstance(item, dict) and "ticker" in item:
+                blacklist_set.add(str(item["ticker"]).zfill(6))
+    except Exception:
+        pass
+    if blacklist_set:
+        print(f"  블랙리스트: {len(blacklist_set)}종목 제외")
+
     candidates = []
     stats = {
         "total": len(data_dict),
@@ -1150,6 +1165,7 @@ def scan_all(
         "grade_B": 0,
         "grade_C": 0,
         "after_grade_filter": 0,
+        "blacklisted": 0,
     }
 
     t0 = time.time()
@@ -1160,6 +1176,12 @@ def scan_all(
             print(f"  {i+1}/{len(data_dict)} ({elapsed:.1f}s)")
 
         stats["loaded"] += 1
+
+        # 블랙리스트 체크 (파이프라인 전에 빠르게 제외)
+        if ticker in blacklist_set:
+            stats["blacklisted"] += 1
+            continue
+
         idx = len(df) - 1
 
         try:

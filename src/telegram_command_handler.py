@@ -842,6 +842,13 @@ class TelegramCommandBot:
             lines.append("  스케줄러 미연결")
         stop_file = PROJECT_ROOT / "STOP.signal"
         lines.append("  \U0001f6d1 STOP.signal 활성!" if stop_file.exists() else "  \U0001f7e2 정상 운영 중")
+        # MDD 모니터 요약
+        try:
+            from src.mdd_monitor import MDDMonitor
+            mdd = MDDMonitor()
+            lines.append(f"  {mdd.format_status_line()}")
+        except Exception:
+            pass
         if self._scheduler:
             lines.append("")
             lines.append("\u23f0 다음 Phase")
