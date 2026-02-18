@@ -550,10 +550,10 @@ def run_backtest(mode, groups, etfs, ewy, stock_indicators):
         equity = cash + pos_value
         daily_results.append({"date": date, "equity": equity, "positions": len(positions)})
 
-    # 미청산 강제 청산
+    # 미청산 강제 청산 (슬리피지 적용)
     for pos in positions:
         z_data = last_group_z.get(pos.group, {}).get(pos.ticker)
-        sell_price = z_data["close"] if z_data else pos.buy_price
+        sell_price = (z_data["close"] if z_data else pos.buy_price) * (1 - SLIPPAGE)
         pnl_pct = (sell_price / pos.buy_price - 1) - COMMISSION * 2 - TAX
         trades.append({
             "ticker": pos.ticker,

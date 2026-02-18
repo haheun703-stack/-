@@ -616,9 +616,12 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None):
             positions=len(positions), daily_pnl=day_pnl
         ))
 
-    # 미청산 포지션 강제 청산
+    # 미청산 포지션 강제 청산 (END_DATE 시점 가격 사용)
     for pos in positions:
-        last_close = float(data_dict[pos.ticker].iloc[-1]["close"])
+        if pos.ticker in day_idx_map:
+            last_close = float(data_dict[pos.ticker].iloc[day_idx_map[pos.ticker]]["close"])
+        else:
+            last_close = float(data_dict[pos.ticker].iloc[-1]["close"])
         pnl_pct = (last_close / pos.buy_price - 1) - COMMISSION * 2 - TAX
         trades.append({
             "ticker": pos.ticker, "name": pos.name,
