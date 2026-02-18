@@ -21,14 +21,16 @@ call venv\Scripts\activate.bat
 REM 로그 디렉토리 확인
 if not exist logs mkdir logs
 
-REM 스케줄러 시작 (로그 동시 출력)
-echo  모드: --dry-run 없이 실제 스케줄러 실행
+REM 스케줄러 시작
+echo  모드: 실제 스케줄러 실행 (텔레그램 명령봇 포함)
 echo  종료: Ctrl+C
+echo  텔레그램 명령: /ping, /help, /status, /stop ...
 echo  ────────────────────────────────────────
 echo.
 
-python -u -X utf8 scripts\daily_scheduler.py 2>&1 | tee logs\scheduler_%date:~0,4%%date:~5,2%%date:~8,2%.log
+python -u -X utf8 scripts\daily_scheduler.py
 
 echo.
 echo  [%date% %time%] 스케줄러 종료됨
+echo.
 pause
