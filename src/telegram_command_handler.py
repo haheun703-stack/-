@@ -148,7 +148,7 @@ class TelegramCommandBot:
         else:
             self._reply(
                 f"\u2753 알 수 없는 명령: {cmd}\n"
-                f"/명령어 로 사용 가능한 명령을 확인하세요."
+                f"/도움 으로 명령어 목록을 확인하세요."
             )
 
     def _reply(self, text: str) -> None:
@@ -175,6 +175,7 @@ class TelegramCommandBot:
             "\u2501" * 24,
             "",
             "\U0001f50d [조회]",
+            "  /도움 — 이 명령어 목록 보기",
             "  /연결 — 봇 연결 확인",
             "  /상태 — 스케줄러 상태",
             "  /잔고 — 보유 종목 현황",
@@ -471,6 +472,7 @@ class TelegramCommandBot:
 
 COMMANDS = {
     # ── 조회 ──
+    "/도움": TelegramCommandBot._cmd_help,
     "/연결": TelegramCommandBot._cmd_ping,
     "/명령어": TelegramCommandBot._cmd_help,
     "/상태": TelegramCommandBot._cmd_status,
