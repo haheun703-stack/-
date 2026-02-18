@@ -39,6 +39,11 @@ ROT_DIR = BASE_DIR / "data" / "group_rotation"
 
 SAMSUNG_EXCLUDE = {"032830"}  # 삼성생명
 
+# 거래 비용 (backtest_v2.py와 동일)
+SLIPPAGE = 0.005   # 0.5%
+COMMISSION = 0.00015  # 편도
+TAX = 0.0018        # 매도세
+
 
 # ── 설정 로드 ──
 
@@ -326,7 +331,9 @@ def check_position_exits(positions, config):
 
             current_price = float(df["close"].iloc[-1])
             entry_price = pos["entry_price"]
-            pnl_pct = (current_price / entry_price - 1) * 100
+            gross_pnl = current_price / entry_price - 1
+            cost_pct = SLIPPAGE * 2 + COMMISSION * 2 + TAX
+            pnl_pct = (gross_pnl - cost_pct) * 100
 
             entry_date = datetime.strptime(pos["entry_date"], "%Y-%m-%d").date()
             hold_days = (today - entry_date).days
@@ -422,8 +429,12 @@ def exit_position(ticker, exit_price, reason):
     for strategy in ["v10", "rotation"]:
         for pos in positions[strategy]:
             if pos["ticker"] == ticker:
-                pnl_pct = (exit_price / pos["entry_price"] - 1) * 100
-                pnl_krw = round((exit_price - pos["entry_price"]) * pos["shares"])
+                gross_pnl_pct = exit_price / pos["entry_price"] - 1
+                cost_pct = SLIPPAGE * 2 + COMMISSION * 2 + TAX  # 왕복 비용
+                pnl_pct = (gross_pnl_pct - cost_pct) * 100
+                net_exit = exit_price * (1 - SLIPPAGE - COMMISSION - TAX)
+                net_entry = pos["entry_price"] * (1 + SLIPPAGE + COMMISSION)
+                pnl_krw = round((net_exit - net_entry) * pos["shares"])
 
                 # trades.csv에 추가
                 row = {
