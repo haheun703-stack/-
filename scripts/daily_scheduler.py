@@ -4,7 +4,7 @@ v4.1 일일 스케줄러 — 사용자 스케줄표 기반 자동 실행
 
 일일 스케줄:
   00:00  Phase 1 — 일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
-  07:00  Phase 2 — 매크로 수집
+  07:00  Phase 2 — 매크로 수집 + US Overnight Signal
   07:10  Phase 3 — 뉴스/리포트 (Grok API)
   08:20  Phase 4 — 매매 준비 (토큰 갱신 → 공휴일 체크 → 시그널 스캔)
   08:25  Phase 4.5 — 장전 포트폴리오 5D/6D 분석 리포트
@@ -97,7 +97,7 @@ class DailyScheduler:
     # ──────────────────────────────────────────
 
     def phase_macro_collect(self) -> None:
-        """KOSPI/KOSDAQ/환율/금리 등 매크로 데이터 수집"""
+        """KOSPI/KOSDAQ/환율/금리 등 매크로 데이터 수집 + US Overnight Signal"""
         logger.info("[Phase 2] 매크로 수집 시작")
         try:
             from scripts.update_daily_data import update_all
@@ -105,7 +105,17 @@ class DailyScheduler:
             logger.info("[Phase 2] 매크로 수집 완료")
         except Exception as e:
             logger.error("[Phase 2] 매크로 수집 실패: %s", e)
-        self._notify("Phase 2 완료: 매크로 수집")
+
+        # US Overnight Signal (yfinance 최신 → 신호 생성)
+        try:
+            from scripts.us_overnight_signal import update_latest, generate_signal
+            df = update_latest()
+            signal = generate_signal(df)
+            logger.info("[Phase 2] US Overnight: %s (%.2f)", signal.get("composite"), signal.get("score", 0))
+        except Exception as e:
+            logger.error("[Phase 2] US Overnight 실패: %s", e)
+
+        self._notify("Phase 2 완료: 매크로 + US Overnight")
 
     # ──────────────────────────────────────────
     # Phase 3: 뉴스/리포트 (07:10)
@@ -353,8 +363,8 @@ class DailyScheduler:
         # Step 7: 오늘 추천 기록 저장
         self._run_step("8-7", "추천 기록 저장", self._close_step_7_save)
 
-        # Step 8: ML 재학습 (향후)
-        logger.info("[Phase 8-8] ML 재학습 — 향후 구현 예정")
+        # Step 8: US-KR 패턴DB 학습 루프 (일일 누적)
+        self._run_step("8-8", "US-KR 패턴DB 업데이트", self._close_step_8_uskr)
 
         # Step 9: 일일 성과 리포트
         self._run_step("8-9", "성과 리포트", self._close_step_9_report)
@@ -363,8 +373,17 @@ class DailyScheduler:
         self._notify("Phase 8 완료: 장마감 파이프라인 (9단계)")
 
     def _close_step_1_collect(self) -> None:
+        """8-1: CSV 업데이트 + parquet 증분 업데이트"""
         from scripts.update_daily_data import update_all
         update_all()
+
+        # P2 fix: raw parquet 증분 업데이트 (pykrx)
+        # 이 단계가 없으면 raw가 구버전 → 8-2 지표 계산도 구버전
+        try:
+            from scripts.extend_parquet_data import main as extend_main
+            extend_main()
+        except Exception as e:
+            logger.error("[Phase 8-1] parquet 증분 업데이트 실패: %s", e)
 
     def _close_step_2_indicators(self) -> None:
         from main import step_indicators
@@ -394,6 +413,11 @@ class DailyScheduler:
             archive_dir = Path("results/archive")
             archive_dir.mkdir(parents=True, exist_ok=True)
             shutil.copy2(signals_path, archive_dir / f"signals_{today}.csv")
+
+    def _close_step_8_uskr(self) -> None:
+        """8-8: US-KR 패턴DB 일일 누적 (학습 루프)"""
+        from scripts.update_us_kr_daily import main as update_uskr_main
+        update_uskr_main()
 
     def _close_step_9_report(self) -> None:
         """장마감 분석 보고서 생성 + 텔레그램 발송"""
@@ -545,7 +569,7 @@ class DailyScheduler:
         print()
         entries = [
             (self.schedule.get("daily_reset", "00:00"), "Phase 1", "일일 리셋 (STOP.signal 삭제 + 로그 로테이션)"),
-            (self.schedule.get("macro_collect", "07:00"), "Phase 2", "매크로 수집 (KOSPI/환율/금리)"),
+            (self.schedule.get("macro_collect", "07:00"), "Phase 2", "매크로 수집 + US Overnight Signal"),
             (self.schedule.get("news_briefing", "07:10"), "Phase 3", "뉴스/리포트 (Grok API 뉴스 스캔)"),
             (self.schedule.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰→공휴일→시그널 스캔)"),
             (self.schedule.get("morning_report", "08:25"), "Phase 4.5", "장전 5D/6D 포트폴리오 분석 리포트"),
@@ -566,7 +590,7 @@ class DailyScheduler:
         print("    8-5. 전일 추천 결과 D+1~D+5 업데이트")
         print("    8-6. 다음날 매수 후보 스캔 (6-Layer Pipeline)")
         print("    8-7. 오늘 추천 기록 저장")
-        print("    8-8. ML 재학습 (향후)")
+        print("    8-8. US-KR 패턴DB 일일 누적 (학습 루프)")
         print("    8-9. 일일 성과 리포트 (텔레그램)")
         print()
         print("  안전장치:")

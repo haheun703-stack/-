@@ -85,7 +85,8 @@ def calc_atr(high: pd.Series, low: pd.Series, close: pd.Series, period=14) -> pd
     tr2 = (high - close.shift(1)).abs()
     tr3 = (low - close.shift(1)).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    return tr.rolling(window=period).mean()
+    # v10.1: EMA 방식으로 통일 (parquet indicators.py와 동일)
+    return tr.ewm(span=period, min_periods=period).mean()
 
 
 def calc_stochastic(high: pd.Series, low: pd.Series, close: pd.Series,

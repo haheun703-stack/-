@@ -139,10 +139,16 @@ class BacktestEngine:
         self.regime_log: list[dict] = []  # 체제 변화 추적용
 
         # v8.3: 공매도 캘린더 + Regime Profile
-        self._short_calendar = self._parse_short_calendar(
-            self.config.get("short_selling_calendar", [])
-        )
-        self._regime_profiles = self.config.get("regime_profiles", {})
+        # v10.1: 마스터 스위치 — use_short_selling_filter: false면 체제 프로파일 비활성
+        self._short_filter_enabled = self.config.get("use_short_selling_filter", False)
+        if self._short_filter_enabled:
+            self._short_calendar = self._parse_short_calendar(
+                self.config.get("short_selling_calendar", [])
+            )
+            self._regime_profiles = self.config.get("regime_profiles", {})
+        else:
+            self._short_calendar = []   # 빈 캘린더 → 항상 기본값 사용
+            self._regime_profiles = {}  # 프로파일 없음 → _apply_regime_profile 무동작
         self._base_max_positions = self.max_positions
         self._base_max_hold_days = self.max_hold_days
         self._base_atr_stop_mult = self.atr_stop_mult

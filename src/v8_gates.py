@@ -34,6 +34,9 @@ class GateEngine:
         self._pullback_max_override: float | None = None
         self._short_gate_active: bool = False  # G4는 공매도 활성기에만 작동
 
+        # v10.1: 마스터 스위치 — use_short_selling_filter: false면 G4 영구 비활성
+        self._short_filter_enabled = config.get('use_short_selling_filter', False)
+
     def set_pullback_max(self, value: float | None):
         """공매도 체제에 따라 G2 pullback 상한을 동적 조정."""
         self._pullback_max_override = value
@@ -188,7 +191,17 @@ class GateEngine:
 
         조건: short_interest_pct > 5% AND short_balance_chg_5d > 0
         공매도 금지기에는 자동 통과 (self._short_gate_active=False).
+
+        v10.1: use_short_selling_filter=false 시 영구 비활성 (마스터 스위치)
         """
+        # v10.1 마스터 스위치: 공매도 필터 비활성 → 항상 통과
+        if not self._short_filter_enabled:
+            return GateResult(
+                passed=True,
+                gate_name="G4_ShortPressure",
+                reason="마스터 스위치 OFF — 공매도 필터 비활성",
+            )
+
         if not self._short_gate_active:
             return GateResult(
                 passed=True,

@@ -51,6 +51,8 @@ class ScoringEngine:
         })
         self.cutoffs = self.cfg.get('grade_cutoffs', {'A': 0.80, 'B': 0.65, 'C': 0.50})
         self.pos_cfg = v8_cfg.get('position', {})
+        # v10.1: 마스터 스위치 — use_short_selling_filter: false면 S5 공매도 보너스 비활성
+        self._short_filter_enabled = config.get('use_short_selling_filter', False)
 
     def score_all(self, row: pd.Series) -> GradeResult:
         """5개 스코어를 계산하고 가중합으로 등급을 결정합니다."""
@@ -411,24 +413,25 @@ class ScoringEngine:
         bd['drs'] = round(drs_score, 3)
 
         # (d) 공매도 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
-        # 데이터 없는 기간(short_ratio=0)은 보너스 0 → v8.3.1 동일 동작
-        short_ratio = row.get('short_ratio', 0)
-        has_short_data = not pd.isna(short_ratio) and short_ratio > 0
+        # v10.1: 마스터 스위치 OFF 시 공매도 보너스 전체 스킵
+        if self._short_filter_enabled:
+            short_ratio = row.get('short_ratio', 0)
+            has_short_data = not pd.isna(short_ratio) and short_ratio > 0
 
-        if has_short_data:
-            short_cover = row.get('short_cover_signal', 0)
-            short_spike = row.get('short_spike', 1.0)
+            if has_short_data:
+                short_cover = row.get('short_cover_signal', 0)
+                short_spike = row.get('short_spike', 1.0)
 
-            if short_cover:
-                short_score = 0.10  # 숏커버링 → 최대 부스트
-            elif short_spike < 0.5:
-                short_score = 0.07  # 공매도 감소 추세
-            elif short_spike > 2.0:
-                short_score = 0.0   # 공매도 급증 → 위험
-            else:
-                short_score = 0.03  # 정상 수준
-            score += short_score
-            bd['short_selling'] = round(short_score, 3)
+                if short_cover:
+                    short_score = 0.10  # 숏커버링 → 최대 부스트
+                elif short_spike < 0.5:
+                    short_score = 0.07  # 공매도 감소 추세
+                elif short_spike > 2.0:
+                    short_score = 0.0   # 공매도 급증 → 위험
+                else:
+                    short_score = 0.03  # 정상 수준
+                score += short_score
+                bd['short_selling'] = round(short_score, 3)
 
         # (e) 연기금 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
         if row.get('pension_top_buyer', 0) == 1:
