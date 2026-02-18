@@ -191,7 +191,7 @@ class QuantumPipelineV8:
         if self.ratio_boost_enabled:
             ratio_boost, ratio_details = self._calc_ratio_boost(row)
             if ratio_boost > 0:
-                result["zone_score"] = round(base_score + ratio_boost, 4)
+                result["zone_score"] = round(min(base_score + ratio_boost, 1.0), 4)
                 result["bes_score"] = result["zone_score"]
                 result["v8_ratio_boost"] = ratio_details
 
