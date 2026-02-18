@@ -239,13 +239,8 @@ def calc_group_z_scores(stock_indicators, etf, date, members):
     rel_20_vals = [v["rel_ret_20"] for v in raw.values()]
     rel_5_vals = [v["rel_ret_5"] for v in raw.values()]
 
-    mean_20, std_20 = np.mean(rel_20_vals), np.std(rel_20_vals)
-    mean_5, std_5 = np.mean(rel_5_vals), np.std(rel_5_vals)
-
-    if std_20 < 0.01:
-        std_20 = 1.0
-    if std_5 < 0.01:
-        std_5 = 1.0
+    mean_20, std_20 = np.mean(rel_20_vals), max(np.std(rel_20_vals), 0.01)
+    mean_5, std_5 = np.mean(rel_5_vals), max(np.std(rel_5_vals), 0.01)
 
     for ticker, data in raw.items():
         data["z_20"] = (data["rel_ret_20"] - mean_20) / std_20
