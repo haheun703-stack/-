@@ -1,0 +1,39 @@
+{
+  "test_name": "v10.3_blind_test_001",
+  "start_date": "2026-02-19",
+  "initial_capital": 100000000,
+  "allocation": {
+    "v10_swing": 0.60,
+    "group_rotation": 0.40
+  },
+  "v10_rules": {
+    "max_positions": 5,
+    "max_daily_entry": 2,
+    "stop_loss_pct": -7.0,
+    "target_pct": 10.0,
+    "trailing_stop_pct": -8.0,
+    "time_stop_days": 15,
+    "max_hold_days": 20,
+    "regime_cap": true
+  },
+  "rotation_rules": {
+    "max_positions": 3,
+    "max_per_group": 2,
+    "stop_loss_pct": -7.0,
+    "z20_entry_threshold": -0.8,
+    "rel_ret_threshold": -3.0,
+    "time_stop_days": 20,
+    "max_hold_days": 30,
+    "ewy_filter": true
+  },
+  "slippage_pct": 0.5,
+  "commission_pct": 0.015,
+  "tax_pct": 0.18,
+  "stop_conditions": {
+    "mdd_halt_pct": -15.0,
+    "halt_days": 5,
+    "min_test_weeks": 8,
+    "param_freeze_weeks": 4
+  },
+  "status": "ACTIVE"
+}
