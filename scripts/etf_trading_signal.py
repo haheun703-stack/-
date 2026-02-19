@@ -9,9 +9,9 @@
                    Stoch GX + ADX > 35 → GX매수
 
 사용법:
-  python scripts/etf_trading_signal.py               # 시그널 생성 + 텔레그램 발송
-  python scripts/etf_trading_signal.py --no-send      # 시그널만 (텔레그램 안보냄)
-  python scripts/etf_trading_signal.py --json-only     # JSON 저장만
+  python scripts/etf_trading_signal.py               # 시그널 생성 + JSON 저장 (기본)
+  python scripts/etf_trading_signal.py --send          # 시그널 생성 + 텔레그램 발송
+  python scripts/etf_trading_signal.py --json-only     # JSON 저장만 (콘솔 출력 없음)
 """
 
 from __future__ import annotations
@@ -447,8 +447,8 @@ def send_telegram(message: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="ETF 매매 시그널 생성기")
-    parser.add_argument("--no-send", action="store_true", help="텔레그램 안보냄")
-    parser.add_argument("--json-only", action="store_true", help="JSON 저장만")
+    parser.add_argument("--send", action="store_true", help="텔레그램 발송 (기본: 저장만)")
+    parser.add_argument("--json-only", action="store_true", help="JSON 저장만 (콘솔 출력 없음)")
     args = parser.parse_args()
 
     logger.info("=" * 50)
@@ -475,11 +475,10 @@ def main():
         print(f"  [관찰/{tag}] {e['sector']}: {e['reason']}")
 
     if args.json_only:
-        logger.info("--json-only: 텔레그램 스킵")
         return
 
-    # 텔레그램 전송
-    if not args.no_send:
+    # 텔레그램 전송 (--send 명시 시에만)
+    if args.send:
         msg = build_telegram_message(signals)
         ok = send_telegram(msg)
         if ok:
@@ -487,7 +486,7 @@ def main():
         else:
             logger.error("텔레그램 전송 실패")
     else:
-        logger.info("--no-send: 텔레그램 스킵")
+        logger.info("텔레그램 미발송 (--send 로 발송 가능)")
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
   07:00  Phase 2  — 한국 매크로 수집 (KOSPI/환율/금리)
   07:20  Phase 3  — 뉴스 스캔 (Grok API)
   07:30  Phase 3B — 📱 1발: 장전 마켓 브리핑 (상승/하락 확률 + S/A/B/C)
+  08:00  Phase 3C — 📱 ETF 매매 시그널 텔레그램 발송
   08:20  Phase 4  — 매매 준비 (토큰 갱신 → 공휴일 체크 → 매수 후보 확정)
 
   === 한국장 운영 + 장중 수급 모니터링 ===
@@ -26,7 +27,7 @@ v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
   16:10  Phase 8-3 — parquet 증분 업데이트
   16:20  Phase 8-4 — 기술적 지표 재계산 (35개)
   16:30  Phase 8-5 — 데이터 검증 (NaN 체크)
-  16:35  Phase 8-6 — ETF 매매 시그널 생성 + 텔레그램 발송
+  16:35  Phase 8-6 — ETF 매매 시그널 생성 (JSON 저장만)
 
   === 수급 확정 + 스캔 + 리포트 ===
   18:20  Phase 9  — 수급 최종 확정 수집 (18:10 이후)
@@ -188,6 +189,34 @@ class DailyScheduler:
         except Exception as e:
             logger.error("[Phase 3B] 장전 브리핑 실패: %s", e)
             self._notify(f"Phase 3B 오류: {e}")
+
+    # ══════════════════════════════════════════
+    # Phase 3C: 📱 ETF 시그널 텔레그램 발송 (08:00)
+    # ══════════════════════════════════════════
+
+    def phase_etf_briefing(self) -> None:
+        """전일 생성된 ETF 매매 시그널 텔레그램 발송 (장전)"""
+        logger.info("[Phase 3C] 📱 ETF 시그널 텔레그램 발송 시작")
+        try:
+            from scripts.etf_trading_signal import build_telegram_message, OUT_PATH
+            from src.telegram_sender import send_message
+
+            if not OUT_PATH.exists():
+                logger.warning("[Phase 3C] etf_trading_signal.json 없음 — 스킵")
+                return
+
+            with open(OUT_PATH, "r", encoding="utf-8") as f:
+                signals = json.load(f)
+
+            msg = build_telegram_message(signals)
+            ok = send_message(msg)
+            if ok:
+                logger.info("[Phase 3C] 📱 ETF 시그널 전송 완료 (%d자)", len(msg))
+            else:
+                logger.error("[Phase 3C] 📱 ETF 시그널 전송 실패")
+        except Exception as e:
+            logger.error("[Phase 3C] ETF 시그널 발송 실패: %s", e)
+            self._notify(f"Phase 3C 오류: {e}")
 
     # ══════════════════════════════════════════
     # Phase 4: 매매 준비 (08:20)
@@ -553,24 +582,20 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def phase_etf_signal(self) -> None:
-        """8-6: 섹터 ETF 매매 시그널 생성 + 텔레그램 발송"""
+        """8-6: 섹터 ETF 매매 시그널 생성 (JSON 저장만, 텔레그램은 08:00에 발송)"""
         logger.info("[Phase 8-6] ETF 매매 시그널 생성 시작")
         try:
-            from scripts.etf_trading_signal import generate_etf_signals, save_signals, build_telegram_message
-            from src.telegram_sender import send_message
+            from scripts.etf_trading_signal import generate_etf_signals, save_signals
 
             signals = generate_etf_signals()
             save_signals(signals)
 
             s = signals.get("summary", {})
             logger.info(
-                "[Phase 8-6] ETF 시그널: SMART %d개, THEME %d개, 관찰 %d개",
+                "[Phase 8-6] ETF 시그널 저장: SMART %d개, THEME %d개, 관찰 %d개",
                 s.get("smart_buy", 0), s.get("theme_buy", 0), s.get("watch", 0),
             )
-
-            msg = build_telegram_message(signals)
-            send_message(msg)
-            logger.info("[Phase 8-6] ETF 시그널 텔레그램 전송 완료")
+            self._notify(f"Phase 8-6: ETF 시그널 저장 (SMART {s.get('smart_buy', 0)}, THEME {s.get('theme_buy', 0)})")
         except Exception as e:
             logger.error("[Phase 8-6] ETF 시그널 실패: %s", e)
             self._notify(f"Phase 8-6 오류: {e}")
@@ -897,6 +922,8 @@ class DailyScheduler:
             self._safe_run, self.phase_news_briefing)
         sched.every().day.at(S.get("morning_briefing", "07:30")).do(
             self._safe_run, self.phase_morning_briefing)
+        sched.every().day.at(S.get("etf_briefing", "08:00")).do(
+            self._safe_run, self.phase_etf_briefing)
         sched.every().day.at(S.get("trade_prep", "08:20")).do(
             self._safe_run, self.phase_trade_prep)
 
@@ -1005,6 +1032,7 @@ class DailyScheduler:
                 (S.get("macro_collect", "07:00"), "Phase 2", "한국 매크로 수집"),
                 (S.get("news_briefing", "07:20"), "Phase 3", "뉴스 스캔 (Grok API)"),
                 (S.get("morning_briefing", "07:30"), "Phase 3B", "\U0001f4f1 1발: 장전 마켓 브리핑"),
+                (S.get("etf_briefing", "08:00"), "Phase 3C", "\U0001f4f1 ETF 매매 시그널 텔레그램"),
                 (S.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰+공휴일+확정)"),
             ]),
             ("\U0001f1f0\U0001f1f7 한국장 운영 + 수급 모니터링", [
@@ -1024,7 +1052,7 @@ class DailyScheduler:
                 (S.get("parquet_update", "16:10"), "Phase 8-3", "parquet 증분"),
                 (S.get("indicator_calc", "16:20"), "Phase 8-4", "지표 재계산 (35개)"),
                 (S.get("data_verify", "16:30"), "Phase 8-5", "데이터 검증 (NaN)"),
-                (S.get("etf_signal", "16:35"), "Phase 8-6", "ETF 매매 시그널 생성 + 텔레그램"),
+                (S.get("etf_signal", "16:35"), "Phase 8-6", "ETF 시그널 생성 (JSON 저장)"),
             ]),
             ("\U0001f319 수급 확정 + 스캔 + 리포트", [
                 (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정 (18:10 후)"),
@@ -1107,6 +1135,7 @@ if __name__ == "__main__":
             "2": scheduler.phase_macro_collect,
             "3": scheduler.phase_news_briefing,
             "3b": scheduler.phase_morning_briefing,
+            "3c": scheduler.phase_etf_briefing,
             "4": scheduler.phase_trade_prep,
             "5": scheduler.phase_buy_execution,
             "6": scheduler.phase_intraday_monitor,
