@@ -26,6 +26,7 @@ v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
   16:10  Phase 8-3 — parquet 증분 업데이트
   16:20  Phase 8-4 — 기술적 지표 재계산 (35개)
   16:30  Phase 8-5 — 데이터 검증 (NaN 체크)
+  16:35  Phase 8-6 — ETF 매매 시그널 생성 + 텔레그램 발송
 
   === 수급 확정 + 스캔 + 리포트 ===
   18:20  Phase 9  — 수급 최종 확정 수집 (18:10 이후)
@@ -548,6 +549,33 @@ class DailyScheduler:
             logger.error("[Phase 8-5] 검증 실패: %s", e)
 
     # ══════════════════════════════════════════
+    # Phase 8-6: ETF 매매 시그널 생성 (16:35)
+    # ══════════════════════════════════════════
+
+    def phase_etf_signal(self) -> None:
+        """8-6: 섹터 ETF 매매 시그널 생성 + 텔레그램 발송"""
+        logger.info("[Phase 8-6] ETF 매매 시그널 생성 시작")
+        try:
+            from scripts.etf_trading_signal import generate_etf_signals, save_signals, build_telegram_message
+            from src.telegram_sender import send_message
+
+            signals = generate_etf_signals()
+            save_signals(signals)
+
+            s = signals.get("summary", {})
+            logger.info(
+                "[Phase 8-6] ETF 시그널: SMART %d개, THEME %d개, 관찰 %d개",
+                s.get("smart_buy", 0), s.get("theme_buy", 0), s.get("watch", 0),
+            )
+
+            msg = build_telegram_message(signals)
+            send_message(msg)
+            logger.info("[Phase 8-6] ETF 시그널 텔레그램 전송 완료")
+        except Exception as e:
+            logger.error("[Phase 8-6] ETF 시그널 실패: %s", e)
+            self._notify(f"Phase 8-6 오류: {e}")
+
+    # ══════════════════════════════════════════
     # Phase 9: 수급 최종 확정 수집 (18:20)
     # ══════════════════════════════════════════
 
@@ -905,6 +933,8 @@ class DailyScheduler:
             self._safe_run, self.phase_indicator_calc)
         sched.every().day.at(S.get("data_verify", "16:30")).do(
             self._safe_run, self.phase_data_verify)
+        sched.every().day.at(S.get("etf_signal", "16:35")).do(
+            self._safe_run, self.phase_etf_signal)
 
         # === 수급 확정 + 스캔 + 리포트 ===
         sched.every().day.at(S.get("supply_final", "18:20")).do(
@@ -994,6 +1024,7 @@ class DailyScheduler:
                 (S.get("parquet_update", "16:10"), "Phase 8-3", "parquet 증분"),
                 (S.get("indicator_calc", "16:20"), "Phase 8-4", "지표 재계산 (35개)"),
                 (S.get("data_verify", "16:30"), "Phase 8-5", "데이터 검증 (NaN)"),
+                (S.get("etf_signal", "16:35"), "Phase 8-6", "ETF 매매 시그널 생성 + 텔레그램"),
             ]),
             ("\U0001f319 수급 확정 + 스캔 + 리포트", [
                 (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정 (18:10 후)"),
@@ -1091,6 +1122,7 @@ if __name__ == "__main__":
             "8-3": scheduler.phase_parquet_update,
             "8-4": scheduler.phase_indicator_calc,
             "8-5": scheduler.phase_data_verify,
+            "8-6": scheduler.phase_etf_signal,
             "9": scheduler.phase_supply_final,
             "10": scheduler.phase_evening_scan,
             "10b": scheduler.phase_evening_briefing,

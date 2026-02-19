@@ -45,4 +45,8 @@ python scripts\sector_zscore.py --top 5 >> logs\auto_update.log 2>&1
 python scripts\sector_investor_flow.py --days 5 >> logs\auto_update.log 2>&1
 python scripts\sector_daily_report.py >> logs\auto_update.log 2>&1
 
+REM 9단계: ETF 매매 시그널 생성 + 텔레그램 발송
+echo [%date% %time%] ETF 매매 시그널 생성 >> logs\auto_update.log
+python scripts\etf_trading_signal.py >> logs\auto_update.log 2>&1
+
 echo [%date% %time%] 일일 데이터 업데이트 완료 >> logs\auto_update.log
