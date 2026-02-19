@@ -487,10 +487,28 @@ def main():
     if momentum:
         for s in momentum.get("sectors", []):
             momentum_map[s["sector"]] = s
+    # 수급 JSON → ETF 섹터명 매핑 (flow JSON 키 → ETF sector name)
+    FLOW_TO_ETF = {
+        "반도체": "반도체", "2차전지": "2차전지", "자동차": "현대차그룹",
+        "조선": "조선", "금융": "금융", "방산/항공": "방산",
+        "바이오": "바이오", "IT/소프트웨어": "소프트웨어",
+        "철강/화학": "에너지화학", "유틸리티": "유틸리티", "건설": "건설",
+        "증권": "증권", "은행": "은행",
+    }
     flow_map = {}
     if flow:
-        for s in flow.get("sectors", []):
-            flow_map[s["sector"]] = s
+        sectors_data = flow.get("sectors", {})
+        if isinstance(sectors_data, dict):
+            for sector_name, vals in sectors_data.items():
+                etf_name = FLOW_TO_ETF.get(sector_name, sector_name)
+                flow_map[etf_name] = {
+                    "sector": etf_name,
+                    "foreign_cum_bil": vals.get("foreign_cum", vals.get("foreign_cum_bil", 0)),
+                    "inst_cum_bil": vals.get("inst_cum", vals.get("inst_cum_bil", 0)),
+                }
+        elif isinstance(sectors_data, list):
+            for s in sectors_data:
+                flow_map[s["sector"]] = s
 
     # 대상 섹터
     if args.sector:
