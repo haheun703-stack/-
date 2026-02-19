@@ -32,24 +32,20 @@ except ImportError:
 
 
 RAW_DIR = Path("data/raw")
-BACKFILL_START = "20250101"
-BACKFILL_END = "20260214"
+BACKFILL_START = "20230101"
+BACKFILL_END = "20260219"
 
 # 투자자 매매동향 컬럼 매핑
 INVESTOR_COLS = ["기관합계", "외국인합계", "개인"]
 
 
 def check_needs_backfill(df: pd.DataFrame) -> bool:
-    """2025년 이후 외국인합계가 모두 0인지 확인"""
+    """외국인합계 컬럼 없거나 전부 0인지 확인"""
     if "외국인합계" not in df.columns:
-        return False
+        return True  # 컬럼 자체가 없으면 백필 필요
 
-    mask_2025 = df.index >= "2025-01-01"
-    if mask_2025.sum() == 0:
-        return False
-
-    foreign_2025 = df.loc[mask_2025, "외국인합계"]
-    nonzero = (foreign_2025 != 0).sum()
+    # 컬럼은 있지만 전부 0이면 재수집
+    nonzero = (df["외국인합계"] != 0).sum()
     return nonzero == 0
 
 
@@ -97,15 +93,18 @@ def backfill_ticker(ticker: str, parquet_path: Path) -> dict:
 
     inv_df.index = pd.to_datetime(inv_df.index)
 
-    # 4. 2025년 이후 날짜만 필터
-    mask_2025 = df.index >= "2025-01-01"
-    dates_to_update = df.index[mask_2025]
+    # 4. 컬럼이 없으면 추가 + 전체 날짜 대상으로 병합
+    for col in INVESTOR_COLS:
+        if col not in df.columns:
+            df[col] = 0
+
+    dates_to_update = df.index
 
     updated = 0
     for date in dates_to_update:
         if date in inv_df.index:
             for col in INVESTOR_COLS:
-                if col in inv_df.columns and col in df.columns:
+                if col in inv_df.columns:
                     new_val = inv_df.loc[date, col]
                     old_val = df.loc[date, col]
                     if old_val == 0 and new_val != 0:
