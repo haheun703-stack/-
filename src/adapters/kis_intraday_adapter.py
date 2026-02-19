@@ -113,6 +113,73 @@ class KisIntradayAdapter(IntradayDataPort):
             logger.error("[KIS장중] %s 틱 조회 실패: %s", ticker, e)
             return {"ticker": ticker, "timestamp": now_str, "current_price": 0}
 
+    def fetch_full_day_1m_candles(self, ticker: str, date_str: str | None = None) -> list[dict]:
+        """
+        당일 전체 1분봉 수집 (페이지네이션).
+
+        KIS API는 1회 호출당 ~30건만 반환하므로,
+        to_time을 역방향으로 이동하며 전체 장중 데이터를 수집한다.
+
+        Args:
+            ticker: 종목코드 (예: "005930")
+            date_str: 날짜 (YYYY-MM-DD). None이면 오늘.
+
+        Returns:
+            시간순 정렬된 1분봉 리스트
+            [{"timestamp": "2026-02-19 09:01:00", "open": ..., "high": ..., ...}, ...]
+        """
+        date_prefix = date_str or datetime.now().strftime("%Y-%m-%d")
+        to_time = "153000"
+        all_candles = {}  # timestamp → candle (중복 방지)
+        max_pages = 15  # 안전 장치 (390분 / 30건 ≈ 13페이지)
+
+        for _ in range(max_pages):
+            _rate_limit()
+            try:
+                data = self.broker._fetch_today_1m_ohlcv(ticker, to_time)
+                raw = data.get("output2", [])
+                if not raw:
+                    break
+
+                earliest_hour = None
+                for c in raw:
+                    hour = c.get("stck_cntg_hour", "")
+                    if len(hour) < 6:
+                        continue
+                    ts = f"{date_prefix} {hour[:2]}:{hour[2:4]}:00"
+                    if ts not in all_candles:
+                        all_candles[ts] = {
+                            "timestamp": ts,
+                            "open": int(c.get("stck_oprc", 0)),
+                            "high": int(c.get("stck_hgpr", 0)),
+                            "low": int(c.get("stck_lwpr", 0)),
+                            "close": int(c.get("stck_prpr", 0)),
+                            "volume": int(c.get("cntg_vol", 0)),
+                        }
+                    if earliest_hour is None or hour < earliest_hour:
+                        earliest_hour = hour
+
+                # 09:00 이전이면 전체 수집 완료
+                if earliest_hour is None or earliest_hour <= "090000":
+                    break
+
+                # 다음 페이지: 가장 이른 시각에서 1분 빼기
+                h, m = int(earliest_hour[:2]), int(earliest_hour[2:4])
+                m -= 1
+                if m < 0:
+                    m = 59
+                    h -= 1
+                if h < 9:
+                    break
+                to_time = f"{h:02d}{m:02d}00"
+
+            except Exception as e:
+                logger.error("[KIS장중] %s 전체1분봉 수집 오류 (page to=%s): %s", ticker, to_time, e)
+                break
+
+        result = sorted(all_candles.values(), key=lambda x: x["timestamp"])
+        return result
+
     def fetch_minute_candles(self, ticker: str, period: int = 5) -> list[dict]:
         """
         최근 N분봉 데이터 조회.

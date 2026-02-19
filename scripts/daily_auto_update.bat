@@ -34,4 +34,15 @@ REM 6단계: US-KR 학습 루프 (패턴매칭 DB 일일 누적)
 echo [%date% %time%] US-KR 패턴DB 업데이트 >> logs\auto_update.log
 python scripts\update_us_kr_daily.py >> logs\auto_update.log 2>&1
 
+REM 7단계: 섹터 ETF 시세 업데이트
+echo [%date% %time%] 섹터 ETF 시세 업데이트 >> logs\auto_update.log
+python scripts\sector_etf_builder.py --daily >> logs\auto_update.log 2>&1
+
+REM 8단계: 섹터 모멘텀 + z-score + 수급 + 통합 리포트
+echo [%date% %time%] 섹터 순환매 분석 >> logs\auto_update.log
+python scripts\sector_momentum.py --history >> logs\auto_update.log 2>&1
+python scripts\sector_zscore.py --top 5 >> logs\auto_update.log 2>&1
+python scripts\sector_investor_flow.py --days 5 >> logs\auto_update.log 2>&1
+python scripts\sector_daily_report.py >> logs\auto_update.log 2>&1
+
 echo [%date% %time%] 일일 데이터 업데이트 완료 >> logs\auto_update.log

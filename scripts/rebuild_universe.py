@@ -6,7 +6,9 @@
 
 사용법:
   python scripts/rebuild_universe.py                    # 기본 (1.5조)
-  python scripts/rebuild_universe.py --min-cap 2.0      # 시총 2.0조 이상
+  python scripts/rebuild_universe.py --min-cap 0.3      # 시총 3,000억 이상
+  python scripts/rebuild_universe.py --min-cap 0.3 --include-preferred  # 우선주 포함
+  python scripts/rebuild_universe.py --min-cap 0.3 --include-preferred --min-trading-value 20  # 거래대금 20억+
   python scripts/rebuild_universe.py --download-only     # 다운로드만
   python scripts/rebuild_universe.py --process-only      # 지표 계산만
 """
@@ -50,7 +52,12 @@ except ImportError:
 # 1단계: 시총 기준 종목 선정
 # ─────────────────────────────────────────────
 
-def select_universe(min_cap_trillion: float = 1.5, ref_date: str = "") -> pd.DataFrame:
+def select_universe(
+    min_cap_trillion: float = 1.5,
+    ref_date: str = "",
+    include_preferred: bool = False,
+    min_trading_value_bil: float = 0,
+) -> pd.DataFrame:
     """시총 기준 유니버스 선정. Returns DataFrame(ticker, name, market_cap)."""
     if not ref_date:
         # 최근 거래일
@@ -69,7 +76,7 @@ def select_universe(min_cap_trillion: float = 1.5, ref_date: str = "") -> pd.Dat
     qualified = all_cap[all_cap["시가총액"] >= min_cap].copy()
     qualified = qualified.sort_values("시가총액", ascending=False)
 
-    # 스팩/리츠/우선주/ETF 제거
+    # 스팩/리츠/ETN 제거 (+ 우선주 옵션)
     excluded = set()
     for ticker in qualified.index:
         try:
@@ -77,10 +84,23 @@ def select_universe(min_cap_trillion: float = 1.5, ref_date: str = "") -> pd.Dat
             time.sleep(0.05)
         except Exception:
             name = ""
-        if _is_excluded(name, ticker):
+        if _is_excluded(name, ticker, include_preferred=include_preferred):
             excluded.add(ticker)
 
     qualified = qualified.drop(index=list(excluded), errors="ignore")
+
+    # 거래대금 필터 (기준일 거래대금 사용 — 빠른 필터)
+    if min_trading_value_bil > 0:
+        min_tv = min_trading_value_bil * 1e8  # 억 → 원
+        if "거래대금" in qualified.columns:
+            before = len(qualified)
+            qualified = qualified[qualified["거래대금"] >= min_tv]
+            logger.info(
+                "거래대금 필터: %.0f억 이상 → %d종목 통과 (%d종목 제외)",
+                min_trading_value_bil, len(qualified), before - len(qualified),
+            )
+        else:
+            logger.warning("거래대금 컬럼 없음 — 필터 스킵")
 
     # 종목명 추가
     names = {}
@@ -98,23 +118,26 @@ def select_universe(min_cap_trillion: float = 1.5, ref_date: str = "") -> pd.Dat
     })
 
     logger.info(
-        "유니버스 선정: %d종목 (시총 %.1f조 이상, %d종목 제외)",
-        len(result), min_cap_trillion, len(excluded),
+        "유니버스 선정: %d종목 (시총 %.1f조 이상, 우선주 %s, %d종목 제외)",
+        len(result), min_cap_trillion,
+        "포함" if include_preferred else "제외",
+        len(excluded),
     )
     return result
 
 
-def _is_excluded(name: str, ticker: str) -> bool:
-    """스팩/리츠/우선주/ETF/ETN 제거."""
+def _is_excluded(name: str, ticker: str, include_preferred: bool = False) -> bool:
+    """스팩/리츠/ETN 제거. 우선주는 옵션."""
     if not name:
         return False
     excludes = ["스팩", "SPAC", "리츠", "REIT", "ETN"]
     for kw in excludes:
         if kw in name:
             return True
-    # 우선주 (코드 끝 5~9)
-    if ticker[-1] in "56789" and ticker[-2] == "0":
-        return True
+    # 우선주 (코드 끝 5~9) — include_preferred=True이면 통과
+    if not include_preferred:
+        if ticker[-1] in "56789" and ticker[-2] == "0":
+            return True
     return False
 
 
@@ -175,11 +198,33 @@ def download_raw(tickers: list[str], years: int = 3) -> dict:
 # 3단계: processed parquet (지표 계산)
 # ─────────────────────────────────────────────
 
-def process_all(tickers: list[str]) -> dict:
-    """raw → processed (IndicatorEngine으로 기술적 지표 계산)."""
+def _process_one(ticker: str) -> str:
+    """단일 종목 지표 계산 (멀티프로세싱 워커용)."""
     from src.indicators import IndicatorEngine
 
-    engine = IndicatorEngine()
+    raw_path = RAW_DIR / f"{ticker}.parquet"
+    out_path = PROCESSED_DIR / f"{ticker}.parquet"
+
+    try:
+        df = pd.read_parquet(raw_path)
+        if len(df) < 200:
+            return "skip"
+        engine = IndicatorEngine()
+        result = engine.compute_all(df)
+        result.to_parquet(out_path)
+        return "ok"
+    except Exception as e:
+        logger.error("%s: %s", ticker, e)
+        return "fail"
+
+
+def process_all(tickers: list[str], workers: int = 0) -> dict:
+    """raw → processed (IndicatorEngine으로 기술적 지표 계산).
+
+    workers=0: CPU 코어 수 자동 감지 (병렬)
+    workers=1: 순차 처리
+    """
+    import multiprocessing as mp
 
     # raw 디렉토리에 있는 것만 처리 (유니버스 한정)
     valid_raw = set(p.stem for p in RAW_DIR.glob("*.parquet"))
@@ -187,31 +232,46 @@ def process_all(tickers: list[str]) -> dict:
 
     logger.info("지표 계산 대상: %d종목 (raw 존재)", len(target))
 
-    # IndicatorEngine.process_all()은 raw 전체를 처리하므로
-    # 유니버스 한정 처리를 위해 직접 compute_all 호출
+    if workers == 0:
+        workers = min(mp.cpu_count(), 8)  # 최대 8코어
+
     stats = {"success": 0, "skip": 0, "fail": 0}
-    total = len(target)
 
-    for i, ticker in enumerate(target):
-        raw_path = RAW_DIR / f"{ticker}.parquet"
-        out_path = PROCESSED_DIR / f"{ticker}.parquet"
-
-        try:
-            df = pd.read_parquet(raw_path)
-            if len(df) < 200:
-                logger.debug("[%d/%d] %s: 데이터 부족 (%d행)", i + 1, total, ticker, len(df))
+    if workers > 1 and len(target) > 10:
+        logger.info("병렬 처리: %d 워커", workers)
+        with mp.Pool(workers) as pool:
+            results = pool.map(_process_one, target)
+        for r in results:
+            if r == "ok":
+                stats["success"] += 1
+            elif r == "skip":
                 stats["skip"] += 1
-                continue
+            else:
+                stats["fail"] += 1
+    else:
+        # 순차 처리 (소수 종목이거나 workers=1)
+        from src.indicators import IndicatorEngine
+        engine = IndicatorEngine()
+        total = len(target)
 
-            result = engine.compute_all(df)
-            result.to_parquet(out_path)
-            stats["success"] += 1
+        for i, ticker in enumerate(target):
+            raw_path = RAW_DIR / f"{ticker}.parquet"
+            out_path = PROCESSED_DIR / f"{ticker}.parquet"
 
-            if (i + 1) % 50 == 0:
-                logger.info("[%d/%d] 지표 계산 진행 중...", i + 1, total)
-        except Exception as e:
-            logger.error("[%d/%d] %s: %s", i + 1, total, ticker, e)
-            stats["fail"] += 1
+            try:
+                df = pd.read_parquet(raw_path)
+                if len(df) < 200:
+                    stats["skip"] += 1
+                    continue
+                result = engine.compute_all(df)
+                result.to_parquet(out_path)
+                stats["success"] += 1
+
+                if (i + 1) % 50 == 0:
+                    logger.info("[%d/%d] 지표 계산 진행 중...", i + 1, total)
+            except Exception as e:
+                logger.error("[%d/%d] %s: %s", i + 1, total, ticker, e)
+                stats["fail"] += 1
 
     logger.info(
         "지표 계산 완료: 성공 %d / 스킵 %d / 실패 %d",
@@ -243,6 +303,10 @@ def main():
     parser = argparse.ArgumentParser(description="유니버스 재구성")
     parser.add_argument("--min-cap", type=float, default=1.5,
                         help="최소 시총 (조 단위, 기본 1.5)")
+    parser.add_argument("--include-preferred", action="store_true",
+                        help="우선주 포함 (기본: 제외)")
+    parser.add_argument("--min-trading-value", type=float, default=0,
+                        help="최소 일평균 거래대금 (억 단위, 0=필터 없음)")
     parser.add_argument("--download-only", action="store_true",
                         help="다운로드만 실행")
     parser.add_argument("--process-only", action="store_true",
@@ -251,13 +315,22 @@ def main():
                         help="탈락 종목 삭제 안 함")
     args = parser.parse_args()
 
+    cap_억 = int(args.min_cap * 10000)
     print("=" * 50)
-    print(f"  유니버스 재구성 (시총 {args.min_cap}조 이상)")
+    print(f"  유니버스 재구성 (시총 {cap_억:,}억 이상)")
+    if args.include_preferred:
+        print(f"  우선주: 포함")
+    if args.min_trading_value > 0:
+        print(f"  거래대금 필터: 일평균 {args.min_trading_value:.0f}억 이상")
     print("=" * 50)
 
     # 1) 종목 선정
     if not args.process_only:
-        universe = select_universe(args.min_cap)
+        universe = select_universe(
+            args.min_cap,
+            include_preferred=args.include_preferred,
+            min_trading_value_bil=args.min_trading_value,
+        )
         universe.to_csv(UNIVERSE_PATH, index=False)
         print(f"\n유니버스 저장: {UNIVERSE_PATH} ({len(universe)}종목)")
 

@@ -98,6 +98,27 @@ class IndicatorEngine:
         })
 
     @staticmethod
+    def calc_stochastic_slow(df: pd.DataFrame, k_period: int = 14,
+                             d_period: int = 3, smooth: int = 3) -> pd.DataFrame:
+        """
+        클래식 Stochastics Slow 계산 (George Lane)
+        Fast %K = (Close - Lowest Low) / (Highest High - Lowest Low) × 100
+        Slow %K = SMA(Fast %K, smooth)
+        Slow %D = SMA(Slow %K, d_period)
+        """
+        lowest = df["low"].rolling(k_period, min_periods=k_period).min()
+        highest = df["high"].rolling(k_period, min_periods=k_period).max()
+
+        fast_k = (df["close"] - lowest) / (highest - lowest).replace(0, np.nan) * 100
+        slow_k = fast_k.rolling(smooth, min_periods=1).mean()
+        slow_d = slow_k.rolling(d_period, min_periods=1).mean()
+
+        return pd.DataFrame({
+            "stoch_slow_k": slow_k,
+            "stoch_slow_d": slow_d,
+        })
+
+    @staticmethod
     def calc_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
         """
         ADX(Average Directional Index) 계산
@@ -590,6 +611,22 @@ class IndicatorEngine:
         # 75. pension_top_buyer는 backfill에서 직접 추가됨 (0/1 플래그)
         if "pension_top_buyer" not in result.columns:
             result["pension_top_buyer"] = 0
+
+        # ──────────────────────────────────────────────
+        # v10.4 Stochastics Slow (76~78)
+        # 가격 기반 클래식 Stochastic — StochRSI와 병행
+        # ──────────────────────────────────────────────
+
+        # 76-77. Stochastics Slow %K, %D (14,3,3)
+        stoch_slow = self.calc_stochastic_slow(df, k_period=14, d_period=3, smooth=3)
+        result["stoch_slow_k"] = stoch_slow["stoch_slow_k"]
+        result["stoch_slow_d"] = stoch_slow["stoch_slow_d"]
+
+        # 78. Stoch Slow 골든크로스 (K가 D를 상향 돌파)
+        result["stoch_slow_golden"] = (
+            (result["stoch_slow_k"] > result["stoch_slow_d"]) &
+            (result["stoch_slow_k"].shift(1) <= result["stoch_slow_d"].shift(1))
+        ).astype(int)
 
         return result
 

@@ -441,6 +441,60 @@ class DailyScheduler:
     # Phase 8: 장마감 데이터 업데이트 (15:40~16:30, 5단계)
     # ══════════════════════════════════════════
 
+    # ══════════════════════════════════════════
+    # Phase 8-0A: 분봉(5분/15분) 아카이브 (15:35)
+    # ══════════════════════════════════════════
+
+    def phase_candle_archive(self) -> None:
+        """8-0A: 전종목 5분봉+15분봉 → parquet 아카이브"""
+        logger.info("[Phase 8-0A] 분봉 아카이브 시작")
+        try:
+            from scripts.collect_intraday_candles import (
+                load_universe, collect_one_ticker, KisIntradayAdapter,
+            )
+            from datetime import datetime as dt
+            tickers = load_universe()
+            adapter = KisIntradayAdapter()
+            date_str = dt.now().strftime("%Y-%m-%d")
+            ok, fail = 0, 0
+            for ticker in tickers:
+                try:
+                    result = collect_one_ticker(adapter, ticker, date_str)
+                    if result["status"] == "ok":
+                        ok += 1
+                    else:
+                        fail += 1
+                except Exception:
+                    fail += 1
+            logger.info("[Phase 8-0A] 분봉 아카이브 완료 (%d성공, %d실패)", ok, fail)
+            self._notify(f"Phase 8-0A: 분봉 아카이브 {ok}종목 완료")
+        except Exception as e:
+            logger.error("[Phase 8-0A] 분봉 아카이브 실패: %s", e)
+            self._notify(f"Phase 8-0A 오류: {e}")
+
+    # ══════════════════════════════════════════
+    # Phase 8-0B: 전종목 체결 스냅샷 (15:32)
+    # ══════════════════════════════════════════
+
+    def phase_tick_snapshot(self) -> None:
+        """8-0B: 전종목 체결정보 스냅샷 → parquet"""
+        logger.info("[Phase 8-0B] 체결 스냅샷 시작")
+        try:
+            from scripts.collect_tick_snapshot import (
+                load_universe, collect_all_ticks, KisIntradayAdapter,
+            )
+            tickers = load_universe()
+            adapter = KisIntradayAdapter()
+            result = collect_all_ticks(adapter, tickers)
+            logger.info(
+                "[Phase 8-0B] 체결 스냅샷 완료 (%d종목, %d건)",
+                result["stocks"], result["rows"],
+            )
+            self._notify(f"Phase 8-0B: 체결 스냅샷 {result['stocks']}종목")
+        except Exception as e:
+            logger.error("[Phase 8-0B] 체결 스냅샷 실패: %s", e)
+            self._notify(f"Phase 8-0B 오류: {e}")
+
     def phase_close_data_collect(self) -> None:
         """8-1: 종가 데이터 수집 (pykrx)"""
         logger.info("[Phase 8-1] 종가 데이터 수집 시작")
@@ -837,6 +891,10 @@ class DailyScheduler:
         # === 매도 + 장마감 데이터 ===
         sched.every().day.at(S.get("sell_execution", "15:25")).do(
             self._safe_run, self.phase_sell_execution)
+        sched.every().day.at(S.get("tick_snapshot", "15:32")).do(
+            self._safe_run, self.phase_tick_snapshot)
+        sched.every().day.at(S.get("candle_archive", "15:35")).do(
+            self._safe_run, self.phase_candle_archive)
         sched.every().day.at(S.get("close_data_collect", "15:40")).do(
             self._safe_run, self.phase_close_data_collect)
         sched.every().day.at(S.get("csv_update", "16:00")).do(
@@ -929,6 +987,8 @@ class DailyScheduler:
                 (S.get("sell_execution", "15:25"), "Phase 7", "매도 실행"),
             ]),
             ("\U0001f1f0\U0001f1f7 장마감 + 데이터 업데이트", [
+                (S.get("tick_snapshot", "15:32"), "Phase 8-0B", "전종목 체결 스냅샷 → parquet"),
+                (S.get("candle_archive", "15:35"), "Phase 8-0A", "전종목 5분/15분봉 → parquet (~26분)"),
                 (S.get("close_data_collect", "15:40"), "Phase 8-1", "종가 데이터 수집 (pykrx)"),
                 (S.get("csv_update", "16:00"), "Phase 8-2", "CSV 업데이트 (FDR)"),
                 (S.get("parquet_update", "16:10"), "Phase 8-3", "parquet 증분"),
@@ -1024,6 +1084,8 @@ if __name__ == "__main__":
             "snap3": lambda: scheduler.phase_supply_snapshot(3),
             "snap4": lambda: scheduler.phase_supply_snapshot(4),
             "7": scheduler.phase_sell_execution,
+            "8-0a": scheduler.phase_candle_archive,
+            "8-0b": scheduler.phase_tick_snapshot,
             "8": scheduler.phase_close_data_collect,
             "8-2": scheduler.phase_csv_update,
             "8-3": scheduler.phase_parquet_update,
