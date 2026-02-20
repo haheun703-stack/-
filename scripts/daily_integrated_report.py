@@ -404,13 +404,10 @@ def format_text_message(data: dict) -> str:
     positions = data["positions"]
 
     lines = []
-    lines.append(f"[Quantum Master 통합] {data['date']} {data['generated_at'].split(' ')[-1]}")
-    lines.append("━" * 30)
+    lines.append(f"[Quantum Master] {data['date']} {data['generated_at'].split(' ')[-1]}")
+    lines.append("-" * 30)
 
     # ── 시장 온도 ──
-    lines.append("")
-    lines.append("== 시장 온도 ==")
-
     us_grade = us.get("grade", "NEUTRAL")
     us_score = us.get("combined_score_100", 0)
     idx = us.get("index_direction", {})
@@ -420,31 +417,27 @@ def format_text_message(data: dict) -> str:
     vix = us.get("vix", {})
     vix_level = vix.get("level", 0)
     vix_status = vix.get("status", "")
-    lines.append(f"US: {us_grade} ({us_score:+.1f}) | "
-                 f"EWY {ewy_ret:+.1f}% SPY {spy_ret:+.1f}% QQQ {qqq_ret:+.1f}% | "
-                 f"VIX {vix_level:.0f} [{vix_status}]")
 
     regime = kospi["regime"]
     slots = kospi["slots"]
     close = kospi.get("close", 0)
     ma20 = kospi.get("ma20", 0)
     ma60 = kospi.get("ma60", 0)
-    lines.append(f"KOSPI: {regime} ({slots}슬롯) | "
-                 f"{close:,.0f} {'>' if close > ma20 else '<'} MA20 {ma20:,.0f} "
-                 f"{'>' if ma20 > ma60 else '<'} MA60 {ma60:,.0f}")
-    lines.append(f"종합: {plan['market_stance']}")
 
-    # 특수 룰
+    lines.append(f"US: {us_grade}({us_score:+.1f}) | EWY{ewy_ret:+.1f}% SPY{spy_ret:+.1f}% QQQ{qqq_ret:+.1f}%")
+    lines.append(f"VIX: {vix_level:.0f}[{vix_status}] | KOSPI: {regime}({slots}슬롯) {close:,.0f}")
+    lines.append(f">> {plan['market_stance']}")
+
     special = us.get("special_rules", [])
     if special:
         rules_str = ", ".join(r.get("name", "") for r in special)
-        lines.append(f"특수룰: {rules_str}")
+        lines.append(f"!! {rules_str}")
 
     # ── Quantum 매수 후보 ──
     candidates = data["quantum"]["candidates"]
+    lines.append("")
     if candidates:
-        lines.append("")
-        lines.append(f"== Quantum 매수 후보 ({len(candidates[:5])}종목) ==")
+        lines.append(f"[Quantum {len(candidates[:5])}종목]")
         for i, c in enumerate(candidates[:5], 1):
             grade = c.get("grade", "?")
             name = c.get("name", "")
@@ -455,42 +448,49 @@ def format_text_message(data: dict) -> str:
             rr = c.get("risk_reward", 0)
             target_pct = (target - entry) / entry * 100 if entry > 0 else 0
             stop_pct = (stop - entry) / entry * 100 if entry > 0 else 0
-            lines.append(f"{grade} {i}위. {name}({ticker}) {entry:,.0f}원 | RR 1:{rr:.1f}")
-            lines.append(f"  목표 {target:,.0f}({target_pct:+.1f}%) 손절 {stop:,.0f}({stop_pct:+.1f}%)")
+            lines.append(f"{grade}{i}. {name}({ticker}) {entry:,.0f}원 RR1:{rr:.1f}")
+            lines.append(f"   T{target_pct:+.1f}% S{stop_pct:+.1f}%")
     else:
-        lines.append("")
-        lines.append("== Quantum 매수 후보 ==")
-        lines.append("  통과 종목 없음")
+        lines.append("[Quantum] 통과 종목 없음 (v8 게이트 대기)")
 
     # ── 릴레이 시그널 ──
     relay = data["relay"]
     fired = relay.get("fired_sectors", [])
     signals = relay.get("relay_signals", [])
 
-    # 진입 적기 (후행 <+3%)만 필터
-    actionable = [s for s in signals
-                  if s.get("follow_stats", {}).get("avg_return", 0) < 3.0
-                  and s["pattern"]["confidence"] in ("HIGH", "MED")]
+    # 분류: 진입적기 vs 이미움직임
+    actionable = []
+    already_moved = []
+    for s in signals:
+        follow_ret = s.get("follow_stats", {}).get("avg_return", 0)
+        conf = s["pattern"]["confidence"]
+        if follow_ret < 3.0 and conf in ("HIGH", "MED"):
+            actionable.append(s)
+        elif follow_ret >= 3.0:
+            already_moved.append(s)
 
     lines.append("")
     if actionable:
-        lines.append(f"== 릴레이 시그널 ({len(actionable)}건 진입적기) ==")
+        lines.append(f"[Relay {len(actionable)}건 진입적기]")
         for sig in actionable:
             p = sig["pattern"]
             follow_ret = sig.get("follow_stats", {}).get("avg_return", 0)
-            lines.append(f"발화: {sig['lead_sector']} {sig['lead_return']:+.1f}% {sig['lead_grade']} "
-                         f"→ {sig['follow_sector']}(대기 {follow_ret:+.1f}%) "
-                         f"lag{p['best_lag']} 승률{p['win_rate']:.0f}% [{p['confidence']}]")
+            lines.append(f"{sig['lead_sector']}{sig['lead_return']:+.1f}% -> "
+                         f"{sig['follow_sector']}(+{follow_ret:.1f}%) "
+                         f"lag{p['best_lag']} W{p['win_rate']:.0f}%[{p['confidence']}]")
             picks = sig.get("picks", [])
             if picks:
-                pick_str = " / ".join(f"{pk['name']}({pk['ticker']})" for pk in picks[:3])
-                lines.append(f"  {pick_str}")
+                pick_str = ", ".join(f"{pk['name']}" for pk in picks[:3])
+                lines.append(f"   -> {pick_str}")
     elif fired:
-        lines.append(f"== 릴레이 시그널 ==")
-        lines.append(f"  발화 {len(fired)}개 (전부 이미움직임 — 진입적기 없음)")
+        lines.append(f"[Relay] 발화{len(fired)}개 (전부 이미움직임)")
     else:
-        lines.append("== 릴레이 시그널 ==")
-        lines.append("  발화 섹터 없음")
+        lines.append("[Relay] 발화 없음")
+
+    if already_moved:
+        moved_str = ", ".join(f"{s['follow_sector']}(+{s.get('follow_stats', {}).get('avg_return', 0):.1f}%)"
+                              for s in already_moved[:3])
+        lines.append(f"   (이미움직임: {moved_str})")
 
     # ── 보유 포지션 ──
     q_pos = positions["quantum"]["positions"]
@@ -499,46 +499,78 @@ def format_text_message(data: dict) -> str:
 
     lines.append("")
     if total_count > 0:
-        lines.append(f"== 보유 포지션 ({total_count}건) ==")
+        lines.append(f"[포지션 {total_count}건]")
         for p in q_pos:
             name = p.get("name", p.get("ticker", ""))
-            lines.append(f"[Q] {name} | {p.get('entry_date', '')}")
+            pnl = p.get("unrealized_pnl_pct", 0)
+            entry_date = p.get("entry_date", "")
+            # 보유일수 계산
+            days_str = ""
+            if entry_date:
+                try:
+                    from datetime import datetime as _dt
+                    d = _dt.strptime(entry_date, "%Y-%m-%d")
+                    days = (datetime.now() - d).days
+                    days_str = f" {days}일"
+                except Exception:
+                    pass
+            lines.append(f"Q. {name} {pnl:+.1f}%{days_str}")
         for p in r_pos:
             pnl = p.get("pnl_pct", 0)
             days = p.get("trading_days_held", 0)
-            lines.append(f"[R] {p['name']}({p['ticker']}) "
-                         f"{pnl:+.1f}% {days}일째 | "
-                         f"{p.get('fired_sector', '')}→{p.get('sector', '')}")
+            lines.append(f"R. {p['name']} {pnl:+.1f}% {days}일 | "
+                         f"{p.get('fired_sector', '')}>{p.get('sector', '')}")
         if positions["total_invested"] > 0:
-            lines.append(f"합계: {positions['total_invested']:,}원 투입 "
-                         f"→ {positions['total_relay_pnl']:+,}원")
+            lines.append(f"   투입{positions['total_invested']:,}원 P/L{positions['total_relay_pnl']:+,}원")
     else:
-        lines.append("== 보유 포지션 ==")
-        lines.append("  없음")
+        lines.append("[포지션] 없음")
 
     # ── 액션 플랜 ──
+    stance = plan["market_stance"]
     lines.append("")
-    lines.append("== 액션 플랜 ==")
+    lines.append("[Action]")
     if plan["buys"]:
-        buy_strs = []
         for b in plan["buys"]:
             src = "Q" if b["source"] == "Quantum" else "R"
-            buy_strs.append(f"{b['name']}[{src}]")
-        lines.append(f"매수: {', '.join(buy_strs)}")
+            if src == "R":
+                lines.append(f"  BUY[{src}] {b['name']} "
+                             f"| {b.get('fired_sector', '')}>{b.get('sector', '')} W{b.get('win_rate', 0):.0f}%")
+            else:
+                lines.append(f"  BUY[{src}] {b['name']} "
+                             f"| {b.get('entry_price', 0):,.0f}원 RR1:{b.get('risk_reward', 0):.1f}")
     else:
-        lines.append("매수: 없음")
+        lines.append(f"  BUY: 없음")
 
     if plan["sells"]:
-        sell_strs = [f"{s['name']}({s['reason']})" for s in plan["sells"]]
-        lines.append(f"매도: {', '.join(sell_strs)}")
-    else:
-        lines.append("매도: 없음")
+        for s in plan["sells"]:
+            lines.append(f"  SELL {s['name']} | {s.get('reason', '')}")
 
     if plan["watches"]:
-        watch_strs = [f"{w['name']}({w.get('reason', '')})" for w in plan["watches"][:3]]
-        lines.append(f"감시: {', '.join(watch_strs)}")
+        # 감시 항목 — 동일 follow를 머지
+        follow_map: dict[str, list[str]] = {}
+        other_watches = []
+        for w in plan["watches"][:5]:
+            name = w.get("name", "")
+            if "->" in name or "\u2192" in name:
+                # lead→follow 형태
+                parts = name.replace("\u2192", "->").split("->")
+                if len(parts) == 2:
+                    lead = parts[0].strip()
+                    follow = parts[1].strip()
+                    follow_map.setdefault(follow, []).append(lead)
+                    continue
+            other_watches.append(name)
+        if follow_map:
+            merged = []
+            for follow, leads in follow_map.items():
+                merged.append(f"{follow}({'+'.join(leads)})")
+            lines.append(f"  WATCH: {', '.join(merged)}")
+            if "관망" in stance or "자제" in stance:
+                lines.append(f"    * {stance} -- 발동시 소량만")
+        for ow in other_watches:
+            lines.append(f"  WATCH: {ow}")
 
-    lines.append("━" * 30)
+    lines.append("-" * 30)
     return "\n".join(lines)
 
 

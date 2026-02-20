@@ -395,7 +395,10 @@ def _build_quantum_section(candidates: list[dict]) -> str:
     if not candidates:
         return """
 <div class="section-title">Quantum 매수 후보</div>
-<div class="card"><span class="small">통과 종목 없음</span></div>
+<div class="card">
+    <span class="small">v8 게이트 통과 종목 없음 &mdash; Quantum 시그널 대기중</span>
+    <div class="small" style="margin-top:6px;color:#484f58">Gate: ADX&ge;18 + Pullback&le;0.8 + Overheat&lt;0.92</div>
+</div>
 """
 
     rows = ""
@@ -444,10 +447,16 @@ def _build_relay_section(relay: dict) -> str:
     fired = relay.get("fired_sectors", [])
     signals = relay.get("relay_signals", [])
 
-    # 진입적기만 필터
-    actionable = [s for s in signals
-                  if s.get("follow_stats", {}).get("avg_return", 0) < 3.0
-                  and s["pattern"]["confidence"] in ("HIGH", "MED")]
+    # 분류: 진입적기 vs 이미움직임
+    actionable = []
+    already_moved = []
+    for s in signals:
+        follow_ret = s.get("follow_stats", {}).get("avg_return", 0)
+        conf = s["pattern"]["confidence"]
+        if follow_ret < 3.0 and conf in ("HIGH", "MED"):
+            actionable.append(s)
+        elif follow_ret >= 3.0:
+            already_moved.append(s)
 
     if not actionable and not fired:
         return """
@@ -455,13 +464,9 @@ def _build_relay_section(relay: dict) -> str:
 <div class="card"><span class="small">발화 섹터 없음</span></div>
 """
 
-    if not actionable and fired:
-        return f"""
-<div class="section-title">릴레이 시그널</div>
-<div class="card"><span class="small">발화 {len(fired)}개 (전부 이미움직임 — 진입적기 없음)</span></div>
-"""
-
     cards = ""
+
+    # 진입적기 카드
     for sig in actionable:
         p = sig["pattern"]
         follow_ret = sig.get("follow_stats", {}).get("avg_return", 0)
@@ -474,17 +479,44 @@ def _build_relay_section(relay: dict) -> str:
 <div class="fire-card">
     <div class="fire-header">
         <span class="fire-sector">{sig['lead_sector']} {sig['lead_return']:+.1f}%</span>
-        <span class="arrow">→</span>
+        <span class="arrow">&rarr;</span>
         <span class="follow-sector">{sig['follow_sector']}</span>
         <span class="badge" style="background:{conf_color}33;color:{conf_color}">{p['confidence']}</span>
     </div>
-    <div class="small">래그{p['best_lag']}일 | 승률{p['win_rate']:.0f}% | n={p['samples']} | 후행 {follow_ret:+.1f}% 대기중</div>
+    <div class="small">lag{p['best_lag']}일 | 승률{p['win_rate']:.0f}% | n={p['samples']} | 후행 {follow_ret:+.1f}% 대기중</div>
     <div class="picks">{picks_html}</div>
 </div>
 """
 
+    # 이미움직임 카드 (회색)
+    if already_moved:
+        moved_items = ""
+        for sig in already_moved[:3]:
+            p = sig["pattern"]
+            follow_ret = sig.get("follow_stats", {}).get("avg_return", 0)
+            moved_items += (
+                f"<div style='padding:4px 0;border-bottom:1px solid #21262d'>"
+                f"<span style='color:#6e7681'>{sig['lead_sector']}</span> "
+                f"<span style='color:#484f58'>&rarr;</span> "
+                f"<span style='color:#6e7681'>{sig['follow_sector']}</span> "
+                f"<span style='color:#6e7681'>+{follow_ret:.1f}%</span> "
+                f"<span style='font-size:11px;color:#484f58'>이미움직임</span>"
+                f"</div>"
+            )
+        cards += f"""
+<div class="card" style="border-color:#21262d;opacity:0.7">
+    <div class="small" style="margin-bottom:4px;color:#484f58">이미움직임 (참고)</div>
+    {moved_items}
+</div>
+"""
+
+    if not actionable and fired:
+        title = f"릴레이 시그널 (발화{len(fired)}개)"
+    else:
+        title = f"릴레이 시그널 ({len(actionable)}건 진입적기)"
+
     return f"""
-<div class="section-title">릴레이 시그널 ({len(actionable)}건 진입적기)</div>
+<div class="section-title">{title}</div>
 {cards}
 """
 
@@ -547,16 +579,16 @@ def _build_action_section(plan: dict) -> str:
     buys = plan.get("buys", [])
     sells = plan.get("sells", [])
     watches = plan.get("watches", [])
+    stance = plan.get("market_stance", "")
 
     buy_html = ""
     if buys:
         for b in buys:
             src = "Q" if b["source"] == "Quantum" else "R"
-            extra = ""
             if b["source"] == "Quantum":
-                extra = f" | {b.get('entry_price', 0):,.0f}원"
+                extra = f" | {b.get('entry_price', 0):,.0f}원 RR 1:{b.get('risk_reward', 0):.1f}"
             else:
-                extra = f" | {b.get('fired_sector', '')}→{b.get('sector', '')} 승률{b.get('win_rate', 0):.0f}%"
+                extra = f" | {b.get('fired_sector', '')}&rarr;{b.get('sector', '')} 승률{b.get('win_rate', 0):.0f}%"
             buy_html += f'<div class="action-item">[{src}] {b["name"]}{extra}</div>'
     else:
         buy_html = '<div class="action-item">없음</div>'
@@ -564,14 +596,35 @@ def _build_action_section(plan: dict) -> str:
     sell_html = ""
     if sells:
         for s in sells:
-            sell_html += f'<div class="action-item">{s["name"]} — {s.get("reason", "")}</div>'
+            sell_html += f'<div class="action-item">{s["name"]} &mdash; {s.get("reason", "")}</div>'
     else:
         sell_html = '<div class="action-item">없음</div>'
 
     watch_html = ""
     if watches:
-        for w in watches[:3]:
-            watch_html += f'<div class="action-item">{w["name"]} ({w.get("reason", "")})</div>'
+        # 동일 follow 섹터 머지
+        follow_map: dict[str, list[str]] = {}
+        other_watches = []
+        for w in watches[:5]:
+            name = w.get("name", "")
+            if "\u2192" in name or "->" in name:
+                parts = name.replace("\u2192", "->").split("->")
+                if len(parts) == 2:
+                    lead = parts[0].strip()
+                    follow = parts[1].strip()
+                    follow_map.setdefault(follow, []).append(lead)
+                    continue
+            other_watches.append(w)
+        for follow, leads in follow_map.items():
+            watch_html += (
+                f'<div class="action-item">'
+                f'{follow} &larr; {"+".join(leads)} 발화'
+                f'</div>'
+            )
+        for w in other_watches:
+            watch_html += f'<div class="action-item">{w.get("name", "")} ({w.get("reason", "")})</div>'
+        if "관망" in stance or "자제" in stance:
+            watch_html += f'<div class="small" style="margin-top:4px;color:#d29922">* {stance} &mdash; 발동시 소량만</div>'
     else:
         watch_html = '<div class="action-item">없음</div>'
 

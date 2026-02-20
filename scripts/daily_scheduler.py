@@ -1,39 +1,42 @@
 #!/usr/bin/env python3
 """
-v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
+v5.1 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
 
 일일 스케줄 (KST):
   === 미장 마감 + 한국장 준비 ===
-  00:00  Phase 0  — 일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
-  06:10  Phase 1  — 미장 마감 데이터 수집 (yfinance: SPY,QQQ,EWY,VIX,SOX)
-  07:00  Phase 2  — 한국 매크로 수집 (KOSPI/환율/금리)
-  07:20  Phase 3  — 뉴스 스캔 (Grok API)
-  07:30  Phase 3B — 📱 1발: 장전 마켓 브리핑 (상승/하락 확률 + S/A/B/C)
-  08:00  Phase 3C — 📱 ETF 매매 시그널 텔레그램 발송
-  08:20  Phase 4  — 매매 준비 (토큰 갱신 → 공휴일 체크 → 매수 후보 확정)
+  00:00  Phase 0    일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
+  06:10  Phase 1    미장 마감 데이터 + US Overnight Signal
+  07:00  Phase 2    한국 매크로 수집
+  07:20  Phase 3    뉴스 스캔 (Grok API)
+  07:30  Phase 3B   [TG] 장전 마켓 브리핑
+  08:00  Phase 3C   [TG] ETF 매매 시그널
+  08:20  Phase 4    매매 준비 (토큰+공휴일+확정)
 
-  === 한국장 운영 + 장중 수급 모니터링 ===
-  09:02  Phase 5  — 매수 실행
-  09:10  Phase 6  — 장중 모니터링 (1분 간격, 15:20까지)
-  09:30  📸 수급 스냅샷 1차 (개장 30분)
-  11:00  📸 수급 스냅샷 2차 (오전장 마무리)
-  13:30  📸 수급 스냅샷 3차 (오후장 전환)
-  15:00  📸 수급 스냅샷 4차 (마감 직전)
-  15:25  Phase 7  — 매도 실행 (장마감 전)
+  === 한국장 운영 ===
+  09:02  Phase 5    매수 실행
+  09:10  Phase 6    장중 모니터링 (~15:20)
+  09:30  수급 1차   개장 30분
+  11:00  수급 2차   오전장
+  13:30  수급 3차   오후장
+  15:00  수급 4차   마감 직전
+  15:25  Phase 7    매도 실행
 
   === 장마감 + 데이터 업데이트 ===
-  15:40  Phase 8-1 — 종가 데이터 수집 (pykrx)
-  16:00  Phase 8-2 — CSV 업데이트 (FDR 37개 지표)
-  16:10  Phase 8-3 — parquet 증분 업데이트
-  16:20  Phase 8-4 — 기술적 지표 재계산 (35개)
-  16:30  Phase 8-5 — 데이터 검증 (NaN 체크)
-  16:35  Phase 8-6 — ETF 매매 시그널 생성 (JSON 저장만)
+  15:32  Phase 8-0B 전종목 체결 스냅샷
+  15:35  Phase 8-0A 전종목 분봉 아카이브
+  15:40  Phase 8-1  종가 수집 + CSV 업데이트 (통합)
+  16:10  Phase 8-3  parquet 증분
+  16:20  Phase 8-4  지표 재계산 (35개)
+  16:30  Phase 8-5  데이터 검증
+  16:35  Phase 8-6  ETF 시그널 생성
+  16:40  Phase 8-7  KOSPI 인덱스 업데이트
 
   === 수급 확정 + 스캔 + 리포트 ===
-  18:20  Phase 9  — 수급 최종 확정 수집 (18:10 이후)
-  18:40  Phase 10 — 내일 매수 후보 스캔 (Kill→Rank→Tag)
-  19:00  Phase 10B— 📱 2발: 장마감 리포트 (결과 + 내일 후보 + 수급 히스토리)
-  19:30  Phase 11 — 업무일지 + 추천기록 아카이브
+  18:20  Phase 9    수급 최종 확정
+  18:30  Phase 9.5  릴레이 포지션 체크
+  18:40  Phase 10   scan_all() 매수 후보 스캔
+  19:00  Phase 10B  [TG] 통합 데일리 리포트
+  19:30  Phase 11   업무일지
 
 안전장치:
   STOP.signal — 매수/매도/모니터링 중단
@@ -43,7 +46,7 @@ v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
 사용법:
   python scripts/daily_scheduler.py               # 스케줄러 시작
   python scripts/daily_scheduler.py --dry-run      # 스케줄 확인만
-  python scripts/daily_scheduler.py --run-now 10   # 특정 Phase 즉시 실행 (0~11)
+  python scripts/daily_scheduler.py --run-now 10   # 특정 Phase 즉시 실행 (0~11, 8-7, 9.5)
 """
 
 from __future__ import annotations
@@ -76,7 +79,7 @@ SUPPLY_SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class DailyScheduler:
-    """v5.0 일일 스케줄러 — 한국장 준비 ~ 미장 마감"""
+    """v5.1 일일 스케줄러 — 한국장 준비 ~ 미장 마감"""
 
     def __init__(self, config_path: str = "config/settings.yaml"):
         with open(config_path, "r", encoding="utf-8") as f:
@@ -259,24 +262,14 @@ class DailyScheduler:
         self._notify(f"Phase 4 완료: 매수 후보 {len(self._buy_signals)}종목")
 
     def _load_signals(self) -> None:
-        """섹터 로테이션 스캔 결과에서 매수 후보 로드"""
-        import json
-        scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+        """scan_cache.json에서 매수 후보 로드 (Phase 10에서 저장)."""
+        scan_path = Path("data/scan_cache.json")
         if not scan_path.exists():
             self._buy_signals = []
             return
         try:
-            with open(scan_path, encoding="utf-8") as f:
-                data = json.load(f)
-            # Smart Money + Theme Money 합산
-            signals = []
-            for item in data.get("smart_money", []):
-                if item.get("entry_ok"):
-                    signals.append(item)
-            for item in data.get("theme_money", []):
-                if item.get("entry_ok"):
-                    signals.append(item)
-            self._buy_signals = signals
+            data = json.loads(scan_path.read_text(encoding="utf-8"))
+            self._buy_signals = data.get("candidates", [])
         except Exception:
             self._buy_signals = []
 
@@ -400,16 +393,12 @@ class DailyScheduler:
         except Exception:
             pass
 
-        # 2. 전일 스캔 후보 (watchlist) — 섹터 로테이션 스캔
+        # 2. 전일 스캔 후보 (watchlist) — scan_cache.json
         try:
-            import json as _json
-            scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+            scan_path = Path("data/scan_cache.json")
             if scan_path.exists():
-                with open(scan_path, encoding="utf-8") as f:
-                    scan_data = _json.load(f)
-                for item in scan_data.get("smart_money", []):
-                    tickers.add(str(item["ticker"]).zfill(6))
-                for item in scan_data.get("theme_money", []):
+                scan_data = json.loads(scan_path.read_text(encoding="utf-8"))
+                for item in scan_data.get("candidates", []):
                     tickers.add(str(item["ticker"]).zfill(6))
         except Exception:
             pass
@@ -536,24 +525,14 @@ class DailyScheduler:
             self._notify(f"Phase 8-0B 오류: {e}")
 
     def phase_close_data_collect(self) -> None:
-        """8-1: 종가 데이터 수집 (pykrx)"""
-        logger.info("[Phase 8-1] 종가 데이터 수집 시작")
+        """8-1: 종가 수집 + CSV 업데이트 (통합)."""
+        logger.info("[Phase 8-1] 종가 수집 + CSV 업데이트 시작")
         try:
             from scripts.update_daily_data import update_all
             update_all()
-            logger.info("[Phase 8-1] 종가 데이터 수집 완료")
+            logger.info("[Phase 8-1] 종가 수집 + CSV 업데이트 완료")
         except Exception as e:
             logger.error("[Phase 8-1] 종가 수집 실패: %s", e)
-
-    def phase_csv_update(self) -> None:
-        """8-2: CSV 업데이트 (FinanceDataReader + 37개 지표)"""
-        logger.info("[Phase 8-2] CSV 업데이트 시작")
-        try:
-            from scripts.update_daily_data import update_all
-            update_all()
-            logger.info("[Phase 8-2] CSV 업데이트 완료")
-        except Exception as e:
-            logger.error("[Phase 8-2] CSV 업데이트 실패: %s", e)
 
     def phase_parquet_update(self) -> None:
         """8-3: parquet 증분 업데이트"""
@@ -611,6 +590,35 @@ class DailyScheduler:
             self._notify(f"Phase 8-6 오류: {e}")
 
     # ══════════════════════════════════════════
+    # Phase 8-7: KOSPI 인덱스 업데이트 (16:40)
+    # ══════════════════════════════════════════
+
+    def phase_kospi_update(self) -> None:
+        """8-7: KOSPI 인덱스(^KS11) yfinance 업데이트 → kospi_index.csv"""
+        logger.info("[Phase 8-7] KOSPI 인덱스 업데이트 시작")
+        try:
+            import yfinance as yf
+            import pandas as pd
+            kospi_path = PROJECT_ROOT / "data" / "kospi_index.csv"
+            df_old = pd.read_csv(kospi_path, index_col="Date", parse_dates=True)
+            last_date = df_old.index[-1].strftime("%Y-%m-%d")
+            df_new = yf.download("^KS11", start=last_date, progress=False)
+            if not df_new.empty:
+                # MultiIndex 열 flatten (yfinance 신버전 대응)
+                if isinstance(df_new.columns, pd.MultiIndex):
+                    df_new.columns = [c[0].lower() for c in df_new.columns]
+                else:
+                    df_new.columns = [c.lower() for c in df_new.columns]
+                df_new.index.name = "Date"
+                combined = pd.concat([df_old, df_new[~df_new.index.isin(df_old.index)]])
+                combined.to_csv(kospi_path)
+                logger.info("[Phase 8-7] KOSPI 업데이트 완료 (%d행)", len(combined))
+            else:
+                logger.info("[Phase 8-7] KOSPI 신규 데이터 없음")
+        except Exception as e:
+            logger.error("[Phase 8-7] KOSPI 업데이트 실패: %s", e)
+
+    # ══════════════════════════════════════════
     # Phase 9: 수급 최종 확정 수집 (18:20)
     # ══════════════════════════════════════════
 
@@ -635,29 +643,43 @@ class DailyScheduler:
         self._notify("Phase 9 완료: 수급 확정 수집")
 
     # ══════════════════════════════════════════
+    # Phase 9.5: 릴레이 포지션 체크 (18:30)
+    # ══════════════════════════════════════════
+
+    def phase_relay_check(self) -> None:
+        """9.5: 릴레이 포지션 청산 조건 체크."""
+        logger.info("[Phase 9.5] 릴레이 포지션 체크 시작")
+        try:
+            from scripts.relay_positions import check_all_positions
+            results = check_all_positions()
+            exits = [r for r in results if r.get("exit")]
+            if exits:
+                names = ", ".join(r["name"] for r in exits)
+                self._notify(f"Phase 9.5: 릴레이 청산 {len(exits)}건 ({names})")
+                logger.info("[Phase 9.5] 릴레이 청산 대상: %s", names)
+            else:
+                logger.info("[Phase 9.5] 릴레이 포지션 %d건 전부 HOLD", len(results))
+        except Exception as e:
+            logger.error("[Phase 9.5] 릴레이 체크 실패: %s", e)
+
+    # ══════════════════════════════════════════
     # Phase 10: 내일 매수 후보 스캔 (18:40)
     # ══════════════════════════════════════════
 
     def phase_evening_scan(self) -> None:
-        """수급 반영된 최신 데이터로 내일 매수 후보 스캔"""
+        """수급 반영된 최신 데이터로 내일 매수 후보 스캔 (scan_all)."""
         logger.info("[Phase 10] 내일 매수 후보 스캔 시작")
         try:
-            from main import step_backtest
-            step_backtest(use_sample=False)
-            logger.info("[Phase 10] 매수 후보 스캔 완료")
+            import importlib
+            mod = importlib.import_module("scan_buy_candidates")
+            candidates, stats = mod.scan_all(grade_filter="AB", use_news=False)
+            # 캐시 저장 (Phase 10B 통합 리포트에서 사용)
+            from scripts.daily_integrated_report import _save_scan_cache
+            _save_scan_cache(candidates, stats)
+            logger.info("[Phase 10] scan_all 완료: %d종목 통과", len(candidates))
         except Exception as e:
             logger.error("[Phase 10] 스캔 실패: %s", e)
-
-        # 추천 기록 아카이브 (섹터 로테이션 스캔)
-        import shutil
-        scan_path = Path("data/sector_rotation/krx_sector_scan.json")
-        if scan_path.exists():
-            today = datetime.now().strftime("%Y%m%d")
-            archive_dir = Path("results/archive")
-            archive_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(scan_path, archive_dir / f"sector_scan_{today}.json")
-
-        self._notify("Phase 10 완료: 내일 후보 스캔")
+        self._notify("Phase 10 완료: 스캔")
 
     # ══════════════════════════════════════════
     # Phase 10B: 📱 2발 장마감 리포트 (19:00)
@@ -985,8 +1007,7 @@ class DailyScheduler:
             self._safe_run, self.phase_candle_archive)
         sched.every().day.at(S.get("close_data_collect", "15:40")).do(
             self._safe_run, self.phase_close_data_collect)
-        sched.every().day.at(S.get("csv_update", "16:00")).do(
-            self._safe_run, self.phase_csv_update)
+        # Phase 8-2 제거 (8-1에서 update_all 통합 호출)
         sched.every().day.at(S.get("parquet_update", "16:10")).do(
             self._safe_run, self.phase_parquet_update)
         sched.every().day.at(S.get("indicator_calc", "16:20")).do(
@@ -995,10 +1016,14 @@ class DailyScheduler:
             self._safe_run, self.phase_data_verify)
         sched.every().day.at(S.get("etf_signal", "16:35")).do(
             self._safe_run, self.phase_etf_signal)
+        sched.every().day.at(S.get("kospi_update", "16:40")).do(
+            self._safe_run, self.phase_kospi_update)
 
         # === 수급 확정 + 스캔 + 리포트 ===
         sched.every().day.at(S.get("supply_final", "18:20")).do(
             self._safe_run, self.phase_supply_final)
+        sched.every().day.at(S.get("relay_check", "18:30")).do(
+            self._safe_run, self.phase_relay_check)
         sched.every().day.at(S.get("evening_scan", "18:40")).do(
             self._safe_run, self.phase_evening_scan)
         sched.every().day.at(S.get("evening_briefing", "19:00")).do(
@@ -1049,11 +1074,11 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def print_schedule(self) -> None:
-        """v5.0 스케줄 표 출력"""
+        """v5.1 스케줄 표 출력."""
         S = self.schedule
         print()
         print("=" * 65)
-        print("  v5.0 일일 스케줄 (한국장 준비 ~ 미장 마감)")
+        print("  v5.1 일일 스케줄 (한국장 준비 ~ 미장 마감)")
         print("=" * 65)
         print(f"  모드: {self.mode} | 실주문: {'ON' if self.enabled else 'OFF'}")
         print()
@@ -1061,37 +1086,38 @@ class DailyScheduler:
         sections = [
             ("\U0001f1fa\U0001f1f8 미장 마감 + \U0001f1f0\U0001f1f7 한국장 준비", [
                 (S.get("daily_reset", "00:00"), "Phase 0", "일일 리셋"),
-                (S.get("us_close_collect", "06:10"), "Phase 1", "미장 마감 데이터 수집 (yfinance)"),
+                (S.get("us_close_collect", "06:10"), "Phase 1", "미장 마감 데이터 + US Overnight Signal"),
                 (S.get("macro_collect", "07:00"), "Phase 2", "한국 매크로 수집"),
                 (S.get("news_briefing", "07:20"), "Phase 3", "뉴스 스캔 (Grok API)"),
-                (S.get("morning_briefing", "07:30"), "Phase 3B", "\U0001f4f1 1발: 장전 마켓 브리핑"),
-                (S.get("etf_briefing", "08:00"), "Phase 3C", "\U0001f4f1 ETF 매매 시그널 텔레그램"),
+                (S.get("morning_briefing", "07:30"), "Phase 3B", "[TG] 장전 마켓 브리핑"),
+                (S.get("etf_briefing", "08:00"), "Phase 3C", "[TG] ETF 매매 시그널"),
                 (S.get("trade_prep", "08:20"), "Phase 4", "매매 준비 (토큰+공휴일+확정)"),
             ]),
-            ("\U0001f1f0\U0001f1f7 한국장 운영 + 수급 모니터링", [
+            ("\U0001f1f0\U0001f1f7 한국장 운영", [
                 (S.get("buy_execution", "09:02"), "Phase 5", "매수 실행"),
                 (S.get("monitor_start", "09:10"), "Phase 6", "장중 모니터링 (~15:20)"),
-                (S.get("supply_snapshot_1", "09:30"), "\U0001f4f8 1차", "개장 30분 외국인 방향"),
-                (S.get("supply_snapshot_2", "11:00"), "\U0001f4f8 2차", "오전장 수급 중간점검"),
-                (S.get("supply_snapshot_3", "13:30"), "\U0001f4f8 3차", "오후장 전환 체크"),
-                (S.get("supply_snapshot_4", "15:00"), "\U0001f4f8 4차", "마감 직전 최종 수급"),
+                (S.get("supply_snapshot_1", "09:30"), "\U0001f4f8 1차", "개장 30분"),
+                (S.get("supply_snapshot_2", "11:00"), "\U0001f4f8 2차", "오전장"),
+                (S.get("supply_snapshot_3", "13:30"), "\U0001f4f8 3차", "오후장"),
+                (S.get("supply_snapshot_4", "15:00"), "\U0001f4f8 4차", "마감 직전"),
                 (S.get("sell_execution", "15:25"), "Phase 7", "매도 실행"),
             ]),
             ("\U0001f1f0\U0001f1f7 장마감 + 데이터 업데이트", [
-                (S.get("tick_snapshot", "15:32"), "Phase 8-0B", "전종목 체결 스냅샷 → parquet"),
-                (S.get("candle_archive", "15:35"), "Phase 8-0A", "전종목 5분/15분봉 → parquet (~26분)"),
-                (S.get("close_data_collect", "15:40"), "Phase 8-1", "종가 데이터 수집 (pykrx)"),
-                (S.get("csv_update", "16:00"), "Phase 8-2", "CSV 업데이트 (FDR)"),
+                (S.get("tick_snapshot", "15:32"), "Phase 8-0B", "전종목 체결 스냅샷"),
+                (S.get("candle_archive", "15:35"), "Phase 8-0A", "전종목 분봉 아카이브"),
+                (S.get("close_data_collect", "15:40"), "Phase 8-1", "종가 수집 + CSV 업데이트 (통합)"),
                 (S.get("parquet_update", "16:10"), "Phase 8-3", "parquet 증분"),
                 (S.get("indicator_calc", "16:20"), "Phase 8-4", "지표 재계산 (35개)"),
-                (S.get("data_verify", "16:30"), "Phase 8-5", "데이터 검증 (NaN)"),
-                (S.get("etf_signal", "16:35"), "Phase 8-6", "ETF 시그널 생성 (JSON 저장)"),
+                (S.get("data_verify", "16:30"), "Phase 8-5", "데이터 검증"),
+                (S.get("etf_signal", "16:35"), "Phase 8-6", "ETF 시그널 생성"),
+                (S.get("kospi_update", "16:40"), "Phase 8-7", "KOSPI 인덱스 업데이트"),
             ]),
             ("\U0001f319 수급 확정 + 스캔 + 리포트", [
-                (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정 (18:10 후)"),
-                (S.get("evening_scan", "18:40"), "Phase 10", "내일 매수 후보 스캔"),
-                (S.get("evening_briefing", "19:00"), "Phase 10B", "\U0001f4f1 2발: 장마감 리포트"),
-                (S.get("eod_journal", "19:30"), "Phase 11", "업무일지 + 아카이브"),
+                (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정"),
+                (S.get("relay_check", "18:30"), "Phase 9.5", "릴레이 포지션 체크"),
+                (S.get("evening_scan", "18:40"), "Phase 10", "scan_all() 매수 후보 스캔"),
+                (S.get("evening_briefing", "19:00"), "Phase 10B", "[TG] 통합 데일리 리포트"),
+                (S.get("eod_journal", "19:30"), "Phase 11", "업무일지"),
             ]),
         ]
 
@@ -1180,12 +1206,14 @@ if __name__ == "__main__":
             "8-0a": scheduler.phase_candle_archive,
             "8-0b": scheduler.phase_tick_snapshot,
             "8": scheduler.phase_close_data_collect,
-            "8-2": scheduler.phase_csv_update,
+            "8-1": scheduler.phase_close_data_collect,
             "8-3": scheduler.phase_parquet_update,
             "8-4": scheduler.phase_indicator_calc,
             "8-5": scheduler.phase_data_verify,
             "8-6": scheduler.phase_etf_signal,
+            "8-7": scheduler.phase_kospi_update,
             "9": scheduler.phase_supply_final,
+            "9.5": scheduler.phase_relay_check,
             "10": scheduler.phase_evening_scan,
             "10b": scheduler.phase_evening_briefing,
             "11": scheduler.phase_eod_journal,
