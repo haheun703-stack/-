@@ -129,6 +129,29 @@ def load_overnight_signal() -> dict:
     return {}
 
 
+def _grade_stock(item: dict, money_type: str) -> tuple[str, str]:
+    """종목 등급 판정. Returns (등급, 이모지)."""
+    bb = item.get("bb_pct", 50)
+    rsi = item.get("rsi", 50)
+    adx = item.get("adx", 0)
+    gx = item.get("stoch_golden_recent", False)
+
+    if money_type == "SMART":
+        if bb < 30 and rsi < 45:
+            return "S", "\U0001f525"
+        elif bb < 50 and rsi < 55:
+            return "A", "\u2b50"
+        else:
+            return "B", "\U0001f539"
+    else:  # THEME
+        if adx > 50:
+            return "S", "\U0001f525"
+        elif adx > 40 or gx:
+            return "A", "\u2b50"
+        else:
+            return "B", "\U0001f539"
+
+
 def load_scan_results() -> dict:
     """섹터 로테이션 스캔 결과 로드 (krx_sector_scan.json)."""
     if not SECTOR_SCAN_PATH.exists():
@@ -299,7 +322,7 @@ def build_briefing_message() -> str:
                 )
             lines.append("")
 
-    # ── 매수 후보 (섹터 로테이션 기반) ──
+    # ── 매수 후보 (섹터 로테이션 기반 + S/A/B 등급) ──
     smart = scan.get("smart_money", [])
     theme = scan.get("theme_money", [])
     if smart or theme:
@@ -310,6 +333,7 @@ def build_briefing_message() -> str:
         if smart:
             lines.append("\U0001f48e Smart Money (외인+기관)")
             for s in smart[:3]:
+                grade, emoji = _grade_stock(s, "SMART")
                 name = s.get("name", s.get("ticker", "?"))
                 ticker = str(s.get("ticker", "")).zfill(6)
                 bb = s.get("bb_pct", 0)
@@ -317,7 +341,7 @@ def build_briefing_message() -> str:
                 stop = s.get("stop_pct", -7)
                 sizing = s.get("sizing", "FULL")
                 sector = s.get("etf_sector", s.get("krx_sector", ""))
-                lines.append(f"  {name} ({ticker}) — {sector}")
+                lines.append(f"{emoji} {grade}급 {name} ({ticker}) — {sector}")
                 lines.append(
                     f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
                     f"손절 {stop}% | {sizing}"
@@ -327,13 +351,14 @@ def build_briefing_message() -> str:
         if theme:
             lines.append("\U0001f525 Theme Money (모멘텀)")
             for t in theme[:3]:
+                grade, emoji = _grade_stock(t, "THEME")
                 name = t.get("name", t.get("ticker", "?"))
                 ticker = str(t.get("ticker", "")).zfill(6)
                 bb = t.get("bb_pct", 0)
                 rsi = t.get("rsi", 0)
                 adx = t.get("adx", 0)
                 sector = t.get("etf_sector", t.get("krx_sector", ""))
-                lines.append(f"  {name} ({ticker}) — {sector}")
+                lines.append(f"{emoji} {grade}급 {name} ({ticker}) — {sector}")
                 lines.append(
                     f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
                 lines.append("")

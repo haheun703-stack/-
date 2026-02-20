@@ -465,6 +465,28 @@ class TelegramCommandBot:
     # 버튼 핸들러 — 분석 그룹
     # ══════════════════════════════════════════
 
+    @staticmethod
+    def _grade_stock(item: dict, money_type: str) -> tuple[str, str]:
+        """종목 등급 판정. Returns (등급, 이모지)."""
+        bb = item.get("bb_pct", 50)
+        rsi = item.get("rsi", 50)
+        adx = item.get("adx", 0)
+        gx = item.get("stoch_golden_recent", False)
+        if money_type == "SMART":
+            if bb < 30 and rsi < 45:
+                return "S", "\U0001f525"
+            elif bb < 50 and rsi < 55:
+                return "A", "\u2b50"
+            else:
+                return "B", "\U0001f539"
+        else:
+            if adx > 50:
+                return "S", "\U0001f525"
+            elif adx > 40 or gx:
+                return "A", "\u2b50"
+            else:
+                return "B", "\U0001f539"
+
     def _cmd_scan(self, args: list) -> None:
         """스캔 — 매수 후보 조회 (섹터 로테이션 스캔 기반)."""
         scan_path = PROJECT_ROOT / "data" / "sector_rotation" / "krx_sector_scan.json"
@@ -493,12 +515,13 @@ class TelegramCommandBot:
         lines.append("\u2500" * 24)
         if good_smart:
             for s in good_smart[:5]:
+                g, ge = self._grade_stock(s, "SMART")
                 name = s.get("name", "?")
                 ticker = s.get("ticker", "?")
                 sector = s.get("etf_sector", "?")
                 rsi = s.get("rsi", 0)
                 bb = s.get("bb_pct", 0)
-                lines.append(f"  \U0001f7e2 {name} ({ticker}) [{sector}]")
+                lines.append(f"  {ge} {g}급 {name} ({ticker}) [{sector}]")
                 lines.append(f"    RSI {rsi:.0f} | BB {bb:.0f}%")
                 lines.append("")
         else:
@@ -509,12 +532,13 @@ class TelegramCommandBot:
         lines.append("\u2500" * 24)
         if good_theme:
             for t in good_theme[:5]:
+                g, ge = self._grade_stock(t, "THEME")
                 name = t.get("name", "?")
                 ticker = t.get("ticker", "?")
                 adx = t.get("adx", 0)
                 rsi = t.get("rsi", 0)
                 gx = " \u2605GX" if t.get("stoch_golden_recent") else ""
-                lines.append(f"  \U0001f7e1 {name} ({ticker}){gx}")
+                lines.append(f"  {ge} {g}급 {name} ({ticker}){gx}")
                 lines.append(f"    ADX {adx:.0f} | RSI {rsi:.0f}")
                 lines.append("")
         else:

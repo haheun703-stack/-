@@ -788,7 +788,7 @@ class DailyScheduler:
             lines.append("  스냅샷 데이터 없음 (장중 수집 안됨)")
         lines.append("")
 
-        # ── 내일 매수 후보 (섹터 로테이션 기반) ──
+        # ── 내일 매수 후보 (섹터 로테이션 기반 + S/A/B 등급) ──
         lines.append("\U0001f525 내일 매수 후보")
         lines.append("\u2501" * 28)
         try:
@@ -802,6 +802,7 @@ class DailyScheduler:
                     if smart:
                         lines.append("\U0001f48e Smart Money (외인+기관)")
                         for s in smart[:3]:
+                            g, ge = self._grade_stock(s, "SMART")
                             name = s.get("name", str(s.get("ticker", "?")).zfill(6))
                             ticker = str(s.get("ticker", "")).zfill(6)
                             bb = s.get("bb_pct", 0)
@@ -809,7 +810,7 @@ class DailyScheduler:
                             stop = s.get("stop_pct", -7)
                             sizing = s.get("sizing", "FULL")
                             sector = s.get("etf_sector", "")
-                            lines.append(f"  {name} ({ticker}) — {sector}")
+                            lines.append(f"{ge} {g}급 {name} ({ticker}) — {sector}")
                             lines.append(
                                 f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
                                 f"손절 {stop}% | {sizing}"
@@ -818,13 +819,14 @@ class DailyScheduler:
                     if theme:
                         lines.append("\U0001f525 Theme Money (모멘텀)")
                         for t in theme[:3]:
+                            g, ge = self._grade_stock(t, "THEME")
                             name = t.get("name", str(t.get("ticker", "?")).zfill(6))
                             ticker = str(t.get("ticker", "")).zfill(6)
                             bb = t.get("bb_pct", 0)
                             rsi = t.get("rsi", 0)
                             adx = t.get("adx", 0)
                             sector = t.get("etf_sector", "")
-                            lines.append(f"  {name} ({ticker}) — {sector}")
+                            lines.append(f"{ge} {g}급 {name} ({ticker}) — {sector}")
                             lines.append(f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
                             lines.append("")
                 else:
@@ -886,6 +888,28 @@ class DailyScheduler:
     # ══════════════════════════════════════════
     # 헬퍼
     # ══════════════════════════════════════════
+
+    @staticmethod
+    def _grade_stock(item: dict, money_type: str) -> tuple[str, str]:
+        """종목 등급 판정. Returns (등급, 이모지)."""
+        bb = item.get("bb_pct", 50)
+        rsi = item.get("rsi", 50)
+        adx = item.get("adx", 0)
+        gx = item.get("stoch_golden_recent", False)
+        if money_type == "SMART":
+            if bb < 30 and rsi < 45:
+                return "S", "\U0001f525"
+            elif bb < 50 and rsi < 55:
+                return "A", "\u2b50"
+            else:
+                return "B", "\U0001f539"
+        else:
+            if adx > 50:
+                return "S", "\U0001f525"
+            elif adx > 40 or gx:
+                return "A", "\u2b50"
+            else:
+                return "B", "\U0001f539"
 
     def _notify(self, message: str) -> None:
         """텔레그램 상태 알림 (실패 무시)"""
