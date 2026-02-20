@@ -664,19 +664,21 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def phase_evening_briefing(self) -> None:
-        """장마감 리포트 텔레그램 발송 (결과 + 내일 후보 + 수급 히스토리)"""
-        logger.info("[Phase 10B] 📱 장마감 리포트 시작")
+        """장마감 통합 데일리 리포트 텔레그램 발송."""
+        logger.info("[Phase 10B] 통합 데일리 리포트 시작")
         try:
-            msg = self._build_evening_message()
-            from src.telegram_sender import send_message
-            ok = send_message(msg)
-            if ok:
-                logger.info("[Phase 10B] 📱 2발 장마감 리포트 전송 완료 (%d자)", len(msg))
-            else:
-                logger.error("[Phase 10B] 📱 2발 전송 실패")
+            from scripts.daily_integrated_report import run_report
+            run_report(send=True, run_scan=False, use_news=False)
+            logger.info("[Phase 10B] 통합 데일리 리포트 완료")
         except Exception as e:
-            logger.error("[Phase 10B] 장마감 리포트 실패: %s", e)
-            self._notify(f"Phase 10B 오류: {e}")
+            logger.error("[Phase 10B] 통합 리포트 실패, 폴백: %s", e)
+            try:
+                msg = self._build_evening_message()
+                from src.telegram_sender import send_message
+                send_message(msg)
+            except Exception as e2:
+                logger.error("[Phase 10B] 폴백도 실패: %s", e2)
+                self._notify(f"Phase 10B 오류: {e}")
 
     def _build_evening_message(self) -> str:
         """장마감 리포트 메시지 생성 (📱2발)"""
