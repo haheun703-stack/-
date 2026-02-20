@@ -35,9 +35,9 @@ except ImportError:
     sys.exit(1)
 
 
-RAW_DIR = Path("data/raw")
+RAW_DIR = Path("data/processed")
 BACKFILL_START = "20250331"  # 공매도 금지 해제일 (2023-11-06~2025-03-30)
-BACKFILL_END = "20260219"
+BACKFILL_END = "20260220"
 
 # 6개월 단위 청크 (KRX API 조회 범위 제한)
 CHUNK_MONTHS = 6
@@ -59,15 +59,15 @@ def date_chunks(start_str: str, end_str: str, months: int = 6):
 
 
 def check_needs_backfill(df: pd.DataFrame) -> bool:
-    """공매도 컬럼이 없거나 전부 0인지 확인"""
+    """공매도 컬럼이 없거나 핵심 컬럼이 전부 0인지 확인"""
     for col in SHORT_COLS:
         if col not in df.columns:
             return True
-    # 컬럼은 있지만 전부 0이면 재수집
-    nonzero = 0
-    for col in SHORT_COLS:
-        nonzero += (df[col] != 0).sum()
-    return nonzero == 0
+    # short_volume 또는 short_ratio가 전부 0이면 재수집
+    for key_col in ["short_volume", "short_ratio"]:
+        if key_col in df.columns and (df[key_col] != 0).sum() == 0:
+            return True
+    return False
 
 
 def fetch_short_status(ticker: str) -> pd.DataFrame:
@@ -92,10 +92,15 @@ def fetch_short_status(ticker: str) -> pd.DataFrame:
     merged.index.name = "date"
 
     result = pd.DataFrame(index=merged.index)
-    if "공매도거래량" in merged.columns:
-        result["short_volume"] = merged["공매도거래량"]
-    if "비중" in merged.columns:
-        result["short_ratio"] = merged["비중"]
+    # pykrx 컬럼명: '거래량' (공매도 거래량), '잔고수량'
+    for col_name in ["공매도거래량", "거래량"]:
+        if col_name in merged.columns:
+            result["short_volume"] = merged[col_name]
+            break
+    for col_name in ["비중", "공매도비중"]:
+        if col_name in merged.columns:
+            result["short_ratio"] = merged[col_name]
+            break
     return result
 
 
@@ -123,6 +128,9 @@ def fetch_short_balance(ticker: str) -> pd.DataFrame:
     result = pd.DataFrame(index=merged.index)
     if "공매도잔고" in merged.columns:
         result["short_balance"] = merged["공매도잔고"]
+    # 비중(%) — get_shorting_balance_by_date에서만 제공
+    if "비중" in merged.columns:
+        result["short_ratio"] = merged["비중"]
     for col_name in ["대차잔고", "잔고"]:
         if col_name in merged.columns:
             result["lending_balance"] = merged[col_name]
@@ -169,10 +177,10 @@ def backfill_ticker(ticker: str, parquet_path: Path) -> dict:
                         df.loc[date, col] = new_val
                         updated += 1
 
-    # 잔고현황 병합
+    # 잔고현황 병합 (short_ratio는 balance API에서만 제공)
     if not balance_df.empty:
         common_dates = df.index.intersection(balance_df.index)
-        for col in ["short_balance", "lending_balance"]:
+        for col in ["short_balance", "lending_balance", "short_ratio"]:
             if col in balance_df.columns:
                 for date in common_dates:
                     new_val = balance_df.loc[date, col]
