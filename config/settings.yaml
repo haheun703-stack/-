@@ -563,10 +563,16 @@ live_trading:
 
   # 포지션 제한
   position:
-    max_positions: 4
+    max_positions: 5                # 서보성 원칙: 보유 종목 5개 이하 집중
     max_single_pct: 0.40            # 단일 종목 최대 40%
     max_portfolio_risk_pct: 0.06
     initial_capital: 30000000       # 3천만원 (사용자 설정)
+    cash_reserve_pct: 0.20          # 서보성 원칙: 현금 비중 20% 항상 유보
+    # 분할매수 비율 (서보성 원칙: 1회 올인 금지)
+    split_buy:
+      entry_1st: 0.50              # 1차 진입: 배정 비중의 50%
+      entry_2nd: 0.30              # 2차 추가 (눌림목 확인 후): 30%
+      entry_3rd: 0.20              # 3차 확인 (추세 확정 후): 20%
 
   # 안전장치
   safety:
