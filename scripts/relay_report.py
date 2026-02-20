@@ -29,6 +29,8 @@ DAILY_DIR = PROJECT_ROOT / "stock_data_daily"
 from relay_stock_picker import pick_relay_stocks, load_stock_latest
 from relay_sizer import calc_full_sizing, grade_fire_intensity
 from relay_exit import check_exit_conditions, get_profit_target
+from relay_positions import (load_positions, check_all_positions,
+                             get_current_price, print_check_results)
 
 # relay_backtest.py의 SUPER_SECTORS 정의 재사용
 SUPER_SECTORS = {
@@ -319,6 +321,31 @@ def print_relay_report(report: dict):
             print(f"    타임아웃: {sig['timeout_days']}일 무반응 시 손절")
             print(f"    릴레이완료: {sig['follow_sector']} 섹터 +3.5% 발화 시")
             print(f"    손절: -5% 이하")
+
+    # 보유 포지션 현황
+    positions = load_positions()
+    if positions:
+        print(f"\n{'─' * 60}")
+        print(f"  보유 포지션 ({len(positions)}건)")
+        total_invest = 0
+        total_pnl = 0
+        for pos in positions:
+            cur = get_current_price(pos["ticker"])
+            if cur <= 0:
+                continue
+            pnl = (cur - pos["entry_price"]) / pos["entry_price"] * 100
+            pnl_amt = int((cur - pos["entry_price"]) * pos["quantity"])
+            total_invest += pos["investment"]
+            total_pnl += pnl_amt
+            icon = "+" if pnl > 0 else ""
+            print(f"    {pos['name']}({pos['ticker']}) "
+                  f"{pos['entry_price']:,}→{cur:,} "
+                  f"{icon}{pnl:.1f}% "
+                  f"{pos.get('trading_days_held',0)}일 "
+                  f"| {pos['fired_sector']}→{pos['sector']}")
+        if total_invest > 0:
+            print(f"    합계: {total_invest:,}원 투입 → "
+                  f"{total_pnl:+,}원 ({total_pnl/total_invest*100:+.1f}%)")
 
     print(f"\n{'=' * 60}")
 
