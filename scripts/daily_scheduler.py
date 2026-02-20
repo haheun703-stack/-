@@ -259,18 +259,26 @@ class DailyScheduler:
         self._notify(f"Phase 4 완료: 매수 후보 {len(self._buy_signals)}종목")
 
     def _load_signals(self) -> None:
-        """저장된 시그널 결과 로드"""
-        import pandas as pd
-        signals_path = Path("results/signals_log.csv")
-        if not signals_path.exists():
+        """섹터 로테이션 스캔 결과에서 매수 후보 로드"""
+        import json
+        scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+        if not scan_path.exists():
             self._buy_signals = []
             return
-        df = pd.read_csv(signals_path)
-        if "signal" in df.columns:
-            df = df[df["signal"] == True]
-        if "date" in df.columns:
-            df = df[df["date"] == df["date"].max()]
-        self._buy_signals = df.to_dict("records")
+        try:
+            with open(scan_path, encoding="utf-8") as f:
+                data = json.load(f)
+            # Smart Money + Theme Money 합산
+            signals = []
+            for item in data.get("smart_money", []):
+                if item.get("entry_ok"):
+                    signals.append(item)
+            for item in data.get("theme_money", []):
+                if item.get("entry_ok"):
+                    signals.append(item)
+            self._buy_signals = signals
+        except Exception:
+            self._buy_signals = []
 
     # ══════════════════════════════════════════
     # Phase 5: 매수 실행 (09:02)
@@ -392,15 +400,17 @@ class DailyScheduler:
         except Exception:
             pass
 
-        # 2. 전일 스캔 후보 (watchlist)
+        # 2. 전일 스캔 후보 (watchlist) — 섹터 로테이션 스캔
         try:
-            import pandas as pd
-            sig_path = Path("results/signals_log.csv")
-            if sig_path.exists():
-                df = pd.read_csv(sig_path)
-                if "ticker" in df.columns:
-                    for t in df["ticker"].unique():
-                        tickers.add(str(t).zfill(6))
+            import json as _json
+            scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+            if scan_path.exists():
+                with open(scan_path, encoding="utf-8") as f:
+                    scan_data = _json.load(f)
+                for item in scan_data.get("smart_money", []):
+                    tickers.add(str(item["ticker"]).zfill(6))
+                for item in scan_data.get("theme_money", []):
+                    tickers.add(str(item["ticker"]).zfill(6))
         except Exception:
             pass
 
@@ -638,14 +648,14 @@ class DailyScheduler:
         except Exception as e:
             logger.error("[Phase 10] 스캔 실패: %s", e)
 
-        # 추천 기록 아카이브
+        # 추천 기록 아카이브 (섹터 로테이션 스캔)
         import shutil
-        signals_path = Path("results/signals_log.csv")
-        if signals_path.exists():
+        scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+        if scan_path.exists():
             today = datetime.now().strftime("%Y%m%d")
             archive_dir = Path("results/archive")
             archive_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(signals_path, archive_dir / f"signals_{today}.csv")
+            shutil.copy2(scan_path, archive_dir / f"sector_scan_{today}.json")
 
         self._notify("Phase 10 완료: 내일 후보 스캔")
 
@@ -778,50 +788,47 @@ class DailyScheduler:
             lines.append("  스냅샷 데이터 없음 (장중 수집 안됨)")
         lines.append("")
 
-        # ── 내일 매수 후보 ──
+        # ── 내일 매수 후보 (섹터 로테이션 기반) ──
         lines.append("\U0001f525 내일 매수 후보")
         lines.append("\u2501" * 28)
         try:
-            import pandas as pd
-            sig_path = Path("results/signals_log.csv")
-            if sig_path.exists():
-                df = pd.read_csv(sig_path)
-                if "date" in df.columns:
-                    df = df[df["date"] == df["date"].max()]
-                if "zone_score" in df.columns:
-                    df = df.sort_values("zone_score", ascending=False)
-                if len(df) > 0:
-                    grade_map = {
-                        0: ("\U0001f525", "S"),
-                        1: ("\u2b50", "A"),
-                        2: ("\U0001f539", "B"),
-                        3: ("\u26d4", "C"),
-                    }
-                    for rank, (_, row) in enumerate(df.head(5).iterrows()):
-                        emoji, g = grade_map.get(rank, ("\u2796", "D"))
-                        ticker = str(row.get("ticker", "?")).zfill(6)
-                        # 종목명 조회
-                        name = ticker
-                        stock_dir = Path("stock_data_daily")
-                        if stock_dir.exists():
-                            for csv in stock_dir.glob(f"*_{ticker}.csv"):
-                                name = csv.stem.rsplit("_", 1)[0]
-                                break
-                        entry = row.get("entry_price", 0)
-                        rr = row.get("rr_ratio", 0)
-                        zone = row.get("zone_score", 0)
-                        trigger = row.get("trigger_type", "")
-                        lines.append(
-                            f"{emoji} {g}등급 {name} ({ticker})"
-                        )
-                        lines.append(
-                            f"  진입 {entry:,.0f}원 | "
-                            f"R:R {rr:.1f}배 | Zone {zone:.2f}"
-                        )
-                        lines.append(f"  트리거: {trigger}")
-                        lines.append("")
+            scan_path = Path("data/sector_rotation/krx_sector_scan.json")
+            if scan_path.exists():
+                with open(scan_path, encoding="utf-8") as f:
+                    scan_data = json.load(f)
+                smart = scan_data.get("smart_money", [])
+                theme = scan_data.get("theme_money", [])
+                if smart or theme:
+                    if smart:
+                        lines.append("\U0001f48e Smart Money (외인+기관)")
+                        for s in smart[:3]:
+                            name = s.get("name", str(s.get("ticker", "?")).zfill(6))
+                            ticker = str(s.get("ticker", "")).zfill(6)
+                            bb = s.get("bb_pct", 0)
+                            rsi = s.get("rsi", 0)
+                            stop = s.get("stop_pct", -7)
+                            sizing = s.get("sizing", "FULL")
+                            sector = s.get("etf_sector", "")
+                            lines.append(f"  {name} ({ticker}) — {sector}")
+                            lines.append(
+                                f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
+                                f"손절 {stop}% | {sizing}"
+                            )
+                            lines.append("")
+                    if theme:
+                        lines.append("\U0001f525 Theme Money (모멘텀)")
+                        for t in theme[:3]:
+                            name = t.get("name", str(t.get("ticker", "?")).zfill(6))
+                            ticker = str(t.get("ticker", "")).zfill(6)
+                            bb = t.get("bb_pct", 0)
+                            rsi = t.get("rsi", 0)
+                            adx = t.get("adx", 0)
+                            sector = t.get("etf_sector", "")
+                            lines.append(f"  {name} ({ticker}) — {sector}")
+                            lines.append(f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
+                            lines.append("")
                 else:
-                    lines.append("  Kill 필터 통과 종목 없음")
+                    lines.append("  스캔 통과 종목 없음")
                     lines.append("")
             else:
                 lines.append("  스캔 결과 없음")

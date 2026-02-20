@@ -3,7 +3,7 @@
 
 데이터 소스:
   - data/us_market/overnight_signal.json (US overnight signal → Phase 1에서 생성)
-  - results/signals_log.csv (전일 스캔 결과 → Phase 10에서 생성)
+  - data/sector_rotation/krx_sector_scan.json (섹터 로테이션 스캔 결과)
   - stock_data_daily/*.csv (종목명 매핑)
 
 수동 실행: python scripts/send_market_briefing.py [--send]
@@ -20,12 +20,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from datetime import datetime
 
-import pandas as pd
-
 logger = logging.getLogger(__name__)
 
 SIGNAL_PATH = PROJECT_ROOT / "data" / "us_market" / "overnight_signal.json"
-SIGNALS_LOG = PROJECT_ROOT / "results" / "signals_log.csv"
+SECTOR_SCAN_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "krx_sector_scan.json"
 STOCK_DATA_DIR = PROJECT_ROOT / "stock_data_daily"
 
 
@@ -131,34 +129,19 @@ def load_overnight_signal() -> dict:
     return {}
 
 
-def load_scan_results() -> list[dict]:
-    """최신 스캔 결과 로드 (signals_log.csv)."""
-    if not SIGNALS_LOG.exists():
-        return []
-    df = pd.read_csv(SIGNALS_LOG)
-    if df.empty:
-        return []
-    if "date" in df.columns:
-        df = df[df["date"] == df["date"].max()]
-    # zone_score 내림차순 정렬
-    if "zone_score" in df.columns:
-        df = df.sort_values("zone_score", ascending=False)
-    results = []
-    for _, row in df.iterrows():
-        ticker = str(row.get("ticker", "")).zfill(6)
-        entry = row.get("entry_price", 0)
-        rr = row.get("rr_ratio", 0)
-        results.append({
-            "ticker": ticker,
-            "name": _get_stock_name(ticker),
-            "zone_score": row.get("zone_score", 0),
-            "grade": row.get("grade", "?"),
-            "trigger_type": row.get("trigger_type", ""),
-            "entry_price": entry,
-            "rr_ratio": rr,
-            "regime": row.get("regime", ""),
-        })
-    return results
+def load_scan_results() -> dict:
+    """섹터 로테이션 스캔 결과 로드 (krx_sector_scan.json)."""
+    if not SECTOR_SCAN_PATH.exists():
+        return {"smart_money": [], "theme_money": []}
+    try:
+        with open(SECTOR_SCAN_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        return {
+            "smart_money": data.get("smart_money", []),
+            "theme_money": data.get("theme_money", []),
+        }
+    except Exception:
+        return {"smart_money": [], "theme_money": []}
 
 
 # ─────────────────────────────────────────────
@@ -199,7 +182,7 @@ def build_briefing_message() -> str:
     bar = make_prob_bar(prob["down_prob"])
 
     # 스캔 결과
-    candidates = load_scan_results()
+    scan = load_scan_results()
 
     lines = []
 
@@ -316,30 +299,44 @@ def build_briefing_message() -> str:
                 )
             lines.append("")
 
-    # ── 매수 후보 (S/A/B/C) ──
-    if candidates:
+    # ── 매수 후보 (섹터 로테이션 기반) ──
+    smart = scan.get("smart_money", [])
+    theme = scan.get("theme_money", [])
+    if smart or theme:
         lines.append("\u2501" * 28)
-        lines.append("\U0001f525 매수 후보")
+        lines.append("\U0001f525 매수 후보 (섹터 로테이션)")
         lines.append("\u2501" * 28)
 
-        grade_labels = {0: ("S", "\U0001f525"), 1: ("A", "\u2b50"), 2: ("B", "\U0001f539"), 3: ("C", "\u26d4")}
+        if smart:
+            lines.append("\U0001f48e Smart Money (외인+기관)")
+            for s in smart[:3]:
+                name = s.get("name", s.get("ticker", "?"))
+                ticker = str(s.get("ticker", "")).zfill(6)
+                bb = s.get("bb_pct", 0)
+                rsi = s.get("rsi", 0)
+                stop = s.get("stop_pct", -7)
+                sizing = s.get("sizing", "FULL")
+                sector = s.get("etf_sector", s.get("krx_sector", ""))
+                lines.append(f"  {name} ({ticker}) — {sector}")
+                lines.append(
+                    f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
+                    f"손절 {stop}% | {sizing}"
+                )
+                lines.append("")
 
-        for i, c in enumerate(candidates[:5]):
-            g_label, g_emoji = grade_labels.get(i, ("D", "\u2796"))
-            name = c["name"]
-            ticker = c["ticker"]
-            entry = c["entry_price"]
-            rr = c["rr_ratio"]
-            zone = c["zone_score"]
-            trigger = c["trigger_type"]
-
-            lines.append(f"{g_emoji} {g_label}등급 — {name} ({ticker})")
-            lines.append(
-                f"  \U0001f4b0 진입: {entry:,.0f}원 | "
-                f"R:R {rr:.1f}배 | Zone {zone:.2f}"
-            )
-            lines.append(f"  \u26a1 트리거: {trigger} | 등급 {c['grade']}")
-            lines.append("")
+        if theme:
+            lines.append("\U0001f525 Theme Money (모멘텀)")
+            for t in theme[:3]:
+                name = t.get("name", t.get("ticker", "?"))
+                ticker = str(t.get("ticker", "")).zfill(6)
+                bb = t.get("bb_pct", 0)
+                rsi = t.get("rsi", 0)
+                adx = t.get("adx", 0)
+                sector = t.get("etf_sector", t.get("krx_sector", ""))
+                lines.append(f"  {name} ({ticker}) — {sector}")
+                lines.append(
+                    f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
+                lines.append("")
     else:
         lines.append("")
         lines.append("\U0001f525 매수 후보: 스캔 결과 없음")

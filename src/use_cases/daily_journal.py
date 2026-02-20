@@ -11,7 +11,7 @@
 의존성:
   - data/positions.json (보유 포지션)
   - data/trades_history.json (거래 이력)
-  - results/signals_log.csv (매수 후보)
+  - data/sector_rotation/krx_sector_scan.json (매수 후보)
   - logs/scheduler.log (스케줄러 로그)
 """
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 REPORTS_DIR = Path("reports/daily")
 TEMPLATES_DIR = Path("templates")
 TRADES_FILE = Path("data/trades_history.json")
-SIGNALS_FILE = Path("results/signals_log.csv")
+SECTOR_SCAN_FILE = Path("data/sector_rotation/krx_sector_scan.json")
 SCHEDULER_LOG = Path("logs/scheduler.log")
 
 
@@ -229,28 +229,36 @@ class DailyJournalWriter:
         return results
 
     def _load_signals(self, journal: JournalData) -> None:
-        """내일 매수 후보 시그널 로드"""
-        if not SIGNALS_FILE.exists():
+        """내일 매수 후보 시그널 로드 (섹터 로테이션 스캔)"""
+        if not SECTOR_SCAN_FILE.exists():
             return
 
         try:
-            df = pd.read_csv(SIGNALS_FILE)
-            if "signal" in df.columns:
-                df = df[df["signal"] == True]
-            if "date" in df.columns and not df.empty:
-                latest = df["date"].max()
-                df = df[df["date"] == latest]
+            import json
+            with open(SECTOR_SCAN_FILE, encoding="utf-8") as f:
+                data = json.load(f)
 
-            for _, row in df.iterrows():
+            for item in data.get("smart_money", [])[:5]:
                 journal.signals.append({
-                    "ticker": row.get("ticker", ""),
-                    "name": row.get("name", row.get("ticker", "")),
-                    "grade": row.get("grade", "?"),
-                    "zone_score": row.get("zone_score", 0),
-                    "trigger": row.get("trigger_type", ""),
-                    "entry_price": row.get("entry_price", 0),
-                    "stop_loss": row.get("stop_loss", 0),
-                    "rr_ratio": row.get("risk_reward_ratio", 0),
+                    "ticker": str(item.get("ticker", "")).zfill(6),
+                    "name": item.get("name", ""),
+                    "grade": "SMART",
+                    "zone_score": 0,
+                    "trigger": f"BB{item.get('bb_pct', 0):.0f}% RSI{item.get('rsi', 0):.0f}",
+                    "entry_price": 0,
+                    "stop_loss": item.get("stop_pct", -7),
+                    "rr_ratio": 0,
+                })
+            for item in data.get("theme_money", [])[:5]:
+                journal.signals.append({
+                    "ticker": str(item.get("ticker", "")).zfill(6),
+                    "name": item.get("name", ""),
+                    "grade": "THEME",
+                    "zone_score": 0,
+                    "trigger": f"ADX{item.get('adx', 0):.0f} RSI{item.get('rsi', 0):.0f}",
+                    "entry_price": 0,
+                    "stop_loss": item.get("stop_pct", -7),
+                    "rr_ratio": 0,
                 })
         except Exception as e:
             logger.error("[업무일지] 시그널 로드 실패: %s", e)
