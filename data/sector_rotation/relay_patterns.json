@@ -1,0 +1,3922 @@
+{
+  "generated_at": "2026-02-20 18:57",
+  "fire_threshold": 3.5,
+  "breadth_threshold": 0.6,
+  "backtest_days": 504,
+  "super_sectors": {
+    "금융": {
+      "증권→생명보험": {
+        "lead": "증권",
+        "follow": "생명보험",
+        "fire_dates": 17,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 70.6,
+          "avg_return": 2.39,
+          "med_return": 1.82,
+          "std_return": 4.32,
+          "samples": 17,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-19",
+              "target_date": "2026-02-20",
+              "lead_ret": 14.0,
+              "follow_ret": 17.44
+            },
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-05",
+              "lead_ret": 5.99,
+              "follow_ret": 5.95
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 7.26,
+              "follow_ret": 5.14
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-11",
+              "lead_ret": 5.28,
+              "follow_ret": -1.11
+            },
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-05-30",
+              "lead_ret": 7.81,
+              "follow_ret": -1.62
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-01-30",
+              "lead_ret": 7.39,
+              "follow_ret": -1.65
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 56.2,
+          "avg_return": 1.45,
+          "med_return": 0.56,
+          "std_return": 4.49,
+          "samples": 16,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-13",
+              "target_date": "2026-02-20",
+              "lead_ret": 8.57,
+              "follow_ret": 17.44
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-12",
+              "lead_ret": 5.28,
+              "follow_ret": 4.44
+            },
+            {
+              "fire_date": "2025-07-08",
+              "target_date": "2025-07-10",
+              "lead_ret": 6.14,
+              "follow_ret": 2.25
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-02",
+              "lead_ret": 7.81,
+              "follow_ret": -1.12
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-02",
+              "lead_ret": 7.39,
+              "follow_ret": -2.46
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 7.26,
+              "follow_ret": -2.68
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 46.7,
+          "avg_return": 0.66,
+          "med_return": -0.1,
+          "std_return": 2.54,
+          "samples": 15,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-04",
+              "lead_ret": 7.81,
+              "follow_ret": 6.88
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-03",
+              "lead_ret": 7.39,
+              "follow_ret": 3.48
+            },
+            {
+              "fire_date": "2025-07-09",
+              "target_date": "2025-07-14",
+              "lead_ret": 6.73,
+              "follow_ret": 2.61
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-10",
+              "lead_ret": 5.99,
+              "follow_ret": -1.51
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 4.05,
+              "follow_ret": -2.42
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 7.26,
+              "follow_ret": -3.4
+            }
+          ]
+        }
+      },
+      "증권→손해보험": {
+        "lead": "증권",
+        "follow": "손해보험",
+        "fire_dates": 17,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 76.5,
+          "avg_return": 2.34,
+          "med_return": 1.7,
+          "std_return": 3.13,
+          "samples": 17,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-19",
+              "target_date": "2026-02-20",
+              "lead_ret": 14.0,
+              "follow_ret": 13.07
+            },
+            {
+              "fire_date": "2025-07-09",
+              "target_date": "2025-07-10",
+              "lead_ret": 6.73,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-10",
+              "lead_ret": 4.15,
+              "follow_ret": 3.83
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-01-30",
+              "lead_ret": 7.39,
+              "follow_ret": -0.31
+            },
+            {
+              "fire_date": "2025-10-20",
+              "target_date": "2025-10-21",
+              "lead_ret": 5.87,
+              "follow_ret": -0.54
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-11",
+              "lead_ret": 5.28,
+              "follow_ret": -1.25
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 56.2,
+          "avg_return": 1.22,
+          "med_return": 0.3,
+          "std_return": 3.44,
+          "samples": 16,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-13",
+              "target_date": "2026-02-20",
+              "lead_ret": 8.57,
+              "follow_ret": 13.07
+            },
+            {
+              "fire_date": "2025-07-08",
+              "target_date": "2025-07-10",
+              "lead_ret": 6.14,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-12",
+              "lead_ret": 5.28,
+              "follow_ret": 2.46
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-24",
+              "target_date": "2025-06-26",
+              "lead_ret": 3.87,
+              "follow_ret": -1.11
+            },
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-02",
+              "lead_ret": 7.81,
+              "follow_ret": -1.23
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-02",
+              "lead_ret": 7.39,
+              "follow_ret": -2.35
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 53.3,
+          "avg_return": 1.11,
+          "med_return": 1.69,
+          "std_return": 2.0,
+          "samples": 15,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-04",
+              "lead_ret": 7.81,
+              "follow_ret": 4.44
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 3.86,
+              "follow_ret": 3.86
+            },
+            {
+              "fire_date": "2025-07-09",
+              "target_date": "2025-07-14",
+              "lead_ret": 6.73,
+              "follow_ret": 3.12
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-10",
+              "lead_ret": 5.99,
+              "follow_ret": -1.15
+            },
+            {
+              "fire_date": "2025-06-24",
+              "target_date": "2025-06-27",
+              "lead_ret": 3.87,
+              "follow_ret": -1.21
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 4.05,
+              "follow_ret": -2.33
+            }
+          ]
+        }
+      },
+      "증권→은행": {
+        "lead": "증권",
+        "follow": "은행",
+        "fire_dates": 17,
+        "best_lag": 2,
+        "lag1": {
+          "win_rate": 58.8,
+          "avg_return": 1.21,
+          "med_return": 0.71,
+          "std_return": 1.89,
+          "samples": 17,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2025-07-09",
+              "target_date": "2025-07-10",
+              "lead_ret": 6.73,
+              "follow_ret": 3.98
+            },
+            {
+              "fire_date": "2025-09-09",
+              "target_date": "2025-09-10",
+              "lead_ret": 4.27,
+              "follow_ret": 3.83
+            },
+            {
+              "fire_date": "2026-02-19",
+              "target_date": "2026-02-20",
+              "lead_ret": 14.0,
+              "follow_ret": 3.69
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-01-23",
+              "target_date": "2026-01-26",
+              "lead_ret": 5.37,
+              "follow_ret": -1.1
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-01-30",
+              "lead_ret": 7.39,
+              "follow_ret": -1.1
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-11",
+              "lead_ret": 5.28,
+              "follow_ret": -1.25
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 68.8,
+          "avg_return": 1.45,
+          "med_return": 1.13,
+          "std_return": 2.67,
+          "samples": 16,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-23",
+              "target_date": "2026-01-27",
+              "lead_ret": 5.37,
+              "follow_ret": 6.1
+            },
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-09",
+              "lead_ret": 5.99,
+              "follow_ret": 4.82
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-11",
+              "lead_ret": 4.15,
+              "follow_ret": 4.41
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-02",
+              "lead_ret": 7.81,
+              "follow_ret": -2.27
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-05",
+              "lead_ret": 4.05,
+              "follow_ret": -2.32
+            },
+            {
+              "fire_date": "2025-06-24",
+              "target_date": "2025-06-26",
+              "lead_ret": 3.87,
+              "follow_ret": -3.02
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 66.7,
+          "avg_return": 1.0,
+          "med_return": 0.92,
+          "std_return": 1.84,
+          "samples": 15,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-05-29",
+              "target_date": "2025-06-04",
+              "lead_ret": 7.81,
+              "follow_ret": 4.59
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-03",
+              "lead_ret": 7.39,
+              "follow_ret": 3.87
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-12",
+              "lead_ret": 4.15,
+              "follow_ret": 3.51
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-10-20",
+              "target_date": "2025-10-23",
+              "lead_ret": 5.87,
+              "follow_ret": -1.06
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 4.05,
+              "follow_ret": -1.31
+            },
+            {
+              "fire_date": "2026-01-23",
+              "target_date": "2026-01-28",
+              "lead_ret": 5.37,
+              "follow_ret": -1.73
+            }
+          ]
+        }
+      },
+      "생명보험→손해보험": {
+        "lead": "생명보험",
+        "follow": "손해보험",
+        "fire_dates": 21,
+        "best_lag": 3,
+        "lag1": {
+          "win_rate": 70.0,
+          "avg_return": 1.02,
+          "med_return": 1.18,
+          "std_return": 1.69,
+          "samples": 20,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-07-09",
+              "target_date": "2025-07-10",
+              "lead_ret": 3.67,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2025-07-07",
+              "target_date": "2025-07-08",
+              "lead_ret": 5.75,
+              "follow_ret": 3.19
+            },
+            {
+              "fire_date": "2024-04-22",
+              "target_date": "2024-04-23",
+              "lead_ret": 5.09,
+              "follow_ret": 2.84
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-05-26",
+              "target_date": "2025-05-27",
+              "lead_ret": 3.64,
+              "follow_ret": -1.11
+            },
+            {
+              "fire_date": "2024-11-18",
+              "target_date": "2024-11-19",
+              "lead_ret": 4.3,
+              "follow_ret": -1.34
+            },
+            {
+              "fire_date": "2024-06-28",
+              "target_date": "2024-07-01",
+              "lead_ret": 3.8,
+              "follow_ret": -2.2
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 55.0,
+          "avg_return": 1.07,
+          "med_return": 0.62,
+          "std_return": 2.7,
+          "samples": 20,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-01-30",
+              "target_date": "2024-02-01",
+              "lead_ret": 6.62,
+              "follow_ret": 10.19
+            },
+            {
+              "fire_date": "2025-07-08",
+              "target_date": "2025-07-10",
+              "lead_ret": 3.53,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2024-06-18",
+              "target_date": "2024-06-20",
+              "lead_ret": 7.2,
+              "follow_ret": 3.5
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-05",
+              "target_date": "2025-06-10",
+              "lead_ret": 5.95,
+              "follow_ret": -1.15
+            },
+            {
+              "fire_date": "2024-07-10",
+              "target_date": "2024-07-12",
+              "lead_ret": 3.78,
+              "follow_ret": -1.64
+            },
+            {
+              "fire_date": "2025-11-12",
+              "target_date": "2025-11-14",
+              "lead_ret": 4.44,
+              "follow_ret": -2.86
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 75.0,
+          "avg_return": 1.52,
+          "med_return": 0.76,
+          "std_return": 2.69,
+          "samples": 20,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-01-29",
+              "target_date": "2024-02-01",
+              "lead_ret": 5.51,
+              "follow_ret": 10.19
+            },
+            {
+              "fire_date": "2025-07-07",
+              "target_date": "2025-07-10",
+              "lead_ret": 5.75,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 3.64,
+              "follow_ret": 3.86
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-10",
+              "lead_ret": 6.88,
+              "follow_ret": -1.15
+            },
+            {
+              "fire_date": "2025-11-12",
+              "target_date": "2025-11-17",
+              "lead_ret": 4.44,
+              "follow_ret": -1.76
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 7.29,
+              "follow_ret": -2.33
+            }
+          ]
+        }
+      },
+      "은행→생명보험": {
+        "lead": "은행",
+        "follow": "생명보험",
+        "fire_dates": 21,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 55.0,
+          "avg_return": 1.37,
+          "med_return": 0.38,
+          "std_return": 2.7,
+          "samples": 20,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-01-31",
+              "target_date": "2024-02-01",
+              "lead_ret": 4.76,
+              "follow_ret": 7.29
+            },
+            {
+              "fire_date": "2025-06-04",
+              "target_date": "2025-06-05",
+              "lead_ret": 4.59,
+              "follow_ret": 5.95
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.87,
+              "follow_ret": 5.14
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-09",
+              "target_date": "2025-06-10",
+              "lead_ret": 4.82,
+              "follow_ret": -1.51
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-04",
+              "lead_ret": 3.77,
+              "follow_ret": -2.64
+            },
+            {
+              "fire_date": "2024-02-19",
+              "target_date": "2024-02-20",
+              "lead_ret": 4.64,
+              "follow_ret": -2.85
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 70.0,
+          "avg_return": 0.51,
+          "med_return": 1.05,
+          "std_return": 2.05,
+          "samples": 20,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-06-09",
+              "target_date": "2025-06-11",
+              "lead_ret": 4.82,
+              "follow_ret": 3.14
+            },
+            {
+              "fire_date": "2025-07-10",
+              "target_date": "2025-07-14",
+              "lead_ret": 3.98,
+              "follow_ret": 2.61
+            },
+            {
+              "fire_date": "2024-01-31",
+              "target_date": "2024-02-02",
+              "lead_ret": 4.76,
+              "follow_ret": 2.59
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.87,
+              "follow_ret": -2.68
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-05",
+              "lead_ret": 3.77,
+              "follow_ret": -3.4
+            },
+            {
+              "fire_date": "2025-11-12",
+              "target_date": "2025-11-14",
+              "lead_ret": 3.74,
+              "follow_ret": -4.24
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 45.0,
+          "avg_return": 0.55,
+          "med_return": -0.07,
+          "std_return": 4.23,
+          "samples": 20,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-12",
+              "target_date": "2026-02-20",
+              "lead_ret": 3.51,
+              "follow_ret": 17.44
+            },
+            {
+              "fire_date": "2024-04-22",
+              "target_date": "2024-04-25",
+              "lead_ret": 4.96,
+              "follow_ret": 2.27
+            },
+            {
+              "fire_date": "2024-01-31",
+              "target_date": "2024-02-05",
+              "lead_ret": 4.76,
+              "follow_ret": 1.98
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 5.47,
+              "follow_ret": -2.42
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.87,
+              "follow_ret": -3.4
+            },
+            {
+              "fire_date": "2024-03-13",
+              "target_date": "2024-03-18",
+              "lead_ret": 4.53,
+              "follow_ret": -3.5
+            }
+          ]
+        }
+      },
+      "은행→손해보험": {
+        "lead": "은행",
+        "follow": "손해보험",
+        "fire_dates": 21,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 65.0,
+          "avg_return": 1.33,
+          "med_return": 1.25,
+          "std_return": 2.79,
+          "samples": 20,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-01-31",
+              "target_date": "2024-02-01",
+              "lead_ret": 4.76,
+              "follow_ret": 10.19
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.87,
+              "follow_ret": 3.61
+            },
+            {
+              "fire_date": "2024-03-13",
+              "target_date": "2024-03-14",
+              "lead_ret": 4.53,
+              "follow_ret": 3.29
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-09",
+              "target_date": "2025-06-10",
+              "lead_ret": 4.82,
+              "follow_ret": -1.15
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-04",
+              "lead_ret": 3.77,
+              "follow_ret": -2.76
+            },
+            {
+              "fire_date": "2024-02-19",
+              "target_date": "2024-02-20",
+              "lead_ret": 4.64,
+              "follow_ret": -3.45
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 50.0,
+          "avg_return": 0.37,
+          "med_return": 0.11,
+          "std_return": 1.99,
+          "samples": 20,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-07-08",
+              "target_date": "2025-07-10",
+              "lead_ret": 6.41,
+              "follow_ret": 4.35
+            },
+            {
+              "fire_date": "2026-01-27",
+              "target_date": "2026-01-29",
+              "lead_ret": 6.1,
+              "follow_ret": 3.36
+            },
+            {
+              "fire_date": "2025-07-10",
+              "target_date": "2025-07-14",
+              "lead_ret": 3.98,
+              "follow_ret": 3.12
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-03-13",
+              "target_date": "2024-03-15",
+              "lead_ret": 4.53,
+              "follow_ret": -2.03
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-05",
+              "lead_ret": 3.77,
+              "follow_ret": -2.57
+            },
+            {
+              "fire_date": "2025-11-12",
+              "target_date": "2025-11-14",
+              "lead_ret": 3.74,
+              "follow_ret": -2.86
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 35.0,
+          "avg_return": 0.42,
+          "med_return": -0.63,
+          "std_return": 3.33,
+          "samples": 20,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-12",
+              "target_date": "2026-02-20",
+              "lead_ret": 3.51,
+              "follow_ret": 13.07
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 4.78,
+              "follow_ret": 3.86
+            },
+            {
+              "fire_date": "2025-06-09",
+              "target_date": "2025-06-12",
+              "lead_ret": 4.82,
+              "follow_ret": 2.88
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-10-02",
+              "lead_ret": 3.52,
+              "follow_ret": -2.18
+            },
+            {
+              "fire_date": "2024-02-01",
+              "target_date": "2024-02-06",
+              "lead_ret": 5.47,
+              "follow_ret": -2.33
+            },
+            {
+              "fire_date": "2025-07-10",
+              "target_date": "2025-07-15",
+              "lead_ret": 3.98,
+              "follow_ret": -2.41
+            }
+          ]
+        }
+      }
+    },
+    "IT/반도체": {
+      "반도체와반도체장비→디스플레이장비및부품": {
+        "lead": "반도체와반도체장비",
+        "follow": "디스플레이장비및부품",
+        "fire_dates": 17,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 64.7,
+          "avg_return": 0.81,
+          "med_return": 0.82,
+          "std_return": 1.21,
+          "samples": 17,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.2,
+              "follow_ret": 4.06
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 5.77,
+              "follow_ret": 2.27
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.24,
+              "follow_ret": 1.98
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-10-02",
+              "target_date": "2025-10-10",
+              "lead_ret": 3.65,
+              "follow_ret": -0.29
+            },
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-09-27",
+              "lead_ret": 4.85,
+              "follow_ret": -0.58
+            },
+            {
+              "fire_date": "2026-02-19",
+              "target_date": "2026-02-20",
+              "lead_ret": 4.27,
+              "follow_ret": -0.79
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 62.5,
+          "avg_return": 0.34,
+          "med_return": 0.52,
+          "std_return": 0.88,
+          "samples": 16,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 6.85,
+              "follow_ret": 1.72
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 5.2,
+              "follow_ret": 1.59
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.37,
+              "follow_ret": 1.49
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-09-12",
+              "target_date": "2024-09-19",
+              "lead_ret": 4.99,
+              "follow_ret": -0.83
+            },
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-09-30",
+              "lead_ret": 4.85,
+              "follow_ret": -0.96
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 5.77,
+              "follow_ret": -0.96
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 56.2,
+          "avg_return": 0.18,
+          "med_return": 0.39,
+          "std_return": 1.01,
+          "samples": 16,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.24,
+              "follow_ret": 1.91
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.2,
+              "follow_ret": 1.49
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 6.85,
+              "follow_ret": 1.04
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-10-02",
+              "lead_ret": 4.85,
+              "follow_ret": -1.16
+            },
+            {
+              "fire_date": "2025-10-02",
+              "target_date": "2025-10-14",
+              "lead_ret": 3.65,
+              "follow_ret": -1.3
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-02-02",
+              "lead_ret": 4.84,
+              "follow_ret": -1.55
+            }
+          ]
+        }
+      },
+      "반도체와반도체장비→전자장비와기기": {
+        "lead": "반도체와반도체장비",
+        "follow": "전자장비와기기",
+        "fire_dates": 17,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 70.6,
+          "avg_return": 0.84,
+          "med_return": 0.83,
+          "std_return": 0.99,
+          "samples": 17,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.2,
+              "follow_ret": 3.67
+            },
+            {
+              "fire_date": "2025-01-03",
+              "target_date": "2025-01-06",
+              "lead_ret": 3.73,
+              "follow_ret": 2.34
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.24,
+              "follow_ret": 1.49
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-19",
+              "target_date": "2026-02-20",
+              "lead_ret": 4.27,
+              "follow_ret": -0.13
+            },
+            {
+              "fire_date": "2025-07-28",
+              "target_date": "2025-07-29",
+              "lead_ret": 3.61,
+              "follow_ret": -0.25
+            },
+            {
+              "fire_date": "2025-01-06",
+              "target_date": "2025-01-07",
+              "lead_ret": 3.66,
+              "follow_ret": -0.27
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 50.0,
+          "avg_return": 0.17,
+          "med_return": 0.0,
+          "std_return": 1.15,
+          "samples": 16,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 6.85,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2026-01-26",
+              "target_date": "2026-01-28",
+              "lead_ret": 3.93,
+              "follow_ret": 1.8
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.37,
+              "follow_ret": 1.7
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 5.24,
+              "follow_ret": -0.53
+            },
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-09-30",
+              "lead_ret": 4.85,
+              "follow_ret": -1.54
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 5.77,
+              "follow_ret": -2.32
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 68.8,
+          "avg_return": 0.19,
+          "med_return": 0.25,
+          "std_return": 1.23,
+          "samples": 16,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.24,
+              "follow_ret": 2.52
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.2,
+              "follow_ret": 1.7
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 4.37,
+              "follow_ret": 1.21
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-10-02",
+              "target_date": "2025-10-14",
+              "lead_ret": 3.65,
+              "follow_ret": -1.19
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 5.77,
+              "follow_ret": -1.52
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-02-02",
+              "lead_ret": 4.84,
+              "follow_ret": -2.37
+            }
+          ]
+        }
+      },
+      "반도체와반도체장비→IT서비스": {
+        "lead": "반도체와반도체장비",
+        "follow": "IT서비스",
+        "fire_dates": 17,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 88.2,
+          "avg_return": 0.88,
+          "med_return": 0.92,
+          "std_return": 0.98,
+          "samples": 17,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.2,
+              "follow_ret": 3.98
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.24,
+              "follow_ret": 1.63
+            },
+            {
+              "fire_date": "2025-01-03",
+              "target_date": "2025-01-06",
+              "lead_ret": 3.73,
+              "follow_ret": 1.49
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-05",
+              "lead_ret": 4.43,
+              "follow_ret": 0.03
+            },
+            {
+              "fire_date": "2025-07-28",
+              "target_date": "2025-07-29",
+              "lead_ret": 3.61,
+              "follow_ret": -0.04
+            },
+            {
+              "fire_date": "2025-10-02",
+              "target_date": "2025-10-10",
+              "lead_ret": 3.65,
+              "follow_ret": -0.29
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 50.0,
+          "avg_return": 0.04,
+          "med_return": -0.07,
+          "std_return": 1.3,
+          "samples": 16,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 6.85,
+              "follow_ret": 3.48
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.37,
+              "follow_ret": 1.84
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 5.2,
+              "follow_ret": 0.96
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-10-02",
+              "target_date": "2025-10-13",
+              "lead_ret": 3.65,
+              "follow_ret": -1.22
+            },
+            {
+              "fire_date": "2024-09-26",
+              "target_date": "2024-09-30",
+              "lead_ret": 4.85,
+              "follow_ret": -1.47
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 5.77,
+              "follow_ret": -2.1
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 62.5,
+          "avg_return": 0.2,
+          "med_return": 0.54,
+          "std_return": 1.33,
+          "samples": 16,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-12",
+              "lead_ret": 5.33,
+              "follow_ret": 2.16
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.2,
+              "follow_ret": 1.84
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.24,
+              "follow_ret": 1.69
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-07",
+              "lead_ret": 4.43,
+              "follow_ret": -1.36
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-02-02",
+              "lead_ret": 4.84,
+              "follow_ret": -2.12
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 5.77,
+              "follow_ret": -2.31
+            }
+          ]
+        }
+      },
+      "디스플레이장비및부품→전자장비와기기": {
+        "lead": "디스플레이장비및부품",
+        "follow": "전자장비와기기",
+        "fire_dates": 4,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 100.0,
+          "avg_return": 1.64,
+          "med_return": 1.22,
+          "std_return": 1.23,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.29,
+              "follow_ret": 3.67
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.07,
+              "follow_ret": 1.49
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 3.69,
+              "follow_ret": 0.96
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.07,
+              "follow_ret": 1.49
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 3.69,
+              "follow_ret": 0.96
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.06,
+              "follow_ret": 0.43
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 75.0,
+          "avg_return": 0.93,
+          "med_return": 1.06,
+          "std_return": 1.05,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 3.69,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.06,
+              "follow_ret": 1.7
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 5.29,
+              "follow_ret": 0.43
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.06,
+              "follow_ret": 1.7
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 5.29,
+              "follow_ret": 0.43
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 5.07,
+              "follow_ret": -0.53
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 100.0,
+          "avg_return": 1.58,
+          "med_return": 1.45,
+          "std_return": 0.61,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.07,
+              "follow_ret": 2.52
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.29,
+              "follow_ret": 1.7
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 4.06,
+              "follow_ret": 1.21
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.29,
+              "follow_ret": 1.7
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 4.06,
+              "follow_ret": 1.21
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 3.69,
+              "follow_ret": 0.91
+            }
+          ]
+        }
+      }
+    },
+    "2차전지/에너지": {
+      "전기제품→화학": {
+        "lead": "전기제품",
+        "follow": "화학",
+        "fire_dates": 14,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 85.7,
+          "avg_return": 0.63,
+          "med_return": 0.46,
+          "std_return": 0.81,
+          "samples": 14,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.29,
+              "follow_ret": 3.01
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.25,
+              "follow_ret": 1.21
+            },
+            {
+              "fire_date": "2026-01-19",
+              "target_date": "2026-01-20",
+              "lead_ret": 4.07,
+              "follow_ret": 1.11
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-23",
+              "target_date": "2025-04-24",
+              "lead_ret": 3.83,
+              "follow_ret": 0.0
+            },
+            {
+              "fire_date": "2024-08-20",
+              "target_date": "2024-08-21",
+              "lead_ret": 3.8,
+              "follow_ret": -0.15
+            },
+            {
+              "fire_date": "2024-10-07",
+              "target_date": "2024-10-08",
+              "lead_ret": 3.94,
+              "follow_ret": -0.51
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 64.3,
+          "avg_return": 0.49,
+          "med_return": 0.54,
+          "std_return": 0.88,
+          "samples": 14,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-22",
+              "target_date": "2026-01-26",
+              "lead_ret": 5.7,
+              "follow_ret": 1.96
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-12",
+              "lead_ret": 3.57,
+              "follow_ret": 1.83
+            },
+            {
+              "fire_date": "2025-04-23",
+              "target_date": "2025-04-25",
+              "lead_ret": 3.83,
+              "follow_ret": 1.23
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-20",
+              "target_date": "2024-08-22",
+              "lead_ret": 3.8,
+              "follow_ret": -0.5
+            },
+            {
+              "fire_date": "2026-01-19",
+              "target_date": "2026-01-21",
+              "lead_ret": 4.07,
+              "follow_ret": -0.78
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-01-30",
+              "lead_ret": 3.87,
+              "follow_ret": -0.82
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 57.1,
+          "avg_return": 0.36,
+          "med_return": 0.42,
+          "std_return": 1.22,
+          "samples": 14,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-19",
+              "target_date": "2026-01-22",
+              "lead_ret": 4.07,
+              "follow_ret": 2.56
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.52,
+              "follow_ret": 1.99
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-12",
+              "lead_ret": 3.5,
+              "follow_ret": 1.8
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-23",
+              "target_date": "2025-04-28",
+              "lead_ret": 3.83,
+              "follow_ret": -0.58
+            },
+            {
+              "fire_date": "2024-10-07",
+              "target_date": "2024-10-11",
+              "lead_ret": 3.94,
+              "follow_ret": -0.91
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-02-02",
+              "lead_ret": 3.87,
+              "follow_ret": -2.25
+            }
+          ]
+        }
+      },
+      "전기제품→에너지장비및서비스": {
+        "lead": "전기제품",
+        "follow": "에너지장비및서비스",
+        "fire_dates": 14,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 57.1,
+          "avg_return": 1.07,
+          "med_return": 1.03,
+          "std_return": 1.93,
+          "samples": 14,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-19",
+              "target_date": "2026-01-20",
+              "lead_ret": 4.07,
+              "follow_ret": 5.0
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.52,
+              "follow_ret": 3.5
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.29,
+              "follow_ret": 3.21
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-12",
+              "target_date": "2024-08-13",
+              "lead_ret": 3.68,
+              "follow_ret": -1.26
+            },
+            {
+              "fire_date": "2024-08-20",
+              "target_date": "2024-08-21",
+              "lead_ret": 3.8,
+              "follow_ret": -1.28
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-10",
+              "lead_ret": 3.5,
+              "follow_ret": -1.51
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 57.1,
+          "avg_return": 0.15,
+          "med_return": 0.67,
+          "std_return": 1.7,
+          "samples": 14,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-12",
+              "target_date": "2024-08-14",
+              "lead_ret": 3.68,
+              "follow_ret": 3.5
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-11",
+              "lead_ret": 3.5,
+              "follow_ret": 1.53
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.25,
+              "follow_ret": 1.52
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-10-07",
+              "target_date": "2024-10-10",
+              "lead_ret": 3.94,
+              "follow_ret": -1.86
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-01-30",
+              "lead_ret": 3.87,
+              "follow_ret": -2.42
+            },
+            {
+              "fire_date": "2026-01-19",
+              "target_date": "2026-01-21",
+              "lead_ret": 4.07,
+              "follow_ret": -2.74
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 57.1,
+          "avg_return": 0.4,
+          "med_return": 0.06,
+          "std_return": 1.61,
+          "samples": 14,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.52,
+              "follow_ret": 3.34
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 4.25,
+              "follow_ret": 2.74
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 5.29,
+              "follow_ret": 1.52
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-23",
+              "target_date": "2025-04-28",
+              "lead_ret": 3.83,
+              "follow_ret": -0.41
+            },
+            {
+              "fire_date": "2024-10-07",
+              "target_date": "2024-10-11",
+              "lead_ret": 3.94,
+              "follow_ret": -0.6
+            },
+            {
+              "fire_date": "2026-01-28",
+              "target_date": "2026-02-02",
+              "lead_ret": 3.87,
+              "follow_ret": -3.7
+            }
+          ]
+        }
+      },
+      "화학→에너지장비및서비스": {
+        "lead": "화학",
+        "follow": "에너지장비및서비스",
+        "fire_dates": 3,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 100.0,
+          "avg_return": 2.83,
+          "med_return": 3.21,
+          "std_return": 0.75,
+          "samples": 3,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.25,
+              "follow_ret": 3.5
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.86,
+              "follow_ret": 3.21
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 5.25,
+              "follow_ret": 1.79
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.25,
+              "follow_ret": 3.5
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.86,
+              "follow_ret": 3.21
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 5.25,
+              "follow_ret": 1.79
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 66.7,
+          "avg_return": 0.49,
+          "med_return": 0.73,
+          "std_return": 0.58,
+          "samples": 3,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.86,
+              "follow_ret": 1.04
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 5.25,
+              "follow_ret": 0.73
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.25,
+              "follow_ret": -0.31
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.86,
+              "follow_ret": 1.04
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 5.25,
+              "follow_ret": 0.73
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.25,
+              "follow_ret": -0.31
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 100.0,
+          "avg_return": 2.11,
+          "med_return": 1.52,
+          "std_return": 0.87,
+          "samples": 3,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.25,
+              "follow_ret": 3.34
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.86,
+              "follow_ret": 1.52
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 5.25,
+              "follow_ret": 1.48
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.25,
+              "follow_ret": 3.34
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.86,
+              "follow_ret": 1.52
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 5.25,
+              "follow_ret": 1.48
+            }
+          ]
+        }
+      },
+      "석유와가스→화학": {
+        "lead": "석유와가스",
+        "follow": "화학",
+        "fire_dates": 10,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 77.8,
+          "avg_return": 0.58,
+          "med_return": 0.34,
+          "std_return": 1.26,
+          "samples": 9,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 6.53,
+              "follow_ret": 3.01
+            },
+            {
+              "fire_date": "2025-06-23",
+              "target_date": "2025-06-24",
+              "lead_ret": 4.64,
+              "follow_ret": 1.84
+            },
+            {
+              "fire_date": "2024-10-04",
+              "target_date": "2024-10-07",
+              "lead_ret": 3.83,
+              "follow_ret": 1.5
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-04",
+              "lead_ret": 8.54,
+              "follow_ret": 0.02
+            },
+            {
+              "fire_date": "2024-04-02",
+              "target_date": "2024-04-03",
+              "lead_ret": 4.0,
+              "follow_ret": -0.8
+            },
+            {
+              "fire_date": "2026-02-04",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.65,
+              "follow_ret": -1.26
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 66.7,
+          "avg_return": 0.26,
+          "med_return": 0.27,
+          "std_return": 0.83,
+          "samples": 9,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-12",
+              "lead_ret": 4.38,
+              "follow_ret": 1.83
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 6.53,
+              "follow_ret": 1.21
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 3.88,
+              "follow_ret": 0.55
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-10-04",
+              "target_date": "2024-10-08",
+              "lead_ret": 3.83,
+              "follow_ret": -0.51
+            },
+            {
+              "fire_date": "2025-06-13",
+              "target_date": "2025-06-17",
+              "lead_ret": 6.42,
+              "follow_ret": -0.51
+            },
+            {
+              "fire_date": "2026-02-04",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.65,
+              "follow_ret": -1.0
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 55.6,
+          "avg_return": 0.43,
+          "med_return": 0.33,
+          "std_return": 0.75,
+          "samples": 9,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-04",
+              "target_date": "2026-02-09",
+              "lead_ret": 3.65,
+              "follow_ret": 2.28
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-13",
+              "lead_ret": 4.38,
+              "follow_ret": 0.87
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-07",
+              "lead_ret": 8.54,
+              "follow_ret": 0.54
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-23",
+              "target_date": "2025-06-26",
+              "lead_ret": 4.64,
+              "follow_ret": -0.15
+            },
+            {
+              "fire_date": "2024-10-04",
+              "target_date": "2024-10-10",
+              "lead_ret": 3.83,
+              "follow_ret": -0.19
+            },
+            {
+              "fire_date": "2024-04-02",
+              "target_date": "2024-04-05",
+              "lead_ret": 4.0,
+              "follow_ret": -0.26
+            }
+          ]
+        }
+      }
+    },
+    "방산/조선": {
+      "우주항공과국방→조선": {
+        "lead": "우주항공과국방",
+        "follow": "조선",
+        "fire_dates": 22,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 66.7,
+          "avg_return": 1.55,
+          "med_return": 1.36,
+          "std_return": 2.9,
+          "samples": 21,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-11-06",
+              "target_date": "2024-11-07",
+              "lead_ret": 3.68,
+              "follow_ret": 7.91
+            },
+            {
+              "fire_date": "2026-01-08",
+              "target_date": "2026-01-09",
+              "lead_ret": 3.96,
+              "follow_ret": 5.6
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 6.22,
+              "follow_ret": 5.21
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-11",
+              "lead_ret": 4.01,
+              "follow_ret": -2.55
+            },
+            {
+              "fire_date": "2026-01-20",
+              "target_date": "2026-01-21",
+              "lead_ret": 4.88,
+              "follow_ret": -2.61
+            },
+            {
+              "fire_date": "2025-01-02",
+              "target_date": "2025-01-03",
+              "lead_ret": 4.76,
+              "follow_ret": -2.66
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 57.1,
+          "avg_return": -0.1,
+          "med_return": 0.51,
+          "std_return": 1.75,
+          "samples": 21,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 6.22,
+              "follow_ret": 2.2
+            },
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-06",
+              "lead_ret": 5.22,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2024-12-23",
+              "target_date": "2024-12-26",
+              "lead_ret": 4.3,
+              "follow_ret": 1.8
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-02-12",
+              "target_date": "2025-02-14",
+              "lead_ret": 4.41,
+              "follow_ret": -2.81
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 6.48,
+              "follow_ret": -3.32
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-02",
+              "lead_ret": 5.36,
+              "follow_ret": -3.58
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 47.6,
+          "avg_return": 0.24,
+          "med_return": -0.04,
+          "std_return": 1.72,
+          "samples": 21,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-01-02",
+              "target_date": "2025-01-07",
+              "lead_ret": 4.76,
+              "follow_ret": 3.63
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-03",
+              "lead_ret": 5.36,
+              "follow_ret": 3.31
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 3.87,
+              "follow_ret": 2.08
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 6.48,
+              "follow_ret": -2.04
+            },
+            {
+              "fire_date": "2025-12-22",
+              "target_date": "2025-12-26",
+              "lead_ret": 6.42,
+              "follow_ret": -2.21
+            },
+            {
+              "fire_date": "2025-02-11",
+              "target_date": "2025-02-14",
+              "lead_ret": 3.96,
+              "follow_ret": -2.81
+            }
+          ]
+        }
+      },
+      "우주항공과국방→기계": {
+        "lead": "우주항공과국방",
+        "follow": "기계",
+        "fire_dates": 22,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 71.4,
+          "avg_return": 0.96,
+          "med_return": 0.62,
+          "std_return": 1.44,
+          "samples": 21,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-03-04",
+              "target_date": "2025-03-05",
+              "lead_ret": 4.53,
+              "follow_ret": 3.62
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.38,
+              "follow_ret": 3.31
+            },
+            {
+              "fire_date": "2026-01-20",
+              "target_date": "2026-01-21",
+              "lead_ret": 4.88,
+              "follow_ret": 2.93
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-12-22",
+              "target_date": "2025-12-23",
+              "lead_ret": 6.42,
+              "follow_ret": -0.51
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-01-30",
+              "lead_ret": 5.36,
+              "follow_ret": -1.0
+            },
+            {
+              "fire_date": "2025-02-11",
+              "target_date": "2025-02-12",
+              "lead_ret": 3.96,
+              "follow_ret": -1.44
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 52.4,
+          "avg_return": -0.01,
+          "med_return": 0.02,
+          "std_return": 1.38,
+          "samples": 21,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-08",
+              "target_date": "2026-01-12",
+              "lead_ret": 3.96,
+              "follow_ret": 2.46
+            },
+            {
+              "fire_date": "2025-02-11",
+              "target_date": "2025-02-13",
+              "lead_ret": 3.96,
+              "follow_ret": 2.18
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 6.22,
+              "follow_ret": 1.52
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 6.48,
+              "follow_ret": -1.43
+            },
+            {
+              "fire_date": "2025-12-12",
+              "target_date": "2025-12-16",
+              "lead_ret": 4.76,
+              "follow_ret": -2.88
+            },
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-02",
+              "lead_ret": 5.36,
+              "follow_ret": -2.97
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 61.9,
+          "avg_return": 0.28,
+          "med_return": 0.11,
+          "std_return": 1.61,
+          "samples": 21,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-29",
+              "target_date": "2026-02-03",
+              "lead_ret": 5.36,
+              "follow_ret": 5.17
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 3.87,
+              "follow_ret": 2.5
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 6.22,
+              "follow_ret": 2.36
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-11-06",
+              "target_date": "2024-11-11",
+              "lead_ret": 3.68,
+              "follow_ret": -1.19
+            },
+            {
+              "fire_date": "2024-12-23",
+              "target_date": "2024-12-27",
+              "lead_ret": 4.3,
+              "follow_ret": -1.82
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 6.48,
+              "follow_ret": -1.93
+            }
+          ]
+        }
+      },
+      "조선→기계": {
+        "lead": "조선",
+        "follow": "기계",
+        "fire_dates": 29,
+        "best_lag": 2,
+        "lag1": {
+          "win_rate": 60.7,
+          "avg_return": 0.5,
+          "med_return": 0.13,
+          "std_return": 1.26,
+          "samples": 28,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 5.53,
+              "follow_ret": 3.31
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 5.32,
+              "follow_ret": 2.51
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 6.13,
+              "follow_ret": 2.47
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-08",
+              "target_date": "2025-04-09",
+              "lead_ret": 3.97,
+              "follow_ret": -0.81
+            },
+            {
+              "fire_date": "2024-04-18",
+              "target_date": "2024-04-19",
+              "lead_ret": 5.03,
+              "follow_ret": -1.54
+            },
+            {
+              "fire_date": "2025-05-21",
+              "target_date": "2025-05-22",
+              "lead_ret": 4.16,
+              "follow_ret": -1.9
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 74.1,
+          "avg_return": 0.78,
+          "med_return": 0.72,
+          "std_return": 1.24,
+          "samples": 27,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-08",
+              "target_date": "2025-04-10",
+              "lead_ret": 3.97,
+              "follow_ret": 5.04
+            },
+            {
+              "fire_date": "2025-04-11",
+              "target_date": "2025-04-15",
+              "lead_ret": 5.21,
+              "follow_ret": 2.36
+            },
+            {
+              "fire_date": "2025-08-29",
+              "target_date": "2025-09-02",
+              "lead_ret": 5.46,
+              "follow_ret": 2.26
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 5.32,
+              "follow_ret": -0.51
+            },
+            {
+              "fire_date": "2024-11-07",
+              "target_date": "2024-11-11",
+              "lead_ret": 7.91,
+              "follow_ret": -1.19
+            },
+            {
+              "fire_date": "2024-07-26",
+              "target_date": "2024-07-30",
+              "lead_ret": 4.98,
+              "follow_ret": -1.41
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 55.6,
+          "avg_return": 0.47,
+          "med_return": 0.64,
+          "std_return": 1.27,
+          "samples": 27,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2025-09-30",
+              "target_date": "2025-10-10",
+              "lead_ret": 3.68,
+              "follow_ret": 3.24
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 5.32,
+              "follow_ret": 2.5
+            },
+            {
+              "fire_date": "2025-04-08",
+              "target_date": "2025-04-11",
+              "lead_ret": 3.97,
+              "follow_ret": 2.47
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-11-07",
+              "target_date": "2024-11-12",
+              "lead_ret": 7.91,
+              "follow_ret": -1.42
+            },
+            {
+              "fire_date": "2025-10-27",
+              "target_date": "2025-10-30",
+              "lead_ret": 4.44,
+              "follow_ret": -1.61
+            },
+            {
+              "fire_date": "2025-04-11",
+              "target_date": "2025-04-16",
+              "lead_ret": 5.21,
+              "follow_ret": -1.71
+            }
+          ]
+        }
+      }
+    },
+    "건설/소재": {
+      "건설→건축자재": {
+        "lead": "건설",
+        "follow": "건축자재",
+        "fire_dates": 4,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 75.0,
+          "avg_return": 1.27,
+          "med_return": 1.53,
+          "std_return": 1.45,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 6.76,
+              "follow_ret": 2.92
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.66,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 3.56,
+              "follow_ret": 0.95
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.66,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 3.56,
+              "follow_ret": 0.95
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-08",
+              "lead_ret": 5.32,
+              "follow_ret": -0.92
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 75.0,
+          "avg_return": 0.41,
+          "med_return": 0.51,
+          "std_return": 0.73,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 3.56,
+              "follow_ret": 1.24
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 6.76,
+              "follow_ret": 0.95
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-09",
+              "lead_ret": 5.32,
+              "follow_ret": 0.07
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 6.76,
+              "follow_ret": 0.95
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-09",
+              "lead_ret": 5.32,
+              "follow_ret": 0.07
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.66,
+              "follow_ret": -0.61
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 100.0,
+          "avg_return": 0.61,
+          "med_return": 0.56,
+          "std_return": 0.52,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 6.76,
+              "follow_ret": 1.24
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 3.56,
+              "follow_ret": 1.01
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-10",
+              "lead_ret": 5.32,
+              "follow_ret": 0.11
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 3.56,
+              "follow_ret": 1.01
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-10",
+              "lead_ret": 5.32,
+              "follow_ret": 0.11
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.66,
+              "follow_ret": 0.07
+            }
+          ]
+        }
+      },
+      "건설→철강": {
+        "lead": "건설",
+        "follow": "철강",
+        "fire_dates": 4,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 100.0,
+          "avg_return": 1.17,
+          "med_return": 1.3,
+          "std_return": 0.63,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 6.76,
+              "follow_ret": 1.89
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.66,
+              "follow_ret": 1.48
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 3.56,
+              "follow_ret": 1.11
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.66,
+              "follow_ret": 1.48
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-12",
+              "lead_ret": 3.56,
+              "follow_ret": 1.11
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-08",
+              "lead_ret": 5.32,
+              "follow_ret": 0.19
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 50.0,
+          "avg_return": 0.18,
+          "med_return": 0.15,
+          "std_return": 0.7,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 6.76,
+              "follow_ret": 1.11
+            },
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 3.56,
+              "follow_ret": 0.56
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-09",
+              "lead_ret": 5.32,
+              "follow_ret": -0.27
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-13",
+              "lead_ret": 3.56,
+              "follow_ret": 0.56
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-09",
+              "lead_ret": 5.32,
+              "follow_ret": -0.27
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.66,
+              "follow_ret": -0.67
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 75.0,
+          "avg_return": 0.35,
+          "med_return": 0.47,
+          "std_return": 0.36,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-11",
+              "target_date": "2024-12-16",
+              "lead_ret": 3.56,
+              "follow_ret": 0.71
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 6.76,
+              "follow_ret": 0.56
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-10",
+              "lead_ret": 5.32,
+              "follow_ret": 0.37
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 6.76,
+              "follow_ret": 0.56
+            },
+            {
+              "fire_date": "2025-12-05",
+              "target_date": "2025-12-10",
+              "lead_ret": 5.32,
+              "follow_ret": 0.37
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.66,
+              "follow_ret": -0.23
+            }
+          ]
+        }
+      },
+      "철강→비철금속": {
+        "lead": "철강",
+        "follow": "비철금속",
+        "fire_dates": 4,
+        "best_lag": 3,
+        "lag1": {
+          "win_rate": 50.0,
+          "avg_return": 0.88,
+          "med_return": 0.83,
+          "std_return": 1.82,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.68,
+              "follow_ret": 3.1
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 3.62,
+              "follow_ret": 2.22
+            },
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-06",
+              "lead_ret": 4.46,
+              "follow_ret": -0.56
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 3.62,
+              "follow_ret": 2.22
+            },
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-06",
+              "lead_ret": 4.46,
+              "follow_ret": -0.56
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-04",
+              "lead_ret": 4.12,
+              "follow_ret": -1.24
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 25.0,
+          "avg_return": -0.07,
+          "med_return": -0.36,
+          "std_return": 0.8,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.68,
+              "follow_ret": 1.27
+            },
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-07",
+              "lead_ret": 4.46,
+              "follow_ret": -0.24
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-05",
+              "lead_ret": 4.12,
+              "follow_ret": -0.48
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-07",
+              "lead_ret": 4.46,
+              "follow_ret": -0.24
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-05",
+              "lead_ret": 4.12,
+              "follow_ret": -0.48
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 3.62,
+              "follow_ret": -0.84
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 100.0,
+          "avg_return": 0.69,
+          "med_return": 0.29,
+          "std_return": 0.77,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 3.62,
+              "follow_ret": 2.03
+            },
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-10",
+              "lead_ret": 4.46,
+              "follow_ret": 0.31
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-07",
+              "lead_ret": 4.12,
+              "follow_ret": 0.28
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-03-05",
+              "target_date": "2025-03-10",
+              "lead_ret": 4.46,
+              "follow_ret": 0.31
+            },
+            {
+              "fire_date": "2024-06-03",
+              "target_date": "2024-06-07",
+              "lead_ret": 4.12,
+              "follow_ret": 0.28
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.68,
+              "follow_ret": 0.15
+            }
+          ]
+        }
+      }
+    },
+    "소비/유통": {
+      "백화점과일반상점→식품": {
+        "lead": "백화점과일반상점",
+        "follow": "식품",
+        "fire_dates": 4,
+        "best_lag": 2,
+        "lag1": {
+          "win_rate": 50.0,
+          "avg_return": 0.19,
+          "med_return": -0.01,
+          "std_return": 1.6,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.59,
+              "follow_ret": 2.62
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-11",
+              "lead_ret": 5.01,
+              "follow_ret": 0.31
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-15",
+              "lead_ret": 3.9,
+              "follow_ret": -0.33
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-11",
+              "lead_ret": 5.01,
+              "follow_ret": 0.31
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-15",
+              "lead_ret": 3.9,
+              "follow_ret": -0.33
+            },
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-07",
+              "lead_ret": 4.46,
+              "follow_ret": -1.83
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 50.0,
+          "avg_return": 0.7,
+          "med_return": 0.43,
+          "std_return": 1.05,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-08",
+              "lead_ret": 4.46,
+              "follow_ret": 2.32
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-12",
+              "lead_ret": 5.01,
+              "follow_ret": 0.91
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-16",
+              "lead_ret": 3.9,
+              "follow_ret": -0.05
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-12",
+              "lead_ret": 5.01,
+              "follow_ret": 0.91
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-16",
+              "lead_ret": 3.9,
+              "follow_ret": -0.05
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.59,
+              "follow_ret": -0.4
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 0.0,
+          "avg_return": -1.04,
+          "med_return": -0.79,
+          "std_return": 0.76,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-19",
+              "lead_ret": 3.9,
+              "follow_ret": -0.34
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-13",
+              "lead_ret": 5.01,
+              "follow_ret": -0.43
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.59,
+              "follow_ret": -1.15
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-13",
+              "lead_ret": 5.01,
+              "follow_ret": -0.43
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.59,
+              "follow_ret": -1.15
+            },
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-09",
+              "lead_ret": 4.46,
+              "follow_ret": -2.25
+            }
+          ]
+        }
+      },
+      "백화점과일반상점→화장품": {
+        "lead": "백화점과일반상점",
+        "follow": "화장품",
+        "fire_dates": 4,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 50.0,
+          "avg_return": -0.99,
+          "med_return": -0.09,
+          "std_return": 1.89,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-04",
+              "lead_ret": 3.59,
+              "follow_ret": 0.44
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-11",
+              "lead_ret": 5.01,
+              "follow_ret": 0.07
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-15",
+              "lead_ret": 3.9,
+              "follow_ret": -0.24
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-11",
+              "lead_ret": 5.01,
+              "follow_ret": 0.07
+            },
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-15",
+              "lead_ret": 3.9,
+              "follow_ret": -0.24
+            },
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-07",
+              "lead_ret": 4.46,
+              "follow_ret": -4.25
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 25.0,
+          "avg_return": -0.16,
+          "med_return": -0.26,
+          "std_return": 0.23,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-16",
+              "lead_ret": 3.9,
+              "follow_ret": 0.23
+            },
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-08",
+              "lead_ret": 4.46,
+              "follow_ret": -0.21
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-12",
+              "lead_ret": 5.01,
+              "follow_ret": -0.3
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-08",
+              "lead_ret": 4.46,
+              "follow_ret": -0.21
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-12",
+              "lead_ret": 5.01,
+              "follow_ret": -0.3
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-05",
+              "lead_ret": 3.59,
+              "follow_ret": -0.36
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 0.0,
+          "avg_return": -1.71,
+          "med_return": -1.74,
+          "std_return": 0.57,
+          "samples": 4,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2026-01-14",
+              "target_date": "2026-01-19",
+              "lead_ret": 3.9,
+              "follow_ret": -0.95
+            },
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.59,
+              "follow_ret": -1.42
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-13",
+              "lead_ret": 5.01,
+              "follow_ret": -2.06
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2026-02-03",
+              "target_date": "2026-02-06",
+              "lead_ret": 3.59,
+              "follow_ret": -1.42
+            },
+            {
+              "fire_date": "2026-02-10",
+              "target_date": "2026-02-13",
+              "lead_ret": 5.01,
+              "follow_ret": -2.06
+            },
+            {
+              "fire_date": "2025-04-04",
+              "target_date": "2025-04-09",
+              "lead_ret": 4.46,
+              "follow_ret": -2.41
+            }
+          ]
+        }
+      },
+      "화장품→식품": {
+        "lead": "화장품",
+        "follow": "식품",
+        "fire_dates": 12,
+        "best_lag": 3,
+        "lag1": {
+          "win_rate": 66.7,
+          "avg_return": 0.5,
+          "med_return": 0.39,
+          "std_return": 0.84,
+          "samples": 12,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 6.86,
+              "follow_ret": 2.06
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.59,
+              "follow_ret": 1.95
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-10",
+              "lead_ret": 4.08,
+              "follow_ret": 1.21
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-09-09",
+              "target_date": "2024-09-10",
+              "lead_ret": 3.79,
+              "follow_ret": -0.19
+            },
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-05",
+              "lead_ret": 4.82,
+              "follow_ret": -0.2
+            },
+            {
+              "fire_date": "2025-06-20",
+              "target_date": "2025-06-23",
+              "lead_ret": 4.68,
+              "follow_ret": -0.85
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 41.7,
+          "avg_return": 0.24,
+          "med_return": -0.37,
+          "std_return": 1.58,
+          "samples": 12,
+          "confidence": "LOW",
+          "best_cases": [
+            {
+              "fire_date": "2024-06-12",
+              "target_date": "2024-06-14",
+              "lead_ret": 4.22,
+              "follow_ret": 4.95
+            },
+            {
+              "fire_date": "2025-06-20",
+              "target_date": "2025-06-24",
+              "lead_ret": 4.68,
+              "follow_ret": 1.18
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 5.03,
+              "follow_ret": 0.81
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-05-21",
+              "target_date": "2024-05-23",
+              "lead_ret": 3.94,
+              "follow_ret": -0.69
+            },
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-06",
+              "lead_ret": 4.82,
+              "follow_ret": -0.7
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-05",
+              "lead_ret": 4.81,
+              "follow_ret": -1.38
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 75.0,
+          "avg_return": 0.68,
+          "med_return": 0.99,
+          "std_return": 1.02,
+          "samples": 12,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2025-04-01",
+              "target_date": "2025-04-04",
+              "lead_ret": 3.52,
+              "follow_ret": 1.9
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.59,
+              "follow_ret": 1.71
+            },
+            {
+              "fire_date": "2024-05-21",
+              "target_date": "2024-05-24",
+              "lead_ret": 3.94,
+              "follow_ret": 1.59
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-06-20",
+              "target_date": "2025-06-25",
+              "lead_ret": 4.68,
+              "follow_ret": -0.41
+            },
+            {
+              "fire_date": "2026-01-02",
+              "target_date": "2026-01-07",
+              "lead_ret": 4.82,
+              "follow_ret": -1.06
+            },
+            {
+              "fire_date": "2024-12-03",
+              "target_date": "2024-12-06",
+              "lead_ret": 4.81,
+              "follow_ret": -1.22
+            }
+          ]
+        }
+      }
+    },
+    "바이오/헬스": {
+      "제약→생물공학": {
+        "lead": "제약",
+        "follow": "생물공학",
+        "fire_dates": 5,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 100.0,
+          "avg_return": 3.24,
+          "med_return": 2.93,
+          "std_return": 1.85,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.49,
+              "follow_ret": 6.67
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 4.35,
+              "follow_ret": 3.34
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.78,
+              "follow_ret": 2.93
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.78,
+              "follow_ret": 2.93
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-10",
+              "lead_ret": 176.57,
+              "follow_ret": 1.9
+            },
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.63,
+              "follow_ret": 1.39
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 80.0,
+          "avg_return": 1.25,
+          "med_return": 1.4,
+          "std_return": 0.85,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.63,
+              "follow_ret": 2.0
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 4.35,
+              "follow_ret": 1.83
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.78,
+              "follow_ret": 1.4
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.78,
+              "follow_ret": 1.4
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.49,
+              "follow_ret": 1.39
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-11",
+              "lead_ret": 176.57,
+              "follow_ret": -0.38
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 100.0,
+          "avg_return": 1.94,
+          "med_return": 2.0,
+          "std_return": 1.11,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.78,
+              "follow_ret": 3.87
+            },
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-12",
+              "lead_ret": 4.63,
+              "follow_ret": 2.12
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.49,
+              "follow_ret": 2.0
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.49,
+              "follow_ret": 2.0
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-12",
+              "lead_ret": 176.57,
+              "follow_ret": 1.0
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 4.35,
+              "follow_ret": 0.7
+            }
+          ]
+        }
+      },
+      "제약→건강관리장비와용품": {
+        "lead": "제약",
+        "follow": "건강관리장비와용품",
+        "fire_dates": 5,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 100.0,
+          "avg_return": 2.36,
+          "med_return": 2.17,
+          "std_return": 1.4,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.49,
+              "follow_ret": 4.12
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 4.78,
+              "follow_ret": 3.8
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 4.35,
+              "follow_ret": 2.17
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-11",
+              "lead_ret": 4.35,
+              "follow_ret": 2.17
+            },
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.63,
+              "follow_ret": 0.88
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-10",
+              "lead_ret": 176.57,
+              "follow_ret": 0.81
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 60.0,
+          "avg_return": 0.66,
+          "med_return": 0.88,
+          "std_return": 0.95,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.63,
+              "follow_ret": 1.82
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-14",
+              "lead_ret": 4.35,
+              "follow_ret": 1.48
+            },
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.49,
+              "follow_ret": 0.88
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-08",
+              "lead_ret": 4.49,
+              "follow_ret": 0.88
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 4.78,
+              "follow_ret": -0.36
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-11",
+              "lead_ret": 176.57,
+              "follow_ret": -0.52
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 80.0,
+          "avg_return": 0.93,
+          "med_return": 0.81,
+          "std_return": 0.61,
+          "samples": 5,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.49,
+              "follow_ret": 1.82
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 4.78,
+              "follow_ret": 1.29
+            },
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 4.35,
+              "follow_ret": 0.81
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-04-10",
+              "target_date": "2025-04-15",
+              "lead_ret": 4.35,
+              "follow_ret": 0.81
+            },
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-12",
+              "lead_ret": 4.63,
+              "follow_ret": 0.73
+            },
+            {
+              "fire_date": "2026-02-09",
+              "target_date": "2026-02-12",
+              "lead_ret": 176.57,
+              "follow_ret": -0.0
+            }
+          ]
+        }
+      },
+      "생물공학→건강관리장비와용품": {
+        "lead": "생물공학",
+        "follow": "건강관리장비와용품",
+        "fire_dates": 10,
+        "best_lag": 1,
+        "lag1": {
+          "win_rate": 80.0,
+          "avg_return": 1.46,
+          "med_return": 0.95,
+          "std_return": 1.55,
+          "samples": 10,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-07",
+              "lead_ret": 4.09,
+              "follow_ret": 4.12
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-11",
+              "lead_ret": 6.1,
+              "follow_ret": 3.8
+            },
+            {
+              "fire_date": "2026-01-23",
+              "target_date": "2026-01-26",
+              "lead_ret": 3.68,
+              "follow_ret": 3.08
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-11-28",
+              "target_date": "2025-12-01",
+              "lead_ret": 4.36,
+              "follow_ret": 0.67
+            },
+            {
+              "fire_date": "2026-01-26",
+              "target_date": "2026-01-27",
+              "lead_ret": 3.97,
+              "follow_ret": -0.16
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-11",
+              "lead_ret": 5.59,
+              "follow_ret": -0.66
+            }
+          ]
+        },
+        "lag2": {
+          "win_rate": 60.0,
+          "avg_return": 0.48,
+          "med_return": 0.64,
+          "std_return": 0.79,
+          "samples": 10,
+          "confidence": "MED",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-07",
+              "target_date": "2024-08-09",
+              "lead_ret": 6.67,
+              "follow_ret": 1.82
+            },
+            {
+              "fire_date": "2025-11-10",
+              "target_date": "2025-11-12",
+              "lead_ret": 5.59,
+              "follow_ret": 1.41
+            },
+            {
+              "fire_date": "2026-01-26",
+              "target_date": "2026-01-28",
+              "lead_ret": 3.97,
+              "follow_ret": 0.97
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-12",
+              "lead_ret": 6.1,
+              "follow_ret": -0.36
+            },
+            {
+              "fire_date": "2025-11-12",
+              "target_date": "2025-11-14",
+              "lead_ret": 4.52,
+              "follow_ret": -0.36
+            },
+            {
+              "fire_date": "2024-11-04",
+              "target_date": "2024-11-06",
+              "lead_ret": 3.52,
+              "follow_ret": -0.68
+            }
+          ]
+        },
+        "lag3": {
+          "win_rate": 70.0,
+          "avg_return": 0.56,
+          "med_return": 0.85,
+          "std_return": 0.84,
+          "samples": 10,
+          "confidence": "HIGH",
+          "best_cases": [
+            {
+              "fire_date": "2024-08-06",
+              "target_date": "2024-08-09",
+              "lead_ret": 4.09,
+              "follow_ret": 1.82
+            },
+            {
+              "fire_date": "2024-12-10",
+              "target_date": "2024-12-13",
+              "lead_ret": 6.1,
+              "follow_ret": 1.29
+            },
+            {
+              "fire_date": "2026-01-26",
+              "target_date": "2026-01-29",
+              "lead_ret": 3.97,
+              "follow_ret": 1.13
+            }
+          ],
+          "worst_cases": [
+            {
+              "fire_date": "2025-11-28",
+              "target_date": "2025-12-03",
+              "lead_ret": 4.36,
+              "follow_ret": -0.09
+            },
+            {
+              "fire_date": "2024-12-13",
+              "target_date": "2024-12-18",
+              "lead_ret": 3.87,
+              "follow_ret": -0.72
+            },
+            {
+              "fire_date": "2024-11-04",
+              "target_date": "2024-11-07",
+              "lead_ret": 3.52,
+              "follow_ret": -0.88
+            }
+          ]
+        }
+      }
+    }
+  }
+}

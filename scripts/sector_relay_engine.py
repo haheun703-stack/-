@@ -346,6 +346,22 @@ def get_override_stocks(
 
 def save_relay_signal(relays: list[dict], override_stocks: list[dict]) -> Path:
     """relay_signal.json 저장."""
+    # 백테스트 신뢰도 포함
+    backtest = load_backtest_patterns()
+    bt_summary = {}
+    if backtest:
+        bt_summary = {
+            f"{lead}→{follow}": {
+                "confidence": info["confidence"],
+                "win_rate": info["win_rate"],
+                "avg_return": info["avg_return"],
+                "best_lag": info["best_lag"],
+                "samples": info["samples"],
+            }
+            for (lead, follow), info in backtest.items()
+            if info["confidence"] in ("HIGH", "MED")
+        }
+
     result = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "params": {
@@ -357,6 +373,7 @@ def save_relay_signal(relays: list[dict], override_stocks: list[dict]) -> Path:
         },
         "relays": relays,
         "override_stocks": override_stocks,
+        "backtest_patterns": bt_summary,
         "summary": {
             "active_relays": sum(
                 1 for r in relays
@@ -373,9 +390,58 @@ def save_relay_signal(relays: list[dict], override_stocks: list[dict]) -> Path:
     return out_path
 
 
+def load_backtest_patterns() -> dict:
+    """relay_patterns.json에서 백테스트 신뢰도 데이터 로드.
+
+    Returns:
+        {(lead, follow): {confidence, win_rate, avg_return, best_lag, samples}}
+    """
+    path = DATA_DIR / "relay_patterns.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+
+    patterns = {}
+    for super_name, pairs in data.get("super_sectors", {}).items():
+        for pair_name, pair_data in pairs.items():
+            # pair_name = "증권→생명보험"
+            parts = pair_name.split("→")
+            if len(parts) != 2:
+                continue
+            lead, follow = parts[0].strip(), parts[1].strip()
+            best_lag = pair_data.get("best_lag", 1)
+            lag_data = pair_data.get(f"lag{best_lag}", {})
+            patterns[(lead, follow)] = {
+                "confidence": lag_data.get("confidence", "NO_DATA"),
+                "win_rate": lag_data.get("win_rate", 0),
+                "avg_return": lag_data.get("avg_return", 0),
+                "best_lag": best_lag,
+                "samples": lag_data.get("samples", 0),
+                "super_sector": super_name,
+            }
+    return patterns
+
+
+def _match_backtest_sector(wics_name: str, patterns: dict) -> list[tuple]:
+    """WICS 섹터명 → 백테스트 패턴에서 매칭되는 선행 또는 후행 쌍 반환."""
+    # 직접 매칭 시도 (WICS명이 네이버 업종명에 포함되는 경우)
+    matches = []
+    for (lead, follow), info in patterns.items():
+        if wics_name in lead or lead in wics_name:
+            matches.append(("lead", lead, follow, info))
+        elif wics_name in follow or follow in wics_name:
+            matches.append(("follow", lead, follow, info))
+    return matches
+
+
 def print_relay_report(relays: list[dict], override_stocks: list[dict]):
     """릴레이 감지 결과를 출력."""
     active = [r for r in relays if any(c["override"] for c in r["relay_candidates"])]
+    backtest = load_backtest_patterns()
 
     print(f"\n{'=' * 60}")
     print(f"  슈퍼섹터 릴레이 감지 결과")
@@ -400,8 +466,22 @@ def print_relay_report(relays: list[dict], override_stocks: list[dict]):
         print(f"\n  릴레이 후보:")
         for c in relay["relay_candidates"]:
             mark = " ← RELAY!" if c["override"] else ""
+            # 백테스트 신뢰도 조회
+            bt_str = ""
+            if backtest:
+                for (lead, follow), info in backtest.items():
+                    leader_name = relay["leader_sector"]
+                    cand_name = c["sector"]
+                    if ((leader_name in lead or lead in leader_name)
+                            and (cand_name in follow or follow in cand_name)):
+                        conf_icon = {"HIGH": "🟢", "MED": "🟡", "LOW": "🔴"}.get(
+                            info["confidence"], "⚫")
+                        bt_str = (f"  {conf_icon}[{info['confidence']}] "
+                                  f"승률{info['win_rate']:.0f}% "
+                                  f"래그{info['best_lag']}일")
+                        break
             print(f"    {c['sector']}: 거래대금 {c['volume_change_pct']:+.1f}%, "
-                  f"RSI {c['rsi']:.1f}, #{c['rank']}{mark}")
+                  f"RSI {c['rsi']:.1f}, #{c['rank']}{mark}{bt_str}")
 
     if override_stocks:
         # 섹터별 그룹핑
@@ -424,6 +504,22 @@ def print_relay_report(relays: list[dict], override_stocks: list[dict]):
                       f"{OVERRIDE_SIZE}, 손절 {OVERRIDE_STOP}%")
             if len(stocks) > 10:
                 print(f"    ... 외 {len(stocks) - 10}종목")
+
+    # 백테스트 신뢰도 요약
+    if backtest:
+        high_med = [(k, v) for k, v in backtest.items()
+                    if v["confidence"] in ("HIGH", "MED")]
+        if high_med:
+            print(f"\n{'─' * 60}")
+            print(f"  백테스트 신뢰도 (MED 이상 — relay_patterns.json)")
+            for (lead, follow), info in sorted(
+                high_med, key=lambda x: x[1]["win_rate"], reverse=True
+            ):
+                conf_icon = "🟢" if info["confidence"] == "HIGH" else "🟡"
+                print(f"    {conf_icon} {lead} → {follow}: "
+                      f"래그{info['best_lag']}일 승률{info['win_rate']:.0f}% "
+                      f"평균{info['avg_return']:+.1f}% "
+                      f"[{info['confidence']}] n={info['samples']}")
 
     print(f"\n{'─' * 60}")
     print(f"  활성 릴레이: {len(active)}건, 오버라이드 종목: {len(override_stocks)}개")
