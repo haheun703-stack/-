@@ -57,6 +57,7 @@ SECTOR_ETFS = {
     # 섹터명: (ETF코드, ETF명, 카테고리)
     "증권": ("157500", "TIGER 증권", "sector"),
     "은행": ("091220", "TIGER 은행", "sector"),
+    "보험": ("140710", "TIGER 보험", "sector"),
     "반도체": ("091230", "TIGER 반도체", "sector"),
     "2차전지": ("305540", "TIGER 2차전지테마", "theme"),
     "바이오": ("364970", "TIGER 바이오TOP10", "theme"),

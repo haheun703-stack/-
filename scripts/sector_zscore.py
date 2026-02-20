@@ -181,6 +181,53 @@ def compute_zscore_for_sector(
         })
 
     df = pd.DataFrame(rows)
+
+    # 선행주 감지: z_5 순위 + z_5 > z_20 반전 체크
+    if "excess_5" in df.columns and df["excess_5"].notna().any():
+        # excess_5 기준 z_5 계산 (섹터 내 상대 5일 초과수익률)
+        valid_e5 = df["excess_5"].dropna()
+        if len(valid_e5) >= 2:
+            mean_e5 = valid_e5.mean()
+            std_e5 = valid_e5.std(ddof=1)
+            if std_e5 < 0.01:
+                std_e5 = 0.01
+            df["z_5"] = df["excess_5"].apply(
+                lambda x: round((x - mean_e5) / std_e5, 3) if pd.notna(x) else None
+            )
+        else:
+            df["z_5"] = None
+
+        # z_5 순위 (높을수록 먼저 반등)
+        z5_valid = df[df["z_5"].notna()].copy()
+        if not z5_valid.empty:
+            z5_valid["z5_rank"] = z5_valid["z_5"].rank(ascending=False).astype(int)
+            df = df.merge(
+                z5_valid[["ticker", "z5_rank"]],
+                on="ticker", how="left",
+            )
+        else:
+            df["z5_rank"] = None
+
+        # z_5 > z_20 반전 = 단기 회복 시작
+        df["z5_reversal"] = df.apply(
+            lambda r: bool(
+                pd.notna(r.get("z_5")) and pd.notna(r.get("z_20"))
+                and r["z_5"] > r["z_20"]
+            ),
+            axis=1,
+        )
+
+        # 선행주 후보: z5_rank == 1 AND z5_reversal
+        df["leader_candidate"] = df.apply(
+            lambda r: bool(r.get("z5_rank") == 1 and r.get("z5_reversal")),
+            axis=1,
+        )
+    else:
+        df["z_5"] = None
+        df["z5_rank"] = None
+        df["z5_reversal"] = False
+        df["leader_candidate"] = False
+
     df.sort_values("z_20", inplace=True)
     return df
 

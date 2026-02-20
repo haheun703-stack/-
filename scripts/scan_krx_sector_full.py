@@ -233,6 +233,7 @@ def analyze_sector(
     flow_map: dict,
     etf_universe: dict,
     min_cap_bil: float = 500,
+    relay_override_codes: set[str] | None = None,
 ) -> list[dict]:
     """KRX 업종 내 전종목을 분석하여 후보 반환."""
 
@@ -369,6 +370,13 @@ def analyze_sector(
             # Theme Money: Zone A만 진입, B/C 불가
             if zone_info["zone"] == "A":
                 entry_ok = True
+            elif (zone_info["zone"] == "B"
+                  and relay_override_codes
+                  and ticker in relay_override_codes):
+                # 릴레이 오버라이드: Zone B → Zone A (HALF 사이즈, -3% 손절)
+                entry_ok = True
+                zone_info["zone"] = "A_RELAY"
+                zone_info["signals"].append("RELAY_OVERRIDE")
             else:
                 entry_ok = False
             # 섹터 리더 ADX 하락 시 주의
@@ -382,6 +390,12 @@ def analyze_sector(
             hold_days = 5
             if zone_info["zone"] == "A":
                 entry_ok = True
+            elif (zone_info["zone"] == "B"
+                  and relay_override_codes
+                  and ticker in relay_override_codes):
+                entry_ok = True
+                zone_info["zone"] = "A_RELAY"
+                zone_info["signals"].append("RELAY_OVERRIDE")
             else:
                 entry_ok = False
             if leader and not leader["adx_rising"] and leader["adx_delta_3d"] < -3:
@@ -510,6 +524,15 @@ def main():
             for s in sectors_data:
                 flow_map[s["sector"]] = s
 
+    # 릴레이 오버라이드 코드 로드
+    relay_signal = load_json("relay_signal.json")
+    relay_override_codes: set[str] = set()
+    if relay_signal:
+        for stock in relay_signal.get("override_stocks", []):
+            relay_override_codes.add(stock["stock_code"])
+        if relay_override_codes:
+            logger.info("릴레이 오버라이드: %d종목 Zone B→A 대상", len(relay_override_codes))
+
     # 대상 섹터
     if args.sector:
         targets = [s.strip() for s in args.sector.split(",")]
@@ -530,6 +553,7 @@ def main():
             momentum_map, flow_map,
             etf_universe or {},
             min_cap_bil=args.min_cap,
+            relay_override_codes=relay_override_codes or None,
         )
 
         lagging = [r for r in results if r["z_20"] <= args.z_threshold]

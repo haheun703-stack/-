@@ -228,28 +228,66 @@ def score_and_rank(momentum_df: pd.DataFrame) -> pd.DataFrame:
 # 최신 날짜 리포트
 # ─────────────────────────────────────────────
 
+def load_prev_momentum() -> dict[str, dict]:
+    """전일 모멘텀 데이터 로드 → {섹터명: {rank, vol_ratio, ...}}."""
+    path = DATA_DIR / "sector_momentum_prev.json"
+    if not path.exists():
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {s["sector"]: s for s in data.get("sectors", [])}
+
+
+def save_as_prev(report: dict):
+    """현재 모멘텀을 전일 데이터로 저장 (다음 날 가속도 비교용)."""
+    out_path = DATA_DIR / "sector_momentum_prev.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+    logger.info("전일 모멘텀 저장 → %s", out_path)
+
+
 def print_latest_report(scored_df: pd.DataFrame) -> dict:
     """최신 날짜의 섹터 순위를 출력하고 JSON으로 반환."""
     latest_date = scored_df.index.max()
     latest = scored_df.loc[latest_date].sort_values("rank")
 
-    print(f"\n{'=' * 70}")
+    # 전일 데이터 로드 (가속도 비교용)
+    prev_data = load_prev_momentum()
+
+    print(f"\n{'=' * 80}")
     print(f"  섹터 모멘텀 순위 — {latest_date.strftime('%Y-%m-%d')}")
-    print(f"{'=' * 70}")
-    print(f"  {'순위':>4} {'섹터':<10} {'점수':>6} {'5일%':>7} {'20일%':>7} {'60일%':>7} {'상대강도':>8} {'거래비':>6} {'RSI':>5}")
-    print(f"  {'─' * 66}")
+    print(f"{'=' * 80}")
+    print(f"  {'순위':>4} {'섹터':<10} {'점수':>6} {'5일%':>7} {'20일%':>7} {'60일%':>7} {'상대강도':>8} {'거래비':>6} {'RSI':>5} {'Δ순위':>5}")
+    print(f"  {'─' * 76}")
 
     report_data = []
+    accel_count = 0
     for _, row in latest.iterrows():
         rank = int(row["rank"])
         sector = row["sector"]
         score = row["momentum_score"]
+        vol_ratio = float(row["vol_ratio"])
+
+        # 가속도 계산
+        prev = prev_data.get(sector, {})
+        prev_rank = prev.get("rank", rank)
+        prev_vol = prev.get("vol_ratio", vol_ratio)
+        rank_change = prev_rank - rank  # 양수 = 순위 상승
+        vol_change_pct = ((vol_ratio - prev_vol) / prev_vol * 100) if prev_vol > 0 else 0
+        accel = rank_change >= 3 and vol_change_pct >= 30
+        if accel:
+            accel_count += 1
+
+        # 표시
         marker = " ★" if rank <= 3 else "  " if rank <= 7 else " ▽"
+        rank_str = f"{rank_change:+d}" if prev_data else "—"
+        accel_str = " ⚡" if accel else ""
 
         print(
             f"  {rank:>4} {sector:<10} {score:>6.1f} "
             f"{row['ret_5']:>+7.2f} {row['ret_20']:>+7.2f} {row['ret_60']:>+7.2f} "
-            f"{row['rel_strength']:>+8.2f} {row['vol_ratio']:>6.2f} {row['rsi_14']:>5.1f}{marker}"
+            f"{row['rel_strength']:>+8.2f} {row['vol_ratio']:>6.2f} {row['rsi_14']:>5.1f}"
+            f" {rank_str:>5}{marker}{accel_str}"
         )
 
         report_data.append({
@@ -264,9 +302,15 @@ def print_latest_report(scored_df: pd.DataFrame) -> dict:
             "rel_strength": round(float(row["rel_strength"]), 2),
             "vol_ratio": round(float(row["vol_ratio"]), 2),
             "rsi_14": round(float(row["rsi_14"]), 1),
+            "rank_prev": prev_rank,
+            "rank_change": rank_change,
+            "vol_change_pct": round(vol_change_pct, 1),
+            "acceleration": accel,
         })
 
-    print(f"\n  ★ = Top 3 (강세 섹터)   ▽ = Bottom 3 (약세 섹터)")
+    print(f"\n  ★ = Top 3   ▽ = Bottom 3   ⚡ = 가속 (순위 +3↑ & 거래량 +30%↑)")
+    if accel_count:
+        print(f"  가속 감지: {accel_count}개 섹터")
 
     # JSON 저장
     report = {
@@ -277,6 +321,9 @@ def print_latest_report(scored_df: pd.DataFrame) -> dict:
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
     logger.info("최신 모멘텀 → %s", out_path)
+
+    # 현재 데이터를 전일로 저장 (다음 날 가속도 비교용)
+    save_as_prev(report)
 
     return report
 
