@@ -1,0 +1,239 @@
+{
+  "date": "2026-02-20",
+  "portfolio": 30000000,
+  "fired_count": 5,
+  "signal_count": 7,
+  "signals": [
+    {
+      "super_sector": "금융",
+      "lead": "생명보험",
+      "follow": "손해보험",
+      "lead_return": 17.44,
+      "confidence": "HIGH",
+      "win_rate": 75.0,
+      "best_lag": 3,
+      "weight_pct": 15.0,
+      "invest_amount": 3600000,
+      "profit_target": 6.0,
+      "timeout_days": 4,
+      "picks": [
+        {
+          "name": "코리안리",
+          "ticker": "003690",
+          "score": 50,
+          "change_pct": 2.25
+        },
+        {
+          "name": "에이플러스에셋",
+          "ticker": "244920",
+          "score": 30,
+          "change_pct": 0.21
+        },
+        {
+          "name": "서울보증보험",
+          "ticker": "031210",
+          "score": 25,
+          "change_pct": 5.26
+        }
+      ]
+    },
+    {
+      "super_sector": "2차전지/에너지",
+      "lead": "석유와가스",
+      "follow": "화학",
+      "lead_return": 7.1,
+      "confidence": "HIGH",
+      "win_rate": 77.8,
+      "best_lag": 1,
+      "weight_pct": 13.3,
+      "invest_amount": 3192000,
+      "profit_target": 6.0,
+      "timeout_days": 2,
+      "picks": [
+        {
+          "name": "HRS",
+          "ticker": "036640",
+          "score": 80,
+          "change_pct": 1.9
+        },
+        {
+          "name": "미원홀딩스",
+          "ticker": "107590",
+          "score": 75,
+          "change_pct": -0.14
+        },
+        {
+          "name": "동방아그로",
+          "ticker": "007590",
+          "score": 75,
+          "change_pct": 0.84
+        }
+      ]
+    },
+    {
+      "super_sector": "방산/조선",
+      "lead": "조선",
+      "follow": "기계",
+      "lead_return": 4.42,
+      "confidence": "HIGH",
+      "win_rate": 74.1,
+      "best_lag": 2,
+      "weight_pct": 4.8,
+      "invest_amount": 1152000,
+      "profit_target": 6.0,
+      "timeout_days": 3,
+      "picks": [
+        {
+          "name": "KZ정밀",
+          "ticker": "036560",
+          "score": 72,
+          "change_pct": 1.22
+        },
+        {
+          "name": "기신정기",
+          "ticker": "092440",
+          "score": 68,
+          "change_pct": 0.0
+        },
+        {
+          "name": "디와이피엔에프",
+          "ticker": "104460",
+          "score": 60,
+          "change_pct": -1.38
+        }
+      ]
+    },
+    {
+      "super_sector": "금융",
+      "lead": "은행",
+      "follow": "생명보험",
+      "lead_return": 3.69,
+      "confidence": "MED",
+      "win_rate": 55.0,
+      "best_lag": 1,
+      "weight_pct": 3.0,
+      "invest_amount": 720000,
+      "profit_target": 4.0,
+      "timeout_days": 2,
+      "picks": [
+        {
+          "name": "아이지넷",
+          "ticker": "462980",
+          "score": 42,
+          "change_pct": 6.65
+        },
+        {
+          "name": "한화생명",
+          "ticker": "088350",
+          "score": 25,
+          "change_pct": 29.92
+        },
+        {
+          "name": "미래에셋생명",
+          "ticker": "085620",
+          "score": 25,
+          "change_pct": 29.98
+        }
+      ]
+    },
+    {
+      "super_sector": "금융",
+      "lead": "은행",
+      "follow": "손해보험",
+      "lead_return": 3.69,
+      "confidence": "HIGH",
+      "win_rate": 65.0,
+      "best_lag": 1,
+      "weight_pct": 3.0,
+      "invest_amount": 720000,
+      "profit_target": 5.0,
+      "timeout_days": 2,
+      "picks": [
+        {
+          "name": "코리안리",
+          "ticker": "003690",
+          "score": 50,
+          "change_pct": 2.25
+        },
+        {
+          "name": "에이플러스에셋",
+          "ticker": "244920",
+          "score": 30,
+          "change_pct": 0.21
+        },
+        {
+          "name": "서울보증보험",
+          "ticker": "031210",
+          "score": 25,
+          "change_pct": 5.26
+        }
+      ]
+    },
+    {
+      "super_sector": "방산/조선",
+      "lead": "우주항공과국방",
+      "follow": "조선",
+      "lead_return": 3.65,
+      "confidence": "HIGH",
+      "win_rate": 66.7,
+      "best_lag": 1,
+      "weight_pct": 3.3,
+      "invest_amount": 792000,
+      "profit_target": 5.0,
+      "timeout_days": 2,
+      "picks": [
+        {
+          "name": "한라IMS",
+          "ticker": "092460",
+          "score": 68,
+          "change_pct": 2.42
+        },
+        {
+          "name": "바이온",
+          "ticker": "032980",
+          "score": 55,
+          "change_pct": 0.0
+        },
+        {
+          "name": "메디콕스",
+          "ticker": "054180",
+          "score": 55,
+          "change_pct": 0.0
+        }
+      ]
+    },
+    {
+      "super_sector": "방산/조선",
+      "lead": "우주항공과국방",
+      "follow": "기계",
+      "lead_return": 3.65,
+      "confidence": "HIGH",
+      "win_rate": 71.4,
+      "best_lag": 1,
+      "weight_pct": 4.3,
+      "invest_amount": 1032000,
+      "profit_target": 6.0,
+      "timeout_days": 2,
+      "picks": [
+        {
+          "name": "KZ정밀",
+          "ticker": "036560",
+          "score": 72,
+          "change_pct": 1.22
+        },
+        {
+          "name": "기신정기",
+          "ticker": "092440",
+          "score": 68,
+          "change_pct": 0.0
+        },
+        {
+          "name": "디와이피엔에프",
+          "ticker": "104460",
+          "score": 60,
+          "change_pct": -1.38
+        }
+      ]
+    }
+  ]
+}
