@@ -466,37 +466,66 @@ class TelegramCommandBot:
     # ══════════════════════════════════════════
 
     def _cmd_scan(self, args: list) -> None:
-        """스캔 — 매수 후보 조회."""
-        import pandas as pd
-        sig_path = PROJECT_ROOT / "results" / "signals_log.csv"
-        if not sig_path.exists():
-            self._reply_kb("\U0001f50d 스캔 결과 없음")
+        """스캔 — 매수 후보 조회 (섹터 로테이션 스캔 기반)."""
+        scan_path = PROJECT_ROOT / "data" / "sector_rotation" / "krx_sector_scan.json"
+        if not scan_path.exists():
+            self._reply_kb("\U0001f50d 스캔 결과 없음 (krx_sector_scan.json)")
             return
-        df = pd.read_csv(sig_path)
-        if df.empty:
-            self._reply_kb("\U0001f50d 스캔 결과 없음")
-            return
-        if "date" in df.columns:
-            latest = df["date"].max()
-            df = df[df["date"] == latest]
-        if "zone_score" in df.columns:
-            df = df.sort_values("zone_score", ascending=False)
 
-        from src.stock_name_resolver import ticker_to_name
-        grade_map = {0: ("\U0001f525", "S"), 1: ("\u2b50", "A"), 2: ("\U0001f539", "B"), 3: ("\u26d4", "C")}
-        lines = [f"\U0001f50d 매수 후보 ({latest if 'date' in df.columns else '?'})", "\u2501" * 24]
-        for rank, (_, row) in enumerate(df.head(5).iterrows()):
-            emoji, g = grade_map.get(rank, ("\u2796", "D"))
-            ticker = str(row.get("ticker", "?")).zfill(6)
-            name = ticker_to_name(ticker)
-            entry = row.get("entry_price", 0)
-            rr = row.get("rr_ratio", 0)
-            zone = row.get("zone_score", 0)
-            lines.append(f"{emoji} {g}등급 {name} ({ticker})")
-            lines.append(f"  {entry:,.0f}원 | R:R {rr:.1f}x | Zone {zone:.2f}")
+        with open(scan_path, "r", encoding="utf-8") as f:
+            scan = json.load(f)
+
+        scan_date = scan.get("scan_date", "?")
+        smart = scan.get("smart_money", [])
+        theme = scan.get("theme_money", [])
+
+        # Smart Money: BB% 낮은 순 (저평가 우선), RSI < 70
+        good_smart = [s for s in smart if s.get("rsi", 100) < 70]
+        good_smart.sort(key=lambda x: x.get("bb_pct", 100))
+
+        # Theme Money: ADX > 35, RSI < 80
+        good_theme = [t for t in theme if t.get("adx", 0) > 35 and t.get("rsi", 100) < 80]
+        good_theme.sort(key=lambda x: -x.get("adx", 0))
+
+        lines = [f"\U0001f50d 매수 후보 ({scan_date})", "\u2501" * 24, ""]
+
+        lines.append("\U0001f48e Smart Money (FULL)")
+        lines.append("\u2500" * 24)
+        if good_smart:
+            for s in good_smart[:5]:
+                name = s.get("name", "?")
+                ticker = s.get("ticker", "?")
+                sector = s.get("etf_sector", "?")
+                rsi = s.get("rsi", 0)
+                bb = s.get("bb_pct", 0)
+                lines.append(f"  \U0001f7e2 {name} ({ticker}) [{sector}]")
+                lines.append(f"    RSI {rsi:.0f} | BB {bb:.0f}%")
+                lines.append("")
+        else:
+            lines.append("  해당 없음")
             lines.append("")
-        if df.empty:
-            lines.append("  통과 종목 없음")
+
+        lines.append("\U0001f525 Theme Money (HALF)")
+        lines.append("\u2500" * 24)
+        if good_theme:
+            for t in good_theme[:5]:
+                name = t.get("name", "?")
+                ticker = t.get("ticker", "?")
+                adx = t.get("adx", 0)
+                rsi = t.get("rsi", 0)
+                gx = " \u2605GX" if t.get("stoch_golden_recent") else ""
+                lines.append(f"  \U0001f7e1 {name} ({ticker}){gx}")
+                lines.append(f"    ADX {adx:.0f} | RSI {rsi:.0f}")
+                lines.append("")
+        else:
+            lines.append("  해당 없음")
+            lines.append("")
+
+        summary = scan.get("summary", {})
+        lines.append(
+            f"\U0001f4cb Smart {len(smart)} | Theme {len(theme)} | "
+            f"\uc9c4\uc785OK {summary.get('entry_ok', '?')}"
+        )
         self._reply_kb("\n".join(lines))
 
     def _cmd_report(self, args: list) -> None:
