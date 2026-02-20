@@ -570,6 +570,22 @@ def format_text_message(data: dict) -> str:
         for ow in other_watches:
             lines.append(f"  WATCH: {ow}")
 
+    # ── 서보성 원칙 ──
+    try:
+        import yaml as _yaml
+        with open(PROJECT_ROOT / "config" / "settings.yaml", encoding="utf-8") as _f:
+            _cfg = _yaml.safe_load(_f)
+        _pos = _cfg.get("live_trading", {}).get("position", {})
+        _reserve = _pos.get("cash_reserve_pct", 0.20)
+        _max_pos = _pos.get("max_positions", 5)
+        _sb = _pos.get("split_buy", {})
+        _e1 = int(_sb.get("entry_1st", 0.50) * 100)
+        _e2 = int(_sb.get("entry_2nd", 0.30) * 100)
+        _e3 = int(_sb.get("entry_3rd", 0.20) * 100)
+        lines.append(f"[원칙] 현금유보{int(_reserve*100)}% 최대{_max_pos}종목 분할{_e1}/{_e2}/{_e3}")
+    except Exception:
+        pass
+
     lines.append("-" * 30)
     return "\n".join(lines)
 

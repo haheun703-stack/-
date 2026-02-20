@@ -951,12 +951,29 @@ class DailyScheduler:
             logger.error("[스케줄러] %s 오류: %s", func.__name__, e)
             self._notify(f"오류: {func.__name__} — {e}")
 
+    def phase_sunday_night_check(self) -> None:
+        """일요일 밤: 미장 체크 + 월요일 시나리오 판정."""
+        # 일요일만 실행
+        from datetime import datetime as _dt
+        if _dt.now().weekday() != 6:  # 0=월 ... 6=일
+            logger.info("[Sunday] 일요일이 아님 — 스킵")
+            return
+        logger.info("[Sunday] 일요일 밤 미장 체크 시작")
+        try:
+            from scripts.sunday_night_check import run as sunday_run
+            result = sunday_run(send=True)
+            scenario = result["judgment"]["scenario"]
+            label = result["judgment"]["label"]
+            logger.info("[Sunday] 시나리오 %s: %s", scenario, label)
+        except Exception as e:
+            logger.error("[Sunday] 체크 실패: %s", e)
+
     # ══════════════════════════════════════════
     # 메인 루프
     # ══════════════════════════════════════════
 
     def run(self) -> None:
-        """v5.0 스케줄러 메인 루프"""
+        """v5.1 스케줄러 메인 루프"""
         import schedule as sched
 
         logger.info("=" * 60)
@@ -1030,6 +1047,10 @@ class DailyScheduler:
             self._safe_run, self.phase_evening_briefing)
         sched.every().day.at(S.get("eod_journal", "19:30")).do(
             self._safe_run, self.phase_eod_journal)
+
+        # === 일요일 밤 미장 체크 ===
+        sched.every().day.at(S.get("sunday_night_check", "21:00")).do(
+            self._safe_run, self.phase_sunday_night_check)
 
         logger.info("등록된 스케줄 (%d건):", len(sched.get_jobs()))
         for job in sched.get_jobs():
@@ -1217,6 +1238,7 @@ if __name__ == "__main__":
             "10": scheduler.phase_evening_scan,
             "10b": scheduler.phase_evening_briefing,
             "11": scheduler.phase_eod_journal,
+            "sunday": scheduler.phase_sunday_night_check,
         }
         key = args.run_now.lower()
         func = phases.get(key)

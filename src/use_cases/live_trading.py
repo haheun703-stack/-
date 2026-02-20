@@ -57,6 +57,13 @@ class LiveTradingEngine:
 
         self.max_positions = pos_cfg.get("max_positions", 4)
         self.initial_capital = pos_cfg.get("initial_capital", 50_000_000)
+        self.cash_reserve_pct = pos_cfg.get("cash_reserve_pct", 0.20)
+
+        # 분할매수 비율 (서보성 원칙)
+        split_cfg = pos_cfg.get("split_buy", {})
+        self.split_buy_1st = split_cfg.get("entry_1st", 0.50)
+        self.split_buy_2nd = split_cfg.get("entry_2nd", 0.30)
+        self.split_buy_3rd = split_cfg.get("entry_3rd", 0.20)
 
         self.monitor_interval = monitor_cfg.get("interval_sec", 60)
 
@@ -95,21 +102,31 @@ class LiveTradingEngine:
             self.guard.emergency_liquidate(self.tracker, self.order_port)
             return results
 
-        # 2. 포지션 수 체크
+        # 2. 현금 유보 적용 (서보성 원칙: 20% 유보)
+        reserved = balance * self.cash_reserve_pct
+        usable_cash = balance - reserved
+        if usable_cash <= 0:
+            logger.info("[매수] 현금 유보 후 가용 잔고 0원 (유보 %.0f%%)", self.cash_reserve_pct * 100)
+            return results
+        logger.info("[매수] 잔고 %s원, 유보 %s원(%.0f%%), 가용 %s원",
+                    f"{balance:,.0f}", f"{reserved:,.0f}",
+                    self.cash_reserve_pct * 100, f"{usable_cash:,.0f}")
+
+        # 3. 포지션 수 체크
         current_count = len(self.tracker.positions)
         available_slots = self.max_positions - current_count
         if available_slots <= 0:
             logger.info("[매수] 최대 포지션 도달 (%d/%d)", current_count, self.max_positions)
             return results
 
-        # 3. 시그널 정렬 (등급 A→C, zone_score 높은 순)
+        # 4. 시그널 정렬 (등급 A→C, zone_score 높은 순)
         grade_order = {"A": 0, "B": 1, "C": 2, "F": 3}
         sorted_signals = sorted(
             [s for s in signals if s.get("signal", False)],
             key=lambda s: (grade_order.get(s.get("grade", "F"), 3), -s.get("zone_score", 0)),
         )
 
-        # 4. 매수 실행 (가용 슬롯만큼)
+        # 5. 매수 실행 (가용 슬롯만큼)
         for sig in sorted_signals[:available_slots]:
             ticker = sig.get("ticker", "")
             if not ticker:
@@ -120,12 +137,12 @@ class LiveTradingEngine:
                 logger.info("[매수] %s 이미 보유 중 — 스킵", ticker)
                 continue
 
-            result = self._execute_single_buy(sig, balance)
+            result = self._execute_single_buy(sig, usable_cash)
             results.append(result)
 
             if result.get("success"):
                 available_slots -= 1
-                balance -= result.get("investment", 0)
+                usable_cash -= result.get("investment", 0)
 
         return results
 
@@ -142,9 +159,9 @@ class LiveTradingEngine:
         if entry_price <= 0:
             return {"ticker": ticker, "success": False, "reason": "현재가 조회 실패"}
 
-        # 포지션 사이징
+        # 포지션 사이징 (서보성 원칙: 1차 진입 비율 적용)
         grade_ratio = {"A": 1.0, "B": 0.67, "C": 0.33}.get(signal.get("grade", "C"), 0.33)
-        stage_pct = signal.get("entry_stage_pct", 0.4)
+        stage_pct = self.split_buy_1st  # 1차 진입: 배정 비중의 50%
 
         portfolio_risk = sum(
             (p.entry_price - p.stop_loss) * p.shares

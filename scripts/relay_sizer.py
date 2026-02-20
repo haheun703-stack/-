@@ -31,7 +31,19 @@ INTENSITY_GRADES = [
     ("WEAK",      0.0, 0.5),
 ]
 
-CASH_RESERVE = 0.20    # 현금 20% 유보
+def _load_cash_reserve() -> float:
+    """settings.yaml에서 cash_reserve_pct 로드 (없으면 0.20)."""
+    try:
+        from pathlib import Path
+        import yaml
+        cfg_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        return cfg.get("live_trading", {}).get("position", {}).get("cash_reserve_pct", 0.20)
+    except Exception:
+        return 0.20
+
+CASH_RESERVE = _load_cash_reserve()
 MAX_WEIGHT = 0.15      # 최대 15%
 MIN_WEIGHT = 0.03      # 최소 3%
 
