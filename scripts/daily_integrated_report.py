@@ -480,8 +480,20 @@ def format_text_message(data: dict) -> str:
                          f"lag{p['best_lag']} W{p['win_rate']:.0f}%[{p['confidence']}]")
             picks = sig.get("picks", [])
             if picks:
-                pick_str = ", ".join(f"{pk['name']}" for pk in picks[:3])
-                lines.append(f"   -> {pick_str}")
+                pick_parts = []
+                for pk in picks[:3]:
+                    fs = pk.get("foreign_streak", 0)
+                    is_ = pk.get("inst_streak", 0)
+                    flow = ""
+                    if fs > 0 or is_ > 0:
+                        fp = []
+                        if fs > 0:
+                            fp.append(f"외{fs}")
+                        if is_ > 0:
+                            fp.append(f"기{is_}")
+                        flow = f"({'/'.join(fp)}일)"
+                    pick_parts.append(f"{pk['name']}{flow}")
+                lines.append(f"   -> {', '.join(pick_parts)}")
     elif fired:
         lines.append(f"[Relay] 발화{len(fired)}개 (전부 이미움직임)")
     else:

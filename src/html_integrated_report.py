@@ -473,7 +473,15 @@ def _build_relay_section(relay: dict) -> str:
         conf_color = "#3fb950" if p["confidence"] == "HIGH" else "#d29922"
         picks_html = ""
         for pk in sig.get("picks", [])[:3]:
-            picks_html += f"<div>{pk['name']}({pk['ticker']}) 점수:{pk.get('score', 0)} {pk.get('change_pct', 0):+.1f}%</div>"
+            fs = pk.get("foreign_streak", 0)
+            is_ = pk.get("inst_streak", 0)
+            flow_parts = []
+            if fs > 0:
+                flow_parts.append(f"외인{fs}일")
+            if is_ > 0:
+                flow_parts.append(f"기관{is_}일")
+            flow_tag = f" [{'+'.join(flow_parts)}]" if flow_parts else ""
+            picks_html += f"<div>{pk['name']}({pk['ticker']}) 점수:{pk.get('score', 0)} {pk.get('change_pct', 0):+.1f}%{flow_tag}</div>"
 
         cards += f"""
 <div class="fire-card">

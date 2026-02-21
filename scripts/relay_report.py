@@ -305,9 +305,19 @@ def print_relay_report(report: dict):
                 print(f"\n  매수 대상 ({sig['follow_sector']} 상위 {len(picks)}종목)")
                 for i, p in enumerate(picks, 1):
                     reason = " | ".join(p["reasons"][:3])
+                    fs = p.get("foreign_streak", 0)
+                    is_ = p.get("inst_streak", 0)
+                    flow_str = ""
+                    if fs > 0 or is_ > 0:
+                        parts = []
+                        if fs > 0:
+                            parts.append(f"외인{fs}일")
+                        if is_ > 0:
+                            parts.append(f"기관{is_}일")
+                        flow_str = f"  수급[{'+'.join(parts)}]"
                     print(f"    {i}위. {p['name']}({p['ticker']}) "
                           f"점수:{p['score']}  {p['change_pct']:+.1f}%  "
-                          f"거래량{p['vol_ratio']:.1f}x  {reason}")
+                          f"거래량{p['vol_ratio']:.1f}x{flow_str}  {reason}")
 
             # 비중
             print(f"\n  비중: {sizing['weight_pct']:.1f}% "

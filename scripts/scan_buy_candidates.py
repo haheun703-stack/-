@@ -1144,9 +1144,9 @@ def scan_all(
     try:
         from src.fundamental import FundamentalEngine
         _fundamental_engine = FundamentalEngine()
-        logger.info("FundamentalEngine 초기화 (Earnings Momentum 활성)")
+        print("  FundamentalEngine 초기화 (Earnings Momentum 활성)")
     except Exception as e:
-        logger.warning("FundamentalEngine 로드 실패 (consensus 0점): %s", e)
+        print(f"  FundamentalEngine 로드 실패 (consensus 0점): {e}")
 
     # 수동 블랙리스트 로드 (잼블랙 인사이트: 시스템 추천이라도 수동 제외)
     import yaml
