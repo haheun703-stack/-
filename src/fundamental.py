@@ -358,11 +358,15 @@ class FundamentalEngine:
                     float(q_map[q][col]) if q in q_map and pd.notna(q_map[q][col]) else 0
                     for q in [1, 2, 3]
                 )
+                q4_rev = ann_rev - sum_q123("revenue_억")
+                # Q4 매출 음수 = DART 수정신고 등 데이터 불일치 → 0으로 클램프
+                if q4_rev < 0:
+                    q4_rev = 0
                 rows.append({
                     "ticker": ticker,
                     "year": year,
                     "quarter": 4,
-                    "revenue": ann_rev - sum_q123("revenue_억"),
+                    "revenue": q4_rev,
                     "op_income": ann_op - sum_q123("op_income_억"),
                     "net_income": ann_net - sum_q123("net_income_억"),
                 })
@@ -385,7 +389,7 @@ class FundamentalEngine:
                 "op_yoy_pct": YoY 영업이익 변화율,
                 "net_yoy_pct": YoY 순이익 변화율,
                 "opm_trend": OPM 4분기 추세 기울기,
-                "is_holding_co": 지주사 여부,
+                "is_holding_co": (미사용, 항상 False),
                 "quarters": [...],  # 최근 8분기 데이터
                 "detail": "판정 근거 설명",
             }
@@ -408,15 +412,9 @@ class FundamentalEngine:
         # 최근 8분기
         sub = sub.tail(8).reset_index(drop=True)
 
-        # 지주사 판별: 순이익 >> 영업이익 (3배 이상)이 2분기 이상
-        holding_co_count = sum(
-            1 for _, r in sub.iterrows()
-            if r["op_income"] > 0 and r["net_income"] > r["op_income"] * 3
-        )
-        is_holding = holding_co_count >= 2
-
-        # 기준 지표 선택: 지주사는 순이익, 일반은 영업이익
-        metric_col = "net_income" if is_holding else "op_income"
+        # 연결재무제표 기준 → 전 종목 영업이익 사용 (지주사도 자회사 실적 포함)
+        is_holding = False
+        metric_col = "op_income"
 
         # 영업이익률
         sub["opm"] = sub.apply(
@@ -463,9 +461,18 @@ class FundamentalEngine:
             opm_slope = 0.0
 
         # ── 판정 ──
-        if metric_prev < 0 and metric_now > 0:
+        # 턴어라운드 최소 기준: 흑자전환 이익 > 1억 AND 전분기 적자 > 3억
+        # (0.1억 흑자전환은 노이즈 — 진짜 턴어라운드가 아님)
+        real_turnaround = (
+            metric_prev < -3 and metric_now > 1
+        )
+        if metric_prev < 0 and metric_now > 0 and real_turnaround:
             verdict = "TURNAROUND_STRONG"
-            detail = f"적자→흑자 전환! ({'순이익' if is_holding else '영업이익'} {metric_prev:.1f}→{metric_now:.1f}억)"
+            detail = f"적자→흑자 전환! (영업이익 {metric_prev:.1f}→{metric_now:.1f}억)"
+        elif metric_prev < 0 and metric_now > 0 and not real_turnaround:
+            # 미미한 흑자전환은 TURNAROUND_EARLY로 격하
+            verdict = "TURNAROUND_EARLY"
+            detail = f"소폭 흑자전환 (영업이익 {metric_prev:.1f}→{metric_now:.1f}억, 아직 미미)"
         elif metric_prev < 0 and metric_now < 0 and abs(metric_now) < abs(metric_prev) * 0.7:
             verdict = "TURNAROUND_EARLY"
             detail = f"적자 30%+ 축소 ({metric_prev:.1f}→{metric_now:.1f}억)"
@@ -566,6 +573,4 @@ if __name__ == "__main__":
             print(f"  순이익 YoY: {result['net_yoy_pct']:+.1f}%")
         if result["opm_trend"] is not None:
             print(f"  OPM 추세: {result['opm_trend']:+.2f}%p/Q")
-        if result["is_holding_co"]:
-            print(f"  ⚠️ 지주사 감지 → 순이익 기준 판정")
         print(f"{'='*60}")
