@@ -1139,6 +1139,15 @@ def scan_all(
     engine = SignalEngine("config/settings.yaml")
     scanner = MarketSignalScanner()
 
+    # FundamentalEngine (Earnings Momentum용)
+    _fundamental_engine = None
+    try:
+        from src.fundamental import FundamentalEngine
+        _fundamental_engine = FundamentalEngine()
+        logger.info("FundamentalEngine 초기화 (Earnings Momentum 활성)")
+    except Exception as e:
+        logger.warning("FundamentalEngine 로드 실패 (consensus 0점): %s", e)
+
     # 수동 블랙리스트 로드 (잼블랙 인사이트: 시스템 추천이라도 수동 제외)
     import yaml
     blacklist_set = set()
@@ -1311,6 +1320,20 @@ def scan_all(
             ] if market_signals else []
         except Exception:
             sig["market_signals"] = []
+
+        # Earnings Momentum → scores.consensus 채우기
+        if _fundamental_engine is not None:
+            em = _fundamental_engine.calc_earnings_momentum(ticker)
+            sig["scores"] = sig.get("scores", {})
+            sig["scores"]["consensus"] = em["score"]
+            sig["scores"]["consensus_detail"] = {
+                "verdict": em["verdict"],
+                "op_yoy": em["op_yoy_pct"],
+                "opm_trend": em["opm_trend"],
+                "holding_co": em["is_holding_co"],
+                "detail": em["detail"],
+            }
+            sig["earnings_momentum"] = em
 
         candidates.append(sig)
 

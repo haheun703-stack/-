@@ -250,11 +250,14 @@ def _build_html(
                 </div>
 
                 <div class="score-row">
-                    <span class="score-label">C 합의</span>
+                    <span class="score-label">C 실적</span>
                     <div class="bar-container">
                         <div class="bar bar-consensus" style="width:{c_pct:.0f}%"></div>
                     </div>
                     <span class="score-value">{sc.get('consensus', 0):.0f}/20</span>
+                </div>
+                <div class="score-detail">
+                    {c_detail.get('verdict', '-')} | {c_detail.get('detail', '')[:40]}
                 </div>
             </div>
 
