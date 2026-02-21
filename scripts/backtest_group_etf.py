@@ -356,6 +356,7 @@ def run_backtest(etf, stock_indicators, members, mode="A"):
     positions: list[Position] = []
     trades = []
     daily_results = []
+    pending_entries: list[tuple[str, float]] = []  # [(ticker, z20_entry)] D-1 시그널 → D 매수
 
     # 일별 레짐 기록
     regime_log = {"active": 0, "paused": 0}
@@ -420,46 +421,35 @@ def run_backtest(etf, stock_indicators, members, mode="A"):
         for c in closed:
             positions.remove(c)
 
-        # ── 2. 신규 진입 ──
-        if etf_active and len(positions) < MAX_POSITIONS:
+        # ── 2. D-1 시그널 실행 (deferred entry — look-ahead bias 방지) ──
+        if pending_entries and etf_active:
             held_tickers = {p.ticker for p in positions}
-            candidates = []
-
-            for ticker, data in z_scores.items():
-                if ticker in held_tickers:
-                    continue
-                ok, reason = check_entry(data, mode=mode, ticker=ticker)
-                if ok:
-                    candidates.append((ticker, data))
-
-            # z_20 가장 낮은 순 (가장 많이 빠진 종목 우선)
-            candidates.sort(key=lambda x: x[1]["z_20"])
-
-            for ticker, data in candidates:
+            for ticker, z20_entry in pending_entries:
                 if len(positions) >= MAX_POSITIONS:
                     break
+                if ticker in held_tickers:
+                    continue
+                data = z_scores.get(ticker)
+                if data is None:
+                    continue
 
-                # 포지션 사이징
+                # 오늘(D) 종가 + 슬리피지로 매수 (D-1 시그널)
                 base_alloc = INITIAL_CAPITAL / MAX_POSITIONS
                 w_mult = WEIGHT_MULT.get(ticker, 1.0)
-                alloc = base_alloc * w_mult
-                alloc = min(alloc, cash)
-
+                alloc = min(base_alloc * w_mult, cash)
                 if alloc < 100000:
                     continue
 
-                # 다음 봉 시가 매수 (당일 종가 기준 시뮬레이션)
                 buy_price = data["close"] * (1 + SLIPPAGE)
                 shares = int(alloc / buy_price)
                 if shares <= 0:
                     continue
-
                 actual_cost = shares * buy_price * (1 + COMMISSION)
                 if actual_cost > cash:
                     continue
 
                 cash -= actual_cost
-
+                held_tickers.add(ticker)
                 positions.append(Position(
                     ticker=ticker,
                     name=name_map.get(ticker, ticker),
@@ -467,10 +457,25 @@ def run_backtest(etf, stock_indicators, members, mode="A"):
                     buy_price=buy_price,
                     shares=shares,
                     allocated=actual_cost,
-                    z20_entry=data["z_20"],
+                    z20_entry=z20_entry,
                 ))
 
-        # ── 3. 일일 마감 ──
+        # ── 3. 오늘 시그널 수집 → 내일 매수 대기열 ──
+        pending_entries = []
+        if etf_active and len(positions) < MAX_POSITIONS:
+            held_tickers = {p.ticker for p in positions}
+            candidates = []
+            for ticker, data in z_scores.items():
+                if ticker in held_tickers:
+                    continue
+                ok, reason = check_entry(data, mode=mode, ticker=ticker)
+                if ok:
+                    candidates.append((ticker, data))
+            candidates.sort(key=lambda x: x[1]["z_20"])
+            for ticker, data in candidates:
+                pending_entries.append((ticker, data["z_20"]))
+
+        # ── 4. 일일 마감 ──
         pos_value = 0
         for pos in positions:
             data = z_scores.get(pos.ticker)

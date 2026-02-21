@@ -3,8 +3,8 @@
 섹터 모멘텀 + 수급 + 기술지표 조합으로 ETF 매매 시그널을 생성한다.
 
 분류 체계:
-  Smart Money ETF: SMART 섹터 + BB% < 80 + RSI < 60 → FULL매수
-                   SMART 섹터 + RSI < 75 → 관찰
+  Smart Money ETF: SMART 섹터 + BB% < 80 + RSI < 60 + Rank ≤ 12 → FULL매수
+                   SMART 섹터 + RSI < 65 → 관찰
   Theme Money ETF: ADX > 40↑ + RSI < 80 → HALF매수
                    Stoch GX + ADX > 35 → GX매수
 
@@ -117,12 +117,12 @@ def load_etf_ohlcv(etf_code: str) -> pd.DataFrame | None:
 # ─────────────────────────────────────────────
 
 def calc_rsi(close: pd.Series, period: int = 14) -> float:
-    """최신 RSI 값."""
+    """최신 RSI 값 (Wilder's Smoothing)."""
     delta = close.diff()
     gain = delta.where(delta > 0, 0.0)
     loss = (-delta).where(delta < 0, 0.0)
-    avg_gain = gain.ewm(alpha=1 / period, min_periods=period).mean()
-    avg_loss = loss.ewm(alpha=1 / period, min_periods=period).mean()
+    avg_gain = gain.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
     rs = avg_gain / avg_loss.replace(0, np.nan)
     rsi = 100 - (100 / (1 + rs))
     return round(float(rsi.iloc[-1]), 1)
@@ -287,14 +287,14 @@ def generate_etf_signals() -> dict:
 
         # ── Smart Money ETF 시그널 ──
         if is_smart:
-            if bb_pct < 80 and rsi < 60:
+            if bb_pct < 80 and rsi < 60 and rank <= 12:
                 entry["signal"] = "SMART_BUY"
                 entry["sizing"] = "FULL"
                 entry["stop_loss"] = "-5%"
                 entry["hold_days"] = 30
-                entry["reason"] = f"SMART섹터 + BB{bb_pct:.0f}% + RSI{rsi:.0f}"
+                entry["reason"] = f"SMART섹터 + BB{bb_pct:.0f}% + RSI{rsi:.0f} + Rank{rank}"
                 signals["smart_money_etf"].append(entry)
-            elif rsi < 75:
+            elif rsi < 65:
                 entry["signal"] = "SMART_WATCH"
                 entry["sizing"] = "HALF"
                 entry["stop_loss"] = "-5%"

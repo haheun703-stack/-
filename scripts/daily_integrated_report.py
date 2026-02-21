@@ -579,7 +579,7 @@ def format_text_message(data: dict) -> str:
             sizing = e.get("sizing", "")
             foreign = e.get("foreign_5d_bil", 0)
             inst = e.get("inst_5d_bil", 0)
-            lines.append(f"  {e['sector']}({e['etf_code']}) [{signal}] {sizing}")
+            lines.append(f"  {e.get('sector', '?')}({e.get('etf_code', '?')}) [{signal}] {sizing}")
             lines.append(f"   RSI{e.get('rsi', 0):.0f} BB{e.get('bb_pct', 0):.0f}% "
                          f"외인{foreign:+,}억 기관{inst:+,}억")
     elif etf_watch:
@@ -589,7 +589,7 @@ def format_text_message(data: dict) -> str:
 
     if etf_watch:
         watch_str = ", ".join(
-            f"{e['sector']}({e.get('signal', '')})"
+            f"{e.get('sector', '?')}({e.get('signal', '')})"
             for e in etf_watch[:4]
         )
         lines.append(f"  관찰: {watch_str}")

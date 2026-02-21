@@ -220,7 +220,7 @@ def score_subsidiaries(
                 "change_pct": data["change_pct"],
                 "volume_ratio": data["vol_ratio"],
                 "rsi": data["rsi"],
-                "score": round(score, 1),
+                "score": round(min(score, 100.0), 1),
                 "reasons": reasons,
             })
 

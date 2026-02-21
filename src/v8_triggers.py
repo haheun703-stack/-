@@ -73,8 +73,8 @@ class TriggerEngine:
         둘 중 하나만 충족해도 발동 (강도 차이)
         """
         cfg = self.cfg.get('volume_rsi', {})
-        vol_mult = cfg.get('vol_multiplier', 1.5)
-        rsi_range = cfg.get('rsi_range', [35, 55])
+        vol_mult = cfg.get('vol_multiplier', 0.3)
+        rsi_range = cfg.get('rsi_range', [30, 80])
         rsi_thresh = cfg.get('rsi_threshold', 45)
 
         volume = row.get('volume', 0)

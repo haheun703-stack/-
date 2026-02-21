@@ -4,6 +4,9 @@
 가설: 대장주(그룹 시총 1위)가 +N% 이상 급등하면,
       D+1~D+3 내에 하위 계열사도 따라 오른다.
 
+NOTE: 수익률은 개별종목 등락률(gross). 실제 매매 시 왕복 수수료(0.03%)
+      + 세금(0.18%) + 슬리피지(≈0.5%) ≈ 총 0.7%를 차감해야 함.
+
 Usage:
     python scripts/group_relay_backtest.py                  # 기본 (3%, 2년)
     python scripts/group_relay_backtest.py --threshold 5.0  # 발화 기준 5%

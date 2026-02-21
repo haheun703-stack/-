@@ -443,11 +443,12 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None, per_filter=None):
                     half_shares = pos.shares // 2
                     if half_shares > 0:
                         proceeds = half_shares * sell_price * (1 - COMMISSION - TAX)
+                        half_cost = half_shares * pos.buy_price * (1 + COMMISSION)
                         cash += proceeds
                         pos.half_sold = True
-                        pos.half_sold_pnl = (sell_price / pos.buy_price - 1)
+                        pos.half_sold_pnl = (sell_price / pos.buy_price - 1) - COMMISSION * 2 - TAX
                         pos.shares -= half_shares
-                        day_pnl += proceeds - half_shares * pos.buy_price
+                        day_pnl += proceeds - half_cost
 
                 # 트레일링 스톱 (반매도 후)
                 if pos.half_sold and low <= pos.peak_price * trail_pct:
@@ -645,12 +646,16 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None, per_filter=None):
             positions=len(positions), daily_pnl=day_pnl
         ))
 
-    # 미청산 포지션 강제 청산 (END_DATE 시점 가격 사용)
+    # 미청산 포지션 강제 청산 (END_DATE 이내 마지막 가격 사용)
+    last_date = dates[-1] if dates else pd.Timestamp(END_DATE)
     for pos in positions:
         if pos.ticker in day_idx_map:
             last_close = float(data_dict[pos.ticker].iloc[day_idx_map[pos.ticker]]["close"])
         else:
-            last_close = float(data_dict[pos.ticker].iloc[-1]["close"])
+            # day_idx_map에 없으면 END_DATE 이전 마지막 종가 사용 (미래 데이터 방지)
+            df_t = data_dict[pos.ticker]
+            valid = df_t[df_t.index <= last_date]
+            last_close = float(valid.iloc[-1]["close"]) if len(valid) > 0 else pos.buy_price
         pnl_pct = (last_close / pos.buy_price - 1) - COMMISSION * 2 - TAX
         trades.append({
             "ticker": pos.ticker, "name": pos.name,

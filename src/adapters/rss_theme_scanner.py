@@ -194,18 +194,35 @@ class RssThemeScanner:
     def _is_recent_duplicate(self, theme_name: str) -> bool:
         """최근 dedup_hours 내 같은 테마 알림이 있었는지 체크"""
         history = self._load_alert_history()
-        cutoff = (datetime.now() - timedelta(hours=self.dedup_hours)).isoformat()
+        cutoff = datetime.now() - timedelta(hours=self.dedup_hours)
         for entry in history:
-            if entry.get("theme") == theme_name and entry.get("timestamp", "") > cutoff:
-                return True
+            if entry.get("theme") != theme_name:
+                continue
+            ts_str = entry.get("timestamp", "")
+            if not ts_str:
+                continue
+            try:
+                ts = datetime.fromisoformat(ts_str)
+                if ts > cutoff:
+                    return True
+            except (ValueError, TypeError):
+                continue
         return False
 
     def _update_alert_history(self, alerts: list[ThemeAlert]) -> None:
         """알림 히스토리 업데이트 (오래된 항목 자동 정리)"""
         history = self._load_alert_history()
-        cutoff = (datetime.now() - timedelta(hours=self.dedup_hours * 3)).isoformat()
-        # 오래된 항목 제거
-        history = [h for h in history if h.get("timestamp", "") > cutoff]
+        cutoff = datetime.now() - timedelta(hours=self.dedup_hours * 3)
+        # 오래된 항목 제거 (datetime 비교)
+        cleaned = []
+        for h in history:
+            ts_str = h.get("timestamp", "")
+            try:
+                if ts_str and datetime.fromisoformat(ts_str) > cutoff:
+                    cleaned.append(h)
+            except (ValueError, TypeError):
+                cleaned.append(h)  # 파싱 실패 시 유지
+        history = cleaned
         # 새 항목 추가
         for alert in alerts:
             history.append({
