@@ -43,6 +43,7 @@ def run_theme_scan(
     use_grok: bool = True,
     send_telegram: bool = True,
     dry_run: bool = False,
+    max_age_override: int | None = None,
 ) -> list[ThemeAlert]:
     """테마 스캔 메인 플로우.
 
@@ -65,14 +66,16 @@ def run_theme_scan(
     rss_feeds = scanner_cfg.get("rss_feeds", [])
     dedup_hours = scanner_cfg.get("dedup_hours", 24)
     max_articles = scanner_cfg.get("max_articles", 50)
+    max_age_hours = max_age_override or scanner_cfg.get("max_age_hours", 48)
 
     # 1. RSS 스캔
     logger.info("=" * 50)
-    logger.info("[Phase 1] RSS 테마 스캔 시작")
+    logger.info("[Phase 1] RSS 테마 스캔 시작 (최근 %dh 기사만)", max_age_hours)
     scanner = RssThemeScanner(
         rss_feeds=rss_feeds,
         dedup_hours=dedup_hours,
         max_articles=max_articles,
+        max_age_hours=max_age_hours,
     )
     alerts = scanner.scan()
     logger.info("[Phase 1] RSS 감지 완료: %d건 테마", len(alerts))
@@ -178,15 +181,15 @@ def _enrich_technical_data(alerts: list[ThemeAlert]) -> list[ThemeAlert]:
                     continue
 
                 last = df.iloc[-1]
-                stock.current_rsi = float(last.get("rsi", 0) or 0)
+                stock.current_rsi = float(last.get("rsi_14", 0) or 0)
 
                 close = float(last.get("close", 0) or 0)
-                ma20 = float(last.get("ma20", 0) or 0)
+                ma20 = float(last.get("sma_20", 0) or 0)
                 if ma20 > 0 and close > 0:
                     stock.ma20_dist_pct = round((close / ma20 - 1) * 100, 1)
 
                 # 간단한 파이프라인 상태 태깅
-                adx = float(last.get("adx", 0) or 0)
+                adx = float(last.get("adx_14", 0) or 0)
                 if stock.current_rsi > 70 or stock.ma20_dist_pct > 20:
                     stock.pipeline_status = "OVERHEATED"
                 elif adx < 18:
@@ -291,6 +294,8 @@ def main():
                         help="텔레그램 발송 안 함")
     parser.add_argument("--dry-run", action="store_true",
                         help="전체 시뮬레이션 (API 호출/발송 없음)")
+    parser.add_argument("--max-age", type=int, default=0,
+                        help="기사 최대 나이(시간). 0이면 settings.yaml 값 사용")
     parser.add_argument("--verbose", "-v", action="store_true",
                         help="상세 로그 출력")
     args = parser.parse_args()
@@ -306,6 +311,7 @@ def main():
         use_grok=not args.no_grok,
         send_telegram=not args.no_send,
         dry_run=args.dry_run,
+        max_age_override=args.max_age if args.max_age > 0 else None,
     )
 
 

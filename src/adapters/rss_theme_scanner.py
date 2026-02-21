@@ -12,7 +12,8 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timedelta
+import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import feedparser
@@ -36,11 +37,13 @@ class RssThemeScanner:
         rss_feeds: list[dict] | None = None,
         dedup_hours: int = 24,
         max_articles: int = 50,
+        max_age_hours: int = 48,
     ):
         self.theme_dict_path = Path(theme_dict_path) if theme_dict_path else THEME_DICT_PATH
         self.rss_feeds = rss_feeds or []
         self.dedup_hours = dedup_hours
         self.max_articles = max_articles
+        self.max_age_hours = max_age_hours
         self.theme_dict: dict = {}
 
     def scan(self) -> list[ThemeAlert]:
@@ -121,8 +124,12 @@ class RssThemeScanner:
             return {}
 
     def _fetch_all_feeds(self) -> list[dict]:
-        """모든 RSS 피드에서 기사 수집"""
+        """모든 RSS 피드에서 기사 수집 (max_age_hours 이내만)"""
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(hours=self.max_age_hours)
         articles = []
+        total_filtered = 0
+
         for feed_cfg in self.rss_feeds:
             url = feed_cfg.get("url", "")
             name = feed_cfg.get("name", url)
@@ -130,17 +137,36 @@ class RssThemeScanner:
                 continue
             try:
                 d = feedparser.parse(url)
+                feed_count = 0
                 for entry in d.entries[: self.max_articles]:
+                    # 발행일 파싱 → 오래된 기사 필터링
+                    pub_parsed = entry.get("published_parsed")
+                    if pub_parsed:
+                        pub_dt = datetime.fromtimestamp(
+                            time.mktime(pub_parsed), tz=timezone.utc
+                        )
+                        if pub_dt < cutoff:
+                            total_filtered += 1
+                            continue
+                        pub_str = pub_dt.strftime("%Y-%m-%d %H:%M")
+                    else:
+                        pub_str = entry.get("published", "")
+
                     articles.append({
                         "title": entry.get("title", ""),
                         "summary": _strip_html(entry.get("summary", "")),
                         "link": entry.get("link", ""),
-                        "published": entry.get("published", ""),
+                        "published": pub_str,
                         "source": name,
                     })
-                logger.info("RSS '%s': %d건 수집", name, min(len(d.entries), self.max_articles))
+                    feed_count += 1
+                logger.info("RSS '%s': %d건 수집 (전체 %d건 중)",
+                            name, feed_count, min(len(d.entries), self.max_articles))
             except Exception as e:
                 logger.warning("RSS '%s' 수집 실패: %s", name, e)
+
+        if total_filtered > 0:
+            logger.info("발행일 필터: %d건 제외 (%dh 초과)", total_filtered, self.max_age_hours)
         return articles
 
     @staticmethod
