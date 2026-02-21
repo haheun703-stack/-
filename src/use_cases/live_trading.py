@@ -2,6 +2,7 @@
 v4.0 라이브 트레이딩 엔진 — 시그널→주문→모니터링 루프
 
 기존 backtest_engine + signal_engine + position_sizer 로직을 라이브 환경으로 통합.
+v4.2: 손절 후 Shakeout 사후 판별 알림 (손절 자체는 절대 막지 않음)
 """
 
 from __future__ import annotations
@@ -256,6 +257,13 @@ class LiveTradingEngine:
             result = self._execute_single_sell(pos, reason, quantity)
             results.append(result)
 
+            # 손절 매도 성공 시 → Shakeout 사후 판별 알림
+            if (
+                result.get("success")
+                and reason in (ExitReason.STOP_LOSS, ExitReason.PCT_STOP)
+            ):
+                self._shakeout_post_sell_alert(pos)
+
         return results
 
     def _execute_single_sell(
@@ -436,6 +444,45 @@ class LiveTradingEngine:
             send_trade_alert(alert_data, "SELL")
         except Exception as e:
             logger.debug("[알림] 매도 알림 실패: %s", e)
+
+    # ──────────────────────────────────────────
+    # Shakeout 사후 판별 (손절은 이미 실행된 후)
+    # ──────────────────────────────────────────
+
+    def _shakeout_post_sell_alert(self, pos: LivePosition) -> None:
+        """
+        손절 매도 완료 후 shakeout 가능성을 사후 판별하여 텔레그램 알림.
+        손절 자체는 절대 막지 않음 — 정보 제공 목적.
+        """
+        try:
+            from src.detect_shakeout import detect_shakeout
+
+            result = detect_shakeout(
+                ticker=pos.ticker,
+                current_price=pos.current_price,
+                entry_price=pos.entry_price,
+            )
+
+            # SHAKEOUT 또는 UNCERTAIN일 때만 알림
+            if result.verdict in ("SHAKEOUT", "UNCERTAIN"):
+                drop_pct = (pos.current_price / pos.entry_price - 1) * 100
+                alert_text = result.to_alert_text(pos.ticker, pos.name, drop_pct)
+                # 사후 판별임을 명시
+                alert_text += "\n\n⚠️ 손절은 이미 실행됨. 3일 내 회복 시 재진입 검토."
+
+                try:
+                    from src.telegram_sender import send_message
+                    send_message(alert_text)
+                except Exception as e:
+                    logger.debug("[알림] Shakeout 사후 알림 실패: %s", e)
+
+                logger.info(
+                    "[Shakeout] %s 사후 판별: %s (%d/4점) — 재진입 모니터링 권장",
+                    pos.ticker, result.verdict, result.score,
+                )
+
+        except Exception as e:
+            logger.debug("[Shakeout] %s 사후 판별 실패: %s", pos.ticker, e)
 
 
 def create_live_engine(config_path: str = "config/settings.yaml") -> LiveTradingEngine:
