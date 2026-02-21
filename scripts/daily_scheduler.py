@@ -35,6 +35,7 @@ v5.1 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
   === 수급 확정 + 스캔 + 리포트 ===
   18:20  Phase 9    수급 최종 확정
   18:30  Phase 9.5  릴레이 포지션 체크
+  18:35  Phase 9.6  그룹 릴레이 체크
   18:40  Phase 10   scan_all() 매수 후보 스캔
   19:00  Phase 10B  [TG] 통합 데일리 리포트
   19:30  Phase 11   업무일지
@@ -679,6 +680,29 @@ class DailyScheduler:
             logger.error("[Phase 9.5] 릴레이 체크 실패: %s", e)
 
     # ══════════════════════════════════════════
+    # Phase 9.6: 그룹 릴레이 체크 (18:35)
+    # ══════════════════════════════════════════
+
+    def phase_group_relay_check(self) -> None:
+        """9.6: 그룹 릴레이 발화 감지 (참고 정보)."""
+        logger.info("[Phase 9.6] 그룹 릴레이 체크 시작")
+        try:
+            from scripts.group_relay_detector import generate_group_relay_report, save_report
+            report = generate_group_relay_report(fire_threshold=3.0)
+            save_report(report)
+            fired = report.get("fired_groups", [])
+            if fired:
+                groups_str = ", ".join(
+                    f"{g['group']}({g['leader_name']}{g['leader_change']:+.1f}%)"
+                    for g in fired
+                )
+                logger.info("[Phase 9.6] 그룹 발화: %s", groups_str)
+            else:
+                logger.info("[Phase 9.6] 그룹 발화 없음")
+        except Exception as e:
+            logger.error("[Phase 9.6] 그룹 릴레이 체크 실패: %s", e)
+
+    # ══════════════════════════════════════════
     # Phase 10: 내일 매수 후보 스캔 (18:40)
     # ══════════════════════════════════════════
 
@@ -1059,6 +1083,8 @@ class DailyScheduler:
             self._safe_run, self.phase_supply_final)
         sched.every().day.at(S.get("relay_check", "18:30")).do(
             self._safe_run, self.phase_relay_check)
+        sched.every().day.at(S.get("group_relay_check", "18:35")).do(
+            self._safe_run, self.phase_group_relay_check)
         sched.every().day.at(S.get("evening_scan", "18:40")).do(
             self._safe_run, self.phase_evening_scan)
         sched.every().day.at(S.get("evening_briefing", "19:00")).do(
@@ -1155,6 +1181,7 @@ class DailyScheduler:
             ("\U0001f319 수급 확정 + 스캔 + 리포트", [
                 (S.get("supply_final", "18:20"), "Phase 9", "수급 최종 확정"),
                 (S.get("relay_check", "18:30"), "Phase 9.5", "릴레이 포지션 체크"),
+                (S.get("group_relay_check", "18:35"), "Phase 9.6", "그룹 릴레이 체크"),
                 (S.get("evening_scan", "18:40"), "Phase 10", "scan_all() 매수 후보 스캔"),
                 (S.get("evening_briefing", "19:00"), "Phase 10B", "[TG] 통합 데일리 리포트"),
                 (S.get("eod_journal", "19:30"), "Phase 11", "업무일지"),

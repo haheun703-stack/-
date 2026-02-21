@@ -178,6 +178,16 @@ def collect_relay_signals() -> dict:
         return {"fired_sectors": [], "relay_signals": []}
 
 
+def collect_group_relay_signals() -> dict:
+    """그룹 릴레이 시그널 수집 (참고 정보)."""
+    try:
+        from group_relay_detector import generate_group_relay_report
+        return generate_group_relay_report(fire_threshold=3.0)
+    except Exception as e:
+        print(f"  그룹 릴레이 스캔 실패: {e}")
+        return {"fired_groups": [], "no_fire": True, "summary": "스캔 실패"}
+
+
 def _load_quantum_positions() -> dict:
     """Quantum positions.json 직접 로드."""
     pos_file = PROJECT_ROOT / "data" / "positions.json"
@@ -246,7 +256,7 @@ def collect_all_signals(
     grade_filter: str = "AB",
     use_news: bool = False,
 ) -> dict:
-    """4개 시그널 시스템 데이터 통합 수집."""
+    """5개 시그널 시스템 데이터 통합 수집."""
     today = datetime.now().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -255,30 +265,36 @@ def collect_all_signals(
     print(f"{'=' * 60}")
 
     # 1. US Overnight
-    print("\n[1/4] US Overnight Signal...")
+    print("\n[1/5] US Overnight Signal...")
     us_data = collect_us_overnight()
     us_grade = us_data.get("grade", "NEUTRAL")
     us_score = us_data.get("combined_score_100", 0)
     print(f"  {us_grade} ({us_score:+.1f})")
 
     # 2. KOSPI 레짐
-    print("\n[2/4] KOSPI 레짐...")
+    print("\n[2/5] KOSPI 레짐...")
     kospi_data = collect_kospi_regime()
     print(f"  {kospi_data['regime']} ({kospi_data['slots']}슬롯)")
 
     # 3. Quantum 스캔
-    print(f"\n[3/4] Quantum v10 {'스캔' if run_scan else '캐시 로드'}...")
+    print(f"\n[3/5] Quantum v10 {'스캔' if run_scan else '캐시 로드'}...")
     candidates, stats = collect_quantum_candidates(run_scan, grade_filter, use_news)
     print(f"  {len(candidates)}종목 통과")
 
-    # 4. 릴레이
-    print("\n[4/4] 릴레이 시그널...")
+    # 4. 섹터 릴레이
+    print("\n[4/5] 섹터 릴레이 시그널...")
     relay_data = collect_relay_signals()
     fired_count = len(relay_data.get("fired_sectors", []))
     signal_count = len(relay_data.get("relay_signals", []))
     print(f"  발화 {fired_count}개, 시그널 {signal_count}개")
 
-    # 5. 포지션
+    # 5. 그룹 릴레이
+    print("\n[5/5] 그룹 릴레이 시그널...")
+    group_relay_data = collect_group_relay_signals()
+    gr_fired = len(group_relay_data.get("fired_groups", []))
+    print(f"  발화 {gr_fired}개 그룹")
+
+    # 포지션
     print("\n포지션 로드...")
     positions = collect_positions()
     print(f"  Quantum {positions['quantum']['count']}건, Relay {positions['relay']['count']}건")
@@ -290,6 +306,7 @@ def collect_all_signals(
         "kospi_regime": kospi_data,
         "quantum": {"candidates": candidates, "stats": stats},
         "relay": relay_data,
+        "group_relay": group_relay_data,
         "positions": positions,
     }
 
@@ -503,6 +520,19 @@ def format_text_message(data: dict) -> str:
         moved_str = ", ".join(f"{s['follow_sector']}(+{s.get('follow_stats', {}).get('avg_return', 0):.1f}%)"
                               for s in already_moved[:3])
         lines.append(f"   (이미움직임: {moved_str})")
+
+    # ── 그룹 릴레이 (참고) ──
+    gr = data.get("group_relay", {})
+    gr_fired = gr.get("fired_groups", [])
+    if gr_fired:
+        lines.append("")
+        lines.append(f"[그룹릴레이 {len(gr_fired)}건]")
+        for fg in gr_fired:
+            leader_chg = fg.get("leader_change", 0)
+            lines.append(f"  {fg['group']}: {fg['leader_name']}{leader_chg:+.1f}% → 계열사 대기")
+            for sub in fg.get("waiting_subsidiaries", [])[:3]:
+                lines.append(f"   -> {sub['name']}({sub['change_pct']:+.1f}%) "
+                              f"S{sub['score']:.0f} [{sub['tier']}]")
 
     # ── 보유 포지션 ──
     q_pos = positions["quantum"]["positions"]

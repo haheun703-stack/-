@@ -122,6 +122,7 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
     kospi = data.get("kospi_regime", {})
     candidates = data.get("quantum", {}).get("candidates", [])
     relay = data.get("relay", {})
+    group_relay = data.get("group_relay", {})
     positions = data.get("positions", {})
 
     # ── 섹션 1: 시장 온도 ──
@@ -135,8 +136,11 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
     # ── 섹션 2: Quantum 매수 후보 ──
     quantum_html = _build_quantum_section(candidates[:5])
 
-    # ── 섹션 3: 릴레이 시그널 ──
+    # ── 섹션 3: 섹터 릴레이 시그널 ──
     relay_html = _build_relay_section(relay)
+
+    # ── 섹션 3.5: 그룹 릴레이 (참고) ──
+    group_relay_html = _build_group_relay_section(group_relay)
 
     # ── 섹션 4: 보유 포지션 ──
     positions_html = _build_positions_section(positions)
@@ -323,6 +327,7 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
 
 {quantum_html}
 {relay_html}
+{group_relay_html}
 {positions_html}
 {action_html}
 
@@ -525,6 +530,55 @@ def _build_relay_section(relay: dict) -> str:
 
     return f"""
 <div class="section-title">{title}</div>
+{cards}
+"""
+
+
+def _build_group_relay_section(group_relay: dict) -> str:
+    """섹션 3.5: 그룹 릴레이 (참고 정보)."""
+    fired_groups = group_relay.get("fired_groups", [])
+
+    if not fired_groups:
+        return ""  # 발화 없으면 섹션 자체를 숨김
+
+    cards = ""
+    for fg in fired_groups:
+        leader_chg = fg.get("leader_change", 0)
+        leader_vr = fg.get("leader_volume_ratio", 1.0)
+        subs_html = ""
+
+        for sub in fg.get("waiting_subsidiaries", [])[:3]:
+            tier_color = {"tier1": "#3fb950", "tier2": "#d29922", "tier3": "#6e7681"}.get(sub["tier"], "#6e7681")
+            score = sub.get("score", 0)
+            chg = sub.get("change_pct", 0)
+            reasons = ", ".join(sub.get("reasons", []))
+            subs_html += (
+                f"<div style='padding:4px 0;border-bottom:1px solid #21262d;display:flex;justify-content:space-between'>"
+                f"<span><span style='color:{tier_color};font-size:11px'>{sub['tier']}</span> "
+                f"{sub['name']}({sub['ticker']})</span>"
+                f"<span style='font-size:12px;color:#8b949e'>{chg:+.1f}% S{score:.0f}</span>"
+                f"</div>"
+            )
+
+        cards += f"""
+<div class="card" style="border-color:#8957e533">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+            <span style="color:#f0883e;font-weight:bold">{fg['group']}</span>
+            <span style="color:#8b949e;font-size:12px;margin-left:8px">대장 {fg['leader_name']}</span>
+        </div>
+        <div>
+            <span style="color:#3fb950;font-weight:bold">{leader_chg:+.1f}%</span>
+            <span style="color:#6e7681;font-size:11px;margin-left:4px">vol{leader_vr:.1f}x</span>
+        </div>
+    </div>
+    <div style="font-size:11px;color:#484f58;margin-bottom:4px">대기 계열사 (참고)</div>
+    {subs_html}
+</div>
+"""
+
+    return f"""
+<div class="section-title">그룹 릴레이 ({len(fired_groups)}건 발화)</div>
 {cards}
 """
 

@@ -1,0 +1,94 @@
+# ============================================================
+# 재벌 그룹 → 대장주 + 계열사 매핑
+# ============================================================
+# leader: 그룹 시총 1위 (발화 기준)
+# tier1: 핵심 계열사 (가장 먼저 따라오는 그룹)
+# tier2: 중간 계열사
+# tier3: 금융/기타 계열사
+# ============================================================
+
+groups:
+  삼성:
+    leader: {ticker: "005930", name: "삼성전자"}
+    tier1:
+      - {ticker: "006400", name: "삼성SDI"}
+      - {ticker: "207940", name: "삼성바이오로직스"}
+      - {ticker: "009150", name: "삼성전기"}
+    tier2:
+      - {ticker: "018260", name: "삼성에스디에스"}
+      - {ticker: "028260", name: "삼성물산"}
+      - {ticker: "010140", name: "삼성중공업"}
+    tier3:
+      - {ticker: "032830", name: "삼성생명"}
+      - {ticker: "000810", name: "삼성화재"}
+      - {ticker: "016360", name: "삼성증권"}
+
+  SK:
+    leader: {ticker: "000660", name: "SK하이닉스"}
+    tier1:
+      - {ticker: "096770", name: "SK이노베이션"}
+      - {ticker: "011790", name: "SKC"}
+    tier2:
+      - {ticker: "017670", name: "SK텔레콤"}
+      - {ticker: "034730", name: "SK"}
+      - {ticker: "326030", name: "SK바이오팜"}
+    tier3:
+      - {ticker: "018670", name: "SK가스"}
+      - {ticker: "001740", name: "SK네트웍스"}
+
+  현대차:
+    leader: {ticker: "005380", name: "현대차"}
+    tier1:
+      - {ticker: "000270", name: "기아"}
+      - {ticker: "012330", name: "현대모비스"}
+    tier2:
+      - {ticker: "086280", name: "현대글로비스"}
+      - {ticker: "011210", name: "현대위아"}
+      - {ticker: "064350", name: "현대로템"}
+    tier3:
+      - {ticker: "004020", name: "현대제철"}
+      - {ticker: "000720", name: "현대건설"}
+
+  LG:
+    leader: {ticker: "373220", name: "LG에너지솔루션"}
+    tier1:
+      - {ticker: "051910", name: "LG화학"}
+      - {ticker: "066570", name: "LG전자"}
+    tier2:
+      - {ticker: "011070", name: "LG이노텍"}
+      - {ticker: "034220", name: "LG디스플레이"}
+    tier3:
+      - {ticker: "003550", name: "LG"}
+      - {ticker: "032640", name: "LG유플러스"}
+
+  한화:
+    leader: {ticker: "012450", name: "한화에어로스페이스"}
+    tier1:
+      - {ticker: "009830", name: "한화솔루션"}
+      - {ticker: "042660", name: "한화오션"}
+    tier2:
+      - {ticker: "082740", name: "한화엔진"}
+      - {ticker: "272210", name: "한화시스템"}
+    tier3:
+      - {ticker: "000880", name: "한화"}
+      - {ticker: "088350", name: "한화생명"}
+
+  HD현대:
+    leader: {ticker: "329180", name: "HD현대중공업"}
+    tier1:
+      - {ticker: "267260", name: "HD현대일렉트릭"}
+      - {ticker: "009540", name: "HD한국조선해양"}
+    tier2:
+      - {ticker: "267270", name: "HD현대건설기계"}
+      - {ticker: "042670", name: "HD현대인프라코어"}
+    tier3:
+      - {ticker: "267250", name: "HD현대"}
+
+  포스코:
+    leader: {ticker: "005490", name: "POSCO홀딩스"}
+    tier1:
+      - {ticker: "003670", name: "포스코퓨처엠"}
+      - {ticker: "047050", name: "포스코인터내셔널"}
+    tier2:
+      - {ticker: "022100", name: "포스코DX"}
+    tier3: []
