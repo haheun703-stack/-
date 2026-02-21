@@ -123,6 +123,7 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
     candidates = data.get("quantum", {}).get("candidates", [])
     relay = data.get("relay", {})
     group_relay = data.get("group_relay", {})
+    etf = data.get("etf", {})
     positions = data.get("positions", {})
 
     # ── 섹션 1: 시장 온도 ──
@@ -141,6 +142,9 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
 
     # ── 섹션 3.5: 그룹 릴레이 (참고) ──
     group_relay_html = _build_group_relay_section(group_relay)
+
+    # ── 섹션 3.7: ETF 시그널 ──
+    etf_html = _build_etf_section(etf)
 
     # ── 섹션 4: 보유 포지션 ──
     positions_html = _build_positions_section(positions)
@@ -328,6 +332,7 @@ def _build_html(data: dict, date_str: str, time_str: str) -> str:
 {quantum_html}
 {relay_html}
 {group_relay_html}
+{etf_html}
 {positions_html}
 {action_html}
 
@@ -579,6 +584,107 @@ def _build_group_relay_section(group_relay: dict) -> str:
 
     return f"""
 <div class="section-title">그룹 릴레이 ({len(fired_groups)}건 발화)</div>
+{cards}
+"""
+
+
+def _build_etf_section(etf: dict) -> str:
+    """섹션 3.7: ETF 매매 시그널."""
+    smart_etfs = etf.get("smart_money_etf", [])
+    theme_etfs = etf.get("theme_money_etf", [])
+    watch_etfs = etf.get("watch_list", [])
+    smart_sectors = etf.get("smart_sectors", [])
+
+    buy_etfs = smart_etfs + theme_etfs
+    if not buy_etfs and not watch_etfs:
+        return ""
+
+    # SMART 섹터 배지
+    smart_badges = ""
+    if smart_sectors:
+        badges = " ".join(
+            f"<span style='display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;"
+            f"background:#1f6feb33;color:#58a6ff;font-size:11px'>{s}</span>"
+            for s in smart_sectors
+        )
+        smart_badges = f"<div style='margin-bottom:8px'>{badges}</div>"
+
+    cards = ""
+
+    # 매수 ETF 카드
+    for e in buy_etfs:
+        signal = e.get("signal", "")
+        sizing = e.get("sizing", "")
+        is_smart = "SMART" in signal
+        border_color = "#1f6feb" if is_smart else "#f0883e"
+        signal_color = "#58a6ff" if is_smart else "#f0883e"
+        label = "SMART" if is_smart else "THEME"
+
+        rsi = e.get("rsi", 0)
+        bb = e.get("bb_pct", 0)
+        adx = e.get("adx", 0)
+        foreign = e.get("foreign_5d_bil", 0)
+        inst = e.get("inst_5d_bil", 0)
+        ret5 = e.get("ret_5", 0)
+        ret20 = e.get("ret_20", 0)
+        reason = e.get("reason", "")
+
+        cards += f"""
+<div class="card" style="border-color:{border_color}55">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+            <span style="color:{signal_color};font-weight:bold;font-size:15px">{e['sector']}</span>
+            <span style="color:#6e7681;font-size:12px;margin-left:6px">({e['etf_code']})</span>
+        </div>
+        <div>
+            <span style="padding:2px 8px;border-radius:4px;background:{signal_color}22;color:{signal_color};font-size:11px;font-weight:bold">{label} {sizing}</span>
+        </div>
+    </div>
+    <div style="display:flex;gap:12px;font-size:12px;color:#8b949e;margin-bottom:4px">
+        <span>RSI {rsi:.0f}</span>
+        <span>BB {bb:.0f}%</span>
+        <span>ADX {adx:.0f}</span>
+        <span style="color:#3fb950">5D {ret5:+.1f}%</span>
+        <span>20D {ret20:+.1f}%</span>
+    </div>
+    <div style="display:flex;gap:12px;font-size:12px;margin-bottom:4px">
+        <span style="color:{'#3fb950' if foreign > 0 else '#f85149'}">외인 {foreign:+,}억</span>
+        <span style="color:{'#3fb950' if inst > 0 else '#f85149'}">기관 {inst:+,}억</span>
+    </div>
+    <div style="font-size:11px;color:#484f58">{reason} | S/L {e.get('stop_loss', '-5%')} | {e.get('hold_days', 30)}일</div>
+</div>
+"""
+
+    # 관찰 ETF (간략)
+    if watch_etfs:
+        watch_items = ""
+        for e in watch_etfs[:4]:
+            signal = e.get("signal", "")
+            rsi = e.get("rsi", 0)
+            bb = e.get("bb_pct", 0)
+            foreign = e.get("foreign_5d_bil", 0)
+            inst = e.get("inst_5d_bil", 0)
+            watch_items += (
+                f"<div style='padding:4px 0;border-bottom:1px solid #21262d;display:flex;justify-content:space-between'>"
+                f"<span>{e['sector']} ({e['etf_code']})</span>"
+                f"<span style='font-size:12px;color:#8b949e'>RSI{rsi:.0f} BB{bb:.0f}% "
+                f"외{foreign:+,} 기{inst:+,}</span>"
+                f"</div>"
+            )
+        cards += f"""
+<div class="card" style="border-color:#21262d;opacity:0.8">
+    <div class="small" style="margin-bottom:4px;color:#484f58">관찰 목록</div>
+    {watch_items}
+</div>
+"""
+
+    buy_count = len(buy_etfs)
+    watch_count = len(watch_etfs)
+    title = f"ETF 시그널 ({buy_count}건 매수, {watch_count}건 관찰)"
+
+    return f"""
+<div class="section-title">{title}</div>
+{smart_badges}
 {cards}
 """
 

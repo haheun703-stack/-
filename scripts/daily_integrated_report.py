@@ -1,10 +1,12 @@
-"""통합 데일리 리포트 — 4개 시그널 통합 + HTML/PNG + 텔레그램 발송.
+"""통합 데일리 리포트 — 6대 시그널 통합 + HTML/PNG + 텔레그램 발송.
 
-4개 시그널:
+6대 시그널:
   1. US Overnight Signal (5등급)
   2. KOSPI 레짐 (4단계)
   3. Quantum v10 매수 후보 (Kill→Rank→Tag)
-  4. 릴레이 트레이딩 (발화→후행 섹터)
+  4. 섹터 릴레이 (발화→후행 섹터)
+  5. 그룹 릴레이 (대장주→계열사, 참고)
+  6. ETF 매매 시그널 (Smart Money + Theme)
 
 사용법:
   python scripts/daily_integrated_report.py              # 전체 실행 + 텔레그램
@@ -188,6 +190,21 @@ def collect_group_relay_signals() -> dict:
         return {"fired_groups": [], "no_fire": True, "summary": "스캔 실패"}
 
 
+def collect_etf_signals() -> dict:
+    """ETF 매매 시그널 수집 (etf_trading_signal.json 로드)."""
+    signal_path = PROJECT_ROOT / "data" / "sector_rotation" / "etf_trading_signal.json"
+    default = {"smart_money_etf": [], "theme_money_etf": [], "watch_list": [],
+               "smart_sectors": [], "summary": {}}
+    if not signal_path.exists():
+        return default
+    try:
+        with open(signal_path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"  ETF 시그널 로드 실패: {e}")
+        return default
+
+
 def _load_quantum_positions() -> dict:
     """Quantum positions.json 직접 로드."""
     pos_file = PROJECT_ROOT / "data" / "positions.json"
@@ -256,7 +273,7 @@ def collect_all_signals(
     grade_filter: str = "AB",
     use_news: bool = False,
 ) -> dict:
-    """5개 시그널 시스템 데이터 통합 수집."""
+    """6개 시그널 시스템 데이터 통합 수집."""
     today = datetime.now().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -265,34 +282,43 @@ def collect_all_signals(
     print(f"{'=' * 60}")
 
     # 1. US Overnight
-    print("\n[1/5] US Overnight Signal...")
+    print("\n[1/6] US Overnight Signal...")
     us_data = collect_us_overnight()
     us_grade = us_data.get("grade", "NEUTRAL")
     us_score = us_data.get("combined_score_100", 0)
     print(f"  {us_grade} ({us_score:+.1f})")
 
     # 2. KOSPI 레짐
-    print("\n[2/5] KOSPI 레짐...")
+    print("\n[2/6] KOSPI 레짐...")
     kospi_data = collect_kospi_regime()
     print(f"  {kospi_data['regime']} ({kospi_data['slots']}슬롯)")
 
     # 3. Quantum 스캔
-    print(f"\n[3/5] Quantum v10 {'스캔' if run_scan else '캐시 로드'}...")
+    print(f"\n[3/6] Quantum v10 {'스캔' if run_scan else '캐시 로드'}...")
     candidates, stats = collect_quantum_candidates(run_scan, grade_filter, use_news)
     print(f"  {len(candidates)}종목 통과")
 
     # 4. 섹터 릴레이
-    print("\n[4/5] 섹터 릴레이 시그널...")
+    print("\n[4/6] 섹터 릴레이 시그널...")
     relay_data = collect_relay_signals()
     fired_count = len(relay_data.get("fired_sectors", []))
     signal_count = len(relay_data.get("relay_signals", []))
     print(f"  발화 {fired_count}개, 시그널 {signal_count}개")
 
     # 5. 그룹 릴레이
-    print("\n[5/5] 그룹 릴레이 시그널...")
+    print("\n[5/6] 그룹 릴레이 시그널...")
     group_relay_data = collect_group_relay_signals()
     gr_fired = len(group_relay_data.get("fired_groups", []))
     print(f"  발화 {gr_fired}개 그룹")
+
+    # 6. ETF 시그널
+    print("\n[6/6] ETF 시그널...")
+    etf_data = collect_etf_signals()
+    etf_summary = etf_data.get("summary", {})
+    smart_buy = etf_summary.get("smart_buy", 0)
+    theme_buy = etf_summary.get("theme_buy", 0)
+    watch = etf_summary.get("watch", 0)
+    print(f"  SMART {smart_buy}개, THEME {theme_buy}개, 관찰 {watch}개")
 
     # 포지션
     print("\n포지션 로드...")
@@ -307,6 +333,7 @@ def collect_all_signals(
         "quantum": {"candidates": candidates, "stats": stats},
         "relay": relay_data,
         "group_relay": group_relay_data,
+        "etf": etf_data,
         "positions": positions,
     }
 
@@ -533,6 +560,39 @@ def format_text_message(data: dict) -> str:
             for sub in fg.get("waiting_subsidiaries", [])[:3]:
                 lines.append(f"   -> {sub['name']}({sub['change_pct']:+.1f}%) "
                               f"S{sub['score']:.0f} [{sub['tier']}]")
+
+    # ── ETF 시그널 ──
+    etf = data.get("etf", {})
+    etf_smart = etf.get("smart_money_etf", [])
+    etf_theme = etf.get("theme_money_etf", [])
+    etf_watch = etf.get("watch_list", [])
+    smart_sectors = etf.get("smart_sectors", [])
+
+    etf_all = etf_smart + etf_theme
+    lines.append("")
+    if etf_all:
+        lines.append(f"[ETF {len(etf_all)}건 매수]")
+        if smart_sectors:
+            lines.append(f"  SMART섹터: {', '.join(smart_sectors)}")
+        for e in etf_all:
+            signal = e.get("signal", "")
+            sizing = e.get("sizing", "")
+            foreign = e.get("foreign_5d_bil", 0)
+            inst = e.get("inst_5d_bil", 0)
+            lines.append(f"  {e['sector']}({e['etf_code']}) [{signal}] {sizing}")
+            lines.append(f"   RSI{e.get('rsi', 0):.0f} BB{e.get('bb_pct', 0):.0f}% "
+                         f"외인{foreign:+,}억 기관{inst:+,}억")
+    elif etf_watch:
+        lines.append(f"[ETF] 매수 0건, 관찰 {len(etf_watch)}건")
+    else:
+        lines.append("[ETF] 시그널 없음")
+
+    if etf_watch:
+        watch_str = ", ".join(
+            f"{e['sector']}({e.get('signal', '')})"
+            for e in etf_watch[:4]
+        )
+        lines.append(f"  관찰: {watch_str}")
 
     # ── 보유 포지션 ──
     q_pos = positions["quantum"]["positions"]
