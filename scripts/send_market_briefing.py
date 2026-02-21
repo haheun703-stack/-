@@ -2,9 +2,10 @@
 장시작전 마켓 브리핑 텔레그램 발송 스크립트.
 
 데이터 소스:
-  - data/us_market/overnight_signal.json (US overnight signal → Phase 1에서 생성)
-  - data/sector_rotation/krx_sector_scan.json (섹터 로테이션 스캔 결과)
-  - stock_data_daily/*.csv (종목명 매핑)
+  - data/us_market/overnight_signal.json (US overnight signal)
+  - data/sector_rotation/relay_trading_signal.json (릴레이 순환매수)
+  - data/sector_rotation/etf_trading_signal.json (ETF 매매 시그널)
+  - data/sector_rotation/krx_sector_scan.json (스마트머니/테마머니)
 
 수동 실행: python scripts/send_market_briefing.py [--send]
 스케줄러: daily_scheduler.phase_morning_briefing()에서 호출
@@ -12,6 +13,7 @@
 
 import json
 import logging
+import math
 import sys
 from pathlib import Path
 
@@ -23,96 +25,101 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 SIGNAL_PATH = PROJECT_ROOT / "data" / "us_market" / "overnight_signal.json"
+PRED_MODEL_PATH = PROJECT_ROOT / "data" / "us_market" / "kospi_pred_model.json"
+RELAY_SIGNAL_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "relay_trading_signal.json"
+ETF_SIGNAL_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "etf_trading_signal.json"
 SECTOR_SCAN_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "krx_sector_scan.json"
 STOCK_DATA_DIR = PROJECT_ROOT / "stock_data_daily"
 
 
 # ─────────────────────────────────────────────
-# 유틸: 종목명 조회
+# 확률 계산 (로지스틱 회귀 모델)
 # ─────────────────────────────────────────────
 
-def _get_stock_name(ticker: str) -> str:
-    """ticker(6자리) → 종목명. CSV 파일명에서 추출."""
-    ticker = str(ticker).zfill(6)
-    if STOCK_DATA_DIR.exists():
-        for csv in STOCK_DATA_DIR.glob(f"*_{ticker}.csv"):
-            # 파일명 형식: "종목명_006400.csv"
-            stem = csv.stem  # "종목명_006400"
-            name = stem.rsplit("_", 1)[0]
-            return name
-    return ticker
+def _load_pred_model() -> dict | None:
+    """kospi_pred_model.json 로드. 없으면 None."""
+    if PRED_MODEL_PATH.exists():
+        with open(PRED_MODEL_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    return None
 
 
-# ─────────────────────────────────────────────
-# 확률 계산
-# ─────────────────────────────────────────────
+def _sigmoid(x: float) -> float:
+    return 1.0 / (1.0 + math.exp(-x))
+
 
 def calc_market_probability(
     ewy_ret: float,
     vix: float,
     spy_ret: float,
     qqq_ret: float,
-    regime: str,
+    soxx_ret: float = 0.0,
+    vix_chg: float = 0.0,
+    stoxx50_ret: float = 0.0,
 ) -> dict:
-    """해외시장 데이터 기반 금일 KOSPI 상승/하락 확률."""
-    down_prob = 50.0
+    """로지스틱 회귀 기반 KOSPI 상승/하락 확률.
 
-    # EWY (40% 가중) — KOSPI 가장 강한 선행지표
-    if ewy_ret < -1:
-        down_prob += min(abs(ewy_ret) * 8, 25)
-    elif ewy_ret < 0:
-        down_prob += abs(ewy_ret) * 5
-    elif ewy_ret > 1:
-        down_prob -= min(ewy_ret * 8, 25)
-    elif ewy_ret > 0:
-        down_prob -= ewy_ret * 5
+    v2: 449일 학습, STOXX50 추가 / EWY 제거
+    Features: soxx, vix_chg, vix_level, spy, qqq, stoxx50
+    """
+    model = _load_pred_model()
 
-    # VIX (20% 가중)
-    if vix > 25:
-        down_prob += 8
-    elif vix > 20:
-        down_prob += 5
-    elif vix < 15:
-        down_prob -= 5
+    if model and model.get("coef"):
+        features = model["features"]
+        mean = model["scaler_mean"]
+        scale = model["scaler_scale"]
+        coef = model["coef"]
+        intercept = model["intercept"]
 
-    # US 종합 (15% 가중)
-    us_avg = (spy_ret + qqq_ret) / 2
-    if us_avg < -0.5:
-        down_prob += 5
-    elif us_avg > 0.5:
-        down_prob -= 5
+        raw = {
+            "ewy": ewy_ret, "soxx": soxx_ret, "vix_chg": vix_chg,
+            "vix_level": vix, "spy": spy_ret, "qqq": qqq_ret,
+            "stoxx50": stoxx50_ret,
+        }
 
-    # KOSPI 레짐 (15% 가중)
-    regime_adj = {
-        "BULL": -5, "STRONG_BULL": -8, "MILD_BULL": -3,
-        "CAUTION": 3, "NEUTRAL": 0,
-        "BEAR": 8, "MILD_BEAR": 5, "STRONG_BEAR": 12,
-        "CRISIS": 12,
-    }.get(regime.upper(), 0)
-    down_prob += regime_adj
+        logit = intercept
+        for i, feat in enumerate(features):
+            val = raw.get(feat, 0.0)
+            scaled = (val - mean[i]) / scale[i] if scale[i] != 0 else 0
+            logit += coef[i] * scaled
 
-    # 클램핑
-    down_prob = max(5, min(95, down_prob))
-    up_prob = 100 - down_prob
-
-    # 예상 레인지 (EWY 기반)
-    if ewy_ret != 0:
-        est_low = round(ewy_ret * 1.2, 1)
-        est_high = round(ewy_ret * 0.6, 1)
+        up_prob = round(_sigmoid(logit) * 100)
     else:
-        est_low, est_high = -0.5, 0.5
+        # 폴백: 단순 룰 기반
+        up_prob = 50
+        if soxx_ret > 2:
+            up_prob += 12
+        elif soxx_ret < -2:
+            up_prob -= 12
+        if spy_ret > 1:
+            up_prob += 8
+        elif spy_ret < -1:
+            up_prob -= 8
+        if vix > 25:
+            up_prob -= 8
+        up_prob = max(5, min(95, up_prob))
+
+    down_prob = 100 - up_prob
+
+    # 예상 레인지 (SOXX + SPY + STOXX50 가중)
+    base = soxx_ret * 0.35 + spy_ret * 0.35 + stoxx50_ret * 0.3
+    if abs(base) > 0.1:
+        est_low = round(base * 0.5, 1)
+        est_high = round(base * 1.1, 1)
+    else:
+        est_low, est_high = -0.3, 0.3
 
     return {
-        "up_prob": round(up_prob),
-        "down_prob": round(down_prob),
+        "up_prob": up_prob,
+        "down_prob": down_prob,
         "est_low": min(est_low, est_high),
         "est_high": max(est_low, est_high),
     }
 
 
-def make_prob_bar(down_pct: int, width: int = 20) -> str:
-    """확률 시각화 바."""
-    filled = round(down_pct / 100 * width)
+def make_prob_bar(up_pct: int, width: int = 20) -> str:
+    """상승 확률 시각화 바. 채운 부분=상승."""
+    filled = round(up_pct / 100 * width)
     return "\u2588" * filled + "\u2591" * (width - filled)
 
 
@@ -120,17 +127,44 @@ def make_prob_bar(down_pct: int, width: int = 20) -> str:
 # 데이터 로드
 # ─────────────────────────────────────────────
 
-def load_overnight_signal() -> dict:
-    """US overnight signal JSON 로드. 없으면 빈 dict."""
-    if SIGNAL_PATH.exists():
-        with open(SIGNAL_PATH, encoding="utf-8") as f:
+def _load_json(path: Path) -> dict:
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
-    logger.warning("overnight_signal.json 없음 — 기본값 사용")
     return {}
 
 
-def _grade_stock(item: dict, money_type: str) -> tuple[str, str]:
-    """종목 등급 판정. Returns (등급, 이모지)."""
+def load_overnight_signal() -> dict:
+    return _load_json(SIGNAL_PATH)
+
+
+def load_relay_signals() -> list:
+    """릴레이 시그널 로드. HIGH confidence만 진입적기."""
+    data = _load_json(RELAY_SIGNAL_PATH)
+    signals = data.get("signals", [])
+    return [s for s in signals if s.get("confidence") == "HIGH"]
+
+
+def load_etf_signals() -> dict:
+    """ETF 매매 시그널 로드."""
+    data = _load_json(ETF_SIGNAL_PATH)
+    return {
+        "buy": data.get("smart_money_etf", []) + data.get("theme_money_etf", []),
+        "watch": data.get("watch_list", []),
+    }
+
+
+def load_scan_results() -> dict:
+    """섹터 로테이션 스캔 결과 로드."""
+    data = _load_json(SECTOR_SCAN_PATH)
+    return {
+        "smart_money": data.get("smart_money", []),
+        "theme_money": data.get("theme_money", []),
+    }
+
+
+def _grade_stock(item: dict, money_type: str) -> str:
+    """종목 등급 판정."""
     bb = item.get("bb_pct", 50)
     rsi = item.get("rsi", 50)
     adx = item.get("adx", 0)
@@ -138,41 +172,40 @@ def _grade_stock(item: dict, money_type: str) -> tuple[str, str]:
 
     if money_type == "SMART":
         if bb < 30 and rsi < 45:
-            return "S", "\U0001f525"
+            return "S"
         elif bb < 50 and rsi < 55:
-            return "A", "\u2b50"
-        else:
-            return "B", "\U0001f539"
-    else:  # THEME
+            return "A"
+        return "B"
+    else:
         if adx > 50:
-            return "S", "\U0001f525"
+            return "S"
         elif adx > 40 or gx:
-            return "A", "\u2b50"
-        else:
-            return "B", "\U0001f539"
-
-
-def load_scan_results() -> dict:
-    """섹터 로테이션 스캔 결과 로드 (krx_sector_scan.json)."""
-    if not SECTOR_SCAN_PATH.exists():
-        return {"smart_money": [], "theme_money": []}
-    try:
-        with open(SECTOR_SCAN_PATH, encoding="utf-8") as f:
-            data = json.load(f)
-        return {
-            "smart_money": data.get("smart_money", []),
-            "theme_money": data.get("theme_money", []),
-        }
-    except Exception:
-        return {"smart_money": [], "theme_money": []}
+            return "A"
+        return "B"
 
 
 # ─────────────────────────────────────────────
 # 메시지 빌더
 # ─────────────────────────────────────────────
 
+def _fetch_stoxx50_ret() -> float:
+    """전일 STOXX50 수익률 가져오기 (yfinance)."""
+    try:
+        import yfinance as yf
+        d = yf.download("^STOXX50E", period="5d", progress=False)
+        if len(d) >= 2:
+            d.columns = d.columns.droplevel(1) if d.columns.nlevels > 1 else d.columns
+            closes = d["Close"].dropna()
+            if len(closes) >= 2:
+                ret = (closes.iloc[-1] / closes.iloc[-2] - 1) * 100
+                return round(float(ret), 2)
+    except Exception as e:
+        logger.warning("STOXX50 수집 실패: %s", e)
+    return 0.0
+
+
 def build_briefing_message() -> str:
-    """오늘의 장전 마켓 브리핑 메시지 자동 생성."""
+    """노션 스타일 장전 마켓 브리핑 메시지."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # === 데이터 로드 ===
@@ -180,197 +213,243 @@ def build_briefing_message() -> str:
     idx = sig.get("index_direction", {})
 
     ewy_ret = idx.get("EWY", {}).get("ret_1d", 0)
+    ewy_5d = idx.get("EWY", {}).get("ret_5d", 0)
     spy_ret = idx.get("SPY", {}).get("ret_1d", 0)
     qqq_ret = idx.get("QQQ", {}).get("ret_1d", 0)
     dia_ret = idx.get("DIA", {}).get("ret_1d", 0)
     vix_data = sig.get("vix", {})
     vix = vix_data.get("level", 20)
-    vix_status = vix_data.get("status", "정상")
-    grade = sig.get("grade", "NEUTRAL")
+    vix_status = vix_data.get("status", "\uc815\uc0c1")
+    us_grade = sig.get("grade", "NEUTRAL")
     combined = sig.get("combined_score_100", 0)
 
-    # SOX: l2_pattern → today_us_vector에서 추출
     l2 = sig.get("l2_pattern", {})
     us_vec = l2.get("today_us_vector", {})
     sox_ret = us_vec.get("us_soxx_chg", 0)
+    vix_chg = us_vec.get("us_vix_chg", 0)
 
-    # 레짐 매핑
-    regime_map = {
-        "STRONG_BULL": "BULL", "MILD_BULL": "BULL",
-        "STRONG_BEAR": "BEAR", "MILD_BEAR": "BEAR",
-    }
-    regime = regime_map.get(grade, grade)
+    # STOXX50 (유럽 전일 종가)
+    stoxx50_ret = _fetch_stoxx50_ret()
 
-    prob = calc_market_probability(ewy_ret, vix, spy_ret, qqq_ret, regime)
-    bar = make_prob_bar(prob["down_prob"])
+    prob = calc_market_probability(
+        ewy_ret, vix, spy_ret, qqq_ret,
+        soxx_ret=sox_ret, vix_chg=vix_chg,
+        stoxx50_ret=stoxx50_ret,
+    )
 
-    # 스캔 결과
+    relay = load_relay_signals()
+    etf = load_etf_signals()
     scan = load_scan_results()
 
-    lines = []
+    L = []
 
     # ── Header ──
-    lines.append(f"\U0001f3c6 Quantum Master v10.3 | {now}")
-    lines.append("\u2501" * 28)
-    lines.append("")
+    L.append(f"\U0001f4ca \uc7a5\uc804 \ub9c8\ucf13 \ube0c\ub9ac\ud551 | {now}")
+    L.append(f"Quantum Master v10.3")
+    L.append("\u2501" * 28)
 
-    # ── 상승/하락 확률 ──
-    lines.append("\U0001f3b2 금일 KOSPI 예측")
-    if prob["down_prob"] >= 55:
-        dir_emoji = "\U0001f4c9"
-        dir_label = "하락"
-    elif prob["up_prob"] >= 55:
-        dir_emoji = "\U0001f4c8"
-        dir_label = "상승"
-    else:
-        dir_emoji = "\u27a1\ufe0f"
-        dir_label = "보합"
-
-    lines.append(
-        f"  {dir_emoji} {dir_label} {prob['down_prob']}% "
-        f"\u2502 \U0001f4c8 상승 {prob['up_prob']}%"
-    )
-    lines.append(f"  {bar}")
-    lines.append(f"  예상 레인지: {prob['est_low']:+.1f}% ~ {prob['est_high']:+.1f}%")
-    lines.append("")
-
-    # ── 근거 ──
-    lines.append("\U0001f4cc 근거")
-    # EWY
-    ewy_emoji = "\U0001f53b" if ewy_ret < 0 else "\U0001f53a"
-    ewy_comment = "강한 하방" if ewy_ret < -1.5 else ("약세" if ewy_ret < 0 else "양호")
-    lines.append(f"  \u251c EWY {ewy_ret:+.2f}% {ewy_emoji} \u2192 {ewy_comment}")
-    # VIX
-    vix_emoji = "\u26a0\ufe0f" if vix > 20 else "\u2705"
-    lines.append(f"  \u251c VIX {vix:.1f} [{vix_emoji}{vix_status}]")
-    # SOX
-    if sox_ret != 0:
-        sox_comment = "반도체 약세 동조" if sox_ret < -0.5 else (
-            "반도체 강세" if sox_ret > 0.5 else "반도체 중립"
-        )
-        lines.append(f"  \u251c SOX {sox_ret:+.1f}% \u2192 {sox_comment}")
-    # US 종합
-    us_avg = (spy_ret + qqq_ret) / 2
-    us_label = "글로벌 약세" if us_avg < -0.3 else ("글로벌 강세" if us_avg > 0.3 else "글로벌 중립")
-    lines.append(f"  \u251c S&P {spy_ret:+.1f}% QQQ {qqq_ret:+.1f}% \u2192 {us_label}")
-    # Grade
-    grade_emoji = {
-        "STRONG_BULL": "\U0001f7e2", "MILD_BULL": "\U0001f7e2",
-        "NEUTRAL": "\U0001f7e1", "MILD_BEAR": "\U0001f7e0",
-        "STRONG_BEAR": "\U0001f534",
-    }.get(grade, "\U0001f7e1")
-    lines.append(f"  \u2514 US Signal {grade_emoji} {grade} ({combined:+.1f})")
-    lines.append("")
-
-    # ── 전략 한줄 ──
+    # ══════════════════════════════
+    # 1. KOSPI 예측
+    # ══════════════════════════════
     if prob["down_prob"] >= 60:
-        lines.append("\U0001f4a1 전략: 갭다운 예상 — 우량주 저가매수 기회!")
+        dir_icon = "\U0001f534"
+        dir_label = "\ud558\ub77d \uc6b0\uc138"
     elif prob["up_prob"] >= 60:
-        lines.append("\U0001f4a1 전략: 갭업 예상 — 목표가 부근 분할매도!")
+        dir_icon = "\U0001f7e2"
+        dir_label = "\uc0c1\uc2b9 \uc6b0\uc138"
+    elif prob["down_prob"] >= 55:
+        dir_icon = "\U0001f7e0"
+        dir_label = "\ud558\ub77d \uc18c\ud3ed"
+    elif prob["up_prob"] >= 55:
+        dir_icon = "\U0001f7e2"
+        dir_label = "\uc0c1\uc2b9 \uc18c\ud3ed"
     else:
-        lines.append("\U0001f4a1 전략: 혼조 예상 — 시가 확인 후 대응!")
-    lines.append("")
+        dir_icon = "\u26aa"
+        dir_label = "\ubcf4\ud569\uad8c"
 
-    # ── 해외시장 요약 ──
-    us_date = sig.get("us_close_date", "")
-    lines.append(f"\U0001f30d 해외시장 ({us_date})")
-    lines.append(
-        f"  \u251c \U0001f1fa\U0001f1f8 SPY {spy_ret:+.1f}% | "
-        f"QQQ {qqq_ret:+.1f}% | DIA {dia_ret:+.1f}%"
-    )
-    lines.append(f"  \u251c \U0001f1f0\U0001f1f7 EWY {ewy_ret:+.2f}%")
-    lines.append(f"  \u2514 \U0001f4ca VIX {vix:.1f} [{vix_emoji}{vix_status}]")
-    lines.append("")
+    bar = make_prob_bar(prob["up_prob"])
+    L.append("")
+    L.append(f"{dir_icon} KOSPI \uc608\uce21 \u2014 {dir_label}")
+    L.append(f"  \uc0c1\uc2b9 {prob['up_prob']}% \u2502 \ud558\ub77d {prob['down_prob']}%")
+    L.append(f"  {bar}")
+    L.append(f"  \uc608\uc0c1 \ub808\uc778\uc9c0: {prob['est_low']:+.1f}% ~ {prob['est_high']:+.1f}%")
 
-    # ── 섹터 Kill 경고 ──
+    if prob["down_prob"] >= 60:
+        L.append("  ➜ 갭다운 예상 — 우량주 저가매수 기회")
+    elif prob["up_prob"] >= 60:
+        L.append("  ➜ 갭업 예상 — 목표가 부근 분할매도")
+    else:
+        L.append(f"  \u279c \ud63c\uc870 \uc608\uc0c1 \u2014 \uc2dc\uac00 \ud655\uc778 \ud6c4 \ub300\uc751")
+
+    # ══════════════════════════════
+    # 2. 판단 근거 (모델 기여도 순)
+    # ══════════════════════════════
+    L.append("")
+    L.append("\U0001f4cc \ud310\ub2e8 \uadfc\uac70")
+
+    # SPY (모델 기여도 1위: coef +0.855)
+    us_tag = "강세" if spy_ret > 0.5 else ("약세" if spy_ret < -0.5 else "보합")
+    L.append(f"  • SPY {spy_ret:+.1f}% | QQQ {qqq_ret:+.1f}% | DIA {dia_ret:+.1f}% — {us_tag}")
+
+    # SOXX (모델 기여도 2위: coef +0.656)
+    sox_tag = "반도체 급락" if sox_ret < -2 else (
+        "반도체 약세" if sox_ret < -0.5 else (
+            "반도체 강세" if sox_ret > 0.5 else "반도체 중립"))
+    L.append(f"  • SOXX {sox_ret:+.1f}% — {sox_tag}")
+
+    # VIX (모델 기여도 3위: coef +0.124)
+    vix_icon = "⚠️" if vix >= 20 else "✅"
+    L.append(f"  • VIX {vix:.1f} {vix_icon} {vix_status} (변화 {vix_chg:+.1f}%)")
+
+    # STOXX50 (모델 기여도 4위: 유럽)
+    if stoxx50_ret != 0:
+        stoxx_tag = "유럽 강세" if stoxx50_ret > 0.5 else (
+            "유럽 약세" if stoxx50_ret < -0.5 else "유럽 보합")
+        L.append(f"  • STOXX50 {stoxx50_ret:+.1f}% — {stoxx_tag}")
+
+    # EWY (참고: 모델에서 제거, 한국 ADR 참고용)
+    ewy_tag = "강한 상방" if ewy_ret > 2 else (
+        "강한 하방" if ewy_ret < -2 else (
+            "약세" if ewy_ret < 0 else "양호"))
+    L.append(f"  • EWY {ewy_ret:+.2f}% (5d {ewy_5d:+.1f}%) — {ewy_tag}")
+
+    # US Signal
+    L.append(f"  \u2022 US Signal: {us_grade} ({combined:+.1f})")
+
+    # 섹터 Kill (있을 때만)
     kills = sig.get("sector_kills", {})
     killed_sectors = [s for s, v in kills.items() if v.get("killed")]
     if killed_sectors:
-        lines.append("\U0001f6a8 섹터 Kill 경고")
+        L.append("")
+        L.append("\U0001f6a8 \uc139\ud130 Kill")
         for s in killed_sectors:
             info = kills[s]
-            lines.append(
-                f"  \u274c {s}: {info['driver_ret']:+.1f}% "
-                f"(임계 {info['threshold_pct']:+.1f}%)"
-            )
-        lines.append("")
+            L.append(f"  \u274c {s}: {info['driver_ret']:+.1f}% (\uc784\uacc4 {info['threshold_pct']:+.1f}%)")
 
-    # ── 패턴 매칭 인사이트 ──
+    # ══════════════════════════════
+    # 3. 패턴매칭
+    # ══════════════════════════════
     l2_kospi = l2.get("kospi", {})
     if l2_kospi:
         pos_rate = l2_kospi.get("positive_rate", 50)
         mean_chg = l2_kospi.get("mean_chg", 0)
         sample = l2.get("sample_count", 0)
         if sample > 30:
-            lines.append(f"\U0001f50d 패턴매칭 (유사 {sample}건)")
-            lines.append(
-                f"  \u251c KOSPI 상승률: {pos_rate:.0f}% (평균 {mean_chg:+.2f}%)"
-            )
-            # 섹터별 탑/바텀
+            L.append("")
+            L.append(f"\U0001f50d \ud328\ud134\ub9e4\uce6d (\uc720\uc0ac {sample}\uac74)")
+            L.append(f"  KOSPI \uc0c1\uc2b9\ud655\ub960 {pos_rate:.0f}% (\ud3c9\uade0 {mean_chg:+.2f}%)")
             sec_l2 = l2.get("sectors", {})
             if sec_l2:
-                sorted_sec = sorted(sec_l2.items(), key=lambda x: x[1].get("mean_chg", 0), reverse=True)
-                top = sorted_sec[0]
-                bot = sorted_sec[-1]
-                lines.append(
-                    f"  \u251c \U0001f53a 강세섹터: {top[0]} "
-                    f"(상승 {top[1]['positive_rate']:.0f}%)"
+                sorted_sec = sorted(
+                    sec_l2.items(),
+                    key=lambda x: x[1].get("mean_chg", 0),
+                    reverse=True,
                 )
-                lines.append(
-                    f"  \u2514 \U0001f53b 약세섹터: {bot[0]} "
-                    f"(상승 {bot[1]['positive_rate']:.0f}%)"
+                top3 = sorted_sec[:3]
+                bot1 = sorted_sec[-1]
+                names = ", ".join(
+                    f"{s[0]}({s[1]['positive_rate']:.0f}%)"
+                    for s in top3
                 )
-            lines.append("")
-
-    # ── 매수 후보 (섹터 로테이션 기반 + S/A/B 등급) ──
-    smart = scan.get("smart_money", [])
-    theme = scan.get("theme_money", [])
-    if smart or theme:
-        lines.append("\u2501" * 28)
-        lines.append("\U0001f525 매수 후보 (섹터 로테이션)")
-        lines.append("\u2501" * 28)
-
-        if smart:
-            lines.append("\U0001f48e Smart Money (외인+기관)")
-            for s in smart[:3]:
-                grade, emoji = _grade_stock(s, "SMART")
-                name = s.get("name", s.get("ticker", "?"))
-                ticker = str(s.get("ticker", "")).zfill(6)
-                bb = s.get("bb_pct", 0)
-                rsi = s.get("rsi", 0)
-                stop = s.get("stop_pct", -7)
-                sizing = s.get("sizing", "FULL")
-                sector = s.get("etf_sector", s.get("krx_sector", ""))
-                lines.append(f"{emoji} {grade}급 {name} ({ticker}) — {sector}")
-                lines.append(
-                    f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
-                    f"손절 {stop}% | {sizing}"
+                L.append(f"  \u25b2 \uac15\uc138: {names}")
+                L.append(
+                    f"  \u25bc \uc57d\uc138: {bot1[0]}"
+                    f"({bot1[1]['positive_rate']:.0f}%)"
                 )
-                lines.append("")
 
-        if theme:
-            lines.append("\U0001f525 Theme Money (모멘텀)")
-            for t in theme[:3]:
-                grade, emoji = _grade_stock(t, "THEME")
-                name = t.get("name", t.get("ticker", "?"))
-                ticker = str(t.get("ticker", "")).zfill(6)
-                bb = t.get("bb_pct", 0)
-                rsi = t.get("rsi", 0)
-                adx = t.get("adx", 0)
-                sector = t.get("etf_sector", t.get("krx_sector", ""))
-                lines.append(f"{emoji} {grade}급 {name} ({ticker}) — {sector}")
-                lines.append(
-                    f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
-                lines.append("")
+    # ══════════════════════════════
+    # 4. 매수 후보 — 4섹션
+    # ══════════════════════════════
+    L.append("")
+    L.append("\u2501" * 28)
+    L.append("\U0001f4b0 \ub9e4\uc218 \ud6c4\ubcf4")
+    L.append("\u2501" * 28)
+
+    # ── 4-1. 릴레이 시그널 ──
+    L.append("")
+    L.append(f"\U0001f504 \ub9b4\ub808\uc774 \uc2dc\uadf8\ub110 ({len(relay)}\uac74 \uc9c4\uc785\uc801\uae30)")
+    if relay:
+        for i, r in enumerate(relay[:5], 1):
+            lead = r.get("lead", "?")
+            follow = r.get("follow", "?")
+            wr = r.get("win_rate", 0)
+            lag = r.get("best_lag", 0)
+            picks = r.get("picks", [])
+            pick_names = ", ".join(p.get("name", "?") for p in picks[:2])
+            extra = f" \uc678{len(picks)-2}" if len(picks) > 2 else ""
+            L.append(
+                f"  {i}. {lead}\u2192{follow} | "
+                f"\uc2b9\ub960{wr:.0f}% lag{lag} | "
+                f"{pick_names}{extra}"
+            )
     else:
-        lines.append("")
-        lines.append("\U0001f525 매수 후보: 스캔 결과 없음")
-        lines.append("")
+        L.append("  \ud574\ub2f9 \uc5c6\uc74c")
 
-    # ── Disclaimer ──
-    lines.append("\u26a0\ufe0f 투자 판단은 본인 책임 | Quantum Master v10.3")
+    # ── 4-2. ETF 매매 시그널 ──
+    etf_buy = etf.get("buy", [])
+    etf_watch = etf.get("watch", [])
+    L.append("")
+    L.append(f"\U0001f4e6 ETF \ub9e4\ub9e4 \uc2dc\uadf8\ub110")
+    if etf_buy:
+        for e in etf_buy[:3]:
+            sector = e.get("sector", "?")
+            code = e.get("etf_code", "")
+            bb = e.get("bb_pct", 0)
+            rsi = e.get("rsi", 0)
+            sizing = e.get("sizing", "FULL")
+            L.append(f"  \u2022 [BUY] {sector}({code}) BB{bb:.0f}% RSI{rsi:.0f} {sizing}")
+    if etf_watch:
+        for e in etf_watch[:3]:
+            sector = e.get("sector", "?")
+            code = e.get("etf_code", "")
+            bb = e.get("bb_pct", 0)
+            rsi = e.get("rsi", 0)
+            sizing = e.get("sizing", "HALF")
+            L.append(f"  \u2022 [\uad00\ub9dd] {sector}({code}) BB{bb:.0f}% RSI{rsi:.0f} {sizing}")
+    if not etf_buy and not etf_watch:
+        L.append("  \ud574\ub2f9 \uc5c6\uc74c")
 
-    return "\n".join(lines)
+    # ── 4-3. 테마머니 ──
+    theme = scan.get("theme_money", [])
+    L.append("")
+    L.append(f"\U0001f525 \ud14c\ub9c8\uba38\ub2c8 (\ubaa8\uba58\ud140)")
+    if theme:
+        for t in theme[:3]:
+            g = _grade_stock(t, "THEME")
+            name = t.get("name", t.get("ticker", "?"))
+            ticker = str(t.get("ticker", "")).zfill(6)
+            sector = t.get("etf_sector", t.get("krx_sector", ""))
+            bb = t.get("bb_pct", 0)
+            rsi = t.get("rsi", 0)
+            adx = t.get("adx", 0)
+            L.append(f"  \u2022 [{g}] {name}({ticker}) {sector}")
+            L.append(f"       BB{bb:.0f}% RSI{rsi:.0f} ADX{adx:.0f}")
+    else:
+        L.append("  \ud574\ub2f9 \uc5c6\uc74c")
+
+    # ── 4-4. 스마트머니 ──
+    smart = scan.get("smart_money", [])
+    L.append("")
+    L.append(f"\U0001f48e \uc2a4\ub9c8\ud2b8\uba38\ub2c8 (\uc678\uc778+\uae30\uad00)")
+    if smart:
+        for s in smart[:3]:
+            g = _grade_stock(s, "SMART")
+            name = s.get("name", s.get("ticker", "?"))
+            ticker = str(s.get("ticker", "")).zfill(6)
+            sector = s.get("etf_sector", s.get("krx_sector", ""))
+            bb = s.get("bb_pct", 0)
+            rsi = s.get("rsi", 0)
+            stop = s.get("stop_pct", -7)
+            L.append(f"  \u2022 [{g}] {name}({ticker}) {sector}")
+            L.append(f"       BB{bb:.0f}% RSI{rsi:.0f} \uc190\uc808{stop}%")
+    else:
+        L.append("  \ud574\ub2f9 \uc5c6\uc74c")
+
+    # ── Footer ──
+    L.append("")
+    L.append("\u26a0\ufe0f \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | QM v10.3")
+
+    return "\n".join(L)
 
 
 # ─────────────────────────────────────────────
@@ -383,19 +462,19 @@ if __name__ == "__main__":
     msg = build_briefing_message()
 
     print("=" * 50)
-    print("[미리보기]")
+    print("[\ubbf8\ub9ac\ubcf4\uae30]")
     print("=" * 50)
     print(msg)
     print("=" * 50)
-    print(f"총 {len(msg)}자 (텔레그램 제한: 4096자)")
+    print(f"\ucd1d {len(msg)}\uc790 (\ud154\ub808\uadf8\ub7a8 \uc81c\ud55c: 4096\uc790)")
     print()
 
     if "--send" in sys.argv:
         from src.telegram_sender import send_message
         ok = send_message(msg)
         if ok:
-            print("\u2705 텔레그램 발송 완료!")
+            print("\ud154\ub808\uadf8\ub7a8 \ubc1c\uc1a1 \uc644\ub8cc!")
         else:
-            print("\u274c 텔레그램 발송 실패")
+            print("\ud154\ub808\uadf8\ub7a8 \ubc1c\uc1a1 \uc2e4\ud328")
     else:
-        print("실제 발송: python scripts/send_market_briefing.py --send")
+        print("\uc2e4\uc81c \ubc1c\uc1a1: python scripts/send_market_briefing.py --send")
