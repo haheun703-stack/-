@@ -865,3 +865,89 @@ def _format_ma_footer(data: dict) -> str:
         f"\n{ICONS['LINE']}\n"
         f"{_icon('CLOCK')} {time_str} | \ud000\ud140\uc804\ub7b5 v8.4"
     )
+
+
+# ============================================================
+# v11.0 테마 스캐너 알림 포맷
+# ============================================================
+
+def format_theme_alert(alert) -> str:
+    """테마 감지 알림 메시지 포맷.
+
+    Args:
+        alert: ThemeAlert 데이터클래스 또는 dict
+    """
+    if isinstance(alert, dict):
+        theme = alert.get('theme_name', '?')
+        title = alert.get('news_title', '')
+        url = alert.get('news_url', '')
+        source = alert.get('news_source', '')
+        published = alert.get('published', '')
+        stocks = alert.get('related_stocks', [])
+        grok_expanded = alert.get('grok_expanded', False)
+    else:
+        theme = alert.theme_name
+        title = alert.news_title
+        url = alert.news_url
+        source = alert.news_source
+        published = alert.published
+        stocks = alert.related_stocks
+        grok_expanded = alert.grok_expanded
+
+    lines = [
+        f'🔥 테마 감지: {theme}',
+        '',
+        f'📰 [{source}] "{title}"',
+    ]
+    if url:
+        lines.append(f'🔗 {url}')
+    if published:
+        lines.append(f'⏰ {published}')
+
+    # 관련주 목록
+    lines.append('')
+    src_label = '딕셔너리' + (' + Grok 확장' if grok_expanded else '')
+    lines.append(f'📊 관련주 ({src_label}):')
+
+    for s in stocks:
+        if isinstance(s, dict):
+            ticker = s.get('ticker', '')
+            name = s.get('name', '')
+            order = s.get('order', 1)
+            rsi = s.get('current_rsi', 0)
+            ma20 = s.get('ma20_dist_pct', 0)
+            src = s.get('source', 'dictionary')
+        else:
+            ticker = s.ticker
+            name = s.name
+            order = s.order
+            rsi = s.current_rsi
+            ma20 = s.ma20_dist_pct
+            src = s.source
+
+        # 상태 판정
+        if rsi > 70 or ma20 > 20:
+            status = '⚠️과열'
+        elif rsi > 0:
+            status = '✅관심'
+        else:
+            status = ''
+
+        order_str = f'{order}차'
+        grok_tag = ' [G]' if src == 'grok_expanded' else ''
+
+        if rsi > 0:
+            ma20_sign = f'+{ma20:.1f}' if ma20 >= 0 else f'{ma20:.1f}'
+            lines.append(
+                f' {order_str} {name}({ticker}) '
+                f'RSI {rsi:.1f} | MA20{ma20_sign}% {status}{grok_tag}'
+            )
+        else:
+            lines.append(f' {order_str} {name}({ticker}){grok_tag}')
+
+    # 푸터
+    lines.append('')
+    lines.append(f'🏷 #테마 #{theme}')
+    lines.append(f'⚠️ 관심종목 — 직접 차트 확인 필요')
+
+    return "\n".join(lines)

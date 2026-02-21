@@ -7,6 +7,7 @@ v5.1 일일 스케줄러 — 한국장 준비 ~ 미장 마감 전체 사이클
   00:00  Phase 0    일일 리셋 (STOP.signal 삭제 + 로그 로테이션)
   06:10  Phase 1    미장 마감 데이터 + US Overnight Signal
   07:00  Phase 2    한국 매크로 수집
+  07:10  Phase 3A   RSS 테마 스캔 + Grok 확장
   07:20  Phase 3    뉴스 스캔 (Grok API)
   07:30  Phase 3B   [TG] 장전 마켓 브리핑
   08:00  Phase 3C   [TG] ETF 매매 시그널
@@ -156,6 +157,21 @@ class DailyScheduler:
         except Exception as e:
             logger.error("[Phase 2] 매크로 수집 실패: %s", e)
         self._notify("Phase 2 완료: 한국 매크로 수집")
+
+    # ══════════════════════════════════════════
+    # Phase 3A: RSS 테마 스캔 + Grok 확장 (07:10)
+    # ══════════════════════════════════════════
+
+    def phase_theme_scan(self) -> None:
+        """RSS 테마 스캔 + Grok 관련주 확장"""
+        logger.info("[Phase 3A] RSS 테마 스캔 시작")
+        try:
+            from scripts.theme_scan_runner import run_theme_scan
+            alerts = run_theme_scan(use_grok=True, send_telegram=True)
+            logger.info("[Phase 3A] 테마 스캔 완료: %d건 감지", len(alerts))
+        except Exception as e:
+            logger.error("[Phase 3A] 테마 스캔 실패: %s", e)
+        self._notify("Phase 3A 완료: 테마 스캔")
 
     # ══════════════════════════════════════════
     # Phase 3: 뉴스 스캔 (07:20)
@@ -990,6 +1006,8 @@ class DailyScheduler:
             self._safe_run, self.phase_us_close_collect)
         sched.every().day.at(S.get("macro_collect", "07:00")).do(
             self._safe_run, self.phase_macro_collect)
+        sched.every().day.at(S.get("theme_scan", "07:10")).do(
+            self._safe_run, self.phase_theme_scan)
         sched.every().day.at(S.get("news_briefing", "07:20")).do(
             self._safe_run, self.phase_news_briefing)
         sched.every().day.at(S.get("morning_briefing", "07:30")).do(
@@ -1109,6 +1127,7 @@ class DailyScheduler:
                 (S.get("daily_reset", "00:00"), "Phase 0", "일일 리셋"),
                 (S.get("us_close_collect", "06:10"), "Phase 1", "미장 마감 데이터 + US Overnight Signal"),
                 (S.get("macro_collect", "07:00"), "Phase 2", "한국 매크로 수집"),
+                (S.get("theme_scan", "07:10"), "Phase 3A", "RSS 테마 스캔 + Grok 확장"),
                 (S.get("news_briefing", "07:20"), "Phase 3", "뉴스 스캔 (Grok API)"),
                 (S.get("morning_briefing", "07:30"), "Phase 3B", "[TG] 장전 마켓 브리핑"),
                 (S.get("etf_briefing", "08:00"), "Phase 3C", "[TG] ETF 매매 시그널"),
@@ -1213,6 +1232,7 @@ if __name__ == "__main__":
             "0": scheduler.phase_daily_reset,
             "1": scheduler.phase_us_close_collect,
             "2": scheduler.phase_macro_collect,
+            "3a": scheduler.phase_theme_scan,
             "3": scheduler.phase_news_briefing,
             "3b": scheduler.phase_morning_briefing,
             "3c": scheduler.phase_etf_briefing,

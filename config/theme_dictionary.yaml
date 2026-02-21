@@ -1,0 +1,86 @@
+# ============================================================
+# 테마 → 관련주 딕셔너리
+# ============================================================
+# 각 테마: keywords(RSS 탐지용), stocks(관련 종목 리스트)
+# order: 1=1차 수혜주, 2=2차 수혜주, 3=3차 수혜주
+# 사용자가 직접 테마/종목 추가·삭제 가능
+# ============================================================
+
+themes:
+  페로브스카이트:
+    keywords: ["페로브스카이트", "perovskite", "차세대 태양전지", "탠덤 셀"]
+    stocks:
+      - {ticker: "009830", name: "한화솔루션", order: 1}
+      - {ticker: "243870", name: "선익시스템", order: 1}
+      - {ticker: "322000", name: "현대에너지솔루션", order: 1}
+      - {ticker: "293490", name: "카와이", order: 2}
+      - {ticker: "086520", name: "에코프로", order: 2}
+
+  양자컴퓨터:
+    keywords: ["양자컴퓨터", "양자컴퓨팅", "quantum computing", "큐비트", "양자암호"]
+    stocks:
+      - {ticker: "078890", name: "가온미디어", order: 1}
+      - {ticker: "131970", name: "테스나", order: 2}
+      - {ticker: "900250", name: "크리스탈신소재", order: 2}
+
+  AI_반도체:
+    keywords: ["AI 반도체", "AI칩", "HBM", "고대역폭메모리", "엔비디아 실적", "GPU", "NPU"]
+    stocks:
+      - {ticker: "000660", name: "SK하이닉스", order: 1}
+      - {ticker: "005930", name: "삼성전자", order: 1}
+      - {ticker: "042700", name: "한미반도체", order: 2}
+      - {ticker: "403870", name: "HPSP", order: 2}
+      - {ticker: "025950", name: "동신건설", order: 3}
+
+  로봇:
+    keywords: ["로봇", "휴머노이드", "산업용로봇", "협동로봇", "로보틱스"]
+    stocks:
+      - {ticker: "090460", name: "비에이치", order: 2}
+      - {ticker: "267260", name: "HD현대일렉트릭", order: 2}
+      - {ticker: "012510", name: "더존비즈온", order: 2}
+
+  우주항공:
+    keywords: ["우주", "위성", "발사체", "우주항공", "저궤도위성", "누리호"]
+    stocks:
+      - {ticker: "012450", name: "한화에어로스페이스", order: 1}
+      - {ticker: "047810", name: "한국항공우주", order: 1}
+      - {ticker: "298040", name: "효성중공업", order: 2}
+      - {ticker: "000720", name: "현대건설", order: 3}
+
+  원전:
+    keywords: ["원전", "원자력", "SMR", "소형모듈원자로", "핵융합", "원전수출"]
+    stocks:
+      - {ticker: "009540", name: "한국전력", order: 1}
+      - {ticker: "034020", name: "두산에너빌리티", order: 1}
+      - {ticker: "267250", name: "HD현대에너지솔루션", order: 2}
+      - {ticker: "092200", name: "디아이씨", order: 2}
+
+  자율주행:
+    keywords: ["자율주행", "라이다", "자율차", "무인차", "자율주행차", "ADAS"]
+    stocks:
+      - {ticker: "005380", name: "현대차", order: 1}
+      - {ticker: "000270", name: "기아", order: 1}
+      - {ticker: "058610", name: "에스피지", order: 2}
+
+  2차전지:
+    keywords: ["2차전지", "이차전지", "배터리", "양극재", "음극재", "전고체", "리튬"]
+    stocks:
+      - {ticker: "373220", name: "LG에너지솔루션", order: 1}
+      - {ticker: "006400", name: "삼성SDI", order: 1}
+      - {ticker: "247540", name: "에코프로비엠", order: 1}
+      - {ticker: "086520", name: "에코프로", order: 2}
+
+  바이오신약:
+    keywords: ["바이오", "신약승인", "FDA승인", "임상3상", "임상성공", "바이오시밀러"]
+    stocks:
+      - {ticker: "068270", name: "셀트리온", order: 1}
+      - {ticker: "207940", name: "삼성바이오로직스", order: 1}
+      - {ticker: "326030", name: "SK바이오팜", order: 2}
+
+  방산:
+    keywords: ["방산", "K-방산", "무기수출", "국방", "K9", "FA-50", "방위산업"]
+    stocks:
+      - {ticker: "012450", name: "한화에어로스페이스", order: 1}
+      - {ticker: "047810", name: "한국항공우주", order: 1}
+      - {ticker: "079550", name: "LIG넥스원", order: 1}
+      - {ticker: "012750", name: "에스원", order: 2}

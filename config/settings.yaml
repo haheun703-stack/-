@@ -372,6 +372,23 @@ sector_classification:
     reserve2: 0.25                # 3순위 종목
 
 # ============================================================
+# v11.0 RSS 테마 스캐너 (RSS + Grok 하이브리드)
+# ============================================================
+theme_scanner:
+  enabled: true
+  rss_feeds:
+    - url: "https://news.google.com/rss/search?q=%EC%A3%BC%EC%8B%9D+%ED%85%8C%EB%A7%88&hl=ko&gl=KR"
+      name: "구글뉴스_주식테마"
+    - url: "https://news.google.com/rss/search?q=%EC%A6%9D%EC%8B%9C+%EA%B8%89%EB%93%B1&hl=ko&gl=KR"
+      name: "구글뉴스_급등"
+    - url: "https://www.hankyung.com/feed/finance"
+      name: "한경_증권"
+    - url: "https://rss.donga.com/economy.xml"
+      name: "동아_경제"
+  max_articles: 50              # 피드당 최대 기사 수
+  dedup_hours: 24                # 같은 테마 재알림 방지 시간
+
+# ============================================================
 # v3.1 News Gate (L-1 이벤트 드리븐 레이어)
 # ============================================================
 news_gate:

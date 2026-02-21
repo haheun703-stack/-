@@ -955,6 +955,7 @@ class TelegramCommandBot:
             "0": ("일일 리셋", self._scheduler.phase_daily_reset),
             "1": ("US 데이터 수집", self._scheduler.phase_us_close_collect),
             "2": ("매크로 수집", self._scheduler.phase_macro_collect),
+            "3a": ("테마 스캔", self._scheduler.phase_theme_scan),
             "3": ("뉴스 스캔", self._scheduler.phase_news_briefing),
             "3b": ("장전 브리핑", self._scheduler.phase_morning_briefing),
             "4": ("매매 준비", self._scheduler.phase_trade_prep),

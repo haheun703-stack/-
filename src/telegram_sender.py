@@ -273,6 +273,18 @@ def send_market_analysis(data: dict) -> bool:
     return send_message(message)
 
 
+def send_theme_alert(alert) -> bool:
+    """v11.0 테마 감지 알림 전송.
+
+    Args:
+        alert: ThemeAlert 데이터클래스 또는 dict
+    """
+    from .telegram_formatter import format_theme_alert
+
+    message = format_theme_alert(alert)
+    return send_message(message)
+
+
 def _split_message(text: str, max_length: int) -> list[str]:
     """
     텔레그램 최대 메시지 길이(4096) 기준 분할.

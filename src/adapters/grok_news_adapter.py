@@ -99,6 +99,47 @@ class GrokNewsAdapter(NewsSearchPort):
         )
 
     # ──────────────────────────────────────────
+    # v11.0: 테마 관련주 확장 검색
+    # ──────────────────────────────────────────
+
+    async def expand_theme_stocks(
+        self, theme_name: str, known_stocks: list[str]
+    ) -> list[dict]:
+        """테마 관련 추가 종목을 Grok으로 검색/확장.
+
+        Args:
+            theme_name: 테마명 (예: "페로브스카이트")
+            known_stocks: 이미 알려진 종목명 리스트
+
+        Returns:
+            추가 종목 리스트 [{name, ticker, order, reason}] 또는 빈 리스트
+        """
+        if not self.api_key:
+            logger.warning("XAI_API_KEY 미설정 — 테마 확장 건너뜀")
+            return []
+
+        known_str = ", ".join(known_stocks) if known_stocks else "없음"
+        prompt = (
+            f"'{theme_name}' 테마의 한국 주식시장 관련주를 검색해줘.\n"
+            f"이미 알려진 종목: {known_str}\n\n"
+            "위 종목 외에 추가 수혜주가 있다면 찾아줘. "
+            "코스피/코스닥 상장 종목만, 최대 5개.\n\n"
+            "반드시 아래 JSON 형식으로만 응답해:\n"
+            '{"theme": "테마명", "additional_stocks": ['
+            '{"name": "종목명", "ticker": "6자리코드", '
+            '"order": 2, "reason": "수혜 이유 한줄"}]}'
+        )
+        result = self._call_api(
+            system="너는 한국 주식 테마/관련주 전문가다. "
+                   "웹과 X를 검색해서 테마 관련주를 정확히 찾는다. "
+                   "반드시 요청된 JSON 형식으로만 응답한다.",
+            user=prompt,
+        )
+        if result and "additional_stocks" in result:
+            return result["additional_stocks"]
+        return []
+
+    # ──────────────────────────────────────────
     # v3.2: 살아있는 이슈 + 실적 예상 통합 검색
     # ──────────────────────────────────────────
 

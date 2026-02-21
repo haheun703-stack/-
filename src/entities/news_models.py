@@ -165,6 +165,36 @@ class DivergenceSignal:
 # v3.2 시장 시그널 (골든크로스, 스마트머니 등)
 # ============================================================
 
+# ============================================================
+# v11.0 테마 스캐너 (RSS + Grok 하이브리드)
+# ============================================================
+
+@dataclass
+class ThemeStock:
+    """테마 관련 종목"""
+    ticker: str
+    name: str
+    order: int = 1              # 1=1차, 2=2차, 3=3차 수혜
+    source: str = "dictionary"  # "dictionary" | "grok_expanded"
+    pipeline_status: str = ""   # "PASS" | "FAIL_G2" | "NOT_IN_UNIVERSE" 등
+    current_rsi: float = 0.0    # 참고용 기술지표
+    ma20_dist_pct: float = 0.0  # MA20 대비 괴리율 (%)
+
+
+@dataclass
+class ThemeAlert:
+    """RSS 테마 감지 알림"""
+    theme_name: str              # "페로브스카이트"
+    matched_keyword: str         # 매칭된 키워드
+    news_title: str              # RSS 기사 제목
+    news_url: str = ""           # 기사 URL
+    news_source: str = ""        # RSS 피드명
+    published: str = ""          # 발행 시각
+    related_stocks: list = field(default_factory=list)  # ThemeStock 리스트
+    grok_expanded: bool = False  # Grok 확장 완료 여부
+    timestamp: str = ""
+
+
 class SignalImportance(Enum):
     """시그널 중요도"""
     CRITICAL = "critical"    # 즉시 확인 필요
