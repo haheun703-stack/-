@@ -1,5 +1,5 @@
 {
-  "date": "2026-02-20",
+  "date": "2026-02-21",
   "portfolio": 30000000,
   "fired_count": 5,
   "signal_count": 7,
@@ -20,20 +20,20 @@
         {
           "name": "코리안리",
           "ticker": "003690",
-          "score": 50,
+          "score": 55,
           "change_pct": 2.25
-        },
-        {
-          "name": "에이플러스에셋",
-          "ticker": "244920",
-          "score": 30,
-          "change_pct": 0.21
         },
         {
           "name": "서울보증보험",
           "ticker": "031210",
-          "score": 25,
+          "score": 34,
           "change_pct": 5.26
+        },
+        {
+          "name": "에이플러스에셋",
+          "ticker": "244920",
+          "score": 31,
+          "change_pct": 0.21
         }
       ]
     },
@@ -51,22 +51,22 @@
       "timeout_days": 2,
       "picks": [
         {
-          "name": "HRS",
-          "ticker": "036640",
-          "score": 80,
-          "change_pct": 1.9
-        },
-        {
           "name": "미원홀딩스",
           "ticker": "107590",
-          "score": 75,
+          "score": 67,
           "change_pct": -0.14
         },
         {
-          "name": "동방아그로",
-          "ticker": "007590",
-          "score": 75,
-          "change_pct": 0.84
+          "name": "원풍",
+          "ticker": "008370",
+          "score": 67,
+          "change_pct": 0.0
+        },
+        {
+          "name": "케이디켐",
+          "ticker": "221980",
+          "score": 67,
+          "change_pct": 0.19
         }
       ]
     },
@@ -86,20 +86,20 @@
         {
           "name": "KZ정밀",
           "ticker": "036560",
-          "score": 72,
+          "score": 73,
           "change_pct": 1.22
         },
         {
           "name": "기신정기",
           "ticker": "092440",
-          "score": 68,
+          "score": 61,
           "change_pct": 0.0
         },
         {
-          "name": "디와이피엔에프",
-          "ticker": "104460",
-          "score": 60,
-          "change_pct": -1.38
+          "name": "이엠코리아",
+          "ticker": "095190",
+          "score": 53,
+          "change_pct": 1.08
         }
       ]
     },
@@ -119,20 +119,20 @@
         {
           "name": "아이지넷",
           "ticker": "462980",
-          "score": 42,
+          "score": 40,
           "change_pct": 6.65
+        },
+        {
+          "name": "삼성생명",
+          "ticker": "032830",
+          "score": 30,
+          "change_pct": 4.78
         },
         {
           "name": "한화생명",
           "ticker": "088350",
-          "score": 25,
+          "score": 26,
           "change_pct": 29.92
-        },
-        {
-          "name": "미래에셋생명",
-          "ticker": "085620",
-          "score": 25,
-          "change_pct": 29.98
         }
       ]
     },
@@ -152,20 +152,20 @@
         {
           "name": "코리안리",
           "ticker": "003690",
-          "score": 50,
+          "score": 55,
           "change_pct": 2.25
-        },
-        {
-          "name": "에이플러스에셋",
-          "ticker": "244920",
-          "score": 30,
-          "change_pct": 0.21
         },
         {
           "name": "서울보증보험",
           "ticker": "031210",
-          "score": 25,
+          "score": 34,
           "change_pct": 5.26
+        },
+        {
+          "name": "에이플러스에셋",
+          "ticker": "244920",
+          "score": 31,
+          "change_pct": 0.21
         }
       ]
     },
@@ -185,19 +185,19 @@
         {
           "name": "한라IMS",
           "ticker": "092460",
-          "score": 68,
+          "score": 69,
           "change_pct": 2.42
+        },
+        {
+          "name": "삼성중공업",
+          "ticker": "010140",
+          "score": 49,
+          "change_pct": 2.08
         },
         {
           "name": "바이온",
           "ticker": "032980",
-          "score": 55,
-          "change_pct": 0.0
-        },
-        {
-          "name": "메디콕스",
-          "ticker": "054180",
-          "score": 55,
+          "score": 45,
           "change_pct": 0.0
         }
       ]
@@ -218,20 +218,20 @@
         {
           "name": "KZ정밀",
           "ticker": "036560",
-          "score": 72,
+          "score": 73,
           "change_pct": 1.22
         },
         {
           "name": "기신정기",
           "ticker": "092440",
-          "score": 68,
+          "score": 61,
           "change_pct": 0.0
         },
         {
-          "name": "디와이피엔에프",
-          "ticker": "104460",
-          "score": 60,
-          "change_pct": -1.38
+          "name": "이엠코리아",
+          "ticker": "095190",
+          "score": 53,
+          "change_pct": 1.08
         }
       ]
     }

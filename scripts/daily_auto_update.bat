@@ -45,8 +45,28 @@ python scripts\sector_zscore.py --top 5 >> logs\auto_update.log 2>&1
 python scripts\sector_investor_flow.py --days 5 >> logs\auto_update.log 2>&1
 python scripts\sector_daily_report.py >> logs\auto_update.log 2>&1
 
-REM 9단계: ETF 매매 시그널 생성 + 텔레그램 발송
+REM 9단계: ETF 마스터 데이터 빌드 (수급 + 지표 + 추천점수)
+echo [%date% %time%] ETF 마스터 데이터 빌드 >> logs\auto_update.log
+python scripts\update_etf_master.py >> logs\auto_update.log 2>&1
+
+REM 10단계: 눌림목 스캔 (전종목 건강한 조정 매수)
+echo [%date% %time%] 눌림목 스캔 >> logs\auto_update.log
+python scripts\scan_pullback.py >> logs\auto_update.log 2>&1
+
+REM 11단계: 세력감지 스캔 (전종목 이상패턴 탐지)
+echo [%date% %time%] 세력감지 스캔 >> logs\auto_update.log
+python scripts\scan_whale_detect.py >> logs\auto_update.log 2>&1
+
+REM 12단계: ETF 매매 시그널 생성 + 텔레그램 발송
 echo [%date% %time%] ETF 매매 시그널 생성 >> logs\auto_update.log
 python scripts\etf_trading_signal.py >> logs\auto_update.log 2>&1
+
+REM 13단계: 추천 성과 추적 (이전 추천 결과 판정 + 보유중 업데이트)
+echo [%date% %time%] 추천 성과 추적 >> logs\auto_update.log
+python scripts\track_pick_results.py >> logs\auto_update.log 2>&1
+
+REM 14단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증)
+echo [%date% %time%] 내일 추천 종목 스캔 >> logs\auto_update.log
+python scripts\scan_tomorrow_picks.py >> logs\auto_update.log 2>&1
 
 echo [%date% %time%] 일일 데이터 업데이트 완료 >> logs\auto_update.log

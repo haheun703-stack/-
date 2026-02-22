@@ -235,6 +235,7 @@ def generate_etf_signals() -> dict:
         "smart_money_etf": [],
         "theme_money_etf": [],
         "watch_list": [],
+        "all_etf": [],
         "summary": {},
     }
 
@@ -285,6 +286,9 @@ def generate_etf_signals() -> dict:
             "ret_20": sec.get("ret_20", 0),
         }
 
+        # 전체 ETF 목록에 추가 (HOT 상승 ETF 등에 활용)
+        signals["all_etf"].append(dict(entry))
+
         # ── Smart Money ETF 시그널 ──
         if is_smart:
             if bb_pct < 80 and rsi < 60 and rank <= 12:
@@ -330,6 +334,9 @@ def generate_etf_signals() -> dict:
             entry["hold_days"] = 5
             entry["reason"] = f"Top{rank} + BB{bb_pct:.0f}% 저위치 + RSI{rsi:.0f}"
             signals["watch_list"].append(entry)
+
+    # all_etf를 5일 수익률 기준 정렬
+    signals["all_etf"].sort(key=lambda x: x.get("ret_5", 0), reverse=True)
 
     # 요약
     signals["summary"] = {

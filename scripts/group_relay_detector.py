@@ -36,10 +36,10 @@ OUTPUT_PATH = PROJECT_ROOT / "data" / "group_relay" / "group_relay_today.json"
 
 # 점수 배분 (100점)
 SCORE_WAITING = 30   # 대기 상태 (-2%~+3%)
-SCORE_VOLUME = 20    # 거래량 이상 (5일 대비)
+SCORE_VOLUME = 15    # 거래량 이상 (5일 대비)
 SCORE_RSI = 15       # RSI 위치 (30~50 이상적)
 SCORE_TIER = 15      # 티어 가산 (tier1 > tier2 > tier3)
-SCORE_FLOW = 20      # 수급 흐름 (외인/기관 연속매수)
+SCORE_FLOW = 25      # 수급 흐름 (5일 누적 순매수 금액 기반)
 
 
 def load_group_structure() -> dict:
@@ -70,7 +70,9 @@ def load_stock_latest(ticker: str) -> dict | None:
         # RSI (CSV에 있으면 사용)
         rsi = float(latest.get("RSI", 50)) if pd.notna(latest.get("RSI")) else 50
 
-        # 외인/기관 연속매수 일수
+        # 수급: 5일 누적 순매수 금액 (억 단위)
+        foreign_5d, inst_5d = _calc_flow_5d(df)
+        # 수급: 연속매수 일수 (참고용)
         foreign_streak = _calc_consecutive_buy(df, "Foreign_Net")
         inst_streak = _calc_consecutive_buy(df, "Inst_Net")
 
@@ -88,12 +90,36 @@ def load_stock_latest(ticker: str) -> dict | None:
             "vol_5d_avg": float(vol_5d) if vol_5d > 0 else 1,
             "vol_ratio": round(float(latest["Volume"]) / vol_5d, 2) if vol_5d > 0 else 1,
             "rsi": rsi,
+            "foreign_5d": foreign_5d,
+            "inst_5d": inst_5d,
             "foreign_streak": foreign_streak,
             "inst_streak": inst_streak,
         }
     except Exception as e:
         logger.debug("CSV 로드 실패: %s — %s", ticker, e)
         return None
+
+
+def _calc_flow_5d(df: pd.DataFrame) -> tuple[float, float]:
+    """최근 5일 외인/기관 누적 순매수 금액 (억 단위)"""
+    f5 = 0.0
+    i5 = 0.0
+    last5 = df.tail(5)
+    if "Foreign_Net" in df.columns:
+        vals = last5["Foreign_Net"].dropna()
+        # Foreign_Net은 주수(거래량) 단위 → 종가 곱해서 금액 변환 후 억 단위
+        closes = last5["Close"].dropna()
+        if len(vals) > 0 and len(closes) > 0:
+            # 간이 금액 = 순매수주수 × 해당일 종가 → 합산 → 억 변환
+            aligned = pd.DataFrame({"net": vals, "close": closes}).dropna()
+            f5 = round(float((aligned["net"] * aligned["close"]).sum()) / 1e8, 1)
+    if "Inst_Net" in df.columns:
+        vals = last5["Inst_Net"].dropna()
+        closes = last5["Close"].dropna()
+        if len(vals) > 0 and len(closes) > 0:
+            aligned = pd.DataFrame({"net": vals, "close": closes}).dropna()
+            i5 = round(float((aligned["net"] * aligned["close"]).sum()) / 1e8, 1)
+    return f5, i5
 
 
 def _calc_consecutive_buy(df: pd.DataFrame, col: str) -> int:
@@ -200,18 +226,28 @@ def score_subsidiaries(
             score += tier_bonus[tier_name]
             reasons.append(tier_name)
 
-            # 5. 수급 흐름
-            fs = data.get("foreign_streak", 0)
-            is_ = data.get("inst_streak", 0)
-            if fs >= 3 and is_ >= 3:
+            # 5. 수급 흐름 (5일 누적 금액 기반)
+            f5 = data.get("foreign_5d", 0)
+            i5 = data.get("inst_5d", 0)
+            dual_buy = f5 > 0 and i5 > 0
+            has_buyer = f5 > 0 or i5 > 0
+
+            if dual_buy:
                 score += SCORE_FLOW
-                reasons.append(f"외인{fs}일+기관{is_}일")
-            elif fs >= 3 or is_ >= 3:
+                reasons.append(f"외인{f5:+.0f}억+기관{i5:+.0f}억(동시)")
+            elif f5 > 5:
                 score += SCORE_FLOW * 0.7
-                tag = f"외인{fs}일" if fs >= 3 else f"기관{is_}일"
-                reasons.append(f"{tag}연속매수")
-            elif fs >= 1 or is_ >= 1:
-                score += SCORE_FLOW * 0.3
+                reasons.append(f"외인{f5:+.0f}억(5일)")
+            elif i5 > 5:
+                score += SCORE_FLOW * 0.7
+                reasons.append(f"기관{i5:+.0f}억(5일)")
+            elif has_buyer:
+                score += SCORE_FLOW * 0.4
+                buyer = f"외인{f5:+.0f}억" if f5 > 0 else f"기관{i5:+.0f}억"
+                reasons.append(f"{buyer}(5일)")
+            elif f5 < -5 and i5 < -5:
+                reasons.append(f"수급악화(외{f5:.0f}+기{i5:.0f}억)")
+            # has_buyer 아니고 소액이면 수급 점수 0
 
             candidates.append({
                 "ticker": data["ticker"],
@@ -220,6 +256,8 @@ def score_subsidiaries(
                 "change_pct": data["change_pct"],
                 "volume_ratio": data["vol_ratio"],
                 "rsi": data["rsi"],
+                "foreign_5d": f5,
+                "inst_5d": i5,
                 "score": round(min(score, 100.0), 1),
                 "reasons": reasons,
             })
