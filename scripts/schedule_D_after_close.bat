@@ -34,7 +34,7 @@ python -u -X utf8 scripts\collect_supply_data.py >> logs\schedule.log 2>&1
 
 REM 4단계: KOSPI 인덱스 업데이트 (레짐 판별용)
 echo [%date% %time%] [4/17] KOSPI 인덱스 업데이트 >> logs\schedule.log
-python -u -X utf8 -c "import yfinance as yf; import pandas as pd; from pathlib import Path; df=yf.download('^KS11',period='3y',progress=False); df.columns=[c[0].lower() for c in df.columns]; df.to_csv(Path('data/kospi_index.csv')); print(f'KOSPI {len(df)}rows saved')" >> logs\schedule.log 2>&1
+python -u -X utf8 scripts\update_kospi_index.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
 REM  PHASE 2: 지표 계산 (~10분)
@@ -42,7 +42,7 @@ REM ═════════════════════════�
 
 REM 5단계: 기술지표 재계산 (raw -> processed parquet, 35개 지표)
 echo [%date% %time%] [5/17] 기술지표 재계산 >> logs\schedule.log
-python -u -X utf8 -c "from src.indicators import IndicatorEngine; e = IndicatorEngine(); e.process_all()" >> logs\schedule.log 2>&1
+python -u -X utf8 scripts\rebuild_indicators.py >> logs\schedule.log 2>&1
 
 REM 6단계: US 시장 데이터 + Overnight Signal 갱신
 echo [%date% %time%] [6/17] US Overnight Signal >> logs\schedule.log
