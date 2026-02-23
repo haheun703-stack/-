@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarvis Control Tower</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { min-height:100vh; background:#0A0B0F; font-family:'Pretendard',-apple-system,'Segoe UI',sans-serif; color:#E5E7EB; padding:20px; }
@@ -104,6 +105,7 @@ body { min-height:100vh; background:#0A0B0F; font-family:'Pretendard',-apple-sys
       <div style="text-align:right">
         <div class="date" id="date-display"></div>
         <span class="stance-badge" id="stance-badge"></span>
+        <a href="/logout" style="display:inline-block;margin-top:4px;font-size:10px;color:#6B7280;text-decoration:none" title="로그아웃">Logout</a>
       </div>
     </div>
     <div class="headline" id="headline"></div>
@@ -153,6 +155,7 @@ const TABS = [
   { id:'shakeout', icon:'&#x26A1;', label:'세력감지', color:'#8B5CF6' },
   { id:'global', icon:'&#x1F30D;', label:'글로벌리스크', color:'#06B6D4' },
   { id:'theme', icon:'&#x1F4CA;', label:'동반매수', color:'#F97316' },
+  { id:'history', icon:'&#x1F4C5;', label:'히스토리', color:'#A78BFA' },
 ];
 
 const STANCE_COLORS = {
@@ -624,9 +627,11 @@ function switchTab(tabId) {
     smartmoney: renderSmartMoney, quantum: renderQuantum,
     journal: renderJournal, shakeout: renderShakeout,
     global: renderGlobal, theme: renderTheme,
+    history: renderHistory,
   };
   const fn = renderers[tabId];
   el.innerHTML = fn ? fn() : '<div class="empty">탭 데이터 없음</div>';
+  if (tabId === 'history') loadHistoryDates();
 }
 
 /* ═══════════════════════════════════════ */
@@ -2345,6 +2350,243 @@ function renderForecast() {
       ${sectorHtml}
     </div>
   `;
+}
+
+/* ═══════════════════════════════════════ */
+/*  히스토리 탭                            */
+/* ═══════════════════════════════════════ */
+let historyDates = [];
+let historyChart = null;
+
+function renderHistory() {
+  return `
+    <h3 class="sec-title" style="color:#A78BFA">&#x1F4C5; 히스토리 아카이브</h3>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button onclick="loadHistoryDates()" style="padding:6px 14px;border-radius:6px;background:#A78BFA22;border:1px solid #A78BFA44;color:#A78BFA;cursor:pointer;font-size:12px;font-weight:600">날짜 목록 새로고침</button>
+      <button onclick="loadPerformanceChart()" style="padding:6px 14px;border-radius:6px;background:#10B98122;border:1px solid #10B98144;color:#10B981;cursor:pointer;font-size:12px;font-weight:600">성과 차트</button>
+      <button onclick="loadWeeklyReports()" style="padding:6px 14px;border-radius:6px;background:#6366F122;border:1px solid #6366F144;color:#6366F1;cursor:pointer;font-size:12px;font-weight:600">주간 보고</button>
+      <button onclick="loadMonthlyReports()" style="padding:6px 14px;border-radius:6px;background:#EC489922;border:1px solid #EC489944;color:#EC4899;cursor:pointer;font-size:12px;font-weight:600">월간 보고</button>
+    </div>
+    <div id="history-calendar" style="margin-bottom:16px"></div>
+    <div id="history-chart-wrap" style="margin-bottom:16px;display:none">
+      <canvas id="perfChart" height="200"></canvas>
+    </div>
+    <div id="history-detail"></div>
+  `;
+}
+
+async function loadHistoryDates() {
+  try {
+    const resp = await fetch('/api/history/dates?limit=90');
+    const data = await resp.json();
+    historyDates = data.dates || [];
+    renderHistoryCalendar();
+  } catch(e) {
+    document.getElementById('history-calendar').innerHTML = '<div class="empty">날짜 목록 로드 실패</div>';
+  }
+}
+
+function renderHistoryCalendar() {
+  const el = document.getElementById('history-calendar');
+  if (!historyDates.length) {
+    el.innerHTML = '<div class="empty">아카이브된 날짜가 없습니다. BAT-D 실행 후 데이터가 쌓입니다.</div>';
+    return;
+  }
+  let html = '<div style="font-size:12px;color:#6B7280;margin-bottom:8px">저장된 날짜 (클릭하여 조회)</div>';
+  html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  historyDates.forEach(d => {
+    const dayName = ['일','월','화','수','목','금','토'][new Date(d).getDay()];
+    const shortDate = d.slice(5);
+    html += `<div onclick="loadHistoryDetail('${d}')" style="padding:6px 10px;border-radius:6px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);cursor:pointer;font-size:12px;font-family:var(--mono);color:#C4B5FD;transition:all 0.2s"
+      onmouseover="this.style.background='rgba(167,139,250,0.2)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">${shortDate}(${dayName})</div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function loadHistoryDetail(date) {
+  const el = document.getElementById('history-detail');
+  el.innerHTML = '<div class="loading">로딩 중...</div>';
+  try {
+    const resp = await fetch(`/api/history/${date}`);
+    if (!resp.ok) { el.innerHTML = '<div class="empty">해당 날짜 데이터 없음</div>'; return; }
+    const data = await resp.json();
+    renderHistoryDetail(data, date);
+  } catch(e) {
+    el.innerHTML = '<div class="empty">로드 실패</div>';
+  }
+}
+
+function renderHistoryDetail(data, date) {
+  const el = document.getElementById('history-detail');
+  const s = data.summary || {};
+  const picks = data.picks || [];
+  const etfs = data.etfs || [];
+
+  let html = `<div style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:12px;margin-bottom:14px">
+    <div style="font-size:16px;font-weight:700;color:#C4B5FD">${date} 아카이브</div>
+    <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;font-size:12px;color:#9CA3AF">
+      <span>추천 <b style="color:#E5E7EB">${s.total_picks||0}</b>건</span>
+      <span>매수등급 <b style="color:#10B981">${s.buy_grade||0}</b></span>
+      <span>관심 <b style="color:#F59E0B">${s.watch_grade||0}</b></span>
+      <span>보유 <b style="color:#6366F1">${s.holding_count||0}</b></span>
+      <span>ETF HOT <b style="color:#EF4444">${s.etf_hot_count||0}</b></span>
+      <span>ETF 매수 <b style="color:#10B981">${s.etf_buy_count||0}</b></span>
+      <span>TOP섹터 <b style="color:#A78BFA">${esc(s.sector_top||'-')}</b></span>
+    </div>
+  </div>`;
+
+  // 추천종목 테이블
+  if (picks.length > 0) {
+    html += '<div style="font-size:13px;font-weight:700;color:#C4B5FD;margin-bottom:8px">추천 종목</div>';
+    html += '<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">';
+    html += '<tr style="color:#6B7280;border-bottom:1px solid rgba(255,255,255,0.06)"><th style="text-align:left;padding:6px">종목</th><th>등급</th><th>점수</th><th>진입가</th><th>RSI</th><th>수익</th><th>상태</th></tr>';
+    picks.forEach(p => {
+      const retColor = (p.day1_return||0) >= 0 ? '#10B981' : '#EF4444';
+      const statusBg = p.status === 'hit_target' ? '#10B98122' : p.status === 'hit_stop' ? '#EF444422' : '#6B728022';
+      const statusColor = p.status === 'hit_target' ? '#10B981' : p.status === 'hit_stop' ? '#EF4444' : '#6B7280';
+      html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+        <td style="padding:6px;font-weight:600;color:#E5E7EB">${esc(p.name)}<span style="color:#6B7280;font-size:10px;margin-left:4px">${p.ticker}</span></td>
+        <td style="text-align:center">${badge(p.grade, p.grade==='강력매수'?'#EF444422':p.grade==='매수'?'#10B98122':'#F59E0B22', p.grade==='강력매수'?'#EF4444':p.grade==='매수'?'#10B981':'#F59E0B')}</td>
+        <td style="text-align:center;font-family:var(--mono);color:#E5E7EB">${num(p.score)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:#9CA3AF">${(p.entry_price||0).toLocaleString()}</td>
+        <td style="text-align:center;font-family:var(--mono);color:#9CA3AF">${num(p.rsi)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${retColor}">${p.day1_return ? (p.day1_return>=0?'+':'') + num(p.day1_return) + '%' : '-'}</td>
+        <td style="text-align:center">${badge(p.status||'pending', statusBg, statusColor)}</td>
+      </tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // ETF 테이블
+  if (etfs.length > 0) {
+    html += '<div style="font-size:13px;font-weight:700;color:#6366F1;margin-top:16px;margin-bottom:8px">ETF 시그널</div>';
+    html += '<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">';
+    html += '<tr style="color:#6B7280;border-bottom:1px solid rgba(255,255,255,0.06)"><th style="text-align:left;padding:6px">섹터</th><th>ETF</th><th>등급</th><th>점수</th><th>5일%</th><th>RSI</th><th>외인</th><th>기관</th></tr>';
+    etfs.slice(0, 15).forEach(e => {
+      const gradeColor = e.grade==='HOT매수'?'#EF4444':e.grade==='매수'?'#10B981':e.grade==='진입대기'?'#F59E0B':'#6B7280';
+      html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+        <td style="padding:6px;color:#9CA3AF">${esc(e.sector)}</td>
+        <td style="font-weight:600;color:#E5E7EB">${esc(e.etf_name)}</td>
+        <td style="text-align:center">${badge(e.grade, gradeColor+'22', gradeColor)}</td>
+        <td style="text-align:center;font-family:var(--mono);color:#E5E7EB">${num(e.score)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${(e.ret_5||0)>=0?'#10B981':'#EF4444'}">${(e.ret_5||0)>=0?'+':''}${num(e.ret_5)}%</td>
+        <td style="text-align:center;font-family:var(--mono);color:#9CA3AF">${num(e.rsi)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${(e.foreign_5d||0)>=0?'#10B981':'#EF4444'}">${num(e.foreign_5d)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${(e.inst_5d||0)>=0?'#10B981':'#EF4444'}">${num(e.inst_5d)}</td>
+      </tr>`;
+    });
+    html += '</table></div>';
+    if (etfs.length > 15) html += `<div style="text-align:center;font-size:11px;color:#6B7280;margin-top:6px">외 ${etfs.length - 15}개 ETF</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+async function loadPerformanceChart() {
+  const wrap = document.getElementById('history-chart-wrap');
+  wrap.style.display = 'block';
+  try {
+    const resp = await fetch('/api/chart/performance?days=30');
+    const data = await resp.json();
+    const items = data.data || [];
+    if (!items.length) { wrap.innerHTML = '<div class="empty">차트 데이터 없음 (아카이브 쌓인 후 표시)</div>'; return; }
+
+    const labels = items.map(d => d.date.slice(5));
+    const picksData = items.map(d => d.total_picks || 0);
+    const winData = items.map(d => d.win_rate || 0);
+    const retData = items.map(d => d.avg_return || 0);
+
+    if (historyChart) historyChart.destroy();
+    const ctx = document.getElementById('perfChart').getContext('2d');
+    historyChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '추천수', data: picksData, borderColor: '#A78BFA', backgroundColor: '#A78BFA22', tension: 0.3, yAxisID: 'y', pointRadius: 3 },
+          { label: '승률%', data: winData, borderColor: '#10B981', backgroundColor: '#10B98122', tension: 0.3, yAxisID: 'y1', pointRadius: 3 },
+          { label: '평균수익%', data: retData, borderColor: '#F59E0B', backgroundColor: '#F59E0B22', tension: 0.3, yAxisID: 'y1', pointRadius: 3 },
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 11 } } } },
+        scales: {
+          x: { ticks: { color: '#6B7280', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+          y: { position: 'left', title: { display: true, text: '추천수', color: '#A78BFA' }, ticks: { color: '#A78BFA' }, grid: { color: 'rgba(255,255,255,0.03)' } },
+          y1: { position: 'right', title: { display: true, text: '%', color: '#10B981' }, ticks: { color: '#10B981' }, grid: { display: false } },
+        }
+      }
+    });
+  } catch(e) {
+    wrap.innerHTML = '<div class="empty">차트 로드 실패</div>';
+  }
+}
+
+async function loadWeeklyReports() {
+  const el = document.getElementById('history-detail');
+  el.innerHTML = '<div class="loading">주간 보고서 로딩...</div>';
+  try {
+    const resp = await fetch('/api/reports/weekly?limit=12');
+    const data = await resp.json();
+    const reports = data.reports || [];
+    if (!reports.length) { el.innerHTML = '<div class="empty">주간 보고서 없음 (금요일 자동 생성)</div>'; return; }
+
+    let html = '<div style="font-size:14px;font-weight:700;color:#6366F1;margin-bottom:12px">주간 보고서</div>';
+    reports.forEach(r => {
+      const wrColor = (r.win_rate||0) >= 50 ? '#10B981' : '#EF4444';
+      const retColor = (r.avg_return||0) >= 0 ? '#10B981' : '#EF4444';
+      html += `<div class="card" style="background:rgba(99,102,241,0.04);border:1px solid rgba(99,102,241,0.12)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-weight:700;color:#A5B4FC;font-size:13px">${r.week_start} ~ ${r.week_end}</span>
+          <span style="font-size:12px;color:#6B7280">${r.total_picks||0}건</span>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <span>승률 <b style="color:${wrColor}">${num(r.win_rate)}%</b></span>
+          <span>평균수익 <b style="color:${retColor}">${r.avg_return>=0?'+':''}${num(r.avg_return,2)}%</b></span>
+          <span>PF <b style="color:#F59E0B">${num(r.profit_factor,2)}</b></span>
+        </div>
+        ${r.best_pick ? `<div style="font-size:11px;color:#6B7280;margin-top:4px">BEST: ${esc(r.best_pick)} | WORST: ${esc(r.worst_pick)}</div>` : ''}
+      </div>`;
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="empty">주간 보고서 로드 실패</div>';
+  }
+}
+
+async function loadMonthlyReports() {
+  const el = document.getElementById('history-detail');
+  el.innerHTML = '<div class="loading">월간 보고서 로딩...</div>';
+  try {
+    const resp = await fetch('/api/reports/monthly?limit=12');
+    const data = await resp.json();
+    const reports = data.reports || [];
+    if (!reports.length) { el.innerHTML = '<div class="empty">월간 보고서 없음 (월말 자동 생성)</div>'; return; }
+
+    let html = '<div style="font-size:14px;font-weight:700;color:#EC4899;margin-bottom:12px">월간 보고서</div>';
+    reports.forEach(r => {
+      const wrColor = (r.win_rate||0) >= 50 ? '#10B981' : '#EF4444';
+      const retColor = (r.avg_return||0) >= 0 ? '#10B981' : '#EF4444';
+      html += `<div class="card" style="background:rgba(236,72,153,0.04);border:1px solid rgba(236,72,153,0.12)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-weight:700;color:#F9A8D4;font-size:14px">${r.year_month}</span>
+          <span style="font-size:12px;color:#6B7280">${r.total_picks||0}건 / 확정 ${r.settled_count||0}건</span>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <span>승률 <b style="color:${wrColor}">${num(r.win_rate)}%</b></span>
+          <span>평균수익 <b style="color:${retColor}">${r.avg_return>=0?'+':''}${num(r.avg_return,2)}%</b></span>
+          <span>PF <b style="color:#F59E0B">${num(r.profit_factor,2)}</b></span>
+        </div>
+        ${r.best_pick ? `<div style="font-size:11px;color:#6B7280;margin-top:4px">BEST: ${esc(r.best_pick)} | WORST: ${esc(r.worst_pick)}</div>` : ''}
+      </div>`;
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="empty">월간 보고서 로드 실패</div>';
+  }
 }
 
 /* ═══════════════════════════════════════ */

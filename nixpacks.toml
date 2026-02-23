@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python312"]
+
+[phases.install]
+cmds = ["pip install -r requirements-railway.txt"]
+
+[start]
+cmd = "python scripts/start_dashboard.py --host 0.0.0.0 --port ${PORT:-8000}"
