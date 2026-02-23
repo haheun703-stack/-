@@ -357,15 +357,18 @@ function renderTomorrowPicks() {
   const genAt = tp.generated_at || '';
   const stats = tp.stats || {};
 
-  // 강력매수 + 매수 + 관심매수만 표시
-  const showPicks = picks.filter(p => ['강력매수','매수','관심매수'].includes(p.grade));
+  // TOP5 우선 표시 (top5 배열이 있으면 해당 종목만, 없으면 등급 기준 fallback)
+  const top5List = tp.top5 || [];
+  const showPicks = top5List.length > 0
+    ? picks.filter(p => top5List.includes(p.ticker))
+    : picks.filter(p => ['적극매수','매수','관심매수'].includes(p.grade)).slice(0, 5);
   if (showPicks.length === 0) {
     el.innerHTML = '';
     return;
   }
 
   const gradeStyle = {
-    '강력매수': { bg: '#DC2626', fg: '#fff', border: '#EF4444' },
+    '적극매수': { bg: '#DC2626', fg: '#fff', border: '#EF4444' },
     '매수':     { bg: '#F59E0B', fg: '#000', border: '#FBBF24' },
     '관심매수': { bg: '#3B82F6', fg: '#fff', border: '#60A5FA' },
   };
@@ -580,7 +583,7 @@ function renderPicksHistory() {
     const pickLabel = (r.pick_date || '').slice(5); // MM-DD
 
     const gradeStyle2 = {
-      '강력매수': { bg: '#DC2626', fg: '#fff' },
+      '적극매수': { bg: '#DC2626', fg: '#fff' },
       '매수':     { bg: '#F59E0B', fg: '#000' },
       '관심매수': { bg: '#3B82F6', fg: '#fff' },
     };
