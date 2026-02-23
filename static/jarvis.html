@@ -668,13 +668,17 @@ function renderRelay() {
     </div>`;
   });
 
-  // 추천 종목 — 점수 높은순 정렬 + 순위
-  const allPicks = [];
+  // 추천 종목 — 종목코드 중복 제거 + 점수 높은순 정렬
+  const pickMap = {};
   signals.forEach(s => {
     (s.picks || []).forEach(p => {
-      allPicks.push({...p, lead: s.lead, follow: s.follow});
+      const key = p.ticker;
+      if (!pickMap[key] || (p.score || 0) > (pickMap[key].score || 0)) {
+        pickMap[key] = {...p, lead: s.lead, follow: s.follow};
+      }
     });
   });
+  const allPicks = Object.values(pickMap);
   allPicks.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   if (allPicks.length > 0) {
