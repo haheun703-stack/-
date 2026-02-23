@@ -10,12 +10,13 @@
   4. 퀀텀시그널 survivors + killed (scan_cache.json)
   5. 동반매수 S/A등급 + core_watch (dual_buying_watch.json)
 
-통합 점수 (100점, 5축):
-  다중 시그널 (30): 2개 소스 +15, 3개 소스 +25, 4개+ +30
-  개별 점수  (25): 각 소스 점수 정규화 평균
-  기술적 지지 (20): RSI 적정(10) + MA60 위(5) + 낙폭<15%(5)
-  수급       (15): 외인5d 순매수(10) + 기관 동반(5)
-  안전       (10): BB과열 아님(5) + ADX 적정(5)
+통합 점수 (100점, 5축 + 과열패널티):
+  다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25, 동반매수3일+ 부스트
+  개별 점수  (20): 각 소스 점수 정규화 평균
+  기술적 지지 (25): RSI 적정(8) + MA(5) + MACD(4) + TRIX(4) + Stoch(4)
+  수급       (20): 외인(8) + 기관(5) + 동시매수(2) + 연속매수(5)
+  안전       (10): BB(4) + ADX(3) + 낙폭(3)
+  과열 패널티: RSI/Stoch/BB/급등 최대 -25점
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -227,10 +228,11 @@ def calc_integrated_score(
     sources: list[dict],
     parquet_data: dict | None,
 ) -> dict:
-    """6축 100점 + 과열패널티 통합 점수 계산 (v2)
+    """5축 100점 + 과열패널티 통합 점수 계산 (v3)
 
     기본 100점 배분:
-      다중시그널(25) + 개별점수(20) + 기술적(25) + 수급(15) + 안전(15)
+      다중시그널(25) + 개별점수(20) + 기술적(25) + 수급(20) + 안전(10)
+    동반매수 부스트: 3일+ 연속 동반매수 시 멀티시그널 + 수급 가점
     과열 패널티: 최대 -25점
     """
 
@@ -244,6 +246,18 @@ def calc_integrated_score(
         multi_score = 12
     else:
         multi_score = 0
+
+    # 동반매수 연속일 부스트: 3일+ 지속 매수는 그 자체가 확인 시그널
+    dual_days = 0
+    for s in sources:
+        dd = s.get("dual_days", 0) or s.get("f_streak", 0) or 0
+        dual_days = max(dual_days, int(dd))
+    if dual_days >= 5:
+        multi_score = max(multi_score, 15)  # 5일+ → 15점 보장
+    elif dual_days >= 4:
+        multi_score = max(multi_score, 12)  # 4일 → 12점 보장
+    elif dual_days >= 3:
+        multi_score = max(multi_score, 8)   # 3일 → 8점 보장
 
     # ── 축2: 개별 점수 평균 (20점) ──
     avg_src_score = np.mean([s["score"] for s in sources]) if sources else 0
@@ -282,10 +296,10 @@ def calc_integrated_score(
 
     # ── 축3: 기술적 지지 (25점) ──
     tech_score = 0
-    # RSI 적정대 (0~8점)
-    if 35 <= rsi <= 55:
+    # RSI 적정대 (0~8점) — 수급 동반 시 55~65도 유효
+    if 35 <= rsi <= 60:
         tech_score += 8
-    elif 30 <= rsi <= 65:
+    elif 30 <= rsi <= 70:
         tech_score += 4
     # 이동평균 (0~5점)
     if above_ma60:
@@ -308,7 +322,7 @@ def calc_integrated_score(
 
     tech_score = min(tech_score, 25)
 
-    # ── 축4: 수급 (15점) ──
+    # ── 축4: 수급 (20점, 기존 15→20 상향) ──
     flow_score = 0
     if foreign_5d > 0:
         flow_score += 8
@@ -319,25 +333,30 @@ def calc_integrated_score(
     # 외인+기관 동시매수
     if foreign_5d > 0 and inst_5d > 0:
         flow_score += 2
+    # 연속 동반매수 보너스 (3일+ 지속 = 스마트머니 확인)
+    if dual_days >= 4:
+        flow_score += 5
+    elif dual_days >= 3:
+        flow_score += 3
 
-    flow_score = min(flow_score, 15)
+    flow_score = min(flow_score, 20)
 
-    # ── 축5: 안전 (15점) ──
+    # ── 축5: 안전 (10점, 기존 15→10) ──
     safety_score = 0
     if bb_pos < 80:
-        safety_score += 5
+        safety_score += 4
     elif bb_pos < 95:
         safety_score += 2
     if 15 <= adx <= 35:
-        safety_score += 5
-    elif adx <= 45:
         safety_score += 3
-    if abs(drawdown) < 15:
-        safety_score += 5
-    elif abs(drawdown) < 25:
+    elif adx <= 45:
         safety_score += 2
+    if abs(drawdown) < 15:
+        safety_score += 3
+    elif abs(drawdown) < 25:
+        safety_score += 1
 
-    safety_score = min(safety_score, 15)
+    safety_score = min(safety_score, 10)
 
     # ── 과열 패널티 (최대 -25점) ── NEW
     overheat_penalty = 0
@@ -474,9 +493,9 @@ def _build_reasons(
     elif n_sources >= 2:
         pros.append(f"{n_sources}중 시그널")
 
-    if 35 <= rsi <= 55:
+    if 35 <= rsi <= 60:
         pros.append(f"RSI {rsi:.0f} 최적")
-    elif 30 <= rsi <= 65:
+    elif 30 <= rsi <= 70:
         pros.append(f"RSI {rsi:.0f} 적정")
 
     if above_ma20 and above_ma60:
