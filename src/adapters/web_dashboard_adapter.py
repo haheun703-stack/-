@@ -216,6 +216,18 @@ async def get_kis_balance():
         return cached[1]
 
     if not os.getenv("KIS_APP_KEY"):
+        # Railway용 fallback: 로컬에서 동기화된 캐시 파일 사용
+        cache_path = PROJECT_ROOT / "data" / "kis_balance.json"
+        if cache_path.exists():
+            data = json.loads(cache_path.read_text(encoding="utf-8"))
+            return {
+                "status": "cached",
+                "holdings": data.get("holdings", []),
+                "total_eval": data.get("total_eval", 0),
+                "total_pnl": data.get("total_pnl", 0),
+                "available_cash": data.get("available_cash", 0),
+                "fetched_at": data.get("fetched_at", ""),
+            }
         return JSONResponse(
             {"error": "KIS API 키 미설정 (.env 확인)", "holdings": []},
             status_code=503,
@@ -392,6 +404,7 @@ async def sync_data(request: Request):
         "sector_rotation/sector_zscore.json", "sector_rotation/investor_flow.json",
         "whale_detect.json", "dual_buying_watch.json", "pullback_scan.json",
         "group_relay/group_relay_today.json",
+        "kis_balance.json", "kospi_regime.json",
     }
     if target not in safe_names:
         return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)

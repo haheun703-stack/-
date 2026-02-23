@@ -141,6 +141,15 @@ class DashboardDataProvider:
 
         kospi_path = DATA_DIR / "kospi_index.csv"
         if not kospi_path.exists():
+            # Railway용 fallback: 동기화된 레짐 JSON 사용
+            regime_path = DATA_DIR / "kospi_regime.json"
+            if regime_path.exists():
+                try:
+                    data = json.loads(regime_path.read_text(encoding="utf-8"))
+                    self._cache[cache_key] = (time.time(), data)
+                    return data
+                except Exception:
+                    pass
             return {"regime": "CAUTION", "slots": 3, "close": 0, "change": 0}
 
         try:
