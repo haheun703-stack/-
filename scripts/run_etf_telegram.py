@@ -2,8 +2,10 @@
 
 전일 생성된 etf_trading_signal.json을 읽어 텔레그램 발송
 """
+import sys
 import json
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def main():

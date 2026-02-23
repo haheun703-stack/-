@@ -11,8 +11,10 @@ REM ============================================================
 echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
 echo [%date% %time%] BAT-D 시작: 장마감 전체 데이터 수집 >> D:\sub-agent-project\logs\schedule.log
 
+chcp 65001 >nul
 call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 
 if not exist logs mkdir logs
 

@@ -9,6 +9,7 @@ echo [%date% %time%] BAT-B 시작: 장전 브리핑 >> D:\sub-agent-project\logs
 
 call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 
 REM 테마스캔 + 뉴스스캔 + 장전 브리핑 (텔레그램 발송 포함)
 echo [%date% %time%] 장전 브리핑 실행 >> logs\schedule.log

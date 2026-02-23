@@ -9,6 +9,7 @@ echo [%date% %time%] BAT-A 시작: 미장 마감 데이터 >> D:\sub-agent-proje
 
 call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 
 REM 1) US 시장 데이터 업데이트 + Overnight Signal
 echo [%date% %time%] US Overnight Signal 업데이트 >> logs\schedule.log

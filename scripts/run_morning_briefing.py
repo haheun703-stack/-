@@ -4,7 +4,10 @@
 2) 뉴스 스캔
 3) 장전 브리핑 텔레그램 발송
 """
+import sys
 import traceback
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def main():

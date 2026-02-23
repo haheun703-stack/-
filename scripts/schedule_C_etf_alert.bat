@@ -9,6 +9,7 @@ echo [%date% %time%] BAT-C 시작: ETF 시그널 발송 >> D:\sub-agent-project\
 
 call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 
 REM ETF 매매 시그널 텔레그램 발송 (전일 생성된 JSON 기반)
 echo [%date% %time%] ETF 시그널 텔레그램 >> logs\schedule.log
