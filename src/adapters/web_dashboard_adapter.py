@@ -384,14 +384,14 @@ async def sync_data(request: Request):
     if not target or content is None:
         return JSONResponse({"error": "file and data required"}, status_code=400)
 
-    # 안전한 파일명만 허용
+    # 안전한 파일명만 허용 (실제 스크립트 출력 파일명 기준)
     safe_names = {
         "tomorrow_picks.json", "etf_master.json", "picks_history.json",
-        "overnight_signal.json", "sector_rotation/sector_momentum.json",
-        "sector_rotation/sector_daily_report.json", "sector_rotation/etf_signal.json",
-        "sector_rotation/sector_zscore.json", "sector_rotation/sector_investor_flow.json",
-        "whale_detect.json", "dual_buying.json", "pullback_candidates.json",
-        "group_relay_signals.json",
+        "us_market/overnight_signal.json", "sector_rotation/sector_momentum.json",
+        "sector_rotation/etf_trading_signal.json",
+        "sector_rotation/sector_zscore.json", "sector_rotation/investor_flow.json",
+        "whale_detect.json", "dual_buying_watch.json", "pullback_scan.json",
+        "group_relay/group_relay_today.json",
     }
     if target not in safe_names:
         return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)

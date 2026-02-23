@@ -28,21 +28,20 @@ RAILWAY_URL = os.getenv("RAILWAY_URL", "")
 SYNC_TOKEN = os.getenv("JARVIS_SECRET", "")
 DATA_DIR = PROJECT_ROOT / "data"
 
-# 동기화 대상 파일 목록
+# 동기화 대상 파일 목록 (실제 스크립트 출력 파일명 기준)
 SYNC_FILES = [
     "tomorrow_picks.json",
     "etf_master.json",
     "picks_history.json",
-    "overnight_signal.json",
+    "us_market/overnight_signal.json",
     "sector_rotation/sector_momentum.json",
-    "sector_rotation/sector_daily_report.json",
-    "sector_rotation/etf_signal.json",
+    "sector_rotation/etf_trading_signal.json",
     "sector_rotation/sector_zscore.json",
-    "sector_rotation/sector_investor_flow.json",
+    "sector_rotation/investor_flow.json",
     "whale_detect.json",
-    "dual_buying.json",
-    "pullback_candidates.json",
-    "group_relay_signals.json",
+    "dual_buying_watch.json",
+    "pullback_scan.json",
+    "group_relay/group_relay_today.json",
 ]
 
 
