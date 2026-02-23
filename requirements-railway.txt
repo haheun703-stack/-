@@ -6,3 +6,5 @@ python-multipart==0.0.22
 python-dotenv==1.2.1
 pydantic==2.12.5
 PyYAML==6.0.3
+numpy
+pandas
