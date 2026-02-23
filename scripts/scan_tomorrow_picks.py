@@ -614,10 +614,30 @@ def get_parquet_data(ticker: str) -> dict | None:
 # 등급 분류
 # ──────────────────────────────────────────
 
-def classify_pick(total_score: float, n_sources: int, rsi: float) -> str:
+def classify_pick(
+    total_score: float, n_sources: int, rsi: float,
+    has_data: bool = True, stoch_k: float = 50, ret_5d: float = 0,
+) -> str:
+    """등급 분류 — 하드 필터 포함 (v4)
+
+    하드 디스퀄:
+      - parquet 데이터 없음 → 데이터부족
+      - Stoch >= 90 (극과열) → 최대 관찰
+      - 5일 수익률 >= 15% (추격매수) → 최대 관찰
+      - RSI >= 78 (과매수 극단) → 최대 관찰
+    """
+    if not has_data:
+        return "데이터부족"
+
+    # 하드 디스퀄: 극과열/추격매수는 관찰 이상 불가
+    is_disqualified = stoch_k >= 90 or ret_5d >= 15 or rsi >= 78
+
+    if is_disqualified:
+        return "관찰" if total_score >= 40 else "보류"
+
     if total_score >= 70 and n_sources >= 2:
-        return "강력매수"
-    if total_score >= 55 and n_sources >= 2:
+        return "적극매수"
+    if total_score >= 60 and n_sources >= 2:
         return "매수"
     if total_score >= 55:
         return "관심매수"
@@ -678,7 +698,13 @@ def main():
         if not name:
             name = name_map.get(ticker, ticker)
 
-        grade = classify_pick(score_detail["total"], len(sources), score_detail["rsi"])
+        has_data = pq_data is not None
+        grade = classify_pick(
+            score_detail["total"], len(sources), score_detail["rsi"],
+            has_data=has_data,
+            stoch_k=score_detail.get("stoch_k", 50),
+            ret_5d=score_detail.get("ret_5d", 0),
+        )
 
         entry_info = score_detail.get("entry_info", {})
         reasons = score_detail.get("reasons", [])
@@ -723,8 +749,15 @@ def main():
         results.append(rec)
 
     # 정렬: 등급 → 점수
-    grade_order = {"강력매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4}
+    grade_order = {"적극매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
+
+    # ── TOP 5 선별: 매수 등급 이상에서 점수순 top 5 ──
+    buyable_grades = {"적극매수", "매수", "관심매수"}
+    buyable = [r for r in results if r["grade"] in buyable_grades]
+    top5 = buyable[:5]
+    for r in top5:
+        r["is_top5"] = True
 
     # 통계
     grade_stats = {}
@@ -733,24 +766,38 @@ def main():
         grade_stats[g] = grade_stats.get(g, 0) + 1
 
     print(f"\n{'='*60}")
-    print(f"[내일 추천] 총 {len(results)}건")
-    for g in ["강력매수", "매수", "관심매수", "관찰", "보류"]:
+    print(f"[내일 추천] 총 {len(results)}건 (TOP5: {len(top5)}건)")
+    for g in ["적극매수", "매수", "관심매수", "관찰", "보류", "데이터부족"]:
         cnt = grade_stats.get(g, 0)
         if cnt:
             print(f"  {g}: {cnt}건")
-    print(f"{'='*60}\n")
+    print(f"{'='*60}")
 
-    # 상위 종목 출력
-    for i, r in enumerate(results[:15], 1):
-        srcs = "+".join(r["sources"])
-        oh = f" 🔥-{r['score_breakdown']['overheat']}p" if r["score_breakdown"]["overheat"] > 0 else ""
-        cond = f" | {r['entry_condition']}" if r.get("entry_condition") else ""
-        reasons_str = ", ".join(r.get("reasons", [])[:3])
-        print(f"  {i:2d}. [{r['grade']}] {r['name']}({r['ticker']}) "
-              f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
-        print(f"      진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
-              f"목표:{r.get('target_price',0):,}{cond}")
-        print(f"      근거: {reasons_str}")
+    # TOP 5 출력
+    if top5:
+        print(f"\n{'─'*60}")
+        print(f"  ★ TOP 5 내일 매수 추천 ★")
+        print(f"{'─'*60}")
+        for i, r in enumerate(top5, 1):
+            srcs = "+".join(r["sources"])
+            oh = f" 🔥-{r['score_breakdown']['overheat']}p" if r["score_breakdown"]["overheat"] > 0 else ""
+            cond = r.get("entry_condition", "")
+            reasons_str = ", ".join(r.get("reasons", [])[:3])
+            print(f"  {i}. [{r['grade']}] {r['name']}({r['ticker']}) "
+                  f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
+            print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
+                  f"목표:{r.get('target_price',0):,} | {cond}")
+            print(f"     근거: {reasons_str}")
+        print(f"{'─'*60}")
+    else:
+        print("\n  ⚠ 매수 적합 종목 없음 — 전체 관망 추천")
+
+    # 나머지 관찰 종목 간략 출력
+    rest = [r for r in results if r["grade"] in buyable_grades][5:]
+    if rest:
+        print(f"\n  [기타 관심종목]")
+        for r in rest:
+            print(f"    - {r['name']}({r['ticker']}) {r['total_score']}점 [{r['grade']}]")
 
     # 날짜 기입 + JSON 저장
     now = datetime.now()
@@ -771,6 +818,7 @@ def main():
         "target_date_label": f"{target.month}/{target.day}({calendar.day_abbr[target.weekday()]})",
         "total_candidates": len(results),
         "stats": grade_stats,
+        "top5": [r["ticker"] for r in top5],
         "picks": results,
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
