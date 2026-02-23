@@ -429,6 +429,58 @@ class KisIntradayAdapter(IntradayDataPort):
         return sectors
 
     # ──────────────────────────────────────────
+    # 호가창 (10호가)
+    # ──────────────────────────────────────────
+
+    def fetch_orderbook(self, ticker: str) -> dict:
+        """
+        10호가 (매수/매도 잔량) 조회.
+        KIS API: FHKST01010200 (주식현재가 호가/예상체결)
+        """
+        data = self._api_get(
+            path="uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn",
+            tr_id="FHKST01010200",
+            params={
+                "FID_COND_MRKT_DIV_CODE": "J",
+                "FID_INPUT_ISCD": ticker,
+            },
+        )
+        output1 = data.get("output1", {})
+        output2 = data.get("output2", {})
+
+        if not output1 and not output2:
+            return {"ticker": ticker, "asks": [], "bids": [],
+                    "total_ask_vol": 0, "total_bid_vol": 0, "bid_ask_ratio": 0}
+
+        out = output1 or output2
+
+        asks = []  # 매도호가 (낮은→높은)
+        bids = []  # 매수호가 (높은→낮은)
+
+        for i in range(1, 11):
+            ask_p = int(out.get(f"askp{i}", 0) or 0)
+            ask_v = int(out.get(f"askp_rsqn{i}", 0) or 0)
+            bid_p = int(out.get(f"bidp{i}", 0) or 0)
+            bid_v = int(out.get(f"bidp_rsqn{i}", 0) or 0)
+            if ask_p > 0:
+                asks.append({"price": ask_p, "volume": ask_v})
+            if bid_p > 0:
+                bids.append({"price": bid_p, "volume": bid_v})
+
+        total_ask = int(out.get("total_askp_rsqn", 0) or 0)
+        total_bid = int(out.get("total_bidp_rsqn", 0) or 0)
+        ratio = round(total_bid / total_ask, 2) if total_ask > 0 else 0
+
+        return {
+            "ticker": ticker,
+            "asks": asks,
+            "bids": bids,
+            "total_ask_vol": total_ask,
+            "total_bid_vol": total_bid,
+            "bid_ask_ratio": ratio,
+        }
+
+    # ──────────────────────────────────────────
     # 편의 메서드
     # ──────────────────────────────────────────
 

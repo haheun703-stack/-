@@ -1079,3 +1079,17 @@ intraday_monitor:
   #   yellow_immediate: true     # 주의 즉시 전송
   #   red_immediate: true        # 매도 즉시 전송
   #   blue_immediate: true       # 추매 즉시 전송
+
+# ============================================================
+# AI 스마트 진입 설정 (SmartEntryEngine)
+# ============================================================
+smart_entry:
+  initial_discount_pct: 0.5      # 전일종가 대비 초기 지정가 할인율 (%)
+  gap_small_pct: 0.5             # 소갭 기준 (%)
+  gap_medium_pct: 1.5            # 중갭 기준 (%)
+  gap_up_pct: 3.0                # 대갭 기준 (%)
+  min_bid_ask_ratio: 1.3         # 진입 허용 최소 매수/매도 잔량비
+  max_candle_wait_min: 15        # 5분봉 대기 시간 (분)
+  order_deadline: 1030           # 주문 마감 시각 (HHMM)
+  adapt_interval_sec: 120        # 적응형 정정 간격 (초)
+  gap_position_scale: 0.5        # 갭업 진입 시 포지션 축소 비율
