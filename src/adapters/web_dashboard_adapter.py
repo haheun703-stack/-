@@ -73,7 +73,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
-    OPEN_PATHS = {"/login", "/api/health"}
+    OPEN_PATHS = {"/login", "/api/health", "/api/sync"}
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
