@@ -402,7 +402,8 @@ async def sync_data(request: Request):
         "us_market/overnight_signal.json", "sector_rotation/sector_momentum.json",
         "sector_rotation/etf_trading_signal.json",
         "sector_rotation/sector_zscore.json", "sector_rotation/investor_flow.json",
-        "whale_detect.json", "dual_buying_watch.json", "pullback_scan.json",
+        "whale_detect.json", "force_hybrid.json", "market_news.json",
+        "dual_buying_watch.json", "pullback_scan.json",
         "group_relay/group_relay_today.json",
         "kis_balance.json", "kospi_regime.json",
     }
