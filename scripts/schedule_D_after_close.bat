@@ -4,8 +4,8 @@ REM  Quantum Master - BAT-D: 장마감 후 전체 데이터 수집 + 스캔
 REM  스케줄: 매일 16:30 (월~금, 종가 확정 후)
 REM  등록: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
 REM
-REM  예상 소요: ~45분 (16:30 → 17:15)
-REM  순서: 기초데이터 → 지표 → 분석 → 스캔 → 추천
+REM  예상 소요: ~50분 (16:30 → 17:20)
+REM  순서: 기초데이터 → 지표 → 분석 → 뉴스+스캔 → 추천 (22단계)
 REM ============================================================
 
 echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
@@ -85,55 +85,63 @@ REM 12단계: 눌림목 스캔 (건강한 조정 매수 후보)
 echo [%date% %time%] [12/20] 눌림목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_pullback.py >> logs\schedule.log 2>&1
 
-REM 13단계: 세력감지 스캔 (이상 거래패턴 탐지)
-echo [%date% %time%] [13/20] 세력감지 스캔 >> logs\schedule.log
+REM 13단계: 시장 뉴스 크롤링 (이벤트 레이더용)
+echo [%date% %time%] [13/22] 시장 뉴스 크롤링 >> logs\schedule.log
+python -u -X utf8 scripts\crawl_market_news.py >> logs\schedule.log 2>&1
+
+REM 14단계: 세력감지 스캔 (기존 whale_detect)
+echo [%date% %time%] [14/22] 세력감지 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_whale_detect.py >> logs\schedule.log 2>&1
 
-REM 14단계: 동반매수 스캔 (외인+기관 동시매수)
-echo [%date% %time%] [14/20] 동반매수 스캔 >> logs\schedule.log
+REM 15단계: 세력감지 하이브리드 (3-Layer 통합)
+echo [%date% %time%] [15/22] 세력감지 하이브리드 >> logs\schedule.log
+python -u -X utf8 scripts\scan_force_hybrid.py >> logs\schedule.log 2>&1
+
+REM 16단계: 동반매수 스캔 (외인+기관 동시매수)
+echo [%date% %time%] [16/22] 동반매수 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_dual_buying.py >> logs\schedule.log 2>&1
 
-REM 15단계: 그룹 릴레이 감지 (재벌 계열사 발화)
-echo [%date% %time%] [15/20] 그룹 릴레이 감지 >> logs\schedule.log
+REM 17단계: 그룹 릴레이 감지 (재벌 계열사 발화)
+echo [%date% %time%] [17/22] 그룹 릴레이 감지 >> logs\schedule.log
 python -u -X utf8 scripts\group_relay_detector.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
 REM  PHASE 5: 성과추적 + 내일 추천 (~5분)
 REM ══════════════════════════════════════════════
 
-REM 16단계: 추천 성과 추적 (이전 추천 결과 판정)
-echo [%date% %time%] [16/20] 추천 성과 추적 >> logs\schedule.log
+REM 18단계: 추천 성과 추적 (이전 추천 결과 판정)
+echo [%date% %time%] [18/22] 추천 성과 추적 >> logs\schedule.log
 python -u -X utf8 scripts\track_pick_results.py >> logs\schedule.log 2>&1
 
-REM 17단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증) *** 최종 ***
-echo [%date% %time%] [17/20] 내일 추천 종목 스캔 >> logs\schedule.log
+REM 19단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증) *** 최종 ***
+echo [%date% %time%] [19/22] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
 REM  PHASE 6: 아카이브 + 보고서 (~1분)
 REM ══════════════════════════════════════════════
 
-REM 18단계: 일일 아카이브 (JSON → SQLite 영구 저장)
-echo [%date% %time%] [18/20] 일일 아카이브 >> logs\schedule.log
+REM 20단계: 일일 아카이브 (JSON → SQLite 영구 저장)
+echo [%date% %time%] [20/22] 일일 아카이브 >> logs\schedule.log
 python -u -X utf8 src\daily_archive.py >> logs\schedule.log 2>&1
 
-REM 19단계: 주간 보고서 자동 생성 (금요일만)
+REM 21단계: 주간 보고서 자동 생성 (금요일만)
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
-    echo [%date% %time%] [19/20] 주간 보고서 생성 (금요일) >> logs\schedule.log
+    echo [%date% %time%] [21/22] 주간 보고서 생성 (금요일) >> logs\schedule.log
     python -u -X utf8 src\daily_archive.py --weekly >> logs\schedule.log 2>&1
 ) else (
-    echo [%date% %time%] [19/20] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
+    echo [%date% %time%] [21/22] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
 )
 
-REM 20단계: Railway 원격 동기화 (RAILWAY_URL 설정 시에만 실행)
+REM 22단계: Railway 원격 동기화 (RAILWAY_URL 설정 시에만 실행)
 if defined RAILWAY_URL (
-    echo [%date% %time%] [20/20] Railway 동기화 >> logs\schedule.log
+    echo [%date% %time%] [22/22] Railway 동기화 >> logs\schedule.log
     python -u -X utf8 scripts\sync_to_railway.py >> logs\schedule.log 2>&1
 ) else (
-    echo [%date% %time%] [20/20] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
+    echo [%date% %time%] [22/22] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
 )
 
 REM ══════════════════════════════════════════════
-echo [%date% %time%] BAT-D 완료 (20단계 순차 실행) >> logs\schedule.log
+echo [%date% %time%] BAT-D 완료 (22단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log

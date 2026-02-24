@@ -41,6 +41,8 @@ SYNC_FILES = [
     "sector_rotation/sector_zscore.json",
     "sector_rotation/investor_flow.json",
     "whale_detect.json",
+    "force_hybrid.json",
+    "market_news.json",
     "dual_buying_watch.json",
     "pullback_scan.json",
     "group_relay/group_relay_today.json",

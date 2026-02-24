@@ -58,6 +58,7 @@ class DashboardDataProvider:
             "dual_buying": self._load_json("dual_buying_watch.json"),
             "pullback": self._load_json("pullback_scan.json"),
             "whale_detect": self._load_json("whale_detect.json"),
+            "force_hybrid": self._load_json("force_hybrid.json"),
             "tomorrow_picks": self._load_json("tomorrow_picks.json"),
             "picks_history": self._load_json("picks_history.json"),
             "market_news": self._load_json("market_news.json"),

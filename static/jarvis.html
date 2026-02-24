@@ -2081,62 +2081,219 @@ function renderJournal() {
 }
 
 function renderShakeout() {
-  const wd = D.whale_detect || {};
-  const items = wd.items || [];
-  const stats = wd.stats || {};
-  const total = wd.total_detected || 0;
-  const scanned = wd.total_scanned || 0;
+  // force_hybrid.json 우선, 없으면 whale_detect.json fallback
+  const fh = D.force_hybrid || {};
+  const hasFH = !!(fh.supply_demand_health || fh.anomaly);
 
-  let html = '<h3 class="sec-title" style="color:#8B5CF6">&#x26A1; 세력감지 — 전종목 이상패턴 스캐너</h3>';
+  let html = '<h3 class="sec-title" style="color:#8B5CF6">&#x26A1; 세력감지 &#x2014; 3-Layer Hybrid</h3>';
 
-  // 컨셉 설명
-  html += `<div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:12px 14px;margin-bottom:16px">
-    <div style="font-size:11px;color:#9CA3AF;line-height:1.6">
-      <span style="color:#8B5CF6;font-weight:700">5가지 세력 패턴</span>을 전종목(${scanned}개)에서 탐지합니다.<br>
-      <span style="color:#6B7280">P1 거래량폭발 &#x00B7; P2 수급반전 &#x00B7; P3 BB스퀴즈 &#x00B7; P4 OBV다이버전스 &#x00B7; P5 수급이탈</span>
-    </div>
-  </div>`;
-
-  if (items.length === 0) {
-    html += '<div class="empty">세력감지 데이터 없음 &#x2014; python scripts/scan_whale_detect.py 실행 필요</div>';
+  if (!hasFH) {
+    // fallback: 기존 whale_detect
+    const wd = D.whale_detect || {};
+    if (!wd.items || wd.items.length === 0) {
+      html += '<div class="empty">세력감지 데이터 없음 &#x2014; python scripts/scan_force_hybrid.py 실행 필요</div>';
+      return html;
+    }
+    html += '<div class="empty">force_hybrid 미생성 &#x2014; 기존 whale_detect 표시 중</div>';
+    html += renderAnomalyCards(wd.items, wd.stats || {});
     return html;
   }
 
-  // 통계 메트릭
-  html += `<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    <div class="metric" style="flex:1;min-width:70px">
-      <div class="label">전체 스캔</div>
-      <div class="value" style="font-size:18px">${scanned}</div>
+  // ════════════════════════════════════════
+  // Layer 1: 수급건전성
+  // ════════════════════════════════════════
+  const sdh = fh.supply_demand_health || {};
+  const sdAlert = sdh.alert || '주의';
+  const sdScore = sdh.score || 50;
+  const sdColor = sdh.alert_color || '#F59E0B';
+  const fData = sdh.foreign || {};
+  const iData = sdh.institution || {};
+  const kospi = sdh.kospi || {};
+
+  html += `<div style="background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.12);border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#A78BFA">&#x1F6A6; Layer 1 &#x2014; 수급건전성</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="background:${sdColor}22;color:${sdColor};padding:4px 12px;border-radius:8px;font-size:13px;font-weight:800">${esc(sdAlert)}</span>
+        <span style="color:#9CA3AF;font-size:11px">${sdScore}점</span>
+      </div>
     </div>
-    <div class="metric" style="flex:1;min-width:70px">
-      <div class="label">탐지 총</div>
-      <div class="value c-yellow" style="font-size:18px">${total}</div>
-    </div>
-    <div class="metric" style="flex:1;min-width:70px">
-      <div class="label">세력포착</div>
-      <div class="value" style="font-size:18px;color:#EF4444">${stats['세력포착']||0}</div>
-    </div>
-    <div class="metric" style="flex:1;min-width:70px">
-      <div class="label">매집의심</div>
-      <div class="value" style="font-size:18px;color:#F59E0B">${stats['매집의심']||0}</div>
-    </div>
-    <div class="metric" style="flex:1;min-width:70px">
-      <div class="label">이탈경고</div>
-      <div class="value" style="font-size:18px;color:#6366F1">${stats['이탈경고']||0}</div>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:10px">${esc(sdh.alert_desc || '')}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="metric" style="flex:1;min-width:65px">
+        <div class="label">외인 매수비</div>
+        <div class="value" style="font-size:16px;color:${(fData.buying_ratio||0) > 50 ? '#10B981' : '#EF4444'}">${fData.buying_ratio||0}%</div>
+      </div>
+      <div class="metric" style="flex:1;min-width:65px">
+        <div class="label">기관 매수비</div>
+        <div class="value" style="font-size:16px;color:${(iData.buying_ratio||0) > 50 ? '#10B981' : '#EF4444'}">${iData.buying_ratio||0}%</div>
+      </div>
+      <div class="metric" style="flex:1;min-width:65px">
+        <div class="label">KOSPI</div>
+        <div class="value" style="font-size:16px;color:${(kospi.pct_1d||0) >= 0 ? '#10B981' : '#EF4444'}">${kospi.close ? kospi.close.toLocaleString() : '-'}</div>
+        <div style="font-size:9px;color:${(kospi.pct_1d||0) >= 0 ? '#10B981' : '#EF4444'}">${kospi.pct_1d >= 0 ? '+' : ''}${num(kospi.pct_1d||0,2)}%</div>
+      </div>
+      <div class="metric" style="flex:1;min-width:65px">
+        <div class="label">KOSPI 5일</div>
+        <div class="value" style="font-size:16px;color:${(kospi.pct_5d||0) >= 0 ? '#10B981' : '#EF4444'}">${kospi.pct_5d >= 0 ? '+' : ''}${num(kospi.pct_5d||0,2)}%</div>
+      </div>
     </div>
   </div>`;
 
-  // 핵심필터 그룹
+  // ════════════════════════════════════════
+  // Layer 3: 이벤트 레이더 (뉴스 먼저 — 맥락 제공)
+  // ════════════════════════════════════════
+  const radar = fh.event_radar || {};
+  const mood = radar.mood || '평온';
+  const moodColors = {'긴장':'#EF4444','경계':'#F59E0B','관심':'#3B82F6','평온':'#10B981'};
+  const moodC = moodColors[mood] || '#6B7280';
+  const events = radar.events || [];
+  const themeHits = radar.theme_hits || [];
+
+  html += `<div style="background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#60A5FA">&#x1F4E1; Layer 2 &#x2014; 이벤트 레이더</div>
+      <span style="background:${moodC}22;color:${moodC};padding:4px 12px;border-radius:8px;font-size:13px;font-weight:800">${esc(mood)}</span>
+    </div>
+    <div style="font-size:11px;color:#9CA3AF;margin-bottom:10px">${esc(radar.mood_desc || '이벤트 데이터 없음')}</div>`;
+
+  if (events.length > 0) {
+    html += '<div style="margin-bottom:8px">';
+    events.slice(0, 8).forEach(ev => {
+      const ic = ev.impact === 'high' ? '#EF4444' : '#F59E0B';
+      const badge = ev.impact === 'high' ? 'HIGH' : 'MED';
+      html += `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:11px">
+        <span style="background:${ic}22;color:${ic};padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;white-space:nowrap">${badge}</span>
+        <span style="color:#D1D5DB;line-height:1.4">${esc(ev.title)}</span>
+        <span style="color:#4B5563;font-size:9px;white-space:nowrap">${esc(ev.source||'')}</span>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (themeHits.length > 0) {
+    html += '<div style="border-top:1px solid rgba(59,130,246,0.1);padding-top:8px;margin-top:6px">';
+    html += '<div style="font-size:10px;color:#60A5FA;font-weight:600;margin-bottom:6px">&#x1F3AF; 테마 매칭</div>';
+    themeHits.slice(0, 5).forEach(th => {
+      const stocks = (th.stocks || []).map(s => s.name || s.ticker).join(', ');
+      html += `<div style="font-size:11px;margin-bottom:4px">
+        <span style="background:rgba(96,165,250,0.15);color:#60A5FA;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600">${esc(th.theme)}</span>
+        <span style="color:#9CA3AF;margin-left:6px">${esc(th.keyword)}</span>
+        ${stocks ? `<div style="color:#6B7280;font-size:10px;margin:2px 0 0 4px">&#x2192; ${esc(stocks)}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ════════════════════════════════════════
+  // 크로스 분석 인사이트
+  // ════════════════════════════════════════
+  const insights = fh.cross_insights || [];
+  if (insights.length > 0) {
+    html += `<div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:#FBBF24;margin-bottom:6px">&#x1F9E0; 크로스 분석</div>`;
+    insights.forEach(ins => {
+      html += `<div style="font-size:11px;color:#D1D5DB;margin-bottom:3px">&#x2022; ${esc(ins)}</div>`;
+    });
+    html += '</div>';
+  }
+
+  // ════════════════════════════════════════
+  // Layer 2: 이상거래 탐지 (종목 리스트)
+  // ════════════════════════════════════════
+  const anomaly = fh.anomaly || {};
+  const aItems = anomaly.items || [];
+  const aStats = anomaly.stats || {};
+
+  html += `<div style="margin-top:4px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#8B5CF6">&#x1F50D; Layer 3 &#x2014; 이상거래 탐지 (${anomaly.total_detected||0}건)</div>
+    </div>`;
+
+  html += renderAnomalyCards(aItems, aStats);
+  html += '</div>';
+
+  // 업데이트 시각
+  if (fh.updated_at) {
+    html += `<div style="text-align:right;color:#4B5563;font-size:10px;margin-top:12px">&#x1F552; ${esc(fh.updated_at)} 기준</div>`;
+  }
+
+  return html;
+}
+
+/* 이상거래 카드 공통 렌더러 */
+function renderAnomalyCards(items, stats) {
+  let html = '';
+  if (!items || items.length === 0) {
+    html += '<div class="empty">이상거래 탐지 데이터 없음</div>';
+    return html;
+  }
+
   const gradeOrder = ['세력포착','매집의심','이상감지','혼합시그널','이탈경고'];
   const gradeColors = {
     '세력포착':'#EF4444', '매집의심':'#F59E0B', '이상감지':'#8B5CF6',
     '혼합시그널':'#6B7280', '이탈경고':'#6366F1'
   };
-  const gradeIcons = {
-    '세력포착':'&#x1F534;', '매집의심':'&#x1F7E1;', '이상감지':'&#x1F7E3;',
-    '혼합시그널':'&#x26AA;', '이탈경고':'&#x1F535;'
+
+  // 통계 배지
+  html += '<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">';
+  gradeOrder.forEach(g => {
+    const cnt = stats[g] || 0;
+    if (cnt === 0) return;
+    const c = gradeColors[g];
+    html += `<span style="background:${c}18;color:${c};padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600">${g} ${cnt}</span>`;
+  });
+  html += '</div>';
+
+  // 패턴 배지 렌더
+  const patBadge = (p) => {
+    const pColors = {
+      'P1_거래량폭발':'#EF4444', 'P2_수급반전':'#10B981', 'P3_BB스퀴즈':'#F59E0B',
+      'P4_OBV다이버전스':'#8B5CF6', 'P5_수급이탈':'#6366F1',
+      'P6_연속매집':'#14B8A6', 'P7_VWAP이탈':'#EC4899'
+    };
+    const c = pColors[p.pattern] || '#6B7280';
+    const label = p.pattern.split('_')[1];
+    return `<span style="background:${c}18;color:${c};padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600">${label}</span>`;
   };
 
+  // 카드 렌더
+  const renderCard = (it) => {
+    const gc = gradeColors[it.grade] || '#6B7280';
+    const pats = it.patterns || [];
+    const pctC = it.price_change >= 0 ? '#10B981' : '#EF4444';
+    let card = `<div class="card" style="background:${gc}06;border:1px solid ${gc}15;padding:12px;margin-bottom:6px">`;
+    card += `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="display:inline-block;padding:2px 7px;border-radius:6px;font-weight:700;font-size:10px;margin-right:6px;background:${gc}22;color:${gc}">${esc(it.grade)}</span>
+        <span style="color:#E5E7EB;font-weight:700;font-size:13px">${esc(it.name)}</span>
+        <span style="color:#6B7280;font-size:9px;margin-left:4px">${esc(it.ticker)}</span>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:16px;font-weight:800;color:${gc}">${num(it.strength,1)}</div>
+        <div style="font-size:8px;color:${gc}">강도</div>
+      </div>
+    </div>`;
+    card += `<div style="display:flex;gap:10px;margin:8px 0 4px 0;font-size:11px;flex-wrap:wrap">
+      <div><span style="color:#6B7280">종가</span> <span style="color:#E5E7EB;font-weight:600">${it.close ? it.close.toLocaleString() : '-'}</span></div>
+      <div><span style="color:#6B7280">등락</span> <span style="color:${pctC};font-weight:600">${it.price_change >= 0 ? '+' : ''}${num(it.price_change,1)}%</span></div>
+      <div><span style="color:#6B7280">RSI</span> <span style="color:${(it.rsi||50) < 40 ? '#10B981' : (it.rsi||50) > 70 ? '#EF4444' : '#E5E7EB'};font-weight:600">${Math.round(it.rsi||50)}</span></div>
+      <div><span style="color:#6B7280">VSR</span> <span style="color:${(it.volume_surge_ratio||1) > 2 ? '#EF4444' : '#E5E7EB'};font-weight:600">${num(it.volume_surge_ratio||1,1)}x</span></div>
+    </div>`;
+    card += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0">';
+    pats.forEach(p => { card += patBadge(p); });
+    if (it.above_ma60) card += '<span style="background:rgba(16,185,129,0.12);color:#10B981;padding:2px 7px;border-radius:8px;font-size:10px">MA60&#x2191;</span>';
+    if (it.above_ma20) card += '<span style="background:rgba(16,185,129,0.08);color:#10B981;padding:2px 7px;border-radius:8px;font-size:10px">MA20&#x2191;</span>';
+    card += '</div>';
+    pats.forEach(p => {
+      card += `<div style="margin:3px 0 0 0;font-size:9px;color:#9CA3AF">&#x2192; ${esc(p.desc)}</div>`;
+    });
+    card += '</div>';
+    return card;
+  };
+
+  // 그룹별 렌더
   const groups = {};
   gradeOrder.forEach(g => groups[g] = []);
   items.forEach(it => {
@@ -2145,120 +2302,40 @@ function renderShakeout() {
     groups[g].push(it);
   });
 
-  // 요약 배지
-  html += '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">';
-  gradeOrder.forEach(g => {
-    const arr = groups[g] || [];
-    if (arr.length === 0) return;
-    const c = gradeColors[g];
-    html += `<span style="background:${c}18;color:${c};padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">${gradeIcons[g]} ${g} ${arr.length}</span>`;
-  });
-  html += '</div>';
-
-  // 패턴 배지 렌더
-  const patBadge = (p) => {
-    const pColors = {
-      'P1_거래량폭발':'#EF4444', 'P2_수급반전':'#10B981',
-      'P3_BB스퀴즈':'#F59E0B', 'P4_OBV다이버전스':'#8B5CF6',
-      'P5_수급이탈':'#6366F1'
-    };
-    const c = pColors[p.pattern] || '#6B7280';
-    const label = p.pattern.split('_')[1];
-    return `<span style="background:${c}18;color:${c};padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600">${label}</span>`;
-  };
-
-  // 종목 카드 렌더
-  const renderWCard = (it) => {
-    const gc = gradeColors[it.grade] || '#6B7280';
-    const pats = it.patterns || [];
-    const pctC = it.price_change >= 0 ? '#10B981' : '#EF4444';
-
-    let card = `<div class="card" style="background:${gc}06;border:1px solid ${gc}15;padding:14px;margin-bottom:8px">`;
-
-    // 헤더: 등급 + 이름 + 강도
-    card += `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <span style="display:inline-block;padding:3px 8px;border-radius:6px;font-weight:700;font-size:11px;margin-right:8px;background:${gc}22;color:${gc}">${esc(it.grade)}</span>
-        <span style="color:#E5E7EB;font-weight:700;font-size:14px">${esc(it.name)}</span>
-        <span style="color:#6B7280;font-size:10px;margin-left:5px">${esc(it.ticker)}</span>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:18px;font-weight:800;color:${gc}">${num(it.strength,1)}</div>
-        <div style="font-size:9px;color:${gc}">강도</div>
-      </div>
-    </div>`;
-
-    // 가격 + 지표 라인
-    card += `<div style="display:flex;gap:12px;margin:10px 0 6px 0;font-size:12px;flex-wrap:wrap">
-      <div><span style="color:#6B7280">종가</span> <span style="color:#E5E7EB;font-weight:600">${it.close.toLocaleString()}</span></div>
-      <div><span style="color:#6B7280">등락</span> <span style="color:${pctC};font-weight:600">${it.price_change >= 0 ? '+' : ''}${num(it.price_change,1)}%</span></div>
-      <div><span style="color:#6B7280">RSI</span> <span style="color:${it.rsi < 40 ? '#10B981' : it.rsi > 70 ? '#EF4444' : '#E5E7EB'};font-weight:600">${Math.round(it.rsi)}</span></div>
-      <div><span style="color:#6B7280">VSR</span> <span style="color:${it.volume_surge_ratio > 2 ? '#EF4444' : '#E5E7EB'};font-weight:600">${num(it.volume_surge_ratio,1)}x</span></div>
-      <div><span style="color:#6B7280">외인5d</span> <span style="color:${it.foreign_5d > 0 ? '#10B981' : it.foreign_5d < 0 ? '#EF4444' : '#6B7280'};font-weight:600">${it.foreign_5d > 0 ? '+' : ''}${(it.foreign_5d/1e4).toFixed(0)}만</span></div>
-    </div>`;
-
-    // 패턴 배지
-    card += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0">';
-    pats.forEach(p => { card += patBadge(p); });
-    if (it.above_ma60) card += '<span style="background:rgba(16,185,129,0.12);color:#10B981;padding:2px 7px;border-radius:8px;font-size:10px">MA60&#x2191;</span>';
-    if (it.above_ma20) card += '<span style="background:rgba(16,185,129,0.08);color:#10B981;padding:2px 7px;border-radius:8px;font-size:10px">MA20&#x2191;</span>';
-    card += '</div>';
-
-    // 패턴 상세
-    pats.forEach(p => {
-      card += `<div style="margin:4px 0 0 0;font-size:10px;color:#9CA3AF">&#x2192; ${esc(p.desc)}</div>`;
-    });
-
-    card += '</div>';
-    return card;
-  };
-
-  // ── 세력포착 / 매집의심 (항상 펼침) ──
+  // 세력포착 / 매집의심 (항상 펼침)
   ['세력포착','매집의심'].forEach(g => {
     const arr = groups[g] || [];
     if (arr.length === 0) return;
     const c = gradeColors[g];
-    html += `<h4 style="color:${c};font-size:13px;margin:18px 0 10px;font-weight:700">${gradeIcons[g]} ${g} (${arr.length}건)</h4>`;
-    arr.forEach(it => { html += renderWCard(it); });
-  });
-
-  // ── 이상감지 (TOP 15 + 접이식) ──
-  const abnormal = groups['이상감지'] || [];
-  if (abnormal.length > 0) {
-    const c = gradeColors['이상감지'];
-    html += `<h4 style="color:${c};font-size:13px;margin:18px 0 10px;font-weight:700">&#x1F7E3; 이상감지 (${abnormal.length}건)</h4>`;
-    const showN = Math.min(15, abnormal.length);
-    abnormal.slice(0, showN).forEach(it => { html += renderWCard(it); });
-    if (abnormal.length > showN) {
-      html += `<details style="margin-top:6px"><summary style="color:#6B7280;font-size:11px;cursor:pointer">+${abnormal.length - showN}건 더 보기</summary>`;
-      abnormal.slice(showN).forEach(it => { html += renderWCard(it); });
+    html += `<h4 style="color:${c};font-size:12px;margin:14px 0 8px;font-weight:700">${g} (${arr.length}건)</h4>`;
+    arr.slice(0, 10).forEach(it => { html += renderCard(it); });
+    if (arr.length > 10) {
+      html += `<details style="margin-top:4px"><summary style="color:#6B7280;font-size:10px;cursor:pointer">+${arr.length - 10}건 더 보기</summary>`;
+      arr.slice(10).forEach(it => { html += renderCard(it); });
       html += '</details>';
     }
-  }
+  });
 
-  // ── 혼합시그널 (접이식) ──
-  const mixed = groups['혼합시그널'] || [];
-  if (mixed.length > 0) {
-    html += `<details style="margin-top:14px"><summary style="color:#6B7280;font-size:12px;cursor:pointer;font-weight:600">&#x26AA; 혼합시그널 (${mixed.length}건)</summary>`;
-    mixed.forEach(it => { html += renderWCard(it); });
+  // 이상감지 (TOP 10 + 접이식)
+  const abnormal = groups['이상감지'] || [];
+  if (abnormal.length > 0) {
+    html += `<details style="margin-top:12px"><summary style="color:#8B5CF6;font-size:12px;cursor:pointer;font-weight:600">&#x1F7E3; 이상감지 (${abnormal.length}건)</summary>`;
+    abnormal.slice(0, 10).forEach(it => { html += renderCard(it); });
+    if (abnormal.length > 10) {
+      html += `<div style="color:#6B7280;font-size:10px;margin-top:6px">... 외 ${abnormal.length - 10}건</div>`;
+    }
     html += '</details>';
   }
 
-  // ── 이탈경고 (접이식, 빨간 경고) ──
-  const exit = groups['이탈경고'] || [];
-  if (exit.length > 0) {
-    const c = gradeColors['이탈경고'];
-    html += `<details style="margin-top:14px"><summary style="color:${c};font-size:12px;cursor:pointer;font-weight:600">&#x1F535; 이탈경고 &#x2014; 외인+기관 동시 이탈 (${exit.length}건)</summary>`;
-    html += `<div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:10px;color:#818CF8">
-      &#x26A0; 외인+기관이 5일 연속 동시 매도 중인 종목입니다. 신규 매수 시 주의하세요.
+  // 이탈경고 (접이식)
+  const exitArr = groups['이탈경고'] || [];
+  if (exitArr.length > 0) {
+    html += `<details style="margin-top:10px"><summary style="color:#6366F1;font-size:12px;cursor:pointer;font-weight:600">&#x1F535; 이탈경고 (${exitArr.length}건)</summary>`;
+    html += `<div style="background:rgba(99,102,241,0.06);border-radius:6px;padding:6px 10px;margin:6px 0;font-size:9px;color:#818CF8">
+      &#x26A0; 외인+기관 5일 연속 동시매도 &#x2014; 신규 매수 주의
     </div>`;
-    exit.forEach(it => { html += renderWCard(it); });
+    exitArr.slice(0, 10).forEach(it => { html += renderCard(it); });
     html += '</details>';
-  }
-
-  // 업데이트 시각
-  if (wd.updated_at) {
-    html += `<div style="text-align:right;color:#4B5563;font-size:10px;margin-top:12px">&#x1F552; ${esc(wd.updated_at)} 기준</div>`;
   }
 
   return html;

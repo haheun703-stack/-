@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-24T10:08:41.315Z",
+  "lastUpdated": "2026-02-24T10:48:27.946Z",
   "activeFeatures": [
     "주식분석-서브에이전트",
     "sub-agent-project",
@@ -59,7 +59,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T11:10:55.433Z",
-        "lastUpdated": "2026-02-23T13:43:22.323Z"
+        "lastUpdated": "2026-02-24T10:44:36.209Z"
       },
       "lastFile": "d:\\sub-agent-project\\src\\use_cases\\dashboard_data_provider.py"
     },
@@ -98,9 +98,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-11T12:39:18.803Z",
-        "lastUpdated": "2026-02-24T10:08:41.315Z"
+        "lastUpdated": "2026-02-24T10:48:27.946Z"
       },
-      "lastFile": "d:\\sub-agent-project\\scripts\\track_pick_results.py"
+      "lastFile": "d:\\sub-agent-project\\scripts\\schedule_D_after_close.bat"
     },
     "tests": {
       "phase": "do",
@@ -152,7 +152,7 @@
   "session": {
     "startedAt": "2026-02-11T10:58:34.349Z",
     "onboardingCompleted": true,
-    "lastActivity": "2026-02-24T10:08:41.315Z"
+    "lastActivity": "2026-02-24T10:48:27.946Z"
   },
   "history": [
     {
@@ -8364,6 +8364,42 @@
     },
     {
       "timestamp": "2026-02-24T10:08:41.315Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:43:13.268Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:44:36.209Z",
+      "feature": "use_cases",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:47:18.853Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:47:41.208Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:48:13.706Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-24T10:48:27.946Z",
       "feature": "scripts",
       "phase": "do",
       "action": "updated"
