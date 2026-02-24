@@ -13,8 +13,9 @@
     - + P6 VWAP 이탈 (당일 VWAP 대비 종가 괴리)
     - + P7 연속 기관/외인 매집 (5일+ 연속 순매수)
 
-  Layer 3. 이벤트 레이더 (메조) — RSS 뉴스 기반 이벤트 감지
+  Layer 3. 이벤트 레이더 (메조) — RSS 뉴스 + DART 공시 기반 이벤트 감지
     - crawl_market_news의 high/medium 임팩트 뉴스
+    - DART 전자공시 (뉴스 대비 30분~수시간 선행)
     - theme_dictionary 키워드 매칭 → 수혜종목 연결
 
 출력: data/force_hybrid.json
@@ -44,6 +45,7 @@ PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 KOSPI_PATH = PROJECT_ROOT / "data" / "kospi_index.csv"
 MARKET_NEWS_PATH = PROJECT_ROOT / "data" / "market_news.json"
+DART_PATH = PROJECT_ROOT / "data" / "dart_disclosures.json"
 THEME_DICT_PATH = PROJECT_ROOT / "config" / "theme_dictionary.yaml"
 OUTPUT_PATH = PROJECT_ROOT / "data" / "force_hybrid.json"
 
@@ -613,7 +615,55 @@ def scan_event_radar(surging_stocks: list[dict] | None = None) -> dict:
                         "stocks": stocks[:5],  # 상위 5종목
                     })
 
-    # 3) 급등주 자동 뉴스 검색 (P1 거래량폭발 + 가격변동 >=8%)
+    # 3) DART 공시 연동 (뉴스 대비 30분~수시간 선행)
+    dart_disclosures = []
+    if DART_PATH.exists():
+        try:
+            with open(DART_PATH, "r", encoding="utf-8") as f:
+                dart_data = json.load(f)
+            # tier1 + tier2 공시를 이벤트로 추가
+            for tier_key in ("tier1", "tier2"):
+                for d in dart_data.get(tier_key, []):
+                    dart_disclosures.append({
+                        "title": f"[공시] {d['corp_name']} — {d['report_nm'][:50]}",
+                        "source": "DART",
+                        "date": d.get("rcept_dt", "")[:4] + "-" + d.get("rcept_dt", "")[4:6] + "-" + d.get("rcept_dt", "")[6:8] if len(d.get("rcept_dt", "")) == 8 else "",
+                        "impact": "high" if "tier1" in d.get("tier", "") else "medium",
+                        "tier": d.get("tier", ""),
+                        "keyword": d.get("keyword", ""),
+                        "corp_name": d.get("corp_name", ""),
+                        "stock_code": d.get("stock_code", ""),
+                        "url": d.get("url", ""),
+                    })
+            # 유니버스 관련 공시 별도 수집
+            universe_dart = dart_data.get("universe_hits", [])
+            logger.info("  DART 공시: tier1+2 %d건, 유니버스 관련 %d건",
+                        len(dart_disclosures), len(universe_dart))
+        except Exception as e:
+            logger.warning("DART 공시 로드 실패: %s", e)
+            universe_dart = []
+    else:
+        universe_dart = []
+
+    # DART 공시도 테마 매칭
+    if theme_dict and dart_disclosures:
+        for disc in dart_disclosures:
+            title = disc["title"]
+            for theme_name, theme_data in theme_dict.items():
+                for kw in theme_data.get("keywords", []):
+                    if kw.lower() in title.lower():
+                        theme_hits.append({
+                            "theme": theme_name,
+                            "keyword": kw,
+                            "news_title": title,
+                            "news_date": disc.get("date", ""),
+                            "impact": disc["impact"],
+                            "stocks": theme_data.get("stocks", [])[:5],
+                            "source": "DART공시",
+                        })
+                        break
+
+    # 4) 급등주 자동 뉴스 검색 (P1 거래량폭발 + 가격변동 >=8%)
     if surging_stocks:
         stock_names = [s["name"] for s in surging_stocks[:10]]  # 최대 10종목
         try:
@@ -686,6 +736,8 @@ def scan_event_radar(surging_stocks: list[dict] | None = None) -> dict:
         "events": events[:15],  # 최대 15건
         "theme_hits": unique_themes[:15],  # 최대 15건
         "surging_stock_news": surging_news[:20],  # 급등주 뉴스 최대 20건
+        "dart_disclosures": dart_disclosures[:20],  # DART 공시 최대 20건
+        "dart_universe": universe_dart[:15],  # 유니버스 관련 DART 공시
     }
 
 
@@ -763,6 +815,15 @@ def main():
         print(f"  → 급등주 뉴스: {len(radar['surging_stock_news'])}건")
         for sn in radar["surging_stock_news"][:5]:
             print(f"    [{sn['stock_name']}] {sn['title'][:50]}...")
+    if radar.get("dart_disclosures"):
+        print(f"  → DART 공시: {len(radar['dart_disclosures'])}건 (tier1+2)")
+        for dc in radar["dart_disclosures"][:5]:
+            icon = "🔴" if dc.get("impact") == "high" else "🟡"
+            print(f"    {icon} {dc['corp_name']}({dc.get('stock_code','')}) [{dc.get('keyword','')}]")
+    if radar.get("dart_universe"):
+        print(f"  → 유니버스 DART: {len(radar['dart_universe'])}건")
+        for du in radar["dart_universe"][:5]:
+            print(f"    🎯 {du['corp_name']}({du['stock_code']}) — {du['report_nm'][:40]}")
 
     # 크로스 분석: 수급건전성 × 이상거래 맥락 해석
     cross_insights = []

@@ -138,12 +138,14 @@ themes:
   # ══════════════════════════════════════════
 
   방산:
-    keywords: ["방산", "K-방산", "K방산", "무기수출", "국방", "K9", "FA-50", "방위산업", "미사일", "천궁", "무인기", "드론전쟁"]
+    keywords: ["방산", "K-방산", "K방산", "무기수출", "국방", "K9", "FA-50", "방위산업", "미사일", "천궁", "무인기", "드론전쟁", "방위비", "NATO", "군비증강"]
     stocks:
       - {ticker: "012450", name: "한화에어로스페이스", order: 1}
       - {ticker: "047810", name: "한국항공우주", order: 1}
       - {ticker: "079550", name: "LIG넥스원", order: 1}
-      - {ticker: "012750", name: "에스원", order: 2}
+      - {ticker: "064350", name: "현대로템", order: 1}
+      - {ticker: "272210", name: "한화시스템", order: 1}
+      - {ticker: "093190", name: "퍼스텍", order: 2}
 
   조선:
     keywords: ["조선", "수주", "LNG선", "LNG운반선", "컨테이너선", "해군", "잠수함", "친환경선박", "메탄올추진"]
@@ -207,18 +209,48 @@ themes:
   # ══════════════════════════════════════════
 
   금리인하:
-    keywords: ["금리인하", "금리 인하", "기준금리 인하", "금통위", "한은 금리", "BOK 인하", "금리 동결"]
+    keywords: ["금리인하", "금리 인하", "기준금리 인하", "금통위", "한은 금리", "BOK 인하", "금리 동결", "빅컷", "자이언트스텝"]
     stocks:
       - {ticker: "105560", name: "KB금융", order: 1}
       - {ticker: "055550", name: "신한지주", order: 1}
       - {ticker: "086790", name: "하나금융지주", order: 1}
       - {ticker: "316140", name: "우리금융지주", order: 1}
+      # 금리인하 수혜: 리츠/건설/성장주
+      - {ticker: "395400", name: "SK리츠", order: 2}
+      - {ticker: "000720", name: "현대건설", order: 2}
+      - {ticker: "035420", name: "NAVER", order: 2}
+      - {ticker: "068270", name: "셀트리온", order: 3}
+
+  금리인상_고금리:
+    keywords: ["금리인상", "금리 인상", "고금리", "NIM", "이자마진", "매파", "hawkish", "긴축"]
+    stocks:
+      - {ticker: "105560", name: "KB금융", order: 1}
+      - {ticker: "055550", name: "신한지주", order: 1}
+      - {ticker: "086790", name: "하나금융지주", order: 1}
+      - {ticker: "316140", name: "우리금융지주", order: 1}
+      - {ticker: "000810", name: "삼성화재", order: 1}
+      - {ticker: "005830", name: "DB손해보험", order: 2}
+
+  워시_연준:
+    keywords: ["케빈워시", "워시", "Warsh", "연준의장", "Fed의장", "연준 의장", "차기 연준", "통화정책", "양발운전", "대차대조표", "QT"]
+    stocks:
+      # 워시 체제 수혜: 은행/보험/가치주 (고금리+달러강세)
+      - {ticker: "105560", name: "KB금융", order: 1}
+      - {ticker: "055550", name: "신한지주", order: 1}
+      - {ticker: "000810", name: "삼성화재", order: 1}
+      - {ticker: "005830", name: "DB손해보험", order: 2}
+      # 달러강세 수혜: 수출주
+      - {ticker: "005930", name: "삼성전자", order: 2}
+      - {ticker: "000660", name: "SK하이닉스", order: 2}
+      - {ticker: "005380", name: "현대차", order: 2}
 
   환율:
-    keywords: ["환율급등", "환율급락", "원달러", "달러강세", "달러약세", "1400원", "1450원", "1500원", "원화가치"]
+    keywords: ["환율급등", "환율급락", "원달러", "달러강세", "달러약세", "1400원", "1450원", "1500원", "원화가치", "강달러"]
     stocks:
       - {ticker: "005930", name: "삼성전자", order: 2}
       - {ticker: "000660", name: "SK하이닉스", order: 2}
+      - {ticker: "005380", name: "현대차", order: 2}
+      - {ticker: "000270", name: "기아", order: 2}
 
   관세전쟁:
     keywords: ["관세", "관세폭탄", "무역전쟁", "보복관세", "트럼프 관세", "수입규제", "수출규제", "반도체규제"]
@@ -305,6 +337,43 @@ themes:
       - {ticker: "012450", name: "한화에어로스페이스", order: 1}
       - {ticker: "047810", name: "한국항공우주", order: 1}
       - {ticker: "079550", name: "LIG넥스원", order: 1}
+      - {ticker: "064350", name: "현대로템", order: 1}
+      - {ticker: "272210", name: "한화시스템", order: 2}
+
+  이란_중동:
+    keywords: ["이란", "이란 전쟁", "이란 공습", "이란 침공", "호르무즈", "중동전쟁", "중동 긴장", "페르시아만", "이란 핵", "이란 제재"]
+    stocks:
+      # 방산 수혜
+      - {ticker: "012450", name: "한화에어로스페이스", order: 1}
+      - {ticker: "079550", name: "LIG넥스원", order: 1}
+      - {ticker: "064350", name: "현대로템", order: 1}
+      - {ticker: "272210", name: "한화시스템", order: 1}
+      - {ticker: "093190", name: "퍼스텍", order: 2}
+      # 정유 수혜 (유가 상승)
+      - {ticker: "010950", name: "S-Oil", order: 1}
+      - {ticker: "096770", name: "SK이노베이션", order: 1}
+
+  유가상승:
+    keywords: ["유가상승", "유가급등", "유가 상승", "원유 급등", "브렌트", "WTI", "배럴", "정제마진", "OPEC", "감산"]
+    stocks:
+      # 정유 수혜
+      - {ticker: "010950", name: "S-Oil", order: 1}
+      - {ticker: "096770", name: "SK이노베이션", order: 1}
+      # 조선 수혜 (유조선/LNG 발주)
+      - {ticker: "329180", name: "HD현대중공업", order: 2}
+      - {ticker: "010140", name: "삼성중공업", order: 2}
+      # 원전 대안 부각
+      - {ticker: "034020", name: "두산에너빌리티", order: 2}
+      - {ticker: "009540", name: "한국전력", order: 2}
+
+  유가상승_피해:
+    keywords: ["항공유", "연료비", "항공 유가", "물류비", "유류비"]
+    stocks:
+      # 항공 피해
+      - {ticker: "003490", name: "대한항공", order: 1}
+      - {ticker: "272450", name: "진에어", order: 2}
+      # 화학 피해 (나프타)
+      - {ticker: "051910", name: "LG화학", order: 2}
 
   금융위기:
     keywords: ["금융위기", "은행위기", "디폴트", "부도", "신용경색", "시스템리스크", "뱅크런"]
@@ -312,7 +381,9 @@ themes:
 
   원자재급등:
     keywords: ["유가급등", "원유", "유가", "구리", "금값", "금가격", "원자재", "곡물가격"]
-    stocks: []
+    stocks:
+      - {ticker: "010950", name: "S-Oil", order: 1}
+      - {ticker: "096770", name: "SK이노베이션", order: 1}
 
   # ══════════════════════════════════════════
   #  실적 / 공시 키워드

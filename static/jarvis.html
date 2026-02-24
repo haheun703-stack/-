@@ -2199,6 +2199,39 @@ function renderShakeout() {
     });
     html += '</div>';
   }
+
+  // DART 공시 (뉴스 선행 정보)
+  const dartDisc = radar.dart_disclosures || [];
+  const dartUni = radar.dart_universe || [];
+  if (dartDisc.length > 0 || dartUni.length > 0) {
+    html += '<div style="border-top:1px solid rgba(248,113,113,0.2);padding-top:8px;margin-top:6px">';
+    html += '<div style="font-size:10px;color:#F87171;font-weight:600;margin-bottom:6px">&#x1F4CB; DART 공시 (뉴스 선행)</div>';
+    // 유니버스 관련 공시 우선 표시
+    if (dartUni.length > 0) {
+      html += '<div style="font-size:9px;color:#FBBF24;font-weight:600;margin-bottom:4px">&#x1F3AF; 우리 종목 관련</div>';
+      dartUni.slice(0, 6).forEach(du => {
+        const tierIcon = (du.tier||'').includes('tier1') ? '&#x1F534;' : '&#x1F7E1;';
+        html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:11px">
+          <span>${tierIcon}</span>
+          <span style="background:#F5920022;color:#F59E0B;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;white-space:nowrap">${esc(du.corp_name)}</span>
+          <span style="color:#D1D5DB;line-height:1.4">${esc((du.report_nm||'').substring(0,45))}</span>
+        </div>`;
+      });
+    }
+    // tier1 주요 공시 (유니버스 외)
+    const tier1Only = dartDisc.filter(d => d.impact === 'high').slice(0, 5);
+    if (tier1Only.length > 0) {
+      html += '<div style="font-size:9px;color:#F87171;font-weight:600;margin:4px 0">&#x1F534; 즉시 반응 공시</div>';
+      tier1Only.forEach(d => {
+        html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:11px">
+          <span style="background:#EF444422;color:#EF4444;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;white-space:nowrap">${esc(d.keyword||'')}</span>
+          <span style="color:#9CA3AF;line-height:1.4">${esc(d.corp_name)} &#x2014; ${esc((d.title||'').substring(0,40))}</span>
+        </div>`;
+      });
+    }
+    html += '</div>';
+  }
+
   html += '</div>';
 
   // ════════════════════════════════════════
