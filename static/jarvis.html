@@ -81,8 +81,18 @@ body { min-height:100vh; background:#0A0B0F; font-family:'Pretendard',-apple-sys
 .bar-fill { height:100%; border-radius:4px; }
 
 /* 결론 */
-.conclusion { background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(99,102,241,0.06)); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:16px; }
-.conclusion .actions { display:flex; gap:16px; flex-wrap:wrap; }
+.conclusion { background:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(245,158,11,0.06)); border:1px solid rgba(239,68,68,0.15); border-radius:12px; padding:16px; }
+.news-list { list-style:none; padding:0; margin:8px 0 0; }
+.news-item { padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:12px; display:flex; gap:8px; align-items:flex-start; }
+.news-item:last-child { border-bottom:none; }
+.news-badge { flex-shrink:0; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; }
+.news-badge.high { background:rgba(239,68,68,0.15); color:#EF4444; }
+.news-badge.medium { background:rgba(245,158,11,0.15); color:#F59E0B; }
+.news-badge.dart { background:rgba(139,92,246,0.15); color:#8B5CF6; }
+.news-title { color:#D1D5DB; line-height:1.4; }
+.news-title a { color:#D1D5DB; text-decoration:none; }
+.news-title a:hover { color:#F9FAFB; text-decoration:underline; }
+.news-source { color:#6B7280; font-size:10px; margin-left:auto; flex-shrink:0; }
 
 /* 로딩 */
 .loading { text-align:center; padding:40px; color:#6B7280; }
@@ -137,8 +147,8 @@ body { min-height:100vh; background:#0A0B0F; font-family:'Pretendard',-apple-sys
     <div class="loading">데이터 로딩 중...</div>
   </div>
 
-  <!-- 통합 결론 -->
-  <div class="conclusion" id="conclusion"></div>
+  <!-- 주요 뉴스 -->
+  <div class="conclusion" id="headline-news"></div>
 </div>
 
 <script>
@@ -212,7 +222,7 @@ function renderAll() {
   renderPicksHistory();
   renderTabNav();
   switchTab(activeTab);
-  renderConclusion();
+  renderHeadlineNews();
 }
 
 /* ═══════════════════════════════════════ */
@@ -2941,44 +2951,78 @@ async function loadMonthlyReports() {
 }
 
 /* ═══════════════════════════════════════ */
-/*  통합 결론                              */
+/*  주요 뉴스                              */
 /* ═══════════════════════════════════════ */
-function renderConclusion() {
-  const m = D.market || {};
-  const relay = D.relay || {};
-  const q = D.quantum || {};
-  const etf = D.etf || {};
+function renderHeadlineNews() {
+  const news = D.market_news || {};
+  const dart = D.dart_disclosures || {};
+  const items = [];
 
-  const buyItems = [];
-  const watchItems = [];
-
-  // 퀀텀 후보
-  (q.candidates || []).forEach(c => buyItems.push(esc(c.name)));
-
-  // 릴레이 추천
-  (relay.signals || []).forEach(s => {
-    (s.picks || []).slice(0, 1).forEach(p => buyItems.push(esc(p.name)));
+  // DART tier1 즉시 공시 (최대 5건)
+  (dart.tier1 || []).slice(0, 5).forEach(d => {
+    items.push({
+      badge: 'dart', badgeText: '공시',
+      title: `[${esc(d.corp_name)}] ${esc(d.report_nm)}`,
+      source: d.keyword || '',
+      url: d.url || '',
+      priority: 0,
+    });
   });
 
-  // ETF 관찰
-  (etf.smart_money_etf || []).forEach(e => watchItems.push(esc(e.sector)));
-  (etf.watch_list || []).forEach(e => watchItems.push(esc(e.sector)));
+  // high impact 뉴스 (최대 5건)
+  (news.articles || []).filter(a => a.impact === 'high').slice(0, 5).forEach(a => {
+    items.push({
+      badge: 'high', badgeText: '중요',
+      title: esc(a.title),
+      source: esc(a.source || ''),
+      url: a.url || '',
+      priority: 1,
+    });
+  });
 
-  const el = document.getElementById('conclusion');
-  el.innerHTML = `
-    <div class="section-label">&#x1F4CB; 통합 결론</div>
-    <div class="actions">
-      <div><span style="color:#10B981;font-weight:700;font-size:13px">매수</span>
-        <span style="color:#9CA3AF;font-size:13px;margin-left:8px">${buyItems.length > 0 ? buyItems.join(' · ') : '없음'}</span></div>
-      <div><span style="color:#EF4444;font-weight:700;font-size:13px">매도</span>
-        <span style="color:#9CA3AF;font-size:13px;margin-left:8px">없음</span></div>
-      <div><span style="color:#F59E0B;font-weight:700;font-size:13px">감시</span>
-        <span style="color:#9CA3AF;font-size:13px;margin-left:8px">${watchItems.length > 0 ? watchItems.join(' · ') : '없음'}</span></div>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:#6B7280">
-      &#x26A0;&#xFE0F; 투자 판단은 본인 책임 | Quantum Master v10.3 | 스탠스: ${esc(m.stance||'관망')}
-    </div>
-  `;
+  // medium impact 뉴스 (남은 슬롯 채우기, 전체 최대 10건)
+  const remain = 10 - items.length;
+  if (remain > 0) {
+    (news.articles || []).filter(a => a.impact === 'medium').slice(0, remain).forEach(a => {
+      items.push({
+        badge: 'medium', badgeText: '주의',
+        title: esc(a.title),
+        source: esc(a.source || ''),
+        url: a.url || '',
+        priority: 2,
+      });
+    });
+  }
+
+  // 정렬: 공시 > high > medium
+  items.sort((a, b) => a.priority - b.priority);
+
+  const el = document.getElementById('headline-news');
+  if (items.length === 0) {
+    el.innerHTML = `
+      <div class="section-label">&#x1F4F0; 주요 뉴스</div>
+      <div style="color:#6B7280;font-size:12px;padding:8px 0">오늘 주요 뉴스가 없습니다</div>
+    `;
+    return;
+  }
+
+  let html = '<div class="section-label">&#x1F4F0; 주요 뉴스 · 공시</div>';
+  html += '<ul class="news-list">';
+  items.forEach(it => {
+    const titleHtml = it.url
+      ? `<a href="${it.url}" target="_blank" rel="noopener">${it.title}</a>`
+      : it.title;
+    html += `<li class="news-item">
+      <span class="news-badge ${it.badge}">${it.badgeText}</span>
+      <span class="news-title">${titleHtml}</span>
+      <span class="news-source">${it.source}</span>
+    </li>`;
+  });
+  html += '</ul>';
+  html += `<div style="margin-top:8px;font-size:10px;color:#4B5563">
+    &#x1F4C5; ${esc(news.crawled_at || dart.crawled_at || '')} | 공시 ${(dart.tier1||[]).length}건 · 뉴스 ${news.high_impact||0}H/${news.medium_impact||0}M
+  </div>`;
+  el.innerHTML = html;
 }
 
 /* ═══════════════════════════════════════ */
