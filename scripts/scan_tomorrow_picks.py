@@ -11,12 +11,14 @@
   5. 동반매수 S/A등급 + core_watch (dual_buying_watch.json)
 
 통합 점수 (100점, 5축 + 과열패널티):
-  다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25, 동반매수3일+ 부스트
+  다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25 (동반매수 단독보장 삭제 v5)
   개별 점수  (20): 각 소스 점수 정규화 평균
   기술적 지지 (25): RSI 적정(8) + MA(5) + MACD(4) + TRIX(4) + Stoch(4)
-  수급       (20): 외인(8) + 기관(5) + 동시매수(2) + 연속매수(5)
+  수급       (20): 외인(8) + 기관(5) + 동시매수(2) + 연속매수(2)
   안전       (10): BB(4) + ADX(3) + 낙폭(3)
   과열 패널티: RSI/Stoch/BB/급등 최대 -25점
+
+v5 변경: 동반매수 가중치 축소 — 단독보장 삭제, base_score 하향, 수급 보너스 축소
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -129,7 +131,9 @@ def collect_pullback() -> dict[str, dict]:
     """소스3: 눌림목 반등임박/매수대기"""
     pb = load_json("pullback_scan.json")
     result = {}
-    for item in pb.get("items", []):
+    # pullback_scan.json의 키: "candidates" (상위 30) + "all_uptrend" (전체)
+    candidates = pb.get("candidates", pb.get("items", []))
+    for item in candidates:
         grade = item.get("grade", "")
         if grade not in ("반등임박", "매수대기"):
             continue
@@ -197,9 +201,9 @@ def collect_dual_buying() -> dict[str, dict]:
     result = {}
 
     for grade, label, base_score in [
-        ("s_grade", "S등급", 85),
-        ("a_grade", "A등급", 70),
-        ("core_watch", "핵심관찰", 60),
+        ("s_grade", "S등급", 65),
+        ("a_grade", "A등급", 50),
+        ("core_watch", "핵심관찰", 40),
     ]:
         for item in db.get(grade, []):
             ticker = item.get("ticker", "")
@@ -228,11 +232,11 @@ def calc_integrated_score(
     sources: list[dict],
     parquet_data: dict | None,
 ) -> dict:
-    """5축 100점 + 과열패널티 통합 점수 계산 (v3)
+    """5축 100점 + 과열패널티 통합 점수 계산 (v5)
 
     기본 100점 배분:
       다중시그널(25) + 개별점수(20) + 기술적(25) + 수급(20) + 안전(10)
-    동반매수 부스트: 3일+ 연속 동반매수 시 멀티시그널 + 수급 가점
+    v5: 동반매수 단독 보장 삭제, 다른 소스와 겹칠 때만 소액 가산
     과열 패널티: 최대 -25점
     """
 
@@ -247,17 +251,14 @@ def calc_integrated_score(
     else:
         multi_score = 0
 
-    # 동반매수 연속일 부스트: 3일+ 지속 매수는 그 자체가 확인 시그널
+    # 동반매수 연속일: 다중소스 점수에 소액 가산만 (단독 보장 삭제)
+    # v4 교훈: 동반매수 단독 15점 보장 → 1소스만으로도 관심매수 → 결과 부진
     dual_days = 0
     for s in sources:
         dd = s.get("dual_days", 0) or s.get("f_streak", 0) or 0
         dual_days = max(dual_days, int(dd))
-    if dual_days >= 5:
-        multi_score = max(multi_score, 15)  # 5일+ → 15점 보장
-    elif dual_days >= 4:
-        multi_score = max(multi_score, 12)  # 4일 → 12점 보장
-    elif dual_days >= 3:
-        multi_score = max(multi_score, 8)   # 3일 → 8점 보장
+    if n_sources >= 2 and dual_days >= 3:
+        multi_score += 3  # 다른 소스와 겹칠 때만 소액 보너스
 
     # ── 축2: 개별 점수 평균 (20점) ──
     avg_src_score = np.mean([s["score"] for s in sources]) if sources else 0
@@ -333,11 +334,11 @@ def calc_integrated_score(
     # 외인+기관 동시매수
     if foreign_5d > 0 and inst_5d > 0:
         flow_score += 2
-    # 연속 동반매수 보너스 (3일+ 지속 = 스마트머니 확인)
+    # 연속 동반매수: 소액 보너스만 (v4 축소)
     if dual_days >= 4:
-        flow_score += 5
+        flow_score += 2
     elif dual_days >= 3:
-        flow_score += 3
+        flow_score += 1
 
     flow_score = min(flow_score, 20)
 
