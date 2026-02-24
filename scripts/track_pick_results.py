@@ -257,8 +257,12 @@ def main():
 
         if pick_date and pick_date not in archived_dates:
             picks = picks_data.get("picks", [])
-            # 강력매수 + 매수 + 관심매수만 아카이브
-            top_picks = [p for p in picks if p.get("grade") in ("강력매수", "매수", "관심매수")]
+            # TOP5만 아카이브 (top5 배열 있으면 해당 종목만, 없으면 등급 기반)
+            top5_tickers = set(picks_data.get("top5", []))
+            if top5_tickers:
+                top_picks = [p for p in picks if p["ticker"] in top5_tickers]
+            else:
+                top_picks = [p for p in picks if p.get("grade") in ("적극매수", "매수", "관심매수")][:5]
 
             new_count = 0
             for p in top_picks:

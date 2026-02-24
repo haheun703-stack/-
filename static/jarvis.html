@@ -2366,8 +2366,101 @@ let historyDates = [];
 let historyChart = null;
 
 function renderHistory() {
-  return `
-    <h3 class="sec-title" style="color:#A78BFA">&#x1F4C5; 히스토리 아카이브</h3>
+  const ph = D.picks_history || {};
+  const records = ph.records || [];
+  const summary = ph.summary || {};
+
+  let html = '';
+
+  // ── 추천 vs 결과 성과 요약 ──
+  html += '<h3 class="sec-title" style="color:#A78BFA">&#x1F4CB; 추천 VS 결과</h3>';
+
+  if (records.length === 0) {
+    html += '<div class="empty">아직 추천 이력이 없습니다. BAT-D 실행 후 데이터가 쌓입니다.</div>';
+  } else {
+    // 통계 카드
+    const ts = summary.total_settled || 0;
+    const wrColor = (summary.win_rate || 0) >= 50 ? '#10B981' : '#EF4444';
+    const arColor = (summary.avg_return || 0) >= 0 ? '#10B981' : '#EF4444';
+    html += `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px">
+      <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:#6B7280">총 추천</div>
+        <div style="font-size:18px;font-weight:700;color:#E5E7EB;font-family:var(--mono)">${summary.total_picks || 0}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:#6B7280">완료</div>
+        <div style="font-size:18px;font-weight:700;color:#A5B4FC;font-family:var(--mono)">${ts}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:#6B7280">승률</div>
+        <div style="font-size:18px;font-weight:700;color:${wrColor};font-family:var(--mono)">${ts > 0 ? num(summary.win_rate)+'%' : '-'}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:#6B7280">평균수익</div>
+        <div style="font-size:18px;font-weight:700;color:${arColor};font-family:var(--mono)">${ts > 0 ? pnlSign(summary.avg_return)+num(summary.avg_return)+'%' : '-'}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:#6B7280">PF</div>
+        <div style="font-size:18px;font-weight:700;color:#A5B4FC;font-family:var(--mono)">${summary.profit_factor > 0 ? num(summary.profit_factor) : '-'}</div>
+      </div>
+    </div>`;
+
+    // 상태 배지
+    const statusStyle = {
+      pending:    { icon: '&#x23F3;', label: '대기', color: '#6B7280' },
+      holding:    { icon: '&#x1F4CA;', label: '보유중', color: '#3B82F6' },
+      hit_target: { icon: '&#x1F3AF;', label: '목표달성', color: '#10B981' },
+      hit_stop:   { icon: '&#x1F6D1;', label: '손절', color: '#EF4444' },
+      expired:    { icon: '&#x23F0;', label: '만기', color: '#F59E0B' },
+    };
+    html += '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">';
+    [['holding', summary.holding],['hit_target', summary.hit_target],['hit_stop', summary.hit_stop],['expired', summary.expired],['pending', summary.pending]].forEach(([k,v]) => {
+      if (!v) return;
+      const s = statusStyle[k];
+      html += `<span style="font-size:11px;padding:3px 10px;border-radius:10px;background:${s.color}18;color:${s.color};border:1px solid ${s.color}33">${s.icon} ${s.label} ${v}</span>`;
+    });
+    html += '</div>';
+
+    // 레코드 테이블 (날짜별 그룹핑)
+    const byDate = {};
+    records.forEach(r => { (byDate[r.pick_date] = byDate[r.pick_date] || []).push(r); });
+    const dates = Object.keys(byDate).sort().reverse();
+
+    dates.forEach(d => {
+      const recs = byDate[d];
+      const dayLabel = d.slice(5);
+      const targetLabel = (recs[0].target_date || '').slice(5);
+      html += `<div style="margin-bottom:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:12px">`;
+      html += `<div style="font-size:12px;font-weight:700;color:#C4B5FD;margin-bottom:8px">&#x1F4C5; ${esc(dayLabel)} 추천 → ${esc(targetLabel)} 대상 (${recs.length}건)</div>`;
+      html += '<div style="display:flex;flex-direction:column;gap:6px">';
+
+      recs.forEach(r => {
+        const s = statusStyle[r.status] || statusStyle.pending;
+        const entry = r.entry_price || r.close_at_pick || 0;
+        const result = r.settled_price || r.latest_price || r.close_price || 0;
+        const ret = r.settled_return != null ? r.settled_return : (r.latest_return != null ? r.latest_return : (r.day1_return || 0));
+        const retColor = ret > 0 ? '#10B981' : ret < 0 ? '#EF4444' : '#6B7280';
+        const gradeColors = { '적극매수':'#DC2626', '매수':'#F59E0B', '관심매수':'#3B82F6' };
+        const gc = gradeColors[r.grade] || '#6B7280';
+
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:6px;font-size:11px;font-family:var(--mono)">
+          <span style="color:${s.color};font-size:14px;width:20px;text-align:center">${s.icon}</span>
+          <span style="color:#E5E7EB;font-weight:600;min-width:80px">${esc(r.name)}</span>
+          <span style="padding:1px 6px;border-radius:4px;background:${gc}22;color:${gc};font-size:10px;border:1px solid ${gc}44">${esc(r.grade)}</span>
+          <span style="color:#9CA3AF;min-width:65px;text-align:right">${entry > 0 ? entry.toLocaleString() : '-'}</span>
+          <span style="color:#6B7280">→</span>
+          <span style="color:#9CA3AF;min-width:65px;text-align:right">${result > 0 ? Math.round(result).toLocaleString() : '-'}</span>
+          <span style="color:${retColor};font-weight:700;min-width:55px;text-align:right">${ret !== 0 ? (ret > 0 ? '+' : '') + ret.toFixed(1) + '%' : '-'}</span>
+          <span style="color:${s.color};font-size:10px">${s.label}</span>
+        </div>`;
+      });
+
+      html += '</div></div>';
+    });
+  }
+
+  // ── 기존 아카이브 섹션 ──
+  html += `<h3 class="sec-title" style="color:#A78BFA;margin-top:24px">&#x1F4C5; 일별 아카이브</h3>
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
       <button onclick="loadHistoryDates()" style="padding:6px 14px;border-radius:6px;background:#A78BFA22;border:1px solid #A78BFA44;color:#A78BFA;cursor:pointer;font-size:12px;font-weight:600">날짜 목록 새로고침</button>
       <button onclick="loadPerformanceChart()" style="padding:6px 14px;border-radius:6px;background:#10B98122;border:1px solid #10B98144;color:#10B981;cursor:pointer;font-size:12px;font-weight:600">성과 차트</button>
@@ -2378,8 +2471,9 @@ function renderHistory() {
     <div id="history-chart-wrap" style="margin-bottom:16px;display:none">
       <canvas id="perfChart" height="200"></canvas>
     </div>
-    <div id="history-detail"></div>
-  `;
+    <div id="history-detail"></div>`;
+
+  return html;
 }
 
 async function loadHistoryDates() {
