@@ -46,6 +46,9 @@ SYNC_FILES = [
     "dual_buying_watch.json",
     "pullback_scan.json",
     "group_relay/group_relay_today.json",
+    "scan_cache.json",
+    "dart_disclosures.json",
+    "integrated_report.json",
     # 라이브 데이터 (동기화 전 자동 캡처)
     "kis_balance.json",
     "kospi_regime.json",
