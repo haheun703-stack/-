@@ -828,38 +828,41 @@ class SmartEntryEngine:
         return report
 
     def build_telegram_message(self, report: dict) -> str:
-        """텔레그램 발송용 메시지 생성"""
+        """텔레그램 발송용 메시지 생성 (Quantum Master 통합 양식)"""
+        LINE = "\u2500" * 30
         mode = "DRY-RUN" if report["dry_run"] else "LIVE"
+        now_str = datetime.now().strftime("%H:%M:%S")
         lines = [
-            f"{'='*30}",
-            f"AI 스마트 진입 결과 [{mode}]",
-            f"{'='*30}",
-            f"대상: {report['total_candidates']}종목",
-            f"체결: {report['filled']}  |  스킵: {report['skipped']}  |  미체결: {report['unfilled']}",
-            "",
+            f"\U0001f916 [AI \uc2a4\ub9c8\ud2b8 \uc9c4\uc785] {mode}",
+            LINE,
+            f"  \ub300\uc0c1: {report['total_candidates']}\uc885\ubaa9",
+            f"  \uccb4\uacb0: {report['filled']}  |  \uc2a4\ud0b5: {report['skipped']}  |  \ubbf8\uccb4\uacb0: {report['unfilled']}",
+            LINE,
         ]
 
         for d in report["details"]:
-            emoji = {"buy": "✅", "skip": "❌", "wait": "⏳", "holding": "📋"}.get(
-                d["decision"], "❓"
+            emoji = {"buy": "\u2705", "skip": "\u274c", "wait": "\u23f3", "holding": "\U0001f4cb"}.get(
+                d["decision"], "\u2753"
             )
             gap_str = f"{d['gap_pct']:+.1f}%" if d["gap_pct"] else ""
             lines.append(
                 f"{emoji} {d['name']}({d['ticker']})"
-                f" 전일{d['prev_close']:,} → 시가{d['open_price']:,}({gap_str})"
+                f" {d['prev_close']:,}\u2192{d['open_price']:,}({gap_str})"
             )
             lines.append(f"   [{d['gap_type']}] {d['decision']}")
             if d["order_price"]:
-                lines.append(f"   지정가: {d['order_price']:,}원")
+                lines.append(f"   \uc9c0\uc815\uac00: {d['order_price']:,}\uc6d0")
             if d.get("bid_ask_ratio"):
-                lines.append(f"   호가비: {d['bid_ask_ratio']:.2f} | 패턴: {d['candle_pattern']} | 수급: {d['flow_signal']}")
+                lines.append(f"   \ud638\uac00\ube44: {d['bid_ask_ratio']:.2f} | \ud328\ud134: {d['candle_pattern']} | \uc218\uae09: {d['flow_signal']}")
             if d.get("triple_detail"):
                 vwap_str = f"VWAP={d['vwap']:,.0f}" if d.get("vwap") else ""
-                lines.append(f"   3중확인: {d['triple_detail']} ({d['triple_confirm']}/3) {vwap_str}")
+                lines.append(f"   3\uc911\ud655\uc778: {d['triple_detail']} ({d['triple_confirm']}/3) {vwap_str}")
             for r in d.get("reasons", [])[:3]:
-                lines.append(f"   • {r}")
+                lines.append(f"   \u2022 {r}")
             lines.append("")
 
+        lines.append(LINE)
+        lines.append(f"\u23f0 {now_str} | Quantum Master")
         return "\n".join(lines)
 
     # ──────────────────────────────────────────

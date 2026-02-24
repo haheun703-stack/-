@@ -1,18 +1,10 @@
 """
-텔레그램 메시지 포맷터 — "퀀텀전략" v3.0
+텔레그램 메시지 포맷터 — Quantum Master 통합 양식
 
-KISBOT v4.3 스타일 참조:
-  - 시장 상태, 백테스트 결과, 매수 추천 종목을 구조화된 메시지로 생성
-  - 6-Layer Pipeline 진단, 트리거별/등급별 성과 포함
-
-기호 참조 (ICONS):
-  시장 상태:  BULL / BEAR / SIDEWAYS
-  등급:       A / B / C
-  트리거:     IMPULSE / CONFIRM / BREAKOUT
-  수익/손실:  WIN / LOSS
-  레짐:       ADVANCE / DISTRIB / ACCUM
-  6-Layer:    PASS / BLOCK
-  랭킹:       RANK_1 / RANK_2 / RANK_3
+모든 메시지 공통 디자인:
+  - 헤더: 아이콘 [카테고리] 부제 (버전 번호 없음)
+  - 구분선: ━━━ 또는 ─── 통일
+  - 푸터: 시간 | Quantum Master
 """
 
 from datetime import datetime
@@ -195,7 +187,7 @@ def format_trade_alert(signal: dict, action: str = "BUY") -> str:
 
 def _format_header(scan_date: str) -> str:
     return (
-        f"{_icon('CHART')} [퀀텀전략 v3.0] {scan_date} 6-Layer 스캔\n"
+        f"{_icon('CHART')} [매수 후보 스캔] {scan_date}\n"
         f"{ICONS['LINE']}"
     )
 
@@ -220,7 +212,7 @@ def _format_backtest_stats(stats: dict) -> str:
     perf_icon = _icon("WIN") if total_return > 0 else _icon("LOSS")
 
     lines = [
-        f"\n{_icon('CHART')} [ 백테스트 성과 ]",
+        f"\n{_icon('CHART')} [백테스트 성과]",
         f"  거래: {total}건 | 승률: {win_rate:.1f}%",
         f"  평균이익: {_sign(avg_win)}% | 평균손실: {avg_loss:.2f}%",
         f"  기대값: {_sign(expectancy)}%/거래",
@@ -268,7 +260,7 @@ def _format_diagnostic(diagnostic: dict) -> str:
     layers = diagnostic.get("layers", {})
 
     lines = [
-        f"\n{_icon('GEAR')} [ 6-Layer Pipeline 진단 ]",
+        f"\n{_icon('GEAR')} [파이프라인 진단]",
         f"  총 평가: {_comma(total_eval)}건 -> 시그널: {final_sig}건 ({sig_rate}%)",
     ]
 
@@ -290,7 +282,7 @@ def _format_diagnostic(diagnostic: dict) -> str:
 def _format_recommendations(signals: list[dict]) -> str:
     """매수 추천 종목 섹션"""
     if not signals:
-        return f"\n{_icon('MEMO')} [ 매수 후보 ]\n  해당 없음"
+        return f"\n{_icon('MEMO')} [매수 후보]\n  해당 없음"
 
     # zone_score 기준 정렬
     sorted_signals = sorted(signals, key=lambda s: s.get("zone_score", 0), reverse=True)
@@ -302,7 +294,7 @@ def _format_recommendations(signals: list[dict]) -> str:
     trigger = top.get("trigger_type", "confirm").upper()
     grade = top.get("grade", "C")
 
-    lines.append(f"\n{_icon('RANK_1')} [ 1순위 추천 매수 ]")
+    lines.append(f"\n{_icon('RANK_1')} [1순위 추천]")
     lines.append(f"  종목: {top.get('ticker', '?')}")
     lines.append(f"  등급: {_icon(grade)} {grade}등급 | BES: {top.get('zone_score', 0):.2f}")
     lines.append(f"  트리거: {_icon(trigger)} {trigger}")
@@ -313,7 +305,7 @@ def _format_recommendations(signals: list[dict]) -> str:
 
     # 2순위 이하
     if len(sorted_signals) > 1:
-        lines.append(f"\n{_icon('MEMO')} [ 매수 후보 ]")
+        lines.append(f"\n{_icon('MEMO')} [매수 후보]")
         for i, sig in enumerate(sorted_signals[1:], start=2):
             rank_icon = _icon(f"RANK_{i}") if i <= 3 else f" {i}."
             t_type = sig.get("trigger_type", "confirm").upper()
@@ -336,8 +328,7 @@ def _format_footer() -> str:
     now = datetime.now().strftime("%H:%M:%S")
     return (
         f"\n{ICONS['LINE']}\n"
-        f"{_icon('CLOCK')} {now} | 6-Layer Pipeline Quant v3.1\n"
-        f"  4단계 부분청산(2R/4R/8R/10R) | HMM 레짐 | OU 필터 | News Gate"
+        f"{_icon('CLOCK')} {now} | Quantum Master"
     )
 
 
@@ -409,7 +400,7 @@ def format_news_alert(
     grade_icon = _icon(grade_key)
 
     parts = [
-        f"{grade_icon} [v3.1 News Gate] {grade}등급 뉴스 감지",
+        f"{grade_icon} [뉴스 감지] {grade}등급",
         ICONS["LINE"],
         f"  종목: {ticker}",
         f"  등급: {grade}등급",
@@ -497,10 +488,9 @@ def format_accumulation_alert(
         phase_name = "매집 미감지"
 
     parts = [
-        f"{phase_icon} [Smart Money v2] 매집 분석",
+        f"{phase_icon} [매집 분석] {phase_name}",
         ICONS["LINE"],
         f"  종목: {ticker}",
-        f"  단계: {phase_name}",
         f"  신뢰도: {confidence:.0f}%",
         f"  보너스: {_sign(bonus_score)}점",
     ]
@@ -548,30 +538,36 @@ def format_order_result(order, action: str = "BUY", name: str = "") -> str:
 
     stock_label = f"{name}({order.ticker})" if name else order.ticker
 
+    now = datetime.now().strftime("%H:%M:%S")
     if filled and order.filled_quantity > 0:
         price = order.filled_price
         qty = order.filled_quantity
         amount = qty * price
         return (
-            f"{icon} {verb} 체결 | {stock_label}\n"
-            f"  {qty:,}주 x {price:,.0f}원 = {amount:,.0f}원"
+            f"{icon} [{verb} 체결] {stock_label}\n"
+            f"{ICONS['LINE']}\n"
+            f"  {qty:,}주 x {price:,.0f}원 = {amount:,.0f}원\n"
+            f"{ICONS['LINE']}\n"
+            f"{_icon('CLOCK')} {now} | Quantum Master"
         )
     else:
-        status_icon = _icon("WARN")
         return (
-            f"{status_icon} {verb} 실패 | {stock_label}\n"
+            f"{_icon('BLOCK')} [{verb} 실패] {stock_label}\n"
+            f"{ICONS['LINE']}\n"
             f"  상태: {order.status.value.upper()}\n"
-            f"  주문: {order.quantity:,}주 x {order.price:,.0f}원"
+            f"  주문: {order.quantity:,}주 x {order.price:,.0f}원\n"
+            f"{ICONS['LINE']}\n"
+            f"{_icon('CLOCK')} {now} | Quantum Master"
         )
 
 
 def format_position_summary(positions: list) -> str:
     """보유종목 현황표 포맷."""
     if not positions:
-        return f"{_icon('INFO')} 보유종목 없음"
+        return f"{_icon('MEMO')} 보유종목 없음"
 
     parts = [
-        f"{_icon('MONEY')} [보유종목 현황]",
+        f"{_icon('MONEY')} [보유종목 현황] {len(positions)}종목",
         ICONS["LINE"],
     ]
 
@@ -597,14 +593,15 @@ def format_position_summary(positions: list) -> str:
     total_icon = _icon("ADVANCE") if total_pnl_pct >= 0 else _icon("DECLINE")
 
     parts.append(ICONS["LINE"])
+    now = datetime.now().strftime("%H:%M:%S")
     parts.append(
         f"  총 투자: {total_invested:,.0f}원\n"
         f"  총 평가: {total_eval:,.0f}원\n"
-        f"  {total_icon} 수익률: {total_pnl_pct:+.1f}%\n"
-        f"  종목수: {len(positions)}개"
+        f"  {total_icon} 수익률: {total_pnl_pct:+.1f}%"
     )
 
     parts.append(ICONS["LINE"])
+    parts.append(f"{_icon('CLOCK')} {now} | Quantum Master")
     return "\n".join(parts)
 
 
@@ -618,7 +615,7 @@ def format_daily_performance(perf) -> str:
     win_rate = (perf.win_trades / perf.trades_executed * 100) if perf.trades_executed > 0 else 0
 
     parts = [
-        f"{_icon('INFO')} [일일 성과 리포트] {perf.date}",
+        f"{_icon('CHART')} [일일 성과] {perf.date}",
         ICONS["LINE"],
         f"  시작잔고: {perf.starting_balance:,.0f}원",
         f"  종료잔고: {perf.ending_balance:,.0f}원",
@@ -629,14 +626,16 @@ def format_daily_performance(perf) -> str:
         f"  매매횟수: {perf.trades_executed}건",
         f"  승률: {win_rate:.0f}% ({perf.win_trades}W/{perf.loss_trades}L)",
         ICONS["LINE"],
+        f"{_icon('CLOCK')} {perf.date} | Quantum Master",
     ]
     return "\n".join(parts)
 
 
 def format_emergency_alert(reason: str) -> str:
     """긴급 알림 포맷."""
+    now = datetime.now().strftime("%H:%M:%S")
     parts = [
-        f"{_icon('WARN')}{_icon('WARN')}{_icon('WARN')} [긴급 알림]",
+        f"{_icon('ALERT')} [긴급 알림]",
         ICONS["LINE"],
         f"  사유: {reason}",
         "  조치: 전종목 시장가 청산 실행",
@@ -645,24 +644,29 @@ def format_emergency_alert(reason: str) -> str:
         "  수동 해제: STOP.signal 파일 삭제",
         "  자동 해제: 00:00 일일 리셋",
         ICONS["LINE"],
+        f"{_icon('CLOCK')} {now} | Quantum Master",
     ]
     return "\n".join(parts)
 
 
 def format_scheduler_status(phase: str, status: str, detail: str = "") -> str:
     """스케줄러 상태 포맷."""
-    status_icon = _icon("ADVANCE") if status == "완료" else (
-        _icon("WARN") if status == "실패" else _icon("INFO")
+    status_icon = _icon("PASS") if status == "완료" else (
+        _icon("BLOCK") if status == "실패" else _icon("GEAR")
     )
 
+    now = datetime.now().strftime("%H:%M:%S")
     parts = [
-        f"{_icon('INFO')} [스케줄러] {phase}",
+        f"{_icon('GEAR')} [스케줄러] {phase}",
+        ICONS["LINE"],
         f"  상태: {status_icon} {status}",
     ]
 
     if detail:
         parts.append(f"  상세: {detail}")
 
+    parts.append(ICONS["LINE"])
+    parts.append(f"{_icon('CLOCK')} {now} | Quantum Master")
     return "\n".join(parts)
 
 
@@ -723,7 +727,7 @@ def _format_ma_header(data: dict) -> str:
     report_date = data.get("date", datetime.now().strftime("%Y-%m-%d"))
     label = _REPORT_TYPE_LABELS.get(data.get("report_type", "morning"), "분석")
     return (
-        f"{_icon('CHART')} [\ud000\ud140\uc804\ub7b5] {report_date} {label}\n"
+        f"{_icon('CHART')} [{label}] {report_date}\n"
         f"{ICONS['LINE']}"
     )
 
@@ -863,7 +867,7 @@ def _format_ma_footer(data: dict) -> str:
     time_str = data.get("time", datetime.now().strftime("%H:%M"))
     return (
         f"\n{ICONS['LINE']}\n"
-        f"{_icon('CLOCK')} {time_str} | \ud000\ud140\uc804\ub7b5 v8.4"
+        f"{_icon('CLOCK')} {time_str} | Quantum Master"
     )
 
 
@@ -895,19 +899,19 @@ def format_theme_alert(alert) -> str:
         grok_expanded = alert.grok_expanded
 
     lines = [
-        f'🔥 테마 감지: {theme}',
-        '',
-        f'📰 [{source}] "{title}"',
+        f'{_icon("FIRE")} [테마 감지] {theme}',
+        ICONS["LINE"],
+        f'  {_icon("MEMO")} [{source}] "{title}"',
     ]
     if url:
-        lines.append(f'🔗 {url}')
+        lines.append(f'  {url}')
     if published:
-        lines.append(f'⏰ {published}')
+        lines.append(f'  {_icon("CLOCK")} {published}')
 
     # 관련주 목록
-    lines.append('')
+    lines.append(ICONS["LINE"])
     src_label = '딕셔너리' + (' + Grok 확장' if grok_expanded else '')
-    lines.append(f'📊 관련주 ({src_label}):')
+    lines.append(f'{_icon("CHART")} 관련주 ({src_label}):')
 
     for s in stocks:
         if isinstance(s, dict):
@@ -946,8 +950,8 @@ def format_theme_alert(alert) -> str:
             lines.append(f' {order_str} {name}({ticker}){grok_tag}')
 
     # 푸터
-    lines.append('')
-    lines.append(f'🏷 #테마 #{theme}')
-    lines.append(f'⚠️ 관심종목 — 직접 차트 확인 필요')
+    now = datetime.now().strftime("%H:%M:%S")
+    lines.append(ICONS["LINE"])
+    lines.append(f'{_icon("CLOCK")} {now} | Quantum Master')
 
     return "\n".join(lines)

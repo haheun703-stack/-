@@ -31,6 +31,29 @@ API_BASE = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# 매수/매도 지정가 할인/프리미엄 비율
+LIMIT_BUY_DISCOUNT = 0.005    # 현재가 -0.5%
+LIMIT_SELL_PREMIUM = 0.005    # 현재가 +0.5%
+
+
+def _tick_round(price: int, reference: int) -> int:
+    """호가 단위 맞춤 (KRX 규칙)."""
+    if reference < 2000:
+        tick = 1
+    elif reference < 5000:
+        tick = 5
+    elif reference < 20000:
+        tick = 10
+    elif reference < 50000:
+        tick = 50
+    elif reference < 200000:
+        tick = 100
+    elif reference < 500000:
+        tick = 500
+    else:
+        tick = 1000
+    return (price // tick) * tick
+
 
 class TelegramCommandBot:
     """텔레그램 키보드 버튼 봇 (백그라운드 스레드)."""
@@ -256,7 +279,7 @@ class TelegramCommandBot:
         self._reply_inline(
             f"\U0001f6d2 매수 확인\n"
             f"  종목: {ctx.stock_name} ({ctx.ticker})\n"
-            f"  수량: {qty}주 (시장가)\n"
+            f"  수량: {qty}주 (지정가 -0.5%)\n"
             f"\n실행하시겠습니까?",
             build_confirm_keyboard("buy", ctx.ticker, str(qty)),
         )
@@ -296,7 +319,7 @@ class TelegramCommandBot:
         self._reply_inline(
             f"\U0001f4e4 매도 확인\n"
             f"  종목: {ctx.stock_name} ({ctx.ticker})\n"
-            f"  수량: {qty}주 (시장가)\n"
+            f"  수량: {qty}주 (지정가 +0.5%)\n"
             f"\n실행하시겠습니까?",
             build_confirm_keyboard("sell", ctx.ticker, str(qty)),
         )
@@ -393,11 +416,21 @@ class TelegramCommandBot:
         try:
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
-            order = adapter.buy_market(ticker, qty)
+            # 현재가 조회 → -0.5% 지정가 매수
+            price_info = adapter.fetch_current_price(ticker)
+            current = price_info.get("current_price", 0)
+            if current <= 0:
+                edit_message_text(chat_id, msg_id, f"\u274c 매수 실패: 현재가 조회 불가 ({ticker})")
+                return
+            limit_price = _tick_round(int(current * (1 - LIMIT_BUY_DISCOUNT)), current)
+            order = adapter.buy_limit(ticker, limit_price, qty)
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
                 chat_id, msg_id,
-                f"\u2705 매수 주문 접수\n  {name}({ticker}) {qty}주 시장가\n  상태: {status}",
+                f"\u2705 매수 주문 접수\n"
+                f"  {name}({ticker}) {qty}주\n"
+                f"  지정가: {limit_price:,}원 (현재가 {current:,}원 -0.5%)\n"
+                f"  상태: {status}",
             )
         except Exception as e:
             edit_message_text(chat_id, msg_id, f"\u274c 매수 실패: {e}")
@@ -409,11 +442,21 @@ class TelegramCommandBot:
         try:
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
-            order = adapter.sell_market(ticker, qty)
+            # 현재가 조회 → +0.5% 지정가 매도
+            price_info = adapter.fetch_current_price(ticker)
+            current = price_info.get("current_price", 0)
+            if current <= 0:
+                edit_message_text(chat_id, msg_id, f"\u274c 매도 실패: 현재가 조회 불가 ({ticker})")
+                return
+            limit_price = _tick_round(int(current * (1 + LIMIT_SELL_PREMIUM)), current)
+            order = adapter.sell_limit(ticker, limit_price, qty)
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
                 chat_id, msg_id,
-                f"\u2705 매도 주문 접수\n  {name}({ticker}) {qty}주 시장가\n  상태: {status}",
+                f"\u2705 매도 주문 접수\n"
+                f"  {name}({ticker}) {qty}주\n"
+                f"  지정가: {limit_price:,}원 (현재가 {current:,}원 +0.5%)\n"
+                f"  상태: {status}",
             )
         except Exception as e:
             edit_message_text(chat_id, msg_id, f"\u274c 매도 실패: {e}")
@@ -643,7 +686,7 @@ class TelegramCommandBot:
             from src.telegram_keyboard import build_confirm_keyboard
             self._conv.set_state(ConvState.BUY_WAIT_QTY, ticker=ticker, stock_name=name, quantity=qty)
             self._reply_inline(
-                f"\U0001f6d2 매수 확인\n  {name}({ticker}) {qty}주 시장가\n\n실행하시겠습니까?",
+                f"\U0001f6d2 매수 확인\n  {name}({ticker}) {qty}주 (지정가 -0.5%)\n\n실행하시겠습니까?",
                 build_confirm_keyboard("buy", ticker, str(qty)),
             )
         elif len(args) == 1:
@@ -689,7 +732,7 @@ class TelegramCommandBot:
                 from src.telegram_keyboard import build_confirm_keyboard
                 self._conv.set_state(ConvState.SELL_WAIT_QTY, ticker=ticker, stock_name=name, quantity=qty)
                 self._reply_inline(
-                    f"\U0001f4e4 매도 확인\n  {name}({ticker}) {qty}주 시장가\n\n실행하시겠습니까?",
+                    f"\U0001f4e4 매도 확인\n  {name}({ticker}) {qty}주 (지정가 +0.5%)\n\n실행하시겠습니까?",
                     build_confirm_keyboard("sell", ticker, str(qty)),
                 )
             else:
@@ -855,10 +898,10 @@ class TelegramCommandBot:
             "    (예: 분석 삼성전자)",
             "",
             "\U0001f4b0 [매매]",
-            "  매수 — 수동 매수",
+            "  매수 — 지정가 매수 (-0.5%)",
             "    (예: 매수 삼성전자 10)",
-            "  매도 — 수동 매도",
-            "  청산 — 전 포지션 매도",
+            "  매도 — 지정가 매도 (+0.5%)",
+            "  청산 — 전 포지션 시장가 매도",
             "",
             "\U0001f4bc [조회]",
             "  현재잔고 — KIS 실잔고",
