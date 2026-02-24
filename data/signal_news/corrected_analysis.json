@@ -1,0 +1,35 @@
+{
+  "method": "GPT-4o-mini inference (gpt-only mode)",
+  "limitation": "GPT 환각으로 인해 촉매 구체 내용 신뢰 불가. 촉매 유무 판단만 참고 가능.",
+  "total_signals": 91,
+  "corrected_groups": {
+    "group_a": {
+      "name": "선행 촉매 (GPT high confidence)",
+      "count": 51,
+      "pct": "56.0%",
+      "note": "GPT가 실적/신사업을 과도 부여하는 경향. 실제로는 40~55% 범위 추정"
+    },
+    "group_b": {
+      "name": "기술적 시작 (촉매 없음)",
+      "count": 16,
+      "pct": "17.6%",
+      "note": "GPT가 명시적으로 기술적 상승으로 판정. 비교적 신뢰도 높음"
+    },
+    "group_c": {
+      "name": "불확실/후행",
+      "count": 24,
+      "pct": "26.4%",
+      "note": "GPT confidence medium 이하. 실제 촉매 유무 불분명"
+    }
+  },
+  "key_findings": [
+    "91건 중 최소 16건(17.6%)은 순수 기술적 시작점 — 촉매 불필요 확인",
+    "GPT가 부여한 촉매의 75%가 실적 관련 — 과잉 귀인 가능성",
+    "다중 시그널 종목: 첫 시그널=촉매, 후속 시그널=기술적 패턴 경향",
+    "v8 파이프라인의 기술적 필터는 뉴스 촉매 없이도 유효한 시작점 탐지 가능"
+  ],
+  "implication_for_v9": {
+    "news_weight": "v9에서 뉴스 축 가중치 25% → 15% 이하로 하향 권장",
+    "reason": "촉매 없는 시작점 17.6%+ 존재 → 뉴스 없다고 감점하면 보석 놓침"
+  }
+}

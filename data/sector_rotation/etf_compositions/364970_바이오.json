@@ -1,0 +1,62 @@
+{
+  "sector": "바이오",
+  "etf_code": "364970",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "068270",
+      "name": "셀트리온",
+      "weight": 31.37
+    },
+    {
+      "code": "196170",
+      "name": "알테오젠",
+      "weight": 18.33
+    },
+    {
+      "code": "207940",
+      "name": "삼성바이오로직스",
+      "weight": 16.48
+    },
+    {
+      "code": "000100",
+      "name": "유한양행",
+      "weight": 4.76
+    },
+    {
+      "code": "028300",
+      "name": "HLB",
+      "weight": 4.32
+    },
+    {
+      "code": "087010",
+      "name": "펩트론",
+      "weight": 3.83
+    },
+    {
+      "code": "141080",
+      "name": "리가켐바이오",
+      "weight": 3.33
+    },
+    {
+      "code": "326030",
+      "name": "SK바이오팜",
+      "weight": 2.18
+    },
+    {
+      "code": "214450",
+      "name": "파마리서치",
+      "weight": 1.55
+    },
+    {
+      "code": "145020",
+      "name": "휴젤",
+      "weight": 1.02
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

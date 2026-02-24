@@ -1,0 +1,3369 @@
+[
+  {
+    "stock_code": "000660",
+    "stock_name": "SK하이닉스",
+    "signal_date": "2025-12-16",
+    "notes": "1차 상승 (530000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 발표와 신사업 소식이 주가에 긍정적인 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 반도체 관련 신사업 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "반도체 기업 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "000660",
+    "stock_name": "SK하이닉스",
+    "signal_date": "2026-01-20",
+    "notes": "2차 상승 (730000원)",
+    "total_news": 0,
+    "catalyst_count": 2,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 1,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 반도체 관련 신사업 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 발표와 신사업 발표가 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 반도체 관련 신사업 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "000660",
+    "stock_name": "SK하이닉스",
+    "signal_date": "2026-02-11",
+    "notes": "3차 급등 (860000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 반도체 관련 신사업 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 관련 뉴스가 주가에 긍정적인 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 반도체 관련 신사업 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 반도체 산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "003670",
+    "stock_name": "포스코퓨처엠",
+    "signal_date": "2026-01-09",
+    "notes": "1차 상승 (175600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "전기차 배터리 소재 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "포스코퓨처엠은 신사업 진출과 정부 정책 발표로 긍정적인 영향을 받았음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 배터리 소재 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 친환경 정책 강화 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "003670",
+    "stock_name": "포스코퓨처엠",
+    "signal_date": "2026-01-23",
+    "notes": "2차 상승 (214000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "포스코퓨처엠은 실적 발표와 정부 정책에 힘입어 주가가 상승했습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 배터리 소재 사업 확대 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 그린 에너지 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "004020",
+    "stock_name": "현대제철",
+    "signal_date": "2026-01-09",
+    "notes": "1차 상승 (29300원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "정부의 철강산업 지원 정책 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 4분기 실적 발표와 정부의 지원 정책이 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 철강산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사와의 합병 논의 보도",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "004020",
+    "stock_name": "현대제철",
+    "signal_date": "2026-02-02",
+    "notes": "2차 상승 (29650원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "정부의 철강산업 지원 정책 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 개선 및 정책 지원 기대감으로 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 철강산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "004310",
+    "stock_name": "현대약품",
+    "signal_date": "2025-12-03",
+    "notes": "1차 바닥 돌파 (3655원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신약 개발 관련 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "004310",
+    "stock_name": "현대약품",
+    "signal_date": "2026-01-14",
+    "notes": "2차 급등 (8130원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신약 개발 관련 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약: 실적 발표와 신사업 관련 소식이 주가에 긍정적인 영향을 미쳤습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신약 개발 관련 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 인수합병 소식",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005380",
+    "stock_name": "현대차",
+    "signal_date": "2025-12-26",
+    "notes": "1차 상승 (287500원)",
+    "total_news": 0,
+    "catalyst_count": 4,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 3,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 3분기 실적 발표와 정부의 전기차 보조금 확대 정책이 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 신모델 출시 계획 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 전기차 보조금 확대 정책 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "전략적 제휴 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005380",
+    "stock_name": "현대차",
+    "signal_date": "2026-01-26",
+    "notes": "2차 급등 (489000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 추진이 주가에 긍정적 영향을 미침",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 및 자율주행차 관련 신규 프로젝트 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 전기차 보조금 확대 정책 발표",
+        "timing": "after",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005490",
+    "stock_name": "POSCO홀딩스",
+    "signal_date": "2026-01-08",
+    "notes": "1차 상승 (302500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출 소식이 긍정적인 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "친환경 철강 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 기업 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005490",
+    "stock_name": "POSCO홀딩스",
+    "signal_date": "2026-02-02",
+    "notes": "2차 상승 (344000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "POSCO홀딩스는 2023년 4분기 실적 발표와 신사업 진출 소식으로 주가가 상승하였으며, 기술적 상승 요소도 존재함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 자회사 인수 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "친환경 철강 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005830",
+    "stock_name": "DB손해보험",
+    "signal_date": "2026-01-14",
+    "notes": "돌파 (122100원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "보험업계 규제 완화 정책 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "정책",
+        "title": "보험업계 규제 완화 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "DB손해보험, 경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005935",
+    "stock_name": "삼성전자우",
+    "signal_date": "2025-12-29",
+    "notes": "1차 돌파 시작 (89800원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼성전자 AI 반도체 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 4분기 실적 발표가 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "삼성전자 2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "삼성전자 AI 반도체 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "삼성전자, 반도체 기업 인수 추진 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "005935",
+    "stock_name": "삼성전자우",
+    "signal_date": "2026-01-13",
+    "notes": "2차 파동 시작 (103200원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 반도체 관련 신규 사업 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 반도체 관련 신규 사업 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 반도체 산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "006360",
+    "stock_name": "GS건설",
+    "signal_date": "2025-12-01",
+    "notes": "1차 상승 (18930원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "GS건설은 3분기 실적 발표와 정부의 건설 경기 부양 정책으로 인해 주가가 상승했습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대규모 건설 프로젝트 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 건설 경기 부양 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "006360",
+    "stock_name": "GS건설",
+    "signal_date": "2026-02-02",
+    "notes": "2차 상승 (18410원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 1분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약: GS건설은 실적 발표와 정부 정책 등으로 긍정적인 영향을 받아 주가 상승.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 건설 프로젝트 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 건설 경기 부양 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "006800",
+    "stock_name": "미래에셋증권",
+    "signal_date": "2025-12-23",
+    "notes": "돌파 (23900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 투자 서비스 출시",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "배당",
+        "title": "2025년 배당금 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "009520",
+    "stock_name": "포스코엠텍",
+    "signal_date": "2026-01-20",
+    "notes": "돌파 (17390원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "포스코엠텍, 새로운 친환경 기술 개발 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "포스코엠텍의 신사업 발표와 실적 개선이 주가에 긍정적인 영향을 미쳤습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "포스코엠텍, 새로운 친환경 기술 개발 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "포스코엠텍, 해외 기업 인수 추진 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "009540",
+    "stock_name": "HD한국조선해양",
+    "signal_date": "2025-12-01",
+    "notes": "1차 돌파 (400500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 선박 수주 계약 체결",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "해양 산업 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "009540",
+    "stock_name": "HD한국조선해양",
+    "signal_date": "2026-01-02",
+    "notes": "2차 상승 (396500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "대형 선박 수주 계약 체결",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 선박 수주 계약 체결",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "해양 산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "009830",
+    "stock_name": "한화솔루션",
+    "signal_date": "2026-02-02",
+    "notes": "돌파 (26750원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "태양광 사업 확대 계획 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화솔루션은 실적 발표와 신사업 계획으로 긍정적인 영향을 받음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "태양광 사업 확대 계획 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 기업 인수 추진 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "011690",
+    "stock_name": "와이투솔루션",
+    "signal_date": "2026-01-16",
+    "notes": "1차 상승 (4070원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "와이투솔루션, AI 기반 데이터 분석 서비스 출시",
+    "catalyst_timing": "before",
+    "gpt_summary": "신사업 진출과 실적 개선 기대감으로 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "와이투솔루션, AI 기반 데이터 분석 서비스 출시",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표, 예상보다 높은 매출 성장률",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "011690",
+    "stock_name": "와이투솔루션",
+    "signal_date": "2026-02-12",
+    "notes": "2차 상승 (5650원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 기반 솔루션 출시 예정",
+    "catalyst_timing": "before",
+    "gpt_summary": "와이투솔루션의 주가는 긍정적인 실적 발표와 신사업 추진 소식에 힘입어 상승세를 보였다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 솔루션 출시 예정",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 IT 산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "012330",
+    "stock_name": "현대모비스",
+    "signal_date": "2026-01-06",
+    "notes": "1차 상승 (367500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 발표와 신사업 진출이 주가 상승에 기여",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 배터리 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "자동차 부품업체 인수 소식",
+        "timing": "after",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "012330",
+    "stock_name": "현대모비스",
+    "signal_date": "2026-01-20",
+    "notes": "2차 상승 (440500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 4분기 실적 발표 예상",
+    "catalyst_timing": "before",
+    "gpt_summary": "2026년 4분기 실적 발표와 신사업 진출 소식이 주가에 긍정적인 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표 예상",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 배터리 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "중국 자동차 부품업체 인수 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "012450",
+    "stock_name": "한화에어로스페이스",
+    "signal_date": "2025-12-26",
+    "notes": "돌파 (870000원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화에어로스페이스는 실적 발표와 방산 계약 체결 등의 긍정적인 소식으로 주가가 상승하였으며, 기술적 상승이 일부 작용했을 가능성도 있음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "국방부와의 대규모 방산 계약 체결",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "우주항공 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "015710",
+    "stock_name": "코콤",
+    "signal_date": "2026-02-06",
+    "notes": "돌파 (3405원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 기반 솔루션 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 솔루션 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수 관련 보도",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "015760",
+    "stock_name": "한국전력",
+    "signal_date": "2026-01-02",
+    "notes": "돌파 (46850원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 4분기 실적 발표와 정부 정책이 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 전력요금 인상 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "재생에너지 투자 확대 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "018260",
+    "stock_name": "삼성에스디에스",
+    "signal_date": "2025-09-02",
+    "notes": "1차 돌파 (145600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼성에스디에스 2025년 2분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼성에스디에스의 실적 발표와 신사업 소식이 주가에 긍정적인 영향을 미쳤습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "삼성에스디에스 2025년 2분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 클라우드 서비스 출시",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "국내 IT 기업 인수 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "018260",
+    "stock_name": "삼성에스디에스",
+    "signal_date": "2025-10-23",
+    "notes": "2차 상승 (164100원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼성에스디에스 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼성에스디에스의 실적 발표와 신사업 계획이 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "삼성에스디에스 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "클라우드 서비스 확대 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "AI 스타트업 인수 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "019010",
+    "stock_name": "베뉴지",
+    "signal_date": "2025-12-12",
+    "notes": "1차 상승 (2605원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "베뉴지, 새로운 VR 콘텐츠 출시 예정",
+    "catalyst_timing": "before",
+    "gpt_summary": "베뉴지의 신사업 발표와 실적 개선이 주가 상승에 기여.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "베뉴지, 새로운 VR 콘텐츠 출시 예정",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "3분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 내 인수합병 소식, 베뉴지 관련 기업 인수 가능성 제기",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "019010",
+    "stock_name": "베뉴지",
+    "signal_date": "2026-01-26",
+    "notes": "2차 상승 (3220원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 프로젝트 착수 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "전략적 인수합병 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "019010",
+    "stock_name": "베뉴지",
+    "signal_date": "2026-02-09",
+    "notes": "3차 상승 (4270원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 1분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "인수합병 관련 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "021240",
+    "stock_name": "코웨이",
+    "signal_date": "2026-01-26",
+    "notes": "1차 상승 (75600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "코웨이의 실적 발표와 배당금 인상이 주가 상승에 기여함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "배당",
+        "title": "배당금 인상 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "021240",
+    "stock_name": "코웨이",
+    "signal_date": "2026-02-06",
+    "notes": "2차 상승 (78800원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신제품 출시 계획 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 계획으로 인한 상승세",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "배당",
+        "title": "배당금 지급 결정",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "025950",
+    "stock_name": "동신건설",
+    "signal_date": "2025-12-01",
+    "notes": "돌파 (13800원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약: 동신건설은 3분기 실적 발표와 정부 정책에 힘입어 주가가 상승했습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 건설 프로젝트 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 건설 경기 부양 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "028260",
+    "stock_name": "삼성물산",
+    "signal_date": "2025-12-30",
+    "notes": "1차 상승 (239500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼성물산 2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼성물산은 실적 발표와 대규모 수주 소식으로 주가가 상승하였으며, 기술적 요인도 작용했을 가능성이 있음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "삼성물산 2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대규모 건설 프로젝트 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 건설업 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "028260",
+    "stock_name": "삼성물산",
+    "signal_date": "2026-02-02",
+    "notes": "2차 상승 (297500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼성물산, 해외 건설 프로젝트 수주 소식",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 개선 및 신사업 진출로 인한 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "삼성물산, 해외 건설 프로젝트 수주 소식",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "친환경 에너지 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "032830",
+    "stock_name": "삼성생명",
+    "signal_date": "2026-01-12",
+    "notes": "1차 상승 (157900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼성생명은 2023년 4분기 실적 발표와 배당금 발표로 인해 주가가 상승하였으며, 기술적 요인도 작용했을 가능성이 있음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "배당",
+        "title": "배당금 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 보험 상품 출시",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "032830",
+    "stock_name": "삼성생명",
+    "signal_date": "2026-02-02",
+    "notes": "2차 상승 (180500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 배당금 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼성생명은 실적 발표와 배당금 발표로 인해 긍정적인 영향을 받았음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "배당",
+        "title": "2023년 배당금 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 보험 상품 출시",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "041920",
+    "stock_name": "메디아나",
+    "signal_date": "2025-12-26",
+    "notes": "1차 상승 (7600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "메디아나, 새로운 헬스케어 솔루션 출시 예정",
+    "catalyst_timing": "before",
+    "gpt_summary": "메디아나의 신사업 발표와 실적 개선이 주가 상승에 기여함.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "메디아나, 새로운 헬스케어 솔루션 출시 예정",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "메디아나 3분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "메디아나, 해외 기업 인수 추진 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "041920",
+    "stock_name": "메디아나",
+    "signal_date": "2026-01-14",
+    "notes": "2차 급등 (13150원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신제품 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "전략적 제휴 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "041920",
+    "stock_name": "메디아나",
+    "signal_date": "2026-01-21",
+    "notes": "3차 눌림 (12730원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 4분기 실적 발표 예정",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표 예정",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 관련 보도",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 인수합병 소식",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "041920",
+    "stock_name": "메디아나",
+    "signal_date": "2026-02-05",
+    "notes": "4차 급등 (23750원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "메디아나, 새로운 헬스케어 솔루션 출시",
+    "catalyst_timing": "before",
+    "gpt_summary": "메디아나의 신사업 출시와 긍정적인 실적 발표가 주가 상승에 기여한 것으로 분석됨.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "메디아나, 새로운 헬스케어 솔루션 출시",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표, 예상보다 높은 성장률 기록",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "헬스케어 스타트업 인수 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "042660",
+    "stock_name": "한화오션",
+    "signal_date": "2025-12-04",
+    "notes": "1차 상승 (106800원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화오션은 긍정적인 실적 발표와 수주 소식으로 주가가 상승하였음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "해양 프로젝트 대규모 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 해양 산업 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "042660",
+    "stock_name": "한화오션",
+    "signal_date": "2025-12-18",
+    "notes": "2차 눌림 (103900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화오션은 3분기 실적 발표와 수주 계약 체결로 주가가 상승했으며, 기술적 상승이 있었던 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "해양 방산 관련 대규모 수주 계약 체결",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 해양 산업 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "042660",
+    "stock_name": "한화오션",
+    "signal_date": "2025-12-30",
+    "notes": "3차 상승 (113700원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화오션은 2025년 3분기 실적 발표와 해양 프로젝트 수주로 주가 상승을 경험함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "해양 프로젝트 대규모 수주 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 해양 산업 지원 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "043260",
+    "stock_name": "성호전자",
+    "signal_date": "2025-11-28",
+    "notes": "1차 바닥 (2450원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 소식으로 주가가 상승함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "043260",
+    "stock_name": "성호전자",
+    "signal_date": "2026-01-26",
+    "notes": "2차 급등 (13040원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신제품 출시 계획 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 계획이 긍정적으로 작용한 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 인수합병 소문",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "043260",
+    "stock_name": "성호전자",
+    "signal_date": "2026-02-13",
+    "notes": "3차 급등 (21700원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출 소식이 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "차세대 전자기기 관련 신사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 내 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "047050",
+    "stock_name": "포스코인터내셔널",
+    "signal_date": "2026-01-08",
+    "notes": "1차 상승 (47700원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신재생 에너지 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "포스코인터내셔널의 주가는 신사업 진출 및 정부 정책 발표에 긍정적인 반응을 보이며 상승함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신재생 에너지 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 친환경 정책 강화 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "047050",
+    "stock_name": "포스코인터내셔널",
+    "signal_date": "2026-01-30",
+    "notes": "2차 상승 (61900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "해외 자원 개발 M&A 소식",
+    "catalyst_timing": "before",
+    "gpt_summary": "포스코인터내셔널은 실적 발표와 M&A 소식, 정부 정책에 긍정적인 반응을 보이며 주가 상승.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 자원 개발 M&A 소식",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 친환경 정책 발표",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "054800",
+    "stock_name": "아이디스홀딩스",
+    "signal_date": "2026-01-29",
+    "notes": "1차 돌파 (11630원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 기반 보안 솔루션 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 보안 솔루션 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "중소기업 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "054800",
+    "stock_name": "아이디스홀딩스",
+    "signal_date": "2026-02-12",
+    "notes": "2차 상승 (13300원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 기반 신제품 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "아이디스홀딩스는 2026년 4분기 실적 발표 후 주가가 상승하며, 신사업 관련 소식도 긍정적인 영향을 미쳤습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 신제품 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "060280",
+    "stock_name": "큐렉소",
+    "signal_date": "2025-11-26",
+    "notes": "1차 상승 (10070원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 계획이 긍정적으로 작용한 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수 소문",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "060280",
+    "stock_name": "큐렉소",
+    "signal_date": "2026-01-08",
+    "notes": "2차 상승 (12250원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "큐렉소의 주가는 4분기 실적 발표와 신사업 소식에 긍정적인 반응을 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 의료기기 개발 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "유망 스타트업 인수 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "071050",
+    "stock_name": "한국금융지주",
+    "signal_date": "2026-01-08",
+    "notes": "1차 상승 (166100원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2023년 4분기 실적 발표와 배당금 발표가 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "배당",
+        "title": "2023년 배당금 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 M&A 소식",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "071050",
+    "stock_name": "한국금융지주",
+    "signal_date": "2026-01-20",
+    "notes": "2차 상승 (177900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 배당금 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약: 실적 발표와 배당금 발표가 긍정적인 영향을 미쳤습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "배당",
+        "title": "2023년 배당금 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "금융업계 M&A 소식",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "071050",
+    "stock_name": "한국금융지주",
+    "signal_date": "2026-02-06",
+    "notes": "3차 상승 (207500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신규 인수합병 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2023년 4분기 실적 발표와 금융 규제 완화 정책이 주가 상승에 기여.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "신규 인수합병 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "금융 규제 완화 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "080220",
+    "stock_name": "제주반도체",
+    "signal_date": "2025-12-24",
+    "notes": "1차 돌파 (19200원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 계획으로 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "080220",
+    "stock_name": "제주반도체",
+    "signal_date": "2026-01-22",
+    "notes": "2차 상승 (29250원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "제주반도체는 2023년 4분기 실적 발표와 신사업 관련 소식으로 주가가 상승하였으며, 기술적 상승의 요소도 포함됨.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "차세대 반도체 기술 개발 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "082270",
+    "stock_name": "젬백스",
+    "signal_date": "2026-01-21",
+    "notes": "돌파 (23500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "젬백스, 새로운 치료제 개발 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "젬백스는 신사업 발표와 실적 발표로 주가 상승을 이끌었다.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "젬백스, 새로운 치료제 개발 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "젬백스, 바이오 기업 인수 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "실적",
+        "title": "젬백스, 4분기 실적 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "082740",
+    "stock_name": "한화엔진",
+    "signal_date": "2026-01-02",
+    "notes": "1차 돌파 시작 (42300원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "대형 엔진 수주 계약 체결",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화엔진의 주가는 긍정적인 실적 발표와 신사업 진출로 인해 상승세를 보였다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 엔진 수주 계약 체결",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "친환경 에너지 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "082740",
+    "stock_name": "한화엔진",
+    "signal_date": "2026-01-22",
+    "notes": "2차 파동 (52500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "대형 프로젝트 수주 소식",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화엔진의 주가는 2026년 4분기 실적 발표와 대형 프로젝트 수주 소식으로 인해 상승세를 보였다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 프로젝트 수주 소식",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "082740",
+    "stock_name": "한화엔진",
+    "signal_date": "2026-02-02",
+    "notes": "3차 파동 (53600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 1분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한화엔진은 2026년 1분기 실적 발표와 대형 프로젝트 수주 소식으로 주가가 상승했습니다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "수주",
+        "title": "대형 프로젝트 수주 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신재생 에너지 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "086280",
+    "stock_name": "현대글로비스",
+    "signal_date": "2026-01-05",
+    "notes": "1차 상승 (178600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 4분기 실적 발표가 긍정적이었으며, M&A 및 신사업 발표가 주가에 긍정적 영향을 미쳤다.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 물류 기업 인수 소식",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "전기차 물류 서비스 진출 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "086280",
+    "stock_name": "현대글로비스",
+    "signal_date": "2026-01-28",
+    "notes": "2차 상승 (243500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2023년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "실적 개선 및 신사업 진출 기대감으로 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2023년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "물류 자동화 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "해외 물류 기업 인수 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "099320",
+    "stock_name": "쎄트렉아이",
+    "signal_date": "2025-12-23",
+    "notes": "1차 돌파 시작 (61500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "쎄트렉아이, 새로운 위성 서비스 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "쎄트렉아이의 신사업 발표가 주가 상승에 기여함.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "쎄트렉아이, 새로운 위성 서비스 출시 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "099320",
+    "stock_name": "쎄트렉아이",
+    "signal_date": "2026-01-16",
+    "notes": "2차 급등 (117500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 1분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "쎄트렉아이는 실적 발표 및 신사업 진출로 인해 주가가 급등하였으며, 일부 증권사에서 목표가를 상향 조정한 영향도 있음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "M&A",
+        "title": "전략적 파트너십 체결",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "same_day",
+        "confidence": "high"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "099320",
+    "stock_name": "쎄트렉아이",
+    "signal_date": "2026-01-26",
+    "notes": "3차 급등 (142900원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 4분기 실적 발표와 신사업 진출이 주가에 긍정적인 영향을 미친 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "우주 관련 신사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "유망 스타트업 인수 소식",
+        "timing": "after",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "122350",
+    "stock_name": "삼기",
+    "signal_date": "2026-01-09",
+    "notes": "돌파 (1258원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "삼기, 새로운 전기차 배터리 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "삼기는 신사업 진출 발표와 긍정적인 실적 발표로 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "삼기, 새로운 전기차 배터리 사업 진출 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표, 예상보다 높은 매출 성장률 기록",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부, 전기차 관련 정책 강화 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "147830",
+    "stock_name": "제룡산업",
+    "signal_date": "2026-01-15",
+    "notes": "돌파 (6240원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 4분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 프로젝트 착수 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수 합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "196450",
+    "stock_name": "코아시아씨엠",
+    "signal_date": "2026-01-06",
+    "notes": "1차 상승 (770원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "코아시아씨엠, 새로운 전기차 부품 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "코아시아씨엠의 신사업 진출 발표가 주가 상승에 기여한 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "코아시아씨엠, 새로운 전기차 부품 사업 진출 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "코아시아씨엠, 경쟁사 인수 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "196450",
+    "stock_name": "코아시아씨엠",
+    "signal_date": "2026-01-30",
+    "notes": "2차 상승 (810원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신제품 출시 계획 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신제품 출시 계획 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 내 인수합병 소문",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "196450",
+    "stock_name": "코아시아씨엠",
+    "signal_date": "2026-02-06",
+    "notes": "3차 상승 (945원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2026년 1분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출이 주가에 긍정적인 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "타 기업 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "199430",
+    "stock_name": "케이엔알시스템",
+    "signal_date": "2026-01-09",
+    "notes": "돌파 (23250원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "AI 기반 솔루션 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 추진으로 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "AI 기반 솔루션 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수 협상 중",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "199820",
+    "stock_name": "제일일렉트릭",
+    "signal_date": "2025-12-26",
+    "notes": "돌파 (8670원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 소식이 주가에 긍정적 영향을 미침.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "차세대 전력 관리 시스템 출시 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "전략적 파트너십 체결 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "306040",
+    "stock_name": "에스제이그룹",
+    "signal_date": "2025-12-11",
+    "notes": "1차 돌파 (3405원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "before",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "306040",
+    "stock_name": "에스제이그룹",
+    "signal_date": "2026-01-15",
+    "notes": "2차 급등 (8200원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신규 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출로 인한 주가 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "인수합병 관련 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "347700",
+    "stock_name": "스피어",
+    "signal_date": "2025-12-10",
+    "notes": "1차 돌파 시작 (8100원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "스피어, 새로운 AI 기반 솔루션 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "스피어는 신사업 발표와 실적 개선으로 주가 상승세를 보였다.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "스피어, 새로운 AI 기반 솔루션 출시 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "3분기 실적 발표, 예상보다 높은 매출 성장률 기록",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "스피어, 경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "347700",
+    "stock_name": "스피어",
+    "signal_date": "2026-01-28",
+    "notes": "2차 급등 (22450원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "스피어, 새로운 AI 기반 솔루션 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "스피어의 주가는 신사업 발표와 실적 개선 기대감으로 상승.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "스피어, 새로운 AI 기반 솔루션 출시 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 4분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "스피어, 경쟁사 인수 추진 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "347700",
+    "stock_name": "스피어",
+    "signal_date": "2026-02-12",
+    "notes": "3차 급등 (38500원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "스피어, 새로운 AI 기반 솔루션 출시 예정",
+    "catalyst_timing": "before",
+    "gpt_summary": "스피어의 주가는 신사업 발표와 긍정적인 실적 전망에 힘입어 급등하였음.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "스피어, 새로운 AI 기반 솔루션 출시 예정",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "스피어, 주요 경쟁사 인수 추진 소식",
+        "timing": "before",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "357550",
+    "stock_name": "석경에이티",
+    "signal_date": "2025-11-19",
+    "notes": "1차 돌파 (44600원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출이 주가에 긍정적인 영향을 미쳤음.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "357550",
+    "stock_name": "석경에이티",
+    "signal_date": "2025-12-02",
+    "notes": "2차 상승 (51400원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약: 석경에이티는 실적 발표와 신사업 소식으로 상승세를 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 제품 출시 계획 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 내 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "357550",
+    "stock_name": "석경에이티",
+    "signal_date": "2025-12-17",
+    "notes": "3차 상승 (62200원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "석경에이티, 새로운 전기차 배터리 소재 개발 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "석경에이티의 상승은 신사업 발표와 긍정적인 실적에 기인한 것으로 보임.",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "석경에이티, 새로운 전기차 배터리 소재 개발 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "석경에이티, 경쟁사와의 전략적 제휴 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "418420",
+    "stock_name": "라온텍",
+    "signal_date": "2026-01-21",
+    "notes": "1차 돌파 (4580원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신규 제품 출시 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "한줄 요약",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 1분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 제품 출시 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "업계 내 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "418420",
+    "stock_name": "라온텍",
+    "signal_date": "2026-01-30",
+    "notes": "2차 상승 (5640원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "신규 사업 진출 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "주요 실적 발표와 신사업 진출로 인한 상승",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2026년 4분기 실적 발표",
+        "timing": "after",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "신규 사업 진출 발표",
+        "timing": "before",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "인수합병 관련 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "462350",
+    "stock_name": "이노스페이스",
+    "signal_date": "2025-12-09",
+    "notes": "1차 돌파 (9040원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "이노스페이스, 우주 발사체 개발 관련 신규 계약 체결",
+    "catalyst_timing": "before",
+    "gpt_summary": "기술적 상승 (촉매 없음)",
+    "gpt_catalysts": [
+      {
+        "type": "신사업",
+        "title": "이노스페이스, 우주 발사체 개발 관련 신규 계약 체결",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표, 예상보다 높은 매출 성장",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "정책",
+        "title": "정부의 우주 산업 지원 정책 발표",
+        "timing": "same_day",
+        "confidence": "medium"
+      }
+    ],
+    "news_items": []
+  },
+  {
+    "stock_code": "462350",
+    "stock_name": "이노스페이스",
+    "signal_date": "2025-12-26",
+    "notes": "2차 상승 (10300원)",
+    "total_news": 0,
+    "catalyst_count": 3,
+    "noise_count": 0,
+    "irrelevant_count": 0,
+    "unknown_count": 0,
+    "pre_catalyst_count": 2,
+    "post_catalyst_count": 1,
+    "top_catalyst": "2025년 3분기 실적 발표",
+    "catalyst_timing": "before",
+    "gpt_summary": "2025년 3분기 실적 발표가 긍정적으로 작용하며 주가 상승에 기여함.",
+    "gpt_catalysts": [
+      {
+        "type": "실적",
+        "title": "2025년 3분기 실적 발표",
+        "timing": "before",
+        "confidence": "high"
+      },
+      {
+        "type": "신사업",
+        "title": "우주 관련 신사업 진출 발표",
+        "timing": "after",
+        "confidence": "medium"
+      },
+      {
+        "type": "M&A",
+        "title": "경쟁사 인수합병 소식",
+        "timing": "same_day",
+        "confidence": "low"
+      }
+    ],
+    "news_items": []
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "hyundai": {
+    "etf_ticker": "138540.KS",
+    "etf_file": "etf_hyundai.csv",
+    "members": [
+      {
+        "ticker": "005380",
+        "name": "현대차",
+        "weight": 30.84
+      },
+      {
+        "ticker": "000270",
+        "name": "기아",
+        "weight": 24.4
+      },
+      {
+        "ticker": "004020",
+        "name": "현대제철",
+        "weight": 7.56
+      }
+    ]
+  },
+  "samsung": {
+    "etf_ticker": "138520.KS",
+    "etf_file": "etf_samsung.csv",
+    "members": [
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "weight": 32.45
+      },
+      {
+        "ticker": "028260",
+        "name": "삼성물산",
+        "weight": 16.11
+      },
+      {
+        "ticker": "006400",
+        "name": "삼성SDI",
+        "weight": 9.6
+      },
+      {
+        "ticker": "032830",
+        "name": "삼성생명",
+        "weight": 7.26
+      },
+      {
+        "ticker": "000810",
+        "name": "삼성화재",
+        "weight": 7.11
+      }
+    ]
+  }
+}

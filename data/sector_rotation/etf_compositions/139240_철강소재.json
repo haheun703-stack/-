@@ -1,0 +1,62 @@
+{
+  "sector": "철강소재",
+  "etf_code": "139240",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "010130",
+      "name": "고려아연",
+      "weight": 27.02
+    },
+    {
+      "code": "005490",
+      "name": "POSCO홀딩스",
+      "weight": 20.34
+    },
+    {
+      "code": "004020",
+      "name": "현대제철",
+      "weight": 16.13
+    },
+    {
+      "code": "103140",
+      "name": "풍산",
+      "weight": 15.23
+    },
+    {
+      "code": "001430",
+      "name": "세아베스틸지주",
+      "weight": 9.41
+    },
+    {
+      "code": "000670",
+      "name": "영풍",
+      "weight": 3.02
+    },
+    {
+      "code": "008730",
+      "name": "율촌화학",
+      "weight": 3.01
+    },
+    {
+      "code": "002030",
+      "name": "아세아",
+      "weight": 2.33
+    },
+    {
+      "code": "003030",
+      "name": "세아제강지주",
+      "weight": 1.91
+    },
+    {
+      "code": "014820",
+      "name": "동원시스템즈",
+      "weight": 1.6
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

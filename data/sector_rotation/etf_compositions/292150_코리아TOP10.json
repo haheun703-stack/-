@@ -1,0 +1,62 @@
+{
+  "sector": "코리아TOP10",
+  "etf_code": "292150",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "weight": 37.37
+    },
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "weight": 30.43
+    },
+    {
+      "code": "005380",
+      "name": "현대차",
+      "weight": 6.39
+    },
+    {
+      "code": "105560",
+      "name": "KB금융",
+      "weight": 4.82
+    },
+    {
+      "code": "000270",
+      "name": "기아",
+      "weight": 3.9
+    },
+    {
+      "code": "055550",
+      "name": "신한지주",
+      "weight": 3.78
+    },
+    {
+      "code": "012450",
+      "name": "한화에어로스페이스",
+      "weight": 3.62
+    },
+    {
+      "code": "068270",
+      "name": "셀트리온",
+      "weight": 3.5
+    },
+    {
+      "code": "035420",
+      "name": "NAVER",
+      "weight": 3.17
+    },
+    {
+      "code": "086790",
+      "name": "하나금융지주",
+      "weight": 3.02
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

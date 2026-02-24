@@ -1,0 +1,62 @@
+{
+  "sector": "증권",
+  "etf_code": "157500",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "006800",
+      "name": "미래에셋증권",
+      "weight": 33.6
+    },
+    {
+      "code": "071050",
+      "name": "한국금융지주",
+      "weight": 22.48
+    },
+    {
+      "code": "039490",
+      "name": "키움증권",
+      "weight": 13.57
+    },
+    {
+      "code": "016360",
+      "name": "삼성증권",
+      "weight": 13.04
+    },
+    {
+      "code": "005940",
+      "name": "NH투자증권",
+      "weight": 9.6
+    },
+    {
+      "code": "003540",
+      "name": "대신증권",
+      "weight": 2.33
+    },
+    {
+      "code": "001720",
+      "name": "신영증권",
+      "weight": 2.0
+    },
+    {
+      "code": "003530",
+      "name": "한화투자증권",
+      "weight": 1.68
+    },
+    {
+      "code": "016610",
+      "name": "DB증권",
+      "weight": 0.87
+    },
+    {
+      "code": "003470",
+      "name": "유안타증권",
+      "weight": 0.83
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

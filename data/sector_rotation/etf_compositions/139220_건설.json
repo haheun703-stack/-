@@ -1,0 +1,62 @@
+{
+  "sector": "건설",
+  "etf_code": "139220",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "000720",
+      "name": "현대건설",
+      "weight": 25.02
+    },
+    {
+      "code": "028260",
+      "name": "삼성물산",
+      "weight": 20.86
+    },
+    {
+      "code": "028050",
+      "name": "삼성E&A",
+      "weight": 16.6
+    },
+    {
+      "code": "052690",
+      "name": "한전기술",
+      "weight": 10.03
+    },
+    {
+      "code": "002380",
+      "name": "KCC",
+      "weight": 8.59
+    },
+    {
+      "code": "047040",
+      "name": "대우건설",
+      "weight": 5.26
+    },
+    {
+      "code": "375500",
+      "name": "DL이앤씨",
+      "weight": 5.24
+    },
+    {
+      "code": "006360",
+      "name": "GS건설",
+      "weight": 5.09
+    },
+    {
+      "code": "000210",
+      "name": "DL",
+      "weight": 1.91
+    },
+    {
+      "code": "300720",
+      "name": "한일시멘트",
+      "weight": 1.39
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

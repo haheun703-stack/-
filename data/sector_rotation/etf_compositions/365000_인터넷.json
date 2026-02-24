@@ -1,0 +1,62 @@
+{
+  "sector": "인터넷",
+  "etf_code": "365000",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "012510",
+      "name": "더존비즈온",
+      "weight": 26.22
+    },
+    {
+      "code": "035420",
+      "name": "NAVER",
+      "weight": 25.76
+    },
+    {
+      "code": "035720",
+      "name": "카카오",
+      "weight": 22.83
+    },
+    {
+      "code": "178320",
+      "name": "서진시스템",
+      "weight": 7.68
+    },
+    {
+      "code": "042000",
+      "name": "카페24",
+      "weight": 4.33
+    },
+    {
+      "code": "067160",
+      "name": "SOOP",
+      "weight": 3.6
+    },
+    {
+      "code": "053800",
+      "name": "안랩",
+      "weight": 2.91
+    },
+    {
+      "code": "376300",
+      "name": "디어유",
+      "weight": 2.52
+    },
+    {
+      "code": "030520",
+      "name": "한글과컴퓨터",
+      "weight": 2.24
+    },
+    {
+      "code": "058970",
+      "name": "엠로",
+      "weight": 1.9
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}

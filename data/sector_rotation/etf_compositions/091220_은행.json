@@ -1,0 +1,62 @@
+{
+  "sector": "은행",
+  "etf_code": "091220",
+  "date": "20260219",
+  "stocks": [
+    {
+      "code": "055550",
+      "name": "신한지주",
+      "weight": 21.2
+    },
+    {
+      "code": "086790",
+      "name": "하나금융지주",
+      "weight": 20.08
+    },
+    {
+      "code": "105560",
+      "name": "KB금융",
+      "weight": 20.03
+    },
+    {
+      "code": "316140",
+      "name": "우리금융지주",
+      "weight": 17.8
+    },
+    {
+      "code": "323410",
+      "name": "카카오뱅크",
+      "weight": 6.35
+    },
+    {
+      "code": "024110",
+      "name": "기업은행",
+      "weight": 4.85
+    },
+    {
+      "code": "138930",
+      "name": "BNK금융지주",
+      "weight": 3.84
+    },
+    {
+      "code": "175330",
+      "name": "JB금융지주",
+      "weight": 3.74
+    },
+    {
+      "code": "139130",
+      "name": "iM금융지주",
+      "weight": 1.97
+    },
+    {
+      "code": "006220",
+      "name": "제주은행",
+      "weight": 0.15
+    },
+    {
+      "code": "010010",
+      "name": "Empty DataFrame\nColumns: []\nIndex: []",
+      "weight": 0.0
+    }
+  ]
+}
