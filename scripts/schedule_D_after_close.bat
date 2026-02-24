@@ -81,8 +81,12 @@ REM ═════════════════════════�
 REM  PHASE 4: 종목 스캔 (~10분)
 REM ══════════════════════════════════════════════
 
+REM 11.5단계: 레버리지/인버스 ETF 로테이션 스캔
+echo [%date% %time%] [11.5/24] 레버리지 ETF 스캔 >> logs\schedule.log
+python -u -X utf8 scripts\leverage_etf_scanner.py >> logs\schedule.log 2>&1
+
 REM 12단계: 눌림목 스캔 (건강한 조정 매수 후보)
-echo [%date% %time%] [12/20] 눌림목 스캔 >> logs\schedule.log
+echo [%date% %time%] [12/24] 눌림목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_pullback.py >> logs\schedule.log 2>&1
 
 REM 13단계: DART 전자공시 크롤링 (뉴스 선행 감지)

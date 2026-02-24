@@ -406,6 +406,7 @@ async def sync_data(request: Request):
         "dual_buying_watch.json", "pullback_scan.json",
         "group_relay/group_relay_today.json",
         "scan_cache.json", "dart_disclosures.json", "integrated_report.json",
+        "leverage_etf/leverage_etf_scan.json",
         "kis_balance.json", "kospi_regime.json",
     }
     if target not in safe_names:

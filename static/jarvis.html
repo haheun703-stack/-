@@ -1235,7 +1235,132 @@ function renderETF() {
   });
   html += '</tbody></table></div>';
 
-  if (!allMaster.length && !smart.length && !theme.length) {
+  // ── 레버리지/인버스 ETF 로테이션 ──
+  const levData = D.leverage_etf || {};
+  const levEtfs = levData.etfs || [];
+  if (levEtfs.length > 0) {
+    const levRegime = levData.kospi_regime || '-';
+    const levUS = levData.us_overnight || '-';
+    const levRec = levData.recommendation || '';
+    const levKospi = levData.kospi_close || 0;
+
+    const dirBadge = (d) => d === 'LONG'
+      ? '<span style="display:inline-block;padding:1px 6px;font-size:9px;font-weight:700;background:rgba(59,130,246,0.2);color:#60A5FA;border-radius:4px">LONG</span>'
+      : '<span style="display:inline-block;padding:1px 6px;font-size:9px;font-weight:700;background:rgba(239,68,68,0.2);color:#F87171;border-radius:4px">SHORT</span>';
+
+    const levGradeColor = g => g === '\uC801\uADF9\uB9E4\uC218' ? '#EF4444' : g === '\uBD84\uD560\uB9E4\uC218' ? '#10B981' : g === '\uAD00\uC2EC' ? '#F59E0B' : g === '\uB300\uAE30' ? '#6B7280' : g === '\uBC29\uD5A5\uBD88\uC77C\uCE58' ? '#991B1B' : '#4B5563';
+    const levScoreBar = (s) => `<div style="display:inline-flex;align-items:center;gap:4px">
+      <div style="width:55px;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+        <div style="width:${Math.min(100,s)}%;height:100%;background:${s>=75?'#EF4444':s>=60?'#10B981':s>=45?'#F59E0B':'#6B7280'};border-radius:3px"></div>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${s>=75?'#EF4444':s>=60?'#10B981':s>=45?'#F59E0B':'#6B7280'}">${s}</span>
+    </div>`;
+
+    const riskBadge = r => r === 'Low' ? '<span style="color:#10B981;font-size:9px">Low</span>'
+      : r === 'Mid' ? '<span style="color:#F59E0B;font-size:9px">Mid</span>'
+      : r === 'High' ? '<span style="color:#EF4444;font-size:9px">High</span>' : '';
+
+    const regimeColor = levRegime === 'BULL' ? '#10B981' : levRegime === 'CAUTION' ? '#F59E0B' : levRegime === 'BEAR' ? '#EF4444' : '#991B1B';
+    html += `<h3 class="sec-title" style="color:#8B5CF6;margin-top:24px">\uD83D\uDE80 \uB808\uBC84\uB9AC\uC9C0/\uC778\uBC84\uC2A4 ETF \uB85C\uD14C\uC774\uC158</h3>`;
+    html += `<div style="padding:10px 14px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:8px;margin-bottom:12px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11px">
+        <span style="color:${regimeColor};font-weight:700">KOSPI ${esc(levRegime)}</span>
+        <span style="color:#9CA3AF">${levKospi ? Number(levKospi).toLocaleString() : '-'}</span>
+        <span style="color:#06B6D4;font-weight:600">US ${esc(levUS)}</span>
+        <span style="color:#E5E7EB;font-weight:600;font-size:12px;margin-left:auto">\u2192 ${esc(levRec)}</span>
+      </div>
+      <div style="font-size:10px;color:#6B7280;margin-top:4px">${esc(levData.updated_at||'')} \u00B7 ${levEtfs.length}\uAC1C ETF</div>
+    </div>`;
+
+    const levActive = levEtfs.filter(e => e.grade === '\uC801\uADF9\uB9E4\uC218');
+    const levSplit = levEtfs.filter(e => e.grade === '\uBD84\uD560\uB9E4\uC218');
+    const levWatch2 = levEtfs.filter(e => e.grade === '\uAD00\uC2EC');
+    const levWait = levEtfs.filter(e => e.grade === '\uB300\uAE30' || e.grade === '\uBD80\uC801\uD569' || e.grade === '\uBC29\uD5A5\uBD88\uC77C\uCE58');
+
+    const renderLevCard = (list, title, titleColor) => {
+      if (!list.length) return;
+      html += `<div style="margin-bottom:8px"><div style="font-size:12px;color:${titleColor};font-weight:700;margin-bottom:6px">${title} (${list.length})</div>`;
+      list.forEach(e => {
+        const gc2 = levGradeColor(e.grade);
+        const splitInfo = e.split_buy ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;font-family:var(--mono)">\uBD84\uD560: ${Number(e.split_buy.entry_1).toLocaleString()} \u2192 ${Number(e.split_buy.entry_2).toLocaleString()} \u2192 ${Number(e.split_buy.entry_3).toLocaleString()} \u2192 ${Number(e.split_buy.entry_4).toLocaleString()}</div>` : '';
+        const upsideInfo = e.upside_conservative ? `<div style="font-size:10px;color:#10B981;margin-top:1px">\uC608\uC0C1: +${e.upside_conservative}% (\uBCF4\uC218) ~ +${e.upside_optimistic}% (\uB099\uAD00)</div>` : '';
+        html += `<div style="padding:10px 12px;background:${gc2}08;border:1px solid ${gc2}18;border-radius:8px;margin-bottom:5px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                ${dirBadge(e.direction)}
+                <span style="color:#E5E7EB;font-weight:700;font-size:13px">${esc(e.etf_name)}</span>
+                ${badge(e.grade, gc2+'20', gc2)}
+                <span style="font-size:10px;color:#6B7280">${esc(e.category)}</span>
+                ${riskBadge(e.vol_decay_risk)}
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px;font-size:11px;font-family:var(--mono)">
+                <span style="color:${e.rsi>70?'#EF4444':e.rsi<40?'#3B82F6':'#9CA3AF'}">RSI ${num(e.rsi)}</span>
+                <span style="color:#9CA3AF">BB ${num(e.bb_pct)}%</span>
+                <span style="color:${(e.foreign_5d||0)>=0?'#10B981':'#EF4444'}">\uC678\uC778 ${num(e.foreign_5d||0)}\uC5B5</span>
+                <span style="color:${(e.inst_5d||0)>=0?'#10B981':'#EF4444'}">\uAE30\uAD00 ${num(e.inst_5d||0)}\uC5B5</span>
+              </div>
+              ${splitInfo}${upsideInfo}
+              ${(e.reasons||[]).length ? `<div style="font-size:10px;color:#6B7280;margin-top:3px">${e.reasons.join(' \u00B7 ')}</div>` : ''}
+            </div>
+            <div style="text-align:right;min-width:80px">
+              ${levScoreBar(e.score)}
+              <div style="font-family:var(--mono);color:${pnlColor(e.ret_5||0)};font-weight:700;font-size:14px;margin-top:4px">${pnlSign(e.ret_5||0)}${num(e.ret_5||0)}%</div>
+              <div style="font-size:10px;color:#6B7280">5\uC77C</div>
+            </div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    };
+
+    renderLevCard(levActive, '\uD83D\uDD34 \uC801\uADF9\uB9E4\uC218 (\u226575\uC810)', '#EF4444');
+    renderLevCard(levSplit, '\uD83D\uDFE2 \uBD84\uD560\uB9E4\uC218 (\u226560\uC810)', '#10B981');
+    renderLevCard(levWatch2, '\uD83D\uDFE1 \uAD00\uC2EC (\u226545\uC810)', '#F59E0B');
+
+    if (levWait.length > 0) {
+      html += `<details style="margin-top:6px"><summary style="color:#6B7280;font-size:12px;font-weight:600;cursor:pointer">\u26AA \uB300\uAE30/\uBD80\uC801\uD569 (${levWait.length}\uAC1C)</summary><div style="margin-top:6px">`;
+      levWait.forEach(e => {
+        html += `<div style="display:flex;justify-content:space-between;padding:4px 12px;font-size:11px;color:#6B7280;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <span>${dirBadge(e.direction)} ${esc(e.etf_name)}</span>
+          <span style="font-family:var(--mono)">${e.score}\uC810 \u00B7 ${esc(e.grade)}</span>
+        </div>`;
+      });
+      html += '</div></details>';
+    }
+
+    html += `<h4 style="color:#6B7280;font-size:12px;font-weight:600;margin-top:14px;margin-bottom:6px">\uD83D\uDCCA \uC804\uCCB4 \uB808\uBC84\uB9AC\uC9C0 ETF (${levEtfs.length}\uAC1C)</h4>`;
+    html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)">';
+    html += '<thead><tr style="color:#6B7280;border-bottom:1px solid rgba(255,255,255,0.08)">';
+    html += '<th style="text-align:center;padding:3px 4px">\uBC29\uD5A5</th>';
+    html += '<th style="text-align:left;padding:3px 4px">ETF</th>';
+    html += '<th style="text-align:right;padding:3px 4px">\uC885\uAC00</th>';
+    html += '<th style="text-align:right;padding:3px 4px">5\uC77C</th>';
+    html += '<th style="text-align:right;padding:3px 4px">RSI</th>';
+    html += '<th style="text-align:right;padding:3px 4px">\uC678\uC778</th>';
+    html += '<th style="text-align:right;padding:3px 4px">\uAE30\uAD00</th>';
+    html += '<th style="text-align:center;padding:3px 4px">\uB4F1\uAE09</th>';
+    html += '<th style="text-align:center;padding:3px 4px">\uAC10\uAC00</th>';
+    html += '</tr></thead><tbody>';
+    levEtfs.forEach(e => {
+      const gc2 = levGradeColor(e.grade);
+      const rsiC = e.rsi > 70 ? '#EF4444' : e.rsi < 40 ? '#3B82F6' : '#E5E7EB';
+      html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+        <td style="padding:3px 4px;text-align:center">${dirBadge(e.direction)}</td>
+        <td style="padding:3px 4px;color:#E5E7EB;font-weight:600;white-space:nowrap;font-size:10px">${esc(e.etf_name)}</td>
+        <td style="padding:3px 4px;text-align:right;color:#9CA3AF">${Number(e.close).toLocaleString()}</td>
+        <td style="padding:3px 4px;text-align:right;color:${pnlColor(e.ret_5||0)};font-weight:700">${pnlSign(e.ret_5||0)}${num(e.ret_5||0)}%</td>
+        <td style="padding:3px 4px;text-align:right;color:${rsiC}">${num(e.rsi)}</td>
+        <td style="padding:3px 4px;text-align:right;color:${(e.foreign_5d||0)>=0?'#10B981':'#EF4444'}">${num(e.foreign_5d||0)}</td>
+        <td style="padding:3px 4px;text-align:right;color:${(e.inst_5d||0)>=0?'#10B981':'#EF4444'}">${num(e.inst_5d||0)}</td>
+        <td style="padding:3px 4px;text-align:center">${badge(e.grade, gc2+'20', gc2)}</td>
+        <td style="padding:3px 4px;text-align:center">${riskBadge(e.vol_decay_risk||'')}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  }
+
+  if (!allMaster.length && !smart.length && !theme.length && !levEtfs.length) {
     html = '<div class="empty">ETF \uB370\uC774\uD130 \uC5C6\uC74C</div>';
   }
 

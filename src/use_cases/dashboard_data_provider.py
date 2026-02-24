@@ -63,6 +63,7 @@ class DashboardDataProvider:
             "tomorrow_picks": self._load_json("tomorrow_picks.json"),
             "picks_history": self._load_json("picks_history.json"),
             "market_news": self._load_json("market_news.json"),
+            "leverage_etf": self._load_json("leverage_etf/leverage_etf_scan.json"),
             "summary": summary,
         }
 
