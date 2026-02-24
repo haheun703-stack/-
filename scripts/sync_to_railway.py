@@ -40,6 +40,7 @@ SYNC_FILES = [
     "sector_rotation/etf_trading_signal.json",
     "sector_rotation/sector_zscore.json",
     "sector_rotation/investor_flow.json",
+    "sector_rotation/relay_trading_signal.json",
     "whale_detect.json",
     "force_hybrid.json",
     "market_news.json",

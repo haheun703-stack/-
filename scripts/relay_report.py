@@ -261,6 +261,21 @@ def print_relay_report(report: dict):
     if not fired:
         print(f"\n  발화 섹터 없음 (기준: +3.5%, breadth 60%)")
         print(f"{'=' * 60}\n")
+        # 발화 없음 상태도 JSON에 기록 (대시보드 날짜 갱신용)
+        out_path = DATA_DIR / "relay_trading_signal.json"
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "date": today,
+            "portfolio": portfolio,
+            "fired_count": 0,
+            "signal_count": 0,
+            "signals": [],
+            "status": "NO_FIRE",
+            "message": "발화 섹터 없음 (기준: +3.5%, breadth 60%)",
+        }
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+        print(f"  저장: {out_path}")
         return
 
     for f in fired:

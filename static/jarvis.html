@@ -654,7 +654,11 @@ function renderRelay() {
   const relay = D.relay || {};
   const signals = relay.signals || [];
 
-  if (signals.length === 0) return '<div class="empty">발화 시그널 없음</div>';
+  if (signals.length === 0) {
+    const dt = relay.date || '?';
+    const msg = relay.message || '발화 섹터 없음';
+    return `<div class="empty">${dt} — ${msg}</div>`;
+  }
 
   // 발화 섹터 히트맵
   let html = '<h3 class="sec-title" style="color:#EF4444">&#x1F525; 발화 섹터 시그널</h3>';

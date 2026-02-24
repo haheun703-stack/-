@@ -109,8 +109,12 @@ REM 17단계: 동반매수 스캔 (외인+기관 동시매수)
 echo [%date% %time%] [17/23] 동반매수 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_dual_buying.py >> logs\schedule.log 2>&1
 
+REM 17.5단계: 섹터 릴레이 트레이딩 시그널 (발화 섹터 → 종목 선정)
+echo [%date% %time%] [17.5/24] 섹터 릴레이 시그널 >> logs\schedule.log
+python -u -X utf8 scripts\relay_report.py >> logs\schedule.log 2>&1
+
 REM 18단계: 그룹 릴레이 감지 (재벌 계열사 발화)
-echo [%date% %time%] [18/23] 그룹 릴레이 감지 >> logs\schedule.log
+echo [%date% %time%] [18/24] 그룹 릴레이 감지 >> logs\schedule.log
 python -u -X utf8 scripts\group_relay_detector.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
