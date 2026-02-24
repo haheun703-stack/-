@@ -1,334 +1,334 @@
 {
-  "date": "2026-02-24",
-  "us_close_date": "2026-02-23",
-  "generated_at": "2026-02-24 17:26",
+  "date": "2026-02-25",
+  "us_close_date": "2026-02-24",
+  "generated_at": "2026-02-25 06:10",
   "index_direction": {
     "EWY": {
-      "ret_1d": -1.84,
-      "ret_5d": 4.0,
+      "ret_1d": 3.71,
+      "ret_5d": 10.58,
       "above_sma20": true
     },
     "QQQ": {
-      "ret_1d": -1.22,
-      "ret_5d": -0.08,
+      "ret_1d": 1.07,
+      "ret_5d": 1.08,
       "above_sma20": false
     },
     "SPY": {
-      "ret_1d": -1.02,
-      "ret_5d": 0.1,
+      "ret_1d": 0.74,
+      "ret_5d": 0.67,
       "above_sma20": false
     },
     "DIA": {
-      "ret_1d": -1.65,
-      "ret_5d": -1.48,
+      "ret_1d": 0.79,
+      "ret_5d": -0.81,
       "above_sma20": false
     }
   },
   "vix": {
-    "level": 21.7,
-    "zscore": 2.39,
-    "status": "공포"
+    "level": 19.4,
+    "zscore": 1.27,
+    "status": "경계"
   },
   "sector_signals": {
     "반도체": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.1%"
     },
     "IT": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.1%"
     },
     "소프트웨어": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.1%"
     },
     "전자부품": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.1%"
     },
     "디스플레이": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.1%"
     },
     "은행": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:-1.9%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:-3.0%"
     },
     "증권": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:-1.9%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:-3.0%"
     },
     "보험": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:-1.9%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:-3.0%"
     },
     "금융": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:-1.9%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:-3.0%"
     },
     "에너지": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.4%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.9%"
     },
     "정유": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.4%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.9%"
     },
     "화학": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.4%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+1.9%"
     },
     "조선": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.4%"
     },
     "기계": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.4%"
     },
     "건설": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.4%"
     },
     "자동차": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.4%"
     },
     "운송": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.4%"
     },
     "제약": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.5%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.4%"
     },
     "바이오": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.5%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.4%"
     },
     "의료기기": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.5%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.4%"
     },
     "헬스케어": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.5%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.4%"
     }
   },
-  "composite": "bearish",
-  "score": -0.361,
+  "composite": "neutral",
+  "score": 0.088,
   "l2_pattern": {
     "sample_count": 94,
     "status": "ok",
     "kospi": {
-      "mean_chg": -0.323,
-      "median_chg": -0.22,
-      "std": 1.335,
-      "positive_rate": 41.5
+      "mean_chg": 0.648,
+      "median_chg": 0.533,
+      "std": 1.129,
+      "positive_rate": 73.4
     },
     "kospi_open_gap": {
-      "mean_gap": -0.324,
-      "median_gap": -0.224
+      "mean_gap": -0.403,
+      "median_gap": 0.581
     },
     "sectors": {
       "반도체": {
-        "mean_chg": -0.5,
-        "positive_rate": 45.2,
-        "sample_count": 93
+        "mean_chg": 0.949,
+        "positive_rate": 66.0,
+        "sample_count": 94
       },
       "2차전지": {
-        "mean_chg": -1.016,
-        "positive_rate": 30.1,
-        "sample_count": 93
+        "mean_chg": 0.705,
+        "positive_rate": 62.8,
+        "sample_count": 94
       },
       "바이오": {
-        "mean_chg": -0.352,
-        "positive_rate": 38.7,
-        "sample_count": 93
+        "mean_chg": 0.474,
+        "positive_rate": 62.8,
+        "sample_count": 94
       },
       "은행": {
-        "mean_chg": 0.052,
-        "positive_rate": 46.7,
-        "sample_count": 92
+        "mean_chg": 0.3,
+        "positive_rate": 53.2,
+        "sample_count": 94
       },
       "철강": {
-        "mean_chg": -0.636,
-        "positive_rate": 32.3,
-        "sample_count": 93
+        "mean_chg": 0.527,
+        "positive_rate": 53.2,
+        "sample_count": 94
       },
       "IT": {
-        "mean_chg": -0.371,
-        "positive_rate": 44.1,
-        "sample_count": 93
+        "mean_chg": 0.795,
+        "positive_rate": 71.3,
+        "sample_count": 94
       },
       "에너지": {
-        "mean_chg": -0.548,
-        "positive_rate": 36.6,
-        "sample_count": 93
+        "mean_chg": 0.461,
+        "positive_rate": 60.6,
+        "sample_count": 94
       },
       "내수": {
-        "mean_chg": -0.29,
-        "positive_rate": 42.4,
-        "sample_count": 92
+        "mean_chg": 0.713,
+        "positive_rate": 76.6,
+        "sample_count": 94
       }
     },
-    "pattern_adjustment": -1.6,
+    "pattern_adjustment": 3.2,
     "confidence": 1.0,
     "today_us_vector": {
-      "us_nasdaq_chg": -1.2155,
-      "us_sp500_chg": -1.0168,
-      "us_vix_chg": 13.0412,
-      "us_soxx_chg": -0.7261,
-      "us_dollar_chg": 0.0185,
-      "us_ewy_chg": -1.8353
+      "us_nasdaq_chg": 1.0658,
+      "us_sp500_chg": 0.7386,
+      "us_vix_chg": -10.4753,
+      "us_soxx_chg": 1.4629,
+      "us_dollar_chg": 0.1108,
+      "us_ewy_chg": 3.7069
     }
   },
   "sector_kills": {
     "반도체": {
       "killed": false,
-      "driver_ret": -0.73,
+      "driver_ret": 1.46,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "전자부품": {
       "killed": false,
-      "driver_ret": -0.73,
+      "driver_ret": 1.46,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "디스플레이": {
       "killed": false,
-      "driver_ret": -0.73,
+      "driver_ret": 1.46,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "IT": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -3.5,
       "sensitivity": 0.7
     },
     "소프트웨어": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -3.5,
       "sensitivity": 0.7
     },
     "에너지": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.8
     },
     "정유": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.8
     },
     "화학": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.8
     },
     "은행": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "증권": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "금융": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "제약": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "바이오": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "의료기기": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "헬스케어": {
       "killed": false,
-      "driver_ret": -1.22,
+      "driver_ret": 1.07,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "조선": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "기계": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "건설": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "자동차": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "운송": {
       "killed": false,
-      "driver_ret": -1.02,
+      "driver_ret": 0.74,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     }
   },
   "special_rules": [],
-  "grade": "MILD_BEAR",
-  "l1_score_100": -36.1,
-  "combined_score_100": -37.7,
-  "summary": "US MILD_BEAR (-37.7 L2:-1.6) | SPY -1.0% QQQ -1.2% | VIX 22 (공포)"
+  "grade": "NEUTRAL",
+  "l1_score_100": 8.8,
+  "combined_score_100": 12.0,
+  "summary": "US NEUTRAL (+12.0 L2:+3.2) | SPY +0.7% QQQ +1.1% | VIX 19 (경계)"
 }
