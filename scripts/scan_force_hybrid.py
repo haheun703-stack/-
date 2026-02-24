@@ -554,10 +554,16 @@ def scan_anomaly() -> list[dict]:
 # Layer 3: 이벤트 레이더 (뉴스 기반)
 # ══════════════════════════════════════════
 
-def scan_event_radar() -> dict:
-    """Layer 3: 뉴스 기반 이벤트 레이더"""
+def scan_event_radar(surging_stocks: list[dict] | None = None) -> dict:
+    """Layer 3: 뉴스 기반 이벤트 레이더
+
+    Args:
+        surging_stocks: Layer 2에서 감지된 급등주 리스트
+            [{name, ticker, price_change, ...}, ...]
+    """
     events = []
     theme_hits = []
+    surging_news = []  # 급등주 자동 뉴스
 
     # 1) market_news.json에서 high/medium 임팩트 뉴스 가져오기
     if MARKET_NEWS_PATH.exists():
@@ -584,6 +590,8 @@ def scan_event_radar() -> dict:
 
     # 2) theme_dictionary 키워드로 뉴스 → 수혜종목 매칭
     theme_dict = _load_theme_dict()
+    all_news_titles = [e["title"] for e in events]
+
     if theme_dict and events:
         for event in events:
             title = event["title"]
@@ -605,6 +613,40 @@ def scan_event_radar() -> dict:
                         "stocks": stocks[:5],  # 상위 5종목
                     })
 
+    # 3) 급등주 자동 뉴스 검색 (P1 거래량폭발 + 가격변동 >=8%)
+    if surging_stocks:
+        stock_names = [s["name"] for s in surging_stocks[:10]]  # 최대 10종목
+        try:
+            from scripts.crawl_market_news import crawl_stock_news
+            raw_news = crawl_stock_news(stock_names, days=3)
+            for n in raw_news:
+                surging_news.append({
+                    "stock_name": n["stock_name"],
+                    "title": n["title"],
+                    "source": n.get("source", ""),
+                    "date": n.get("date", ""),
+                    "impact": n.get("impact", "medium"),
+                    "url": n.get("url", ""),
+                })
+                # 급등주 뉴스도 테마 매칭 시도
+                if theme_dict:
+                    for theme_name, theme_data in theme_dict.items():
+                        for kw in theme_data.get("keywords", []):
+                            if kw.lower() in n["title"].lower():
+                                theme_hits.append({
+                                    "theme": theme_name,
+                                    "keyword": kw,
+                                    "news_title": n["title"],
+                                    "news_date": n.get("date", ""),
+                                    "impact": "high",
+                                    "stocks": [{"name": n["stock_name"]}],
+                                    "source": "급등주뉴스",
+                                })
+                                break
+            logger.info(f"  급등주 뉴스: {len(surging_news)}건 ({len(stock_names)}종목)")
+        except Exception as e:
+            logger.warning("급등주 뉴스 크롤 실패: %s", e)
+
     # 이벤트 요약 통계
     high_count = sum(1 for e in events if e["impact"] == "high")
     med_count = sum(1 for e in events if e["impact"] == "medium")
@@ -619,9 +661,21 @@ def scan_event_radar() -> dict:
     elif med_count >= 3:
         mood = "관심"
         mood_desc = f"중요 뉴스 {med_count}건 — 테마/이벤트 주시"
+    elif surging_news:
+        mood = "관심"
+        mood_desc = f"급등주 {len(surging_stocks)}개 뉴스 {len(surging_news)}건 — 이벤트 확인"
     else:
         mood = "평온"
         mood_desc = "특별한 이벤트 없음 — 기술적 분석 우선"
+
+    # theme_hits 중복 제거
+    seen_theme = set()
+    unique_themes = []
+    for th in theme_hits:
+        key = (th["theme"], th["news_title"][:30])
+        if key not in seen_theme:
+            seen_theme.add(key)
+            unique_themes.append(th)
 
     return {
         "mood": mood,
@@ -630,7 +684,8 @@ def scan_event_radar() -> dict:
         "high_impact": high_count,
         "medium_impact": med_count,
         "events": events[:15],  # 최대 15건
-        "theme_hits": theme_hits[:10],  # 최대 10건
+        "theme_hits": unique_themes[:15],  # 최대 15건
+        "surging_stock_news": surging_news[:20],  # 급등주 뉴스 최대 20건
     }
 
 
@@ -683,15 +738,31 @@ def main():
         if cnt:
             print(f"  {g}: {cnt}건")
 
+    # Layer 2 → Layer 3 연계: P1 거래량폭발 + 가격변동 >=8% → 급등주
+    surging_stocks = []
+    for item in anomaly_items:
+        has_p1 = any(p["pattern"] == "P1_거래량폭발" for p in item["patterns"])
+        pct = abs(item.get("price_change", 0))
+        if has_p1 and pct >= 8:
+            surging_stocks.append(item)
+    if surging_stocks:
+        print(f"\n[Layer2→3] 급등주 {len(surging_stocks)}개 뉴스 자동검색 대상:")
+        for s in surging_stocks[:5]:
+            print(f"  → {s['name']}({s['ticker']}) {s['price_change']:+.1f}%")
+
     # Layer 3: 이벤트 레이더
     print("\n[Layer 3] 이벤트 레이더 스캔 중...")
-    radar = scan_event_radar()
+    radar = scan_event_radar(surging_stocks=surging_stocks if surging_stocks else None)
     print(f"  → 시장 분위기: {radar['mood']} ({radar['mood_desc']})")
     print(f"  → 이벤트 {radar['event_count']}건 (HIGH:{radar['high_impact']} MED:{radar['medium_impact']})")
     if radar["theme_hits"]:
         print(f"  → 테마 매칭: {len(radar['theme_hits'])}건")
-        for th in radar["theme_hits"][:3]:
+        for th in radar["theme_hits"][:5]:
             print(f"    [{th['theme']}] {th['keyword']} — {th['news_title'][:40]}...")
+    if radar.get("surging_stock_news"):
+        print(f"  → 급등주 뉴스: {len(radar['surging_stock_news'])}건")
+        for sn in radar["surging_stock_news"][:5]:
+            print(f"    [{sn['stock_name']}] {sn['title'][:50]}...")
 
     # 크로스 분석: 수급건전성 × 이상거래 맥락 해석
     cross_insights = []

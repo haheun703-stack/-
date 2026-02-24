@@ -2174,12 +2174,27 @@ function renderShakeout() {
   if (themeHits.length > 0) {
     html += '<div style="border-top:1px solid rgba(59,130,246,0.1);padding-top:8px;margin-top:6px">';
     html += '<div style="font-size:10px;color:#60A5FA;font-weight:600;margin-bottom:6px">&#x1F3AF; 테마 매칭</div>';
-    themeHits.slice(0, 5).forEach(th => {
+    themeHits.slice(0, 8).forEach(th => {
       const stocks = (th.stocks || []).map(s => s.name || s.ticker).join(', ');
+      const srcBadge = th.source === '급등주뉴스' ? '<span style="background:#EF444422;color:#EF4444;padding:0 4px;border-radius:3px;font-size:8px;margin-left:4px">급등</span>' : '';
       html += `<div style="font-size:11px;margin-bottom:4px">
         <span style="background:rgba(96,165,250,0.15);color:#60A5FA;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600">${esc(th.theme)}</span>
-        <span style="color:#9CA3AF;margin-left:6px">${esc(th.keyword)}</span>
+        <span style="color:#9CA3AF;margin-left:6px">${esc(th.keyword)}</span>${srcBadge}
         ${stocks ? `<div style="color:#6B7280;font-size:10px;margin:2px 0 0 4px">&#x2192; ${esc(stocks)}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // 급등주 자동 뉴스
+  const surgingNews = radar.surging_stock_news || [];
+  if (surgingNews.length > 0) {
+    html += '<div style="border-top:1px solid rgba(239,68,68,0.15);padding-top:8px;margin-top:6px">';
+    html += '<div style="font-size:10px;color:#EF4444;font-weight:600;margin-bottom:6px">&#x1F525; 급등주 뉴스 자동검색</div>';
+    surgingNews.slice(0, 8).forEach(sn => {
+      html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;font-size:11px">
+        <span style="background:#EF444422;color:#EF4444;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:700;white-space:nowrap">${esc(sn.stock_name)}</span>
+        <span style="color:#D1D5DB;line-height:1.4">${esc(sn.title)}</span>
       </div>`;
     });
     html += '</div>';
