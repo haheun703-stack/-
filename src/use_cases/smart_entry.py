@@ -88,6 +88,17 @@ class CandidateState:
     inst_net: int = 0
     flow_signal: str = ""       # "both_buy", "foreign_buy", "both_sell"
 
+    # VWAP + 3중 확인 (60 EMA + VWAP + MACD Histogram)
+    vwap: float = 0.0                # 당일 누적 VWAP
+    vwap_position: str = ""          # "above" / "below"
+    sma60: float = 0.0               # 일봉 SMA60 (추세 기준선)
+    sma60_position: str = ""         # "above" / "below"
+    macd_hist: float = 0.0           # MACD 히스토그램 (최신)
+    macd_hist_prev: float = 0.0      # MACD 히스토그램 (전일)
+    macd_hist_rising: bool = False   # 히스토그램 증가 중
+    triple_confirm: int = 0          # 3중 확인 충족 개수 (0~3)
+    triple_detail: str = ""          # "EMA✓ VWAP✓ MACD✓" 등
+
 
 # ─── SmartEntryEngine ────────────────────────────────
 
@@ -249,11 +260,27 @@ class SmartEntryEngine:
         """
         decisions = {"buy": 0, "wait": 0, "skip": 0}
 
+        # VWAP 3중 확인 활성화 여부
+        vwap_enabled = self.config.get("smart_entry", {}).get("vwap_enabled", True)
+
         for c in self.candidates:
+            # ── 모든 종목에 대해 일봉 지표 + VWAP 사전 로드 ──
+            if vwap_enabled:
+                self._load_daily_indicators(c)
+                self._calc_cumulative_vwap(c)
+
             # 갭다운/플랫: 초기 지정가 유지 (좋은 진입 기회)
             if c.gap_type in (GapType.GAP_DOWN, GapType.FLAT):
                 c.decision = EntryDecision.HOLDING
                 c.decision_reasons.append(f"갭{c.gap_pct:+.1f}% → 초기 지정가 유지")
+
+                # 갭다운/플랫에서도 3중 확인 정보 기록 (참고용)
+                if vwap_enabled and c.vwap > 0:
+                    self._calc_triple_confirmation(c)
+                    c.decision_reasons.append(
+                        f"[3중확인] {c.triple_detail} ({c.triple_confirm}/3)"
+                    )
+
                 decisions["wait"] += 1
                 continue
 
@@ -262,12 +289,32 @@ class SmartEntryEngine:
             candle_score = self._analyze_5min_candles(c)
             flow_score = self._analyze_investor_flow(c)
 
-            total = ob_score + candle_score + flow_score
-            c.decision_reasons.append(
-                f"갭 +{c.gap_pct:.1f}% → 호가({ob_score}) + 캔들({candle_score}) + 수급({flow_score}) = {total}"
-            )
+            base_total = ob_score + candle_score + flow_score
 
-            # 판단 기준: 3축 합산 (각 0~10점, 총 0~30)
+            # ── VWAP 3중 확인 보너스 ──
+            vwap_bonus = 0
+            if vwap_enabled and c.vwap > 0:
+                vwap_bonus = self._calc_triple_confirmation(c)
+
+            total = max(0, min(30, base_total + vwap_bonus))
+
+            if vwap_bonus != 0:
+                c.decision_reasons.append(
+                    f"갭 +{c.gap_pct:.1f}% → 호가({ob_score}) + 캔들({candle_score}) "
+                    f"+ 수급({flow_score}) = {base_total} "
+                    f"+ 3중확인({vwap_bonus:+d}) = {total}"
+                )
+                c.decision_reasons.append(
+                    f"[3중확인] {c.triple_detail} | "
+                    f"VWAP={c.vwap:,.0f} SMA60={c.sma60:,.0f} "
+                    f"MACD={c.macd_hist:+.2f}"
+                )
+            else:
+                c.decision_reasons.append(
+                    f"갭 +{c.gap_pct:.1f}% → 호가({ob_score}) + 캔들({candle_score}) + 수급({flow_score}) = {total}"
+                )
+
+            # 판단 기준: 3축 합산 + VWAP 보너스 (총 0~30)
             if total >= 18:
                 c.decision = EntryDecision.BUY
                 c.decision_reasons.append("→ 진입 결정 (강한 신호)")
@@ -282,8 +329,8 @@ class SmartEntryEngine:
                 decisions["skip"] += 1
 
             logger.info(
-                "[판단] %s: %s (점수 %d/30) — %s",
-                c.name, c.decision.value, total,
+                "[판단] %s: %s (점수 %d/30, 3중확인 %d/3) — %s",
+                c.name, c.decision.value, total, c.triple_confirm,
                 " | ".join(c.decision_reasons[-2:]),
             )
 
@@ -460,6 +507,160 @@ class SmartEntryEngine:
         return score
 
     # ──────────────────────────────────────────
+    # VWAP + 3중 확인 (60 EMA + VWAP + MACD Histogram)
+    # ──────────────────────────────────────────
+
+    def _calc_cumulative_vwap(self, c: CandidateState) -> float:
+        """
+        당일 1분봉 기반 누적 VWAP 계산.
+        VWAP = Σ(typical_price × volume) / Σ(volume)
+        typical_price = (high + low + close) / 3
+
+        기관 알고리즘의 70%+ 가 VWAP을 실행 기준으로 사용.
+        VWAP 위 = 당일 매수자 수익 구간 (매도 압력 약함)
+        VWAP 아래 = 당일 매수자 손실 구간 (매수 기회 or 위험)
+        """
+        try:
+            candles = self.intraday.fetch_minute_candles(c.ticker, period=1)
+        except Exception as e:
+            logger.warning("[VWAP] %s 1분봉 조회 실패: %s", c.ticker, e)
+            return 0.0
+
+        if not candles:
+            return 0.0
+
+        cum_tp_vol = 0.0
+        cum_vol = 0
+
+        for cd in candles:
+            h = cd.get("high", 0)
+            l = cd.get("low", 0)
+            cl = cd.get("close", 0)
+            v = cd.get("volume", 0)
+            if h > 0 and l > 0 and cl > 0 and v > 0:
+                typical = (h + l + cl) / 3.0
+                cum_tp_vol += typical * v
+                cum_vol += v
+
+        if cum_vol == 0:
+            return 0.0
+
+        vwap = cum_tp_vol / cum_vol
+        c.vwap = round(vwap, 0)
+
+        # 현재가 vs VWAP 위치 판단
+        if c.current_price > 0:
+            if c.current_price > vwap:
+                c.vwap_position = "above"
+            else:
+                c.vwap_position = "below"
+
+        logger.info(
+            "[VWAP] %s: VWAP=%.0f, 현재가=%d → %s",
+            c.ticker, vwap, c.current_price, c.vwap_position,
+        )
+        return vwap
+
+    def _load_daily_indicators(self, c: CandidateState):
+        """
+        일봉 parquet에서 SMA60 + MACD 히스토그램 로드.
+        60일 이동평균: 중기 추세 기준선 (EMA60 대용)
+        MACD 히스토그램: 모멘텀의 '힘' (증가=강세 가속, 감소=약화)
+        """
+        try:
+            import pandas as pd
+            parquet_path = Path(f"data/processed/{c.ticker}.parquet")
+            if not parquet_path.exists():
+                logger.warning("[일봉] %s parquet 없음", c.ticker)
+                return
+
+            df = pd.read_parquet(parquet_path)
+            if len(df) < 2:
+                return
+
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+
+            # SMA60 (추세 기준선)
+            c.sma60 = float(latest.get("sma_60", 0) or 0)
+            if c.sma60 > 0 and c.current_price > 0:
+                c.sma60_position = "above" if c.current_price > c.sma60 else "below"
+
+            # MACD 히스토그램
+            c.macd_hist = float(latest.get("macd_histogram", 0) or 0)
+            c.macd_hist_prev = float(prev.get("macd_histogram", 0) or 0)
+            c.macd_hist_rising = c.macd_hist > c.macd_hist_prev
+
+            logger.info(
+                "[일봉] %s: SMA60=%.0f(%s), MACD_Hist=%.2f(%s)",
+                c.ticker, c.sma60, c.sma60_position,
+                c.macd_hist, "상승" if c.macd_hist_rising else "하락",
+            )
+
+        except Exception as e:
+            logger.warning("[일봉] %s 지표 로드 실패: %s", c.ticker, e)
+
+    def _calc_triple_confirmation(self, c: CandidateState) -> int:
+        """
+        3중 확인 시스템 (60 EMA + VWAP + MACD Histogram).
+
+        기관 알고리즘 + 트레이딩 논문 기반:
+        - 60 EMA 위: 중기 상승 추세 확인 (방향)
+        - VWAP 위: 당일 수급 우위 확인 (돈)
+        - MACD Histogram 양수+상승: 모멘텀 가속 확인 (힘)
+
+        3개 모두 충족 = 가짜 신호 극적 감소
+
+        Returns:
+            보너스 점수 (-3 ~ +3)
+        """
+        confirms = 0
+        details = []
+
+        # 확인 1: SMA60 위 = 중기 상승 추세
+        if c.sma60_position == "above":
+            confirms += 1
+            details.append("EMA\u2713")
+        else:
+            details.append("EMA\u2717")
+
+        # 확인 2: VWAP 위 = 당일 매수세 우위
+        if c.vwap_position == "above":
+            confirms += 1
+            details.append("VWAP\u2713")
+        else:
+            details.append("VWAP\u2717")
+
+        # 확인 3: MACD Histogram 양수 + 상승 = 모멘텀 가속
+        if c.macd_hist > 0 and c.macd_hist_rising:
+            confirms += 1
+            details.append("MACD\u2713")
+        elif c.macd_hist > 0:
+            # 양수이지만 하락 중 → 0.5점 (반올림 안 함)
+            details.append("MACD\u25b3")
+        else:
+            details.append("MACD\u2717")
+
+        c.triple_confirm = confirms
+        c.triple_detail = " ".join(details)
+
+        # 보너스 점수: 3중 확인 충족도에 따라
+        if confirms == 3:
+            bonus = 3   # 완벽한 3중 확인 → 강한 보너스
+        elif confirms == 2:
+            bonus = 2   # 2개 확인 → 양호
+        elif confirms == 1:
+            bonus = 0   # 1개만 → 중립 (보너스 없음)
+        else:
+            bonus = -2  # 0개 → 역방향 → 페널티
+
+        logger.info(
+            "[3중확인] %s: %s (%d/3) → 보너스 %+d점",
+            c.ticker, c.triple_detail, confirms, bonus,
+        )
+        return bonus
+
+    # ──────────────────────────────────────────
     # Phase 4: 적응형 주문 관리
     # ──────────────────────────────────────────
 
@@ -612,6 +813,15 @@ class SmartEntryEngine:
                 "flow_signal": c.flow_signal,
                 "foreign_net": c.foreign_net,
                 "inst_net": c.inst_net,
+                # VWAP 3중 확인
+                "vwap": c.vwap,
+                "vwap_position": c.vwap_position,
+                "sma60": c.sma60,
+                "sma60_position": c.sma60_position,
+                "macd_hist": c.macd_hist,
+                "macd_hist_rising": c.macd_hist_rising,
+                "triple_confirm": c.triple_confirm,
+                "triple_detail": c.triple_detail,
             }
             report["details"].append(detail)
 
@@ -643,6 +853,9 @@ class SmartEntryEngine:
                 lines.append(f"   지정가: {d['order_price']:,}원")
             if d.get("bid_ask_ratio"):
                 lines.append(f"   호가비: {d['bid_ask_ratio']:.2f} | 패턴: {d['candle_pattern']} | 수급: {d['flow_signal']}")
+            if d.get("triple_detail"):
+                vwap_str = f"VWAP={d['vwap']:,.0f}" if d.get("vwap") else ""
+                lines.append(f"   3중확인: {d['triple_detail']} ({d['triple_confirm']}/3) {vwap_str}")
             for r in d.get("reasons", [])[:3]:
                 lines.append(f"   • {r}")
             lines.append("")

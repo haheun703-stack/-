@@ -1093,3 +1093,7 @@ smart_entry:
   order_deadline: 1030           # 주문 마감 시각 (HHMM)
   adapt_interval_sec: 120        # 적응형 정정 간격 (초)
   gap_position_scale: 0.5        # 갭업 진입 시 포지션 축소 비율
+  # VWAP 3중 확인 시스템 (60 EMA + VWAP + MACD Histogram)
+  vwap_enabled: true               # 3중 확인 활성화
+  # 기관 알고 70%+가 VWAP 기준 매매. 3중 확인 = 가짜 신호 극적 감소
+  # 보너스: 3/3=+3, 2/3=+2, 1/3=0, 0/3=-2 (기존 30점에 가감)
