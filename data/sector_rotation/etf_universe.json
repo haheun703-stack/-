@@ -1,0 +1,134 @@
+{
+  "증권": {
+    "etf_code": "157500",
+    "etf_name": "TIGER 증권",
+    "category": "sector",
+    "stock_count": 11
+  },
+  "은행": {
+    "etf_code": "091220",
+    "etf_name": "TIGER 은행",
+    "category": "sector",
+    "stock_count": 11
+  },
+  "반도체": {
+    "etf_code": "091230",
+    "etf_name": "TIGER 반도체",
+    "category": "sector",
+    "stock_count": 36
+  },
+  "2차전지": {
+    "etf_code": "305540",
+    "etf_name": "TIGER 2차전지테마",
+    "category": "theme",
+    "stock_count": 29
+  },
+  "바이오": {
+    "etf_code": "364970",
+    "etf_name": "TIGER 바이오TOP10",
+    "category": "theme",
+    "stock_count": 11
+  },
+  "헬스케어": {
+    "etf_code": "143860",
+    "etf_name": "TIGER 헬스케어",
+    "category": "sector",
+    "stock_count": 67
+  },
+  "IT": {
+    "etf_code": "139260",
+    "etf_name": "TIGER 200 IT",
+    "category": "sector",
+    "stock_count": 16
+  },
+  "건설": {
+    "etf_code": "139220",
+    "etf_name": "TIGER 200 건설",
+    "category": "sector",
+    "stock_count": 11
+  },
+  "금융": {
+    "etf_code": "139270",
+    "etf_name": "TIGER 200 금융",
+    "category": "sector",
+    "stock_count": 23
+  },
+  "에너지화학": {
+    "etf_code": "139250",
+    "etf_name": "TIGER 200 에너지화학",
+    "category": "sector",
+    "stock_count": 28
+  },
+  "철강소재": {
+    "etf_code": "139240",
+    "etf_name": "TIGER 200 철강소재",
+    "category": "sector",
+    "stock_count": 11
+  },
+  "소프트웨어": {
+    "etf_code": "157490",
+    "etf_name": "TIGER 소프트웨어",
+    "category": "sector",
+    "stock_count": 26
+  },
+  "미디어": {
+    "etf_code": "228810",
+    "etf_name": "TIGER 미디어컨텐츠",
+    "category": "sector",
+    "stock_count": 18
+  },
+  "게임": {
+    "etf_code": "300610",
+    "etf_name": "TIGER K게임",
+    "category": "theme",
+    "stock_count": 18
+  },
+  "인터넷": {
+    "etf_code": "365000",
+    "etf_name": "TIGER 인터넷TOP10",
+    "category": "theme",
+    "stock_count": 11
+  },
+  "방산": {
+    "etf_code": "463250",
+    "etf_name": "TIGER K방산&우주",
+    "category": "theme",
+    "stock_count": 12
+  },
+  "조선": {
+    "etf_code": "494670",
+    "etf_name": "TIGER 조선TOP10",
+    "category": "theme",
+    "stock_count": 11
+  },
+  "삼성그룹": {
+    "etf_code": "138520",
+    "etf_name": "TIGER 삼성그룹",
+    "category": "group",
+    "stock_count": 16
+  },
+  "현대차그룹": {
+    "etf_code": "138540",
+    "etf_name": "TIGER 현대차그룹플러스",
+    "category": "group",
+    "stock_count": 20
+  },
+  "KRX300": {
+    "etf_code": "292160",
+    "etf_name": "TIGER KRX300",
+    "category": "market",
+    "stock_count": 299
+  },
+  "코리아TOP10": {
+    "etf_code": "292150",
+    "etf_name": "TIGER 코리아TOP10",
+    "category": "market",
+    "stock_count": 11
+  },
+  "보험": {
+    "etf_code": "140710",
+    "etf_name": "TIGER 보험",
+    "category": "sector",
+    "stock_count": 0
+  }
+}

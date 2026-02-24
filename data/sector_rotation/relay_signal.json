@@ -1,0 +1,129 @@
+{
+  "date": "2026-02-20",
+  "params": {
+    "leader_top_n": 3,
+    "leader_rsi_min": 70,
+    "volume_change_min_pct": 30.0,
+    "override_size": "HALF",
+    "override_stop_pct": -3.0
+  },
+  "relays": [
+    {
+      "supersector": "금융",
+      "supersector_code": "G40",
+      "leader_sector": "증권",
+      "leader_etf": "157500",
+      "leader_rsi": 84.7,
+      "leader_rank": 1,
+      "leader_ret_5": 27.66,
+      "leader_ret_20": 75.35,
+      "relay_candidates": [
+        {
+          "sector": "보험",
+          "etf_code": "140710",
+          "volume_change_pct": -58.7,
+          "rsi": 77.4,
+          "rank": 9,
+          "override": false
+        }
+      ]
+    },
+    {
+      "supersector": "금융",
+      "supersector_code": "G40",
+      "leader_sector": "은행",
+      "leader_etf": "091220",
+      "leader_rsi": 82.1,
+      "leader_rank": 3,
+      "leader_ret_5": 9.74,
+      "leader_ret_20": 32.93,
+      "relay_candidates": [
+        {
+          "sector": "보험",
+          "etf_code": "140710",
+          "volume_change_pct": -58.7,
+          "rsi": 77.4,
+          "rank": 9,
+          "override": false
+        }
+      ]
+    }
+  ],
+  "override_stocks": [],
+  "backtest_patterns": {
+    "증권→생명보험": {
+      "confidence": "MED",
+      "win_rate": 63.6,
+      "avg_return": 2.9,
+      "best_lag": 1,
+      "samples": 11
+    },
+    "증권→손해보험": {
+      "confidence": "MED",
+      "win_rate": 63.6,
+      "avg_return": 2.2,
+      "best_lag": 1,
+      "samples": 11
+    },
+    "증권→은행": {
+      "confidence": "HIGH",
+      "win_rate": 80.0,
+      "avg_return": 2.21,
+      "best_lag": 2,
+      "samples": 10
+    },
+    "생명보험→손해보험": {
+      "confidence": "HIGH",
+      "win_rate": 80.0,
+      "avg_return": 1.89,
+      "best_lag": 3,
+      "samples": 10
+    },
+    "반도체와반도체장비→디스플레이장비및부품": {
+      "confidence": "MED",
+      "win_rate": 100.0,
+      "avg_return": 1.93,
+      "best_lag": 1,
+      "samples": 5
+    },
+    "반도체와반도체장비→전자장비와기기": {
+      "confidence": "MED",
+      "win_rate": 100.0,
+      "avg_return": 1.59,
+      "best_lag": 1,
+      "samples": 5
+    },
+    "반도체와반도체장비→IT서비스": {
+      "confidence": "MED",
+      "win_rate": 100.0,
+      "avg_return": 1.72,
+      "best_lag": 1,
+      "samples": 5
+    },
+    "우주항공과국방→조선": {
+      "confidence": "MED",
+      "win_rate": 80.0,
+      "avg_return": 1.66,
+      "best_lag": 1,
+      "samples": 5
+    },
+    "우주항공과국방→기계": {
+      "confidence": "MED",
+      "win_rate": 80.0,
+      "avg_return": 1.14,
+      "best_lag": 3,
+      "samples": 5
+    },
+    "조선→기계": {
+      "confidence": "HIGH",
+      "win_rate": 66.7,
+      "avg_return": 0.9,
+      "best_lag": 1,
+      "samples": 12
+    }
+  },
+  "summary": {
+    "active_relays": 0,
+    "total_override_stocks": 0
+  }
+}

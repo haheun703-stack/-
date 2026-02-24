@@ -156,6 +156,41 @@ def sync_file(filename: str) -> bool:
         return False
 
 
+def git_commit_data():
+    """데이터 JSON을 git에 커밋+푸시 (Railway 재배포 시 데이터 유지용)."""
+    import subprocess
+
+    try:
+        # data/ 내 JSON 파일만 추가
+        subprocess.run(
+            ["git", "add", "data/*.json", "data/**/*.json"],
+            cwd=str(PROJECT_ROOT), capture_output=True, timeout=10,
+        )
+        # 변경사항 확인
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=str(PROJECT_ROOT), capture_output=True, timeout=10,
+        )
+        if result.returncode == 0:
+            logger.info("[GIT] 데이터 변경 없음 — 커밋 스킵")
+            return
+
+        subprocess.run(
+            ["git", "commit", "-m", f"data: 자동 데이터 스냅샷 {time.strftime('%Y-%m-%d %H:%M')}"],
+            cwd=str(PROJECT_ROOT), capture_output=True, timeout=30,
+        )
+        push = subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=str(PROJECT_ROOT), capture_output=True, timeout=60,
+        )
+        if push.returncode == 0:
+            logger.info("[GIT] 데이터 커밋+푸시 완료")
+        else:
+            logger.warning("[GIT] 푸시 실패: %s", push.stderr.decode()[:200])
+    except Exception as e:
+        logger.warning("[GIT] 자동 커밋 실패 (무시): %s", e)
+
+
 def main():
     if not RAILWAY_URL:
         logger.error("RAILWAY_URL 환경변수가 설정되지 않았습니다.")
@@ -182,6 +217,9 @@ def main():
             skip += 1
 
     logger.info("동기화 완료: 성공 %d / 실패 %d / 스킵 %d", ok, fail, skip)
+
+    # Railway API 동기화 후, git에도 데이터 커밋 (재배포 대비)
+    git_commit_data()
 
 
 if __name__ == "__main__":

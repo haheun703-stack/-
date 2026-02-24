@@ -1,0 +1,3958 @@
+{
+  "generated_at": "2026-02-21 18:39",
+  "fire_threshold": 5.0,
+  "lookback_days": 504,
+  "groups": {
+    "삼성": {
+      "leader": "삼성전자",
+      "leader_ticker": "005930",
+      "fire_events": 13,
+      "fire_dates_sample": [
+        "2024-03-20",
+        "2024-11-15",
+        "2024-11-18",
+        "2025-03-17",
+        "2025-04-10"
+      ],
+      "tier1": {
+        "propagation_rate": 0.282,
+        "win_rate": 0.564,
+        "avg_return": 0.955,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 39,
+            "propagation_rate": 0.282,
+            "win_rate": 0.564,
+            "avg_return": 0.275,
+            "med_return": 0.328,
+            "std_return": 2.068,
+            "best_cases": [
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성SDI",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": 6.491084858555252,
+                "cum_ret": 6.491084858555252
+              },
+              {
+                "fire_date": "2026-01-02",
+                "target_date": "2026-01-05",
+                "stock": "삼성SDI",
+                "leader_ret": 7.172643869891582,
+                "follow_ret": 4.761904761904767,
+                "cum_ret": 4.761904761904767
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-04",
+                "stock": "삼성SDI",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": 4.539385847797073,
+                "cum_ret": 4.539385847797073
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-13",
+                "stock": "삼성전기",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": -3.32541567695962,
+                "cum_ret": -3.32541567695962
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-13",
+                "stock": "삼성전기",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": -3.1298904538341166,
+                "cum_ret": -3.1298904538341166
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-13",
+                "stock": "삼성SDI",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": -2.853437094682232,
+                "cum_ret": -2.853437094682232
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 39,
+            "propagation_rate": 0.282,
+            "win_rate": 0.564,
+            "avg_return": 0.955,
+            "med_return": 0.328,
+            "std_return": 3.91,
+            "best_cases": [
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-19",
+                "stock": "삼성전기",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 15.670436187399028,
+                "cum_ret": 12.540545733564912
+              },
+              {
+                "fire_date": "2025-07-28",
+                "target_date": "2025-07-30",
+                "stock": "삼성전기",
+                "leader_ret": 6.828528072837625,
+                "follow_ret": 10.55312954876273,
+                "cum_ret": 9.758905722047928
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-19",
+                "stock": "삼성SDI",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 8.945260347129501,
+                "cum_ret": 6.09182325244727
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "삼성전기",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -4.918032786885251,
+                "cum_ret": -5.731040916966556
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "삼성바이오로직스",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -3.354178510517336,
+                "cum_ret": -2.7824232217809053
+              },
+              {
+                "fire_date": "2024-03-20",
+                "target_date": "2024-03-22",
+                "stock": "삼성전기",
+                "leader_ret": 5.631868131868134,
+                "follow_ret": -3.14171122994652,
+                "cum_ret": -1.7866976798110223
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 39,
+            "propagation_rate": 0.308,
+            "win_rate": 0.487,
+            "avg_return": 0.539,
+            "med_return": 0.0,
+            "std_return": 2.907,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-15",
+                "stock": "삼성바이오로직스",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": 9.73713860776284,
+                "cum_ret": 11.015151264762913
+              },
+              {
+                "fire_date": "2026-01-05",
+                "target_date": "2026-01-08",
+                "stock": "삼성바이오로직스",
+                "leader_ret": 7.470817120622564,
+                "follow_ret": 6.677985285795129,
+                "cum_ret": 9.817866828755562
+              },
+              {
+                "fire_date": "2025-12-26",
+                "target_date": "2026-01-02",
+                "stock": "삼성전기",
+                "leader_ret": 5.310531053105305,
+                "follow_ret": 5.882352941176472,
+                "cum_ret": 4.332328575618128
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-06",
+                "stock": "삼성SDI",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -4.0207522697795035,
+                "cum_ret": -1.0139334717908617
+              },
+              {
+                "fire_date": "2025-05-12",
+                "target_date": "2025-05-15",
+                "stock": "삼성전기",
+                "leader_ret": 5.109489051094895,
+                "follow_ret": -3.246239113222482,
+                "cum_ret": -2.8491613632035673
+              },
+              {
+                "fire_date": "2025-07-28",
+                "target_date": "2025-07-31",
+                "stock": "삼성바이오로직스",
+                "leader_ret": 6.828528072837625,
+                "follow_ret": -2.823311004192519,
+                "cum_ret": 0.06393691730138817
+              }
+            ]
+          }
+        },
+        "stocks": 3,
+        "stock_names": [
+          "삼성SDI",
+          "삼성바이오로직스",
+          "삼성전기"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.385,
+        "win_rate": 0.615,
+        "avg_return": 0.857,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 39,
+            "propagation_rate": 0.385,
+            "win_rate": 0.615,
+            "avg_return": 0.857,
+            "med_return": 0.513,
+            "std_return": 2.321,
+            "best_cases": [
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성에스디에스",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": 6.232091690544417,
+                "cum_ret": 6.232091690544417
+              },
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성물산",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": 5.71184995737426,
+                "cum_ret": 5.71184995737426
+              },
+              {
+                "fire_date": "2024-03-20",
+                "target_date": "2024-03-21",
+                "stock": "삼성물산",
+                "leader_ret": 5.631868131868134,
+                "follow_ret": 5.633802816901401,
+                "cum_ret": 5.633802816901401
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-13",
+                "stock": "삼성물산",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": -4.790419161676651,
+                "cum_ret": -4.790419161676651
+              },
+              {
+                "fire_date": "2024-11-18",
+                "target_date": "2024-11-19",
+                "stock": "삼성물산",
+                "leader_ret": 5.981308411214958,
+                "follow_ret": -2.0967741935483897,
+                "cum_ret": -2.0967741935483897
+              },
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성중공업",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": -1.6820857863751093,
+                "cum_ret": -1.6820857863751093
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 39,
+            "propagation_rate": 0.308,
+            "win_rate": 0.513,
+            "avg_return": -0.085,
+            "med_return": 0.329,
+            "std_return": 1.977,
+            "best_cases": [
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-19",
+                "stock": "삼성중공업",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 4.332129963898912,
+                "cum_ret": 2.733550923046335
+              },
+              {
+                "fire_date": "2024-03-20",
+                "target_date": "2024-03-22",
+                "stock": "삼성중공업",
+                "leader_ret": 5.631868131868134,
+                "follow_ret": 2.598870056497171,
+                "cum_ret": 3.052899568415457
+              },
+              {
+                "fire_date": "2025-05-12",
+                "target_date": "2025-05-14",
+                "stock": "삼성중공업",
+                "leader_ret": 5.109489051094895,
+                "follow_ret": 2.3141654978962034,
+                "cum_ret": 0.6589930841030989
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-14",
+                "stock": "삼성중공업",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": -4.719101123595504,
+                "cum_ret": -5.388743980738364
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "삼성중공업",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -3.9316239316239288,
+                "cum_ret": -1.8373830939275915
+              },
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-14",
+                "stock": "삼성물산",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": -3.3250620347394566,
+                "cum_ret": -3.818889195233288
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 39,
+            "propagation_rate": 0.308,
+            "win_rate": 0.538,
+            "avg_return": 0.073,
+            "med_return": 0.207,
+            "std_return": 2.191,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-15",
+                "stock": "삼성물산",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": 5.749486652977409,
+                "cum_ret": 1.930597457744121
+              },
+              {
+                "fire_date": "2026-01-05",
+                "target_date": "2026-01-08",
+                "stock": "삼성중공업",
+                "leader_ret": 7.470817120622564,
+                "follow_ret": 3.9447731755424043,
+                "cum_ret": 7.594007953562065
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-20",
+                "stock": "삼성물산",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 3.5993740219092407,
+                "cum_ret": -0.7193470265598574
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-06",
+                "stock": "삼성물산",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -5.392156862745101,
+                "cum_ret": -8.233501931578324
+              },
+              {
+                "fire_date": "2025-03-17",
+                "target_date": "2025-03-20",
+                "stock": "삼성중공업",
+                "leader_ret": 5.301645338208405,
+                "follow_ret": -4.404996712689025,
+                "cum_ret": -1.499772625555507
+              },
+              {
+                "fire_date": "2025-07-28",
+                "target_date": "2025-07-31",
+                "stock": "삼성물산",
+                "leader_ret": 6.828528072837625,
+                "follow_ret": -3.9886039886039892,
+                "cum_ret": 0.73903600690719
+              }
+            ]
+          }
+        },
+        "stocks": 3,
+        "stock_names": [
+          "삼성에스디에스",
+          "삼성물산",
+          "삼성중공업"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.436,
+        "win_rate": 0.59,
+        "avg_return": 1.16,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 39,
+            "propagation_rate": 0.436,
+            "win_rate": 0.59,
+            "avg_return": 1.16,
+            "med_return": 0.792,
+            "std_return": 3.589,
+            "best_cases": [
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성생명",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": 11.475409836065564,
+                "cum_ret": 11.475409836065564
+              },
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-18",
+                "stock": "삼성화재",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": 10.479041916167663,
+                "cum_ret": 10.479041916167663
+              },
+              {
+                "fire_date": "2024-03-20",
+                "target_date": "2024-03-21",
+                "stock": "삼성화재",
+                "leader_ret": 5.631868131868134,
+                "follow_ret": 8.71632329635499,
+                "cum_ret": 8.71632329635499
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-12-26",
+                "target_date": "2025-12-29",
+                "stock": "삼성증권",
+                "leader_ret": 5.310531053105305,
+                "follow_ret": -4.630788485607007,
+                "cum_ret": -4.630788485607007
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-13",
+                "stock": "삼성화재",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": -3.7865748709122182,
+                "cum_ret": -3.7865748709122182
+              },
+              {
+                "fire_date": "2024-11-18",
+                "target_date": "2024-11-19",
+                "stock": "삼성생명",
+                "leader_ret": 5.981308411214958,
+                "follow_ret": -3.676470588235292,
+                "cum_ret": -3.676470588235292
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 39,
+            "propagation_rate": 0.308,
+            "win_rate": 0.615,
+            "avg_return": 0.423,
+            "med_return": 0.382,
+            "std_return": 2.519,
+            "best_cases": [
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-19",
+                "stock": "삼성증권",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 10.396039603960405,
+                "cum_ret": 14.412517461838892
+              },
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-14",
+                "stock": "삼성생명",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": 6.301718650541055,
+                "cum_ret": 4.48921865054106
+              },
+              {
+                "fire_date": "2026-01-02",
+                "target_date": "2026-01-06",
+                "stock": "삼성증권",
+                "leader_ret": 7.172643869891582,
+                "follow_ret": 3.664921465968596,
+                "cum_ret": 4.3236829942953525
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-11-15",
+                "target_date": "2024-11-19",
+                "stock": "삼성생명",
+                "leader_ret": 7.214428857715438,
+                "follow_ret": -3.676470588235292,
+                "cum_ret": 7.798939247830273
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "삼성증권",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -3.239740820734338,
+                "cum_ret": -3.669848347616056
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "삼성생명",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -2.936708860759496,
+                "cum_ret": 3.0751000496001435
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 39,
+            "propagation_rate": 0.205,
+            "win_rate": 0.359,
+            "avg_return": -0.097,
+            "med_return": -0.435,
+            "std_return": 2.356,
+            "best_cases": [
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-20",
+                "stock": "삼성화재",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 8.421052631578952,
+                "cum_ret": 6.602277402884983
+              },
+              {
+                "fire_date": "2026-02-12",
+                "target_date": "2026-02-20",
+                "stock": "삼성생명",
+                "leader_ret": 6.436233611442188,
+                "follow_ret": 4.784688995215314,
+                "cum_ret": 6.731754451271343
+              },
+              {
+                "fire_date": "2025-10-10",
+                "target_date": "2025-10-15",
+                "stock": "삼성증권",
+                "leader_ret": 6.067415730337089,
+                "follow_ret": 3.596127247579539,
+                "cum_ret": 2.250136962912286
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-06",
+                "stock": "삼성생명",
+                "leader_ret": 11.369680851063823,
+                "follow_ret": -3.860198226395406,
+                "cum_ret": -0.7850981767952625
+              },
+              {
+                "fire_date": "2025-05-12",
+                "target_date": "2025-05-15",
+                "stock": "삼성생명",
+                "leader_ret": 5.109489051094895,
+                "follow_ret": -3.244495944380066,
+                "cum_ret": -2.662286197437125
+              },
+              {
+                "fire_date": "2025-05-12",
+                "target_date": "2025-05-15",
+                "stock": "삼성증권",
+                "leader_ret": 5.109489051094895,
+                "follow_ret": -3.074141048824597,
+                "cum_ret": -1.786149760833311
+              }
+            ]
+          }
+        },
+        "stocks": 3,
+        "stock_names": [
+          "삼성생명",
+          "삼성화재",
+          "삼성증권"
+        ]
+      }
+    },
+    "SK": {
+      "leader": "SK하이닉스",
+      "leader_ticker": "000660",
+      "fire_events": 42,
+      "fire_dates_sample": [
+        "2024-02-13",
+        "2024-02-22",
+        "2024-03-04",
+        "2024-03-21",
+        "2024-04-24"
+      ],
+      "tier1": {
+        "propagation_rate": 0.341,
+        "win_rate": 0.549,
+        "avg_return": 0.72,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 82,
+            "propagation_rate": 0.268,
+            "win_rate": 0.427,
+            "avg_return": -0.017,
+            "med_return": -0.393,
+            "std_return": 3.605,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-17",
+                "stock": "SKC",
+                "leader_ret": 5.307855626326963,
+                "follow_ret": 15.486725663716804,
+                "cum_ret": 15.486725663716804
+              },
+              {
+                "fire_date": "2024-06-07",
+                "target_date": "2024-06-10",
+                "stock": "SKC",
+                "leader_ret": 7.124419204956123,
+                "follow_ret": 13.739946380697043,
+                "cum_ret": 13.739946380697043
+              },
+              {
+                "fire_date": "2025-01-16",
+                "target_date": "2025-01-17",
+                "stock": "SKC",
+                "leader_ret": 5.953582240161448,
+                "follow_ret": 9.404388714733546,
+                "cum_ret": 9.404388714733546
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-29",
+                "target_date": "2025-10-30",
+                "stock": "SKC",
+                "leader_ret": 7.101727447216888,
+                "follow_ret": -6.0679611650485406,
+                "cum_ret": -6.0679611650485406
+              },
+              {
+                "fire_date": "2025-11-17",
+                "target_date": "2025-11-18",
+                "stock": "SKC",
+                "leader_ret": 8.214285714285708,
+                "follow_ret": -5.3480475382003405,
+                "cum_ret": -5.3480475382003405
+              },
+              {
+                "fire_date": "2025-11-17",
+                "target_date": "2025-11-18",
+                "stock": "SK이노베이션",
+                "leader_ret": 8.214285714285708,
+                "follow_ret": -5.151267375306623,
+                "cum_ret": -5.151267375306623
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 82,
+            "propagation_rate": 0.341,
+            "win_rate": 0.549,
+            "avg_return": 0.72,
+            "med_return": 0.359,
+            "std_return": 3.946,
+            "best_cases": [
+              {
+                "fire_date": "2024-06-18",
+                "target_date": "2024-06-20",
+                "stock": "SK이노베이션",
+                "leader_ret": 5.156950672645744,
+                "follow_ret": 15.568290353390646,
+                "cum_ret": 17.12018172099492
+              },
+              {
+                "fire_date": "2025-01-06",
+                "target_date": "2025-01-08",
+                "stock": "SKC",
+                "leader_ret": 9.840571742715776,
+                "follow_ret": 12.551953449709053,
+                "cum_ret": 14.58757685937826
+              },
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-18",
+                "stock": "SK이노베이션",
+                "leader_ret": 5.307855626326963,
+                "follow_ret": 10.97694840834249,
+                "cum_ret": 9.67684006598063
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-11-04",
+                "target_date": "2024-11-06",
+                "stock": "SKC",
+                "leader_ret": 6.476399560922053,
+                "follow_ret": -8.345323741007194,
+                "cum_ret": -11.750466201048893
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-05",
+                "stock": "SKC",
+                "leader_ret": 9.277108433734949,
+                "follow_ret": -5.499153976311333,
+                "cum_ret": -4.473512950670311
+              },
+              {
+                "fire_date": "2024-09-26",
+                "target_date": "2024-09-30",
+                "stock": "SKC",
+                "leader_ret": 9.437386569872963,
+                "follow_ret": -5.478547854785476,
+                "cum_ret": -2.347165962341635
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 82,
+            "propagation_rate": 0.341,
+            "win_rate": 0.476,
+            "avg_return": 0.374,
+            "med_return": -0.092,
+            "std_return": 3.809,
+            "best_cases": [
+              {
+                "fire_date": "2025-01-06",
+                "target_date": "2025-01-09",
+                "stock": "SKC",
+                "leader_ret": 9.840571742715776,
+                "follow_ret": 19.35007385524372,
+                "cum_ret": 33.93765071462198
+              },
+              {
+                "fire_date": "2025-01-03",
+                "target_date": "2025-01-08",
+                "stock": "SKC",
+                "leader_ret": 6.25,
+                "follow_ret": 12.551953449709053,
+                "cum_ret": 15.356807628609026
+              },
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-19",
+                "stock": "SKC",
+                "leader_ret": 5.307855626326963,
+                "follow_ret": 7.37864077669903,
+                "cum_ret": 21.524370271833458
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-06",
+                "stock": "SKC",
+                "leader_ret": 10.912343470482998,
+                "follow_ret": -7.052297939778129,
+                "cum_ret": -13.531935172230291
+              },
+              {
+                "fire_date": "2024-06-18",
+                "target_date": "2024-06-21",
+                "stock": "SK이노베이션",
+                "leader_ret": 5.156950672645744,
+                "follow_ret": -5.702479338842981,
+                "cum_ret": 11.41770238215194
+              },
+              {
+                "fire_date": "2025-06-24",
+                "target_date": "2025-06-27",
+                "stock": "SKC",
+                "leader_ret": 7.321772639691715,
+                "follow_ret": -5.387205387205385,
+                "cum_ret": 4.171173318178778
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "SK이노베이션",
+          "SKC"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.228,
+        "win_rate": 0.52,
+        "avg_return": 0.152,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 123,
+            "propagation_rate": 0.244,
+            "win_rate": 0.447,
+            "avg_return": -0.078,
+            "med_return": -0.096,
+            "std_return": 2.367,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-24",
+                "target_date": "2025-10-27",
+                "stock": "SK바이오팜",
+                "leader_ret": 6.583072100313481,
+                "follow_ret": 8.169014084507031,
+                "cum_ret": 8.169014084507031
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-01-29",
+                "stock": "SK",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": 6.0556464811784005,
+                "cum_ret": 6.0556464811784005
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-04",
+                "stock": "SK텔레콤",
+                "leader_ret": 9.277108433734949,
+                "follow_ret": 5.842391304347827,
+                "cum_ret": 5.842391304347827
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-02",
+                "stock": "SK",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": -10.194902548725636,
+                "cum_ret": -10.194902548725636
+              },
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-02",
+                "stock": "SK바이오팜",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": -5.508474576271183,
+                "cum_ret": -5.508474576271183
+              },
+              {
+                "fire_date": "2024-06-07",
+                "target_date": "2024-06-10",
+                "stock": "SK바이오팜",
+                "leader_ret": 7.124419204956123,
+                "follow_ret": -4.872389791183296,
+                "cum_ret": -4.872389791183296
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 123,
+            "propagation_rate": 0.228,
+            "win_rate": 0.52,
+            "avg_return": 0.152,
+            "med_return": 0.151,
+            "std_return": 1.976,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-03",
+                "stock": "SK",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": 8.180300500834715,
+                "cum_ret": -2.0146020478909215
+              },
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-03",
+                "stock": "SK텔레콤",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": 6.512301013024602,
+                "cum_ret": 1.8226458406108037
+              },
+              {
+                "fire_date": "2026-01-27",
+                "target_date": "2026-01-29",
+                "stock": "SK",
+                "leader_ret": 8.695652173913038,
+                "follow_ret": 6.0556464811784005,
+                "cum_ret": 8.572425004668327
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-02-22",
+                "target_date": "2024-02-26",
+                "stock": "SK",
+                "leader_ret": 5.033557046979875,
+                "follow_ret": -6.764705882352939,
+                "cum_ret": -7.009204659859048
+              },
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-05",
+                "stock": "SK",
+                "leader_ret": 10.912343470482998,
+                "follow_ret": -5.753968253968256,
+                "cum_ret": -6.149225170964301
+              },
+              {
+                "fire_date": "2024-06-18",
+                "target_date": "2024-06-20",
+                "stock": "SK",
+                "leader_ret": 5.156950672645744,
+                "follow_ret": -3.9497307001795323,
+                "cum_ret": -5.073991055209115
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 123,
+            "propagation_rate": 0.268,
+            "win_rate": 0.472,
+            "avg_return": 0.138,
+            "med_return": 0.0,
+            "std_return": 2.632,
+            "best_cases": [
+              {
+                "fire_date": "2024-10-07",
+                "target_date": "2024-10-11",
+                "stock": "SK바이오팜",
+                "leader_ret": 6.203331418724867,
+                "follow_ret": 7.678244972577697,
+                "cum_ret": 10.394536611811201
+              },
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-06",
+                "stock": "SK",
+                "leader_ret": 10.912343470482998,
+                "follow_ret": 6.947368421052635,
+                "cum_ret": 0.7981432500883345
+              },
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-04",
+                "stock": "SK텔레콤",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": 5.842391304347827,
+                "cum_ret": 7.665037144958631
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-06",
+                "stock": "SK텔레콤",
+                "leader_ret": 9.277108433734949,
+                "follow_ret": -10.709677419354835,
+                "cum_ret": -5.380764934005722
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "SK",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": -10.194902548725636,
+                "cum_ret": -1.2071573021151352
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "SK바이오팜",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": -5.508474576271183,
+                "cum_ret": -6.681916527575627
+              }
+            ]
+          }
+        },
+        "stocks": 3,
+        "stock_names": [
+          "SK텔레콤",
+          "SK",
+          "SK바이오팜"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.305,
+        "win_rate": 0.5,
+        "avg_return": 0.337,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 82,
+            "propagation_rate": 0.232,
+            "win_rate": 0.427,
+            "avg_return": -0.523,
+            "med_return": -0.519,
+            "std_return": 2.635,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-02",
+                "target_date": "2025-10-10",
+                "stock": "SK네트웍스",
+                "leader_ret": 9.861111111111121,
+                "follow_ret": 4.4792833146696465,
+                "cum_ret": 4.4792833146696465
+              },
+              {
+                "fire_date": "2025-03-12",
+                "target_date": "2025-03-13",
+                "stock": "SK가스",
+                "leader_ret": 5.91054313099042,
+                "follow_ret": 4.374999999999996,
+                "cum_ret": 4.374999999999996
+              },
+              {
+                "fire_date": "2024-04-24",
+                "target_date": "2024-04-25",
+                "stock": "SK가스",
+                "leader_ret": 5.146198830409365,
+                "follow_ret": 4.090623033354301,
+                "cum_ret": 4.090623033354301
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-02-13",
+                "target_date": "2024-02-14",
+                "stock": "SK네트웍스",
+                "leader_ret": 5.042016806722693,
+                "follow_ret": -13.947696139476962,
+                "cum_ret": -13.947696139476962
+              },
+              {
+                "fire_date": "2026-01-30",
+                "target_date": "2026-02-02",
+                "stock": "SK네트웍스",
+                "leader_ret": 5.574912891986061,
+                "follow_ret": -9.82142857142857,
+                "cum_ret": -9.82142857142857
+              },
+              {
+                "fire_date": "2024-04-24",
+                "target_date": "2024-04-25",
+                "stock": "SK네트웍스",
+                "leader_ret": 5.146198830409365,
+                "follow_ret": -8.122743682310475,
+                "cum_ret": -8.122743682310475
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 82,
+            "propagation_rate": 0.305,
+            "win_rate": 0.5,
+            "avg_return": 0.337,
+            "med_return": 0.113,
+            "std_return": 2.615,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-01-30",
+                "stock": "SK네트웍스",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": 15.822130299896585,
+                "cum_ret": 16.867062379311413
+              },
+              {
+                "fire_date": "2025-10-24",
+                "target_date": "2025-10-28",
+                "stock": "SK가스",
+                "leader_ret": 6.583072100313481,
+                "follow_ret": 6.694560669456062,
+                "cum_ret": 7.965747110134025
+              },
+              {
+                "fire_date": "2024-09-12",
+                "target_date": "2024-09-19",
+                "stock": "SK네트웍스",
+                "leader_ret": 7.379134860050884,
+                "follow_ret": 6.382978723404253,
+                "cum_ret": 6.382978723404253
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-04-10",
+                "target_date": "2025-04-14",
+                "stock": "SK가스",
+                "leader_ret": 11.030303030303035,
+                "follow_ret": -5.882352941176472,
+                "cum_ret": -5.460412012906435
+              },
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-05",
+                "stock": "SK가스",
+                "leader_ret": 10.912343470482998,
+                "follow_ret": -3.724394785847296,
+                "cum_ret": -5.011159491729645
+              },
+              {
+                "fire_date": "2024-06-07",
+                "target_date": "2024-06-11",
+                "stock": "SK가스",
+                "leader_ret": 7.124419204956123,
+                "follow_ret": -2.692091979809308,
+                "cum_ret": 0.37149183521958395
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 82,
+            "propagation_rate": 0.341,
+            "win_rate": 0.585,
+            "avg_return": 0.284,
+            "med_return": 0.216,
+            "std_return": 3.009,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-27",
+                "target_date": "2026-01-30",
+                "stock": "SK네트웍스",
+                "leader_ret": 8.695652173913038,
+                "follow_ret": 15.822130299896585,
+                "cum_ret": 18.459419067209513
+              },
+              {
+                "fire_date": "2024-11-04",
+                "target_date": "2024-11-07",
+                "stock": "SK가스",
+                "leader_ret": 6.476399560922053,
+                "follow_ret": 5.102040816326525,
+                "cum_ret": 6.494161731000947
+              },
+              {
+                "fire_date": "2025-04-10",
+                "target_date": "2025-04-15",
+                "stock": "SK가스",
+                "leader_ret": 11.030303030303035,
+                "follow_ret": 4.6875,
+                "cum_ret": -0.7729120129064349
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-09-12",
+                "target_date": "2024-09-20",
+                "stock": "SK네트웍스",
+                "leader_ret": 7.379134860050884,
+                "follow_ret": -11.363636363636365,
+                "cum_ret": -4.980657640232112
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "SK네트웍스",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": -9.82142857142857,
+                "cum_ret": 7.045633807882844
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "SK가스",
+                "leader_ret": 5.125000000000002,
+                "follow_ret": -4.506437768240346,
+                "cum_ret": -2.100247845851733
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "SK가스",
+          "SK네트웍스"
+        ]
+      }
+    },
+    "현대차": {
+      "leader": "현대차",
+      "leader_ticker": "005380",
+      "fire_events": 23,
+      "fire_dates_sample": [
+        "2024-02-01",
+        "2024-02-02",
+        "2024-02-16",
+        "2024-04-11",
+        "2024-05-22"
+      ],
+      "tier1": {
+        "propagation_rate": 0.304,
+        "win_rate": 0.457,
+        "avg_return": 0.502,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 46,
+            "propagation_rate": 0.239,
+            "win_rate": 0.304,
+            "avg_return": -0.429,
+            "med_return": -1.006,
+            "std_return": 3.425,
+            "best_cases": [
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-02",
+                "stock": "기아",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": 12.417685794920041,
+                "cum_ret": 12.417685794920041
+              },
+              {
+                "fire_date": "2024-02-16",
+                "target_date": "2024-02-19",
+                "stock": "현대모비스",
+                "leader_ret": 5.208333333333326,
+                "follow_ret": 5.856832971800441,
+                "cum_ret": 5.856832971800441
+              },
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-02",
+                "stock": "현대모비스",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": 5.6947608200455635,
+                "cum_ret": 5.6947608200455635
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-04-10",
+                "target_date": "2025-04-11",
+                "stock": "기아",
+                "leader_ret": 5.0561797752809,
+                "follow_ret": -7.029478458049887,
+                "cum_ret": -7.029478458049887
+              },
+              {
+                "fire_date": "2026-01-21",
+                "target_date": "2026-01-22",
+                "stock": "현대모비스",
+                "leader_ret": 14.613778705636737,
+                "follow_ret": -6.9743589743589745,
+                "cum_ret": -6.9743589743589745
+              },
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-03",
+                "stock": "현대모비스",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -5.221518987341767,
+                "cum_ret": -5.221518987341767
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 46,
+            "propagation_rate": 0.304,
+            "win_rate": 0.457,
+            "avg_return": 0.502,
+            "med_return": -0.206,
+            "std_return": 3.534,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-13",
+                "stock": "현대모비스",
+                "leader_ret": 7.488986784140961,
+                "follow_ret": 14.467005076142136,
+                "cum_ret": 13.090284175015732
+              },
+              {
+                "fire_date": "2026-01-19",
+                "target_date": "2026-01-21",
+                "stock": "현대모비스",
+                "leader_ret": 16.22276029055689,
+                "follow_ret": 8.093126385809303,
+                "cum_ret": 6.672361358486901
+              },
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-09",
+                "stock": "기아",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": 6.645316253002398,
+                "cum_ret": 3.242377351223591
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-02-02",
+                "target_date": "2024-02-06",
+                "stock": "기아",
+                "leader_ret": 9.134615384615374,
+                "follow_ret": -5.663567202028741,
+                "cum_ret": -6.667751302447156
+              },
+              {
+                "fire_date": "2024-02-02",
+                "target_date": "2024-02-06",
+                "stock": "현대모비스",
+                "leader_ret": 9.134615384615374,
+                "follow_ret": -5.183585313174943,
+                "cum_ret": -5.399102554554258
+              },
+              {
+                "fire_date": "2026-01-21",
+                "target_date": "2026-01-23",
+                "stock": "기아",
+                "leader_ret": 14.613778705636737,
+                "follow_ret": -3.402187120291611,
+                "cum_ret": -7.760118555503692
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 46,
+            "propagation_rate": 0.326,
+            "win_rate": 0.435,
+            "avg_return": -0.284,
+            "med_return": -0.224,
+            "std_return": 2.573,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-14",
+                "stock": "기아",
+                "leader_ret": 7.488986784140961,
+                "follow_ret": 5.147058823529416,
+                "cum_ret": 7.400878768764674
+              },
+              {
+                "fire_date": "2024-02-02",
+                "target_date": "2024-02-07",
+                "stock": "현대모비스",
+                "leader_ret": 9.134615384615374,
+                "follow_ret": 4.328018223234631,
+                "cum_ret": -1.0710843313196268
+              },
+              {
+                "fire_date": "2026-02-11",
+                "target_date": "2026-02-19",
+                "stock": "기아",
+                "leader_ret": 5.93132154006244,
+                "follow_ret": 3.595368677635591,
+                "cum_ret": 5.05366964681353
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-19",
+                "target_date": "2026-01-22",
+                "stock": "현대모비스",
+                "leader_ret": 16.22276029055689,
+                "follow_ret": -6.9743589743589745,
+                "cum_ret": -0.3019976158720734
+              },
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-06",
+                "stock": "기아",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": -5.663567202028741,
+                "cum_ret": 5.749934492472885
+              },
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-06",
+                "stock": "현대모비스",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": -5.183585313174943,
+                "cum_ret": 0.2956582654913058
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "기아",
+          "현대모비스"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.377,
+        "win_rate": 0.493,
+        "avg_return": 0.191,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 69,
+            "propagation_rate": 0.391,
+            "win_rate": 0.522,
+            "avg_return": 0.171,
+            "med_return": 0.195,
+            "std_return": 3.157,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-08",
+                "stock": "현대위아",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": 8.129032258064516,
+                "cum_ret": 8.129032258064516
+              },
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-12",
+                "stock": "현대글로비스",
+                "leader_ret": 7.488986784140961,
+                "follow_ret": 7.505518763796903,
+                "cum_ret": 7.505518763796903
+              },
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-02",
+                "stock": "현대위아",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": 6.788079470198682,
+                "cum_ret": 6.788079470198682
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-03",
+                "stock": "현대글로비스",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -7.256355932203384,
+                "cum_ret": -7.256355932203384
+              },
+              {
+                "fire_date": "2025-04-10",
+                "target_date": "2025-04-11",
+                "stock": "현대글로비스",
+                "leader_ret": 5.0561797752809,
+                "follow_ret": -5.32386867790594,
+                "cum_ret": -5.32386867790594
+              },
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-01-30",
+                "stock": "현대글로비스",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": -5.283757338551864,
+                "cum_ret": -5.283757338551864
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 69,
+            "propagation_rate": 0.377,
+            "win_rate": 0.493,
+            "avg_return": 0.191,
+            "med_return": 0.0,
+            "std_return": 3.112,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-09",
+                "stock": "현대위아",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": 9.307875894988072,
+                "cum_ret": 17.43690815305259
+              },
+              {
+                "fire_date": "2026-01-19",
+                "target_date": "2026-01-21",
+                "stock": "현대위아",
+                "leader_ret": 16.22276029055689,
+                "follow_ret": 7.208237986270016,
+                "cum_ret": 2.208237986270012
+              },
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-13",
+                "stock": "현대로템",
+                "leader_ret": 7.488986784140961,
+                "follow_ret": 6.422018348623859,
+                "cum_ret": 5.965397344057644
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-02-02",
+                "stock": "현대로템",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": -6.941431670281995,
+                "cum_ret": -5.175427255270948
+              },
+              {
+                "fire_date": "2024-04-11",
+                "target_date": "2024-04-15",
+                "stock": "현대로템",
+                "leader_ret": 5.701754385964919,
+                "follow_ret": -6.25,
+                "cum_ret": -6.8473715651135025
+              },
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-04",
+                "stock": "현대로템",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -5.9304703476482645,
+                "cum_ret": 0.1432823638484848
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 69,
+            "propagation_rate": 0.304,
+            "win_rate": 0.478,
+            "avg_return": 0.009,
+            "med_return": 0.0,
+            "std_return": 3.077,
+            "best_cases": [
+              {
+                "fire_date": "2025-02-13",
+                "target_date": "2025-02-18",
+                "stock": "현대위아",
+                "leader_ret": 5.2498738011105495,
+                "follow_ret": 8.513341804320195,
+                "cum_ret": 10.20077843140945
+              },
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-12",
+                "stock": "현대글로비스",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": 7.505518763796903,
+                "cum_ret": 11.136130162442326
+              },
+              {
+                "fire_date": "2025-02-13",
+                "target_date": "2025-02-18",
+                "stock": "현대로템",
+                "leader_ret": 5.2498738011105495,
+                "follow_ret": 7.040572792362765,
+                "cum_ret": 11.88091151492159
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-11-18",
+                "target_date": "2024-11-21",
+                "stock": "현대로템",
+                "leader_ret": 5.339805825242716,
+                "follow_ret": -7.451564828614011,
+                "cum_ret": -2.4849848938515056
+              },
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-05",
+                "stock": "현대로템",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -6.739130434782615,
+                "cum_ret": -6.59584807093413
+              },
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-12",
+                "stock": "현대위아",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": -5.021834061135366,
+                "cum_ret": 12.415074091917223
+              }
+            ]
+          }
+        },
+        "stocks": 3,
+        "stock_names": [
+          "현대글로비스",
+          "현대위아",
+          "현대로템"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.348,
+        "win_rate": 0.435,
+        "avg_return": 1.037,
+        "best_lag": 3,
+        "lag_detail": {
+          "lag1": {
+            "samples": 46,
+            "propagation_rate": 0.261,
+            "win_rate": 0.37,
+            "avg_return": 0.205,
+            "med_return": -0.478,
+            "std_return": 4.291,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-12",
+                "stock": "현대건설",
+                "leader_ret": 7.488986784140961,
+                "follow_ret": 20.184696569920835,
+                "cum_ret": 20.184696569920835
+              },
+              {
+                "fire_date": "2025-12-04",
+                "target_date": "2025-12-05",
+                "stock": "현대건설",
+                "leader_ret": 6.378986866791747,
+                "follow_ret": 9.956076134699842,
+                "cum_ret": 9.956076134699842
+              },
+              {
+                "fire_date": "2026-01-21",
+                "target_date": "2026-01-22",
+                "stock": "현대제철",
+                "leader_ret": 14.613778705636737,
+                "follow_ret": 7.961783439490455,
+                "cum_ret": 7.961783439490455
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-16",
+                "target_date": "2025-10-17",
+                "stock": "현대건설",
+                "leader_ret": 8.277404921700215,
+                "follow_ret": -8.496732026143794,
+                "cum_ret": -8.496732026143794
+              },
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-01-30",
+                "stock": "현대건설",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": -5.611775528978846,
+                "cum_ret": -5.611775528978846
+              },
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-03",
+                "stock": "현대건설",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -4.267425320056894,
+                "cum_ret": -4.267425320056894
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 46,
+            "propagation_rate": 0.326,
+            "win_rate": 0.457,
+            "avg_return": 0.028,
+            "med_return": -0.417,
+            "std_return": 2.218,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-15",
+                "stock": "현대건설",
+                "leader_ret": 10.626702997275196,
+                "follow_ret": 5.268703898840887,
+                "cum_ret": 8.420877811884363
+              },
+              {
+                "fire_date": "2026-01-21",
+                "target_date": "2026-01-23",
+                "stock": "현대건설",
+                "leader_ret": 14.613778705636737,
+                "follow_ret": 5.000000000000004,
+                "cum_ret": 0.8525345622119813
+              },
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-15",
+                "stock": "현대제철",
+                "leader_ret": 10.626702997275196,
+                "follow_ret": 4.220779220779214,
+                "cum_ret": 2.780779220779217
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-02-02",
+                "stock": "현대제철",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": -5.44,
+                "cum_ret": -6.390871632329631
+              },
+              {
+                "fire_date": "2024-02-02",
+                "target_date": "2024-02-06",
+                "stock": "현대건설",
+                "leader_ret": 9.134615384615374,
+                "follow_ret": -4.125177809388337,
+                "cum_ret": -1.944945251248809
+              },
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-02-02",
+                "stock": "현대건설",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": -3.703703703703709,
+                "cum_ret": -9.315479232682556
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 46,
+            "propagation_rate": 0.348,
+            "win_rate": 0.435,
+            "avg_return": 1.037,
+            "med_return": -0.263,
+            "std_return": 4.55,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-07",
+                "target_date": "2026-01-12",
+                "stock": "현대건설",
+                "leader_ret": 13.798701298701289,
+                "follow_ret": 20.184696569920835,
+                "cum_ret": 21.65296966229031
+              },
+              {
+                "fire_date": "2026-01-29",
+                "target_date": "2026-02-03",
+                "stock": "현대건설",
+                "leader_ret": 7.208121827411174,
+                "follow_ret": 9.919028340080981,
+                "cum_ret": 0.6035491073984254
+              },
+              {
+                "fire_date": "2026-02-11",
+                "target_date": "2026-02-19",
+                "stock": "현대건설",
+                "leader_ret": 5.93132154006244,
+                "follow_ret": 8.748906386701671,
+                "cum_ret": 8.493780426765662
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-31",
+                "target_date": "2025-11-05",
+                "stock": "현대건설",
+                "leader_ret": 9.433962264150942,
+                "follow_ret": -4.8816568047337245,
+                "cum_ret": -8.703316894478585
+              },
+              {
+                "fire_date": "2026-01-19",
+                "target_date": "2026-01-22",
+                "stock": "현대건설",
+                "leader_ret": 16.22276029055689,
+                "follow_ret": -4.147465437788023,
+                "cum_ret": -3.589069428816483
+              },
+              {
+                "fire_date": "2024-02-01",
+                "target_date": "2024-02-06",
+                "stock": "현대건설",
+                "leader_ret": 6.885919835560128,
+                "follow_ret": -4.125177809388337,
+                "cum_ret": -3.799438831847957
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "현대제철",
+          "현대건설"
+        ]
+      }
+    },
+    "LG": {
+      "leader": "LG에너지솔루션",
+      "leader_ticker": "373220",
+      "fire_events": 24,
+      "fire_dates_sample": [
+        "2024-07-01",
+        "2024-08-21",
+        "2024-08-26",
+        "2024-08-29",
+        "2024-09-02"
+      ],
+      "tier1": {
+        "propagation_rate": 0.271,
+        "win_rate": 0.521,
+        "avg_return": 0.161,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 48,
+            "propagation_rate": 0.271,
+            "win_rate": 0.521,
+            "avg_return": 0.161,
+            "med_return": 0.266,
+            "std_return": 2.214,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-16",
+                "target_date": "2025-10-17",
+                "stock": "LG화학",
+                "leader_ret": 8.796895213454082,
+                "follow_ret": 8.653846153846146,
+                "cum_ret": 8.653846153846146
+              },
+              {
+                "fire_date": "2024-08-21",
+                "target_date": "2024-08-22",
+                "stock": "LG화학",
+                "leader_ret": 6.060606060606055,
+                "follow_ret": 6.040268456375841,
+                "cum_ret": 6.040268456375841
+              },
+              {
+                "fire_date": "2025-10-02",
+                "target_date": "2025-10-10",
+                "stock": "LG전자",
+                "leader_ret": 14.82014388489208,
+                "follow_ret": 3.4031413612565453,
+                "cum_ret": 3.4031413612565453
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-01-20",
+                "target_date": "2025-01-21",
+                "stock": "LG화학",
+                "leader_ret": 5.706134094151216,
+                "follow_ret": -4.752475247524757,
+                "cum_ret": -4.752475247524757
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-01-29",
+                "stock": "LG화학",
+                "leader_ret": 5.5079559363525155,
+                "follow_ret": -3.1073446327683607,
+                "cum_ret": -3.1073446327683607
+              },
+              {
+                "fire_date": "2025-03-26",
+                "target_date": "2025-03-27",
+                "stock": "LG전자",
+                "leader_ret": 7.302533532041733,
+                "follow_ret": -2.8301886792452824,
+                "cum_ret": -2.8301886792452824
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 48,
+            "propagation_rate": 0.354,
+            "win_rate": 0.479,
+            "avg_return": -0.013,
+            "med_return": -0.063,
+            "std_return": 3.03,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-16",
+                "target_date": "2025-10-20",
+                "stock": "LG전자",
+                "leader_ret": 8.796895213454082,
+                "follow_ret": 8.076009501187652,
+                "cum_ret": 8.433578035156675
+              },
+              {
+                "fire_date": "2025-10-14",
+                "target_date": "2025-10-16",
+                "stock": "LG화학",
+                "leader_ret": 6.944444444444442,
+                "follow_ret": 6.1224489795918435,
+                "cum_ret": 5.279278659187126
+              },
+              {
+                "fire_date": "2024-08-29",
+                "target_date": "2024-09-02",
+                "stock": "LG화학",
+                "leader_ret": 6.105834464043425,
+                "follow_ret": 5.754276827371685,
+                "cum_ret": 6.066289307870898
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-01-30",
+                "stock": "LG화학",
+                "leader_ret": 5.5079559363525155,
+                "follow_ret": -9.475218658892127,
+                "cum_ret": -12.582563291660488
+              },
+              {
+                "fire_date": "2025-11-26",
+                "target_date": "2025-11-28",
+                "stock": "LG화학",
+                "leader_ret": 5.3204353083434075,
+                "follow_ret": -5.436156763590394,
+                "cum_ret": -5.813990516739009
+              },
+              {
+                "fire_date": "2024-10-23",
+                "target_date": "2024-10-25",
+                "stock": "LG전자",
+                "leader_ret": 5.6356487549148016,
+                "follow_ret": -5.246913580246915,
+                "cum_ret": -7.558471369191633
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 48,
+            "propagation_rate": 0.167,
+            "win_rate": 0.417,
+            "avg_return": -0.172,
+            "med_return": -0.473,
+            "std_return": 2.526,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-14",
+                "target_date": "2025-10-17",
+                "stock": "LG화학",
+                "leader_ret": 6.944444444444442,
+                "follow_ret": 8.653846153846146,
+                "cum_ret": 13.933124813033272
+              },
+              {
+                "fire_date": "2025-10-02",
+                "target_date": "2025-10-14",
+                "stock": "LG화학",
+                "leader_ret": 14.82014388489208,
+                "follow_ret": 5.141843971631199,
+                "cum_ret": 6.757653329376034
+              },
+              {
+                "fire_date": "2024-10-23",
+                "target_date": "2024-10-28",
+                "stock": "LG화학",
+                "leader_ret": 5.6356487549148016,
+                "follow_ret": 5.116279069767438,
+                "cum_ret": 4.5180322359894
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-03-26",
+                "target_date": "2025-03-31",
+                "stock": "LG화학",
+                "leader_ret": 7.302533532041733,
+                "follow_ret": -5.405405405405405,
+                "cum_ret": -10.225818700835099
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "LG화학",
+                "leader_ret": 5.5079559363525155,
+                "follow_ret": -4.508856682769724,
+                "cum_ret": -17.091419974430213
+              },
+              {
+                "fire_date": "2024-12-12",
+                "target_date": "2024-12-17",
+                "stock": "LG화학",
+                "leader_ret": 7.0105820105820005,
+                "follow_ret": -4.104477611940293,
+                "cum_ret": -3.9168655755317245
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "LG화학",
+          "LG전자"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.396,
+        "win_rate": 0.562,
+        "avg_return": 0.22,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 48,
+            "propagation_rate": 0.396,
+            "win_rate": 0.562,
+            "avg_return": 0.22,
+            "med_return": 0.472,
+            "std_return": 3.561,
+            "best_cases": [
+              {
+                "fire_date": "2025-07-24",
+                "target_date": "2025-07-25",
+                "stock": "LG디스플레이",
+                "leader_ret": 9.361069836552737,
+                "follow_ret": 9.00216919739696,
+                "cum_ret": 9.00216919739696
+              },
+              {
+                "fire_date": "2025-10-02",
+                "target_date": "2025-10-10",
+                "stock": "LG디스플레이",
+                "leader_ret": 14.82014388489208,
+                "follow_ret": 7.133058984910834,
+                "cum_ret": 7.133058984910834
+              },
+              {
+                "fire_date": "2025-10-14",
+                "target_date": "2025-10-15",
+                "stock": "LG이노텍",
+                "leader_ret": 6.944444444444442,
+                "follow_ret": 6.8627450980392135,
+                "cum_ret": 6.8627450980392135
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-10-23",
+                "target_date": "2024-10-24",
+                "stock": "LG이노텍",
+                "leader_ret": 5.6356487549148016,
+                "follow_ret": -11.867801702553827,
+                "cum_ret": -11.867801702553827
+              },
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-03",
+                "stock": "LG이노텍",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": -7.857142857142863,
+                "cum_ret": -7.857142857142863
+              },
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-03",
+                "stock": "LG디스플레이",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": -5.595026642984013,
+                "cum_ret": -5.595026642984013
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 48,
+            "propagation_rate": 0.229,
+            "win_rate": 0.396,
+            "avg_return": -0.23,
+            "med_return": -0.231,
+            "std_return": 2.066,
+            "best_cases": [
+              {
+                "fire_date": "2025-04-10",
+                "target_date": "2025-04-14",
+                "stock": "LG이노텍",
+                "leader_ret": 11.305732484076426,
+                "follow_ret": 5.805515239477499,
+                "cum_ret": 8.03103452731133
+              },
+              {
+                "fire_date": "2024-07-01",
+                "target_date": "2024-07-03",
+                "stock": "LG디스플레이",
+                "leader_ret": 6.278713629402755,
+                "follow_ret": 3.5775127768313375,
+                "cum_ret": 5.222534421852987
+              },
+              {
+                "fire_date": "2025-07-24",
+                "target_date": "2025-07-28",
+                "stock": "LG디스플레이",
+                "leader_ret": 9.361069836552737,
+                "follow_ret": 3.482587064676612,
+                "cum_ret": 12.48475626207357
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-04",
+                "stock": "LG이노텍",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": -6.2015503875969,
+                "cum_ret": -14.058693244739763
+              },
+              {
+                "fire_date": "2025-03-26",
+                "target_date": "2025-03-28",
+                "stock": "LG이노텍",
+                "leader_ret": 7.302533532041733,
+                "follow_ret": -3.6130536130536184,
+                "cum_ret": -5.443717228614265
+              },
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-04",
+                "stock": "LG디스플레이",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": -3.5747883349012244,
+                "cum_ret": -9.169814977885238
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 48,
+            "propagation_rate": 0.25,
+            "win_rate": 0.354,
+            "avg_return": -0.847,
+            "med_return": -1.045,
+            "std_return": 3.113,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-14",
+                "target_date": "2025-10-17",
+                "stock": "LG이노텍",
+                "leader_ret": 6.944444444444442,
+                "follow_ret": 5.808080808080818,
+                "cum_ret": 13.588257098780577
+              },
+              {
+                "fire_date": "2024-09-11",
+                "target_date": "2024-09-19",
+                "stock": "LG디스플레이",
+                "leader_ret": 5.138339920948609,
+                "follow_ret": 5.418250950570336,
+                "cum_ret": 6.57619845330456
+              },
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-05",
+                "stock": "LG디스플레이",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": 4.292682926829272,
+                "cum_ret": -4.877132051055966
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-08-29",
+                "target_date": "2024-09-03",
+                "stock": "LG이노텍",
+                "leader_ret": 6.105834464043425,
+                "follow_ret": -7.857142857142863,
+                "cum_ret": -3.791993489648016
+              },
+              {
+                "fire_date": "2025-10-02",
+                "target_date": "2025-10-14",
+                "stock": "LG디스플레이",
+                "leader_ret": 14.82014388489208,
+                "follow_ret": -7.636603028308098,
+                "cum_ret": -3.256424965292271
+              },
+              {
+                "fire_date": "2025-01-20",
+                "target_date": "2025-01-23",
+                "stock": "LG이노텍",
+                "leader_ret": 5.706134094151216,
+                "follow_ret": -6.823821339950376,
+                "cum_ret": -6.136750759063426
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "LG이노텍",
+          "LG디스플레이"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.271,
+        "win_rate": 0.458,
+        "avg_return": 0.363,
+        "best_lag": 3,
+        "lag_detail": {
+          "lag1": {
+            "samples": 48,
+            "propagation_rate": 0.229,
+            "win_rate": 0.438,
+            "avg_return": 0.282,
+            "med_return": -0.113,
+            "std_return": 2.17,
+            "best_cases": [
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-03",
+                "stock": "LG",
+                "leader_ret": 6.185567010309279,
+                "follow_ret": 7.964601769911495,
+                "cum_ret": 7.964601769911495
+              },
+              {
+                "fire_date": "2025-05-28",
+                "target_date": "2025-05-29",
+                "stock": "LG",
+                "leader_ret": 6.055045871559628,
+                "follow_ret": 6.896551724137923,
+                "cum_ret": 6.896551724137923
+              },
+              {
+                "fire_date": "2026-01-22",
+                "target_date": "2026-01-23",
+                "stock": "LG",
+                "leader_ret": 5.703422053231932,
+                "follow_ret": 5.186020293122895,
+                "cum_ret": 5.186020293122895
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-07-03",
+                "target_date": "2025-07-04",
+                "stock": "LG",
+                "leader_ret": 5.289256198347103,
+                "follow_ret": -4.311377245508985,
+                "cum_ret": -4.311377245508985
+              },
+              {
+                "fire_date": "2025-01-20",
+                "target_date": "2025-01-21",
+                "stock": "LG유플러스",
+                "leader_ret": 5.706134094151216,
+                "follow_ret": -3.384912959381048,
+                "cum_ret": -3.384912959381048
+              },
+              {
+                "fire_date": "2025-10-16",
+                "target_date": "2025-10-17",
+                "stock": "LG유플러스",
+                "leader_ret": 8.796895213454082,
+                "follow_ret": -1.9723865877712021,
+                "cum_ret": -1.9723865877712021
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 48,
+            "propagation_rate": 0.167,
+            "win_rate": 0.375,
+            "avg_return": -0.287,
+            "med_return": -0.331,
+            "std_return": 1.612,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-16",
+                "target_date": "2025-10-20",
+                "stock": "LG",
+                "leader_ret": 8.796895213454082,
+                "follow_ret": 4.483695652173902,
+                "cum_ret": 3.8089318195153377
+              },
+              {
+                "fire_date": "2024-12-12",
+                "target_date": "2024-12-16",
+                "stock": "LG유플러스",
+                "leader_ret": 7.0105820105820005,
+                "follow_ret": 2.7397260273972712,
+                "cum_ret": 3.2906902147251005
+              },
+              {
+                "fire_date": "2024-09-11",
+                "target_date": "2024-09-13",
+                "stock": "LG",
+                "leader_ret": 5.138339920948609,
+                "follow_ret": 2.1897810218978186,
+                "cum_ret": 1.8261446582614527
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-05-28",
+                "target_date": "2025-05-30",
+                "stock": "LG",
+                "leader_ret": 6.055045871559628,
+                "follow_ret": -4.5698924731182755,
+                "cum_ret": 2.326659251019647
+              },
+              {
+                "fire_date": "2026-01-22",
+                "target_date": "2026-01-26",
+                "stock": "LG",
+                "leader_ret": 5.703422053231932,
+                "follow_ret": -3.9657020364415874,
+                "cum_ret": 1.2203182566813076
+              },
+              {
+                "fire_date": "2025-03-26",
+                "target_date": "2025-03-28",
+                "stock": "LG유플러스",
+                "leader_ret": 7.302533532041733,
+                "follow_ret": -3.264925373134331,
+                "cum_ret": -3.636672585030243
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 48,
+            "propagation_rate": 0.271,
+            "win_rate": 0.458,
+            "avg_return": 0.363,
+            "med_return": -0.079,
+            "std_return": 2.156,
+            "best_cases": [
+              {
+                "fire_date": "2024-08-29",
+                "target_date": "2024-09-03",
+                "stock": "LG",
+                "leader_ret": 6.105834464043425,
+                "follow_ret": 7.964601769911495,
+                "cum_ret": 6.468476129950229
+              },
+              {
+                "fire_date": "2026-01-22",
+                "target_date": "2026-01-27",
+                "stock": "LG유플러스",
+                "leader_ret": 5.703422053231932,
+                "follow_ret": 7.439104674127717,
+                "cum_ret": 6.201190927122269
+              },
+              {
+                "fire_date": "2024-07-01",
+                "target_date": "2024-07-04",
+                "stock": "LG",
+                "leader_ret": 6.278713629402755,
+                "follow_ret": 3.7641154328732718,
+                "cum_ret": 2.7754895586926898
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "LG",
+                "leader_ret": 5.5079559363525155,
+                "follow_ret": -4.143947655398039,
+                "cum_ret": -3.8074315092538775
+              },
+              {
+                "fire_date": "2024-12-12",
+                "target_date": "2024-12-17",
+                "stock": "LG유플러스",
+                "leader_ret": 7.0105820105820005,
+                "follow_ret": -2.577777777777779,
+                "cum_ret": 0.7129124369473216
+              },
+              {
+                "fire_date": "2024-12-12",
+                "target_date": "2024-12-17",
+                "stock": "LG",
+                "leader_ret": 7.0105820105820005,
+                "follow_ret": -2.088772845953002,
+                "cum_ret": -1.5401622985600771
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "LG",
+          "LG유플러스"
+        ]
+      }
+    },
+    "한화": {
+      "leader": "한화에어로스페이스",
+      "leader_ticker": "012450",
+      "fire_events": 57,
+      "fire_dates_sample": [
+        "2024-02-14",
+        "2024-02-19",
+        "2024-02-26",
+        "2024-02-27",
+        "2024-02-28"
+      ],
+      "tier1": {
+        "propagation_rate": 0.312,
+        "win_rate": 0.438,
+        "avg_return": 0.531,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 112,
+            "propagation_rate": 0.312,
+            "win_rate": 0.438,
+            "avg_return": 0.531,
+            "med_return": -0.229,
+            "std_return": 4.45,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-10",
+                "target_date": "2025-06-11",
+                "stock": "한화솔루션",
+                "leader_ret": 6.363636363636371,
+                "follow_ret": 22.9903536977492,
+                "cum_ret": 22.9903536977492
+              },
+              {
+                "fire_date": "2024-11-06",
+                "target_date": "2024-11-07",
+                "stock": "한화오션",
+                "leader_ret": 7.044209356931863,
+                "follow_ret": 21.76258992805755,
+                "cum_ret": 21.76258992805755
+              },
+              {
+                "fire_date": "2025-02-11",
+                "target_date": "2025-02-12",
+                "stock": "한화오션",
+                "leader_ret": 20.581140593533533,
+                "follow_ret": 15.165876777251185,
+                "cum_ret": 15.165876777251185
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-06-13",
+                "target_date": "2024-06-14",
+                "stock": "한화솔루션",
+                "leader_ret": 6.132296080201893,
+                "follow_ret": -6.896551724137934,
+                "cum_ret": -6.896551724137934
+              },
+              {
+                "fire_date": "2025-03-24",
+                "target_date": "2025-03-25",
+                "stock": "한화오션",
+                "leader_ret": 7.484051455784724,
+                "follow_ret": -6.292749658002739,
+                "cum_ret": -6.292749658002739
+              },
+              {
+                "fire_date": "2024-11-06",
+                "target_date": "2024-11-07",
+                "stock": "한화솔루션",
+                "leader_ret": 7.044209356931863,
+                "follow_ret": -5.870646766169152,
+                "cum_ret": -5.870646766169152
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 112,
+            "propagation_rate": 0.348,
+            "win_rate": 0.482,
+            "avg_return": -0.298,
+            "med_return": -0.181,
+            "std_return": 4.151,
+            "best_cases": [
+              {
+                "fire_date": "2024-08-07",
+                "target_date": "2024-08-09",
+                "stock": "한화솔루션",
+                "leader_ret": 5.681488587938688,
+                "follow_ret": 10.35242290748899,
+                "cum_ret": 8.620821175887261
+              },
+              {
+                "fire_date": "2026-01-08",
+                "target_date": "2026-01-12",
+                "stock": "한화오션",
+                "leader_ret": 7.920792079207928,
+                "follow_ret": 8.407738095238093,
+                "cum_ret": 12.0314852039505
+              },
+              {
+                "fire_date": "2024-11-06",
+                "target_date": "2024-11-08",
+                "stock": "한화오션",
+                "leader_ret": 7.044209356931863,
+                "follow_ret": 6.9423929098966,
+                "cum_ret": 28.70498283795415
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-05",
+                "stock": "한화솔루션",
+                "leader_ret": 6.435137895812049,
+                "follow_ret": -14.940828402366868,
+                "cum_ret": -12.826024776989232
+              },
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-05",
+                "stock": "한화오션",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -13.48314606741573,
+                "cum_ret": -17.93099882815192
+              },
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-05",
+                "stock": "한화솔루션",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -12.404580152671752,
+                "cum_ret": -15.367543115634719
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 112,
+            "propagation_rate": 0.304,
+            "win_rate": 0.446,
+            "avg_return": 0.397,
+            "med_return": -0.064,
+            "std_return": 4.415,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-05",
+                "target_date": "2025-06-11",
+                "stock": "한화솔루션",
+                "leader_ret": 7.100591715976323,
+                "follow_ret": 22.9903536977492,
+                "cum_ret": 23.47448607062217
+              },
+              {
+                "fire_date": "2025-01-02",
+                "target_date": "2025-01-07",
+                "stock": "한화오션",
+                "leader_ret": 11.332292398897682,
+                "follow_ret": 12.598425196850393,
+                "cum_ret": 13.415981134888266
+              },
+              {
+                "fire_date": "2024-07-29",
+                "target_date": "2024-08-01",
+                "stock": "한화솔루션",
+                "leader_ret": 8.039925017265759,
+                "follow_ret": 9.090909090909083,
+                "cum_ret": 7.904258002841313
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-02-19",
+                "target_date": "2024-02-22",
+                "stock": "한화솔루션",
+                "leader_ret": 7.501250555802574,
+                "follow_ret": -10.67073170731707,
+                "cum_ret": -12.02822255127066
+              },
+              {
+                "fire_date": "2025-06-12",
+                "target_date": "2025-06-17",
+                "stock": "한화솔루션",
+                "leader_ret": 5.303867403314921,
+                "follow_ret": -9.053497942386834,
+                "cum_ret": -8.566735090446796
+              },
+              {
+                "fire_date": "2025-03-07",
+                "target_date": "2025-03-12",
+                "stock": "한화오션",
+                "leader_ret": 7.817204140017675,
+                "follow_ret": -8.974358974358976,
+                "cum_ret": -11.976266728819763
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "한화솔루션",
+          "한화오션"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.366,
+        "win_rate": 0.491,
+        "avg_return": 1.091,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 112,
+            "propagation_rate": 0.366,
+            "win_rate": 0.491,
+            "avg_return": 1.091,
+            "med_return": 0.0,
+            "std_return": 5.392,
+            "best_cases": [
+              {
+                "fire_date": "2025-02-11",
+                "target_date": "2025-02-12",
+                "stock": "한화시스템",
+                "leader_ret": 20.581140593533533,
+                "follow_ret": 29.644268774703562,
+                "cum_ret": 29.644268774703562
+              },
+              {
+                "fire_date": "2026-01-08",
+                "target_date": "2026-01-09",
+                "stock": "한화시스템",
+                "leader_ret": 7.920792079207928,
+                "follow_ret": 27.529021558872312,
+                "cum_ret": 27.529021558872312
+              },
+              {
+                "fire_date": "2024-06-13",
+                "target_date": "2024-06-14",
+                "stock": "한화엔진",
+                "leader_ret": 6.132296080201893,
+                "follow_ret": 13.874538745387444,
+                "cum_ret": 13.874538745387444
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-03-24",
+                "target_date": "2025-03-25",
+                "stock": "한화시스템",
+                "leader_ret": 7.484051455784724,
+                "follow_ret": -7.191316146540028,
+                "cum_ret": -7.191316146540028
+              },
+              {
+                "fire_date": "2024-07-29",
+                "target_date": "2024-07-30",
+                "stock": "한화시스템",
+                "leader_ret": 8.039925017265759,
+                "follow_ret": -5.9633027522935755,
+                "cum_ret": -5.9633027522935755
+              },
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-02",
+                "stock": "한화엔진",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -5.720053835800809,
+                "cum_ret": -5.720053835800809
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 112,
+            "propagation_rate": 0.366,
+            "win_rate": 0.473,
+            "avg_return": 0.286,
+            "med_return": -0.084,
+            "std_return": 5.313,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-05",
+                "target_date": "2025-06-10",
+                "stock": "한화시스템",
+                "leader_ret": 7.100591715976323,
+                "follow_ret": 20.09345794392523,
+                "cum_ret": 17.366185216652507
+              },
+              {
+                "fire_date": "2025-06-12",
+                "target_date": "2025-06-16",
+                "stock": "한화시스템",
+                "leader_ret": 5.303867403314921,
+                "follow_ret": 18.014705882352942,
+                "cum_ret": 20.656215316315205
+              },
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-13",
+                "stock": "한화시스템",
+                "leader_ret": 11.376146788990816,
+                "follow_ret": 14.157014157014158,
+                "cum_ret": 15.197326250642252
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-05",
+                "stock": "한화엔진",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -14.346895074946463,
+                "cum_ret": -20.06694891074727
+              },
+              {
+                "fire_date": "2025-02-18",
+                "target_date": "2025-02-20",
+                "stock": "한화엔진",
+                "leader_ret": 11.438377260527123,
+                "follow_ret": -10.526315789473683,
+                "cum_ret": -8.021498833789675
+              },
+              {
+                "fire_date": "2025-04-03",
+                "target_date": "2025-04-07",
+                "stock": "한화엔진",
+                "leader_ret": 5.128205128205132,
+                "follow_ret": -10.1123595505618,
+                "cum_ret": -11.223470661672907
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 112,
+            "propagation_rate": 0.402,
+            "win_rate": 0.509,
+            "avg_return": 0.58,
+            "med_return": 0.17,
+            "std_return": 4.58,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-08",
+                "target_date": "2026-01-13",
+                "stock": "한화시스템",
+                "leader_ret": 7.920792079207928,
+                "follow_ret": 14.157014157014158,
+                "cum_ret": 42.726347809514564
+              },
+              {
+                "fire_date": "2025-03-13",
+                "target_date": "2025-03-18",
+                "stock": "한화엔진",
+                "leader_ret": 6.315847343352243,
+                "follow_ret": 13.71308016877637,
+                "cum_ret": 13.735216256019644
+              },
+              {
+                "fire_date": "2024-11-06",
+                "target_date": "2024-11-11",
+                "stock": "한화시스템",
+                "leader_ret": 7.044209356931863,
+                "follow_ret": 13.146551724137922,
+                "cum_ret": 32.36818876819565
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-02-17",
+                "target_date": "2025-02-20",
+                "stock": "한화엔진",
+                "leader_ret": 8.255151967807816,
+                "follow_ret": -10.526315789473683,
+                "cum_ret": -7.2447998046634705
+              },
+              {
+                "fire_date": "2025-05-07",
+                "target_date": "2025-05-12",
+                "stock": "한화시스템",
+                "leader_ret": 8.801982398269882,
+                "follow_ret": -8.324439701173958,
+                "cum_ret": -3.4447431045631305
+              },
+              {
+                "fire_date": "2025-05-07",
+                "target_date": "2025-05-12",
+                "stock": "한화엔진",
+                "leader_ret": 8.801982398269882,
+                "follow_ret": -8.293460925039875,
+                "cum_ret": 2.6425319578556543
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "한화엔진",
+          "한화시스템"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.357,
+        "win_rate": 0.491,
+        "avg_return": 0.812,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 112,
+            "propagation_rate": 0.357,
+            "win_rate": 0.491,
+            "avg_return": 0.812,
+            "med_return": 0.0,
+            "std_return": 4.069,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-14",
+                "stock": "한화",
+                "leader_ret": 5.775577557755773,
+                "follow_ret": 25.365853658536587,
+                "cum_ret": 25.365853658536587
+              },
+              {
+                "fire_date": "2025-02-11",
+                "target_date": "2025-02-12",
+                "stock": "한화",
+                "leader_ret": 20.581140593533533,
+                "follow_ret": 15.999999999999993,
+                "cum_ret": 15.999999999999993
+              },
+              {
+                "fire_date": "2025-02-17",
+                "target_date": "2025-02-18",
+                "stock": "한화",
+                "leader_ret": 8.255151967807816,
+                "follow_ret": 12.994350282485879,
+                "cum_ret": 12.994350282485879
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-06-12",
+                "target_date": "2025-06-13",
+                "stock": "한화",
+                "leader_ret": 5.303867403314921,
+                "follow_ret": -5.832449628844117,
+                "cum_ret": -5.832449628844117
+              },
+              {
+                "fire_date": "2025-11-03",
+                "target_date": "2025-11-04",
+                "stock": "한화",
+                "leader_ret": 6.435137895812049,
+                "follow_ret": -4.294478527607359,
+                "cum_ret": -4.294478527607359
+              },
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-02",
+                "stock": "한화생명",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -4.207119741100329,
+                "cum_ret": -4.207119741100329
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 112,
+            "propagation_rate": 0.33,
+            "win_rate": 0.464,
+            "avg_return": 0.113,
+            "med_return": -0.177,
+            "std_return": 3.435,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-12",
+                "target_date": "2025-06-16",
+                "stock": "한화",
+                "leader_ret": 5.303867403314921,
+                "follow_ret": 13.288288288288296,
+                "cum_ret": 7.455838659444179
+              },
+              {
+                "fire_date": "2025-02-11",
+                "target_date": "2025-02-13",
+                "stock": "한화",
+                "leader_ret": 20.581140593533533,
+                "follow_ret": 11.803713527851457,
+                "cum_ret": 27.80371352785145
+              },
+              {
+                "fire_date": "2025-05-27",
+                "target_date": "2025-05-29",
+                "stock": "한화",
+                "leader_ret": 6.482593037214879,
+                "follow_ret": 10.222222222222221,
+                "cum_ret": 19.445523193096005
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-02-18",
+                "target_date": "2025-02-20",
+                "stock": "한화",
+                "leader_ret": 11.438377260527123,
+                "follow_ret": -8.03757828810021,
+                "cum_ret": -12.237578288100213
+              },
+              {
+                "fire_date": "2024-08-01",
+                "target_date": "2024-08-05",
+                "stock": "한화생명",
+                "leader_ret": 5.381867513821947,
+                "follow_ret": -7.770270270270274,
+                "cum_ret": -11.977390011370602
+              },
+              {
+                "fire_date": "2025-04-03",
+                "target_date": "2025-04-07",
+                "stock": "한화",
+                "leader_ret": 5.128205128205132,
+                "follow_ret": -7.294117647058829,
+                "cum_ret": -10.37279495606681
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 112,
+            "propagation_rate": 0.366,
+            "win_rate": 0.473,
+            "avg_return": 0.111,
+            "med_return": -0.141,
+            "std_return": 3.77,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-14",
+                "stock": "한화",
+                "leader_ret": 11.376146788990816,
+                "follow_ret": 25.365853658536587,
+                "cum_ret": 37.17598698455311
+              },
+              {
+                "fire_date": "2026-01-09",
+                "target_date": "2026-01-14",
+                "stock": "한화생명",
+                "leader_ret": 11.376146788990816,
+                "follow_ret": 10.440456769983687,
+                "cum_ret": 9.953443782970695
+              },
+              {
+                "fire_date": "2026-01-08",
+                "target_date": "2026-01-13",
+                "stock": "한화",
+                "leader_ret": 7.920792079207928,
+                "follow_ret": 7.105538140020906,
+                "cum_ret": 16.74698751660206
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-03-07",
+                "target_date": "2025-03-12",
+                "stock": "한화",
+                "leader_ret": 7.817204140017675,
+                "follow_ret": -10.392156862745095,
+                "cum_ret": -3.119159645544312
+              },
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-16",
+                "stock": "한화",
+                "leader_ret": 5.775577557755773,
+                "follow_ret": -8.71794871794872,
+                "cum_ret": 22.873585874440003
+              },
+              {
+                "fire_date": "2025-02-17",
+                "target_date": "2025-02-20",
+                "stock": "한화",
+                "leader_ret": 8.255151967807816,
+                "follow_ret": -8.03757828810021,
+                "cum_ret": 0.7567719943856659
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "한화",
+          "한화생명"
+        ]
+      }
+    },
+    "HD현대": {
+      "leader": "HD현대중공업",
+      "leader_ticker": "329180",
+      "fire_events": 40,
+      "fire_dates_sample": [
+        "2024-03-14",
+        "2024-03-18",
+        "2024-04-18",
+        "2024-04-26",
+        "2024-05-13"
+      ],
+      "tier1": {
+        "propagation_rate": 0.463,
+        "win_rate": 0.537,
+        "avg_return": 0.932,
+        "best_lag": 1,
+        "lag_detail": {
+          "lag1": {
+            "samples": 80,
+            "propagation_rate": 0.463,
+            "win_rate": 0.537,
+            "avg_return": 0.932,
+            "med_return": 0.635,
+            "std_return": 3.519,
+            "best_cases": [
+              {
+                "fire_date": "2024-09-13",
+                "target_date": "2024-09-19",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 5.4525014052838605,
+                "follow_ret": 11.816578483245156,
+                "cum_ret": 11.816578483245156
+              },
+              {
+                "fire_date": "2025-08-27",
+                "target_date": "2025-08-28",
+                "stock": "HD한국조선해양",
+                "leader_ret": 11.324786324786329,
+                "follow_ret": 10.554803788903921,
+                "cum_ret": 10.554803788903921
+              },
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-07",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 10.215053763440851,
+                "follow_ret": 7.950530035335679,
+                "cum_ret": 7.950530035335679
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-14",
+                "stock": "HD한국조선해양",
+                "leader_ret": 6.788079470198682,
+                "follow_ret": -7.567567567567568,
+                "cum_ret": -7.567567567567568
+              },
+              {
+                "fire_date": "2025-06-24",
+                "target_date": "2025-06-25",
+                "stock": "HD한국조선해양",
+                "leader_ret": 6.92041522491349,
+                "follow_ret": -7.14285714285714,
+                "cum_ret": -7.14285714285714
+              },
+              {
+                "fire_date": "2024-03-14",
+                "target_date": "2024-03-15",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 7.830783078307824,
+                "follow_ret": -5.310300703774795,
+                "cum_ret": -5.310300703774795
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 78,
+            "propagation_rate": 0.436,
+            "win_rate": 0.487,
+            "avg_return": 0.66,
+            "med_return": 0.0,
+            "std_return": 3.837,
+            "best_cases": [
+              {
+                "fire_date": "2025-04-08",
+                "target_date": "2025-04-10",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 6.896551724137923,
+                "follow_ret": 16.728624535315983,
+                "cum_ret": 14.192392651258013
+              },
+              {
+                "fire_date": "2025-04-08",
+                "target_date": "2025-04-10",
+                "stock": "HD한국조선해양",
+                "leader_ret": 6.896551724137923,
+                "follow_ret": 8.951406649616377,
+                "cum_ret": 10.827383721007731
+              },
+              {
+                "fire_date": "2025-10-21",
+                "target_date": "2025-10-23",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 9.9609375,
+                "follow_ret": 8.746355685131203,
+                "cum_ret": 9.926296688081049
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-04-18",
+                "target_date": "2024-04-22",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 8.086253369272246,
+                "follow_ret": -6.762295081967218,
+                "cum_ret": -4.670244872762197
+              },
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-08",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 10.215053763440851,
+                "follow_ret": -6.382978723404253,
+                "cum_ret": 1.5675513119314255
+              },
+              {
+                "fire_date": "2025-01-21",
+                "target_date": "2025-01-23",
+                "stock": "HD한국조선해양",
+                "leader_ret": 5.996758508914102,
+                "follow_ret": -6.224066390041494,
+                "cum_ret": -9.24217504195296
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 78,
+            "propagation_rate": 0.385,
+            "win_rate": 0.5,
+            "avg_return": 0.588,
+            "med_return": 0.112,
+            "std_return": 3.277,
+            "best_cases": [
+              {
+                "fire_date": "2025-01-21",
+                "target_date": "2025-01-24",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 5.996758508914102,
+                "follow_ret": 8.935128518971847,
+                "cum_ret": 14.964304822120766
+              },
+              {
+                "fire_date": "2024-03-18",
+                "target_date": "2024-03-21",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 5.123825789923142,
+                "follow_ret": 8.617234468937873,
+                "cum_ret": 5.46208103865371
+              },
+              {
+                "fire_date": "2024-11-20",
+                "target_date": "2024-11-25",
+                "stock": "HD한국조선해양",
+                "leader_ret": 5.122494432071267,
+                "follow_ret": 7.444168734491319,
+                "cum_ret": 6.263767678456189
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-03-04",
+                "target_date": "2025-03-07",
+                "stock": "HD한국조선해양",
+                "leader_ret": 6.25,
+                "follow_ret": -5.273833671399597,
+                "cum_ret": -0.4849213800131258
+              },
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-06",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 6.0109289617486406,
+                "follow_ret": -3.7800687285223344,
+                "cum_ret": -5.362541373987117
+              },
+              {
+                "fire_date": "2024-03-14",
+                "target_date": "2024-03-19",
+                "stock": "HD현대일렉트릭",
+                "leader_ret": 7.830783078307824,
+                "follow_ret": -3.557567917205695,
+                "cum_ret": -4.40840916152102
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "HD현대일렉트릭",
+          "HD한국조선해양"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.403,
+        "win_rate": 0.558,
+        "avg_return": 0.776,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 78,
+            "propagation_rate": 0.308,
+            "win_rate": 0.474,
+            "avg_return": 0.9,
+            "med_return": 0.0,
+            "std_return": 4.035,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-17",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 5.029239766081872,
+                "follow_ret": 14.923954372623571,
+                "cum_ret": 14.923954372623571
+              },
+              {
+                "fire_date": "2025-02-12",
+                "target_date": "2025-02-13",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 15.359477124182996,
+                "follow_ret": 14.16256157635467,
+                "cum_ret": 14.16256157635467
+              },
+              {
+                "fire_date": "2025-01-21",
+                "target_date": "2025-01-22",
+                "stock": "HD현대건설기계",
+                "leader_ret": 5.996758508914102,
+                "follow_ret": 10.486322188449847,
+                "cum_ret": 10.486322188449847
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2026-02-03",
+                "target_date": "2026-02-04",
+                "stock": "HD현대건설기계",
+                "leader_ret": 6.0109289617486406,
+                "follow_ret": -6.622516556291391,
+                "cum_ret": -6.622516556291391
+              },
+              {
+                "fire_date": "2024-11-06",
+                "target_date": "2024-11-07",
+                "stock": "HD현대건설기계",
+                "leader_ret": 5.474665113570176,
+                "follow_ret": -6.228956228956228,
+                "cum_ret": -6.228956228956228
+              },
+              {
+                "fire_date": "2024-11-18",
+                "target_date": "2024-11-19",
+                "stock": "HD현대건설기계",
+                "leader_ret": 6.557377049180335,
+                "follow_ret": -5.759999999999998,
+                "cum_ret": -5.759999999999998
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 77,
+            "propagation_rate": 0.403,
+            "win_rate": 0.558,
+            "avg_return": 0.776,
+            "med_return": 0.56,
+            "std_return": 2.932,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-21",
+                "target_date": "2025-10-23",
+                "stock": "HD현대건설기계",
+                "leader_ret": 9.9609375,
+                "follow_ret": 10.480769230769237,
+                "cum_ret": 14.793708047218578
+              },
+              {
+                "fire_date": "2025-01-08",
+                "target_date": "2025-01-10",
+                "stock": "HD현대건설기계",
+                "leader_ret": 5.199306759098787,
+                "follow_ret": 6.829268292682933,
+                "cum_ret": 7.1555325667449265
+              },
+              {
+                "fire_date": "2025-04-08",
+                "target_date": "2025-04-10",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 6.896551724137923,
+                "follow_ret": 6.545961002785505,
+                "cum_ret": 4.633392696774575
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-07-26",
+                "target_date": "2024-07-30",
+                "stock": "HD현대건설기계",
+                "leader_ret": 16.901408450704224,
+                "follow_ret": -6.000000000000005,
+                "cum_ret": -5.068322981366458
+              },
+              {
+                "fire_date": "2025-02-12",
+                "target_date": "2025-02-14",
+                "stock": "HD현대건설기계",
+                "leader_ret": 15.359477124182996,
+                "follow_ret": -5.91787439613527,
+                "cum_ret": 3.6059351276742646
+              },
+              {
+                "fire_date": "2025-01-21",
+                "target_date": "2025-01-23",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 5.996758508914102,
+                "follow_ret": -4.773869346733672,
+                "cum_ret": 4.267226543677282
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 77,
+            "propagation_rate": 0.338,
+            "win_rate": 0.416,
+            "avg_return": -0.064,
+            "med_return": -0.353,
+            "std_return": 3.081,
+            "best_cases": [
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-19",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 5.029239766081872,
+                "follow_ret": 7.692307692307687,
+                "cum_ret": 19.39045561331836
+              },
+              {
+                "fire_date": "2026-01-06",
+                "target_date": "2026-01-09",
+                "stock": "HD현대건설기계",
+                "leader_ret": 7.21247563352827,
+                "follow_ret": 6.2801932367149815,
+                "cum_ret": 0.37411305208802137
+              },
+              {
+                "fire_date": "2025-05-26",
+                "target_date": "2025-05-29",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 6.041131105398456,
+                "follow_ret": 5.95647193585338,
+                "cum_ret": 6.202094533132341
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-10-27",
+                "target_date": "2025-10-30",
+                "stock": "HD현대인프라코어",
+                "leader_ret": 5.050505050505061,
+                "follow_ret": -9.430707303047726,
+                "cum_ret": -8.253717459710309
+              },
+              {
+                "fire_date": "2025-10-27",
+                "target_date": "2025-10-30",
+                "stock": "HD현대건설기계",
+                "leader_ret": 5.050505050505061,
+                "follow_ret": -7.271095152603236,
+                "cum_ret": -6.994976844284185
+              },
+              {
+                "fire_date": "2024-11-14",
+                "target_date": "2024-11-19",
+                "stock": "HD현대건설기계",
+                "leader_ret": 9.406438631790737,
+                "follow_ret": -5.759999999999998,
+                "cum_ret": -2.554852238289917
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "HD현대건설기계",
+          "HD현대인프라코어"
+        ]
+      },
+      "tier3": {
+        "propagation_rate": 0.436,
+        "win_rate": 0.615,
+        "avg_return": 0.919,
+        "best_lag": 3,
+        "lag_detail": {
+          "lag1": {
+            "samples": 40,
+            "propagation_rate": 0.375,
+            "win_rate": 0.425,
+            "avg_return": 0.296,
+            "med_return": -0.193,
+            "std_return": 2.905,
+            "best_cases": [
+              {
+                "fire_date": "2026-02-19",
+                "target_date": "2026-02-20",
+                "stock": "HD현대",
+                "leader_ret": 5.7090239410681365,
+                "follow_ret": 7.948243992606274,
+                "cum_ret": 7.948243992606274
+              },
+              {
+                "fire_date": "2025-06-02",
+                "target_date": "2025-06-04",
+                "stock": "HD현대",
+                "leader_ret": 5.5487053020961685,
+                "follow_ret": 6.554472984942428,
+                "cum_ret": 6.554472984942428
+              },
+              {
+                "fire_date": "2024-04-26",
+                "target_date": "2024-04-29",
+                "stock": "HD현대",
+                "leader_ret": 8.984375,
+                "follow_ret": 5.061349693251538,
+                "cum_ret": 5.061349693251538
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-07-25",
+                "target_date": "2025-07-28",
+                "stock": "HD현대",
+                "leader_ret": 5.833333333333335,
+                "follow_ret": -5.0734312416555465,
+                "cum_ret": -5.0734312416555465
+              },
+              {
+                "fire_date": "2025-11-13",
+                "target_date": "2025-11-14",
+                "stock": "HD현대",
+                "leader_ret": 5.970149253731338,
+                "follow_ret": -4.867256637168138,
+                "cum_ret": -4.867256637168138
+              },
+              {
+                "fire_date": "2025-12-09",
+                "target_date": "2025-12-10",
+                "stock": "HD현대",
+                "leader_ret": 6.26151012891345,
+                "follow_ret": -3.4965034965035002,
+                "cum_ret": -3.4965034965035002
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 39,
+            "propagation_rate": 0.359,
+            "win_rate": 0.59,
+            "avg_return": 0.687,
+            "med_return": 0.39,
+            "std_return": 2.738,
+            "best_cases": [
+              {
+                "fire_date": "2025-05-26",
+                "target_date": "2025-05-28",
+                "stock": "HD현대",
+                "leader_ret": 6.041131105398456,
+                "follow_ret": 12.42807825086305,
+                "cum_ret": 12.084041553615343
+              },
+              {
+                "fire_date": "2025-04-08",
+                "target_date": "2025-04-10",
+                "stock": "HD현대",
+                "leader_ret": 6.896551724137923,
+                "follow_ret": 5.829596412556048,
+                "cum_ret": 3.0679685055792993
+              },
+              {
+                "fire_date": "2025-11-13",
+                "target_date": "2025-11-17",
+                "stock": "HD현대",
+                "leader_ret": 5.970149253731338,
+                "follow_ret": 5.348837209302326,
+                "cum_ret": 0.48158057213418815
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-06-16",
+                "target_date": "2025-06-18",
+                "stock": "HD현대",
+                "leader_ret": 5.029239766081872,
+                "follow_ret": -3.5498489425981883,
+                "cum_ret": -6.6245195136084405
+              },
+              {
+                "fire_date": "2025-10-21",
+                "target_date": "2025-10-23",
+                "stock": "HD현대",
+                "leader_ret": 9.9609375,
+                "follow_ret": -2.877697841726623,
+                "cum_ret": 1.5731692102964878
+              },
+              {
+                "fire_date": "2025-06-24",
+                "target_date": "2025-06-26",
+                "stock": "HD현대",
+                "leader_ret": 6.92041522491349,
+                "follow_ret": -2.2376543209876587,
+                "cum_ret": -3.9813995825494497
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 39,
+            "propagation_rate": 0.436,
+            "win_rate": 0.615,
+            "avg_return": 0.919,
+            "med_return": 0.423,
+            "std_return": 2.886,
+            "best_cases": [
+              {
+                "fire_date": "2025-05-26",
+                "target_date": "2025-05-29",
+                "stock": "HD현대",
+                "leader_ret": 6.041131105398456,
+                "follow_ret": 11.258955987717512,
+                "cum_ret": 23.342997541332856
+              },
+              {
+                "fire_date": "2024-12-26",
+                "target_date": "2025-01-02",
+                "stock": "HD현대",
+                "leader_ret": 9.558823529411775,
+                "follow_ret": 8.080808080808088,
+                "cum_ret": 3.928356280526712
+              },
+              {
+                "fire_date": "2026-01-06",
+                "target_date": "2026-01-09",
+                "stock": "HD현대",
+                "leader_ret": 7.21247563352827,
+                "follow_ret": 4.325699745547085,
+                "cum_ret": 4.902446321758635
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-04-26",
+                "target_date": "2024-05-02",
+                "stock": "HD현대",
+                "leader_ret": 8.984375,
+                "follow_ret": -4.599406528189909,
+                "cum_ret": -1.1438962509967676
+              },
+              {
+                "fire_date": "2025-11-13",
+                "target_date": "2025-11-18",
+                "stock": "HD현대",
+                "leader_ret": 5.970149253731338,
+                "follow_ret": -3.9735099337748325,
+                "cum_ret": -3.4919293616406444
+              },
+              {
+                "fire_date": "2024-09-13",
+                "target_date": "2024-09-23",
+                "stock": "HD현대",
+                "leader_ret": 5.4525014052838605,
+                "follow_ret": -3.0229746070132957,
+                "cum_ret": 2.004826672376281
+              }
+            ]
+          }
+        },
+        "stocks": 1,
+        "stock_names": [
+          "HD현대"
+        ]
+      }
+    },
+    "포스코": {
+      "leader": "POSCO홀딩스",
+      "leader_ticker": "005490",
+      "fire_events": 22,
+      "fire_dates_sample": [
+        "2024-03-04",
+        "2024-04-18",
+        "2024-07-11",
+        "2024-08-06",
+        "2024-09-02"
+      ],
+      "tier1": {
+        "propagation_rate": 0.364,
+        "win_rate": 0.432,
+        "avg_return": 0.158,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 44,
+            "propagation_rate": 0.318,
+            "win_rate": 0.455,
+            "avg_return": -0.419,
+            "med_return": -0.408,
+            "std_return": 3.22,
+            "best_cases": [
+              {
+                "fire_date": "2025-02-21",
+                "target_date": "2025-02-24",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 5.027932960893855,
+                "follow_ret": 7.303974221267451,
+                "cum_ret": 7.303974221267451
+              },
+              {
+                "fire_date": "2025-03-20",
+                "target_date": "2025-03-21",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 6.240000000000001,
+                "follow_ret": 5.7347670250896154,
+                "cum_ret": 5.7347670250896154
+              },
+              {
+                "fire_date": "2025-02-21",
+                "target_date": "2025-02-24",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.027932960893855,
+                "follow_ret": 5.010302416642465,
+                "cum_ret": 5.010302416642465
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-11-14",
+                "target_date": "2024-11-15",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 7.26643598615917,
+                "follow_ret": -9.503278241057956,
+                "cum_ret": -9.503278241057956
+              },
+              {
+                "fire_date": "2024-03-04",
+                "target_date": "2024-03-05",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 6.141367323290847,
+                "follow_ret": -5.231683095029549,
+                "cum_ret": -5.231683095029549
+              },
+              {
+                "fire_date": "2025-07-21",
+                "target_date": "2025-07-22",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.144694533762051,
+                "follow_ret": -4.21994884910486,
+                "cum_ret": -4.21994884910486
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 44,
+            "propagation_rate": 0.364,
+            "win_rate": 0.432,
+            "avg_return": 0.158,
+            "med_return": -0.225,
+            "std_return": 3.696,
+            "best_cases": [
+              {
+                "fire_date": "2024-04-18",
+                "target_date": "2024-04-22",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.121293800539073,
+                "follow_ret": 9.270269940298137,
+                "cum_ret": 7.33586490853031
+              },
+              {
+                "fire_date": "2025-07-21",
+                "target_date": "2025-07-23",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 5.144694533762051,
+                "follow_ret": 8.7890625,
+                "cum_ret": 4.669212312734084
+              },
+              {
+                "fire_date": "2024-11-14",
+                "target_date": "2024-11-18",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 7.26643598615917,
+                "follow_ret": 5.274725274725278,
+                "cum_ret": 1.4692284459726368
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-08",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 5.087440381558039,
+                "follow_ret": -5.68527918781726,
+                "cum_ret": -4.763148040276277
+              },
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-08",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.087440381558039,
+                "follow_ret": -5.225445990982158,
+                "cum_ret": -8.221057878346006
+              },
+              {
+                "fire_date": "2025-02-21",
+                "target_date": "2025-02-25",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.027932960893855,
+                "follow_ret": -5.163682950675974,
+                "cum_ret": -0.15338053403350926
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 44,
+            "propagation_rate": 0.227,
+            "win_rate": 0.341,
+            "avg_return": -0.708,
+            "med_return": -0.573,
+            "std_return": 2.585,
+            "best_cases": [
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-09",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 5.087440381558039,
+                "follow_ret": 6.027987082884811,
+                "cum_ret": 1.2648390426085347
+              },
+              {
+                "fire_date": "2025-02-21",
+                "target_date": "2025-02-26",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.027932960893855,
+                "follow_ret": 4.066208308744579,
+                "cum_ret": 3.9128277747110696
+              },
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-09",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 5.087440381558039,
+                "follow_ret": 3.0075810071466202,
+                "cum_ret": -5.2134768711993855
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-05",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 5.882352941176472,
+                "follow_ret": -7.388316151202745,
+                "cum_ret": -5.823061017328679
+              },
+              {
+                "fire_date": "2025-03-20",
+                "target_date": "2025-03-25",
+                "stock": "포스코인터내셔널",
+                "leader_ret": 6.240000000000001,
+                "follow_ret": -6.818181818181824,
+                "cum_ret": -4.134262250719323
+              },
+              {
+                "fire_date": "2024-07-11",
+                "target_date": "2024-07-16",
+                "stock": "포스코퓨처엠",
+                "leader_ret": 6.241519674355489,
+                "follow_ret": -4.8416781615378435,
+                "cum_ret": -5.191205540403965
+              }
+            ]
+          }
+        },
+        "stocks": 2,
+        "stock_names": [
+          "포스코퓨처엠",
+          "포스코인터내셔널"
+        ]
+      },
+      "tier2": {
+        "propagation_rate": 0.455,
+        "win_rate": 0.5,
+        "avg_return": 0.81,
+        "best_lag": 2,
+        "lag_detail": {
+          "lag1": {
+            "samples": 22,
+            "propagation_rate": 0.273,
+            "win_rate": 0.5,
+            "avg_return": -0.029,
+            "med_return": -0.01,
+            "std_return": 2.589,
+            "best_cases": [
+              {
+                "fire_date": "2025-10-24",
+                "target_date": "2025-10-27",
+                "stock": "포스코DX",
+                "leader_ret": 5.681818181818188,
+                "follow_ret": 4.972375690607733,
+                "cum_ret": 4.972375690607733
+              },
+              {
+                "fire_date": "2025-03-12",
+                "target_date": "2025-03-13",
+                "stock": "포스코DX",
+                "leader_ret": 5.90219224283306,
+                "follow_ret": 3.900709219858145,
+                "cum_ret": 3.900709219858145
+              },
+              {
+                "fire_date": "2025-03-06",
+                "target_date": "2025-03-07",
+                "stock": "포스코DX",
+                "leader_ret": 6.871609403254975,
+                "follow_ret": 3.8306451612903247,
+                "cum_ret": 3.8306451612903247
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-11-14",
+                "target_date": "2024-11-15",
+                "stock": "포스코DX",
+                "leader_ret": 7.26643598615917,
+                "follow_ret": -5.947136563876654,
+                "cum_ret": -5.947136563876654
+              },
+              {
+                "fire_date": "2025-02-13",
+                "target_date": "2025-02-14",
+                "stock": "포스코DX",
+                "leader_ret": 6.941431670282006,
+                "follow_ret": -4.275184275184274,
+                "cum_ret": -4.275184275184274
+              },
+              {
+                "fire_date": "2024-04-18",
+                "target_date": "2024-04-19",
+                "stock": "포스코DX",
+                "leader_ret": 5.121293800539073,
+                "follow_ret": -3.366583541147128,
+                "cum_ret": -3.366583541147128
+              }
+            ]
+          },
+          "lag2": {
+            "samples": 22,
+            "propagation_rate": 0.455,
+            "win_rate": 0.5,
+            "avg_return": 0.81,
+            "med_return": -0.204,
+            "std_return": 7.283,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-15",
+                "stock": "포스코DX",
+                "leader_ret": 13.89337641357027,
+                "follow_ret": 29.915966386554626,
+                "cum_ret": 31.974285426005732
+              },
+              {
+                "fire_date": "2024-04-18",
+                "target_date": "2024-04-22",
+                "stock": "포스코DX",
+                "leader_ret": 5.121293800539073,
+                "follow_ret": 6.838709677419352,
+                "cum_ret": 3.4721261362722244
+              },
+              {
+                "fire_date": "2025-07-21",
+                "target_date": "2025-07-23",
+                "stock": "포스코DX",
+                "leader_ret": 5.144694533762051,
+                "follow_ret": 4.89236790606653,
+                "cum_ret": 4.502504358308245
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2025-11-12",
+                "target_date": "2025-11-14",
+                "stock": "포스코DX",
+                "leader_ret": 5.115511551155105,
+                "follow_ret": -5.807622504537202,
+                "cum_ret": -3.009115041850629
+              },
+              {
+                "fire_date": "2025-03-12",
+                "target_date": "2025-03-14",
+                "stock": "포스코DX",
+                "leader_ret": 5.90219224283306,
+                "follow_ret": -5.802047781569963,
+                "cum_ret": -1.9013385617118184
+              },
+              {
+                "fire_date": "2025-02-21",
+                "target_date": "2025-02-25",
+                "stock": "포스코DX",
+                "leader_ret": 5.027932960893855,
+                "follow_ret": -4.835589941972918,
+                "cum_ret": -6.733123148804033
+              }
+            ]
+          },
+          "lag3": {
+            "samples": 22,
+            "propagation_rate": 0.318,
+            "win_rate": 0.364,
+            "avg_return": -0.143,
+            "med_return": -0.664,
+            "std_return": 3.365,
+            "best_cases": [
+              {
+                "fire_date": "2026-01-13",
+                "target_date": "2026-01-16",
+                "stock": "포스코DX",
+                "leader_ret": 13.89337641357027,
+                "follow_ret": 8.667529107373873,
+                "cum_ret": 40.6418145333796
+              },
+              {
+                "fire_date": "2025-03-07",
+                "target_date": "2025-03-12",
+                "stock": "포스코DX",
+                "leader_ret": 7.275803722504226,
+                "follow_ret": 7.6335877862595325,
+                "cum_ret": 9.394813514414867
+              },
+              {
+                "fire_date": "2024-08-06",
+                "target_date": "2024-08-09",
+                "stock": "포스코DX",
+                "leader_ret": 5.087440381558039,
+                "follow_ret": 2.7027027027026973,
+                "cum_ret": -1.3549712073697258
+              }
+            ],
+            "worst_cases": [
+              {
+                "fire_date": "2024-09-02",
+                "target_date": "2024-09-05",
+                "stock": "포스코DX",
+                "leader_ret": 5.882352941176472,
+                "follow_ret": -6.228956228956228,
+                "cum_ret": -8.506098411492502
+              },
+              {
+                "fire_date": "2024-07-11",
+                "target_date": "2024-07-16",
+                "stock": "포스코DX",
+                "leader_ret": 6.241519674355489,
+                "follow_ret": -3.3333333333333326,
+                "cum_ret": -7.889804838406
+              },
+              {
+                "fire_date": "2026-01-28",
+                "target_date": "2026-02-02",
+                "stock": "포스코DX",
+                "leader_ret": 5.146036161335177,
+                "follow_ret": -2.975420439844756,
+                "cum_ret": -8.41936396904186
+              }
+            ]
+          }
+        },
+        "stocks": 1,
+        "stock_names": [
+          "포스코DX"
+        ]
+      },
+      "tier3": {
+        "stocks": 0,
+        "error": "종목 없음"
+      }
+    }
+  }
+}

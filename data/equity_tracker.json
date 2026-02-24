@@ -1,0 +1,22 @@
+{
+  "initial_capital": 100000000,
+  "peak_equity": 100000000,
+  "peak_date": "",
+  "current_equity": 100000000,
+  "current_mdd_pct": 0.0,
+  "max_mdd_pct": 0.0,
+  "max_mdd_date": "",
+  "daily_log": [
+    {
+      "date": "2026-02-19",
+      "equity": 100000000,
+      "mdd_pct": 0.0
+    },
+    {
+      "date": "2026-02-20",
+      "equity": 100000000,
+      "mdd_pct": 0.0
+    }
+  ],
+  "alert_history": []
+}

@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-02-18T15:27:03.467801",
+  "total_records": 466,
+  "date_range": {
+    "start": "2024-02-22",
+    "end": "2026-02-13"
+  },
+  "score_vs_kospi": {
+    "STRONG_BEAR": {
+      "count": 71,
+      "kospi_mean": -0.994,
+      "kospi_positive_rate": 25.4,
+      "kospi_median": -0.681
+    },
+    "MILD_BEAR": {
+      "count": 72,
+      "kospi_mean": -0.028,
+      "kospi_positive_rate": 51.4,
+      "kospi_median": 0.035
+    },
+    "NEUTRAL": {
+      "count": 132,
+      "kospi_mean": 0.221,
+      "kospi_positive_rate": 61.4,
+      "kospi_median": 0.215
+    },
+    "MILD_BULL": {
+      "count": 107,
+      "kospi_mean": 0.489,
+      "kospi_positive_rate": 64.5,
+      "kospi_median": 0.232
+    },
+    "STRONG_BULL": {
+      "count": 84,
+      "kospi_mean": 0.819,
+      "kospi_positive_rate": 77.4,
+      "kospi_median": 0.76
+    }
+  },
+  "correlations_top15": {
+    "us_soxx_chg -> kr_kospi_chg": 0.463,
+    "us_soxx_chg -> kr_semi_chg": 0.442,
+    "us_sp500_chg -> kr_kospi_chg": 0.421,
+    "us_nasdaq_chg -> kr_kospi_chg": 0.416,
+    "us_nasdaq_chg -> kr_semi_chg": 0.386,
+    "us_vix_chg -> kr_kospi_chg": -0.354,
+    "us_sp500_chg -> kr_semi_chg": 0.353,
+    "us_soxx_chg -> kr_ev_chg": 0.312,
+    "us_vix_chg -> kr_semi_chg": -0.308,
+    "us_soxx_chg -> kr_bio_chg": 0.277,
+    "us_sp500_chg -> kr_ev_chg": 0.27,
+    "us_nasdaq_chg -> kr_ev_chg": 0.27,
+    "us_sp500_chg -> kr_bio_chg": 0.265,
+    "us_nasdaq_chg -> kr_bio_chg": 0.261,
+    "us_vix_chg -> kr_bio_chg": -0.254
+  },
+  "extreme_analysis": {
+    "nasdaq_crash_minus3": {
+      "count": 9,
+      "kospi_mean": -1.647,
+      "kospi_worst": -5.566,
+      "kospi_positive_rate": 11.1
+    },
+    "vix_above_30": {
+      "count": 13,
+      "kospi_mean": 0.35,
+      "kospi_positive_rate": 53.8
+    },
+    "soxx_crash_vs_kr_semi": {
+      "count": 40,
+      "kr_semi_mean": -2.621,
+      "kr_semi_worst": -11.38
+    }
+  },
+  "gap_analysis": {
+    "score_gap_correlation": 0.589,
+    "mean_positive_gap": 0.623,
+    "mean_negative_gap": -0.483
+  }
+}

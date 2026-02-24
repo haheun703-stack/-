@@ -1,0 +1,183 @@
+{
+  "scan_time": "2026-02-24T08:02:17.670863",
+  "theme_count": 2,
+  "alerts": [
+    {
+      "theme_name": "원전",
+      "matched_keyword": "원전",
+      "news_title": "\"원전주 된 현대건설, 유례없이 강하다…목표가 상향\"-KB",
+      "news_url": "https://www.hankyung.com/article/2026022370126",
+      "news_source": "한경_증권",
+      "published": "2026-02-22 13:34",
+      "grok_expanded": true,
+      "timestamp": "2026-02-24T08:01:20.967309",
+      "related_stocks": [
+        {
+          "ticker": "009540",
+          "name": "한국전력",
+          "order": 1,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 67.02934381429543,
+          "ma20_dist_pct": 13.5
+        },
+        {
+          "ticker": "034020",
+          "name": "두산에너빌리티",
+          "order": 1,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 63.67205997375571,
+          "ma20_dist_pct": 8.5
+        },
+        {
+          "ticker": "267250",
+          "name": "HD현대에너지솔루션",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 76.22813382737483,
+          "ma20_dist_pct": 17.9
+        },
+        {
+          "ticker": "092200",
+          "name": "디아이씨",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 44.640700296711266,
+          "ma20_dist_pct": -2.7
+        },
+        {
+          "ticker": "000720",
+          "name": "현대건설",
+          "order": 2,
+          "source": "grok_expanded",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 76.53021759848114,
+          "ma20_dist_pct": 21.0
+        },
+        {
+          "ticker": "052690",
+          "name": "한전기술",
+          "order": 3,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 69.70686806401885,
+          "ma20_dist_pct": 12.9
+        },
+        {
+          "ticker": "083650",
+          "name": "비에이치아이",
+          "order": 4,
+          "source": "grok_expanded",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 73.57804452817078,
+          "ma20_dist_pct": 20.7
+        },
+        {
+          "ticker": "032820",
+          "name": "우리기술",
+          "order": 5,
+          "source": "grok_expanded",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 84.56996540460977,
+          "ma20_dist_pct": 62.9
+        },
+        {
+          "ticker": "051600",
+          "name": "한전KPS",
+          "order": 6,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 68.12227763454848,
+          "ma20_dist_pct": 8.3
+        }
+      ]
+    },
+    {
+      "theme_name": "로봇",
+      "matched_keyword": "로봇",
+      "news_title": "“두시간 뒤 회의 있어요” 묻기 전에 알려주는 AI 비서",
+      "news_url": "https://www.donga.com/news/Economy/article/all/20260223/133406154/2",
+      "news_source": "동아_경제",
+      "published": "2026-02-23 06:30",
+      "grok_expanded": true,
+      "timestamp": "2026-02-24T08:01:20.975017",
+      "related_stocks": [
+        {
+          "ticker": "090460",
+          "name": "비에이치",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 59.63472060555159,
+          "ma20_dist_pct": 7.2
+        },
+        {
+          "ticker": "267260",
+          "name": "HD현대일렉트릭",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 67.93338509906101,
+          "ma20_dist_pct": 15.8
+        },
+        {
+          "ticker": "012510",
+          "name": "더존비즈온",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 76.11028977084929,
+          "ma20_dist_pct": 28.9
+        },
+        {
+          "ticker": "277810",
+          "name": "레인보우로보틱스",
+          "order": 2,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 58.62411904746665,
+          "ma20_dist_pct": 1.9
+        },
+        {
+          "ticker": "454910",
+          "name": "두산로보틱스",
+          "order": 3,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 49.67671427153661,
+          "ma20_dist_pct": -6.1
+        },
+        {
+          "ticker": "108490",
+          "name": "로보티즈",
+          "order": 4,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 47.22408247251129,
+          "ma20_dist_pct": -5.6
+        },
+        {
+          "ticker": "117730",
+          "name": "티로보틱스",
+          "order": 5,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 45.52852560317031,
+          "ma20_dist_pct": -8.2
+        },
+        {
+          "ticker": "056080",
+          "name": "유진로봇",
+          "order": 6,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 56.29326756092631,
+          "ma20_dist_pct": 1.8
+        }
+      ]
+    }
+  ]
+}

@@ -7,10 +7,19 @@ __pycache__/
 
 # 데이터/캐시
 stock_data_daily/
-data/
 results/
 *.dat
 nul
+
+# data/ — 대용량 파일은 제외, JSON은 Railway 배포용으로 포함
+data/*.parquet
+data/*.csv
+data/*.db
+data/*.sqlite
+data/processed/
+data/us_market/*.parquet
+data/trade_journal/
+data/daily_snapshots/
 
 # 빌드/압축
 *.zip

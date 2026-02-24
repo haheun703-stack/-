@@ -1,0 +1,735 @@
+{
+  "cases": [
+    {
+      "ticker": "007070",
+      "date": "2023-12-12",
+      "outcome": "failure",
+      "pnl_pct": -3.76,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "053800",
+      "date": "2023-12-28",
+      "outcome": "success",
+      "pnl_pct": 8.73,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "053800",
+      "date": "2023-12-28",
+      "outcome": "success",
+      "pnl_pct": 4.78,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "000080",
+      "date": "2024-01-25",
+      "outcome": "failure",
+      "pnl_pct": -2.5,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "234340",
+      "date": "2024-01-31",
+      "outcome": "failure",
+      "pnl_pct": -9.24,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "045390",
+      "date": "2024-02-06",
+      "outcome": "failure",
+      "pnl_pct": -2.16,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "298380",
+      "date": "2024-02-21",
+      "outcome": "success",
+      "pnl_pct": 19.51,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "298380",
+      "date": "2024-02-21",
+      "outcome": "success",
+      "pnl_pct": 27.37,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "080220",
+      "date": "2024-03-06",
+      "outcome": "failure",
+      "pnl_pct": -6.34,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "452260",
+      "date": "2024-04-17",
+      "outcome": "failure",
+      "pnl_pct": -3.14,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "009155",
+      "date": "2024-03-12",
+      "outcome": "success",
+      "pnl_pct": 7.69,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "009155",
+      "date": "2024-03-12",
+      "outcome": "success",
+      "pnl_pct": 8.0,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "000120",
+      "date": "2024-04-09",
+      "outcome": "success",
+      "pnl_pct": 4.16,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "086390",
+      "date": "2024-05-07",
+      "outcome": "failure",
+      "pnl_pct": -6.88,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "281740",
+      "date": "2024-05-17",
+      "outcome": "failure",
+      "pnl_pct": -3.69,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "240810",
+      "date": "2024-05-22",
+      "outcome": "failure",
+      "pnl_pct": -3.26,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "161580",
+      "date": "2024-05-24",
+      "outcome": "failure",
+      "pnl_pct": -5.77,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "089970",
+      "date": "2024-05-30",
+      "outcome": "failure",
+      "pnl_pct": -3.02,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "057050",
+      "date": "2024-06-03",
+      "outcome": "failure",
+      "pnl_pct": -2.69,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "011690",
+      "date": "2024-06-12",
+      "outcome": "failure",
+      "pnl_pct": -4.29,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "001680",
+      "date": "2024-07-23",
+      "outcome": "failure",
+      "pnl_pct": -4.69,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "077970",
+      "date": "2024-07-25",
+      "outcome": "failure",
+      "pnl_pct": -5.55,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "078600",
+      "date": "2024-08-06",
+      "outcome": "failure",
+      "pnl_pct": -7.17,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "001680",
+      "date": "2024-08-08",
+      "outcome": "failure",
+      "pnl_pct": -5.94,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "280360",
+      "date": "2024-08-16",
+      "outcome": "failure",
+      "pnl_pct": -2.64,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "066575",
+      "date": "2024-08-20",
+      "outcome": "success",
+      "pnl_pct": 10.8,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "042000",
+      "date": "2024-09-19",
+      "outcome": "failure",
+      "pnl_pct": -6.49,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "006360",
+      "date": "2024-09-20",
+      "outcome": "failure",
+      "pnl_pct": -5.94,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "358570",
+      "date": "2024-11-11",
+      "outcome": "failure",
+      "pnl_pct": -7.5,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "003540",
+      "date": "2024-10-02",
+      "outcome": "success",
+      "pnl_pct": 6.47,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "003540",
+      "date": "2024-10-02",
+      "outcome": "success",
+      "pnl_pct": 3.31,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "029780",
+      "date": "2024-10-22",
+      "outcome": "failure",
+      "pnl_pct": -4.62,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "086900",
+      "date": "2024-10-29",
+      "outcome": "failure",
+      "pnl_pct": -5.08,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "086900",
+      "date": "2024-11-04",
+      "outcome": "failure",
+      "pnl_pct": -4.12,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "237690",
+      "date": "2024-11-06",
+      "outcome": "failure",
+      "pnl_pct": -4.85,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "053030",
+      "date": "2024-11-07",
+      "outcome": "failure",
+      "pnl_pct": -6.77,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "016610",
+      "date": "2024-11-18",
+      "outcome": "success",
+      "pnl_pct": 5.77,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "071055",
+      "date": "2024-12-27",
+      "outcome": "success",
+      "pnl_pct": 8.33,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "102940",
+      "date": "2025-01-31",
+      "outcome": "success",
+      "pnl_pct": 15.82,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "102940",
+      "date": "2025-01-31",
+      "outcome": "success",
+      "pnl_pct": 24.07,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "000500",
+      "date": "2025-02-17",
+      "outcome": "failure",
+      "pnl_pct": -7.81,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "001530",
+      "date": "2025-02-26",
+      "outcome": "failure",
+      "pnl_pct": -2.96,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "018880",
+      "date": "2025-03-10",
+      "outcome": "failure",
+      "pnl_pct": -3.06,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "050890",
+      "date": "2025-03-13",
+      "outcome": "failure",
+      "pnl_pct": -5.79,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "057050",
+      "date": "2025-03-31",
+      "outcome": "failure",
+      "pnl_pct": -5.31,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "014620",
+      "date": "2025-04-02",
+      "outcome": "failure",
+      "pnl_pct": -8.13,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "119850",
+      "date": "2025-04-08",
+      "outcome": "success",
+      "pnl_pct": 27.08,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "119850",
+      "date": "2025-04-08",
+      "outcome": "success",
+      "pnl_pct": 6.91,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "011760",
+      "date": "2025-04-22",
+      "outcome": "success",
+      "pnl_pct": 12.27,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "005180",
+      "date": "2025-05-27",
+      "outcome": "failure",
+      "pnl_pct": -2.22,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "115180",
+      "date": "2025-07-21",
+      "outcome": "failure",
+      "pnl_pct": -4.92,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "045390",
+      "date": "2025-07-23",
+      "outcome": "failure",
+      "pnl_pct": -2.99,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "010780",
+      "date": "2025-08-12",
+      "outcome": "failure",
+      "pnl_pct": -2.82,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "041920",
+      "date": "2025-08-13",
+      "outcome": "failure",
+      "pnl_pct": -3.71,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "00680K",
+      "date": "2025-08-18",
+      "outcome": "failure",
+      "pnl_pct": -4.45,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "060250",
+      "date": "2025-08-29",
+      "outcome": "failure",
+      "pnl_pct": -2.63,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "032500",
+      "date": "2025-09-02",
+      "outcome": "success",
+      "pnl_pct": 14.47,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "032500",
+      "date": "2025-09-02",
+      "outcome": "success",
+      "pnl_pct": 8.54,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "002020",
+      "date": "2025-09-18",
+      "outcome": "failure",
+      "pnl_pct": -2.78,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "001460",
+      "date": "2025-09-23",
+      "outcome": "failure",
+      "pnl_pct": -4.6,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "323280",
+      "date": "2025-09-26",
+      "outcome": "failure",
+      "pnl_pct": -3.37,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "002960",
+      "date": "2025-09-30",
+      "outcome": "success",
+      "pnl_pct": 6.65,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "002960",
+      "date": "2025-09-30",
+      "outcome": "success",
+      "pnl_pct": 4.84,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "077970",
+      "date": "2025-10-23",
+      "outcome": "failure",
+      "pnl_pct": -4.59,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "214180",
+      "date": "2025-10-28",
+      "outcome": "failure",
+      "pnl_pct": -4.74,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "122870",
+      "date": "2025-10-30",
+      "outcome": "failure",
+      "pnl_pct": -2.15,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "014620",
+      "date": "2025-11-03",
+      "outcome": "failure",
+      "pnl_pct": -3.71,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "084990",
+      "date": "2025-11-04",
+      "outcome": "failure",
+      "pnl_pct": -2.92,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "187660",
+      "date": "2025-11-05",
+      "outcome": "failure",
+      "pnl_pct": -3.91,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "028050",
+      "date": "2025-11-06",
+      "outcome": "failure",
+      "pnl_pct": -2.72,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "252990",
+      "date": "2025-11-18",
+      "outcome": "failure",
+      "pnl_pct": -4.62,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "270660",
+      "date": "2025-11-20",
+      "outcome": "success",
+      "pnl_pct": 14.78,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "270660",
+      "date": "2025-11-20",
+      "outcome": "success",
+      "pnl_pct": 10.01,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "031980",
+      "date": "2025-12-19",
+      "outcome": "success",
+      "pnl_pct": 21.02,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "031980",
+      "date": "2025-12-19",
+      "outcome": "success",
+      "pnl_pct": 15.4,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "356860",
+      "date": "2026-01-05",
+      "outcome": "failure",
+      "pnl_pct": -4.54,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "089890",
+      "date": "2026-01-07",
+      "outcome": "failure",
+      "pnl_pct": -7.17,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "016590",
+      "date": "2026-01-08",
+      "outcome": "failure",
+      "pnl_pct": -2.37,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "000240",
+      "date": "2026-01-09",
+      "outcome": "failure",
+      "pnl_pct": -2.78,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "015860",
+      "date": "2026-01-13",
+      "outcome": "success",
+      "pnl_pct": 16.06,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    },
+    {
+      "ticker": "015860",
+      "date": "2026-01-13",
+      "outcome": "success",
+      "pnl_pct": 13.68,
+      "trigger_type": "T2_Volume_RSI",
+      "grade": "A",
+      "features": {}
+    }
+  ],
+  "success_centroid": {},
+  "failure_centroid": {}
+}

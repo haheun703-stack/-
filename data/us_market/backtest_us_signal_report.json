@@ -1,0 +1,295 @@
+{
+  "test_days": 406,
+  "period": "2024-05-24 ~ 2026-02-13",
+  "experiment_A": {
+    "with_ewy": {
+      "accuracy": {
+        "overall_accuracy": 61.6,
+        "bull_accuracy": 68.4,
+        "bull_count": 228,
+        "bear_accuracy": 52.8,
+        "bear_count": 178,
+        "neutral_count": 0
+      },
+      "rmse": 1.3888,
+      "correlation": 0.4009
+    },
+    "without_ewy": {
+      "accuracy": {
+        "overall_accuracy": 62.1,
+        "bull_accuracy": 69.0,
+        "bull_count": 226,
+        "bear_accuracy": 53.3,
+        "bear_count": 180,
+        "neutral_count": 0
+      },
+      "rmse": 1.3885,
+      "correlation": 0.3957
+    },
+    "ewy_kospi_direct_corr": 0.3493,
+    "accuracy_improvement": -0.5,
+    "rmse_improvement": -0.0003,
+    "summary": "EWY 추가로 방향 적중률 -0.5%p, 상관계수 +0.0052 개선"
+  },
+  "experiment_B": {
+    "l1_only": {
+      "accuracy": {
+        "overall_accuracy": 61.6,
+        "bull_accuracy": 68.4,
+        "bull_count": 228,
+        "bear_accuracy": 52.8,
+        "bear_count": 178,
+        "neutral_count": 0
+      },
+      "rmse": 1.3888,
+      "correlation": 0.4009
+    },
+    "l1_plus_l2": {
+      "accuracy": {
+        "overall_accuracy": 61.6,
+        "bull_accuracy": 68.3,
+        "bull_count": 230,
+        "bear_accuracy": 52.8,
+        "bear_count": 176,
+        "neutral_count": 0
+      },
+      "rmse": 1.3956,
+      "correlation": 0.4016
+    },
+    "l2_active_days": 397,
+    "l2_direction_accuracy": 65.5,
+    "accuracy_improvement": 0.0,
+    "summary": "L2 패턴매칭으로 적중률 +0.0%p, L2 자체 방향 적중률 65.5%"
+  },
+  "experiment_C": {
+    "kill_days": 35,
+    "normal_days": 371,
+    "kill_kospi_mean": -1.893,
+    "normal_kospi_mean": 0.38,
+    "kill_defense_rate": 91.4,
+    "sector_kill_detail": {
+      "반도체": {
+        "count": 35,
+        "mean_chg": -2.951,
+        "defense_rate": 82.9
+      },
+      "IT": {
+        "count": 6,
+        "mean_chg": -2.783,
+        "defense_rate": 100.0
+      },
+      "바이오": {
+        "count": 2,
+        "mean_chg": -2.625,
+        "defense_rate": 50.0
+      },
+      "에너지": {
+        "count": 1,
+        "mean_chg": -6.581,
+        "defense_rate": 100.0
+      },
+      "은행": {
+        "count": 1,
+        "mean_chg": -4.982,
+        "defense_rate": 100.0
+      }
+    },
+    "rule_days": 32,
+    "rule_kospi_mean": -0.468,
+    "summary": "Kill 발동 35일: KOSPI 평균 -1.893% (방어율 91%) | 정상 371일: +0.380%"
+  },
+  "grade_analysis": {
+    "STRONG_BULL": {
+      "count": 73,
+      "kospi_mean": 0.833,
+      "kospi_median": 0.705,
+      "kospi_std": 1.201,
+      "positive_rate": 78.1,
+      "best": 6.599,
+      "worst": -1.344,
+      "gap_mean": 0.93
+    },
+    "MILD_BULL": {
+      "count": 100,
+      "kospi_mean": 0.506,
+      "kospi_median": 0.3,
+      "kospi_std": 1.235,
+      "positive_rate": 65.0,
+      "best": 6.837,
+      "worst": -2.372,
+      "gap_mean": 0.39
+    },
+    "NEUTRAL": {
+      "count": 102,
+      "kospi_mean": 0.312,
+      "kospi_median": 0.273,
+      "kospi_std": 0.947,
+      "positive_rate": 66.7,
+      "best": 2.733,
+      "worst": -2.783,
+      "gap_mean": 0.167
+    },
+    "MILD_BEAR": {
+      "count": 67,
+      "kospi_mean": 0.006,
+      "kospi_median": 0.041,
+      "kospi_std": 1.249,
+      "positive_rate": 52.2,
+      "best": 3.022,
+      "worst": -2.638,
+      "gap_mean": -0.135
+    },
+    "STRONG_BEAR": {
+      "count": 64,
+      "kospi_mean": -1.075,
+      "kospi_median": -0.789,
+      "kospi_std": 2.068,
+      "positive_rate": 23.4,
+      "best": 3.301,
+      "worst": -8.768,
+      "gap_mean": -0.875
+    }
+  },
+  "sector_analysis": {
+    "반도체": {
+      "corr_with_score": 0.366,
+      "corr_with_combined": 0.3665,
+      "actual_mean": 0.216,
+      "days": 403
+    },
+    "2차전지": {
+      "corr_with_score": 0.3251,
+      "corr_with_combined": 0.324,
+      "actual_mean": 0.052,
+      "days": 403
+    },
+    "바이오": {
+      "corr_with_score": 0.2612,
+      "corr_with_combined": 0.261,
+      "actual_mean": 0.12,
+      "days": 403
+    },
+    "은행": {
+      "corr_with_score": 0.1797,
+      "corr_with_combined": 0.1809,
+      "actual_mean": 0.199,
+      "days": 402
+    },
+    "철강": {
+      "corr_with_score": 0.3012,
+      "corr_with_combined": 0.3003,
+      "actual_mean": 0.176,
+      "days": 403
+    },
+    "IT": {
+      "corr_with_score": 0.392,
+      "corr_with_combined": 0.3926,
+      "actual_mean": 0.237,
+      "days": 403
+    },
+    "에너지": {
+      "corr_with_score": 0.3173,
+      "corr_with_combined": 0.3166,
+      "actual_mean": 0.061,
+      "days": 403
+    },
+    "내수": {
+      "corr_with_score": 0.3968,
+      "corr_with_combined": 0.3976,
+      "actual_mean": 0.219,
+      "days": 402
+    }
+  },
+  "special_rules_analysis": {
+    "VIX_SPIKE": {
+      "count": 12,
+      "kospi_mean": -1.545,
+      "kospi_worst": -8.768,
+      "positive_rate": 33.3,
+      "dates": [
+        "2024-07-25",
+        "2024-08-05",
+        "2024-08-06",
+        "2024-09-04",
+        "2024-12-19"
+      ]
+    },
+    "VIX_HIGH": {
+      "count": 13,
+      "kospi_mean": 0.35,
+      "kospi_worst": -5.566,
+      "positive_rate": 53.8,
+      "dates": [
+        "2024-08-06",
+        "2025-04-04",
+        "2025-04-07",
+        "2025-04-08",
+        "2025-04-09"
+      ]
+    },
+    "SOXX_CRASH": {
+      "count": 11,
+      "kospi_mean": -2.718,
+      "kospi_worst": -8.768,
+      "positive_rate": 0.0,
+      "dates": [
+        "2024-07-18",
+        "2024-07-25",
+        "2024-08-02",
+        "2024-08-05",
+        "2024-09-04"
+      ]
+    },
+    "NASDAQ_CIRCUIT": {
+      "count": 9,
+      "kospi_mean": -1.647,
+      "kospi_worst": -5.566,
+      "positive_rate": 11.1,
+      "dates": [
+        "2024-07-25",
+        "2024-09-04",
+        "2024-12-19",
+        "2025-03-11",
+        "2025-04-04"
+      ]
+    },
+    "TRIPLE_BULL": {
+      "count": 7,
+      "kospi_mean": 1.693,
+      "kospi_worst": 0.042,
+      "positive_rate": 100.0,
+      "dates": [
+        "2024-08-09",
+        "2024-11-07",
+        "2025-03-17",
+        "2025-04-10",
+        "2025-04-25"
+      ]
+    },
+    "MARKET_CRASH": {
+      "count": 3,
+      "kospi_mean": -2.309,
+      "kospi_worst": -5.566,
+      "positive_rate": 0.0,
+      "dates": [
+        "2025-04-04",
+        "2025-04-07",
+        "2025-04-11"
+      ]
+    }
+  },
+  "extreme_analysis": {
+    "strong_bear": {
+      "count": 64,
+      "kospi_mean": -1.075,
+      "kospi_worst": -8.768,
+      "defense_rate": 76.6
+    },
+    "strong_bull": {
+      "count": 73,
+      "kospi_mean": 0.833,
+      "kospi_best": 6.599,
+      "hit_rate": 78.1
+    }
+  }
+}

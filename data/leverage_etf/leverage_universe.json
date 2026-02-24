@@ -1,0 +1,114 @@
+{
+  "KODEX 레버리지": {
+    "etf_code": "122630",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "지수",
+    "underlying": "KOSPI200"
+  },
+  "KODEX 코스닥150레버리지": {
+    "etf_code": "233740",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "지수",
+    "underlying": "코스닥150"
+  },
+  "KODEX 200선물인버스2X": {
+    "etf_code": "252670",
+    "direction": "SHORT",
+    "leverage": 2,
+    "category": "지수",
+    "underlying": "KOSPI200"
+  },
+  "KODEX 인버스": {
+    "etf_code": "114800",
+    "direction": "SHORT",
+    "leverage": 1,
+    "category": "지수",
+    "underlying": "KOSPI200"
+  },
+  "KODEX 코스닥150선물인버스": {
+    "etf_code": "251340",
+    "direction": "SHORT",
+    "leverage": 1,
+    "category": "지수",
+    "underlying": "코스닥150"
+  },
+  "KODEX 반도체레버리지": {
+    "etf_code": "494310",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "반도체",
+    "underlying": "KRX반도체"
+  },
+  "TIGER 반도체TOP10레버리지": {
+    "etf_code": "488080",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "반도체",
+    "underlying": "반도체TOP10"
+  },
+  "KODEX 2차전지산업레버리지": {
+    "etf_code": "462330",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "2차전지",
+    "underlying": "2차전지산업"
+  },
+  "TIGER 2차전지TOP10레버리지": {
+    "etf_code": "412570",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "2차전지",
+    "underlying": "2차전지TOP10"
+  },
+  "RISE 2차전지TOP10인버스": {
+    "etf_code": "465350",
+    "direction": "SHORT",
+    "leverage": 1,
+    "category": "2차전지",
+    "underlying": "2차전지TOP10"
+  },
+  "KODEX K방산TOP10레버리지": {
+    "etf_code": "0100K0",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "방산",
+    "underlying": "K방산TOP10"
+  },
+  "SOL 조선TOP3플러스레버리지": {
+    "etf_code": "0080Y0",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "조선",
+    "underlying": "조선TOP3"
+  },
+  "TIGER 미국나스닥100레버리지": {
+    "etf_code": "418660",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "해외",
+    "underlying": "나스닥100"
+  },
+  "KODEX 미국나스닥100선물인버스": {
+    "etf_code": "409810",
+    "direction": "SHORT",
+    "leverage": 1,
+    "category": "해외",
+    "underlying": "나스닥100"
+  },
+  "TIGER 미국필라델피아반도체레버리지": {
+    "etf_code": "423920",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "해외",
+    "underlying": "필라델피아반도체"
+  },
+  "ACE 골드선물레버리지": {
+    "etf_code": "225130",
+    "direction": "LONG",
+    "leverage": 2,
+    "category": "원자재",
+    "underlying": "금선물"
+  }
+}
