@@ -36,8 +36,8 @@
       "settled_price": 128400.0,
       "settled_return": 0.63,
       "settled_date": "2026-02-23",
-      "latest_price": 137700.0,
-      "latest_return": 7.92
+      "latest_price": 131200.0,
+      "latest_return": 2.82
     },
     {
       "pick_date": "2026-02-22",
@@ -72,8 +72,8 @@
       "settled_price": 34250.0,
       "settled_return": 4.1,
       "settled_date": "2026-02-23",
-      "latest_price": 33900.0,
-      "latest_return": 3.04
+      "latest_price": 34000.0,
+      "latest_return": 3.34
     },
     {
       "pick_date": "2026-02-22",
@@ -108,8 +108,8 @@
       "settled_price": 271000.0,
       "settled_return": 5.86,
       "settled_date": "2026-02-23",
-      "latest_price": 276500.0,
-      "latest_return": 8.01
+      "latest_price": 287500.0,
+      "latest_return": 12.3
     },
     {
       "pick_date": "2026-02-22",
@@ -145,8 +145,8 @@
       "settled_price": 69100.0,
       "settled_return": 2.67,
       "settled_date": "2026-02-23",
-      "latest_price": 69000.0,
-      "latest_return": 2.53
+      "latest_price": 73000.0,
+      "latest_return": 8.47
     },
     {
       "pick_date": "2026-02-22",
@@ -183,8 +183,8 @@
       "settled_price": 66500.0,
       "settled_return": -1.34,
       "settled_date": "2026-02-23",
-      "latest_price": 66400.0,
-      "latest_return": -1.48
+      "latest_price": 64100.0,
+      "latest_return": -4.9
     },
     {
       "pick_date": "2026-02-22",
@@ -221,8 +221,8 @@
       "settled_price": 56400.0,
       "settled_return": -1.74,
       "settled_date": "2026-02-23",
-      "latest_price": 55400.0,
-      "latest_return": -3.48
+      "latest_price": 55100.0,
+      "latest_return": -4.01
     },
     {
       "pick_date": "2026-02-22",
@@ -259,8 +259,8 @@
       "settled_price": 6660.0,
       "settled_return": -0.75,
       "settled_date": "2026-02-23",
-      "latest_price": 6570.0,
-      "latest_return": -2.09
+      "latest_price": 6390.0,
+      "latest_return": -4.77
     },
     {
       "pick_date": "2026-02-22",
@@ -297,8 +297,8 @@
       "settled_price": 147200.0,
       "settled_return": -1.8,
       "settled_date": "2026-02-23",
-      "latest_price": 143100.0,
-      "latest_return": -4.54
+      "latest_price": 142000.0,
+      "latest_return": -5.27
     },
     {
       "pick_date": "2026-02-23",
@@ -400,15 +400,15 @@
       ],
       "rsi": 54.22,
       "stoch_k": 38.67,
-      "open_price": null,
-      "close_price": null,
-      "high_price": null,
-      "low_price": null,
-      "day1_return": null,
-      "status": "pending",
-      "settled_price": null,
-      "settled_return": null,
-      "settled_date": null,
+      "open_price": 71400.0,
+      "close_price": 73000.0,
+      "high_price": 73000.0,
+      "low_price": 69500.0,
+      "day1_return": 5.8,
+      "status": "hit_target",
+      "settled_price": 71470,
+      "settled_return": 3.58,
+      "settled_date": "2026-02-25",
       "latest_price": null,
       "latest_return": null
     },
@@ -438,15 +438,15 @@
       ],
       "rsi": 50.32,
       "stoch_k": 29.65,
-      "open_price": null,
-      "close_price": null,
-      "high_price": null,
-      "low_price": null,
-      "day1_return": null,
-      "status": "pending",
-      "settled_price": null,
-      "settled_return": null,
-      "settled_date": null,
+      "open_price": 11670.0,
+      "close_price": 11440.0,
+      "high_price": 11690.0,
+      "low_price": 11370.0,
+      "day1_return": -0.69,
+      "status": "hit_stop",
+      "settled_price": 11550,
+      "settled_return": 0.26,
+      "settled_date": "2026-02-25",
       "latest_price": null,
       "latest_return": null
     },
@@ -477,17 +477,17 @@
       ],
       "rsi": 52.13,
       "stoch_k": 42.06,
-      "open_price": null,
-      "close_price": null,
-      "high_price": null,
-      "low_price": null,
-      "day1_return": null,
-      "status": "pending",
-      "settled_price": null,
-      "settled_return": null,
-      "settled_date": null,
-      "latest_price": null,
-      "latest_return": null
+      "open_price": 114100.0,
+      "close_price": 113700.0,
+      "high_price": 114700.0,
+      "low_price": 111600.0,
+      "day1_return": 0.71,
+      "status": "holding",
+      "settled_price": 113700.0,
+      "settled_return": 0.71,
+      "settled_date": "2026-02-25",
+      "latest_price": 113700.0,
+      "latest_return": 0.71
     },
     {
       "pick_date": "2026-02-24",
@@ -516,17 +516,17 @@
       ],
       "rsi": 53.45,
       "stoch_k": 78.87,
-      "open_price": null,
-      "close_price": null,
-      "high_price": null,
-      "low_price": null,
-      "day1_return": null,
-      "status": "pending",
-      "settled_price": null,
-      "settled_return": null,
-      "settled_date": null,
-      "latest_price": null,
-      "latest_return": null
+      "open_price": 29300.0,
+      "close_price": 28950.0,
+      "high_price": 29300.0,
+      "low_price": 28800.0,
+      "day1_return": -0.17,
+      "status": "holding",
+      "settled_price": 28950.0,
+      "settled_return": -0.17,
+      "settled_date": "2026-02-25",
+      "latest_price": 28950.0,
+      "latest_return": -0.17
     },
     {
       "pick_date": "2026-02-24",
@@ -553,32 +553,32 @@
       ],
       "rsi": 53.63,
       "stoch_k": 59.92,
-      "open_price": null,
-      "close_price": null,
-      "high_price": null,
-      "low_price": null,
-      "day1_return": null,
-      "status": "pending",
-      "settled_price": null,
-      "settled_return": null,
-      "settled_date": null,
+      "open_price": 5820.0,
+      "close_price": 5810.0,
+      "high_price": 6010.0,
+      "low_price": 5740.0,
+      "day1_return": 0.0,
+      "status": "hit_target",
+      "settled_price": 6010,
+      "settled_return": 3.44,
+      "settled_date": "2026-02-25",
       "latest_price": null,
       "latest_return": null
     }
   ],
   "summary": {
     "total_picks": 15,
-    "total_settled": 2,
-    "hit_target": 1,
-    "hit_stop": 1,
+    "total_settled": 5,
+    "hit_target": 3,
+    "hit_stop": 2,
     "expired": 0,
-    "holding": 8,
-    "pending": 5,
-    "win_rate": 50.0,
-    "avg_return": -0.21,
-    "avg_win": 1.43,
+    "holding": 10,
+    "pending": 0,
+    "win_rate": 80.0,
+    "avg_return": 1.37,
+    "avg_win": 2.18,
     "avg_loss": -1.84,
-    "profit_factor": 0.78,
-    "updated_at": "2026-02-24 21:06"
+    "profit_factor": 4.73,
+    "updated_at": "2026-02-25 22:23"
   }
 }

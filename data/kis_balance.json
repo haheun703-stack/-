@@ -5,114 +5,74 @@
       "name": "대한전선",
       "quantity": 60,
       "avg_price": 34950.0,
-      "current_price": 33900,
-      "eval_amount": 2034000,
-      "pnl_amount": -63000,
-      "pnl_pct": -3.0
-    },
-    {
-      "ticker": "004020",
-      "name": "현대제철",
-      "quantity": 30,
-      "avg_price": 34250.0,
-      "current_price": 36850,
-      "eval_amount": 1105500,
-      "pnl_amount": 78000,
-      "pnl_pct": 7.59
-    },
-    {
-      "ticker": "005930",
-      "name": "삼성전자",
-      "quantity": 36,
-      "avg_price": 187200.0,
-      "current_price": 200000,
-      "eval_amount": 7200000,
-      "pnl_amount": 460800,
-      "pnl_pct": 6.83
-    },
-    {
-      "ticker": "006360",
-      "name": "GS건설",
-      "quantity": 50,
-      "avg_price": 21300.0,
-      "current_price": 23250,
-      "eval_amount": 1162500,
-      "pnl_amount": 97500,
-      "pnl_pct": 9.15
+      "current_price": 34000,
+      "eval_amount": 2040000,
+      "pnl_amount": -57000,
+      "pnl_pct": -2.71
     },
     {
       "ticker": "010950",
       "name": "S-Oil",
       "quantity": 27,
       "avg_price": 107900.0,
-      "current_price": 114100,
-      "eval_amount": 3080700,
-      "pnl_amount": 167400,
-      "pnl_pct": 5.74
+      "current_price": 112600,
+      "eval_amount": 3040200,
+      "pnl_amount": 126900,
+      "pnl_pct": 4.35
     },
     {
       "ticker": "068270",
       "name": "셀트리온",
       "quantity": 13,
       "avg_price": 242500.0,
-      "current_price": 248500,
-      "eval_amount": 3230500,
-      "pnl_amount": 78000,
-      "pnl_pct": 2.47
+      "current_price": 244500,
+      "eval_amount": 3178500,
+      "pnl_amount": 26000,
+      "pnl_pct": 0.82
     },
     {
       "ticker": "082740",
       "name": "한화엔진",
       "quantity": 35,
       "avg_price": 57900.0,
-      "current_price": 55400,
-      "eval_amount": 1939000,
-      "pnl_amount": -87500,
-      "pnl_pct": -4.31
+      "current_price": 55100,
+      "eval_amount": 1928500,
+      "pnl_amount": -98000,
+      "pnl_pct": -4.83
     },
     {
       "ticker": "099440",
       "name": "스맥",
       "quantity": 550,
       "avg_price": 6807.2727,
-      "current_price": 6570,
-      "eval_amount": 3613500,
-      "pnl_amount": -130500,
-      "pnl_pct": -3.48
+      "current_price": 6390,
+      "eval_amount": 3514500,
+      "pnl_amount": -229500,
+      "pnl_pct": -6.12
     },
     {
       "ticker": "323410",
       "name": "카카오뱅크",
       "quantity": 73,
       "avg_price": 27900.0,
-      "current_price": 28450,
-      "eval_amount": 2076850,
-      "pnl_amount": 40150,
-      "pnl_pct": 1.97
+      "current_price": 28000,
+      "eval_amount": 2044000,
+      "pnl_amount": 7300,
+      "pnl_pct": 0.35
     },
     {
       "ticker": "462980",
       "name": "아이지넷",
       "quantity": 700,
       "avg_price": 2047.8571,
-      "current_price": 2020,
-      "eval_amount": 1414000,
-      "pnl_amount": -19500,
-      "pnl_pct": -1.36
-    },
-    {
-      "ticker": "466100",
-      "name": "클로봇",
-      "quantity": 48,
-      "avg_price": 69595.8333,
-      "current_price": 69000,
-      "eval_amount": 3312000,
-      "pnl_amount": -28600,
-      "pnl_pct": -0.85
+      "current_price": 2065,
+      "eval_amount": 1445500,
+      "pnl_amount": 12000,
+      "pnl_pct": 0.83
     }
   ],
-  "total_eval": 30928819,
-  "total_pnl": 592750,
+  "total_eval": 30958593,
+  "total_pnl": -212300,
   "available_cash": 760269,
-  "fetched_at": "2026-02-25 07:20:04"
+  "fetched_at": "2026-02-25 22:24:04"
 }

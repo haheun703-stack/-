@@ -1,468 +1,206 @@
 {
-  "updated_at": "2026-02-24 23:29",
+  "updated_at": "2026-02-25 22:21",
   "total_scanned": 662,
-  "total_detected": 209,
+  "total_detected": 205,
   "stats": {
-    "세력포착": 24,
-    "매집의심": 6,
-    "이상감지": 179
+    "세력포착": 20,
+    "매집의심": 14,
+    "이상감지": 171
   },
   "items": [
     {
-      "ticker": "085620",
-      "name": "미래에셋생명",
-      "close": 15110,
-      "price_change": -6.27,
-      "volume": 5135685,
-      "trading_value_m": 77600.2,
-      "rsi": 77.72,
-      "adx": 45.74,
-      "bb_position": 1.11,
-      "volume_surge_ratio": 7.37,
+      "ticker": "000400",
+      "name": "롯데손해보험",
+      "close": 2630,
+      "price_change": 10.27,
+      "volume": 43109309,
+      "trading_value_m": 113377.48,
+      "rsi": 73.58,
+      "adx": 52.83,
+      "bb_position": 1.01,
+      "volume_surge_ratio": 7.43,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": -4257721145.0,
+      "foreign_5d": 0.0,
       "grade": "세력포착",
-      "strength": 6.96,
-      "pattern_count": 3,
+      "strength": 5.48,
+      "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P1_거래량폭발",
-          "strength": 2.457090849904165,
+          "strength": 2.4754760146503445,
           "vsr": 7.4,
-          "direction": "하락폭발",
-          "price_change": -6.27,
-          "desc": "거래량 7.4배 폭발 (하락폭발)"
-        },
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -35510.0,
-          "f_last5": 68298.0,
-          "i_prev5": -107617.0,
-          "i_last5": -535814.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-35,510→+68,298)"
-          ],
-          "desc": "외인 매도→매수 반전 (-35,510→+68,298)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 3.0,
-          "min_bb_width": 0.07,
-          "curr_bb_width": 0.84,
-          "expansion": 12.16,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (12.2배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "001820",
-      "name": "삼화콘덴서",
-      "close": 60700,
-      "price_change": 6.49,
-      "volume": 2303102,
-      "trading_value_m": 139798.29,
-      "rsi": 88.35,
-      "adx": 56.08,
-      "bb_position": 1.21,
-      "volume_surge_ratio": 5.67,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 6.39,
-      "pattern_count": 3,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.8911475591830917,
-          "vsr": 5.7,
           "direction": "상승폭발",
-          "price_change": 6.49,
-          "desc": "거래량 5.7배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -74977.0,
-          "f_last5": 40276.0,
-          "i_prev5": 101287.0,
-          "i_last5": 92664.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-74,977→+40,276)"
-          ],
-          "desc": "외인 매도→매수 반전 (-74,977→+40,276)"
+          "price_change": 10.27,
+          "desc": "거래량 7.4배 폭발 (상승폭발)"
         },
         {
           "pattern": "P3_BB스퀴즈",
           "strength": 3.0,
-          "min_bb_width": 0.11,
-          "curr_bb_width": 0.93,
-          "expansion": 8.53,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (8.5배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "003000",
-      "name": "부광약품",
-      "close": 5870,
-      "price_change": 9.31,
-      "volume": 11646319,
-      "trading_value_m": 68363.89,
-      "rsi": 83.71,
-      "adx": 51.85,
-      "bb_position": 1.1,
-      "volume_surge_ratio": 5.21,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 6.24,
-      "pattern_count": 3,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.7380228160657376,
-          "vsr": 5.2,
-          "direction": "상승폭발",
-          "price_change": 9.31,
-          "desc": "거래량 5.2배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": 269551.0,
-          "f_last5": 431289.0,
-          "i_prev5": -10817.0,
-          "i_last5": 838994.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "기관 매도→매수 반전 (-10,817→+838,994)"
-          ],
-          "desc": "기관 매도→매수 반전 (-10,817→+838,994)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 3.0,
-          "min_bb_width": 0.09,
-          "curr_bb_width": 0.57,
-          "expansion": 6.61,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (6.6배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "006340",
-      "name": "대원전선",
-      "close": 6510,
-      "price_change": 19.67,
-      "volume": 127853311,
-      "trading_value_m": 832325.05,
-      "rsi": 87.26,
-      "adx": 43.82,
-      "bb_position": 1.38,
-      "volume_surge_ratio": 9.92,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 6.0,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 3.0,
-          "vsr": 9.9,
-          "direction": "상승폭발",
-          "price_change": 19.67,
-          "desc": "거래량 9.9배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 3.0,
-          "min_bb_width": 0.09,
+          "min_bb_width": 0.05,
           "curr_bb_width": 0.73,
-          "expansion": 8.55,
+          "expansion": 13.5,
           "vol_confirm": true,
-          "desc": "BB 수축→폭발 (8.6배) +거래량"
+          "desc": "BB 수축→폭발 (13.5배) +거래량"
         }
       ]
     },
     {
-      "ticker": "206650",
-      "name": "유바이오로직스",
-      "close": 16200,
-      "price_change": 14.41,
-      "volume": 4662145,
-      "trading_value_m": 75526.75,
-      "rsi": 79.06,
-      "adx": 62.34,
-      "bb_position": 1.18,
-      "volume_surge_ratio": 6.68,
+      "ticker": "000500",
+      "name": "가온전선",
+      "close": 122000,
+      "price_change": 24.62,
+      "volume": 605022,
+      "trading_value_m": 73812.68,
+      "rsi": 81.28,
+      "adx": 29.33,
+      "bb_position": 1.44,
+      "volume_surge_ratio": 6.43,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
       "grade": "세력포착",
-      "strength": 5.16,
+      "strength": 4.51,
       "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P1_거래량폭발",
-          "strength": 2.226097478598054,
-          "vsr": 6.7,
+          "strength": 2.1441553602023444,
+          "vsr": 6.4,
           "direction": "상승폭발",
-          "price_change": 14.41,
-          "desc": "거래량 6.7배 폭발 (상승폭발)"
+          "price_change": 24.62,
+          "desc": "거래량 6.4배 폭발 (상승폭발)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 2.9317308032747036,
-          "min_bb_width": 0.07,
-          "curr_bb_width": 0.34,
-          "expansion": 4.86,
+          "strength": 2.3628612309811388,
+          "min_bb_width": 0.1,
+          "curr_bb_width": 0.38,
+          "expansion": 3.73,
           "vol_confirm": true,
-          "desc": "BB 수축→폭발 (4.9배) +거래량"
+          "desc": "BB 수축→폭발 (3.7배) +거래량"
         }
       ]
     },
     {
-      "ticker": "005440",
-      "name": "현대지에프홀딩스",
-      "close": 18750,
-      "price_change": 20.19,
-      "volume": 9321338,
-      "trading_value_m": 174775.09,
-      "rsi": 94.59,
-      "adx": 74.42,
-      "bb_position": 1.15,
-      "volume_surge_ratio": 5.98,
+      "ticker": "005850",
+      "name": "에스엘",
+      "close": 72200,
+      "price_change": 17.97,
+      "volume": 1037996,
+      "trading_value_m": 74943.31,
+      "rsi": 74.29,
+      "adx": 35.46,
+      "bb_position": 1.34,
+      "volume_surge_ratio": 3.27,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": -2867832445.0,
+      "foreign_5d": 5678757950.0,
       "grade": "세력포착",
-      "strength": 4.99,
-      "pattern_count": 2,
+      "strength": 3.89,
+      "pattern_count": 3,
       "patterns": [
         {
           "pattern": "P1_거래량폭발",
-          "strength": 1.9940226199876072,
-          "vsr": 6.0,
+          "strength": 1.0893121901010314,
+          "vsr": 3.3,
           "direction": "상승폭발",
-          "price_change": 20.19,
-          "desc": "거래량 6.0배 폭발 (상승폭발)"
+          "price_change": 17.97,
+          "desc": "거래량 3.3배 폭발 (상승폭발)"
         },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 3.0,
-          "min_bb_width": 0.12,
-          "curr_bb_width": 1.0,
-          "expansion": 8.02,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (8.0배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "222080",
-      "name": "씨아이에스",
-      "close": 15060,
-      "price_change": 17.56,
-      "volume": 29739325,
-      "trading_value_m": 447874.23,
-      "rsi": 68.4,
-      "adx": 42.15,
-      "bb_position": 0.99,
-      "volume_surge_ratio": 5.17,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 4.72,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.7223814100162818,
-          "vsr": 5.2,
-          "direction": "상승폭발",
-          "price_change": 17.56,
-          "desc": "거래량 5.2배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -543210.0,
-          "f_last5": 1223400.0,
-          "i_prev5": -21613.0,
-          "i_last5": 233625.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-543,210→+1,223,400)",
-            "기관 매도→매수 반전 (-21,613→+233,625)"
-          ],
-          "desc": "외인 매도→매수 반전 (-543,210→+1,223,400) / 기관 매도→매수 반전 (-21,613→+233,625)"
-        }
-      ]
-    },
-    {
-      "ticker": "008930",
-      "name": "한미사이언스",
-      "close": 50700,
-      "price_change": 18.6,
-      "volume": 4131453,
-      "trading_value_m": 209464.67,
-      "rsi": 69.15,
-      "adx": 27.76,
-      "bb_position": 1.15,
-      "volume_surge_ratio": 7.84,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 18038326075.0,
-      "grade": "세력포착",
-      "strength": 4.1,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 2.6138293231332406,
-          "vsr": 7.8,
-          "direction": "상승폭발",
-          "price_change": 18.6,
-          "desc": "거래량 7.8배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 1.484168792335026,
-          "min_bb_width": 0.14,
-          "curr_bb_width": 0.27,
-          "expansion": 1.97,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (2.0배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "057050",
-      "name": "현대홈쇼핑",
-      "close": 92900,
-      "price_change": 10.6,
-      "volume": 179049,
-      "trading_value_m": 16633.65,
-      "rsi": 93.96,
-      "adx": 82.96,
-      "bb_position": 1.05,
-      "volume_surge_ratio": 3.02,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 4.01,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.0070683601033341,
-          "vsr": 3.0,
-          "direction": "상승폭발",
-          "price_change": 10.6,
-          "desc": "거래량 3.0배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 3.0,
-          "min_bb_width": 0.07,
-          "curr_bb_width": 0.74,
-          "expansion": 10.07,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (10.1배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "187660",
-      "name": "현대ADM",
-      "close": 15670,
-      "price_change": 29.93,
-      "volume": 10270614,
-      "trading_value_m": 160940.52,
-      "rsi": 96.34,
-      "adx": 84.23,
-      "bb_position": 1.22,
-      "volume_surge_ratio": 0.6,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 4.0,
-      "pattern_count": 2,
-      "patterns": [
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": -183614.0,
-          "f_last5": 428559.0,
-          "i_prev5": -94999.0,
-          "i_last5": 0.0,
+          "f_prev5": 112499.0,
+          "f_last5": 82144.0,
+          "i_prev5": -86272.0,
+          "i_last5": 267219.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-183,614→+428,559)"
+            "기관 매도→매수 반전 (-86,272→+267,219)"
           ],
-          "desc": "외인 매도→매수 반전 (-183,614→+428,559)"
+          "desc": "기관 매도→매수 반전 (-86,272→+267,219)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 2.5,
-          "min_bb_width": 0.17,
-          "curr_bb_width": 2.78,
-          "expansion": 15.94,
-          "vol_confirm": false,
-          "desc": "BB 수축→폭발 (15.9배)"
+          "strength": 1.298085180648485,
+          "min_bb_width": 0.21,
+          "curr_bb_width": 0.33,
+          "expansion": 1.6,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (1.6배) +거래량"
         }
       ]
     },
     {
-      "ticker": "048410",
-      "name": "현대바이오",
-      "close": 20000,
-      "price_change": 12.55,
-      "volume": 22810725,
-      "trading_value_m": 456214.5,
-      "rsi": 86.81,
-      "adx": 62.26,
-      "bb_position": 1.17,
-      "volume_surge_ratio": 3.45,
+      "ticker": "112610",
+      "name": "씨에스윈드",
+      "close": 53800,
+      "price_change": 7.92,
+      "volume": 1384193,
+      "trading_value_m": 74469.58,
+      "rsi": 71.51,
+      "adx": 50.23,
+      "bb_position": 1.11,
+      "volume_surge_ratio": 2.66,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 0.0,
+      "foreign_5d": 7662039225.0,
       "grade": "세력포착",
-      "strength": 3.9,
+      "strength": 3.89,
       "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P1_거래량폭발",
-          "strength": 1.150823745412056,
-          "vsr": 3.5,
+          "strength": 0.8860615262163707,
+          "vsr": 2.7,
           "direction": "상승폭발",
-          "price_change": 12.55,
-          "desc": "거래량 3.5배 폭발 (상승폭발)"
+          "price_change": 7.92,
+          "desc": "거래량 2.7배 폭발 (상승폭발)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 2.7472772177078855,
-          "min_bb_width": 0.27,
-          "curr_bb_width": 1.19,
+          "strength": 3.0,
+          "min_bb_width": 0.05,
+          "curr_bb_width": 0.37,
+          "expansion": 7.29,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (7.3배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "003240",
+      "name": "태광산업",
+      "close": 1500000,
+      "price_change": 25.1,
+      "volume": 14763,
+      "trading_value_m": 22144.5,
+      "rsi": 85.16,
+      "adx": 59.64,
+      "bb_position": 1.22,
+      "volume_surge_ratio": 2.53,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "세력포착",
+      "strength": 3.59,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 0.8417361556553346,
+          "vsr": 2.5,
+          "direction": "상승폭발",
+          "price_change": 25.1,
+          "desc": "거래량 2.5배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.745333756909535,
+          "min_bb_width": 0.16,
+          "curr_bb_width": 0.7,
           "expansion": 4.49,
           "vol_confirm": true,
           "desc": "BB 수축→폭발 (4.5배) +거래량"
@@ -472,296 +210,296 @@
     {
       "ticker": "012510",
       "name": "더존비즈온",
-      "close": 118800,
-      "price_change": 0.17,
-      "volume": 824572,
-      "trading_value_m": 97959.15,
-      "rsi": 76.21,
-      "adx": 37.61,
-      "bb_position": 1.16,
-      "volume_surge_ratio": 1.82,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": -10843022900.0,
-      "grade": "세력포착",
-      "strength": 3.81,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -197670.0,
-          "f_last5": 200663.0,
-          "i_prev5": -120995.0,
-          "i_last5": -187217.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-197,670→+200,663)"
-          ],
-          "desc": "외인 매도→매수 반전 (-197,670→+200,663)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 2.3145777998867905,
-          "min_bb_width": 0.11,
-          "curr_bb_width": 0.42,
-          "expansion": 3.63,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (3.6배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "383220",
-      "name": "F&F",
-      "close": 70800,
-      "price_change": -2.75,
-      "volume": 108392,
-      "trading_value_m": 7674.15,
-      "rsi": 50.02,
-      "adx": 22.57,
-      "bb_position": 0.46,
-      "volume_surge_ratio": 0.8,
-      "above_ma20": false,
-      "above_ma60": true,
-      "foreign_5d": -155382200.0,
-      "grade": "세력포착",
-      "strength": 3.77,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -27015.0,
-          "f_last5": 14827.0,
-          "i_prev5": -8040.0,
-          "i_last5": -3930.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-27,015→+14,827)"
-          ],
-          "desc": "외인 매도→매수 반전 (-27,015→+14,827)"
-        },
-        {
-          "pattern": "P4_OBV다이버전스",
-          "strength": 2.2687342709351506,
-          "price_chg_10d": -3.01,
-          "obv_chg_10d": 19.69,
-          "obv_trend_5d": 0.04,
-          "vol_contracted": false,
-          "desc": "가격 -3.0% vs OBV +19.7% (은밀매집)"
-        }
-      ]
-    },
-    {
-      "ticker": "093520",
-      "name": "매커스",
-      "close": 32000,
-      "price_change": 11.5,
-      "volume": 408333,
-      "trading_value_m": 13066.66,
-      "rsi": 79.84,
-      "adx": 37.39,
-      "bb_position": 1.31,
-      "volume_surge_ratio": 3.31,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 3.68,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.102655313178218,
-          "vsr": 3.3,
-          "direction": "상승폭발",
-          "price_change": 11.5,
-          "desc": "거래량 3.3배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 2.5799233159050217,
-          "min_bb_width": 0.1,
-          "curr_bb_width": 0.42,
-          "expansion": 4.16,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (4.2배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "046890",
-      "name": "서울반도체",
-      "close": 9520,
-      "price_change": 29.88,
-      "volume": 2729290,
-      "trading_value_m": 25982.84,
-      "rsi": 80.26,
-      "adx": 39.23,
-      "bb_position": 1.36,
-      "volume_surge_ratio": 4.8,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 3.43,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.6013072413111908,
-          "vsr": 4.8,
-          "direction": "상승폭발",
-          "price_change": 29.88,
-          "desc": "거래량 4.8배 폭발 (상승폭발)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 1.8287272857071983,
-          "min_bb_width": 0.13,
-          "curr_bb_width": 0.34,
-          "expansion": 2.66,
-          "vol_confirm": true,
-          "desc": "BB 수축→폭발 (2.7배) +거래량"
-        }
-      ]
-    },
-    {
-      "ticker": "103590",
-      "name": "일진전기",
-      "close": 82200,
-      "price_change": -0.12,
-      "volume": 549142,
-      "trading_value_m": 45139.47,
-      "rsi": 70.3,
-      "adx": 42.71,
+      "close": 119100,
+      "price_change": 0.25,
+      "volume": 333249,
+      "trading_value_m": 39689.96,
+      "rsi": 76.36,
+      "adx": 42.88,
       "bb_position": 1.05,
-      "volume_surge_ratio": 0.78,
+      "volume_surge_ratio": 0.73,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 28591388250.0,
+      "foreign_5d": -12857622200.0,
       "grade": "세력포착",
-      "strength": 3.22,
+      "strength": 3.59,
       "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": -660.0,
-          "f_last5": 141498.0,
-          "i_prev5": 137190.0,
-          "i_last5": -180473.0,
+          "f_prev5": -109631.0,
+          "f_last5": 167563.0,
+          "i_prev5": -124608.0,
+          "i_last5": -110958.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-660→+141,498)"
+            "외인 매도→매수 반전 (-109,631→+167,563)"
           ],
-          "desc": "외인 매도→매수 반전 (-660→+141,498)"
+          "desc": "외인 매도→매수 반전 (-109,631→+167,563)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 1.7162046749866842,
+          "strength": 2.087180507534784,
           "min_bb_width": 0.11,
-          "curr_bb_width": 0.36,
-          "expansion": 3.43,
+          "curr_bb_width": 0.48,
+          "expansion": 4.17,
           "vol_confirm": false,
-          "desc": "BB 수축→폭발 (3.4배)"
+          "desc": "BB 수축→폭발 (4.2배)"
         }
       ]
     },
     {
-      "ticker": "011500",
-      "name": "한농화성",
-      "close": 26100,
-      "price_change": 10.83,
-      "volume": 5835734,
-      "trading_value_m": 152312.66,
-      "rsi": 63.7,
-      "adx": 28.77,
-      "bb_position": 0.82,
-      "volume_surge_ratio": 4.44,
+      "ticker": "000720",
+      "name": "현대건설",
+      "close": 155200,
+      "price_change": 12.06,
+      "volume": 2922470,
+      "trading_value_m": 453567.34,
+      "rsi": 83.37,
+      "adx": 66.48,
+      "bb_position": 1.21,
+      "volume_surge_ratio": 1.76,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 0.0,
+      "foreign_5d": 95079813400.0,
       "grade": "세력포착",
-      "strength": 2.98,
+      "strength": 3.53,
       "pattern_count": 2,
       "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.4797840644081282,
-          "vsr": 4.4,
-          "direction": "상승폭발",
-          "price_change": 10.83,
-          "desc": "거래량 4.4배 폭발 (상승폭발)"
-        },
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": -15663.0,
-          "f_last5": 21874.0,
-          "i_prev5": 4420.0,
-          "i_last5": -184.0,
+          "f_prev5": -254549.0,
+          "f_last5": 237482.0,
+          "i_prev5": 445023.0,
+          "i_last5": 424556.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-15,663→+21,874)"
+            "외인 매도→매수 반전 (-254,549→+237,482)"
           ],
-          "desc": "외인 매도→매수 반전 (-15,663→+21,874)"
-        }
-      ]
-    },
-    {
-      "ticker": "086450",
-      "name": "동국제약",
-      "close": 22000,
-      "price_change": 7.06,
-      "volume": 1145611,
-      "trading_value_m": 25203.44,
-      "rsi": 76.37,
-      "adx": 42.19,
-      "bb_position": 1.15,
-      "volume_surge_ratio": 2.67,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "세력포착",
-      "strength": 2.95,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 0.8900890783676828,
-          "vsr": 2.7,
-          "direction": "상승폭발",
-          "price_change": 7.06,
-          "desc": "거래량 2.7배 폭발 (상승폭발)"
+          "desc": "외인 매도→매수 반전 (-254,549→+237,482)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 2.055549279311859,
-          "min_bb_width": 0.09,
-          "curr_bb_width": 0.27,
-          "expansion": 3.11,
+          "strength": 2.031500144314007,
+          "min_bb_width": 0.16,
+          "curr_bb_width": 0.48,
+          "expansion": 3.06,
           "vol_confirm": true,
           "desc": "BB 수축→폭발 (3.1배) +거래량"
         }
       ]
     },
     {
-      "ticker": "248070",
-      "name": "솔루엠",
-      "close": 19510,
-      "price_change": 6.9,
-      "volume": 780755,
-      "trading_value_m": 15232.53,
-      "rsi": 75.82,
-      "adx": 38.76,
-      "bb_position": 1.12,
-      "volume_surge_ratio": 3.23,
+      "ticker": "103590",
+      "name": "일진전기",
+      "close": 84600,
+      "price_change": 2.92,
+      "volume": 2452632,
+      "trading_value_m": 207492.67,
+      "rsi": 72.24,
+      "adx": 48.41,
+      "bb_position": 1.04,
+      "volume_surge_ratio": 3.02,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 9924060100.0,
+      "grade": "세력포착",
+      "strength": 3.4,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 1.0075204426295128,
+          "vsr": 3.0,
+          "direction": "상승폭발",
+          "price_change": 2.92,
+          "desc": "거래량 3.0배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.3911565490153484,
+          "min_bb_width": 0.11,
+          "curr_bb_width": 0.4,
+          "expansion": 3.78,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (3.8배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "034220",
+      "name": "LG디스플레이",
+      "close": 14820,
+      "price_change": 5.41,
+      "volume": 15991564,
+      "trading_value_m": 236994.98,
+      "rsi": 76.13,
+      "adx": 42.92,
+      "bb_position": 1.13,
+      "volume_surge_ratio": 2.71,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 78544494480.0,
+      "grade": "세력포착",
+      "strength": 3.38,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 0.9022432962784569,
+          "vsr": 2.7,
+          "direction": "상승폭발",
+          "price_change": 5.41,
+          "desc": "거래량 2.7배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.4775707448073927,
+          "min_bb_width": 0.09,
+          "curr_bb_width": 0.34,
+          "expansion": 3.96,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (4.0배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "383220",
+      "name": "F&F",
+      "close": 72300,
+      "price_change": 2.12,
+      "volume": 149003,
+      "trading_value_m": 10772.92,
+      "rsi": 53.44,
+      "adx": 23.4,
+      "bb_position": 0.57,
+      "volume_surge_ratio": 1.07,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": -1287990100.0,
+      "grade": "세력포착",
+      "strength": 3.2,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P2_수급반전",
+          "strength": 1.5,
+          "f_prev5": -25139.0,
+          "f_last5": 18331.0,
+          "i_prev5": -13980.0,
+          "i_last5": -12919.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "외인 매도→매수 반전 (-25,139→+18,331)"
+          ],
+          "desc": "외인 매도→매수 반전 (-25,139→+18,331)"
+        },
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.7027551937520014,
+          "price_chg_10d": -3.86,
+          "obv_chg_10d": 17.03,
+          "obv_trend_5d": -0.05,
+          "vol_contracted": false,
+          "desc": "가격 -3.9% vs OBV +17.0% (은밀매집)"
+        }
+      ]
+    },
+    {
+      "ticker": "214150",
+      "name": "클래시스",
+      "close": 59900,
+      "price_change": -11.13,
+      "volume": 2855871,
+      "trading_value_m": 171066.67,
+      "rsi": 41.07,
+      "adx": 23.22,
+      "bb_position": -0.02,
+      "volume_surge_ratio": 4.49,
+      "above_ma20": false,
+      "above_ma60": false,
+      "foreign_5d": -16129839500.0,
+      "grade": "세력포착",
+      "strength": 3.0,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 1.4952764721441911,
+          "vsr": 4.5,
+          "direction": "하락폭발",
+          "price_change": -11.13,
+          "desc": "거래량 4.5배 폭발 (하락폭발)"
+        },
+        {
+          "pattern": "P2_수급반전",
+          "strength": 1.5,
+          "f_prev5": 79795.0,
+          "f_last5": 65711.0,
+          "i_prev5": -40767.0,
+          "i_last5": 147139.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "기관 매도→매수 반전 (-40,767→+147,139)"
+          ],
+          "desc": "기관 매도→매수 반전 (-40,767→+147,139)"
+        }
+      ]
+    },
+    {
+      "ticker": "108320",
+      "name": "LX세미콘",
+      "close": 62900,
+      "price_change": 12.72,
+      "volume": 437499,
+      "trading_value_m": 27518.69,
+      "rsi": 77.3,
+      "adx": 53.99,
+      "bb_position": 1.4,
+      "volume_surge_ratio": 3.53,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "세력포착",
+      "strength": 2.96,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 1.177616302661271,
+          "vsr": 3.5,
+          "direction": "상승폭발",
+          "price_change": 12.72,
+          "desc": "거래량 3.5배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 1.780747188303252,
+          "min_bb_width": 0.06,
+          "curr_bb_width": 0.16,
+          "expansion": 2.56,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (2.6배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "006405",
+      "name": "삼성SDI우",
+      "close": 233000,
+      "price_change": 6.88,
+      "volume": 29923,
+      "trading_value_m": 6972.06,
+      "rsi": 70.31,
+      "adx": 34.82,
+      "bb_position": 1.31,
+      "volume_surge_ratio": 1.87,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
@@ -770,124 +508,44 @@
       "pattern_count": 2,
       "patterns": [
         {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.0754509960788818,
-          "vsr": 3.2,
-          "direction": "상승폭발",
-          "price_change": 6.9,
-          "desc": "거래량 3.2배 폭발 (상승폭발)"
+          "pattern": "P2_수급반전",
+          "strength": 1.5,
+          "f_prev5": 63.0,
+          "f_last5": 2883.0,
+          "i_prev5": -1045.0,
+          "i_last5": 1525.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "기관 매도→매수 반전 (-1,045→+1,525)"
+          ],
+          "desc": "기관 매도→매수 반전 (-1,045→+1,525)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 1.8187283809746098,
-          "min_bb_width": 0.1,
-          "curr_bb_width": 0.26,
-          "expansion": 2.64,
+          "strength": 1.389283229550233,
+          "min_bb_width": 0.09,
+          "curr_bb_width": 0.15,
+          "expansion": 1.78,
           "vol_confirm": true,
-          "desc": "BB 수축→폭발 (2.6배) +거래량"
+          "desc": "BB 수축→폭발 (1.8배) +거래량"
         }
       ]
     },
     {
-      "ticker": "066570",
-      "name": "LG전자",
-      "close": 134500,
-      "price_change": 1.43,
-      "volume": 1918668,
-      "trading_value_m": 258060.85,
-      "rsi": 73.19,
-      "adx": 50.11,
+      "ticker": "047050",
+      "name": "포스코인터내셔널",
+      "close": 75500,
+      "price_change": 2.86,
+      "volume": 826143,
+      "trading_value_m": 62373.8,
+      "rsi": 70.4,
+      "adx": 62.2,
       "bb_position": 0.99,
-      "volume_surge_ratio": 0.82,
+      "volume_surge_ratio": 0.92,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 124950677400.0,
-      "grade": "세력포착",
-      "strength": 2.88,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -10103.0,
-          "f_last5": 726137.0,
-          "i_prev5": 402077.0,
-          "i_last5": 294687.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-10,103→+726,137)"
-          ],
-          "desc": "외인 매도→매수 반전 (-10,103→+726,137)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 1.3756619658185854,
-          "min_bb_width": 0.17,
-          "curr_bb_width": 0.46,
-          "expansion": 2.75,
-          "vol_confirm": false,
-          "desc": "BB 수축→폭발 (2.8배)"
-        }
-      ]
-    },
-    {
-      "ticker": "000720",
-      "name": "현대건설",
-      "close": 138500,
-      "price_change": 2.29,
-      "volume": 1596458,
-      "trading_value_m": 221109.43,
-      "rsi": 77.87,
-      "adx": 63.15,
-      "bb_position": 1.09,
-      "volume_surge_ratio": 0.91,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 54405080300.0,
-      "grade": "세력포착",
-      "strength": 2.67,
-      "pattern_count": 2,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 1.5,
-          "f_prev5": -245090.0,
-          "f_last5": 164900.0,
-          "i_prev5": 415382.0,
-          "i_last5": 467018.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-245,090→+164,900)"
-          ],
-          "desc": "외인 매도→매수 반전 (-245,090→+164,900)"
-        },
-        {
-          "pattern": "P3_BB스퀴즈",
-          "strength": 1.1741455303211947,
-          "min_bb_width": 0.16,
-          "curr_bb_width": 0.37,
-          "expansion": 2.35,
-          "vol_confirm": false,
-          "desc": "BB 수축→폭발 (2.3배)"
-        }
-      ]
-    },
-    {
-      "ticker": "009240",
-      "name": "한샘",
-      "close": 50400,
-      "price_change": 2.54,
-      "volume": 79553,
-      "trading_value_m": 4009.47,
-      "rsi": 68.1,
-      "adx": 48.05,
-      "bb_position": 1.16,
-      "volume_surge_ratio": 1.07,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
+      "foreign_5d": 6206262250.0,
       "grade": "세력포착",
       "strength": 2.56,
       "pattern_count": 2,
@@ -895,382 +553,718 @@
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": 61193.0,
-          "f_last5": 40038.0,
-          "i_prev5": -7587.0,
-          "i_last5": 21734.0,
+          "f_prev5": 44476.0,
+          "f_last5": 209216.0,
+          "i_prev5": -53953.0,
+          "i_last5": 411855.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "기관 매도→매수 반전 (-7,587→+21,734)"
+            "기관 매도→매수 반전 (-53,953→+411,855)"
           ],
-          "desc": "기관 매도→매수 반전 (-7,587→+21,734)"
+          "desc": "기관 매도→매수 반전 (-53,953→+411,855)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 1.060267226872775,
-          "min_bb_width": 0.06,
-          "curr_bb_width": 0.14,
-          "expansion": 2.12,
+          "strength": 1.0648960574192075,
+          "min_bb_width": 0.13,
+          "curr_bb_width": 0.27,
+          "expansion": 2.13,
           "vol_confirm": false,
           "desc": "BB 수축→폭발 (2.1배)"
         }
       ]
     },
     {
-      "ticker": "011170",
-      "name": "롯데케미칼",
-      "close": 91500,
-      "price_change": 6.15,
-      "volume": 881915,
-      "trading_value_m": 80695.22,
-      "rsi": 66.67,
-      "adx": 33.0,
-      "bb_position": 1.04,
-      "volume_surge_ratio": 3.15,
+      "ticker": "006040",
+      "name": "동원산업",
+      "close": 44250,
+      "price_change": -2.64,
+      "volume": 102678,
+      "trading_value_m": 4543.5,
+      "rsi": 55.79,
+      "adx": 41.27,
+      "bb_position": 0.7,
+      "volume_surge_ratio": 1.16,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": -8579912000.0,
+      "foreign_5d": -830758550.0,
       "grade": "세력포착",
-      "strength": 2.55,
+      "strength": 2.5,
       "pattern_count": 2,
       "patterns": [
         {
-          "pattern": "P1_거래량폭발",
-          "strength": 1.05044673004139,
-          "vsr": 3.2,
-          "direction": "상승폭발",
-          "price_change": 6.15,
-          "desc": "거래량 3.2배 폭발 (상승폭발)"
-        },
-        {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": 115829.0,
-          "f_last5": 8935.0,
-          "i_prev5": -19020.0,
-          "i_last5": 105789.0,
+          "f_prev5": -5537.0,
+          "f_last5": 15097.0,
+          "i_prev5": 109445.0,
+          "i_last5": 333.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "기관 매도→매수 반전 (-19,020→+105,789)"
+            "외인 매도→매수 반전 (-5,537→+15,097)"
           ],
-          "desc": "기관 매도→매수 반전 (-19,020→+105,789)"
+          "desc": "외인 매도→매수 반전 (-5,537→+15,097)"
+        },
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.0048513508198662,
+          "price_chg_10d": 2.67,
+          "obv_chg_10d": 7.05,
+          "obv_trend_5d": 0.0,
+          "vol_contracted": false,
+          "desc": "가격 +2.7% vs OBV +7.0% (은밀매집)"
         }
       ]
     },
     {
-      "ticker": "044490",
-      "name": "태웅",
-      "close": 36200,
-      "price_change": 1.4,
-      "volume": 310047,
-      "trading_value_m": 11223.7,
-      "rsi": 64.19,
-      "adx": 39.07,
-      "bb_position": 0.99,
-      "volume_surge_ratio": 0.87,
+      "ticker": "011500",
+      "name": "한농화성",
+      "close": 26650,
+      "price_change": 2.11,
+      "volume": 3605892,
+      "trading_value_m": 96097.02,
+      "rsi": 65.44,
+      "adx": 29.97,
+      "bb_position": 0.96,
+      "volume_surge_ratio": 2.71,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
       "grade": "세력포착",
-      "strength": 2.3,
+      "strength": 2.4,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 0.9035897606682134,
+          "vsr": 2.7,
+          "direction": "상승폭발",
+          "price_change": 2.11,
+          "desc": "거래량 2.7배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P2_수급반전",
+          "strength": 1.5,
+          "f_prev5": -21357.0,
+          "f_last5": 13402.0,
+          "i_prev5": -983.0,
+          "i_last5": -114.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "외인 매도→매수 반전 (-21,357→+13,402)"
+          ],
+          "desc": "외인 매도→매수 반전 (-21,357→+13,402)"
+        }
+      ]
+    },
+    {
+      "ticker": "052690",
+      "name": "한전기술",
+      "close": 168200,
+      "price_change": 4.8,
+      "volume": 520936,
+      "trading_value_m": 87621.44,
+      "rsi": 72.2,
+      "adx": 57.98,
+      "bb_position": 0.98,
+      "volume_surge_ratio": 0.71,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 15232329350.0,
+      "grade": "세력포착",
+      "strength": 2.29,
       "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": 26716.0,
-          "f_last5": 275382.0,
-          "i_prev5": -4265.0,
-          "i_last5": 293404.0,
+          "f_prev5": -60060.0,
+          "f_last5": 156148.0,
+          "i_prev5": 90908.0,
+          "i_last5": 86821.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "기관 매도→매수 반전 (-4,265→+293,404)"
+            "외인 매도→매수 반전 (-60,060→+156,148)"
           ],
-          "desc": "기관 매도→매수 반전 (-4,265→+293,404)"
+          "desc": "외인 매도→매수 반전 (-60,060→+156,148)"
         },
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 0.8045399306361991,
-          "min_bb_width": 0.18,
-          "curr_bb_width": 0.29,
-          "expansion": 1.61,
+          "strength": 0.792664419039439,
+          "min_bb_width": 0.2,
+          "curr_bb_width": 0.32,
+          "expansion": 1.59,
           "vol_confirm": false,
           "desc": "BB 수축→폭발 (1.6배)"
         }
       ]
     },
     {
-      "ticker": "069260",
-      "name": "TKG휴켐스",
-      "close": 20300,
-      "price_change": 0.0,
-      "volume": 97226,
-      "trading_value_m": 1973.69,
-      "rsi": 56.42,
-      "adx": 23.38,
-      "bb_position": 0.6,
-      "volume_surge_ratio": 0.64,
+      "ticker": "020150",
+      "name": "롯데에너지머티리얼즈",
+      "close": 45700,
+      "price_change": 2.35,
+      "volume": 423895,
+      "trading_value_m": 19372.0,
+      "rsi": 60.34,
+      "adx": 32.56,
+      "bb_position": 0.7,
+      "volume_surge_ratio": 0.75,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "매집의심",
-      "strength": 3.77,
+      "foreign_5d": 8693947900.0,
+      "grade": "세력포착",
+      "strength": 2.28,
       "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P2_수급반전",
           "strength": 1.5,
-          "f_prev5": -127780.0,
-          "f_last5": 87965.0,
-          "i_prev5": 143646.0,
-          "i_last5": 32953.0,
+          "f_prev5": -90843.0,
+          "f_last5": 70018.0,
+          "i_prev5": -201411.0,
+          "i_last5": -108730.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-127,780→+87,965)"
+            "외인 매도→매수 반전 (-90,843→+70,018)"
           ],
-          "desc": "외인 매도→매수 반전 (-127,780→+87,965)"
+          "desc": "외인 매도→매수 반전 (-90,843→+70,018)"
         },
         {
           "pattern": "P4_OBV다이버전스",
-          "strength": 2.2678883413528412,
-          "price_chg_10d": 0.5,
-          "obv_chg_10d": 16.68,
-          "obv_trend_5d": 1.73,
-          "vol_contracted": true,
-          "desc": "가격 +0.5% vs OBV +16.7% (은밀매집 +저거래량)"
+          "strength": 0.7767970371126574,
+          "price_chg_10d": 0.99,
+          "obv_chg_10d": 4.77,
+          "obv_trend_5d": 0.06,
+          "vol_contracted": false,
+          "desc": "가격 +1.0% vs OBV +4.8% (은밀매집)"
         }
       ]
     },
     {
-      "ticker": "008770",
-      "name": "호텔신라",
-      "close": 48250,
-      "price_change": -0.72,
-      "volume": 177577,
-      "trading_value_m": 8568.09,
-      "rsi": 51.94,
-      "adx": 43.05,
-      "bb_position": 0.53,
-      "volume_surge_ratio": 0.38,
+      "ticker": "051910",
+      "name": "LG화학",
+      "close": 387500,
+      "price_change": 10.56,
+      "volume": 1099978,
+      "trading_value_m": 426241.47,
+      "rsi": 67.57,
+      "adx": 34.23,
+      "bb_position": 1.17,
+      "volume_surge_ratio": 2.5,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": -5647118850.0,
-      "grade": "매집의심",
-      "strength": 2.65,
-      "pattern_count": 1,
+      "foreign_5d": 208646054250.0,
+      "grade": "세력포착",
+      "strength": 2.27,
+      "pattern_count": 2,
       "patterns": [
         {
-          "pattern": "P4_OBV다이버전스",
-          "strength": 2.6528659975215088,
-          "price_chg_10d": -1.63,
-          "obv_chg_10d": 20.53,
-          "obv_trend_5d": 0.72,
-          "vol_contracted": true,
-          "desc": "가격 -1.6% vs OBV +20.5% (은밀매집 +저거래량)"
+          "pattern": "P1_거래량폭발",
+          "strength": 0.8347132937732026,
+          "vsr": 2.5,
+          "direction": "상승폭발",
+          "price_change": 10.56,
+          "desc": "거래량 2.5배 폭발 (상승폭발)"
+        },
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 1.4344285832689243,
+          "min_bb_width": 0.14,
+          "curr_bb_width": 0.26,
+          "expansion": 1.87,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (1.9배) +거래량"
         }
       ]
     },
     {
-      "ticker": "216080",
-      "name": "제테마",
-      "close": 9660,
-      "price_change": -3.69,
-      "volume": 285313,
-      "trading_value_m": 2756.12,
-      "rsi": 55.51,
-      "adx": 18.27,
-      "bb_position": 0.44,
-      "volume_surge_ratio": 0.58,
-      "above_ma20": false,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "매집의심",
-      "strength": 1.84,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P4_OBV다이버전스",
-          "strength": 1.8405164195760813,
-          "price_chg_10d": -0.31,
-          "obv_chg_10d": 15.41,
-          "obv_trend_5d": -0.02,
-          "vol_contracted": true,
-          "desc": "가격 -0.3% vs OBV +15.4% (은밀매집 +저거래량)"
-        }
-      ]
-    },
-    {
-      "ticker": "011930",
-      "name": "신성이엔지",
-      "close": 2145,
-      "price_change": 2.63,
-      "volume": 10594897,
-      "trading_value_m": 22726.05,
-      "rsi": 56.53,
-      "adx": 60.95,
-      "bb_position": 0.57,
-      "volume_surge_ratio": 0.69,
+      "ticker": "060720",
+      "name": "KH바텍",
+      "close": 17710,
+      "price_change": 8.65,
+      "volume": 4126783,
+      "trading_value_m": 73085.33,
+      "rsi": 61.0,
+      "adx": 25.24,
+      "bb_position": 0.68,
+      "volume_surge_ratio": 2.76,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
-      "grade": "매집의심",
-      "strength": 0.93,
-      "pattern_count": 1,
+      "grade": "세력포착",
+      "strength": 1.93,
+      "pattern_count": 2,
       "patterns": [
+        {
+          "pattern": "P1_거래량폭발",
+          "strength": 0.9184162671000875,
+          "vsr": 2.8,
+          "direction": "상승폭발",
+          "price_change": 8.65,
+          "desc": "거래량 2.8배 폭발 (상승폭발)"
+        },
         {
           "pattern": "P4_OBV다이버전스",
-          "strength": 0.9297215544035484,
-          "price_chg_10d": -2.72,
-          "obv_chg_10d": 6.3,
-          "obv_trend_5d": -0.03,
-          "vol_contracted": true,
-          "desc": "가격 -2.7% vs OBV +6.3% (은밀매집 +저거래량)"
-        }
-      ]
-    },
-    {
-      "ticker": "000490",
-      "name": "대동",
-      "close": 11290,
-      "price_change": -0.88,
-      "volume": 402041,
-      "trading_value_m": 4539.04,
-      "rsi": 58.78,
-      "adx": 62.56,
-      "bb_position": 0.63,
-      "volume_surge_ratio": 0.22,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "매집의심",
-      "strength": 0.61,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P4_OBV다이버전스",
-          "strength": 0.6099257119250321,
-          "price_chg_10d": -1.83,
-          "obv_chg_10d": 3.1,
-          "obv_trend_5d": -0.02,
-          "vol_contracted": true,
-          "desc": "가격 -1.8% vs OBV +3.1% (은밀매집 +저거래량)"
-        }
-      ]
-    },
-    {
-      "ticker": "376300",
-      "name": "디어유",
-      "close": 40900,
-      "price_change": -1.45,
-      "volume": 112529,
-      "trading_value_m": 4602.44,
-      "rsi": 54.84,
-      "adx": 40.08,
-      "bb_position": 0.59,
-      "volume_surge_ratio": 0.37,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "매집의심",
-      "strength": 0.6,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P4_OBV다이버전스",
-          "strength": 0.6005811820650295,
-          "price_chg_10d": -0.37,
-          "obv_chg_10d": 3.01,
-          "obv_trend_5d": -0.03,
-          "vol_contracted": true,
-          "desc": "가격 -0.4% vs OBV +3.0% (은밀매집 +저거래량)"
-        }
-      ]
-    },
-    {
-      "ticker": "001060",
-      "name": "JW중외제약",
-      "close": 37200,
-      "price_change": -2.11,
-      "volume": 110426,
-      "trading_value_m": 4107.85,
-      "rsi": 66.74,
-      "adx": 48.4,
-      "bb_position": 0.84,
-      "volume_surge_ratio": 0.57,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -24774.0,
-          "f_last5": 24192.0,
-          "i_prev5": -1392.0,
-          "i_last5": 16928.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-24,774→+24,192)",
-            "기관 매도→매수 반전 (-1,392→+16,928)"
-          ],
-          "desc": "외인 매도→매수 반전 (-24,774→+24,192) / 기관 매도→매수 반전 (-1,392→+16,928)"
+          "strength": 1.0144098652495168,
+          "price_chg_10d": 1.61,
+          "obv_chg_10d": 7.14,
+          "obv_trend_5d": 0.07,
+          "vol_contracted": false,
+          "desc": "가격 +1.6% vs OBV +7.1% (은밀매집)"
         }
       ]
     },
     {
       "ticker": "003380",
       "name": "하림지주",
-      "close": 16970,
-      "price_change": 1.07,
-      "volume": 2943798,
-      "trading_value_m": 49956.25,
-      "rsi": 62.26,
-      "adx": 40.34,
-      "bb_position": 0.73,
-      "volume_surge_ratio": 0.6,
+      "close": 16730,
+      "price_change": -1.41,
+      "volume": 2028465,
+      "trading_value_m": 33936.22,
+      "rsi": 60.8,
+      "adx": 40.01,
+      "bb_position": 0.68,
+      "volume_surge_ratio": 0.42,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 9598670840.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
+      "foreign_5d": 7758299965.0,
+      "grade": "매집의심",
+      "strength": 4.5,
+      "pattern_count": 2,
       "patterns": [
         {
           "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -827968.0,
-          "f_last5": 899999.0,
-          "i_prev5": -134801.0,
-          "i_last5": 371979.0,
+          "strength": 1.5,
+          "f_prev5": -558758.0,
+          "f_last5": 770426.0,
+          "i_prev5": 125231.0,
+          "i_last5": 261595.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-827,968→+899,999)",
-            "기관 매도→매수 반전 (-134,801→+371,979)"
+            "외인 매도→매수 반전 (-558,758→+770,426)"
           ],
-          "desc": "외인 매도→매수 반전 (-827,968→+899,999) / 기관 매도→매수 반전 (-134,801→+371,979)"
+          "desc": "외인 매도→매수 반전 (-558,758→+770,426)"
+        },
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 3.0,
+          "price_chg_10d": -0.12,
+          "obv_chg_10d": 38.23,
+          "obv_trend_5d": 0.55,
+          "vol_contracted": true,
+          "desc": "가격 -0.1% vs OBV +38.2% (은밀매집 +저거래량)"
         }
       ]
     },
     {
-      "ticker": "006405",
-      "name": "삼성SDI우",
-      "close": 218000,
-      "price_change": 6.08,
-      "volume": 32279,
-      "trading_value_m": 7036.82,
-      "rsi": 63.83,
-      "adx": 30.38,
-      "bb_position": 1.09,
-      "volume_surge_ratio": 1.9,
+      "ticker": "005300",
+      "name": "롯데칠성",
+      "close": 144300,
+      "price_change": -1.16,
+      "volume": 20522,
+      "trading_value_m": 2961.32,
+      "rsi": 62.12,
+      "adx": 59.83,
+      "bb_position": 0.81,
+      "volume_surge_ratio": 0.57,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 3.0,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 3.0,
+          "price_chg_10d": 1.12,
+          "obv_chg_10d": 45.19,
+          "obv_trend_5d": 0.35,
+          "vol_contracted": true,
+          "desc": "가격 +1.1% vs OBV +45.2% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "008770",
+      "name": "호텔신라",
+      "close": 48200,
+      "price_change": -0.1,
+      "volume": 265369,
+      "trading_value_m": 12790.79,
+      "rsi": 51.68,
+      "adx": 39.12,
+      "bb_position": 0.51,
+      "volume_surge_ratio": 0.56,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": -6373897950.0,
+      "grade": "매집의심",
+      "strength": 3.0,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 3.0,
+          "price_chg_10d": -3.02,
+          "obv_chg_10d": 64.38,
+          "obv_trend_5d": 0.56,
+          "vol_contracted": true,
+          "desc": "가격 -3.0% vs OBV +64.4% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "302440",
+      "name": "SK바이오사이언스",
+      "close": 50500,
+      "price_change": 0.2,
+      "volume": 105053,
+      "trading_value_m": 5305.18,
+      "rsi": 53.35,
+      "adx": 18.57,
+      "bb_position": 0.59,
+      "volume_surge_ratio": 0.66,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 5139525200.0,
+      "grade": "매집의심",
+      "strength": 2.53,
+      "pattern_count": 2,
+      "patterns": [
+        {
+          "pattern": "P2_수급반전",
+          "strength": 1.5,
+          "f_prev5": -2137.0,
+          "f_last5": 41406.0,
+          "i_prev5": 42601.0,
+          "i_last5": 11804.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "외인 매도→매수 반전 (-2,137→+41,406)"
+          ],
+          "desc": "외인 매도→매수 반전 (-2,137→+41,406)"
+        },
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.0323053768919017,
+          "price_chg_10d": 2.33,
+          "obv_chg_10d": 4.32,
+          "obv_trend_5d": 0.03,
+          "vol_contracted": true,
+          "desc": "가격 +2.3% vs OBV +4.3% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "139480",
+      "name": "이마트",
+      "close": 108600,
+      "price_change": 0.37,
+      "volume": 333576,
+      "trading_value_m": 36226.35,
+      "rsi": 58.8,
+      "adx": 51.65,
+      "bb_position": 0.62,
+      "volume_surge_ratio": 0.5,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 4323561800.0,
+      "grade": "매집의심",
+      "strength": 2.4,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 2.4017487347579305,
+          "price_chg_10d": 1.12,
+          "obv_chg_10d": 18.02,
+          "obv_trend_5d": 0.03,
+          "vol_contracted": true,
+          "desc": "가격 +1.1% vs OBV +18.0% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "278280",
+      "name": "천보",
+      "close": 54400,
+      "price_change": 2.84,
+      "volume": 87253,
+      "trading_value_m": 4746.56,
+      "rsi": 51.73,
+      "adx": 17.62,
+      "bb_position": 0.44,
+      "volume_surge_ratio": 0.58,
+      "above_ma20": false,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 1.62,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.6224406433495029,
+          "price_chg_10d": -0.37,
+          "obv_chg_10d": 13.22,
+          "obv_trend_5d": -0.66,
+          "vol_contracted": true,
+          "desc": "가격 -0.4% vs OBV +13.2% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "203400",
+      "name": "에이비온",
+      "close": 3480,
+      "price_change": 0.0,
+      "volume": 899877,
+      "trading_value_m": 3131.57,
+      "rsi": 47.38,
+      "adx": 10.55,
+      "bb_position": 0.2,
+      "volume_surge_ratio": 0.56,
+      "above_ma20": false,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 1.5,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.499398175379789,
+          "price_chg_10d": 2.2,
+          "obv_chg_10d": 11.99,
+          "obv_trend_5d": -0.01,
+          "vol_contracted": true,
+          "desc": "가격 +2.2% vs OBV +12.0% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "192650",
+      "name": "드림텍",
+      "close": 8090,
+      "price_change": -0.74,
+      "volume": 449168,
+      "trading_value_m": 3633.77,
+      "rsi": 54.09,
+      "adx": 34.08,
+      "bb_position": 0.55,
+      "volume_surge_ratio": 0.59,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 1.23,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.2275703978465153,
+          "price_chg_10d": 1.12,
+          "obv_chg_10d": 6.28,
+          "obv_trend_5d": 0.01,
+          "vol_contracted": true,
+          "desc": "가격 +1.1% vs OBV +6.3% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "036830",
+      "name": "솔브레인홀딩스",
+      "close": 53700,
+      "price_change": 1.51,
+      "volume": 78078,
+      "trading_value_m": 4192.79,
+      "rsi": 57.8,
+      "adx": 28.43,
+      "bb_position": 0.61,
+      "volume_surge_ratio": 0.5,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": -583709950.0,
+      "grade": "매집의심",
+      "strength": 1.03,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.0297723275743649,
+          "price_chg_10d": -3.24,
+          "obv_chg_10d": 4.3,
+          "obv_trend_5d": 0.08,
+          "vol_contracted": true,
+          "desc": "가격 -3.2% vs OBV +4.3% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "253450",
+      "name": "스튜디오드래곤",
+      "close": 46000,
+      "price_change": -0.76,
+      "volume": 77074,
+      "trading_value_m": 3545.4,
+      "rsi": 47.94,
+      "adx": 22.5,
+      "bb_position": 0.29,
+      "volume_surge_ratio": 0.58,
+      "above_ma20": false,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 1.0,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 1.00137342922016,
+          "price_chg_10d": -2.34,
+          "obv_chg_10d": 4.01,
+          "obv_trend_5d": 0.52,
+          "vol_contracted": true,
+          "desc": "가격 -2.3% vs OBV +4.0% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "256840",
+      "name": "한국비엔씨",
+      "close": 4730,
+      "price_change": -1.05,
+      "volume": 710803,
+      "trading_value_m": 3362.1,
+      "rsi": 46.71,
+      "adx": 30.72,
+      "bb_position": 0.33,
+      "volume_surge_ratio": 0.41,
+      "above_ma20": false,
+      "above_ma60": false,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 0.95,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 0.9450048906690474,
+          "price_chg_10d": 1.28,
+          "obv_chg_10d": 3.45,
+          "obv_trend_5d": 0.0,
+          "vol_contracted": true,
+          "desc": "가격 +1.3% vs OBV +3.5% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "006220",
+      "name": "제주은행",
+      "close": 16040,
+      "price_change": -2.91,
+      "volume": 2259451,
+      "trading_value_m": 36241.59,
+      "rsi": 57.37,
+      "adx": 59.76,
+      "bb_position": 0.59,
+      "volume_surge_ratio": 0.7,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 0.91,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 0.9089335714177489,
+          "price_chg_10d": 1.84,
+          "obv_chg_10d": 3.09,
+          "obv_trend_5d": 0.03,
+          "vol_contracted": true,
+          "desc": "가격 +1.8% vs OBV +3.1% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "033240",
+      "name": "자화전자",
+      "close": 40300,
+      "price_change": -2.18,
+      "volume": 264834,
+      "trading_value_m": 10672.81,
+      "rsi": 65.88,
+      "adx": 67.83,
+      "bb_position": 0.64,
+      "volume_surge_ratio": 0.47,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 0.67,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 0.6743726220280386,
+          "price_chg_10d": 2.41,
+          "obv_chg_10d": 3.74,
+          "obv_trend_5d": -0.03,
+          "vol_contracted": true,
+          "desc": "가격 +2.4% vs OBV +3.7% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "090460",
+      "name": "비에이치",
+      "close": 20100,
+      "price_change": -0.5,
+      "volume": 235009,
+      "trading_value_m": 4723.68,
+      "rsi": 59.31,
+      "adx": 32.23,
+      "bb_position": 0.66,
+      "volume_surge_ratio": 0.44,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "매집의심",
+      "strength": 0.67,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 0.6701409910501763,
+          "price_chg_10d": 1.06,
+          "obv_chg_10d": 3.7,
+          "obv_trend_5d": -0.01,
+          "vol_contracted": true,
+          "desc": "가격 +1.1% vs OBV +3.7% (은밀매집 +저거래량)"
+        }
+      ]
+    },
+    {
+      "ticker": "001060",
+      "name": "JW중외제약",
+      "close": 37000,
+      "price_change": -0.54,
+      "volume": 97529,
+      "trading_value_m": 3608.57,
+      "rsi": 65.77,
+      "adx": 47.67,
+      "bb_position": 0.8,
+      "volume_surge_ratio": 0.51,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
@@ -1281,34 +1275,34 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -3362.0,
-          "f_last5": 2670.0,
-          "i_prev5": -669.0,
-          "i_last5": 1602.0,
+          "f_prev5": -44610.0,
+          "f_last5": 59107.0,
+          "i_prev5": -13435.0,
+          "i_last5": 15562.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-3,362→+2,670)",
-            "기관 매도→매수 반전 (-669→+1,602)"
+            "외인 매도→매수 반전 (-44,610→+59,107)",
+            "기관 매도→매수 반전 (-13,435→+15,562)"
           ],
-          "desc": "외인 매도→매수 반전 (-3,362→+2,670) / 기관 매도→매수 반전 (-669→+1,602)"
+          "desc": "외인 매도→매수 반전 (-44,610→+59,107) / 기관 매도→매수 반전 (-13,435→+15,562)"
         }
       ]
     },
     {
-      "ticker": "009150",
-      "name": "삼성전기",
-      "close": 446000,
-      "price_change": 4.57,
-      "volume": 1410621,
-      "trading_value_m": 629136.97,
-      "rsi": 84.65,
-      "adx": 50.25,
-      "bb_position": 1.16,
-      "volume_surge_ratio": 1.59,
+      "ticker": "006340",
+      "name": "대원전선",
+      "close": 6190,
+      "price_change": -4.92,
+      "volume": 33732573,
+      "trading_value_m": 208804.63,
+      "rsi": 79.51,
+      "adx": 50.32,
+      "bb_position": 1.1,
+      "volume_surge_ratio": 2.33,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 122558650500.0,
+      "foreign_5d": 0.0,
       "grade": "이상감지",
       "strength": 3.0,
       "pattern_count": 1,
@@ -1316,28 +1310,28 @@
         {
           "pattern": "P3_BB스퀴즈",
           "strength": 3.0,
-          "min_bb_width": 0.11,
-          "curr_bb_width": 0.63,
-          "expansion": 5.8,
+          "min_bb_width": 0.09,
+          "curr_bb_width": 0.85,
+          "expansion": 10.0,
           "vol_confirm": true,
-          "desc": "BB 수축→폭발 (5.8배) +거래량"
+          "desc": "BB 수축→폭발 (10.0배) +거래량"
         }
       ]
     },
     {
       "ticker": "009540",
       "name": "HD한국조선해양",
-      "close": 457500,
-      "price_change": -3.07,
-      "volume": 307314,
-      "trading_value_m": 140596.15,
-      "rsi": 61.22,
-      "adx": 39.23,
-      "bb_position": 0.92,
-      "volume_surge_ratio": 1.21,
+      "close": 467500,
+      "price_change": 2.19,
+      "volume": 292537,
+      "trading_value_m": 136761.05,
+      "rsi": 63.56,
+      "adx": 41.47,
+      "bb_position": 0.96,
+      "volume_surge_ratio": 1.15,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 81476846250.0,
+      "foreign_5d": 99826141250.0,
       "grade": "이상감지",
       "strength": 3.0,
       "pattern_count": 1,
@@ -1345,101 +1339,31 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -183151.0,
-          "f_last5": 135562.0,
-          "i_prev5": -63411.0,
-          "i_last5": 101889.0,
+          "f_prev5": -149645.0,
+          "f_last5": 116137.0,
+          "i_prev5": -31130.0,
+          "i_last5": 108100.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-183,151→+135,562)",
-            "기관 매도→매수 반전 (-63,411→+101,889)"
+            "외인 매도→매수 반전 (-149,645→+116,137)",
+            "기관 매도→매수 반전 (-31,130→+108,100)"
           ],
-          "desc": "외인 매도→매수 반전 (-183,151→+135,562) / 기관 매도→매수 반전 (-63,411→+101,889)"
-        }
-      ]
-    },
-    {
-      "ticker": "010170",
-      "name": "대한광통신",
-      "close": 4550,
-      "price_change": -4.41,
-      "volume": 17983632,
-      "trading_value_m": 81825.53,
-      "rsi": 70.15,
-      "adx": 46.65,
-      "bb_position": 1.05,
-      "volume_surge_ratio": 0.88,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -618584.0,
-          "f_last5": 2876988.0,
-          "i_prev5": -14956.0,
-          "i_last5": 432019.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-618,584→+2,876,988)",
-            "기관 매도→매수 반전 (-14,956→+432,019)"
-          ],
-          "desc": "외인 매도→매수 반전 (-618,584→+2,876,988) / 기관 매도→매수 반전 (-14,956→+432,019)"
-        }
-      ]
-    },
-    {
-      "ticker": "011690",
-      "name": "와이투솔루션",
-      "close": 9140,
-      "price_change": 4.34,
-      "volume": 1939012,
-      "trading_value_m": 17722.57,
-      "rsi": 76.83,
-      "adx": 67.93,
-      "bb_position": 1.04,
-      "volume_surge_ratio": 0.53,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -414035.0,
-          "f_last5": 871199.0,
-          "i_prev5": -47.0,
-          "i_last5": 692.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-414,035→+871,199)",
-            "기관 매도→매수 반전 (-47→+692)"
-          ],
-          "desc": "외인 매도→매수 반전 (-414,035→+871,199) / 기관 매도→매수 반전 (-47→+692)"
+          "desc": "외인 매도→매수 반전 (-149,645→+116,137) / 기관 매도→매수 반전 (-31,130→+108,100)"
         }
       ]
     },
     {
       "ticker": "033100",
       "name": "제룡전기",
-      "close": 55500,
-      "price_change": -1.42,
-      "volume": 341207,
-      "trading_value_m": 18936.99,
-      "rsi": 59.84,
-      "adx": 44.69,
-      "bb_position": 0.65,
-      "volume_surge_ratio": 0.4,
+      "close": 57200,
+      "price_change": 3.06,
+      "volume": 822040,
+      "trading_value_m": 47020.69,
+      "rsi": 61.95,
+      "adx": 45.88,
+      "bb_position": 0.69,
+      "volume_surge_ratio": 0.93,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
@@ -1450,34 +1374,34 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -88383.0,
-          "f_last5": 96493.0,
-          "i_prev5": -66240.0,
-          "i_last5": 51100.0,
+          "f_prev5": -45185.0,
+          "f_last5": 41729.0,
+          "i_prev5": -47886.0,
+          "i_last5": 72520.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-88,383→+96,493)",
-            "기관 매도→매수 반전 (-66,240→+51,100)"
+            "외인 매도→매수 반전 (-45,185→+41,729)",
+            "기관 매도→매수 반전 (-47,886→+72,520)"
           ],
-          "desc": "외인 매도→매수 반전 (-88,383→+96,493) / 기관 매도→매수 반전 (-66,240→+51,100)"
+          "desc": "외인 매도→매수 반전 (-45,185→+41,729) / 기관 매도→매수 반전 (-47,886→+72,520)"
         }
       ]
     },
     {
       "ticker": "036570",
       "name": "엔씨소프트",
-      "close": 230000,
-      "price_change": 0.22,
-      "volume": 90693,
-      "trading_value_m": 20859.39,
-      "rsi": 56.56,
-      "adx": 30.45,
-      "bb_position": 0.7,
-      "volume_surge_ratio": 0.52,
+      "close": 237500,
+      "price_change": 3.26,
+      "volume": 133761,
+      "trading_value_m": 31768.24,
+      "rsi": 60.97,
+      "adx": 33.24,
+      "bb_position": 0.84,
+      "volume_surge_ratio": 0.76,
       "above_ma20": true,
       "above_ma60": true,
-      "foreign_5d": 11623611000.0,
+      "foreign_5d": 13134370250.0,
       "grade": "이상감지",
       "strength": 3.0,
       "pattern_count": 1,
@@ -1485,66 +1409,31 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -91908.0,
-          "f_last5": 52698.0,
-          "i_prev5": -65900.0,
-          "i_last5": 82093.0,
+          "f_prev5": -63499.0,
+          "f_last5": 42892.0,
+          "i_prev5": -93606.0,
+          "i_last5": 88455.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-91,908→+52,698)",
-            "기관 매도→매수 반전 (-65,900→+82,093)"
+            "외인 매도→매수 반전 (-63,499→+42,892)",
+            "기관 매도→매수 반전 (-93,606→+88,455)"
           ],
-          "desc": "외인 매도→매수 반전 (-91,908→+52,698) / 기관 매도→매수 반전 (-65,900→+82,093)"
-        }
-      ]
-    },
-    {
-      "ticker": "041190",
-      "name": "우리기술투자",
-      "close": 7910,
-      "price_change": -1.49,
-      "volume": 1132342,
-      "trading_value_m": 8956.83,
-      "rsi": 49.6,
-      "adx": 21.06,
-      "bb_position": 0.38,
-      "volume_surge_ratio": 0.61,
-      "above_ma20": false,
-      "above_ma60": true,
-      "foreign_5d": -1441601315.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -32053.0,
-          "f_last5": 526583.0,
-          "i_prev5": -42182.0,
-          "i_last5": 216902.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-32,053→+526,583)",
-            "기관 매도→매수 반전 (-42,182→+216,902)"
-          ],
-          "desc": "외인 매도→매수 반전 (-32,053→+526,583) / 기관 매도→매수 반전 (-42,182→+216,902)"
+          "desc": "외인 매도→매수 반전 (-63,499→+42,892) / 기관 매도→매수 반전 (-93,606→+88,455)"
         }
       ]
     },
     {
       "ticker": "077970",
       "name": "STX엔진",
-      "close": 34350,
-      "price_change": -3.1,
-      "volume": 223275,
-      "trading_value_m": 7669.5,
-      "rsi": 49.27,
-      "adx": 29.19,
-      "bb_position": 0.52,
-      "volume_surge_ratio": 0.69,
+      "close": 34700,
+      "price_change": 1.02,
+      "volume": 180116,
+      "trading_value_m": 6250.03,
+      "rsi": 50.41,
+      "adx": 25.62,
+      "bb_position": 0.59,
+      "volume_surge_ratio": 0.59,
       "above_ma20": true,
       "above_ma60": false,
       "foreign_5d": 0.0,
@@ -1555,199 +1444,31 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -16739.0,
-          "f_last5": 30833.0,
-          "i_prev5": -81410.0,
-          "i_last5": 125881.0,
+          "f_prev5": -24259.0,
+          "f_last5": 65950.0,
+          "i_prev5": -55923.0,
+          "i_last5": 98354.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-16,739→+30,833)",
-            "기관 매도→매수 반전 (-81,410→+125,881)"
+            "외인 매도→매수 반전 (-24,259→+65,950)",
+            "기관 매도→매수 반전 (-55,923→+98,354)"
           ],
-          "desc": "외인 매도→매수 반전 (-16,739→+30,833) / 기관 매도→매수 반전 (-81,410→+125,881)"
+          "desc": "외인 매도→매수 반전 (-24,259→+65,950) / 기관 매도→매수 반전 (-55,923→+98,354)"
         }
       ]
     },
     {
-      "ticker": "082740",
-      "name": "한화엔진",
-      "close": 55400,
-      "price_change": -1.77,
-      "volume": 459572,
-      "trading_value_m": 25460.29,
-      "rsi": 53.98,
-      "adx": 28.77,
-      "bb_position": 0.52,
-      "volume_surge_ratio": 0.64,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 12228249150.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -51696.0,
-          "f_last5": 232492.0,
-          "i_prev5": -39185.0,
-          "i_last5": 59095.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-51,696→+232,492)",
-            "기관 매도→매수 반전 (-39,185→+59,095)"
-          ],
-          "desc": "외인 매도→매수 반전 (-51,696→+232,492) / 기관 매도→매수 반전 (-39,185→+59,095)"
-        }
-      ]
-    },
-    {
-      "ticker": "123890",
-      "name": "한국자산신탁",
-      "close": 2970,
-      "price_change": 0.68,
-      "volume": 11739704,
-      "trading_value_m": 34866.92,
-      "rsi": 82.55,
-      "adx": 73.74,
-      "bb_position": 0.92,
-      "volume_surge_ratio": 10.57,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 0.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P1_거래량폭발",
-          "strength": 3.0,
-          "vsr": 10.6,
-          "direction": "횡보폭발",
-          "price_change": 0.68,
-          "desc": "거래량 10.6배 폭발 (횡보폭발)"
-        }
-      ]
-    },
-    {
-      "ticker": "214450",
-      "name": "파마리서치",
-      "close": 356500,
-      "price_change": 0.28,
-      "volume": 89750,
-      "trading_value_m": 31995.88,
-      "rsi": 40.64,
-      "adx": 34.77,
-      "bb_position": 0.33,
-      "volume_surge_ratio": 0.33,
-      "above_ma20": false,
-      "above_ma60": false,
-      "foreign_5d": 12240061250.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -38489.0,
-          "f_last5": 20026.0,
-          "i_prev5": -7219.0,
-          "i_last5": 17039.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-38,489→+20,026)",
-            "기관 매도→매수 반전 (-7,219→+17,039)"
-          ],
-          "desc": "외인 매도→매수 반전 (-38,489→+20,026) / 기관 매도→매수 반전 (-7,219→+17,039)"
-        }
-      ]
-    },
-    {
-      "ticker": "277810",
-      "name": "레인보우로보틱스",
-      "close": 729000,
-      "price_change": 4.89,
-      "volume": 132513,
-      "trading_value_m": 96601.98,
-      "rsi": 62.62,
-      "adx": 28.8,
-      "bb_position": 0.68,
-      "volume_surge_ratio": 0.34,
-      "above_ma20": true,
-      "above_ma60": true,
-      "foreign_5d": 26617373000.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -55565.0,
-          "f_last5": 30963.0,
-          "i_prev5": -25965.0,
-          "i_last5": 62187.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-55,565→+30,963)",
-            "기관 매도→매수 반전 (-25,965→+62,187)"
-          ],
-          "desc": "외인 매도→매수 반전 (-55,565→+30,963) / 기관 매도→매수 반전 (-25,965→+62,187)"
-        }
-      ]
-    },
-    {
-      "ticker": "336570",
-      "name": "원텍",
-      "close": 7980,
-      "price_change": -1.97,
-      "volume": 824460,
-      "trading_value_m": 6579.19,
-      "rsi": 43.23,
-      "adx": 19.82,
-      "bb_position": 0.23,
-      "volume_surge_ratio": 0.71,
-      "above_ma20": false,
-      "above_ma60": false,
-      "foreign_5d": 0.0,
-      "grade": "이상감지",
-      "strength": 3.0,
-      "pattern_count": 1,
-      "patterns": [
-        {
-          "pattern": "P2_수급반전",
-          "strength": 3.0,
-          "f_prev5": -90131.0,
-          "f_last5": 81329.0,
-          "i_prev5": -5684.0,
-          "i_last5": 150761.0,
-          "f_today": 0.0,
-          "i_today": 0.0,
-          "reasons": [
-            "외인 매도→매수 반전 (-90,131→+81,329)",
-            "기관 매도→매수 반전 (-5,684→+150,761)"
-          ],
-          "desc": "외인 매도→매수 반전 (-90,131→+81,329) / 기관 매도→매수 반전 (-5,684→+150,761)"
-        }
-      ]
-    },
-    {
-      "ticker": "365270",
-      "name": "큐라클",
-      "close": 16270,
-      "price_change": 0.56,
-      "volume": 445024,
-      "trading_value_m": 7240.54,
-      "rsi": 78.97,
-      "adx": 66.25,
-      "bb_position": 0.92,
-      "volume_surge_ratio": 0.61,
+      "ticker": "095610",
+      "name": "테스",
+      "close": 69900,
+      "price_change": -2.92,
+      "volume": 315092,
+      "trading_value_m": 22024.93,
+      "rsi": 58.72,
+      "adx": 29.73,
+      "bb_position": 0.62,
+      "volume_surge_ratio": 0.5,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
@@ -1758,31 +1479,182 @@
         {
           "pattern": "P2_수급반전",
           "strength": 3.0,
-          "f_prev5": -100704.0,
-          "f_last5": 73745.0,
-          "i_prev5": -48974.0,
-          "i_last5": 36771.0,
+          "f_prev5": -36999.0,
+          "f_last5": 23174.0,
+          "i_prev5": -215416.0,
+          "i_last5": 260211.0,
           "f_today": 0.0,
           "i_today": 0.0,
           "reasons": [
-            "외인 매도→매수 반전 (-100,704→+73,745)",
-            "기관 매도→매수 반전 (-48,974→+36,771)"
+            "외인 매도→매수 반전 (-36,999→+23,174)",
+            "기관 매도→매수 반전 (-215,416→+260,211)"
           ],
-          "desc": "외인 매도→매수 반전 (-100,704→+73,745) / 기관 매도→매수 반전 (-48,974→+36,771)"
+          "desc": "외인 매도→매수 반전 (-36,999→+23,174) / 기관 매도→매수 반전 (-215,416→+260,211)"
+        }
+      ]
+    },
+    {
+      "ticker": "371950",
+      "name": "풍원정밀",
+      "close": 18260,
+      "price_change": 1.11,
+      "volume": 166252,
+      "trading_value_m": 3035.76,
+      "rsi": 75.64,
+      "adx": 34.59,
+      "bb_position": 0.98,
+      "volume_surge_ratio": 0.62,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "이상감지",
+      "strength": 3.0,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P2_수급반전",
+          "strength": 3.0,
+          "f_prev5": -89369.0,
+          "f_last5": 50518.0,
+          "i_prev5": -2191.0,
+          "i_last5": 97903.0,
+          "f_today": 0.0,
+          "i_today": 0.0,
+          "reasons": [
+            "외인 매도→매수 반전 (-89,369→+50,518)",
+            "기관 매도→매수 반전 (-2,191→+97,903)"
+          ],
+          "desc": "외인 매도→매수 반전 (-89,369→+50,518) / 기관 매도→매수 반전 (-2,191→+97,903)"
+        }
+      ]
+    },
+    {
+      "ticker": "093520",
+      "name": "매커스",
+      "close": 30150,
+      "price_change": -5.78,
+      "volume": 273870,
+      "trading_value_m": 8257.18,
+      "rsi": 70.23,
+      "adx": 40.58,
+      "bb_position": 1.02,
+      "volume_surge_ratio": 2.05,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "이상감지",
+      "strength": 2.8,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.796794563705784,
+          "min_bb_width": 0.1,
+          "curr_bb_width": 0.47,
+          "expansion": 4.59,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (4.6배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "298050",
+      "name": "HS효성첨단소재",
+      "close": 263500,
+      "price_change": 3.74,
+      "volume": 31517,
+      "trading_value_m": 8304.73,
+      "rsi": 64.58,
+      "adx": 19.25,
+      "bb_position": 0.74,
+      "volume_surge_ratio": 0.83,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "이상감지",
+      "strength": 2.8,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P4_OBV다이버전스",
+          "strength": 2.8,
+          "price_chg_10d": 2.33,
+          "obv_chg_10d": 5404.62,
+          "obv_trend_5d": 0.99,
+          "vol_contracted": false,
+          "desc": "가격 +2.3% vs OBV +5404.6% (은밀매집)"
+        }
+      ]
+    },
+    {
+      "ticker": "010690",
+      "name": "화신",
+      "close": 13820,
+      "price_change": 5.1,
+      "volume": 2191632,
+      "trading_value_m": 30288.35,
+      "rsi": 79.06,
+      "adx": 59.24,
+      "bb_position": 1.02,
+      "volume_surge_ratio": 1.94,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 0.0,
+      "grade": "이상감지",
+      "strength": 2.6,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.6003062174078004,
+          "min_bb_width": 0.15,
+          "curr_bb_width": 0.64,
+          "expansion": 4.2,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (4.2배) +거래량"
+        }
+      ]
+    },
+    {
+      "ticker": "009150",
+      "name": "삼성전기",
+      "close": 465000,
+      "price_change": 4.26,
+      "volume": 1019024,
+      "trading_value_m": 473846.16,
+      "rsi": 86.09,
+      "adx": 54.95,
+      "bb_position": 1.1,
+      "volume_surge_ratio": 1.16,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 118699759250.0,
+      "grade": "이상감지",
+      "strength": 2.5,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.5,
+          "min_bb_width": 0.11,
+          "curr_bb_width": 0.73,
+          "expansion": 6.66,
+          "vol_confirm": false,
+          "desc": "BB 수축→폭발 (6.7배)"
         }
       ]
     },
     {
       "ticker": "009155",
       "name": "삼성전기우",
-      "close": 179300,
-      "price_change": 2.17,
-      "volume": 59759,
-      "trading_value_m": 10714.79,
-      "rsi": 84.58,
-      "adx": 43.58,
-      "bb_position": 1.16,
-      "volume_surge_ratio": 1.3,
+      "close": 183800,
+      "price_change": 2.51,
+      "volume": 64178,
+      "trading_value_m": 11795.92,
+      "rsi": 85.57,
+      "adx": 49.16,
+      "bb_position": 1.08,
+      "volume_surge_ratio": 1.37,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
@@ -1794,67 +1666,97 @@
           "pattern": "P3_BB스퀴즈",
           "strength": 2.5,
           "min_bb_width": 0.08,
-          "curr_bb_width": 0.55,
-          "expansion": 6.52,
+          "curr_bb_width": 0.64,
+          "expansion": 7.53,
           "vol_confirm": false,
-          "desc": "BB 수축→폭발 (6.5배)"
+          "desc": "BB 수축→폭발 (7.5배)"
         }
       ]
     },
     {
-      "ticker": "241520",
-      "name": "DSC인베스트먼트",
-      "close": 18620,
-      "price_change": 0.54,
-      "volume": 4794572,
-      "trading_value_m": 89274.93,
-      "rsi": 91.02,
-      "adx": 70.68,
-      "bb_position": 1.08,
-      "volume_surge_ratio": 0.82,
+      "ticker": "091700",
+      "name": "파트론",
+      "close": 8560,
+      "price_change": 3.88,
+      "volume": 910259,
+      "trading_value_m": 7791.82,
+      "rsi": 82.5,
+      "adx": 44.16,
+      "bb_position": 1.13,
+      "volume_surge_ratio": 2.2,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
       "grade": "이상감지",
-      "strength": 2.5,
+      "strength": 2.27,
       "pattern_count": 1,
       "patterns": [
         {
           "pattern": "P3_BB스퀴즈",
-          "strength": 2.5,
-          "min_bb_width": 0.12,
-          "curr_bb_width": 1.27,
-          "expansion": 11.02,
-          "vol_confirm": false,
-          "desc": "BB 수축→폭발 (11.0배)"
+          "strength": 2.2653051140841223,
+          "min_bb_width": 0.07,
+          "curr_bb_width": 0.24,
+          "expansion": 3.53,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (3.5배) +거래량"
         }
       ]
     },
     {
-      "ticker": "476060",
-      "name": "온코닉테라퓨틱스",
-      "close": 25450,
-      "price_change": 29.98,
-      "volume": 6519825,
-      "trading_value_m": 165929.55,
-      "rsi": 75.62,
-      "adx": 29.89,
-      "bb_position": 1.42,
-      "volume_surge_ratio": 6.17,
+      "ticker": "046890",
+      "name": "서울반도체",
+      "close": 12370,
+      "price_change": 29.94,
+      "volume": 302319,
+      "trading_value_m": 3739.69,
+      "rsi": 88.7,
+      "adx": 46.26,
+      "bb_position": 1.45,
+      "volume_surge_ratio": 0.53,
       "above_ma20": true,
       "above_ma60": true,
       "foreign_5d": 0.0,
       "grade": "이상감지",
-      "strength": 2.06,
+      "strength": 2.16,
       "pattern_count": 1,
       "patterns": [
         {
-          "pattern": "P1_거래량폭발",
-          "strength": 2.0554038577403566,
-          "vsr": 6.2,
-          "direction": "상승폭발",
-          "price_change": 29.98,
-          "desc": "거래량 6.2배 폭발 (상승폭발)"
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.158019162872756,
+          "min_bb_width": 0.15,
+          "curr_bb_width": 0.64,
+          "expansion": 4.32,
+          "vol_confirm": false,
+          "desc": "BB 수축→폭발 (4.3배)"
+        }
+      ]
+    },
+    {
+      "ticker": "180640",
+      "name": "한진칼",
+      "close": 173000,
+      "price_change": 7.19,
+      "volume": 196751,
+      "trading_value_m": 34037.92,
+      "rsi": 81.32,
+      "adx": 50.37,
+      "bb_position": 1.12,
+      "volume_surge_ratio": 1.51,
+      "above_ma20": true,
+      "above_ma60": true,
+      "foreign_5d": 23534222550.0,
+      "grade": "이상감지",
+      "strength": 2.12,
+      "pattern_count": 1,
+      "patterns": [
+        {
+          "pattern": "P3_BB스퀴즈",
+          "strength": 2.1217543374716663,
+          "min_bb_width": 0.17,
+          "curr_bb_width": 0.56,
+          "expansion": 3.24,
+          "vol_confirm": true,
+          "desc": "BB 수축→폭발 (3.2배) +거래량"
         }
       ]
     }

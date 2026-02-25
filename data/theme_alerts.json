@@ -1,711 +1,101 @@
 {
-  "scan_time": "2026-02-25T07:00:20.522233",
-  "theme_count": 22,
+  "scan_time": "2026-02-25T08:04:29.694327",
+  "theme_count": 3,
   "alerts": [
     {
-      "theme_name": "상장_IPO",
-      "matched_keyword": "상장",
-      "news_title": "국내주식 테마형 ETN 5종목 신규상장 - 글로벌뉴스통신GNA",
-      "news_url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE11RVFYdThXOUlpa1Q4bk55QjJqWnV4YUc5WGFDeXVJSVE1ckszdmZ1TUNOYmx5R1hfVGUwN2oxQ0hGVjlrcW0wSEFSendqb3VsVUE3and4WnB6bl9xcXB1YkY0N3VFS3lfMEZ5VGJwLXFhZVR5?oc=5",
-      "news_source": "구글뉴스_주식테마",
-      "published": "2026-02-23 13:14",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.177988",
-      "related_stocks": []
-    },
-    {
-      "theme_name": "조선",
-      "matched_keyword": "조선",
-      "news_title": "대신證 “밸류에이션 정상화·금융주가 증시 상승 동력… 내수·성장株 주목” - 조선비즈 - Chosunbiz",
-      "news_url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPeVpmT1gwTHZLQ0trdTVySUh1cngtaHdlUm5yN2pmazhwaUdFajlMazJaMjNqUXZyTE5oZnlmUXlXcGs3SmZWQUhqVGg3a1B2eVB4NWRYYy05OHQ2d3RUV1g1MUZXS0dnbXoxbldlUmhoVkhvUlBCUUFycWE2cnF4RzduaHBFVVNo0gGcAUFVX3lxTE1BQ0dSLXJzcnpON2ZnY2E3Um9MMTU1aVVhQTRKWnNKYllPRVc0M1Jua2pfNGF0N0VsalM0S211aTRGa0hWT05uVmxXTmJZbjNHcFZ6ZmNWb1k3Z1YzUFpLRjVtVTFyNldTaU5haEZiUU1EWTlCWVNUMFZGZXlEanBzaU02SWQ3SHp5S1hzMXFvRGJ1MFdxM0lCMHd1QQ?oc=5",
-      "news_source": "구글뉴스_급등",
-      "published": "2026-02-24 01:45",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.178404",
+      "theme_name": "로봇",
+      "matched_keyword": "로봇",
+      "news_title": "6개월 새 172% 급등…반도체 호황·로봇 붐 올라탄 '이 회사'",
+      "news_url": "https://www.hankyung.com/article/2026022418631",
+      "news_source": "한경_증권",
+      "published": "2026-02-23 23:04",
+      "grok_expanded": true,
+      "timestamp": "2026-02-25T08:03:07.401413",
       "related_stocks": [
         {
-          "ticker": "009540",
-          "name": "한국전력",
+          "ticker": "090460",
+          "name": "비에이치",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 60.19849977041903,
+          "ma20_dist_pct": 6.7
+        },
+        {
+          "ticker": "267260",
+          "name": "HD현대일렉트릭",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 68.1681529308791,
+          "ma20_dist_pct": 15.0
+        },
+        {
+          "ticker": "012510",
+          "name": "더존비즈온",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 76.20507636073745,
+          "ma20_dist_pct": 27.6
+        },
+        {
+          "ticker": "277810",
+          "name": "레인보우로보틱스",
+          "order": 2,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 62.6218370732098,
+          "ma20_dist_pct": 5.1
+        },
+        {
+          "ticker": "108490",
+          "name": "로보티즈",
           "order": 3,
-          "source": "dictionary",
+          "source": "grok_expanded",
           "pipeline_status": "WATCHABLE",
-          "current_rsi": 61.21851408812962,
-          "ma20_dist_pct": 9.6
+          "current_rsi": 48.907714083147404,
+          "ma20_dist_pct": -4.5
         },
         {
-          "ticker": "329180",
-          "name": "HD현대중공업",
-          "order": 1,
-          "source": "dictionary",
+          "ticker": "117730",
+          "name": "티로보틱스",
+          "order": 4,
+          "source": "grok_expanded",
           "pipeline_status": "WATCHABLE",
-          "current_rsi": 56.21220895284614,
-          "ma20_dist_pct": 4.2
+          "current_rsi": 47.52105812912192,
+          "ma20_dist_pct": -5.8
         },
         {
-          "ticker": "267250",
-          "name": "HD현대에너지솔루션",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 76.87455921882926,
-          "ma20_dist_pct": 17.7
+          "ticker": "056080",
+          "name": "유진로봇",
+          "order": 5,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 58.26805775994067,
+          "ma20_dist_pct": 5.3
+        },
+        {
+          "ticker": "454910",
+          "name": "두산로보틱스",
+          "order": 6,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 53.81406686554491,
+          "ma20_dist_pct": -2.7
         }
       ]
     },
     {
-      "theme_name": "관세전쟁",
-      "matched_keyword": "관세",
-      "news_title": "뉴욕증시 프리뷰, 보합권 반등…AMD 14% 급등, 관세·AI 불안은 여전 - 뉴스핌",
-      "news_url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE43N2RybWhvM1dGSjh6NVJDaVdrTkFfT2lHS2ZiM2daY2R5R1BiT1Y0OEw0YUR2dXFiOWd0OWhkY3RxVXJLSmtNWEU2SVA5ZFgtd1Q4MjhTQVM5U1BM?oc=5",
-      "news_source": "구글뉴스_급등",
-      "published": "2026-02-24 04:39",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.178862",
-      "related_stocks": [
-        {
-          "ticker": "005930",
-          "name": "삼성전자",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 80.70697079454382,
-          "ma20_dist_pct": 18.2
-        },
-        {
-          "ticker": "000660",
-          "name": "SK하이닉스",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 72.44084439376502,
-          "ma20_dist_pct": 15.4
-        },
-        {
-          "ticker": "005380",
-          "name": "현대차",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 64.32924954831881,
-          "ma20_dist_pct": 5.0
-        }
-      ]
-    },
-    {
-      "theme_name": "바이오신약",
-      "matched_keyword": "비만치료제",
-      "news_title": "美 일라이릴리 '급등'...한국증시 비만치료제주 장중 흐름은? - 초이스경제",
-      "news_url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9fU3BOcE9CVHI4amp4OW1FTU51dWl3elBIVWJ1b3pDNFN1RzN0dUpHZWRwQWVJR1gydjhHaTFHOEtGNldtTE1zSkI2dXlOUFF5V0FDbU9OZXZpWUNCODlXM3FnSmVvc1BXYVYyRkNOSdIBc0FVX3lxTE95cEU1RWtqTmZxcFBtRVhncmU1Nk1hX01qakUyTWc1akZyRnRLaFVYZnltWnhYNExuTG45UzBwTkxGRllxUW0xWjR0QUNPaXNUSUw1ZUd4dU9VV25PMTdkUGRGcDNvTWZxVU9uQVdSRXRDWVE?oc=5",
-      "news_source": "구글뉴스_급등",
-      "published": "2026-02-23 15:43",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.179462",
-      "related_stocks": [
-        {
-          "ticker": "068270",
-          "name": "셀트리온",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 73.05469096520783,
-          "ma20_dist_pct": 10.6
-        },
-        {
-          "ticker": "207940",
-          "name": "삼성바이오로직스",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 45.49841945339013,
-          "ma20_dist_pct": -0.8
-        },
-        {
-          "ticker": "326030",
-          "name": "SK바이오팜",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 54.44724442339001,
-          "ma20_dist_pct": 3.3
-        },
-        {
-          "ticker": "141080",
-          "name": "레고켐바이오",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "FAIL_G1",
-          "current_rsi": 52.847517383253695,
-          "ma20_dist_pct": -0.7
-        }
-      ]
-    },
-    {
-      "theme_name": "비만치료제",
-      "matched_keyword": "비만치료",
-      "news_title": "美 일라이릴리 '급등'...한국증시 비만치료제주 장중 흐름은? - 초이스경제",
-      "news_url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9fU3BOcE9CVHI4amp4OW1FTU51dWl3elBIVWJ1b3pDNFN1RzN0dUpHZWRwQWVJR1gydjhHaTFHOEtGNldtTE1zSkI2dXlOUFF5V0FDbU9OZXZpWUNCODlXM3FnSmVvc1BXYVYyRkNOSdIBc0FVX3lxTE95cEU1RWtqTmZxcFBtRVhncmU1Nk1hX01qakUyTWc1akZyRnRLaFVYZnltWnhYNExuTG45UzBwTkxGRllxUW0xWjR0QUNPaXNUSUw1ZUd4dU9VV25PMTdkUGRGcDNvTWZxVU9uQVdSRXRDWVE?oc=5",
-      "news_source": "구글뉴스_급등",
-      "published": "2026-02-23 15:43",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.179562",
-      "related_stocks": [
-        {
-          "ticker": "068270",
-          "name": "셀트리온",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 73.05469096520783,
-          "ma20_dist_pct": 10.6
-        },
-        {
-          "ticker": "207940",
-          "name": "삼성바이오로직스",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 45.49841945339013,
-          "ma20_dist_pct": -0.8
-        },
-        {
-          "ticker": "326030",
-          "name": "SK바이오팜",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 54.44724442339001,
-          "ma20_dist_pct": 3.3
-        }
-      ]
-    },
-    {
-      "theme_name": "원자재급등",
-      "matched_keyword": "금값",
-      "news_title": "뉴욕증시, 관세 불확실성·AI 산업 파괴 우려에 하락…금값, 3% 이상 급등 [글로벌마켓 모닝 브리핑] - 이투데이",
-      "news_url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE8tY1JSbW5GZ3loSkNDVG80dmN1OGxwUk04dUVLcDJJLV9kSl9iS0dFTDczemhCd25kczVoR1Iyb0RBMnF5b0hmWjNVdzYxaEp1S2wyVA?oc=5",
-      "news_source": "구글뉴스_급등",
-      "published": "2026-02-23 13:55",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.179962",
-      "related_stocks": [
-        {
-          "ticker": "010950",
-          "name": "S-Oil",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 66.31830614652478,
-          "ma20_dist_pct": 9.5
-        },
-        {
-          "ticker": "096770",
-          "name": "SK이노베이션",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 74.33217610028325,
-          "ma20_dist_pct": 20.1
-        }
-      ]
-    },
-    {
-      "theme_name": "밸류업",
-      "matched_keyword": "주주환원",
-      "news_title": "미래에셋증권, 6354억 규모 주주환원 결의…역대 최대",
-      "news_url": "https://www.hankyung.com/article/2026022424506",
-      "news_source": "한경_증권",
-      "published": "2026-02-24 04:32",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.180748",
-      "related_stocks": [
-        {
-          "ticker": "105560",
-          "name": "KB금융",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 74.06770073932736,
-          "ma20_dist_pct": 10.9
-        },
-        {
-          "ticker": "055550",
-          "name": "신한지주",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 67.62256079619249,
-          "ma20_dist_pct": 8.7
-        },
-        {
-          "ticker": "005930",
-          "name": "삼성전자",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 80.70697079454382,
-          "ma20_dist_pct": 18.2
-        }
-      ]
-    },
-    {
-      "theme_name": "K콘텐츠",
-      "matched_keyword": "IP",
-      "news_title": "활기 찾은 공모주 시장…내달까지 10여곳 '릴레이 IPO'",
-      "news_url": "https://www.hankyung.com/article/2026022419391",
-      "news_source": "한경_증권",
-      "published": "2026-02-23 23:34",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.181276",
-      "related_stocks": [
-        {
-          "ticker": "035420",
-          "name": "NAVER",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "FAIL_G1",
-          "current_rsi": 48.60005440091612,
-          "ma20_dist_pct": -2.9
-        },
-        {
-          "ticker": "035720",
-          "name": "카카오",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 46.16883326182124,
-          "ma20_dist_pct": -2.1
-        }
-      ]
-    },
-    {
-      "theme_name": "공매도",
-      "matched_keyword": "공매도",
-      "news_title": "불장에 공매도 대기자금도 '사상 최대'",
-      "news_url": "https://www.hankyung.com/article/2026022419381",
-      "news_source": "한경_증권",
-      "published": "2026-02-23 23:31",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.181408",
-      "related_stocks": []
-    },
-    {
-      "theme_name": "MA_인수합병",
-      "matched_keyword": "공개매수",
-      "news_title": "\"패키지 딜 경쟁력 입증\"… NH證, 2.2조 더존비즈온 공개매수 수임",
-      "news_url": "https://www.hankyung.com/article/2026022407336",
-      "news_source": "한경_증권",
-      "published": "2026-02-23 17:04",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.182587",
-      "related_stocks": []
-    },
-    {
-      "theme_name": "이란_중동",
-      "matched_keyword": "이란",
-      "news_title": "美·이란 협상 재개에 유가 보합세…관세 불확실성 영향도",
-      "news_url": "https://www.hankyung.com/article/202602240171i",
-      "news_source": "한경_증권",
-      "published": "2026-02-23 16:45",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.182835",
-      "related_stocks": [
-        {
-          "ticker": "012450",
-          "name": "한화에어로스페이스",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 55.98792880955084,
-          "ma20_dist_pct": 1.4
-        },
-        {
-          "ticker": "079550",
-          "name": "LIG넥스원",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 61.743534757507256,
-          "ma20_dist_pct": 8.6
-        },
-        {
-          "ticker": "064350",
-          "name": "현대로템",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 56.12454999529196,
-          "ma20_dist_pct": 3.5
-        },
-        {
-          "ticker": "272210",
-          "name": "한화시스템",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 61.903437122437644,
-          "ma20_dist_pct": 7.9
-        },
-        {
-          "ticker": "093190",
-          "name": "퍼스텍",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "NOT_IN_UNIVERSE",
-          "current_rsi": 0.0,
-          "ma20_dist_pct": 0.0
-        },
-        {
-          "ticker": "010950",
-          "name": "S-Oil",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 66.31830614652478,
-          "ma20_dist_pct": 9.5
-        },
-        {
-          "ticker": "096770",
-          "name": "SK이노베이션",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 74.33217610028325,
-          "ma20_dist_pct": 20.1
-        }
-      ]
-    },
-    {
-      "theme_name": "지배구조",
-      "matched_keyword": "경영권",
-      "news_title": "한미약품 경영권 분쟁 재점화…지주사 한미사이언스 '급등'",
-      "news_url": "https://www.hankyung.com/article/2026022403096",
-      "news_source": "한경_증권",
-      "published": "2026-02-23 16:31",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.182988",
-      "related_stocks": []
-    },
-    {
-      "theme_name": "면세점_관광",
-      "matched_keyword": "면세점",
-      "news_title": "신세계百, 신세계免·한국관광공사와 MOU 연장… 외국인 관광객 유치 총력",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414195/1",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 12:00",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.183282",
-      "related_stocks": [
-        {
-          "ticker": "035250",
-          "name": "강원랜드",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 70.59485923406515,
-          "ma20_dist_pct": 7.0
-        }
-      ]
-    },
-    {
-      "theme_name": "부동산",
-      "matched_keyword": "부동산",
-      "news_title": "李, 부동산과의 전쟁 한달… ‘집값 상승 심리’ 일단 꺾여",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260225/133416468/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 10:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.183554",
-      "related_stocks": [
-        {
-          "ticker": "000720",
-          "name": "현대건설",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 77.86782297011617,
-          "ma20_dist_pct": 21.9
-        },
-        {
-          "ticker": "047040",
-          "name": "대우건설",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 75.14111119035323,
-          "ma20_dist_pct": 31.6
-        }
-      ]
-    },
-    {
-      "theme_name": "지정학리스크",
-      "matched_keyword": "전쟁",
-      "news_title": "李, 부동산과의 전쟁 한달… ‘집값 상승 심리’ 일단 꺾여",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260225/133416468/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 10:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.183643",
-      "related_stocks": [
-        {
-          "ticker": "012450",
-          "name": "한화에어로스페이스",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 55.98792880955084,
-          "ma20_dist_pct": 1.4
-        },
-        {
-          "ticker": "047810",
-          "name": "한국항공우주",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 68.51404066184584,
-          "ma20_dist_pct": 9.5
-        },
-        {
-          "ticker": "079550",
-          "name": "LIG넥스원",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 61.743534757507256,
-          "ma20_dist_pct": 8.6
-        },
-        {
-          "ticker": "064350",
-          "name": "현대로템",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 56.12454999529196,
-          "ma20_dist_pct": 3.5
-        },
-        {
-          "ticker": "272210",
-          "name": "한화시스템",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 61.903437122437644,
-          "ma20_dist_pct": 7.9
-        }
-      ]
-    },
-    {
-      "theme_name": "전력기기",
-      "matched_keyword": "전력망",
+      "theme_name": "2차전지",
+      "matched_keyword": "배터리",
       "news_title": "“美, 새 ‘국가안보 관세’ 추진”… 배터리-전력망 등 6대 산업 겨냥",
       "news_url": "https://www.donga.com/news/Inter/article/all/20260225/133416040/2",
       "news_source": "동아_경제",
       "published": "2026-02-24 10:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.184501",
+      "grok_expanded": true,
+      "timestamp": "2026-02-25T08:03:07.423458",
       "related_stocks": [
-        {
-          "ticker": "267260",
-          "name": "HD현대일렉트릭",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 68.1681529308791,
-          "ma20_dist_pct": 15.0
-        },
-        {
-          "ticker": "298040",
-          "name": "효성중공업",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 70.14478910358449,
-          "ma20_dist_pct": 12.9
-        },
-        {
-          "ticker": "103590",
-          "name": "일진전기",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 70.3025166750165,
-          "ma20_dist_pct": 20.0
-        }
-      ]
-    },
-    {
-      "theme_name": "금융위기",
-      "matched_keyword": "금융위기",
-      "news_title": "원화 실질가치, 6개월 연속 하락하다 지난달 반등",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414876/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.186938",
-      "related_stocks": []
-    },
-    {
-      "theme_name": "AI_반도체",
-      "matched_keyword": "GPU",
-      "news_title": "LGU+ 차세대 AI데이터센터 베일 벗는다",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414580/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.188090",
-      "related_stocks": [
-        {
-          "ticker": "000660",
-          "name": "SK하이닉스",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 72.44084439376502,
-          "ma20_dist_pct": 15.4
-        },
-        {
-          "ticker": "005930",
-          "name": "삼성전자",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 80.70697079454382,
-          "ma20_dist_pct": 18.2
-        },
-        {
-          "ticker": "042700",
-          "name": "한미반도체",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 63.35808418786823,
-          "ma20_dist_pct": 7.7
-        },
-        {
-          "ticker": "403870",
-          "name": "HPSP",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 49.04776125624286,
-          "ma20_dist_pct": -5.4
-        },
-        {
-          "ticker": "036930",
-          "name": "주성엔지니어링",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 68.93506697355386,
-          "ma20_dist_pct": 16.0
-        },
-        {
-          "ticker": "025950",
-          "name": "동신건설",
-          "order": 3,
-          "source": "dictionary",
-          "pipeline_status": "NOT_IN_UNIVERSE",
-          "current_rsi": 0.0,
-          "ma20_dist_pct": 0.0
-        }
-      ]
-    },
-    {
-      "theme_name": "클라우드_데이터센터",
-      "matched_keyword": "데이터센터",
-      "news_title": "LGU+ 차세대 AI데이터센터 베일 벗는다",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414580/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.188193",
-      "related_stocks": [
-        {
-          "ticker": "267260",
-          "name": "HD현대일렉트릭",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 68.1681529308791,
-          "ma20_dist_pct": 15.0
-        },
-        {
-          "ticker": "298040",
-          "name": "효성중공업",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "OVERHEATED",
-          "current_rsi": 70.14478910358449,
-          "ma20_dist_pct": 12.9
-        },
-        {
-          "ticker": "003230",
-          "name": "삼양식품",
-          "order": 3,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 56.3285552196231,
-          "ma20_dist_pct": 5.6
-        }
-      ]
-    },
-    {
-      "theme_name": "사이버보안",
-      "matched_keyword": "사이버공격",
-      "news_title": "“AI 악용 사이버공격 급증… ‘인간-AI 협업 레드팀’ 꾸려 대응 필요”",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414643/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.188411",
-      "related_stocks": [
-        {
-          "ticker": "053800",
-          "name": "안랩",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 56.91317733347091,
-          "ma20_dist_pct": 0.8
-        },
-        {
-          "ticker": "067920",
-          "name": "이글루코퍼레이션",
-          "order": 2,
-          "source": "dictionary",
-          "pipeline_status": "NOT_IN_UNIVERSE",
-          "current_rsi": 0.0,
-          "ma20_dist_pct": 0.0
-        }
-      ]
-    },
-    {
-      "theme_name": "전기차",
-      "matched_keyword": "전기차",
-      "news_title": "작년 美전기차 등록대수 10년 만에 첫 감소",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414630/2",
-      "news_source": "동아_경제",
-      "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.188889",
-      "related_stocks": [
-        {
-          "ticker": "005380",
-          "name": "현대차",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 64.32924954831881,
-          "ma20_dist_pct": 5.0
-        },
-        {
-          "ticker": "000270",
-          "name": "기아",
-          "order": 1,
-          "source": "dictionary",
-          "pipeline_status": "WATCHABLE",
-          "current_rsi": 69.47279745761948,
-          "ma20_dist_pct": 9.3
-        },
         {
           "ticker": "373220",
           "name": "LG에너지솔루션",
@@ -718,32 +108,176 @@
         {
           "ticker": "006400",
           "name": "삼성SDI",
-          "order": 2,
+          "order": 1,
           "source": "dictionary",
           "pipeline_status": "WATCHABLE",
           "current_rsi": 65.51414978277785,
           "ma20_dist_pct": 9.2
+        },
+        {
+          "ticker": "247540",
+          "name": "에코프로비엠",
+          "order": 1,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 57.73854100939314,
+          "ma20_dist_pct": 0.9
+        },
+        {
+          "ticker": "086520",
+          "name": "에코프로",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 65.5497707889536,
+          "ma20_dist_pct": 7.3
+        },
+        {
+          "ticker": "003670",
+          "name": "포스코퓨처엠",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 58.93988156664555,
+          "ma20_dist_pct": 4.1
+        },
+        {
+          "ticker": "066970",
+          "name": "엘앤에프",
+          "order": 1,
+          "source": "grok_expanded",
+          "pipeline_status": "FAIL_G1",
+          "current_rsi": 55.72433307035154,
+          "ma20_dist_pct": 2.9
+        },
+        {
+          "ticker": "005070",
+          "name": "코스모신소재",
+          "order": 2,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 68.28717909995837,
+          "ma20_dist_pct": 13.4
+        },
+        {
+          "ticker": "137400",
+          "name": "피엔티",
+          "order": 3,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 58.7523357668175,
+          "ma20_dist_pct": 3.4
+        },
+        {
+          "ticker": "096770",
+          "name": "SK이노베이션",
+          "order": 4,
+          "source": "grok_expanded",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 74.33217610028325,
+          "ma20_dist_pct": 20.1
+        },
+        {
+          "ticker": "020150",
+          "name": "롯데에너지머티리얼즈",
+          "order": 5,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 58.27558369117216,
+          "ma20_dist_pct": 3.8
         }
       ]
     },
     {
-      "theme_name": "탄소중립",
-      "matched_keyword": "탄소중립",
-      "news_title": "현대百, 정부 ‘탄소중립포인트제’ 참여",
-      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414655/2",
+      "theme_name": "원전",
+      "matched_keyword": "원전",
+      "news_title": "“새 원전 수용지역 전기료 원가수준 낮춰야”",
+      "news_url": "https://www.donga.com/news/Economy/article/all/20260224/133414572/2",
       "news_source": "동아_경제",
       "published": "2026-02-24 06:30",
-      "grok_expanded": false,
-      "timestamp": "2026-02-25T07:00:07.189404",
+      "grok_expanded": true,
+      "timestamp": "2026-02-25T08:03:07.445028",
       "related_stocks": [
         {
-          "ticker": "009830",
-          "name": "한화솔루션",
+          "ticker": "009540",
+          "name": "한국전력",
+          "order": 1,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 61.21851408812962,
+          "ma20_dist_pct": 9.6
+        },
+        {
+          "ticker": "034020",
+          "name": "두산에너빌리티",
+          "order": 1,
+          "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 62.35920690842586,
+          "ma20_dist_pct": 7.1
+        },
+        {
+          "ticker": "267260",
+          "name": "HD현대일렉트릭",
           "order": 2,
           "source": "dictionary",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 68.1681529308791,
+          "ma20_dist_pct": 15.0
+        },
+        {
+          "ticker": "092200",
+          "name": "디아이씨",
+          "order": 2,
+          "source": "dictionary",
+          "pipeline_status": "FAIL_G1",
+          "current_rsi": 43.84884900367759,
+          "ma20_dist_pct": -2.7
+        },
+        {
+          "ticker": "052690",
+          "name": "한전기술",
+          "order": 2,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 68.46353869042593,
+          "ma20_dist_pct": 11.2
+        },
+        {
+          "ticker": "083650",
+          "name": "비에이치아이",
+          "order": 3,
+          "source": "grok_expanded",
           "pipeline_status": "OVERHEATED",
-          "current_rsi": 67.44885607811048,
-          "ma20_dist_pct": 28.8
+          "current_rsi": 70.8157615154115,
+          "ma20_dist_pct": 16.7
+        },
+        {
+          "ticker": "000720",
+          "name": "현대건설",
+          "order": 4,
+          "source": "grok_expanded",
+          "pipeline_status": "OVERHEATED",
+          "current_rsi": 77.86782297011617,
+          "ma20_dist_pct": 21.9
+        },
+        {
+          "ticker": "051600",
+          "name": "한전KPS",
+          "order": 5,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 63.932574637034314,
+          "ma20_dist_pct": 6.2
+        },
+        {
+          "ticker": "105840",
+          "name": "우진",
+          "order": 6,
+          "source": "grok_expanded",
+          "pipeline_status": "WATCHABLE",
+          "current_rsi": 59.96672611837565,
+          "ma20_dist_pct": 4.5
         }
       ]
     }
