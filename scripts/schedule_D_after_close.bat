@@ -133,6 +133,10 @@ REM 19단계: 추천 성과 추적 (이전 추천 결과 판정)
 echo [%date% %time%] [19/23] 추천 성과 추적 >> logs\schedule.log
 python -u -X utf8 scripts\track_pick_results.py >> logs\schedule.log 2>&1
 
+REM 19.5단계: 기관 추정 목표가 계산 (VPOC + 외인VWAP + 피보나치 + MA120)
+echo [%date% %time%] [19.5/26] 기관 목표가 계산 >> logs\schedule.log
+python -u -X utf8 scripts\calc_institutional_targets.py >> logs\schedule.log 2>&1
+
 REM 20단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증) *** 최종 ***
 echo [%date% %time%] [20/23] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1

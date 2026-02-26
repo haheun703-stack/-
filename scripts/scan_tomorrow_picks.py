@@ -370,6 +370,49 @@ def load_regime_boost() -> float:
     return macro.get("position_multiplier", 1.0)
 
 
+def load_institutional_targets() -> dict:
+    """기관 추정 목표가 데이터 로드."""
+    data = load_json("institutional_targets.json")
+    return data.get("targets", {})
+
+
+def get_target_zone_bonus(ticker: str, targets: dict) -> tuple[float, dict]:
+    """D존 기반 점수 보정 + 부가 정보 반환.
+
+    Returns:
+        (bonus_points, info_dict)
+        D-3: +5, D-2: +3, D-1: +1, 도달: 0, 초과: -3
+        confidence < 0.5이면 보정 절반.
+    """
+    t = targets.get(ticker)
+    if not t:
+        return 0.0, {}
+
+    zone = t.get("zone", "")
+    zone_bonus = {
+        "D-3": 5.0,
+        "D-2": 3.0,
+        "D-1": 1.0,
+        "도달": 0.0,
+        "초과": -3.0,
+    }
+
+    bonus = zone_bonus.get(zone, 0.0)
+
+    confidence = t.get("confidence", 0.5)
+    if confidence < 0.5:
+        bonus *= 0.5
+
+    info = {
+        "estimated_target": t.get("estimated_target", 0),
+        "gap_pct": t.get("gap_pct", 0),
+        "zone": zone,
+        "confidence": confidence,
+    }
+
+    return bonus, info
+
+
 # ──────────────────────────────────────────
 # 통합 점수 계산
 # ──────────────────────────────────────────
@@ -865,10 +908,13 @@ def main():
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)}")
 
-    # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트
+    # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
     sector_boost_map = load_sector_momentum_boost()
+    inst_targets = load_institutional_targets()
+    if inst_targets:
+        print(f"[기관목표가] {len(inst_targets)}종목 로드됨")
     if avoid_tickers:
         print(f"[DART AVOID] {len(avoid_tickers)}종목 자동 제외")
     print(f"[레짐 부스트] x{regime_mult:.1f}")
@@ -916,6 +962,12 @@ def main():
             score_detail["total"] = round(boosted, 1)
             if ticker_boost > 0:
                 source_names.append("US모멘텀")
+
+        # 기관 추정 목표가 D존 보정
+        target_bonus, target_info = get_target_zone_bonus(ticker, inst_targets)
+        if target_bonus != 0:
+            boosted = max(min(score_detail["total"] + target_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
 
         # 이름 결정
         name = ""
@@ -972,6 +1024,10 @@ def main():
             "risk_pct": entry_info.get("risk_pct", 0),
             "reasons": reasons,
             "overheat_flags": score_detail.get("overheat_flags", []),
+            "estimated_target": target_info.get("estimated_target", 0),
+            "target_gap_pct": target_info.get("gap_pct", 0),
+            "target_zone": target_info.get("zone", ""),
+            "target_confidence": target_info.get("confidence", 0),
         }
 
         results.append(rec)
@@ -1011,10 +1067,16 @@ def main():
             oh = f" 🔥-{r['score_breakdown']['overheat']}p" if r["score_breakdown"]["overheat"] > 0 else ""
             cond = r.get("entry_condition", "")
             reasons_str = ", ".join(r.get("reasons", [])[:3])
-            print(f"  {i}. [{r['grade']}] {r['name']}({r['ticker']}) "
+            zone_tag = f" [{r['target_zone']}]" if r.get("target_zone") else ""
+            print(f"  {i}. [{r['grade']}]{zone_tag} {r['name']}({r['ticker']}) "
                   f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
-            print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
-                  f"목표:{r.get('target_price',0):,} | {cond}")
+            if r.get("estimated_target"):
+                print(f"     기관목표:{r['estimated_target']:,} (갭:{r.get('target_gap_pct',0):+.1f}%) "
+                      f"| 진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
+                      f"목표:{r.get('target_price',0):,}")
+            else:
+                print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
+                      f"목표:{r.get('target_price',0):,} | {cond}")
             print(f"     근거: {reasons_str}")
         print(f"{'─'*60}")
     else:
