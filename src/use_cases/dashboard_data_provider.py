@@ -68,6 +68,7 @@ class DashboardDataProvider:
             "dart_events": self._load_json("dart_event_signals.json"),
             "portfolio_allocation": self._load_json("portfolio_allocation.json"),
             "volume_spike": self._load_json("volume_spike_watchlist.json"),
+            "institutional_targets": self._load_json("institutional_targets.json"),
             "summary": summary,
         }
 
