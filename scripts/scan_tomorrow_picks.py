@@ -377,26 +377,26 @@ def load_sector_momentum_boost() -> dict[str, float]:
 
 
 def get_ticker_sector_boost(ticker: str, boost_map: dict[str, float]) -> float:
-    """종목 → stock_to_sector → SECTOR_BRIDGE → sector_momentum boost 합산."""
+    """종목 → stock_to_sector → SECTOR_BRIDGE → sector_momentum boost (절대값 최대)."""
     if not boost_map:
         return 0.0
     sts = _load_stock_to_sector()
     sectors = sts.get(ticker, [])
-    max_boost = 0.0
+    best_boost = 0.0
     for sec in sectors:
         # 직접 매칭
         if sec in boost_map:
-            max_boost = max(max_boost, boost_map[sec]) if boost_map[sec] > 0 else min(max_boost, boost_map[sec])
+            b = boost_map[sec]
+            if abs(b) > abs(best_boost):
+                best_boost = b
         # SECTOR_BRIDGE 매칭
         bridge_keys = SECTOR_BRIDGE.get(sec, [])
         for bk in bridge_keys:
             if bk in boost_map:
                 b = boost_map[bk]
-                if b > 0:
-                    max_boost = max(max_boost, b)
-                else:
-                    max_boost = min(max_boost, b)
-    return round(max_boost, 1)
+                if abs(b) > abs(best_boost):
+                    best_boost = b
+    return round(best_boost, 1)
 
 
 def load_regime_boost() -> float:
@@ -741,7 +741,17 @@ def _calc_entry_stop(
     ma5_entry = ""  # MA5 진입 판정 태그
 
     if ma_mid > 0:
-        if ma_mid_gap <= 3.0:
+        if ma_mid_gap < -3.0:
+            # MA5 하향 이탈 → 반등 확인 필요
+            ma5_entry = "하향이탈"
+            condition = f"MA5 하향이탈 {ma5_gap:+.1f}%→반등확인 후"
+            entry = int(round(ma5 * 0.995, -1))  # MA5 -0.5%
+        elif ma_mid_gap < 0:
+            # -3% ~ 0%: MA5 아래 소폭 → 반등 대기
+            ma5_entry = "반등대기"
+            condition = f"MA5 소폭하회 {ma5_gap:+.1f}%→반등 확인"
+            entry = _safe_int(close)
+        elif ma_mid_gap <= 3.0:
             # 최적 진입 구간: MA5~7 이내 (0%~+3%)
             ma5_entry = "5·7선접근"
             condition = f"MA5~7 부근 진입적기 ({ma5_gap:+.1f}%)"
@@ -751,21 +761,11 @@ def _calc_entry_stop(
             ma5_entry = "눌림대기"
             condition = f"MA5 대비 +{ma5_gap:.1f}% 이격→5일선 눌림 대기"
             entry = int(round(ma_mid * 1.005, -1))  # MA중간 +0.5% 수준
-        elif ma_mid_gap > 5.0:
-            # 과이격: MA5 복귀 대기
+        else:
+            # 과이격 (+5% 초과): MA5 복귀 대기
             ma5_entry = "이격과대"
             condition = f"MA5 대비 +{ma5_gap:.1f}% 과이격→5일선 복귀 대기"
             entry = int(round(ma5 * 1.01, -1))  # MA5 +1% 수준
-        elif ma_mid_gap < -3.0:
-            # MA5 하향 이탈 → 반등 확인
-            ma5_entry = "하향이탈"
-            condition = f"MA5 하향이탈 {ma5_gap:+.1f}%→반등확인 후"
-            entry = int(round(ma5 * 0.995, -1))  # MA5 -0.5%
-        else:
-            # -3% ~ 0%: MA5 아래 소폭 → 반등 대기
-            ma5_entry = "반등대기"
-            condition = f"MA5 소폭하회 {ma5_gap:+.1f}%→반등 확인"
-            entry = _safe_int(close)
     else:
         # MA5 데이터 없을 때 기존 로직 폴백
         ma5_entry = ""

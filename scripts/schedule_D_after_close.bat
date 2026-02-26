@@ -122,31 +122,39 @@ echo [%date% %time%] [17.5/24] 섹터 릴레이 시그널 >> logs\schedule.log
 python -u -X utf8 scripts\relay_report.py >> logs\schedule.log 2>&1
 
 REM 18단계: 그룹 릴레이 감지 (재벌 계열사 발화)
-echo [%date% %time%] [18/24] 그룹 릴레이 감지 >> logs\schedule.log
+echo [%date% %time%] [18/28] 그룹 릴레이 감지 >> logs\schedule.log
 python -u -X utf8 scripts\group_relay_detector.py >> logs\schedule.log 2>&1
+
+REM 18.5단계: 매집 추적 스캔 (전략D — 거래량폭발 이후 매집 진행 종목)
+echo [%date% %time%] [18.5/28] 매집 추적 스캔 >> logs\schedule.log
+python -u -X utf8 scripts\scan_accumulation_tracker.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
 REM  PHASE 5: 성과추적 + 내일 추천 (~5분)
 REM ══════════════════════════════════════════════
 
 REM 19단계: 추천 성과 추적 (이전 추천 결과 판정)
-echo [%date% %time%] [19/23] 추천 성과 추적 >> logs\schedule.log
+echo [%date% %time%] [19/28] 추천 성과 추적 >> logs\schedule.log
 python -u -X utf8 scripts\track_pick_results.py >> logs\schedule.log 2>&1
 
-REM 19.5단계: 기관 추정 목표가 계산 (VPOC + 외인VWAP + 피보나치 + MA120)
-echo [%date% %time%] [19.5/26] 기관 목표가 계산 >> logs\schedule.log
-python -u -X utf8 scripts\calc_institutional_targets.py >> logs\schedule.log 2>&1
-
-REM 20단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증) *** 최종 ***
-echo [%date% %time%] [20/23] 내일 추천 종목 스캔 >> logs\schedule.log
-python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
-
-REM 20.5단계: DART 이벤트 드리븐 시그널
-echo [%date% %time%] [20.5/26] DART 이벤트 시그널 >> logs\schedule.log
+REM 19.3단계: DART 이벤트 드리븐 시그널 (추천 스캔 전에 생성해야 함!)
+echo [%date% %time%] [19.3/28] DART 이벤트 시그널 >> logs\schedule.log
 python -u -X utf8 scripts\dart_event_signal.py >> logs\schedule.log 2>&1
 
+REM 19.5단계: 기관 추정 목표가 계산 (VPOC + 외인VWAP + 피보나치 + MA120)
+echo [%date% %time%] [19.5/28] 기관 목표가 계산 >> logs\schedule.log
+python -u -X utf8 scripts\calc_institutional_targets.py >> logs\schedule.log 2>&1
+
+REM 19.7단계: Perplexity 시장 인텔리전스 (전략E — US 이벤트→KR 파급 분석)
+echo [%date% %time%] [19.7/28] Perplexity 인텔리전스 >> logs\schedule.log
+python -u -X utf8 scripts\perplexity_market_intel.py >> logs\schedule.log 2>&1
+
+REM 20단계: 내일 추천 종목 통합 스캔 (10개 시그널 교차검증) *** 최종 ***
+echo [%date% %time%] [20/28] 내일 추천 종목 스캔 >> logs\schedule.log
+python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
+
 REM 20.7단계: 멀티전략 포트폴리오 배분
-echo [%date% %time%] [20.7/26] 포트폴리오 배분 >> logs\schedule.log
+echo [%date% %time%] [20.7/28] 포트폴리오 배분 >> logs\schedule.log
 python -u -X utf8 scripts\portfolio_allocator.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
@@ -154,26 +162,26 @@ REM  PHASE 6: 아카이브 + 보고서 (~1분)
 REM ══════════════════════════════════════════════
 
 REM 21단계: 일일 아카이브 (JSON → SQLite 영구 저장)
-echo [%date% %time%] [21/23] 일일 아카이브 >> logs\schedule.log
+echo [%date% %time%] [21/28] 일일 아카이브 >> logs\schedule.log
 python -u -X utf8 src\daily_archive.py >> logs\schedule.log 2>&1
 
 REM 22단계: 주간 보고서 자동 생성 (금요일만)
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
-    echo [%date% %time%] [22/23] 주간 보고서 생성 (금요일) >> logs\schedule.log
+    echo [%date% %time%] [22/28] 주간 보고서 생성 (금요일) >> logs\schedule.log
     python -u -X utf8 src\daily_archive.py --weekly >> logs\schedule.log 2>&1
 ) else (
-    echo [%date% %time%] [22/23] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
+    echo [%date% %time%] [22/28] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
 )
 
 REM 23단계: Railway 원격 동기화 (RAILWAY_URL 설정 시에만 실행)
 if defined RAILWAY_URL (
-    echo [%date% %time%] [23/23] Railway 동기화 >> logs\schedule.log
+    echo [%date% %time%] [23/28] Railway 동기화 >> logs\schedule.log
     python -u -X utf8 scripts\sync_to_railway.py >> logs\schedule.log 2>&1
 ) else (
-    echo [%date% %time%] [23/23] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
+    echo [%date% %time%] [23/28] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
 )
 
 REM ══════════════════════════════════════════════
-echo [%date% %time%] BAT-D 완료 (23단계 순차 실행) >> logs\schedule.log
+echo [%date% %time%] BAT-D 완료 (28단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log
