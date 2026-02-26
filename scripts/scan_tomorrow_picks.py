@@ -678,7 +678,9 @@ def calc_integrated_score(
     total = max(base_total - overheat_penalty, 0)
 
     # ── 진입가 / 손절가 / 목표가 자동 생성 ──
-    entry_info = _calc_entry_stop(close, ma20, ma60, low_20d, rsi, stoch_k, bb_pos)
+    ma5 = parquet_data.get("ma5", 0) if parquet_data else 0
+    ma7 = parquet_data.get("ma7", 0) if parquet_data else 0
+    entry_info = _calc_entry_stop(close, ma20, ma60, low_20d, rsi, stoch_k, bb_pos, ma5, ma7)
 
     # ── 핵심 근거 생성 ──
     reasons = _build_reasons(
@@ -715,34 +717,76 @@ def calc_integrated_score(
 def _calc_entry_stop(
     close: float, ma20: float, ma60: float,
     low_20d: float, rsi: float, stoch_k: float, bb_pos: float,
+    ma5: float = 0, ma7: float = 0,
 ) -> dict:
-    """진입가/손절가/진입조건 자동 생성"""
+    """진입가/손절가/진입조건 자동 생성 (MA5~MA7 진입 전략 반영)"""
     if close <= 0:
-        return {"entry": 0, "stop": 0, "target": 0, "condition": "데이터 부족"}
+        return {"entry": 0, "stop": 0, "target": 0, "condition": "데이터 부족",
+                "ma5_entry": ""}
 
     # 손절가: 20일 저점 또는 MA20*0.98 중 더 높은 값 (최대 -7%)
     stop_candidates = [v for v in [low_20d, ma20 * 0.98] if v > 0]
     stop = max(stop_candidates) if stop_candidates else close * 0.93
     stop = max(stop, close * 0.93)  # 손절폭 -7% 이내로 제한
 
-    # 진입 조건 판단
-    if stoch_k > 85 or bb_pos > 100:
-        # 과열 → 조정 대기
-        if stoch_k > 85:
-            condition = f"Stoch {stoch_k:.0f}→70 이하 냉각 시"
-            entry = round(close * 0.97, -1)  # -3% 수준
+    # ── MA5~MA7 진입 전략 ──
+    # 핵심: 5일선~7일선 근처에서 진입해야 승률이 높다
+    ma5_gap = ((close / ma5) - 1) * 100 if ma5 > 0 else 0
+    ma7_gap = ((close / ma7) - 1) * 100 if ma7 > 0 else 0
+    # MA5와 MA7의 중간값을 기준선으로 사용
+    ma_mid = (ma5 + ma7) / 2 if ma5 > 0 and ma7 > 0 else ma5 or ma7
+    ma_mid_gap = ((close / ma_mid) - 1) * 100 if ma_mid > 0 else 0
+    ma5_entry = ""  # MA5 진입 판정 태그
+
+    if ma_mid > 0:
+        if ma_mid_gap <= 3.0:
+            # 최적 진입 구간: MA5~7 이내 (0%~+3%)
+            ma5_entry = "5·7선접근"
+            condition = f"MA5~7 부근 진입적기 ({ma5_gap:+.1f}%)"
+            entry = _safe_int(close)
+        elif ma_mid_gap <= 5.0:
+            # 약간 이격: 눌림 대기 권장
+            ma5_entry = "눌림대기"
+            condition = f"MA5 대비 +{ma5_gap:.1f}% 이격→5일선 눌림 대기"
+            entry = int(round(ma_mid * 1.005, -1))  # MA중간 +0.5% 수준
+        elif ma_mid_gap > 5.0:
+            # 과이격: MA5 복귀 대기
+            ma5_entry = "이격과대"
+            condition = f"MA5 대비 +{ma5_gap:.1f}% 과이격→5일선 복귀 대기"
+            entry = int(round(ma5 * 1.01, -1))  # MA5 +1% 수준
+        elif ma_mid_gap < -3.0:
+            # MA5 하향 이탈 → 반등 확인
+            ma5_entry = "하향이탈"
+            condition = f"MA5 하향이탈 {ma5_gap:+.1f}%→반등확인 후"
+            entry = int(round(ma5 * 0.995, -1))  # MA5 -0.5%
         else:
-            condition = f"BB {bb_pos:.0f}%→85% 이하 복귀 시"
-            entry = round(close * 0.96, -1)
-    elif rsi > 70:
-        condition = f"RSI {rsi:.0f}→65 이하 조정 시"
-        entry = round(close * 0.97, -1)
-    elif rsi < 35:
-        condition = "RSI 과매도 반등 확인 후"
-        entry = round(close * 1.01, -1)  # 반등 확인 후
+            # -3% ~ 0%: MA5 아래 소폭 → 반등 대기
+            ma5_entry = "반등대기"
+            condition = f"MA5 소폭하회 {ma5_gap:+.1f}%→반등 확인"
+            entry = _safe_int(close)
     else:
-        condition = "현재가 부근 매수 가능"
-        entry = _safe_int(close)
+        # MA5 데이터 없을 때 기존 로직 폴백
+        ma5_entry = ""
+        if stoch_k > 85 or bb_pos > 100:
+            if stoch_k > 85:
+                condition = f"Stoch {stoch_k:.0f}→70 이하 냉각 시"
+                entry = round(close * 0.97, -1)
+            else:
+                condition = f"BB {bb_pos:.0f}%→85% 이하 복귀 시"
+                entry = round(close * 0.96, -1)
+        elif rsi > 70:
+            condition = f"RSI {rsi:.0f}→65 이하 조정 시"
+            entry = round(close * 0.97, -1)
+        elif rsi < 35:
+            condition = "RSI 과매도 반등 확인 후"
+            entry = round(close * 1.01, -1)
+        else:
+            condition = "현재가 부근 매수 가능"
+            entry = _safe_int(close)
+
+    # 과열 상태에서는 MA5 접근이어도 과열 경고 추가
+    if ma5_entry and (stoch_k > 85 or rsi > 75):
+        condition += f" (⚠ 과열: RSI {rsi:.0f}/Stoch {stoch_k:.0f})"
 
     # 목표가: R:R 2:1 기준
     risk = entry - stop
@@ -758,6 +802,7 @@ def _calc_entry_stop(
         "target": target,
         "condition": condition,
         "risk_pct": round((entry - stop) / entry * 100, 1) if entry > 0 else 0,
+        "ma5_entry": ma5_entry,
     }
 
 
@@ -825,6 +870,9 @@ def get_parquet_data(ticker: str) -> dict | None:
         close = float(last.get("close", 0))
         ma60 = float(last.get("sma_60", 0))
         ma20 = float(last.get("sma_20", 0))
+        ma5 = float(last.get("sma_5", 0))
+        # MA7은 parquet에 없으므로 직접 계산
+        ma7 = float(df["close"].tail(7).mean()) if len(df) >= 7 else 0
 
         # 외인/기관 5일 합산
         f5 = float(np.nansum(df.tail(5)["외국인합계"].values)) if "외국인합계" in df.columns else 0
@@ -864,6 +912,10 @@ def get_parquet_data(ticker: str) -> dict | None:
         # 손절가 = 최근 20일 최저가
         low_20d = float(df.tail(20)["low"].min()) if "low" in df.columns else close * 0.93
 
+        # MA5 이격도 (%)
+        ma5_gap_pct = round((close / ma5 - 1) * 100, 2) if ma5 > 0 else 0
+        ma7_gap_pct = round((close / ma7 - 1) * 100, 2) if ma7 > 0 else 0
+
         return {
             "close": close,
             "price_change": float(last.get("price_change", 0)),
@@ -875,6 +927,10 @@ def get_parquet_data(ticker: str) -> dict | None:
             "drawdown": dd,
             "foreign_5d": f5,
             "inst_5d": i5,
+            "ma5": ma5,
+            "ma7": ma7,
+            "ma5_gap_pct": ma5_gap_pct,
+            "ma7_gap_pct": ma7_gap_pct,
             "ma20": ma20,
             "ma60": ma60,
             "ret_5d": ret_5d,
@@ -1135,6 +1191,9 @@ def main():
             "accum_return": src10.get(ticker, {}).get("return_since_spike", 0),
             "intel_bonus": intel_bonus,
             "intel_tag": intel_tag,
+            "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
+            "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
+            "ma5_entry": entry_info.get("ma5_entry", ""),
         }
 
         results.append(rec)
@@ -1185,7 +1244,11 @@ def main():
             else:
                 print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
                       f"목표:{r.get('target_price',0):,} | {cond}")
-            print(f"     근거: {reasons_str}")
+            ma5g = r.get("ma5_gap_pct", 0)
+            ma5e = r.get("ma5_entry", "")
+            ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
+            intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
+            print(f"     근거: {reasons_str}{ma5_str}{intel_str}")
         print(f"{'─'*60}")
     else:
         print("\n  ⚠ 매수 적합 종목 없음 — 전체 관망 추천")

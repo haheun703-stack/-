@@ -592,6 +592,29 @@ function renderTomorrowPicks() {
       </div>`;
     }
 
+    // 2.6행: MA5~7 이격도 (진입 타이밍 판정)
+    const ma5Gap = p.ma5_gap_pct || 0;
+    const ma5Entry = p.ma5_entry || '';
+    if (ma5Entry) {
+      const ma5Cfg = {
+        '5·7선접근': {bg:'rgba(16,185,129,0.12)', fg:'#34D399', icon:'&#x1F3AF;'},
+        '눌림대기':  {bg:'rgba(245,158,11,0.10)', fg:'#FBBF24', icon:'&#x23F3;'},
+        '이격과대':  {bg:'rgba(239,68,68,0.10)',   fg:'#F87171', icon:'&#x26A0;'},
+        '반등대기':  {bg:'rgba(59,130,246,0.12)',  fg:'#60A5FA', icon:'&#x1F504;'},
+        '하향이탈':  {bg:'rgba(239,68,68,0.08)',   fg:'#EF4444', icon:'&#x274C;'},
+      };
+      const mc = ma5Cfg[ma5Entry] || {bg:'rgba(107,114,128,0.08)', fg:'#9CA3AF', icon:''};
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;background:${mc.bg};border:1px solid ${mc.fg}33;border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:11px;font-family:var(--mono)">
+        <div>
+          <span style="color:#9CA3AF">5일선</span>
+          <span style="font-weight:700;color:${mc.fg};margin-left:4px">${mc.icon} ${esc(ma5Entry)}</span>
+        </div>
+        <div>
+          <span style="color:${ma5Gap <= 3 ? '#34D399' : ma5Gap <= 5 ? '#FBBF24' : '#F87171'};font-weight:600">MA5 ${ma5Gap > 0 ? '+' : ''}${ma5Gap.toFixed(1)}%</span>
+        </div>
+      </div>`;
+    }
+
     // 2.7행: 매집 추적 (Phase + 폭발 경과일 + 수익률)
     const accumPhase = p.accum_phase || '';
     if (accumPhase) {
@@ -618,7 +641,7 @@ function renderTomorrowPicks() {
     // 3행: 진입 조건
     const cond = p.entry_condition || '';
     if (cond) {
-      const isWait = cond.includes('냉각') || cond.includes('조정') || cond.includes('복귀') || cond.includes('확인');
+      const isWait = cond.includes('냉각') || cond.includes('조정') || cond.includes('복귀') || cond.includes('확인') || cond.includes('대기') || cond.includes('이격');
       const condBg = isWait ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)';
       const condBorder = isWait ? 'rgba(245,158,11,0.25)' : 'rgba(16,185,129,0.25)';
       const condColor = isWait ? '#FBBF24' : '#34D399';
