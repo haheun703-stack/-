@@ -1999,6 +1999,88 @@ function renderGlobal() {
 
   let html = '<h3 class="sec-title" style="color:#06B6D4">&#x1F30D; 글로벌 리스크 모니터</h3>';
 
+  // ── Perplexity 인텔리전스 (최상단) ──
+  const intel = D.market_intelligence || {};
+  const intelMood = intel.us_market_mood || '';
+  if (intelMood) {
+    const moodCfg = {
+      'RISK_ON':  {icon:'&#x1F7E2;',label:'RISK ON', bg:'rgba(16,185,129,0.08)',border:'rgba(16,185,129,0.25)',color:'#10B981'},
+      'RISK_OFF': {icon:'&#x1F534;',label:'RISK OFF',bg:'rgba(239,68,68,0.08)',border:'rgba(239,68,68,0.25)',color:'#EF4444'},
+      'MIXED':    {icon:'&#x1F7E1;',label:'MIXED',   bg:'rgba(245,158,11,0.08)',border:'rgba(245,158,11,0.25)',color:'#F59E0B'},
+      'NEUTRAL':  {icon:'&#x26AA;', label:'NEUTRAL', bg:'rgba(107,114,128,0.08)',border:'rgba(107,114,128,0.25)',color:'#6B7280'},
+    };
+    const mc = moodCfg[intelMood] || moodCfg['NEUTRAL'];
+    const fcst = intel.kr_open_forecast || '보합';
+    const fcColor = fcst==='상승'?'#10B981':fcst==='하락'?'#EF4444':'#6B7280';
+    const fcIcon = fcst==='상승'?'&#x25B2;':fcst==='하락'?'&#x25BC;':'&#x2500;';
+
+    html += `<div style="background:${mc.bg};border:1px solid ${mc.border};border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:${mc.color}">${mc.icon} AI 시장분석 (Perplexity)</span>
+        <span style="font-size:10px;color:#6B7280">${esc(intel.generated_at||'')}</span>
+      </div>
+      <div style="font-size:12px;color:#D1D5DB;margin-bottom:6px;line-height:1.5">${esc(intel.us_market_summary||'')}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">
+        <span style="padding:2px 8px;border-radius:6px;background:${mc.color}22;color:${mc.color};font-weight:700">${mc.label}</span>
+        <span style="color:${fcColor};font-weight:600">${fcIcon} KR ${esc(fcst)}</span>
+        <span style="color:#6B7280;font-size:11px">${esc(intel.kr_forecast_reason||'')}</span>
+      </div>`;
+
+    // 이벤트 리스트
+    const iEvents = intel.key_events || [];
+    if (iEvents.length > 0) {
+      html += `<div style="margin-bottom:8px">`;
+      iEvents.forEach(e => {
+        const uI = e.urgency==='BREAKING'?'&#x1F6A8;':e.urgency==='IMPORTANT'?'&#x26A1;':'&#x1F4CC;';
+        const iC = e.impact==='positive'?'#10B981':e.impact==='negative'?'#EF4444':'#6B7280';
+        const secs = (e.kr_sectors_affected||[]).slice(0,3).join(', ');
+        html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <span>${uI}</span>
+          <div style="flex:1">
+            <span style="color:#E5E7EB;font-weight:600">${esc(e.event||'')}</span>
+            <div style="color:#6B7280;font-size:10px;margin-top:2px">${esc(e.detail||'')}</div>
+            ${secs?`<span style="color:${iC};font-size:10px">→ ${esc(e.kr_impact_direction||'')} ${esc(secs)}</span>`:''}
+          </div>
+          <span style="font-size:11px;font-weight:700;color:${iC};font-family:var(--mono);white-space:nowrap">${e.kr_impact_score>0?'+':''}${e.kr_impact_score||0}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    // 섹터 영향 칩
+    const sImpacts = (intel.sector_impacts||[]).filter(s=>s.score!==0);
+    if (sImpacts.length > 0) {
+      html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">`;
+      sImpacts.forEach(s => {
+        const sC = s.score>0?'#10B981':'#EF4444';
+        html += `<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${sC}15;color:${sC};font-weight:600">${esc(s.sector)} ${s.score>0?'+':''}${s.score} ${esc(s.trade_action||'')}</span>`;
+      });
+      html += `</div>`;
+    }
+
+    // 핫테마 + 리스크
+    const themes = intel.hot_themes||[];
+    const risks = intel.risk_factors||[];
+    if (themes.length > 0) {
+      html += `<div style="font-size:11px;color:#FCD34D;margin-bottom:4px">&#x1F525; ${themes.join(' | ')}</div>`;
+    }
+    if (risks.length > 0) {
+      html += `<div style="font-size:10px;color:#F87171">&#x26A0;&#xFE0F; ${risks.slice(0,3).join(' | ')}</div>`;
+    }
+
+    // 수혜/피해 종목
+    const bene = intel.beneficiary_stocks||[];
+    const riskStocks = intel.risk_stocks||[];
+    if (bene.length > 0 || riskStocks.length > 0) {
+      html += `<div style="margin-top:6px;font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">`;
+      if (bene.length > 0) html += `<span style="color:#6EE7B7">&#x2705; 수혜: ${bene.slice(0,8).join(', ')}</span>`;
+      if (riskStocks.length > 0) html += `<span style="color:#FCA5A5">&#x26A0;&#xFE0F; 주의: ${riskStocks.slice(0,5).join(', ')}</span>`;
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  }
+
   // VIX
   const vixLevel = vix.level || 0;
   const vixSev = vixLevel < 20 ? 'LOW' : vixLevel < 25 ? 'MEDIUM' : 'HIGH';
