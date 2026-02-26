@@ -724,10 +724,12 @@ def _calc_entry_stop(
         return {"entry": 0, "stop": 0, "target": 0, "condition": "데이터 부족",
                 "ma5_entry": ""}
 
-    # 손절가: 20일 저점 또는 MA20*0.98 중 더 높은 값 (최대 -7%)
-    stop_candidates = [v for v in [low_20d, ma20 * 0.98] if v > 0]
-    stop = max(stop_candidates) if stop_candidates else close * 0.93
-    stop = max(stop, close * 0.93)  # 손절폭 -7% 이내로 제한
+    # 손절가: 20일 저점 또는 MA20*0.98 중 현재가 아래에 있는 지지선 활용
+    # (현재가 이상인 후보는 제외 — 한화에어로 버그 방지)
+    stop_candidates = [v for v in [low_20d, ma20 * 0.98] if 0 < v < close]
+    stop = max(stop_candidates) if stop_candidates else close * 0.95
+    stop = max(stop, close * 0.93)   # 손절폭 최대 -7%
+    stop = min(stop, close * 0.97)   # 손절폭 최소 -3% (너무 가까우면 의미 없음)
 
     # ── MA5~MA7 진입 전략 ──
     # 핵심: 5일선~7일선 근처에서 진입해야 승률이 높다
@@ -787,6 +789,11 @@ def _calc_entry_stop(
     # 과열 상태에서는 MA5 접근이어도 과열 경고 추가
     if ma5_entry and (stoch_k > 85 or rsi > 75):
         condition += f" (⚠ 과열: RSI {rsi:.0f}/Stoch {stoch_k:.0f})"
+
+    # ── 손절가를 entry 기준으로 재조정 ──
+    # entry가 MA5 수준으로 낮아졌을 때 stop이 entry 근처면 R:R 무의미
+    stop = min(stop, entry * 0.97)   # entry 대비 최소 -3%
+    stop = max(stop, entry * 0.93)   # entry 대비 최대 -7%
 
     # 목표가: R:R 2:1 기준
     risk = entry - stop
