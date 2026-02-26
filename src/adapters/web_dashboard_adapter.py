@@ -408,6 +408,8 @@ async def sync_data(request: Request):
         "group_relay/group_relay_today.json",
         "scan_cache.json", "dart_disclosures.json", "integrated_report.json",
         "leverage_etf/leverage_etf_scan.json",
+        "regime_macro_signal.json", "dart_event_signals.json",
+        "portfolio_allocation.json",
         "kis_balance.json", "kospi_regime.json",
     }
     if target not in safe_names:

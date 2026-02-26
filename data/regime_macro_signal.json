@@ -1,0 +1,29 @@
+{
+  "date": "2026-02-26",
+  "generated_at": "2026-02-26 20:13",
+  "current_regime": "CAUTION",
+  "transition_direction": "BULL 접근",
+  "transition_probability": 80,
+  "macro_score": 75,
+  "macro_grade": "공격적 매수",
+  "position_multiplier": 1.3,
+  "signals": {
+    "ma20_slope": 4.2,
+    "ma60_slope": 6.21,
+    "gap_ma20_pct": 12.8,
+    "rv_current": 100.0,
+    "rv_declining": false,
+    "vix_level": 17.9,
+    "us_grade": "NEUTRAL",
+    "ewy_5d": 11.95,
+    "regime_gap": "MA20 위 12.8%, RV 100%ile → CAUTION"
+  },
+  "recommendation": "CAUTION→BULL 전환 가능성 높음. 포지션 확대 유효.",
+  "regime_history_5d": [
+    "CAUTION",
+    "CAUTION",
+    "CAUTION",
+    "CAUTION",
+    "CAUTION"
+  ]
+}

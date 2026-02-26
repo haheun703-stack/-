@@ -93,8 +93,12 @@ REM 13단계: DART 전자공시 크롤링 (뉴스 선행 감지)
 echo [%date% %time%] [13/23] DART 공시 크롤링 >> logs\schedule.log
 python -u -X utf8 scripts\crawl_dart_disclosure.py --alert >> logs\schedule.log 2>&1
 
+REM 13.5단계: 레짐 전환 매크로 시그널
+echo [%date% %time%] [13.5/26] 레짐 매크로 시그널 >> logs\schedule.log
+python -u -X utf8 scripts\regime_macro_signal.py >> logs\schedule.log 2>&1
+
 REM 14단계: 시장 뉴스 크롤링 (이벤트 레이더용)
-echo [%date% %time%] [14/23] 시장 뉴스 크롤링 >> logs\schedule.log
+echo [%date% %time%] [14/26] 시장 뉴스 크롤링 >> logs\schedule.log
 python -u -X utf8 scripts\crawl_market_news.py >> logs\schedule.log 2>&1
 
 REM 15단계: 세력감지 스캔 (기존 whale_detect)
@@ -128,6 +132,14 @@ python -u -X utf8 scripts\track_pick_results.py >> logs\schedule.log 2>&1
 REM 20단계: 내일 추천 종목 통합 스캔 (5개 시그널 교차검증) *** 최종 ***
 echo [%date% %time%] [20/23] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
+
+REM 20.5단계: DART 이벤트 드리븐 시그널
+echo [%date% %time%] [20.5/26] DART 이벤트 시그널 >> logs\schedule.log
+python -u -X utf8 scripts\dart_event_signal.py >> logs\schedule.log 2>&1
+
+REM 20.7단계: 멀티전략 포트폴리오 배분
+echo [%date% %time%] [20.7/26] 포트폴리오 배분 >> logs\schedule.log
+python -u -X utf8 scripts\portfolio_allocator.py >> logs\schedule.log 2>&1
 
 REM ══════════════════════════════════════════════
 REM  PHASE 6: 아카이브 + 보고서 (~1분)

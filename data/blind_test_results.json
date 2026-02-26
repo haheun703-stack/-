@@ -1,0 +1,36 @@
+{
+  "A": {
+    "base_return": 64.14,
+    "new_return": 77.69,
+    "alpha": 13.55,
+    "base_mdd": -15.98,
+    "new_mdd": -13.64,
+    "mdd_improvement": 2.35,
+    "trading_days": 650
+  },
+  "B": {
+    "avoid_count": 9,
+    "measured_count": 1,
+    "avg_5d": 15.73,
+    "avg_20d": 13.37,
+    "negative_pct": 0.0
+  },
+  "C": {
+    "multi_count": 3,
+    "single_count": 114,
+    "avg_multi_score": 74.7,
+    "avg_single_score": 49.8,
+    "new_source_hits": 49,
+    "new_only": 49,
+    "multi_ret": {
+      "count": 3,
+      "avg_ret": 0.92,
+      "win_rate": 66.7
+    },
+    "single_ret": {
+      "count": 96,
+      "avg_ret": 7.07,
+      "win_rate": 62.5
+    }
+  }
+}

@@ -51,6 +51,10 @@ SYNC_FILES = [
     "dart_disclosures.json",
     "integrated_report.json",
     "leverage_etf/leverage_etf_scan.json",
+    # 전략 업그레이드 (Timefolio 벤치마크)
+    "regime_macro_signal.json",
+    "dart_event_signals.json",
+    "portfolio_allocation.json",
     # 라이브 데이터 (동기화 전 자동 캡처)
     "kis_balance.json",
     "kospi_regime.json",

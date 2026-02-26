@@ -1,0 +1,341 @@
+{
+  "date": "2026-02-26",
+  "generated_at": "2026-02-26 20:13",
+  "source_period": "20260225~20260225",
+  "total_events": 294,
+  "actionable_count": 118,
+  "signals": [
+    {
+      "ticker": "052670",
+      "name": "제일바이오",
+      "event": "자기주식취득",
+      "report_nm": "자기주식취득결과보고서",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 20,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225005841"
+    },
+    {
+      "ticker": "053160",
+      "name": "프리엠스",
+      "event": "자기주식취득",
+      "report_nm": "주요사항보고서(자기주식취득결정)",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 20,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225003990"
+    },
+    {
+      "ticker": "049520",
+      "name": "유아이엘",
+      "event": "자기주식취득",
+      "report_nm": "주요사항보고서(자기주식취득신탁계약해지결정)",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 20,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225001583"
+    },
+    {
+      "ticker": "007460",
+      "name": "에이프로젠",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801981"
+    },
+    {
+      "ticker": "036190",
+      "name": "금화피에스시",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901632"
+    },
+    {
+      "ticker": "432720",
+      "name": "퀄리타스반도체",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901604"
+    },
+    {
+      "ticker": "066980",
+      "name": "한성크린텍",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결(자율공시)",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901619"
+    },
+    {
+      "ticker": "277880",
+      "name": "티에스아이",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901527"
+    },
+    {
+      "ticker": "457550",
+      "name": "우진엔텍",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901380"
+    },
+    {
+      "ticker": "010960",
+      "name": "삼호개발",
+      "event": "공급계약체결",
+      "report_nm": "단일판매ㆍ공급계약체결(자율공시)",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801589"
+    },
+    {
+      "ticker": "459510",
+      "name": "나우로보틱스",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901396"
+    },
+    {
+      "ticker": "018000",
+      "name": "유니슨",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901395"
+    },
+    {
+      "ticker": "013120",
+      "name": "동원개발",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901218"
+    },
+    {
+      "ticker": "013580",
+      "name": "계룡건설산업",
+      "event": "공급계약체결",
+      "report_nm": "단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801091"
+    },
+    {
+      "ticker": "011370",
+      "name": "서한",
+      "event": "공급계약체결",
+      "report_nm": "단일판매ㆍ공급계약체결(자율공시)",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225900775"
+    },
+    {
+      "ticker": "373220",
+      "name": "LG에너지솔루션",
+      "event": "타법인주식및출자증권취득결정",
+      "report_nm": "[기재정정]타법인주식및출자증권취득결정",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 59.7,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225800513"
+    },
+    {
+      "ticker": "417840",
+      "name": "저스템",
+      "event": "공급계약체결",
+      "report_nm": "단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225900241"
+    },
+    {
+      "ticker": "058730",
+      "name": "다스코",
+      "event": "공급계약체결",
+      "report_nm": "[기재정정]단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225800157"
+    },
+    {
+      "ticker": "069140",
+      "name": "누리플랜",
+      "event": "공급계약체결",
+      "report_nm": "단일판매ㆍ공급계약체결",
+      "tier": "tier1_즉시",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225900092"
+    },
+    {
+      "ticker": "069620",
+      "name": "대웅제약",
+      "event": "배당",
+      "report_nm": "현금ㆍ현물배당결정",
+      "tier": "tier2_중요",
+      "action": "BUY",
+      "event_score": 15,
+      "rsi": 55.8,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801979"
+    }
+  ],
+  "avoid_list": [
+    {
+      "ticker": "313760",
+      "name": "캐리",
+      "event": "관리종목",
+      "report_nm": "기타시장안내(관리종목지정우려종목)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225902152"
+    },
+    {
+      "ticker": "313760",
+      "name": "캐리",
+      "event": "상장폐지",
+      "report_nm": "내부결산시점관리종목지정ㆍ형식적상장폐지ㆍ상장적격성실질심사사유발생",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225902135"
+    },
+    {
+      "ticker": "083660",
+      "name": "CSA 코스믹",
+      "event": "유상증자",
+      "report_nm": "[기재정정]주요사항보고서(유상증자결정)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225005915"
+    },
+    {
+      "ticker": "023440",
+      "name": "제이스코홀딩스",
+      "event": "파산",
+      "report_nm": "파산신청",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901999"
+    },
+    {
+      "ticker": "269620",
+      "name": "시스웍",
+      "event": "상장폐지",
+      "report_nm": "내부결산시점관리종목지정ㆍ형식적상장폐지ㆍ상장적격성실질심사사유발생",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901924"
+    },
+    {
+      "ticker": "019490",
+      "name": "엑시큐어하이트론",
+      "event": "상장폐지",
+      "report_nm": "기타시장안내              (상장폐지 이의신청서 제출)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801965"
+    },
+    {
+      "ticker": "148250",
+      "name": "알엔투테크놀로지",
+      "event": "유상증자",
+      "report_nm": "주요사항보고서(유상증자결정)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225005267"
+    },
+    {
+      "ticker": "051910",
+      "name": "LG화학",
+      "event": "유상증자",
+      "report_nm": "[기재정정]유상증자결정(종속회사의주요경영사항)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225801777"
+    },
+    {
+      "ticker": "244460",
+      "name": "올리패스",
+      "event": "상장폐지",
+      "report_nm": "내부결산시점관리종목지정ㆍ형식적상장폐지ㆍ상장적격성실질심사사유발생",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -30,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225901549"
+    },
+    {
+      "ticker": "496320",
+      "name": "본시스템즈",
+      "event": "유상증자",
+      "report_nm": "[기재정정]주요사항보고서(유상증자결정)",
+      "tier": "tier1_즉시",
+      "action": "AVOID",
+      "event_score": -15,
+      "rsi": 50,
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260225005244"
+    }
+  ]
+}

@@ -64,6 +64,9 @@ class DashboardDataProvider:
             "picks_history": self._load_json("picks_history.json"),
             "market_news": self._load_json("market_news.json"),
             "leverage_etf": self._load_json("leverage_etf/leverage_etf_scan.json"),
+            "regime_macro": self._load_json("regime_macro_signal.json"),
+            "dart_events": self._load_json("dart_event_signals.json"),
+            "portfolio_allocation": self._load_json("portfolio_allocation.json"),
             "summary": summary,
         }
 

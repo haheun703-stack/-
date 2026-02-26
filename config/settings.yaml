@@ -1097,3 +1097,48 @@ smart_entry:
   vwap_enabled: true               # 3중 확인 활성화
   # 기관 알고 70%+가 VWAP 기준 매매. 3중 확인 = 가짜 신호 극적 감소
   # 보너스: 3/3=+3, 2/3=+2, 1/3=0, 0/3=-2 (기존 30점에 가감)
+
+# ============================================================
+# Timefolio 벤치마크 — 4대 전략 업그레이드
+# ============================================================
+
+# ── 전략 1: 레짐 전환 매크로 시그널 ──
+regime_macro:
+  lookback_days: 60
+  ma20_slope_window: 5
+  ma60_slope_window: 10
+  transition_threshold: 0.7
+  grades:
+    aggressive: 75
+    active: 60
+    normal: 45
+    defensive: 30
+
+# ── 전략 2: 포트폴리오 배분 ──
+portfolio_allocation:
+  max_single_stock_pct: 15
+  strategies:
+    momentum: {base: 30}
+    flow: {base: 25}
+    event: {base: 15}
+    sector: {base: 20}
+    safety: {base: 10}
+  regime_overrides:
+    BULL: {momentum: 35, flow: 25, event: 15, sector: 20, safety: 5}
+    CAUTION: {momentum: 25, flow: 25, event: 15, sector: 20, safety: 15}
+    BEAR: {momentum: 10, flow: 20, event: 20, sector: 15, safety: 35}
+    CRISIS: {momentum: 0, flow: 10, event: 15, sector: 10, safety: 65}
+
+# ── 전략 3: DART 이벤트 드리븐 ──
+dart_event:
+  buy_keywords: ["자기주식취득", "공급계약체결", "수주", "배당"]
+  watch_keywords: ["최대주주변경", "합병", "인수"]
+  avoid_keywords: ["유상증자", "관리종목", "거래정지", "상장폐지"]
+  rsi_overheated: 70
+  flow_bonus_threshold: 0
+
+# ── 전략 4: 앙상블 다각화 ──
+ensemble:
+  sources: 8
+  regime_boost_enabled: true
+  dart_avoid_filter: true

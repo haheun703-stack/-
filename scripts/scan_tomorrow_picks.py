@@ -1,7 +1,7 @@
 """
-내일 추천 종목 통합 스캐너 — 5개 시그널 교차 검증
+내일 추천 종목 통합 스캐너 — 8개 시그널 교차 검증
 
-5개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
+8개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
 
 소스:
   1. 섹터릴레이 picks (relay_trading_signal.json)
@@ -9,6 +9,9 @@
   3. 눌림목 반등임박/매수대기 (pullback_scan.json)
   4. 퀀텀시그널 survivors + killed (scan_cache.json)
   5. 동반매수 S/A등급 + core_watch (dual_buying_watch.json)
+  6. 세력감지 세력포착/매집의심 (force_hybrid.json)  — v6 NEW
+  7. DART 이벤트 BUY (dart_event_signals.json)          — v6 NEW
+  8. 레짐 부스트 (regime_macro_signal.json)              — v6 NEW
 
 통합 점수 (100점, 5축 + 과열패널티):
   다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25 (동반매수 단독보장 삭제 v5)
@@ -17,8 +20,10 @@
   수급       (20): 외인(8) + 기관(5) + 동시매수(2) + 연속매수(2)
   안전       (10): BB(4) + ADX(3) + 낙폭(3)
   과열 패널티: RSI/Stoch/BB/급등 최대 -25점
+  레짐 부스트: 매크로 점수에 따라 최종 점수 × position_multiplier (0.5~1.3x)
+  DART AVOID: 유상증자/관리종목 등 자동 제외
 
-v5 변경: 동반매수 가중치 축소 — 단독보장 삭제, base_score 하향, 수급 보너스 축소
+v6 변경: 5→8소스 앙상블 + 레짐 부스트 + DART AVOID 필터
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -221,6 +226,64 @@ def collect_dual_buying() -> dict[str, dict]:
             }
 
     return result
+
+
+def collect_force_hybrid() -> dict[str, dict]:
+    """소스6: 세력감지 하이브리드 (세력포착/매집의심)"""
+    fh = load_json("force_hybrid.json")
+    result = {}
+    for item in fh.get("anomaly", {}).get("items", []):
+        grade = item.get("grade", "")
+        if grade not in ("세력포착", "매집의심"):
+            continue
+        ticker = item.get("ticker", "")
+        if not ticker:
+            continue
+        patterns = item.get("patterns", [])
+        pattern_names = [p.get("pattern", "") for p in patterns[:2]]
+        result[ticker] = {
+            "source": "세력감지",
+            "score": 70 if grade == "세력포착" else 55,
+            "name": item.get("name", ""),
+            "detail": f"{grade} {','.join(pattern_names)}",
+        }
+    return result
+
+
+def collect_dart_event() -> dict[str, dict]:
+    """소스7: DART 이벤트 BUY 시그널"""
+    de = load_json("dart_event_signals.json")
+    result = {}
+    for sig in de.get("signals", []):
+        if sig.get("action") != "BUY":
+            continue
+        ticker = sig.get("ticker", "")
+        if not ticker:
+            continue
+        result[ticker] = {
+            "source": "이벤트",
+            "score": sig.get("event_score", 0),
+            "name": sig.get("name", ""),
+            "detail": sig.get("event", "DART"),
+        }
+    return result
+
+
+def load_dart_avoid_tickers() -> set[str]:
+    """DART AVOID 종목 티커 세트 (유상증자/관리종목 등)"""
+    de = load_json("dart_event_signals.json")
+    avoid = set()
+    for item in de.get("avoid_list", []):
+        ticker = item.get("ticker", "")
+        if ticker:
+            avoid.add(ticker)
+    return avoid
+
+
+def load_regime_boost() -> float:
+    """레짐 매크로 시그널에서 position_multiplier 로드"""
+    macro = load_json("regime_macro_signal.json")
+    return macro.get("position_multiplier", 1.0)
 
 
 # ──────────────────────────────────────────
@@ -656,20 +719,33 @@ def main():
 
     name_map = build_name_map()
 
-    # 5개 소스 수집
+    # 8개 소스 수집 (v6: 5→8 앙상블)
     src1 = collect_relay()
     src2 = collect_group_relay()
     src3 = collect_pullback()
     src4 = collect_quantum()
     src5 = collect_dual_buying()
+    src6 = collect_force_hybrid()
+    src7 = collect_dart_event()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
-          f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)}")
+          f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
+          f"세력감지:{len(src6)} 이벤트:{len(src7)}")
+
+    # DART AVOID 필터 + 레짐 부스트
+    avoid_tickers = load_dart_avoid_tickers()
+    regime_mult = load_regime_boost()
+    if avoid_tickers:
+        print(f"[DART AVOID] {len(avoid_tickers)}종목 자동 제외")
+    print(f"[레짐 부스트] x{regime_mult:.1f}")
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5]:
+    for src in [src1, src2, src3, src4, src5, src6, src7]:
         all_tickers.update(src.keys())
+
+    # AVOID 종목 제외
+    all_tickers -= avoid_tickers
 
     print(f"[통합] 고유 종목: {len(all_tickers)}개")
 
@@ -679,7 +755,8 @@ def main():
         sources = []
         source_names = []
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
-                           (src4, "퀀텀"), (src5, "동반매수")]:
+                           (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
+                           (src7, "이벤트")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
@@ -689,6 +766,11 @@ def main():
 
         # 통합 점수 계산
         score_detail = calc_integrated_score(ticker, sources, pq_data)
+
+        # 레짐 부스트 적용 (v6): 매크로 점수에 따라 최종 점수 보정
+        if regime_mult != 1.0:
+            boosted = min(score_detail["total"] * regime_mult, 100)
+            score_detail["total"] = round(boosted, 1)
 
         # 이름 결정
         name = ""
