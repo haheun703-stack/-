@@ -1,103 +1,101 @@
 {
   "date": "2026-02-26",
-  "generated_at": "2026-02-26 22:30",
-  "us_market_summary": "미국 주식시장은 2월 25일(수) 긍정적으로 마감했으며, 기술주 강세와 4분기 실적 평가가 주도했다. S&P 500은 0.8% 상승하여 6,946.13으로 마감했고, 나스닥은 1.3% 올라 23,152.08을 기록했다.",
-  "us_market_mood": "RISK_ON",
+  "generated_at": "2026-02-26 22:58",
+  "us_market_summary": "미국 주식시장은 2월 25-26일 이틀 연속 상승세를 보였으며, S&P 500이 6,900 심리선을 돌파했다. 기술주 강세와 긍정적 경제지표가 주도했으나, 금리 우려와 AI 관련 변동성이 시장을 양분하고 있다.",
+  "us_market_mood": "MIXED",
   "kr_open_forecast": "상승",
-  "kr_forecast_reason": "미국 기술주 강세, 글로벌 AI 수요 확인, 대만 수출 호조가 한국 반도체 및 IT 섹터에 긍정적 신호를 주고 있으며, 엔비디아 실적 발표 결과에 따라 추가 상승 모멘텀이 기대된다.",
+  "kr_forecast_reason": "대만 경상수지 흑자와 글로벌 AI/반도체 수요 강세가 한국 반도체 및 IT 섹터에 긍정적이나, 미국 금리 상승 우려가 부분적으로 상쇄될 것으로 예상된다.",
   "key_events": [
     {
-      "event": "엔비디아(NVDA) 4분기 실적 발표",
-      "category": "실적",
-      "impact": "positive",
-      "urgency": "BREAKING",
-      "detail": "2월 25일 장 마감 후 엔비디아가 2026 회계연도 4분기 및 연간 실적을 발표했으며, 이는 AI 섹터 전반의 방향성을 결정하는 핵심 이벤트다. 젠슨 황 CEO의 발언과 가이던스가 2월 26일 시장 전체 톤을 설정할 것으로 예상된다.",
-      "kr_sectors_affected": [
-        "반도체",
-        "로봇/AI",
-        "IT/소프트웨어"
-      ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 4
-    },
-    {
-      "event": "기술주 강세 및 AI 수요 확인",
+      "event": "S&P 500 6,900 돌파 및 기술주 강세",
       "category": "섹터",
       "impact": "positive",
       "urgency": "IMPORTANT",
-      "detail": "정보기술 섹터(XLK)가 1.8% 상승했으며, 대만의 기록적 경상수지 흑자(US$69.9b)가 AI 및 전자제품 수출 호조를 반영하고 있다. 글로벌 반도체 및 하드웨어 수요가 기업 수익으로 이어지고 있다.",
+      "detail": "S&P 500이 0.8% 상승하여 6,946.13으로 마감했고, 나스닥은 1.3% 상승했다. 정보기술(XLK) 1.8%, 금융(XLF) 1.7% 상승으로 대형주 중심의 강한 랠리를 기록했다.[1][3]",
       "kr_sectors_affected": [
         "반도체",
         "IT/소프트웨어",
-        "로봇/AI"
+        "금융"
       ],
       "kr_impact_direction": "수혜",
       "kr_impact_score": 3
     },
     {
-      "event": "금리 인상 우려 및 10년물 수익률 상승",
+      "event": "대만 기록적 경상수지 흑자 및 AI/반도체 수출 호조",
       "category": "매크로",
-      "impact": "negative",
+      "impact": "positive",
       "urgency": "IMPORTANT",
-      "detail": "미국 10년물 수익률이 4.06% 근처에서 형성되고 있으며, 빠른 금리 인하 기대감이 축소되고 있다. 이는 성장주, 기술주, 부동산 관련 종목에 역풍이 되지만 은행 마진을 지지할 수 있다.",
+      "detail": "대만이 약 69.9억 달러의 기록적 경상수지 흑자를 기록했으며, AI 및 전자제품 수출이 주도했다. 이는 글로벌 칩 수요의 강한 신호를 시사한다.[4]",
       "kr_sectors_affected": [
-        "금융",
-        "IT/소프트웨어",
-        "부동산"
+        "반도체",
+        "로봇/AI"
       ],
-      "kr_impact_direction": "피해",
-      "kr_impact_score": -2
+      "kr_impact_direction": "수혜",
+      "kr_impact_score": 4
     },
     {
-      "event": "개별 기업 실적 호조",
-      "category": "실적",
+      "event": "미국 10년물 수익률 4.06% 상승 및 금리 인하 기대 축소",
+      "category": "정책",
+      "impact": "negative",
+      "urgency": "IMPORTANT",
+      "detail": "미국 10년물 수익률이 4.06% 근처에서 상승하고 있으며, 빠른 금리 인하 기대가 축소되고 있다. 이는 성장주, 기술주, 부동산 관련 종목에 역풍이 될 수 있다.[4]",
+      "kr_sectors_affected": [
+        "IT/소프트웨어",
+        "금융",
+        "전력기기"
+      ],
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -3
+    },
+    {
+      "event": "Anthropic AI 통합 발표 및 엔터프라이즈 고객 확대",
+      "category": "기술",
       "impact": "positive",
       "urgency": "NORMAL",
-      "detail": "액손 엔터프라이즈(AXON)가 4분기 실적 우수 및 2026년 매출 가이던스 상향으로 17.55% 급등했고, 유나이티드 테라퓨틱스(UTHR)는 13.03% 상승했다.",
+      "detail": "Anthropic이 엔터프라이즈 고객 대상 AI 통합을 발표했으며, Salesforce(4.1% 상승), DocuSign(2.6% 상승) 등 관련 기업들이 긍정 반응을 보였다.[2]",
       "kr_sectors_affected": [
-        "바이오"
+        "IT/소프트웨어",
+        "로봇/AI"
       ],
       "kr_impact_direction": "수혜",
       "kr_impact_score": 2
     },
     {
-      "event": "변동성 지수(VIX) 하락",
-      "category": "기술",
-      "impact": "positive",
-      "urgency": "NORMAL",
-      "detail": "공포지수(VIX)가 8.3% 하락하여 17.93으로 내려갔으며, 시장 심리가 개선되고 있음을 시사한다.",
-      "kr_sectors_affected": [
-        "금융"
-      ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 1
-    },
-    {
-      "event": "한국 수출 데이터 주목",
-      "category": "매크로",
+      "event": "Nvidia 실적 발표 예정 및 기술주 변동성",
+      "category": "실적",
       "impact": "neutral",
-      "urgency": "IMPORTANT",
-      "detail": "한국의 주요 수출 스냅샷이 오늘 발표될 예정이며, 글로벌 제조업 강세와 AI 수요가 한국 수출에 미치는 영향을 평가하는 중요한 지표가 될 것이다.",
+      "urgency": "BREAKING",
+      "detail": "Nvidia가 2월 26일 장 마감 후 실적을 발표할 예정이며, 이를 앞두고 기술주 거래량이 증가했다. AI 관련 우려와 기대가 혼재하고 있다.[3]",
       "kr_sectors_affected": [
         "반도체",
-        "IT/소프트웨어",
-        "화학/에너지"
+        "로봇/AI"
       ],
       "kr_impact_direction": "중립",
       "kr_impact_score": 0
     },
     {
-      "event": "금융 및 에너지 섹터 실적 시즌",
-      "category": "실적",
+      "event": "VIX 하락 및 변동성 완화",
+      "category": "매크로",
       "impact": "positive",
       "urgency": "NORMAL",
-      "detail": "금융, 기술, 에너지 대형주들의 실적 발표가 시장 톤을 주도하고 있으며, 금융 섹터(XLF)는 1.7% 상승했다.",
+      "detail": "공포지수(VIX)가 19.55에서 17.93으로 8.3% 하락했으며, 시장 심리가 개선되고 있다.[1]",
       "kr_sectors_affected": [
-        "금융",
-        "화학/에너지"
+        "금융"
       ],
       "kr_impact_direction": "수혜",
       "kr_impact_score": 2
+    },
+    {
+      "event": "포트폴리오 리밸런싱 및 월말 수급 개선",
+      "category": "매크로",
+      "impact": "positive",
+      "urgency": "NORMAL",
+      "detail": "월말 포트폴리오 리밸런싱이 시장 상승을 견인했으며, 이는 단기적 기술적 요인으로 작용하고 있다.[3]",
+      "kr_sectors_affected": [
+        "금융"
+      ],
+      "kr_impact_direction": "수혜",
+      "kr_impact_score": 1
     }
   ],
   "event_stats": {
@@ -112,7 +110,7 @@
       "sector": "반도체",
       "impact": "수혜",
       "score": 4,
-      "reason": "엔비디아 실적 발표와 AI 수요 호조가 삼성전자, SK하이닉스 등 HBM 공급망에 직접적인 긍정 영향을 미침.",
+      "reason": "S&P 500 기술주 강세와 대만 AI/반도체 수출 호조로 글로벌 칩 수요 증가가 삼성전자, SK하이닉스 등에 긍정적",
       "top_stocks": [
         "삼성전자",
         "SK하이닉스",
@@ -121,22 +119,10 @@
       "trade_action": "매수관심"
     },
     {
-      "sector": "로봇/AI",
-      "impact": "수혜",
-      "score": 3,
-      "reason": "엔비디아 실적과 기술주 강세가 AI 관련 로봇 기업들의 수요 확대를 뒷받침함.",
-      "top_stocks": [
-        "레인보우로보틱스",
-        "두산로보틱스",
-        "엔젤로보틱스"
-      ],
-      "trade_action": "매수관심"
-    },
-    {
       "sector": "IT/소프트웨어",
       "impact": "수혜",
       "score": 2,
-      "reason": "글로벌 AI 및 기술주 강세가 네이버, 카카오 등 소프트웨어 기업에 긍정적 파급.",
+      "reason": "S&P 500 기술주 랠리와 Anthropic AI 통합 발표로 네이버, 카카오 등 소프트웨어 기업 수혜 예상되나 금리 상승 역풍 존재",
       "top_stocks": [
         "네이버",
         "카카오",
@@ -145,67 +131,74 @@
       "trade_action": "매수관심"
     },
     {
-      "sector": "바이오",
+      "sector": "로봇/AI",
       "impact": "수혜",
-      "score": 2,
-      "reason": "미국 개별 바이오 기업 실적 호조가 삼성바이오로직스, 셀트리온 등 국내 바이오 섹터에 긍정적 신호.",
+      "score": 3,
+      "reason": "대만 AI 수출 호조와 Anthropic 엔터프라이즈 AI 확대가 레인보우로보틱스 등 국내 AI/로봇주에 호재",
       "top_stocks": [
-        "삼성바이오로직스",
-        "셀트리온",
-        "알테오젠"
+        "레인보우로보틱스",
+        "두산로보틱스",
+        "엔젤로보틱스"
       ],
       "trade_action": "매수관심"
     },
     {
       "sector": "금융",
-      "impact": "중립",
-      "score": 0,
-      "reason": "금리 인상 우려로 부정적 압력 있지만 VIX 하락과 은행 마진 지지로 상쇄됨.",
+      "impact": "수혜",
+      "score": 2,
+      "reason": "S&P 500 금융주 강세와 VIX 하락으로 시장 심리 개선이 KB금융 등에 긍정적이나 금리 상승 압력 상쇄",
       "top_stocks": [
         "KB금융",
-        "신한지주"
+        "신한지주",
+        "하나금융"
       ],
-      "trade_action": "관망"
+      "trade_action": "매수관심"
     },
     {
-      "sector": "부동산",
+      "sector": "전력기기",
       "impact": "피해",
       "score": -2,
-      "reason": "미국 10년물 금리 상승으로 성장주 및 부동산 관련 종목에 역풍 발생.",
-      "top_stocks": [],
+      "reason": "미국 10년물 금리 상승으로 성장주 및 부동산 관련 전력기기주에 역풍",
+      "top_stocks": [
+        "HD현대일렉트릭",
+        "LS ELECTRIC"
+      ],
       "trade_action": "비중축소"
     }
   ],
   "sector_boost": {
     "반도체": 4,
-    "로봇/AI": 3,
     "IT/소프트웨어": 2,
-    "바이오": 2,
-    "부동산": -2
+    "로봇/AI": 3,
+    "금융": 2,
+    "전력기기": -2
   },
   "hot_themes": [
-    "AI 반도체",
-    "로봇/AI 테마",
-    "바이오 실적 호조"
+    "반도체/AI",
+    "기술주 랠리",
+    "로봇"
   ],
   "risk_factors": [
-    "엔비디아 실적 기대치 미달 및 가이던스 부진",
-    "미국 금리 인상 우려 지속",
-    "메모리 가격 상승에 따른 마진 압박"
+    "미국 금리 상승 지속",
+    "금리 인하 기대 축소",
+    "글로벌 변동성 재점화"
   ],
   "beneficiary_stocks": [
-    "엔젤로보틱스",
-    "삼성SDS",
-    "한미반도체",
-    "SK하이닉스",
-    "두산로보틱스",
-    "레인보우로보틱스",
-    "알테오젠",
-    "카카오",
-    "삼성전자",
     "네이버",
-    "셀트리온",
-    "삼성바이오로직스"
+    "하나금융",
+    "두산로보틱스",
+    "카카오",
+    "한미반도체",
+    "레인보우로보틱스",
+    "삼성전자",
+    "삼성SDS",
+    "신한지주",
+    "KB금융",
+    "엔젤로보틱스",
+    "SK하이닉스"
   ],
-  "risk_stocks": []
+  "risk_stocks": [
+    "LS ELECTRIC",
+    "HD현대일렉트릭"
+  ]
 }
