@@ -53,7 +53,7 @@ except ImportError:
 # ─────────────────────────────────────────────
 
 def select_universe(
-    min_cap_trillion: float = 1.5,
+    min_cap_trillion: float = 0.2,
     ref_date: str = "",
     include_preferred: bool = False,
     min_trading_value_bil: float = 0,
@@ -301,8 +301,8 @@ def cleanup_dropped(valid_tickers: set[str]) -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="유니버스 재구성")
-    parser.add_argument("--min-cap", type=float, default=1.5,
-                        help="최소 시총 (조 단위, 기본 1.5)")
+    parser.add_argument("--min-cap", type=float, default=0.2,
+                        help="최소 시총 (조 단위, 기본 0.2 = 2000억)")
     parser.add_argument("--include-preferred", action="store_true",
                         help="우선주 포함 (기본: 제외)")
     parser.add_argument("--min-trading-value", type=float, default=0,

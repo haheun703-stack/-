@@ -15,8 +15,8 @@ strategy:
   name: "quantum_master_v7.0"
 
   # === 유니버스 설정 ===
-  min_market_cap_조: 1.5       # 시총 하한 (조 단위) — rebuild_universe.py 기준
-  universe_count: 279           # 현재 유니버스 종목수 (2026-02-19 기준)
+  min_market_cap_조: 0.2       # 시총 하한 (조 단위, 2000억) — rebuild_universe.py 기준
+  universe_count: 1022          # 현재 유니버스 종목수 (2026-02-26 기준, 시총 2000억↑)
 
   # === 수동 블랙리스트 (잼블랙 인사이트) ===
   # 시스템이 추천해도 수동으로 제외할 종목 (악재/리스크 인지)
