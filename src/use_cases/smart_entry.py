@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -74,6 +75,7 @@ class CandidateState:
     order_qty: int = 0
     is_filled: bool = False
     filled_price: int = 0
+    org_no: str = ""            # 한투 조직코드 (정정/취소 필수)
 
     # 호가 분석
     bid_ask_ratio: float = 0.0  # 매수잔량/매도잔량
@@ -129,9 +131,125 @@ class SmartEntryEngine:
         self.adapt_interval_sec = entry_cfg.get("adapt_interval_sec", 120)
         self.gap_position_scale = entry_cfg.get("gap_position_scale", 0.5)  # 갭업 시 포지션 50% 축소
 
+        # ─── 라이브 안전장치 ───
+        live_cfg = entry_cfg.get("live", {})
+        self.max_stocks = live_cfg.get("max_stocks", 1)
+        self.max_amount_per_stock = live_cfg.get("max_amount_per_stock", 500_000)
+        self.max_total_amount = live_cfg.get("max_total_amount", 500_000)
+        self.kill_switch_file = Path(live_cfg.get("kill_switch_file", "data/KILL_SWITCH"))
+
+        # 감사 로그 DB
+        self._audit_db = Path("data/order_audit.db")
+        if not self.dry_run:
+            self._init_audit_db()
+
         # 종목별 상태
         self.candidates: list[CandidateState] = []
         self.results: list[dict] = []
+
+    # ──────────────────────────────────────────
+    # 안전장치 + 감사 로그
+    # ──────────────────────────────────────────
+
+    def _init_audit_db(self):
+        """주문 감사 로그 DB 초기화."""
+        self._audit_db.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(str(self._audit_db))
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS order_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts TEXT NOT NULL,
+            action TEXT NOT NULL,
+            ticker TEXT,
+            name TEXT,
+            price INTEGER,
+            qty INTEGER,
+            order_id TEXT,
+            org_no TEXT,
+            status TEXT,
+            message TEXT
+        )""")
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS session_log (
+            date TEXT PRIMARY KEY,
+            started_at TEXT,
+            mode TEXT,
+            max_stocks INTEGER,
+            max_amount INTEGER,
+            candidates INTEGER,
+            filled INTEGER,
+            skipped INTEGER
+        )""")
+        conn.commit()
+        conn.close()
+
+    def _log_order(self, action: str, c: CandidateState, status: str = "", message: str = ""):
+        """주문 이벤트를 감사 DB에 기록."""
+        if self.dry_run:
+            return
+        try:
+            conn = sqlite3.connect(str(self._audit_db))
+            conn.execute(
+                "INSERT INTO order_log (ts, action, ticker, name, price, qty, order_id, org_no, status, message) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (datetime.now().isoformat(), action, c.ticker, c.name,
+                 c.order_price, c.order_qty, c.order_id, c.org_no, status, message),
+            )
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning("[감사] DB 기록 실패: %s", e)
+
+    def _log_session(self, report: dict):
+        """세션 결과를 감사 DB에 기록."""
+        if self.dry_run:
+            return
+        try:
+            conn = sqlite3.connect(str(self._audit_db))
+            conn.execute(
+                "INSERT OR REPLACE INTO session_log (date, started_at, mode, max_stocks, max_amount, candidates, filled, skipped) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (datetime.now().strftime("%Y-%m-%d"), datetime.now().isoformat(),
+                 "LIVE", self.max_stocks, self.max_amount_per_stock,
+                 report["total_candidates"], report["filled"], report["skipped"]),
+            )
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning("[감사] 세션 기록 실패: %s", e)
+
+    def _check_kill_switch(self) -> bool:
+        """킬스위치 파일 존재 여부 확인. True = 즉시 중단."""
+        if self.kill_switch_file.exists():
+            logger.critical("[킬스위치] %s 감지 — 즉시 중단!", self.kill_switch_file)
+            return True
+        return False
+
+    def _check_duplicate_session(self) -> bool:
+        """오늘 이미 라이브 세션이 실행되었는지 확인. True = 중복."""
+        if self.dry_run:
+            return False
+        try:
+            conn = sqlite3.connect(str(self._audit_db))
+            row = conn.execute(
+                "SELECT date FROM session_log WHERE date = ?",
+                (datetime.now().strftime("%Y-%m-%d"),),
+            ).fetchone()
+            conn.close()
+            if row:
+                logger.critical("[중복방지] 오늘(%s) 이미 라이브 세션 실행됨!", row[0])
+                return True
+        except Exception:
+            pass
+        return False
+
+    def _calc_order_qty(self, c: CandidateState) -> int:
+        """종목당 주문 수량 계산 (금액 상한 기반)."""
+        if c.order_price <= 0:
+            return 0
+        qty = self.max_amount_per_stock // c.order_price
+        return max(qty, 1)  # 최소 1주
 
     # ──────────────────────────────────────────
     # Phase 1: 추천 종목 로드 + 초기 지정가
@@ -166,6 +284,17 @@ class SmartEntryEngine:
             )
             self.candidates.append(c)
 
+        # ─── 안전장치: max_stocks 제한 (점수 높은 순) ───
+        if not self.dry_run and len(self.candidates) > self.max_stocks:
+            self.candidates.sort(key=lambda x: x.score, reverse=True)
+            dropped = self.candidates[self.max_stocks:]
+            self.candidates = self.candidates[:self.max_stocks]
+            logger.warning(
+                "[안전] max_stocks=%d 제한 → %d종목 드롭: %s",
+                self.max_stocks, len(dropped),
+                ", ".join(f"{c.name}({c.score:.0f})" for c in dropped),
+            )
+
         logger.info("[로드] %d건 추천 종목 로드 완료", len(self.candidates))
         return len(self.candidates)
 
@@ -182,26 +311,35 @@ class SmartEntryEngine:
                 c.prev_close,
             )
             c.order_price = order_price
+            c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
 
             if self.dry_run:
                 logger.info(
-                    "[DRY] 초기 지정가: %s(%s) %d원 (전일종가 %d원, -%.1f%%)",
-                    c.name, c.ticker, order_price, c.prev_close, self.initial_discount,
+                    "[DRY] 초기 지정가: %s(%s) %d원 × %d주 = %s원 (전일종가 %d원, -%.1f%%)",
+                    c.name, c.ticker, order_price, c.order_qty,
+                    f"{order_price * c.order_qty:,}", c.prev_close, self.initial_discount,
                 )
                 placed += 1
             else:
-                # TODO: 실제 주문 시 수량 계산 필요 (PositionSizer 연동)
+                if c.order_qty <= 0:
+                    logger.error("[안전] %s 수량 0 → 스킵 (가격 %d > 상한 %d)",
+                                 c.name, c.order_price, self.max_amount_per_stock)
+                    continue
                 order = self.order.buy_limit(c.ticker, order_price, c.order_qty)
                 if order.status.value != "failed":
                     c.order_id = order.order_id
+                    c.org_no = order.org_no
                     placed += 1
                     logger.info(
-                        "[주문] 초기 지정가: %s %d원 %d주 (주문번호=%s)",
-                        c.name, order_price, c.order_qty, order.order_id,
+                        "[주문] 초기 지정가: %s %d원 × %d주 = %s원 (주문번호=%s, org=%s)",
+                        c.name, order_price, c.order_qty,
+                        f"{order_price * c.order_qty:,}", order.order_id, order.org_no,
                     )
+                    self._log_order("PLACE", c, status="PENDING", message="초기 지정가")
                 else:
                     logger.warning("[주문] 접수 실패: %s — %s", c.name, order.message)
+                    self._log_order("PLACE_FAIL", c, status="FAILED", message=order.message)
 
         logger.info("[Phase1] %d/%d건 초기 지정가 접수", placed, len(self.candidates))
         return placed
@@ -743,14 +881,17 @@ class SmartEntryEngine:
         else:
             if c.order_id and self.order:
                 from src.entities.trading_models import Order
-                order_obj = Order(order_id=c.order_id, ticker=c.ticker)
+                order_obj = Order(order_id=c.order_id, ticker=c.ticker, org_no=c.org_no)
                 result = self.order.modify(order_obj, new_price, c.order_qty)
                 if result.status.value != "failed":
                     c.order_id = result.order_id or c.order_id
+                    c.org_no = result.org_no or c.org_no
                     logger.info(
                         "[정정] %s: %d → %d원 (주문번호=%s)",
                         c.name, old, new_price, c.order_id,
                     )
+                    self._log_order("MODIFY", c, status="PENDING",
+                                    message=f"{old} → {new_price}")
 
     def _cancel_order(self, c: CandidateState):
         """주문 취소"""
@@ -759,10 +900,14 @@ class SmartEntryEngine:
         else:
             if c.order_id and self.order:
                 from src.entities.trading_models import Order
-                order_obj = Order(order_id=c.order_id, ticker=c.ticker, quantity=c.order_qty)
+                order_obj = Order(order_id=c.order_id, ticker=c.ticker,
+                                  quantity=c.order_qty, org_no=c.org_no)
                 self.order.cancel(order_obj)
                 logger.info("[취소] %s (주문번호=%s)", c.name, c.order_id)
+                self._log_order("CANCEL", c, status="CANCELLED",
+                                message=c.decision.value)
         c.order_id = ""
+        c.org_no = ""
 
     # ──────────────────────────────────────────
     # Phase 5: 미체결 전량 취소 + 결과 보고
@@ -876,7 +1021,20 @@ class SmartEntryEngine:
         """
         logger.info("=" * 50)
         logger.info("[SmartEntry] 세션 시작 (dry_run=%s)", self.dry_run)
+        if not self.dry_run:
+            logger.info("[안전] max_stocks=%d, max_amount=%s원/종목, 킬스위치=%s",
+                        self.max_stocks, f"{self.max_amount_per_stock:,}",
+                        self.kill_switch_file)
         logger.info("=" * 50)
+
+        # ─── 안전 체크 (라이브 전용) ───
+        if not self.dry_run:
+            if self._check_kill_switch():
+                logger.critical("[중단] 킬스위치 활성 → 세션 취소")
+                return self.generate_report()
+            if self._check_duplicate_session():
+                logger.critical("[중단] 오늘 이미 실행됨 → 세션 취소")
+                return self.generate_report()
 
         # Phase 1: 종목 로드 + 초기 지정가
         count = self.load_picks()
@@ -919,6 +1077,12 @@ class SmartEntryEngine:
             if hhmm >= self.order_deadline_hhmm:
                 break
 
+            # 킬스위치 체크 (매 루프)
+            if self._check_kill_switch():
+                logger.critical("[긴급] 킬스위치 감지 → 전 주문 취소")
+                self.cancel_all_unfilled()
+                break
+
             self.update_orders()
             self._check_fills()
 
@@ -940,6 +1104,9 @@ class SmartEntryEngine:
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
         logger.info("[저장] %s", report_path)
+
+        # 감사 로그 기록
+        self._log_session(report)
 
         # 텔레그램 발송
         try:
@@ -1022,8 +1189,12 @@ class SmartEntryEngine:
                 c.is_filled = True
                 c.filled_price = int(status.filled_price or c.order_price)
                 logger.info(
-                    "[체결] %s %d원 %d주", c.name, c.filled_price, c.order_qty,
+                    "[체결] %s %d원 %d주 (투자금 %s원)",
+                    c.name, c.filled_price, c.order_qty,
+                    f"{c.filled_price * c.order_qty:,}",
                 )
+                self._log_order("FILLED", c, status="FILLED",
+                                message=f"체결가 {c.filled_price:,}원")
 
     def _wait_until(self, hour: int, minute: int):
         """특정 시각까지 대기 (dry_run이면 즉시 리턴)"""
