@@ -1101,8 +1101,8 @@ smart_entry:
   # ─── 라이브 트레이딩 안전장치 ───
   live:
     max_stocks: 1                  # 동시 매수 최대 종목수 (1단계: 1종목)
-    max_amount_per_stock: 500000   # 종목당 최대 투자금 (원, 1단계: 50만원)
-    max_total_amount: 500000       # 전체 최대 투자금 (원)
+    max_amount_per_stock: 1000000  # 종목당 최대 투자금 (원, 100만원)
+    max_total_amount: 1000000      # 전체 최대 투자금 (원)
     confirm_before_order: true     # 첫 주문 전 텔레그램 확인 (예정)
     kill_switch_file: "data/KILL_SWITCH"  # 이 파일 존재 시 즉시 중단
 
