@@ -1,0 +1,239 @@
+{
+  "date": "2026-02-26",
+  "scanned_at": "2026-02-26 21:12",
+  "watching": {
+    "001200": {
+      "spike_date": "2026-02-26",
+      "spike_close": 5510.0,
+      "spike_high": 6290.0,
+      "vol_z": 4.06,
+      "vsr": 3.62,
+      "name": "유진투자증권",
+      "rsi_at_spike": 68.1,
+      "status": "watching"
+    },
+    "001510": {
+      "spike_date": "2026-02-26",
+      "spike_close": 2150.0,
+      "spike_high": 2345.0,
+      "vol_z": 4.06,
+      "vsr": 3.91,
+      "name": "SK증권",
+      "rsi_at_spike": 82.2,
+      "status": "watching"
+    },
+    "003530": {
+      "spike_date": "2026-02-26",
+      "spike_close": 8530.0,
+      "spike_high": 9690.0,
+      "vol_z": 3.46,
+      "vsr": 2.97,
+      "name": "한화투자증권",
+      "rsi_at_spike": 65.9,
+      "status": "watching"
+    },
+    "005830": {
+      "spike_date": "2026-02-26",
+      "spike_close": 205500.0,
+      "spike_high": 213500.0,
+      "vol_z": 4.02,
+      "vsr": 2.25,
+      "name": "DB손해보험",
+      "rsi_at_spike": 82.3,
+      "status": "watching"
+    },
+    "011070": {
+      "spike_date": "2026-02-26",
+      "spike_close": 345000.0,
+      "spike_high": 353500.0,
+      "vol_z": 5.7,
+      "vsr": 3.52,
+      "name": "LG이노텍",
+      "rsi_at_spike": 78.9,
+      "status": "watching"
+    },
+    "017800": {
+      "spike_date": "2026-02-26",
+      "spike_close": 100500.0,
+      "spike_high": 100900.0,
+      "vol_z": 3.24,
+      "vsr": 2.06,
+      "name": "현대엘리베이터",
+      "rsi_at_spike": 50.9,
+      "status": "watching"
+    },
+    "018260": {
+      "spike_date": "2026-02-26",
+      "spike_close": 191300.0,
+      "spike_high": 194600.0,
+      "vol_z": 4.34,
+      "vsr": 2.97,
+      "name": "삼성에스디에스",
+      "rsi_at_spike": 69.7,
+      "status": "watching"
+    },
+    "032830": {
+      "spike_date": "2026-02-26",
+      "spike_close": 239000.0,
+      "spike_high": 243500.0,
+      "vol_z": 3.18,
+      "vsr": 2.03,
+      "name": "삼성생명",
+      "rsi_at_spike": 71.7,
+      "status": "watching"
+    },
+    "034220": {
+      "spike_date": "2026-02-26",
+      "spike_close": 15850.0,
+      "spike_high": 16050.0,
+      "vol_z": 3.07,
+      "vsr": 2.46,
+      "name": "LG디스플레이",
+      "rsi_at_spike": 80.6,
+      "status": "watching"
+    },
+    "035720": {
+      "spike_date": "2026-02-26",
+      "spike_close": 61400.0,
+      "spike_high": 62300.0,
+      "vol_z": 4.4,
+      "vsr": 3.01,
+      "name": "카카오",
+      "rsi_at_spike": 59.7,
+      "status": "watching"
+    },
+    "036540": {
+      "spike_date": "2026-02-26",
+      "spike_close": 8340.0,
+      "spike_high": 8640.0,
+      "vol_z": 6.21,
+      "vsr": 6.16,
+      "name": "SFA반도체",
+      "rsi_at_spike": 69.4,
+      "status": "watching"
+    },
+    "039440": {
+      "spike_date": "2026-02-26",
+      "spike_close": 40800.0,
+      "spike_high": 43200.0,
+      "vol_z": 3.86,
+      "vsr": 4.1,
+      "name": "에스티아이",
+      "rsi_at_spike": 66.1,
+      "status": "watching"
+    },
+    "046890": {
+      "spike_date": "2026-02-26",
+      "spike_close": 13210.0,
+      "spike_high": 14910.0,
+      "vol_z": 7.4,
+      "vsr": 10.99,
+      "name": "서울반도체",
+      "rsi_at_spike": 90.1,
+      "status": "watching"
+    },
+    "047040": {
+      "spike_date": "2026-02-26",
+      "spike_close": 10050.0,
+      "spike_high": 10850.0,
+      "vol_z": 4.8,
+      "vsr": 3.82,
+      "name": "대우건설",
+      "rsi_at_spike": 83.4,
+      "status": "watching"
+    },
+    "080220": {
+      "spike_date": "2026-02-26",
+      "spike_close": 50700.0,
+      "spike_high": 54500.0,
+      "vol_z": 4.22,
+      "vsr": 4.02,
+      "name": "제주반도체",
+      "rsi_at_spike": 71.4,
+      "status": "watching"
+    },
+    "093520": {
+      "spike_date": "2026-02-26",
+      "spike_close": 33300.0,
+      "spike_high": 33850.0,
+      "vol_z": 3.87,
+      "vsr": 2.94,
+      "name": "매커스",
+      "rsi_at_spike": 75.6,
+      "status": "watching"
+    },
+    "161890": {
+      "spike_date": "2026-02-26",
+      "spike_close": 75000.0,
+      "spike_high": 77900.0,
+      "vol_z": 4.94,
+      "vsr": 2.82,
+      "name": "한국콜마",
+      "rsi_at_spike": 68.7,
+      "status": "watching"
+    },
+    "192080": {
+      "spike_date": "2026-02-26",
+      "spike_close": 54500.0,
+      "spike_high": 56300.0,
+      "vol_z": 3.0,
+      "vsr": 1.85,
+      "name": "더블유게임즈",
+      "rsi_at_spike": 50.9,
+      "status": "signal"
+    },
+    "383310": {
+      "spike_date": "2026-02-26",
+      "spike_close": 37400.0,
+      "spike_high": 41300.0,
+      "vol_z": 3.27,
+      "vsr": 2.79,
+      "name": "에코프로에이치엔",
+      "rsi_at_spike": 59.9,
+      "status": "signal"
+    },
+    "489790": {
+      "spike_date": "2026-02-26",
+      "spike_close": 86000.0,
+      "spike_high": 94400.0,
+      "vol_z": 4.27,
+      "vsr": 3.31,
+      "name": "한화비전",
+      "rsi_at_spike": 74.5,
+      "status": "watching"
+    }
+  },
+  "signals": [
+    {
+      "ticker": "192080",
+      "name": "더블유게임즈",
+      "spike_date": "2026-02-26",
+      "spike_high": 56300,
+      "current_close": 54500,
+      "pullback_pct": -3.2,
+      "days_since_spike": 0,
+      "rsi": 50.9,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.0,
+      "score": 65
+    },
+    {
+      "ticker": "383310",
+      "name": "에코프로에이치엔",
+      "spike_date": "2026-02-26",
+      "spike_high": 41300,
+      "current_close": 37400,
+      "pullback_pct": -9.4,
+      "days_since_spike": 0,
+      "rsi": 59.9,
+      "foreign_5d": -2665224400.0,
+      "vol_z_at_spike": 3.27,
+      "score": 65
+    }
+  ],
+  "stats": {
+    "new_spikes": 22,
+    "total_watching": 20,
+    "active_signals": 2
+  }
+}

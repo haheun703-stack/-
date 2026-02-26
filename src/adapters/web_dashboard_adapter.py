@@ -411,6 +411,7 @@ async def sync_data(request: Request):
         "regime_macro_signal.json", "dart_event_signals.json",
         "portfolio_allocation.json",
         "kis_balance.json", "kospi_regime.json",
+        "volume_spike_watchlist.json",
     }
     if target not in safe_names:
         return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)

@@ -277,6 +277,95 @@ def update_latest() -> pd.DataFrame:
     return df
 
 
+def _compute_sector_momentum(df: pd.DataFrame) -> dict:
+    """US ETF 연속 상승/하락 감지 → KR 섹터 부스트 데이터 생성.
+
+    실증: SOXX 3일 연속 상승 → KR 반도체 3일 전 사전진입: 승률 63.7%, +2.73%
+    이를 전체 6개 US ETF → 20개 KR 섹터로 확장.
+
+    Returns:
+        {"반도체": {"us_etf": "SOXX", "consecutive_up": 3, "boost": 3.0, ...}, ...}
+    """
+    result = {}
+
+    for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx"]:
+        close_col = f"{prefix}_close"
+        if close_col not in df.columns:
+            continue
+
+        closes = df[close_col].dropna().tail(10)
+        if len(closes) < 3:
+            continue
+
+        # 연속 상승일 계산
+        consecutive_up = 0
+        for i in range(len(closes) - 1, 0, -1):
+            if closes.iloc[i] > closes.iloc[i - 1]:
+                consecutive_up += 1
+            else:
+                break
+
+        # 연속 하락일 계산
+        consecutive_down = 0
+        for i in range(len(closes) - 1, 0, -1):
+            if closes.iloc[i] < closes.iloc[i - 1]:
+                consecutive_down += 1
+            else:
+                break
+
+        # 5일 수익률
+        ret_5d = 0.0
+        if len(closes) >= 6:
+            c_last = float(closes.iloc[-1])
+            c_prev = float(closes.iloc[-6])
+            if c_prev > 0:
+                ret_5d = (c_last / c_prev - 1) * 100
+
+        # 1일 수익률
+        ret_1d = 0.0
+        if len(closes) >= 2:
+            c_last = float(closes.iloc[-1])
+            c_prev = float(closes.iloc[-2])
+            if c_prev > 0:
+                ret_1d = (c_last / c_prev - 1) * 100
+
+        # 해당 ETF에 연결된 KR 섹터에 부스트 적용
+        kr_sectors = US_KR_SECTOR_MAP.get(prefix, [])
+        for sector in kr_sectors:
+            # 부스트 계산
+            boost = 0.0
+            if consecutive_up >= 4:
+                boost = 5.0
+            elif consecutive_up >= 3:
+                boost = 3.0
+            elif consecutive_up >= 2:
+                boost = 1.0
+
+            # 하락 페널티
+            if consecutive_down >= 3:
+                boost = min(boost, -3.0)
+            elif consecutive_down >= 2:
+                boost = min(boost, -1.0)
+
+            entry = {
+                "us_etf": prefix.upper(),
+                "consecutive_up": int(consecutive_up),
+                "consecutive_down": int(consecutive_down),
+                "ret_1d_pct": round(ret_1d, 2),
+                "ret_5d_pct": round(ret_5d, 2),
+                "boost": boost,
+            }
+
+            # 같은 섹터가 여러 ETF에서 매핑될 수 있음 → 최대 부스트 채택
+            if sector in result:
+                if abs(boost) > abs(result[sector]["boost"]):
+                    result[sector] = entry
+            else:
+                result[sector] = entry
+
+    return result
+
+
 def generate_signal(df: pd.DataFrame | None = None) -> dict:
     """US Overnight Signal 생성.
 
@@ -467,6 +556,9 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     signal["grade"] = grade
     signal["l1_score_100"] = l1_100
     signal["combined_score_100"] = round(combined_100, 1)
+
+    # 전략 C: US→KR 섹터 모멘텀 (전 섹터 사전 포지셔닝)
+    signal["sector_momentum"] = _compute_sector_momentum(df)
 
     # 요약 생성
     spy_ret = index_dir.get("SPY", {}).get("ret_1d", 0)

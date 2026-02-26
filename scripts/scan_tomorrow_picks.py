@@ -1,7 +1,7 @@
 """
-내일 추천 종목 통합 스캐너 — 8개 시그널 교차 검증
+내일 추천 종목 통합 스캐너 — 9개 시그널 교차 검증
 
-8개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
+9개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
 
 소스:
   1. 섹터릴레이 picks (relay_trading_signal.json)
@@ -9,21 +9,23 @@
   3. 눌림목 반등임박/매수대기 (pullback_scan.json)
   4. 퀀텀시그널 survivors + killed (scan_cache.json)
   5. 동반매수 S/A등급 + core_watch (dual_buying_watch.json)
-  6. 세력감지 세력포착/매집의심 (force_hybrid.json)  — v6 NEW
-  7. DART 이벤트 BUY (dart_event_signals.json)          — v6 NEW
-  8. 레짐 부스트 (regime_macro_signal.json)              — v6 NEW
+  6. 세력감지 세력포착/매집의심 (force_hybrid.json)
+  7. DART 이벤트 BUY (dart_event_signals.json)
+  8. 레짐 부스트 (regime_macro_signal.json)
+  9. 수급폭발→조정 매수 (volume_spike_watchlist.json) — v7 NEW
 
 통합 점수 (100점, 5축 + 과열패널티):
-  다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25 (동반매수 단독보장 삭제 v5)
+  다중 시그널 (25): 2소스 +12, 3소스 +20, 4+ +25
   개별 점수  (20): 각 소스 점수 정규화 평균
-  기술적 지지 (25): RSI 적정(8) + MA(5) + MACD(4) + TRIX(4) + Stoch(4)
+  기술적 지지 (25): RSI(8) + MA(5) + MACD(4) + TRIX(4) + Stoch(4) + MACD 3중 보너스
   수급       (20): 외인(8) + 기관(5) + 동시매수(2) + 연속매수(2)
   안전       (10): BB(4) + ADX(3) + 낙폭(3)
   과열 패널티: RSI/Stoch/BB/급등 최대 -25점
   레짐 부스트: 매크로 점수에 따라 최종 점수 × position_multiplier (0.5~1.3x)
+  US섹터 부스트: 전략C — US ETF 모멘텀 → KR 섹터 가산 (최대 ±5점)
   DART AVOID: 유상증자/관리종목 등 자동 제외
 
-v6 변경: 5→8소스 앙상블 + 레짐 부스트 + DART AVOID 필터
+v7 변경: 전략A(수급폭발 소스) + 전략B(MACD 3중 필터) + 전략C(US섹터 부스트)
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -269,6 +271,24 @@ def collect_dart_event() -> dict[str, dict]:
     return result
 
 
+def collect_volume_spike() -> dict[str, dict]:
+    """소스9: 수급 폭발 → 조정 매수 시그널 (전략 A)"""
+    vs = load_json("volume_spike_watchlist.json")
+    result = {}
+    for sig in vs.get("signals", []):
+        ticker = sig.get("ticker", "")
+        if not ticker:
+            continue
+        score = sig.get("score", 50)
+        result[ticker] = {
+            "source": "수급폭발",
+            "score": score,
+            "name": sig.get("name", ""),
+            "detail": f"폭발→조정{sig.get('pullback_pct', 0):+.1f}% {sig.get('days_since_spike', 0)}일전",
+        }
+    return result
+
+
 def load_dart_avoid_tickers() -> set[str]:
     """DART AVOID 종목 티커 세트 (유상증자/관리종목 등)"""
     de = load_json("dart_event_signals.json")
@@ -280,6 +300,70 @@ def load_dart_avoid_tickers() -> set[str]:
     return avoid
 
 
+# ── 전략 C: US→KR 섹터 모멘텀 부스트 ──
+SECTOR_BRIDGE = {
+    "에너지화학": ["에너지", "화학"],
+    "헬스케어": ["헬스케어", "제약", "의료기기"],
+    "반도체": ["반도체", "전자부품"],
+    "IT": ["IT", "소프트웨어"],
+    "금융": ["금융", "은행"],
+    "은행": ["은행"],
+    "증권": ["증권"],
+    "건설": ["건설"],
+    "조선": ["조선"],
+    "바이오": ["바이오", "제약"],
+    "소프트웨어": ["소프트웨어", "IT"],
+    "2차전지": ["반도체", "전자부품"],
+    "인터넷": ["IT", "소프트웨어"],
+    "철강소재": ["에너지", "화학"],
+}
+
+_STOCK_SECTOR_CACHE: dict | None = None
+
+
+def _load_stock_to_sector() -> dict:
+    """stock_to_sector.json 캐시 로드."""
+    global _STOCK_SECTOR_CACHE
+    if _STOCK_SECTOR_CACHE is None:
+        fp = DATA_DIR / "sector_rotation" / "stock_to_sector.json"
+        if fp.exists():
+            with open(fp, encoding="utf-8") as f:
+                _STOCK_SECTOR_CACHE = json.load(f)
+        else:
+            _STOCK_SECTOR_CACHE = {}
+    return _STOCK_SECTOR_CACHE
+
+
+def load_sector_momentum_boost() -> dict[str, float]:
+    """overnight_signal.json의 sector_momentum → {섹터명: boost} 딕셔너리."""
+    sig = load_json("us_market/overnight_signal.json")
+    sm = sig.get("sector_momentum", {})
+    return {k: v.get("boost", 0) for k, v in sm.items()}
+
+
+def get_ticker_sector_boost(ticker: str, boost_map: dict[str, float]) -> float:
+    """종목 → stock_to_sector → SECTOR_BRIDGE → sector_momentum boost 합산."""
+    if not boost_map:
+        return 0.0
+    sts = _load_stock_to_sector()
+    sectors = sts.get(ticker, [])
+    max_boost = 0.0
+    for sec in sectors:
+        # 직접 매칭
+        if sec in boost_map:
+            max_boost = max(max_boost, boost_map[sec]) if boost_map[sec] > 0 else min(max_boost, boost_map[sec])
+        # SECTOR_BRIDGE 매칭
+        bridge_keys = SECTOR_BRIDGE.get(sec, [])
+        for bk in bridge_keys:
+            if bk in boost_map:
+                b = boost_map[bk]
+                if b > 0:
+                    max_boost = max(max_boost, b)
+                else:
+                    max_boost = min(max_boost, b)
+    return round(max_boost, 1)
+
+
 def load_regime_boost() -> float:
     """레짐 매크로 시그널에서 position_multiplier 로드"""
     macro = load_json("regime_macro_signal.json")
@@ -289,6 +373,45 @@ def load_regime_boost() -> float:
 # ──────────────────────────────────────────
 # 통합 점수 계산
 # ──────────────────────────────────────────
+
+def _calc_macd_triple_bonus(pq: dict | None) -> int:
+    """전략 B: MACD 0선 근처 + 골든크로스 + 외인매수 + 거래량surge → 보너스
+
+    4중 충족: +6점, 3중: +4점, 2중+MACD상승: +2점
+    """
+    if not pq:
+        return 0
+
+    hits = 0
+
+    # 조건1: MACD 0선 근처 (close의 ±2% 이내)
+    macd_val = pq.get("macd", 0)
+    close = pq.get("close", 0)
+    if close > 0 and abs(macd_val) < close * 0.02:
+        hits += 1
+
+    # 조건2: MACD 골든크로스 (histogram 음→양)
+    hist = pq.get("macd_histogram", 0)
+    hist_prev = pq.get("macd_histogram_prev", 0)
+    if hist > 0 and hist_prev <= 0:
+        hits += 1
+
+    # 조건3: 외인 5일 순매수
+    if pq.get("foreign_5d", 0) > 0:
+        hits += 1
+
+    # 조건4: 거래량 서지 (vol_z >= 2.0 또는 vsr >= 2.0)
+    if pq.get("vol_z", 0) >= 2.0 or pq.get("volume_surge_ratio", 0) >= 2.0:
+        hits += 1
+
+    if hits >= 4:
+        return 6
+    if hits >= 3:
+        return 4
+    if hits >= 2 and pq.get("macd_rising", False):
+        return 2
+    return 0
+
 
 def calc_integrated_score(
     ticker: str,
@@ -383,6 +506,9 @@ def calc_integrated_score(
         tech_score += 4
     elif 20 <= stoch_k <= 75:
         tech_score += 2
+
+    # 전략 B: MACD 3중 필터 가산
+    tech_score += _calc_macd_triple_bonus(parquet_data)
 
     tech_score = min(tech_score, 25)
 
@@ -668,6 +794,12 @@ def get_parquet_data(ticker: str) -> dict | None:
             "trix_gx": trix_gx,
             "macd_rising": macd_rising,
             "low_20d": low_20d,
+            "vol_z": float(last.get("vol_z", 0) or 0),
+            "volume_surge_ratio": float(last.get("volume_surge_ratio", 0) or 0),
+            "macd": float(last.get("macd", 0) or 0),
+            "macd_signal": float(last.get("macd_signal", 0) or 0),
+            "macd_histogram": macd_hist,
+            "macd_histogram_prev": macd_hist_prev,
         }
     except Exception as e:
         logger.warning("parquet 읽기 실패 %s: %s", ticker, e)
@@ -719,7 +851,7 @@ def main():
 
     name_map = build_name_map()
 
-    # 8개 소스 수집 (v6: 5→8 앙상블)
+    # 9개 소스 수집 (v7: 8→9 앙상블, 전략A 수급폭발 추가)
     src1 = collect_relay()
     src2 = collect_group_relay()
     src3 = collect_pullback()
@@ -727,21 +859,26 @@ def main():
     src5 = collect_dual_buying()
     src6 = collect_force_hybrid()
     src7 = collect_dart_event()
+    src9 = collect_volume_spike()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
-          f"세력감지:{len(src6)} 이벤트:{len(src7)}")
+          f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)}")
 
-    # DART AVOID 필터 + 레짐 부스트
+    # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
+    sector_boost_map = load_sector_momentum_boost()
     if avoid_tickers:
         print(f"[DART AVOID] {len(avoid_tickers)}종목 자동 제외")
     print(f"[레짐 부스트] x{regime_mult:.1f}")
+    active_boosts = {k: v for k, v in sector_boost_map.items() if v != 0}
+    if active_boosts:
+        print(f"[US섹터 부스트] {len(active_boosts)}섹터 활성: {active_boosts}")
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5, src6, src7]:
+    for src in [src1, src2, src3, src4, src5, src6, src7, src9]:
         all_tickers.update(src.keys())
 
     # AVOID 종목 제외
@@ -756,7 +893,7 @@ def main():
         source_names = []
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
                            (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
-                           (src7, "이벤트")]:
+                           (src7, "이벤트"), (src9, "수급폭발")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
@@ -771,6 +908,14 @@ def main():
         if regime_mult != 1.0:
             boosted = min(score_detail["total"] * regime_mult, 100)
             score_detail["total"] = round(boosted, 1)
+
+        # 전략 C: US섹터 모멘텀 부스트 (가산, 최대 ±5점)
+        ticker_boost = get_ticker_sector_boost(ticker, sector_boost_map)
+        if ticker_boost != 0:
+            boosted = max(min(score_detail["total"] + ticker_boost, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if ticker_boost > 0:
+                source_names.append("US모멘텀")
 
         # 이름 결정
         name = ""

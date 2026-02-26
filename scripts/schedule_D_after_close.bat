@@ -89,6 +89,10 @@ REM 12단계: 눌림목 스캔 (건강한 조정 매수 후보)
 echo [%date% %time%] [12/24] 눌림목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_pullback.py >> logs\schedule.log 2>&1
 
+REM 12.5단계: 수급 폭발 → 조정 매수 스캐너 (전략 A)
+echo [%date% %time%] [12.5/26] 수급 폭발 스캐너 >> logs\schedule.log
+python -u -X utf8 scripts\scan_volume_spike.py >> logs\schedule.log 2>&1
+
 REM 13단계: DART 전자공시 크롤링 (뉴스 선행 감지)
 echo [%date% %time%] [13/23] DART 공시 크롤링 >> logs\schedule.log
 python -u -X utf8 scripts\crawl_dart_disclosure.py --alert >> logs\schedule.log 2>&1

@@ -67,6 +67,7 @@ class DashboardDataProvider:
             "regime_macro": self._load_json("regime_macro_signal.json"),
             "dart_events": self._load_json("dart_event_signals.json"),
             "portfolio_allocation": self._load_json("portfolio_allocation.json"),
+            "volume_spike": self._load_json("volume_spike_watchlist.json"),
             "summary": summary,
         }
 

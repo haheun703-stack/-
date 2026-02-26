@@ -58,6 +58,7 @@ SYNC_FILES = [
     # 라이브 데이터 (동기화 전 자동 캡처)
     "kis_balance.json",
     "kospi_regime.json",
+    "volume_spike_watchlist.json",
 ]
 
 
