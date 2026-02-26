@@ -268,9 +268,8 @@ def main():
     buy_signals.sort(key=lambda x: -x["event_score"])
     watch_signals.sort(key=lambda x: -x["event_score"])
 
-    # 통합 시그널 (BUY + WATCH, 상위 20건)
+    # 통합 시그널 (BUY + WATCH 전체)
     signals = buy_signals + watch_signals
-    signals = signals[:20]
 
     actionable_count = len(buy_signals)
 
@@ -282,7 +281,7 @@ def main():
         "total_events": len(all_disclosures),
         "actionable_count": actionable_count,
         "signals": signals,
-        "avoid_list": avoid_list[:10],
+        "avoid_list": avoid_list,
     }
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

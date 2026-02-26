@@ -1,21 +1,22 @@
 {
-  "generated_at": "2026-02-26 20:13",
+  "generated_at": "2026-02-26 20:27",
   "target_date": "2026-02-27",
   "target_date_label": "2/27(Fri)",
-  "total_candidates": 117,
+  "total_candidates": 188,
   "stats": {
-    "적극매수": 3,
-    "관심매수": 46,
-    "관찰": 30,
-    "보류": 20,
-    "데이터부족": 18
+    "적극매수": 5,
+    "매수": 4,
+    "관심매수": 45,
+    "관찰": 48,
+    "보류": 43,
+    "데이터부족": 43
   },
   "top5": [
     "010140",
+    "002710",
     "079370",
     "455900",
-    "445680",
-    "166090"
+    "078350"
   ],
   "picks": [
     {
@@ -62,6 +63,55 @@
         "RSI 51 최적",
         "MA60 위",
         "외인 순매수"
+      ],
+      "overheat_flags": [],
+      "is_top5": true
+    },
+    {
+      "ticker": "002710",
+      "name": "TCC스틸",
+      "grade": "적극매수",
+      "total_score": 76.0,
+      "n_sources": 2,
+      "sources": [
+        "눌림목",
+        "이벤트"
+      ],
+      "source_details": [
+        "반등임박",
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 9.5,
+        "tech": 15,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 15610,
+      "price_change": -2.44,
+      "rsi": 48.31,
+      "adx": 17.14,
+      "stoch_k": 54.62,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.19,
+      "foreign_5d": 20171.0,
+      "inst_5d": 1471.0,
+      "ret_5d": -3.04,
+      "drawdown": -53.12,
+      "entry_price": 15610,
+      "stop_loss": 15930,
+      "target_price": 16700,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -2.0,
+      "reasons": [
+        "2중 시그널",
+        "RSI 48 최적",
+        "MA60 위",
+        "Stoch 55 안전",
+        "외인+기관 동시매수"
       ],
       "overheat_flags": [],
       "is_top5": true
@@ -168,6 +218,254 @@
       "is_top5": true
     },
     {
+      "ticker": "078350",
+      "name": "한양디지텍",
+      "grade": "적극매수",
+      "total_score": 73.1,
+      "n_sources": 2,
+      "sources": [
+        "눌림목",
+        "이벤트"
+      ],
+      "source_details": [
+        "반등임박",
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 7.2,
+        "tech": 19,
+        "flow": 8,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 27000,
+      "price_change": -0.37,
+      "rsi": 53.97,
+      "adx": 18.94,
+      "stoch_k": 45.2,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.46,
+      "foreign_5d": 26418.0,
+      "inst_5d": -2009.0,
+      "ret_5d": 6.09,
+      "drawdown": -11.62,
+      "entry_price": 27000,
+      "stop_loss": 26690,
+      "target_price": 27620,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 1.1,
+      "reasons": [
+        "2중 시그널",
+        "RSI 54 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "Stoch 45 안전",
+        "외인 순매수"
+      ],
+      "overheat_flags": [],
+      "is_top5": true
+    },
+    {
+      "ticker": "190510",
+      "name": "나무가",
+      "grade": "매수",
+      "total_score": 67.0,
+      "n_sources": 2,
+      "sources": [
+        "퀀텀",
+        "이벤트"
+      ],
+      "source_details": [
+        "Kill(R:R 2.5)",
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 8.5,
+        "tech": 17,
+        "flow": 7,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 23400,
+      "price_change": 0.86,
+      "rsi": 49.87,
+      "adx": 14.94,
+      "stoch_k": 21.41,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.36,
+      "foreign_5d": -25196.0,
+      "inst_5d": 49.0,
+      "ret_5d": -2.7,
+      "drawdown": -18.18,
+      "entry_price": 23400,
+      "stop_loss": 23470,
+      "target_price": 25040,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -0.3,
+      "reasons": [
+        "2중 시그널",
+        "RSI 50 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "036830",
+      "name": "솔브레인홀딩스",
+      "grade": "매수",
+      "total_score": 65.6,
+      "n_sources": 2,
+      "sources": [
+        "눌림목",
+        "이벤트"
+      ],
+      "source_details": [
+        "반등임박",
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 7.5,
+        "tech": 21,
+        "flow": 0,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 54500,
+      "price_change": 1.49,
+      "rsi": 58.97,
+      "adx": 28.69,
+      "stoch_k": 62.96,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.65,
+      "foreign_5d": -2250757850.0,
+      "inst_5d": -762986350.0,
+      "ret_5d": -1.27,
+      "drawdown": -9.17,
+      "entry_price": 54500,
+      "stop_loss": 51560,
+      "target_price": 60370,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 5.4,
+      "reasons": [
+        "2중 시그널",
+        "RSI 59 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "ADX 29 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "437730",
+      "name": "삼현",
+      "grade": "매수",
+      "total_score": 63.3,
+      "n_sources": 2,
+      "sources": [
+        "눌림목",
+        "이벤트"
+      ],
+      "source_details": [
+        "반등임박",
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 9.7,
+        "tech": 21,
+        "flow": 0,
+        "safety": 8,
+        "overheat": 2
+      },
+      "close": 59000,
+      "price_change": 2.79,
+      "rsi": 52.41,
+      "adx": 33.81,
+      "stoch_k": 47.13,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.53,
+      "foreign_5d": -45038743250.0,
+      "inst_5d": -9006654125.0,
+      "ret_5d": 12.38,
+      "drawdown": -23.28,
+      "entry_price": 59000,
+      "stop_loss": 57230,
+      "target_price": 62540,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 3.0,
+      "reasons": [
+        "2중 시그널",
+        "RSI 52 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "Stoch 47 안전",
+        "ADX 34 강추세",
+        "⚠ 5일 +12% 급등주의",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": [
+        "5일 +12% 급등주의"
+      ]
+    },
+    {
+      "ticker": "253450",
+      "name": "스튜디오드래곤",
+      "grade": "매수",
+      "total_score": 60.1,
+      "n_sources": 2,
+      "sources": [
+        "퀀텀",
+        "이벤트"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)",
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 6.2,
+        "tech": 13,
+        "flow": 7,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 44950,
+      "price_change": -2.28,
+      "rsi": 43.59,
+      "adx": 22.27,
+      "stoch_k": 27.64,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.15,
+      "foreign_5d": -10023.0,
+      "inst_5d": 24664.0,
+      "ret_5d": -5.47,
+      "drawdown": -21.14,
+      "entry_price": 44950,
+      "stop_loss": 46170,
+      "target_price": 48100,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -2.7,
+      "reasons": [
+        "2중 시그널",
+        "RSI 44 최적",
+        "MA60 위",
+        "기관 순매수",
+        "ADX 22 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "445680",
       "name": "큐리옥스바이오시스템즈",
       "grade": "관심매수",
@@ -212,8 +510,7 @@
         "외인+기관 동시매수",
         "ADX 26 강추세"
       ],
-      "overheat_flags": [],
-      "is_top5": true
+      "overheat_flags": []
     },
     {
       "ticker": "166090",
@@ -259,8 +556,7 @@
         "Stoch 53 안전",
         "외인+기관 동시매수"
       ],
-      "overheat_flags": [],
-      "is_top5": true
+      "overheat_flags": []
     },
     {
       "ticker": "117730",
@@ -589,51 +885,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "002710",
-      "name": "TCC스틸",
-      "grade": "관심매수",
-      "total_score": 70.2,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 17.0,
-        "tech": 15,
-        "flow": 15,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 15610,
-      "price_change": -2.44,
-      "rsi": 48.31,
-      "adx": 17.14,
-      "stoch_k": 54.62,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.19,
-      "foreign_5d": 20171.0,
-      "inst_5d": 1471.0,
-      "ret_5d": -3.04,
-      "drawdown": -53.12,
-      "entry_price": 15610,
-      "stop_loss": 15930,
-      "target_price": 16700,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -2.0,
-      "reasons": [
-        "RSI 48 최적",
-        "MA60 위",
-        "Stoch 55 안전",
-        "외인+기관 동시매수"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "069260",
       "name": "TKG휴켐스",
       "grade": "관심매수",
@@ -676,52 +927,6 @@
         "Stoch 43 안전",
         "외인+기관 동시매수",
         "ADX 22 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "078350",
-      "name": "한양디지텍",
-      "grade": "관심매수",
-      "total_score": 68.2,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 15.5,
-        "tech": 19,
-        "flow": 8,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 27000,
-      "price_change": -0.37,
-      "rsi": 53.97,
-      "adx": 18.94,
-      "stoch_k": 45.2,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.46,
-      "foreign_5d": 26418.0,
-      "inst_5d": -2009.0,
-      "ret_5d": 6.09,
-      "drawdown": -11.62,
-      "entry_price": 27000,
-      "stop_loss": 26690,
-      "target_price": 27620,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 1.1,
-      "reasons": [
-        "RSI 54 최적",
-        "MA60 위",
-        "MACD 상승전환",
-        "Stoch 45 안전",
-        "외인 순매수"
       ],
       "overheat_flags": []
     },
@@ -996,53 +1201,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "036570",
-      "name": "엔씨소프트",
-      "grade": "관심매수",
-      "total_score": 63.7,
-      "n_sources": 1,
-      "sources": [
-        "세력감지"
-      ],
-      "source_details": [
-        "세력포착 P2_수급반전,P7_VWAP이탈"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 14.0,
-        "tech": 15,
-        "flow": 15,
-        "safety": 9,
-        "overheat": 4
-      },
-      "close": 231500,
-      "price_change": -2.53,
-      "rsi": 56.06,
-      "adx": 37.68,
-      "stoch_k": 82.31,
-      "above_ma60": true,
-      "above_ma20": true,
-      "bb_position": 0.71,
-      "foreign_5d": 11087182000.0,
-      "inst_5d": 31535269750.0,
-      "ret_5d": 1.98,
-      "drawdown": -10.44,
-      "entry_price": 231500,
-      "stop_loss": 217850,
-      "target_price": 258790,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 5.9,
-      "reasons": [
-        "RSI 56 최적",
-        "추세 만점",
-        "외인+기관 동시매수",
-        "⚠ Stoch 82 과열"
-      ],
-      "overheat_flags": [
-        "Stoch 82 과열"
-      ]
-    },
-    {
       "ticker": "009540",
       "name": "HD한국조선해양",
       "grade": "관심매수",
@@ -1136,6 +1294,53 @@
       "overheat_flags": []
     },
     {
+      "ticker": "036570",
+      "name": "엔씨소프트",
+      "grade": "관심매수",
+      "total_score": 63.7,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P2_수급반전,P7_VWAP이탈"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 15,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 4
+      },
+      "close": 231500,
+      "price_change": -2.53,
+      "rsi": 56.06,
+      "adx": 37.68,
+      "stoch_k": 82.31,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.71,
+      "foreign_5d": 11087182000.0,
+      "inst_5d": 31535269750.0,
+      "ret_5d": 1.98,
+      "drawdown": -10.44,
+      "entry_price": 231500,
+      "stop_loss": 217850,
+      "target_price": 258790,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 5.9,
+      "reasons": [
+        "RSI 56 최적",
+        "추세 만점",
+        "외인+기관 동시매수",
+        "⚠ Stoch 82 과열"
+      ],
+      "overheat_flags": [
+        "Stoch 82 과열"
+      ]
+    },
+    {
       "ticker": "060280",
       "name": "큐렉소",
       "grade": "관심매수",
@@ -1224,52 +1429,6 @@
         "MACD 상승전환",
         "Stoch 60 안전",
         "외인 순매수"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "036830",
-      "name": "솔브레인홀딩스",
-      "grade": "관심매수",
-      "total_score": 61.1,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 16.0,
-        "tech": 21,
-        "flow": 0,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 54500,
-      "price_change": 1.49,
-      "rsi": 58.97,
-      "adx": 28.69,
-      "stoch_k": 62.96,
-      "above_ma60": true,
-      "above_ma20": true,
-      "bb_position": 0.65,
-      "foreign_5d": -2250757850.0,
-      "inst_5d": -762986350.0,
-      "ret_5d": -1.27,
-      "drawdown": -9.17,
-      "entry_price": 54500,
-      "stop_loss": 51560,
-      "target_price": 60370,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 5.4,
-      "reasons": [
-        "RSI 59 최적",
-        "추세 만점",
-        "MACD 상승전환",
-        "ADX 29 강추세",
-        "⚠ 외인+기관 동시매도"
       ],
       "overheat_flags": []
     },
@@ -1368,52 +1527,6 @@
       ]
     },
     {
-      "ticker": "095500",
-      "name": "미래나노텍",
-      "grade": "관심매수",
-      "total_score": 60.4,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 19,
-        "flow": 7,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 11630,
-      "price_change": 1.66,
-      "rsi": 51.59,
-      "adx": 14.05,
-      "stoch_k": 41.71,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.43,
-      "foreign_5d": -25239.0,
-      "inst_5d": 2249.0,
-      "ret_5d": 0.52,
-      "drawdown": -17.87,
-      "entry_price": 11630,
-      "stop_loss": 11510,
-      "target_price": 11880,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 1.0,
-      "reasons": [
-        "RSI 52 최적",
-        "MA60 위",
-        "MACD 상승전환",
-        "Stoch 42 안전",
-        "기관 순매수"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "098460",
       "name": "고영",
       "grade": "관심매수",
@@ -1506,47 +1619,97 @@
       "overheat_flags": []
     },
     {
-      "ticker": "190510",
-      "name": "나무가",
+      "ticker": "095500",
+      "name": "미래나노텍",
       "grade": "관심매수",
-      "total_score": 59.8,
+      "total_score": 60.4,
       "n_sources": 1,
       "sources": [
         "퀀텀"
       ],
       "source_details": [
-        "Kill(R:R 2.5)"
+        "Kill(R:R 1.8)"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 15.0,
-        "tech": 17,
+        "individual": 13.5,
+        "tech": 19,
         "flow": 7,
         "safety": 7,
         "overheat": 0
       },
-      "close": 23400,
-      "price_change": 0.86,
-      "rsi": 49.87,
-      "adx": 14.94,
-      "stoch_k": 21.41,
+      "close": 11630,
+      "price_change": 1.66,
+      "rsi": 51.59,
+      "adx": 14.05,
+      "stoch_k": 41.71,
       "above_ma60": true,
       "above_ma20": false,
-      "bb_position": 0.36,
-      "foreign_5d": -25196.0,
-      "inst_5d": 49.0,
-      "ret_5d": -2.7,
-      "drawdown": -18.18,
-      "entry_price": 23400,
-      "stop_loss": 23470,
-      "target_price": 25040,
+      "bb_position": 0.43,
+      "foreign_5d": -25239.0,
+      "inst_5d": 2249.0,
+      "ret_5d": 0.52,
+      "drawdown": -17.87,
+      "entry_price": 11630,
+      "stop_loss": 11510,
+      "target_price": 11880,
       "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -0.3,
+      "risk_pct": 1.0,
       "reasons": [
-        "RSI 50 최적",
+        "RSI 52 최적",
         "MA60 위",
         "MACD 상승전환",
+        "Stoch 42 안전",
         "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "049630",
+      "name": "재영솔루텍",
+      "grade": "관심매수",
+      "total_score": 59.8,
+      "n_sources": 2,
+      "sources": [
+        "퀀텀",
+        "이벤트"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)",
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 8.0,
+        "tech": 19,
+        "flow": 0,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 4365,
+      "price_change": 0.46,
+      "rsi": 47.02,
+      "adx": 25.69,
+      "stoch_k": 31.96,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.41,
+      "foreign_5d": -1237818.0,
+      "inst_5d": 0.0,
+      "ret_5d": -2.35,
+      "drawdown": -46.11,
+      "entry_price": 4365,
+      "stop_loss": 4400,
+      "target_price": 4670,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -0.8,
+      "reasons": [
+        "2중 시그널",
+        "RSI 47 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "Stoch 32 안전",
+        "ADX 26 강추세"
       ],
       "overheat_flags": []
     },
@@ -1685,6 +1848,55 @@
       "overheat_flags": []
     },
     {
+      "ticker": "348370",
+      "name": "엔켐",
+      "grade": "관심매수",
+      "total_score": 58.2,
+      "n_sources": 2,
+      "sources": [
+        "눌림목",
+        "이벤트"
+      ],
+      "source_details": [
+        "반등임박",
+        "타법인주식및출자증권취득결정"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 8.8,
+        "tech": 17,
+        "flow": 0,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 77800,
+      "price_change": -1.52,
+      "rsi": 51.58,
+      "adx": 24.99,
+      "stoch_k": 27.1,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.35,
+      "foreign_5d": -2957692950.0,
+      "inst_5d": -117039150.0,
+      "ret_5d": -1.77,
+      "drawdown": -41.9,
+      "entry_price": 77800,
+      "stop_loss": 79320,
+      "target_price": 83250,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -2.0,
+      "reasons": [
+        "2중 시그널",
+        "RSI 52 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "ADX 25 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "094170",
       "name": "동운아나텍",
       "grade": "관심매수",
@@ -1776,98 +1988,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "089010",
-      "name": "켐트로닉스",
-      "grade": "관심매수",
-      "total_score": 57.8,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 21,
-        "flow": 2,
-        "safety": 8,
-        "overheat": 0
-      },
-      "close": 34250,
-      "price_change": 4.58,
-      "rsi": 54.92,
-      "adx": 17.97,
-      "stoch_k": 41.72,
-      "above_ma60": true,
-      "above_ma20": true,
-      "bb_position": 0.55,
-      "foreign_5d": -10386.0,
-      "inst_5d": -41.0,
-      "ret_5d": 1.63,
-      "drawdown": -24.56,
-      "entry_price": 34250,
-      "stop_loss": 33320,
-      "target_price": 36110,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 2.7,
-      "reasons": [
-        "RSI 55 최적",
-        "추세 만점",
-        "MACD 상승전환",
-        "Stoch 42 안전",
-        "⚠ 외인+기관 동시매도"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "101360",
-      "name": "에코앤드림",
-      "grade": "관심매수",
-      "total_score": 57.8,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 15.5,
-        "tech": 15,
-        "flow": 7,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 20850,
-      "price_change": -1.65,
-      "rsi": 51.95,
-      "adx": 21.48,
-      "stoch_k": 54.35,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.39,
-      "foreign_5d": -11231.0,
-      "inst_5d": 12198.0,
-      "ret_5d": -1.88,
-      "drawdown": -36.14,
-      "entry_price": 20850,
-      "stop_loss": 20830,
-      "target_price": 20890,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 0.1,
-      "reasons": [
-        "RSI 52 최적",
-        "MA60 위",
-        "Stoch 54 안전",
-        "기관 순매수",
-        "ADX 21 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "222800",
       "name": "심텍",
       "grade": "관심매수",
@@ -1909,6 +2029,52 @@
         "추세 만점",
         "MACD 상승전환",
         "Stoch 32 안전",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "089010",
+      "name": "켐트로닉스",
+      "grade": "관심매수",
+      "total_score": 57.8,
+      "n_sources": 1,
+      "sources": [
+        "퀀텀"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 13.5,
+        "tech": 21,
+        "flow": 2,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 34250,
+      "price_change": 4.58,
+      "rsi": 54.92,
+      "adx": 17.97,
+      "stoch_k": 41.72,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.55,
+      "foreign_5d": -10386.0,
+      "inst_5d": -41.0,
+      "ret_5d": 1.63,
+      "drawdown": -24.56,
+      "entry_price": 34250,
+      "stop_loss": 33320,
+      "target_price": 36110,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 2.7,
+      "reasons": [
+        "RSI 55 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "Stoch 42 안전",
         "⚠ 외인+기관 동시매도"
       ],
       "overheat_flags": []
@@ -1960,60 +2126,10 @@
       "overheat_flags": []
     },
     {
-      "ticker": "437730",
-      "name": "삼현",
+      "ticker": "101360",
+      "name": "에코앤드림",
       "grade": "관심매수",
-      "total_score": 57.2,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 17.0,
-        "tech": 21,
-        "flow": 0,
-        "safety": 8,
-        "overheat": 2
-      },
-      "close": 59000,
-      "price_change": 2.79,
-      "rsi": 52.41,
-      "adx": 33.81,
-      "stoch_k": 47.13,
-      "above_ma60": true,
-      "above_ma20": true,
-      "bb_position": 0.53,
-      "foreign_5d": -45038743250.0,
-      "inst_5d": -9006654125.0,
-      "ret_5d": 12.38,
-      "drawdown": -23.28,
-      "entry_price": 59000,
-      "stop_loss": 57230,
-      "target_price": 62540,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 3.0,
-      "reasons": [
-        "RSI 52 최적",
-        "추세 만점",
-        "MACD 상승전환",
-        "Stoch 47 안전",
-        "ADX 34 강추세",
-        "⚠ 5일 +12% 급등주의",
-        "⚠ 외인+기관 동시매도"
-      ],
-      "overheat_flags": [
-        "5일 +12% 급등주의"
-      ]
-    },
-    {
-      "ticker": "278280",
-      "name": "천보",
-      "grade": "관심매수",
-      "total_score": 56.6,
+      "total_score": 57.8,
       "n_sources": 1,
       "sources": [
         "눌림목"
@@ -2024,34 +2140,80 @@
       "score_breakdown": {
         "multi": 0,
         "individual": 15.5,
-        "tech": 19,
-        "flow": 2,
+        "tech": 15,
+        "flow": 7,
         "safety": 7,
         "overheat": 0
       },
-      "close": 54600,
-      "price_change": 0.37,
-      "rsi": 52.18,
-      "adx": 19.36,
-      "stoch_k": 48.1,
+      "close": 20850,
+      "price_change": -1.65,
+      "rsi": 51.95,
+      "adx": 21.48,
+      "stoch_k": 54.35,
       "above_ma60": true,
       "above_ma20": false,
-      "bb_position": 0.47,
-      "foreign_5d": -9081.0,
-      "inst_5d": -37580.0,
-      "ret_5d": 0.37,
-      "drawdown": -32.26,
-      "entry_price": 54600,
-      "stop_loss": 53890,
-      "target_price": 56030,
+      "bb_position": 0.39,
+      "foreign_5d": -11231.0,
+      "inst_5d": 12198.0,
+      "ret_5d": -1.88,
+      "drawdown": -36.14,
+      "entry_price": 20850,
+      "stop_loss": 20830,
+      "target_price": 20890,
       "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 1.3,
+      "risk_pct": 0.1,
       "reasons": [
         "RSI 52 최적",
         "MA60 위",
+        "Stoch 54 안전",
+        "기관 순매수",
+        "ADX 21 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "298020",
+      "name": "효성티앤씨",
+      "grade": "관심매수",
+      "total_score": 57.7,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 17,
+        "flow": 15,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 418000,
+      "price_change": 0.84,
+      "rsi": 66.12,
+      "adx": 31.69,
+      "stoch_k": 61.14,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.96,
+      "foreign_5d": 9414283250.0,
+      "inst_5d": 7931242750.0,
+      "ret_5d": 4.37,
+      "drawdown": -4.57,
+      "entry_price": 418000,
+      "stop_loss": 388740,
+      "target_price": 476520,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 66 적정",
+        "추세 만점",
         "MACD 상승전환",
-        "Stoch 48 안전",
-        "⚠ 외인+기관 동시매도"
+        "외인+기관 동시매수",
+        "ADX 32 강추세"
       ],
       "overheat_flags": []
     },
@@ -2146,6 +2308,52 @@
       "overheat_flags": []
     },
     {
+      "ticker": "278280",
+      "name": "천보",
+      "grade": "관심매수",
+      "total_score": 56.6,
+      "n_sources": 1,
+      "sources": [
+        "눌림목"
+      ],
+      "source_details": [
+        "반등임박"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 15.5,
+        "tech": 19,
+        "flow": 2,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 54600,
+      "price_change": 0.37,
+      "rsi": 52.18,
+      "adx": 19.36,
+      "stoch_k": 48.1,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.47,
+      "foreign_5d": -9081.0,
+      "inst_5d": -37580.0,
+      "ret_5d": 0.37,
+      "drawdown": -32.26,
+      "entry_price": 54600,
+      "stop_loss": 53890,
+      "target_price": 56030,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 1.3,
+      "reasons": [
+        "RSI 52 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "Stoch 48 안전",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "096770",
       "name": "SK이노베이션",
       "grade": "관심매수",
@@ -2191,6 +2399,50 @@
       "overheat_flags": [
         "Stoch 81 과열"
       ]
+    },
+    {
+      "ticker": "001680",
+      "name": "대상",
+      "grade": "관심매수",
+      "total_score": 55.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 17,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 22800,
+      "price_change": -3.39,
+      "rsi": 52.48,
+      "adx": 37.33,
+      "stoch_k": 74.03,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.54,
+      "foreign_5d": 14995.0,
+      "inst_5d": 12856.0,
+      "ret_5d": -1.94,
+      "drawdown": -12.64,
+      "entry_price": 22800,
+      "stop_loss": 22210,
+      "target_price": 23980,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 2.6,
+      "reasons": [
+        "RSI 52 최적",
+        "추세 만점",
+        "외인+기관 동시매수"
+      ],
+      "overheat_flags": []
     },
     {
       "ticker": "160190",
@@ -2377,51 +2629,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "253450",
-      "name": "스튜디오드래곤",
-      "grade": "관찰",
-      "total_score": 54.0,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 13,
-        "flow": 7,
-        "safety": 8,
-        "overheat": 0
-      },
-      "close": 44950,
-      "price_change": -2.28,
-      "rsi": 43.59,
-      "adx": 22.27,
-      "stoch_k": 27.64,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.15,
-      "foreign_5d": -10023.0,
-      "inst_5d": 24664.0,
-      "ret_5d": -5.47,
-      "drawdown": -21.14,
-      "entry_price": 44950,
-      "stop_loss": 46170,
-      "target_price": 48100,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -2.7,
-      "reasons": [
-        "RSI 44 최적",
-        "MA60 위",
-        "기관 순매수",
-        "ADX 22 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "464080",
       "name": "에스오에스랩",
       "grade": "관찰",
@@ -2560,145 +2767,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "373220",
-      "name": "LG에너지솔루션",
-      "grade": "관찰",
-      "total_score": 53.3,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "타법인주식및출자증권취득결정"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 19,
-        "flow": 15,
-        "safety": 8,
-        "overheat": 4
-      },
-      "close": 427000,
-      "price_change": 0.23,
-      "rsi": 59.67,
-      "adx": 32.77,
-      "stoch_k": 87.82,
-      "above_ma60": true,
-      "above_ma20": true,
-      "bb_position": 0.93,
-      "foreign_5d": 113329728750.0,
-      "inst_5d": 21671023500.0,
-      "ret_5d": 5.82,
-      "drawdown": -18.98,
-      "entry_price": 414190,
-      "stop_loss": 397110,
-      "target_price": 448350,
-      "entry_condition": "Stoch 88→70 이하 냉각 시",
-      "risk_pct": 4.1,
-      "reasons": [
-        "RSI 60 최적",
-        "추세 만점",
-        "MACD 상승전환",
-        "외인+기관 동시매수",
-        "ADX 33 강추세",
-        "⚠ Stoch 88 과열"
-      ],
-      "overheat_flags": [
-        "Stoch 88 과열"
-      ]
-    },
-    {
-      "ticker": "032350",
-      "name": "롯데관광개발",
-      "grade": "관찰",
-      "total_score": 52.6,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 11,
-        "flow": 8,
-        "safety": 8,
-        "overheat": 0
-      },
-      "close": 23350,
-      "price_change": -2.1,
-      "rsi": 45.06,
-      "adx": 26.49,
-      "stoch_k": 14.18,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.25,
-      "foreign_5d": 10534772000.0,
-      "inst_5d": -17616461325.0,
-      "ret_5d": -5.85,
-      "drawdown": -15.7,
-      "entry_price": 23350,
-      "stop_loss": 24240,
-      "target_price": 24980,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -3.8,
-      "reasons": [
-        "RSI 45 최적",
-        "MA60 위",
-        "외인 순매수",
-        "ADX 26 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "323280",
-      "name": "태성",
-      "grade": "관찰",
-      "total_score": 52.6,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 15,
-        "flow": 5,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 70500,
-      "price_change": 5.86,
-      "rsi": 58.28,
-      "adx": 35.97,
-      "stoch_k": 12.83,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.43,
-      "foreign_5d": -3912903450.0,
-      "inst_5d": 2233420800.0,
-      "ret_5d": 0.0,
-      "drawdown": -18.31,
-      "entry_price": 70500,
-      "stop_loss": 70230,
-      "target_price": 71040,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": 0.4,
-      "reasons": [
-        "RSI 58 최적",
-        "MA60 위",
-        "MACD 상승전환",
-        "기관 순매수"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "103140",
       "name": "풍산",
       "grade": "관찰",
@@ -2791,6 +2859,96 @@
       "overheat_flags": []
     },
     {
+      "ticker": "032350",
+      "name": "롯데관광개발",
+      "grade": "관찰",
+      "total_score": 52.6,
+      "n_sources": 1,
+      "sources": [
+        "퀀텀"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 13.5,
+        "tech": 11,
+        "flow": 8,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 23350,
+      "price_change": -2.1,
+      "rsi": 45.06,
+      "adx": 26.49,
+      "stoch_k": 14.18,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.25,
+      "foreign_5d": 10534772000.0,
+      "inst_5d": -17616461325.0,
+      "ret_5d": -5.85,
+      "drawdown": -15.7,
+      "entry_price": 23350,
+      "stop_loss": 24240,
+      "target_price": 24980,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -3.8,
+      "reasons": [
+        "RSI 45 최적",
+        "MA60 위",
+        "외인 순매수",
+        "ADX 26 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "323280",
+      "name": "태성",
+      "grade": "관찰",
+      "total_score": 52.6,
+      "n_sources": 1,
+      "sources": [
+        "퀀텀"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 13.5,
+        "tech": 15,
+        "flow": 5,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 70500,
+      "price_change": 5.86,
+      "rsi": 58.28,
+      "adx": 35.97,
+      "stoch_k": 12.83,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.43,
+      "foreign_5d": -3912903450.0,
+      "inst_5d": 2233420800.0,
+      "ret_5d": 0.0,
+      "drawdown": -18.31,
+      "entry_price": 70500,
+      "stop_loss": 70230,
+      "target_price": 71040,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 0.4,
+      "reasons": [
+        "RSI 58 최적",
+        "MA60 위",
+        "MACD 상승전환",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "108320",
       "name": "LX세미콘",
       "grade": "관찰",
@@ -2832,6 +2990,97 @@
         "추세 만점",
         "MACD 상승전환",
         "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "030530",
+      "name": "원익홀딩스",
+      "grade": "관찰",
+      "total_score": 51.7,
+      "n_sources": 2,
+      "sources": [
+        "퀀텀",
+        "이벤트"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)",
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 7.8,
+        "tech": 14,
+        "flow": 0,
+        "safety": 6,
+        "overheat": 0
+      },
+      "close": 36350,
+      "price_change": -1.09,
+      "rsi": 46.28,
+      "adx": 41.26,
+      "stoch_k": 28.72,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 0.36,
+      "foreign_5d": -4846790775.0,
+      "inst_5d": -180410725.0,
+      "ret_5d": -0.41,
+      "drawdown": -28.16,
+      "entry_price": 36350,
+      "stop_loss": 37200,
+      "target_price": 38890,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -2.3,
+      "reasons": [
+        "2중 시그널",
+        "RSI 46 최적",
+        "MACD 상승전환",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "036620",
+      "name": "감성코퍼레이션",
+      "grade": "관찰",
+      "total_score": 51.4,
+      "n_sources": 1,
+      "sources": [
+        "퀀텀"
+      ],
+      "source_details": [
+        "Kill(R:R 1.8)"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 13.5,
+        "tech": 11,
+        "flow": 8,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 6280,
+      "price_change": -2.33,
+      "rsi": 46.67,
+      "adx": 41.37,
+      "stoch_k": 15.33,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.15,
+      "foreign_5d": 172889.0,
+      "inst_5d": -121454.0,
+      "ret_5d": -9.38,
+      "drawdown": -18.44,
+      "entry_price": 6280,
+      "stop_loss": 6540,
+      "target_price": 6720,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -4.1,
+      "reasons": [
+        "RSI 47 최적",
+        "MA60 위",
+        "외인 순매수"
       ],
       "overheat_flags": []
     },
@@ -2882,142 +3131,6 @@
       "overheat_flags": []
     },
     {
-      "ticker": "049630",
-      "name": "재영솔루텍",
-      "grade": "관찰",
-      "total_score": 51.4,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 19,
-        "flow": 0,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 4365,
-      "price_change": 0.46,
-      "rsi": 47.02,
-      "adx": 25.69,
-      "stoch_k": 31.96,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.41,
-      "foreign_5d": -1237818.0,
-      "inst_5d": 0.0,
-      "ret_5d": -2.35,
-      "drawdown": -46.11,
-      "entry_price": 4365,
-      "stop_loss": 4400,
-      "target_price": 4670,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -0.8,
-      "reasons": [
-        "RSI 47 최적",
-        "MA60 위",
-        "MACD 상승전환",
-        "Stoch 32 안전",
-        "ADX 26 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "036620",
-      "name": "감성코퍼레이션",
-      "grade": "관찰",
-      "total_score": 51.4,
-      "n_sources": 1,
-      "sources": [
-        "퀀텀"
-      ],
-      "source_details": [
-        "Kill(R:R 1.8)"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 11,
-        "flow": 8,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 6280,
-      "price_change": -2.33,
-      "rsi": 46.67,
-      "adx": 41.37,
-      "stoch_k": 15.33,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.15,
-      "foreign_5d": 172889.0,
-      "inst_5d": -121454.0,
-      "ret_5d": -9.38,
-      "drawdown": -18.44,
-      "entry_price": 6280,
-      "stop_loss": 6540,
-      "target_price": 6720,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -4.1,
-      "reasons": [
-        "RSI 47 최적",
-        "MA60 위",
-        "외인 순매수"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "348370",
-      "name": "엔켐",
-      "grade": "관찰",
-      "total_score": 51.4,
-      "n_sources": 1,
-      "sources": [
-        "눌림목"
-      ],
-      "source_details": [
-        "반등임박"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 15.5,
-        "tech": 17,
-        "flow": 0,
-        "safety": 7,
-        "overheat": 0
-      },
-      "close": 77800,
-      "price_change": -1.52,
-      "rsi": 51.58,
-      "adx": 24.99,
-      "stoch_k": 27.1,
-      "above_ma60": true,
-      "above_ma20": false,
-      "bb_position": 0.35,
-      "foreign_5d": -2957692950.0,
-      "inst_5d": -117039150.0,
-      "ret_5d": -1.77,
-      "drawdown": -41.9,
-      "entry_price": 77800,
-      "stop_loss": 79320,
-      "target_price": 83250,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -2.0,
-      "reasons": [
-        "RSI 52 최적",
-        "MA60 위",
-        "MACD 상승전환",
-        "ADX 25 강추세",
-        "⚠ 외인+기관 동시매도"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "348340",
       "name": "뉴로메카",
       "grade": "관찰",
@@ -3059,6 +3172,52 @@
         "MA60 위",
         "MACD 상승전환",
         "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "298830",
+      "name": "슈어소프트테크",
+      "grade": "관찰",
+      "total_score": 51.2,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 21,
+        "flow": 8,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 8370,
+      "price_change": -3.79,
+      "rsi": 51.2,
+      "adx": 22.35,
+      "stoch_k": 60.06,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.5,
+      "foreign_5d": 40707.0,
+      "inst_5d": -24228.0,
+      "ret_5d": 1.82,
+      "drawdown": -23.07,
+      "entry_price": 8370,
+      "stop_loss": 8200,
+      "target_price": 8710,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 2.0,
+      "reasons": [
+        "RSI 51 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "외인 순매수",
+        "ADX 22 강추세"
       ],
       "overheat_flags": []
     },
@@ -3149,6 +3308,50 @@
         "MA60 위",
         "MACD 상승전환",
         "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "015750",
+      "name": "성우하이텍",
+      "grade": "관찰",
+      "total_score": 49.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.4,
+        "tech": 13,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 8640,
+      "price_change": -1.82,
+      "rsi": 61.65,
+      "adx": 42.12,
+      "stoch_k": 70.3,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.84,
+      "foreign_5d": 16802.0,
+      "inst_5d": 86728.0,
+      "ret_5d": 0.82,
+      "drawdown": -5.98,
+      "entry_price": 8640,
+      "stop_loss": 8040,
+      "target_price": 9850,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 6.9,
+      "reasons": [
+        "RSI 62 적정",
+        "추세 만점",
+        "외인+기관 동시매수"
       ],
       "overheat_flags": []
     },
@@ -3244,51 +3447,52 @@
       "overheat_flags": []
     },
     {
-      "ticker": "004020",
-      "name": "현대제철",
+      "ticker": "082920",
+      "name": "비츠로셀",
       "grade": "관찰",
-      "total_score": 48.1,
+      "total_score": 48.6,
       "n_sources": 1,
       "sources": [
-        "그룹순환"
+        "이벤트"
       ],
       "source_details": [
-        " 계열"
+        "배당"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 12.0,
-        "tech": 15,
-        "flow": 5,
-        "safety": 7,
+        "individual": 1.4,
+        "tech": 13,
+        "flow": 15,
+        "safety": 10,
         "overheat": 2
       },
-      "close": 38800,
-      "price_change": 1.7,
-      "rsi": 68.46,
-      "adx": 53.86,
-      "stoch_k": 77.78,
+      "close": 22650,
+      "price_change": 4.86,
+      "rsi": 63.72,
+      "adx": 21.17,
+      "stoch_k": 79.54,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 0.95,
-      "foreign_5d": -36164349575.0,
-      "inst_5d": 31809700175.0,
-      "ret_5d": 11.33,
-      "drawdown": -3.72,
-      "entry_price": 38800,
-      "stop_loss": 36080,
-      "target_price": 44230,
+      "bb_position": 1.04,
+      "foreign_5d": 25520.0,
+      "inst_5d": 12905.0,
+      "ret_5d": 10.22,
+      "drawdown": -1.95,
+      "entry_price": 22650,
+      "stop_loss": 21060,
+      "target_price": 25820,
       "entry_condition": "현재가 부근 매수 가능",
       "risk_pct": 7.0,
       "reasons": [
-        "RSI 68 적정",
+        "RSI 64 적정",
         "추세 만점",
         "MACD 상승전환",
-        "기관 순매수",
-        "⚠ 5일 +11% 급등주의"
+        "외인+기관 동시매수",
+        "ADX 21 강추세",
+        "⚠ 5일 +10% 급등주의"
       ],
       "overheat_flags": [
-        "5일 +11% 급등주의"
+        "5일 +10% 급등주의"
       ]
     },
     {
@@ -3340,51 +3544,147 @@
       ]
     },
     {
-      "ticker": "476060",
-      "name": "온코닉테라퓨틱스",
+      "ticker": "307950",
+      "name": "현대오토에버",
       "grade": "관찰",
-      "total_score": 46.8,
+      "total_score": 48.1,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P1_거래량폭발,P7_VWAP이탈"
+        "자기주식처분"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 11,
-        "flow": 8,
-        "safety": 7,
+        "individual": 1.0,
+        "tech": 15,
+        "flow": 15,
+        "safety": 10,
         "overheat": 4
       },
-      "close": 23050,
-      "price_change": -12.36,
-      "rsi": 61.07,
-      "adx": 37.54,
-      "stoch_k": 78.3,
+      "close": 505000,
+      "price_change": 2.02,
+      "rsi": 65.36,
+      "adx": 24.95,
+      "stoch_k": 71.45,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 0.86,
-      "foreign_5d": 34854.0,
-      "inst_5d": -10050.0,
-      "ret_5d": 22.02,
-      "drawdown": -20.24,
-      "entry_price": 23050,
-      "stop_loss": 21440,
-      "target_price": 26280,
+      "bb_position": 1.07,
+      "foreign_5d": 61906509250.0,
+      "inst_5d": 9429760750.0,
+      "ret_5d": 15.17,
+      "drawdown": -5.43,
+      "entry_price": 505000,
+      "stop_loss": 469650,
+      "target_price": 575700,
       "entry_condition": "현재가 부근 매수 가능",
       "risk_pct": 7.0,
       "reasons": [
-        "RSI 61 적정",
+        "RSI 65 적정",
         "추세 만점",
-        "외인 순매수",
-        "⚠ 5일 +22% 급등"
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "ADX 25 강추세",
+        "⚠ 5일 +15% 급등"
       ],
       "overheat_flags": [
-        "5일 +22% 급등"
+        "5일 +15% 급등"
       ]
+    },
+    {
+      "ticker": "004020",
+      "name": "현대제철",
+      "grade": "관찰",
+      "total_score": 48.1,
+      "n_sources": 1,
+      "sources": [
+        "그룹순환"
+      ],
+      "source_details": [
+        " 계열"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 12.0,
+        "tech": 15,
+        "flow": 5,
+        "safety": 7,
+        "overheat": 2
+      },
+      "close": 38800,
+      "price_change": 1.7,
+      "rsi": 68.46,
+      "adx": 53.86,
+      "stoch_k": 77.78,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.95,
+      "foreign_5d": -36164349575.0,
+      "inst_5d": 31809700175.0,
+      "ret_5d": 11.33,
+      "drawdown": -3.72,
+      "entry_price": 38800,
+      "stop_loss": 36080,
+      "target_price": 44230,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 68 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "기관 순매수",
+        "⚠ 5일 +11% 급등주의"
+      ],
+      "overheat_flags": [
+        "5일 +11% 급등주의"
+      ]
+    },
+    {
+      "ticker": "215200",
+      "name": "메가스터디교육",
+      "grade": "관찰",
+      "total_score": 47.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.4,
+        "tech": 19,
+        "flow": 7,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 48400,
+      "price_change": 1.36,
+      "rsi": 62.5,
+      "adx": 44.58,
+      "stoch_k": 58.7,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.83,
+      "foreign_5d": -213.0,
+      "inst_5d": 4690.0,
+      "ret_5d": 2.22,
+      "drawdown": -11.68,
+      "entry_price": 48400,
+      "stop_loss": 45560,
+      "target_price": 54090,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 5.9,
+      "reasons": [
+        "RSI 62 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "Stoch 59 안전",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
     },
     {
       "ticker": "000400",
@@ -3433,6 +3733,281 @@
       "overheat_flags": [
         "5일 +26% 급등"
       ]
+    },
+    {
+      "ticker": "105840",
+      "name": "우진",
+      "grade": "관찰",
+      "total_score": 46.8,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 17,
+        "flow": 7,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 26200,
+      "price_change": -2.06,
+      "rsi": 56.68,
+      "adx": 28.62,
+      "stoch_k": 49.76,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.59,
+      "foreign_5d": -22460.0,
+      "inst_5d": 13285.0,
+      "ret_5d": -0.76,
+      "drawdown": -12.96,
+      "entry_price": 26200,
+      "stop_loss": 25330,
+      "target_price": 27950,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 3.3,
+      "reasons": [
+        "RSI 57 최적",
+        "추세 만점",
+        "Stoch 50 안전",
+        "기관 순매수",
+        "ADX 29 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "476060",
+      "name": "온코닉테라퓨틱스",
+      "grade": "관찰",
+      "total_score": 46.8,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P1_거래량폭발,P7_VWAP이탈"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 11,
+        "flow": 8,
+        "safety": 7,
+        "overheat": 4
+      },
+      "close": 23050,
+      "price_change": -12.36,
+      "rsi": 61.07,
+      "adx": 37.54,
+      "stoch_k": 78.3,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.86,
+      "foreign_5d": 34854.0,
+      "inst_5d": -10050.0,
+      "ret_5d": 22.02,
+      "drawdown": -20.24,
+      "entry_price": 23050,
+      "stop_loss": 21440,
+      "target_price": 26280,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 61 적정",
+        "추세 만점",
+        "외인 순매수",
+        "⚠ 5일 +22% 급등"
+      ],
+      "overheat_flags": [
+        "5일 +22% 급등"
+      ]
+    },
+    {
+      "ticker": "161890",
+      "name": "한국콜마",
+      "grade": "관찰",
+      "total_score": 46.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.8,
+        "tech": 19,
+        "flow": 8,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 75000,
+      "price_change": 4.75,
+      "rsi": 68.68,
+      "adx": 28.84,
+      "stoch_k": 62.81,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.95,
+      "foreign_5d": 13474100100.0,
+      "inst_5d": -5417209500.0,
+      "ret_5d": 1.76,
+      "drawdown": -32.25,
+      "entry_price": 75000,
+      "stop_loss": 69750,
+      "target_price": 85500,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 69 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "외인 순매수",
+        "ADX 29 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "354320",
+      "name": "알멕",
+      "grade": "관찰",
+      "total_score": 46.0,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 11,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 52900,
+      "price_change": -5.7,
+      "rsi": 45.37,
+      "adx": 34.12,
+      "stoch_k": 15.06,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.04,
+      "foreign_5d": 21385.0,
+      "inst_5d": 7699.0,
+      "ret_5d": -19.36,
+      "drawdown": -29.75,
+      "entry_price": 52900,
+      "stop_loss": 61750,
+      "target_price": 56600,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -16.7,
+      "reasons": [
+        "RSI 45 최적",
+        "MA60 위",
+        "외인+기관 동시매수",
+        "ADX 34 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "023160",
+      "name": "태광",
+      "grade": "관찰",
+      "total_score": 46.0,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 15,
+        "flow": 8,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 28100,
+      "price_change": -3.1,
+      "rsi": 50.49,
+      "adx": 28.59,
+      "stoch_k": 56.39,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.42,
+      "foreign_5d": 28535.0,
+      "inst_5d": -45388.0,
+      "ret_5d": -10.22,
+      "drawdown": -13.0,
+      "entry_price": 28100,
+      "stop_loss": 27980,
+      "target_price": 28340,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 0.4,
+      "reasons": [
+        "RSI 50 최적",
+        "MA60 위",
+        "Stoch 56 안전",
+        "외인 순매수",
+        "ADX 29 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "214320",
+      "name": "이노션",
+      "grade": "관찰",
+      "total_score": 45.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 15,
+        "flow": 8,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 20000,
+      "price_change": -1.23,
+      "rsi": 58.07,
+      "adx": 30.11,
+      "stoch_k": 77.94,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.63,
+      "foreign_5d": 27871.0,
+      "inst_5d": -42382.0,
+      "ret_5d": -0.99,
+      "drawdown": -8.68,
+      "entry_price": 20000,
+      "stop_loss": 19260,
+      "target_price": 21470,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 3.7,
+      "reasons": [
+        "RSI 58 최적",
+        "추세 만점",
+        "외인 순매수",
+        "ADX 30 강추세"
+      ],
+      "overheat_flags": []
     },
     {
       "ticker": "052690",
@@ -3531,6 +4106,238 @@
       "overheat_flags": []
     },
     {
+      "ticker": "004800",
+      "name": "효성",
+      "grade": "관찰",
+      "total_score": 44.7,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 15,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 7
+      },
+      "close": 174700,
+      "price_change": 1.1,
+      "rsi": 67.62,
+      "adx": 43.11,
+      "stoch_k": 91.25,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.92,
+      "foreign_5d": 5327082300.0,
+      "inst_5d": 3836025350.0,
+      "ret_5d": 6.98,
+      "drawdown": -1.63,
+      "entry_price": 169460,
+      "stop_loss": 162470,
+      "target_price": 183440,
+      "entry_condition": "Stoch 91→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "RSI 68 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "⚠ Stoch 91 극과열"
+      ],
+      "overheat_flags": [
+        "Stoch 91 극과열"
+      ]
+    },
+    {
+      "ticker": "031210",
+      "name": "서울보증보험",
+      "grade": "관찰",
+      "total_score": 44.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.2,
+        "tech": 15,
+        "flow": 8,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 59400,
+      "price_change": 5.13,
+      "rsi": 65.64,
+      "adx": 43.08,
+      "stoch_k": 55.64,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.79,
+      "foreign_5d": 3804390700.0,
+      "inst_5d": -4537355700.0,
+      "ret_5d": 0.85,
+      "drawdown": -8.33,
+      "entry_price": 59400,
+      "stop_loss": 55240,
+      "target_price": 67720,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 66 적정",
+        "추세 만점",
+        "Stoch 56 안전",
+        "외인 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "032190",
+      "name": "다우데이타",
+      "grade": "관찰",
+      "total_score": 44.2,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 15,
+        "flow": 7,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 27550,
+      "price_change": -3.67,
+      "rsi": 56.32,
+      "adx": 34.43,
+      "stoch_k": 70.07,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.55,
+      "foreign_5d": -11103.0,
+      "inst_5d": 100787.0,
+      "ret_5d": 0.0,
+      "drawdown": -12.4,
+      "entry_price": 27550,
+      "stop_loss": 26580,
+      "target_price": 29480,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 3.5,
+      "reasons": [
+        "RSI 56 최적",
+        "추세 만점",
+        "기관 순매수",
+        "ADX 34 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "192650",
+      "name": "드림텍",
+      "grade": "관찰",
+      "total_score": 44.2,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 15,
+        "flow": 7,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 7940,
+      "price_change": -1.85,
+      "rsi": 51.33,
+      "adx": 31.14,
+      "stoch_k": 40.78,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.4,
+      "foreign_5d": -6224.0,
+      "inst_5d": 38257.0,
+      "ret_5d": -4.45,
+      "drawdown": -12.94,
+      "entry_price": 7940,
+      "stop_loss": 7890,
+      "target_price": 8040,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 0.6,
+      "reasons": [
+        "RSI 51 최적",
+        "MA60 위",
+        "Stoch 41 안전",
+        "기관 순매수",
+        "ADX 31 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "004000",
+      "name": "롯데정밀화학",
+      "grade": "관찰",
+      "total_score": 43.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.8,
+        "tech": 11,
+        "flow": 15,
+        "safety": 10,
+        "overheat": 4
+      },
+      "close": 50900,
+      "price_change": -0.97,
+      "rsi": 61.68,
+      "adx": 32.5,
+      "stoch_k": 88.41,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.83,
+      "foreign_5d": 24874.0,
+      "inst_5d": 13176.0,
+      "ret_5d": 3.25,
+      "drawdown": -3.05,
+      "entry_price": 49370,
+      "stop_loss": 47890,
+      "target_price": 52330,
+      "entry_condition": "Stoch 88→70 이하 냉각 시",
+      "risk_pct": 3.0,
+      "reasons": [
+        "RSI 62 적정",
+        "추세 만점",
+        "외인+기관 동시매수",
+        "ADX 32 강추세",
+        "⚠ Stoch 88 과열"
+      ],
+      "overheat_flags": [
+        "Stoch 88 과열"
+      ]
+    },
+    {
       "ticker": "326030",
       "name": "SK바이오팜",
       "grade": "관찰",
@@ -3579,48 +4386,58 @@
       ]
     },
     {
-      "ticker": "030530",
-      "name": "원익홀딩스",
+      "ticker": "180640",
+      "name": "한진칼",
       "grade": "관찰",
       "total_score": 43.6,
-      "n_sources": 1,
+      "n_sources": 2,
       "sources": [
-        "퀀텀"
+        "세력감지",
+        "이벤트"
       ],
       "source_details": [
-        "Kill(R:R 1.8)"
+        "세력포착 P3_BB스퀴즈,P7_VWAP이탈",
+        "배당"
       ],
       "score_breakdown": {
-        "multi": 0,
-        "individual": 13.5,
-        "tech": 14,
-        "flow": 0,
-        "safety": 6,
-        "overheat": 0
+        "multi": 12,
+        "individual": 7.5,
+        "tech": 11,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 19
       },
-      "close": 36350,
-      "price_change": -1.09,
-      "rsi": 46.28,
-      "adx": 41.26,
-      "stoch_k": 28.72,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 0.36,
-      "foreign_5d": -4846790775.0,
-      "inst_5d": -180410725.0,
-      "ret_5d": -0.41,
-      "drawdown": -28.16,
-      "entry_price": 36350,
-      "stop_loss": 37200,
-      "target_price": 38890,
-      "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -2.3,
+      "close": 172500,
+      "price_change": -0.29,
+      "rsi": 80.71,
+      "adx": 54.64,
+      "stoch_k": 95.04,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 1.01,
+      "foreign_5d": 25260185700.0,
+      "inst_5d": 6969423300.0,
+      "ret_5d": 18.23,
+      "drawdown": -1.93,
+      "entry_price": 167320,
+      "stop_loss": 160420,
+      "target_price": 181110,
+      "entry_condition": "Stoch 95→70 이하 냉각 시",
+      "risk_pct": 4.1,
       "reasons": [
-        "RSI 46 최적",
+        "2중 시그널",
+        "추세 만점",
         "MACD 상승전환",
-        "⚠ 외인+기관 동시매도"
+        "외인+기관 동시매수",
+        "⚠ RSI 81 과매수",
+        "⚠ Stoch 95 극과열",
+        "⚠ 5일 +18% 급등"
       ],
-      "overheat_flags": []
+      "overheat_flags": [
+        "RSI 81 과매수",
+        "Stoch 95 극과열",
+        "5일 +18% 급등"
+      ]
     },
     {
       "ticker": "371950",
@@ -3673,46 +4490,326 @@
       ]
     },
     {
-      "ticker": "214150",
-      "name": "클래시스",
-      "grade": "보류",
-      "total_score": 39.0,
+      "ticker": "195870",
+      "name": "해성디에스",
+      "grade": "관찰",
+      "total_score": 42.9,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P1_거래량폭발,P2_수급반전"
+        "배당"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 8,
-        "flow": 0,
+        "individual": 2.0,
+        "tech": 17,
+        "flow": 8,
+        "safety": 10,
+        "overheat": 4
+      },
+      "close": 64900,
+      "price_change": -0.92,
+      "rsi": 58.95,
+      "adx": 23.51,
+      "stoch_k": 81.53,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.77,
+      "foreign_5d": 46832.0,
+      "inst_5d": -115163.0,
+      "ret_5d": 8.35,
+      "drawdown": -3.85,
+      "entry_price": 64900,
+      "stop_loss": 60800,
+      "target_price": 73100,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 6.3,
+      "reasons": [
+        "RSI 59 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "외인 순매수",
+        "ADX 24 강추세",
+        "⚠ Stoch 82 과열"
+      ],
+      "overheat_flags": [
+        "Stoch 82 과열"
+      ]
+    },
+    {
+      "ticker": "003090",
+      "name": "대웅",
+      "grade": "관찰",
+      "total_score": 42.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 17,
+        "flow": 5,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 27450,
+      "price_change": -5.02,
+      "rsi": 59.75,
+      "adx": 44.37,
+      "stoch_k": 69.45,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.72,
+      "foreign_5d": -4259879000.0,
+      "inst_5d": 2292984425.0,
+      "ret_5d": 1.29,
+      "drawdown": -10.29,
+      "entry_price": 27450,
+      "stop_loss": 25530,
+      "target_price": 31290,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 60 최적",
+        "추세 만점",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "000880",
+      "name": "한화",
+      "grade": "관찰",
+      "total_score": 42.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 17,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 11
+      },
+      "close": 139200,
+      "price_change": 0.07,
+      "rsi": 68.77,
+      "adx": 40.34,
+      "stoch_k": 90.45,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 1.06,
+      "foreign_5d": 72917597800.0,
+      "inst_5d": 7900433200.0,
+      "ret_5d": 16.19,
+      "drawdown": -3.4,
+      "entry_price": 135020,
+      "stop_loss": 129460,
+      "target_price": 146150,
+      "entry_condition": "Stoch 90→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "RSI 69 적정",
+        "추세 만점",
+        "TRIX 골든크로스",
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "⚠ Stoch 90 극과열",
+        "⚠ 5일 +16% 급등"
+      ],
+      "overheat_flags": [
+        "Stoch 90 극과열",
+        "5일 +16% 급등"
+      ]
+    },
+    {
+      "ticker": "039490",
+      "name": "키움증권",
+      "grade": "관찰",
+      "total_score": 41.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.8,
+        "tech": 13,
+        "flow": 8,
+        "safety": 9,
+        "overheat": 0
+      },
+      "close": 471500,
+      "price_change": 0.86,
+      "rsi": 63.76,
+      "adx": 36.12,
+      "stoch_k": 58.6,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.72,
+      "foreign_5d": 31234403750.0,
+      "inst_5d": -24558474500.0,
+      "ret_5d": -3.28,
+      "drawdown": -8.8,
+      "entry_price": 471500,
+      "stop_loss": 438500,
+      "target_price": 537510,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 64 적정",
+        "추세 만점",
+        "Stoch 59 안전",
+        "외인 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "078930",
+      "name": "GS",
+      "grade": "관찰",
+      "total_score": 40.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 17,
+        "flow": 5,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 70200,
+      "price_change": -4.23,
+      "rsi": 55.61,
+      "adx": 48.47,
+      "stoch_k": 46.43,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.54,
+      "foreign_5d": -18582561050.0,
+      "inst_5d": 2352454550.0,
+      "ret_5d": -4.1,
+      "drawdown": -13.33,
+      "entry_price": 70200,
+      "stop_loss": 68280,
+      "target_price": 74050,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 2.7,
+      "reasons": [
+        "RSI 56 최적",
+        "추세 만점",
+        "Stoch 46 안전",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "272290",
+      "name": "이녹스첨단소재",
+      "grade": "관찰",
+      "total_score": 40.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 13,
+        "flow": 8,
         "safety": 8,
         "overheat": 0
       },
-      "close": 58900,
-      "price_change": -1.67,
-      "rsi": 39.8,
-      "adx": 26.36,
-      "stoch_k": 14.3,
-      "above_ma60": false,
+      "close": 35350,
+      "price_change": -0.98,
+      "rsi": 55.27,
+      "adx": 23.74,
+      "stoch_k": 28.86,
+      "above_ma60": true,
       "above_ma20": false,
-      "bb_position": -0.0,
-      "foreign_5d": -25385155200.0,
-      "inst_5d": -25853820100.0,
-      "ret_5d": -16.34,
-      "drawdown": -24.1,
-      "entry_price": 58900,
-      "stop_loss": 66910,
-      "target_price": 63020,
+      "bb_position": 0.44,
+      "foreign_5d": 46524.0,
+      "inst_5d": -4911.0,
+      "ret_5d": -4.2,
+      "drawdown": -20.38,
+      "entry_price": 35350,
+      "stop_loss": 35340,
+      "target_price": 35370,
       "entry_condition": "현재가 부근 매수 가능",
-      "risk_pct": -13.6,
+      "risk_pct": 0.0,
       "reasons": [
-        "RSI 40 최적",
-        "ADX 26 강추세",
-        "⚠ 외인+기관 동시매도"
+        "RSI 55 최적",
+        "MA60 위",
+        "외인 순매수",
+        "ADX 24 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "240810",
+      "name": "원익IPS",
+      "grade": "보류",
+      "total_score": 39.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.4,
+        "tech": 17,
+        "flow": 5,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 126500,
+      "price_change": 10.19,
+      "rsi": 61.28,
+      "adx": 48.12,
+      "stoch_k": 62.01,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.9,
+      "foreign_5d": -41154040350.0,
+      "inst_5d": 14211257000.0,
+      "ret_5d": 8.21,
+      "drawdown": -5.17,
+      "entry_price": 126500,
+      "stop_loss": 117640,
+      "target_price": 144210,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 61 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "기관 순매수"
       ],
       "overheat_flags": []
     },
@@ -3768,6 +4865,142 @@
       ]
     },
     {
+      "ticker": "086520",
+      "name": "에코프로",
+      "grade": "보류",
+      "total_score": 39.0,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.0,
+        "tech": 11,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 4
+      },
+      "close": 184200,
+      "price_change": 5.14,
+      "rsi": 71.24,
+      "adx": 59.74,
+      "stoch_k": 73.14,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.96,
+      "foreign_5d": 67752577400.0,
+      "inst_5d": 29510837550.0,
+      "ret_5d": 6.91,
+      "drawdown": -3.05,
+      "entry_price": 178670,
+      "stop_loss": 171310,
+      "target_price": 193400,
+      "entry_condition": "RSI 71→65 이하 조정 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "⚠ RSI 71 주의"
+      ],
+      "overheat_flags": [
+        "RSI 71 주의"
+      ]
+    },
+    {
+      "ticker": "214150",
+      "name": "클래시스",
+      "grade": "보류",
+      "total_score": 39.0,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P1_거래량폭발,P2_수급반전"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 8,
+        "flow": 0,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 58900,
+      "price_change": -1.67,
+      "rsi": 39.8,
+      "adx": 26.36,
+      "stoch_k": 14.3,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": -0.0,
+      "foreign_5d": -25385155200.0,
+      "inst_5d": -25853820100.0,
+      "ret_5d": -16.34,
+      "drawdown": -24.1,
+      "entry_price": 58900,
+      "stop_loss": 66910,
+      "target_price": 63020,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -13.6,
+      "reasons": [
+        "RSI 40 최적",
+        "ADX 26 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "450080",
+      "name": "에코프로머티",
+      "grade": "보류",
+      "total_score": 39.0,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 19,
+        "flow": 5,
+        "safety": 4,
+        "overheat": 0
+      },
+      "close": 70200,
+      "price_change": 0.43,
+      "rsi": 57.15,
+      "adx": 48.53,
+      "stoch_k": 71.81,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.71,
+      "foreign_5d": -26790474750.0,
+      "inst_5d": 3755877000.0,
+      "ret_5d": 2.33,
+      "drawdown": -31.71,
+      "entry_price": 70200,
+      "stop_loss": 66170,
+      "target_price": 78250,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 5.7,
+      "reasons": [
+        "RSI 57 최적",
+        "추세 만점",
+        "MACD 상승전환",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "047050",
       "name": "포스코인터내셔널",
       "grade": "보류",
@@ -3811,6 +5044,101 @@
       ],
       "overheat_flags": [
         "RSI 71 주의"
+      ]
+    },
+    {
+      "ticker": "256840",
+      "name": "한국비엔씨",
+      "grade": "보류",
+      "total_score": 36.4,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 7,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 4605,
+      "price_change": -2.64,
+      "rsi": 41.65,
+      "adx": 27.08,
+      "stoch_k": 22.06,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 0.07,
+      "foreign_5d": -25230.0,
+      "inst_5d": 128.0,
+      "ret_5d": -4.26,
+      "drawdown": -27.02,
+      "entry_price": 4605,
+      "stop_loss": 4680,
+      "target_price": 4930,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -1.6,
+      "reasons": [
+        "RSI 42 최적",
+        "기관 순매수",
+        "ADX 27 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "034220",
+      "name": "LG디스플레이",
+      "grade": "보류",
+      "total_score": 36.4,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P1_거래량폭발,P3_BB스퀴즈"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 11,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 19
+      },
+      "close": 15850,
+      "price_change": 6.95,
+      "rsi": 80.57,
+      "adx": 48.3,
+      "stoch_k": 92.54,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 1.16,
+      "foreign_5d": 99816365900.0,
+      "inst_5d": 28790562820.0,
+      "ret_5d": 29.07,
+      "drawdown": -1.25,
+      "entry_price": 15370,
+      "stop_loss": 14740,
+      "target_price": 16630,
+      "entry_condition": "Stoch 93→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "⚠ RSI 81 과매수",
+        "⚠ Stoch 93 극과열",
+        "⚠ 5일 +29% 급등"
+      ],
+      "overheat_flags": [
+        "RSI 81 과매수",
+        "Stoch 93 극과열",
+        "5일 +29% 급등"
       ]
     },
     {
@@ -3865,106 +5193,95 @@
       ]
     },
     {
-      "ticker": "180640",
-      "name": "한진칼",
+      "ticker": "005420",
+      "name": "코스모화학",
       "grade": "보류",
-      "total_score": 36.4,
+      "total_score": 35.6,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+        "매출액또는손익구조"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 11,
-        "flow": 15,
+        "individual": 2.4,
+        "tech": 15,
+        "flow": 7,
         "safety": 7,
-        "overheat": 19
+        "overheat": 4
       },
-      "close": 172500,
-      "price_change": -0.29,
-      "rsi": 80.71,
-      "adx": 54.64,
-      "stoch_k": 95.04,
+      "close": 17190,
+      "price_change": -3.1,
+      "rsi": 55.32,
+      "adx": 40.11,
+      "stoch_k": 81.03,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 1.01,
-      "foreign_5d": 25260185700.0,
-      "inst_5d": 6969423300.0,
-      "ret_5d": 18.23,
-      "drawdown": -1.93,
-      "entry_price": 167320,
-      "stop_loss": 160420,
-      "target_price": 181110,
-      "entry_condition": "Stoch 95→70 이하 냉각 시",
-      "risk_pct": 4.1,
+      "bb_position": 0.65,
+      "foreign_5d": -34807.0,
+      "inst_5d": 7432.0,
+      "ret_5d": -0.81,
+      "drawdown": -21.51,
+      "entry_price": 17190,
+      "stop_loss": 16510,
+      "target_price": 18540,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 4.0,
       "reasons": [
+        "RSI 55 최적",
         "추세 만점",
-        "MACD 상승전환",
-        "외인+기관 동시매수",
-        "⚠ RSI 81 과매수",
-        "⚠ Stoch 95 극과열",
-        "⚠ 5일 +18% 급등"
+        "기관 순매수",
+        "⚠ Stoch 81 과열"
       ],
       "overheat_flags": [
-        "RSI 81 과매수",
-        "Stoch 95 극과열",
-        "5일 +18% 급등"
+        "Stoch 81 과열"
       ]
     },
     {
-      "ticker": "034220",
-      "name": "LG디스플레이",
+      "ticker": "084690",
+      "name": "대상홀딩스",
       "grade": "보류",
-      "total_score": 36.4,
+      "total_score": 35.1,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P1_거래량폭발,P3_BB스퀴즈"
+        "배당"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 11,
-        "flow": 15,
-        "safety": 7,
-        "overheat": 19
+        "individual": 2.0,
+        "tech": 19,
+        "flow": 2,
+        "safety": 4,
+        "overheat": 0
       },
-      "close": 15850,
-      "price_change": 6.95,
-      "rsi": 80.57,
-      "adx": 48.3,
-      "stoch_k": 92.54,
+      "close": 10260,
+      "price_change": -3.93,
+      "rsi": 52.56,
+      "adx": 55.65,
+      "stoch_k": 62.27,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 1.16,
-      "foreign_5d": 99816365900.0,
-      "inst_5d": 28790562820.0,
-      "ret_5d": 29.07,
-      "drawdown": -1.25,
-      "entry_price": 15370,
-      "stop_loss": 14740,
-      "target_price": 16630,
-      "entry_condition": "Stoch 93→70 이하 냉각 시",
-      "risk_pct": 4.1,
+      "bb_position": 0.56,
+      "foreign_5d": -10320.0,
+      "inst_5d": -62.0,
+      "ret_5d": -3.21,
+      "drawdown": -44.9,
+      "entry_price": 10260,
+      "stop_loss": 9960,
+      "target_price": 10870,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 2.9,
       "reasons": [
+        "RSI 53 최적",
         "추세 만점",
-        "MACD 상승전환",
-        "외인+기관 동시매수",
-        "⚠ RSI 81 과매수",
-        "⚠ Stoch 93 극과열",
-        "⚠ 5일 +29% 급등"
+        "⚠ 외인+기관 동시매도"
       ],
-      "overheat_flags": [
-        "RSI 81 과매수",
-        "Stoch 93 극과열",
-        "5일 +29% 급등"
-      ]
+      "overheat_flags": []
     },
     {
       "ticker": "005850",
@@ -4015,6 +5332,198 @@
         "RSI 71 주의",
         "Stoch 90 과열",
         "5일 +28% 급등"
+      ]
+    },
+    {
+      "ticker": "093520",
+      "name": "매커스",
+      "grade": "보류",
+      "total_score": 35.1,
+      "n_sources": 2,
+      "sources": [
+        "세력감지",
+        "이벤트"
+      ],
+      "source_details": [
+        "세력포착 P3_BB스퀴즈,P7_VWAP이탈",
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 12,
+        "individual": 7.0,
+        "tech": 11,
+        "flow": 7,
+        "safety": 9,
+        "overheat": 19
+      },
+      "close": 33300,
+      "price_change": 10.45,
+      "rsi": 75.61,
+      "adx": 44.53,
+      "stoch_k": 91.42,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 1.12,
+      "foreign_5d": -6500.0,
+      "inst_5d": 3085.0,
+      "ret_5d": 34.55,
+      "drawdown": -1.62,
+      "entry_price": 32300,
+      "stop_loss": 30970,
+      "target_price": 34960,
+      "entry_condition": "Stoch 91→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "2중 시그널",
+        "추세 만점",
+        "MACD 상승전환",
+        "기관 순매수",
+        "⚠ RSI 76 과매수",
+        "⚠ Stoch 91 극과열",
+        "⚠ 5일 +35% 급등"
+      ],
+      "overheat_flags": [
+        "RSI 76 과매수",
+        "Stoch 91 극과열",
+        "5일 +35% 급등"
+      ]
+    },
+    {
+      "ticker": "096530",
+      "name": "씨젠",
+      "grade": "보류",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 15,
+        "flow": 2,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 26700,
+      "price_change": -1.11,
+      "rsi": 50.74,
+      "adx": 32.67,
+      "stoch_k": 36.04,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.29,
+      "foreign_5d": -88150.0,
+      "inst_5d": -2025.0,
+      "ret_5d": -6.15,
+      "drawdown": -27.15,
+      "entry_price": 26700,
+      "stop_loss": 26720,
+      "target_price": 28570,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -0.1,
+      "reasons": [
+        "RSI 51 최적",
+        "MA60 위",
+        "Stoch 36 안전",
+        "ADX 33 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "131290",
+      "name": "티에스이",
+      "grade": "보류",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.4,
+        "tech": 11,
+        "flow": 7,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 93200,
+      "price_change": 1.3,
+      "rsi": 64.68,
+      "adx": 51.03,
+      "stoch_k": 74.23,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.8,
+      "foreign_5d": -23022.0,
+      "inst_5d": 4768.0,
+      "ret_5d": -2.2,
+      "drawdown": -4.99,
+      "entry_price": 93200,
+      "stop_loss": 86680,
+      "target_price": 106250,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 65 적정",
+        "추세 만점",
+        "기관 순매수"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "047810",
+      "name": "한국항공우주",
+      "grade": "보류",
+      "total_score": 33.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.8,
+        "tech": 13,
+        "flow": 8,
+        "safety": 7,
+        "overheat": 4
+      },
+      "close": 183900,
+      "price_change": 0.77,
+      "rsi": 68.04,
+      "adx": 45.48,
+      "stoch_k": 87.52,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.93,
+      "foreign_5d": 2962650000.0,
+      "inst_5d": -15840697100.0,
+      "ret_5d": 4.85,
+      "drawdown": -2.44,
+      "entry_price": 178380,
+      "stop_loss": 171030,
+      "target_price": 193090,
+      "entry_condition": "Stoch 88→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "RSI 68 적정",
+        "추세 만점",
+        "MACD 상승전환",
+        "외인 순매수",
+        "⚠ Stoch 88 과열"
+      ],
+      "overheat_flags": [
+        "Stoch 88 과열"
       ]
     },
     {
@@ -4069,6 +5578,143 @@
       ]
     },
     {
+      "ticker": "098070",
+      "name": "한텍",
+      "grade": "보류",
+      "total_score": 32.5,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 15,
+        "flow": 2,
+        "safety": 6,
+        "overheat": 0
+      },
+      "close": 36350,
+      "price_change": -3.2,
+      "rsi": 48.81,
+      "adx": 13.86,
+      "stoch_k": 59.49,
+      "above_ma60": true,
+      "above_ma20": false,
+      "bb_position": 0.36,
+      "foreign_5d": -8704.0,
+      "inst_5d": -4682.0,
+      "ret_5d": -4.84,
+      "drawdown": -33.91,
+      "entry_price": 36350,
+      "stop_loss": 36250,
+      "target_price": 36550,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 0.3,
+      "reasons": [
+        "RSI 49 최적",
+        "MA60 위",
+        "Stoch 59 안전",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "000640",
+      "name": "동아쏘시오홀딩스",
+      "grade": "보류",
+      "total_score": 31.7,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.4,
+        "tech": 11,
+        "flow": 7,
+        "safety": 9,
+        "overheat": 4
+      },
+      "close": 119600,
+      "price_change": -0.83,
+      "rsi": 68.27,
+      "adx": 43.96,
+      "stoch_k": 87.01,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.88,
+      "foreign_5d": -2969.0,
+      "inst_5d": 8252.0,
+      "ret_5d": 3.46,
+      "drawdown": -4.7,
+      "entry_price": 116010,
+      "stop_loss": 111230,
+      "target_price": 125570,
+      "entry_condition": "Stoch 87→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "RSI 68 적정",
+        "추세 만점",
+        "기관 순매수",
+        "⚠ Stoch 87 과열"
+      ],
+      "overheat_flags": [
+        "Stoch 87 과열"
+      ]
+    },
+    {
+      "ticker": "071320",
+      "name": "지역난방공사",
+      "grade": "보류",
+      "total_score": 31.2,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 8,
+        "overheat": 0
+      },
+      "close": 91600,
+      "price_change": -0.65,
+      "rsi": 37.45,
+      "adx": 30.7,
+      "stoch_k": 7.28,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 0.24,
+      "foreign_5d": -5033.0,
+      "inst_5d": -2135.0,
+      "ret_5d": 0.0,
+      "drawdown": -21.51,
+      "entry_price": 91600,
+      "stop_loss": 96650,
+      "target_price": 98010,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -5.5,
+      "reasons": [
+        "RSI 37 최적",
+        "MACD 상승전환",
+        "ADX 31 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "006340",
       "name": "대원전선",
       "grade": "보류",
@@ -4120,55 +5766,93 @@
       ]
     },
     {
-      "ticker": "093520",
-      "name": "매커스",
+      "ticker": "001720",
+      "name": "신영증권",
       "grade": "보류",
-      "total_score": 28.6,
+      "total_score": 30.4,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+        "배당"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 11,
-        "flow": 7,
-        "safety": 9,
-        "overheat": 19
+        "individual": 1.4,
+        "tech": 15,
+        "flow": 0,
+        "safety": 7,
+        "overheat": 0
       },
-      "close": 33300,
-      "price_change": 10.45,
-      "rsi": 75.61,
-      "adx": 44.53,
-      "stoch_k": 91.42,
+      "close": 233000,
+      "price_change": 0.0,
+      "rsi": 67.71,
+      "adx": 53.56,
+      "stoch_k": 62.86,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 1.12,
-      "foreign_5d": -6500.0,
-      "inst_5d": 3085.0,
-      "ret_5d": 34.55,
-      "drawdown": -1.62,
-      "entry_price": 32300,
-      "stop_loss": 30970,
-      "target_price": 34960,
-      "entry_condition": "Stoch 91→70 이하 냉각 시",
-      "risk_pct": 4.1,
+      "bb_position": 0.77,
+      "foreign_5d": -28153221000.0,
+      "inst_5d": -2931099000.0,
+      "ret_5d": -3.12,
+      "drawdown": -14.34,
+      "entry_price": 233000,
+      "stop_loss": 216690,
+      "target_price": 265620,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
       "reasons": [
+        "RSI 68 적정",
         "추세 만점",
-        "MACD 상승전환",
-        "기관 순매수",
-        "⚠ RSI 76 과매수",
-        "⚠ Stoch 91 극과열",
-        "⚠ 5일 +35% 급등"
+        "⚠ 외인+기관 동시매도"
       ],
-      "overheat_flags": [
-        "RSI 76 과매수",
-        "Stoch 91 극과열",
-        "5일 +35% 급등"
-      ]
+      "overheat_flags": []
+    },
+    {
+      "ticker": "137310",
+      "name": "에스디바이오센서",
+      "grade": "보류",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 14,
+        "flow": 0,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 8550,
+      "price_change": -4.47,
+      "rsi": 41.68,
+      "adx": 26.06,
+      "stoch_k": 48.91,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 0.01,
+      "foreign_5d": -1796210720.0,
+      "inst_5d": -5194360.0,
+      "ret_5d": -5.73,
+      "drawdown": -36.9,
+      "entry_price": 8550,
+      "stop_loss": 8760,
+      "target_price": 9150,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -2.5,
+      "reasons": [
+        "RSI 42 최적",
+        "Stoch 49 안전",
+        "ADX 26 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
     },
     {
       "ticker": "103590",
@@ -4217,6 +5901,150 @@
       "overheat_flags": [
         "RSI 75 과매수",
         "5일 +25% 급등"
+      ]
+    },
+    {
+      "ticker": "016610",
+      "name": "DB증권",
+      "grade": "보류",
+      "total_score": 28.6,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 0.0,
+        "tech": 15,
+        "flow": 2,
+        "safety": 5,
+        "overheat": 0
+      },
+      "close": 16190,
+      "price_change": 2.53,
+      "rsi": 66.56,
+      "adx": 49.73,
+      "stoch_k": 50.45,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.79,
+      "foreign_5d": -120222.0,
+      "inst_5d": -2505.0,
+      "ret_5d": -7.7,
+      "drawdown": -16.33,
+      "entry_price": 16190,
+      "stop_loss": 15060,
+      "target_price": 18460,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 67 적정",
+        "추세 만점",
+        "Stoch 50 안전",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "298040",
+      "name": "효성중공업",
+      "grade": "보류",
+      "total_score": 27.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.0,
+        "tech": 11,
+        "flow": 15,
+        "safety": 9,
+        "overheat": 15
+      },
+      "close": 2898000,
+      "price_change": 4.89,
+      "rsi": 74.28,
+      "adx": 35.58,
+      "stoch_k": 90.57,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 1.05,
+      "foreign_5d": 139375377500.0,
+      "inst_5d": 24022984000.0,
+      "ret_5d": 18.14,
+      "drawdown": -1.46,
+      "entry_price": 2811060,
+      "stop_loss": 2695140,
+      "target_price": 3042900,
+      "entry_condition": "Stoch 91→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "MACD 상승전환",
+        "외인+기관 동시매수",
+        "⚠ RSI 74 주의",
+        "⚠ Stoch 91 극과열",
+        "⚠ 5일 +18% 급등"
+      ],
+      "overheat_flags": [
+        "RSI 74 주의",
+        "Stoch 91 극과열",
+        "5일 +18% 급등"
+      ]
+    },
+    {
+      "ticker": "091700",
+      "name": "파트론",
+      "grade": "보류",
+      "total_score": 27.3,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 7,
+        "flow": 8,
+        "safety": 7,
+        "overheat": 15
+      },
+      "close": 8450,
+      "price_change": -1.29,
+      "rsi": 77.37,
+      "adx": 48.79,
+      "stoch_k": 92.85,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.98,
+      "foreign_5d": 100449.0,
+      "inst_5d": -22.0,
+      "ret_5d": 9.46,
+      "drawdown": -3.21,
+      "entry_price": 8200,
+      "stop_loss": 7860,
+      "target_price": 8880,
+      "entry_condition": "Stoch 93→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "외인 순매수",
+        "⚠ RSI 77 과매수",
+        "⚠ Stoch 93 극과열"
+      ],
+      "overheat_flags": [
+        "RSI 77 과매수",
+        "Stoch 93 극과열"
       ]
     },
     {
@@ -4271,102 +6099,142 @@
       ]
     },
     {
-      "ticker": "091700",
-      "name": "파트론",
+      "ticker": "009420",
+      "name": "한올바이오파마",
       "grade": "보류",
       "total_score": 27.3,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+        "자기주식처분"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 7,
-        "flow": 8,
-        "safety": 7,
-        "overheat": 15
+        "individual": 0.0,
+        "tech": 11,
+        "flow": 5,
+        "safety": 9,
+        "overheat": 4
       },
-      "close": 8450,
-      "price_change": -1.29,
-      "rsi": 77.37,
-      "adx": 48.79,
-      "stoch_k": 92.85,
+      "close": 61100,
+      "price_change": 0.49,
+      "rsi": 65.01,
+      "adx": 41.54,
+      "stoch_k": 84.41,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 0.98,
-      "foreign_5d": 100449.0,
-      "inst_5d": -22.0,
-      "ret_5d": 9.46,
-      "drawdown": -3.21,
-      "entry_price": 8200,
-      "stop_loss": 7860,
-      "target_price": 8880,
-      "entry_condition": "Stoch 93→70 이하 냉각 시",
-      "risk_pct": 4.1,
+      "bb_position": 0.92,
+      "foreign_5d": -3064986750.0,
+      "inst_5d": 11104298200.0,
+      "ret_5d": 8.33,
+      "drawdown": -4.53,
+      "entry_price": 61100,
+      "stop_loss": 56820,
+      "target_price": 69650,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
       "reasons": [
+        "RSI 65 적정",
         "추세 만점",
-        "외인 순매수",
-        "⚠ RSI 77 과매수",
-        "⚠ Stoch 93 극과열"
+        "기관 순매수",
+        "⚠ Stoch 84 과열"
       ],
       "overheat_flags": [
-        "RSI 77 과매수",
-        "Stoch 93 극과열"
+        "Stoch 84 과열"
       ]
     },
     {
-      "ticker": "003240",
-      "name": "태광산업",
+      "ticker": "088350",
+      "name": "한화생명",
       "grade": "보류",
-      "total_score": 26.0,
+      "total_score": 27.0,
       "n_sources": 1,
       "sources": [
-        "세력감지"
+        "이벤트"
       ],
       "source_details": [
-        "세력포착 P1_거래량폭발,P3_BB스퀴즈"
+        "매출액또는손익구조"
       ],
       "score_breakdown": {
         "multi": 0,
-        "individual": 14.0,
-        "tech": 11,
-        "flow": 7,
-        "safety": 7,
-        "overheat": 19
+        "individual": 1.8,
+        "tech": 15,
+        "flow": 0,
+        "safety": 4,
+        "overheat": 0
       },
-      "close": 1570000,
-      "price_change": 4.67,
-      "rsi": 86.48,
-      "adx": 63.54,
-      "stoch_k": 93.86,
+      "close": 5130,
+      "price_change": -0.97,
+      "rsi": 60.99,
+      "adx": 64.94,
+      "stoch_k": 43.17,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 1.13,
-      "foreign_5d": -135.0,
-      "inst_5d": 289.0,
-      "ret_5d": 41.31,
-      "drawdown": -3.92,
-      "entry_price": 1522900,
-      "stop_loss": 1460100,
-      "target_price": 1648500,
-      "entry_condition": "Stoch 94→70 이하 냉각 시",
-      "risk_pct": 4.1,
+      "bb_position": 0.71,
+      "foreign_5d": -52907136634.0,
+      "inst_5d": -29447251029.0,
+      "ret_5d": 0.98,
+      "drawdown": -32.14,
+      "entry_price": 5130,
+      "stop_loss": 4770,
+      "target_price": 5850,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
       "reasons": [
+        "RSI 61 적정",
         "추세 만점",
-        "MACD 상승전환",
+        "Stoch 43 안전",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "048410",
+      "name": "현대바이오",
+      "grade": "보류",
+      "total_score": 27.0,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.8,
+        "tech": 11,
+        "flow": 7,
+        "safety": 5,
+        "overheat": 4
+      },
+      "close": 16800,
+      "price_change": -11.86,
+      "rsi": 68.42,
+      "adx": 59.71,
+      "stoch_k": 77.41,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.82,
+      "foreign_5d": -155216.0,
+      "inst_5d": 26453.0,
+      "ret_5d": 22.27,
+      "drawdown": -21.86,
+      "entry_price": 16800,
+      "stop_loss": 15620,
+      "target_price": 19150,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": 7.0,
+      "reasons": [
+        "RSI 68 적정",
+        "추세 만점",
         "기관 순매수",
-        "⚠ RSI 86 과매수",
-        "⚠ Stoch 94 극과열",
-        "⚠ 5일 +41% 급등"
+        "⚠ 5일 +22% 급등"
       ],
       "overheat_flags": [
-        "RSI 86 과매수",
-        "Stoch 94 극과열",
-        "5일 +41% 급등"
+        "5일 +22% 급등"
       ]
     },
     {
@@ -4421,53 +6289,146 @@
       ]
     },
     {
-      "ticker": "010690",
-      "name": "화신",
+      "ticker": "003240",
+      "name": "태광산업",
       "grade": "보류",
-      "total_score": 24.7,
+      "total_score": 26.0,
       "n_sources": 1,
       "sources": [
         "세력감지"
       ],
       "source_details": [
-        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+        "세력포착 P1_거래량폭발,P3_BB스퀴즈"
       ],
       "score_breakdown": {
         "multi": 0,
         "individual": 14.0,
-        "tech": 7,
+        "tech": 11,
         "flow": 7,
         "safety": 7,
-        "overheat": 16
+        "overheat": 19
       },
-      "close": 13950,
-      "price_change": 0.94,
-      "rsi": 79.52,
-      "adx": 62.95,
-      "stoch_k": 88.41,
+      "close": 1570000,
+      "price_change": 4.67,
+      "rsi": 86.48,
+      "adx": 63.54,
+      "stoch_k": 93.86,
       "above_ma60": true,
       "above_ma20": true,
-      "bb_position": 0.96,
-      "foreign_5d": -209131.0,
-      "inst_5d": 174399.0,
-      "ret_5d": 20.36,
-      "drawdown": -3.73,
-      "entry_price": 13530,
-      "stop_loss": 12970,
-      "target_price": 14640,
-      "entry_condition": "Stoch 88→70 이하 냉각 시",
+      "bb_position": 1.13,
+      "foreign_5d": -135.0,
+      "inst_5d": 289.0,
+      "ret_5d": 41.31,
+      "drawdown": -3.92,
+      "entry_price": 1522900,
+      "stop_loss": 1460100,
+      "target_price": 1648500,
+      "entry_condition": "Stoch 94→70 이하 냉각 시",
       "risk_pct": 4.1,
       "reasons": [
         "추세 만점",
+        "MACD 상승전환",
         "기관 순매수",
-        "⚠ RSI 80 과매수",
-        "⚠ Stoch 88 과열",
-        "⚠ 5일 +20% 급등"
+        "⚠ RSI 86 과매수",
+        "⚠ Stoch 94 극과열",
+        "⚠ 5일 +41% 급등"
       ],
       "overheat_flags": [
-        "RSI 80 과매수",
-        "Stoch 88 과열",
-        "5일 +20% 급등"
+        "RSI 86 과매수",
+        "Stoch 94 극과열",
+        "5일 +41% 급등"
+      ]
+    },
+    {
+      "ticker": "042000",
+      "name": "카페24",
+      "grade": "보류",
+      "total_score": 25.2,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 8,
+        "flow": 2,
+        "safety": 7,
+        "overheat": 0
+      },
+      "close": 32550,
+      "price_change": -2.69,
+      "rsi": 43.47,
+      "adx": 20.82,
+      "stoch_k": 4.04,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 0.12,
+      "foreign_5d": -14773.0,
+      "inst_5d": -41893.0,
+      "ret_5d": -11.19,
+      "drawdown": -53.3,
+      "entry_price": 32550,
+      "stop_loss": 35280,
+      "target_price": 34830,
+      "entry_condition": "현재가 부근 매수 가능",
+      "risk_pct": -8.4,
+      "reasons": [
+        "RSI 43 최적",
+        "ADX 21 강추세",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "294870",
+      "name": "HDC현대산업개발",
+      "grade": "보류",
+      "total_score": 24.7,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 1.0,
+        "tech": 7,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 11
+      },
+      "close": 24400,
+      "price_change": 0.41,
+      "rsi": 71.28,
+      "adx": 50.54,
+      "stoch_k": 91.05,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.84,
+      "foreign_5d": 4534124500.0,
+      "inst_5d": 879017250.0,
+      "ret_5d": 3.83,
+      "drawdown": -12.39,
+      "entry_price": 23670,
+      "stop_loss": 22690,
+      "target_price": 25630,
+      "entry_condition": "Stoch 91→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "외인+기관 동시매수",
+        "⚠ RSI 71 주의",
+        "⚠ Stoch 91 극과열"
+      ],
+      "overheat_flags": [
+        "RSI 71 주의",
+        "Stoch 91 극과열"
       ]
     },
     {
@@ -4523,6 +6484,56 @@
       ]
     },
     {
+      "ticker": "010690",
+      "name": "화신",
+      "grade": "보류",
+      "total_score": 24.7,
+      "n_sources": 1,
+      "sources": [
+        "세력감지"
+      ],
+      "source_details": [
+        "세력포착 P3_BB스퀴즈,P7_VWAP이탈"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 14.0,
+        "tech": 7,
+        "flow": 7,
+        "safety": 7,
+        "overheat": 16
+      },
+      "close": 13950,
+      "price_change": 0.94,
+      "rsi": 79.52,
+      "adx": 62.95,
+      "stoch_k": 88.41,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.96,
+      "foreign_5d": -209131.0,
+      "inst_5d": 174399.0,
+      "ret_5d": 20.36,
+      "drawdown": -3.73,
+      "entry_price": 13530,
+      "stop_loss": 12970,
+      "target_price": 14640,
+      "entry_condition": "Stoch 88→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "기관 순매수",
+        "⚠ RSI 80 과매수",
+        "⚠ Stoch 88 과열",
+        "⚠ 5일 +20% 급등"
+      ],
+      "overheat_flags": [
+        "RSI 80 과매수",
+        "Stoch 88 과열",
+        "5일 +20% 급등"
+      ]
+    },
+    {
       "ticker": "012510",
       "name": "더존비즈온",
       "grade": "보류",
@@ -4571,6 +6582,54 @@
         "RSI 75 과매수",
         "Stoch 99 극과열",
         "5일 +30% 급등"
+      ]
+    },
+    {
+      "ticker": "171090",
+      "name": "선익시스템",
+      "grade": "보류",
+      "total_score": 22.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 0.0,
+        "tech": 7,
+        "flow": 15,
+        "safety": 7,
+        "overheat": 12
+      },
+      "close": 129800,
+      "price_change": 2.12,
+      "rsi": 77.14,
+      "adx": 60.66,
+      "stoch_k": 80.49,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.84,
+      "foreign_5d": 38095.0,
+      "inst_5d": 7690.0,
+      "ret_5d": 1.01,
+      "drawdown": -9.86,
+      "entry_price": 125910,
+      "stop_loss": 120710,
+      "target_price": 136300,
+      "entry_condition": "RSI 77→65 이하 조정 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "외인+기관 동시매수",
+        "⚠ RSI 77 과매수",
+        "⚠ Stoch 80 과열"
+      ],
+      "overheat_flags": [
+        "RSI 77 과매수",
+        "Stoch 80 과열"
       ]
     },
     {
@@ -4673,8 +6732,107 @@
       ]
     },
     {
-      "ticker": "052670",
-      "name": "제일바이오",
+      "ticker": "001820",
+      "name": "삼화콘덴서공업",
+      "grade": "보류",
+      "total_score": 11.7,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 0.0,
+        "tech": 9,
+        "flow": 7,
+        "safety": 5,
+        "overheat": 12
+      },
+      "close": 57300,
+      "price_change": 0.17,
+      "rsi": 79.28,
+      "adx": 60.3,
+      "stoch_k": 73.99,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.94,
+      "foreign_5d": -3674.0,
+      "inst_5d": 11105.0,
+      "ret_5d": 37.58,
+      "drawdown": -16.23,
+      "entry_price": 55580,
+      "stop_loss": 53290,
+      "target_price": 60160,
+      "entry_condition": "RSI 79→65 이하 조정 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "기관 순매수",
+        "⚠ RSI 79 과매수",
+        "⚠ 5일 +38% 급등"
+      ],
+      "overheat_flags": [
+        "RSI 79 과매수",
+        "5일 +38% 급등"
+      ]
+    },
+    {
+      "ticker": "012630",
+      "name": "HDC",
+      "grade": "보류",
+      "total_score": 10.4,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 0.0,
+        "tech": 11,
+        "flow": 7,
+        "safety": 7,
+        "overheat": 17
+      },
+      "close": 25500,
+      "price_change": 2.2,
+      "rsi": 82.3,
+      "adx": 65.32,
+      "stoch_k": 91.05,
+      "above_ma60": true,
+      "above_ma20": true,
+      "bb_position": 0.97,
+      "foreign_5d": -9498.0,
+      "inst_5d": 36813.0,
+      "ret_5d": 11.35,
+      "drawdown": -3.41,
+      "entry_price": 24740,
+      "stop_loss": 23720,
+      "target_price": 26790,
+      "entry_condition": "Stoch 91→70 이하 냉각 시",
+      "risk_pct": 4.1,
+      "reasons": [
+        "추세 만점",
+        "MACD 상승전환",
+        "기관 순매수",
+        "⚠ RSI 82 과매수",
+        "⚠ Stoch 91 극과열",
+        "⚠ 5일 +11% 급등주의"
+      ],
+      "overheat_flags": [
+        "RSI 82 과매수",
+        "Stoch 91 극과열",
+        "5일 +11% 급등주의"
+      ]
+    },
+    {
+      "ticker": "049520",
+      "name": "유아이엘",
       "grade": "데이터부족",
       "total_score": 36.4,
       "n_sources": 1,
@@ -4761,8 +6919,8 @@
       "overheat_flags": []
     },
     {
-      "ticker": "049520",
-      "name": "유아이엘",
+      "ticker": "052670",
+      "name": "제일바이오",
       "grade": "데이터부족",
       "total_score": 36.4,
       "n_sources": 1,
@@ -4805,536 +6963,8 @@
       "overheat_flags": []
     },
     {
-      "ticker": "011370",
-      "name": "서한",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "058730",
-      "name": "다스코",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "432720",
-      "name": "퀄리타스반도체",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "066980",
-      "name": "한성크린텍",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "069140",
-      "name": "누리플랜",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
       "ticker": "010960",
       "name": "삼호개발",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "457550",
-      "name": "우진엔텍",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "013580",
-      "name": "계룡건설산업",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "036190",
-      "name": "금화피에스시",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "013120",
-      "name": "동원개발",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "277880",
-      "name": "티에스아이",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "007460",
-      "name": "에이프로젠",
-      "grade": "데이터부족",
-      "total_score": 35.1,
-      "n_sources": 1,
-      "sources": [
-        "이벤트"
-      ],
-      "source_details": [
-        "공급계약체결"
-      ],
-      "score_breakdown": {
-        "multi": 0,
-        "individual": 3.0,
-        "tech": 12,
-        "flow": 2,
-        "safety": 10,
-        "overheat": 0
-      },
-      "close": 0,
-      "price_change": 0.0,
-      "rsi": 50.0,
-      "adx": 20.0,
-      "stoch_k": 50.0,
-      "above_ma60": false,
-      "above_ma20": false,
-      "bb_position": 50.0,
-      "foreign_5d": 0.0,
-      "inst_5d": 0.0,
-      "ret_5d": 0.0,
-      "drawdown": 0.0,
-      "entry_price": 0,
-      "stop_loss": 0,
-      "target_price": 0,
-      "entry_condition": "데이터 부족",
-      "risk_pct": 0,
-      "reasons": [
-        "RSI 50 최적",
-        "Stoch 50 안전",
-        "ADX 20 강추세"
-      ],
-      "overheat_flags": []
-    },
-    {
-      "ticker": "018000",
-      "name": "유니슨",
       "grade": "데이터부족",
       "total_score": 35.1,
       "n_sources": 1,
@@ -5421,6 +7051,314 @@
       "overheat_flags": []
     },
     {
+      "ticker": "036190",
+      "name": "금화피에스시",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "007460",
+      "name": "에이프로젠",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "432720",
+      "name": "퀄리타스반도체",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "457550",
+      "name": "우진엔텍",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "013120",
+      "name": "동원개발",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "013580",
+      "name": "계룡건설산업",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "066980",
+      "name": "한성크린텍",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
       "ticker": "459510",
       "name": "나우로보틱스",
       "grade": "데이터부족",
@@ -5435,6 +7373,1326 @@
       "score_breakdown": {
         "multi": 0,
         "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "277880",
+      "name": "티에스아이",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "018000",
+      "name": "유니슨",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "058730",
+      "name": "다스코",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "011370",
+      "name": "서한",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "069140",
+      "name": "누리플랜",
+      "grade": "데이터부족",
+      "total_score": 35.1,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "공급계약체결"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 3.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "302550",
+      "name": "리메드",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "024910",
+      "name": "경창산업",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "052900",
+      "name": "KX하이텍",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "069640",
+      "name": "한세엠케이",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "089850",
+      "name": "유비벨록스",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "012200",
+      "name": "계양전기",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "246720",
+      "name": "아스타",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "075180",
+      "name": "새론오토모티브",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "016450",
+      "name": "한세예스24홀딩스",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "286750",
+      "name": "나노실리칸첨단소재",
+      "grade": "데이터부족",
+      "total_score": 34.3,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "매출액또는손익구조"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.4,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "307180",
+      "name": "아이엘",
+      "grade": "데이터부족",
+      "total_score": 33.8,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "타법인주식및출자증권취득결정"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "091590",
+      "name": "남화토건",
+      "grade": "데이터부족",
+      "total_score": 33.8,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "488280",
+      "name": "에스투더블유",
+      "grade": "데이터부족",
+      "total_score": 33.8,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "타법인주식및출자증권취득결정"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "065950",
+      "name": "웰크론",
+      "grade": "데이터부족",
+      "total_score": 33.8,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "배당"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": 2.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "265560",
+      "name": "영화테크",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "134580",
+      "name": "탑코미디어",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "480370",
+      "name": "씨케이솔루션",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "008870",
+      "name": "금비",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "271980",
+      "name": "제일약품",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "053690",
+      "name": "한미글로벌",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "042500",
+      "name": "링네트",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "067920",
+      "name": "이글루",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "093320",
+      "name": "케이아이엔엑스",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "183490",
+      "name": "엔지켐생명과학",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
+        "tech": 12,
+        "flow": 2,
+        "safety": 10,
+        "overheat": 0
+      },
+      "close": 0,
+      "price_change": 0.0,
+      "rsi": 50.0,
+      "adx": 20.0,
+      "stoch_k": 50.0,
+      "above_ma60": false,
+      "above_ma20": false,
+      "bb_position": 50.0,
+      "foreign_5d": 0.0,
+      "inst_5d": 0.0,
+      "ret_5d": 0.0,
+      "drawdown": 0.0,
+      "entry_price": 0,
+      "stop_loss": 0,
+      "target_price": 0,
+      "entry_condition": "데이터 부족",
+      "risk_pct": 0,
+      "reasons": [
+        "RSI 50 최적",
+        "Stoch 50 안전",
+        "ADX 20 강추세"
+      ],
+      "overheat_flags": []
+    },
+    {
+      "ticker": "064480",
+      "name": "브리지텍",
+      "grade": "데이터부족",
+      "total_score": 29.9,
+      "n_sources": 1,
+      "sources": [
+        "이벤트"
+      ],
+      "source_details": [
+        "자기주식처분"
+      ],
+      "score_breakdown": {
+        "multi": 0,
+        "individual": -1.0,
         "tech": 12,
         "flow": 2,
         "safety": 10,
