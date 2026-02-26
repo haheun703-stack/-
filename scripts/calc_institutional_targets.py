@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -40,6 +41,7 @@ logger = logging.getLogger(__name__)
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_PATH = PROJECT_ROOT / "data" / "institutional_targets.json"
+DB_PATH = PROJECT_ROOT / "data" / "jarvis_archive.db"
 
 # ── 파라미터 ──
 LOOKBACK = 60
@@ -220,6 +222,91 @@ def classify_zone(gap_pct: float) -> str:
         return "초과"
 
 
+def init_vpoc_table():
+    """vpoc_history 테이블 생성 (없으면)."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS vpoc_history (
+        date   TEXT NOT NULL,
+        ticker TEXT NOT NULL,
+        vpoc   REAL,
+        fwap   REAL,
+        target REAL,
+        PRIMARY KEY (date, ticker)
+    )""")
+    conn.commit()
+    conn.close()
+
+
+def save_vpoc_history(date_str: str, targets: dict):
+    """오늘자 VPOC/FWAP/목표가 히스토리를 SQLite에 저장."""
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.execute("PRAGMA journal_mode=WAL")
+    rows = [
+        (date_str, ticker, t.get("vpoc_60d"), t.get("foreign_vwap"), t.get("estimated_target"))
+        for ticker, t in targets.items()
+    ]
+    conn.executemany(
+        "INSERT OR REPLACE INTO vpoc_history (date, ticker, vpoc, fwap, target) VALUES (?,?,?,?,?)",
+        rows,
+    )
+    conn.commit()
+    conn.close()
+    logger.info("[VPOC 히스토리] %d건 저장 (날짜: %s)", len(rows), date_str)
+
+
+def calc_velocity(targets: dict) -> dict[str, dict]:
+    """과거 히스토리 대비 목표가 이동 속도(velocity) 계산.
+
+    Returns: {ticker: {"delta_5d": float|None, "delta_10d": float|None, "direction": str}}
+    direction: RISING(+2%↑) / STABLE / FALLING(-2%↓) / NEW(히스토리 부족)
+    """
+    conn = sqlite3.connect(str(DB_PATH))
+    velocity = {}
+
+    for ticker, t in targets.items():
+        rows = conn.execute(
+            "SELECT date, target FROM vpoc_history WHERE ticker=? ORDER BY date DESC LIMIT 21",
+            (ticker,),
+        ).fetchall()
+
+        cur_target = t["estimated_target"]
+
+        if len(rows) < 2:
+            velocity[ticker] = {"delta_5d": None, "delta_10d": None, "direction": "NEW"}
+            continue
+
+        # 5일 전 target (가용한 만큼)
+        idx_5 = min(5, len(rows) - 1)
+        d5_target = rows[idx_5][1]
+        delta_5 = round((cur_target - d5_target) / d5_target * 100, 2) if d5_target and d5_target > 0 else None
+
+        # 10일 전 target
+        delta_10 = None
+        if len(rows) > 5:
+            idx_10 = min(10, len(rows) - 1)
+            d10_target = rows[idx_10][1]
+            delta_10 = round((cur_target - d10_target) / d10_target * 100, 2) if d10_target and d10_target > 0 else None
+
+        # 방향 분류 (5일 우선, 없으면 10일)
+        ref = delta_5 if delta_5 is not None else delta_10
+        if ref is None:
+            direction = "NEW"
+        elif ref > 2:
+            direction = "RISING"
+        elif ref < -2:
+            direction = "FALLING"
+        else:
+            direction = "STABLE"
+
+        velocity[ticker] = {"delta_5d": delta_5, "delta_10d": delta_10, "direction": direction}
+
+    conn.close()
+    return velocity
+
+
 def calc_single_target(ticker: str) -> dict | None:
     """단일 종목의 추정 기관 목표가 계산."""
     pq_path = PROCESSED_DIR / f"{ticker}.parquet"
@@ -282,8 +369,12 @@ def calc_single_target(ticker: str) -> dict | None:
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
+    # SQLite 테이블 초기화
+    init_vpoc_table()
+
     name_map = build_name_map()
     parquet_files = sorted(PROCESSED_DIR.glob("*.parquet"))
+    today_str = datetime.now().strftime("%Y-%m-%d")
     print(f"[기관목표가] 계산 대상: {len(parquet_files)}종목")
 
     targets = {}
@@ -297,12 +388,25 @@ def main():
             targets[ticker] = result
             zone_stats[result["zone"]] += 1
 
+    # VPOC 히스토리 SQLite 저장 (velocity 계산 전에 저장해야 오늘 데이터 포함)
+    save_vpoc_history(today_str, targets)
+
+    # Velocity 계산 (과거 히스토리 대비 목표가 이동 속도)
+    velocity = calc_velocity(targets)
+    dir_stats = {"RISING": 0, "STABLE": 0, "FALLING": 0, "NEW": 0}
+    for ticker, v in velocity.items():
+        targets[ticker]["target_delta_5d"] = v["delta_5d"]
+        targets[ticker]["target_delta_10d"] = v["delta_10d"]
+        targets[ticker]["target_direction"] = v["direction"]
+        dir_stats[v["direction"]] += 1
+
     output = {
-        "date": datetime.now().strftime("%Y-%m-%d"),
+        "date": today_str,
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "total_stocks": len(parquet_files),
         "calculated": len(targets),
         "zone_distribution": zone_stats,
+        "velocity_distribution": dir_stats,
         "targets": targets,
     }
 
@@ -319,6 +423,10 @@ def main():
         pct = cnt / len(targets) * 100 if targets else 0
         print(f"  {zone}: {cnt}종목 ({pct:.1f}%)")
 
+    print(f"\n[Velocity 분포]")
+    for d in ["RISING", "STABLE", "FALLING", "NEW"]:
+        print(f"  {d}: {dir_stats[d]}종목")
+
     # D-3 (깊은 저평가) 종목 TOP 10 출력
     d3_stocks = [
         (t, v) for t, v in targets.items() if v["zone"] == "D-3"
@@ -330,10 +438,11 @@ def main():
         print(f"  D-3 깊은 저평가 TOP 10 (분할매수 1차 대상)")
         print(f"{'─'*55}")
         for ticker, info in d3_stocks[:10]:
+            dir_icon = {"RISING": "▲", "FALLING": "▼", "STABLE": "─", "NEW": "★"}.get(info.get("target_direction", ""), "")
             print(
                 f"  {info['name']}({ticker}) "
                 f"현재:{info['current_close']:,} → 목표:{info['estimated_target']:,} "
-                f"({info['gap_pct']:+.1f}%) 신뢰:{info['confidence']:.0%}"
+                f"({info['gap_pct']:+.1f}%) 신뢰:{info['confidence']:.0%} {dir_icon}"
             )
 
     print(f"\n[저장] {OUTPUT_PATH}")

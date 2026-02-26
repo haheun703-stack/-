@@ -456,6 +456,31 @@ function renderTomorrowPicks() {
       </div>`;
     }
 
+    // 2.5행: 기관 추정 목표가
+    const instTarget = p.estimated_target || 0;
+    if (instTarget > 0) {
+      const zoneBgs = {'D-3':'rgba(220,38,38,0.12)','D-2':'rgba(245,158,11,0.12)','D-1':'rgba(59,130,246,0.12)','도달':'rgba(107,114,128,0.08)','초과':'rgba(239,68,68,0.08)'};
+      const zoneFgs = {'D-3':'#FCA5A5','D-2':'#FCD34D','D-1':'#93C5FD','도달':'#9CA3AF','초과':'#F87171'};
+      const tZone = p.target_zone || '';
+      const tGap = p.target_gap_pct || 0;
+      const tDir = p.target_direction || '';
+      const dirIcon = tDir === 'RISING' ? '&#x25B2;' : tDir === 'FALLING' ? '&#x25BC;' : tDir === 'STABLE' ? '&#x2500;' : '';
+      const dirColor = tDir === 'RISING' ? '#10B981' : tDir === 'FALLING' ? '#EF4444' : '#6B7280';
+      const tBg = zoneBgs[tZone] || 'rgba(107,114,128,0.08)';
+      const tFg = zoneFgs[tZone] || '#9CA3AF';
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;background:${tBg};border:1px solid ${tFg}33;border-radius:6px;padding:5px 10px;margin-bottom:8px;font-size:11px;font-family:var(--mono)">
+        <div>
+          <span style="color:#9CA3AF">기관추정</span>
+          <span style="font-weight:700;color:${tFg};margin-left:4px">${instTarget.toLocaleString()}원</span>
+          <span style="font-size:10px;padding:1px 6px;border-radius:6px;background:${tFg}22;color:${tFg};margin-left:6px">${esc(tZone)}</span>
+        </div>
+        <div>
+          <span style="color:${tGap < 0 ? '#60A5FA' : '#F87171'}">${tGap > 0 ? '+' : ''}${tGap.toFixed(1)}%</span>
+          ${dirIcon ? `<span style="color:${dirColor};margin-left:6px;font-weight:700">${dirIcon}</span>` : ''}
+        </div>
+      </div>`;
+    }
+
     // 3행: 진입 조건
     const cond = p.entry_condition || '';
     if (cond) {

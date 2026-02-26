@@ -403,11 +403,20 @@ def get_target_zone_bonus(ticker: str, targets: dict) -> tuple[float, dict]:
     if confidence < 0.5:
         bonus *= 0.5
 
+    # Velocity 보정: RISING +2, FALLING -2
+    direction = t.get("target_direction", "")
+    if direction == "RISING":
+        bonus += 2.0
+    elif direction == "FALLING":
+        bonus -= 2.0
+
     info = {
         "estimated_target": t.get("estimated_target", 0),
         "gap_pct": t.get("gap_pct", 0),
         "zone": zone,
         "confidence": confidence,
+        "direction": direction,
+        "delta_5d": t.get("target_delta_5d"),
     }
 
     return bonus, info
@@ -1028,6 +1037,8 @@ def main():
             "target_gap_pct": target_info.get("gap_pct", 0),
             "target_zone": target_info.get("zone", ""),
             "target_confidence": target_info.get("confidence", 0),
+            "target_direction": target_info.get("direction", ""),
+            "target_delta_5d": target_info.get("delta_5d"),
         }
 
         results.append(rec)
@@ -1071,7 +1082,8 @@ def main():
             print(f"  {i}. [{r['grade']}]{zone_tag} {r['name']}({r['ticker']}) "
                   f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
             if r.get("estimated_target"):
-                print(f"     기관목표:{r['estimated_target']:,} (갭:{r.get('target_gap_pct',0):+.1f}%) "
+                dir_icon = {"RISING": "▲", "FALLING": "▼", "STABLE": "─", "NEW": "★"}.get(r.get("target_direction", ""), "")
+                print(f"     기관목표:{r['estimated_target']:,} (갭:{r.get('target_gap_pct',0):+.1f}%) {dir_icon} "
                       f"| 진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
                       f"목표:{r.get('target_price',0):,}")
             else:
