@@ -60,6 +60,7 @@ SYNC_FILES = [
     "kospi_regime.json",
     "volume_spike_watchlist.json",
     "institutional_targets.json",
+    "accumulation_tracker.json",
 ]
 
 

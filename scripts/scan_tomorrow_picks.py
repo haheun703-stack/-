@@ -26,6 +26,7 @@
   DART AVOID: 유상증자/관리종목 등 자동 제외
 
 v7 변경: 전략A(수급폭발 소스) + 전략B(MACD 3중 필터) + 전략C(US섹터 부스트)
+v8 변경: 전략D(매집추적 소스) — 거래량폭발 이후 매집 진행 중 종목
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -267,6 +268,39 @@ def collect_dart_event() -> dict[str, dict]:
             "score": sig.get("event_score", 0),
             "name": sig.get("name", ""),
             "detail": sig.get("event", "DART"),
+        }
+    return result
+
+
+def collect_accumulation_tracker() -> dict[str, dict]:
+    """소스10: 세력 매집 추적 (전략 D) — 거래량폭발 이후 매집 진행 중 종목.
+
+    phase: 매집/재돌파/가속
+    score: 40~100
+    """
+    at = load_json("accumulation_tracker.json")
+    result = {}
+    for item in at.get("items", []):
+        ticker = item.get("ticker", "")
+        if not ticker:
+            continue
+        phase = item.get("phase", "")
+        # 폭발 직후(Phase1)는 이미 수급폭발 소스에서 커버 → 매집/재돌파/가속만 사용
+        if phase == "폭발":
+            continue
+        score = item.get("total_score", 0)
+        if score < 50:
+            continue  # 50점 이하는 시그널로 부적합
+
+        phase_icon = {"매집": "🔄", "재돌파": "🚀", "가속": "⚡"}.get(phase, "")
+        result[ticker] = {
+            "source": "매집추적",
+            "score": score,
+            "name": item.get("name", ""),
+            "detail": f"{phase_icon}{phase} {item.get('days_since_spike',0)}일전폭발 수익:{item.get('return_since_spike',0):+.1f}%",
+            "phase": phase,
+            "days_since_spike": item.get("days_since_spike", 0),
+            "return_since_spike": item.get("return_since_spike", 0),
         }
     return result
 
@@ -903,7 +937,7 @@ def main():
 
     name_map = build_name_map()
 
-    # 9개 소스 수집 (v7: 8→9 앙상블, 전략A 수급폭발 추가)
+    # 10개 소스 수집 (v8: 9→10 앙상블, 전략D 매집추적 추가)
     src1 = collect_relay()
     src2 = collect_group_relay()
     src3 = collect_pullback()
@@ -912,10 +946,12 @@ def main():
     src6 = collect_force_hybrid()
     src7 = collect_dart_event()
     src9 = collect_volume_spike()
+    src10 = collect_accumulation_tracker()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
-          f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)}")
+          f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
+          f"매집추적:{len(src10)}")
 
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가
     avoid_tickers = load_dart_avoid_tickers()
@@ -933,7 +969,7 @@ def main():
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5, src6, src7, src9]:
+    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10]:
         all_tickers.update(src.keys())
 
     # AVOID 종목 제외
@@ -948,7 +984,7 @@ def main():
         source_names = []
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
                            (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
-                           (src7, "이벤트"), (src9, "수급폭발")]:
+                           (src7, "이벤트"), (src9, "수급폭발"), (src10, "매집추적")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
@@ -1039,6 +1075,9 @@ def main():
             "target_confidence": target_info.get("confidence", 0),
             "target_direction": target_info.get("direction", ""),
             "target_delta_5d": target_info.get("delta_5d"),
+            "accum_phase": src10.get(ticker, {}).get("phase", ""),
+            "accum_days": src10.get(ticker, {}).get("days_since_spike", 0),
+            "accum_return": src10.get(ticker, {}).get("return_since_spike", 0),
         }
 
         results.append(rec)

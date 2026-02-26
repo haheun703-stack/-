@@ -413,6 +413,7 @@ async def sync_data(request: Request):
         "kis_balance.json", "kospi_regime.json",
         "volume_spike_watchlist.json",
         "institutional_targets.json",
+        "accumulation_tracker.json",
     }
     if target not in safe_names:
         return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)
