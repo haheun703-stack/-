@@ -1,0 +1,115 @@
+{
+  "date": "2026-02-26",
+  "macd_zero_cross": {
+    "signal_count": 5700,
+    "by_period": {
+      "ret_1d": {
+        "count": 5698,
+        "win_rate": 45.9,
+        "avg_return": 0.17,
+        "median_return": -0.08,
+        "max_gain": 29.98,
+        "max_loss": -19.96
+      },
+      "ret_3d": {
+        "count": 5691,
+        "win_rate": 49.3,
+        "avg_return": 0.66,
+        "median_return": 0.0,
+        "max_gain": 64.32,
+        "max_loss": -51.44
+      },
+      "ret_5d": {
+        "count": 5680,
+        "win_rate": 49.6,
+        "avg_return": 0.94,
+        "median_return": 0.0,
+        "max_gain": 76.83,
+        "max_loss": -93.86
+      },
+      "ret_10d": {
+        "count": 5654,
+        "win_rate": 51.8,
+        "avg_return": 1.77,
+        "median_return": 0.31,
+        "max_gain": 164.59,
+        "max_loss": -93.94
+      },
+      "ret_20d": {
+        "count": 5590,
+        "win_rate": 52.9,
+        "avg_return": 3.38,
+        "median_return": 0.69,
+        "max_gain": 330.87,
+        "max_loss": -93.83
+      }
+    }
+  },
+  "volume_spike_pattern": {
+    "pattern_count": 10947,
+    "stats": {
+      "rebound_5d": {
+        "count": 10947,
+        "win_rate": 82.9,
+        "avg": 7.15,
+        "median": 4.83
+      },
+      "rebound_10d": {
+        "count": 10947,
+        "win_rate": 77.3,
+        "avg": 9.23,
+        "median": 5.85
+      },
+      "rebound_20d": {
+        "count": 10896,
+        "win_rate": 69.3,
+        "avg": 10.84,
+        "median": 5.51
+      }
+    }
+  },
+  "us_kr_linkage": {
+    "semi_count": 36,
+    "soxx_surge_days": 111,
+    "SOXX급등_후_KR반도체_ret_1d": {
+      "count": 3953,
+      "win_rate": 56.8,
+      "avg": 1.09
+    },
+    "SOXX급등_후_KR반도체_ret_3d": {
+      "count": 3953,
+      "win_rate": 56.2,
+      "avg": 1.62
+    },
+    "SOXX급등_후_KR반도체_ret_5d": {
+      "count": 3953,
+      "win_rate": 54.6,
+      "avg": 1.89
+    },
+    "SOXX급등_후_KR반도체_ret_10d": {
+      "count": 3917,
+      "win_rate": 55.2,
+      "avg": 2.95
+    },
+    "SOXX급락_후_KR반도체_ret_1d": {
+      "count": 2969,
+      "win_rate": 30.9,
+      "avg": -1.49
+    },
+    "SOXX급락_후_KR반도체_ret_3d": {
+      "count": 2969,
+      "win_rate": 33.9,
+      "avg": -1.66
+    },
+    "SOXX급락_후_KR반도체_ret_5d": {
+      "count": 2969,
+      "win_rate": 37.2,
+      "avg": -1.15
+    },
+    "SOXX급락_후_KR반도체_ret_10d": {
+      "count": 2933,
+      "win_rate": 42.7,
+      "avg": -0.6
+    }
+  }
+}

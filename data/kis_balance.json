@@ -5,74 +5,74 @@
       "name": "대한전선",
       "quantity": 60,
       "avg_price": 34950.0,
-      "current_price": 34000,
-      "eval_amount": 2040000,
-      "pnl_amount": -57000,
-      "pnl_pct": -2.71
+      "current_price": 35350,
+      "eval_amount": 2121000,
+      "pnl_amount": 24000,
+      "pnl_pct": 1.14
     },
     {
       "ticker": "010950",
       "name": "S-Oil",
       "quantity": 27,
       "avg_price": 107900.0,
-      "current_price": 112600,
-      "eval_amount": 3040200,
-      "pnl_amount": 126900,
-      "pnl_pct": 4.35
+      "current_price": 113700,
+      "eval_amount": 3069900,
+      "pnl_amount": 156600,
+      "pnl_pct": 5.37
     },
     {
       "ticker": "068270",
       "name": "셀트리온",
       "quantity": 13,
       "avg_price": 242500.0,
-      "current_price": 244500,
-      "eval_amount": 3178500,
-      "pnl_amount": 26000,
-      "pnl_pct": 0.82
+      "current_price": 242000,
+      "eval_amount": 3146000,
+      "pnl_amount": -6500,
+      "pnl_pct": -0.2
     },
     {
       "ticker": "082740",
       "name": "한화엔진",
       "quantity": 35,
       "avg_price": 57900.0,
-      "current_price": 55100,
-      "eval_amount": 1928500,
-      "pnl_amount": -98000,
-      "pnl_pct": -4.83
+      "current_price": 53800,
+      "eval_amount": 1883000,
+      "pnl_amount": -143500,
+      "pnl_pct": -7.08
     },
     {
       "ticker": "099440",
       "name": "스맥",
       "quantity": 550,
       "avg_price": 6807.2727,
-      "current_price": 6390,
-      "eval_amount": 3514500,
-      "pnl_amount": -229500,
-      "pnl_pct": -6.12
+      "current_price": 6020,
+      "eval_amount": 3311000,
+      "pnl_amount": -433000,
+      "pnl_pct": -11.56
     },
     {
       "ticker": "323410",
       "name": "카카오뱅크",
       "quantity": 73,
       "avg_price": 27900.0,
-      "current_price": 28000,
-      "eval_amount": 2044000,
-      "pnl_amount": 7300,
-      "pnl_pct": 0.35
+      "current_price": 27900,
+      "eval_amount": 2036700,
+      "pnl_amount": 0,
+      "pnl_pct": 0.0
     },
     {
       "ticker": "462980",
       "name": "아이지넷",
       "quantity": 700,
       "avg_price": 2047.8571,
-      "current_price": 2065,
-      "eval_amount": 1445500,
-      "pnl_amount": 12000,
-      "pnl_pct": 0.83
+      "current_price": 2005,
+      "eval_amount": 1403500,
+      "pnl_amount": -30000,
+      "pnl_pct": -2.09
     }
   ],
-  "total_eval": 30958593,
-  "total_pnl": -212300,
+  "total_eval": 30738493,
+  "total_pnl": -432400,
   "available_cash": 760269,
-  "fetched_at": "2026-02-26 07:20:15"
+  "fetched_at": "2026-02-26 21:39:37"
 }

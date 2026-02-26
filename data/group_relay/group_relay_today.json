@@ -1,122 +1,184 @@
 {
-  "scan_time": "2026-02-25T22:22:57.344771",
+  "scan_time": "2026-02-26T19:41:44.186951",
   "fire_threshold": 3.0,
   "fired_groups": [
     {
-      "group": "현대차",
-      "leader_name": "현대차",
-      "leader_change": 9.16,
-      "leader_volume_ratio": 2.63,
+      "group": "삼성",
+      "leader_name": "삼성전자",
+      "leader_change": 7.13,
+      "leader_volume_ratio": 1.18,
       "waiting_subsidiaries": [
         {
-          "ticker": "064350",
-          "name": "현대로템",
+          "ticker": "207940",
+          "name": "삼성바이오로직스",
+          "tier": "tier1",
+          "change_pct": 2.2,
+          "volume_ratio": 1.77,
+          "rsi": 53.933414794026106,
+          "foreign_5d": 8.7,
+          "inst_5d": 16.0,
+          "score": 92.5,
+          "reasons": [
+            "대기중(+2.2%)",
+            "거래량1.8x",
+            "RSI54",
+            "tier1",
+            "외인+9억+기관+16억(동시)"
+          ]
+        },
+        {
+          "ticker": "010140",
+          "name": "삼성중공업",
           "tier": "tier2",
-          "change_pct": 0.45,
-          "volume_ratio": 1.19,
-          "rsi": 56.6626462314609,
-          "foreign_5d": 876.6,
-          "inst_5d": 146.1,
+          "change_pct": -0.86,
+          "volume_ratio": 1.02,
+          "rsi": 51.32181391261377,
+          "foreign_5d": 89.0,
+          "inst_5d": 73.5,
           "score": 75.5,
           "reasons": [
-            "대기중(+0.5%)",
-            "RSI57",
+            "대기중(-0.9%)",
+            "RSI51",
             "tier2",
-            "외인+877억+기관+146억(동시)"
+            "외인+89억+기관+74억(동시)"
           ]
         },
         {
-          "ticker": "000270",
-          "name": "기아",
-          "tier": "tier1",
-          "change_pct": 12.7,
-          "volume_ratio": 3.36,
-          "rsi": 79.59779184071235,
-          "foreign_5d": 530.5,
-          "inst_5d": 433.9,
-          "score": 55,
+          "ticker": "000810",
+          "name": "삼성화재",
+          "tier": "tier3",
+          "change_pct": 0.0,
+          "volume_ratio": 0.64,
+          "rsi": 54.09654232833649,
+          "foreign_5d": -97.6,
+          "inst_5d": 172.1,
+          "score": 63.0,
           "reasons": [
-            "거래량3.4x",
-            "tier1",
-            "외인+530억+기관+434억(동시)"
-          ]
-        },
-        {
-          "ticker": "086280",
-          "name": "현대글로비스",
-          "tier": "tier2",
-          "change_pct": 4.08,
-          "volume_ratio": 2.72,
-          "rsi": 69.24137097959864,
-          "foreign_5d": 214.5,
-          "inst_5d": 130.9,
-          "score": 50.0,
-          "reasons": [
-            "거래량2.7x",
-            "tier2",
-            "외인+214억+기관+131억(동시)"
+            "대기중(+0.0%)",
+            "RSI54",
+            "tier3",
+            "기관+172억(5일)"
           ]
         }
       ]
     },
     {
-      "group": "LG",
-      "leader_name": "LG에너지솔루션",
-      "leader_change": 3.27,
-      "leader_volume_ratio": 1.65,
+      "group": "SK",
+      "leader_name": "SK하이닉스",
+      "leader_change": 7.96,
+      "leader_volume_ratio": 1.16,
       "waiting_subsidiaries": [
         {
-          "ticker": "066570",
-          "name": "LG전자",
+          "ticker": "011790",
+          "name": "SKC",
           "tier": "tier1",
-          "change_pct": -0.89,
-          "volume_ratio": 0.47,
-          "rsi": 71.56184725399123,
-          "foreign_5d": 792.4,
-          "inst_5d": 280.3,
+          "change_pct": -1.14,
+          "volume_ratio": 2.07,
+          "rsi": 51.20333033533127,
+          "foreign_5d": -11.1,
+          "inst_5d": -23.2,
+          "score": 70.5,
+          "reasons": [
+            "대기중(-1.1%)",
+            "거래량2.1x",
+            "RSI51",
+            "tier1",
+            "수급악화(외-11+기-23억)"
+          ]
+        },
+        {
+          "ticker": "096770",
+          "name": "SK이노베이션",
+          "tier": "tier1",
+          "change_pct": -0.91,
+          "volume_ratio": 0.67,
+          "rsi": 63.71969972057051,
+          "foreign_5d": 250.2,
+          "inst_5d": 257.8,
           "score": 70,
           "reasons": [
             "대기중(-0.9%)",
             "tier1",
-            "외인+792억+기관+280억(동시)"
+            "외인+250억+기관+258억(동시)"
           ]
         },
         {
-          "ticker": "003550",
-          "name": "LG",
-          "tier": "tier3",
-          "change_pct": -0.1,
-          "volume_ratio": 1.54,
-          "rsi": 66.96145546015231,
-          "foreign_5d": -38.3,
-          "inst_5d": 90.3,
-          "score": 64.5,
+          "ticker": "326030",
+          "name": "SK바이오팜",
+          "tier": "tier2",
+          "change_pct": 0.0,
+          "volume_ratio": 0.81,
+          "rsi": 52.88180682847428,
+          "foreign_5d": 36.8,
+          "inst_5d": -26.4,
+          "score": 68.0,
           "reasons": [
-            "대기중(-0.1%)",
-            "거래량1.5x",
-            "tier3",
-            "기관+90억(5일)"
+            "대기중(+0.0%)",
+            "RSI53",
+            "tier2",
+            "외인+37억(5일)"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "현대차",
+      "leader_name": "현대차",
+      "leader_change": 6.47,
+      "leader_volume_ratio": 1.33,
+      "waiting_subsidiaries": [
+        {
+          "ticker": "064350",
+          "name": "현대로템",
+          "tier": "tier2",
+          "change_pct": -1.12,
+          "volume_ratio": 0.98,
+          "rsi": 54.85150785393149,
+          "foreign_5d": 551.8,
+          "inst_5d": 81.8,
+          "score": 75.5,
+          "reasons": [
+            "대기중(-1.1%)",
+            "RSI55",
+            "tier2",
+            "외인+552억+기관+82억(동시)"
           ]
         },
         {
-          "ticker": "032640",
-          "name": "LG유플러스",
-          "tier": "tier3",
-          "change_pct": 0.17,
-          "volume_ratio": 0.9,
-          "rsi": 69.35868939029251,
-          "foreign_5d": -37.6,
-          "inst_5d": 67.2,
-          "score": 52.5,
+          "ticker": "011210",
+          "name": "현대위아",
+          "tier": "tier2",
+          "change_pct": 0.0,
+          "volume_ratio": 1.19,
+          "rsi": 63.012896368097564,
+          "foreign_5d": 21.3,
+          "inst_5d": 2.9,
+          "score": 65.0,
           "reasons": [
-            "대기중(+0.2%)",
+            "대기중(+0.0%)",
+            "tier2",
+            "외인+21억+기관+3억(동시)"
+          ]
+        },
+        {
+          "ticker": "004020",
+          "name": "현대제철",
+          "tier": "tier3",
+          "change_pct": 1.7,
+          "volume_ratio": 0.82,
+          "rsi": 68.4633284572406,
+          "foreign_5d": 23.5,
+          "inst_5d": 226.9,
+          "score": 60.0,
+          "reasons": [
+            "대기중(+1.7%)",
             "tier3",
-            "기관+67억(5일)"
+            "외인+24억+기관+227억(동시)"
           ]
         }
       ]
     }
   ],
   "no_fire": false,
-  "summary": "그룹 발화: 현대차(현대차 +9.2%), LG(LG에너지솔루션 +3.3%)"
+  "summary": "그룹 발화: 삼성(삼성전자 +7.1%), SK(SK하이닉스 +8.0%), 현대차(현대차 +6.5%)"
 }
