@@ -1,0 +1,25 @@
+{
+  "event": "한-UAE 650억달러 협력합의",
+  "date": "2026-02-26",
+  "expires": "2026-03-07",
+  "summary": "방산 350억달러 (KF-21, 통합방공, 함정, 전주기 협력) + 투자 300억달러 (원전·AI·인프라)",
+  "source_url": "https://www.koreatimes.co.kr/foreignaffairs/20260226/korea-uae-seal-65-bil-partnership-in-defense-nuclear-energy-high-tech",
+  "stocks": [
+    {"ticker": "012450", "name": "한화에어로스페이스", "sector": "방산", "score": 80, "detail": "KF-21 엔진·기체 핵심 수혜"},
+    {"ticker": "047810", "name": "한국항공우주", "sector": "방산", "score": 80, "detail": "KF-21 총괄 개발사"},
+    {"ticker": "272210", "name": "한화시스템", "sector": "방산", "score": 75, "detail": "통합방공 레이더·전자전"},
+    {"ticker": "042660", "name": "한화오션", "sector": "방산", "score": 70, "detail": "함정 건조"},
+    {"ticker": "079550", "name": "LIG넥스원", "sector": "방산", "score": 70, "detail": "미사일·유도무기"},
+    {"ticker": "064350", "name": "현대로템", "sector": "방산", "score": 65, "detail": "장갑차·전차"},
+    {"ticker": "082740", "name": "한화엔진", "sector": "방산", "score": 65, "detail": "함정 엔진"},
+    {"ticker": "011210", "name": "현대위아", "sector": "방산", "score": 60, "detail": "포탄·방산부품"},
+    {"ticker": "034020", "name": "두산에너빌리티", "sector": "원전", "score": 75, "detail": "바라카 원전 기자재 핵심"},
+    {"ticker": "052690", "name": "한전기술", "sector": "원전", "score": 70, "detail": "원전 설계"},
+    {"ticker": "051600", "name": "한전KPS", "sector": "원전", "score": 65, "detail": "원전 정비·유지보수"},
+    {"ticker": "298040", "name": "효성중공업", "sector": "원전", "score": 60, "detail": "전력기기·변압기"},
+    {"ticker": "083650", "name": "비에이치아이", "sector": "원전", "score": 55, "detail": "원전 보조기기"},
+    {"ticker": "000720", "name": "현대건설", "sector": "건설", "score": 60, "detail": "중동 인프라 강자"},
+    {"ticker": "028260", "name": "삼성물산", "sector": "건설", "score": 55, "detail": "UAE 인프라 실적"},
+    {"ticker": "375500", "name": "DL이앤씨", "sector": "건설", "score": 50, "detail": "플랜트 건설"}
+  ]
+}
