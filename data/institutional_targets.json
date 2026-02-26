@@ -1,6 +1,6 @@
 {
   "date": "2026-02-26",
-  "generated_at": "2026-02-26 21:38",
+  "generated_at": "2026-02-26 21:58",
   "total_stocks": 662,
   "calculated": 662,
   "zone_distribution": {
@@ -9,6 +9,12 @@
     "D-1": 53,
     "도달": 89,
     "초과": 480
+  },
+  "velocity_distribution": {
+    "RISING": 0,
+    "STABLE": 0,
+    "FALLING": 0,
+    "NEW": 662
   },
   "targets": {
     "000080": {
@@ -21,7 +27,10 @@
       "gap_pct": -1.24,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "하이트진로"
+      "name": "하이트진로",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000100": {
       "vpoc_60d": 108103,
@@ -33,7 +42,10 @@
       "gap_pct": 0.7,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "유한양행"
+      "name": "유한양행",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000120": {
       "vpoc_60d": 95503,
@@ -45,7 +57,10 @@
       "gap_pct": 29.5,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "CJ대한통운"
+      "name": "CJ대한통운",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000150": {
       "vpoc_60d": 893790,
@@ -57,7 +72,10 @@
       "gap_pct": 36.3,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "두산"
+      "name": "두산",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000155": {
       "vpoc_60d": 513640,
@@ -69,7 +87,10 @@
       "gap_pct": 14.02,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "두산우"
+      "name": "두산우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000210": {
       "vpoc_60d": 39138,
@@ -81,7 +102,10 @@
       "gap_pct": 26.14,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "DL"
+      "name": "DL",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000240": {
       "vpoc_60d": 26241,
@@ -93,7 +117,10 @@
       "gap_pct": 22.12,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국앤컴퍼니"
+      "name": "한국앤컴퍼니",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000250": {
       "vpoc_60d": 231650,
@@ -105,7 +132,10 @@
       "gap_pct": 134.37,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "삼천당제약"
+      "name": "삼천당제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000270": {
       "vpoc_60d": 121670,
@@ -117,7 +147,10 @@
       "gap_pct": 52.13,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "기아"
+      "name": "기아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000370": {
       "vpoc_60d": 5329,
@@ -129,7 +162,10 @@
       "gap_pct": 23.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한화손해보험"
+      "name": "한화손해보험",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000400": {
       "vpoc_60d": 2547,
@@ -141,7 +177,10 @@
       "gap_pct": -1.57,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "롯데손해보험"
+      "name": "롯데손해보험",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000490": {
       "vpoc_60d": 11820,
@@ -153,7 +192,10 @@
       "gap_pct": -0.23,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "대동"
+      "name": "대동",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000500": {
       "vpoc_60d": 87732,
@@ -165,7 +207,10 @@
       "gap_pct": 32.05,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "가온전선"
+      "name": "가온전선",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000640": {
       "vpoc_60d": 108595,
@@ -177,7 +222,10 @@
       "gap_pct": 8.47,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "동아쏘시오홀딩스"
+      "name": "동아쏘시오홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000650": {
       "vpoc_60d": null,
@@ -189,7 +237,10 @@
       "gap_pct": -7.72,
       "zone": "D-2",
       "confidence": 0.62,
-      "name": "천일고속"
+      "name": "천일고속",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000660": {
       "vpoc_60d": 748860,
@@ -201,7 +252,10 @@
       "gap_pct": 52.12,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "SK하이닉스"
+      "name": "SK하이닉스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000670": {
       "vpoc_60d": 59671,
@@ -213,7 +267,10 @@
       "gap_pct": 14.53,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "영풍"
+      "name": "영풍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000720": {
       "vpoc_60d": 70400,
@@ -225,7 +282,10 @@
       "gap_pct": 90.67,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대건설"
+      "name": "현대건설",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000810": {
       "vpoc_60d": 493000,
@@ -237,7 +297,10 @@
       "gap_pct": 9.22,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼성화재"
+      "name": "삼성화재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000815": {
       "vpoc_60d": 374975,
@@ -249,7 +312,10 @@
       "gap_pct": 8.72,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "삼성화재우"
+      "name": "삼성화재우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000880": {
       "vpoc_60d": 116917,
@@ -261,7 +327,10 @@
       "gap_pct": 20.76,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한화"
+      "name": "한화",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "00088K": {
       "vpoc_60d": 36760,
@@ -273,7 +342,10 @@
       "gap_pct": 28.74,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "00088K"
+      "name": "00088K",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "000990": {
       "vpoc_60d": 65512,
@@ -285,7 +357,10 @@
       "gap_pct": 28.02,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "DB하이텍"
+      "name": "DB하이텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001040": {
       "vpoc_60d": 174535,
@@ -297,7 +372,10 @@
       "gap_pct": 19.39,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "CJ"
+      "name": "CJ",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "00104K": {
       "vpoc_60d": 156757,
@@ -309,7 +387,10 @@
       "gap_pct": 13.68,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "00104K"
+      "name": "00104K",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001060": {
       "vpoc_60d": 27265,
@@ -321,7 +402,10 @@
       "gap_pct": 26.26,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "JW중외제약"
+      "name": "JW중외제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001120": {
       "vpoc_60d": 32551,
@@ -333,7 +417,10 @@
       "gap_pct": 27.72,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LX인터내셔널"
+      "name": "LX인터내셔널",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001200": {
       "vpoc_60d": 3433,
@@ -345,7 +432,10 @@
       "gap_pct": 33.32,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "유진투자증권"
+      "name": "유진투자증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001270": {
       "vpoc_60d": 60278,
@@ -357,7 +447,10 @@
       "gap_pct": 39.67,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "부국증권"
+      "name": "부국증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001340": {
       "vpoc_60d": 5912,
@@ -369,7 +462,10 @@
       "gap_pct": 14.01,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "PKC"
+      "name": "PKC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001390": {
       "vpoc_60d": 5864,
@@ -381,7 +477,10 @@
       "gap_pct": 0.42,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "KG케미칼"
+      "name": "KG케미칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001430": {
       "vpoc_60d": 46102,
@@ -393,7 +492,10 @@
       "gap_pct": 32.64,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "세아베스틸지주"
+      "name": "세아베스틸지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001440": {
       "vpoc_60d": 22745,
@@ -405,7 +507,10 @@
       "gap_pct": 38.65,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "대한전선"
+      "name": "대한전선",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001450": {
       "vpoc_60d": 30274,
@@ -417,7 +522,10 @@
       "gap_pct": 12.95,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "현대해상"
+      "name": "현대해상",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001460": {
       "vpoc_60d": 56470,
@@ -429,7 +537,10 @@
       "gap_pct": 3.87,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "BYC"
+      "name": "BYC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001500": {
       "vpoc_60d": 13245,
@@ -441,7 +552,10 @@
       "gap_pct": 9.07,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대차증권"
+      "name": "현대차증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001510": {
       "vpoc_60d": 995,
@@ -453,7 +567,10 @@
       "gap_pct": 86.96,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SK증권"
+      "name": "SK증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001530": {
       "vpoc_60d": 19947,
@@ -465,7 +582,10 @@
       "gap_pct": 20.6,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "DI동일"
+      "name": "DI동일",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001570": {
       "vpoc_60d": null,
@@ -477,7 +597,10 @@
       "gap_pct": 0.0,
       "zone": "D-1",
       "confidence": 0.38,
-      "name": "금양"
+      "name": "금양",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001680": {
       "vpoc_60d": 21416,
@@ -489,7 +612,10 @@
       "gap_pct": 5.63,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "대상"
+      "name": "대상",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001720": {
       "vpoc_60d": 144107,
@@ -501,7 +627,10 @@
       "gap_pct": 45.31,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "신영증권"
+      "name": "신영증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001740": {
       "vpoc_60d": 5187,
@@ -513,7 +642,10 @@
       "gap_pct": 14.32,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "SK네트웍스"
+      "name": "SK네트웍스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001750": {
       "vpoc_60d": 19236,
@@ -525,7 +657,10 @@
       "gap_pct": 30.95,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한양증권"
+      "name": "한양증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001800": {
       "vpoc_60d": 20612,
@@ -537,7 +672,10 @@
       "gap_pct": 13.64,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "오리온홀딩스"
+      "name": "오리온홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "001820": {
       "vpoc_60d": 31014,
@@ -549,7 +687,10 @@
       "gap_pct": 50.92,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "삼화콘덴서"
+      "name": "삼화콘덴서",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002020": {
       "vpoc_60d": 51003,
@@ -561,7 +702,10 @@
       "gap_pct": 34.78,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "코오롱"
+      "name": "코오롱",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002310": {
       "vpoc_60d": 7709,
@@ -573,7 +717,10 @@
       "gap_pct": 24.55,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "아세아제지"
+      "name": "아세아제지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002350": {
       "vpoc_60d": 7830,
@@ -585,7 +732,10 @@
       "gap_pct": 16.92,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "넥센타이어"
+      "name": "넥센타이어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002380": {
       "vpoc_60d": 422735,
@@ -597,7 +747,10 @@
       "gap_pct": 49.35,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "KCC"
+      "name": "KCC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002710": {
       "vpoc_60d": 16189,
@@ -609,7 +762,10 @@
       "gap_pct": -3.18,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "TCC스틸"
+      "name": "TCC스틸",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002790": {
       "vpoc_60d": 28532,
@@ -621,7 +777,10 @@
       "gap_pct": 10.9,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "아모레퍼시픽홀딩스"
+      "name": "아모레퍼시픽홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002900": {
       "vpoc_60d": 6348,
@@ -633,7 +792,10 @@
       "gap_pct": 18.03,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "TYM"
+      "name": "TYM",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "002960": {
       "vpoc_60d": 434745,
@@ -645,7 +807,10 @@
       "gap_pct": 4.85,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "한국쉘석유"
+      "name": "한국쉘석유",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003000": {
       "vpoc_60d": 3944,
@@ -657,7 +822,10 @@
       "gap_pct": 21.3,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "부광약품"
+      "name": "부광약품",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003030": {
       "vpoc_60d": 139950,
@@ -669,7 +837,10 @@
       "gap_pct": 5.93,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "세아제강지주"
+      "name": "세아제강지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003090": {
       "vpoc_60d": 23907,
@@ -681,7 +852,10 @@
       "gap_pct": 13.6,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "대웅"
+      "name": "대웅",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003160": {
       "vpoc_60d": 21595,
@@ -693,7 +867,10 @@
       "gap_pct": 43.74,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "디아이"
+      "name": "디아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003230": {
       "vpoc_60d": 1184890,
@@ -705,7 +882,10 @@
       "gap_pct": 0.83,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "삼양식품"
+      "name": "삼양식품",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003240": {
       "vpoc_60d": 809860,
@@ -717,7 +897,10 @@
       "gap_pct": 69.47,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "태광산업"
+      "name": "태광산업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003280": {
       "vpoc_60d": 1712,
@@ -729,7 +912,10 @@
       "gap_pct": 4.29,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "흥아해운"
+      "name": "흥아해운",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003380": {
       "vpoc_60d": 10910,
@@ -741,7 +927,10 @@
       "gap_pct": 35.69,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "하림지주"
+      "name": "하림지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003410": {
       "vpoc_60d": 20043,
@@ -753,7 +942,10 @@
       "gap_pct": -7.71,
       "zone": "D-2",
       "confidence": 0.9,
-      "name": "003410"
+      "name": "003410",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003470": {
       "vpoc_60d": 3753,
@@ -765,7 +957,10 @@
       "gap_pct": 26.32,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "유안타증권"
+      "name": "유안타증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003490": {
       "vpoc_60d": 23800,
@@ -777,7 +972,10 @@
       "gap_pct": 16.78,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "대한항공"
+      "name": "대한항공",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003530": {
       "vpoc_60d": 4790,
@@ -789,7 +987,10 @@
       "gap_pct": 48.81,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한화투자증권"
+      "name": "한화투자증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003540": {
       "vpoc_60d": 27313,
@@ -801,7 +1002,10 @@
       "gap_pct": 50.25,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "대신증권"
+      "name": "대신증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003545": {
       "vpoc_60d": 20924,
@@ -813,7 +1017,10 @@
       "gap_pct": 27.26,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "대신증권우"
+      "name": "대신증권우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003550": {
       "vpoc_60d": 83221,
@@ -825,7 +1032,10 @@
       "gap_pct": 21.15,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "LG"
+      "name": "LG",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003570": {
       "vpoc_60d": 49440,
@@ -837,7 +1047,10 @@
       "gap_pct": 10.35,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "SNT다이내믹스"
+      "name": "SNT다이내믹스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003620": {
       "vpoc_60d": 3984,
@@ -849,7 +1062,10 @@
       "gap_pct": 6.04,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "KG모빌리티"
+      "name": "KG모빌리티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003670": {
       "vpoc_60d": 225475,
@@ -861,7 +1077,10 @@
       "gap_pct": 12.77,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "포스코퓨처엠"
+      "name": "포스코퓨처엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003690": {
       "vpoc_60d": 11593,
@@ -873,7 +1092,10 @@
       "gap_pct": 21.98,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "코리안리"
+      "name": "코리안리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "003850": {
       "vpoc_60d": 9174,
@@ -885,7 +1107,10 @@
       "gap_pct": 8.61,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "보령"
+      "name": "보령",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004000": {
       "vpoc_60d": 47018,
@@ -897,7 +1122,10 @@
       "gap_pct": 8.36,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "롯데정밀화학"
+      "name": "롯데정밀화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004020": {
       "vpoc_60d": 30672,
@@ -909,7 +1137,10 @@
       "gap_pct": 20.35,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대제철"
+      "name": "현대제철",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004170": {
       "vpoc_60d": 251565,
@@ -921,7 +1152,10 @@
       "gap_pct": 32.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "신세계"
+      "name": "신세계",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004310": {
       "vpoc_60d": 6668,
@@ -933,7 +1167,10 @@
       "gap_pct": 61.99,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대약품"
+      "name": "현대약품",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004370": {
       "vpoc_60d": 409350,
@@ -945,7 +1182,10 @@
       "gap_pct": 3.35,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "농심"
+      "name": "농심",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004490": {
       "vpoc_60d": 66903,
@@ -957,7 +1197,10 @@
       "gap_pct": 8.09,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "세방전지"
+      "name": "세방전지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004690": {
       "vpoc_60d": 130218,
@@ -969,7 +1212,10 @@
       "gap_pct": 16.15,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "삼천리"
+      "name": "삼천리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004800": {
       "vpoc_60d": 151275,
@@ -981,7 +1227,10 @@
       "gap_pct": 20.43,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "효성"
+      "name": "효성",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "004990": {
       "vpoc_60d": 28026,
@@ -993,7 +1242,10 @@
       "gap_pct": 20.87,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "롯데지주"
+      "name": "롯데지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005070": {
       "vpoc_60d": 51663,
@@ -1005,7 +1257,10 @@
       "gap_pct": 14.96,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "코스모신소재"
+      "name": "코스모신소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005090": {
       "vpoc_60d": 21240,
@@ -1017,7 +1272,10 @@
       "gap_pct": 63.01,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SGC에너지"
+      "name": "SGC에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005180": {
       "vpoc_60d": 75850,
@@ -1029,7 +1287,10 @@
       "gap_pct": 8.57,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "빙그레"
+      "name": "빙그레",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005290": {
       "vpoc_60d": 39792,
@@ -1041,7 +1302,10 @@
       "gap_pct": 29.09,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "동진쎄미켐"
+      "name": "동진쎄미켐",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005300": {
       "vpoc_60d": 140111,
@@ -1053,7 +1317,10 @@
       "gap_pct": 2.76,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "롯데칠성"
+      "name": "롯데칠성",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005380": {
       "vpoc_60d": 497715,
@@ -1065,7 +1332,10 @@
       "gap_pct": 36.37,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대차"
+      "name": "현대차",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005385": {
       "vpoc_60d": 274940,
@@ -1077,7 +1347,10 @@
       "gap_pct": 19.02,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대차우"
+      "name": "현대차우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005387": {
       "vpoc_60d": 279460,
@@ -1089,7 +1362,10 @@
       "gap_pct": 19.38,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대차2우B"
+      "name": "현대차2우B",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005389": {
       "vpoc_60d": 273649,
@@ -1101,7 +1377,10 @@
       "gap_pct": 15.53,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대차3우B"
+      "name": "현대차3우B",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005420": {
       "vpoc_60d": 17045,
@@ -1113,7 +1392,10 @@
       "gap_pct": 3.39,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "코스모화학"
+      "name": "코스모화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005440": {
       "vpoc_60d": 14394,
@@ -1125,7 +1407,10 @@
       "gap_pct": 29.98,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대지에프홀딩스"
+      "name": "현대지에프홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005490": {
       "vpoc_60d": 306520,
@@ -1137,7 +1422,10 @@
       "gap_pct": 23.71,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "POSCO홀딩스"
+      "name": "POSCO홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005690": {
       "vpoc_60d": 16912,
@@ -1149,7 +1437,10 @@
       "gap_pct": 5.05,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "파미셀"
+      "name": "파미셀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005830": {
       "vpoc_60d": 123180,
@@ -1161,7 +1452,10 @@
       "gap_pct": 55.41,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "DB손해보험"
+      "name": "DB손해보험",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005850": {
       "vpoc_60d": 43767,
@@ -1173,7 +1467,10 @@
       "gap_pct": 49.33,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에스엘"
+      "name": "에스엘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005880": {
       "vpoc_60d": 1901,
@@ -1185,7 +1482,10 @@
       "gap_pct": 13.65,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "대한해운"
+      "name": "대한해운",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005930": {
       "vpoc_60d": 139203,
@@ -1197,7 +1497,10 @@
       "gap_pct": 58.04,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼성전자"
+      "name": "삼성전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005935": {
       "vpoc_60d": 114750,
@@ -1209,7 +1512,10 @@
       "gap_pct": 37.6,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "삼성전자우"
+      "name": "삼성전자우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005940": {
       "vpoc_60d": 21018,
@@ -1221,7 +1527,10 @@
       "gap_pct": 56.36,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "NH투자증권"
+      "name": "NH투자증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "005945": {
       "vpoc_60d": 19467,
@@ -1233,7 +1542,10 @@
       "gap_pct": 23.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "NH투자증권우"
+      "name": "NH투자증권우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006040": {
       "vpoc_60d": 41450,
@@ -1245,7 +1557,10 @@
       "gap_pct": 0.87,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "동원산업"
+      "name": "동원산업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006110": {
       "vpoc_60d": 28752,
@@ -1257,7 +1572,10 @@
       "gap_pct": 11.78,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼아알미늄"
+      "name": "삼아알미늄",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006120": {
       "vpoc_60d": 60701,
@@ -1269,7 +1587,10 @@
       "gap_pct": 1.83,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SK디스커버리"
+      "name": "SK디스커버리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006220": {
       "vpoc_60d": 16472,
@@ -1281,7 +1602,10 @@
       "gap_pct": 4.44,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "제주은행"
+      "name": "제주은행",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006260": {
       "vpoc_60d": 188597,
@@ -1293,7 +1617,10 @@
       "gap_pct": 40.8,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "LS"
+      "name": "LS",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006280": {
       "vpoc_60d": 162562,
@@ -1305,7 +1632,10 @@
       "gap_pct": 3.17,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "녹십자"
+      "name": "녹십자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006340": {
       "vpoc_60d": 3771,
@@ -1317,7 +1647,10 @@
       "gap_pct": 47.8,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "대원전선"
+      "name": "대원전선",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006360": {
       "vpoc_60d": 18767,
@@ -1329,7 +1662,10 @@
       "gap_pct": 19.65,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "GS건설"
+      "name": "GS건설",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006400": {
       "vpoc_60d": 379780,
@@ -1341,7 +1677,10 @@
       "gap_pct": 22.9,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "삼성SDI"
+      "name": "삼성SDI",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006405": {
       "vpoc_60d": 208053,
@@ -1353,7 +1692,10 @@
       "gap_pct": 27.85,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "삼성SDI우"
+      "name": "삼성SDI우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006650": {
       "vpoc_60d": 146867,
@@ -1365,7 +1707,10 @@
       "gap_pct": 23.8,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "대한유화"
+      "name": "대한유화",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006730": {
       "vpoc_60d": 12698,
@@ -1377,7 +1722,10 @@
       "gap_pct": 17.07,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "서부T&D"
+      "name": "서부T&D",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006800": {
       "vpoc_60d": 22652,
@@ -1389,7 +1737,10 @@
       "gap_pct": 131.0,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "미래에셋증권"
+      "name": "미래에셋증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006805": {
       "vpoc_60d": 15118,
@@ -1401,7 +1752,10 @@
       "gap_pct": 55.83,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "미래에셋증권우"
+      "name": "미래에셋증권우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "00680K": {
       "vpoc_60d": 12394,
@@ -1413,7 +1767,10 @@
       "gap_pct": 57.88,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "00680K"
+      "name": "00680K",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "006910": {
       "vpoc_60d": 8302,
@@ -1425,7 +1782,10 @@
       "gap_pct": 39.22,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "보성파워텍"
+      "name": "보성파워텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007070": {
       "vpoc_60d": 22318,
@@ -1437,7 +1797,10 @@
       "gap_pct": 2.28,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "GS리테일"
+      "name": "GS리테일",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007310": {
       "vpoc_60d": 389205,
@@ -1449,7 +1812,10 @@
       "gap_pct": 2.41,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "오뚜기"
+      "name": "오뚜기",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007340": {
       "vpoc_60d": 25308,
@@ -1461,7 +1827,10 @@
       "gap_pct": 7.55,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "DN오토모티브"
+      "name": "DN오토모티브",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007390": {
       "vpoc_60d": 22194,
@@ -1473,7 +1842,10 @@
       "gap_pct": -3.46,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "네이처셀"
+      "name": "네이처셀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007660": {
       "vpoc_60d": 119875,
@@ -1485,7 +1857,10 @@
       "gap_pct": -1.33,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "이수페타시스"
+      "name": "이수페타시스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "007810": {
       "vpoc_60d": 36128,
@@ -1497,7 +1872,10 @@
       "gap_pct": 41.68,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "코리아써키트"
+      "name": "코리아써키트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "008730": {
       "vpoc_60d": 27782,
@@ -1509,7 +1887,10 @@
       "gap_pct": -1.81,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "율촌화학"
+      "name": "율촌화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "008770": {
       "vpoc_60d": 45738,
@@ -1521,7 +1902,10 @@
       "gap_pct": 3.04,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "호텔신라"
+      "name": "호텔신라",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "008930": {
       "vpoc_60d": 37272,
@@ -1533,7 +1917,10 @@
       "gap_pct": 14.86,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한미사이언스"
+      "name": "한미사이언스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009150": {
       "vpoc_60d": 264245,
@@ -1545,7 +1932,10 @@
       "gap_pct": 64.48,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "삼성전기"
+      "name": "삼성전기",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009155": {
       "vpoc_60d": 123684,
@@ -1557,7 +1947,10 @@
       "gap_pct": 48.64,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "삼성전기우"
+      "name": "삼성전기우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009240": {
       "vpoc_60d": 45922,
@@ -1569,7 +1962,10 @@
       "gap_pct": 11.06,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한샘"
+      "name": "한샘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009290": {
       "vpoc_60d": 5998,
@@ -1581,7 +1977,10 @@
       "gap_pct": 26.31,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "광동제약"
+      "name": "광동제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009420": {
       "vpoc_60d": 51730,
@@ -1593,7 +1992,10 @@
       "gap_pct": 20.76,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한올바이오파마"
+      "name": "한올바이오파마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009450": {
       "vpoc_60d": 56230,
@@ -1605,7 +2007,10 @@
       "gap_pct": 13.3,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "경동나비엔"
+      "name": "경동나비엔",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009520": {
       "vpoc_60d": 16196,
@@ -1617,7 +2022,10 @@
       "gap_pct": 18.14,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "포스코엠텍"
+      "name": "포스코엠텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009540": {
       "vpoc_60d": 421530,
@@ -1629,7 +2037,10 @@
       "gap_pct": 6.35,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "HD한국조선해양"
+      "name": "HD한국조선해양",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009830": {
       "vpoc_60d": 28052,
@@ -1641,7 +2052,10 @@
       "gap_pct": 47.39,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한화솔루션"
+      "name": "한화솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "009970": {
       "vpoc_60d": 187822,
@@ -1653,7 +2067,10 @@
       "gap_pct": 28.97,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "영원무역홀딩스"
+      "name": "영원무역홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010060": {
       "vpoc_60d": 115485,
@@ -1665,7 +2082,10 @@
       "gap_pct": 19.66,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "OCI홀딩스"
+      "name": "OCI홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010120": {
       "vpoc_60d": 503205,
@@ -1677,7 +2097,10 @@
       "gap_pct": 52.56,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LS ELECTRIC"
+      "name": "LS ELECTRIC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010130": {
       "vpoc_60d": 1183850,
@@ -1689,7 +2112,10 @@
       "gap_pct": 46.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "고려아연"
+      "name": "고려아연",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010140": {
       "vpoc_60d": 28265,
@@ -1701,7 +2127,10 @@
       "gap_pct": 2.85,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "삼성중공업"
+      "name": "삼성중공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010170": {
       "vpoc_60d": 3238,
@@ -1713,7 +2142,10 @@
       "gap_pct": 29.92,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "대한광통신"
+      "name": "대한광통신",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010620": {
       "vpoc_60d": null,
@@ -1725,7 +2157,10 @@
       "gap_pct": 13.34,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "010620"
+      "name": "010620",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010690": {
       "vpoc_60d": 9173,
@@ -1737,7 +2172,10 @@
       "gap_pct": 42.99,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "화신"
+      "name": "화신",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010780": {
       "vpoc_60d": 22721,
@@ -1749,7 +2187,10 @@
       "gap_pct": 31.62,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "아이에스동서"
+      "name": "아이에스동서",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "010950": {
       "vpoc_60d": 80751,
@@ -1761,7 +2202,10 @@
       "gap_pct": 30.45,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "S-Oil"
+      "name": "S-Oil",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011070": {
       "vpoc_60d": 275725,
@@ -1773,7 +2217,10 @@
       "gap_pct": 26.18,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "LG이노텍"
+      "name": "LG이노텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011170": {
       "vpoc_60d": 73577,
@@ -1785,7 +2232,10 @@
       "gap_pct": 18.74,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "롯데케미칼"
+      "name": "롯데케미칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011200": {
       "vpoc_60d": 20188,
@@ -1797,7 +2247,10 @@
       "gap_pct": 8.35,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "HMM"
+      "name": "HMM",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011210": {
       "vpoc_60d": 87473,
@@ -1809,7 +2262,10 @@
       "gap_pct": 11.4,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대위아"
+      "name": "현대위아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011500": {
       "vpoc_60d": 24778,
@@ -1821,7 +2277,10 @@
       "gap_pct": 12.53,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "한농화성"
+      "name": "한농화성",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011690": {
       "vpoc_60d": 4295,
@@ -1833,7 +2292,10 @@
       "gap_pct": 68.55,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "와이투솔루션"
+      "name": "와이투솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011760": {
       "vpoc_60d": 22340,
@@ -1845,7 +2307,10 @@
       "gap_pct": 22.07,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대코퍼레이션"
+      "name": "현대코퍼레이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011780": {
       "vpoc_60d": 122406,
@@ -1857,7 +2322,10 @@
       "gap_pct": 19.51,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "금호석유화학"
+      "name": "금호석유화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011790": {
       "vpoc_60d": 112690,
@@ -1869,7 +2337,10 @@
       "gap_pct": 0.34,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SKC"
+      "name": "SKC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "011930": {
       "vpoc_60d": 1626,
@@ -1881,7 +2352,10 @@
       "gap_pct": 15.91,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "신성이엔지"
+      "name": "신성이엔지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012030": {
       "vpoc_60d": 2104,
@@ -1893,7 +2367,10 @@
       "gap_pct": 8.16,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "DB"
+      "name": "DB",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012210": {
       "vpoc_60d": 8835,
@@ -1905,7 +2382,10 @@
       "gap_pct": 63.64,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "삼미금속"
+      "name": "삼미금속",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012330": {
       "vpoc_60d": 444605,
@@ -1917,7 +2397,10 @@
       "gap_pct": 24.07,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대모비스"
+      "name": "현대모비스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012450": {
       "vpoc_60d": 1294810,
@@ -1929,7 +2412,10 @@
       "gap_pct": 1.1,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "한화에어로스페이스"
+      "name": "한화에어로스페이스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012510": {
       "vpoc_60d": 118817,
@@ -1941,7 +2427,10 @@
       "gap_pct": 11.45,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "더존비즈온"
+      "name": "더존비즈온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012630": {
       "vpoc_60d": 18066,
@@ -1953,7 +2442,10 @@
       "gap_pct": 35.59,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "HDC"
+      "name": "HDC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "012750": {
       "vpoc_60d": 75797,
@@ -1965,7 +2457,10 @@
       "gap_pct": 15.99,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "에스원"
+      "name": "에스원",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "013030": {
       "vpoc_60d": 33102,
@@ -1977,7 +2472,10 @@
       "gap_pct": 15.87,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "하이록코리아"
+      "name": "하이록코리아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "014620": {
       "vpoc_60d": 26412,
@@ -1989,7 +2487,10 @@
       "gap_pct": 21.21,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "성광벤드"
+      "name": "성광벤드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "014680": {
       "vpoc_60d": 243210,
@@ -2001,7 +2502,10 @@
       "gap_pct": 31.13,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한솔케미칼"
+      "name": "한솔케미칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "015750": {
       "vpoc_60d": 7622,
@@ -2013,7 +2517,10 @@
       "gap_pct": 15.54,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "성우하이텍"
+      "name": "성우하이텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "015760": {
       "vpoc_60d": 50222,
@@ -2025,7 +2532,10 @@
       "gap_pct": 20.24,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한국전력"
+      "name": "한국전력",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "015860": {
       "vpoc_60d": 7223,
@@ -2037,7 +2547,10 @@
       "gap_pct": 23.66,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "일진홀딩스"
+      "name": "일진홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "016360": {
       "vpoc_60d": 79083,
@@ -2049,7 +2562,10 @@
       "gap_pct": 34.62,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼성증권"
+      "name": "삼성증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "016380": {
       "vpoc_60d": 5469,
@@ -2061,7 +2577,10 @@
       "gap_pct": 8.43,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "KG스틸"
+      "name": "KG스틸",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "016590": {
       "vpoc_60d": 14050,
@@ -2073,7 +2592,10 @@
       "gap_pct": 11.46,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "신대양제지"
+      "name": "신대양제지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "016610": {
       "vpoc_60d": 10748,
@@ -2085,7 +2607,10 @@
       "gap_pct": 32.61,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "DB증권"
+      "name": "DB증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "017670": {
       "vpoc_60d": 53486,
@@ -2097,7 +2622,10 @@
       "gap_pct": 36.68,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SK텔레콤"
+      "name": "SK텔레콤",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "017800": {
       "vpoc_60d": 89970,
@@ -2109,7 +2637,10 @@
       "gap_pct": 9.8,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "현대엘리베이터"
+      "name": "현대엘리베이터",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "017940": {
       "vpoc_60d": 86010,
@@ -2121,7 +2652,10 @@
       "gap_pct": 19.27,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "E1"
+      "name": "E1",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "017960": {
       "vpoc_60d": 34632,
@@ -2133,7 +2667,10 @@
       "gap_pct": 16.07,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국카본"
+      "name": "한국카본",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "018260": {
       "vpoc_60d": 175220,
@@ -2145,7 +2682,10 @@
       "gap_pct": 9.57,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼성에스디에스"
+      "name": "삼성에스디에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "018290": {
       "vpoc_60d": 19802,
@@ -2157,7 +2697,10 @@
       "gap_pct": -11.32,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "브이티"
+      "name": "브이티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "018670": {
       "vpoc_60d": 226850,
@@ -2169,7 +2712,10 @@
       "gap_pct": 3.32,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SK가스"
+      "name": "SK가스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "018880": {
       "vpoc_60d": 4610,
@@ -2181,7 +2727,10 @@
       "gap_pct": 9.67,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한온시스템"
+      "name": "한온시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "019170": {
       "vpoc_60d": 14539,
@@ -2193,7 +2742,10 @@
       "gap_pct": -14.51,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "신풍제약"
+      "name": "신풍제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "020000": {
       "vpoc_60d": 15501,
@@ -2205,7 +2757,10 @@
       "gap_pct": 32.39,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한섬"
+      "name": "한섬",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "020150": {
       "vpoc_60d": 40398,
@@ -2217,7 +2772,10 @@
       "gap_pct": 14.38,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "롯데에너지머티리얼즈"
+      "name": "롯데에너지머티리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "020560": {
       "vpoc_60d": 7748,
@@ -2229,7 +2787,10 @@
       "gap_pct": 0.39,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "아시아나항공"
+      "name": "아시아나항공",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "021240": {
       "vpoc_60d": 85977,
@@ -2241,7 +2802,10 @@
       "gap_pct": -1.6,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "코웨이"
+      "name": "코웨이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "022100": {
       "vpoc_60d": 40412,
@@ -2253,7 +2817,10 @@
       "gap_pct": 6.87,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "포스코DX"
+      "name": "포스코DX",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "023160": {
       "vpoc_60d": 27586,
@@ -2265,7 +2832,10 @@
       "gap_pct": 4.02,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "태광"
+      "name": "태광",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "023410": {
       "vpoc_60d": 3629,
@@ -2277,7 +2847,10 @@
       "gap_pct": 27.04,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "유진기업"
+      "name": "유진기업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "023530": {
       "vpoc_60d": 75630,
@@ -2289,7 +2862,10 @@
       "gap_pct": 26.69,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "롯데쇼핑"
+      "name": "롯데쇼핑",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "023590": {
       "vpoc_60d": 39308,
@@ -2301,7 +2877,10 @@
       "gap_pct": 34.3,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "다우기술"
+      "name": "다우기술",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "023760": {
       "vpoc_60d": 803,
@@ -2313,7 +2892,10 @@
       "gap_pct": 27.68,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한국캐피탈"
+      "name": "한국캐피탈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "024110": {
       "vpoc_60d": 20854,
@@ -2325,7 +2907,10 @@
       "gap_pct": 22.61,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "기업은행"
+      "name": "기업은행",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "024850": {
       "vpoc_60d": 3046,
@@ -2337,7 +2922,10 @@
       "gap_pct": 0.11,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "HLB이노베이션"
+      "name": "HLB이노베이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "025320": {
       "vpoc_60d": 6412,
@@ -2349,7 +2937,10 @@
       "gap_pct": 4.01,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "시노펙스"
+      "name": "시노펙스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "025540": {
       "vpoc_60d": 74216,
@@ -2361,7 +2952,10 @@
       "gap_pct": 13.94,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국단자"
+      "name": "한국단자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "025860": {
       "vpoc_60d": 6737,
@@ -2373,7 +2967,10 @@
       "gap_pct": 6.55,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "남해화학"
+      "name": "남해화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "025980": {
       "vpoc_60d": 7673,
@@ -2385,7 +2982,10 @@
       "gap_pct": 3.03,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "아난티"
+      "name": "아난티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "026960": {
       "vpoc_60d": 27458,
@@ -2397,7 +2997,10 @@
       "gap_pct": 1.59,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "동서"
+      "name": "동서",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "027360": {
       "vpoc_60d": 3512,
@@ -2409,7 +3012,10 @@
       "gap_pct": 26.41,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "아주IB투자"
+      "name": "아주IB투자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "028050": {
       "vpoc_60d": 25314,
@@ -2421,7 +3027,10 @@
       "gap_pct": 42.22,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "삼성E&A"
+      "name": "삼성E&A",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "028260": {
       "vpoc_60d": 243300,
@@ -2433,7 +3042,10 @@
       "gap_pct": 38.0,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "삼성물산"
+      "name": "삼성물산",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "028300": {
       "vpoc_60d": 52266,
@@ -2445,7 +3057,10 @@
       "gap_pct": -1.9,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "HLB"
+      "name": "HLB",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "028670": {
       "vpoc_60d": 3942,
@@ -2457,7 +3072,10 @@
       "gap_pct": 24.76,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "팬오션"
+      "name": "팬오션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "029780": {
       "vpoc_60d": 55625,
@@ -2469,7 +3087,10 @@
       "gap_pct": 12.59,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "삼성카드"
+      "name": "삼성카드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030000": {
       "vpoc_60d": 20874,
@@ -2481,7 +3102,10 @@
       "gap_pct": 3.66,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "제일기획"
+      "name": "제일기획",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030190": {
       "vpoc_60d": 16868,
@@ -2493,7 +3117,10 @@
       "gap_pct": 0.43,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "NICE평가정보"
+      "name": "NICE평가정보",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030200": {
       "vpoc_60d": 52825,
@@ -2505,7 +3132,10 @@
       "gap_pct": 15.79,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "KT"
+      "name": "KT",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030210": {
       "vpoc_60d": 3517,
@@ -2517,7 +3147,10 @@
       "gap_pct": 23.17,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "다올투자증권"
+      "name": "다올투자증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030520": {
       "vpoc_60d": 23271,
@@ -2529,7 +3162,10 @@
       "gap_pct": -2.82,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "한글과컴퓨터"
+      "name": "한글과컴퓨터",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030530": {
       "vpoc_60d": 34316,
@@ -2541,7 +3177,10 @@
       "gap_pct": 5.48,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "원익홀딩스"
+      "name": "원익홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "030610": {
       "vpoc_60d": 9729,
@@ -2553,7 +3192,10 @@
       "gap_pct": 40.91,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "교보증권"
+      "name": "교보증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "031210": {
       "vpoc_60d": 49838,
@@ -2565,7 +3207,10 @@
       "gap_pct": 15.85,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "서울보증보험"
+      "name": "서울보증보험",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "031330": {
       "vpoc_60d": 3865,
@@ -2577,7 +3222,10 @@
       "gap_pct": 36.98,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스에이엠티"
+      "name": "에스에이엠티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "031980": {
       "vpoc_60d": 51504,
@@ -2589,7 +3237,10 @@
       "gap_pct": 55.93,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "피에스케이홀딩스"
+      "name": "피에스케이홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032190": {
       "vpoc_60d": 18046,
@@ -2601,7 +3252,10 @@
       "gap_pct": 32.6,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "다우데이타"
+      "name": "다우데이타",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032350": {
       "vpoc_60d": 22521,
@@ -2613,7 +3267,10 @@
       "gap_pct": 4.15,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "롯데관광개발"
+      "name": "롯데관광개발",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032500": {
       "vpoc_60d": 15088,
@@ -2625,7 +3282,10 @@
       "gap_pct": 17.44,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "케이엠더블유"
+      "name": "케이엠더블유",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032640": {
       "vpoc_60d": 15256,
@@ -2637,7 +3297,10 @@
       "gap_pct": 15.7,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "LG유플러스"
+      "name": "LG유플러스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032820": {
       "vpoc_60d": 4042,
@@ -2649,7 +3312,10 @@
       "gap_pct": 142.4,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "우리기술"
+      "name": "우리기술",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "032830": {
       "vpoc_60d": 153770,
@@ -2661,7 +3327,10 @@
       "gap_pct": 42.95,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "삼성생명"
+      "name": "삼성생명",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033100": {
       "vpoc_60d": 37158,
@@ -2673,7 +3342,10 @@
       "gap_pct": 30.57,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "제룡전기"
+      "name": "제룡전기",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033240": {
       "vpoc_60d": 23264,
@@ -2685,7 +3357,10 @@
       "gap_pct": 62.57,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "자화전자"
+      "name": "자화전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033500": {
       "vpoc_60d": 28038,
@@ -2697,7 +3372,10 @@
       "gap_pct": 4.49,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "동성화인텍"
+      "name": "동성화인텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033640": {
       "vpoc_60d": 17908,
@@ -2709,7 +3387,10 @@
       "gap_pct": 10.42,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "네패스"
+      "name": "네패스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033780": {
       "vpoc_60d": 142825,
@@ -2721,7 +3402,10 @@
       "gap_pct": 15.79,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "KT&G"
+      "name": "KT&G",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "033790": {
       "vpoc_60d": 5372,
@@ -2733,7 +3417,10 @@
       "gap_pct": 12.31,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "피노"
+      "name": "피노",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "034020": {
       "vpoc_60d": 94146,
@@ -2745,7 +3432,10 @@
       "gap_pct": 13.3,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "두산에너빌리티"
+      "name": "두산에너빌리티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "034220": {
       "vpoc_60d": 11935,
@@ -2757,7 +3447,10 @@
       "gap_pct": 25.47,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LG디스플레이"
+      "name": "LG디스플레이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "034230": {
       "vpoc_60d": 17891,
@@ -2769,7 +3462,10 @@
       "gap_pct": 9.24,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "파라다이스"
+      "name": "파라다이스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "034730": {
       "vpoc_60d": 266530,
@@ -2781,7 +3477,10 @@
       "gap_pct": 48.12,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "SK"
+      "name": "SK",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "035250": {
       "vpoc_60d": 17961,
@@ -2793,7 +3492,10 @@
       "gap_pct": 7.37,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "강원랜드"
+      "name": "강원랜드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "035420": {
       "vpoc_60d": 248115,
@@ -2805,7 +3507,10 @@
       "gap_pct": 3.01,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "NAVER"
+      "name": "NAVER",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "035720": {
       "vpoc_60d": 58371,
@@ -2817,7 +3522,10 @@
       "gap_pct": 3.43,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "카카오"
+      "name": "카카오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "035760": {
       "vpoc_60d": 61679,
@@ -2829,7 +3537,10 @@
       "gap_pct": 9.78,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "CJ ENM"
+      "name": "CJ ENM",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "035900": {
       "vpoc_60d": 70965,
@@ -2841,7 +3552,10 @@
       "gap_pct": -2.52,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "JYP Ent."
+      "name": "JYP Ent.",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036200": {
       "vpoc_60d": 10760,
@@ -2853,7 +3567,10 @@
       "gap_pct": 6.38,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "유니셈"
+      "name": "유니셈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036460": {
       "vpoc_60d": 40849,
@@ -2865,7 +3582,10 @@
       "gap_pct": 6.78,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국가스공사"
+      "name": "한국가스공사",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036540": {
       "vpoc_60d": 7172,
@@ -2877,7 +3597,10 @@
       "gap_pct": 23.26,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "SFA반도체"
+      "name": "SFA반도체",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036570": {
       "vpoc_60d": 216038,
@@ -2889,7 +3612,10 @@
       "gap_pct": 6.69,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "엔씨소프트"
+      "name": "엔씨소프트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036620": {
       "vpoc_60d": 6512,
@@ -2901,7 +3627,10 @@
       "gap_pct": -1.18,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "감성코퍼레이션"
+      "name": "감성코퍼레이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036810": {
       "vpoc_60d": 30695,
@@ -2913,7 +3642,10 @@
       "gap_pct": 25.44,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에프에스티"
+      "name": "에프에스티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036830": {
       "vpoc_60d": 53736,
@@ -2925,7 +3657,10 @@
       "gap_pct": 8.69,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "솔브레인홀딩스"
+      "name": "솔브레인홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036890": {
       "vpoc_60d": 13763,
@@ -2937,7 +3672,10 @@
       "gap_pct": 9.12,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "진성티이씨"
+      "name": "진성티이씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "036930": {
       "vpoc_60d": 31878,
@@ -2949,7 +3687,10 @@
       "gap_pct": 57.63,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "주성엔지니어링"
+      "name": "주성엔지니어링",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "037270": {
       "vpoc_60d": 7219,
@@ -2961,7 +3702,10 @@
       "gap_pct": -0.2,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "YG PLUS"
+      "name": "YG PLUS",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "037460": {
       "vpoc_60d": 16814,
@@ -2973,7 +3717,10 @@
       "gap_pct": 40.94,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "삼지전자"
+      "name": "삼지전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "038500": {
       "vpoc_60d": null,
@@ -2985,7 +3732,10 @@
       "gap_pct": 47.76,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "삼표시멘트"
+      "name": "삼표시멘트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "039030": {
       "vpoc_60d": 373335,
@@ -2997,7 +3747,10 @@
       "gap_pct": 23.39,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "이오테크닉스"
+      "name": "이오테크닉스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "039130": {
       "vpoc_60d": 48790,
@@ -3009,7 +3762,10 @@
       "gap_pct": 0.6,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "하나투어"
+      "name": "하나투어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "039200": {
       "vpoc_60d": 44656,
@@ -3021,7 +3777,10 @@
       "gap_pct": 6.73,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "오스코텍"
+      "name": "오스코텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "039440": {
       "vpoc_60d": 30124,
@@ -3033,7 +3792,10 @@
       "gap_pct": 32.73,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스티아이"
+      "name": "에스티아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "039490": {
       "vpoc_60d": 282640,
@@ -3045,7 +3807,10 @@
       "gap_pct": 45.49,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "키움증권"
+      "name": "키움증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "041190": {
       "vpoc_60d": 8046,
@@ -3057,7 +3822,10 @@
       "gap_pct": -1.66,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "우리기술투자"
+      "name": "우리기술투자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "041510": {
       "vpoc_60d": 116033,
@@ -3069,7 +3837,10 @@
       "gap_pct": -1.51,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "에스엠"
+      "name": "에스엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "041920": {
       "vpoc_60d": 8151,
@@ -3081,7 +3852,10 @@
       "gap_pct": 85.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "메디아나"
+      "name": "메디아나",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "041960": {
       "vpoc_60d": 7002,
@@ -3093,7 +3867,10 @@
       "gap_pct": 22.9,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "코미팜"
+      "name": "코미팜",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "042000": {
       "vpoc_60d": 31568,
@@ -3105,7 +3882,10 @@
       "gap_pct": -2.29,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "카페24"
+      "name": "카페24",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "042520": {
       "vpoc_60d": 29425,
@@ -3117,7 +3897,10 @@
       "gap_pct": 61.56,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한스바이오메드"
+      "name": "한스바이오메드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "042660": {
       "vpoc_60d": 141153,
@@ -3129,7 +3912,10 @@
       "gap_pct": 2.58,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "한화오션"
+      "name": "한화오션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "042700": {
       "vpoc_60d": 119584,
@@ -3141,7 +3927,10 @@
       "gap_pct": 80.04,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한미반도체"
+      "name": "한미반도체",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "043260": {
       "vpoc_60d": 5083,
@@ -3153,7 +3942,10 @@
       "gap_pct": 177.51,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "성호전자"
+      "name": "성호전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "044490": {
       "vpoc_60d": 29226,
@@ -3165,7 +3957,10 @@
       "gap_pct": 13.92,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "태웅"
+      "name": "태웅",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "045100": {
       "vpoc_60d": 21318,
@@ -3177,7 +3972,10 @@
       "gap_pct": 39.65,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한양이엔지"
+      "name": "한양이엔지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "045390": {
       "vpoc_60d": 4259,
@@ -3189,7 +3987,10 @@
       "gap_pct": 6.1,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "대아티아이"
+      "name": "대아티아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "046890": {
       "vpoc_60d": 7474,
@@ -3201,7 +4002,10 @@
       "gap_pct": 55.96,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "서울반도체"
+      "name": "서울반도체",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "047040": {
       "vpoc_60d": 5008,
@@ -3213,7 +4017,10 @@
       "gap_pct": 76.47,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "대우건설"
+      "name": "대우건설",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "047050": {
       "vpoc_60d": 63263,
@@ -3225,7 +4032,10 @@
       "gap_pct": 22.31,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "포스코인터내셔널"
+      "name": "포스코인터내셔널",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "047810": {
       "vpoc_60d": 165523,
@@ -3237,7 +4047,10 @@
       "gap_pct": 21.81,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한국항공우주"
+      "name": "한국항공우주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "048410": {
       "vpoc_60d": 5488,
@@ -3249,7 +4062,10 @@
       "gap_pct": 91.58,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대바이오"
+      "name": "현대바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "049630": {
       "vpoc_60d": 4701,
@@ -3261,7 +4077,10 @@
       "gap_pct": 0.16,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "재영솔루텍"
+      "name": "재영솔루텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "050890": {
       "vpoc_60d": 8201,
@@ -3273,7 +4092,10 @@
       "gap_pct": 2.67,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "쏠리드"
+      "name": "쏠리드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "051370": {
       "vpoc_60d": 10680,
@@ -3285,7 +4107,10 @@
       "gap_pct": 11.14,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "인터플렉스"
+      "name": "인터플렉스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "051600": {
       "vpoc_60d": 57523,
@@ -3297,7 +4122,10 @@
       "gap_pct": 9.46,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한전KPS"
+      "name": "한전KPS",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "051900": {
       "vpoc_60d": 262680,
@@ -3309,7 +4137,10 @@
       "gap_pct": 0.82,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "LG생활건강"
+      "name": "LG생활건강",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "051910": {
       "vpoc_60d": 334145,
@@ -3321,7 +4152,10 @@
       "gap_pct": 15.11,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "LG화학"
+      "name": "LG화학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "051915": {
       "vpoc_60d": 162050,
@@ -3333,7 +4167,10 @@
       "gap_pct": 10.76,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "LG화학우"
+      "name": "LG화학우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "052020": {
       "vpoc_60d": 7330,
@@ -3345,7 +4182,10 @@
       "gap_pct": 15.26,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스티큐브"
+      "name": "에스티큐브",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "052400": {
       "vpoc_60d": 49550,
@@ -3357,7 +4197,10 @@
       "gap_pct": 30.56,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "코나아이"
+      "name": "코나아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "052690": {
       "vpoc_60d": 136993,
@@ -3369,7 +4212,10 @@
       "gap_pct": 27.83,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "한전기술"
+      "name": "한전기술",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "053030": {
       "vpoc_60d": 15230,
@@ -3381,7 +4227,10 @@
       "gap_pct": -1.95,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "바이넥스"
+      "name": "바이넥스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "053610": {
       "vpoc_60d": 51790,
@@ -3393,7 +4242,10 @@
       "gap_pct": 25.04,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "프로텍"
+      "name": "프로텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "053800": {
       "vpoc_60d": 63255,
@@ -3405,7 +4257,10 @@
       "gap_pct": 2.56,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "안랩"
+      "name": "안랩",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "055550": {
       "vpoc_60d": 78186,
@@ -3417,7 +4272,10 @@
       "gap_pct": 21.85,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "신한지주"
+      "name": "신한지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "056080": {
       "vpoc_60d": 14670,
@@ -3429,7 +4287,10 @@
       "gap_pct": 77.89,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "유진로봇"
+      "name": "유진로봇",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "056190": {
       "vpoc_60d": 23792,
@@ -3441,7 +4302,10 @@
       "gap_pct": 35.93,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에스에프에이"
+      "name": "에스에프에이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "057050": {
       "vpoc_60d": 55714,
@@ -3453,7 +4317,10 @@
       "gap_pct": 33.77,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대홈쇼핑"
+      "name": "현대홈쇼핑",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "058470": {
       "vpoc_60d": 65083,
@@ -3465,7 +4332,10 @@
       "gap_pct": 52.66,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "리노공업"
+      "name": "리노공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "058610": {
       "vpoc_60d": 81382,
@@ -3477,7 +4347,10 @@
       "gap_pct": 76.39,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스피지"
+      "name": "에스피지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "058820": {
       "vpoc_60d": 1993,
@@ -3489,7 +4362,10 @@
       "gap_pct": 1.41,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "CMG제약"
+      "name": "CMG제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "058970": {
       "vpoc_60d": 38622,
@@ -3501,7 +4377,10 @@
       "gap_pct": 6.28,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "엠로"
+      "name": "엠로",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "059090": {
       "vpoc_60d": 14000,
@@ -3513,7 +4392,10 @@
       "gap_pct": 13.41,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "미코"
+      "name": "미코",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "060250": {
       "vpoc_60d": 23313,
@@ -3525,7 +4407,10 @@
       "gap_pct": 1.79,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "NHN KCP"
+      "name": "NHN KCP",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "060280": {
       "vpoc_60d": 13682,
@@ -3537,7 +4422,10 @@
       "gap_pct": 18.66,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "큐렉소"
+      "name": "큐렉소",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "060310": {
       "vpoc_60d": 1510,
@@ -3549,7 +4437,10 @@
       "gap_pct": -13.19,
       "zone": "D-3",
       "confidence": 1.0,
-      "name": "3S"
+      "name": "3S",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "060370": {
       "vpoc_60d": 29408,
@@ -3561,7 +4452,10 @@
       "gap_pct": 7.5,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "LS마린솔루션"
+      "name": "LS마린솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "060720": {
       "vpoc_60d": 14408,
@@ -3573,7 +4467,10 @@
       "gap_pct": 22.15,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "KH바텍"
+      "name": "KH바텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "062040": {
       "vpoc_60d": 144859,
@@ -3585,7 +4482,10 @@
       "gap_pct": 16.07,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "산일전기"
+      "name": "산일전기",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064260": {
       "vpoc_60d": 9198,
@@ -3597,7 +4497,10 @@
       "gap_pct": -3.02,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "다날"
+      "name": "다날",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064350": {
       "vpoc_60d": 219573,
@@ -3609,7 +4512,10 @@
       "gap_pct": 3.67,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "현대로템"
+      "name": "현대로템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064400": {
       "vpoc_60d": 69865,
@@ -3621,7 +4527,10 @@
       "gap_pct": 7.57,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "LG씨엔에스"
+      "name": "LG씨엔에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064760": {
       "vpoc_60d": 144898,
@@ -3633,7 +4542,10 @@
       "gap_pct": 46.35,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "티씨케이"
+      "name": "티씨케이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064820": {
       "vpoc_60d": 10394,
@@ -3645,7 +4557,10 @@
       "gap_pct": 11.24,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "케이프"
+      "name": "케이프",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "064960": {
       "vpoc_60d": 36804,
@@ -3657,7 +4572,10 @@
       "gap_pct": 2.12,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SNT모티브"
+      "name": "SNT모티브",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "065350": {
       "vpoc_60d": 58905,
@@ -3669,7 +4587,10 @@
       "gap_pct": 12.98,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "신성델타테크"
+      "name": "신성델타테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "066570": {
       "vpoc_60d": 94530,
@@ -3681,7 +4602,10 @@
       "gap_pct": 43.7,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "LG전자"
+      "name": "LG전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "066575": {
       "vpoc_60d": 50388,
@@ -3693,7 +4617,10 @@
       "gap_pct": 31.03,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LG전자우"
+      "name": "LG전자우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "066970": {
       "vpoc_60d": 126864,
@@ -3705,7 +4632,10 @@
       "gap_pct": 3.41,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "엘앤에프"
+      "name": "엘앤에프",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "067160": {
       "vpoc_60d": 69905,
@@ -3717,7 +4647,10 @@
       "gap_pct": 1.13,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SOOP"
+      "name": "SOOP",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "067310": {
       "vpoc_60d": 24971,
@@ -3729,7 +4662,10 @@
       "gap_pct": 34.51,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "하나마이크론"
+      "name": "하나마이크론",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "067390": {
       "vpoc_60d": 604,
@@ -3741,7 +4677,10 @@
       "gap_pct": 34.68,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "아스트"
+      "name": "아스트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "067630": {
       "vpoc_60d": 4029,
@@ -3753,7 +4692,10 @@
       "gap_pct": -6.02,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "HLB생명과학"
+      "name": "HLB생명과학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "068270": {
       "vpoc_60d": 212416,
@@ -3765,7 +4707,10 @@
       "gap_pct": 14.47,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "셀트리온"
+      "name": "셀트리온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "068760": {
       "vpoc_60d": 60960,
@@ -3777,7 +4722,10 @@
       "gap_pct": 14.02,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "셀트리온제약"
+      "name": "셀트리온제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "069080": {
       "vpoc_60d": 14812,
@@ -3789,7 +4737,10 @@
       "gap_pct": -9.95,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "웹젠"
+      "name": "웹젠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "069260": {
       "vpoc_60d": 19627,
@@ -3801,7 +4752,10 @@
       "gap_pct": -0.8,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "TKG휴켐스"
+      "name": "TKG휴켐스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "069620": {
       "vpoc_60d": 167937,
@@ -3813,7 +4767,10 @@
       "gap_pct": 6.23,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "대웅제약"
+      "name": "대웅제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "069960": {
       "vpoc_60d": 91130,
@@ -3825,7 +4782,10 @@
       "gap_pct": 16.39,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "현대백화점"
+      "name": "현대백화점",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "071050": {
       "vpoc_60d": 161515,
@@ -3837,7 +4797,10 @@
       "gap_pct": 50.63,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한국금융지주"
+      "name": "한국금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "071055": {
       "vpoc_60d": 128256,
@@ -3849,7 +4812,10 @@
       "gap_pct": 33.49,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한국금융지주우"
+      "name": "한국금융지주우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "071320": {
       "vpoc_60d": 92427,
@@ -3861,7 +4827,10 @@
       "gap_pct": -5.63,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "지역난방공사"
+      "name": "지역난방공사",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "071970": {
       "vpoc_60d": 92700,
@@ -3873,7 +4842,10 @@
       "gap_pct": -4.77,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "HD현대마린엔진"
+      "name": "HD현대마린엔진",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "073240": {
       "vpoc_60d": 6088,
@@ -3885,7 +4857,10 @@
       "gap_pct": 14.89,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "금호타이어"
+      "name": "금호타이어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "074600": {
       "vpoc_60d": 22977,
@@ -3897,7 +4872,10 @@
       "gap_pct": 34.0,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "원익QnC"
+      "name": "원익QnC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "075580": {
       "vpoc_60d": 17857,
@@ -3909,7 +4887,10 @@
       "gap_pct": 3.15,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "세진중공업"
+      "name": "세진중공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "077360": {
       "vpoc_60d": 5960,
@@ -3921,7 +4902,10 @@
       "gap_pct": 63.01,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "덕산하이메탈"
+      "name": "덕산하이메탈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "077970": {
       "vpoc_60d": 37862,
@@ -3933,7 +4917,10 @@
       "gap_pct": -8.25,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "STX엔진"
+      "name": "STX엔진",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078020": {
       "vpoc_60d": 8124,
@@ -3945,7 +4932,10 @@
       "gap_pct": 10.56,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LS증권"
+      "name": "LS증권",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078160": {
       "vpoc_60d": 23280,
@@ -3957,7 +4947,10 @@
       "gap_pct": -2.07,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "메디포스트"
+      "name": "메디포스트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078340": {
       "vpoc_60d": 29691,
@@ -3969,7 +4962,10 @@
       "gap_pct": 11.12,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "컴투스"
+      "name": "컴투스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078350": {
       "vpoc_60d": 26998,
@@ -3981,7 +4977,10 @@
       "gap_pct": 6.1,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한양디지텍"
+      "name": "한양디지텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078600": {
       "vpoc_60d": 75553,
@@ -3993,7 +4992,10 @@
       "gap_pct": 25.98,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "대주전자재료"
+      "name": "대주전자재료",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "078930": {
       "vpoc_60d": 56466,
@@ -4005,7 +5007,10 @@
       "gap_pct": 19.12,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "GS"
+      "name": "GS",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "079160": {
       "vpoc_60d": 6003,
@@ -4017,7 +5022,10 @@
       "gap_pct": -5.76,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "CJ CGV"
+      "name": "CJ CGV",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "079370": {
       "vpoc_60d": 19285,
@@ -4029,7 +5037,10 @@
       "gap_pct": 0.07,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "제우스"
+      "name": "제우스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "079550": {
       "vpoc_60d": 379620,
@@ -4041,7 +5052,10 @@
       "gap_pct": 17.49,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "LIG넥스원"
+      "name": "LIG넥스원",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "079900": {
       "vpoc_60d": 61490,
@@ -4053,7 +5067,10 @@
       "gap_pct": -0.06,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "전진건설로봇"
+      "name": "전진건설로봇",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "080220": {
       "vpoc_60d": 30768,
@@ -4065,7 +5082,10 @@
       "gap_pct": 55.22,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "제주반도체"
+      "name": "제주반도체",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "080580": {
       "vpoc_60d": 10343,
@@ -4077,7 +5097,10 @@
       "gap_pct": 44.2,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "오킨스전자"
+      "name": "오킨스전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "081660": {
       "vpoc_60d": 44512,
@@ -4089,7 +5112,10 @@
       "gap_pct": 11.89,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "미스토홀딩스"
+      "name": "미스토홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "082270": {
       "vpoc_60d": 29439,
@@ -4101,7 +5127,10 @@
       "gap_pct": 42.01,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "젬백스"
+      "name": "젬백스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "082640": {
       "vpoc_60d": 7741,
@@ -4113,7 +5142,10 @@
       "gap_pct": -1.62,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "동양생명"
+      "name": "동양생명",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "082740": {
       "vpoc_60d": 53970,
@@ -4125,7 +5157,10 @@
       "gap_pct": 3.51,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "한화엔진"
+      "name": "한화엔진",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "082920": {
       "vpoc_60d": 20733,
@@ -4137,7 +5172,10 @@
       "gap_pct": 14.43,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "비츠로셀"
+      "name": "비츠로셀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "083450": {
       "vpoc_60d": 28382,
@@ -4149,7 +5187,10 @@
       "gap_pct": 14.99,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "GST"
+      "name": "GST",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "083650": {
       "vpoc_60d": 55338,
@@ -4161,7 +5202,10 @@
       "gap_pct": 46.2,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "비에이치아이"
+      "name": "비에이치아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "084370": {
       "vpoc_60d": 76354,
@@ -4173,7 +5217,10 @@
       "gap_pct": 58.36,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "유진테크"
+      "name": "유진테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "084690": {
       "vpoc_60d": 9681,
@@ -4185,7 +5232,10 @@
       "gap_pct": 5.68,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "대상홀딩스"
+      "name": "대상홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "084990": {
       "vpoc_60d": 6729,
@@ -4197,7 +5247,10 @@
       "gap_pct": -2.79,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "헬릭스미스"
+      "name": "헬릭스미스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "085620": {
       "vpoc_60d": 9327,
@@ -4209,7 +5262,10 @@
       "gap_pct": 39.81,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "미래에셋생명"
+      "name": "미래에셋생명",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "085660": {
       "vpoc_60d": 14787,
@@ -4221,7 +5277,10 @@
       "gap_pct": 30.76,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "차바이오텍"
+      "name": "차바이오텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086280": {
       "vpoc_60d": 254181,
@@ -4233,7 +5292,10 @@
       "gap_pct": 21.22,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "현대글로비스"
+      "name": "현대글로비스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086390": {
       "vpoc_60d": 20552,
@@ -4245,7 +5307,10 @@
       "gap_pct": 2.29,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "유니테스트"
+      "name": "유니테스트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086450": {
       "vpoc_60d": 18319,
@@ -4257,7 +5322,10 @@
       "gap_pct": 10.53,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "동국제약"
+      "name": "동국제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086520": {
       "vpoc_60d": 95866,
@@ -4269,7 +5337,10 @@
       "gap_pct": 62.37,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에코프로"
+      "name": "에코프로",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086790": {
       "vpoc_60d": 93135,
@@ -4281,7 +5352,10 @@
       "gap_pct": 26.48,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "하나금융지주"
+      "name": "하나금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "086900": {
       "vpoc_60d": 119716,
@@ -4293,7 +5367,10 @@
       "gap_pct": 4.8,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "메디톡스"
+      "name": "메디톡스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "087010": {
       "vpoc_60d": 248375,
@@ -4305,7 +5382,10 @@
       "gap_pct": 7.96,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "펩트론"
+      "name": "펩트론",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "088350": {
       "vpoc_60d": 5219,
@@ -4317,7 +5397,10 @@
       "gap_pct": 2.07,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "한화생명"
+      "name": "한화생명",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "088980": {
       "vpoc_60d": 11184,
@@ -4329,7 +5412,10 @@
       "gap_pct": 1.29,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "맥쿼리인프라"
+      "name": "맥쿼리인프라",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089010": {
       "vpoc_60d": 30838,
@@ -4341,7 +5427,10 @@
       "gap_pct": 8.33,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "켐트로닉스"
+      "name": "켐트로닉스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089030": {
       "vpoc_60d": 46222,
@@ -4353,7 +5442,10 @@
       "gap_pct": 1.37,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "테크윙"
+      "name": "테크윙",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089590": {
       "vpoc_60d": 5396,
@@ -4365,7 +5457,10 @@
       "gap_pct": 9.6,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "제주항공"
+      "name": "제주항공",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089890": {
       "vpoc_60d": 26221,
@@ -4377,7 +5472,10 @@
       "gap_pct": 1.15,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "코세스"
+      "name": "코세스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089970": {
       "vpoc_60d": 28512,
@@ -4389,7 +5487,10 @@
       "gap_pct": 44.72,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "브이엠"
+      "name": "브이엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "089980": {
       "vpoc_60d": 22491,
@@ -4401,7 +5502,10 @@
       "gap_pct": 3.99,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "상아프론테크"
+      "name": "상아프론테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "090360": {
       "vpoc_60d": 79344,
@@ -4413,7 +5517,10 @@
       "gap_pct": 2.25,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "로보스타"
+      "name": "로보스타",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "090430": {
       "vpoc_60d": 120082,
@@ -4425,7 +5532,10 @@
       "gap_pct": 19.72,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "아모레퍼시픽"
+      "name": "아모레퍼시픽",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "090435": {
       "vpoc_60d": 44502,
@@ -4437,7 +5547,10 @@
       "gap_pct": 12.99,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "아모레퍼시픽우"
+      "name": "아모레퍼시픽우",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "090460": {
       "vpoc_60d": 18435,
@@ -4449,7 +5562,10 @@
       "gap_pct": 9.52,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "비에이치"
+      "name": "비에이치",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "090710": {
       "vpoc_60d": null,
@@ -4461,7 +5577,10 @@
       "gap_pct": 30.26,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "휴림로봇"
+      "name": "휴림로봇",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "091700": {
       "vpoc_60d": 7246,
@@ -4473,7 +5592,10 @@
       "gap_pct": 15.66,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "파트론"
+      "name": "파트론",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "092200": {
       "vpoc_60d": 11924,
@@ -4485,7 +5607,10 @@
       "gap_pct": -10.17,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "디아이씨"
+      "name": "디아이씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "092790": {
       "vpoc_60d": 11769,
@@ -4497,7 +5622,10 @@
       "gap_pct": -1.85,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "넥스틸"
+      "name": "넥스틸",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "092870": {
       "vpoc_60d": 15435,
@@ -4509,7 +5637,10 @@
       "gap_pct": 76.3,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "엑시콘"
+      "name": "엑시콘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "093370": {
       "vpoc_60d": 8236,
@@ -4521,7 +5652,10 @@
       "gap_pct": 0.54,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "후성"
+      "name": "후성",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "093520": {
       "vpoc_60d": 22062,
@@ -4533,7 +5667,10 @@
       "gap_pct": 38.81,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "매커스"
+      "name": "매커스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "094170": {
       "vpoc_60d": 28178,
@@ -4545,7 +5682,10 @@
       "gap_pct": 4.1,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "동운아나텍"
+      "name": "동운아나텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "094360": {
       "vpoc_60d": 19033,
@@ -4557,7 +5697,10 @@
       "gap_pct": 0.43,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "칩스앤미디어"
+      "name": "칩스앤미디어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "094480": {
       "vpoc_60d": 10970,
@@ -4569,7 +5712,10 @@
       "gap_pct": -2.31,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "갤럭시아머니트리"
+      "name": "갤럭시아머니트리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "095340": {
       "vpoc_60d": 107323,
@@ -4581,7 +5727,10 @@
       "gap_pct": 60.55,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "ISC"
+      "name": "ISC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "095500": {
       "vpoc_60d": 12260,
@@ -4593,7 +5742,10 @@
       "gap_pct": -2.42,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "미래나노텍"
+      "name": "미래나노텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "095610": {
       "vpoc_60d": 52636,
@@ -4605,7 +5757,10 @@
       "gap_pct": 40.03,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "테스"
+      "name": "테스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "095660": {
       "vpoc_60d": 25625,
@@ -4617,7 +5772,10 @@
       "gap_pct": -1.52,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "네오위즈"
+      "name": "네오위즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "096530": {
       "vpoc_60d": 24148,
@@ -4629,7 +5787,10 @@
       "gap_pct": 6.19,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "씨젠"
+      "name": "씨젠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "096770": {
       "vpoc_60d": 112566,
@@ -4641,7 +5802,10 @@
       "gap_pct": 13.72,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "SK이노베이션"
+      "name": "SK이노베이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "097230": {
       "vpoc_60d": 25168,
@@ -4653,7 +5817,10 @@
       "gap_pct": 1.21,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "HJ중공업"
+      "name": "HJ중공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "097520": {
       "vpoc_60d": 30059,
@@ -4665,7 +5832,10 @@
       "gap_pct": -6.44,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "엠씨넥스"
+      "name": "엠씨넥스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "097950": {
       "vpoc_60d": 210850,
@@ -4677,7 +5847,10 @@
       "gap_pct": 0.85,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "CJ제일제당"
+      "name": "CJ제일제당",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "098070": {
       "vpoc_60d": 34664,
@@ -4689,7 +5862,10 @@
       "gap_pct": 2.98,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "한텍"
+      "name": "한텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "098460": {
       "vpoc_60d": 27661,
@@ -4701,7 +5877,10 @@
       "gap_pct": 17.73,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "고영"
+      "name": "고영",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "099190": {
       "vpoc_60d": 16030,
@@ -4713,7 +5892,10 @@
       "gap_pct": 34.17,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "아이센스"
+      "name": "아이센스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "099320": {
       "vpoc_60d": 59018,
@@ -4725,7 +5907,10 @@
       "gap_pct": 107.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "쎄트렉아이"
+      "name": "쎄트렉아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "099430": {
       "vpoc_60d": 5112,
@@ -4737,7 +5922,10 @@
       "gap_pct": -3.04,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "바이오플러스"
+      "name": "바이오플러스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "099440": {
       "vpoc_60d": 6784,
@@ -4749,7 +5937,10 @@
       "gap_pct": -9.16,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "스맥"
+      "name": "스맥",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "100090": {
       "vpoc_60d": 20078,
@@ -4761,7 +5952,10 @@
       "gap_pct": -2.11,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "SK오션플랜트"
+      "name": "SK오션플랜트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "100790": {
       "vpoc_60d": 12900,
@@ -4773,7 +5967,10 @@
       "gap_pct": 45.44,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "미래에셋벤처투자"
+      "name": "미래에셋벤처투자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "100840": {
       "vpoc_60d": 38588,
@@ -4785,7 +5982,10 @@
       "gap_pct": 12.41,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SNT에너지"
+      "name": "SNT에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "101160": {
       "vpoc_60d": 22458,
@@ -4797,7 +5997,10 @@
       "gap_pct": 33.86,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "월덱스"
+      "name": "월덱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "101360": {
       "vpoc_60d": 21107,
@@ -4809,7 +6012,10 @@
       "gap_pct": -0.05,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "에코앤드림"
+      "name": "에코앤드림",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "101490": {
       "vpoc_60d": 65154,
@@ -4821,7 +6027,10 @@
       "gap_pct": 40.37,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스앤에스텍"
+      "name": "에스앤에스텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "102710": {
       "vpoc_60d": 46286,
@@ -4833,7 +6042,10 @@
       "gap_pct": 23.06,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "이엔에프테크놀로지"
+      "name": "이엔에프테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "102940": {
       "vpoc_60d": 51438,
@@ -4845,7 +6057,10 @@
       "gap_pct": 22.88,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "코오롱생명과학"
+      "name": "코오롱생명과학",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "103140": {
       "vpoc_60d": 123113,
@@ -4857,7 +6072,10 @@
       "gap_pct": -5.18,
       "zone": "D-2",
       "confidence": 0.9,
-      "name": "풍산"
+      "name": "풍산",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "103590": {
       "vpoc_60d": 62600,
@@ -4869,7 +6087,10 @@
       "gap_pct": 39.32,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "일진전기"
+      "name": "일진전기",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "104830": {
       "vpoc_60d": 31282,
@@ -4881,7 +6102,10 @@
       "gap_pct": 38.93,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "원익머트리얼즈"
+      "name": "원익머트리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "105560": {
       "vpoc_60d": 124977,
@@ -4893,7 +6117,10 @@
       "gap_pct": 26.72,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "KB금융"
+      "name": "KB금융",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "105630": {
       "vpoc_60d": 13786,
@@ -4905,7 +6132,10 @@
       "gap_pct": 4.76,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "한세실업"
+      "name": "한세실업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "105840": {
       "vpoc_60d": 18550,
@@ -4917,7 +6147,10 @@
       "gap_pct": 31.41,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "우진"
+      "name": "우진",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "107640": {
       "vpoc_60d": 50390,
@@ -4929,7 +6162,10 @@
       "gap_pct": 5.43,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한중엔시에스"
+      "name": "한중엔시에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "108320": {
       "vpoc_60d": 50854,
@@ -4941,7 +6177,10 @@
       "gap_pct": 14.85,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LX세미콘"
+      "name": "LX세미콘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "108490": {
       "vpoc_60d": 278830,
@@ -4953,7 +6192,10 @@
       "gap_pct": 8.26,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "로보티즈"
+      "name": "로보티즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "108860": {
       "vpoc_60d": 12360,
@@ -4965,7 +6207,10 @@
       "gap_pct": -5.9,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "셀바스AI"
+      "name": "셀바스AI",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "110990": {
       "vpoc_60d": 17629,
@@ -4977,7 +6222,10 @@
       "gap_pct": 32.8,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "디아이티"
+      "name": "디아이티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "111770": {
       "vpoc_60d": 89795,
@@ -4989,7 +6237,10 @@
       "gap_pct": 6.2,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "영원무역"
+      "name": "영원무역",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "112040": {
       "vpoc_60d": 28448,
@@ -5001,7 +6252,10 @@
       "gap_pct": -7.54,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "위메이드"
+      "name": "위메이드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "112610": {
       "vpoc_60d": 40281,
@@ -5013,7 +6267,10 @@
       "gap_pct": 21.66,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "씨에스윈드"
+      "name": "씨에스윈드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "114090": {
       "vpoc_60d": 13458,
@@ -5025,7 +6282,10 @@
       "gap_pct": -3.08,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "GKL"
+      "name": "GKL",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "114190": {
       "vpoc_60d": 16210,
@@ -5037,7 +6297,10 @@
       "gap_pct": -3.53,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "강원에너지"
+      "name": "강원에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "114810": {
       "vpoc_60d": 12523,
@@ -5049,7 +6312,10 @@
       "gap_pct": 19.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한솔아이원스"
+      "name": "한솔아이원스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "115180": {
       "vpoc_60d": 29152,
@@ -5061,7 +6327,10 @@
       "gap_pct": 14.29,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "큐리언트"
+      "name": "큐리언트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "117730": {
       "vpoc_60d": 18228,
@@ -5073,7 +6342,10 @@
       "gap_pct": 24.18,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "티로보틱스"
+      "name": "티로보틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "119850": {
       "vpoc_60d": 34350,
@@ -5085,7 +6357,10 @@
       "gap_pct": 10.49,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "지엔씨에너지"
+      "name": "지엔씨에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "120110": {
       "vpoc_60d": 45494,
@@ -5097,7 +6372,10 @@
       "gap_pct": 40.49,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "코오롱인더"
+      "name": "코오롱인더",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "121600": {
       "vpoc_60d": 70700,
@@ -5109,7 +6387,10 @@
       "gap_pct": 7.9,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "나노신소재"
+      "name": "나노신소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "122640": {
       "vpoc_60d": 19060,
@@ -5121,7 +6402,10 @@
       "gap_pct": 25.02,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "예스티"
+      "name": "예스티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "122870": {
       "vpoc_60d": 70765,
@@ -5133,7 +6417,10 @@
       "gap_pct": 0.69,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "와이지엔터테인먼트"
+      "name": "와이지엔터테인먼트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "123890": {
       "vpoc_60d": 2516,
@@ -5145,7 +6432,10 @@
       "gap_pct": 12.82,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한국자산신탁"
+      "name": "한국자산신탁",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "124500": {
       "vpoc_60d": 31592,
@@ -5157,7 +6447,10 @@
       "gap_pct": 81.91,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "아이티센글로벌"
+      "name": "아이티센글로벌",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "126340": {
       "vpoc_60d": 71500,
@@ -5169,7 +6462,10 @@
       "gap_pct": 60.49,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "비나텍"
+      "name": "비나텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "126720": {
       "vpoc_60d": 25880,
@@ -5181,7 +6477,10 @@
       "gap_pct": 11.45,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "수산인더스트리"
+      "name": "수산인더스트리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "127120": {
       "vpoc_60d": 17128,
@@ -5193,7 +6492,10 @@
       "gap_pct": 78.25,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "제이에스링크"
+      "name": "제이에스링크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "128820": {
       "vpoc_60d": 8788,
@@ -5205,7 +6507,10 @@
       "gap_pct": 7.4,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "대성산업"
+      "name": "대성산업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "128940": {
       "vpoc_60d": 433400,
@@ -5217,7 +6522,10 @@
       "gap_pct": 27.82,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한미약품"
+      "name": "한미약품",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "130660": {
       "vpoc_60d": 21976,
@@ -5229,7 +6537,10 @@
       "gap_pct": 20.24,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한전산업"
+      "name": "한전산업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "131290": {
       "vpoc_60d": 58660,
@@ -5241,7 +6552,10 @@
       "gap_pct": 43.01,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "티에스이"
+      "name": "티에스이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "131970": {
       "vpoc_60d": 52640,
@@ -5253,7 +6567,10 @@
       "gap_pct": 31.52,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "두산테스나"
+      "name": "두산테스나",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "136480": {
       "vpoc_60d": 3025,
@@ -5265,7 +6582,10 @@
       "gap_pct": 2.96,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "하림"
+      "name": "하림",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "137310": {
       "vpoc_60d": 8982,
@@ -5277,7 +6597,10 @@
       "gap_pct": -5.13,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "에스디바이오센서"
+      "name": "에스디바이오센서",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "137400": {
       "vpoc_60d": 52775,
@@ -5289,7 +6612,10 @@
       "gap_pct": 10.27,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "피엔티"
+      "name": "피엔티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "138930": {
       "vpoc_60d": 15461,
@@ -5301,7 +6627,10 @@
       "gap_pct": 25.74,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "BNK금융지주"
+      "name": "BNK금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "139130": {
       "vpoc_60d": 14511,
@@ -5313,7 +6642,10 @@
       "gap_pct": 26.01,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "iM금융지주"
+      "name": "iM금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "139480": {
       "vpoc_60d": 83165,
@@ -5325,7 +6657,10 @@
       "gap_pct": 15.53,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "이마트"
+      "name": "이마트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "140410": {
       "vpoc_60d": 91735,
@@ -5337,7 +6672,10 @@
       "gap_pct": 33.15,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "메지온"
+      "name": "메지온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "140860": {
       "vpoc_60d": 231795,
@@ -5349,7 +6687,10 @@
       "gap_pct": 18.13,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "파크시스템스"
+      "name": "파크시스템스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "141080": {
       "vpoc_60d": 174359,
@@ -5361,7 +6702,10 @@
       "gap_pct": 6.89,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "리가켐바이오"
+      "name": "리가켐바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "145020": {
       "vpoc_60d": 233980,
@@ -5373,7 +6717,10 @@
       "gap_pct": 7.01,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "휴젤"
+      "name": "휴젤",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "145720": {
       "vpoc_60d": 48557,
@@ -5385,7 +6732,10 @@
       "gap_pct": 3.48,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "덴티움"
+      "name": "덴티움",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "151860": {
       "vpoc_60d": 6451,
@@ -5397,7 +6747,10 @@
       "gap_pct": 6.26,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "KG에코솔루션"
+      "name": "KG에코솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "160190": {
       "vpoc_60d": 62372,
@@ -5409,7 +6762,10 @@
       "gap_pct": 10.43,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "하이젠알앤엠"
+      "name": "하이젠알앤엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "161000": {
       "vpoc_60d": 10243,
@@ -5421,7 +6777,10 @@
       "gap_pct": 5.73,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "애경케미칼"
+      "name": "애경케미칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "161390": {
       "vpoc_60d": 60690,
@@ -5433,7 +6792,10 @@
       "gap_pct": 23.74,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국타이어앤테크놀로지"
+      "name": "한국타이어앤테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "161580": {
       "vpoc_60d": 44784,
@@ -5445,7 +6807,10 @@
       "gap_pct": 18.15,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "필옵틱스"
+      "name": "필옵틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "161890": {
       "vpoc_60d": 64925,
@@ -5457,7 +6822,10 @@
       "gap_pct": 11.96,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "한국콜마"
+      "name": "한국콜마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "166090": {
       "vpoc_60d": 43774,
@@ -5469,7 +6837,10 @@
       "gap_pct": 31.59,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "하나머티리얼즈"
+      "name": "하나머티리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "168360": {
       "vpoc_60d": 16107,
@@ -5481,7 +6852,10 @@
       "gap_pct": 76.32,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "펨트론"
+      "name": "펨트론",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "170920": {
       "vpoc_60d": 26834,
@@ -5493,7 +6867,10 @@
       "gap_pct": 1.95,
       "zone": "도달",
       "confidence": 0.65,
-      "name": "엘티씨"
+      "name": "엘티씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "171090": {
       "vpoc_60d": 57435,
@@ -5505,7 +6882,10 @@
       "gap_pct": 86.52,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "선익시스템"
+      "name": "선익시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "174900": {
       "vpoc_60d": 38850,
@@ -5517,7 +6897,10 @@
       "gap_pct": 42.0,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "앱클론"
+      "name": "앱클론",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "175330": {
       "vpoc_60d": 24750,
@@ -5529,7 +6912,10 @@
       "gap_pct": 19.94,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "JB금융지주"
+      "name": "JB금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "178320": {
       "vpoc_60d": 37548,
@@ -5541,7 +6927,10 @@
       "gap_pct": 10.93,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "서진시스템"
+      "name": "서진시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "178920": {
       "vpoc_60d": 19687,
@@ -5553,7 +6942,10 @@
       "gap_pct": 10.72,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "PI첨단소재"
+      "name": "PI첨단소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "179900": {
       "vpoc_60d": 24101,
@@ -5565,7 +6957,10 @@
       "gap_pct": -6.98,
       "zone": "D-2",
       "confidence": 0.9,
-      "name": "유티아이"
+      "name": "유티아이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "180640": {
       "vpoc_60d": 119252,
@@ -5577,7 +6972,10 @@
       "gap_pct": 38.75,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한진칼"
+      "name": "한진칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "181710": {
       "vpoc_60d": 32506,
@@ -5589,7 +6987,10 @@
       "gap_pct": 17.87,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "NHN"
+      "name": "NHN",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "183300": {
       "vpoc_60d": 87869,
@@ -5601,7 +7002,10 @@
       "gap_pct": 18.45,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "코미코"
+      "name": "코미코",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "185750": {
       "vpoc_60d": 86911,
@@ -5613,7 +7017,10 @@
       "gap_pct": 6.62,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "종근당"
+      "name": "종근당",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "187660": {
       "vpoc_60d": null,
@@ -5625,7 +7032,10 @@
       "gap_pct": 125.76,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "현대ADM"
+      "name": "현대ADM",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "189300": {
       "vpoc_60d": 71240,
@@ -5637,7 +7047,10 @@
       "gap_pct": 59.37,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "인텔리안테크"
+      "name": "인텔리안테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "190510": {
       "vpoc_60d": 24545,
@@ -5649,7 +7062,10 @@
       "gap_pct": -0.2,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "나무가"
+      "name": "나무가",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "192080": {
       "vpoc_60d": 53531,
@@ -5661,7 +7077,10 @@
       "gap_pct": 1.76,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "더블유게임즈"
+      "name": "더블유게임즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "192650": {
       "vpoc_60d": 7140,
@@ -5673,7 +7092,10 @@
       "gap_pct": 7.12,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "드림텍"
+      "name": "드림텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "192820": {
       "vpoc_60d": 163186,
@@ -5685,7 +7107,10 @@
       "gap_pct": 7.53,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "코스맥스"
+      "name": "코스맥스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "194480": {
       "vpoc_60d": 37062,
@@ -5697,7 +7122,10 @@
       "gap_pct": 3.22,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "데브시스터즈"
+      "name": "데브시스터즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "195870": {
       "vpoc_60d": 54598,
@@ -5709,7 +7137,10 @@
       "gap_pct": 19.08,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "해성디에스"
+      "name": "해성디에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "195940": {
       "vpoc_60d": 51887,
@@ -5721,7 +7152,10 @@
       "gap_pct": 5.57,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "HK이노엔"
+      "name": "HK이노엔",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "196170": {
       "vpoc_60d": 438000,
@@ -5733,7 +7167,10 @@
       "gap_pct": -8.72,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "알테오젠"
+      "name": "알테오젠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "199430": {
       "vpoc_60d": 25590,
@@ -5745,7 +7182,10 @@
       "gap_pct": 25.63,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "케이엔알시스템"
+      "name": "케이엔알시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "200470": {
       "vpoc_60d": 7806,
@@ -5757,7 +7197,10 @@
       "gap_pct": 20.73,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에이팩트"
+      "name": "에이팩트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "200670": {
       "vpoc_60d": 42026,
@@ -5769,7 +7212,10 @@
       "gap_pct": 3.36,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "휴메딕스"
+      "name": "휴메딕스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "200710": {
       "vpoc_60d": 35891,
@@ -5781,7 +7227,10 @@
       "gap_pct": 34.46,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "에이디테크놀로지"
+      "name": "에이디테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "200880": {
       "vpoc_60d": 16486,
@@ -5793,7 +7242,10 @@
       "gap_pct": 5.48,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "서연이화"
+      "name": "서연이화",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "203400": {
       "vpoc_60d": 3590,
@@ -5805,7 +7257,10 @@
       "gap_pct": -7.41,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "에이비온"
+      "name": "에이비온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "204270": {
       "vpoc_60d": 20892,
@@ -5817,7 +7272,10 @@
       "gap_pct": 11.14,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "제이앤티씨"
+      "name": "제이앤티씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "204320": {
       "vpoc_60d": 60055,
@@ -5829,7 +7287,10 @@
       "gap_pct": 6.55,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "HL만도"
+      "name": "HL만도",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "204620": {
       "vpoc_60d": 4737,
@@ -5841,7 +7302,10 @@
       "gap_pct": 6.39,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "글로벌텍스프리"
+      "name": "글로벌텍스프리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "206650": {
       "vpoc_60d": 13712,
@@ -5853,7 +7317,10 @@
       "gap_pct": 13.27,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "유바이오로직스"
+      "name": "유바이오로직스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "207940": {
       "vpoc_60d": 1731060,
@@ -5865,7 +7332,10 @@
       "gap_pct": 1.05,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "삼성바이오로직스"
+      "name": "삼성바이오로직스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "211050": {
       "vpoc_60d": 15173,
@@ -5877,7 +7347,10 @@
       "gap_pct": -5.48,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "인카금융서비스"
+      "name": "인카금융서비스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "213420": {
       "vpoc_60d": 38018,
@@ -5889,7 +7362,10 @@
       "gap_pct": 11.67,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "덕산네오룩스"
+      "name": "덕산네오룩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214150": {
       "vpoc_60d": 59246,
@@ -5901,7 +7377,10 @@
       "gap_pct": -3.33,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "클래시스"
+      "name": "클래시스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214180": {
       "vpoc_60d": 20008,
@@ -5913,7 +7392,10 @@
       "gap_pct": 8.05,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "헥토이노베이션"
+      "name": "헥토이노베이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214320": {
       "vpoc_60d": 18819,
@@ -5925,7 +7407,10 @@
       "gap_pct": 5.84,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "이노션"
+      "name": "이노션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214370": {
       "vpoc_60d": 72632,
@@ -5937,7 +7422,10 @@
       "gap_pct": 62.11,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "케어젠"
+      "name": "케어젠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214430": {
       "vpoc_60d": 79580,
@@ -5949,7 +7437,10 @@
       "gap_pct": 20.64,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "아이쓰리시스템"
+      "name": "아이쓰리시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "214450": {
       "vpoc_60d": 349350,
@@ -5961,7 +7452,10 @@
       "gap_pct": -9.15,
       "zone": "D-2",
       "confidence": 0.65,
-      "name": "파마리서치"
+      "name": "파마리서치",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "215000": {
       "vpoc_60d": 60813,
@@ -5973,7 +7467,10 @@
       "gap_pct": -2.95,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "골프존"
+      "name": "골프존",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "215200": {
       "vpoc_60d": 44406,
@@ -5985,7 +7482,10 @@
       "gap_pct": 9.3,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "메가스터디교육"
+      "name": "메가스터디교육",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "215600": {
       "vpoc_60d": 3480,
@@ -5997,7 +7497,10 @@
       "gap_pct": 3.51,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "신라젠"
+      "name": "신라젠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "216080": {
       "vpoc_60d": 9953,
@@ -6009,7 +7512,10 @@
       "gap_pct": 12.02,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "제테마"
+      "name": "제테마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "218410": {
       "vpoc_60d": 34939,
@@ -6021,7 +7527,10 @@
       "gap_pct": 49.48,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "RFHIC"
+      "name": "RFHIC",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "220100": {
       "vpoc_60d": 30927,
@@ -6033,7 +7542,10 @@
       "gap_pct": -21.92,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "퓨쳐켐"
+      "name": "퓨쳐켐",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "221800": {
       "vpoc_60d": null,
@@ -6045,7 +7557,10 @@
       "gap_pct": 102.47,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "유투바이오"
+      "name": "유투바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "222080": {
       "vpoc_60d": 13465,
@@ -6057,7 +7572,10 @@
       "gap_pct": 12.69,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "씨아이에스"
+      "name": "씨아이에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "222800": {
       "vpoc_60d": 51084,
@@ -6069,7 +7587,10 @@
       "gap_pct": 9.05,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "심텍"
+      "name": "심텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "225570": {
       "vpoc_60d": 12153,
@@ -6081,7 +7602,10 @@
       "gap_pct": -4.97,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "넥슨게임즈"
+      "name": "넥슨게임즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "226950": {
       "vpoc_60d": 136460,
@@ -6093,7 +7617,10 @@
       "gap_pct": 17.52,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "올릭스"
+      "name": "올릭스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "228760": {
       "vpoc_60d": 25974,
@@ -6105,7 +7632,10 @@
       "gap_pct": -22.56,
       "zone": "D-3",
       "confidence": 1.0,
-      "name": "지노믹트리"
+      "name": "지노믹트리",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "229640": {
       "vpoc_60d": 35668,
@@ -6117,7 +7647,10 @@
       "gap_pct": 18.65,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LS에코에너지"
+      "name": "LS에코에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "232140": {
       "vpoc_60d": 14895,
@@ -6129,7 +7662,10 @@
       "gap_pct": 35.88,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "와이씨"
+      "name": "와이씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "234340": {
       "vpoc_60d": 24669,
@@ -6141,7 +7677,10 @@
       "gap_pct": 13.43,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "헥토파이낸셜"
+      "name": "헥토파이낸셜",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "236200": {
       "vpoc_60d": 45333,
@@ -6153,7 +7692,10 @@
       "gap_pct": 12.91,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "슈프리마"
+      "name": "슈프리마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "237690": {
       "vpoc_60d": 125980,
@@ -6165,7 +7707,10 @@
       "gap_pct": 17.11,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "에스티팜"
+      "name": "에스티팜",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "240810": {
       "vpoc_60d": 76460,
@@ -6177,7 +7722,10 @@
       "gap_pct": 60.46,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "원익IPS"
+      "name": "원익IPS",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "241520": {
       "vpoc_60d": 7426,
@@ -6189,7 +7737,10 @@
       "gap_pct": 85.84,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "DSC인베스트먼트"
+      "name": "DSC인베스트먼트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "241560": {
       "vpoc_60d": 60805,
@@ -6201,7 +7752,10 @@
       "gap_pct": 5.22,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "두산밥캣"
+      "name": "두산밥캣",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "241710": {
       "vpoc_60d": 67998,
@@ -6213,7 +7767,10 @@
       "gap_pct": 12.92,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "코스메카코리아"
+      "name": "코스메카코리아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "244920": {
       "vpoc_60d": 8961,
@@ -6225,7 +7782,10 @@
       "gap_pct": 48.92,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에이플러스에셋"
+      "name": "에이플러스에셋",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "247540": {
       "vpoc_60d": 215304,
@@ -6237,7 +7797,10 @@
       "gap_pct": 7.28,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에코프로비엠"
+      "name": "에코프로비엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "248070": {
       "vpoc_60d": 16876,
@@ -6249,7 +7812,10 @@
       "gap_pct": 11.37,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "솔루엠"
+      "name": "솔루엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "249420": {
       "vpoc_60d": 38592,
@@ -6261,7 +7827,10 @@
       "gap_pct": -1.62,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "일동제약"
+      "name": "일동제약",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "251270": {
       "vpoc_60d": 49338,
@@ -6273,7 +7842,10 @@
       "gap_pct": 6.05,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "넷마블"
+      "name": "넷마블",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "251970": {
       "vpoc_60d": 53919,
@@ -6285,7 +7857,10 @@
       "gap_pct": -3.39,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "펌텍코리아"
+      "name": "펌텍코리아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "252990": {
       "vpoc_60d": 7112,
@@ -6297,7 +7872,10 @@
       "gap_pct": 43.18,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "샘씨엔에스"
+      "name": "샘씨엔에스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "253450": {
       "vpoc_60d": 45396,
@@ -6309,7 +7887,10 @@
       "gap_pct": -0.42,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "스튜디오드래곤"
+      "name": "스튜디오드래곤",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "253590": {
       "vpoc_60d": 16430,
@@ -6321,7 +7902,10 @@
       "gap_pct": 18.46,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "네오셈"
+      "name": "네오셈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "255220": {
       "vpoc_60d": 3092,
@@ -6333,7 +7917,10 @@
       "gap_pct": -2.91,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "SG"
+      "name": "SG",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "256840": {
       "vpoc_60d": 4819,
@@ -6345,7 +7932,10 @@
       "gap_pct": -7.38,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "한국비엔씨"
+      "name": "한국비엔씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "257720": {
       "vpoc_60d": 44382,
@@ -6357,7 +7947,10 @@
       "gap_pct": -5.63,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "실리콘투"
+      "name": "실리콘투",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "259960": {
       "vpoc_60d": 242655,
@@ -6369,7 +7962,10 @@
       "gap_pct": 3.26,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "크래프톤"
+      "name": "크래프톤",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "263750": {
       "vpoc_60d": 37569,
@@ -6381,7 +7977,10 @@
       "gap_pct": 25.93,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "펄어비스"
+      "name": "펄어비스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "265520": {
       "vpoc_60d": 20122,
@@ -6393,7 +7992,10 @@
       "gap_pct": 13.36,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "AP시스템"
+      "name": "AP시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "267250": {
       "vpoc_60d": 191890,
@@ -6405,7 +8007,10 @@
       "gap_pct": 40.07,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "HD현대"
+      "name": "HD현대",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "267260": {
       "vpoc_60d": 891800,
@@ -6417,7 +8022,10 @@
       "gap_pct": 26.52,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "HD현대일렉트릭"
+      "name": "HD현대일렉트릭",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "267270": {
       "vpoc_60d": 105900,
@@ -6429,7 +8037,10 @@
       "gap_pct": 25.0,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "HD현대건설기계"
+      "name": "HD현대건설기계",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "270660": {
       "vpoc_60d": 23658,
@@ -6441,7 +8052,10 @@
       "gap_pct": 1.88,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "에브리봇"
+      "name": "에브리봇",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "271560": {
       "vpoc_60d": 104361,
@@ -6453,7 +8067,10 @@
       "gap_pct": 22.1,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "오리온"
+      "name": "오리온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "272210": {
       "vpoc_60d": 90492,
@@ -6465,7 +8082,10 @@
       "gap_pct": 28.91,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "한화시스템"
+      "name": "한화시스템",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "272290": {
       "vpoc_60d": 24420,
@@ -6477,7 +8097,10 @@
       "gap_pct": 26.24,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "이녹스첨단소재"
+      "name": "이녹스첨단소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "274090": {
       "vpoc_60d": 20238,
@@ -6489,7 +8112,10 @@
       "gap_pct": 16.28,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "켄코아에어로스페이스"
+      "name": "켄코아에어로스페이스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "277810": {
       "vpoc_60d": 473485,
@@ -6501,7 +8127,10 @@
       "gap_pct": 68.16,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "레인보우로보틱스"
+      "name": "레인보우로보틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "278280": {
       "vpoc_60d": 53080,
@@ -6513,7 +8142,10 @@
       "gap_pct": 0.36,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "천보"
+      "name": "천보",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "278470": {
       "vpoc_60d": 279540,
@@ -6525,7 +8157,10 @@
       "gap_pct": 16.01,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "에이피알"
+      "name": "에이피알",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "280360": {
       "vpoc_60d": 120692,
@@ -6537,7 +8172,10 @@
       "gap_pct": 7.4,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "롯데웰푸드"
+      "name": "롯데웰푸드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "281740": {
       "vpoc_60d": 15194,
@@ -6549,7 +8187,10 @@
       "gap_pct": 32.02,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "레이크머티리얼즈"
+      "name": "레이크머티리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "281820": {
       "vpoc_60d": 38849,
@@ -6561,7 +8202,10 @@
       "gap_pct": 25.09,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "케이씨텍"
+      "name": "케이씨텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "282330": {
       "vpoc_60d": 109218,
@@ -6573,7 +8217,10 @@
       "gap_pct": 12.64,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "BGF리테일"
+      "name": "BGF리테일",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "285130": {
       "vpoc_60d": 66250,
@@ -6585,7 +8232,10 @@
       "gap_pct": 1.5,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "SK케미칼"
+      "name": "SK케미칼",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "286940": {
       "vpoc_60d": 23957,
@@ -6597,7 +8247,10 @@
       "gap_pct": 5.46,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "롯데이노베이트"
+      "name": "롯데이노베이트",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "290650": {
       "vpoc_60d": 69350,
@@ -6609,7 +8262,10 @@
       "gap_pct": 35.0,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "엘앤씨바이오"
+      "name": "엘앤씨바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "293490": {
       "vpoc_60d": 15326,
@@ -6621,7 +8277,10 @@
       "gap_pct": -5.68,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "카카오게임즈"
+      "name": "카카오게임즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "294870": {
       "vpoc_60d": 20652,
@@ -6633,7 +8292,10 @@
       "gap_pct": 15.78,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "HDC현대산업개발"
+      "name": "HDC현대산업개발",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "295310": {
       "vpoc_60d": 85998,
@@ -6645,7 +8307,10 @@
       "gap_pct": 7.2,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에이치브이엠"
+      "name": "에이치브이엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "298020": {
       "vpoc_60d": 390015,
@@ -6657,7 +8322,10 @@
       "gap_pct": 20.06,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "효성티앤씨"
+      "name": "효성티앤씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "298040": {
       "vpoc_60d": 1839900,
@@ -6669,7 +8337,10 @@
       "gap_pct": 43.91,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "효성중공업"
+      "name": "효성중공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "298050": {
       "vpoc_60d": 257425,
@@ -6681,7 +8352,10 @@
       "gap_pct": 7.6,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "HS효성첨단소재"
+      "name": "HS효성첨단소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "298380": {
       "vpoc_60d": 195801,
@@ -6693,7 +8367,10 @@
       "gap_pct": -2.22,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "에이비엘바이오"
+      "name": "에이비엘바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "298830": {
       "vpoc_60d": 8854,
@@ -6705,7 +8382,10 @@
       "gap_pct": -1.53,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "슈어소프트테크"
+      "name": "슈어소프트테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "302440": {
       "vpoc_60d": 49737,
@@ -6717,7 +8397,10 @@
       "gap_pct": -0.55,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "SK바이오사이언스"
+      "name": "SK바이오사이언스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "304100": {
       "vpoc_60d": 26568,
@@ -6729,7 +8412,10 @@
       "gap_pct": -6.58,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "솔트룩스"
+      "name": "솔트룩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "304360": {
       "vpoc_60d": 30945,
@@ -6741,7 +8427,10 @@
       "gap_pct": 21.11,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에스바이오메딕스"
+      "name": "에스바이오메딕스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "307950": {
       "vpoc_60d": 287559,
@@ -6753,7 +8442,10 @@
       "gap_pct": 53.67,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "현대오토에버"
+      "name": "현대오토에버",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "308430": {
       "vpoc_60d": 23625,
@@ -6765,7 +8457,10 @@
       "gap_pct": 9.94,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "셀비온"
+      "name": "셀비온",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "310210": {
       "vpoc_60d": 213263,
@@ -6777,7 +8472,10 @@
       "gap_pct": 44.41,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "보로노이"
+      "name": "보로노이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "316140": {
       "vpoc_60d": 27705,
@@ -6789,7 +8487,10 @@
       "gap_pct": 29.86,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "우리금융지주"
+      "name": "우리금융지주",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "317330": {
       "vpoc_60d": 19597,
@@ -6801,7 +8502,10 @@
       "gap_pct": 0.48,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "덕산테코피아"
+      "name": "덕산테코피아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "319400": {
       "vpoc_60d": null,
@@ -6813,7 +8517,10 @@
       "gap_pct": 51.72,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "현대무벡스"
+      "name": "현대무벡스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "319660": {
       "vpoc_60d": 42200,
@@ -6825,7 +8532,10 @@
       "gap_pct": 49.35,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "피에스케이"
+      "name": "피에스케이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "322000": {
       "vpoc_60d": 82247,
@@ -6837,7 +8547,10 @@
       "gap_pct": 3.37,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "HD현대에너지솔루션"
+      "name": "HD현대에너지솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "323280": {
       "vpoc_60d": 45840,
@@ -6849,7 +8562,10 @@
       "gap_pct": 40.44,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "태성"
+      "name": "태성",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "323410": {
       "vpoc_60d": 21548,
@@ -6861,7 +8577,10 @@
       "gap_pct": 19.32,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "카카오뱅크"
+      "name": "카카오뱅크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "326030": {
       "vpoc_60d": 117880,
@@ -6873,7 +8592,10 @@
       "gap_pct": -2.22,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "SK바이오팜"
+      "name": "SK바이오팜",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "327260": {
       "vpoc_60d": 24426,
@@ -6885,7 +8607,10 @@
       "gap_pct": 59.48,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "RF머트리얼즈"
+      "name": "RF머트리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "328130": {
       "vpoc_60d": 38824,
@@ -6897,7 +8622,10 @@
       "gap_pct": 0.73,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "루닛"
+      "name": "루닛",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "329180": {
       "vpoc_60d": 591745,
@@ -6909,7 +8637,10 @@
       "gap_pct": 1.12,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "HD현대중공업"
+      "name": "HD현대중공업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "336260": {
       "vpoc_60d": 30942,
@@ -6921,7 +8652,10 @@
       "gap_pct": 20.84,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "두산퓨얼셀"
+      "name": "두산퓨얼셀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "336370": {
       "vpoc_60d": 8122,
@@ -6933,7 +8667,10 @@
       "gap_pct": 8.44,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "솔루스첨단소재"
+      "name": "솔루스첨단소재",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "336570": {
       "vpoc_60d": 8079,
@@ -6945,7 +8682,10 @@
       "gap_pct": -7.61,
       "zone": "D-2",
       "confidence": 0.9,
-      "name": "원텍"
+      "name": "원텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "338840": {
       "vpoc_60d": 25922,
@@ -6957,7 +8697,10 @@
       "gap_pct": 2.72,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "와이바이오로직스"
+      "name": "와이바이오로직스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "340570": {
       "vpoc_60d": 49378,
@@ -6969,7 +8712,10 @@
       "gap_pct": 11.09,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "티앤엘"
+      "name": "티앤엘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "344820": {
       "vpoc_60d": 26742,
@@ -6981,7 +8727,10 @@
       "gap_pct": 8.29,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "KCC글라스"
+      "name": "KCC글라스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "347700": {
       "vpoc_60d": null,
@@ -6993,7 +8742,10 @@
       "gap_pct": 73.59,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "스피어"
+      "name": "스피어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "347850": {
       "vpoc_60d": 91715,
@@ -7005,7 +8757,10 @@
       "gap_pct": -1.95,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "디앤디파마텍"
+      "name": "디앤디파마텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "348150": {
       "vpoc_60d": 6060,
@@ -7017,7 +8772,10 @@
       "gap_pct": -17.06,
       "zone": "D-3",
       "confidence": 1.0,
-      "name": "고바이오랩"
+      "name": "고바이오랩",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "348210": {
       "vpoc_60d": 70616,
@@ -7029,7 +8787,10 @@
       "gap_pct": 13.22,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "넥스틴"
+      "name": "넥스틴",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "348340": {
       "vpoc_60d": null,
@@ -7041,7 +8802,10 @@
       "gap_pct": 5.58,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "뉴로메카"
+      "name": "뉴로메카",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "348370": {
       "vpoc_60d": 63595,
@@ -7053,7 +8817,10 @@
       "gap_pct": 8.37,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "엔켐"
+      "name": "엔켐",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "352820": {
       "vpoc_60d": 377670,
@@ -7065,7 +8832,10 @@
       "gap_pct": 8.06,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "하이브"
+      "name": "하이브",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "353200": {
       "vpoc_60d": 48412,
@@ -7077,7 +8847,10 @@
       "gap_pct": 31.83,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "대덕전자"
+      "name": "대덕전자",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "354320": {
       "vpoc_60d": 27734,
@@ -7089,7 +8862,10 @@
       "gap_pct": 49.57,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "알멕"
+      "name": "알멕",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "356860": {
       "vpoc_60d": 58975,
@@ -7101,7 +8877,10 @@
       "gap_pct": 5.32,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "티엘비"
+      "name": "티엘비",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "357550": {
       "vpoc_60d": 58617,
@@ -7113,7 +8892,10 @@
       "gap_pct": -1.23,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "석경에이티"
+      "name": "석경에이티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "357780": {
       "vpoc_60d": 284775,
@@ -7125,7 +8907,10 @@
       "gap_pct": 42.0,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "솔브레인"
+      "name": "솔브레인",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "358570": {
       "vpoc_60d": 14920,
@@ -7137,7 +8922,10 @@
       "gap_pct": -3.56,
       "zone": "D-1",
       "confidence": 0.65,
-      "name": "지아이이노베이션"
+      "name": "지아이이노베이션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "361610": {
       "vpoc_60d": 26283,
@@ -7149,7 +8937,10 @@
       "gap_pct": 4.51,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "SK아이이테크놀로지"
+      "name": "SK아이이테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "365270": {
       "vpoc_60d": 6402,
@@ -7161,7 +8952,10 @@
       "gap_pct": 108.95,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "큐라클"
+      "name": "큐라클",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "365340": {
       "vpoc_60d": 43295,
@@ -7173,7 +8967,10 @@
       "gap_pct": 26.63,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "성일하이텍"
+      "name": "성일하이텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "368770": {
       "vpoc_60d": 16482,
@@ -7185,7 +8982,10 @@
       "gap_pct": -7.7,
       "zone": "D-2",
       "confidence": 0.65,
-      "name": "파이버프로"
+      "name": "파이버프로",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "371950": {
       "vpoc_60d": 11550,
@@ -7197,7 +8997,10 @@
       "gap_pct": 42.87,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "풍원정밀"
+      "name": "풍원정밀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "372320": {
       "vpoc_60d": 44449,
@@ -7209,7 +9012,10 @@
       "gap_pct": 17.91,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "큐로셀"
+      "name": "큐로셀",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "373220": {
       "vpoc_60d": 396135,
@@ -7221,7 +9027,10 @@
       "gap_pct": 7.08,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "LG에너지솔루션"
+      "name": "LG에너지솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "375500": {
       "vpoc_60d": 43695,
@@ -7233,7 +9042,10 @@
       "gap_pct": 20.7,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "DL이앤씨"
+      "name": "DL이앤씨",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "376270": {
       "vpoc_60d": 47132,
@@ -7245,7 +9057,10 @@
       "gap_pct": 49.0,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "HEM파마"
+      "name": "HEM파마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "376300": {
       "vpoc_60d": 38753,
@@ -7257,7 +9072,10 @@
       "gap_pct": 0.25,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "디어유"
+      "name": "디어유",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "377300": {
       "vpoc_60d": 48272,
@@ -7269,7 +9087,10 @@
       "gap_pct": 27.14,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "카카오페이"
+      "name": "카카오페이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "378340": {
       "vpoc_60d": 16091,
@@ -7281,7 +9102,10 @@
       "gap_pct": 4.83,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "필에너지"
+      "name": "필에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "383220": {
       "vpoc_60d": 71082,
@@ -7293,7 +9117,10 @@
       "gap_pct": 1.32,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "F&F"
+      "name": "F&F",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "383310": {
       "vpoc_60d": 36322,
@@ -7305,7 +9132,10 @@
       "gap_pct": 7.12,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "에코프로에이치엔"
+      "name": "에코프로에이치엔",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "383800": {
       "vpoc_60d": 8156,
@@ -7317,7 +9147,10 @@
       "gap_pct": 12.65,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "LX홀딩스"
+      "name": "LX홀딩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "388720": {
       "vpoc_60d": 85300,
@@ -7329,7 +9162,10 @@
       "gap_pct": 31.55,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "유일로보틱스"
+      "name": "유일로보틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "389260": {
       "vpoc_60d": 19982,
@@ -7341,7 +9177,10 @@
       "gap_pct": 0.87,
       "zone": "도달",
       "confidence": 1.0,
-      "name": "대명에너지"
+      "name": "대명에너지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "389470": {
       "vpoc_60d": 88325,
@@ -7353,7 +9192,10 @@
       "gap_pct": -0.08,
       "zone": "D-1",
       "confidence": 0.75,
-      "name": "인벤티지랩"
+      "name": "인벤티지랩",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "389500": {
       "vpoc_60d": 39034,
@@ -7365,7 +9207,10 @@
       "gap_pct": 41.06,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "에스비비테크"
+      "name": "에스비비테크",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "389650": {
       "vpoc_60d": 88126,
@@ -7377,7 +9222,10 @@
       "gap_pct": -11.41,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "넥스트바이오메디컬"
+      "name": "넥스트바이오메디컬",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "393890": {
       "vpoc_60d": 9078,
@@ -7389,7 +9237,10 @@
       "gap_pct": 13.54,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "더블유씨피"
+      "name": "더블유씨피",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "394280": {
       "vpoc_60d": 14723,
@@ -7401,7 +9252,10 @@
       "gap_pct": 9.08,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "오픈엣지테크놀로지"
+      "name": "오픈엣지테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "394800": {
       "vpoc_60d": 18074,
@@ -7413,7 +9267,10 @@
       "gap_pct": -14.91,
       "zone": "D-3",
       "confidence": 0.65,
-      "name": "쓰리빌리언"
+      "name": "쓰리빌리언",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "397030": {
       "vpoc_60d": 46475,
@@ -7425,7 +9282,10 @@
       "gap_pct": 45.08,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "에이프릴바이오"
+      "name": "에이프릴바이오",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "399720": {
       "vpoc_60d": 61144,
@@ -7437,7 +9297,10 @@
       "gap_pct": 16.71,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "가온칩스"
+      "name": "가온칩스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "402340": {
       "vpoc_60d": 302025,
@@ -7449,7 +9312,10 @@
       "gap_pct": 82.23,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SK스퀘어"
+      "name": "SK스퀘어",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "403870": {
       "vpoc_60d": 34068,
@@ -7461,7 +9327,10 @@
       "gap_pct": 21.7,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "HPSP"
+      "name": "HPSP",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "416180": {
       "vpoc_60d": 39144,
@@ -7473,7 +9342,10 @@
       "gap_pct": 3.06,
       "zone": "도달",
       "confidence": 0.75,
-      "name": "신성에스티"
+      "name": "신성에스티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "417200": {
       "vpoc_60d": 16522,
@@ -7485,7 +9357,10 @@
       "gap_pct": 13.82,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "LS머트리얼즈"
+      "name": "LS머트리얼즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "419530": {
       "vpoc_60d": 38162,
@@ -7497,7 +9372,10 @@
       "gap_pct": -10.42,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "SAMG엔터"
+      "name": "SAMG엔터",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "420770": {
       "vpoc_60d": 54049,
@@ -7509,7 +9387,10 @@
       "gap_pct": 36.42,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "기가비스"
+      "name": "기가비스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "425420": {
       "vpoc_60d": 37092,
@@ -7521,7 +9402,10 @@
       "gap_pct": 15.16,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "티에프이"
+      "name": "티에프이",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "437730": {
       "vpoc_60d": 41058,
@@ -7533,7 +9417,10 @@
       "gap_pct": 28.04,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "삼현"
+      "name": "삼현",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "440110": {
       "vpoc_60d": null,
@@ -7545,7 +9432,10 @@
       "gap_pct": 49.38,
       "zone": "초과",
       "confidence": 0.62,
-      "name": "파두"
+      "name": "파두",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "441270": {
       "vpoc_60d": 9734,
@@ -7557,7 +9447,10 @@
       "gap_pct": 0.67,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "파인엠텍"
+      "name": "파인엠텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "443060": {
       "vpoc_60d": 187054,
@@ -7569,7 +9462,10 @@
       "gap_pct": -2.63,
       "zone": "D-1",
       "confidence": 1.0,
-      "name": "HD현대마린솔루션"
+      "name": "HD현대마린솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "445090": {
       "vpoc_60d": 31948,
@@ -7581,7 +9477,10 @@
       "gap_pct": 1.54,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "에이직랜드"
+      "name": "에이직랜드",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "445680": {
       "vpoc_60d": 96656,
@@ -7593,7 +9492,10 @@
       "gap_pct": 18.05,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "큐리옥스바이오시스템즈"
+      "name": "큐리옥스바이오시스템즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "448900": {
       "vpoc_60d": 62627,
@@ -7605,7 +9507,10 @@
       "gap_pct": 94.11,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한국피아이엠"
+      "name": "한국피아이엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "450080": {
       "vpoc_60d": 65940,
@@ -7617,7 +9522,10 @@
       "gap_pct": 7.15,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "에코프로머티"
+      "name": "에코프로머티",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "451760": {
       "vpoc_60d": 20907,
@@ -7629,7 +9537,10 @@
       "gap_pct": -3.11,
       "zone": "D-1",
       "confidence": 0.65,
-      "name": "컨텍"
+      "name": "컨텍",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "452260": {
       "vpoc_60d": 1516,
@@ -7641,7 +9552,10 @@
       "gap_pct": 78.15,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "한화갤러리아"
+      "name": "한화갤러리아",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "454910": {
       "vpoc_60d": 83296,
@@ -7653,7 +9567,10 @@
       "gap_pct": 23.17,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "두산로보틱스"
+      "name": "두산로보틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "455900": {
       "vpoc_60d": 31071,
@@ -7665,7 +9582,10 @@
       "gap_pct": 7.42,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "엔젤로보틱스"
+      "name": "엔젤로보틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "456040": {
       "vpoc_60d": 60235,
@@ -7677,7 +9597,10 @@
       "gap_pct": 35.08,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "OCI"
+      "name": "OCI",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "457190": {
       "vpoc_60d": 100080,
@@ -7689,7 +9612,10 @@
       "gap_pct": 17.81,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "이수스페셜티케미컬"
+      "name": "이수스페셜티케미컬",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "458870": {
       "vpoc_60d": 120166,
@@ -7701,7 +9627,10 @@
       "gap_pct": 13.42,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "씨어스테크놀로지"
+      "name": "씨어스테크놀로지",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "460850": {
       "vpoc_60d": 5090,
@@ -7713,7 +9642,10 @@
       "gap_pct": 10.9,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "동국씨엠"
+      "name": "동국씨엠",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "460930": {
       "vpoc_60d": 19590,
@@ -7725,7 +9657,10 @@
       "gap_pct": 0.79,
       "zone": "도달",
       "confidence": 0.9,
-      "name": "현대힘스"
+      "name": "현대힘스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "462350": {
       "vpoc_60d": 22920,
@@ -7737,7 +9672,10 @@
       "gap_pct": -8.28,
       "zone": "D-2",
       "confidence": 0.65,
-      "name": "이노스페이스"
+      "name": "이노스페이스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "462860": {
       "vpoc_60d": 4777,
@@ -7749,7 +9687,10 @@
       "gap_pct": -8.58,
       "zone": "D-2",
       "confidence": 1.0,
-      "name": "더즌"
+      "name": "더즌",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "462870": {
       "vpoc_60d": 33638,
@@ -7761,7 +9702,10 @@
       "gap_pct": -4.62,
       "zone": "D-1",
       "confidence": 0.9,
-      "name": "시프트업"
+      "name": "시프트업",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "464080": {
       "vpoc_60d": 18668,
@@ -7773,7 +9717,10 @@
       "gap_pct": 6.76,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "에스오에스랩"
+      "name": "에스오에스랩",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "466100": {
       "vpoc_60d": 65990,
@@ -7785,7 +9732,10 @@
       "gap_pct": 18.82,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "클로봇"
+      "name": "클로봇",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "474170": {
       "vpoc_60d": 13268,
@@ -7797,7 +9747,10 @@
       "gap_pct": 24.33,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "루미르"
+      "name": "루미르",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "475150": {
       "vpoc_60d": 20218,
@@ -7809,7 +9762,10 @@
       "gap_pct": 27.43,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "SK이터닉스"
+      "name": "SK이터닉스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "475400": {
       "vpoc_60d": 35146,
@@ -7821,7 +9777,10 @@
       "gap_pct": 6.28,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "씨메스"
+      "name": "씨메스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "475830": {
       "vpoc_60d": 116240,
@@ -7833,7 +9792,10 @@
       "gap_pct": 18.57,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "오름테라퓨틱"
+      "name": "오름테라퓨틱",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "475960": {
       "vpoc_60d": 49894,
@@ -7845,7 +9807,10 @@
       "gap_pct": 27.34,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "토모큐브"
+      "name": "토모큐브",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "476060": {
       "vpoc_60d": 19052,
@@ -7857,7 +9822,10 @@
       "gap_pct": 18.16,
       "zone": "초과",
       "confidence": 0.75,
-      "name": "온코닉테라퓨틱스"
+      "name": "온코닉테라퓨틱스",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "481070": {
       "vpoc_60d": 21039,
@@ -7869,7 +9837,10 @@
       "gap_pct": -5.62,
       "zone": "D-2",
       "confidence": 0.75,
-      "name": "에이유브랜즈"
+      "name": "에이유브랜즈",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "482630": {
       "vpoc_60d": 21592,
@@ -7881,7 +9852,10 @@
       "gap_pct": -20.37,
       "zone": "D-3",
       "confidence": 0.65,
-      "name": "삼양엔씨켐"
+      "name": "삼양엔씨켐",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "484870": {
       "vpoc_60d": 136414,
@@ -7893,7 +9867,10 @@
       "gap_pct": -6.51,
       "zone": "D-2",
       "confidence": 0.9,
-      "name": "엠앤씨솔루션"
+      "name": "엠앤씨솔루션",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "489500": {
       "vpoc_60d": 29432,
@@ -7905,7 +9882,10 @@
       "gap_pct": 14.73,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "엘케이켐"
+      "name": "엘케이켐",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "489790": {
       "vpoc_60d": 60912,
@@ -7917,7 +9897,10 @@
       "gap_pct": 43.43,
       "zone": "초과",
       "confidence": 1.0,
-      "name": "한화비전"
+      "name": "한화비전",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "499790": {
       "vpoc_60d": 42818,
@@ -7929,7 +9912,10 @@
       "gap_pct": 12.39,
       "zone": "초과",
       "confidence": 0.65,
-      "name": "GS피앤엘"
+      "name": "GS피앤엘",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "950160": {
       "vpoc_60d": 81803,
@@ -7941,7 +9927,10 @@
       "gap_pct": 28.57,
       "zone": "초과",
       "confidence": 0.9,
-      "name": "코오롱티슈진"
+      "name": "코오롱티슈진",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     },
     "950210": {
       "vpoc_60d": 13228,
@@ -7953,7 +9942,10 @@
       "gap_pct": -14.96,
       "zone": "D-3",
       "confidence": 0.75,
-      "name": "프레스티지바이오파마"
+      "name": "프레스티지바이오파마",
+      "target_delta_5d": null,
+      "target_delta_10d": null,
+      "target_direction": "NEW"
     }
   }
 }
