@@ -70,6 +70,7 @@ class DashboardDataProvider:
             "volume_spike": self._load_json("volume_spike_watchlist.json"),
             "institutional_targets": self._load_json("institutional_targets.json"),
             "accumulation_tracker": self._load_json("accumulation_tracker.json"),
+            "market_intelligence": self._load_json("market_intelligence.json"),
             "summary": summary,
         }
 

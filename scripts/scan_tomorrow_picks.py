@@ -27,6 +27,7 @@
 
 v7 변경: 전략A(수급폭발 소스) + 전략B(MACD 3중 필터) + 전략C(US섹터 부스트)
 v8 변경: 전략D(매집추적 소스) — 거래량폭발 이후 매집 진행 중 종목
+v9 변경: 전략E(Perplexity 인텔리전스) — 미국장 이벤트 → 한국 섹터/종목 파급 보정
 
 Usage:
     python scripts/scan_tomorrow_picks.py
@@ -408,6 +409,11 @@ def load_institutional_targets() -> dict:
     """기관 추정 목표가 데이터 로드."""
     data = load_json("institutional_targets.json")
     return data.get("targets", {})
+
+
+def load_market_intelligence() -> dict:
+    """Perplexity 시장 인텔리전스 데이터 로드."""
+    return load_json("market_intelligence.json")
 
 
 def get_target_zone_bonus(ticker: str, targets: dict) -> tuple[float, dict]:
@@ -953,11 +959,12 @@ def main():
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
           f"매집추적:{len(src10)}")
 
-    # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가
+    # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
     sector_boost_map = load_sector_momentum_boost()
     inst_targets = load_institutional_targets()
+    intel = load_market_intelligence()
     if inst_targets:
         print(f"[기관목표가] {len(inst_targets)}종목 로드됨")
     if avoid_tickers:
@@ -966,6 +973,18 @@ def main():
     active_boosts = {k: v for k, v in sector_boost_map.items() if v != 0}
     if active_boosts:
         print(f"[US섹터 부스트] {len(active_boosts)}섹터 활성: {active_boosts}")
+
+    # 전략 E: Perplexity 인텔리전스
+    intel_sector_boost = intel.get("sector_boost", {})
+    intel_beneficiary = set(intel.get("beneficiary_stocks", []))
+    intel_risk = set(intel.get("risk_stocks", []))
+    intel_mood = intel.get("us_market_mood", "")
+    intel_themes = intel.get("hot_themes", [])
+    if intel_sector_boost:
+        print(f"[인텔리전스] {intel_mood} | 섹터부스트: {intel_sector_boost}")
+        print(f"  수혜종목: {len(intel_beneficiary)}개 | 주의종목: {len(intel_risk)}개")
+        if intel_themes:
+            print(f"  핫테마: {' | '.join(intel_themes)}")
 
     # 전체 종목 티커 수집
     all_tickers = set()
@@ -1013,6 +1032,42 @@ def main():
         if target_bonus != 0:
             boosted = max(min(score_detail["total"] + target_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
+
+        # 전략 E: Perplexity 인텔리전스 보정 (최대 ±5점)
+        intel_bonus = 0.0
+        intel_tag = ""
+        # E-1: 수혜/피해 종목 직접 매칭 (종목명 기반)
+        cur_name = ""
+        for s in sources:
+            if s.get("name"):
+                cur_name = s["name"]
+                break
+        if not cur_name:
+            cur_name = name_map.get(ticker, "")
+        if cur_name in intel_beneficiary:
+            intel_bonus += 3.0
+            intel_tag = "수혜"
+        elif cur_name in intel_risk:
+            intel_bonus -= 3.0
+            intel_tag = "피해"
+        # E-2: 섹터 부스트 (stock_to_sector → intel_sector_boost)
+        if intel_sector_boost:
+            sts = _load_stock_to_sector()
+            stock_sectors = sts.get(ticker, [])
+            for sec in stock_sectors:
+                if sec in intel_sector_boost:
+                    sb = intel_sector_boost[sec]
+                    intel_bonus += min(max(sb * 0.5, -2), 2)  # 섹터당 ±2 한도
+                    if not intel_tag:
+                        intel_tag = f"{sec}{'수혜' if sb > 0 else '피해'}"
+                    break  # 첫 매칭만
+
+        intel_bonus = round(max(min(intel_bonus, 5), -5), 1)
+        if intel_bonus != 0:
+            boosted = max(min(score_detail["total"] + intel_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if intel_bonus > 0:
+                source_names.append("인텔리전스")
 
         # 이름 결정
         name = ""
@@ -1078,6 +1133,8 @@ def main():
             "accum_phase": src10.get(ticker, {}).get("phase", ""),
             "accum_days": src10.get(ticker, {}).get("days_since_spike", 0),
             "accum_return": src10.get(ticker, {}).get("return_since_spike", 0),
+            "intel_bonus": intel_bonus,
+            "intel_tag": intel_tag,
         }
 
         results.append(rec)
@@ -1161,6 +1218,13 @@ def main():
         "stats": grade_stats,
         "top5": [r["ticker"] for r in top5],
         "picks": results,
+        "market_intel": {
+            "mood": intel_mood,
+            "forecast": intel.get("kr_open_forecast", ""),
+            "forecast_reason": intel.get("kr_forecast_reason", ""),
+            "hot_themes": intel_themes,
+            "summary": intel.get("us_market_summary", ""),
+        } if intel_mood else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:

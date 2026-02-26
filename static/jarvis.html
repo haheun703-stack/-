@@ -133,6 +133,9 @@ body { min-height:100vh; background:#0A0B0F; font-family:'Pretendard',-apple-sys
     <div id="holdings"></div>
   </div>
 
+  <!-- 시장 인텔리전스 -->
+  <div id="market-intel" style="margin-bottom:20px"></div>
+
   <!-- 내일 추천 종목 -->
   <div id="tomorrow-picks" style="margin-bottom:20px"></div>
 
@@ -218,6 +221,7 @@ function renderAll() {
   renderMetrics();
   renderForecast();
   renderHoldings();
+  renderMarketIntel();
   renderTomorrowPicks();
   renderPicksHistory();
   renderTabNav();
@@ -351,6 +355,98 @@ function renderHoldings() {
 }
 
 /* ═══════════════════════════════════════ */
+/*  시장 인텔리전스 (Perplexity)            */
+/* ═══════════════════════════════════════ */
+function renderMarketIntel() {
+  const el = document.getElementById('market-intel');
+  const intel = D.market_intelligence || {};
+  const mood = intel.us_market_mood || '';
+  if (!mood) { el.innerHTML = ''; return; }
+
+  const moodMap = {
+    'RISK_ON':  { icon: '&#x1F7E2;', label: 'RISK ON',  bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.25)', color: '#10B981' },
+    'RISK_OFF': { icon: '&#x1F534;', label: 'RISK OFF', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', color: '#EF4444' },
+    'MIXED':    { icon: '&#x1F7E1;', label: 'MIXED',    bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)', color: '#F59E0B' },
+    'NEUTRAL':  { icon: '&#x26AA;',  label: 'NEUTRAL',  bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.25)', color: '#6B7280' },
+  };
+  const m = moodMap[mood] || moodMap['NEUTRAL'];
+  const forecast = intel.kr_open_forecast || '보합';
+  const fcIcon = forecast === '상승' ? '&#x1F4C8;' : forecast === '하락' ? '&#x1F4C9;' : '&#x27A1;&#xFE0F;';
+  const fcColor = forecast === '상승' ? '#10B981' : forecast === '하락' ? '#EF4444' : '#6B7280';
+
+  let html = `<div style="background:${m.bg};border:1px solid ${m.border};border-radius:12px;padding:14px 16px">`;
+  // 헤더
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:14px;font-weight:700;color:${m.color}">&#x1F30D; 시장 인텔리전스</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:11px;padding:3px 10px;border-radius:12px;background:${m.color}22;color:${m.color};font-weight:600">${m.icon} ${m.label}</span>
+      <span style="font-size:10px;color:#6B7280">${esc(intel.generated_at || '')}</span>
+    </div>
+  </div>`;
+
+  // 미국장 요약
+  if (intel.us_market_summary) {
+    html += `<div style="font-size:12px;color:#D1D5DB;margin-bottom:8px;line-height:1.5">${esc(intel.us_market_summary)}</div>`;
+  }
+
+  // 한국장 전망
+  html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:12px">
+    <span style="color:#9CA3AF">KR 전망:</span>
+    <span style="font-weight:700;color:${fcColor}">${fcIcon} ${esc(forecast)}</span>
+    <span style="color:#6B7280;font-size:11px">${esc(intel.kr_forecast_reason || '')}</span>
+  </div>`;
+
+  // 주요 이벤트 (최대 5개)
+  const events = intel.key_events || [];
+  if (events.length > 0) {
+    html += `<div style="margin-bottom:8px">`;
+    events.slice(0, 5).forEach(e => {
+      const uIcon = e.urgency === 'BREAKING' ? '&#x1F6A8;' : e.urgency === 'IMPORTANT' ? '&#x26A1;' : '&#x1F4CC;';
+      const iColor = e.impact === 'positive' ? '#10B981' : e.impact === 'negative' ? '#EF4444' : '#6B7280';
+      const sectors = (e.kr_sectors_affected || []).slice(0, 3).join(', ');
+      html += `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;font-size:11px">
+        <span>${uIcon}</span>
+        <div style="flex:1">
+          <span style="color:#E5E7EB;font-weight:600">${esc(e.event || '')}</span>
+          ${sectors ? `<span style="color:${iColor};font-size:10px;margin-left:6px">${esc(e.kr_impact_direction || '')} ${esc(sectors)}</span>` : ''}
+        </div>
+        <span style="font-size:10px;font-weight:700;color:${iColor};font-family:var(--mono)">${e.kr_impact_score > 0 ? '+' : ''}${e.kr_impact_score || 0}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 섹터 영향 (점수 0이 아닌 것만)
+  const impacts = (intel.sector_impacts || []).filter(s => s.score !== 0);
+  if (impacts.length > 0) {
+    html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">`;
+    impacts.forEach(s => {
+      const sColor = s.score > 0 ? '#10B981' : '#EF4444';
+      const sBg = s.score > 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
+      html += `<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:${sBg};color:${sColor};font-weight:600">${esc(s.sector)} ${s.score > 0 ? '+' : ''}${s.score}</span>`;
+    });
+    html += `</div>`;
+  }
+
+  // 핫 테마 + 수혜 종목
+  const themes = intel.hot_themes || [];
+  const bene = intel.beneficiary_stocks || [];
+  if (themes.length > 0 || bene.length > 0) {
+    html += `<div style="font-size:10px;color:#6B7280;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">`;
+    if (themes.length > 0) {
+      html += `<span>&#x1F525; ${themes.join(' | ')}</span>`;
+    }
+    if (bene.length > 0) {
+      html += `<span>&#x2705; ${bene.slice(0, 6).join(', ')}</span>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════ */
 /*  내일 추천 종목                         */
 /* ═══════════════════════════════════════ */
 function renderTomorrowPicks() {
@@ -397,6 +493,21 @@ function renderTomorrowPicks() {
     html += `<span style="font-size:11px;padding:3px 10px;border-radius:12px;background:${gs.bg}22;color:${gs.bg === '#374151' ? '#9CA3AF' : gs.bg};border:1px solid ${gs.border}44">${grade} ${count}건</span>`;
   }
   html += `</div>`;
+
+  // 인텔리전스 무드 배지 (tomorrow_picks에 내장된 market_intel)
+  const mIntel = tp.market_intel || {};
+  if (mIntel.mood) {
+    const mMoodColors = {'RISK_ON':'#10B981','RISK_OFF':'#EF4444','MIXED':'#F59E0B','NEUTRAL':'#6B7280'};
+    const mFcIcons = {'상승':'&#x25B2;','하락':'&#x25BC;','보합':'&#x2500;'};
+    const mColor = mMoodColors[mIntel.mood] || '#6B7280';
+    const mFc = mIntel.forecast || '';
+    const mThemes = mIntel.hot_themes || [];
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:11px;flex-wrap:wrap">
+      <span style="padding:2px 8px;border-radius:6px;background:${mColor}22;color:${mColor};font-weight:600">&#x1F30D; ${esc(mIntel.mood)}</span>
+      ${mFc ? `<span style="color:${mMoodColors[mFc === '상승' ? 'RISK_ON' : mFc === '하락' ? 'RISK_OFF' : 'NEUTRAL'] || '#6B7280'}">${mFcIcons[mFc] || ''} KR ${esc(mFc)}</span>` : ''}
+      ${mThemes.map(t => `<span style="padding:1px 6px;border-radius:4px;background:rgba(245,158,11,0.1);color:#FCD34D;font-size:10px">${esc(t)}</span>`).join('')}
+    </div>`;
+  }
 
   // 추천 종목 카드
   showPicks.forEach((p, idx) => {
@@ -525,8 +636,9 @@ function renderTomorrowPicks() {
         <span>ADX ${num(p.adx)}</span>
         <span>${p.above_ma20 ? '<span style="color:#10B981">MA20&#x2191;</span>' : '<span style="color:#EF4444">MA20&#x2193;</span>'}${p.above_ma60 ? ' <span style="color:#10B981">MA60&#x2191;</span>' : ''}</span>
       </div>
-      <div style="display:flex;gap:4px">
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
         ${(p.sources||[]).map(s => `<span style="font-size:9px;padding:1px 6px;border-radius:6px;background:rgba(99,102,241,0.15);color:#A5B4FC">${esc(s)}</span>`).join('')}
+        ${p.intel_bonus && p.intel_bonus !== 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:6px;background:${p.intel_bonus > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${p.intel_bonus > 0 ? '#6EE7B7' : '#FCA5A5'};font-weight:600">&#x1F30D; ${p.intel_bonus > 0 ? '+' : ''}${p.intel_bonus}p ${esc(p.intel_tag || '')}</span>` : ''}
       </div>
     </div>`;
 
