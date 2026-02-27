@@ -1254,3 +1254,15 @@ tomorrow_picks:
   overlap_pairs:
     - [릴레이, 그룹순환]
     - [세력감지, 매집추적]
+
+# ============================================================
+# AI Brain — Claude API 정성적 뉴스 판단 엔진
+# ============================================================
+ai_brain:
+  enabled: true
+  model: "claude-sonnet-4-5-20250929"
+  max_news_items: 70          # 최대 뉴스 수
+  max_stock_judgments: 15     # 최대 종목 판단 수
+  bonus_max: 7                # scan_tomorrow_picks 최대 보너스
+  daily_call_limit: 3         # 일일 API 호출 한도 (비용 안전장치)
+  universe_filter: true       # 84종목 유니버스 밖 종목 필터링

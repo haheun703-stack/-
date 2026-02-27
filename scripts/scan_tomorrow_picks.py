@@ -515,6 +515,11 @@ def load_market_intelligence() -> dict:
     return load_json("market_intelligence.json")
 
 
+def load_ai_brain_data() -> dict:
+    """AI 두뇌 판단 결과 로드 (전략 H)."""
+    return load_json("ai_brain_judgment.json")
+
+
 def load_morning_reports() -> dict:
     """장전 리포트 스캔 결과 로드 (전략 G)."""
     data = load_json("morning_reports.json")
@@ -1193,6 +1198,20 @@ def main():
         if intel_themes:
             print(f"  핫테마: {' | '.join(intel_themes)}")
 
+    # 전략 H: AI 두뇌 판단
+    ai_brain_data = load_ai_brain_data()
+    ai_brain_judgments = {}  # ticker → judgment dict
+    if ai_brain_data and ai_brain_data.get("stock_judgments"):
+        for j in ai_brain_data["stock_judgments"]:
+            t = j.get("ticker", "")
+            if t:
+                ai_brain_judgments[t] = j
+        ai_sentiment = ai_brain_data.get("market_sentiment", "")
+        ai_themes = ai_brain_data.get("key_themes", [])
+        print(f"[AI 두뇌] 센티먼트: {ai_sentiment} | 판단종목: {len(ai_brain_judgments)}개")
+        if ai_themes:
+            print(f"  테마: {' | '.join(ai_themes[:3])}")
+
     # 전체 종목 티커 수집
     all_tickers = set()
     for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11, src12]:
@@ -1325,6 +1344,30 @@ def main():
             if report_bonus > 0:
                 source_names.append("리포트")
 
+        # 전략 H: AI 두뇌 보너스 (최대 ±7점)
+        ai_bonus = 0.0
+        ai_tag = ""
+        ai_action = ""
+        if ticker in ai_brain_judgments:
+            j = ai_brain_judgments[ticker]
+            ai_action = j.get("action", "")
+            confidence = j.get("confidence", 0)
+            if ai_action == "BUY":
+                ai_bonus = min(3 + confidence * 4, 7)
+                ai_tag = f"AI:BUY({confidence:.0%})"
+            elif ai_action == "WATCH":
+                ai_bonus = 1.0
+                ai_tag = "AI:WATCH"
+            elif ai_action == "AVOID":
+                ai_bonus = max(-3 - confidence * 4, -7)
+                ai_tag = f"AI:AVOID({confidence:.0%})"
+        ai_bonus = round(max(min(ai_bonus, 7), -7), 1)
+        if ai_bonus != 0:
+            boosted = max(min(score_detail["total"] + ai_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if ai_bonus > 0:
+                source_names.append("AI두뇌")
+
         # 이름 결정
         name = ""
         for s in sources:
@@ -1393,6 +1436,9 @@ def main():
             "intel_tag": intel_tag,
             "report_bonus": report_bonus,
             "report_tag": report_tag,
+            "ai_bonus": ai_bonus,
+            "ai_tag": ai_tag,
+            "ai_action": ai_action,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),

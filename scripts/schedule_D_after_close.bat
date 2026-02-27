@@ -157,8 +157,12 @@ REM 19.7단계: Perplexity 시장 인텔리전스 (전략E — US 이벤트→KR
 echo [%date% %time%] [19.7/28] Perplexity 인텔리전스 >> logs\schedule.log
 python -u -X utf8 scripts\perplexity_market_intel.py >> logs\schedule.log 2>&1
 
+REM 19.8단계: AI 두뇌 뉴스 분석 (Claude API → 정성적 종목 판단)
+echo [%date% %time%] [19.8/30] AI 두뇌 뉴스 분석 >> logs\schedule.log
+python -u -X utf8 scripts\ai_news_brain.py >> logs\schedule.log 2>&1
+
 REM 20단계: 내일 추천 종목 통합 스캔 (10개 시그널 교차검증) *** 최종 ***
-echo [%date% %time%] [20/28] 내일 추천 종목 스캔 >> logs\schedule.log
+echo [%date% %time%] [20/30] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 
 REM 20.7단계: 멀티전략 포트폴리오 배분

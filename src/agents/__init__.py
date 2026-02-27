@@ -7,6 +7,7 @@ from src.agents.condition_judge import ConditionJudgeAgent
 from src.agents.flow_prediction import FlowPredictionAgent
 from src.agents.game_analyst import GameAnalystAgent
 from src.agents.macro_analyst import MacroAnalystAgent
+from src.agents.news_brain import NewsBrainAgent
 from src.agents.risk_sentinel import RiskSentinelAgent
 from src.agents.volume_analysis import VolumeAnalysisAgent
 
@@ -18,6 +19,7 @@ __all__ = [
     "FlowPredictionAgent",
     "GameAnalystAgent",
     "MacroAnalystAgent",
+    "NewsBrainAgent",
     "RiskSentinelAgent",
     "VolumeAnalysisAgent",
 ]

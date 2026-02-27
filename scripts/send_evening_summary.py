@@ -169,6 +169,53 @@ def _section_value_chain() -> list[str]:
     return lines
 
 
+def _section_ai_vs_bot() -> list[str]:
+    """AI 두뇌 판단 vs Bot(기술적) 판단 비교."""
+    ai_data = _load("ai_brain_judgment.json")
+    picks_data = _load("tomorrow_picks.json")
+    if not ai_data or not ai_data.get("stock_judgments"):
+        return []
+
+    lines = ["\n\u2501\u2501 \U0001f9e0 AI 두뇌 분석 \u2501\u2501"]
+    sentiment = ai_data.get("market_sentiment", "")
+    s_icon = {"bullish": "\u25b2", "bearish": "\u25bc", "neutral": "\u2500"}.get(sentiment, "")
+    lines.append(f"센티먼트: {s_icon}{sentiment}")
+    themes = ai_data.get("key_themes", [])
+    if themes:
+        lines.append(f"테마: {', '.join(themes[:3])}")
+
+    # Bot TOP 종목 티커 세트
+    bot_tickers = set()
+    if picks_data:
+        for p in picks_data.get("picks", []):
+            if isinstance(p, dict):
+                bot_tickers.add(p.get("ticker", ""))
+
+    ai_buys = [j for j in ai_data["stock_judgments"] if j.get("action") == "BUY"]
+    ai_avoids = [j for j in ai_data["stock_judgments"] if j.get("action") == "AVOID"]
+
+    both = [j for j in ai_buys if j.get("ticker") in bot_tickers]
+    ai_only = [j for j in ai_buys if j.get("ticker") not in bot_tickers]
+
+    if both:
+        lines.append("\u2705 AI+Bot 동시 추천:")
+        for j in both[:3]:
+            lines.append(f"  \U0001f7e2 {j.get('name', '?')} ({j.get('confidence', 0):.0%})")
+
+    if ai_only:
+        lines.append("\U0001f9e0 AI만 포착:")
+        for j in ai_only[:3]:
+            reason = j.get("reasoning", "")[:30]
+            lines.append(f"  \U0001f7e1 {j.get('name', '?')} \u2014 {reason}")
+
+    if ai_avoids:
+        lines.append("\U0001f6a8 AI 경고:")
+        for j in ai_avoids[:2]:
+            lines.append(f"  \U0001f534 {j.get('name', '?')} \u2014 {j.get('reasoning', '')[:30]}")
+
+    return lines
+
+
 def _section_intel() -> list[str]:
     """Perplexity 시장 인텔리전스 요약 (무드+핫테마만)."""
     data = _load("market_intelligence.json")
@@ -214,6 +261,7 @@ def build_evening_summary() -> str:
     L.extend(_section_holdings())
     L.extend(_section_dart())
     L.extend(_section_picks())
+    L.extend(_section_ai_vs_bot())
     L.extend(_section_value_chain())
     L.extend(_section_intel())
 
