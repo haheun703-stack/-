@@ -1,6 +1,6 @@
 {
-  "date": "2026-02-27",
-  "generated_at": "2026-02-27 21:38",
+  "date": "2026-02-28",
+  "generated_at": "2026-02-28 07:01",
   "reports": [
     {
       "stock_name": "와이지엔터테인먼트",
@@ -517,246 +517,6 @@
       "url": "https://finance.naver.com/research/company_read.naver?nid=90714&page=2",
       "boost": 0,
       "tag": "중립"
-    },
-    {
-      "stock_name": "한글과컴퓨터",
-      "stock_code": "030520",
-      "title": "새로운 성장 궤도 진입",
-      "broker": "신한투자증권",
-      "target_price": 35000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90713&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "아이에스동서",
-      "stock_code": "010780",
-      "title": "경산 펜타힐즈W 탐방 후기, 자체 사업의 잠재..",
-      "broker": "미래에셋증권",
-      "target_price": 0,
-      "opinion": "없음",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90712&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "씨젠",
-      "stock_code": "096530",
-      "title": "체외진단 매출 5,000억원 시대를 예고하다",
-      "broker": "미래에셋증권",
-      "target_price": 44000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90711&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "한국콜마",
-      "stock_code": "161890",
-      "title": "가격 매력 발생",
-      "broker": "미래에셋증권",
-      "target_price": 95000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90710&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "기아",
-      "stock_code": "000270",
-      "title": "역사적 신고가 경신은 새로운 시작을 의미",
-      "broker": "한화투자증권",
-      "target_price": 240000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90709&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "오리온",
-      "stock_code": "271560",
-      "title": "좋은 출발",
-      "broker": "한화투자증권",
-      "target_price": 180000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90708&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "씨에스베어링",
-      "stock_code": "297090",
-      "title": "낮아진 기대, 예상 밖의 좋은 실적",
-      "broker": "DS투자증권",
-      "target_price": 9900,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90707&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "LG이노텍",
-      "stock_code": "011070",
-      "title": "로봇산업 진출, P와 Q의 확",
-      "broker": "교보증권",
-      "target_price": 370000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90706&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "한미약품",
-      "stock_code": "128940",
-      "title": "이익과 파이프라인 성장",
-      "broker": "교보증권",
-      "target_price": 700000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90705&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "오리온",
-      "stock_code": "271560",
-      "title": "1월 Review: 반등의 실마리는 만들어졌다",
-      "broker": "교보증권",
-      "target_price": 160000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90704&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "펨트론",
-      "stock_code": "168360",
-      "title": "적층 메모리(HBM, HBF,SOCAMM) 모두 대응 가..",
-      "broker": "대신증권",
-      "target_price": 0,
-      "opinion": "없음",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90703&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "한국콜마",
-      "stock_code": "161890",
-      "title": "별도법인 매출 성장세 견조",
-      "broker": "SK증권",
-      "target_price": 95000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90702&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "오리온",
-      "stock_code": "271560",
-      "title": "출발이 좋다",
-      "broker": "IBK투자증권",
-      "target_price": 170000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90701&page=2",
-      "boost": 5,
-      "tag": "매수"
-    },
-    {
-      "stock_name": "파트론",
-      "stock_code": "091700",
-      "title": "고객사 출하 전략의 수혜",
-      "broker": "iM증권",
-      "target_price": 11500,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90700&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "웹젠",
-      "stock_code": "069080",
-      "title": "주주환원 확대에도 부진한 신작 성과",
-      "broker": "신한투자증권",
-      "target_price": 0,
-      "opinion": "중립",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90699&page=2",
-      "boost": -5,
-      "tag": "비중축소"
-    },
-    {
-      "stock_name": "신흥에스이씨",
-      "stock_code": "243840",
-      "title": "미국 공장 가동으로 실적 개선 기대",
-      "broker": "유진투자증권",
-      "target_price": 10000,
-      "opinion": "Buy",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90698&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "코세스",
-      "stock_code": "089890",
-      "title": "SOFC 증설 사이클 초입, 실적 레벨업 시작",
-      "broker": "SK증권",
-      "target_price": 0,
-      "opinion": "없음",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90697&page=2",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "동운아나텍",
-      "stock_code": "094170",
-      "title": "4Q25P Review: 본업 실적 성장 속에, 상반기..",
-      "broker": "유진투자증권",
-      "target_price": 0,
-      "opinion": "없음",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90696&page=3",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "인터로조",
-      "stock_code": "119610",
-      "title": "본격적인 턴어라운드로 26년 사상 최대 실적 ..",
-      "broker": "한국IR협의회",
-      "target_price": 0,
-      "opinion": "없음",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90695&page=3",
-      "boost": 0,
-      "tag": "중립"
-    },
-    {
-      "stock_name": "비에이치",
-      "stock_code": "090460",
-      "title": "폴더블 + IT OLED 적자폭 축소",
-      "broker": "미래에셋증권",
-      "target_price": 25000,
-      "opinion": "매수",
-      "date": "26.02.26",
-      "url": "https://finance.naver.com/research/company_read.naver?nid=90694&page=3",
-      "boost": 5,
-      "tag": "매수"
     }
   ],
   "report_boost_map": {
@@ -871,65 +631,144 @@
       "broker": "미래에셋증권",
       "target_price": 64000,
       "title": "추가 해외 수주가 필요"
-    },
-    "030520": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "신한투자증권",
-      "target_price": 35000,
-      "title": "새로운 성장 궤도 진입"
-    },
-    "096530": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "미래에셋증권",
-      "target_price": 44000,
-      "title": "체외진단 매출 5,000억원 시대를 예고하다"
-    },
-    "161890": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "미래에셋증권",
-      "target_price": 95000,
-      "title": "가격 매력 발생"
-    },
-    "297090": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "DS투자증권",
-      "target_price": 9900,
-      "title": "낮아진 기대, 예상 밖의 좋은 실적"
-    },
-    "271560": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "IBK투자증권",
-      "target_price": 170000,
-      "title": "출발이 좋다"
-    },
-    "069080": {
-      "boost": -5,
-      "tag": "비중축소",
-      "broker": "신한투자증권",
-      "target_price": 0,
-      "title": "주주환원 확대에도 부진한 신작 성과"
-    },
-    "090460": {
-      "boost": 5,
-      "tag": "매수",
-      "broker": "미래에셋증권",
-      "target_price": 25000,
-      "title": "폴더블 + IT OLED 적자폭 축소"
     }
   },
-  "perplexity_themes": {},
-  "candidate_news": [],
-  "news_boost_map": {},
+  "perplexity_themes": {
+    "hot_themes": [
+      {
+        "theme": "반도체 및 AI 밸류체인",
+        "catalyst": "엔비디아 호실적 서프라이즈와 국내 반도체주(삼성전자 +7.1%, SK하이닉스 +8.0%) 강세 지속",
+        "urgency": "HIGH",
+        "stocks": [
+          "삼성전자",
+          "SK하이닉스",
+          "한미반도체",
+          "이오테크닉스",
+          "LG이노텍"
+        ]
+      },
+      {
+        "theme": "반도체 소부장",
+        "catalyst": "반도체 초강세 속 소부장 종목들의 신고가 돌파 가능성 및 순환매 기대",
+        "urgency": "HIGH",
+        "stocks": [
+          "이오테크닉스",
+          "LG이노텍",
+          "한미반도체"
+        ]
+      },
+      {
+        "theme": "스테이블코인·암호화폐",
+        "catalyst": "미국 Circle의 깜짝 실적 발표 후 주가 +35% 급등으로 발행사 수익성 재평가",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "암호화폐 관련 국내 기업"
+        ]
+      },
+      {
+        "theme": "로봇·방위산업",
+        "catalyst": "미 상무부 3월 로봇 제조사 회의 예고 및 트럼프-젤렌스키 통화에서 '한 달 내 종전 희망' 언급",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "SG",
+          "대동기어",
+          "유진로봇"
+        ]
+      },
+      {
+        "theme": "코스닥 정책 수혜",
+        "catalyst": "3차 상법 개정안 통과, 좀비기업 퇴출, 코스닥 벤처펀드 세제 혜택 등 코스닥 활성화 정책",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "코스닥 벤처·성장기업"
+        ]
+      }
+    ],
+    "breaking_catalysts": [
+      {
+        "stock_name": "삼성전자",
+        "catalyst": "맥쿼리 목표주가 34만원으로 대폭 상향",
+        "impact": "positive",
+        "source": "글로벌투자은행(IB) 맥쿼리"
+      },
+      {
+        "stock_name": "SK하이닉스",
+        "catalyst": "맥쿼리 목표주가 170만원으로 대폭 상향 및 경기 용인 반도체 클러스터 1기 팹에 21조6000억원 추가 투입",
+        "impact": "positive",
+        "source": "글로벌투자은행(IB) 맥쿼리 및 기업 공시"
+      },
+      {
+        "stock_name": "한화솔루션",
+        "catalyst": "목표주가 151,000원에서 190,000원으로 상향, 태양광·에너지 턴어라운드 모멘텀",
+        "impact": "positive",
+        "source": "증권사 리포트"
+      },
+      {
+        "stock_name": "유진로봇",
+        "catalyst": "삼성자산운용 지분 5.04% 신규 취득 보고",
+        "impact": "positive",
+        "source": "대량보유 보고"
+      },
+      {
+        "stock_name": "메디아나",
+        "catalyst": "해외 전시 및 수출 모멘텀, +20.63% 상승",
+        "impact": "positive",
+        "source": "시장 데이터"
+      }
+    ],
+    "sector_outlook": {
+      "bullish": [
+        "반도체",
+        "AI 밸류체인",
+        "로봇·방위산업"
+      ],
+      "bearish": [
+        "코스닥 조정 가능성",
+        "차익실현 압력"
+      ]
+    }
+  },
+  "candidate_news": [
+    {
+      "stock_name": "한화에어로스페이스",
+      "date": "2026-02-27",
+      "title": "한화에어로스페이스 주가, 2월 27일 장중 1,217,000원 1.93% 상승",
+      "source": "톱스타뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBIMDllZTFPOG80QkRLVDdFVDcxSWlGaDdKUDI2bWJpY2RVTnkyRTdyTmJ5STUtckF0VlAyODJoZjNtN29xWGtFVWl6QVhPS3ZnQnBJU3ItWXVIeVpwZzFHaUp6NnlUYW8zbTdNUmVrZmZ4Zw?oc=5"
+    },
+    {
+      "stock_name": "한화에어로스페이스",
+      "date": "2026-02-27",
+      "title": "한화에어로스페이스, 글로벌 LNG 유통사업 첫 진출",
+      "source": "인포스탁데일리",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1aRS0tSGZ2Um5pQ29HS0JvZ2ZqcDI4eHB0aHZPcDZHTXhMZi1oTF9hWmpIQ0hjRDF0Z0NhaTFvc29pcks1OWJSLU1XSHFCa0dLNEZjTXdVZ3h4dXJCVHcwVTJJbHlpWVNlNW1vNzJqZV9CcERCbWc?oc=5"
+    },
+    {
+      "stock_name": "엔씨소프트",
+      "date": "2026-02-27",
+      "title": "게임주 노답? 상승장 외면, 하락장 동참…36조 또 붕괴",
+      "source": "gameand.co.kr",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5vQjMzdlV2Yllobl9tMGxJbDB0MzdRZUt3VXI4bUpHa1V5bklyNW4ydXVJc3ByQkhVT3V2ZmFsdkZVTTFIb0NWelZsblJOZDlXZ2E1SzF2TVg3NGR6QzZ3TlNLMzlhM05HWFE?oc=5"
+    }
+  ],
+  "news_boost_map": {
+    "한화에어로스페이스": {
+      "boost": 3,
+      "reason": "한화에어로스페이스 주가, 2월 27일 장중 1,217,000원 1.93%"
+    },
+    "엔씨소프트": {
+      "boost": 5,
+      "reason": "게임주 노답? 상승장 외면, 하락장 동참…36조 또 붕괴"
+    }
+  },
   "stats": {
-    "total_reports": 63,
-    "positive_reports": 21,
-    "negative_reports": 3,
-    "news_alerts": 0,
-    "themes_count": 0
+    "total_reports": 43,
+    "positive_reports": 14,
+    "negative_reports": 2,
+    "news_alerts": 3,
+    "themes_count": 5
   }
 }
