@@ -11,8 +11,12 @@ call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
 set PYTHONPATH=D:\sub-agent-project
 
-REM 테마스캔 + 뉴스스캔 + 장전 브리핑 (텔레그램 발송 포함)
-echo [%date% %time%] 장전 브리핑 실행 >> logs\schedule.log
+REM 1단계: 장전 리포트 스캔 (증권사 리포트 + Perplexity 테마 + 후보풀 뉴스)
+echo [%date% %time%] [1/2] 장전 리포트 스캔 >> logs\schedule.log
+python -u -X utf8 scripts\crawl_morning_reports.py --send >> logs\schedule.log 2>&1
+
+REM 2단계: 테마스캔 + 뉴스스캔 + 장전 브리핑 (텔레그램 발송 포함)
+echo [%date% %time%] [2/2] 장전 브리핑 실행 >> logs\schedule.log
 python -u -X utf8 scripts\run_morning_briefing.py >> logs\schedule.log 2>&1
 
 echo [%date% %time%] BAT-B 완료 >> logs\schedule.log

@@ -1150,3 +1150,79 @@ ensemble:
   sources: 8
   regime_boost_enabled: true
   dart_avoid_filter: true
+
+# ============================================================
+# position_monitor — 보유종목 동적 목표가 재판정 엔진
+# ============================================================
+position_monitor:
+  # 판정 임계값 (final_target / current_price)
+  add_threshold: 1.08           # >= 1.08 → ADD (추가매수)
+  hold_threshold: 1.03          # >= 1.03 → HOLD (보유 유지)
+  partial_sell_threshold: 1.01  # < 1.01 → PARTIAL_SELL (부분매도)
+  full_sell_threshold: 0.97     # < 0.97 → FULL_SELL (전량매도)
+
+  # 보조 안전장치
+  hard_stop_loss_pct: -8.0      # pnl < -8% 강제 FULL_SELL
+  profit_take_pct: 12.0         # pnl >= 12% 최소 PARTIAL_SELL
+
+  # 총 조정 클램핑
+  total_adj_max: 0.15
+  total_adj_min: -0.15
+
+  # 1 증권사 리포트 조정
+  report:
+    strong_buy_adj: 0.04        # Buy + 목표가상향 → +4%
+    buy_adj: 0.03               # Buy → +3%
+    hold_adj: 0.0
+    reduce_adj: -0.05           # 비중축소 → -5%
+    sell_adj: -0.08             # Sell → -8%
+
+  # 2 뉴스 임팩트 조정
+  news:
+    high_positive_adj: 0.025
+    high_negative_adj: -0.04
+    medium_scale: 0.6           # medium은 high의 60%
+    beneficiary_adj: 0.02
+    risk_adj: -0.03
+    positive_keywords: ["호재","수주","급등","실적","상향","승인","계약","돌파"]
+    negative_keywords: ["악재","손실","하락","조사","하향","리콜","소송","부진"]
+
+  # 3 수급 조정
+  supply:
+    dual_buy_3d_adj: 0.02       # 외인+기관 3일 순매수
+    foreign_only_3d_adj: 0.015
+    inst_only_3d_adj: 0.01
+    dual_sell_3d_adj: -0.02
+    foreign_sell_3d_adj: -0.015
+
+  # 4 MACD 조정
+  macd:
+    golden_cross_adj: 0.02
+    dead_cross_adj: -0.03
+    bearish_divergence_adj: -0.05
+    bullish_divergence_adj: 0.02
+    divergence_lookback: 20
+
+  # 5 RSI 조정
+  rsi:
+    extreme_overbought: 75      # 이 이상 → base_target override
+    override_multiplier: 1.03   # 현재가 × 1.03으로 강제
+    overbought: 70
+    overbought_adj: -0.02
+    oversold: 30
+    oversold_adj: 0.03
+    near_oversold: 40
+    near_oversold_adj: 0.015
+
+  # 6 볼린저 조정
+  bollinger:
+    upper_breach: 100
+    upper_breach_adj: 0.01
+    lower_breach: 5
+    lower_breach_adj: -0.05
+
+  # 7 DART 이벤트 조정
+  dart:
+    tier1_buy_adj: 0.03
+    tier2_adj: 0.01
+    avoid_adj: -0.10

@@ -306,6 +306,41 @@ def collect_accumulation_tracker() -> dict[str, dict]:
     return result
 
 
+def collect_event_catalyst() -> dict[str, dict]:
+    """소스11: 이벤트 촉매 — 정책/협력/합병 등 외부 이벤트 수혜종목 (전략 F)
+
+    data/event_catalyst.json에서 로드. expires 지나면 자동 무시.
+    """
+    ec = load_json("event_catalyst.json")
+    if not ec:
+        return {}
+
+    # 만료일 체크
+    expires = ec.get("expires", "")
+    if expires:
+        try:
+            exp_date = datetime.strptime(expires, "%Y-%m-%d").date()
+            if datetime.now().date() > exp_date:
+                logger.info("[이벤트촉매] 만료됨 (%s) — 무시", expires)
+                return {}
+        except ValueError:
+            pass
+
+    event_name = ec.get("event", "이벤트")
+    result = {}
+    for item in ec.get("stocks", []):
+        ticker = item.get("ticker", "")
+        if not ticker:
+            continue
+        result[ticker] = {
+            "source": "이벤트촉매",
+            "score": item.get("score", 60),
+            "name": item.get("name", ""),
+            "detail": f"[{item.get('sector','')}] {item.get('detail','')} ({event_name})",
+        }
+    return result
+
+
 def collect_volume_spike() -> dict[str, dict]:
     """소스9: 수급 폭발 → 조정 매수 시그널 (전략 A)"""
     vs = load_json("volume_spike_watchlist.json")
@@ -414,6 +449,19 @@ def load_institutional_targets() -> dict:
 def load_market_intelligence() -> dict:
     """Perplexity 시장 인텔리전스 데이터 로드."""
     return load_json("market_intelligence.json")
+
+
+def load_morning_reports() -> dict:
+    """장전 리포트 스캔 결과 로드 (전략 G)."""
+    data = load_json("morning_reports.json")
+    if not data:
+        return {}
+    # 당일 또는 전일 데이터만 유효
+    today = datetime.now().strftime("%Y-%m-%d")
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    if data.get("date") not in (today, yesterday):
+        return {}
+    return data
 
 
 def get_target_zone_bonus(ticker: str, targets: dict) -> tuple[float, dict]:
@@ -729,7 +777,7 @@ def _calc_entry_stop(
     stop_candidates = [v for v in [low_20d, ma20 * 0.98] if 0 < v < close]
     stop = max(stop_candidates) if stop_candidates else close * 0.95
     stop = max(stop, close * 0.93)   # 손절폭 최대 -7%
-    stop = min(stop, close * 0.97)   # 손절폭 최소 -3% (너무 가까우면 의미 없음)
+    stop = min(stop, close * 0.95)   # 손절폭 최소 -5%
 
     # ── MA5~MA7 진입 전략 ──
     # 핵심: 5일선~7일선 근처에서 진입해야 승률이 높다
@@ -792,7 +840,7 @@ def _calc_entry_stop(
 
     # ── 손절가를 entry 기준으로 재조정 ──
     # entry가 MA5 수준으로 낮아졌을 때 stop이 entry 근처면 R:R 무의미
-    stop = min(stop, entry * 0.97)   # entry 대비 최소 -3%
+    stop = min(stop, entry * 0.95)   # entry 대비 최소 -5%
     stop = max(stop, entry * 0.93)   # entry 대비 최대 -7%
 
     # 목표가: R:R 2:1 기준
@@ -1006,7 +1054,7 @@ def main():
 
     name_map = build_name_map()
 
-    # 10개 소스 수집 (v8: 9→10 앙상블, 전략D 매집추적 추가)
+    # 11개 소스 수집 (v8: 9→10 앙상블, 전략D 매집추적, 전략F 이벤트촉매)
     src1 = collect_relay()
     src2 = collect_group_relay()
     src3 = collect_pullback()
@@ -1016,11 +1064,12 @@ def main():
     src7 = collect_dart_event()
     src9 = collect_volume_spike()
     src10 = collect_accumulation_tracker()
+    src11 = collect_event_catalyst()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
-          f"매집추적:{len(src10)}")
+          f"매집추적:{len(src10)} 이벤트촉매:{len(src11)}")
 
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
@@ -1037,6 +1086,17 @@ def main():
     if active_boosts:
         print(f"[US섹터 부스트] {len(active_boosts)}섹터 활성: {active_boosts}")
 
+    # 전략 G: 장전 리포트 부스트
+    morning = load_morning_reports()
+    report_boost_map = morning.get("report_boost_map", {})
+    pplx_themes = morning.get("perplexity_themes", {})
+    news_boost_map = morning.get("news_boost_map", {})
+    if report_boost_map:
+        print(f"[리포트 부스트] {len(report_boost_map)}종목 활성")
+    if pplx_themes.get("hot_themes"):
+        themes_str = " | ".join(t["theme"] for t in pplx_themes["hot_themes"][:3])
+        print(f"[장전 테마] {themes_str}")
+
     # 전략 E: Perplexity 인텔리전스
     intel_sector_boost = intel.get("sector_boost", {})
     intel_beneficiary = set(intel.get("beneficiary_stocks", []))
@@ -1051,7 +1111,7 @@ def main():
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10]:
+    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11]:
         all_tickers.update(src.keys())
 
     # AVOID 종목 제외
@@ -1066,10 +1126,17 @@ def main():
         source_names = []
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
                            (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
-                           (src7, "이벤트"), (src9, "수급폭발"), (src10, "매집추적")]:
+                           (src7, "이벤트"), (src9, "수급폭발"), (src10, "매집추적"),
+                           (src11, "이벤트촉매")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
+
+        # ── 눌림목 단독 추천 차단 (v12) ──
+        # 눌림목이 유일한 소스면 교차검증 없음 → 승률 28% 문제
+        # 최소 2개 소스 필수. 눌림목 단독이면 스킵
+        if source_names == ["눌림목"]:
+            continue
 
         # parquet 기술적 데이터
         pq_data = get_parquet_data(ticker)
@@ -1131,6 +1198,36 @@ def main():
             score_detail["total"] = round(boosted, 1)
             if intel_bonus > 0:
                 source_names.append("인텔리전스")
+
+        # 전략 G: 리포트 + 뉴스 부스트 (최대 ±10점, intel과 독립)
+        report_bonus = 0.0
+        report_tag = ""
+        # G-1: 증권사 리포트 (티커 기반)
+        if ticker in report_boost_map:
+            rb = report_boost_map[ticker]
+            report_bonus += rb.get("boost", 0)
+            report_tag = f"리포트:{rb.get('tag', '')}"
+        # G-2: Perplexity 개별 촉매 (종목명 기반)
+        cur_name = name_map.get(ticker, "")
+        if pplx_themes:
+            for cat in pplx_themes.get("breaking_catalysts", []):
+                if cat.get("stock_name") == cur_name and cat.get("impact") == "positive":
+                    report_bonus += 3.0
+                    if not report_tag:
+                        report_tag = f"촉매:{cat.get('catalyst', '')[:15]}"
+                    break
+        # G-3: 뉴스 부스트 (종목명 기반)
+        if cur_name in news_boost_map:
+            nb = news_boost_map[cur_name]
+            report_bonus += nb.get("boost", 0)
+            if not report_tag:
+                report_tag = f"뉴스:{nb.get('reason', '')[:15]}"
+        report_bonus = round(max(min(report_bonus, 10), -10), 1)
+        if report_bonus != 0:
+            boosted = max(min(score_detail["total"] + report_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if report_bonus > 0:
+                source_names.append("리포트")
 
         # 이름 결정
         name = ""
@@ -1198,6 +1295,8 @@ def main():
             "accum_return": src10.get(ticker, {}).get("return_since_spike", 0),
             "intel_bonus": intel_bonus,
             "intel_tag": intel_tag,
+            "report_bonus": report_bonus,
+            "report_tag": report_tag,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
@@ -1209,12 +1308,44 @@ def main():
     grade_order = {"적극매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
 
-    # ── TOP 5 선별: 매수 등급 이상에서 점수순 top 5 ──
+    # ── TOP 5 선별: 매수 등급 이상 + 동일 이벤트 테마 최대 2개 ──
     buyable_grades = {"적극매수", "매수", "관심매수"}
     buyable = [r for r in results if r["grade"] in buyable_grades]
-    top5 = buyable[:5]
+
+    # 고가주 추천 제외 (v12): 1주 80만원 초과 종목은 시드 제약으로 추천에서만 제외
+    MAX_PRICE_FOR_PICK = 800_000
+
+    # 동일 이벤트촉매 섹터 2개 제한 (v12): UAE 방산 3개 등 편중 방지
+    _ec = load_json("event_catalyst.json") or {}
+    _ec_sector_map = {s["ticker"]: s.get("sector", "") for s in _ec.get("stocks", [])}
+
+    top5 = []
+    _event_sector_cnt: dict[str, int] = {}
+    for r in buyable:
+        if len(top5) >= 5:
+            break
+        if r.get("close", 0) > MAX_PRICE_FOR_PICK:
+            continue  # 고가주 → 분석은 유지, 추천에서만 제외
+        ec_sector = _ec_sector_map.get(r["ticker"], "")
+        if ec_sector:
+            cnt = _event_sector_cnt.get(ec_sector, 0)
+            if cnt >= 2:
+                continue  # 같은 이벤트 섹터 이미 2개 → 스킵
+            _event_sector_cnt[ec_sector] = cnt + 1
+        top5.append(r)
     for r in top5:
         r["is_top5"] = True
+
+    # ── 관심종목 5개 (v12): TOP5 제외, 60점+, 소스 3개 이상 우선 ──
+    top5_tickers = {r["ticker"] for r in top5}
+    watchlist_pool = [r for r in buyable
+                      if r["ticker"] not in top5_tickers
+                      and r.get("close", 0) <= MAX_PRICE_FOR_PICK]
+    # 소스 3개+ 우선, 그 다음 점수순
+    watchlist_pool.sort(key=lambda x: (-min(x["n_sources"], 3), -x["total_score"]))
+    watchlist5 = watchlist_pool[:5]
+    for r in watchlist5:
+        r["is_watchlist"] = True
 
     # 통계
     grade_stats = {}
@@ -1255,16 +1386,30 @@ def main():
             ma5e = r.get("ma5_entry", "")
             ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
             intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
-            print(f"     근거: {reasons_str}{ma5_str}{intel_str}")
+            report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
+            print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}")
         print(f"{'─'*60}")
     else:
         print("\n  ⚠ 매수 적합 종목 없음 — 전체 관망 추천")
 
+    # 관심종목 5개 출력 (v12)
+    if watchlist5:
+        print(f"\n{'─'*60}")
+        print(f"  👀 관심종목 5 (소스 다양성 우선)")
+        print(f"{'─'*60}")
+        for i, r in enumerate(watchlist5, 1):
+            srcs = "+".join(r["sources"])
+            print(f"  {i}. {r['name']}({r['ticker']}) "
+                  f"{r['total_score']}점 [{r['grade']}] ({r['n_sources']}소스: {srcs})")
+        print(f"{'─'*60}")
+
     # 나머지 관찰 종목 간략 출력
-    rest = [r for r in results if r["grade"] in buyable_grades][5:]
+    rest = [r for r in results if r["grade"] in buyable_grades
+            and r["ticker"] not in top5_tickers
+            and r["ticker"] not in {w["ticker"] for w in watchlist5}]
     if rest:
         print(f"\n  [기타 관심종목]")
-        for r in rest:
+        for r in rest[:10]:
             print(f"    - {r['name']}({r['ticker']}) {r['total_score']}점 [{r['grade']}]")
 
     # 날짜 기입 + JSON 저장
@@ -1287,6 +1432,7 @@ def main():
         "total_candidates": len(results),
         "stats": grade_stats,
         "top5": [r["ticker"] for r in top5],
+        "watchlist5": [r["ticker"] for r in watchlist5],
         "picks": results,
         "market_intel": {
             "mood": intel_mood,
@@ -1295,6 +1441,12 @@ def main():
             "hot_themes": intel_themes,
             "summary": intel.get("us_market_summary", ""),
         } if intel_mood else {},
+        "morning_report": {
+            "date": morning.get("date", ""),
+            "report_count": len(report_boost_map),
+            "themes": [t["theme"] for t in pplx_themes.get("hot_themes", [])][:5],
+            "boosted_tickers": list(report_boost_map.keys()),
+        } if morning else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:

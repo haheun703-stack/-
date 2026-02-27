@@ -145,6 +145,10 @@ REM 19.5단계: 기관 추정 목표가 계산 (VPOC + 외인VWAP + 피보나치
 echo [%date% %time%] [19.5/28] 기관 목표가 계산 >> logs\schedule.log
 python -u -X utf8 scripts\calc_institutional_targets.py >> logs\schedule.log 2>&1
 
+REM 19.6단계: 보유종목 동적 목표가 재판정
+echo [%date% %time%] [19.6/28] 보유종목 재판정 >> logs\schedule.log
+python -u -X utf8 scripts\position_monitor.py --send >> logs\schedule.log 2>&1
+
 REM 19.7단계: Perplexity 시장 인텔리전스 (전략E — US 이벤트→KR 파급 분석)
 echo [%date% %time%] [19.7/28] Perplexity 인텔리전스 >> logs\schedule.log
 python -u -X utf8 scripts\perplexity_market_intel.py >> logs\schedule.log 2>&1
