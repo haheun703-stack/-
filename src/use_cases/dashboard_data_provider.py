@@ -71,6 +71,7 @@ class DashboardDataProvider:
             "institutional_targets": self._load_json("institutional_targets.json"),
             "accumulation_tracker": self._load_json("accumulation_tracker.json"),
             "market_intelligence": self._load_json("market_intelligence.json"),
+            "value_chain": self._load_json("value_chain_relay.json"),
             "summary": summary,
         }
 

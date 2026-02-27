@@ -93,9 +93,13 @@ REM 12.5단계: 수급 폭발 → 조정 매수 스캐너 (전략 A)
 echo [%date% %time%] [12.5/26] 수급 폭발 스캐너 >> logs\schedule.log
 python -u -X utf8 scripts\scan_volume_spike.py >> logs\schedule.log 2>&1
 
+REM 12.7단계: 밸류체인 릴레이 스캔 (대장주→소부장)
+echo [%date% %time%] [12.7/28] 밸류체인 스캔 >> logs\schedule.log
+python -u -X utf8 scripts\scan_value_chain.py >> logs\schedule.log 2>&1
+
 REM 13단계: DART 전자공시 크롤링 (뉴스 선행 감지)
 echo [%date% %time%] [13/23] DART 공시 크롤링 >> logs\schedule.log
-python -u -X utf8 scripts\crawl_dart_disclosure.py --alert >> logs\schedule.log 2>&1
+python -u -X utf8 scripts\crawl_dart_disclosure.py >> logs\schedule.log 2>&1
 
 REM 13.5단계: 레짐 전환 매크로 시그널
 echo [%date% %time%] [13.5/26] 레짐 매크로 시그널 >> logs\schedule.log
@@ -147,7 +151,7 @@ python -u -X utf8 scripts\calc_institutional_targets.py >> logs\schedule.log 2>&
 
 REM 19.6단계: 보유종목 동적 목표가 재판정
 echo [%date% %time%] [19.6/28] 보유종목 재판정 >> logs\schedule.log
-python -u -X utf8 scripts\position_monitor.py --send >> logs\schedule.log 2>&1
+python -u -X utf8 scripts\position_monitor.py >> logs\schedule.log 2>&1
 
 REM 19.7단계: Perplexity 시장 인텔리전스 (전략E — US 이벤트→KR 파급 분석)
 echo [%date% %time%] [19.7/28] Perplexity 인텔리전스 >> logs\schedule.log
@@ -186,6 +190,10 @@ if defined RAILWAY_URL (
     echo [%date% %time%] [23/28] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
 )
 
+REM 24단계: 저녁 통합 텔레그램 (보유종목+DART+추천+밸류체인 → 1건)
+echo [%date% %time%] [24/29] 저녁 통합 리포트 >> logs\schedule.log
+python -u -X utf8 scripts\send_evening_summary.py --send >> logs\schedule.log 2>&1
+
 REM ══════════════════════════════════════════════
-echo [%date% %time%] BAT-D 완료 (28단계 순차 실행) >> logs\schedule.log
+echo [%date% %time%] BAT-D 완료 (29단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log

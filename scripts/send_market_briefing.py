@@ -453,6 +453,125 @@ def build_briefing_message() -> str:
 
 
 # ─────────────────────────────────────────────
+# 통합 아침 브리핑 (1건으로 압축)
+# ─────────────────────────────────────────────
+
+MORNING_REPORTS_PATH = PROJECT_ROOT / "data" / "morning_reports.json"
+THEME_ALERTS_PATH = PROJECT_ROOT / "data" / "theme_alerts.json"
+
+
+def build_unified_morning() -> str:
+    """아침 통합 브리핑 — KOSPI예측+US+증권사+테마+ETF → 1건.
+
+    기존 build_briefing_message()의 핵심만 추출하고,
+    증권사 리포트, 테마 알림, ETF 시그널을 한 메시지에 통합.
+    """
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # === 데이터 로드 ===
+    sig = load_overnight_signal()
+    idx = sig.get("index_direction", {})
+
+    ewy_ret = idx.get("EWY", {}).get("ret_1d", 0)
+    spy_ret = idx.get("SPY", {}).get("ret_1d", 0)
+    qqq_ret = idx.get("QQQ", {}).get("ret_1d", 0)
+    dia_ret = idx.get("DIA", {}).get("ret_1d", 0)
+    vix_data = sig.get("vix", {})
+    vix = vix_data.get("level", 20)
+    vix_status = vix_data.get("status", "정상")
+    us_grade = sig.get("grade", "NEUTRAL")
+
+    us_vec = sig.get("l2_pattern", {}).get("today_us_vector", {})
+    sox_ret = us_vec.get("us_soxx_chg", 0)
+    vix_chg = us_vec.get("us_vix_chg", 0)
+    stoxx50_ret = _fetch_stoxx50_ret()
+
+    prob = calc_market_probability(
+        ewy_ret, vix, spy_ret, qqq_ret,
+        soxx_ret=sox_ret, vix_chg=vix_chg,
+        stoxx50_ret=stoxx50_ret,
+    )
+
+    L = []
+
+    # ── Header ──
+    L.append(f"\U0001f4ca 장전 브리핑 | {now}")
+    L.append("\u2501" * 24)
+
+    # ── 1. KOSPI 예측 ──
+    if prob["down_prob"] >= 60:
+        dir_icon, dir_label = "\U0001f534", "하락 우세"
+    elif prob["up_prob"] >= 60:
+        dir_icon, dir_label = "\U0001f7e2", "상승 우세"
+    elif prob["down_prob"] >= 55:
+        dir_icon, dir_label = "\U0001f7e0", "하락 소폭"
+    elif prob["up_prob"] >= 55:
+        dir_icon, dir_label = "\U0001f7e2", "상승 소폭"
+    else:
+        dir_icon, dir_label = "\u26aa", "보합권"
+
+    bar = make_prob_bar(prob["up_prob"], width=15)
+    L.append(f"\n{dir_icon} KOSPI {dir_label}")
+    L.append(f"  상승 {prob['up_prob']}% {bar} 하락 {prob['down_prob']}%")
+    L.append(f"  레인지: {prob['est_low']:+.1f}% ~ {prob['est_high']:+.1f}%")
+
+    # ── 2. US 야간 (1줄 요약) ──
+    L.append(f"\n\U0001f30d US: SPY{spy_ret:+.1f}% QQQ{qqq_ret:+.1f}% SOXX{sox_ret:+.1f}%")
+    vix_icon = "\u26a0\ufe0f" if vix >= 20 else "\u2705"
+    L.append(f"  VIX {vix:.1f}{vix_icon} EWY{ewy_ret:+.1f}% Signal:{us_grade}")
+
+    # 섹터 Kill
+    kills = sig.get("sector_kills", {})
+    killed = [s for s, v in kills.items() if v.get("killed")]
+    if killed:
+        L.append(f"  \U0001f6a8 Kill: {', '.join(killed)}")
+
+    # ── 3. 증권사 리포트 ──
+    morning = _load_json(MORNING_REPORTS_PATH)
+    reports = morning.get("reports", [])
+    positive = [r for r in reports if r.get("opinion_type") == "매수"]
+    if positive:
+        L.append(f"\n\U0001f4dd 증권사 매수 ({len(positive)}건)")
+        for r in positive[:4]:
+            corp = r.get("company", "?")
+            broker = r.get("broker", "")
+            target = r.get("target_price", "")
+            target_str = f" 목표{target}" if target else ""
+            L.append(f"  \u2022 {corp}{target_str} ({broker})")
+
+    # ── 4. 테마 동향 ──
+    theme_data = _load_json(THEME_ALERTS_PATH)
+    if isinstance(theme_data, list) and theme_data:
+        themes = [t.get("theme_name", "") for t in theme_data if t.get("theme_name")][:4]
+        if themes:
+            L.append(f"\n\U0001f525 테마: {' | '.join(themes)}")
+
+    # ── 5. ETF 시그널 (BAT-C 흡수) ──
+    etf = load_etf_signals()
+    etf_buy = etf.get("buy", [])
+    if etf_buy:
+        parts = []
+        for e in etf_buy[:3]:
+            sector = e.get("sector", "?")
+            sizing = e.get("sizing", "FULL")
+            parts.append(f"{sector}({sizing})")
+        L.append(f"\n\U0001f4e6 ETF: {' | '.join(parts)}")
+
+    # ── 6. 전략 요약 ──
+    L.append("")
+    if prob["down_prob"] >= 60:
+        L.append("\u279c 갭다운 예상 \u2014 우량주 저가매수 기회")
+    elif prob["up_prob"] >= 60:
+        L.append("\u279c 갭업 예상 \u2014 목표가 부근 분할매도")
+    else:
+        L.append("\u279c 혼조 예상 \u2014 시가 확인 후 대응")
+
+    L.append("\n\u26a0\ufe0f 투자 판단은 본인 책임 | QM v10.3")
+
+    return "\n".join(L)
+
+
+# ─────────────────────────────────────────────
 # CLI
 # ─────────────────────────────────────────────
 

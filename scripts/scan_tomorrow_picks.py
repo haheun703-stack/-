@@ -55,6 +55,50 @@ PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_PATH = DATA_DIR / "tomorrow_picks.json"
 
+# ──────────────────────────────────────────
+# 전략 그룹 정의: 스윙(3~7일) vs 단타(1~3일)
+# ──────────────────────────────────────────
+STRATEGY_GROUPS = {
+    "swing": {
+        "label": "스윙(3~7일)",
+        "slots": 5,
+        "sources": {"릴레이", "그룹순환", "눌림목", "퀀텀", "동반매수", "이벤트촉매", "이벤트", "밸류체인"},
+        "overlap_pairs": [("릴레이", "그룹순환")],
+    },
+    "short": {
+        "label": "단타(1~3일)",
+        "slots": 5,
+        "sources": {"수급폭발", "세력감지", "매집추적"},
+        "overlap_pairs": [("세력감지", "매집추적")],
+    },
+}
+
+
+def calc_effective_source_count(source_names: list[str], group_key: str) -> float:
+    """그룹 내 유효 소스 수 계산 — 겹치는 소스쌍 보정.
+
+    릴레이+그룹순환 동시 → 2가 아닌 1.5소스로 카운트.
+    세력감지+매집추적 동시 → 마찬가지.
+    """
+    group = STRATEGY_GROUPS[group_key]
+    group_sources = [s for s in source_names if s in group["sources"]]
+    n = float(len(group_sources))
+    for a, b in group.get("overlap_pairs", []):
+        if a in group_sources and b in group_sources:
+            n -= 0.5
+    return max(n, 0)
+
+
+def classify_strategy_group(source_names: list[str]) -> str:
+    """소스 분포 기반 전략 그룹 판별 → "swing" / "short" / "both" """
+    swing_cnt = sum(1 for s in source_names if s in STRATEGY_GROUPS["swing"]["sources"])
+    short_cnt = sum(1 for s in source_names if s in STRATEGY_GROUPS["short"]["sources"])
+    if swing_cnt > 0 and short_cnt > 0:
+        return "both"
+    if short_cnt > 0:
+        return "short"
+    return "swing"
+
 
 def _sf(val, default=0):
     """NaN/Inf/None/str 안전 변환"""
@@ -359,6 +403,26 @@ def collect_volume_spike() -> dict[str, dict]:
     return result
 
 
+def collect_value_chain() -> dict[str, dict]:
+    """소스12: 밸류체인 릴레이 (대장주→소부장)"""
+    vc = load_json("value_chain_relay.json")
+    result = {}
+    for sector_data in vc.get("fired_sectors", []):
+        sector = sector_data.get("sector", "")
+        leader_names = [l["name"] for l in sector_data.get("leaders", [])]
+        for item in sector_data.get("candidates", []):
+            ticker = item.get("ticker", "")
+            if not ticker:
+                continue
+            result[ticker] = {
+                "source": "밸류체인",
+                "score": item.get("score", 0),
+                "name": item.get("name", ""),
+                "detail": f"{sector} 소부장 ({'+'.join(leader_names)}↑)",
+            }
+    return result
+
+
 def load_dart_avoid_tickers() -> set[str]:
     """DART AVOID 종목 티커 세트 (유상증자/관리종목 등)"""
     de = load_json("dart_event_signals.json")
@@ -557,6 +621,7 @@ def calc_integrated_score(
     ticker: str,
     sources: list[dict],
     parquet_data: dict | None,
+    group_source_count: float | None = None,
 ) -> dict:
     """5축 100점 + 과열패널티 통합 점수 계산 (v5)
 
@@ -564,15 +629,18 @@ def calc_integrated_score(
       다중시그널(25) + 개별점수(20) + 기술적(25) + 수급(20) + 안전(10)
     v5: 동반매수 단독 보장 삭제, 다른 소스와 겹칠 때만 소액 가산
     과열 패널티: 최대 -25점
+
+    group_source_count: 그룹별 유효 소스 수 (겹침 보정 적용). None이면 len(sources) 사용.
     """
 
     # ── 축1: 다중 시그널 (25점) ──
-    n_sources = len(sources)
-    if n_sources >= 4:
+    n_eff = group_source_count if group_source_count is not None else len(sources)
+    n_sources = len(sources)  # 전체 소스 수 (동반매수 보너스 등에서 사용)
+    if n_eff >= 4:
         multi_score = 25
-    elif n_sources >= 3:
+    elif n_eff >= 3:
         multi_score = 20
-    elif n_sources >= 2:
+    elif n_eff >= 2:
         multi_score = 12
     else:
         multi_score = 0
@@ -1065,11 +1133,12 @@ def main():
     src9 = collect_volume_spike()
     src10 = collect_accumulation_tracker()
     src11 = collect_event_catalyst()
+    src12 = collect_value_chain()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
-          f"매집추적:{len(src10)} 이벤트촉매:{len(src11)}")
+          f"매집추적:{len(src10)} 이벤트촉매:{len(src11)} 밸류체인:{len(src12)}")
 
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
@@ -1111,7 +1180,7 @@ def main():
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11]:
+    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11, src12]:
         all_tickers.update(src.keys())
 
     # AVOID 종목 제외
@@ -1127,7 +1196,7 @@ def main():
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
                            (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
                            (src7, "이벤트"), (src9, "수급폭발"), (src10, "매집추적"),
-                           (src11, "이벤트촉매")]:
+                           (src11, "이벤트촉매"), (src12, "밸류체인")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
@@ -1141,8 +1210,20 @@ def main():
         # parquet 기술적 데이터
         pq_data = get_parquet_data(ticker)
 
-        # 통합 점수 계산
-        score_detail = calc_integrated_score(ticker, sources, pq_data)
+        # 전략 그룹 판별 + 유효 소스 수 (겹침 보정)
+        strategy = classify_strategy_group(source_names)
+        if strategy == "short":
+            grp_src_cnt = calc_effective_source_count(source_names, "short")
+        elif strategy == "swing":
+            grp_src_cnt = calc_effective_source_count(source_names, "swing")
+        else:
+            # both: 더 많은 쪽 기준
+            sw = calc_effective_source_count(source_names, "swing")
+            sh = calc_effective_source_count(source_names, "short")
+            grp_src_cnt = max(sw, sh)
+
+        # 통합 점수 계산 (그룹별 유효 소스 수 반영)
+        score_detail = calc_integrated_score(ticker, sources, pq_data, grp_src_cnt)
 
         # 레짐 부스트 적용 (v6): 매크로 점수에 따라 최종 점수 보정
         if regime_mult != 1.0:
@@ -1300,6 +1381,8 @@ def main():
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
+            "strategy": strategy,
+            "group_source_count": grp_src_cnt,
         }
 
         results.append(rec)
@@ -1308,7 +1391,7 @@ def main():
     grade_order = {"적극매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
 
-    # ── TOP 5 선별: 매수 등급 이상 + 동일 이벤트 테마 최대 2개 ──
+    # ── TOP 10 선별: 전략 그룹별 슬롯 분리 (스윙 5 + 단타 5) ──
     buyable_grades = {"적극매수", "매수", "관심매수"}
     buyable = [r for r in results if r["grade"] in buyable_grades]
 
@@ -1319,24 +1402,54 @@ def main():
     _ec = load_json("event_catalyst.json") or {}
     _ec_sector_map = {s["ticker"]: s.get("sector", "") for s in _ec.get("stocks", [])}
 
-    top5 = []
-    _event_sector_cnt: dict[str, int] = {}
-    for r in buyable:
-        if len(top5) >= 5:
-            break
-        if r.get("close", 0) > MAX_PRICE_FOR_PICK:
-            continue  # 고가주 → 분석은 유지, 추천에서만 제외
-        ec_sector = _ec_sector_map.get(r["ticker"], "")
-        if ec_sector:
-            cnt = _event_sector_cnt.get(ec_sector, 0)
-            if cnt >= 2:
-                continue  # 같은 이벤트 섹터 이미 2개 → 스킵
-            _event_sector_cnt[ec_sector] = cnt + 1
-        top5.append(r)
+    swing_slots = STRATEGY_GROUPS["swing"]["slots"]  # 3
+    short_slots = STRATEGY_GROUPS["short"]["slots"]  # 2
+
+    # 그룹별 풀 분리 (both는 양쪽 모두에 포함)
+    swing_pool = [r for r in buyable if r.get("strategy") in ("swing", "both")]
+    short_pool = [r for r in buyable if r.get("strategy") in ("short", "both")]
+
+    def _select_top_n(pool, n, used_tickers, ec_sector_cnt):
+        """풀에서 상위 n개 선별 (고가주/이벤트섹터 제한 적용)."""
+        selected = []
+        for r in pool:
+            if len(selected) >= n:
+                break
+            if r["ticker"] in used_tickers:
+                continue
+            if r.get("close", 0) > MAX_PRICE_FOR_PICK:
+                continue
+            ec_sector = _ec_sector_map.get(r["ticker"], "")
+            if ec_sector:
+                cnt = ec_sector_cnt.get(ec_sector, 0)
+                if cnt >= 2:
+                    continue
+                ec_sector_cnt[ec_sector] = cnt + 1
+            selected.append(r)
+            used_tickers.add(r["ticker"])
+        return selected
+
+    used = set()
+    ec_cnt: dict[str, int] = {}
+
+    top5_swing = _select_top_n(swing_pool, swing_slots, used, ec_cnt)
+    top5_short = _select_top_n(short_pool, short_slots, used, ec_cnt)
+
+    # 부족 시 상호 보충
+    if len(top5_swing) < swing_slots:
+        need = swing_slots - len(top5_swing)
+        extras = _select_top_n(short_pool, need, used, ec_cnt)
+        top5_swing.extend(extras)
+    if len(top5_short) < short_slots:
+        need = short_slots - len(top5_short)
+        extras = _select_top_n(swing_pool, need, used, ec_cnt)
+        top5_short.extend(extras)
+
+    top5 = top5_swing + top5_short
     for r in top5:
         r["is_top5"] = True
 
-    # ── 관심종목 5개 (v12): TOP5 제외, 60점+, 소스 3개 이상 우선 ──
+    # ── 관심종목 5개 (v12): TOP5 제외, 소스 3개 이상 우선 ──
     top5_tickers = {r["ticker"] for r in top5}
     watchlist_pool = [r for r in buyable
                       if r["ticker"] not in top5_tickers
@@ -1354,40 +1467,53 @@ def main():
         grade_stats[g] = grade_stats.get(g, 0) + 1
 
     print(f"\n{'='*60}")
-    print(f"[내일 추천] 총 {len(results)}건 (TOP5: {len(top5)}건)")
+    print(f"[내일 추천] 총 {len(results)}건 (TOP10: {len(top5)}건)")
     for g in ["적극매수", "매수", "관심매수", "관찰", "보류", "데이터부족"]:
         cnt = grade_stats.get(g, 0)
         if cnt:
             print(f"  {g}: {cnt}건")
     print(f"{'='*60}")
 
-    # TOP 5 출력
+    # TOP 5 출력 — 전략 그룹별 구분
+    def _print_pick(idx, r):
+        """종목 1건 상세 출력."""
+        srcs = "+".join(r["sources"])
+        oh = f" 🔥-{r['score_breakdown']['overheat']}p" if r["score_breakdown"]["overheat"] > 0 else ""
+        cond = r.get("entry_condition", "")
+        reasons_str = ", ".join(r.get("reasons", [])[:3])
+        zone_tag = f" [{r['target_zone']}]" if r.get("target_zone") else ""
+        print(f"  {idx}. [{r['grade']}]{zone_tag} {r['name']}({r['ticker']}) "
+              f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
+        if r.get("estimated_target"):
+            dir_icon = {"RISING": "▲", "FALLING": "▼", "STABLE": "─", "NEW": "★"}.get(r.get("target_direction", ""), "")
+            print(f"     기관목표:{r['estimated_target']:,} (갭:{r.get('target_gap_pct',0):+.1f}%) {dir_icon} "
+                  f"| 진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
+                  f"목표:{r.get('target_price',0):,}")
+        else:
+            print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
+                  f"목표:{r.get('target_price',0):,} | {cond}")
+        ma5g = r.get("ma5_gap_pct", 0)
+        ma5e = r.get("ma5_entry", "")
+        ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
+        intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
+        report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}")
+
     if top5:
         print(f"\n{'─'*60}")
-        print(f"  ★ TOP 5 내일 매수 추천 ★")
+        print(f"  ★ TOP 10 내일 매수 추천 (스윙 {len(top5_swing)} + 단타 {len(top5_short)}) ★")
         print(f"{'─'*60}")
-        for i, r in enumerate(top5, 1):
-            srcs = "+".join(r["sources"])
-            oh = f" 🔥-{r['score_breakdown']['overheat']}p" if r["score_breakdown"]["overheat"] > 0 else ""
-            cond = r.get("entry_condition", "")
-            reasons_str = ", ".join(r.get("reasons", [])[:3])
-            zone_tag = f" [{r['target_zone']}]" if r.get("target_zone") else ""
-            print(f"  {i}. [{r['grade']}]{zone_tag} {r['name']}({r['ticker']}) "
-                  f"{r['total_score']}점{oh} ({r['n_sources']}개 소스: {srcs})")
-            if r.get("estimated_target"):
-                dir_icon = {"RISING": "▲", "FALLING": "▼", "STABLE": "─", "NEW": "★"}.get(r.get("target_direction", ""), "")
-                print(f"     기관목표:{r['estimated_target']:,} (갭:{r.get('target_gap_pct',0):+.1f}%) {dir_icon} "
-                      f"| 진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
-                      f"목표:{r.get('target_price',0):,}")
-            else:
-                print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
-                      f"목표:{r.get('target_price',0):,} | {cond}")
-            ma5g = r.get("ma5_gap_pct", 0)
-            ma5e = r.get("ma5_entry", "")
-            ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
-            intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
-            report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
-            print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}")
+        idx = 1
+        if top5_swing:
+            print(f"  [{STRATEGY_GROUPS['swing']['label']}]")
+            for r in top5_swing:
+                _print_pick(idx, r)
+                idx += 1
+        if top5_short:
+            print(f"\n  [{STRATEGY_GROUPS['short']['label']}]")
+            for r in top5_short:
+                _print_pick(idx, r)
+                idx += 1
         print(f"{'─'*60}")
     else:
         print("\n  ⚠ 매수 적합 종목 없음 — 전체 관망 추천")
@@ -1432,6 +1558,8 @@ def main():
         "total_candidates": len(results),
         "stats": grade_stats,
         "top5": [r["ticker"] for r in top5],
+        "top5_swing": [r["ticker"] for r in top5_swing],
+        "top5_short": [r["ticker"] for r in top5_short],
         "watchlist5": [r["ticker"] for r in watchlist5],
         "picks": results,
         "market_intel": {

@@ -62,6 +62,7 @@ SYNC_FILES = [
     "institutional_targets.json",
     "accumulation_tracker.json",
     "market_intelligence.json",
+    "value_chain_relay.json",
 ]
 
 
