@@ -1,95 +1,401 @@
 {
-  "candidates": [
-    {
-      "ticker": "249420",
-      "name": "일동제약",
-      "grade": "B",
-      "zone_score": 0.6329,
-      "trigger_type": "T2_Volume_RSI",
-      "confidence": 1.0,
-      "entry_price": 36950,
-      "stop_loss": 33709,
-      "target_price": 42620,
-      "risk_reward": 1.75,
-      "rsi": 48.36171641851547,
-      "adx": 17.615737945556933,
-      "plus_di": 28.880112864951496,
-      "minus_di": 27.530391780950453,
-      "vol_surge": 0.6392472219009613,
-      "obv_trend": "down",
-      "foreign_streak": 0,
-      "inst_streak": 0,
-      "foreign_amount_5d": 0,
-      "inst_amount_5d": 0,
-      "foreign_net_5d": 0.0,
-      "short_balance_chg_5d": 0.0,
-      "consensus": null,
-      "avg_trading_value_20d": 16125896357.5,
-      "pct_of_52w_high": 0.8201997780244173,
-      "trix": -0.1313508730354851,
-      "trix_signal": -0.14394690197775925,
-      "slope_ma60": 3.4157198078950346,
-      "above_ma60": true,
-      "above_ma120": true,
-      "drawdown_from_high": -17.980022197558267,
-      "vol_contraction": 0.9534538652225799,
-      "per": 0.0,
-      "pbr": 0.0,
-      "trix_counter": 1,
-      "market_signals": [
-        {
-          "title": "데드크로스 경고",
-          "importance": "high",
-          "confidence": 70
-        }
-      ],
-      "market_cap": 1169033411400,
-      "news_data": null,
-      "freshness_mult": 1.15,
-      "sd_cross": "비활성",
-      "density": "보통",
-      "us_sector_killed": false,
-      "v9_rank_score": 1.2737,
-      "v9_catalyst_boost": 1.0,
-      "v9_sd_mult": 1.0,
-      "v9_density_mult": 1.0,
-      "v9_us_mult": 1.0,
-      "v9_freshness_mult": 1.15,
-      "v9_tags": [],
-      "position_grade": "S"
-    }
-  ],
+  "candidates": [],
   "stats": {
-    "total": 662,
-    "loaded": 662,
+    "total": 1029,
+    "loaded": 1029,
     "passed_pipeline": 33,
     "trigger_impulse": 0,
     "trigger_confirm": 0,
-    "grade_A": 2,
-    "grade_B": 31,
+    "grade_A": 1,
+    "grade_B": 32,
     "grade_C": 0,
     "after_grade_filter": 33,
     "blacklisted": 0,
-    "scan_sec": 63.2,
-    "v9_killed": 32,
-    "v9_survivors": 1,
+    "scan_sec": 63.3,
+    "v9_killed": 33,
+    "v9_survivors": 0,
     "v9_killed_list": [
+      {
+        "ticker": "001780",
+        "name": "알루코",
+        "grade": "B",
+        "zone_score": 0.5063,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 2240,
+        "stop_loss": 2091,
+        "target_price": 2499,
+        "risk_reward": 1.75,
+        "rsi": 47.76316557319593,
+        "adx": 19.869960686000393,
+        "plus_di": 15.822648018796873,
+        "minus_di": 22.94478251713709,
+        "vol_surge": 0.5170529012662103,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 2841727203.75,
+        "pct_of_52w_high": 0.8280961182994455,
+        "trix": 0.2792248054410251,
+        "trix_signal": 0.3058105251218539,
+        "slope_ma60": 2.85044314613887,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -17.19038817005545,
+        "vol_contraction": 0.6002796881656215,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -2,
+        "market_signals": [],
+        "scores": {
+          "consensus": 12,
+          "consensus_detail": {
+            "verdict": "GROWING",
+            "op_yoy": 3.0,
+            "opm_trend": 0.3,
+            "holding_co": false,
+            "detail": "YoY 개선 (+3.0%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "GROWING",
+          "score": 12,
+          "op_yoy_pct": 3.0,
+          "net_yoy_pct": -21.2,
+          "opm_trend": 0.3,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 737.0,
+              "op_income": -1.8,
+              "net_income": -46.4,
+              "opm": -0.2
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 708.8,
+              "op_income": 4.3,
+              "net_income": 22.0,
+              "opm": 0.6
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 773.6,
+              "op_income": 9.4,
+              "net_income": 24.6,
+              "opm": 1.2
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 706.8,
+              "op_income": 6.7,
+              "net_income": -32.6,
+              "opm": 0.9
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 784.3,
+              "op_income": 3.1,
+              "net_income": 59.8,
+              "opm": 0.4
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 815.7,
+              "op_income": 3.5,
+              "net_income": 2.5,
+              "opm": 0.4
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 673.4,
+              "op_income": 4.7,
+              "net_income": -52.5,
+              "opm": 0.7
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 527.1,
+              "op_income": 6.9,
+              "net_income": 25.7,
+              "opm": 1.3
+            }
+          ],
+          "detail": "YoY 개선 (+3.0%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K4:유동성(28억<50억)",
+          "K6:저가주(2240원<5,000원)",
+          "K8:TRIX_DC(-2일차)"
+        ]
+      },
+      {
+        "ticker": "012450",
+        "name": "한화에어로스페이스",
+        "grade": "B",
+        "zone_score": 0.5835,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 1195000,
+        "stop_loss": 1079798,
+        "target_price": 1396602,
+        "risk_reward": 1.75,
+        "rsi": 50.33134088983148,
+        "adx": 18.733955598885846,
+        "plus_di": 27.868324870949902,
+        "minus_di": 21.818658118002798,
+        "vol_surge": 1.2582706005717819,
+        "obv_trend": "down",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": -39323824000.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 307707815450.0,
+        "pct_of_52w_high": 0.8547925608011445,
+        "trix": -0.03738974627223168,
+        "trix_signal": 0.1171341717240629,
+        "slope_ma60": 4.5303832174966585,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -14.520743919885549,
+        "vol_contraction": 0.8141460647338737,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -20,
+        "market_signals": [],
+        "scores": {
+          "consensus": 16,
+          "consensus_detail": {
+            "verdict": "ACCELERATING",
+            "op_yoy": 34.3,
+            "opm_trend": 0.66,
+            "holding_co": false,
+            "detail": "2분기 연속 YoY 성장 (최근 +34.3%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "ACCELERATING",
+          "score": 16,
+          "op_yoy_pct": 34.3,
+          "net_yoy_pct": 7.3,
+          "opm_trend": 0.66,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 22399.9,
+              "op_income": 2976.0,
+              "net_income": 1814.5,
+              "opm": 13.3
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 8651.7,
+              "op_income": 21.4,
+              "net_income": 121.2,
+              "opm": 0.2
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 15471.0,
+              "op_income": 2693.5,
+              "net_income": 1387.3,
+              "opm": 17.4
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 18615.0,
+              "op_income": 4235.3,
+              "net_income": 3233.1,
+              "opm": 22.8
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 36613.3,
+              "op_income": 8046.8,
+              "net_income": 5638.8,
+              "opm": 22.0
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 14747.2,
+              "op_income": 3020.3,
+              "net_income": 4390.2,
+              "opm": 20.5
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 20880.9,
+              "op_income": 4990.4,
+              "net_income": 1424.4,
+              "opm": 23.9
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 24674.9,
+              "op_income": 5686.6,
+              "net_income": 3469.6,
+              "opm": 23.0
+            }
+          ],
+          "detail": "2분기 연속 YoY 성장 (최근 +34.3%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX_DC(-20일차)"
+        ]
+      },
+      {
+        "ticker": "022100",
+        "name": "포스코DX",
+        "grade": "B",
+        "zone_score": 0.5717,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 39300,
+        "stop_loss": 35959,
+        "target_price": 45145,
+        "risk_reward": 1.75,
+        "rsi": 55.5127794508633,
+        "adx": 25.052427783193046,
+        "plus_di": 26.91437359509388,
+        "minus_di": 17.184694386399997,
+        "vol_surge": 0.5503211007692368,
+        "obv_trend": "down",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 4221728800.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 35914948650.0,
+        "pct_of_52w_high": 0.8618421052631579,
+        "trix": 0.2984065083727394,
+        "trix_signal": 0.5371631503405719,
+        "slope_ma60": 7.454964615054682,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -13.815789473684214,
+        "vol_contraction": 0.6216516149055501,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -16,
+        "market_signals": [],
+        "scores": {
+          "consensus": 8,
+          "consensus_detail": {
+            "verdict": "STABLE",
+            "op_yoy": -9.7,
+            "opm_trend": 0.17,
+            "holding_co": false,
+            "detail": "흑자 유지, YoY 소폭 변동 (-9.7%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "STABLE",
+          "score": 8,
+          "op_yoy_pct": -9.7,
+          "net_yoy_pct": -11.5,
+          "opm_trend": 0.17,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q3",
+              "revenue": 3459.1,
+              "op_income": 322.5,
+              "net_income": 259.3,
+              "opm": 9.3
+            },
+            {
+              "period": "2023Q4",
+              "revenue": 3477.9,
+              "op_income": 150.5,
+              "net_income": 129.6,
+              "opm": 4.3
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 4326.2,
+              "op_income": 346.0,
+              "net_income": 254.6,
+              "opm": 8.0
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 3436.4,
+              "op_income": 235.6,
+              "net_income": 200.1,
+              "opm": 6.9
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 3109.3,
+              "op_income": 256.7,
+              "net_income": 213.3,
+              "opm": 8.3
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 3532.0,
+              "op_income": 223.4,
+              "net_income": 199.6,
+              "opm": 6.3
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 2653.9,
+              "op_income": 159.6,
+              "net_income": 136.5,
+              "opm": 6.0
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 2388.0,
+              "op_income": 212.8,
+              "net_income": 177.1,
+              "opm": 8.9
+            }
+          ],
+          "detail": "흑자 유지, YoY 소폭 변동 (-9.7%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX_DC(-16일차)"
+        ]
+      },
       {
         "ticker": "024850",
         "name": "HLB이노베이션",
         "grade": "B",
-        "zone_score": 0.5473,
+        "zone_score": 0.5499,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 2770,
-        "stop_loss": 2401,
-        "target_price": 3415,
+        "entry_price": 2640,
+        "stop_loss": 2283,
+        "target_price": 3264,
         "risk_reward": 1.75,
-        "rsi": 48.23515671441455,
-        "adx": 27.47730170318863,
-        "plus_di": 17.018535599091962,
-        "minus_di": 28.388761706002363,
-        "vol_surge": 0.6585049535490992,
+        "rsi": 43.826166577034556,
+        "adx": 28.2917167812658,
+        "plus_di": 15.238088449817933,
+        "minus_di": 30.649688763374023,
+        "vol_surge": 0.8244878689934738,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -98,18 +404,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 5337503934.25,
-        "pct_of_52w_high": 0.8318318318318318,
-        "trix": 0.8210805222224948,
-        "trix_signal": 1.1531271517647275,
-        "slope_ma60": 10.223244004768329,
+        "avg_trading_value_20d": 5152602110.25,
+        "pct_of_52w_high": 0.7927927927927928,
+        "trix": 0.6673294928000839,
+        "trix_signal": 1.0559676199717987,
+        "slope_ma60": 9.80575385275284,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -16.816816816816814,
-        "vol_contraction": 0.5028698597141086,
+        "drawdown_from_high": -20.72072072072072,
+        "vol_contraction": 0.591449675370586,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -12,
+        "trix_counter": -13,
         "market_signals": [],
         "scores": {
           "consensus": 16,
@@ -188,301 +494,51 @@
           ],
           "detail": "소폭 흑자전환 (영업이익 -3.6→0.1억, 아직 미미)"
         },
-        "market_cap": 409597526110,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K5:시총(4096억<5000억)",
-          "K6:저가주(2770원<5,000원)",
-          "K8:TRIX_DC(-12일차)"
-        ]
-      },
-      {
-        "ticker": "030190",
-        "name": "NICE평가정보",
-        "grade": "B",
-        "zone_score": 0.5747,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 16900,
-        "stop_loss": 15700,
-        "target_price": 18999,
-        "risk_reward": 1.75,
-        "rsi": 49.02656553589349,
-        "adx": 21.959804008307728,
-        "plus_di": 24.065449478616525,
-        "minus_di": 22.43580114772055,
-        "vol_surge": 0.5063748163656115,
-        "obv_trend": "down",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 1335318796.5,
-        "pct_of_52w_high": 0.9135135135135135,
-        "trix": 0.16976880670405148,
-        "trix_signal": 0.1259988140135817,
-        "slope_ma60": 0.8992912869989933,
-        "above_ma60": false,
-        "above_ma120": true,
-        "drawdown_from_high": -8.64864864864865,
-        "vol_contraction": 0.503639517163556,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": 21,
-        "market_signals": [
-          {
-            "title": "골든크로스 확정!",
-            "importance": "critical",
-            "confidence": 87.42002124896706
-          }
-        ],
-        "scores": {
-          "consensus": 12,
-          "consensus_detail": {
-            "verdict": "GROWING",
-            "op_yoy": 10.3,
-            "opm_trend": 0.44,
-            "holding_co": false,
-            "detail": "YoY 개선 (+10.3%)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "GROWING",
-          "score": 12,
-          "op_yoy_pct": 10.3,
-          "net_yoy_pct": 18.1,
-          "opm_trend": 0.44,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 1047.9,
-              "op_income": 161.6,
-              "net_income": 107.6,
-              "opm": 15.4
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 1060.8,
-              "op_income": 178.5,
-              "net_income": 149.0,
-              "opm": 16.8
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 1126.2,
-              "op_income": 239.4,
-              "net_income": 196.4,
-              "opm": 21.3
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 1093.4,
-              "op_income": 197.9,
-              "net_income": 150.1,
-              "opm": 18.1
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 1145.5,
-              "op_income": 199.6,
-              "net_income": 145.3,
-              "opm": 17.4
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 1126.6,
-              "op_income": 215.5,
-              "net_income": 173.3,
-              "opm": 19.1
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 1203.7,
-              "op_income": 244.5,
-              "net_income": 195.6,
-              "opm": 20.3
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 1179.8,
-              "op_income": 218.3,
-              "net_income": 177.3,
-              "opm": 18.5
-            }
-          ],
-          "detail": "YoY 개선 (+10.3%)"
-        },
-        "market_cap": 995604806300,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K4:유동성(13억<50억)",
-          "K8:TRIX과열(GC+21일)"
-        ]
-      },
-      {
-        "ticker": "030530",
-        "name": "원익홀딩스",
-        "grade": "B",
-        "zone_score": 0.694,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 36350,
-        "stop_loss": 31679,
-        "target_price": 44523,
-        "risk_reward": 1.75,
-        "rsi": 46.27801903603368,
-        "adx": 41.260723564443474,
-        "plus_di": 14.281865294810343,
-        "minus_di": 22.530831705495668,
-        "vol_surge": 1.112921695125652,
-        "obv_trend": "down",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": -4846790775.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 57683982122.5,
-        "pct_of_52w_high": 0.7183794466403162,
-        "trix": -0.6256349555537111,
-        "trix_signal": -0.4156742584271095,
-        "slope_ma60": 5.020046973974512,
-        "above_ma60": false,
-        "above_ma120": true,
-        "drawdown_from_high": -28.162055335968383,
-        "vol_contraction": 1.2952261496713184,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -30,
-        "market_signals": [],
-        "scores": {
-          "consensus": 0,
-          "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -867.3,
-            "opm_trend": -16.8,
-            "holding_co": false,
-            "detail": "적자 전환/지속 (-157.3억)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -867.3,
-          "net_yoy_pct": 861.7,
-          "opm_trend": -16.8,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 858.3,
-              "op_income": 35.5,
-              "net_income": -164.2,
-              "opm": 4.1
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 342.1,
-              "op_income": -36.8,
-              "net_income": -38.7,
-              "opm": -10.8
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 803.7,
-              "op_income": 98.0,
-              "net_income": 56.2,
-              "opm": 12.2
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 550.8,
-              "op_income": 20.5,
-              "net_income": -16.7,
-              "opm": 3.7
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 1180.5,
-              "op_income": 130.5,
-              "net_income": -363.3,
-              "opm": 11.1
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 730.9,
-              "op_income": 39.7,
-              "net_income": 41.8,
-              "opm": 5.4
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 713.2,
-              "op_income": -36.0,
-              "net_income": -78.1,
-              "opm": -5.0
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 379.5,
-              "op_income": -157.3,
-              "net_income": 160.6,
-              "opm": -41.4
-            }
-          ],
-          "detail": "적자 전환/지속 (-157.3억)"
-        },
-        "market_cap": 2807600609350,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-30일차)",
-          "K11:폭락(-28%)"
+          "K6:저가주(2640원<5,000원)",
+          "K8:TRIX_DC(-13일차)",
+          "K11:폭락(-21%)"
         ]
       },
       {
         "ticker": "032350",
         "name": "롯데관광개발",
         "grade": "B",
-        "zone_score": 0.5194,
+        "zone_score": 0.5778,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 23350,
-        "stop_loss": 20510,
-        "target_price": 28319,
+        "entry_price": 23150,
+        "stop_loss": 20448,
+        "target_price": 27876,
         "risk_reward": 1.75,
-        "rsi": 45.06454951621884,
-        "adx": 26.490681665488466,
-        "plus_di": 12.619048692542934,
-        "minus_di": 19.8311737522336,
-        "vol_surge": 0.5991298991502689,
+        "rsi": 43.95827560827952,
+        "adx": 26.571110282187682,
+        "plus_di": 11.497818168499593,
+        "minus_di": 20.043623723252622,
+        "vol_surge": 0.923928706382962,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
         "foreign_amount_5d": 0,
         "inst_amount_5d": 0,
-        "foreign_net_5d": 10534772000.0,
+        "foreign_net_5d": 14311521425.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 24453222980.0,
-        "pct_of_52w_high": 0.8429602888086642,
-        "trix": 0.43554754434180776,
-        "trix_signal": 0.5714730236904926,
-        "slope_ma60": 3.272552350314939,
+        "avg_trading_value_20d": 24753293200.0,
+        "pct_of_52w_high": 0.8357400722021661,
+        "trix": 0.34387379119298345,
+        "trix_signal": 0.5259531771909908,
+        "slope_ma60": 2.9828876445653796,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -15.703971119133575,
-        "vol_contraction": 0.7895867092186777,
+        "drawdown_from_high": -16.425992779783392,
+        "vol_contraction": 0.860768426885284,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -3,
+        "trix_counter": -4,
         "market_signals": [],
         "scores": {
           "consensus": 16,
@@ -561,29 +617,29 @@
           ],
           "detail": "적자 30%+ 축소 (-44.8→-21.4억)"
         },
-        "market_cap": 1858694417900,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-3일차)"
+          "K8:TRIX_DC(-4일차)"
         ]
       },
       {
-        "ticker": "036620",
-        "name": "감성코퍼레이션",
+        "ticker": "032940",
+        "name": "원익",
         "grade": "B",
-        "zone_score": 0.5207,
+        "zone_score": 0.7241,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 6280,
-        "stop_loss": 5527,
-        "target_price": 7597,
+        "entry_price": 11870,
+        "stop_loss": 9787,
+        "target_price": 15514,
         "risk_reward": 1.75,
-        "rsi": 46.66560999641224,
-        "adx": 41.372879853821864,
-        "plus_di": 17.38971563858,
-        "minus_di": 22.568636467270284,
-        "vol_surge": 0.5098130532765489,
+        "rsi": 44.31732096981025,
+        "adx": 29.51783971895935,
+        "plus_di": 30.356635763281513,
+        "minus_di": 20.032278629234735,
+        "vol_surge": 0.5235705204262993,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -592,119 +648,120 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 6305596052.0,
-        "pct_of_52w_high": 0.8155844155844156,
-        "trix": 0.5871545972671033,
-        "trix_signal": 0.7086408270232275,
-        "slope_ma60": 3.2257168259613334,
+        "avg_trading_value_20d": 9321412464.0,
+        "pct_of_52w_high": 0.6668539325842696,
+        "trix": -0.24741642211275616,
+        "trix_signal": 0.12016526994311034,
+        "slope_ma60": 8.362839044989446,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -18.441558441558435,
-        "vol_contraction": 0.5400665758174011,
+        "drawdown_from_high": -33.31460674157304,
+        "vol_contraction": 1.34846323195028,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -2,
+        "trix_counter": -24,
         "market_signals": [],
         "scores": {
-          "consensus": 10,
+          "consensus": 18,
           "consensus_detail": {
-            "verdict": "GROWING",
-            "op_yoy": 22.8,
-            "opm_trend": -1.23,
+            "verdict": "ACCELERATING",
+            "op_yoy": 46.5,
+            "opm_trend": 2.21,
             "holding_co": false,
-            "detail": "YoY 개선 (+22.8%) ⚠️ OPM 악화(-1.2%p/Q)"
+            "detail": "2분기 연속 YoY 성장 (최근 +46.5%)"
           }
         },
         "earnings_momentum": {
-          "verdict": "GROWING",
-          "score": 10,
-          "op_yoy_pct": 22.8,
-          "net_yoy_pct": 17.6,
-          "opm_trend": -1.23,
+          "verdict": "ACCELERATING",
+          "score": 18,
+          "op_yoy_pct": 46.5,
+          "net_yoy_pct": 129.9,
+          "opm_trend": 2.21,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 711.3,
-              "op_income": 148.5,
-              "net_income": 138.2,
-              "opm": 20.9
+              "revenue": 149.9,
+              "op_income": 11.8,
+              "net_income": 1.6,
+              "opm": 7.9
             },
             {
               "period": "2024Q1",
-              "revenue": 371.8,
-              "op_income": 46.2,
-              "net_income": 51.1,
-              "opm": 12.4
+              "revenue": 138.1,
+              "op_income": 16.3,
+              "net_income": 9.5,
+              "opm": 11.8
             },
             {
               "period": "2024Q2",
-              "revenue": 500.8,
-              "op_income": 100.3,
-              "net_income": 69.4,
-              "opm": 20.0
+              "revenue": 142.5,
+              "op_income": 18.2,
+              "net_income": 11.8,
+              "opm": 12.8
             },
             {
               "period": "2024Q3",
-              "revenue": 430.6,
-              "op_income": 50.5,
-              "net_income": 39.8,
-              "opm": 11.7
+              "revenue": 135.5,
+              "op_income": 17.2,
+              "net_income": 6.7,
+              "opm": 12.7
             },
             {
               "period": "2024Q4",
-              "revenue": 900.8,
-              "op_income": 163.5,
-              "net_income": 132.3,
-              "opm": 18.2
+              "revenue": 156.7,
+              "op_income": 12.4,
+              "net_income": 13.8,
+              "opm": 7.9
             },
             {
               "period": "2025Q1",
-              "revenue": 466.8,
-              "op_income": 68.5,
-              "net_income": 57.1,
-              "opm": 14.7
+              "revenue": 152.6,
+              "op_income": 20.7,
+              "net_income": 13.5,
+              "opm": 13.6
             },
             {
               "period": "2025Q2",
-              "revenue": 536.2,
-              "op_income": 87.4,
-              "net_income": 68.5,
-              "opm": 16.3
+              "revenue": 140.1,
+              "op_income": 20.9,
+              "net_income": 14.4,
+              "opm": 14.9
             },
             {
               "period": "2025Q3",
-              "revenue": 459.1,
-              "op_income": 62.0,
-              "net_income": 46.8,
-              "opm": 13.5
+              "revenue": 170.1,
+              "op_income": 25.2,
+              "net_income": 15.4,
+              "opm": 14.8
             }
           ],
-          "detail": "YoY 개선 (+22.8%) ⚠️ OPM 악화(-1.2%p/Q)"
+          "detail": "2분기 연속 YoY 성장 (최근 +46.5%)"
         },
-        "market_cap": 568363681880,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-2일차)"
+          "K8:TRIX_DC(-24일차)",
+          "K11:폭락(-33%)"
         ]
       },
       {
         "ticker": "049630",
         "name": "재영솔루텍",
         "grade": "B",
-        "zone_score": 0.6844,
+        "zone_score": 0.7059,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 4365,
-        "stop_loss": 3481,
-        "target_price": 5910,
+        "entry_price": 4060,
+        "stop_loss": 3205,
+        "target_price": 5555,
         "risk_reward": 1.75,
-        "rsi": 47.01866605776183,
-        "adx": 25.686294392937352,
-        "plus_di": 40.268462126655095,
-        "minus_di": 15.249808402819754,
-        "vol_surge": 3.3362922250784908,
+        "rsi": 41.98460958240999,
+        "adx": 25.248637096727407,
+        "plus_di": 36.059783522255856,
+        "minus_di": 22.859571057064535,
+        "vol_surge": 0.9898599998579471,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -713,18 +770,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 55898597590.75,
-        "pct_of_52w_high": 0.5388888888888889,
-        "trix": -0.8843421285790409,
-        "trix_signal": -0.5349924229645355,
-        "slope_ma60": 10.31255782804472,
-        "above_ma60": true,
+        "avg_trading_value_20d": 53525122093.75,
+        "pct_of_52w_high": 0.5012345679012346,
+        "trix": -0.887452640352715,
+        "trix_signal": -0.6054844664421715,
+        "slope_ma60": 10.086219290640486,
+        "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -46.111111111111114,
-        "vol_contraction": 1.1058506706060351,
+        "drawdown_from_high": -49.876543209876544,
+        "vol_contraction": 1.2076703280722647,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -21,
+        "trix_counter": -22,
         "market_signals": [],
         "scores": {
           "consensus": 16,
@@ -803,32 +860,32 @@
           ],
           "detail": "적자→흑자 전환! (영업이익 -10.4→18.9억)"
         },
-        "market_cap": 510257849400,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K6:저가주(4365원<5,000원)",
-          "K8:TRIX_DC(-21일차)",
-          "K11:폭락(-46%)"
+          "K6:저가주(4060원<5,000원)",
+          "K8:TRIX_DC(-22일차)",
+          "K11:폭락(-50%)"
         ]
       },
       {
-        "ticker": "069260",
-        "name": "TKG휴켐스",
+        "ticker": "054450",
+        "name": "텔레칩스",
         "grade": "B",
-        "zone_score": 0.6302,
+        "zone_score": 0.5704,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 19350,
-        "stop_loss": 17875,
-        "target_price": 21929,
+        "entry_price": 14230,
+        "stop_loss": 12758,
+        "target_price": 16805,
         "risk_reward": 1.75,
-        "rsi": 45.17776692343081,
-        "adx": 21.93639615426141,
-        "plus_di": 23.140805657791258,
-        "minus_di": 35.53754223155699,
-        "vol_surge": 1.2035577978543779,
-        "obv_trend": "up",
+        "rsi": 42.129028217869354,
+        "adx": 24.463382434830688,
+        "plus_di": 11.661353500820088,
+        "minus_di": 26.46924143620064,
+        "vol_surge": 0.72179277009038,
+        "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
         "foreign_amount_5d": 0,
@@ -836,120 +893,121 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 3315401225.0,
-        "pct_of_52w_high": 0.8979118329466357,
-        "trix": 0.300553487035482,
-        "trix_signal": 0.33331174210542397,
-        "slope_ma60": 1.9424143699920737,
-        "above_ma60": true,
+        "avg_trading_value_20d": 4628962605.5,
+        "pct_of_52w_high": 0.7223350253807107,
+        "trix": -0.180577751782951,
+        "trix_signal": -0.05294998084887371,
+        "slope_ma60": 3.9420048725414603,
+        "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -10.208816705336432,
-        "vol_contraction": 0.8165144257935195,
+        "drawdown_from_high": -27.766497461928928,
+        "vol_contraction": 0.6638330191898946,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -2,
+        "trix_counter": -30,
         "market_signals": [],
         "scores": {
-          "consensus": 18,
+          "consensus": 0,
           "consensus_detail": {
-            "verdict": "ACCELERATING",
-            "op_yoy": 33.4,
-            "opm_trend": 2.07,
+            "verdict": "DETERIORATING",
+            "op_yoy": -261.9,
+            "opm_trend": -2.88,
             "holding_co": false,
-            "detail": "2분기 연속 YoY 성장 (최근 +33.4%)"
+            "detail": "적자 전환/지속 (-27.2억)"
           }
         },
         "earnings_momentum": {
-          "verdict": "ACCELERATING",
-          "score": 18,
-          "op_yoy_pct": 33.4,
-          "net_yoy_pct": 60.7,
-          "opm_trend": 2.07,
+          "verdict": "DETERIORATING",
+          "score": 0,
+          "op_yoy_pct": -261.9,
+          "net_yoy_pct": -142.3,
+          "opm_trend": -2.88,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 2211.9,
-              "op_income": -15.6,
-              "net_income": 113.6,
-              "opm": -0.7
+              "revenue": 444.7,
+              "op_income": 23.8,
+              "net_income": 312.8,
+              "opm": 5.4
             },
             {
               "period": "2024Q1",
-              "revenue": 3008.1,
-              "op_income": 315.4,
-              "net_income": 305.3,
-              "opm": 10.5
+              "revenue": 453.8,
+              "op_income": 12.7,
+              "net_income": -61.2,
+              "opm": 2.8
             },
             {
               "period": "2024Q2",
-              "revenue": 2807.2,
-              "op_income": 215.0,
-              "net_income": 215.9,
-              "opm": 7.7
+              "revenue": 460.0,
+              "op_income": 12.7,
+              "net_income": -156.8,
+              "opm": 2.8
             },
             {
               "period": "2024Q3",
-              "revenue": 2947.7,
-              "op_income": 195.7,
-              "net_income": 182.5,
-              "opm": 6.6
+              "revenue": 476.1,
+              "op_income": 16.8,
+              "net_income": -97.5,
+              "opm": 3.5
             },
             {
               "period": "2024Q4",
-              "revenue": 3022.0,
-              "op_income": 101.9,
-              "net_income": 101.3,
-              "opm": 3.4
+              "revenue": 476.3,
+              "op_income": 15.7,
+              "net_income": -70.1,
+              "opm": 3.3
             },
             {
               "period": "2025Q1",
-              "revenue": 2591.0,
-              "op_income": 131.6,
-              "net_income": 159.0,
-              "opm": 5.1
+              "revenue": 452.0,
+              "op_income": -23.6,
+              "net_income": -34.5,
+              "opm": -5.2
             },
             {
               "period": "2025Q2",
-              "revenue": 2781.1,
-              "op_income": 217.6,
-              "net_income": 193.9,
-              "opm": 7.8
+              "revenue": 443.0,
+              "op_income": -34.8,
+              "net_income": -30.7,
+              "opm": -7.9
             },
             {
               "period": "2025Q3",
-              "revenue": 2792.0,
-              "op_income": 261.0,
-              "net_income": 293.3,
-              "opm": 9.3
+              "revenue": 502.5,
+              "op_income": -27.2,
+              "net_income": -41.2,
+              "opm": -5.4
             }
           ],
-          "detail": "2분기 연속 YoY 성장 (최근 +33.4%)"
+          "detail": "적자 전환/지속 (-27.2억)"
         },
-        "market_cap": 791000677800,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K4:유동성(33억<50억)",
-          "K8:TRIX_DC(-2일차)"
+          "K4:유동성(46억<50억)",
+          "K8:TRIX_DC(-30일차)",
+          "K11:폭락(-28%)"
         ]
       },
       {
         "ticker": "078160",
         "name": "메디포스트",
         "grade": "B",
-        "zone_score": 0.5889,
+        "zone_score": 0.63,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 21500,
-        "stop_loss": 17822,
-        "target_price": 27936,
+        "entry_price": 21950,
+        "stop_loss": 18402,
+        "target_price": 28158,
         "risk_reward": 1.75,
-        "rsi": 50.743716743940624,
-        "adx": 17.6795619922049,
-        "plus_di": 15.899987129806032,
-        "minus_di": 15.419283856551033,
-        "vol_surge": 0.478061925862897,
+        "rsi": 53.05711603947929,
+        "adx": 17.956208256545573,
+        "plus_di": 20.675844045205153,
+        "minus_di": 13.854565686202568,
+        "vol_surge": 0.4583643615372953,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -958,18 +1016,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 15047623737.5,
-        "pct_of_52w_high": 0.7719928186714542,
-        "trix": 0.7402202656644041,
-        "trix_signal": 1.1911740234830375,
-        "slope_ma60": 5.370757892821421,
+        "avg_trading_value_20d": 12460985670.0,
+        "pct_of_52w_high": 0.7881508078994613,
+        "trix": 0.6150366049160638,
+        "trix_signal": 1.0759465397696428,
+        "slope_ma60": 5.000948689453288,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -22.80071813285458,
-        "vol_contraction": 0.49221724712648984,
+        "drawdown_from_high": -21.184919210053867,
+        "vol_contraction": 0.578157987827727,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -6,
+        "trix_counter": -7,
         "market_signals": [],
         "scores": {
           "consensus": 1,
@@ -1048,30 +1106,157 @@
           ],
           "detail": "2분기 연속 YoY 악화 (-46.9%)"
         },
-        "market_cap": 842898964500,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-6일차)",
-          "K11:폭락(-23%)"
+          "K8:TRIX_DC(-7일차)",
+          "K11:폭락(-21%)"
         ]
       },
       {
-        "ticker": "079370",
-        "name": "제우스",
+        "ticker": "085660",
+        "name": "차바이오텍",
         "grade": "B",
-        "zone_score": 0.5667,
+        "zone_score": 0.6017,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 18270,
-        "stop_loss": 16278,
-        "target_price": 21754,
+        "entry_price": 21650,
+        "stop_loss": 19453,
+        "target_price": 25493,
         "risk_reward": 1.75,
-        "rsi": 55.60789805292342,
-        "adx": 18.023969430691356,
-        "plus_di": 19.53319609230949,
-        "minus_di": 18.64627717755248,
-        "vol_surge": 0.7600334639599281,
+        "rsi": 64.11120873582152,
+        "adx": 34.16624211801404,
+        "plus_di": 30.01271406456585,
+        "minus_di": 10.865991170698523,
+        "vol_surge": 0.9641439751545975,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": -6959509900.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 21635298107.5,
+        "pct_of_52w_high": 0.9039665970772442,
+        "trix": 0.9291611981159242,
+        "trix_signal": 1.186925024899203,
+        "slope_ma60": 9.073934584495902,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -9.603340292275576,
+        "vol_contraction": 0.5826734064446507,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -8,
+        "market_signals": [
+          {
+            "title": "완전 정배열 (5>20>60>120)",
+            "importance": "high",
+            "confidence": 85
+          }
+        ],
+        "scores": {
+          "consensus": 0,
+          "consensus_detail": {
+            "verdict": "DETERIORATING",
+            "op_yoy": -1860.0,
+            "opm_trend": -4.71,
+            "holding_co": false,
+            "detail": "적자 전환/지속 (-17.6억)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "DETERIORATING",
+          "score": 0,
+          "op_yoy_pct": -1860.0,
+          "net_yoy_pct": -108.6,
+          "opm_trend": -4.71,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q3",
+              "revenue": 124.0,
+              "op_income": -7.0,
+              "net_income": -97.3,
+              "opm": -5.6
+            },
+            {
+              "period": "2023Q4",
+              "revenue": 118.4,
+              "op_income": -17.1,
+              "net_income": -80.8,
+              "opm": -14.4
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 124.5,
+              "op_income": 0.9,
+              "net_income": 16.5,
+              "opm": 0.7
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 136.6,
+              "op_income": -1.0,
+              "net_income": 337.5,
+              "opm": -0.7
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 129.8,
+              "op_income": -1.4,
+              "net_income": 183.0,
+              "opm": -1.1
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 148.1,
+              "op_income": -0.0,
+              "net_income": -31.9,
+              "opm": -0.0
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 155.3,
+              "op_income": -22.5,
+              "net_income": -239.6,
+              "opm": -14.5
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 147.1,
+              "op_income": -17.6,
+              "net_income": -29.1,
+              "opm": -12.0
+            }
+          ],
+          "detail": "적자 전환/지속 (-17.6억)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX_DC(-8일차)"
+        ]
+      },
+      {
+        "ticker": "086900",
+        "name": "메디톡스",
+        "grade": "B",
+        "zone_score": 0.5742,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 128800,
+        "stop_loss": 121456,
+        "target_price": 141651,
+        "risk_reward": 1.75,
+        "rsi": 49.37401419827293,
+        "adx": 15.738258987563182,
+        "plus_di": 13.423677350846003,
+        "minus_di": 25.620298872894953,
+        "vol_surge": 0.72587697529201,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -1080,119 +1265,120 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 25348803654.0,
-        "pct_of_52w_high": 0.8720763723150358,
-        "trix": 0.3665124490794591,
-        "trix_signal": 0.6561423764111995,
-        "slope_ma60": 4.771135292303619,
+        "avg_trading_value_20d": 7045220530.0,
+        "pct_of_52w_high": 0.7049808429118773,
+        "trix": 0.2212316875393583,
+        "trix_signal": 0.29238394052011374,
+        "slope_ma60": 1.1156513791064082,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -12.792362768496425,
-        "vol_contraction": 0.5098336738823727,
+        "drawdown_from_high": -29.501915708812266,
+        "vol_contraction": 0.6596612637141871,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -8,
+        "trix_counter": -6,
         "market_signals": [],
         "scores": {
-          "consensus": 0,
+          "consensus": 14,
           "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -111.0,
-            "opm_trend": -4.32,
+            "verdict": "GROWING",
+            "op_yoy": 126.5,
+            "opm_trend": 2.08,
             "holding_co": false,
-            "detail": "적자 전환/지속 (-18.0억)"
+            "detail": "YoY 개선 (+126.5%) + OPM 개선(+2.1%p/Q)"
           }
         },
         "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -111.0,
-          "net_yoy_pct": -94.0,
-          "opm_trend": -4.32,
+          "verdict": "GROWING",
+          "score": 14,
+          "op_yoy_pct": 126.5,
+          "net_yoy_pct": 182.9,
+          "opm_trend": 2.08,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 588.4,
-              "op_income": -36.2,
-              "net_income": 0.7,
-              "opm": -6.2
+              "revenue": 602.2,
+              "op_income": 5.7,
+              "net_income": -0.6,
+              "opm": 0.9
             },
             {
               "period": "2024Q1",
-              "revenue": 625.3,
-              "op_income": 54.7,
-              "net_income": 73.0,
-              "opm": 8.7
+              "revenue": 489.8,
+              "op_income": -18.8,
+              "net_income": -13.0,
+              "opm": -3.8
             },
             {
               "period": "2024Q2",
-              "revenue": 645.3,
-              "op_income": 27.9,
-              "net_income": 38.5,
-              "opm": 4.3
+              "revenue": 592.7,
+              "op_income": 129.1,
+              "net_income": 112.7,
+              "opm": 21.8
             },
             {
               "period": "2024Q3",
-              "revenue": 836.6,
-              "op_income": 164.2,
-              "net_income": 117.3,
-              "opm": 19.6
+              "revenue": 455.6,
+              "op_income": 38.5,
+              "net_income": 25.7,
+              "opm": 8.5
             },
             {
               "period": "2024Q4",
-              "revenue": 1049.4,
-              "op_income": 143.8,
-              "net_income": 159.2,
-              "opm": 13.7
+              "revenue": 543.4,
+              "op_income": 42.6,
+              "net_income": 93.7,
+              "opm": 7.8
             },
             {
               "period": "2025Q1",
-              "revenue": 566.1,
-              "op_income": 59.2,
-              "net_income": 66.8,
-              "opm": 10.5
+              "revenue": 596.7,
+              "op_income": 68.3,
+              "net_income": 68.5,
+              "opm": 11.4
             },
             {
               "period": "2025Q2",
-              "revenue": 681.9,
-              "op_income": 129.4,
-              "net_income": 62.1,
-              "opm": 19.0
+              "revenue": 542.8,
+              "op_income": 53.1,
+              "net_income": 21.6,
+              "opm": 9.8
             },
             {
               "period": "2025Q3",
-              "revenue": 511.3,
-              "op_income": -18.0,
-              "net_income": 7.0,
-              "opm": -3.5
+              "revenue": 568.3,
+              "op_income": 87.2,
+              "net_income": 72.7,
+              "opm": 15.3
             }
           ],
-          "detail": "적자 전환/지속 (-18.0억)"
+          "detail": "YoY 개선 (+126.5%) + OPM 개선(+2.1%p/Q)"
         },
-        "market_cap": 566680407300,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-8일차)"
+          "K8:TRIX_DC(-6일차)",
+          "K11:폭락(-30%)"
         ]
       },
       {
-        "ticker": "089010",
-        "name": "켐트로닉스",
+        "ticker": "088800",
+        "name": "에이스테크",
         "grade": "B",
-        "zone_score": 0.5817,
+        "zone_score": 0.5863,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 34250,
-        "stop_loss": 31213,
-        "target_price": 39563,
+        "entry_price": 2875,
+        "stop_loss": 2606,
+        "target_price": 3345,
         "risk_reward": 1.75,
-        "rsi": 54.920239137597655,
-        "adx": 17.968643463307995,
-        "plus_di": 19.883716916102834,
-        "minus_di": 20.97448198376803,
-        "vol_surge": 1.320879648301502,
+        "rsi": 44.567416393624356,
+        "adx": 18.057401425519338,
+        "plus_di": 17.51196469048592,
+        "minus_di": 26.647970943640928,
+        "vol_surge": 0.4750416447380125,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -1201,18 +1387,152 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 12361765045.0,
-        "pct_of_52w_high": 0.7544052863436124,
-        "trix": 0.06754933739563374,
-        "trix_signal": 0.22091618447837424,
-        "slope_ma60": 1.981934112646111,
-        "above_ma60": true,
+        "avg_trading_value_20d": 1337824453.0,
+        "pct_of_52w_high": 0.6130063965884861,
+        "trix": -0.03785072672101153,
+        "trix_signal": -0.03789867567430585,
+        "slope_ma60": -2.541552364047117,
+        "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -24.559471365638764,
-        "vol_contraction": 0.648461626196518,
+        "drawdown_from_high": -38.69936034115139,
+        "vol_contraction": 0.636602284813751,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -9,
+        "trix_counter": 3,
+        "market_signals": [
+          {
+            "title": "MACD 데드크로스 경고",
+            "importance": "high",
+            "confidence": 70
+          },
+          {
+            "title": "골든크로스 접근",
+            "importance": "high",
+            "confidence": 61.008775560890804
+          }
+        ],
+        "scores": {
+          "consensus": 14,
+          "consensus_detail": {
+            "verdict": "TURNAROUND_EARLY",
+            "op_yoy": -128.8,
+            "opm_trend": 0.07,
+            "holding_co": false,
+            "detail": "적자 30%+ 축소 (-18.1→-8.4억)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "TURNAROUND_EARLY",
+          "score": 14,
+          "op_yoy_pct": -128.8,
+          "net_yoy_pct": -116.5,
+          "opm_trend": 0.07,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 204.6,
+              "op_income": -96.5,
+              "net_income": -331.7,
+              "opm": -47.2
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 249.6,
+              "op_income": -5.6,
+              "net_income": -28.9,
+              "opm": -2.2
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 307.8,
+              "op_income": 10.7,
+              "net_income": -120.8,
+              "opm": 3.5
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 313.2,
+              "op_income": -29.2,
+              "net_income": -116.9,
+              "opm": -9.3
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 384.4,
+              "op_income": -16.4,
+              "net_income": -101.4,
+              "opm": -4.3
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 457.4,
+              "op_income": 0.7,
+              "net_income": -30.5,
+              "opm": 0.2
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 416.7,
+              "op_income": -18.1,
+              "net_income": -168.1,
+              "opm": -4.3
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 333.1,
+              "op_income": -8.4,
+              "net_income": -19.3,
+              "opm": -2.5
+            }
+          ],
+          "detail": "적자 30%+ 축소 (-18.1→-8.4억)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 1.208,
+        "v9_kill_reasons": [
+          "K4:유동성(13억<50억)",
+          "K6:저가주(2875원<5,000원)",
+          "K11:폭락(-39%)"
+        ]
+      },
+      {
+        "ticker": "089010",
+        "name": "켐트로닉스",
+        "grade": "B",
+        "zone_score": 0.6288,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 33250,
+        "stop_loss": 30285,
+        "target_price": 38438,
+        "risk_reward": 1.75,
+        "rsi": 50.391581585881696,
+        "adx": 16.243058825936213,
+        "plus_di": 17.648217157724527,
+        "minus_di": 19.51577828856968,
+        "vol_surge": 0.7377280021334608,
+        "obv_trend": "down",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 11977253932.5,
+        "pct_of_52w_high": 0.7323788546255506,
+        "trix": 0.04931832427808036,
+        "trix_signal": 0.18659661243831546,
+        "slope_ma60": 2.1159666542770683,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -26.762114537444937,
+        "vol_contraction": 0.7271227705564011,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -10,
         "market_signals": [],
         "scores": {
           "consensus": 12,
@@ -1291,152 +1611,30 @@
           ],
           "detail": "YoY 개선 (+93.1%)"
         },
-        "market_cap": 559621812750,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-9일차)",
-          "K11:폭락(-25%)"
-        ]
-      },
-      {
-        "ticker": "090360",
-        "name": "로보스타",
-        "grade": "B",
-        "zone_score": 0.6334,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 80400,
-        "stop_loss": 71718,
-        "target_price": 95592,
-        "risk_reward": 1.75,
-        "rsi": 50.43255583100589,
-        "adx": 21.587226556970702,
-        "plus_di": 32.68580838304182,
-        "minus_di": 23.468350722965923,
-        "vol_surge": 1.0374175096036933,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 16998004090.0,
-        "pct_of_52w_high": 0.7444444444444445,
-        "trix": -0.21241107608610532,
-        "trix_signal": -0.026346892187900258,
-        "slope_ma60": 2.2971134955418027,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -25.555555555555554,
-        "vol_contraction": 0.5607950680419993,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -12,
-        "market_signals": [],
-        "scores": {
-          "consensus": 0,
-          "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -155.6,
-            "opm_trend": -2.29,
-            "holding_co": false,
-            "detail": "적자 전환/지속 (-11.9억)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -155.6,
-          "net_yoy_pct": -127.0,
-          "opm_trend": -2.29,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 264.1,
-              "op_income": 25.0,
-              "net_income": 18.9,
-              "opm": 9.5
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 206.3,
-              "op_income": -5.6,
-              "net_income": 1.9,
-              "opm": -2.7
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 274.1,
-              "op_income": 14.9,
-              "net_income": 15.9,
-              "opm": 5.4
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 167.3,
-              "op_income": -21.4,
-              "net_income": -23.7,
-              "opm": -12.8
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 234.7,
-              "op_income": 10.7,
-              "net_income": 24.3,
-              "opm": 4.6
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 139.5,
-              "op_income": -23.3,
-              "net_income": -21.7,
-              "opm": -16.7
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 193.5,
-              "op_income": -9.4,
-              "net_income": -14.7,
-              "opm": -4.9
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 169.3,
-              "op_income": -11.9,
-              "net_income": -6.4,
-              "opm": -7.0
-            }
-          ],
-          "detail": "적자 전환/지속 (-11.9억)"
-        },
-        "market_cap": 783900000000,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-12일차)",
-          "K11:폭락(-26%)"
+          "K8:TRIX_DC(-10일차)",
+          "K11:폭락(-27%)"
         ]
       },
       {
         "ticker": "092200",
         "name": "디아이씨",
         "grade": "B",
-        "zone_score": 0.6593,
+        "zone_score": 0.5392,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 10190,
-        "stop_loss": 8856,
-        "target_price": 12524,
+        "entry_price": 10180,
+        "stop_loss": 8917,
+        "target_price": 12389,
         "risk_reward": 1.75,
-        "rsi": 42.96962020687405,
-        "adx": 17.875980767445704,
-        "plus_di": 21.821828065590715,
-        "minus_di": 19.116514864934032,
-        "vol_surge": 1.1616846290470944,
+        "rsi": 42.86771381347664,
+        "adx": 15.71913270120141,
+        "plus_di": 19.97852174784308,
+        "minus_di": 20.669381755362874,
+        "vol_surge": 1.0032597416578573,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -1445,18 +1643,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 11506890109.0,
-        "pct_of_52w_high": 0.6726072607260726,
-        "trix": -0.6015770217817185,
-        "trix_signal": -0.6173945442657903,
-        "slope_ma60": 5.905730129390019,
+        "avg_trading_value_20d": 11339525646.0,
+        "pct_of_52w_high": 0.671947194719472,
+        "trix": -0.5778758518643401,
+        "trix_signal": -0.6094908057855003,
+        "slope_ma60": 5.664217936945226,
         "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -32.739273927392745,
-        "vol_contraction": 1.0000854709428149,
+        "drawdown_from_high": -32.805280528052805,
+        "vol_contraction": 1.0834520778166365,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": 1,
+        "trix_counter": 2,
         "market_signals": [],
         "scores": {
           "consensus": 3,
@@ -1535,152 +1733,29 @@
           ],
           "detail": "2분기 연속 YoY 악화 (-37.8%)"
         },
-        "market_cap": 396274518110,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 1.15,
         "v9_kill_reasons": [
-          "K5:시총(3963억<5000억)",
           "K11:폭락(-33%)"
         ]
       },
       {
-        "ticker": "094360",
-        "name": "칩스앤미디어",
+        "ticker": "092730",
+        "name": "네오팜",
         "grade": "B",
-        "zone_score": 0.5676,
+        "zone_score": 0.5448,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 18700,
-        "stop_loss": 16869,
-        "target_price": 21903,
+        "entry_price": 18900,
+        "stop_loss": 17384,
+        "target_price": 21551,
         "risk_reward": 1.75,
-        "rsi": 51.108998168351135,
-        "adx": 16.048447871346742,
-        "plus_di": 24.641414171550846,
-        "minus_di": 19.76959358350453,
-        "vol_surge": 0.5097721048740264,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 6846222405.5,
-        "pct_of_52w_high": 0.8329621380846325,
-        "trix": 0.22717928769295792,
-        "trix_signal": 0.29403051745997816,
-        "slope_ma60": 4.373790166473102,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -16.70378619153675,
-        "vol_contraction": 0.4969459610388582,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -3,
-        "market_signals": [],
-        "scores": {
-          "consensus": 6,
-          "consensus_detail": {
-            "verdict": "STABLE",
-            "op_yoy": -11.0,
-            "opm_trend": -1.08,
-            "holding_co": false,
-            "detail": "흑자 유지, YoY 소폭 변동 (-11.0%)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "STABLE",
-          "score": 6,
-          "op_yoy_pct": -11.0,
-          "net_yoy_pct": 45.2,
-          "opm_trend": -1.08,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 74.0,
-              "op_income": 23.6,
-              "net_income": -213.2,
-              "opm": 31.9
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 49.1,
-              "op_income": 0.4,
-              "net_income": 8.3,
-              "opm": 0.8
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 60.5,
-              "op_income": 6.0,
-              "net_income": 12.2,
-              "opm": 9.9
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 70.3,
-              "op_income": 17.2,
-              "net_income": 16.8,
-              "opm": 24.5
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 90.9,
-              "op_income": 29.4,
-              "net_income": 62.9,
-              "opm": 32.3
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 53.7,
-              "op_income": 2.0,
-              "net_income": 5.7,
-              "opm": 3.7
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 66.1,
-              "op_income": 13.6,
-              "net_income": 9.7,
-              "opm": 20.6
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 66.2,
-              "op_income": 15.3,
-              "net_income": 24.4,
-              "opm": 23.1
-            }
-          ],
-          "detail": "흑자 유지, YoY 소폭 변동 (-11.0%)"
-        },
-        "market_cap": 397922423800,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K5:시총(3979억<5000억)",
-          "K8:TRIX_DC(-3일차)"
-        ]
-      },
-      {
-        "ticker": "095500",
-        "name": "미래나노텍",
-        "grade": "B",
-        "zone_score": 0.7235,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 11630,
-        "stop_loss": 10617,
-        "target_price": 13402,
-        "risk_reward": 1.75,
-        "rsi": 51.5898028562868,
-        "adx": 14.050535107174248,
-        "plus_di": 24.627713575857882,
-        "minus_di": 17.22444136286751,
-        "vol_surge": 1.230116284694129,
+        "rsi": 44.3980820331587,
+        "adx": 22.51831867607606,
+        "plus_di": 13.907735767444562,
+        "minus_di": 25.449145993344953,
+        "vol_surge": 0.46322354424646567,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -1689,242 +1764,242 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 4350749335.0,
-        "pct_of_52w_high": 0.8213276836158192,
-        "trix": 0.05585959699401233,
-        "trix_signal": 0.1808969242324316,
-        "slope_ma60": -1.5002512382456312,
-        "above_ma60": true,
+        "avg_trading_value_20d": 1875068261.5,
+        "pct_of_52w_high": 0.8344370860927153,
+        "trix": 0.26324237217332236,
+        "trix_signal": 0.35649138217004184,
+        "slope_ma60": 1.0297099532751597,
+        "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -17.86723163841808,
-        "vol_contraction": 0.6820930585358991,
+        "drawdown_from_high": -16.55629139072847,
+        "vol_contraction": 0.6419445416086782,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -8,
+        "trix_counter": -3,
         "market_signals": [],
         "scores": {
-          "consensus": 3,
+          "consensus": 16,
           "consensus_detail": {
-            "verdict": "UNCERTAIN",
-            "op_yoy": -37.9,
-            "opm_trend": -1.15,
+            "verdict": "ACCELERATING",
+            "op_yoy": 33.2,
+            "opm_trend": 0.47,
             "holding_co": false,
-            "detail": "판정 불충분 (YoY=-37.854251012145745)"
+            "detail": "2분기 연속 YoY 성장 (최근 +33.2%)"
           }
         },
         "earnings_momentum": {
-          "verdict": "UNCERTAIN",
-          "score": 3,
-          "op_yoy_pct": -37.9,
-          "net_yoy_pct": 1518.2,
-          "opm_trend": -1.15,
+          "verdict": "ACCELERATING",
+          "score": 16,
+          "op_yoy_pct": 33.2,
+          "net_yoy_pct": 57.5,
+          "opm_trend": 0.47,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 609.5,
-              "op_income": -20.2,
-              "net_income": -29.3,
-              "opm": -3.3
+              "revenue": 272.2,
+              "op_income": 71.1,
+              "net_income": 60.5,
+              "opm": 26.1
             },
             {
               "period": "2024Q1",
-              "revenue": 693.1,
-              "op_income": 13.8,
-              "net_income": -32.5,
-              "opm": 2.0
+              "revenue": 282.3,
+              "op_income": 67.4,
+              "net_income": 60.8,
+              "opm": 23.9
             },
             {
               "period": "2024Q2",
-              "revenue": 657.6,
-              "op_income": 21.6,
-              "net_income": 38.6,
-              "opm": 3.3
+              "revenue": 306.8,
+              "op_income": 64.0,
+              "net_income": 60.8,
+              "opm": 20.9
             },
             {
               "period": "2024Q3",
-              "revenue": 826.7,
-              "op_income": 49.4,
-              "net_income": -2.2,
-              "opm": 6.0
+              "revenue": 261.4,
+              "op_income": 51.5,
+              "net_income": 44.2,
+              "opm": 19.7
             },
             {
               "period": "2024Q4",
-              "revenue": 712.5,
-              "op_income": 56.0,
-              "net_income": 44.6,
-              "opm": 7.9
+              "revenue": 341.4,
+              "op_income": 65.4,
+              "net_income": 63.0,
+              "opm": 19.2
             },
             {
               "period": "2025Q1",
-              "revenue": 1050.9,
-              "op_income": 91.2,
-              "net_income": 68.0,
-              "opm": 8.7
+              "revenue": 315.7,
+              "op_income": 76.5,
+              "net_income": 70.0,
+              "opm": 24.2
             },
             {
               "period": "2025Q2",
-              "revenue": 774.9,
-              "op_income": 65.4,
-              "net_income": -15.3,
-              "opm": 8.4
+              "revenue": 319.6,
+              "op_income": 71.7,
+              "net_income": 72.2,
+              "opm": 22.4
             },
             {
               "period": "2025Q3",
-              "revenue": 748.7,
-              "op_income": 30.7,
-              "net_income": 35.6,
-              "opm": 4.1
+              "revenue": 321.7,
+              "op_income": 68.6,
+              "net_income": 69.6,
+              "opm": 21.3
             }
           ],
-          "detail": "판정 불충분 (YoY=-37.854251012145745)"
+          "detail": "2분기 연속 YoY 성장 (최근 +33.2%)"
         },
-        "market_cap": 360646288370,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K4:유동성(44억<50억)",
-          "K5:시총(3606억<5000억)",
-          "K8:TRIX_DC(-8일차)"
+          "K4:유동성(19억<50억)",
+          "K8:TRIX_DC(-3일차)"
         ]
       },
       {
-        "ticker": "098460",
-        "name": "고영",
+        "ticker": "101170",
+        "name": "우림피티에스",
         "grade": "B",
-        "zone_score": 0.53,
+        "zone_score": 0.5114,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 32200,
-        "stop_loss": 28702,
-        "target_price": 38320,
+        "entry_price": 16720,
+        "stop_loss": 14042,
+        "target_price": 21404,
         "risk_reward": 1.75,
-        "rsi": 54.35763805230347,
-        "adx": 22.361762594632747,
-        "plus_di": 21.379296063244364,
-        "minus_di": 17.947679869488816,
-        "vol_surge": 0.8429094596908202,
+        "rsi": 49.50113438685453,
+        "adx": 24.92884742939542,
+        "plus_di": 31.86818026509312,
+        "minus_di": 12.498023246519038,
+        "vol_surge": 3.9669302544204665,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
         "foreign_amount_5d": 0,
         "inst_amount_5d": 0,
-        "foreign_net_5d": 3821095500.0,
+        "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 100612550242.5,
-        "pct_of_52w_high": 0.8598130841121495,
-        "trix": 0.3713643912555131,
-        "trix_signal": 0.6378775455391041,
-        "slope_ma60": 8.234108114277028,
+        "avg_trading_value_20d": 12360386691.5,
+        "pct_of_52w_high": 0.6966666666666667,
+        "trix": -0.675589811226962,
+        "trix_signal": -0.40177588666842196,
+        "slope_ma60": 11.837426512421768,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -14.018691588785048,
-        "vol_contraction": 0.6170554355281606,
+        "drawdown_from_high": -30.333333333333336,
+        "vol_contraction": 1.253251581018066,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -9,
+        "trix_counter": -25,
         "market_signals": [],
         "scores": {
-          "consensus": 18,
+          "consensus": 20,
           "consensus_detail": {
-            "verdict": "ACCELERATING",
-            "op_yoy": 396.6,
-            "opm_trend": 3.14,
+            "verdict": "TURNAROUND_STRONG",
+            "op_yoy": 302.3,
+            "opm_trend": 11.88,
             "holding_co": false,
-            "detail": "2분기 연속 YoY 성장 (최근 +396.6%)"
+            "detail": "적자→흑자 전환! (영업이익 -12.9→35.4억)"
           }
         },
         "earnings_momentum": {
-          "verdict": "ACCELERATING",
-          "score": 18,
-          "op_yoy_pct": 396.6,
-          "net_yoy_pct": 32.8,
-          "opm_trend": 3.14,
+          "verdict": "TURNAROUND_STRONG",
+          "score": 20,
+          "op_yoy_pct": 302.3,
+          "net_yoy_pct": 283.1,
+          "opm_trend": 11.88,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 466.4,
-              "op_income": 18.1,
-              "net_income": -15.6,
-              "opm": 3.9
+              "revenue": 170.1,
+              "op_income": 18.5,
+              "net_income": 29.4,
+              "opm": 10.9
             },
             {
               "period": "2024Q1",
-              "revenue": 513.1,
-              "op_income": 54.6,
-              "net_income": 98.3,
-              "opm": 10.6
+              "revenue": 211.0,
+              "op_income": 14.1,
+              "net_income": 16.5,
+              "opm": 6.7
             },
             {
               "period": "2024Q2",
-              "revenue": 405.4,
-              "op_income": 7.2,
-              "net_income": 54.7,
-              "opm": 1.8
+              "revenue": 234.2,
+              "op_income": 10.9,
+              "net_income": 13.3,
+              "opm": 4.7
             },
             {
               "period": "2024Q3",
-              "revenue": 403.3,
-              "op_income": -5.9,
-              "net_income": -55.2,
-              "opm": -1.5
+              "revenue": 121.6,
+              "op_income": -8.8,
+              "net_income": -8.9,
+              "opm": -7.2
             },
             {
               "period": "2024Q4",
-              "revenue": 406.9,
-              "op_income": -31.2,
-              "net_income": 114.5,
-              "opm": -7.7
+              "revenue": 150.9,
+              "op_income": -32.1,
+              "net_income": -98.7,
+              "opm": -21.3
             },
             {
               "period": "2025Q1",
-              "revenue": 484.6,
-              "op_income": 50.9,
-              "net_income": 53.4,
-              "opm": 10.5
+              "revenue": 137.2,
+              "op_income": 2.0,
+              "net_income": 6.4,
+              "opm": 1.5
             },
             {
               "period": "2025Q2",
-              "revenue": 431.1,
-              "op_income": 7.3,
-              "net_income": -67.2,
-              "opm": 1.7
+              "revenue": 120.0,
+              "op_income": -12.9,
+              "net_income": -16.2,
+              "opm": -10.8
             },
             {
               "period": "2025Q3",
-              "revenue": 511.2,
-              "op_income": 29.3,
-              "net_income": 73.3,
-              "opm": 5.7
+              "revenue": 158.0,
+              "op_income": 35.4,
+              "net_income": 34.1,
+              "opm": 22.4
             }
           ],
-          "detail": "2분기 연속 YoY 성장 (최근 +396.6%)"
+          "detail": "적자→흑자 전환! (영업이익 -12.9→35.4억)"
         },
-        "market_cap": 2210683111000,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-9일차)"
+          "K8:TRIX_DC(-25일차)",
+          "K11:폭락(-30%)"
         ]
       },
       {
         "ticker": "115180",
         "name": "큐리언트",
         "grade": "B",
-        "zone_score": 0.63,
+        "zone_score": 0.6802,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 33700,
-        "stop_loss": 28581,
-        "target_price": 42657,
+        "entry_price": 32250,
+        "stop_loss": 27107,
+        "target_price": 41249,
         "risk_reward": 1.75,
-        "rsi": 52.57536059254448,
-        "adx": 18.569757954620712,
-        "plus_di": 23.550754604619996,
-        "minus_di": 20.915307172332803,
-        "vol_surge": 0.872691749579225,
+        "rsi": 48.377510532583756,
+        "adx": 16.603416007179284,
+        "plus_di": 20.31461550723554,
+        "minus_di": 18.819107894338277,
+        "vol_surge": 0.6652932815305912,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -1933,18 +2008,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 8968305267.5,
-        "pct_of_52w_high": 0.8435544430538173,
-        "trix": 0.4521940053918483,
-        "trix_signal": 0.6617723369707476,
-        "slope_ma60": 4.615471262425719,
+        "avg_trading_value_20d": 9009052482.5,
+        "pct_of_52w_high": 0.8072590738423029,
+        "trix": 0.3653462505058158,
+        "trix_signal": 0.6024871196777613,
+        "slope_ma60": 4.2795126732950495,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -15.644555694618267,
-        "vol_contraction": 0.5701016150562883,
+        "drawdown_from_high": -19.27409261576971,
+        "vol_contraction": 0.5773902396314762,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -4,
+        "trix_counter": -5,
         "market_signals": [],
         "scores": {
           "consensus": 0,
@@ -2023,29 +2098,29 @@
           ],
           "detail": "적자 전환/지속 (-63.8억)"
         },
-        "market_cap": 1253365917900,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-4일차)"
+          "K8:TRIX_DC(-5일차)"
         ]
       },
       {
         "ticker": "190510",
         "name": "나무가",
         "grade": "A",
-        "zone_score": 0.7349,
+        "zone_score": 0.7637,
         "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 23400,
-        "stop_loss": 20849,
-        "target_price": 29775,
+        "confidence": 0.883,
+        "entry_price": 22700,
+        "stop_loss": 20223,
+        "target_price": 28891,
         "risk_reward": 2.5,
-        "rsi": 49.87097811507049,
-        "adx": 14.944837612298315,
-        "plus_di": 28.696240466860935,
-        "minus_di": 19.56915912585954,
-        "vol_surge": 0.4476476639112493,
+        "rsi": 46.02084451749698,
+        "adx": 14.032288304843785,
+        "plus_di": 25.606625312168834,
+        "minus_di": 21.76887011799258,
+        "vol_surge": 0.3847746198595977,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -2054,18 +2129,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 5838900282.5,
-        "pct_of_52w_high": 0.8181818181818182,
-        "trix": -0.060065511814633155,
-        "trix_signal": 0.1693518950214693,
-        "slope_ma60": 6.298155788636484,
+        "avg_trading_value_20d": 5680414307.5,
+        "pct_of_52w_high": 0.7937062937062938,
+        "trix": -0.09704477940193357,
+        "trix_signal": 0.11607256013678872,
+        "slope_ma60": 6.244749369924385,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -18.181818181818176,
-        "vol_contraction": 0.5600222940278261,
+        "drawdown_from_high": -20.629370629370626,
+        "vol_contraction": 0.5721584818453853,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -23,
+        "trix_counter": -24,
         "market_signals": [],
         "scores": {
           "consensus": 14,
@@ -2144,152 +2219,30 @@
           ],
           "detail": "YoY 개선 (+100.0%) + OPM 개선(+1.9%p/Q)"
         },
-        "market_cap": 329596417800,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K5:시총(3296억<5000억)",
-          "K8:TRIX_DC(-23일차)"
-        ]
-      },
-      {
-        "ticker": "253450",
-        "name": "스튜디오드래곤",
-        "grade": "B",
-        "zone_score": 0.6646,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 44950,
-        "stop_loss": 42004,
-        "target_price": 50105,
-        "risk_reward": 1.75,
-        "rsi": 43.58680894537315,
-        "adx": 22.268390791598996,
-        "plus_di": 18.952589141533664,
-        "minus_di": 28.886781651023743,
-        "vol_surge": 0.9015132719413977,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 5879033185.0,
-        "pct_of_52w_high": 0.7885964912280702,
-        "trix": 0.157978536652581,
-        "trix_signal": 0.2541763686764926,
-        "slope_ma60": 3.2875156641603898,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -21.140350877192983,
-        "vol_contraction": 0.6213852552392312,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -15,
-        "market_signals": [],
-        "scores": {
-          "consensus": 18,
-          "consensus_detail": {
-            "verdict": "TURNAROUND_STRONG",
-            "op_yoy": 1159.8,
-            "opm_trend": -0.44,
-            "holding_co": false,
-            "detail": "적자→흑자 전환! (영업이익 -33.5→109.6억)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "TURNAROUND_STRONG",
-          "score": 18,
-          "op_yoy_pct": 1159.8,
-          "net_yoy_pct": 84.4,
-          "opm_trend": -0.44,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 1500.9,
-              "op_income": 2.4,
-              "net_income": -1.1,
-              "opm": 0.2
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 1908.8,
-              "op_income": 218.5,
-              "net_income": 206.0,
-              "opm": 11.4
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 1369.1,
-              "op_income": 83.4,
-              "net_income": 69.0,
-              "opm": 6.1
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 763.0,
-              "op_income": 8.7,
-              "net_income": -46.8,
-              "opm": 1.1
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 1276.0,
-              "op_income": 87.5,
-              "net_income": 117.2,
-              "opm": 6.9
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 1337.7,
-              "op_income": 66.5,
-              "net_income": 44.3,
-              "opm": 5.0
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 1110.4,
-              "op_income": -33.5,
-              "net_income": -40.7,
-              "opm": -3.0
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 1362.9,
-              "op_income": 109.6,
-              "net_income": 86.3,
-              "opm": 8.0
-            }
-          ],
-          "detail": "적자→흑자 전환! (영업이익 -33.5→109.6억)"
-        },
-        "market_cap": 1351129485100,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-15일차)",
+          "K8:TRIX_DC(-24일차)",
           "K11:폭락(-21%)"
         ]
       },
       {
-        "ticker": "255220",
-        "name": "SG",
+        "ticker": "192650",
+        "name": "드림텍",
         "grade": "B",
-        "zone_score": 0.5123,
+        "zone_score": 0.5137,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 2900,
-        "stop_loss": 2413,
-        "target_price": 3751,
+        "entry_price": 7790,
+        "stop_loss": 7045,
+        "target_price": 9093,
         "risk_reward": 1.75,
-        "rsi": 50.566734039571344,
-        "adx": 28.440185282644915,
-        "plus_di": 22.326897800856283,
-        "minus_di": 20.81125535488529,
-        "vol_surge": 0.48802961004699347,
+        "rsi": 48.64912012444981,
+        "adx": 28.449517601030134,
+        "plus_di": 21.777664831763587,
+        "minus_di": 27.12443079865944,
+        "vol_surge": 0.5315522881552796,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -2298,122 +2251,246 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 37132812855.75,
-        "pct_of_52w_high": 0.7988980716253443,
-        "trix": 0.7859921404721248,
-        "trix_signal": 0.956155879118053,
-        "slope_ma60": 4.929970151211993,
+        "avg_trading_value_20d": 6064645754.5,
+        "pct_of_52w_high": 0.8541666666666666,
+        "trix": 0.422089307440876,
+        "trix_signal": 0.4975260454118267,
+        "slope_ma60": 2.8572087445807526,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -26.67509481668774,
-        "vol_contraction": 0.4487394547629257,
+        "drawdown_from_high": -14.583333333333337,
+        "vol_contraction": 0.6452441971312508,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -2,
+        "trix_counter": -3,
         "market_signals": [],
         "scores": {
-          "consensus": 0,
+          "consensus": 12,
           "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -220.2,
-            "opm_trend": -4.85,
+            "verdict": "GROWING",
+            "op_yoy": 154.4,
+            "opm_trend": 0.2,
             "holding_co": false,
-            "detail": "적자 전환/지속 (-13.1억)"
+            "detail": "YoY 개선 (+154.4%)"
           }
         },
         "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -220.2,
-          "net_yoy_pct": -98.5,
-          "opm_trend": -4.85,
+          "verdict": "GROWING",
+          "score": 12,
+          "op_yoy_pct": 154.4,
+          "net_yoy_pct": 757.1,
+          "opm_trend": 0.2,
           "is_holding_co": false,
           "quarters": [
             {
               "period": "2023Q4",
-              "revenue": 149.8,
-              "op_income": -1.0,
-              "net_income": -304.6,
-              "opm": -0.7
+              "revenue": 1082.6,
+              "op_income": 9.5,
+              "net_income": -52.7,
+              "opm": 0.9
             },
             {
               "period": "2024Q1",
-              "revenue": 63.8,
-              "op_income": -39.6,
-              "net_income": -99.2,
-              "opm": -62.1
+              "revenue": 1324.5,
+              "op_income": 80.5,
+              "net_income": 73.9,
+              "opm": 6.1
             },
             {
               "period": "2024Q2",
-              "revenue": 151.0,
-              "op_income": -5.9,
-              "net_income": -31.3,
-              "opm": -3.9
+              "revenue": 1383.2,
+              "op_income": 95.5,
+              "net_income": 23.6,
+              "opm": 6.9
             },
             {
               "period": "2024Q3",
-              "revenue": 116.3,
-              "op_income": -10.9,
-              "net_income": -52.8,
-              "opm": -9.4
+              "revenue": 1411.0,
+              "op_income": 25.9,
+              "net_income": 8.4,
+              "opm": 1.8
             },
             {
               "period": "2024Q4",
-              "revenue": 183.3,
-              "op_income": 20.8,
-              "net_income": -84.5,
-              "opm": 11.3
+              "revenue": 1147.2,
+              "op_income": 42.3,
+              "net_income": 38.9,
+              "opm": 3.7
             },
             {
               "period": "2025Q1",
-              "revenue": 72.5,
-              "op_income": -10.9,
-              "net_income": 30.2,
-              "opm": -15.0
+              "revenue": 1295.0,
+              "op_income": 52.1,
+              "net_income": 38.5,
+              "opm": 4.0
             },
             {
               "period": "2025Q2",
-              "revenue": 193.7,
-              "op_income": 21.0,
-              "net_income": 24.6,
-              "opm": 10.8
+              "revenue": 1258.1,
+              "op_income": 42.7,
+              "net_income": 24.7,
+              "opm": 3.4
             },
             {
               "period": "2025Q3",
-              "revenue": 97.5,
-              "op_income": -13.1,
-              "net_income": 0.8,
-              "opm": -13.4
+              "revenue": 1447.7,
+              "op_income": 65.9,
+              "net_income": 72.0,
+              "opm": 4.6
             }
           ],
-          "detail": "적자 전환/지속 (-13.1억)"
+          "detail": "YoY 개선 (+154.4%)"
         },
-        "market_cap": 309294219100,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K5:시총(3093억<5000억)",
-          "K6:저가주(2900원<5,000원)",
-          "K8:TRIX_DC(-2일차)",
-          "K11:폭락(-27%)"
+          "K8:TRIX_DC(-3일차)"
         ]
       },
       {
-        "ticker": "270660",
-        "name": "에브리봇",
+        "ticker": "195940",
+        "name": "HK이노엔",
         "grade": "B",
-        "zone_score": 0.6831,
+        "zone_score": 0.5102,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 23850,
-        "stop_loss": 21104,
-        "target_price": 28655,
+        "entry_price": 54000,
+        "stop_loss": 49734,
+        "target_price": 61463,
         "risk_reward": 1.75,
-        "rsi": 47.747844090234494,
-        "adx": 14.938043708752891,
-        "plus_di": 24.49341502962405,
-        "minus_di": 20.624143314226522,
-        "vol_surge": 0.6067276329217778,
+        "rsi": 49.063321205459005,
+        "adx": 30.678376520223573,
+        "plus_di": 24.26410891122737,
+        "minus_di": 26.476933321432988,
+        "vol_surge": 0.5828204973943797,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 1864696400.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 14574448515.0,
+        "pct_of_52w_high": 0.9215017064846417,
+        "trix": 0.4177967247611658,
+        "trix_signal": 0.4131565987103304,
+        "slope_ma60": 1.935567679916872,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -7.849829351535831,
+        "vol_contraction": 0.6287255649318457,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": 20,
+        "market_signals": [
+          {
+            "title": "MACD 데드크로스 경고",
+            "importance": "high",
+            "confidence": 70
+          }
+        ],
+        "scores": {
+          "consensus": 12,
+          "consensus_detail": {
+            "verdict": "GROWING",
+            "op_yoy": 16.4,
+            "opm_trend": -0.41,
+            "holding_co": false,
+            "detail": "YoY 개선 (+16.4%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "GROWING",
+          "score": 12,
+          "op_yoy_pct": 16.4,
+          "net_yoy_pct": 28.0,
+          "opm_trend": -0.41,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 2240.7,
+              "op_income": 225.4,
+              "net_income": 151.3,
+              "opm": 10.1
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 2126.1,
+              "op_income": 172.6,
+              "net_income": 104.9,
+              "opm": 8.1
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 2192.9,
+              "op_income": 243.5,
+              "net_income": 174.2,
+              "opm": 11.1
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 2294.7,
+              "op_income": 222.3,
+              "net_income": 145.0,
+              "opm": 9.7
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 2357.7,
+              "op_income": 243.8,
+              "net_income": 191.7,
+              "opm": 10.3
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 2473.6,
+              "op_income": 253.7,
+              "net_income": 174.3,
+              "opm": 10.3
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 2630.9,
+              "op_income": 195.3,
+              "net_income": 120.4,
+              "opm": 7.4
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 2608.2,
+              "op_income": 258.7,
+              "net_income": 185.6,
+              "opm": 9.9
+            }
+          ],
+          "detail": "YoY 개선 (+16.4%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX과열(GC+20일)"
+        ]
+      },
+      {
+        "ticker": "211050",
+        "name": "인카금융서비스",
+        "grade": "B",
+        "zone_score": 0.5231,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 14050,
+        "stop_loss": 12354,
+        "target_price": 17017,
+        "risk_reward": 1.75,
+        "rsi": 49.3054802929547,
+        "adx": 22.59774247783891,
+        "plus_di": 15.953837367308065,
+        "minus_di": 23.53215670496693,
+        "vol_surge": 0.6179062875633429,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -2422,18 +2499,261 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 6378158285.0,
-        "pct_of_52w_high": 0.7476489028213166,
-        "trix": -0.04606618182027011,
-        "trix_signal": 0.267817396840719,
-        "slope_ma60": 4.400128806697956,
+        "avg_trading_value_20d": 3671924785.5,
+        "pct_of_52w_high": 0.8107328332371609,
+        "trix": 0.34269540814606536,
+        "trix_signal": 0.3786624564533647,
+        "slope_ma60": 1.1584322953941628,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -25.235109717868344,
-        "vol_contraction": 0.41598544021852607,
+        "drawdown_from_high": -18.926716676283906,
+        "vol_contraction": 0.6919614242307109,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -12,
+        "trix_counter": -2,
+        "market_signals": [],
+        "scores": {
+          "consensus": 8,
+          "consensus_detail": {
+            "verdict": "STABLE",
+            "op_yoy": -8.3,
+            "opm_trend": 0.26,
+            "holding_co": false,
+            "detail": "흑자 유지, YoY 소폭 변동 (-8.3%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "STABLE",
+          "score": 8,
+          "op_yoy_pct": -8.3,
+          "net_yoy_pct": 2.6,
+          "opm_trend": 0.26,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 1640.6,
+              "op_income": 167.1,
+              "net_income": 97.7,
+              "opm": 10.2
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 1856.5,
+              "op_income": 183.9,
+              "net_income": 126.8,
+              "opm": 9.9
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 2100.9,
+              "op_income": 210.2,
+              "net_income": 147.7,
+              "opm": 10.0
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 2347.3,
+              "op_income": 284.7,
+              "net_income": 208.9,
+              "opm": 12.1
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 2002.9,
+              "op_income": 184.2,
+              "net_income": 134.3,
+              "opm": 9.2
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 2287.4,
+              "op_income": 214.2,
+              "net_income": 159.8,
+              "opm": 9.4
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 2366.2,
+              "op_income": 239.9,
+              "net_income": 175.8,
+              "opm": 10.1
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 2664.9,
+              "op_income": 261.2,
+              "net_income": 214.3,
+              "opm": 9.8
+            }
+          ],
+          "detail": "흑자 유지, YoY 소폭 변동 (-8.3%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K4:유동성(37억<50억)",
+          "K8:TRIX_DC(-2일차)"
+        ]
+      },
+      {
+        "ticker": "220260",
+        "name": "켐트로스",
+        "grade": "B",
+        "zone_score": 0.6464,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 6020,
+        "stop_loss": 5256,
+        "target_price": 7356,
+        "risk_reward": 1.75,
+        "rsi": 46.20123711084181,
+        "adx": 22.374059098815152,
+        "plus_di": 27.058895159547294,
+        "minus_di": 25.206123960346947,
+        "vol_surge": 0.5331432909133945,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 5654265656.0,
+        "pct_of_52w_high": 0.6290491118077325,
+        "trix": -0.49154305759716577,
+        "trix_signal": -0.5819007760366693,
+        "slope_ma60": 5.736189647672885,
+        "above_ma60": false,
+        "above_ma120": true,
+        "drawdown_from_high": -37.09508881922675,
+        "vol_contraction": 1.3074330449762122,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": 3,
+        "market_signals": [],
+        "scores": {
+          "consensus": 0,
+          "consensus_detail": {
+            "verdict": "DETERIORATING",
+            "op_yoy": -225.5,
+            "opm_trend": -3.49,
+            "holding_co": false,
+            "detail": "적자 전환/지속 (-6.4억)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "DETERIORATING",
+          "score": 0,
+          "op_yoy_pct": -225.5,
+          "net_yoy_pct": 31.4,
+          "opm_trend": -3.49,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 109.2,
+              "op_income": 19.3,
+              "net_income": 4.7,
+              "opm": 17.7
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 146.9,
+              "op_income": 21.0,
+              "net_income": 22.5,
+              "opm": 14.3
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 117.8,
+              "op_income": 6.9,
+              "net_income": 8.3,
+              "opm": 5.9
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 117.5,
+              "op_income": 5.1,
+              "net_income": 3.5,
+              "opm": 4.3
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 120.9,
+              "op_income": 4.9,
+              "net_income": 17.1,
+              "opm": 4.1
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 122.1,
+              "op_income": 2.5,
+              "net_income": 4.5,
+              "opm": 2.0
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 147.3,
+              "op_income": -8.8,
+              "net_income": -22.1,
+              "opm": -6.0
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 130.7,
+              "op_income": -6.4,
+              "net_income": 4.6,
+              "opm": -4.9
+            }
+          ],
+          "detail": "적자 전환/지속 (-6.4억)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.977,
+        "v9_kill_reasons": [
+          "K11:폭락(-37%)"
+        ]
+      },
+      {
+        "ticker": "270660",
+        "name": "에브리봇",
+        "grade": "B",
+        "zone_score": 0.6241,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 22800,
+        "stop_loss": 20113,
+        "target_price": 27501,
+        "risk_reward": 1.75,
+        "rsi": 43.017406123498844,
+        "adx": 14.909379008302626,
+        "plus_di": 21.697255845020997,
+        "minus_di": 29.18931548837317,
+        "vol_surge": 0.7053369821178143,
+        "obv_trend": "down",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 5939497690.0,
+        "pct_of_52w_high": 0.7147335423197492,
+        "trix": -0.10645070853056993,
+        "trix_signal": 0.19296377576646118,
+        "slope_ma60": 4.227576525162502,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -28.526645768025084,
+        "vol_contraction": 0.5134715163049408,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -13,
         "market_signals": [],
         "scores": {
           "consensus": 3,
@@ -2512,275 +2832,30 @@
           ],
           "detail": "적자 전환/지속 (-3.2억)"
         },
-        "market_cap": 302670404550,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K5:시총(3027억<5000억)",
-          "K8:TRIX_DC(-12일차)",
-          "K11:폭락(-25%)"
-        ]
-      },
-      {
-        "ticker": "274090",
-        "name": "켄코아에어로스페이스",
-        "grade": "B",
-        "zone_score": 0.6192,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 0.506,
-        "entry_price": 23250,
-        "stop_loss": 18887,
-        "target_price": 30884,
-        "risk_reward": 1.75,
-        "rsi": 47.13114216463299,
-        "adx": 25.214409184645035,
-        "plus_di": 15.608976074902529,
-        "minus_di": 25.769691531725602,
-        "vol_surge": 0.2543887778954113,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 37317126252.5,
-        "pct_of_52w_high": 0.7428115015974441,
-        "trix": 0.4371413080088704,
-        "trix_signal": 1.0073002370577777,
-        "slope_ma60": 14.229958013837706,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -25.718849840255587,
-        "vol_contraction": 0.47795627444786465,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -14,
-        "market_signals": [],
-        "scores": {
-          "consensus": 0,
-          "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -600.9,
-            "opm_trend": -8.93,
-            "holding_co": false,
-            "detail": "적자 전환/지속 (-54.6억)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -600.9,
-          "net_yoy_pct": -602.0,
-          "opm_trend": -8.93,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 157.7,
-              "op_income": -13.7,
-              "net_income": -55.4,
-              "opm": -8.7
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 124.3,
-              "op_income": -17.3,
-              "net_income": -23.3,
-              "opm": -13.9
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 136.2,
-              "op_income": -22.3,
-              "net_income": -11.0,
-              "opm": -16.4
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 138.8,
-              "op_income": -10.9,
-              "net_income": -9.8,
-              "opm": -7.9
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 109.2,
-              "op_income": -42.0,
-              "net_income": -59.7,
-              "opm": -38.5
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 63.4,
-              "op_income": -14.3,
-              "net_income": -15.6,
-              "opm": -22.6
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 115.9,
-              "op_income": -22.7,
-              "net_income": -29.0,
-              "opm": -19.6
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 78.9,
-              "op_income": -54.6,
-              "net_income": -49.2,
-              "opm": -69.2
-            }
-          ],
-          "detail": "적자 전환/지속 (-54.6억)"
-        },
-        "market_cap": 318151674750,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K5:시총(3182억<5000억)",
-          "K8:TRIX_DC(-14일차)",
-          "K11:폭락(-26%)"
-        ]
-      },
-      {
-        "ticker": "281740",
-        "name": "레이크머티리얼즈",
-        "grade": "B",
-        "zone_score": 0.625,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 23450,
-        "stop_loss": 19524,
-        "target_price": 30319,
-        "risk_reward": 1.75,
-        "rsi": 55.40194113933747,
-        "adx": 24.67089499394668,
-        "plus_di": 16.658861329913197,
-        "minus_di": 18.633793204047393,
-        "vol_surge": 0.809197158835131,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 541004475.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 40677758582.5,
-        "pct_of_52w_high": 0.8170731707317073,
-        "trix": 0.7994810418402443,
-        "trix_signal": 1.4021933396474036,
-        "slope_ma60": 10.059390497520404,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -18.292682926829272,
-        "vol_contraction": 0.9900380000831092,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -9,
-        "market_signals": [],
-        "scores": {
-          "consensus": 1,
-          "consensus_detail": {
-            "verdict": "DECELERATING",
-            "op_yoy": -70.9,
-            "opm_trend": -3.6,
-            "holding_co": false,
-            "detail": "2분기 연속 YoY 악화 (-70.9%)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DECELERATING",
-          "score": 1,
-          "op_yoy_pct": -70.9,
-          "net_yoy_pct": -84.7,
-          "opm_trend": -3.6,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 315.6,
-              "op_income": 82.2,
-              "net_income": 64.6,
-              "opm": 26.0
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 308.1,
-              "op_income": 47.0,
-              "net_income": 41.9,
-              "opm": 15.3
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 307.2,
-              "op_income": 44.5,
-              "net_income": 43.5,
-              "opm": 14.5
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 324.1,
-              "op_income": 35.7,
-              "net_income": 29.4,
-              "opm": 11.0
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 447.1,
-              "op_income": 72.3,
-              "net_income": 93.5,
-              "opm": 16.2
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 319.4,
-              "op_income": 26.6,
-              "net_income": 17.4,
-              "opm": 8.3
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 312.0,
-              "op_income": 38.1,
-              "net_income": 10.6,
-              "opm": 12.2
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 361.4,
-              "op_income": 10.4,
-              "net_income": 4.5,
-              "opm": 2.9
-            }
-          ],
-          "detail": "2분기 연속 YoY 악화 (-70.9%)"
-        },
-        "market_cap": 1541381350600,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-9일차)"
+          "K8:TRIX_DC(-13일차)",
+          "K11:폭락(-29%)"
         ]
       },
       {
         "ticker": "295310",
         "name": "에이치브이엠",
         "grade": "B",
-        "zone_score": 0.633,
+        "zone_score": 0.5366,
         "trigger_type": "T2_Volume_RSI",
-        "confidence": 0.979,
-        "entry_price": 77100,
-        "stop_loss": 63495,
-        "target_price": 100907,
+        "confidence": 1.0,
+        "entry_price": 75000,
+        "stop_loss": 62036,
+        "target_price": 97686,
         "risk_reward": 1.75,
-        "rsi": 46.599716591062226,
-        "adx": 25.299243610145556,
-        "plus_di": 12.11891699676897,
-        "minus_di": 20.464603616275692,
-        "vol_surge": 0.4138115332671858,
+        "rsi": 44.60442068952839,
+        "adx": 26.706540075604913,
+        "plus_di": 11.022065207824488,
+        "minus_di": 23.3434745042311,
+        "vol_surge": 0.47973815906495015,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -2789,18 +2864,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 37161412255.0,
-        "pct_of_52w_high": 0.7923946557040082,
-        "trix": 0.30026657391775124,
-        "trix_signal": 0.8337597146045138,
-        "slope_ma60": 18.64477853016091,
+        "avg_trading_value_20d": 36715302530.0,
+        "pct_of_52w_high": 0.7708119218910586,
+        "trix": 0.169832687090965,
+        "trix_signal": 0.700974309101804,
+        "slope_ma60": 17.8836172123537,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -20.760534429599176,
-        "vol_contraction": 0.6055137942199468,
+        "drawdown_from_high": -22.918807810894137,
+        "vol_contraction": 0.4864110669512438,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -28,
+        "trix_counter": -29,
         "market_signals": [],
         "scores": {
           "consensus": 3,
@@ -2865,152 +2940,31 @@
           ],
           "detail": "적자 전환/지속 (-3.0억)"
         },
-        "market_cap": 917638880100,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-28일차)",
-          "K11:폭락(-21%)"
-        ]
-      },
-      {
-        "ticker": "323280",
-        "name": "태성",
-        "grade": "B",
-        "zone_score": 0.5842,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 70500,
-        "stop_loss": 61063,
-        "target_price": 87014,
-        "risk_reward": 1.75,
-        "rsi": 58.27589912907893,
-        "adx": 35.97402239041484,
-        "plus_di": 27.593790776745557,
-        "minus_di": 21.95523241413155,
-        "vol_surge": 0.6800263633025564,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": -3912903450.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 43662578870.0,
-        "pct_of_52w_high": 0.816917728852839,
-        "trix": 1.382247269566328,
-        "trix_signal": 1.8617577620965753,
-        "slope_ma60": 11.397014823300111,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -18.308227114716104,
-        "vol_contraction": 0.5093030598703698,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": -5,
-        "market_signals": [],
-        "scores": {
-          "consensus": 0,
-          "consensus_detail": {
-            "verdict": "DETERIORATING",
-            "op_yoy": -244.3,
-            "opm_trend": -11.85,
-            "holding_co": false,
-            "detail": "적자 전환/지속 (-12.7억)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DETERIORATING",
-          "score": 0,
-          "op_yoy_pct": -244.3,
-          "net_yoy_pct": -411.7,
-          "opm_trend": -11.85,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 63.6,
-              "op_income": -1.9,
-              "net_income": -7.7,
-              "opm": -3.0
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 179.5,
-              "op_income": 24.1,
-              "net_income": 23.4,
-              "opm": 13.4
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 140.4,
-              "op_income": 24.3,
-              "net_income": 13.5,
-              "opm": 17.3
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 123.2,
-              "op_income": -8.8,
-              "net_income": -10.3,
-              "opm": -7.1
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 81.1,
-              "op_income": 12.2,
-              "net_income": 33.9,
-              "opm": 15.0
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 55.4,
-              "op_income": -8.1,
-              "net_income": -13.0,
-              "opm": -14.6
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 68.4,
-              "op_income": -16.5,
-              "net_income": -8.3,
-              "opm": -24.1
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 59.7,
-              "op_income": -12.7,
-              "net_income": -32.1,
-              "opm": -21.3
-            }
-          ],
-          "detail": "적자 전환/지속 (-12.7억)"
-        },
-        "market_cap": 2152927590000,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-5일차)"
+          "K8:TRIX_DC(-29일차)",
+          "K11:폭락(-23%)"
         ]
       },
       {
         "ticker": "348340",
         "name": "뉴로메카",
         "grade": "B",
-        "zone_score": 0.5056,
+        "zone_score": 0.5112,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 80300,
-        "stop_loss": 62803,
-        "target_price": 110919,
+        "entry_price": 81700,
+        "stop_loss": 64642,
+        "target_price": 111550,
         "risk_reward": 1.75,
-        "rsi": 50.17440039506938,
-        "adx": 18.33997977517126,
-        "plus_di": 37.00912789618811,
-        "minus_di": 23.437664186722145,
-        "vol_surge": 0.9026337982958464,
-        "obv_trend": "down",
+        "rsi": 51.281947250524084,
+        "adx": 18.194927236853623,
+        "plus_di": 32.90115992527923,
+        "minus_di": 23.337493015507768,
+        "vol_surge": 0.8628564649243501,
+        "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
         "foreign_amount_5d": 0,
@@ -3018,18 +2972,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 96450615095.0,
-        "pct_of_52w_high": 0.5776978417266188,
-        "trix": 0.407081967048617,
-        "trix_signal": 1.3358713031584986,
-        "slope_ma60": 18.100385079412295,
+        "avg_trading_value_20d": 87674568160.0,
+        "pct_of_52w_high": 0.5877697841726619,
+        "trix": 0.2893249309705803,
+        "trix_signal": 1.126562028720915,
+        "slope_ma60": 17.54707197718508,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -42.23021582733813,
-        "vol_contraction": 0.6392832795378592,
+        "drawdown_from_high": -41.22302158273381,
+        "vol_contraction": 0.7315585731808102,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -16,
+        "trix_counter": -17,
         "market_signals": [],
         "scores": {
           "consensus": 0,
@@ -3108,50 +3062,50 @@
           ],
           "detail": "적자 전환/지속 (-39.0억)"
         },
-        "market_cap": 992680725300,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-16일차)",
-          "K11:폭락(-42%)"
+          "K8:TRIX_DC(-17일차)",
+          "K11:폭락(-41%)"
         ]
       },
       {
         "ticker": "357550",
         "name": "석경에이티",
         "grade": "B",
-        "zone_score": 0.5029,
+        "zone_score": 0.5209,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 59000,
-        "stop_loss": 52669,
-        "target_price": 70077,
+        "entry_price": 58000,
+        "stop_loss": 51873,
+        "target_price": 68720,
         "risk_reward": 1.75,
-        "rsi": 49.91717103161713,
-        "adx": 25.859239141841723,
-        "plus_di": 25.69958466975965,
-        "minus_di": 12.468458669730136,
-        "vol_surge": 0.7482660359405695,
+        "rsi": 47.81290933666931,
+        "adx": 23.417070934151457,
+        "plus_di": 23.014724048728194,
+        "minus_di": 19.871781090832023,
+        "vol_surge": 0.8381741109977234,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
         "foreign_amount_5d": 0,
         "inst_amount_5d": 0,
-        "foreign_net_5d": 20150000.0,
+        "foreign_net_5d": 282368750.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 1186305800.0,
-        "pct_of_52w_high": 0.7835325365205843,
-        "trix": -0.21189188749674015,
-        "trix_signal": -0.28065148998404815,
-        "slope_ma60": 2.673216348227836,
+        "avg_trading_value_20d": 1186956325.0,
+        "pct_of_52w_high": 0.7702523240371846,
+        "trix": -0.188018620154351,
+        "trix_signal": -0.2621249160181087,
+        "slope_ma60": 2.5901557424835575,
         "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -21.64674634794157,
-        "vol_contraction": 0.8144431031133906,
-        "per": 74.12,
-        "pbr": 8.050000190734863,
-        "trix_counter": 10,
+        "drawdown_from_high": -22.97476759628154,
+        "vol_contraction": 0.7755514561582542,
+        "per": 72.86,
+        "pbr": 7.909999847412109,
+        "trix_counter": 11,
         "market_signals": [],
         "scores": {
           "consensus": 3,
@@ -3230,252 +3184,30 @@
           ],
           "detail": "판정 불충분 (YoY=-68.59504132231405)"
         },
-        "market_cap": 321845000000,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.7,
         "v9_kill_reasons": [
           "K4:유동성(12억<50억)",
-          "K5:시총(3218억<5000억)",
-          "K11:폭락(-22%)"
-        ]
-      },
-      {
-        "ticker": "357780",
-        "name": "솔브레인",
-        "grade": "B",
-        "zone_score": 0.5717,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 441000,
-        "stop_loss": 389793,
-        "target_price": 530611,
-        "risk_reward": 1.75,
-        "rsi": 63.68566245255765,
-        "adx": 30.420362495461276,
-        "plus_di": 32.02177967463184,
-        "minus_di": 14.626948976907782,
-        "vol_surge": 1.1290276815545368,
-        "obv_trend": "up",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 4750230250.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 35816131700.0,
-        "pct_of_52w_high": 0.8320754716981132,
-        "trix": 0.93832262438025,
-        "trix_signal": 1.2758347749245684,
-        "slope_ma60": 8.878100499428033,
-        "above_ma60": true,
-        "above_ma120": true,
-        "drawdown_from_high": -16.792452830188676,
-        "vol_contraction": 0.681561630296252,
-        "per": 28.83,
-        "pbr": 3.390000104904175,
-        "trix_counter": -8,
-        "market_signals": [],
-        "scores": {
-          "consensus": 1,
-          "consensus_detail": {
-            "verdict": "DECELERATING",
-            "op_yoy": -22.7,
-            "opm_trend": -1.49,
-            "holding_co": false,
-            "detail": "2분기 연속 YoY 악화 (-22.7%)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "DECELERATING",
-          "score": 1,
-          "op_yoy_pct": -22.7,
-          "net_yoy_pct": -32.4,
-          "opm_trend": -1.49,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2023Q4",
-              "revenue": 1847.5,
-              "op_income": 218.1,
-              "net_income": 230.8,
-              "opm": 11.8
-            },
-            {
-              "period": "2024Q1",
-              "revenue": 1985.2,
-              "op_income": 436.0,
-              "net_income": 444.2,
-              "opm": 22.0
-            },
-            {
-              "period": "2024Q2",
-              "revenue": 1982.8,
-              "op_income": 428.0,
-              "net_income": 521.9,
-              "opm": 21.6
-            },
-            {
-              "period": "2024Q3",
-              "revenue": 2039.9,
-              "op_income": 360.9,
-              "net_income": 387.1,
-              "opm": 17.7
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 1974.3,
-              "op_income": 324.1,
-              "net_income": -48.8,
-              "opm": 16.4
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 1926.0,
-              "op_income": 330.8,
-              "net_income": 282.8,
-              "opm": 17.2
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 1864.4,
-              "op_income": 179.1,
-              "net_income": 166.1,
-              "opm": 9.6
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 1994.5,
-              "op_income": 278.8,
-              "net_income": 261.5,
-              "opm": 14.0
-            }
-          ],
-          "detail": "2분기 연속 YoY 악화 (-22.7%)"
-        },
-        "market_cap": 3430347606000,
-        "news_data": null,
-        "freshness_mult": 0.0,
-        "v9_kill_reasons": [
-          "K8:TRIX_DC(-8일차)"
-        ]
-      },
-      {
-        "ticker": "389650",
-        "name": "넥스트바이오메디컬",
-        "grade": "B",
-        "zone_score": 0.6712,
-        "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 75700,
-        "stop_loss": 66740,
-        "target_price": 91379,
-        "risk_reward": 1.75,
-        "rsi": 48.56062923544444,
-        "adx": 14.17384144899387,
-        "plus_di": 21.59361625248107,
-        "minus_di": 22.285583703567873,
-        "vol_surge": 0.5502393826219985,
-        "obv_trend": "down",
-        "foreign_streak": 0,
-        "inst_streak": 0,
-        "foreign_amount_5d": 0,
-        "inst_amount_5d": 0,
-        "foreign_net_5d": 0.0,
-        "short_balance_chg_5d": 0.0,
-        "consensus": null,
-        "avg_trading_value_20d": 7962162755.0,
-        "pct_of_52w_high": 0.7495049504950495,
-        "trix": -0.3293190736000873,
-        "trix_signal": -0.40679711234683374,
-        "slope_ma60": 1.5161502966380969,
-        "above_ma60": false,
-        "above_ma120": true,
-        "drawdown_from_high": -25.04950495049505,
-        "vol_contraction": 0.7863984742782193,
-        "per": 0.0,
-        "pbr": 0.0,
-        "trix_counter": 4,
-        "market_signals": [],
-        "scores": {
-          "consensus": 7,
-          "consensus_detail": {
-            "verdict": "UNCERTAIN",
-            "op_yoy": -63.4,
-            "opm_trend": 14.53,
-            "holding_co": false,
-            "detail": "판정 불충분 (YoY=-63.36633663366336)"
-          }
-        },
-        "earnings_momentum": {
-          "verdict": "UNCERTAIN",
-          "score": 7,
-          "op_yoy_pct": -63.4,
-          "net_yoy_pct": -20.9,
-          "opm_trend": 14.53,
-          "is_holding_co": false,
-          "quarters": [
-            {
-              "period": "2024Q3",
-              "revenue": 21.9,
-              "op_income": -10.1,
-              "net_income": -13.4,
-              "opm": -46.1
-            },
-            {
-              "period": "2024Q4",
-              "revenue": 73.5,
-              "op_income": -25.6,
-              "net_income": 42.0,
-              "opm": -34.8
-            },
-            {
-              "period": "2025Q1",
-              "revenue": 37.7,
-              "op_income": -6.7,
-              "net_income": -4.2,
-              "opm": -17.8
-            },
-            {
-              "period": "2025Q2",
-              "revenue": 39.7,
-              "op_income": 0.2,
-              "net_income": -9.0,
-              "opm": 0.5
-            },
-            {
-              "period": "2025Q3",
-              "revenue": 49.3,
-              "op_income": 3.7,
-              "net_income": 10.6,
-              "opm": 7.5
-            }
-          ],
-          "detail": "판정 불충분 (YoY=-63.36633663366336)"
-        },
-        "market_cap": 621034170200,
-        "news_data": null,
-        "freshness_mult": 1.0,
-        "v9_kill_reasons": [
-          "K11:폭락(-25%)"
+          "K11:폭락(-23%)"
         ]
       },
       {
         "ticker": "394800",
         "name": "쓰리빌리언",
-        "grade": "A",
-        "zone_score": 0.7358,
+        "grade": "B",
+        "zone_score": 0.5837,
         "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 14170,
-        "stop_loss": 12098,
-        "target_price": 19349,
-        "risk_reward": 2.5,
-        "rsi": 46.27515514462453,
-        "adx": 25.01782652680232,
-        "plus_di": 29.693448598597488,
-        "minus_di": 17.240770631625082,
-        "vol_surge": 0.7983011306910675,
+        "confidence": 0.78,
+        "entry_price": 14450,
+        "stop_loss": 12505,
+        "target_price": 17853,
+        "risk_reward": 1.75,
+        "rsi": 48.355711214070574,
+        "adx": 25.21974215251663,
+        "plus_di": 27.413564553698112,
+        "minus_di": 15.91701203368748,
+        "vol_surge": 0.3538855043048972,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -3484,18 +3216,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 7027772221.0,
-        "pct_of_52w_high": 0.7049751243781095,
-        "trix": -0.3550980189560127,
-        "trix_signal": -0.439770068430302,
-        "slope_ma60": 3.478520881092395,
+        "avg_trading_value_20d": 6958272016.0,
+        "pct_of_52w_high": 0.7189054726368159,
+        "trix": -0.3170088831136897,
+        "trix_signal": -0.4152178313669795,
+        "slope_ma60": 3.4874863381945342,
         "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -29.50248756218905,
-        "vol_contraction": 0.7984534674232304,
+        "drawdown_from_high": -28.109452736318406,
+        "vol_contraction": 0.7498284648407983,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": 3,
+        "trix_counter": 4,
         "market_signals": [],
         "scores": {
           "consensus": 0,
@@ -3517,30 +3249,151 @@
           "quarters": [],
           "detail": "DART 분기 데이터 없음"
         },
-        "market_cap": 450060114920,
+        "market_cap": 0,
         "news_data": null,
-        "freshness_mult": 1.15,
+        "freshness_mult": 1.0,
         "v9_kill_reasons": [
-          "K5:시총(4501억<5000억)",
-          "K11:폭락(-30%)"
+          "K11:폭락(-28%)"
         ]
       },
       {
-        "ticker": "455900",
-        "name": "엔젤로보틱스",
+        "ticker": "417010",
+        "name": "나노팀",
         "grade": "B",
-        "zone_score": 0.6477,
+        "zone_score": 0.578,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 0.563,
+        "entry_price": 11310,
+        "stop_loss": 8288,
+        "target_price": 16598,
+        "risk_reward": 1.75,
+        "rsi": 51.93712945401206,
+        "adx": 30.276214042070517,
+        "plus_di": 18.820066284752723,
+        "minus_di": 16.920464807630857,
+        "vol_surge": 0.22613561610937277,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 34074731994.5,
+        "pct_of_52w_high": 0.741639344262295,
+        "trix": 1.4884015859226718,
+        "trix_signal": 2.0407414944134032,
+        "slope_ma60": 18.031624229740718,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -25.836065573770494,
+        "vol_contraction": 0.5803553611475601,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -5,
+        "market_signals": [],
+        "scores": {
+          "consensus": 5,
+          "consensus_detail": {
+            "verdict": "DECELERATING",
+            "op_yoy": -16.1,
+            "opm_trend": 4.06,
+            "holding_co": false,
+            "detail": "2분기 연속 YoY 악화 (-16.1%)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "DECELERATING",
+          "score": 5,
+          "op_yoy_pct": -16.1,
+          "net_yoy_pct": 23.4,
+          "opm_trend": 4.06,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q2",
+              "revenue": 132.0,
+              "op_income": 18.4,
+              "net_income": 16.1,
+              "opm": 13.9
+            },
+            {
+              "period": "2023Q3",
+              "revenue": 105.7,
+              "op_income": 7.8,
+              "net_income": 7.0,
+              "opm": 7.4
+            },
+            {
+              "period": "2023Q4",
+              "revenue": 111.4,
+              "op_income": 14.0,
+              "net_income": 13.7,
+              "opm": 12.6
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 104.1,
+              "op_income": 6.2,
+              "net_income": 4.7,
+              "opm": 6.0
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 88.8,
+              "op_income": -2.8,
+              "net_income": -2.9,
+              "opm": -3.2
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 70.3,
+              "op_income": -10.8,
+              "net_income": -15.1,
+              "opm": -15.4
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 107.9,
+              "op_income": 3.0,
+              "net_income": 2.4,
+              "opm": 2.8
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 119.6,
+              "op_income": 5.2,
+              "net_income": 5.8,
+              "opm": 4.3
+            }
+          ],
+          "detail": "2분기 연속 YoY 악화 (-16.1%)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX_DC(-5일차)",
+          "K11:폭락(-26%)"
+        ]
+      },
+      {
+        "ticker": "452430",
+        "name": "사피엔반도체",
+        "grade": "B",
+        "zone_score": 0.6317,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 35200,
-        "stop_loss": 31673,
-        "target_price": 41372,
+        "entry_price": 34150,
+        "stop_loss": 30308,
+        "target_price": 40872,
         "risk_reward": 1.75,
-        "rsi": 51.69049511746113,
-        "adx": 20.78748313558636,
-        "plus_di": 26.3852488140584,
-        "minus_di": 22.835720031378152,
-        "vol_surge": 1.2579507567756891,
+        "rsi": 44.70936843121225,
+        "adx": 25.06465354209705,
+        "plus_di": 16.157267565307812,
+        "minus_di": 26.079144971481007,
+        "vol_surge": 1.0318716901454033,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -3549,18 +3402,140 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 7433483870.0,
-        "pct_of_52w_high": 0.800910125142207,
-        "trix": -0.03306318951474818,
-        "trix_signal": 0.15545201684540477,
-        "slope_ma60": 3.447829910506428,
-        "above_ma60": true,
+        "avg_trading_value_20d": 3033590425.0,
+        "pct_of_52w_high": 0.8442521631644005,
+        "trix": -0.09266453220684312,
+        "trix_signal": 0.10241396487978109,
+        "slope_ma60": 4.123941150245214,
+        "above_ma60": false,
         "above_ma120": true,
-        "drawdown_from_high": -19.908987485779296,
-        "vol_contraction": 0.7247682495222073,
+        "drawdown_from_high": -15.574783683559945,
+        "vol_contraction": 1.0663146331827789,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -13,
+        "trix_counter": -9,
+        "market_signals": [],
+        "scores": {
+          "consensus": 0,
+          "consensus_detail": {
+            "verdict": "DETERIORATING",
+            "op_yoy": -281.7,
+            "opm_trend": -15.93,
+            "holding_co": false,
+            "detail": "적자 전환/지속 (-12.9억)"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "DETERIORATING",
+          "score": 0,
+          "op_yoy_pct": -281.7,
+          "net_yoy_pct": -204.8,
+          "opm_trend": -15.93,
+          "is_holding_co": false,
+          "quarters": [
+            {
+              "period": "2023Q4",
+              "revenue": 32.1,
+              "op_income": -69.2,
+              "net_income": -131.1,
+              "opm": -215.6
+            },
+            {
+              "period": "2024Q1",
+              "revenue": 0.8,
+              "op_income": -32.6,
+              "net_income": -163.7,
+              "opm": 0.0
+            },
+            {
+              "period": "2024Q2",
+              "revenue": 1.7,
+              "op_income": -14.7,
+              "net_income": -16.0,
+              "opm": 0.0
+            },
+            {
+              "period": "2024Q3",
+              "revenue": 10.5,
+              "op_income": -7.1,
+              "net_income": -8.3,
+              "opm": -67.6
+            },
+            {
+              "period": "2024Q4",
+              "revenue": 66.9,
+              "op_income": 19.9,
+              "net_income": 17.2,
+              "opm": 29.7
+            },
+            {
+              "period": "2025Q1",
+              "revenue": 16.5,
+              "op_income": -16.0,
+              "net_income": -17.0,
+              "opm": -97.0
+            },
+            {
+              "period": "2025Q2",
+              "revenue": 20.2,
+              "op_income": -16.9,
+              "net_income": -22.5,
+              "opm": -83.7
+            },
+            {
+              "period": "2025Q3",
+              "revenue": 46.4,
+              "op_income": -12.9,
+              "net_income": -8.7,
+              "opm": -27.8
+            }
+          ],
+          "detail": "적자 전환/지속 (-12.9억)"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K4:유동성(30억<50억)",
+          "K8:TRIX_DC(-9일차)"
+        ]
+      },
+      {
+        "ticker": "455900",
+        "name": "엔젤로보틱스",
+        "grade": "B",
+        "zone_score": 0.6439,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 34450,
+        "stop_loss": 31086,
+        "target_price": 40335,
+        "risk_reward": 1.75,
+        "rsi": 48.6255758865038,
+        "adx": 19.297237498592533,
+        "plus_di": 23.979447999831397,
+        "minus_di": 29.078673495957585,
+        "vol_surge": 0.60575766642006,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 6940521535.0,
+        "pct_of_52w_high": 0.7838452787258248,
+        "trix": -0.05211206163960869,
+        "trix_signal": 0.11393920114840207,
+        "slope_ma60": 3.4331553560834616,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -21.615472127417522,
+        "vol_contraction": 0.7904194218129752,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -14,
         "market_signals": [],
         "scores": {
           "consensus": 3,
@@ -3639,29 +3614,30 @@
           ],
           "detail": "적자 전환/지속 (-28.4억)"
         },
-        "market_cap": 535675465600,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-13일차)"
+          "K8:TRIX_DC(-14일차)",
+          "K11:폭락(-22%)"
         ]
       },
       {
         "ticker": "475400",
         "name": "씨메스",
         "grade": "B",
-        "zone_score": 0.6163,
+        "zone_score": 0.6581,
         "trigger_type": "T2_Volume_RSI",
         "confidence": 1.0,
-        "entry_price": 37650,
-        "stop_loss": 32829,
-        "target_price": 46085,
+        "entry_price": 36700,
+        "stop_loss": 32055,
+        "target_price": 44827,
         "risk_reward": 1.75,
-        "rsi": 49.71577403521949,
-        "adx": 22.36311722956107,
-        "plus_di": 30.38983939224393,
-        "minus_di": 27.643119439280916,
-        "vol_surge": 0.6453446028049514,
+        "rsi": 47.173659381350475,
+        "adx": 20.950219776324854,
+        "plus_di": 27.336080664325838,
+        "minus_di": 34.62688226411769,
+        "vol_surge": 0.6196063857250287,
         "obv_trend": "down",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -3670,18 +3646,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 8397782275.0,
-        "pct_of_52w_high": 0.8019169329073482,
-        "trix": -0.11702615665247773,
-        "trix_signal": 0.17438763320224507,
-        "slope_ma60": 3.9096706643822587,
+        "avg_trading_value_20d": 7982678405.0,
+        "pct_of_52w_high": 0.7816826411075612,
+        "trix": -0.1524181468592123,
+        "trix_signal": 0.10902647718995359,
+        "slope_ma60": 3.896473265073941,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -19.808306709265178,
-        "vol_contraction": 0.6678324193241842,
+        "drawdown_from_high": -21.831735889243873,
+        "vol_contraction": 0.7620268603518608,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -11,
+        "trix_counter": -12,
         "market_signals": [],
         "scores": {
           "consensus": 0,
@@ -3703,30 +3679,30 @@
           "quarters": [],
           "detail": "DART 분기 데이터 없음"
         },
-        "market_cap": 442615734300,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K5:시총(4426억<5000억)",
-          "K8:TRIX_DC(-11일차)"
+          "K8:TRIX_DC(-12일차)",
+          "K11:폭락(-22%)"
         ]
       },
       {
-        "ticker": "499790",
-        "name": "GS피앤엘",
+        "ticker": "484810",
+        "name": "티엑스알로보틱스",
         "grade": "B",
-        "zone_score": 0.5015,
+        "zone_score": 0.6468,
         "trigger_type": "T2_Volume_RSI",
-        "confidence": 1.0,
-        "entry_price": 52900,
-        "stop_loss": 44629,
-        "target_price": 67373,
+        "confidence": 0.983,
+        "entry_price": 18910,
+        "stop_loss": 16427,
+        "target_price": 23254,
         "risk_reward": 1.75,
-        "rsi": 47.162661082324746,
-        "adx": 40.93560408430449,
-        "plus_di": 16.576533626012026,
-        "minus_di": 25.671417616435765,
-        "vol_surge": 0.9974735910117848,
+        "rsi": 48.2924692403928,
+        "adx": 20.903703305106326,
+        "plus_di": 33.187237975977595,
+        "minus_di": 22.779778431045337,
+        "vol_surge": 0.41483532300505066,
         "obv_trend": "up",
         "foreign_streak": 0,
         "inst_streak": 0,
@@ -3735,18 +3711,18 @@
         "foreign_net_5d": 0.0,
         "short_balance_chg_5d": 0.0,
         "consensus": null,
-        "avg_trading_value_20d": 16493735360.0,
-        "pct_of_52w_high": 0.7895522388059701,
-        "trix": 1.2740823754871844,
-        "trix_signal": 1.3619383186111422,
-        "slope_ma60": 4.238951952595116,
+        "avg_trading_value_20d": 4775605096.0,
+        "pct_of_52w_high": 0.6965009208103131,
+        "trix": -0.06655951137755078,
+        "trix_signal": 0.19521796950775866,
+        "slope_ma60": 5.264558346719772,
         "above_ma60": true,
         "above_ma120": true,
-        "drawdown_from_high": -21.044776119402986,
-        "vol_contraction": 0.622725468645051,
+        "drawdown_from_high": -30.34990791896869,
+        "vol_contraction": 0.9561550967504102,
         "per": 0.0,
         "pbr": 0.0,
-        "trix_counter": -1,
+        "trix_counter": -15,
         "market_signals": [],
         "scores": {
           "consensus": 0,
@@ -3768,12 +3744,78 @@
           "quarters": [],
           "detail": "DART 분기 데이터 없음"
         },
-        "market_cap": 1049051488900,
+        "market_cap": 0,
         "news_data": null,
         "freshness_mult": 0.0,
         "v9_kill_reasons": [
-          "K8:TRIX_DC(-1일차)",
-          "K11:폭락(-21%)"
+          "K4:유동성(48억<50억)",
+          "K8:TRIX_DC(-15일차)",
+          "K11:폭락(-30%)"
+        ]
+      },
+      {
+        "ticker": "499790",
+        "name": "GS피앤엘",
+        "grade": "B",
+        "zone_score": 0.5099,
+        "trigger_type": "T2_Volume_RSI",
+        "confidence": 1.0,
+        "entry_price": 51300,
+        "stop_loss": 43332,
+        "target_price": 65243,
+        "risk_reward": 1.75,
+        "rsi": 44.40632096945417,
+        "adx": 39.9807833108022,
+        "plus_di": 14.91214858585956,
+        "minus_di": 30.12227755102394,
+        "vol_surge": 0.8384342355329952,
+        "obv_trend": "up",
+        "foreign_streak": 0,
+        "inst_streak": 0,
+        "foreign_amount_5d": 0,
+        "inst_amount_5d": 0,
+        "foreign_net_5d": 0.0,
+        "short_balance_chg_5d": 0.0,
+        "consensus": null,
+        "avg_trading_value_20d": 16943111390.0,
+        "pct_of_52w_high": 0.7656716417910447,
+        "trix": 1.09467170433577,
+        "trix_signal": 1.3084849957560678,
+        "slope_ma60": 3.609251585024631,
+        "above_ma60": true,
+        "above_ma120": true,
+        "drawdown_from_high": -23.432835820895527,
+        "vol_contraction": 0.6886990087690681,
+        "per": 0.0,
+        "pbr": 0.0,
+        "trix_counter": -2,
+        "market_signals": [],
+        "scores": {
+          "consensus": 0,
+          "consensus_detail": {
+            "verdict": "NO_DATA",
+            "op_yoy": null,
+            "opm_trend": null,
+            "holding_co": false,
+            "detail": "DART 분기 데이터 없음"
+          }
+        },
+        "earnings_momentum": {
+          "verdict": "NO_DATA",
+          "score": 0,
+          "op_yoy_pct": null,
+          "net_yoy_pct": null,
+          "opm_trend": null,
+          "is_holding_co": false,
+          "quarters": [],
+          "detail": "DART 분기 데이터 없음"
+        },
+        "market_cap": 0,
+        "news_data": null,
+        "freshness_mult": 0.0,
+        "v9_kill_reasons": [
+          "K8:TRIX_DC(-2일차)",
+          "K11:폭락(-23%)"
         ]
       }
     ],
@@ -3783,7 +3825,7 @@
     "daily_entries_left": 2,
     "held_count": 0,
     "capital": 100000000,
-    "elapsed_sec": 102.9
+    "elapsed_sec": 104.4
   },
-  "cached_at": "2026-02-26 19:44"
+  "cached_at": "2026-02-27 21:46"
 }
