@@ -221,7 +221,18 @@ class PositionRevaluationEngine:
             report_reasons + news_reasons + supply_reasons
             + macd_reasons + rsi_reasons + bb_reasons + dart_reasons
         )
-        action = self._determine_action(final_target, current_price, pnl_pct)
+        # SAR 트레일링 스톱용 데이터
+        sar_value, sar_trend, atr = 0.0, 0, 0.0
+        if df is not None and not df.empty:
+            last = df.iloc[-1]
+            sar_value = float(last.get("sar", 0) or 0)
+            sar_trend = int(last.get("sar_trend", 0) or 0)
+            atr = float(last.get("atr_14", 0) or 0)
+
+        action = self._determine_action(
+            final_target, current_price, pnl_pct,
+            sar_value=sar_value, sar_trend=sar_trend, atr=atr,
+        )
 
         # confidence: 기관목표가 신뢰도 × 데이터 충분도
         inst_conf = self._targets.get(ticker, {}).get("confidence", 0.5)
@@ -543,6 +554,7 @@ class PositionRevaluationEngine:
 
     def _determine_action(
         self, final_target: float, current_price: float, pnl_pct: float,
+        sar_value: float = 0, sar_trend: int = 0, atr: float = 0,
     ) -> MonitorAction:
         # 보조 안전장치 (최우선)
         hard_stop = self.cfg.get("hard_stop_loss_pct", -8.0)
@@ -550,6 +562,15 @@ class PositionRevaluationEngine:
 
         if pnl_pct <= hard_stop:
             return MonitorAction.FULL_SELL
+
+        # SAR 트레일링 스톱 (SAR 하향 전환 시)
+        sar_cfg = self.cfg.get("sar_trailing", {})
+        if sar_cfg.get("enabled", False) and sar_trend == -1 and sar_value > 0 and current_price > 0:
+            buffer = atr * sar_cfg.get("buffer_atr_mult", 0.3)
+            if current_price < sar_value - buffer:
+                return MonitorAction.FULL_SELL
+            elif current_price < sar_value:
+                return MonitorAction.PARTIAL_SELL
 
         if current_price <= 0:
             return MonitorAction.HOLD

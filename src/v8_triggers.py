@@ -35,6 +35,7 @@ class TriggerEngine:
             self.trigger_trix_golden(row),
             self.trigger_volume_rsi(row),
             self.trigger_curvature_obv(row),
+            self.trigger_sar_reversal(row),
         ]
 
         return [t for t in all_triggers if t.fired]
@@ -143,5 +144,39 @@ class TriggerEngine:
             fired=fired,
             trigger_name="T3_Curvature_OBV",
             reason=reason,
+            strength=strength,
+        )
+
+    # ─── T4: Parabolic SAR 반전 ───
+    def trigger_sar_reversal(self, row: pd.Series) -> TriggerResult:
+        """
+        SAR 하강→상승 반전 (새로운 상승추세 시작)
+        SAR이 가격 아래로 내려가는 순간 = 매수 진입 타이밍
+        """
+        cfg = self.cfg.get('sar_reversal', {})
+        if not cfg.get('enabled', True):
+            return TriggerResult(fired=False, trigger_name="T4_SAR_Reversal")
+
+        sar_trend = row.get('sar_trend', 0)
+        sar_reversal = row.get('sar_reversal_up', 0)
+        sar = row.get('sar', 0)
+        close = row.get('close', 0)
+
+        # 조건: SAR 상향 반전 + 현재가 > SAR (확인)
+        fired = bool(sar_reversal == 1 and close > sar > 0)
+
+        strength = 0.0
+        if fired:
+            atr = row.get('atr_14', 1)
+            if atr > 0:
+                gap_ratio = (close - sar) / atr
+                strength = max(0.3, min(1.0 - gap_ratio * 0.2, 0.8))
+            else:
+                strength = 0.5
+
+        return TriggerResult(
+            fired=fired,
+            trigger_name="T4_SAR_Reversal",
+            reason=f"SAR 반전({sar:,.0f}) < Close({close:,.0f})" if fired else "",
             strength=strength,
         )

@@ -718,6 +718,14 @@ def calc_integrated_score(
     # 전략 B: MACD 3중 필터 가산
     tech_score += _calc_macd_triple_bonus(parquet_data)
 
+    # SAR 추세 (0~3점)
+    sar_trend = parquet_data.get("sar_trend", 0) if parquet_data else 0
+    sar_val = parquet_data.get("sar", 0) if parquet_data else 0
+    if sar_trend == 1 and close > sar_val > 0:
+        tech_score += 3   # SAR 상향 + 가격 위
+    elif sar_trend == 1:
+        tech_score += 1   # SAR 상향이지만 근접
+
     tech_score = min(tech_score, 25)
 
     # ── 축4: 수급 (20점, 기존 15→20 상향) ──
@@ -787,6 +795,11 @@ def calc_integrated_score(
     elif ret_5d > 10:
         overheat_penalty += 2
         overheat_flags.append(f"5일 +{ret_5d:.0f}% 급등주의")
+
+    # SAR 하향 + 가격 < SAR → 하락추세 페널티
+    if sar_trend == -1 and 0 < sar_val and close < sar_val:
+        overheat_penalty += 3
+        overheat_flags.append("SAR↓")
 
     overheat_penalty = min(overheat_penalty, 25)
 
@@ -1071,6 +1084,8 @@ def get_parquet_data(ticker: str) -> dict | None:
             "macd_signal": float(last.get("macd_signal", 0) or 0),
             "macd_histogram": macd_hist,
             "macd_histogram_prev": macd_hist_prev,
+            "sar": float(last.get("sar", 0) or 0),
+            "sar_trend": int(last.get("sar_trend", 0) or 0),
         }
     except Exception as e:
         logger.warning("parquet 읽기 실패 %s: %s", ticker, e)
@@ -1383,6 +1398,7 @@ def main():
             "ma5_entry": entry_info.get("ma5_entry", ""),
             "strategy": strategy,
             "group_source_count": grp_src_cnt,
+            "sar_trend": pq_data.get("sar_trend", 0) if pq_data else 0,
         }
 
         results.append(rec)

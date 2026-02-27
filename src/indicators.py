@@ -119,6 +119,69 @@ class IndicatorEngine:
         })
 
     @staticmethod
+    def calc_parabolic_sar(df: pd.DataFrame, af_init: float = 0.02,
+                           af_step: float = 0.02, af_max: float = 0.20) -> pd.DataFrame:
+        """Parabolic SAR 계산 (Wilder 원전 알고리즘).
+
+        Returns:
+            DataFrame with columns: sar, sar_trend(1=상승/-1=하강), sar_af, sar_ep
+        """
+        high = df["high"].values
+        low = df["low"].values
+        close = df["close"].values
+        n = len(df)
+
+        sar = np.full(n, np.nan)
+        trend = np.zeros(n, dtype=int)
+        af = np.full(n, af_init)
+        ep = np.full(n, np.nan)
+
+        if n < 5:
+            return pd.DataFrame(
+                {"sar": sar, "sar_trend": trend, "sar_af": af, "sar_ep": ep},
+                index=df.index,
+            )
+
+        # 초기 추세 판별 (첫 5봉)
+        if close[4] > close[0]:
+            trend[4], sar[4], ep[4] = 1, np.min(low[:5]), np.max(high[:5])
+        else:
+            trend[4], sar[4], ep[4] = -1, np.max(high[:5]), np.min(low[:5])
+        af[4] = af_init
+
+        for i in range(5, n):
+            prev_sar, prev_af, prev_ep, prev_trend = sar[i-1], af[i-1], ep[i-1], trend[i-1]
+
+            new_sar = prev_sar + prev_af * (prev_ep - prev_sar)
+
+            # SAR 보정 (이전 2봉 범위 내로 제한)
+            if prev_trend == 1:
+                new_sar = min(new_sar, low[i-1], low[i-2])
+            else:
+                new_sar = max(new_sar, high[i-1], high[i-2])
+
+            # 추세 반전 체크
+            if prev_trend == 1 and low[i] <= new_sar:
+                trend[i], new_sar, ep[i], af[i] = -1, prev_ep, low[i], af_init
+            elif prev_trend == -1 and high[i] >= new_sar:
+                trend[i], new_sar, ep[i], af[i] = 1, prev_ep, high[i], af_init
+            else:
+                trend[i] = prev_trend
+                if prev_trend == 1:
+                    ep[i] = max(prev_ep, high[i])
+                    af[i] = min(prev_af + af_step, af_max) if high[i] > prev_ep else prev_af
+                else:
+                    ep[i] = min(prev_ep, low[i])
+                    af[i] = min(prev_af + af_step, af_max) if low[i] < prev_ep else prev_af
+
+            sar[i] = new_sar
+
+        return pd.DataFrame(
+            {"sar": sar, "sar_trend": trend, "sar_af": af, "sar_ep": ep},
+            index=df.index,
+        )
+
+    @staticmethod
     def calc_adx(df: pd.DataFrame, period: int = 14) -> pd.Series:
         """
         ADX(Average Directional Index) 계산
@@ -626,6 +689,23 @@ class IndicatorEngine:
         result["stoch_slow_golden"] = (
             (result["stoch_slow_k"] > result["stoch_slow_d"]) &
             (result["stoch_slow_k"].shift(1) <= result["stoch_slow_d"].shift(1))
+        ).astype(int)
+
+        # ──────────────────────────────────────────────
+        # v10.5 Parabolic SAR (79~83)
+        # 트레일링 스톱 + 추세 반전 탐지
+        # ──────────────────────────────────────────────
+
+        # 79-82. Parabolic SAR 4개 컬럼
+        sar_df = self.calc_parabolic_sar(df)
+        result["sar"] = sar_df["sar"]
+        result["sar_trend"] = sar_df["sar_trend"]        # 1=상승, -1=하강
+        result["sar_af"] = sar_df["sar_af"]              # 가속계수 (0.02~0.20)
+        result["sar_ep"] = sar_df["sar_ep"]              # 극단점 (추세 내 최고/최저)
+
+        # 83. SAR 반전 신호 (전일 하강 → 오늘 상승 = 매수 반전)
+        result["sar_reversal_up"] = (
+            (result["sar_trend"] == 1) & (result["sar_trend"].shift(1) == -1)
         ).astype(int)
 
         return result

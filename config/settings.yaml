@@ -983,6 +983,8 @@ v8_hybrid:
       vol_multiplier: 0.3        # v8.5: 역도출 (91건 5%=0.36, 1.5→0.3 — 조용한 시작점 포착)
       rsi_threshold: 45           # RSI 교차 기준
       rsi_range: [30, 80]         # v8.5: 역도출 (91건 90%=[33,78], [35,55]→[30,80])
+    sar_reversal:
+      enabled: true                # T4: SAR 하강→상승 반전 트리거
 
   # ─── Position Sizing ───
   position:
@@ -992,6 +994,9 @@ v8_hybrid:
     target_atr_A: 5.0            # A등급 타겟: +5 ATR
     target_atr_B: 3.5            # B등급 타겟: +3.5 ATR
     min_rr_ratio: 1.5            # 최소 손익비
+    sar_trailing:
+      enabled: true              # SAR 기반 동적 트레일링 스톱
+      buffer_atr_mult: 0.3       # SAR ± ATR×0.3 버퍼 (타이트 방지)
 
 # ════════════════════════════════════════════════════════════
 # 수급 이면 데이터 레이어 (6개)
@@ -1226,3 +1231,26 @@ position_monitor:
     tier1_buy_adj: 0.03
     tier2_adj: 0.01
     avoid_adj: -0.10
+
+# ──────────────────────────────────────────
+# 내일 추천 종목 전략 그룹 설정
+# ──────────────────────────────────────────
+tomorrow_picks:
+  swing_slots: 3
+  short_slots: 2
+  swing_sources:
+    - 릴레이
+    - 그룹순환
+    - 눌림목
+    - 퀀텀
+    - 동반매수
+    - 이벤트촉매
+    - 이벤트
+    - 밸류체인
+  short_sources:
+    - 수급폭발
+    - 세력감지
+    - 매집추적
+  overlap_pairs:
+    - [릴레이, 그룹순환]
+    - [세력감지, 매집추적]

@@ -136,7 +136,8 @@ def _section_picks() -> list[str]:
             srcs = "+".join(p.get("sources", []))
             score = p.get("total_score", p.get("score", 0))
             grade = p.get("grade", "")
-            lines.append(f"  {i}. {name} | {srcs} | {score:.0f}점 {grade}")
+            sar_icon = " SAR\u2191" if p.get("sar_trend") == 1 else (" SAR\u2193" if p.get("sar_trend") == -1 else "")
+            lines.append(f"  {i}. {name} | {srcs} | {score:.0f}점 {grade}{sar_icon}")
 
     _fmt(swing_picks, "스윙(3~7일)", "\U0001f4c8")
     _fmt(short_picks, "단타(1~3일)", "\u26a1")
