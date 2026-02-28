@@ -1,0 +1,124 @@
+{
+  "regime": "CAUTION",
+  "allocation": {
+    "sector": 30,
+    "leverage": 0,
+    "index": 30,
+    "cash": 40
+  },
+  "sector_result": {
+    "buy_candidates": [
+      {
+        "code": "139220",
+        "name": "TIGER 200 건설",
+        "sector": "건설",
+        "signal": "BUY",
+        "composite_score": 92.3,
+        "momentum_rank": 2,
+        "momentum_score": 42.722,
+        "smart_money_type": "smart_money",
+        "supply_score": 81,
+        "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수"
+      },
+      {
+        "code": "157500",
+        "name": "TIGER 증권",
+        "sector": "증권",
+        "signal": "BUY",
+        "composite_score": 80.1,
+        "momentum_rank": 3,
+        "momentum_score": 62.349999999999994,
+        "smart_money_type": "theme_money",
+        "supply_score": 67,
+        "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점"
+      }
+    ],
+    "sell_signals": [],
+    "current_positions": [],
+    "summary": "[섹터 ETF] 매수후보 2종: TIGER 200 건설(92점), TIGER 증권(80점) | 매도시그널: 없음"
+  },
+  "leverage_result": {
+    "decision": {
+      "signal": "NO_ENTRY",
+      "etf_code": "",
+      "etf_name": "",
+      "multiplier": 0,
+      "confidence": 0,
+      "reason": "CAUTION 레짐 - 레버리지 진입 금지",
+      "risk_note": ""
+    },
+    "position_action": "NO_ENTRY",
+    "summary": "[레버리지] 진입대기 (CAUTION) | CAUTION 레짐 - 레버리지 진입 금지"
+  },
+  "index_result": {
+    "targets": [
+      {
+        "code": "069500",
+        "name": "KODEX 200",
+        "target_weight_pct": 21.0,
+        "current_weight_pct": 0,
+        "action": "BUY",
+        "amount_delta_pct": 21.0,
+        "reason": "신규 진입: 목표 21.0%"
+      },
+      {
+        "code": "278530",
+        "name": "KODEX MSCI Korea TR",
+        "target_weight_pct": 9.0,
+        "current_weight_pct": 0,
+        "action": "BUY",
+        "amount_delta_pct": 9.0,
+        "reason": "신규 진입: 목표 9.0%"
+      }
+    ],
+    "total_index_allocation_pct": 30.0,
+    "regime": "CAUTION",
+    "ma_adjustment": 1.0,
+    "summary": "[지수 ETF] CAUTION / 목표 30.0% | KODEX 200: BUY | KODEX MSCI Korea TR: BUY"
+  },
+  "risk_check": {
+    "passed": true,
+    "level": "OK",
+    "violations": [],
+    "summary": "✅ [리스크] 정상 - 모든 체크 통과"
+  },
+  "order_queue": [
+    {
+      "axis": "sector",
+      "code": "139220",
+      "name": "TIGER 200 건설",
+      "action": "BUY",
+      "target_weight_pct": 15.0,
+      "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수",
+      "priority": 2
+    },
+    {
+      "axis": "sector",
+      "code": "157500",
+      "name": "TIGER 증권",
+      "action": "BUY",
+      "target_weight_pct": 15.0,
+      "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점",
+      "priority": 2
+    },
+    {
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
+      "action": "BUY",
+      "target_weight_pct": 21.0,
+      "reason": "신규 진입: 목표 21.0%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 9.0,
+      "reason": "신규 진입: 목표 9.0%",
+      "priority": 3
+    }
+  ],
+  "timestamp": "2026-02-28T20:48:33.287295"
+}

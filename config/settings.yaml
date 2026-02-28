@@ -1287,3 +1287,60 @@ ai_brain:
   # [채널 3] KOSPI 레짐 AI 보정 (bearish 시 하향만 적용)
   regime_adjustment:
     enabled: false             # 안전장치: 기본 off
+
+# ============================================================
+# ETF 3축 로테이션 시스템
+# ============================================================
+# 축1: 섹터 ETF (저격수) — 모멘텀 Top N → Smart Money → 수급
+# 축2: 레버리지/인버스 (포병) — 레짐+US야간+5축
+# 축3: 지수 ETF (보급부대) — KODEX200 + MSCI Korea TR
+etf_rotation:
+  enabled: true
+
+  # 레짐별 비중 매트릭스 (%)
+  regime_allocation:
+    BULL:    {sector: 40, leverage: 20, index: 30, cash: 10}
+    CAUTION: {sector: 30, leverage: 0,  index: 30, cash: 40}
+    BEAR:    {sector: 0,  leverage: 15, index: 15, cash: 70}
+    CRISIS:  {sector: 0,  leverage: 20, index: 0,  cash: 80}
+
+  # 섹터 ETF 파라미터
+  sector:
+    max_holdings: 3              # 최대 보유 종목 수
+    momentum_top_n: 5            # 모멘텀 Top N 필터
+    smart_money_required: true   # Smart Money 유입 필수
+    min_supply_score: 60         # 최소 수급 점수 (100점 만점)
+    stop_loss_pct: -5.0          # 손절 기준 (%)
+    rotation_rank_threshold: 5   # 이 순위 밖이면 교체
+    momentum_weights:            # 모멘텀 기간별 가중치
+      5d: 0.2
+      20d: 0.5
+      60d: 0.3
+
+  # 레버리지 파라미터
+  leverage:
+    stop_loss_pct: -3.0          # 손절 기준 (%)
+    max_hold_days: 5             # 최대 보유일 (감가 리스크)
+    min_5axis_score: 70          # 5축 최소 점수
+    us_overnight_required: true  # US Overnight 시그널 확인
+
+  # 지수 ETF 파라미터
+  index:
+    rebalance_threshold_pct: 2.0 # 리밸런싱 임계값 (%p)
+
+  # 리스크 관리
+  risk:
+    sector_overlap_block: true       # 개별주-ETF 섹터 중복 차단
+    max_sector_exposure_pct: 25      # 동일 섹터 최대 노출 (%)
+    max_leverage_exposure_pct: 20    # 레버리지 실질 비중 상한 (%)
+    max_total_investment_pct: 90     # 최대 투자 비중 (%)
+    min_cash_pct: 10                 # 최소 현금 보유 (%)
+    killswitch_levels:
+      - {drawdown_pct: -7,  action: close_leverage,  desc: "레버리지 전량 청산"}
+      - {drawdown_pct: -10, action: close_sector,     desc: "섹터 ETF도 청산"}
+      - {drawdown_pct: -15, action: close_all,         desc: "전량 현금화 + 수동모드"}
+    regime_crash_rule:
+      from: BULL
+      to: CRISIS
+      action: close_all
+      desc: "BULL→CRISIS 직행 시 익일 시가 전량 청산"
