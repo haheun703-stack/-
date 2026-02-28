@@ -647,7 +647,7 @@ def run_backtest(data_dict, name_map, mode="D", kospi_df=None, per_filter=None):
         ))
 
     # 미청산 포지션 강제 청산 (END_DATE 이내 마지막 가격 사용)
-    last_date = dates[-1] if dates else pd.Timestamp(END_DATE)
+    last_date = dates[-1] if len(dates) > 0 else pd.Timestamp(END_DATE)
     for pos in positions:
         if pos.ticker in day_idx_map:
             last_close = float(data_dict[pos.ticker].iloc[day_idx_map[pos.ticker]]["close"])
