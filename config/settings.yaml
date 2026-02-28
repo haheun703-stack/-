@@ -1282,6 +1282,8 @@ ai_brain:
     sector_boost: true         # AI sector_outlook → +10/-15점 보정
     veto_avoid: true           # AI AVOID 종목 최종 추천 제외
     dynamic_slots: true        # AI 센티먼트 → 추천 수량 조절 (bullish 14 / neutral 10 / bearish 10)
+    min_sources: 3             # TOP 추천 최소 소스 수 (3개 미만은 추천 제외)
+    min_sources_alt_score: 70  # 소스 부족 시 이 점수 이상이면 통과 (복합 조건)
   # [채널 3] KOSPI 레짐 AI 보정 (bearish 시 하향만 적용)
   regime_adjustment:
     enabled: false             # 안전장치: 기본 off

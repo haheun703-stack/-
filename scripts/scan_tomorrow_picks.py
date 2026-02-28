@@ -1599,6 +1599,22 @@ def main():
         swing_slots = base_swing
         short_slots = base_short
 
+    # 최소 소스 수 필터 (복합 조건: 소스 N개+ OR 소스 (N-1)개 + 고점수)
+    min_sources = ai_sel_cfg.get("min_sources", 0)
+    alt_score = ai_sel_cfg.get("min_sources_alt_score", 70)
+    if min_sources >= 2:
+        before_cnt = len(buyable)
+        buyable = [
+            r for r in buyable
+            if r.get("n_sources", 0) >= min_sources
+            or (r.get("n_sources", 0) >= min_sources - 1
+                and r.get("total_score", 0) >= alt_score)
+        ]
+        filtered_cnt = before_cnt - len(buyable)
+        if filtered_cnt:
+            print(f"[소스 필터] {min_sources}소스+ OR ({min_sources-1}소스+{alt_score}점+) → "
+                  f"{filtered_cnt}종목 제외, 잔여 {len(buyable)}종목")
+
     # 그룹별 풀 분리 (both는 양쪽 모두에 포함)
     swing_pool = [r for r in buyable if r.get("strategy") in ("swing", "both")]
     short_pool = [r for r in buyable if r.get("strategy") in ("short", "both")]
