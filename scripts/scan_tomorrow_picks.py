@@ -1739,6 +1739,33 @@ def main():
                   f"{r['total_score']}점 [{r['grade']}] ({r['n_sources']}소스: {srcs})")
         print(f"{'─'*60}")
 
+    # ── AI 대형주 참고 섹션: AI BUY인데 TOP/관심에 없는 종목 ──
+    ai_largecap = []
+    if ai_brain_judgments:
+        used_all = top5_tickers | {w["ticker"] for w in watchlist5}
+        for t, j in ai_brain_judgments.items():
+            if j.get("action") != "BUY" or t in used_all:
+                continue
+            ai_largecap.append({
+                "ticker": t,
+                "name": j.get("name", ""),
+                "confidence": j.get("confidence", 0),
+                "reasoning": j.get("reasoning", ""),
+                "urgency": j.get("urgency", ""),
+                "expected_impact_pct": j.get("expected_impact_pct", 0),
+            })
+        ai_largecap.sort(key=lambda x: -x["confidence"])
+
+    if ai_largecap:
+        print(f"\n{'─'*60}")
+        print(f"  🧠 AI 대형주 참고 ({len(ai_largecap)}종목) — Bot 시그널 미검출, AI 판단만")
+        print(f"{'─'*60}")
+        for r in ai_largecap:
+            urg = " 🔥" if r["urgency"] == "high" else ""
+            print(f"    {r['name']}({r['ticker']}) "
+                  f"AI확신:{r['confidence']:.0%}{urg} "
+                  f"| {r['reasoning'][:50]}")
+
     # 나머지 관찰 종목 간략 출력
     rest = [r for r in results if r["grade"] in buyable_grades
             and r["ticker"] not in top5_tickers
@@ -1771,6 +1798,7 @@ def main():
         "top5_swing": [r["ticker"] for r in top5_swing],
         "top5_short": [r["ticker"] for r in top5_short],
         "watchlist5": [r["ticker"] for r in watchlist5],
+        "ai_largecap": ai_largecap,
         "picks": results,
         "market_intel": {
             "mood": intel_mood,
