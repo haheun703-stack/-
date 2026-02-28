@@ -1,0 +1,63 @@
+{
+  "date": "2026-02-28",
+  "timestamp": "2026-02-28 22:27:30",
+  "regime": "CAUTION",
+  "kospi_close": 6244.13,
+  "kospi_ma20_above": true,
+  "kospi_ma60_above": true,
+  "us_overnight_grade": 3,
+  "us_overnight_signal": "neutral",
+  "momentum_sectors": 20,
+  "smart_money_count": 15,
+  "supply_count": 25,
+  "five_axis_score": 63.0,
+  "allocation": {
+    "sector": 30,
+    "leverage": 0,
+    "index": 30,
+    "cash": 40
+  },
+  "order_queue": [
+    {
+      "axis": "sector",
+      "code": "139220",
+      "name": "TIGER 200 건설",
+      "action": "BUY",
+      "target_weight_pct": 15.0,
+      "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수",
+      "priority": 2
+    },
+    {
+      "axis": "sector",
+      "code": "157500",
+      "name": "TIGER 증권",
+      "action": "BUY",
+      "target_weight_pct": 15.0,
+      "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점",
+      "priority": 2
+    },
+    {
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
+      "action": "BUY",
+      "target_weight_pct": 21.0,
+      "reason": "신규 진입: 목표 21.0%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 9.0,
+      "reason": "신규 진입: 목표 9.0%",
+      "priority": 3
+    }
+  ],
+  "sector_candidates": [],
+  "leverage_action": null,
+  "index_action": null,
+  "risk_level": null,
+  "risk_summary": null
+}

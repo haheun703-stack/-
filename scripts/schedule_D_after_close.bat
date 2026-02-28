@@ -77,6 +77,10 @@ REM 11단계: ETF 매매 시그널 생성 (다음날 08:00 텔레그램용)
 echo [%date% %time%] [11/20] ETF 매매 시그널 >> logs\schedule.log
 python -u -X utf8 scripts\etf_trading_signal.py >> logs\schedule.log 2>&1
 
+REM 11.3단계: ETF 3축 로테이션 (블라인드 테스트 — 시그널 기록 + 텔레그램)
+echo [%date% %time%] [11.3/30] ETF 3축 로테이션 (블라인드) >> logs\schedule.log
+python -u -X utf8 scripts\run_etf_rotation.py --blind-test >> logs\schedule.log 2>&1
+
 REM ══════════════════════════════════════════════
 REM  PHASE 4: 종목 스캔 (~10분)
 REM ══════════════════════════════════════════════
