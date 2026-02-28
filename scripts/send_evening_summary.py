@@ -60,7 +60,7 @@ def _section_holdings() -> list[str]:
     }
 
     lines.append("")
-    lines.append("\u2501\u2501 보유종목 현황 \u2501\u2501")
+    lines.append("━━━━ 💼 보유종목 현황 ━━━━")
     for rec in monitored:
         action = rec.get("monitor_action", "HOLD")
         emoji = ACTION_EMOJI.get(action, "\u26aa")
@@ -68,9 +68,10 @@ def _section_holdings() -> list[str]:
         name = rec.get("name", rec.get("ticker", "?"))
         target = rec.get("monitor_target", 0)
         pnl = rec.get("pnl_pct", 0)
+        pnl_bar = "▲" if pnl > 0 else ("▼" if pnl < 0 else "─")
         lines.append(
-            f"{emoji} {name}: {pnl:+.1f}% \u2192 {label}"
-            + (f" (목표 {target:,.0f})" if target else "")
+            f"  {emoji} {name} {pnl_bar}{pnl:+.1f}% → {label}"
+            + (f" (🎯{target:,.0f})" if target else "")
         )
 
     return lines
@@ -88,17 +89,17 @@ def _section_dart() -> list[str]:
     if not tier1 and not universe:
         return []
 
-    lines = ["\n\u2501\u2501 DART 공시 \u2501\u2501"]
+    lines = ["\n━━━━ 📢 DART 공시 ━━━━"]
 
     for d in tier1[:3]:
         corp = d.get("corp_name", "?")
         kw = d.get("keyword", "")
-        lines.append(f"\U0001f534 [즉시] {corp} \u2014 {kw}")
+        lines.append(f"  🚨 {corp} — {kw}")
 
     for d in universe[:3]:
         corp = d.get("corp_name", "?")
         kw = d.get("keyword", "")
-        lines.append(f"\U0001f7e1 [참고] {corp} \u2014 {kw}")
+        lines.append(f"  📌 {corp} — {kw}")
 
     return lines
 
@@ -125,24 +126,30 @@ def _section_picks() -> list[str]:
     others = [p for p in top_picks if p["ticker"] not in swing_set and p["ticker"] not in short_set]
 
     target_label = data.get("target_date_label", "")
-    lines = [f"\n\u2501\u2501 내일 추천 TOP{len(top_tickers)} {target_label} \u2501\u2501"]
+    lines = [f"\n━━━━ 🏆 내일 추천 TOP{len(top_tickers)} {target_label} ━━━━"]
+
+    MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
+    GRADE_EMOJI = {"적극매수": "🔥", "매수": "👍", "관심": "👀"}
 
     def _fmt(p_list, group_label, icon):
         if not p_list:
             return
-        lines.append(f"{icon} {group_label}")
+        lines.append(f"\n  {icon} {group_label}")
         for i, p in enumerate(p_list, 1):
             name = p.get("name", "?")
             srcs = "+".join(p.get("sources", []))
             score = p.get("total_score", p.get("score", 0))
             grade = p.get("grade", "")
-            sar_icon = " SAR\u2191" if p.get("sar_trend") == 1 else (" SAR\u2193" if p.get("sar_trend") == -1 else "")
-            lines.append(f"  {i}. {name} | {srcs} | {score:.0f}점 {grade}{sar_icon}")
+            grade_e = GRADE_EMOJI.get(grade, "")
+            sar_icon = " ↗️" if p.get("sar_trend") == 1 else (" ↘️" if p.get("sar_trend") == -1 else "")
+            medal = MEDAL.get(i, f"  {i}.")
+            lines.append(f"  {medal} {name} {grade_e}{grade}")
+            lines.append(f"       📊 {score:.0f}점 | {srcs}{sar_icon}")
 
-    _fmt(swing_picks, "스윙(3~7일)", "\U0001f4c8")
-    _fmt(short_picks, "단타(1~3일)", "\u26a1")
+    _fmt(swing_picks, "📈 스윙(3~7일)", "🔵")
+    _fmt(short_picks, "⚡ 단타(1~3일)", "🟡")
     if others:
-        _fmt(others, "기타", "\U0001f4cc")
+        _fmt(others, "📌 기타", "⚪")
 
     return lines
 
@@ -155,10 +162,12 @@ def _section_ai_largecap() -> list[str]:
     largecap = data.get("ai_largecap", [])
     if not largecap:
         return []
-    lines = ["\n━━ 🧠 AI 대형주 참고 ━━"]
+    lines = ["\n━━━━ 🧠 AI 대형주 참고 ━━━━"]
     for r in largecap[:5]:
+        conf = r.get("confidence", 0)
         urg = " 🔥" if r.get("urgency") == "high" else ""
-        lines.append(f"  {r['name']} AI:{r['confidence']:.0%}{urg}")
+        bar = "🟩" * int(conf * 5) + "⬜" * (5 - int(conf * 5))
+        lines.append(f"  💎 {r['name']} {bar} {conf:.0%}{urg}")
     return lines
 
 
@@ -172,14 +181,15 @@ def _section_value_chain() -> list[str]:
     if not fired:
         return []
 
-    lines = ["\n\u2501\u2501 밸류체인 발화 \u2501\u2501"]
+    lines = ["\n━━━━ 🔗 밸류체인 발화 ━━━━"]
     for sec in fired[:5]:
         sector = sec.get("sector", "?")
         leaders = [l.get("name", "?") for l in sec.get("leaders", [])]
         candidates = [c.get("name", "?") for c in sec.get("candidates", [])[:2]]
-        leader_str = "+".join(leaders) + "\u2191"
+        leader_str = "+".join(leaders)
         cand_str = ", ".join(candidates) if candidates else "대기 없음"
-        lines.append(f"\U0001f517 {sector}: {leader_str} \u2192 {cand_str}")
+        lines.append(f"  🏭 {sector}")
+        lines.append(f"    🔺 {leader_str} → 🎯 {cand_str}")
 
     return lines
 
@@ -191,13 +201,15 @@ def _section_ai_vs_bot() -> list[str]:
     if not ai_data or not ai_data.get("stock_judgments"):
         return []
 
-    lines = ["\n\u2501\u2501 \U0001f9e0 AI 두뇌 분석 \u2501\u2501"]
+    lines = ["\n━━━━ 🧠 AI 두뇌 분석 ━━━━"]
     sentiment = ai_data.get("market_sentiment", "")
-    s_icon = {"bullish": "\u25b2", "bearish": "\u25bc", "neutral": "\u2500"}.get(sentiment, "")
-    lines.append(f"센티먼트: {s_icon}{sentiment}")
+    s_map = {"bullish": ("📈 강세", "🟢"), "bearish": ("📉 약세", "🔴"), "neutral": ("➡️ 중립", "🟡")}
+    s_label, s_dot = s_map.get(sentiment, ("❓", "⚪"))
+    lines.append(f"  {s_dot} 센티먼트: {s_label}")
     themes = ai_data.get("key_themes", [])
     if themes:
-        lines.append(f"테마: {', '.join(themes[:3])}")
+        for t in themes[:3]:
+            lines.append(f"  💡 {t[:40]}")
 
     # Bot TOP 종목 티커 세트
     bot_tickers = set()
@@ -213,20 +225,20 @@ def _section_ai_vs_bot() -> list[str]:
     ai_only = [j for j in ai_buys if j.get("ticker") not in bot_tickers]
 
     if both:
-        lines.append("\u2705 AI+Bot 동시 추천:")
+        lines.append("\n  ✅ AI+Bot 동시 추천")
         for j in both[:3]:
-            lines.append(f"  \U0001f7e2 {j.get('name', '?')} ({j.get('confidence', 0):.0%})")
+            lines.append(f"    🟢 {j.get('name', '?')} ({j.get('confidence', 0):.0%})")
 
     if ai_only:
-        lines.append("\U0001f9e0 AI만 포착:")
+        lines.append("  🧠 AI만 포착")
         for j in ai_only[:3]:
             reason = j.get("reasoning", "")[:30]
-            lines.append(f"  \U0001f7e1 {j.get('name', '?')} \u2014 {reason}")
+            lines.append(f"    🟡 {j.get('name', '?')} — {reason}")
 
     if ai_avoids:
-        lines.append("\U0001f6a8 AI 경고:")
+        lines.append("  ⛔ AI 경고")
         for j in ai_avoids[:2]:
-            lines.append(f"  \U0001f534 {j.get('name', '?')} \u2014 {j.get('reasoning', '')[:30]}")
+            lines.append(f"    🔴 {j.get('name', '?')} — {j.get('reasoning', '')[:30]}")
 
     return lines
 
@@ -256,15 +268,18 @@ def _section_ai_accuracy() -> list[str]:
     total = len(completed)
     avg_ret = sum(j.get("ret_d5", 0) or 0 for j in completed) / total
 
-    lines = ["\n\u2501\u2501 \U0001f4ca AI \uc801\uc911\ub960 \u2501\u2501"]
-    lines.append(f"D+5 기준: {wins}/{total} ({wins/total:.0%}) | 평균 {avg_ret:+.1f}%")
+    lines = ["\n━━━━ 📊 AI 적중률 ━━━━"]
+    hit_pct = wins / total
+    bar = "🟩" * int(hit_pct * 10) + "⬜" * (10 - int(hit_pct * 10))
+    lines.append(f"  D+5 기준: {bar} {wins}/{total} ({hit_pct:.0%})")
+    lines.append(f"  📈 평균수익률: {avg_ret:+.1f}%")
 
     # 최근 3건 상세
     recent = completed[-3:]
     for j in recent:
         ret = j.get("ret_d5", 0) or 0
-        icon = "\u25b2" if ret > 0 else "\u25bc"
-        lines.append(f"  {icon} {j.get('name', '?')} {ret:+.1f}%")
+        icon = "✅" if ret > 0 else "❌"
+        lines.append(f"    {icon} {j.get('name', '?')} {ret:+.1f}%")
 
     return lines
 
@@ -282,17 +297,17 @@ def _section_intel() -> list[str]:
     if not mood and not themes:
         return []
 
-    lines = ["\n\u2501\u2501 시장 무드 \u2501\u2501"]
+    lines = ["\n━━━━ 🌍 시장 무드 ━━━━"]
     parts = []
     if mood:
-        parts.append(f"\U0001f30d {mood}")
+        parts.append(f"  🌐 {mood}")
     if forecast:
-        fc_icon = {"상승": "\u25b2", "하락": "\u25bc", "보합": "\u2500"}.get(forecast, "")
-        parts.append(f"KR {fc_icon}{forecast}")
+        fc_map = {"상승": "📈 상승", "하락": "📉 하락", "보합": "➡️ 보합"}
+        parts.append(f"  🇰🇷 KR {fc_map.get(forecast, forecast)}")
     if parts:
-        lines.append(" | ".join(parts))
+        lines.extend(parts)
     if themes:
-        lines.append(f"\U0001f525 " + " | ".join(themes[:4]))
+        lines.append(f"  🔥 " + " | ".join(themes[:4]))
 
     return lines
 
@@ -305,9 +320,10 @@ def build_evening_summary() -> str:
     """저녁 통합 리포트 1건."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     L = [
-        f"\U0001f4cb 장마감 리포트 | {now}",
-        "Quantum Master v10.3",
-        "\u2501" * 24,
+        "╔══════════════════════╗",
+        f"  🤖 Quantum Master v10.3",
+        f"  📅 {now} 장마감 리포트",
+        "╚══════════════════════╝",
     ]
 
     # 각 섹션을 우선순위 순으로 추가
@@ -321,8 +337,12 @@ def build_evening_summary() -> str:
     L.extend(_section_intel())
 
     # 빈 내용 체크
-    if len(L) <= 3:
-        L.append("\n\u26a0 오늘 발송할 내용이 없습니다.")
+    if len(L) <= 4:
+        L.append("\n⚠️ 오늘 발송할 내용이 없습니다.")
+
+    # 푸터
+    L.append("\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈")
+    L.append(f"⏰ {now} | Quantum Master 🤖")
 
     return "\n".join(L)
 
