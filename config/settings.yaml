@@ -1345,3 +1345,14 @@ etf_rotation:
       to: CRISIS
       action: close_all
       desc: "BULL→CRISIS 직행 시 익일 시가 전량 청산"
+
+  # AI 필터 레이어 (v11)
+  # 룰베이스 주문 → AI가 PASS/KILL/HOLD 판단 → 최악 매매만 걸러내기
+  # 핵심: AI는 "사라"고 안 함. "사지 마라"만 할 수 있음. 공격은 룰, 방어만 AI.
+  ai_filter:
+    enabled: true
+    model: "claude-sonnet-4-5-20250929"   # AI 모델 (비용 효율)
+    # AI 개입 3가지:
+    #   KILL  — 룰이 매수라는데 위험 감지 → 매수 보류
+    #   HOLD  — 룰이 교체라는데 기존 추세 강함 → 교체 연기
+    #   WARNING — 룰에 없는 이상 징후 → 사람에게 알림
