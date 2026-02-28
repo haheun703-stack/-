@@ -1324,6 +1324,10 @@ etf_rotation:
     max_hold_days: 5             # 최대 보유일 (감가 리스크)
     min_5axis_score: 70          # 5축 최소 점수
     us_overnight_required: true  # US Overnight 시그널 확인
+    # 섹터 레버리지 (포병 → 저격 포병)
+    # BULL + 모멘텀 1위 섹터에 유동성 충분한 레버리지 ETF 있으면 정밀 타격
+    # 없으면 KODEX 레버리지(지수 2배) 기본값
+    sector_leverage_enabled: true
 
   # 지수 ETF 파라미터
   index:

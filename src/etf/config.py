@@ -38,11 +38,21 @@ _KODEX_ADDITIONS = {
     "266360": {"name": "KODEX 핀테크", "sector": "핀테크"},
 }
 
-# 레버리지/인버스 ETF
+# 레버리지/인버스 ETF (지수 기본값)
 LEVERAGE_ETF = {
     "BULL": {"code": "122630", "name": "KODEX 레버리지", "multiplier": 2.0},
     "BEAR": {"code": "114800", "name": "KODEX 인버스", "multiplier": -1.0},
     "CRISIS": {"code": "252670", "name": "KODEX 200선물인버스2X", "multiplier": -2.0},
+}
+
+# 섹터 레버리지 ETF — 유동성 기준 통과 종목만
+# AUM 500억+ & 일거래대금 충분한 종목만 등록
+# "포병이 저격수로 변한다" — 섹터 확신 시 정밀 타격
+SECTOR_LEVERAGE_ETF = {
+    "반도체": {"code": "488080", "name": "TIGER 반도체TOP10레버리지", "multiplier": 2.0},
+    # 유동성 미달 (AUM/거래대금 부족) — 관찰 후 추가
+    # "2차전지": {"code": "466940", "name": "KODEX 2차전지레버리지", "multiplier": 2.0},
+    # "방산":    {"code": "472170", "name": "PLUS K방산레버리지", "multiplier": 2.0},
 }
 
 # 지수 ETF

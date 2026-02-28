@@ -94,6 +94,7 @@ class ETFOrchestrator:
             us_overnight=us_overnight,
             five_axis_score=five_axis_score,
             previous_regime=self.previous_regime,
+            momentum_data=momentum_data,
         )
         print(f"   {leverage_result['summary']}")
 
