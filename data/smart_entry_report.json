@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-27 10:30",
+  "timestamp": "2026-02-28 10:30",
   "dry_run": false,
   "total_candidates": 1,
   "filled": 0,
@@ -7,19 +7,19 @@
   "unfilled": 1,
   "details": [
     {
-      "ticker": "445680",
-      "name": "큐리옥스바이오시스템즈",
+      "ticker": "041510",
+      "name": "에스엠",
       "grade": "관심매수",
-      "prev_close": 118300,
-      "open_price": 118800,
-      "gap_pct": 0.42,
-      "gap_type": "flat",
+      "prev_close": 115500,
+      "open_price": 113200,
+      "gap_pct": -1.99,
+      "gap_type": "gap_down",
       "decision": "holding",
       "reasons": [
-        "갭+0.4% → 초기 지정가 유지",
-        "[3중확인] EMA✓ VWAP✓ MACD✗ (2/3)"
+        "갭-2.0% → 초기 지정가 유지",
+        "[3중확인] EMA✓ VWAP✓ MACD△ (2/3)"
       ],
-      "order_price": 118300,
+      "order_price": 115500,
       "is_filled": false,
       "filled_price": 0,
       "bid_ask_ratio": 0.0,
@@ -27,14 +27,14 @@
       "flow_signal": "",
       "foreign_net": 0,
       "inst_net": 0,
-      "vwap": 118824.0,
+      "vwap": 113686.0,
       "vwap_position": "above",
-      "sma60": 108515.0,
+      "sma60": 113955.0,
       "sma60_position": "above",
-      "macd_hist": -766.2572581995514,
-      "macd_hist_rising": true,
+      "macd_hist": 102.39850305112344,
+      "macd_hist_rising": false,
       "triple_confirm": 2,
-      "triple_detail": "EMA✓ VWAP✓ MACD✗"
+      "triple_detail": "EMA✓ VWAP✓ MACD△"
     }
   ]
 }
