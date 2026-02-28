@@ -1269,14 +1269,19 @@ ai_brain:
   model: "claude-sonnet-4-5-20250929"
   max_news_items: 70          # 최대 뉴스 수
   max_stock_judgments: 15     # 최대 종목 판단 수
-  bonus_max: 7                # scan_tomorrow_picks 최대 보너스
+  bonus_max: 20               # scan_tomorrow_picks 최대 보너스 (±20점, confidence 비례)
   daily_call_limit: 3         # 일일 API 호출 한도 (비용 안전장치)
   universe_filter: true       # 84종목 유니버스 밖 종목 필터링
   # [채널 1] AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능)
   independent_pick:
-    enabled: false             # 안전장치: 기본 off → 검증 후 on
-    max_count: 2               # 최대 독립 추천 종목 수
-    min_confidence: 0.75       # 최소 AI 신뢰도
+    enabled: true
+    max_count: 5               # 최대 독립 추천 종목 수
+    min_confidence: 0.70       # 최소 AI 신뢰도
+  # [종목선정 강화] AI 섹터 필터 + 거부권 + 동적 슬롯
+  stock_selection:
+    sector_boost: true         # AI sector_outlook → +10/-15점 보정
+    veto_avoid: true           # AI AVOID 종목 최종 추천 제외
+    dynamic_slots: true        # AI 센티먼트 → 추천 수량 조절 (bullish 14 / neutral 10 / bearish 10)
   # [채널 3] KOSPI 레짐 AI 보정 (bearish 시 하향만 적용)
   regime_adjustment:
     enabled: false             # 안전장치: 기본 off

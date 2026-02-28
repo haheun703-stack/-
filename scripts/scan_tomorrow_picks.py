@@ -469,6 +469,36 @@ def _load_stock_to_sector() -> dict:
     return _STOCK_SECTOR_CACHE
 
 
+# AI Brain 섹터명 → stock_to_sector 섹터명 브릿지
+AI_SECTOR_BRIDGE = {
+    "반도체": ["반도체", "IT"],
+    "IT/소프트웨어": ["IT", "소프트웨어"],
+    "금융": ["금융", "은행", "보험", "증권"],
+    "에너지(원전/정유)": ["에너지화학", "에너지"],
+    "방산": ["조선", "기계", "방산"],
+    "2차전지": ["2차전지", "전지", "전자부품"],
+    "자동차": ["자동차", "자동차부품"],
+    "바이오": ["바이오", "제약"],
+    "건설": ["건설"],
+    "유통": ["유통"],
+}
+
+
+def _match_ai_sector(stock_sector: str, ai_sector_outlook: dict) -> dict | None:
+    """stock_to_sector의 섹터명 → AI brain sector_outlook 매칭.
+
+    직접 매칭 시도 후, AI_SECTOR_BRIDGE 역방향 매칭.
+    """
+    # 직접 매칭
+    if stock_sector in ai_sector_outlook:
+        return ai_sector_outlook[stock_sector]
+    # 브릿지: AI 섹터명 → stock_to_sector 섹터명 리스트에 stock_sector 포함?
+    for ai_name, bridge_names in AI_SECTOR_BRIDGE.items():
+        if stock_sector in bridge_names and ai_name in ai_sector_outlook:
+            return ai_sector_outlook[ai_name]
+    return None
+
+
 def load_sector_momentum_boost() -> dict[str, float]:
     """overnight_signal.json의 sector_momentum → {섹터명: boost} 딕셔너리."""
     sig = load_json("us_market/overnight_signal.json")
@@ -1231,8 +1261,8 @@ def main():
     # ── 채널 1: AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능) ──
     ai_ind_cfg = yaml_config.get("ai_brain", {}).get("independent_pick", {})
     ai_ind_enabled = ai_ind_cfg.get("enabled", False)
-    ai_ind_max = ai_ind_cfg.get("max_count", 2)
-    ai_ind_min_conf = ai_ind_cfg.get("min_confidence", 0.75)
+    ai_ind_max = ai_ind_cfg.get("max_count", 5)
+    ai_ind_min_conf = ai_ind_cfg.get("min_confidence", 0.70)
 
     ai_independent_tickers = set()
     if ai_ind_enabled and ai_brain_judgments:
@@ -1386,29 +1416,61 @@ def main():
             if report_bonus > 0:
                 source_names.append("리포트")
 
-        # 전략 H: AI 두뇌 보너스 (최대 ±7점)
+        # 전략 H: AI 두뇌 보너스 (최대 ±20점, confidence 비례)
         ai_bonus = 0.0
         ai_tag = ""
         ai_action = ""
+        ai_urgency = ""
         if ticker in ai_brain_judgments:
             j = ai_brain_judgments[ticker]
             ai_action = j.get("action", "")
             confidence = j.get("confidence", 0)
+            ai_urgency = j.get("urgency", "")
             if ai_action == "BUY":
-                ai_bonus = min(3 + confidence * 4, 7)
-                ai_tag = f"AI:BUY({confidence:.0%})"
+                # confidence 0.60→+8, 0.75→+14, 0.85→+18, 0.90→+20
+                ai_bonus = round(confidence * 24 - 6, 1)
+                # urgency 가산: high→+3, medium→+1
+                if ai_urgency == "high":
+                    ai_bonus += 3
+                elif ai_urgency == "medium":
+                    ai_bonus += 1
+                ai_tag = f"AI:BUY({confidence:.0%},{ai_urgency})"
             elif ai_action == "WATCH":
-                ai_bonus = 1.0
+                ai_bonus = round(confidence * 4 - 1, 1)  # 0.6→+1.4, 0.7→+1.8
                 ai_tag = "AI:WATCH"
             elif ai_action == "AVOID":
-                ai_bonus = max(-3 - confidence * 4, -7)
+                ai_bonus = round(-confidence * 24 + 2, 1)  # 0.7→-14.8, 0.8→-17.2
                 ai_tag = f"AI:AVOID({confidence:.0%})"
-        ai_bonus = round(max(min(ai_bonus, 7), -7), 1)
+        ai_bonus = round(max(min(ai_bonus, 20), -20), 1)
         if ai_bonus != 0:
             boosted = max(min(score_detail["total"] + ai_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
             if ai_bonus > 0:
                 source_names.append("AI두뇌")
+
+        # 전략 H-2: AI 섹터 전망 보정 (positive +10, negative -15)
+        ai_sector_bonus = 0.0
+        ai_sector_tag = ""
+        ai_sel_cfg_h2 = yaml_config.get("ai_brain", {}).get("stock_selection", {})
+        if ai_sel_cfg_h2.get("sector_boost", False) and ai_brain_data and ai_brain_data.get("sector_outlook"):
+            sts = _load_stock_to_sector()
+            stock_sectors = sts.get(ticker, [])
+            for sec in stock_sectors:
+                matched_outlook = _match_ai_sector(sec, ai_brain_data["sector_outlook"])
+                if matched_outlook:
+                    direction = matched_outlook.get("direction", "")
+                    if direction == "positive":
+                        ai_sector_bonus = max(ai_sector_bonus, 10.0)
+                        ai_sector_tag = f"섹터↑{sec}"
+                    elif direction == "negative":
+                        ai_sector_bonus = min(ai_sector_bonus, -15.0)
+                        ai_sector_tag = f"섹터↓{sec}"
+                    break  # 첫 매칭만
+        if ai_sector_bonus != 0:
+            boosted = max(min(score_detail["total"] + ai_sector_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if ai_sector_bonus > 0:
+                source_names.append("AI섹터")
 
         # 이름 결정
         name = ""
@@ -1481,6 +1543,9 @@ def main():
             "ai_bonus": ai_bonus,
             "ai_tag": ai_tag,
             "ai_action": ai_action,
+            "ai_urgency": ai_urgency,
+            "ai_sector_bonus": ai_sector_bonus,
+            "ai_sector_tag": ai_sector_tag,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
@@ -1495,9 +1560,18 @@ def main():
     grade_order = {"적극매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
 
-    # ── TOP 10 선별: 전략 그룹별 슬롯 분리 (스윙 5 + 단타 5) ──
+    # ── TOP 선별: 전략 그룹별 슬롯 분리 ──
     buyable_grades = {"적극매수", "매수", "관심매수"}
     buyable = [r for r in results if r["grade"] in buyable_grades]
+
+    # AI 거부권: AVOID 종목은 최종 추천에서 제외
+    ai_veto_cfg = yaml_config.get("ai_brain", {}).get("stock_selection", {})
+    if ai_veto_cfg.get("veto_avoid", False):
+        ai_vetoed = [r for r in buyable if r.get("ai_action") == "AVOID"]
+        if ai_vetoed:
+            buyable = [r for r in buyable if r.get("ai_action") != "AVOID"]
+            print(f"[AI 거부권] {len(ai_vetoed)}종목 제외: "
+                  f"{', '.join(r['name'] for r in ai_vetoed)}")
 
     # 고가주 추천 제외 (v12): 1주 80만원 초과 종목은 시드 제약으로 추천에서만 제외
     MAX_PRICE_FOR_PICK = 800_000
@@ -1506,8 +1580,24 @@ def main():
     _ec = load_json("event_catalyst.json") or {}
     _ec_sector_map = {s["ticker"]: s.get("sector", "") for s in _ec.get("stocks", [])}
 
-    swing_slots = STRATEGY_GROUPS["swing"]["slots"]  # 3
-    short_slots = STRATEGY_GROUPS["short"]["slots"]  # 2
+    # AI 센티먼트 → 추천 수량 동적 조절 (최소 10개 보장)
+    ai_sel_cfg = yaml_config.get("ai_brain", {}).get("stock_selection", {})
+    base_swing = STRATEGY_GROUPS["swing"]["slots"]  # 5
+    base_short = STRATEGY_GROUPS["short"]["slots"]  # 5
+    if ai_sel_cfg.get("dynamic_slots", False) and ai_brain_data:
+        sentiment = ai_brain_data.get("market_sentiment", "neutral")
+        # bullish: +2/+2 (총14), neutral: 기본(총10), bearish: -1/-1 (총8→10보장)
+        slot_adj = {"bullish": 2, "neutral": 0, "bearish": -1}.get(sentiment, 0)
+        swing_slots = max(base_swing + slot_adj, 3)
+        short_slots = max(base_short + slot_adj, 3)
+        # 최소 총 10개 보장
+        if swing_slots + short_slots < 10:
+            swing_slots = 5
+            short_slots = 5
+        print(f"[AI 슬롯] {sentiment} → 스윙 {swing_slots} + 단타 {short_slots} = {swing_slots + short_slots}개")
+    else:
+        swing_slots = base_swing
+        short_slots = base_short
 
     # 그룹별 풀 분리 (both는 양쪽 모두에 포함)
     swing_pool = [r for r in buyable if r.get("strategy") in ("swing", "both")]
