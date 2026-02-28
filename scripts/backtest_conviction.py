@@ -1,11 +1,14 @@
 """
-Phase 1 확신 사이징 백테스트 — v10.3 기존 vs 확신 비대칭 비교
-================================================================
+Phase 2 수급 가속도 기반 확신 사이징 백테스트
+==============================================
 핵심 변경 (파라미터 2개만 추가):
-  확신 판정 = Grade + 수급(vol_ratio) 기반
-    HIGH: Grade S/A + vol_ratio < 0.8 → 슬롯 1.5배
-    MID:  그 외 → 슬롯 1.0배 (기존과 동일)
-    LOW:  Grade B + vol_ratio > 1.2 → 슬롯 0.5배
+  확신 판정 = 수급 가속도 기반 (OBV + 거래량 동시 변화율)
+    HIGH: OBV 가속 + 거래량 가속 동시 (쌍가속) → 슬롯 1.5배
+    MID:  한쪽만 가속 → 슬롯 1.0배 (기존과 동일)
+    LOW:  OBV 감속 + 거래량 감속 동시 (쌍감속) → 슬롯 0.5배
+
+  OBV 가속도 = obv_trend_5d[오늘] - obv_trend_5d[5일전]
+  거래량 가속도 = volume_surge_ratio[오늘] - volume_surge_ratio[5일전]
 
   손절: -7% 고정 유지 (변경 없음)
   게이트/트리거: 변경 없음
@@ -39,6 +42,9 @@ TAX = 0.0018
 CONVICTION_HIGH_MULT = 1.5   # HIGH: 기본 슬롯의 1.5배
 CONVICTION_LOW_MULT = 0.5    # LOW: 기본 슬롯의 0.5배
 # MID는 1.0 (기존과 동일)
+
+# ── 수급 가속도 측정 구간 ──
+ACCEL_LOOKBACK = 5  # 5일 전 대비 가속도 계산
 
 
 @dataclass
@@ -258,6 +264,22 @@ def scan_signals(data_dict, day_idx_map):
         rank = rr * zone * freshness
         grade = "S" if counter <= 3 else ("A" if counter <= 7 else "B")
 
+        # 수급 가속도 계산
+        obv_trend = df.get("obv_trend_5d")
+        vol_surge = df.get("volume_surge_ratio")
+        obv_accel = 0.0
+        vol_accel = 0.0
+        if obv_trend is not None and idx >= ACCEL_LOOKBACK:
+            cur = obv_trend.iloc[idx]
+            prev = obv_trend.iloc[idx - ACCEL_LOOKBACK]
+            if not pd.isna(cur) and not pd.isna(prev):
+                obv_accel = float(cur - prev)
+        if vol_surge is not None and idx >= ACCEL_LOOKBACK:
+            cur = vol_surge.iloc[idx]
+            prev = vol_surge.iloc[idx - ACCEL_LOOKBACK]
+            if not pd.isna(cur) and not pd.isna(prev):
+                vol_accel = float(cur - prev)
+
         signals.append({
             "ticker": ticker,
             "close": close,
@@ -271,7 +293,9 @@ def scan_signals(data_dict, day_idx_map):
             "freshness": freshness,
             "rsi": rsi,
             "atr": atr,
-            "vol_ratio": vol_c,  # 확신 판정용 추가
+            "vol_ratio": vol_c,
+            "obv_accel": obv_accel,   # 수급 가속도
+            "vol_accel": vol_accel,    # 거래량 가속도
         })
 
     signals.sort(key=lambda s: s["rank"], reverse=True)
@@ -280,16 +304,25 @@ def scan_signals(data_dict, day_idx_map):
 
 # ── 확신 판정 ──
 
-def judge_conviction(grade: str, vol_ratio: float) -> str:
-    """확신도 판정.
-
-    HIGH: Grade S/A + 거래량 수축 (vol_ratio < 0.8) = 수급 확인됨
-    LOW:  Grade B + 거래량 팽창 (vol_ratio > 1.2) = 수급 미확인
-    MID:  그 외
-    """
+def judge_conviction_p1(grade: str, vol_ratio: float) -> str:
+    """Phase 1: Grade+vol_ratio 기반 (비교 대조군)."""
     if grade in ("S", "A") and vol_ratio < 0.8:
         return "HIGH"
     elif grade == "B" and vol_ratio > 1.2:
+        return "LOW"
+    return "MID"
+
+
+def judge_conviction_accel(obv_accel: float, vol_accel: float) -> str:
+    """Phase 2: 수급 가속도 기반 확신 판정.
+
+    HIGH: OBV 가속 + 거래량 가속 동시 (쌍가속) — 수급 유입 가속 중
+    LOW:  OBV 감속 + 거래량 감속 동시 (쌍감속) — 수급 이탈 가속 중
+    MID:  그 외 (한쪽만 가속 또는 둘 다 정체)
+    """
+    if obv_accel > 0 and vol_accel > 0:
+        return "HIGH"
+    elif obv_accel < 0 and vol_accel < 0:
         return "LOW"
     return "MID"
 
@@ -317,8 +350,8 @@ def calc_position_size(capital, grade, freshness, conviction, mode):
 
     size = base * grade_mult * fresh_mult
 
-    # Phase 1: 확신 배수 적용
-    if mode == "P1":
+    # 확신 배수 적용 (P1, P2 모두 동일한 배수 사용)
+    if mode in ("P1", "P2"):
         if conviction == "HIGH":
             size *= CONVICTION_HIGH_MULT
         elif conviction == "LOW":
@@ -470,7 +503,12 @@ def run_backtest(data_dict, name_map, mode, kospi_df):
                 buy_price = next_open * (1 + SLIPPAGE)
 
                 # 확신 판정
-                conviction = judge_conviction(sig["grade"], sig["vol_ratio"])
+                if mode == "P1":
+                    conviction = judge_conviction_p1(sig["grade"], sig["vol_ratio"])
+                elif mode == "P2":
+                    conviction = judge_conviction_accel(sig["obv_accel"], sig["vol_accel"])
+                else:
+                    conviction = "MID"  # C_new: 확신 무시
                 conviction_stats[conviction] += 1
 
                 # 포지션 사이징 (확신 반영)
@@ -646,17 +684,59 @@ def report(trades, daily_results, label, conviction_stats=None):
 
 # ── 메인 ──
 
+def compare_results(base, test, test_label):
+    """base vs test 비교 + 4-criteria 판정."""
+    print(f"\n  {'지표':<18} {'C_new (기존)':>14} {test_label:>14} {'변화':>12}")
+    print(f"  {'-' * 58}")
+    for key, label, fmt in [
+        ("trades", "거래 수", "{:.0f}"),
+        ("win_rate", "승률 (%)", "{:.1f}"),
+        ("pf", "Profit Factor", "{:.2f}"),
+        ("total_return", "총 수익률 (%)", "{:+.1f}"),
+        ("mdd", "MDD (%)", "{:.1f}"),
+        ("sharpe", "Sharpe", "{:.2f}"),
+        ("avg_win", "평균 수익 (%)", "{:+.1f}"),
+        ("avg_loss", "평균 손실 (%)", "{:.1f}"),
+    ]:
+        v1 = base[key]
+        v2 = test[key]
+        diff = v2 - v1
+        sign = "+" if diff > 0 else ""
+        print(f"  {label:<18} {fmt.format(v1):>14} {fmt.format(v2):>14} {sign}{fmt.format(diff):>10}")
+
+    pf_better = test["pf"] >= base["pf"]
+    mdd_safe = test["mdd"] >= base["mdd"] - 1.0
+    ret_better = test["total_return"] >= base["total_return"]
+    sharpe_better = test["sharpe"] >= base["sharpe"]
+
+    wins = sum([pf_better, mdd_safe, ret_better, sharpe_better])
+    print(f"\n  판정:")
+    print(f"    PF 개선:       {'PASS' if pf_better else 'FAIL'} ({base['pf']:.2f} → {test['pf']:.2f})")
+    print(f"    MDD 안전:      {'PASS' if mdd_safe else 'FAIL'} ({base['mdd']:.1f}% → {test['mdd']:.1f}%)")
+    print(f"    수익률 개선:   {'PASS' if ret_better else 'FAIL'} ({base['total_return']:+.1f}% → {test['total_return']:+.1f}%)")
+    print(f"    Sharpe 개선:   {'PASS' if sharpe_better else 'FAIL'} ({base['sharpe']:.2f} → {test['sharpe']:.2f})")
+
+    if wins >= 3:
+        print(f"\n  결론: PASS ({wins}/4) — 채택 가능")
+    elif wins >= 2:
+        print(f"\n  결론: 부분 개선 ({wins}/4) — 파라미터 미세 조정 후 재검토")
+    else:
+        print(f"\n  결론: FAIL ({wins}/4) — 효과 없음, 기존 유지")
+    return wins
+
+
 def main():
     print("=" * 60)
-    print("  Phase 1 확신 사이징 백테스트")
-    print("  v10.3 기존 (C_new) vs 확신 비대칭 (P1)")
+    print("  수급 가속도 확신 사이징 백테스트")
+    print("  C_new (기존) vs P1 (Grade) vs P2 (수급 가속도)")
     print("=" * 60)
     print(f"  기간: {START_DATE} ~ {END_DATE}")
     print(f"  초기 자본: {INITIAL_CAPITAL / 1e8:.1f}억")
     print(f"  슬리피지: {SLIPPAGE * 100:.1f}%")
     print(f"  확신 배수: HIGH {CONVICTION_HIGH_MULT}x / MID 1.0x / LOW {CONVICTION_LOW_MULT}x")
-    print(f"  확신 판정: Grade(S/A) + vol_ratio<0.8 → HIGH")
-    print(f"             Grade(B) + vol_ratio>1.2 → LOW")
+    print(f"  P1 판정: Grade(S/A) + vol_ratio<0.8 → HIGH")
+    print(f"  P2 판정: OBV가속(↑) + 거래량가속(↑) → HIGH (수급 쌍가속)")
+    print(f"           OBV감속(↓) + 거래량감속(↓) → LOW  (수급 쌍감속)")
     print(f"  손절: -7% 고정 (변경 없음)")
 
     print("\n데이터 로딩...")
@@ -674,56 +754,45 @@ def main():
     if r1:
         results.append(r1)
 
-    # 2. Phase 1 확신 사이징
-    print(f"\n[P1] Phase 1 확신 사이징 실행 중...")
+    # 2. Phase 1: Grade+vol_ratio (비교 대조군)
+    print(f"\n[P1] Phase 1 Grade+vol_ratio 실행 중...")
     trades_p1, daily_p1, stats_p1 = run_backtest(data_dict, name_map, "P1", kospi_df)
-    r2 = report(trades_p1, daily_p1, "P1) 확신 사이징 (HIGH 1.5x / LOW 0.5x)", stats_p1)
+    r2 = report(trades_p1, daily_p1, "P1) Grade+vol_ratio (대조군)", stats_p1)
     if r2:
         results.append(r2)
 
+    # 3. Phase 2: 수급 가속도 (실험군)
+    print(f"\n[P2] Phase 2 수급 가속도 실행 중...")
+    trades_p2, daily_p2, stats_p2 = run_backtest(data_dict, name_map, "P2", kospi_df)
+    r3 = report(trades_p2, daily_p2, "P2) 수급 가속도 (OBV+거래량 쌍가속)", stats_p2)
+    if r3:
+        results.append(r3)
+
     # 비교 테이블
-    if len(results) == 2:
-        base, p1 = results[0], results[1]
+    if len(results) >= 3:
+        base, p1, p2 = results[0], results[1], results[2]
 
         print(f"\n{'=' * 70}")
-        print(f"  종합 비교: C_new (기존) vs P1 (확신 사이징)")
+        print(f"  비교 1: C_new vs P1 (Grade+vol_ratio)")
         print(f"{'=' * 70}")
-        print(f"  {'지표':<18} {'C_new (기존)':>14} {'P1 (확신)':>14} {'변화':>12}")
-        print(f"  {'-' * 58}")
-        for key, label, fmt in [
-            ("trades", "거래 수", "{:.0f}"),
-            ("win_rate", "승률 (%)", "{:.1f}"),
-            ("pf", "Profit Factor", "{:.2f}"),
-            ("total_return", "총 수익률 (%)", "{:+.1f}"),
-            ("mdd", "MDD (%)", "{:.1f}"),
-            ("sharpe", "Sharpe", "{:.2f}"),
-            ("avg_win", "평균 수익 (%)", "{:+.1f}"),
-            ("avg_loss", "평균 손실 (%)", "{:.1f}"),
-        ]:
-            v1 = base[key]
-            v2 = p1[key]
-            diff = v2 - v1
-            sign = "+" if diff > 0 else ""
-            print(f"  {label:<18} {fmt.format(v1):>14} {fmt.format(v2):>14} {sign}{fmt.format(diff):>10}")
+        w1 = compare_results(base, p1, "P1 (Grade)")
 
-        print(f"\n  판정:")
-        pf_better = p1["pf"] >= base["pf"]
-        mdd_safe = p1["mdd"] >= base["mdd"] - 1.0  # MDD 1%p 이내 악화 허용
-        ret_better = p1["total_return"] >= base["total_return"]
-        sharpe_better = p1["sharpe"] >= base["sharpe"]
+        print(f"\n{'=' * 70}")
+        print(f"  비교 2: C_new vs P2 (수급 가속도)")
+        print(f"{'=' * 70}")
+        w2 = compare_results(base, p2, "P2 (가속도)")
 
-        wins = sum([pf_better, mdd_safe, ret_better, sharpe_better])
-        print(f"    PF 개선:       {'PASS' if pf_better else 'FAIL'} ({base['pf']:.2f} → {p1['pf']:.2f})")
-        print(f"    MDD 안전:      {'PASS' if mdd_safe else 'FAIL'} ({base['mdd']:.1f}% → {p1['mdd']:.1f}%)")
-        print(f"    수익률 개선:   {'PASS' if ret_better else 'FAIL'} ({base['total_return']:+.1f}% → {p1['total_return']:+.1f}%)")
-        print(f"    Sharpe 개선:   {'PASS' if sharpe_better else 'FAIL'} ({base['sharpe']:.2f} → {p1['sharpe']:.2f})")
-
-        if wins >= 3:
-            print(f"\n  결론: PASS ({wins}/4) — Phase 1 확신 사이징 채택 가능")
-        elif wins >= 2:
-            print(f"\n  결론: 부분 개선 ({wins}/4) — 파라미터 미세 조정 후 재검토")
+        print(f"\n{'=' * 70}")
+        print(f"  최종 결론")
+        print(f"{'=' * 70}")
+        if w2 > w1:
+            print(f"  P2 (수급 가속도) 승: {w2}/4 > P1 {w1}/4")
+        elif w1 > w2:
+            print(f"  P1 (Grade) 승: {w1}/4 > P2 {w2}/4")
         else:
-            print(f"\n  결론: FAIL ({wins}/4) — 확신 사이징 효과 없음, 기존 유지")
+            print(f"  P1 = P2 동점: 둘 다 {w1}/4")
+        if max(w1, w2) < 3:
+            print(f"  → 두 방식 모두 v10.3 현행 유지 권장")
 
 
 if __name__ == "__main__":
