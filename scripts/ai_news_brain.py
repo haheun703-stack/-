@@ -45,6 +45,53 @@ PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_PATH = DATA_DIR / "ai_brain_judgment.json"
 SETTINGS_PATH = PROJECT_ROOT / "config" / "settings.yaml"
+VALUE_CHAIN_PATH = DATA_DIR / "value_chain_relay.json"
+
+
+# ──────────────────────────────────────────
+# 밸류체인 요약 (AI 컨텍스트용)
+# ──────────────────────────────────────────
+
+def build_value_chain_context() -> str:
+    """value_chain_relay.json에서 섹터별 대장주/소부장 요약 추출.
+
+    ~300토큰 이내로 압축된 텍스트를 반환.
+    파일이 없거나 에러 시 빈 문자열 반환 (안전).
+    """
+    if not VALUE_CHAIN_PATH.exists():
+        logger.info("밸류체인 파일 없음 — 컨텍스트 생략")
+        return ""
+
+    try:
+        with open(VALUE_CHAIN_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        logger.warning("밸류체인 파일 로드 실패: %s", e)
+        return ""
+
+    lines = []
+    for sector in data.get("fired_sectors", []):
+        name = sector.get("sector", "")
+        leaders = ", ".join(l["name"] for l in sector.get("leaders", []))
+        cands = sector.get("candidates", [])[:5]
+        suppliers = ", ".join(c["name"] for c in cands)
+        if leaders:
+            line = f"  {name} | 대장: {leaders}"
+            if suppliers:
+                line += f" | 소부장: {suppliers}"
+            lines.append(line)
+
+    for sector in data.get("unfired_sectors", []):
+        name = sector.get("sector", "")
+        leaders = ", ".join(l["name"] for l in sector.get("leaders", []))
+        if leaders:
+            lines.append(f"  {name} | 대장: {leaders} | (미발화)")
+
+    if not lines:
+        return ""
+
+    logger.info("밸류체인 컨텍스트: %d개 섹터 로드", len(lines))
+    return "\n".join(lines)
 
 
 # ──────────────────────────────────────────
@@ -400,17 +447,24 @@ async def run_daily_analysis(cfg: dict) -> dict:
     universe = build_universe()
     logger.info("유니버스: %d종목, 최대 판단: %d개", len(universe), max_judgments)
 
-    # 3. AI 분석
-    agent = NewsBrainAgent(model=model)
-    result = await agent.analyze_daily_news(news, universe, max_judgments=max_judgments)
+    # 3. 밸류체인 컨텍스트 빌드
+    vc_context = build_value_chain_context()
 
-    # 4. 메타데이터 추가
+    # 4. AI 분석
+    agent = NewsBrainAgent(model=model)
+    result = await agent.analyze_daily_news(
+        news, universe,
+        max_judgments=max_judgments,
+        value_chain_context=vc_context,
+    )
+
+    # 5. 메타데이터 추가
     result["date"] = datetime.now().strftime("%Y-%m-%d")
     result["generated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     result["model"] = model
     result["news_count"] = len(news)
 
-    # 5. JSON 저장
+    # 6. JSON 저장
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     logger.info("저장 완료: %s", OUTPUT_PATH)

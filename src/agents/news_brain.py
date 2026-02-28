@@ -37,6 +37,7 @@ SYSTEM_PROMPT = """\
 3. ticker는 반드시 6자리 숫자 문자열로 작성하세요 (예: "005930").
 4. 최대 {max_judgments}개 종목까지 판단하세요. 가능한 많이 판단하되 근거 없는 종목은 제외하세요.
 5. 근거가 불충분하면 WATCH로 분류하세요. 추측으로 BUY 하지 마세요.
+6. 밸류체인 정보는 뉴스 해석의 맥락 참고용입니다. 소부장 종목에 대해 밸류체인 연관성만으로 BUY/AVOID 판단을 하지 마세요. 소부장 관련 뉴스가 직접 존재할 때만 해당 섹터와의 연관성을 분석에 포함하세요.
 
 ## 출력 형식
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.
@@ -77,12 +78,14 @@ class NewsBrainAgent(BaseAgent):
         news_items: list[dict],
         universe: dict[str, str],
         max_judgments: int = 50,
+        value_chain_context: str = "",
     ) -> dict:
         """50~70개 뉴스를 종합 분석하여 종목별 판단 생성.
 
         Args:
             news_items: 뉴스 리스트 [{title, summary, source, category, ...}]
             universe: ticker→name 매핑 (예: {"005930": "삼성전자"})
+            value_chain_context: 섹터별 대장주/소부장 요약 텍스트 (맥락 참고용)
 
         Returns:
             AI 판단 결과 dict
@@ -108,10 +111,19 @@ class NewsBrainAgent(BaseAgent):
                     news_text += f" | 영향: {impact}"
                 news_text += "\n"
 
+        # 밸류체인 컨텍스트 블록 (있을 때만 삽입)
+        vc_block = ""
+        if value_chain_context:
+            vc_block = f"""
+## 참고: 섹터별 밸류체인 구조
+{value_chain_context}
+※ 위 정보는 뉴스 해석의 맥락 참고용. 소부장 뉴스가 직접 없으면 해당 종목을 언급하지 마세요.
+"""
+
         user_prompt = f"""\
 ## 투자 유니버스 ({len(universe)}종목)
 {universe_text}
-
+{vc_block}
 ## 오늘의 뉴스 ({len(news_items)}건)
 {news_text}
 
