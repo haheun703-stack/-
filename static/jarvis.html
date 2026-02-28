@@ -1352,6 +1352,208 @@ function renderETF() {
 
   let html = '';
 
+  // ═══════════════════════════════════════
+  //  ETF 3축 로테이션 전략 패널
+  // ═══════════════════════════════════════
+  const rot = D.etf_rotation || {};
+  if (rot.regime) {
+    const regime = rot.regime || 'CAUTION';
+    const alloc = rot.allocation || {};
+    const sectorR = rot.sector_result || {};
+    const levR = rot.leverage_result || {};
+    const idxR = rot.index_result || {};
+    const predR = rot.predator_result || {};
+    const riskR = rot.risk_check || {};
+    const aiF = rot.ai_filter || {};
+    const oq = rot.order_queue || [];
+
+    const regColor = regime==='BULL'?'#10B981':regime==='CAUTION'?'#F59E0B':regime==='BEAR'?'#EF4444':'#991B1B';
+
+    // 헤더: 레짐 + 비중 매트릭스
+    html += `<div style="padding:14px 16px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.06));border:1px solid rgba(99,102,241,0.2);border-radius:12px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#A5B4FC">\u26A1 ETF 3\uCD95 \uB85C\uD14C\uC774\uC158</div>
+          <div style="font-size:11px;color:#6B7280;margin-top:2px">${rot.timestamp ? rot.timestamp.slice(0,16) : ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="padding:4px 12px;border-radius:20px;font-weight:800;font-size:13px;background:${regColor}20;color:${regColor};border:1px solid ${regColor}40">${regime}</span>
+          <span style="font-size:11px;color:${riskR.level==='OK'?'#10B981':riskR.level==='WARNING'?'#F59E0B':'#EF4444'};font-weight:600">${riskR.passed?'\u2705':'\u26A0\uFE0F'} ${riskR.level||''}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        ${['sector','leverage','index','cash'].map(k => {
+          const v = alloc[k] || 0;
+          const lbl = k==='sector'?'\uC139\uD130':k==='leverage'?'\uB808\uBC84\uB9AC\uC9C0':k==='index'?'\uC9C0\uC218':'\uD604\uAE08';
+          const c = k==='cash'?'#6B7280':v>0?'#A5B4FC':'#4B5563';
+          return `<div style="flex:1;min-width:65px;padding:6px 8px;background:rgba(255,255,255,0.03);border:1px solid ${c}30;border-radius:8px;text-align:center">
+            <div style="font-size:10px;color:#6B7280">${lbl}</div>
+            <div style="font-size:16px;font-weight:800;color:${c};font-family:var(--mono)">${v}%</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+    // 주문 큐 — 핵심 액션
+    if (oq.length > 0) {
+      html += `<div style="margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:#10B981;margin-bottom:8px">\uD83D\uDCCB \uC8FC\uBB38 \uD050 (${oq.length}\uAC74)</div>`;
+      oq.forEach((o,i) => {
+        const axC = o.axis==='sector'?'#6366F1':o.axis==='leverage'?'#8B5CF6':'#06B6D4';
+        const axL = o.axis==='sector'?'\uC139\uD130':o.axis==='leverage'?'\uB808\uBC84':'\uC9C0\uC218';
+        const actC = o.action==='BUY'?'#10B981':'#EF4444';
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${actC}06;border:1px solid ${actC}15;border-radius:8px;margin-bottom:4px">
+          <span style="font-size:16px;font-weight:900;color:${actC};width:20px;text-align:center">${i+1}</span>
+          <span style="padding:2px 8px;font-size:9px;font-weight:700;background:${axC}20;color:${axC};border-radius:4px">${axL}</span>
+          <div style="flex:1">
+            <span style="color:#E5E7EB;font-weight:700;font-size:13px">${esc(o.name)}</span>
+            <span style="font-size:10px;color:#6B7280;margin-left:4px">${esc(o.code)}</span>
+            <div style="font-size:10px;color:#9CA3AF;margin-top:1px">${esc(o.reason||'')}</div>
+          </div>
+          <div style="text-align:right">
+            <span style="padding:2px 8px;font-size:11px;font-weight:700;background:${actC}20;color:${actC};border-radius:4px">${o.action}</span>
+            <div style="font-size:12px;font-weight:800;color:${actC};font-family:var(--mono);margin-top:2px">${o.target_weight_pct}%</div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    // AI 필터 결과
+    if (aiF.stats) {
+      const st = aiF.stats;
+      const warns = aiF.warnings || [];
+      const held = aiF.held || [];
+      const killed = aiF.killed || [];
+      html += `<div style="padding:10px 14px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.12);border-radius:8px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;font-weight:700;color:#F59E0B">\uD83E\uDDE0 AI \uD544\uD130</span>
+          <span style="font-size:11px;color:#9CA3AF">\uD1B5\uACFC ${st.pass} \u00B7 \uBCF4\uB958 ${st.hold} \u00B7 \uCC28\uB2E8 ${st.kill}</span>
+        </div>`;
+      if (held.length > 0) {
+        held.forEach(h => {
+          html += `<div style="margin-top:6px;padding:6px 10px;background:rgba(245,158,11,0.06);border-radius:6px;font-size:11px">
+            <span style="color:#F59E0B;font-weight:600">HOLD</span> <span style="color:#E5E7EB;font-weight:600">${esc(h.name)}</span>
+            <div style="color:#9CA3AF;margin-top:2px;font-size:10px">${esc(h.ai_reason||'')}</div>
+          </div>`;
+        });
+      }
+      if (killed.length > 0) {
+        killed.forEach(k => {
+          html += `<div style="margin-top:6px;padding:6px 10px;background:rgba(239,68,68,0.06);border-radius:6px;font-size:11px">
+            <span style="color:#EF4444;font-weight:600">KILL</span> <span style="color:#E5E7EB;font-weight:600">${esc(k.name)}</span>
+            <div style="color:#9CA3AF;margin-top:2px;font-size:10px">${esc(k.ai_reason||'')}</div>
+          </div>`;
+        });
+      }
+      if (warns.length > 0) {
+        html += '<div style="margin-top:6px">';
+        warns.forEach(w => {
+          html += `<div style="font-size:10px;color:#F59E0B;margin-top:2px">\u26A0 ${esc(w)}</div>`;
+        });
+        html += '</div>';
+      }
+      if (aiF.market_assessment) {
+        html += `<div style="font-size:10px;color:#6B7280;margin-top:4px;font-style:italic">${esc(aiF.market_assessment)}</div>`;
+      }
+      html += '</div>';
+    }
+
+    // 3축 상세 — 섹터 + 레버리지 + 지수
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
+
+    // 축1: 섹터
+    const sBuy = sectorR.buy_candidates || [];
+    html += `<div style="flex:1;min-width:180px;padding:10px 12px;background:rgba(99,102,241,0.04);border:1px solid rgba(99,102,241,0.12);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:#6366F1;margin-bottom:6px">\uD83C\uDFAF \uCD951 \uC139\uD130 (${alloc.sector||0}%)</div>`;
+    if (sBuy.length > 0) {
+      sBuy.forEach(s => {
+        html += `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+          <div style="color:#E5E7EB;font-weight:600;font-size:12px">${esc(s.name)} <span style="color:#6B7280;font-size:10px">${esc(s.sector)}</span></div>
+          <div style="font-size:10px;color:#9CA3AF">${esc(s.reason||'')}</div>
+        </div>`;
+      });
+    } else {
+      html += '<div style="font-size:11px;color:#6B7280">\uB9E4\uC218 \uD6C4\uBCF4 \uC5C6\uC74C</div>';
+    }
+    html += '</div>';
+
+    // 축2: 레버리지
+    const levD = levR.decision || {};
+    const levSig = levD.signal || 'NO_ENTRY';
+    const levSigC = levSig==='BUY'?'#10B981':levSig==='SELL'?'#EF4444':'#6B7280';
+    html += `<div style="flex:1;min-width:180px;padding:10px 12px;background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.12);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:#8B5CF6;margin-bottom:6px">\uD83D\uDE80 \uCD952 \uB808\uBC84\uB9AC\uC9C0 (${alloc.leverage||0}%)</div>
+      <div style="padding:2px 8px;display:inline-block;font-size:11px;font-weight:700;background:${levSigC}15;color:${levSigC};border-radius:4px">${levSig}</div>
+      ${levD.etf_name ? `<div style="color:#E5E7EB;font-weight:600;font-size:12px;margin-top:4px">${esc(levD.etf_name)}</div>` : ''}
+      <div style="font-size:10px;color:#9CA3AF;margin-top:2px">${esc(levD.reason||'')}</div>
+    </div>`;
+
+    // 축3: 지수
+    const idxTargets = idxR.targets || [];
+    html += `<div style="flex:1;min-width:180px;padding:10px 12px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.12);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:#06B6D4;margin-bottom:6px">\uD83C\uDFE0 \uCD953 \uC9C0\uC218 (${alloc.index||0}%)</div>`;
+    if (idxTargets.length > 0) {
+      idxTargets.forEach(t => {
+        const tActC = t.action==='BUY'?'#10B981':t.action==='SELL'?'#EF4444':'#F59E0B';
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+          <span style="color:#E5E7EB;font-weight:600;font-size:11px">${esc(t.name)}</span>
+          <span style="font-size:11px;font-weight:700;color:${tActC};font-family:var(--mono)">${t.action} ${t.target_weight_pct}%</span>
+        </div>`;
+      });
+    } else {
+      html += '<div style="font-size:11px;color:#6B7280">\uD3EC\uC9C0\uC158 \uC5C6\uC74C</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+
+    // 프레데터 엔진 — 가속도 TOP 5
+    const convictions = predR.convictions || [];
+    const accel = (predR.accelerations || []).slice(0, 5);
+    const evtTriggers = predR.event_triggers || [];
+    if (convictions.length > 0 || accel.length > 0) {
+      html += `<div style="padding:10px 14px;background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.12);border-radius:8px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:#EF4444;margin-bottom:6px">\uD83E\uDD85 \uD504\uB808\uB370\uD130 \u2014 \uC139\uD130 \uAC00\uC18D\uB3C4</div>`;
+      if (convictions.length > 0) {
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">';
+        convictions.forEach(c => {
+          const lvlC = c.level==='HIGH'?'#EF4444':c.level==='MID'?'#F59E0B':'#6B7280';
+          html += `<div style="padding:6px 10px;background:${lvlC}08;border:1px solid ${lvlC}18;border-radius:6px;min-width:100px">
+            <div style="font-size:12px;font-weight:700;color:#E5E7EB">${esc(c.sector)}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+              <span style="font-size:10px;font-weight:600;color:${lvlC}">${c.level} ${c.weight_pct}%</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${lvlC}">${num(c.score)}</span>
+            </div>
+            <div style="font-size:9px;color:#6B7280;margin-top:2px">${(c.reasons||[]).join(', ')}</div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      if (accel.length > 0) {
+        html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px;font-family:var(--mono)">';
+        html += '<tr style="color:#6B7280"><th style="text-align:left;padding:2px 4px">\uC139\uD130</th><th style="text-align:right;padding:2px 4px">\uC21C\uC704</th><th style="text-align:right;padding:2px 4px">\uBCC0\uB3D9</th><th style="text-align:right;padding:2px 4px">\uAC00\uC18D\uB3C4</th></tr>';
+        accel.forEach(a => {
+          const chgC = a.rank_change > 0 ? '#10B981' : a.rank_change < 0 ? '#EF4444' : '#6B7280';
+          html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.03)">
+            <td style="padding:2px 4px;color:#E5E7EB;font-weight:600">${esc(a.sector)}</td>
+            <td style="padding:2px 4px;text-align:right;color:#9CA3AF">${a.current_rank}</td>
+            <td style="padding:2px 4px;text-align:right;color:${chgC};font-weight:700">${a.rank_change>0?'+':''}${a.rank_change}</td>
+            <td style="padding:2px 4px;text-align:right;color:${a.acceleration_score>=55?'#EF4444':a.acceleration_score>=45?'#F59E0B':'#6B7280'};font-weight:700">${num(a.acceleration_score)}</td>
+          </tr>`;
+        });
+        html += '</table></div>';
+      }
+      if (evtTriggers.length > 0) {
+        const smCount = evtTriggers.filter(t => t.triggered).length;
+        html += `<div style="font-size:10px;color:#F59E0B;margin-top:6px">\u26A1 \uC2A4\uB9C8\uD2B8\uB9C8\uB2C8 \uD2B8\uB9AC\uAC70 ${smCount}\uAC74: ${evtTriggers.filter(t=>t.triggered).map(t=>esc(t.sector)).join(', ')}</div>`;
+      }
+      html += '</div>';
+    }
+
+    // 구분선
+    html += '<div style="border-top:1px solid rgba(99,102,241,0.15);margin:16px 0;padding-top:4px"></div>';
+  }
+
   // ── ETF 추천종목 (etf_master 기반) ──
   if (allMaster.length > 0) {
     const hotBuy = allMaster.filter(e => e.grade === 'HOT\uB9E4\uC218');

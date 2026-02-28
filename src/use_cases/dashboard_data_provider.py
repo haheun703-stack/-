@@ -72,6 +72,7 @@ class DashboardDataProvider:
             "accumulation_tracker": self._load_json("accumulation_tracker.json"),
             "market_intelligence": self._load_json("market_intelligence.json"),
             "value_chain": self._load_json("value_chain_relay.json"),
+            "etf_rotation": self._load_json("etf_rotation_result.json"),
             "summary": summary,
         }
 
@@ -89,6 +90,9 @@ class DashboardDataProvider:
 
     def get_us_overnight(self) -> dict:
         return self._load_json("us_market/overnight_signal.json")
+
+    def get_etf_rotation(self) -> dict:
+        return self._load_json("etf_rotation_result.json")
 
     def clear_cache(self) -> None:
         """캐시 강제 초기화."""

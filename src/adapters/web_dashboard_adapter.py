@@ -188,6 +188,12 @@ async def get_etf():
     return provider.get_etf()
 
 
+@app.get("/api/etf-rotation")
+async def get_etf_rotation():
+    """ETF 3축 로테이션 결과."""
+    return _sanitize(provider.get_etf_rotation())
+
+
 @app.get("/api/quantum")
 async def get_quantum():
     """Quantum 스캔 후보."""
@@ -416,6 +422,7 @@ async def sync_data(request: Request):
         "accumulation_tracker.json",
         "market_intelligence.json",
         "value_chain_relay.json",
+        "etf_rotation_result.json",
     }
     if target not in safe_names:
         return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)
