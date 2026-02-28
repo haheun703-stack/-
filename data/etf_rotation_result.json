@@ -76,6 +76,335 @@
     "ma_adjustment": 1.0,
     "summary": "[지수 ETF] CAUTION / 목표 30.0% | KODEX 200: BUY | KODEX MSCI Korea TR: BUY"
   },
+  "predator_result": {
+    "accelerations": [
+      {
+        "sector": "IT",
+        "code": "",
+        "current_rank": 1,
+        "prev_rank": 7,
+        "rank_change": 6,
+        "acceleration_score": 63.83,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "건설",
+        "code": "",
+        "current_rank": 2,
+        "prev_rank": 4,
+        "rank_change": 2,
+        "acceleration_score": 55.76,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "에너지화학",
+        "code": "",
+        "current_rank": 6,
+        "prev_rank": 10,
+        "rank_change": 4,
+        "acceleration_score": 54.98,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "현대차그룹",
+        "code": "",
+        "current_rank": 7,
+        "prev_rank": 11,
+        "rank_change": 4,
+        "acceleration_score": 53.9,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "반도체",
+        "code": "",
+        "current_rank": 4,
+        "prev_rank": 6,
+        "rank_change": 2,
+        "acceleration_score": 53.62,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "삼성그룹",
+        "code": "",
+        "current_rank": 5,
+        "prev_rank": 5,
+        "rank_change": 0,
+        "acceleration_score": 49.05,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "증권",
+        "code": "",
+        "current_rank": 3,
+        "prev_rank": 1,
+        "rank_change": -2,
+        "acceleration_score": 47.69,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "방산",
+        "code": "",
+        "current_rank": 13,
+        "prev_rank": 17,
+        "rank_change": 4,
+        "acceleration_score": 47.48,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "철강소재",
+        "code": "",
+        "current_rank": 11,
+        "prev_rank": 13,
+        "rank_change": 2,
+        "acceleration_score": 46.12,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "보험",
+        "code": "",
+        "current_rank": 8,
+        "prev_rank": 8,
+        "rank_change": 0,
+        "acceleration_score": 45.83,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "조선",
+        "code": "",
+        "current_rank": 16,
+        "prev_rank": 19,
+        "rank_change": 3,
+        "acceleration_score": 43.58,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "헬스케어",
+        "code": "",
+        "current_rank": 14,
+        "prev_rank": 16,
+        "rank_change": 2,
+        "acceleration_score": 42.9,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "2차전지",
+        "code": "",
+        "current_rank": 10,
+        "prev_rank": 9,
+        "rank_change": -1,
+        "acceleration_score": 41.94,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "소프트웨어",
+        "code": "",
+        "current_rank": 19,
+        "prev_rank": 20,
+        "rank_change": 1,
+        "acceleration_score": 40.08,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "바이오",
+        "code": "",
+        "current_rank": 18,
+        "prev_rank": 18,
+        "rank_change": 0,
+        "acceleration_score": 38.33,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "인터넷",
+        "code": "",
+        "current_rank": 15,
+        "prev_rank": 14,
+        "rank_change": -1,
+        "acceleration_score": 36.58,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "게임",
+        "code": "",
+        "current_rank": 17,
+        "prev_rank": 14,
+        "rank_change": -3,
+        "acceleration_score": 33.08,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "금융",
+        "code": "",
+        "current_rank": 9,
+        "prev_rank": 2,
+        "rank_change": -7,
+        "acceleration_score": 32.51,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "은행",
+        "code": "",
+        "current_rank": 12,
+        "prev_rank": 3,
+        "rank_change": -9,
+        "acceleration_score": 25.8,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      },
+      {
+        "sector": "미디어",
+        "code": "",
+        "current_rank": 20,
+        "prev_rank": 12,
+        "rank_change": -8,
+        "acceleration_score": 24.33,
+        "ret_5d": 0,
+        "ret_20d": 0,
+        "ret_60d": 0
+      }
+    ],
+    "convictions": [
+      {
+        "sector": "IT",
+        "code": "",
+        "level": "HIGH",
+        "score": 78.83,
+        "weight_pct": 10.0,
+        "reasons": [
+          "확신 HIGH",
+          "가속도 64점",
+          "기관 순매수",
+          "순위 6단계 급상승"
+        ]
+      },
+      {
+        "sector": "건설",
+        "code": "",
+        "level": "HIGH",
+        "score": 80.75999999999999,
+        "weight_pct": 10.0,
+        "reasons": [
+          "확신 HIGH",
+          "가속도 56점",
+          "외인+기관 동시매수",
+          "스텔스 매집"
+        ]
+      },
+      {
+        "sector": "에너지화학",
+        "code": "",
+        "level": "HIGH",
+        "score": 84.97999999999999,
+        "weight_pct": 10.0,
+        "reasons": [
+          "확신 HIGH",
+          "가속도 55점",
+          "외인+기관 동시매수",
+          "스텔스 매집",
+          "순위 4단계 상승"
+        ]
+      }
+    ],
+    "event_triggers": [
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "2차전지",
+        "reason": "2차전지 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "현대차그룹",
+        "reason": "현대차그룹 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "조선",
+        "reason": "조선 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "에너지화학",
+        "reason": "에너지화학 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "바이오",
+        "reason": "바이오 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "철강소재",
+        "reason": "철강소재 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "헬스케어",
+        "reason": "헬스케어 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "방산",
+        "reason": "방산 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "미디어",
+        "reason": "미디어 스마트머니 스텔스 매집 감지"
+      },
+      {
+        "triggered": true,
+        "trigger_type": "SMART_MONEY",
+        "sector": "건설",
+        "reason": "건설 스마트머니 스텔스 매집 감지"
+      }
+    ],
+    "summary": "[프레데터] 가속도 TOP3: IT(64) > 건설(56) > 에너지화학(55) | 배분: IT HIGH(10.0%) | 건설 HIGH(10.0%) | 에너지화학 HIGH(10.0%) | 트리거: 10건 발동"
+  },
   "risk_check": {
     "passed": true,
     "level": "OK",
@@ -83,6 +412,36 @@
     "summary": "✅ [리스크] 정상 - 모든 체크 통과"
   },
   "order_queue": [
+    {
+      "axis": "sector",
+      "code": "157500",
+      "name": "TIGER 증권",
+      "action": "BUY",
+      "target_weight_pct": 15.0,
+      "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점",
+      "priority": 2
+    },
+    {
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
+      "action": "BUY",
+      "target_weight_pct": 21.0,
+      "reason": "신규 진입: 목표 21.0%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 9.0,
+      "reason": "신규 진입: 목표 9.0%",
+      "priority": 3
+    }
+  ],
+  "timestamp": "2026-02-28T23:38:06.483189",
+  "order_queue_original": [
     {
       "axis": "sector",
       "code": "139220",
@@ -120,5 +479,34 @@
       "priority": 3
     }
   ],
-  "timestamp": "2026-02-28T22:39:53.933726"
+  "ai_filter": {
+    "stats": {
+      "total": 4,
+      "pass": 3,
+      "kill": 0,
+      "hold": 1
+    },
+    "killed": [],
+    "held": [
+      {
+        "axis": "sector",
+        "code": "139220",
+        "name": "TIGER 200 건설",
+        "action": "BUY",
+        "target_weight_pct": 15.0,
+        "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수",
+        "priority": 2,
+        "ai_verdict": "HOLD",
+        "ai_reason": "모멘텀 2위이나 뉴스에서 건설 관련 호재 없고, 금리 동결 전망으로 부동산/건설 섹터에 즉각적 촉매 부재. Smart Money 유입은 긍정적이나 CAUTION 레짐에서 교체 연기 권고.",
+        "ai_confidence": 0.7
+      }
+    ],
+    "warnings": [
+      "미국 10년물 금리 4.06% 상승세로 성장주/기술주 밸류에이션 압박 가능성 주의",
+      "Nvidia 실적 발표(2/26 장 마감 후) 결과에 따라 국내 반도체/IT 섹터 변동성 확대 가능",
+      "CAUTION 레짐에서 레버리지 0% 유지는 적절하나, 건설 섹터는 추가 모니터링 필요"
+    ],
+    "market_assessment": "미국 기술주 강세와 국내 AI/방산 테마 부각되나 금리 상승 압력과 CAUTION 레짐으로 신중한 진입 필요",
+    "risk_level": "medium"
+  }
 }

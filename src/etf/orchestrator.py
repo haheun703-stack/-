@@ -162,7 +162,7 @@ class ETFOrchestrator:
             print(f"   📭 주문 없음")
 
         # Step 7: 텔레그램 리포트
-        telegram_report = self._build_telegram_report(allocation, sector_result, leverage_result, index_result, risk_check, order_queue)
+        telegram_report = self._build_telegram_report(allocation, sector_result, leverage_result, index_result, risk_check, order_queue, predator_result)
 
         result = {
             "regime": self.current_regime,
@@ -252,7 +252,7 @@ class ETFOrchestrator:
             exposure[sector] = exposure.get(sector, 0) + 10
         return exposure
 
-    def _build_telegram_report(self, allocation, sector_result, leverage_result, index_result, risk_check, order_queue) -> str:
+    def _build_telegram_report(self, allocation, sector_result, leverage_result, index_result, risk_check, order_queue, predator_result=None) -> str:
         lines = []
         lines.append("━" * 28)
         lines.append("🤖 ETF 3축 로테이션 리포트")
@@ -277,6 +277,32 @@ class ETFOrchestrator:
         if sell_sigs:
             for s in sell_sigs:
                 lines.append(f"  📉 {s['name']} SELL - {s['reason']}")
+
+        # 프레데터 모드
+        if predator_result:
+            lines.append(f"\n🦅 [프레데터 모드]")
+            # 가속도 TOP 3
+            accels = predator_result.get("accelerations", [])[:3]
+            if accels:
+                accel_str = " > ".join([f"{a['sector']}({a['acceleration_score']:.0f})" for a in accels])
+                lines.append(f"  가속도: {accel_str}")
+
+            # 확신도 배분
+            convictions = predator_result.get("convictions", [])
+            if convictions:
+                for c in convictions:
+                    level_emoji = {"HIGH": "🔥", "MID": "📌", "LOW": "📎"}.get(c["level"], "")
+                    lines.append(f"  {level_emoji} {c['sector']} {c['level']} → {c['weight_pct']:.1f}%")
+                    if c.get("reasons"):
+                        lines.append(f"     {', '.join(c['reasons'][:3])}")
+
+            # 이벤트 트리거
+            triggers = predator_result.get("event_triggers", [])
+            if triggers:
+                for t in triggers:
+                    lines.append(f"  ⚡ {t['trigger_type']}: {t['reason']}")
+            else:
+                lines.append(f"  트리거: 없음 (정상)")
 
         # 레버리지
         lines.append(f"\n⚡ [레버리지]")

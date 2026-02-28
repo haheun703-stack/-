@@ -147,6 +147,10 @@ def main():
     print(f"  📊 레버리지 5축: {data['five_axis_score']:.0f}점")
     if data["individual_sectors"]:
         print(f"  📊 개별주 섹터: {data['individual_sectors']}")
+    if data.get("prev_momentum"):
+        print(f"  📊 프레데터 prev_momentum: {len(data['prev_momentum'])}개 섹터")
+    if data.get("sector_returns_1d"):
+        print(f"  📊 섹터 1일 수익률: {len(data['sector_returns_1d'])}개")
 
     # ---- 2. 오케스트레이터 실행 ----
     orchestrator = ETFOrchestrator()
@@ -160,6 +164,10 @@ def main():
         us_overnight=data["us_overnight"],
         five_axis_score=data["five_axis_score"],
         individual_stock_sectors=data["individual_sectors"],
+        # 프레데터 모드 데이터
+        prev_momentum_data=data.get("prev_momentum"),
+        sector_returns_1d=data.get("sector_returns_1d"),
+        supply_flow_data=data.get("supply_flow"),
     )
 
     # ---- 2.5. AI 필터 레이어 ----

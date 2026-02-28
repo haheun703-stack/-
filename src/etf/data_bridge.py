@@ -539,6 +539,112 @@ def load_individual_stock_sectors() -> set[str]:
 
 
 # ============================================================
+# 8. 프레데터 모드 데이터
+# ============================================================
+def load_prev_momentum(lookback_days: int = 5) -> dict:
+    """N일 전 모멘텀 순위 데이터 로드 (프레데터 가속도 계산용).
+
+    Returns:
+        {sector: {"rank": int, "ret_5": float, "ret_20": float,
+                  "ret_60": float, "momentum_score": float, "code": str}}
+    """
+    hist_path = DATA_DIR / "sector_rotation" / "momentum" / "momentum_history.parquet"
+    if not hist_path.exists():
+        logger.warning("프레데터: momentum_history.parquet 없음 → 빈 딕셔너리")
+        return {}
+
+    try:
+        df = pd.read_parquet(hist_path)
+        dates = sorted(df.index.unique())
+        if len(dates) < lookback_days + 1:
+            logger.warning("프레데터: 히스토리 %d일 — lookback %d일 부족", len(dates), lookback_days)
+            return {}
+
+        target_date = dates[-(lookback_days + 1)]
+        sub = df[df.index == target_date]
+
+        result = {}
+        for _, row in sub.iterrows():
+            sector = row.get("sector", "")
+            result[sector] = {
+                "rank": int(row.get("rank", 99)),
+                "ret_5": float(row.get("ret_5", 0)),
+                "ret_20": float(row.get("ret_20", 0)),
+                "ret_60": float(row.get("ret_60", 0)),
+                "momentum_score": float(row.get("momentum_score", 50)),
+                "code": str(row.get("etf_code", "")),
+            }
+        logger.info("프레데터 prev_momentum: %s 기준 %d개 섹터", target_date.strftime("%Y-%m-%d"), len(result))
+        return result
+    except Exception as e:
+        logger.error("프레데터 prev_momentum 로드 실패: %s", e)
+        return {}
+
+
+def load_sector_returns_1d() -> dict[str, float]:
+    """섹터 ETF 1일 수익률 계산 (프레데터 이벤트 트리거용).
+
+    Returns:
+        {sector: 1일 수익률 %}
+    """
+    etf_dir = _PATHS["etf_daily_dir"]
+    if not etf_dir.exists():
+        return {}
+
+    universe_raw = _safe_json_load(_PATHS["universe_json"])
+    if not universe_raw:
+        return {}
+
+    result = {}
+    for sector, info in universe_raw.items():
+        code = info.get("etf_code", "")
+        parquet_path = etf_dir / f"{code}.parquet"
+        if not parquet_path.exists():
+            continue
+
+        try:
+            df = pd.read_parquet(parquet_path)
+            close_col = _resolve_column(df, "close")
+            if not close_col or len(df) < 2:
+                continue
+            closes = df[close_col].values
+            ret_1d = (closes[-1] / closes[-2] - 1) * 100
+            result[sector] = round(float(ret_1d), 2)
+        except Exception:
+            continue
+
+    return result
+
+
+def load_supply_flow_for_predator() -> dict:
+    """수급 데이터를 프레데터 엔진 형식으로 변환.
+
+    Returns:
+        {sector: {"foreign_cum_bil": float, "inst_cum_bil": float, "stealth_buying": bool}}
+    """
+    raw = _safe_json_load(_PATHS["flow_json"])
+    if not raw or not raw.get("sectors"):
+        return {}
+
+    result = {}
+    for s in raw["sectors"]:
+        sector = s.get("sector", "")
+        foreign_bil = s.get("foreign_cum_bil", 0)
+        inst_bil = s.get("inst_cum_bil", 0)
+        # 스텔스 매집 판정: 외인 순매수 + 거래대금 비율 낮음 (필드 있으면)
+        stealth = s.get("stealth_buying", False)
+        if not stealth and foreign_bil > 300 and inst_bil > 0:
+            stealth = True  # 외인 300억+ & 기관 동반 → 스텔스 추정
+
+        result[sector] = {
+            "foreign_cum_bil": foreign_bil,
+            "inst_cum_bil": inst_bil,
+            "stealth_buying": stealth,
+        }
+    return result
+
+
+# ============================================================
 # 통합 로더
 # ============================================================
 def load_all() -> dict:
@@ -565,4 +671,8 @@ def load_all() -> dict:
         "regime": regime,
         "five_axis_score": load_leverage_5axis(regime["regime"]),
         "individual_sectors": load_individual_stock_sectors(),
+        # 프레데터 모드용
+        "prev_momentum": load_prev_momentum(),
+        "sector_returns_1d": load_sector_returns_1d(),
+        "supply_flow": load_supply_flow_for_predator(),
     }

@@ -63,6 +63,8 @@ SYNC_FILES = [
     "accumulation_tracker.json",
     "market_intelligence.json",
     "value_chain_relay.json",
+    # ETF 3축 로테이션 (프레데터 모드 포함)
+    "etf_rotation_result.json",
 ]
 
 
