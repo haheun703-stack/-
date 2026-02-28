@@ -113,31 +113,61 @@ class SafetyGuard:
     # ──────────────────────────────────────────
 
     def emergency_liquidate(self, tracker, order_port) -> list:
-        """전종목 시장가 청산"""
-        from src.entities.trading_models import ExitReason
+        """전종목 시장가 청산 (최대 3회 재시도)"""
+        import time
+
+        from src.entities.trading_models import ExitReason, OrderStatus
 
         logger.critical("[안전] 긴급 전량 청산 시작!")
         results = []
 
         for pos in list(tracker.positions):
-            try:
-                order = order_port.sell_market(pos.ticker, pos.shares)
-                results.append({
-                    "ticker": pos.ticker,
-                    "shares": pos.shares,
-                    "order": order,
-                })
-                tracker.apply_partial_exit(pos, pos.shares, ExitReason.EMERGENCY)
-                logger.info(
-                    "[긴급청산] %s %d주 시장가 매도 접수", pos.ticker, pos.shares
-                )
-            except Exception as e:
-                logger.error("[긴급청산] %s 매도 실패: %s", pos.ticker, e)
-                results.append({"ticker": pos.ticker, "error": str(e)})
+            success = False
+            for attempt in range(3):
+                try:
+                    order = order_port.sell_market(pos.ticker, pos.shares)
+                    if order.status != OrderStatus.FAILED:
+                        results.append({
+                            "ticker": pos.ticker,
+                            "shares": pos.shares,
+                            "order": order,
+                        })
+                        tracker.apply_partial_exit(pos, pos.shares, ExitReason.EMERGENCY)
+                        logger.info(
+                            "[긴급청산] %s %d주 시장가 매도 접수", pos.ticker, pos.shares,
+                        )
+                        success = True
+                        break
+                    logger.warning(
+                        "[긴급청산] %s 매도 실패 (%d/3): %s",
+                        pos.ticker, attempt + 1, order.message,
+                    )
+                except Exception as e:
+                    logger.error(
+                        "[긴급청산] %s 매도 예외 (%d/3): %s",
+                        pos.ticker, attempt + 1, e,
+                    )
+                time.sleep(2)
+
+            if not success:
+                logger.critical("[긴급청산] %s 3회 재시도 실패 — 수동 매도 필요!", pos.ticker)
+                results.append({"ticker": pos.ticker, "error": "3회 재시도 실패"})
 
         # STOP.signal 생성
         self.create_stop_signal("긴급 전량 청산 (총 손실 한도 초과)")
         logger.critical("[안전] 긴급 전량 청산 완료: %d건 처리", len(results))
+
+        # 긴급 알림 발송 (텔레그램 + 파일 폴백)
+        success_count = sum(1 for r in results if "error" not in r)
+        fail_count = sum(1 for r in results if "error" in r)
+        reason = (f"긴급 전량 청산 실행: 성공 {success_count}건, 실패 {fail_count}건"
+                  f" (총 손실 한도 초과)")
+        try:
+            from src.telegram_sender import send_emergency_alert
+            send_emergency_alert(reason)
+        except Exception as e:
+            logger.error("[안전] 긴급 알림 발송 실패: %s", e)
+
         return results
 
     # ──────────────────────────────────────────

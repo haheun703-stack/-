@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime
+from pathlib import Path
 
 import yaml
 
@@ -113,11 +114,14 @@ class LiveTradingEngine:
                     f"{balance:,.0f}", f"{reserved:,.0f}",
                     self.cash_reserve_pct * 100, f"{usable_cash:,.0f}")
 
-        # 3. 포지션 수 체크
+        # 3. 포지션 수 체크 (KOSPI 레짐 캡 적용)
         current_count = len(self.tracker.positions)
-        available_slots = self.max_positions - current_count
+        regime_slots = self._get_kospi_regime_slots()
+        effective_max = min(self.max_positions, regime_slots)
+        available_slots = effective_max - current_count
         if available_slots <= 0:
-            logger.info("[매수] 최대 포지션 도달 (%d/%d)", current_count, self.max_positions)
+            logger.info("[매수] 최대 포지션 도달 (%d/%d, 레짐 %d슬롯)",
+                        current_count, effective_max, regime_slots)
             return results
 
         # 4. 시그널 정렬 (등급 A→C, zone_score 높은 순)
@@ -225,20 +229,36 @@ class LiveTradingEngine:
             return {"ticker": ticker, "success": False, "reason": "체결 실패/취소"}
 
     def _wait_for_fill(self, order: Order, timeout: int | None = None) -> Order:
-        """체결 대기 (timeout초 후 미체결 시 취소)"""
+        """체결 대기 (timeout초 후 미체결 시 취소, API 오류 시 재시도)"""
         timeout = timeout or self.cancel_after_sec
         start = time.time()
+        api_errors = 0
 
         while time.time() - start < timeout:
-            status = self.order_port.get_order_status(order.order_id)
-            if status.status == OrderStatus.FILLED:
-                order.status = OrderStatus.FILLED
-                order.filled_quantity = status.filled_quantity or order.quantity
-                order.filled_price = status.filled_price or order.price
-                return order
+            try:
+                status = self.order_port.get_order_status(order.order_id)
+                api_errors = 0  # 성공 시 리셋
+
+                if status.status == OrderStatus.FILLED:
+                    order.status = OrderStatus.FILLED
+                    order.filled_quantity = status.filled_quantity or order.quantity
+                    order.filled_price = status.filled_price or order.price
+                    return order
+
+                if status.status == OrderStatus.FAILED:
+                    logger.warning("[대기] %s 상태조회 FAILED 응답 — 재시도", order.ticker)
+            except Exception as e:
+                api_errors += 1
+                logger.warning(
+                    "[대기] %s 상태조회 오류 (%d회): %s", order.ticker, api_errors, e,
+                )
+                if api_errors >= 5:
+                    logger.error("[대기] %s API 오류 5회 연속 — 취소 시도", order.ticker)
+                    break
+
             time.sleep(5)
 
-        # 타임아웃 → 취소
+        # 타임아웃 또는 API 오류 → 취소
         logger.warning("[매수] %s 미체결 %d초 → 취소", order.ticker, timeout)
         self.order_port.cancel(order)
         order.status = OrderStatus.CANCELLED
@@ -483,6 +503,56 @@ class LiveTradingEngine:
 
         except Exception as e:
             logger.debug("[Shakeout] %s 사후 판별 실패: %s", pos.ticker, e)
+
+
+    # ──────────────────────────────────────────
+    # KOSPI 레짐 기반 슬롯 캡
+    # ──────────────────────────────────────────
+
+    def _get_kospi_regime_slots(self) -> int:
+        """KOSPI 레짐 기반 최대 슬롯 수 반환.
+
+        BULL=5, CAUTION=3, BEAR=2, CRISIS=0.
+        데이터 없거나 계산 실패 시 settings의 max_positions 반환.
+        """
+        try:
+            import pandas as pd
+
+            kospi_path = Path("data/kospi_index.csv")
+            if not kospi_path.exists():
+                logger.warning("[레짐] kospi_index.csv 없음 → 기본값 %d", self.max_positions)
+                return self.max_positions
+
+            df = pd.read_csv(kospi_path, parse_dates=["Date"])
+            df = df.sort_values("Date").tail(252)
+            if len(df) < 60:
+                return self.max_positions
+
+            close = df["close"].iloc[-1]
+            ma20 = df["close"].tail(20).mean()
+            ma60 = df["close"].tail(60).mean()
+
+            # RV20 백분위
+            returns = df["close"].pct_change().dropna()
+            rv20 = returns.tail(20).std()
+            rv_series = returns.rolling(20).std().dropna()
+            rv_pct = (rv_series < rv20).mean() if len(rv_series) > 0 else 0.5
+
+            if ma20 == 0 or ma60 == 0:
+                regime, slots = "CAUTION", 3
+            elif close > ma20:
+                regime, slots = ("BULL", 5) if rv_pct < 0.50 else ("CAUTION", 3)
+            elif close > ma60:
+                regime, slots = "BEAR", 2
+            else:
+                regime, slots = "CRISIS", 0
+
+            logger.info("[레짐] KOSPI %.0f (MA20=%.0f, MA60=%.0f, RV%%ile=%.0f%%) → %s(%d슬롯)",
+                        close, ma20, ma60, rv_pct * 100, regime, slots)
+            return slots
+        except Exception as e:
+            logger.warning("[레짐] KOSPI 레짐 계산 실패: %s → 기본값 %d", e, self.max_positions)
+            return self.max_positions
 
 
 def create_live_engine(config_path: str = "config/settings.yaml") -> LiveTradingEngine:

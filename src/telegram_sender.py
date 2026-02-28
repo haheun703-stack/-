@@ -7,6 +7,8 @@
 
 import logging
 import os
+import time as _time
+from datetime import datetime
 from pathlib import Path
 
 import requests
@@ -19,6 +21,9 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+# 긴급 알림 폴백 로그 경로
+ALERT_FALLBACK_PATH = Path(__file__).resolve().parent.parent / "logs" / "emergency_alerts.log"
 
 API_BASE = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 
@@ -68,20 +73,28 @@ def send_message(
         if reply_markup and i == len(chunks) - 1:
             payload["reply_markup"] = reply_markup
 
-        try:
-            resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
-            if resp.status_code == 200 and resp.json().get("ok"):
-                if len(chunks) > 1:
-                    logger.debug(f"텔레그램 전송 성공 ({i+1}/{len(chunks)})")
-            else:
-                logger.error(f"텔레그램 전송 실패: {resp.status_code} {resp.text}")
-                success = False
-        except requests.RequestException as e:
-            logger.error(f"텔레그램 전송 오류: {e}")
+        sent = False
+        for attempt in range(2):  # 1회 재시도
+            try:
+                resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
+                if resp.status_code == 200 and resp.json().get("ok"):
+                    if len(chunks) > 1:
+                        logger.debug(f"텔레그램 전송 성공 ({i+1}/{len(chunks)})")
+                    sent = True
+                    break
+                else:
+                    logger.error(f"텔레그램 전송 실패: {resp.status_code} {resp.text}")
+            except requests.RequestException as e:
+                logger.error(f"텔레그램 전송 오류 ({attempt+1}/2): {e}")
+            if attempt == 0:
+                _time.sleep(3)  # 재시도 전 3초 대기
+        if not sent:
             success = False
 
     if success:
         logger.info(f"텔레그램 메시지 전송 완료 ({len(chunks)}건)")
+    else:
+        _write_fallback_alert(text)
 
     return success
 
@@ -243,10 +256,12 @@ def send_daily_performance(perf) -> bool:
 
 
 def send_emergency_alert(reason: str) -> bool:
-    """긴급 알림 전송."""
+    """긴급 알림 전송 (텔레그램 + 파일 폴백 항상 기록)."""
     from .telegram_formatter import format_emergency_alert
 
     message = format_emergency_alert(reason)
+    # 긴급 알림은 텔레그램 성공 여부와 무관하게 항상 파일에 기록
+    _write_fallback_alert(f"[EMERGENCY] {reason}\n{message}")
     return send_message(message)
 
 
@@ -308,3 +323,22 @@ def _split_message(text: str, max_length: int) -> list[str]:
         chunks.append(current)
 
     return chunks
+
+
+def _write_fallback_alert(text: str) -> None:
+    """텔레그램 전송 실패 시 로컬 파일에 알림 기록 (대체 경로).
+
+    logs/emergency_alerts.log에 타임스탬프와 함께 기록.
+    """
+    try:
+        ALERT_FALLBACK_PATH.parent.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(ALERT_FALLBACK_PATH, "a", encoding="utf-8") as f:
+            f.write(f"\n{'='*60}\n")
+            f.write(f"[{timestamp}] 텔레그램 전송 실패 — 폴백 기록\n")
+            f.write(f"{'='*60}\n")
+            f.write(text)
+            f.write("\n")
+        logger.warning("[폴백] 알림을 %s에 기록했습니다", ALERT_FALLBACK_PATH)
+    except Exception as e:
+        logger.error("[폴백] 파일 기록도 실패: %s", e)

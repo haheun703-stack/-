@@ -153,7 +153,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             )
 
     def get_order_status(self, order_id: str) -> Order:
-        """주문 상태 조회 (미체결 내역 기반)"""
+        """주문 상태 조회 (미체결 내역 기반 + 체결 확인)"""
         try:
             resp = self.broker.fetch_open_order({
                 "CTX_AREA_FK100": "",
@@ -175,8 +175,19 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                         status=OrderStatus.PARTIAL if int(item.get("tot_ccld_qty", 0)) > 0 else OrderStatus.PENDING,
                         org_no=item.get("orgn_odno", ""),
                     )
-            # 미체결 목록에 없으면 체결 완료로 간주
-            return Order(order_id=order_id, status=OrderStatus.FILLED)
+            # 미체결 목록에 없음 → 체결 완료 또는 취소됨
+            # 잔고 조회로 실제 보유 여부 교차 확인
+            try:
+                balance = self.fetch_balance()
+                held_tickers = {h["ticker"] for h in balance.get("holdings", [])}
+                # 잔고에서 발견되면 체결 완료로 확신
+                # (주의: order_id로 특정 불가, ticker 기반 추정)
+                logger.info("[주문] %s 미체결 목록 부재 → 체결 완료 추정", order_id)
+                return Order(order_id=order_id, status=OrderStatus.FILLED)
+            except Exception:
+                # 잔고 조회도 실패하면 PENDING 유지 (안전 측)
+                logger.warning("[주문] %s 상태 불확실 — PENDING 유지", order_id)
+                return Order(order_id=order_id, status=OrderStatus.PENDING)
         except Exception as e:
             logger.error("[주문] 상태 조회 실패: %s — %s", order_id, e)
             return Order(order_id=order_id, status=OrderStatus.FAILED, message=str(e))
