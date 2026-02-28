@@ -1,0 +1,45 @@
+{
+  "standard": {
+    "mode": "standard",
+    "total_return_pct": 12.7,
+    "mdd_pct": -4.23,
+    "pf": 1.33,
+    "win_rate_pct": 33.3,
+    "sharpe": 2.65,
+    "total_trades": 33,
+    "wins": 11,
+    "losses": 22,
+    "avg_profit_pct": 7.43,
+    "avg_loss_pct": 2.79,
+    "stop_losses": 1,
+    "buy_trades": 33,
+    "regime_dist": {
+      "CAUTION": 70.08547008547008,
+      "BULL": 16.23931623931624,
+      "BEAR": 13.675213675213676
+    },
+    "final_value": 112700945
+  },
+  "predator": {
+    "mode": "predator",
+    "total_return_pct": 12.5,
+    "mdd_pct": -3.22,
+    "pf": 3.54,
+    "win_rate_pct": 50.0,
+    "sharpe": 2.74,
+    "total_trades": 38,
+    "wins": 19,
+    "losses": 19,
+    "avg_profit_pct": 10.96,
+    "avg_loss_pct": 3.1,
+    "stop_losses": 2,
+    "buy_trades": 38,
+    "regime_dist": {
+      "CAUTION": 70.08547008547008,
+      "BULL": 16.23931623931624,
+      "BEAR": 13.675213675213676
+    },
+    "final_value": 112502964
+  },
+  "backtest_date": "2026-02-28T23:25:01.021265"
+}

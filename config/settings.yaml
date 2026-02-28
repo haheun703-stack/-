@@ -1350,6 +1350,27 @@ etf_rotation:
       action: close_all
       desc: "BULL→CRISIS 직행 시 익일 시가 전량 청산"
 
+  # 프레데터 모드 — "룰을 깨는 전략"
+  # 1. 모멘텀 가속도: 순위 변화 속도로 "다음 1위"를 선제 매수
+  # 2. 확신 집중: HIGH에 60%, MID에 30%, LOW에 10% 비대칭 배분
+  # 3. 이벤트 트리거: 격주 기본 + 급등/수급폭발/레짐전환 시 즉시 대응
+  predator:
+    enabled: true
+    accel_lookback: 5              # 순위 변화 관찰 기간 (일)
+    accel_weight_recent: 0.6       # 최근 변화 가중치
+    conviction_thresholds:
+      HIGH: 70
+      MID: 45
+      LOW: 25
+    conviction_weights:            # 확신도별 비중 배분 (섹터 전체 대비 %)
+      HIGH: 60
+      MID: 30
+      LOW: 10
+    max_sector_holdings: 3
+    surge_threshold_pct: 5.0       # 이벤트 트리거: 일간 급등 기준 (%)
+    smart_money_threshold_bil: 500 # 이벤트 트리거: 외인 누적 매수 기준 (억)
+    smart_money_consecutive_days: 3
+
   # AI 필터 레이어 (v11)
   # 룰베이스 주문 → AI가 PASS/KILL/HOLD 판단 → 최악 매매만 걸러내기
   # 핵심: AI는 "사라"고 안 함. "사지 마라"만 할 수 있음. 공격은 룰, 방어만 AI.

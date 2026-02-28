@@ -20,6 +20,7 @@ from src.etf.sector_engine import SectorETFEngine
 from src.etf.leverage_engine import LeverageEngine
 from src.etf.index_engine import IndexETFEngine
 from src.etf.risk_manager import ETFRiskManager
+from src.etf.predator_engine import PredatorEngine
 
 
 class ETFOrchestrator:
@@ -31,6 +32,7 @@ class ETFOrchestrator:
         self.leverage_engine = LeverageEngine(self.settings)
         self.index_engine = IndexETFEngine(self.settings)
         self.risk_manager = ETFRiskManager(self.settings)
+        self.predator_engine = PredatorEngine(self.settings)
 
         self.current_regime: str = "CAUTION"
         self.previous_regime: str | None = None
@@ -49,6 +51,10 @@ class ETFOrchestrator:
         us_overnight: dict = None,
         five_axis_score: float = 0,
         index_holdings: dict = None,
+        # 프레데터 모드 파라미터
+        prev_momentum_data: dict = None,
+        sector_returns_1d: dict = None,
+        supply_flow_data: dict = None,
     ) -> dict:
         """
         3축 통합 실행.
@@ -86,6 +92,23 @@ class ETFOrchestrator:
             print(f"   {sector_result['summary']}")
         else:
             print(f"   ⏭️ 섹터 ETF 비중 0% - 스킵")
+
+        # Step 2.5: 프레데터 모드 (가속도 + 확신 집중)
+        predator_enabled = self.settings.get("predator", {}).get("enabled", False)
+        predator_result = None
+        if predator_enabled and momentum_data and prev_momentum_data:
+            print(f"\n🦅 Step 2.5: 프레데터 모드")
+            predator_result = self.predator_engine.run(
+                current_ranks=momentum_data,
+                prev_ranks=prev_momentum_data,
+                supply_data=supply_flow_data,
+                total_sector_pct=allocation["sector"],
+                sector_returns_1d=sector_returns_1d or {},
+                regime_changed=(previous_regime is not None and previous_regime.upper() != self.current_regime),
+                regime_direction=f"{previous_regime}→{self.current_regime}" if previous_regime else "",
+                us_overnight_grade=us_overnight.get("grade", 3) if us_overnight else 3,
+            )
+            print(f"   {predator_result['summary']}")
 
         # Step 3: 레버리지 판단
         print(f"\n⚡ Step 3: 레버리지 판단")
@@ -147,6 +170,7 @@ class ETFOrchestrator:
             "sector_result": {k: v for k, v in sector_result.items() if k != "timestamp"},
             "leverage_result": {k: v for k, v in leverage_result.items() if k != "timestamp"},
             "index_result": {k: v for k, v in index_result.items() if k != "timestamp"},
+            "predator_result": predator_result,
             "risk_check": {"passed": risk_check.passed, "level": risk_check.level, "violations": risk_check.violations, "summary": risk_check.summary},
             "order_queue": order_queue,
             "telegram_report": telegram_report,
