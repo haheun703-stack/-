@@ -1103,6 +1103,12 @@ smart_entry:
   # 기관 알고 70%+가 VWAP 기준 매매. 3중 확인 = 가짜 신호 극적 감소
   # 보너스: 3/3=+3, 2/3=+2, 1/3=0, 0/3=-2 (기존 30점에 가감)
 
+  # [채널 2] AI 두뇌 진입 보정 (BUY+high → +3점, AVOID → -3점)
+  ai_brain_adjustment:
+    enabled: false             # 안전장치: 기본 off
+    buy_boost: 3               # AI BUY + urgency=high → +3점
+    avoid_penalty: -3          # AI AVOID → -3점
+
   # ─── 라이브 트레이딩 안전장치 ───
   live:
     max_stocks: 1                  # 동시 매수 최대 종목수 (1단계: 1종목)
@@ -1266,3 +1272,11 @@ ai_brain:
   bonus_max: 7                # scan_tomorrow_picks 최대 보너스
   daily_call_limit: 3         # 일일 API 호출 한도 (비용 안전장치)
   universe_filter: true       # 84종목 유니버스 밖 종목 필터링
+  # [채널 1] AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능)
+  independent_pick:
+    enabled: false             # 안전장치: 기본 off → 검증 후 on
+    max_count: 2               # 최대 독립 추천 종목 수
+    min_confidence: 0.75       # 최소 AI 신뢰도
+  # [채널 3] KOSPI 레짐 AI 보정 (bearish 시 하향만 적용)
+  regime_adjustment:
+    enabled: false             # 안전장치: 기본 off

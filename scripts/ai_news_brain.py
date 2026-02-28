@@ -272,6 +272,108 @@ def collect_all_news(max_items: int = 70) -> list[dict]:
 
 
 # ──────────────────────────────────────────
+# 채널 4: 피드백 루프 — 이전 판단 아카이브 + 수익률 추적
+# ──────────────────────────────────────────
+
+HISTORY_PATH = DATA_DIR / "ai_brain_history.json"
+
+
+def _archive_previous_judgment():
+    """이전 AI 판단을 히스토리에 아카이브하고 D+3/5/7 수익률 추적."""
+    if not OUTPUT_PATH.exists():
+        return
+
+    try:
+        prev = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return
+
+    prev_date = prev.get("date", "")
+    if not prev_date:
+        return
+
+    # 히스토리 로드/생성
+    history = []
+    if HISTORY_PATH.exists():
+        try:
+            history = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            history = []
+
+    # 중복 방지
+    existing_dates = {h.get("date") for h in history}
+    if prev_date not in existing_dates:
+        history.append(prev)
+        logger.info("[아카이브] %s AI 판단 저장 (%d건)",
+                     prev_date, len(prev.get("stock_judgments", [])))
+
+    # D+3/5/7 수익률 추적
+    _update_tracking_returns(history)
+
+    # 최대 90일분 유지
+    history = history[-90:]
+    HISTORY_PATH.write_text(
+        json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
+def _update_tracking_returns(history: list):
+    """과거 AI BUY 판단의 D+3/5/7 수익률 추적."""
+    today = datetime.now().date()
+
+    for entry in history:
+        if entry.get("tracking_complete"):
+            continue
+
+        entry_date_str = entry.get("date", "")
+        if not entry_date_str:
+            continue
+        try:
+            entry_date = datetime.strptime(entry_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+
+        days_elapsed = (today - entry_date).days
+        if days_elapsed < 3:
+            continue
+
+        for j in entry.get("stock_judgments", []):
+            if j.get("action") != "BUY":
+                continue
+            ticker = j.get("ticker", "")
+            if not ticker:
+                continue
+
+            pq_path = PROCESSED_DIR / f"{ticker}.parquet"
+            if not pq_path.exists():
+                continue
+
+            try:
+                df = pd.read_parquet(pq_path)
+                if not isinstance(df.index, pd.DatetimeIndex):
+                    df.index = pd.to_datetime(df.index)
+
+                mask = df.index.date >= entry_date
+                if mask.sum() < 2:
+                    continue
+                sub = df[mask]
+                base_price = float(sub.iloc[0]["close"])
+
+                for d in [3, 5, 7]:
+                    key = f"ret_d{d}"
+                    if key in j:
+                        continue
+                    if len(sub) > d:
+                        future_price = float(sub.iloc[d]["close"])
+                        j[key] = round((future_price / base_price - 1) * 100, 2)
+            except Exception:
+                continue
+
+        if days_elapsed >= 7:
+            entry["tracking_complete"] = True
+
+
+# ──────────────────────────────────────────
 # 메인 분석 실행
 # ──────────────────────────────────────────
 
@@ -280,6 +382,9 @@ async def run_daily_analysis(cfg: dict) -> dict:
     if not cfg.get("enabled", True):
         logger.info("AI Brain 비활성화 — 스킵")
         return {}
+
+    # 0. 이전 AI 판단 아카이브 + 수익률 추적
+    _archive_previous_judgment()
 
     max_items = cfg.get("max_news_items", 70)
     model = cfg.get("model", "claude-sonnet-4-5-20250929")

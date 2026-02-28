@@ -44,6 +44,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -1198,6 +1199,13 @@ def main():
         if intel_themes:
             print(f"  핫테마: {' | '.join(intel_themes)}")
 
+    # settings.yaml 로드 (AI 독립추천 등 설정용)
+    yaml_path = PROJECT_ROOT / "config" / "settings.yaml"
+    yaml_config = {}
+    if yaml_path.exists():
+        with open(yaml_path, encoding="utf-8") as f:
+            yaml_config = yaml.safe_load(f) or {}
+
     # 전략 H: AI 두뇌 판단
     ai_brain_data = load_ai_brain_data()
     ai_brain_judgments = {}  # ticker → judgment dict
@@ -1220,6 +1228,30 @@ def main():
     # AVOID 종목 제외
     all_tickers -= avoid_tickers
 
+    # ── 채널 1: AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능) ──
+    ai_ind_cfg = yaml_config.get("ai_brain", {}).get("independent_pick", {})
+    ai_ind_enabled = ai_ind_cfg.get("enabled", False)
+    ai_ind_max = ai_ind_cfg.get("max_count", 2)
+    ai_ind_min_conf = ai_ind_cfg.get("min_confidence", 0.75)
+
+    ai_independent_tickers = set()
+    if ai_ind_enabled and ai_brain_judgments:
+        for t, j in ai_brain_judgments.items():
+            if j.get("action") != "BUY" or j.get("confidence", 0) < ai_ind_min_conf:
+                continue
+            if t in all_tickers or t in avoid_tickers:
+                continue
+            pq_path = PROCESSED_DIR / f"{t}.parquet"
+            if not pq_path.exists():
+                continue
+            ai_independent_tickers.add(t)
+            if len(ai_independent_tickers) >= ai_ind_max:
+                break
+        if ai_independent_tickers:
+            all_tickers.update(ai_independent_tickers)
+            print(f"[AI 독립추천] {len(ai_independent_tickers)}종목 추가: "
+                  f"{', '.join(ai_independent_tickers)}")
+
     print(f"[통합] 고유 종목: {len(all_tickers)}개")
 
     # 종목별 통합
@@ -1234,6 +1266,16 @@ def main():
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
+
+        # AI 독립추천 소스 (12개 소스에 없던 종목)
+        if ai_ind_enabled and ticker in ai_independent_tickers:
+            j = ai_brain_judgments[ticker]
+            sources.append({
+                "source": "AI두뇌", "name": j.get("name", ""),
+                "detail": f"AI독립:conf={j.get('confidence', 0):.0%}",
+                "score": j.get("confidence", 0) * 100,
+            })
+            source_names.append("AI두뇌독립")
 
         # ── 눌림목 단독 추천 차단 (v12) ──
         # 눌림목이 유일한 소스면 교차검증 없음 → 승률 28% 문제

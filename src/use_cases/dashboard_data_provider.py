@@ -205,11 +205,63 @@ class DashboardDataProvider:
                 "ma60": round(ma60, 2),
                 "rv_pct": round(rv_pct, 2),
             }
+            # [채널 3] AI 센티먼트 보수적 하향 보정
+            result = self._apply_ai_regime_adjustment(result)
             self._cache[cache_key] = (time.time(), result)
             return result
         except Exception as e:
             logger.error("KOSPI 레짐 계산 실패: %s", e)
             return {"regime": "CAUTION", "slots": 3, "close": 0, "change": 0}
+
+    def _apply_ai_regime_adjustment(self, regime_data: dict) -> dict:
+        """[채널 3] AI 센티먼트로 KOSPI 레짐 보수적 하향 보정.
+
+        규칙 (하향만, 상향 없음):
+          BULL  + bearish → CAUTION (5슬롯→3)
+          CAUTION + bearish → BEAR   (3슬롯→2)
+        """
+        try:
+            import yaml
+            settings_path = PROJECT_ROOT / "config" / "settings.yaml"
+            if settings_path.exists():
+                cfg = yaml.safe_load(settings_path.read_text(encoding="utf-8"))
+            else:
+                cfg = {}
+            ai_cfg = cfg.get("ai_brain", {}).get("regime_adjustment", {})
+            if not ai_cfg.get("enabled", False):
+                return regime_data
+
+            ai_path = DATA_DIR / "ai_brain_judgment.json"
+            if not ai_path.exists():
+                return regime_data
+
+            ai_data = json.loads(ai_path.read_text(encoding="utf-8"))
+            sentiment = ai_data.get("market_sentiment", "")
+
+            if sentiment != "bearish":
+                return regime_data
+
+            current = regime_data.get("regime", "")
+            downgrade_map = {
+                "BULL": ("CAUTION", 3),
+                "CAUTION": ("BEAR", 2),
+            }
+            if current not in downgrade_map:
+                return regime_data
+
+            new_regime, new_slots = downgrade_map[current]
+            regime_data["regime"] = new_regime
+            regime_data["slots"] = new_slots
+            regime_data["ai_adjusted"] = True
+            regime_data["original_regime"] = current
+            logger.info(
+                "[채널3] AI bearish → 레짐 하향: %s→%s (슬롯 %d)",
+                current, new_regime, new_slots,
+            )
+        except Exception as e:
+            logger.warning("[채널3] AI 레짐 보정 실패 (무시): %s", e)
+
+        return regime_data
 
     # ──────────────────────────────────────────
     # JSON 파일 로더 + 캐시

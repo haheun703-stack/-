@@ -216,6 +216,44 @@ def _section_ai_vs_bot() -> list[str]:
     return lines
 
 
+def _section_ai_accuracy() -> list[str]:
+    """[채널 4] 지난 2주간 AI BUY 적중률."""
+    hist_path = DATA_DIR / "ai_brain_history.json"
+    if not hist_path.exists():
+        return []
+    try:
+        history = json.loads(hist_path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+    # tracking_complete인 BUY 판단만 집계
+    completed = []
+    for entry in history:
+        for j in entry.get("stock_judgments", []):
+            if j.get("action") != "BUY" or not j.get("tracking_complete"):
+                continue
+            completed.append(j)
+
+    if len(completed) < 3:
+        return []  # 최소 3건 이상
+
+    wins = sum(1 for j in completed if (j.get("ret_d5") or 0) > 0)
+    total = len(completed)
+    avg_ret = sum(j.get("ret_d5", 0) or 0 for j in completed) / total
+
+    lines = ["\n\u2501\u2501 \U0001f4ca AI \uc801\uc911\ub960 \u2501\u2501"]
+    lines.append(f"D+5 기준: {wins}/{total} ({wins/total:.0%}) | 평균 {avg_ret:+.1f}%")
+
+    # 최근 3건 상세
+    recent = completed[-3:]
+    for j in recent:
+        ret = j.get("ret_d5", 0) or 0
+        icon = "\u25b2" if ret > 0 else "\u25bc"
+        lines.append(f"  {icon} {j.get('name', '?')} {ret:+.1f}%")
+
+    return lines
+
+
 def _section_intel() -> list[str]:
     """Perplexity 시장 인텔리전스 요약 (무드+핫테마만)."""
     data = _load("market_intelligence.json")
@@ -262,6 +300,7 @@ def build_evening_summary() -> str:
     L.extend(_section_dart())
     L.extend(_section_picks())
     L.extend(_section_ai_vs_bot())
+    L.extend(_section_ai_accuracy())
     L.extend(_section_value_chain())
     L.extend(_section_intel())
 

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -44,6 +45,7 @@ class PositionTracker:
     """보유 포지션 관리 + 청산 조건 판정"""
 
     def __init__(self, config: dict | None = None, config_path: str | None = None):
+        self._lock = threading.RLock()
         self.positions: list[LivePosition] = []
         self.config = config or {}
         exit_cfg = self.config.get("quant_engine", {}).get("exit", {})
@@ -71,25 +73,27 @@ class PositionTracker:
     # ──────────────────────────────────────────
 
     def load_positions(self) -> None:
-        """data/positions.json 에서 로드"""
-        if POSITIONS_FILE.exists():
-            try:
-                raw = json.loads(POSITIONS_FILE.read_text(encoding="utf-8"))
-                self.positions = [LivePosition.from_dict(d) for d in raw]
-                logger.info("[포지션] %d개 포지션 로드 완료", len(self.positions))
-            except Exception as e:
-                logger.error("[포지션] 로드 실패: %s", e)
+        """data/positions.json 에서 로드 (thread-safe)"""
+        with self._lock:
+            if POSITIONS_FILE.exists():
+                try:
+                    raw = json.loads(POSITIONS_FILE.read_text(encoding="utf-8"))
+                    self.positions = [LivePosition.from_dict(d) for d in raw]
+                    logger.info("[포지션] %d개 포지션 로드 완료", len(self.positions))
+                except Exception as e:
+                    logger.error("[포지션] 로드 실패: %s", e)
+                    self.positions = []
+            else:
                 self.positions = []
-        else:
-            self.positions = []
 
     def save_positions(self) -> None:
-        """data/positions.json 에 저장"""
-        POSITIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        data = [p.to_dict() for p in self.positions]
-        POSITIONS_FILE.write_text(
-            json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        """data/positions.json 에 저장 (thread-safe)"""
+        with self._lock:
+            POSITIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            data = [p.to_dict() for p in self.positions]
+            POSITIONS_FILE.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
 
     # ──────────────────────────────────────────
     # 포지션 추가/제거
@@ -467,30 +471,46 @@ class PositionTracker:
     # ──────────────────────────────────────────
 
     def _log_trade(self, pos: LivePosition, shares: int, reason: ExitReason) -> None:
-        """체결 이력을 trades_history.json에 기록"""
-        TRADES_FILE.parent.mkdir(parents=True, exist_ok=True)
-        history = []
-        if TRADES_FILE.exists():
-            try:
-                history = json.loads(TRADES_FILE.read_text(encoding="utf-8"))
-            except Exception:
-                history = []
+        """체결 이력을 trades_history.json에 기록 (thread-safe)"""
+        with self._lock:
+            TRADES_FILE.parent.mkdir(parents=True, exist_ok=True)
+            history = []
+            if TRADES_FILE.exists():
+                try:
+                    history = json.loads(TRADES_FILE.read_text(encoding="utf-8"))
+                except Exception:
+                    history = []
 
-        trade = {
-            "ticker": pos.ticker,
-            "name": pos.name,
-            "entry_date": pos.entry_date,
-            "exit_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "entry_price": pos.entry_price,
-            "exit_price": pos.current_price,
-            "shares": shares,
-            "pnl": (pos.current_price - pos.entry_price) * shares,
-            "pnl_pct": round(pos.unrealized_pnl_pct, 2),
-            "exit_reason": reason.value,
-            "grade": pos.grade,
-            "trigger_type": pos.trigger_type,
-        }
-        history.append(trade)
-        TRADES_FILE.write_text(
-            json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+            trade = {
+                "ticker": pos.ticker,
+                "name": pos.name,
+                "entry_date": pos.entry_date,
+                "exit_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "entry_price": pos.entry_price,
+                "exit_price": pos.current_price,
+                "shares": shares,
+                "pnl": (pos.current_price - pos.entry_price) * shares,
+                "pnl_pct": round(pos.unrealized_pnl_pct, 2),
+                "exit_reason": reason.value,
+                "grade": pos.grade,
+                "trigger_type": pos.trigger_type,
+                "ai_action": self._get_ai_action_for_ticker(pos.ticker),
+            }
+            history.append(trade)
+            TRADES_FILE.write_text(
+                json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+
+    def _get_ai_action_for_ticker(self, ticker: str) -> str | None:
+        """[채널 4] 해당 종목의 AI 두뇌 판단(BUY/WATCH/AVOID) 조회."""
+        try:
+            ai_path = Path("data/ai_brain_judgment.json")
+            if not ai_path.exists():
+                return None
+            data = json.loads(ai_path.read_text(encoding="utf-8"))
+            for j in data.get("stock_judgments", []):
+                if j.get("ticker") == ticker:
+                    return j.get("action")
+        except Exception:
+            pass
+        return None

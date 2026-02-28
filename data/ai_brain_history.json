@@ -1,0 +1,290 @@
+[
+  {
+    "market_sentiment": "bullish",
+    "key_themes": [
+      "미국 S&P 500 6,900 돌파 및 기술주 강세 지속",
+      "대만 AI/반도체 수출 호조로 글로벌 칩 수요 증가",
+      "금리 동결 전망 속 방산·원전(SMR)·로봇 테마 부각"
+    ],
+    "stock_judgments": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "action": "BUY",
+        "confidence": 0.85,
+        "reasoning": "대만 기록적 경상수지 흑자 및 AI/반도체 수출 호조로 글로벌 칩 수요 강세 확인. S&P 500 기술주 랠리(XLK +1.8%)와 Nvidia 실적 발표 앞둔 기대감으로 반도체 섹터 수혜 예상",
+        "catalysts": [
+          "대만 AI 반도체 수출 급증",
+          "미국 기술주 강세",
+          "Nvidia 실적 발표 임박"
+        ],
+        "risks": [
+          "미국 금리 인하 기대 축소"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 7
+      },
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "action": "BUY",
+        "confidence": 0.8,
+        "reasoning": "글로벌 반도체 수요 증가와 나스닥 1.3% 상승으로 메모리/시스템 반도체 모두 수혜. AI 데이터센터 증설 경쟁 가속화로 HBM 등 고부가 제품 수요 증가",
+        "catalysts": [
+          "대만 칩 수출 호조",
+          "AI 데이터센터 증설 경쟁",
+          "AMD-메타 AI칩 대형 계약"
+        ],
+        "risks": [
+          "금리 상승 압력"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "373220",
+        "name": "LG에너지솔루션",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "타법인 주식 취득 공시(기재정정)가 있으나 구체적 내용 불명. 미국 10년물 금리 4.06% 상승으로 성장주에 역풍이지만, 전기차 배터리 중장기 수요는 견고",
+        "catalysts": [
+          "타법인 주식 취득 공시"
+        ],
+        "risks": [
+          "금리 상승으로 성장주 밸류에이션 압박",
+          "전기차 수요 둔화 우려"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "035420",
+        "name": "NAVER",
+        "action": "BUY",
+        "confidence": 0.75,
+        "reasoning": "Anthropic AI 통합 발표로 엔터프라이즈 AI 시장 확대. S&P 500 정보기술 섹터 1.8% 상승으로 글로벌 IT/AI 테마 강세. 국내 AI 서비스 선도주로 수혜",
+        "catalysts": [
+          "Anthropic 엔터프라이즈 AI 확대",
+          "나스닥 1.3% 상승",
+          "AI 공포 진정 국면"
+        ],
+        "risks": [
+          "금리 상승 부담"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 5
+      },
+      {
+        "ticker": "035720",
+        "name": "카카오",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "IT/소프트웨어 섹터 전반적 강세 수혜 가능하나, 금리 상승 역풍과 개별 악재 부재로 확신 부족. AI 관련 신규 촉매 필요",
+        "catalysts": [
+          "S&P 기술주 랠리"
+        ],
+        "risks": [
+          "금리 상승",
+          "구체적 AI 사업 촉매 부족"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "105560",
+        "name": "KB금융",
+        "action": "WATCH",
+        "confidence": 0.7,
+        "reasoning": "자회사 유상증자 결정 공시로 자본 확충 진행 중. S&P 금융섹터(XLF) 1.7% 상승으로 긍정적이나, 한은 금리 동결 전망으로 NIM 개선 제한적",
+        "catalysts": [
+          "자회사 유상증자",
+          "미국 금융주 강세"
+        ],
+        "risks": [
+          "한은 금리 동결로 NIM 개선 한계",
+          "부동산 리스크"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "055550",
+        "name": "신한지주",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "미국 금융주 강세(XLF +1.7%) 수혜 가능하나, 한국은행 금리 동결 전망과 환율·부동산 리스크로 상승 모멘텀 제한적",
+        "catalysts": [
+          "미국 금융섹터 상승"
+        ],
+        "risks": [
+          "금리 동결",
+          "부동산 리스크",
+          "환율 변동성"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "042660",
+        "name": "한화오션",
+        "action": "WATCH",
+        "confidence": 0.7,
+        "reasoning": "K-방산 수출 호조 및 방산 스타트업 육성 정책 수혜 예상. 다만 조선업 특성상 단기 촉매보다는 중장기 수주 모멘텀 중요",
+        "catalysts": [
+          "K-방산 수출 2배 증가",
+          "방산물자 자체 보유 제도 시행"
+        ],
+        "risks": [
+          "단기 실적 가시성 부족"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 4
+      },
+      {
+        "ticker": "009540",
+        "name": "HD한국조선해양",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "방산 수출 증가 및 조선업 호황 지속 수혜 가능하나, 뉴스에서 구체적 수주나 실적 언급 없어 확신 부족",
+        "catalysts": [
+          "방산 생태계 확대"
+        ],
+        "risks": [
+          "단기 촉매 부족"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "034020",
+        "name": "두산에너빌리티",
+        "action": "BUY",
+        "confidence": 0.8,
+        "reasoning": "폴란드 SMR 도입 추진 및 노르웨이 SMR 도입 검토로 글로벌 원전 수요 급증. 국내 원전 선도기업으로 SMR 테마 최대 수혜주",
+        "catalysts": [
+          "폴란드 SMR 도입 추진",
+          "노르웨이 SMR 검토",
+          "AI 에너지 수요 급증"
+        ],
+        "risks": [
+          "해외 프로젝트 수주 불확실성"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 8
+      },
+      {
+        "ticker": "010950",
+        "name": "S-Oil",
+        "action": "BUY",
+        "confidence": 0.75,
+        "reasoning": "미국-이란 충돌 가능성으로 유가 상승 기대. 정유주 상반기 실적 개선 전망 명시적 언급",
+        "catalysts": [
+          "미국-이란 충돌로 유가 상승",
+          "정유주 상반기 실적 훈풍"
+        ],
+        "risks": [
+          "유가 변동성",
+          "글로벌 경기 둔화"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "096770",
+        "name": "SK이노베이션",
+        "action": "WATCH",
+        "confidence": 0.7,
+        "reasoning": "유가 상승 수혜 예상되나, 배터리 부문 부진으로 정유 부문 실적만으로는 전체 주가 상승 확신 부족",
+        "catalysts": [
+          "유가 상승 전망"
+        ],
+        "risks": [
+          "배터리 부문 적자",
+          "복합적 사업구조"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 4
+      },
+      {
+        "ticker": "018260",
+        "name": "삼성에스디에스",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "AI 데이터센터 증설 경쟁 및 엔터프라이즈 AI 확대 수혜 가능하나, 구체적 수주나 계약 뉴스 없음",
+        "catalysts": [
+          "AI 데이터센터 증설",
+          "엔터프라이즈 AI 확대"
+        ],
+        "risks": [
+          "금리 상승",
+          "구체적 수주 부재"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "086520",
+        "name": "에코프로",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "2차전지 테마이나 뉴스에서 구체적 촉매 부재. 금리 상승으로 성장주 밸류에이션 부담 지속",
+        "catalysts": [
+          "중장기 전기차 수요"
+        ],
+        "risks": [
+          "금리 상승",
+          "단기 촉매 부족",
+          "수요 둔화 우려"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "247540",
+        "name": "에코프로비엠",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "2차전지 소재 업체로 중장기 수요는 견고하나, 단기 촉매 부족하고 금리 상승 부담",
+        "catalysts": [
+          "전기차 배터리 중장기 수요"
+        ],
+        "risks": [
+          "금리 상승",
+          "단기 실적 가시성 부족"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      }
+    ],
+    "sector_outlook": {
+      "반도체": {
+        "direction": "positive",
+        "reason": "대만 AI/반도체 수출 기록적 흑자, S&P 기술주 1.8% 상승, Nvidia 실적 기대감으로 글로벌 칩 수요 강세 확인"
+      },
+      "IT/소프트웨어": {
+        "direction": "positive",
+        "reason": "Anthropic 엔터프라이즈 AI 확대, 나스닥 1.3% 상승으로 AI 공포 진정. 다만 금리 상승은 밸류에이션 부담 요인"
+      },
+      "금융": {
+        "direction": "neutral",
+        "reason": "미국 금융주(XLF) 1.7% 상승 긍정적이나, 한은 금리 동결 전망으로 NIM 개선 제한적. 부동산·환율 리스크 상존"
+      },
+      "에너지(원전/정유)": {
+        "direction": "positive",
+        "reason": "폴란드·노르웨이 SMR 도입 추진으로 원전 수요 급증. 미국-이란 충돌 가능성으로 유가 상승 및 정유 실적 개선 전망"
+      },
+      "방산": {
+        "direction": "positive",
+        "reason": "K-방산 수출 2배 증가, 방산 스타트업 육성 정책, 방산물자 보유 제도 시행 등 정책·실적 모두 호조"
+      },
+      "2차전지": {
+        "direction": "neutral",
+        "reason": "중장기 수요는 견고하나 단기 촉매 부족. 금리 상승으로 성장주 밸류에이션 압박"
+      }
+    },
+    "date": "2026-02-28",
+    "generated_at": "2026-02-28 02:17",
+    "model": "claude-sonnet-4-5-20250929",
+    "news_count": 70
+  }
+]

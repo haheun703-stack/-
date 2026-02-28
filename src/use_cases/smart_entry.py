@@ -131,6 +131,13 @@ class SmartEntryEngine:
         self.adapt_interval_sec = entry_cfg.get("adapt_interval_sec", 120)
         self.gap_position_scale = entry_cfg.get("gap_position_scale", 0.5)  # 갭업 시 포지션 50% 축소
 
+        # [채널 2] AI 두뇌 진입 보정
+        ai_adj = entry_cfg.get("ai_brain_adjustment", {})
+        self.ai_adj_enabled = ai_adj.get("enabled", False)
+        self.ai_adj_buy_boost = ai_adj.get("buy_boost", 3)
+        self.ai_adj_avoid_penalty = ai_adj.get("avoid_penalty", -3)
+        self._ai_judgments_cache = None  # 1회 로드 캐시
+
         # ─── 라이브 안전장치 ───
         live_cfg = entry_cfg.get("live", {})
         self.max_stocks = live_cfg.get("max_stocks", 1)
@@ -452,7 +459,14 @@ class SmartEntryEngine:
                     f"갭 +{c.gap_pct:.1f}% → 호가({ob_score}) + 캔들({candle_score}) + 수급({flow_score}) = {total}"
                 )
 
-            # 판단 기준: 3축 합산 + VWAP 보너스 (총 0~30)
+            # ── [채널 2] AI 두뇌 보정 ──
+            if self.ai_adj_enabled:
+                ai_adj = self._get_ai_brain_adjustment(c.ticker)
+                if ai_adj != 0:
+                    total = max(0, min(30, total + ai_adj))
+                    c.decision_reasons.append(f"[AI보정] {ai_adj:+d}점 → 최종 {total}/30")
+
+            # 판단 기준: 3축 합산 + VWAP 보너스 + AI 보정 (총 0~30)
             if total >= 18:
                 c.decision = EntryDecision.BUY
                 c.decision_reasons.append("→ 진입 결정 (강한 신호)")
@@ -473,6 +487,35 @@ class SmartEntryEngine:
             )
 
         return decisions
+
+    def _get_ai_brain_adjustment(self, ticker: str) -> int:
+        """[채널 2] AI 두뇌 판단에 따른 진입 점수 보정."""
+        if self._ai_judgments_cache is None:
+            try:
+                ai_path = Path("data/ai_brain_judgment.json")
+                if not ai_path.exists():
+                    self._ai_judgments_cache = {}
+                else:
+                    import json as _json
+                    data = _json.loads(ai_path.read_text(encoding="utf-8"))
+                    self._ai_judgments_cache = {
+                        j.get("ticker"): j
+                        for j in data.get("stock_judgments", [])
+                        if j.get("ticker")
+                    }
+            except Exception:
+                self._ai_judgments_cache = {}
+
+        j = self._ai_judgments_cache.get(ticker)
+        if not j:
+            return 0
+        action = j.get("action", "")
+        urgency = j.get("urgency", "")
+        if action == "BUY" and urgency == "high":
+            return self.ai_adj_buy_boost
+        elif action == "AVOID":
+            return self.ai_adj_avoid_penalty
+        return 0
 
     def _analyze_orderbook(self, c: CandidateState) -> int:
         """호가창 분석 → 0~10점"""
