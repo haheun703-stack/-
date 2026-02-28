@@ -147,6 +147,21 @@ def _section_picks() -> list[str]:
     return lines
 
 
+def _section_ai_largecap() -> list[str]:
+    """AI 대형주 참고 — Bot 미검출, AI BUY만."""
+    data = _load("tomorrow_picks.json")
+    if not data:
+        return []
+    largecap = data.get("ai_largecap", [])
+    if not largecap:
+        return []
+    lines = ["\n━━ 🧠 AI 대형주 참고 ━━"]
+    for r in largecap[:5]:
+        urg = " 🔥" if r.get("urgency") == "high" else ""
+        lines.append(f"  {r['name']} AI:{r['confidence']:.0%}{urg}")
+    return lines
+
+
 def _section_value_chain() -> list[str]:
     """밸류체인 발화 요약 (섹터+대장주만, 1줄씩)."""
     data = _load("value_chain_relay.json")
@@ -299,6 +314,7 @@ def build_evening_summary() -> str:
     L.extend(_section_holdings())
     L.extend(_section_dart())
     L.extend(_section_picks())
+    L.extend(_section_ai_largecap())
     L.extend(_section_ai_vs_bot())
     L.extend(_section_ai_accuracy())
     L.extend(_section_value_chain())
