@@ -350,13 +350,17 @@ def calc_position_size(capital, grade, freshness, conviction, mode):
 
     size = base * grade_mult * fresh_mult
 
-    # 확신 배수 적용 (P1, P2 모두 동일한 배수 사용)
+    # 확신 배수 적용
     if mode in ("P1", "P2"):
         if conviction == "HIGH":
             size *= CONVICTION_HIGH_MULT
         elif conviction == "LOW":
             size *= CONVICTION_LOW_MULT
-        # MID = 1.0 (변경 없음)
+    elif mode == "VIP1":
+        # VIP 1: 방어 전용 — HIGH 부스트 제거, LOW 방어만 적용
+        if conviction == "LOW":
+            size *= CONVICTION_LOW_MULT
+        # HIGH/MID = 1.0 (기존과 동일)
 
     return size
 
@@ -505,7 +509,7 @@ def run_backtest(data_dict, name_map, mode, kospi_df):
                 # 확신 판정
                 if mode == "P1":
                     conviction = judge_conviction_p1(sig["grade"], sig["vol_ratio"])
-                elif mode == "P2":
+                elif mode in ("P2", "VIP1"):
                     conviction = judge_conviction_accel(sig["obv_accel"], sig["vol_accel"])
                 else:
                     conviction = "MID"  # C_new: 확신 무시
@@ -727,16 +731,16 @@ def compare_results(base, test, test_label):
 
 def main():
     print("=" * 60)
-    print("  수급 가속도 확신 사이징 백테스트")
-    print("  C_new (기존) vs P1 (Grade) vs P2 (수급 가속도)")
+    print("  VIP 확신 사이징 백테스트")
+    print("  기존 vs P2(쌍가속) vs VIP1(방어전용)")
     print("=" * 60)
     print(f"  기간: {START_DATE} ~ {END_DATE}")
     print(f"  초기 자본: {INITIAL_CAPITAL / 1e8:.1f}억")
     print(f"  슬리피지: {SLIPPAGE * 100:.1f}%")
-    print(f"  확신 배수: HIGH {CONVICTION_HIGH_MULT}x / MID 1.0x / LOW {CONVICTION_LOW_MULT}x")
-    print(f"  P1 판정: Grade(S/A) + vol_ratio<0.8 → HIGH")
-    print(f"  P2 판정: OBV가속(↑) + 거래량가속(↑) → HIGH (수급 쌍가속)")
-    print(f"           OBV감속(↓) + 거래량감속(↓) → LOW  (수급 쌍감속)")
+    print(f"  P2:   HIGH 1.5x / MID 1.0x / LOW 0.5x (공격+방어)")
+    print(f"  VIP1: HIGH 1.0x / MID 1.0x / LOW 0.5x (방어 전용)")
+    print(f"  판정: OBV가속(↑)+거래량가속(↑) → HIGH (쌍가속)")
+    print(f"        OBV감속(↓)+거래량감속(↓) → LOW  (쌍감속)")
     print(f"  손절: -7% 고정 (변경 없음)")
 
     print("\n데이터 로딩...")
@@ -745,54 +749,50 @@ def main():
     kospi_df = load_kospi_index()
     print(f"  {len(data_dict)}종목 로드")
 
-    results = []
+    results = {}
 
-    # 1. 기존 C_new (확신 무시)
-    print(f"\n[C_new] 기존 v10.3 실행 중...")
+    # 1. 기존 (확신 무시)
+    print(f"\n[기존] v11.2 현행 실행 중...")
     trades_base, daily_base, stats_base = run_backtest(data_dict, name_map, "C_new", kospi_df)
-    r1 = report(trades_base, daily_base, "C_new) 기존 v10.3 (균등 사이징)", stats_base)
-    if r1:
-        results.append(r1)
+    results["base"] = report(trades_base, daily_base, "기존) v11.2 현행 (균등 사이징)", stats_base)
 
-    # 2. Phase 1: Grade+vol_ratio (비교 대조군)
-    print(f"\n[P1] Phase 1 Grade+vol_ratio 실행 중...")
-    trades_p1, daily_p1, stats_p1 = run_backtest(data_dict, name_map, "P1", kospi_df)
-    r2 = report(trades_p1, daily_p1, "P1) Grade+vol_ratio (대조군)", stats_p1)
-    if r2:
-        results.append(r2)
-
-    # 3. Phase 2: 수급 가속도 (실험군)
-    print(f"\n[P2] Phase 2 수급 가속도 실행 중...")
+    # 2. P2: 수급 가속도 (공격+방어)
+    print(f"\n[P2] 수급 가속도 (공격+방어) 실행 중...")
     trades_p2, daily_p2, stats_p2 = run_backtest(data_dict, name_map, "P2", kospi_df)
-    r3 = report(trades_p2, daily_p2, "P2) 수급 가속도 (OBV+거래량 쌍가속)", stats_p2)
-    if r3:
-        results.append(r3)
+    results["p2"] = report(trades_p2, daily_p2, "P2) 쌍가속 공격+방어 (HIGH 1.5x / LOW 0.5x)", stats_p2)
 
-    # 비교 테이블
-    if len(results) >= 3:
-        base, p1, p2 = results[0], results[1], results[2]
+    # 3. VIP 1: 방어 전용 (HIGH 부스트 제거)
+    print(f"\n[VIP1] 방어 전용 실행 중...")
+    trades_v1, daily_v1, stats_v1 = run_backtest(data_dict, name_map, "VIP1", kospi_df)
+    results["vip1"] = report(trades_v1, daily_v1, "VIP1) 수급 방어 전용 (LOW만 0.5x)", stats_v1)
 
-        print(f"\n{'=' * 70}")
-        print(f"  비교 1: C_new vs P1 (Grade+vol_ratio)")
-        print(f"{'=' * 70}")
-        w1 = compare_results(base, p1, "P1 (Grade)")
+    # 비교
+    base = results["base"]
+    if base:
+        for key, label in [("p2", "P2 (공격+방어)"), ("vip1", "VIP1 (방어전용)")]:
+            r = results.get(key)
+            if r:
+                print(f"\n{'=' * 70}")
+                print(f"  기존 vs {label}")
+                print(f"{'=' * 70}")
+                compare_results(base, r, label)
 
-        print(f"\n{'=' * 70}")
-        print(f"  비교 2: C_new vs P2 (수급 가속도)")
-        print(f"{'=' * 70}")
-        w2 = compare_results(base, p2, "P2 (가속도)")
-
-        print(f"\n{'=' * 70}")
-        print(f"  최종 결론")
-        print(f"{'=' * 70}")
-        if w2 > w1:
-            print(f"  P2 (수급 가속도) 승: {w2}/4 > P1 {w1}/4")
-        elif w1 > w2:
-            print(f"  P1 (Grade) 승: {w1}/4 > P2 {w2}/4")
-        else:
-            print(f"  P1 = P2 동점: 둘 다 {w1}/4")
-        if max(w1, w2) < 3:
-            print(f"  → 두 방식 모두 v10.3 현행 유지 권장")
+        # 최종 비교: P2 vs VIP1
+        p2, vip1 = results.get("p2"), results.get("vip1")
+        if p2 and vip1:
+            print(f"\n{'=' * 70}")
+            print(f"  최종 비교: P2 vs VIP1")
+            print(f"{'=' * 70}")
+            print(f"  수익률:  P2 {p2['total_return']:+.1f}% vs VIP1 {vip1['total_return']:+.1f}%")
+            print(f"  MDD:     P2 {p2['mdd']:.1f}% vs VIP1 {vip1['mdd']:.1f}%")
+            print(f"  PF:      P2 {p2['pf']:.2f} vs VIP1 {vip1['pf']:.2f}")
+            print(f"  Sharpe:  P2 {p2['sharpe']:.2f} vs VIP1 {vip1['sharpe']:.2f}")
+            # 리스크 조정 수익 비교
+            p2_rar = p2["total_return"] / abs(p2["mdd"]) if p2["mdd"] != 0 else 0
+            v1_rar = vip1["total_return"] / abs(vip1["mdd"]) if vip1["mdd"] != 0 else 0
+            print(f"  수익/MDD: P2 {p2_rar:.2f} vs VIP1 {v1_rar:.2f}")
+            winner = "VIP1" if v1_rar > p2_rar else "P2"
+            print(f"\n  리스크 조정 수익 기준 승자: {winner}")
 
 
 if __name__ == "__main__":
