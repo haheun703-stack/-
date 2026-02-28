@@ -14,11 +14,11 @@ class BaseAgent:
         self.client = anthropic.AsyncAnthropic()
         self.model = model
 
-    async def _ask_claude(self, system_prompt: str, user_prompt: str) -> str:
+    async def _ask_claude(self, system_prompt: str, user_prompt: str, max_tokens: int = 16000) -> str:
         """Claude API에 질문하고 텍스트 응답을 받는다"""
         response = await self.client.messages.create(
             model=self.model,
-            max_tokens=4096,
+            max_tokens=max_tokens,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],
         )

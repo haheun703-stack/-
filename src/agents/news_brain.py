@@ -35,7 +35,7 @@ SYSTEM_PROMPT = """\
 1. 아래 제공된 유니버스 목록에 있는 종목만 판단하세요.
 2. 유니버스에 없는 종목은 절대 언급하지 마세요.
 3. ticker는 반드시 6자리 숫자 문자열로 작성하세요 (예: "005930").
-4. 최대 15개 종목까지만 판단하세요.
+4. 최대 {max_judgments}개 종목까지 판단하세요. 가능한 많이 판단하되 근거 없는 종목은 제외하세요.
 5. 근거가 불충분하면 WATCH로 분류하세요. 추측으로 BUY 하지 마세요.
 
 ## 출력 형식
@@ -76,6 +76,7 @@ class NewsBrainAgent(BaseAgent):
         self,
         news_items: list[dict],
         universe: dict[str, str],
+        max_judgments: int = 50,
     ) -> dict:
         """50~70개 뉴스를 종합 분석하여 종목별 판단 생성.
 
@@ -124,8 +125,10 @@ class NewsBrainAgent(BaseAgent):
             len(universe),
         )
 
+        system_prompt = SYSTEM_PROMPT.replace("{max_judgments}", str(max_judgments))
+
         try:
-            result = await self._ask_claude_json(SYSTEM_PROMPT, user_prompt)
+            result = await self._ask_claude_json(system_prompt, user_prompt)
         except Exception as e:
             logger.error("AI 두뇌 분석 실패: %s", e)
             return {

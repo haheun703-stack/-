@@ -387,6 +387,7 @@ async def run_daily_analysis(cfg: dict) -> dict:
     _archive_previous_judgment()
 
     max_items = cfg.get("max_news_items", 70)
+    max_judgments = cfg.get("max_stock_judgments", 50)
     model = cfg.get("model", "claude-sonnet-4-5-20250929")
 
     # 1. 뉴스 수집
@@ -397,11 +398,11 @@ async def run_daily_analysis(cfg: dict) -> dict:
 
     # 2. 유니버스 빌드
     universe = build_universe()
-    logger.info("유니버스: %d종목", len(universe))
+    logger.info("유니버스: %d종목, 최대 판단: %d개", len(universe), max_judgments)
 
     # 3. AI 분석
     agent = NewsBrainAgent(model=model)
-    result = await agent.analyze_daily_news(news, universe)
+    result = await agent.analyze_daily_news(news, universe, max_judgments=max_judgments)
 
     # 4. 메타데이터 추가
     result["date"] = datetime.now().strftime("%Y-%m-%d")
