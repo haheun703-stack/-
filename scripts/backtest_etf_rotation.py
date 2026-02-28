@@ -331,12 +331,14 @@ def run_backtest(start_date: str = "2025-06-01", end_date: str = "2026-02-27") -
     prev_sector_holdings = set()  # 이전에 보유했던 섹터
     prev_sector_codes = set()     # 이전 섹터 ETF 코드
 
-    # 섹터 로테이션 설정
+    # 섹터 로테이션 설정 (백테스트 최적화 v2: PF 1.51→2.71)
     MAX_SECTOR_HOLDINGS = 3
     MOMENTUM_TOP_N = 5
-    STOP_LOSS_PCT = -5.0
+    STOP_LOSS_PCT = -7.0       # -5→-7: ETF 변동성 반영, 불필요한 손절 감소
     LEVERAGE_MAX_HOLD = 5
+    ROTATION_FREQ = 10          # 1→10: 격주 로테이션, 노이즈 트레이딩 제거
     leverage_entry_date = None
+    last_rotation_day = 0
 
     print("[2/3] 백테스트 실행...")
 
@@ -392,8 +394,13 @@ def run_backtest(start_date: str = "2025-06-01", end_date: str = "2026-02-27") -
             if hold_days >= LEVERAGE_MAX_HOLD:
                 portfolio.sell(code, open_map.get(code, 0), date, f"보유일 초과 {hold_days}일")
 
-        # ── 8. 섹터 ETF 로테이션 (BULL/CAUTION만) ──
-        if alloc["sector"] > 0 and momentum:
+        # ── 8. 섹터 ETF 로테이션 (BULL/CAUTION만, 격주 빈도) ──
+        days_since_rotation = i - last_rotation_day
+        do_rotation = (days_since_rotation >= ROTATION_FREQ) and alloc["sector"] > 0 and momentum
+
+        if do_rotation:
+            last_rotation_day = i
+
             # 상위 N개 섹터 필터
             top_sectors = sorted(
                 momentum.keys(),

@@ -1310,8 +1310,9 @@ etf_rotation:
     momentum_top_n: 5            # 모멘텀 Top N 필터
     smart_money_required: true   # Smart Money 유입 필수
     min_supply_score: 60         # 최소 수급 점수 (100점 만점)
-    stop_loss_pct: -5.0          # 손절 기준 (%)
+    stop_loss_pct: -7.0          # 손절 기준 (%) — 백테스트 최적화: -5→-7 (ETF 변동성 반영)
     rotation_rank_threshold: 5   # 이 순위 밖이면 교체
+    rotation_freq_days: 10       # 로테이션 주기 (거래일) — 백테스트 최적화: 1→10 (격주, PF 2.71)
     momentum_weights:            # 모멘텀 기간별 가중치
       5d: 0.2
       20d: 0.5
