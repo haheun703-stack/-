@@ -5,12 +5,12 @@
 
 5단계 깔때기:
   Phase 1: StrategicBrain (Opus) → ai_strategic_analysis.json
-  Phase 2: SectorStrategist → ai_sector_focus.json       (미구현)
-  Phase 3: SignalEngine 기존 스캔 + sector boost → 후보   (미구현)
-  Phase 4: DeepAnalyst (Sonnet×N) → conviction 필터       (미구현)
+  Phase 2: SectorStrategist → ai_sector_focus.json
+  Phase 3: scan_cache.json에서 후보 추출 + sector boost/suppress
+  Phase 4: DeepAnalyst (Sonnet×N) → conviction 필터
   Phase 5: PortfolioBrain (Opus) → ai_v3_picks.json       (미구현)
 
-현재 Phase 1만 구현. Phase 2~5는 후속 커밋에서 추가.
+Phase 1~4 구현 완료. Phase 5는 후속 커밋에서 추가.
 """
 
 from __future__ import annotations
@@ -31,6 +31,8 @@ from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env")
 
 from src.agents.strategic_brain import StrategicBrainAgent
+from src.agents.sector_strategist import SectorStrategistAgent
+from src.agents.deep_analyst import DeepAnalystAgent
 
 # ─── 로깅 설정 ──────────────────────────────────────────────────
 logging.basicConfig(
@@ -198,10 +200,214 @@ async def run_phase1(dry_run: bool = False) -> dict:
     return result
 
 
+# ─── Phase 2: Sector Strategist ────────────────────────────────
+
+async def run_phase2(strategic_result: dict) -> dict:
+    """Phase 2: 섹터 전략가 (Agent 2B) 실행
+
+    Phase 1의 산업 thesis와 ETF 모멘텀 데이터를 교차 검증하여
+    집중 섹터 + boost/suppress 목록 생성.
+
+    Args:
+        strategic_result: Phase 1 결과 (ai_strategic_analysis.json)
+
+    Returns:
+        ai_sector_focus.json 내용
+    """
+    logger.info("=" * 60)
+    logger.info("Phase 2: Sector Strategist (v3 Agent 2B) 시작")
+    logger.info("=" * 60)
+
+    # ── 소스 로드 ──
+    sector_flow = _load_json(
+        DATA_DIR / "sector_rotation" / "etf_trading_signal.json"
+    )
+    relay_db = _load_json(DATA_DIR / "relay_pattern_db.json")
+
+    if not sector_flow:
+        logger.warning("ETF 모멘텀 데이터 없음 — Phase 2 스킵")
+        return SectorStrategistAgent._fallback_result("ETF 데이터 없음")
+
+    # ── Agent 2B 실행 ──
+    agent = SectorStrategistAgent()
+    result = await agent.focus(strategic_result, sector_flow, relay_db)
+
+    # ── 결과 저장 ──
+    settings = _load_settings()
+    output_path = Path(settings.get("sector_output", "data/ai_sector_focus.json"))
+    if not output_path.is_absolute():
+        output_path = PROJECT_ROOT / output_path
+    _save_json(output_path, result)
+
+    # ── 결과 요약 로그 ──
+    logger.info("-" * 60)
+    logger.info("Phase 2 결과 요약:")
+    focus = result.get("focus_sectors", [])
+    logger.info("  집중 섹터: %d개", len(focus))
+    for s in focus[:5]:
+        logger.info(
+            "    - %s: 타이밍=%s, 정합=%s, 비중=%.1fx (순위 %s)",
+            s.get("sector", "?"),
+            s.get("entry_timing", "?"),
+            s.get("thesis_alignment", "?"),
+            s.get("size_weight", 1.0),
+            s.get("momentum_rank", "?"),
+        )
+
+    boost = result.get("screening_boost", [])
+    suppress = result.get("screening_suppress", [])
+    logger.info("  부스트: %s", ", ".join(boost) or "없음")
+    logger.info("  억제: %s", ", ".join(suppress) or "없음")
+
+    warnings = result.get("sector_warnings", [])
+    if warnings:
+        logger.info("  경고:")
+        for w in warnings:
+            logger.info("    - [%s] %s: %s", w.get("severity", "?"), w.get("sector", "?"), w.get("warning", "?"))
+
+    logger.info("-" * 60)
+
+    return result
+
+
+# ─── Phase 3+4: 후보 추출 + Deep Analyst ──────────────────────
+
+async def run_phase3_4(
+    strategic_result: dict,
+    sector_focus: dict,
+) -> list[dict]:
+    """Phase 3+4: 후보 추출 → 정밀 분석
+
+    Phase 3: scan_cache.json에서 파이프라인 통과 종목 추출 + sector boost/suppress
+    Phase 4: DeepAnalyst 배치 분석 → conviction 필터
+
+    Args:
+        strategic_result: Phase 1 결과
+        sector_focus: Phase 2 결과
+
+    Returns:
+        conviction 기준 통과한 종목 리스트
+    """
+    logger.info("=" * 60)
+    logger.info("Phase 3+4: 후보 추출 + Deep Analyst (v3 Agent 2D) 시작")
+    logger.info("=" * 60)
+
+    # ── Phase 3: scan_cache에서 후보 추출 ──
+    scan_cache = _load_json(DATA_DIR / "scan_cache.json")
+
+    # v9 생존자 + v9에서 제거된 종목 합산 (v8 파이프라인 통과 전체)
+    candidates = list(scan_cache.get("candidates", []))
+    killed = scan_cache.get("stats", {}).get("v9_killed_list", [])
+    if killed:
+        existing_tickers = {c.get("ticker") for c in candidates}
+        for k in killed:
+            if k.get("ticker") not in existing_tickers:
+                candidates.append(k)
+        logger.info("v9 killed 종목 %d개 복원 (AI가 재판단)", len(killed))
+
+    if not candidates:
+        logger.warning("scan_cache 후보 0 — Phase 3+4 스킵")
+        return []
+
+    # sector boost/suppress 적용
+    boost_sectors = set(sector_focus.get("screening_boost", []))
+    suppress_sectors = set(sector_focus.get("screening_suppress", []))
+
+    # 공격 섹터 목록 (Phase 1)
+    attack_sectors = set(
+        strategic_result.get("sector_priority", {}).get("attack", [])
+    )
+
+    # boost 섹터에 해당하는 종목 우선 포함
+    boosted = []
+    normal = []
+    suppressed = []
+
+    for c in candidates:
+        sector = c.get("sector", "")
+        if sector in suppress_sectors:
+            suppressed.append(c)
+        elif sector in boost_sectors or sector in attack_sectors:
+            boosted.append(c)
+        else:
+            normal.append(c)
+
+    # 부스트 우선 + 일반 + 억제(제외)
+    filtered = boosted + normal
+    logger.info(
+        "Phase 3 후보: %d종목 (부스트 %d + 일반 %d, 억제 %d 제외)",
+        len(filtered), len(boosted), len(normal), len(suppressed),
+    )
+
+    if not filtered:
+        logger.warning("후보 종목 0 — Phase 4 스킵")
+        return []
+
+    # 배치 상한
+    settings = _load_settings()
+    max_batch = settings.get("deep_analyst", {}).get("max_batch_size", 30)
+    if len(filtered) > max_batch:
+        logger.info("후보 %d → %d로 제한", len(filtered), max_batch)
+        filtered = filtered[:max_batch]
+
+    # ── Phase 4: DeepAnalyst 배치 분석 ──
+    industry_thesis = strategic_result.get("industry_thesis", [])
+    min_conviction = settings.get("deep_analyst", {}).get("min_conviction", 5)
+
+    agent = DeepAnalystAgent()
+    passed = await agent.analyze_batch(
+        candidates=filtered,
+        industry_thesis=industry_thesis,
+        sector_focus=sector_focus,
+        min_conviction=min_conviction,
+    )
+
+    # ── 결과 로그 ──
+    logger.info("-" * 60)
+    logger.info("Phase 4 결과 요약:")
+    logger.info("  분석 대상: %d종목 → 통과: %d종목 (conviction>=%d)", len(filtered), len(passed), min_conviction)
+
+    for p in passed[:10]:
+        logger.info(
+            "    - %s(%s): conviction=%d, strategy=%s, thesis=%s",
+            p.get("name", "?"),
+            p.get("ticker", "?"),
+            p.get("conviction", 0),
+            p.get("strategy", "?"),
+            p.get("thesis_alignment", "?"),
+        )
+
+    logger.info("-" * 60)
+
+    # ── 결과 저장 (임시 — Phase 5에서 최종 picks로 변환) ──
+    total_scanned = scan_cache.get("stats", {}).get("total", len(candidates))
+    picks_data = {
+        "analysis_date": datetime.now().strftime("%Y-%m-%d"),
+        "phase": "phase4_deep_analyst",
+        "total_scanned": total_scanned,
+        "pipeline_passed": len(candidates),
+        "boost_filtered": len(filtered),
+        "conviction_passed": len(passed),
+        "min_conviction": min_conviction,
+        "picks": passed,
+    }
+
+    picks_path = Path(settings.get("picks_output", "data/ai_v3_picks.json"))
+    if not picks_path.is_absolute():
+        picks_path = PROJECT_ROOT / picks_path
+    _save_json(picks_path, picks_data)
+
+    return passed
+
+
 # ─── 텔레그램 알림 ──────────────────────────────────────────────
 
-async def _send_telegram_summary(result: dict) -> None:
-    """Phase 1 결과를 텔레그램으로 전송"""
+async def _send_telegram_summary(
+    result: dict,
+    sector_focus: dict | None = None,
+    picks: list[dict] | None = None,
+) -> None:
+    """v3 Brain 전체 결과를 텔레그램으로 전송"""
     try:
         from src.telegram_sender import send_message
     except ImportError:
@@ -216,7 +422,7 @@ async def _send_telegram_summary(result: dict) -> None:
     regime_emoji = {"공격": "🟢", "중립": "🟡", "방어": "🟠", "회피": "🔴"}.get(regime, "⚪")
 
     lines = [
-        f"🧠 v3 Strategic Brain 판단",
+        f"🧠 v3 AI Brain 판단",
         f"",
         f"{regime_emoji} 레짐: {regime} ({confidence:.0%})",
         f"📊 최대 매수: {max_buys}종목 | 현금: {cash}%",
@@ -240,6 +446,35 @@ async def _send_telegram_summary(result: dict) -> None:
         lines.append(f"\n🎯 공격: {', '.join(attack)}")
     if avoid:
         lines.append(f"⛔ 회피: {', '.join(avoid)}")
+
+    # Phase 2 — 섹터 포커스
+    if sector_focus:
+        boost = sector_focus.get("screening_boost", [])
+        suppress = sector_focus.get("screening_suppress", [])
+        focus_sectors = sector_focus.get("focus_sectors", [])
+
+        if focus_sectors:
+            lines.append(f"\n🔍 섹터 포커스 ({len(focus_sectors)}개):")
+            for s in focus_sectors[:3]:
+                lines.append(
+                    f"  • {s.get('sector', '?')}: "
+                    f"{s.get('entry_timing', '?')} "
+                    f"({s.get('thesis_alignment', '?')})"
+                )
+        if boost:
+            lines.append(f"⬆️ 부스트: {', '.join(boost)}")
+        if suppress:
+            lines.append(f"⬇️ 억제: {', '.join(suppress)}")
+
+    # Phase 4 — Deep Analyst picks
+    if picks:
+        lines.append(f"\n🎯 Deep Analyst 통과: {len(picks)}종목")
+        for p in picks[:5]:
+            lines.append(
+                f"  • {p.get('name', '?')}({p.get('ticker', '?')}): "
+                f"확신 {p.get('conviction', 0)}/10 "
+                f"[{p.get('strategy', '?')}]"
+            )
 
     # 릴레이 알림
     alerts = result.get("relay_alerts", [])
@@ -267,8 +502,9 @@ async def _send_telegram_summary(result: dict) -> None:
 async def main():
     parser = argparse.ArgumentParser(description="v3 AI Brain 5단계 깔때기 러너")
     parser.add_argument("--dry-run", action="store_true", help="분석만 수행, 매수 없음")
-    parser.add_argument("--phase", type=int, default=1, help="실행할 최대 Phase (기본: 1)")
+    parser.add_argument("--phase", type=int, default=4, help="실행할 최대 Phase (기본: 4)")
     parser.add_argument("--no-telegram", action="store_true", help="텔레그램 알림 생략")
+    parser.add_argument("--skip-phase1", action="store_true", help="Phase 1 생략 (기존 ai_strategic_analysis.json 사용)")
     args = parser.parse_args()
 
     settings = _load_settings()
@@ -279,16 +515,45 @@ async def main():
     start_time = datetime.now()
     logger.info("v3 AI Brain 러너 시작 (phase=%d, dry_run=%s)", args.phase, args.dry_run)
 
-    # Phase 1
-    result = await run_phase1(dry_run=args.dry_run)
+    # Phase 1: Strategic Brain
+    if args.skip_phase1:
+        logger.info("Phase 1 생략 — 기존 ai_strategic_analysis.json 로드")
+        output_path = Path(settings.get("regime_output", "data/ai_strategic_analysis.json"))
+        if not output_path.is_absolute():
+            output_path = PROJECT_ROOT / output_path
+        result = _load_json(output_path)
+        if not result:
+            logger.error("ai_strategic_analysis.json 없음 — 종료")
+            return
+    else:
+        result = await run_phase1(dry_run=args.dry_run)
 
-    # Phase 2~5는 미구현 — 후속 커밋에서 추가
-    if args.phase >= 2:
-        logger.info("Phase 2~5는 미구현 — Phase 1 결과만 사용")
+    sector_focus = None
+    picks = None
+
+    # Phase 2: Sector Strategist
+    if args.phase >= 2 and not result.get("error"):
+        try:
+            sector_focus = await run_phase2(result)
+        except Exception as e:
+            logger.error("Phase 2 실패 (계속 진행): %s", e)
+            sector_focus = SectorStrategistAgent._fallback_result(str(e))
+
+    # Phase 3+4: 후보 추출 + Deep Analyst
+    if args.phase >= 4 and sector_focus and not sector_focus.get("error"):
+        try:
+            picks = await run_phase3_4(result, sector_focus)
+        except Exception as e:
+            logger.error("Phase 3+4 실패: %s", e)
+            picks = []
+
+    # Phase 5: PortfolioBrain (미구현)
+    if args.phase >= 5:
+        logger.info("Phase 5 (PortfolioBrain)는 미구현 — Phase 4 결과를 그대로 사용")
 
     # 텔레그램
     if not args.no_telegram and not result.get("error"):
-        await _send_telegram_summary(result)
+        await _send_telegram_summary(result, sector_focus, picks)
 
     elapsed = (datetime.now() - start_time).total_seconds()
     logger.info("v3 AI Brain 러너 완료 (%.1f초)", elapsed)

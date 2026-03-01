@@ -1,0 +1,104 @@
+{
+  "analysis_date": "2026-03-01",
+  "focus_sectors": [
+    {
+      "sector": "IT서비스",
+      "entry_timing": "즉시진입",
+      "size_weight": 1.2,
+      "thesis_alignment": "강한일치",
+      "momentum_rank": 1,
+      "momentum_score": 91.3,
+      "rsi": 80.5,
+      "smart_money": false,
+      "relay_source": "반도체",
+      "reasoning": "반도체 릴레이 발화 중, 모멘텀 1위, thesis 확신 8/10, ADX 상승 중으로 릴레이 즉시 진입 타이밍"
+    },
+    {
+      "sector": "건설",
+      "entry_timing": "즉시진입",
+      "size_weight": 1.0,
+      "thesis_alignment": "thesis없음",
+      "momentum_rank": 2,
+      "momentum_score": 89.7,
+      "rsi": 81.3,
+      "smart_money": true,
+      "relay_source": null,
+      "reasoning": "모멘텀 2위, 스마트머니 유입, ADX 61.2로 강한 추세, RSI 아직 과열 전 단계"
+    },
+    {
+      "sector": "에너지화학",
+      "entry_timing": "즉시진입",
+      "size_weight": 0.9,
+      "thesis_alignment": "강한일치",
+      "momentum_rank": 6,
+      "momentum_score": 69.7,
+      "rsi": 77.3,
+      "smart_money": true,
+      "relay_source": null,
+      "reasoning": "정유 thesis(확신 7/10)와 일치, 스마트머니 유입, ADX 상승 중, 유가 상승 수혜"
+    },
+    {
+      "sector": "증권",
+      "entry_timing": "눌림대기",
+      "size_weight": 0.8,
+      "thesis_alignment": "thesis없음",
+      "momentum_rank": 3,
+      "momentum_score": 81.6,
+      "rsi": 70.3,
+      "smart_money": false,
+      "relay_source": null,
+      "reasoning": "모멘텀 3위이나 스마트머니 이탈, Theme BUY 신호 있으나 외인 매도 지속으로 눌림 대기"
+    },
+    {
+      "sector": "2차전지",
+      "entry_timing": "관망",
+      "size_weight": 0.6,
+      "thesis_alignment": "thesis없음",
+      "momentum_rank": 10,
+      "momentum_score": 57.1,
+      "rsi": 69.9,
+      "smart_money": true,
+      "reasoning": "스마트머니 유입 중이나 모멘텀 중위권, ADX 약세로 추세 불분명, 구조적 thesis 부재"
+    }
+  ],
+  "screening_boost": [
+    "IT서비스",
+    "건설",
+    "에너지화학",
+    "철강소재"
+  ],
+  "screening_suppress": [
+    "반도체",
+    "현대차그룹",
+    "삼성그룹",
+    "게임",
+    "미디어"
+  ],
+  "sector_warnings": [
+    {
+      "sector": "반도체",
+      "warning": "RSI 80.5, BB 109.0%로 단기 과열, thesis는 강하나 외인 5일간 -58,370 대량 매도 중, 릴레이 소스로만 활용",
+      "severity": "high"
+    },
+    {
+      "sector": "현대차그룹",
+      "warning": "RSI 82.9, BB 118.1%로 극심한 과열, 단기 조정 가능성 높음",
+      "severity": "high"
+    },
+    {
+      "sector": "삼성그룹",
+      "warning": "RSI 80.1, BB 94.2%로 과열 진입, 외인 5일간 -64,652 최대 매도",
+      "severity": "medium"
+    },
+    {
+      "sector": "방산",
+      "warning": "모멘텀 32.6으로 하위권, ADX 21.5로 추세력 약화, 릴레이 대기 상태로 진입 보류",
+      "severity": "medium"
+    },
+    {
+      "sector": "인터넷",
+      "warning": "RSI 70.9, BB 99.5%로 과열이나 스마트머니 이탈, ADX 16.9로 추세 불분명",
+      "severity": "low"
+    }
+  ]
+}
