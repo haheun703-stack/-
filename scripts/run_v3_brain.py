@@ -589,6 +589,280 @@ async def _send_telegram_summary(
         logger.warning("텔레그램 전송 실패: %s", e)
 
 
+# ─── Phase 7: 학습 루프 ──────────────────────────────────────────
+
+def daily_review() -> dict:
+    """Agent 7A — 일일 성과 리뷰
+
+    당일 v3 Brain 판단 vs 실제 시장 결과를 비교하여
+    data/daily_performance.json에 누적.
+
+    비교 항목:
+      - regime 적중 여부 (KOSPI 방향 vs 판단)
+      - sector_priority 적중 여부 (공격 섹터 수익률)
+      - 릴레이 예측 적중 여부
+      - v3 picks 수익률
+
+    Returns:
+        오늘자 리뷰 결과
+    """
+    logger.info("=" * 60)
+    logger.info("Agent 7A: 일일 성과 리뷰")
+    logger.info("=" * 60)
+
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    # ── v3 판단 로드 ──
+    strategic = _load_json(DATA_DIR / "ai_strategic_analysis.json")
+    sector_focus = _load_json(DATA_DIR / "ai_sector_focus.json")
+    v3_picks = _load_json(DATA_DIR / "ai_v3_picks.json")
+
+    if not strategic:
+        logger.warning("ai_strategic_analysis.json 없음 — 리뷰 스킵")
+        return {}
+
+    analysis_date = strategic.get("analysis_date", "")
+    if analysis_date != today_str:
+        logger.info("오늘(%s) 분석 아님(%s) — 리뷰 스킵", today_str, analysis_date)
+        return {}
+
+    # ── 실제 시장 데이터 확인 ──
+    review = {
+        "date": today_str,
+        "regime_predicted": strategic.get("regime", "?"),
+        "regime_confidence": strategic.get("regime_confidence", 0),
+        "attack_sectors": strategic.get("sector_priority", {}).get("attack", []),
+        "avoid_sectors": strategic.get("sector_priority", {}).get("avoid", []),
+    }
+
+    # KOSPI 실제 방향 (ETF 데이터에서 추출)
+    try:
+        import pandas as pd
+        kospi_path = DATA_DIR / "kospi_index.csv"
+        if kospi_path.exists():
+            df = pd.read_csv(kospi_path)
+            if len(df) >= 2:
+                col = "Close" if "Close" in df.columns else "close"
+                last_close = float(df.iloc[-1][col])
+                prev_close = float(df.iloc[-2][col])
+                kospi_chg = (last_close / prev_close - 1) * 100
+                review["kospi_change_pct"] = round(kospi_chg, 2)
+
+                # 레짐 판단 적중 여부
+                regime = strategic.get("regime", "")
+                if regime == "공격" and kospi_chg > 0:
+                    review["regime_hit"] = True
+                elif regime == "방어" and kospi_chg < 0:
+                    review["regime_hit"] = True
+                elif regime == "회피" and kospi_chg < -1:
+                    review["regime_hit"] = True
+                elif regime == "중립" and abs(kospi_chg) < 1:
+                    review["regime_hit"] = True
+                else:
+                    review["regime_hit"] = False
+    except Exception as e:
+        logger.warning("KOSPI 데이터 확인 실패: %s", e)
+
+    # 섹터 모멘텀 결과 (ETF 시그널에서 추출)
+    etf_signal = _load_json(DATA_DIR / "sector_rotation" / "etf_trading_signal.json")
+    if etf_signal and "sectors" in etf_signal:
+        attack_returns = []
+        avoid_returns = []
+        for sec in etf_signal.get("sectors", []):
+            sec_name = sec.get("sector", "")
+            day_return = sec.get("return_1d", 0)
+            if sec_name in review.get("attack_sectors", []):
+                attack_returns.append({"sector": sec_name, "return_1d": day_return})
+            if sec_name in review.get("avoid_sectors", []):
+                avoid_returns.append({"sector": sec_name, "return_1d": day_return})
+
+        if attack_returns:
+            avg_attack = sum(r["return_1d"] for r in attack_returns) / len(attack_returns)
+            review["attack_sector_avg_return"] = round(avg_attack, 2)
+            review["attack_sector_details"] = attack_returns
+        if avoid_returns:
+            avg_avoid = sum(r["return_1d"] for r in avoid_returns) / len(avoid_returns)
+            review["avoid_sector_avg_return"] = round(avg_avoid, 2)
+            # 회피 섹터가 실제로 하락했으면 적중
+            review["avoid_hit"] = avg_avoid < 0
+
+    # v3 picks 결과
+    if v3_picks and "buys" in v3_picks:
+        buy_results = []
+        for buy in v3_picks.get("buys", []):
+            ticker = buy.get("ticker", "")
+            entry_price = buy.get("entry_price", 0)
+            if ticker and entry_price:
+                # processed parquet에서 당일 종가 확인
+                try:
+                    pq_path = DATA_DIR / "processed" / f"{ticker}.parquet"
+                    if pq_path.exists():
+                        df = pd.read_parquet(pq_path)
+                        if len(df) > 0:
+                            last_close = float(df.iloc[-1]["close"])
+                            pnl = (last_close / entry_price - 1) * 100
+                            buy_results.append({
+                                "ticker": ticker,
+                                "name": buy.get("name", ""),
+                                "entry_price": entry_price,
+                                "current_close": last_close,
+                                "pnl_pct": round(pnl, 2),
+                                "conviction": buy.get("conviction", 0),
+                            })
+                except Exception:
+                    pass
+        if buy_results:
+            review["v3_picks_results"] = buy_results
+            review["v3_picks_avg_pnl"] = round(
+                sum(r["pnl_pct"] for r in buy_results) / len(buy_results), 2
+            )
+
+    # ── 누적 저장 ──
+    perf_path = DATA_DIR / "daily_performance.json"
+    history = []
+    if perf_path.exists():
+        try:
+            with open(perf_path, encoding="utf-8") as f:
+                history = json.load(f)
+                if not isinstance(history, list):
+                    history = []
+        except Exception:
+            history = []
+
+    # 같은 날짜 중복 방지
+    history = [h for h in history if h.get("date") != today_str]
+    history.append(review)
+
+    # 최근 30일만 유지
+    history = history[-30:]
+
+    _save_json(perf_path, history)
+
+    # 로그
+    logger.info("일일 리뷰 결과:")
+    logger.info("  레짐 판단: %s (적중: %s)", review.get("regime_predicted"), review.get("regime_hit", "N/A"))
+    if "kospi_change_pct" in review:
+        logger.info("  KOSPI 변동: %.2f%%", review["kospi_change_pct"])
+    if "attack_sector_avg_return" in review:
+        logger.info("  공격 섹터 평균: %.2f%%", review["attack_sector_avg_return"])
+    if "v3_picks_avg_pnl" in review:
+        logger.info("  v3 picks 평균 수익: %.2f%%", review["v3_picks_avg_pnl"])
+
+    return review
+
+
+def weekly_review() -> dict:
+    """Agent 7B — 주간 정확도 분석
+
+    daily_performance.json 누적 데이터를 집계하여
+    data/weekly_accuracy.json에 피드백 텍스트 생성.
+    → 다음 주 StrategicBrain 프롬프트에 자동 주입.
+
+    금요일 장후 자동 실행 (BAT-D 22단계에서 DOW==4 체크).
+
+    Returns:
+        주간 분석 결과 + feedback_text
+    """
+    logger.info("=" * 60)
+    logger.info("Agent 7B: 주간 정확도 분석")
+    logger.info("=" * 60)
+
+    perf_path = DATA_DIR / "daily_performance.json"
+    if not perf_path.exists():
+        logger.warning("daily_performance.json 없음 — 주간 리뷰 스킵")
+        return {}
+
+    try:
+        with open(perf_path, encoding="utf-8") as f:
+            history = json.load(f)
+    except Exception as e:
+        logger.warning("daily_performance.json 로드 실패: %s", e)
+        return {}
+
+    if not history or len(history) < 3:
+        logger.info("데이터 %d일분 — 최소 3일 필요, 스킵", len(history))
+        return {}
+
+    # ── 최근 5일(영업일) 데이터 집계 ──
+    recent = history[-5:]
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    # 레짐 적중률
+    regime_hits = [r for r in recent if r.get("regime_hit") is not None]
+    regime_accuracy = (
+        sum(1 for r in regime_hits if r["regime_hit"]) / len(regime_hits)
+        if regime_hits else 0
+    )
+
+    # 공격 섹터 평균 수익률
+    attack_returns = [
+        r["attack_sector_avg_return"]
+        for r in recent
+        if "attack_sector_avg_return" in r
+    ]
+    avg_attack_return = sum(attack_returns) / len(attack_returns) if attack_returns else 0
+
+    # 회피 섹터 적중률
+    avoid_hits = [r for r in recent if r.get("avoid_hit") is not None]
+    avoid_accuracy = (
+        sum(1 for r in avoid_hits if r["avoid_hit"]) / len(avoid_hits)
+        if avoid_hits else 0
+    )
+
+    # v3 picks 평균 수익률
+    picks_pnls = [
+        r["v3_picks_avg_pnl"]
+        for r in recent
+        if "v3_picks_avg_pnl" in r
+    ]
+    avg_picks_pnl = sum(picks_pnls) / len(picks_pnls) if picks_pnls else 0
+
+    result = {
+        "review_date": today_str,
+        "period_days": len(recent),
+        "regime_accuracy": round(regime_accuracy, 2),
+        "regime_details": [
+            {"date": r["date"], "predicted": r.get("regime_predicted"), "hit": r.get("regime_hit")}
+            for r in regime_hits
+        ],
+        "attack_sector_avg_return": round(avg_attack_return, 2),
+        "avoid_accuracy": round(avoid_accuracy, 2),
+        "v3_picks_avg_pnl": round(avg_picks_pnl, 2),
+    }
+
+    # ── 피드백 텍스트 생성 (Phase 1 프롬프트에 주입) ──
+    feedback_lines = [
+        f"[주간 피드백 {today_str}] 최근 {len(recent)}일 성과:",
+        f"- 레짐 판단 적중률: {regime_accuracy:.0%} ({sum(1 for r in regime_hits if r['regime_hit'])}/{len(regime_hits)})" if regime_hits else "- 레짐 적중률: 데이터 부족",
+        f"- 공격 섹터 평균 수익: {avg_attack_return:+.2f}%" if attack_returns else "- 공격 섹터: 데이터 부족",
+        f"- 회피 섹터 적중률: {avoid_accuracy:.0%}" if avoid_hits else "- 회피 섹터: 데이터 부족",
+        f"- v3 picks 평균 수익: {avg_picks_pnl:+.2f}%" if picks_pnls else "- v3 picks: 데이터 부족",
+    ]
+
+    # 개선 제안
+    if regime_accuracy < 0.5 and regime_hits:
+        feedback_lines.append("⚠️ 레짐 판단 정확도 낮음 — 거시 소스 가중치 재검토 필요")
+    if avg_attack_return < 0 and attack_returns:
+        feedback_lines.append("⚠️ 공격 섹터 수익 마이너스 — 모멘텀 과열 종목 회피 필요")
+    if avg_picks_pnl < -2 and picks_pnls:
+        feedback_lines.append("⚠️ v3 picks 평균 손실 — conviction 기준 상향 검토")
+
+    result["feedback_text"] = "\n".join(feedback_lines)
+
+    # 저장
+    _save_json(DATA_DIR / "weekly_accuracy.json", result)
+
+    # 로그
+    logger.info("주간 리뷰 결과:")
+    logger.info("  레짐 적중률: %.0f%%", regime_accuracy * 100)
+    logger.info("  공격 섹터 평균: %+.2f%%", avg_attack_return)
+    logger.info("  회피 적중률: %.0f%%", avoid_accuracy * 100)
+    logger.info("  v3 picks 평균: %+.2f%%", avg_picks_pnl)
+    logger.info("  피드백 텍스트 (%d자) → weekly_accuracy.json", len(result["feedback_text"]))
+
+    return result
+
+
 # ─── 메인 ───────────────────────────────────────────────────────
 
 async def main():
@@ -597,11 +871,22 @@ async def main():
     parser.add_argument("--phase", type=int, default=5, help="실행할 최대 Phase (기본: 5)")
     parser.add_argument("--no-telegram", action="store_true", help="텔레그램 알림 생략")
     parser.add_argument("--skip-phase1", action="store_true", help="Phase 1 생략 (기존 ai_strategic_analysis.json 사용)")
+    parser.add_argument("--review", action="store_true", help="일일 성과 리뷰만 실행 (Phase 7A)")
+    parser.add_argument("--weekly-review", action="store_true", help="주간 정확도 분석 실행 (Phase 7B)")
     args = parser.parse_args()
 
     settings = _load_settings()
     if not settings.get("enabled", True):
         logger.info("ai_brain_v3.enabled=false — 스킵")
+        return
+
+    # ── 리뷰 전용 모드 ──
+    if args.review:
+        daily_review()
+        return
+    if args.weekly_review:
+        daily_review()  # 주간 리뷰 전에 당일 리뷰도 실행
+        weekly_review()
         return
 
     start_time = datetime.now()

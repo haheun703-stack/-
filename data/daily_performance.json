@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "date": "2026-03-01",
+    "regime_predicted": "공격",
+    "regime_confidence": 0.85,
+    "attack_sectors": [
+      "반도체",
+      "IT서비스",
+      "정유"
+    ],
+    "avoid_sectors": [
+      "전력/유틸리티",
+      "게임/엔터"
+    ],
+    "kospi_change_pct": -1.0,
+    "regime_hit": false,
+    "v3_picks_results": [
+      {
+        "ticker": "022100",
+        "name": "포스코DX",
+        "entry_price": 39300,
+        "current_close": 39300.0,
+        "pnl_pct": 0.0,
+        "conviction": 8
+      },
+      {
+        "ticker": "455900",
+        "name": "엔젤로보틱스",
+        "entry_price": 34450,
+        "current_close": 34450.0,
+        "pnl_pct": 0.0,
+        "conviction": 7
+      }
+    ],
+    "v3_picks_avg_pnl": 0.0
+  }
+]

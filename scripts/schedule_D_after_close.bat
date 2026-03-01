@@ -165,7 +165,12 @@ REM 19.8단계: AI 두뇌 뉴스 분석 (Claude API → 정성적 종목 판단)
 echo [%date% %time%] [19.8/30] AI 두뇌 뉴스 분석 >> logs\schedule.log
 python -u -X utf8 scripts\ai_news_brain.py >> logs\schedule.log 2>&1
 
-REM 20단계: 내일 추천 종목 통합 스캔 (10개 시그널 교차검증) *** 최종 ***
+REM 19.9단계: v3 AI Brain 5단계 깔때기 (Opus→Sonnet→Opus 체인)
+echo [%date% %time%] [19.9/30] v3 AI Brain >> logs\schedule.log
+python -u -X utf8 scripts\run_v3_brain.py --no-telegram >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] v3 Brain 실패 (무시, 기존 시스템으로 계속) >> logs\schedule.log
+
+REM 20단계: 내일 추천 종목 통합 스캔 (10개 시그널 교차검증 + v3 boost) *** 최종 ***
 echo [%date% %time%] [20/30] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 
@@ -181,11 +186,17 @@ REM 21단계: 일일 아카이브 (JSON → SQLite 영구 저장)
 echo [%date% %time%] [21/28] 일일 아카이브 >> logs\schedule.log
 python -u -X utf8 src\daily_archive.py >> logs\schedule.log 2>&1
 
+REM 21.5단계: v3 Brain 일일 성과 리뷰 (AI 판단 vs 실제 결과 비교)
+echo [%date% %time%] [21.5/30] v3 일일 리뷰 >> logs\schedule.log
+python -u -X utf8 scripts\run_v3_brain.py --review >> logs\schedule.log 2>&1
+
 REM 22단계: 주간 보고서 자동 생성 (금요일만)
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
     echo [%date% %time%] [22/28] 주간 보고서 생성 (금요일) >> logs\schedule.log
     python -u -X utf8 src\daily_archive.py --weekly >> logs\schedule.log 2>&1
+    echo [%date% %time%] [22.5/30] v3 주간 정확도 분석 >> logs\schedule.log
+    python -u -X utf8 scripts\run_v3_brain.py --weekly-review >> logs\schedule.log 2>&1
 ) else (
     echo [%date% %time%] [22/28] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
 )
