@@ -101,6 +101,11 @@ class CandidateState:
     triple_confirm: int = 0          # 3중 확인 충족 개수 (0~3)
     triple_detail: str = ""          # "EMA✓ VWAP✓ MACD✓" 등
 
+    # v3 AI Brain 연동
+    v3_backed: bool = False         # v3 picks에 포함된 종목
+    v3_conviction: int = 0          # v3 conviction (1~10)
+    v3_size_pct: float = 0.0        # v3 비중 (%, 계좌 대비)
+
 
 # ─── SmartEntryEngine ────────────────────────────────
 
@@ -144,6 +149,7 @@ class SmartEntryEngine:
         self.max_amount_per_stock = live_cfg.get("max_amount_per_stock", 500_000)
         self.max_total_amount = live_cfg.get("max_total_amount", 500_000)
         self.kill_switch_file = Path(live_cfg.get("kill_switch_file", "data/KILL_SWITCH"))
+        self.v3_sizing_enabled = live_cfg.get("v3_sizing_enabled", False)
 
         # 감사 로그 DB
         self._audit_db = Path("data/order_audit.db")
@@ -252,18 +258,97 @@ class SmartEntryEngine:
         return False
 
     def _calc_order_qty(self, c: CandidateState) -> int:
-        """종목당 주문 수량 계산 (금액 상한 기반)."""
+        """종목당 주문 수량 계산.
+
+        v3 종목: available_cash × v3_size_pct / 100
+        비-v3 종목: max_amount_per_stock (설정값)
+        """
         if c.order_price <= 0:
             return 0
+
+        # v3 사이징: 예수금 × size_pct
+        if c.v3_backed and c.v3_size_pct > 0 and self.v3_sizing_enabled:
+            cash = self._get_available_cash()
+            if cash > 0:
+                amount = int(cash * c.v3_size_pct / 100)
+                # max_amount_per_stock 상한 적용
+                amount = min(amount, self.max_amount_per_stock)
+                qty = amount // c.order_price
+                logger.info("[v3사이징] %s: 예수금 %s × %.1f%% = %s원 → %d주",
+                            c.name, f"{cash:,.0f}", c.v3_size_pct,
+                            f"{amount:,}", qty)
+                return max(qty, 1)
+
         qty = self.max_amount_per_stock // c.order_price
         return max(qty, 1)  # 최소 1주
+
+    def _get_available_cash(self) -> float:
+        """KIS API에서 주문 가능 예수금 조회 (캐시 1분)."""
+        now = time.time()
+        if hasattr(self, "_cash_cache") and (now - self._cash_cache[0]) < 60:
+            return self._cash_cache[1]
+
+        cash = 0.0
+        if self.order and not self.dry_run:
+            try:
+                cash = self.order.get_available_cash()
+                logger.info("[잔고] 주문 가능 예수금: %s원", f"{cash:,.0f}")
+            except Exception as e:
+                logger.warning("[잔고] 예수금 조회 실패: %s → max_amount 사용", e)
+                return 0.0
+        self._cash_cache = (now, cash)
+        return cash
 
     # ──────────────────────────────────────────
     # Phase 1: 추천 종목 로드 + 초기 지정가
     # ──────────────────────────────────────────
 
+    def _load_v3_sizing(self) -> dict:
+        """ai_v3_picks.json에서 v3 종목별 비중 정보 로드.
+
+        Returns: {ticker: {conviction, size_pct, entry_price, stop_loss_pct, target_pct}}
+        """
+        v3_path = Path("data/ai_v3_picks.json")
+        if not v3_path.exists():
+            return {}
+
+        try:
+            with open(v3_path, encoding="utf-8") as f:
+                v3 = json.load(f)
+
+            # 당일 데이터만 사용
+            from datetime import date as _date
+            if v3.get("decision_date") != _date.today().isoformat():
+                logger.info("[v3] ai_v3_picks.json이 오늘 날짜가 아님 → 무시")
+                return {}
+
+            result = {}
+            for buy in v3.get("buys", []):
+                result[buy["ticker"]] = {
+                    "conviction": buy.get("conviction", 5),
+                    "size_pct": buy.get("size_pct", 10.0),
+                    "entry_price": buy.get("entry_price", 0),
+                    "stop_loss_pct": buy.get("stop_loss_pct", -8.0),
+                    "target_pct": buy.get("target_pct", 15.0),
+                    "strategy": buy.get("strategy", ""),
+                    "reasoning": buy.get("reasoning", ""),
+                }
+            logger.info("[v3] %d종목 사이징 로드: %s",
+                        len(result),
+                        ", ".join(f"{t}({v['size_pct']}%%)" for t, v in result.items()))
+            return result
+        except Exception as e:
+            logger.warning("[v3] ai_v3_picks.json 로드 실패: %s", e)
+            return {}
+
     def load_picks(self, picks_path: str | Path | None = None) -> int:
-        """tomorrow_picks.json 로드 → CandidateState 리스트 생성"""
+        """tomorrow_picks.json 로드 → CandidateState 리스트 생성.
+
+        v3 AI Brain 연동:
+          - ai_v3_picks.json도 함께 로드
+          - v3 picks에 포함된 종목은 v3_backed=True, v3_size_pct 설정
+          - v3 picks 우선 정렬 (conviction 기반)
+        """
         path = Path(picks_path) if picks_path else Path("data/tomorrow_picks.json")
         if not path.exists():
             logger.error("[로드] %s 없음", path)
@@ -272,16 +357,22 @@ class SmartEntryEngine:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
+        # v3 사이징 로드
+        v3_map = self._load_v3_sizing()
+
         picks = data.get("picks", [])
-        # 강력매수 + 매수 + 관심매수만
-        valid_grades = {"강력매수", "매수", "관심매수"}
+        # 적극매수 + 매수 + 관심매수만 (적극매수가 최상위 등급)
+        valid_grades = {"적극매수", "매수", "관심매수"}
 
         self.candidates = []
+        seen_tickers = set()
         for p in picks:
             if p.get("grade") not in valid_grades:
                 continue
+            ticker = p["ticker"]
+            seen_tickers.add(ticker)
             c = CandidateState(
-                ticker=p["ticker"],
+                ticker=ticker,
                 name=p["name"],
                 grade=p["grade"],
                 prev_close=int(p.get("close", 0) or p.get("entry_price", 0)),
@@ -289,11 +380,54 @@ class SmartEntryEngine:
                 target_price=int(p.get("target_price", 0)),
                 score=float(p.get("total_score", 0)),
             )
+
+            # v3 사이징 연동
+            if ticker in v3_map:
+                v3 = v3_map[ticker]
+                c.v3_backed = True
+                c.v3_conviction = v3["conviction"]
+                c.v3_size_pct = v3["size_pct"]
+                # v3 진입가/손절/목표가 반영 (v3가 더 정밀)
+                if v3["entry_price"] > 0:
+                    c.prev_close = v3["entry_price"]
+                if v3["stop_loss_pct"] != 0 and c.prev_close > 0:
+                    c.stop_loss = int(c.prev_close * (1 + v3["stop_loss_pct"] / 100))
+                if v3["target_pct"] != 0 and c.prev_close > 0:
+                    c.target_price = int(c.prev_close * (1 + v3["target_pct"] / 100))
+                logger.info("[v3] %s → conviction=%d, size=%.1f%%, 진입=%d",
+                            c.name, c.v3_conviction, c.v3_size_pct, c.prev_close)
+
             self.candidates.append(c)
 
-        # ─── 안전장치: max_stocks 제한 (점수 높은 순) ───
+        # v3 picks 중 tomorrow_picks에 없는 종목 추가 (AI 전용 종목)
+        for ticker, v3 in v3_map.items():
+            if ticker not in seen_tickers:
+                c = CandidateState(
+                    ticker=ticker,
+                    name=v3.get("name", ticker),
+                    grade="v3전용",
+                    prev_close=v3["entry_price"],
+                    score=90.0,  # v3 전용은 높은 기본 점수
+                    v3_backed=True,
+                    v3_conviction=v3["conviction"],
+                    v3_size_pct=v3["size_pct"],
+                )
+                if v3["stop_loss_pct"] != 0 and c.prev_close > 0:
+                    c.stop_loss = int(c.prev_close * (1 + v3["stop_loss_pct"] / 100))
+                if v3["target_pct"] != 0 and c.prev_close > 0:
+                    c.target_price = int(c.prev_close * (1 + v3["target_pct"] / 100))
+                self.candidates.append(c)
+                logger.info("[v3전용] %s 추가 (tomorrow_picks에 없음) → conv=%d, size=%.1f%%",
+                            c.name, c.v3_conviction, c.v3_size_pct)
+
+        # ─── 정렬: v3 우선 → 점수순 ───
+        self.candidates.sort(
+            key=lambda x: (x.v3_backed, x.v3_conviction, x.score),
+            reverse=True,
+        )
+
+        # ─── 안전장치: max_stocks 제한 ───
         if not self.dry_run and len(self.candidates) > self.max_stocks:
-            self.candidates.sort(key=lambda x: x.score, reverse=True)
             dropped = self.candidates[self.max_stocks:]
             self.candidates = self.candidates[:self.max_stocks]
             logger.warning(
@@ -302,7 +436,9 @@ class SmartEntryEngine:
                 ", ".join(f"{c.name}({c.score:.0f})" for c in dropped),
             )
 
-        logger.info("[로드] %d건 추천 종목 로드 완료", len(self.candidates))
+        v3_count = sum(1 for c in self.candidates if c.v3_backed)
+        logger.info("[로드] %d건 추천 종목 로드 (v3=%d건, 기존=%d건)",
+                    len(self.candidates), v3_count, len(self.candidates) - v3_count)
         return len(self.candidates)
 
     def place_initial_orders(self) -> int:

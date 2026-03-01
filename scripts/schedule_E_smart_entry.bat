@@ -4,8 +4,11 @@ REM  Quantum Master - BAT-E: AI 스마트 진입 (LIVE)
 REM  스케줄: 매일 08:50 (월~금, 장 시작 10분 전)
 REM  등록: schtasks /create /tn "QM_E_SmartEntry" /tr "D:\sub-agent-project\scripts\schedule_E_smart_entry.bat" /sc daily /st 08:50
 REM
+REM  매수 소스: v3 AI Brain picks (우선) + 기존 TOP 7 (보조)
 REM  안전장치:
-REM    - max_stocks=1 (TOP1만), max_amount=100만원
+REM    - max_stocks=5 (v3 2종목 + TOP 3종목)
+REM    - v3 종목: 예수금 × size_pct 동적 사이징
+REM    - 비-v3 종목: 종목당 max 500만원
 REM    - 킬스위치: data/KILL_SWITCH 파일 생성 시 즉시 중단
 REM    - 당일 중복 실행 방지 (order_audit.db)
 REM    - 모든 주문 감사 로그 기록
@@ -20,7 +23,8 @@ set PYTHONPATH=D:\sub-agent-project
 
 echo ========================================
 echo [QM-E] AI 스마트 진입 LIVE (08:50~10:30)
-echo   max_stocks=1, max_amount=100만원
+echo   v3 + TOP7 병행, max_stocks=5
+echo   v3: 예수금 x size_pct 동적 사이징
 echo   킬스위치: data/KILL_SWITCH
 echo ========================================
 
