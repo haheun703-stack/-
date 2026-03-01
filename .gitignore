@@ -46,6 +46,71 @@ geoquant_quickstart.py
 analyze_sj_group.py
 strategy_config.json
 
+# 한글 개인 폴더 (참고자료/스크린샷/메모)
+매매,매도 캡쳐/
+병행_설계_확정/
+서보성 대화 텍스트/
+섹션별 모음/
+수급건전성,이벤트 드리븐시스템 외 모음/
+아이디어 사진들/
+웹 HTML_메인/
+인스타 영상모음/
+주식차트 모음/
+클로드 HTML 보고서/
+자동매매봇_최종검수_지시서.docx
+
+# 루트 참고 문서 (코드 아님)
+FILTER_CRITERIA_v7.md
+GOMCAM*
+KISBOT_AI_BRAIN_v3_ARCHITECTURE.md
+cfo_agent_upgrade_instructions.md
+chatgpt_api_integration_guide.md
+claude_code_instructions.md
+etf_sector_anatomy.jsx
+jarvis-dashboard-preview.html
+monday_battle_plan.md
+news-early-detection-guide.html
+paper_trader.py
+quantum_v8_spec.docx
+
+# 참조 코드 (구현 완료 후 보존용)
+_etf_ref/
+
+# 로그 / 일일 리포트
+logs/
+reports/
+
+# data 캐시/임시 폴더
+data/dart_cache/
+data/fundamental_cache/
+data/intraday/
+data/macro/
+data/raw/
+data/signal_analysis/
+data/sniper_watch/
+data/universe/
+data/sector_rotation/etf_daily/
+data/sector_rotation/momentum/
+data/sector_rotation/daily_report.txt
+data/sector_rotation/wics_*.csv
+data/group_etf/
+data/group_rotation/
+data/signal_news/
+data/analysis_*.txt
+data/mechanical_universe_*.txt
+data/new_universe_tickers.txt
+data/scan_result.txt
+data/us_market/*.db
+data/value_trap_*.json
+
+# docs 자동생성 (bkit)
+docs/.bkit-memory.json
+docs/.pdca-status.json
+
+# 테스트 커버리지
+.coverage
+htmlcov/
+
 # 임시 폴더
 _tmp_files*/
 
