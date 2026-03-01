@@ -8,9 +8,9 @@
   Phase 2: SectorStrategist → ai_sector_focus.json
   Phase 3: scan_cache.json에서 후보 추출 + sector boost/suppress
   Phase 4: DeepAnalyst (Sonnet×N) → conviction 필터
-  Phase 5: PortfolioBrain (Opus) → ai_v3_picks.json       (미구현)
+  Phase 5: PortfolioBrain (Opus) → ai_v3_picks.json (최종 포트폴리오)
 
-Phase 1~4 구현 완료. Phase 5는 후속 커밋에서 추가.
+Phase 1~5 구현 완료.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 from src.agents.strategic_brain import StrategicBrainAgent
 from src.agents.sector_strategist import SectorStrategistAgent
 from src.agents.deep_analyst import DeepAnalystAgent
+from src.agents.portfolio_brain import PortfolioBrainAgent
 
 # ─── 로깅 설정 ──────────────────────────────────────────────────
 logging.basicConfig(
@@ -400,12 +401,87 @@ async def run_phase3_4(
     return passed
 
 
+# ─── Phase 5: Portfolio Brain ─────────────────────────────────
+
+async def run_phase5(
+    deep_picks: list[dict],
+    strategic_result: dict,
+) -> dict:
+    """Phase 5: 최종 포트폴리오 결정 (Agent 2E).
+
+    Deep Analyst 통과 종목 + 현재 포지션 + 레짐 → 최종 매수 결정.
+
+    Args:
+        deep_picks: Phase 4 통과 종목
+        strategic_result: Phase 1 결과
+
+    Returns:
+        ai_v3_picks.json 최종 형식
+    """
+    logger.info("=" * 60)
+    logger.info("Phase 5: Portfolio Brain (v3 Agent 2E) 시작")
+    logger.info("=" * 60)
+
+    # 현재 포지션 로드
+    positions = _load_json(DATA_DIR / "positions.json")
+    if isinstance(positions, dict):
+        positions = positions.get("positions", [])
+
+    logger.info("현재 보유: %d종목, Phase 4 후보: %d종목", len(positions), len(deep_picks))
+
+    if not deep_picks:
+        logger.info("Phase 4 통과 종목 없음 — Phase 5 결과: 매수 0")
+        result = PortfolioBrainAgent._fallback_result("후보 없음", strategic_result)
+        result.pop("error", None)
+        result["reasoning"] = "Deep Analyst 통과 종목이 없어 매수 보류"
+    else:
+        agent = PortfolioBrainAgent()
+        result = await agent.decide(deep_picks, positions, strategic_result)
+
+    # 결과 저장
+    settings = _load_settings()
+    picks_path = Path(settings.get("picks_output", "data/ai_v3_picks.json"))
+    if not picks_path.is_absolute():
+        picks_path = PROJECT_ROOT / picks_path
+    _save_json(picks_path, result)
+
+    # 결과 로그
+    logger.info("-" * 60)
+    logger.info("Phase 5 결과 요약:")
+    buys = result.get("buys", [])
+    logger.info("  매수 결정: %d종목", len(buys))
+    for b in buys:
+        logger.info(
+            "    - %s(%s): conviction=%d, 비중=%.1f%%, strategy=%s",
+            b.get("name", "?"),
+            b.get("ticker", "?"),
+            b.get("conviction", 0),
+            b.get("size_pct", 0),
+            b.get("strategy", "?"),
+        )
+
+    skipped = result.get("skipped", [])
+    if skipped:
+        logger.info("  스킵: %d종목", len(skipped))
+        for s in skipped:
+            logger.info("    - %s: %s", s.get("name", "?"), s.get("skip_reason", "?"))
+
+    warnings = result.get("portfolio_warnings", [])
+    if warnings:
+        for w in warnings:
+            logger.info("  경고: %s", w)
+
+    logger.info("-" * 60)
+    return result
+
+
 # ─── 텔레그램 알림 ──────────────────────────────────────────────
 
 async def _send_telegram_summary(
     result: dict,
     sector_focus: dict | None = None,
     picks: list[dict] | None = None,
+    final_picks: dict | None = None,
 ) -> None:
     """v3 Brain 전체 결과를 텔레그램으로 전송"""
     try:
@@ -476,6 +552,22 @@ async def _send_telegram_summary(
                 f"[{p.get('strategy', '?')}]"
             )
 
+    # Phase 5 — 최종 매수 결정
+    if final_picks:
+        buys = final_picks.get("buys", [])
+        if buys:
+            lines.append(f"\n💰 최종 매수 결정: {len(buys)}종목")
+            for b in buys[:5]:
+                lines.append(
+                    f"  • {b.get('name', '?')}({b.get('ticker', '?')}): "
+                    f"비중 {b.get('size_pct', 0):.0f}% "
+                    f"[{b.get('strategy', '?')}]"
+                )
+        else:
+            lines.append(f"\n💰 최종 매수: 없음")
+        if final_picks.get("reasoning"):
+            lines.append(f"  → {final_picks['reasoning'][:60]}")
+
     # 릴레이 알림
     alerts = result.get("relay_alerts", [])
     if alerts:
@@ -502,7 +594,7 @@ async def _send_telegram_summary(
 async def main():
     parser = argparse.ArgumentParser(description="v3 AI Brain 5단계 깔때기 러너")
     parser.add_argument("--dry-run", action="store_true", help="분석만 수행, 매수 없음")
-    parser.add_argument("--phase", type=int, default=4, help="실행할 최대 Phase (기본: 4)")
+    parser.add_argument("--phase", type=int, default=5, help="실행할 최대 Phase (기본: 5)")
     parser.add_argument("--no-telegram", action="store_true", help="텔레그램 알림 생략")
     parser.add_argument("--skip-phase1", action="store_true", help="Phase 1 생략 (기존 ai_strategic_analysis.json 사용)")
     args = parser.parse_args()
@@ -547,13 +639,18 @@ async def main():
             logger.error("Phase 3+4 실패: %s", e)
             picks = []
 
-    # Phase 5: PortfolioBrain (미구현)
-    if args.phase >= 5:
-        logger.info("Phase 5 (PortfolioBrain)는 미구현 — Phase 4 결과를 그대로 사용")
+    # Phase 5: Portfolio Brain
+    final_picks = None
+    if args.phase >= 5 and picks is not None:
+        try:
+            final_picks = await run_phase5(picks, result)
+        except Exception as e:
+            logger.error("Phase 5 실패: %s", e)
+            final_picks = None
 
     # 텔레그램
     if not args.no_telegram and not result.get("error"):
-        await _send_telegram_summary(result, sector_focus, picks)
+        await _send_telegram_summary(result, sector_focus, picks, final_picks)
 
     elapsed = (datetime.now() - start_time).total_seconds()
     logger.info("v3 AI Brain 러너 완료 (%.1f초)", elapsed)

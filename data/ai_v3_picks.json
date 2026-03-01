@@ -1,55 +1,37 @@
 {
-  "analysis_date": "2026-03-01",
-  "phase": "phase4_deep_analyst",
-  "total_scanned": 1029,
-  "pipeline_passed": 33,
-  "boost_filtered": 30,
-  "conviction_passed": 2,
-  "min_conviction": 5,
-  "picks": [
+  "decision_date": "2026-03-01",
+  "regime": "공격",
+  "available_slots": 10,
+  "current_holdings": 0,
+  "cash_pct_before": 100.0,
+  "cash_pct_after": 75.0,
+  "buys": [
     {
       "ticker": "022100",
       "name": "포스코DX",
-      "buy": true,
       "conviction": 8,
+      "size_pct": 15.0,
       "strategy": "momentum",
       "thesis_alignment": "strong",
       "entry_price": 39300,
-      "target_pct": 14.9,
       "stop_loss_pct": -8.5,
-      "reasoning": "IT서비스 섹터 즉시진입 타이밍과 강한 thesis 정합성(1.2x 비중). ADX 25.1로 추세 강도 확보, RSI 55.5는 과열 아닌 건강한 상승 구간. 외국인 5일 42억 순매수로 수급 반등 시그널. 반도체 랠리의 후행 수혜주로 엔터프라이즈 AI 인프라 수요 수혜 예상.",
-      "risks": [
-        "거래량 서지 0.55x로 낮고 OBV 추세 down으로 매집 확신 부족",
-        "52주 고점 대비 86.2%로 단기 저항 가능성",
-        "TRIX가 Signal 하회로 모멘텀 약화 조짐"
-      ],
-      "catalysts": [
-        "Nvidia 실적 발표 앞두고 AI 인프라 기대감 확산",
-        "포스코그룹 스마트팩토리·AI 전환 수혜",
-        "외국인 대규모 순매수 전환"
-      ]
+      "target_pct": 14.9,
+      "reasoning": "IT서비스 섹터 즉시진입 타이밍과 강한 thesis 일치, 엔터프라이즈 AI 시장 확대 수혜"
     },
     {
-      "ticker": "032940",
-      "name": "원익",
-      "buy": true,
-      "conviction": 8,
+      "ticker": "455900",
+      "name": "엔젤로보틱스",
+      "conviction": 7,
+      "size_pct": 10.0,
       "strategy": "relay",
-      "thesis_alignment": "strong",
-      "entry_price": 11870,
-      "target_pct": 30.7,
-      "stop_loss_pct": -17.5,
-      "reasoning": "반도체 장비 기업으로 HBM 공급 부족과 AI칩 수요 폭증의 직접 수혜주. 현재 반도체 섹터가 억제 목록이나, 원익은 장비/소부장 릴레이 경로의 후행 수혜 타이밍. ADX 29.5로 강한 추세 확인, RSI 44.3은 과매수 아닌 건강한 재진입 구간. OBV 상승 추세와 MA60/120 정배열로 중기 모멘텀 양호.",
-      "risks": [
-        "반도체 섹터 전체가 억제 목록에 있어 단기 조정 가능성",
-        "52주 고점 대비 66.7% 수준으로 추가 상승 여력 제한적",
-        "외국인 5일 순매수 0으로 해외 수급 유입 미흡"
-      ],
-      "catalysts": [
-        "Nvidia 실적 발표 전후 반도체 장비 재평가",
-        "HBM 생산 확대에 따른 장비 투자 증가",
-        "대만 반도체 수출 호조의 한국 장비사 연쇄 수혜"
-      ]
+      "thesis_alignment": "moderate",
+      "entry_price": 34450,
+      "stop_loss_pct": -9.8,
+      "target_pct": 17.1,
+      "reasoning": "IT서비스 섹터 부스트 정책 부합, MA 정배열과 OBV 상승으로 기술적 우위"
     }
-  ]
+  ],
+  "skipped": [],
+  "portfolio_warnings": [],
+  "reasoning": "공격 레짐에서 IT서비스 섹터의 즉시진입 시그널과 1.2x 비중 부스트를 활용하여 두 종목 모두 매수. 빈 포트폴리오에서 시작하므로 섹터 집중은 문제없으며, 현금 75%로 권고 비중(20%) 이상 충분히 확보. 미국 금리 상승 리스크를 고려하여 초기 진입은 표준 사이즈로 제한."
 }

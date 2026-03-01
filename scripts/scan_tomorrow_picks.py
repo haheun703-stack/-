@@ -551,6 +551,18 @@ def load_ai_brain_data() -> dict:
     return load_json("ai_brain_judgment.json")
 
 
+def load_v3_picks() -> dict:
+    """v3 AI Brain 최종 picks 로드 (전략 I)."""
+    data = load_json("ai_v3_picks.json")
+    if not data:
+        return {}
+    # 당일 데이터만 유효
+    today = datetime.now().strftime("%Y-%m-%d")
+    if data.get("decision_date", data.get("analysis_date", "")) != today:
+        return {}
+    return data
+
+
 def load_morning_reports() -> dict:
     """장전 리포트 스캔 결과 로드 (전략 G)."""
     data = load_json("morning_reports.json")
@@ -1236,6 +1248,17 @@ def main():
         with open(yaml_path, encoding="utf-8") as f:
             yaml_config = yaml.safe_load(f) or {}
 
+    # 전략 I: v3 AI Brain picks
+    v3_picks_data = load_v3_picks()
+    v3_buy_map = {}  # ticker → {conviction, size_pct, strategy, ...}
+    if v3_picks_data:
+        for b in v3_picks_data.get("buys", []):
+            t = b.get("ticker", "")
+            if t:
+                v3_buy_map[t] = b
+        if v3_buy_map:
+            print(f"[v3 Brain] {len(v3_buy_map)}종목 매수 결정 로드")
+
     # 전략 H: AI 두뇌 판단
     ai_brain_data = load_ai_brain_data()
     ai_brain_judgments = {}  # ticker → judgment dict
@@ -1471,6 +1494,21 @@ def main():
             score_detail["total"] = round(boosted, 1)
             if ai_sector_bonus > 0:
                 source_names.append("AI섹터")
+
+        # 전략 I: v3 AI Brain conviction 부스트 (최대 +15점)
+        v3_bonus = 0.0
+        v3_tag = ""
+        if ticker in v3_buy_map:
+            v3 = v3_buy_map[ticker]
+            conv = v3.get("conviction", 0)
+            # conviction 5→+5, 7→+10, 9→+14, 10→+15
+            v3_bonus = round(min(conv * 1.67 - 3.35, 15), 1)
+            v3_tag = f"v3:{v3.get('strategy', '?')}(c{conv})"
+        v3_bonus = round(max(min(v3_bonus, 15), 0), 1)
+        if v3_bonus > 0:
+            boosted = max(min(score_detail["total"] + v3_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            source_names.append("v3Brain")
 
         # 이름 결정
         name = ""
