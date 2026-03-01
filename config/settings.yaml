@@ -1381,3 +1381,39 @@ etf_rotation:
     #   KILL  — 룰이 매수라는데 위험 감지 → 매수 보류
     #   HOLD  — 룰이 교체라는데 기존 추세 강함 → 교체 연기
     #   WARNING — 룰에 없는 이상 징후 → 사람에게 알림
+
+# ============================================================
+# AI Brain v3 — 산업 구조 해석 전략가 (KISBOT AI Brain v3)
+# ============================================================
+# "AI = 전략가(Strategy), Bot = 병사(Execution)" — 85:15 비율
+# 5단계 깔때기: 거시→섹터→스크리닝→정밀→포트폴리오
+ai_brain_v3:
+  enabled: true
+  strategic_model: "claude-opus-4-20250514"       # Opus: 전략 판단 (2A, 2E)
+  tactical_model: "claude-sonnet-4-5-20250929"    # Sonnet: 전술 실행 (2B, 2D, 4B)
+  daily_opus_limit: 3          # Opus 일일 호출 한도
+  daily_sonnet_limit: 30       # Sonnet 일일 호출 한도
+  fallback_to_sonnet: true     # Opus 장애 시 Sonnet 대행
+
+  # 출력 파일 경로
+  regime_output: "data/ai_strategic_analysis.json"
+  sector_output: "data/ai_sector_focus.json"
+  picks_output: "data/ai_v3_picks.json"
+
+  # Agent 2A: 전략 두뇌 파라미터
+  strategic_brain:
+    max_industry_theses: 5     # 최대 산업 thesis 수
+    min_conviction: 3          # 최소 conviction (1~10, 이 이상만 추천)
+    max_new_buys: 3            # 일일 최대 신규 매수 종목 수
+    relay_min_winrate: 70      # 릴레이 패턴 최소 승률 (%)
+
+  # Agent 2D: 정밀 분석 파라미터 (Phase 2에서 구현)
+  deep_analyst:
+    min_conviction: 5          # 정밀 분석 통과 최소 conviction (1~10)
+    max_batch_size: 30         # 배치 최대 분석 종목 수
+
+  # Agent 4B/4C: AI 매도 파라미터 (Phase 3에서 구현)
+  sell_brain:
+    check_times: ["10:00", "12:00", "14:00"]  # 장중 AI 매도 체크 시각
+    preclose_time: "14:30"     # 프리클로즈 AI 매도 시각
+    cache_ttl_min: 35          # ai_sell_cache TTL (분)

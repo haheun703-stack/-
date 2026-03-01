@@ -1,0 +1,121 @@
+{
+  "patterns": [
+    {
+      "source_sector": "반도체",
+      "target_sector": "IT서비스",
+      "win_rate": 88.2,
+      "confidence": "HIGH",
+      "avg_lag_days": 1,
+      "sample_count": 34,
+      "last_triggered": "2026-02-20",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "증권",
+      "target_sector": "손해보험",
+      "win_rate": 76.5,
+      "confidence": "HIGH",
+      "avg_lag_days": 1,
+      "sample_count": 17,
+      "last_triggered": "2026-02-20",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "증권",
+      "target_sector": "생명보험",
+      "win_rate": 70.6,
+      "confidence": "HIGH",
+      "avg_lag_days": 1,
+      "sample_count": 17,
+      "last_triggered": "2026-02-19",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "증권",
+      "target_sector": "은행",
+      "win_rate": 68.8,
+      "confidence": "MEDIUM",
+      "avg_lag_days": 2,
+      "sample_count": 16,
+      "last_triggered": "2026-02-20",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "전기제품",
+      "target_sector": "화학",
+      "win_rate": 85.7,
+      "confidence": "HIGH",
+      "avg_lag_days": 1,
+      "sample_count": 21,
+      "last_triggered": "2026-02-15",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "방산조선",
+      "target_sector": "기계",
+      "win_rate": 74.1,
+      "confidence": "HIGH",
+      "avg_lag_days": 2,
+      "sample_count": 27,
+      "last_triggered": "2026-02-18",
+      "last_result": "WIN",
+      "status": "active"
+    },
+    {
+      "source_sector": "생물공학",
+      "target_sector": "건강관리",
+      "win_rate": 80.0,
+      "confidence": "HIGH",
+      "avg_lag_days": 1,
+      "sample_count": 15,
+      "last_triggered": "2026-02-12",
+      "last_result": "WIN",
+      "status": "active"
+    }
+  ],
+  "global_triggers": [
+    {
+      "source": "SOX",
+      "threshold": "+3%",
+      "target_sector": "반도체 (대형주 → 소부장)",
+      "historical_accuracy": "82%",
+      "avg_kospi_reaction": "+1.8%",
+      "note": "SOX 급등 다음날 삼전/하닉 갭업 후 소부장 릴레이"
+    },
+    {
+      "source": "SOX",
+      "threshold": "-3%",
+      "target_sector": "반도체 (방어)",
+      "historical_accuracy": "78%",
+      "avg_kospi_reaction": "-1.5%",
+      "note": "SOX 급락 다음날 반도체 전체 하락, 신규 매수 회피"
+    },
+    {
+      "source": "VIX",
+      "threshold": ">=30",
+      "target_sector": "전체 (방어 모드)",
+      "historical_accuracy": "85%",
+      "avg_kospi_reaction": "-2.1%",
+      "note": "VIX 30 이상이면 전체 시장 방어, 현금 비중 확대"
+    }
+  ],
+  "super_sector_groups": {
+    "금융": ["증권", "생명보험", "손해보험", "은행"],
+    "IT": ["반도체", "디스플레이", "IT서비스", "전자장비"],
+    "에너지": ["2차전지", "전기차부품", "충전인프라"],
+    "소재": ["정유", "화학", "플라스틱"],
+    "방산": ["방산", "항공", "조선", "기계"],
+    "바이오": ["생물공학", "건강관리", "제약"]
+  },
+  "metadata": {
+    "last_updated": "2026-03-01",
+    "backtest_period": "2024-01-01 ~ 2026-02-28",
+    "update_frequency": "weekly",
+    "version": "v3.0"
+  }
+}
