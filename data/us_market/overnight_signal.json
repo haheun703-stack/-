@@ -1,7 +1,7 @@
 {
-  "date": "2026-02-28",
+  "date": "2026-03-02",
   "us_close_date": "2026-02-27",
-  "generated_at": "2026-02-28 06:10",
+  "generated_at": "2026-03-02 06:10",
   "index_direction": {
     "EWY": {
       "ret_1d": 0.6,
@@ -142,54 +142,54 @@
     "sample_count": 95,
     "status": "ok",
     "kospi": {
-      "mean_chg": 0.144,
+      "mean_chg": 0.135,
       "median_chg": 0.167,
-      "std": 1.024,
+      "std": 1.031,
       "positive_rate": 58.9
     },
     "kospi_open_gap": {
-      "mean_gap": -0.028,
+      "mean_gap": -0.044,
       "median_gap": -0.056
     },
     "sectors": {
       "반도체": {
-        "mean_chg": 0.132,
+        "mean_chg": 0.096,
         "positive_rate": 47.9,
         "sample_count": 94
       },
       "2차전지": {
-        "mean_chg": -0.278,
-        "positive_rate": 40.4,
+        "mean_chg": -0.188,
+        "positive_rate": 41.5,
         "sample_count": 94
       },
       "바이오": {
-        "mean_chg": 0.11,
+        "mean_chg": 0.108,
         "positive_rate": 48.9,
         "sample_count": 94
       },
       "은행": {
-        "mean_chg": 0.185,
+        "mean_chg": 0.164,
         "positive_rate": 48.9,
         "sample_count": 94
       },
       "철강": {
-        "mean_chg": 0.179,
-        "positive_rate": 45.7,
+        "mean_chg": 0.239,
+        "positive_rate": 46.8,
         "sample_count": 94
       },
       "IT": {
-        "mean_chg": 0.13,
-        "positive_rate": 52.1,
+        "mean_chg": 0.108,
+        "positive_rate": 51.1,
         "sample_count": 94
       },
       "에너지": {
-        "mean_chg": -0.093,
-        "positive_rate": 43.6,
+        "mean_chg": -0.056,
+        "positive_rate": 44.7,
         "sample_count": 94
       },
       "내수": {
-        "mean_chg": 0.195,
-        "positive_rate": 56.4,
+        "mean_chg": 0.178,
+        "positive_rate": 55.3,
         "sample_count": 94
       }
     },

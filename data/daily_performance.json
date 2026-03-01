@@ -24,12 +24,12 @@
         "conviction": 8
       },
       {
-        "ticker": "455900",
-        "name": "엔젤로보틱스",
-        "entry_price": 34450,
-        "current_close": 34450.0,
+        "ticker": "032940",
+        "name": "원익",
+        "entry_price": 11870,
+        "current_close": 11870.0,
         "pnl_pct": 0.0,
-        "conviction": 7
+        "conviction": 8
       }
     ],
     "v3_picks_avg_pnl": 0.0

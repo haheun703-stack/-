@@ -16,22 +16,25 @@
       "entry_price": 39300,
       "stop_loss_pct": -8.5,
       "target_pct": 14.9,
-      "reasoning": "IT서비스 섹터 즉시진입 타이밍과 강한 thesis 일치, 엔터프라이즈 AI 시장 확대 수혜"
+      "reasoning": "IT서비스 섹터 부스트와 엔터프라이즈 AI 확산 수혜주로 conviction 8의 표준 사이즈 배분"
     },
     {
-      "ticker": "455900",
-      "name": "엔젤로보틱스",
-      "conviction": 7,
+      "ticker": "032940",
+      "name": "원익",
+      "conviction": 8,
       "size_pct": 10.0,
       "strategy": "relay",
-      "thesis_alignment": "moderate",
-      "entry_price": 34450,
-      "stop_loss_pct": -9.8,
-      "target_pct": 17.1,
-      "reasoning": "IT서비스 섹터 부스트 정책 부합, MA 정배열과 OBV 상승으로 기술적 우위"
+      "thesis_alignment": "strong",
+      "entry_price": 11870,
+      "stop_loss_pct": -17.5,
+      "target_pct": 30.7,
+      "reasoning": "AI칩/HBM 수요 수혜주이나 억제 섹터 소속으로 축소 사이즈 배분"
     }
   ],
   "skipped": [],
-  "portfolio_warnings": [],
-  "reasoning": "공격 레짐에서 IT서비스 섹터의 즉시진입 시그널과 1.2x 비중 부스트를 활용하여 두 종목 모두 매수. 빈 포트폴리오에서 시작하므로 섹터 집중은 문제없으며, 현금 75%로 권고 비중(20%) 이상 충분히 확보. 미국 금리 상승 리스크를 고려하여 초기 진입은 표준 사이즈로 제한."
+  "portfolio_warnings": [
+    "원익은 억제 섹터(반도체)에 속해 있어 주의 필요",
+    "첫 매수로 총 25% 배분은 적절한 리스크 관리"
+  ],
+  "reasoning": "공격 레짐에서 현금 100%의 첫 진입으로 conviction 8의 두 종목에 총 25% 배분. IT서비스 부스트 섹터인 포스코DX에 표준 사이즈 15%, 억제 섹터이나 AI 수혜주인 원익에 축소 사이즈 10% 배분하여 현금 비중 75%로 추가 기회 대비."
 }

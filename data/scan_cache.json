@@ -11,7 +11,7 @@
     "grade_C": 0,
     "after_grade_filter": 33,
     "blacklisted": 0,
-    "scan_sec": 63.3,
+    "scan_sec": 51.1,
     "v9_killed": 33,
     "v9_survivors": 0,
     "v9_killed_list": [
@@ -3825,7 +3825,7 @@
     "daily_entries_left": 2,
     "held_count": 0,
     "capital": 100000000,
-    "elapsed_sec": 104.4
+    "elapsed_sec": 84.5
   },
-  "cached_at": "2026-02-27 21:46"
+  "cached_at": "2026-02-28 22:01"
 }
