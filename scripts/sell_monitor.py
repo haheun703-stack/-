@@ -62,8 +62,56 @@ def save_json(name: str, data: dict):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def load_target_prices() -> dict:
+    """tomorrow_picks.json에서 종목별 목표가/손절가 로드.
+
+    Returns: {ticker: {target_price, stop_loss, entry_price, grade}}
+    """
+    tp_path = ROOT / "data" / "tomorrow_picks.json"
+    if not tp_path.exists():
+        return {}
+    try:
+        with open(tp_path, encoding="utf-8") as f:
+            data = json.load(f)
+        result = {}
+        for p in data.get("picks", []):
+            ticker = p.get("ticker", "")
+            if ticker and p.get("target_price"):
+                result[ticker] = {
+                    "target_price": int(p.get("target_price", 0)),
+                    "stop_loss": int(p.get("stop_loss", 0)),
+                    "entry_price": int(p.get("entry_price", 0) or p.get("close", 0)),
+                    "grade": p.get("grade", ""),
+                }
+        return result
+    except Exception as e:
+        logger.warning("목표가 로드 실패: %s", e)
+        return {}
+
+
+def fetch_supply_demand(ticker: str) -> dict:
+    """KIS API로 당일 수급(외인/기관/개인) 조회"""
+    try:
+        from src.adapters.kis_intraday_adapter import KisIntradayAdapter
+        adapter = KisIntradayAdapter()
+        flow = adapter.fetch_investor_flow(ticker)
+        return {
+            "foreign_net": flow.get("foreign_net_buy", 0),
+            "inst_net": flow.get("inst_net_buy", 0),
+            "individual_net": flow.get("individual_net_buy", 0),
+        }
+    except Exception as e:
+        logger.warning("수급 조회 실패 %s: %s", ticker, e)
+        return {"foreign_net": 0, "inst_net": 0, "individual_net": 0}
+
+
 def fetch_holdings() -> list[dict]:
-    """KIS API에서 현재 보유 종목 조회 → sell_brain 입력 형식으로 변환"""
+    """KIS API에서 현재 보유 종목 조회 → sell_brain 입력 형식으로 변환
+
+    보강 데이터:
+      - 목표가/손절가 (tomorrow_picks.json)
+      - 당일 수급 (KIS 투자자별 매매동향)
+    """
     import mojito
 
     broker = mojito.KoreaInvestment(
@@ -75,6 +123,23 @@ def fetch_holdings() -> list[dict]:
 
     resp = broker.fetch_balance()
     holdings = resp.get("output1", [])
+
+    # 목표가 맵 로드
+    target_map = load_target_prices()
+
+    # v3 picks 목표가도 로드
+    v3 = load_json("ai_v3_picks.json")
+    for b in v3.get("buys", []):
+        ticker = b.get("ticker", "")
+        if ticker and ticker not in target_map:
+            entry = int(b.get("entry_price", 0))
+            if entry > 0:
+                target_map[ticker] = {
+                    "target_price": int(entry * (1 + b.get("target_pct", 15) / 100)),
+                    "stop_loss": int(entry * (1 + b.get("stop_loss_pct", -8) / 100)),
+                    "entry_price": entry,
+                    "grade": "v3",
+                }
 
     positions = []
     for h in holdings:
@@ -88,7 +153,26 @@ def fetch_holdings() -> list[dict]:
         curr_price = int(h.get("prpr", 0))
         pnl_pct = float(h.get("evlu_pfls_rt", 0))
 
-        positions.append({
+        # 목표가/손절가 (시그널 기반 or 기본 -8%/+10%)
+        targets = target_map.get(ticker, {})
+        target_price = targets.get("target_price", int(avg_price * 1.10))
+        stop_loss = targets.get("stop_loss", int(avg_price * 0.92))
+        grade = targets.get("grade", "수동매수")
+
+        # 목표가 대비 현재 위치
+        if target_price > stop_loss:
+            progress = (curr_price - avg_price) / (target_price - avg_price) * 100 if target_price != avg_price else 0
+        else:
+            progress = 0
+
+        # 당일 수급 조회 (장중에만)
+        now_h = datetime.now().hour
+        supply_demand = {}
+        if 9 <= now_h <= 15:
+            supply_demand = fetch_supply_demand(ticker)
+            time.sleep(0.3)  # API 쓰로틀링
+
+        pos = {
             "ticker": ticker,
             "name": name,
             "entry_price": int(avg_price),
@@ -96,10 +180,27 @@ def fetch_holdings() -> list[dict]:
             "quantity": qty,
             "pnl_pct": pnl_pct,
             "hold_days": "?",
-            "grade": "수동매수",
+            "grade": grade,
             "trigger_type": "manual",
-            "stop_loss": int(avg_price * 0.92),  # 기본 -8%
-        })
+            "stop_loss": stop_loss,
+            # 보강 데이터
+            "target_price": target_price,
+            "target_progress_pct": round(progress, 1),
+            "foreign_net": supply_demand.get("foreign_net", 0),
+            "inst_net": supply_demand.get("inst_net", 0),
+            "individual_net": supply_demand.get("individual_net", 0),
+        }
+        positions.append(pos)
+
+        sd_str = ""
+        if supply_demand:
+            f_net = supply_demand.get("foreign_net", 0)
+            i_net = supply_demand.get("inst_net", 0)
+            sd_str = f" | 외인{f_net:+,} 기관{i_net:+,}"
+        logger.info(
+            "  %s: %+.1f%% (목표 %d→진행 %.0f%%){sd}".format(sd=sd_str),
+            name, pnl_pct, target_price, progress,
+        )
 
     return positions, broker
 

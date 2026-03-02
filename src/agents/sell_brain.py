@@ -49,7 +49,17 @@ SYSTEM_SELL_BRAIN = """\
    - 릴레이 타겟 종목 → 소스 섹터 하락 전환 시 매도
    - 릴레이 매수 후 3~5일 경과 → 모멘텀 약화 시 매도
 
-5. **오버나이트 리스크** (프리클로즈 전용)
+5. **목표가 접근/도달**
+   - 목표가 진행도 90%+ → PARTIAL_SELL (50% 이익 실현)
+   - 목표가 초과 달성 → 수급 확인 후 HOLD(수급 양호) or SELL_NOW(수급 이탈)
+   - 목표가 진행도 <0% (역행) + 수급 악화 → 손절 검토
+
+6. **수급 판단** (외인+기관 동향)
+   - 외인+기관 동반 매수 → 추세 유효, HOLD 강화
+   - 외인+기관 동반 매도 → 경고, 목표가 하향 또는 PARTIAL_SELL
+   - 외인 매도 + 기관 매수 (엇갈림) → 관망
+
+7. **오버나이트 리스크** (프리클로즈 전용)
    - 미국 선물 하락, VIX 급등 → 비중 축소 권고
    - 어닝 시즌 전날 → 리스크 경고
 
@@ -217,7 +227,7 @@ thesis 변화와 기술적 이탈에 주의하세요.
 
     @staticmethod
     def _format_positions(positions: list[dict]) -> str:
-        """보유 종목 → 텍스트"""
+        """보유 종목 → 텍스트 (목표가+수급 포함)"""
         lines = [f"[보유 종목 ({len(positions)}개)]"]
         for p in positions:
             name = p.get("name", "?")
@@ -229,10 +239,24 @@ thesis 변화와 기술적 이탈에 주의하세요.
             grade = p.get("grade", "?")
             trigger = p.get("trigger_type", "?")
             stop = p.get("stop_loss", 0)
+            target = p.get("target_price", 0)
+            progress = p.get("target_progress_pct", 0)
 
             lines.append(f"  {name}({ticker}): 등급={grade}, 트리거={trigger}")
             lines.append(f"    진입={entry:,} → 현재={current:,} ({pnl:+.1f}%)")
-            lines.append(f"    보유 {hold_days}일, 손절={stop:,}")
+            lines.append(f"    보유 {hold_days}일, 손절={stop:,}, 목표={target:,}")
+
+            # 목표가 진행도
+            if target > 0:
+                lines.append(f"    목표가 진행도: {progress:.0f}% (목표 도달 시 매도 고려)")
+
+            # 당일 수급
+            f_net = p.get("foreign_net", 0)
+            i_net = p.get("inst_net", 0)
+            ind_net = p.get("individual_net", 0)
+            if f_net != 0 or i_net != 0:
+                sd_emoji = "🟢" if (f_net > 0 and i_net > 0) else "🔴" if (f_net < 0 and i_net < 0) else "🟡"
+                lines.append(f"    수급 {sd_emoji}: 외인{f_net:+,}주 기관{i_net:+,}주 개인{ind_net:+,}주")
 
             # 기술적 상태 (있으면)
             rsi = p.get("rsi")
