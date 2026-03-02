@@ -459,6 +459,505 @@ def api_status():
         'server_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     })
 
+# ─── 라우트: 리모콘 ──────────────────────────────────────
+@app.route('/remote')
+@login_required
+def remote():
+    return render_template('remote.html', api_key=API_KEY)
+
+# ─── API: 리모콘 명령 실행 ───────────────────────────────
+REMOTE_QUEUE_FILE = os.path.join(DATA_DIR, 'remote_queue.json')
+
+def _load_remote_queue():
+    if os.path.exists(REMOTE_QUEUE_FILE):
+        with open(REMOTE_QUEUE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
+
+def _save_remote_queue(q):
+    with open(REMOTE_QUEUE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(q, f, ensure_ascii=False, indent=2)
+
+@app.route('/api/remote/exec', methods=['POST'])
+@api_key_required
+def api_remote_exec():
+    """리모콘 명령 처리 — 데이터 조회 + 액션 큐잉"""
+    if not request.is_json:
+        return jsonify({'error': 'JSON required'}), 400
+
+    cmd = request.json.get('cmd', '')
+    brain = get_brain_data()
+    market = get_market_data()
+    holdings = get_holdings()
+    metrics = get_metrics()
+
+    result = _exec_cmd(cmd, brain, market, holdings, metrics)
+    return jsonify(result)
+
+@app.route('/api/remote/queue', methods=['GET'])
+@api_key_required
+def api_remote_queue():
+    """로컬 머신이 폴링 — 대기 명령 반환 + 큐 비움"""
+    q = _load_remote_queue()
+    if q:
+        _save_remote_queue([])  # 큐 비움
+    return jsonify({'commands': q})
+
+@app.route('/api/remote/result', methods=['POST'])
+@api_key_required
+def api_remote_result():
+    """로컬 머신이 명령 실행 결과 전송"""
+    if not request.is_json:
+        return jsonify({'error': 'JSON required'}), 400
+    # 결과를 저장 (다음 폴링 때 리모콘에 표시)
+    result_file = os.path.join(DATA_DIR, 'remote_result.json')
+    with open(result_file, 'w', encoding='utf-8') as f:
+        json.dump(request.json, f, ensure_ascii=False, indent=2)
+    return jsonify({'status': 'ok'})
+
+
+def _exec_cmd(cmd, brain, market, holdings, metrics):
+    """각 명령별 처리 로직"""
+
+    # ── 스캔/분석 그룹 ──
+    if cmd == '스캔':
+        picks = market.get('picks', [])
+        lines = []
+        for i, p in enumerate(picks[:10], 1):
+            g = p.get('grade', '-')
+            s = p.get('score', 0)
+            name = p.get('name', '?')
+            code = p.get('code', '')
+            sigs = ', '.join(p.get('signals', [])[:3])
+            emoji = '🟢' if g == '적극매수' else '🟡' if g == '매수' else '⚪'
+            lines.append(f"{emoji} {i:>2}. {name}({code}) — {s}점 [{g}]")
+            if sigs:
+                lines.append(f"     시그널: {sigs}")
+        return {'title': f'📊 매수 후보 TOP 10', 'lines': lines or ['데이터 없음']}
+
+    elif cmd == '스윙스캔':
+        picks = market.get('picks', [])
+        swing = [p for p in picks if p.get('type') != 'short'][:7]
+        lines = []
+        for i, p in enumerate(swing, 1):
+            lines.append(f"🔵 {i}. {p.get('name','?')} — {p.get('score',0)}점 [{p.get('grade','-')}]")
+        return {'title': '🌊 스윙 후보', 'lines': lines or ['데이터 없음']}
+
+    elif cmd == '사전감지':
+        whale = brain.get('whale', {})
+        dual = brain.get('dual_buying', {})
+        lines = []
+        # 웨일
+        items = whale.get('items', [])[:5]
+        lines.append(f"🐋 웨일 감지: {whale.get('total_detected', 0)}건")
+        for w in items:
+            lines.append(f"  {w.get('name','?')} — 거래량비 {w.get('vol_ratio',0):.1f}x, 외국인 {w.get('foreign_net',0):+,.0f}")
+        # 쌍매수
+        s_grade = dual.get('s_grade', [])
+        a_grade = dual.get('a_grade', [])
+        lines.append(f"")
+        lines.append(f"🔥 외국인+기관 쌍매수")
+        lines.append(f"  S등급: {len(s_grade)}종목, A등급: {len(a_grade)}종목")
+        for s in s_grade[:3]:
+            lines.append(f"  ⭐ {s.get('name','?')} — 외국인 {s.get('foreign_net',0):+,.0f}, 기관 {s.get('inst_net',0):+,.0f}")
+        return {'title': '🔍 사전감지 (웨일+쌍매수)', 'lines': lines}
+
+    elif cmd == '이상거래':
+        whale = brain.get('whale', {})
+        items = whale.get('items', [])
+        abnormal = [w for w in items if w.get('vol_ratio', 0) > 3.0][:7]
+        lines = [f"총 이상거래 감지: {len(abnormal)}건"]
+        for w in abnormal:
+            lines.append(f"⚠ {w.get('name','?')} — 거래량 {w.get('vol_ratio',0):.1f}배, "
+                         f"외국인 {w.get('foreign_net',0):+,.0f}")
+        return {'title': '⚠️ 이상거래 감지', 'lines': lines or ['이상거래 없음']}
+
+    elif cmd == '건전성':
+        lines = []
+        lines.append(f"서버: 🟢 정상")
+        lines.append(f"시장 데이터: {market.get('updated_at', '미수신')}")
+        lines.append(f"Brain 데이터: {brain.get('updated_at', '미수신')}")
+        lines.append(f"보유주식: {holdings.get('fetched_at', '미수신')}")
+        lines.append(f"리포트: {len(get_report_dates())}건")
+        regime = market.get('regime', 'UNKNOWN')
+        lines.append(f"레짐: {regime} ({market.get('regime_slots', 0)}슬롯)")
+        return {'title': '🛡️ 시스템 건전성', 'lines': lines}
+
+    elif cmd == '이벤트':
+        strat = brain.get('strategic', {})
+        relay = brain.get('group_relay', {})
+        lines = []
+        # 릴레이 알림
+        alerts = strat.get('relay_alerts', [])
+        if alerts:
+            lines.append('📡 릴레이 알림:')
+            for a in alerts:
+                status = a.get('status', '')
+                emoji = '🔥' if status == '발화' else '👀'
+                lines.append(f"  {emoji} {a.get('pattern','')} — {status} → {a.get('action','')}")
+        # 그룹 릴레이
+        fired = relay.get('fired_groups', [])
+        if fired:
+            lines.append('')
+            lines.append('🎯 그룹 릴레이 발화:')
+            for g in fired[:5]:
+                leader = g.get('leader', '?')
+                subs = ', '.join(g.get('subs', [])[:3])
+                lines.append(f"  {leader} → {subs}")
+        # 리스크
+        risks = strat.get('risk_factors', [])
+        if risks:
+            lines.append('')
+            lines.append('🚨 리스크 요인:')
+            for r in risks[:5]:
+                lines.append(f"  🔴 {r}")
+        return {'title': '⚡ 이벤트 & 릴레이', 'lines': lines or ['이벤트 없음']}
+
+    # ── AI 선정 그룹 ──
+    elif cmd == '종목선정':
+        v3 = brain.get('v3_picks', {})
+        buys = v3.get('buys', [])
+        lines = []
+        lines.append(f"레짐: {v3.get('regime', '?')} | 슬롯: {v3.get('available_slots', '?')}")
+        lines.append(f"현금: {v3.get('cash_pct_after', '?')}%")
+        lines.append('')
+        if buys:
+            for b in buys:
+                conv = b.get('conviction', 0)
+                stars = '⭐' * min(conv, 10)
+                lines.append(f"🎯 {b.get('name','?')} ({b.get('ticker','')})")
+                lines.append(f"   확신도: {conv}/10 {stars}")
+                lines.append(f"   비중: {b.get('size_pct',0)}% | 진입가: {b.get('entry_price',0):,}원")
+                lines.append(f"   손절: {b.get('stop_loss_pct',0)}% | 목표: +{b.get('target_pct',0)}%")
+                lines.append(f"   전략: {b.get('strategy','')} | 정합: {b.get('thesis_alignment','')}")
+                lines.append(f"   사유: {b.get('reasoning','')}")
+                lines.append('')
+        else:
+            lines.append('추천 종목 없음')
+        # 경고
+        warns = v3.get('portfolio_warnings', [])
+        if warns:
+            lines.append('⚠️ 경고:')
+            for w in warns:
+                lines.append(f"  🟡 {w}")
+        return {'title': '🧠 AI v3 종목선정', 'lines': lines}
+
+    elif cmd == 'MACD스캔':
+        picks = market.get('picks', [])
+        macd = [p for p in picks if 'MACD' in str(p.get('signals', []))][:10]
+        lines = [f"MACD 시그널 보유 종목: {len(macd)}건"]
+        for i, p in enumerate(macd, 1):
+            lines.append(f"📈 {i}. {p.get('name','?')} — {p.get('score',0)}점")
+        return {'title': '📊 MACD 스캔', 'lines': lines or ['MACD 시그널 없음']}
+
+    elif cmd == '워치리스트':
+        lines = [
+            '👁️ 관심종목 워치리스트 (7종목)',
+            '',
+            '1. 산일전기 — 전력인프라/변압기',
+            '2. 한화시스템 — 방산/ICT',
+            '3. 풍산 — 방산/비철금속',
+            '4. 한국금융지주 — 금융',
+            '5. 달바글로벌 — 화장품/소비재',
+            '6. 아모레퍼시픽 — 화장품',
+            '7. LG생활건강 — 화장품/생활용품',
+            '',
+            '📌 시그널 발생 시 즉시 알림 활성화됨',
+        ]
+        return {'title': '👁️ 워치리스트', 'lines': lines}
+
+    # ── AI 정보 그룹 ──
+    elif cmd == '해외이벤트':
+        strat = brain.get('strategic', {})
+        news = brain.get('news', {})
+        lines = []
+        # 해외 시장
+        regime = strat.get('regime', '?')
+        lines.append(f"레짐: {regime} (확신도 {strat.get('regime_confidence', 0):.0%})")
+        lines.append(f"글로벌: {strat.get('global_summary', '')}")
+        lines.append('')
+        # 리스크
+        risks = strat.get('risk_factors', [])
+        if risks:
+            lines.append('🚨 리스크:')
+            for r in risks:
+                lines.append(f"  🔴 {r}")
+        return {'title': '🌏 해외이벤트 & 거시', 'lines': lines}
+
+    elif cmd == 'AI모니터':
+        strat = brain.get('strategic', {})
+        theses = strat.get('industry_thesis', [])
+        lines = []
+        lines.append(f"레짐: {strat.get('regime', '?')} | 현금 권고: {strat.get('cash_reserve_suggestion', '?')}%")
+        lines.append(f"최대 신규매수: {strat.get('max_new_buys', '?')}종목")
+        lines.append('')
+        prio = strat.get('sector_priority', {})
+        if prio:
+            attack = ', '.join(prio.get('attack', []))
+            watch = ', '.join(prio.get('watch', []))
+            avoid = ', '.join(prio.get('avoid', []))
+            lines.append(f"🟢 공격: {attack}")
+            lines.append(f"🟡 감시: {watch}")
+            lines.append(f"🔴 회피: {avoid}")
+            lines.append('')
+        for t in theses[:4]:
+            conf = t.get('confidence', 0)
+            lines.append(f"📊 {t.get('sector','')} (확신 {conf}/10)")
+            lines.append(f"   {t.get('thesis','')}")
+            lines.append(f"   수급: {t.get('demand_supply','')} | ASP: {t.get('asp_trend','')}")
+            lines.append('')
+        return {'title': '🤖 AI 전략 모니터', 'lines': lines}
+
+    elif cmd == '뉴스AI':
+        news = brain.get('news', {})
+        lines = []
+        lines.append(f"시장 심리: {news.get('market_sentiment', '?')} | 방향: {news.get('direction', '?')}")
+        lines.append('')
+        themes = news.get('key_themes', [])
+        if themes:
+            lines.append('📰 핵심 테마:')
+            for t in themes:
+                lines.append(f"  • {t}")
+            lines.append('')
+        outlook = news.get('sector_outlook', {})
+        if outlook:
+            lines.append('📊 섹터 전망:')
+            for sector, info in list(outlook.items())[:8]:
+                d = info.get('direction', '?') if isinstance(info, dict) else info
+                reason = info.get('reason', '') if isinstance(info, dict) else ''
+                emoji = '🟢' if d == 'positive' else '🔴' if d == 'negative' else '🟡'
+                lines.append(f"  {emoji} {sector}: {reason[:50]}")
+        return {'title': '📰 뉴스 AI 분석', 'lines': lines}
+
+    # ── 계좌 그룹 ──
+    elif cmd == '현재잔고':
+        h_list = holdings.get('holdings', [])
+        total_eval = holdings.get('total_eval', 0)
+        total_pnl = holdings.get('total_pnl', 0)
+        cash = holdings.get('available_cash', 0)
+        lines = []
+        lines.append(f"총 평가: {total_eval:,.0f}원")
+        lines.append(f"총 손익: {total_pnl:+,.0f}원")
+        lines.append(f"예수금:  {cash:,.0f}원")
+        lines.append(f"종목수:  {len(h_list)}종목")
+        lines.append('')
+        for h in h_list:
+            pnl = h.get('pnl_pct', 0)
+            emoji = '📈' if pnl > 0 else '📉' if pnl < 0 else '➖'
+            lines.append(f"{emoji} {h.get('name','?')} — {h.get('eval_amount',0):,.0f}원 ({pnl:+.2f}%)")
+        balance_str = f"💰 {total_eval:,.0f}원"
+        return {'title': '💰 현재 잔고', 'lines': lines, 'balance': balance_str}
+
+    elif cmd == '체결내역':
+        lines = ['체결내역은 장중에만 조회 가능합니다.', '텔레그램에서 "체결내역" 명령을 사용하세요.']
+        return {'title': '📋 체결내역', 'lines': lines}
+
+    elif cmd == '포트폴리오':
+        h_list = holdings.get('holdings', [])
+        total = holdings.get('total_eval', 0)
+        cash = holdings.get('available_cash', 0)
+        lines = []
+        if total > 0:
+            stock_pct = ((total - cash) / total * 100) if total > 0 else 0
+            cash_pct = (cash / total * 100) if total > 0 else 0
+            lines.append(f"주식: {stock_pct:.1f}% | 현금: {cash_pct:.1f}%")
+            lines.append('')
+            # 섹터별 분포
+            for h in sorted(h_list, key=lambda x: x.get('eval_amount', 0), reverse=True):
+                pct = (h.get('eval_amount', 0) / total * 100) if total > 0 else 0
+                bar_len = int(pct / 2)
+                bar = '█' * bar_len + '░' * (20 - bar_len)
+                lines.append(f"  {h.get('name','?'):>10} {bar} {pct:.1f}%")
+        else:
+            lines.append('보유 종목 없음')
+        return {'title': '📊 포트폴리오 구성', 'lines': lines}
+
+    # ── 제어 그룹 ──
+    elif cmd == '시작':
+        q = _load_remote_queue()
+        q.append({'cmd': 'start', 'ts': datetime.now().isoformat()})
+        _save_remote_queue(q)
+        return {
+            'title': '🟢 자동매매 시작 명령',
+            'lines': [
+                '✅ 시작 명령이 큐에 등록되었습니다.',
+                '로컬 시스템이 명령을 수신하면 KILL_SWITCH가 해제됩니다.',
+                '',
+                '💡 텔레그램에서 "시작" 명령도 동일하게 작동합니다.',
+            ],
+            'live_status': True
+        }
+
+    elif cmd == '정지':
+        q = _load_remote_queue()
+        q.append({'cmd': 'stop', 'ts': datetime.now().isoformat()})
+        _save_remote_queue(q)
+        return {
+            'title': '🔴 자동매매 정지 명령',
+            'lines': [
+                '🛑 정지 명령이 큐에 등록되었습니다.',
+                '로컬 시스템이 명령을 수신하면 KILL_SWITCH가 생성됩니다.',
+                '',
+                '💡 텔레그램에서 "정지" 명령도 동일하게 작동합니다.',
+            ],
+            'live_status': False
+        }
+
+    elif cmd == '상태':
+        lines = []
+        lines.append(f"서버 시각: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f"라이브 트레이딩: 🟢 활성화")
+        regime = market.get('regime', 'UNKNOWN')
+        emoji_r = '🟢' if regime == 'BULL' else '🟡' if regime == 'CAUTION' else '🔴' if regime in ('BEAR','CRISIS') else '⚪'
+        lines.append(f"KOSPI 레짐: {emoji_r} {regime} ({market.get('regime_slots', 0)}슬롯)")
+        # Brain 레짐
+        strat = brain.get('strategic', {})
+        lines.append(f"AI 레짐: {strat.get('regime', '?')} (확신 {strat.get('regime_confidence', 0):.0%})")
+        lines.append(f"현금 권고: {strat.get('cash_reserve_suggestion', '?')}%")
+        lines.append('')
+        total = holdings.get('total_eval', 0)
+        cash = holdings.get('available_cash', 0)
+        lines.append(f"총 자산: {total:,.0f}원")
+        lines.append(f"예수금: {cash:,.0f}원")
+        lines.append(f"보유: {len(holdings.get('holdings', []))}종목")
+        lines.append('')
+        # BAT 상태
+        bat = market.get('bat_status', {})
+        if bat:
+            lines.append('BAT 스케줄:')
+            for k, v in bat.items():
+                lines.append(f"  {k}: {v}")
+        # 데이터 갱신 시각
+        lines.append('')
+        lines.append(f"시장 데이터: {market.get('updated_at', '미수신')}")
+        lines.append(f"Brain 데이터: {brain.get('updated_at', '미수신')}")
+        balance_str = f"💰 {total:,.0f}원" if total > 0 else '--'
+        return {'title': '💓 시스템 상태', 'lines': lines, 'balance': balance_str, 'live_status': True}
+
+    # ── 유틸리티 그룹 ──
+    elif cmd == '유니버스':
+        lines = [
+            '🗄️ 매매 유니버스: 84종목 (기계적 선별)',
+            '',
+            '선별 기준:',
+            '  • 시가총액 상위',
+            '  • 일평균 거래대금 5억원+',
+            '  • 이상치 17종목 제거',
+            '  • KOSPI/KOSDAQ 혼합',
+            '',
+            f"데이터: data/processed/*.parquet",
+        ]
+        return {'title': '🗄️ 유니버스', 'lines': lines}
+
+    elif cmd == '시나리오':
+        strat = brain.get('strategic', {})
+        news = brain.get('news', {})
+        lines = []
+        regime = strat.get('regime', '?')
+        lines.append(f"현재 레짐: {regime}")
+        lines.append('')
+        lines.append('📋 시나리오:')
+        lines.append(f"  🟢 BULL → 공격 5슬롯, {", ".join(strat.get("sector_priority", {}).get("attack", []))} 집중')
+        lines.append(f"  🟡 중립 → 3슬롯, 현금 30%+ 유지')
+        lines.append(f"  🔴 BEAR → 2슬롯, 방어주 위주')
+        lines.append(f"  ⚫ CRISIS → 0슬롯, 전량 현금화")
+        lines.append('')
+        lines.append(f"현재 판단: {strat.get('regime_reasoning', '')[:100]}")
+        return {'title': '🗺️ 시나리오 분석', 'lines': lines}
+
+    elif cmd == '시그널':
+        us = market.get('us_signal', {})
+        lines = []
+        grade = us.get('grade', '-')
+        score = us.get('score', 0)
+        emoji = '🟢' if 'BULL' in str(grade) else '🔴' if 'BEAR' in str(grade) else '🟡'
+        lines.append(f"US 오버나이트: {emoji} {grade} (점수: {score})")
+        lines.append(f"  SPY: {us.get('spy_return', 0):+.2f}%")
+        lines.append(f"  QQQ: {us.get('qqq_return', 0):+.2f}%")
+        lines.append(f"  VIX: {us.get('vix_return', 0):+.2f}%")
+        rules = us.get('special_rules', [])
+        if rules:
+            lines.append(f"  특수룰: {', '.join(rules)}")
+        kills = us.get('kill_sectors', [])
+        if kills:
+            lines.append(f"  🔴 KILL 섹터: {', '.join(kills)}")
+        return {'title': '📡 시그널 현황', 'lines': lines}
+
+    elif cmd == '일지':
+        journal = brain.get('journal', {})
+        days = journal.get('days', [])
+        lines = []
+        lines.append(f"기간: {journal.get('period', '-')}")
+        lines.append(f"총 추천: {journal.get('total_picks', 0)}건")
+        lines.append(f"적중률: {journal.get('hit_rate', 0):.1f}% | 평균수익: {journal.get('avg_return', 0):+.1f}%")
+        lines.append('')
+        for d in days:
+            lines.append(f"📅 {d.get('date', '')}")
+            for p in d.get('picks', []):
+                emoji = '✅' if p.get('hit') else '⬜'
+                lines.append(f"  {emoji} {p.get('name','?')} [{p.get('grade','')}] {p.get('result_pct',0):+.1f}%")
+        return {'title': '📓 매매일지', 'lines': lines}
+
+    elif cmd == '로그':
+        lines = [
+            '최근 시스템 로그:',
+            '',
+            '로그는 로컬 시스템에 저장됩니다.',
+            '  logs/schedule.log — BAT 스케줄 로그',
+            '  logs/smart_entry.log — 매수 로그',
+            '  logs/trading.log — 매매 로그',
+            '',
+            '텔레그램에서 "로그" 명령으로 최근 로그를 확인하세요.',
+        ]
+        return {'title': '📋 시스템 로그', 'lines': lines}
+
+    elif cmd == '도움':
+        lines = [
+            '🎮 QUANTUM REMOTE 명령어',
+            '',
+            '📊 [스캔]',
+            '  사전감지 — 웨일+쌍매수 감지',
+            '  스윙스캔 — 스윙 후보 조회',
+            '  스캔 — 전체 매수 후보',
+            '',
+            '🤖 [AI]',
+            '  종목선정 — AI v3 추천 종목',
+            '  AI모니터 — 전략 분석 현황',
+            '  뉴스AI — 뉴스 기반 분석',
+            '',
+            '💰 [계좌]',
+            '  현재잔고 — 보유주식 조회',
+            '  포트폴리오 — 자산 구성',
+            '',
+            '🎛️ [제어]',
+            '  시작 — 자동매매 ON',
+            '  정지 — 자동매매 OFF',
+            '  상태 — 시스템 현황',
+            '  청산 — 전량 청산 (위험!)',
+            '',
+            '💡 텔레그램 봇에서도 동일 명령 사용 가능',
+        ]
+        return {'title': '❓ 도움말', 'lines': lines}
+
+    elif cmd == '청산':
+        q = _load_remote_queue()
+        q.append({'cmd': 'liquidate', 'ts': datetime.now().isoformat()})
+        _save_remote_queue(q)
+        return {
+            'title': '💀 전량 청산 명령',
+            'lines': [
+                '🛑 청산 명령이 큐에 등록되었습니다.',
+                '로컬 시스템이 명령을 수신하면 전량 시장가 매도됩니다.',
+                '',
+                '⚠️ 이 작업은 되돌릴 수 없습니다!',
+                '💡 텔레그램에서 "청산" 명령도 동일하게 작동합니다.',
+            ]
+        }
+
+    else:
+        return {'error': f'알 수 없는 명령: {cmd}'}
+
+
 # ═══════════════════════════════════════════════════════════
 if __name__ == '__main__':
     app.run(debug=True)

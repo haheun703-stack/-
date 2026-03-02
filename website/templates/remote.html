@@ -1,0 +1,634 @@
+{% extends "base.html" %}
+{% block title %}QUANTUM REMOTE — JARVIS{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ─── 리모콘 전용 스타일 ─── */
+.remote-wrap {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 8px;
+    position: relative;
+}
+
+/* 상단 헤더 */
+.remote-header {
+    text-align: center;
+    padding: 18px 0 14px;
+    position: relative;
+}
+.remote-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.remote-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 12px;
+}
+.status-pill.live {
+    background: rgba(16,185,129,0.15);
+    color: var(--accent-green);
+    animation: pulse-glow 2s infinite;
+}
+.status-pill.off {
+    background: rgba(239,68,68,0.15);
+    color: var(--accent-red);
+}
+.status-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(16,185,129,0.2); }
+    50% { box-shadow: 0 0 16px rgba(16,185,129,0.4); }
+}
+
+/* 버튼 그리드 */
+.remote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.remote-divider {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    margin: 4px 0;
+}
+.group-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 4px 6px 0;
+}
+
+/* 리모콘 버튼 */
+.rc-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 8px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    overflow: hidden;
+}
+.rc-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.rc-btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+.rc-btn:hover::before { opacity: 1; }
+.rc-btn:active { transform: scale(0.95); }
+.rc-btn.loading { pointer-events: none; opacity: 0.6; }
+.rc-btn.loading .rc-icon { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.rc-icon {
+    font-size: 22px;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+.rc-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+.rc-btn:hover .rc-label { color: var(--text-primary); }
+
+/* 버튼 컬러 그룹 */
+.rc-btn.scan { color: var(--accent-cyan); }
+.rc-btn.scan::before { background: radial-gradient(ellipse at center, rgba(6,182,212,0.12), transparent 70%); }
+.rc-btn.scan:hover { border-color: rgba(6,182,212,0.3); box-shadow: 0 4px 20px rgba(6,182,212,0.15); }
+
+.rc-btn.detect { color: var(--accent-yellow); }
+.rc-btn.detect::before { background: radial-gradient(ellipse at center, rgba(245,158,11,0.12), transparent 70%); }
+.rc-btn.detect:hover { border-color: rgba(245,158,11,0.3); box-shadow: 0 4px 20px rgba(245,158,11,0.15); }
+
+.rc-btn.ai { color: var(--accent-purple); }
+.rc-btn.ai::before { background: radial-gradient(ellipse at center, rgba(139,92,246,0.12), transparent 70%); }
+.rc-btn.ai:hover { border-color: rgba(139,92,246,0.3); box-shadow: 0 4px 20px rgba(139,92,246,0.15); }
+
+.rc-btn.info { color: var(--accent-blue); }
+.rc-btn.info::before { background: radial-gradient(ellipse at center, rgba(59,130,246,0.12), transparent 70%); }
+.rc-btn.info:hover { border-color: rgba(59,130,246,0.3); box-shadow: 0 4px 20px rgba(59,130,246,0.15); }
+
+.rc-btn.acct { color: var(--accent-green); }
+.rc-btn.acct::before { background: radial-gradient(ellipse at center, rgba(16,185,129,0.12), transparent 70%); }
+.rc-btn.acct:hover { border-color: rgba(16,185,129,0.3); box-shadow: 0 4px 20px rgba(16,185,129,0.15); }
+
+.rc-btn.ctrl-start { color: var(--accent-green); border-color: rgba(16,185,129,0.2); }
+.rc-btn.ctrl-start::before { background: radial-gradient(ellipse at center, rgba(16,185,129,0.15), transparent 70%); }
+.rc-btn.ctrl-start:hover { border-color: rgba(16,185,129,0.5); box-shadow: 0 4px 24px rgba(16,185,129,0.25); }
+
+.rc-btn.ctrl-stop { color: var(--accent-red); border-color: rgba(239,68,68,0.2); }
+.rc-btn.ctrl-stop::before { background: radial-gradient(ellipse at center, rgba(239,68,68,0.15), transparent 70%); }
+.rc-btn.ctrl-stop:hover { border-color: rgba(239,68,68,0.5); box-shadow: 0 4px 24px rgba(239,68,68,0.25); }
+
+.rc-btn.ctrl { color: var(--accent-orange); }
+.rc-btn.ctrl::before { background: radial-gradient(ellipse at center, rgba(249,115,22,0.12), transparent 70%); }
+.rc-btn.ctrl:hover { border-color: rgba(249,115,22,0.3); box-shadow: 0 4px 20px rgba(249,115,22,0.15); }
+
+.rc-btn.util { color: var(--text-muted); }
+.rc-btn.util::before { background: radial-gradient(ellipse at center, rgba(255,255,255,0.05), transparent 70%); }
+.rc-btn.util:hover { border-color: rgba(255,255,255,0.15); }
+
+.rc-btn.danger {
+    grid-column: 1 / -1;
+    color: var(--accent-red);
+    border-color: rgba(239,68,68,0.2);
+    background: linear-gradient(145deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02));
+    flex-direction: row;
+    gap: 10px;
+    padding: 14px;
+}
+.rc-btn.danger::before { background: radial-gradient(ellipse at center, rgba(239,68,68,0.1), transparent 70%); }
+.rc-btn.danger:hover { border-color: rgba(239,68,68,0.5); box-shadow: 0 4px 24px rgba(239,68,68,0.2); }
+
+/* 터미널 출력 */
+.terminal-wrap {
+    margin-top: 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: #050810;
+    overflow: hidden;
+}
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+}
+.terminal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+}
+.terminal-dot.r { background: #ff5f57; }
+.terminal-dot.y { background: #ffbd2e; }
+.terminal-dot.g { background: #28c840; }
+.terminal-title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.terminal-clear {
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.terminal-clear:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+
+.terminal-body {
+    padding: 14px 16px;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #a0d0a0;
+}
+.terminal-body::-webkit-scrollbar { width: 4px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+.term-line { margin-bottom: 2px; white-space: pre-wrap; word-break: break-all; }
+.term-cmd { color: var(--accent-cyan); font-weight: 700; }
+.term-title { color: var(--accent-yellow); font-weight: 700; font-size: 14px; }
+.term-sep { color: rgba(255,255,255,0.15); }
+.term-error { color: var(--accent-red); }
+.term-success { color: var(--accent-green); }
+.term-warn { color: var(--accent-orange); }
+.term-muted { color: rgba(160,208,160,0.5); }
+.term-highlight { color: var(--accent-yellow); font-weight: 600; }
+
+.cursor-blink::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+    color: var(--accent-green);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* 확인 모달 (청산/시작/정지) */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-icon { font-size: 48px; margin-bottom: 14px; }
+.modal-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.modal-btn.cancel { background: var(--bg-hover); color: var(--text-secondary); }
+.modal-btn.cancel:hover { background: rgba(255,255,255,0.1); }
+.modal-btn.confirm-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+.modal-btn.confirm-danger:hover { opacity: 0.9; }
+.modal-btn.confirm-ok { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+.modal-btn.confirm-ok:hover { opacity: 0.9; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .remote-wrap { padding: 0 4px; }
+    .remote-grid { gap: 7px; }
+    .rc-btn { padding: 14px 6px; border-radius: 12px; }
+    .rc-icon { font-size: 20px; }
+    .rc-label { font-size: 12px; }
+    .terminal-body { min-height: 160px; max-height: 300px; font-size: 12px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="remote-wrap">
+    <!-- 헤더 -->
+    <div class="remote-header">
+        <div class="remote-title">QUANTUM REMOTE</div>
+        <div class="remote-status">
+            <span class="status-pill live" id="statusPill">
+                <span class="dot"></span> LIVE
+            </span>
+            <span id="statusBalance">--</span>
+        </div>
+    </div>
+
+    <!-- 버튼 그리드 -->
+    <div class="remote-grid">
+        <!-- 스캔/분석 -->
+        <span class="group-label">SCAN</span>
+        <div class="rc-btn scan" data-cmd="사전감지">
+            <span class="rc-icon"><i class="fas fa-radar"></i></span>
+            <span class="rc-label">사전감지</span>
+        </div>
+        <div class="rc-btn scan" data-cmd="스윙스캔">
+            <span class="rc-icon"><i class="fas fa-wave-square"></i></span>
+            <span class="rc-label">스윙스캔</span>
+        </div>
+        <div class="rc-btn scan" data-cmd="스캔">
+            <span class="rc-icon"><i class="fas fa-crosshairs"></i></span>
+            <span class="rc-label">스캔</span>
+        </div>
+
+        <!-- 이상/건전성 -->
+        <div class="rc-btn detect" data-cmd="이상거래">
+            <span class="rc-icon"><i class="fas fa-triangle-exclamation"></i></span>
+            <span class="rc-label">이상거래</span>
+        </div>
+        <div class="rc-btn detect" data-cmd="건전성">
+            <span class="rc-icon"><i class="fas fa-shield-halved"></i></span>
+            <span class="rc-label">건전성</span>
+        </div>
+        <div class="rc-btn detect" data-cmd="이벤트">
+            <span class="rc-icon"><i class="fas fa-bolt"></i></span>
+            <span class="rc-label">이벤트</span>
+        </div>
+
+        <div class="remote-divider"></div>
+
+        <!-- AI 선정 -->
+        <span class="group-label">AI SELECT</span>
+        <div class="rc-btn ai" data-cmd="종목선정">
+            <span class="rc-icon"><i class="fas fa-brain"></i></span>
+            <span class="rc-label">종목선정</span>
+        </div>
+        <div class="rc-btn ai" data-cmd="MACD스캔">
+            <span class="rc-icon"><i class="fas fa-chart-line"></i></span>
+            <span class="rc-label">MACD스캔</span>
+        </div>
+        <div class="rc-btn ai" data-cmd="워치리스트">
+            <span class="rc-icon"><i class="fas fa-eye"></i></span>
+            <span class="rc-label">워치리스트</span>
+        </div>
+
+        <!-- AI 정보 -->
+        <div class="rc-btn info" data-cmd="해외이벤트">
+            <span class="rc-icon"><i class="fas fa-globe"></i></span>
+            <span class="rc-label">해외이벤트</span>
+        </div>
+        <div class="rc-btn info" data-cmd="AI모니터">
+            <span class="rc-icon"><i class="fas fa-robot"></i></span>
+            <span class="rc-label">AI모니터</span>
+        </div>
+        <div class="rc-btn info" data-cmd="뉴스AI">
+            <span class="rc-icon"><i class="fas fa-newspaper"></i></span>
+            <span class="rc-label">뉴스AI</span>
+        </div>
+
+        <div class="remote-divider"></div>
+
+        <!-- 계좌 -->
+        <span class="group-label">ACCOUNT</span>
+        <div class="rc-btn acct" data-cmd="현재잔고">
+            <span class="rc-icon"><i class="fas fa-wallet"></i></span>
+            <span class="rc-label">현재잔고</span>
+        </div>
+        <div class="rc-btn acct" data-cmd="체결내역">
+            <span class="rc-icon"><i class="fas fa-receipt"></i></span>
+            <span class="rc-label">체결내역</span>
+        </div>
+        <div class="rc-btn acct" data-cmd="포트폴리오">
+            <span class="rc-icon"><i class="fas fa-chart-pie"></i></span>
+            <span class="rc-label">포트폴리오</span>
+        </div>
+
+        <div class="remote-divider"></div>
+
+        <!-- 제어 -->
+        <span class="group-label">CONTROL</span>
+        <div class="rc-btn ctrl-start" data-cmd="시작" data-confirm="start">
+            <span class="rc-icon"><i class="fas fa-play"></i></span>
+            <span class="rc-label">시작</span>
+        </div>
+        <div class="rc-btn ctrl-stop" data-cmd="정지" data-confirm="stop">
+            <span class="rc-icon"><i class="fas fa-stop"></i></span>
+            <span class="rc-label">정지</span>
+        </div>
+        <div class="rc-btn ctrl" data-cmd="상태">
+            <span class="rc-icon"><i class="fas fa-heartbeat"></i></span>
+            <span class="rc-label">상태</span>
+        </div>
+
+        <div class="remote-divider"></div>
+
+        <!-- 유틸리티 -->
+        <span class="group-label">UTILITY</span>
+        <div class="rc-btn util" data-cmd="유니버스">
+            <span class="rc-icon"><i class="fas fa-database"></i></span>
+            <span class="rc-label">유니버스</span>
+        </div>
+        <div class="rc-btn util" data-cmd="시나리오">
+            <span class="rc-icon"><i class="fas fa-route"></i></span>
+            <span class="rc-label">시나리오</span>
+        </div>
+        <div class="rc-btn util" data-cmd="시그널">
+            <span class="rc-icon"><i class="fas fa-signal"></i></span>
+            <span class="rc-label">시그널</span>
+        </div>
+
+        <div class="rc-btn util" data-cmd="일지">
+            <span class="rc-icon"><i class="fas fa-book"></i></span>
+            <span class="rc-label">일지</span>
+        </div>
+        <div class="rc-btn util" data-cmd="로그">
+            <span class="rc-icon"><i class="fas fa-terminal"></i></span>
+            <span class="rc-label">로그</span>
+        </div>
+        <div class="rc-btn util" data-cmd="도움">
+            <span class="rc-icon"><i class="fas fa-circle-question"></i></span>
+            <span class="rc-label">도움</span>
+        </div>
+
+        <div class="remote-divider"></div>
+
+        <!-- 청산 (위험) -->
+        <div class="rc-btn danger" data-cmd="청산" data-confirm="liquidate">
+            <span class="rc-icon"><i class="fas fa-skull-crossbones"></i></span>
+            <span class="rc-label">전량 청산</span>
+        </div>
+    </div>
+
+    <!-- 터미널 출력 -->
+    <div class="terminal-wrap">
+        <div class="terminal-header">
+            <span class="terminal-dot r"></span>
+            <span class="terminal-dot y"></span>
+            <span class="terminal-dot g"></span>
+            <span class="terminal-title">QUANTUM TERMINAL</span>
+            <span class="terminal-clear" onclick="clearTerminal()">CLEAR</span>
+        </div>
+        <div class="terminal-body" id="termBody">
+            <div class="term-line term-muted">Quantum Master Remote v1.0</div>
+            <div class="term-line term-muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+            <div class="term-line term-success">시스템 연결됨. 명령을 선택하세요.</div>
+            <div class="term-line cursor-blink"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 확인 모달 -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon"></div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+        <div class="modal-btns">
+            <button class="modal-btn cancel" onclick="closeModal()">취소</button>
+            <button class="modal-btn" id="modalConfirm" onclick="confirmAction()">확인</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const API_KEY = '{{ api_key }}';
+const termBody = document.getElementById('termBody');
+let pendingCmd = null;
+
+// ─── 터미널 출력 ───
+function termWrite(html) {
+    const cursor = termBody.querySelector('.cursor-blink');
+    if (cursor) cursor.remove();
+    const line = document.createElement('div');
+    line.className = 'term-line';
+    line.innerHTML = html;
+    termBody.appendChild(line);
+    // 커서 추가
+    const c = document.createElement('div');
+    c.className = 'term-line cursor-blink';
+    termBody.appendChild(c);
+    termBody.scrollTop = termBody.scrollHeight;
+}
+function termSep() {
+    termWrite('<span class="term-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
+}
+function clearTerminal() {
+    termBody.innerHTML = '<div class="term-line term-muted">터미널 초기화됨</div><div class="term-line cursor-blink"></div>';
+}
+
+// ─── 모달 ───
+const modals = {
+    start: {
+        icon: '🟢', title: '자동매매 시작',
+        desc: 'KILL_SWITCH를 해제하고 자동매매를 시작합니다.\n텔레그램으로도 "시작" 명령 가능합니다.',
+        btnClass: 'confirm-ok', btnText: '시작'
+    },
+    stop: {
+        icon: '🔴', title: '자동매매 정지',
+        desc: 'KILL_SWITCH를 생성하여 모든 자동매매를 즉시 중단합니다.',
+        btnClass: 'confirm-danger', btnText: '정지'
+    },
+    liquidate: {
+        icon: '💀', title: '전량 청산',
+        desc: '보유 중인 모든 종목을 시장가로 매도합니다.\n이 작업은 되돌릴 수 없습니다!',
+        btnClass: 'confirm-danger', btnText: '청산 실행'
+    }
+};
+function showModal(type, cmd) {
+    const m = modals[type];
+    document.getElementById('modalIcon').textContent = m.icon;
+    document.getElementById('modalTitle').textContent = m.title;
+    document.getElementById('modalDesc').textContent = m.desc;
+    const btn = document.getElementById('modalConfirm');
+    btn.className = 'modal-btn ' + m.btnClass;
+    btn.textContent = m.btnText;
+    pendingCmd = cmd;
+    document.getElementById('confirmModal').classList.add('show');
+}
+function closeModal() {
+    document.getElementById('confirmModal').classList.remove('show');
+    pendingCmd = null;
+}
+function confirmAction() {
+    closeModal();
+    if (pendingCmd) execCommand(pendingCmd);
+}
+
+// ─── 명령 실행 ───
+async function execCommand(cmd) {
+    termWrite(`<span class="term-cmd">$ ${cmd}</span>`);
+
+    // 버튼 로딩 상태
+    const btn = document.querySelector(`[data-cmd="${cmd}"]`);
+    if (btn) btn.classList.add('loading');
+
+    try {
+        const resp = await fetch('/api/remote/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
+            body: JSON.stringify({ cmd })
+        });
+        const data = await resp.json();
+
+        if (data.error) {
+            termWrite(`<span class="term-error">ERROR: ${data.error}</span>`);
+        } else {
+            if (data.title) termWrite(`<span class="term-title">${data.title}</span>`);
+            termSep();
+            if (data.lines) {
+                data.lines.forEach(l => {
+                    let cls = '';
+                    if (l.startsWith('+') || l.includes('🟢') || l.includes('✅')) cls = 'term-success';
+                    else if (l.startsWith('-') || l.includes('🔴') || l.includes('❌')) cls = 'term-error';
+                    else if (l.includes('⚠') || l.includes('🟡')) cls = 'term-warn';
+                    else if (l.startsWith('  ')) cls = 'term-muted';
+                    termWrite(cls ? `<span class="${cls}">${l}</span>` : l);
+                });
+            }
+            termSep();
+
+            // 상태 업데이트
+            if (data.balance) {
+                document.getElementById('statusBalance').textContent = data.balance;
+            }
+            if (data.live_status !== undefined) {
+                const pill = document.getElementById('statusPill');
+                if (data.live_status) {
+                    pill.className = 'status-pill live';
+                    pill.innerHTML = '<span class="dot"></span> LIVE';
+                } else {
+                    pill.className = 'status-pill off';
+                    pill.innerHTML = '<span class="dot"></span> OFF';
+                }
+            }
+        }
+    } catch (e) {
+        termWrite(`<span class="term-error">네트워크 오류: ${e.message}</span>`);
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+}
+
+// ─── 버튼 클릭 핸들러 ───
+document.querySelectorAll('.rc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const cmd = btn.dataset.cmd;
+        const confirm = btn.dataset.confirm;
+        if (confirm) {
+            showModal(confirm, cmd);
+        } else {
+            execCommand(cmd);
+        }
+    });
+});
+
+// ─── 초기 상태 로드 ───
+window.addEventListener('load', () => {
+    execCommand('상태');
+});
+</script>
+{% endblock %}

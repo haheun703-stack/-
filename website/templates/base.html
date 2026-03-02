@@ -709,6 +709,9 @@
                 <a href="{{ url_for('upload_report') }}" class="{{ 'active' if request.endpoint == 'upload_report' }}">
                     <i class="fas fa-upload"></i> 업로드
                 </a>
+                <a href="{{ url_for('remote') }}" class="{{ 'active' if request.endpoint == 'remote' }}" style="{% if request.endpoint == 'remote' %}background: linear-gradient(135deg, #ef4444, #f97316);{% endif %}">
+                    <i class="fas fa-gamepad"></i> 리모콘
+                </a>
             </div>
         </div>
         <div class="nav-right">
