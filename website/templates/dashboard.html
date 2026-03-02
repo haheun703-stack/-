@@ -731,12 +731,70 @@
 
 <!-- ── 6. 매매일지 ── -->
 <div class="tab-panel" id="panel-journal">
-    <h3 class="sec-title" style="color:var(--accent-pink);"><i class="fas fa-book"></i> 매매일지</h3>
+    <h3 class="sec-title" style="color:var(--accent-pink);"><i class="fas fa-book"></i> 매매일지 — AI 추천 vs 실제</h3>
+    {% if brain and brain.journal %}
+    {% set jn = brain.journal %}
+
+    {# 요약 성적표 #}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+        <div style="border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:20px;text-align:center;">
+            <div style="font-size:15px;color:#9CA3AF;margin-bottom:8px;">총 추천</div>
+            <div style="font-size:28px;font-weight:700;color:#E5E7EB;">{{ jn.total_picks }}</div>
+        </div>
+        <div style="border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:20px;text-align:center;">
+            <div style="font-size:15px;color:#9CA3AF;margin-bottom:8px;">적중률</div>
+            <div style="font-size:28px;font-weight:700;color:{{ '#10B981' if jn.hit_rate >= 50 else '#EF4444' }};">{{ "%.0f"|format(jn.hit_rate) }}%</div>
+        </div>
+        <div style="border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:20px;text-align:center;">
+            <div style="font-size:15px;color:#9CA3AF;margin-bottom:8px;">평균 수익</div>
+            <div style="font-size:28px;font-weight:700;color:{{ '#10B981' if jn.avg_return >= 0 else '#EF4444' }};">{{ "%+.1f"|format(jn.avg_return) }}%</div>
+        </div>
+        <div style="border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:20px;text-align:center;">
+            <div style="font-size:15px;color:#9CA3AF;margin-bottom:8px;">기간</div>
+            <div style="font-size:20px;font-weight:700;color:#E5E7EB;">{{ jn.period }}</div>
+        </div>
+    </div>
+
+    {# 일별 추천 기록 #}
+    {% for day in jn.days %}
+    <div style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <span style="font-size:18px;font-weight:700;color:#E5E7EB;">{{ day.date }}</span>
+            <span style="font-size:15px;padding:5px 14px;border-radius:8px;background:{{ 'rgba(16,185,129,0.15)' if day.day_return >= 0 else 'rgba(239,68,68,0.15)' }};color:{{ '#6EE7B7' if day.day_return >= 0 else '#FCA5A5' }};font-weight:600;">{{ "%+.1f"|format(day.day_return) }}%</span>
+            <span style="font-size:14px;color:#6B7280;">{{ day.picks|length }}종목 추천</span>
+        </div>
+        {% for p in day.picks %}
+        {% set ret_color = '#10B981' if p.result_pct >= 0 else '#EF4444' %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;">
+                <span style="font-weight:700;font-size:17px;color:#E5E7EB;">{{ p.name }}</span>
+                <span style="font-size:13px;color:#6B7280;font-family:monospace;">{{ p.ticker }}</span>
+                {% set gs_bg = '#DC2626' if p.grade == '적극매수' else '#F59E0B' if p.grade == '매수' else '#3B82F6' %}
+                <span style="font-size:13px;padding:4px 10px;border-radius:8px;background:{{ gs_bg }}33;color:{{ gs_bg }};font-weight:600;">{{ p.grade }}</span>
+                <span style="font-size:14px;color:#6B7280;">{{ "%.0f"|format(p.score) }}점</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:18px;">
+                <div style="text-align:right;">
+                    <div style="font-size:13px;color:#6B7280;">진입 → 현재</div>
+                    <div style="font-size:15px;font-family:monospace;color:#9CA3AF;">{{ "{:,}".format(p.entry_price) }} → {{ "{:,}".format(p.current_price) }}</div>
+                </div>
+                <div style="min-width:80px;text-align:right;">
+                    <div style="font-size:22px;font-weight:700;color:{{ ret_color }};font-family:monospace;">{{ "%+.1f"|format(p.result_pct) }}%</div>
+                    <div style="font-size:12px;color:{{ ret_color }};">{{ '적중' if p.hit else '미적중' }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    {% else %}
     <div class="empty-state" style="padding:40px;">
         <div style="font-size:48px;margin-bottom:12px;">&#x1F4D3;</div>
-        <p style="font-size:16px;">매매일지 데이터는 다음 업데이트에서 연동됩니다</p>
-        <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">trades_history.json → 매수/매도 기록</p>
+        <p style="font-size:16px;">매매일지 데이터가 업로드되면 표시됩니다</p>
+        <p style="font-size:14px;color:var(--text-muted);margin-top:8px;">AI 추천 종목의 익일 수익률을 자동 추적합니다</p>
     </div>
+    {% endif %}
 </div>
 
 <!-- ── 7. 세력감지 ── -->

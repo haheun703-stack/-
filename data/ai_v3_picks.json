@@ -1,40 +1,51 @@
 {
-  "decision_date": "2026-03-01",
+  "decision_date": "2026-03-02",
   "regime": "공격",
   "available_slots": 10,
   "current_holdings": 0,
   "cash_pct_before": 100.0,
-  "cash_pct_after": 75.0,
+  "cash_pct_after": 30.0,
   "buys": [
-    {
-      "ticker": "022100",
-      "name": "포스코DX",
-      "conviction": 8,
-      "size_pct": 15.0,
-      "strategy": "momentum",
-      "thesis_alignment": "strong",
-      "entry_price": 39300,
-      "stop_loss_pct": -8.5,
-      "target_pct": 14.9,
-      "reasoning": "IT서비스 섹터 부스트와 엔터프라이즈 AI 확산 수혜주로 conviction 8의 표준 사이즈 배분"
-    },
     {
       "ticker": "032940",
       "name": "원익",
       "conviction": 8,
-      "size_pct": 10.0,
+      "size_pct": 20.0,
       "strategy": "relay",
       "thesis_alignment": "strong",
       "entry_price": 11870,
       "stop_loss_pct": -17.5,
       "target_pct": 30.7,
-      "reasoning": "AI칩/HBM 수요 수혜주이나 억제 섹터 소속으로 축소 사이즈 배분"
+      "reasoning": "반도체 장비주로 AI 수요 직접 수혜, 섹터 억제는 단기 조정 의미로 중장기 상승 여력 충분"
+    },
+    {
+      "ticker": "022100",
+      "name": "포스코DX",
+      "conviction": 8,
+      "size_pct": 20.0,
+      "strategy": "momentum",
+      "thesis_alignment": "strong",
+      "entry_price": 39300,
+      "stop_loss_pct": -8.5,
+      "target_pct": 14.9,
+      "reasoning": "IT서비스 섹터 부스트와 강한 일치, 엔터프라이즈 AI 확산 수혜 예상되며 ADX 25.1의 건전한 추세"
+    },
+    {
+      "ticker": "211050",
+      "name": "인카금융서비스",
+      "conviction": 7,
+      "size_pct": 15.0,
+      "strategy": "relay",
+      "thesis_alignment": "moderate",
+      "entry_price": 14050,
+      "stop_loss_pct": -12.1,
+      "target_pct": 21.1,
+      "reasoning": "증권 섹터 부스트 간접 수혜, conviction 낮아 축소 배분하되 섹터 분산 효과"
     }
   ],
   "skipped": [],
   "portfolio_warnings": [
-    "원익은 억제 섹터(반도체)에 속해 있어 주의 필요",
-    "첫 매수로 총 25% 배분은 적절한 리스크 관리"
+    "현금 비중 30%로 공격 레짐 권고(15%)보다 높게 유지하여 추가 기회 대응력 확보"
   ],
-  "reasoning": "공격 레짐에서 현금 100%의 첫 진입으로 conviction 8의 두 종목에 총 25% 배분. IT서비스 부스트 섹터인 포스코DX에 표준 사이즈 15%, 억제 섹터이나 AI 수혜주인 원익에 축소 사이즈 10% 배분하여 현금 비중 75%로 추가 기회 대비."
+  "reasoning": "공격 레짐에서 높은 conviction 종목들을 풀사이즈(20%)로 배분하되, 반도체 섹터 단기 억제 신호를 감안하여 전체 투자비중을 70%로 제한. IT서비스와 금융으로 섹터 분산하며, 현금 30% 유지로 변동성 대응력과 추가 매수 여력 확보."
 }

@@ -1,41 +1,17 @@
 {
-  "analysis_date": "2026-03-01",
+  "analysis_date": "2026-03-02",
   "focus_sectors": [
     {
       "sector": "IT서비스",
       "entry_timing": "즉시진입",
-      "size_weight": 1.2,
+      "size_weight": 1.0,
       "thesis_alignment": "강한일치",
       "momentum_rank": 1,
       "momentum_score": 91.3,
       "rsi": 80.5,
       "smart_money": false,
       "relay_source": "반도체",
-      "reasoning": "반도체 발화 후 1일 지연 릴레이(승률 88.2%) 진입 타이밍. thesis와 모멘텀 1위 완벽 일치, ADX 상승 중"
-    },
-    {
-      "sector": "건설",
-      "entry_timing": "즉시진입",
-      "size_weight": 1.0,
-      "thesis_alignment": "thesis없음",
-      "momentum_rank": 2,
-      "momentum_score": 89.7,
-      "rsi": 81.3,
-      "smart_money": true,
-      "relay_source": null,
-      "reasoning": "모멘텀 2위 + 스마트머니 유입 + ADX 61.2(강한 추세). thesis 없으나 기술적 우위 명확"
-    },
-    {
-      "sector": "증권",
-      "entry_timing": "즉시진입",
-      "size_weight": 1.0,
-      "thesis_alignment": "thesis없음",
-      "momentum_rank": 3,
-      "momentum_score": 81.6,
-      "rsi": 70.3,
-      "smart_money": false,
-      "relay_source": null,
-      "reasoning": "Theme BUY 지정 + 모멘텀 3위 + RSI 70대(과열 아님). 금융 릴레이 소스로 보험/은행 연계 가능"
+      "reasoning": "반도체 릴레이 발화 시점 + 모멘텀 1위 + thesis 8/10 확신 + ADX 상승 추세로 즉시 진입 최적"
     },
     {
       "sector": "에너지화학",
@@ -46,60 +22,70 @@
       "momentum_score": 69.7,
       "rsi": 77.3,
       "smart_money": true,
-      "reasoning": "정유 thesis와 일치(유가 상승). 스마트머니 유입 + 모멘텀 상위권 + ADX 상승"
+      "relay_source": null,
+      "reasoning": "정유 thesis 7/10 확신 + 스마트머니 유입 + 유가 상승 모멘텀 + RSI 적정 수준으로 진입 양호"
     },
     {
-      "sector": "보험",
+      "sector": "건설",
       "entry_timing": "눌림대기",
-      "size_weight": 0.8,
+      "size_weight": 0.7,
       "thesis_alignment": "thesis없음",
-      "momentum_rank": 8,
-      "momentum_score": 62.6,
-      "rsi": 72.6,
+      "momentum_rank": 2,
+      "momentum_score": 89.7,
+      "rsi": 81.3,
+      "smart_money": true,
+      "relay_source": null,
+      "reasoning": "모멘텀 2위 + 스마트머니 유입이나 RSI 81.3으로 단기 과열, 구조적 thesis 없어 눌림 후 진입"
+    },
+    {
+      "sector": "증권",
+      "entry_timing": "즉시진입",
+      "size_weight": 0.8,
+      "thesis_alignment": "약한일치",
+      "momentum_rank": 3,
+      "momentum_score": 81.6,
+      "rsi": 70.3,
       "smart_money": false,
-      "relay_source": "증권",
-      "reasoning": "증권 릴레이 타겟(승률 76.5%, 1일 지연). Theme BUY이나 아직 릴레이 대기 구간"
+      "relay_source": null,
+      "reasoning": "Theme BUY 신호 + 모멘텀 3위 + RSI 적정 + 릴레이 소스 역할 가능으로 진입 타당"
     }
   ],
   "screening_boost": [
     "IT서비스",
-    "건설",
-    "증권",
     "에너지화학",
-    "2차전지",
-    "철강소재"
+    "증권",
+    "보험"
   ],
   "screening_suppress": [
     "반도체",
     "현대차그룹",
-    "삼성그룹",
-    "게임",
-    "미디어"
+    "2차전지",
+    "철강소재"
   ],
   "sector_warnings": [
     {
       "sector": "반도체",
-      "warning": "RSI 80.5 + BB 109.0%로 과열. thesis 강하나 단기 조정 리스크. IT서비스 릴레이로 전환 권장",
+      "warning": "RSI 80.5 + BB 109.0% 과열 + 외인 5일간 -58,370 대량 매도, 릴레이 소스로만 활용하고 신규 진입 자제",
       "severity": "high"
     },
     {
       "sector": "현대차그룹",
-      "warning": "RSI 82.9 + BB 118.1%로 극도 과열. 스마트머니 유입 중이나 단기 눌림 불가피",
+      "warning": "RSI 82.9 + BB 118.1% 극심한 과열, 단기 조정 임박 가능성",
       "severity": "high"
     },
     {
-      "sector": "삼성그룹",
-      "warning": "반도체 과열 영향으로 BB 94.2%. 외국인 -64,652주 매도. 조정 가능성",
+      "sector": "2차전지",
+      "warning": "Phase 1 회피 섹터이나 모멘텀 10위 + 스마트머니 유입 모순, BB 105.3% 과열로 진입 보류",
+      "severity": "medium"
+    },
+    {
+      "sector": "반도체→IT서비스",
+      "warning": "릴레이 발화 시점이나 반도체 과열 상태, IT서비스 즉시 진입하되 반도체 추가 매수 금지",
       "severity": "medium"
     },
     {
       "sector": "방산",
-      "warning": "모멘텀 32.6점(13위)으로 하락. 릴레이 대기 상태이나 기술적 약세. 기계 릴레이 무효화 가능성",
-      "severity": "medium"
-    },
-    {
-      "sector": "금융",
-      "warning": "ADX 하락 전환. 증권/보험 강세 대비 은행 상대적 약세. 섹터 내 차별화 주의",
+      "warning": "Phase 1 관찰 섹터이나 모멘텀 13위 + ADX 21.5 약세, 구조적 촉매 없이 관망 유지",
       "severity": "low"
     }
   ]
