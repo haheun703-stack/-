@@ -742,7 +742,7 @@
 <!-- ── 7. 세력감지 ── -->
 <div class="tab-panel" id="panel-shakeout">
     <h3 class="sec-title" style="color:var(--accent-purple);"><i class="fas fa-bolt"></i> 세력감지 — 이상 패턴 스캐너</h3>
-    {% if brain and brain.whale and brain.whale.items %}
+    {% if brain and brain.whale and brain.whale['items'] %}
     {% set wh = brain.whale %}
 
     {# 요약 배지 #}
@@ -755,7 +755,7 @@
     </div>
 
     {# 세력포착 / 매집의심 카드 #}
-    {% for item in wh.items[:15] %}
+    {% for item in wh['items'][:15] %}
     {% set gc_color = '#EF4444' if item.grade == '세력포착' else '#F59E0B' if item.grade == '매집의심' else '#6B7280' %}
     {% set gc_bg = 'rgba(239,68,68,0.06)' if item.grade == '세력포착' else 'rgba(245,158,11,0.05)' if item.grade == '매집의심' else 'rgba(107,114,128,0.04)' %}
     {% set gc_border = 'rgba(239,68,68,0.15)' if item.grade == '세력포착' else 'rgba(245,158,11,0.12)' if item.grade == '매집의심' else 'rgba(107,114,128,0.1)' %}
@@ -801,15 +801,17 @@
     <h3 class="sec-title" style="color:var(--accent-cyan);"><i class="fas fa-globe"></i> 시장 인텔리전스</h3>
     {% if brain and brain.news %}
     {% set news = brain.news %}
+    {% set sent = news.market_sentiment|default(news.sentiment|default('neutral')) %}
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <span class="signal-badge {{ 'bull-badge' if news.sentiment == 'bullish' else ('bear-badge' if news.sentiment == 'bearish' else 'neutral-badge') }}" style="font-size:16px;">
-            {{ news.sentiment|upper }}
+        <span class="signal-badge {{ 'bull-badge' if sent == 'bullish' else ('bear-badge' if sent == 'bearish' else 'neutral-badge') }}" style="font-size:16px;">
+            {{ sent|upper }}
         </span>
-        <span style="color:var(--text-muted);font-size:14px;">{{ news.date|default('-') }}</span>
+        <span style="color:var(--text-muted);font-size:14px;">{{ news.date|default(news.generated_at|default('-')) }}</span>
     </div>
-    {% if news.themes %}
+    {% set themes = news.key_themes|default(news.themes|default([])) %}
+    {% if themes %}
     <div class="brain-section-title"><i class="fas fa-newspaper"></i> 주요 테마</div>
-    {% for theme in news.themes %}
+    {% for theme in themes %}
     <div class="brain-item" style="padding:10px 14px;">
         <div class="brain-item-text" style="font-size:15px;"><i class="fas fa-bolt" style="color:var(--accent-yellow);margin-right:8px;"></i>{{ theme }}</div>
     </div>
@@ -820,8 +822,9 @@
     {% for sec, info in news.sector_outlook.items() %}
     <div class="brain-outlook-row">
         <span class="brain-outlook-sector">{{ sec }}</span>
-        <span class="brain-outlook-dir {{ 'positive' if info.dir == 'positive' else ('negative' if info.dir == 'negative' else '') }}">
-            {% if info.dir == 'positive' %}<i class="fas fa-arrow-up"></i>{% elif info.dir == 'negative' %}<i class="fas fa-arrow-down"></i>{% else %}<i class="fas fa-minus"></i>{% endif %}
+        {% set dir = info.direction|default(info.dir|default('neutral')) %}
+        <span class="brain-outlook-dir {{ 'positive' if dir == 'positive' else ('negative' if dir == 'negative' else '') }}">
+            {% if dir == 'positive' %}<i class="fas fa-arrow-up"></i>{% elif dir == 'negative' %}<i class="fas fa-arrow-down"></i>{% else %}<i class="fas fa-minus"></i>{% endif %}
         </span>
         <span class="brain-outlook-reason">{{ info.reason }}</span>
     </div>
