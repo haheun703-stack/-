@@ -31,6 +31,7 @@ MONTHLY_DIR = os.path.join(REPORTS_DIR, 'monthly')
 METRICS_FILE = os.path.join(DATA_DIR, 'metrics.json')
 MARKET_FILE = os.path.join(DATA_DIR, 'market_data.json')
 HOLDINGS_FILE = os.path.join(DATA_DIR, 'holdings.json')
+BRAIN_FILE = os.path.join(DATA_DIR, 'brain_data.json')
 
 # 디렉토리 자동 생성
 for d in [DATA_DIR, REPORTS_DIR, DAILY_DIR, WEEKLY_DIR, MONTHLY_DIR]:
@@ -140,6 +141,19 @@ def save_holdings(data):
     with open(HOLDINGS_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+def get_brain_data():
+    """AI Brain 데이터 로드 (전략/섹터/릴레이/뉴스/v3)"""
+    if os.path.exists(BRAIN_FILE):
+        with open(BRAIN_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_brain_data(data):
+    """AI Brain 데이터 저장"""
+    data['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(BRAIN_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 def get_calendar_data(year, month):
     """달력 데이터 생성"""
     import calendar
@@ -225,6 +239,7 @@ def dashboard():
     metrics = get_metrics()
     market = get_market_data()
     holdings = get_holdings()
+    brain = get_brain_data()
     recent_dates = get_report_dates()[:7]
 
     # 이전/다음 달 계산
@@ -238,6 +253,7 @@ def dashboard():
         metrics=metrics,
         market=market,
         holdings=holdings,
+        brain=brain,
         recent_dates=recent_dates,
         year=year, month=month,
         prev_year=prev_year, prev_month=prev_month,
@@ -390,6 +406,24 @@ def api_update_market():
     market.update(request.json)
     save_market_data(market)
     return jsonify({'status': 'ok', 'updated_at': market['updated_at']})
+
+@app.route('/api/brain', methods=['POST'])
+@api_key_required
+def api_update_brain():
+    """봇에서 AI Brain 데이터를 업데이트하는 API
+
+    수신 데이터:
+      - strategic: {regime, confidence, thesis[], sector_priority, risk_factors}
+      - sector_focus: {focus_sectors[], boost[], suppress[], warnings[]}
+      - group_relay: {fired_groups[], summary}
+      - news: {sentiment, themes[], sector_outlook{}}
+      - v3_picks: {buys[], regime, slots}
+    """
+    if not request.is_json:
+        return jsonify({'error': 'JSON required'}), 400
+
+    save_brain_data(request.json)
+    return jsonify({'status': 'ok'})
 
 @app.route('/api/holdings', methods=['POST'])
 @api_key_required

@@ -99,6 +99,23 @@ class JarvisUploader:
             logger.warning(f"[JARVIS] 시장 데이터 업데이트 실패: {e}")
             return {"error": str(e)}
 
+    def update_brain(self, data: dict) -> dict:
+        """대시보드 AI Brain 데이터 업데이트."""
+        if not self.is_available:
+            return {"error": "API key not set"}
+
+        url = f"{self.base_url}/api/brain"
+
+        try:
+            resp = requests.post(url, headers=self.headers, json=data, timeout=30)
+            resp.raise_for_status()
+            logger.info("[JARVIS] AI Brain 데이터 업데이트 완료")
+            return resp.json()
+
+        except Exception as e:
+            logger.warning(f"[JARVIS] AI Brain 업데이트 실패: {e}")
+            return {"error": str(e)}
+
     def update_holdings(self, data: dict) -> dict:
         """대시보드 보유주식 업데이트."""
         if not self.is_available:
@@ -151,6 +168,12 @@ class JarvisUploader:
         if holdings:
             r = self.update_holdings(holdings)
             results.append(f"Holdings: {r.get('status', r.get('error', '?'))}")
+
+        # 5) AI Brain 데이터 업데이트 (전략/섹터/릴레이/뉴스/v3)
+        brain = self._build_brain_data()
+        if brain:
+            r = self.update_brain(brain)
+            results.append(f"Brain: {r.get('status', r.get('error', '?'))}")
 
         return results
 
@@ -272,6 +295,111 @@ class JarvisUploader:
                 logger.warning(f"[JARVIS] KOSPI 레짐 계산 실패: {e}")
 
         return market
+
+    def _build_brain_data(self) -> dict:
+        """AI Brain 관련 데이터 통합 빌드."""
+        brain = {}
+
+        # 1) AI 전략 분석
+        path = DATA_DIR / "ai_strategic_analysis.json"
+        if path.exists():
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                brain["strategic"] = {
+                    "regime": d.get("regime", "-"),
+                    "confidence": d.get("regime_confidence", 0),
+                    "thesis": [
+                        {"sector": t["sector"], "thesis": t["thesis"][:80], "confidence": t.get("confidence", 0)}
+                        for t in d.get("industry_thesis", [])[:5]
+                    ],
+                    "sector_priority": d.get("sector_priority", {}),
+                    "risk_factors": d.get("risk_factors", []),
+                    "max_new_buys": d.get("max_new_buys", 0),
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] AI 전략 로드 실패: {e}")
+
+        # 2) 섹터 집중
+        path = DATA_DIR / "ai_sector_focus.json"
+        if path.exists():
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                brain["sector_focus"] = {
+                    "focus_sectors": [f["sector"] for f in d.get("focus_sectors", [])[:6]],
+                    "boost": d.get("screening_boost", [])[:6],
+                    "suppress": d.get("screening_suppress", [])[:6],
+                    "warnings": d.get("sector_warnings", []),
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] 섹터 집중 로드 실패: {e}")
+
+        # 3) 그룹 릴레이
+        path = DATA_DIR / "group_relay" / "group_relay_today.json"
+        if path.exists():
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                fired = []
+                for g in d.get("fired_groups", [])[:3]:
+                    subs = [
+                        {"name": s["name"], "change": s.get("change_pct", 0), "score": s.get("score", 0)}
+                        for s in g.get("waiting_subsidiaries", [])[:5]
+                    ]
+                    fired.append({
+                        "group": g.get("group", ""),
+                        "leader": g.get("leader_name", ""),
+                        "leader_change": g.get("leader_change", 0),
+                        "subsidiaries": subs,
+                    })
+                brain["group_relay"] = {
+                    "fired": fired,
+                    "summary": d.get("summary", ""),
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] 그룹 릴레이 로드 실패: {e}")
+
+        # 4) AI 뉴스 판단
+        path = DATA_DIR / "ai_brain_judgment.json"
+        if path.exists():
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                outlook = {}
+                for sec, info in d.get("sector_outlook", {}).items():
+                    if isinstance(info, dict):
+                        outlook[sec] = {"dir": info.get("direction", ""), "reason": info.get("reason", "")[:60]}
+                    else:
+                        outlook[sec] = {"dir": "", "reason": str(info)[:60]}
+                brain["news"] = {
+                    "sentiment": d.get("market_sentiment", "-"),
+                    "themes": d.get("key_themes", [])[:5],
+                    "sector_outlook": dict(list(outlook.items())[:8]),
+                    "date": d.get("date", ""),
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] 뉴스 판단 로드 실패: {e}")
+
+        # 5) v3 AI Picks
+        path = DATA_DIR / "ai_v3_picks.json"
+        if path.exists():
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                buys = []
+                for b in d.get("buys", [])[:5]:
+                    buys.append({
+                        "name": b.get("name", b.get("stock_name", "?")),
+                        "ticker": b.get("ticker", ""),
+                        "conviction": b.get("conviction", 0),
+                        "strategy": b.get("strategy", ""),
+                        "thesis_alignment": b.get("thesis_alignment", ""),
+                    })
+                brain["v3_picks"] = {
+                    "regime": d.get("regime", ""),
+                    "slots": d.get("available_slots", 0),
+                    "buys": buys,
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] v3 Picks 로드 실패: {e}")
+
+        return brain
 
     def _build_holdings(self) -> dict:
         """KIS 잔고에서 보유주식 데이터 빌드."""

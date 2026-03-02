@@ -183,6 +183,149 @@
     {% endif %}
 </div>
 
+<!-- ═══ AI Brain — 전략/섹터/릴레이/뉴스 ═══ -->
+{% if brain %}
+<div class="grid-2" style="margin-bottom:22px;">
+    <!-- 왼쪽: AI 전략 + 섹터 -->
+    <div>
+        {% if brain.strategic %}
+        {% set st = brain.strategic %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-brain" style="color:var(--accent-purple);"></i> AI 전략 레짐</span>
+                {% set r_class = 'positive' if st.regime in ['공격','BULL'] else ('negative' if st.regime in ['회피','방어','CRISIS'] else '') %}
+                <span class="signal-badge {{ 'bull-badge' if r_class == 'positive' else ('bear-badge' if r_class == 'negative' else 'neutral-badge') }}">
+                    {{ st.regime }} ({{ "%.0f"|format((st.confidence|default(0))*100) }}%)
+                </span>
+            </div>
+            <!-- 산업 Thesis -->
+            {% if st.thesis %}
+            <div class="brain-section-title"><i class="fas fa-industry"></i> 산업 분석</div>
+            {% for t in st.thesis %}
+            <div class="brain-item">
+                <div class="brain-item-header">
+                    <span class="brain-sector">{{ t.sector }}</span>
+                    <span class="brain-conf">신뢰도 {{ t.confidence }}/10</span>
+                </div>
+                <div class="brain-item-text">{{ t.thesis }}</div>
+            </div>
+            {% endfor %}
+            {% endif %}
+            <!-- 섹터 우선순위 -->
+            {% if st.sector_priority %}
+            <div class="brain-section-title" style="margin-top:16px;"><i class="fas fa-crosshairs"></i> 섹터 우선순위</div>
+            <div class="brain-tags-row">
+                <span class="brain-tag-label">공격</span>
+                {% for s in st.sector_priority.get('attack', []) %}
+                <span class="brain-tag attack">{{ s }}</span>
+                {% endfor %}
+            </div>
+            <div class="brain-tags-row">
+                <span class="brain-tag-label">관망</span>
+                {% for s in st.sector_priority.get('watch', [])[:4] %}
+                <span class="brain-tag watch">{{ s }}</span>
+                {% endfor %}
+            </div>
+            <div class="brain-tags-row">
+                <span class="brain-tag-label">회피</span>
+                {% for s in st.sector_priority.get('avoid', []) %}
+                <span class="brain-tag avoid">{{ s }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <!-- 리스크 -->
+            {% if st.risk_factors %}
+            <div class="brain-section-title" style="margin-top:16px;"><i class="fas fa-exclamation-triangle" style="color:var(--accent-red);"></i> 리스크</div>
+            {% for r in st.risk_factors %}
+            <div class="brain-risk">{{ r }}</div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 오른쪽: 뉴스 + 릴레이 + v3 -->
+    <div>
+        <!-- AI 뉴스 판단 -->
+        {% if brain.news %}
+        {% set news = brain.news %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-newspaper" style="color:var(--accent-yellow);"></i> AI 뉴스 판단</span>
+                <span class="card-subtitle">{{ news.date|default('-') }}</span>
+            </div>
+            <div class="brain-sentiment">
+                시장 심리: <strong>{{ news.sentiment }}</strong>
+            </div>
+            {% if news.themes %}
+            <div class="brain-tags-row" style="margin:10px 0;">
+                {% for theme in news.themes %}
+                <span class="brain-tag theme">{{ theme }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if news.sector_outlook %}
+            <div class="brain-section-title"><i class="fas fa-chart-pie"></i> 섹터 전망</div>
+            {% for sec, info in news.sector_outlook.items() %}
+            <div class="brain-outlook-row">
+                <span class="brain-outlook-sector">{{ sec }}</span>
+                <span class="brain-outlook-dir {{ 'positive' if info.dir == 'positive' else ('negative' if info.dir == 'negative' else '') }}">
+                    {% if info.dir == 'positive' %}<i class="fas fa-arrow-up"></i>{% elif info.dir == 'negative' %}<i class="fas fa-arrow-down"></i>{% else %}<i class="fas fa-minus"></i>{% endif %}
+                </span>
+                <span class="brain-outlook-reason">{{ info.reason }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- 그룹 릴레이 -->
+        {% if brain.group_relay and brain.group_relay.fired %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-project-diagram" style="color:var(--accent-orange);"></i> 그룹 릴레이</span>
+            </div>
+            <div class="brain-sentiment">{{ brain.group_relay.summary }}</div>
+            {% for g in brain.group_relay.fired %}
+            <div class="relay-group">
+                <div class="relay-leader">
+                    <span class="relay-leader-name">{{ g.leader }}</span>
+                    <span class="positive" style="font-weight:800;">+{{ "%.1f"|format(g.leader_change) }}%</span>
+                </div>
+                <div class="relay-subs">
+                    {% for s in g.subsidiaries %}
+                    <span class="relay-sub {{ 'positive' if s.change > 0 else 'negative' }}">
+                        {{ s.name }} {{ "%+.1f"|format(s.change) }}%
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- v3 AI Picks -->
+        {% if brain.v3_picks and brain.v3_picks.buys %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-robot" style="color:var(--accent-cyan);"></i> v3 AI PICKS</span>
+                <span class="signal-badge neutral-badge">{{ brain.v3_picks.regime }}</span>
+            </div>
+            {% for b in brain.v3_picks.buys %}
+            <div class="v3-pick-row">
+                <div class="v3-pick-name">{{ b.name }} <span class="h-code">{{ b.ticker }}</span></div>
+                <div class="v3-pick-meta">
+                    <span class="v3-conv">확신 {{ b.conviction }}/10</span>
+                    <span class="brain-tag {{ 'attack' if b.thesis_alignment == 'strong' else 'watch' }}">{{ b.strategy }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
 <!-- ═══ 추천 종목 + 전략/달력/리포트 ═══ -->
 <div class="grid-2">
     <!-- 왼쪽: 추천 종목 -->

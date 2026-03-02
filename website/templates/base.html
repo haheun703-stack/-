@@ -286,6 +286,80 @@
         .pnl-badge.negative { background: rgba(239,68,68,0.15); color: var(--accent-red); }
         .card-subtitle { font-size: 12px; color: var(--text-muted); }
 
+        /* ─── AI Brain 섹션 ─── */
+        .brain-section-title {
+            font-size: 13px; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 10px; padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .brain-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+        }
+        .brain-item-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+        }
+        .brain-sector { font-size: 15px; font-weight: 800; }
+        .brain-conf { font-size: 12px; color: var(--accent-yellow); font-weight: 600; }
+        .brain-item-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .brain-tags-row {
+            display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px;
+        }
+        .brain-tag-label {
+            font-size: 12px; font-weight: 700; color: var(--text-muted);
+            min-width: 36px;
+        }
+        .brain-tag {
+            font-size: 12px; padding: 3px 10px; border-radius: 8px; font-weight: 600;
+        }
+        .brain-tag.attack { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .brain-tag.watch { background: rgba(249,115,22,0.12); color: var(--accent-orange); }
+        .brain-tag.avoid { background: rgba(239,68,68,0.12); color: var(--accent-red); }
+        .brain-tag.theme { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+        .brain-risk {
+            font-size: 13px; color: var(--accent-red); padding: 6px 10px;
+            background: rgba(239,68,68,0.06); border-radius: 8px; margin-bottom: 4px;
+        }
+        .brain-sentiment {
+            font-size: 15px; color: var(--text-secondary); margin-bottom: 8px;
+        }
+        .brain-outlook-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 13px;
+        }
+        .brain-outlook-row:last-child { border-bottom: none; }
+        .brain-outlook-sector { font-weight: 700; min-width: 80px; font-size: 14px; }
+        .brain-outlook-dir { font-size: 13px; min-width: 20px; }
+        .brain-outlook-reason { color: var(--text-secondary); flex: 1; }
+        .relay-group {
+            background: rgba(255,255,255,0.03); border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 8px;
+        }
+        .relay-leader {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .relay-leader-name { font-size: 16px; font-weight: 800; }
+        .relay-subs { display: flex; gap: 8px; flex-wrap: wrap; }
+        .relay-sub {
+            font-size: 12px; padding: 3px 10px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); font-weight: 600;
+        }
+        .v3-pick-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .v3-pick-row:last-child { border-bottom: none; }
+        .v3-pick-name { font-size: 15px; font-weight: 700; }
+        .v3-pick-meta { display: flex; gap: 8px; align-items: center; }
+        .v3-conv {
+            font-size: 13px; font-weight: 700; color: var(--accent-yellow);
+            background: rgba(245,158,11,0.12); padding: 2px 10px; border-radius: 8px;
+        }
+
         /* ─── 메트릭 카드 ─── */
         .metrics-grid {
             display: grid;
