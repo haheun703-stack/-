@@ -50,6 +50,10 @@ US_KR_SECTOR_MAP = {
     "xle": ["에너지", "정유", "화학"],
     "xli": ["조선", "기계", "건설", "자동차", "운송"],
     "xlv": ["제약", "바이오", "의료기기", "헬스케어"],
+    # 원자재 → 한국 섹터
+    "gld": ["철강금속"],
+    "uso": ["에너지", "정유", "화학"],
+    "copx": ["조선", "기계", "건설", "자동차", "전자부품"],
 }
 
 DB_PATH = US_DIR / "us_kr_history.db"
@@ -63,9 +67,9 @@ SECTOR_KILL_CONFIG = {
     "디스플레이": {"kill_col": "soxx_ret_1d", "threshold": -0.03, "sensitivity": 0.95},
     "IT":       {"kill_col": "qqq_ret_1d",  "threshold": -0.035, "sensitivity": 0.70},
     "소프트웨어": {"kill_col": "qqq_ret_1d",  "threshold": -0.035, "sensitivity": 0.70},
-    "에너지":   {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.80},
-    "정유":     {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.80},
-    "화학":     {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.80},
+    "에너지":   {"kill_col": "uso_ret_1d",  "threshold": -0.04, "sensitivity": 0.85},
+    "정유":     {"kill_col": "uso_ret_1d",  "threshold": -0.04, "sensitivity": 0.85},
+    "화학":     {"kill_col": "uso_ret_1d",  "threshold": -0.04, "sensitivity": 0.80},
     "은행":     {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.50},
     "증권":     {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.50},
     "금융":     {"kill_col": "spy_ret_1d",  "threshold": -0.05, "sensitivity": 0.50},
@@ -163,6 +167,34 @@ def _check_special_rules(latest, prev) -> list[dict]:
             "name": "MARKET_CRASH",
             "desc": f"SPY {spy_ret*100:+.1f}% -> 전체 시장 경계",
             "global_position_cap": 0.5,
+        })
+
+    # R7: 원유 급락 -5%+ → 에너지/정유 KILL
+    uso_ret = _ret("uso_ret_1d")
+    if uso_ret <= -0.05:
+        triggered.append({
+            "name": "OIL_CRASH",
+            "desc": f"WTI(USO) {uso_ret*100:+.1f}% 급락 -> 에너지/정유 KILL",
+            "sector_kill": ["에너지", "정유", "화학"],
+        })
+
+    # R8: 금 급등 +3%+ → risk-off 신호 → 전체 포지션 경계
+    gld_ret = _ret("gld_ret_1d")
+    if gld_ret >= 0.03:
+        triggered.append({
+            "name": "GOLD_SPIKE",
+            "desc": f"금(GLD) {gld_ret*100:+.1f}% 급등 -> risk-off 경계",
+            "global_position_cap": 0.8,
+        })
+
+    # R9: 구리 급락 -5%+ → 경기 둔화 신호 → 산업재 KILL
+    copx_ret = _ret("copx_ret_1d")
+    if copx_ret <= -0.05:
+        triggered.append({
+            "name": "COPPER_CRASH",
+            "desc": f"구리(COPX) {copx_ret*100:+.1f}% 급락 -> 경기 둔화 경고",
+            "sector_kill": ["조선", "기계", "건설", "자동차"],
+            "global_position_cap": 0.8,
         })
 
     return triggered
@@ -288,7 +320,7 @@ def _compute_sector_momentum(df: pd.DataFrame) -> dict:
     """
     result = {}
 
-    for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx"]:
+    for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx", "gld", "uso", "copx"]:
         close_col = f"{prefix}_close"
         if close_col not in df.columns:
             continue
@@ -436,7 +468,7 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
         }
 
     signal["index_direction"] = index_dir
-    score += index_score * 0.45
+    score += index_score * 0.40  # 45%→40% (원자재 5% 배분)
 
     # ─── 2. VIX (가중치: 20%) ───
     vix = float(latest.get("vix_close", 20) or 20)
@@ -467,13 +499,86 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     }
     score += vix_score * 0.20
 
-    # ─── 3. 채권/달러 (가중치: 10%) ───
+    # ─── 3. 채권/달러 (가중치: 8%) ── (10%→8%, 원자재에 2% 배분)
     bond_dollar_score = 0.0
     tlt_ret = float(latest.get("tlt_ret_1d", 0) or 0)
     # TLT 상승 = risk-off → 주식에 약세
     bond_dollar_score -= max(-0.5, min(0.5, tlt_ret * 30))
 
-    score += bond_dollar_score * 0.10
+    score += bond_dollar_score * 0.08
+
+    # ─── 3.5 원자재 신호 (가중치: 7%) ───
+    commodity_data = {}
+    commodity_score = 0.0
+
+    # 금(GLD): 상승 = risk-off → 주식 약세 신호 (역상관)
+    gld_ret = float(latest.get("gld_ret_1d", 0) or 0)
+    gld_ret5 = float(latest.get("gld_ret_5d", 0) or 0)
+    gld_above = int(latest.get("gld_above_sma20", 0) or 0)
+    if gld_ret != 0:
+        # 금 상승 = risk-off = 주식 약세 → 역방향
+        gold_signal = -max(-0.5, min(0.5, gld_ret * 30))
+        commodity_score += gold_signal * 0.30  # 금 30%
+        commodity_data["gold"] = {
+            "ret_1d": round(gld_ret * 100, 2),
+            "ret_5d": round(gld_ret5 * 100, 2),
+            "above_sma20": bool(gld_above),
+            "signal": "risk_off" if gld_ret > 0.005 else ("risk_on" if gld_ret < -0.005 else "neutral"),
+        }
+
+    # 원유(USO): WTI → 정유 호재 / 화학 부담 → 중립적
+    uso_ret = float(latest.get("uso_ret_1d", 0) or 0)
+    uso_ret5 = float(latest.get("uso_ret_5d", 0) or 0)
+    uso_above = int(latest.get("uso_above_sma20", 0) or 0)
+    if uso_ret != 0:
+        # 원유 급락 = 수요 둔화 경고
+        oil_signal = max(-0.5, min(0.5, uso_ret * 20))
+        commodity_score += oil_signal * 0.25  # 원유 25%
+        commodity_data["oil"] = {
+            "ret_1d": round(uso_ret * 100, 2),
+            "ret_5d": round(uso_ret5 * 100, 2),
+            "above_sma20": bool(uso_above),
+            "signal": "demand_up" if uso_ret > 0.01 else ("demand_down" if uso_ret < -0.01 else "neutral"),
+        }
+
+    # 구리(COPX): "닥터 구리" = 경기 선행지표 → 동행
+    copx_ret = float(latest.get("copx_ret_1d", 0) or 0)
+    copx_ret5 = float(latest.get("copx_ret_5d", 0) or 0)
+    copx_above = int(latest.get("copx_above_sma20", 0) or 0)
+    if copx_ret != 0:
+        copper_signal = max(-0.5, min(0.5, copx_ret * 25))
+        commodity_score += copper_signal * 0.30  # 구리 30%
+        commodity_data["copper"] = {
+            "ret_1d": round(copx_ret * 100, 2),
+            "ret_5d": round(copx_ret5 * 100, 2),
+            "above_sma20": bool(copx_above),
+            "signal": "expansion" if copx_ret > 0.01 else ("contraction" if copx_ret < -0.01 else "neutral"),
+        }
+
+    # 은(SLV): 금과 동반 + 산업재 수요
+    slv_ret = float(latest.get("slv_ret_1d", 0) or 0)
+    slv_ret5 = float(latest.get("slv_ret_5d", 0) or 0)
+    if slv_ret != 0:
+        commodity_data["silver"] = {
+            "ret_1d": round(slv_ret * 100, 2),
+            "ret_5d": round(slv_ret5 * 100, 2),
+            "signal": "up" if slv_ret > 0.005 else ("down" if slv_ret < -0.005 else "neutral"),
+        }
+        commodity_score += max(-0.3, min(0.3, slv_ret * 15)) * 0.15  # 은 15%
+
+    # 구리/금 비율 (경기 확장/수축 판단)
+    cg_ratio = float(latest.get("copper_gold_ratio", 0) or 0)
+    cg_sma = float(latest.get("copper_gold_ratio_sma20", 0) or 0)
+    if cg_ratio > 0 and cg_sma > 0:
+        cg_above = cg_ratio > cg_sma
+        commodity_data["copper_gold_ratio"] = {
+            "ratio": round(cg_ratio, 4),
+            "sma20": round(cg_sma, 4),
+            "regime": "expansion" if cg_above else "contraction",
+        }
+
+    signal["commodities"] = commodity_data
+    score += commodity_score * 0.07
 
     # ─── 4. 섹터 신호 (가중치: 25%) ───
     sector_signals = {}
@@ -565,10 +670,19 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     qqq_ret = index_dir.get("QQQ", {}).get("ret_1d", 0)
     l2_conf = l2.get("confidence", 0)
     l2_adj_str = f" L2:{l2_adj:+.1f}" if l2_conf > 0 else ""
+
+    # 원자재 요약
+    commod_parts = []
+    for key, sym in [("gold", "Au"), ("oil", "Oil"), ("copper", "Cu")]:
+        c = signal.get("commodities", {}).get(key, {})
+        if c:
+            commod_parts.append(f"{sym}{c['ret_1d']:+.1f}%")
+    commod_str = f" | {' '.join(commod_parts)}" if commod_parts else ""
+
     signal["summary"] = (
         f"US {grade} ({combined_100:+.1f}{l2_adj_str}) | "
         f"SPY {spy_ret:+.1f}% QQQ {qqq_ret:+.1f}% | "
-        f"VIX {vix:.0f} ({vix_status})"
+        f"VIX {vix:.0f} ({vix_status}){commod_str}"
     )
 
     # 저장
@@ -607,6 +721,23 @@ def format_telegram_message(signal: dict) -> str:
     vix = signal.get("vix", {})
     if vix:
         lines.append(f"\nVIX: {vix['level']} (z:{vix['zscore']:+.1f}) [{vix['status']}]")
+
+    # 원자재
+    commod = signal.get("commodities", {})
+    if commod:
+        lines.append("\n[ 원자재 ]")
+        for key, label in [("gold", "금(GLD)"), ("silver", "은(SLV)"),
+                           ("oil", "유(USO)"), ("copper", "구리(COPX)")]:
+            c = commod.get(key, {})
+            if c:
+                sma = ">" if c.get("above_sma20") else "<"
+                lines.append(
+                    f"  {label}: {c['ret_1d']:+.1f}% (5D:{c['ret_5d']:+.1f}%) "
+                    f"[{c['signal']}]"
+                )
+        cg = commod.get("copper_gold_ratio", {})
+        if cg:
+            lines.append(f"  구리/금 비율: {cg['ratio']:.4f} [{cg['regime']}]")
 
     # Level 2 패턴매칭
     l2 = signal.get("l2_pattern", {})

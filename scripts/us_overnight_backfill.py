@@ -6,6 +6,7 @@ yfinance로 미국 시장 핵심 지표 3년치 다운로드:
   - XLK (Tech), XLF (Finance), XLE (Energy), XLI (Industrial), XLV (Healthcare)
   - SOXX (반도체), ^VIX (변동성)
   - TLT (20Y Treasury), DXY (달러인덱스 → UUP 대용)
+  - GLD (금), SLV (은), USO (WTI 원유), COPX (구리 광산)
 
 저장: data/us_market/us_daily.parquet (날짜 인덱스, 멀티 티커)
 
@@ -50,6 +51,11 @@ TICKERS = {
     "^VIX": "VIX",
     "TLT": "Treasury20Y",
     "UUP": "DollarIndex",
+    # 원자재 (금/은/원유/구리)
+    "GLD": "Gold",
+    "SLV": "Silver",
+    "USO": "WTI_Oil",
+    "COPX": "Copper_Miners",
     # 한국 프록시 (미국 상장 Korea ETF)
     "EWY": "KoreaETF",
 }
@@ -62,6 +68,10 @@ US_KR_SECTOR_MAP = {
     "XLE": ["에너지", "정유", "화학"],
     "XLI": ["조선", "기계", "건설", "자동차"],
     "XLV": ["제약", "바이오", "의료기기"],
+    # 원자재 → 한국 섹터
+    "GLD": ["철강금속"],          # 금 → 비철/안전자산 선호
+    "USO": ["에너지", "정유", "화학"],  # 원유 → 정유/화학
+    "COPX": ["조선", "기계", "건설", "자동차", "전자부품"],  # 구리 → 경기민감/산업재
 }
 
 
@@ -156,10 +166,29 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "tlt_close" in df.columns:
         df["tlt_ret_1d"] = df["tlt_close"].pct_change()
 
+    # 원자재 파생 지표 (금/은/원유/구리)
+    for prefix in ["gld", "slv", "uso", "copx"]:
+        col = f"{prefix}_close"
+        if col in df.columns:
+            df[f"{prefix}_ret_1d"] = df[col].pct_change()
+            df[f"{prefix}_ret_5d"] = df[col].pct_change(5)
+            df[f"{prefix}_sma_20"] = df[col].rolling(20).mean()
+            df[f"{prefix}_above_sma20"] = (df[col] > df[f"{prefix}_sma_20"]).astype(int)
+
+    # 금/은 비율 (Gold-Silver Ratio) — 경기 침체 지표
+    if "gld_close" in df.columns and "slv_close" in df.columns:
+        df["gold_silver_ratio"] = df["gld_close"] / df["slv_close"].replace(0, pd.NA)
+
+    # 구리/금 비율 (Copper-Gold Ratio) — 경기 확장/수축 지표
+    if "copx_close" in df.columns and "gld_close" in df.columns:
+        df["copper_gold_ratio"] = df["copx_close"] / df["gld_close"].replace(0, pd.NA)
+        df["copper_gold_ratio_sma20"] = df["copper_gold_ratio"].rolling(20).mean()
+
     # 섹터 상대 강도 (vs SPY)
     if "spy_close" in df.columns:
         spy_ret = df["spy_close"].pct_change(5)
-        for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx", "ewy"]:
+        for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx", "ewy",
+                        "gld", "slv", "uso", "copx"]:
             col = f"{prefix}_close"
             if col in df.columns:
                 sector_ret = df[col].pct_change(5)
