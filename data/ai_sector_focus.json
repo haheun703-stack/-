@@ -4,88 +4,101 @@
     {
       "sector": "IT서비스",
       "entry_timing": "즉시진입",
-      "size_weight": 1.0,
+      "size_weight": 1.2,
       "thesis_alignment": "강한일치",
       "momentum_rank": 1,
       "momentum_score": 91.3,
       "rsi": 80.5,
       "smart_money": false,
       "relay_source": "반도체",
-      "reasoning": "반도체 릴레이 발화 시점 + 모멘텀 1위 + thesis 8/10 확신 + ADX 상승 추세로 즉시 진입 최적"
-    },
-    {
-      "sector": "에너지화학",
-      "entry_timing": "즉시진입",
-      "size_weight": 0.9,
-      "thesis_alignment": "강한일치",
-      "momentum_rank": 6,
-      "momentum_score": 69.7,
-      "rsi": 77.3,
-      "smart_money": true,
-      "relay_source": null,
-      "reasoning": "정유 thesis 7/10 확신 + 스마트머니 유입 + 유가 상승 모멘텀 + RSI 적정 수준으로 진입 양호"
+      "reasoning": "반도체 thesis(확신 9/10) + 릴레이 '매수준비' 신호 + 모멘텀 1위(91.3) + ADX 상승(44.4) + 기관 순매수(+32,154) 완벽 정렬. 반도체→IT 릴레이 승률 88.2%로 즉시 진입 타당."
     },
     {
       "sector": "건설",
-      "entry_timing": "눌림대기",
-      "size_weight": 0.7,
+      "entry_timing": "즉시진입",
+      "size_weight": 1.1,
       "thesis_alignment": "thesis없음",
       "momentum_rank": 2,
       "momentum_score": 89.7,
       "rsi": 81.3,
       "smart_money": true,
       "relay_source": null,
-      "reasoning": "모멘텀 2위 + 스마트머니 유입이나 RSI 81.3으로 단기 과열, 구조적 thesis 없어 눌림 후 진입"
+      "reasoning": "thesis 없으나 모멘텀 2위(89.7) + 스마트머니 유입 + ADX 최고(61.2) + 외인/기관 동반 매수. 구조적 근거는 약하나 기술적 강세 명확하여 단기 집중 가능."
     },
     {
-      "sector": "증권",
+      "sector": "에너지화학",
       "entry_timing": "즉시진입",
-      "size_weight": 0.8,
-      "thesis_alignment": "약한일치",
-      "momentum_rank": 3,
-      "momentum_score": 81.6,
-      "rsi": 70.3,
-      "smart_money": false,
+      "size_weight": 1.0,
+      "thesis_alignment": "강한일치",
+      "momentum_rank": 6,
+      "momentum_score": 69.7,
+      "rsi": 77.3,
+      "smart_money": true,
+      "reasoning": "정유 thesis(확신 7/10, 미-이란 충돌 유가 압력) + 모멘텀 6위(69.7) + 스마트머니 + ADX 상승. RSI 77.3으로 아직 과열 전, 즉시 진입 타당."
+    },
+    {
+      "sector": "방산",
+      "entry_timing": "관망",
+      "size_weight": 0.5,
+      "thesis_alignment": "불일치",
+      "momentum_rank": 13,
+      "momentum_score": 32.6,
+      "rsi": 62.6,
+      "smart_money": true,
       "relay_source": null,
-      "reasoning": "Theme BUY 신호 + 모멘텀 3위 + RSI 적정 + 릴레이 소스 역할 가능으로 진입 타당"
+      "reasoning": "thesis 강함(확신 8/10, K-방산 수출 2배) 그러나 모멘텀 13위(32.6) + ADX 약세(21.5). AI와 현실 괴리로 아직 초기 단계. 스마트머니는 있으나 관망 후 재진입."
+    },
+    {
+      "sector": "2차전지",
+      "entry_timing": "관망",
+      "size_weight": 0.3,
+      "thesis_alignment": "불일치",
+      "momentum_rank": 10,
+      "momentum_score": 57.1,
+      "rsi": 69.9,
+      "smart_money": true,
+      "relay_source": null,
+      "reasoning": "회피 섹터 지정 + 모멘텀 중위권(10위, 57.1). 스마트머니 유입은 있으나 thesis '회피'와 충돌. 과열 아니나 공격적 진입 부적절."
     }
   ],
   "screening_boost": [
     "IT서비스",
+    "건설",
     "에너지화학",
-    "증권",
-    "보험"
+    "정유"
   ],
   "screening_suppress": [
     "반도체",
+    "삼성그룹",
     "현대차그룹",
-    "2차전지",
-    "철강소재"
+    "증권",
+    "금융",
+    "2차전지"
   ],
   "sector_warnings": [
     {
       "sector": "반도체",
-      "warning": "RSI 80.5 + BB 109.0% 과열 + 외인 5일간 -58,370 대량 매도, 릴레이 소스로만 활용하고 신규 진입 자제",
+      "warning": "RSI 80.5 + BB 109.0% 심각한 과열. thesis 강하나 기술적 조정 임박. 릴레이 소스로만 활용, 직접 진입 억제.",
       "severity": "high"
     },
     {
       "sector": "현대차그룹",
-      "warning": "RSI 82.9 + BB 118.1% 극심한 과열, 단기 조정 임박 가능성",
+      "warning": "RSI 82.9 + BB 118.1% 극단적 과열. 모멘텀 7위이나 단기 급락 위험. 전량 회피.",
       "severity": "high"
     },
     {
-      "sector": "2차전지",
-      "warning": "Phase 1 회피 섹터이나 모멘텀 10위 + 스마트머니 유입 모순, BB 105.3% 과열로 진입 보류",
-      "severity": "medium"
-    },
-    {
-      "sector": "반도체→IT서비스",
-      "warning": "릴레이 발화 시점이나 반도체 과열 상태, IT서비스 즉시 진입하되 반도체 추가 매수 금지",
+      "sector": "증권",
+      "warning": "모멘텀 3위(81.6) + ADX 하락 전환. Theme BUY 지정되었으나 추세 약화 신호. 릴레이 소스로만 관찰.",
       "severity": "medium"
     },
     {
       "sector": "방산",
-      "warning": "Phase 1 관찰 섹터이나 모멘텀 13위 + ADX 21.5 약세, 구조적 촉매 없이 관망 유지",
+      "warning": "thesis 확신 8/10이나 모멘텀 13위 + ADX 21.5 약세. AI와 시장 괴리 심각. 재점화 전까지 대기.",
+      "severity": "medium"
+    },
+    {
+      "sector": "2차전지",
+      "warning": "회피 섹터이나 스마트머니 유입(+12,225). 구조적 회복 신호 vs 레짐 판단 충돌. 소량 관찰 포지션만 허용.",
       "severity": "low"
     }
   ]

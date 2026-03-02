@@ -1,51 +1,41 @@
 {
   "decision_date": "2026-03-02",
-  "regime": "공격",
+  "regime": "중립",
   "available_slots": 10,
   "current_holdings": 0,
   "cash_pct_before": 100.0,
-  "cash_pct_after": 30.0,
+  "cash_pct_after": 70.0,
   "buys": [
+    {
+      "ticker": "022100",
+      "name": "포스코DX",
+      "conviction": 8,
+      "size_pct": 15.0,
+      "strategy": "relay",
+      "thesis_alignment": "strong",
+      "entry_price": 39300,
+      "stop_loss_pct": -8.5,
+      "target_pct": 14.9,
+      "reasoning": "IT서비스 섹터 릴레이 수혜 + 엔터프라이즈 AI 확산. 이란 전쟁 직접 영향 제한적, ADX 25.1 건전한 추세"
+    },
     {
       "ticker": "032940",
       "name": "원익",
       "conviction": 8,
-      "size_pct": 20.0,
+      "size_pct": 15.0,
       "strategy": "relay",
       "thesis_alignment": "strong",
       "entry_price": 11870,
       "stop_loss_pct": -17.5,
       "target_pct": 30.7,
-      "reasoning": "반도체 장비주로 AI 수요 직접 수혜, 섹터 억제는 단기 조정 의미로 중장기 상승 여력 충분"
-    },
-    {
-      "ticker": "022100",
-      "name": "포스코DX",
-      "conviction": 8,
-      "size_pct": 20.0,
-      "strategy": "momentum",
-      "thesis_alignment": "strong",
-      "entry_price": 39300,
-      "stop_loss_pct": -8.5,
-      "target_pct": 14.9,
-      "reasoning": "IT서비스 섹터 부스트와 강한 일치, 엔터프라이즈 AI 확산 수혜 예상되며 ADX 25.1의 건전한 추세"
-    },
-    {
-      "ticker": "211050",
-      "name": "인카금융서비스",
-      "conviction": 7,
-      "size_pct": 15.0,
-      "strategy": "relay",
-      "thesis_alignment": "moderate",
-      "entry_price": 14050,
-      "stop_loss_pct": -12.1,
-      "target_pct": 21.1,
-      "reasoning": "증권 섹터 부스트 간접 수혜, conviction 낮아 축소 배분하되 섹터 분산 효과"
+      "reasoning": "반도체 장비주 AI 수요 직접 수혜. 이란 전쟁에도 반도체 구조적 수요 불변, 단기 조정 시 매수 기회"
     }
   ],
   "skipped": [],
   "portfolio_warnings": [
-    "현금 비중 30%로 공격 레짐 권고(15%)보다 높게 유지하여 추가 기회 대응력 확보"
+    "이란 전쟁 + 미장 선물 급락으로 레짐 공격→중립 하향. 현금 비중 35% 유지 권고",
+    "방산주(한화에어로스페이스 등) 시그널 발생 중이나 v3 Deep Analyst API 크레딧 소진으로 미분석",
+    "API 크레딧 충전 후 방산/정유 섹터 정밀 분석 필요"
   ],
-  "reasoning": "공격 레짐에서 높은 conviction 종목들을 풀사이즈(20%)로 배분하되, 반도체 섹터 단기 억제 신호를 감안하여 전체 투자비중을 70%로 제한. IT서비스와 금융으로 섹터 분산하며, 현금 30% 유지로 변동성 대응력과 추가 매수 여력 확보."
+  "reasoning": "이란 전쟁 + 미장 급락으로 중립 레짐 전환. 반도체/IT서비스 구조적 수요는 유효하나 리스크 관리 강화. 각 15%씩 총 30% 투입, 현금 70% 유지하여 추가 하락 시 방산/정유 추가 매수 여력 확보."
 }

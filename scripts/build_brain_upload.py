@@ -72,8 +72,9 @@ def build_news():
     raw = load("ai_brain_judgment.json")
     date_str = raw.get("date", "") if raw else ""
 
-    # 3/2 날짜가 아니면 이란 전쟁 반영 버전 직접 생성
-    if "2026-03-02" not in str(date_str):
+    # 이란 전쟁 반영 — 미장 선물 급락 실시간 데이터 강제 적용
+    # (ai_brain_judgment은 선물 급락 전 뉴스 기반이라 bullish → cautious 보정)
+    if True:  # 이란 전쟁 기간 동안 강제 적용
         return {
             "market_sentiment": "cautious",
             "key_themes": [
