@@ -99,8 +99,25 @@ class JarvisUploader:
             logger.warning(f"[JARVIS] 시장 데이터 업데이트 실패: {e}")
             return {"error": str(e)}
 
+    def update_holdings(self, data: dict) -> dict:
+        """대시보드 보유주식 업데이트."""
+        if not self.is_available:
+            return {"error": "API key not set"}
+
+        url = f"{self.base_url}/api/holdings"
+
+        try:
+            resp = requests.post(url, headers=self.headers, json=data, timeout=30)
+            resp.raise_for_status()
+            logger.info(f"[JARVIS] 보유주식 업데이트 완료 ({len(data.get('holdings', []))}종목)")
+            return resp.json()
+
+        except Exception as e:
+            logger.warning(f"[JARVIS] 보유주식 업데이트 실패: {e}")
+            return {"error": str(e)}
+
     def upload_daily_auto(self):
-        """BAT-D/BAT-A 자동 호출용 — HTML 보고서 + 메트릭스 + 시장 데이터 일괄 업로드."""
+        """BAT-D/BAT-A 자동 호출용 — HTML 보고서 + 메트릭스 + 시장 데이터 + 보유주식 일괄 업로드."""
         today = datetime.now().strftime("%Y-%m-%d")
         results = []
 
@@ -128,6 +145,12 @@ class JarvisUploader:
         if market:
             r = self.update_market_data(market)
             results.append(f"Market: {r.get('status', r.get('error', '?'))}")
+
+        # 4) 보유주식 업데이트 (KIS 잔고)
+        holdings = self._build_holdings()
+        if holdings:
+            r = self.update_holdings(holdings)
+            results.append(f"Holdings: {r.get('status', r.get('error', '?'))}")
 
         return results
 
@@ -249,6 +272,25 @@ class JarvisUploader:
                 logger.warning(f"[JARVIS] KOSPI 레짐 계산 실패: {e}")
 
         return market
+
+    def _build_holdings(self) -> dict:
+        """KIS 잔고에서 보유주식 데이터 빌드."""
+        balance_path = DATA_DIR / "kis_balance.json"
+        if not balance_path.exists():
+            return {}
+
+        try:
+            bal = json.loads(balance_path.read_text(encoding="utf-8"))
+            return {
+                "holdings": bal.get("holdings", []),
+                "total_eval": bal.get("total_eval", 0),
+                "total_pnl": bal.get("total_pnl", 0),
+                "available_cash": bal.get("available_cash", 0),
+                "fetched_at": bal.get("fetched_at", ""),
+            }
+        except Exception as e:
+            logger.warning(f"[JARVIS] 보유주식 로드 실패: {e}")
+            return {}
 
 
 def main():

@@ -30,6 +30,7 @@ WEEKLY_DIR = os.path.join(REPORTS_DIR, 'weekly')
 MONTHLY_DIR = os.path.join(REPORTS_DIR, 'monthly')
 METRICS_FILE = os.path.join(DATA_DIR, 'metrics.json')
 MARKET_FILE = os.path.join(DATA_DIR, 'market_data.json')
+HOLDINGS_FILE = os.path.join(DATA_DIR, 'holdings.json')
 
 # 디렉토리 자동 생성
 for d in [DATA_DIR, REPORTS_DIR, DAILY_DIR, WEEKLY_DIR, MONTHLY_DIR]:
@@ -127,6 +128,18 @@ def save_market_data(data):
     with open(MARKET_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+def get_holdings():
+    """보유주식 데이터 로드"""
+    if os.path.exists(HOLDINGS_FILE):
+        with open(HOLDINGS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {'holdings': [], 'total_eval': 0, 'total_pnl': 0, 'available_cash': 0, 'fetched_at': ''}
+
+def save_holdings(data):
+    """보유주식 데이터 저장"""
+    with open(HOLDINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
 def get_calendar_data(year, month):
     """달력 데이터 생성"""
     import calendar
@@ -211,6 +224,7 @@ def dashboard():
     calendar_data = get_calendar_data(year, month)
     metrics = get_metrics()
     market = get_market_data()
+    holdings = get_holdings()
     recent_dates = get_report_dates()[:7]
 
     # 이전/다음 달 계산
@@ -223,6 +237,7 @@ def dashboard():
         calendar=calendar_data,
         metrics=metrics,
         market=market,
+        holdings=holdings,
         recent_dates=recent_dates,
         year=year, month=month,
         prev_year=prev_year, prev_month=prev_month,
@@ -375,6 +390,24 @@ def api_update_market():
     market.update(request.json)
     save_market_data(market)
     return jsonify({'status': 'ok', 'updated_at': market['updated_at']})
+
+@app.route('/api/holdings', methods=['POST'])
+@api_key_required
+def api_update_holdings():
+    """봇에서 보유주식 데이터를 업데이트하는 API
+
+    수신 데이터:
+      - holdings: [{ticker, name, quantity, avg_price, current_price, eval_amount, pnl_amount, pnl_pct}]
+      - total_eval: 총 평가금액
+      - total_pnl: 총 손익
+      - available_cash: 예수금
+      - fetched_at: 조회 시각
+    """
+    if not request.is_json:
+        return jsonify({'error': 'JSON required'}), 400
+
+    save_holdings(request.json)
+    return jsonify({'status': 'ok', 'count': len(request.json.get('holdings', []))})
 
 @app.route('/api/status')
 @api_key_required
