@@ -267,21 +267,248 @@
 
 <!-- ── 3. ETF ── -->
 <div class="tab-panel" id="panel-etf">
-    <h3 class="sec-title" style="color:var(--accent-purple);"><i class="fas fa-chart-pie"></i> ETF 3축 로테이션</h3>
-    {% set sa = metrics.strategy_a|default({}) %}
-    {% set sb = metrics.strategy_b|default({}) %}
-    <div class="strategy-grid" style="grid-template-columns:1fr;max-width:600px;">
-        <div class="strategy-card">
-            <div class="strategy-name"><span class="badge badge-blue">{{ sa.alloc|default(60) }}%</span> {{ sa.name|default('Quantum v10.3 + v3 Brain') }}</div>
-            <div class="alloc-bar"><div class="fill" style="width:{{ sa.alloc|default(60) }}%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan));"></div></div>
-        </div>
-        <div class="strategy-card">
-            <div class="strategy-name"><span class="badge badge-purple">{{ sb.alloc|default(40) }}%</span> {{ sb.name|default('ETF 3축 로테이션') }}</div>
-            <div class="alloc-bar"><div class="fill" style="width:{{ sb.alloc|default(40) }}%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-pink));"></div></div>
+    {% set etf = market.etf|default({}) %}
+    {% set alloc = etf.allocation|default({}) %}
+    {% set regime = etf.regime|default('UNKNOWN') %}
+    {% set regime_cls = 'bull' if regime == 'BULL' else ('neutral' if regime == 'CAUTION' else 'bear') %}
+
+    {# ── ETF 추천종목 (제일 위) ── #}
+    {% if etf.master and etf.master.etfs %}
+    {% set etfs = etf.master.etfs %}
+    {% set hot_list = etfs|selectattr('grade','equalto','HOT매수')|list %}
+    {% set buy_list = etfs|selectattr('grade','equalto','매수')|list %}
+    {% set wait_list = etfs|selectattr('grade','equalto','진입대기')|list %}
+    {% set watch_list = etfs|selectattr('grade','equalto','관찰')|list %}
+
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <span style="color:#6366F1;font-weight:700;font-size:15px;">🎯 ETF 추천 {{ etfs|length }}개</span>
+        <span style="font-size:14px;color:#EF4444;font-weight:600;">HOT{{ hot_list|length }}</span>
+        <span style="font-size:14px;color:#10B981;font-weight:600;">매수{{ buy_list|length }}</span>
+        <span style="font-size:14px;color:#F59E0B;font-weight:600;">대기{{ wait_list|length }}</span>
+        <span style="font-size:14px;color:#6B7280;">관찰{{ watch_list|length }}</span>
+        <span style="font-size:12px;color:#4B5563;margin-left:auto;">{{ etf.master.updated_at }}</span>
+    </div>
+
+    {# HOT매수 카드 #}
+    {% if hot_list %}
+    <h3 style="color:#EF4444;font-size:18px;font-weight:700;margin-bottom:12px;">🔴 HOT매수 (≥70점)</h3>
+    {% for e in hot_list %}
+    <div style="padding:16px 18px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:10px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="color:#E5E7EB;font-weight:700;font-size:16px;">{{ e.name }}</span>
+                    <span style="font-size:12px;color:#6B7280;font-family:monospace;">{{ e.code }}</span>
+                    <span style="font-size:12px;padding:3px 10px;border-radius:6px;background:rgba(239,68,68,0.2);color:#FCA5A5;font-weight:600;">HOT매수</span>
+                </div>
+                <div style="font-size:14px;color:#9CA3AF;margin-top:6px;">{{ e.sector }} · {{ "{:,}".format(e.close) }}원</div>
+                <div style="display:flex;gap:14px;margin-top:8px;font-size:13px;font-family:monospace;">
+                    <span style="color:{{ '#EF4444' if e.rsi > 70 else '#3B82F6' if e.rsi < 40 else '#9CA3AF' }};">RSI {{ "%.1f"|format(e.rsi) }}</span>
+                    <span style="color:#9CA3AF;">BB {{ "%.1f"|format(e.bb_pct) }}%</span>
+                    <span style="color:{{ '#10B981' if e.foreign_5d >= 0 else '#EF4444' }};">외인 {{ "%.1f"|format(e.foreign_5d) }}억</span>
+                    <span style="color:{{ '#10B981' if e.inst_5d >= 0 else '#EF4444' }};">기관 {{ "%.1f"|format(e.inst_5d) }}억</span>
+                </div>
+                {% if e.reasons %}<div style="font-size:12px;color:#6B7280;margin-top:6px;">{{ e.reasons|join(' · ') }}</div>{% endif %}
+            </div>
+            <div style="text-align:right;min-width:90px;">
+                <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;">
+                    <div style="width:60px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="width:{{ [e.score,100]|min }}%;height:100%;background:{{ '#EF4444' if e.score >= 70 else '#10B981' }};border-radius:3px;"></div></div>
+                    <span style="font-family:monospace;font-size:15px;font-weight:700;color:#EF4444;">{{ "%.1f"|format(e.score) }}</span>
+                </div>
+                <div style="font-family:monospace;color:{{ '#10B981' if e.ret_5 >= 0 else '#EF4444' }};font-weight:700;font-size:16px;margin-top:6px;">{{ '+' if e.ret_5 > 0 else '' }}{{ "%.1f"|format(e.ret_5) }}%</div>
+                <div style="font-size:11px;color:#6B7280;">5일</div>
+            </div>
         </div>
     </div>
+    {% endfor %}
+    {% endif %}
+
+    {# 매수 카드 #}
+    {% if buy_list %}
+    <h3 style="color:#10B981;font-size:18px;font-weight:700;margin:16px 0 12px;">🟢 매수 (≥55점)</h3>
+    {% for e in buy_list %}
+    <div style="padding:16px 18px;background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.12);border-radius:10px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="color:#E5E7EB;font-weight:700;font-size:16px;">{{ e.name }}</span>
+                    <span style="font-size:12px;color:#6B7280;font-family:monospace;">{{ e.code }}</span>
+                    <span style="font-size:12px;padding:3px 10px;border-radius:6px;background:rgba(16,185,129,0.2);color:#6EE7B7;font-weight:600;">매수</span>
+                </div>
+                <div style="font-size:14px;color:#9CA3AF;margin-top:6px;">{{ e.sector }} · {{ "{:,}".format(e.close) }}원</div>
+                <div style="display:flex;gap:14px;margin-top:8px;font-size:13px;font-family:monospace;">
+                    <span style="color:{{ '#EF4444' if e.rsi > 70 else '#3B82F6' if e.rsi < 40 else '#9CA3AF' }};">RSI {{ "%.1f"|format(e.rsi) }}</span>
+                    <span style="color:#9CA3AF;">BB {{ "%.1f"|format(e.bb_pct) }}%</span>
+                    <span style="color:{{ '#10B981' if e.foreign_5d >= 0 else '#EF4444' }};">외인 {{ "%.1f"|format(e.foreign_5d) }}억</span>
+                    <span style="color:{{ '#10B981' if e.inst_5d >= 0 else '#EF4444' }};">기관 {{ "%.1f"|format(e.inst_5d) }}억</span>
+                </div>
+                {% if e.reasons %}<div style="font-size:12px;color:#6B7280;margin-top:6px;">{{ e.reasons|join(' · ') }}</div>{% endif %}
+            </div>
+            <div style="text-align:right;min-width:90px;">
+                <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;">
+                    <div style="width:60px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="width:{{ [e.score,100]|min }}%;height:100%;background:#10B981;border-radius:3px;"></div></div>
+                    <span style="font-family:monospace;font-size:15px;font-weight:700;color:#10B981;">{{ "%.1f"|format(e.score) }}</span>
+                </div>
+                <div style="font-family:monospace;color:{{ '#10B981' if e.ret_5 >= 0 else '#EF4444' }};font-weight:700;font-size:16px;margin-top:6px;">{{ '+' if e.ret_5 > 0 else '' }}{{ "%.1f"|format(e.ret_5) }}%</div>
+                <div style="font-size:11px;color:#6B7280;">5일</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {# 진입대기 간략 리스트 #}
+    {% if wait_list %}
+    <h3 style="color:#F59E0B;font-size:18px;font-weight:700;margin:16px 0 12px;">🟡 진입대기 (≥40점)</h3>
+    {% for e in wait_list %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.1);border-radius:8px;margin-bottom:6px;">
+        <div>
+            <span style="color:#E5E7EB;font-weight:600;font-size:14px;">{{ e.name }}</span>
+            <span style="font-size:12px;color:#6B7280;margin-left:6px;">RSI {{ "%.0f"|format(e.rsi) }} · {{ "{:,}".format(e.close) }}원</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:4px;">
+                <div style="width:50px;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="width:{{ [e.score,100]|min }}%;height:100%;background:#F59E0B;border-radius:3px;"></div></div>
+                <span style="font-family:monospace;font-size:13px;font-weight:700;color:#F59E0B;">{{ "%.0f"|format(e.score) }}</span>
+            </div>
+            <span style="font-family:monospace;color:{{ '#10B981' if e.ret_5 >= 0 else '#EF4444' }};font-weight:600;font-size:13px;">{{ '+' if e.ret_5 > 0 else '' }}{{ "%.1f"|format(e.ret_5) }}%</span>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {# 구분선 #}
+    <div style="border-top:1px solid rgba(99,102,241,0.15);margin:24px 0;"></div>
+    {% endif %}
+
+    {# ── ETF 3축 로테이션 배분 ── #}
+    <h3 class="sec-title" style="color:var(--accent-purple);"><i class="fas fa-bolt"></i> ETF 3축 로테이션
+        {% if etf.timestamp %}<span style="font-size:12px;color:#6B7280;font-weight:400;margin-left:8px;">{{ etf.timestamp }}</span>{% endif %}
+    </h3>
+
+    {# 레짐 + 리스크 #}
+    {% if etf.regime %}
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span class="signal-badge {{ 'bull-badge' if regime == 'BULL' else ('bear-badge' if regime in ['BEAR','CRISIS'] else 'neutral-badge') }}" style="font-size:18px;font-weight:700;">{{ regime }}</span>
+        {% if etf.ai_filter %}<span style="font-size:14px;color:#10B981;">✅ OK</span>{% endif %}
+    </div>
+    {% endif %}
+
+    {# 배분 그리드: 섹터 / 레버리지 / 지수 / 현금 #}
+    {% if alloc %}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+        {% set alloc_items = [('섹터', alloc.sector|default(0), '#10B981'), ('레버리지', alloc.leverage|default(0), '#A78BFA'), ('지수', alloc.index|default(0), '#3B82F6'), ('현금', alloc.cash|default(0), '#6B7280')] %}
+        {% for label, pct, color in alloc_items %}
+        <div style="border:1px solid {{ color }}33;border-radius:10px;padding:14px;text-align:center;">
+            <div style="font-size:13px;color:#9CA3AF;margin-bottom:6px;">{{ label }}</div>
+            <div style="font-size:24px;font-weight:700;color:{{ color }};">{{ pct }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# 주문 큐 #}
+    {% if etf.order_queue %}
+    <div style="margin-bottom:20px;">
+        <div style="font-size:16px;font-weight:700;color:#E5E7EB;margin-bottom:12px;">📋 주문 큐 ({{ etf.order_queue|length }}건)</div>
+        {% for o in etf.order_queue %}
+        {% set axis_colors = {'sector':'#10B981','leverage':'#A78BFA','index':'#3B82F6'} %}
+        {% set axis_labels = {'sector':'섹터','leverage':'레버','index':'지수'} %}
+        {% set ac = axis_colors.get(o.axis, '#6B7280') %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:15px;font-weight:700;color:#E5E7EB;">{{ loop.index }}</span>
+                <span style="font-size:12px;padding:3px 10px;border-radius:6px;background:{{ ac }}22;color:{{ ac }};font-weight:600;">{{ axis_labels.get(o.axis, o.axis) }}</span>
+                <div>
+                    <div style="font-weight:700;font-size:16px;color:#E5E7EB;">{{ o.name }}</div>
+                    <div style="font-size:12px;color:#6B7280;margin-top:2px;">{{ o.reason }}</div>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:14px;padding:4px 12px;border-radius:6px;background:rgba(16,185,129,0.15);color:#6EE7B7;font-weight:700;">{{ o.action }}</span>
+                <div style="font-size:16px;font-weight:700;color:#10B981;margin-top:4px;">{{ "%.0f"|format(o.target_weight_pct) }}%</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# AI 필터 #}
+    {% if etf.ai_filter %}
+    {% set af = etf.ai_filter %}
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:16px;font-weight:700;color:#F472B6;">🔮 AI 필터</span>
+            <span style="font-size:13px;color:#9CA3AF;">통과 {{ af.stats.pass }} · 보류 {{ af.stats.hold }} · 차단 {{ af.stats.kill }}</span>
+        </div>
+        {% for h in af.held|default([]) %}
+        <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:12px 16px;margin-bottom:8px;">
+            <div style="font-weight:700;font-size:14px;color:#FBBF24;">HOLD {{ h.name }}</div>
+            <div style="font-size:13px;color:#9CA3AF;margin-top:4px;">{{ h.ai_reason }}</div>
+        </div>
+        {% endfor %}
+        {% for k in af.killed|default([]) %}
+        <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:12px 16px;margin-bottom:8px;">
+            <div style="font-weight:700;font-size:14px;color:#F87171;">KILL {{ k.name }}</div>
+            <div style="font-size:13px;color:#9CA3AF;margin-top:4px;">{{ k.ai_reason }}</div>
+        </div>
+        {% endfor %}
+        {% for w in af.warnings|default([]) %}
+        <div style="font-size:13px;color:#FBBF24;margin-bottom:4px;">⚠ {{ w }}</div>
+        {% endfor %}
+        {% if af.market_assessment %}
+        <div style="font-size:13px;color:#9CA3AF;margin-top:8px;font-style:italic;">{{ af.market_assessment }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# 프레데터 — 섹터 가속도 #}
+    {% if etf.predator and etf.predator.convictions %}
+    <div style="margin-bottom:20px;">
+        <div style="font-size:16px;font-weight:700;color:#F472B6;margin-bottom:12px;">🚀 프레데터 — 섹터 가속도</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:12px;">
+            {% for c in etf.predator.convictions %}
+            {% set cv_color = '#10B981' if c.level == 'HIGH' else '#F59E0B' if c.level == 'MID' else '#6B7280' %}
+            <div style="border:1px solid {{ cv_color }}33;border-radius:10px;padding:14px 16px;">
+                <div style="font-weight:700;font-size:16px;color:#E5E7EB;">{{ c.sector }}</div>
+                <div style="color:{{ cv_color }};font-weight:600;font-size:13px;margin-top:4px;">{{ c.level }} {{ "%.0f"|format(c.weight_pct) }}%</div>
+                <div style="font-family:monospace;font-size:20px;font-weight:700;color:{{ cv_color }};text-align:right;margin-top:4px;">{{ "%.1f"|format(c.score) }}</div>
+                <div style="font-size:12px;color:#6B7280;margin-top:4px;">{{ c.reasons|join(', ') }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# 가속도 테이블 TOP5 #}
+        {% if etf.predator.accelerations %}
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                <th style="text-align:left;padding:8px 12px;color:#9CA3AF;font-weight:600;">섹터</th>
+                <th style="text-align:right;padding:8px;color:#9CA3AF;">순위</th>
+                <th style="text-align:right;padding:8px;color:#9CA3AF;">변동</th>
+                <th style="text-align:right;padding:8px 12px;color:#9CA3AF;">가속도</th>
+            </tr></thead>
+            <tbody>
+            {% for a in etf.predator.accelerations %}
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                <td style="padding:8px 12px;font-weight:600;color:#E5E7EB;">{{ a.sector }}</td>
+                <td style="text-align:right;padding:8px;color:#9CA3AF;">{{ a.current_rank }}</td>
+                <td style="text-align:right;padding:8px;color:{{ '#10B981' if a.rank_change > 0 else '#EF4444' if a.rank_change < 0 else '#6B7280' }};font-weight:600;">{{ '+' if a.rank_change > 0 else '' }}{{ a.rank_change }}</td>
+                <td style="text-align:right;padding:8px 12px;font-family:monospace;font-weight:700;color:{{ '#FBBF24' if a.acceleration_score >= 50 else '#9CA3AF' }};">{{ "%.1f"|format(a.acceleration_score) }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if etf.predator.smart_money_sectors %}
+        <div style="font-size:13px;color:#A78BFA;margin-top:10px;">⚡ 스마트머니 트리거 {{ etf.predator.event_triggers_count }}건: {{ etf.predator.smart_money_sectors|join(', ') }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# AI 섹터 우선순위 #}
     {% if brain and brain.strategic and brain.strategic.sector_priority %}
-    <div class="brain-section-title" style="margin-top:20px;"><i class="fas fa-bullseye"></i> AI 섹터 우선순위 (ETF 참조)</div>
+    <div class="brain-section-title" style="margin-top:20px;"><i class="fas fa-bullseye"></i> AI 섹터 우선순위</div>
     <div class="brain-tags-row"><span class="brain-tag-label">공격</span>{% for s in brain.strategic.sector_priority.get('attack', []) %}<span class="brain-tag attack">{{ s }}</span>{% endfor %}</div>
     <div class="brain-tags-row"><span class="brain-tag-label">관망</span>{% for s in brain.strategic.sector_priority.get('watch', []) %}<span class="brain-tag watch">{{ s }}</span>{% endfor %}</div>
     {% endif %}

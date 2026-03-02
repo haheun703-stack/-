@@ -1239,5 +1239,703 @@
   },
   "regime": "CAUTION",
   "regime_slots": 3,
-  "updated_at": "2026-03-02 17:17"
+  "updated_at": "2026-03-02 17:17",
+  "etf": {
+    "regime": "CAUTION",
+    "allocation": {
+      "sector": 30,
+      "leverage": 0,
+      "index": 30,
+      "cash": 40
+    },
+    "timestamp": "2026-02-28T23:38:06.483189",
+    "order_queue": [
+      {
+        "axis": "sector",
+        "code": "157500",
+        "name": "TIGER 증권",
+        "action": "BUY",
+        "target_weight_pct": 15.0,
+        "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점",
+        "priority": 2
+      },
+      {
+        "axis": "index",
+        "code": "069500",
+        "name": "KODEX 200",
+        "action": "BUY",
+        "target_weight_pct": 21.0,
+        "reason": "신규 진입: 목표 21.0%",
+        "priority": 3
+      },
+      {
+        "axis": "index",
+        "code": "278530",
+        "name": "KODEX MSCI Korea TR",
+        "action": "BUY",
+        "target_weight_pct": 9.0,
+        "reason": "신규 진입: 목표 9.0%",
+        "priority": 3
+      }
+    ],
+    "sector_result": {
+      "buy_candidates": [
+        {
+          "code": "139220",
+          "name": "TIGER 200 건설",
+          "sector": "건설",
+          "signal": "BUY",
+          "composite_score": 92.3,
+          "momentum_rank": 2,
+          "momentum_score": 42.722,
+          "smart_money_type": "smart_money",
+          "supply_score": 81,
+          "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수"
+        },
+        {
+          "code": "157500",
+          "name": "TIGER 증권",
+          "sector": "증권",
+          "signal": "BUY",
+          "composite_score": 80.1,
+          "momentum_rank": 3,
+          "momentum_score": 62.349999999999994,
+          "smart_money_type": "theme_money",
+          "supply_score": 67,
+          "reason": "모멘텀 3위 | Theme Money 감지 | 수급 67점"
+        }
+      ],
+      "summary": "[섹터 ETF] 매수후보 2종: TIGER 200 건설(92점), TIGER 증권(80점) | 매도시그널: 없음"
+    },
+    "leverage_result": {
+      "decision": {
+        "signal": "NO_ENTRY",
+        "etf_code": "",
+        "etf_name": "",
+        "multiplier": 0,
+        "confidence": 0,
+        "reason": "CAUTION 레짐 - 레버리지 진입 금지",
+        "risk_note": ""
+      },
+      "summary": "[레버리지] 진입대기 (CAUTION) | CAUTION 레짐 - 레버리지 진입 금지"
+    },
+    "index_result": {
+      "targets": [
+        {
+          "code": "069500",
+          "name": "KODEX 200",
+          "target_weight_pct": 21.0,
+          "current_weight_pct": 0,
+          "action": "BUY",
+          "amount_delta_pct": 21.0,
+          "reason": "신규 진입: 목표 21.0%"
+        },
+        {
+          "code": "278530",
+          "name": "KODEX MSCI Korea TR",
+          "target_weight_pct": 9.0,
+          "current_weight_pct": 0,
+          "action": "BUY",
+          "amount_delta_pct": 9.0,
+          "reason": "신규 진입: 목표 9.0%"
+        }
+      ],
+      "summary": "[지수 ETF] CAUTION / 목표 30.0% | KODEX 200: BUY | KODEX MSCI Korea TR: BUY"
+    },
+    "predator": {
+      "accelerations": [
+        {
+          "sector": "IT",
+          "code": "",
+          "current_rank": 1,
+          "prev_rank": 7,
+          "rank_change": 6,
+          "acceleration_score": 63.83,
+          "ret_5d": 0,
+          "ret_20d": 0,
+          "ret_60d": 0
+        },
+        {
+          "sector": "건설",
+          "code": "",
+          "current_rank": 2,
+          "prev_rank": 4,
+          "rank_change": 2,
+          "acceleration_score": 55.76,
+          "ret_5d": 0,
+          "ret_20d": 0,
+          "ret_60d": 0
+        },
+        {
+          "sector": "에너지화학",
+          "code": "",
+          "current_rank": 6,
+          "prev_rank": 10,
+          "rank_change": 4,
+          "acceleration_score": 54.98,
+          "ret_5d": 0,
+          "ret_20d": 0,
+          "ret_60d": 0
+        },
+        {
+          "sector": "현대차그룹",
+          "code": "",
+          "current_rank": 7,
+          "prev_rank": 11,
+          "rank_change": 4,
+          "acceleration_score": 53.9,
+          "ret_5d": 0,
+          "ret_20d": 0,
+          "ret_60d": 0
+        },
+        {
+          "sector": "반도체",
+          "code": "",
+          "current_rank": 4,
+          "prev_rank": 6,
+          "rank_change": 2,
+          "acceleration_score": 53.62,
+          "ret_5d": 0,
+          "ret_20d": 0,
+          "ret_60d": 0
+        }
+      ],
+      "convictions": [
+        {
+          "sector": "IT",
+          "code": "",
+          "level": "HIGH",
+          "score": 78.83,
+          "weight_pct": 10.0,
+          "reasons": [
+            "확신 HIGH",
+            "가속도 64점",
+            "기관 순매수",
+            "순위 6단계 급상승"
+          ]
+        },
+        {
+          "sector": "건설",
+          "code": "",
+          "level": "HIGH",
+          "score": 80.75999999999999,
+          "weight_pct": 10.0,
+          "reasons": [
+            "확신 HIGH",
+            "가속도 56점",
+            "외인+기관 동시매수",
+            "스텔스 매집"
+          ]
+        },
+        {
+          "sector": "에너지화학",
+          "code": "",
+          "level": "HIGH",
+          "score": 84.97999999999999,
+          "weight_pct": 10.0,
+          "reasons": [
+            "확신 HIGH",
+            "가속도 55점",
+            "외인+기관 동시매수",
+            "스텔스 매집",
+            "순위 4단계 상승"
+          ]
+        }
+      ],
+      "event_triggers_count": 10,
+      "smart_money_sectors": [
+        "2차전지",
+        "현대차그룹",
+        "조선",
+        "에너지화학",
+        "바이오",
+        "철강소재",
+        "헬스케어",
+        "방산",
+        "미디어",
+        "건설"
+      ],
+      "summary": "[프레데터] 가속도 TOP3: IT(64) > 건설(56) > 에너지화학(55) | 배분: IT HIGH(10.0%) | 건설 HIGH(10.0%) | 에너지화학 HIGH(10.0%) | 트리거: 10건 발동"
+    },
+    "ai_filter": {
+      "stats": {
+        "total": 4,
+        "pass": 3,
+        "kill": 0,
+        "hold": 1
+      },
+      "killed": [],
+      "held": [
+        {
+          "axis": "sector",
+          "code": "139220",
+          "name": "TIGER 200 건설",
+          "action": "BUY",
+          "target_weight_pct": 15.0,
+          "reason": "모멘텀 2위 | Smart Money 유입 | 수급 81점 | 외인+기관 동시매수",
+          "priority": 2,
+          "ai_verdict": "HOLD",
+          "ai_reason": "모멘텀 2위이나 뉴스에서 건설 관련 호재 없고, 금리 동결 전망으로 부동산/건설 섹터에 즉각적 촉매 부재. Smart Money 유입은 긍정적이나 CAUTION 레짐에서 교체 연기 권고.",
+          "ai_confidence": 0.7
+        }
+      ],
+      "warnings": [
+        "미국 10년물 금리 4.06% 상승세로 성장주/기술주 밸류에이션 압박 가능성 주의",
+        "Nvidia 실적 발표(2/26 장 마감 후) 결과에 따라 국내 반도체/IT 섹터 변동성 확대 가능",
+        "CAUTION 레짐에서 레버리지 0% 유지는 적절하나, 건설 섹터는 추가 모니터링 필요"
+      ],
+      "market_assessment": "미국 기술주 강세와 국내 AI/방산 테마 부각되나 금리 상승 압력과 CAUTION 레짐으로 신중한 진입 필요",
+      "risk_level": "medium"
+    },
+    "master": {
+      "updated_at": "2026-02-25 22:19",
+      "etf_count": 22,
+      "etfs": [
+        {
+          "sector": "헬스케어",
+          "code": "143860",
+          "name": "TIGER 헬스케어",
+          "close": 54410,
+          "ret_5": 4.5,
+          "rsi": 59.1,
+          "bb_pct": 76.2,
+          "foreign_5d": -6.5,
+          "inst_5d": 17.5,
+          "score": 73.2,
+          "grade": "HOT매수",
+          "reasons": [
+            "5일 +4.5% 강세",
+            "20일 +9.1% 상승추세",
+            "RSI 적정",
+            "TRIX 상승전환",
+            "기관 순매수 18억"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "바이오",
+          "code": "364970",
+          "name": "TIGER 바이오TOP10",
+          "close": 9440,
+          "ret_5": 4.5,
+          "rsi": 57.0,
+          "bb_pct": 78.9,
+          "foreign_5d": -14.0,
+          "inst_5d": 80.1,
+          "score": 70.8,
+          "grade": "HOT매수",
+          "reasons": [
+            "5일 +4.5% 강세",
+            "RSI 적정",
+            "TRIX 상승전환",
+            "기관 순매수 80억"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "인터넷",
+          "code": "365000",
+          "name": "TIGER 인터넷TOP10",
+          "close": 5230,
+          "ret_5": 8.4,
+          "rsi": 64.3,
+          "bb_pct": 85.6,
+          "foreign_5d": -5.1,
+          "inst_5d": 50.8,
+          "score": 67.2,
+          "grade": "매수",
+          "reasons": [
+            "5일 +8.4% 강세",
+            "RSI 적정",
+            "TRIX 상승전환",
+            "기관 순매수 51억"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "2차전지",
+          "code": "305540",
+          "name": "TIGER 2차전지테마",
+          "close": 23230,
+          "ret_5": 12.1,
+          "rsi": 66.8,
+          "bb_pct": 110.5,
+          "foreign_5d": -95.1,
+          "inst_5d": 238.0,
+          "score": 67.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +12.1% 강세",
+            "20일 +15.5% 상승추세",
+            "기관 순매수 238억",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "방산",
+          "code": "463250",
+          "name": "TIGER K방산&우주",
+          "close": 42800,
+          "ret_5": 6.5,
+          "rsi": 60.9,
+          "bb_pct": 78.9,
+          "foreign_5d": -9.8,
+          "inst_5d": -32.9,
+          "score": 63.2,
+          "grade": "매수",
+          "reasons": [
+            "5일 +6.5% 강세",
+            "20일 +7.5% 상승추세",
+            "RSI 적정"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "157490",
+          "name": "TIGER 소프트웨어",
+          "close": 10150,
+          "ret_5": 3.6,
+          "rsi": 56.6,
+          "bb_pct": 57.7,
+          "foreign_5d": 2.6,
+          "inst_5d": 2.8,
+          "score": 63.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +3.6% 강세",
+            "RSI 적정",
+            "외인+기관 동시매수"
+          ],
+          "is_smart": true
+        },
+        {
+          "sector": "현대차그룹",
+          "code": "138540",
+          "name": "TIGER 현대차그룹플러스",
+          "close": 66810,
+          "ret_5": 14.8,
+          "rsi": 76.2,
+          "bb_pct": 123.5,
+          "foreign_5d": 5.4,
+          "inst_5d": -49.6,
+          "score": 63.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +14.8% 강세",
+            "20일 +14.1% 상승추세",
+            "RSI 76 과열",
+            "TRIX 상승전환",
+            "외인 순매수 5억",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "코리아TOP10",
+          "code": "292150",
+          "name": "TIGER 코리아TOP10",
+          "close": 32870,
+          "ret_5": 11.6,
+          "rsi": 81.0,
+          "bb_pct": 103.8,
+          "foreign_5d": 28.5,
+          "inst_5d": -693.3,
+          "score": 63.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +11.6% 강세",
+            "20일 +25.9% 상승추세",
+            "RSI 81 과열",
+            "TRIX 상승전환",
+            "외인 순매수 28억",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "조선",
+          "code": "494670",
+          "name": "TIGER 조선TOP10",
+          "close": 30950,
+          "ret_5": 9.9,
+          "rsi": 58.8,
+          "bb_pct": 78.7,
+          "foreign_5d": 4.9,
+          "inst_5d": -34.4,
+          "score": 61.7,
+          "grade": "매수",
+          "reasons": [
+            "5일 +9.9% 강세",
+            "RSI 적정",
+            "TRIX 상승전환",
+            "외인 순매수 5억"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "반도체",
+          "code": "091230",
+          "name": "TIGER 반도체",
+          "close": 101100,
+          "ret_5": 8.8,
+          "rsi": 73.8,
+          "bb_pct": 90.9,
+          "foreign_5d": -23.5,
+          "inst_5d": 19.0,
+          "score": 58.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +8.8% 강세",
+            "20일 +33.3% 상승추세",
+            "RSI 74 과열",
+            "기관 순매수 19억"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "철강소재",
+          "code": "139240",
+          "name": "TIGER 200 철강소재",
+          "close": 16150,
+          "ret_5": 11.4,
+          "rsi": 68.4,
+          "bb_pct": 118.0,
+          "foreign_5d": -0.0,
+          "inst_5d": -6.1,
+          "score": 57.0,
+          "grade": "매수",
+          "reasons": [
+            "5일 +11.4% 강세",
+            "20일 +11.5% 상승추세",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "보험",
+          "code": "140710",
+          "name": "TIGER 보험",
+          "close": 7700,
+          "ret_5": 6.9,
+          "rsi": 81.9,
+          "bb_pct": 97.7,
+          "foreign_5d": 0.1,
+          "inst_5d": -0.9,
+          "score": 53.2,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +6.9% 강세",
+            "20일 +15.6% 상승추세",
+            "RSI 82 과열",
+            "TRIX 상승전환",
+            "외인 순매수 0억",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "IT",
+          "code": "139260",
+          "name": "TIGER 200 IT",
+          "close": 89500,
+          "ret_5": 16.4,
+          "rsi": 79.1,
+          "bb_pct": 109.5,
+          "foreign_5d": -2.8,
+          "inst_5d": -159.3,
+          "score": 53.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +16.4% 강세",
+            "20일 +32.0% 상승추세",
+            "RSI 79 과열",
+            "TRIX 상승전환",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "에너지화학",
+          "code": "139250",
+          "name": "TIGER 200 에너지화학",
+          "close": 19040,
+          "ret_5": 13.1,
+          "rsi": 76.6,
+          "bb_pct": 104.1,
+          "foreign_5d": -2.2,
+          "inst_5d": -8.6,
+          "score": 53.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +13.1% 강세",
+            "20일 +19.8% 상승추세",
+            "RSI 77 과열",
+            "TRIX 상승전환",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "삼성그룹",
+          "code": "138520",
+          "name": "TIGER 삼성그룹",
+          "close": 27785,
+          "ret_5": 11.9,
+          "rsi": 82.3,
+          "bb_pct": 103.5,
+          "foreign_5d": -6.8,
+          "inst_5d": -25.2,
+          "score": 53.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +11.9% 강세",
+            "20일 +23.8% 상승추세",
+            "RSI 82 과열",
+            "TRIX 상승전환",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "KRX300",
+          "code": "292160",
+          "name": "TIGER KRX300",
+          "close": 41500,
+          "ret_5": 11.0,
+          "rsi": 81.5,
+          "bb_pct": 102.8,
+          "foreign_5d": -0.0,
+          "inst_5d": -4.2,
+          "score": 53.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +11.0% 강세",
+            "20일 +24.4% 상승추세",
+            "RSI 82 과열",
+            "TRIX 상승전환",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "건설",
+          "code": "139220",
+          "name": "TIGER 200 건설",
+          "close": 7800,
+          "ret_5": 17.5,
+          "rsi": 83.2,
+          "bb_pct": 109.6,
+          "foreign_5d": -1.4,
+          "inst_5d": -42.8,
+          "score": 52.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +17.5% 강세",
+            "20일 +30.9% 상승추세",
+            "RSI 83 과열",
+            "TRIX 상승전환",
+            "BB% 과열 주의"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "게임",
+          "code": "300610",
+          "name": "TIGER K게임",
+          "close": 7055,
+          "ret_5": 2.3,
+          "rsi": 55.2,
+          "bb_pct": 46.7,
+          "foreign_5d": 0.0,
+          "inst_5d": -0.4,
+          "score": 51.5,
+          "grade": "진입대기",
+          "reasons": [
+            "20일 +6.3% 상승추세",
+            "RSI 적정"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "금융",
+          "code": "139270",
+          "name": "TIGER 200 금융",
+          "close": 17970,
+          "ret_5": 2.4,
+          "rsi": 77.0,
+          "bb_pct": 79.9,
+          "foreign_5d": -0.3,
+          "inst_5d": -26.6,
+          "score": 50.1,
+          "grade": "진입대기",
+          "reasons": [
+            "20일 +29.0% 상승추세",
+            "RSI 77 과열",
+            "TRIX 상승전환"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "증권",
+          "code": "157500",
+          "name": "TIGER 증권",
+          "close": 20310,
+          "ret_5": 10.4,
+          "rsi": 74.2,
+          "bb_pct": 86.3,
+          "foreign_5d": -11.5,
+          "inst_5d": -525.9,
+          "score": 48.0,
+          "grade": "진입대기",
+          "reasons": [
+            "5일 +10.4% 강세",
+            "20일 +57.0% 상승추세",
+            "RSI 74 과열",
+            "TRIX 상승전환"
+          ],
+          "is_smart": false
+        },
+        {
+          "sector": "은행",
+          "code": "091220",
+          "name": "TIGER 은행",
+          "close": 17565,
+          "ret_5": -0.7,
+          "rsi": 71.8,
+          "bb_pct": 74.3,
+          "foreign_5d": 1.4,
+          "inst_5d": 0.3,
+          "score": 46.4,
+          "grade": "진입대기",
+          "reasons": [
+            "20일 +25.3% 상승추세",
+            "RSI 72 과열",
+            "TRIX 상승전환",
+            "외인+기관 동시매수"
+          ],
+          "is_smart": true
+        },
+        {
+          "sector": "미디어",
+          "code": "228810",
+          "name": "TIGER 미디어컨텐츠",
+          "close": 5870,
+          "ret_5": -3.4,
+          "rsi": 46.7,
+          "bb_pct": 25.8,
+          "foreign_5d": -6.2,
+          "inst_5d": 4.7,
+          "score": 41.2,
+          "grade": "진입대기",
+          "reasons": [
+            "RSI 적정",
+            "기관 순매수 5억"
+          ],
+          "is_smart": false
+        }
+      ]
+    }
+  }
 }
