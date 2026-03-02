@@ -316,28 +316,87 @@ def _section_intel() -> list[str]:
 # 메인 빌더
 # ───────────────────────────────────────
 
-def build_evening_summary() -> str:
-    """저녁 통합 리포트 1건."""
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    L = [
-        "╔══════════════════════╗",
-        f"  🤖 Quantum Master v10.3",
-        f"  📅 {now} 장마감 리포트",
-        "╚══════════════════════╝",
-    ]
+def _section_us_overnight() -> list[str]:
+    """US Overnight 시그널 요약 (아침 리포트용)."""
+    sig = _load("overnight_signal.json")
+    if not sig:
+        return []
 
-    # 각 섹션을 우선순위 순으로 추가
-    L.extend(_section_holdings())
-    L.extend(_section_dart())
-    L.extend(_section_picks())
-    L.extend(_section_ai_largecap())
-    L.extend(_section_ai_vs_bot())
-    L.extend(_section_ai_accuracy())
-    L.extend(_section_value_chain())
-    L.extend(_section_intel())
+    lines = ["\n📡 US Overnight Signal"]
+    grade = sig.get("grade", "?")
+    score = sig.get("total_score", 0)
+    grade_emoji = {
+        "STRONG_BULL": "🟢🟢", "MILD_BULL": "🟢", "NEUTRAL": "⚪",
+        "MILD_BEAR": "🟡", "STRONG_BEAR": "🔴",
+    }.get(grade, "❓")
+
+    lines.append(f"  {grade_emoji} {grade} (점수: {score:.1f})")
+
+    # 주요 지수
+    summary = sig.get("summary", {})
+    if summary:
+        spy = summary.get("spy_ret", 0)
+        qqq = summary.get("qqq_ret", 0)
+        vix = summary.get("vix_close", 0)
+        lines.append(f"  SPY {spy:+.1%} | QQQ {qqq:+.1%} | VIX {vix:.1f}")
+
+    # 원자재
+    commodity = sig.get("commodity", {})
+    if commodity:
+        au = commodity.get("gld_ret", 0)
+        oil = commodity.get("uso_ret", 0)
+        cu = commodity.get("copx_ret", 0)
+        lines.append(f"  Au {au:+.1%} | Oil {oil:+.1%} | Cu {cu:+.1%}")
+
+    # 특수 룰 발동
+    rules = sig.get("special_rules_triggered", [])
+    if rules:
+        lines.append(f"  ⚠️ 특수룰: {', '.join(rules)}")
+
+    # 킬 섹터
+    kills = sig.get("sector_kills", [])
+    if kills:
+        lines.append(f"  🚫 킬섹터: {', '.join(kills[:5])}")
+
+    return lines
+
+
+def build_evening_summary(morning: bool = False) -> str:
+    """통합 리포트 (저녁 또는 아침)."""
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    if morning:
+        L = [
+            "╔══════════════════════╗",
+            f"  🌅 Quantum Master v10.3",
+            f"  📅 {now} 아침 리포트",
+            f"  (미장 반영 재스캔)",
+            "╚══════════════════════╝",
+        ]
+        # 아침: US Overnight + 추천종목 + AI 대형주
+        L.extend(_section_us_overnight())
+        L.extend(_section_picks())
+        L.extend(_section_ai_largecap())
+        L.extend(_section_ai_vs_bot())
+    else:
+        L = [
+            "╔══════════════════════╗",
+            f"  🤖 Quantum Master v10.3",
+            f"  📅 {now} 장마감 리포트",
+            "╚══════════════════════╝",
+        ]
+        # 저녁: 전체 섹션
+        L.extend(_section_holdings())
+        L.extend(_section_dart())
+        L.extend(_section_picks())
+        L.extend(_section_ai_largecap())
+        L.extend(_section_ai_vs_bot())
+        L.extend(_section_ai_accuracy())
+        L.extend(_section_value_chain())
+        L.extend(_section_intel())
 
     # 빈 내용 체크
-    if len(L) <= 4:
+    if len(L) <= 5:
         L.append("\n⚠️ 오늘 발송할 내용이 없습니다.")
 
     # 푸터
@@ -348,11 +407,12 @@ def build_evening_summary() -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="저녁 통합 리포트")
+    parser = argparse.ArgumentParser(description="통합 리포트")
     parser.add_argument("--send", action="store_true", help="텔레그램 발송")
+    parser.add_argument("--morning", action="store_true", help="아침 리포트 (US 반영)")
     args = parser.parse_args()
 
-    msg = build_evening_summary()
+    msg = build_evening_summary(morning=args.morning)
 
     if args.send:
         try:

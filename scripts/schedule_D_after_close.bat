@@ -201,13 +201,8 @@ if "%DOW%"=="4" (
     echo [%date% %time%] [22/28] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
 )
 
-REM 23단계: Railway 원격 동기화 (RAILWAY_URL 설정 시에만 실행)
-if defined RAILWAY_URL (
-    echo [%date% %time%] [23/28] Railway 동기화 >> logs\schedule.log
-    python -u -X utf8 scripts\sync_to_railway.py >> logs\schedule.log 2>&1
-) else (
-    echo [%date% %time%] [23/28] Railway 동기화 스킵 (RAILWAY_URL 미설정) >> logs\schedule.log
-)
+REM 23단계: [폐지] Railway → ppwangga.com 이전 예정
+echo [%date% %time%] [23/28] Railway 폐지 (ppwangga.com 이전 예정) >> logs\schedule.log
 
 REM 24단계: 저녁 통합 텔레그램 (보유종목+DART+추천+밸류체인 → 1건)
 echo [%date% %time%] [24/29] 저녁 통합 리포트 >> logs\schedule.log
