@@ -34,7 +34,20 @@ if %ERRORLEVEL% NEQ 0 (
     echo [%date% %time%] [FAIL] smart_entry_runner 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
 )
 
-echo [%date% %time%] BAT-E 완료 >> logs\schedule.log
+REM ── 매도 모니터: 10:00/12:00/14:00/14:30 자동 체크+실행 ──
+echo [%date% %time%] Sell Monitor LIVE 시작 >> logs\schedule.log
+echo ========================================
+echo [QM-E] Sell Monitor 시작 (10:00~14:50)
+echo   SELL_NOW → 시장가 즉시매도
+echo   PARTIAL_SELL → 50%% 매도
+echo   HOLD/WATCH → 유지
+echo ========================================
+python -u -X utf8 scripts/sell_monitor.py >> logs\schedule.log 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo [%date% %time%] [FAIL] sell_monitor 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
+)
+
+echo [%date% %time%] BAT-E 완료 (매수+매도) >> logs\schedule.log
 echo ========================================
 echo [QM-E] 완료
 echo ========================================
