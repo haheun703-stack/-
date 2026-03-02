@@ -197,19 +197,23 @@ class JarvisUploader:
             except Exception as e:
                 logger.warning(f"[JARVIS] 추천종목 로드 실패: {e}")
 
-        # 2) US Overnight Signal
-        signal_path = DATA_DIR / "overnight_signal.json"
+        # 2) US Overnight Signal (data/us_market/overnight_signal.json)
+        signal_path = DATA_DIR / "us_market" / "overnight_signal.json"
         if signal_path.exists():
             try:
                 sig = json.loads(signal_path.read_text(encoding="utf-8"))
+                idx = sig.get("index_direction", {})
+                vix = sig.get("vix", {})
+                kills = sig.get("sector_kills", {})
+                killed_sectors = [k for k, v in kills.items() if v.get("killed")]
                 market["us_signal"] = {
                     "grade": sig.get("grade", "-"),
-                    "score": sig.get("l1_score", sig.get("score", 0)),
-                    "spy_return": sig.get("spy_return", sig.get("returns", {}).get("SPY", 0)),
-                    "qqq_return": sig.get("qqq_return", sig.get("returns", {}).get("QQQ", 0)),
-                    "vix_return": sig.get("vix_return", sig.get("returns", {}).get("^VIX", 0)),
-                    "special_rules": sig.get("special_rules", sig.get("triggered_rules", [])),
-                    "kill_sectors": sig.get("kill_sectors", []),
+                    "score": sig.get("combined_score_100", sig.get("l1_score_100", 0)),
+                    "spy_return": idx.get("SPY", {}).get("ret_1d", 0),
+                    "qqq_return": idx.get("QQQ", {}).get("ret_1d", 0),
+                    "vix_return": vix.get("level", 0),
+                    "special_rules": sig.get("special_rules", []),
+                    "kill_sectors": killed_sectors,
                 }
             except Exception as e:
                 logger.warning(f"[JARVIS] US 시그널 로드 실패: {e}")
@@ -221,12 +225,14 @@ class JarvisUploader:
             try:
                 import pandas as pd
                 df = pd.read_csv(kospi_path, parse_dates=["Date"])
+                # 컬럼명 대소문자 호환 (close / Close)
+                col = "Close" if "Close" in df.columns else "close"
                 if len(df) >= 60:
-                    close = df["Close"].iloc[-1]
-                    ma20 = df["Close"].iloc[-20:].mean()
-                    ma60 = df["Close"].iloc[-60:].mean()
-                    rv20 = df["Close"].pct_change().iloc[-20:].std() * (252 ** 0.5)
-                    rv_median = df["Close"].pct_change().rolling(20).std().iloc[-252:].median() * (252 ** 0.5) if len(df) >= 272 else 0.2
+                    close = df[col].iloc[-1]
+                    ma20 = df[col].iloc[-20:].mean()
+                    ma60 = df[col].iloc[-60:].mean()
+                    rv20 = df[col].pct_change().iloc[-20:].std() * (252 ** 0.5)
+                    rv_median = df[col].pct_change().rolling(20).std().iloc[-252:].median() * (252 ** 0.5) if len(df) >= 272 else 0.2
 
                     if close > ma20 and rv20 < rv_median:
                         regime = "BULL"
