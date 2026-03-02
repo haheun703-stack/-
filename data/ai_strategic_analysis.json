@@ -1,37 +1,36 @@
 {
   "analysis_date": "2026-03-02",
-  "regime": "중립",
-  "regime_confidence": 0.70,
-  "regime_reasoning": "AI/반도체 구조적 수요 폭증은 유효하나, 이란 전쟁 확대 + 미장 선물 급락(나스닥 -1.34%, VIX +3.38%)으로 단기 리스크 급등. 방산/정유 수혜 vs 기술주 조정 혼조. 현금 35% 유지 권고.",
+  "regime": "공격",
+  "regime_confidence": 0.85,
+  "regime_reasoning": "글로벌 AI/반도체 수요 폭증과 대만 수출 기록적 흑자, AMD-메타 대규모 계약 체결로 산업 구조 매우 양호. 나스닥 1.3% 상승과 SOX 강세로 기술주 랠리 지속.",
   "industry_thesis": [
     {
       "sector": "반도체",
-      "thesis": "대만 AI/반도체 수출 역대 최대 흑자(69.9억달러)는 글로벌 공급부족 신호. AMD-메타 AI칩 계약으로 2026년 수요 가시화.",
+      "thesis": "AI칩 수요 폭발적 증가로 공급 부족 심화. 대만 반도체 수출 69.9억 달러 흑자는 글로벌 수급 타이트함 입증.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 9,
       "catalysts": [
-        "AI 수요 폭증",
-        "대만 수출 신기록",
-        "AMD-메타 대규모 계약"
+        "AMD-메타 AI칩 계약",
+        "대만 수출 기록적 흑자"
       ],
       "risks": [
-        "중국 보복 관세"
+        "미중 갈등"
       ],
-      "relay_source": "미국 SOX 지수",
+      "relay_source": "자체 발화",
       "relay_verified": true
     },
     {
-      "sector": "IT서비스",
-      "thesis": "Anthropic 엔터프라이즈 AI 통합으로 B2B AI 시장 확대. 반도체 섹터 후행 릴레이 패턴 작동(승률 88.2%).",
+      "sector": "IT/소프트웨어",
+      "thesis": "엔터프라이즈 AI 수요 확대와 Anthropic 통합으로 AI 소프트웨어 업사이클 진입.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 8,
       "catalysts": [
         "엔터프라이즈 AI 확산",
-        "반도체 릴레이 효과"
+        "나스닥 강세"
       ],
       "risks": [
         "밸류에이션 부담"
@@ -41,68 +40,61 @@
     },
     {
       "sector": "방산",
-      "thesis": "K-방산 수출 2배 증가와 절충교역 확대로 구조적 성장. 정부의 방산 스타트업 육성 정책이 중장기 촉매.",
+      "thesis": "K-방산 수출 2배 증가와 절충교역 확대로 구조적 성장 사이클. 중동 긴장으로 추가 수주 기대.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "독립",
       "confidence": 8,
       "catalysts": [
         "수출 2배 증가",
-        "절충교역 확대",
-        "정책 지원"
+        "미-이란 긴장"
       ],
       "risks": [
-        "지정학적 변동성"
+        "정치적 변수"
       ],
-      "relay_source": "없음",
-      "relay_verified": false
+      "relay_source": "자체 발화",
+      "relay_verified": true
     },
     {
-      "sector": "정유",
-      "thesis": "미국-이란 충돌로 유가 상승 압력. 정유 마진 확대와 상반기 실적 개선 기대.",
-      "demand_supply": "균형",
+      "sector": "원전/SMR",
+      "thesis": "AI 데이터센터 전력 수요 폭증과 폴란드 SMR 도입으로 원전 르네상스 가속화.",
+      "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 7,
       "catalysts": [
-        "지정학적 긴장",
-        "유가 상승"
+        "폴란드 SMR 도입",
+        "AI 전력수요"
       ],
       "risks": [
-        "수요 둔화",
-        "재고 증가"
+        "인허가 지연"
       ],
-      "relay_source": "없음",
+      "relay_source": "자체 발화",
       "relay_verified": false
     }
   ],
   "sector_priority": {
     "attack": [
       "반도체",
-      "IT서비스",
+      "IT/소프트웨어",
       "방산"
     ],
     "watch": [
-      "정유",
-      "원전/SMR"
+      "원전/SMR",
+      "정유"
     ],
     "avoid": [
-      "금융",
-      "2차전지"
+      "2차전지",
+      "조선"
     ]
   },
   "max_new_buys": 3,
   "risk_factors": [
-    "미국/이스라엘 vs 이란 군사충돌 — 중동 전면전 리스크 급등",
-    "미장 선물 급락: 다우 -1.07%, 나스닥 -1.34%, S&P -1.05%",
-    "VIX +3.38% 급등 — 공포 심리 확산",
-    "금 +3.08% 급등 — 안전자산 선호 극대화",
-    "유가 급등 가능성 (호르무즈 해협 봉쇄 시나리오)",
-    "중국 보복 관세 가능성",
-    "환율 변동성 (원/달러 상승 압력)"
+    "미중 갈등 재점화",
+    "환율 급등"
   ],
-  "cash_reserve_suggestion": 35,
-  "global_summary": "미국 기술주 강세와 AI 수요 폭증으로 글로벌 반도체 사이클 상승기 진입. 한국은 방산 수출 호조가 추가 모멘텀.",
+  "cash_reserve_suggestion": 20,
+  "global_summary": "글로벌 AI 수요 폭증으로 반도체와 IT 섹터 강세 지속. 나스닥 1.3% 상승과 SOX 강세로 기술주 랠리 확인.",
   "relay_alerts": [
     {
       "pattern": "반도체→IT서비스",
