@@ -230,8 +230,26 @@
     </div>
     {% endfor %}
     {% endif %}
+    {# 릴레이 알림 #}
+    {% if st.relay_alerts %}
+    <div class="brain-section-title" style="margin-top:20px;"><i class="fas fa-exchange-alt" style="color:var(--accent-cyan);"></i> 릴레이 경로</div>
+    {% for ra in st.relay_alerts %}
+    {% set ra_color = '#10B981' if ra.status == '발화' else '#F59E0B' if ra.status == '대기' else '#6B7280' %}
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:{{ ra_color }}0D;border:1px solid {{ ra_color }}33;border-radius:10px;margin-bottom:10px;">
+        <span style="font-size:17px;font-weight:700;color:#E5E7EB;">{{ ra.pattern }}</span>
+        <span style="font-size:14px;padding:4px 12px;border-radius:8px;background:{{ ra_color }}22;color:{{ ra_color }};font-weight:600;">{{ ra.status }}</span>
+        <span style="font-size:15px;color:#9CA3AF;margin-left:auto;">{{ ra.action }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {# 글로벌 요약 #}
+    {% if st.global_summary %}
+    <div style="margin-top:20px;padding:18px 22px;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:12px;font-size:16px;color:#9CA3AF;line-height:1.7;">
+        <i class="fas fa-globe" style="color:#6366F1;margin-right:8px;"></i>{{ st.global_summary }}
+    </div>
+    {% endif %}
     {% if st.risk_factors %}
-    <div class="brain-section-title" style="margin-top:16px;"><i class="fas fa-shield-alt" style="color:var(--accent-red);"></i> 리스크 팩터</div>
+    <div class="brain-section-title" style="margin-top:20px;"><i class="fas fa-shield-alt" style="color:var(--accent-red);"></i> 리스크 팩터</div>
     {% for r in st.risk_factors %}<div class="brain-risk">{{ r }}</div>{% endfor %}
     {% endif %}
     {% else %}
@@ -724,11 +742,58 @@
 <!-- ── 7. 세력감지 ── -->
 <div class="tab-panel" id="panel-shakeout">
     <h3 class="sec-title" style="color:var(--accent-purple);"><i class="fas fa-bolt"></i> 세력감지 — 이상 패턴 스캐너</h3>
-    <div class="empty-state" style="padding:40px;">
-        <div style="font-size:48px;margin-bottom:12px;">&#x26A1;</div>
-        <p style="font-size:16px;">세력감지 데이터는 다음 업데이트에서 연동됩니다</p>
-        <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">whale_detect.json → 전종목 이상패턴</p>
+    {% if brain and brain.whale and brain.whale.items %}
+    {% set wh = brain.whale %}
+
+    {# 요약 배지 #}
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:18px;font-weight:700;color:#A78BFA;">{{ wh.total_detected }}건 감지</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(239,68,68,0.15);color:#FCA5A5;">세력포착 {{ wh.stats.get('세력포착', 0) }}</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(245,158,11,0.12);color:#FBBF24;">매집의심 {{ wh.stats.get('매집의심', 0) }}</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(107,114,128,0.15);color:#9CA3AF;">이상감지 {{ wh.stats.get('이상감지', 0) }}</span>
+        <span style="font-size:13px;color:#4B5563;margin-left:auto;">{{ wh.date }} · {{ wh.total_scanned }}종목 스캔</span>
     </div>
+
+    {# 세력포착 / 매집의심 카드 #}
+    {% for item in wh.items[:15] %}
+    {% set gc_color = '#EF4444' if item.grade == '세력포착' else '#F59E0B' if item.grade == '매집의심' else '#6B7280' %}
+    {% set gc_bg = 'rgba(239,68,68,0.06)' if item.grade == '세력포착' else 'rgba(245,158,11,0.05)' if item.grade == '매집의심' else 'rgba(107,114,128,0.04)' %}
+    {% set gc_border = 'rgba(239,68,68,0.15)' if item.grade == '세력포착' else 'rgba(245,158,11,0.12)' if item.grade == '매집의심' else 'rgba(107,114,128,0.1)' %}
+    <div style="padding:20px 22px;background:{{ gc_bg }};border:1px solid {{ gc_border }};border-radius:12px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="color:#E5E7EB;font-weight:700;font-size:19px;">{{ item.name }}</span>
+                    <span style="font-size:14px;color:#6B7280;font-family:monospace;">{{ item.ticker }}</span>
+                    <span style="font-size:14px;padding:5px 12px;border-radius:8px;background:{{ gc_border }};color:{{ gc_color }};font-weight:600;">{{ item.grade }}</span>
+                </div>
+                <div style="font-size:16px;color:#9CA3AF;margin-top:10px;">{{ "{:,}".format(item.close) }}원 · 강도 {{ "%.1f"|format(item.strength) }}</div>
+                <div style="display:flex;gap:16px;margin-top:12px;font-size:15px;font-family:monospace;">
+                    <span style="color:{{ '#10B981' if item.price_change >= 0 else '#EF4444' }};font-weight:700;">{{ '+' if item.price_change > 0 else '' }}{{ "%.1f"|format(item.price_change) }}%</span>
+                    <span style="color:{{ '#EF4444' if item.rsi > 70 else '#3B82F6' if item.rsi < 40 else '#9CA3AF' }};">RSI {{ "%.0f"|format(item.rsi) }}</span>
+                    <span style="color:#9CA3AF;">ADX {{ "%.0f"|format(item.adx) }}</span>
+                    <span style="color:#FBBF24;">거래량 {{ "%.1f"|format(item.volume_surge_ratio) }}배</span>
+                </div>
+                {% if item.patterns %}
+                <div style="margin-top:12px;">
+                    {% for p in item.patterns %}
+                    <div style="font-size:14px;color:#9CA3AF;padding:8px 14px;margin-bottom:6px;background:rgba(255,255,255,0.03);border-radius:8px;line-height:1.6;">
+                        {{ p.desc }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div style="text-align:right;min-width:80px;">
+                <div style="font-family:monospace;font-size:20px;font-weight:700;color:{{ gc_color }};">{{ item.pattern_count }}패턴</div>
+                <div style="font-size:13px;color:#6B7280;margin-top:6px;">{{ '✅MA20' if item.above_ma20 else '❌MA20' }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state"><i class="fas fa-bolt"></i><p>세력감지 데이터가 업로드되면 표시됩니다</p></div>
+    {% endif %}
 </div>
 
 <!-- ── 8. 글로벌리스크 ── -->
@@ -770,11 +835,73 @@
 <!-- ── 9. 동반매수 ── -->
 <div class="tab-panel" id="panel-cobuy">
     <h3 class="sec-title" style="color:var(--accent-orange);"><i class="fas fa-users"></i> 외인+기관 동반매수</h3>
-    <div class="empty-state" style="padding:40px;">
-        <div style="font-size:48px;margin-bottom:12px;">&#x1F4CA;</div>
-        <p style="font-size:16px;">동반매수 데이터는 다음 업데이트에서 연동됩니다</p>
-        <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">dual_buying_watch.json → 외인+기관 동시 매수 종목</p>
+    {% if brain and brain.dual_buying %}
+    {% set db = brain.dual_buying %}
+
+    {# 요약 배지 #}
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:18px;font-weight:700;color:#F97316;">{{ db.stats.total_found }}건 발견</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(239,68,68,0.15);color:#FCA5A5;">S등급 {{ db.stats.s }}</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(245,158,11,0.12);color:#FBBF24;">A등급 {{ db.stats.a }}</span>
+        <span style="font-size:15px;padding:6px 14px;border-radius:10px;background:rgba(59,130,246,0.12);color:#60A5FA;">B등급 {{ db.stats.b_total }}</span>
+        <span style="font-size:13px;color:#4B5563;margin-left:auto;">{{ db.date }} · {{ db.stats.total_scanned }}종목 스캔</span>
     </div>
+
+    {# S등급 #}
+    {% if db.s_grade %}
+    <h4 style="color:#EF4444;font-size:18px;font-weight:700;margin-bottom:14px;">🔴 S등급 — 강력 동반매수</h4>
+    {% for s in db.s_grade %}
+    <div style="padding:20px 22px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:12px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="color:#E5E7EB;font-weight:700;font-size:19px;">{{ s.name }}</span>
+            <span style="font-size:14px;color:#6B7280;font-family:monospace;">{{ s.ticker }}</span>
+            <span style="font-size:14px;padding:5px 12px;border-radius:8px;background:rgba(239,68,68,0.2);color:#FCA5A5;font-weight:600;">S등급</span>
+        </div>
+        {% if s.reasons %}<div style="font-size:15px;color:#9CA3AF;margin-top:10px;line-height:1.7;">{{ s.reasons|join(' · ') }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {# A등급 #}
+    {% if db.a_grade %}
+    <h4 style="color:#F59E0B;font-size:18px;font-weight:700;margin:18px 0 14px;">🟡 A등급 — 우선 관심</h4>
+    {% for a in db.a_grade %}
+    <div style="padding:20px 22px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);border-radius:12px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="color:#E5E7EB;font-weight:700;font-size:19px;">{{ a.name }}</span>
+            <span style="font-size:14px;color:#6B7280;font-family:monospace;">{{ a.ticker }}</span>
+            <span style="font-size:14px;padding:5px 12px;border-radius:8px;background:rgba(245,158,11,0.2);color:#FBBF24;font-weight:600;">A등급</span>
+        </div>
+        {% if a.reasons %}<div style="font-size:15px;color:#9CA3AF;margin-top:10px;line-height:1.7;">{{ a.reasons|join(' · ') }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {# B등급 #}
+    {% if db.b_grade %}
+    <h4 style="color:#3B82F6;font-size:18px;font-weight:700;margin:18px 0 14px;">🔵 B등급 — 관찰</h4>
+    {% for b in db.b_grade %}
+    <div style="padding:16px 20px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.1);border-radius:10px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="color:#E5E7EB;font-weight:600;font-size:17px;">{{ b.name }}</span>
+            <span style="font-size:14px;color:#6B7280;font-family:monospace;">{{ b.ticker }}</span>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {# 아무것도 없을 때 #}
+    {% if not db.s_grade and not db.a_grade and not db.b_grade %}
+    <div style="background:rgba(107,114,128,0.06);border:1px solid rgba(107,114,128,0.12);border-radius:12px;padding:30px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🔍</div>
+        <div style="font-size:17px;color:#9CA3AF;">현재 외인+기관 동반매수 종목이 없습니다</div>
+        <div style="font-size:14px;color:#6B7280;margin-top:8px;">{{ db.stats.total_scanned }}종목 스캔 완료 · {{ db.date }}</div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state"><i class="fas fa-users"></i><p>동반매수 데이터가 업로드되면 표시됩니다</p></div>
+    {% endif %}
 </div>
 
 <!-- ── 10. 히스토리 ── -->

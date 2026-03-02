@@ -1,0 +1,2026 @@
+{
+  "strategic": {
+    "regime": "공격",
+    "confidence": 0.85,
+    "reasoning": "글로벌 AI/반도체 수요 강세 지속, 미국 기술주 랠리(S&P +1.8%, 나스닥 +1.3%), 한국은행 금리 동결로 유동성 우호적. SOX 지수 강세 가능성 높아 공격적 매수 타이밍.",
+    "thesis": [
+      {
+        "sector": "반도체",
+        "thesis": "대만 AI/반도체 수출 호조와 Nvidia 실적 발표 앞두고 글로벌 AI칩 수요 폭증. HBM 공급 부족 지속.",
+        "demand_supply": "공급부족",
+        "asp_trend": "상승",
+        "global_alignment": "동조",
+        "confidence": 9,
+        "catalysts": [
+          "Nvidia 실적 기대감",
+          "AI 데이터센터 투자 확대"
+        ],
+        "risks": [
+          "미국 금리 상승"
+        ],
+        "relay_source": null,
+        "relay_verified": true
+      },
+      {
+        "sector": "IT서비스",
+        "thesis": "Anthropic AI 통합으로 엔터프라이즈 AI 시장 확대. 반도체 랠리의 후행 수혜 예상.",
+        "demand_supply": "균형",
+        "asp_trend": "상승",
+        "global_alignment": "동조",
+        "confidence": 8,
+        "catalysts": [
+          "기업 AI 도입 가속화",
+          "소프트웨어 섹터 반등"
+        ],
+        "risks": [
+          "밸류에이션 부담"
+        ],
+        "relay_source": "반도체",
+        "relay_verified": true
+      },
+      {
+        "sector": "정유",
+        "thesis": "미국-이란 긴장으로 유가 상승 전망. 상반기 정유사 실적 개선 기대.",
+        "demand_supply": "균형",
+        "asp_trend": "상승",
+        "global_alignment": "동조",
+        "confidence": 7,
+        "catalysts": [
+          "지정학적 리스크",
+          "유가 상승"
+        ],
+        "risks": [
+          "수요 둔화 가능성"
+        ],
+        "relay_source": null,
+        "relay_verified": false
+      }
+    ],
+    "sector_priority": {
+      "attack": [
+        "반도체",
+        "IT서비스",
+        "정유"
+      ],
+      "watch": [
+        "방산조선",
+        "금융"
+      ],
+      "avoid": [
+        "전력/유틸리티",
+        "게임/엔터"
+      ]
+    },
+    "risk_factors": [
+      "미국 10년물 금리 4.06% 상승",
+      "미국 관세 불확실성"
+    ],
+    "max_new_buys": 3,
+    "cash_reserve": 20,
+    "global_summary": "미국 기술주 강세와 AI 투자 확대로 risk-on 심리 확산. 금리 상승은 부담이나 성장주 모멘텀이 우세.",
+    "relay_alerts": [
+      {
+        "pattern": "반도체→IT서비스",
+        "status": "발화",
+        "action": "매수 준비"
+      },
+      {
+        "pattern": "방산조선→기계",
+        "status": "대기",
+        "action": "주의"
+      }
+    ]
+  },
+  "sector_focus": {
+    "focus_sectors": [
+      {
+        "sector": "IT서비스",
+        "entry_timing": "즉시진입",
+        "size_weight": 1.2,
+        "thesis_alignment": "강한일치",
+        "momentum_rank": 1,
+        "momentum_score": 91.3,
+        "rsi": 80.5,
+        "smart_money": false,
+        "relay_source": "반도체",
+        "reasoning": "반도체 발화 후 1일 지연 릴레이(승률 88.2%) 진입 타이밍. thesis와 모멘텀 1위 완벽 일치, ADX 상승 중"
+      },
+      {
+        "sector": "건설",
+        "entry_timing": "즉시진입",
+        "size_weight": 1.0,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 2,
+        "momentum_score": 89.7,
+        "rsi": 81.3,
+        "smart_money": true,
+        "relay_source": null,
+        "reasoning": "모멘텀 2위 + 스마트머니 유입 + ADX 61.2(강한 추세). thesis 없으나 기술적 우위 명확"
+      },
+      {
+        "sector": "증권",
+        "entry_timing": "즉시진입",
+        "size_weight": 1.0,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 3,
+        "momentum_score": 81.6,
+        "rsi": 70.3,
+        "smart_money": false,
+        "relay_source": null,
+        "reasoning": "Theme BUY 지정 + 모멘텀 3위 + RSI 70대(과열 아님). 금융 릴레이 소스로 보험/은행 연계 가능"
+      },
+      {
+        "sector": "에너지화학",
+        "entry_timing": "즉시진입",
+        "size_weight": 0.9,
+        "thesis_alignment": "강한일치",
+        "momentum_rank": 6,
+        "momentum_score": 69.7,
+        "rsi": 77.3,
+        "smart_money": true,
+        "reasoning": "정유 thesis와 일치(유가 상승). 스마트머니 유입 + 모멘텀 상위권 + ADX 상승"
+      },
+      {
+        "sector": "보험",
+        "entry_timing": "눌림대기",
+        "size_weight": 0.8,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 8,
+        "momentum_score": 62.6,
+        "rsi": 72.6,
+        "smart_money": false,
+        "relay_source": "증권",
+        "reasoning": "증권 릴레이 타겟(승률 76.5%, 1일 지연). Theme BUY이나 아직 릴레이 대기 구간"
+      }
+    ],
+    "screening_boost": [
+      "IT서비스",
+      "건설",
+      "증권",
+      "에너지화학",
+      "2차전지",
+      "철강소재"
+    ],
+    "screening_suppress": [
+      "반도체",
+      "현대차그룹",
+      "삼성그룹",
+      "게임",
+      "미디어"
+    ],
+    "warnings": [
+      {
+        "sector": "반도체",
+        "warning": "RSI 80.5 + BB 109.0%로 과열. thesis 강하나 단기 조정 리스크. IT서비스 릴레이로 전환 권장",
+        "severity": "high"
+      },
+      {
+        "sector": "현대차그룹",
+        "warning": "RSI 82.9 + BB 118.1%로 극도 과열. 스마트머니 유입 중이나 단기 눌림 불가피",
+        "severity": "high"
+      },
+      {
+        "sector": "삼성그룹",
+        "warning": "반도체 과열 영향으로 BB 94.2%. 외국인 -64,652주 매도. 조정 가능성",
+        "severity": "medium"
+      },
+      {
+        "sector": "방산",
+        "warning": "모멘텀 32.6점(13위)으로 하락. 릴레이 대기 상태이나 기술적 약세. 기계 릴레이 무효화 가능성",
+        "severity": "medium"
+      },
+      {
+        "sector": "금융",
+        "warning": "ADX 하락 전환. 증권/보험 강세 대비 은행 상대적 약세. 섹터 내 차별화 주의",
+        "severity": "low"
+      }
+    ]
+  },
+  "group_relay": {
+    "fired": [
+      {
+        "group": "반도체",
+        "leader": "SK하이닉스",
+        "leader_change": -3.46,
+        "subsidiaries": [
+          {
+            "name": "티씨케이",
+            "change": -5.07,
+            "score": 24,
+            "gap_pct": 2.99
+          },
+          {
+            "name": "필옵틱스",
+            "change": -3.66,
+            "score": 24,
+            "gap_pct": 1.58
+          },
+          {
+            "name": "덕산네오룩스",
+            "change": -4.46,
+            "score": 22,
+            "gap_pct": 2.38
+          },
+          {
+            "name": "LX세미콘",
+            "change": -3.95,
+            "score": 21,
+            "gap_pct": 1.87
+          },
+          {
+            "name": "하나마이크론",
+            "change": -2.56,
+            "score": 20,
+            "gap_pct": 0.48
+          }
+        ]
+      },
+      {
+        "group": "2차전지",
+        "leader": "삼성SDI",
+        "leader_change": 3.79,
+        "subsidiaries": [
+          {
+            "name": "SK아이이테크놀로지",
+            "change": -1.99,
+            "score": 53,
+            "gap_pct": 7.41
+          },
+          {
+            "name": "SKC",
+            "change": 0.71,
+            "score": 52,
+            "gap_pct": 4.71
+          },
+          {
+            "name": "롯데에너지머티리얼즈",
+            "change": -1.76,
+            "score": 47,
+            "gap_pct": 7.18
+          },
+          {
+            "name": "엘앤에프",
+            "change": 0.64,
+            "score": 44,
+            "gap_pct": 4.78
+          },
+          {
+            "name": "더블유씨피",
+            "change": -0.89,
+            "score": 35,
+            "gap_pct": 6.31
+          }
+        ]
+      },
+      {
+        "group": "IT",
+        "leader": "삼성전자",
+        "leader_change": -0.69,
+        "subsidiaries": [
+          {
+            "name": "포스코DX",
+            "change": 0.38,
+            "score": 34,
+            "gap_pct": -3.43
+          }
+        ]
+      },
+      {
+        "group": "에너지화학",
+        "leader": "LG화학",
+        "leader_change": 7.05,
+        "subsidiaries": [
+          {
+            "name": "S-Oil",
+            "change": -3.25,
+            "score": 48,
+            "gap_pct": 5.89
+          },
+          {
+            "name": "SKC",
+            "change": 0.71,
+            "score": 43,
+            "gap_pct": 1.93
+          },
+          {
+            "name": "SK케미칼",
+            "change": 0.73,
+            "score": 25,
+            "gap_pct": 1.91
+          },
+          {
+            "name": "코스모화학",
+            "change": -0.7,
+            "score": 25,
+            "gap_pct": 3.34
+          }
+        ]
+      },
+      {
+        "group": "소프트웨어",
+        "leader": "카카오",
+        "leader_change": 1.47,
+        "subsidiaries": [
+          {
+            "name": "포스코DX",
+            "change": 0.38,
+            "score": 34,
+            "gap_pct": -0.73
+          },
+          {
+            "name": "엔씨소프트",
+            "change": -0.22,
+            "score": 30,
+            "gap_pct": -0.13
+          },
+          {
+            "name": "안랩",
+            "change": 0.77,
+            "score": 15,
+            "gap_pct": -1.12
+          }
+        ]
+      },
+      {
+        "group": "방산",
+        "leader": "한국항공우주",
+        "leader_change": 4.13,
+        "subsidiaries": [
+          {
+            "name": "쎄트렉아이",
+            "change": -0.99,
+            "score": 42,
+            "gap_pct": 4.19
+          }
+        ]
+      },
+      {
+        "group": "조선",
+        "leader": "HD현대중공업",
+        "leader_change": 1.86,
+        "subsidiaries": [
+          {
+            "name": "HD현대마린엔진",
+            "change": 0.11,
+            "score": 30,
+            "gap_pct": 1.75
+          },
+          {
+            "name": "성광벤드",
+            "change": -1.13,
+            "score": 24,
+            "gap_pct": 2.99
+          },
+          {
+            "name": "동성화인텍",
+            "change": 0.86,
+            "score": 18,
+            "gap_pct": 1.0
+          }
+        ]
+      }
+    ],
+    "summary": "7개 섹터 발화 — 반도체, 2차전지, IT 등",
+    "no_fire": [
+      "헬스케어",
+      "바이오"
+    ],
+    "date": "2026-02-27 23:34"
+  },
+  "whale": {
+    "stats": {
+      "세력포착": 20,
+      "매집의심": 14,
+      "이상감지": 171
+    },
+    "total_detected": 205,
+    "total_scanned": 662,
+    "date": "2026-02-25 22:21",
+    "items": [
+      {
+        "ticker": "000400",
+        "name": "롯데손해보험",
+        "close": 2630,
+        "price_change": 10.27,
+        "volume": 43109309,
+        "trading_value_m": 113377.48,
+        "rsi": 73.58,
+        "adx": 52.83,
+        "bb_position": 1.01,
+        "volume_surge_ratio": 7.43,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 5.48,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.4754760146503445,
+            "vsr": 7.4,
+            "direction": "상승폭발",
+            "price_change": 10.27,
+            "desc": "거래량 7.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 3.0,
+            "min_bb_width": 0.05,
+            "curr_bb_width": 0.73,
+            "expansion": 13.5,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (13.5배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "000500",
+        "name": "가온전선",
+        "close": 122000,
+        "price_change": 24.62,
+        "volume": 605022,
+        "trading_value_m": 73812.68,
+        "rsi": 81.28,
+        "adx": 29.33,
+        "bb_position": 1.44,
+        "volume_surge_ratio": 6.43,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 4.51,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.1441553602023444,
+            "vsr": 6.4,
+            "direction": "상승폭발",
+            "price_change": 24.62,
+            "desc": "거래량 6.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.3628612309811388,
+            "min_bb_width": 0.1,
+            "curr_bb_width": 0.38,
+            "expansion": 3.73,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.7배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "005850",
+        "name": "에스엘",
+        "close": 72200,
+        "price_change": 17.97,
+        "volume": 1037996,
+        "trading_value_m": 74943.31,
+        "rsi": 74.29,
+        "adx": 35.46,
+        "bb_position": 1.34,
+        "volume_surge_ratio": 3.27,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 5678757950.0,
+        "grade": "세력포착",
+        "strength": 3.89,
+        "pattern_count": 3,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.0893121901010314,
+            "vsr": 3.3,
+            "direction": "상승폭발",
+            "price_change": 17.97,
+            "desc": "거래량 3.3배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": 112499.0,
+            "f_last5": 82144.0,
+            "i_prev5": -86272.0,
+            "i_last5": 267219.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "기관 매도→매수 반전 (-86,272→+267,219)"
+            ],
+            "desc": "기관 매도→매수 반전 (-86,272→+267,219)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.298085180648485,
+            "min_bb_width": 0.21,
+            "curr_bb_width": 0.33,
+            "expansion": 1.6,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (1.6배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "112610",
+        "name": "씨에스윈드",
+        "close": 53800,
+        "price_change": 7.92,
+        "volume": 1384193,
+        "trading_value_m": 74469.58,
+        "rsi": 71.51,
+        "adx": 50.23,
+        "bb_position": 1.11,
+        "volume_surge_ratio": 2.66,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 7662039225.0,
+        "grade": "세력포착",
+        "strength": 3.89,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.8860615262163707,
+            "vsr": 2.7,
+            "direction": "상승폭발",
+            "price_change": 7.92,
+            "desc": "거래량 2.7배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 3.0,
+            "min_bb_width": 0.05,
+            "curr_bb_width": 0.37,
+            "expansion": 7.29,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (7.3배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "003240",
+        "name": "태광산업",
+        "close": 1500000,
+        "price_change": 25.1,
+        "volume": 14763,
+        "trading_value_m": 22144.5,
+        "rsi": 85.16,
+        "adx": 59.64,
+        "bb_position": 1.22,
+        "volume_surge_ratio": 2.53,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 3.59,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.8417361556553346,
+            "vsr": 2.5,
+            "direction": "상승폭발",
+            "price_change": 25.1,
+            "desc": "거래량 2.5배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.745333756909535,
+            "min_bb_width": 0.16,
+            "curr_bb_width": 0.7,
+            "expansion": 4.49,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (4.5배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "012510",
+        "name": "더존비즈온",
+        "close": 119100,
+        "price_change": 0.25,
+        "volume": 333249,
+        "trading_value_m": 39689.96,
+        "rsi": 76.36,
+        "adx": 42.88,
+        "bb_position": 1.05,
+        "volume_surge_ratio": 0.73,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -12857622200.0,
+        "grade": "세력포착",
+        "strength": 3.59,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -109631.0,
+            "f_last5": 167563.0,
+            "i_prev5": -124608.0,
+            "i_last5": -110958.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-109,631→+167,563)"
+            ],
+            "desc": "외인 매도→매수 반전 (-109,631→+167,563)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.087180507534784,
+            "min_bb_width": 0.11,
+            "curr_bb_width": 0.48,
+            "expansion": 4.17,
+            "vol_confirm": false,
+            "desc": "BB 수축→폭발 (4.2배)"
+          }
+        ]
+      },
+      {
+        "ticker": "000720",
+        "name": "현대건설",
+        "close": 155200,
+        "price_change": 12.06,
+        "volume": 2922470,
+        "trading_value_m": 453567.34,
+        "rsi": 83.37,
+        "adx": 66.48,
+        "bb_position": 1.21,
+        "volume_surge_ratio": 1.76,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 95079813400.0,
+        "grade": "세력포착",
+        "strength": 3.53,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -254549.0,
+            "f_last5": 237482.0,
+            "i_prev5": 445023.0,
+            "i_last5": 424556.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-254,549→+237,482)"
+            ],
+            "desc": "외인 매도→매수 반전 (-254,549→+237,482)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.031500144314007,
+            "min_bb_width": 0.16,
+            "curr_bb_width": 0.48,
+            "expansion": 3.06,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.1배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "103590",
+        "name": "일진전기",
+        "close": 84600,
+        "price_change": 2.92,
+        "volume": 2452632,
+        "trading_value_m": 207492.67,
+        "rsi": 72.24,
+        "adx": 48.41,
+        "bb_position": 1.04,
+        "volume_surge_ratio": 3.02,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 9924060100.0,
+        "grade": "세력포착",
+        "strength": 3.4,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.0075204426295128,
+            "vsr": 3.0,
+            "direction": "상승폭발",
+            "price_change": 2.92,
+            "desc": "거래량 3.0배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.3911565490153484,
+            "min_bb_width": 0.11,
+            "curr_bb_width": 0.4,
+            "expansion": 3.78,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.8배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "034220",
+        "name": "LG디스플레이",
+        "close": 14820,
+        "price_change": 5.41,
+        "volume": 15991564,
+        "trading_value_m": 236994.98,
+        "rsi": 76.13,
+        "adx": 42.92,
+        "bb_position": 1.13,
+        "volume_surge_ratio": 2.71,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 78544494480.0,
+        "grade": "세력포착",
+        "strength": 3.38,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.9022432962784569,
+            "vsr": 2.7,
+            "direction": "상승폭발",
+            "price_change": 5.41,
+            "desc": "거래량 2.7배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.4775707448073927,
+            "min_bb_width": 0.09,
+            "curr_bb_width": 0.34,
+            "expansion": 3.96,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (4.0배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "383220",
+        "name": "F&F",
+        "close": 72300,
+        "price_change": 2.12,
+        "volume": 149003,
+        "trading_value_m": 10772.92,
+        "rsi": 53.44,
+        "adx": 23.4,
+        "bb_position": 0.57,
+        "volume_surge_ratio": 1.07,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -1287990100.0,
+        "grade": "세력포착",
+        "strength": 3.2,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -25139.0,
+            "f_last5": 18331.0,
+            "i_prev5": -13980.0,
+            "i_last5": -12919.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-25,139→+18,331)"
+            ],
+            "desc": "외인 매도→매수 반전 (-25,139→+18,331)"
+          },
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 1.7027551937520014,
+            "price_chg_10d": -3.86,
+            "obv_chg_10d": 17.03,
+            "obv_trend_5d": -0.05,
+            "vol_contracted": false,
+            "desc": "가격 -3.9% vs OBV +17.0% (은밀매집)"
+          }
+        ]
+      },
+      {
+        "ticker": "214150",
+        "name": "클래시스",
+        "close": 59900,
+        "price_change": -11.13,
+        "volume": 2855871,
+        "trading_value_m": 171066.67,
+        "rsi": 41.07,
+        "adx": 23.22,
+        "bb_position": -0.02,
+        "volume_surge_ratio": 4.49,
+        "above_ma20": false,
+        "above_ma60": false,
+        "foreign_5d": -16129839500.0,
+        "grade": "세력포착",
+        "strength": 3.0,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.4952764721441911,
+            "vsr": 4.5,
+            "direction": "하락폭발",
+            "price_change": -11.13,
+            "desc": "거래량 4.5배 폭발 (하락폭발)"
+          },
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": 79795.0,
+            "f_last5": 65711.0,
+            "i_prev5": -40767.0,
+            "i_last5": 147139.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "기관 매도→매수 반전 (-40,767→+147,139)"
+            ],
+            "desc": "기관 매도→매수 반전 (-40,767→+147,139)"
+          }
+        ]
+      },
+      {
+        "ticker": "108320",
+        "name": "LX세미콘",
+        "close": 62900,
+        "price_change": 12.72,
+        "volume": 437499,
+        "trading_value_m": 27518.69,
+        "rsi": 77.3,
+        "adx": 53.99,
+        "bb_position": 1.4,
+        "volume_surge_ratio": 3.53,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 2.96,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.177616302661271,
+            "vsr": 3.5,
+            "direction": "상승폭발",
+            "price_change": 12.72,
+            "desc": "거래량 3.5배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.780747188303252,
+            "min_bb_width": 0.06,
+            "curr_bb_width": 0.16,
+            "expansion": 2.56,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.6배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "006405",
+        "name": "삼성SDI우",
+        "close": 233000,
+        "price_change": 6.88,
+        "volume": 29923,
+        "trading_value_m": 6972.06,
+        "rsi": 70.31,
+        "adx": 34.82,
+        "bb_position": 1.31,
+        "volume_surge_ratio": 1.87,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 2.89,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": 63.0,
+            "f_last5": 2883.0,
+            "i_prev5": -1045.0,
+            "i_last5": 1525.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "기관 매도→매수 반전 (-1,045→+1,525)"
+            ],
+            "desc": "기관 매도→매수 반전 (-1,045→+1,525)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.389283229550233,
+            "min_bb_width": 0.09,
+            "curr_bb_width": 0.15,
+            "expansion": 1.78,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (1.8배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "047050",
+        "name": "포스코인터내셔널",
+        "close": 75500,
+        "price_change": 2.86,
+        "volume": 826143,
+        "trading_value_m": 62373.8,
+        "rsi": 70.4,
+        "adx": 62.2,
+        "bb_position": 0.99,
+        "volume_surge_ratio": 0.92,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 6206262250.0,
+        "grade": "세력포착",
+        "strength": 2.56,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": 44476.0,
+            "f_last5": 209216.0,
+            "i_prev5": -53953.0,
+            "i_last5": 411855.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "기관 매도→매수 반전 (-53,953→+411,855)"
+            ],
+            "desc": "기관 매도→매수 반전 (-53,953→+411,855)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.0648960574192075,
+            "min_bb_width": 0.13,
+            "curr_bb_width": 0.27,
+            "expansion": 2.13,
+            "vol_confirm": false,
+            "desc": "BB 수축→폭발 (2.1배)"
+          }
+        ]
+      },
+      {
+        "ticker": "006040",
+        "name": "동원산업",
+        "close": 44250,
+        "price_change": -2.64,
+        "volume": 102678,
+        "trading_value_m": 4543.5,
+        "rsi": 55.79,
+        "adx": 41.27,
+        "bb_position": 0.7,
+        "volume_surge_ratio": 1.16,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -830758550.0,
+        "grade": "세력포착",
+        "strength": 2.5,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -5537.0,
+            "f_last5": 15097.0,
+            "i_prev5": 109445.0,
+            "i_last5": 333.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-5,537→+15,097)"
+            ],
+            "desc": "외인 매도→매수 반전 (-5,537→+15,097)"
+          },
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 1.0048513508198662,
+            "price_chg_10d": 2.67,
+            "obv_chg_10d": 7.05,
+            "obv_trend_5d": 0.0,
+            "vol_contracted": false,
+            "desc": "가격 +2.7% vs OBV +7.0% (은밀매집)"
+          }
+        ]
+      },
+      {
+        "ticker": "011500",
+        "name": "한농화성",
+        "close": 26650,
+        "price_change": 2.11,
+        "volume": 3605892,
+        "trading_value_m": 96097.02,
+        "rsi": 65.44,
+        "adx": 29.97,
+        "bb_position": 0.96,
+        "volume_surge_ratio": 2.71,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 2.4,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.9035897606682134,
+            "vsr": 2.7,
+            "direction": "상승폭발",
+            "price_change": 2.11,
+            "desc": "거래량 2.7배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -21357.0,
+            "f_last5": 13402.0,
+            "i_prev5": -983.0,
+            "i_last5": -114.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-21,357→+13,402)"
+            ],
+            "desc": "외인 매도→매수 반전 (-21,357→+13,402)"
+          }
+        ]
+      },
+      {
+        "ticker": "052690",
+        "name": "한전기술",
+        "close": 168200,
+        "price_change": 4.8,
+        "volume": 520936,
+        "trading_value_m": 87621.44,
+        "rsi": 72.2,
+        "adx": 57.98,
+        "bb_position": 0.98,
+        "volume_surge_ratio": 0.71,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 15232329350.0,
+        "grade": "세력포착",
+        "strength": 2.29,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -60060.0,
+            "f_last5": 156148.0,
+            "i_prev5": 90908.0,
+            "i_last5": 86821.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-60,060→+156,148)"
+            ],
+            "desc": "외인 매도→매수 반전 (-60,060→+156,148)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 0.792664419039439,
+            "min_bb_width": 0.2,
+            "curr_bb_width": 0.32,
+            "expansion": 1.59,
+            "vol_confirm": false,
+            "desc": "BB 수축→폭발 (1.6배)"
+          }
+        ]
+      },
+      {
+        "ticker": "020150",
+        "name": "롯데에너지머티리얼즈",
+        "close": 45700,
+        "price_change": 2.35,
+        "volume": 423895,
+        "trading_value_m": 19372.0,
+        "rsi": 60.34,
+        "adx": 32.56,
+        "bb_position": 0.7,
+        "volume_surge_ratio": 0.75,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 8693947900.0,
+        "grade": "세력포착",
+        "strength": 2.28,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P2_수급반전",
+            "strength": 1.5,
+            "f_prev5": -90843.0,
+            "f_last5": 70018.0,
+            "i_prev5": -201411.0,
+            "i_last5": -108730.0,
+            "f_today": 0.0,
+            "i_today": 0.0,
+            "reasons": [
+              "외인 매도→매수 반전 (-90,843→+70,018)"
+            ],
+            "desc": "외인 매도→매수 반전 (-90,843→+70,018)"
+          },
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 0.7767970371126574,
+            "price_chg_10d": 0.99,
+            "obv_chg_10d": 4.77,
+            "obv_trend_5d": 0.06,
+            "vol_contracted": false,
+            "desc": "가격 +1.0% vs OBV +4.8% (은밀매집)"
+          }
+        ]
+      },
+      {
+        "ticker": "051910",
+        "name": "LG화학",
+        "close": 387500,
+        "price_change": 10.56,
+        "volume": 1099978,
+        "trading_value_m": 426241.47,
+        "rsi": 67.57,
+        "adx": 34.23,
+        "bb_position": 1.17,
+        "volume_surge_ratio": 2.5,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 208646054250.0,
+        "grade": "세력포착",
+        "strength": 2.27,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.8347132937732026,
+            "vsr": 2.5,
+            "direction": "상승폭발",
+            "price_change": 10.56,
+            "desc": "거래량 2.5배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.4344285832689243,
+            "min_bb_width": 0.14,
+            "curr_bb_width": 0.26,
+            "expansion": 1.87,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (1.9배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "060720",
+        "name": "KH바텍",
+        "close": 17710,
+        "price_change": 8.65,
+        "volume": 4126783,
+        "trading_value_m": 73085.33,
+        "rsi": 61.0,
+        "adx": 25.24,
+        "bb_position": 0.68,
+        "volume_surge_ratio": 2.76,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "세력포착",
+        "strength": 1.93,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.9184162671000875,
+            "vsr": 2.8,
+            "direction": "상승폭발",
+            "price_change": 8.65,
+            "desc": "거래량 2.8배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 1.0144098652495168,
+            "price_chg_10d": 1.61,
+            "obv_chg_10d": 7.14,
+            "obv_trend_5d": 0.07,
+            "vol_contracted": false,
+            "desc": "가격 +1.6% vs OBV +7.1% (은밀매집)"
+          }
+        ]
+      }
+    ]
+  },
+  "dual_buying": {
+    "date": "2026-02-25",
+    "stats": {
+      "total_scanned": 2859,
+      "total_found": 177,
+      "s": 0,
+      "a": 0,
+      "b_total": 0
+    },
+    "s_grade": [],
+    "a_grade": [],
+    "b_grade": [],
+    "core_watch": []
+  },
+  "v3_picks": {
+    "decision_date": "2026-03-01",
+    "regime": "공격",
+    "available_slots": 10,
+    "current_holdings": 0,
+    "cash_pct_before": 100.0,
+    "cash_pct_after": 75.0,
+    "buys": [
+      {
+        "ticker": "022100",
+        "name": "포스코DX",
+        "conviction": 8,
+        "size_pct": 15.0,
+        "strategy": "momentum",
+        "thesis_alignment": "strong",
+        "entry_price": 39300,
+        "stop_loss_pct": -8.5,
+        "target_pct": 14.9,
+        "reasoning": "IT서비스 섹터 부스트와 엔터프라이즈 AI 확산 수혜주로 conviction 8의 표준 사이즈 배분"
+      },
+      {
+        "ticker": "032940",
+        "name": "원익",
+        "conviction": 8,
+        "size_pct": 10.0,
+        "strategy": "relay",
+        "thesis_alignment": "strong",
+        "entry_price": 11870,
+        "stop_loss_pct": -17.5,
+        "target_pct": 30.7,
+        "reasoning": "AI칩/HBM 수요 수혜주이나 억제 섹터 소속으로 축소 사이즈 배분"
+      }
+    ],
+    "skipped": [],
+    "portfolio_warnings": [
+      "원익은 억제 섹터(반도체)에 속해 있어 주의 필요",
+      "첫 매수로 총 25% 배분은 적절한 리스크 관리"
+    ],
+    "reasoning": "공격 레짐에서 현금 100%의 첫 진입으로 conviction 8의 두 종목에 총 25% 배분. IT서비스 부스트 섹터인 포스코DX에 표준 사이즈 15%, 억제 섹터이나 AI 수혜주인 원익에 축소 사이즈 10% 배분하여 현금 비중 75%로 추가 기회 대비."
+  },
+  "news": {
+    "market_sentiment": "bullish",
+    "key_themes": [
+      "글로벌 AI/반도체 수요 강세 (대만 수출 호조, S&P 기술주 랠리)",
+      "한국은행 금리 동결 전망 (유동성 우호적 환경 지속)",
+      "K-방산 수출 확대 및 정책 지원 강화",
+      "유가 상승 가능성 (미국-이란 긴장, 정유주 실적 개선)",
+      "AI 데이터센터 투자 확대 및 휴머노이드 로봇 산업 성장"
+    ],
+    "stock_judgments": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "action": "BUY",
+        "confidence": 0.85,
+        "reasoning": "대만 기록적 경상수지 흑자와 AI/반도체 수출 호조는 글로벌 칩 수요 강세를 확인. S&P 기술주 1.8% 상승 랠리와 연계되어 HBM 수혜 기대",
+        "catalysts": [
+          "글로벌 AI 칩 수요 증가",
+          "대만 반도체 수출 호조",
+          "S&P 기술주 강세"
+        ],
+        "risks": [
+          "미국 금리 상승 우려"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 7
+      },
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "action": "BUY",
+        "confidence": 0.8,
+        "reasoning": "대만 AI 반도체 수출 호조와 글로벌 기술주 랠리가 반도체 부문 수혜 기대. Nvidia 실적 발표 앞두고 AI 관련주 거래량 증가",
+        "catalysts": [
+          "대만 반도체 수출 증가",
+          "글로벌 AI 수요",
+          "S&P 기술주 강세"
+        ],
+        "risks": [
+          "금리 상승",
+          "Nvidia 실적 불확실성"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "035420",
+        "name": "NAVER",
+        "action": "BUY",
+        "confidence": 0.75,
+        "reasoning": "Anthropic AI 통합 발표로 엔터프라이즈 AI 시장 확대. S&P 기술주 랠리와 AI 데이터센터 투자 증가가 클라우드 및 AI 서비스 수혜 전망",
+        "catalysts": [
+          "엔터프라이즈 AI 확대",
+          "MWC AI 데이터센터 투자",
+          "S&P 기술주 랠리"
+        ],
+        "risks": [
+          "금리 상승 역풍"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 5
+      },
+      {
+        "ticker": "035720",
+        "name": "카카오",
+        "action": "BUY",
+        "confidence": 0.72,
+        "reasoning": "Anthropic AI 통합 발표와 소프트웨어 섹터 반등이 AI 서비스 기업에 긍정적. 나스닥 1.3% 상승 랠리 동조화 가능성",
+        "catalysts": [
+          "AI 소프트웨어 섹터 반등",
+          "엔터프라이즈 AI 수요",
+          "나스닥 강세"
+        ],
+        "risks": [
+          "금리 상승",
+          "규제 불확실성"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 5
+      },
+      {
+        "ticker": "010950",
+        "name": "S-Oil",
+        "action": "BUY",
+        "confidence": 0.8,
+        "reasoning": "미국-이란 충돌로 유가 상승 조짐. 정유주 상반기 실적 훈풍 기대되며 직접적 수혜 예상",
+        "catalysts": [
+          "유가 상승 가능성",
+          "정유주 실적 개선 전망",
+          "미국-이란 긴장"
+        ],
+        "risks": [
+          "글로벌 경기 둔화"
+        ],
+        "urgency": "high",
+        "expected_impact_pct": 8
+      },
+      {
+        "ticker": "096770",
+        "name": "SK이노베이션",
+        "action": "BUY",
+        "confidence": 0.75,
+        "reasoning": "유가 상승 조짐으로 정유 부문 수혜 기대. 2차전지 부문은 글로벌 AI 수요 연계 성장 가능",
+        "catalysts": [
+          "유가 상승",
+          "정유 실적 개선",
+          "2차전지 수요"
+        ],
+        "risks": [
+          "2차전지 경쟁 심화"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "373220",
+        "name": "LG에너지솔루션",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "타법인 주식 취득 결정 공시 발표. AI 데이터센터 전력 수요 증가가 장기 긍정 요인이나 즉각적 촉매는 불분명",
+        "catalysts": [
+          "타법인 투자 확대",
+          "데이터센터 전력 수요"
+        ],
+        "risks": [
+          "금리 상승",
+          "2차전지 경쟁"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "006400",
+        "name": "삼성SDI",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "AI 데이터센터 전력 수요 증가와 글로벌 2차전지 수요는 긍정적이나 직접적 뉴스 없음. 금리 상승 리스크 존재",
+        "catalysts": [
+          "데이터센터 수요",
+          "전기차 배터리 수요"
+        ],
+        "risks": [
+          "금리 상승",
+          "중국 경쟁"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "051910",
+        "name": "LG화학",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "2차전지 및 화학 부문 보유. AI 수요 연계 가능하나 직접 촉매 부재. 유가 상승은 화학 원가 부담 요인",
+        "catalysts": [
+          "2차전지 수요",
+          "석유화학 경기"
+        ],
+        "risks": [
+          "유가 상승 원가 부담",
+          "금리 상승"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "009150",
+        "name": "삼성전기",
+        "action": "BUY",
+        "confidence": 0.75,
+        "reasoning": "S&P 기술주 강세와 대만 전자제품 수출 호조로 MLCC 등 부품 수요 증가 기대. AI 스마트폰 및 데이터센터 수혜",
+        "catalysts": [
+          "글로벌 전자부품 수요",
+          "AI 기기 확대",
+          "대만 수출 호조"
+        ],
+        "risks": [
+          "금리 상승"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "042700",
+        "name": "한미반도체",
+        "action": "BUY",
+        "confidence": 0.7,
+        "reasoning": "대만 AI/반도체 수출 호조와 글로벌 칩 수요 증가로 반도체 장비 수요 확대 전망",
+        "catalysts": [
+          "글로벌 반도체 캡스 증가",
+          "AI 칩 수요",
+          "대만 수출 호조"
+        ],
+        "risks": [
+          "설비투자 지연 가능성"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 7
+      },
+      {
+        "ticker": "039030",
+        "name": "이오테크닉스",
+        "action": "BUY",
+        "confidence": 0.7,
+        "reasoning": "반도체 레이저 장비 수혜주. 대만 AI 칩 수출 호조와 글로벌 반도체 투자 확대가 긍정적",
+        "catalysts": [
+          "반도체 장비 투자",
+          "AI 칩 생산 증가",
+          "대만 수출 강세"
+        ],
+        "risks": [
+          "설비투자 사이클 변동"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 7
+      },
+      {
+        "ticker": "058470",
+        "name": "리노공업",
+        "action": "BUY",
+        "confidence": 0.68,
+        "reasoning": "반도체 테스트 소켓 수혜. 글로벌 AI 칩 수요 증가와 대만 반도체 수출 호조가 긍정적",
+        "catalysts": [
+          "AI 칩 테스트 수요",
+          "글로벌 반도체 생산 증가"
+        ],
+        "risks": [
+          "반도체 사이클 변동"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": 6
+      },
+      {
+        "ticker": "105560",
+        "name": "KB금융",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "자회사 유상증자 공시 발표. S&P 금융 섹터 1.7% 상승은 긍정적이나 한국은행 금리 동결 전망으로 NIM 개선 제한적",
+        "catalysts": [
+          "S&P 금융 섹터 강세",
+          "자회사 자본 확충"
+        ],
+        "risks": [
+          "금리 동결로 수익성 정체"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "055550",
+        "name": "신한지주",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "S&P 금융 섹터 강세는 긍정적이나 한은 금리 동결 전망으로 NIM 개선 제한. 직접 촉매 없음",
+        "catalysts": [
+          "글로벌 금융주 강세"
+        ],
+        "risks": [
+          "금리 동결",
+          "부동산 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "086790",
+        "name": "하나금융지주",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "S&P 금융 섹터 상승은 긍정적이나 한은 기준금리 동결 전망으로 수익성 개선 제한적",
+        "catalysts": [
+          "글로벌 금융주 강세"
+        ],
+        "risks": [
+          "금리 동결",
+          "환율 변동성"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "316140",
+        "name": "우리금융지주",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "금융 섹터 글로벌 강세는 긍정적이나 국내 금리 동결 전망으로 직접 수혜 제한적",
+        "catalysts": [
+          "글로벌 금융주 랠리"
+        ],
+        "risks": [
+          "금리 동결",
+          "부동산 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "323410",
+        "name": "카카오뱅크",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "금융 섹터 강세는 긍정적이나 한은 금리 동결로 NIM 개선 제한. 성장주 특성상 금리 상승 역풍 존재",
+        "catalysts": [
+          "금융 섹터 강세"
+        ],
+        "risks": [
+          "금리 상승",
+          "금리 동결"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "017670",
+        "name": "SK텔레콤",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "MWC에서 통신사들의 AI 데이터센터 GPU 확보 경쟁 보도. AI 인프라 투자 확대 수혜 가능하나 즉각적 실적 반영은 불확실",
+        "catalysts": [
+          "AI 데이터센터 투자",
+          "MWC AI 트렌드"
+        ],
+        "risks": [
+          "투자 부담 증가"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "030200",
+        "name": "KT",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "MWC AI 데이터센터 투자 트렌드는 긍정적이나 실적 반영 시점 불명확. 통신사 GPU 확보 경쟁 참여 가능",
+        "catalysts": [
+          "AI 데이터센터 수요",
+          "MWC 트렌드"
+        ],
+        "risks": [
+          "투자 부담"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 3
+      },
+      {
+        "ticker": "032640",
+        "name": "LG유플러스",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "MWC AI 데이터센터 이슈는 긍정적이나 직접적 수혜 확인 안 됨. 통신 3사 중 상대적 약세",
+        "catalysts": [
+          "AI 인프라 투자"
+        ],
+        "risks": [
+          "경쟁 심화"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "066570",
+        "name": "LG전자",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "AI 가전 및 로봇 관련 장기 테마 보유. AW 2026 휴머노이드 전시 등 로봇 산업 성장은 긍정적이나 직접 촉매 부재",
+        "catalysts": [
+          "로봇 산업 성장",
+          "AI 가전"
+        ],
+        "risks": [
+          "실적 가시성 부족"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "000270",
+        "name": "기아",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "글로벌 자동차 수요는 양호하나 직접 뉴스 없음. 미국 관세 불확실성 지속",
+        "catalysts": [
+          "전기차 수요"
+        ],
+        "risks": [
+          "미국 관세 15% 인상"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "005380",
+        "name": "현대차",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "자동차 산업 전반적 안정세이나 미국 관세 인상 리스크 존재. 직접 촉매 없음",
+        "catalysts": [
+          "전기차 판매"
+        ],
+        "risks": [
+          "미국 관세 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "012330",
+        "name": "현대모비스",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "자동차 부품 수요는 안정적이나 관세 리스크와 직접 촉매 부재",
+        "catalysts": [
+          "전기차 부품 수요"
+        ],
+        "risks": [
+          "관세 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "003490",
+        "name": "대한항공",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "항공 수요 회복세 지속되나 직접 뉴스 없음. 유가 상승은 원가 부담 요인",
+        "catalysts": [
+          "항공 수요 회복"
+        ],
+        "risks": [
+          "유가 상승"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "009540",
+        "name": "HD한국조선해양",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "조선 수주 호조 지속되나 직접 뉴스 없음. 장기 수주잔고는 긍정적",
+        "catalysts": [
+          "조선 수주 호조"
+        ],
+        "risks": [
+          "원자재 가격 상승"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "010140",
+        "name": "삼성중공업",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "조선 업황 양호하나 직접 촉매 부재. 수주잔고는 안정적",
+        "catalysts": [
+          "조선 수주"
+        ],
+        "risks": [
+          "원자재 비용"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "042660",
+        "name": "한화오션",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "조선 수주 환경은 양호하나 직접 뉴스 없음",
+        "catalysts": [
+          "LNG선 수주"
+        ],
+        "risks": [
+          "원자재 가격"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "329180",
+        "name": "HD현대중공업",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "조선 수주 호조세 지속. 밸류체인상 유리하나 직접 뉴스 부재",
+        "catalysts": [
+          "조선 수주"
+        ],
+        "risks": [
+          "원자재 비용"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "034020",
+        "name": "두산에너빌리티",
+        "action": "WATCH",
+        "confidence": 0.65,
+        "reasoning": "폴란드 SMR 도입 추진 및 노르웨이 SMR 검토 뉴스는 장기 긍정적이나 즉각적 수혜는 불확실. AI 데이터센터 전력 수요는 추가 긍정 요인",
+        "catalysts": [
+          "SMR 시장 확대",
+          "AI 데이터센터 전력 수요"
+        ],
+        "risks": [
+          "프로젝트 지연 가능성"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 4
+      },
+      {
+        "ticker": "015760",
+        "name": "한국전력",
+        "action": "AVOID",
+        "confidence": 0.75,
+        "reasoning": "한국은행 금리 동결 전망에도 불구, 미국 10년물 금리 4.06% 상승으로 성장주 및 부동산 관련주에 역풍. 전력 요금 조정 불확실성 지속",
+        "catalysts": [],
+        "risks": [
+          "금리 상승",
+          "요금 조정 불확실성",
+          "부채 부담"
+        ],
+        "urgency": "medium",
+        "expected_impact_pct": -3
+      },
+      {
+        "ticker": "267260",
+        "name": "HD현대일렉트릭",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "AI 데이터센터 전력 수요 증가는 긍정적이나 미국 금리 상승으로 전력기기주 역풍 가능",
+        "catalysts": [
+          "데이터센터 수요"
+        ],
+        "risks": [
+          "금리 상승"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "259960",
+        "name": "크래프톤",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "게임주 전반적 약세. AI 소프트웨어 섹터 반등과 무관. 직접 촉매 없음",
+        "catalysts": [
+          "신작 출시"
+        ],
+        "risks": [
+          "게임 업황 부진"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "036570",
+        "name": "엔씨소프트",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "게임주 약세 지속. AI 게임 개발은 장기 테마이나 단기 촉매 부재",
+        "catalysts": [
+          "AI 게임 개발"
+        ],
+        "risks": [
+          "게임 흥행 불확실성"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "352820",
+        "name": "하이브",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "엔터 업황 안정적이나 직접 촉매 없음. AI 활용 콘텐츠는 장기 테마",
+        "catalysts": [
+          "AI 콘텐츠"
+        ],
+        "risks": [
+          "아티스트 의존도"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "035900",
+        "name": "JYP Ent.",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "엔터 업황 안정. 직접 뉴스 없음",
+        "catalysts": [
+          "신인 데뷔"
+        ],
+        "risks": [
+          "경쟁 심화"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "041510",
+        "name": "에스엠",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "엔터 업황 양호. 직접 촉매 부재",
+        "catalysts": [
+          "컴백"
+        ],
+        "risks": [
+          "경쟁"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "068270",
+        "name": "셀트리온",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "바이오 업황 안정적이나 직접 뉴스 없음. 글로벌 바이오시밀러 수요는 긍정적",
+        "catalysts": [
+          "바이오시밀러 수요"
+        ],
+        "risks": [
+          "규제 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "207940",
+        "name": "삼성바이오로직스",
+        "action": "WATCH",
+        "confidence": 0.6,
+        "reasoning": "CMO 수주 호조 지속되나 직접 뉴스 없음. 장기 수주잔고는 안정적",
+        "catalysts": [
+          "CMO 수주"
+        ],
+        "risks": [
+          "경쟁 심화"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "028300",
+        "name": "HLB",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "바이오 포트폴리오 보유. 직접 뉴스 없으나 업황은 안정적",
+        "catalysts": [
+          "신약 개발"
+        ],
+        "risks": [
+          "임상 불확실성"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "196170",
+        "name": "알테오젠",
+        "action": "WATCH",
+        "confidence": 0.55,
+        "reasoning": "바이오 기술주. 직접 뉴스 없음. 기술이전 기대감은 지속",
+        "catalysts": [
+          "기술이전"
+        ],
+        "risks": [
+          "임상 리스크"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 2
+      },
+      {
+        "ticker": "145020",
+        "name": "휴젤",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "보툴리눔 톡신 시장 안정. 직접 촉매 없음",
+        "catalysts": [
+          "해외 수출"
+        ],
+        "risks": [
+          "경쟁"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      },
+      {
+        "ticker": "326030",
+        "name": "SK바이오팜",
+        "action": "WATCH",
+        "confidence": 0.5,
+        "reasoning": "신약 매출 안정적이나 직접 뉴스 없음",
+        "catalysts": [
+          "신약 판매"
+        ],
+        "risks": [
+          "특허 만료"
+        ],
+        "urgency": "low",
+        "expected_impact_pct": 1
+      }
+    ],
+    "sector_outlook": {
+      "반도체": {
+        "direction": "positive",
+        "reason": "대만 AI/반도체 수출 호조와 S&P 기술주 1.8% 상승으로 글로벌 칩 수요 강세 확인. Nvidia 실적 앞두고 AI 관련 거래량 증가"
+      },
+      "IT/소프트웨어": {
+        "direction": "positive",
+        "reason": "Anthropic AI 통합 발표로 엔터프라이즈 AI 확대. 나스닥 1.3% 상승과 소프트웨어 섹터 반등으로 단기 모멘텀 긍정적"
+      },
+      "정유": {
+        "direction": "positive",
+        "reason": "미국-이란 충돌로 유가 상승 조짐. 정유주 상반기 실적 훈풍 기대로 단기 수혜 전망"
+      },
+      "금융": {
+        "direction": "neutral",
+        "reason": "S&P 금융 섹터 1.7% 상승은 긍정적이나 한국은행 금리 동결 전망으로 NIM 개선 제한적. 환율과 부동산 리스크 상존"
+      },
+      "2차전지": {
+        "direction": "neutral",
+        "reason": "AI 데이터센터 전력 수요 증가는 장기 긍정적이나 미국 금리 상승으로 성장주 역풍. 직접적 단기 촉매 부족"
+      },
+      "조선": {
+        "direction": "neutral",
+        "reason": "수주 호조 지속되나 직접 뉴스 부재. 원자재 가격 상승은 마진 압박 요인"
+      },
+      "통신": {
+        "direction": "neutral",
+        "reason": "MWC AI 데이터센터 투자 경쟁은 긍정적이나 실적 반영 시점 불명확. 투자 부담 증가 가능성"
+      },
+      "자동차": {
+        "direction": "neutral",
+        "reason": "글로벌 수요 안정적이나 미국 관세 15% 인상 불확실성 지속"
+      },
+      "전력/유틸리티": {
+        "direction": "negative",
+        "reason": "미국 10년물 금리 4.06% 상승으로 전력기기 및 유틸리티주 역풍. 한국전력 요금 조정 불확실성"
+      },
+      "게임/엔터": {
+        "direction": "neutral",
+        "reason": "AI 콘텐츠는 장기 테마이나 단기 촉매 부족. 게임주 업황 부진 지속"
+      },
+      "바이오": {
+        "direction": "neutral",
+        "reason": "업황 안정적이나 직접 촉매 부재. CMO 수주와 바이오시밀러 수요는 양호"
+      }
+    },
+    "date": "2026-02-28",
+    "generated_at": "2026-02-28 14:37",
+    "model": "claude-sonnet-4-5-20250929",
+    "news_count": 70
+  }
+}
