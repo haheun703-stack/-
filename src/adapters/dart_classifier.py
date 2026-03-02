@@ -1,12 +1,7 @@
-"""OpenAI gpt-4o-mini 공시 분류기 — DART 공시 → 촉매/소음 판정
-
-역할 분담:
-- ChatGPT(OpenAI) = DART 공시 담당
-- Grok(xAI) = 뉴스 담당
-- 겹치지 않게 분리
+"""DART 공시 분류기 — Claude Haiku로 촉매/소음 판정
 
 설계 4원칙:
-1. JSON 강제 (response_format=json_object)
+1. JSON 강제 (Claude tool_use 대신 텍스트 파싱 — 경량)
 2. Confidence 0.7 미만 무시
 3. LLM이 최종 매매 결정하지 않음 (점수 가중치만)
 4. Fail-safe (API 장애 시 기존 로직 유지)
@@ -20,7 +15,6 @@ import os
 
 logger = logging.getLogger(__name__)
 
-# 기본 응답 (API 실패 / confidence 미달 시)
 DEFAULT_RESULT = {
     "catalyst_type": "none",
     "catalyst_category": "",
@@ -60,31 +54,19 @@ def classify_disclosures(
     ticker: str,
     name: str,
     filings: list[dict],
-    api_key: str | None = None,
 ) -> dict:
-    """DART 공시 목록을 gpt-4o-mini로 분류.
-
-    Args:
-        ticker: 종목코드
-        name: 종목명
-        filings: dart_adapter.fetch_recent_disclosures() 결과
-        api_key: OpenAI API 키 (없으면 환경변수)
-
-    Returns:
-        {"catalyst_type": ..., "catalyst_category": ..., "confidence": ..., "reason": ...}
-    """
+    """DART 공시 목록을 Claude Haiku로 분류."""
     if not filings:
         return DEFAULT_RESULT.copy()
 
-    key = api_key or os.getenv("OPENAI_API_KEY", "")
+    key = os.getenv("ANTHROPIC_API_KEY", "")
     if not key:
-        logger.warning("OPENAI_API_KEY 미설정 — 공시 분류 건너뜀")
+        logger.warning("ANTHROPIC_API_KEY 미설정 — 공시 분류 건너뜀")
         return DEFAULT_RESULT.copy()
 
-    # 공시 목록 → 텍스트 포맷
     filing_text = "\n".join(
         f"- [{f['date']}] {f['title']}" + (f" ({f['remark']})" if f.get("remark") else "")
-        for f in filings[:15]  # 최대 15건
+        for f in filings[:15]
     )
 
     user_prompt = f"""종목: {name} ({ticker})
@@ -95,31 +77,32 @@ def classify_disclosures(
 위 공시 중 가장 의미 있는 선행 촉매가 있는지 판단해줘."""
 
     try:
-        import openai
+        import anthropic
 
-        client = openai.OpenAI(api_key=key)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.1,
+        client = anthropic.Anthropic(api_key=key)
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
             max_tokens=200,
-            timeout=15,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": user_prompt}],
+            temperature=0.1,
         )
 
-        result = json.loads(response.choices[0].message.content)
+        raw = response.content[0].text.strip()
+        # JSON 블록 추출 (```json ... ``` 또는 순수 JSON)
+        if "```" in raw:
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+        result = json.loads(raw)
 
-        # Confidence 0.7 미만 → 무시
         if result.get("confidence", 0) < 0.7:
             logger.debug(
                 f"공시 분류 confidence 미달: {ticker} {result.get('confidence', 0):.2f}"
             )
             return DEFAULT_RESULT.copy()
 
-        # 필수 필드 검증
         if result.get("catalyst_type") not in ("catalyst", "noise", "none"):
             return DEFAULT_RESULT.copy()
 
@@ -131,49 +114,36 @@ def classify_disclosures(
         }
 
     except Exception as e:
-        # Fail-safe: API 장애 시 기존 로직 유지
-        logger.warning(f"OpenAI 공시 분류 실패 ({ticker}): {e}")
+        logger.warning(f"공시 분류 실패 ({ticker}): {e}")
         return DEFAULT_RESULT.copy()
 
 
 def classify_batch(
     candidates: list[dict],
     dart_adapter,
-    api_key: str | None = None,
 ) -> dict[str, dict]:
-    """전체 후보 종목에 대해 DART 공시 조회 + 분류 일괄 실행.
-
-    Args:
-        candidates: scan_all() 결과 리스트
-        dart_adapter: DartAdapter 인스턴스
-        api_key: OpenAI API 키
-
-    Returns:
-        {ticker: {"catalyst_type": ..., ...}}
-    """
+    """전체 후보 종목에 대해 DART 공시 조회 + 분류 일괄 실행."""
     results = {}
 
     if not dart_adapter or not dart_adapter.is_available:
         logger.info("DART API 미설정 — 공시 분류 건너뜀")
         return results
 
-    key = api_key or os.getenv("OPENAI_API_KEY", "")
+    key = os.getenv("ANTHROPIC_API_KEY", "")
     if not key:
-        logger.info("OPENAI_API_KEY 미설정 — 공시 분류 건너뜀")
+        logger.info("ANTHROPIC_API_KEY 미설정 — 공시 분류 건너뜀")
         return results
 
     for sig in candidates:
         ticker = sig["ticker"]
         name = sig.get("name", ticker)
 
-        # DART에서 최근 30일 공시 목록 조회
         filings = dart_adapter.fetch_recent_disclosures(ticker, days=30)
         if not filings:
             results[ticker] = DEFAULT_RESULT.copy()
             continue
 
-        # gpt-4o-mini 분류
-        result = classify_disclosures(ticker, name, filings, api_key=key)
+        result = classify_disclosures(ticker, name, filings)
         results[ticker] = result
 
         cat = result["catalyst_type"]

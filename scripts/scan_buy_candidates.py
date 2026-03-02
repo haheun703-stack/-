@@ -1459,7 +1459,7 @@ def scan_all(
     if use_dart and survivors:
         try:
             from src.adapters.dart_adapter import DartAdapter
-            from src.adapters.openai_classifier import classify_batch
+            from src.adapters.dart_classifier import classify_batch
 
             print(f"\nDART 공시 분류 ({len(survivors)} stocks)...")
             dart_adapter = DartAdapter()
