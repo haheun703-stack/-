@@ -576,7 +576,78 @@
         }
         .status-dot.online { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
 
+        /* ─── 레일웨이 탭 네비게이션 ─── */
+        .tab-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 22px 0;
+        }
+        .tab-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s;
+        }
+        .tab-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08));
+            border-color: rgba(239,68,68,0.4);
+            box-shadow: 0 0 20px rgba(239,68,68,0.1);
+        }
+        .tab-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+        .tab-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+        .tab-btn.active .tab-label {
+            color: var(--text-primary);
+        }
+
+        /* ─── 탭 콘텐츠 ─── */
+        .tab-content-area {
+            margin-bottom: 20px;
+        }
+        .tab-panel {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            min-height: 300px;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sec-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         @media (max-width: 1024px) {
+            .tab-nav { grid-template-columns: repeat(5, 1fr); gap: 6px; }
             .grid-2 { grid-template-columns: 1fr; }
             .signal-grid { grid-template-columns: 1fr; }
             .hero-top-row { flex-direction: column; gap: 20px; }
@@ -597,6 +668,12 @@
             .holdings-table { font-size: 13px; }
             .holdings-table td { padding: 8px 10px; font-size: 13px; }
             .holdings-table .h-name { font-size: 14px; }
+            .tab-nav { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+            .tab-btn { padding: 10px 4px; border-radius: 10px; }
+            .tab-icon { font-size: 22px; }
+            .tab-label { font-size: 10px; }
+            .tab-panel { padding: 16px; }
+            .sec-title { font-size: 16px; }
         }
     </style>
     {% block extra_css %}{% endblock %}
