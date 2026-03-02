@@ -522,8 +522,8 @@ daily_hold_scorer:
 # v4.0 라이브 트레이딩 설정
 # ============================================================
 live_trading:
-  enabled: false                    # true로 변경 시 실주문 활성화
-  mode: "paper"                     # "paper" (모의) / "real" (실전)
+  enabled: true                     # 2026-03-02 활성화 — 텔레그램 "정지"로 OFF
+  mode: "real"                      # "paper" (모의) / "real" (실전)
 
   # v5.0 일일 스케줄 (KST) — 한국장 준비 ~ 미장 마감
   schedule:

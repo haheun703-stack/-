@@ -497,12 +497,15 @@ class TelegramCommandBot:
     def _execute_auto_start(self, chat_id: str, msg_id: int) -> None:
         from src.telegram_sender import edit_message_text
         stop_path = PROJECT_ROOT / "STOP.signal"
+        kill_path = PROJECT_ROOT / "data" / "KILL_SWITCH"
         if stop_path.exists():
             stop_path.unlink()
+        if kill_path.exists():
+            kill_path.unlink()
         if self._scheduler:
             self._scheduler.enabled = True
-        edit_message_text(chat_id, msg_id, "\U0001f7e2 자동매매 시작됨 (STOP.signal 삭제)")
-        logger.info("[명령봇] 자동매매 시작")
+        edit_message_text(chat_id, msg_id, "\U0001f7e2 자동매매 시작됨 (STOP + KILL_SWITCH 삭제)")
+        logger.info("[명령봇] 자동매매 시작 (STOP + KILL_SWITCH 해제)")
 
     # ══════════════════════════════════════════
     # 버튼 핸들러 — 분석 그룹
@@ -876,14 +879,20 @@ class TelegramCommandBot:
         )
 
     def _cmd_stop(self, args: list) -> None:
-        """정지 — 자동매매 OFF (즉시 실행)."""
+        """정지 — 자동매매 OFF (즉시 실행). STOP.signal + KILL_SWITCH 동시 생성."""
+        ts = datetime.now().isoformat()
+        # 1) DailyScheduler용 STOP.signal
         stop_path = PROJECT_ROOT / "STOP.signal"
-        stop_path.write_text(
-            f"STOPPED by telegram command at {datetime.now().isoformat()}",
-            encoding="utf-8",
+        stop_path.write_text(f"STOPPED by telegram command at {ts}", encoding="utf-8")
+        # 2) SmartEntry용 KILL_SWITCH
+        kill_path = PROJECT_ROOT / "data" / "KILL_SWITCH"
+        kill_path.write_text(f"KILLED by telegram command at {ts}", encoding="utf-8")
+        self._reply_kb(
+            "\U0001f6d1 자동매매 정지됨\n"
+            "STOP.signal + KILL_SWITCH 생성 완료\n"
+            "재개: '시작' 명령"
         )
-        self._reply_kb("\U0001f6d1 자동매매 정지됨\nSTOP.signal 생성 완료")
-        logger.warning("[명령봇] 자동매매 정지")
+        logger.warning("[명령봇] 자동매매 정지 (STOP + KILL_SWITCH)")
 
     def _cmd_help(self, args: list) -> None:
         """도움 — 명령어 목록."""
