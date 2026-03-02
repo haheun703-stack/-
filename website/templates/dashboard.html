@@ -2,45 +2,251 @@
 {% block title %}JARVIS — 대시보드{% endblock %}
 
 {% block content %}
-<!-- 메트릭스 카드 -->
-<div class="metrics-grid">
-    <div class="metric-card blue">
-        <div class="metric-label"><i class="fas fa-wallet"></i> 포트폴리오 평가</div>
-        <div class="metric-value">{{ "{:,.0f}".format(metrics.portfolio_value) }}원</div>
-        <div class="metric-sub">총 자산</div>
-    </div>
-    <div class="metric-card {{ 'green' if metrics.total_pnl_pct >= 0 else 'red' }}">
-        <div class="metric-label"><i class="fas fa-chart-line"></i> 총 수익률</div>
-        <div class="metric-value {{ 'positive' if metrics.total_pnl_pct >= 0 else 'negative' }}">
-            {{ "+" if metrics.total_pnl_pct >= 0 else "" }}{{ "%.2f"|format(metrics.total_pnl_pct) }}%
+<!-- ═══ 히어로 배너: 포트폴리오 핵심 지표 ═══ -->
+<div class="hero-banner">
+    <div class="hero-grid">
+        <!-- 포트폴리오 평가 -->
+        <div class="hero-main">
+            <div class="hero-label"><i class="fas fa-wallet"></i> Portfolio Value</div>
+            <div class="hero-value">{{ "{:,.0f}".format(metrics.portfolio_value) }}<span style="font-size:16px;color:var(--text-muted);font-weight:400;">원</span></div>
+            <div class="hero-sub">
+                {% if metrics.total_pnl_pct >= 0 %}
+                <span class="positive"><i class="fas fa-caret-up"></i> +{{ "%.2f"|format(metrics.total_pnl_pct) }}%</span>
+                {% else %}
+                <span class="negative"><i class="fas fa-caret-down"></i> {{ "%.2f"|format(metrics.total_pnl_pct) }}%</span>
+                {% endif %}
+                <span style="color:var(--text-muted);margin-left:8px;">({{ "{:+,.0f}".format(metrics.total_pnl) }}원)</span>
+            </div>
         </div>
-        <div class="metric-sub">{{ "{:+,.0f}".format(metrics.total_pnl) }}원</div>
-    </div>
-    <div class="metric-card cyan">
-        <div class="metric-label"><i class="fas fa-trophy"></i> 승률</div>
-        <div class="metric-value">{{ "%.1f"|format(metrics.win_rate) }}%</div>
-        <div class="metric-sub">{{ metrics.total_trades }}건 매매</div>
-    </div>
-    <div class="metric-card green">
-        <div class="metric-label"><i class="fas fa-balance-scale"></i> Profit Factor</div>
-        <div class="metric-value">{{ "%.2f"|format(metrics.pf) }}</div>
-        <div class="metric-sub">총이익/총손실</div>
-    </div>
-    <div class="metric-card red">
-        <div class="metric-label"><i class="fas fa-arrow-down"></i> MDD</div>
-        <div class="metric-value negative">{{ "%.1f"|format(metrics.mdd) }}%</div>
-        <div class="metric-sub">최대 낙폭</div>
-    </div>
-    <div class="metric-card purple">
-        <div class="metric-label"><i class="fas fa-star"></i> Sharpe Ratio</div>
-        <div class="metric-value">{{ "%.2f"|format(metrics.sharpe) }}</div>
-        <div class="metric-sub">위험조정 수익</div>
+
+        <div class="hero-divider"></div>
+
+        <!-- 핵심 성과 -->
+        <div class="hero-stat-group">
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-trophy" style="color:var(--accent-yellow);margin-right:6px;"></i>승률</span>
+                <span class="hs-value {{ 'positive' if metrics.win_rate >= 50 else 'negative' }}">{{ "%.1f"|format(metrics.win_rate) }}%</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-balance-scale" style="color:var(--accent-green);margin-right:6px;"></i>Profit Factor</span>
+                <span class="hs-value {{ 'positive' if metrics.pf >= 1.0 else 'negative' }}">{{ "%.2f"|format(metrics.pf) }}</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-arrow-down" style="color:var(--accent-red);margin-right:6px;"></i>MDD</span>
+                <span class="hs-value negative">{{ "%.1f"|format(metrics.mdd) }}%</span>
+            </div>
+        </div>
+
+        <div class="hero-divider"></div>
+
+        <!-- 시스템 상태 -->
+        <div class="hero-stat-group">
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-exchange-alt" style="color:var(--accent-cyan);margin-right:6px;"></i>총 매매</span>
+                <span class="hs-value">{{ metrics.total_trades }}건</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-star" style="color:var(--accent-purple);margin-right:6px;"></i>Sharpe</span>
+                <span class="hs-value">{{ "%.2f"|format(metrics.sharpe) }}</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hs-label"><i class="fas fa-clock" style="color:var(--text-muted);margin-right:6px;"></i>업데이트</span>
+                <span class="hs-value" style="font-size:12px;color:var(--text-secondary);">{{ metrics.updated_at or '-' }}</span>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- ═══ 시그널 배너: US Overnight + KOSPI 레짐 ═══ -->
+<div class="signal-grid">
+    <!-- US Overnight Signal -->
+    {% set us = market.us_signal %}
+    {% set us_class = 'bull' if 'BULL' in (us.grade|default('-')|upper) else ('bear' if 'BEAR' in (us.grade|default('-')|upper) else ('neutral' if us.grade|default('-') != '-' else 'unknown')) %}
+    {% set us_badge = 'bull-badge' if us_class == 'bull' else ('bear-badge' if us_class == 'bear' else ('neutral-badge' if us_class == 'neutral' else 'unknown-badge')) %}
+    <div class="signal-banner {{ us_class }}">
+        <div class="signal-header">
+            <span class="signal-title"><i class="fas fa-globe-americas"></i> US Overnight Signal</span>
+            <span class="signal-badge {{ us_badge }}">{{ us.grade|default('-') }}</span>
+        </div>
+        <div class="signal-details">
+            <div class="signal-detail">
+                <div class="sd-label">SPY</div>
+                <div class="sd-value {{ 'positive' if (us.spy_return|default(0)) >= 0 else 'negative' }}">
+                    {{ "%+.1f"|format(us.spy_return|default(0)) }}%
+                </div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">QQQ</div>
+                <div class="sd-value {{ 'positive' if (us.qqq_return|default(0)) >= 0 else 'negative' }}">
+                    {{ "%+.1f"|format(us.qqq_return|default(0)) }}%
+                </div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">VIX</div>
+                <div class="sd-value {{ 'negative' if (us.vix_return|default(0)) > 5 else ('positive' if (us.vix_return|default(0)) < -5 else '') }}">
+                    {{ "%+.1f"|format(us.vix_return|default(0)) }}%
+                </div>
+            </div>
+        </div>
+        {% if us.special_rules %}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+            {% for rule in us.special_rules %}
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(239,68,68,0.15);color:var(--accent-red);font-weight:600;">{{ rule }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- KOSPI Regime -->
+    {% set regime = market.regime|default('UNKNOWN') %}
+    {% set regime_class = 'bull' if regime == 'BULL' else ('neutral' if regime == 'CAUTION' else ('bear' if regime in ['BEAR', 'CRISIS'] else 'unknown')) %}
+    {% set regime_badge = 'bull-badge' if regime == 'BULL' else ('neutral-badge' if regime == 'CAUTION' else ('bear-badge' if regime in ['BEAR', 'CRISIS'] else 'unknown-badge')) %}
+    {% set regime_slots = market.regime_slots|default(0) %}
+    <div class="signal-banner {{ regime_class }}">
+        <div class="signal-header">
+            <span class="signal-title"><i class="fas fa-chart-bar"></i> KOSPI Regime</span>
+            <span class="signal-badge {{ regime_badge }}">{{ regime }}</span>
+        </div>
+        <div class="signal-details">
+            <div class="signal-detail">
+                <div class="sd-label">매수 슬롯</div>
+                <div class="sd-value" style="color:var(--accent-cyan);">{{ regime_slots }}개</div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">리포트 수</div>
+                <div class="sd-value">{{ recent_dates|length }}건</div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">시그널 점수</div>
+                <div class="sd-value">{{ us.score|default(0) }}점</div>
+            </div>
+        </div>
+        {% if us.kill_sectors %}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:var(--accent-red);font-weight:600;"><i class="fas fa-ban"></i> Kill:</span>
+            {% for sec in us.kill_sectors[:5] %}
+            <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(239,68,68,0.1);color:var(--accent-orange);">{{ sec }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══ 전략 배분 + 추천 종목 ═══ -->
 <div class="grid-2">
-    <!-- 왼쪽: 달력 + 차트 -->
+    <!-- 왼쪽: 추천 종목 + 수익 차트 -->
     <div>
+        <!-- 추천 종목 TOP -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-fire" style="color:var(--accent-orange);"></i> TODAY'S TOP PICKS</span>
+                <span style="font-size:11px;color:var(--text-muted);">{{ market.updated_at or '-' }}</span>
+            </div>
+            {% if market.picks %}
+            <table class="picks-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>종목명</th>
+                        <th>코드</th>
+                        <th style="text-align:right;">점수</th>
+                        <th style="text-align:center;">등급</th>
+                        <th>시그널</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pick in market.picks[:7] %}
+                    <tr>
+                        <td>
+                            <span class="pick-rank {{ 'top' if loop.index <= 3 else 'mid' }}">{{ loop.index }}</span>
+                        </td>
+                        <td><span class="pick-name">{{ pick.name }}</span></td>
+                        <td style="color:var(--text-muted);font-size:12px;">{{ pick.code }}</td>
+                        <td style="text-align:right;">
+                            <span class="pick-score {{ 'positive' if pick.score >= 80 else '' }}">{{ "%.1f"|format(pick.score) }}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            {% set g = pick.grade|default('C') %}
+                            <span class="pick-grade {{ 'grade-a' if g == 'A' else ('grade-b' if g == 'B' else 'grade-c') }}">{{ g }}</span>
+                        </td>
+                        <td style="font-size:11px;color:var(--text-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            {{ pick.signals|default('-') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state" style="padding:24px;">
+                <i class="fas fa-search"></i>
+                <p>봇에서 추천 종목 데이터가 올라오면 표시됩니다</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 수익 곡선 차트 -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-chart-area" style="color:var(--accent-green);"></i> Equity Curve</span>
+            </div>
+            {% if metrics.daily_pnl %}
+            <div class="chart-container">
+                <canvas id="pnlChart"></canvas>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:24px;">
+                <i class="fas fa-chart-area"></i>
+                <p>봇에서 수익 데이터가 올라오면 차트가 표시됩니다</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 오른쪽: 전략 + 달력 + 최근 리포트 -->
+    <div>
+        <!-- 전략별 성과 -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="fas fa-layer-group" style="color:var(--accent-purple);"></i> Strategy Allocation</span>
+            </div>
+            <div class="strategy-grid" style="grid-template-columns:1fr;">
+                <div class="strategy-card">
+                    <div class="strategy-name">
+                        <span class="badge badge-blue">{{ metrics.strategy_a.alloc }}%</span>
+                        {{ metrics.strategy_a.name }}
+                    </div>
+                    <div class="strategy-stat">
+                        <span class="label">Profit Factor</span>
+                        <span class="value {{ 'positive' if metrics.strategy_a.pf >= 1.0 else 'negative' }}">{{ "%.2f"|format(metrics.strategy_a.pf) }}</span>
+                    </div>
+                    <div class="strategy-stat">
+                        <span class="label">MDD</span>
+                        <span class="value negative">{{ "%.1f"|format(metrics.strategy_a.mdd) }}%</span>
+                    </div>
+                    <div class="alloc-bar">
+                        <div class="fill" style="width:{{ metrics.strategy_a.alloc }}%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan));"></div>
+                    </div>
+                </div>
+                <div class="strategy-card">
+                    <div class="strategy-name">
+                        <span class="badge badge-purple">{{ metrics.strategy_b.alloc }}%</span>
+                        {{ metrics.strategy_b.name }}
+                    </div>
+                    <div class="strategy-stat">
+                        <span class="label">Profit Factor</span>
+                        <span class="value {{ 'positive' if metrics.strategy_b.pf >= 1.0 else 'negative' }}">{{ "%.2f"|format(metrics.strategy_b.pf) }}</span>
+                    </div>
+                    <div class="strategy-stat">
+                        <span class="label">MDD</span>
+                        <span class="value negative">{{ "%.1f"|format(metrics.strategy_b.mdd) }}%</span>
+                    </div>
+                    <div class="alloc-bar">
+                        <div class="fill" style="width:{{ metrics.strategy_b.alloc }}%;background:linear-gradient(90deg,var(--accent-purple),var(--accent-pink));"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 달력 -->
         <div class="card">
             <div class="calendar-nav">
@@ -76,68 +282,11 @@
                 </tbody>
             </table>
         </div>
-        
-        <!-- 수익 곡선 차트 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title"><i class="fas fa-chart-area"></i> 수익 곡선</span>
-            </div>
-            {% if metrics.daily_pnl %}
-            <div class="chart-container">
-                <canvas id="pnlChart"></canvas>
-            </div>
-            {% else %}
-            <div class="empty-state" style="padding:30px;">
-                <i class="fas fa-chart-area"></i>
-                <p>봇에서 수익 데이터가 올라오면 차트가 표시됩니다</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    
-    <!-- 오른쪽: 전략 비교 + 최근 리포트 -->
-    <div>
-        <!-- 전략별 성과 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title"><i class="fas fa-layer-group"></i> 전략별 성과</span>
-            </div>
-            <div class="strategy-grid" style="grid-template-columns:1fr;">
-                <div class="strategy-card">
-                    <div class="strategy-name">
-                        <span class="badge badge-blue">{{ metrics.strategy_a.alloc }}%</span>
-                        {{ metrics.strategy_a.name }}
-                    </div>
-                    <div class="strategy-stat">
-                        <span class="label">PF</span>
-                        <span class="value">{{ "%.2f"|format(metrics.strategy_a.pf) }}</span>
-                    </div>
-                    <div class="strategy-stat">
-                        <span class="label">MDD</span>
-                        <span class="value negative">{{ "%.1f"|format(metrics.strategy_a.mdd) }}%</span>
-                    </div>
-                </div>
-                <div class="strategy-card">
-                    <div class="strategy-name">
-                        <span class="badge badge-purple">{{ metrics.strategy_b.alloc }}%</span>
-                        {{ metrics.strategy_b.name }}
-                    </div>
-                    <div class="strategy-stat">
-                        <span class="label">PF</span>
-                        <span class="value">{{ "%.2f"|format(metrics.strategy_b.pf) }}</span>
-                    </div>
-                    <div class="strategy-stat">
-                        <span class="label">MDD</span>
-                        <span class="value negative">{{ "%.1f"|format(metrics.strategy_b.mdd) }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+
         <!-- 최근 리포트 -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title"><i class="fas fa-file-alt"></i> 최근 리포트</span>
+                <span class="card-title"><i class="fas fa-file-alt" style="color:var(--accent-green);"></i> Recent Reports</span>
             </div>
             {% if recent_dates %}
             <ul class="report-list">
@@ -145,7 +294,7 @@
                 <li>
                     <a href="{{ url_for('view_report', date=date) }}">
                         <span class="date-label">
-                            <i class="fas fa-file-alt" style="color:var(--accent-green);margin-right:8px;font-size:12px;"></i>
+                            <i class="fas fa-file-alt" style="color:var(--accent-green);margin-right:8px;font-size:11px;"></i>
                             {{ date }}
                         </span>
                         <span class="arrow"><i class="fas fa-chevron-right"></i></span>
@@ -154,36 +303,15 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <div class="empty-state" style="padding:30px;">
+            <div class="empty-state" style="padding:24px;">
                 <i class="fas fa-inbox"></i>
                 <p>아직 리포트가 없습니다</p>
-                <p style="font-size:12px;margin-top:8px;">
-                    <a href="{{ url_for('upload_report') }}" style="color:var(--accent-blue);">수동 업로드</a> 
-                    또는 봇 API로 자동 업로드하세요
+                <p style="font-size:11px;margin-top:6px;">
+                    <a href="{{ url_for('upload_report') }}" style="color:var(--accent-blue);">수동 업로드</a>
+                    또는 봇 API로 자동 업로드
                 </p>
             </div>
             {% endif %}
-        </div>
-        
-        <!-- 시스템 상태 -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title"><i class="fas fa-server"></i> 시스템 상태</span>
-            </div>
-            <div style="font-size:13px;">
-                <div class="strategy-stat">
-                    <span class="label">서버</span>
-                    <span class="value positive"><i class="fas fa-circle" style="font-size:8px;"></i> Online</span>
-                </div>
-                <div class="strategy-stat">
-                    <span class="label">총 리포트</span>
-                    <span class="value">{{ recent_dates|length }}건</span>
-                </div>
-                <div class="strategy-stat">
-                    <span class="label">마지막 업데이트</span>
-                    <span class="value">{{ metrics.updated_at or '-' }}</span>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -196,41 +324,61 @@ const pnlData = {{ metrics.daily_pnl | tojson }};
 const labels = pnlData.map(d => d.date.slice(5));
 const values = pnlData.map(d => d.pnl);
 
-// 누적 수익 계산
 let cumulative = [];
 let sum = 0;
 values.forEach(v => { sum += v; cumulative.push(sum); });
 
 const ctx = document.getElementById('pnlChart').getContext('2d');
+const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+gradient.addColorStop(0, 'rgba(16,185,129,0.25)');
+gradient.addColorStop(1, 'rgba(16,185,129,0.02)');
+
 new Chart(ctx, {
     type: 'line',
     data: {
         labels: labels,
         datasets: [{
-            label: '누적 수익',
+            label: 'Cumulative P&L',
             data: cumulative,
             borderColor: '#10b981',
-            backgroundColor: 'rgba(16,185,129,0.1)',
+            backgroundColor: gradient,
             fill: true,
             tension: 0.4,
             pointRadius: 0,
+            pointHoverRadius: 4,
+            pointHoverBackgroundColor: '#10b981',
             borderWidth: 2
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(15,23,42,0.95)',
+                titleColor: '#94a3b8',
+                bodyColor: '#e2e8f0',
+                borderColor: '#334155',
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: function(ctx) { return (ctx.parsed.y / 10000).toFixed(1) + '만원'; }
+                }
+            }
+        },
         scales: {
             x: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
+                grid: { color: 'rgba(255,255,255,0.03)' },
                 ticks: { color: '#64748b', font: { size: 10 } }
             },
             y: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
+                grid: { color: 'rgba(255,255,255,0.03)' },
                 ticks: {
                     color: '#64748b', font: { size: 10 },
-                    callback: v => (v/10000).toFixed(0) + '만'
+                    callback: function(v) { return (v / 10000).toFixed(0) + '만'; }
                 }
             }
         }

@@ -1,6 +1,8 @@
 """JARVIS 대시보드 연동 — ppwangga.com 자동 업로드
 
-BAT-D/BAT-A에서 호출하여 일일 리포트 + 메트릭스를 대시보드에 업로드.
+BAT-D/BAT-A에서 호출하여 일일 리포트 + 메트릭스 + 시장 데이터를 대시보드에 업로드.
+
+v2.0: 추천종목 + US Overnight + KOSPI 레짐 업로드 추가
 """
 
 from __future__ import annotations
@@ -80,8 +82,25 @@ class JarvisUploader:
             logger.warning(f"[JARVIS] 메트릭스 업데이트 실패: {e}")
             return {"error": str(e)}
 
+    def update_market_data(self, data: dict) -> dict:
+        """대시보드 시장 데이터 업데이트 (추천종목, US시그널, 레짐)."""
+        if not self.is_available:
+            return {"error": "API key not set"}
+
+        url = f"{self.base_url}/api/market"
+
+        try:
+            resp = requests.post(url, headers=self.headers, json=data, timeout=30)
+            resp.raise_for_status()
+            logger.info("[JARVIS] 시장 데이터 업데이트 완료")
+            return resp.json()
+
+        except Exception as e:
+            logger.warning(f"[JARVIS] 시장 데이터 업데이트 실패: {e}")
+            return {"error": str(e)}
+
     def upload_daily_auto(self):
-        """BAT-D/BAT-A 자동 호출용 — HTML 보고서 + 메트릭스 일괄 업로드."""
+        """BAT-D/BAT-A 자동 호출용 — HTML 보고서 + 메트릭스 + 시장 데이터 일괄 업로드."""
         today = datetime.now().strftime("%Y-%m-%d")
         results = []
 
@@ -98,11 +117,17 @@ class JarvisUploader:
             results.append(f"HTML: {r.get('status', r.get('error', '?'))}")
             logger.info(f"[JARVIS] HTML 업로드: {latest.name}")
 
-        # 2) 메트릭스 업데이트 (picks_history + 포트폴리오 데이터)
+        # 2) 메트릭스 업데이트 (포트폴리오 + 성과)
         metrics = self._build_metrics()
         if metrics:
             r = self.update_metrics(**metrics)
             results.append(f"Metrics: {r.get('status', r.get('error', '?'))}")
+
+        # 3) 시장 데이터 업데이트 (추천종목 + US시그널 + 레짐)
+        market = self._build_market_data()
+        if market:
+            r = self.update_market_data(market)
+            results.append(f"Market: {r.get('status', r.get('error', '?'))}")
 
         return results
 
@@ -148,6 +173,76 @@ class JarvisUploader:
         }
 
         return metrics
+
+    def _build_market_data(self) -> dict:
+        """추천종목 + US Overnight + KOSPI 레짐 데이터 빌드."""
+        market = {}
+
+        # 1) 추천종목 (tomorrow_picks.json)
+        picks_path = DATA_DIR / "tomorrow_picks.json"
+        if picks_path.exists():
+            try:
+                raw = json.loads(picks_path.read_text(encoding="utf-8"))
+                picks_list = raw if isinstance(raw, list) else raw.get("picks", [])
+                market["picks"] = [
+                    {
+                        "name": p.get("name", p.get("stock_name", "")),
+                        "code": p.get("code", p.get("stock_code", "")),
+                        "score": p.get("score", p.get("total_score", 0)),
+                        "grade": p.get("grade", "C"),
+                        "signals": ", ".join(p.get("signals", [])) if isinstance(p.get("signals"), list) else p.get("signals", "-"),
+                    }
+                    for p in picks_list[:10]
+                ]
+            except Exception as e:
+                logger.warning(f"[JARVIS] 추천종목 로드 실패: {e}")
+
+        # 2) US Overnight Signal
+        signal_path = DATA_DIR / "overnight_signal.json"
+        if signal_path.exists():
+            try:
+                sig = json.loads(signal_path.read_text(encoding="utf-8"))
+                market["us_signal"] = {
+                    "grade": sig.get("grade", "-"),
+                    "score": sig.get("l1_score", sig.get("score", 0)),
+                    "spy_return": sig.get("spy_return", sig.get("returns", {}).get("SPY", 0)),
+                    "qqq_return": sig.get("qqq_return", sig.get("returns", {}).get("QQQ", 0)),
+                    "vix_return": sig.get("vix_return", sig.get("returns", {}).get("^VIX", 0)),
+                    "special_rules": sig.get("special_rules", sig.get("triggered_rules", [])),
+                    "kill_sectors": sig.get("kill_sectors", []),
+                }
+            except Exception as e:
+                logger.warning(f"[JARVIS] US 시그널 로드 실패: {e}")
+
+        # 3) KOSPI 레짐
+        regime_map = {"BULL": 5, "CAUTION": 3, "BEAR": 2, "CRISIS": 0}
+        kospi_path = DATA_DIR / "kospi_index.csv"
+        if kospi_path.exists():
+            try:
+                import pandas as pd
+                df = pd.read_csv(kospi_path, parse_dates=["Date"])
+                if len(df) >= 60:
+                    close = df["Close"].iloc[-1]
+                    ma20 = df["Close"].iloc[-20:].mean()
+                    ma60 = df["Close"].iloc[-60:].mean()
+                    rv20 = df["Close"].pct_change().iloc[-20:].std() * (252 ** 0.5)
+                    rv_median = df["Close"].pct_change().rolling(20).std().iloc[-252:].median() * (252 ** 0.5) if len(df) >= 272 else 0.2
+
+                    if close > ma20 and rv20 < rv_median:
+                        regime = "BULL"
+                    elif close > ma20:
+                        regime = "CAUTION"
+                    elif close > ma60:
+                        regime = "BEAR"
+                    else:
+                        regime = "CRISIS"
+
+                    market["regime"] = regime
+                    market["regime_slots"] = regime_map.get(regime, 0)
+            except Exception as e:
+                logger.warning(f"[JARVIS] KOSPI 레짐 계산 실패: {e}")
+
+        return market
 
 
 def main():
