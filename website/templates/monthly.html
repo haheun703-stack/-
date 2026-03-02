@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}JARVIS — 월간 보고서{% endblock %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title"><i class="fas fa-calendar-alt"></i> 월간 보고서</span>
+            <span style="font-size:13px; color:var(--text-muted);">{{ report.year }}년 {{ report.month }}월</span>
+        </div>
+        
+        <!-- 월간 요약 -->
+        <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:24px;">
+            <div class="metric-card cyan" style="padding:14px;">
+                <div class="metric-label">리포트 수</div>
+                <div class="metric-value" style="font-size:24px;">{{ report.report_count }}건</div>
+            </div>
+            <div class="metric-card green" style="padding:14px;">
+                <div class="metric-label">승률</div>
+                <div class="metric-value" style="font-size:24px;">{{ "%.1f"|format(metrics.win_rate) }}%</div>
+            </div>
+            <div class="metric-card purple" style="padding:14px;">
+                <div class="metric-label">Sharpe</div>
+                <div class="metric-value" style="font-size:24px;">{{ "%.2f"|format(metrics.sharpe) }}</div>
+            </div>
+        </div>
+        
+        <!-- 전략 비교 -->
+        <h3 style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">
+            <i class="fas fa-layer-group"></i> 전략별 성과
+        </h3>
+        <div class="strategy-grid" style="margin-bottom:24px;">
+            <div class="strategy-card">
+                <div class="strategy-name">
+                    <span class="badge badge-blue">{{ metrics.strategy_a.alloc }}%</span>
+                    {{ metrics.strategy_a.name }}
+                </div>
+                <div class="strategy-stat">
+                    <span class="label">PF</span>
+                    <span class="value">{{ "%.2f"|format(metrics.strategy_a.pf) }}</span>
+                </div>
+                <div class="strategy-stat">
+                    <span class="label">MDD</span>
+                    <span class="value negative">{{ "%.1f"|format(metrics.strategy_a.mdd) }}%</span>
+                </div>
+            </div>
+            <div class="strategy-card">
+                <div class="strategy-name">
+                    <span class="badge badge-purple">{{ metrics.strategy_b.alloc }}%</span>
+                    {{ metrics.strategy_b.name }}
+                </div>
+                <div class="strategy-stat">
+                    <span class="label">PF</span>
+                    <span class="value">{{ "%.2f"|format(metrics.strategy_b.pf) }}</span>
+                </div>
+                <div class="strategy-stat">
+                    <span class="label">MDD</span>
+                    <span class="value negative">{{ "%.1f"|format(metrics.strategy_b.mdd) }}%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 일별 리포트 -->
+        {% if report.dates %}
+        <h3 style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">
+            <i class="fas fa-list"></i> 이번 달 리포트
+        </h3>
+        <ul class="report-list">
+            {% for date in report.dates %}
+            <li>
+                <a href="{{ url_for('view_report', date=date) }}">
+                    <span class="date-label">
+                        <i class="fas fa-file-alt" style="color:var(--accent-green); margin-right:8px; font-size:12px;"></i>
+                        {{ date }}
+                    </span>
+                    <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state" style="padding:30px;">
+            <i class="fas fa-inbox"></i>
+            <p>이번 달 리포트가 없습니다</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

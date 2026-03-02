@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}JARVIS — 주간 보고서{% endblock %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title"><i class="fas fa-calendar-week"></i> 주간 보고서</span>
+            <span style="font-size:13px; color:var(--text-muted);">{{ report.start }} ~ {{ report.end }}</span>
+        </div>
+        
+        <!-- 주간 요약 -->
+        <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:24px;">
+            <div class="metric-card cyan" style="padding:14px;">
+                <div class="metric-label">리포트 수</div>
+                <div class="metric-value" style="font-size:24px;">{{ report.report_count }}건</div>
+            </div>
+            <div class="metric-card green" style="padding:14px;">
+                <div class="metric-label">PF</div>
+                <div class="metric-value" style="font-size:24px;">{{ "%.2f"|format(metrics.pf) }}</div>
+            </div>
+            <div class="metric-card red" style="padding:14px;">
+                <div class="metric-label">MDD</div>
+                <div class="metric-value negative" style="font-size:24px;">{{ "%.1f"|format(metrics.mdd) }}%</div>
+            </div>
+        </div>
+        
+        <!-- 일별 리포트 -->
+        {% if report.dates %}
+        <h3 style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">
+            <i class="fas fa-list"></i> 이번 주 리포트
+        </h3>
+        <ul class="report-list">
+            {% for date in report.dates %}
+            <li>
+                <a href="{{ url_for('view_report', date=date) }}">
+                    <span class="date-label">
+                        <i class="fas fa-file-alt" style="color:var(--accent-green); margin-right:8px; font-size:12px;"></i>
+                        {{ date }}
+                    </span>
+                    <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state" style="padding:30px;">
+            <i class="fas fa-inbox"></i>
+            <p>이번 주 리포트가 없습니다</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

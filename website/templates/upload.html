@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}JARVIS — 리포트 업로드{% endblock %}
+
+{% block content %}
+<div class="upload-form">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title"><i class="fas fa-upload"></i> 수동 리포트 업로드</span>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>날짜</label>
+                <input type="date" name="date" value="{{ now }}" required>
+            </div>
+            <div class="form-group">
+                <label>HTML 리포트 파일</label>
+                <input type="file" name="report_file" accept=".html,.htm" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+                <i class="fas fa-cloud-upload-alt"></i> 업로드
+            </button>
+        </form>
+    </div>
+    
+    <!-- API 가이드 -->
+    <div class="card" style="margin-top:20px;">
+        <div class="card-header">
+            <span class="card-title"><i class="fas fa-robot"></i> 봇 자동 업로드 API</span>
+        </div>
+        <div style="font-size:13px; color:var(--text-secondary); line-height:1.8;">
+            <p>자동매매 봇에서 아래 코드를 사용하면 리포트가 자동으로 올라옵니다:</p>
+            <pre style="background:var(--bg-primary); padding:16px; border-radius:8px; margin-top:12px; overflow-x:auto; font-size:12px; color:var(--accent-cyan);">
+import requests
+
+url = "https://www.ppwangga.com/api/upload"
+headers = {"X-API-Key": "YOUR_API_KEY"}
+
+# 파일 업로드
+files = {"file": open("report.html", "rb")}
+data = {"date": "2026-03-02"}
+requests.post(url, headers=headers, files=files, data=data)
+
+# 또는 HTML 텍스트 직접 전송
+requests.post(url, headers=headers, json={
+    "date": "2026-03-02",
+    "html": "&lt;html&gt;리포트 내용&lt;/html&gt;"
+})</pre>
+            
+            <p style="margin-top:16px;"><strong>메트릭스 업데이트:</strong></p>
+            <pre style="background:var(--bg-primary); padding:16px; border-radius:8px; margin-top:12px; overflow-x:auto; font-size:12px; color:var(--accent-cyan);">
+requests.post("https://www.ppwangga.com/api/metrics",
+    headers={"X-API-Key": "YOUR_API_KEY"},
+    json={
+        "total_pnl": 1500000,
+        "total_pnl_pct": 5.2,
+        "win_rate": 62.5,
+        "pf": 1.78,
+        "mdd": -4.5,
+        "sharpe": 2.22,
+        "portfolio_value": 30000000,
+        "today_pnl": 150000
+    }
+)</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

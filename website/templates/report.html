@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}JARVIS — {{ date }} 리포트{% endblock %}
+
+{% block content %}
+<div class="report-nav">
+    <div>
+        {% if prev_date %}
+        <a href="{{ url_for('view_report', date=prev_date) }}">
+            <i class="fas fa-chevron-left"></i> {{ prev_date }}
+        </a>
+        {% endif %}
+    </div>
+    <span class="date-title">
+        <i class="fas fa-file-alt" style="color:var(--accent-green);"></i> {{ date }}
+    </span>
+    <div>
+        {% if next_date %}
+        <a href="{{ url_for('view_report', date=next_date) }}">
+            {{ next_date }} <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+    <div class="report-frame">
+        <iframe srcdoc="{{ content|e }}" sandbox="allow-same-origin allow-scripts"></iframe>
+    </div>
+</div>
+
+<div style="text-align:center; margin-top:16px;">
+    <a href="{{ url_for('dashboard') }}" style="color:var(--accent-blue); text-decoration:none; font-size:14px;">
+        <i class="fas fa-arrow-left"></i> 대시보드로 돌아가기
+    </a>
+</div>
+{% endblock %}

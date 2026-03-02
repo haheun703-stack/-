@@ -201,8 +201,9 @@ if "%DOW%"=="4" (
     echo [%date% %time%] [22/28] 주간 보고서 스킵 (금요일 아님) >> logs\schedule.log
 )
 
-REM 23단계: [폐지] Railway → ppwangga.com 이전 예정
-echo [%date% %time%] [23/28] Railway 폐지 (ppwangga.com 이전 예정) >> logs\schedule.log
+REM 23단계: ppwangga.com 대시보드 업로드 (일일 리포트 + 메트릭스)
+echo [%date% %time%] [23/28] JARVIS 대시보드 업로드 >> logs\schedule.log
+python -u -X utf8 -c "from src.adapters.jarvis_uploader import main; main()" >> logs\schedule.log 2>&1
 
 REM 24단계: 저녁 통합 텔레그램 (보유종목+DART+추천+밸류체인 → 1건)
 echo [%date% %time%] [24/29] 저녁 통합 리포트 >> logs\schedule.log
