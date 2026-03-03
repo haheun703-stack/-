@@ -63,6 +63,14 @@ SYSTEM_SELL_BRAIN = """\
    - 미국 선물 하락, VIX 급등 → 비중 축소 권고
    - 어닝 시즌 전날 → 리스크 경고
 
+8. **뉴스 촉매 전망** (GPT 분석 결과 참조) ★핵심
+   - GPT가 CATALYST_ALIVE + tomorrow=UP → 함부로 매도하지 마라
+   - GPT가 CATALYST_DEAD + 기술적 매도 시그널 → 매도 강화
+   - GPT가 CATALYST_FADING → 부분매도(50%) 후 관찰 고려
+
+   ★ 뉴스 촉매가 살아있는 종목을 단순 기술적 이탈로 매도하면
+     "내일 10% 더 오를 종목"을 놓치게 됩니다. 촉매 우선 원칙.
+
 ## 판단 등급
 - HOLD: 유지 (변화 없음)
 - WATCH: 관찰 (내일까지 대기)
@@ -119,6 +127,7 @@ class SellBrainAgent(BaseAgent):
         positions: list[dict],
         strategic_result: dict,
         sector_focus: dict | None = None,
+        gpt_catalyst: dict | None = None,
     ) -> dict:
         """장중 AI 매도 체크 (10:00, 12:00, 14:00).
 
@@ -126,6 +135,7 @@ class SellBrainAgent(BaseAgent):
             positions: 현재 보유 포지션
             strategic_result: Phase 1 결과 (thesis 참조)
             sector_focus: Phase 2 결과 (섹터 경고 참조)
+            gpt_catalyst: GPT 뉴스 촉매 분석 결과 (듀얼 AI)
 
         Returns:
             {positions: [{ticker, action, reasoning, ...}]}
@@ -136,17 +146,19 @@ class SellBrainAgent(BaseAgent):
 
         position_text = self._format_positions(positions)
         context_text = self._format_context(strategic_result, sector_focus)
+        catalyst_text = self._format_catalyst_context(gpt_catalyst)
 
         now = datetime.now().strftime("%H:%M")
         user_prompt = f"""\
 ## 장중 매도 체크: {now}
 
 {context_text}
+{catalyst_text}
 
 {position_text}
 
 각 보유 종목의 매도/유지 판단을 JSON으로 응답하세요.
-thesis 변화와 기술적 이탈에 주의하세요.
+thesis 변화와 기술적 이탈에 주의하되, 뉴스 촉매가 살아있으면 매도를 자제하세요.
 """
 
         logger.info("v3 Sell Brain 장중 체크 시작 (%d종목)", len(positions))
@@ -175,13 +187,15 @@ thesis 변화와 기술적 이탈에 주의하세요.
         positions: list[dict],
         strategic_result: dict,
         overnight_signal: dict | None = None,
+        gpt_catalyst: dict | None = None,
     ) -> dict:
-        """프리클로즈 AI 매도 (14:30) — 오버나이트 리스크 집중 분석.
+        """프리클로즈 AI 매도 (14:30) — 오버나이트 리스크 + 내일 전망.
 
         Args:
             positions: 현재 보유 포지션
             strategic_result: Phase 1 결과
             overnight_signal: US overnight 시그널 (있으면)
+            gpt_catalyst: GPT 뉴스 촉매 분석 결과 (듀얼 AI)
 
         Returns:
             {positions: [{ticker, action, ...}]}
@@ -190,6 +204,7 @@ thesis 변화와 기술적 이탈에 주의하세요.
             return self._empty_result("preclose")
 
         position_text = self._format_positions(positions)
+        catalyst_text = self._format_catalyst_context(gpt_catalyst)
 
         overnight_text = ""
         if overnight_signal:
@@ -206,10 +221,12 @@ thesis 변화와 기술적 이탈에 주의하세요.
 
 [레짐: {strategic_result.get('regime', '?')}]
 [리스크: {', '.join(strategic_result.get('risk_factors', [])[:3])}]
+{catalyst_text}
 
 {position_text}
 
-오버나이트 리스크를 고려하여 매도/유지 판단을 JSON으로 응답하세요.
+오버나이트 리스크와 내일 전망을 모두 고려하여 매도/유지 판단을 JSON으로 응답하세요.
+뉴스 촉매가 살아있으면 내일 추가 상승 가능성을 반영하세요.
 미국 시장 하락 가능성이 높으면 비중 축소를 권고하세요.
 """
 
@@ -264,6 +281,47 @@ thesis 변화와 기술적 이탈에 주의하세요.
             sar = p.get("sar_trend")
             if rsi is not None:
                 lines.append(f"    RSI={rsi:.1f}, ADX={adx or '?'}, SAR={'↑' if sar == 1 else '↓' if sar == -1 else '?'}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def _format_catalyst_context(gpt_catalyst: dict | None) -> str:
+        """GPT 촉매 분석 결과 → 텍스트"""
+        if not gpt_catalyst or gpt_catalyst.get("error"):
+            return ""
+
+        lines = ["\n[GPT 뉴스 촉매 분석]"]
+        summary = gpt_catalyst.get("market_catalyst_summary", "")
+        if summary:
+            lines.append(f"  시장: {summary}")
+
+        for p in gpt_catalyst.get("positions", []):
+            name = p.get("name", "?")
+            status = p.get("catalyst_status", "?")
+            strength = p.get("catalyst_strength", 0)
+            catalyst = p.get("primary_catalyst", "")
+            lifespan = p.get("catalyst_lifespan", "")
+            tomorrow = p.get("tomorrow_direction", "?")
+            confidence = p.get("tomorrow_confidence", 0)
+            day_after = p.get("day_after_direction", "?")
+            news = p.get("news_summary", "")
+
+            status_emoji = {
+                "CATALYST_ALIVE": "🟢",
+                "CATALYST_FADING": "🟡",
+                "CATALYST_DEAD": "🔴",
+                "CATALYST_NEW": "🔵",
+            }.get(status, "⚪")
+
+            lines.append(f"  {status_emoji} {name}: {status} (강도 {strength:.0%})")
+            lines.append(f"    촉매: {catalyst} (수명: {lifespan})")
+            lines.append(f"    내일: {tomorrow} (확신 {confidence:.0%}), 모레: {day_after}")
+            if news:
+                lines.append(f"    뉴스: {news[:80]}")
+
+            risks = p.get("catalyst_risks", [])
+            if risks:
+                lines.append(f"    리스크: {', '.join(risks[:2])}")
 
         return "\n".join(lines)
 

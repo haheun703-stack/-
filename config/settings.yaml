@@ -1418,3 +1418,28 @@ ai_brain_v3:
     check_times: ["10:00", "12:00", "14:00"]  # 장중 AI 매도 체크 시각
     preclose_time: "14:30"     # 프리클로즈 AI 매도 시각
     cache_ttl_min: 35          # ai_sell_cache TTL (분)
+
+# ============================================================
+# 듀얼 AI 매도 시스템 — Claude + GPT 역할 분담
+# ============================================================
+# Claude Sonnet: 기술적 분석 + 포트폴리오 맥락 + 최종 판단
+# GPT-4o: 뉴스 촉매 분석 + 내일/모레 전망
+# 합의 규칙: GPT 촉매가 살아있으면 Claude의 매도 판단 무효화
+dual_sell_system:
+  enabled: true
+
+  # GPT News Catalyst Analyst
+  gpt_catalyst:
+    model: "gpt-4o"
+    max_tokens: 4000
+    temperature: 0.3
+    max_news_items: 40            # 뉴스 맥락 최대 줄수
+    timeout_sec: 30               # GPT 응답 타임아웃
+    fallback_on_failure: true     # GPT 실패 시 Claude 단독 판단
+
+  # 합의 규칙
+  consensus:
+    catalyst_alive_overrides_sell: true    # GPT ALIVE → Claude SELL 무효화
+    catalyst_fading_downgrades: true       # FADING → SELL을 PARTIAL로 다운
+    manual_entry_protection: true          # 수동매수 자동매도 차단
+    manual_entries_file: "manual_entries.json"

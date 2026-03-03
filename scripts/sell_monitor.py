@@ -62,6 +62,12 @@ def save_json(name: str, data: dict):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def load_manual_entries() -> dict:
+    """수동매수 종목 로드 → {ticker: {name, auto_sell, ...}}"""
+    data = load_json("manual_entries.json")
+    return data.get("entries", {})
+
+
 def load_target_prices() -> dict:
     """tomorrow_picks.json에서 종목별 목표가/손절가 로드.
 
@@ -124,8 +130,9 @@ def fetch_holdings() -> list[dict]:
     resp = broker.fetch_balance()
     holdings = resp.get("output1", [])
 
-    # 목표가 맵 로드
+    # 목표가 맵 + 수동매수 맵 로드
     target_map = load_target_prices()
+    manual_map = load_manual_entries()
 
     # v3 picks 목표가도 로드
     v3 = load_json("ai_v3_picks.json")
@@ -172,6 +179,9 @@ def fetch_holdings() -> list[dict]:
             supply_demand = fetch_supply_demand(ticker)
             time.sleep(0.3)  # API 쓰로틀링
 
+        # 수동매수 플래그
+        is_manual = ticker in manual_map
+
         pos = {
             "ticker": ticker,
             "name": name,
@@ -189,6 +199,8 @@ def fetch_holdings() -> list[dict]:
             "foreign_net": supply_demand.get("foreign_net", 0),
             "inst_net": supply_demand.get("inst_net", 0),
             "individual_net": supply_demand.get("individual_net", 0),
+            # 수동매수 보호
+            "manual_entry": is_manual,
         }
         positions.append(pos)
 
@@ -240,34 +252,230 @@ def send_telegram(text: str):
         logger.warning("텔레그램 전송 실패: %s", e)
 
 
+def apply_consensus(
+    claude_result: dict,
+    gpt_result: dict,
+    positions: list[dict],
+) -> dict:
+    """GPT 촉매 + Claude 기술 → 합의 규칙 적용.
+
+    합의 매트릭스:
+      ALIVE + SELL → HOLD (촉매 우선)
+      ALIVE + PARTIAL → HOLD (촉매 우선)
+      FADING + SELL → PARTIAL (절충)
+      FADING + PARTIAL → PARTIAL (일치)
+      DEAD + SELL → SELL (일치)
+      DEAD + PARTIAL → SELL (촉매 없으니 빠른 청산)
+      manual_entry → 알림만 (자동매도 금지)
+    """
+    # GPT 촉매 맵 생성
+    gpt_map = {}
+    for gp in gpt_result.get("positions", []):
+        gpt_map[gp.get("ticker", "")] = gp
+
+    # Claude 판단 맵
+    claude_map = {}
+    for cp in claude_result.get("positions", []):
+        claude_map[cp.get("ticker", "")] = cp
+
+    # 포지션 manual 맵
+    manual_map = {p["ticker"]: p.get("manual_entry", False) for p in positions}
+
+    final_decisions = []
+    catalyst_overrides = 0
+    manual_blocks = 0
+
+    for pos in positions:
+        ticker = pos["ticker"]
+        name = pos.get("name", "?")
+        is_manual = manual_map.get(ticker, False)
+
+        claude_pos = claude_map.get(ticker, {})
+        claude_action = claude_pos.get("action", "HOLD")
+        claude_reasoning = claude_pos.get("reasoning", "")
+
+        gpt_pos = gpt_map.get(ticker, {})
+        catalyst_status = gpt_pos.get("catalyst_status", "CATALYST_DEAD")
+        catalyst_strength = gpt_pos.get("catalyst_strength", 0)
+        tomorrow_dir = gpt_pos.get("tomorrow_direction", "UNCERTAIN")
+        tomorrow_conf = gpt_pos.get("tomorrow_confidence", 0)
+        catalyst_note = gpt_pos.get("primary_catalyst", "")
+
+        # confidence < 0.5인 ALIVE는 무시 (이상 감지)
+        if catalyst_status == "CATALYST_ALIVE" and catalyst_strength < 0.5:
+            catalyst_status = "CATALYST_FADING"
+
+        # ── 수동매수 보호 ──
+        if is_manual:
+            manual_blocks += 1
+            final_decisions.append({
+                "ticker": ticker,
+                "name": name,
+                "claude_action": claude_action,
+                "gpt_catalyst": catalyst_status,
+                "final_action": "HOLD",
+                "override_reason": f"수동매수 보호 (Claude: {claude_action})",
+                "manual_entry": True,
+                "manual_blocked": True,
+                "manual_alert": claude_action in ("SELL_NOW", "PARTIAL_SELL"),
+                "reasoning": claude_reasoning,
+                "catalyst_note": catalyst_note,
+                "tomorrow_direction": tomorrow_dir,
+            })
+            continue
+
+        # ── 합의 매트릭스 적용 ──
+        final_action = claude_action  # 기본값: Claude 따름
+        override_reason = ""
+
+        if catalyst_status == "CATALYST_ALIVE":
+            if claude_action in ("SELL_NOW", "PARTIAL_SELL"):
+                final_action = "HOLD"
+                override_reason = f"촉매 생존(강도 {catalyst_strength:.0%}) → 매도 보류"
+                catalyst_overrides += 1
+            # HOLD/WATCH → 그대로 HOLD
+
+        elif catalyst_status == "CATALYST_FADING":
+            if claude_action == "SELL_NOW":
+                final_action = "PARTIAL_SELL"
+                override_reason = "촉매 약화 중 → 절충 PARTIAL"
+                catalyst_overrides += 1
+            # PARTIAL/HOLD/WATCH → 그대로
+
+        elif catalyst_status == "CATALYST_DEAD":
+            if claude_action == "PARTIAL_SELL":
+                final_action = "SELL_NOW"
+                override_reason = "촉매 소멸 → 빠른 청산"
+            # SELL_NOW → 그대로, HOLD → WATCH로 올릴 수도 있지만 Claude 판단 존중
+
+        # CATALYST_NEW는 Claude 판단 그대로 (새 촉매 방향에 따라 다름)
+
+        final_decisions.append({
+            "ticker": ticker,
+            "name": name,
+            "claude_action": claude_action,
+            "gpt_catalyst": catalyst_status,
+            "final_action": final_action,
+            "override_reason": override_reason,
+            "manual_entry": False,
+            "manual_blocked": False,
+            "manual_alert": False,
+            "reasoning": claude_reasoning,
+            "catalyst_note": catalyst_note,
+            "tomorrow_direction": tomorrow_dir,
+        })
+
+    return {
+        "final_decisions": final_decisions,
+        "consensus_stats": {
+            "catalyst_overrides": catalyst_overrides,
+            "manual_blocks": manual_blocks,
+            "total": len(positions),
+        },
+    }
+
+
 async def run_check(positions: list[dict], broker, check_type: str, dry_run: bool) -> dict:
-    """1회 매도 체크 + 실행"""
+    """1회 매도 체크 + 실행 — 듀얼 AI (GPT 촉매 + Claude 기술)"""
+    import yaml
     from src.agents.sell_brain import SellBrainAgent
 
     strategic = load_json("ai_strategic_analysis.json")
     sector_focus = load_json("ai_sector_focus.json")
 
+    # ── 듀얼 AI 활성화 여부 확인 ──
+    dual_enabled = False
+    try:
+        with open(ROOT / "config" / "settings.yaml", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        dual_enabled = cfg.get("dual_sell_system", {}).get("enabled", False)
+    except Exception:
+        pass
+
+    # ── Step 1: GPT 뉴스 촉매 분석 (듀얼 AI 활성 시) ──
+    gpt_result = None
+    if dual_enabled:
+        try:
+            from src.agents.gpt_catalyst import GPTCatalystAgent
+            gpt_agent = GPTCatalystAgent()
+            gpt_result = await gpt_agent.analyze_catalysts(positions)
+            save_json("gpt_catalyst_analysis.json", gpt_result)
+            logger.info("GPT 촉매 분석 완료: %d종목", len(gpt_result.get("positions", [])))
+        except Exception as e:
+            logger.error("GPT 촉매 분석 실패 (Claude 단독 진행): %s", e)
+            gpt_result = None
+
+    # ── Step 2: Claude Sell Brain (GPT 결과 포함) ──
     agent = SellBrainAgent()
 
     if check_type == "preclose":
-        overnight = load_json("overnight_signal.json")
-        result = await agent.preclose_check(positions, strategic, overnight)
+        overnight = load_json(str(Path("us_market") / "overnight_signal.json"))
+        claude_result = await agent.preclose_check(
+            positions, strategic, overnight, gpt_catalyst=gpt_result,
+        )
     else:
-        result = await agent.check_sell(positions, strategic, sector_focus)
+        claude_result = await agent.check_sell(
+            positions, strategic, sector_focus, gpt_catalyst=gpt_result,
+        )
 
     # 결과 저장
-    save_json("ai_sell_cache.json", result)
+    save_json("ai_sell_cache.json", claude_result)
 
-    # 매도 실행
+    # ── Step 3: 합의 규칙 적용 ──
+    if dual_enabled and gpt_result and not gpt_result.get("error"):
+        consensus = apply_consensus(claude_result, gpt_result, positions)
+        save_json("ai_sell_consensus.json", consensus)
+        stats = consensus.get("consensus_stats", {})
+        logger.info(
+            "합의 규칙: 촉매오버라이드=%d, 수동차단=%d (총 %d종목)",
+            stats.get("catalyst_overrides", 0),
+            stats.get("manual_blocks", 0),
+            stats.get("total", 0),
+        )
+    else:
+        # 듀얼 비활성 or GPT 장애 → Claude 단독 결정
+        consensus = {
+            "final_decisions": [
+                {
+                    "ticker": p.get("ticker", ""),
+                    "name": p.get("name", ""),
+                    "claude_action": p.get("action", "HOLD"),
+                    "gpt_catalyst": "N/A",
+                    "final_action": p.get("action", "HOLD"),
+                    "override_reason": "",
+                    "manual_entry": False,
+                    "manual_blocked": any(
+                        pos.get("manual_entry") for pos in positions
+                        if pos.get("ticker") == p.get("ticker")
+                    ),
+                    "manual_alert": False,
+                    "reasoning": p.get("reasoning", ""),
+                    "catalyst_note": "",
+                    "tomorrow_direction": "",
+                }
+                for p in claude_result.get("positions", [])
+            ],
+            "consensus_stats": {"catalyst_overrides": 0, "manual_blocks": 0, "total": len(positions)},
+        }
+
+    # ── Step 4: 최종 결정에 따라 매도 실행 ──
     sells_executed = []
-    for p in result.get("positions", []):
-        action = p.get("action", "HOLD")
-        ticker = p.get("ticker", "")
-        name = p.get("name", "")
-        reasoning = p.get("reasoning", "")
+    manual_alerts = []
 
-        if action in ("SELL_NOW", "PARTIAL_SELL"):
-            # 해당 종목의 수량 찾기
+    for decision in consensus.get("final_decisions", []):
+        ticker = decision["ticker"]
+        name = decision["name"]
+        final_action = decision["final_action"]
+        reasoning = decision.get("reasoning", "")
+        override = decision.get("override_reason", "")
+
+        # 수동매수 보호 — 알림만
+        if decision.get("manual_blocked"):
+            if decision.get("manual_alert"):
+                manual_alerts.append(decision)
+            continue
+
+        if final_action in ("SELL_NOW", "PARTIAL_SELL"):
             pos = next((x for x in positions if x["ticker"] == ticker), None)
             if pos is None:
                 continue
@@ -275,41 +483,97 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
             qty = pos["quantity"]
             pnl = pos.get("pnl_pct", 0)
 
-            logger.info("[매도 결정] %s → %s (사유: %s)", name, action, reasoning[:50])
+            if override:
+                logger.info("[합의 매도] %s → %s (오버라이드: %s)", name, final_action, override)
+            else:
+                logger.info("[매도 결정] %s → %s (사유: %s)", name, final_action, reasoning[:50])
 
-            sell_result = execute_sell(broker, ticker, name, qty, action, dry_run)
+            sell_result = execute_sell(broker, ticker, name, qty, final_action, dry_run)
             sells_executed.append({
                 "ticker": ticker,
                 "name": name,
-                "action": action,
-                "qty": qty if action == "SELL_NOW" else max(1, qty // 2),
+                "action": final_action,
+                "claude_action": decision.get("claude_action", ""),
+                "gpt_catalyst": decision.get("gpt_catalyst", ""),
+                "override_reason": override,
+                "qty": qty if final_action == "SELL_NOW" else max(1, qty // 2),
                 "pnl_pct": pnl,
                 "reasoning": reasoning,
                 "result": sell_result,
             })
 
-    # 텔레그램 알림
-    if sells_executed:
-        lines = [f"🔴 AI 매도 실행 ({check_type})"]
-        for s in sells_executed:
-            mode = "DRY" if dry_run else "LIVE"
-            status = s["result"].get("status", "?")
-            lines.append(f"  {s['name']}: {s['action']} {s['qty']}주 [{status}]")
-            lines.append(f"    손익 {s['pnl_pct']:+.1f}% | {s['reasoning'][:40]}")
-        send_telegram("\n".join(lines))
-    else:
-        # 매도 없으면 요약만
-        hold_count = sum(1 for p in result.get("positions", []) if p.get("action") == "HOLD")
-        watch_count = sum(1 for p in result.get("positions", []) if p.get("action") == "WATCH")
-        if check_type == "preclose":
-            send_telegram(f"🟡 프리클로즈 체크: HOLD {hold_count} / WATCH {watch_count}")
+    # ── Step 5: 텔레그램 알림 ──
+    _send_dual_telegram(check_type, consensus, sells_executed, manual_alerts, dry_run)
 
     return {
         "check_type": check_type,
         "total": len(positions),
         "sells": len(sells_executed),
+        "catalyst_overrides": consensus.get("consensus_stats", {}).get("catalyst_overrides", 0),
+        "manual_blocks": len(manual_alerts),
         "details": sells_executed,
     }
+
+
+def _send_dual_telegram(
+    check_type: str,
+    consensus: dict,
+    sells_executed: list,
+    manual_alerts: list,
+    dry_run: bool,
+):
+    """듀얼 AI 매도 결과 텔레그램 알림."""
+    lines = []
+    mode = "DRY" if dry_run else "LIVE"
+    stats = consensus.get("consensus_stats", {})
+
+    # 매도 실행 건
+    if sells_executed:
+        lines.append(f"{'🔴' if not dry_run else '🟠'} AI 매도 [{mode}] ({check_type})")
+        for s in sells_executed:
+            status = s["result"].get("status", "?")
+            lines.append(f"  {s['name']}: {s['action']} {s['qty']}주 [{status}]")
+            lines.append(f"    손익 {s['pnl_pct']:+.1f}% | {s['reasoning'][:40]}")
+            if s.get("override_reason"):
+                lines.append(f"    → {s['override_reason']}")
+            gpt = s.get("gpt_catalyst", "")
+            if gpt and gpt != "N/A":
+                lines.append(f"    GPT: {gpt} | Claude: {s.get('claude_action', '')}")
+
+    # 촉매 오버라이드 (매도 보류)
+    overrides = [
+        d for d in consensus.get("final_decisions", [])
+        if d.get("override_reason") and d["final_action"] == "HOLD"
+    ]
+    if overrides:
+        lines.append("")
+        lines.append("🟢 촉매 보호 (매도 보류)")
+        for o in overrides:
+            lines.append(f"  {o['name']}: Claude {o['claude_action']} → HOLD")
+            lines.append(f"    GPT: {o['gpt_catalyst']} | {o.get('catalyst_note', '')[:40]}")
+            if o.get("tomorrow_direction"):
+                lines.append(f"    내일: {o['tomorrow_direction']}")
+
+    # 수동매수 보호
+    if manual_alerts:
+        lines.append("")
+        lines.append("🔒 수동매수 보호")
+        for m in manual_alerts:
+            lines.append(f"  {m['name']}: Claude {m['claude_action']} → 자동매도 차단")
+
+    # 아무것도 없으면 요약
+    if not sells_executed and not overrides and not manual_alerts:
+        hold_count = sum(
+            1 for d in consensus.get("final_decisions", [])
+            if d["final_action"] == "HOLD"
+        )
+        if check_type == "preclose":
+            lines.append(f"🟡 프리클로즈: HOLD {hold_count}종목")
+            if stats.get("catalyst_overrides"):
+                lines.append(f"  촉매보호 {stats['catalyst_overrides']}건")
+
+    if lines:
+        send_telegram("\n".join(lines))
 
 
 def main():

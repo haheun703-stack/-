@@ -34,9 +34,18 @@ if %ERRORLEVEL% NEQ 0 (
     echo [%date% %time%] [FAIL] smart_entry_runner 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
 )
 
-REM ── 매도 모니터: 비활성화 (2026-03-03 사용자 요청) ──
-echo [%date% %time%] Sell Monitor 비활성화 (사용자 OFF) >> logs\schedule.log
-REM python -u -X utf8 scripts/sell_monitor.py >> logs\schedule.log 2>&1
+REM ── 듀얼 AI 매도 모니터: Claude+GPT (DRY-RUN, 2026-03-03 재설계) ──
+echo [%date% %time%] Dual AI Sell Monitor (DRY-RUN) 시작 >> logs\schedule.log
+echo ========================================
+echo [QM-E] Dual AI Sell Monitor (DRY-RUN)
+echo   Claude: 기술적 분석 + 포트폴리오
+echo   GPT-4o: 뉴스 촉매 + 내일 전망
+echo   합의규칙: 촉매 우선 + 수동매수 보호
+echo ========================================
+python -u -X utf8 scripts/sell_monitor.py --dry-run >> logs\schedule.log 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo [%date% %time%] [FAIL] sell_monitor 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
+)
 
 echo [%date% %time%] BAT-E 완료 (매수+매도) >> logs\schedule.log
 echo ========================================
