@@ -707,18 +707,44 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def phase_evening_scan(self) -> None:
-        """수급 반영된 최신 데이터로 내일 매수 후보 스캔 (scan_all)."""
-        logger.info("[Phase 10] 내일 매수 후보 스캔 시작")
+        """내일 매수 후보 확인 — BAT-D의 tomorrow_picks.json 우선 사용."""
+        logger.info("[Phase 10] 내일 매수 후보 확인 시작")
+
+        # BAT-D가 이미 실행했으면 tomorrow_picks.json 사용
+        picks_path = Path("data/tomorrow_picks.json")
+        if picks_path.exists():
+            try:
+                data = json.loads(picks_path.read_text(encoding="utf-8"))
+                gen_date = data.get("generated_at", "")[:10]
+                today = datetime.now().strftime("%Y-%m-%d")
+                if gen_date == today:
+                    count = len(data.get("top5", []))
+                    stats = data.get("stats", {})
+                    logger.info(
+                        "[Phase 10] BAT-D tomorrow_picks.json 사용 (top5=%d종목, 적극매수=%s)",
+                        count, stats.get("적극매수", 0),
+                    )
+                    self._notify(f"Phase 10: tomorrow_picks {count}종목 (BAT-D 결과)")
+                    return
+            except Exception as e:
+                logger.warning("[Phase 10] tomorrow_picks.json 파싱 실패: %s", e)
+
+        # BAT-D 미실행 시 scan_tomorrow_picks.py 직접 실행
+        logger.info("[Phase 10] BAT-D 결과 없음 → scan_tomorrow_picks.py 실행")
         try:
-            import importlib
-            mod = importlib.import_module("scan_buy_candidates")
-            candidates, stats = mod.scan_all(grade_filter="AB", use_news=False)
-            # 캐시 저장 (Phase 10B 통합 리포트에서 사용)
-            from scripts.daily_integrated_report import _save_scan_cache
-            _save_scan_cache(candidates, stats)
-            logger.info("[Phase 10] scan_all 완료: %d종목 통과", len(candidates))
+            from scripts.scan_tomorrow_picks import main as scan_tomorrow
+            scan_tomorrow()
+            logger.info("[Phase 10] scan_tomorrow_picks 완료")
         except Exception as e:
-            logger.error("[Phase 10] 스캔 실패: %s", e)
+            logger.error("[Phase 10] scan_tomorrow_picks 실패: %s", e)
+            # 최종 폴백: 구형 scan_all
+            try:
+                import importlib
+                mod = importlib.import_module("scan_buy_candidates")
+                candidates, stats = mod.scan_all(grade_filter="AB", use_news=False)
+                logger.info("[Phase 10] 폴백 scan_all 완료: %d종목", len(candidates))
+            except Exception as e2:
+                logger.error("[Phase 10] 폴백 scan_all도 실패: %s", e2)
         self._notify("Phase 10 완료: 스캔")
 
     # ══════════════════════════════════════════
@@ -726,8 +752,26 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def phase_evening_briefing(self) -> None:
-        """장마감 통합 데일리 리포트 텔레그램 발송."""
+        """장마감 통합 데일리 리포트 텔레그램 발송 — tomorrow_picks.json 우선."""
         logger.info("[Phase 10B] 통합 데일리 리포트 시작")
+
+        # 1차: tomorrow_picks.json 기반 최신 리포트
+        picks_path = Path("data/tomorrow_picks.json")
+        if picks_path.exists():
+            try:
+                data = json.loads(picks_path.read_text(encoding="utf-8"))
+                gen_date = data.get("generated_at", "")[:10]
+                today = datetime.now().strftime("%Y-%m-%d")
+                if gen_date == today:
+                    msg = self._build_picks_message(data)
+                    from src.telegram_sender import send_message
+                    send_message(msg)
+                    logger.info("[Phase 10B] tomorrow_picks 기반 리포트 발송 완료")
+                    return
+            except Exception as e:
+                logger.warning("[Phase 10B] tomorrow_picks 리포트 실패: %s", e)
+
+        # 2차: daily_integrated_report
         try:
             from scripts.daily_integrated_report import run_report
             run_report(send=True, run_scan=False, use_news=False)
@@ -742,8 +786,128 @@ class DailyScheduler:
                 logger.error("[Phase 10B] 폴백도 실패: %s", e2)
                 self._notify(f"Phase 10B 오류: {e}")
 
+    def _build_picks_message(self, picks_data: dict) -> str:
+        """tomorrow_picks.json 기반 장마감 리포트 메시지 생성."""
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+        target = picks_data.get("target_date_label", "내일")
+        stats = picks_data.get("stats", {})
+        picks = picks_data.get("picks", [])
+        ai_largecap = picks_data.get("ai_largecap", [])
+        lines = []
+
+        lines.append(f"\U0001f319 Quantum Master | {now}")
+        lines.append("\u2501" * 28)
+
+        # ── 시장 컨텍스트 ──
+        try:
+            sig_path = Path("data/us_market/overnight_signal.json")
+            if sig_path.exists():
+                us_sig = json.loads(sig_path.read_text(encoding="utf-8"))
+                grade = us_sig.get("grade", "NEUTRAL")
+                score = us_sig.get("combined_score_100", 0)
+                lines.append(f"US: {grade} ({score:+.1f})")
+        except Exception:
+            pass
+
+        try:
+            v3_path = Path("data/ai_strategic_analysis.json")
+            if v3_path.exists():
+                v3 = json.loads(v3_path.read_text(encoding="utf-8"))
+                regime = v3.get("regime", "")
+                if regime:
+                    lines.append(f"v3 Brain: {regime}")
+        except Exception:
+            pass
+
+        lines.append(f"\U0001f4ca {target} 추천 | "
+                     f"\u2705\ufe0f\ufe0f\ufe0f\ufe0f\ufe0f 적극매수 {stats.get('적극매수', 0)} / "
+                     f"매수 {stats.get('매수', 0)} / "
+                     f"관심 {stats.get('관심매수', 0)}")
+        lines.append("")
+
+        # ── AI 대형주 추천 (v3 Brain) ──
+        if ai_largecap:
+            lines.append("\U0001f9e0 AI Brain \ub300\ud615\uc8fc TOP")
+            lines.append("\u2500" * 28)
+            for item in ai_largecap[:3]:
+                name = item.get("name", "")
+                conf = item.get("confidence", 0)
+                reason = item.get("reasoning", "")[:60]
+                urgency = item.get("urgency", "")
+                urg_emoji = "\U0001f525" if urgency == "high" else "\u26a0\ufe0f"
+                lines.append(f"  {urg_emoji} {name} (\uc2e0\ub8b0 {conf:.0%})")
+                lines.append(f"    {reason}")
+            lines.append("")
+
+        # ── TOP 5 종목 ──
+        top5_tickers = picks_data.get("top5", [])
+        top5_picks = [p for p in picks if p.get("ticker") in top5_tickers]
+        if not top5_picks:
+            top5_picks = picks[:5]
+
+        if top5_picks:
+            lines.append(f"\U0001f525 TOP {len(top5_picks)} \uc885\ubaa9")
+            lines.append("\u2501" * 28)
+            for i, p in enumerate(top5_picks, 1):
+                name = p.get("name", "")
+                ticker = p.get("ticker", "")
+                grade = p.get("grade", "")
+                score = p.get("total_score", 0)
+                close = p.get("close", 0)
+                entry = p.get("entry_price", 0)
+                target_p = p.get("target_price", 0)
+                stop = p.get("stop_loss", 0)
+                rsi = p.get("rsi", 0)
+                sources = p.get("sources", [])
+                strategy = p.get("strategy", "")
+                entry_cond = p.get("entry_condition", "")
+
+                # 등급 이모지
+                g_emoji = "\U0001f525" if "\uc801\uadf9" in grade else ("\u2b50" if "\ub9e4\uc218" == grade else "\U0001f539")
+
+                stop_pct = (stop - entry) / entry * 100 if entry > 0 else 0
+                target_pct = (target_p - entry) / entry * 100 if entry > 0 else 0
+
+                lines.append(f"{g_emoji}{i}. [{grade}] {name} ({ticker})")
+                lines.append(f"   {score:.0f}\uc810 | RSI {rsi:.0f} | {close:,.0f}\uc6d0")
+                lines.append(f"   \u2192 \uc9c4\uc785 {entry:,.0f} | T{target_pct:+.1f}% S{stop_pct:+.1f}%")
+                if entry_cond:
+                    lines.append(f"   \u2514 {entry_cond}")
+                if sources:
+                    lines.append(f"   \u2514 \uc18c\uc2a4: {', '.join(sources[:4])}")
+                lines.append("")
+        else:
+            lines.append("\U0001f525 \uc2a4\uce94 \ud1b5\uacfc \uc885\ubaa9 \uc5c6\uc74c")
+            lines.append("")
+
+        # ── 보유 포지션 요약 ──
+        try:
+            pos_path = Path("data/positions.json")
+            if pos_path.exists():
+                pos_data = json.loads(pos_path.read_text(encoding="utf-8"))
+                positions = pos_data.get("positions", [])
+                if positions:
+                    lines.append(f"\U0001f4bc \ubcf4\uc720 {len(positions)}\uc885\ubaa9")
+                    lines.append("\u2500" * 28)
+                    for p in positions:
+                        name = p.get("name", p.get("ticker", "?"))
+                        pnl = p.get("unrealized_pnl_pct", 0)
+                        pnl_e = "\U0001f7e2" if pnl >= 0 else "\U0001f534"
+                        lines.append(f"  {pnl_e} {name} {pnl:+.1f}%")
+                    lines.append("")
+        except Exception:
+            pass
+
+        # ── 체크리스트 ──
+        lines.append("\U0001f4cb \ub0b4\uc77c \uccb4\ud06c")
+        lines.append("\u2500" * 28)
+        lines.append(f"  \u2514 07:30 \uc7a5\uc804 \ube0c\ub9ac\ud551\uc5d0\uc11c \ucd5c\uc885 \ud655\ub960 \ud655\uc778")
+        lines.append("")
+        lines.append("\u26a0\ufe0f \ud22c\uc790 \ud310\ub2e8\uc740 \ubcf8\uc778 \ucc45\uc784 | Quantum Master")
+        return "\n".join(lines)
+
     def _build_evening_message(self) -> str:
-        """장마감 리포트 메시지 생성 (📱2발)"""
+        """장마감 리포트 메시지 생성 (📱2발) — 폴백용"""
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         lines = []
 
@@ -852,52 +1016,34 @@ class DailyScheduler:
             lines.append("  스냅샷 데이터 없음 (장중 수집 안됨)")
         lines.append("")
 
-        # ── 내일 매수 후보 (섹터 로테이션 기반 + S/A/B 등급) ──
+        # ── 내일 매수 후보 (tomorrow_picks.json 우선) ──
         lines.append("\U0001f525 내일 매수 후보")
         lines.append("\u2501" * 28)
         try:
-            scan_path = Path("data/sector_rotation/krx_sector_scan.json")
-            if scan_path.exists():
-                with open(scan_path, encoding="utf-8") as f:
-                    scan_data = json.load(f)
-                smart = scan_data.get("smart_money", [])
-                theme = scan_data.get("theme_money", [])
-                if smart or theme:
-                    if smart:
-                        lines.append("\U0001f48e Smart Money (외인+기관)")
-                        for s in smart[:3]:
-                            g, ge = self._grade_stock(s, "SMART")
-                            name = s.get("name", str(s.get("ticker", "?")).zfill(6))
-                            ticker = str(s.get("ticker", "")).zfill(6)
-                            bb = s.get("bb_pct", 0)
-                            rsi = s.get("rsi", 0)
-                            stop = s.get("stop_pct", -7)
-                            sizing = s.get("sizing", "FULL")
-                            sector = s.get("etf_sector", "")
-                            lines.append(f"{ge} {g}급 {name} ({ticker}) — {sector}")
-                            lines.append(
-                                f"  BB {bb:.0f}% | RSI {rsi:.0f} | "
-                                f"손절 {stop}% | {sizing}"
-                            )
-                            lines.append("")
-                    if theme:
-                        lines.append("\U0001f525 Theme Money (모멘텀)")
-                        for t in theme[:3]:
-                            g, ge = self._grade_stock(t, "THEME")
-                            name = t.get("name", str(t.get("ticker", "?")).zfill(6))
-                            ticker = str(t.get("ticker", "")).zfill(6)
-                            bb = t.get("bb_pct", 0)
-                            rsi = t.get("rsi", 0)
-                            adx = t.get("adx", 0)
-                            sector = t.get("etf_sector", "")
-                            lines.append(f"{ge} {g}급 {name} ({ticker}) — {sector}")
-                            lines.append(f"  BB {bb:.0f}% | RSI {rsi:.0f} | ADX {adx:.0f}")
-                            lines.append("")
+            picks_path = Path("data/tomorrow_picks.json")
+            if picks_path.exists():
+                picks_data = json.loads(picks_path.read_text(encoding="utf-8"))
+                picks_list = picks_data.get("picks", [])
+                top5 = picks_data.get("top5", [])
+                top_picks = [p for p in picks_list if p.get("ticker") in top5]
+                if not top_picks:
+                    top_picks = picks_list[:5]
+                if top_picks:
+                    for p in top_picks:
+                        name = p.get("name", "")
+                        ticker = p.get("ticker", "")
+                        grade = p.get("grade", "")
+                        score = p.get("total_score", 0)
+                        rsi = p.get("rsi", 0)
+                        sources = ", ".join(p.get("sources", [])[:3])
+                        lines.append(f"  [{grade}] {name} ({ticker}) {score:.0f}점")
+                        lines.append(f"    RSI {rsi:.0f} | {sources}")
+                        lines.append("")
                 else:
                     lines.append("  스캔 통과 종목 없음")
                     lines.append("")
             else:
-                lines.append("  스캔 결과 없음")
+                lines.append("  tomorrow_picks.json 없음")
                 lines.append("")
         except Exception:
             lines.append("  스캔 결과 로드 실패")
