@@ -104,6 +104,7 @@ class DeepAnalystAgent(BaseAgent):
         stock_context: dict,
         industry_thesis: list[dict],
         sector_focus: dict,
+        chart_image: str | None = None,
     ) -> dict:
         """단일 종목 정밀 분석.
 
@@ -111,6 +112,7 @@ class DeepAnalystAgent(BaseAgent):
             stock_context: scan_cache의 개별 종목 데이터
             industry_thesis: Phase 1의 industry_thesis 리스트
             sector_focus: Phase 2의 ai_sector_focus.json
+            chart_image: base64 PNG 차트 이미지 (Vision 사용 시)
 
         Returns:
             {buy, conviction, strategy, thesis_alignment, reasoning, ...}
@@ -125,9 +127,16 @@ class DeepAnalystAgent(BaseAgent):
 
 위 종목을 산업 thesis 관점에서 정밀 분석하여 매수 판단을 JSON으로 응답하세요.
 """
+        if chart_image:
+            user_prompt += "\n첨부된 차트 이미지도 참고하여 기술적 패턴을 분석하세요."
 
         try:
-            result = await self._ask_claude_json(SYSTEM_DEEP_ANALYSIS, user_prompt)
+            if chart_image:
+                result = await self._ask_claude_vision_json(
+                    SYSTEM_DEEP_ANALYSIS, user_prompt, [chart_image]
+                )
+            else:
+                result = await self._ask_claude_json(SYSTEM_DEEP_ANALYSIS, user_prompt)
         except Exception as e:
             logger.warning(
                 "종목 분석 실패 %s(%s): %s",
@@ -161,6 +170,7 @@ class DeepAnalystAgent(BaseAgent):
         sector_focus: dict,
         min_conviction: int = 5,
         max_concurrent: int = 3,
+        enable_vision: bool = False,
     ) -> list[dict]:
         """후보 종목 배치 분석 — conviction >= min_conviction만 통과.
 
@@ -170,21 +180,37 @@ class DeepAnalystAgent(BaseAgent):
             sector_focus: Phase 2 섹터 포커스
             min_conviction: 최소 conviction 기준
             max_concurrent: 동시 분석 수 (API rate limit 고려)
+            enable_vision: True이면 차트 이미지 첨부 (Vision API)
 
         Returns:
             conviction >= min_conviction인 종목만 필터링된 리스트
         """
         logger.info(
-            "Deep Analyst 배치 분석 시작: %d종목, min_conviction=%d",
-            len(candidates), min_conviction,
+            "Deep Analyst 배치 분석 시작: %d종목, min_conviction=%d, vision=%s",
+            len(candidates), min_conviction, enable_vision,
         )
+
+        # Vision 활성화 시 차트 렌더링
+        chart_images: dict[str, str | None] = {}
+        if enable_vision:
+            try:
+                from src.chart_renderer import render_batch
+                tickers = [c.get("ticker", "") for c in candidates if c.get("ticker")]
+                chart_images = render_batch(tickers)
+                rendered = sum(1 for v in chart_images.values() if v)
+                logger.info("차트 렌더링: %d/%d 성공", rendered, len(tickers))
+            except Exception as e:
+                logger.warning("차트 렌더링 실패 (텍스트만 분석): %s", e)
 
         results = []
         semaphore = asyncio.Semaphore(max_concurrent)
 
         async def _analyze_with_limit(stock):
             async with semaphore:
-                return await self.analyze_single(stock, industry_thesis, sector_focus)
+                img = chart_images.get(stock.get("ticker", "")) if enable_vision else None
+                return await self.analyze_single(
+                    stock, industry_thesis, sector_focus, chart_image=img
+                )
 
         tasks = [_analyze_with_limit(c) for c in candidates]
         raw_results = await asyncio.gather(*tasks, return_exceptions=True)

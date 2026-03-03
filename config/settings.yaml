@@ -1448,3 +1448,37 @@ dual_sell_system:
     uncertain_bias: "reduce"              # "reduce" = 불확실하면 PARTIAL_SELL, "hold" = 기존 HOLD 유지
     dead_catalyst_hold_to_reduce: true    # DEAD+HOLD → PARTIAL_SELL (촉매 소멸 시 축소)
     fading_weak_hold_to_reduce: true      # FADING(strength<0.4)+HOLD → PARTIAL_SELL
+
+# ============================================================
+# 섹터 릴레이 엔진 — US→KR 4단계 릴레이 경보
+# ============================================================
+# config/relay_sectors.yaml에 상세 섹터 정의
+# 여기는 on/off 및 전체 파라미터만
+relay_engine:
+  enabled: true
+  config_file: "config/relay_sectors.yaml"     # 섹터 상세 설정
+  alert_min_count: 3                           # 경보 3개 이상 동시 충족 시 거래
+  telegram_enabled: true                       # 텔레그램 경보 발송
+
+# ============================================================
+# AI 역할 업그레이드 — Vision + o1 + Perplexity 검증
+# ============================================================
+# v12.0: 3가지 AI 업그레이드
+#   Phase 0 (NEW): GPT o1 Deep Thinking → 거시/미시 분석
+#   Phase 4 (MOD): Claude Vision → 차트 이미지 분석
+#   Phase 6 (NEW): Perplexity 교차검증 → 팩트체크
+ai_upgrade:
+  # --- Claude Vision (Phase 4) ---
+  vision_enabled: true                     # DeepAnalyst에 차트 이미지 첨부
+  chart_days: 60                           # 렌더링할 최근 거래일 수
+
+  # --- GPT o1 Deep Thinking (Phase 0) ---
+  o1_enabled: true                         # Phase 0 활성화
+  o1_model: "o1"                           # o1 모델 ID
+  o1_timeout_sec: 120                      # o1 타임아웃 (초)
+
+  # --- Perplexity 교차검증 (Phase 6) ---
+  perplexity_verify_enabled: true          # Phase 6 활성화
+  perplexity_model: "sonar"                # Perplexity 모델
+  perplexity_max_verifications: 5          # 최대 종목 검증 수
+  perplexity_max_thesis_checks: 3          # 최대 thesis 검증 수

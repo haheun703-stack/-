@@ -24,12 +24,24 @@
 - **5등급**: STRONG_BULL → STRONG_BEAR
 - **데이터**: `data/us_market/overnight_signal.json`, `us_daily.parquet`, `us_kr_history.db`
 
-## 3. AI Brain v3 — Claude API 뉴스/전략 판단
+## 3. AI Brain v3 — Claude API 뉴스/전략 판단 (v12.0 업그레이드)
 
 - **실행**: `scripts/ai_news_brain.py`, `scripts/run_v3_brain.py`
-- **5단계 깔때기**: 매크로→섹터→종목→리스크→최종 판단
+- **7단계 파이프라인** (v12.0):
+  - Phase 0 (NEW): GPT o1 Deep Thinking → `data/o1_deep_analysis.json`
+  - Phase 1: StrategicBrain (Opus) + o1 컨텍스트 주입
+  - Phase 2: SectorStrategist
+  - Phase 3+4: DeepAnalyst + Claude Vision (차트 이미지 분석)
+  - Phase 5: PortfolioBrain
+  - Phase 6 (NEW): Perplexity 교차검증 → `data/perplexity_verification.json`
+  - Phase 7: 학습 루프
 - **뉴스 소스 5개**: Perplexity, RSS, DART, sector_outlook, US Overnight
 - **출력**: `data/ai_brain_judgment.json`, `data/ai_v3_picks.json`, `data/ai_sector_focus.json`
+- **v12.0 신규 파일**:
+  - `src/chart_renderer.py`: parquet→matplotlib→base64 PNG 차트 렌더링
+  - `src/agents/o1_strategist.py`: GPT o1 거시/미시 Deep Thinking
+  - `src/agents/perplexity_verifier.py`: Perplexity 팩트체크 교차검증
+- **설정**: `config/settings.yaml` → `ai_upgrade` 섹션
 
 ## 4. ETF 3축 로테이션
 

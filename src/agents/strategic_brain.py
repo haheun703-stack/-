@@ -343,10 +343,18 @@ class StrategicBrainAgent(BaseAgent):
             "{feedback_section}", feedback_section
         )
 
+        # o1 Deep Thinking 분석 결과 (Phase 0, 있으면 주입)
+        o1_text = ""
+        o1_data = context.get("o1_deep_analysis", {})
+        if o1_data and not o1_data.get("error"):
+            o1_text = self._format_o1_analysis(o1_data)
+
         # 유저 프롬프트 조합
         today = datetime.now().strftime("%Y-%m-%d")
         user_prompt = f"""\
 ## 분석 날짜: {today}
+
+{o1_text}
 
 {overnight_text}
 
@@ -358,7 +366,7 @@ class StrategicBrainAgent(BaseAgent):
 
 {portfolio_text}
 
-위 5개 소스를 종합 분석하여 오늘의 전략 판단을 JSON으로 응답하세요.
+위 소스를 종합 분석하여 오늘의 전략 판단을 JSON으로 응답하세요.
 산업 구조(수요/공급/CAPA)를 1순위로, 거시 환경을 2순위로 판단하세요.
 릴레이 패턴 DB를 참조하여 발화 섹터의 후행 경로를 확인하세요.
 """
@@ -423,6 +431,60 @@ class StrategicBrainAgent(BaseAgent):
         result.setdefault("global_summary", "")
 
         return result
+
+    @staticmethod
+    def _format_o1_analysis(data: dict) -> str:
+        """o1 Deep Thinking 결과를 프롬프트 텍스트로 변환."""
+        lines = ["[o1 Deep Thinking 거시/미시 분석]"]
+
+        macro = data.get("macro_analysis", {})
+        if macro:
+            lines.append(f"  매크로 레짐: {macro.get('macro_regime', 'N/A')}")
+            lines.append(f"  글로벌 유동성: {macro.get('global_liquidity', 'N/A')}")
+            lines.append(f"  동조 상태: {macro.get('coupling_status', 'N/A')}")
+            lines.append(f"  사이클 위치: {macro.get('cycle_position', 'N/A')}")
+            lines.append(f"  지정학 리스크: {macro.get('geopolitical_risk_score', 'N/A')}/10")
+            lines.append(f"  신뢰도: {macro.get('confidence', 0):.0%}")
+            insights = macro.get("key_macro_insights", [])
+            if insights:
+                lines.append("  핵심 인사이트:")
+                for ins in insights[:3]:
+                    lines.append(f"    - {ins}")
+
+        micros = data.get("micro_analysis", [])
+        if micros:
+            lines.append("\n  [섹터별 미시 분석]")
+            for m in micros[:5]:
+                lines.append(
+                    f"  {m.get('sector', '?')}: "
+                    f"실적={m.get('earnings_cycle', '?')}, "
+                    f"밸류={m.get('valuation_rerating', '?')}, "
+                    f"수급={m.get('supply_demand_shift', '?')}, "
+                    f"확신={m.get('conviction', 0)}/10"
+                )
+                contrarian = m.get("contrarian_view", "")
+                if contrarian:
+                    lines.append(f"    → 역발상: {contrarian}")
+
+        cross = data.get("cross_sector_dynamics", "")
+        if cross:
+            lines.append(f"\n  섹터간 역학: {cross[:200]}")
+
+        risks = data.get("risk_scenarios", [])
+        if risks:
+            lines.append("\n  [리스크 시나리오]")
+            for r in risks[:3]:
+                lines.append(
+                    f"    - {r.get('scenario', '?')} "
+                    f"(확률 {r.get('probability', 0):.0%}, "
+                    f"영향 {r.get('impact', '?')})"
+                )
+
+        summary = data.get("actionable_summary", "")
+        if summary:
+            lines.append(f"\n  ★ 핵심 요약: {summary}")
+
+        return "\n".join(lines)
 
     @staticmethod
     def _fallback_result(error_msg: str) -> dict:

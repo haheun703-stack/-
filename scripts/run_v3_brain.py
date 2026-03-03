@@ -34,6 +34,8 @@ from src.agents.strategic_brain import StrategicBrainAgent
 from src.agents.sector_strategist import SectorStrategistAgent
 from src.agents.deep_analyst import DeepAnalystAgent
 from src.agents.portfolio_brain import PortfolioBrainAgent
+from src.agents.o1_strategist import O1StrategistAgent
+from src.agents.perplexity_verifier import PerplexityVerifier
 
 # ─── 로깅 설정 ──────────────────────────────────────────────────
 logging.basicConfig(
@@ -82,9 +84,66 @@ def _load_settings() -> dict:
         return {}
 
 
+def _load_upgrade_settings() -> dict:
+    """settings.yaml의 ai_upgrade 섹션 로드"""
+    try:
+        import yaml
+        settings_path = CONFIG_DIR / "settings.yaml"
+        with open(settings_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        return cfg.get("ai_upgrade", {})
+    except Exception:
+        return {}
+
+
+# ─── Phase 0: o1 Deep Thinking (NEW) ─────────────────────────────
+
+async def run_phase0() -> dict:
+    """Phase 0: GPT o1 Deep Thinking 거시/미시 분석.
+
+    o1의 deep reasoning으로 거시적+미시적 분석을 수행하여
+    Phase 1 StrategicBrain에 컨텍스트로 주입.
+
+    Returns:
+        o1_deep_analysis.json 내용 (실패 시 빈 dict)
+    """
+    upgrade = _load_upgrade_settings()
+    if not upgrade.get("o1_enabled", False):
+        logger.info("Phase 0 비활성화 (ai_upgrade.o1_enabled=false)")
+        return {}
+
+    logger.info("=" * 60)
+    logger.info("Phase 0: o1 Deep Thinking (거시/미시 분석)")
+    logger.info("=" * 60)
+
+    try:
+        agent = O1StrategistAgent()
+        result = await agent.deep_analyze()
+
+        # 저장
+        output_path = DATA_DIR / "o1_deep_analysis.json"
+        _save_json(output_path, result)
+
+        if result.get("error"):
+            logger.warning("Phase 0 fallback: %s", result["error"])
+        else:
+            macro = result.get("macro_analysis", {})
+            logger.info(
+                "Phase 0 완료: regime=%s, confidence=%.0f%%, 미시 %d섹터",
+                macro.get("macro_regime", "?"),
+                macro.get("confidence", 0) * 100,
+                len(result.get("micro_analysis", [])),
+            )
+
+        return result
+    except Exception as e:
+        logger.error("Phase 0 실패 (Phase 1 독립 동작): %s", e)
+        return {}
+
+
 # ─── Phase 1: Strategic Brain ───────────────────────────────────
 
-async def run_phase1(dry_run: bool = False) -> dict:
+async def run_phase1(dry_run: bool = False, o1_context: dict | None = None) -> dict:
     """Phase 1: 전략 두뇌 (Agent 2A) 실행
 
     5개 소스를 로드하여 StrategicBrainAgent에 전달.
@@ -155,6 +214,11 @@ async def run_phase1(dry_run: bool = False) -> dict:
         "portfolio": portfolio,
         "feedback": feedback,
     }
+
+    # o1 Deep Thinking 컨텍스트 주입 (Phase 0 결과)
+    if o1_context and not o1_context.get("error"):
+        context["o1_deep_analysis"] = o1_context
+        logger.info("o1 Deep Thinking 컨텍스트 주입 완료")
 
     agent = StrategicBrainAgent()
     result = await agent.analyze(context)
@@ -355,12 +419,17 @@ async def run_phase3_4(
     industry_thesis = strategic_result.get("industry_thesis", [])
     min_conviction = settings.get("deep_analyst", {}).get("min_conviction", 5)
 
+    # Vision 활성화 여부
+    upgrade = _load_upgrade_settings()
+    enable_vision = upgrade.get("vision_enabled", False)
+
     agent = DeepAnalystAgent()
     passed = await agent.analyze_batch(
         candidates=filtered,
         industry_thesis=industry_thesis,
         sector_focus=sector_focus,
         min_conviction=min_conviction,
+        enable_vision=enable_vision,
     )
 
     # ── 결과 로그 ──
@@ -473,6 +542,73 @@ async def run_phase5(
 
     logger.info("-" * 60)
     return result
+
+
+# ─── Phase 6: Perplexity 교차검증 (NEW) ──────────────────────────
+
+async def run_phase6(final_picks: dict, strategic_result: dict) -> dict:
+    """Phase 6: Perplexity 교차검증.
+
+    Phase 5 결과의 매수 종목 촉매/리스크를 웹검색으로 팩트체크.
+    Phase 1의 산업 thesis도 교차검증.
+
+    Args:
+        final_picks: Phase 5 결과 (ai_v3_picks.json)
+        strategic_result: Phase 1 결과 (ai_strategic_analysis.json)
+
+    Returns:
+        perplexity_verification.json 내용 (실패 시 빈 dict)
+    """
+    upgrade = _load_upgrade_settings()
+    if not upgrade.get("perplexity_verify_enabled", False):
+        logger.info("Phase 6 비활성화 (ai_upgrade.perplexity_verify_enabled=false)")
+        return {}
+
+    logger.info("=" * 60)
+    logger.info("Phase 6: Perplexity 교차검증")
+    logger.info("=" * 60)
+
+    buys = final_picks.get("buys", [])
+    if not buys:
+        logger.info("매수 종목 없음 — Phase 6 스킵")
+        return {}
+
+    try:
+        max_v = upgrade.get("perplexity_max_verifications", 5)
+        verifier = PerplexityVerifier(max_verifications=max_v)
+        result = verifier.verify_picks(final_picks, strategic_result)
+
+        # 저장
+        output_path = DATA_DIR / "perplexity_verification.json"
+        _save_json(output_path, result)
+
+        # 로그
+        logger.info("-" * 60)
+        logger.info("Phase 6 결과 요약:")
+        logger.info("  종합 신뢰도: %.0f%%", result.get("overall_confidence", 0) * 100)
+        logger.info(
+            "  종목 검증: %d건, thesis 검증: %d건",
+            len(result.get("stock_verifications", [])),
+            len(result.get("thesis_verifications", [])),
+        )
+
+        warnings = result.get("warnings", [])
+        if warnings:
+            for w in warnings:
+                logger.warning("  ⚠️ %s", w)
+
+        hallucinations = result.get("hallucination_flags", [])
+        if hallucinations:
+            logger.warning("  🚨 환각 감지 %d건!", len(hallucinations))
+            for h in hallucinations:
+                logger.warning("    - %s: confidence=%.2f", h.get("name", "?"), h.get("confidence_score", 0))
+
+        logger.info("-" * 60)
+        return result
+
+    except Exception as e:
+        logger.error("Phase 6 실패 (검증 없이 진행): %s", e)
+        return {}
 
 
 # ─── 텔레그램 알림 ──────────────────────────────────────────────
@@ -892,6 +1028,14 @@ async def main():
     start_time = datetime.now()
     logger.info("v3 AI Brain 러너 시작 (phase=%d, dry_run=%s)", args.phase, args.dry_run)
 
+    # Phase 0: o1 Deep Thinking (NEW)
+    o1_context = {}
+    if not args.skip_phase1:
+        try:
+            o1_context = await run_phase0()
+        except Exception as e:
+            logger.error("Phase 0 예외 (Phase 1 독립 진행): %s", e)
+
     # Phase 1: Strategic Brain
     if args.skip_phase1:
         logger.info("Phase 1 생략 — 기존 ai_strategic_analysis.json 로드")
@@ -903,7 +1047,7 @@ async def main():
             logger.error("ai_strategic_analysis.json 없음 — 종료")
             return
     else:
-        result = await run_phase1(dry_run=args.dry_run)
+        result = await run_phase1(dry_run=args.dry_run, o1_context=o1_context)
 
     sector_focus = None
     picks = None
@@ -932,6 +1076,13 @@ async def main():
         except Exception as e:
             logger.error("Phase 5 실패: %s", e)
             final_picks = None
+
+    # Phase 6: Perplexity 교차검증 (NEW)
+    if final_picks and final_picks.get("buys"):
+        try:
+            await run_phase6(final_picks, result)
+        except Exception as e:
+            logger.error("Phase 6 예외 (검증 없이 진행): %s", e)
 
     # 텔레그램
     if not args.no_telegram and not result.get("error"):
