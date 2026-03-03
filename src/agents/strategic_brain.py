@@ -67,8 +67,8 @@ SYSTEM_STRATEGIC_ANALYSIS = """\
 
 ## 레짐 분류 기준
 
-- **공격**: 글로벌 우호 + 산업 구조 양호 + 수급 긍정 → 최대 3종목 매수
-- **중립**: 혼조세 또는 일부 약세 요인 → 1~2종목 선별 매수
+- **공격**: 글로벌 우호 + 산업 구조 양호 + 수급 긍정 → 최대 4종목 매수
+- **중립**: 혼조세 또는 일부 약세 요인 → 2~3종목 선별 매수
 - **방어**: 다수 약세 요인 → 신규 매수 축소, 현금 확대
 - **회피**: 위기 징후 + 글로벌 급락 → 매수 중단, 현금 100%
 
@@ -104,7 +104,7 @@ SYSTEM_STRATEGIC_ANALYSIS = """\
     "watch": ["관찰할 섹터"],
     "avoid": ["회피할 섹터"]
   },
-  "max_new_buys": 0~3,
+  "max_new_buys": 0~4,
   "risk_factors": ["리스크1", "리스크2"],
   "cash_reserve_suggestion": 15~100,
   "global_summary": "글로벌 시장 요약 1~2문장",
@@ -408,9 +408,9 @@ class StrategicBrainAgent(BaseAgent):
             )
             result["regime"] = "중립"
 
-        # max_new_buys 클램핑
+        # max_new_buys 클램핑 (v12.0: 상한 3→4, Perplexity 검증이 안전망)
         max_buys = result.get("max_new_buys", 2)
-        result["max_new_buys"] = max(0, min(3, max_buys))
+        result["max_new_buys"] = max(0, min(4, max_buys))
 
         # cash_reserve_suggestion 클램핑
         cash = result.get("cash_reserve_suggestion", 20)

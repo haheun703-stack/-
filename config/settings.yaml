@@ -1410,7 +1410,7 @@ ai_brain_v3:
 
   # Agent 2D: 정밀 분석 파라미터 (Phase 2에서 구현)
   deep_analyst:
-    min_conviction: 5          # 정밀 분석 통과 최소 conviction (1~10)
+    min_conviction: 4          # 정밀 분석 통과 최소 conviction (1~10) — v12.0: 5→4 완화 (Perplexity 검증이 안전망)
     max_batch_size: 30         # 배치 최대 분석 종목 수
 
   # Agent 4B/4C: AI 매도 파라미터 (Phase 3에서 구현)

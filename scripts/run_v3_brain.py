@@ -1080,7 +1080,42 @@ async def main():
     # Phase 6: Perplexity 교차검증 (NEW)
     if final_picks and final_picks.get("buys"):
         try:
-            await run_phase6(final_picks, result)
+            verification = await run_phase6(final_picks, result)
+
+            # HALLUCINATION 판정 종목 자동 제거
+            if verification:
+                hallucination_tickers = set()
+                for v in verification.get("stock_verifications", []):
+                    if v.get("verdict") == "HALLUCINATION_DETECTED":
+                        hallucination_tickers.add(v.get("ticker", ""))
+                for h in verification.get("hallucination_flags", []):
+                    hallucination_tickers.add(h.get("ticker", ""))
+                hallucination_tickers.discard("")
+
+                if hallucination_tickers:
+                    before_count = len(final_picks["buys"])
+                    removed = [b for b in final_picks["buys"] if b.get("ticker") in hallucination_tickers]
+                    final_picks["buys"] = [b for b in final_picks["buys"] if b.get("ticker") not in hallucination_tickers]
+                    for r in removed:
+                        final_picks.setdefault("skipped", []).append({
+                            "ticker": r.get("ticker", ""),
+                            "name": r.get("name", ""),
+                            "skip_reason": "Perplexity HALLUCINATION_DETECTED — 촉매 팩트체크 실패",
+                        })
+                    logger.warning(
+                        "HALLUCINATION 자동 제거: %d종목 (%s) → 최종 %d종목",
+                        len(removed),
+                        ", ".join(r.get("name", "?") for r in removed),
+                        len(final_picks["buys"]),
+                    )
+
+                    # 변경된 최종 picks 재저장
+                    settings = _load_settings()
+                    picks_path = Path(settings.get("picks_output", "data/ai_v3_picks.json"))
+                    if not picks_path.is_absolute():
+                        picks_path = PROJECT_ROOT / picks_path
+                    _save_json(picks_path, final_picks)
+
         except Exception as e:
             logger.error("Phase 6 예외 (검증 없이 진행): %s", e)
 
