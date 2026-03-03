@@ -71,6 +71,11 @@ SYSTEM_SELL_BRAIN = """\
    ★ 뉴스 촉매가 살아있는 종목을 단순 기술적 이탈로 매도하면
      "내일 10% 더 오를 종목"을 놓치게 됩니다. 촉매 우선 원칙.
 
+9. **불확실할 때 REDUCE 우선** ★보완 원칙
+   - 확실한 HOLD도, 확실한 SELL도 아닌 경우 → PARTIAL_SELL(50% 축소) 우선
+   - "모르겠으면 반만 줄여라" — 전량 HOLD로 리스크 방치하지 마라
+   - 특히 촉매 약화(FADING) + 기술적 애매함 → REDUCE가 최선
+
 ## 판단 등급
 - HOLD: 유지 (변화 없음)
 - WATCH: 관찰 (내일까지 대기)
@@ -89,9 +94,11 @@ SYSTEM_SELL_BRAIN = """\
       "ticker": "종목코드",
       "name": "종목명",
       "action": "HOLD|WATCH|PARTIAL_SELL|SELL_NOW",
+      "confidence": 0~100,
       "urgency": "immediate|end_of_day|tomorrow",
       "thesis_status": "intact|weakened|broken",
       "reasoning": "판단 근거 1~2문장",
+      "top_reasons": ["근거1", "근거2", "근거3"],
       "risks": ["리스크1"]
     }
   ],

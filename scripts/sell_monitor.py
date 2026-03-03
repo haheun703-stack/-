@@ -252,22 +252,53 @@ def send_telegram(text: str):
         logger.warning("텔레그램 전송 실패: %s", e)
 
 
+def _calc_gpt_score(catalyst_status: str, catalyst_strength: float, tomorrow_dir: str) -> int:
+    """GPT 촉매 → 점수 (-2 ~ +2).
+
+    점수 합산형 (ChatGPT 제안 반영):
+      ALIVE(강) +2, ALIVE(약) +1, FADING 0/-1, DEAD -2, NEW ±1
+    """
+    if catalyst_status == "CATALYST_ALIVE":
+        return 2 if catalyst_strength >= 0.7 else 1
+    elif catalyst_status == "CATALYST_FADING":
+        return 0 if catalyst_strength >= 0.5 else -1
+    elif catalyst_status == "CATALYST_DEAD":
+        return -2
+    elif catalyst_status == "CATALYST_NEW":
+        return 1 if tomorrow_dir in ("UP", "SIDEWAYS") else -1
+    return 0
+
+
+def _calc_claude_score(action: str) -> int:
+    """Claude 판단 → 점수 (-2 ~ +1).
+
+    HOLD +1, WATCH 0, PARTIAL -1, SELL -2
+    """
+    return {"HOLD": 1, "WATCH": 0, "PARTIAL_SELL": -1, "SELL_NOW": -2}.get(action, 0)
+
+
 def apply_consensus(
     claude_result: dict,
     gpt_result: dict,
     positions: list[dict],
+    consensus_cfg: dict | None = None,
 ) -> dict:
     """GPT 촉매 + Claude 기술 → 합의 규칙 적용.
 
-    합의 매트릭스:
-      ALIVE + SELL → HOLD (촉매 우선)
-      ALIVE + PARTIAL → HOLD (촉매 우선)
-      FADING + SELL → PARTIAL (절충)
-      FADING + PARTIAL → PARTIAL (일치)
-      DEAD + SELL → SELL (일치)
-      DEAD + PARTIAL → SELL (촉매 없으니 빠른 청산)
-      manual_entry → 알림만 (자동매도 금지)
+    합의 매트릭스 + 점수 합산 하이브리드:
+      1차: 매트릭스 (명확한 경우)
+      2차: 점수 합산 (불확실한 경우 REDUCE 원칙 적용)
+
+    핵심 보완 (ChatGPT 제안):
+      - "불확실할 때는 HOLD보다 REDUCE(부분매도) 우선"
+      - DEAD + HOLD → PARTIAL_SELL (촉매 죽었으면 줄여라)
+      - FADING + HOLD (약) → PARTIAL_SELL (애매하면 줄여라)
+      - 점수 합산으로 투명성 확보
     """
+    if consensus_cfg is None:
+        consensus_cfg = {}
+    dead_hold_reduce = consensus_cfg.get("dead_catalyst_hold_to_reduce", True)
+    fading_weak_reduce = consensus_cfg.get("fading_weak_hold_to_reduce", True)
     # GPT 촉매 맵 생성
     gpt_map = {}
     for gp in gpt_result.get("positions", []):
@@ -283,6 +314,7 @@ def apply_consensus(
 
     final_decisions = []
     catalyst_overrides = 0
+    reduce_upgrades = 0
     manual_blocks = 0
 
     for pos in positions:
@@ -305,6 +337,17 @@ def apply_consensus(
         if catalyst_status == "CATALYST_ALIVE" and catalyst_strength < 0.5:
             catalyst_status = "CATALYST_FADING"
 
+        # ── 점수 계산 ──
+        gpt_score = _calc_gpt_score(catalyst_status, catalyst_strength, tomorrow_dir)
+        claude_score = _calc_claude_score(claude_action)
+        combined_score = gpt_score + claude_score  # -4 ~ +3
+
+        score_info = {
+            "gpt_score": gpt_score,
+            "claude_score": claude_score,
+            "combined_score": combined_score,
+        }
+
         # ── 수동매수 보호 ──
         if is_manual:
             manual_blocks += 1
@@ -321,6 +364,7 @@ def apply_consensus(
                 "reasoning": claude_reasoning,
                 "catalyst_note": catalyst_note,
                 "tomorrow_direction": tomorrow_dir,
+                **score_info,
             })
             continue
 
@@ -340,13 +384,22 @@ def apply_consensus(
                 final_action = "PARTIAL_SELL"
                 override_reason = "촉매 약화 중 → 절충 PARTIAL"
                 catalyst_overrides += 1
-            # PARTIAL/HOLD/WATCH → 그대로
+            elif claude_action == "HOLD" and catalyst_strength < 0.4 and fading_weak_reduce:
+                # ★ ChatGPT 보완: 불확실할 때 REDUCE 우선
+                final_action = "PARTIAL_SELL"
+                override_reason = f"촉매 약화(강도 {catalyst_strength:.0%}) + 불확실 → REDUCE 원칙"
+                reduce_upgrades += 1
+            # PARTIAL/WATCH → 그대로
 
         elif catalyst_status == "CATALYST_DEAD":
             if claude_action == "PARTIAL_SELL":
                 final_action = "SELL_NOW"
                 override_reason = "촉매 소멸 → 빠른 청산"
-            # SELL_NOW → 그대로, HOLD → WATCH로 올릴 수도 있지만 Claude 판단 존중
+            elif claude_action == "HOLD" and dead_hold_reduce:
+                # ★ ChatGPT 보완: 촉매 죽었는데 HOLD? → REDUCE
+                final_action = "PARTIAL_SELL"
+                override_reason = "촉매 소멸 + 기술 유지 → REDUCE 원칙 (줄이고 관찰)"
+                reduce_upgrades += 1
 
         # CATALYST_NEW는 Claude 판단 그대로 (새 촉매 방향에 따라 다름)
 
@@ -363,12 +416,14 @@ def apply_consensus(
             "reasoning": claude_reasoning,
             "catalyst_note": catalyst_note,
             "tomorrow_direction": tomorrow_dir,
+            **score_info,
         })
 
     return {
         "final_decisions": final_decisions,
         "consensus_stats": {
             "catalyst_overrides": catalyst_overrides,
+            "reduce_upgrades": reduce_upgrades,
             "manual_blocks": manual_blocks,
             "total": len(positions),
         },
@@ -385,9 +440,10 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
 
     # ── 듀얼 AI 활성화 여부 확인 ──
     dual_enabled = False
+    cfg = {}
     try:
         with open(ROOT / "config" / "settings.yaml", encoding="utf-8") as f:
-            cfg = yaml.safe_load(f)
+            cfg = yaml.safe_load(f) or {}
         dual_enabled = cfg.get("dual_sell_system", {}).get("enabled", False)
     except Exception:
         pass
@@ -423,12 +479,14 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
 
     # ── Step 3: 합의 규칙 적용 ──
     if dual_enabled and gpt_result and not gpt_result.get("error"):
-        consensus = apply_consensus(claude_result, gpt_result, positions)
+        consensus_cfg = cfg.get("dual_sell_system", {}).get("consensus", {}) if cfg else {}
+        consensus = apply_consensus(claude_result, gpt_result, positions, consensus_cfg)
         save_json("ai_sell_consensus.json", consensus)
         stats = consensus.get("consensus_stats", {})
         logger.info(
-            "합의 규칙: 촉매오버라이드=%d, 수동차단=%d (총 %d종목)",
+            "합의 규칙: 촉매오버라이드=%d, REDUCE승격=%d, 수동차단=%d (총 %d종목)",
             stats.get("catalyst_overrides", 0),
+            stats.get("reduce_upgrades", 0),
             stats.get("manual_blocks", 0),
             stats.get("total", 0),
         )
@@ -452,10 +510,13 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
                     "reasoning": p.get("reasoning", ""),
                     "catalyst_note": "",
                     "tomorrow_direction": "",
+                    "gpt_score": 0,
+                    "claude_score": _calc_claude_score(p.get("action", "HOLD")),
+                    "combined_score": _calc_claude_score(p.get("action", "HOLD")),
                 }
                 for p in claude_result.get("positions", [])
             ],
-            "consensus_stats": {"catalyst_overrides": 0, "manual_blocks": 0, "total": len(positions)},
+            "consensus_stats": {"catalyst_overrides": 0, "reduce_upgrades": 0, "manual_blocks": 0, "total": len(positions)},
         }
 
     # ── Step 4: 최종 결정에 따라 매도 실행 ──
@@ -500,6 +561,9 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
                 "pnl_pct": pnl,
                 "reasoning": reasoning,
                 "result": sell_result,
+                "gpt_score": decision.get("gpt_score", 0),
+                "claude_score": decision.get("claude_score", 0),
+                "combined_score": decision.get("combined_score", 0),
             })
 
     # ── Step 5: 텔레그램 알림 ──
@@ -539,20 +603,42 @@ def _send_dual_telegram(
             gpt = s.get("gpt_catalyst", "")
             if gpt and gpt != "N/A":
                 lines.append(f"    GPT: {gpt} | Claude: {s.get('claude_action', '')}")
+            # 점수 브레이크다운
+            gs = s.get("gpt_score", "")
+            cs = s.get("claude_score", "")
+            comb = s.get("combined_score", "")
+            if gs != "" and cs != "":
+                lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {comb:+d}")
 
-    # 촉매 오버라이드 (매도 보류)
+    # 촉매 오버라이드 (매도 보류) + REDUCE 승격
     overrides = [
         d for d in consensus.get("final_decisions", [])
-        if d.get("override_reason") and d["final_action"] == "HOLD"
+        if d.get("override_reason") and not d.get("manual_blocked")
     ]
-    if overrides:
+    hold_overrides = [o for o in overrides if o["final_action"] == "HOLD"]
+    reduce_overrides = [o for o in overrides if o["final_action"] == "PARTIAL_SELL" and o.get("claude_action") in ("HOLD", "WATCH")]
+
+    if hold_overrides:
         lines.append("")
         lines.append("🟢 촉매 보호 (매도 보류)")
-        for o in overrides:
+        for o in hold_overrides:
             lines.append(f"  {o['name']}: Claude {o['claude_action']} → HOLD")
             lines.append(f"    GPT: {o['gpt_catalyst']} | {o.get('catalyst_note', '')[:40]}")
             if o.get("tomorrow_direction"):
                 lines.append(f"    내일: {o['tomorrow_direction']}")
+            gs = o.get("gpt_score", 0)
+            cs = o.get("claude_score", 0)
+            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {gs+cs:+d}")
+
+    if reduce_overrides:
+        lines.append("")
+        lines.append("🟡 REDUCE 승격 (불확실→축소)")
+        for o in reduce_overrides:
+            lines.append(f"  {o['name']}: Claude {o['claude_action']} → PARTIAL_SELL")
+            lines.append(f"    사유: {o['override_reason'][:50]}")
+            gs = o.get("gpt_score", 0)
+            cs = o.get("claude_score", 0)
+            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {gs+cs:+d}")
 
     # 수동매수 보호
     if manual_alerts:

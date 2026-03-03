@@ -1443,3 +1443,8 @@ dual_sell_system:
     catalyst_fading_downgrades: true       # FADING → SELL을 PARTIAL로 다운
     manual_entry_protection: true          # 수동매수 자동매도 차단
     manual_entries_file: "manual_entries.json"
+
+    # ChatGPT 보완: 불확실할 때 REDUCE 원칙
+    uncertain_bias: "reduce"              # "reduce" = 불확실하면 PARTIAL_SELL, "hold" = 기존 HOLD 유지
+    dead_catalyst_hold_to_reduce: true    # DEAD+HOLD → PARTIAL_SELL (촉매 소멸 시 축소)
+    fading_weak_hold_to_reduce: true      # FADING(strength<0.4)+HOLD → PARTIAL_SELL
