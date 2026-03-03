@@ -22,6 +22,13 @@ from src.entities.supply_demand_models import (
     ShortSellingData,
 )
 
+# KIS API fallback (pykrx 수급 장애 대비)
+try:
+    from src.adapters.kis_investor_adapter import fetch_investor_by_ticker as kis_fetch_investor
+    KIS_INVESTOR_AVAILABLE = True
+except ImportError:
+    KIS_INVESTOR_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -134,18 +141,42 @@ class PykrxSupplyAdapter:
     # Layer 5: 기관/외인 수급
     # ─────────────────────────────────────────
     def fetch_investor_flow(self, ticker: str) -> InvestorFlowData:
-        """투자자별 매매동향 (외국인/기관/연기금/개인)"""
-        stock = self._ensure_pykrx()
+        """투자자별 매매동향 (외국인/기관/연기금/개인)
+
+        pykrx 우선 시도, 실패 시 KIS API fallback.
+        """
         start, end = self._date_range(days=30)
         today = datetime.today().strftime("%Y%m%d")
 
         result = InvestorFlowData(ticker=ticker, date=today)
+        inv_df = None
 
+        # 1) pykrx 시도
         try:
+            stock = self._ensure_pykrx()
             inv_df = stock.get_market_trading_value_by_date(start, end, ticker)
             if inv_df is None or inv_df.empty:
-                return result
+                inv_df = None
+        except Exception as e:
+            logger.debug(f"[{ticker}] pykrx 수급 실패: {e}")
+            inv_df = None
 
+        # 2) KIS API fallback
+        if inv_df is None and KIS_INVESTOR_AVAILABLE:
+            try:
+                inv_df = kis_fetch_investor(ticker)
+                if inv_df is not None and not inv_df.empty:
+                    logger.debug(f"[{ticker}] KIS fallback 수급 조회 성공")
+                else:
+                    inv_df = None
+            except Exception as e:
+                logger.debug(f"[{ticker}] KIS fallback 실패: {e}")
+                inv_df = None
+
+        if inv_df is None or inv_df.empty:
+            return result
+
+        try:
             latest = inv_df.iloc[-1]
 
             # 투자자별 순매수
@@ -153,7 +184,7 @@ class PykrxSupplyAdapter:
             result.institution_net = int(latest.get("기관합계", 0))
             result.individual_net = int(latest.get("개인", 0))
 
-            # 연기금 (있는 경우)
+            # 연기금 (pykrx에서만 제공)
             if "연기금등" in inv_df.columns:
                 result.pension_net = int(latest.get("연기금등", 0))
 
@@ -175,7 +206,7 @@ class PykrxSupplyAdapter:
                 )
 
         except Exception as e:
-            logger.warning(f"[{ticker}] 투자자별 매매동향 조회 실패: {e}")
+            logger.warning(f"[{ticker}] 투자자별 매매동향 파싱 실패: {e}")
 
         return result
 

@@ -36,6 +36,13 @@ except ImportError:
     PYKRX_AVAILABLE = False
     logger.error("pykrx 미설치: pip install pykrx")
 
+# KIS API fallback (pykrx 수급 API 장애 대비)
+try:
+    from src.adapters.kis_investor_adapter import fetch_investor_by_ticker as kis_fetch_investor
+    KIS_INVESTOR_AVAILABLE = True
+except ImportError:
+    KIS_INVESTOR_AVAILABLE = False
+
 
 def extend_single(parquet_path: Path, end_date: str) -> dict:
     """단일 parquet 파일 증분 업데이트"""
@@ -92,20 +99,36 @@ def extend_single(parquet_path: Path, end_date: str) -> dict:
             else:
                 new_rows[col] = 0.0  # 없는 컬럼은 0으로 채움
 
-        # 투자자 매매동향 업데이트 시도
+        # 투자자 매매동향 업데이트 시도 (pykrx → KIS fallback)
+        inv_df = None
         try:
             inv_df = krx.get_market_trading_value_by_date(fetch_start, end_date, ticker)
             if inv_df is not None and not inv_df.empty:
                 inv_df.index.name = "date"
-                inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
-                for kr_col, en_col in inv_col_map.items():
-                    if kr_col in inv_df.columns and en_col in new_rows.columns:
-                        common_idx = inv_df.index.intersection(new_rows.index)
-                        if len(common_idx) > 0:
-                            new_rows.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
+            else:
+                inv_df = None
             time.sleep(0.3)
         except Exception:
-            pass
+            inv_df = None
+
+        # pykrx 실패 → KIS API fallback
+        if inv_df is None and KIS_INVESTOR_AVAILABLE:
+            try:
+                kis_df = kis_fetch_investor(ticker)
+                if kis_df is not None and not kis_df.empty:
+                    kis_df.index.name = "date"
+                    inv_df = kis_df
+                    logger.debug("[%s] KIS fallback 수급 조회 성공", ticker)
+            except Exception as e:
+                logger.debug("[%s] KIS fallback 실패: %s", ticker, e)
+
+        if inv_df is not None:
+            inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
+            for kr_col, en_col in inv_col_map.items():
+                if kr_col in inv_df.columns and en_col in new_rows.columns:
+                    common_idx = inv_df.index.intersection(new_rows.index)
+                    if len(common_idx) > 0:
+                        new_rows.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
 
         # 펀더멘탈 업데이트 시도
         try:

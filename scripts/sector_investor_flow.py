@@ -38,9 +38,18 @@ logger = logging.getLogger(__name__)
 
 try:
     from pykrx import stock as krx
+    PYKRX_AVAILABLE = True
 except ImportError:
-    logger.error("pykrx 미설치: pip install pykrx")
-    sys.exit(1)
+    PYKRX_AVAILABLE = False
+    logger.warning("pykrx 미설치 → KIS API만 사용")
+
+# KIS API (pykrx 수급 장애 대비 주력)
+try:
+    from src.adapters.kis_investor_adapter import fetch_investor_by_ticker as kis_fetch_investor
+    KIS_INVESTOR_AVAILABLE = True
+except ImportError:
+    KIS_INVESTOR_AVAILABLE = False
+    logger.warning("KIS investor adapter 미사용")
 
 DATA_DIR = PROJECT_ROOT / "data" / "sector_rotation"
 DAILY_DIR = DATA_DIR / "etf_daily"
@@ -75,18 +84,36 @@ def load_etf_universe() -> dict:
 def fetch_stock_trading(ticker: str, start: str, end: str) -> pd.DataFrame | None:
     """종목의 투자자별 순매수 거래대금 조회.
 
+    KIS API 우선, pykrx fallback.
     Returns: DataFrame (기관합계, 외국인합계 등)
     """
-    try:
-        df = krx.get_market_trading_value_by_date(start, end, ticker)
-        time.sleep(0.15)
-        if df is None or df.empty:
-            return None
-        df.index = pd.to_datetime(df.index)
-        return df
-    except Exception as e:
-        logger.debug("%s 수급 조회 실패: %s", ticker, e)
-        return None
+    # 1) KIS API (주력)
+    if KIS_INVESTOR_AVAILABLE:
+        try:
+            df = kis_fetch_investor(ticker)
+            if df is not None and not df.empty:
+                df.index = pd.to_datetime(df.index)
+                # start~end 범위 필터링
+                start_dt = pd.Timestamp(datetime.strptime(start, "%Y%m%d"))
+                end_dt = pd.Timestamp(datetime.strptime(end, "%Y%m%d"))
+                df = df[(df.index >= start_dt) & (df.index <= end_dt)]
+                if not df.empty:
+                    return df
+        except Exception as e:
+            logger.debug("%s KIS 수급 조회 실패: %s", ticker, e)
+
+    # 2) pykrx fallback
+    if PYKRX_AVAILABLE:
+        try:
+            df = krx.get_market_trading_value_by_date(start, end, ticker)
+            time.sleep(0.15)
+            if df is not None and not df.empty:
+                df.index = pd.to_datetime(df.index)
+                return df
+        except Exception as e:
+            logger.debug("%s pykrx 수급 조회 실패: %s", ticker, e)
+
+    return None
 
 
 # ─────────────────────────────────────────────
@@ -102,10 +129,12 @@ def analyze_sector_flow(
     """섹터별 상위 종목의 수급을 합산하여 섹터 수준 흐름 분석."""
 
     try:
+        if not PYKRX_AVAILABLE:
+            raise RuntimeError("pykrx 미사용")
         end_date = krx.get_nearest_business_day_in_a_week(
             datetime.now().strftime("%Y%m%d"), prev=True
         )
-    except (IndexError, KeyError, Exception) as e:
+    except Exception as e:
         logger.warning("pykrx 영업일 조회 실패 (%s) → fallback 직접 계산", e)
         from datetime import date
         d = date.today()
