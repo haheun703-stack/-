@@ -1215,6 +1215,19 @@ class SmartEntryEngine:
                 logger.critical("[중단] 오늘 이미 실행됨 → 세션 취소")
                 return self.generate_report()
 
+        # ─── 잔고 체크 (라이브 전용) ───
+        if not self.dry_run and self.order:
+            cash = self._get_available_cash()
+            min_cash = 500_000  # 최소 50만원
+            if 0 < cash < min_cash:
+                logger.critical(
+                    "[중단] 주문가능금액 %s원 < 최소 %s원 → 세션 취소 (보유종목 매도 후 재시도)",
+                    f"{cash:,.0f}", f"{min_cash:,}",
+                )
+                return self.generate_report()
+            elif cash > 0:
+                logger.info("[잔고] 주문가능금액 %s원 — 정상", f"{cash:,.0f}")
+
         # Phase 1: 종목 로드 + 초기 지정가
         count = self.load_picks()
         if count == 0:

@@ -239,11 +239,29 @@ def fetch_etf_daily(days: int = 120) -> int:
     return count
 
 
+def _safe_nearest_business_day() -> str:
+    """pykrx get_nearest_business_day_in_a_week 안전 래퍼.
+
+    KRX API가 빈 응답 반환 시 직접 계산으로 fallback.
+    """
+    today_str = datetime.now().strftime("%Y%m%d")
+    try:
+        return krx.get_nearest_business_day_in_a_week(today_str, prev=True)
+    except (IndexError, KeyError, Exception) as e:
+        logger.warning("pykrx 영업일 조회 실패 (%s) → fallback 직접 계산", e)
+        # 오늘부터 역순으로 최대 7일 탐색하여 평일 반환
+        from datetime import date
+        d = date.today()
+        for _ in range(7):
+            if d.weekday() < 5:  # 월~금
+                return d.strftime("%Y%m%d")
+            d -= timedelta(days=1)
+        return today_str
+
+
 def update_etf_daily() -> int:
     """기존 시세에 최신 데이터를 증분 추가."""
-    end_date = krx.get_nearest_business_day_in_a_week(
-        datetime.now().strftime("%Y%m%d"), prev=True
-    )
+    end_date = _safe_nearest_business_day()
 
     count = 0
     for sector_name, (etf_code, _, _) in SECTOR_ETFS.items():

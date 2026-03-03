@@ -101,9 +101,21 @@ def analyze_sector_flow(
 ) -> list[dict]:
     """섹터별 상위 종목의 수급을 합산하여 섹터 수준 흐름 분석."""
 
-    end_date = krx.get_nearest_business_day_in_a_week(
-        datetime.now().strftime("%Y%m%d"), prev=True
-    )
+    try:
+        end_date = krx.get_nearest_business_day_in_a_week(
+            datetime.now().strftime("%Y%m%d"), prev=True
+        )
+    except (IndexError, KeyError, Exception) as e:
+        logger.warning("pykrx 영업일 조회 실패 (%s) → fallback 직접 계산", e)
+        from datetime import date
+        d = date.today()
+        for _ in range(7):
+            if d.weekday() < 5:
+                end_date = d.strftime("%Y%m%d")
+                break
+            d -= timedelta(days=1)
+        else:
+            end_date = datetime.now().strftime("%Y%m%d")
     start_date = (
         datetime.strptime(end_date, "%Y%m%d") - timedelta(days=cum_days + 20)
     ).strftime("%Y%m%d")

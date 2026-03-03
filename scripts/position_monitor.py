@@ -92,9 +92,9 @@ DRY_RUN_HOLDINGS = [
 
 def fetch_real_holdings(ticker_filter: str | None = None) -> list[dict]:
     """KIS API에서 실제 보유종목 조회."""
-    from src.adapters.kis_order_adapter import KISOrderAdapter
+    from src.adapters.kis_order_adapter import KisOrderAdapter
 
-    adapter = KISOrderAdapter()
+    adapter = KisOrderAdapter()
     balance = adapter.fetch_balance()
     holdings = balance.get("holdings", [])
 
