@@ -359,6 +359,15 @@ class TelegramCommandBot:
         parts = data.split(":")
         action = parts[0]
 
+        # ── 자동매매 승인/거부 콜백 ──
+        if action in ("auto_approve", "auto_reject"):
+            approval_id = ":".join(parts[1:]) if len(parts) > 1 else ""
+            approved = (action == "auto_approve")
+            self._handle_auto_trade_approval(
+                approval_id, approved, query_id, chat_id, message_id,
+            )
+            return
+
         if action == "confirm" and len(parts) >= 3:
             cmd = parts[1]  # buy / sell / liquidate / start
             ticker = parts[2]
@@ -404,6 +413,31 @@ class TelegramCommandBot:
                 self._do_analyze(name, ticker)
         else:
             answer_callback_query(query_id, "알 수 없는 작업")
+
+    # ══════════════════════════════════════════
+    # 자동매매 승인 처리
+    # ══════════════════════════════════════════
+
+    def _handle_auto_trade_approval(
+        self, approval_id: str, approved: bool,
+        query_id: str, chat_id: str, msg_id: int,
+    ) -> None:
+        """자동매매 승인/거부 처리 → JSON 파일 업데이트."""
+        from src.telegram_sender import answer_callback_query, edit_message_text
+        from src.trade_approval import TradeApprovalGateway
+
+        gateway = TradeApprovalGateway()
+        status = "approved" if approved else "rejected"
+        gateway.update_approval(approval_id, status)
+
+        if approved:
+            status_text = "\u2705 \uc2b9\uc778\ub428"
+        else:
+            status_text = "\u274c \uac70\ubd80\ub428"
+
+        edit_message_text(chat_id, msg_id, f"{status_text} ({approval_id})")
+        answer_callback_query(query_id, status_text)
+        logger.info("[명령봇] 자동매매 %s: %s", status, approval_id)
 
     # ══════════════════════════════════════════
     # 주문 실행 (확인 후)

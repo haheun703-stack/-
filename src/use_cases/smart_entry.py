@@ -143,6 +143,10 @@ class SmartEntryEngine:
         self.ai_adj_avoid_penalty = ai_adj.get("avoid_penalty", -3)
         self._ai_judgments_cache = None  # 1회 로드 캐시
 
+        # ─── 텔레그램 승인 게이트 ───
+        self.confirm_before_order = entry_cfg.get("confirm_before_order", False)
+        self.approval_timeout = entry_cfg.get("approval_timeout_sec", 300)
+
         # ─── 라이브 안전장치 ───
         live_cfg = entry_cfg.get("live", {})
         self.max_stocks = live_cfg.get("max_stocks", 1)
@@ -469,6 +473,28 @@ class SmartEntryEngine:
                     logger.error("[안전] %s 수량 0 → 스킵 (가격 %d > 상한 %d)",
                                  c.name, c.order_price, self.max_amount_per_stock)
                     continue
+
+                # 텔레그램 승인 게이트
+                if self.confirm_before_order:
+                    try:
+                        from src.trade_approval import TradeApprovalGateway
+                        gateway = TradeApprovalGateway(timeout_sec=self.approval_timeout)
+                        approved = gateway.request_buy_approval(
+                            ticker=c.ticker,
+                            name=c.name,
+                            price=order_price,
+                            qty=c.order_qty,
+                            reasoning=f"등급: {c.grade}, 점수: {c.score:.0f}",
+                        )
+                        if not approved:
+                            logger.info("[승인거부] %s 매수 스킵", c.name)
+                            c.decision = EntryDecision.SKIP
+                            continue
+                    except Exception as e:
+                        logger.warning("[승인] 게이트 오류 → 스킵: %s — %s", c.name, e)
+                        c.decision = EntryDecision.SKIP
+                        continue
+
                 order = self.order.buy_limit(c.ticker, order_price, c.order_qty)
                 if order.status.value != "failed":
                     c.order_id = order.order_id

@@ -217,8 +217,35 @@ def fetch_holdings() -> list[dict]:
     return positions, broker
 
 
-def execute_sell(broker, ticker: str, name: str, qty: int, sell_type: str, dry_run: bool) -> dict:
-    """시장가 매도 실행"""
+def _tick_round(price: int, reference: int) -> int:
+    """호가 단위 맞춤 (KRX 규칙)."""
+    if reference < 2000:
+        tick = 1
+    elif reference < 5000:
+        tick = 5
+    elif reference < 20000:
+        tick = 10
+    elif reference < 50000:
+        tick = 50
+    elif reference < 200000:
+        tick = 100
+    elif reference < 500000:
+        tick = 500
+    else:
+        tick = 1000
+    return (price // tick) * tick
+
+
+def execute_sell(
+    broker, ticker: str, name: str, qty: int, sell_type: str,
+    dry_run: bool, use_limit: bool = True, limit_premium_pct: float = 0.5,
+) -> dict:
+    """매도 실행 — 지정가 우선, 시장가 fallback.
+
+    Args:
+        use_limit: True=지정가 매도(+premium%), False=시장가 매도
+        limit_premium_pct: 지정가 매도 시 현재가 대비 프리미엄 (기본 +0.5%)
+    """
     if sell_type == "PARTIAL_SELL":
         qty = max(1, qty // 2)  # 50% 매도
 
@@ -227,14 +254,47 @@ def execute_sell(broker, ticker: str, name: str, qty: int, sell_type: str, dry_r
         return {"status": "dry_run", "ticker": ticker, "qty": qty}
 
     try:
+        if use_limit:
+            # 현재가 조회 → +premium% 지정가 매도 ("더 비싸게 매도" 모토)
+            price_resp = broker.fetch_price(ticker)
+            current = int(price_resp.get("output", {}).get("stck_prpr", 0))
+            if current > 0:
+                limit_price = _tick_round(
+                    int(current * (1 + limit_premium_pct / 100)), current,
+                )
+                resp = broker.create_limit_sell_order(ticker, limit_price, qty)
+                rt_cd = resp.get("rt_cd", "?")
+                msg = resp.get("msg1", "")
+                odno = resp.get("output", {}).get("ODNO", "")
+
+                if rt_cd == "0":
+                    logger.info(
+                        "[지정가 매도] %s %d주 @%d원 (+%.1f%%), 주문번호=%s",
+                        name, qty, limit_price, limit_premium_pct, odno,
+                    )
+                    return {
+                        "status": "ok", "ticker": ticker, "qty": qty,
+                        "order_no": odno, "order_type": "limit",
+                        "limit_price": limit_price,
+                    }
+                else:
+                    logger.warning("[지정가 매도 실패] %s: %s → 시장가 fallback", name, msg)
+                    # 지정가 실패 시 시장가 fallback
+            else:
+                logger.warning("[매도] %s 현재가 조회 실패 → 시장가 fallback", name)
+
+        # 시장가 매도 (기본 or fallback)
         resp = broker.create_market_sell_order(ticker, qty)
         rt_cd = resp.get("rt_cd", "?")
         msg = resp.get("msg1", "")
         odno = resp.get("output", {}).get("ODNO", "")
 
         if rt_cd == "0":
-            logger.info("[매도 성공] %s %d주, 주문번호=%s", name, qty, odno)
-            return {"status": "ok", "ticker": ticker, "qty": qty, "order_no": odno}
+            logger.info("[시장가 매도] %s %d주, 주문번호=%s", name, qty, odno)
+            return {
+                "status": "ok", "ticker": ticker, "qty": qty,
+                "order_no": odno, "order_type": "market",
+            }
         else:
             logger.error("[매도 실패] %s: %s", name, msg)
             return {"status": "failed", "ticker": ticker, "msg": msg}
@@ -519,7 +579,14 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
             "consensus_stats": {"catalyst_overrides": 0, "reduce_upgrades": 0, "manual_blocks": 0, "total": len(positions)},
         }
 
-    # ── Step 4: 최종 결정에 따라 매도 실행 ──
+    # ── Step 4: 매도 설정 로드 ──
+    sell_cfg = cfg.get("sell_monitor", {}) if cfg else {}
+    use_limit = sell_cfg.get("use_limit_orders", True)
+    limit_premium = sell_cfg.get("limit_sell_premium_pct", 0.5)
+    approval_enabled = sell_cfg.get("confirm_before_sell", False) and not dry_run
+    approval_timeout = sell_cfg.get("approval_timeout_sec", 300)
+
+    # ── Step 5: 최종 결정에 따라 매도 실행 ──
     sells_executed = []
     manual_alerts = []
 
@@ -544,12 +611,47 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
             qty = pos["quantity"]
             pnl = pos.get("pnl_pct", 0)
 
+            # ── 텔레그램 승인 게이트 ──
+            if approval_enabled:
+                try:
+                    from src.trade_approval import TradeApprovalGateway
+                    gateway = TradeApprovalGateway(timeout_sec=approval_timeout)
+
+                    # 매도 지정가 미리 계산 (승인 메시지에 표시)
+                    sell_price = 0
+                    if use_limit:
+                        try:
+                            price_resp = broker.fetch_price(ticker)
+                            current = int(price_resp.get("output", {}).get("stck_prpr", 0))
+                            if current > 0:
+                                sell_price = _tick_round(
+                                    int(current * (1 + limit_premium / 100)), current,
+                                )
+                        except Exception:
+                            pass
+
+                    approved = gateway.request_sell_approval(
+                        ticker, name, qty if final_action == "SELL_NOW" else max(1, qty // 2),
+                        pnl_pct=pnl, action=final_action,
+                        sell_price=sell_price,
+                        reasoning=reasoning[:100],
+                    )
+                    if not approved:
+                        logger.info("[승인거부] %s 매도 스킵", name)
+                        continue
+                except Exception as e:
+                    logger.error("[승인] 승인 요청 실패 → 매도 스킵 (안전): %s", e)
+                    continue
+
             if override:
                 logger.info("[합의 매도] %s → %s (오버라이드: %s)", name, final_action, override)
             else:
                 logger.info("[매도 결정] %s → %s (사유: %s)", name, final_action, reasoning[:50])
 
-            sell_result = execute_sell(broker, ticker, name, qty, final_action, dry_run)
+            sell_result = execute_sell(
+                broker, ticker, name, qty, final_action, dry_run,
+                use_limit=use_limit, limit_premium_pct=limit_premium,
+            )
             sells_executed.append({
                 "ticker": ticker,
                 "name": name,
