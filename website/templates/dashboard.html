@@ -68,7 +68,7 @@
             </div>
             {% if us.special_rules %}
             <div class="signal-tags">
-                {% for rule in us.special_rules %}<span class="signal-tag danger">{{ rule }}</span>{% endfor %}
+                {% for rule in us.special_rules %}<span class="signal-tag danger">{{ rule.name if rule is mapping else rule }}</span>{% endfor %}
             </div>
             {% endif %}
         </div>

@@ -261,7 +261,10 @@ class JarvisUploader:
                     "spy_return": idx.get("SPY", {}).get("ret_1d", 0),
                     "qqq_return": idx.get("QQQ", {}).get("ret_1d", 0),
                     "vix_return": vix.get("level", 0),
-                    "special_rules": sig.get("special_rules", []),
+                    "special_rules": [
+                        r.get("name", str(r)) if isinstance(r, dict) else str(r)
+                        for r in sig.get("special_rules", [])
+                    ],
                     "kill_sectors": killed_sectors,
                 }
             except Exception as e:
