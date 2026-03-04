@@ -105,15 +105,33 @@ class LeverageEngine:
             "timestamp": datetime.now().isoformat(),
         }
 
+    # 인버스/숏 방향 레짐 (PRE_ 포함)
+    _BEARISH_REGIMES = {"BEAR", "PRE_BEAR", "CRISIS", "PRE_CRISIS"}
+    # 레버리지/롱 방향 레짐 (PRE_ 포함)
+    _BULLISH_REGIMES = {"BULL", "PRE_BULL"}
+
     def _evaluate_entry(
         self, regime: str, us_overnight: dict, score: float,
         momentum_data: dict = None,
     ) -> LeverageDecision:
-        """신규 진입 여부 판단."""
+        """신규 진입 여부 판단.
+
+        PRE_BEAR/PRE_CRISIS: US Overnight 기반 선행 시그널 → 인버스 진입 허용
+        PRE_BULL: 반등 시그널 → 레버리지 진입 (조건부)
+        """
+        # CAUTION만 무조건 차단 (PRE_BEAR 등은 통과)
         if regime == "CAUTION":
             return LeverageDecision(signal="NO_ENTRY", reason="CAUTION 레짐 - 레버리지 진입 금지")
 
         if self.current_position:
+            # PRE_BEAR/PRE_CRISIS 전환 시 롱 포지션 보유 중이면 청산 경고
+            if regime in self._BEARISH_REGIMES and self.current_position.multiplier > 0:
+                return LeverageDecision(
+                    signal="SELL",
+                    etf_code=self.current_position.code,
+                    etf_name=self.current_position.name,
+                    reason=f"선행 베어 시그널({regime}) — 롱 포지션 청산 권고",
+                )
             return LeverageDecision(
                 signal="HOLD",
                 etf_code=self.current_position.code,
@@ -126,25 +144,26 @@ class LeverageEngine:
         if not target_etf:
             return LeverageDecision(signal="NO_ENTRY", reason=f"{regime} 레짐에 매칭 ETF 없음")
 
-        # US Overnight 체크 (BULL일 때만)
-        if regime == "BULL" and self.us_overnight_required:
+        # US Overnight 체크 (BULL/PRE_BULL일 때만)
+        if regime in self._BULLISH_REGIMES and self.us_overnight_required:
             us_grade = us_overnight.get("grade", 3)
             if us_grade > 3:
                 return LeverageDecision(
                     signal="NO_ENTRY",
-                    reason=f"US Overnight 부정적 ({us_grade}등급) - BULL 레버리지 보류",
+                    reason=f"US Overnight 부정적 ({us_grade}등급) - {regime} 레버리지 보류",
                 )
 
-        # 5축 스코어 체크
-        if score < self.min_5axis_score:
+        # PRE_BEAR/PRE_CRISIS는 5축 스코어 체크 면제 (US 시그널이 충분)
+        is_pre_bearish = regime in ("PRE_BEAR", "PRE_CRISIS")
+        if not is_pre_bearish and score < self.min_5axis_score:
             return LeverageDecision(
                 signal="NO_ENTRY",
                 reason=f"5축 스코어 미달 ({score:.0f} < {self.min_5axis_score})",
             )
 
-        # 섹터 레버리지 업그레이드: BULL + 모멘텀 1위 섹터에 레버리지 ETF 있으면 정밀 타격
+        # 섹터 레버리지 업그레이드: BULL + 모멘텀 1위 섹터
         sector_lev_enabled = self.cfg.get("sector_leverage_enabled", True)
-        if regime == "BULL" and sector_lev_enabled and momentum_data:
+        if regime in self._BULLISH_REGIMES and sector_lev_enabled and momentum_data:
             sector_etf = self._select_sector_leverage(momentum_data)
             if sector_etf:
                 target_etf = sector_etf
@@ -189,11 +208,15 @@ class LeverageEngine:
     def _confidence(self, regime: str, us_overnight: dict, score: float) -> float:
         """진입 신뢰도 (0~100)."""
         result = 0.0
-        regime_scores = {"BULL": 80, "BEAR": 70, "CRISIS": 90}
+        regime_scores = {
+            "BULL": 80, "PRE_BULL": 65,
+            "BEAR": 70, "PRE_BEAR": 60,
+            "CRISIS": 90, "PRE_CRISIS": 75,
+        }
         result += regime_scores.get(regime, 0) * 0.4
 
         us_grade = us_overnight.get("grade", 3)
-        if regime == "BULL":
+        if regime in self._BULLISH_REGIMES:
             us_map = {1: 100, 2: 80, 3: 50, 4: 20, 5: 0}
         else:
             us_map = {1: 0, 2: 20, 3: 50, 4: 80, 5: 100}
@@ -226,10 +249,10 @@ class LeverageEngine:
             return {"action": "CLOSE", "reason": f"손절 발동 ({pos.pnl_pct:.1f}% ≤ {self.stop_loss_pct}%)"}
         if pos.hold_days >= self.max_hold_days:
             return {"action": "CLOSE", "reason": f"보유일 초과 ({pos.hold_days}일 ≥ {self.max_hold_days}일)"}
-        if pos.multiplier > 0 and current_regime != "BULL":
+        if pos.multiplier > 0 and current_regime not in self._BULLISH_REGIMES:
             return {"action": "CLOSE", "reason": f"레짐 전환 ({current_regime}) - 롱 레버리지 청산"}
-        if pos.multiplier < 0 and current_regime == "BULL":
-            return {"action": "CLOSE", "reason": "레짐 BULL 전환 - 인버스 청산"}
+        if pos.multiplier < 0 and current_regime in self._BULLISH_REGIMES:
+            return {"action": "CLOSE", "reason": f"레짐 {current_regime} 전환 - 인버스 청산"}
         return {"action": "HOLD", "reason": "조건 충족 - 유지"}
 
     def _emergency_close(self, reason: str) -> dict:

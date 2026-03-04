@@ -504,6 +504,186 @@ def _default_regime() -> dict:
 
 
 # ============================================================
+# 6-1. 선행 레짐 계산 (US Overnight 기반 보정)
+# ============================================================
+
+# 위험 레짐 하향 순서
+_REGIME_DOWN = ["BULL", "PRE_BULL", "CAUTION", "PRE_BEAR", "BEAR", "PRE_CRISIS", "CRISIS"]
+
+
+def calc_leading_regime(kospi_regime: str, us_overnight_raw: dict | None = None) -> dict:
+    """US overnight 시그널 기반 선행 레짐 보정.
+
+    KOSPI 전일 종가 레짐만으로는 2~3일 전 인버스/레버리지 선행 진입 불가.
+    US 시장 데이터(VIX, EWY, 특수룰 등)를 점수화하여 레짐을 사전 보정.
+
+    Args:
+        kospi_regime: BULL / CAUTION / BEAR / CRISIS
+        us_overnight_raw: overnight_signal.json 원본 (None이면 파일에서 로드)
+
+    Returns:
+        {"effective_regime": str, "warning_score": int,
+         "original_regime": str, "override_reason": str,
+         "score_breakdown": dict}
+    """
+    if us_overnight_raw is None:
+        us_overnight_raw = _safe_json_load(_PATHS["overnight_json"]) or {}
+
+    kospi_regime = kospi_regime.upper()
+
+    # --- settings.yaml에서 가중치 로드 ---
+    try:
+        import yaml
+        with open(PROJECT_ROOT / "config" / "settings.yaml", "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        ls_cfg = cfg.get("etf_rotation", {}).get("leverage", {}).get("leading_signal", {})
+    except Exception:
+        ls_cfg = {}
+
+    if not ls_cfg.get("enabled", True):
+        return {
+            "effective_regime": kospi_regime,
+            "warning_score": 0,
+            "original_regime": kospi_regime,
+            "override_reason": "선행 시그널 비활성",
+            "score_breakdown": {},
+        }
+
+    weights = ls_cfg.get("weights", {})
+    pre_bear_th = ls_cfg.get("pre_bear_threshold", 40)
+    pre_crisis_th = ls_cfg.get("pre_crisis_threshold", 60)
+    pre_bull_th = ls_cfg.get("pre_bull_threshold", -30)
+
+    # --- warning_score 계산 ---
+    score = 0
+    breakdown = {}
+
+    # 1) US grade
+    grade_str = str(us_overnight_raw.get("grade", "NEUTRAL")).upper()
+    grade_map = {"STRONG_BULL": 1, "MILD_BULL": 2, "NEUTRAL": 3, "MILD_BEAR": 4, "STRONG_BEAR": 5}
+    us_grade = grade_map.get(grade_str, 3)
+
+    if us_grade == 5:
+        pts = weights.get("us_grade_5", 40)
+        score += pts
+        breakdown["us_grade_5"] = pts
+    elif us_grade == 4:
+        pts = weights.get("us_grade_4", 20)
+        score += pts
+        breakdown["us_grade_4"] = pts
+    elif us_grade == 1:
+        pts = -weights.get("us_grade_5", 40)  # 반대 방향 (불 시그널)
+        score += pts
+        breakdown["us_grade_1_bull"] = pts
+    elif us_grade == 2:
+        pts = -weights.get("us_grade_4", 20)
+        score += pts
+        breakdown["us_grade_2_bull"] = pts
+
+    # 2) VIX zscore
+    vix_data = us_overnight_raw.get("vix", {})
+    vix_zscore = vix_data.get("zscore", 0)
+
+    if vix_zscore > 3.0:
+        pts = weights.get("vix_panic", 25)
+        score += pts
+        breakdown["vix_panic"] = pts
+    elif vix_zscore > 2.0:
+        pts = weights.get("vix_high", 15)
+        score += pts
+        breakdown["vix_high"] = pts
+    elif vix_zscore < -1.0:
+        score -= 10
+        breakdown["vix_low_calm"] = -10
+
+    # 3) EWY (한국 proxy)
+    ewy_data = us_overnight_raw.get("index_direction", {}).get("EWY", {})
+    ewy_ret = ewy_data.get("ret_1d", 0)
+
+    if ewy_ret <= -8.0:
+        pts = weights.get("ewy_drop_8pct", 25)
+        score += pts
+        breakdown["ewy_drop_8pct"] = pts
+    elif ewy_ret <= -5.0:
+        pts = weights.get("ewy_drop_5pct", 15)
+        score += pts
+        breakdown["ewy_drop_5pct"] = pts
+    elif ewy_ret >= 3.0:
+        score -= 10
+        breakdown["ewy_surge_bull"] = -10
+
+    # 4) 특수룰 (위험 룰만)
+    special_rules = us_overnight_raw.get("special_rules", [])
+    critical_rules = {"VIX_SPIKE", "MARKET_CRASH", "SOXX_CRASH", "NASDAQ_CIRCUIT",
+                      "OIL_CRASH", "COPPER_CRASH", "GOLD_SPIKE"}
+    for rule in special_rules:
+        name = rule.get("name", "")
+        if name in critical_rules:
+            pts = weights.get("special_rule", 10)
+            score += pts
+            breakdown[f"rule_{name}"] = pts
+
+    # 5) L2 패턴매칭
+    l2 = us_overnight_raw.get("l2_pattern", {})
+    kospi_l2 = l2.get("kospi", {})
+    positive_rate = kospi_l2.get("positive_rate", 50)
+    if positive_rate < 35:
+        pts = weights.get("l2_bearish", 10)
+        score += pts
+        breakdown["l2_bearish"] = pts
+    elif positive_rate > 65:
+        score -= 10
+        breakdown["l2_bullish"] = -10
+
+    # --- 레짐 보정 ---
+    reasons = []
+    effective = kospi_regime
+
+    if score >= pre_crisis_th:
+        effective = "PRE_CRISIS"
+        reasons.append(f"경고점수 {score} >= {pre_crisis_th} → PRE_CRISIS")
+    elif score >= pre_bear_th:
+        effective = "PRE_BEAR"
+        reasons.append(f"경고점수 {score} >= {pre_bear_th} → PRE_BEAR")
+    elif 20 <= score < pre_bear_th:
+        # 1단계만 하향
+        idx = _REGIME_DOWN.index(kospi_regime) if kospi_regime in _REGIME_DOWN else 2
+        new_idx = min(idx + 1, len(_REGIME_DOWN) - 1)
+        effective = _REGIME_DOWN[new_idx]
+        reasons.append(f"경고점수 {score} → {kospi_regime}에서 1단계 하향 {effective}")
+    elif score <= pre_bull_th:
+        # 상향 보정
+        if kospi_regime in ("BEAR", "PRE_BEAR"):
+            effective = "PRE_BULL"
+            reasons.append(f"경고점수 {score} <= {pre_bull_th} → PRE_BULL (반등 시그널)")
+        elif kospi_regime == "CAUTION":
+            effective = "PRE_BULL"
+            reasons.append(f"경고점수 {score} <= {pre_bull_th} → PRE_BULL")
+
+    # 이미 더 나쁜 레짐이면 보정 안 함 (BEAR에서 PRE_BEAR로 올라가면 안 됨)
+    if kospi_regime in _REGIME_DOWN and effective in _REGIME_DOWN:
+        orig_idx = _REGIME_DOWN.index(kospi_regime)
+        eff_idx = _REGIME_DOWN.index(effective)
+        if eff_idx < orig_idx and score > 0:
+            # 양수 점수인데 레짐이 올라가는 건 잘못됨
+            effective = kospi_regime
+            reasons = [f"원본 레짐({kospi_regime})이 이미 보정보다 하위 → 유지"]
+
+    override_reason = " | ".join(reasons) if reasons else "보정 없음"
+
+    logger.info("[선행레짐] %s → %s (점수: %d, 근거: %s)",
+                kospi_regime, effective, score, override_reason)
+
+    return {
+        "effective_regime": effective,
+        "warning_score": score,
+        "original_regime": kospi_regime,
+        "override_reason": override_reason,
+        "score_breakdown": breakdown,
+    }
+
+
+# ============================================================
 # 7. 포트폴리오 (개별주 섹터 추출)
 # ============================================================
 def load_individual_stock_sectors() -> set[str]:
@@ -645,6 +825,26 @@ def load_supply_flow_for_predator() -> dict:
 
 
 # ============================================================
+# 9. 릴레이 경보 시그널
+# ============================================================
+def load_relay_signal() -> dict:
+    """섹터 릴레이 경보 시그널 로드.
+
+    Returns:
+        relay_signal.json 내용 또는 빈 딕셔너리
+    """
+    relay_path = DATA_DIR / "relay" / "relay_signal.json"
+    raw = _safe_json_load(relay_path)
+    if raw:
+        logger.info("릴레이 시그널: 활성 %s, 실행준비 %s",
+                     raw.get("active_alerts", []),
+                     raw.get("execution_ready", []))
+        return raw
+    logger.info("릴레이 시그널: 데이터 없음")
+    return {}
+
+
+# ============================================================
 # 통합 로더
 # ============================================================
 def load_all() -> dict:
@@ -675,4 +875,6 @@ def load_all() -> dict:
         "prev_momentum": load_prev_momentum(),
         "sector_returns_1d": load_sector_returns_1d(),
         "supply_flow": load_supply_flow_for_predator(),
+        # 릴레이 경보
+        "relay_signal": load_relay_signal(),
     }

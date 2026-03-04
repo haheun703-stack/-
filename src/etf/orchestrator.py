@@ -259,9 +259,11 @@ class ETFOrchestrator:
         lines.append(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         lines.append("━" * 28)
 
-        regime_emoji = {"BULL": "🟢", "CAUTION": "🟡", "BEAR": "🟠", "CRISIS": "🔴"}
+        regime_emoji = {"BULL": "🟢", "PRE_BULL": "🟢", "CAUTION": "🟡",
+                       "PRE_BEAR": "🟠", "BEAR": "🟠", "PRE_CRISIS": "🔴", "CRISIS": "🔴"}
         r = self.current_regime
-        lines.append(f"\n{regime_emoji.get(r, '⚪')} 레짐: {r}")
+        pre_tag = " (선행)" if r.startswith("PRE_") else ""
+        lines.append(f"\n{regime_emoji.get(r, '⚪')} 레짐: {r}{pre_tag}")
         lines.append(f"📊 섹터 {allocation['sector']}% | 레버 {allocation['leverage']}% | 지수 {allocation['index']}% | 현금 {allocation['cash']}%")
 
         # 섹터 ETF

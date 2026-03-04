@@ -38,11 +38,14 @@ _KODEX_ADDITIONS = {
     "266360": {"name": "KODEX 핀테크", "sector": "핀테크"},
 }
 
-# 레버리지/인버스 ETF (지수 기본값)
+# 레버리지/인버스 ETF (지수 기본값 + 선행 레짐)
 LEVERAGE_ETF = {
     "BULL": {"code": "122630", "name": "KODEX 레버리지", "multiplier": 2.0},
+    "PRE_BULL": {"code": "122630", "name": "KODEX 레버리지", "multiplier": 2.0},
     "BEAR": {"code": "114800", "name": "KODEX 인버스", "multiplier": -1.0},
+    "PRE_BEAR": {"code": "114800", "name": "KODEX 인버스", "multiplier": -1.0},
     "CRISIS": {"code": "252670", "name": "KODEX 200선물인버스2X", "multiplier": -2.0},
+    "PRE_CRISIS": {"code": "252670", "name": "KODEX 200선물인버스2X", "multiplier": -2.0},
 }
 
 # 섹터 레버리지 ETF — 유동성 기준 통과 종목만

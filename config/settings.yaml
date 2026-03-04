@@ -1310,12 +1310,15 @@ ai_brain:
 etf_rotation:
   enabled: true
 
-  # 레짐별 비중 매트릭스 (%)
+  # 레짐별 비중 매트릭스 (%) — PRE_ 선행 레짐 포함
   regime_allocation:
-    BULL:    {sector: 40, leverage: 20, index: 30, cash: 10}
-    CAUTION: {sector: 30, leverage: 0,  index: 30, cash: 40}
-    BEAR:    {sector: 0,  leverage: 15, index: 15, cash: 70}
-    CRISIS:  {sector: 0,  leverage: 20, index: 0,  cash: 80}
+    BULL:       {sector: 40, leverage: 20, index: 30, cash: 10}
+    PRE_BULL:   {sector: 35, leverage: 15, index: 30, cash: 20}
+    CAUTION:    {sector: 30, leverage: 0,  index: 30, cash: 40}
+    PRE_BEAR:   {sector: 10, leverage: 15, index: 10, cash: 65}
+    BEAR:       {sector: 0,  leverage: 15, index: 15, cash: 70}
+    PRE_CRISIS: {sector: 0,  leverage: 20, index: 0,  cash: 80}
+    CRISIS:     {sector: 0,  leverage: 20, index: 0,  cash: 80}
 
   # 섹터 ETF 파라미터
   sector:
@@ -1341,6 +1344,23 @@ etf_rotation:
     # BULL + 모멘텀 1위 섹터에 유동성 충분한 레버리지 ETF 있으면 정밀 타격
     # 없으면 KODEX 레버리지(지수 2배) 기본값
     sector_leverage_enabled: true
+
+    # 선행 시그널 (US Overnight → 레짐 보정)
+    # KOSPI 전일종가 레짐에 US 시그널로 2~3일 선행 경보
+    leading_signal:
+      enabled: true
+      pre_bear_threshold: 40       # 경고점수 >= 이 값 → PRE_BEAR (인버스 진입)
+      pre_crisis_threshold: 60     # 경고점수 >= 이 값 → PRE_CRISIS (인버스2X)
+      pre_bull_threshold: -30      # 경고점수 <= 이 값 → PRE_BULL (반등 시그널)
+      weights:
+        us_grade_4: 20             # MILD_BEAR 등급
+        us_grade_5: 40             # STRONG_BEAR 등급
+        vix_high: 15               # VIX zscore > 2.0
+        vix_panic: 25              # VIX zscore > 3.0
+        ewy_drop_5pct: 15          # EWY -5% 이하
+        ewy_drop_8pct: 25          # EWY -8% 이하
+        special_rule: 10           # 위험 특수룰 1개당
+        l2_bearish: 10             # L2 상승확률 < 35%
 
   # 지수 ETF 파라미터
   index:

@@ -38,7 +38,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 load_dotenv(PROJECT_ROOT / ".env")
 
 from src.etf.orchestrator import ETFOrchestrator
-from src.etf.data_bridge import load_all
+from src.etf.data_bridge import load_all, calc_leading_regime
 
 logger = logging.getLogger(__name__)
 OUTPUT_PATH = PROJECT_ROOT / "data" / "etf_rotation_result.json"
@@ -60,6 +60,8 @@ def _save_blind_log(result: dict, data: dict):
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         # 시장 상태
         "regime": data["regime"]["regime"],
+        "effective_regime": result.get("leading_regime", {}).get("effective_regime", ""),
+        "warning_score": result.get("leading_regime", {}).get("warning_score", 0),
         "kospi_close": data["regime"]["close"],
         "kospi_ma20_above": data["regime"]["ma20_above"],
         "kospi_ma60_above": data["regime"]["ma60_above"],
@@ -139,7 +141,26 @@ def main():
 
     kospi = data["regime"]
     us = data["us_overnight"]
+
+    # ---- 1.5 선행 레짐 보정 (US Overnight → 인버스/레버리지 선행 시그널) ----
+    us_raw = None
+    try:
+        us_raw_path = PROJECT_ROOT / "data" / "us_market" / "overnight_signal.json"
+        if us_raw_path.exists():
+            us_raw = json.loads(us_raw_path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+
+    leading = calc_leading_regime(kospi["regime"], us_raw)
+    effective_regime = leading["effective_regime"]
+    regime_overridden = effective_regime != kospi["regime"]
+
     print(f"  📊 KOSPI 레짐: {kospi['regime']} (종가 {kospi['close']:,.0f})")
+    if regime_overridden:
+        print(f"  ⚠️ 선행 보정: {kospi['regime']} → {effective_regime} "
+              f"(경고점수: {leading['warning_score']})")
+        for k, v in leading["score_breakdown"].items():
+            print(f"      • {k}: {v:+d}점")
     print(f"  📊 모멘텀 섹터: {len(data['momentum'])}개")
     print(f"  📊 Smart Money: {len(data['smart_money'])}개")
     print(f"  📊 수급 데이터: {len(data['supply'])}개")
@@ -155,7 +176,7 @@ def main():
     # ---- 2. 오케스트레이터 실행 ----
     orchestrator = ETFOrchestrator()
     result = orchestrator.run(
-        regime=kospi["regime"],
+        regime=effective_regime,
         kospi_ma20_above=kospi["ma20_above"],
         kospi_ma60_above=kospi["ma60_above"],
         momentum_data=data["momentum"],
@@ -219,6 +240,9 @@ def main():
     elif not ai_enabled:
         print("\n🧠 AI 필터: 비활성화 (settings.yaml 또는 --no-ai)")
 
+    # 선행 레짐 정보 결과에 포함
+    result["leading_regime"] = leading
+
     # ---- 3. 결과 JSON 저장 ----
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     serializable = {k: v for k, v in result.items() if k != "telegram_report"}
@@ -236,6 +260,24 @@ def main():
     if send_telegram:
         try:
             from src.telegram_sender import send_message
+
+            # 선행 레짐 경보 별도 전송
+            if regime_overridden:
+                bd = leading["score_breakdown"]
+                bd_lines = "\n".join(f"  • {k}: {v:+d}점" for k, v in bd.items())
+                alert_msg = (
+                    f"⚠️ [레짐 선행 경보]\n"
+                    f"━━━━━━━━━━━━━━━━━━\n"
+                    f"  원본 레짐: {kospi['regime']}\n"
+                    f"  보정 레짐: {effective_regime}\n"
+                    f"  경고 점수: {leading['warning_score']}/100\n\n"
+                    f"  근거:\n{bd_lines}\n"
+                    f"━━━━━━━━━━━━━━━━━━\n"
+                    f"  → {leading['override_reason']}"
+                )
+                send_message(alert_msg)
+                print("📨 선행 레짐 경보 발송 완료")
+
             report = result.get("telegram_report", "")
             if report:
                 # AI 필터 섹션 추가
