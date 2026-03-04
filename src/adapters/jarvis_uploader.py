@@ -224,22 +224,25 @@ class JarvisUploader:
         """추천종목 + US Overnight + KOSPI 레짐 데이터 빌드."""
         market = {}
 
-        # 1) 추천종목 (tomorrow_picks.json)
+        # 1) 추천종목 (tomorrow_picks.json) — raw 전체 필드 + 호환 alias
         picks_path = DATA_DIR / "tomorrow_picks.json"
         if picks_path.exists():
             try:
                 raw = json.loads(picks_path.read_text(encoding="utf-8"))
                 picks_list = raw if isinstance(raw, list) else raw.get("picks", [])
-                market["picks"] = [
-                    {
-                        "name": p.get("name", p.get("stock_name", "")),
-                        "code": p.get("code", p.get("stock_code", "")),
-                        "score": p.get("score", p.get("total_score", 0)),
-                        "grade": p.get("grade", "C"),
-                        "signals": ", ".join(p.get("signals", [])) if isinstance(p.get("signals"), list) else p.get("signals", "-"),
-                    }
-                    for p in picks_list[:10]
-                ]
+                picks_stats = raw.get("stats", {}) if isinstance(raw, dict) else {}
+                enriched = []
+                for p in picks_list[:10]:
+                    pick = dict(p)  # raw 전체 복사
+                    # 템플릿 호환 alias 추가
+                    pick.setdefault("code", pick.get("ticker", ""))
+                    pick.setdefault("score", pick.get("total_score", 0))
+                    pick.setdefault("signals", pick.get("sources", []))
+                    enriched.append(pick)
+                market["picks"] = enriched
+                if picks_stats:
+                    market["picks_stats"] = picks_stats
+                market["picks_date_label"] = raw.get("date", "") if isinstance(raw, dict) else ""
             except Exception as e:
                 logger.warning(f"[JARVIS] 추천종목 로드 실패: {e}")
 

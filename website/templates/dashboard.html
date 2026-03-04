@@ -636,12 +636,14 @@
     {% for pick in market.picks[:10] %}
     {% set rank = loop.index %}
     {% set gs_bg = '#DC2626' if pick.grade == '적극매수' else '#F59E0B' if pick.grade == '매수' else '#3B82F6' %}
-    {% set score_color = '#EF4444' if pick.score >= 70 else '#F59E0B' if pick.score >= 55 else '#3B82F6' %}
+    {% set pick_score = pick.score|default(pick.total_score|default(0)) %}
+    {% set pick_code = pick.code|default(pick.ticker|default('')) %}
+    {% set score_color = '#EF4444' if pick_score >= 70 else '#F59E0B' if pick_score >= 55 else '#3B82F6' %}
     {% set rank_bg = '#F59E0B' if rank <= 3 else '#4B5563' %}
     {% set rank_fg = '#000' if rank <= 3 else '#D1D5DB' %}
     {% set chg_color = '#10B981' if (pick.price_change|default(0)) >= 0 else '#EF4444' %}
-    {% set rsi_color = '#EF4444' if pick.rsi > 70 else '#10B981' if pick.rsi < 40 else '#D1D5DB' %}
-    {% set has_ai = pick.ai_bonus or pick.ai_sector_bonus %}
+    {% set rsi_color = '#EF4444' if (pick.rsi|default(50)) > 70 else '#10B981' if (pick.rsi|default(50)) < 40 else '#D1D5DB' %}
+    {% set has_ai = pick.ai_bonus|default(0) or pick.ai_sector_bonus|default(0) %}
 
     <div style="background:rgba(255,255,255,0.03);border:1px solid {{ gs_bg }}33;border-radius:14px;padding:30px;margin-bottom:30px;">
 
@@ -650,7 +652,7 @@
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:{{ rank_bg }};color:{{ rank_fg }};font-size:17px;font-weight:700;">{{ rank }}</span>
                 <span style="font-weight:700;font-size:22px;color:#E5E7EB;">{{ pick.name }}</span>
-                <span style="font-size:15px;color:#6B7280;font-family:monospace;">{{ pick.code }}</span>
+                <span style="font-size:15px;color:#6B7280;font-family:monospace;">{{ pick_code }}</span>
                 <span style="font-size:15px;padding:6px 14px;border-radius:8px;background:{{ gs_bg }};color:{{ '#fff' if pick.grade == '적극매수' else '#000' }};font-weight:600;">{{ pick.grade }}</span>
                 {# AI+봇 타입 배지 #}
                 {% if has_ai %}
@@ -660,14 +662,14 @@
                 {% endif %}
             </div>
             <div style="text-align:right;">
-                <span style="font-size:28px;font-weight:700;color:{{ score_color }};font-family:monospace;">{{ "%.1f"|format(pick.score) }}</span>
+                <span style="font-size:28px;font-weight:700;color:{{ score_color }};font-family:monospace;">{{ "%.1f"|format(pick_score) }}</span>
                 <span style="font-size:16px;color:#6B7280;">점</span>
             </div>
         </div>
 
         {# 점수 바 #}
         <div style="height:7px;background:rgba(255,255,255,0.06);border-radius:4px;margin-bottom:22px;overflow:hidden;">
-            <div style="height:100%;width:{{ [pick.score, 100]|min }}%;background:{{ score_color }};border-radius:3px;"></div>
+            <div style="height:100%;width:{{ [pick_score, 100]|min }}%;background:{{ score_color }};border-radius:3px;"></div>
         </div>
 
         {# 2행: 진입가 / 손절가 / 목표가 #}
@@ -675,15 +677,15 @@
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;font-family:monospace;font-size:17px;">
             <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:18px;text-align:center;">
                 <div style="font-size:15px;color:#93C5FD;margin-bottom:8px;">진입가</div>
-                <div style="font-weight:700;color:#60A5FA;font-size:19px;">{{ "{:,}".format(pick.entry_price) }}</div>
+                <div style="font-weight:700;color:#60A5FA;font-size:19px;">{{ "{:,}".format(pick.entry_price|default(0)|int) }}</div>
             </div>
             <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:18px;text-align:center;">
                 <div style="font-size:15px;color:#FCA5A5;margin-bottom:8px;">손절 (-{{ "%.0f"|format(pick.risk_pct|default(5)) }}%)</div>
-                <div style="font-weight:700;color:#F87171;font-size:19px;">{{ "{:,}".format(pick.stop_loss) }}</div>
+                <div style="font-weight:700;color:#F87171;font-size:19px;">{{ "{:,}".format(pick.stop_loss|default(0)|int) }}</div>
             </div>
             <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:18px;text-align:center;">
                 <div style="font-size:15px;color:#6EE7B7;margin-bottom:8px;">목표가</div>
-                <div style="font-weight:700;color:#34D399;font-size:19px;">{{ "{:,}".format(pick.target_price) }}</div>
+                <div style="font-weight:700;color:#34D399;font-size:19px;">{{ "{:,}".format(pick.target_price|default(0)|int) }}</div>
             </div>
         </div>
         {% endif %}
@@ -699,7 +701,7 @@
                 <span style="font-size:14px;padding:4px 10px;border-radius:8px;background:{{ zc }}22;color:{{ zc }};margin-left:10px;">{{ pick.target_zone }}</span>
             </div>
             <div>
-                <span style="font-weight:600;font-size:17px;color:{{ '#60A5FA' if pick.target_gap_pct < 0 else '#F87171' }};">{{ '+' if pick.target_gap_pct > 0 else '' }}{{ "%.1f"|format(pick.target_gap_pct) }}%</span>
+                <span style="font-weight:600;font-size:17px;color:{{ '#60A5FA' if (pick.target_gap_pct|default(0)) < 0 else '#F87171' }};">{{ '+' if (pick.target_gap_pct|default(0)) > 0 else '' }}{{ "%.1f"|format(pick.target_gap_pct|default(0)) }}%</span>
             </div>
         </div>
         {% endif %}
@@ -714,8 +716,8 @@
                 <span style="font-weight:700;color:{{ ms[0] }};margin-left:10px;">{{ ms[1] }} {{ pick.ma5_entry }}</span>
             </div>
             <div>
-                {% set gap_color = '#34D399' if pick.ma5_gap_pct <= 3 else '#FBBF24' if pick.ma5_gap_pct <= 5 else '#F87171' %}
-                <span style="color:{{ gap_color }};font-weight:600;font-size:17px;">MA5 {{ '+' if pick.ma5_gap_pct > 0 else '' }}{{ "%.1f"|format(pick.ma5_gap_pct) }}%</span>
+                {% set gap_color = '#34D399' if (pick.ma5_gap_pct|default(0)) <= 3 else '#FBBF24' if (pick.ma5_gap_pct|default(0)) <= 5 else '#F87171' %}
+                <span style="color:{{ gap_color }};font-weight:600;font-size:17px;">MA5 {{ '+' if (pick.ma5_gap_pct|default(0)) > 0 else '' }}{{ "%.1f"|format(pick.ma5_gap_pct|default(0)) }}%</span>
             </div>
         </div>
         {% endif %}
@@ -731,8 +733,8 @@
                 <span style="font-size:14px;color:#6B7280;margin-left:10px;">{{ pick.accum_days }}일전 폭발</span>
             </div>
             <div>
-                {% set ar_color = '#10B981' if pick.accum_return >= 0 else '#EF4444' %}
-                <span style="color:{{ ar_color }};font-weight:600;font-size:17px;">{{ '+' if pick.accum_return > 0 else '' }}{{ "%.1f"|format(pick.accum_return) }}%</span>
+                {% set ar_color = '#10B981' if (pick.accum_return|default(0)) >= 0 else '#EF4444' %}
+                <span style="color:{{ ar_color }};font-weight:600;font-size:17px;">{{ '+' if (pick.accum_return|default(0)) > 0 else '' }}{{ "%.1f"|format(pick.accum_return|default(0)) }}%</span>
             </div>
         </div>
         {% endif %}
@@ -749,9 +751,9 @@
         {# 지표 + 소스 #}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:16px;font-family:monospace;">
             <div style="display:flex;gap:14px;color:#6B7280;">
-                <span>RSI <span style="color:{{ rsi_color }};font-weight:600;">{{ "%.0f"|format(pick.rsi) }}</span></span>
-                {% if pick.stoch_k %}<span>Stoch <span style="color:{{ '#EF4444' if pick.stoch_k > 80 else '#10B981' if pick.stoch_k < 30 else '#D1D5DB' }};font-weight:600;">{{ "%.0f"|format(pick.stoch_k) }}</span></span>{% endif %}
-                <span>ADX <span style="font-weight:600;">{{ "%.0f"|format(pick.adx) }}</span></span>
+                <span>RSI <span style="color:{{ rsi_color }};font-weight:600;">{{ "%.0f"|format(pick.rsi|default(50)) }}</span></span>
+                {% if pick.stoch_k %}<span>Stoch <span style="color:{{ '#EF4444' if pick.stoch_k > 80 else '#10B981' if pick.stoch_k < 30 else '#D1D5DB' }};font-weight:600;">{{ "%.0f"|format(pick.stoch_k|default(0)) }}</span></span>{% endif %}
+                <span>ADX <span style="font-weight:600;">{{ "%.0f"|format(pick.adx|default(0)) }}</span></span>
                 <span>{{ '✅MA20' if pick.above_ma20 else '❌MA20' }}{{ ' ✅MA60' if pick.above_ma60 else '' }}</span>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
