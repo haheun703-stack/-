@@ -98,6 +98,53 @@
             </div>
         </div>
     </a>
+
+    <!-- 차이나머니 수급 배너 -->
+    {% if brain and brain.china_money and brain.china_money.summary %}
+    {% set cm = brain.china_money %}
+    {% set cm_surge = cm.summary.get('SURGE', 0)|default(0) %}
+    {% set cm_inflow = cm.summary.get('INFLOW', 0)|default(0) %}
+    {% set cm_focus = cm.summary.get('SECTOR_FOCUS', 0)|default(0) %}
+    {% set cm_total = cm_surge + cm_inflow + cm_focus %}
+    {% set cm_class = 'bull' if cm_surge > 0 else ('neutral' if cm_inflow > 0 else 'unknown') %}
+    <div class="signal-banner {{ cm_class }}" style="cursor:pointer;" onclick="switchTab('chinamoney')">
+        <div class="signal-header">
+            <span class="signal-title"><i class="fas fa-dragon"></i> 차이나머니 수급</span>
+            {% if cm_surge > 0 %}
+            <span class="signal-badge bear-badge">SURGE {{ cm_surge }}</span>
+            {% elif cm_inflow > 0 %}
+            <span class="signal-badge bull-badge">INFLOW {{ cm_inflow }}</span>
+            {% else %}
+            <span class="signal-badge neutral-badge">NORMAL</span>
+            {% endif %}
+        </div>
+        <div class="signal-details">
+            <div class="signal-detail">
+                <div class="sd-label">SURGE</div>
+                <div class="sd-value" style="color:var(--accent-red);">{{ cm_surge }}종목</div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">INFLOW</div>
+                <div class="sd-value" style="color:var(--accent-yellow);">{{ cm_inflow }}종목</div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">FOCUS</div>
+                <div class="sd-value" style="color:var(--accent-cyan);">{{ cm_focus }}종목</div>
+            </div>
+            <div class="signal-detail">
+                <div class="sd-label">스캔</div>
+                <div class="sd-value">{{ cm.total_stocks|default(0) }}종목</div>
+            </div>
+        </div>
+        {% if cm.signals %}
+        <div class="signal-tags">
+            {% for s in cm.signals[:3] %}
+            <span class="signal-tag {{ 'danger' if s.signal == 'SURGE' else ('warning' if s.signal == 'INFLOW' else '') }}">{{ s.name }} ({{ s.signal }})</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 
 <!-- ═══ 보유 주식 현황 ═══ -->
@@ -181,6 +228,10 @@
     <div class="tab-btn" data-tab="cobuy" onclick="switchTab('cobuy')">
         <div class="tab-icon">&#x1F4CA;</div>
         <div class="tab-label">동반매수</div>
+    </div>
+    <div class="tab-btn" data-tab="chinamoney" onclick="switchTab('chinamoney')">
+        <div class="tab-icon">&#x1F1E8;&#x1F1F3;</div>
+        <div class="tab-label">차이나머니</div>
     </div>
     <div class="tab-btn" data-tab="history" onclick="switchTab('history')">
         <div class="tab-icon">&#x1F4C5;</div>
@@ -965,7 +1016,100 @@
     {% endif %}
 </div>
 
-<!-- ── 10. 히스토리 ── -->
+<!-- ── 10.5 차이나머니 수급 ── -->
+<div class="tab-panel" id="panel-chinamoney">
+    <h3 class="sec-title" style="color:#ff4444;"><i class="fas fa-dragon"></i> 차이나머니 수급 감지</h3>
+    {% if brain and brain.china_money and brain.china_money.signals %}
+    {% set cm = brain.china_money %}
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <span class="signal-badge {{ 'bear-badge' if cm.summary.get('SURGE',0) > 0 else ('bull-badge' if cm.summary.get('INFLOW',0) > 0 else 'neutral-badge') }}" style="font-size:16px;">
+            {% if cm.summary.get('SURGE',0) > 0 %}SURGE {{ cm.summary.SURGE }}종목
+            {% elif cm.summary.get('INFLOW',0) > 0 %}INFLOW {{ cm.summary.INFLOW }}종목
+            {% else %}NORMAL{% endif %}
+        </span>
+        <span style="color:var(--text-muted);font-size:13px;">{{ cm.generated_at|default('') }} 기준 | {{ cm.total_stocks|default(0) }}종목 스캔</span>
+    </div>
+
+    <!-- 시그널 요약 카드 -->
+    <div class="grid-4" style="margin-bottom:20px;">
+        <div class="mini-stat-card">
+            <div class="msc-label" style="color:var(--accent-red);">SURGE</div>
+            <div class="msc-value">{{ cm.summary.get('SURGE', 0)|default(0) }}</div>
+        </div>
+        <div class="mini-stat-card">
+            <div class="msc-label" style="color:var(--accent-yellow);">INFLOW</div>
+            <div class="msc-value">{{ cm.summary.get('INFLOW', 0)|default(0) }}</div>
+        </div>
+        <div class="mini-stat-card">
+            <div class="msc-label" style="color:var(--accent-cyan);">SECTOR_FOCUS</div>
+            <div class="msc-value">{{ cm.summary.get('SECTOR_FOCUS', 0)|default(0) }}</div>
+        </div>
+        <div class="mini-stat-card">
+            <div class="msc-label" style="color:var(--text-muted);">WATCH</div>
+            <div class="msc-value">{{ cm.summary.get('WATCH', 0)|default(0) }}</div>
+        </div>
+    </div>
+
+    <!-- 시그널 종목 테이블 -->
+    {% if cm.signals %}
+    <h4 style="color:var(--text-primary);margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="color:var(--accent-yellow);"></i> 감지된 시그널</h4>
+    <div class="holdings-table-wrap">
+        <table class="holdings-table">
+            <thead><tr>
+                <th>종목</th><th>시그널</th><th style="text-align:right;">점수</th>
+                <th style="text-align:right;">외국인 5일</th><th style="text-align:right;">Z-score</th>
+                <th style="text-align:right;">주가 5일</th><th>EWY 디커플</th><th>이유</th>
+            </tr></thead>
+            <tbody>
+            {% for s in cm.signals %}
+                {% set sig_color = 'var(--accent-red)' if s.signal == 'SURGE' else ('var(--accent-yellow)' if s.signal == 'INFLOW' else 'var(--accent-cyan)') %}
+                <tr>
+                    <td><span class="h-name">{{ s.name }}</span><br><span class="h-code">{{ s.ticker }}</span></td>
+                    <td><span class="signal-badge" style="background:{{ sig_color }};color:#000;font-size:11px;">{{ s.signal }}</span></td>
+                    <td style="text-align:right;font-weight:700;">{{ s.score }}</td>
+                    <td style="text-align:right;" class="{{ 'positive' if s.foreign_net_5d > 0 else 'negative' }}">{{ "{:+,}".format(s.foreign_net_5d) }}주</td>
+                    <td style="text-align:right;font-weight:700;">{{ "%.1f"|format(s.foreign_zscore) }}</td>
+                    <td style="text-align:right;" class="{{ 'positive' if s.pct_change_5d >= 0 else 'negative' }}">{{ "%+.1f"|format(s.pct_change_5d) }}%</td>
+                    <td style="text-align:center;">{% if s.ewy_decouple %}<i class="fas fa-check-circle" style="color:var(--accent-green);"></i>{% else %}-{% endif %}</td>
+                    <td style="font-size:12px;color:var(--text-muted);">{{ s.reasons[:2]|join(' / ') if s.reasons else '-' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- TOP 외국인 순매수 -->
+    {% if cm.top_foreign_buyers %}
+    <h4 style="color:var(--text-primary);margin:20px 0 10px;"><i class="fas fa-chart-line" style="color:var(--accent-green);"></i> 외국인 순매수 TOP 10 (5일)</h4>
+    <div class="holdings-table-wrap">
+        <table class="holdings-table">
+            <thead><tr>
+                <th>#</th><th>종목</th><th style="text-align:right;">외국인 5일</th>
+                <th style="text-align:right;">Z-score</th><th style="text-align:right;">연속매수</th><th style="text-align:right;">주가 5일</th>
+            </tr></thead>
+            <tbody>
+            {% for s in cm.top_foreign_buyers %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><span class="h-name">{{ s.name }}</span></td>
+                    <td style="text-align:right;font-weight:700;" class="{{ 'positive' if s.foreign_net_5d > 0 else 'negative' }}">{{ "{:+,}".format(s.foreign_net_5d) }}주</td>
+                    <td style="text-align:right;">{{ "%.1f"|format(s.foreign_zscore) }}</td>
+                    <td style="text-align:right;">{{ s.consecutive_days }}일</td>
+                    <td style="text-align:right;" class="{{ 'positive' if s.pct_change_5d >= 0 else 'negative' }}">{{ "%+.1f"|format(s.pct_change_5d) }}%</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state"><i class="fas fa-dragon"></i><p>차이나머니 수급 데이터가 업로드되면 표시됩니다</p></div>
+    {% endif %}
+</div>
+
+<!-- ── 11. 히스토리 ── -->
 <div class="tab-panel" id="panel-history">
     <h3 class="sec-title" style="color:var(--accent-purple);"><i class="fas fa-history"></i> 히스토리 — 리포트 &amp; 달력</h3>
     <div class="grid-2" style="margin-top:16px;">

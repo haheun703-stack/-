@@ -79,6 +79,12 @@ python -u -X utf8 scripts\sector_zscore.py --top 5 >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9b/29] FAILED (z-score) >> logs\schedule.log
 python -u -X utf8 scripts\sector_investor_flow.py --days 5 >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9c/29] FAILED (수급) >> logs\schedule.log
+
+REM 9c.5단계: 차이나머니 수급 크롤링 (KIS 외국인 국적별 + EWY 프록시)
+echo [%date% %time%] [9c.5/29] 차이나머니 수급 >> logs\schedule.log
+python -u -X utf8 scripts\crawl_china_money.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [9c.5/29] FAILED >> logs\schedule.log
+
 python -u -X utf8 scripts\sector_daily_report.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9d/29] FAILED (리포트) >> logs\schedule.log
 

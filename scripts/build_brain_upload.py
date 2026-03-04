@@ -190,6 +190,21 @@ def build_journal():
     }
 
 
+def build_china_money():
+    """차이나머니 수급 시그널 데이터"""
+    raw = load("china_money/china_money_signal.json")
+    if not raw:
+        return {"date": "", "summary": {}, "signals": [], "top_foreign_buyers": []}
+    return {
+        "date": raw.get("date", ""),
+        "generated_at": raw.get("generated_at", ""),
+        "total_stocks": raw.get("total_stocks", 0),
+        "summary": raw.get("summary", {}),
+        "signals": raw.get("signals", [])[:15],
+        "top_foreign_buyers": raw.get("top_foreign_buyers", [])[:10],
+    }
+
+
 def main():
     brain = {
         "strategic": build_strategic(),
@@ -200,6 +215,7 @@ def main():
         "v3_picks": build_v3_picks(),
         "news": build_news(),
         "journal": build_journal(),
+        "china_money": build_china_money(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -212,6 +228,8 @@ def main():
     print(f"  journal total picks: {brain['journal'].get('total_picks', 0)}")
     print(f"  news sentiment: {brain['news'].get('market_sentiment', 'N/A')}")
     print(f"  risk factors: {len(brain['strategic'].get('risk_factors', []))}")
+    cm = brain["china_money"]
+    print(f"  china_money: {cm.get('summary', {}).get('SURGE', 0)} SURGE / {cm.get('summary', {}).get('INFLOW', 0)} INFLOW")
 
 
 if __name__ == "__main__":
