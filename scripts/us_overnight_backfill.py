@@ -58,6 +58,13 @@ TICKERS = {
     "COPX": "Copper_Miners",
     # 한국 프록시 (미국 상장 Korea ETF)
     "EWY": "KoreaETF",
+    # ── NIGHTWATCH 신규 티커 ──
+    "HYG": "HighYield",         # L0: 하이일드 채권 ETF (크레딧 리스크)
+    "^TNX": "Treasury10Y",      # L1: 10년물 금리 (채권 자경단)
+    "^TYX": "Treasury30Y",      # L1: 30년물 금리 (채권 자경단)
+    "^VIX3M": "VIX3M",          # L0: VIX 3개월 (기간구조 프록시)
+    "JPY=X": "USDJPY",          # L4: 엔캐리 트레이드
+    "KRW=X": "USDKRW",          # L4: 원/달러 환율
 }
 
 # 한국 섹터 매핑 (US ETF → KR 업종)
@@ -100,7 +107,7 @@ def backfill(years: int = 3) -> pd.DataFrame:
             df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
 
             # 필요 컬럼만
-            prefix = ticker.replace("^", "").lower()
+            prefix = ticker.replace("^", "").replace("=", "").replace("-", "").lower()
             cols = {
                 "Close": f"{prefix}_close",
                 "Volume": f"{prefix}_volume",
@@ -183,6 +190,41 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "copx_close" in df.columns and "gld_close" in df.columns:
         df["copper_gold_ratio"] = df["copx_close"] / df["gld_close"].replace(0, pd.NA)
         df["copper_gold_ratio_sma20"] = df["copper_gold_ratio"].rolling(20).mean()
+
+    # ── NIGHTWATCH 파생지표 ──
+
+    # HYG (하이일드 채권) 수익률 + SPY 괴리
+    if "hyg_close" in df.columns:
+        df["hyg_ret_1d"] = df["hyg_close"].pct_change()
+        df["hyg_ret_5d"] = df["hyg_close"].pct_change(5)
+        df["hyg_sma_20"] = df["hyg_close"].rolling(20).mean()
+        if "spy_close" in df.columns:
+            spy_5d = df["spy_close"].pct_change(5)
+            hyg_5d = df["hyg_close"].pct_change(5)
+            df["hyg_spy_div_5d"] = hyg_5d - spy_5d  # 음수 = HYG가 더 약함 = 위험
+
+    # 10Y/30Y 국채 금리 변화 (basis point)
+    for prefix in ["tnx", "tyx"]:
+        col = f"{prefix}_close"
+        if col in df.columns:
+            df[f"{prefix}_change_bp"] = df[col].diff()  # 절대 변화 (bp)
+            df[f"{prefix}_ret_1d"] = df[col].pct_change()
+            df[f"{prefix}_sma_20"] = df[col].rolling(20).mean()
+
+    # 10Y-30Y 스프레드 (정상: 음수, 역전: 양수)
+    if "tnx_close" in df.columns and "tyx_close" in df.columns:
+        df["yield_spread_10_30"] = df["tnx_close"] - df["tyx_close"]
+
+    # VIX 기간구조 (VIX / VIX3M)
+    if "vix_close" in df.columns and "vix3m_close" in df.columns:
+        df["vix_term_ratio"] = df["vix_close"] / df["vix3m_close"].replace(0, pd.NA)
+
+    # 환율 수익률
+    for prefix in ["jpyx", "krwx"]:
+        col = f"{prefix}_close"
+        if col in df.columns:
+            df[f"{prefix}_ret_1d"] = df[col].pct_change()
+            df[f"{prefix}_ret_5d"] = df[col].pct_change(5)
 
     # 섹터 상대 강도 (vs SPY)
     if "spy_close" in df.columns:

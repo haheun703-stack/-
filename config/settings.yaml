@@ -1514,3 +1514,46 @@ ai_upgrade:
   perplexity_model: "sonar"                # Perplexity 모델
   perplexity_max_verifications: 5          # 최대 종목 검증 수
   perplexity_max_thesis_checks: 3          # 최대 thesis 검증 수
+
+# ============================================================
+# NIGHTWATCH — 글로벌 시장 야간 수호자 (v1.0)
+# ============================================================
+# 기존 US Overnight과 앙상블:
+#   기존 L1 Score * 0.70 + NIGHTWATCH Score * 0.30
+# 채권 자경단 비토: 주식↓ + 금리↑ → 강제 STRONG_BEAR
+# ============================================================
+nightwatch:
+  enabled: true
+
+  # 앙상블 가중치 (기존 vs NIGHTWATCH)
+  ensemble_weights:
+    existing: 0.70
+    nightwatch: 0.30
+
+  # NIGHTWATCH 내부 레이어 가중치
+  layer_weights:
+    leading: 0.25         # L0: HYG 크레딧 + VIX 기간구조
+    bond_vigilante: 0.45  # L1: 채권 자경단 (핵심)
+    fx_triangle: 0.30     # L4: 환율 삼각형
+
+  # L1: 채권 자경단 비토
+  bond_vigilante:
+    spy_threshold: -0.01      # SPY -1% 이하 + 금리 상승 → 비토
+    tnx_threshold_bp: 5.0     # 10Y 금리 +5bp 이상
+    veto_score_cap: -0.50     # 비토 시 ensemble score 상한
+    position_cap: 0.30        # 비토 시 포지션 30% 축소
+
+  # L4: 환율 삼각형
+  fx_triangle:
+    yen_carry_threshold: -1.5  # USD/JPY -1.5% = 엔캐리 청산 경고
+    krw_threshold: 1.0         # KRW/USD +1.0% = 원화 약세 경고
+
+  # L0: HYG 선행지표
+  hyg:
+    warn_ret_5d: -0.02        # 5일 수익률 -2% → 경고
+    critical_ret_5d: -0.04    # 5일 수익률 -4% → 위험
+
+  # 블라인드 테스트
+  blind_test:
+    enabled: true
+    log_dir: "data/us_market/nightwatch_blind"

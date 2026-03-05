@@ -57,6 +57,17 @@ US_KR_SECTOR_MAP = {
 }
 
 DB_PATH = US_DIR / "us_kr_history.db"
+CONFIG_PATH = Path("config/settings.yaml")
+
+
+def _load_settings() -> dict:
+    """settings.yaml 로드. 실패 시 빈 dict."""
+    try:
+        import yaml
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except Exception:
+        return {}
 
 # ── 섹터 Kill 설정 (US ETF 기준) ──
 # kill_col: parquet의 ret_1d 컬럼 (분수 형태, 0.01=1%)
@@ -643,9 +654,60 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     # ─── 7. 특수 상황 룰 ───
     signal["special_rules"] = _check_special_rules(latest, prev)
 
+    # ─── 8. NIGHTWATCH 앙상블 ───
+    ensemble_score = score  # 기본값: 기존 L1 score
+    nw_result = None
+
+    settings = _load_settings()
+    nw_enabled = settings.get("nightwatch", {}).get("enabled", False)
+
+    if nw_enabled:
+        try:
+            from src.nightwatch.engine import NightwatchEngine
+
+            nw_engine = NightwatchEngine(settings)
+            nw_result = nw_engine.compute(df, latest, prev)
+            signal["nightwatch"] = nw_result
+
+            ens_w = settings.get("nightwatch", {}).get("ensemble_weights", {})
+            w_existing = ens_w.get("existing", 0.70)
+            w_nw = ens_w.get("nightwatch", 0.30)
+            ensemble_score = score * w_existing + nw_result["nightwatch_score"] * w_nw
+
+            # 채권 자경단 비토
+            if nw_result.get("bond_vigilante_veto"):
+                veto_cap = settings.get("nightwatch", {}).get(
+                    "bond_vigilante", {}
+                ).get("veto_score_cap", -0.50)
+                ensemble_score = min(ensemble_score, veto_cap)
+
+                pos_cap = settings.get("nightwatch", {}).get(
+                    "bond_vigilante", {}
+                ).get("position_cap", 0.30)
+                signal["special_rules"].append({
+                    "name": "BOND_VIGILANTE",
+                    "desc": "채권 자경단 발동 → 포지션 축소",
+                    "global_position_cap": pos_cap,
+                })
+                logger.warning("NIGHTWATCH: 채권 자경단 비토 발동!")
+
+            signal["ensemble_score"] = round(ensemble_score, 4)
+            logger.info(
+                f"NIGHTWATCH: nw={nw_result['nightwatch_score']:+.4f} "
+                f"ensemble={ensemble_score:+.4f} "
+                f"veto={nw_result.get('bond_vigilante_veto', False)}"
+            )
+        except Exception as e:
+            logger.warning(f"NIGHTWATCH 실패, 기존 로직만 사용: {e}")
+            signal["nightwatch"] = {"error": str(e)}
+    else:
+        signal["nightwatch"] = {"enabled": False}
+
+    # ─── 등급 판정 (ensemble 기반) ───
     l1_100 = round(score * 100, 1)
+    ensemble_100 = round(ensemble_score * 100, 1)
     l2_adj = l2.get("pattern_adjustment", 0)
-    combined_100 = max(-100.0, min(100.0, l1_100 + l2_adj))
+    combined_100 = max(-100.0, min(100.0, ensemble_100 + l2_adj))
 
     if combined_100 >= 50:
         grade = "STRONG_BULL"
@@ -660,6 +722,7 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
 
     signal["grade"] = grade
     signal["l1_score_100"] = l1_100
+    signal["ensemble_score_100"] = ensemble_100
     signal["combined_score_100"] = round(combined_100, 1)
 
     # 전략 C: US→KR 섹터 모멘텀 (전 섹터 사전 포지셔닝)
@@ -679,8 +742,15 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
             commod_parts.append(f"{sym}{c['ret_1d']:+.1f}%")
     commod_str = f" | {' '.join(commod_parts)}" if commod_parts else ""
 
+    # NIGHTWATCH 요약
+    nw_str = ""
+    if nw_result and isinstance(nw_result, dict) and "nightwatch_score" in nw_result:
+        nw_s = nw_result["nightwatch_score"]
+        veto_mark = " VETO!" if nw_result.get("bond_vigilante_veto") else ""
+        nw_str = f" NW:{nw_s:+.2f}{veto_mark}"
+
     signal["summary"] = (
-        f"US {grade} ({combined_100:+.1f}{l2_adj_str}) | "
+        f"US {grade} ({combined_100:+.1f}{l2_adj_str}{nw_str}) | "
         f"SPY {spy_ret:+.1f}% QQQ {qqq_ret:+.1f}% | "
         f"VIX {vix:.0f} ({vix_status}){commod_str}"
     )
@@ -762,6 +832,35 @@ def format_telegram_message(signal: dict) -> str:
                     f"  {s_name}: {s_val['mean_chg']:+.2f}% "
                     f"(상승 {s_val['positive_rate']:.0f}%)"
                 )
+
+    # NIGHTWATCH
+    nw = signal.get("nightwatch", {})
+    if nw and nw.get("nightwatch_score") is not None:
+        layers = nw.get("layers", {})
+        l0 = layers.get("L0_leading", {})
+        l1 = layers.get("L1_bond_vigilante", {})
+        l4 = layers.get("L4_fx_triangle", {})
+
+        veto_mark = " VETO!" if nw.get("bond_vigilante_veto") else ""
+        lines.append(f"\n[ NIGHTWATCH ] (Score: {nw['nightwatch_score']:+.4f}{veto_mark})")
+
+        # L0
+        hyg_5d = l0.get("hyg_ret_5d", "N/A")
+        hyg_st = l0.get("hyg_status", "?")
+        vix_tr = l0.get("vix_term_ratio", "N/A")
+        vix_ts = l0.get("vix_term_status", "?")
+        lines.append(f"  L0 선행: HYG 5D:{hyg_5d}% [{hyg_st}] | VIX Term:{vix_tr} [{vix_ts}]")
+
+        # L1
+        tnx_bp = l1.get("tnx_change_bp", "N/A")
+        cross = l1.get("cross_regime", "?")
+        lines.append(f"  L1 채권자경단: 10Y {tnx_bp}bp | {cross}")
+
+        # L4
+        jpy_chg = l4.get("usdjpy_change_pct", "N/A")
+        krw_chg = l4.get("usdkrw_change_pct", "N/A")
+        yen_st = l4.get("yen_carry_status", "?")
+        lines.append(f"  L4 환율삼각: JPY {jpy_chg}% | KRW {krw_chg}% | 엔캐리:{yen_st}")
 
     # 특수 룰
     rules = signal.get("special_rules", [])
