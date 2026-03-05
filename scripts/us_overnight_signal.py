@@ -409,6 +409,124 @@ def _compute_sector_momentum(df: pd.DataFrame) -> dict:
     return result
 
 
+NIGHTWATCH_BLIND_DIR = Path("data/us_market/nightwatch_blind")
+
+
+def _save_nightwatch_blind_log(signal: dict, score: float, ensemble_score: float):
+    """NIGHTWATCH 블라인드 테스트 — 기존 vs 앙상블 일별 비교 기록."""
+    settings = _load_settings()
+    if not settings.get("nightwatch", {}).get("blind_test", {}).get("enabled", False):
+        return
+
+    NIGHTWATCH_BLIND_DIR.mkdir(parents=True, exist_ok=True)
+    today = signal.get("us_close_date", datetime.now().strftime("%Y-%m-%d"))
+
+    # 기존 로직 등급 (NIGHTWATCH 없이)
+    l1_100 = round(score * 100, 1)
+    l2_adj = signal.get("l2_pattern", {}).get("pattern_adjustment", 0)
+    existing_combined = max(-100.0, min(100.0, l1_100 + l2_adj))
+    if existing_combined >= 50:
+        existing_grade = "STRONG_BULL"
+    elif existing_combined >= 20:
+        existing_grade = "MILD_BULL"
+    elif existing_combined > -20:
+        existing_grade = "NEUTRAL"
+    elif existing_combined > -50:
+        existing_grade = "MILD_BEAR"
+    else:
+        existing_grade = "STRONG_BEAR"
+
+    nw = signal.get("nightwatch", {})
+    log_entry = {
+        "date": today,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        # 비교 핵심
+        "existing_grade": existing_grade,
+        "existing_combined_100": round(existing_combined, 1),
+        "ensemble_grade": signal.get("grade", "?"),
+        "ensemble_combined_100": signal.get("combined_score_100", 0),
+        # NIGHTWATCH 상세
+        "nightwatch_score": nw.get("nightwatch_score"),
+        "ensemble_score": signal.get("ensemble_score"),
+        "bond_vigilante_veto": nw.get("bond_vigilante_veto", False),
+        # 레이어별
+        "l0_score": nw.get("layers", {}).get("L0_leading", {}).get("score"),
+        "l1_score": nw.get("layers", {}).get("L1_bond_vigilante", {}).get("score"),
+        "l1_cross_regime": nw.get("layers", {}).get("L1_bond_vigilante", {}).get("cross_regime"),
+        "l4_score": nw.get("layers", {}).get("L4_fx_triangle", {}).get("score"),
+        # 시장 컨텍스트
+        "spy_ret_1d": nw.get("layers", {}).get("L1_bond_vigilante", {}).get("spy_ret_1d"),
+        "tnx_change_bp": nw.get("layers", {}).get("L1_bond_vigilante", {}).get("tnx_change_bp"),
+        "special_rules_count": len(signal.get("special_rules", [])),
+    }
+
+    log_path = NIGHTWATCH_BLIND_DIR / f"{today}.json"
+    log_path.write_text(
+        json.dumps(log_entry, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+
+    # _index.json 업데이트
+    index_path = NIGHTWATCH_BLIND_DIR / "_index.json"
+    if index_path.exists():
+        index_data = json.loads(index_path.read_text(encoding="utf-8"))
+    else:
+        index_data = {"start_date": today, "logs": []}
+    if today not in index_data["logs"]:
+        index_data["logs"].append(today)
+    index_data["total_days"] = len(index_data["logs"])
+    index_data["last_updated"] = today
+    index_path.write_text(
+        json.dumps(index_data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    logger.info(f"NIGHTWATCH 블라인드 로그: {log_path}")
+
+
+def _send_bond_vigilante_alert(signal: dict, nw_result: dict):
+    """채권 자경단 비토 발동 시 별도 긴급 텔레그램 발송."""
+    settings = _load_settings()
+    if not settings.get("nightwatch", {}).get("bond_vigilante", {}).get("emergency_alert", True):
+        return
+
+    layers = nw_result.get("layers", {})
+    l1 = layers.get("L1_bond_vigilante", {})
+
+    spy_ret = l1.get("spy_ret_1d", "?")
+    tnx_bp = l1.get("tnx_change_bp", "?")
+    cross = l1.get("cross_regime", "?")
+    spread_inv = l1.get("spread_inversion_veto", False)
+    nw_score = nw_result.get("nightwatch_score", 0)
+    ensemble = signal.get("ensemble_score", 0)
+    grade = signal.get("grade", "?")
+
+    lines = [
+        "\U0001f6a8 [\ucc44\uad8c \uc790\uacbd\ub2e8 \ube44\ud1a0 \ubc1c\ub3d9]",
+        "\u2501" * 20,
+        f"  SPY: {spy_ret}% | 10Y: {tnx_bp}bp",
+        f"  \uad50\ucc28 \ub808\uc9d0: {cross}",
+    ]
+    if spread_inv:
+        lines.append("  \u26a0\ufe0f 10Y-30Y \uc2a4\ud504\ub808\ub4dc \uc5ed\uc804 \uac10\uc9c0")
+    lines += [
+        "\u2501" * 20,
+        f"  NW Score: {nw_score:+.4f}",
+        f"  Ensemble: {ensemble:+.4f}",
+        f"  \ub4f1\uae09: {grade}",
+        "\u2501" * 20,
+        "  \uc870\uce58: \ud3ec\uc9c0\uc158 30% \uce21 \uc801\uc6a9",
+        "  \uc8fc\uc2dd\u2193 + \uae08\ub9ac\u2191 = \ucd5c\uc545 \uc2dc\ub098\ub9ac\uc624",
+        "  \uc2e0\uaddc \ub9e4\uc218 \uc790\uc81c, \uae30\uc874 \ud3ec\uc9c0\uc158 \ucd95\uc18c \uac80\ud1a0",
+    ]
+
+    try:
+        from src.telegram_sender import send_message
+        send_message("\n".join(lines))
+        logger.info("\ucc44\uad8c \uc790\uacbd\ub2e8 \ube44\ud1a0 \uae34\uae09 \ud154\ub808\uadf8\ub7a8 \ubc1c\uc1a1 \uc644\ub8cc")
+    except Exception as e:
+        logger.warning(f"\ucc44\uad8c \uc790\uacbd\ub2e8 \uae34\uae09 \ud154\ub808\uadf8\ub7a8 \uc2e4\ud328: {e}")
+
+
 def generate_signal(df: pd.DataFrame | None = None) -> dict:
     """US Overnight Signal 생성.
 
@@ -691,6 +809,9 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
                 })
                 logger.warning("NIGHTWATCH: 채권 자경단 비토 발동!")
 
+                # 긴급 텔레그램 별도 발송 (--send 무관, 비토는 항상)
+                _send_bond_vigilante_alert(signal, nw_result)
+
             signal["ensemble_score"] = round(ensemble_score, 4)
             logger.info(
                 f"NIGHTWATCH: nw={nw_result['nightwatch_score']:+.4f} "
@@ -762,6 +883,9 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
 
     logger.info(f"신호: {signal['summary']}")
     logger.info(f"저장: {SIGNAL_PATH}")
+
+    # NIGHTWATCH 블라인드 테스트 로그
+    _save_nightwatch_blind_log(signal, score, ensemble_score)
 
     return signal
 

@@ -1542,6 +1542,7 @@ nightwatch:
     tnx_threshold_bp: 5.0     # 10Y 금리 +5bp 이상
     veto_score_cap: -0.50     # 비토 시 ensemble score 상한
     position_cap: 0.30        # 비토 시 포지션 30% 축소
+    emergency_alert: true     # 비토 시 별도 긴급 텔레그램 발송
 
   # L4: 환율 삼각형
   fx_triangle:
