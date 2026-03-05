@@ -221,6 +221,11 @@ echo [%date% %time%] [20.7/29] 포트폴리오 배분 >> logs\schedule.log
 python -u -X utf8 scripts\portfolio_allocator.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [20.7/29] FAILED >> logs\schedule.log
 
+REM 20.8단계: 3단 예측 체인 (유럽장 DAX 30분 → 미국장 방향 선행 예측)
+echo [%date% %time%] [20.8/29] 3단 예측 체인 >> logs\schedule.log
+python -u -X utf8 scripts\run_predict_chain.py --send --blind >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [20.8/29] FAILED >> logs\schedule.log
+
 REM ══════════════════════════════════════════════
 REM  PHASE 6: 아카이브 + 보고서 (~1분)
 REM ══════════════════════════════════════════════
