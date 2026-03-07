@@ -383,13 +383,13 @@ class ScoringEngine:
     # S5: 수급/스마트머니 스코어 (가중치 0.15)
     # ═══════════════════════════════════════════════════════
     def score_smart_money(self, row: pd.Series) -> ScoreResult:
-        """v12.3 수급/스마트머니 — 7개 구성요소 (실제 수급 데이터 50% 비중)
+        """v12.5 수급/스마트머니 — 7개 구성요소 + ETF 왜곡 보정
 
         (a) OBV 다이버전스      0.25  기술적 매집 신호
         (b) 외국인 연속 매수     0.20  연속일수 구간별 채점
-        (c) 기관 연속 매수       0.20  연속일수 구간별 채점
+        (c) 기관 연속 매수       0.20  연속일수 구간별 채점 (ETF 왜곡 할인)
         (d) DRS                 0.15  분배 리스크
-        (e) 수급 다이버전스   ±0.10  기관매집/쌍매도
+        (e) 수급 다이버전스   ±0.10  기관매집/쌍매도 (ETF 왜곡 시 할인)
         (f) 공매도 보너스        0.05
         (g) 연기금 보너스        0.05
         """
@@ -397,6 +397,12 @@ class ScoringEngine:
         cfg = self.cfg.get('smart_money', {})
         score = 0.0
         bd = {}
+
+        # ── ETF 왜곡 보정 파라미터 ──
+        etf_distortion = row.get('etf_distortion_pct', 0)
+        etf_cfg = self.cfg.get('etf_flow_distortion', {}).get('distortion_correction', {})
+        high_thresh = etf_cfg.get('high_distortion_threshold', 50)
+        mid_thresh = etf_cfg.get('medium_distortion_threshold', 30)
 
         # (a) OBV 다이버전스 (0.25)
         price_trend = row.get('price_trend_5d', 0)
@@ -419,13 +425,21 @@ class ScoringEngine:
         bd['foreign'] = round(f_sub, 3)
         bd['foreign_consec_days'] = f_consec
 
-        # (c) 기관 연속 매수 (0.20) — 구간별 채점
+        # (c) 기관 연속 매수 (0.20) — ETF 왜곡 비율만큼 할인
         i_consec = int(row.get('inst_consecutive_buy', 0))
         i_ratio = _graduated_consecutive_score(i_consec, cfg)
+
+        if etf_distortion > high_thresh:
+            i_ratio *= 0.5   # 50%+ 왜곡 → 기관 점수 반감
+        elif etf_distortion > mid_thresh:
+            i_ratio *= 0.7   # 30~50% 왜곡 → 30% 할인
+
         i_sub = round(i_ratio * 0.20, 4)
         score += i_sub
         bd['institutional'] = round(i_sub, 3)
         bd['inst_consec_days'] = i_consec
+        if etf_distortion > 0:
+            bd['etf_distortion_pct'] = round(etf_distortion, 1)
 
         # (d) DRS (0.15)
         drs = row.get('distribution_risk_score', row.get('smart_z', 0.5))
@@ -441,12 +455,15 @@ class ScoringEngine:
         score += drs_score
         bd['drs'] = round(drs_score, 3)
 
-        # (e) 수급 다이버전스 (±0.10)
+        # (e) 수급 다이버전스 (±0.10) — ETF 왜곡 시 기관매집 신뢰 하락
         div = int(row.get('supply_divergence', 0))
         div_bonus = cfg.get('divergence_bonus', 0.10)
         div_penalty = cfg.get('divergence_penalty', -0.05)
         if div == 1:      # 외인매도 + 기관매수 = 기관 매집
-            div_score = div_bonus
+            if etf_distortion > high_thresh:
+                div_score = div_bonus * 0.3  # ETF 기계적 매수 가능성 → 대폭 할인
+            else:
+                div_score = div_bonus
         elif div == -1:   # 쌍매도 = 위험
             div_score = div_penalty
         else:

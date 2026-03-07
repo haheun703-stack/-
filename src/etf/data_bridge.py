@@ -330,8 +330,53 @@ def load_supply() -> dict:
             if code not in result:
                 result[code] = entry.copy()
 
+    # ── ETF 센티먼트 레이어 (v12.5) ──
+    sentiment = _load_etf_sentiment()
+    if sentiment:
+        # universe에서 코드→섹터 역매핑
+        code_to_sector = {code: info["sector"] for code, info in universe.items()}
+
+        for code, entry in result.items():
+            sector = code_to_sector.get(code, "")
+            if sector in sentiment:
+                s = sentiment[sector]
+                entry["retail_sentiment"] = s.get("sentiment", "NEUTRAL")
+                entry["retail_net_5d"] = s.get("individual_net_5d", 0)
+
+                adj = _load_sentiment_adjustment()
+                if s.get("sentiment") == "HOT":
+                    entry["score"] = min(100, entry["score"] + adj)
+                elif s.get("sentiment") == "COLD":
+                    entry["score"] = max(0, entry["score"] - adj)
+
+        logger.info("수급: 센티먼트 보정 적용 (%d개 섹터)", len(sentiment))
+
     logger.info("수급: %d개 ETF 매핑", len(result))
     return result
+
+
+def _load_etf_sentiment() -> dict:
+    """ETF 투자자 데이터에서 섹터 센티먼트 계산."""
+    try:
+        from src.etf.flow_distortion import calc_sector_sentiment, load_etf_flow_data
+        data = load_etf_flow_data()
+        if not data:
+            return {}
+        return calc_sector_sentiment(data)
+    except Exception as e:
+        logger.debug("ETF 센티먼트 로드 실패 (무시): %s", e)
+        return {}
+
+
+def _load_sentiment_adjustment() -> int:
+    """settings.yaml에서 센티먼트 점수 조정값 로드."""
+    try:
+        import yaml
+        with open(PROJECT_ROOT / "config" / "settings.yaml", "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        return int(cfg.get("etf_flow_distortion", {}).get("sentiment", {}).get("score_adjustment", 10))
+    except Exception:
+        return 10
 
 
 # ============================================================

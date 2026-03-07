@@ -85,6 +85,11 @@ echo [%date% %time%] [9c.5/29] 차이나머니 수급 >> logs\schedule.log
 python -u -X utf8 scripts\crawl_china_money.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9c.5/29] FAILED >> logs\schedule.log
 
+REM 9c.7단계: ETF 투자자별 수급 수집 (수급 왜곡 보정 + 센티먼트)
+echo [%date% %time%] [9c.7/29] ETF 투자자 수급 수집 >> logs\schedule.log
+python -u -X utf8 scripts\collect_etf_investor_flow.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [9c.7/29] FAILED >> logs\schedule.log
+
 python -u -X utf8 scripts\sector_daily_report.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9d/29] FAILED (리포트) >> logs\schedule.log
 

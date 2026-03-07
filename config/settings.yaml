@@ -1664,3 +1664,31 @@ smallcap_explosion:
     min_cum_return: 8        # 최소 누적 상승%
 
   telegram_top_n: 10         # 알림 최대 종목수
+
+# ─── ETF 수급 왜곡 보정 (v12.5) ───
+etf_flow_distortion:
+  enabled: true
+
+  # A: 수급 보정 — 기관 순매수에서 ETF 기계적 매수 차감
+  distortion_correction:
+    enabled: true
+    high_distortion_threshold: 50    # 50%+ → 기관점수 0.5배
+    medium_distortion_threshold: 30  # 30~50% → 기관점수 0.7배
+    exclude_tickers:                 # 왜곡 효과 없는 종목 (X-Ray v2 검증)
+      - "005930"  # 삼성전자 (유동성 과다)
+      - "005380"  # 현대차 (교차 흐름)
+
+  # B: 선행 시그널 — ETF 개인 급증 → T+1~T+2 기관 매수 예측
+  leading_signal:
+    enabled: true
+    surge_threshold: 2.0             # MA20 대비 N배 이상
+    strong_threshold: 3.0            # STRONG 등급 기준
+    telegram_alert: true
+    auto_buy: false                  # 절대 자동매수 안 함
+
+  # C: 센티먼트 — ETF 개인 순매수 추세로 섹터 관심도 판단
+  sentiment:
+    enabled: true
+    hot_threshold: 100e8             # 5일 100억+ 순매수
+    cold_threshold: -100e8           # 5일 100억+ 순매도
+    score_adjustment: 10             # HOT +10 / COLD -10

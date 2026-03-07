@@ -1,0 +1,22 @@
+[
+  {
+    "sector": "방산",
+    "etf_code": "463250",
+    "etf_name": "TIGER K방산&우주",
+    "individual_net_today": 17388000000,
+    "individual_net_ma20": 8505416666.666667,
+    "surge_ratio": 2.04,
+    "expected_stocks": [
+      {
+        "code": "012450",
+        "name": "한화에어로스페이스"
+      },
+      {
+        "code": "064350",
+        "name": "현대로템"
+      }
+    ],
+    "signal_strength": "MODERATE",
+    "message": "TIGER K방산&우주 개인 2.0배 급증 (174억 vs 평균 85억) → 한화에어로스페이스, 현대로템 T+1~T+2 기관매수 유입 예상"
+  }
+]
