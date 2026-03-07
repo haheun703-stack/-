@@ -77,7 +77,9 @@ def make_row(**kwargs):
         'macd_histogram_prev': -0.3,
         'price_trend_5d': -0.02,
         'obv_trend_5d': 0.03,
-        'institutional_net_buy_5d': 50000,
+        'foreign_consecutive_buy': 3,
+        'inst_consecutive_buy': 2,
+        'supply_divergence': 0,
         'distribution_risk_score': 0.2,
     }
     defaults.update(kwargs)
@@ -157,7 +159,40 @@ class TestS5SmartMoney:
         """가격 하락 + OBV 상승 = 매집"""
         row = make_row(price_trend_5d=-0.03, obv_trend_5d=0.05)
         result = engine.score_smart_money(row)
-        assert result.breakdown['obv_divergence'] == 0.40
+        assert result.breakdown['obv_divergence'] == 0.25
+
+    def test_foreign_consecutive_graduated(self, engine):
+        """외국인 연속 매수 구간별 점수"""
+        # 0일 → 0점
+        row = make_row(foreign_consecutive_buy=0)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['foreign'] == 0.0
+        # 3일 → 0.50 * 0.20 = 0.10
+        row = make_row(foreign_consecutive_buy=3)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['foreign'] == 0.1
+        # 8일 → 1.00 * 0.20 = 0.20
+        row = make_row(foreign_consecutive_buy=8)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['foreign'] == 0.2
+
+    def test_inst_consecutive_graduated(self, engine):
+        """기관 연속 매수 구간별 점수"""
+        row = make_row(inst_consecutive_buy=5)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['institutional'] == 0.15  # 0.75 * 0.20
+
+    def test_supply_divergence_bonus(self, engine):
+        """외인매도+기관매수 = 기관 매집 → 보너스"""
+        row = make_row(supply_divergence=1)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['divergence'] == 0.10
+
+    def test_dual_selling_penalty(self, engine):
+        """쌍매도 → 패널티"""
+        row = make_row(supply_divergence=-1)
+        r = engine.score_smart_money(row)
+        assert r.breakdown['divergence'] == -0.05
 
 
 class TestGradeResult:
@@ -177,7 +212,9 @@ class TestGradeResult:
             ema_curvature=-0.01, ema_curvature_prev=-0.005,
             macd_histogram=-1.0, macd_histogram_prev=-0.5,
             price_trend_5d=0.05, obv_trend_5d=-0.03,
-            institutional_net_buy_5d=-100000,
+            foreign_consecutive_buy=0,
+            inst_consecutive_buy=0,
+            supply_divergence=-1,
             distribution_risk_score=0.8,
         )
         result = engine.score_all(row)

@@ -389,11 +389,11 @@ class IndicatorEngine:
         result["macd_signal"] = result["macd"].ewm(span=9, min_periods=9).mean()
         result["macd_histogram"] = result["macd"] - result["macd_signal"]
 
-        # 34. 기관/외국인 연속 순매수 일수
-        for col_name in ["inst_net", "foreign_net"]:
-            if col_name in result.columns:
-                result[f"{col_name}_streak"] = calc_institutional_streak(
-                    result[col_name].fillna(0)
+        # 34. 기관/외국인 연속 순매수 일수 (v12.3: 컬럼명 버그 수정)
+        for kr_col, en_alias in [("기관합계", "inst"), ("외국인합계", "foreign")]:
+            if kr_col in result.columns:
+                result[f"{en_alias}_net_streak"] = calc_institutional_streak(
+                    result[kr_col].fillna(0)
                 )
 
         # 35. 갭업 비율 (전일 종가 대비 시가)
@@ -553,6 +553,69 @@ class IndicatorEngine:
             result["foreign_net_20d"] = 0
             result["foreign_consecutive_buy"] = 0
             result["foreign_vol_confirm"] = 0
+
+        # ──────────────────────────────────────────────
+        # v12.3 기관 수급 파생지표 (84~89)
+        # 기관합계 → 외국인과 동일한 파생지표 체계
+        # ──────────────────────────────────────────────
+
+        inst_col = None
+        for ic in ["기관합계", "inst_net"]:
+            if ic in result.columns:
+                inst_col = ic
+                break
+
+        if inst_col is not None:
+            inet = result[inst_col].fillna(0)
+
+            # 84. 기관 5일 누적 순매수
+            result["inst_net_5d"] = inet.rolling(5, min_periods=1).sum()
+
+            # 85. 기관 20일 누적 순매수
+            result["inst_net_20d"] = inet.rolling(20, min_periods=1).sum()
+
+            # 86. 기관 연속 순매수 일수
+            consec_inst = []
+            count = 0
+            for val in inet:
+                if val > 0:
+                    count += 1
+                else:
+                    count = 0
+                consec_inst.append(count)
+            result["inst_consecutive_buy"] = consec_inst
+
+            # 87. 기관+거래량 복합 신호
+            vol_above_avg_i = (df["volume"] > result["volume_ma20"]).astype(int)
+            inst_buying = (inet > 0).astype(int)
+            result["inst_vol_confirm"] = vol_above_avg_i * inst_buying
+
+            # 88. 수급 다이버전스 (외인매도+기관매수=+1, 쌍매도=-1)
+            if foreign_col is not None:
+                fnet_local = result[foreign_col].fillna(0)
+                div = pd.Series(0, index=result.index)
+                div[(fnet_local < 0) & (inet > 0)] = 1   # 기관 매집
+                div[(fnet_local < 0) & (inet < 0)] = -1   # 쌍매도
+                result["supply_divergence"] = div
+            else:
+                result["supply_divergence"] = 0
+
+            # 89. 매집 효율성 (외인+기관 순매수 / 거래대금MA20)
+            if foreign_col is not None:
+                combined_net = result[foreign_col].fillna(0) + inet
+                trade_value_ma20 = (result["volume_ma20"] * df["close"]).replace(0, np.nan)
+                result["accumulation_efficiency"] = (
+                    combined_net / trade_value_ma20
+                ).fillna(0).clip(-1, 1)
+            else:
+                result["accumulation_efficiency"] = 0.0
+        else:
+            result["inst_net_5d"] = 0
+            result["inst_net_20d"] = 0
+            result["inst_consecutive_buy"] = 0
+            result["inst_vol_confirm"] = 0
+            result["supply_divergence"] = 0
+            result["accumulation_efficiency"] = 0.0
 
         # ──────────────────────────────────────────────
         # v8.4 L2 공매도 레이어 지표 (63~67)

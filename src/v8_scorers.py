@@ -11,6 +11,21 @@ from dataclasses import dataclass
 import pandas as pd
 
 
+def _graduated_consecutive_score(days: int, cfg: dict) -> float:
+    """연속 매수 일수 → 구간별 점수 (0.0 ~ 1.0)
+
+    8일+: 1.00 (확신 매집) | 5~7일: 0.75 (강한 매집)
+    3~4일: 0.50 (추세 형성) | 1~2일: 0.25 (관심 시작) | 0일: 0.00
+    """
+    thresholds = cfg.get('consecutive_thresholds', [
+        [8, 1.00], [5, 0.75], [3, 0.50], [1, 0.25],
+    ])
+    for min_days, score in thresholds:
+        if days >= min_days:
+            return score
+    return 0.0
+
+
 @dataclass
 class ScoreResult:
     """개별 스코어 결과"""
@@ -368,52 +383,78 @@ class ScoringEngine:
     # S5: 수급/스마트머니 스코어 (가중치 0.15)
     # ═══════════════════════════════════════════════════════
     def score_smart_money(self, row: pd.Series) -> ScoreResult:
-        """기관 매집 감지 — OBV 다이버전스 + 기관수급 + DRS"""
+        """v12.3 수급/스마트머니 — 7개 구성요소 (실제 수급 데이터 50% 비중)
+
+        (a) OBV 다이버전스      0.25  기술적 매집 신호
+        (b) 외국인 연속 매수     0.20  연속일수 구간별 채점
+        (c) 기관 연속 매수       0.20  연속일수 구간별 채점
+        (d) DRS                 0.15  분배 리스크
+        (e) 수급 다이버전스   ±0.10  기관매집/쌍매도
+        (f) 공매도 보너스        0.05
+        (g) 연기금 보너스        0.05
+        """
         w = self.weights.get('smart_money', 0.15)
         cfg = self.cfg.get('smart_money', {})
         score = 0.0
         bd = {}
 
-        # (a) OBV 다이버전스 (0.40)
+        # (a) OBV 다이버전스 (0.25)
         price_trend = row.get('price_trend_5d', 0)
         obv_trend = row.get('obv_trend_5d', 0)
 
         if price_trend < 0 and obv_trend > 0:
-            obv_score = 0.40  # 가격 하락 + OBV 상승 = 매집
+            obv_score = 0.25  # 가격 하락 + OBV 상승 = 매집
         elif obv_trend > 0:
-            obv_score = 0.20
+            obv_score = 0.12
         else:
             obv_score = 0.0
         score += obv_score
         bd['obv_divergence'] = round(obv_score, 3)
 
-        # (b) 기관/외국인 순매수 (0.30)
-        inst_net = row.get('institutional_net_buy_5d', 0)
-        if inst_net > 0:
-            inst_score = 0.30
-        elif inst_net == 0:
-            inst_score = 0.10  # 데이터 없음 → 중립 보너스
-        else:
-            inst_score = 0.0
-        score += inst_score
-        bd['institutional'] = round(inst_score, 3)
+        # (b) 외국인 연속 매수 (0.20) — 구간별 채점
+        f_consec = int(row.get('foreign_consecutive_buy', 0))
+        f_ratio = _graduated_consecutive_score(f_consec, cfg)
+        f_sub = round(f_ratio * 0.20, 4)
+        score += f_sub
+        bd['foreign'] = round(f_sub, 3)
+        bd['foreign_consec_days'] = f_consec
 
-        # (c) 분배 리스크 (DRS) — 낮을수록 좋음 (0.30, v8.3.1 원본)
+        # (c) 기관 연속 매수 (0.20) — 구간별 채점
+        i_consec = int(row.get('inst_consecutive_buy', 0))
+        i_ratio = _graduated_consecutive_score(i_consec, cfg)
+        i_sub = round(i_ratio * 0.20, 4)
+        score += i_sub
+        bd['institutional'] = round(i_sub, 3)
+        bd['inst_consec_days'] = i_consec
+
+        # (d) DRS (0.15)
         drs = row.get('distribution_risk_score', row.get('smart_z', 0.5))
         drs_safe = cfg.get('drs_safe_threshold', 0.3)
         drs_neutral = cfg.get('drs_neutral_threshold', 0.5)
 
         if drs < drs_safe:
-            drs_score = 0.30
-        elif drs <= drs_neutral:
             drs_score = 0.15
+        elif drs <= drs_neutral:
+            drs_score = 0.08
         else:
             drs_score = 0.0
         score += drs_score
         bd['drs'] = round(drs_score, 3)
 
-        # (d) 공매도 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
-        # v10.1: 마스터 스위치 OFF 시 공매도 보너스 전체 스킵
+        # (e) 수급 다이버전스 (±0.10)
+        div = int(row.get('supply_divergence', 0))
+        div_bonus = cfg.get('divergence_bonus', 0.10)
+        div_penalty = cfg.get('divergence_penalty', -0.05)
+        if div == 1:      # 외인매도 + 기관매수 = 기관 매집
+            div_score = div_bonus
+        elif div == -1:   # 쌍매도 = 위험
+            div_score = div_penalty
+        else:
+            div_score = 0.0
+        score += div_score
+        bd['divergence'] = round(div_score, 3)
+
+        # (f) 공매도 보너스 (0~0.05)
         if self._short_filter_enabled:
             short_ratio = row.get('short_ratio', 0)
             has_short_data = not pd.isna(short_ratio) and short_ratio > 0
@@ -423,23 +464,23 @@ class ScoringEngine:
                 short_spike = row.get('short_spike', 1.0)
 
                 if short_cover:
-                    short_score = 0.10  # 숏커버링 → 최대 부스트
+                    short_score = 0.05
                 elif short_spike < 0.5:
-                    short_score = 0.07  # 공매도 감소 추세
+                    short_score = 0.03
                 elif short_spike > 2.0:
-                    short_score = 0.0   # 공매도 급증 → 위험
+                    short_score = 0.0
                 else:
-                    short_score = 0.03  # 정상 수준
+                    short_score = 0.02
                 score += short_score
                 bd['short_selling'] = round(short_score, 3)
 
-        # (e) 연기금 보너스 — 실제 데이터 있을 때만 적용 (0~0.10)
+        # (g) 연기금 보너스 (0~0.05)
         if row.get('pension_top_buyer', 0) == 1:
-            pension_score = 0.10  # 연기금 TOP20 순매수
+            pension_score = 0.05
             score += pension_score
             bd['pension'] = round(pension_score, 3)
         elif row.get('pension_net_5d', 0) > 0:
-            pension_score = 0.05  # 연기금 5일 누적 양전
+            pension_score = 0.03
             score += pension_score
             bd['pension'] = round(pension_score, 3)
 

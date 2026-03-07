@@ -410,9 +410,11 @@ class PositionRevaluationEngine:
         if "foreign_consecutive_buy" in df.columns:
             f_streak = int(df["foreign_consecutive_buy"].iloc[-1])
 
-        # 기관 연속 매수 (inst_net_streak 또는 기관합계에서 계산)
+        # 기관 연속 매수 (v12.3: inst_consecutive_buy 우선)
         i_streak = 0
-        if "inst_net_streak" in df.columns:
+        if "inst_consecutive_buy" in df.columns:
+            i_streak = int(df["inst_consecutive_buy"].iloc[-1])
+        elif "inst_net_streak" in df.columns:
             i_streak = int(df["inst_net_streak"].iloc[-1])
         elif "기관합계" in df.columns:
             inst = df["기관합계"].tail(5).values

@@ -962,6 +962,14 @@ v8_hybrid:
       obv_trend_days: 5
       drs_safe_threshold: 0.3
       drs_neutral_threshold: 0.5
+      # v12.3 수급 업그레이드 — 연속일 구간별 채점 + 다이버전스
+      consecutive_thresholds:
+        - [8, 1.00]    # 8일+ 확신 매집
+        - [5, 0.75]    # 5-7일 강한 매집
+        - [3, 0.50]    # 3-4일 추세 형성
+        - [1, 0.25]    # 1-2일 관심 시작
+      divergence_bonus: 0.10    # 기관매집 (외인매도+기관매수) 보너스
+      divergence_penalty: -0.05  # 쌍매도 패널티
 
     grade_cutoffs:
       A: 0.65                    # 풀 사이즈 진입 (fundamental 미존재 보정)
@@ -1120,6 +1128,23 @@ smart_entry:
     max_total_amount: 50000000     # 전체 최대 투자금 (원, 5천만원 상한)
     kill_switch_file: "data/KILL_SWITCH"  # 이 파일 존재 시 즉시 중단
     v3_sizing_enabled: true        # v3 size_pct 기반 동적 사이징 활성화
+
+# ============================================================
+# 금요일 투매 역매수 스캐너 (Friday Dip Scanner)
+# ============================================================
+friday_dip:
+  enabled: true
+  min_rsi: 55.0              # RSI 하한 (강한 종목만)
+  min_adx: 25.0              # ADX 하한 (추세 있는 종목만)
+  min_drop_pct: 2.0          # 고가 대비 최소 하락률 (%)
+  min_vol_ratio: 1.5         # 20일 평균 대비 거래량 배율
+  require_above_sma20: true  # SMA20 위 필수
+  stop_loss_pct: 1.0         # 손절 기준 (%)
+  max_candidates: 5          # 최대 추천 종목 수
+  min_trading_value_억: 10.0
+  scan_time: "14:00"         # 스캔 시작 시각 (금요일만)
+  # 모든 요일 스캔: false → 금요일만, true → 매일 (향후 확장)
+  all_weekdays: false
 
 # ============================================================
 # 매도 모니터 설정
