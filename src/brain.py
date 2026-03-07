@@ -1001,6 +1001,22 @@ class Brain:
             lines.append(f"  {'복합방향':>16s}: {comp_dir} (데이터 {stale}일 전)")
             lines.append("")
 
+        # v3 캡 정보
+        integ = self.settings.get("brain_v3_integration", {})
+        if integ.get("enabled"):
+            slot_caps = integ.get("regime_slot_cap", {})
+            slot_cap = slot_caps.get(effective_regime, 99)
+            swing_pct = arms.get("swing", 0)
+            n_slots = slot_cap if slot_cap < 99 else "무제한"
+            if isinstance(n_slots, int) and n_slots > 0:
+                per_stock = round(swing_pct / n_slots, 1)
+                lines.append(f"v3 캡: {effective_regime} → 신규 최대 {n_slots}종목, 종목당 {per_stock}%")
+            elif n_slots == 0:
+                lines.append(f"v3 캡: {effective_regime} → 신규진입 금지")
+            else:
+                lines.append(f"v3 캡: {effective_regime} → 제한 없음")
+            lines.append("")
+
         # 보정 사항
         if adjustments:
             lines.append("보정:")

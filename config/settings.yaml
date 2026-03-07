@@ -1479,6 +1479,32 @@ ai_brain_v3:
     cache_ttl_min: 35          # ai_sell_cache TTL (분)
 
 # ============================================================
+# BRAIN → v3 Brain 연동 — 매크로 배분이 종목추천을 제약
+# ============================================================
+# BRAIN(brain.py)의 레짐 판정 + 배분 결과로
+# v3 Brain(run_v3_brain.py)의 슬롯 수/conviction/예산을 캡.
+# "천장만 걸고 바닥은 안 건다" — v3가 더 보수적인 건 OK
+brain_v3_integration:
+  enabled: true
+  stale_hours: 24                    # brain_decision.json 유효 시간
+  stale_default_regime: "CAUTION"    # 만료 시 기본 레짐
+
+  # 레짐별 max_new_buys 상한 (v3 Phase 1 결과를 클램핑)
+  regime_slot_cap:
+    BULL: 99                         # 제한 없음 (v3 자체 설정 따름)
+    CAUTION: 5
+    BEAR: 2
+    CRISIS: 0                        # 신규진입 금지
+    PRE_BEAR: 1
+
+  # BRAIN confidence → min_conviction 상향
+  confidence_conviction_map:
+    - {below: 0.30, min_conviction: 8}
+    - {below: 0.50, min_conviction: 6}
+    - {below: 0.70, min_conviction: 5}
+    - {below: 1.01, min_conviction: 4}   # 기본값
+
+# ============================================================
 # 듀얼 AI 매도 시스템 — Claude + GPT 역할 분담
 # ============================================================
 # Claude Sonnet: 기술적 분석 + 포트폴리오 맥락 + 최종 판단

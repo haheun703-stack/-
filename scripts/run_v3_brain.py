@@ -96,6 +96,81 @@ def _load_upgrade_settings() -> dict:
         return {}
 
 
+# ─── BRAIN 지시서 로드 (v13.9: 매크로→종목 연동) ─────────────────
+
+def _load_brain_cap() -> dict:
+    """brain_decision.json에서 BRAIN 캡 정보를 로드.
+
+    Returns:
+        dict: {regime, swing_pct, confidence, slot_cap, min_conviction, capped}
+        실패 시 기본값 반환 (기존 로직 그대로 동작).
+    """
+    import yaml
+    try:
+        settings_path = CONFIG_DIR / "settings.yaml"
+        with open(settings_path, encoding="utf-8") as f:
+            full_cfg = yaml.safe_load(f) or {}
+    except Exception:
+        full_cfg = {}
+
+    integ = full_cfg.get("brain_v3_integration", {})
+    if not integ.get("enabled", False):
+        return {"capped": False, "reason": "brain_v3_integration disabled"}
+
+    brain = _load_json(DATA_DIR / "brain_decision.json")
+    if not brain or not brain.get("arms"):
+        logger.warning("BRAIN 지시서 없음 — 기존 로직으로 독립 실행")
+        return {"capped": False, "reason": "brain_decision.json 없음"}
+
+    # stale 체크
+    stale_hours = integ.get("stale_hours", 24)
+    ts = brain.get("timestamp", "")
+    regime = brain.get("effective_regime", "NEUTRAL")
+    try:
+        decision_time = datetime.fromisoformat(ts)
+        age_hours = (datetime.now() - decision_time).total_seconds() / 3600
+        if age_hours > stale_hours:
+            logger.warning("BRAIN 지시서 %.1f시간 경과 — 보수적 기본값", age_hours)
+            regime = integ.get("stale_default_regime", "CAUTION")
+    except Exception:
+        pass
+
+    # swing_pct 추출
+    swing_pct = 30.0  # 기본값
+    for arm in brain.get("arms", []):
+        if arm.get("name") == "swing":
+            swing_pct = arm.get("adjusted_pct", 30.0)
+            break
+
+    confidence = brain.get("confidence", 0.5)
+
+    # 레짐별 슬롯 캡
+    slot_caps = integ.get("regime_slot_cap", {})
+    slot_cap = slot_caps.get(regime, 99)  # 미정의 레짐은 제한 없음
+
+    # confidence → min_conviction
+    conv_map = integ.get("confidence_conviction_map", [])
+    min_conviction = 4  # 기본값
+    for entry in conv_map:
+        if confidence < entry.get("below", 1.01):
+            min_conviction = entry.get("min_conviction", 4)
+            break
+
+    logger.info(
+        "BRAIN 캡 로드: 레짐=%s, swing=%.1f%%, confidence=%.2f → 슬롯캡=%d, min_conviction=%d",
+        regime, swing_pct, confidence, slot_cap, min_conviction,
+    )
+
+    return {
+        "capped": True,
+        "regime": regime,
+        "swing_pct": swing_pct,
+        "confidence": confidence,
+        "slot_cap": slot_cap,
+        "min_conviction": min_conviction,
+    }
+
+
 # ─── Phase 0: o1 Deep Thinking (NEW) ─────────────────────────────
 
 async def run_phase0() -> dict:
@@ -340,6 +415,7 @@ async def run_phase2(strategic_result: dict) -> dict:
 async def run_phase3_4(
     strategic_result: dict,
     sector_focus: dict,
+    brain_cap: dict | None = None,
 ) -> list[dict]:
     """Phase 3+4: 후보 추출 → 정밀 분석
 
@@ -349,6 +425,7 @@ async def run_phase3_4(
     Args:
         strategic_result: Phase 1 결과
         sector_focus: Phase 2 결과
+        brain_cap: BRAIN 캡 정보 (None이면 기존 로직)
 
     Returns:
         conviction 기준 통과한 종목 리스트
@@ -419,6 +496,16 @@ async def run_phase3_4(
     industry_thesis = strategic_result.get("industry_thesis", [])
     min_conviction = settings.get("deep_analyst", {}).get("min_conviction", 5)
 
+    # BRAIN 캡: confidence 낮으면 conviction 상향
+    if brain_cap and brain_cap.get("capped"):
+        brain_min = brain_cap.get("min_conviction", min_conviction)
+        if brain_min > min_conviction:
+            logger.info(
+                "BRAIN 캡 적용: min_conviction %d → %d (confidence=%.2f)",
+                min_conviction, brain_min, brain_cap.get("confidence", 0),
+            )
+            min_conviction = brain_min
+
     # Vision 활성화 여부
     upgrade = _load_upgrade_settings()
     enable_vision = upgrade.get("vision_enabled", False)
@@ -475,6 +562,7 @@ async def run_phase3_4(
 async def run_phase5(
     deep_picks: list[dict],
     strategic_result: dict,
+    brain_cap: dict | None = None,
 ) -> dict:
     """Phase 5: 최종 포트폴리오 결정 (Agent 2E).
 
@@ -483,6 +571,7 @@ async def run_phase5(
     Args:
         deep_picks: Phase 4 통과 종목
         strategic_result: Phase 1 결과
+        brain_cap: BRAIN 캡 정보 (None이면 기존 로직)
 
     Returns:
         ai_v3_picks.json 최종 형식
@@ -498,6 +587,25 @@ async def run_phase5(
 
     logger.info("현재 보유: %d종목, Phase 4 후보: %d종목", len(positions), len(deep_picks))
 
+    # ── BRAIN 슬롯 캡 적용 ──
+    if brain_cap and brain_cap.get("capped"):
+        slot_cap = brain_cap["slot_cap"]
+        original_max = strategic_result.get("max_new_buys", 99)
+        if slot_cap < original_max:
+            strategic_result["max_new_buys"] = slot_cap
+            logger.info(
+                "BRAIN 캡 적용됨: 레짐=%s, 슬롯캡=%d, 원래요청=%d → 캡적용=%d",
+                brain_cap.get("regime", "?"), slot_cap, original_max, slot_cap,
+            )
+        else:
+            logger.info(
+                "BRAIN 캡 불필요: 레짐=%s, 슬롯캡=%d, 원래요청=%d (캡 이내)",
+                brain_cap.get("regime", "?"), slot_cap, original_max,
+            )
+        # BRAIN 레짐 정보를 strategic_result에 주입 (Opus 참조용)
+        strategic_result["brain_regime"] = brain_cap.get("regime", "NEUTRAL")
+        strategic_result["brain_swing_pct"] = brain_cap.get("swing_pct", 30)
+
     if not deep_picks:
         logger.info("Phase 4 통과 종목 없음 — Phase 5 결과: 매수 0")
         result = PortfolioBrainAgent._fallback_result("후보 없음", strategic_result)
@@ -506,6 +614,31 @@ async def run_phase5(
     else:
         agent = PortfolioBrainAgent()
         result = await agent.decide(deep_picks, positions, strategic_result)
+
+    # ── BRAIN 종목당 배분 상한 적용 ──
+    if brain_cap and brain_cap.get("capped") and result.get("buys"):
+        swing_pct = brain_cap.get("swing_pct", 30)
+        n_buys = len(result["buys"])
+        if n_buys > 0:
+            max_per_stock = swing_pct / n_buys
+            capped_any = False
+            for buy in result["buys"]:
+                original = buy.get("size_pct", 0)
+                if original > max_per_stock:
+                    buy["size_pct"] = round(max_per_stock, 1)
+                    buy["brain_size_capped"] = True
+                    capped_any = True
+            if capped_any:
+                logger.info(
+                    "BRAIN 배분캡: swing %.1f%% / %d종목 = 종목당 최대 %.1f%%",
+                    swing_pct, n_buys, max_per_stock,
+                )
+        result["brain_cap_applied"] = {
+            "regime": brain_cap.get("regime"),
+            "slot_cap": brain_cap.get("slot_cap"),
+            "swing_pct": swing_pct,
+            "min_conviction": brain_cap.get("min_conviction"),
+        }
 
     # 결과 저장
     settings = _load_settings()
@@ -1028,6 +1161,9 @@ async def main():
     start_time = datetime.now()
     logger.info("v3 AI Brain 러너 시작 (phase=%d, dry_run=%s)", args.phase, args.dry_run)
 
+    # ── BRAIN 지시서 로드 (매크로→종목 연동) ──
+    brain_cap = _load_brain_cap()
+
     # Phase 0: o1 Deep Thinking (NEW)
     o1_context = {}
     if not args.skip_phase1:
@@ -1063,7 +1199,7 @@ async def main():
     # Phase 3+4: 후보 추출 + Deep Analyst
     if args.phase >= 4 and sector_focus and not sector_focus.get("error"):
         try:
-            picks = await run_phase3_4(result, sector_focus)
+            picks = await run_phase3_4(result, sector_focus, brain_cap=brain_cap)
         except Exception as e:
             logger.error("Phase 3+4 실패: %s", e)
             picks = []
@@ -1072,7 +1208,7 @@ async def main():
     final_picks = None
     if args.phase >= 5 and picks is not None:
         try:
-            final_picks = await run_phase5(picks, result)
+            final_picks = await run_phase5(picks, result, brain_cap=brain_cap)
         except Exception as e:
             logger.error("Phase 5 실패: %s", e)
             final_picks = None
