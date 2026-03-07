@@ -200,7 +200,7 @@
     ]
   },
   "group_relay": {
-    "scan_time": "2026-03-07T17:37:47.096449",
+    "scan_time": "2026-03-07T18:35:00.823357",
     "fire_threshold": 3.0,
     "fired_groups": [
       {
@@ -1411,7 +1411,7 @@
     ]
   },
   "brain_decision": {
-    "timestamp": "2026-03-07T17:39:20.041606",
+    "timestamp": "2026-03-07T20:23:34.541368",
     "effective_regime": "CAUTION",
     "kospi_regime": "CAUTION",
     "nightwatch_score": -0.165,
@@ -1503,7 +1503,7 @@
     ]
   },
   "shield_report": {
-    "timestamp": "2026-03-07T17:39:08.658401",
+    "timestamp": "2026-03-07T20:23:28.742255",
     "overall_level": "ORANGE",
     "mdd_status": {
       "peak_equity": 40345724,

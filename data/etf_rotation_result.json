@@ -420,9 +420,9 @@
       "priority": 3
     }
   ],
-  "timestamp": "2026-03-07T17:39:28.174645",
+  "timestamp": "2026-03-07T20:23:49.899104",
   "brain": {
-    "timestamp": "2026-03-07T17:39:20.041606",
+    "timestamp": "2026-03-07T20:23:34.541368",
     "confidence": 0.6,
     "adjustments": [
       "VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75",
@@ -432,44 +432,6 @@
     "warnings": [
       "SHIELD 방어 등급: ORANGE"
     ]
-  },
-  "order_queue_original": [
-    {
-      "axis": "index",
-      "code": "069500",
-      "name": "KODEX 200",
-      "action": "BUY",
-      "target_weight_pct": 6.3,
-      "reason": "신규 진입: 목표 6.3%",
-      "priority": 3
-    },
-    {
-      "axis": "index",
-      "code": "278530",
-      "name": "KODEX MSCI Korea TR",
-      "action": "BUY",
-      "target_weight_pct": 2.7,
-      "reason": "신규 진입: 목표 2.7%",
-      "priority": 3
-    }
-  ],
-  "ai_filter": {
-    "stats": {
-      "total": 2,
-      "pass": 2,
-      "kill": 0,
-      "hold": 0
-    },
-    "killed": [],
-    "held": [],
-    "warnings": [
-      "미국 3대 지수 동반 급락(-0.93~1.59%)으로 아시아 증시 동반 하락 가능성 높음",
-      "유가 90불 돌파 및 150불 전망으로 인플레이션 재점화 우려 - 한국 화학/정유 섹터 원가 부담",
-      "호르무즈 해협 긴장으로 주말 지정학 리스크 존재 - 월요일 갭 하락 가능성 대비 필요",
-      "현재 지수 비중 15% 목표 중 9% 매수 완료 시 잔여 현금 34.8% 유지 - 추가 하락 시 분할 매수 여력 확보 중요"
-    ],
-    "market_assessment": "미국 급락(-1.35~1.59%), 유가 90불 돌파, 지정학 리스크 고조 속 BEAR 레짐 지속. 방어적 지수 매수는 타당하나 추가 하락 경계 필요.",
-    "risk_level": "high"
   },
   "leading_regime": {
     "effective_regime": "BEAR",

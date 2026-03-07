@@ -1517,10 +1517,6 @@ class SignalEngine:
 
         return result
 
-    # 하위호환
-    def calculate_bes(self, ticker: str, df: pd.DataFrame, idx: int) -> dict:
-        return self.calculate_signal(ticker, df, idx)
-
     # ══════════════════════════════════════════════
     #  전종목 스캔
     # ══════════════════════════════════════════════
@@ -1576,85 +1572,3 @@ class SignalEngine:
                 pass
         return breakouts
 
-    # ══════════════════════════════════════════════
-    #  v6.4 포물선 초점 탐지 (Focus Point Detection)
-    # ══════════════════════════════════════════════
-
-    def detect_focus_point(self, ticker: str, df: pd.DataFrame, idx: int,
-                           lookback: int = 5) -> dict:
-        """
-        BES 구성 팩터의 기하학적 합의 탐지.
-        최근 N일간 ATR/Value/Supply 점수가 동시에 상승 추세이면
-        "포물선의 초점" = 에너지 수렴 타점으로 판정.
-
-        Args:
-            ticker: 종목코드
-            df: 지표 계산된 DataFrame
-            idx: 현재 인덱스
-            lookback: 추세 분석 기간 (기본 5일)
-
-        Returns:
-            Dict with focus_detected, rising_factors, strength, signal
-        """
-        focus_cfg = self.strategy.get("focus_point", {})
-        if not focus_cfg.get("enabled", False):
-            return {"ticker": ticker, "focus_detected": False, "rising_factors": 0,
-                    "strength": 0, "signal": "disabled"}
-
-        if idx < lookback + 1:
-            return {"ticker": ticker, "focus_detected": False, "rising_factors": 0,
-                    "strength": 0, "signal": "insufficient_data"}
-
-        # 최근 lookback일간 각 팩터 점수 계산
-        atr_scores = []
-        supply_scores = []
-        for i in range(idx - lookback, idx + 1):
-            if i < 0 or i >= len(df):
-                continue
-            row = df.iloc[i]
-            pa = row.get("pullback_atr", np.nan)
-            atr_scores.append(self.score_atr_pullback(pa) if not pd.isna(pa) else 0)
-            supply_scores.append(self.score_supply_demand(df, i))
-
-        # RSI Z-Score 추세 (Z-Score가 상승하면 과매도에서 회복 중)
-        rsi_zscores = []
-        for i in range(idx - lookback, idx + 1):
-            if i < 0 or i >= len(df):
-                continue
-            rsi_z = df.iloc[i].get("rsi_zscore", np.nan)
-            rsi_zscores.append(float(rsi_z) if not pd.isna(rsi_z) else 0)
-
-        def calc_trend(series):
-            """선형 기울기"""
-            if len(series) < 2:
-                return 0
-            x = np.arange(len(series))
-            return float(np.polyfit(x, series, 1)[0])
-
-        trends = {
-            "atr_pullback": calc_trend(atr_scores),
-            "supply_demand": calc_trend(supply_scores),
-            "rsi_recovery": calc_trend(rsi_zscores),
-        }
-
-        rising_count = sum(1 for t in trends.values() if t > 0)
-        min_rising = focus_cfg.get("min_rising_factors", 3)
-        all_rising = rising_count >= min_rising
-        avg_strength = np.mean(list(trends.values()))
-
-        result = {
-            "ticker": ticker,
-            "focus_detected": all_rising,
-            "rising_factors": rising_count,
-            "strength": round(avg_strength, 4),
-            "trends": {k: round(v, 4) for k, v in trends.items()},
-        }
-
-        if all_rising:
-            result["signal"] = f"focus_detected(strength={avg_strength:.4f})"
-        elif rising_count >= 2:
-            result["signal"] = f"focus_near({rising_count}/3)"
-        else:
-            result["signal"] = f"no_focus({rising_count}/3)"
-
-        return result
