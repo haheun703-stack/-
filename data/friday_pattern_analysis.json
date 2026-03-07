@@ -1,0 +1,140 @@
+{
+  "weekday_returns": {
+    "월": {
+      "mean_pct": 0.1769,
+      "median_pct": 0.0,
+      "positive_rate": 49.24,
+      "count": 63153
+    },
+    "화": {
+      "mean_pct": 0.1361,
+      "median_pct": 0.0,
+      "positive_rate": 47.81,
+      "count": 64057
+    },
+    "수": {
+      "mean_pct": 0.0655,
+      "median_pct": 0.0,
+      "positive_rate": 47.64,
+      "count": 63972
+    },
+    "목": {
+      "mean_pct": 0.2214,
+      "median_pct": 0.0,
+      "positive_rate": 48.4,
+      "count": 64620
+    },
+    "금": {
+      "mean_pct": 0.009,
+      "median_pct": -0.0364,
+      "positive_rate": 45.97,
+      "count": 65008
+    }
+  },
+  "friday_to_monday": {
+    "fri_to_mon_open": {
+      "mean_pct": -0.0029,
+      "median_pct": 0.0494,
+      "positive_rate": 50.49,
+      "count": 64726
+    },
+    "fri_to_mon_close": {
+      "mean_pct": 0.1685,
+      "median_pct": 0.0,
+      "positive_rate": 49.2,
+      "count": 64726
+    }
+  },
+  "friday_dumping": {
+    "drop_2pct": {
+      "count": 16311,
+      "mon_open_ret_mean": 0.082,
+      "mon_close_ret_mean": 0.2507,
+      "mon_close_positive_rate": 50.7,
+      "mon_close_median": 0.1085,
+      "avg_fri_drop": -3.46
+    },
+    "drop_3pct": {
+      "count": 7254,
+      "mon_open_ret_mean": -0.0062,
+      "mon_close_ret_mean": 0.2879,
+      "mon_close_positive_rate": 51.01,
+      "mon_close_median": 0.1442,
+      "avg_fri_drop": -4.78
+    },
+    "drop_5pct": {
+      "count": 2221,
+      "mon_open_ret_mean": -0.1662,
+      "mon_close_ret_mean": 0.3981,
+      "mon_close_positive_rate": 50.92,
+      "mon_close_median": 0.1376,
+      "avg_fri_drop": -7.02
+    }
+  },
+  "all_weekday_dumping": {
+    "월": {
+      "count": 14760,
+      "win_rate": 50.39,
+      "mean_ret": 0.3815,
+      "median_ret": 0.0698
+    },
+    "화": {
+      "count": 16278,
+      "win_rate": 49.01,
+      "mean_ret": 0.0764,
+      "median_ret": 0.0
+    },
+    "수": {
+      "count": 15380,
+      "win_rate": 51.14,
+      "mean_ret": 0.5726,
+      "median_ret": 0.1232
+    },
+    "목": {
+      "count": 15716,
+      "win_rate": 46.82,
+      "mean_ret": 0.0629,
+      "median_ret": -0.069
+    },
+    "금": {
+      "count": 16311,
+      "win_rate": 50.7,
+      "mean_ret": 0.2507,
+      "median_ret": 0.1085
+    }
+  },
+  "filtered_dumping": {
+    "base_count": 16311,
+    "base_win_rate": 50.7,
+    "base_mean_ret": 0.2507,
+    "filters": {
+      "rsi_under_40": {
+        "count": 3350,
+        "win_rate": 49.7,
+        "mean_ret": -0.1287
+      },
+      "rsi_over_60": {
+        "count": 3835,
+        "win_rate": 50.69,
+        "mean_ret": 0.518
+      },
+      "bb_under_30": {
+        "count": 5257,
+        "win_rate": 51.7,
+        "mean_ret": 0.0129
+      },
+      "both_selling": {
+        "count": 5217,
+        "win_rate": 50.57,
+        "mean_ret": 0.2051
+      },
+      "foreign_sell_only": {
+        "count": 4552,
+        "win_rate": 50.66,
+        "mean_ret": 0.2861
+      }
+    }
+  },
+  "universe_count": 284,
+  "analyzed_at": "2026-03-07 09:10:30"
+}

@@ -1,0 +1,103 @@
+{
+  "analysis_time": "10:00",
+  "market_catalyst_summary": "이란과의 지정학적 긴장 고조로 인해 에너지 및 방산 관련 주식이 주목받고 있으며, 글로벌 시장의 불확실성이 증가하고 있습니다.",
+  "positions": [
+    {
+      "ticker": "003570",
+      "name": "SNT다이내믹스",
+      "catalyst_status": "CATALYST_DEAD",
+      "catalyst_strength": 0.2,
+      "primary_catalyst": "특별한 뉴스 촉매 없음",
+      "catalyst_lifespan": "N/A",
+      "tomorrow_direction": "SIDEWAYS",
+      "tomorrow_confidence": 0.3,
+      "day_after_direction": "SIDEWAYS",
+      "news_summary": "현재 특별한 뉴스 촉매가 없어 주가에 큰 영향을 미치지 않을 것으로 예상됩니다.",
+      "catalyst_risks": [
+        "전반적인 시장 하락"
+      ],
+      "new_catalysts": []
+    },
+    {
+      "ticker": "005380",
+      "name": "현대차",
+      "catalyst_status": "CATALYST_ALIVE",
+      "catalyst_strength": 0.7,
+      "primary_catalyst": "현대차그룹의 새만금 9조 투자 및 자율주행 기술 개발",
+      "catalyst_lifespan": "1주+",
+      "tomorrow_direction": "UP",
+      "tomorrow_confidence": 0.6,
+      "day_after_direction": "UP",
+      "news_summary": "현대차그룹의 대규모 투자 및 자율주행 기술 개발 소식이 긍정적으로 작용할 것으로 보입니다.",
+      "catalyst_risks": [
+        "유가 급등으로 인한 소비 심리 위축"
+      ],
+      "new_catalysts": []
+    },
+    {
+      "ticker": "010140",
+      "name": "삼성중공업",
+      "catalyst_status": "CATALYST_ALIVE",
+      "catalyst_strength": 0.8,
+      "primary_catalyst": "유조선 수요 증가 및 발주 확대 기대",
+      "catalyst_lifespan": "3-5일",
+      "tomorrow_direction": "UP",
+      "tomorrow_confidence": 0.7,
+      "day_after_direction": "UP",
+      "news_summary": "호르무즈 해협 폐쇄로 인한 유조선 수요 증가가 조선업에 긍정적 영향을 미칠 것으로 예상됩니다.",
+      "catalyst_risks": [
+        "수주 공시 부재"
+      ],
+      "new_catalysts": []
+    },
+    {
+      "ticker": "064350",
+      "name": "현대로템",
+      "catalyst_status": "CATALYST_ALIVE",
+      "catalyst_strength": 0.9,
+      "primary_catalyst": "이란 사태로 인한 방산주 수요 증가",
+      "catalyst_lifespan": "1주+",
+      "tomorrow_direction": "UP",
+      "tomorrow_confidence": 0.8,
+      "day_after_direction": "UP",
+      "news_summary": "이란과의 지정학적 긴장으로 방산주가 주목받고 있으며, 현대로템의 주가 상승이 예상됩니다.",
+      "catalyst_risks": [
+        "지정학적 긴장 완화"
+      ],
+      "new_catalysts": []
+    },
+    {
+      "ticker": "068270",
+      "name": "셀트리온",
+      "catalyst_status": "CATALYST_FADING",
+      "catalyst_strength": 0.4,
+      "primary_catalyst": "FDA 규제 혁신 기대",
+      "catalyst_lifespan": "1-2일",
+      "tomorrow_direction": "SIDEWAYS",
+      "tomorrow_confidence": 0.5,
+      "day_after_direction": "SIDEWAYS",
+      "news_summary": "FDA 규제 혁신 기대가 있으나 글로벌 증시 약세로 인해 주가에 큰 영향을 미치지 않을 것으로 보입니다.",
+      "catalyst_risks": [
+        "글로벌 증시 약세"
+      ],
+      "new_catalysts": []
+    },
+    {
+      "ticker": "323410",
+      "name": "카카오뱅크",
+      "catalyst_status": "CATALYST_FADING",
+      "catalyst_strength": 0.3,
+      "primary_catalyst": "금리 상승",
+      "catalyst_lifespan": "1-2일",
+      "tomorrow_direction": "DOWN",
+      "tomorrow_confidence": 0.6,
+      "day_after_direction": "DOWN",
+      "news_summary": "금리 상승으로 인한 금융주 압박이 예상되며, IT 섹터 약세가 지속될 것으로 보입니다.",
+      "catalyst_risks": [
+        "IT 섹터 약세",
+        "경기 둔화"
+      ],
+      "new_catalysts": []
+    }
+  ]
+}

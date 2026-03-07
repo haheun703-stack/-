@@ -33,5 +33,67 @@
       }
     ],
     "v3_picks_avg_pnl": 0.0
+  },
+  {
+    "date": "2026-03-03",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.8,
+    "attack_sectors": [
+      "정유",
+      "해운"
+    ],
+    "avoid_sectors": [
+      "반도체",
+      "IT/소프트웨어",
+      "2차전지",
+      "자동차"
+    ],
+    "kospi_change_pct": -7.24,
+    "regime_hit": true,
+    "v3_picks_results": [
+      {
+        "ticker": "011780",
+        "name": "금호석유화학",
+        "entry_price": 138500,
+        "current_close": 138500.0,
+        "pnl_pct": 0.0,
+        "conviction": 8
+      },
+      {
+        "ticker": "119850",
+        "name": "지엔씨에너지",
+        "entry_price": 36200,
+        "current_close": 36200.0,
+        "pnl_pct": 0.0,
+        "conviction": 8
+      }
+    ],
+    "v3_picks_avg_pnl": 0.0
+  },
+  {
+    "date": "2026-03-04",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.85,
+    "attack_sectors": [],
+    "avoid_sectors": [
+      "반도체",
+      "IT서비스",
+      "화학",
+      "2차전지",
+      "자동차"
+    ],
+    "kospi_change_pct": -12.06,
+    "regime_hit": true,
+    "v3_picks_results": [
+      {
+        "ticker": "010060",
+        "name": "OCI홀딩스",
+        "entry_price": 120600,
+        "current_close": 120600.0,
+        "pnl_pct": 0.0,
+        "conviction": 7
+      }
+    ],
+    "v3_picks_avg_pnl": 0.0
   }
 ]

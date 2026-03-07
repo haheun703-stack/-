@@ -1,0 +1,130 @@
+# ============================================================
+# Sector Relay Engine — 5개 섹터 릴레이 경보 시스템
+# ============================================================
+# US 선행주 확인 → 한국 대장주 확인 → 한국 2차 연동주 진입
+# 4단계: INACTIVE → WATCH → CONFIRM → KR_READY → EXECUTE
+# ============================================================
+
+relay_engine:
+  enabled: true
+  alert_min_count: 3          # 경보 3개 이상 동시 충족 시만 거래
+  capital_split:
+    kr_leader_pct: 50         # 한국 대장주 배분 %
+    kr_secondary_pct: 50      # 한국 2차 연동주 배분 %
+  max_trades_per_sector: 2    # 섹터당 일일 최대 거래 수
+
+  # 공통 매수/매도 규칙
+  common_rules:
+    gap_up_chase_ban_pct: 7.0       # 시초 +7% 이상 갭상승 추격 금지
+    first_5min_ban: true             # 첫 5분 추격 금지
+    vwap_stuck_minutes: 30           # VWAP 아래 N분 고착 시 킬
+    stop_method: "vwap_or_pullback"  # VWAP종가이탈 OR 돌파캔들저점이탈 (먼저 도달)
+
+  # ── AI 반도체 ──
+  sectors:
+    ai_semiconductor:
+      name: "AI 반도체"
+      type: "persistent"
+      us_leaders:
+        - {ticker: "NVDA", name: "NVIDIA", role: "AI accelerator"}
+        - {ticker: "AVGO", name: "Broadcom", role: "AI networking"}
+        - {ticker: "AMD",  name: "AMD", role: "GPU challenger"}
+        - {ticker: "MU",   name: "Micron", role: "HBM/memory"}
+      us_leader_min_strong: 2
+      us_secondaries_etf: "SOXX"
+      kr_leaders:
+        - {ticker: "000660", name: "SK하이닉스"}
+        - {ticker: "005930", name: "삼성전자"}
+      kr_secondaries:
+        - {ticker: "042700", name: "한미반도체"}
+        - {ticker: "403870", name: "HPSP"}
+        - {ticker: "095340", name: "ISC"}
+      alert_keywords: ["HBM", "AI chip", "AI investment", "반도체 수출", "AI CAPEX", "GPU", "NVIDIA"]
+      kill_switch: "kr_leaders_both_below_vwap_30min"
+      take_profit_leader: [4, 6]
+      take_profit_secondary: [5, 8]
+
+    # ── 방산 ──
+    defense:
+      name: "방산"
+      type: "event"
+      us_leaders:
+        - {ticker: "LMT", name: "Lockheed Martin", role: "prime defense"}
+        - {ticker: "RTX", name: "RTX", role: "defense/aerospace"}
+      us_leader_min_strong: 2
+      us_secondaries_etf: "XLI"
+      kr_leaders:
+        - {ticker: "012450", name: "한화에어로스페이스"}
+        - {ticker: "079550", name: "LIG넥스원"}
+      kr_secondaries:
+        - {ticker: "272210", name: "한화시스템"}
+      alert_keywords: ["전쟁", "지정학", "방산 수출", "국방비", "NATO", "무기 수출", "방산주"]
+      kill_switch: "geopolitics_eased_or_leader_breakout_fail_2x"
+      take_profit_leader: [3, 5]
+      take_profit_secondary: [5, 8]
+
+    # ── 정유/에너지 ──
+    energy:
+      name: "정유/에너지"
+      type: "event"
+      us_leaders:
+        - {ticker: "XOM", name: "Exxon Mobil", role: "major oil"}
+        - {ticker: "CVX", name: "Chevron", role: "major oil"}
+      us_leader_min_strong: 2
+      us_secondaries_etf: "XLE"
+      kr_leaders:
+        - {ticker: "010950", name: "S-Oil"}
+        - {ticker: "096770", name: "SK이노베이션"}
+      kr_secondaries:
+        - {ticker: "004090", name: "한국석유"}
+        - {ticker: "000440", name: "중앙에너비스"}
+        - {ticker: "024060", name: "흥구석유"}
+      alert_keywords: ["유가 급등", "호르무즈", "OPEC", "원유", "정제마진", "이란", "oil surge"]
+      kill_switch: "oil_futures_negative_or_leader_open_low_break"
+      take_profit_leader: [3, 4]
+      take_profit_secondary: [5, 8]
+
+    # ── 배터리/ESS ──
+    battery_ess:
+      name: "배터리/ESS"
+      type: "conditional"
+      condition: "ESS/AI전환 뉴스 필수 (EV 반등만으로 불가)"
+      us_leaders:
+        - {ticker: "TSLA", name: "Tesla", role: "EV/ESS leader"}
+        - {ticker: "ENPH", name: "Enphase", role: "energy storage"}
+      us_leader_min_strong: 2
+      us_secondaries_etf: "XLK"
+      kr_leaders:
+        - {ticker: "373220", name: "LG에너지솔루션"}
+        - {ticker: "006400", name: "삼성SDI"}
+      kr_secondaries:
+        - {ticker: "247540", name: "에코프로비엠"}
+        - {ticker: "003670", name: "포스코퓨처엠"}
+      alert_keywords: ["ESS", "AI 데이터센터 배터리", "에너지저장", "전력 인프라", "InterBattery"]
+      negative_keywords: ["EV 수요 부진", "전기차 둔화", "배터리 과잉"]
+      kill_switch: "ev_demand_concern_headline"
+      entry_rule: "2day_above_prev_high"
+      take_profit_leader: [5, 7]
+      take_profit_secondary: [5, 8]
+
+    # ── 조선/LNG ──
+    shipbuilding_lng:
+      name: "조선/LNG"
+      type: "conditional"
+      condition: "LNG 장기계약/발주 뉴스 필수"
+      us_leaders:
+        - {ticker: "LNG",  name: "Cheniere Energy", role: "LNG export"}
+        - {ticker: "GLNG", name: "Golar LNG", role: "LNG infra"}
+      us_leader_min_strong: 2
+      us_secondaries_etf: "XLE"
+      kr_leaders:
+        - {ticker: "329180", name: "HD현대중공업"}
+        - {ticker: "042660", name: "한화오션"}
+      kr_secondaries:
+        - {ticker: "082740", name: "HSD엔진"}
+        - {ticker: "071970", name: "STX중공업"}
+      alert_keywords: ["LNG 계약", "선박 발주", "조선 수주", "해양 인프라", "운임 상승"]
+      kill_switch: "single_news_no_volume"
+      entry_rule: "weekly_pullback_swing"
+      take_profit_leader: [6, 10]
+      take_profit_secondary: [5, 8]

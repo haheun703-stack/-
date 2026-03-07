@@ -1,64 +1,62 @@
 {
-  "scan_time": "2026-03-02T22:46:07.817129",
+  "scan_time": "2026-03-06T18:35:00.194946",
   "fire_threshold": 3.0,
   "fired_groups": [
     {
-      "group": "현대차",
-      "leader_name": "현대차",
-      "leader_change": 10.67,
-      "leader_volume_ratio": 1.81,
+      "group": "한화",
+      "leader_name": "한화에어로스페이스",
+      "leader_change": 7.24,
+      "leader_volume_ratio": 1.07,
       "waiting_subsidiaries": [
         {
-          "ticker": "000270",
-          "name": "기아",
-          "tier": "tier1",
-          "change_pct": -0.24,
-          "volume_ratio": 1.57,
-          "rsi": 81.79829968817246,
+          "ticker": "082740",
+          "name": "한화엔진",
+          "tier": "tier2",
+          "change_pct": 1.26,
+          "volume_ratio": 0.43,
+          "rsi": 42.22845367377505,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
-          "score": 57.0,
+          "score": 55.0,
           "reasons": [
-            "대기중(-0.2%)",
-            "거래량1.6x",
+            "대기중(+1.3%)",
+            "RSI42(적정)",
+            "tier2"
+          ]
+        },
+        {
+          "ticker": "009830",
+          "name": "한화솔루션",
+          "tier": "tier1",
+          "change_pct": 16.67,
+          "volume_ratio": 3.71,
+          "rsi": 60.17112069102381,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "score": 30,
+          "reasons": [
+            "거래량3.7x",
             "tier1"
           ]
         },
         {
-          "ticker": "000720",
-          "name": "현대건설",
-          "tier": "tier3",
-          "change_pct": 1.67,
-          "volume_ratio": 4.26,
-          "rsi": 85.6062966565695,
+          "ticker": "042660",
+          "name": "한화오션",
+          "tier": "tier1",
+          "change_pct": 3.77,
+          "volume_ratio": 0.55,
+          "rsi": 45.31462851531656,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
-          "score": 50.0,
+          "score": 30,
           "reasons": [
-            "대기중(+1.7%)",
-            "거래량4.3x",
-            "tier3"
-          ]
-        },
-        {
-          "ticker": "086280",
-          "name": "현대글로비스",
-          "tier": "tier2",
-          "change_pct": -0.34,
-          "volume_ratio": 1.4,
-          "rsi": 71.80079770706536,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "score": 47.5,
-          "reasons": [
-            "대기중(-0.3%)",
-            "거래량1.4x",
-            "tier2"
+            "RSI45(적정)",
+            "tier1"
           ]
         }
       ]
     }
   ],
   "no_fire": false,
-  "summary": "그룹 발화: 현대차(현대차 +10.7%)"
+  "summary": "그룹 발화: 한화(한화에어로스페이스 +7.2%)"
 }

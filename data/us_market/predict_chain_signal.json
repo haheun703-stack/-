@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "stage1_asian_risk": {
+    "audjpy_ret_pct": 0.121,
+    "audjpy_signal": "NEUTRAL",
+    "usdcnh_ret_pct": 0.0624,
+    "cnh_signal": "STABLE",
+    "es_futures_ret_pct": 0.2042,
+    "score": 0.040836,
+    "direction": "NEUTRAL"
+  },
+  "stage2_europe_open": {
+    "dax_30m_ret_pct": -0.3984,
+    "dax_signal": "BEAR",
+    "eurusd_30m_ret_pct": 0.0815,
+    "eurusd_signal": "NEUTRAL",
+    "es_futures_30m_pct": -0.051,
+    "score": -0.560193,
+    "direction": "BEAR"
+  },
+  "stage3_divergence": {
+    "hyg_vs_futures_gap": 16.7248,
+    "tnx_ret_pct": 0.0245,
+    "gold_ret_pct": 0.0097,
+    "alerts": [],
+    "alert_count": 0,
+    "invalidate": false,
+    "boost": false
+  },
+  "final_signal": "NEUTRAL",
+  "final_score": -34.9833,
+  "confidence": 17.4916,
+  "direction_match": false,
+  "divergence_alert": false,
+  "timestamp": "2026-03-05 20:06:38 KST"
+}

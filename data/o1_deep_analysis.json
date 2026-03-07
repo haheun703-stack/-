@@ -1,0 +1,82 @@
+{
+  "analysis_date": "2026-03-06",
+  "macro_analysis": {
+    "global_liquidity": "미국 금리 인상 압박 지속과 달러 강세, VIX 상승이 복합적으로 작용해 글로벌 유동성은 점차 긴축 기조를 형성",
+    "coupling_status": "부분역행",
+    "cycle_position": "late",
+    "geopolitical_risk_score": 8,
+    "key_macro_insights": [
+      "왜? 1) 미국의 금리 인상과 강달러 환경에서 한국은 자본 유출에 취약해 외인 매도가 가속화됨",
+      "왜? 2) 지정학적 갈등(미-이란 분쟁)으로 유가 상승 압력이 커지고, 수출 원가 부담이 늘어 한국 시장에 부정적",
+      "왜? 3) 기술 및 금융주 주도의 미국 시장 하락이 심화되어, 한국 반도체·IT 업종도 연동하여 급락 위험 증가"
+    ],
+    "macro_regime": "RISK_OFF",
+    "confidence": 0.86
+  },
+  "micro_analysis": [
+    {
+      "sector": "반도체",
+      "earnings_cycle": "trough",
+      "leading_indicators": "AI 수요 둔화 예상과 미국 기술주 약세로 주문량 축소, ASP 재하락 전망",
+      "valuation_rerating": "하향",
+      "supply_demand_shift": "분배",
+      "conviction": 7,
+      "contrarian_view": "장기적으로 AI·클라우드 서버 투자 확대가 재개되면 단기 저점 매수 기회가 될 가능성"
+    },
+    {
+      "sector": "2차전지",
+      "earnings_cycle": "expansion",
+      "leading_indicators": "EV 수요와 글로벌 전동화 추세 여전, 주문잔고 견조",
+      "valuation_rerating": "유지",
+      "supply_demand_shift": "중립",
+      "conviction": 8,
+      "contrarian_view": "단가 하락 압박이 있지만 장기 성장성에 대한 시장 기대는 여전"
+    },
+    {
+      "sector": "조선",
+      "earnings_cycle": "recovery",
+      "leading_indicators": "LNG선 중심 신규 수주 강세, 수주잔고 상승세",
+      "valuation_rerating": "상향",
+      "supply_demand_shift": "매집",
+      "conviction": 7,
+      "contrarian_view": "원자재 가격 변동성이 커지면 조선사 마진 훼손 가능성 존재"
+    },
+    {
+      "sector": "방산",
+      "earnings_cycle": "expansion",
+      "leading_indicators": "중동·동유럽·아시아 수출 증가, 지정학적 리스크로 정부 방산 예산 확대",
+      "valuation_rerating": "상향",
+      "supply_demand_shift": "매집",
+      "conviction": 9,
+      "contrarian_view": "일시적 불확실성이 완화될 경우 주가 급등 후 차익실현 매물이 나올 가능성 대비"
+    },
+    {
+      "sector": "바이오",
+      "earnings_cycle": "contraction",
+      "leading_indicators": "임상 지연, FDA 승인 불확실성 증대, 금리 상승에 따른 R&D 자금 조달 부담",
+      "valuation_rerating": "하향",
+      "supply_demand_shift": "분배",
+      "conviction": 5,
+      "contrarian_view": "mRNA 및 세포·유전자치료제 분야의 장기 혁신 잠재력은 여전히 유효"
+    }
+  ],
+  "cross_sector_dynamics": "방산은 지정학적 이슈로 단기적으로 자금 유입이 크고, 2차전지는 글로벌 전동화 추세 속에서도 기술·금융 불안에 따라 상승 모멘텀이 줄어듦. 반도체는 AI 수요 둔화로 단기 조정 가능성이 높으나, 하반기 기술주 반등 시 동반 회복 가능성.",
+  "risk_scenarios": [
+    {
+      "scenario": "호르무즈 해협 충돌 심화로 에너지 가격 급등",
+      "probability": 0.3,
+      "impact": "high"
+    },
+    {
+      "scenario": "미국 연준 추가 긴축 가속화",
+      "probability": 0.4,
+      "impact": "medium"
+    },
+    {
+      "scenario": "AI 투자심리 재개로 기술주 반등",
+      "probability": 0.3,
+      "impact": "medium"
+    }
+  ],
+  "actionable_summary": "1) 글로벌 긴축기조와 중동 리스크로 방어적 태도 필요. 2) 방산·조선 등 실물 기반 섹터에 우선 관심. 3) 반도체는 저점 분할 매수 관점 유효."
+}

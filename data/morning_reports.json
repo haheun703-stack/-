@@ -1,107 +1,488 @@
 {
-  "date": "2026-03-02",
-  "generated_at": "2026-03-02 07:00",
-  "reports": [],
-  "report_boost_map": {},
+  "date": "2026-03-06",
+  "generated_at": "2026-03-06 07:00",
+  "reports": [
+    {
+      "stock_name": "삼성전기",
+      "stock_code": "009150",
+      "title": "기판, 살판 났다",
+      "broker": "미래에셋증권",
+      "target_price": 500000,
+      "opinion": "매수",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90827&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "한국가스공사",
+      "stock_code": "036460",
+      "title": "배당이 아쉬우니",
+      "broker": "한화투자증권",
+      "target_price": 50000,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90826&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "와이지엔터테인먼트",
+      "stock_code": "122870",
+      "title": "빅뱅 컴백 오피셜",
+      "broker": "하나증권",
+      "target_price": 100000,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90825&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "슈프리마",
+      "stock_code": "236200",
+      "title": "[NDR 후기] 2026년 성장 요인",
+      "broker": "유안타증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90824&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "신한알파리츠",
+      "stock_code": "293940",
+      "title": "그레이츠 판교, 임대료 상승도 GREAT!",
+      "broker": "대신증권",
+      "target_price": 7200,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90823&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "하나머티리얼즈",
+      "stock_code": "166090",
+      "title": "최대 실적이 다가온다",
+      "broker": "대신증권",
+      "target_price": 78000,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90822&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "덴티움",
+      "stock_code": "145720",
+      "title": "이 정도면 바닥이 아닐까?",
+      "broker": "미래에셋증권",
+      "target_price": 90000,
+      "opinion": "매수",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90821&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "AJ네트웍스",
+      "stock_code": "095570",
+      "title": "기대되는 2026년",
+      "broker": "신한투자증권",
+      "target_price": 6500,
+      "opinion": "매수",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90820&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "와이지엔터테인먼트",
+      "stock_code": "122870",
+      "title": "빅뱅 20주년 월드투어 동행 확정",
+      "broker": "iM증권",
+      "target_price": 100000,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90819&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "티씨케이",
+      "stock_code": "064760",
+      "title": "실적 서프라이즈 예상, AI 수혜 본격화",
+      "broker": "키움증권",
+      "target_price": 320000,
+      "opinion": "Buy",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90818&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "엔알비",
+      "stock_code": "475230",
+      "title": "차곡차곡 쌓이는 일감",
+      "broker": "키움증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90817&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "엠플러스",
+      "stock_code": "259630",
+      "title": "군계일학",
+      "broker": "SK증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90816&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "크레버스",
+      "stock_code": "096240",
+      "title": "실적 턴어라운드 기대",
+      "broker": "한국IR협의회",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90815&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "삼성전자",
+      "stock_code": "005930",
+      "title": "후퇴가 아닌 진격을 할 때",
+      "broker": "미래에셋증권",
+      "target_price": 275000,
+      "opinion": "매수",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90814&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "SK하이닉스",
+      "stock_code": "000660",
+      "title": "메모리 업황은 평화롭다",
+      "broker": "미래에셋증권",
+      "target_price": 1540000,
+      "opinion": "매수",
+      "date": "26.03.05",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90813&page=1",
+      "boost": 5,
+      "tag": "매수"
+    }
+  ],
+  "report_boost_map": {
+    "009150": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 500000,
+      "title": "기판, 살판 났다"
+    },
+    "145720": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 90000,
+      "title": "이 정도면 바닥이 아닐까?"
+    },
+    "095570": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "신한투자증권",
+      "target_price": 6500,
+      "title": "기대되는 2026년"
+    },
+    "005930": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 275000,
+      "title": "후퇴가 아닌 진격을 할 때"
+    },
+    "000660": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 1540000,
+      "title": "메모리 업황은 평화롭다"
+    }
+  },
   "perplexity_themes": {
     "hot_themes": [
       {
-        "theme": "AI 에너지 인프라",
-        "catalyst": "AI 시대 핵심 에너지 패러다임 부상으로 한화솔루션 시총 37계단 상승하며 미국 솔라허브 수직계열화 기대",
+        "theme": "K-방산",
+        "catalyst": "미국-이란 전쟁 지정학 리스크 확대와 미국 협력 강화로 실적 찍히는 종목 수혜.",
         "urgency": "HIGH",
         "stocks": [
-          "한화솔루션"
+          "LIG넥스원",
+          "한화에어로스페이스",
+          "한국항공우주"
         ]
       },
       {
-        "theme": "반도체",
-        "catalyst": "반도체 소부장 신고가 돌파 과정에서 급등 모멘텀 지속으로 주도 테마 1위",
+        "theme": "정유/LPG",
+        "catalyst": "중동 전쟁으로 유가 및 LNG 급등 대안 테마로 주목.",
         "urgency": "HIGH",
         "stocks": [
-          "이수페타시스",
-          "한미반도체"
+          "S-Oil",
+          "SK이노베이션",
+          "LG화학"
         ]
       },
       {
-        "theme": "현대차그룹/로봇",
-        "catalyst": "현대차그룹 새만금 투자 이슈와 로봇 액츄에이터 사업 모멘텀으로 사상 최고가 돌파",
+        "theme": "반도체 대장주",
+        "catalyst": "AI 반도체 슈퍼 사이클 지속에도 조정 후 눌림목 분할 매수 전략 유효.",
         "urgency": "MEDIUM",
         "stocks": [
-          "현대차",
-          "기아",
-          "STORY"
+          "삼성전자",
+          "SK하이닉스"
         ]
       },
       {
-        "theme": "방산/원전",
-        "catalyst": "UAE 협력 소식으로 방산 및 원전 테마 강세",
+        "theme": "통신장비",
+        "catalyst": "MWC 2026 개막으로 5G 통신 장비주 강세.",
         "urgency": "MEDIUM",
         "stocks": [
-          "두산에너빌리티"
+          "삼성전자",
+          "SK텔레콤",
+          "LG유플러스"
         ]
       },
       {
-        "theme": "철강",
-        "catalyst": "데이터센터 수혜 기대감으로 철강 급등",
+        "theme": "조선",
+        "catalyst": "미국과의 협력 강화로 실적 개선 기대.",
         "urgency": "MEDIUM",
         "stocks": [
-          "포스코홀딩스"
+          "HD한국조선해양",
+          "삼성중공업",
+          "한화오션"
         ]
       }
     ],
     "breaking_catalysts": [
       {
-        "stock_name": "한화솔루션",
-        "catalyst": "미국 솔라허브 수직계열화 및 2026년 영업이익 퀀텀점프 리포트",
+        "stock_name": "LIG넥스원",
+        "catalyst": "지정학 리스크 확대 수혜 상한가",
         "impact": "positive",
-        "source": "g-enews"
+        "source": "한국경제TV"
       },
       {
-        "stock_name": "인바디",
-        "catalyst": "주주환원정책 발표 및 2026년 매출 성장 리포트",
+        "stock_name": "S-Oil",
+        "catalyst": "유가 급등 수혜 급등",
         "impact": "positive",
-        "source": "investing.com"
-      },
-      {
-        "stock_name": "기아",
-        "catalyst": "현대차그룹 새만금 투자 이슈",
-        "impact": "positive",
-        "source": "youtube LS증권"
+        "source": "한국경제TV"
       }
     ],
     "sector_outlook": {
       "bullish": [
-        "에너지/태양광",
-        "반도체",
-        "자동차/로봇"
+        "방산",
+        "정유",
+        "조선"
       ],
       "bearish": [
-        "AI 반도체 하드웨어",
-        "이란 관련 지정학 리스크"
+        "반도체",
+        "항공"
       ]
     }
   },
   "candidate_news": [
     {
-      "stock_name": "NAVER",
-      "date": "2026-03-01",
-      "title": "[주식핵심 체크포인트] 3월 증시, 미국의 이란 기습폭격 (feat, 엄청난 기회)",
-      "source": "네이버 프리미엄콘텐츠",
+      "stock_name": "현대로템",
+      "date": "2026-03-05",
+      "title": "현대로템 주가, 3월 5일 장중 226,000원 11.88% 상승",
+      "source": "톱스타뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE82Y1NlR29wbjk1R0hwb3g4NXJpcHJPWk5iYUhrWDFtYVZudE1RcFRBZjBVTURQRnVzemJhYXN3OFIxUV96SGNMaDVmMWg2aGhocDRmQUwwdDI3eVJmV0g5SHZpM0pCSHpSZXJlLTRyZ2JGQQ?oc=5"
+    },
+    {
+      "stock_name": "코오롱티슈진",
+      "date": "2026-03-05",
+      "title": "손해보며 전환 아니었어?... 7배 차익 기대하는 코오롱티슈진 CB 투자자, 그만큼 오버행 우려 - 조선비즈",
+      "source": "Chosunbiz",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNUk9hYThSVEpBaG1BN1laNXhxNlFOZGRlY3Zwcld6ZDUtdzRhUk1EVUVfWTZyZFROb2szbEcyOUlMd1dJNC0ycnVmQzRNMkUzNFVuVEtkb05JWnZIMHU1bFlGNVZVbGlqdGRENEdtSTdwdFpUX0V5eDAzOW1Uenh4eEg1TXdUUEnSAZsBQVVfeXFMT2g3MEtXOG9POHU3M3NrbTlxVzNZckJBeVVOcks3eUEzUmxpeVJCb3h1UkVBeTVnNWZoNy11ZXVBc1VScmNPSDBMZmZoUXpjYU1jdUFPNUk3bm5nYTd1WFVJU3FCYnVneXFXODR1Smgzd3g1a21OcTJwaVJQb2lYdXM3MDZ4MXlNaDBTaXVWR1RtTUFKTlNDemhxUDA?oc=5"
+    },
+    {
+      "stock_name": "레인보우로보틱스",
+      "date": "2026-03-05",
+      "title": "레인보우로보틱스 주가, 급등세... 왜?",
+      "source": "금강일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE43WkN3WkgzZFNzcFdPTkFFVEhJSlRMcTBTM1Z1X0Q5TU40bEQwLWc5NTk4dFlSS1NheEhzMXlJR1MySzFCelI3OHZmM0Y2TG1nZmRnVTRvaUVfWnJOcXhOMG1wX2gzOE9pR0E?oc=5"
+    },
+    {
+      "stock_name": "HD현대",
+      "date": "2026-03-05",
+      "title": "자사주 소각에 배당·성과 보상까지…중공업 '돈 쓰는 방식' 달라진다",
+      "source": "ebn.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1kdmlBTjNMMGlxN3JiVTA5eGJVMXhpWS16X1NSR284ZFV6RjlSb1NKVUFmU1ZIdjFFNzVtbEhlODU5akplZEJTLUdoVk9RRThNbmExaXBZNXV1blhzLTM1aExSd2hNOHZC?oc=5"
+    },
+    {
+      "stock_name": "에이팩트",
+      "date": "2026-03-05",
+      "title": "[주식마감기사] 대규모 자사주 소각에 미래에셋생명 상한가... 한화시스템, 한국ANKOR유전, 에이엔피, 한화갤러리아우, 솔브레인, 우리기술, 현대바이오, 큐리언트, 현대ADM, KD 등 급등",
+      "source": "금강일보",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOV2FYT0l5WkY2UzBCYlFqMk9feUdXaERCVUsyT2ZxZXAyb0lEcXVZNEM2eHNnZ3RsRzhBMFp4aTIycDUyVWQxRGowSm1ad3BpN3dHQkR1OWNQN0tvbmNIX3RxenJtbDh5WFI0RFBJWVRjNkJ0VUNOX2ZHNFEweFU2dVdoLWpLZw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBtOUhlS0RKLTRLVlFCZjljMmVCU1VTOUlkMFcxdTdqUTVEYUl4aFFKbmRhWWpvNXVlZTUwaWNrdFY3OC1KellDWlotN1pVcW5oZmh4cVJyRDR6cnVmXzRPd0pNRUhTbEFjTmc?oc=5"
+    },
+    {
+      "stock_name": "에이팩트",
+      "date": "2026-03-05",
+      "title": "[오늘의 상한가] 미래에셋생명·우리기술 등",
+      "source": "중앙이코노미뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE96WWVraUxyeEQzNUJRMFVrWXQzZjVGTWtXVGgxd2lDWTI2c0laZ0dVS2FGWDVEdnB0Q2xDdk04R2hwRkxMcG1wV0VTeDRNaS1yQ2VJQnRHcG00LVVYdnRDVUQ3Qmx1N2ZXQTNpcEZLM1V3dw?oc=5"
+    },
+    {
+      "stock_name": "에이팩트",
+      "date": "2026-03-05",
+      "title": "‘미국-이란 전쟁만큼 나쁜’ 주가조작 상장사 24곳 명단 밝혀라 [뉴스톡 웰스톡]",
+      "source": "뉴스웰",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE51TEs1VS1QcmZ4ODdtajk2cmlEaW8td2FjekFoTUl5dTJrQUZ3T1lWNnRRS21GTk11d1BlXzBNVmFDWXB6MnZrdTk3QzVTdlpQejNxcy02WnVNWl9lTi1DR3ZPV3RiN3RYQV9DUA?oc=5"
+    },
+    {
+      "stock_name": "두산에너빌리티",
+      "date": "2026-03-05",
+      "title": "두산에너빌리티 주가 반격, 14% 도약…'십만빌리티' 회복 여부도 눈길",
+      "source": "CBC뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1VbWZFS3pjS1VHQ09VREUyZFV2aGE1V200R0ZBaW1qWE1nTDlEMGlESHFXbjZwbXJUM3E4Qk1UUDJoNElORTFfZWhVVEY4WDJTWkt0NnRUcUhDcXhVOWl2UmVVbkdHRmY2?oc=5"
+    },
+    {
+      "stock_name": "두산에너빌리티",
+      "date": "2026-03-05",
+      "title": "[속보] 두산에너빌리티 VI 발동...전쟁 여파 영향권",
+      "source": "CBC뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBndVVOTXhlZlVKLUhnZ1BKQVJQS0MwU2RZUGtOemgxUlhjYUpMY3FNTFdJQnVSOUZQWXdQN2hVN18xQVJrWTZKWGcwRkpZZWtBUFR2QVV4dlhZRzVBRWF6RHdkYlAySUxK?oc=5"
+    },
+    {
+      "stock_name": "S-Oil",
+      "date": "2026-03-05",
+      "title": "“이란 공습 반사이익 노린다”…‘정유주’ 에쓰오일·SK이노 투심 강세[주식 초고수는 지금]",
+      "source": "매일경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBYd0dDR1IxSlUzUHVDbjFYb3pMQk9SRU5yOWl3MkZKTzFacjhqTm12eE1xUE9nLU4wOG5oaHZ3a0paa0RmOW9qeUtNWVRKRmNNc0E?oc=5"
+    },
+    {
+      "stock_name": "S-Oil",
+      "date": "2026-03-05",
+      "title": "코스피 10% 급등…수익률 상위 투자자는 'S-Oil' 선택 [주식 초고수는 지금]",
+      "source": "네이트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9uaGpYN0VuMFRNM1ZTcW5EMUROX3V3Z0hwaHNhd0RVQ0hBTm5ldXFLcVhqcEUtSFk3S3JlYkZETkN6XzlSZ0J2V25HUnU2U3FiOEJJYVlFaVJOZ1lLaTZ5TGpEdkJCWFN0a3FGdmZ2NlB4Z1UtMUlmeQ?oc=5"
+    },
+    {
+      "stock_name": "삼천당제약",
+      "date": "2026-03-05",
+      "title": "삼천당제약, 24.65% 급등 마감…외국인 매수 집중, 주가 급등 견인 (+000250, 주가급등, 외국인매수, 거래량급증, 2026년 3월 5일 목요일)",
+      "source": "민심뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1qeW9JcmRubmhFZmQ3QnVpZGpORzZ5UmpOU2VfMUs0LS1ZMUw5dVdLQU5HQjljR0tLNFk1eGN6Ul9fTzJSVWtiWk1HejliMVJDb3dQN21QZ3YydzZGYkF2czZmV1djbGhRZ0J0cQ?oc=5"
+    },
+    {
+      "stock_name": "한화시스템",
+      "date": "2026-03-05",
+      "title": "[오늘의 주목주] 'UAE의 천궁-Ⅱ추가 도입 요청' 한화시스템 상한가, 코스닥 솔브레인도 상한가",
+      "source": "비즈니스포스트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBoRVZweXJiS19MSi1PVmhJdURLdkRPbS1ZbHBpVVRGLTY4NkVnNWF5SUhqbUlVeVFmN1o1SjhXSnhJbVdfRlB4N2NrWXJPR0UyUlZvMUR3cHlqaE04a243eUpsdXA0cGhhYk9sdTJJTko5cjg?oc=5"
+    },
+    {
+      "stock_name": "한화시스템",
+      "date": "2026-03-05",
+      "title": "오전 이슈 [우주항공] : 스피어, 알멕, LK삼양, 한화시스템, 서진시스템",
+      "source": "파이낸셜뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5GaDZFeTdyaHhQN0ZMdXVIcGlPcUFuUkxUTzE0akNnTUcyblVOR045YVYxQUtDTjY0MmVXWTZFMm1MXzVhaG82VWZhQTdKTGhVd0w2QWVRVlFEZw?oc=5"
+    },
+    {
+      "stock_name": "한화시스템",
+      "date": "2026-03-05",
+      "title": "[급등락주 짚어보기] 한화시스템· 미래에셋생명 등 上···바이오株도 강세",
+      "source": "네이트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5Gclpad3FVdE1KVTBVbDNaOVZPMlBoQV9NT1BKQ1o4MGdRMUFlQUFNTmhQSC10UW9Vbm1lQTY2cXgteHZ1TncxLWNuNHFSUEJDVEJZ?oc=5"
+    },
+    {
+      "stock_name": "한국콜마",
+      "date": "2026-03-05",
+      "title": "콜마홀딩스, 350억에 우정바이오 경영권 인수",
+      "source": "부산일보사",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE43QlJsUFczWG1UQjdjZmFoR1NQMG1MZzYzbVRCel9oMTBMcThFNTlCX3cwZXczd21Qdjg5eGRKWFY5aU5xelN5dWFFa2RrNC01eFlNdGo3U2VyYUpRVmNlRU0wVlpPNmhkeTJnbHU1Mmx3anZ1?oc=5"
+    },
+    {
+      "stock_name": "한국콜마",
+      "date": "2026-03-05",
+      "title": "콜마홀딩스, 우정바이오 경영권 인수…350억 CB 투자",
+      "source": "네이트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9iR0pUZmdfZUJHRk9YZ04wQkZ0ZmhtUncwMTNZaEZsTjVoeHlIOHFLZFZXWUVtckZGUFVTQk5ScWpZM3RRQ3dWWU11Z2xZYVdORmUw?oc=5"
     }
   ],
   "news_boost_map": {
-    "NAVER": {
+    "현대로템": {
+      "boost": 3,
+      "reason": "현대로템 주가, 3월 5일 장중 226,000원 11.88% 상승"
+    },
+    "코오롱티슈진": {
+      "boost": 3,
+      "reason": "손해보며 전환 아니었어?... 7배 차익 기대하는 코오롱티슈진 CB 투자"
+    },
+    "레인보우로보틱스": {
+      "boost": 3,
+      "reason": "레인보우로보틱스 주가, 급등세... 왜?"
+    },
+    "HD현대": {
+      "boost": 3,
+      "reason": "자사주 소각에 배당·성과 보상까지…중공업 '돈 쓰는 방식' 달라진다"
+    },
+    "에이팩트": {
       "boost": 5,
-      "reason": "[주식핵심 체크포인트] 3월 증시, 미국의 이란 기습폭격 (feat, 엄"
+      "reason": "‘미국-이란 전쟁만큼 나쁜’ 주가조작 상장사 24곳 명단 밝혀라 [뉴스톡"
+    },
+    "두산에너빌리티": {
+      "boost": 5,
+      "reason": "[속보] 두산에너빌리티 VI 발동...전쟁 여파 영향권"
+    },
+    "S-Oil": {
+      "boost": 5,
+      "reason": "“이란 공습 반사이익 노린다”…‘정유주’ 에쓰오일·SK이노 투심 강세[주"
+    },
+    "삼천당제약": {
+      "boost": 3,
+      "reason": "삼천당제약, 24.65% 급등 마감…외국인 매수 집중, 주가 급등 견인 "
+    },
+    "한화시스템": {
+      "boost": 5,
+      "reason": "[오늘의 주목주] 'UAE의 천궁-Ⅱ추가 도입 요청' 한화시스템 상한가,"
+    },
+    "한국콜마": {
+      "boost": 3,
+      "reason": "콜마홀딩스, 350억에 우정바이오 경영권 인수"
     }
   },
   "stats": {
-    "total_reports": 0,
-    "positive_reports": 0,
+    "total_reports": 15,
+    "positive_reports": 5,
     "negative_reports": 0,
-    "news_alerts": 1,
+    "news_alerts": 17,
     "themes_count": 5
   }
 }

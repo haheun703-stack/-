@@ -1,108 +1,94 @@
 {
-  "analysis_date": "2026-03-02",
-  "regime": "공격",
-  "regime_confidence": 0.85,
-  "regime_reasoning": "글로벌 AI/반도체 수요 폭증과 대만 수출 기록적 흑자, AMD-메타 대규모 계약 체결로 산업 구조 매우 양호. 나스닥 1.3% 상승과 SOX 강세로 기술주 랠리 지속.",
+  "analysis_date": "2026-03-06",
+  "regime": "회피",
+  "regime_confidence": 0.9,
+  "regime_reasoning": "호르무즈 해협 봉쇄 우려로 유가·환율·금리 트리플 쇼크 발생. VIX 30 이상으로 극단적 변동성. 서킷브레이커 발동 상황에서 신규 매수는 위험.",
   "industry_thesis": [
     {
-      "sector": "반도체",
-      "thesis": "AI칩 수요 폭발적 증가로 공급 부족 심화. 대만 반도체 수출 69.9억 달러 흑자는 글로벌 수급 타이트함 입증.",
-      "demand_supply": "공급부족",
-      "asp_trend": "상승",
-      "global_alignment": "동조",
-      "confidence": 9,
-      "catalysts": [
-        "AMD-메타 AI칩 계약",
-        "대만 수출 기록적 흑자"
-      ],
-      "risks": [
-        "미중 갈등"
-      ],
-      "relay_source": "자체 발화",
-      "relay_verified": true
-    },
-    {
-      "sector": "IT/소프트웨어",
-      "thesis": "엔터프라이즈 AI 수요 확대와 Anthropic 통합으로 AI 소프트웨어 업사이클 진입.",
-      "demand_supply": "공급부족",
-      "asp_trend": "상승",
-      "global_alignment": "동조",
-      "confidence": 8,
-      "catalysts": [
-        "엔터프라이즈 AI 확산",
-        "나스닥 강세"
-      ],
-      "risks": [
-        "밸류에이션 부담"
-      ],
-      "relay_source": "반도체",
-      "relay_verified": true
-    },
-    {
       "sector": "방산",
-      "thesis": "K-방산 수출 2배 증가와 절충교역 확대로 구조적 성장 사이클. 중동 긴장으로 추가 수주 기대.",
+      "thesis": "중동 지정학 리스크 심화로 방산 수요 급증 예상되나, 극심한 변동성으로 단기 급락 후 재평가 가능",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "독립",
-      "confidence": 8,
+      "confidence": 7,
       "catalysts": [
-        "수출 2배 증가",
-        "미-이란 긴장"
+        "중동 긴장 고조",
+        "국방비 증액"
       ],
       "risks": [
-        "정치적 변수"
+        "급등 후 차익실현"
       ],
-      "relay_source": "자체 발화",
+      "relay_source": "방산조선",
       "relay_verified": true
     },
     {
-      "sector": "원전/SMR",
-      "thesis": "AI 데이터센터 전력 수요 폭증과 폴란드 SMR 도입으로 원전 르네상스 가속화.",
-      "demand_supply": "공급부족",
+      "sector": "정유",
+      "thesis": "유가 급등으로 정제마진 개선 기대되나, 수요 파괴 우려와 환율 급등으로 실질 수익성은 불확실",
+      "demand_supply": "균형",
       "asp_trend": "상승",
       "global_alignment": "동조",
-      "confidence": 7,
+      "confidence": 6,
       "catalysts": [
-        "폴란드 SMR 도입",
-        "AI 전력수요"
+        "유가 급등",
+        "정제마진 개선"
       ],
       "risks": [
-        "인허가 지연"
+        "수요 파괴",
+        "환율 부담"
       ],
-      "relay_source": "자체 발화",
+      "relay_source": null,
+      "relay_verified": false
+    },
+    {
+      "sector": "반도체",
+      "thesis": "AI 투자 우려로 단기 급락했으나, 장기 AI/클라우드 수요는 여전. 극도의 매도세는 오버슈팅",
+      "demand_supply": "공급과잉",
+      "asp_trend": "하락",
+      "global_alignment": "동조",
+      "confidence": 4,
+      "catalysts": [
+        "AI 장기 수요",
+        "저점 매수"
+      ],
+      "risks": [
+        "SOX -3% 트리거",
+        "기술주 약세"
+      ],
+      "relay_source": null,
       "relay_verified": false
     }
   ],
   "sector_priority": {
-    "attack": [
-      "반도체",
-      "IT/소프트웨어",
-      "방산"
-    ],
+    "attack": [],
     "watch": [
-      "원전/SMR",
+      "방산",
       "정유"
     ],
     "avoid": [
+      "반도체",
+      "IT서비스",
       "2차전지",
-      "조선"
+      "금융",
+      "화학"
     ]
   },
-  "max_new_buys": 3,
+  "max_new_buys": 0,
   "risk_factors": [
-    "미중 갈등 재점화",
-    "환율 급등"
+    "호르무즈 해협 봉쇄 위협",
+    "VIX 30 이상 극단 변동성",
+    "서킷브레이커 발동",
+    "트리플 쇼크(유가·환율·금리)"
   ],
-  "cash_reserve_suggestion": 20,
-  "global_summary": "글로벌 AI 수요 폭증으로 반도체와 IT 섹터 강세 지속. 나스닥 1.3% 상승과 SOX 강세로 기술주 랠리 확인.",
+  "cash_reserve_suggestion": 100,
+  "global_summary": "중동 지정학 위기로 글로벌 금융시장 패닉. 미국 기술주 급락과 원자재 가격 급등이 동시 발생하며 스태그플레이션 우려 확산.",
   "relay_alerts": [
     {
-      "pattern": "반도체→IT서비스",
+      "pattern": "방산조선→기계",
       "status": "발화",
-      "action": "매수 준비"
+      "action": "무시"
     },
     {
-      "pattern": "방산조선→기계",
+      "pattern": "반도체→IT서비스",
       "status": "대기",
       "action": "주의"
     }

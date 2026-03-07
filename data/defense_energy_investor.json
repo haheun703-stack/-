@@ -1,0 +1,82 @@
+{
+  "012450": {
+    "name": "한화에어로스페이스",
+    "foreign_5d": -149221000000,
+    "inst_5d": 143000000,
+    "foreign_30d": -600657000000,
+    "inst_30d": -7516000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 0
+  },
+  "064350": {
+    "name": "현대로템",
+    "foreign_5d": 170843000000,
+    "inst_5d": -134059000000,
+    "foreign_30d": 237044000000,
+    "inst_30d": -171124000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 2
+  },
+  "079550": {
+    "name": "LIG넥스원",
+    "foreign_5d": -405989000000,
+    "inst_5d": 121719000000,
+    "foreign_30d": -525012000000,
+    "inst_30d": 122482000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 0
+  },
+  "011210": {
+    "name": "현대위아",
+    "foreign_5d": -18600000000,
+    "inst_5d": 30001000000,
+    "foreign_30d": 17293000000,
+    "inst_30d": 10537000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 0
+  },
+  "047810": {
+    "name": "한국항공우주",
+    "foreign_5d": 48332000000,
+    "inst_5d": -39088000000,
+    "foreign_30d": -289319000000,
+    "inst_30d": 173289000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 2
+  },
+  "010950": {
+    "name": "S-Oil",
+    "foreign_5d": -297032000000,
+    "inst_5d": -144872000000,
+    "foreign_30d": -234736000000,
+    "inst_30d": -92294000000,
+    "both_buy_5d": false,
+    "both_sell_5d": true,
+    "consec_foreign": 1
+  },
+  "096770": {
+    "name": "SK이노베이션",
+    "foreign_5d": 17815000000,
+    "inst_5d": 150000000,
+    "foreign_30d": 101171000000,
+    "inst_30d": 94447000000,
+    "both_buy_5d": true,
+    "both_sell_5d": false,
+    "consec_foreign": 2
+  },
+  "004090": {
+    "name": "한국석유",
+    "foreign_5d": 2809000000,
+    "inst_5d": -488000000,
+    "foreign_30d": -725000000,
+    "inst_30d": -563000000,
+    "both_buy_5d": false,
+    "both_sell_5d": false,
+    "consec_foreign": 1
+  }
+}

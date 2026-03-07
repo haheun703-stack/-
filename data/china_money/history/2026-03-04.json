@@ -1,33 +1,126 @@
 {
   "date": "2026-03-04",
-  "generated_at": "2026-03-04 15:13",
+  "generated_at": "2026-03-04 19:35",
   "total_stocks": 50,
   "summary": {
-    "SURGE": 0,
-    "INFLOW": 5,
-    "SECTOR_FOCUS": 24,
+    "SURGE": 4,
+    "INFLOW": 9,
+    "SECTOR_FOCUS": 22,
     "WATCH": 0,
-    "NORMAL": 21
+    "NORMAL": 15
   },
   "signals": [
     {
       "date": "2026-03-04",
+      "ticker": "373220",
+      "name": "LG에너지솔루션",
+      "signal": "SURGE",
+      "score": 80,
+      "reasons": [
+        "외국인 폭풍매수 (z=2.3)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 9일 연속 순매수",
+        "스텔스 매수 (주가 -15.8% but 외국인↑)",
+        "2차전지 섹터 외국인 집중"
+      ],
+      "foreign_net_5d": 402197,
+      "foreign_zscore": 2.33,
+      "ewy_decouple": true,
+      "consecutive_days": 9,
+      "pct_change_5d": -15.76
+    },
+    {
+      "date": "2026-03-04",
       "ticker": "051910",
       "name": "LG화학",
-      "signal": "INFLOW",
-      "score": 60,
+      "signal": "SURGE",
+      "score": 75,
       "reasons": [
         "외국인 강매수 (z=1.3)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.0% but 외국인↑)",
+        "외국인 13일 연속 순매수",
+        "스텔스 매수 (주가 -12.4% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)",
         "2차전지 섹터 외국인 집중"
       ],
-      "foreign_net_5d": 587958,
-      "foreign_zscore": 1.31,
+      "foreign_net_5d": 603210,
+      "foreign_zscore": 1.34,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -11.98
+      "consecutive_days": 13,
+      "pct_change_5d": -12.41
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "329180",
+      "name": "HD현대중공업",
+      "signal": "SURGE",
+      "score": 75,
+      "reasons": [
+        "외국인 폭풍매수 (z=2.7)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 8일 연속 순매수",
+        "스텔스 매수 (주가 -14.3% but 외국인↑)"
+      ],
+      "foreign_net_5d": 380188,
+      "foreign_zscore": 2.68,
+      "ewy_decouple": true,
+      "consecutive_days": 8,
+      "pct_change_5d": -14.26
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "010140",
+      "name": "삼성중공업",
+      "signal": "SURGE",
+      "score": 75,
+      "reasons": [
+        "외국인 폭풍매수 (z=2.4)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 10일 연속 순매수",
+        "스텔스 매수 (주가 -19.0% but 외국인↑)"
+      ],
+      "foreign_net_5d": 4679825,
+      "foreign_zscore": 2.4,
+      "ewy_decouple": true,
+      "consecutive_days": 10,
+      "pct_change_5d": -18.97
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "316140",
+      "name": "우리금융지주",
+      "signal": "INFLOW",
+      "score": 68,
+      "reasons": [
+        "외국인 폭풍매수 (z=2.3)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -18.7% but 외국인↑)"
+      ],
+      "foreign_net_5d": 2145128,
+      "foreign_zscore": 2.26,
+      "ewy_decouple": true,
+      "consecutive_days": 4,
+      "pct_change_5d": -18.67
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "003550",
+      "name": "LG",
+      "signal": "INFLOW",
+      "score": 63,
+      "reasons": [
+        "외국인 강매수 (z=1.1)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 3일 연속 순매수",
+        "스텔스 매수 (주가 -8.7% but 외국인↑)",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 265007,
+      "foreign_zscore": 1.1,
+      "ewy_decouple": true,
+      "consecutive_days": 3,
+      "pct_change_5d": -8.7
     },
     {
       "date": "2026-03-04",
@@ -36,88 +129,125 @@
       "signal": "INFLOW",
       "score": 60,
       "reasons": [
-        "외국인 강매수 (z=1.1)",
+        "외국인 강매수 (z=1.0)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -21.3% but 외국인↑)",
+        "스텔스 매수 (주가 -21.5% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)",
         "2차전지 섹터 외국인 집중"
       ],
-      "foreign_net_5d": 311635,
-      "foreign_zscore": 1.08,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -21.27
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "329180",
-      "name": "HD현대중공업",
-      "signal": "INFLOW",
-      "score": 60,
-      "reasons": [
-        "외국인 폭풍매수 (z=2.2)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -14.6% but 외국인↑)"
-      ],
-      "foreign_net_5d": 275730,
-      "foreign_zscore": 2.24,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -14.6
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "010130",
-      "name": "고려아연",
-      "signal": "INFLOW",
-      "score": 55,
-      "reasons": [
-        "외국인 강매수 (z=1.0)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -11.9% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
-      ],
-      "foreign_net_5d": 29838,
+      "foreign_net_5d": 299675,
       "foreign_zscore": 1.03,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -11.92
+      "pct_change_5d": -21.53
     },
     {
       "date": "2026-03-04",
-      "ticker": "000880",
-      "name": "한화",
+      "ticker": "009540",
+      "name": "한국조선해양",
+      "signal": "INFLOW",
+      "score": 60,
+      "reasons": [
+        "외국인 강매수 (z=1.3)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 5일 연속 순매수",
+        "스텔스 매수 (주가 -17.2% but 외국인↑)"
+      ],
+      "foreign_net_5d": 218895,
+      "foreign_zscore": 1.28,
+      "ewy_decouple": true,
+      "consecutive_days": 5,
+      "pct_change_5d": -17.16
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "128940",
+      "name": "한미약품",
+      "signal": "INFLOW",
+      "score": 60,
+      "reasons": [
+        "외국인 강매수 (z=1.7)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 11일 연속 순매수",
+        "스텔스 매수 (주가 -22.4% but 외국인↑)"
+      ],
+      "foreign_net_5d": 117381,
+      "foreign_zscore": 1.74,
+      "ewy_decouple": true,
+      "consecutive_days": 11,
+      "pct_change_5d": -22.4
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "036570",
+      "name": "엔씨소프트",
       "signal": "INFLOW",
       "score": 55,
       "reasons": [
-        "외국인 강매수 (z=1.2)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -13.7% but 외국인↑)",
+        "외국인 5일 연속 순매수",
+        "스텔스 매수 (주가 -15.0% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 343562,
-      "foreign_zscore": 1.24,
+      "foreign_net_5d": 91548,
+      "foreign_zscore": 0.99,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -13.71
+      "consecutive_days": 5,
+      "pct_change_5d": -14.96
     },
     {
       "date": "2026-03-04",
-      "ticker": "373220",
-      "name": "LG에너지솔루션",
-      "signal": "SECTOR_FOCUS",
-      "score": 50,
+      "ticker": "068270",
+      "name": "셀트리온",
+      "signal": "INFLOW",
+      "score": 53,
       "reasons": [
-        "외국인 강매수 (z=1.8)",
+        "외국인 강매수 (z=1.5)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -15.6% but 외국인↑)",
-        "2차전지 섹터 외국인 집중"
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -20.6% but 외국인↑)"
       ],
-      "foreign_net_5d": 223827,
-      "foreign_zscore": 1.79,
+      "foreign_net_5d": 1094890,
+      "foreign_zscore": 1.51,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -15.64
+      "consecutive_days": 4,
+      "pct_change_5d": -20.56
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "055550",
+      "name": "신한지주",
+      "signal": "INFLOW",
+      "score": 53,
+      "reasons": [
+        "외국인 강매수 (z=1.2)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -12.0% but 외국인↑)"
+      ],
+      "foreign_net_5d": 832854,
+      "foreign_zscore": 1.19,
+      "ewy_decouple": true,
+      "consecutive_days": 4,
+      "pct_change_5d": -11.99
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "086790",
+      "name": "하나금융지주",
+      "signal": "INFLOW",
+      "score": 53,
+      "reasons": [
+        "외국인 강매수 (z=1.9)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -16.3% but 외국인↑)"
+      ],
+      "foreign_net_5d": 550033,
+      "foreign_zscore": 1.9,
+      "ewy_decouple": true,
+      "consecutive_days": 4,
+      "pct_change_5d": -16.34
     },
     {
       "date": "2026-03-04",
@@ -126,66 +256,15 @@
       "signal": "SECTOR_FOCUS",
       "score": 45,
       "reasons": [
-        "외국인 강매수 (z=1.8)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.3% but 외국인↑)"
-      ],
-      "foreign_net_5d": 40552,
-      "foreign_zscore": 1.81,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -12.3
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "316140",
-      "name": "우리금융지주",
-      "signal": "SECTOR_FOCUS",
-      "score": 45,
-      "reasons": [
         "외국인 강매수 (z=1.9)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.9% but 외국인↑)"
+        "스텔스 매수 (주가 -12.0% but 외국인↑)"
       ],
-      "foreign_net_5d": 1216431,
-      "foreign_zscore": 1.93,
+      "foreign_net_5d": 43883,
+      "foreign_zscore": 1.91,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.93
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "086790",
-      "name": "하나금융지주",
-      "signal": "SECTOR_FOCUS",
-      "score": 45,
-      "reasons": [
-        "외국인 강매수 (z=1.6)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -15.9% but 외국인↑)"
-      ],
-      "foreign_net_5d": 354977,
-      "foreign_zscore": 1.59,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -15.94
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "009540",
-      "name": "한국조선해양",
-      "signal": "SECTOR_FOCUS",
-      "score": 45,
-      "reasons": [
-        "외국인 강매수 (z=1.0)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -17.2% but 외국인↑)"
-      ],
-      "foreign_net_5d": 185850,
-      "foreign_zscore": 1.05,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -17.16
+      "consecutive_days": 1,
+      "pct_change_5d": -12.01
     },
     {
       "date": "2026-03-04",
@@ -194,83 +273,83 @@
       "signal": "SECTOR_FOCUS",
       "score": 45,
       "reasons": [
-        "외국인 강매수 (z=1.8)",
+        "외국인 강매수 (z=1.4)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 1274474,
-      "foreign_zscore": 1.81,
+      "foreign_net_5d": 959277,
+      "foreign_zscore": 1.35,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": 25.71
+      "pct_change_5d": 23.33
     },
     {
       "date": "2026-03-04",
-      "ticker": "010140",
-      "name": "삼성중공업",
+      "ticker": "352820",
+      "name": "하이브",
+      "signal": "SECTOR_FOCUS",
+      "score": 45,
+      "reasons": [
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 10일 연속 순매수",
+        "스텔스 매수 (주가 -18.1% but 외국인↑)"
+      ],
+      "foreign_net_5d": 309791,
+      "foreign_zscore": 0.75,
+      "ewy_decouple": true,
+      "consecutive_days": 10,
+      "pct_change_5d": -18.05
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "047810",
+      "name": "한국항공우주",
+      "signal": "SECTOR_FOCUS",
+      "score": 45,
+      "reasons": [
+        "외국인 강매수 (z=1.2)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "스텔스 매수 (주가 -13.7% but 외국인↑)"
+      ],
+      "foreign_net_5d": 82283,
+      "foreign_zscore": 1.25,
+      "ewy_decouple": true,
+      "consecutive_days": 1,
+      "pct_change_5d": -13.67
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "000880",
+      "name": "한화",
       "signal": "SECTOR_FOCUS",
       "score": 45,
       "reasons": [
         "외국인 강매수 (z=1.7)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.3% but 외국인↑)"
+        "스텔스 매수 (주가 -14.2% but 외국인↑)"
       ],
-      "foreign_net_5d": 3109276,
-      "foreign_zscore": 1.74,
+      "foreign_net_5d": 493848,
+      "foreign_zscore": 1.71,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.28
+      "consecutive_days": 2,
+      "pct_change_5d": -14.17
     },
     {
       "date": "2026-03-04",
-      "ticker": "128940",
-      "name": "한미약품",
+      "ticker": "180640",
+      "name": "한진칼",
       "signal": "SECTOR_FOCUS",
       "score": 45,
       "reasons": [
-        "외국인 강매수 (z=1.0)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -22.2% but 외국인↑)"
+        "외국인 13일 연속 순매수",
+        "스텔스 매수 (주가 -30.0% but 외국인↑)"
       ],
-      "foreign_net_5d": 64268,
-      "foreign_zscore": 1.05,
+      "foreign_net_5d": 95833,
+      "foreign_zscore": 0.78,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -22.24
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "005380",
-      "name": "현대차",
-      "signal": "SECTOR_FOCUS",
-      "score": 40,
-      "reasons": [
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -4.4% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
-      ],
-      "foreign_net_5d": 86289,
-      "foreign_zscore": 0.85,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -4.39
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "006400",
-      "name": "삼성SDI",
-      "signal": "SECTOR_FOCUS",
-      "score": 40,
-      "reasons": [
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -16.2% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
-      ],
-      "foreign_net_5d": 53179,
-      "foreign_zscore": -0.57,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -16.25
+      "consecutive_days": 13,
+      "pct_change_5d": -29.99
     },
     {
       "date": "2026-03-04",
@@ -280,31 +359,48 @@
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -16.1% but 외국인↑)",
+        "스텔스 매수 (주가 -15.9% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 68918,
-      "foreign_zscore": 0.2,
+      "foreign_net_5d": 101188,
+      "foreign_zscore": 0.44,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -16.05
+      "consecutive_days": 2,
+      "pct_change_5d": -15.92
     },
     {
       "date": "2026-03-04",
-      "ticker": "018260",
-      "name": "삼성에스디에스",
+      "ticker": "066570",
+      "name": "LG전자",
       "signal": "SECTOR_FOCUS",
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -10.5% but 외국인↑)",
+        "스텔스 매수 (주가 -19.0% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 205498,
-      "foreign_zscore": 0.61,
+      "foreign_net_5d": 276118,
+      "foreign_zscore": -0.39,
+      "ewy_decouple": true,
+      "consecutive_days": 1,
+      "pct_change_5d": -18.96
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "010130",
+      "name": "고려아연",
+      "signal": "SECTOR_FOCUS",
+      "score": 40,
+      "reasons": [
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "스텔스 매수 (주가 -12.8% but 외국인↑)",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 28316,
+      "foreign_zscore": 0.97,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -10.48
+      "pct_change_5d": -12.77
     },
     {
       "date": "2026-03-04",
@@ -314,31 +410,31 @@
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.3% but 외국인↑)",
+        "스텔스 매수 (주가 -18.7% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 1039029,
-      "foreign_zscore": 0.94,
+      "foreign_net_5d": 753561,
+      "foreign_zscore": 0.86,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -18.31
+      "pct_change_5d": -18.74
     },
     {
       "date": "2026-03-04",
-      "ticker": "036570",
-      "name": "엔씨소프트",
+      "ticker": "017670",
+      "name": "SK텔레콤",
       "signal": "SECTOR_FOCUS",
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -14.8% but 외국인↑)",
+        "스텔스 매수 (주가 -13.1% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 73970,
-      "foreign_zscore": 0.84,
+      "foreign_net_5d": 402556,
+      "foreign_zscore": 0.76,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -14.78
+      "consecutive_days": 2,
+      "pct_change_5d": -13.1
     },
     {
       "date": "2026-03-04",
@@ -348,79 +444,111 @@
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.6% but 외국인↑)",
+        "스텔스 매수 (주가 -12.4% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 1511492,
-      "foreign_zscore": -0.17,
+      "foreign_net_5d": 1610300,
+      "foreign_zscore": -0.12,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -12.64
+      "consecutive_days": 2,
+      "pct_change_5d": -12.45
     },
     {
       "date": "2026-03-04",
-      "ticker": "003550",
-      "name": "LG",
+      "ticker": "009830",
+      "name": "한화솔루션",
       "signal": "SECTOR_FOCUS",
-      "score": 40,
+      "score": 35,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -9.5% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
+        "스텔스 매수 (주가 -21.5% but 외국인↑)",
+        "2차전지 섹터 외국인 집중"
       ],
-      "foreign_net_5d": 54291,
-      "foreign_zscore": 0.35,
+      "foreign_net_5d": 1388615,
+      "foreign_zscore": -0.36,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -9.5
+      "consecutive_days": 2,
+      "pct_change_5d": -21.51
     },
     {
       "date": "2026-03-04",
-      "ticker": "068270",
-      "name": "셀트리온",
-      "signal": "SECTOR_FOCUS",
-      "score": 30,
-      "reasons": [
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -20.4% but 외국인↑)"
-      ],
-      "foreign_net_5d": 654900,
-      "foreign_zscore": 0.35,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -20.44
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "055550",
-      "name": "신한지주",
+      "ticker": "005490",
+      "name": "POSCO홀딩스",
       "signal": "SECTOR_FOCUS",
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.9% but 외국인↑)"
+        "스텔스 매수 (주가 -19.5% but 외국인↑)"
       ],
-      "foreign_net_5d": 427134,
-      "foreign_zscore": 0.7,
+      "foreign_net_5d": 30065,
+      "foreign_zscore": -0.23,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -12.88
+      "consecutive_days": 1,
+      "pct_change_5d": -19.52
     },
     {
       "date": "2026-03-04",
-      "ticker": "352820",
-      "name": "하이브",
+      "ticker": "006400",
+      "name": "삼성SDI",
       "signal": "SECTOR_FOCUS",
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.3% but 외국인↑)"
+        "스텔스 매수 (주가 -16.7% but 외국인↑)"
       ],
-      "foreign_net_5d": 187557,
-      "foreign_zscore": -0.41,
+      "foreign_net_5d": 257744,
+      "foreign_zscore": -0.15,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.3
+      "consecutive_days": 1,
+      "pct_change_5d": -16.73
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "009150",
+      "name": "삼성전기",
+      "signal": "SECTOR_FOCUS",
+      "score": 30,
+      "reasons": [
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "스텔스 매수 (주가 -18.7% but 외국인↑)"
+      ],
+      "foreign_net_5d": 22131,
+      "foreign_zscore": -0.7,
+      "ewy_decouple": true,
+      "consecutive_days": 2,
+      "pct_change_5d": -18.72
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "028260",
+      "name": "삼성물산",
+      "signal": "SECTOR_FOCUS",
+      "score": 30,
+      "reasons": [
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "스텔스 매수 (주가 -19.5% but 외국인↑)"
+      ],
+      "foreign_net_5d": 97085,
+      "foreign_zscore": 0.23,
+      "ewy_decouple": true,
+      "consecutive_days": 2,
+      "pct_change_5d": -19.53
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "018260",
+      "name": "삼성에스디에스",
+      "signal": "SECTOR_FOCUS",
+      "score": 30,
+      "reasons": [
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "스텔스 매수 (주가 -10.6% but 외국인↑)"
+      ],
+      "foreign_net_5d": 228321,
+      "foreign_zscore": 0.85,
+      "ewy_decouple": true,
+      "consecutive_days": 1,
+      "pct_change_5d": -10.59
     },
     {
       "date": "2026-03-04",
@@ -432,8 +560,8 @@
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
         "스텔스 매수 (주가 -20.5% but 외국인↑)"
       ],
-      "foreign_net_5d": 126238,
-      "foreign_zscore": -0.79,
+      "foreign_net_5d": 84046,
+      "foreign_zscore": -0.9,
       "ewy_decouple": true,
       "consecutive_days": 0,
       "pct_change_5d": -20.48
@@ -446,13 +574,13 @@
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -9.0% but 외국인↑)"
+        "스텔스 매수 (주가 -8.8% but 외국인↑)"
       ],
-      "foreign_net_5d": 381536,
-      "foreign_zscore": 0.37,
+      "foreign_net_5d": 554550,
+      "foreign_zscore": 0.59,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -9.03
+      "consecutive_days": 1,
+      "pct_change_5d": -8.8
     },
     {
       "date": "2026-03-04",
@@ -462,29 +590,13 @@
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.9% but 외국인↑)"
+        "스텔스 매수 (주가 -18.7% but 외국인↑)"
       ],
-      "foreign_net_5d": 262577,
-      "foreign_zscore": -0.25,
+      "foreign_net_5d": 238469,
+      "foreign_zscore": -0.37,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -18.93
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "180640",
-      "name": "한진칼",
-      "signal": "SECTOR_FOCUS",
-      "score": 30,
-      "reasons": [
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -30.2% but 외국인↑)"
-      ],
-      "foreign_net_5d": 84364,
-      "foreign_zscore": 0.58,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -30.17
+      "pct_change_5d": -18.66
     },
     {
       "date": "2026-03-04",
@@ -494,13 +606,13 @@
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -20.1% but 외국인↑)"
+        "스텔스 매수 (주가 -20.4% but 외국인↑)"
       ],
-      "foreign_net_5d": 1012222,
-      "foreign_zscore": -0.1,
+      "foreign_net_5d": 1208544,
+      "foreign_zscore": -0.05,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -20.14
+      "consecutive_days": 1,
+      "pct_change_5d": -20.43
     }
   ],
   "top_foreign_buyers": [
@@ -508,18 +620,37 @@
       "date": "2026-03-04",
       "ticker": "010140",
       "name": "삼성중공업",
-      "signal": "SECTOR_FOCUS",
-      "score": 45,
+      "signal": "SURGE",
+      "score": 75,
       "reasons": [
-        "외국인 강매수 (z=1.7)",
+        "외국인 폭풍매수 (z=2.4)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.3% but 외국인↑)"
+        "외국인 10일 연속 순매수",
+        "스텔스 매수 (주가 -19.0% but 외국인↑)"
       ],
-      "foreign_net_5d": 3109276,
-      "foreign_zscore": 1.74,
+      "foreign_net_5d": 4679825,
+      "foreign_zscore": 2.4,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.28
+      "consecutive_days": 10,
+      "pct_change_5d": -18.97
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "316140",
+      "name": "우리금융지주",
+      "signal": "INFLOW",
+      "score": 68,
+      "reasons": [
+        "외국인 폭풍매수 (z=2.3)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -18.7% but 외국인↑)"
+      ],
+      "foreign_net_5d": 2145128,
+      "foreign_zscore": 2.26,
+      "ewy_decouple": true,
+      "consecutive_days": 4,
+      "pct_change_5d": -18.67
     },
     {
       "date": "2026-03-04",
@@ -529,65 +660,31 @@
       "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.6% but 외국인↑)",
+        "스텔스 매수 (주가 -12.4% but 외국인↑)",
         "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 1511492,
-      "foreign_zscore": -0.17,
+      "foreign_net_5d": 1610300,
+      "foreign_zscore": -0.12,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -12.64
+      "consecutive_days": 2,
+      "pct_change_5d": -12.45
     },
     {
       "date": "2026-03-04",
-      "ticker": "042700",
-      "name": "한미반도체",
+      "ticker": "009830",
+      "name": "한화솔루션",
       "signal": "SECTOR_FOCUS",
-      "score": 45,
-      "reasons": [
-        "외국인 강매수 (z=1.8)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
-      ],
-      "foreign_net_5d": 1274474,
-      "foreign_zscore": 1.81,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": 25.71
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "316140",
-      "name": "우리금융지주",
-      "signal": "SECTOR_FOCUS",
-      "score": 45,
-      "reasons": [
-        "외국인 강매수 (z=1.9)",
-        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.9% but 외국인↑)"
-      ],
-      "foreign_net_5d": 1216431,
-      "foreign_zscore": 1.93,
-      "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.93
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "035720",
-      "name": "카카오",
-      "signal": "SECTOR_FOCUS",
-      "score": 40,
+      "score": 35,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -18.3% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)"
+        "스텔스 매수 (주가 -21.5% but 외국인↑)",
+        "2차전지 섹터 외국인 집중"
       ],
-      "foreign_net_5d": 1039029,
-      "foreign_zscore": 0.94,
+      "foreign_net_5d": 1388615,
+      "foreign_zscore": -0.36,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -18.31
+      "consecutive_days": 2,
+      "pct_change_5d": -21.51
     },
     {
       "date": "2026-03-04",
@@ -597,80 +694,103 @@
       "score": 30,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -20.1% but 외국인↑)"
+        "스텔스 매수 (주가 -20.4% but 외국인↑)"
       ],
-      "foreign_net_5d": 1012222,
-      "foreign_zscore": -0.1,
+      "foreign_net_5d": 1208544,
+      "foreign_zscore": -0.05,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -20.14
+      "consecutive_days": 1,
+      "pct_change_5d": -20.43
     },
     {
       "date": "2026-03-04",
       "ticker": "068270",
       "name": "셀트리온",
-      "signal": "SECTOR_FOCUS",
-      "score": 30,
+      "signal": "INFLOW",
+      "score": 53,
       "reasons": [
+        "외국인 강매수 (z=1.5)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -20.4% but 외국인↑)"
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -20.6% but 외국인↑)"
       ],
-      "foreign_net_5d": 654900,
-      "foreign_zscore": 0.35,
+      "foreign_net_5d": 1094890,
+      "foreign_zscore": 1.51,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -20.44
+      "consecutive_days": 4,
+      "pct_change_5d": -20.56
     },
     {
       "date": "2026-03-04",
-      "ticker": "051910",
-      "name": "LG화학",
-      "signal": "INFLOW",
-      "score": 60,
+      "ticker": "042700",
+      "name": "한미반도체",
+      "signal": "SECTOR_FOCUS",
+      "score": 45,
       "reasons": [
-        "외국인 강매수 (z=1.3)",
+        "외국인 강매수 (z=1.4)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.0% but 외국인↑)",
-        "외국인+기관 동시 순매수 (5일)",
-        "2차전지 섹터 외국인 집중"
+        "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 587958,
-      "foreign_zscore": 1.31,
+      "foreign_net_5d": 959277,
+      "foreign_zscore": 1.35,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -11.98
+      "pct_change_5d": 23.33
     },
     {
       "date": "2026-03-04",
       "ticker": "055550",
       "name": "신한지주",
-      "signal": "SECTOR_FOCUS",
-      "score": 30,
+      "signal": "INFLOW",
+      "score": 53,
       "reasons": [
+        "외국인 강매수 (z=1.2)",
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -12.9% but 외국인↑)"
+        "외국인 4일 연속 순매수",
+        "스텔스 매수 (주가 -12.0% but 외국인↑)"
       ],
-      "foreign_net_5d": 427134,
-      "foreign_zscore": 0.7,
+      "foreign_net_5d": 832854,
+      "foreign_zscore": 1.19,
       "ewy_decouple": true,
-      "consecutive_days": 0,
-      "pct_change_5d": -12.88
+      "consecutive_days": 4,
+      "pct_change_5d": -11.99
     },
     {
       "date": "2026-03-04",
-      "ticker": "064350",
-      "name": "현대로템",
+      "ticker": "035720",
+      "name": "카카오",
       "signal": "SECTOR_FOCUS",
-      "score": 30,
+      "score": 40,
       "reasons": [
         "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-        "스텔스 매수 (주가 -9.0% but 외국인↑)"
+        "스텔스 매수 (주가 -18.7% but 외국인↑)",
+        "외국인+기관 동시 순매수 (5일)"
       ],
-      "foreign_net_5d": 381536,
-      "foreign_zscore": 0.37,
+      "foreign_net_5d": 753561,
+      "foreign_zscore": 0.86,
       "ewy_decouple": true,
       "consecutive_days": 0,
-      "pct_change_5d": -9.03
+      "pct_change_5d": -18.74
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "051910",
+      "name": "LG화학",
+      "signal": "SURGE",
+      "score": 75,
+      "reasons": [
+        "외국인 강매수 (z=1.3)",
+        "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+        "외국인 13일 연속 순매수",
+        "스텔스 매수 (주가 -12.4% but 외국인↑)",
+        "외국인+기관 동시 순매수 (5일)",
+        "2차전지 섹터 외국인 집중"
+      ],
+      "foreign_net_5d": 603210,
+      "foreign_zscore": 1.34,
+      "ewy_decouple": true,
+      "consecutive_days": 13,
+      "pct_change_5d": -12.41
     }
   ]
 }

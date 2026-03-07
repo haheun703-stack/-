@@ -1,0 +1,62 @@
+{
+  "005930": {
+    "ticker": "005930",
+    "date": "20260305",
+    "short_risk": 50.0,
+    "spoofing_risk": 50.0,
+    "execution_score": 50.0,
+    "program_pressure": 50.0,
+    "institutional": 55.0,
+    "options_signal": 50.0,
+    "trap_adjustment": -5.0,
+    "smart_money_boost": 0.15
+  },
+  "000660": {
+    "ticker": "000660",
+    "date": "20260305",
+    "short_risk": 50.0,
+    "spoofing_risk": 50.0,
+    "execution_score": 50.0,
+    "program_pressure": 50.0,
+    "institutional": 65.0,
+    "options_signal": 50.0,
+    "trap_adjustment": -5.0,
+    "smart_money_boost": 0.15
+  },
+  "009540": {
+    "ticker": "009540",
+    "date": "20260305",
+    "short_risk": 50.0,
+    "spoofing_risk": 50.0,
+    "execution_score": 50.0,
+    "program_pressure": 50.0,
+    "institutional": 35.0,
+    "options_signal": 50.0,
+    "trap_adjustment": 0.0,
+    "smart_money_boost": 0.0
+  },
+  "042700": {
+    "ticker": "042700",
+    "date": "20260305",
+    "short_risk": 50.0,
+    "spoofing_risk": 50.0,
+    "execution_score": 50.0,
+    "program_pressure": 50.0,
+    "institutional": 65.0,
+    "options_signal": 50.0,
+    "trap_adjustment": -5.0,
+    "smart_money_boost": 0.15
+  },
+  "010130": {
+    "ticker": "010130",
+    "date": "20260305",
+    "short_risk": 50.0,
+    "spoofing_risk": 50.0,
+    "execution_score": 50.0,
+    "program_pressure": 50.0,
+    "institutional": 65.0,
+    "options_signal": 50.0,
+    "trap_adjustment": -5.0,
+    "smart_money_boost": 0.15
+  }
+}

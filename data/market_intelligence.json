@@ -1,204 +1,219 @@
 {
-  "date": "2026-02-26",
-  "generated_at": "2026-02-26 22:58",
-  "us_market_summary": "미국 주식시장은 2월 25-26일 이틀 연속 상승세를 보였으며, S&P 500이 6,900 심리선을 돌파했다. 기술주 강세와 긍정적 경제지표가 주도했으나, 금리 우려와 AI 관련 변동성이 시장을 양분하고 있다.",
-  "us_market_mood": "MIXED",
-  "kr_open_forecast": "상승",
-  "kr_forecast_reason": "대만 경상수지 흑자와 글로벌 AI/반도체 수요 강세가 한국 반도체 및 IT 섹터에 긍정적이나, 미국 금리 상승 우려가 부분적으로 상쇄될 것으로 예상된다.",
+  "date": "2026-03-04",
+  "generated_at": "2026-03-04 19:26",
+  "us_market_summary": "미국 주식시장은 최근 기술주와 금융주 하락으로 급락세를 보였으며, S&P 500은 3월 4일 6782포인트로 0.51% 하락 마감했다. AI 투자 우려, 뜨거운 인플레이션 데이터, 지정학적 긴장으로 투자 심리가 취약해졌다.[1][2]",
+  "us_market_mood": "RISK_OFF",
+  "kr_open_forecast": "하락",
+  "kr_forecast_reason": "미국 증시 연속 하락과 미-이란 지정학적 리스크 확산으로 한국 코스피 개장 시 추가 매도세 예상되며 에너지·반도체 섹터 타격 클 전망.",
   "key_events": [
     {
-      "event": "S&P 500 6,900 돌파 및 기술주 강세",
-      "category": "섹터",
-      "impact": "positive",
-      "urgency": "IMPORTANT",
-      "detail": "S&P 500이 0.8% 상승하여 6,946.13으로 마감했고, 나스닥은 1.3% 상승했다. 정보기술(XLK) 1.8%, 금융(XLF) 1.7% 상승으로 대형주 중심의 강한 랠리를 기록했다.[1][3]",
+      "event": "미-이란 분쟁 격화 및 호르무즈 해협 긴장",
+      "category": "지정학",
+      "impact": "negative",
+      "urgency": "BREAKING",
+      "detail": "미국과 이스라엘의 이란과의 갈등으로 에너지 가격 상승 우려가 커지며 글로벌 주식시장이 하락했다. 트럼프 대통령의 호르무즈 해협 유조선 호위 약속으로 손실 일부 완화됐으나 불확실성 지속.[2][4]",
       "kr_sectors_affected": [
-        "반도체",
-        "IT/소프트웨어",
-        "금융"
+        "화학/에너지",
+        "반도체"
       ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 3
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -4
     },
     {
-      "event": "대만 기록적 경상수지 흑자 및 AI/반도체 수출 호조",
+      "event": "뜨거운 생산자 물가 인플레이션 데이터",
       "category": "매크로",
-      "impact": "positive",
-      "urgency": "IMPORTANT",
-      "detail": "대만이 약 69.9억 달러의 기록적 경상수지 흑자를 기록했으며, AI 및 전자제품 수출이 주도했다. 이는 글로벌 칩 수요의 강한 신호를 시사한다.[4]",
-      "kr_sectors_affected": [
-        "반도체",
-        "로봇/AI"
-      ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 4
-    },
-    {
-      "event": "미국 10년물 수익률 4.06% 상승 및 금리 인하 기대 축소",
-      "category": "정책",
       "impact": "negative",
       "urgency": "IMPORTANT",
-      "detail": "미국 10년물 수익률이 4.06% 근처에서 상승하고 있으며, 빠른 금리 인하 기대가 축소되고 있다. 이는 성장주, 기술주, 부동산 관련 종목에 역풍이 될 수 있다.[4]",
+      "detail": "예상보다 높은 생산자 물가 상승으로 투자자들이 인플레이션 우려를 키우며 벤치마크 지수 전반 하락했다.[1]",
       "kr_sectors_affected": [
-        "IT/소프트웨어",
         "금융",
-        "전력기기"
+        "IT/소프트웨어"
       ],
       "kr_impact_direction": "피해",
       "kr_impact_score": -3
     },
     {
-      "event": "Anthropic AI 통합 발표 및 엔터프라이즈 고객 확대",
-      "category": "기술",
-      "impact": "positive",
-      "urgency": "NORMAL",
-      "detail": "Anthropic이 엔터프라이즈 고객 대상 AI 통합을 발표했으며, Salesforce(4.1% 상승), DocuSign(2.6% 상승) 등 관련 기업들이 긍정 반응을 보였다.[2]",
-      "kr_sectors_affected": [
-        "IT/소프트웨어",
-        "로봇/AI"
-      ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 2
-    },
-    {
-      "event": "Nvidia 실적 발표 예정 및 기술주 변동성",
-      "category": "실적",
-      "impact": "neutral",
-      "urgency": "BREAKING",
-      "detail": "Nvidia가 2월 26일 장 마감 후 실적을 발표할 예정이며, 이를 앞두고 기술주 거래량이 증가했다. AI 관련 우려와 기대가 혼재하고 있다.[3]",
+      "event": "기술주 및 AI 관련 매도세",
+      "category": "섹터",
+      "impact": "negative",
+      "urgency": "IMPORTANT",
+      "detail": "AI 지출 지속성 우려로 반도체 및 소프트웨어주가 급락하며 기술 섹터가 최대 낙폭을 기록했다.[1][3]",
       "kr_sectors_affected": [
         "반도체",
         "로봇/AI"
       ],
-      "kr_impact_direction": "중립",
-      "kr_impact_score": 0
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -4
     },
     {
-      "event": "VIX 하락 및 변동성 완화",
-      "category": "매크로",
-      "impact": "positive",
+      "event": "금융주 하락",
+      "category": "섹터",
+      "impact": "negative",
       "urgency": "NORMAL",
-      "detail": "공포지수(VIX)가 19.55에서 17.93으로 8.3% 하락했으며, 시장 심리가 개선되고 있다.[1]",
+      "detail": "금융주가 기술주에 이어 큰 하락을 보이며 다우지수 1.1% 하락을 주도했다.[1]",
       "kr_sectors_affected": [
         "금융"
       ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 2
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -2
     },
     {
-      "event": "포트폴리오 리밸런싱 및 월말 수급 개선",
-      "category": "매크로",
-      "impact": "positive",
-      "urgency": "NORMAL",
-      "detail": "월말 포트폴리오 리밸런싱이 시장 상승을 견인했으며, 이는 단기적 기술적 요인으로 작용하고 있다.[3]",
+      "event": "관세 및 무역 정책 불확실성 부활",
+      "category": "정책",
+      "impact": "negative",
+      "urgency": "IMPORTANT",
+      "detail": "관세 불확실성과 무역 정책 우려가 투자 심리를 약화시키며 주가 하락을 부추겼다.[1][3]",
       "kr_sectors_affected": [
-        "금융"
+        "반도체",
+        "자동차"
       ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 1
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -3
+    },
+    {
+      "event": "S&P 500 및 다우 연속 하락",
+      "category": "매크로",
+      "impact": "negative",
+      "urgency": "NORMAL",
+      "detail": "S&P 500이 3월 4일 0.51% 추가 하락하며 6782포인트, 다우는 전일 0.89% 하락 마감했다.[2]",
+      "kr_sectors_affected": [
+        "IT/소프트웨어"
+      ],
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -2
+    },
+    {
+      "event": "아시아 주식 급락 및 한국 코스피 GFC 이후 최대 낙폭",
+      "category": "매크로",
+      "impact": "negative",
+      "urgency": "BREAKING",
+      "detail": "이란 불확실성으로 아시아 증시 매도세 확산, 한국 코스피 2일간 GFC 이후 최대 하락 기록.[4]",
+      "kr_sectors_affected": [
+        "반도체",
+        "화학/에너지"
+      ],
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -5
     }
   ],
   "event_stats": {
     "total": 7,
-    "breaking": 1,
+    "breaking": 2,
     "important": 3,
-    "positive": 5,
-    "negative": 1
+    "positive": 0,
+    "negative": 7
   },
   "sector_impacts": [
     {
+      "sector": "화학/에너지",
+      "impact": "피해",
+      "score": -4,
+      "reason": "호르무즈 해협 봉쇄로 유가 급등과 원가 부담 심화로 정유·화학 산업 타격 예상[1][4]",
+      "top_stocks": [
+        "LG화학",
+        "롯데케미칼",
+        "S-Oil"
+      ],
+      "trade_action": "비중축소"
+    },
+    {
       "sector": "반도체",
-      "impact": "수혜",
-      "score": 4,
-      "reason": "S&P 500 기술주 강세와 대만 AI/반도체 수출 호조로 글로벌 칩 수요 증가가 삼성전자, SK하이닉스 등에 긍정적",
+      "impact": "피해",
+      "score": -4,
+      "reason": "지정학 불확실성, 기술주 매도세, 관세 우려로 글로벌 수요 위축과 주가 하락[1][3][4]",
       "top_stocks": [
         "삼성전자",
         "SK하이닉스",
         "한미반도체"
       ],
-      "trade_action": "매수관심"
-    },
-    {
-      "sector": "IT/소프트웨어",
-      "impact": "수혜",
-      "score": 2,
-      "reason": "S&P 500 기술주 랠리와 Anthropic AI 통합 발표로 네이버, 카카오 등 소프트웨어 기업 수혜 예상되나 금리 상승 역풍 존재",
-      "top_stocks": [
-        "네이버",
-        "카카오",
-        "삼성SDS"
-      ],
-      "trade_action": "매수관심"
-    },
-    {
-      "sector": "로봇/AI",
-      "impact": "수혜",
-      "score": 3,
-      "reason": "대만 AI 수출 호조와 Anthropic 엔터프라이즈 AI 확대가 레인보우로보틱스 등 국내 AI/로봇주에 호재",
-      "top_stocks": [
-        "레인보우로보틱스",
-        "두산로보틱스",
-        "엔젤로보틱스"
-      ],
-      "trade_action": "매수관심"
+      "trade_action": "비중축소"
     },
     {
       "sector": "금융",
-      "impact": "수혜",
-      "score": 2,
-      "reason": "S&P 500 금융주 강세와 VIX 하락으로 시장 심리 개선이 KB금융 등에 긍정적이나 금리 상승 압력 상쇄",
+      "impact": "피해",
+      "score": -3,
+      "reason": "인플레이션 우려와 금리 인하 지연으로 금융주 하락 압력 지속[1][5]",
       "top_stocks": [
         "KB금융",
         "신한지주",
         "하나금융"
       ],
-      "trade_action": "매수관심"
+      "trade_action": "관망"
     },
     {
-      "sector": "전력기기",
+      "sector": "IT/소프트웨어",
       "impact": "피해",
-      "score": -2,
-      "reason": "미국 10년물 금리 상승으로 성장주 및 부동산 관련 전력기기주에 역풍",
+      "score": -3,
+      "reason": "뜨거운 생산자 물가와 인플레이션 우려로 기술 섹터 전반 약세[1]",
       "top_stocks": [
-        "HD현대일렉트릭",
-        "LS ELECTRIC"
+        "네이버",
+        "카카오",
+        "삼성SDS"
+      ],
+      "trade_action": "관망"
+    },
+    {
+      "sector": "로봇/AI",
+      "impact": "피해",
+      "score": -4,
+      "reason": "AI 관련 매도세 확산으로 반도체 연계 로봇/AI 주가 급락[3]",
+      "top_stocks": [
+        "레인보우로보틱스",
+        "두산로보틱스",
+        "엔젤로보틱스"
       ],
       "trade_action": "비중축소"
+    },
+    {
+      "sector": "자동차",
+      "impact": "피해",
+      "score": -3,
+      "reason": "관세·무역 정책 불확실성과 유가 상승으로 수출 및 원가 부담 증가[1][4]",
+      "top_stocks": [
+        "현대차",
+        "기아",
+        "현대모비스"
+      ],
+      "trade_action": "관망"
     }
   ],
   "sector_boost": {
-    "반도체": 4,
-    "IT/소프트웨어": 2,
-    "로봇/AI": 3,
-    "금융": 2,
-    "전력기기": -2
+    "화학/에너지": -4,
+    "반도체": -4,
+    "금융": -3,
+    "IT/소프트웨어": -3,
+    "로봇/AI": -4,
+    "자동차": -3
   },
   "hot_themes": [
-    "반도체/AI",
-    "기술주 랠리",
-    "로봇"
+    "호르무즈 해협 리스크",
+    "인플레이션 우려",
+    "기술주 매도세"
   ],
   "risk_factors": [
-    "미국 금리 상승 지속",
-    "금리 인하 기대 축소",
-    "글로벌 변동성 재점화"
+    "유가 급등 장기화",
+    "환율 상승 및 외국인 매도",
+    "글로벌 공급망 차질"
   ],
-  "beneficiary_stocks": [
-    "네이버",
-    "하나금융",
-    "두산로보틱스",
-    "카카오",
-    "한미반도체",
-    "레인보우로보틱스",
-    "삼성전자",
-    "삼성SDS",
-    "신한지주",
-    "KB금융",
-    "엔젤로보틱스",
-    "SK하이닉스"
-  ],
+  "beneficiary_stocks": [],
   "risk_stocks": [
-    "LS ELECTRIC",
-    "HD현대일렉트릭"
+    "LG화학",
+    "엔젤로보틱스",
+    "하나금융",
+    "레인보우로보틱스",
+    "롯데케미칼",
+    "KB금융",
+    "두산로보틱스",
+    "S-Oil",
+    "현대차",
+    "SK하이닉스",
+    "삼성SDS",
+    "한미반도체",
+    "신한지주",
+    "네이버",
+    "현대모비스",
+    "카카오",
+    "삼성전자",
+    "기아"
   ]
 }

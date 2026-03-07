@@ -1,52 +1,27 @@
 {
-  "decision_date": "2026-03-02",
-  "regime": "공격",
-  "available_slots": 10,
+  "decision_date": "2026-03-06",
+  "regime": "회피",
+  "available_slots": 0,
   "current_holdings": 0,
   "cash_pct_before": 100.0,
-  "cash_pct_after": 40.0,
-  "buys": [
+  "cash_pct_after": 100.0,
+  "buys": [],
+  "skipped": [
     {
-      "ticker": "022100",
-      "name": "포스코DX",
-      "conviction": 8,
-      "size_pct": 20.0,
-      "strategy": "momentum",
-      "thesis_alignment": "strong",
-      "entry_price": 39300,
-      "stop_loss_pct": -8.5,
-      "target_pct": 14.9,
-      "reasoning": "IT섹터 부스트(1.2x) + 즉시진입 타이밍 완벽 부합, ADX 25.1로 추세 확정"
+      "ticker": "010060",
+      "name": "OCI홀딩스",
+      "skip_reason": "회피 레짐 - 신규 매수 금지"
     },
     {
-      "ticker": "115180",
-      "name": "큐리언트",
-      "conviction": 7,
-      "size_pct": 20.0,
-      "strategy": "momentum",
-      "thesis_alignment": "strong",
-      "entry_price": 32250,
-      "stop_loss_pct": -15.9,
-      "target_pct": 27.9,
-      "reasoning": "AI 소프트웨어 업사이클 수혜 + IT섹터 즉시진입 시그널 강력 일치"
-    },
-    {
-      "ticker": "211050",
-      "name": "인카금융서비스",
-      "conviction": 7,
-      "size_pct": 20.0,
-      "strategy": "momentum",
-      "thesis_alignment": "moderate",
-      "entry_price": 14050,
-      "stop_loss_pct": -12.1,
-      "target_pct": 21.1,
-      "reasoning": "증권섹터 즉시진입 정책 부합 + ADX 22.6으로 추세 강도 확인"
+      "ticker": "298040",
+      "name": "효성중공업",
+      "skip_reason": "회피 레짐 - 신규 매수 금지"
     }
   ],
-  "skipped": [],
   "portfolio_warnings": [
-    "IT섹터 2종목(40%) 집중 - 섹터 리스크 노출",
-    "OBV 하락 추세 종목들로 단기 조정 가능성 존재"
+    "회피 레짐 발동 - 모든 신규 매수 금지",
+    "호르무즈 해협 봉쇄 위협으로 극단적 변동성 경계",
+    "VIX 30 이상, 서킷브레이커 발동 상황"
   ],
-  "reasoning": "공격 레짐에서 최대 3종목 신규매수 실행, 모두 '즉시진입' 타이밍 시그널과 부합하여 전량 매수. IT섹터 1.2x 부스트를 활용해 포스코DX와 큐리언트에 각 20% 배분하고, 증권섹터 인카금융서비스도 20% 배분하여 총 60% 투자, 현금 40% 보유로 추가 기회 대비."
+  "reasoning": "현재 회피 레짐(신뢰도 90%)으로 최대 신규매수 0종목, 현금 비중 100% 권고에 따라 모든 매수를 중단합니다. 호르무즈 해협 봉쇄 위협과 VIX 30 이상의 극단적 변동성, 서킷브레이커 발동 상황에서는 현금 보유가 최선의 전략입니다."
 }
