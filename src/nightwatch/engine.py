@@ -4,6 +4,7 @@ NIGHTWATCH Engine — 글로벌 시장 야간 수호자
 기존 US Overnight L1에 없는 고유 가치 레이어만 계산:
   L0: 선행지표 (HYG 크레딧 + VIX 기간구조)
   L1: 채권 자경단 (금리-주식 교차 분석 + 비토)
+  L2: 레짐 전환 선행 (크레딧 스프레드 + MOVE + 수익률 커브)  ← 2D 신규
   L4: 환율 삼각형 (원/달러 + USD/JPY + CNH)
 
 앙상블: 기존 US Overnight Score * 0.70 + NIGHTWATCH Score * 0.30
@@ -18,13 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class NightwatchEngine:
-    """NIGHTWATCH 3-Layer 고유 스코어 계산."""
+    """NIGHTWATCH 4-Layer 고유 스코어 계산."""
 
     # 기본값 (settings.yaml로 오버라이드 가능)
     DEFAULT_LAYER_WEIGHTS = {
-        "leading": 0.25,
-        "bond_vigilante": 0.45,
-        "fx_triangle": 0.30,
+        "leading": 0.20,
+        "regime_transition": 0.20,
+        "bond_vigilante": 0.35,
+        "fx_triangle": 0.25,
     }
 
     DEFAULT_BV_CFG = {
@@ -44,12 +46,21 @@ class NightwatchEngine:
         "critical_ret_5d": -0.04,     # -4%
     }
 
+    DEFAULT_RT_CFG = {
+        "credit_spread_z_warn": 1.5,
+        "credit_spread_z_critical": 2.0,
+        "move_z_warn": 1.5,
+        "move_z_critical": 2.0,
+        "curve_inversion_threshold": 0,  # 10Y-3M < 0 = 역전
+    }
+
     def __init__(self, settings: dict | None = None):
         nw = (settings or {}).get("nightwatch", {})
         self.weights = nw.get("layer_weights", self.DEFAULT_LAYER_WEIGHTS)
         self.bv_cfg = nw.get("bond_vigilante", self.DEFAULT_BV_CFG)
         self.fx_cfg = nw.get("fx_triangle", self.DEFAULT_FX_CFG)
         self.hyg_cfg = nw.get("hyg", self.DEFAULT_HYG_CFG)
+        self.rt_cfg = nw.get("regime_transition", self.DEFAULT_RT_CFG)
 
     def compute(self, df, latest, prev) -> dict:
         """NIGHTWATCH 스코어 계산.
@@ -63,27 +74,30 @@ class NightwatchEngine:
             {
                 "nightwatch_score": float (-1.0 ~ +1.0),
                 "bond_vigilante_veto": bool,
-                "layers": {L0, L1, L4 상세},
+                "layers": {L0, L1, L2, L4 상세},
             }
         """
         l0 = self._compute_leading(latest, prev, df)
         l1 = self._compute_bond_vigilante(latest, prev)
+        l2 = self._compute_regime_transition(latest, prev)
         l4 = self._compute_fx_triangle(latest, prev)
 
         nw_score = (
-            l0["score"] * self.weights.get("leading", 0.25)
-            + l1["score"] * self.weights.get("bond_vigilante", 0.45)
-            + l4["score"] * self.weights.get("fx_triangle", 0.30)
+            l0["score"] * self.weights.get("leading", 0.20)
+            + l1["score"] * self.weights.get("bond_vigilante", 0.35)
+            + l2["score"] * self.weights.get("regime_transition", 0.20)
+            + l4["score"] * self.weights.get("fx_triangle", 0.25)
         )
         nw_score = max(-1.0, min(1.0, nw_score))
 
         return {
-            "version": "1.0",
+            "version": "2.0",
             "nightwatch_score": round(nw_score, 4),
             "bond_vigilante_veto": l1["veto"],
             "layers": {
                 "L0_leading": l0,
                 "L1_bond_vigilante": l1,
+                "L2_regime_transition": l2,
                 "L4_fx_triangle": l4,
             },
         }
@@ -225,6 +239,93 @@ class NightwatchEngine:
         score = max(-1.0, min(1.0, score))
         details["score"] = round(score, 4)
         details["veto"] = veto
+        return details
+
+    # ──────────────────────────────────────────
+    # L2: 레짐 전환 선행지표 (2D)
+    # ──────────────────────────────────────────
+    def _compute_regime_transition(self, latest, prev) -> dict:
+        """레짐 전환 사전 감지.
+
+        3가지 선행지표 교차 분석:
+        - 크레딧 스프레드 z-score (HY-IG): 급등 = 위기 선행
+        - MOVE 인덱스 z-score: 채권시장 공포
+        - 10Y-3M 수익률 커브: 역전 = 침체 선행
+        """
+        score = 0.0
+        details: dict[str, Any] = {}
+
+        # ── 크레딧 스프레드 z-score ──
+        credit_z = _safe_float(latest, "credit_spread_z")
+        details["credit_spread_z"] = round(credit_z, 2) if credit_z is not None else None
+
+        cs_warn = self.rt_cfg.get("credit_spread_z_warn", 1.5)
+        cs_crit = self.rt_cfg.get("credit_spread_z_critical", 2.0)
+
+        if credit_z is not None:
+            if credit_z >= cs_crit:
+                score -= 0.6
+                details["credit_status"] = "CRITICAL"
+            elif credit_z >= cs_warn:
+                score -= 0.3
+                details["credit_status"] = "WARNING"
+            elif credit_z <= -1.0:
+                score += 0.2
+                details["credit_status"] = "STABLE"
+            else:
+                details["credit_status"] = "NORMAL"
+
+        # ── MOVE 인덱스 z-score ──
+        move_z = _safe_float(latest, "move_z")
+        move_level = _safe_float(latest, "move_level")
+        details["move_z"] = round(move_z, 2) if move_z is not None else None
+        details["move_level"] = round(move_level, 1) if move_level is not None else None
+
+        mv_warn = self.rt_cfg.get("move_z_warn", 1.5)
+        mv_crit = self.rt_cfg.get("move_z_critical", 2.0)
+
+        if move_z is not None:
+            if move_z >= mv_crit:
+                score -= 0.4
+                details["move_status"] = "CRITICAL"
+            elif move_z >= mv_warn:
+                score -= 0.2
+                details["move_status"] = "WARNING"
+            elif move_z <= 0:
+                score += 0.1
+                details["move_status"] = "STABLE"
+            else:
+                details["move_status"] = "NORMAL"
+
+        # ── 10Y-3M 수익률 커브 ──
+        curve = _safe_float(latest, "yield_curve_10_3m")
+        details["yield_curve_10_3m"] = round(curve, 3) if curve is not None else None
+
+        inv_th = self.rt_cfg.get("curve_inversion_threshold", 0)
+
+        if curve is not None:
+            if curve < inv_th:
+                score -= 0.3
+                details["curve_status"] = "INVERTED"
+            elif curve < 0.5:
+                score -= 0.1
+                details["curve_status"] = "FLAT"
+            elif curve > 1.0:
+                score += 0.1
+                details["curve_status"] = "NORMAL"
+            else:
+                details["curve_status"] = "NEUTRAL"
+
+        # ── 이중 경보: 크레딧 + MOVE 동시 경고 ──
+        if (credit_z is not None and credit_z >= cs_warn and
+                move_z is not None and move_z >= mv_warn):
+            score -= 0.3
+            details["dual_alarm"] = True
+        else:
+            details["dual_alarm"] = False
+
+        score = max(-1.0, min(1.0, score))
+        details["score"] = round(score, 4)
         return details
 
     # ──────────────────────────────────────────

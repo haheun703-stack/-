@@ -1555,11 +1555,20 @@ nightwatch:
     existing: 0.70
     nightwatch: 0.30
 
-  # NIGHTWATCH 내부 레이어 가중치
+  # NIGHTWATCH 내부 레이어 가중치 (4개 레이어, 합=1.0)
   layer_weights:
-    leading: 0.25         # L0: HYG 크레딧 + VIX 기간구조
-    bond_vigilante: 0.45  # L1: 채권 자경단 (핵심)
-    fx_triangle: 0.30     # L4: 환율 삼각형
+    leading: 0.20              # L0: HYG 크레딧 + VIX 기간구조
+    regime_transition: 0.20    # L2: 크레딧 스프레드 + MOVE + 수익률 커브 (2D)
+    bond_vigilante: 0.35       # L1: 채권 자경단 (핵심)
+    fx_triangle: 0.25          # L4: 환율 삼각형
+
+  # L2: 레짐 전환 선행지표 (2D)
+  regime_transition:
+    credit_spread_z_warn: 1.5       # HY-IG z-score 경고
+    credit_spread_z_critical: 2.0   # HY-IG z-score 위기
+    move_z_warn: 1.5                # MOVE z-score 경고
+    move_z_critical: 2.0            # MOVE z-score 위기
+    curve_inversion_threshold: 0    # 10Y-3M < 0 = 역전
 
   # L1: 채권 자경단 비토
   bond_vigilante:
@@ -1721,3 +1730,22 @@ shield:
   equity_tracker_auto_update: true  # equity_tracker.json 자동 업데이트
   telegram_alert: true
   alert_levels: ["ORANGE", "RED"]   # 이 등급 이상 텔레그램 발송
+
+  # S4: 교차자산 상관관계 붕괴 감지 (3D)
+  correlation:
+    enabled: true
+    window: 60                       # 롤링 상관계수 윈도우 (일)
+    pairs:
+      gold_spy:
+        normal_sign: "negative"      # 정상: 음의 상관 (안전자산 ↔ 위험자산)
+        breakdown_threshold: 0.3     # 이 이상이면 동시하락 = 유동성 위기
+      dollar_spy:
+        normal_sign: "negative"      # 정상: 약한 음의 상관
+        breakdown_threshold: 0.4     # 달러-주식 동조 = 비정상
+      bond_spy:
+        normal_sign: "negative"      # 정상: 음의 상관 (flight to safety)
+        breakdown_threshold: 0.3     # 채권-주식 동조 = 헤지 실패
+      oil_spy:
+        normal_sign: "positive"      # 정상: 양의 상관 (경기 동행)
+        breakdown_threshold: -0.3    # 유가↓+주식↓ = 수요 붕괴
+    danger_count: 3                  # 3개+ 동시 붕괴 = DANGER

@@ -333,7 +333,7 @@ def _classify_shock_type(latest, prev, special_rules: list, nightwatch: dict) ->
 def _run_level2_pattern(df: pd.DataFrame, latest, prev) -> dict:
     """Level 2 패턴매칭 실행. DB 없으면 스킵."""
     try:
-        from scripts.backfill_us_kr_history import PatternMatcher
+        from scripts.archive.backfill.backfill_us_kr_history import PatternMatcher
     except ImportError:
         return {"status": "import_error", "pattern_adjustment": 0, "confidence": 0}
 
@@ -377,7 +377,7 @@ def _run_level2_pattern(df: pd.DataFrame, latest, prev) -> dict:
 def update_latest() -> pd.DataFrame:
     """yfinance로 최신 데이터 추가 (증분)."""
     import yfinance as yf
-    from scripts.us_overnight_backfill import TICKERS, _calc_derived
+    from scripts.us_data_backfill import TICKERS, _calc_derived
 
     if not PARQUET_PATH.exists():
         logger.error(f"백필 데이터 없음: {PARQUET_PATH} → 먼저 us_overnight_backfill.py 실행")
@@ -403,7 +403,7 @@ def update_latest() -> pd.DataFrame:
                 continue
 
             new.index = pd.to_datetime(new.index).tz_localize(None).normalize()
-            prefix = ticker.replace("^", "").lower()
+            prefix = ticker.replace("^", "").replace("=", "").replace("-", "").lower()
             cols = {
                 "Close": f"{prefix}_close",
                 "Volume": f"{prefix}_volume",
@@ -1116,6 +1116,7 @@ def format_telegram_message(signal: dict) -> str:
         layers = nw.get("layers", {})
         l0 = layers.get("L0_leading", {})
         l1 = layers.get("L1_bond_vigilante", {})
+        l2 = layers.get("L2_regime_transition", {})
         l4 = layers.get("L4_fx_triangle", {})
 
         veto_mark = " VETO!" if nw.get("bond_vigilante_veto") else ""
@@ -1132,6 +1133,16 @@ def format_telegram_message(signal: dict) -> str:
         tnx_bp = l1.get("tnx_change_bp", "N/A")
         cross = l1.get("cross_regime", "?")
         lines.append(f"  L1 채권자경단: 10Y {tnx_bp}bp | {cross}")
+
+        # L2 (2D)
+        if l2:
+            cs_z = l2.get("credit_spread_z", "N/A")
+            cs_st = l2.get("credit_status", "?")
+            mv_z = l2.get("move_z", "N/A")
+            mv_st = l2.get("move_status", "?")
+            curve = l2.get("yield_curve_10_3m", "N/A")
+            dual = " DUAL!" if l2.get("dual_alarm") else ""
+            lines.append(f"  L2 레짐전환: Credit z:{cs_z} [{cs_st}] | MOVE z:{mv_z} [{mv_st}] | 10Y-3M:{curve}{dual}")
 
         # L4
         jpy_chg = l4.get("usdjpy_change_pct", "N/A")

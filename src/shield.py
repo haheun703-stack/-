@@ -25,6 +25,11 @@ from pathlib import Path
 
 import yaml
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -120,6 +125,27 @@ class SystemicRisk:
 
 
 @dataclass
+class CorrelationBreakdown:
+    """교차자산 상관관계 붕괴 감지 (S4)."""
+    pair_name: str               # "gold_spy", "dollar_spy" 등
+    current_corr: float          # 현재 60일 상관계수
+    normal_sign: str             # "negative" 또는 "positive"
+    breakdown_threshold: float   # 붕괴 판정 기준
+    is_breakdown: bool           # 붕괴 여부
+    severity: str                # OK / WARNING / DANGER
+
+    def to_dict(self) -> dict:
+        return {
+            "pair_name": self.pair_name,
+            "current_corr": self.current_corr,
+            "normal_sign": self.normal_sign,
+            "breakdown_threshold": self.breakdown_threshold,
+            "is_breakdown": self.is_breakdown,
+            "severity": self.severity,
+        }
+
+
+@dataclass
 class ShieldReport:
     """SHIELD 전체 리포트."""
     timestamp: str
@@ -128,6 +154,7 @@ class ShieldReport:
     mdd_status: MddStatus
     stock_alerts: list[StockAlert]
     systemic_risk: SystemicRisk
+    correlation_breakdowns: list[CorrelationBreakdown]
     brain_overrides: dict               # BRAIN에 전달할 보정 지시
     warnings: list[str]
     telegram_message: str
@@ -140,6 +167,7 @@ class ShieldReport:
             "mdd_status": self.mdd_status.to_dict(),
             "stock_alerts": [a.to_dict() for a in self.stock_alerts],
             "systemic_risk": self.systemic_risk.to_dict(),
+            "correlation_breakdowns": [c.to_dict() for c in self.correlation_breakdowns],
             "brain_overrides": self.brain_overrides,
             "warnings": self.warnings,
         }
@@ -259,20 +287,25 @@ class Shield:
         stock_alerts = self._check_stock_alerts(holdings)
         systemic_risk = self._check_systemic_risk(holdings)
 
+        # ── 4.5. S4: 교차자산 상관관계 붕괴 감지 ──
+        correlation_breakdowns = self._check_correlation_breakdown()
+
         # ── 5. 종합 위험 등급 ──
         overall_level = self._determine_overall_level(
-            overlaps, mdd_status, stock_alerts, systemic_risk
+            overlaps, mdd_status, stock_alerts, systemic_risk,
+            correlation_breakdowns
         )
 
         # ── 6. BRAIN 보정 지시 생성 ──
         brain_overrides = self._build_brain_overrides(
-            overlaps, mdd_status, stock_alerts, systemic_risk, overall_level
+            overlaps, mdd_status, stock_alerts, systemic_risk,
+            correlation_breakdowns, overall_level
         )
 
         # ── 7. 텔레그램 메시지 ──
         telegram_msg = self._build_telegram_message(
             overall_level, overlaps, mdd_status, stock_alerts, systemic_risk,
-            portfolio_value
+            correlation_breakdowns, portfolio_value
         )
 
         report = ShieldReport(
@@ -282,6 +315,7 @@ class Shield:
             mdd_status=mdd_status,
             stock_alerts=stock_alerts,
             systemic_risk=systemic_risk,
+            correlation_breakdowns=correlation_breakdowns,
             brain_overrides=brain_overrides,
             warnings=warnings,
             telegram_message=telegram_msg,
@@ -530,6 +564,95 @@ class Shield:
         )
 
     # ────────────────────────────────────────
+    # S4: 교차자산 상관관계 붕괴 감지
+    # ────────────────────────────────────────
+    def _check_correlation_breakdown(self) -> list[CorrelationBreakdown]:
+        """us_daily.parquet에서 60일 롤링 상관관계 읽어 붕괴 감지."""
+        corr_cfg = self.shield_cfg.get("correlation", {})
+        if not corr_cfg.get("enabled", False):
+            return []
+
+        parquet_path = PROJECT_ROOT / "data" / "us_market" / "us_daily.parquet"
+        if pd is None or not parquet_path.exists():
+            return []
+
+        try:
+            df = pd.read_parquet(parquet_path)
+        except Exception:
+            logger.warning("S4: parquet 읽기 실패")
+            return []
+
+        if df.empty:
+            return []
+
+        latest = df.iloc[-1]
+        pairs_cfg = corr_cfg.get("pairs", {})
+
+        # 컬럼 매핑: pair_name → parquet 컬럼
+        corr_columns = {
+            "gold_spy": "corr_gold_spy_60d",
+            "dollar_spy": "corr_dollar_spy_60d",
+            "bond_spy": "corr_bond_spy_60d",
+            "oil_spy": "corr_oil_spy_60d",
+        }
+
+        breakdowns: list[CorrelationBreakdown] = []
+
+        for pair_name, col_name in corr_columns.items():
+            pair_cfg = pairs_cfg.get(pair_name, {})
+            if not pair_cfg:
+                continue
+
+            corr_val = None
+            try:
+                v = latest.get(col_name) if hasattr(latest, "get") else latest[col_name]
+                if v is not None:
+                    import math
+                    f = float(v)
+                    if not math.isnan(f) and not math.isinf(f):
+                        corr_val = f
+            except (KeyError, IndexError, ValueError, TypeError):
+                pass
+
+            if corr_val is None:
+                continue
+
+            normal_sign = pair_cfg.get("normal_sign", "negative")
+            threshold = pair_cfg.get("breakdown_threshold", 0.3)
+
+            # 붕괴 판정
+            if normal_sign == "negative":
+                # 정상: 음의 상관 → 양으로 전환되면 붕괴
+                is_breakdown = corr_val > threshold
+            else:
+                # 정상: 양의 상관 → 음으로 전환되면 붕괴
+                is_breakdown = corr_val < threshold
+
+            if is_breakdown:
+                severity = "DANGER"
+            elif normal_sign == "negative" and corr_val > threshold * 0.7:
+                severity = "WARNING"
+            elif normal_sign == "positive" and corr_val < threshold * 0.7:
+                severity = "WARNING"
+            else:
+                severity = "OK"
+
+            breakdowns.append(CorrelationBreakdown(
+                pair_name=pair_name,
+                current_corr=round(corr_val, 4),
+                normal_sign=normal_sign,
+                breakdown_threshold=threshold,
+                is_breakdown=is_breakdown,
+                severity=severity,
+            ))
+
+        breakdown_count = sum(1 for b in breakdowns if b.is_breakdown)
+        if breakdown_count > 0:
+            logger.warning("S4: %d개 상관관계 붕괴 감지", breakdown_count)
+
+        return breakdowns
+
+    # ────────────────────────────────────────
     # 종합 판정
     # ────────────────────────────────────────
     def _determine_overall_level(
@@ -538,6 +661,7 @@ class Shield:
         mdd: MddStatus,
         alerts: list[StockAlert],
         systemic: SystemicRisk,
+        corr_breakdowns: list[CorrelationBreakdown] | None = None,
     ) -> str:
         """GREEN / YELLOW / ORANGE / RED 결정."""
         danger_count = 0
@@ -559,6 +683,15 @@ class Shield:
 
         warning_count += len(alerts)
 
+        # S4: 상관관계 붕괴
+        danger_threshold = self.shield_cfg.get("correlation", {}).get("danger_count", 3)
+        if corr_breakdowns:
+            bd_count = sum(1 for b in corr_breakdowns if b.is_breakdown)
+            if bd_count >= danger_threshold:
+                danger_count += 1  # 유동성 위기
+            elif bd_count >= 2:
+                warning_count += 1
+
         if danger_count >= 2:
             return "RED"
         if danger_count >= 1:
@@ -575,7 +708,8 @@ class Shield:
         mdd: MddStatus,
         alerts: list[StockAlert],
         systemic: SystemicRisk,
-        overall_level: str,
+        corr_breakdowns: list[CorrelationBreakdown] | None = None,
+        overall_level: str = "GREEN",
     ) -> dict:
         """BRAIN에 전달할 보정 지시."""
         overrides: dict = {
@@ -633,6 +767,24 @@ class Shield:
                 f"S3: {systemic.simultaneous_decline_count}개 동시하락 (avg {systemic.avg_decline_pct:+.1f}%)"
             )
 
+        # S4: 상관관계 붕괴
+        if corr_breakdowns:
+            danger_threshold = self.shield_cfg.get("correlation", {}).get("danger_count", 3)
+            bd_count = sum(1 for b in corr_breakdowns if b.is_breakdown)
+            bd_pairs = [b.pair_name for b in corr_breakdowns if b.is_breakdown]
+            if bd_count >= danger_threshold:
+                adj = overrides["arm_adjustments"]
+                adj["etf_leverage"] = adj.get("etf_leverage", 0) - 100
+                adj["etf_sector"] = adj.get("etf_sector", 0) - 50
+                adj["cash"] = adj.get("cash", 0) + 50
+                overrides["messages"].append(
+                    f"S4: 유동성 위기 ({bd_count}개 상관붕괴: {', '.join(bd_pairs)})"
+                )
+            elif bd_count >= 2:
+                overrides["messages"].append(
+                    f"S4: 상관붕괴 경고 ({bd_count}개: {', '.join(bd_pairs)})"
+                )
+
         return overrides
 
     def _build_telegram_message(
@@ -642,7 +794,8 @@ class Shield:
         mdd: MddStatus,
         alerts: list[StockAlert],
         systemic: SystemicRisk,
-        portfolio_value: float,
+        corr_breakdowns: list[CorrelationBreakdown] | None = None,
+        portfolio_value: float = 0,
     ) -> str:
         """텔레그램 경보 메시지."""
         emoji_map = {"GREEN": "G", "YELLOW": "Y", "ORANGE": "O", "RED": "R"}
@@ -679,6 +832,15 @@ class Shield:
             lines.append(f"Systemic: {systemic.message}")
             for t in systemic.decline_tickers:
                 lines.append(f"  {t}")
+            lines.append("")
+
+        # 상관관계 붕괴
+        if corr_breakdowns:
+            bd_items = [b for b in corr_breakdowns if b.is_breakdown]
+            if bd_items:
+                lines.append(f"Correlation Breakdown ({len(bd_items)}):")
+                for b in bd_items:
+                    lines.append(f"  {b.pair_name}: {b.current_corr:+.3f} (정상: {b.normal_sign})")
 
         return "\n".join(lines)
 
@@ -712,6 +874,7 @@ class Shield:
             mdd_status=MddStatus(0, 0, 0, 0, "", "NONE", ""),
             stock_alerts=[],
             systemic_risk=SystemicRisk(0, [], 0, "OK", "데이터 부족"),
+            correlation_breakdowns=[],
             brain_overrides={
                 "shield_level": "YELLOW",
                 "arm_adjustments": {},

@@ -237,6 +237,26 @@ class Brain:
             adjustments.extend(nw_adj["adjustments"])
             warnings.extend(nw_adj.get("warnings", []))
 
+        # ── 5.5. 2D 레짐 전환 선제 방어 ──
+        nw_layers = nw.get("layers", {}) if isinstance(nw, dict) else {}
+        l2_data = nw_layers.get("L2_regime_transition", {})
+        credit_z = l2_data.get("credit_spread_z") or 0
+        move_z = l2_data.get("move_z") or 0
+
+        if credit_z >= 2.0 or move_z >= 2.0:
+            # 크레딧/채권 위기 선행 → 레버리지 제거, 방어자산 확대
+            arms["etf_leverage"] = 0
+            arms["etf_gold"] = arms.get("etf_gold", 0) + 5
+            arms["etf_bonds"] = arms.get("etf_bonds", 0) + 5
+            arms["cash"] = arms.get("cash", 0) + 10
+            adjustments.append(f"2D 선제방어: credit_z={credit_z:.1f}, MOVE_z={move_z:.1f}")
+        elif credit_z >= 1.5 and move_z >= 1.0:
+            # 경고 구간 → 소폭 방어
+            arms["etf_leverage"] = max(0, arms.get("etf_leverage", 0) - 5)
+            arms["etf_gold"] = arms.get("etf_gold", 0) + 3
+            arms["cash"] = arms.get("cash", 0) + 2
+            adjustments.append(f"2D 경고: credit_z={credit_z:.1f}, MOVE_z={move_z:.1f}")
+
         # ── 6. 충격 유형별 보정 ──
         if shock_type != "NONE" and shock_type in self.SHOCK_ARM_ADJUSTMENTS:
             shock_adj = self.SHOCK_ARM_ADJUSTMENTS[shock_type]

@@ -53,5 +53,16 @@
     "total_invest": 56.2,
     "cash": 43.8,
     "adjustments_count": 3
+  },
+  {
+    "date": "2026-03-07",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": -0.245,
+    "vix": 29.5,
+    "confidence": 0.6,
+    "total_invest": 66.2,
+    "cash": 33.8,
+    "adjustments_count": 4
   }
 ]
