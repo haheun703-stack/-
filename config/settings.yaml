@@ -1337,13 +1337,15 @@ etf_rotation:
 
   # 레짐별 비중 매트릭스 (%) — PRE_ 선행 레짐 포함
   regime_allocation:
-    BULL:       {sector: 30, leverage: 15, index: 20, gold: 5, small_cap: 10, bonds: 0, dollar: 0, cash: 20}
-    PRE_BULL:   {sector: 25, leverage: 10, index: 20, gold: 5, small_cap: 5,  bonds: 5, dollar: 0, cash: 30}
-    CAUTION:    {sector: 20, leverage: 0,  index: 20, gold: 10, small_cap: 0, bonds: 10, dollar: 5, cash: 35}
-    PRE_BEAR:   {sector: 5,  leverage: 15, index: 5,  gold: 10, small_cap: 0, bonds: 15, dollar: 10, cash: 40}
-    BEAR:       {sector: 0,  leverage: 15, index: 5,  gold: 15, small_cap: 0, bonds: 15, dollar: 10, cash: 40}
-    PRE_CRISIS: {sector: 0,  leverage: 20, index: 0,  gold: 10, small_cap: 0, bonds: 15, dollar: 15, cash: 40}
-    CRISIS:     {sector: 0,  leverage: 20, index: 0,  gold: 10, small_cap: 0, bonds: 15, dollar: 15, cash: 40}
+    # 2024-2026 백테스트 기반 교정 (v13.8)
+    # Gold 확대, 채권 축소 (금리 인상기 TLT 비유효), 공격 레짐 현금 축소
+    BULL:       {sector: 30, leverage: 15, index: 20, gold: 10, small_cap: 10, bonds: 0, dollar: 0, cash: 15}
+    PRE_BULL:   {sector: 25, leverage: 10, index: 20, gold: 10, small_cap: 5,  bonds: 5, dollar: 0, cash: 25}
+    CAUTION:    {sector: 20, leverage: 0,  index: 20, gold: 15, small_cap: 0, bonds: 5, dollar: 5, cash: 35}
+    PRE_BEAR:   {sector: 0,  leverage: 15, index: 0,  gold: 10, small_cap: 0, bonds: 10, dollar: 15, cash: 50}
+    BEAR:       {sector: 0,  leverage: 15, index: 0,  gold: 25, small_cap: 0, bonds: 10, dollar: 10, cash: 40}
+    PRE_CRISIS: {sector: 0,  leverage: 20, index: 0,  gold: 20, small_cap: 0, bonds: 5,  dollar: 15, cash: 40}
+    CRISIS:     {sector: 0,  leverage: 15, index: 0,  gold: 20, small_cap: 0, bonds: 5,  dollar: 15, cash: 45}
 
   # 섹터 ETF 파라미터
   sector:
@@ -1564,14 +1566,16 @@ nightwatch:
 
   # L2: 레짐 전환 선행지표 (2D)
   regime_transition:
-    credit_spread_z_warn: 1.5       # HY-IG z-score 경고
-    credit_spread_z_critical: 2.0   # HY-IG z-score 위기
-    move_z_warn: 1.5                # MOVE z-score 경고
-    move_z_critical: 2.0            # MOVE z-score 위기
+    credit_spread_z_warn: 3.0       # HY-IG z-score 경고 (v13.8: 1.5→3.0, 백테스트 적중률 35%로 상향)
+    credit_spread_z_critical: 4.0   # HY-IG z-score 위기 (v13.8: 2.0→4.0)
+    move_z_warn: 3.0                # MOVE z-score 경고 (v13.8: 1.5→3.0, 백테스트 적중률 50%로 상향)
+    move_z_critical: 4.0            # MOVE z-score 위기 (v13.8: 2.0→4.0)
     curve_inversion_threshold: 0    # 10Y-3M < 0 = 역전
 
   # L1: 채권 자경단 비토
+  # v13.8: 백테스트 적중률 37%(랜덤 이하) → 비활성화. 코드 유지, enabled=false
   bond_vigilante:
+    enabled: false             # v13.8: 비활성화 (적중률 37%, 오탐 과다)
     spy_threshold: -0.01      # SPY -1% 이하 + 금리 상승 → 비토
     tnx_threshold_bp: 0.05    # 10Y 금리 +5bp 이상 (parquet %p 단위: 0.05 = 5bp)
     veto_score_cap: -0.50     # 비토 시 ensemble score 상한
@@ -1747,9 +1751,11 @@ cot_tracker:
     safety_demand_boost_pct: 3.0       # 금 안전수요 시 금ETF 확대 (%p)
     slowdown_bond_boost_pct: 3.0       # 국채 매수 시 채권ETF 확대 (%p)
   cross_validation:
-    aligned_confidence_bonus: 0.10     # NW-COT 동조 시 확신도 가산
-    diverged_confidence_penalty: 0.05  # NW-COT 괴리 시 확신도 차감
-    diverged_change_mult: 0.50         # 괴리 시 배분 변경폭 배수
+    enabled: false                      # v13.8: change_mult 비활성화 (1.0 고정). 로그는 유지
+    aligned_threshold: 0.50             # v13.8: ±0.20→±0.50 (92% MIXED 해소)
+    aligned_confidence_bonus: 0.10      # NW-COT 동조 시 확신도 가산 (enabled=false 시 미적용)
+    diverged_confidence_penalty: 0.05   # NW-COT 괴리 시 확신도 차감 (enabled=false 시 미적용)
+    diverged_change_mult: 0.50          # 괴리 시 배분 변경폭 배수 (enabled=false 시 1.0 고정)
 
 # ─── SHIELD 포트폴리오 방어 시스템 ───
 # BRAIN 전에 실행. 3대 방어축:

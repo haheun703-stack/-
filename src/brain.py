@@ -185,7 +185,10 @@ class Brain:
         kospi_regime = kospi.get("regime", "CAUTION")
         nw = us_signal.get("nightwatch", {})
         nw_score = nw.get("nightwatch_score", 0.0) if isinstance(nw, dict) else 0.0
-        bv_veto = nw.get("bond_vigilante_veto", False) if isinstance(nw, dict) else False
+        bv_cfg = self.settings.get("nightwatch", {}).get("bond_vigilante", {})
+        bv_enabled = bv_cfg.get("enabled", True)
+        bv_veto_raw = nw.get("bond_vigilante_veto", False) if isinstance(nw, dict) else False
+        bv_veto = bv_veto_raw and bv_enabled  # v13.8: enabled=false → 항상 False
         vix_data = us_signal.get("vix", {})
         vix_level = float(vix_data.get("level", 20.0))
         us_grade = us_signal.get("grade", "NEUTRAL")
@@ -549,17 +552,24 @@ class Brain:
         stale_mult = 0.5 if stale_days > stale_warn else 1.0
 
         # NW-COT 교차검증
-        nw_bearish = nw_score <= -0.20
-        nw_bullish = nw_score >= 0.20
-        cot_bearish = composite_score <= -0.20
-        cot_bullish = composite_score >= 0.20
+        cross_cfg = cot_cfg.get("cross_validation", {})
+        cross_enabled = cross_cfg.get("enabled", True)
+        align_th = cross_cfg.get("aligned_threshold", 0.50)  # v13.8: ±0.20→±0.50
+
+        nw_bearish = nw_score <= -align_th
+        nw_bullish = nw_score >= align_th
+        cot_bearish = composite_score <= -align_th
+        cot_bullish = composite_score >= align_th
 
         aligned = (nw_bearish and cot_bearish) or (nw_bullish and cot_bullish)
         diverged = (nw_bearish and cot_bullish) or (nw_bullish and cot_bearish)
 
-        cross_cfg = cot_cfg.get("cross_validation", {})
-        diverged_mult = cross_cfg.get("diverged_change_mult", 0.50)
-        change_mult = 1.0 if aligned else (diverged_mult if diverged else 0.75)
+        # v13.8: cross_validation.enabled=false → change_mult 항상 1.0 (로그는 유지)
+        if cross_enabled:
+            diverged_mult = cross_cfg.get("diverged_change_mult", 0.50)
+            change_mult = 1.0 if aligned else (diverged_mult if diverged else 0.75)
+        else:
+            change_mult = 1.0  # 비활성화: 배분 변경폭 제한 없음
         change_mult *= stale_mult
 
         arm_cfg = cot_cfg.get("arm_adjustments", {})
@@ -714,8 +724,8 @@ class Brain:
     # ────────────────────────────────────────
     # 10. 신뢰도
     # ────────────────────────────────────────
-    @staticmethod
     def _calc_confidence(
+        self,
         kospi_regime: str, effective_regime: str,
         nw_score: float, vix_level: float,
         macro_score: int, shock_type: str,
@@ -755,11 +765,14 @@ class Brain:
         if not confirmed:
             conf -= 0.15
 
-        # COT-NW 교차검증 보정
-        if cot_nw_aligned == "ALIGNED":
-            conf += 0.10  # Fast+Slow 동조 → 확신 강화
-        elif cot_nw_aligned == "DIVERGED":
-            conf -= 0.05  # 충돌 → 불확실성 증가
+        # COT-NW 교차검증 보정 (v13.8: cross_validation.enabled 체크)
+        cot_cross_enabled = self.settings.get("cot_tracker", {}).get(
+            "cross_validation", {}).get("enabled", True)
+        if cot_cross_enabled:
+            if cot_nw_aligned == "ALIGNED":
+                conf += 0.10  # Fast+Slow 동조 → 확신 강화
+            elif cot_nw_aligned == "DIVERGED":
+                conf -= 0.05  # 충돌 → 불확실성 증가
 
         return max(0.10, min(0.95, conf))
 
