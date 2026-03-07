@@ -211,6 +211,125 @@ def _check_special_rules(latest, prev) -> list[dict]:
     return triggered
 
 
+def _classify_shock_type(latest, prev, special_rules: list, nightwatch: dict) -> dict:
+    """충격 유형 분류 — CORTEX 아이디어 차용.
+
+    기존 데이터(special_rules, commodities, NIGHTWATCH)를 재활용하여
+    당일 충격 유형을 태깅한다. 나중에 BEAR/CRISIS 레짐에서 낙폭 게이트
+    구현 시 축적된 shock_type 데이터를 활용.
+
+    분류:
+        GEOPOLITICAL — 유가 급등 + 금 상승 + VIX 스파이크
+        RATE         — 채권 금리 급변 (NIGHTWATCH L1 기반)
+        LIQUIDITY    — VIX 스파이크 + 구리 급락 + 다수 섹터 동시 하락
+        EARNINGS     — SOXX 급락 but SPY 상대적 방어 (섹터 특정)
+        COMPOUND     — 2개 이상 동시 감지
+        NONE         — 특이 충격 없음
+    """
+    def _ret(col):
+        return float(latest.get(col, 0) or 0)
+
+    def _close_chg(col):
+        cur = float(latest.get(col, 0) or 0)
+        prv = float(prev.get(col, 0) or 0)
+        if prv > 0 and cur > 0:
+            return (cur - prv) / prv
+        return 0.0
+
+    scores = {"GEOPOLITICAL": 0, "RATE": 0, "LIQUIDITY": 0, "EARNINGS": 0}
+    signals = {}
+
+    uso_ret = _ret("uso_ret_1d")
+    gld_ret = _ret("gld_ret_1d")
+    spy_ret = _ret("spy_ret_1d")
+    qqq_ret = _ret("qqq_ret_1d")
+    soxx_ret = _ret("soxx_ret_1d")
+    vix_chg = _close_chg("vix_close")
+    vix_level = float(latest.get("vix_close", 20) or 20)
+    copx_ret = _ret("copx_ret_1d")
+
+    # ── 지정학 시그널 ──
+    if uso_ret >= 0.05:  # 유가 +5%+
+        scores["GEOPOLITICAL"] += 35
+        signals["oil_spike"] = round(uso_ret * 100, 2)
+    if gld_ret >= 0.015:  # 금 +1.5%+ (risk-off)
+        scores["GEOPOLITICAL"] += 15
+        signals["gold_risk_off"] = round(gld_ret * 100, 2)
+    if vix_chg >= 0.15 and vix_level >= 25:  # VIX 급등 + 높은 수준
+        scores["GEOPOLITICAL"] += 20
+        signals["vix_fear"] = round(vix_level, 1)
+
+    # ── 금리 시그널 (NIGHTWATCH L1 기반) ──
+    nw_layers = nightwatch.get("layers", {}) if isinstance(nightwatch, dict) else {}
+    l1 = nw_layers.get("L1_bond_vigilante", {})
+    tnx_bp = abs(float(l1.get("tnx_change_bp", 0) or 0))
+    cross_regime = l1.get("cross_regime", "")
+
+    if tnx_bp >= 0.10:  # 10bp+ 금리 변동
+        scores["RATE"] += 40
+        signals["tnx_spike_bp"] = round(tnx_bp * 100, 1)
+    if cross_regime in ("DIVERGENCE", "CORRECTION"):
+        scores["RATE"] += 20
+        signals["bond_cross_regime"] = cross_regime
+    if nightwatch.get("bond_vigilante_veto"):
+        scores["RATE"] += 25
+        signals["bond_vigilante_veto"] = True
+
+    # ── 유동성 시그널 ──
+    if vix_chg >= 0.20:  # VIX +20%+
+        scores["LIQUIDITY"] += 30
+        signals["vix_spike_pct"] = round(vix_chg * 100, 1)
+    if copx_ret <= -0.03:  # 구리 -3%+ (경기 둔화)
+        scores["LIQUIDITY"] += 25
+        signals["copper_crash"] = round(copx_ret * 100, 2)
+    # 다수 특수 룰 발동 = 유동성 경색 징후
+    rule_names = {r.get("name") for r in special_rules}
+    if len(rule_names & {"VIX_SPIKE", "MARKET_CRASH", "COPPER_CRASH"}) >= 2:
+        scores["LIQUIDITY"] += 20
+
+    # ── 실적 시그널 (섹터 특정 급락) ──
+    if soxx_ret <= -0.04 and spy_ret > -0.02:  # SOXX 급락 but SPY 방어
+        scores["EARNINGS"] += 45
+        signals["soxx_isolated_crash"] = round(soxx_ret * 100, 2)
+    elif soxx_ret <= -0.05:  # SOXX 폭락 (시장 전체와 무관하게)
+        scores["EARNINGS"] += 30
+        signals["soxx_crash"] = round(soxx_ret * 100, 2)
+
+    # ── 최종 판정 ──
+    max_type = max(scores, key=scores.get)
+    max_score = scores[max_type]
+
+    high_scores = [k for k, v in scores.items() if v >= 40]
+
+    if max_score < 25:
+        shock_type = "NONE"
+        confidence = 0.0
+        description = "특이 충격 없음"
+    elif len(high_scores) >= 2:
+        shock_type = "COMPOUND"
+        confidence = min(max_score / 100, 0.95)
+        types_str = "+".join(high_scores)
+        description = f"복합 충격 ({types_str})"
+    else:
+        shock_type = max_type
+        confidence = min(max_score / 100, 0.95)
+        desc_map = {
+            "GEOPOLITICAL": "지정학 충격 (유가/VIX/금)",
+            "RATE": "금리 충격 (채권/금리 급변)",
+            "LIQUIDITY": "유동성 충격 (VIX/구리/다중 경고)",
+            "EARNINGS": "실적/섹터 충격 (반도체 등 특정 섹터)",
+        }
+        description = desc_map.get(shock_type, shock_type)
+
+    return {
+        "shock_type": shock_type,
+        "confidence": round(confidence, 2),
+        "description": description,
+        "scores": {k: v for k, v in scores.items() if v > 0},
+        "signals": signals,
+    }
+
+
 def _run_level2_pattern(df: pd.DataFrame, latest, prev) -> dict:
     """Level 2 패턴매칭 실행. DB 없으면 스킵."""
     try:
@@ -824,6 +943,19 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     else:
         signal["nightwatch"] = {"enabled": False}
 
+    # ─── 8.5. 충격 유형 분류 (CORTEX 차용) ───
+    shock = _classify_shock_type(
+        latest, prev,
+        signal.get("special_rules", []),
+        signal.get("nightwatch", {}),
+    )
+    signal["shock_type"] = shock
+    if shock["shock_type"] != "NONE":
+        logger.info(
+            f"⚡ 충격 분류: {shock['shock_type']} "
+            f"(신뢰도 {shock['confidence']:.0%}) — {shock['description']}"
+        )
+
     # ─── 등급 판정 (ensemble 기반) ───
     l1_100 = round(score * 100, 1)
     ensemble_100 = round(ensemble_score * 100, 1)
@@ -895,11 +1027,32 @@ def format_telegram_message(signal: dict) -> str:
     grade = signal.get("grade", signal.get("composite", "NEUTRAL").upper())
     combined = signal.get("combined_score_100", signal.get("score", 0) * 100)
 
+    # 충격 유형 헤더
+    shock = signal.get("shock_type", {})
+    shock_label = shock.get("shock_type", "NONE") if isinstance(shock, dict) else "NONE"
+    shock_emoji = {
+        "GEOPOLITICAL": "\U0001f30d", "RATE": "\U0001f4c8",
+        "LIQUIDITY": "\U0001f4a7", "EARNINGS": "\U0001f4ca",
+        "COMPOUND": "\U0001f534", "NONE": "",
+    }.get(shock_label, "")
+    shock_str = f" | {shock_emoji}{shock_label}" if shock_label != "NONE" else ""
+
     lines = [
         f"[US Overnight] {signal.get('us_close_date', '?')}",
-        f"Grade: {grade} (Score: {combined:+.1f})",
+        f"Grade: {grade} (Score: {combined:+.1f}){shock_str}",
         "",
     ]
+
+    # 충격 상세 (NONE이 아닐 때만)
+    if shock_label != "NONE" and isinstance(shock, dict):
+        conf = shock.get("confidence", 0)
+        desc = shock.get("description", "")
+        lines.append(f"[ 충격 ] {shock_emoji} {desc} (신뢰도 {conf:.0%})")
+        sigs = shock.get("signals", {})
+        if sigs:
+            sig_parts = [f"{k}={v}" for k, v in sigs.items()]
+            lines.append(f"  시그널: {', '.join(sig_parts)}")
+        lines.append("")
 
     # 지수
     idx = signal.get("index_direction", {})

@@ -1584,6 +1584,25 @@ nightwatch:
     enabled: true
     log_dir: "data/us_market/nightwatch_blind"
 
+  # ─── MACRO GATE (v12.3) ───
+  # US Overnight grade + cross_regime + shock_type → 매수 게이트
+  # scan_buy_candidates.py run_pipeline() 최우선 실행
+  macro_gate:
+    enabled: true
+    # 3색 신호등 (채권 자경단 기반)
+    # RED:    주식↓ + 금리↑ (DIVERGENCE) → 절대 금지
+    # YELLOW: 주식↓ + 금리↓ (CORRECTION) → 최대 1종목, 반토막 포지션
+    # GREEN:  주식↑ + 금리 안정 (NORMAL)  → 정상 운영
+    red_action: "block"           # block = 매수 0건
+    yellow_max_survivors: 1       # 최대 통과 종목 수
+    yellow_position_mult: 0.5     # 포지션 반토막
+    # grade 기반 추가 필터
+    strong_bear_action: "block"   # STRONG_BEAR → 매수 0건
+    mild_bear_max_survivors: 2    # MILD_BEAR → 최대 2종목
+    # shock_type 기반
+    compound_action: "restrict"   # COMPOUND → MILD_BEAR와 동일 취급
+    compound_max_survivors: 1
+
 # ─── 3단 예측 체인 (유럽장 오픈 기반) ───
 predict_chain:
   enabled: true

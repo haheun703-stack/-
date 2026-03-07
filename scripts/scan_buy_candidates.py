@@ -829,6 +829,73 @@ def run_pipeline(
     if killed_by_us:
         print(f"    [섹터Kill] {', '.join(killed_by_us)}")
 
+    # ─── MACRO GATE (v12.3) ───────────────────────────────────────
+    # 3색 신호등: cross_regime + grade + shock_type → 매수 게이트
+    import yaml as _yaml
+    _cfg_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+    with open(_cfg_path, "r", encoding="utf-8") as _f:
+        _full_cfg = _yaml.safe_load(_f)
+    _mg = _full_cfg.get("nightwatch", {}).get("macro_gate", {})
+    macro_gate_enabled = _mg.get("enabled", False)
+
+    macro_gate_color = "GREEN"     # 기본: 정상
+    macro_gate_cap = None          # None = 무제한
+    macro_gate_pos_mult = 1.0      # 포지션 배수
+
+    if macro_gate_enabled:
+        # 1) cross_regime → 3색 신호등
+        nightwatch = us_signal.get("nightwatch", {})
+        layers = nightwatch.get("layers", {})
+        cross_regime = layers.get("L1_bond_vigilante", {}).get("cross_regime", "NORMAL")
+
+        if cross_regime == "DIVERGENCE":
+            macro_gate_color = "RED"
+        elif cross_regime == "CORRECTION":
+            macro_gate_color = "YELLOW"
+
+        # 2) grade 기반 오버라이드 (더 엄격한 쪽으로)
+        if us_grade == "STRONG_BEAR" and _mg.get("strong_bear_action") == "block":
+            macro_gate_color = "RED"  # STRONG_BEAR → 무조건 RED
+        elif us_grade == "MILD_BEAR" and macro_gate_color == "GREEN":
+            macro_gate_color = "YELLOW"  # MILD_BEAR + GREEN → YELLOW로 격상
+
+        # 3) shock_type COMPOUND → 추가 제한
+        shock = us_signal.get("shock_type", {})
+        shock_label = shock.get("shock_type", "NONE") if isinstance(shock, dict) else "NONE"
+        is_compound = (shock_label == "COMPOUND")
+
+        # 최종 cap/mult 결정 (가장 엄격한 쪽)
+        if macro_gate_color == "RED":
+            macro_gate_cap = 0
+            macro_gate_pos_mult = 0.0
+        elif macro_gate_color == "YELLOW":
+            macro_gate_cap = _mg.get("yellow_max_survivors", 1)
+            macro_gate_pos_mult = _mg.get("yellow_position_mult", 0.5)
+            # MILD_BEAR가 yellow보다 관대하면 MILD_BEAR 기준 사용
+            if us_grade == "MILD_BEAR":
+                mb_cap = _mg.get("mild_bear_max_survivors", 2)
+                macro_gate_cap = min(macro_gate_cap, mb_cap)
+
+        # COMPOUND 충격은 GREEN이라도 제한 (설정에 따라)
+        if is_compound and _mg.get("compound_action") == "restrict":
+            comp_cap = _mg.get("compound_max_survivors", 1)
+            if macro_gate_cap is None:
+                macro_gate_cap = comp_cap
+            else:
+                macro_gate_cap = min(macro_gate_cap, comp_cap)
+
+        # 신호등 출력
+        color_emoji = {"RED": "🔴", "YELLOW": "🟡", "GREEN": "🟢"}.get(macro_gate_color, "⚪")
+        cap_str = f"cap={macro_gate_cap}" if macro_gate_cap is not None else "무제한"
+        compound_str = f" | COMPOUND" if is_compound else ""
+        print(f"\n  ═══ MACRO GATE: {color_emoji} {macro_gate_color} ({cross_regime} / {us_grade}{compound_str}) → {cap_str}, pos×{macro_gate_pos_mult:.1f} ═══")
+
+        if macro_gate_cap == 0:
+            print(f"  >>> 매수 전면 차단 — 후보 {len(candidates)}건 전량 KILL <<<")
+            return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
+
+    # ─── END MACRO GATE ───────────────────────────────────────────
+
     killed_list = []
     survivors = []
 
@@ -959,6 +1026,22 @@ def run_pipeline(
 
     # 순위 정렬
     survivors.sort(key=lambda s: s["v9_rank_score"], reverse=True)
+
+    # ─── MACRO GATE: YELLOW cap 적용 (최종 정렬 후) ───
+    if macro_gate_enabled and macro_gate_cap is not None and macro_gate_cap > 0:
+        if len(survivors) > macro_gate_cap:
+            gate_killed = survivors[macro_gate_cap:]
+            for s in gate_killed:
+                s["v9_kill_reasons"] = [f"MACRO_GATE_{macro_gate_color}_CAP"]
+            killed_list.extend(gate_killed)
+            survivors = survivors[:macro_gate_cap]
+            print(f"  MACRO GATE {macro_gate_color}: {len(gate_killed)}종목 추가 제거 → 생존 {len(survivors)}종목")
+
+        # 포지션 배수 태그 (SmartEntry에서 참조)
+        if macro_gate_pos_mult < 1.0:
+            for s in survivors:
+                s["macro_gate_pos_mult"] = macro_gate_pos_mult
+            print(f"  MACRO GATE: 포지션 ×{macro_gate_pos_mult:.1f} 적용")
 
     return survivors, killed_list
 
