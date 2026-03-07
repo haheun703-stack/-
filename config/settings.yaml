@@ -1716,6 +1716,40 @@ brain:
   # 텔레그램 브리핑
   telegram_briefing: true
 
+# ─── COT Tracker (Slow Eye) ───
+# CFTC Commitments of Traders 주간 기관 포지셔닝 분석
+# NIGHTWATCH(일간 Fast Eye)와 교차검증하여 확신도 조정
+cot_tracker:
+  enabled: true
+  zscore_window: 52                    # z-score 롤링 윈도우 (주)
+  stale_warn_days: 10                  # 데이터 경고 임계 (일)
+  stale_ignore_days: 14                # 데이터 무시 임계 (일)
+  thresholds:
+    sp500:
+      bearish_z: -1.0
+      strong_bearish_z: -1.5
+      bullish_z: 1.0
+    gold:
+      safety_surge_z: 1.5
+      extreme_surge_z: 2.0
+      complacent_z: -1.0
+    treasury10y:
+      slowdown_bet_z: 1.0
+      strong_slowdown_z: 1.5
+      reflation_z: -1.0
+    crude_oil:
+      cyclical_down_z: -1.0
+      demand_collapse_z: -1.5
+      demand_boom_z: 1.5
+  arm_adjustments:
+    risk_off_cut_pct: 5.0              # S&P 매도 시 리스크ARM 축소 (%p)
+    safety_demand_boost_pct: 3.0       # 금 안전수요 시 금ETF 확대 (%p)
+    slowdown_bond_boost_pct: 3.0       # 국채 매수 시 채권ETF 확대 (%p)
+  cross_validation:
+    aligned_confidence_bonus: 0.10     # NW-COT 동조 시 확신도 가산
+    diverged_confidence_penalty: 0.05  # NW-COT 괴리 시 확신도 차감
+    diverged_change_mult: 0.50         # 괴리 시 배분 변경폭 배수
+
 # ─── SHIELD 포트폴리오 방어 시스템 ───
 # BRAIN 전에 실행. 3대 방어축:
 #   S1: 섹터 오버랩 감지 (스윙+ETF 중복)

@@ -1,0 +1,59 @@
+{
+  "date": "2026-03-07",
+  "report_date": "2026-03-03",
+  "stale_days": 4,
+  "contracts": {
+    "sp500": {
+      "label": "S&P 500 E-mini",
+      "net": 1004768,
+      "long": 1185588,
+      "short": 180820,
+      "z": 2.23,
+      "direction": "BULLISH",
+      "net_change_1w": -8376,
+      "net_change_4w": 71542,
+      "percentile_52w": 96.2
+    },
+    "gold": {
+      "label": "Gold COMEX",
+      "net": 97917,
+      "long": 123456,
+      "short": 25539,
+      "z": -1.25,
+      "direction": "BULLISH",
+      "net_change_1w": 1943,
+      "net_change_4w": 5845,
+      "percentile_52w": 9.6
+    },
+    "treasury10y": {
+      "label": "10Y T-Note",
+      "net": 2098536,
+      "long": 3068736,
+      "short": 970200,
+      "z": -0.12,
+      "direction": "NEUTRAL",
+      "net_change_1w": -62190,
+      "net_change_4w": 68892,
+      "percentile_52w": 42.3
+    },
+    "crude_oil": {
+      "label": "WTI Crude Oil",
+      "net": 68385,
+      "long": 187335,
+      "short": 118950,
+      "z": 0.12,
+      "direction": "NEUTRAL",
+      "net_change_1w": 685,
+      "net_change_4w": -8375,
+      "percentile_52w": 53.8
+    }
+  },
+  "signals": {
+    "risk_off": false,
+    "safety_demand": false,
+    "slowdown_bet": false,
+    "cyclical_down": false
+  },
+  "composite_direction": "MILD_BULLISH",
+  "composite_score": 0.275
+}

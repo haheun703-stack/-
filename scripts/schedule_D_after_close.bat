@@ -108,6 +108,11 @@ echo [%date% %time%] [11.1/29] SHIELD 방어 점검 >> logs\schedule.log
 python -u -X utf8 scripts\run_shield.py --send >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [11.1/29] FAILED >> logs\schedule.log
 
+REM 11.15단계: COT Slow Eye 시그널 갱신 (BRAIN 전에 실행)
+echo [%date% %time%] [11.15/29] COT Slow Eye >> logs\schedule.log
+python -u -X utf8 scripts\run_cot_tracker.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [11.15/29] FAILED >> logs\schedule.log
+
 REM 11.2단계: BRAIN 자본배분 결정 (SHIELD+NIGHTWATCH+VIX+레짐 → ARM별 비중)
 echo [%date% %time%] [11.2/29] BRAIN 자본배분 >> logs\schedule.log
 python -u -X utf8 scripts\run_brain.py >> logs\schedule.log 2>&1

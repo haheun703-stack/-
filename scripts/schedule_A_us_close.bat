@@ -25,6 +25,10 @@ REM 2) US-KR 패턴DB 일일 누적
 echo [%date% %time%] [2/7] US-KR 패턴DB 업데이트 >> logs\schedule.log
 python -u -X utf8 scripts\update_us_kr_daily.py >> logs\schedule.log 2>&1
 
+REM 2.5) COT 주간 업데이트 (매일 체크, 금요일에만 실질 변경)
+echo [%date% %time%] [2.5/7] COT 주간 업데이트 >> logs\schedule.log
+python -u -X utf8 scripts\fetch_cot_weekly.py >> logs\schedule.log 2>&1
+
 REM 3) 섹터 릴레이 엔진 (US 대장주 업데이트 + 경보 판정 + 텔레그램)
 echo [%date% %time%] [3/7] 섹터 릴레이 경보 >> logs\schedule.log
 python -u -X utf8 scripts\run_relay_engine.py --all >> logs\schedule.log 2>&1

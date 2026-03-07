@@ -268,6 +268,17 @@ class Brain:
             arms["cash"] = arms.get("cash", 0) + 2
             adjustments.append(f"2D 경고: credit_z={credit_z:.1f}, MOVE_z={move_z:.1f}")
 
+        # ── 5.8. COT "Slow Eye" 주간 시그널 보정 ──
+        cot_signal = self._load_json(DATA_DIR / "cot" / "cot_signal.json")
+        cot_adj = self._apply_cot_adjustment(arms, cot_signal, nw_score)
+        if cot_adj:
+            arms = cot_adj["arms"]
+            adjustments.extend(cot_adj["adjustments"])
+            warnings.extend(cot_adj.get("warnings", []))
+            cot_nw_aligned = cot_adj.get("nw_aligned")
+        else:
+            cot_nw_aligned = None
+
         # ── 6. 충격 유형별 보정 ──
         if shock_type != "NONE" and shock_type in self.SHOCK_ARM_ADJUSTMENTS:
             shock_adj = self.SHOCK_ARM_ADJUSTMENTS[shock_type]
@@ -312,7 +323,8 @@ class Brain:
         # ── 10. 신뢰도 계산 ──
         confidence = self._calc_confidence(
             kospi_regime, effective_regime, nw_score, vix_level,
-            macro_score, shock_type, confirmation["confirmed"]
+            macro_score, shock_type, confirmation["confirmed"],
+            cot_nw_aligned=cot_nw_aligned,
         )
 
         # ── 11. ArmAllocation 객체 생성 ──
@@ -340,7 +352,8 @@ class Brain:
         # ── 12. 브리핑 생성 ──
         briefing = self._build_briefing(
             effective_regime, kospi_regime, nw_score, vix_level,
-            vix_label, us_grade, shock_type, arms, adjustments, warnings
+            vix_label, us_grade, shock_type, arms, adjustments, warnings,
+            cot_signal=cot_signal,
         )
 
         decision = BrainDecision(
@@ -499,6 +512,109 @@ class Brain:
         return {"arms": result_arms, "adjustments": adj_list, "warnings": warn_list}
 
     # ────────────────────────────────────────
+    # 5.8. COT Slow Eye 보정
+    # ────────────────────────────────────────
+    def _apply_cot_adjustment(
+        self, arms: dict, cot_signal: dict, nw_score: float
+    ) -> dict | None:
+        """COT 주간 시그널 기반 ARM 보정 + NW-COT 교차검증.
+
+        핵심 원칙:
+          1. COT는 주간 → 일간(NW)보다 느리지만 더 근본적
+          2. NW와 COT가 정렬 → 배분 변경 100% + confidence 가산
+          3. NW와 COT가 충돌 → 배분 변경 50%만 적용
+        """
+        if not cot_signal or not cot_signal.get("contracts"):
+            return None
+
+        stale_days = cot_signal.get("stale_days", 999)
+        cot_cfg = self.settings.get("cot_tracker", {})
+        stale_ignore = cot_cfg.get("stale_ignore_days", 14)
+        stale_warn = cot_cfg.get("stale_warn_days", 10)
+
+        if stale_days > stale_ignore:
+            return {"arms": arms, "adjustments": [],
+                    "warnings": [f"COT 데이터 오래됨 ({stale_days}일) — 무시"],
+                    "nw_aligned": None}
+
+        signals = cot_signal.get("signals", {})
+        composite_score = cot_signal.get("composite_score", 0.0)
+        composite_dir = cot_signal.get("composite_direction", "NEUTRAL")
+
+        result_arms = dict(arms)
+        adj_list = []
+        warn_list = []
+
+        # stale 감쇠
+        stale_mult = 0.5 if stale_days > stale_warn else 1.0
+
+        # NW-COT 교차검증
+        nw_bearish = nw_score <= -0.20
+        nw_bullish = nw_score >= 0.20
+        cot_bearish = composite_score <= -0.20
+        cot_bullish = composite_score >= 0.20
+
+        aligned = (nw_bearish and cot_bearish) or (nw_bullish and cot_bullish)
+        diverged = (nw_bearish and cot_bullish) or (nw_bullish and cot_bearish)
+
+        cross_cfg = cot_cfg.get("cross_validation", {})
+        diverged_mult = cross_cfg.get("diverged_change_mult", 0.50)
+        change_mult = 1.0 if aligned else (diverged_mult if diverged else 0.75)
+        change_mult *= stale_mult
+
+        arm_cfg = cot_cfg.get("arm_adjustments", {})
+
+        # === 개별 시그널 처리 ===
+        if signals.get("risk_off"):
+            cut_pct = arm_cfg.get("risk_off_cut_pct", 5.0) * change_mult
+            for risk_arm in ["etf_leverage", "etf_sector", "etf_small_cap"]:
+                cut = min(result_arms.get(risk_arm, 0), cut_pct)
+                result_arms[risk_arm] = max(0, result_arms[risk_arm] - cut)
+                result_arms["cash"] = result_arms.get("cash", 0) + cut
+            adj_list.append(f"COT: S&P 매도 포지셔닝 → 리스크ARM -{cut_pct:.0f}%p")
+
+        if signals.get("safety_demand"):
+            gold_boost = arm_cfg.get("safety_demand_boost_pct", 3.0) * change_mult
+            if result_arms.get("cash", 0) > 10 + gold_boost:
+                result_arms["etf_gold"] = result_arms.get("etf_gold", 0) + gold_boost
+                result_arms["cash"] -= gold_boost
+                adj_list.append(f"COT: 금 안전수요 급등 → 금ETF +{gold_boost:.0f}%p")
+
+        if signals.get("slowdown_bet"):
+            bond_boost = arm_cfg.get("slowdown_bond_boost_pct", 3.0) * change_mult
+            if result_arms.get("cash", 0) > 10 + bond_boost:
+                result_arms["etf_bonds"] = result_arms.get("etf_bonds", 0) + bond_boost
+                result_arms["cash"] -= bond_boost
+                adj_list.append(f"COT: 국채 매수(둔화 베팅) → 채권 +{bond_boost:.0f}%p")
+
+        if signals.get("cyclical_down"):
+            warn_list.append("COT: 원유 매도 포지셔닝 → 경기순환 섹터 주의")
+
+        # NW-COT 정렬 상태
+        if aligned:
+            alignment = "ALIGNED"
+            adj_list.append(f"NW-COT 동조: {composite_dir} (배분 100%)")
+        elif diverged:
+            alignment = "DIVERGED"
+            adj_list.append(
+                f"NW-COT 괴리: NW={nw_score:+.3f} vs COT={composite_score:+.2f} "
+                f"→ 변경폭 {diverged_mult:.0%}"
+            )
+        else:
+            alignment = "MIXED"
+
+        if not adj_list and not warn_list:
+            return {"arms": result_arms, "adjustments": [],
+                    "warnings": [], "nw_aligned": alignment}
+
+        return {
+            "arms": result_arms,
+            "adjustments": adj_list,
+            "warnings": warn_list,
+            "nw_aligned": alignment,
+        }
+
+    # ────────────────────────────────────────
     # 6. 충격 유형 보정
     # ────────────────────────────────────────
     def _apply_shock_adjustment(
@@ -604,6 +720,7 @@ class Brain:
         nw_score: float, vix_level: float,
         macro_score: int, shock_type: str,
         confirmed: bool,
+        cot_nw_aligned: str | None = None,
     ) -> float:
         """결정 신뢰도 0~1."""
         conf = 0.50  # 기본
@@ -637,6 +754,12 @@ class Brain:
         # 레짐 미확인 -0.15
         if not confirmed:
             conf -= 0.15
+
+        # COT-NW 교차검증 보정
+        if cot_nw_aligned == "ALIGNED":
+            conf += 0.10  # Fast+Slow 동조 → 확신 강화
+        elif cot_nw_aligned == "DIVERGED":
+            conf -= 0.05  # 충돌 → 불확실성 증가
 
         return max(0.10, min(0.95, conf))
 
@@ -698,6 +821,7 @@ class Brain:
         nw_score: float, vix_level: float, vix_label: str,
         us_grade: str, shock_type: str,
         arms: dict, adjustments: list, warnings: list,
+        cot_signal: dict | None = None,
     ) -> str:
         """텔레그램 브리핑 텍스트 생성."""
         lines = []
@@ -734,6 +858,19 @@ class Brain:
             bar = "█" * int(pct / 5) if pct > 0 else ""
             lines.append(f"  {label:>8s} {pct:5.1f}% {bar}")
         lines.append("")
+
+        # COT Slow Eye 섹션
+        if cot_signal and cot_signal.get("contracts"):
+            lines.append("COT Slow Eye (주간):")
+            for name, c in cot_signal["contracts"].items():
+                z = c.get("z", 0)
+                direction = c.get("direction", "N/A")
+                label = c.get("label", name)
+                lines.append(f"  {label:>16s}: z={z:+.2f} ({direction})")
+            comp_dir = cot_signal.get("composite_direction", "N/A")
+            stale = cot_signal.get("stale_days", 0)
+            lines.append(f"  {'복합방향':>16s}: {comp_dir} (데이터 {stale}일 전)")
+            lines.append("")
 
         # 보정 사항
         if adjustments:
