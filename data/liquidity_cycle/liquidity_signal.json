@@ -1,0 +1,41 @@
+{
+  "date": "2026-03-07",
+  "data_date": "2026-03-06",
+  "stale_days": 1,
+  "indicators": {
+    "net_liquidity": {
+      "value": 5795.3,
+      "z": 1.58,
+      "change_20d": 99.5
+    },
+    "m2_yoy_pct": {
+      "value": 3.78,
+      "z": -2.54
+    },
+    "reserves": {
+      "value": 3.0,
+      "z": 0.52,
+      "change_20d": 0.0
+    },
+    "rrp": {
+      "value": 1.5,
+      "change_20d": 0.2
+    },
+    "tga": {
+      "value": 832.1,
+      "change_20d": -76.7
+    },
+    "walcl": {
+      "value": 6628.9,
+      "change_20d": 23.0
+    }
+  },
+  "regime": "AMPLE",
+  "signals": {
+    "liquidity_tightening": false,
+    "liquidity_ample": false,
+    "reserve_stress": false
+  },
+  "composite_direction": "MILD_AMPLE",
+  "composite_score": 0.304
+}

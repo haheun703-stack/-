@@ -1757,6 +1757,35 @@ cot_tracker:
     diverged_confidence_penalty: 0.05   # NW-COT 괴리 시 확신도 차감 (enabled=false 시 미적용)
     diverged_change_mult: 0.50          # 괴리 시 배분 변경폭 배수 (enabled=false 시 1.0 고정)
 
+# ─── 유동성 사이클 예측 레이어 (5D) ───
+# FRED 5대 지표 기반 중기 유동성 레짐 판정
+# BRAIN Step 5.6: TIGHTENING/STRESS에서 방어만 (공격 안 함)
+liquidity_cycle:
+  enabled: true
+  zscore_window: 60              # 3개월 롤링 (중기)
+  stale_warn_days: 5
+  stale_ignore_days: 14
+  indicators:
+    net_liquidity_weight: 0.50   # 순유동성 (WALCL-TGA-RRP)
+    m2_momentum_weight: 0.30     # M2 YoY
+    reserves_weight: 0.20        # 은행 지준
+  thresholds:
+    tightening_z: -1.0           # Net Liquidity z < -1.0 → 긴축
+    stress_z: -1.5               # Net Liquidity z < -1.5 + 지준 z < -1.0 → 위기
+    ample_z: 1.0                 # Net Liquidity z > +1.0 + M2 YoY > 0 → 풍부
+    reserve_stress_z: -1.0       # 은행 지준 z < -1.0 → 스트레스
+  arm_adjustments:
+    stress_sector_cut: 10.0      # STRESS → 섹터 -10%p
+    stress_gold_boost: 5.0       # STRESS → 금 +5%p
+    tightening_leverage_cut: 5.0 # TIGHTENING → 레버리지 -5%p
+    tightening_sector_cut: 5.0   # TIGHTENING → 섹터 -5%p
+  fred_indicators:
+    - {code: RRPONTSYD, label: "Reverse Repo", freq: daily}
+    - {code: WTREGEN, label: "TGA", freq: weekly}
+    - {code: WM2NS, label: "M2", freq: weekly}
+    - {code: WALCL, label: "Fed Balance Sheet", freq: weekly}
+    - {code: TOTRESNS, label: "Total Reserves", freq: biweekly}
+
 # ─── SHIELD 포트폴리오 방어 시스템 ───
 # BRAIN 전에 실행. 3대 방어축:
 #   S1: 섹터 오버랩 감지 (스윙+ETF 중복)

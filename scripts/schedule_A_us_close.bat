@@ -29,6 +29,14 @@ REM 2.5) COT 주간 업데이트 (매일 체크, 금요일에만 실질 변경)
 echo [%date% %time%] [2.5/7] COT 주간 업데이트 >> logs\schedule.log
 python -u -X utf8 scripts\fetch_cot_weekly.py >> logs\schedule.log 2>&1
 
+REM 2.7) 유동성 사이클 데이터 업데이트 (FRED 5대 지표)
+echo [%date% %time%] [2.7/7] 유동성 데이터 업데이트 >> logs\schedule.log
+python -u -X utf8 scripts\fetch_liquidity_data.py >> logs\schedule.log 2>&1
+
+REM 2.8) 유동성 시그널 생성
+echo [%date% %time%] [2.8/7] 유동성 시그널 생성 >> logs\schedule.log
+python -u -X utf8 scripts\run_liquidity_signal.py >> logs\schedule.log 2>&1
+
 REM 3) 섹터 릴레이 엔진 (US 대장주 업데이트 + 경보 판정 + 텔레그램)
 echo [%date% %time%] [3/7] 섹터 릴레이 경보 >> logs\schedule.log
 python -u -X utf8 scripts\run_relay_engine.py --all >> logs\schedule.log 2>&1

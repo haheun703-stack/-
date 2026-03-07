@@ -271,6 +271,14 @@ class Brain:
             arms["cash"] = arms.get("cash", 0) + 2
             adjustments.append(f"2D 경고: credit_z={credit_z:.1f}, MOVE_z={move_z:.1f}")
 
+        # ── 5.6. 유동성 사이클 메타 레이어 ──
+        liq_signal = self._load_json(DATA_DIR / "liquidity_cycle" / "liquidity_signal.json")
+        liq_adj = self._apply_liquidity_adjustment(arms, liq_signal)
+        if liq_adj:
+            arms = liq_adj["arms"]
+            adjustments.extend(liq_adj["adjustments"])
+            warnings.extend(liq_adj.get("warnings", []))
+
         # ── 5.8. COT "Slow Eye" 주간 시그널 보정 ──
         cot_signal = self._load_json(DATA_DIR / "cot" / "cot_signal.json")
         cot_adj = self._apply_cot_adjustment(arms, cot_signal, nw_score)
@@ -356,6 +364,7 @@ class Brain:
         briefing = self._build_briefing(
             effective_regime, kospi_regime, nw_score, vix_level,
             vix_label, us_grade, shock_type, arms, adjustments, warnings,
+            liq_signal=liq_signal,
             cot_signal=cot_signal,
         )
 
@@ -510,6 +519,91 @@ class Brain:
                 adj_list.append(f"NW 긍정({nw_score:+.3f}): 투자 +{boost:.0f}%p 확대")
 
         if not adj_list:
+            return None
+
+        return {"arms": result_arms, "adjustments": adj_list, "warnings": warn_list}
+
+    # ────────────────────────────────────────
+    # 5.6. 유동성 사이클 메타 레이어
+    # ────────────────────────────────────────
+    def _apply_liquidity_adjustment(
+        self, arms: dict, liq_signal: dict
+    ) -> dict | None:
+        """유동성 사이클 시그널 기반 방어적 ARM 보정.
+
+        핵심 원칙: 유동성 레이어는 "공격하지 않는다" — 오직 방어만.
+          STRESS → 레버리지 0, 섹터 축소, 금/현금 확대
+          TIGHTENING → 레버리지/섹터 소폭 축소
+          NEUTRAL/AMPLE → 보정 없음
+        """
+        if not liq_signal or not liq_signal.get("indicators"):
+            return None
+
+        liq_cfg = self.settings.get("liquidity_cycle", {})
+        if not liq_cfg.get("enabled", True):
+            return None
+
+        stale_days = liq_signal.get("stale_days", 999)
+        stale_ignore = liq_cfg.get("stale_ignore_days", 14)
+        stale_warn = liq_cfg.get("stale_warn_days", 5)
+
+        if stale_days > stale_ignore:
+            return None
+
+        stale_mult = 0.5 if stale_days > stale_warn else 1.0
+
+        regime = liq_signal.get("regime", "NEUTRAL")
+        result_arms = dict(arms)
+        adj_list = []
+        warn_list = []
+
+        arm_cfg = liq_cfg.get("arm_adjustments", {})
+
+        if regime == "STRESS":
+            # 레버리지 전량 축소
+            if result_arms.get("etf_leverage", 0) > 0:
+                freed = result_arms["etf_leverage"]
+                result_arms["etf_leverage"] = 0
+                result_arms["cash"] = result_arms.get("cash", 0) + freed
+                adj_list.append(f"유동성 STRESS: 레버리지 {freed:.0f}%→0%")
+
+            # 섹터 축소
+            sector_cut = arm_cfg.get("stress_sector_cut", 10.0) * stale_mult
+            actual_cut = min(result_arms.get("etf_sector", 0), sector_cut)
+            if actual_cut > 0:
+                result_arms["etf_sector"] -= actual_cut
+                result_arms["cash"] = result_arms.get("cash", 0) + actual_cut
+                adj_list.append(f"유동성 STRESS: 섹터 -{actual_cut:.0f}%p")
+
+            # 금 확대
+            gold_boost = arm_cfg.get("stress_gold_boost", 5.0) * stale_mult
+            if result_arms.get("cash", 0) > 10 + gold_boost:
+                result_arms["etf_gold"] = result_arms.get("etf_gold", 0) + gold_boost
+                result_arms["cash"] -= gold_boost
+                adj_list.append(f"유동성 STRESS: 금 +{gold_boost:.0f}%p")
+
+            warn_list.append("유동성 위기(STRESS) — Net Liquidity + 은행 지준 동반 악화")
+
+        elif regime == "TIGHTENING":
+            # 레버리지 소폭 축소
+            lev_cut = arm_cfg.get("tightening_leverage_cut", 5.0) * stale_mult
+            actual_lev_cut = min(result_arms.get("etf_leverage", 0), lev_cut)
+            if actual_lev_cut > 0:
+                result_arms["etf_leverage"] -= actual_lev_cut
+                result_arms["cash"] = result_arms.get("cash", 0) + actual_lev_cut
+                adj_list.append(f"유동성 긴축: 레버리지 -{actual_lev_cut:.0f}%p")
+
+            # 섹터 소폭 축소
+            sec_cut = arm_cfg.get("tightening_sector_cut", 5.0) * stale_mult
+            actual_sec_cut = min(result_arms.get("etf_sector", 0), sec_cut)
+            if actual_sec_cut > 0:
+                result_arms["etf_sector"] -= actual_sec_cut
+                result_arms["cash"] = result_arms.get("cash", 0) + actual_sec_cut
+                adj_list.append(f"유동성 긴축: 섹터 -{actual_sec_cut:.0f}%p")
+
+        # NEUTRAL / AMPLE → 보정 없음
+
+        if not adj_list and not warn_list:
             return None
 
         return {"arms": result_arms, "adjustments": adj_list, "warnings": warn_list}
@@ -834,6 +928,7 @@ class Brain:
         nw_score: float, vix_level: float, vix_label: str,
         us_grade: str, shock_type: str,
         arms: dict, adjustments: list, warnings: list,
+        liq_signal: dict | None = None,
         cot_signal: dict | None = None,
     ) -> str:
         """텔레그램 브리핑 텍스트 생성."""
@@ -871,6 +966,27 @@ class Brain:
             bar = "█" * int(pct / 5) if pct > 0 else ""
             lines.append(f"  {label:>8s} {pct:5.1f}% {bar}")
         lines.append("")
+
+        # 유동성 사이클 섹션
+        if liq_signal and liq_signal.get("indicators"):
+            lines.append("유동성 사이클:")
+            ind = liq_signal["indicators"]
+            nl = ind.get("net_liquidity", {})
+            lines.append(f"  Net Liquidity: {nl.get('value', 0):,.1f}B "
+                         f"(z={nl.get('z', 0):+.2f}, 20d: {nl.get('change_20d', 0):+,.1f}B)")
+            m2 = ind.get("m2_yoy_pct", {})
+            lines.append(f"  M2 YoY: {m2.get('value', 0):+.2f}% (z={m2.get('z', 0):+.2f})")
+            res = ind.get("reserves", {})
+            lines.append(f"  은행 지준: {res.get('value', 0):,.1f}B (z={res.get('z', 0):+.2f})")
+            rrp = ind.get("rrp", {})
+            tga = ind.get("tga", {})
+            lines.append(f"  RRP: {rrp.get('value', 0):,.1f}B (20d: {rrp.get('change_20d', 0):+,.1f}B) | "
+                         f"TGA: {tga.get('value', 0):,.1f}B (20d: {tga.get('change_20d', 0):+,.1f}B)")
+            liq_regime = liq_signal.get("regime", "NEUTRAL")
+            liq_score = liq_signal.get("composite_score", 0)
+            liq_stale = liq_signal.get("stale_days", 0)
+            lines.append(f"  유동성 레짐: {liq_regime} (score={liq_score:+.3f}, {liq_stale}일 전)")
+            lines.append("")
 
         # COT Slow Eye 섹션
         if cot_signal and cot_signal.get("contracts"):
