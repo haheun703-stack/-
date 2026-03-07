@@ -1602,6 +1602,9 @@ nightwatch:
     # shock_type 기반
     compound_action: "restrict"   # COMPOUND → MILD_BEAR와 동일 취급
     compound_max_survivors: 1
+    # 거래량 필터 (v12.3 수급 프록시)
+    # vol_5d / vol_20d >= threshold → 거래량 증가 종목만 통과
+    vol_filter_threshold: 0.85   # 백테스트 최적값 (승률 50→58%, PF 1.70→2.37)
 
 # ─── 3단 예측 체인 (유럽장 오픈 기반) ───
 predict_chain:

@@ -909,6 +909,25 @@ def run_pipeline(
 
         survivors.append(sig)
 
+    # ─── 거래량 필터 (v12.3 수급 프록시) ───
+    # vol_surge (= vol_5d / vol_20d) >= threshold → 거래량 증가 종목만 통과
+    vol_thr = _mg.get("vol_filter_threshold", 0) if macro_gate_enabled else 0
+    if vol_thr > 0:
+        vol_passed = []
+        vol_killed_count = 0
+        for sig in survivors:
+            vr = sig.get("vol_surge", 1.0)  # scan_csv에서 이미 계산됨
+            sig["vol_ratio"] = round(vr, 3)
+            if vr >= vol_thr:
+                vol_passed.append(sig)
+            else:
+                sig["v9_kill_reasons"] = [f"VOL_FILTER (vr={vr:.2f}<{vol_thr})"]
+                killed_list.append(sig)
+                vol_killed_count += 1
+        if vol_killed_count > 0:
+            print(f"  거래량 필터 (vol_ratio≥{vol_thr}): {vol_killed_count}종목 제거 → {len(vol_passed)}종목 통과")
+        survivors = vol_passed
+
     # Rank: R:R × zone_score × catalyst × sd_cross × density
     #
     # SD 교차필터 (Part 2):

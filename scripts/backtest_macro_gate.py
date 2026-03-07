@@ -1,5 +1,5 @@
 """
-v12.3 MACRO GATE 백테스트 — C_new(기존) vs E(MACRO GATE) 비교
+v12.3 MACRO GATE 백테스트 — C_new vs E(MACRO GATE) vs F(Gate+Vol Filter) 3-way 비교
 
 backtest_v2.py의 C_new 모드를 기반으로,
 US Overnight cross_regime + grade + shock_type에 의한
@@ -178,8 +178,12 @@ def reconstruct_cross_regime(us_df, date):
 
 
 def run_backtest_with_gate(data_dict, name_map, kospi_df, us_df,
-                           start_date, end_date, use_macro_gate=False):
-    """C_new + (선택적) MACRO GATE 백테스트."""
+                           start_date, end_date, use_macro_gate=False,
+                           vol_filter_threshold=0.0):
+    """C_new + (선택적) MACRO GATE + (선택적) 거래량 필터 백테스트.
+
+    vol_filter_threshold: 0.0이면 비활성, 0.8이면 vol_5d/vol_20d >= 0.8 필터.
+    """
     ref_ticker = "005930"
     ref_df = data_dict[ref_ticker]
     dates = ref_df.index[(ref_df.index >= start_date) & (ref_df.index <= end_date)]
@@ -285,6 +289,22 @@ def run_backtest_with_gate(data_dict, name_map, kospi_df, us_df,
 
         if available_slots > 0 and (gate_cap is None or gate_cap > 0):
             signals = scan_signals(data_dict, day_idx_map)
+
+            # 거래량 필터: vol_5d / vol_20d >= threshold
+            if vol_filter_threshold > 0:
+                filtered = []
+                for sig in signals:
+                    ticker = sig["ticker"]
+                    df = data_dict[ticker]
+                    idx = day_idx_map[ticker]
+                    vol = df["volume"].values
+                    vol_5 = np.mean(vol[max(0, idx - 4):idx + 1])
+                    vol_20 = np.mean(vol[max(0, idx - 19):idx + 1])
+                    vr = vol_5 / vol_20 if vol_20 > 0 else 1.0
+                    if vr >= vol_filter_threshold:
+                        filtered.append(sig)
+                gate_stats["vol_filtered"] = gate_stats.get("vol_filtered", 0) + len(signals) - len(filtered)
+                signals = filtered
 
             # MACRO GATE cap 적용
             if gate_cap is not None and len(signals) > gate_cap:
@@ -513,7 +533,7 @@ def main():
     results = []
 
     # ── A) C_new (기존: KOSPI 레짐만, MACRO GATE 없음) ──
-    print("\n[1/2] C_new 실행 중...")
+    print("\n[1/3] C_new 실행 중...")
     trades_cnew, daily_cnew, stats_cnew = run_backtest_with_gate(
         data_dict, name_map, kospi_df, us_df,
         args.start, args.end, use_macro_gate=False
@@ -522,7 +542,7 @@ def main():
     results.append(r1)
 
     # ── B) E (C_new + MACRO GATE) ──
-    print("\n[2/2] E (MACRO GATE) 실행 중...")
+    print("\n[2/3] E (MACRO GATE) 실행 중...")
     trades_e, daily_e, stats_e = run_backtest_with_gate(
         data_dict, name_map, kospi_df, us_df,
         args.start, args.end, use_macro_gate=True
@@ -530,11 +550,20 @@ def main():
     r2 = report(trades_e, daily_e, "E (C_new + MACRO GATE)", gate_stats=stats_e)
     results.append(r2)
 
-    # ── 비교 ──
-    print(f"\n{'=' * 58}")
-    print("  C_new vs E 비교")
-    print(f"{'=' * 58}")
-    if r1 and r2:
+    # ── C) F (MACRO GATE + 거래량 필터 vol_ratio >= 0.8) ──
+    print("\n[3/3] F (MACRO GATE + Vol Filter) 실행 중...")
+    trades_f, daily_f, stats_f = run_backtest_with_gate(
+        data_dict, name_map, kospi_df, us_df,
+        args.start, args.end, use_macro_gate=True, vol_filter_threshold=0.8
+    )
+    r3 = report(trades_f, daily_f, "F (MACRO GATE + Vol≥0.8)", gate_stats=stats_f)
+    results.append(r3)
+
+    # ── 3-way 비교 ──
+    print(f"\n{'=' * 72}")
+    print("  C_new vs E(Gate) vs F(Gate+Vol) 비교")
+    print(f"{'=' * 72}")
+    if r1 and r2 and r3:
         metrics = [
             ("총 거래", "trades", "건", 0),
             ("승률", "win_rate", "%", 1),
@@ -544,25 +573,40 @@ def main():
             ("평균 수익", "avg_win", "%", 2),
             ("평균 손실", "avg_loss", "%", 2),
         ]
-        print(f"  {'지표':<14} {'C_new':>10} {'E(Gate)':>10} {'차이':>10}")
-        print(f"  {'-'*14} {'-'*10} {'-'*10} {'-'*10}")
+        print(f"  {'지표':<14} {'C_new':>10} {'E(Gate)':>10} {'F(G+Vol)':>10} {'E-C':>8} {'F-C':>8}")
+        print(f"  {'-'*14} {'-'*10} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
         for label, key, unit, dec in metrics:
             v1 = r1.get(key, 0)
             v2 = r2.get(key, 0)
-            diff = v2 - v1
+            v3 = r3.get(key, 0)
+            d_ec = v2 - v1
+            d_fc = v3 - v1
             fmt = f".{dec}f"
-            sign = "+" if diff > 0 else ""
-            print(f"  {label:<14} {v1:>9{fmt}}{unit} {v2:>9{fmt}}{unit} {sign}{diff:>8{fmt}}{unit}")
+            s_ec = "+" if d_ec > 0 else ""
+            s_fc = "+" if d_fc > 0 else ""
+            print(f"  {label:<14} {v1:>9{fmt}}{unit} {v2:>9{fmt}}{unit} {v3:>9{fmt}}{unit} {s_ec}{d_ec:>6{fmt}} {s_fc}{d_fc:>6{fmt}}")
 
-    # 손절 비교 (가장 중요)
-    if trades_cnew and trades_e:
+    # 손절 비교
+    if trades_cnew and trades_e and trades_f:
         stops_cnew = [t for t in trades_cnew if t["exit"] == "stop"]
         stops_e = [t for t in trades_e if t["exit"] == "stop"]
-        print(f"\n  손절 건수: C_new {len(stops_cnew)}건 → E {len(stops_e)}건 ({len(stops_e)-len(stops_cnew):+d})")
+        stops_f = [t for t in trades_f if t["exit"] == "stop"]
+        print(f"\n  손절 건수: C_new {len(stops_cnew)}건 → E {len(stops_e)}건 ({len(stops_e)-len(stops_cnew):+d}) → F {len(stops_f)}건 ({len(stops_f)-len(stops_cnew):+d})")
 
-        # MACRO GATE가 차단한 날의 시그널 중 실제 손실인 것이 몇 개인지
-        if stats_e["blocked_signals"] > 0:
-            print(f"  RED 차단 시그널: {stats_e['blocked_signals']}건 (손실 회피)")
+        if stats_e.get("blocked_signals", 0) > 0:
+            print(f"  RED 차단 시그널: {stats_e['blocked_signals']}건")
+        if stats_f.get("vol_filtered", 0) > 0:
+            print(f"  거래량 필터 차단: {stats_f['vol_filtered']}건")
+
+    # ── 승률 개선 핵심 지표 ──
+    if r1 and r3:
+        wr_diff = r3.get("win_rate", 0) - r1.get("win_rate", 0)
+        print(f"\n  ★ 핵심: 승률 {r1.get('win_rate',0):.1f}% → {r3.get('win_rate',0):.1f}% ({wr_diff:+.1f}%p)")
+        print(f"  ★ PF   {r1.get('pf',0):.2f} → {r3.get('pf',0):.2f}")
+        if r3.get("win_rate", 0) >= 60:
+            print(f"  → 거래량 필터 유효! live 파이프라인 적용 추천")
+        else:
+            print(f"  → 추가 필터 또는 threshold 조정 검토 필요")
 
 
 if __name__ == "__main__":
