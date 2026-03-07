@@ -1640,3 +1640,27 @@ predict_chain:
   # 블라인드 테스트
   blind_test:
     enabled: true
+
+# ─── 소형주 급등 포착 (v12.4) ───
+smallcap_explosion:
+  enabled: true
+  min_trading_value: 5e8     # 20일 평균 거래대금 5억+
+  min_price: 1000            # 최소 종가
+  exclude_main_universe: true  # 메인 유니버스(대형주) 제외
+
+  # Pattern A: 거래량 폭발 + 돌파
+  vol_breakout:
+    min_vol_ratio: 2.5       # MA20 대비 최소 배수
+
+  # Pattern B: 세력 털기 V자
+  shakeout:
+    min_drop_pct: -5         # 급락 최소
+    min_bounce_pct: 3        # 반등 최소
+    min_vol_ratio: 1.0       # 반등일 최소 거래량
+
+  # Pattern C: 연속 양봉
+  consecutive:
+    min_streak: 3            # 최소 연속일
+    min_cum_return: 8        # 최소 누적 상승%
+
+  telegram_top_n: 10         # 알림 최대 종목수

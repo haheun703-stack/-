@@ -122,6 +122,11 @@ echo [%date% %time%] [12.5/29] 수급 폭발 스캐너 >> logs\schedule.log
 python -u -X utf8 scripts\scan_volume_spike.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [12.5/29] FAILED >> logs\schedule.log
 
+REM 12.6단계: 소형주 급등 포착 스캐너 (v12.4)
+echo [%date% %time%] [12.6/29] 소형주 급등 포착 >> logs\schedule.log
+python -u -X utf8 scripts\scan_smallcap_explosion.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [12.6/29] FAILED >> logs\schedule.log
+
 REM 12.7단계: 밸류체인 릴레이 스캔 (대장주→소부장)
 echo [%date% %time%] [12.7/29] 밸류체인 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_value_chain.py >> logs\schedule.log 2>&1
