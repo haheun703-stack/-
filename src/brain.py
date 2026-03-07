@@ -360,12 +360,16 @@ class Brain:
                 frozen=not confirmation["confirmed"] and name != "cash",
             ))
 
+        # ── 11.5. ICT 프리미엄 레벨 + OR/IR 로드 (브리핑용) ──
+        ict_data = self._load_ict_data(positions)
+
         # ── 12. 브리핑 생성 ──
         briefing = self._build_briefing(
             effective_regime, kospi_regime, nw_score, vix_level,
             vix_label, us_grade, shock_type, arms, adjustments, warnings,
             liq_signal=liq_signal,
             cot_signal=cot_signal,
+            ict_data=ict_data,
         )
 
         decision = BrainDecision(
@@ -922,6 +926,61 @@ class Brain:
 
         logger.info("BRAIN 결정 저장: %s", BRAIN_OUTPUT_PATH)
 
+    def _load_ict_data(self, positions: Any) -> dict | None:
+        """ICT 프리미엄 레벨 + OR/IR 데이터 로드 (브리핑용).
+
+        Args:
+            positions: positions.json 내용 (dict 또는 list)
+
+        Returns:
+            dict with 'levels', 'or_ir', 'held_symbols' or None
+        """
+        try:
+            from src.ict.premium_levels import load_premium_levels
+            from src.ict.opening_range import load_or_ir
+        except ImportError:
+            logger.debug("ICT 모듈 미설치 — 브리핑 ICT 섹션 생략")
+            return None
+
+        today_str = datetime.now().strftime("%Y-%m-%d")
+
+        # 보유 종목 추출
+        held_symbols = []
+        if isinstance(positions, list):
+            pos_list = positions
+        elif isinstance(positions, dict):
+            pos_list = positions.get("positions", [])
+        else:
+            pos_list = []
+
+        for p in pos_list:
+            ticker = p.get("ticker", p.get("symbol", ""))
+            qty = p.get("shares", p.get("quantity", 0))
+            if ticker and qty and int(qty) > 0:
+                held_symbols.append(ticker)
+
+        if not held_symbols:
+            return None
+
+        # 프리미엄 레벨
+        levels = load_premium_levels(today_str)
+        if isinstance(levels, dict):
+            levels = levels.get("levels", [])
+
+        # OR/IR
+        or_ir = load_or_ir(today_str)
+        if isinstance(or_ir, dict):
+            or_ir = or_ir.get("records", [])
+
+        if not levels and not or_ir:
+            return None
+
+        return {
+            "levels": levels or [],
+            "or_ir": or_ir or [],
+            "held_symbols": held_symbols,
+        }
+
     def _build_briefing(
         self,
         effective_regime: str, kospi_regime: str,
@@ -930,6 +989,7 @@ class Brain:
         arms: dict, adjustments: list, warnings: list,
         liq_signal: dict | None = None,
         cot_signal: dict | None = None,
+        ict_data: dict | None = None,
     ) -> str:
         """텔레그램 브리핑 텍스트 생성."""
         lines = []
@@ -1017,6 +1077,13 @@ class Brain:
                 lines.append(f"v3 캡: {effective_regime} → 제한 없음")
             lines.append("")
 
+        # ICT 전술 레벨 (보유 종목)
+        if ict_data:
+            ict_lines = self._format_ict_briefing(ict_data)
+            if ict_lines:
+                lines.extend(ict_lines)
+                lines.append("")
+
         # 보정 사항
         if adjustments:
             lines.append("보정:")
@@ -1031,6 +1098,59 @@ class Brain:
                 lines.append(f"  ! {w}")
 
         return "\n".join(lines)
+
+    @staticmethod
+    def _format_ict_briefing(ict_data: dict) -> list[str]:
+        """ICT 프리미엄 레벨 + OR/IR bias 브리핑 포맷."""
+        levels = ict_data.get("levels", [])
+        or_ir = ict_data.get("or_ir", [])
+        held = set(ict_data.get("held_symbols", []))
+
+        if not held:
+            return []
+
+        # 보유 종목 프리미엄 레벨
+        held_levels = [lv for lv in levels if lv.get("symbol") in held]
+        # KOSPI ETF OR/IR
+        kospi_or = [r for r in or_ir if r.get("symbol") == "069500"]
+        held_or = [r for r in or_ir if r.get("symbol") in held]
+
+        if not held_levels and not kospi_or and not held_or:
+            return []
+
+        _level_names = {
+            "prev_day_high": "전일고", "prev_day_low": "전일저",
+            "prev_week_high": "주간고", "prev_week_low": "주간저",
+            "prev_month_high": "월간고", "prev_month_low": "월간저",
+        }
+
+        lines = ["ICT 전술 레벨:"]
+
+        # KOSPI bias
+        for rec in kospi_or:
+            bias = rec.get("daily_bias", "?")
+            bias_icon = {"bullish": "↑", "bearish": "↓", "neutral": "−"}.get(bias, "?")
+            lines.append(f"  KOSPI bias: {bias} {bias_icon} (OR {rec['or_low']:,}~{rec['or_high']:,})")
+
+        # 보유 종목 레벨
+        for lv in held_levels:
+            name = lv.get("name", lv["symbol"])
+            price = lv["current_price"]
+            parts = [f"  {name} {price:,}"]
+
+            res = lv.get("nearest_resistance")
+            if res:
+                lbl = _level_names.get(res["level"], res["level"])
+                parts.append(f"↑{lbl} {res['price']:,}({res['distance_pct']:+.1f}%)")
+
+            sup = lv.get("nearest_support")
+            if sup:
+                lbl = _level_names.get(sup["level"], sup["level"])
+                parts.append(f"↓{lbl} {sup['price']:,}({sup['distance_pct']:+.1f}%)")
+
+            lines.append(" | ".join(parts))
+
+        return lines
 
 
 # ================================================================

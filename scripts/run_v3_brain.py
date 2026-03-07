@@ -1132,6 +1132,147 @@ def weekly_review() -> dict:
     return result
 
 
+# ─── Phase 4.5: ICT 전술 필터 ─────────────────────────────────
+
+def _apply_ict_filter(picks: list[dict]) -> list[dict]:
+    """ICT 프리미엄 레벨 + OR/IR bias로 conviction 보정.
+
+    - confidence_adjust(-0.2~+0.1) × 10 → conviction 보정(-2~+1)
+    - 보정 후 min_conviction 이하 → 자동 필터링
+    - data/ict_log/{date}.json에 로그 누적
+
+    Args:
+        picks: Phase 4 통과 종목 리스트
+
+    Returns:
+        ICT 보정 적용된 picks (필터링 포함)
+    """
+    try:
+        from src.ict.ict_filter import ict_check
+    except ImportError:
+        logger.warning("ICT 모듈 미설치 — Phase 4.5 스킵")
+        return picks
+
+    if not picks:
+        return picks
+
+    settings = _load_settings()
+    min_conviction = settings.get("deep_analyst", {}).get("min_conviction", 5)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    log_records = []
+    adjusted_picks = []
+    filtered_count = 0
+
+    for pick in picks:
+        ticker = pick.get("ticker", "")
+        name = pick.get("name", ticker)
+        original_conviction = pick.get("conviction", 0)
+
+        try:
+            result = ict_check(ticker, "buy", today_str)
+        except Exception as e:
+            logger.debug("ICT 체크 실패 %s: %s", ticker, e)
+            adjusted_picks.append(pick)
+            continue
+
+        adj = result.get("confidence_adjust", 0.0)
+        conviction_delta = int(round(adj * 10))  # -2 ~ +1
+        new_conviction = max(0, min(10, original_conviction + conviction_delta))
+
+        # 로그 레코드
+        record = {
+            "symbol": ticker,
+            "name": name,
+            "signal_type": "buy",
+            "daily_bias": result.get("daily_bias", "unknown"),
+            "confidence_adjust": adj,
+            "conviction_before": original_conviction,
+            "conviction_delta": conviction_delta,
+            "conviction_after": new_conviction,
+            "tags": result.get("tags", []),
+            "reason": result.get("reason", ""),
+            "suggested_target": result.get("suggested_target"),
+            "suggested_stop": result.get("suggested_stop"),
+            "filtered": False,
+        }
+
+        if conviction_delta != 0:
+            pick["conviction"] = new_conviction
+            pick["ict_adjust"] = conviction_delta
+            pick["ict_tags"] = result.get("tags", [])
+            pick["ict_reason"] = result.get("reason", "")
+
+        # 필터링 체크
+        if new_conviction < min_conviction:
+            record["filtered"] = True
+            filtered_count += 1
+            logger.info(
+                "[ICT] %s(%s) FILTERED: conviction %d→%d (<%d) | bias=%s | %s",
+                name, ticker, original_conviction, new_conviction,
+                min_conviction, result.get("daily_bias", "?"), result.get("reason", ""),
+            )
+        else:
+            adjusted_picks.append(pick)
+            if conviction_delta != 0:
+                logger.info(
+                    "[ICT] %s(%s) adj=%+d: conviction %d→%d | bias=%s | %s",
+                    name, ticker, conviction_delta, original_conviction,
+                    new_conviction, result.get("daily_bias", "?"), result.get("reason", ""),
+                )
+
+        log_records.append(record)
+
+    # ICT 로그 저장
+    _save_ict_log(today_str, log_records, filtered_count)
+
+    if filtered_count > 0:
+        logger.info(
+            "Phase 4.5 ICT 필터: %d종목 → %d종목 (-%d)",
+            len(picks), len(adjusted_picks), filtered_count,
+        )
+    else:
+        adj_count = sum(1 for r in log_records if r["conviction_delta"] != 0)
+        logger.info(
+            "Phase 4.5 ICT: %d종목, %d종목 conviction 보정, 필터링 0",
+            len(picks), adj_count,
+        )
+
+    return adjusted_picks
+
+
+def _save_ict_log(date_str: str, records: list[dict], filtered_count: int) -> None:
+    """ICT 체크 로그를 data/ict_log/{date}.json에 저장."""
+    log_dir = DATA_DIR / "ict_log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / f"{date_str}.json"
+
+    positive = sum(1 for r in records if r["conviction_delta"] > 0)
+    negative = sum(1 for r in records if r["conviction_delta"] < 0)
+    neutral = sum(1 for r in records if r["conviction_delta"] == 0)
+    avg_adj = (
+        round(sum(r["confidence_adjust"] for r in records) / len(records), 4)
+        if records else 0
+    )
+
+    log_data = {
+        "date": date_str,
+        "total_checks": len(records),
+        "adjustments": {
+            "positive": positive,
+            "negative": negative,
+            "neutral": neutral,
+        },
+        "filtered_out": filtered_count,
+        "avg_adjustment": avg_adj,
+        "records": records,
+    }
+
+    _save_json(log_path, log_data)
+    logger.info("ICT 로그 저장: %s (%d건, +%d/-%d/=%d, filtered=%d)",
+                log_path.name, len(records), positive, negative, neutral, filtered_count)
+
+
 # ─── 메인 ───────────────────────────────────────────────────────
 
 async def main():
@@ -1203,6 +1344,10 @@ async def main():
         except Exception as e:
             logger.error("Phase 3+4 실패: %s", e)
             picks = []
+
+    # Phase 4.5: ICT 전술 필터 (Phase 4 conviction 보정)
+    if picks:
+        picks = _apply_ict_filter(picks)
 
     # Phase 5: Portfolio Brain
     final_picks = None
