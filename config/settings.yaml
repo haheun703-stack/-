@@ -1564,7 +1564,7 @@ nightwatch:
   # L1: 채권 자경단 비토
   bond_vigilante:
     spy_threshold: -0.01      # SPY -1% 이하 + 금리 상승 → 비토
-    tnx_threshold_bp: 5.0     # 10Y 금리 +5bp 이상
+    tnx_threshold_bp: 0.05    # 10Y 금리 +5bp 이상 (parquet %p 단위: 0.05 = 5bp)
     veto_score_cap: -0.50     # 비토 시 ensemble score 상한
     position_cap: 0.30        # 비토 시 포지션 30% 축소
     emergency_alert: true     # 비토 시 별도 긴급 텔레그램 발송
