@@ -1,25 +1,15 @@
-"""서브에이전트 패키지 — AI 분석 에이전트 모음"""
+"""서브에이전트 패키지 — AI 분석 에이전트 모음
+
+deprecated (scripts/archive/deprecated_agents/로 이동됨):
+  CFOAgent, ChartAnalysisAgent, ConditionJudgeAgent,
+  FlowPredictionAgent, GameAnalystAgent, MacroAnalystAgent,
+  RiskSentinelAgent, VolumeAnalysisAgent
+"""
 
 from src.agents.base import BaseAgent
-from src.agents.cfo import CFOAgent
-from src.agents.chart_analysis import ChartAnalysisAgent
-from src.agents.condition_judge import ConditionJudgeAgent
-from src.agents.flow_prediction import FlowPredictionAgent
-from src.agents.game_analyst import GameAnalystAgent
-from src.agents.macro_analyst import MacroAnalystAgent
 from src.agents.news_brain import NewsBrainAgent
-from src.agents.risk_sentinel import RiskSentinelAgent
-from src.agents.volume_analysis import VolumeAnalysisAgent
 
 __all__ = [
     "BaseAgent",
-    "CFOAgent",
-    "ChartAnalysisAgent",
-    "ConditionJudgeAgent",
-    "FlowPredictionAgent",
-    "GameAnalystAgent",
-    "MacroAnalystAgent",
     "NewsBrainAgent",
-    "RiskSentinelAgent",
-    "VolumeAnalysisAgent",
 ]

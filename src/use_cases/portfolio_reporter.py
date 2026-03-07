@@ -221,9 +221,9 @@ class PortfolioReporter:
     # ──────────────────────────────────────────
 
     def _run_6d_analysis(self, stocks: list[StockReportData]) -> None:
-        """6D 게임 분석을 Claude API로 실행"""
+        """6D 게임 분석을 Claude API로 실행 (deprecated — archive 이동됨)"""
         try:
-            from src.agents.game_analyst import GameAnalystAgent
+            from scripts.archive.deprecated_agents.game_analyst import GameAnalystAgent
 
             agent = GameAnalystAgent()
             contexts = []
