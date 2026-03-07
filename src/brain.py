@@ -938,6 +938,7 @@ class Brain:
         try:
             from src.ict.premium_levels import load_premium_levels
             from src.ict.opening_range import load_or_ir
+            from src.ict.equal_level_detector import load_equal_levels
         except ImportError:
             logger.debug("ICT 모듈 미설치 — 브리핑 ICT 섹션 생략")
             return None
@@ -972,12 +973,21 @@ class Brain:
         if isinstance(or_ir, dict):
             or_ir = or_ir.get("records", [])
 
-        if not levels and not or_ir:
+        # Equal Levels
+        try:
+            eq_levels = load_equal_levels(today_str)
+            if isinstance(eq_levels, dict):
+                eq_levels = eq_levels.get("levels", [])
+        except Exception:
+            eq_levels = []
+
+        if not levels and not or_ir and not eq_levels:
             return None
 
         return {
             "levels": levels or [],
             "or_ir": or_ir or [],
+            "equal_levels": eq_levels or [],
             "held_symbols": held_symbols,
         }
 
@@ -1101,9 +1111,10 @@ class Brain:
 
     @staticmethod
     def _format_ict_briefing(ict_data: dict) -> list[str]:
-        """ICT 프리미엄 레벨 + OR/IR bias 브리핑 포맷."""
+        """ICT 프리미엄 레벨 + OR/IR bias + Equal Level 브리핑 포맷."""
         levels = ict_data.get("levels", [])
         or_ir = ict_data.get("or_ir", [])
+        eq_all = ict_data.get("equal_levels", [])
         held = set(ict_data.get("held_symbols", []))
 
         if not held:
@@ -1113,9 +1124,13 @@ class Brain:
         held_levels = [lv for lv in levels if lv.get("symbol") in held]
         # KOSPI ETF OR/IR
         kospi_or = [r for r in or_ir if r.get("symbol") == "069500"]
-        held_or = [r for r in or_ir if r.get("symbol") in held]
+        # 보유 종목 Equal Levels
+        held_eq = [
+            lv for lv in eq_all if lv.get("symbol") in held
+            and (lv.get("equal_lows") or lv.get("equal_highs"))
+        ]
 
-        if not held_levels and not kospi_or and not held_or:
+        if not held_levels and not kospi_or and not held_eq:
             return []
 
         _level_names = {
@@ -1149,6 +1164,24 @@ class Brain:
                 parts.append(f"↓{lbl} {sup['price']:,}({sup['distance_pct']:+.1f}%)")
 
             lines.append(" | ".join(parts))
+
+        # Equal Levels (보유 종목)
+        if held_eq:
+            lines.append("  ---")
+            for lv in held_eq:
+                name = lv.get("name", lv["symbol"])
+                for eq in lv.get("equal_lows", [])[:2]:
+                    star = " ★" if eq["strength"] == "strong" else ""
+                    lines.append(
+                        f"  {name} ▽EqLow {eq['price_center']:,} "
+                        f"x{eq['touches']}({eq['distance_pct']:+.1f}%){star}"
+                    )
+                for eq in lv.get("equal_highs", [])[:2]:
+                    star = " ★" if eq["strength"] == "strong" else ""
+                    lines.append(
+                        f"  {name} △EqHigh {eq['price_center']:,} "
+                        f"x{eq['touches']}({eq['distance_pct']:+.1f}%){star}"
+                    )
 
         return lines
 

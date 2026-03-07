@@ -1,8 +1,8 @@
 """
-ICT 프리미엄 레벨 + OR/IR 계산 CLI 래퍼
+ICT 프리미엄 레벨 + OR/IR + Equal Level 계산 CLI 래퍼
 
 사용법:
-  python scripts/run_ict_levels.py                    # 오늘 프리미엄 레벨 + OR/IR 계산
+  python scripts/run_ict_levels.py                    # 오늘 프리미엄 레벨 + OR/IR + Equal Level 계산
   python scripts/run_ict_levels.py --backfill 14      # 과거 14일 OR/IR 백필
   python scripts/run_ict_levels.py --accuracy          # daily_bias 정확도 측정
   python scripts/run_ict_levels.py --date 2026-03-06   # 특정 날짜
@@ -22,6 +22,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from src.ict.premium_levels import compute_premium_levels, format_premium_briefing
 from src.ict.opening_range import compute_or_ir, backfill_or_ir, measure_bias_accuracy, format_or_ir_briefing
+from src.ict.equal_level_detector import compute_equal_levels, format_equal_levels_briefing
 
 logging.basicConfig(
     level=logging.INFO,
@@ -76,15 +77,30 @@ def main():
             bias_dist[b] = bias_dist.get(b, 0) + 1
         print(f"\nDaily Bias 분포: {bias_dist}")
 
+    # 3.5. Equal Level 탐지
+    logger.info("Equal Level 탐지: %s", date_str)
+    eq_levels = compute_equal_levels(date_str, symbols)
+    eq_count = sum(
+        1 for lv in eq_levels
+        if lv.get("equal_lows") or lv.get("equal_highs")
+    )
+    logger.info("Equal Levels: %d종목 (유효 %d)", len(eq_levels), eq_count)
+
     # 4. 요약 브리핑 (보유 종목)
     positions_path = Path("data/positions.json")
     held_symbols = []
     if positions_path.exists():
         with open(positions_path, encoding="utf-8") as f:
             positions = json.load(f)
+        if isinstance(positions, list):
+            pos_list = positions
+        elif isinstance(positions, dict):
+            pos_list = positions.get("positions", [])
+        else:
+            pos_list = []
         held_symbols = [
             p.get("ticker", p.get("symbol", ""))
-            for p in positions
+            for p in pos_list
             if p.get("shares", p.get("quantity", 0)) > 0
         ]
 
@@ -92,6 +108,10 @@ def main():
         print("\n" + format_premium_briefing(levels, held_symbols))
     if held_symbols and or_ir:
         print("\n" + format_or_ir_briefing(or_ir, held_symbols + ["069500"]))
+    if held_symbols and eq_levels:
+        eq_brief = format_equal_levels_briefing(eq_levels, held_symbols)
+        if eq_brief:
+            print("\n" + eq_brief)
 
 
 if __name__ == "__main__":
