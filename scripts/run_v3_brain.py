@@ -752,108 +752,267 @@ async def _send_telegram_summary(
     picks: list[dict] | None = None,
     final_picks: dict | None = None,
 ) -> None:
-    """v3 Brain 전체 결과를 텔레그램으로 전송"""
+    """v3 Brain 통합 파이프라인 결과 — 이모지 v2 (5대 눈 + ICT + Perplexity 통합)"""
     try:
         from src.telegram_sender import send_message
     except ImportError:
         logger.warning("telegram_sender 임포트 실패 — 알림 생략")
         return
 
-    regime = result.get("regime", "?")
-    confidence = result.get("regime_confidence", 0)
-    max_buys = result.get("max_new_buys", 0)
-    cash = result.get("cash_reserve_suggestion", 20)
+    from datetime import datetime, date
 
-    regime_emoji = {"공격": "🟢", "중립": "🟡", "방어": "🟠", "회피": "🔴"}.get(regime, "⚪")
+    # ── 보조 데이터 로드 (graceful) ──
+    brain_dec = _load_json(DATA_DIR / "brain_decision.json")
+    shield = _load_json(DATA_DIR / "shield_report.json")
+    cot = _load_json(DATA_DIR / "cot" / "cot_signal.json")
+    liq = _load_json(DATA_DIR / "liquidity_cycle" / "liquidity_signal.json")
+    us_overnight = _load_json(DATA_DIR / "us_market" / "overnight_signal.json")
+    perplexity = _load_json(DATA_DIR / "perplexity_verification.json")
 
-    lines = [
-        f"🧠 v3 AI Brain 판단",
-        f"",
-        f"{regime_emoji} 레짐: {regime} ({confidence:.0%})",
-        f"📊 최대 매수: {max_buys}종목 | 현금: {cash}%",
-    ]
+    # ICT 데이터 (최신 날짜 파일)
+    premium_map, equal_map = {}, {}
+    for subdir, target in [("premium_levels", premium_map), ("equal_levels", equal_map)]:
+        ict_dir = DATA_DIR / subdir
+        if ict_dir.exists():
+            files = sorted(ict_dir.glob("*.json"), reverse=True)
+            if files:
+                ict_data = _load_json(files[0])
+                key = "levels" if subdir == "premium_levels" else "levels"
+                for lv in ict_data.get(key, []):
+                    target[lv.get("symbol", "")] = lv
 
-    # 산업 Thesis
-    theses = result.get("industry_thesis", [])
-    if theses:
-        lines.append(f"\n📋 산업 Thesis ({len(theses)}개):")
-        for t in theses[:3]:
-            sector = t.get("sector", "?")
-            conf = t.get("confidence", 0)
-            thesis_text = t.get("thesis", "?")[:40]
-            lines.append(f"  • {sector} ({conf}/10): {thesis_text}")
+    # Perplexity 검증 매핑
+    pv_map = {}
+    for sv in perplexity.get("stock_verifications", []):
+        pv_map[sv.get("ticker", "")] = sv
 
-    # 섹터 우선순위
-    priority = result.get("sector_priority", {})
-    attack = priority.get("attack", [])
-    avoid = priority.get("avoid", [])
-    if attack:
-        lines.append(f"\n🎯 공격: {', '.join(attack)}")
-    if avoid:
-        lines.append(f"⛔ 회피: {', '.join(avoid)}")
+    # ── 요일/날짜 ──
+    weekdays = ["월", "화", "수", "목", "금", "토", "일"]
+    now = datetime.now()
+    # 다음 거래일 계산 (토=월, 일=월, 평일=당일/다음날)
+    target_date = (final_picks or {}).get("decision_date", "")
+    if target_date:
+        date_label = target_date.lstrip("0").replace("-0", "-").split("-")
+        date_str = f"{date_label[1]}/{date_label[2]}" if len(date_label) == 3 else target_date
+    else:
+        date_str = f"{now.month}/{now.day}"
+    weekday_kr = weekdays[now.weekday()]
 
-    # Phase 2 — 섹터 포커스
-    if sector_focus:
-        boost = sector_focus.get("screening_boost", [])
-        suppress = sector_focus.get("screening_suppress", [])
-        focus_sectors = sector_focus.get("focus_sectors", [])
+    # ── 레짐 ──
+    effective_regime = brain_dec.get("effective_regime", result.get("regime", "?"))
+    regime_icons = {
+        "BULL": "🟢", "CAUTION": "🟡", "BEAR": "🟠", "CRISIS": "🔴",
+        "공격": "🟢", "중립": "🟡", "방어": "🟠", "회피": "🔴",
+    }
+    regime_icon = regime_icons.get(effective_regime, "⚪")
 
-        if focus_sectors:
-            lines.append(f"\n🔍 섹터 포커스 ({len(focus_sectors)}개):")
-            for s in focus_sectors[:3]:
-                lines.append(
-                    f"  • {s.get('sector', '?')}: "
-                    f"{s.get('entry_timing', '?')} "
-                    f"({s.get('thesis_alignment', '?')})"
-                )
-        if boost:
-            lines.append(f"⬆️ 부스트: {', '.join(boost)}")
-        if suppress:
-            lines.append(f"⬇️ 억제: {', '.join(suppress)}")
+    lines = []
 
-    # Phase 4 — Deep Analyst picks
-    if picks:
-        lines.append(f"\n🎯 Deep Analyst 통과: {len(picks)}종목")
-        for p in picks[:5]:
+    # ═══ 헤더 ═══
+    lines.append(f"🧠 {weekday_kr}요일({date_str}) 통합 파이프라인 결과")
+    lines.append("")
+    lines.append(f"🔮 BRAIN 레짐: {regime_icon} {effective_regime}")
+
+    # ═══ 배분 ═══
+    arm_labels = {
+        "swing": "스윙", "etf_sector": "섹터", "etf_leverage": "레버리지",
+        "etf_index": "지수", "etf_gold": "금", "etf_small_cap": "소형주",
+        "etf_bonds": "채권", "etf_dollar": "달러", "cash": "현금",
+    }
+    arms_data = brain_dec.get("arms", [])
+    if arms_data:
+        parts = []
+        for arm in arms_data:
+            pct = arm.get("adjusted_pct", 0)
+            if pct > 0:
+                label = arm_labels.get(arm["name"], arm["name"])
+                parts.append(f"{label} {pct:.1f}%")
+        if parts:
+            lines.append(f"🥧 배분: {' │ '.join(parts)}")
+
+    # ═══ v3 캡 ═══
+    cap = (final_picks or {}).get("brain_cap_applied", {})
+    if cap:
+        lines.append(
+            f"🔒 v3 캡: {cap.get('regime', effective_regime)} → "
+            f"최대 {cap.get('slot_cap', '?')}종목, "
+            f"min_conviction {cap.get('min_conviction', '?')}"
+        )
+
+    # ═══ 매수 후보 ═══
+    buys = (final_picks or {}).get("buys", [])
+    skipped = (final_picks or {}).get("skipped", [])
+    lines.append("")
+    lines.append(f"━━━━━━━━━━━━━━━━━━")
+    lines.append(f"🎯 매수 후보 ({len(buys)}종목)")
+    lines.append(f"━━━━━━━━━━━━━━━━━━")
+
+    if buys:
+        num_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+        for i, b in enumerate(buys[:5]):
+            ticker = b.get("ticker", "")
+            name = b.get("name", "?")
+            num = num_emojis[i] if i < len(num_emojis) else f"{i+1}."
+            lines.append("")
+            lines.append(f"{num} {name} ({ticker})")
             lines.append(
-                f"  • {p.get('name', '?')}({p.get('ticker', '?')}): "
-                f"확신 {p.get('conviction', 0)}/10 "
-                f"[{p.get('strategy', '?')}]"
+                f"  🔥 conviction: {b.get('conviction', '?')}/10 │ "
+                f"비중: {b.get('size_pct', 0):.1f}%"
+            )
+            strategy = b.get("strategy", "?")
+            thesis = b.get("thesis_alignment", "")
+            thesis_str = f" ({thesis} thesis)" if thesis else ""
+            lines.append(f"  📌 전략: {strategy}{thesis_str}")
+
+            if b.get("entry_price"):
+                lines.append(f"  💲 진입가: {b['entry_price']:,}")
+
+            # ICT 프리미엄 레벨
+            plv = premium_map.get(ticker)
+            if plv:
+                res = plv.get("nearest_resistance")
+                sup = plv.get("nearest_support")
+                ict_parts = []
+                if res:
+                    ict_parts.append(
+                        f"전일고 {res['price']:,}({res['distance_pct']:+.1f}%)"
+                    )
+                if sup:
+                    ict_parts.append(
+                        f"전일저 {sup['price']:,}({sup['distance_pct']:+.1f}%)"
+                    )
+                if ict_parts:
+                    lines.append(f"  📐 {' │ '.join(ict_parts)}")
+
+            # Equal Levels
+            elv = equal_map.get(ticker)
+            if elv:
+                eq_parts = []
+                for eq in (elv.get("equal_lows") or [])[:1]:
+                    star = " ★" if eq.get("strength") == "strong" else ""
+                    eq_parts.append(
+                        f"EqLow {eq['price_center']:,} "
+                        f"x{eq['touches']}({eq['distance_pct']:+.1f}%){star}"
+                    )
+                for eq in (elv.get("equal_highs") or [])[:1]:
+                    star = " ★" if eq.get("strength") == "strong" else ""
+                    eq_parts.append(
+                        f"EqHigh {eq['price_center']:,} "
+                        f"x{eq['touches']}({eq['distance_pct']:+.1f}%){star}"
+                    )
+                if eq_parts:
+                    lines.append(f"  ⚖️ {' │ '.join(eq_parts)}")
+
+            # Perplexity 검증
+            pv = pv_map.get(ticker)
+            if pv:
+                verdict = pv.get("verdict", "?")
+                conf = pv.get("confidence_score", 0)
+                v_icon = {
+                    "CONFIRMED": "✅",
+                    "PARTIALLY_CONFIRMED": "⚠️",
+                    "HALLUCINATION_DETECTED": "❌",
+                }.get(verdict, "❓")
+                lines.append(
+                    f"  🔬 Perplexity: {v_icon} {verdict} ({conf:.0%})"
+                )
+    else:
+        lines.append("")
+        lines.append("  (매수 후보 없음)")
+
+    # ═══ 스킵 ═══
+    if skipped:
+        lines.append("")
+        lines.append("❌ 스킵")
+        for s in skipped:
+            reason = s.get("skip_reason", "?")
+            # 긴 사유 축약
+            if len(reason) > 50:
+                reason = reason[:47] + "..."
+            lines.append(f"  ▸ {s.get('name', '?')}: {reason}")
+
+    # ═══ 5대 눈 ═══
+    lines.append("")
+    lines.append(f"━━━━━━━━━━━━━━━━━━")
+    lines.append(f"👁️‍🗨️ 5대 눈")
+    lines.append(f"━━━━━━━━━━━━━━━━━━")
+
+    # 1D NightWatch
+    nw_score = brain_dec.get("nightwatch_score", 0)
+    nw_label = "긍정" if nw_score > 0.1 else ("부정" if nw_score < -0.1 else "중립")
+    lines.append(f"🌙 1D NW: {nw_score:+.3f} ({nw_label})")
+
+    # 2D Credit/MOVE
+    nw_data = us_overnight.get("nightwatch", {}) if isinstance(us_overnight, dict) else {}
+    nw_layers = nw_data.get("layers", {})
+    l2 = nw_layers.get("L2_regime_transition", {})
+    credit_z = l2.get("credit_spread_z", 0)
+    move_z = l2.get("move_z", 0)
+    if credit_z or move_z:
+        lines.append(f"🏛️ 2D credit_z={credit_z:+.1f} │ MOVE_z={move_z:+.1f}")
+
+    # 3D SHIELD
+    shield_level = shield.get("overall_level", "GREEN")
+    shield_icons = {"GREEN": "🟢", "YELLOW": "🟡", "ORANGE": "🟠", "RED": "🔴"}
+    s_icon = shield_icons.get(shield_level, "⚪")
+    systemic = shield.get("systemic_risk", {})
+    if systemic.get("simultaneous_decline_count", 0) > 0:
+        lines.append(
+            f"🛡️ 3D SHIELD: {s_icon} {shield_level} "
+            f"({systemic['simultaneous_decline_count']}종목 동시하락 "
+            f"{systemic.get('avg_decline_pct', 0):.1f}%)"
+        )
+    else:
+        lines.append(f"🛡️ 3D SHIELD: {s_icon} {shield_level}")
+
+    # 4D COT
+    if cot and cot.get("contracts"):
+        comp_dir = cot.get("composite_direction", "N/A")
+        comp_score = cot.get("composite_score", 0)
+        lines.append(f"📜 4D COT: {comp_dir} ({comp_score:+.3f})")
+        # SP500, Gold만 표시
+        key_parts = []
+        for cname, c in cot.get("contracts", {}).items():
+            label = c.get("label", cname)
+            z = c.get("z", 0)
+            if any(k in label for k in ["S&P", "SP500", "Gold", "금"]):
+                short = label.replace("E-mini", "").replace("COMEX", "").strip()
+                key_parts.append(f"{short} z={z:+.2f}")
+        if key_parts:
+            lines.append(f"  {' │ '.join(key_parts)}")
+
+    # 5D 유동성
+    if liq:
+        liq_regime = liq.get("regime", "?")
+        liq_score = liq.get("composite_score", 0)
+        ind = liq.get("indicators", {})
+        nl = ind.get("net_liquidity", {})
+        lines.append(f"🌊 5D 유동성: {liq_regime} ({liq_score:+.3f})")
+        if nl:
+            lines.append(
+                f"  Net Liq: {nl.get('value', 0):,.0f}B (z={nl.get('z', 0):+.2f})"
             )
 
-    # Phase 5 — 최종 매수 결정
-    if final_picks:
-        buys = final_picks.get("buys", [])
-        if buys:
-            lines.append(f"\n💰 최종 매수 결정: {len(buys)}종목")
-            for b in buys[:5]:
-                lines.append(
-                    f"  • {b.get('name', '?')}({b.get('ticker', '?')}): "
-                    f"비중 {b.get('size_pct', 0):.0f}% "
-                    f"[{b.get('strategy', '?')}]"
-                )
-        else:
-            lines.append(f"\n💰 최종 매수: 없음")
-        if final_picks.get("reasoning"):
-            lines.append(f"  → {final_picks['reasoning'][:60]}")
-
-    # 릴레이 알림
-    alerts = result.get("relay_alerts", [])
-    if alerts:
-        lines.append(f"\n🔗 릴레이:")
-        for a in alerts[:2]:
-            lines.append(f"  • {a.get('pattern')}: {a.get('action')}")
+    # ═══ 핵심 요약 ═══
+    lines.append("")
+    reasoning = (final_picks or {}).get("reasoning", "")
+    warnings = (final_picks or {}).get("portfolio_warnings", [])
+    if reasoning:
+        short = reasoning[:90] + ("..." if len(reasoning) > 90 else "")
+        lines.append(f"💡 {short}")
+    elif warnings:
+        lines.append(f"💡 {warnings[0][:90]}")
 
     # 리스크
     risks = result.get("risk_factors", [])
     if risks:
-        lines.append(f"\n⚠️ 리스크: {', '.join(risks[:3])}")
+        lines.append(f"⚠️ 리스크: {', '.join(risks[:3])}")
 
     text = "\n".join(lines)
 
     try:
-        await send_message(text)
-        logger.info("텔레그램 전송 완료")
+        send_message(text)
+        logger.info("텔레그램 전송 완료 (%d chars)", len(text))
     except Exception as e:
         logger.warning("텔레그램 전송 실패: %s", e)
 
