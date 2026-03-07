@@ -40,11 +40,16 @@ def main():
     print("\n계약별 포지션:")
     for name, c in result["contracts"].items():
         z = c.get("z", 0)
+        slow_z = c.get("slow_z", z)
+        fast_z = c.get("fast_z", z)
+        fast_used = c.get("fast_z_used", False)
         direction = c.get("direction", "N/A")
         net = c.get("net", 0)
         chg_1w = c.get("net_change_1w", 0)
         pct = c.get("percentile_52w", 50)
-        print(f"  {c['label']:>16s}: net={net:>+12,d}  z={z:+.2f}  "
+        z_tag = "FAST" if fast_used else "slow"
+        print(f"  {c['label']:>16s}: net={net:>+12,d}  z={z:+.2f}[{z_tag}]  "
+              f"(s={slow_z:+.2f}/f={fast_z:+.2f})  "
               f"{direction:>16s}  1W={chg_1w:>+10,d}  pct={pct:.0f}%")
 
     print("\n시그널:")

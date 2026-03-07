@@ -1721,7 +1721,8 @@ brain:
 # NIGHTWATCH(일간 Fast Eye)와 교차검증하여 확신도 조정
 cot_tracker:
   enabled: true
-  zscore_window: 52                    # z-score 롤링 윈도우 (주)
+  zscore_window: 52                    # slow z-score 롤링 윈도우 (주, 계절성 제거)
+  fast_zscore_window: 13               # fast z-score 롤링 윈도우 (주, 급변 감지)
   stale_warn_days: 10                  # 데이터 경고 임계 (일)
   stale_ignore_days: 14                # 데이터 무시 임계 (일)
   thresholds:

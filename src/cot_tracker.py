@@ -83,6 +83,7 @@ class CotTracker:
         cot_cfg = settings.get("cot_tracker", {})
         self.enabled = cot_cfg.get("enabled", True)
         self.zscore_window = cot_cfg.get("zscore_window", 52)
+        self.fast_zscore_window = cot_cfg.get("fast_zscore_window", 13)
         self.stale_warn_days = cot_cfg.get("stale_warn_days", 10)
         self.stale_ignore_days = cot_cfg.get("stale_ignore_days", 14)
         self.thresholds = cot_cfg.get("thresholds", DEFAULT_THRESHOLDS)
@@ -125,9 +126,13 @@ class CotTracker:
                 continue
 
             latest_net = int(series.iloc[-1])
-            z = self._calc_zscore(series)
+            z, slow_z, fast_z, fast_used = self._calc_dual_zscore(series)
             percentile = self._calc_percentile(series)
             direction = self._classify_direction(name, z)
+
+            if fast_used:
+                logger.info("COT %s: fast_z 우선 적용 (slow=%.2f, fast=%.2f)",
+                            name, slow_z, fast_z)
 
             # 1주/4주 변화
             net_change_1w = int(series.iloc[-1] - series.iloc[-2]) if len(series) >= 2 else 0
@@ -145,6 +150,9 @@ class CotTracker:
                 "long": latest_long,
                 "short": latest_short,
                 "z": round(z, 2),
+                "slow_z": round(slow_z, 2),
+                "fast_z": round(fast_z, 2),
+                "fast_z_used": fast_used,
                 "direction": direction,
                 "net_change_1w": net_change_1w,
                 "net_change_4w": net_change_4w,
@@ -184,9 +192,26 @@ class CotTracker:
             return pd.DataFrame()
         return pd.read_parquet(PARQUET_PATH)
 
-    def _calc_zscore(self, series: pd.Series) -> float:
-        """52주 롤링 z-score."""
-        window = min(self.zscore_window, len(series))
+    def _calc_dual_zscore(self, series: pd.Series) -> tuple[float, float, float, bool]:
+        """듀얼 윈도우 z-score: slow(52주) + fast(13주).
+
+        Returns:
+            (final_z, slow_z, fast_z, fast_used)
+            - final_z: 절대값이 큰 쪽 채택
+            - fast_used: True이면 fast_z가 채택됨 (로그 추적용)
+        """
+        slow_z = self._single_zscore(series, self.zscore_window)
+        fast_z = self._single_zscore(series, self.fast_zscore_window)
+
+        fast_used = abs(fast_z) > abs(slow_z)
+        final_z = fast_z if fast_used else slow_z
+
+        return final_z, slow_z, fast_z, fast_used
+
+    @staticmethod
+    def _single_zscore(series: pd.Series, window: int) -> float:
+        """단일 윈도우 z-score 계산."""
+        window = min(window, len(series))
         if window < 10:
             return 0.0
         recent = series.tail(window)
