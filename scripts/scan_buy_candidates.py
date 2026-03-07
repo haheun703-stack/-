@@ -33,8 +33,37 @@ POSITIONS_FILE = Path(__file__).resolve().parent.parent / "data" / "positions.js
 
 # ── 포지션 사이징 설정 ──
 CAPITAL = 100_000_000       # 1억 (사용자 수정 가능)
-MAX_POSITIONS = 5           # 최대 동시 보유
+MAX_POSITIONS = 5           # 최대 동시 보유 (BRAIN이 동적 조절)
 MAX_DAILY_ENTRY = 2         # 일일 최대 신규 진입
+
+
+def _get_brain_swing_slots() -> int | None:
+    """BRAIN 결정에서 스윙 슬롯 수 계산.
+
+    swing_pct → 슬롯 변환:
+      30%+ → 5슬롯 (기본 최대)
+      24~29% → 4슬롯
+      18~23% → 3슬롯
+      12~17% → 2슬롯
+      6~11% → 1슬롯
+      0~5% → 0슬롯 (신규 진입 차단)
+
+    Returns:
+        슬롯 수 (0~5) 또는 None (BRAIN 결정 없음)
+    """
+    brain_path = Path(__file__).resolve().parent.parent / "data" / "brain_decision.json"
+    if not brain_path.exists():
+        return None
+    try:
+        import json as _json
+        data = _json.loads(brain_path.read_text(encoding="utf-8"))
+        arms = {a["name"]: a["adjusted_pct"] for a in data.get("arms", [])}
+        swing_pct = arms.get("swing", 30)
+        # 6%p 단위로 슬롯 환산 (30% ÷ 5슬롯 = 6%p/슬롯)
+        slots = min(5, max(0, int(swing_pct / 6)))
+        return slots
+    except Exception:
+        return None
 
 
 # =========================================================
@@ -87,13 +116,19 @@ def save_positions(data: dict):
     )
 
 
-def calc_position_guide(sig: dict, capital: float, held_count: int) -> dict:
+def calc_position_guide(sig: dict, capital: float, held_count: int, max_pos: int | None = None) -> dict:
     """포지션 사이징 가이드 계산.
+
+    Args:
+        max_pos: BRAIN이 조절한 최대 슬롯 수. None이면 MAX_POSITIONS 사용.
 
     Returns:
         {"alloc": 금액, "pct": 비율, "shares": 수량, "label": "매수"/"대기"}
     """
-    base = capital / MAX_POSITIONS
+    effective_max = max_pos if max_pos is not None else MAX_POSITIONS
+    if effective_max <= 0:
+        return {"alloc": 0, "pct": 0, "shares": 0, "label": "N/A"}
+    base = capital / effective_max
 
     # Grade 가중
     grade_mult = {"S": 1.2, "A": 1.0, "B": 0.8}.get(
@@ -1207,7 +1242,15 @@ def scan_all(
     pos_data = load_positions()
     held_tickers = {p["ticker"] for p in pos_data.get("positions", [])}
     held_count = len(held_tickers)
-    available_slots = MAX_POSITIONS - held_count
+
+    # BRAIN 스윙 슬롯 동적 조절
+    max_pos = MAX_POSITIONS
+    brain_slots = _get_brain_swing_slots()
+    if brain_slots is not None:
+        max_pos = brain_slots
+        if max_pos != MAX_POSITIONS:
+            print(f"  🧠 BRAIN 스윙 슬롯: {MAX_POSITIONS} → {max_pos}")
+    available_slots = max(0, max_pos - held_count)
 
     # 일일 진입 카운트 (날짜 리셋)
     today_str = str(_date.today())
@@ -1219,7 +1262,7 @@ def scan_all(
 
     if held_tickers:
         held_names = [p.get("name", p["ticker"]) for p in pos_data["positions"]]
-        print(f"  보유 중: {', '.join(held_names)} ({held_count}/{MAX_POSITIONS}슬롯)")
+        print(f"  보유 중: {', '.join(held_names)} ({held_count}/{max_pos}슬롯)")
     print(f"  가용 슬롯: {available_slots} | 금일 진입 여유: {daily_entries_left}")
 
     # 데이터 신선도 검증 (대책 D)
@@ -1600,7 +1643,7 @@ def scan_all(
         # position_grade: S=1위, A=2위, B=3위 이하
         rank = survivors.index(sig) + 1
         sig["position_grade"] = {1: "S", 2: "A"}.get(rank, "B")
-        guide = calc_position_guide(sig, capital, held_count)
+        guide = calc_position_guide(sig, capital, held_count, max_pos)
 
         if entry_idx < daily_entries_left and entry_idx < available_slots:
             guide["label"] = "매수"
@@ -1614,6 +1657,7 @@ def scan_all(
     stats["daily_entries_left"] = daily_entries_left
     stats["held_count"] = held_count
     stats["capital"] = capital
+    stats["brain_max_pos"] = max_pos  # BRAIN 조절된 최대 슬롯
 
     stats["elapsed_sec"] = round(time.time() - t0, 1)
     return survivors, stats
@@ -1703,7 +1747,9 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     avail = stats.get("available_slots", MAX_POSITIONS)
     daily_left = stats.get("daily_entries_left", MAX_DAILY_ENTRY)
     cap = stats.get("capital", CAPITAL)
-    lines.append(f"\u2550\u2550 포지션 ({held_n}/{MAX_POSITIONS}) \u2550\u2550")
+    brain_max = stats.get("brain_max_pos", MAX_POSITIONS)
+    brain_tag = f" 🧠" if brain_max != MAX_POSITIONS else ""
+    lines.append(f"══ 포지션 ({held_n}/{brain_max}{brain_tag}) ══")
     lines.append(f"자본 {cap/1e8:.1f}억 | 가용 {avail}슬롯 | 금일 진입여유 {daily_left}건")
     if held_n > 0:
         pos_data = load_positions()
