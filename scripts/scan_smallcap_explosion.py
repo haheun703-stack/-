@@ -538,6 +538,213 @@ def send_telegram(results: list[dict], cfg: dict):
         print(f"  [텔레그램 실패: {e}]")
 
 
+PAPER_LOG_PATH = PROJECT_ROOT / "data" / "smallcap_paper_trading.json"
+
+
+def load_paper_log() -> dict:
+    """페이퍼 트레이딩 로그 로드."""
+    if PAPER_LOG_PATH.exists():
+        with open(PAPER_LOG_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    return {"trades": [], "summary": {}}
+
+
+def save_paper_log(log: dict):
+    """페이퍼 트레이딩 로그 저장."""
+    PAPER_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(PAPER_LOG_PATH, "w", encoding="utf-8") as f:
+        json.dump(log, f, ensure_ascii=False, indent=2, default=str)
+
+
+def record_paper_trades(primary_signals: list[dict], scan_date: str,
+                        name_map: dict[str, str]):
+    """PRIMARY 시그널 → 페이퍼 트레이딩 진입 기록.
+
+    진입가: 당일 종가
+    SL: 종가 - ATR×1.0 (약 -5~8%)
+    TP: 종가 + ATR×3.0 (약 +15~25%)
+    판정일: 5거래일 후
+    """
+    log = load_paper_log()
+    existing_keys = {(t["ticker"], t["entry_date"]) for t in log["trades"]}
+
+    new_count = 0
+    for sig in primary_signals:
+        ticker = sig["ticker"]
+        key = (ticker, scan_date)
+        if key in existing_keys:
+            continue  # 이미 기록됨
+
+        # ATR 가져오기
+        csv_files = list(CSV_DIR.glob(f"*_{ticker}.csv"))
+        if not csv_files:
+            continue
+        try:
+            df = pd.read_csv(csv_files[0], index_col="Date", parse_dates=True).sort_index()
+        except Exception:
+            continue
+
+        atr = float(df["ATR"].iloc[-1]) if "ATR" in df.columns and not pd.isna(df["ATR"].iloc[-1]) else 0
+        close = sig["close"]
+
+        if atr <= 0:
+            atr = close * 0.05  # fallback: 5%
+
+        trade = {
+            "ticker": ticker,
+            "name": sig["name"],
+            "entry_date": scan_date,
+            "entry_price": close,
+            "atr": round(atr, 1),
+            "sl_price": round(close - atr * 1.0),  # ATR×1.0 손절
+            "tp_price": round(close + atr * 3.0),  # ATR×3.0 익절
+            "sl_pct": round((atr * -1.0 / close) * 100, 1),
+            "tp_pct": round((atr * 3.0 / close) * 100, 1),
+            "grade": sig["grade"],
+            "supply_grade": sig["supply_grade"],
+            "patterns": sig["pattern_names"],
+            "check_date": None,  # 5일 후 자동 채움
+            "exit_price": None,
+            "pnl_pct": None,
+            "result": None,  # WIN / LOSS / SL_HIT / TP_HIT / OPEN
+            "status": "OPEN",
+        }
+        log["trades"].append(trade)
+        new_count += 1
+
+    if new_count > 0:
+        print(f"\n  [페이퍼] 신규 {new_count}건 기록")
+
+    save_paper_log(log)
+    return new_count
+
+
+def check_paper_results(name_map: dict[str, str]):
+    """5거래일 경과한 OPEN 트레이드 결과 확인.
+
+    판정 로직:
+    1. 5일 내 SL 히트 → SL_HIT (LOSS)
+    2. 5일 내 TP 히트 → TP_HIT (WIN)
+    3. 둘 다 히트 → SL 우선 (보수적)
+    4. 5일 경과 → 종가 기준 WIN/LOSS
+    """
+    log = load_paper_log()
+    today = pd.Timestamp(datetime.now().strftime("%Y-%m-%d"))
+    updated = 0
+
+    for trade in log["trades"]:
+        if trade["status"] != "OPEN":
+            continue
+
+        entry_date = pd.Timestamp(trade["entry_date"])
+        ticker = trade["ticker"]
+
+        csv_files = list(CSV_DIR.glob(f"*_{ticker}.csv"))
+        if not csv_files:
+            continue
+        try:
+            df = pd.read_csv(csv_files[0], index_col="Date", parse_dates=True).sort_index()
+        except Exception:
+            continue
+
+        # 진입일 이후 데이터
+        after = df[df.index > entry_date]
+        if len(after) < 5:
+            continue  # 아직 5일 안 됨
+
+        entry_price = trade["entry_price"]
+        sl = trade["sl_price"]
+        tp = trade["tp_price"]
+
+        # 5거래일 데이터
+        fwd_5d = after.iloc[:5]
+        check_date = fwd_5d.index[-1].strftime("%Y-%m-%d")
+        exit_price = float(fwd_5d["Close"].iloc[-1])
+
+        # SL/TP 히트 확인
+        sl_hit_day = None
+        tp_hit_day = None
+        for i, (dt, row) in enumerate(fwd_5d.iterrows()):
+            if float(row["Low"]) <= sl and sl_hit_day is None:
+                sl_hit_day = i
+            if float(row["High"]) >= tp and tp_hit_day is None:
+                tp_hit_day = i
+
+        # 결과 판정
+        if sl_hit_day is not None and (tp_hit_day is None or sl_hit_day <= tp_hit_day):
+            result = "SL_HIT"
+            exit_price = sl
+        elif tp_hit_day is not None:
+            result = "TP_HIT"
+            exit_price = tp
+        elif exit_price > entry_price:
+            result = "WIN"
+        else:
+            result = "LOSS"
+
+        pnl_pct = round((exit_price / entry_price - 1) * 100, 1)
+
+        trade["check_date"] = check_date
+        trade["exit_price"] = int(exit_price)
+        trade["pnl_pct"] = pnl_pct
+        trade["result"] = result
+        trade["status"] = "CLOSED"
+        updated += 1
+
+    if updated > 0:
+        # 요약 업데이트
+        closed = [t for t in log["trades"] if t["status"] == "CLOSED"]
+        if closed:
+            wins = [t for t in closed if t["result"] in ("WIN", "TP_HIT")]
+            losses = [t for t in closed if t["result"] in ("LOSS", "SL_HIT")]
+            log["summary"] = {
+                "total_trades": len(closed),
+                "wins": len(wins),
+                "losses": len(losses),
+                "win_rate": round(len(wins) / len(closed) * 100, 1) if closed else 0,
+                "avg_pnl": round(np.mean([t["pnl_pct"] for t in closed]), 1),
+                "total_pnl": round(sum(t["pnl_pct"] for t in closed), 1),
+                "tp_hits": len([t for t in closed if t["result"] == "TP_HIT"]),
+                "sl_hits": len([t for t in closed if t["result"] == "SL_HIT"]),
+            }
+        print(f"\n  [페이퍼] {updated}건 결과 확인 완료")
+        save_paper_log(log)
+
+    # 현황 출력
+    log = load_paper_log()
+    open_trades = [t for t in log["trades"] if t["status"] == "OPEN"]
+    closed_trades = [t for t in log["trades"] if t["status"] == "CLOSED"]
+
+    if open_trades or closed_trades:
+        print(f"\n{'─' * 70}")
+        print(f"  페이퍼 트레이딩 현황")
+        print(f"{'─' * 70}")
+
+    if open_trades:
+        print(f"  OPEN ({len(open_trades)}건):")
+        for t in open_trades:
+            patterns = "+".join(p.split("_")[0] for p in t["patterns"])
+            print(f"    {t['name']}({t['ticker']}) 진입:{t['entry_price']:,} "
+                  f"SL:{t['sl_price']:,}({t['sl_pct']:+.1f}%) "
+                  f"TP:{t['tp_price']:,}({t['tp_pct']:+.1f}%) "
+                  f"[{patterns}] {t['supply_grade']} ({t['entry_date']})")
+
+    if closed_trades:
+        s = log.get("summary", {})
+        print(f"  CLOSED ({len(closed_trades)}건): "
+              f"승률 {s.get('win_rate', 0):.0f}% | "
+              f"평균 {s.get('avg_pnl', 0):+.1f}% | "
+              f"누적 {s.get('total_pnl', 0):+.1f}% | "
+              f"TP:{s.get('tp_hits', 0)} SL:{s.get('sl_hits', 0)}")
+        # 최근 5건 상세
+        recent = sorted(closed_trades, key=lambda x: x.get("check_date", ""), reverse=True)[:5]
+        for t in recent:
+            emoji = "+" if t["pnl_pct"] >= 0 else ""
+            print(f"    {t['name']}({t['ticker']}) {t['result']:>6} "
+                  f"{emoji}{t['pnl_pct']:.1f}% "
+                  f"({t['entry_date']}→{t['check_date']})")
+
+
 def main():
     parser = argparse.ArgumentParser(description="소형주 급등 포착 스캐너 v2")
     parser.add_argument("--no-send", action="store_true", help="텔레그램 미발송")
@@ -650,6 +857,14 @@ def main():
         print(f"  PRIMARY 수급: CONFIRMED {supply_counts.get('CONFIRMED', 0)} │"
               f" PARTIAL {supply_counts.get('PARTIAL', 0)} │"
               f" NONE {supply_counts.get('NONE', 0)}")
+
+    # 페이퍼 트레이딩 (backtest 모드가 아닐 때만)
+    if not args.backtest:
+        # 결과 확인 (5일 경과 트레이드)
+        check_paper_results(name_map)
+        # PRIMARY 시그널 신규 기록
+        if primary_list:
+            record_paper_trades(primary_list, scan_date, name_map)
 
     # 텔레그램
     if not args.no_send and results:

@@ -1,0 +1,111 @@
+{
+  "trades": [
+    {
+      "ticker": "024740",
+      "name": "한일단조",
+      "entry_date": "2026-03-07",
+      "entry_price": 3720,
+      "atr": 328.0,
+      "sl_price": 3392,
+      "tp_price": 4704,
+      "sl_pct": -8.8,
+      "tp_pct": 26.5,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "031980",
+      "name": "피에스케이홀딩스",
+      "entry_date": "2026-03-07",
+      "entry_price": 117300,
+      "atr": 10485.1,
+      "sl_price": 106815,
+      "tp_price": 148755,
+      "sl_pct": -8.9,
+      "tp_pct": 26.8,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "357880",
+      "name": "SKAI",
+      "entry_date": "2026-03-07",
+      "entry_price": 2580,
+      "atr": 375.0,
+      "sl_price": 2205,
+      "tp_price": 3705,
+      "sl_pct": -14.5,
+      "tp_pct": 43.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "036170",
+      "name": "에이치엠넥스",
+      "entry_date": "2026-03-07",
+      "entry_price": 3300,
+      "atr": 389.8,
+      "sl_price": 2910,
+      "tp_price": 4469,
+      "sl_pct": -11.8,
+      "tp_pct": 35.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "297570",
+      "name": "알로이스",
+      "entry_date": "2026-03-07",
+      "entry_price": 1454,
+      "atr": 105.4,
+      "sl_price": 1349,
+      "tp_price": 1770,
+      "sl_pct": -7.3,
+      "tp_pct": 21.8,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    }
+  ],
+  "summary": {}
+}
