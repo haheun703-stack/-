@@ -39,6 +39,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 from src.etf.orchestrator import ETFOrchestrator
 from src.etf.data_bridge import load_all, calc_leading_regime
+from src.brain import Brain, BRAIN_OUTPUT_PATH
 
 logger = logging.getLogger(__name__)
 OUTPUT_PATH = PROJECT_ROOT / "data" / "etf_rotation_result.json"
@@ -173,8 +174,45 @@ def main():
     if data.get("sector_returns_1d"):
         print(f"  📊 섹터 1일 수익률: {len(data['sector_returns_1d'])}개")
 
+    # ---- 1.8 BRAIN 자본배분 오버라이드 ----
+    brain_decision = None
+    brain_alloc_override = None
+    try:
+        if BRAIN_OUTPUT_PATH.exists():
+            brain_data = json.loads(BRAIN_OUTPUT_PATH.read_text(encoding="utf-8"))
+            brain_regime = brain_data.get("effective_regime", "")
+            if brain_regime:
+                # BRAIN이 결정한 레짐 사용
+                if brain_regime != effective_regime:
+                    print(f"  🧠 BRAIN 레짐 오버라이드: {effective_regime} → {brain_regime}")
+                    effective_regime = brain_regime
+                    regime_overridden = True
+
+                # BRAIN 배분 비율 → 오케스트레이터 주입용
+                brain_arms = {a["name"]: a["adjusted_pct"] for a in brain_data.get("arms", [])}
+                if brain_arms:
+                    brain_alloc_override = {
+                        "sector": brain_arms.get("etf_sector", 0),
+                        "leverage": brain_arms.get("etf_leverage", 0),
+                        "index": brain_arms.get("etf_index", 0),
+                        "cash": brain_arms.get("cash", 40),
+                    }
+                    print(f"  🧠 BRAIN 배분: "
+                          f"섹터 {brain_alloc_override['sector']:.0f}% | "
+                          f"레버 {brain_alloc_override['leverage']:.0f}% | "
+                          f"지수 {brain_alloc_override['index']:.0f}% | "
+                          f"현금 {brain_alloc_override['cash']:.0f}%")
+                    brain_decision = brain_data
+    except Exception as e:
+        print(f"  ⚠️ BRAIN 로드 실패, 기존 로직 사용: {e}")
+
     # ---- 2. 오케스트레이터 실행 ----
     orchestrator = ETFOrchestrator()
+
+    # BRAIN 배분 오버라이드 주입
+    if brain_alloc_override:
+        orchestrator.settings.setdefault("regime_allocation", {})[effective_regime] = brain_alloc_override
+
     result = orchestrator.run(
         regime=effective_regime,
         kospi_ma20_above=kospi["ma20_above"],
@@ -190,6 +228,15 @@ def main():
         sector_returns_1d=data.get("sector_returns_1d"),
         supply_flow_data=data.get("supply_flow"),
     )
+
+    # BRAIN 정보 결과에 포함
+    if brain_decision:
+        result["brain"] = {
+            "timestamp": brain_decision.get("timestamp"),
+            "confidence": brain_decision.get("confidence"),
+            "adjustments": brain_decision.get("adjustments", []),
+            "warnings": brain_decision.get("warnings", []),
+        }
 
     # ---- 2.5. AI 필터 레이어 ----
     ai_filter_result = None
@@ -280,6 +327,12 @@ def main():
 
             report = result.get("telegram_report", "")
             if report:
+                # BRAIN 브리핑 섹션 추가
+                if brain_decision:
+                    briefing = brain_decision.get("briefing", "")
+                    if briefing:
+                        report = briefing + "\n\n━━━━━━━━━━━━━━━━━━\n\n" + report
+
                 # AI 필터 섹션 추가
                 if ai_filter_result:
                     from src.etf.ai_filter import build_ai_telegram_section

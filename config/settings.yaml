@@ -1692,3 +1692,17 @@ etf_flow_distortion:
     hot_threshold: 100e8             # 5일 100억+ 순매수
     cold_threshold: -100e8           # 5일 100억+ 순매도
     score_adjustment: 10             # HOT +10 / COLD -10
+
+# ─── BRAIN — 자본배분 중앙 두뇌 (v13.0) ───
+brain:
+  enabled: true
+
+  # 개별종목 스윙 기본 비중 (BRAIN이 ETF 3축과 별도로 관리)
+  swing_base_pct: 30
+
+  # 안전장치
+  max_daily_change_pct: 20    # 일일 최대 변경폭 (%p)
+  confirmation_days: 2         # 레짐 변경 시 확인 대기 일수
+
+  # 텔레그램 브리핑
+  telegram_briefing: true

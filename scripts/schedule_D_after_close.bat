@@ -103,7 +103,12 @@ echo [%date% %time%] [11/29] ETF 매매 시그널 >> logs\schedule.log
 python -u -X utf8 scripts\etf_trading_signal.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [11/29] FAILED >> logs\schedule.log
 
-REM 11.3단계: ETF 3축 로테이션 (블라인드 테스트 — 시그널 기록 + 텔레그램)
+REM 11.2단계: BRAIN 자본배분 결정 (NIGHTWATCH+VIX+레짐 → ARM별 비중)
+echo [%date% %time%] [11.2/29] BRAIN 자본배분 >> logs\schedule.log
+python -u -X utf8 scripts\run_brain.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [11.2/29] FAILED >> logs\schedule.log
+
+REM 11.3단계: ETF 3축 로테이션 (BRAIN 배분 참조 + 블라인드 테스트)
 echo [%date% %time%] [11.3/29] ETF 3축 로테이션 (블라인드) >> logs\schedule.log
 python -u -X utf8 scripts\run_etf_rotation.py --blind-test >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [11.3/29] FAILED >> logs\schedule.log
