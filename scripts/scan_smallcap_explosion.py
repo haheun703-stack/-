@@ -561,9 +561,9 @@ def record_paper_trades(primary_signals: list[dict], scan_date: str,
     """PRIMARY 시그널 → 페이퍼 트레이딩 진입 기록.
 
     진입가: 당일 종가
-    SL: 종가 - ATR×1.0 (약 -5~8%)
-    TP: 종가 + ATR×3.0 (약 +15~25%)
-    판정일: 5거래일 후
+    SL: 종가 - ATR×1.5 (시뮬레이션 최적화: PF 1.32)
+    TP: 종가 + ATR×3.0
+    판정일: 10거래일 후
     """
     log = load_paper_log()
     existing_keys = {(t["ticker"], t["entry_date"]) for t in log["trades"]}
@@ -596,9 +596,9 @@ def record_paper_trades(primary_signals: list[dict], scan_date: str,
             "entry_date": scan_date,
             "entry_price": close,
             "atr": round(atr, 1),
-            "sl_price": round(close - atr * 1.0),  # ATR×1.0 손절
+            "sl_price": round(close - atr * 1.5),  # ATR×1.5 손절 (시뮬 최적화)
             "tp_price": round(close + atr * 3.0),  # ATR×3.0 익절
-            "sl_pct": round((atr * -1.0 / close) * 100, 1),
+            "sl_pct": round((atr * -1.5 / close) * 100, 1),
             "tp_pct": round((atr * 3.0 / close) * 100, 1),
             "grade": sig["grade"],
             "supply_grade": sig["supply_grade"],
@@ -620,13 +620,13 @@ def record_paper_trades(primary_signals: list[dict], scan_date: str,
 
 
 def check_paper_results(name_map: dict[str, str]):
-    """5거래일 경과한 OPEN 트레이드 결과 확인.
+    """10거래일 경과한 OPEN 트레이드 결과 확인.
 
     판정 로직:
-    1. 5일 내 SL 히트 → SL_HIT (LOSS)
-    2. 5일 내 TP 히트 → TP_HIT (WIN)
+    1. 10일 내 SL 히트 → SL_HIT (LOSS)
+    2. 10일 내 TP 히트 → TP_HIT (WIN)
     3. 둘 다 히트 → SL 우선 (보수적)
-    4. 5일 경과 → 종가 기준 WIN/LOSS
+    4. 10일 경과 → 종가 기준 WIN/LOSS
     """
     log = load_paper_log()
     today = pd.Timestamp(datetime.now().strftime("%Y-%m-%d"))
@@ -649,22 +649,22 @@ def check_paper_results(name_map: dict[str, str]):
 
         # 진입일 이후 데이터
         after = df[df.index > entry_date]
-        if len(after) < 5:
-            continue  # 아직 5일 안 됨
+        if len(after) < 10:
+            continue  # 아직 10일 안 됨
 
         entry_price = trade["entry_price"]
         sl = trade["sl_price"]
         tp = trade["tp_price"]
 
-        # 5거래일 데이터
-        fwd_5d = after.iloc[:5]
-        check_date = fwd_5d.index[-1].strftime("%Y-%m-%d")
-        exit_price = float(fwd_5d["Close"].iloc[-1])
+        # 10거래일 데이터
+        fwd_10d = after.iloc[:10]
+        check_date = fwd_10d.index[-1].strftime("%Y-%m-%d")
+        exit_price = float(fwd_10d["Close"].iloc[-1])
 
         # SL/TP 히트 확인
         sl_hit_day = None
         tp_hit_day = None
-        for i, (dt, row) in enumerate(fwd_5d.iterrows()):
+        for i, (dt, row) in enumerate(fwd_10d.iterrows()):
             if float(row["Low"]) <= sl and sl_hit_day is None:
                 sl_hit_day = i
             if float(row["High"]) >= tp and tp_hit_day is None:
