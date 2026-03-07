@@ -664,20 +664,12 @@ class DailyScheduler:
     # ══════════════════════════════════════════
 
     def phase_relay_check(self) -> None:
-        """9.5: 릴레이 포지션 청산 조건 체크."""
-        logger.info("[Phase 9.5] 릴레이 포지션 체크 시작")
-        try:
-            from scripts.relay_positions import check_all_positions
-            results = check_all_positions()
-            exits = [r for r in results if r.get("exit")]
-            if exits:
-                names = ", ".join(r["name"] for r in exits)
-                self._notify(f"Phase 9.5: 릴레이 청산 {len(exits)}건 ({names})")
-                logger.info("[Phase 9.5] 릴레이 청산 대상: %s", names)
-            else:
-                logger.info("[Phase 9.5] 릴레이 포지션 %d건 전부 HOLD", len(results))
-        except Exception as e:
-            logger.error("[Phase 9.5] 릴레이 체크 실패: %s", e)
+        """9.5: 릴레이 포지션 청산 조건 체크.
+
+        NOTE: 구 relay_positions.py 삭제됨 → src/relay/ 신규 시스템으로 교체.
+        현재 릴레이 포지션 0건이므로 스킵.
+        """
+        logger.info("[Phase 9.5] 릴레이 포지션 체크 — 스킵 (신규 릴레이 시스템 전환 중)")
 
     # ══════════════════════════════════════════
     # Phase 9.6: 그룹 릴레이 체크 (18:35)
