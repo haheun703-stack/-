@@ -52,6 +52,11 @@ echo [%date% %time%] [5/29] 기술지표 재계산 >> logs\schedule.log
 python -u -X utf8 scripts\rebuild_indicators.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [5/29] FAILED >> logs\schedule.log
 
+REM 5.5단계: ICT 프리미엄 레벨 + OR/IR 계산 (일봉+5분봉)
+echo [%date% %time%] [5.5/29] ICT 레벨+OR/IR >> logs\schedule.log
+python -u -X utf8 scripts\run_ict_levels.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [5.5/29] FAILED >> logs\schedule.log
+
 REM 6단계: US 시장 데이터 + Overnight Signal 갱신
 echo [%date% %time%] [6/29] US Overnight Signal >> logs\schedule.log
 python -u -X utf8 scripts\us_overnight_signal.py --update >> logs\schedule.log 2>&1
