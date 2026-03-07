@@ -47,7 +47,7 @@ BRAIN_HISTORY_PATH = DATA_DIR / "brain_history.json"
 @dataclass
 class ArmAllocation:
     """개별 ARM에 대한 배분 지시."""
-    name: str           # "swing" | "etf_sector" | "etf_leverage" | "etf_index" | "cash"
+    name: str           # "swing" | "etf_sector" | "etf_leverage" | "etf_index" | "etf_gold" | "etf_small_cap" | "etf_bonds" | "etf_dollar" | "cash"
     base_pct: float     # settings.yaml 기본 비중
     adjusted_pct: float  # BRAIN 보정 후 비중
     reason: str = ""    # 보정 이유
@@ -102,18 +102,23 @@ class BrainDecision:
 class Brain:
     """자본배분 중앙 두뇌.
 
-    현재 지원 ARM (Phase 1):
+    9개 ARM:
       - swing: 개별종목 스윙 (v10.3 기반)
       - etf_sector: 섹터 ETF 로테이션 (축1)
       - etf_leverage: 레버리지/인버스 ETF (축2)
       - etf_index: 지수 ETF (축3)
+      - etf_gold: 금 ETF (안전자산 헤지)
+      - etf_small_cap: 소형주 ETF (BULL 초과수익)
+      - etf_bonds: 채권 ETF (금리하락 방어)
+      - etf_dollar: 달러 ETF (환율 헤지)
       - cash: 현금
-
-    향후 확장 (Phase 2+):
-      - gold: 금 ETF
-      - small_cap: 소형주 모멘텀
-      - etc.
     """
+
+    # 투자 ARM 리스트 (현금 제외)
+    INVEST_ARMS = [
+        "swing", "etf_sector", "etf_leverage", "etf_index",
+        "etf_gold", "etf_small_cap", "etf_bonds", "etf_dollar",
+    ]
 
     # VIX 구간별 보정 계수 (투자비중 축소/확대)
     VIX_BUCKETS = [
@@ -136,11 +141,11 @@ class Brain:
 
     # 충격 유형별 ARM 보정
     SHOCK_ARM_ADJUSTMENTS = {
-        "GEOPOLITICAL": {"etf_leverage": -10, "cash": +10},  # 레버리지 축소
-        "RATE": {"etf_index": -5, "etf_sector": -5, "cash": +10},  # 금리 → 지수+섹터 축소
-        "LIQUIDITY": {"etf_leverage": -15, "etf_sector": -5, "cash": +20},  # 유동성 위기
+        "GEOPOLITICAL": {"etf_leverage": -10, "etf_gold": +5, "cash": +5},
+        "RATE": {"etf_index": -5, "etf_sector": -5, "etf_bonds": +5, "cash": +5},
+        "LIQUIDITY": {"etf_leverage": -15, "etf_sector": -5, "etf_dollar": +5, "cash": +15},
         "EARNINGS": {},  # 실적 → 개별 ARM이 판단
-        "COMPOUND": {"etf_leverage": -15, "etf_sector": -10, "cash": +25},  # 복합 → 방어 극대화
+        "COMPOUND": {"etf_leverage": -15, "etf_sector": -10, "etf_gold": +5, "etf_dollar": +5, "cash": +15},
     }
 
     def __init__(self, settings: dict | None = None):
@@ -212,6 +217,10 @@ class Brain:
             "etf_sector": float(regime_alloc.get("sector", 0)),
             "etf_leverage": float(regime_alloc.get("leverage", 0)),
             "etf_index": float(regime_alloc.get("index", 0)),
+            "etf_gold": float(regime_alloc.get("gold", 0)),
+            "etf_small_cap": float(regime_alloc.get("small_cap", 0)),
+            "etf_bonds": float(regime_alloc.get("bonds", 0)),
+            "etf_dollar": float(regime_alloc.get("dollar", 0)),
             "cash": float(regime_alloc.get("cash", 40)),
         }
 
@@ -282,9 +291,13 @@ class Brain:
             "etf_sector": float(regime_alloc.get("sector", 0)),
             "etf_leverage": float(regime_alloc.get("leverage", 0)),
             "etf_index": float(regime_alloc.get("index", 0)),
+            "etf_gold": float(regime_alloc.get("gold", 0)),
+            "etf_small_cap": float(regime_alloc.get("small_cap", 0)),
+            "etf_bonds": float(regime_alloc.get("bonds", 0)),
+            "etf_dollar": float(regime_alloc.get("dollar", 0)),
             "cash": float(regime_alloc.get("cash", 40)),
         }
-        for name in ["swing", "etf_sector", "etf_leverage", "etf_index", "cash"]:
+        for name in self.INVEST_ARMS + ["cash"]:
             arm_objects.append(ArmAllocation(
                 name=name,
                 base_pct=base_alloc[name],
@@ -380,8 +393,8 @@ class Brain:
 
     def _apply_vix_adjustment(self, arms: dict, mult: float, label: str) -> dict:
         """VIX 배수로 투자 ARM 비중 축소/확대, 나머지 현금으로."""
-        invest_arms = ["swing", "etf_sector", "etf_leverage", "etf_index"]
-        total_invest = sum(arms[a] for a in invest_arms)
+        invest_arms = self.INVEST_ARMS
+        total_invest = sum(arms.get(a, 0) for a in invest_arms)
 
         if total_invest <= 0:
             return arms
@@ -391,7 +404,7 @@ class Brain:
 
         result = dict(arms)
         for a in invest_arms:
-            result[a] = arms[a] * scale
+            result[a] = arms.get(a, 0) * scale
         result["cash"] = 100.0 - sum(result[a] for a in invest_arms)
         return result
 
@@ -423,7 +436,7 @@ class Brain:
         # 강한 부정 (-0.4 이하) → 투자 20% 추가 축소
         if nw_score <= self.NW_THRESHOLDS["strong_negative"]:
             scale = 0.80
-            invest_arms = ["swing", "etf_sector", "etf_leverage", "etf_index"]
+            invest_arms = self.INVEST_ARMS
             freed = 0
             for a in invest_arms:
                 cut = result_arms[a] * (1 - scale)
@@ -470,15 +483,15 @@ class Brain:
     # ────────────────────────────────────────
     # 7. 정규화
     # ────────────────────────────────────────
-    @staticmethod
-    def _normalize_allocations(arms: dict) -> dict:
+    @classmethod
+    def _normalize_allocations(cls, arms: dict) -> dict:
         """합계 100%로 정규화. 현금은 나머지."""
-        invest_arms = ["swing", "etf_sector", "etf_leverage", "etf_index"]
-        total = sum(max(0, arms[a]) for a in invest_arms)
+        invest_arms = cls.INVEST_ARMS
+        total = sum(max(0, arms.get(a, 0)) for a in invest_arms)
 
         result = {}
         for a in invest_arms:
-            result[a] = max(0, arms[a])
+            result[a] = max(0, arms.get(a, 0))
 
         # 투자 합계가 100% 초과하면 비례 축소
         if total > 95:
@@ -508,9 +521,9 @@ class Brain:
         result = dict(arms)
         max_chg = self.max_daily_change
 
-        for name in ["swing", "etf_sector", "etf_leverage", "etf_index"]:
+        for name in self.INVEST_ARMS:
             prev_val = prev_arms.get(name, 0)
-            new_val = result[name]
+            new_val = result.get(name, 0)
             delta = new_val - prev_val
             if abs(delta) > max_chg:
                 result[name] = prev_val + max_chg * (1 if delta > 0 else -1)
@@ -518,7 +531,7 @@ class Brain:
                 clamped = True
 
         # 현금은 나머지
-        invest = sum(result[a] for a in ["swing", "etf_sector", "etf_leverage", "etf_index"])
+        invest = sum(result.get(a, 0) for a in self.INVEST_ARMS)
         result["cash"] = max(5.0, 100.0 - invest)
 
         return result, clamped
@@ -678,11 +691,15 @@ class Brain:
             "etf_sector": "섹터ETF",
             "etf_leverage": "레버리지",
             "etf_index": "지수ETF",
+            "etf_gold": "금ETF",
+            "etf_small_cap": "소형주",
+            "etf_bonds": "채권",
+            "etf_dollar": "달러",
             "cash": "현금",
         }
-        for name in ["swing", "etf_sector", "etf_leverage", "etf_index", "cash"]:
+        for name in self.INVEST_ARMS + ["cash"]:
             label = arm_labels[name]
-            pct = arms[name]
+            pct = arms.get(name, 0)
             bar = "█" * int(pct / 5) if pct > 0 else ""
             lines.append(f"  {label:>8s} {pct:5.1f}% {bar}")
         lines.append("")

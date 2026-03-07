@@ -21,6 +21,7 @@ from src.etf.leverage_engine import LeverageEngine
 from src.etf.index_engine import IndexETFEngine
 from src.etf.risk_manager import ETFRiskManager
 from src.etf.predator_engine import PredatorEngine
+from src.etf.passive_engine import PassiveETFEngine
 
 
 class ETFOrchestrator:
@@ -33,6 +34,7 @@ class ETFOrchestrator:
         self.index_engine = IndexETFEngine(self.settings)
         self.risk_manager = ETFRiskManager(self.settings)
         self.predator_engine = PredatorEngine(self.settings)
+        self.passive_engine = PassiveETFEngine()
 
         self.current_regime: str = "CAUTION"
         self.previous_regime: str | None = None
@@ -76,8 +78,13 @@ class ETFOrchestrator:
         # Step 1: 비중 매트릭스
         allocation = get_allocation(self.current_regime, self.settings)
         print(f"\n📋 Step 1: 비중 배분")
-        print(f"   섹터 {allocation['sector']}% | 레버 {allocation['leverage']}% | "
-              f"지수 {allocation['index']}% | 현금 {allocation['cash']}%")
+        alloc_parts = [f"섹터 {allocation['sector']}%", f"레버 {allocation['leverage']}%",
+                       f"지수 {allocation['index']}%"]
+        for key, label in [("gold", "금"), ("small_cap", "소형"), ("bonds", "채권"), ("dollar", "달러")]:
+            if allocation.get(key, 0) > 0:
+                alloc_parts.append(f"{label} {allocation[key]}%")
+        alloc_parts.append(f"현금 {allocation['cash']}%")
+        print(f"   {' | '.join(alloc_parts)}")
 
         # Step 2: 섹터 ETF 스캔
         print(f"\n🎯 Step 2: 섹터 ETF 스캔")
@@ -132,6 +139,16 @@ class ETFOrchestrator:
         )
         print(f"   {index_result['summary']}")
 
+        # Step 4.5: 패시브 ETF (금/소형주/채권/달러)
+        print(f"\n🪙 Step 4.5: 패시브 ETF")
+        passive_results = self.passive_engine.run_all(allocation, self.current_regime)
+        active_passive = [v for v in passive_results.values() if v["signal"] == "BUY"]
+        if active_passive:
+            for p in active_passive:
+                print(f"   📌 {p['etf_name']} {p['allocation_pct']:.0f}%")
+        else:
+            print(f"   ⏭️ 패시브 ETF 전체 비활성")
+
         # Step 5: 통합 리스크 체크
         print(f"\n🛡️ Step 5: 리스크 체크")
         etf_sectors = self._extract_etf_sectors(sector_result)
@@ -171,6 +188,7 @@ class ETFOrchestrator:
             "leverage_result": {k: v for k, v in leverage_result.items() if k != "timestamp"},
             "index_result": {k: v for k, v in index_result.items() if k != "timestamp"},
             "predator_result": predator_result,
+            "passive_results": passive_results,
             "risk_check": {"passed": risk_check.passed, "level": risk_check.level, "violations": risk_check.violations, "summary": risk_check.summary},
             "order_queue": order_queue,
             "telegram_report": telegram_report,

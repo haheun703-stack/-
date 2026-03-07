@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-07T15:58:00.149209",
+  "timestamp": "2026-03-07T16:48:30.561145",
   "effective_regime": "CAUTION",
   "kospi_regime": "CAUTION",
   "nightwatch_score": -0.165,
@@ -9,17 +9,17 @@
     {
       "name": "swing",
       "base_pct": 30,
-      "adjusted_pct": 22.5,
-      "delta_pct": -7.5,
-      "reason": "축소 7.5%p",
+      "adjusted_pct": 12.5,
+      "delta_pct": -17.5,
+      "reason": "축소 17.5%p",
       "frozen": false
     },
     {
       "name": "etf_sector",
-      "base_pct": 30.0,
-      "adjusted_pct": 12.5,
-      "delta_pct": -17.5,
-      "reason": "축소 17.5%p",
+      "base_pct": 20.0,
+      "adjusted_pct": 0,
+      "delta_pct": -20.0,
+      "reason": "축소 20.0%p",
       "frozen": false
     },
     {
@@ -32,27 +32,62 @@
     },
     {
       "name": "etf_index",
-      "base_pct": 30.0,
-      "adjusted_pct": 22.5,
-      "delta_pct": -7.5,
-      "reason": "축소 7.5%p",
+      "base_pct": 20.0,
+      "adjusted_pct": 15.0,
+      "delta_pct": -5.0,
+      "reason": "축소 5.0%p",
+      "frozen": false
+    },
+    {
+      "name": "etf_gold",
+      "base_pct": 10.0,
+      "adjusted_pct": 12.5,
+      "delta_pct": 2.5,
+      "reason": "확대 2.5%p",
+      "frozen": false
+    },
+    {
+      "name": "etf_small_cap",
+      "base_pct": 0.0,
+      "adjusted_pct": 0,
+      "delta_pct": 0.0,
+      "reason": "변경 없음",
+      "frozen": false
+    },
+    {
+      "name": "etf_bonds",
+      "base_pct": 10.0,
+      "adjusted_pct": 7.5,
+      "delta_pct": -2.5,
+      "reason": "축소 2.5%p",
+      "frozen": false
+    },
+    {
+      "name": "etf_dollar",
+      "base_pct": 5.0,
+      "adjusted_pct": 8.8,
+      "delta_pct": 3.8,
+      "reason": "확대 3.8%p",
       "frozen": false
     },
     {
       "name": "cash",
-      "base_pct": 40.0,
-      "adjusted_pct": 42.5,
-      "delta_pct": 2.5,
-      "reason": "확대 2.5%p",
+      "base_pct": 35.0,
+      "adjusted_pct": 43.8,
+      "delta_pct": 8.8,
+      "reason": "확대 8.8%p",
       "frozen": false
     }
   ],
-  "total_invest_pct": 57.5,
-  "cash_pct": 42.5,
+  "total_invest_pct": 56.2,
+  "cash_pct": 43.8,
   "adjustments": [
     "VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75",
-    "충격 보정: COMPOUND (확신도 70%)"
+    "충격 보정: COMPOUND (확신도 70%)",
+    "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
   ],
-  "warnings": [],
-  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: -0.165 | VIX: 29.3 (HIGH) | US: MILD_BEAR\n충격: COMPOUND\n\n자본 배분:\n      개별스윙  22.5% ████\n     섹터ETF  12.5% ██\n      레버리지   0.0% \n     지수ETF  22.5% ████\n        현금  42.5% ████████\n\n보정:\n  · VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75\n  · 충격 보정: COMPOUND (확신도 70%)\n"
+  "warnings": [
+    "SHIELD 방어 등급: ORANGE"
+  ],
+  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: -0.165 | VIX: 29.3 (HIGH) | US: MILD_BEAR\n충격: COMPOUND\n\n자본 배분:\n      개별스윙  12.5% ██\n     섹터ETF   0.0% \n      레버리지   0.0% \n     지수ETF  15.0% ███\n      금ETF  12.5% ██\n       소형주   0.0% \n        채권   7.5% █\n        달러   8.8% █\n        현금  43.8% ████████\n\n보정:\n  · VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75\n  · 충격 보정: COMPOUND (확신도 70%)\n  · SHIELD: S3: 5개 동시하락 (avg -11.9%)\n\n경고:\n  ! SHIELD 방어 등급: ORANGE"
 }

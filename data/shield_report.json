@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-03-07T16:48:46.263506",
+  "overall_level": "ORANGE",
+  "sector_overlaps": [],
+  "mdd_status": {
+    "peak_equity": 40345724,
+    "current_equity": 40345724,
+    "current_mdd_pct": 0.0,
+    "max_mdd_pct": 0.0,
+    "max_mdd_date": "",
+    "killswitch_level": "NONE",
+    "killswitch_action": ""
+  },
+  "stock_alerts": [
+    {
+      "ticker": "003570",
+      "name": "SNT다이내믹스",
+      "pnl_pct": -16.32,
+      "alert_type": "DEEP_LOSS",
+      "message": "SNT다이내믹스(003570) -16.3%"
+    }
+  ],
+  "systemic_risk": {
+    "simultaneous_decline_count": 5,
+    "decline_tickers": [
+      "SNT다이내믹스(-16.3%)",
+      "현대차(-10.4%)",
+      "삼성중공업(-6.3%)",
+      "셀트리온(-12.8%)",
+      "카카오뱅크(-13.8%)"
+    ],
+    "avg_decline_pct": -11.93,
+    "severity": "DANGER",
+    "message": "5개 종목 동시 -5.0%+ 하락"
+  },
+  "brain_overrides": {
+    "shield_level": "ORANGE",
+    "arm_adjustments": {
+      "swing": -10,
+      "etf_sector": -5,
+      "cash": 15
+    },
+    "frozen_sectors": [],
+    "messages": [
+      "S3: 5개 동시하락 (avg -11.9%)"
+    ]
+  },
+  "warnings": []
+}

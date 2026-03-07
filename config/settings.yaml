@@ -1337,13 +1337,13 @@ etf_rotation:
 
   # 레짐별 비중 매트릭스 (%) — PRE_ 선행 레짐 포함
   regime_allocation:
-    BULL:       {sector: 40, leverage: 20, index: 30, cash: 10}
-    PRE_BULL:   {sector: 35, leverage: 15, index: 30, cash: 20}
-    CAUTION:    {sector: 30, leverage: 0,  index: 30, cash: 40}
-    PRE_BEAR:   {sector: 10, leverage: 15, index: 10, cash: 65}
-    BEAR:       {sector: 0,  leverage: 15, index: 15, cash: 70}
-    PRE_CRISIS: {sector: 0,  leverage: 20, index: 0,  cash: 80}
-    CRISIS:     {sector: 0,  leverage: 20, index: 0,  cash: 80}
+    BULL:       {sector: 30, leverage: 15, index: 20, gold: 5, small_cap: 10, bonds: 0, dollar: 0, cash: 20}
+    PRE_BULL:   {sector: 25, leverage: 10, index: 20, gold: 5, small_cap: 5,  bonds: 5, dollar: 0, cash: 30}
+    CAUTION:    {sector: 20, leverage: 0,  index: 20, gold: 10, small_cap: 0, bonds: 10, dollar: 5, cash: 35}
+    PRE_BEAR:   {sector: 5,  leverage: 15, index: 5,  gold: 10, small_cap: 0, bonds: 15, dollar: 10, cash: 40}
+    BEAR:       {sector: 0,  leverage: 15, index: 5,  gold: 15, small_cap: 0, bonds: 15, dollar: 10, cash: 40}
+    PRE_CRISIS: {sector: 0,  leverage: 20, index: 0,  gold: 10, small_cap: 0, bonds: 15, dollar: 15, cash: 40}
+    CRISIS:     {sector: 0,  leverage: 20, index: 0,  gold: 10, small_cap: 0, bonds: 15, dollar: 15, cash: 40}
 
   # 섹터 ETF 파라미터
   sector:

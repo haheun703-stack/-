@@ -195,12 +195,20 @@ def main():
                         "sector": brain_arms.get("etf_sector", 0),
                         "leverage": brain_arms.get("etf_leverage", 0),
                         "index": brain_arms.get("etf_index", 0),
+                        "gold": brain_arms.get("etf_gold", 0),
+                        "small_cap": brain_arms.get("etf_small_cap", 0),
+                        "bonds": brain_arms.get("etf_bonds", 0),
+                        "dollar": brain_arms.get("etf_dollar", 0),
                         "cash": brain_arms.get("cash", 40),
                     }
                     print(f"  🧠 BRAIN 배분: "
                           f"섹터 {brain_alloc_override['sector']:.0f}% | "
                           f"레버 {brain_alloc_override['leverage']:.0f}% | "
                           f"지수 {brain_alloc_override['index']:.0f}% | "
+                          f"금 {brain_alloc_override['gold']:.0f}% | "
+                          f"소형 {brain_alloc_override['small_cap']:.0f}% | "
+                          f"채권 {brain_alloc_override['bonds']:.0f}% | "
+                          f"달러 {brain_alloc_override['dollar']:.0f}% | "
                           f"현금 {brain_alloc_override['cash']:.0f}%")
                     brain_decision = brain_data
     except Exception as e:

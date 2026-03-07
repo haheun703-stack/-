@@ -9,5 +9,27 @@
     "total_invest": 57.5,
     "cash": 42.5,
     "adjustments_count": 2
+  },
+  {
+    "date": "2026-03-07",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": -0.165,
+    "vix": 29.3,
+    "confidence": 0.6,
+    "total_invest": 42.5,
+    "cash": 57.5,
+    "adjustments_count": 3
+  },
+  {
+    "date": "2026-03-07",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": -0.165,
+    "vix": 29.3,
+    "confidence": 0.6,
+    "total_invest": 56.2,
+    "cash": 43.8,
+    "adjustments_count": 3
   }
 ]
