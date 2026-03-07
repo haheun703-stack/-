@@ -1,0 +1,143 @@
+{
+  "run_date": "2026-03-07 15:07",
+  "pages_per_item": 20,
+  "sectors": [
+    {
+      "sector": "반도체",
+      "pairs": [
+        {
+          "etf": "KODEX 반도체",
+          "stock": "SK하이닉스",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0673,
+          "corr_etf_inst_vs_stock_inst": 0.0251,
+          "corr_etf_frgn_vs_stock_frgn": -0.0195,
+          "corr_etf_retail_vs_stock_frgn": -0.3926
+        },
+        {
+          "etf": "KODEX 반도체",
+          "stock": "삼성전자",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0955,
+          "corr_etf_inst_vs_stock_inst": 0.0718,
+          "corr_etf_frgn_vs_stock_frgn": 0.0575,
+          "corr_etf_retail_vs_stock_frgn": -0.2073
+        },
+        {
+          "etf": "TIGER 반도체TOP10",
+          "stock": "SK하이닉스",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": 0.0282,
+          "corr_etf_inst_vs_stock_inst": -0.0304,
+          "corr_etf_frgn_vs_stock_frgn": -0.0623,
+          "corr_etf_retail_vs_stock_frgn": -0.1556
+        },
+        {
+          "etf": "TIGER 반도체TOP10",
+          "stock": "삼성전자",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0686,
+          "corr_etf_inst_vs_stock_inst": 0.0833,
+          "corr_etf_frgn_vs_stock_frgn": -0.0376,
+          "corr_etf_retail_vs_stock_frgn": -0.0138
+        }
+      ]
+    },
+    {
+      "sector": "자동차",
+      "pairs": [
+        {
+          "etf": "KODEX 자동차",
+          "stock": "현대차",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.2417,
+          "corr_etf_inst_vs_stock_inst": 0.1469,
+          "corr_etf_frgn_vs_stock_frgn": 0.0413,
+          "corr_etf_retail_vs_stock_frgn": -0.3331
+        },
+        {
+          "etf": "KODEX 자동차",
+          "stock": "기아",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.1996,
+          "corr_etf_inst_vs_stock_inst": 0.1344,
+          "corr_etf_frgn_vs_stock_frgn": -0.0067,
+          "corr_etf_retail_vs_stock_frgn": -0.3035
+        }
+      ]
+    },
+    {
+      "sector": "조선",
+      "pairs": [
+        {
+          "etf": "KODEX 조선",
+          "stock": "삼성중공업",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0951,
+          "corr_etf_inst_vs_stock_inst": 0.0775,
+          "corr_etf_frgn_vs_stock_frgn": -0.0045,
+          "corr_etf_retail_vs_stock_frgn": 0.0212
+        },
+        {
+          "etf": "KODEX 조선",
+          "stock": "HD한국조선해양",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0449,
+          "corr_etf_inst_vs_stock_inst": 0.0366,
+          "corr_etf_frgn_vs_stock_frgn": -0.0275,
+          "corr_etf_retail_vs_stock_frgn": 0.0146
+        }
+      ]
+    },
+    {
+      "sector": "건설",
+      "pairs": [
+        {
+          "etf": "KODEX 건설",
+          "stock": "현대건설",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": 0.0312,
+          "corr_etf_inst_vs_stock_inst": -0.0647,
+          "corr_etf_frgn_vs_stock_frgn": 0.0678,
+          "corr_etf_retail_vs_stock_frgn": -0.1004
+        },
+        {
+          "etf": "KODEX 건설",
+          "stock": "대우건설",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": 0.0908,
+          "corr_etf_inst_vs_stock_inst": -0.0787,
+          "corr_etf_frgn_vs_stock_frgn": -0.0436,
+          "corr_etf_retail_vs_stock_frgn": -0.1359
+        }
+      ]
+    },
+    {
+      "sector": "은행",
+      "pairs": [
+        {
+          "etf": "KODEX 은행",
+          "stock": "KB금융",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0591,
+          "corr_etf_inst_vs_stock_inst": 0.0378,
+          "corr_etf_frgn_vs_stock_frgn": 0.0167,
+          "corr_etf_retail_vs_stock_frgn": -0.2754
+        },
+        {
+          "etf": "KODEX 은행",
+          "stock": "신한지주",
+          "days": 400,
+          "corr_etf_retail_vs_stock_inst": -0.0101,
+          "corr_etf_inst_vs_stock_inst": 0.0039,
+          "corr_etf_frgn_vs_stock_frgn": 0.0202,
+          "corr_etf_retail_vs_stock_frgn": -0.1744
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "pairs_count": 12,
+    "avg_corr_retail_inst": -0.061
+  }
+}
