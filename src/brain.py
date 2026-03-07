@@ -204,6 +204,17 @@ class Brain:
         if effective_regime != kospi_regime:
             adjustments.append(f"레짐 보정: {kospi_regime}→{effective_regime} (US={us_grade}, NW={nw_score:+.3f})")
 
+        # ── 2.5. COMPOUND 충격 시 자동 레짐 하향 ──
+        shock_conf = shock.get("confidence", 0) if isinstance(shock, dict) else 0
+        if shock_type == "COMPOUND" and shock_conf >= 0.5:
+            prev_regime = effective_regime
+            effective_regime = self._downgrade_regime(effective_regime)
+            if effective_regime != prev_regime:
+                adjustments.append(
+                    f"COMPOUND 충격 하향: {prev_regime}→{effective_regime} "
+                    f"(확신도 {shock_conf:.0%})"
+                )
+
         # ── 3. 기본 배분 로드 (settings.yaml) ──
         etf_cfg = self.settings.get("etf_rotation", {})
         regime_alloc = etf_cfg.get("regime_allocation", {}).get(effective_regime, {})
@@ -382,7 +393,7 @@ class Brain:
             return "PRE_BEAR"
 
         # US MILD_BEAR + ensemble 강한 부정 → PRE_BEAR
-        if us_grade == "MILD_BEAR" and ensemble_score <= -0.40:
+        if us_grade == "MILD_BEAR" and ensemble_score <= -0.30:
             if kospi_regime in ("BULL", "CAUTION"):
                 return "PRE_BEAR"
 
