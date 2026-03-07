@@ -1,102 +1,100 @@
 {
   "strategic": {
-    "analysis_date": "2026-03-06",
-    "regime": "회피",
-    "regime_confidence": 0.9,
-    "regime_reasoning": "호르무즈 해협 봉쇄 우려로 유가·환율·금리 트리플 쇼크 발생. VIX 30 이상으로 극단적 변동성. 서킷브레이커 발동 상황에서 신규 매수는 위험.",
+    "analysis_date": "2026-03-07",
+    "regime": "방어",
+    "regime_confidence": 0.8,
+    "regime_reasoning": "VIX 상승, 달러 강세, 유가 급등(90달러 돌파)의 3중 위기 신호. 중동 지정학 리스크가 호르무즈 해협 봉쇄 가능성으로 확대되며 글로벌 Risk-Off 심화. 한국 증시는 GFC 이후 최대 낙폭 기록.",
     "industry_thesis": [
       {
-        "sector": "방산",
-        "thesis": "중동 지정학 리스크 심화로 방산 수요 급증 예상되나, 극심한 변동성으로 단기 급락 후 재평가 가능",
+        "sector": "원전/전력",
+        "thesis": "에너지 안보 위기 속에서 SMR 등 원전이 유일한 대안으로 부상. 한수원의 인도·태국 진출과 북미 전력망 투자 확대로 장기 성장성 확보.",
         "demand_supply": "공급부족",
         "asp_trend": "상승",
-        "global_alignment": "독립",
-        "confidence": 7,
+        "global_alignment": "동조",
+        "confidence": 8,
         "catalysts": [
-          "중동 긴장 고조",
-          "국방비 증액"
+          "호르무즈 해협 위기로 원전 필수성 부각",
+          "SMR 글로벌 협력 가속"
         ],
         "risks": [
-          "급등 후 차익실현"
+          "건설 지연 리스크"
         ],
-        "relay_source": "방산조선",
-        "relay_verified": true
+        "relay_source": null,
+        "relay_verified": false
       },
       {
-        "sector": "정유",
-        "thesis": "유가 급등으로 정제마진 개선 기대되나, 수요 파괴 우려와 환율 급등으로 실질 수익성은 불확실",
-        "demand_supply": "균형",
+        "sector": "방산",
+        "thesis": "중동 긴장 고조로 K-방산 수요 급증 예상. 미-이란 갈등 확대 시 한국 방산업체들의 중동 및 동남아 수출 기회 확대.",
+        "demand_supply": "공급부족",
         "asp_trend": "상승",
         "global_alignment": "동조",
-        "confidence": 6,
+        "confidence": 7,
         "catalysts": [
-          "유가 급등",
-          "정제마진 개선"
+          "지정학 리스크 8/10",
+          "K-방산 글로벌 인지도 상승"
         ],
         "risks": [
-          "수요 파괴",
-          "환율 부담"
+          "갈등 완화 시 모멘텀 소멸"
         ],
         "relay_source": null,
         "relay_verified": false
       },
       {
         "sector": "반도체",
-        "thesis": "AI 투자 우려로 단기 급락했으나, 장기 AI/클라우드 수요는 여전. 극도의 매도세는 오버슈팅",
-        "demand_supply": "공급과잉",
-        "asp_trend": "하락",
+        "thesis": "나스닥 급락과 AI 투자 우려로 단기 약세. 그러나 AI 수요의 구조적 성장은 지속되며 과도한 공포 후 저점 매수 기회.",
+        "demand_supply": "균형",
+        "asp_trend": "횡보",
         "global_alignment": "동조",
-        "confidence": 4,
+        "confidence": 5,
         "catalysts": [
-          "AI 장기 수요",
-          "저점 매수"
+          "AI 장기 수요 지속"
         ],
         "risks": [
-          "SOX -3% 트리거",
-          "기술주 약세"
+          "SOX -3% 시그널 발동",
+          "관세 불확실성"
         ],
         "relay_source": null,
         "relay_verified": false
       }
     ],
     "sector_priority": {
-      "attack": [],
+      "attack": [
+        "원전/전력"
+      ],
       "watch": [
         "방산",
-        "정유"
+        "조선"
       ],
       "avoid": [
         "반도체",
-        "IT서비스",
         "2차전지",
-        "금융",
-        "화학"
+        "IT/소프트웨어",
+        "금융"
       ]
     },
-    "max_new_buys": 0,
+    "max_new_buys": 2,
     "risk_factors": [
-      "호르무즈 해협 봉쇄 위협",
-      "VIX 30 이상 극단 변동성",
-      "서킷브레이커 발동",
-      "트리플 쇼크(유가·환율·금리)"
+      "호르무즈 해협 봉쇄 가능성 30%",
+      "유가 150달러 전망",
+      "VIX 급등 및 글로벌 Risk-Off"
     ],
-    "cash_reserve_suggestion": 100,
-    "global_summary": "중동 지정학 위기로 글로벌 금융시장 패닉. 미국 기술주 급락과 원자재 가격 급등이 동시 발생하며 스태그플레이션 우려 확산.",
+    "cash_reserve_suggestion": 70,
+    "global_summary": "중동 지정학 위기와 유가 급등, 미국 인플레이션 우려가 겹치며 글로벌 금융시장 극도의 불안정. VIX 30 근접 시 전체 방어 모드 필수.",
     "relay_alerts": [
       {
         "pattern": "방산조선→기계",
-        "status": "발화",
-        "action": "무시"
+        "status": "대기",
+        "action": "방산 상승 시 2일 후 기계 섹터 매수 준비"
       },
       {
-        "pattern": "반도체→IT서비스",
-        "status": "대기",
-        "action": "주의"
+        "pattern": "SOX -3%→반도체 방어",
+        "status": "발화",
+        "action": "반도체 신규 매수 중단"
       }
     ]
   },
   "sector_focus": {
-    "analysis_date": "2026-03-06",
+    "analysis_date": "2026-03-07",
     "focus_sectors": [
       {
         "sector": "에너지화학",
@@ -108,31 +106,43 @@
         "rsi": 77.3,
         "smart_money": true,
         "relay_source": null,
-        "reasoning": "정유 thesis와 일치하며 스마트머니 유입 중, RSI 77.3으로 아직 과열 전 단계"
+        "reasoning": "원전/전력 thesis와 일치하며 스마트머니 유입 중, RSI 77수준으로 아직 과열 전 단계"
+      },
+      {
+        "sector": "철강소재",
+        "entry_timing": "즉시진입",
+        "size_weight": 0.8,
+        "thesis_alignment": "약한일치",
+        "momentum_rank": 8,
+        "momentum_score": 59.5,
+        "rsi": 70.6,
+        "smart_money": true,
+        "relay_source": null,
+        "reasoning": "건설 섹터 강세 수혜 + 스마트머니 유입, ADX 31로 추세 형성 중"
+      },
+      {
+        "sector": "방산",
+        "entry_timing": "관망",
+        "size_weight": 0.5,
+        "thesis_alignment": "불일치",
+        "momentum_rank": 13,
+        "momentum_score": 38.9,
+        "rsi": 62.6,
+        "smart_money": false,
+        "relay_source": null,
+        "reasoning": "thesis는 긍정적이나 모멘텀 13위로 실제 자금 유입 없음, 외인 순매도 지속"
       },
       {
         "sector": "증권",
-        "entry_timing": "즉시진입",
-        "size_weight": 0.8,
+        "entry_timing": "눌림대기",
+        "size_weight": 0.7,
         "thesis_alignment": "thesis없음",
         "momentum_rank": 7,
         "momentum_score": 61.6,
         "rsi": 70.3,
         "smart_money": false,
         "relay_source": null,
-        "reasoning": "Theme BUY 신호이며 ADX 52.9 고강도 추세, 릴레이 소스 역할 가능"
-      },
-      {
-        "sector": "철강소재",
-        "entry_timing": "눌림대기",
-        "size_weight": 0.6,
-        "thesis_alignment": "thesis없음",
-        "momentum_rank": 8,
-        "momentum_score": 59.5,
-        "rsi": 70.6,
-        "smart_money": true,
-        "relay_source": null,
-        "reasoning": "스마트머니 유입 중이나 BB 109.1%로 단기 과열, 조정 후 재진입 검토"
+        "reasoning": "Theme BUY 신호이나 ADX 하락 전환, 릴레이 소스로서 보험 섹터 대기"
       },
       {
         "sector": "보험",
@@ -144,7 +154,7 @@
         "rsi": 72.6,
         "smart_money": false,
         "relay_source": "증권",
-        "reasoning": "증권 릴레이 타겟(승률 70~76%), 1일 지연으로 즉시 진입 타이밍"
+        "reasoning": "증권 섹터 릴레이 타겟(승률 70~76%), Theme BUY 신호로 1일 지연 진입 타이밍"
       },
       {
         "sector": "2차전지",
@@ -155,47 +165,54 @@
         "momentum_score": 46.8,
         "rsi": 69.9,
         "smart_money": true,
-        "relay_source": null,
-        "reasoning": "회피 thesis와 상충, 스마트머니 유입은 있으나 모멘텀 약세로 관망"
+        "reasoning": "thesis는 회피 지시이나 스마트머니 유입 중, 방어 레짐에서 신규 진입 부적합"
       }
     ],
     "screening_boost": [
       "에너지화학",
-      "증권",
-      "보험"
+      "철강소재",
+      "보험",
+      "증권"
     ],
     "screening_suppress": [
       "현대차그룹",
       "반도체",
       "IT",
       "건설",
-      "삼성그룹"
+      "삼성그룹",
+      "소프트웨어",
+      "헬스케어"
     ],
     "sector_warnings": [
       {
         "sector": "현대차그룹",
-        "warning": "RSI 82.9 + BB 118.1% 극도 과열, 외인 대량 매도 중 (-2694억)",
+        "warning": "RSI 82.9 + BB 118.1% 극심한 과열, 외인 대규모 순매도 중 (-2694억)",
         "severity": "high"
       },
       {
         "sector": "반도체",
-        "warning": "회피 thesis이나 모멘텀 2위 역설, 외인 15.9조 매도 vs 기관 2.8조 매수 충돌",
+        "warning": "SOX 급락 릴레이 발화로 신규 매수 중단 지시, 외인 -1592억 이탈",
         "severity": "high"
       },
       {
         "sector": "건설",
-        "warning": "RSI 81.3 + ADX 61.2 과열 추세, thesis 없이 급등으로 조정 위험",
+        "warning": "RSI 81.3 + ADX 61.2 과열, 모멘텀 1위급이나 조정 임박",
+        "severity": "high"
+      },
+      {
+        "sector": "IT",
+        "warning": "반도체 동반 과열(RSI 80.5), thesis 회피 지시와 일치",
         "severity": "medium"
       },
       {
         "sector": "방산",
-        "warning": "thesis 확신 7/10이나 모멘텀 13위로 급락, 릴레이 무시 신호 발생",
-        "severity": "high"
+        "warning": "thesis 긍정적이나 실제 자금 유입 없음, 조선 릴레이 소스 미발화로 기계 진입 보류",
+        "severity": "medium"
       },
       {
-        "sector": "IT서비스",
-        "warning": "반도체 릴레이 주의 신호이나 현재 모멘텀 3위 과열, 진입 시점 이미 경과",
-        "severity": "medium"
+        "sector": "조선",
+        "warning": "모멘텀 17위 하락, 방산→조선→기계 릴레이 체인 끊김",
+        "severity": "low"
       }
     ]
   },
@@ -763,31 +780,50 @@
     }
   },
   "v3_picks": {
-    "decision_date": "2026-03-06",
-    "regime": "회피",
-    "available_slots": 0,
+    "decision_date": "2026-03-08",
+    "regime": "방어",
+    "available_slots": 5,
     "current_holdings": 0,
     "cash_pct_before": 100.0,
-    "cash_pct_after": 100.0,
-    "buys": [],
+    "cash_pct_after": 85.0,
+    "buys": [
+      {
+        "ticker": "000500",
+        "name": "가온전선",
+        "conviction": 8,
+        "size_pct": 6.2,
+        "strategy": "relay",
+        "thesis_alignment": "strong",
+        "entry_price": 87600,
+        "stop_loss_pct": -23.0,
+        "target_pct": 40.0,
+        "reasoning": "원전 thesis 핵심 수혜주로 conviction 높으나, 방어 레짐과 하락추세 감안하여 반감된 비중 배분",
+        "brain_size_capped": true
+      }
+    ],
     "skipped": [
       {
         "ticker": "010060",
         "name": "OCI홀딩스",
-        "skip_reason": "회피 레짐 - 신규 매수 금지"
+        "skip_reason": "MA60 미돌파 및 하락압력 잔존으로 방어 레짐에서 제외"
       },
       {
         "ticker": "298040",
         "name": "효성중공업",
-        "skip_reason": "회피 레짐 - 신규 매수 금지"
+        "skip_reason": "Perplexity HALLUCINATION_DETECTED — 촉매 팩트체크 실패"
       }
     ],
     "portfolio_warnings": [
-      "회피 레짐 발동 - 모든 신규 매수 금지",
-      "호르무즈 해협 봉쇄 위협으로 극단적 변동성 경계",
-      "VIX 30 이상, 서킷브레이커 발동 상황"
+      "호르무즈 해협 봉쇄 리스크로 글로벌 변동성 급증 가능",
+      "방어 레짐에서 최소 포지션만 운용하며 85% 현금 보유 유지"
     ],
-    "reasoning": "현재 회피 레짐(신뢰도 90%)으로 최대 신규매수 0종목, 현금 비중 100% 권고에 따라 모든 매수를 중단합니다. 호르무즈 해협 봉쇄 위협과 VIX 30 이상의 극단적 변동성, 서킷브레이커 발동 상황에서는 현금 보유가 최선의 전략입니다."
+    "reasoning": "방어 레짐에서 70% 이상 현금 보유 원칙을 지키며, conviction 높은 원전 관련주 2종목만 각 7.5%씩 최소 비중으로 진입. 호르무즈 리스크와 VIX 급등 상황에서 추가 하락에 대비한 보수적 포지션 구축.",
+    "brain_cap_applied": {
+      "regime": "BEAR",
+      "slot_cap": 2,
+      "swing_pct": 12.5,
+      "min_conviction": 6
+    }
   },
   "news": {
     "market_sentiment": "bearish",
@@ -838,11 +874,28 @@
     }
   },
   "journal": {
-    "total_picks": 9,
+    "total_picks": 10,
     "hit_rate": 0.0,
     "avg_return": 0.0,
     "period": "2026-03-02 ~ 2026-03-03",
     "days": [
+      {
+        "date": "2026-03-08 (AI Brain v3)",
+        "day_return": 0.0,
+        "picks": [
+          {
+            "ticker": "000500",
+            "name": "가온전선",
+            "grade": "conviction 8",
+            "score": 80,
+            "entry_price": 87600,
+            "current_price": 87600,
+            "result_pct": 0.0,
+            "hit": false,
+            "reasoning": "원전 thesis 핵심 수혜주로 conviction 높으나, 방어 레짐과 하락추세 감안하여 반감된 비중 배분"
+          }
+        ]
+      },
       {
         "date": "2026-03-09 (TOP 7 추천)",
         "day_return": 0.0,
@@ -1411,12 +1464,12 @@
     ]
   },
   "brain_decision": {
-    "timestamp": "2026-03-07T20:23:34.541368",
-    "effective_regime": "CAUTION",
+    "timestamp": "2026-03-07T23:55:20.839634",
+    "effective_regime": "BEAR",
     "kospi_regime": "CAUTION",
-    "nightwatch_score": -0.165,
-    "vix_level": 29.3,
-    "confidence": 0.6,
+    "nightwatch_score": -0.245,
+    "vix_level": 29.5,
+    "confidence": 0.45,
     "arms": [
       {
         "name": "swing",
@@ -1428,14 +1481,6 @@
       },
       {
         "name": "etf_sector",
-        "base_pct": 20.0,
-        "adjusted_pct": 0,
-        "delta_pct": -20.0,
-        "reason": "축소 20.0%p",
-        "frozen": false
-      },
-      {
-        "name": "etf_leverage",
         "base_pct": 0.0,
         "adjusted_pct": 0,
         "delta_pct": 0.0,
@@ -1443,19 +1488,27 @@
         "frozen": false
       },
       {
+        "name": "etf_leverage",
+        "base_pct": 15.0,
+        "adjusted_pct": 0,
+        "delta_pct": -15.0,
+        "reason": "축소 15.0%p",
+        "frozen": false
+      },
+      {
         "name": "etf_index",
-        "base_pct": 20.0,
-        "adjusted_pct": 15.0,
-        "delta_pct": -5.0,
-        "reason": "축소 5.0%p",
+        "base_pct": 0.0,
+        "adjusted_pct": 0,
+        "delta_pct": 0.0,
+        "reason": "변경 없음",
         "frozen": false
       },
       {
         "name": "etf_gold",
-        "base_pct": 10.0,
-        "adjusted_pct": 12.5,
-        "delta_pct": 2.5,
-        "reason": "확대 2.5%p",
+        "base_pct": 25.0,
+        "adjusted_pct": 28.8,
+        "delta_pct": 3.8,
+        "reason": "확대 3.8%p",
         "frozen": false
       },
       {
@@ -1469,32 +1522,35 @@
       {
         "name": "etf_bonds",
         "base_pct": 10.0,
-        "adjusted_pct": 7.5,
-        "delta_pct": -2.5,
-        "reason": "축소 2.5%p",
+        "adjusted_pct": 12.5,
+        "delta_pct": 2.5,
+        "reason": "확대 2.5%p",
         "frozen": false
       },
       {
         "name": "etf_dollar",
-        "base_pct": 5.0,
-        "adjusted_pct": 8.8,
-        "delta_pct": 3.8,
-        "reason": "확대 3.8%p",
+        "base_pct": 10.0,
+        "adjusted_pct": 12.5,
+        "delta_pct": 2.5,
+        "reason": "확대 2.5%p",
         "frozen": false
       },
       {
         "name": "cash",
-        "base_pct": 35.0,
-        "adjusted_pct": 43.8,
-        "delta_pct": 8.8,
-        "reason": "확대 8.8%p",
+        "base_pct": 40.0,
+        "adjusted_pct": 33.8,
+        "delta_pct": -6.2,
+        "reason": "축소 6.2%p",
         "frozen": false
       }
     ],
-    "total_invest_pct": 56.2,
-    "cash_pct": 43.8,
+    "total_invest_pct": 66.2,
+    "cash_pct": 33.8,
     "adjustments": [
-      "VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75",
+      "COMPOUND 충격 하향: CAUTION→BEAR (확신도 70%)",
+      "VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75",
+      "NW 부정(-0.245): 레버리지 30% 축소",
+      "2D 선제방어: credit_z=-1.1, MOVE_z=3.1",
       "충격 보정: COMPOUND (확신도 70%)",
       "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
     ],
@@ -1503,7 +1559,7 @@
     ]
   },
   "shield_report": {
-    "timestamp": "2026-03-07T20:23:28.742255",
+    "timestamp": "2026-03-07T21:04:47.903732",
     "overall_level": "ORANGE",
     "mdd_status": {
       "peak_equity": 40345724,
@@ -1537,5 +1593,190 @@
       "message": "5개 종목 동시 -5.0%+ 하락"
     },
     "sector_overlaps": []
+  },
+  "cot_signal": {
+    "date": "2026-03-07",
+    "report_date": "2026-03-03",
+    "stale_days": 4,
+    "composite_direction": "MILD_BULLISH",
+    "composite_score": 0.275,
+    "contracts": {
+      "sp500": {
+        "label": "S&P 500 E-mini",
+        "net": 1004768,
+        "long": 1185588,
+        "short": 180820,
+        "z": 2.23,
+        "slow_z": 2.23,
+        "fast_z": 1.55,
+        "fast_z_used": false,
+        "direction": "BULLISH",
+        "net_change_1w": -8376,
+        "net_change_4w": 71542,
+        "percentile_52w": 96.2
+      },
+      "gold": {
+        "label": "Gold COMEX",
+        "net": 97917,
+        "long": 123456,
+        "short": 25539,
+        "z": -1.25,
+        "slow_z": -1.25,
+        "fast_z": -0.98,
+        "fast_z_used": false,
+        "direction": "BULLISH",
+        "net_change_1w": 1943,
+        "net_change_4w": 5845,
+        "percentile_52w": 9.6
+      },
+      "treasury10y": {
+        "label": "10Y T-Note",
+        "net": 2098536,
+        "long": 3068736,
+        "short": 970200,
+        "z": -0.12,
+        "slow_z": -0.12,
+        "fast_z": -0.05,
+        "fast_z_used": false,
+        "direction": "NEUTRAL",
+        "net_change_1w": -62190,
+        "net_change_4w": 68892,
+        "percentile_52w": 42.3
+      },
+      "crude_oil": {
+        "label": "WTI Crude Oil",
+        "net": 68385,
+        "long": 187335,
+        "short": 118950,
+        "z": 0.87,
+        "slow_z": 0.12,
+        "fast_z": 0.87,
+        "fast_z_used": true,
+        "direction": "NEUTRAL",
+        "net_change_1w": 685,
+        "net_change_4w": -8375,
+        "percentile_52w": 53.8
+      }
+    },
+    "signals": {
+      "risk_off": false,
+      "safety_demand": false,
+      "slowdown_bet": false,
+      "cyclical_down": false
+    }
+  },
+  "liquidity_signal": {
+    "date": "2026-03-07",
+    "data_date": "2026-03-06",
+    "stale_days": 1,
+    "regime": "AMPLE",
+    "composite_direction": "MILD_AMPLE",
+    "composite_score": 0.304,
+    "indicators": {
+      "net_liquidity": {
+        "value": 5795.3,
+        "z": 1.58,
+        "change_20d": 99.5
+      },
+      "m2_yoy_pct": {
+        "value": 3.78,
+        "z": -2.54
+      },
+      "reserves": {
+        "value": 3.0,
+        "z": 0.52,
+        "change_20d": 0.0
+      },
+      "rrp": {
+        "value": 1.5,
+        "change_20d": 0.2
+      },
+      "tga": {
+        "value": 832.1,
+        "change_20d": -76.7
+      },
+      "walcl": {
+        "value": 6628.9,
+        "change_20d": 23.0
+      }
+    },
+    "signals": {
+      "liquidity_tightening": false,
+      "liquidity_ample": false,
+      "reserve_stress": false
+    }
+  },
+  "regime_macro": {
+    "date": "2026-03-04",
+    "current_regime": "CAUTION",
+    "macro_score": 46,
+    "macro_grade": "보통",
+    "position_multiplier": 1.0,
+    "signals": {
+      "ma20_slope": 2.79,
+      "ma60_slope": 6.47,
+      "gap_ma20_pct": 13.1,
+      "rv_current": 100.0,
+      "rv_declining": false,
+      "vix_level": 23.5,
+      "us_grade": "NEUTRAL",
+      "ewy_5d": -8.41,
+      "regime_gap": "MA20 위 13.1%, RV 100%ile → CAUTION"
+    },
+    "recommendation": "하락 리스크 존재. 신규 진입 신중."
+  },
+  "perplexity": {
+    "verification_date": "2026-03-08",
+    "overall_confidence": 0.77,
+    "stock_verifications": [
+      {
+        "ticker": "000500",
+        "name": "가온전선",
+        "confidence_score": 0.75,
+        "verdict": "PARTIALLY_CONFIRMED",
+        "summary": "",
+        "additional_findings": [
+          "2025년 3분기 누적 매출 59% 증가, 영업이익 97.3% 증가 등 실적 호조[4]",
+          "전선·케이블 테마 강세, 구리 가격 상승 및 글로벌 전력망 투자 수혜 기대[3]",
+          "2026년 수익성 개선 여부는 스프레드 안정, 고부가 발주 비중, 현금흐름 개선에 달림[1]"
+        ]
+      },
+      {
+        "ticker": "298040",
+        "name": "효성중공업",
+        "confidence_score": 0.65,
+        "verdict": "HALLUCINATION_DETECTED",
+        "summary": "AI의 '원전 변압기 수요 확대' 주장은 검증되지 않음. 실제 촉매는 AI 데이터센터와 전기차 보급으로 인한 일반 송전망 투자 확대이며, 이는 원전과 무관함. 다만 미국 시장에서의 대규모 수주 실적과 시장 지위는 확인됨. AI가 제시한 리스크 부재는 부적절하며, 실제로는 대규모 자본 투자 필요 및 정책 의존도 등의 리스크 존재.",
+        "additional_findings": [
+          "AI가 놓친 주요 촉매: 미국 AI 데이터센터 건설 및 전기차 보급 확대로 인한 전력 수요 25% 급증 예상[1][2][4]",
+          "현재 미국 765kV 초고압 변압기 시장에서 약 50% 점유율 보유 및 2010년대 초부터 시장 점유율 1위 유지[1][4]",
+          "미국 내 유일한 765kV 변압기 생산 기지 보유로 경쟁 우위 확보[4]"
+        ]
+      }
+    ],
+    "thesis_verifications": [
+      {
+        "sector": "원전/전력",
+        "confidence_score": 0.85,
+        "verdict": "PARTIALLY_CONFIRMED",
+        "summary": ""
+      },
+      {
+        "sector": "방산",
+        "confidence_score": 0.85,
+        "verdict": "CONFIRMED",
+        "summary": ""
+      },
+      {
+        "sector": "반도체",
+        "confidence_score": 0.75,
+        "verdict": "PARTIALLY_CONFIRMED",
+        "summary": "AI의 구조적 성장 지속과 저점 매수 기회 주장은 검증되나, 수요/공급 '균형' 및 ASP '횡보' 주장은 부정확. 실제로는 NAND 공급 부족이 심화되고 있으며 ASP는 상승 추세를 보이고 있음. 단기 약세와 AI 투자 우려는 확인되었으나, 공급 부족으로 인한 가격 상승 압력이 저점 매수 타이밍 판단을 복잡하게 함."
+      }
+    ],
+    "warnings": [
+      "환각 감지: 효성중공업 — AI 촉매 주장이 사실과 다름"
+    ],
+    "hallucination_flags": []
   }
 }

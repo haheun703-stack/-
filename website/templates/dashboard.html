@@ -274,6 +274,192 @@
 </div>
 {% endif %}
 
+<!-- ═══ 5대 눈 — BRAIN 인텔리전스 ═══ -->
+{% if brain and (brain.brain_decision or brain.cot_signal or brain.liquidity_signal) %}
+{% set bd = brain.brain_decision|default({}) %}
+{% set cot = brain.cot_signal|default({}) %}
+{% set liq = brain.liquidity_signal|default({}) %}
+{% set rm = brain.regime_macro|default({}) %}
+{% set sr = brain.shield_report|default({}) %}
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+        <span class="card-title"><i class="fas fa-eye" style="color:var(--accent-cyan);"></i> 5대 눈 — 멀티타임프레임 인텔리전스</span>
+    </div>
+    <div style="padding:16px 24px;">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+            {# 1D NightWatch #}
+            {% set nw = bd.nightwatch_score|default(0) %}
+            {% set nw_color = '#10B981' if nw > 0.1 else '#EF4444' if nw < -0.1 else '#9CA3AF' %}
+            <div style="border:1px solid {{ nw_color }}33;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">1D NightWatch</div>
+                <div style="font-size:22px;font-weight:700;color:{{ nw_color }};font-family:monospace;">{{ "%+.3f"|format(nw) }}</div>
+                <div style="font-size:11px;color:#4B5563;margin-top:4px;">VIX {{ "%.1f"|format(bd.vix_level|default(0)) }}</div>
+            </div>
+            {# 2D Macro #}
+            {% set ms = rm.macro_score|default(0) %}
+            {% set ms_color = '#10B981' if ms >= 60 else '#EF4444' if ms < 40 else '#F59E0B' %}
+            <div style="border:1px solid {{ ms_color }}33;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">2D Macro</div>
+                <div style="font-size:22px;font-weight:700;color:{{ ms_color }};font-family:monospace;">{{ ms }}점</div>
+                <div style="font-size:11px;color:#4B5563;margin-top:4px;">{{ rm.macro_grade|default('-') }}</div>
+            </div>
+            {# 3D SHIELD #}
+            {% set sl = sr.overall_level|default('GREEN') %}
+            {% set sl_color = '#10B981' if sl == 'GREEN' else '#F59E0B' if sl == 'YELLOW' else '#EF4444' %}
+            <div style="border:1px solid {{ sl_color }}33;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">3D SHIELD</div>
+                <div style="font-size:22px;font-weight:700;color:{{ sl_color }};">{{ sl }}</div>
+                <div style="font-size:11px;color:#4B5563;margin-top:4px;">경고 {{ sr.stock_alerts|default([])|length }}건</div>
+            </div>
+            {# 4D COT #}
+            {% set cd = cot.composite_direction|default('-') %}
+            {% set cs = cot.composite_score|default(0) %}
+            {% set cd_color = '#10B981' if 'BULL' in cd|upper else '#EF4444' if 'BEAR' in cd|upper else '#9CA3AF' %}
+            <div style="border:1px solid {{ cd_color }}33;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">4D COT</div>
+                <div style="font-size:16px;font-weight:700;color:{{ cd_color }};">{{ cd }}</div>
+                <div style="font-size:11px;color:#4B5563;margin-top:4px;">score {{ "%+.3f"|format(cs) }}</div>
+            </div>
+            {# 5D Liquidity #}
+            {% set lr = liq.regime|default('-') %}
+            {% set ls = liq.composite_score|default(0) %}
+            {% set lr_color = '#10B981' if lr == 'AMPLE' else '#EF4444' if lr in ['TIGHTENING','STRESS'] else '#9CA3AF' %}
+            <div style="border:1px solid {{ lr_color }}33;border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:12px;color:#6B7280;margin-bottom:6px;">5D Liquidity</div>
+                <div style="font-size:16px;font-weight:700;color:{{ lr_color }};">{{ lr }}</div>
+                <div style="font-size:11px;color:#4B5563;margin-top:4px;">score {{ "%+.3f"|format(ls) }}</div>
+            </div>
+        </div>
+
+        {# COT 상세 (접힘) #}
+        {% if cot.contracts %}
+        <details style="margin-top:14px;">
+            <summary style="cursor:pointer;font-size:13px;color:#6B7280;">
+                <i class="fas fa-chart-bar"></i> COT 선물 포지션 상세
+                {% if cot.stale_days|default(0) > 3 %}<span style="color:#F59E0B;margin-left:8px;">stale {{ cot.stale_days }}d</span>{% endif %}
+            </summary>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">
+                {% for key, c in cot.contracts.items() %}
+                {% set cz = c.z|default(0) %}
+                {% set cz_color = '#10B981' if cz > 1 else '#EF4444' if cz < -1 else '#9CA3AF' %}
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid {{ cz_color }};">
+                    <div style="font-size:12px;color:#9CA3AF;">{{ c.label|default(key) }}</div>
+                    <div style="font-size:14px;font-weight:700;color:{{ cz_color }};font-family:monospace;">z={{ "%.2f"|format(cz) }}</div>
+                    <div style="font-size:11px;color:#6B7280;">{{ c.direction|default('-') }} · P{{ "%.0f"|format(c.percentile_52w|default(0)) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+
+        {# Liquidity 상세 (접힘) #}
+        {% if liq.indicators %}
+        <details style="margin-top:10px;">
+            <summary style="cursor:pointer;font-size:13px;color:#6B7280;">
+                <i class="fas fa-water"></i> 유동성 지표 상세
+                {% if liq.stale_days|default(0) > 3 %}<span style="color:#F59E0B;margin-left:8px;">stale {{ liq.stale_days }}d</span>{% endif %}
+            </summary>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;">
+                {% set nl = liq.indicators.net_liquidity|default({}) %}
+                {% set nl_z = nl.z|default(0) %}
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid {{ '#10B981' if nl_z > 1 else '#EF4444' if nl_z < -1 else '#9CA3AF' }};">
+                    <div style="font-size:12px;color:#9CA3AF;">Net Liquidity</div>
+                    <div style="font-size:14px;font-weight:700;color:#E5E7EB;font-family:monospace;">{{ "{:,.0f}".format(nl.value|default(0)) }}B</div>
+                    <div style="font-size:11px;color:#6B7280;">z={{ "%.2f"|format(nl_z) }} · 20d {{ "%+.0f"|format(nl.change_20d|default(0)) }}B</div>
+                </div>
+                {% set m2 = liq.indicators.m2_yoy_pct|default({}) %}
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid {{ '#10B981' if m2.value|default(0) > 0 else '#EF4444' }};">
+                    <div style="font-size:12px;color:#9CA3AF;">M2 YoY</div>
+                    <div style="font-size:14px;font-weight:700;color:#E5E7EB;font-family:monospace;">{{ "%+.1f"|format(m2.value|default(0)) }}%</div>
+                    <div style="font-size:11px;color:#6B7280;">z={{ "%.2f"|format(m2.z|default(0)) }}</div>
+                </div>
+                {% set rv = liq.indicators.reserves|default({}) %}
+                <div style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid #9CA3AF;">
+                    <div style="font-size:12px;color:#9CA3AF;">은행 지준</div>
+                    <div style="font-size:14px;font-weight:700;color:#E5E7EB;font-family:monospace;">{{ "{:,.0f}".format(rv.value|default(0)) }}B</div>
+                    <div style="font-size:11px;color:#6B7280;">z={{ "%.2f"|format(rv.z|default(0)) }}</div>
+                </div>
+            </div>
+        </details>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ Perplexity 검증 ═══ -->
+{% if brain and brain.perplexity and brain.perplexity.stock_verifications %}
+{% set px = brain.perplexity %}
+{% set px_conf = px.overall_confidence|default(0) %}
+{% set px_color = '#10B981' if px_conf >= 0.8 else '#F59E0B' if px_conf >= 0.6 else '#EF4444' %}
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="card-title"><i class="fas fa-search-plus" style="color:#A78BFA;"></i> Perplexity 검증</span>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:15px;color:{{ px_color }};font-weight:700;">신뢰도 {{ "%.0f"|format(px_conf * 100) }}%</span>
+            {% if px.warnings %}
+            <span style="font-size:13px;padding:3px 10px;border-radius:8px;background:rgba(239,68,68,0.15);color:#FCA5A5;">경고 {{ px.warnings|length }}건</span>
+            {% endif %}
+        </div>
+    </div>
+    <div style="padding:16px 24px;">
+        {# 종목 검증 #}
+        {% for sv in px.stock_verifications %}
+        {% set v_color = '#10B981' if sv.verdict == 'CONFIRMED' else '#F59E0B' if sv.verdict == 'PARTIALLY_CONFIRMED' else '#EF4444' %}
+        {% set v_icon = 'check-circle' if sv.verdict == 'CONFIRMED' else 'exclamation-triangle' if sv.verdict == 'PARTIALLY_CONFIRMED' else 'times-circle' %}
+        <div style="padding:14px 18px;background:{{ v_color }}08;border:1px solid {{ v_color }}22;border-radius:10px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <i class="fas fa-{{ v_icon }}" style="color:{{ v_color }};font-size:18px;"></i>
+                    <span style="font-weight:700;font-size:16px;color:#E5E7EB;">{{ sv.name }}</span>
+                    <span style="font-size:12px;color:#6B7280;font-family:monospace;">{{ sv.ticker }}</span>
+                    <span style="font-size:12px;padding:3px 10px;border-radius:8px;background:{{ v_color }}22;color:{{ v_color }};font-weight:600;">{{ sv.verdict }}</span>
+                </div>
+                <span style="font-family:monospace;font-size:15px;font-weight:700;color:{{ v_color }};">{{ "%.0f"|format(sv.confidence_score * 100) }}%</span>
+            </div>
+            {% if sv.summary %}
+            <div style="font-size:13px;color:#9CA3AF;margin-top:8px;line-height:1.6;">{{ sv.summary }}</div>
+            {% endif %}
+            {% if sv.additional_findings %}
+            <div style="margin-top:8px;">
+                {% for f in sv.additional_findings %}
+                <div style="font-size:12px;color:#6B7280;padding:4px 0;line-height:1.5;">· {{ f }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {# 섹터 thesis 검증 #}
+        {% if px.thesis_verifications %}
+        <div style="margin-top:14px;">
+            <div style="font-size:14px;font-weight:700;color:#A78BFA;margin-bottom:10px;">섹터 Thesis 검증</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+                {% for tv in px.thesis_verifications %}
+                {% set tv_color = '#10B981' if tv.verdict == 'CONFIRMED' else '#F59E0B' if tv.verdict == 'PARTIALLY_CONFIRMED' else '#EF4444' %}
+                <div style="padding:10px 14px;border:1px solid {{ tv_color }}22;border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-weight:600;font-size:14px;color:#E5E7EB;">{{ tv.sector }}</span>
+                        <span style="font-size:12px;color:{{ tv_color }};font-weight:700;">{{ "%.0f"|format(tv.confidence_score * 100) }}%</span>
+                    </div>
+                    <div style="font-size:11px;color:{{ tv_color }};margin-top:4px;">{{ tv.verdict }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {# 경고 #}
+        {% if px.warnings %}
+        <div style="margin-top:12px;">
+            {% for w in px.warnings %}
+            <div style="font-size:13px;color:#FCA5A5;padding:6px 0;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>{{ w }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
 <!-- ═══ 보유 주식 현황 ═══ -->
 <div class="card">
     <div class="card-header">

@@ -200,6 +200,89 @@ def build_china_money():
     }
 
 
+def build_cot_signal():
+    """4D COT 선물 포지션 시그널"""
+    raw = load("cot/cot_signal.json")
+    if not raw:
+        return {}
+    return {
+        "date": raw.get("date", ""),
+        "report_date": raw.get("report_date", ""),
+        "stale_days": raw.get("stale_days", 0),
+        "composite_direction": raw.get("composite_direction", ""),
+        "composite_score": raw.get("composite_score", 0),
+        "contracts": raw.get("contracts", {}),
+        "signals": raw.get("signals", {}),
+    }
+
+
+def build_liquidity_signal():
+    """5D 유동성 사이클 시그널"""
+    raw = load("liquidity_cycle/liquidity_signal.json")
+    if not raw:
+        return {}
+    return {
+        "date": raw.get("date", ""),
+        "data_date": raw.get("data_date", ""),
+        "stale_days": raw.get("stale_days", 0),
+        "regime": raw.get("regime", ""),
+        "composite_direction": raw.get("composite_direction", ""),
+        "composite_score": raw.get("composite_score", 0),
+        "indicators": raw.get("indicators", {}),
+        "signals": raw.get("signals", {}),
+    }
+
+
+def build_perplexity():
+    """Perplexity 검증 결과"""
+    raw = load("perplexity_verification.json")
+    if not raw:
+        return {}
+    # stock_verifications에서 핵심만 추출 (사이즈 절감)
+    stock_vfs = []
+    for sv in raw.get("stock_verifications", []):
+        stock_vfs.append({
+            "ticker": sv.get("ticker", ""),
+            "name": sv.get("name", ""),
+            "confidence_score": sv.get("confidence_score", 0),
+            "verdict": sv.get("verdict", ""),
+            "summary": sv.get("summary", ""),
+            "additional_findings": sv.get("additional_findings", [])[:3],
+        })
+    thesis_vfs = []
+    for tv in raw.get("thesis_verifications", []):
+        thesis_vfs.append({
+            "sector": tv.get("sector", ""),
+            "confidence_score": tv.get("confidence_score", 0),
+            "verdict": tv.get("verdict", ""),
+            "summary": tv.get("summary", ""),
+        })
+    return {
+        "verification_date": raw.get("verification_date", ""),
+        "overall_confidence": raw.get("overall_confidence", 0),
+        "stock_verifications": stock_vfs,
+        "thesis_verifications": thesis_vfs,
+        "warnings": raw.get("warnings", []),
+        "hallucination_flags": raw.get("hallucination_flags", []),
+    }
+
+
+def build_regime_macro():
+    """2D KOSPI 레짐 + 매크로 시그널"""
+    raw = load("regime_macro_signal.json")
+    if not raw:
+        return {}
+    return {
+        "date": raw.get("date", ""),
+        "current_regime": raw.get("current_regime", ""),
+        "macro_score": raw.get("macro_score", 0),
+        "macro_grade": raw.get("macro_grade", ""),
+        "position_multiplier": raw.get("position_multiplier", 1.0),
+        "signals": raw.get("signals", {}),
+        "recommendation": raw.get("recommendation", ""),
+    }
+
+
 def main():
     brain = {
         "strategic": build_strategic(),
@@ -213,6 +296,11 @@ def main():
         "china_money": build_china_money(),
         "brain_decision": build_brain_decision(),
         "shield_report": build_shield_report(),
+        # v13.9+ 5대 눈 + Perplexity
+        "cot_signal": build_cot_signal(),
+        "liquidity_signal": build_liquidity_signal(),
+        "regime_macro": build_regime_macro(),
+        "perplexity": build_perplexity(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -231,6 +319,15 @@ def main():
     print(f"  brain_decision: regime={bd.get('effective_regime', 'N/A')}, invest={bd.get('total_invest_pct', 0):.1f}%, cash={bd.get('cash_pct', 0):.1f}%")
     sr = brain["shield_report"]
     print(f"  shield_report: level={sr.get('overall_level', 'N/A')}, alerts={len(sr.get('stock_alerts', []))}")
+    # 5대 눈
+    cot = brain["cot_signal"]
+    print(f"  4D COT: {cot.get('composite_direction', 'N/A')} (score={cot.get('composite_score', 0):.3f})")
+    liq = brain["liquidity_signal"]
+    print(f"  5D Liquidity: {liq.get('regime', 'N/A')} (score={liq.get('composite_score', 0):.3f})")
+    rm = brain["regime_macro"]
+    print(f"  2D Macro: regime={rm.get('current_regime', 'N/A')}, score={rm.get('macro_score', 0)}, grade={rm.get('macro_grade', 'N/A')}")
+    px = brain["perplexity"]
+    print(f"  Perplexity: conf={px.get('overall_confidence', 0):.0%}, stocks={len(px.get('stock_verifications', []))}, warnings={len(px.get('warnings', []))}")
 
 
 if __name__ == "__main__":
