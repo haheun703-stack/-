@@ -1,6 +1,6 @@
 {
-  "date": "2026-03-04",
-  "scanned_at": "2026-03-04 19:21",
+  "date": "2026-03-07",
+  "scanned_at": "2026-03-07 17:37",
   "watching": {
     "001250": {
       "spike_date": "2026-03-03",
@@ -10,7 +10,7 @@
       "vsr": 3.69,
       "name": "GS글로벌",
       "rsi_at_spike": 64.9,
-      "status": "watching"
+      "status": "signal"
     },
     "010950": {
       "spike_date": "2026-03-03",
@@ -20,7 +20,7 @@
       "vsr": 7.82,
       "name": "S-Oil",
       "rsi_at_spike": 77.9,
-      "status": "watching"
+      "status": "signal"
     },
     "012450": {
       "spike_date": "2026-03-03",
@@ -50,7 +50,7 @@
       "vsr": 2.25,
       "name": "남해화학",
       "rsi_at_spike": 59.1,
-      "status": "signal"
+      "status": "watching"
     },
     "043150": {
       "spike_date": "2026-03-03",
@@ -90,7 +90,7 @@
       "vsr": 5.54,
       "name": "테크윙",
       "rsi_at_spike": 60.5,
-      "status": "signal"
+      "status": "watching"
     },
     "117580": {
       "spike_date": "2026-03-03",
@@ -110,7 +110,7 @@
       "vsr": 3.34,
       "name": "잉글우드랩",
       "rsi_at_spike": 52.3,
-      "status": "signal"
+      "status": "watching"
     },
     "000070": {
       "spike_date": "2026-03-04",
@@ -130,7 +130,7 @@
       "vsr": 2.03,
       "name": "유한양행",
       "rsi_at_spike": 24.7,
-      "status": "watching"
+      "status": "signal"
     },
     "000140": {
       "spike_date": "2026-03-04",
@@ -140,7 +140,7 @@
       "vsr": 1.91,
       "name": "하이트진로홀딩스",
       "rsi_at_spike": 31.4,
-      "status": "signal"
+      "status": "watching"
     },
     "000155": {
       "spike_date": "2026-03-04",
@@ -160,7 +160,7 @@
       "vsr": 2.93,
       "name": "CR홀딩스",
       "rsi_at_spike": 36.7,
-      "status": "signal"
+      "status": "watching"
     },
     "000660": {
       "spike_date": "2026-03-04",
@@ -170,7 +170,7 @@
       "vsr": 1.84,
       "name": "SK하이닉스",
       "rsi_at_spike": 46.3,
-      "status": "watching"
+      "status": "signal"
     },
     "000815": {
       "spike_date": "2026-03-04",
@@ -180,7 +180,7 @@
       "vsr": 1.8,
       "name": "삼성화재우",
       "rsi_at_spike": 40.1,
-      "status": "signal"
+      "status": "watching"
     },
     "003220": {
       "spike_date": "2026-03-04",
@@ -191,16 +191,6 @@
       "name": "대원제약",
       "rsi_at_spike": 20.6,
       "status": "signal"
-    },
-    "003280": {
-      "spike_date": "2026-03-04",
-      "spike_close": 2905.0,
-      "spike_high": 3010.0,
-      "vol_z": 7.26,
-      "vsr": 10.26,
-      "name": "흥아해운",
-      "rsi_at_spike": 86.1,
-      "status": "watching"
     },
     "003555": {
       "spike_date": "2026-03-04",
@@ -222,16 +212,6 @@
       "rsi_at_spike": 25.5,
       "status": "signal"
     },
-    "004090": {
-      "spike_date": "2026-03-04",
-      "spike_close": 27450.0,
-      "spike_high": 27450.0,
-      "vol_z": 3.25,
-      "vsr": 3.55,
-      "name": "한국석유",
-      "rsi_at_spike": 81.9,
-      "status": "watching"
-    },
     "004430": {
       "spike_date": "2026-03-04",
       "spike_close": 8510.0,
@@ -240,7 +220,7 @@
       "vsr": 2.02,
       "name": "송원산업",
       "rsi_at_spike": 34.6,
-      "status": "signal"
+      "status": "watching"
     },
     "004690": {
       "spike_date": "2026-03-04",
@@ -260,7 +240,7 @@
       "vsr": 2.87,
       "name": "성신양회",
       "rsi_at_spike": 27.4,
-      "status": "signal"
+      "status": "watching"
     },
     "005930": {
       "spike_date": "2026-03-04",
@@ -270,7 +250,7 @@
       "vsr": 2.5,
       "name": "삼성전자",
       "rsi_at_spike": 48.1,
-      "status": "watching"
+      "status": "signal"
     },
     "005935": {
       "spike_date": "2026-03-04",
@@ -290,7 +270,7 @@
       "vsr": 2.72,
       "name": "NH투자증권우",
       "rsi_at_spike": 40.5,
-      "status": "signal"
+      "status": "watching"
     },
     "007310": {
       "spike_date": "2026-03-04",
@@ -320,7 +300,7 @@
       "vsr": 1.95,
       "name": "HD한국조선해양",
       "rsi_at_spike": 37.7,
-      "status": "watching"
+      "status": "signal"
     },
     "011760": {
       "spike_date": "2026-03-04",
@@ -350,7 +330,7 @@
       "vsr": 2.33,
       "name": "콜마홀딩스",
       "rsi_at_spike": 28.7,
-      "status": "watching"
+      "status": "signal"
     },
     "028260": {
       "spike_date": "2026-03-04",
@@ -360,7 +340,7 @@
       "vsr": 1.91,
       "name": "삼성물산",
       "rsi_at_spike": 37.6,
-      "status": "watching"
+      "status": "signal"
     },
     "02826K": {
       "spike_date": "2026-03-04",
@@ -370,7 +350,7 @@
       "vsr": 3.74,
       "name": "02826K",
       "rsi_at_spike": 36.2,
-      "status": "watching"
+      "status": "signal"
     },
     "039570": {
       "spike_date": "2026-03-04",
@@ -410,7 +390,7 @@
       "vsr": 2.62,
       "name": "제이브이엠",
       "rsi_at_spike": 29.0,
-      "status": "signal"
+      "status": "watching"
     },
     "060150": {
       "spike_date": "2026-03-04",
@@ -420,7 +400,7 @@
       "vsr": 1.92,
       "name": "인선이엔티",
       "rsi_at_spike": 27.0,
-      "status": "signal"
+      "status": "watching"
     },
     "064290": {
       "spike_date": "2026-03-04",
@@ -430,7 +410,7 @@
       "vsr": 3.21,
       "name": "인텍플러스",
       "rsi_at_spike": 35.7,
-      "status": "watching"
+      "status": "signal"
     },
     "078070": {
       "spike_date": "2026-03-04",
@@ -440,7 +420,7 @@
       "vsr": 3.61,
       "name": "유비쿼스홀딩스",
       "rsi_at_spike": 39.7,
-      "status": "watching"
+      "status": "signal"
     },
     "081660": {
       "spike_date": "2026-03-04",
@@ -450,7 +430,7 @@
       "vsr": 1.77,
       "name": "미스토홀딩스",
       "rsi_at_spike": 41.6,
-      "status": "signal"
+      "status": "watching"
     },
     "088980": {
       "spike_date": "2026-03-04",
@@ -470,7 +450,7 @@
       "vsr": 10.88,
       "name": "제넥신",
       "rsi_at_spike": 53.0,
-      "status": "watching"
+      "status": "signal"
     },
     "097950": {
       "spike_date": "2026-03-04",
@@ -510,7 +490,7 @@
       "vsr": 2.81,
       "name": "쿠쿠홀딩스",
       "rsi_at_spike": 40.3,
-      "status": "signal"
+      "status": "watching"
     },
     "194700": {
       "spike_date": "2026-03-04",
@@ -520,7 +500,7 @@
       "vsr": 2.28,
       "name": "노바렉스",
       "rsi_at_spike": 23.5,
-      "status": "signal"
+      "status": "watching"
     },
     "206640": {
       "spike_date": "2026-03-04",
@@ -530,7 +510,7 @@
       "vsr": 2.13,
       "name": "바디텍메드",
       "rsi_at_spike": 30.2,
-      "status": "watching"
+      "status": "signal"
     },
     "210980": {
       "spike_date": "2026-03-04",
@@ -540,7 +520,7 @@
       "vsr": 3.23,
       "name": "SK디앤디",
       "rsi_at_spike": 33.2,
-      "status": "signal"
+      "status": "watching"
     },
     "213500": {
       "spike_date": "2026-03-04",
@@ -580,7 +560,7 @@
       "vsr": 2.09,
       "name": "HD현대",
       "rsi_at_spike": 50.2,
-      "status": "signal"
+      "status": "watching"
     },
     "294870": {
       "spike_date": "2026-03-04",
@@ -601,202 +581,276 @@
       "name": "티앤엘",
       "rsi_at_spike": 31.0,
       "status": "watching"
+    },
+    "005710": {
+      "spike_date": "2026-03-07",
+      "spike_close": 12750.0,
+      "spike_high": 13280.0,
+      "vol_z": 3.88,
+      "vsr": 3.79,
+      "name": "대원산업",
+      "rsi_at_spike": 41.6,
+      "status": "signal"
+    },
+    "006650": {
+      "spike_date": "2026-03-07",
+      "spike_close": 123800.0,
+      "spike_high": 134400.0,
+      "vol_z": 4.26,
+      "vsr": 2.67,
+      "name": "대한유화",
+      "rsi_at_spike": 32.8,
+      "status": "signal"
+    },
+    "010820": {
+      "spike_date": "2026-03-07",
+      "spike_close": 9020.0,
+      "spike_high": 9900.0,
+      "vol_z": 5.04,
+      "vsr": 4.63,
+      "name": "퍼스텍",
+      "rsi_at_spike": 73.4,
+      "status": "watching"
+    },
+    "033500": {
+      "spike_date": "2026-03-07",
+      "spike_close": 24800.0,
+      "spike_high": 27650.0,
+      "vol_z": 5.85,
+      "vsr": 3.91,
+      "name": "동성화인텍",
+      "rsi_at_spike": 38.3,
+      "status": "watching"
+    },
+    "052020": {
+      "spike_date": "2026-03-07",
+      "spike_close": 11050.0,
+      "spike_high": 11400.0,
+      "vol_z": 6.9,
+      "vsr": 6.6,
+      "name": "에스티큐브",
+      "rsi_at_spike": 71.6,
+      "status": "watching"
+    },
+    "074600": {
+      "spike_date": "2026-03-07",
+      "spike_close": 36850.0,
+      "spike_high": 36850.0,
+      "vol_z": 5.35,
+      "vsr": 4.33,
+      "name": "원익QnC",
+      "rsi_at_spike": 67.7,
+      "status": "watching"
+    },
+    "078600": {
+      "spike_date": "2026-03-07",
+      "spike_close": 118800.0,
+      "spike_high": 122900.0,
+      "vol_z": 3.95,
+      "vsr": 3.31,
+      "name": "대주전자재료",
+      "rsi_at_spike": 67.7,
+      "status": "watching"
+    },
+    "115180": {
+      "spike_date": "2026-03-07",
+      "spike_close": 41200.0,
+      "spike_high": 43000.0,
+      "vol_z": 5.5,
+      "vsr": 4.18,
+      "name": "큐리언트",
+      "rsi_at_spike": 63.6,
+      "status": "signal"
+    },
+    "251270": {
+      "spike_date": "2026-03-07",
+      "spike_close": 54000.0,
+      "spike_high": 56300.0,
+      "vol_z": 4.26,
+      "vsr": 3.04,
+      "name": "넷마블",
+      "rsi_at_spike": 51.9,
+      "status": "signal"
+    },
+    "487570": {
+      "spike_date": "2026-03-07",
+      "spike_close": 54400.0,
+      "spike_high": 57000.0,
+      "vol_z": 3.44,
+      "vsr": 2.56,
+      "name": "HS효성",
+      "rsi_at_spike": 38.0,
+      "status": "signal"
     }
   },
   "signals": [
     {
-      "ticker": "950140",
-      "name": "잉글우드랩",
-      "spike_date": "2026-03-03",
-      "spike_high": 12840,
-      "current_close": 12050,
-      "pullback_pct": -6.2,
-      "days_since_spike": 1,
-      "rsi": 45.8,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 5.2,
-      "score": 80
-    },
-    {
-      "ticker": "000480",
-      "name": "CR홀딩스",
+      "ticker": "009540",
+      "name": "HD한국조선해양",
       "spike_date": "2026-03-04",
-      "spike_high": 4940,
-      "current_close": 4690,
+      "spike_high": 423500,
+      "current_close": 402000,
       "pullback_pct": -5.1,
-      "days_since_spike": 0,
-      "rsi": 36.7,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.59,
-      "score": 80
+      "days_since_spike": 3,
+      "rsi": 44.5,
+      "foreign_5d": 74248623750.0,
+      "vol_z_at_spike": 3.39,
+      "score": 95
     },
     {
-      "ticker": "000815",
-      "name": "삼성화재우",
+      "ticker": "028260",
+      "name": "삼성물산",
       "spike_date": "2026-03-04",
-      "spike_high": 400500,
-      "current_close": 376500,
-      "pullback_pct": -6.0,
-      "days_since_spike": 0,
-      "rsi": 40.1,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.53,
-      "score": 80
-    },
-    {
-      "ticker": "003555",
-      "name": "LG우",
-      "spike_date": "2026-03-04",
-      "spike_high": 74500,
-      "current_close": 68800,
-      "pullback_pct": -7.7,
-      "days_since_spike": 0,
-      "rsi": 40.3,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.36,
-      "score": 80
-    },
-    {
-      "ticker": "004430",
-      "name": "송원산업",
-      "spike_date": "2026-03-04",
-      "spike_high": 9130,
-      "current_close": 8510,
-      "pullback_pct": -6.8,
-      "days_since_spike": 0,
-      "rsi": 34.6,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.18,
-      "score": 80
-    },
-    {
-      "ticker": "004690",
-      "name": "삼천리",
-      "spike_date": "2026-03-04",
-      "spike_high": 143400,
-      "current_close": 132000,
-      "pullback_pct": -7.9,
-      "days_since_spike": 0,
-      "rsi": 36.2,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.56,
-      "score": 80
-    },
-    {
-      "ticker": "011760",
-      "name": "현대코퍼레이션",
-      "spike_date": "2026-03-04",
-      "spike_high": 26050,
-      "current_close": 24400,
-      "pullback_pct": -6.3,
-      "days_since_spike": 0,
-      "rsi": 44.2,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.26,
-      "score": 80
-    },
-    {
-      "ticker": "051360",
-      "name": "토비스",
-      "spike_date": "2026-03-04",
-      "spike_high": 14970,
-      "current_close": 14010,
-      "pullback_pct": -6.4,
-      "days_since_spike": 0,
-      "rsi": 30.4,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.67,
-      "score": 80
-    },
-    {
-      "ticker": "081660",
-      "name": "미스토홀딩스",
-      "spike_date": "2026-03-04",
-      "spike_high": 49250,
-      "current_close": 47000,
-      "pullback_pct": -4.6,
-      "days_since_spike": 0,
-      "rsi": 41.6,
-      "foreign_5d": 9990331125.0,
-      "vol_z_at_spike": 3.36,
-      "score": 80
-    },
-    {
-      "ticker": "102260",
-      "name": "동성케미컬",
-      "spike_date": "2026-03-04",
-      "spike_high": 4300,
-      "current_close": 3990,
-      "pullback_pct": -7.2,
-      "days_since_spike": 0,
-      "rsi": 30.6,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.41,
-      "score": 80
-    },
-    {
-      "ticker": "213500",
-      "name": "한솔제지",
-      "spike_date": "2026-03-04",
-      "spike_high": 8610,
-      "current_close": 8030,
+      "spike_high": 304000,
+      "current_close": 283500,
       "pullback_pct": -6.7,
-      "days_since_spike": 0,
-      "rsi": 31.1,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.98,
-      "score": 80
+      "days_since_spike": 3,
+      "rsi": 42.4,
+      "foreign_5d": 47612723250.0,
+      "vol_z_at_spike": 3.27,
+      "score": 95
     },
     {
-      "ticker": "294870",
-      "name": "HDC현대산업개발",
+      "ticker": "000100",
+      "name": "유한양행",
       "spike_date": "2026-03-04",
-      "spike_high": 22450,
-      "current_close": 20450,
-      "pullback_pct": -8.9,
-      "days_since_spike": 0,
-      "rsi": 37.2,
-      "foreign_5d": 5950618675.0,
-      "vol_z_at_spike": 4.27,
-      "score": 80
-    },
-    {
-      "ticker": "000070",
-      "name": "삼양홀딩스",
-      "spike_date": "2026-03-04",
-      "spike_high": 72700,
-      "current_close": 68100,
-      "pullback_pct": -6.3,
-      "days_since_spike": 0,
-      "rsi": 52.9,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.36,
-      "score": 75
-    },
-    {
-      "ticker": "003220",
-      "name": "대원제약",
-      "spike_date": "2026-03-04",
-      "spike_high": 11040,
-      "current_close": 10240,
-      "pullback_pct": -7.2,
-      "days_since_spike": 0,
-      "rsi": 20.6,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.03,
-      "score": 75
+      "spike_high": 104000,
+      "current_close": 99300,
+      "pullback_pct": -4.5,
+      "days_since_spike": 3,
+      "rsi": 38.0,
+      "foreign_5d": 30362982300.0,
+      "vol_z_at_spike": 3.34,
+      "score": 85
     },
     {
       "ticker": "003960",
       "name": "사조대림",
       "spike_date": "2026-03-04",
       "spike_high": 35500,
-      "current_close": 32850,
-      "pullback_pct": -7.5,
-      "days_since_spike": 0,
-      "rsi": 25.5,
+      "current_close": 33700,
+      "pullback_pct": -5.1,
+      "days_since_spike": 3,
+      "rsi": 34.2,
       "foreign_5d": 0.0,
       "vol_z_at_spike": 3.1,
+      "score": 85
+    },
+    {
+      "ticker": "024720",
+      "name": "콜마홀딩스",
+      "spike_date": "2026-03-04",
+      "spike_high": 9820,
+      "current_close": 9230,
+      "pullback_pct": -6.0,
+      "days_since_spike": 3,
+      "rsi": 38.9,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 4.19,
+      "score": 85
+    },
+    {
+      "ticker": "02826K",
+      "name": "02826K",
+      "spike_date": "2026-03-04",
+      "spike_high": 191700,
+      "current_close": 178600,
+      "pullback_pct": -6.8,
+      "days_since_spike": 3,
+      "rsi": 44.5,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.58,
+      "score": 85
+    },
+    {
+      "ticker": "064290",
+      "name": "인텍플러스",
+      "spike_date": "2026-03-04",
+      "spike_high": 16560,
+      "current_close": 15380,
+      "pullback_pct": -7.1,
+      "days_since_spike": 3,
+      "rsi": 45.3,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.8,
+      "score": 85
+    },
+    {
+      "ticker": "206640",
+      "name": "바디텍메드",
+      "spike_date": "2026-03-04",
+      "spike_high": 12800,
+      "current_close": 12100,
+      "pullback_pct": -5.5,
+      "days_since_spike": 3,
+      "rsi": 40.8,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.13,
+      "score": 85
+    },
+    {
+      "ticker": "016800",
+      "name": "퍼시스",
+      "spike_date": "2026-03-03",
+      "spike_high": 42950,
+      "current_close": 39700,
+      "pullback_pct": -7.6,
+      "days_since_spike": 4,
+      "rsi": 25.1,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 5.08,
+      "score": 80
+    },
+    {
+      "ticker": "006650",
+      "name": "대한유화",
+      "spike_date": "2026-03-07",
+      "spike_high": 134400,
+      "current_close": 123800,
+      "pullback_pct": -7.9,
+      "days_since_spike": 0,
+      "rsi": 32.8,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 4.26,
+      "score": 80
+    },
+    {
+      "ticker": "003220",
+      "name": "대원제약",
+      "spike_date": "2026-03-04",
+      "spike_high": 11040,
+      "current_close": 10700,
+      "pullback_pct": -3.1,
+      "days_since_spike": 3,
+      "rsi": 34.8,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 4.03,
+      "score": 75
+    },
+    {
+      "ticker": "003555",
+      "name": "LG우",
+      "spike_date": "2026-03-04",
+      "spike_high": 74500,
+      "current_close": 71500,
+      "pullback_pct": -4.0,
+      "days_since_spike": 3,
+      "rsi": 46.9,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.36,
+      "score": 75
+    },
+    {
+      "ticker": "004690",
+      "name": "삼천리",
+      "spike_date": "2026-03-04",
+      "spike_high": 143400,
+      "current_close": 137900,
+      "pullback_pct": -3.8,
+      "days_since_spike": 3,
+      "rsi": 44.0,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.56,
       "score": 75
     },
     {
@@ -804,12 +858,25 @@
       "name": "오뚜기",
       "spike_date": "2026-03-04",
       "spike_high": 384500,
-      "current_close": 362500,
-      "pullback_pct": -5.7,
-      "days_since_spike": 0,
-      "rsi": 29.7,
-      "foreign_5d": -1635784750.0,
+      "current_close": 367000,
+      "pullback_pct": -4.6,
+      "days_since_spike": 3,
+      "rsi": 35.6,
+      "foreign_5d": -1001106500.0,
       "vol_z_at_spike": 4.5,
+      "score": 75
+    },
+    {
+      "ticker": "011760",
+      "name": "현대코퍼레이션",
+      "spike_date": "2026-03-04",
+      "spike_high": 26050,
+      "current_close": 25250,
+      "pullback_pct": -3.1,
+      "days_since_spike": 3,
+      "rsi": 48.9,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.26,
       "score": 75
     },
     {
@@ -817,25 +884,64 @@
       "name": "삼목에스폼",
       "spike_date": "2026-03-04",
       "spike_high": 19310,
-      "current_close": 17890,
-      "pullback_pct": -7.4,
-      "days_since_spike": 0,
-      "rsi": 28.6,
+      "current_close": 18380,
+      "pullback_pct": -4.8,
+      "days_since_spike": 3,
+      "rsi": 35.5,
       "foreign_5d": 0.0,
       "vol_z_at_spike": 4.12,
       "score": 75
     },
     {
-      "ticker": "054950",
-      "name": "제이브이엠",
+      "ticker": "051360",
+      "name": "토비스",
       "spike_date": "2026-03-04",
-      "spike_high": 24700,
-      "current_close": 23450,
-      "pullback_pct": -5.1,
-      "days_since_spike": 0,
-      "rsi": 29.0,
+      "spike_high": 14970,
+      "current_close": 14410,
+      "pullback_pct": -3.7,
+      "days_since_spike": 3,
+      "rsi": 38.2,
       "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.07,
+      "vol_z_at_spike": 4.67,
+      "score": 75
+    },
+    {
+      "ticker": "051500",
+      "name": "CJ프레시웨이",
+      "spike_date": "2026-03-04",
+      "spike_high": 31000,
+      "current_close": 29800,
+      "pullback_pct": -3.9,
+      "days_since_spike": 3,
+      "rsi": 43.3,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.32,
+      "score": 75
+    },
+    {
+      "ticker": "078070",
+      "name": "유비쿼스홀딩스",
+      "spike_date": "2026-03-04",
+      "spike_high": 11790,
+      "current_close": 11210,
+      "pullback_pct": -4.9,
+      "days_since_spike": 3,
+      "rsi": 48.3,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.73,
+      "score": 75
+    },
+    {
+      "ticker": "095700",
+      "name": "제넥신",
+      "spike_date": "2026-03-04",
+      "spike_high": 5500,
+      "current_close": 5080,
+      "pullback_pct": -7.6,
+      "days_since_spike": 3,
+      "rsi": 63.0,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 7.47,
       "score": 75
     },
     {
@@ -843,187 +949,187 @@
       "name": "CJ제일제당",
       "spike_date": "2026-03-04",
       "spike_high": 202500,
-      "current_close": 190300,
-      "pullback_pct": -6.0,
-      "days_since_spike": 0,
-      "rsi": 23.8,
-      "foreign_5d": -26573389250.0,
+      "current_close": 195900,
+      "pullback_pct": -3.3,
+      "days_since_spike": 3,
+      "rsi": 32.5,
+      "foreign_5d": -15451156500.0,
       "vol_z_at_spike": 3.4,
       "score": 75
     },
     {
-      "ticker": "194700",
-      "name": "노바렉스",
+      "ticker": "102260",
+      "name": "동성케미컬",
       "spike_date": "2026-03-04",
-      "spike_high": 12730,
-      "current_close": 11940,
-      "pullback_pct": -6.2,
-      "days_since_spike": 0,
-      "rsi": 23.5,
+      "spike_high": 4300,
+      "current_close": 4125,
+      "pullback_pct": -4.1,
+      "days_since_spike": 3,
+      "rsi": 39.5,
       "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.42,
+      "vol_z_at_spike": 3.41,
       "score": 75
     },
     {
-      "ticker": "267250",
-      "name": "HD현대",
+      "ticker": "213500",
+      "name": "한솔제지",
       "spike_date": "2026-03-04",
-      "spike_high": 287000,
-      "current_close": 261500,
-      "pullback_pct": -8.9,
-      "days_since_spike": 0,
-      "rsi": 50.2,
-      "foreign_5d": 34049328000.0,
-      "vol_z_at_spike": 3.09,
+      "spike_high": 8610,
+      "current_close": 8350,
+      "pullback_pct": -3.0,
+      "days_since_spike": 3,
+      "rsi": 43.2,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 4.98,
       "score": 75
-    },
-    {
-      "ticker": "016800",
-      "name": "퍼시스",
-      "spike_date": "2026-03-03",
-      "spike_high": 42950,
-      "current_close": 40900,
-      "pullback_pct": -4.8,
-      "days_since_spike": 1,
-      "rsi": 31.4,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 5.08,
-      "score": 70
-    },
-    {
-      "ticker": "025860",
-      "name": "남해화학",
-      "spike_date": "2026-03-03",
-      "spike_high": 7680,
-      "current_close": 7010,
-      "pullback_pct": -8.7,
-      "days_since_spike": 1,
-      "rsi": 44.9,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.21,
-      "score": 70
-    },
-    {
-      "ticker": "000140",
-      "name": "하이트진로홀딩스",
-      "spike_date": "2026-03-04",
-      "spike_high": 9420,
-      "current_close": 9000,
-      "pullback_pct": -4.5,
-      "days_since_spike": 0,
-      "rsi": 31.4,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.11,
-      "score": 70
-    },
-    {
-      "ticker": "005945",
-      "name": "NH투자증권우",
-      "spike_date": "2026-03-04",
-      "spike_high": 24150,
-      "current_close": 22050,
-      "pullback_pct": -8.7,
-      "days_since_spike": 0,
-      "rsi": 40.5,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 4.38,
-      "score": 70
-    },
-    {
-      "ticker": "051500",
-      "name": "CJ프레시웨이",
-      "spike_date": "2026-03-04",
-      "spike_high": 31000,
-      "current_close": 29600,
-      "pullback_pct": -4.5,
-      "days_since_spike": 0,
-      "rsi": 41.9,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.32,
-      "score": 70
-    },
-    {
-      "ticker": "192400",
-      "name": "쿠쿠홀딩스",
-      "spike_date": "2026-03-04",
-      "spike_high": 28700,
-      "current_close": 27350,
-      "pullback_pct": -4.7,
-      "days_since_spike": 0,
-      "rsi": 40.3,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.45,
-      "score": 70
-    },
-    {
-      "ticker": "210980",
-      "name": "SK디앤디",
-      "spike_date": "2026-03-04",
-      "spike_high": 12570,
-      "current_close": 12160,
-      "pullback_pct": -3.3,
-      "days_since_spike": 0,
-      "rsi": 33.2,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.46,
-      "score": 70
-    },
-    {
-      "ticker": "089030",
-      "name": "테크윙",
-      "spike_date": "2026-03-03",
-      "spike_high": 55900,
-      "current_close": 51000,
-      "pullback_pct": -8.8,
-      "days_since_spike": 1,
-      "rsi": 59.8,
-      "foreign_5d": -12070699375.0,
-      "vol_z_at_spike": 6.36,
-      "score": 65
-    },
-    {
-      "ticker": "004980",
-      "name": "성신양회",
-      "spike_date": "2026-03-04",
-      "spike_high": 9600,
-      "current_close": 8800,
-      "pullback_pct": -8.3,
-      "days_since_spike": 0,
-      "rsi": 27.4,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.82,
-      "score": 65
-    },
-    {
-      "ticker": "060150",
-      "name": "인선이엔티",
-      "spike_date": "2026-03-04",
-      "spike_high": 4200,
-      "current_close": 3835,
-      "pullback_pct": -8.7,
-      "days_since_spike": 0,
-      "rsi": 27.0,
-      "foreign_5d": 0.0,
-      "vol_z_at_spike": 3.13,
-      "score": 65
     },
     {
       "ticker": "217270",
       "name": "넵튠",
       "spike_date": "2026-03-04",
       "spike_high": 4425,
-      "current_close": 4050,
-      "pullback_pct": -8.5,
-      "days_since_spike": 0,
-      "rsi": 22.7,
+      "current_close": 4270,
+      "pullback_pct": -3.5,
+      "days_since_spike": 3,
+      "rsi": 32.3,
       "foreign_5d": 0.0,
       "vol_z_at_spike": 3.27,
+      "score": 75
+    },
+    {
+      "ticker": "294870",
+      "name": "HDC현대산업개발",
+      "spike_date": "2026-03-04",
+      "spike_high": 22450,
+      "current_close": 21550,
+      "pullback_pct": -4.0,
+      "days_since_spike": 3,
+      "rsi": 45.8,
+      "foreign_5d": -2078874025.0,
+      "vol_z_at_spike": 4.27,
+      "score": 75
+    },
+    {
+      "ticker": "251270",
+      "name": "넷마블",
+      "spike_date": "2026-03-07",
+      "spike_high": 56300,
+      "current_close": 54000,
+      "pullback_pct": -4.1,
+      "days_since_spike": 0,
+      "rsi": 51.9,
+      "foreign_5d": 6892200650.0,
+      "vol_z_at_spike": 4.26,
+      "score": 75
+    },
+    {
+      "ticker": "001250",
+      "name": "GS글로벌",
+      "spike_date": "2026-03-03",
+      "spike_high": 2775,
+      "current_close": 2515,
+      "pullback_pct": -9.4,
+      "days_since_spike": 4,
+      "rsi": 53.4,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 4.96,
+      "score": 70
+    },
+    {
+      "ticker": "000070",
+      "name": "삼양홀딩스",
+      "spike_date": "2026-03-04",
+      "spike_high": 72700,
+      "current_close": 70500,
+      "pullback_pct": -3.0,
+      "days_since_spike": 3,
+      "rsi": 57.2,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.36,
+      "score": 70
+    },
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "spike_date": "2026-03-04",
+      "spike_high": 954000,
+      "current_close": 924000,
+      "pullback_pct": -3.1,
+      "days_since_spike": 3,
+      "rsi": 52.7,
+      "foreign_5d": -3895373538000.0,
+      "vol_z_at_spike": 3.31,
+      "score": 70
+    },
+    {
+      "ticker": "005930",
+      "name": "삼성전자",
+      "spike_date": "2026-03-04",
+      "spike_high": 195900,
+      "current_close": 188200,
+      "pullback_pct": -3.9,
+      "days_since_spike": 3,
+      "rsi": 55.2,
+      "foreign_5d": -9607683828250.0,
+      "vol_z_at_spike": 4.8,
+      "score": 70
+    },
+    {
+      "ticker": "005710",
+      "name": "대원산업",
+      "spike_date": "2026-03-07",
+      "spike_high": 13280,
+      "current_close": 12750,
+      "pullback_pct": -4.0,
+      "days_since_spike": 0,
+      "rsi": 41.6,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.88,
+      "score": 70
+    },
+    {
+      "ticker": "487570",
+      "name": "HS효성",
+      "spike_date": "2026-03-07",
+      "spike_high": 57000,
+      "current_close": 54400,
+      "pullback_pct": -4.6,
+      "days_since_spike": 0,
+      "rsi": 38.0,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 3.44,
+      "score": 70
+    },
+    {
+      "ticker": "010950",
+      "name": "S-Oil",
+      "spike_date": "2026-03-03",
+      "spike_high": 142800,
+      "current_close": 129700,
+      "pullback_pct": -9.2,
+      "days_since_spike": 4,
+      "rsi": 62.5,
+      "foreign_5d": -318334971500.0,
+      "vol_z_at_spike": 7.33,
       "score": 65
+    },
+    {
+      "ticker": "115180",
+      "name": "큐리언트",
+      "spike_date": "2026-03-07",
+      "spike_high": 43000,
+      "current_close": 41200,
+      "pullback_pct": -4.2,
+      "days_since_spike": 0,
+      "rsi": 63.6,
+      "foreign_5d": 0.0,
+      "vol_z_at_spike": 5.5,
+      "score": 60
     }
   ],
   "stats": {
-    "new_spikes": 79,
-    "total_watching": 60,
-    "active_signals": 32
+    "new_spikes": 16,
+    "total_watching": 68,
+    "active_signals": 34
   }
 }

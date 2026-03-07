@@ -1,10 +1,14 @@
 {
-  "regime": "PRE_CRISIS",
+  "regime": "CAUTION",
   "allocation": {
     "sector": 0,
-    "leverage": 20,
-    "index": 0,
-    "cash": 80
+    "leverage": 0,
+    "index": 15.0,
+    "gold": 12.5,
+    "small_cap": 0,
+    "bonds": 7.5,
+    "dollar": 8.8,
+    "cash": 43.8
   },
   "sector_result": {
     "buy_candidates": [],
@@ -14,42 +18,42 @@
   },
   "leverage_result": {
     "decision": {
-      "signal": "BUY",
-      "etf_code": "252670",
-      "etf_name": "KODEX 200선물인버스2X",
-      "multiplier": -2.0,
-      "confidence": 73.5,
-      "reason": "레짐: PRE_CRISIS | US야간: 4등급(negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 200선물인버스2X",
-      "risk_note": "⚠️ 2.0배 레버리지 - 최대 5일 보유 권장"
+      "signal": "NO_ENTRY",
+      "etf_code": "",
+      "etf_name": "",
+      "multiplier": 0,
+      "confidence": 0,
+      "reason": "CAUTION 레짐 - 레버리지 진입 금지",
+      "risk_note": ""
     },
-    "position_action": "BUY",
-    "summary": "[레버리지] 매수: KODEX 200선물인버스2X (신뢰도 74%) | 레짐: PRE_CRISIS | US야간: 4등급(negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 200선물인버스2X"
+    "position_action": "NO_ENTRY",
+    "summary": "[레버리지] 진입대기 (CAUTION) | CAUTION 레짐 - 레버리지 진입 금지"
   },
   "index_result": {
     "targets": [
       {
         "code": "069500",
         "name": "KODEX 200",
-        "target_weight_pct": 0.0,
+        "target_weight_pct": 6.3,
         "current_weight_pct": 0,
-        "action": "HOLD",
-        "amount_delta_pct": 0.0,
-        "reason": "비중 유지 (차이 0.0%p < 2.0%p)"
+        "action": "BUY",
+        "amount_delta_pct": 6.3,
+        "reason": "신규 진입: 목표 6.3%"
       },
       {
         "code": "278530",
         "name": "KODEX MSCI Korea TR",
-        "target_weight_pct": 0.0,
+        "target_weight_pct": 2.7,
         "current_weight_pct": 0,
-        "action": "HOLD",
-        "amount_delta_pct": 0.0,
-        "reason": "비중 유지 (차이 0.0%p < 2.0%p)"
+        "action": "BUY",
+        "amount_delta_pct": 2.7,
+        "reason": "신규 진입: 목표 2.7%"
       }
     ],
-    "total_index_allocation_pct": 0.0,
-    "regime": "PRE_CRISIS",
+    "total_index_allocation_pct": 9.0,
+    "regime": "CAUTION",
     "ma_adjustment": 0.6,
-    "summary": "[지수 ETF] PRE_CRISIS / 목표 0.0% | 변동 없음"
+    "summary": "[지수 ETF] CAUTION / 목표 9.0% | KODEX 200: BUY | KODEX MSCI Korea TR: BUY"
   },
   "predator_result": {
     "accelerations": [
@@ -356,6 +360,40 @@
     ],
     "summary": "[프레데터] 가속도 TOP3: 현대차그룹(71) > 반도체(63) > 철강소재(56) | 배분: 현대차그룹 HIGH(0.0%) | 반도체 HIGH(0.0%) | 철강소재 HIGH(0.0%) | 트리거: 6건 발동"
   },
+  "passive_results": {
+    "gold": {
+      "arm": "gold",
+      "signal": "BUY",
+      "etf_code": "132030",
+      "etf_name": "KODEX 골드선물(H)",
+      "allocation_pct": 12.5,
+      "reason": "금 ETF 12% (CAUTION)"
+    },
+    "small_cap": {
+      "arm": "small_cap",
+      "signal": "SELL",
+      "etf_code": "229200",
+      "etf_name": "KODEX 코스닥150",
+      "allocation_pct": 0,
+      "reason": "소형주 ETF 비중 0% (CAUTION)"
+    },
+    "bonds": {
+      "arm": "bonds",
+      "signal": "BUY",
+      "etf_code": "114820",
+      "etf_name": "KODEX 국고채10년",
+      "allocation_pct": 7.5,
+      "reason": "채권 ETF 8% (CAUTION)"
+    },
+    "dollar": {
+      "arm": "dollar",
+      "signal": "BUY",
+      "etf_code": "261240",
+      "etf_name": "KODEX 미국달러선물",
+      "allocation_pct": 8.8,
+      "reason": "달러 ETF 9% (CAUTION)"
+    }
+  },
   "risk_check": {
     "passed": true,
     "level": "OK",
@@ -364,54 +402,84 @@
   },
   "order_queue": [
     {
-      "axis": "leverage",
-      "code": "252670",
-      "name": "KODEX 200선물인버스2X",
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
       "action": "BUY",
-      "target_weight_pct": 20,
-      "reason": "레짐: PRE_CRISIS | US야간: 4등급(negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 200선물인버스2X",
-      "priority": 2
+      "target_weight_pct": 6.3,
+      "reason": "신규 진입: 목표 6.3%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 2.7,
+      "reason": "신규 진입: 목표 2.7%",
+      "priority": 3
     }
   ],
-  "timestamp": "2026-03-04T19:20:03.472880",
+  "timestamp": "2026-03-07T17:39:28.174645",
+  "brain": {
+    "timestamp": "2026-03-07T17:39:20.041606",
+    "confidence": 0.6,
+    "adjustments": [
+      "VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75",
+      "충격 보정: COMPOUND (확신도 70%)",
+      "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
+    ],
+    "warnings": [
+      "SHIELD 방어 등급: ORANGE"
+    ]
+  },
   "order_queue_original": [
     {
-      "axis": "leverage",
-      "code": "252670",
-      "name": "KODEX 200선물인버스2X",
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
       "action": "BUY",
-      "target_weight_pct": 20,
-      "reason": "레짐: PRE_CRISIS | US야간: 4등급(negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 200선물인버스2X",
-      "priority": 2
+      "target_weight_pct": 6.3,
+      "reason": "신규 진입: 목표 6.3%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 2.7,
+      "reason": "신규 진입: 목표 2.7%",
+      "priority": 3
     }
   ],
   "ai_filter": {
     "stats": {
-      "total": 1,
-      "pass": 1,
+      "total": 2,
+      "pass": 2,
       "kill": 0,
       "hold": 0
     },
     "killed": [],
     "held": [],
     "warnings": [
-      "레버리지 ETF는 변동성 극대화 구간에서 양방향 손실 위험 존재. 단기 반등 시 급격한 손실 가능",
-      "호르무즈 봉쇄 해제 또는 미-이란 협상 진전 시 급격한 risk-on 전환 가능성 모니터링 필요",
-      "주말 리스크: 중동 정세 급변 가능성으로 금요일 종가 기준 포지션 재검토 권장"
+      "미국 3대 지수 동반 급락(-0.93~1.59%)으로 아시아 증시 동반 하락 가능성 높음",
+      "유가 90불 돌파 및 150불 전망으로 인플레이션 재점화 우려 - 한국 화학/정유 섹터 원가 부담",
+      "호르무즈 해협 긴장으로 주말 지정학 리스크 존재 - 월요일 갭 하락 가능성 대비 필요",
+      "현재 지수 비중 15% 목표 중 9% 매수 완료 시 잔여 현금 34.8% 유지 - 추가 하락 시 분할 매수 여력 확보 중요"
     ],
-    "market_assessment": "중동 전쟁 리스크로 변동성 극대화, 호르무즈 봉쇄와 유가 급등으로 스태그플레이션 우려 고조, 인버스 레버리지 진입 타이밍",
+    "market_assessment": "미국 급락(-1.35~1.59%), 유가 90불 돌파, 지정학 리스크 고조 속 BEAR 레짐 지속. 방어적 지수 매수는 타당하나 추가 하락 경계 필요.",
     "risk_level": "high"
   },
   "leading_regime": {
-    "effective_regime": "PRE_CRISIS",
-    "warning_score": 70,
+    "effective_regime": "BEAR",
+    "warning_score": 55,
     "original_regime": "BEAR",
-    "override_reason": "경고점수 70 >= 60 → PRE_CRISIS",
+    "override_reason": "원본 레짐(BEAR)이 이미 보정보다 하위 → 유지",
     "score_breakdown": {
       "us_grade_4": 20,
-      "vix_high": 15,
-      "ewy_drop_8pct": 25,
-      "rule_COPPER_CRASH": 10
+      "vix_panic": 25,
+      "rule_VIX_SPIKE": 10
     }
   }
 }

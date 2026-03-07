@@ -11,7 +11,7 @@ results/
 *.dat
 nul
 
-# data/ — 대용량 파일은 제외, JSON은 Railway 배포용으로 포함
+# data/ — 대용량 파일은 제외, JSON은 포함
 data/*.parquet
 data/*.csv
 data/*.db

@@ -156,7 +156,7 @@ class DashboardDataProvider:
 
         kospi_path = DATA_DIR / "kospi_index.csv"
         if not kospi_path.exists():
-            # Railway용 fallback: 동기화된 레짐 JSON 사용
+            # fallback: 동기화된 레짐 JSON 사용
             regime_path = DATA_DIR / "kospi_regime.json"
             if regime_path.exists():
                 try:

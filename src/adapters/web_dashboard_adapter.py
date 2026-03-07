@@ -222,7 +222,7 @@ async def get_kis_balance():
         return cached[1]
 
     if not os.getenv("KIS_APP_KEY"):
-        # Railway용 fallback: 로컬에서 동기화된 캐시 파일 사용
+        # fallback: 캐시 파일 사용
         cache_path = PROJECT_ROOT / "data" / "kis_balance.json"
         if cache_path.exists():
             data = json.loads(cache_path.read_text(encoding="utf-8"))
@@ -382,56 +382,3 @@ async def health():
     return {"status": "ok", "version": "1.0"}
 
 
-# ──────────────────────────────────────────
-# 데이터 동기화 (로컬 → Railway 푸시)
-# ──────────────────────────────────────────
-
-SYNC_TOKEN = os.getenv("JARVIS_SECRET", "jarvis-default-secret")
-
-
-@app.post("/api/sync")
-async def sync_data(request: Request):
-    """로컬 BAT-D 완료 후 JSON 데이터를 Railway로 푸시."""
-    auth = request.headers.get("X-Sync-Token", "")
-    if auth != SYNC_TOKEN:
-        return JSONResponse({"error": "Invalid sync token"}, status_code=403)
-
-    body = await request.json()
-    target = body.get("file")  # 예: "tomorrow_picks.json"
-    content = body.get("data")
-    if not target or content is None:
-        return JSONResponse({"error": "file and data required"}, status_code=400)
-
-    # 안전한 파일명만 허용 (실제 스크립트 출력 파일명 기준)
-    safe_names = {
-        "tomorrow_picks.json", "etf_master.json", "picks_history.json",
-        "us_market/overnight_signal.json", "sector_rotation/sector_momentum.json",
-        "sector_rotation/etf_trading_signal.json",
-        "sector_rotation/sector_zscore.json", "sector_rotation/investor_flow.json",
-        "sector_rotation/relay_trading_signal.json",
-        "whale_detect.json", "force_hybrid.json", "market_news.json",
-        "dual_buying_watch.json", "pullback_scan.json",
-        "group_relay/group_relay_today.json",
-        "scan_cache.json", "dart_disclosures.json", "integrated_report.json",
-        "leverage_etf/leverage_etf_scan.json",
-        "regime_macro_signal.json", "dart_event_signals.json",
-        "portfolio_allocation.json",
-        "kis_balance.json", "kospi_regime.json",
-        "volume_spike_watchlist.json",
-        "institutional_targets.json",
-        "accumulation_tracker.json",
-        "market_intelligence.json",
-        "value_chain_relay.json",
-        "etf_rotation_result.json",
-    }
-    if target not in safe_names:
-        return JSONResponse({"error": f"File not allowed: {target}"}, status_code=400)
-
-    dest = PROJECT_ROOT / "data" / target
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    # 캐시 갱신
-    provider.clear_cache()
-    logger.info("[SYNC] %s 수신 완료", target)
-    return {"status": "ok", "file": target}

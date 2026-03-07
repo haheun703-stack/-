@@ -18,15 +18,6 @@ def build_strategic():
     raw = load("ai_strategic_analysis.json")
     if not raw:
         return {}
-    # 이란 전쟁 리스크 반영 확인 — 이미 risk_factors에 없으면 추가
-    risks = raw.get("risk_factors", [])
-    iran_keywords = ["이란", "Iran", "중동"]
-    has_iran = any(any(kw in r for kw in iran_keywords) for r in risks)
-    if not has_iran:
-        risks.insert(0, "미국/이스라엘 vs 이란 군사충돌 — 중동 전면전 리스크 급등")
-        risks.insert(1, "유가 급등 가능성 (WTI $85+ 전망) — 호르무즈 해협 봉쇄 시나리오")
-        risks.insert(2, "안전자산 선호 심리 → 원/달러 환율 상승 압력")
-        raw["risk_factors"] = risks
     return raw
 
 
@@ -67,41 +58,10 @@ def build_v3_picks():
 
 
 def build_news():
-    """3/2 기준 이란 전쟁 반영 뉴스 데이터"""
-    # ai_brain_judgment.json이 최신이면 사용, 아니면 직접 생성
+    """AI Brain 뉴스 판단 데이터 — ai_brain_judgment.json 기반"""
     raw = load("ai_brain_judgment.json")
-    date_str = raw.get("date", "") if raw else ""
-
-    # 이란 전쟁 반영 — 미장 선물 급락 실시간 데이터 강제 적용
-    # (ai_brain_judgment은 선물 급락 전 뉴스 기반이라 bullish → cautious 보정)
-    if True:  # 이란 전쟁 기간 동안 강제 적용
-        return {
-            "market_sentiment": "cautious",
-            "key_themes": [
-                "미국/이스라엘 vs 이란 군사 충돌 — 중동 전면전 리스크",
-                "유가 급등 전망 (호르무즈 해협 봉쇄 시나리오)",
-                "방산주 글로벌 급등 — K-방산 수출 확대 수혜",
-                "글로벌 기술주 랠리 (S&P +1.8%, NASDAQ +1.3%)",
-                "대만 AI/반도체 수출 역대급 — HBM 수요 폭증",
-                "한국은행 금리 동결 전망 — 유동성 우호적",
-                "안전자산 선호 확대 — 금/달러 강세",
-            ],
-            "direction": "cautious",
-            "sector_outlook": {
-                "정유/에너지": {"direction": "positive", "reason": "이란 전쟁으로 유가 급등 전망, 정유사 마진 확대"},
-                "방산": {"direction": "positive", "reason": "중동 전쟁 확대로 글로벌 방산 수주 급증, K-방산 최대 수혜"},
-                "반도체": {"direction": "positive", "reason": "대만 AI 수출 호조 + Nvidia 실적 기대, 공급 타이트"},
-                "IT서비스": {"direction": "positive", "reason": "반도체 릴레이 수혜 + 엔터프라이즈 AI 확산"},
-                "금융": {"direction": "neutral", "reason": "금리 동결 전망이나 중동 리스크로 변동성 확대"},
-                "건설": {"direction": "negative", "reason": "금리 불확실성 + 원자재 상승 압력으로 마진 악화"},
-                "2차전지": {"direction": "negative", "reason": "유럽 EV 보조금 축소 + 원자재 상승 부담"},
-                "유틸리티": {"direction": "neutral", "reason": "방어주 성격이나 유가 상승 시 발전원가 부담"},
-                "조선": {"direction": "positive", "reason": "중동 리스크로 해상 운송 우회 수요 + LNG선 수주"},
-                "철강": {"direction": "neutral", "reason": "원자재 상승 혼조 — 원가 부담 vs 제품가 전가"},
-                "자동차": {"direction": "neutral", "reason": "현대차 그룹 릴레이 진행 중이나 환율 불확실성"},
-            },
-        }
-    # 기존 데이터 활용
+    if not raw:
+        return {"market_sentiment": "neutral", "key_themes": [], "direction": "neutral", "sector_outlook": {}}
     return {
         "market_sentiment": raw.get("market_sentiment", raw.get("sentiment", "neutral")),
         "key_themes": raw.get("key_themes", raw.get("themes", [])),

@@ -1,22 +1,701 @@
 {
-  "crawled_at": "2026-03-04 19:22",
-  "article_count": 240,
-  "high_impact": 99,
-  "medium_impact": 116,
+  "crawled_at": "2026-03-07 17:38",
+  "article_count": 264,
+  "high_impact": 102,
+  "medium_impact": 143,
   "articles": [
     {
-      "date": "2026-03-04",
-      "title": "2월에 20조원 팔아치운 외국인...폭락 알고 있었나?",
-      "source": "조선일보",
+      "date": "2026-03-07",
+      "title": "국제유가 배럴당 90달러 돌파…호르무즈 막히고 산유국 감산 여파",
+      "source": "한겨레",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQbW5jR2hsem8tNHZ4RXNrWXN1eG9fWUZaZWNSSTU5SzZRNVZYMS0yVDR0SWdPZmJtSGNjMmdyY2d0RkVxTUNEbEkyTDJ2OE5uY0cyWXhSY3FTM0cxSVBnRl9YVFp4TnAwRWFWNTBYMGdTNG5qb3dIWExBUkNla0dqR1k5MTVCSkNyY3JUMmRB0gGiAUFVX3lxTFBoTFdHYXBvSWpUbzFQclZSRWNTeEFCbTFTc1RmbG9wZjBuMHJ4a1FQQS1UN0szTzFuZ1ozNHZzYS1Bbk95bXpFNHZ2VEJURXpPNGtXTVNnZjdCYjg5d19XRkdCM2x5WVZWTXh6NXktdmZ4OW1SbGtIa3pMbTBDd0tkdUg4U3AwWWR2M1dNNG9pdmVLbms5aFg3Z3dnQjZ2UGltdw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBuaC1tLW94TkY1aFZsUlVuWE5DaDVIb2RWY1BCTlZnNlBZMWZxRW1IdGpocUc5eG02Ukw4cE1YZnFmcEdrWlZMcmZUWmdGdkw1THNJdzZZbUFQZDRTTkVVSkdrenFlOEVWdFowa0pfZ2ZNNF9TZjVv?oc=5"
     },
     {
-      "date": "2026-03-04",
-      "title": "정책이 이끄는 주식시장, 배당·코스닥·생산적 금융의 세 가지 축 - 정책칼럼 | 뉴스",
-      "source": "대한민국 정책브리핑",
+      "date": "2026-03-07",
+      "title": "방위산업계, 'K-방산·국방반도체' 수요 급증... 이공계 진로 지형도 변화",
+      "source": "교육을 비추다",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQU19hazAyLWpIUWt1X2xVVVBiY2RWOExSWlpIaHNhMFZsMks5R0xhLVlTb0otcmNOZGMzVnl5QUpUNzREUVhpMVV6d3c2Z1hJeWhCcjMxNmFKenpUVlRQNHJmTDFIdTRfZnBpd1JqSVA5WVdybHFxeWswaXlzQmlrMlRkQmVOZEJUcWV3Ny1HNjBRUQ?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE5JMXpiQkR0VVR5T0VaSTlFYjE2SzM5N1hfT1hhZHRJWGRBUktUYkdDSkhobmNYQW1wVVVNQ3VhSTlfekE4SWdzXzd4SkZ2dzIwdGtXX3hXOGVWcHo4c0pZSS1vNnNPdw?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "오를만큼 올랐는데, ‘서학개미’ 국내 시장 투자로 ‘유턴’ 조짐…어떤 배경?",
+      "source": "문화일보",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE02TFpteHZTUDM5eHprMWpzYVFMRF9nbS1WcDZ0VTAwY1dvQXIwMkhWbDZnT2NFcjgzUDk2UzlZSnhsd2F0eUdfTGU2YkVDWlVS?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "\"이란보다 한국이 미국 증시에 더 위협\" 평가, 빅테크 주가에 변동성 확산 우려",
+      "source": "비즈니스포스트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5ncGRJT0I2czRTenNaelpnNTVDYThOc2pHb1I1MkZ1bDdhWjB2U3R3dUloVDZyRHkwcTloeDJfUjJhVHJISkVMN1EzY0tObmxYLWZyLUphQ3hwUE9FUXlBaDRONDI5STlPWDNBbHpwN1hwRTQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "‘韓 증시 버블’ 직접 답한 靑 정책실장…“제 값 찾는 중” - 조선비즈",
+      "source": "Chosunbiz",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPbTRfNWJCMHRobWNTU19iWjU3UVhSOFljLWdJSDN2eU9RUU5lY0g5aTZtcGpsenRGTWYxdE1SckJUM0hUUHB4ZnhEcHp5RXA3MW5IM2VycXNTQW9INTF4TXd5emdvdF9JdFZGMGV0OGdqSk82OXhieVZhcVNmdkNlcTFzOTgyOEkyNHlRT3F4N2ZCODNtVUtkbjRB0gGuAUFVX3lxTE01ZnJmWEpZSHMxQ255Zmlydlk3REl0d2hZdG9YWXIwVG8tRmh4X0s4TWRIMmR2WnhVSUtTQmR5enVBSG1sZzVXUnlBd2RPQkpQeGd1MVB4dm01SDlMSkJQTFZxRFJaZXdBTVhhTlZBS1dNSUU0V0tFdktFWTh0cGN1SkstQVVYLVg4X3ZJMDV6R2xMMHdPWm95ME9pV0R3RTJ4Z3Z3SnoySWcyLVc0QQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "태국 유력 핀테크 플랫폼 \"삼성전자·SK하이닉스, 韓 주식시장 호황 원동력\" By The Guru",
+      "source": "Investing.com 한국어",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBxSERjdjNYelRzeXRMYWV2VnBaMHl5NXVrU0JoUi12Ukg0QWNJNWZ6TUVrV0hpcmVGQjdrUXZ2YVFFU0hQZWpLS2wwOTRRTUhhdXEtU3VPRnZLZFY3RGctN1h3YlhmVFFrUzh5TTJMSFU?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "‘프로 비관러’ 버리 “코스피 급등락은 종말 징후”…한국 증시에 경고",
+      "source": "매일경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5tMFNKeGpjTEJHYzBCWW1vS3dQOVZvWWJvZnduX2dJcXJNQUpSSHFldm02LXdST3J0SlFTQjVhUlMycEdmbm9fU3RvOV9XbWZPdXc?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "\"양대 악재\"...미국증시 '뚝', 나스닥 '급락'",
+      "source": "초이스경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5HZ3puV3puZlpWbkNKMTBzSlN2dEpRZkQtVHlPYllPNWRsVU1teDgxeFZ2M3E1Nm1UTEktWXdWWUV2VmVwYWFSVXUyRkloSFh1Q3AxT2pjZWZiOHk3eW9nekJFYWpxVlhFVTZ0eDlYLTk?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "뉴욕증시, 유가 폭등에 일제히 하락...나스닥 1.6%↓",
+      "source": "여성신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFA2VVhpb0lQbXE4VVJDdVE5VC1RdmRIQ3ZraTJWVzNJRllxUURteUIwdFBtcHBxdExXRG5ubWxmTnFKVmhSNE5jUDJ3OTFHWi1pV28tUmpkVVNJcEFvTjBZbm1iQXVhQTQyamgxOENKWdIBc0FVX3lxTFBQdXpqcnp5SlZUWFQ2V05LTW45UUpPV0M3T2dvQTc3bXNWVzlIbGVTcGlBelNuMmpkUG1JRWlVX0lxcHFRY1ZUMl9rTmJtYUJlaF9JOVMxQXhKWm03NVA3Vmk4VWN2RnAxWkFkSkVwUnIwNjg?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "[속보] 미국 증시 일제 하락… 나스닥 1.52%↓·다우 0.93%↓·S&P500 1.35%↓",
+      "source": "천지일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBiVW9IWTl6LWYzQi0tQkR1LUxkUmVJVFloTURqUkRfNWFYUllRZHhsd3M4S2thb0lEZjJMUGIyMnhBaldxTXRST2JCc3VBejFvRC1MTzF5cTlqMDZiNDEtNFZ2RHdYLUZPMlE?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "뉴욕증시, 하락세로 마감…나스닥 1.59%↓",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9hWlEzeEtpcDR4WVVlU0RqX0dub3FId1pFdkN0Y2ZmMUZJUGhTQzRVOUN1STlQZlJFQjZBWWVmb2FndTV5dXVscGpUejBkMlZ2?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "뉴욕증시 급락, 유가 90달러·고용쇼크 겹쳐...나스닥 1.6% 하락",
+      "source": "스페셜경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9vTDIwRmRUUUY4N2h4aWdXcFVjTUo4VXdBd3RZbEt1ME9IUVl0WGtOX3c1REZUYnJWSjU2bFFEam5ZaC12UnFTQUNQUEVfdEFzdW9HMk42YnZpT21pVzlhR2Y2a3E1enV0NndXRg?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "미국 뉴욕증시, 유가 폭등·고용 충격에 질식…다우존스·S&P500·나스닥지수 하락 마감",
+      "source": "한국강사신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE8xX3pvbGQyRHlGSEpfbXlyR19wcjBYTGl1cDgxWXRPSGxzbUU4cWtaRjh5VWhGSDFYeFJxalVnQk9TdXRMMFFvTWg3Q2dBYXp4TlJRMlU2Ti1ySHM3R0VzcDU3ek9MOFVJVG56ZmdkTlo?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "뉴욕증시, 하락세로 전환…나스닥 0.90%↓",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE81dktHdTdDWDJoNjN5S3VSa1VZRS1DZkhfME9QT3d4TUtxdXdQS25SVjNjbXBIMzNSOUtxaWo4QmxNRUx0TDIxbV9ocmhNeE4w?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "AI 확산·환율 변동·금리 구조 변화…한국 경제 구조 전환의 분기점",
+      "source": "데일리연합",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1pcU5UZ3k4US1kMmozejdPeWlwdDFvRDBJNWVXTm1IczIwV3c5X24tbVFYX3YtZGlxZjMyZUoxMkNBR2hKV1VGUmRuMEhYOUhKclYwb0VpRE9aM3ZRTXUzeQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "유가 상승에도 차기 美 연준 의장 금리 인하 예상",
+      "source": "v.daum.net",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE84MTc0Vi1OYmVrSUJfZ3lQXzFVMUlMMXpzZUVwQ2lDaHY1eFdJbTZDak10VDV3Yzh3SUdjRnV3SHpfSHZMZkpCR3FkdjJvLXFvR3lUVQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "호르무즈 해협 마비에 천정부지 국제유가...배럴당 90달러 돌파",
+      "source": "경북매일",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5peU82TU9OTWFxSWNmUGhhWlM2R1JsbGE2VmM4Sm1HYjlXSm40S2t0SFZTU2F5MlUtSXFDV2hfQ0pvcXpyTUU4Y2hHbmhSb3FuVGhLS3kwNHFKdw?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "국제유가 배럴당 90달러 돌파…\"150불 전망도\" 일주일새 36%↑",
+      "source": "mt.co.kr",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9JNmNENGU5OE9IRkoxa3MzbThBUThQTVgwZG1aWDVoZjJ4bjFwcERYaHlLMGJBWDM5TmRsdlRiV3pVejdYLU9pTGZ6ZmxDX0l2R2p4cnc3R1FwMzlLS1dMSUVVUGpEOHJZ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "\"유가 2~3주 내 150달러 '2배 폭등'\"…걸프만 원유 생산중단 경고등",
+      "source": "mt.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE0zNHhTVWZZQlJaTkk3RTByTFowWFpyd1Z3NGZCckc4UWZZTlNrU1Rmc2hFUVBjTVFsQTd6WEhSbzJCVVcxdnNZdWRpejNmRlFFdDJmdG5kZWFjSTNrZ0RaTGxhU083Z2dP?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "방산주 장중 강세 흐름…한화에어로스페이스 143만원대 거래, LIG넥스원·현대로템 상승세",
+      "source": "CBC뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBwbTl2cnlzajFjVUdFdTg0YV81WVBFMTBqYl9Hb2l0SEdEc0k0UHNVekxqM3Fybk02R1FFWFVQZHlHZ3cyZzQ0XzFDWUhYTjMyZC1aZFRTNGNfTXZocFFxQVMxMEphODBt?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "중동발 긴장 속 '천궁-Ⅱ' 수요↑…LIG넥스원 등 방산주 강세",
+      "source": "뉴시스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9IbjdYNzZwOXJrSDZXdGUyYm45TVdsRXNkX3FWU0lQSG12a2RnaDdydGZyVVpOai1HcGdPNlpTRkpoTkFkU0Y4RjdfWmxjeFduRDFUSm10dHM3Z29haWVsdlFKZmQ1YjlhSmc3d0lCTHRaZ193c2paOdIBeEFVX3lxTE9IbjdYNzZwOXJrSDZXdGUyYm45TVdsRXNkX3FWU0lQSG12a2RnaDdydGZyVVpOai1HcGdPNlpTRkpoTkFkU0Y4RjdfWmxjeFduRDFUSm10dHM3Z29haWVsdlFKZmQ1YjlhSmc3d0lCTHRaZ193c2paOQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "중동서 성능 입증한 '천궁-Ⅱ'…LIG넥스원 등 방산주 강세",
+      "source": "뉴시스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5scGQwZm1OOVJKdnZpM2ZZZkJZUHRxLXZ3RVZabERhajJyREVEN0pBUXhpOGNFYkZodFdQb1lTMHZ6cUlQZWxORTVSNTlPYnZ4YW93UlRmNzI3U2FodzVKYdIBeEFVX3lxTE9IbjdYNzZwOXJrSDZXdGUyYm45TVdsRXNkX3FWU0lQSG12a2RnaDdydGZyVVpOai1HcGdPNlpTRkpoTkFkU0Y4RjdfWmxjeFduRDFUSm10dHM3Z29haWVsdlFKZmQ1YjlhSmc3d0lCTHRaZ193c2paOQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "순항하던 정유주, 유류 최고가격 지정 가능성에 ‘제동’",
+      "source": "동양뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5odjRabTV5OFlFbERHVExlWmdNaU93ZTJ4LXM4YVRubGtud190NEZ6Qi1qVlMtTTVTQ3JucDd3SDAxZHZuSjk4T3J4aTg5REd4NWN1R19Yc1FIU2JEMS1GSg?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "11조 베팅한 반도체가 내 통장 잔고 바꿀까?…순매수 TOP 5 공개",
+      "source": "위키트리",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBEMXdWczdXS0RUQkZ6ZU9WeHBGc2Q5WXIxQVpPZWN3dGlfUEFlaUlpUnBiejhLcm5EbmdGQ2FSZDl1RGUwWVhiYk9JdlNKRGVfcHpJYnhn?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "혁신 중소기업 'K-방산' 진입 지원…기술사업화·수출 협력 강화",
+      "source": "신아일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9aZGlxWVNINkV2Wlo4dnl1amlIVVVidGFBcm40cFEwMUFFVlk0dkpjN1V1VUFWTFdZX3ZNaC0ycXV6Z1JfNlNEZEVnV05fcVFMZS1pSWZHaW81MzZRMEZPX0JndHQ5VVdDNVExYzhOcw?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "“창원 생산·판교 기술 잇다”… K-방산, 대기업 공장 넘어 ‘혁신 생태계’로 확장",
+      "source": "뉴스로드",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE5yZENuTjlHQ1JLV3NhRFI0NFpDcUs5dEhmZGJQUEQ1eC11V2pkTGRZM0xLYjZQUE5kY1dTdUxvQnk5OC1DSWNGN2NJeDA5UGVjb2Rnd1ViT3FWMVpYQUd3aElWZWtkYnBCSzlB0gFvQVVfeXFMT3pVa2hZM0lITUtZOTdsczNvRjM2cDZkY2ZRWEQ3cVdVcVpFcGVGbjhQSEkxYlB5LW96V2NjeXdocVZPRWpQcnkwajBxVENTRkp2eUt5eGFRUEppWHdPalJxZFUxbnlOMWl2NkxxMFNz?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "엔비디아, AI 리더십과 GPU 지배력이 성장 견인…\"강력매수\"-타이그리스 파이낸셜",
+      "source": "edaily.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQcG1ib3IzREVmLVVVRDdBU3FFd0FTQXNBUnFfMzJreUJtMk96a0lEWnpQT3FRWDFNdUs5QlZVSXlQdnhRVXlYdXI1T2VsOEhvb0tZM0xURlhOeXZ4RUhDSGdIMUJmUW5JcU85VHRFOEI0MXk1ME5mcF90Um5wbm9WUg?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "[AW 2026] 티로보틱스 '피지컬 AI 기반' 차세대 산업용 휴머노이드 공개",
+      "source": "헬로티",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1seWJUSlIwTE9ZVTl1NnVZeUoxSXowcW9Ea0ttejd5V192ZXlVVm14ZWNJQ1RPcUdjT1FWSVpnSm4yTm12TU1kTHJ1c2hhWEFYbTA1Sm5aTkhfb05IdGFj?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "‘AW2026’ 화두는 '피지컬 AI'와 '휴머노이드'",
+      "source": "시사뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE8tWHQ4SUFrTUR5TDVSbElTei14N1ZpUkdycUlOVll2a1dzcDRlazlBU2lxS2FRUXEwc2hHMTZFczF0a2JqWlVWZnFqVFBqOFI2UjVqSWJ6X0xwWW91ZHQwbzk3RQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "한수원-인도 타타파워, SMR 협력 본격화··· \"노후 석탄발전소가 원전으로\"",
+      "source": "에너지안전신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFBncEo2RjZyN3Rkay1STWlNY2JWYjhjQkM5V2RKUFg2clJkNVowS2xUcTdBd2lPLXdDdXcwT0pvVHJENlZQQ3BzeEYxa0l0aUJMVWlYTS1ZRWdYd3R2ZUxBOFFtUEo?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "한수원, 인도 최대 민간 에너지기업 타타 파워와 ‘소형모듈원전’ 협력 본격화",
+      "source": "교수신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5UUGYwd2JaeWNFdVI4YjV5R2lheDBqUTdnb0EzdGdua3BWX2dMcTNNNHFpOExQeXJGVGUtYUMxNC00ajBaZ1ZQLXlVNnhlMnVYcGwwdHZ5R2dZdVNwUjZwcTBram5pTlE?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "[WIKI ENERGY] '한미 원전동맹 상징' 테라파워…SMR 주기기 공급하는 두산에너빌리티",
+      "source": "위키리크스한국",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9qWWJCazdpbm16RzhWaVBUNVVTNzNMcjh5STlyLXpVZXA3VmlNcDBlc01HTXpjNzRxdEl1eXJYNS1saWpUdlNmYjN0Y0JFZmRmN3c5TXptSmtFRGhibWFUeUFqbFdJUHhILWI3NUw5QQ?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "K-원전, 인도 100GW 거대 시장 조준… 한수원·타타파워 SMR 워크숍",
+      "source": "에너지코리아뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE44ZGRXQTNER2tBVTlZUS0tUkJ0Z3ZMQ1hOMG9ldTNJc0dTZ21mN3EzSGhYLXRlS0RiZ0pIakRGVU11VUNjV193aVo3b2pMUlFvRjY0Unl4czRyYUtRdWMtOHNUZjUzTGJCTWVENWtUMTE?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "한국수력원자력, 태국 전력청과 SMR 협력 본격화",
+      "source": "드림저널",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE0xVm94OEJXQVF6NDFOZmk0dEJOLUxvelM5NlV0WlQwUjhESjRJOEphZER2bnpNcE85M19IWlk4Qnc4Ym9XbEE?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "태국 시장 정조준… 한수원·EGAT 소형모듈원전 협력 가속",
+      "source": "에너지코리아뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFAyN3Nvem42MTRveFgyNTlyZC1EbnNsd080RmlfQUFETVZYbjhHd0F0OVoxOEdTRjMwNGc0aDFVemt3TEQ2OTdTMXJNQ1BDQXhLZlg3emw2ZlAzR0tBdXJveDJCTE1jd1FDME4zcks1QnE?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "[HD현대일렉트릭] 북미 전력망 투자 확대… HD현대일렉트릭 주가 상승 이유는?(2025년_4Q)",
+      "source": "네이버 프리미엄콘텐츠",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxON2lqWXBHampkMnpLWUlkTEpNa1VTcHhwQ1Z2NWlMZldZSWw2UUhDQXdLcjJqMDE4eDdta0s3NGVvQUtvV3pHVE5URThvWkhtNlhQOFVZeEx0THpoamVXZk9zYWtoM0pYUXhWVGNQcmtTWW5DSzd1NXZ3RW13TVZxcnNMd2g5UDZz?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "“지금 수확, 나중에 복호화”…양자컴퓨터 시대 대비한 보안 전략 주목",
+      "source": "전국뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9CeDg2OHJoRkJ1WV9vYzhJSXI0dlh4dWh4eDBhamtWWVI1SFNXMDFvVWZ3NXhlak11YXVaU3dKNjZwTTIwZ2g2U1N6U0xlRXd1SlM5YU8xUUVWVE9XMS1DT01yZXlkNFBaR2xZSkFqTXA?oc=5"
+    },
+    {
+      "date": "2026-03-06",
+      "title": "우주에서 시작된 태양광 혁명, 페로브스카이트는 어디까지",
+      "source": "브런치",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiR0FVX3lxTFBkNzd0dEhJT3d1ZEllWFNhMlI5bEcxd3VkbGR2VXdEb1NRQzdUX1dBU1cwTk1ZWmk1X3RBVkx3aVVZd3pDU3p3?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "'결혼자금 3억 주식 몰빵' 공무원, \"살아있냐\" 물었더니…",
+      "source": "한국경제",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1hQ3hhOFRYUDM3TXp2NkZTRzZobU1OcDk4S2JqYnVMU0FocW1teXlTYm1KdnY1NkJsTjlKQVk3Snpvcko5ZnRPOVVCY3BTdENPODBQVnZHRTIxQdIBVEFVX3lxTE1lZ1VmalkyX2FJeVNwR2R4djVKekpPeDhBTFk3QzdiSVI1aXRpdDg1WXR2NFYtTGJPT09qTVh3SnQxamxzd3UtdXRrU0I2ZUphNllLdA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "\"한국 증시 자체가 밈 주식이다\"",
+      "source": "네이버 프리미엄콘텐츠",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTFA4QTVna1QwTnZxTXlIZWt1Rko1N2REWXg2X1owV3ZnVkNLZlB6V29ZSTVsX2cxSFR2dEM1c0p0cEg4U0F2RGhubzZ6aUhubE5wUUVDOTF1WkpXMkxvLWZNM1BlQ2VjMWpPNG4xa2ZnR2ZWbjlDWmwya0JTWjJLZk0?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "중동발 금융쇼크에 1천조 증발한 한국 증시…대만에 시총 역전",
+      "source": "산경투데이",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9sSFBoaVZOTm5zWnRXVExUT3hjSHBPNkZ0d1dCNzU2UnFPNG1FQU1UMldISmJEUmRMS00xdXdYaWw3cTBhNGFmMHRDMTc1blEtejdNZWhEdi1IbzBNclM2U01UcHhleFRsdko0Qm5ITkrSAXRBVV95cUxOTG1QVTBTZGJCLXNPMlBVX1dseGlReWtraDd5a213dmduTm1JNVV0Sm9oelZzUUNERW1GYVhhUjdrREd0TFZQN2JoWFczLS16VE02R2tyUDJXVnNuSlh6SDhadGw4OF9CeVhKRXRIUi1UYkhkWA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "'美-이란 전쟁' 이후 한국 증시 변동률, 日-대만의 3배 넘어",
+      "source": "네이트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE96S2hOWllqSzRBOFZXdDFNbC0zX3Y5Vnh0czZLZjlrcnBtZ1lFaU4zZkU1SU9tNlk4N0xoTk1RTjJBUTB3ZWhXcHBBVHZkVFpTRkRLaEpZY0Fwa3JoMThuODEyMjhxWXJ5dkE?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "美 나스닥100 '막판 낙폭 축소'...브로드컴·BKNG·SW주 '껑충'",
+      "source": "초이스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9MdkdjakZpNEFEUlF6UnlZZUgwNFE5OVJJMWtjeWRzbGd5djJ2cTRJVVZuQ2NlYVZuN0ZFRmk5OUdMLTZVbTR5SmI2eEZIbGxVWkNVOXlVQXlxSmx4MENHaDlIZG84QzAyNjJSZXI4MNIBc0FVX3lxTE00VUxTWnpLUVpUalh3WW5wZWJfN1JseWxBeVBzWGQ1cDdGc2VMejFwb2ZuYm45YlVRcGRPSHU5WHN6a2t2SG1DX1YzX2V1QURQVDJrNUNud1FLWUxfdmI0M2hBZkplZmNWZklOaUJaRUt1ZEU?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "뉴욕증시, 하락세로 마감…나스닥 0.26%↓",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9FRWNaYTFKcWdSMEJpUWxJZ29rVG04ZTc5U1VoRXowNmdTZmlMRUc5R3FHTllPUHRmcGQxc0RkZG1lSzBMMVpkS0lmdGxDYnhJ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "뉴욕증시, 하락세로 전환…나스닥 1.21%↓",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBoeWhXc1lVS24zS2JtemlJNEd6Z1FycDhtNjFMMHVZczJCRkRVdFJuN1BMYzdCLTVpMHY0OVVHSFU0N1h3a255OG1FMHpWeDc5?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[서울데이터랩]미국 증시 지수 종합",
+      "source": "네이트",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9sVllJSmQ2N0VBT3d2TlQ3OFVWQzZJZ2VybWNyWDFDcG95WW5tcmN5TG55YXNsX1VzNkYtRHp3c3RpYTBPQkxrdm05NjBOQmFVWWRN?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "미국 뉴욕증시, 이란 전쟁 확전 불안감…다우존스·S&P500·나스닥지수 하락 마감",
+      "source": "한국강사신문",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9mXzhFem91Y1N3a1ZEXzZWcnJfWVNtb19SZnI3TENMV0NNTFplTWZTemNrR25TYVpHVE0yMkxzZXNrd1dmcGRMTklqTXdvWTFYRzdkS1FvMHU0NURqRHFiOUNmWDY4MVBvVkhYU2tZNnQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[환율진단]②\"펀더멘털 대비 과도하게 높아…전쟁 이후엔 美 금리·경제가 변수\"",
+      "source": "아시아경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFBPbURjWDlzd0xxMFJUOXRjZ2xUeHlfMzgzOUlwaDlRemoxUTlsSHdYTHQ2VXJrVjhwdTlIVkphbWtvY092TG54TlRMZkhrVUlMeWhwbHZsYVFRd1dCbk56TA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[중동리스크] 유가 금리 환율 '3高 가시화'…스태그플레이션 우려 점증",
+      "source": "ebn.co.kr",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9UQ3lETEtLS0VVZU03NmhqclIyaUxKNlpVWVRYRWNKaTRNYTMyMFA3ZVdwSGVFSHdfR0E0MEpyb2JWVFZxZTVQRVZjd2pNQVdYUEh2OHlDNWlqVUtHYm92WEVmWGdvTEtG?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[뉴스룸 시선] 중동전쟁과 한국 경제의 에너지 리스크",
+      "source": "지이코노미",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE50MVh5eXF0TWJWZkNtRkpsVGpvb3dHNzB2ajIxQmZlU3Mydk9mSm1rN19QdEpVMTR5c2xCMW5BSFdmQU42aXk4YUwtRkxwVmRDMWVtTVNYMG5LUU1tYWVPcWV3QjE?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "원·달러 환율 다소 진정…\"단기 1500원 배제 못해\"",
+      "source": "한국경제",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBsaGJPMXpRcmw0YnIwSXA3djdHR3d2Ynl4YlM5U0xHbTJhVVhuNEVyelE3MXV1QUV4TzE3bWk3QXdsRzBnOEdxc3ZLYjVuWTBqRjZtc0Y4WXRjUdIBVEFVX3lxTE01Yk9OblpnN0RZUm1qSVNQT1hRbFMtSFVCZXhpb2ZETFhBUlZUNmhHSUM0bS14SUtQbjd3YVNZX3dsREhTVGk3Z3dNb0JoY0dPWHJOcA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "'\"증시 핵심 변수는 유가·금리\"'",
+      "source": "한국경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9GMzF6QTV2TmpmY1N5MVBSZWlXZmZZSzI5a0Iwa3hzR3pmTUpBUVpvTEx6NzZmaXB5T0xMeks2TlFnTGlGeEwzWTVJTnZTVXZaN2F3a05oai1KUdIBVEFVX3lxTE90SkJDM25ScmxwS2hFa3htUmRaRTRsWml0SmNabDFQenNFX0JsSU5fM1A3cnNuWXEwZ0VfbWhzMThZUWdtUFE3b0pJR0cyUzlNUjZveA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[미국 연준 의장 교체] 트럼프의 선택, '매파' 케빈 워시…상원 공화당 균열로 '반쪽 출발'",
+      "source": "글로벌이코노믹",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMy0wN1RNNXhrZlk1Ty1KVU9BUVZrQ09oWWxSaGt0SktyVXA1eFJpU1V2bzd6cUVQTXFsV1l3UE90Ul9lMjlqM1BRS3NXcWc4NE5HY1lHSkpiWWFKQVQzNVlRNTlITDdGZlhueHNSWDVUU3hKWmktT1k5c290VnN6WG14SWtnQU11?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[뉴욕유가] 이란 전쟁, 중동 전쟁으로 번지나…WTI 8.5% 폭등",
+      "source": "연합뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFBMbGctYnpTcEtZQUk0bnlkNWtXek15T2RMemRIZ1BFN0JxUkxoNDBxVnMtNzRmcVFlblhVYlhNbkxjUmo4enZZOEdBVEIwelR2eDNLcVQ2ZGxfSlVnYWZ5MNIBYEFVX3lxTFBMbGctYnpTcEtZQUk0bnlkNWtXek15T2RMemRIZ1BFN0JxUkxoNDBxVnMtNzRmcVFlblhVYlhNbkxjUmo4enZZOEdBVEIwelR2eDNLcVQ2ZGxfSlVnYWZ5MA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "유가 120달러? 이란 전쟁과 호르무즈 봉쇄의 경제학[딥다이브]",
+      "source": "동아일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1yOGhneVJsNXJaWEtwX2RNR0N0akZIaE16S005NDNCNFYxOVpHVlZIRDlSQ0hWaHhCRXdBRGtOR21lNXFlY0RQVHh0T0RtSl96RkpBbkR4aXg1WXYtWVFzYkZaNUdUWklvRmUzZ2stMTNXOWVyRGfSAWZBVV95cUxQa1NFWld6LWYwbE9DVGJCbEt1TmJKQkxUREltQmNqc1VhUmVfem9LcW1HQ0poSWJMNGVOSTF2eEhxdzhsenlaWW5rblhNcWFyb1dGUEQ5TzdJM0p6NUE3TVNVQTc2c2c?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "이란 전쟁〉호르무즈 봉쇄 여파…이라크 원유 저장시설 포화",
+      "source": "진일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE8tSnQ4alhpQ0RJMEIwNVVfa1B1b2xmQVZ2cWFKdXJ3VzRHSEZGVFdCN0hNM09CdlNGaEo0WXdRTEVqazNWamFYODNLTVpnU1NwUHNkTVJkV0hmaG5qXzBRT3hZSWNJSExFVkhQNTJQTQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "국제 유가 전쟁 3일 만에 진정세...“오일 패닉 없어”",
+      "source": "조선일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxPQk40S0VhUGl0dXhhVmY3SmxiZTlaMGR4ZFNzeDdBdWV0REJHMEQtRk92Z2FLM0gxRG9lYkFZWXBJYlNGRnlyTDNHa1BQejlOdEliWWFjOHcwOWhBYjdQUHdHOVU3b253V2dNR1ZBelB4bGF0cGR2QTdjbTFkQ0tOTUpNTlhCOElDMXczekh30gGiAUFVX3lxTFBQY2wxMWo1ZElHOGtYdjRBMl9QeEdab0Jnc1Z1Sng1QlFTVnpNMG9yRVRuMC1nZVpZWUFNa045aXpVWXhTLWRGOWhLdFBLSTdKaG94Wkc2bTJTWmF6SklhaWZuYlBKbW9rS3JOS0JJa1BILVNKSVZkMllWYS1rY3N2WElqbGlOVlpYSW9kaHZkRTFmQ0l2Z29zSGhYcTN3bE55QQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[중동전쟁 1주일] 미·이스라엘 이란전 일주일…본토 공습 넘어 해상 물류전으로 번졌다",
+      "source": "아주경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1Rc2gzWFlvZ284VkJ3U1dwa18xWmFxWHZwUHVBTmhLRmJiOERua0Ewckd2V1NTVW9hdExLWW04VnRxdHExZFZIT2FON050SXZxVFVBenJ2V0vSAVhBVV95cUxNUXNoM1hZb2dvOFZCd1NXcGtfMVphcVh2cFB1QU5oS0ZiYjhEbmtBMHJHdldTU1VvYXRMS1ltOFZ0cXRxMWRWSE9hTjdOdEl2cVRVQXpydldL?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "美 FDA 장벽 넘어야 할 K바이오",
+      "source": "한국경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1DMTViUW9QaDFXYVFBT29kY2lwRUNadVVwQW1ra3JaZTJIU1djRXN2N2RqSVNXWU5BWFhxOWxmWC1qSGFoT0hhRmYweEVzUmdiU2RleWwwR1FEUdIBVEFVX3lxTFBENXFEcktrYkwwT2NLQW0zMnVKUFAwX2NMRzRkTm1najZ1SVdJRml3MkVlcC1UekIxSUFVR2Zza0FmVGF4d1R3OC1zX043OUctOUVjNQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "삼아알미늄, ‘K-배터리’ 양극박 핵심 기지로 우뚝… 북미 시장 정조준",
+      "source": "핀포인트뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5CczAyOWxFZjB1NGRnZDVlWXpIMUxMZkJyZF94cVpaLXJ5TTEySnpENWVOLXAtVTVvbV91eXFJM1Z2OEMwN0lsUk1tM3RjNEpLYkg5VFBFR3pLb0dFQ0lQZ3JqVkt6M3c0OFExV0dVTkZXU1nSAXdBVV95cUxQSFlPWDNxSEQ3M0VpU1BHaEJZNmtodmVnRVhMUzJpMXUzaWhRYThPcGZMMHRvREQ4TUE0MktaNkZxN2Nia2hCV2k5c21jeUZ0OWd4RHZUX1gwV2NsWWt5cm52dUg4RXREemhfTEs2UTJkeTBzbDB3bw?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[창간 11주년 특별기획-조선·방산산업 전망] ② K-조선, 고부가·친환경 세계 1위 ‘옛말’",
+      "source": "한스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBfQU54MlZRR0ZDRHdYeHhLWG1faG5oWDN4bkxqLWFDWW1OUXFkVEg4cnUxT0c4TTdJaFptTE13MDVVckhUSTFYbkxPWkhyZzRCdHp3NUlpRUFHZ3NteVU4QWF0eGVxdFFJd3lpa20yONIBb0FVX3lxTFBfQU54MlZRR0ZDRHdYeHhLWG1faG5oWDN4bkxqLWFDWW1OUXFkVEg4cnUxT0c4TTdJaFptTE13MDVVckhUSTFYbkxPWkhyZzRCdHp3NUlpRUFHZ3NteVU4QWF0eGVxdFFJd3lpa20yOA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 그룹 기술 결집한 소형 데이터센터 'AI 박스' 공개…글로벌 공략",
+      "source": "지디넷코리아",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBIbDlsekl1WlhoTHJmMUF6b1ZoclhBQlkwMTZJQXJ6ZU1YeXBtOWZ1am5KRkVySG93aFJBaEZIeTFjNTYyUVNDaDJUU3ZfeUpieXkybHpB?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LGCNS, 6개월 내 구축 가능한 인공지능 데이터센터 'AI 박스' 출시",
+      "source": "비즈니스포스트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE96M01Zci1qTklHNTZuVUFrWlpBampyVkd6cFdZUXFHMDZFNWZXeTJPSjk5QUFta212MHRfbG5ILTRqU1I0ODJsUG9uMjRLTUhjMmViUzhvbXJHZDQ5NW9XRHB0U01PY2wyX2llOVhtQ2dfOTg?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 6개월 만에 짓는 소형 AI 데이터센터 ‘AI 박스’ 출시 - 조선비즈",
+      "source": "Chosunbiz",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxPTHctQTVkU3NsWVZJa0ZjWm9vNEoyOE10VElUWWZPbEpZQlRPbkpyX3N3c1pjZ2lPNFR6bnZHVFVGa1F3NzNVclVXekRqTU43cDh0S0FqQVl1bi1wd2ZHbkVkMG42SjBNVDN4NW9RSWdndDBWUWwzMlA0LUFVTmVMeGpR0gGWAUFVX3lxTE5nWnJrNERhOXFlSm54a2x1UlpNdE8xY0NMc3E3RlRmaW1Ka2hraEFrNUN0YUEwYUZ6Sm8zbDNKVTlPa2pVdUMxNnNKMURQcTBad3hQR25YbWxvcjJVUk5uQVNqaEQtMWNCdUlEQmlCY3JkUDRiQzQzcHZaaVhBRmYxVFJUZVlRR3YxZ3R4RG5KLTVGcFFXZw?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "컨테이너 1대에 GPU 576장 … 6개월이면 데이터센터 뚝딱",
+      "source": "v.daum.net",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE5ob3pfeUQ5aGxpS0NwR1dYaVlrYTQ0R0lTTy1iU1BRS0FOd3BlaGVpcHNLOWpBbEZiYWd3R1RjUXJwS280WEE?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 소형 AI 데이터센터 ‘AI 박스’ 출시…GPU 576장 수용",
+      "source": "한국금융신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE5XYWdnUUttcTlreGtoRHZySlFRbGlnTXNQMzdKYW9COTlQUmFseUh1YVNvN1pacGR4WFRrUW5KVXNCSzZFZ21pNkVEamRCUUNqV0IyU0NoYVh0dGpma2k1QzJQS1FoclpjQWllVi11azF5Tm40amoyMTJ1UHg?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, GPU 576장 수용 ‘AI 박스’ 공개…소형 AI 데이터센터 시장 공략",
+      "source": "일요주간",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9VdURYWUlNcGRZdktKLXZuVWNyd3ZlYmRYSWZxQ2xrVGN2LTRuVGNfNGRNcGI0LTFQblV4eG9ybWJKN083TXhBZUpuVHcxSWp2ejZ3UzVFSmlySEgtUkdSMFB4M1drWHFHMUtjbFJDVnRBdGhBQ2c?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 6개월 만에 짓는 소형 AI 데이터센터 'AI 박스' 출시",
+      "source": "비즈트리뷴",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5wcHRpLVhZQmNRb3ZKdUdpYm5Kb2FCR3hJTTMxdFJMa0NIV3Z6bTZScGJrTHp6bThxYTRSaDhSYjJ5Z3VRV1B3cl9YQ0RxVFNtMERTVVJQd3ZIaDNVOFJrUFo3Si1VR0ZvMWI2X0VDQkQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, GPU 576장 담은 이동식 데이터센터 ‘AI 박스’ 공개",
+      "source": "AI포스트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBsa2hQRTV2NUFHd3pfLTVxWTdCcG1TRGxsZDBfcElsM2JGVjlRWWtPY3I2M3Z3NTBCaUNUTWgwUk9kNEtwaXpDdEsyRUdEVnZRcmRZSkhvdWNqb2xaVkdoMjN5Uld4VWN5Y0cxM01n0gFyQVVfeXFMUENpT3hncjlmV1FkLXZtS1B0eXVTaVB3ZVVPOXZhMWJkTmVqUlVqa2hpdWh2QTBEMnNDZnpfT0dlLTNubVg4Y2lEc0RZSmpOZFRvdjlBN0l3VEZmcWh2OTk1S1BteTNlRWlmN1oyMjFHdUxn?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 소형 데이터센터 'AI 박스' 공개…GPU 576장 수용",
+      "source": "데일리한국",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE0wT0tfOHg4UGFZSXBwbTBQMm5mN0xnOEZBS2lsQVJTeHhIaGliajlCNFBSZ2cwYktlZ2xwZy0xcTR2TnB0cHZrSTBvOG9sejY2VHJjVjNjbjJHTnBYRGV0WTV4WUx0aFFBYm00TTdETdIBc0FVX3lxTE1UUVVYODkxdGhlMEZFUGZKWnFQYklqUmpLUldyc3h3SFBWbWhuaUgzcDRHa0ozc0VUNnBZUTg5cUNBV2VPMjNwRGp1YUx2YnBlaFpUV3RvclFpU0paMFY5RkpDeXJDU24zRXhvY1ZZcXJjZms?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 6개월만에 짓는 AI 데이터센터 ‘AI 박스’ 출시",
+      "source": "시사포커스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1YMUp0X2t1TVo3a3RUYXpQVmxnU1JLLTk2WnVOUnlmWTNMQkY3Uk9aTDNBN0hVdGNqV0VYVWtRQ1ktUzhGQngwc0R1cG8xRlNMc29oMy1CYlRleERDaGNESHlmbTJxYW5MZkViY3NnVQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 컨테이너형 데이터센터 ‘AI 박스’ 공개",
+      "source": "한스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1xUXEtUTJ1TkNmcXhEQWk4R243eGFhTU8wY005UU9say1pU2ZpLWlnby1jMkVYNmZRMlBMX0t4dW9yRjZ2NUxwWno3dHJrc2p1cTMwaVdsdjBSbHJRaVdkelVnaUU3azR6djBF0gFvQVVfeXFMUC1ibTJtMUUzOE90X0RmdUJNZjN5RWtFYTRMdUwxSmFobTl0UXN2VkpSaDhZUTZzc0stZzdZVGxuckZxam5ETzhnaFdZNkpLcUYyaE9UWnR1WVZ1SjF1WUQ3V0lSUkZlNGFadUZwbTNj?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 6개월 만에 구축하는 모듈형 AI 데이터센터 'AI 박스' 출시",
+      "source": "네이트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1LNUU3MWFybDFDa2VGajJicVFZaC1odFo4bTVQNDh5NDZQN252ZG5pakZkLWs2OFk0WUFOYk4tbzZvRE9td05NUkM1NFl0N0I5UjRr?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 데이터센터 구축기간 75% 줄여주는 'AI 박스' 출시",
+      "source": "생생비즈플러스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5GQmNwZUZGMUlOSXl0S2hHbDljUU40Z2dxcGZlY1M0QXNRd3VsTDhyQy1LVHRXRDNXUTJreGhnRnhicXZEc1ZPNTVqR01hNEt1NHYyY092SFBSQlMzQmQ4eDJjckExeW1RcW5OSw?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "LG CNS, 컨테이너형 데이터센터 ‘AI 박스’ 출시… “6개월 만에 구축”",
+      "source": "한국면세뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5HWTVBam1hOFFBbHN4UzVNcW95VHVrblVLdi14UFBxQjd5T2J2aFFzbFpPUUt0Ni05ODVsRmpGUXNkLXVRR3EyVV9WYjMyeFE2Zmxua3M0NTVMWERLYTQyTEdRclRsazdRcFE?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "단일 컨테이너에 GPU 576장 수용…LG CNS, ‘AI박스’ 출시",
+      "source": "IT비즈뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9XN3NHU05tRDFEZWUzdzhZQzVEX0ZSNmJxdlJRQkY1dUd0Ml9xbHFEb1kzQ2NHeVh3NnFIYUhCS3FGdndlQl9JaUVENmRFSWV5UkZQaWo4NndhRnphNEEtZ3NxUkxoMURzOFVRRw?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "컨테이너에 GPU 576장… LG CNS, ‘AI 박스’ 본격 개시",
+      "source": "sedaily.com",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE1WY3luVFQwQ28xSENOcTVmZ1NBTnhmT2IzNy0ya0lFaFVHaDZRclBJdmRFUUlHSXNKa2ZPMjVyUXRuQnhCTTU2bFY4bE8takE?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "컨테이너 박스 AI 데이터센터 나왔다…\"GPU 576장 담고 반년 만에 지어\"",
+      "source": "네이트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5pWEtFaG1hcTRFaTVDSnE3d1JnOFFDQW9rUG9PMjZMcnZoODNTRmo1Y01fSTEtZlNXVVN2V2EtSHd4NkV2VUJFUm5ZYzljb0UwZzdz?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "로봇 자동화, 공장 넘어 매장으로…‘리테일 휴머노이드’",
+      "source": "산업일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiREFVX3lxTFBSaDVXMlRWeTlfUkVScEtMVFY4bmRvdktqOEE1YW1FS2RDcEdvd2JXNl95Y3NFNXliUGxKNnFPMmpScTZG?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "뉴빌리티, 휴머노이드형 서비스 로봇 ‘빌리’ 최초 공개",
+      "source": "테크월드뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5hZDVmczRySHhjUmJsOG9rTXlMUlR5U194Q2RxWm9ZYUxxNndUTkdZTDF1eG00NFhtQ0VjaXA5dTYycVIydDNJQXkzbUtZYk5ONDFhaXpmVEZSNzNwcXlVVDZSZmRZYmxN?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[포토] 티로보틱스, AW2026에서 자체 개발한 휴머노이드 로봇 최초 공개",
+      "source": "이코노미톡뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFAyMjZidm9EY2dxWGtfbHFpQmVjczdkc2FmNEVfODRqTEVuekN0czViZmd1eHByUEJrdFpLbjdnbmlsSFlEOWNfYXpmV0hZRU5xMk90SjJ4UW1FYnBqWU52amFzdzZvM1Atd3gtNA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "내년 휴머노이드 로봇 시장 급성장⋯산업부, 3대 강국 도약 박차",
+      "source": "이투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9hZHJJQlo4SjNOd0c3OWM2ZUtLUnlKaVZmcUhtSFZyU1J5bVlQN2t1YUVrTk8waXZvdnBxZWpkVmJWelZEWVRHY3FwQkxiekRlOWs5OA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[아이숏] 춤추는 중국 휴머노이드 로봇 유니트리 G1 #shorts",
+      "source": "아이뉴스24",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE1uLVFTOHc3YWh5ZUZZYVlsOFRUbnJwRnRFcEF1Sm5hS3hkMklyS1VyMEFZaEVYWWhHZDRqVVdSZXlzSU50a3d0RktjSE4?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[AW 2026] 한국전자기술연구원, 휴머노이드 양팔 작업 기술 시연…산업 공정 로봇 자동화 기술 제시",
+      "source": "헬로티",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE1FWUI3cWZwSTlpSlV2NnRIalBjcWV2aWY5LVRxYk9td1JrcDdVNm9aVWpUZUhNVW9fRE9zQVBjaE11aGpadmlBdWV6U2FvMjg0VVphR0VDV3dmSFc2MDRZ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "현대모비스, 휴머노이드 아틀라스에 그리퍼도 공급한다",
+      "source": "테크월드뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1uY05xNnhIU3FKLWUwbmZmR1hNRjFmQkgtampwWVpWeXNHcHVTSmg5bW1CVXpXcnFaMGxxNmlGQ0xDTXM0YmFsNzhwaFlEU1gwUlpWaHlnTXIwbk9ZTjRKMkNwZzh0NzlR?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[아이숏] 중국 휴머노이드 로봇 레쥬 쿠아보 4프로 #shorts",
+      "source": "아이뉴스24",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE1iYTJuMEdwQjYyaVk4ZTBYd0xoNWtIWndSRUJ3T2Y5TTVyZG9WekFHMnltU0hGLXlzQV9lSHZWcDNRTFE2eGsyNF9ieGM?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[아이숏] 현대글로비스 보스턴다이나믹스 휴머노이드 로봇 '아틀라스' #shorts",
+      "source": "아이뉴스24",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE94cXQyVVNQMTFUYW5WY2cxRC02OG0tcjJKV1RNMlUyNkY0bHdkOThobEoxa2cxWVJQa2VJX1Q0TWVFTC0xeVdsNk9GLUo?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "美 첫 첨단 원전 승인…SMR 시대 막 올랐다",
+      "source": "한국경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9BRVdjTnlqR2hQTGdNR3BXWDZIWnlJdXU0Z2tDZllOa3Etd043WS0wTkxUamVINXlDTTZfR0NqTGxtNjROYzViY2RoR3ZEcFdCY0doVF9RTjY1d9IBVEFVX3lxTE41eUk4T0JMN0twUjNKcG1mRHVNWUFONG5uaDcyQ0kxR0w3ZEQ1WWZUSjNUQWoyTTNKUEFaWVNqenNPdV9SUzlYaVh2MVYzTnA5R3M1TQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "美테라파워 SMR 첫 건설 승인…SK·한수원 투자 결실",
+      "source": "전기신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9rdl81SGlaNTF1akluRUhRa1VRVXhBdm9rRDBXS1JTTk4xWFA1UzJBb0pvNG9qQzU0aUloazRiTG54T04xYVA2S3VVdGRiWmpHcm5oWGUxUGxaWkdWdFhZZDhWNnBFQ2kzaDJadNIBcEFVX3lxTE1uN3daZ3VUVks1cmpHa1RlNm5POEk5OXUxVmVwMUFDbmVVa1hKRnJXWnl5bVJ1VTZwT2E5OEJXQmZKY2tVWTFsWVBXR0xnc2NDUGF4aHVIX2ZXWWhtbVh4NEVlWGNHcXdCSXFGR2d5M3g?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "빌게이츠 테라파워, 美 첫 상업용 SMR 건설 허가… SK이노, 한수원 수혜",
+      "source": "임팩트온",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5ORDR6aFhiYWc2YUZzMnBXSkdta2tVNERPSnpkNVZJYU0yVnpvYUxVNFVia1lIQ2ptQTRSSW45dGJSV1pFWjVsSWhYNWxXVGVROXZya3o2OVdIOWJpRGRXcHZ2QWI3aWhD0gFsQVVfeXFMTTdYZ2hGUlk4OGxwOHpGaEw3bGFqVnU2RUthc1psaWt4VHRrNGpRM1cwVXl5bFpTdW5HRmU1T29Jb3VwVlFGMWtibGxINGo2eW9tc0RMUk1CTG1lMHc5RkdPeWEybnEwVXBFd1E0?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "'SK 투자' 테라파워, 美 첫 상업용 SMR 승인…차세대 원전 전환점",
+      "source": "연합뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9hUW1WV2NQQ3AtdHVrOXpZSHhtWTY4cmctdU5Sd1Y3WENBZGh4Tm9CTDE5WU56Wk1rQ0lxNDhjd2paTmo0VENydEZvejdON0t6cHVFbnFVbGFIQ1IxNmlXV9IBYEFVX3lxTE9hUW1WV2NQQ3AtdHVrOXpZSHhtWTY4cmctdU5Sd1Y3WENBZGh4Tm9CTDE5WU56Wk1rQ0lxNDhjd2paTmo0VENydEZvejdON0t6cHVFbnFVbGFIQ1IxNmlXVw?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "美 NRC, 테라파워 원전 승인···SK이노·한수원, 글로벌 SMR 진출 '시동'",
+      "source": "서울파이낸스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1Jc0xnYUt2b3FVSUxrZVE1emt0Yk1mUHg5NkJYeEY4dVJLNGZsMVNPTTJRRDhOcWJkdTlfZm1NQlFBeWlqTENybnpFa01NMnhqUzNPa25PLWN5cm9hRUdXNWd5YzRVOGl2Qmc?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "[에너지이슈] SK·한수원이 투자한 테라파워, 美 최초 상업용 SMR 건설 승인...이론에서 현실세계로",
+      "source": "산경e뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBObXBsWXJ1TDAtTWppUm51eUJDR3pKenJlX0UwaERhRXpsWTBoZF9oU2ZQQ09vNmE0MHZpQW9oRFBRZFBUMmQzTVlBSlRlaTZlX0NsMG1xWFFpMm9GRmd0TWVKSFFKMzQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "빌 게이츠의 SMR, 美 최초 건설 승인… SK·한수원 AI 에너지 선점 가속",
+      "source": "에너지코리아뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5oQm44SC1OZnh4NGlkRUFGUWhCZlpQYmlkZE0wU3g1eDdEY2loNUp1aDJkdGNOOERHQ1BUOE01Ql9wcFJydVk5NHJUVUx2RDR5QnowZ0ZyampiR0QxODQ1eTRoZHNRUFplemNYaHNqa0M?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "SK이노 투자 ‘테라파워’, 美 첫 SMR 원전 건설 승인",
+      "source": "디지틀조선TV",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9NbmNoaEhnRnY2RVBEYUpDLTItY2hRd0tWZjdoTVE1R2VkU0hGUnZpLXBQSnZuSWtHUXlxX1k2dTh3Z0poY1dsbWpoaV9ESUtXV0hndl9HcERtWkZ1ZWI5LXgxa0NTbHpZWlpZckppMk8xR3FzendCV3ZVSTg?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "SK이노·한수원 투자 테라파워, 美 SMR 건설 승인…10년 만 신규 원전 허가",
+      "source": "팝콘뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBrSkJUSUVFWjdsYlRGNk1SRldXTTkwSzhVbWhoM24xWHZtZ1JyVmJCbVVUTnZkNk1tSFRnSE5XeHBqQ1E5bFNfMnFOdlQ1ekpkT1Nwc3FxVHE0SURXOFZkZWtRTVl6MFpsNzhZM2Fn0gFyQVVfeXFMTVJnVEJfbW1tWGNNYTNQcXNVU09NaUtVTzBSRGREc1hmaENFTEJhM0RucXgyUVhwZkNvblg5bEN3LTJGQV81YTBCcTFDa0dxb21YdkpuOGZFX1VLWVphMWQ2dFd5d21DR1VjZ1pxSnNBN19n?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "SK이노·한수원 투자 테라파워, 미국 최초 상업용 SMR 승인",
+      "source": "그린포스트코리아",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1yRzlLdHJGTWpGNjhhOUJCRDZ0Nk13TzdHQnJkS1didmFEc3BvWHlNUDhFTkNIdC1DcW5VdnFrRGdxczBMbzFpR3d2YmJnNjB1REs5TFRqeWhBNEl6dzJzZ1k0T2VocTR2bUFBWEM4UVJkWjNrdVHSAXpBVV95cUxQY19NQ3plbUtzMXlZel9tOHNCSXZIQWhFNi1rWVNWVTVFLW9Jb3NySVI3Tk5fUFJGelA0OWN0dlkwc2o2RFB6a0FFX3BlRGZvU2tvZG1Jc2JnZ3NZczlhUU1iSXpGTFZGQm5pYjR6RlVURDJlNWJoM1hGQQ?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "과기정통부, '양자정보기술 백서' 발간…기술·시장·소부장 동향 총망라",
+      "source": "아시아경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9tcFNIUG44Q0JOOHNyeXlIZURwX2hfWVVzaE5wYzdJNTdWXzNwTFJDZGw5VDZ6S0wzZ2dMRll6b3VDeFYxQWlJUEY4WTdCZkpRbTg1RHZvYmFKRlJ1cThpNA?oc=5"
+    },
+    {
+      "date": "2026-03-05",
+      "title": "유니테스트, 반도체 검사 기술로 ‘꿈의 에너지’ 페로브스카이트 시장 연다",
+      "source": "핀포인트뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFB5NktMUVlta3ZJOWQyZmFEeEN4SzJQM0RIa3MydUxHXzdiT1lfc2VpZ2tpbzNOcDdMSnlWNHQ0WUZDcU9sZ2hhLUNpQzExQlh2azRiaTI2OWZTcnZ6MzNrTHo3Zk5nZFRuWDVvUjBQaU9KTjTSAXdBVV95cUxNb2NieDdNQlktVjZCM0ZOMFRPTDhNQzRGUnRBYUIteTRJVTRyZ19xR241ZS1aa011MnBWcmJmUVNzQnVLWGdxQlhDdk5FYVdsVnZDcnI3TWJtcDFmYVUxVU90endjWUpvUW5PNlNtV0tDdFF4NXl2TQ?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -27,73 +706,136 @@
     },
     {
       "date": "2026-03-04",
-      "title": "코스피, 글로벌 증시서 최악의 폭락 이유는…\"종목 쏠림·유가변동 취약\"",
-      "source": "연합인포맥스",
+      "title": "코스피지수 8% 이상 급락으로 한국 증시 거래 중단",
+      "source": "Investing.com 한국어",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBNNkpXT3FWUGVkVVVOZUR1RS1iY2xyRnFneU5RZnFDMllVTy1pQlNQdm9nTEdueFE2ekczUzFVNzZvQmhnenhuZDI0cC1XeXk4NkpzSFpUd25NLXN5QmRZY3RENTVJdzZuS2pDNW9JUGw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFA1OWVVdllZYmEzc2hwZ3QyaDM1RUx5S0ZvZm5mbXFJclI0aDdTNExzU3J4UXhhOEREODgzZV9nbC1lWGk5T01RQXBCQUlTVmFHNnUwMGh0VHRiSXJoU1lMME9mR1hFaFVkUU14X0hlSGE?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "한국증시 장중...코스피·코스닥 '급락', 방산주 '혼조', 원화 '절상'",
-      "source": "초이스경제",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE03VFZiZjdqejZvei1rdGlTcWpfRmx6MURMMG5LM25NNjRSTmRTclI2d2JwdF95OWNzdG9SWGpQOWxCaU4yZEl5MVc1RUpoXzFTTERMRHk1aWlkUkNsMG8wOFZ0QkF4Y216b1BJZ0NySdIBc0FVX3lxTFBjNTN3RF9LYU9SeWNiQTVFSWMta1JXTHktaTYzT2ROazNVT1FqaXJsMWtiTXFnVkRmYXhTRnlmcGR1T2g0ejZwMXc0Q01yY3FkYjN2SktwR21SVEVBOG96ZzVYeHZLbGhMZk9hcGhxZ09xenM?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "전쟁은 중동서 발발했는데 핵폭탄 맞은 한국증시...방산·해운·정유株마저 꺾여",
-      "source": "생생비즈플러스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBZOE1vcVQtQktuT3RTeVFxNFBEbDltNTE0UXEtVHhxcXhaSW5hZ2stMXpkVlJwb1JJeXVpQkg4VmhLenB5ZWRrMHBscVhyRGkwbDBUQjNHdFZaY1FKUURxQWluTk43aDgtYzBBNw?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "서킷브레이커 발동 이유는? 오늘 한국 증시 급락 원인과 시장 상황",
-      "source": "EBC Financial Group",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBhZUZsV2F3WnhwLUw1dE9SWFNsNXZkQks3SjF0TU1EY3c1b3RmSWdFdzR0VnRxbnU2czJxVWZSR0FRa0hfYTVycXVMMlhaZXh3MXc?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "중동발 충격에 아시아 증시 '패닉'…닛케이 3.61%↓·대만 4.35%↓",
-      "source": "뉴시스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5wZDQ1QlQyYTlpdFZFaXhiMXJsVVBNUUJxSlpEdmdfSEg3cHNObjBteUtWOVpIWFpVY0lCWVZ5NzctV2lHNXExZ1lsUjlPQ3RfQXRhZ0owWE9ZS0JlZG13VdIBeEFVX3lxTFBMUVBjaTJpXzFyV0hBSy1kUjFiZTE5eVFZbW5jOGRWOGVRMHNTZFc5eUQ5aUN2NVhDSUNoRVdVcndMcG1IcUxUbHVEYW9NZ2hlX0pmZE1ocnRjQXBoLXRxaE82Q2pOVmhNSVpOWUpQcEhiUWFPV1F6bQ?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "9·11 테러때보다 더 빠진 코스피, 왜 한국만 이러나",
-      "source": "sedaily.com",
+      "title": "비트코인 가격 분석: 한국 주식서 자금 이탈에 BTC, 73,000달러 돌파",
+      "source": "CoinDesk",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBNLTZyQlNOOS1mUDZkVENSQXg3X182VVBXbG0tRE5mNUZGUXhRRUhKbm5VakZJbm1rLUQwOXFfZkFjLVhSNEZiSFRSZw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPQUk2Nmp0dW50Slc0RzdjajlfS3M0eWE3WDdCQTJSamNBcE9LVFZiS0JpMTYzNExsdFo1UEF2R0dRR29EQURSRUxUVUY0Y2lZY3F0TGNFS2Y3Ym5TNm5jam5SQWRHaXphYmU1bWZfb3dyTC15Uk9qUkZYeGdGMjByaWpLajE4MkF3b2FQenFPMGQ0SFN1M0tMZVhNM0ZJczgwVkdEaTJaS01mTHQ0SjM0T294VmVHaFIzNVhldnZCV1FyVjNuMmc?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "중동 전쟁 충격에 국내 증시 패닉…코스피·코스닥 급락 ‘서킷브레이커’ 발동",
-      "source": "산경투데이",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5pQ0JGR2QzWVJVdC05ZnBQRUlSdFJ0R3U4QlMzRHpOUWFLS2tRQTBjTHZzOUxwZFEwOENXMFBUUUhlRzVnVzRpd2V0OG1mS0xHRmo2NmE0cVNSbE9Jclk3T3V0bWZuWjZidWg2QmZRLXLSAXRBVV95cUxPSUF5eGtsbWs0dlp5STdtZVd3aHJETU9PZDREM2JMWTVLVFFDLTJON3h5Nk9SRUN2aDlFUVg2aldJWUQwYnQ1WnNpQ3g2N2hrbXROWDZpb0V0dmZYa3YwZzFpUkVGbzgyRUI4eVh6TlgzY3BnQQ?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "환율·유가 급등에 인플레 압력↑…한은 금리 인상 시계 빨라지나",
+      "title": "한국 증시 유독 폭락 컸다…한때 1,500원 넘은 환율은?",
       "source": "v.daum.net",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE4tR3g3SWxDXzV0Y0o1RDRVaXFJb09LYUIxdEVQOVE0RGNwc3c5OEZuVEtQOGdhM190aXBFTE00WGxUNThIVk8zQXNsSmtRTlk?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBrOE5qOVZKM2Z1aTZ2ZlZKcDJSVFpyblZzNTcza1RZRDUtb1QwZXdoYkFzQjlVWVFUdm9mb2xhMUNYX2o5eGdHbnVOMU9WY2M?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "유가·환율·금리 트리플 충격 한국 경제 시험대에 섰다",
-      "source": "브랜드경제신문",
+      "title": "[글로벌증시] 미·이란 접촉설 속 상승 마감…나스닥 1%대↑",
+      "source": "연합뉴스 한민족센터",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE8yWlR3cm1ZMXc5YnZ4NlU5elBEa3JVejRIM2xJczl3NENCcFpSUkhQREFTWEhZTW9zdXBXdWVLN2p6LUdpTDgxbkxWT0M?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE1ubmxydTkyWi1aZi1Dam10ZGlwb2JBbldqaVNCeDA2MUNuLU5ScF9zMXMwUU1zQ3gtbmtRVzlCN1J3SGplQkVVbnJTdlZ3ZUFjeTVxdFlzMXNiMGlOWWU5Nm91N2pGeFpCZm15b3Z5N2dWbmlv?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "전쟁 중에도 뉴욕 증시는 올랐다...나스닥 1.3%↑",
+      "source": "조선일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxPeTJkUm1pbzEzNmF0WGk2NGoweWZPcVpoVklBb0ZEQTNtS29La19JdXllOEEycUYwQ2k5ZjJhQmxTOXdsSmgyTWFTb1NLN3M0V0xhMWNaeWdPWjFES0RJZkVGeUwzdVhhOEVUV2JaWWw4SS1mVUcxSXNqbWlOOUw3aXhtTmNrR0VkMnhHMVZGcGlyaWt4ZkpCRy1UXy02UdIBsgFBVV95cUxPV2Utc2QtZlVHZXNNNkJUVW4wUFh1UW5sS0Y3LWlJaXR4NzdaTlUtVjNobVpqS3VDV0NxZEtkNTVfakNFd1BTbzdfU2xPaUpYaVNHVmlRZVBBUnh3cm9NenAtRmRWOUlZdUxTQzlEQzVHR1JqMlk5SWYxYzRHQWs5Q192SnVzd1FFMXRIai0zUmdneHk2bFpaSUhZY09hVUJhMHV1TzZnTlhfbXlMVDU2dHp3?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "미국증시 장중..나스닥 '급등', 美국채금리 '상승', 유가 '주춤', 천연가스 '뚝'",
+      "source": "초이스경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5PVEhPZnZ0djZ2VHBwQzdvWWo1Q3hYX2s1TlEyQ1ZiSDltSlZ4MDIwUzhWVUpIMXg1RU9mUHM3c1RsQ1c3Z1N5ZF9xWHF4am55ekF0TGIyRUIzT1FValJkRzFGVnZ0VlRHMFJGclFKRdIBc0FVX3lxTE9LeENjaFNucnJMVFRMbUlQbzFpYUZ0eHJZUzM0RjlnUjF6VHlOQWU5YU5vWVNpXzFQVnBaR0hSMWhnUEhCNXhpbjcyTjlkZHVjSzRtQ09jdVoxLU4wbGRNU0pHWk5CTFpwZEZWT0hHY3pzbGs?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "미국증시 마감 60분전..4대지수·빅테크·SW·금융·디지털주 '활짝'",
+      "source": "초이스경제",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9RTXFvVWVucGtfTnd0RE9BbW1rYVE4RUEzX1IwVjIxdng3eFE3b2VsdmJtVThOU0FJOHVxS0NFdWhBbW1hUzZSbDhJdHNPLXZxdm55NkJXWHlwdm9fYzNpNURpX2ZNdW51VE9Jc0xvQdIBc0FVX3lxTFBDMEJvR25tZ2ttVVp0Xzc3S1pBaGdOMllYTUJrWWtVZl9xVUhkaDYxVEZ4bEg5WkdUY05qOGNMR2hzeGN0elQ0VHl5bHVsUFd4ZDBDWVFxalFaSTI3VXdYNU9lNWZmZmVRaU1SS1FsbVFERGM?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "美증시 나스닥100 '급반등'...MSTR · SW 및 반도체주 '껑충'",
+      "source": "초이스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5FZWVVNjFxdi1LOElnY0F2SlpmZEJJTnNYUnNCbV96cTZqcUJuQ2FPSFRwN1Y4dVdCcExIT2l1V2dEdmZoMWxQZjhfNUxrcERFY1lpMWlwWVNCZnVmUG1HQ3RlUnY5VE5WMER6S1pFMNIBc0FVX3lxTE1sYXBHcS1sRFNaM0I5Q3YxbGpXM0pRWm94MC1VM3Q1MHhYeXY2Z2F6WXFkZllJMnJrd09XN2REbUV1YzlBWkV2WW15cWRVcU9vQl83YVlWb2EwVVJTczBNMVlMeTQ5Y1dWX2pkV3lDUEctMmM?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "양대 호재 속...미국증시 '활짝', 테슬라 반도체주 '껑충'",
+      "source": "초이스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1hWklxV2pyaEdiZktPeFdSVUZjeGo1SnNnVDdrTHRmZVlXRTVfZl8xMm5IcDJqdFoyUExQLUJSaUlpa3dGc2REa0hhbF81S19yUnNJLUdtblBRWTJnUjgtdmItak5Hc1RBOV9hYjNDRdIBc0FVX3lxTE5kTTJDNEFheHBlX3VDbVFScWJPM1dwOURSTkpSZFN4eTBPVnZaaW9iajlyYjIyY0tSdFJ4a1lRcTh1bTFxNWpYUXQ3NDY5MEZhNWU1S1FBeGVoajVVMkI3QkFZVlhhUFBTYkdBV2hkWncyVFU?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "뉴욕증시 장중...나스닥·엔비디아·마이크론·테슬라·IGV '껑충'",
+      "source": "초이스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBBR2lIU0psSVVPRUZxUXp5eXdnRWd4bEpoeGhGMUpYUUFQZlVKV0k0WjQxTW5ld3dqV0dhWUs2ZEhLYkZpUmE4cEdrSVZWY3hBaFZ4MUpabUc0a0QyOWtTc3ZDUTNKQ1RiWHlFbTItONIBc0FVX3lxTE5iRnQySVpkcVhwNVBJTVA1V0FoOTM2ZXI0dlI3anRZTnNVMU9lOU1KOHVKYV8yczQ1N0hvSndsX0ZCQXRBUEY5WlpWc1A4VlN6Z0JvcG80dTZsQUg3bTRDNVFzZWVFeG1BT3EyNnZJQV80bnM?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "중동 충격 완화..미국증시, 반도체ETF·샌디스크·마이크론·인텔 '껑충'",
+      "source": "초이스경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBDOWZHellhallKMm9qSFZlUkw5NHBqSVZSRG1lSDY3VTJ6WnVxREpTbVlJMGFRSTRRSURZWUthVlQ0a0VWLVVERFNjV3F5WVRnNGdCY1BKZVFBRFhvQ0ZNc01SVy1nR1lFZjR5em1IUWzSAXNBVV95cUxOYU1zUndnbnloa1VEZlpzNzdWVTBCWlhXUElKMUdFcWpTb19ENEtfUTExZkZCZTN0OGdaYmh0Uy1YMGFvekFxN2Z2Mko4cVBFQ0JwYnFZejVLb1VYWGFpWjNBb2FwR01rWHpJclB0X2ZBNVRV?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "아증시 일제 급락, 美지수 선물 일제 하락…나스닥 0.72%↓",
+      "source": "뉴스1",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9HMDJ5dkRqMTMwTzVZTF83UFo0ZmJtYkp1V1JFYnQwbW1veEZUWE1pVlhwaG1KODh4ODdJd0dGeF9tZkpfWE5pcUtUQU04YUVEVHVIUWY4OTM?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "유가 진정 조짐에 매수심리 회복…나스닥 1.3% 상승 [뉴욕증시 브리핑]",
+      "source": "한국경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5iVUpmb3pwYW5PSExPQXdJaXJ3cU5QRWl0RjUxTml3OXc5MGF6cklFZUU2RTZTRTRnLWxFeHdQajV3aVRqZFluOVNLeUJPYndhbkRua0xuX2U4UdIBVEFVX3lxTFBzNFBYRzg4bmhqWTVZWUk1Mk9ZeVE1VS0zV1NkTWZpM2M5X1p1WEZvNzIzZXNlNnhwMHVralVxNll4S1NHVjJjSm5KQXZldWJQMDBNaQ?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "뉴욕증시, 상승세로 마감…나스닥 1.29%↑",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBuMjExWGZlcElDODlPQXp4clRWa3JsTXVHNXRVWjhDRUQtaUVIaW9tUzMyNkJCcFFWQXFPREFfZmY1SFV6N0lheENESXl6SjdD?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "뉴욕증시, 상승세로 전환…나스닥 1.45%↑",
+      "source": "블루밍비트",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBwQlZSVVFsV2xYM2FENHFWWFlqNHFNQkQ0dENCd3BoU2l4alhYSWxhMFZBaWgyeDNZNmJiay00N2Y2bzFkTGJBQ1kwa3R3SHkz?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "중동 긴장 완화 기대 속 미 증시 혼조…나스닥 상승·다우 하락",
+      "source": "더페어",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9iV3lEcUZZZEZ1eUFaTldoLTEyTEZzb25iRlEycUEtbXQtM2pmRUhnQkRkUTZKUS1jNGRBc3hQY3BwR3dZRUNGb3hVMVNfeURJdXJkLWowWUtBWl8wT21oN2lkR2xoRkNaMlRjcU9PZGzSAXRBVV95cUxPLXpibnJVTXN0NlVYc2NHSnYxSHhYQUIzdlpMZTRmZnVGal8zNVoyMFFJWHdYQXFqeURnTFZiRjFESVFHcnkyWnU2djFJRnExSU51dm4xR2N1blRQSEp3aFNyWWthMnVxVGdoTU5vZWdPeURsdg?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "환율 ‘심리적 방어선’ 1500원 한때 넘어… 유가-환율-금리 3高 경고등 다시 켜져",
+      "source": "v.daum.net",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5fNVY1c0xoQkhwc1c3R1R0SmlvM2psRVdSS20xbTVoYzZkSk9NbEhvVDZHVDRnQUVxMmJmbGJWb29DTDdxU3ptMjNLR3d2N3M?oc=5"
     },
     {
       "date": "2026-03-04",
       "title": "유가·환율·금리 '3高 쇼크' 우려…\"장기화땐 스태그플레이션 가능성\"",
-      "source": "네이트",
+      "source": "한국경제",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5NUlBSemkxanVBVUlZT0FzaVJxeWw5VGpjTENwakVXMFdSY0ZyT1ZBSXRvT21vNE5NMkFOSFBtWjMxNFdubW5zLXVYR2o4RS1iQTI5WWx3Qlk4dGtQalU5Q25PV3BxbkJBN1E?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1xdHNqR0hpeHlTYTZFcTg4TnNQbjZNeEpOcXNreVo4VkxuOG5zQW1jenhuUGhZN1pCNTdNaElESDN6MjJfMUNSTWI2SnlsNWdFR0RsU0pWQXktQdIBVEFVX3lxTE5FN0d1VU8xajgxUkZYSUc3dEVNZ1l5Vk9mUzlOSEF1TTA5ODAtMnBTTGVpT3pyQndrcXhGOF91VGVTVm5Mcm5rWURoWlB2aDUzWU15Mw?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "[아주 사설 | 기본·원칙·상식] 중동 전쟁 충격…주가·환율·금리 흔들리는 한국 금융시장",
+      "source": "아주경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBSQ25JX3hNX3BZS19XM1dGR0VxaF9iTEg0T3VEbnRuU2JVLUEtMmc1ZkpJNEU5VFllb1dJLUFieHQ3QzRhelFmTVRsX1gwNzJ4RzRIbnliNThSZ9IBWEFVX3lxTE5xajl4eWt0Rk9FVFpIUzNLOEN0UXRoaVVQT3d2ZV9TSnlOWnB5TVRwWV9DMkNyQnQwSnYwdldQMFYtcUtzcG0xZHE4bkFBRmlMQVlCM0RvaDQ?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -104,24 +846,38 @@
     },
     {
       "date": "2026-03-04",
-      "title": "[아주 사설 | 기본·원칙·상식] 중동 전쟁 충격…주가·환율·금리 흔들리는 한국 금융시장",
-      "source": "네이트",
+      "title": "유가·환율·금리 트리플 충격 한국 경제 시험대에 섰다",
+      "source": "youthassembly.kr",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1uNV9hbGVReXpsLVJobWhnLXI3OWtCRmtyand0Mi1tNVVIaVo5UlAtRGlPbkNoZDZ4QTZkc254R1V6aDlKUEEzelA5UEpESFBxSlFR?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1wUDhnMWpYYWRCeHZCOGF0TDItUDFvdGVsbjBpYW5RcEduanBqNmtxdlVGT3drb3cxdWtHQU1XaDdTUHQ2NE5QZ0dnU1d0TGNVLUE?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "美·이란戰에 기준금리 인하 늦춰질 듯",
+      "source": "조선일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxNd3puX1FTQVdaU2p0VnFMQVBmbXJqeXFpVE1tQXUwUFZubDB3RHNNcDdDcEtMTVBPSEpQakd4OWN1VWhULVZTYk9jc09QMTVmMnJVd0FHZjVpQWo2bWNyN3AwZmpwLTVuMXZIOFBwWnIxZTJBUGlra04tMXJGYVhDVmlvWGVEaGZhYmlNY0tR0gGiAUFVX3lxTE5ZRXFBUEZVSW82TVJxN2swQUNYM0xjek1lR0xSeE1TZExaZnhfcTV0b1JmOG85U3JnUk9FaXk4czFHUFoxQmlfNklIbjJhUlp6d1lycDZ3c3AtSUdNM3JCQTJTZnNIYjUwZ2xmVVpXaVE3X0ZZUVFZMWU4dUVDb3BwOFRGSVNlWnBzNHh2UVJXWjk1N0k1MEdBRUd4YjVfT1E0Zw?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "케빈 워시의 연준 의장 인준이 비트코인의 금리 민감한 미래를 어떻게 재편할 수 있는가",
+      "source": "Yellow.com",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMi9ANBVV95cUxQVzBZa0N2Qjg3algzMV9nNXNFWXBBQm5yaWlCalRlUkQ3MzlOTVlvM1BEek15RXA3NHlHUWFvWEk4WlJrUF9LUVFaNi0tU0VTemU1ZURlUUhpMnpTUlpqSHl3N012eEduc2owSXZxWUY2LVVfX2wzMkhlMGUwVEpLTmMxYXFYTlY0dE1LSHdIMWx0TWJxeVMxRWRISFpuVDJSejZGZUswbEppVF9LWWZkamZEaVBwT0JCai1ZM3NpSENBWWszamtVSy14QjNlWldERDlSUDVwcDl4THd2ZE9XQ3I2MGpHUXRyTmotNHZ2cTA3bGdFMElBbTNoc2pMQVFMREZ0S0cwSmZoejd0dGlzeVJOem1fbURVU2pXWHpXdWVlRGViUzhfMzhzRzhkR3IyaTVTSkFyVkJ4X05VS1JaU1NybWZ4YUtJYWwxZmZyczMwMHRBcXpBZlZnYzU5TmR1R3FPZWRnUUI5ZHU2RjBNRmZteU1pa3FkakZmN2hqVVJOc2doRDRUS3RXMEFVUXlLU1NfYjlyRmx6Wkp2ZlBUUXpLOFIxWnBCTWxuQ3NpM0FZOUxBUlAyalZVdkt4cTZRMEwzOE5Yc2lxY2FXMHJLLXhHWmhocHhfU3pDb0xZOW9sZlVWTURoNzdNUkFlaWFkMUc1ag?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "연준 FOMC 금리인하 \"IMF 전면 수정 권고\" 뉴욕증시 비트코인\" 엔비디아 후폭풍\"",
+      "source": "초이스스탁US",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5BWmxRYUFGM0lvQ3ViU2FQdzF0emNmRElCMjBoem1NYVd3cmFJZWx3eVNSYVI0d2lpRWdpVkI3M0xYZmYtYUxhNHpZYWRXcGtSUEhxQUZFSlVXNl9zTk83VU9VMkluc00?oc=5"
     },
     {
       "date": "2026-03-04",
       "title": "트럼프 “미 해군이 호르무즈해협 유조선 보호” 호언 [중동 확전 일로]",
       "source": "부산일보사",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9fQ3NUN3NScVlPbmE4dDlKYzk4V0swUkJCMTVmYmJZNU1ZUXVmaHRJOXZZYWZsekUtQ3ZlOVFoMEU4anlFSFB1X1RGVU1HczVZTEZoYkpldkxRa3VZVDdOS29EMElRdGs0TGxmRVgzRkJHUHhE?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "“평소 80척→2척”…전쟁에 멈춘 호르무즈 유조선",
-      "source": "동아일보",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBORS1Ldm5QNU0wU0htM3Rlb01zSHlvbVZTODdIaUtYSzNUVEtLNnJOVFVrZjNsYTlxbDZrVUZEaGVGUXUtRUswRGVNZFBWSXpVaW9BSTlfZlhtWEVycXNycXhZOG1IR1l3S2Q3cjhjU2NDYUnSAWZBVV95cUxNNDk2TDVQdFdrWV93T0lCbWI3QVI2a3hoSDhBekxtdWpFa1RhWW94a1lxSW50a0VqMnN6bEd6N1cxY0NYS2NYRkFkQXpsaWZ3Q01wS3JWc3pOaldHMlN0UXZTcnRPSGc?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE5lU19DWC1Fc1BqQXBjaTcyaGJpZDlvNjJMdFRfVVBQck11U2xfTllQNlBsVmhkXzJQd19Tb3dmTmNlc2ttT1RkNHZqYUFlTlgzaWdOOVBCWHRGNU1RS3Zsc3hJWTRYTk9VdlIyd1ZqcWdTQUV3dXh0LQ?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -132,10 +888,17 @@
     },
     {
       "date": "2026-03-04",
-      "title": "호르무즈 봉쇄 땐 유가 108달러…중동 전쟁에 120달러 전망까지",
-      "source": "동아일보",
+      "title": "[美 이란 공습] 원유·천연가스 가격 급등… 전쟁 장기화 하면 韓 물가·성장 ‘빨간불’ - 조선비즈",
+      "source": "Chosunbiz",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1HbmF3Wk9FeU5aOF9HXzNBYTlfNktDUnlpdnYxbE0tNUVtOWJzLXp3NDNyck0ySUhORnk0S2hXZlEwakl0MHFab1g5Q2NMbllmSmo3LXF0Rnc4ZllTZjNuajQ5eWNIcFJfUXU2YlFyVVR5SlnSAWZBVV95cUxNeE5xdWk5WDZUMkxPNWZHTzJ1UG5XTXZwc3FRVGJNTWVnWXJVcUhBcjlwN21oUUF0SjIxMjQwb0xkOUFvMFU3N2o5SERjOE1Nak9TSkhiV0dGNGNkZ245N0tCMmtjQUE?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOSTMtZnlKZGJSbEdXOXBiZlZjalVXQ1Q5MUY4RTNTOHE0N2F3b2E1SG9qOE8yUVZDTkdjR3hlSGxvbm5ONXN2QUt0c28wOHNwSWZ0a005R29oWUtyc2NfZFEzNG55TnlVdXRvSHh5QjBTMWd4eHFSZy14YUFxcEg5aEQ3U1Z2Z9IBmgFBVV95cUxQaHVrLWQzRnVzc0JTdE1xMVZkMDFEMFlSY3JtLXdtQk9wV2dwMTZBaXJaNG9NVXB0TVlMd0RTa29WMVdFRTdCYWxzT3FHQjFESFY1RGFMQzVnWHVablgzY09XTUZuSUw1bEhMZ3F6c0ljcC1PVGotbFRhb2F2bUkwVURwTHFrcXg0eTVicUNtVEU4aFVxLWJUaU5B?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "미국·이스라엘, 이란 공습 후폭풍...한국 경제에 ‘에너지 청구서’ 오나",
+      "source": "중앙이코노미뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5fLVY3NlJIcUxYUTh2YXlya2RFclVLRzhNWEdUdzd3aE42UG9KaUlIeVFwT0NtSEFuQ0tSMi0zMHh5T2VtU2NwemgzSWhfRTc0Q1VpZl9kUXlKeFBrTDZwZHFPaUcwbjZpQUJYVjc4WWdZQQ?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -149,7 +912,7 @@
       "title": "상한가 뒤 급락, 널뛰는 방산株…일시적 발작인가 구조적 수혜인가[분석]",
       "source": "에너지경제신문",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFA2Z0d1M2QyNGpwa00yRmtERTlFQkRRQmRHMVkyUUNtX1NwNkExSGJYRU9mT3RYUDk3TUxfMDFTUmMzRTZabW00cTI5bE52QTZTcWtvMGJoZFZmbTA?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE9kQTZNb0twUHhnNVM0LWVHVUxjeW93N1F3c0FpY2tJSDJlVzRHbE5qajd6cW5xYktwelUxMUlrUi1EaEV3RjI3QmJNckJnVnRFcWY2TXlKY2Y3WDhNZDZzb1NHdw?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -167,6 +930,20 @@
     },
     {
       "date": "2026-03-04",
+      "title": "전쟁통 ‘방산주’의 배신…미사일처럼 솟아올라 하루 만에 추락[증시 패닉데이]",
+      "source": "이투데이",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE11MXc5YjRuYXRJUUg2cy1Pd1BBTW5oOThTLUZyc0d5WXJwc082dHFYN3YxR3hBUEc4N2E0eVBaU1g4Ql9RakFOT3RIOGNsekM2cFpiWQ?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "전쟁통 '방산주'의 배신…미사일처럼 솟아올라 하루 만에 추락[증시 패닉데이]",
+      "source": "네이트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9Ndm1GMGZVTlJtdWptOG0tQWtQNW1pT0FRZzY3Z0NnNGtJSGxWN1p0dmgyWW1BMVo5VTVHbWx2Yl8zcmRwc2R2bGMyaHZzd3B2WjN3Si0yVmp3TUR5Zkx4M2sxQlUySFU3YlliZk5vVlFCdE1qeHJ1Rg?oc=5"
+    },
+    {
+      "date": "2026-03-04",
       "title": "[특징주] LIG넥스원 오르고 한화에어로 내리고…변동성 커진 방산주",
       "source": "조선일보",
       "impact": "medium",
@@ -174,31 +951,24 @@
     },
     {
       "date": "2026-03-04",
-      "title": "키움증권 \"국내 방산주 중장기적 주가 상승 전망 유효, 중동사업 확대 예상\"",
+      "title": "키움증권 \"국내 방산주 중장기적 주가 상승 전망 유효, 중동 사업 확대 예상\"",
       "source": "비즈니스포스트",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE14RDFTWHlONlRSUDZmRUVCcTlUTmJ1eVotb2ltUlhRUUxKUjNkUGIzbC1abVY1LXdfN1k1VmpkNm0wdl9QTktiQUVkdFNZNkNZTk92aHZIeEtxdy1PdTFyaTV0Wm8tam5MZWlOd25VVQ?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5jLVVFd2pnOFdlMnJvaUYtaGJWSWtydlJfckloWHo5bWhmQkxOcVduZmFGMEN4blFqWVBOSF9qUC1jTFlfZ21qQnNYMjBmUEIxN21zdlZoLXpkM3FQbHYxcVNzOHV4SjZDX1VxVks0T3hsVDA?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "전쟁통 '방산주'의 배신…미사일처럼 솟아올라 하루 만에 추락[메가 블랙 수요일]",
-      "source": "네이트",
+      "title": "'美-이란 전쟁' 수혜주라더니…에쓰오일·SK이노·방산株 급락, 왜?",
+      "source": "KPI뉴스",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9XVTUtbFpPZXVDdkMyejg3ZjM0alhKUGNkSU1KV0l6QXc1NEd2aUxoMUFjTVNSYWlqQjVRdnVnZzA1aVpZUzdWczlQcEUwSWVlaFBr?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "\"호르무즈 봉쇄로 유가 급등…단기전으로 끝나면 정유주 수혜\"",
-      "source": "네이트",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTFBha0JxNlMyeEhrX1ZEUVJBS3h2Y0w4NUktbm13QVBYUkNEY2dlSEN2eS1PODNGbDN3YWNCX3pvZWZ2bUUyUUwybkRwV2ltaGctMHJULXdMS2hyVjg0X1FHVm9GbXZwTk9STWVSLWFsdTA4MmFtamhqUg?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE5PVGdscXE4eFMwZFNBYm1hel9QRzNfa3JKTkNTMTVYclA0U2d1eldaa0w1WjdMdC1qanh5c250aHgzeTNfV3luX2ZCT1otTmxVdDJkWVhzNA?oc=5"
     },
     {
       "date": "2026-03-04",
       "title": "\"호르무즈 봉쇄로 유가 급등…단기적으로 끝나면 정유주 수혜\"",
       "source": "네이트",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1oUmVTUUM3MVFIWWR0QnNsQlZGUHpaTXUxUExqaEhVcXVwSnhrMDM0aXFmN0sxc3FCUXdEZjVsdEZyTDdjVlBnUV82a1cxWXhJMkktRFVuSzJOdkRMT2lEMw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTFBha0JxNlMyeEhrX1ZEUVJBS3h2Y0w4NUktbm13QVBYUkNEY2dlSEN2eS1PODNGbDN3YWNCX3pvZWZ2bUUyUUwybkRwV2ltaGctMHJULXdMS2hyVjg0X1FHVm9GbXZwTk9STWVSLWFsdTA4MmFtamhqUg?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -216,10 +986,17 @@
     },
     {
       "date": "2026-03-04",
-      "title": "SKT, AI 데이터센터 구축 속도 높인다",
-      "source": "한국경제",
+      "title": "[미래전장 첨단국방산업 포럼] 부승찬 민주당 의원 “오늘 포럼 통해 K방산 수출, 거침없이 달렸으면”",
+      "source": "굿모닝경제",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9yY2k1SjRpRGRxNkhYbDZTNzdHNkV5Nnkwa0t0cXRwYlhNOTFZMThXY01YWVZXdGc0SWtxdjhlQ0Vjc0JTdGg1R2NyWUVCakRleF9nOTBWeERJZ9IBVEFVX3lxTE5yNk1aUHJoLUQ1Y0RtT0RXV0xkTUZ4eHIwaHY2SmFxQWh0Y0RXakhIZU9lZVV3ZTdPQnhwakhWekthVVJ3OGZCM1RqTGdMYWh4cnQ3Ug?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBSNVJtY1NDbW9BdDZyS3M0ZmVKTEM2cHpNdEZhRWVpcWIzVGRtRlJxVjcyMWVRbU9lVU1tUUlUMWw3cXB1YUlMMHhLWW4zYUZ1dWpoRWJOd2ZiZU1obXZUNEtwX0FELXlOQ2FUZw?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "[미래전장 첨단국방산업 포럼] \"K국방·K방산 발전 위해선 민간·군 협력 확대 및 규제 개선 필요\"",
+      "source": "굿모닝경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBxZXNFZkV0eFVvZ2J3Sm0yTVdsWlRBV1hGcFRsQlJGcjhJT19TU25sb0tabkpiOURmUFYzdU9CYjFBa0RsNDFBZXdOTXk1b3hZSHNhdG5KaEZpcUVBaXZaQ3luRDNUczVCbzNHSg?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -227,6 +1004,13 @@
       "source": "인공지능신문",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBZc3ppYUZaV3JxT1QybHJCMzR5UXZMS1BkT01VeWMxclhHRWx4eUVNQkVJV0xfNHRiTzNlMktGU2NyclhmZU1zZDVNcnZVTlVmWkdqbF93VVM1X0c2UmJMcUxqRmNKaDA?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "SKT, AI 데이터센터 구축 속도 높인다",
+      "source": "한국경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9yY2k1SjRpRGRxNkhYbDZTNzdHNkV5Nnkwa0t0cXRwYlhNOTFZMThXY01YWVZXdGc0SWtxdjhlQ0Vjc0JTdGg1R2NyWUVCakRleF9nOTBWeERJZ9IBVEFVX3lxTE5yNk1aUHJoLUQ1Y0RtT0RXV0xkTUZ4eHIwaHY2SmFxQWh0Y0RXakhIZU9lZVV3ZTdPQnhwakhWekthVVJ3OGZCM1RqTGdMYWh4cnQ3Ug?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -244,13 +1028,6 @@
     },
     {
       "date": "2026-03-04",
-      "title": "SK텔레콤, 파네시아와 ‘CXL 기반 차세대 AI DC 구조’ 공동개발 착수",
-      "source": "mstoday.co.kr",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFB1WDNGd1JMb0ZQSlZUT1Q1TTJ1aXdFbGliSThNME9Oa3hlU0RDLTNaUjI5bVhCSmcyZm10MUI0Sk1feVRyWG9rRjFpdVYzeGFOZjd0SlpEU3Atc1Z6eGp2eTJyaVQyZ1llSDRXN21B?oc=5"
-    },
-    {
-      "date": "2026-03-04",
       "title": "SKT-파네시아, CXL 기반 AI 데이터센터 혁신 추진",
       "source": "서울타임즈뉴스",
       "impact": "medium",
@@ -258,17 +1035,24 @@
     },
     {
       "date": "2026-03-04",
-      "title": "파네시아, SKT와 CXL 기반 AI 랙 실증 추진",
-      "source": "정보통신신문",
+      "title": "[MWC26] SKT, 파네시아와 손잡고 AI 데이터센터 구조 혁신 추진",
+      "source": "아이뉴스24",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1YVU11V0pHbE9BVUxVMFA1ZWx4QTdaWGExdVpxYldGLTVEYnF1VnZVYWtiell6QXNRREhwZFdFRzI3NEJLenFVOUwzY0t3a2pRWTl5T01yejNxN2RfN0Z4c1R3dklGbUtZ0gFsQVVfeXFMUExvOXZIWENQdGJtczN1X3NGYTVjOHlSdk5OS2ZSMlFRN05CVXVOOE94bUpTYUI4ejNfVTZXT3luOFo3V0lIUmViWVlMT25rTHhhaTk0UVNJOEJOcmdXMENhaktvOFhjWV9rVjNx?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE1ZYjI1eDlveWhDbjdFVkx6X0tZbDNsLVRPeEFwcXlLYmFxWGVjTVZYUGJCdURwUTdGd0VRbWxGVUJMcWR1cnZUbmZjVUQ?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "파네시아, SK텔레콤과 맞손…AI 데이터센터 구조 혁신 나선다",
-      "source": "네이트",
+      "title": "AI 데이터센터에 GPU 서비스 제공… 매출 두 자릿수 성장",
+      "source": "조선일보",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9vaXR0b29seG1iNEYzOEVnN0xjT29Bam4wTnYyZmxxS2pjRVNaWm05THFhdHRaSGVTUzdJLU1OeTc0Q2VwZ2xHQUEzSWY0YnlLRW9j?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOVURMMDRTZHhmM2NWeDE2YUdlNjdjTmZsbHB5T0tWejFWdU9qcGJRQ0V0VnBLLXhxeUJUb1VTSkNUVzNrbGt0dFZBVlN3R09TSXFUcGlrWHNma0treVdzNlliVi1uNU4wM084cUM2MGpGUnhyS2NURXd0TV9oN3BIMXpha0t5enNmR0tiUWFGRGk5VnVuSVhv0gGXAUFVX3lxTE5VREwwNFNkeGYzY1Z4MTZhR2U2N2NOZmxscHlPS1Z6MVZ1T2pwYlFDRXRWcEsteHF5QlRvVVNKQ1RXM2tsa3R0VkFWU3dHT1NJcVRwaWtYc2ZrS2t5V3M2WWJWLW41TjAzTzhxQzYwakZSeHJLY1RFd3RNX2g3cEgxemFrS3l6c2ZHS2JRYUZEaTlWdW5JWG8?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "SK텔레콤, 파네시아와 ‘CXL 기반 차세대 AI DC 구조’ 공동개발 착수",
+      "source": "mstoday.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFB1WDNGd1JMb0ZQSlZUT1Q1TTJ1aXdFbGliSThNME9Oa3hlU0RDLTNaUjI5bVhCSmcyZm10MUI0Sk1feVRyWG9rRjFpdVYzeGFOZjd0SlpEU3Atc1Z6eGp2eTJyaVQyZ1llSDRXN21B?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -279,24 +1063,17 @@
     },
     {
       "date": "2026-03-04",
+      "title": "파네시아, SKT와 CXL 기반 AI 랙 실증 추진",
+      "source": "정보통신신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1YVU11V0pHbE9BVUxVMFA1ZWx4QTdaWGExdVpxYldGLTVEYnF1VnZVYWtiell6QXNRREhwZFdFRzI3NEJLenFVOUwzY0t3a2pRWTl5T01yejNxN2RfN0Z4c1R3dklGbUtZ0gFsQVVfeXFMUExvOXZIWENQdGJtczN1X3NGYTVjOHlSdk5OS2ZSMlFRN05CVXVOOE94bUpTYUI4ejNfVTZXT3luOFo3V0lIUmViWVlMT25rTHhhaTk0UVNJOEJOcmdXMENhaktvOFhjWV9rVjNx?oc=5"
+    },
+    {
+      "date": "2026-03-04",
       "title": "'GPU 무한 증설' 끝낸다… SKT-파네시아, AI 데이터 센터 구조 개편",
       "source": "더퍼블릭",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE9Nbk82aVVUYTNoSk1jQ3IzdUFmWWRaS3RpS2lKYnZDNGJXbmxZaUF4ZXRySmxjcTZocENmczFOZ1FheXBGYUh4V0ZlSVdyZHhfREtUeFlNeThTQ2lqd190X1lLVlF1WGpzTEtF0gFvQVVfeXFMTmZhZnpYWXY1bFdZZkI0d3ctWFM5b1hCaTVBSy1xTTNQQkowWFIxUXNheEVjSE9oaUxORzc0OW1nZW5nMHFFYVFYZnBKVGJoSVR0UFNza1JmMl8wVVVWaFRQRUdvMWFzbFVxWUJpbGtF?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "SK텔레콤, 글로벌 파트너와 AI 데이터센터 혁신…‘프리팹 모듈러’ 모델 구축",
-      "source": "서울타임즈뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTFAwUW5WV21XUjVneWdONlVnRGpjT1FOZ0tMamZ0a25CUnhMdHNhcEljOG9CdE5WMksydVdPMDZOd202cUlMb1N6bGNNdzVGUGhzRFB4SVlXd0NOX09YbFhkM3BCSjBzU1VNNmtJ?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "SKT, 파네시아와 AIDC 구조 개선 협력…GPU 비효율 잡는다",
-      "source": "네이트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE9ZTjl4Vm9YYkhkN0stbW1ncENTdWotNkFSNUtzcE12Y3UxMEFhWnRHVDktcU5OYUJacnhCTnNYNG02c3N1Q3EyN0ZuNUJxQk5XcFk1Wi15UFhaX1JXV2ZhU285cGhPNm1oUHJTZmo0RGJVU2pwSXhqaA?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -310,14 +1087,7 @@
       "title": "[포토] AW 2026서 선보인 중국 휴머노이드 로봇",
       "source": "디지털포스트(PC사랑)",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFAySVE2aXBwXzRsVFBiWTlVVnJwNndKd01ucGZVVjdiYVNRNXVVYm1qRnlsZUFZX0hmYXZzU3Z3blB3UG01UnJ0M3NCZHdxaG96ZDZ0SDRhQV9Jc2FVNVlXSUJKWDRnaWVzZnc?oc=5"
-    },
-    {
-      "date": "2026-03-04",
-      "title": "AW 2026 개막, 눈길 끄는 중국 휴머노이드 로봇",
-      "source": "sedaily.com",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBhYUNlSUwySWVMeDVxR3RqbjdfNzI1NEtrQUh3YWdqWHExYktiRnRQUVAybVd2MzR5bTVzc0NiY0xac05taVNKaVpXR3B2eWszeGc?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTFBsWXU2S0IyOFFWNWdEU3FIOE1lN0hseDgwVk8tQlpraFdLX3RYSEtKdW8xcngtUjVqQXJpX2Yyc21kcXZWYm5xSWlVLXFCaUxfeXpzNHhBTEhUU3djSXBHVkIxMDAzZkNzWWdj?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -328,17 +1098,17 @@
     },
     {
       "date": "2026-03-04",
-      "title": "\"中 5대 로봇 기업 한자리에\"…코엑스 달군 ‘차이나 휴머노이드’",
-      "source": "edaily.co.kr",
+      "title": "로봇 아틀라스, 택배 분류부터 배송까지 … ‘물류 휴머노이드’ 선택이 아닌 필수",
+      "source": "뉴데일리 경제",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOaTBaZllLeE96VkxYcWEyRHRUdW1wbGpoUDJDcmY0R0hiMlpRQjJaQVB0aUV4ZHp3VU10bGUtNTM1dWUwUDU4eDJJY3VGS2VodDJzbXRyVlRrTXdyVThHZW8tREVuRjVpaEpfQlZud0VoQ3RwdG04cmFEcC03eFNYdA?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1TeV9NRzJ0NUtfTHlEaDhaS0JqTGs2QnlOdXFEMUxYaVAxaVhmWWdkMVJFVFFuTVVYWGlTaFVjSENLVUd4T0JWQm5VTk5PTnJXT2RLalNReHo0ZFo4ajlyQWtYOVNWaE05VDBpU3JoQnRaMldHLUhkeThvUQ?oc=5"
     },
     {
       "date": "2026-03-04",
-      "title": "[포토] 국내 최초로 공개된 현대글로비스의 휴머노이드 로봇 아틀라스",
-      "source": "시사포커스",
+      "title": "중국 휴머노이드 ‘빅5’ 서울 집결…“산업 현장·가정으로 확산”",
+      "source": "글로벌이코노믹",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5lSVpXc3NsaVp4SkktNGpjVnJESEFnQUpkTURrdm9saUhNU2U5LWtmRjhjdDNxZzZ0dUVMSGlrODY4MWdxS29uRG1rM3RSOVU2d0QybEh5clRFeG9EWWs5NlBFdTVaUnJBYldJbkY5aw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxPRmNnR1lVV2ZVUkpPQVhEU2s3ZHlfdGdTSHNmTjNkM3l3YVpoeXZOaGNCSGJhUDktdTlieFV2Q3JYd1hLTHd2eVMxdDVad0pJOHBBTHhWT2pwUWpGOThEeHdsWm9fRk9UblJZV2RDM0plejA4NGZtVk1hd1l2SmtxangxRld1Zw?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -349,10 +1119,31 @@
     },
     {
       "date": "2026-03-04",
-      "title": "4일부터 ‘AW 2026’ 개막...AI·휴머노이드 중심 AX 산업 전환 본격화",
-      "source": "에너지타임뉴스",
+      "title": "AW 2026 개막, 눈길 끄는 중국 휴머노이드 로봇",
+      "source": "sedaily.com",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5UbUZIOC04MkgwVGJUY0VDZXR1YTZ1TS1XNHkzejlaVzd6RzFVNXVPb1FMYWk1Qm1fU29zd0ZLMDZzWGxvbWtyWjliZ0FWTlNtcHhPUFUtYzU1aWdfYzJja1pKREhBVjdaOG9POHVKRDA0d9IBdkFVX3lxTE5KTE9RQnBLZ1NseXdSMDA2MnowMm5nN1JweVlHSVpmM1ptcE9LV1dmdDFCSU1sVUhTcW1uN0oxUldjR1hDWFB1S1VZdnpabnJrNjdlUUNuX2oyTjlhVUVCdVZlWEdPTjFXY3l0Um5Gd1N6dm5ta2c?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBhYUNlSUwySWVMeDVxR3RqbjdfNzI1NEtrQUh3YWdqWHExYktiRnRQUVAybVd2MzR5bTVzc0NiY0xac05taVNKaVpXR3B2eWszeGc?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "[포토] 국내 최초로 공개된 현대글로비스의 휴머노이드 로봇 아틀라스",
+      "source": "시사포커스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5lSVpXc3NsaVp4SkktNGpjVnJESEFnQUpkTURrdm9saUhNU2U5LWtmRjhjdDNxZzZ0dUVMSGlrODY4MWdxS29uRG1rM3RSOVU2d0QybEh5clRFeG9EWWs5NlBFdTVaUnJBYldJbkY5aw?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "\"中 5대 로봇 기업 한자리에\"…코엑스 달군 ‘차이나 휴머노이드’",
+      "source": "edaily.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOaTBaZllLeE96VkxYcWEyRHRUdW1wbGpoUDJDcmY0R0hiMlpRQjJaQVB0aUV4ZHp3VU10bGUtNTM1dWUwUDU4eDJJY3VGS2VodDJzbXRyVlRrTXdyVThHZW8tREVuRjVpaEpfQlZud0VoQ3RwdG04cmFEcC03eFNYdA?oc=5"
+    },
+    {
+      "date": "2026-03-04",
+      "title": "휴머노이드가 산업 자동화 빈틈 메운다… 中 레주 ‘마지막 1km 해결’",
+      "source": "디지털데일리",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE1tWlRlZkI1VFliUE81bWc1SFl3VUFFVDBQU2NuUXBSMlhDOHJBSHdkdnJJMkdrUzlnTzlWazM4ZkRJN1VOek9iRktsYUZpamYzSHhLckVMWE9nQVdYYlNKaEI0QnQ?oc=5"
     },
     {
       "date": "2026-03-04",
@@ -362,11 +1153,11 @@
       "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE91VXBHbHcxSDFSZHEwM2gzcUVhWVFIdlRMd3lpX3ViV0hrRUFmN0ZHdDh1RlRRejUyVERUc2I5cGEtd3haWHNmUzJaaVlpSW5GS3Nj?oc=5"
     },
     {
-      "date": "2026-03-03",
-      "title": "'코루'를 아십니까…하룻밤에 '-45%' 찍은 한국 증시 3배 ETF",
-      "source": "연합인포맥스",
+      "date": "2026-03-04",
+      "title": "\"국산 누리호, 게임 안 돼\" 돈다발 싸들고 '스페이스X' 우르르...비결은",
+      "source": "mt.co.kr",
       "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBUNWdSRzFqUDhUMlVzeE1sT3JzLTVjUFdpS0Y1Z09oN1dRYkxBRjM3cjBFSGVfNmZWM2VrLVFmTzExeHA0amtSdllQNW1Ja0VmMDVYeVcyR2xqaElCTmRXV1lBSUpaeVNRTTN2bEY0Y0Q?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5hMW5jbzR2YWxIenZTZ1JnbXBpa1E0azdKVFJMckIyNi1zSHJwQVlNQVZFNmVKR1VEWm5xUVJPdkw0d0lheU56blZ6Z3BzbDNwOXUtNEZ5TXJ3amVjcThDckM3NEZ2UlU?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -377,24 +1168,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "미국-이란 전쟁이슈 : 한국증시의 뇌관, 개인투자자 빚투 점검 및 전망 (feat. 코스피, 코스닥)",
-      "source": "네이버 프리미엄콘텐츠",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPcGJ0Y2R5QmpXU0FGTE9PZUZVSFlMQk15VHA2bjdQNkFZZjFzWlpnZ1pFMEpKWE9GV0xRT0ZwMS1nUi00bllZQ0NBWENXVVVvRi1SZXNRZ0ZXRkJVMEpZenkzTTdGekhiNkhwRi1lRlEtUWNiYTh5ZkJVWFExZzRFbTgtdw?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "韓증시 아직 못믿나…중동전 터지자 외국인 5조원 ‘썰물’",
-      "source": "동아일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5nQ3lQRUZmSWZGZE5nSmlRUW1ZRnZScXhsR2NYbjhmRktveG1lTE9qYlA0ZUtNamxQMzZkSUZvRVp3UThURTNaalZ4bmswbU9UeVdXMHgydHZyWDNsNF9mU0RqZ0g4VEJTbGktNGZrTlhYUlU3NmfSAWZBVV95cUxPYkpzZTd5M0x6bWw3M3BadF84WTN2TldnWFkxMElwQ05tZnNoa1pRRHIxaHlaVXdvZ0NKZDBJMGRjSFI0cDJ1WkwtNDhGYk56aVpGclpRaXBEVXJ5NVlEdGs5dGNWMWc?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "세계증시 일제 급락했는데 미증시는 1% 하락에 그쳐…왜?",
-      "source": "뉴스1",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5RWGxpdm92UjN0Q24zcUdvN2o1MlJXZWpGOG9ZRlJidGRsYjJWa0RLNjNUdnFvQjliRUZMYTJRcTBaTXhUVU9Bd0ViNGRDcmZhNkhVa3VmZlI?oc=5"
+      "title": "'코루'를 아십니까…하룻밤에 '-45%' 찍은 한국 증시 3배 ETF",
+      "source": "연합인포맥스",
+      "impact": "low",
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBUNWdSRzFqUDhUMlVzeE1sT3JzLTVjUFdpS0Y1Z09oN1dRYkxBRjM3cjBFSGVfNmZWM2VrLVFmTzExeHA0amtSdllQNW1Ja0VmMDVYeVcyR2xqaElCTmRXV1lBSUpaeVNRTTN2bEY0Y0Q?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -402,48 +1179,6 @@
       "source": "초이스경제",
       "impact": "high",
       "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE05TzZuT1ZMd3kyRnkwVXFsa3RBVktSVFh0QkZsV3N4blBia090OHJrYThENmZKNHRWSWRPdmdQQXU5STNLbjZtYnZuN3dsUHJGZWFXT0kwMjFFN1hLeXE2LTRWODFuVGZsT1Q5ajgyVdIBc0FVX3lxTE1BT2F6dnByY2hwRGx6eGFtdy1KMDdqc1VTTWFDMlNHWndGTVYydEIyYjdSM3l4U3hXMlJRcW5XLXRySmxLb0VEc1lVQ3VDbFlSRXBxSGZUaWZBeFl3dXZLLWtqaWlYRmY3VW9GclpZVzhzUUE?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "이스라엘 증시, 이란 공격 후 사상 최고치... 전쟁 나도 오르는 주식시장, 왜?",
-      "source": "조선일보",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxONlZ4NTR5T044YWFIMjZjb19NM25SRml6R3daalZVX0pTRVFuMEdEUG44d3ZmcGVXVmdMWE1YTlV1Q2htcmZkdHBjZGZ5YVUtSjNpUlM3elZwQnZEaVBUNlNQOWxZa0NuTWNqYlliME1YbGw3dWlSd1pOcnNnbGtPeFpFYmZmaTNZeDM1ZTZR0gGiAUFVX3lxTE5tWHliblZSWWh3Wm1DWEZGazAxeVpLTmpwdjNqOC0xME9zR3o1NmxFbXZZMW1XYk1sYk4yaThoa2VrZ0k4T3lTVU9RelRpT2JFOHZzYzgwMXJuWVBYQVkwWUhTdGVEcFBXWmtaNW5ZVm41cUtiS1Ixd3hlS2tXWU81QlVpY19Wc0hxVHlBTXRBOVc5Nlo4U1NhNGN2UlJRcTJIUQ?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "美·이란 전쟁에도 “불확실성 해소” 판단…나스닥 0.36% 상승 마감",
-      "source": "중앙일보",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE8zZk0yZGlaNENkTTJQS1JnVnlIOHBacjc2ZElfZ2h3cDR3Y0JFQ0RKd012bWx5aTVpT25Td1E1ZkRuQ1NEZFR6RWljcjVCTmJXT2ZKYzFB?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "美 증시,불안감 속 다우·나스닥·S&P500 모두 2% 넘게 하락",
-      "source": "v.daum.net",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE10YnhVZDBpMTh6Z3RvVVVHemV0MnVKZF9waVNlRFBWd2VHbEhQa0dJRk0yZE0yRkNpTXZ6aTJuem1hd1ctV3QtbjcwS1c4Ykk?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "뉴욕증시, 미-이란 장기전 우려에 하락 마감...나스닥 1.02%↓",
-      "source": "동양뉴스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1PNmgyU3M5cUg2Mm9YaEcxT3pLazZ3MFVPcTR6a3lOMFc2OGRzcnp4ZmVGTUxpSFFBUmQ0RDFfYzRTNmZmZHgyMEQ3a2VLVGNzcXEyQm05LXNTbVBLSThySA?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "뉴욕증시, 하락세로 마감…나스닥 1.02%↓",
-      "source": "블루밍비트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5yemhoZFBlNGJvdlZRanRLU1NJU2I5dnB3MkpCZWhUSFZ1YTFEYXVhVk4tZ0IwRFVWVW9WR052aXFqYjRFcGxWRTYyZXJ5clp1?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "뉴욕증시 급락…다우 0.83%↓·나스닥 1.02%↓",
-      "source": "네이트",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9UbUlpcm1jWlJhMXB5Um5zNmZzdDdGYnJtZWIwbC1zTjdIY3NFOWN2cjN6YkIzQlRLWWk3eHBRQmhLZFZFZVRIS19XV1Y3dm1LUmg0?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -461,38 +1196,24 @@
     },
     {
       "date": "2026-03-03",
-      "title": "뉴욕증시, 하락세로 전환…나스닥 1.20%↓",
-      "source": "블루밍비트",
+      "title": "美 증시,불안감 속 다우·나스닥·S&P500 모두 2% 넘게 하락",
+      "source": "한국경제",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE92X3IwTnFmbnRwVGdvOEo5WUM2OFBHUnI3eEswV2Z4N0tSMDdwRkZZcXFzTVhtV28yMUJzOTVseUJqaU5lTFBOVFFERUxXZUNM?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFB6d3hiMERvV0J4aThiRDZrZjR2V3V5cEtSbkxwMHhmSGtxdl8yS194Z3gwOFc2VlkzRngyaXdscEN0OEJXelNaTGN4S2RibTAyWmxxWnlQTVdpUdIBVEFVX3lxTE5qLU1TVU1hTnpMT21QYjYwdHFpY0FENlBNRXNQXzhMNGwzM0wtLWdxNURRVWN6YWZlTHZSOUdnZVd2WXBQQ3lGeV9oaVhZdG9uNWh3cw?oc=5"
     },
     {
       "date": "2026-03-03",
-      "title": "전쟁 터졌는데 왜 오르나…나스닥 0.36%↑",
-      "source": "mstoday.co.kr",
+      "title": "뉴욕증시, 미-이란 장기전 우려에 하락 마감...나스닥 1.02%↓",
+      "source": "동양뉴스",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE92Q2VTNzJZVVNTTjhycGpuV2NiOTFtdXBPY09JZXFEczhvYU1OTDRsczJzVmxYZk1FQkRoVGFBSHA5S2JiMnNYNU5TSms5SXdnMlcwazUyLXYtV2ZqWThBa2tsR1dsSm1zaUZSRg?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1PNmgyU3M5cUg2Mm9YaEcxT3pLazZ3MFVPcTR6a3lOMFc2OGRzcnp4ZmVGTUxpSFFBUmQ0RDFfYzRTNmZmZHgyMEQ3a2VLVGNzcXEyQm05LXNTbVBLSThySA?oc=5"
     },
     {
       "date": "2026-03-03",
-      "title": "중동 불길 확산 우려에…나스닥 2.01%↓ 美증시 하락 출발",
-      "source": "네이트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9zTU42QjEzMURvWUwxeEtXRExMM2VhTExZdXFQc1NVZXFJQzVPRzhOTXJ3VU1hZW5jYW1QbDJSVmE3ajFLYnBjMHhhdFhEVkxVUHdZ?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "중동사태 장기화 우려에 美증시 하락…나스닥 1.02%↓",
-      "source": "citytimes.co.kr",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5CbnRSdEpkMXI3SW5pNjJMVUxseFhpVUtVd3JtbE5JQjg1SkwxY0g0c19FME93aWZCLXJ6cXEtMlFhakVJeXZIa0ZJRFF5TW94U3dIRzNWS3NhbTB0ZzJEQmtKOUFIN3pmSi0zaWxR0gFyQVVfeXFMTUZfN2NfZHdwdW5nT0dpWm54NjdueEUzRkJrRF8zY0dxR2FJdFBMWUxMNHV2YUNqOU9XVGd5b3pQR0ZTcHhGdk91THhhZWx0RXlDOGdoQ1lERWhYdVJiMzF3OWx5clk4LVFUZkY0SGhqSEdn?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "[뉴욕증시] 미-이란 장기전 우려에 일제히 하락…나스닥 1%↓",
-      "source": "네이트",
+      "title": "미국 뉴욕증시, 호르무즈 봉쇄 여파 어디까지…다우존스·S&P500·나스닥지수 하락 마감",
+      "source": "한국강사신문",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1fUWVOVTZ3TXB4aG5mY3BSTFdSWTlMdndOMU1nN0N6OVZWTVEzZ1lac0ItdVZiamktS3V2ZnhTcXk4U1ljSE9MQXJEOHpTRFJUY2tR?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBMemZ3V1VPWXJBV1FCN1MxX3BlU2dNam9yblNWdEpIbV9mQkNyUkJWOF9qaHRHOG03Y25kSGhkUDBjUjR2ZFJLc3ZacThYZm9ubmtCcVBfbDNGVkRnRHRPM0NzRWVMUUROM1ZrTmpDdnY?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -507,13 +1228,6 @@
       "source": "한국경제",
       "impact": "high",
       "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE45M1ZTYzJVNU9vbmRkQlRJdk8tT2RpTjZ3N1BUb1NXQlQxdUc1Yzh3TGFCbHVTU2tFRVo0RXA2WUhUZ0NEZU4yZlQ1UGZlN20yNjcwNNIBVEFVX3lxTE45M1ZTYzJVNU9vbmRkQlRJdk8tT2RpTjZ3N1BUb1NXQlQxdUc1Yzh3TGFCbHVTU2tFRVo0RXA2WUhUZ0NEZU4yZlQ1UGZlN20yNjcwNA?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "이란 사태에 환율·금리 크게 뛰고…‘안전자산’ 금값은 급등",
-      "source": "한겨레",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1VelNMWUxLTWxmaHI0Y20tX1RFdENnR2VGWmxwZjlzSGpyU0J1VnU4Wlk4THZFOElaRHZJWFRDbTMyT2FuUzBVWTlXbzZXZjVfWWVDT2tuVFJscFA0TE9HU01HV1Mtd2M?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -548,14 +1262,7 @@
       "title": "이란, 호르무즈 봉쇄 저울질… 한국 경제 직격탄 맞나",
       "source": "시사위크",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5SVUpQYkprdVlIWlYwNXM0eHlhdHhPeURhTG9XUGxONDhvMzZ2MTY3QlR4Zkp4Z2J2NUlVajIyVkRfaXFsdXRwNGJTSFVTZkVsYXAwUHNaSTVWak5vM1dlRUZMUGc2dXlGLXpMSXdOTdIBb0FVX3lxTE5SVUpQYkprdVlIWlYwNXM0eHlhdHhPeURhTG9XUGxONDhvMzZ2MTY3QlR4Zkp4Z2J2NUlVajIyVkRfaXFsdXRwNGJTSFVTZkVsYXAwUHNaSTVWak5vM1dlRUZMUGc2dXlGLXpMSXdOTQ?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "[사설] 유가 급등·코스피 폭락, 중동발 경제 불확실성 커졌다",
-      "source": "부산일보사",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFB0dC1zQjdxUmRyaTA3d0JHWURpZzZVZlZneW1xR0hKVE9QMnU0eGRYT0pqZElHakFCbmlaUkNKRXhwY2J3SHNvRElxU0ZvNDkxZ2gxWm5TXzlNcmVmcnQtbmQ4czNhdlkzYVM2bXpzNWhGYjdT?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTFAyTnpKaFV6clRyaXJ2LWhQX202cXhqbnpEa0NkS0RmQWxNYmhPZ01CWFloVjU5dko0QWxzYjN5bDlIVHJEckpLc3N6R195STNOR05JdTVwUE52NDg2OTMtVEdkWTVJRmRsbGVZ0gFvQVVfeXFMTlJVSlBiSmt1WUhaVjA1czR4eWF0eE95RGFMb1dQbE40OG8zNnYxNjdCVHhmSnhnYnY1SVVqMjJWRF9pcWx1dHA0YlNIVVNmRWxhcDBQc1pJNVZqTm8zV2VFRkxQZzZ1eUYtekxJd05N?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -566,20 +1273,6 @@
     },
     {
       "date": "2026-03-03",
-      "title": "[美 이란 공습] 원유·천연가스 가격 급등… 전쟁 장기화 하면 韓 물가·성장 ‘빨간불’ - 조선비즈",
-      "source": "Chosunbiz",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOSTMtZnlKZGJSbEdXOXBiZlZjalVXQ1Q5MUY4RTNTOHE0N2F3b2E1SG9qOE8yUVZDTkdjR3hlSGxvbm5ONXN2QUt0c28wOHNwSWZ0a005R29oWUtyc2NfZFEzNG55TnlVdXRvSHh5QjBTMWd4eHFSZy14YUFxcEg5aEQ3U1Z2Z9IBmgFBVV95cUxQaHVrLWQzRnVzc0JTdE1xMVZkMDFEMFlSY3JtLXdtQk9wV2dwMTZBaXJaNG9NVXB0TVlMd0RTa29WMVdFRTdCYWxzT3FHQjFESFY1RGFMQzVnWHVablgzY09XTUZuSUw1bEhMZ3F6c0ljcC1PVGotbFRhb2F2bUkwVURwTHFrcXg0eTVicUNtVEU4aFVxLWJUaU5B?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "이란 호르무즈 봉쇄 카드에 中 촉각…원유 운송비 급등",
-      "source": "아주경제",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE96MVFfM3B0UVgyN19oWk1xX2NEbjlnQ0hyZExBdXZ4M1FEbmg5cFlzY3YwLWNBRzhMTHZteUJUVDRGWTRLR1ZOY0Nuel9EZWdwamhLMFpQZFTSAVhBVV95cUxPejFRXzNwdFFYMjdfaFpNcV9jRG45Z0NIcmRMQXV2eDNRRG5oOXBZc2N2MC1jQUc4TEx2bXlCVFQ0Rlk0S0dWTmNDbnpfRGVncGpoSzBaUGRU?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "호르무즈 봉쇄에 유가 급등… 해운·정유업계 ‘촉각’",
       "source": "IT조선",
       "impact": "high",
@@ -587,17 +1280,52 @@
     },
     {
       "date": "2026-03-03",
-      "title": "모건스탠리 이란 전쟁 장기화 땐 한국 경제 더 취약",
-      "source": "아주경제",
+      "title": "[사설] 유가 급등·코스피 폭락, 중동발 경제 불확실성 커졌다",
+      "source": "부산일보사",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9sazVRSGV1bGxKMDZsSXFHVlJqZ2FTWTBKSmI1OW81OWN5aXp2dXZtOGx1WktGZGcteDZyV2xFR2taNmpqblYtYjhXTG1aOWJGV3NicnEtWWHSAVhBVV95cUxPbGs1UUhldWxsSjA2bElxR1ZSamdhU1kwSkpiNTlvNTljeWl6dnV2bThsdVpLRmRnLXg2cldsRUdrWjZqam5WLWI4V0xtWjliRldzYnJxLVlh?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE5qT3FncmhZNjNXQUlrRHZGdXFOU3pSUzRMcTJ4eWNkVWJxVWVxSWRleFEwRDVHaUUzT2NFZldrVll4YjRHOS1ncVVudldqam8tN1E3bE5JM2tBeVFVRU5FZWxHNkVYYkZLTmxUSTB4T1BIaEpQem56ZA?oc=5"
     },
     {
       "date": "2026-03-03",
-      "title": "\"호르무즈 봉쇄 장기화시 오일쇼크 수준 충격\"…韓 경제 비상",
-      "source": "뉴시스",
+      "title": "중동전쟁 확전 양상에 전세계 '초비상'…韓 경제에도 '찬물'",
+      "source": "뉴스;트리",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9rZ0dmTkRDXzZ2ZVg5RENpbUMycVRhMjNIcTNJcUhCbXhBX3ZtajduWXp5MVViRE9yVlhOOTd2S1lyUC1yc0NOZk5KbnFocEJxbndXdVF0cmNOdlBicUd3eNIBeEFVX3lxTE81LUxNVU1WMmNDc3N1MGJEdGN4QzJQLThGQVU3blZ5YkdXUHpvTWZ0UjlPZnZsOEFxbU5KUHVMS1FjbjA3cmVUR3dnU3d3WVBDNG9DTGxSMGJ6dXZacElRcl9nQjJndV9MN0JCTTRLSVBPZldjTkt5Rw?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5RVDlwVzFPMDR4Qm96QlVPWU02cXZ4SFpVNWRmVldpb0U2SkFycHJEUlhVemMxZHdENi1tRlhOQ1NYRGlhYTJFV0hpSFRLZmZyakV6R19ZdDl6bEw2?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "[중동 전쟁] 트럼프 \"곧 美해군 호르무즈 해협서 유조선 호송\"",
+      "source": "데일리안",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE1pTmJpZGtUNjA0eS0zamFZWXdQNktOOWhfWkxJR0dWaEFFa1FicmhpVklSMnpLcnJpZHU5WWE4VXRncXlUMzdZV1ZtbHRMa2ZH0gGbAkFVX3lxTE16eVlUaFZzMldzOUlUUkhTZ0h1ZWhFVE11b0N4VnlqZnVMTUcyaU9kazBKWnNibUVoT0p6VVJkWTFrWWdCOFJLRVpJako5X0Y1aXFsT3hBM3A1WklOTW9RRVg0Y040SUljcm9zMFYtQjhob19xODd3aVFhRklKRnlwVlJONW9yRjYyOVNJXzNuYkZTRnFFYkowTmxNamQ5eW9HSi1DaGhXTkJETlJ6VWF3Y2h1RndiZnFBVjFUSXdkT285UnY1aDhaalk2WXFicGNBZ0RRZ0tPSDRkc1FKaER1YXNHeFpqTW9zbU80V1VDRzdoclN1UEIxRXF3Sk1MbWp1N2VBMHlUcmZKT1JTMnlraTg5MDZHUmlsWmM?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "[미국∙이란 전쟁] 중동 전쟁에 호르무즈 해협 봉쇄… 국내 산업계 ‘비상’ 속 ‘물가급등’ 우려도",
+      "source": "세계비즈",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBYMXREckRnbWxzZFF2SVl0V3VVLWtKbmwyWjkxczRuYW9aVGFfSkVuWExYLXROdDhIV1dicmF2Z0dEYnN1OGMzVXoxVVVFT2tQQWl1dXNVUmpFUQ?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "[美-이란 전쟁 산업계 여파①] 호르무즈 봉쇄에 해운업계 비상 대응... 운임 변동성 확대",
+      "source": "빅데이터뉴스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9SQXhDN0NnMVExT014cFBDUTJmTkhNTWh4eEJSb1lRV21Da0ZFTkNEVG1NekZFT3pjbzN0VU94MUF6RF8tSG16UHNoNmFIM3lWVDRseDhvTzRWQ29RU2dkVlFKeEZBa3ZfejUwWlNnSFNXdDI1RmRHdGthTU4?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "이란 “호르무즈 해협 폐쇄”…원유 수송로 막히자 국제유가 급등, 세계 경제 긴장",
+      "source": "내외일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE8taTB6bEpSU2oxaVJVbFZEYU8xMWlFTEVNbTZhT0puS08zWEtKNERuZjhQbmtUaGYxX0V5Yk9tRHJHTU1iOUQ1S0FUdFctdDZEZXZFbUNTeFkwOXltdWpHZ2pNdUo3NUtyQ2RURTloVQ?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "미국 이란 전면전에 방산주 불기둥, 대장주는 '미사일 강자' LIG넥스원·한화에어로",
+      "source": "비즈니스포스트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1SbGQ0NG5IeXZlX2ZjODEwVUpmczU4VWpTc1N4c0VwOFZndEowX1MtbGlYbW03cTlLa3V6WnM2ZHdLRElONWpmaFRMRWwxNElDNWl4OHJWSHo4Z2tHRzJQY1V3ZHpQQlNsVmpyV1pwajZqS00?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -615,31 +1343,24 @@
     },
     {
       "date": "2026-03-03",
-      "title": "LIG넥스원, 장중 상한가…美 이란 공습에 방산주 ‘불기둥’",
-      "source": "v.daum.net",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9ja0dTTUZWdzVQRFBoaG5WSUozZVBWaXpjMDZYY2hyRHVvWHJOcFU2QTJEUzNMSE90aExBMUljcjRCTXJoTTE0UHE5SQ?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "미국 이란 전면전에 방산주 불기둥, 대장주는 '미사일 강자' LIG넥스원·한화에어로",
-      "source": "비즈니스포스트",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1SbGQ0NG5IeXZlX2ZjODEwVUpmczU4VWpTc1N4c0VwOFZndEowX1MtbGlYbW03cTlLa3V6WnM2ZHdLRElONWpmaFRMRWwxNElDNWl4OHJWSHo4Z2tHRzJQY1V3ZHpQQlNsVmpyV1pwajZqS00?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "\"주식 참 쉽네\" vs \"내가 사니 전쟁났다\"…중동 쇼크에 엇갈린 개미들",
-      "source": "뉴시스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1OWjd5VzgyaHBCMDRVOE5QdVljQ0FPNldIYTcyY2tFekx3akJHcFNnSmlER1FuM0dfek1fSVRtTzJ1anh5QjFPX253Tl9TQ2k3WkJzcnBCS0xjdHNCMTUwWtIBeEFVX3lxTE53Smh2aDRIeEhxTnB5UHl0b0NRZVRmQkR3NmkwQVVmWWZuWURuWmU4bnhWSFFtQnpwa3ZXU195SndOQllzWjVCRmR3RE1VX3BySzdaSTFrZWFjVzQtYTlibjVibXA2azNHSWdJbHZGUUNabzB0NXVkQw?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "이란 사태에 방산주 ‘불기둥’…한화에어로 20%·LIG넥스원 30%·현대로템 16% 급등[종목Pick]",
       "source": "헤럴드경제",
       "impact": "high",
       "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5fZlNReVFSN0ktWk85XzBiQnh1ako5Q0wxY1NJbGxhQ1dYYmwtUGtwUHJrMXlrYWFic3dtN0tlRDZBdlgtZnlUX19rTV9mVzc2OEdrNTVB?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "LIG넥스원, 장중 상한가…美 이란 공습에 방산주 ‘불기둥’",
+      "source": "v.daum.net",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE01c0JhMmxleHZCV1B0UkhrT3I1MElsWmE3czdaOGZPaXlWQ1ZXVjhOQk1JeU1iNTNDOHdvN0t6TG4yWjVaWnc?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "영상지정학 리스크에 불붙은 방산주…한화그룹 시총 5위 올라",
+      "source": "sedaily.com",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9LWlhxOXp5T0VYRkdObXR2a1lGM0w5ajFDUUhUZlBhNXVIcmxZM1A2a2M3NE5YcTdDU0syS3VoMDljRVZTdmJhbXlCRjBwVUk?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -657,6 +1378,20 @@
     },
     {
       "date": "2026-03-03",
+      "title": "\"주식 참 쉽네\" vs \"내가 사니 전쟁났다\"…중동 쇼크에 엇갈린 개미들",
+      "source": "뉴시스",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE53Smh2aDRIeEhxTnB5UHl0b0NRZVRmQkR3NmkwQVVmWWZuWURuWmU4bnhWSFFtQnpwa3ZXU195SndOQllzWjVCRmR3RE1VX3BySzdaSTFrZWFjVzQtYTlibjVibXA2azNHSWdJbHZGUUNabzB0NXVkQ9IBeEFVX3lxTE53Smh2aDRIeEhxTnB5UHl0b0NRZVRmQkR3NmkwQVVmWWZuWURuWmU4bnhWSFFtQnpwa3ZXU195SndOQllzWjVCRmR3RE1VX3BySzdaSTFrZWFjVzQtYTlibjVibXA2azNHSWdJbHZGUUNabzB0NXVkQw?oc=5"
+    },
+    {
+      "date": "2026-03-03",
+      "title": "LIG넥스원 주가 장중 상한가, 미국의 이란 공습에 국내 방산주 일제히 강세",
+      "source": "비즈니스포스트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5uaFl2T0VtS2dlVjVOUmNfX3h3dmE3ajBTeEJYa3drMmxRdVl6NjZDSFFHamd0bmVIZkNtbmplVGN0c3BweWlZcEhZd19yT0VJSkdrY1Z1Q0E3VVpLTkFpcmY2Sk1Kb3V6YjRUTHBQQmpaWE0?oc=5"
+    },
+    {
+      "date": "2026-03-03",
       "title": "지상군 투입 열어둔 美…전쟁 장기화 우려에 LIG넥스원 상한가[핫종목]",
       "source": "뉴스1",
       "impact": "high",
@@ -664,10 +1399,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "LIG넥스원 주가 장중 상한가, 미국의 이란 공습에 국내 방산주 일제히 강세",
-      "source": "비즈니스포스트",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9TaUwxaER2bHVaYUZHZ2RETWVDT09vM0RRT1hZaTV6V0hPb190bUNORi1CTzd3Vkh1SHNVanBhX3JYWndlTV9XbXVrSFNkaEFaRXNnVlFWT0xTUE9BYWNIZnZaY2Z1RlpKWkFDOHlTX0tLdw?oc=5"
+      "title": "코스피지수 하락 속 방산주↑....LIG넥스원 29.85% 상승",
+      "source": "월요신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5qSmhBUWFMRTRqWjVCMGE1TndGbXljN2Z2dl94U3A5TW1uRkNYbnJqX1NjdlhKSjV6Wmp0LXZBd05UUWstZkplb2xHWEliZ1lSOGU4Z3JYbEF3SmhqeHZHLWxwYjgzNU9lakE?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -678,17 +1413,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "중동 덮친 사자의 포효…글로벌 군비증강 흐름에 방산주 급등",
+      "title": "이란 공습에 달아오른 군비경쟁...방산주 줄줄이 '최고가'",
       "source": "mt.co.kr",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5HM0xXakZTRU9BWkZyaXJmcVlhUjBmUzN1SnJpR1UydXkwQXV1X1hDZExsQjh5ZW55T09zQWNONzZrM3FwV1NfNTkzT21FNmdjN0RRM2tkYTdhdEVVOXZDdGxhNWFVNWJjSFRGZ25B?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "코스피지수 하락 속 방산주↑....LIG넥스원 29.85% 상승",
-      "source": "월요신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5qSmhBUWFMRTRqWjVCMGE1TndGbXljN2Z2dl94U3A5TW1uRkNYbnJqX1NjdlhKSjV6Wmp0LXZBd05UUWstZkplb2xHWEliZ1lSOGU4Z3JYbEF3SmhqeHZHLWxwYjgzNU9lakE?oc=5"
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5XZDZMVmxjYS1kTkhsS01kdmduLVA1NW5laTdjR0ZlOXQ0dG90d3ppQk1JT19hVjJUb0NUVzEtT215TUNnUVNncXYwNW9yNDlZZ1cwREJUd1pVRF9YZklodUxtZi03NXFv?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -734,24 +1462,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "코스피, 이란 사태에 2%대 하락 출발…반도체 급락 vs 정유주 급등",
-      "source": "스트레이트뉴스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5CNHRKclNpT0lNUWRBVUt5NTJiX2lXNDNCMFdvWTlyNXlSWXQ5WW42Sm1hUWc5MjRUQnkta3RKWVR4LW9MamxBZkpIUTAxQjBzVy1GTk1wUjNySG56RVVJY04wa0kwSFJiVlZ4UEtwTmFsTDRGZjBv0gF3QVVfeXFMTkI0dEpyU2lPSU1RZEFVS3k1MmJfaVc0M0IwV29ZOXI1eVJZdDlZbjZKbWFRZzkyNFRCeS1rdEpZVHgtb0xqbEFmSkhRMDFCMHNXLUZOTXBSM3JIbnpFVUljTjBrSTBIUmJWVnhQS3BOYWxMNEZmMG8?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "'중동 리스크' 국내 정유주 수혜…에쓰오일 19% 올라 [핫종목]",
       "source": "뉴스1",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTFBmOG52eUxrS0Nkd0c2Y0Q2ay04dk41SWNPMVdEeTZKMkVTOEI1NlpKVnNpRUk1MFFJZXpHR2RlMDY5UEpCbE1JWnJ3c3dfNFc1Zl9zTnp0Z1J0bDlDWnNV?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "중동 쇼크에 국제유가 급등…정유주 줄줄이 상한가",
-      "source": "v.daum.net",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE1jUEhvcHY5WmNtM3BzNGlrWkVhSFZBdDJLbFBiRG1meFJ5NmZTcEwtY08xMzJXVENFdzJXOUxfd1lJbnc5MlNaRzM3TQ?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -762,31 +1476,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "‘RCT의 벽’ 넘는 K-바이오… FDA 규제 혁신에 유전자 치료제 ‘청신호’",
-      "source": "금융경제플러스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9JOXpCNFJ3MlB2dG5VTF9rUU5EOVJ6eXM5eU1LRy1ZYnJTQzR5X3R2VzJma1pObks5d2kwQ2dsejhmRFJrMmQtQW93S0FqdmV0a0gzVklQeFl3VjN3WF9EZng3c29QcmxhTGxIUw?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "우리기술 자회사 우리DS, 창원 방산 신공장 증설 완료…K-방산 수주 물량 정조준",
       "source": "파이낸스스코프",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFA0T0xRUnNNWVlJeUwzcUlYQjlDRU9SV0EyM09vdm95dDF5NlVRNkhOMVlpRUFLaFVBUmp6QS05ekt2dEJVZThOLUtHdWFJaDhRVFhYMW5RX29hdmFDLTFEbXNmZnZKUzBLamc?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "(재)창원산업진흥원, 전국 유일 해군 연계 방산전시회,2026 이순신방위산업전(YIDEX 2026) 4월 개최",
-      "source": "시사일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE5pZ01LM3pkNHQxT1VIckxLOVpSRGdIaU9CZzM5bGNVdkpEdmpVRmVUUzA3LWNzNXF1TFNkcDhyMlUxWmZqUWcwMUtGZVg?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "해군 연계 유일 '방산전' 2026 이순신방위산업전 4월 개최",
-      "source": "네이트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5zMmQ3T0tJa0d5WFZBbnYyRWQ2X0UzQWVFWmJYMGNyZ3Y2aTN4eXpRM2hjUmxOck9sQTlRWW9ndmc2QmlDZnE1WEt5MWl6QmJndy1v?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -797,13 +1490,6 @@
     },
     {
       "date": "2026-03-03",
-      "title": "GPU 넘어 AI 인프라로 확장하는 엔비디아, 광학 기업에 5.8조원 투자",
-      "source": "조선일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPVFRndVJWLUg2VzZyalBjMUYxSGdvbEhaTmpDanJvblZOalJKZ0t3VG93M2ZJNjNrbWxYYTFaTTZ4aDN5akZlbEV0YXJteVo0Mk1nUlhzakFVc3ZsbFlQU2Q3SThjOEpRMkhCa2s2bHhkQmQ1MWdmdFFxM09XX0xxN2lKVdIBlwFBVV95cUxOWEVSTjRUQUhTQ0I0dllSSFNTWFB6ZjRkWFlFWExIcUQxWEc4d2RWY3VjWEJlLWxxQmdya3lieWIzYUlQQ3ctQlJJVTNhLTNjNG9JQjBKeG5nUEtKbjN1cEZfTHI2cDY4R3JhNFlJbXZXVFBGcmdRVDBQZzV4eW1OUWVNX3dvNVNjS0w2UlpiQWU4RmxKakJz?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "'GPU 비효율' 잡는 똑똑한 AI 데이터센터…SKT·파네시아 맞손",
       "source": "네이트",
       "impact": "medium",
@@ -811,10 +1497,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "엔비디아, GPU 넘어 ‘광 네트워크’까지… 광학 부품 업체 2곳에 5.8조 투자",
-      "source": "IT조선",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1Pczd6bXMtSEc5RVZKcWpRckd2dWlSbFc2elVBaDRsSkNWQU54NGFKQlc5TVlSUm1Tb3ctb2ozLU96Mi1Kb2lOWV9ieHR3WUE3VGZ5anB0cnZtX2lWbjlwOUNEbUVPTnBiMTQtMHdCQkjSAXRBVV95cUxORjlKLWMxNjFfVkgtZkpRUXFMN2p5Vk5RWDlkMXpuaVZYbGJiZTJFbXlJVDl4Q1dRZXlxbkdBZnlRNWNYWHZVVGFxYURWZG43ZGxwaUg4SHRodUpmcHl6SFp1SjNHSW1PZkR2b2NkU0JVWHBBMg?oc=5"
+      "title": "[파워인터뷰 예고] 뉴로메카 박종훈 대표 \"협동로봇 넘어 휴머노이드까지…산업용 피지컬AI 사업 본격화\"",
+      "source": "팍스경제TV",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE0zWWtLSi1JWEtWSlMybFRYbHdJM1l5eGJ0YmxTbkVyeEh5YnFWa3loYVB6dDREb055VGtXLXhZOHRMTXJ6S0dQOUxsYURoVjYtamNUbWd2WThXYi1VdllpbzlLSi1ueE5U?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -822,20 +1508,6 @@
       "source": "mstoday.co.kr",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1iVFg3Vm5CT25fNno1OXFBTmpqMGdvMHhNNXVnU0pMdXBMaVVMT2JkY1dVNzhrcjdoRDNUbTlVV2xpdHF1bmxDQTlqdEhBMHdMQ3o3LXltVGNkcmlIa3Z2SlBJS3JTWi1KTWlFbA?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "[파워인터뷰 예고] 뉴로메카 박종훈 대표 \"협동로봇 넘어 휴머노이드까지…산업용 피지컬AI 사업 본격화\"",
-      "source": "팍스경제TV",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1Cc3l3WjZmVWNVdWYtTVpocWdYdHZNMUJVbjJfdGx6Yk5oREIxbG5aTV9Kb0FSYm4zTnNIblBMSmRBV1R1ak4zSzd4b1BtNGI3Si1jMll1dFUwMmgxUTg4Y1lxeWNMcTA?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "대만, 원전 재가동 본격화··· SMR·핵융합 등 '신에너지' 시대 예고",
-      "source": "에너지안전신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFBldU0ta1dCUmt1WTRtLVE3SGRrLWVPWk51RkRiaEliVjlCVkRUU2hVRlNWSllsUWkzNWlpRmdibTVKcEVtNTRsckRTVVh4RnFaNlRjZFQtdDFwSFpUdXY1cWRIV2c?oc=5"
     },
     {
       "date": "2026-03-03",
@@ -853,20 +1525,6 @@
     },
     {
       "date": "2026-03-03",
-      "title": "원전 영토 넓히는 K-원전... 한수원, 싱가포르와 SMR 협력 물꼬",
-      "source": "에너지코리아뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE15YmlVMTRaNDBHVlMtX2QtNE1aT1pPclR6MzAzNktoTWRmakQ2T3ZjUUdPZGtZNTc0Z1ZjQXV1NW9wY1cxbXVXZmh2TnlPNTM0T2VHcDJIOWR6U1BjSkpSclFtbEhwNmlmcXNMV1ZMY1A?oc=5"
-    },
-    {
-      "date": "2026-03-03",
-      "title": "한국 SMR, 싱가포르 첫발…한수원·EMA 원전 협력 MOU 체결",
-      "source": "경북일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE93TWlza1ltVTJRVk81aFNneWQ5TXFNTTdaUE4tcXZ0SG5KdFh0YTMxenB5QnV1aF9qODZfR2gwODFHSC1uSEhZTmJ5RHVZMER5N0U3cFAyS294ZWx2YWxQZjgwUVJKRTd2X09IZjJFcw?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "양자 해킹 선제 대응 ‘양자내성 이중 구조 암호’...공개키 해독 위험 차단",
       "source": "지티티코리아",
       "impact": "medium",
@@ -881,31 +1539,10 @@
     },
     {
       "date": "2026-03-03",
-      "title": "수소에너지·수소차·연료전지 관련주, '웃음꽃' 현대로템·에스에너지... '눈물' 유일에너테크·에스코넥·한온시스템",
-      "source": "현대경제신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1PdW4tblJjYnVWYi1zTWtBOFFxNUt1TmpiTE00RU1uRUQyV1UxS1FSeVJQNnp0dmJ5aTJZa0o4MnFBQ2VzQmVJN293NFJFZXlPNlkwSUJmTGIzbjVTZnZpdXpncUlyVTDSAWtBVV95cUxOQUs1VU8xZ0hJcDhJVVFqWTdjRTh2S0U5STk4U2piREVxajg1Szc5NXR4V2hKOW41ZTNWVXA1NXVNQXpMcGhKLVZlb1J1M2VGN0ZxSTBMZWV2eFBELTRfSGJtUXN6U2hQTXJBcw?oc=5"
-    },
-    {
-      "date": "2026-03-03",
       "title": "[명승엽PD의 이슈리포트] 지구 넘어 우주로… 초고효율, AI 등 전략 축 확장 나선 태양광",
       "source": "솔라투데이",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE53bGxIV01ZaGlOcFpwaGdUM2FIeHRWOEhxdVFScEpNcndmeHBKRzRQU2trdjFNc2tmZHF3UFlzTGtDazcxU2U4aWd6NU45SVFveXlmdVB6RHpPQ09hMUVGWWJzRmdYRjZTREFjQmJ3UFY?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "[성공예감] 美·이란 교전 이후 한국 증시, 시나리오는 이렇습니다 – 홍춘욱 대표(프리즘투자자문)",
-      "source": "KBS 뉴스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE4wNlI4Y3RaYXZLYVIyY0gzSHBoSXA4S3RBTnhIM0Q2Z3lRS3Z3eWh0NE41RWdQSTFxM051bjBIV0tTcjlNUk9yWURVcW10Z09lcWsxMEtkcGY2Qm8?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "“중동 사태, 주식시장 충격 1개월로 제한적…주목할 섹터는”",
-      "source": "마켓인",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1tYTZaalN5UTdzeUJzZmY0blNZdHdsdGNiUnJXclBoQV9yeHVmU08tLVZJMVdNVDlUNVdHRklCeVlDU0tFYlNqZWhVS3FnMmtDbkVLRV9YcHRQUmZXZVBXRVJzLXM1Q3RxNVU0VTM0QmRmSHM?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -916,73 +1553,17 @@
     },
     {
       "date": "2026-03-02",
-      "title": "미국, 한국증시 전망 : 미국-이란 전쟁 이슈에 따른 하락장 전환 대비 필요",
-      "source": "네이버 프리미엄콘텐츠",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxON0ticDdobGZDRnZiZDN3VXpJb1pRNHFia09KYzFJRW1nOC1jejlJbjYzX3ZfLUtqbEpHaHhBQTJBcnBXaVV3SkdrWFdFb3ZRekM3cWxJNGtUWThINXROX0kzSlBaeG1MLVNZZktJWmlOMU9iVm1TS0xtU092c19idnFWVQ?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "뉴욕증시, 이란 전쟁은 불확실성 제거일뿐…나스닥 강세 마감",
-      "source": "연합뉴스",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5WOE15Q0Nld21LMG1EeEtDdm16aTlPbWJtZGF1S3FfLWMwLTlQLWQ0Qm9RSWNIUXN4NklSV3FhcWM5dFZ1RkVnZldSUHkyYXI4T0t5NXpoRHlaT03SAWBBVV95cUxNWXZ0N0RKdjJ2TjFoZWtaRGRYajQzZm5QUXJPVk1ZVktyWTFGVzY2UHdlS0NoUkFTZGxJNlZFSTA1dkQ1NGh3OXNRa0RRc3JGTTJmMzEzMmZvSFdCN1ZmLWg?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "美-이란 전쟁에도..美 나스닥100 '상승', MSTR '껑충' vs 메모리주 '뚝'",
-      "source": "초이스경제",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBSWV9vcGNhaXhyUjFLWHd3dF8ybV91eDhWZi10RUVkNHhYNHR3d3JlQWNpZkhXVDFUaGtMYTlJSzhyNkJEclJ5c0VRbHIwMk9LZ2xtalRfRmRGVlJhOG55OFo1U0dwZFZnNW1IYmd6d9IBc0FVX3lxTE55UWdmZDU4eTNzTGZpdUxaOWNrS0I4bWR1Zy1QazlmYzUxd095a3Zzd1pRWXJxSG5tdFJ4WWNEVEQ1TC1fczZpZ1BIZERFZ1dhV0dfTk5URTA4RURQTlpBSGhkYmRMdWw0SkxhMmEzeVdfZlU?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "뉴욕증시, 혼조세로 마감…나스닥 0.36%↑",
-      "source": "블루밍비트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9GRW14THk2TGlHdlprZmd6Y2FnSkIySHpwaHFQb3daU0Z2NWQyUjlkQzcyMk9DbXBNNjdlZWF1MzFaVzE5WV9acFBHUlBGNDJW?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "미증시 지수 선물 소폭 하락에 그쳐…나스닥 0.12%↓",
-      "source": "뉴스1",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1rVzAyYm5hbkdPdnpGeDRRQWlLWE1rZjE1SkxwYUxmWWxESDRVRDFwdUItYmotLXdhbG9LUThmeldxb2dqYjlESmJjYVFNN0twYTRsMFhaNFQ?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "뉴욕증시, 상승세로 전환…나스닥 0.41%↑",
-      "source": "블루밍비트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBHdk5rdzRFRTRFZGNsbWsxaGU2UjBUdU1Mams5VWNkVTRWalZ0MUFEQ25xUUFOYXZlMEJveU83ZEFpT3Rra3NvMGxWMUdLNTJM?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "뉴욕증시, 미국 이란 공습에도 기술주 강세...나스닥 0.36%↑ [상보]",
-      "source": "이투데이",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE13TTNDWmhJZ2c2QzRPVjdScm1lRDBHM05VUVl6bzVWZ2NoSjZwU3ZGVHFRV3JGWVFIX3lETUxYakIxTm8zN3lUQVp0dmdLbXdtS0M4VQ?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "이란 사태에도 미국 증시 선방…나스닥 0.36%↑, 엔비디아 2.99% 급등 |",
-      "source": "HeraldK.com",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiygJBVV95cUxQbFZGZk4yYXlyUXNQWHhrN09uRXh0MDRKNGNiU2tOMzREcDZKZE8wWlBjNFg3MUhtekV5OVNZekpvZE9USE9qMDd2X193Sy1waUNPYWlpZGZNRzQxdkUyRnRzUXZkamYwNnp3eFVPVG5sVVZRaFprdUhuQ1N6T3NvNDY4bVRTNHNGS3JSS21wcUd3azBjLWYzenlYOEYyYWllU1R6OWxiRXB4My1ucUNkbXk2Szh1OHpnMUptQ3pRSHVYYnR6SUIzZE1RV3U0cV9qaDBreXg5WWZJYU16dGtKSFJsVWZRZXU4clFrMlNJWmdUMmRyQTg2aUJIZlRkekY1N1FHWWtieWVmcnotamxaRmRxQS1aeG5IWEcyZS1LWnlzVkFhblQzUHpacEdSc3Z0NV9LNmVJaU1RYW9mYVdDdEpKdkI4WkdDWVE?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "미국 뉴욕증시, 다우 나스닥 하락...호르무즈 해협 봉쇄에 유가 급등",
-      "source": "gukjenews.com",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9iQzg0MUZlOUdhSV9PNGRtbDdpX05SSThRbm0zb3MtSVhZQ192TV92bzBMd0c0NTZkM0llYk9hT2k5UDg4SFBkaV9udmRzQlcxQkROZ25IbDcwRzR2Vld2WWxWclY1R2NXeWRfT0t3?oc=5"
-    },
-    {
-      "date": "2026-03-02",
       "title": "[美 이란 공습]중동 전쟁에 유가 향방, \"'호르무즈 해협' 봉쇄 여부에 달려\"",
+      "source": "아시아경제",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5MMTZqVWFUS3ctd0tRNXV4clFBVXI2QUNBclNfMzBoNUZJRVUyY3JuUlNmbTF6bnhSaEtWdktHSzQzUms0aEhKOGNyWTh1WjZOcS1fdTBsSGdIYi02TGRJLQ?oc=5"
+    },
+    {
+      "date": "2026-03-02",
+      "title": "이란 전쟁〉'호르무즈 봉쇄' 우려에 에너지 수급 비상…韓 원유 70% 중동 의존",
       "source": "v.daum.net",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9YUUR2VXlTTXZqNUlwaWxUOU41a2VtWGhsUUx5d1hPRTYtVlg5VWRMaXRqeTBBUkdaRWVac0VDNnFWUzJweTctNkU0dms3T3lzWkFRUg?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE1MVU1UZGQySU43VHF1bHlSV3ZOSzdmRXQwWjZETXVrak1nRVpNVWJnQWtQczRvZnJKQTZxOGs5aE5PT2VJT0QxWkkzQQ?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -993,10 +1574,10 @@
     },
     {
       "date": "2026-03-02",
-      "title": "“유가 100달러 간다”...이란 공습에 러 ‘화색’",
-      "source": "sedaily.com",
+      "title": "이란 끝내 호르무즈 봉쇄 ... 국제유가 달러환율 금값 \"폭발\"",
+      "source": "글로벌이코노믹",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBNNEhjeGlmY24weTNjWHJ2c1RvOXFfX2FfTlBTT21uYUQ3NGhWRFhzbzl5bXk1YUFaTFhBZkpNdEVjYjBhT3c5QllJRlQ0UlE?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNSXVNOHVmS01DRFN1T2xEeGJhZ2xmLVRNY3lIMWR0b0szWThTbldDcjBiQVNNS0ZSLTRROXBKaEVEU1Q0NkE1VGZZVHp3M3pTT3hoWHViQUVwNm9FdkMtTWVnc2lOUVV3NDVqQTJ4YnFFazRoc0N6ZmYtQU4zT3Y2VVFSZGxnck1K?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -1007,31 +1588,24 @@
     },
     {
       "date": "2026-03-02",
-      "title": "러시아, 국제유가 급등에 화색…유럽은 가스값 폭등",
-      "source": "연합뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE10X3JzbTQ0SE5pMVgxY3FuRmtjR0dMdnViaGNiWWNJVk1XUmlMbW55Qm5GSXNxbjY2bm5KYjkzaXBDSjY1WmZiNnpneThBVUNxT3BCSWVLVS1nZ0lqUmQtMtIBYEFVX3lxTE10X3JzbTQ0SE5pMVgxY3FuRmtjR0dMdnViaGNiWWNJVk1XUmlMbW55Qm5GSXNxbjY2bm5KYjkzaXBDSjY1WmZiNnpneThBVUNxT3BCSWVLVS1nZ0lqUmQtMg?oc=5"
-    },
-    {
-      "date": "2026-03-02",
       "title": "중동 전운 확산, 호르무즈 봉쇄에 원유시장 ‘요동’…유가 100달러 돌파하나",
       "source": "CEO스코어데일리",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE5RWjdfRGJwYmRPRmdKMmJ3d2lERHMtNkNzMUhWbHJXUlZpR1pQZVVDLTBITHE0UnUzR1ZoQmdQa1ByQjJyWVZzOHVDaU1sVUtHeHN6OTZxYTVLc0xzQTFlTUY1N1N0dVQ5bUp3?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9KVzBkQ1QwV1hocFh6bHRQV3NyaVotSlI5QmxHXzJPcXpFclJXYnNuQkhFOWdoNXZKMHIydERyd2NHcUp6MThLbDJYMW12SVhYVno2Uk1jZHdUckNIUllOLUZnTWFKaHM?oc=5"
     },
     {
       "date": "2026-03-02",
-      "title": "韓 원유 70%·LNG 20% 중동 의존…호르무즈 해협 막히면 韓산업 타격 우려",
-      "source": "연합뉴스",
+      "title": "“유가 100달러 간다”...이란 공습에 러 ‘화색’",
+      "source": "sedaily.com",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE0xRFViQzNEbU5tdDN0QkRFbl9oNXc0MV9oclhpS0U5bWNobG1JNFRyaDZYMm5KcWt6RVFGMndmSzFldHVrZ3N4R3gwbjY5LWROdmplTTdybUpYWlnSAWBBVV95cUxPbXZiSF9Jb3hheHhPQzhLREVROHB0THVpZm9pR3lvWWdTTUNTcmwzT2psU2VnN2Ryd0J6VDdqNkRPMXpZMEJCalUybnhXNjJQeThHaGRjbW5HNWx2S05KUlY?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9DXzVSVnlpQmJoZnVkT1dHTTJNS2dSYVFQS0RveTRkSk1yMkVRQWVUNHIyaTU1ZlVCaV9wQTdJUVlobWVJRWpXYmc0VmQ4ZzRqaUE?oc=5"
     },
     {
       "date": "2026-03-02",
-      "title": "[김대호 박사의 오늘의 키워드] 이란전쟁 경제충격·트럼프 지상군·호르무즈·비축유 210일",
-      "source": "SBS Biz",
+      "title": "강달러도 버거운데 유가마저… 韓 ‘호르무즈 리스크’ 예의주시 [美, 이란 공습]",
+      "source": "segye.com",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9nRFhzNUZJOFA2UzI4ZGdoYmZlX2Y0Q2xPZ2FQc05scGRuSl9maXZGV1gyek0xWkJabnMxYlZIYW00LWxyTUdSM1RZQ2MwNXRsZ2V0WVc2VXTSAVhBVV95cUxPZ0RYczVGSThQNlMyOGRnaGJmZV9mNENsT2dhUHNObHBkbkpfZml2RldYMnpNMVpCWm5zMWJWSGFtNC1sck1HUjNUWUNjMDV0bGdldFlXNlV0?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFAzbi03U05vRnpPWUpSQ2Z5SGlzS0d4UU56NHFkd3ctQThMeGczTlN1bkYteW5TZHR0M1RlZlIxSVNONXN3ZjA4bm1MdWZWQlR3aXY2cUl3QVrSAVRBVV95cUxQZ2p4dXhDdWJta1FmREN2WDlfRGxPR0dOUzNTSHV6Uk5JQnVEaDF1QUpoM0VDRmtEODVObmVoR05MTVFLNEQ4Tkc0X2NzMWRjejBDSjk?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -1042,14 +1616,21 @@
     },
     {
       "date": "2026-03-02",
-      "title": "강달러도 버거운데 유가마저…韓 '호르무즈 리스크' 예의주시 [美, 이란 공습]",
-      "source": "네이트",
+      "title": "호르무즈 해협 봉쇄에 유가 시장 긴장…봉쇄 장기화 시 글로벌 유가 타격",
+      "source": "kyungjeilbo.com",
       "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1XaFZHY0RDUUR0aUFWMWltbDB5a3ktc2l0WVUySFEtWkpGNTZxaDZzYmVEbEVmNmJ5bUNZbDZPYXM5TGx1LUg4UXV1cFVCUnpFZDU4?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1JS2JsRk82T01EU3NHSTVhYWxraXoyUnF3d053N3A0ZWw5NDV4Mnkwa0VNaWFXWUZJbU9OanplSERnT0dveEhqR1M0TzZSelZVSjdNbmZZSkR2cFdhMkFzMNIBXEFVX3lxTE9kY2U4cXpKNUpvM3RWeUZkZmpIR1VyLXBrcjdIUjBvOG9RbFRoSk1xTzYtUkFSeHFET0M2LTkwVVNRdkNpMTd0OVZRZ09fMDFPX3MzOWpZa3pnU0RG?oc=5"
     },
     {
       "date": "2026-03-02",
-      "title": "'호르무즈 봉쇄' 불똥에…정유·항공·해운업계 직격탄",
+      "title": "피의 보복”과 전장 확산, 트럼프의 이란 공습이 겨냥한 진짜 목표 이란, 군사 열세를 ‘전장 확대’로 뒤집다: 걸프 6개국까지 불붙은 전쟁 호르무즈·키프로스까지 흔들리는 에너지 목줄, 유가 쇼크 재점화되나",
+      "source": "데일리머니",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBxM2NrbUlKT2VlMFlMSkcyUklKNnRGZlJOZUN5SGpPQTNPeTRiOXdrbHZFRVNyb2VIcXZjQzIzRXBmX2YyY0xVNEt4LWdrNTFQTDZzSGpreHJMWEppdEpfenNrQTQ3ZHF6ZXVTMFNpZkx1Z9IBdkFVX3lxTE0wUTdhb0FMbHI5MUpVQVZ3OEhfTU5KME5RamROZkIxWmNldXZZd2RZT2FyYmtTWjJFS2pfMU1FRS1tUGdLZll3WWh4bjhEUng2bHRPVVJzYmk5TDByb016ejBEaTJFbjRDRWdhQVJjU2V2UzFPT0E?oc=5"
+    },
+    {
+      "date": "2026-03-02",
+      "title": "호르무즈 해협 봉쇄… 정유·석화·항공·해운 ‘비상’",
       "source": "edaily.co.kr",
       "impact": "high",
       "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQZDJMam5yWjVKcUt2WXNaSHJtNnBGSmdMVkdqSDFrSU5rWk9yWnJPcGhSc1NROFFIYUJkWGhGcjQ0ckQ0WmNnRW9qTkltY3JKNzlwOEZXMTVuMmlHMnVLSEt0STdXbFNxbUNMcGlCOFREVGc3T3NnYm5yLXRFa1pwaw?oc=5"
@@ -1084,17 +1665,10 @@
     },
     {
       "date": "2026-03-02",
-      "title": "[자동화] 삼성전자, 2030년까지 전 공장 'AI 자율화'…휴머노이드 로봇 투입",
-      "source": "리뷰타임스",
+      "title": "한-싱가포르, '미래에너지' SMR 손잡다...5조 시장 공략",
+      "source": "에너지신문",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9ucTBuUFZ6ejl4ZXlGUW5pX0JHNVZCZ09iQU5kSVNMSkJyRDBXLXVWcjZvSE9kdEpNVnliYnNWVENjdHZ0U1NYbjg1TWxUTkc0U1djRmZ3VHFXSEZiY3p5TU5xdTNHbmFmX24teG9WeXI?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "한수원-싱가포르, 5조원 규모 SMR 시장 뚫는다··· K-원전 '미래 동맹' 결성",
-      "source": "에너지안전신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFBpbUV6VTRUbG16QllMWTFpQy1LeFlKa0RmNkVfRjQ3N1lPQTN0RTRvNWFoSkdwVTE3N2hhVlVVOVNFWUNHU0xIUHRBNEhMQ19LV2R4aVI5R09iZ3hIQUdOTkE5OXA?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9yM1dHX3RzSndQakhjN1BqWmN1aGptZWRrX1NkaktTMXhFdktiV0MwOThkOTQxZlpDdDYtVE1Xcm50ZlFYNXFUT256T1FwdHZWTzBIcUp0dExuUFFXWm52VVZXNFV5MUtUenZJZlB1MzRYUQ?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -1102,13 +1676,6 @@
       "source": "아이티비즈",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBkZ2dtX3hZU282ZWVxUjhrUUcxS2ktQzVHM0xkRWx5QWFNcDlGNXFvaWJocWd5VFIzV1I2aURTRUdwYldXMU1lNVBkM3dnWTlUTnRRR3FIZC1pSGhDd19qcUtpclhZQ28?oc=5"
-    },
-    {
-      "date": "2026-03-02",
-      "title": "中 중심 공급망 탈피… K태양광, 새로운 밸류체인 밝힌다",
-      "source": "mt.co.kr",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE1NQ2d2VGtVdG1tTmd1SnRHdFZfZFpOdnA4cF8zOE5mNlRSV3FCOEg0NXo2U0RGclZPZ3AzMnhzSDRJNUNUMVN1S0wxcXBtMGRqUEZQYU5uZVh6eEN3a1djMjNBTTExMUgtM3Y4d253dzRUQQ?oc=5"
     },
     {
       "date": "2026-03-02",
@@ -1147,24 +1714,31 @@
     },
     {
       "date": "2026-03-01",
+      "title": "“韓 원유 70%가 중동산...호르무즈 장기 봉쇄 땐 전력·수출난 가능성”",
+      "source": "sedaily.com",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE42aHVRNnJqQjFKQk15WnZlR2VGZnZma1JiUE9ycy1SYVFfbXlzZVZ3cnJsNEJMU2toUmNoSGw3MEVZZXpUSG9tZWRfeUlMVXc?oc=5"
+    },
+    {
+      "date": "2026-03-01",
+      "title": "이란 공습, 유가 급등 부를 수 있다",
+      "source": "밴쿠버 조선일보",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE51UTRiU3VlNkZtUGVQQnZLSDFuR0lfT3JtMnE5bm5qZDJ6dWVQQ2wtcjFERzFfN1BFMGwyYXZEQV9aN3R5Q3g2UjNn?oc=5"
+    },
+    {
+      "date": "2026-03-01",
+      "title": "미국 이란 '전면 전쟁 위기'에 방산주 관련주 '주목'",
+      "source": "gukjenews.com",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE01Z3pHWDg5QUVlU0pFZUJnYWVFcTJqSmFuVWRvNXQ0UDVqVXo1QTZNY1dTTU9wU2RyNzVSRTlsMllhY0hNcGVSclVlUTJMR0h1dkJqYUtTREt0OGhZdDFSd01xNFoxQXItY0x1RXd3?oc=5"
+    },
+    {
+      "date": "2026-03-01",
       "title": "삼성 평택공장, 'HBM 전진기지'로…메모리·파운드리 시너지 확대",
       "source": "연합뉴스",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9PaFlkYjd0Y0QzOTBQVnZESG1rQm1QTDEtZTV5eVlRZWlUYmxrNmdmTzBrZWotemE3LVEtWV96aF9MRFBCbmptTnBLSkJaWmpMaWV4VVI0dFVMX1HSAWBBVV95cUxOQU1QUV9NM1B6Z0xsTUVLRzVoTDZuOU05ZnpOWGQtUDhETHFlcTY5aHYxVzlaSG5Xb3dQRkNSNUV2WUN6c0JoWERqMlJ6NDhNQXB4TlJXVFdZbmc5aXFVNzI?oc=5"
-    },
-    {
-      "date": "2026-03-01",
-      "title": "바이오마린 PKU 신약 ‘팔린지크’, 12세 이상 청소년으로 FDA 승인 확대",
-      "source": "금융경제플러스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9YUkdua3NiY01MVWliZ1RELVNDdVJPRXlOeElkWUZQM01GNTNSeThZM29tbEsxU1Z6ektoY1pjeEZkUjlFZDZRbkNzaDlScXA5YkE0akV1Yl9oc3czMldOeC1oZFdJQm1DOFFwUQ?oc=5"
-    },
-    {
-      "date": "2026-03-01",
-      "title": "“꿈의 배터리” 이수스페셜티케미컬, 황화리튬 ‘마더플랜트’ 승부수",
-      "source": "핀포인트뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBwN1UxVDRFSGFpRHRlelRDbjhSWlJ6dTc5cU5kcFQ2Q09uM0p6aG02QkRnWWdSWFdNY0JmRXM2UDVlT2xlZS1ZdUpUR2NqZGN0QWVTM0hDakNCc3lrUUdqQUxldERqMk04Ti1JS2RpbFlPSXfSAXdBVV95cUxQRmkyZzZzS2ZYNnRwWnVJYl96RnZCQXd5N3VRWG13b1M4RVlOVXBtcW1rMFVsblVxWi1qbTdtalJJdFhadUg1aGthLW1xUnNRTmZQbzdTdXNqeTk4VDlTN2xVWFBqcC1GeVpiSFVpekp4TEItLWJUSQ?oc=5"
     },
     {
       "date": "2026-03-01",
@@ -1196,10 +1770,10 @@
     },
     {
       "date": "2026-03-01",
-      "title": "[산업통상자원부] 미 수소시장 진출을 위한 민관 합동 로드쇼 개최",
-      "source": "국가기후위기대응위원회",
+      "title": "MLCC부터 전기차 배터리까지… 대주전자재료, 글로벌 'IT 혈관' 공급",
+      "source": "핀포인트뉴스",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQeDVVNndjeWFtTHlQRDBlQUw5LURFWURIMXY2V04zUTRMclRqdmJNclQ4RGdTSFJfUEVkVVFPbEo2cmZBTDNyOF9Vb3RXRHY5YnZXUjZKQ081VmdWN3pLQlcwQlp6ak9nRnBlQm1CYzhPQkFDWkJUYkw1V2VPTmJQZDBwX2xXckNDdWt6cnd4cTNTbVMzLUstSW5IN29zS21kbGtjbFFLaENjQy1EdGd4T183SE1GM3ZEdnpZeW53d1YtamNpVjR4eHhLaG51c0h6c3VMS01ucExvV2M?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9fejRsVl9ZUWltT1EwOW9KTUh1VlNnVDVIQS1OR2tFbUVjaE0tMFM0TlhpWjc5YVRpdWpqRHd6T3ZVS1ZEdEhIb1hBYWt2R2Mtc0pJUTQwSWVKRUJST1VIN3dMbVdtVjhEd2k2akRxVl94U3fSAXdBVV95cUxQTlNrbDUyQnBjQ0JPcFNQVXE4WDJsdVNPWUFNZUdrR1VhUTdnVXJfRlJGLWltT25Lcnd3bS1jTTM3V2VkRXRfSDkyS25MWnR3V2R2TjhqZ2F3TDRRemJRbkt4VTBfMk5SaE9xZHBRUldvTnpVbE5VVQ?oc=5"
     },
     {
       "date": "2026-02-28",
@@ -1224,6 +1798,20 @@
     },
     {
       "date": "2026-02-28",
+      "title": "호르무즈 해협 봉쇄되나…정유·석유화학업계 타격 불가피[미국-이란 전쟁]",
+      "source": "v.daum.net",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBGT1ZIcm5UM3RvNzFXbkx4MWk5V2V2U3RpdzRxaDRDbE5heGU0SWZkX0hURGdSUm5UU3EyWm9fUV9KUDlpMElLSDd4eWRGY0U?oc=5"
+    },
+    {
+      "date": "2026-02-28",
+      "title": "[미국 이란 전쟁] 美·이스라엘, 이란 공습 감행…정유업계 긴장감 속 예의주시",
+      "source": "딜사이트",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE03RkdnUmprRVUxUTFRNi15S2Itbkx5aVRTSkVUaUdQS2FUYTZzbGNobUNBUTBNTDlFRS03cW1YOG1mMS1OX3I3VzNJX0dKcE0?oc=5"
+    },
+    {
+      "date": "2026-02-28",
       "title": "중동 전면전 확대 '호르무즈 뇌관' 터졌다...원유, 금 폭등 불가피",
       "source": "더밀크 | The Miilk",
       "impact": "high",
@@ -1238,24 +1826,10 @@
     },
     {
       "date": "2026-02-28",
-      "title": "호르무즈 해협 봉쇄되나…정유·석유화학업계 타격 불가피[미국-이란 전쟁]",
-      "source": "네이트",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1MNUhCakxPTGRfdmJ5WTdWaHdmeEg4RDdHWFJGS01zcWd2OS1od1ZaYkFFR1pTeFZ2SjJvc0VfajJ1LVF4S3dFODBDc3cyTThmbzJ3?oc=5"
-    },
-    {
-      "date": "2026-02-28",
       "title": "KAI 신임대표 방산 수출전문가 김종출 내정",
       "source": "스페셜경제",
       "impact": "medium",
       "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE54cnVEdGZlS1BTaERwU0V2eWxFUExuYUwyeE1oTTRwdHpOMkRXUnF4YmlEUHlkY3F2M3ZFM0R2QXNhNThTdFJQVkJ3MnYyZjRsd3ltZVdRUFl5NkZYdDNXZm82akQ5VmJJcmlmSw?oc=5"
-    },
-    {
-      "date": "2026-02-28",
-      "title": "KAI, 차기 대표이사 후보에 김종출 前 방사청 국방기술보호국장 추천…수출·기술 전략 강화 무게",
-      "source": "이코노미사이언스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9uZWoyMVAxZ3A1czVodXNXek5hODBWNGVSa1FnUVNKemtMenF1aEpmOXBJbW1zVmx2MHBERGVCdlVISGZxbkVudXdyQVdoUmdJWXFiSTB1R1FZX0RTdXZudUl6elF4eC1zeFFqdlVxdw?oc=5"
     },
     {
       "date": "2026-02-28",
@@ -1277,412 +1851,6 @@
       "source": "에너지경제신문",
       "impact": "low",
       "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5DamxqazhoVTljUlJTYW5wWW9lSUhhTUN1dzdBakxVRzV4Z0x5RGVoSkw4SXNwX3JwLS1iWlEwbHJsMmFQTk9KQXlaNDl3WkJ5N2FDaGE1ZFFLVlk?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "한국증시 이제는 좀 위험합니다.",
-      "source": "네이버 프리미엄콘텐츠",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPNGtmemd6OVd2Ty05M3BRTFZwaEZwRXJ1b2xEb25yc0FzbVJNUXFxV0t1UkdaeF9mQ1RIVlE5QV9HcllDV2pBMnMxT2RxNlBjcl83Tm96emN0b3NsalN2bHFvREVVU1VGWFd0VHZxZTAwcWpKc3NlN2VnOUwzRUE0emFlSDNXaUUxQjl6Rg?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "AI 균열에 美증시 출렁…나스닥 급락 위기",
-      "source": "mstoday.co.kr",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5scmViaFU3VG5NRWFMWjZiaF9heHJMUDRnVjVjZHlFNVV2RFdXZGc3X1dSaDUxRHJQZ2RWMG5PbFRwZkw1RVByM2FBX0JpNzFQVEJFekt2TkY4UU5rdDY4N0dkYS1UZUtBOC1QMA?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "\"韓-UAE, 350억달러 이상 방산 협력\"…방산주 '들썩'",
-      "source": "한국경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9aNkNYdVpPWHh6YTBQbW5jLUcxc2pZbkdmbGtaUlA0d0RpcGFwTDlwb2tvaUl4clFIN00yeWlLdWZmaXMyT2k0bG1SZUV1ZldIeHRqaFFRaDdkZ9IBVEFVX3lxTE92RjlyaHVLU1dUME9MaUE5WVhQRGJ1UFUtVWxhT1lWVDBtLXJfeTVKNnA0TVpkbUJybmtSemFWUnNtUE1POVBEdmo0ekNRYVZqWm9KMA?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "삼성바이오, 넥틴-4 타깃 ADC 1상 IND 승인… '신약개발 시작'",
-      "source": "히트뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE5aMWp1OVoxbGxmYmJHT3VVVmJGbG1Uci1NWnI2cC1pbW1rN2ZtazZ5RS1YQl9NSkJfeGZjNlVXbkJjb3ppOXdZc3JqWDlvUFR3Y2FSSlNLT2dmY0x2Tng2YVpGZWZqRVhqTkY4?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "KAI, 새 대표에 'K방산 수출 전문가' 김종출 전 방위사업청 국장 내정",
-      "source": "뉴시스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE40ODJiS1VaNXJEN1lMWkpzM21rNWZSU0s1V3FlWmdCbEpWd3p6RWw4UWtUM24yZWxHTjZRUmJVc2RteVE5M2ZpdHNKLWNTTjhWdV9maWFRR0tUeWZqQlZFRNIBeEFVX3lxTFBSd2NBeUJfZVJOSm9jTGRoZ2RNY2NPN0R2bjhPQ29JMDZBT2JCMTBJaXBDWVdQS2FGQlY2b1pTN2FfbHhUdzJWdkMtMGZwNVBTZFM2OW9EcWxBaWp4WU1LR1dIZ2dITGJPek9pMW9iQjNyTnZDY2I5VQ?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "뉴로메카, 휴머노이드 로봇 전략 본격화…경제부총리 현장 방문",
-      "source": "팍스경제TV",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE45c2k5SkhiVEJFbkRfOXV1Z1Q0OENkejBZVXo5LUpYeGNObmxwQld3bV90WjRIXzBiN2FLeDRHV1hUNW9lWUlUWnczNkhSZVUtbDlzRV9wUHlXNnRTUXpTWEJQeEtUUQ?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "국내 양자컴퓨터 관련주, 대장주 TOP10",
-      "source": "브런치",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE1XWS14bXNhbHdUajZRdmRxNVFRQnplTzdkVXNJaEdMRTR0MWFPTjM3V014ODlTeDBsZW1HNUJ3cUhfTy10NFZ2VzF3?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "정부, 올해 우주 R&D에 1조1,605억 투입…누리호 5차 발사·달착륙선 개발 본격화",
-      "source": "드론매거진 뉴스",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5nNThQekhFdDVVZlppbkdlWnNoVFRMSFd6enZpOGQxbWthVlU0TFQ0LTZ6QktpTkxGMnlVOXoydG1Xamt6YVNwN3ItMHoxM1dubEl4UUlXMnlLRjRWVW1BM2tpenE?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "현대차그룹, 새만금에 9조 투자...‘AI·수소’ 산업 미래 전초기지",
-      "source": "월간수소경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFBZMFoyRTVHRnphLXNiZmJac1FZbjFNbHVGSHNPMnFMOHNoUFZJMkJpMWVTOTN3MFVfd2xMbV8xVENaVDJMQ2ZTRWpvTkNBY1NHNkVLSjAyUlMtb1NEMGRManc3clN5Zw?oc=5"
-    },
-    {
-      "date": "2026-02-27",
-      "title": "우주태양광·페로브스카이트 관련주, '껑충껑충' HD현대에너지솔루션·한화솔루션... '주르륵' 한국전력",
-      "source": "현대경제신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBDdXZPdGtpbkMzSkYtZTJWVXJsS0pKTnRRUWFIUk5IdkdCQVBEOUdLUUhLaU1BQkZBVHlPM1lYZEQxNDdsenpzVHo1YjM3X3lBSzJvV0dXWnNFS0ZfOVNZTENUWk5Xc0XSAWtBVV95cUxNQWRnbUhnQ3psTElRS3lWUzdHVkdFdFNGb25IenIwNi1tbVpNbWVsWVVTSUIxUlhzc1dlaEEzbkZubExZUk9xUncxbW1kbTlnSzc1d2tMMkZRaVlaRmJnMTdnYmtXTFNERlRTVQ?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "한국 증시 시총, 佛·獨 제치고 세계 9위로 도약",
-      "source": "중소기업투데이",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBSdlh5SzJoaU9mdVRkdEl5YlViM2Y4V1M3Mk45MHZQX1FSTGVpUTNXT3pUcWtmaTROY1IzejVsNXpheDNPT1l6ajlTUGhYZ3dzYjh0TTNzWjJpWUh3ZVFuXzY0NkFmMVZz0gFsQVVfeXFMTy0tYTMycnQxMmZudjZmbXVYVnY5YW5CQTVTOGc3cnpBREc4MkVqclJqa0o3UlhPbi1XSDNralF0SFdBUXpCek5mV0EzZHpKekh2VkswY0poUF9TOHlJYlNkMC1GVmJKc3NUUDRD?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "미국증시 장중...나스닥 '뚝', 엔비디아·마이크론·브로드컴 '급락'",
-      "source": "초이스경제",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5fZVpraGNPT3l4Qk5ISmhpWnRFNFR4MC1BSWU1a0NSNnhKbHBhTjBQZHRCcTVKWUE4TEZ1Rk1hTndyb0lXMmFlUjNGb3VCNDY2bWxLdjU5XzhJUE9kZ3pGRWp4bVJRNmhSb3BWZkswd9IBc0FVX3lxTE9CZGtHbzV1cjI0S1ZNc2lHWmxQWmxBS3lmX2dyalE1OW8weDV1WHoyc2xJdWRvMVpDS1M0NWlSbGEyNjZ5MWpjX2tLVy10eG45THBjX2JzRXFLUTU0M1FhX0JqNGY1dmVQdUtZak1WSmFvcTQ?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "엔비디아 '쇼크'...미국증시 '혼조', 나스닥 1.2% '뚝'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBtQXhvNGFpTlhXc0pVRGR6VnR5LVE0Ylp5bklCVnJrb3JFQVhwaVFjQlJZaFFaTkZVWVNSNUIyNV9JY2ZuMXBMaC1HYXc2RWZxa05xOGdqbmFGaGloRDlWT2o5Yk05dHBOS29kVTRFd9IBc0FVX3lxTE96aS1RUVM3QlBmU2s2ZkpLSmtiU2o1TWFHSnNJWnl5ZHM0aV96VFNTNVFlbF9TcldxeHR2dTd6NDRwYnp6cUgyM2J3ZGw2S05HT29ZWXVCZjdKQTR3Rkk0YVZMRHBIZnpzWFpZUWg5VGRwR2c?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "미국증시 나스닥100 '뚝'...SW관련주 '활짝' vs 반도체주 '휘청'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1IVlduYVA5akE1RlllYXR4SkYwbTJORnprT3hndnlFM0FjcE12RXFSTmVvOWxFSDZQbWs1TEp3N1M4SFA0YjJtNVdEb0FJYTNtVV9OQWlhMmhsNGlySEZWdjdYY2lSTzVuQ3hObjM3TmvSAXNBVV95cUxNWHhsNklQM3J2RFhKUnpCSEx5U2VhZlJDalZ1cWhIbWJlZjRPT05NN3pLQXlPWjRqUFg5cmdBb09PeVd6UTQxUVJZMlM1S0kxdmhrc0tCc3A5bzBFbHozdExZZDh2QXRrYkV5dmVDR2FMWmh3?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "미국증시 나스닥 급등 속...코스피·코스닥 '상승 출발'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1nT0J3REV6ZUVTX2hyR0EyU2RqaTN6TGROMlFGemdkeWp3bDN0VW5Nb21PcmhjelpmQ0cxd2ZIaTBHUzg0SXU1al9ZcFAyMk1yZUNHRkNINnJCMS1pb2o4REpMVGZPWmVGaDIweGFhMNIBc0FVX3lxTE5CMWQtaVQ3RjVmR09zMUVweUFxNVFhMnAzeWpvM0VpaEtJU3QzcWhJOFFPcHdqZnllWnBBa2o3cGR0MktlZkNOUEowRTFUWXNWWjdWQnpiVE52NDhuWEswQk1haTQwbXZJMzVHY3NFRUx2djA?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "이창용 “환율·금리 불안 여전···금리, 당분간 현 수준 유지”",
-      "source": "ceodaily.co.kr",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5NUUh1SnkwNHA2aEs4QXlFOFRzWDc1dUtDeGt5eXh1a3hWT3VnQVRZVzVUTFRKbDc2X1FrYjVSNnh6c2h6XzRyT2syNGFFOWF1aGlZY0pIajN5dzl3SnN1aVNLVEpPbmtaUzJLS9IBcEFVX3lxTE1xT2o3eGpGWVRqb2Mzd0dwOUhuTW94XzhjTEJIbTVxbURiVTFzQWlGMmFWU1pnMEYyYWRiRm42X0NrWi1yQTlVYWRhRDZ5alVnaG5SZVBuU1ZvVXBMRW1XQkFuSGQzVHVaaWczTF96S0g?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "[경제 오딧세이]한국은행, 기준금리 동결 전망...환율과 집값 변수",
-      "source": "BBS불교방송",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE0xRlc4MWJzSF9Sek9fYmpOdmhTT1BXNmlmLVU5allZMUlCMmNkSlZyZjFnYzcwREV1LUVLZnF3cXByTlczWHBSa0V4cEM4YnE1dTlpQ2NYY3dlNlZfLVVQSHdXYXZTSFhfZF8w?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "기준금리 연 2.5%, 6연속 동결…경기 좋은데 집값·환율은 불안(종합)",
-      "source": "v.daum.net",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBaMlZyUlBLSldPQnhmN0JOTjBJazZSOHhOZ09ZLXhQeWJ1Z1lXbTNoeXZnbGpvdF9lSklqaGU4TDlJcXZGZG10cGpQZWtNUXhmTzExMg?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "“美 국채, 금리 상하방 요인 혼재…채권시장 줄다리기 지속”",
-      "source": "뉴스투데이",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5EU2JrUVY5Y0twYTRVNWxma1M4S1NsWi00R2U2enFyM21hd0xybk5fVVRIUVBlUGJlWTlPdTZOb1dQUE43U3dsaklkYnBjTm4wc2J5U2pfU0h1WHJhTUE?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "연준 FOMC 금리인하 \"IMF 전면 수정 권고\" 뉴욕증시 비트코인\" 엔비디아 후폭풍\"",
-      "source": "초이스스탁",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5BWmxRYUFGM0lvQ3ViU2FQdzF0emNmRElCMjBoem1NYVd3cmFJZWx3eVNSYVI0d2lpRWdpVkI3M0xYZmYtYUxhNHpZYWRXcGtSUEhxQUZFSlVXNl9zTk83VU9VMkluc00?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "美 이란 공습 우려, 중동 석유 수출량 급증…국제유가 상승세 주춤",
-      "source": "아시아경제",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5zQUNraFg1aG9GZWxFdkFIOGZSZU9VNzBlMFJhWXptQ1pQQkh1Wlc0MkJNSFlRa3pSUG0xRXpXMUlPTlUxUUhsY1N6ZTlRVWp6UXQyU2NKYVF6cmhvZTZ2aw?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "3상 임상 2→1건 축소 꺼낸 FDA, 美 진출 필요한 것은 '연구 설계'",
-      "source": "히트뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1vT2IzaGl6b1RNajN4LTRZR3Q5Ty1CZ0h4X28tanJCN1o0Q1d2djRQQ2MwVzJIdmdhdlZqdkxHN1RmT1daQi0tZEJBVXQxelQ2UkpPcXBUUGMxdmRCZzd2V3FHbUlxNDV2RDA0?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "“신약 허가 기간 절반으로 줄인다” …불붙은 미·중 바이오 전쟁",
-      "source": "조선일보",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNSl9ObEp5TFU4c2lCcFB3VGpPeU1Mb19ndFhKSmlqajBwQlF4U0tCYWxyX1FjV2xDN29FajdDVVdWTHNYVy1VQy10UkVfdzQtQUZLZ2steXNDUU56VjJNUjBBZWd3WW1VX3pGdGFaMFlqRUp2YzRBdkllRW5fQklRaDBEY9IBlwFBVV95cUxPRC04RVlPbEZaak05dTRpb0xpWFk2NlVrc2Q3ODdYMEI1WGpxb1lkNkg3Z1NDWUdSQlNmS3hwX296Qng2SUZmNWpubFZBSVV4cmZDMDVWdHJUVllLQTdFSVIyZm9aLXhZcFFRSXNmMGl3ZlhUbWl0U3RzdFVob3VYYXZWODlqazMzVnlsWmlNdmhndW9HUTBj?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "“신약 개발 기간 단축”… 美·中 바이오 전쟁 - 조선비즈",
-      "source": "Chosunbiz",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPUDdCaHBoQ2JwdTcxLWRUQkEzTWtZUHBaak1MbGwzbDVNbTNNX3pweC1Ga25fWDU3R0pzclF0dlZmLWZDUlZfUjRkTTVBdVAwankzZHJJaGV6djA5TzRSM1B4QTFhNFdFcTJBb1NvWWVYU05teEpJbi01am5KUDJPMU13Y3V3YTBHS01CRtIBoAFBVV95cUxOc2RiVGhOVVBtcTZscXlYNER0Ym14UHVOb3BURkVwRS1FN1pZT01DZHM1dEF4NEZUZGdOeThVQVpVWFMwa29JMEppOEpkTTRIQWFyc194VnlQN1hfdFBtVmJnYUhrN2t2dmZXYU5IcHU0d2JkVlhNcDhlM3EzQUJPdG9MWnBLVDB1ejZMZ3lRaEJPcGhRMzJOVDJEdGh5ZE16?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "日 방산 수출 드라이브…K방산에 미칠 영향은?",
-      "source": "이코노미톡뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1ValkySUROanNLV1l3UmdWVXBaeTVCOUNtT0VSTmN4MUpBTHFYaDNOMjJHSVVjNTl3eDZrNE5sQk1wNlRPSkg4cVlYWUx5TlhyZ0VKNXBaRXhpQlBFTXJma1BwcWtJRFZJZU5fWg?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "중국 휴머노이드 '빅5', 다음달 서울 집결…K-로봇, 플랫폼·실용주의로 정면 승부",
-      "source": "글로벌이코노믹",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPemlfNkdZVnZkdjloaVNHdF9EenVJN0h5WVZzYU9iVnBnQW94ZVFURWRwaXhhOE1ZbDVPdzkwTzVVNjd1V0J4akVXU24zZXg5aVlERWpZSzVBRzU5cS1sTkd3RmFHVEdROUpHc0d0bjhQeUIzR0lLdl93dFpxamwzZ3hWVEtjUFlx?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "수산인더스트리, 원전정비·SMR 기술로 ‘퀀텀 점프’ 시동",
-      "source": "전기신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1ScWl3ajF2VXQ5VjJGYkg4cWo3ZkxyREJKekNacDBLR19YTGJpQk9aVjdCaktCV0gwZHFMOUw3dU8zMWR4Yk55MDN1dGtUamswZHVoeVBXM1Rfc2NKMW5iZExjVXlSeXBKa0VMQtIBcEFVX3lxTE9tNXA4OTFyNWQ1UDBNU090SlVoWjZ1akM4WWZzRnp5ZU1FZmF2WFd4bnlzSTVoX2FULXBXcl9XUDhSN0JSc0FRbnBIRnBGN1Q4ZC12ZDhuVDFoeExsbHhibG1rRHkzNDBlaGszenMycDc?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "'자율주행차 타다 해킹당하면 어쩌지'… 양자암호로 걱정 덜 수 있을까-경제ㅣ한국일보",
-      "source": "한국일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBXTzVrbzJpd2JqelczTmpBdXBOa0staDZqMG9rV3RXM2o4elhwLTQtV21vSXl3NDdUcVZKV1dneGxBVGM4NUkwRllLZHlqQkpHTUdNODFXc2dUQ1k0SzExcm9EOWREbGF3UFZPNlBnbFFuT3c?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "[TODAY인] AI 다음 '양자기술'…양자컴퓨터 현재와 미래는?",
-      "source": "YTN 사이언스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOM1M4emg3WUlSVy01OGJNakNRaTdyUU5FRlpTNGY3VFhxZ0V6Q19xWGk2NkVSWlRONHFNVDRLV1FnUVQzTjBHcjAxbTlENnRvRG84QzlpbG82ZnV1TGJ5OTl2ZWhPNnNjdmhsTU83X2JGTlhuQmVYNnNjUDl1SXRrckdFQzFfLUdGenZvTQ?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "서울시, AI･바이오･금융까지 바꾸는 '양자기술' 육성 본격화",
-      "source": "한국강사신문",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE95T3FuZE1EakluOHVfNzl1WTVPWm5VZi11N1dQMjhSV0wxZlhFOGt1QXByb2FqYkp5RkZLRnZPV0NjdVdvLVBfRGJLdEpodU9tN1NIOHRLOXpVWWpoenliVlR2M2NwdEhVSnhYdFZwaUg?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "우주 개발 예산 1조1605억…누리호 5차 발사·달 착륙선 개발 본격화",
-      "source": "동아사이언스",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE11TF9pSlhJX1ptY2dmRjdUZ3lmbF9aMUVVU3prRHVJN1JRT3lDTV9TeWN4OTlWSWQwYURaUkxUbEhmS21NdW9mYUhJbmtsbjhk?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "누리호 5차 발사·재사용 발사체 확보 등 본격 추진",
-      "source": "브릿지경제",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE80c1ljQXZpaks5ZWV2WGo0cFlBam1oV3pFU1Z6SVlLdUVZOWR2U2pvWmdyaTgyVFFRQUJDdEx4eU5HRUpDVnBZdGtLZ0pwTEVnUmVDSjJNaGhqdw?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "누리호 고도화·재사용발사체·달 착륙선…갈 길 먼 우주청 [지금은 우주]",
-      "source": "아이뉴스24",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiTEFVX3lxTE5aU3gtdDhfeXdZVDQ2X0ZwTGl3bDFrMmFYYmVVMS1wUHN0NXNwb05MVl9HYU9OdTBaUmtWOEJjeGtnS1RkZVcxWGJJcWk?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "오태석 우주청장 \"우주개발·위성활용, 우리나라 우주항공 생존전략\"",
-      "source": "뉴시스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1YMXFqSk55UmtMZGtPb3c5V2hWUktKVlpDM3B6VXVadmpxVVVueGhBZnpxbnBsTEZQNmF2TFlKblplNy0wZWVvZ2hJUUtSa2dEM0hYSURtdjZiRFFXVG4zSNIBeEFVX3lxTE5hb3MtVmNXVXpzUUxpWlJYNDVrUktTVFVCel9kM21XZ2FzRkZrSGJ1NnA5ZFhUdWJjNnNYNUJtUm1lN0xaRkwtWllnczV6d2NCblFQQ1ZxcE9vZkhCNTJRWVhaYTlwVlhSVVFZX1A0SHhkekswSTFEVA?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "우주개발 예산 1조1605억…달 착륙선·누리호 5차·재사용 발사체 본격화",
-      "source": "네이트",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFByZkpFTUVpeTE1VlphZFd2MFRvU3pNaTVIQUlZRGF4UUxHYWJ5dEtVM0Q5b0VLOWxPR2F5SkJjbU8telY3X1JOY01RQjJOQUxiTHFB?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "올해 우주에 1조1천605억원 투입…누리호 5차 발사 추진",
-      "source": "네이트",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE02aGZwZWNsQ0xNS2s5QjNGelJiTUV6TndGNElxWmRqSHJDaHFicGIwTXJjUFFUMzN2WFlmQjlhNjZmZ3dHYnVsaWlJT1lwVU9MZG1J?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "AI가 설계하고 로봇이 빚는 수소차의 ‘심장’",
-      "source": "월간수소경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1qUnpnZzk0eGpobTNBREU4WFdHSWhVMFlRM1ZONFFpNkVwOXpsNmZyZDEyNV90X2dHLUtwbVdNd0FQenFaTHdmazQ3c1VhWE9qdjBvZExsckgzanh6cG1FdF8zbFBudw?oc=5"
-    },
-    {
-      "date": "2026-02-26",
-      "title": "머스크가 찍은 'K-태양전지'…우주 데이터센터 수혜株",
-      "source": "경제타임스",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1QS05KZVNsczk2OS02bHJKM3QwMDNiR0t6MURZcURUdzBQeWVxMzB5QWstcC1DWmRMYldUM1JfWFA4Z3JISUhhbS0xVHRxNFotQ2xz?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "[K-증시 70년, 육천피 돌파] 증시자금·주식계좌 ‘사상 최대’…‘개미의 시대’, 시장의 판이 바뀐다",
-      "source": "헤럴드경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE01RmprT05rX3FqMWhCY3duT080Z0dxZzZUYVdrcFlOMlpEeG8zdjdJZTVuX0gyOWxGMGZIU2YwTTYzRXFuSUFmNmdvalhUYlBhbm9vWWRn?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "미국증시 마감 60분前...나스닥·엔비디아·SW 및 금융주 '활짝'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE50XzFpZlBNelp6UzdyQ0pVY1l2d2ZrWHc0VnZSQ3d1RzdHNC14NTU5c0FzMUgwVjZUQVNVeU9RSG10X2FiVWw0cUdJdUpZdjFyZ3VPWXdmR1J0a3NCbWxrdVpkN1BjRFZDUVFoX1NqVdIBc0FVX3lxTE12Q0NlcjEwX2xWUVA5WUJmazlTQTE5cE9jX0tLZExzZkx3c2hDTUk1TE82OXp3VTJjQUJaVnpNckhUVnB6VUR0R3NYOU9mS0tfb1R6ZDFGeVZmR0NIQlVMNVBkS2lLZFNOVDI1QjNVeTR0Nmc?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "엔비디아 & SW기업 '실적 촉각'...미국증시 '상승', 나스닥 '껑충'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFB6cE1XZnpVLWJPRE4yS2t3bmc0Sy1BTVFFWXZycmw2cUd2R05iZzh4WVFTUERMemx0cHE1cXhMNUZMS0pJb2pkOWlnT19BSjBZZXAweUZhMURxOE5pX2tjV0JVSHk4bmIxT3NJdkhoRdIBc0FVX3lxTE5vdTQyV1Z0eU9ORnJiTElleFNPNmQ0cGphTzdXa2h6b0J0VFBhaGppRkp0LXlldnNYckZUdnZvVGo1d3c2NUVFb1BWS1d6bmFsZHo3eDNjNWgzWVNWVEhpQW1YeFY1UG1iekZELVlvYm1hV28?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "엔비디아 실적 기대..미국증시 반도체주·S&P테크·나스닥 '급등'",
-      "source": "초이스경제",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE4weVlOSGtOemhKMGJQLXZQR3M5eDdGQnJRZU5paldDenVTemYxMm9QdmdHV3lIanhvNllfRG1yY0VieE9ZQnRLcy1mNzdXNHpDbFFiNjRlYVFlSnNVWjFLM05mLUZLZ0FFR1IyTUdGNNIBc0FVX3lxTE41MTE0MlVXZDkwdmxEM0FDNUlMTlZ0WkVvMW92ZVlNZ05EOW5LQm9oM3NqellOUzN6UlhYekZDWThYdkx1bUNHaDlibUtwbmdfcFotbmVPN2hhYnh4RkxCTXJUV1lDN1dDRmh6M3JwYm00SWs?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "[뉴욕증시]'엔비디아 믿는다'…나스닥 1.26% 상승 마감",
-      "source": "v.daum.net",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBnQ2FrblRqd2F1ZjUzWWxrQ1c4MFRmd3VTZDhvMWVRVHZmSmxXYURhU09sRWdGS3hhRjhZdzdWZFdLcERrbGFVZFFTMkVjS1k?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "방산주 현대로템 주가 전망 : 미국과 이란 전쟁으로 추가 랠리 가능할까?",
-      "source": "네이버 프리미엄콘텐츠",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOaEpxQUxGalRZQ2NCdEUza2hiQlJfRE94LWNVazdXUDlGZTJuZi1qZ29Wd2gzcnA2OFd4UHpIeW5NclFDYmtud0hrNnVNamRSMHR5aVpsYUFBN0lYd0UyRm5Kek8wckdBalQwQnRhRHlPUmZZYWRhWXJva1ppS3JuTU40TQ?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "미국 이란 '전면 전쟁 위기'에 방산주 관련주 '주목'",
-      "source": "gukjenews.com",
-      "impact": "high",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE01Z3pHWDg5QUVlU0pFZUJnYWVFcTJqSmFuVWRvNXQ0UDVqVXo1QTZNY1dTTU9wU2RyNzVSRTlsMllhY0hNcGVSclVlUTJMR0h1dkJqYUtTREt0OGhZdDFSd01xNFoxQXItY0x1RXd3?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "메타, AMD와 143조원 메가 AI칩 계약...韓 반도체에도 ‘훈풍’",
-      "source": "조선일보",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPVTJkbTlfd1gxaVFBU2U2cHRKWldQLTlmandKT0JDZ1FrRVJUQTc1NWtRUnlIcGZNV05HU000V2FiUFJYUF93UUtlRWNuTmdRcmdOUkR3Z1FfVFZwMkV2RnphVlIxSUhGMGFDTWlXQmNNcHgwd1E3YmU1eFN6R3RqUUViQdIBlwFBVV95cUxQd05XSGtyU2liWlV5b29QMVBOZXJ5akp6a3dTakFuNmtKMTN2U3gxMXNzWXNMUGVVeG44dkgwXzZqc2pteHlqSGtQWU90MUtYbzE1RWFicVBTZE9paEROOFh6NThxX0ZqNXgxM0o2WTVrRjZLTXVUck1mTzVHTE15NVNoWFN4S0hGVHk5Q1hGYlB4T3FkVzZv?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "美 FDA, 임상 프레임 대전환···K-바이오 수혜 기대감",
-      "source": "뉴스웨이",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFAzN1ItcTQyU1NlM202NVBRUmh3VHV4SWg2clM2YXppRGFLTmpRa184RWVBVXZkaGlOdmxBTGtBZ0RVeDA0QTlsWjdPYXpLVU0tMUx4cE1vU0hzQ1hOM3RHNGhBdGJ5WVYyNnc?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "샤페론, 아토피 피부염 치료제 미국 FDA 임상 2상 승인",
-      "source": "히트뉴스",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE9uTXdnS3A4ZGNCTTg3T3hPbXdJdjBfc1VBeVNWdWlGZDMtbmNVMlFlVkpCSXVNWnFFbXI1MkZZcmUxUklqR3daSDRhU0xUYUhxcE5oM2l6NlBERDZmNUh3TkVjcmtxTmNDYmZV?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "K-방산, ‘수출 호황’ 넘어 지속 성장으로…정책·산업 생태계 재설계 논의",
-      "source": "아시아투데이",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFAxbmozQnpSRjM4aWZDckhNV0FsX0FBTkNQYWJRck16RDNOQlp5NFhHTk90Snd0RlI3eE5PREotVTVlNWdfYUFMdC1mWWtJclJLbDFlcld2NmRhbE1LaUJNXzFtMXRCRnhReUgzSTRn?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "K-방산 수출이 순조로울까?…미국의 어깃장 감지돼",
-      "source": "entropytimes.co.kr",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBqMzNOaXRMR200T1k3UzltQzBPU19GdU85amwyUTRGZ0pRM2VsamtpVlFfQ05wYjQzdjA4Z1gwdkd1dDdIbnpsSm1nck5GaXIyQWJmUHF6NnhBTEo4czZvTkpfRjBQX2xP?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "코엑스에 상륙하는 ‘로봇 물결’...AW 2026, 로보틱스 생태계로 체질 개선 노린다",
-      "source": "헬로티",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9Ea29Wci1QOFFXZzFva01WaHZfcEhVNjR6czRCLWR4R2R1Z3lGbEVPZEkxQjJOUGgtY0lob08xWms0OTVlMTdSRTFhUFRZVXpkOWdEa1RMRWMyNnk5SGR3?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "휴머노이드 전면 배치…3월 4일 개막 AW 2026 로봇 산업 ‘무게중심 이동’ 예고",
-      "source": "글로벌이코노믹",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxONTJicXRZREdZekRnQTRrYXhNazdTb3c4NnZEbW0tTjlOX3JBM1c4S3pmcFlsdXA5cXJmMzJxMUJzb0JIaXpYdUs5ZW5YTE9iZ0Vvczk3RGJkSHdPOVdmZFctS1RCZkNSbEQ0QjlOdGIwMEVjclJ6MjVKeEVDWENNMlAyWHVzUQ?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "티로보틱스, '오토메이션월드 2026'서 자체개발 휴머노이드 공개…\"산업 자동화 패러다임 전환\"",
-      "source": "네이트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBHbFpwZ2dxLUVKSzhWR3VDOTJSRWplY3R0Q2oxYURONldraTY1S1V1UUQ3cXV0UFJ0T3FaaEFKUW5YclhnWUhnaVFuQjU3RV9oZzhF?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "서울시, AI·바이오·금융 판도 바꿀 '양자기술' 승부수",
-      "source": "네이트",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE0xQkwteS1ETnVjMTRBXzh2emlaRWpHZHcwU21XTk04dFZhUU1zNUNkbjFwRThGTDd0SmRUOTNqd2JHZXBlQTdZZjB5dm9EaHN3N3I0?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "기사",
-      "source": "월간수소경제",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxQZFBJSkZOWUtnWGV0cVRuQXVfNkRlZS1fQTdyQ0pFQkFYeGx5WkFxd3QyOUtyeFVDV3FCdEFTUnJxT295U2U2eUtSaUxsMnVNSU5RYkdNSnM5SFZ4dC1BS3FuT3hqSDNHcVVKN1YzbmFhODJPbWNRMEFDcHgxbEY5S1oxQlFiaENmOGc?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "태양광 꿈의 소재 ‘페로브스카이트’, 일론 머스크도 주목",
-      "source": "중기이코노미",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1LRmRaVGVsVFpPN25hamJYejhRRjViSGU0S29xb2NPSHQ3aDVHS1pGWmJPRUc1Y0pFcFd3c25YYzdxemlhV0RGZUlBWUtOemJQclNiT2lBNjZOZGFaN19GUG4zR1VXUzFOanc?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "기후부, ‘태양광 생태계 혁신 방안’ 조만간 발표",
-      "source": "지디넷코리아",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9LV0RuOHVac1YyaW1kU3BNRW1iNEtrMHd1UnhvcGtQLUIxVGNfaks0clQ0Yl81aXRaajlUREM1b0NrZmttdTU1TkV5ZF9kWkFHelNQVVV3?oc=5"
-    },
-    {
-      "date": "2026-02-25",
-      "title": "차세대 '태양전지' 핵심장비 신시장 개척",
-      "source": "네이트",
-      "impact": "low",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFB6V0hFVlZuSEZ6SXRWaGYwN2g0UUNvTWdkSlNMRmtjd2RJTDBaVWgxM1dvRkFjNDF3VVlrdllzOV95d2xzTzVZbEdRcldFejJYQVNV?oc=5"
     }
   ]
 }

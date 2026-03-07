@@ -75,9 +75,6 @@
     },
     "max_new_buys": 0,
     "risk_factors": [
-      "미국/이스라엘 vs 이란 군사충돌 — 중동 전면전 리스크 급등",
-      "유가 급등 가능성 (WTI $85+ 전망) — 호르무즈 해협 봉쇄 시나리오",
-      "안전자산 선호 심리 → 원/달러 환율 상승 압력",
       "호르무즈 해협 봉쇄 위협",
       "VIX 30 이상 극단 변동성",
       "서킷브레이커 발동",
@@ -203,7 +200,7 @@
     ]
   },
   "group_relay": {
-    "scan_time": "2026-03-06T18:35:00.194946",
+    "scan_time": "2026-03-07T17:37:47.096449",
     "fire_threshold": 3.0,
     "fired_groups": [
       {
@@ -265,574 +262,494 @@
     "summary": "그룹 발화: 한화(한화에어로스페이스 +7.2%)"
   },
   "whale": {
-    "updated_at": "2026-03-04 19:23",
-    "total_detected": 317,
+    "updated_at": "2026-03-07 17:38",
+    "total_detected": 96,
     "stats": {
-      "세력포착": 18,
-      "매집의심": 8,
-      "이상감지": 291
+      "세력포착": 5,
+      "매집의심": 26,
+      "이상감지": 65
     },
     "items": [
       {
-        "ticker": "003280",
-        "name": "흥아해운",
-        "close": 2905,
-        "price_change": 24.68,
-        "volume": 224962550,
-        "trading_value_m": 653516.21,
-        "rsi": 86.11,
-        "adx": 56.33,
-        "bb_position": 1.4,
-        "volume_surge_ratio": 10.26,
+        "ticker": "089030",
+        "name": "테크윙",
+        "close": 71100,
+        "price_change": 7.24,
+        "volume": 13157562,
+        "trading_value_m": 935502.66,
+        "rsi": 78.1,
+        "adx": 48.17,
+        "bb_position": 1.27,
+        "volume_surge_ratio": 4.28,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 6.0,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 3.0,
-            "vsr": 10.3,
-            "direction": "상승폭발",
-            "price_change": 24.68,
-            "desc": "거래량 10.3배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 3.0,
-            "min_bb_width": 0.11,
-            "curr_bb_width": 0.62,
-            "expansion": 5.58,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (5.6배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "117580",
-        "name": "대성에너지",
-        "close": 13580,
-        "price_change": 29.95,
-        "volume": 10776562,
-        "trading_value_m": 146345.71,
-        "rsi": 89.42,
-        "adx": 37.73,
-        "bb_position": 1.46,
-        "volume_surge_ratio": 10.92,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 6.0,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 3.0,
-            "vsr": 10.9,
-            "direction": "상승폭발",
-            "price_change": 29.95,
-            "desc": "거래량 10.9배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 3.0,
-            "min_bb_width": 0.04,
-            "curr_bb_width": 0.6,
-            "expansion": 15.99,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (16.0배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "004090",
-        "name": "한국석유",
-        "close": 27450,
-        "price_change": 29.79,
-        "volume": 7588356,
-        "trading_value_m": 208300.37,
-        "rsi": 81.87,
-        "adx": 62.26,
-        "bb_position": 1.35,
-        "volume_surge_ratio": 3.55,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 4.18,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.1846787939736338,
-            "vsr": 3.6,
-            "direction": "상승폭발",
-            "price_change": 29.79,
-            "desc": "거래량 3.6배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 3.0,
-            "min_bb_width": 0.13,
-            "curr_bb_width": 0.74,
-            "expansion": 5.59,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (5.6배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "210980",
-        "name": "SK디앤디",
-        "close": 12160,
-        "price_change": -3.95,
-        "volume": 213012,
-        "trading_value_m": 2590.23,
-        "rsi": 33.22,
-        "adx": 38.62,
-        "bb_position": -0.03,
-        "volume_surge_ratio": 3.23,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 4.08,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.0771474797306675,
-            "vsr": 3.2,
-            "direction": "하락폭발",
-            "price_change": -3.95,
-            "desc": "거래량 3.2배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 3.0,
-            "min_bb_width": 0.02,
-            "curr_bb_width": 0.1,
-            "expansion": 6.12,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (6.1배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "044450",
-        "name": "KSS해운",
-        "close": 10530,
-        "price_change": -16.76,
-        "volume": 3099619,
-        "trading_value_m": 32638.99,
-        "rsi": 51.41,
-        "adx": 47.54,
-        "bb_position": 0.49,
-        "volume_surge_ratio": 3.31,
-        "above_ma20": false,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 3.9,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.1047722654389784,
-            "vsr": 3.3,
-            "direction": "하락폭발",
-            "price_change": -16.76,
-            "desc": "거래량 3.3배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.8,
-            "price_chg_10d": -0.66,
-            "obv_chg_10d": 184.61,
-            "obv_trend_5d": 1.69,
-            "vol_contracted": false,
-            "desc": "가격 -0.7% vs OBV +184.6% (은밀매집)"
-          }
-        ]
-      },
-      {
-        "ticker": "079550",
-        "name": "LIG넥스원",
-        "close": 619000,
-        "price_change": -6.35,
-        "volume": 2187274,
-        "trading_value_m": 1353922.61,
-        "rsi": 68.23,
-        "adx": 40.76,
-        "bb_position": 1.06,
-        "volume_surge_ratio": 6.5,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -274243850000.0,
+        "foreign_5d": 15718574125.0,
         "grade": "세력포착",
         "strength": 3.8,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.1666727339771614,
-            "vsr": 6.5,
-            "direction": "하락폭발",
-            "price_change": -6.35,
-            "desc": "거래량 6.5배 폭발 (하락폭발)"
+            "strength": 1.4254872738361204,
+            "vsr": 4.3,
+            "direction": "상승폭발",
+            "price_change": 7.24,
+            "desc": "거래량 4.3배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.634653631150821,
-            "min_bb_width": 0.21,
-            "curr_bb_width": 0.47,
-            "expansion": 2.27,
+            "strength": 2.3695443577839947,
+            "min_bb_width": 0.16,
+            "curr_bb_width": 0.61,
+            "expansion": 3.74,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.3배) +거래량"
+            "desc": "BB 수축→폭발 (3.7배) +거래량"
           }
         ]
       },
       {
-        "ticker": "088980",
-        "name": "맥쿼리인프라",
-        "close": 11110,
-        "price_change": -1.94,
-        "volume": 6803201,
-        "trading_value_m": 75583.56,
-        "rsi": 37.58,
-        "adx": 30.14,
-        "bb_position": 0.15,
-        "volume_surge_ratio": 2.79,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -26427298225.0,
-        "grade": "세력포착",
-        "strength": 3.43,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 0.9294600109595986,
-            "vsr": 2.8,
-            "direction": "하락폭발",
-            "price_change": -1.94,
-            "desc": "거래량 2.8배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.5,
-            "price_chg_10d": -3.73,
-            "obv_chg_10d": 2096.65,
-            "obv_trend_5d": -5.07,
-            "vol_contracted": false,
-            "desc": "가격 -3.7% vs OBV +2096.6% (은밀매집)"
-          }
-        ]
-      },
-      {
-        "ticker": "028670",
-        "name": "팬오션",
-        "close": 5150,
-        "price_change": -16.94,
-        "volume": 23538075,
-        "trading_value_m": 121221.09,
-        "rsi": 52.02,
-        "adx": 43.31,
-        "bb_position": 0.49,
-        "volume_surge_ratio": 2.93,
-        "above_ma20": false,
+        "ticker": "086820",
+        "name": "바이오솔루션",
+        "close": 11650,
+        "price_change": 15.35,
+        "volume": 1160766,
+        "trading_value_m": 13522.92,
+        "rsi": 74.64,
+        "adx": 58.94,
+        "bb_position": 1.18,
+        "volume_surge_ratio": 3.2,
+        "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -39989689630.0,
-        "grade": "세력포착",
-        "strength": 3.36,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 0.9757606517239584,
-            "vsr": 2.9,
-            "direction": "하락폭발",
-            "price_change": -16.94,
-            "desc": "거래량 2.9배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.382779160731356,
-            "price_chg_10d": 1.38,
-            "obv_chg_10d": 20.83,
-            "obv_trend_5d": 0.18,
-            "vol_contracted": false,
-            "desc": "가격 +1.4% vs OBV +20.8% (은밀매집)"
-          }
-        ]
-      },
-      {
-        "ticker": "018310",
-        "name": "삼목에스폼",
-        "close": 17890,
-        "price_change": -7.69,
-        "volume": 56742,
-        "trading_value_m": 1015.11,
-        "rsi": 28.58,
-        "adx": 36.04,
-        "bb_position": -0.28,
-        "volume_surge_ratio": 3.23,
-        "above_ma20": false,
-        "above_ma60": false,
         "foreign_5d": 0.0,
         "grade": "세력포착",
-        "strength": 3.22,
+        "strength": 3.56,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.0778098475372608,
+            "strength": 1.0659500128449453,
             "vsr": 3.2,
-            "direction": "하락폭발",
-            "price_change": -7.69,
-            "desc": "거래량 3.2배 폭발 (하락폭발)"
+            "direction": "상승폭발",
+            "price_change": 15.35,
+            "desc": "거래량 3.2배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 2.1441342670284094,
-            "min_bb_width": 0.04,
-            "curr_bb_width": 0.14,
-            "expansion": 3.29,
+            "strength": 2.4899832236436357,
+            "min_bb_width": 0.13,
+            "curr_bb_width": 0.5,
+            "expansion": 3.98,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (3.3배) +거래량"
+            "desc": "BB 수축→폭발 (4.0배) +거래량"
           }
         ]
       },
       {
-        "ticker": "017390",
-        "name": "서울가스",
-        "close": 66500,
-        "price_change": -9.89,
-        "volume": 178380,
-        "trading_value_m": 11862.27,
-        "rsi": 49.3,
-        "adx": 41.87,
-        "bb_position": 0.44,
-        "volume_surge_ratio": 6.69,
-        "above_ma20": false,
+        "ticker": "079550",
+        "name": "LIG넥스원",
+        "close": 834000,
+        "price_change": 9.31,
+        "volume": 1559685,
+        "trading_value_m": 1300777.29,
+        "rsi": 81.47,
+        "adx": 52.78,
+        "bb_position": 1.2,
+        "volume_surge_ratio": 3.23,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -622575808000.0,
+        "grade": "세력포착",
+        "strength": 3.33,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.0757427201737426,
+            "vsr": 3.2,
+            "direction": "상승폭발",
+            "price_change": 9.31,
+            "desc": "거래량 3.2배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.2527116498212236,
+            "min_bb_width": 0.24,
+            "curr_bb_width": 0.85,
+            "expansion": 3.51,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.5배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "115180",
+        "name": "큐리언트",
+        "close": 41200,
+        "price_change": 19.25,
+        "volume": 1364330,
+        "trading_value_m": 56210.4,
+        "rsi": 63.56,
+        "adx": 20.72,
+        "bb_position": 1.09,
+        "volume_surge_ratio": 4.18,
+        "above_ma20": true,
         "above_ma60": true,
         "foreign_5d": 0.0,
         "grade": "세력포착",
-        "strength": 2.89,
+        "strength": 2.7,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.2308975179107753,
-            "vsr": 6.7,
-            "direction": "하락폭발",
-            "price_change": -9.89,
-            "desc": "거래량 6.7배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 0.6633923074079415,
-            "price_chg_10d": -0.89,
-            "obv_chg_10d": 3.63,
-            "obv_trend_5d": 0.05,
-            "vol_contracted": false,
-            "desc": "가격 -0.9% vs OBV +3.6% (은밀매집)"
-          }
-        ]
-      },
-      {
-        "ticker": "036460",
-        "name": "한국가스공사",
-        "close": 36150,
-        "price_change": -10.96,
-        "volume": 2212141,
-        "trading_value_m": 79968.9,
-        "rsi": 31.27,
-        "adx": 31.3,
-        "bb_position": -0.17,
-        "volume_surge_ratio": 3.64,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -52900767300.0,
-        "grade": "세력포착",
-        "strength": 2.89,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.213220629468907,
-            "vsr": 3.6,
-            "direction": "하락폭발",
-            "price_change": -10.96,
-            "desc": "거래량 3.6배 폭발 (하락폭발)"
+            "strength": 1.394243992852038,
+            "vsr": 4.2,
+            "direction": "상승폭발",
+            "price_change": 19.25,
+            "desc": "거래량 4.2배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.6774617554232505,
-            "min_bb_width": 0.09,
-            "curr_bb_width": 0.2,
-            "expansion": 2.35,
+            "strength": 1.3076226999455982,
+            "min_bb_width": 0.22,
+            "curr_bb_width": 0.36,
+            "expansion": 1.62,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.4배) +거래량"
+            "desc": "BB 수축→폭발 (1.6배) +거래량"
           }
         ]
       },
       {
-        "ticker": "02826K",
-        "name": "02826K",
-        "close": 165600,
-        "price_change": -14.11,
-        "volume": 38968,
-        "trading_value_m": 6453.1,
-        "rsi": 36.15,
-        "adx": 44.24,
-        "bb_position": 0.0,
-        "volume_surge_ratio": 3.74,
+        "ticker": "487570",
+        "name": "HS효성",
+        "close": 54400,
+        "price_change": -5.06,
+        "volume": 93943,
+        "trading_value_m": 5110.5,
+        "rsi": 37.95,
+        "adx": 43.29,
+        "bb_position": 0.02,
+        "volume_surge_ratio": 2.56,
         "above_ma20": false,
         "above_ma60": false,
         "foreign_5d": 0.0,
         "grade": "세력포착",
-        "strength": 2.87,
+        "strength": 2.47,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.2455610426555432,
-            "vsr": 3.7,
-            "direction": "하락폭발",
-            "price_change": -14.11,
-            "desc": "거래량 3.7배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 1.6292791105162434,
-            "min_bb_width": 0.13,
-            "curr_bb_width": 0.3,
-            "expansion": 2.26,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.3배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "054950",
-        "name": "제이브이엠",
-        "close": 23450,
-        "price_change": -7.68,
-        "volume": 179249,
-        "trading_value_m": 4203.39,
-        "rsi": 29.04,
-        "adx": 34.11,
-        "bb_position": -0.21,
-        "volume_surge_ratio": 2.62,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 2.66,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 0.8748601375136507,
+            "strength": 0.8545100709173411,
             "vsr": 2.6,
             "direction": "하락폭발",
-            "price_change": -7.68,
+            "price_change": -5.06,
             "desc": "거래량 2.6배 폭발 (하락폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.7899040945303786,
-            "min_bb_width": 0.05,
-            "curr_bb_width": 0.12,
-            "expansion": 2.58,
+            "strength": 1.6161209005044233,
+            "min_bb_width": 0.12,
+            "curr_bb_width": 0.27,
+            "expansion": 2.23,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.6배) +거래량"
+            "desc": "BB 수축→폭발 (2.2배) +거래량"
           }
         ]
       },
       {
-        "ticker": "230360",
-        "name": "에코마케팅",
-        "close": 15820,
-        "price_change": -0.06,
-        "volume": 132081,
-        "trading_value_m": 2089.52,
-        "rsi": 68.01,
-        "adx": 33.9,
-        "bb_position": -0.0,
-        "volume_surge_ratio": 3.33,
+        "ticker": "003460",
+        "name": "유화증권",
+        "close": 3780,
+        "price_change": 0.13,
+        "volume": 1031562,
+        "trading_value_m": 3899.3,
+        "rsi": 59.1,
+        "adx": 48.78,
+        "bb_position": 0.68,
+        "volume_surge_ratio": 0.53,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": 1.89,
+            "obv_chg_10d": 296.6,
+            "obv_trend_5d": 0.15,
+            "vol_contracted": true,
+            "desc": "가격 +1.9% vs OBV +296.6% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "456040",
+        "name": "OCI",
+        "close": 83300,
+        "price_change": 3.48,
+        "volume": 64962,
+        "trading_value_m": 5411.33,
+        "rsi": 55.82,
+        "adx": 37.72,
+        "bb_position": 0.56,
+        "volume_surge_ratio": 0.58,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": -2.23,
+            "obv_chg_10d": 102.27,
+            "obv_trend_5d": 0.83,
+            "vol_contracted": true,
+            "desc": "가격 -2.2% vs OBV +102.3% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "034830",
+        "name": "한국토지신탁",
+        "close": 1423,
+        "price_change": -4.18,
+        "volume": 1432823,
+        "trading_value_m": 2038.91,
+        "rsi": 51.03,
+        "adx": 42.74,
+        "bb_position": 0.5,
+        "volume_surge_ratio": 0.32,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "매집의심",
+        "strength": 2.8,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.8,
+            "price_chg_10d": -2.33,
+            "obv_chg_10d": 172.04,
+            "obv_trend_5d": -0.3,
+            "vol_contracted": true,
+            "desc": "가격 -2.3% vs OBV +172.0% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "066570",
+        "name": "LG전자",
+        "close": 118000,
+        "price_change": 2.25,
+        "volume": 1179043,
+        "trading_value_m": 139127.07,
+        "rsi": 50.85,
+        "adx": 42.72,
+        "bb_position": 0.48,
+        "volume_surge_ratio": 0.43,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": -38489181750.0,
+        "grade": "매집의심",
+        "strength": 2.8,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.8,
+            "price_chg_10d": -4.53,
+            "obv_chg_10d": 37.01,
+            "obv_trend_5d": -0.18,
+            "vol_contracted": true,
+            "desc": "가격 -4.5% vs OBV +37.0% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "066575",
+        "name": "LG전자우",
+        "close": 54700,
+        "price_change": 1.3,
+        "volume": 134570,
+        "trading_value_m": 7360.98,
+        "rsi": 49.12,
+        "adx": 43.14,
+        "bb_position": 0.46,
+        "volume_surge_ratio": 0.46,
         "above_ma20": false,
         "above_ma60": true,
         "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 2.65,
-        "pattern_count": 2,
+        "grade": "매집의심",
+        "strength": 2.8,
+        "pattern_count": 1,
         "patterns": [
           {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.111189631891776,
-            "vsr": 3.3,
-            "direction": "횡보폭발",
-            "price_change": -0.06,
-            "desc": "거래량 3.3배 폭발 (횡보폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 1.5406716114500447,
-            "min_bb_width": 0.0,
-            "curr_bb_width": 0.01,
-            "expansion": 2.08,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.1배) +거래량"
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.8,
+            "price_chg_10d": -2.15,
+            "obv_chg_10d": 27.3,
+            "obv_trend_5d": -0.12,
+            "vol_contracted": true,
+            "desc": "가격 -2.1% vs OBV +27.3% (은밀매집 +저거래량)"
           }
         ]
       },
       {
-        "ticker": "064290",
-        "name": "인텍플러스",
-        "close": 14220,
-        "price_change": -3.0,
-        "volume": 710751,
-        "trading_value_m": 10106.88,
-        "rsi": 35.72,
-        "adx": 28.32,
-        "bb_position": -0.13,
-        "volume_surge_ratio": 3.21,
+        "ticker": "009410",
+        "name": "태영건설",
+        "close": 1744,
+        "price_change": 0.06,
+        "volume": 306568,
+        "trading_value_m": 534.65,
+        "rsi": 50.31,
+        "adx": 33.39,
+        "bb_position": 0.5,
+        "volume_surge_ratio": 0.36,
         "above_ma20": false,
-        "above_ma60": false,
+        "above_ma60": true,
         "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 2.6,
-        "pattern_count": 2,
+        "grade": "매집의심",
+        "strength": 2.29,
+        "pattern_count": 1,
         "patterns": [
           {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.070565734639399,
-            "vsr": 3.2,
-            "direction": "하락폭발",
-            "price_change": -3.0,
-            "desc": "거래량 3.2배 폭발 (하락폭발)"
-          },
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.286239761182653,
+            "price_chg_10d": -1.69,
+            "obv_chg_10d": 19.86,
+            "obv_trend_5d": -0.07,
+            "vol_contracted": true,
+            "desc": "가격 -1.7% vs OBV +19.9% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "009900",
+        "name": "명신산업",
+        "close": 9290,
+        "price_change": 1.64,
+        "volume": 312927,
+        "trading_value_m": 2907.09,
+        "rsi": 47.3,
+        "adx": 29.87,
+        "bb_position": 0.4,
+        "volume_surge_ratio": 0.37,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "매집의심",
+        "strength": 2.2,
+        "pattern_count": 1,
+        "patterns": [
           {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 1.5314212650434287,
-            "min_bb_width": 0.12,
-            "curr_bb_width": 0.25,
-            "expansion": 2.06,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.1배) +거래량"
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.2002769790644967,
+            "price_chg_10d": -2.21,
+            "obv_chg_10d": 19.0,
+            "obv_trend_5d": -0.1,
+            "vol_contracted": true,
+            "desc": "가격 -2.2% vs OBV +19.0% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "005387",
+        "name": "현대차2우B",
+        "close": 275500,
+        "price_change": 1.29,
+        "volume": 170467,
+        "trading_value_m": 46963.66,
+        "rsi": 50.71,
+        "adx": 31.06,
+        "bb_position": 0.51,
+        "volume_surge_ratio": 0.58,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 4870171500.0,
+        "grade": "매집의심",
+        "strength": 2.18,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.1767923411737407,
+            "price_chg_10d": -1.61,
+            "obv_chg_10d": 18.77,
+            "obv_trend_5d": -0.01,
+            "vol_contracted": true,
+            "desc": "가격 -1.6% vs OBV +18.8% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "038500",
+        "name": "삼표시멘트",
+        "close": 14770,
+        "price_change": 3.07,
+        "volume": 9982907,
+        "trading_value_m": 147447.54,
+        "rsi": 55.37,
+        "adx": 23.94,
+        "bb_position": 0.36,
+        "volume_surge_ratio": 0.65,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": 9176508410.0,
+        "grade": "매집의심",
+        "strength": 2.02,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.0166550752187624,
+            "price_chg_10d": 1.79,
+            "obv_chg_10d": 14.17,
+            "obv_trend_5d": 0.08,
+            "vol_contracted": true,
+            "desc": "가격 +1.8% vs OBV +14.2% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "100790",
+        "name": "미래에셋벤처투자",
+        "close": 22300,
+        "price_change": 4.69,
+        "volume": 1653383,
+        "trading_value_m": 36870.44,
+        "rsi": 55.37,
+        "adx": 27.9,
+        "bb_position": 0.44,
+        "volume_surge_ratio": 0.39,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
+        "grade": "매집의심",
+        "strength": 1.95,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 1.9460785132173037,
+            "price_chg_10d": -4.29,
+            "obv_chg_10d": 13.46,
+            "obv_trend_5d": 0.14,
+            "vol_contracted": true,
+            "desc": "가격 -4.3% vs OBV +13.5% (은밀매집 +저거래량)"
           }
         ]
       }
     ]
   },
   "dual_buying": {
-    "date": "2026-03-04",
-    "scanned_at": "2026-03-04 19:24",
+    "date": "2026-03-07",
+    "scanned_at": "2026-03-07 17:38",
     "s_grade": [],
     "a_grade": [],
     "b_grade": [],
@@ -873,61 +790,50 @@
     "reasoning": "현재 회피 레짐(신뢰도 90%)으로 최대 신규매수 0종목, 현금 비중 100% 권고에 따라 모든 매수를 중단합니다. 호르무즈 해협 봉쇄 위협과 VIX 30 이상의 극단적 변동성, 서킷브레이커 발동 상황에서는 현금 보유가 최선의 전략입니다."
   },
   "news": {
-    "market_sentiment": "cautious",
+    "market_sentiment": "bearish",
     "key_themes": [
-      "미국/이스라엘 vs 이란 군사 충돌 — 중동 전면전 리스크",
-      "유가 급등 전망 (호르무즈 해협 봉쇄 시나리오)",
-      "방산주 글로벌 급등 — K-방산 수출 확대 수혜",
-      "글로벌 기술주 랠리 (S&P +1.8%, NASDAQ +1.3%)",
-      "대만 AI/반도체 수출 역대급 — HBM 수요 폭증",
-      "한국은행 금리 동결 전망 — 유동성 우호적",
-      "안전자산 선호 확대 — 금/달러 강세"
+      "중동 지정학 리스크로 유가 급등 (배럴당 90달러 돌파, 150달러 전망)",
+      "미국 인플레이션 우려와 기술주 매도세 (나스닥 1.59% 급락)",
+      "한국 증시 변동성 확대 (GFC 이후 최대 낙폭, 미국의 3배 변동률)",
+      "방산·SMR(소형모듈원전) 수요 급증"
     ],
-    "direction": "cautious",
+    "direction": "neutral",
     "sector_outlook": {
-      "정유/에너지": {
-        "direction": "positive",
-        "reason": "이란 전쟁으로 유가 급등 전망, 정유사 마진 확대"
-      },
-      "방산": {
-        "direction": "positive",
-        "reason": "중동 전쟁 확대로 글로벌 방산 수주 급증, K-방산 최대 수혜"
-      },
       "반도체": {
-        "direction": "positive",
-        "reason": "대만 AI 수출 호조 + Nvidia 실적 기대, 공급 타이트"
+        "direction": "negative",
+        "reason": "AI 투자 우려와 나스닥 1.59% 급락으로 글로벌 반도체 섹터 최대 낙폭. 관세 불확실성과 지정학 리스크로 단기 추가 조정 불가피"
       },
-      "IT서비스": {
-        "direction": "positive",
-        "reason": "반도체 릴레이 수혜 + 엔터프라이즈 AI 확산"
+      "IT/소프트웨어": {
+        "direction": "negative",
+        "reason": "생산자 물가 상승과 인플레이션 우려로 기술 섹터 전반 약세. 한국 증시 GFC 이후 최대 낙폭 기록"
       },
       "금융": {
-        "direction": "neutral",
-        "reason": "금리 동결 전망이나 중동 리스크로 변동성 확대"
-      },
-      "건설": {
         "direction": "negative",
-        "reason": "금리 불확실성 + 원자재 상승 압력으로 마진 악화"
+        "reason": "금융주가 기술주 이어 큰 하락세. 금리 불확실성과 환율 변동성으로 단기 부정적"
+      },
+      "에너지/화학": {
+        "direction": "neutral",
+        "reason": "유가 90달러 돌파는 호재이나 유류 최고가격 지정 가능성과 원가 부담 심화로 방향성 혼재"
+      },
+      "원전/전력": {
+        "direction": "positive",
+        "reason": "한수원 SMR 협력 본격화(인도·태국)와 북미 전력망 투자 확대로 중장기 성장 전망. 두산에너빌리티·HD현대일렉트릭 수혜"
+      },
+      "방산": {
+        "direction": "neutral",
+        "reason": "중동 긴장과 K-방산 수요 급증은 호재이나 직접 수주 공시 부재로 단기 방향성 불확실"
+      },
+      "조선": {
+        "direction": "neutral",
+        "reason": "호르무즈 해협 긴장으로 유조선·LNG선 수요 증가 기대되나 구체적 수주 미확인"
+      },
+      "바이오/헬스케어": {
+        "direction": "neutral",
+        "reason": "상대적 방어적 섹터이나 한국 증시 전반 약세로 단기 조정 가능"
       },
       "2차전지": {
         "direction": "negative",
-        "reason": "유럽 EV 보조금 축소 + 원자재 상승 부담"
-      },
-      "유틸리티": {
-        "direction": "neutral",
-        "reason": "방어주 성격이나 유가 상승 시 발전원가 부담"
-      },
-      "조선": {
-        "direction": "positive",
-        "reason": "중동 리스크로 해상 운송 우회 수요 + LNG선 수주"
-      },
-      "철강": {
-        "direction": "neutral",
-        "reason": "원자재 상승 혼조 — 원가 부담 vs 제품가 전가"
-      },
-      "자동차": {
-        "direction": "neutral",
-        "reason": "현대차 그룹 릴레이 진행 중이나 환율 불확실성"
+        "reason": "기술주 매도세와 글로벌 수요 위축 우려로 섹터 전반 약세"
       }
     }
   },
@@ -945,7 +851,7 @@
             "ticker": "011210",
             "name": "현대위아",
             "grade": "매수",
-            "score": 62.8,
+            "score": 60.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
@@ -953,70 +859,70 @@
             "reasoning": "퀀텀, 이벤트촉매"
           },
           {
-            "ticker": "298040",
-            "name": "효성중공업",
-            "grade": "매수",
-            "score": 60.0,
-            "entry_price": 0,
-            "current_price": 0,
-            "result_pct": 0.0,
-            "hit": false,
-            "reasoning": "눌림목, 퀀텀, 매집추적, 이벤트촉매, 리포트"
-          },
-          {
             "ticker": "064350",
             "name": "현대로템",
             "grade": "관심매수",
-            "score": 57.0,
+            "score": 61.0,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "이벤트촉매"
+            "reasoning": "이벤트촉매, 리포트"
           },
           {
-            "ticker": "950160",
-            "name": "코오롱티슈진",
+            "ticker": "000880",
+            "name": "한화",
             "grade": "관심매수",
-            "score": 56.8,
+            "score": 59.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "매집추적"
-          },
-          {
-            "ticker": "017670",
-            "name": "SK텔레콤",
-            "grade": "관심매수",
-            "score": 56.2,
-            "entry_price": 0,
-            "current_price": 0,
-            "result_pct": 0.0,
-            "hit": false,
-            "reasoning": "매집추적, AI두뇌"
+            "reasoning": "매집추적, US모멘텀"
           },
           {
             "ticker": "017960",
             "name": "한국카본",
             "grade": "관심매수",
-            "score": 55.0,
+            "score": 59.0,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "매집추적, US모멘텀, 리포트"
+            "reasoning": "매집추적, US모멘텀"
           },
           {
             "ticker": "281740",
             "name": "레이크머티리얼즈",
-            "grade": "관찰",
-            "score": 53.8,
+            "grade": "관심매수",
+            "score": 58.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
             "reasoning": "매집추적"
+          },
+          {
+            "ticker": "112610",
+            "name": "씨에스윈드",
+            "grade": "관심매수",
+            "score": 58.6,
+            "entry_price": 0,
+            "current_price": 0,
+            "result_pct": 0.0,
+            "hit": false,
+            "reasoning": "매집추적"
+          },
+          {
+            "ticker": "950160",
+            "name": "코오롱티슈진",
+            "grade": "관심매수",
+            "score": 57.8,
+            "entry_price": 0,
+            "current_price": 0,
+            "result_pct": 0.0,
+            "hit": false,
+            "reasoning": "매집추적, 리포트"
           }
         ]
       },
@@ -1051,472 +957,461 @@
     ]
   },
   "china_money": {
-    "date": "2026-03-04",
-    "generated_at": "2026-03-04 19:35",
+    "date": "2026-03-07",
+    "generated_at": "2026-03-07 17:38",
     "total_stocks": 50,
     "summary": {
-      "SURGE": 4,
-      "INFLOW": 9,
-      "SECTOR_FOCUS": 22,
-      "WATCH": 0,
-      "NORMAL": 15
+      "SURGE": 3,
+      "INFLOW": 8,
+      "SECTOR_FOCUS": 19,
+      "WATCH": 3,
+      "NORMAL": 17
     },
     "signals": [
       {
-        "date": "2026-03-04",
-        "ticker": "373220",
-        "name": "LG에너지솔루션",
-        "signal": "SURGE",
-        "score": 80,
-        "reasons": [
-          "외국인 폭풍매수 (z=2.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 9일 연속 순매수",
-          "스텔스 매수 (주가 -15.8% but 외국인↑)",
-          "2차전지 섹터 외국인 집중"
-        ],
-        "foreign_net_5d": 402197,
-        "foreign_zscore": 2.33,
-        "ewy_decouple": true,
-        "consecutive_days": 9,
-        "pct_change_5d": -15.76
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "051910",
-        "name": "LG화학",
-        "signal": "SURGE",
-        "score": 75,
-        "reasons": [
-          "외국인 강매수 (z=1.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 13일 연속 순매수",
-          "스텔스 매수 (주가 -12.4% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)",
-          "2차전지 섹터 외국인 집중"
-        ],
-        "foreign_net_5d": 603210,
-        "foreign_zscore": 1.34,
-        "ewy_decouple": true,
-        "consecutive_days": 13,
-        "pct_change_5d": -12.41
-      },
-      {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
         "ticker": "329180",
         "name": "HD현대중공업",
         "signal": "SURGE",
         "score": 75,
         "reasons": [
-          "외국인 폭풍매수 (z=2.7)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 8일 연속 순매수",
-          "스텔스 매수 (주가 -14.3% but 외국인↑)"
+          "외국인 폭풍매수 (z=2.4)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 10일 연속 순매수",
+          "스텔스 매수 (주가 -6.4% but 외국인↑)"
         ],
-        "foreign_net_5d": 380188,
-        "foreign_zscore": 2.68,
+        "foreign_net_5d": 344472,
+        "foreign_zscore": 2.43,
         "ewy_decouple": true,
-        "consecutive_days": 8,
-        "pct_change_5d": -14.26
+        "consecutive_days": 10,
+        "pct_change_5d": -6.42
       },
       {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
         "ticker": "010140",
         "name": "삼성중공업",
         "signal": "SURGE",
         "score": 75,
         "reasons": [
-          "외국인 폭풍매수 (z=2.4)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 10일 연속 순매수",
-          "스텔스 매수 (주가 -19.0% but 외국인↑)"
+          "외국인 폭풍매수 (z=2.5)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 12일 연속 순매수",
+          "스텔스 매수 (주가 -3.8% but 외국인↑)"
         ],
-        "foreign_net_5d": 4679825,
-        "foreign_zscore": 2.4,
+        "foreign_net_5d": 5024636,
+        "foreign_zscore": 2.49,
         "ewy_decouple": true,
-        "consecutive_days": 10,
-        "pct_change_5d": -18.97
+        "consecutive_days": 12,
+        "pct_change_5d": -3.83
       },
       {
-        "date": "2026-03-04",
-        "ticker": "316140",
-        "name": "우리금융지주",
+        "date": "2026-03-07",
+        "ticker": "003550",
+        "name": "LG",
+        "signal": "SURGE",
+        "score": 75,
+        "reasons": [
+          "외국인 폭풍매수 (z=2.8)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 5일 연속 순매수",
+          "스텔스 매수 (주가 -9.1% but 외국인↑)"
+        ],
+        "foreign_net_5d": 603981,
+        "foreign_zscore": 2.83,
+        "ewy_decouple": true,
+        "consecutive_days": 5,
+        "pct_change_5d": -9.09
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "032830",
+        "name": "삼성생명",
         "signal": "INFLOW",
         "score": 68,
         "reasons": [
-          "외국인 폭풍매수 (z=2.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
           "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -18.7% but 외국인↑)"
+          "스텔스 매수 (주가 -12.1% but 외국인↑)"
         ],
-        "foreign_net_5d": 2145128,
-        "foreign_zscore": 2.26,
+        "foreign_net_5d": 476979,
+        "foreign_zscore": 2.15,
         "ewy_decouple": true,
         "consecutive_days": 4,
-        "pct_change_5d": -18.67
+        "pct_change_5d": -12.13
       },
       {
-        "date": "2026-03-04",
-        "ticker": "003550",
-        "name": "LG",
+        "date": "2026-03-07",
+        "ticker": "373220",
+        "name": "LG에너지솔루션",
         "signal": "INFLOW",
-        "score": 63,
+        "score": 65,
         "reasons": [
-          "외국인 강매수 (z=1.1)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 3일 연속 순매수",
-          "스텔스 매수 (주가 -8.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 265007,
-        "foreign_zscore": 1.1,
-        "ewy_decouple": true,
-        "consecutive_days": 3,
-        "pct_change_5d": -8.7
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "003670",
-        "name": "포스코퓨처엠",
-        "signal": "INFLOW",
-        "score": 60,
-        "reasons": [
-          "외국인 강매수 (z=1.0)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -21.5% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)",
+          "외국인 강매수 (z=1.5)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 11일 연속 순매수",
+          "스텔스 매수 (주가 -11.6% but 외국인↑)",
           "2차전지 섹터 외국인 집중"
         ],
-        "foreign_net_5d": 299675,
-        "foreign_zscore": 1.03,
+        "foreign_net_5d": 285854,
+        "foreign_zscore": 1.53,
         "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": -21.53
+        "consecutive_days": 11,
+        "pct_change_5d": -11.59
       },
       {
-        "date": "2026-03-04",
-        "ticker": "009540",
-        "name": "한국조선해양",
+        "date": "2026-03-07",
+        "ticker": "055550",
+        "name": "신한지주",
         "signal": "INFLOW",
         "score": 60,
         "reasons": [
-          "외국인 강매수 (z=1.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 5일 연속 순매수",
-          "스텔스 매수 (주가 -17.2% but 외국인↑)"
+          "외국인 강매수 (z=1.7)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 6일 연속 순매수",
+          "스텔스 매수 (주가 -8.1% but 외국인↑)"
         ],
-        "foreign_net_5d": 218895,
-        "foreign_zscore": 1.28,
+        "foreign_net_5d": 1056853,
+        "foreign_zscore": 1.73,
         "ewy_decouple": true,
-        "consecutive_days": 5,
-        "pct_change_5d": -17.16
+        "consecutive_days": 6,
+        "pct_change_5d": -8.11
       },
       {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
+        "ticker": "316140",
+        "name": "우리금융지주",
+        "signal": "INFLOW",
+        "score": 60,
+        "reasons": [
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -12.7% but 외국인↑)"
+        ],
+        "foreign_net_5d": 1617956,
+        "foreign_zscore": 2.07,
+        "ewy_decouple": true,
+        "consecutive_days": 0,
+        "pct_change_5d": -12.68
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "086790",
+        "name": "하나금융지주",
+        "signal": "INFLOW",
+        "score": 60,
+        "reasons": [
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -11.7% but 외국인↑)"
+        ],
+        "foreign_net_5d": 414255,
+        "foreign_zscore": 2.13,
+        "ewy_decouple": true,
+        "consecutive_days": 0,
+        "pct_change_5d": -11.69
+      },
+      {
+        "date": "2026-03-07",
         "ticker": "128940",
         "name": "한미약품",
         "signal": "INFLOW",
         "score": 60,
         "reasons": [
-          "외국인 강매수 (z=1.7)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 11일 연속 순매수",
-          "스텔스 매수 (주가 -22.4% but 외국인↑)"
+          "외국인 강매수 (z=2.0)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 13일 연속 순매수",
+          "스텔스 매수 (주가 -13.1% but 외국인↑)"
         ],
-        "foreign_net_5d": 117381,
-        "foreign_zscore": 1.74,
+        "foreign_net_5d": 134099,
+        "foreign_zscore": 1.97,
         "ewy_decouple": true,
-        "consecutive_days": 11,
-        "pct_change_5d": -22.4
+        "consecutive_days": 13,
+        "pct_change_5d": -13.13
       },
       {
-        "date": "2026-03-04",
-        "ticker": "036570",
-        "name": "엔씨소프트",
-        "signal": "INFLOW",
-        "score": 55,
-        "reasons": [
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 5일 연속 순매수",
-          "스텔스 매수 (주가 -15.0% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 91548,
-        "foreign_zscore": 0.99,
-        "ewy_decouple": true,
-        "consecutive_days": 5,
-        "pct_change_5d": -14.96
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "068270",
-        "name": "셀트리온",
+        "date": "2026-03-07",
+        "ticker": "207940",
+        "name": "삼성바이오로직스",
         "signal": "INFLOW",
         "score": 53,
         "reasons": [
-          "외국인 강매수 (z=1.5)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -20.6% but 외국인↑)"
+          "외국인 강매수 (z=1.4)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 3일 연속 순매수",
+          "스텔스 매수 (주가 -6.9% but 외국인↑)"
         ],
-        "foreign_net_5d": 1094890,
-        "foreign_zscore": 1.51,
+        "foreign_net_5d": 40866,
+        "foreign_zscore": 1.43,
         "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": -20.56
+        "consecutive_days": 3,
+        "pct_change_5d": -6.91
       },
       {
-        "date": "2026-03-04",
-        "ticker": "055550",
-        "name": "신한지주",
+        "date": "2026-03-07",
+        "ticker": "028260",
+        "name": "삼성물산",
         "signal": "INFLOW",
         "score": 53,
         "reasons": [
           "외국인 강매수 (z=1.2)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
           "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -12.0% but 외국인↑)"
+          "스텔스 매수 (주가 -21.2% but 외국인↑)"
         ],
-        "foreign_net_5d": 832854,
-        "foreign_zscore": 1.19,
+        "foreign_net_5d": 172737,
+        "foreign_zscore": 1.16,
         "ewy_decouple": true,
         "consecutive_days": 4,
-        "pct_change_5d": -11.99
+        "pct_change_5d": -21.25
       },
       {
-        "date": "2026-03-04",
-        "ticker": "086790",
-        "name": "하나금융지주",
-        "signal": "INFLOW",
-        "score": 53,
-        "reasons": [
-          "외국인 강매수 (z=1.9)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -16.3% but 외국인↑)"
-        ],
-        "foreign_net_5d": 550033,
-        "foreign_zscore": 1.9,
-        "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": -16.34
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "207940",
-        "name": "삼성바이오로직스",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
-        "reasons": [
-          "외국인 강매수 (z=1.9)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -12.0% but 외국인↑)"
-        ],
-        "foreign_net_5d": 43883,
-        "foreign_zscore": 1.91,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": -12.01
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "042700",
-        "name": "한미반도체",
+        "date": "2026-03-07",
+        "ticker": "068270",
+        "name": "셀트리온",
         "signal": "SECTOR_FOCUS",
         "score": 45,
         "reasons": [
           "외국인 강매수 (z=1.4)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -12.2% but 외국인↑)"
         ],
-        "foreign_net_5d": 959277,
-        "foreign_zscore": 1.35,
+        "foreign_net_5d": 1038650,
+        "foreign_zscore": 1.41,
         "ewy_decouple": true,
         "consecutive_days": 0,
-        "pct_change_5d": 23.33
+        "pct_change_5d": -12.19
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "017670",
+        "name": "SK텔레콤",
+        "signal": "SECTOR_FOCUS",
+        "score": 45,
+        "reasons": [
+          "외국인 강매수 (z=1.4)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -7.0% but 외국인↑)"
+        ],
+        "foreign_net_5d": 1057628,
+        "foreign_zscore": 1.37,
+        "ewy_decouple": true,
+        "consecutive_days": 0,
+        "pct_change_5d": -7.05
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "047810",
+        "name": "한국항공우주",
+        "signal": "SECTOR_FOCUS",
+        "score": 43,
+        "reasons": [
+          "외국인 강매수 (z=1.6)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 3일 연속 순매수"
+        ],
+        "foreign_net_5d": 387846,
+        "foreign_zscore": 1.62,
+        "ewy_decouple": true,
+        "consecutive_days": 3,
+        "pct_change_5d": -0.33
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "034730",
+        "name": "SK",
+        "signal": "SECTOR_FOCUS",
+        "score": 40,
+        "reasons": [
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -15.2% but 외국인↑)",
+          "외국인+기관 동시 순매수 (5일)"
+        ],
+        "foreign_net_5d": 62630,
+        "foreign_zscore": 0.19,
+        "ewy_decouple": true,
+        "consecutive_days": 1,
+        "pct_change_5d": -15.15
       }
     ],
     "top_foreign_buyers": [
       {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
         "ticker": "010140",
         "name": "삼성중공업",
         "signal": "SURGE",
         "score": 75,
         "reasons": [
-          "외국인 폭풍매수 (z=2.4)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 10일 연속 순매수",
-          "스텔스 매수 (주가 -19.0% but 외국인↑)"
+          "외국인 폭풍매수 (z=2.5)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 12일 연속 순매수",
+          "스텔스 매수 (주가 -3.8% but 외국인↑)"
         ],
-        "foreign_net_5d": 4679825,
-        "foreign_zscore": 2.4,
+        "foreign_net_5d": 5024636,
+        "foreign_zscore": 2.49,
         "ewy_decouple": true,
-        "consecutive_days": 10,
-        "pct_change_5d": -18.97
+        "consecutive_days": 12,
+        "pct_change_5d": -3.83
       },
       {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
         "ticker": "316140",
         "name": "우리금융지주",
         "signal": "INFLOW",
-        "score": 68,
+        "score": 60,
         "reasons": [
-          "외국인 폭풍매수 (z=2.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -18.7% but 외국인↑)"
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -12.7% but 외국인↑)"
         ],
-        "foreign_net_5d": 2145128,
-        "foreign_zscore": 2.26,
+        "foreign_net_5d": 1617956,
+        "foreign_zscore": 2.07,
         "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": -18.67
+        "consecutive_days": 0,
+        "pct_change_5d": -12.68
       },
       {
-        "date": "2026-03-04",
-        "ticker": "003490",
-        "name": "대한항공",
-        "signal": "SECTOR_FOCUS",
-        "score": 40,
-        "reasons": [
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -12.4% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 1610300,
-        "foreign_zscore": -0.12,
-        "ewy_decouple": true,
-        "consecutive_days": 2,
-        "pct_change_5d": -12.45
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "009830",
-        "name": "한화솔루션",
-        "signal": "SECTOR_FOCUS",
-        "score": 35,
-        "reasons": [
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -21.5% but 외국인↑)",
-          "2차전지 섹터 외국인 집중"
-        ],
-        "foreign_net_5d": 1388615,
-        "foreign_zscore": -0.36,
-        "ewy_decouple": true,
-        "consecutive_days": 2,
-        "pct_change_5d": -21.51
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "034020",
-        "name": "두산에너빌리티",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
-        "reasons": [
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -20.4% but 외국인↑)"
-        ],
-        "foreign_net_5d": 1208544,
-        "foreign_zscore": -0.05,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": -20.43
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "068270",
-        "name": "셀트리온",
-        "signal": "INFLOW",
-        "score": 53,
-        "reasons": [
-          "외국인 강매수 (z=1.5)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -20.6% but 외국인↑)"
-        ],
-        "foreign_net_5d": 1094890,
-        "foreign_zscore": 1.51,
-        "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": -20.56
-      },
-      {
-        "date": "2026-03-04",
-        "ticker": "042700",
-        "name": "한미반도체",
+        "date": "2026-03-07",
+        "ticker": "017670",
+        "name": "SK텔레콤",
         "signal": "SECTOR_FOCUS",
         "score": 45,
         "reasons": [
           "외국인 강매수 (z=1.4)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -7.0% but 외국인↑)"
         ],
-        "foreign_net_5d": 959277,
-        "foreign_zscore": 1.35,
+        "foreign_net_5d": 1057628,
+        "foreign_zscore": 1.37,
         "ewy_decouple": true,
         "consecutive_days": 0,
-        "pct_change_5d": 23.33
+        "pct_change_5d": -7.05
       },
       {
-        "date": "2026-03-04",
+        "date": "2026-03-07",
         "ticker": "055550",
         "name": "신한지주",
         "signal": "INFLOW",
-        "score": 53,
+        "score": 60,
         "reasons": [
-          "외국인 강매수 (z=1.2)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 4일 연속 순매수",
-          "스텔스 매수 (주가 -12.0% but 외국인↑)"
+          "외국인 강매수 (z=1.7)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 6일 연속 순매수",
+          "스텔스 매수 (주가 -8.1% but 외국인↑)"
         ],
-        "foreign_net_5d": 832854,
-        "foreign_zscore": 1.19,
+        "foreign_net_5d": 1056853,
+        "foreign_zscore": 1.73,
         "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": -11.99
+        "consecutive_days": 6,
+        "pct_change_5d": -8.11
       },
       {
-        "date": "2026-03-04",
-        "ticker": "035720",
-        "name": "카카오",
+        "date": "2026-03-07",
+        "ticker": "068270",
+        "name": "셀트리온",
         "signal": "SECTOR_FOCUS",
-        "score": 40,
+        "score": 45,
         "reasons": [
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "스텔스 매수 (주가 -18.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
+          "외국인 강매수 (z=1.4)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -12.2% but 외국인↑)"
         ],
-        "foreign_net_5d": 753561,
-        "foreign_zscore": 0.86,
+        "foreign_net_5d": 1038650,
+        "foreign_zscore": 1.41,
         "ewy_decouple": true,
         "consecutive_days": 0,
-        "pct_change_5d": -18.74
+        "pct_change_5d": -12.19
       },
       {
-        "date": "2026-03-04",
-        "ticker": "051910",
-        "name": "LG화학",
+        "date": "2026-03-07",
+        "ticker": "003490",
+        "name": "대한항공",
+        "signal": "SECTOR_FOCUS",
+        "score": 38,
+        "reasons": [
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 4일 연속 순매수",
+          "스텔스 매수 (주가 -12.8% but 외국인↑)"
+        ],
+        "foreign_net_5d": 1038141,
+        "foreign_zscore": -0.62,
+        "ewy_decouple": true,
+        "consecutive_days": 4,
+        "pct_change_5d": -12.81
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "064350",
+        "name": "현대로템",
+        "signal": "WATCH",
+        "score": 28,
+        "reasons": [
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 3일 연속 순매수"
+        ],
+        "foreign_net_5d": 896137,
+        "foreign_zscore": 0.83,
+        "ewy_decouple": true,
+        "consecutive_days": 3,
+        "pct_change_5d": 5.91
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "003550",
+        "name": "LG",
         "signal": "SURGE",
         "score": 75,
         "reasons": [
-          "외국인 강매수 (z=1.3)",
-          "EWY 디커플링 (EWY -8.4% but 외국인↑)",
-          "외국인 13일 연속 순매수",
-          "스텔스 매수 (주가 -12.4% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)",
-          "2차전지 섹터 외국인 집중"
+          "외국인 폭풍매수 (z=2.8)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 5일 연속 순매수",
+          "스텔스 매수 (주가 -9.1% but 외국인↑)"
         ],
-        "foreign_net_5d": 603210,
-        "foreign_zscore": 1.34,
+        "foreign_net_5d": 603981,
+        "foreign_zscore": 2.83,
         "ewy_decouple": true,
-        "consecutive_days": 13,
-        "pct_change_5d": -12.41
+        "consecutive_days": 5,
+        "pct_change_5d": -9.09
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "032830",
+        "name": "삼성생명",
+        "signal": "INFLOW",
+        "score": 68,
+        "reasons": [
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "외국인 4일 연속 순매수",
+          "스텔스 매수 (주가 -12.1% but 외국인↑)"
+        ],
+        "foreign_net_5d": 476979,
+        "foreign_zscore": 2.15,
+        "ewy_decouple": true,
+        "consecutive_days": 4,
+        "pct_change_5d": -12.13
+      },
+      {
+        "date": "2026-03-07",
+        "ticker": "086790",
+        "name": "하나금융지주",
+        "signal": "INFLOW",
+        "score": 60,
+        "reasons": [
+          "외국인 폭풍매수 (z=2.1)",
+          "EWY 디커플링 (EWY -16.2% but 외국인↑)",
+          "스텔스 매수 (주가 -11.7% but 외국인↑)"
+        ],
+        "foreign_net_5d": 414255,
+        "foreign_zscore": 2.13,
+        "ewy_decouple": true,
+        "consecutive_days": 0,
+        "pct_change_5d": -11.69
       }
     ]
   },
   "brain_decision": {
-    "timestamp": "2026-03-07T16:48:30.561145",
+    "timestamp": "2026-03-07T17:39:20.041606",
     "effective_regime": "CAUTION",
     "kospi_regime": "CAUTION",
     "nightwatch_score": -0.165,
@@ -1608,7 +1503,7 @@
     ]
   },
   "shield_report": {
-    "timestamp": "2026-03-07T16:48:46.263506",
+    "timestamp": "2026-03-07T17:39:08.658401",
     "overall_level": "ORANGE",
     "mdd_status": {
       "peak_equity": 40345724,
