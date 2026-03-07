@@ -235,7 +235,7 @@ async def run_phase1(dry_run: bool = False, o1_context: dict | None = None) -> d
     logger.info("=" * 60)
 
     # ── 5개 소스 로드 ──
-    overnight = _load_json(DATA_DIR / "overnight_signal.json")
+    overnight = _load_json(DATA_DIR / "us_market" / "overnight_signal.json")
     news = _load_json(DATA_DIR / "ai_brain_judgment.json")
     sector_flow = _load_json(
         DATA_DIR / "sector_rotation" / "etf_trading_signal.json"
