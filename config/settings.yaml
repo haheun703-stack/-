@@ -1706,3 +1706,18 @@ brain:
 
   # 텔레그램 브리핑
   telegram_briefing: true
+
+# ─── SHIELD 포트폴리오 방어 시스템 ───
+# BRAIN 전에 실행. 3대 방어축:
+#   S1: 섹터 오버랩 감지 (스윙+ETF 중복)
+#   S2: MDD 실시간 추적 + 킬스위치
+#   S3: 종목별 손절 통합 + 시스템적 리스크
+shield:
+  enabled: true
+  max_sector_exposure_pct: 30       # 단일 섹터 최대 노출 (%)
+  deep_loss_pct: -15.0              # 개별종목 손절 경고 기준 (%)
+  simultaneous_decline_pct: -5.0    # 동시 하락 판정 기준 (%)
+  systemic_min_count: 3             # N개+ 동시 하락 → 시스템적 리스크
+  equity_tracker_auto_update: true  # equity_tracker.json 자동 업데이트
+  telegram_alert: true
+  alert_levels: ["ORANGE", "RED"]   # 이 등급 이상 텔레그램 발송

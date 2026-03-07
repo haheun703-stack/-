@@ -236,6 +236,23 @@ class Brain:
                 shock_conf = shock.get("confidence", 0) if isinstance(shock, dict) else 0
                 adjustments.append(f"충격 보정: {shock_type} (확신도 {shock_conf:.0%})")
 
+        # ── 6.5. SHIELD 방어 보정 ──
+        shield_report = self._load_json(DATA_DIR / "shield_report.json")
+        shield_overrides = shield_report.get("brain_overrides", {})
+        shield_level = shield_overrides.get("shield_level", "GREEN")
+
+        if shield_level in ("ORANGE", "RED"):
+            arm_adj = shield_overrides.get("arm_adjustments", {})
+            for arm_name, delta in arm_adj.items():
+                if arm_name in arms:
+                    arms[arm_name] = max(0, arms[arm_name] + delta)
+            for msg in shield_overrides.get("messages", []):
+                adjustments.append(f"SHIELD: {msg}")
+            warnings.append(f"SHIELD 방어 등급: {shield_level}")
+        elif shield_level == "YELLOW":
+            for msg in shield_overrides.get("messages", []):
+                warnings.append(f"SHIELD: {msg}")
+
         # ── 7. 비중 정규화 (합계 = 100%) ──
         arms = self._normalize_allocations(arms)
 
