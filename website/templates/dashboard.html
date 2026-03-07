@@ -147,6 +147,133 @@
     {% endif %}
 </div>
 
+<!-- ═══ BRAIN 자본배분 + SHIELD 방어 ═══ -->
+{% if brain and brain.brain_decision and brain.brain_decision.arms %}
+{% set bd = brain.brain_decision %}
+{% set sr = brain.shield_report|default({}) %}
+{% set shield_level = sr.overall_level|default('GREEN') %}
+{% set shield_cls = 'bull' if shield_level == 'GREEN' else ('neutral' if shield_level == 'YELLOW' else 'bear') %}
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="card-title"><i class="fas fa-brain" style="color:var(--accent-purple);"></i> BRAIN 자본배분</span>
+        <div style="display:flex;gap:10px;align-items:center;">
+            {% if shield_level != 'GREEN' %}
+            <span class="signal-badge {{ 'bear-badge' if shield_level in ['ORANGE','RED'] else 'neutral-badge' }}">
+                <i class="fas fa-shield-alt"></i> SHIELD {{ shield_level }}
+            </span>
+            {% else %}
+            <span class="signal-badge bull-badge"><i class="fas fa-shield-alt"></i> SHIELD OK</span>
+            {% endif %}
+            <span style="font-size:13px;color:#6B7280;">{{ bd.effective_regime }} | VIX {{ "%.1f"|format(bd.vix_level|default(0)) }} | 신뢰도 {{ "%.0f"|format((bd.confidence|default(0))*100) }}%</span>
+        </div>
+    </div>
+
+    {# ARM 배분 바 차트 #}
+    <div style="padding:16px 24px;">
+        {# 상단: 투자/현금 요약 #}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;gap:20px;align-items:baseline;">
+                <span style="font-size:28px;font-weight:700;color:#E5E7EB;">{{ "%.1f"|format(bd.total_invest_pct|default(0)) }}%</span>
+                <span style="color:#6B7280;font-size:14px;">투자</span>
+                <span style="font-size:28px;font-weight:700;color:#9CA3AF;">{{ "%.1f"|format(bd.cash_pct|default(0)) }}%</span>
+                <span style="color:#6B7280;font-size:14px;">현금</span>
+            </div>
+            {% if bd.effective_regime != bd.kospi_regime %}
+            <span style="font-size:13px;color:#F59E0B;">KOSPI {{ bd.kospi_regime }} → {{ bd.effective_regime }}</span>
+            {% endif %}
+        </div>
+
+        {# 스택 바 (전체 100%) #}
+        <div style="display:flex;height:32px;border-radius:8px;overflow:hidden;margin-bottom:16px;background:rgba(255,255,255,0.03);">
+            {% set arm_colors = {
+                'swing': '#3B82F6', 'etf_sector': '#10B981', 'etf_leverage': '#EF4444',
+                'etf_index': '#8B5CF6', 'etf_gold': '#F59E0B', 'etf_small_cap': '#EC4899',
+                'etf_bonds': '#06B6D4', 'etf_dollar': '#84CC16', 'cash': '#374151'
+            } %}
+            {% set arm_names = {
+                'swing': '스윙', 'etf_sector': '섹터', 'etf_leverage': '레버',
+                'etf_index': '지수', 'etf_gold': '금', 'etf_small_cap': '소형',
+                'etf_bonds': '채권', 'etf_dollar': '달러', 'cash': '현금'
+            } %}
+            {% for arm in bd.arms %}
+            {% if arm.adjusted_pct > 0 %}
+            <div style="width:{{ arm.adjusted_pct }}%;background:{{ arm_colors.get(arm.name, '#6B7280') }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;min-width:{% if arm.adjusted_pct > 5 %}0{% else %}0{% endif %}px;" title="{{ arm_names.get(arm.name, arm.name) }} {{ '%.1f'|format(arm.adjusted_pct) }}%">
+                {% if arm.adjusted_pct > 6 %}{{ arm_names.get(arm.name, arm.name) }} {{ "%.0f"|format(arm.adjusted_pct) }}%{% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        {# ARM 상세 그리드 #}
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">
+            {% for arm in bd.arms %}
+            {% set acolor = arm_colors.get(arm.name, '#6B7280') %}
+            <div style="padding:10px 14px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:3px solid {{ acolor }};">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:13px;color:#9CA3AF;">{{ arm_names.get(arm.name, arm.name) }}</span>
+                    <span style="font-size:16px;font-weight:700;color:{{ acolor }};">{{ "%.1f"|format(arm.adjusted_pct) }}%</span>
+                </div>
+                {% if arm.delta_pct != 0 %}
+                <div style="font-size:11px;color:{{ '#10B981' if arm.delta_pct > 0 else '#EF4444' }};margin-top:4px;">
+                    {{ "%+.1f"|format(arm.delta_pct) }}%p
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {# 보정 사항 (접힌 상태) #}
+        {% if bd.adjustments or bd.warnings %}
+        <details style="margin-top:14px;">
+            <summary style="cursor:pointer;font-size:13px;color:#6B7280;">
+                <i class="fas fa-sliders-h"></i> 보정 {{ bd.adjustments|length }}건
+                {% if bd.warnings %} · 경고 {{ bd.warnings|length }}건{% endif %}
+            </summary>
+            <div style="margin-top:8px;font-size:13px;color:#9CA3AF;line-height:1.8;">
+                {% for adj in bd.adjustments %}
+                <div>· {{ adj }}</div>
+                {% endfor %}
+                {% for w in bd.warnings %}
+                <div style="color:#F59E0B;">! {{ w }}</div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+    </div>
+
+    {# SHIELD 상세 (ORANGE/RED만 표시) #}
+    {% if shield_level in ['ORANGE', 'RED'] %}
+    <div style="padding:12px 24px;border-top:1px solid rgba(255,255,255,0.05);background:rgba(239,68,68,0.03);">
+        <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;">
+            {% if sr.mdd_status %}
+            <div>
+                <span style="color:#6B7280;">MDD</span>
+                <span style="color:{{ '#EF4444' if sr.mdd_status.current_mdd_pct|default(0) < -10 else '#F59E0B' }};font-weight:600;margin-left:6px;">
+                    {{ "%+.1f"|format(sr.mdd_status.current_mdd_pct|default(0)) }}%
+                </span>
+                <span style="color:#4B5563;margin-left:4px;">peak {{ "{:,.0f}".format(sr.mdd_status.peak_equity|default(0)) }}원</span>
+            </div>
+            {% endif %}
+            {% if sr.stock_alerts %}
+            <div>
+                <span style="color:#6B7280;">종목경고</span>
+                {% for alert in sr.stock_alerts %}
+                <span style="color:#EF4444;font-weight:600;margin-left:6px;">{{ alert.name }} {{ "%+.1f"|format(alert.pnl_pct|default(0)) }}%</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if sr.systemic_risk and sr.systemic_risk.severity|default('') in ['DANGER','WARNING'] %}
+            <div>
+                <span style="color:#6B7280;">시스템리스크</span>
+                <span style="color:#EF4444;font-weight:600;margin-left:6px;">{{ sr.systemic_risk.message|default('') }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
 <!-- ═══ 보유 주식 현황 ═══ -->
 <div class="card">
     <div class="card-header">

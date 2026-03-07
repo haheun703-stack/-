@@ -190,6 +190,41 @@ def build_journal():
     }
 
 
+def build_brain_decision():
+    """BRAIN 자본배분 결정 데이터"""
+    raw = load("brain_decision.json")
+    if not raw:
+        return {}
+    return {
+        "timestamp": raw.get("timestamp", ""),
+        "effective_regime": raw.get("effective_regime", ""),
+        "kospi_regime": raw.get("kospi_regime", ""),
+        "nightwatch_score": raw.get("nightwatch_score", 0),
+        "vix_level": raw.get("vix_level", 0),
+        "confidence": raw.get("confidence", 0),
+        "arms": raw.get("arms", []),
+        "total_invest_pct": raw.get("total_invest_pct", 0),
+        "cash_pct": raw.get("cash_pct", 0),
+        "adjustments": raw.get("adjustments", []),
+        "warnings": raw.get("warnings", []),
+    }
+
+
+def build_shield_report():
+    """SHIELD 포트폴리오 방어 리포트"""
+    raw = load("shield_report.json")
+    if not raw:
+        return {}
+    return {
+        "timestamp": raw.get("timestamp", ""),
+        "overall_level": raw.get("overall_level", "GREEN"),
+        "mdd_status": raw.get("mdd_status", {}),
+        "stock_alerts": raw.get("stock_alerts", []),
+        "systemic_risk": raw.get("systemic_risk", {}),
+        "sector_overlaps": raw.get("sector_overlaps", []),
+    }
+
+
 def build_china_money():
     """차이나머니 수급 시그널 데이터"""
     raw = load("china_money/china_money_signal.json")
@@ -216,6 +251,8 @@ def main():
         "news": build_news(),
         "journal": build_journal(),
         "china_money": build_china_money(),
+        "brain_decision": build_brain_decision(),
+        "shield_report": build_shield_report(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -230,6 +267,10 @@ def main():
     print(f"  risk factors: {len(brain['strategic'].get('risk_factors', []))}")
     cm = brain["china_money"]
     print(f"  china_money: {cm.get('summary', {}).get('SURGE', 0)} SURGE / {cm.get('summary', {}).get('INFLOW', 0)} INFLOW")
+    bd = brain["brain_decision"]
+    print(f"  brain_decision: regime={bd.get('effective_regime', 'N/A')}, invest={bd.get('total_invest_pct', 0):.1f}%, cash={bd.get('cash_pct', 0):.1f}%")
+    sr = brain["shield_report"]
+    print(f"  shield_report: level={sr.get('overall_level', 'N/A')}, alerts={len(sr.get('stock_alerts', []))}")
 
 
 if __name__ == "__main__":

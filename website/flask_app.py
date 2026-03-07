@@ -103,10 +103,7 @@ def save_metrics(data):
 
 def get_market_data():
     """시장 데이터 로드 (추천종목, US시그널, 레짐)"""
-    if os.path.exists(MARKET_FILE):
-        with open(MARKET_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {
+    defaults = {
         'picks': [],
         'us_signal': {
             'grade': '-',
@@ -120,8 +117,19 @@ def get_market_data():
         'regime': 'UNKNOWN',
         'regime_slots': 0,
         'bat_status': {},
-        'updated_at': ''
+        'updated_at': '',
+        'etf': {},
     }
+    if os.path.exists(MARKET_FILE):
+        with open(MARKET_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        # 기본값 병합 (키 누락 방지)
+        for k, v in defaults.items():
+            data.setdefault(k, v)
+        if not isinstance(data.get('us_signal'), dict):
+            data['us_signal'] = defaults['us_signal']
+        return data
+    return defaults
 
 def save_market_data(data):
     """시장 데이터 저장"""

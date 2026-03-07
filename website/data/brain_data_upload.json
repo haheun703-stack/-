@@ -1,58 +1,59 @@
 {
   "strategic": {
-    "analysis_date": "2026-03-05",
+    "analysis_date": "2026-03-06",
     "regime": "회피",
-    "regime_confidence": 0.85,
-    "regime_reasoning": "미-이란 갈등으로 지정학 리스크 극대화, 서킷브레이커 발동 등 패닉 상태. 유가·환율·금리 트리플 쇼크로 시장 기능 마비 수준.",
+    "regime_confidence": 0.9,
+    "regime_reasoning": "호르무즈 해협 봉쇄 우려로 유가·환율·금리 트리플 쇼크 발생. VIX 30 이상으로 극단적 변동성. 서킷브레이커 발동 상황에서 신규 매수는 위험.",
     "industry_thesis": [
       {
         "sector": "방산",
-        "thesis": "지정학적 갈등 심화로 방위산업 수요 구조적 확대 전망. 정부 국방예산 증액 가속화.",
+        "thesis": "중동 지정학 리스크 심화로 방산 수요 급증 예상되나, 극심한 변동성으로 단기 급락 후 재평가 가능",
         "demand_supply": "공급부족",
         "asp_trend": "상승",
-        "global_alignment": "동조",
+        "global_alignment": "독립",
         "confidence": 7,
         "catalysts": [
-          "미-이란 갈등",
-          "국방예산 증액"
+          "중동 긴장 고조",
+          "국방비 증액"
         ],
         "risks": [
-          "단기 과열 후 급락"
+          "급등 후 차익실현"
         ],
         "relay_source": "방산조선",
         "relay_verified": true
       },
       {
         "sector": "정유",
-        "thesis": "호르무즈 해협 위기로 원유 공급 차질 우려. 정제마진 단기 급등 가능.",
-        "demand_supply": "공급부족",
+        "thesis": "유가 급등으로 정제마진 개선 기대되나, 수요 파괴 우려와 환율 급등으로 실질 수익성은 불확실",
+        "demand_supply": "균형",
         "asp_trend": "상승",
         "global_alignment": "동조",
         "confidence": 6,
         "catalysts": [
           "유가 급등",
-          "정제마진 확대"
+          "정제마진 개선"
         ],
         "risks": [
           "수요 파괴",
-          "경기 침체"
+          "환율 부담"
         ],
         "relay_source": null,
         "relay_verified": false
       },
       {
-        "sector": "통신",
-        "thesis": "방어주 성격으로 패닉장에서 상대적 안정. AI 데이터센터 투자 중장기 성장동력.",
-        "demand_supply": "균형",
-        "asp_trend": "횡보",
-        "global_alignment": "독립",
-        "confidence": 5,
+        "sector": "반도체",
+        "thesis": "AI 투자 우려로 단기 급락했으나, 장기 AI/클라우드 수요는 여전. 극도의 매도세는 오버슈팅",
+        "demand_supply": "공급과잉",
+        "asp_trend": "하락",
+        "global_alignment": "동조",
+        "confidence": 4,
         "catalysts": [
-          "방어적 성격",
-          "배당 매력"
+          "AI 장기 수요",
+          "저점 매수"
         ],
         "risks": [
-          "성장 둔화"
+          "SOX -3% 트리거",
+          "기술주 약세"
         ],
         "relay_source": null,
         "relay_verified": false
@@ -62,8 +63,7 @@
       "attack": [],
       "watch": [
         "방산",
-        "정유",
-        "통신"
+        "정유"
       ],
       "avoid": [
         "반도체",
@@ -75,32 +75,35 @@
     },
     "max_new_buys": 0,
     "risk_factors": [
-      "미-이란 전면전 가능성",
-      "호르무즈 해협 봉쇄",
-      "글로벌 금융시장 연쇄 급락",
-      "인플레이션 재점화"
+      "미국/이스라엘 vs 이란 군사충돌 — 중동 전면전 리스크 급등",
+      "유가 급등 가능성 (WTI $85+ 전망) — 호르무즈 해협 봉쇄 시나리오",
+      "안전자산 선호 심리 → 원/달러 환율 상승 압력",
+      "호르무즈 해협 봉쇄 위협",
+      "VIX 30 이상 극단 변동성",
+      "서킷브레이커 발동",
+      "트리플 쇼크(유가·환율·금리)"
     ],
     "cash_reserve_suggestion": 100,
-    "global_summary": "VIX 30 이상 극도의 공포 상태. 지정학 리스크와 인플레이션 우려가 복합적으로 작용하며 글로벌 리스크오프 심화.",
+    "global_summary": "중동 지정학 위기로 글로벌 금융시장 패닉. 미국 기술주 급락과 원자재 가격 급등이 동시 발생하며 스태그플레이션 우려 확산.",
     "relay_alerts": [
       {
         "pattern": "방산조선→기계",
-        "status": "대기",
+        "status": "발화",
         "action": "무시"
       },
       {
         "pattern": "반도체→IT서비스",
-        "status": "발화",
-        "action": "무시"
+        "status": "대기",
+        "action": "주의"
       }
     ]
   },
   "sector_focus": {
-    "analysis_date": "2026-03-05",
+    "analysis_date": "2026-03-06",
     "focus_sectors": [
       {
         "sector": "에너지화학",
-        "entry_timing": "눌림대기",
+        "entry_timing": "즉시진입",
         "size_weight": 1.0,
         "thesis_alignment": "강한일치",
         "momentum_rank": 6,
@@ -108,31 +111,43 @@
         "rsi": 77.3,
         "smart_money": true,
         "relay_source": null,
-        "reasoning": "정유 thesis(공급부족+ASP상승)와 스마트머니 유입 일치. RSI 77로 단기 과열 구간이나 구조적 강세 지속 예상"
+        "reasoning": "정유 thesis와 일치하며 스마트머니 유입 중, RSI 77.3으로 아직 과열 전 단계"
+      },
+      {
+        "sector": "증권",
+        "entry_timing": "즉시진입",
+        "size_weight": 0.8,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 7,
+        "momentum_score": 61.6,
+        "rsi": 70.3,
+        "smart_money": false,
+        "relay_source": null,
+        "reasoning": "Theme BUY 신호이며 ADX 52.9 고강도 추세, 릴레이 소스 역할 가능"
       },
       {
         "sector": "철강소재",
-        "entry_timing": "즉시진입",
-        "size_weight": 0.8,
+        "entry_timing": "눌림대기",
+        "size_weight": 0.6,
         "thesis_alignment": "thesis없음",
         "momentum_rank": 8,
         "momentum_score": 59.5,
         "rsi": 70.6,
         "smart_money": true,
         "relay_source": null,
-        "reasoning": "AI thesis 없으나 스마트머니 강한 유입+RSI 70 적정 수준. 건설(4위) 강세의 수혜 가능성"
+        "reasoning": "스마트머니 유입 중이나 BB 109.1%로 단기 과열, 조정 후 재진입 검토"
       },
       {
-        "sector": "방산",
-        "entry_timing": "관망",
-        "size_weight": 0.5,
-        "thesis_alignment": "불일치",
-        "momentum_rank": 13,
-        "momentum_score": 38.9,
-        "rsi": 62.6,
+        "sector": "보험",
+        "entry_timing": "즉시진입",
+        "size_weight": 0.7,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 9,
+        "momentum_score": 59.2,
+        "rsi": 72.6,
         "smart_money": false,
-        "relay_source": null,
-        "reasoning": "thesis 확신 7/10이나 모멘텀 13위+스마트머니 이탈. 구조적 강세 전 조정국면 판단"
+        "relay_source": "증권",
+        "reasoning": "증권 릴레이 타겟(승률 70~76%), 1일 지연으로 즉시 진입 타이밍"
       },
       {
         "sector": "2차전지",
@@ -144,24 +159,13 @@
         "rsi": 69.9,
         "smart_money": true,
         "relay_source": null,
-        "reasoning": "회피 섹터 지정+스마트머니 유입 상충. BB 105%로 변동성 확대 중이나 레짐 부합 안됨"
-      },
-      {
-        "sector": "증권",
-        "entry_timing": "눌림대기",
-        "size_weight": 0.7,
-        "thesis_alignment": "thesis없음",
-        "momentum_rank": 7,
-        "momentum_score": 61.6,
-        "rsi": 70.3,
-        "smart_money": false,
-        "relay_source": null,
-        "reasoning": "Theme BUY 지정+릴레이 소스 역할(보험/은행 대상). ADX 하락 전환으로 추세 약화 신호"
+        "reasoning": "회피 thesis와 상충, 스마트머니 유입은 있으나 모멘텀 약세로 관망"
       }
     ],
     "screening_boost": [
       "에너지화학",
-      "철강소재"
+      "증권",
+      "보험"
     ],
     "screening_suppress": [
       "현대차그룹",
@@ -173,37 +177,92 @@
     "sector_warnings": [
       {
         "sector": "현대차그룹",
-        "warning": "모멘텀 1위이나 RSI 82.9+BB 118.1 극심한 과열. 외인 대량 매도(-2694억) 진행 중",
+        "warning": "RSI 82.9 + BB 118.1% 극도 과열, 외인 대량 매도 중 (-2694억)",
         "severity": "high"
       },
       {
         "sector": "반도체",
-        "warning": "회피 섹터임에도 모멘텀 2위. 외인 -1592억 이탈+BB 109% 과열. IT서비스 릴레이 무시 권고",
+        "warning": "회피 thesis이나 모멘텀 2위 역설, 외인 15.9조 매도 vs 기관 2.8조 매수 충돌",
         "severity": "high"
       },
       {
         "sector": "건설",
-        "warning": "RSI 81.3+ADX 61.2로 과열+강한 추세. BB 96%로 밴드 상단 근접, 단기 조정 임박",
-        "severity": "high"
-      },
-      {
-        "sector": "방산",
-        "warning": "thesis 확신 7/10이나 실제 모멘텀 38.9(13위). 외인 -1889억 이탈로 구조적 강세 미발현",
+        "warning": "RSI 81.3 + ADX 61.2 과열 추세, thesis 없이 급등으로 조정 위험",
         "severity": "medium"
       },
       {
-        "sector": "통신",
-        "warning": "thesis 확신 5/10이나 ETF 모멘텀 데이터 누락. 검증 불가능",
-        "severity": "low"
+        "sector": "방산",
+        "warning": "thesis 확신 7/10이나 모멘텀 13위로 급락, 릴레이 무시 신호 발생",
+        "severity": "high"
+      },
+      {
+        "sector": "IT서비스",
+        "warning": "반도체 릴레이 주의 신호이나 현재 모멘텀 3위 과열, 진입 시점 이미 경과",
+        "severity": "medium"
       }
     ]
   },
   "group_relay": {
-    "scan_time": "2026-03-04T19:24:29.300120",
+    "scan_time": "2026-03-06T18:35:00.194946",
     "fire_threshold": 3.0,
-    "fired_groups": [],
-    "no_fire": true,
-    "summary": "오늘 발화한 대장주 없음"
+    "fired_groups": [
+      {
+        "group": "한화",
+        "leader_name": "한화에어로스페이스",
+        "leader_change": 7.24,
+        "leader_volume_ratio": 1.07,
+        "waiting_subsidiaries": [
+          {
+            "ticker": "082740",
+            "name": "한화엔진",
+            "tier": "tier2",
+            "change_pct": 1.26,
+            "volume_ratio": 0.43,
+            "rsi": 42.22845367377505,
+            "foreign_5d": 0.0,
+            "inst_5d": 0.0,
+            "score": 55.0,
+            "reasons": [
+              "대기중(+1.3%)",
+              "RSI42(적정)",
+              "tier2"
+            ]
+          },
+          {
+            "ticker": "009830",
+            "name": "한화솔루션",
+            "tier": "tier1",
+            "change_pct": 16.67,
+            "volume_ratio": 3.71,
+            "rsi": 60.17112069102381,
+            "foreign_5d": 0.0,
+            "inst_5d": 0.0,
+            "score": 30,
+            "reasons": [
+              "거래량3.7x",
+              "tier1"
+            ]
+          },
+          {
+            "ticker": "042660",
+            "name": "한화오션",
+            "tier": "tier1",
+            "change_pct": 3.77,
+            "volume_ratio": 0.55,
+            "rsi": 45.31462851531656,
+            "foreign_5d": 0.0,
+            "inst_5d": 0.0,
+            "score": 30,
+            "reasons": [
+              "RSI45(적정)",
+              "tier1"
+            ]
+          }
+        ]
+      }
+    ],
+    "no_fire": false,
+    "summary": "그룹 발화: 한화(한화에어로스페이스 +7.2%)"
   },
   "whale": {
     "updated_at": "2026-03-04 19:23",
@@ -787,7 +846,7 @@
     }
   },
   "v3_picks": {
-    "decision_date": "2026-03-05",
+    "decision_date": "2026-03-06",
     "regime": "회피",
     "available_slots": 0,
     "current_holdings": 0,
@@ -796,21 +855,22 @@
     "buys": [],
     "skipped": [
       {
-        "ticker": "278470",
-        "name": "에이피알",
-        "skip_reason": "회피 레짐에서 신규매수 금지"
+        "ticker": "010060",
+        "name": "OCI홀딩스",
+        "skip_reason": "회피 레짐 - 신규 매수 금지"
       },
       {
         "ticker": "298040",
         "name": "효성중공업",
-        "skip_reason": "회피 레짐에서 신규매수 금지"
+        "skip_reason": "회피 레짐 - 신규 매수 금지"
       }
     ],
     "portfolio_warnings": [
-      "회피 레짐: 미-이란 전면전 리스크로 현금 100% 유지 필수",
-      "호르무즈 해협 봉쇄 시 글로벌 공급망 마비 우려"
+      "회피 레짐 발동 - 모든 신규 매수 금지",
+      "호르무즈 해협 봉쇄 위협으로 극단적 변동성 경계",
+      "VIX 30 이상, 서킷브레이커 발동 상황"
     ],
-    "reasoning": "회피 레짐에서는 시장 참여를 완전 중단하고 현금 100%를 유지합니다. 미-이란 전면전 가능성과 호르무즈 해협 봉쇄 리스크는 글로벌 금융시장 연쇄 급락을 촉발할 수 있어, 어떤 종목도 매수하지 않고 관망하는 것이 최선의 전략입니다."
+    "reasoning": "현재 회피 레짐(신뢰도 90%)으로 최대 신규매수 0종목, 현금 비중 100% 권고에 따라 모든 매수를 중단합니다. 호르무즈 해협 봉쇄 위협과 VIX 30 이상의 극단적 변동성, 서킷브레이커 발동 상황에서는 현금 보유가 최선의 전략입니다."
   },
   "news": {
     "market_sentiment": "cautious",
@@ -878,7 +938,7 @@
     "period": "2026-03-02 ~ 2026-03-03",
     "days": [
       {
-        "date": "2026-03-06 (TOP 7 추천)",
+        "date": "2026-03-09 (TOP 7 추천)",
         "day_return": 0.0,
         "picks": [
           {
@@ -961,7 +1021,7 @@
         ]
       },
       {
-        "date": "2026-03-06 (AI 대형주)",
+        "date": "2026-03-09 (AI 대형주)",
         "day_return": 0.0,
         "picks": [
           {
@@ -1454,5 +1514,133 @@
         "pct_change_5d": -12.41
       }
     ]
+  },
+  "brain_decision": {
+    "timestamp": "2026-03-07T16:48:30.561145",
+    "effective_regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nightwatch_score": -0.165,
+    "vix_level": 29.3,
+    "confidence": 0.6,
+    "arms": [
+      {
+        "name": "swing",
+        "base_pct": 30,
+        "adjusted_pct": 12.5,
+        "delta_pct": -17.5,
+        "reason": "축소 17.5%p",
+        "frozen": false
+      },
+      {
+        "name": "etf_sector",
+        "base_pct": 20.0,
+        "adjusted_pct": 0,
+        "delta_pct": -20.0,
+        "reason": "축소 20.0%p",
+        "frozen": false
+      },
+      {
+        "name": "etf_leverage",
+        "base_pct": 0.0,
+        "adjusted_pct": 0,
+        "delta_pct": 0.0,
+        "reason": "변경 없음",
+        "frozen": false
+      },
+      {
+        "name": "etf_index",
+        "base_pct": 20.0,
+        "adjusted_pct": 15.0,
+        "delta_pct": -5.0,
+        "reason": "축소 5.0%p",
+        "frozen": false
+      },
+      {
+        "name": "etf_gold",
+        "base_pct": 10.0,
+        "adjusted_pct": 12.5,
+        "delta_pct": 2.5,
+        "reason": "확대 2.5%p",
+        "frozen": false
+      },
+      {
+        "name": "etf_small_cap",
+        "base_pct": 0.0,
+        "adjusted_pct": 0,
+        "delta_pct": 0.0,
+        "reason": "변경 없음",
+        "frozen": false
+      },
+      {
+        "name": "etf_bonds",
+        "base_pct": 10.0,
+        "adjusted_pct": 7.5,
+        "delta_pct": -2.5,
+        "reason": "축소 2.5%p",
+        "frozen": false
+      },
+      {
+        "name": "etf_dollar",
+        "base_pct": 5.0,
+        "adjusted_pct": 8.8,
+        "delta_pct": 3.8,
+        "reason": "확대 3.8%p",
+        "frozen": false
+      },
+      {
+        "name": "cash",
+        "base_pct": 35.0,
+        "adjusted_pct": 43.8,
+        "delta_pct": 8.8,
+        "reason": "확대 8.8%p",
+        "frozen": false
+      }
+    ],
+    "total_invest_pct": 56.2,
+    "cash_pct": 43.8,
+    "adjustments": [
+      "VIX 보정: 29.3 (HIGH) → 투자비중 ×0.75",
+      "충격 보정: COMPOUND (확신도 70%)",
+      "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
+    ],
+    "warnings": [
+      "SHIELD 방어 등급: ORANGE"
+    ]
+  },
+  "shield_report": {
+    "timestamp": "2026-03-07T16:48:46.263506",
+    "overall_level": "ORANGE",
+    "mdd_status": {
+      "peak_equity": 40345724,
+      "current_equity": 40345724,
+      "current_mdd_pct": 0.0,
+      "max_mdd_pct": 0.0,
+      "max_mdd_date": "",
+      "killswitch_level": "NONE",
+      "killswitch_action": ""
+    },
+    "stock_alerts": [
+      {
+        "ticker": "003570",
+        "name": "SNT다이내믹스",
+        "pnl_pct": -16.32,
+        "alert_type": "DEEP_LOSS",
+        "message": "SNT다이내믹스(003570) -16.3%"
+      }
+    ],
+    "systemic_risk": {
+      "simultaneous_decline_count": 5,
+      "decline_tickers": [
+        "SNT다이내믹스(-16.3%)",
+        "현대차(-10.4%)",
+        "삼성중공업(-6.3%)",
+        "셀트리온(-12.8%)",
+        "카카오뱅크(-13.8%)"
+      ],
+      "avg_decline_pct": -11.93,
+      "severity": "DANGER",
+      "message": "5개 종목 동시 -5.0%+ 하락"
+    },
+    "sector_overlaps": []
   }
 }
