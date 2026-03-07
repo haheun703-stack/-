@@ -1,5 +1,6 @@
 {
-  "run_date": "2026-03-07 15:07",
+  "run_date": "2026-03-07 15:19",
+  "version": "v2",
   "pages_per_item": 20,
   "sectors": [
     {
@@ -9,37 +10,105 @@
           "etf": "KODEX 반도체",
           "stock": "SK하이닉스",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0673,
-          "corr_etf_inst_vs_stock_inst": 0.0251,
-          "corr_etf_frgn_vs_stock_frgn": -0.0195,
-          "corr_etf_retail_vs_stock_frgn": -0.3926
+          "lag_corrs": {
+            "T+0": -0.0673,
+            "T+1": 0.0999,
+            "T+2": 0.1063,
+            "T+3": 0.1275
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 81078,
+            "T-2": 83736,
+            "T-1": 169319,
+            "T+0": 9334,
+            "T+1": 147684,
+            "T+2": 143533,
+            "T+3": 139668,
+            "T+4": 136876,
+            "T+5": 172210
+          },
+          "cum_t1t3_event": 430884,
+          "cum_t1t3_control": 96108,
+          "cum_diff_pct": 348.3
         },
         {
           "etf": "KODEX 반도체",
           "stock": "삼성전자",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0955,
-          "corr_etf_inst_vs_stock_inst": 0.0718,
-          "corr_etf_frgn_vs_stock_frgn": 0.0575,
-          "corr_etf_retail_vs_stock_frgn": -0.2073
+          "lag_corrs": {
+            "T+0": -0.0955,
+            "T+1": -0.0191,
+            "T+2": -0.0511,
+            "T+3": -0.0705
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 1686,
+            "T-2": 365118,
+            "T-1": 394447,
+            "T+0": 282601,
+            "T+1": 283914,
+            "T+2": -248394,
+            "T+3": -52334,
+            "T+4": -149588,
+            "T+5": 534474
+          },
+          "cum_t1t3_event": -16814,
+          "cum_t1t3_control": 349786,
+          "cum_diff_pct": -104.8
         },
         {
           "etf": "TIGER 반도체TOP10",
           "stock": "SK하이닉스",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": 0.0282,
-          "corr_etf_inst_vs_stock_inst": -0.0304,
-          "corr_etf_frgn_vs_stock_frgn": -0.0623,
-          "corr_etf_retail_vs_stock_frgn": -0.1556
+          "lag_corrs": {
+            "T+0": 0.0282,
+            "T+1": 0.098,
+            "T+2": 0.0744,
+            "T+3": 0.0479
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 91693,
+            "T-2": 122894,
+            "T-1": 200439,
+            "T+0": 133838,
+            "T+1": 171573,
+            "T+2": 178551,
+            "T+3": 159519,
+            "T+4": 147436,
+            "T+5": 172882
+          },
+          "cum_t1t3_event": 501192,
+          "cum_t1t3_control": 88296,
+          "cum_diff_pct": 467.6
         },
         {
           "etf": "TIGER 반도체TOP10",
           "stock": "삼성전자",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0686,
-          "corr_etf_inst_vs_stock_inst": 0.0833,
-          "corr_etf_frgn_vs_stock_frgn": -0.0376,
-          "corr_etf_retail_vs_stock_frgn": -0.0138
+          "lag_corrs": {
+            "T+0": -0.0686,
+            "T+1": -0.011,
+            "T+2": -0.0225,
+            "T+3": 0.0089
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 182101,
+            "T-2": 101512,
+            "T-1": 340211,
+            "T+0": -288495,
+            "T+1": -76576,
+            "T+2": 19572,
+            "T+3": 22676,
+            "T+4": -170705,
+            "T+5": 198337
+          },
+          "cum_t1t3_event": -35384,
+          "cum_t1t3_control": 351850,
+          "cum_diff_pct": -110.1
         }
       ]
     },
@@ -50,19 +119,53 @@
           "etf": "KODEX 자동차",
           "stock": "현대차",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.2417,
-          "corr_etf_inst_vs_stock_inst": 0.1469,
-          "corr_etf_frgn_vs_stock_frgn": 0.0413,
-          "corr_etf_retail_vs_stock_frgn": -0.3331
+          "lag_corrs": {
+            "T+0": -0.2417,
+            "T+1": -0.0136,
+            "T+2": -0.0543,
+            "T+3": -0.0482
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 30487,
+            "T-2": -10781,
+            "T-1": 14078,
+            "T+0": -58513,
+            "T+1": -10712,
+            "T+2": -10189,
+            "T+3": -44731,
+            "T+4": -31028,
+            "T+5": -5150
+          },
+          "cum_t1t3_event": -64259,
+          "cum_t1t3_control": -727,
+          "cum_diff_pct": 8738.1
         },
         {
           "etf": "KODEX 자동차",
           "stock": "기아",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.1996,
-          "corr_etf_inst_vs_stock_inst": 0.1344,
-          "corr_etf_frgn_vs_stock_frgn": -0.0067,
-          "corr_etf_retail_vs_stock_frgn": -0.3035
+          "lag_corrs": {
+            "T+0": -0.1996,
+            "T+1": 0.0283,
+            "T+2": -0.0155,
+            "T+3": -0.0356
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 62643,
+            "T-2": 11579,
+            "T-1": 15632,
+            "T+0": -53057,
+            "T+1": 16964,
+            "T+2": 6566,
+            "T+3": -7523,
+            "T+4": 8725,
+            "T+5": 19926
+          },
+          "cum_t1t3_event": 16031,
+          "cum_t1t3_control": 27977,
+          "cum_diff_pct": -42.7
         }
       ]
     },
@@ -73,19 +176,53 @@
           "etf": "KODEX 조선",
           "stock": "삼성중공업",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0951,
-          "corr_etf_inst_vs_stock_inst": 0.0775,
-          "corr_etf_frgn_vs_stock_frgn": -0.0045,
-          "corr_etf_retail_vs_stock_frgn": 0.0212
+          "lag_corrs": {
+            "T+0": -0.0951,
+            "T+1": -0.0208,
+            "T+2": -0.0279,
+            "T+3": -0.0337
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": -178590,
+            "T-2": -47987,
+            "T-1": 116169,
+            "T+0": -237802,
+            "T+1": -66688,
+            "T+2": -6965,
+            "T+3": -40007,
+            "T+4": -20772,
+            "T+5": 105884
+          },
+          "cum_t1t3_event": -113661,
+          "cum_t1t3_control": 42890,
+          "cum_diff_pct": -365.0
         },
         {
           "etf": "KODEX 조선",
           "stock": "HD한국조선해양",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0449,
-          "corr_etf_inst_vs_stock_inst": 0.0366,
-          "corr_etf_frgn_vs_stock_frgn": -0.0275,
-          "corr_etf_retail_vs_stock_frgn": 0.0146
+          "lag_corrs": {
+            "T+0": -0.0449,
+            "T+1": -0.0448,
+            "T+2": -0.0009,
+            "T+3": 0.0541
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": -2040,
+            "T-2": -7750,
+            "T-1": -1859,
+            "T+0": -5801,
+            "T+1": 270,
+            "T+2": 12090,
+            "T+3": 1866,
+            "T+4": -5140,
+            "T+5": 768
+          },
+          "cum_t1t3_event": 14226,
+          "cum_t1t3_control": 4906,
+          "cum_diff_pct": 190.0
         }
       ]
     },
@@ -96,19 +233,53 @@
           "etf": "KODEX 건설",
           "stock": "현대건설",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": 0.0312,
-          "corr_etf_inst_vs_stock_inst": -0.0647,
-          "corr_etf_frgn_vs_stock_frgn": 0.0678,
-          "corr_etf_retail_vs_stock_frgn": -0.1004
+          "lag_corrs": {
+            "T+0": 0.0312,
+            "T+1": 0.0336,
+            "T+2": 0.0385,
+            "T+3": 0.0078
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 46278,
+            "T-2": 20540,
+            "T-1": 67647,
+            "T+0": 34351,
+            "T+1": 9936,
+            "T+2": 21136,
+            "T+3": 44574,
+            "T+4": 27696,
+            "T+5": 9929
+          },
+          "cum_t1t3_event": 75647,
+          "cum_t1t3_control": 88847,
+          "cum_diff_pct": -14.9
         },
         {
           "etf": "KODEX 건설",
           "stock": "대우건설",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": 0.0908,
-          "corr_etf_inst_vs_stock_inst": -0.0787,
-          "corr_etf_frgn_vs_stock_frgn": -0.0436,
-          "corr_etf_retail_vs_stock_frgn": -0.1359
+          "lag_corrs": {
+            "T+0": 0.0908,
+            "T+1": 0.0567,
+            "T+2": 0.0412,
+            "T+3": 0.0255
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 92457,
+            "T-2": 116272,
+            "T-1": 236462,
+            "T+0": 256998,
+            "T+1": 92319,
+            "T+2": 33932,
+            "T+3": 140612,
+            "T+4": 132375,
+            "T+5": 78042
+          },
+          "cum_t1t3_event": 266863,
+          "cum_t1t3_control": 151587,
+          "cum_diff_pct": 76.0
         }
       ]
     },
@@ -119,25 +290,59 @@
           "etf": "KODEX 은행",
           "stock": "KB금융",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0591,
-          "corr_etf_inst_vs_stock_inst": 0.0378,
-          "corr_etf_frgn_vs_stock_frgn": 0.0167,
-          "corr_etf_retail_vs_stock_frgn": -0.2754
+          "lag_corrs": {
+            "T+0": -0.0591,
+            "T+1": 0.06,
+            "T+2": 0.1612,
+            "T+3": 0.0713
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 72248,
+            "T-2": 55218,
+            "T-1": 93763,
+            "T+0": 40507,
+            "T+1": 85083,
+            "T+2": 150658,
+            "T+3": 121418,
+            "T+4": 101176,
+            "T+5": 83149
+          },
+          "cum_t1t3_event": 357160,
+          "cum_t1t3_control": 142043,
+          "cum_diff_pct": 151.4
         },
         {
           "etf": "KODEX 은행",
           "stock": "신한지주",
           "days": 400,
-          "corr_etf_retail_vs_stock_inst": -0.0101,
-          "corr_etf_inst_vs_stock_inst": 0.0039,
-          "corr_etf_frgn_vs_stock_frgn": 0.0202,
-          "corr_etf_retail_vs_stock_frgn": -0.1744
+          "lag_corrs": {
+            "T+0": -0.0101,
+            "T+1": 0.0726,
+            "T+2": 0.1305,
+            "T+3": 0.0502
+          },
+          "event_count": 40,
+          "event_profile": {
+            "T-3": 117731,
+            "T-2": 110088,
+            "T-1": 139382,
+            "T+0": 117564,
+            "T+1": 124829,
+            "T+2": 154122,
+            "T+3": 137714,
+            "T+4": 119122,
+            "T+5": 86428
+          },
+          "cum_t1t3_event": 416665,
+          "cum_t1t3_control": 207299,
+          "cum_diff_pct": 101.0
         }
       ]
     }
   ],
   "summary": {
     "pairs_count": 12,
-    "avg_corr_retail_inst": -0.061
+    "avg_cum_diff_pct": 786.2
   }
 }

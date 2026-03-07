@@ -1,10 +1,18 @@
-"""ETF Flow X-Ray: ETF 매수가 기초종목 수급에 어떻게 반영되는지 분석
+"""ETF Flow X-Ray v2: ETF 매수가 기초종목 수급에 어떻게 반영되는지 분석
 
 가설: 개인이 섹터 ETF를 대량 매수하면,
   AP(지정참가회사=증권사)가 ETF 설정 과정에서 기초자산을 매수.
   이때 개별종목에서는 "기관(금융투자)" 매수로 기록됨.
 
-검증: ETF 개인순매수(=-(기관+외국인)) vs 기초종목 기관순매수 상관관계.
+v1 결함 (동일일 상관만 봄):
+  - ETF 설정은 T+1~T+2에 반영 → 시차(lag) 분석 필요
+  - 기관 전체에 노이즈 과다 → 대량 유입일만 필터링 필요
+  - 이벤트 스터디: 대량 유입 전후 5일 누적 패턴
+
+v2 추가 분석:
+  1. 시차 상관 (T+0 ~ T+3)
+  2. 규모 필터 (ETF 개인매수 상위 20% 날만)
+  3. 이벤트 스터디 (전후 5일 기초종목 기관 누적)
 
 Usage:
     python scripts/backtest_etf_flow_xray.py
@@ -156,7 +164,7 @@ def scrape_investor_data(code: str, pages: int = 10) -> pd.DataFrame:
 
 
 def analyze_sector(sector_name: str, config: dict, pages: int) -> dict:
-    """한 섹터의 ETF↔기초종목 교차분석."""
+    """한 섹터의 ETF↔기초종목 교차분석 (v2: 시차+규모+이벤트스터디)."""
 
     print(f"\n{'═' * 75}")
     print(f"  섹터: {sector_name}")
@@ -169,7 +177,6 @@ def analyze_sector(sector_name: str, config: dict, pages: int) -> dict:
         df = scrape_investor_data(code, pages)
         print(f"{len(df)}일")
         if not df.empty:
-            # 개인 순매수 추정 = -(기관 + 외국인)
             df["retail_net_est"] = -(df["inst_net"] + df["frgn_net"])
             etf_dfs[code] = df
 
@@ -186,7 +193,6 @@ def analyze_sector(sector_name: str, config: dict, pages: int) -> dict:
         print("  데이터 부족!")
         return {}
 
-    # 교차 상관분석
     results = []
 
     for etf_code, etf_name in config["etfs"]:
@@ -206,52 +212,144 @@ def analyze_sector(sector_name: str, config: dict, pages: int) -> dict:
                 how="inner",
             )
 
-            if len(merged) < 10:
+            if len(merged) < 20:
                 continue
 
-            # ── 핵심 상관관계 ──
-            # 가설: ETF 개인매수(retail_net_est) ↔ 기초종목 기관매수(inst_net_stk)
-            corr_retail_inst = merged["retail_net_est"].corr(merged["inst_net_stk"])
-
-            # 대조군: ETF 기관매수 ↔ 기초종목 기관매수
-            corr_inst_inst = merged["inst_net_etf"].corr(merged["inst_net_stk"])
-
-            # 대조군: ETF 외국인매수 ↔ 기초종목 외국인매수
-            corr_frgn_frgn = merged["frgn_net_etf"].corr(merged["frgn_net_stk"])
-
-            # 추가: ETF 개인매수 ↔ 기초종목 외국인매수
-            corr_retail_frgn = merged["retail_net_est"].corr(merged["frgn_net_stk"])
-
             print(f"\n  [{etf_name}] ↔ [{stk_name}] ({len(merged)}일)")
-            print(f"    ★ ETF 개인매수  → 주식 기관매수: {corr_retail_inst:+.4f}")
-            print(f"      ETF 기관매수  → 주식 기관매수: {corr_inst_inst:+.4f}")
-            print(f"      ETF 외국인    → 주식 외국인:   {corr_frgn_frgn:+.4f}")
-            print(f"      ETF 개인매수  → 주식 외국인:   {corr_retail_frgn:+.4f}")
 
-            # 상위/하위 10% 분석
+            # ═══════════════════════════════════════════════
+            # 분석 1: 시차별 상관 (T+0 ~ T+3)
+            # ═══════════════════════════════════════════════
+            print(f"    ── 시차별 상관 (ETF개인매수 T → 주식기관매수 T+lag) ──")
+            lag_corrs = {}
+            for lag in range(4):
+                if lag == 0:
+                    corr = merged["retail_net_est"].corr(merged["inst_net_stk"])
+                else:
+                    # T일 ETF 개인매수 vs T+lag일 주식 기관매수
+                    shifted = merged["inst_net_stk"].shift(-lag)
+                    valid = merged["retail_net_est"].to_frame().join(
+                        shifted.rename("stk_inst_lag")
+                    ).dropna()
+                    corr = valid["retail_net_est"].corr(valid["stk_inst_lag"])
+                lag_corrs[f"T+{lag}"] = round(corr, 4)
+                marker = " ★" if abs(corr) > 0.1 else ""
+                print(f"      T+{lag}: {corr:+.4f}{marker}")
+
+            # ═══════════════════════════════════════════════
+            # 분석 2: 규모 필터 (상위 20% 대량 유입일만)
+            # ═══════════════════════════════════════════════
+            q80 = merged["retail_net_est"].quantile(0.8)
+            q20 = merged["retail_net_est"].quantile(0.2)
+            big_buy = merged[merged["retail_net_est"] >= q80]
+            big_sell = merged[merged["retail_net_est"] <= q20]
+
+            print(f"    ── 규모 필터 (ETF개인매수 상위20% vs 하위20%) ──")
+            big_buy_corrs = {}
+            big_sell_corrs = {}
+            for lag in range(4):
+                # 대량 매수일 기준, T+lag일 주식 기관매수 평균
+                buy_vals = []
+                sell_vals = []
+                for dt in big_buy.index:
+                    pos = merged.index.get_loc(dt)
+                    if pos + lag < len(merged):
+                        buy_vals.append(merged["inst_net_stk"].iloc[pos + lag])
+                for dt in big_sell.index:
+                    pos = merged.index.get_loc(dt)
+                    if pos + lag < len(merged):
+                        sell_vals.append(merged["inst_net_stk"].iloc[pos + lag])
+
+                buy_avg = np.mean(buy_vals) if buy_vals else 0
+                sell_avg = np.mean(sell_vals) if sell_vals else 0
+                all_avg = merged["inst_net_stk"].mean()
+                big_buy_corrs[f"T+{lag}"] = round(buy_avg)
+                big_sell_corrs[f"T+{lag}"] = round(sell_avg)
+
+                marker = " ★" if buy_avg > all_avg * 1.3 else ""
+                print(f"      T+{lag}: 대량매수일→기관 {buy_avg:>+12,.0f}"
+                      f"  |  대량매도일→기관 {sell_avg:>+12,.0f}"
+                      f"  |  전체평균 {all_avg:>+12,.0f}{marker}")
+
+            # ═══════════════════════════════════════════════
+            # 분석 3: 이벤트 스터디 (전후 5일 누적)
+            # ═══════════════════════════════════════════════
+            print(f"    ── 이벤트 스터디 (ETF개인 대량매수일 전후 5일) ──")
+
+            # 상위 10% 대량 유입 이벤트
             q90 = merged["retail_net_est"].quantile(0.9)
-            q10 = merged["retail_net_est"].quantile(0.1)
+            events = merged[merged["retail_net_est"] >= q90].index
 
-            top = merged[merged["retail_net_est"] >= q90]
-            bot = merged[merged["retail_net_est"] <= q10]
+            window = range(-3, 6)  # T-3 ~ T+5
+            event_profile = {d: [] for d in window}
 
-            if len(top) >= 3 and len(bot) >= 3:
-                top_stk_inst = top["inst_net_stk"].mean()
-                bot_stk_inst = bot["inst_net_stk"].mean()
-                avg_stk_inst = merged["inst_net_stk"].mean()
+            for evt_dt in events:
+                evt_pos = merged.index.get_loc(evt_dt)
+                for offset in window:
+                    target_pos = evt_pos + offset
+                    if 0 <= target_pos < len(merged):
+                        event_profile[offset].append(
+                            merged["inst_net_stk"].iloc[target_pos]
+                        )
 
-                print(f"    ETF 개인 상위10%일때 → 주식 기관 평균: {top_stk_inst:+,.0f}")
-                print(f"    ETF 개인 하위10%일때 → 주식 기관 평균: {bot_stk_inst:+,.0f}")
-                print(f"    전체 평균                           : {avg_stk_inst:+,.0f}")
+            print(f"      이벤트 수: {len(events)}건 (상위 10%)")
+            print(f"      {'날짜':>8} {'주식기관순매수평균':>15} {'vs전체평균':>10}")
+            all_avg = merged["inst_net_stk"].mean()
+            event_avgs = {}
+            for offset in window:
+                vals = event_profile[offset]
+                if vals:
+                    avg = np.mean(vals)
+                    diff = avg - all_avg
+                    label = f"T{offset:+d}" if offset != 0 else "T+0(당일)"
+                    marker = " ★" if diff > 0 and offset > 0 else ""
+                    print(f"      {label:>10} {avg:>+15,.0f} {diff:>+10,.0f}{marker}")
+                    event_avgs[f"T{offset:+d}"] = round(avg)
+
+            # ═══════════════════════════════════════════════
+            # 분석 4: 누적 효과 (T+1~T+3 합산)
+            # ═══════════════════════════════════════════════
+            cum_after = []
+            for evt_dt in events:
+                evt_pos = merged.index.get_loc(evt_dt)
+                cum = 0
+                for d in range(1, 4):  # T+1, T+2, T+3
+                    if evt_pos + d < len(merged):
+                        cum += merged["inst_net_stk"].iloc[evt_pos + d]
+                cum_after.append(cum)
+
+            # 비이벤트일 대조군
+            non_events = merged[merged["retail_net_est"] < q90].index
+            cum_control = []
+            for dt in non_events:
+                pos = merged.index.get_loc(dt)
+                cum = 0
+                for d in range(1, 4):
+                    if pos + d < len(merged):
+                        cum += merged["inst_net_stk"].iloc[pos + d]
+                cum_control.append(cum)
+
+            avg_cum_event = np.mean(cum_after) if cum_after else 0
+            avg_cum_control = np.mean(cum_control) if cum_control else 0
+
+            print(f"    ── T+1~T+3 기관 누적매수 ──")
+            print(f"      ETF 대량유입 후:  {avg_cum_event:>+15,.0f}")
+            print(f"      일반일 후:        {avg_cum_control:>+15,.0f}")
+            diff_pct = ((avg_cum_event / avg_cum_control - 1) * 100
+                        if avg_cum_control != 0 else 0)
+            print(f"      차이:             {diff_pct:>+14.1f}%"
+                  f"{'  ★ 유의미' if abs(diff_pct) > 30 else ''}")
 
             results.append({
                 "etf": etf_name,
                 "stock": stk_name,
                 "days": len(merged),
-                "corr_etf_retail_vs_stock_inst": round(corr_retail_inst, 4),
-                "corr_etf_inst_vs_stock_inst": round(corr_inst_inst, 4),
-                "corr_etf_frgn_vs_stock_frgn": round(corr_frgn_frgn, 4),
-                "corr_etf_retail_vs_stock_frgn": round(corr_retail_frgn, 4),
+                "lag_corrs": lag_corrs,
+                "event_count": len(events),
+                "event_profile": event_avgs,
+                "cum_t1t3_event": round(avg_cum_event),
+                "cum_t1t3_control": round(avg_cum_control),
+                "cum_diff_pct": round(diff_pct, 1),
             })
 
     return {
@@ -281,7 +379,7 @@ def main():
 
     # ── 종합 요약 ──
     print(f"\n{'═' * 75}")
-    print(f"  종합 요약")
+    print(f"  종합 요약 (v2: 시차+규모+이벤트스터디)")
     print(f"{'═' * 75}")
 
     all_pairs = []
@@ -289,40 +387,56 @@ def main():
         all_pairs.extend(r.get("pairs", []))
 
     if all_pairs:
-        print(f"\n  {'ETF':>20} {'주식':>12} {'일수':>5} │"
-              f" {'★ETF개인→주식기관':>18} {'ETF기관→주식기관':>16}"
-              f" {'ETF외인→주식외인':>16}")
-        print(f"  {'─' * 20} {'─' * 12} {'─' * 5} ┼"
-              f" {'─' * 18} {'─' * 16} {'─' * 16}")
+        # 시차별 상관 요약
+        print(f"\n  ── 시차별 상관계수 평균 ──")
+        for lag in range(4):
+            key = f"T+{lag}"
+            vals = [p["lag_corrs"].get(key, 0) for p in all_pairs
+                    if "lag_corrs" in p]
+            if vals:
+                avg = np.mean(vals)
+                best = max(vals)
+                marker = " ★ BEST" if lag > 0 and avg > np.mean(
+                    [p["lag_corrs"].get("T+0", 0) for p in all_pairs
+                     if "lag_corrs" in p]
+                ) else ""
+                print(f"    {key}: 평균 {avg:+.4f}  (최대 {best:+.4f}){marker}")
 
-        corrs = []
+        # T+1~T+3 누적 효과 요약
+        print(f"\n  ── T+1~T+3 기관 누적매수 비교 ──")
+        print(f"  {'ETF':>20} {'주식':>12} │"
+              f" {'대량유입후':>12} {'일반일후':>12} {'차이':>8}")
+        print(f"  {'─' * 20} {'─' * 12} ┼"
+              f" {'─' * 12} {'─' * 12} {'─' * 8}")
+
+        diffs = []
         for p in all_pairs:
-            print(f"  {p['etf']:>20} {p['stock']:>12} {p['days']:>5} │"
-                  f" {p['corr_etf_retail_vs_stock_inst']:>+17.4f}"
-                  f" {p['corr_etf_inst_vs_stock_inst']:>+15.4f}"
-                  f" {p['corr_etf_frgn_vs_stock_frgn']:>+15.4f}")
-            corrs.append(p["corr_etf_retail_vs_stock_inst"])
+            evt = p.get("cum_t1t3_event", 0)
+            ctrl = p.get("cum_t1t3_control", 0)
+            diff = p.get("cum_diff_pct", 0)
+            marker = " ★" if diff > 30 else ""
+            print(f"  {p['etf']:>20} {p['stock']:>12} │"
+                  f" {evt:>+12,} {ctrl:>+12,} {diff:>+7.1f}%{marker}")
+            diffs.append(diff)
 
-        avg_corr = np.mean(corrs)
-        print(f"\n  ★ 핵심 상관계수 평균 (ETF개인→주식기관): {avg_corr:+.4f}")
-
-        if avg_corr > 0.3:
-            print("  → 강한 양의 상관: ETF 설정 메커니즘 확인!")
-        elif avg_corr > 0.1:
-            print("  → 약한 양의 상관: ETF 설정 효과 존재하나 다른 요인도 큼")
-        elif avg_corr > -0.1:
-            print("  → 상관 없음: ETF 설정이 기초종목 수급에 미치는 영향 미미")
+        avg_diff = np.mean(diffs) if diffs else 0
+        print(f"\n  ★ 평균 차이: {avg_diff:+.1f}%")
+        if avg_diff > 30:
+            print("  → ETF 대량유입 후 T+1~T+3 기관매수 유의미하게 증가!")
+        elif avg_diff > 10:
+            print("  → 약한 효과 존재: ETF 설정이 기초종목 기관매수에 일부 기여")
         else:
-            print("  → 음의 상관: 예상과 반대 (ETF와 개별종목 수급 분리)")
+            print("  → 효과 미미 또는 없음")
 
     # 저장
     output = {
         "run_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "version": "v2",
         "pages_per_item": args.pages,
         "sectors": all_results,
         "summary": {
             "pairs_count": len(all_pairs),
-            "avg_corr_retail_inst": round(avg_corr, 4) if all_pairs else None,
+            "avg_cum_diff_pct": round(avg_diff, 1) if all_pairs else None,
         },
     }
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
