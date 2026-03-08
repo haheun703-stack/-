@@ -65,7 +65,7 @@ INDICATORS = {
         "code": "TOTRESNS",
         "label": "Total Reserves",
         "freq": "biweekly",
-        "unit_div": 1000.0,  # 백만 → 십억
+        "unit_div": 1.0,  # FRED에서 이미 십억 달러 단위
     },
 }
 
@@ -186,6 +186,8 @@ def update() -> pd.DataFrame:
     combined = pd.concat([existing, new_df])
     combined = combined[~combined.index.duplicated(keep="last")]
     combined = combined.sort_index()
+    # 주간/격주 지표 NaN 전파 방지 — ffill 적용
+    combined = combined.ffill()
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     combined.to_parquet(PARQUET_PATH)

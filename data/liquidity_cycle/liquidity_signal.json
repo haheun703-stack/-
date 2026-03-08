@@ -1,7 +1,7 @@
 {
-  "date": "2026-03-07",
+  "date": "2026-03-08",
   "data_date": "2026-03-06",
-  "stale_days": 1,
+  "stale_days": 2,
   "indicators": {
     "net_liquidity": {
       "value": 5795.3,
@@ -13,7 +13,7 @@
       "z": -2.54
     },
     "reserves": {
-      "value": 3.0,
+      "value": 2967.9,
       "z": 0.52,
       "change_20d": 0.0
     },

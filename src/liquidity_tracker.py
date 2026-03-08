@@ -165,7 +165,10 @@ class LiquidityTracker:
         if not PARQUET_PATH.exists():
             logger.warning("유동성 parquet 없음: %s", PARQUET_PATH)
             return pd.DataFrame()
-        return pd.read_parquet(PARQUET_PATH)
+        df = pd.read_parquet(PARQUET_PATH)
+        # 주간/격주 지표의 NaN 전파 방지
+        df = df.ffill()
+        return df
 
     def _calc_zscore(self, series: pd.Series) -> float:
         """롤링 z-score 계산."""
