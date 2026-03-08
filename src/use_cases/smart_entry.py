@@ -106,6 +106,9 @@ class CandidateState:
     v3_conviction: int = 0          # v3 conviction (1~10)
     v3_size_pct: float = 0.0        # v3 비중 (%, 계좌 대비)
 
+    # 페이퍼 트레이딩 모드
+    paper_mode: bool = False        # True면 분석만, 실매매 안 함
+
 
 # ─── SmartEntryEngine ────────────────────────────────
 
@@ -383,6 +386,7 @@ class SmartEntryEngine:
                 stop_loss=int(p.get("stop_loss", 0)),
                 target_price=int(p.get("target_price", 0)),
                 score=float(p.get("total_score", 0)),
+                paper_mode=bool(p.get("paper_mode", False)),
             )
 
             # v3 사이징 연동
@@ -460,6 +464,14 @@ class SmartEntryEngine:
             c.order_price = order_price
             c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
+
+            if c.paper_mode:
+                logger.info(
+                    "[PAPER] 역발상 분석 대상: %s(%s) %d원 × %d주 (분석만, 주문 안 함)",
+                    c.name, c.ticker, order_price, c.order_qty,
+                )
+                placed += 1
+                continue
 
             if self.dry_run:
                 logger.info(
@@ -1017,7 +1029,7 @@ class SmartEntryEngine:
         updated = 0
 
         for c in self.candidates:
-            if c.is_filled:
+            if c.is_filled or c.paper_mode:
                 continue
 
             # 현재가 갱신
@@ -1172,6 +1184,7 @@ class SmartEntryEngine:
                 "macd_hist_rising": c.macd_hist_rising,
                 "triple_confirm": c.triple_confirm,
                 "triple_detail": c.triple_detail,
+                "paper_mode": c.paper_mode,
             }
             report["details"].append(detail)
 
@@ -1194,9 +1207,10 @@ class SmartEntryEngine:
             emoji = {"buy": "\u2705", "skip": "\u274c", "wait": "\u23f3", "holding": "\U0001f4cb"}.get(
                 d["decision"], "\u2753"
             )
+            paper_tag = "[PAPER] " if d.get("paper_mode") else ""
             gap_str = f"{d['gap_pct']:+.1f}%" if d["gap_pct"] else ""
             lines.append(
-                f"{emoji} {d['name']}({d['ticker']})"
+                f"{emoji} {paper_tag}{d['name']}({d['ticker']})"
                 f" {d['prev_close']:,}\u2192{d['open_price']:,}({gap_str})"
             )
             lines.append(f"   [{d['gap_type']}] {d['decision']}")
@@ -1278,8 +1292,10 @@ class SmartEntryEngine:
         decisions = self.analyze_and_decide()
         logger.info("[Phase3] 판단 결과: %s", decisions)
 
-        # Phase 3.5: BUY 판정 종목 주문 갱신
+        # Phase 3.5: BUY 판정 종목 주문 갱신 (paper_mode 제외)
         for c in self.candidates:
+            if c.paper_mode:
+                continue
             if c.decision == EntryDecision.BUY and c.gap_type != GapType.GAP_DOWN:
                 new_price = self._calc_adaptive_price(c)
                 if new_price != c.order_price:

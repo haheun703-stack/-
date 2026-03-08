@@ -531,6 +531,9 @@ def run_daily(force: bool = False) -> dict:
                         "cost": cost,
                     })
 
+    # 7.5. 시그널 발견 시 tomorrow_picks.json에 paper_mode로 추가
+    _inject_to_tomorrow_picks(new_candidates, scan_day_str, fear_score)
+
     # 8. 일일 자산 기록
     prices = {}
     for code in pf["positions"]:
@@ -618,6 +621,72 @@ def run_daily(force: bool = False) -> dict:
         "equity": equity,
         "return_pct": round(total_return, 2),
     }
+
+
+# ═══════════════════════════════════════════════
+# tomorrow_picks.json 연동
+# ═══════════════════════════════════════════════
+
+TOMORROW_PICKS_PATH = DATA_DIR / "tomorrow_picks.json"
+
+
+def _inject_to_tomorrow_picks(
+    candidates: list[dict],
+    scan_date: str,
+    fear_score: int,
+) -> None:
+    """역발상 시그널을 tomorrow_picks.json에 paper_mode로 병합.
+
+    기존 picks를 유지하면서 역발상 후보를 추가한다.
+    이미 있는 ticker는 중복 추가하지 않는다.
+    시그널이 없어도 이전 역발상 picks를 정리한다.
+    """
+    # 기존 파일 로드
+    if TOMORROW_PICKS_PATH.exists():
+        with open(TOMORROW_PICKS_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {"generated_at": "", "picks": []}
+
+    # 기존 역발상(paper_mode) picks 제거 — 매일 갱신
+    data["picks"] = [p for p in data["picks"] if not p.get("paper_mode")]
+
+    existing_tickers = {p["ticker"] for p in data["picks"]}
+
+    added = 0
+    for cand in candidates:
+        if cand["code"] in existing_tickers:
+            continue
+
+        pick = {
+            "ticker": cand["code"],
+            "name": cand["name"],
+            "grade": "관심매수",
+            "total_score": cand["score"],
+            "close": int(cand["price"]),
+            "entry_price": int(cand["price"]),
+            "stop_loss": int(cand["price"] * (1 + STOP_LOSS_PCT)),
+            "target_price": int(cand["price"] * (1 + TRAILING_ACTIVATE_PCT)),
+            "reasons": cand["reasons"],
+            "sources": ["역발상"],
+            "paper_mode": True,
+            "contrarian": {
+                "fear_score": fear_score,
+                "stock_score": cand["score"],
+                "scan_date": scan_date,
+            },
+        }
+        data["picks"].append(pick)
+        existing_tickers.add(cand["code"])
+        added += 1
+
+    with open(TOMORROW_PICKS_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    if added:
+        print(f"  [PAPER] tomorrow_picks에 {added}건 역발상 후보 추가 (paper_mode)")
+    else:
+        print("  [PAPER] tomorrow_picks: 역발상 후보 0건 (이전 paper picks 정리)")
 
 
 # ═══════════════════════════════════════════════
