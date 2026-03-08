@@ -1193,14 +1193,16 @@ class SignalEngine:
         try:
             accum_signal = self.accum_detector.detect(df, idx)
             result["accum_phase"] = accum_signal.phase
-        except Exception:
+        except Exception as e:
+            logger.warning("매집 감지 실패 %s: %s", ticker, e)
             accum_signal = None
 
         # v3.1 OBV 다이버전스 감지
         try:
             div_signal = self.div_scanner.scan(df)
             result["divergence_type"] = div_signal.type
-        except Exception:
+        except Exception as e:
+            logger.warning("다이버전스 감지 실패 %s: %s", ticker, e)
             div_signal = None
 
         # 매집/다이버전스 보너스로 SmartZ 게이트 조정
@@ -1568,7 +1570,7 @@ class SignalEngine:
                         "trigger": bo,
                         "date": str(df.index[idx].date()) if hasattr(df.index[idx], "date") else str(df.index[idx]),
                     })
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("breakout 감지 실패 %s: %s", ticker, e)
         return breakouts
 

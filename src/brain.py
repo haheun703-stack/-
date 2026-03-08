@@ -893,7 +893,8 @@ class Brain:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            logger.error("JSON 로드 실패 %s: %s", path.name, e)
             return {}
 
     def _save_decision(self, decision: BrainDecision):
