@@ -36,6 +36,33 @@ LIMIT_BUY_DISCOUNT = 0.005    # 현재가 -0.5%
 LIMIT_SELL_PREMIUM = 0.005    # 현재가 +0.5%
 
 
+def _parse_amount(text: str) -> int | None:
+    """금액 문자열 파싱. '50만' → 500000, '100만원' → 1000000, '1000000' → 1000000.
+
+    지원 형식:
+      - 순수 숫자: 500000
+      - 만원 단위: 50만, 50만원
+      - 억 단위: 1억, 1.5억
+    금액이 아니면 None 반환.
+    """
+    s = text.strip().replace(",", "").replace("원", "")
+    if "억" in s:
+        try:
+            return int(float(s.replace("억", "")) * 100_000_000)
+        except ValueError:
+            return None
+    if "만" in s:
+        try:
+            return int(float(s.replace("만", "")) * 10_000)
+        except ValueError:
+            return None
+    try:
+        v = int(s)
+        return v if v >= 10000 else None  # 1만원 미만은 수량으로 간주
+    except ValueError:
+        return None
+
+
 def _tick_round(price: int, reference: int) -> int:
     """호가 단위 맞춤 (KRX 규칙)."""
     if reference < 2000:
@@ -262,18 +289,30 @@ class TelegramCommandBot:
             return
         name, ticker = matches[0]
         self._conv.set_state(ConvState.BUY_WAIT_QTY, ticker=ticker, stock_name=name)
-        self._reply_kb(f"\U0001f4b0 {name}({ticker})\n매수 수량을 입력하세요. (예: 10)")
+        self._reply_kb(f"\U0001f4b0 {name}({ticker})\n수량 또는 금액을 입력하세요.\n예: 10 / 50만 / 500000")
 
     def _conv_buy_qty(self, text: str) -> None:
+        ctx = self._conv.context
+
+        # 금액 입력 확인
+        amount = _parse_amount(text.strip())
+        if amount is not None:
+            qty = self._amount_to_qty(ctx.ticker, ctx.stock_name, amount)
+            if qty is None:
+                return
+            ctx.quantity = qty
+            self._run_buy_analysis(ctx.ticker, ctx.stock_name, qty)
+            return
+
+        # 수량 입력
         try:
             qty = int(text.strip())
             if qty <= 0:
                 raise ValueError
         except ValueError:
-            self._reply_kb("\u274c 숫자를 입력하세요. (예: 10)")
+            self._reply_kb("\u274c 수량 또는 금액을 입력하세요.\n예: 10 / 50만 / 500000")
             return
 
-        ctx = self._conv.context
         ctx.quantity = qty
         self._run_buy_analysis(ctx.ticker, ctx.stock_name, qty)
 
@@ -746,15 +785,45 @@ class TelegramCommandBot:
     # ══════════════════════════════════════════
 
     def _cmd_buy(self, args: list) -> None:
-        """매수 — 수동 매수 주문 (AI 분석 포함)."""
+        """매수 — 수동 매수 주문 (AI 분석 포함).
+
+        지원 형식:
+          매수 삼성전자 10        -> 10주 매수
+          매수 삼성전자 50만      -> 50만원어치 매수 (자동 수량 계산)
+          매수 삼성전자 50만원    -> 50만원어치 매수
+          매수 삼성전자 500000   -> 50만원어치 매수 (1만 이상은 금액)
+          매수 삼성전자           -> 수량/금액 입력 대기
+        """
         from src.telegram_conversation import ConvState
         if len(args) >= 2:
-            # 한 줄: "매수 삼성전자 10"
             query = args[0]
+            raw_val = args[1]
+
+            # 금액인지 수량인지 판별
+            amount = _parse_amount(raw_val)
+            if amount is not None:
+                # 금액 매수 -> 현재가 조회 후 수량 계산
+                matches = self._resolve_stock(query)
+                if not matches:
+                    self._reply_kb(f"\u274c '{query}' 종목을 찾을 수 없습니다.")
+                    return
+                if len(matches) > 1:
+                    from src.telegram_keyboard import build_stock_select_keyboard
+                    self._reply_inline(f"\U0001f50d 종목 선택:", build_stock_select_keyboard(matches, "buy"))
+                    return
+                name, ticker = matches[0]
+                qty = self._amount_to_qty(ticker, name, amount)
+                if qty is None:
+                    return
+                self._conv.set_state(ConvState.BUY_WAIT_QTY, ticker=ticker, stock_name=name, quantity=qty)
+                self._run_buy_analysis(ticker, name, qty)
+                return
+
+            # 수량 매수
             try:
-                qty = int(args[1])
+                qty = int(raw_val)
             except ValueError:
-                self._reply_kb("\u274c 수량은 숫자로 입력하세요. 예: 매수 삼성전자 10")
+                self._reply_kb("\u274c 수량 또는 금액을 입력하세요.\n예: 매수 삼성전자 10\n예: 매수 삼성전자 50만")
                 return
             matches = self._resolve_stock(query)
             if not matches:
@@ -779,10 +848,38 @@ class TelegramCommandBot:
                 return
             name, ticker = matches[0]
             self._conv.set_state(ConvState.BUY_WAIT_QTY, ticker=ticker, stock_name=name)
-            self._reply_kb(f"\U0001f4b0 {name}({ticker})\n매수 수량을 입력하세요.")
+            self._reply_kb(f"\U0001f4b0 {name}({ticker})\n수량 또는 금액을 입력하세요.\n예: 10 / 50만 / 500000")
         else:
             self._conv.set_state(ConvState.BUY_WAIT_STOCK, action="buy")
             self._reply_kb("\U0001f4b0 매수할 종목명을 입력하세요. (예: 삼성전자)\n취소: '취소' 입력")
+
+    def _amount_to_qty(self, ticker: str, name: str, amount: int) -> int | None:
+        """금액 -> 수량 변환. 현재가 조회 후 계산. 실패 시 None 반환 + 에러 메시지."""
+        try:
+            from src.adapters.kis_order_adapter import KisOrderAdapter
+            adapter = KisOrderAdapter()
+            info = adapter.fetch_current_price(ticker)
+            current = info.get("current_price", 0)
+            if current <= 0:
+                self._reply_kb(f"\u274c 현재가 조회 실패: {name}({ticker})")
+                return None
+            qty = amount // current
+            if qty <= 0:
+                self._reply_kb(
+                    f"\u274c {amount:,}원으로 {name} 1주도 못 삽니다.\n"
+                    f"현재가: {current:,}원"
+                )
+                return None
+            actual = qty * current
+            self._reply_kb(
+                f"\U0001f4b0 {name}({ticker})\n"
+                f"금액 {amount:,}원 \u2192 {qty}주 매수\n"
+                f"(현재가 {current:,}원, 실투자 약 {actual:,}원)"
+            )
+            return qty
+        except Exception as e:
+            self._reply_kb(f"\u274c 현재가 조회 오류: {e}")
+            return None
 
     def _cmd_sell(self, args: list) -> None:
         """매도 — 수동 매도 주문 (AI 분석 포함)."""
