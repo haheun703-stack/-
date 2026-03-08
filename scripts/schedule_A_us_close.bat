@@ -37,9 +37,10 @@ REM 2.8) 유동성 시그널 생성
 echo [%date% %time%] [2.8/7] 유동성 시그널 생성 >> logs\schedule.log
 python -u -X utf8 scripts\run_liquidity_signal.py >> logs\schedule.log 2>&1
 
-REM 3) 섹터 릴레이 엔진 (US 대장주 업데이트 + 경보 판정 + 텔레그램)
-echo [%date% %time%] [3/7] 섹터 릴레이 경보 >> logs\schedule.log
-python -u -X utf8 scripts\run_relay_engine.py --all >> logs\schedule.log 2>&1
+REM 3) 섹터 릴레이 엔진 (US 대장주 업데이트 + 경보 판정, 텔레그램은 아침 통합에 흡수)
+REM v13: --all → --update --signal (릴레이 별도 알림 제거, BAT-B 아침 브리핑에서 통합)
+echo [%date% %time%] [3/7] 섹터 릴레이 데이터 업데이트 >> logs\schedule.log
+python -u -X utf8 scripts\run_relay_engine.py --update --signal >> logs\schedule.log 2>&1
 
 REM ── PHASE 2: 아침 재스캔 (미국장 반영) ──
 
@@ -52,8 +53,8 @@ REM 5) 추천종목 재스캔 (overnight_signal + v3 picks 반영)
 echo [%date% %time%] [5/7] 추천종목 아침 재스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 
-REM 6) 아침 통합 텔레그램 발송 (재스캔 결과 포함)
-echo [%date% %time%] [6/7] 아침 텔레그램 발송 >> logs\schedule.log
-python -u -X utf8 scripts\send_evening_summary.py --send --morning >> logs\schedule.log 2>&1
+REM 6) 아침 텔레그램 — BAT-B (07:00) 통합 브리핑에서 1건으로 발송
+REM v13: BAT-A에서는 데이터만 준비, BAT-B에서 증권사+테마+릴레이 통합 1건 발송
+echo [%date% %time%] [6/7] 아침 텔레그램은 BAT-B(07:00)에서 통합 발송 >> logs\schedule.log
 
 echo [%date% %time%] BAT-A 완료 (7단계) >> logs\schedule.log

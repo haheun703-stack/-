@@ -1137,16 +1137,13 @@ class TelegramCommandBot:
 # ══════════════════════════════════════════
 
 # 키보드 버튼 텍스트 → 핸들러
+# v13: 운영 중심 8버튼 (매수/매도/청산/체결내역 제거 — 수동 운영 전환)
 TEXT_COMMANDS = {
-    "스캔": TelegramCommandBot._cmd_scan,
-    "리포트": TelegramCommandBot._cmd_report,
-    "분석": TelegramCommandBot._cmd_analyze,
-    "매수": TelegramCommandBot._cmd_buy,
-    "매도": TelegramCommandBot._cmd_sell,
-    "청산": TelegramCommandBot._cmd_liquidate,
     "현재잔고": TelegramCommandBot._cmd_balance,
     "포트폴리오": TelegramCommandBot._cmd_portfolio,
-    "체결내역": TelegramCommandBot._cmd_trade_history,
+    "리포트": TelegramCommandBot._cmd_report,
+    "분석": TelegramCommandBot._cmd_analyze,
+    "스캔": TelegramCommandBot._cmd_scan,
     "시작": TelegramCommandBot._cmd_auto_start,
     "정지": TelegramCommandBot._cmd_stop,
     "도움": TelegramCommandBot._cmd_help,

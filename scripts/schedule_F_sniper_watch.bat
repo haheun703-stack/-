@@ -10,7 +10,8 @@ call venv\Scripts\activate.bat
 
 echo [%date% %time%] BAT-F 스나이퍼 워치 시작
 
-python -u -X utf8 scripts/scan_value_trap.py --telegram >> logs\sniper_watch.log 2>&1
+REM v13: --telegram 제거 → 저녁 통합 리포트에 흡수 (JSON만 저장)
+python -u -X utf8 scripts/scan_value_trap.py >> logs\sniper_watch.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo [%date% %time%] BAT-F 스나이퍼 워치 실패 >> logs\sniper_watch.log
 ) else (

@@ -312,26 +312,32 @@ def main():
         _save_blind_log(result, data)
 
     # ---- 4. 텔레그램 발송 ----
+    # v13: 레짐 경보(긴급)는 항상 발송, 전체 리포트는 --no-telegram 시 저녁 통합으로 흡수
+    try:
+        from src.telegram_sender import send_message
+
+        # 선행 레짐 경보 — 긴급이므로 항상 발송 (PRE_BEAR/PRE_CRISIS)
+        if regime_overridden:
+            bd = leading["score_breakdown"]
+            bd_lines = "\n".join(f"  • {k}: {v:+d}점" for k, v in bd.items())
+            alert_msg = (
+                f"⚠️ [레짐 선행 경보]\n"
+                f"━━━━━━━━━━━━━━━━━━\n"
+                f"  원본 레짐: {kospi['regime']}\n"
+                f"  보정 레짐: {effective_regime}\n"
+                f"  경고 점수: {leading['warning_score']}/100\n\n"
+                f"  근거:\n{bd_lines}\n"
+                f"━━━━━━━━━━━━━━━━━━\n"
+                f"  → {leading['override_reason']}"
+            )
+            send_message(alert_msg)
+            print("📨 선행 레짐 경보 발송 완료")
+    except Exception as e:
+        print(f"⚠️ 레짐 경보 발송 오류: {e}")
+
     if send_telegram:
         try:
             from src.telegram_sender import send_message
-
-            # 선행 레짐 경보 별도 전송
-            if regime_overridden:
-                bd = leading["score_breakdown"]
-                bd_lines = "\n".join(f"  • {k}: {v:+d}점" for k, v in bd.items())
-                alert_msg = (
-                    f"⚠️ [레짐 선행 경보]\n"
-                    f"━━━━━━━━━━━━━━━━━━\n"
-                    f"  원본 레짐: {kospi['regime']}\n"
-                    f"  보정 레짐: {effective_regime}\n"
-                    f"  경고 점수: {leading['warning_score']}/100\n\n"
-                    f"  근거:\n{bd_lines}\n"
-                    f"━━━━━━━━━━━━━━━━━━\n"
-                    f"  → {leading['override_reason']}"
-                )
-                send_message(alert_msg)
-                print("📨 선행 레짐 경보 발송 완료")
 
             report = result.get("telegram_report", "")
             if report:
@@ -360,7 +366,7 @@ def main():
         except Exception as e:
             print(f"⚠️ 텔레그램 발송 오류: {e}")
     else:
-        print("📭 텔레그램 발송 스킵 (--dry-run / --no-telegram)")
+        print("📭 전체 리포트 스킵 — 저녁 통합에 흡수 (--no-telegram)")
 
     print(f"\n✅ ETF 3축 로테이션 완료{mode_tag} — {datetime.now().strftime('%H:%M:%S')}")
     return result
