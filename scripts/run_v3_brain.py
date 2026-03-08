@@ -587,12 +587,13 @@ async def run_phase5(
 
     logger.info("현재 보유: %d종목, Phase 4 후보: %d종목", len(positions), len(deep_picks))
 
-    # ── BRAIN 슬롯 캡 적용 ──
+    # ── BRAIN 슬롯 캡 적용 (원본 보존을 위해 복사본 사용) ──
+    strategic_for_p5 = dict(strategic_result)
     if brain_cap and brain_cap.get("capped"):
         slot_cap = brain_cap["slot_cap"]
-        original_max = strategic_result.get("max_new_buys", 99)
+        original_max = strategic_for_p5.get("max_new_buys", 99)
         if slot_cap < original_max:
-            strategic_result["max_new_buys"] = slot_cap
+            strategic_for_p5["max_new_buys"] = slot_cap
             logger.info(
                 "BRAIN 캡 적용됨: 레짐=%s, 슬롯캡=%d, 원래요청=%d → 캡적용=%d",
                 brain_cap.get("regime", "?"), slot_cap, original_max, slot_cap,
@@ -602,18 +603,18 @@ async def run_phase5(
                 "BRAIN 캡 불필요: 레짐=%s, 슬롯캡=%d, 원래요청=%d (캡 이내)",
                 brain_cap.get("regime", "?"), slot_cap, original_max,
             )
-        # BRAIN 레짐 정보를 strategic_result에 주입 (Opus 참조용)
-        strategic_result["brain_regime"] = brain_cap.get("regime", "NEUTRAL")
-        strategic_result["brain_swing_pct"] = brain_cap.get("swing_pct", 30)
+        # BRAIN 레짐 정보를 복사본에 주입 (Opus 참조용)
+        strategic_for_p5["brain_regime"] = brain_cap.get("regime", "NEUTRAL")
+        strategic_for_p5["brain_swing_pct"] = brain_cap.get("swing_pct", 30)
 
     if not deep_picks:
         logger.info("Phase 4 통과 종목 없음 — Phase 5 결과: 매수 0")
-        result = PortfolioBrainAgent._fallback_result("후보 없음", strategic_result)
+        result = PortfolioBrainAgent._fallback_result("후보 없음", strategic_for_p5)
         result.pop("error", None)
         result["reasoning"] = "Deep Analyst 통과 종목이 없어 매수 보류"
     else:
         agent = PortfolioBrainAgent()
-        result = await agent.decide(deep_picks, positions, strategic_result)
+        result = await agent.decide(deep_picks, positions, strategic_for_p5)
 
     # ── BRAIN 종목당 배분 상한 적용 ──
     if brain_cap and brain_cap.get("capped") and result.get("buys"):
@@ -1296,7 +1297,7 @@ def weekly_review() -> dict:
 def _apply_ict_filter(picks: list[dict]) -> list[dict]:
     """ICT 프리미엄 레벨 + OR/IR bias로 conviction 보정.
 
-    - confidence_adjust(-0.2~+0.1) × 10 → conviction 보정(-2~+1)
+    - confidence_adjust(-0.2~+0.2) × 10 → conviction 보정(-2~+2)
     - 보정 후 min_conviction 이하 → 자동 필터링
     - data/ict_log/{date}.json에 로그 누적
 
