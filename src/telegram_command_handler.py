@@ -275,14 +275,7 @@ class TelegramCommandBot:
 
         ctx = self._conv.context
         ctx.quantity = qty
-        from src.telegram_keyboard import build_confirm_keyboard
-        self._reply_inline(
-            f"\U0001f6d2 매수 확인\n"
-            f"  종목: {ctx.stock_name} ({ctx.ticker})\n"
-            f"  수량: {qty}주 (지정가 -0.5%)\n"
-            f"\n실행하시겠습니까?",
-            build_confirm_keyboard("buy", ctx.ticker, str(qty)),
-        )
+        self._run_buy_analysis(ctx.ticker, ctx.stock_name, qty)
 
     def _conv_sell_stock(self, text: str) -> None:
         from src.telegram_conversation import ConvState
@@ -315,14 +308,7 @@ class TelegramCommandBot:
 
         ctx = self._conv.context
         ctx.quantity = qty
-        from src.telegram_keyboard import build_confirm_keyboard
-        self._reply_inline(
-            f"\U0001f4e4 매도 확인\n"
-            f"  종목: {ctx.stock_name} ({ctx.ticker})\n"
-            f"  수량: {qty}주 (지정가 +0.5%)\n"
-            f"\n실행하시겠습니까?",
-            build_confirm_keyboard("sell", ctx.ticker, str(qty)),
-        )
+        self._run_sell_analysis(ctx.ticker, ctx.stock_name, qty)
 
     def _conv_analyze_stock(self, text: str) -> None:
         matches = self._resolve_stock(text)
@@ -389,6 +375,53 @@ class TelegramCommandBot:
             answer_callback_query(query_id, "취소됨")
             edit_message_text(chat_id, message_id, "\u274c 취소되었습니다.")
             self._conv.reset()
+
+        # ── AI 판단 후 매수/매도 콜백 ──
+        elif action == "ai_buy" and len(parts) >= 3:
+            ticker = parts[1]
+            qty = int(parts[2]) if len(parts) > 2 else 0
+            answer_callback_query(query_id, "매수 실행 중...")
+            self._conv.reset()
+            self._execute_buy(ticker, qty, chat_id, message_id)
+            return
+
+        elif action == "ai_wait" and len(parts) >= 3:
+            ticker = parts[1]
+            qty = int(parts[2]) if len(parts) > 2 else 0
+            answer_callback_query(query_id, "눌림 대기")
+            name = self._get_stock_name(ticker) or ticker
+            edit_message_text(
+                chat_id, message_id,
+                f"\u23f3 {name}({ticker}) {qty}주 — 눌림 대기 결정\n"
+                f"지표 호전 시 다시 '매수 {name} {qty}' 입력하세요.",
+            )
+            self._conv.reset()
+            return
+
+        elif action == "ai_sell" and len(parts) >= 3:
+            ticker = parts[1]
+            qty = int(parts[2]) if len(parts) > 2 else 0
+            answer_callback_query(query_id, "매도 실행 중...")
+            self._conv.reset()
+            self._execute_sell(ticker, qty, chat_id, message_id)
+            return
+
+        elif action == "ai_partial" and len(parts) >= 3:
+            ticker = parts[1]
+            qty = int(parts[2]) if len(parts) > 2 else 0
+            partial_qty = max(qty // 2, 1)
+            answer_callback_query(query_id, f"50% 매도 ({partial_qty}주)...")
+            self._conv.reset()
+            self._execute_sell(ticker, partial_qty, chat_id, message_id)
+            return
+
+        elif action == "ai_hold" and len(parts) >= 2:
+            ticker = parts[1]
+            answer_callback_query(query_id, "홀딩 결정")
+            name = self._get_stock_name(ticker) or ticker
+            edit_message_text(chat_id, message_id, f"\u2705 {name}({ticker}) — 홀딩 결정")
+            self._conv.reset()
+            return
 
         elif action == "select" and len(parts) >= 3:
             cmd = parts[1]  # buy / sell / analyze
@@ -713,7 +746,7 @@ class TelegramCommandBot:
     # ══════════════════════════════════════════
 
     def _cmd_buy(self, args: list) -> None:
-        """매수 — 수동 매수 주문."""
+        """매수 — 수동 매수 주문 (AI 분석 포함)."""
         from src.telegram_conversation import ConvState
         if len(args) >= 2:
             # 한 줄: "매수 삼성전자 10"
@@ -732,12 +765,8 @@ class TelegramCommandBot:
                 self._reply_inline(f"\U0001f50d 종목 선택:", build_stock_select_keyboard(matches, "buy"))
                 return
             name, ticker = matches[0]
-            from src.telegram_keyboard import build_confirm_keyboard
             self._conv.set_state(ConvState.BUY_WAIT_QTY, ticker=ticker, stock_name=name, quantity=qty)
-            self._reply_inline(
-                f"\U0001f6d2 매수 확인\n  {name}({ticker}) {qty}주 (지정가 -0.5%)\n\n실행하시겠습니까?",
-                build_confirm_keyboard("buy", ticker, str(qty)),
-            )
+            self._run_buy_analysis(ticker, name, qty)
         elif len(args) == 1:
             query = args[0]
             matches = self._resolve_stock(query)
@@ -756,7 +785,7 @@ class TelegramCommandBot:
             self._reply_kb("\U0001f4b0 매수할 종목명을 입력하세요. (예: 삼성전자)\n취소: '취소' 입력")
 
     def _cmd_sell(self, args: list) -> None:
-        """매도 — 수동 매도 주문."""
+        """매도 — 수동 매도 주문 (AI 분석 포함)."""
         from src.telegram_conversation import ConvState
         if args:
             query = args[0]
@@ -778,12 +807,8 @@ class TelegramCommandBot:
             else:
                 qty = held or 0
             if qty > 0:
-                from src.telegram_keyboard import build_confirm_keyboard
                 self._conv.set_state(ConvState.SELL_WAIT_QTY, ticker=ticker, stock_name=name, quantity=qty)
-                self._reply_inline(
-                    f"\U0001f4e4 매도 확인\n  {name}({ticker}) {qty}주 (지정가 +0.5%)\n\n실행하시겠습니까?",
-                    build_confirm_keyboard("sell", ticker, str(qty)),
-                )
+                self._run_sell_analysis(ticker, name, qty)
             else:
                 self._conv.set_state(ConvState.SELL_WAIT_QTY, ticker=ticker, stock_name=name)
                 self._reply_kb(f"\U0001f4b0 {name}({ticker})\n매도 수량을 입력하세요.")
@@ -814,6 +839,155 @@ class TelegramCommandBot:
         lines.append(f"\n총 {len(positions)}종목 전량 시장가 매도")
         from src.telegram_keyboard import build_confirm_keyboard
         self._reply_inline("\n".join(lines), build_confirm_keyboard("liquidate", "all"))
+
+    # ══════════════════════════════════════════
+    # AI 분석 실행 (매수/매도 공통)
+    # ══════════════════════════════════════════
+
+    def _run_buy_analysis(self, ticker: str, name: str, qty: int) -> None:
+        """AI 매수 분석 실행. 분석 중 메시지 → 결과 교체."""
+        if not self._is_trade_advisor_enabled():
+            # AI 비활성 → 기존 확인 플로우
+            from src.telegram_keyboard import build_confirm_keyboard
+            self._reply_inline(
+                f"\U0001f6d2 매수 확인\n  {name}({ticker}) {qty}주 (지정가 -0.5%)\n\n실행하시겠습니까?",
+                build_confirm_keyboard("buy", ticker, str(qty)),
+            )
+            return
+
+        # "분석 중..." 메시지 전송 → message_id 획득
+        from src.telegram_sender import send_message_get_id
+        msg_id = send_message_get_id(f"\U0001f50d {name}({ticker}) AI 매수 분석 중...")
+        if not msg_id:
+            # 메시지 전송 실패 → fallback
+            from src.telegram_keyboard import build_confirm_keyboard
+            self._reply_inline(
+                f"\U0001f6d2 매수 확인\n  {name}({ticker}) {qty}주\n\n실행하시겠습니까?",
+                build_confirm_keyboard("buy", ticker, str(qty)),
+            )
+            return
+
+        # 백그라운드 스레드에서 AI 분석 실행
+        t = threading.Thread(
+            target=self._do_buy_analysis_thread,
+            args=(ticker, name, qty, msg_id),
+            daemon=True,
+        )
+        t.start()
+
+    def _do_buy_analysis_thread(self, ticker: str, name: str, qty: int, msg_id: int) -> None:
+        """AI 매수 분석 (별도 스레드)."""
+        import asyncio
+        from src.telegram_sender import edit_message_text
+        try:
+            from src.agents.trade_advisor import TradeAdvisor
+            advisor = TradeAdvisor()
+            result = asyncio.run(advisor.analyze_buy(ticker, qty))
+
+            verdict = result.get("verdict", "ERROR")
+            msg_text = advisor.format_buy_message(ticker, name, qty, result)
+
+            if verdict == "ERROR":
+                # AI 실패 → fallback
+                from src.telegram_keyboard import build_confirm_keyboard
+                edit_message_text(
+                    TELEGRAM_CHAT_ID, msg_id, msg_text,
+                    reply_markup=build_confirm_keyboard("buy", ticker, str(qty)),
+                )
+            else:
+                from src.telegram_keyboard import build_ai_buy_keyboard
+                edit_message_text(
+                    TELEGRAM_CHAT_ID, msg_id, msg_text,
+                    reply_markup=build_ai_buy_keyboard(ticker, qty, verdict),
+                )
+        except Exception as e:
+            logger.error("AI 매수 분석 스레드 오류: %s", e)
+            from src.telegram_keyboard import build_confirm_keyboard
+            edit_message_text(
+                TELEGRAM_CHAT_ID, msg_id,
+                f"\u274c AI 분석 실패: {e}\n\n{name}({ticker}) {qty}주 매수하시겠습니까?",
+                reply_markup=build_confirm_keyboard("buy", ticker, str(qty)),
+            )
+
+    def _run_sell_analysis(self, ticker: str, name: str, qty: int) -> None:
+        """AI 매도 분석 실행. 분석 중 메시지 → 결과 교체."""
+        if not self._is_trade_advisor_enabled():
+            from src.telegram_keyboard import build_confirm_keyboard
+            self._reply_inline(
+                f"\U0001f4e4 매도 확인\n  {name}({ticker}) {qty}주 (지정가 +0.5%)\n\n실행하시겠습니까?",
+                build_confirm_keyboard("sell", ticker, str(qty)),
+            )
+            return
+
+        from src.telegram_sender import send_message_get_id
+        msg_id = send_message_get_id(f"\U0001f50d {name}({ticker}) AI 매도 분석 중...")
+        if not msg_id:
+            from src.telegram_keyboard import build_confirm_keyboard
+            self._reply_inline(
+                f"\U0001f4e4 매도 확인\n  {name}({ticker}) {qty}주\n\n실행하시겠습니까?",
+                build_confirm_keyboard("sell", ticker, str(qty)),
+            )
+            return
+
+        t = threading.Thread(
+            target=self._do_sell_analysis_thread,
+            args=(ticker, name, qty, msg_id),
+            daemon=True,
+        )
+        t.start()
+
+    def _do_sell_analysis_thread(self, ticker: str, name: str, qty: int, msg_id: int) -> None:
+        """AI 매도 분석 (별도 스레드)."""
+        import asyncio
+        from src.telegram_sender import edit_message_text
+        try:
+            from src.agents.trade_advisor import TradeAdvisor
+            advisor = TradeAdvisor()
+            result = asyncio.run(advisor.analyze_sell(ticker, qty))
+
+            verdict = result.get("verdict", "ERROR")
+
+            # 보유 정보 추출 (메시지 포맷용)
+            holding = None
+            try:
+                holding = advisor._get_position_info(ticker)
+            except Exception:
+                pass
+
+            msg_text = advisor.format_sell_message(ticker, name, qty, result, holding)
+
+            if verdict == "ERROR":
+                from src.telegram_keyboard import build_confirm_keyboard
+                edit_message_text(
+                    TELEGRAM_CHAT_ID, msg_id, msg_text,
+                    reply_markup=build_confirm_keyboard("sell", ticker, str(qty)),
+                )
+            else:
+                from src.telegram_keyboard import build_ai_sell_keyboard
+                edit_message_text(
+                    TELEGRAM_CHAT_ID, msg_id, msg_text,
+                    reply_markup=build_ai_sell_keyboard(ticker, qty, verdict),
+                )
+        except Exception as e:
+            logger.error("AI 매도 분석 스레드 오류: %s", e)
+            from src.telegram_keyboard import build_confirm_keyboard
+            edit_message_text(
+                TELEGRAM_CHAT_ID, msg_id,
+                f"\u274c AI 분석 실패: {e}\n\n{name}({ticker}) {qty}주 매도하시겠습니까?",
+                reply_markup=build_confirm_keyboard("sell", ticker, str(qty)),
+            )
+
+    @staticmethod
+    def _is_trade_advisor_enabled() -> bool:
+        """trade_advisor 활성 여부 확인."""
+        try:
+            cfg_path = PROJECT_ROOT / "config" / "settings.yaml"
+            with open(cfg_path, encoding="utf-8") as f:
+                import yaml
+                cfg = yaml.safe_load(f) or {}
+            return cfg.get("trade_advisor", {}).get("enabled", False)
+        except Exception:
+            return False
 
     # ══════════════════════════════════════════
     # 버튼 핸들러 — 조회 그룹

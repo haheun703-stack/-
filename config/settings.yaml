@@ -1535,6 +1535,27 @@ dual_sell_system:
     fading_weak_hold_to_reduce: true      # FADING(strength<0.4)+HOLD → PARTIAL_SELL
 
 # ============================================================
+# 텔레그램 매수/매도 AI 판단 — TradeAdvisor
+# ============================================================
+# 텔레그램에서 매수/매도 시 AI 분석 후 판단 제시
+# false → 기존 즉시 확인 플로우 (AI 없이)
+trade_advisor:
+  enabled: true
+  model: "claude-sonnet-4-5-20250929"   # 빠른 판단용 Sonnet
+  max_analysis_sec: 15                   # 타임아웃
+  perplexity_enabled: true               # 실시간 촉매 체크
+  sell_cache_ttl_min: 35                 # ai_sell_cache 유효기간 (분)
+
+  buy_thresholds:
+    skip_rsi_above: 75                   # RSI 과열 기준
+    skip_grade_below: "C"                # 등급 하한
+    wait_near_high_pct: 3               # 52주 고점 근접 %
+
+  sell_thresholds:
+    catalyst_alive_block_sell: true       # 촉매 ALIVE면 매도 차단 추천
+    partial_sell_pct: 50                 # 분할 매도 비율
+
+# ============================================================
 # 섹터 릴레이 엔진 — US→KR 4단계 릴레이 경보
 # ============================================================
 # config/relay_sectors.yaml에 상세 섹터 정의

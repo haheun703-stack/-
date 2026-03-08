@@ -99,6 +99,28 @@ def send_message(
     return success
 
 
+def send_message_get_id(
+    text: str,
+    chat_id: str = None,
+    reply_markup: dict = None,
+) -> int | None:
+    """텔레그램 메시지 전송 후 message_id 반환. edit_message_text용."""
+    target_chat = chat_id or TELEGRAM_CHAT_ID
+    if not TELEGRAM_BOT_TOKEN or not target_chat:
+        return None
+    payload: dict = {"chat_id": target_chat, "text": text}
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    try:
+        resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
+        data = resp.json()
+        if resp.status_code == 200 and data.get("ok"):
+            return data["result"]["message_id"]
+    except Exception as e:
+        logger.error(f"send_message_get_id 오류: {e}")
+    return None
+
+
 def answer_callback_query(
     callback_query_id: str, text: str = "", show_alert: bool = False,
 ) -> bool:

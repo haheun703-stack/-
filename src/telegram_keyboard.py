@@ -42,3 +42,64 @@ def build_stock_select_keyboard(matches: list[tuple[str, str]], action: str) -> 
         }])
     buttons.append([{"text": "취소", "callback_data": "cancel:select"}])
     return {"inline_keyboard": buttons}
+
+
+def build_ai_buy_keyboard(ticker: str, qty: int, verdict: str) -> dict:
+    """AI 매수 판단 결과에 따른 InlineKeyboard.
+
+    verdict:
+      BUY_OK → [매수 실행] [눌림 대기] [취소]
+      WAIT   → [눌림 대기] [그래도 매수] [취소]
+      SKIP   → [그래도 매수] [취소]
+    """
+    buy_cb = f"ai_buy:{ticker}:{qty}"
+    cancel_cb = "cancel:buy"
+
+    if verdict == "BUY_OK":
+        return {"inline_keyboard": [[
+            {"text": "✅ 매수 실행", "callback_data": buy_cb},
+            {"text": "⏳ 눌림 대기", "callback_data": f"ai_wait:{ticker}:{qty}"},
+            {"text": "취소", "callback_data": cancel_cb},
+        ]]}
+    elif verdict == "WAIT":
+        return {"inline_keyboard": [[
+            {"text": "⏳ 눌림 대기", "callback_data": f"ai_wait:{ticker}:{qty}"},
+            {"text": "그래도 매수", "callback_data": buy_cb},
+            {"text": "취소", "callback_data": cancel_cb},
+        ]]}
+    else:  # SKIP or unknown
+        return {"inline_keyboard": [[
+            {"text": "⚠️ 그래도 매수", "callback_data": buy_cb},
+            {"text": "취소", "callback_data": cancel_cb},
+        ]]}
+
+
+def build_ai_sell_keyboard(ticker: str, qty: int, verdict: str) -> dict:
+    """AI 매도 판단 결과에 따른 InlineKeyboard.
+
+    verdict:
+      SELL_OK → [매도 실행] [50% 매도] [홀딩]
+      PARTIAL → [50% 매도] [전량 매도] [홀딩]
+      HOLD    → [그래도 매도] [홀딩]
+    """
+    sell_cb = f"ai_sell:{ticker}:{qty}"
+    partial_cb = f"ai_partial:{ticker}:{qty}"
+    hold_cb = f"ai_hold:{ticker}"
+
+    if verdict == "SELL_OK":
+        return {"inline_keyboard": [[
+            {"text": "🔴 매도 실행", "callback_data": sell_cb},
+            {"text": "50% 매도", "callback_data": partial_cb},
+            {"text": "홀딩", "callback_data": hold_cb},
+        ]]}
+    elif verdict == "PARTIAL":
+        return {"inline_keyboard": [[
+            {"text": "50% 매도", "callback_data": partial_cb},
+            {"text": "전량 매도", "callback_data": sell_cb},
+            {"text": "홀딩", "callback_data": hold_cb},
+        ]]}
+    else:  # HOLD or unknown
+        return {"inline_keyboard": [[
+            {"text": "⚠️ 그래도 매도", "callback_data": sell_cb},
+            {"text": "✅ 홀딩", "callback_data": hold_cb},
+        ]]}
