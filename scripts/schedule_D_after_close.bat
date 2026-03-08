@@ -19,6 +19,17 @@ set PYTHONPATH=D:\sub-agent-project
 
 if not exist logs mkdir logs
 
+REM ── 주말 가드 (토일: Claude/Perplexity API 비용 낭비 방지) ──
+for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
+if "%DOW%"=="5" (
+    echo [%date% %time%] BAT-D 스킵: 토요일 >> logs\schedule.log
+    goto :eof
+)
+if "%DOW%"=="6" (
+    echo [%date% %time%] BAT-D 스킵: 일요일 >> logs\schedule.log
+    goto :eof
+)
+
 REM ══════════════════════════════════════════════
 REM  PHASE 1: 기초 데이터 수집 (~15분)
 REM ══════════════════════════════════════════════

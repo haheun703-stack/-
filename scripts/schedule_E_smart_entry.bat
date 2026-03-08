@@ -21,6 +21,23 @@ call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
 set PYTHONPATH=D:\sub-agent-project
 
+REM ── 주말/공휴일 가드 (CRITICAL: LIVE 매매 보호) ──
+for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
+if "%DOW%"=="5" (
+    echo [%date% %time%] BAT-E 스킵: 토요일 >> logs\schedule.log
+    goto :eof
+)
+if "%DOW%"=="6" (
+    echo [%date% %time%] BAT-E 스킵: 일요일 >> logs\schedule.log
+    goto :eof
+)
+REM 공휴일 체크 (holidays 라이브러리)
+for /f %%a in ('python -c "from datetime import date; exec(\"try:\\n import holidays\\n print(1 if date.today() in holidays.KR(years=date.today().year) else 0)\\nexcept ImportError:\\n print(0)\")"') do set IS_HOLIDAY=%%a
+if "%IS_HOLIDAY%"=="1" (
+    echo [%date% %time%] BAT-E 스킵: 공휴일 >> logs\schedule.log
+    goto :eof
+)
+
 echo ========================================
 echo [QM-E] AI 스마트 진입 LIVE (08:50~10:30)
 echo   v3 + TOP7 병행, max_stocks=5
