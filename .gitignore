@@ -70,7 +70,7 @@ etf_sector_anatomy.jsx
 jarvis-dashboard-preview.html
 monday_battle_plan.md
 news-early-detection-guide.html
-paper_trader.py
+# paper_trader.py  # scripts/paper_trader.py는 추적 대상
 quantum_v8_spec.docx
 
 # 참조 코드 (구현 완료 후 보존용)
