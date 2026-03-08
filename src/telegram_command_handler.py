@@ -1137,7 +1137,7 @@ class TelegramCommandBot:
 # ══════════════════════════════════════════
 
 # 키보드 버튼 텍스트 → 핸들러
-# v13: 운영 중심 8버튼 (매수/매도/청산/체결내역 제거 — 수동 운영 전환)
+# v13: 키보드는 8버튼이지만, 텍스트 직접 입력은 매수/매도/청산도 지원
 TEXT_COMMANDS = {
     "현재잔고": TelegramCommandBot._cmd_balance,
     "포트폴리오": TelegramCommandBot._cmd_portfolio,
@@ -1147,6 +1147,11 @@ TEXT_COMMANDS = {
     "시작": TelegramCommandBot._cmd_auto_start,
     "정지": TelegramCommandBot._cmd_stop,
     "도움": TelegramCommandBot._cmd_help,
+    # 키보드에는 없지만 텍스트 입력으로 사용 가능
+    "매수": TelegramCommandBot._cmd_buy,
+    "매도": TelegramCommandBot._cmd_sell,
+    "청산": TelegramCommandBot._cmd_liquidate,
+    "체결내역": TelegramCommandBot._cmd_trade_history,
 }
 
 # 기존 /슬래시 명령어 (호환 유지)
