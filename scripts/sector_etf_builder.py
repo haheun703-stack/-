@@ -12,6 +12,8 @@ pykrx API로 TIGER 섹터 ETF 구성종목을 조회하여
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import json
 import logging
 import sys
@@ -210,7 +212,7 @@ def fetch_etf_daily(days: int = 120) -> int:
     count = 0
     for sector_name, (etf_code, etf_name, _) in SECTOR_ETFS.items():
         try:
-            ohlcv = krx.get_etf_ohlcv_by_date(start_date, end_date, etf_code)
+            ohlcv = _safe_etf_ohlcv(start_date, end_date, etf_code)
             time.sleep(0.3)
 
             if ohlcv is None or ohlcv.empty:
@@ -243,13 +245,18 @@ def _safe_nearest_business_day() -> str:
     """pykrx get_nearest_business_day_in_a_week 안전 래퍼.
 
     KRX API가 빈 응답 반환 시 직접 계산으로 fallback.
+    pykrx 내부 로깅 버그 억제 포함.
     """
     today_str = datetime.now().strftime("%Y%m%d")
+    root = logging.getLogger()
+    orig_level = root.level
+    root.setLevel(logging.CRITICAL)
+    stderr_capture = io.StringIO()
     try:
-        return krx.get_nearest_business_day_in_a_week(today_str, prev=True)
+        with contextlib.redirect_stderr(stderr_capture):
+            return krx.get_nearest_business_day_in_a_week(today_str, prev=True)
     except (IndexError, KeyError, Exception) as e:
         logger.warning("pykrx 영업일 조회 실패 (%s) → fallback 직접 계산", e)
-        # 오늘부터 역순으로 최대 7일 탐색하여 평일 반환
         from datetime import date
         d = date.today()
         for _ in range(7):
@@ -257,6 +264,28 @@ def _safe_nearest_business_day() -> str:
                 return d.strftime("%Y%m%d")
             d -= timedelta(days=1)
         return today_str
+    finally:
+        root.setLevel(orig_level)
+
+
+def _safe_etf_ohlcv(start: str, end: str, etf_code: str):
+    """pykrx get_etf_ohlcv_by_date 안전 래퍼.
+
+    pykrx 내부 버그: 일부 ETF에서 KeyError('isin') 발생 후
+    깨진 logging.info(args, kwargs) 호출 → TypeError + 수백 줄 stderr 출력.
+    로깅 레벨 임시 상향 + stderr 리다이렉트로 노이즈 완전 억제.
+    """
+    root = logging.getLogger()
+    orig_level = root.level
+    root.setLevel(logging.CRITICAL)
+    stderr_capture = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(stderr_capture):
+            return krx.get_etf_ohlcv_by_date(start, end, etf_code)
+    except (KeyError, TypeError, Exception):
+        return None
+    finally:
+        root.setLevel(orig_level)
 
 
 def update_etf_daily() -> int:
@@ -264,6 +293,7 @@ def update_etf_daily() -> int:
     end_date = _safe_nearest_business_day()
 
     count = 0
+    failed = []
     for sector_name, (etf_code, _, _) in SECTOR_ETFS.items():
         out_path = DAILY_DIR / f"{etf_code}.parquet"
 
@@ -278,10 +308,11 @@ def update_etf_daily() -> int:
                 start = (datetime.strptime(end_date, "%Y%m%d") - timedelta(days=180)).strftime("%Y%m%d")
                 existing = None
 
-            ohlcv = krx.get_etf_ohlcv_by_date(start, end_date, etf_code)
+            ohlcv = _safe_etf_ohlcv(start, end_date, etf_code)
             time.sleep(0.3)
 
             if ohlcv is None or ohlcv.empty:
+                failed.append(f"{sector_name}({etf_code})")
                 continue
 
             ohlcv.index.name = "date"
@@ -305,8 +336,11 @@ def update_etf_daily() -> int:
 
         except Exception as e:
             logger.error("%s (%s): %s", sector_name, etf_code, e)
+            failed.append(f"{sector_name}({etf_code})")
 
-    logger.info("ETF 시세 업데이트: %d개 갱신", count)
+    if failed:
+        logger.warning("ETF 시세 실패: %s", ", ".join(failed))
+    logger.info("ETF 시세 업데이트: %d/%d개 갱신", count, len(SECTOR_ETFS))
     return count
 
 

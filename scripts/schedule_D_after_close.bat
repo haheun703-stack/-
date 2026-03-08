@@ -19,6 +19,15 @@ set PYTHONPATH=D:\sub-agent-project
 
 if not exist logs mkdir logs
 
+REM ── 로그 로테이션 (10MB 초과 시 백업) ──
+for %%F in (logs\schedule.log) do (
+    if %%~zF GTR 10000000 (
+        echo [%date% %time%] 로그 로테이션: %%~zF bytes >> logs\schedule.log
+        copy /Y logs\schedule.log logs\schedule.log.old >nul 2>&1
+        echo [%date% %time%] BAT-D 시작 (로테이션 후) > logs\schedule.log
+    )
+)
+
 REM ── 주말 가드 (토일: Claude/Perplexity API 비용 낭비 방지) ──
 for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
 if "%DOW%"=="5" (
