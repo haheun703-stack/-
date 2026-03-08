@@ -1,0 +1,105 @@
+{
+  "analyzed_at": "2026-03-09 00:07:56",
+  "targets": [
+    {
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "qty": 20,
+      "desc": "원전/SMR | AI Brain BUY 85%",
+      "current_price": 98000,
+      "limit_price": 97500,
+      "invest_amount": 1950000,
+      "change_pct": 8.29,
+      "result": {
+        "verdict": "SKIP",
+        "confidence": 82,
+        "signal_grade": "F",
+        "signal_score": 37.9,
+        "technical_summary": "SAR↓ 하락추세 + MACD 데드크로스 진행 중 + ADX 0.0(추세 부재) + RSI 52.9(중립)",
+        "catalyst": "미국 가스터빈 12기 공급계약 + 해상풍력 EPC 5,750억 + SMR 공장 착공 (confirmed)",
+        "risk_warning": "⚠️ 치명적 밸류에이션: PER 520배/PBR 7.7배 + 2029년 이후 납기로 단기 실적 기여 제한 + 기술적 하락추세 진행 중",
+        "suggestion": "촉매는 강력하나 ①시그널 F등급 ②하락 추세 ③극단적 고평가 ④단기 실적 반영 불가로 현 시점 매수 부적합. 주가 조정 후 85,000원대(MA60 형성 후) 또는 기술적 반등 신호 확인 시 재검토 권장"
+      }
+    },
+    {
+      "ticker": "000500",
+      "name": "가온전선",
+      "qty": 20,
+      "desc": "원전 relay | AI v3 conv8",
+      "current_price": 100300,
+      "limit_price": 99700,
+      "invest_amount": 1994000,
+      "change_pct": 5.47,
+      "result": {
+        "verdict": "SKIP",
+        "confidence": 82,
+        "signal_grade": "F",
+        "signal_score": 38.7,
+        "technical_summary": "SAR↑지만 ADX=0.0(추세없음) + MACD 데드크로스 임박 + MA데이터 오류",
+        "catalyst": "북미시장 확대·2025년 매출 2조 목표·전선테마 강세 (확인됨)",
+        "risk_warning": "시그널 F등급으로 기술적 매수 조건 미달 + MA/ADX 데이터 신뢰도 이슈 + 주식희석 리스크",
+        "suggestion": "촉매는 긍정적이나 시그널 F등급(38.7점)으로 기술적 진입 시점 아님. 60점 이상 회복 또는 명확한 골든크로스 확인 후 재검토 권장. 현 시점 매수 비추천"
+      }
+    },
+    {
+      "ticker": "011690",
+      "name": "와이투솔루션",
+      "qty": 200,
+      "desc": "전력인프라 | AI v3 conv8",
+      "current_price": 6990,
+      "limit_price": 6950,
+      "invest_amount": 1390000,
+      "change_pct": -2.24,
+      "result": {
+        "verdict": "SKIP",
+        "confidence": 85,
+        "signal_grade": "F",
+        "signal_score": 31.8,
+        "technical_summary": "SAR↓ 하락추세 + ADX 0.0 추세없음 + MACD 데드크로스 임박 — 기술적 매우 약세",
+        "catalyst": "HRT로보틱스 AW 2026 전시회 참가 (확인됨)",
+        "risk_warning": "VI 발동 + 1주일 12.91% 급락 + 기술적 지표 전반 악화 + 시그널 F등급",
+        "suggestion": "촉매는 확인되나 기술적 바닥 미확인. 최소 6,500원 지지선 테스트 후 반등 확인 필요. 현재 매수는 고점물림 리스크 높음"
+      }
+    },
+    {
+      "ticker": "028050",
+      "name": "삼성E&A",
+      "qty": 60,
+      "desc": "건설 Tier2 | 눌림목",
+      "current_price": 33450,
+      "limit_price": 33250,
+      "invest_amount": 1995000,
+      "change_pct": 0.9,
+      "result": {
+        "verdict": "SKIP",
+        "confidence": 85,
+        "signal_grade": "F",
+        "signal_score": 21.2,
+        "technical_summary": "SAR↓ 하락추세 + MACD 데드크로스 임박 + ADX 0.0 (추세 부재) + MA 데이터 이상",
+        "catalyst": "2026년 실적 목표(수주 12조, 영업익 8천억) 및 뉴에너지 수주 비중 54% 긍정적, 신한證 목표가 45,000원(+34%) 상향",
+        "risk_warning": "⚠️ 시그널 F등급(21.2점) + 2025년 수주 부진(6.4조) + 중동 지정학 리스크 + 단기 변동성 우려 + 기술적 하락추세",
+        "suggestion": "촉매는 양호하나 시그널 등급 F + 기술적 하락추세 + 2025년 실적 부진으로 현 시점 매수 부적합. 최소 SAR 상향전환 + RSI 45선 지지 확인 후 재검토 또는 31,500원(-5.8%) 수준 눌림목 대기 권장"
+      }
+    },
+    {
+      "ticker": "064350",
+      "name": "현대로템",
+      "qty": 5,
+      "desc": "방산 Tier1 | 추가매수",
+      "current_price": 233000,
+      "limit_price": 231500,
+      "invest_amount": 1157500,
+      "change_pct": 3.33,
+      "result": {
+        "verdict": "SKIP",
+        "confidence": 85,
+        "signal_grade": "F",
+        "signal_score": 0,
+        "technical_summary": "SAR↑지만 ADX 0.0(추세 부재) + MA데이터 없음 — 기술적 신뢰도 낮음",
+        "catalyst": "사우디 방산전시회 참가로 중동 진출 모멘텀 있으나 단기 주가 영향 불확실",
+        "risk_warning": "시그널 F등급 + 4Q25 실적 기대치 하회 + 기술적 지표 불완전(ADX 0, MA 미산출)",
+        "suggestion": "실적 개선 확인 및 기술적 지표 정상화 후 재진입 검토. 현 시점 매수는 리스크 과다"
+      }
+    }
+  ]
+}
