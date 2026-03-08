@@ -175,19 +175,19 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                         status=OrderStatus.PARTIAL if int(item.get("tot_ccld_qty", 0)) > 0 else OrderStatus.PENDING,
                         org_no=item.get("orgn_odno", ""),
                     )
-            # 미체결 목록에 없음 → 체결 완료 또는 취소됨
-            # 잔고 조회로 실제 보유 여부 교차 확인
+            # 미체결 목록에 없음 → 체결 완료 또는 취소/거부됨
+            # 당일 체결 내역 조회로 교차 확인
             try:
-                balance = self.fetch_balance()
-                held_tickers = {h["ticker"] for h in balance.get("holdings", [])}
-                # 잔고에서 발견되면 체결 완료로 확신
-                # (주의: order_id로 특정 불가, ticker 기반 추정)
-                logger.info("[주문] %s 미체결 목록 부재 → 체결 완료 추정", order_id)
-                return Order(order_id=order_id, status=OrderStatus.FILLED)
-            except Exception:
-                # 잔고 조회도 실패하면 PENDING 유지 (안전 측)
-                logger.warning("[주문] %s 상태 불확실 — PENDING 유지", order_id)
-                return Order(order_id=order_id, status=OrderStatus.PENDING)
+                filled_order = self._check_filled_today(order_id)
+                if filled_order:
+                    logger.info("[주문] %s 당일 체결 확인됨", order_id)
+                    return filled_order
+            except Exception as e:
+                logger.warning("[주문] %s 체결 확인 조회 실패: %s", order_id, e)
+
+            # 체결 내역에도 없음 → 취소/거부로 간주 (안전 측)
+            logger.warning("[주문] %s 미체결+체결 모두 부재 → CANCELLED 추정 (취소/거부)", order_id)
+            return Order(order_id=order_id, status=OrderStatus.CANCELLED)
         except Exception as e:
             logger.error("[주문] 상태 조회 실패: %s — %s", order_id, e)
             return Order(order_id=order_id, status=OrderStatus.FAILED, message=str(e))
@@ -265,6 +265,45 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     # ──────────────────────────────────────────
     # 내부 헬퍼
     # ──────────────────────────────────────────
+
+    def _check_filled_today(self, order_id: str) -> Order | None:
+        """당일 체결 내역에서 order_id 확인. 체결되었으면 Order, 아니면 None."""
+        try:
+            from datetime import date
+            today = date.today().strftime("%Y%m%d")
+            resp = self.broker.fetch_today_execution({
+                "INQR_STRT_DT": today,
+                "INQR_END_DT": today,
+                "SLL_BUY_DVSN_CD": "00",  # 전체
+                "INQR_DVSN": "00",
+                "PDNO": "",
+                "CCLD_DVSN": "01",  # 체결분만
+                "ORD_GNO_BRNO": "",
+                "ODNO": "",
+                "INQR_DVSN_3": "00",
+                "INQR_DVSN_1": "",
+                "CTX_AREA_FK100": "",
+                "CTX_AREA_NK100": "",
+            })
+            for item in resp.get("output1", []):
+                if item.get("odno") == order_id:
+                    return Order(
+                        order_id=order_id,
+                        ticker=item.get("pdno", ""),
+                        side=OrderSide.BUY if item.get("sll_buy_dvsn_cd") == "02" else OrderSide.SELL,
+                        order_type=OrderType.LIMIT,
+                        price=int(item.get("ord_unpr", 0)),
+                        quantity=int(item.get("ord_qty", 0)),
+                        filled_quantity=int(item.get("tot_ccld_qty", 0)),
+                        filled_price=float(item.get("avg_prvs", 0) or item.get("ccld_pric", 0)),
+                        status=OrderStatus.FILLED,
+                    )
+        except AttributeError:
+            # mojito에 fetch_today_execution이 없으면 잔고 기반 fallback
+            logger.debug("[주문] fetch_today_execution 미지원 → 잔고 기반 확인")
+        except Exception as e:
+            logger.warning("[주문] 당일 체결 조회 실패: %s", e)
+        return None
 
     @staticmethod
     def _parse_order_response(

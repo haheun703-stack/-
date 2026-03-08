@@ -457,6 +457,24 @@ class TelegramCommandBot:
                 edit_message_text(chat_id, msg_id, f"\u274c 매수 실패: 현재가 조회 불가 ({ticker})")
                 return
             limit_price = _tick_round(int(current * (1 - LIMIT_BUY_DISCOUNT)), current)
+            # 예수금 확인 — 주문금액 > 예수금이면 차단
+            invest_amount = limit_price * qty
+            available_cash = adapter.get_available_cash()
+            if available_cash > 0 and invest_amount > available_cash:
+                edit_message_text(
+                    chat_id, msg_id,
+                    f"\u274c 예수금 부족\n"
+                    f"  주문금액: {invest_amount:,}원\n"
+                    f"  예수금: {available_cash:,.0f}원\n"
+                    f"  부족분: {invest_amount - available_cash:,.0f}원",
+                )
+                return
+            # 이미 보유 중인 종목 경고
+            holdings = adapter.fetch_holdings()
+            held = next((h for h in holdings if h.get("ticker") == ticker), None)
+            if held:
+                held_qty = held.get("quantity", 0)
+                logger.warning("[수동매수] %s 이미 보유 중 (%d주) — 추가매수 진행", ticker, held_qty)
             order = adapter.buy_limit(ticker, limit_price, qty)
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
@@ -497,25 +515,19 @@ class TelegramCommandBot:
 
     def _execute_liquidate(self, chat_id: str, msg_id: int) -> None:
         from src.telegram_sender import edit_message_text
-        pos_path = PROJECT_ROOT / "data" / "positions.json"
-        if not pos_path.exists():
-            edit_message_text(chat_id, msg_id, "\u274c 보유 종목 없음")
-            return
-        with open(pos_path, encoding="utf-8") as f:
-            data = json.load(f)
-        positions = data.get("positions", [])
-        if not positions:
-            edit_message_text(chat_id, msg_id, "\u274c 보유 종목 없음")
-            return
-
         results = []
         try:
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
-            for p in positions:
-                ticker = p.get("ticker", "")
-                shares = p.get("shares", 0)
-                name = p.get("name", ticker)
+            # KIS 실제 잔고 기반으로 청산 (positions.json 대신)
+            holdings = adapter.fetch_holdings()
+            if not holdings:
+                edit_message_text(chat_id, msg_id, "\u274c 보유 종목 없음 (KIS 잔고 조회)")
+                return
+            for h in holdings:
+                ticker = h.get("ticker", "")
+                shares = h.get("quantity", 0)
+                name = h.get("name", ticker)
                 if shares > 0:
                     try:
                         adapter.sell_market(ticker, shares)

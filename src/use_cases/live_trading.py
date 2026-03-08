@@ -187,8 +187,12 @@ class LiveTradingEngine:
         if shares <= 0:
             return {"ticker": ticker, "success": False, "reason": "계산 수량 0"}
 
-        # 주문 가격 결정 (지정가: 현재가 + 슬리피지)
-        order_price = entry_price + self.slippage_ticks if self.default_order_type == "limit" else 0
+        # 주문 가격 결정 (지정가: 현재가 + 호가 N틱)
+        if self.default_order_type == "limit":
+            tick_size = self._get_tick_size(entry_price)
+            order_price = entry_price + tick_size * self.slippage_ticks
+        else:
+            order_price = 0
 
         # 주문 실행 (재시도 로직)
         order = None
@@ -406,6 +410,24 @@ class LiveTradingEngine:
     # ──────────────────────────────────────────
     # 내부 헬퍼
     # ──────────────────────────────────────────
+
+    @staticmethod
+    def _get_tick_size(price: int) -> int:
+        """KRX 호가 단위 반환."""
+        if price < 2000:
+            return 1
+        elif price < 5000:
+            return 5
+        elif price < 20000:
+            return 10
+        elif price < 50000:
+            return 50
+        elif price < 200000:
+            return 100
+        elif price < 500000:
+            return 500
+        else:
+            return 1000
 
     def _calc_daily_loss_pct(self) -> float:
         """당일 손실률 계산"""
