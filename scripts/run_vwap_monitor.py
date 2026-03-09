@@ -65,6 +65,9 @@ VWAP_HOT_PCT = 2.5           # VWAP 대비 이만큼 상향 → 과열 알림
 VWAP_RECOVER_PCT = -0.3      # 눌림 후 이 수준 회복 → 진입 기회 알림
 ALERT_COOLDOWN_SEC = 900     # 동일 종목 알림 쿨다운 (15분)
 SUMMARY_INTERVAL_SEC = 1800  # 30분마다 현황 요약
+API_RETRY_MAX = 3            # API 호출 실패 시 재시도 횟수
+API_RETRY_DELAY = 10         # 재시도 대기 (초)
+API_CIRCUIT_BREAKER_WAIT = 60  # 서킷브레이커 감지 시 대기 (초)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -202,32 +205,79 @@ class VWAPMonitor:
             for t in targets
         }
         self.state_path = Path("data/vwap_monitor.json")
+        self._consecutive_failures = 0  # API 연속 실패 카운터
 
         if not simulate:
-            from src.adapters.kis_order_adapter import KisOrderAdapter
-            self.adapter = KisOrderAdapter()
+            try:
+                from src.adapters.kis_order_adapter import KisOrderAdapter
+                self.adapter = KisOrderAdapter()
+                logger.info("[INIT] KIS API 어댑터 초기화 성공")
+            except Exception as e:
+                logger.error("[INIT] KIS API 어댑터 초기화 실패: %s", e)
+                logger.error("[INIT] .env 파일/KIS 키 확인 필요 — 모니터 종료")
+                raise
         else:
             self.adapter = None
 
     # ── 데이터 수집 ──
 
-    def poll_all(self):
-        """전 종목 현재가 스냅샷."""
+    def poll_all(self) -> bool:
+        """전 종목 현재가 스냅샷. 성공 시 True, 전체 실패 시 False."""
+        success_count = 0
+        fail_count = 0
+
         for ticker, tracker in self.trackers.items():
-            try:
-                if self.simulate:
-                    info = self._simulate_price(ticker, tracker)
-                else:
-                    info = self.adapter.fetch_current_price(ticker)
-                snap = tracker.update(info)
-                if snap:
-                    logger.debug("[POLL] %s: %s원 (vol=%s)",
-                                 tracker.name, snap["price"], snap["cum_vol"])
-                else:
-                    logger.warning("[POLL] %s: 가격 조회 실패", tracker.name)
-                time.sleep(0.5)  # API 속도 제한
-            except Exception as e:
-                logger.error("[POLL] %s 오류: %s", ticker, e)
+            for attempt in range(1, API_RETRY_MAX + 1):
+                try:
+                    if self.simulate:
+                        info = self._simulate_price(ticker, tracker)
+                    else:
+                        info = self.adapter.fetch_current_price(ticker)
+
+                    if not info or info.get("current_price", 0) <= 0:
+                        logger.warning("[POLL] %s: 가격 0 또는 빈 응답 (시도 %d/%d)",
+                                       tracker.name, attempt, API_RETRY_MAX)
+                        if attempt < API_RETRY_MAX:
+                            time.sleep(API_RETRY_DELAY)
+                            continue
+                        fail_count += 1
+                        break
+
+                    snap = tracker.update(info)
+                    if snap:
+                        logger.debug("[POLL] %s: %s원 (vol=%s)",
+                                     tracker.name, snap["price"], snap["cum_vol"])
+                        success_count += 1
+                    break  # 성공 → 다음 종목
+
+                except Exception as e:
+                    logger.error("[POLL] %s 오류 (시도 %d/%d): %s",
+                                 ticker, attempt, API_RETRY_MAX, e)
+                    if attempt < API_RETRY_MAX:
+                        time.sleep(API_RETRY_DELAY)
+                    else:
+                        fail_count += 1
+
+            time.sleep(0.5)  # API 속도 제한
+
+        # 연속 실패 카운터 관리
+        if success_count == 0 and fail_count > 0:
+            self._consecutive_failures += 1
+            logger.warning("[POLL] 전 종목 실패 (%d회 연속) — API 장애 또는 서킷브레이커 의심",
+                           self._consecutive_failures)
+            if self._consecutive_failures >= 3:
+                logger.warning("[POLL] 3회 연속 전체 실패 — %d초 대기 후 재시도",
+                               API_CIRCUIT_BREAKER_WAIT)
+                self.send(
+                    "⚠️ [VWAP 모니터] API 3회 연속 실패\n"
+                    f"서킷브레이커 또는 API 장애 의심\n"
+                    f"{API_CIRCUIT_BREAKER_WAIT}초 대기 후 재시도합니다."
+                )
+                time.sleep(API_CIRCUIT_BREAKER_WAIT)
+            return False
+        else:
+            self._consecutive_failures = 0
+            return True
 
     def _simulate_price(self, ticker: str, tracker: StockTracker) -> dict:
         """시뮬레이션 모드: 가짜 가격 생성."""
@@ -520,7 +570,41 @@ class VWAPMonitor:
         logger.info("[VWAP Monitor] 시작 — %d종목 %s",
                      len(self.trackers),
                      "(시뮬레이션)" if self.simulate else "(LIVE)")
+        logger.info("  대상: %s", ", ".join(
+            f"{t.name}({t.ticker})" for t in self.trackers.values()
+        ))
         logger.info("=" * 50)
+
+        try:
+            self._run_phases()
+        except KeyboardInterrupt:
+            logger.info("[VWAP Monitor] 사용자 중단 (Ctrl+C)")
+        except Exception as e:
+            logger.critical("[VWAP Monitor] 치명적 오류로 종료: %s", e, exc_info=True)
+            try:
+                self.send(
+                    f"🚨 [VWAP 모니터 크래시]\n"
+                    f"오류: {e}\n"
+                    f"시각: {datetime.now().strftime('%H:%M:%S')}\n"
+                    f"수집된 스냅샷: {self._snapshot_count()}개"
+                )
+            except Exception:
+                pass
+        finally:
+            # 어떤 상황이든 마지막 상태 저장
+            try:
+                self.save_state()
+                logger.info("[VWAP Monitor] 최종 상태 저장 완료")
+            except Exception as e2:
+                logger.error("[VWAP Monitor] 최종 상태 저장 실패: %s", e2)
+            logger.info("[VWAP Monitor] 종료")
+
+    def _snapshot_count(self) -> int:
+        """전체 스냅샷 수."""
+        return sum(len(t.snapshots) for t in self.trackers.values())
+
+    def _run_phases(self):
+        """Phase 0~5 순차 실행. 예외 발생 시 상위 run()이 처리."""
 
         # ━━ Phase 0: 장 시작 대기 ━━
         if not self.simulate:
@@ -534,7 +618,6 @@ class VWAPMonitor:
 
         # ━━ Phase 2: VWAP 축적 (09:00~09:30) ━━
         if self.simulate:
-            # 시뮬: 10회 빠르게
             for i in range(10):
                 time.sleep(1)
                 self.poll_all()
@@ -558,39 +641,40 @@ class VWAPMonitor:
         ai_done = False
 
         if self.simulate:
-            end_iter = 20  # 시뮬: 20회
+            end_iter = 20
             for i in range(end_iter):
                 time.sleep(1)
                 self.poll_all()
-
-                # 알림 체크
                 self._check_and_send_alerts()
-
-                # 요약 (매 5회)
                 if (i + 1) % 5 == 0:
                     self.send(self.format_summary())
-
-                # AI 분석 (15회째)
                 if i == 14 and not ai_done:
                     logger.info("[AI] 시뮬 AI 분석")
-                    # 시뮬에서는 AI 스킵 (API 필요)
                     self.send("🔍 [11:30 AI 분석] (시뮬레이션 — AI 스킵)")
                     ai_done = True
-
                 self.save_state()
         else:
             end_time = datetime.now().replace(hour=14, minute=0, second=0)
             while datetime.now() < end_time:
                 time.sleep(POLL_SEC_NORMAL)
-                self.poll_all()
 
-                # 알림 체크
-                self._check_and_send_alerts()
+                try:
+                    self.poll_all()
+                except Exception as e:
+                    logger.error("[Phase 4] poll_all 예외 (무시하고 계속): %s", e)
+
+                try:
+                    self._check_and_send_alerts()
+                except Exception as e:
+                    logger.error("[Phase 4] 알림 체크 예외: %s", e)
 
                 # 30분 요약
                 elapsed = (datetime.now() - last_summary).total_seconds()
                 if elapsed >= SUMMARY_INTERVAL_SEC:
-                    self.send(self.format_summary())
+                    try:
+                        self.send(self.format_summary())
+                    except Exception as e:
+                        logger.error("[Phase 4] 요약 전송 실패: %s", e)
                     last_summary = datetime.now()
 
                 # 11:30 AI 분석
@@ -604,12 +688,14 @@ class VWAPMonitor:
                         self.send(f"⚠️ [AI 분석 실패] {e}")
                     ai_done = True
 
-                self.save_state()
+                try:
+                    self.save_state()
+                except Exception as e:
+                    logger.error("[Phase 4] 상태 저장 실패: %s", e)
 
         # ━━ Phase 5: 종료 (14:00) ━━
         self.send(self.format_final())
         self.save_state()
-        logger.info("[VWAP Monitor] 종료")
 
     def _check_and_send_alerts(self):
         """전 종목 VWAP 알림 체크 → 발생 시 즉시 텔레그램."""
