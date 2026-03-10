@@ -1,0 +1,65 @@
+{
+  "updated_at": "2026-03-09 15:43:40",
+  "stocks": {
+    "034020": {
+      "name": "두산에너빌리티",
+      "current_price": 100182,
+      "vwap": 100694,
+      "vwap_dev_pct": -0.51,
+      "opening_price": 99175,
+      "dip_count": 0,
+      "below_vwap": false,
+      "snapshots": 26,
+      "day_high": 101610,
+      "day_low": 99175
+    },
+    "000500": {
+      "name": "가온전선",
+      "current_price": 99930,
+      "vwap": 100946,
+      "vwap_dev_pct": -1.01,
+      "opening_price": 101613,
+      "dip_count": 0,
+      "below_vwap": false,
+      "snapshots": 26,
+      "day_high": 101613,
+      "day_low": 99930
+    },
+    "011690": {
+      "name": "와이투솔루션",
+      "current_price": 6820,
+      "vwap": 6795,
+      "vwap_dev_pct": 0.37,
+      "opening_price": 6875,
+      "dip_count": 0,
+      "below_vwap": false,
+      "snapshots": 26,
+      "day_high": 6875,
+      "day_low": 6746
+    },
+    "028050": {
+      "name": "삼성E&A",
+      "current_price": 33391,
+      "vwap": 33267,
+      "vwap_dev_pct": 0.37,
+      "opening_price": 33239,
+      "dip_count": 0,
+      "below_vwap": false,
+      "snapshots": 26,
+      "day_high": 33592,
+      "day_low": 32864
+    },
+    "064350": {
+      "name": "현대로템",
+      "current_price": 234961,
+      "vwap": 232283,
+      "vwap_dev_pct": 1.15,
+      "opening_price": 232242,
+      "dip_count": 0,
+      "below_vwap": false,
+      "snapshots": 26,
+      "day_high": 234961,
+      "day_low": 229556
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "analysis_date": "2026-03-06",
+  "analysis_date": "2026-03-08",
   "focus_sectors": [
     {
       "sector": "에너지화학",
@@ -11,61 +11,73 @@
       "rsi": 77.3,
       "smart_money": true,
       "relay_source": null,
-      "reasoning": "정유 thesis와 일치하며 스마트머니 유입 중, RSI 77.3으로 아직 과열 전 단계"
-    },
-    {
-      "sector": "증권",
-      "entry_timing": "즉시진입",
-      "size_weight": 0.8,
-      "thesis_alignment": "thesis없음",
-      "momentum_rank": 7,
-      "momentum_score": 61.6,
-      "rsi": 70.3,
-      "smart_money": false,
-      "relay_source": null,
-      "reasoning": "Theme BUY 신호이며 ADX 52.9 고강도 추세, 릴레이 소스 역할 가능"
+      "reasoning": "원전/전력인프라 thesis와 정확히 일치하며, 스마트머니 유입 중이고 RSI 77로 아직 과열 전 단계"
     },
     {
       "sector": "철강소재",
-      "entry_timing": "눌림대기",
-      "size_weight": 0.6,
-      "thesis_alignment": "thesis없음",
+      "entry_timing": "즉시진입",
+      "size_weight": 0.8,
+      "thesis_alignment": "강한일치",
       "momentum_rank": 8,
       "momentum_score": 59.5,
       "rsi": 70.6,
       "smart_money": true,
       "relay_source": null,
-      "reasoning": "스마트머니 유입 중이나 BB 109.1%로 단기 과열, 조정 후 재진입 검토"
+      "reasoning": "조선 thesis 연계(철강 수요 증가) + 스마트머니 동반 유입, 과열 없이 건강한 상승"
+    },
+    {
+      "sector": "증권",
+      "entry_timing": "즉시진입",
+      "size_weight": 0.7,
+      "thesis_alignment": "약한일치",
+      "momentum_rank": 7,
+      "momentum_score": 61.6,
+      "rsi": 70.3,
+      "smart_money": false,
+      "relay_source": null,
+      "reasoning": "Theme BUY 신호 + 릴레이 소스 역할 가능, ADX 하락 전환이지만 모멘텀 7위로 건재"
     },
     {
       "sector": "보험",
-      "entry_timing": "즉시진입",
-      "size_weight": 0.7,
-      "thesis_alignment": "thesis없음",
+      "entry_timing": "눌림대기",
+      "size_weight": 0.5,
+      "thesis_alignment": "약한일치",
       "momentum_rank": 9,
       "momentum_score": 59.2,
       "rsi": 72.6,
       "smart_money": false,
       "relay_source": "증권",
-      "reasoning": "증권 릴레이 타겟(승률 70~76%), 1일 지연으로 즉시 진입 타이밍"
+      "reasoning": "증권 릴레이 타겟(1일 지연, 승률 76.5%) + Theme BUY이나 증권 아직 고점 미도달로 1일 대기"
     },
     {
-      "sector": "2차전지",
+      "sector": "방산",
       "entry_timing": "관망",
       "size_weight": 0.3,
       "thesis_alignment": "불일치",
-      "momentum_rank": 11,
-      "momentum_score": 46.8,
-      "rsi": 69.9,
-      "smart_money": true,
+      "momentum_rank": 13,
+      "momentum_score": 38.9,
+      "rsi": 62.6,
+      "smart_money": false,
       "relay_source": null,
-      "reasoning": "회피 thesis와 상충, 스마트머니 유입은 있으나 모멘텀 약세로 관망"
+      "reasoning": "thesis 확신 7/10이나 모멘텀 13위로 실제 자금 유입 없음, 중동 리스크가 아직 미반영"
+    },
+    {
+      "sector": "조선",
+      "entry_timing": "관망",
+      "size_weight": 0.3,
+      "thesis_alignment": "불일치",
+      "momentum_rank": 17,
+      "momentum_score": 24.2,
+      "rsi": 57.8,
+      "smart_money": false,
+      "relay_source": null,
+      "reasoning": "유가 급등 thesis 있으나 모멘텀 17위, 기관 매도(-1113억) 지속으로 구조적 모멘텀 부재"
     }
   ],
   "screening_boost": [
     "에너지화학",
-    "증권",
-    "보험"
+    "철강소재",
+    "증권"
   ],
   "screening_suppress": [
     "현대차그룹",
@@ -77,28 +89,28 @@
   "sector_warnings": [
     {
       "sector": "현대차그룹",
-      "warning": "RSI 82.9 + BB 118.1% 극도 과열, 외인 대량 매도 중 (-2694억)",
+      "warning": "RSI 82.9 + BB 118.1%로 극심한 과열, 외인 26억 매도 전환 조짐",
       "severity": "high"
     },
     {
       "sector": "반도체",
-      "warning": "회피 thesis이나 모멘텀 2위 역설, 외인 15.9조 매도 vs 기관 2.8조 매수 충돌",
+      "warning": "thesis 회피 지시 + RSI 80.5이나 외인 5일간 -1592억 대규모 이탈 중",
       "severity": "high"
     },
     {
       "sector": "건설",
-      "warning": "RSI 81.3 + ADX 61.2 과열 추세, thesis 없이 급등으로 조정 위험",
+      "warning": "RSI 81.3 과열 + ADX 61.2로 추세 피크 임박, 단기 조정 가능성",
       "severity": "medium"
     },
     {
       "sector": "방산",
-      "warning": "thesis 확신 7/10이나 모멘텀 13위로 급락, 릴레이 무시 신호 발생",
-      "severity": "high"
+      "warning": "thesis와 모멘텀 불일치(확신 7/10 vs 순위 13위), 중동 리스크 선반영 안됨",
+      "severity": "medium"
     },
     {
-      "sector": "IT서비스",
-      "warning": "반도체 릴레이 주의 신호이나 현재 모멘텀 3위 과열, 진입 시점 이미 경과",
-      "severity": "medium"
+      "sector": "조선",
+      "warning": "유가 급등 호재 있으나 ADX 18.3 약세 + 기관 매도 지속, 릴레이 대기→무시 전환",
+      "severity": "low"
     }
   ]
 }

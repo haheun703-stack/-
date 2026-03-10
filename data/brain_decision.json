@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-07T21:42:20.044139",
-  "effective_regime": "BEAR",
+  "timestamp": "2026-03-08T19:33:24.083831",
+  "effective_regime": "CAUTION",
   "kospi_regime": "CAUTION",
-  "nightwatch_score": -0.245,
+  "nightwatch_score": -0.06,
   "vix_level": 29.5,
-  "confidence": 0.45,
+  "confidence": 0.65,
   "arms": [
     {
       "name": "swing",
@@ -12,39 +12,39 @@
       "adjusted_pct": 12.5,
       "delta_pct": -17.5,
       "reason": "축소 17.5%p",
-      "frozen": false
+      "frozen": true
     },
     {
       "name": "etf_sector",
+      "base_pct": 20.0,
+      "adjusted_pct": 10.0,
+      "delta_pct": -10.0,
+      "reason": "축소 10.0%p",
+      "frozen": true
+    },
+    {
+      "name": "etf_leverage",
       "base_pct": 0.0,
       "adjusted_pct": 0,
       "delta_pct": 0.0,
       "reason": "변경 없음",
-      "frozen": false
-    },
-    {
-      "name": "etf_leverage",
-      "base_pct": 15.0,
-      "adjusted_pct": 0,
-      "delta_pct": -15.0,
-      "reason": "축소 15.0%p",
-      "frozen": false
+      "frozen": true
     },
     {
       "name": "etf_index",
-      "base_pct": 5.0,
-      "adjusted_pct": 3.8,
-      "delta_pct": -1.2,
-      "reason": "축소 1.2%p",
-      "frozen": false
+      "base_pct": 20.0,
+      "adjusted_pct": 15.0,
+      "delta_pct": -5.0,
+      "reason": "축소 5.0%p",
+      "frozen": true
     },
     {
       "name": "etf_gold",
       "base_pct": 15.0,
-      "adjusted_pct": 21.2,
-      "delta_pct": 6.2,
-      "reason": "확대 6.2%p",
-      "frozen": false
+      "adjusted_pct": 16.2,
+      "delta_pct": 1.2,
+      "reason": "확대 1.2%p",
+      "frozen": true
     },
     {
       "name": "etf_small_cap",
@@ -52,45 +52,43 @@
       "adjusted_pct": 0,
       "delta_pct": 0.0,
       "reason": "변경 없음",
-      "frozen": false
+      "frozen": true
     },
     {
       "name": "etf_bonds",
-      "base_pct": 15.0,
-      "adjusted_pct": 16.2,
-      "delta_pct": 1.2,
-      "reason": "확대 1.2%p",
-      "frozen": false
+      "base_pct": 5.0,
+      "adjusted_pct": 8.8,
+      "delta_pct": 3.8,
+      "reason": "확대 3.8%p",
+      "frozen": true
     },
     {
       "name": "etf_dollar",
-      "base_pct": 10.0,
-      "adjusted_pct": 12.5,
-      "delta_pct": 2.5,
-      "reason": "확대 2.5%p",
-      "frozen": false
+      "base_pct": 5.0,
+      "adjusted_pct": 3.8,
+      "delta_pct": -1.2,
+      "reason": "축소 1.2%p",
+      "frozen": true
     },
     {
       "name": "cash",
-      "base_pct": 40.0,
+      "base_pct": 35.0,
       "adjusted_pct": 33.8,
-      "delta_pct": -6.2,
-      "reason": "축소 6.2%p",
+      "delta_pct": -1.2,
+      "reason": "축소 1.2%p",
       "frozen": false
     }
   ],
   "total_invest_pct": 66.2,
   "cash_pct": 33.8,
   "adjustments": [
-    "COMPOUND 충격 하향: CAUTION→BEAR (확신도 70%)",
     "VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75",
-    "NW 부정(-0.245): 레버리지 30% 축소",
-    "2D 선제방어: credit_z=-1.1, MOVE_z=3.1",
-    "충격 보정: COMPOUND (확신도 70%)",
+    "2D 선제방어: credit_z=0.2, MOVE_z=2.8",
     "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
   ],
   "warnings": [
-    "SHIELD 방어 등급: ORANGE"
+    "SHIELD 방어 등급: ORANGE",
+    "레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
   ],
-  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: BEAR (KOSPI: CAUTION)\nNW: -0.245 | VIX: 29.5 (HIGH) | US: MILD_BEAR\n충격: COMPOUND\n\n자본 배분:\n      개별스윙  12.5% ██\n     섹터ETF   0.0% \n      레버리지   0.0% \n     지수ETF   3.8% \n      금ETF  21.2% ████\n       소형주   0.0% \n        채권  16.2% ███\n        달러  12.5% ██\n        현금  33.8% ██████\n\n보정:\n  · COMPOUND 충격 하향: CAUTION→BEAR (확신도 70%)\n  · VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75\n  · NW 부정(-0.245): 레버리지 30% 축소\n  · 2D 선제방어: credit_z=-1.1, MOVE_z=3.1\n  · 충격 보정: COMPOUND (확신도 70%)\n  · SHIELD: S3: 5개 동시하락 (avg -11.9%)\n\n경고:\n  ! SHIELD 방어 등급: ORANGE"
+  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: -0.060 | VIX: 29.5 (HIGH) | US: NEUTRAL\n\n자본 배분:\n      개별스윙  12.5% ██\n     섹터ETF  10.0% ██\n      레버리지   0.0% \n     지수ETF  15.0% ███\n      금ETF  16.2% ███\n       소형주   0.0% \n        채권   8.8% █\n        달러   3.8% \n        현금  33.8% ██████\n\n유동성 사이클:\n  Net Liquidity: 5,795.3B (z=+1.58, 20d: +99.5B)\n  M2 YoY: +3.78% (z=-2.54)\n  은행 지준: 2,967.9B (z=+0.52)\n  RRP: 1.5B (20d: +0.2B) | TGA: 832.1B (20d: -76.7B)\n  유동성 레짐: AMPLE (score=+0.304, 2일 전)\n\nCOT Slow Eye (주간):\n    S&P 500 E-mini: z=+2.23 (BULLISH)\n        Gold COMEX: z=-1.25 (BULLISH)\n        10Y T-Note: z=-0.12 (NEUTRAL)\n     WTI Crude Oil: z=+0.87 (NEUTRAL)\n              복합방향: MILD_BULLISH (데이터 4일 전)\n\nv3 캡: CAUTION → 신규 최대 5종목, 종목당 2.5%\n\n보정:\n  · VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75\n  · 2D 선제방어: credit_z=0.2, MOVE_z=2.8\n  · SHIELD: S3: 5개 동시하락 (avg -11.9%)\n\n경고:\n  ! SHIELD 방어 등급: ORANGE\n  ! 레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
 }

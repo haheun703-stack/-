@@ -1,0 +1,69 @@
+{
+  "date": "2026-03-07",
+  "total_checks": 4,
+  "adjustments": {
+    "positive": 0,
+    "negative": 2,
+    "neutral": 2
+  },
+  "filtered_out": 1,
+  "avg_adjustment": -0.05,
+  "records": [
+    {
+      "symbol": "005930",
+      "name": "삼성전자",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": -0.1,
+      "conviction_before": 7,
+      "conviction_delta": -1,
+      "conviction_after": 6,
+      "tags": [
+        "NEAR_RESISTANCE"
+      ],
+      "reason": "저항 근접: 전일고 189,700 (+0.8%)",
+      "filtered": false
+    },
+    {
+      "symbol": "005380",
+      "name": "현대차",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": 0.0,
+      "conviction_before": 6,
+      "conviction_delta": 0,
+      "conviction_after": 6,
+      "tags": [],
+      "reason": "ICT 특이사항 없음",
+      "filtered": false
+    },
+    {
+      "symbol": "010140",
+      "name": "삼성중공업",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": -0.1,
+      "conviction_before": 4,
+      "conviction_delta": -1,
+      "conviction_after": 3,
+      "tags": [
+        "NEAR_RESISTANCE"
+      ],
+      "reason": "저항 근접: 전일고 27,800 (+0.7%)",
+      "filtered": true
+    },
+    {
+      "symbol": "003240",
+      "name": "태광산업",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": 0.0,
+      "conviction_before": 5,
+      "conviction_delta": 0,
+      "conviction_after": 5,
+      "tags": [],
+      "reason": "ICT 특이사항 없음",
+      "filtered": false
+    }
+  ]
+}
