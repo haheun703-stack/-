@@ -1866,3 +1866,30 @@ shield:
         normal_sign: "positive"      # 정상: 양의 상관 (경기 동행)
         breakdown_threshold: -0.3    # 유가↓+주식↓ = 수요 붕괴
     danger_count: 3                  # 3개+ 동시 붕괴 = DANGER
+
+# ============================================================
+# 컨센서스 스크리너 — wisereport 애널리스트 컨센서스 기반 중기 투자 후보
+# ============================================================
+consensus_scanner:
+  enabled: true
+  min_turnover_억: 100            # 최소 거래대금 (대형주 필터)
+  min_price: 5000                 # 최소 주가
+  fetch_delay_sec: 0.5            # wisereport 요청 간격
+  max_retries: 3                  # HTTP 재시도
+
+  scoring:
+    upside_weight: 35             # 상승여력 배점
+    per_weight: 20                # Forward PER 배점
+    analyst_weight: 15            # 애널리스트 확신 배점
+    technical_weight: 20          # 기술적 건전성 배점
+    dividend_weight: 10           # 배당 보너스 배점
+
+  thresholds:
+    min_upside_pct: 10            # 최소 상승여력
+    min_analyst_count: 3          # 최소 기관수
+    min_opinion_score: 3.0        # 최소 투자의견
+
+  report:
+    top_n: 15                     # 리포트 종목수
+    send_telegram: true           # 텔레그램 발송
+    save_html: true               # HTML 저장

@@ -262,6 +262,11 @@ echo [%date% %time%] [19.9/29] v3 AI Brain >> logs\schedule.log
 python -u -X utf8 scripts\run_v3_brain.py --no-telegram >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [19.9/29] FAILED (v3 Brain) >> logs\schedule.log
 
+REM 19.95단계: 컨센서스 스크리닝 (wisereport → 목표가 괴리율 TOP)
+echo [%date% %time%] [19.95/29] 컨센서스 스크리닝 >> logs\schedule.log
+python -u -X utf8 scripts\scan_consensus.py --top 15 --send >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [19.95/29] FAILED >> logs\schedule.log
+
 REM 20단계: 내일 추천 종목 통합 스캔 (10개 시그널 교차검증 + v3 boost) *** 최종 ***
 echo [%date% %time%] [20/29] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
