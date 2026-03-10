@@ -426,6 +426,17 @@ def run_scan(
 
     logger.info("")
 
+    # all_picks: 전체 필터 통과 종목 (tomorrow_picks 컨센서스 풀용)
+    all_picks_json = []
+    for p in picks:
+        pj = {k: v for k, v in p.items() if k != "technical"}
+        pj["rsi"] = p["technical"].get("rsi") if p.get("technical") else None
+        pj["above_ma60"] = p["technical"].get("above_ma60") if p.get("technical") else None
+        pj["sar_trend"] = p["technical"].get("sar_trend") if p.get("technical") else None
+        all_picks_json.append(pj)
+    result["all_picks"] = all_picks_json
+    logger.info(f"전체 풀: {len(all_picks_json)}종목 (tomorrow_picks 연동용)")
+
     # ── 5. JSON 저장 ──
     def _default(o):
         if isinstance(o, (np.bool_,)):

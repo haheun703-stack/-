@@ -1893,3 +1893,13 @@ consensus_scanner:
     top_n: 15                     # 리포트 종목수
     send_telegram: true           # 텔레그램 발송
     save_html: true               # HTML 저장
+
+# ============================================================
+# 컨센서스 풀 → 내일 추천 통합 (전략 J)
+# scan_consensus.py 결과를 scan_tomorrow_picks.py에 연동
+# ============================================================
+consensus_pool:
+  enabled: true                   # 컨센서스 풀 연동 활성화
+  pool_only: false                # true: 풀 내 종목만 추천 / false: 풀 외 종목도 추천 (보너스만)
+  # pool_only=false → 기존 11개 소스 전체 유지 + 풀 내 종목에 보너스
+  # pool_only=true  → 컨센서스 풀 안에 있는 종목만 추천 대상 (A 철학 모드)

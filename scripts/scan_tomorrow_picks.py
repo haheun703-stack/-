@@ -1248,6 +1248,26 @@ def main():
         with open(yaml_path, encoding="utf-8") as f:
             yaml_config = yaml.safe_load(f) or {}
 
+    # 전략 J: 컨센서스 풀 (consensus_screening.json)
+    consensus_pool_cfg = yaml_config.get("consensus_pool", {})
+    consensus_pool_enabled = consensus_pool_cfg.get("enabled", False)
+    consensus_pool_only = consensus_pool_cfg.get("pool_only", False)
+    consensus_pool = {}  # ticker → {upside_pct, composite_score, grade, forward_per, ...}
+    if consensus_pool_enabled:
+        cs_data = load_json("consensus_screening.json")
+        for p in cs_data.get("top_picks", []):
+            t = p.get("ticker", "")
+            if t:
+                consensus_pool[t] = p
+        # 풀 확장: 전체 필터 통과 종목 (all_picks 필드가 있으면)
+        for p in cs_data.get("all_picks", []):
+            t = p.get("ticker", "")
+            if t and t not in consensus_pool:
+                consensus_pool[t] = p
+        if consensus_pool:
+            print(f"[컨센서스 풀] {len(consensus_pool)}종목 로드 | "
+                  f"pool_only={consensus_pool_only}")
+
     # 전략 I: v3 AI Brain picks
     v3_picks_data = load_v3_picks()
     v3_buy_map = {}  # ticker → {conviction, size_pct, strategy, ...}
@@ -1280,6 +1300,12 @@ def main():
 
     # AVOID 종목 제외
     all_tickers -= avoid_tickers
+
+    # 컨센서스 풀 필터 (pool_only 모드)
+    if consensus_pool_enabled and consensus_pool_only and consensus_pool:
+        before_cnt = len(all_tickers)
+        all_tickers &= set(consensus_pool.keys())
+        print(f"[컨센서스 풀 필터] {before_cnt} → {len(all_tickers)}종목 (풀 내 종목만)")
 
     # ── 채널 1: AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능) ──
     ai_ind_cfg = yaml_config.get("ai_brain", {}).get("independent_pick", {})
@@ -1510,6 +1536,28 @@ def main():
             score_detail["total"] = round(boosted, 1)
             source_names.append("v3Brain")
 
+        # 전략 J: 컨센서스 풀 보너스 (최대 +10점)
+        consensus_bonus = 0.0
+        consensus_tag = ""
+        consensus_upside = 0.0
+        consensus_score = 0.0
+        consensus_fper = 0.0
+        if consensus_pool_enabled and ticker in consensus_pool:
+            cp = consensus_pool[ticker]
+            consensus_upside = cp.get("upside_pct", 0)
+            consensus_score = cp.get("composite_score", 0)
+            consensus_fper = cp.get("forward_per", 0) or 0
+            cp_grade = cp.get("grade", "D")
+            # 등급별 보너스: S→+10, A→+8, B→+5, C→+2
+            grade_bonus = {"S": 10, "A": 8, "B": 5, "C": 2}.get(cp_grade, 0)
+            consensus_bonus = float(grade_bonus)
+            if consensus_bonus > 0:
+                consensus_tag = f"컨센서스:{cp_grade}({consensus_score:.0f}점,↑{consensus_upside:.0f}%)"
+        if consensus_bonus > 0:
+            boosted = max(min(score_detail["total"] + consensus_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            source_names.append("컨센서스")
+
         # 이름 결정
         name = ""
         for s in sources:
@@ -1584,6 +1632,11 @@ def main():
             "ai_urgency": ai_urgency,
             "ai_sector_bonus": ai_sector_bonus,
             "ai_sector_tag": ai_sector_tag,
+            "consensus_bonus": consensus_bonus,
+            "consensus_tag": consensus_tag,
+            "consensus_upside": consensus_upside,
+            "consensus_score": consensus_score,
+            "consensus_fper": consensus_fper,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
@@ -1745,7 +1798,8 @@ def main():
         ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
         intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
         report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}")
+        cons_str = f"  📊{r['consensus_tag']}" if r.get("consensus_tag") else ""
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}")
 
     if top5:
         print(f"\n{'─'*60}")
@@ -1851,6 +1905,12 @@ def main():
             "themes": [t["theme"] for t in pplx_themes.get("hot_themes", [])][:5],
             "boosted_tickers": list(report_boost_map.keys()),
         } if morning else {},
+        "consensus_pool": {
+            "enabled": consensus_pool_enabled,
+            "pool_only": consensus_pool_only,
+            "pool_size": len(consensus_pool),
+            "matched": sum(1 for r in results if r.get("consensus_bonus", 0) > 0),
+        } if consensus_pool_enabled else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
