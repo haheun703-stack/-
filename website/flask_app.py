@@ -239,35 +239,40 @@ def logout():
 @app.route('/')
 @login_required
 def dashboard():
-    now = datetime.now()
-    year = request.args.get('year', now.year, type=int)
-    month = request.args.get('month', now.month, type=int)
+    try:
+        now = datetime.now()
+        year = request.args.get('year', now.year, type=int)
+        month = request.args.get('month', now.month, type=int)
 
-    calendar_data = get_calendar_data(year, month)
-    metrics = get_metrics()
-    market = get_market_data()
-    holdings = get_holdings()
-    brain = get_brain_data()
-    recent_dates = get_report_dates()[:7]
+        calendar_data = get_calendar_data(year, month)
+        metrics = get_metrics()
+        market = get_market_data()
+        holdings = get_holdings()
+        brain = get_brain_data()
+        recent_dates = get_report_dates()[:7]
 
-    # 이전/다음 달 계산
-    prev_month = month - 1 if month > 1 else 12
-    prev_year = year if month > 1 else year - 1
-    next_month = month + 1 if month < 12 else 1
-    next_year = year if month < 12 else year + 1
+        # 이전/다음 달 계산
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
 
-    return render_template('dashboard.html',
-        calendar=calendar_data,
-        metrics=metrics,
-        market=market,
-        holdings=holdings,
-        brain=brain,
-        recent_dates=recent_dates,
-        year=year, month=month,
-        prev_year=prev_year, prev_month=prev_month,
-        next_year=next_year, next_month=next_month,
-        month_name=f"{year}년 {month}월"
-    )
+        return render_template('dashboard.html',
+            calendar=calendar_data,
+            metrics=metrics,
+            market=market,
+            holdings=holdings,
+            brain=brain,
+            recent_dates=recent_dates,
+            year=year, month=month,
+            prev_year=prev_year, prev_month=prev_month,
+            next_year=next_year, next_month=next_month,
+            month_name=f"{year}년 {month}월"
+        )
+    except Exception as e:
+        import traceback
+        app.logger.error(f"Dashboard error: {traceback.format_exc()}")
+        return f"<pre>Dashboard Error:\n{traceback.format_exc()}</pre>", 500
 
 # ─── 라우트: 일별 리포트 보기 ───────────────────────────
 @app.route('/report/<date>')
