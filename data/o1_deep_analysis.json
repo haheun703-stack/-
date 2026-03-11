@@ -1,81 +1,82 @@
 {
-  "analysis_date": "2026-03-08",
+  "analysis_date": "2026-03-11",
   "macro_analysis": {
-    "global_liquidity": "미국 금리 상승과 강달러 기조, VIX 오름세로 유동성이 점차 타이트해지는 양상",
+    "global_liquidity": "미국 금리 인상 기조로 달러 인덱스가 강세를 보이고 있으며, VIX가 상승해 위험회피 심리가 커진 상황. 인플레이션 지표가 예상치를 웃돌아 유동성 자체는 제한적으로 유지되나, 단기 급락으로 인해 하락 베팅 유입이 늘어나고 있음.",
     "coupling_status": "동조",
-    "cycle_position": "late",
+    "cycle_position": "mid",
     "geopolitical_risk_score": 8,
     "key_macro_insights": [
-      "국제유가 90달러 돌파로 인플레이션 압력 심화",
-      "미-이란 갈등 격화로 지정학적 변동성 확대, 주식시장 위험회피 심리 강화"
+      "미-이란 갈등 격화로 인해 에너지 가격 상승 압력이 지속되고 있음",
+      "생산자 물가지수(PPI) 서프라이즈로 금리 불확실성이 커짐",
+      "기술주 급락이 전반적 투자심리 악화를 주도하며, 한국 시장도 동반 하락 압력"
     ],
     "macro_regime": "RISK_OFF",
-    "confidence": 0.8
+    "confidence": 0.76
   },
   "micro_analysis": [
     {
       "sector": "반도체",
-      "earnings_cycle": "recovery",
-      "leading_indicators": "재고조정 마무리와 함께 AI·데이터센터 수요 회복 기대",
-      "valuation_rerating": "상향",
+      "earnings_cycle": "trough",
+      "leading_indicators": "수주잔고 소폭 증가세이나 ASP 회복은 아직 더딤. AI 투자 둔화 우려 확산",
+      "valuation_rerating": "유지",
       "supply_demand_shift": "매집",
       "conviction": 8,
-      "contrarian_view": "글로벌 기술주 전반에 매도세가 있지만 국내 반도체 기업은 저평가 매력으로 저점 매수 유입 전망"
+      "contrarian_view": "AI 투자 축소 걱정이 과도하다는 일부 시각 존재, 장기적으로 산업은 확장 지속 가능"
     },
     {
       "sector": "2차전지",
       "earnings_cycle": "expansion",
-      "leading_indicators": "전기차 수요 지속 증가, 배터리 소재 단가 상승",
-      "valuation_rerating": "유지",
-      "supply_demand_shift": "중립",
-      "conviction": 7,
-      "contrarian_view": "투자심리가 단기 과열 되었다고 보는 시각 존재하나 중장기적으로는 기술 혁신 수혜"
+      "leading_indicators": "글로벌 전기차 시장 수요 증가로 출하량 계속 확대 중",
+      "valuation_rerating": "상향",
+      "supply_demand_shift": "매집",
+      "conviction": 9,
+      "contrarian_view": "높은 밸류에이션 부담이 있으나, 소재 혁신 및 장비 수주 증가로 추가 성장이 가능하다는 견해"
     },
     {
       "sector": "조선",
-      "earnings_cycle": "expansion",
-      "leading_indicators": "LNG선·특수선 수주 증가, 전년 대비 수주잔고 확대",
-      "valuation_rerating": "상향",
-      "supply_demand_shift": "매집",
-      "conviction": 8,
-      "contrarian_view": "현 시점 수주잔고는 양호하나, 글로벌 경기 둔화 시 운임 하락으로 수익성 위축 가능"
+      "earnings_cycle": "recovery",
+      "leading_indicators": "수주잔고 안정적 증가, 러시아 제재 이후 대체 물량 확대",
+      "valuation_rerating": "유지",
+      "supply_demand_shift": "중립",
+      "conviction": 7,
+      "contrarian_view": "해상 운임 하락 우려가 있지만, 친환경 선박 교체 수요로 중장기적 모멘텀은 유지"
     },
     {
       "sector": "방산",
       "earnings_cycle": "expansion",
-      "leading_indicators": "방산 수출 확대 및 미-이란 갈등에 따른 국방 지출 상승 기대",
+      "leading_indicators": "국방 예산 증액, 지정학적 갈등 확대에 따른 수주 상승",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
-      "conviction": 9,
-      "contrarian_view": "지정학 리스크 단기적 집중 반영으로 중장기 모멘텀은 제한적일 수 있음"
+      "conviction": 8,
+      "contrarian_view": "단기 급등에 따른 밸류 부담이 존재하나, 중동·동유럽 등의 꾸준한 수요 전망"
     },
     {
       "sector": "바이오",
       "earnings_cycle": "contraction",
-      "leading_indicators": "신약 임상 지연, R&D 비용 부담 증가",
+      "leading_indicators": "주요 신약 임상 지연, 투자심리 위축으로 R&D 예산 축소 추세",
       "valuation_rerating": "하향",
       "supply_demand_shift": "분배",
-      "conviction": 6,
-      "contrarian_view": "인플레이션 국면에서도 필수 치료제 시장은 안정적 수요가 존재"
+      "conviction": 5,
+      "contrarian_view": "핵심 파이프라인 성공 시 단기 급반등 가능성은 존재"
     }
   ],
-  "cross_sector_dynamics": "방산·조선은 지정학적 긴장과 에너지 물류 수요 증가로 동반 강세를 보이지만, 바이오는 투자심리 위축으로 매기가 분산. 반도체와 2차전지는 성장주 성격이 강하나, 높은 변동성에도 장기적 상승 여력을 보유.",
+  "cross_sector_dynamics": "에너지·방산·조선의 지정학적 리스크 수혜가 이어지는 가운데, 반도체·IT 섹터는 글로벌 투자 심리 위축에 타격을 받고 있음. 2차전지 섹터의 성장 모멘텀은 상대적으로 견고해, 다른 섹터의 침체 분위기를 일부 보완하며 시장 투자심리를 지탱하는 역할을 수행.",
   "risk_scenarios": [
     {
-      "scenario": "미-이란 갈등 확산으로 호르무즈 해협 봉쇄 및 유가 급등",
+      "scenario": "국제유가 추가 급등 및 인플레이션 재가속",
       "probability": 0.4,
       "impact": "high"
     },
     {
-      "scenario": "글로벌 인플레이션 심화로 각국 긴축 가속",
-      "probability": 0.6,
-      "impact": "high"
-    },
-    {
-      "scenario": "AI 투자 둔화 및 무역 갈등 재점화로 수출 위축",
+      "scenario": "반도체 업황 반등 지연 및 AI 투자 둔화 심화",
       "probability": 0.3,
       "impact": "medium"
+    },
+    {
+      "scenario": "방산 수주 차질과 지정학적 긴장 완화",
+      "probability": 0.2,
+      "impact": "low"
     }
   ],
-  "actionable_summary": "1) 에너지·방산 업종은 지정학적 긴장 수혜 가능성. 2) 반도체는 단기 변동성에도 중장기 성장동력 강조. 3) 바이오는 인플레 국면에서 가치 재평가까지 시간 필요."
+  "actionable_summary": "첫째, 지정학적 리스크로 인한 에너지·방산 강세가 지속될 것으로 전망. 둘째, 2차전지 섹터는 밸류 부담에도 성장 사이클 우위 유지. 셋째, 반도체·IT는 제품 ASP 회복이 지연될 수 있으나 향후 AI 투자 회복 시점에 관심 집중."
 }

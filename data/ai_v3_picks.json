@@ -1,64 +1,27 @@
 {
-  "decision_date": "2026-03-08",
+  "decision_date": "2026-03-11",
   "regime": "방어",
-  "available_slots": 10,
-  "current_holdings": 0,
-  "cash_pct_before": 100.0,
-  "cash_pct_after": 80.0,
-  "buys": [
-    {
-      "ticker": "000500",
-      "name": "가온전선",
-      "conviction": 8,
-      "size_pct": 6.2,
-      "strategy": "relay",
-      "thesis_alignment": "strong",
-      "entry_price": 87600,
-      "stop_loss_pct": -23.0,
-      "target_pct": 40.2,
-      "reasoning": "원전 thesis 핵심주이면서 고점 대비 30% 조정 완료로 리스크/리워드 최적",
-      "brain_size_capped": true
-    },
-    {
-      "ticker": "011690",
-      "name": "와이투솔루션",
-      "conviction": 8,
-      "size_pct": 6.2,
-      "strategy": "momentum",
-      "thesis_alignment": "strong",
-      "entry_price": 6610,
-      "stop_loss_pct": -26.2,
-      "target_pct": 45.9,
-      "reasoning": "박스권 돌파 모멘텀과 전력인프라 수혜가 결합된 최적 진입 타이밍",
-      "brain_size_capped": true
-    }
-  ],
+  "available_slots": 0,
+  "current_holdings": 10,
+  "cash_pct_before": 0,
+  "cash_pct_after": 0,
+  "buys": [],
   "skipped": [
-    {
-      "ticker": "278470",
-      "name": "에이피알",
-      "skip_reason": "52주 고점 80% 위치로 방어 레짐에서 과열 리스크"
-    },
-    {
-      "ticker": "010060",
-      "name": "OCI홀딩스",
-      "skip_reason": "ADX 47.6 극단 수준으로 추세 피로도 높음"
-    },
     {
       "ticker": "298040",
       "name": "효성중공업",
-      "skip_reason": "고가 대형주로 방어 레짐 초기 진입 부적합"
+      "skip_reason": "포트폴리오 슬롯 포화 (10/10)"
+    },
+    {
+      "ticker": "000500",
+      "name": "가온전선",
+      "skip_reason": "포트폴리오 슬롯 포화 (10/10)"
     }
   ],
   "portfolio_warnings": [
-    "방어 레짐 진입으로 현금 80% 유지하며 최소 포지션만 구축",
-    "원전/전력인프라 섹터 2종목 집중으로 추가 매수 시 섹터 분산 필요"
+    "현금 비중 0%로 방어 레짐 권고(70%)에 크게 미달",
+    "포트폴리오 슬롯 포화 상태로 신규 매수 불가",
+    "중동 전쟁 리스크 상황에서 현금 확보 필요"
   ],
-  "reasoning": "방어 레짐에서는 조정 완료된 relay 종목(가온전선)과 박스권 돌파 momentum(와이투솔루션)을 각 10%씩 소규모로 진입. 유가 150달러 리스크와 미국 긴축 가속을 고려해 현금 80%를 유지하며, 추가 하락 시 매수 여력을 확보하는 신중한 접근을 택함.",
-  "brain_cap_applied": {
-    "regime": "BEAR",
-    "slot_cap": 2,
-    "swing_pct": 12.5,
-    "min_conviction": 6
-  }
+  "reasoning": "방어 레짐에서 이미 10종목을 보유하여 최대 슬롯에 도달한 상태로 신규 매수가 불가능합니다. 현재 현금 비중이 0%로 방어 레짐 권고치 70%에 크게 미달하여 리스크 노출도가 과도한 상황이며, 중동 전쟁 확산과 유가 급등 리스크를 고려할 때 일부 종목 정리를 통한 현금 확보가 우선되어야 합니다."
 }

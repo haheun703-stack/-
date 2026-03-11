@@ -1,81 +1,82 @@
 {
-  "analysis_date": "2026-03-08",
+  "analysis_date": "2026-03-11",
   "regime": "방어",
   "regime_confidence": 0.85,
-  "regime_reasoning": "중동 지정학 리스크 급격 악화(이란 갈등)로 유가 90달러 돌파, VIX 상승과 나스닥 1.59% 급락으로 글로벌 위험회피 심리 확산. 한국 증시 GFC 이후 최대 낙폭 기록으로 변동성 극대화.",
+  "regime_reasoning": "중동 지정학 리스크로 유가 90달러 돌파, VIX 상승과 미국 인플레이션 재점화로 위험회피 심리 극대화. 나스닥 1.59% 급락과 한국 증시 GFC 이후 최대 낙폭으로 방어적 접근 필수.",
   "industry_thesis": [
     {
-      "sector": "원전/전력인프라",
-      "thesis": "SMR 글로벌 수요 폭증과 북미 전력망 대규모 투자로 구조적 성장 사이클 진입. 한수원의 인도·태국 진출로 K-원전 경쟁력 입증.",
+      "sector": "원전/전력",
+      "thesis": "SMR 글로벌 수요 폭증과 한수원-인도/태국 협력 본격화로 장기 성장 사이클 진입. 북미 전력망 투자 확대로 수주 가시성 높음.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 8,
       "catalysts": [
-        "SMR 해외수주 본격화",
-        "AI 데이터센터 전력수요 급증"
+        "SMR 수주 본격화",
+        "북미 전력망 투자"
       ],
       "risks": [
-        "프로젝트 실행 지연"
+        "실행 지연"
       ],
-      "relay_source": "없음",
+      "relay_source": "해당없음",
       "relay_verified": false
     },
     {
       "sector": "방산",
-      "thesis": "중동 긴장 고조와 호르무즈 해협 리스크로 방산 수요 구조적 증가. 다만 단기 과열 가능성 존재.",
+      "thesis": "중동 긴장 고조로 K-방산 수요 급증. 유가 150달러 전망 시 중동 국가들의 방산 구매력 확대.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 7,
       "catalysts": [
-        "중동 갈등 확산",
-        "K-방산 글로벌 인지도 상승"
+        "중동 긴장",
+        "K-방산 수요"
       ],
       "risks": [
-        "평화 협상 진전 시 모멘텀 약화"
+        "수주 지연",
+        "밸류에이션 부담"
       ],
-      "relay_source": "없음",
+      "relay_source": "해당없음",
       "relay_verified": false
     },
     {
       "sector": "조선",
-      "thesis": "유가 급등으로 유조선·LNG선 발주 증가 예상. 호르무즈 해협 우회 항로 수요도 추가 호재.",
+      "thesis": "호르무즈 해협 긴장으로 유조선/LNG선 발주 증가 기대. 친환경 선박 교체 사이클 지속.",
       "demand_supply": "균형",
       "asp_trend": "횡보",
       "global_alignment": "동조",
       "confidence": 6,
       "catalysts": [
-        "에너지 운송 수요 증가"
+        "해상 운송 리스크",
+        "친환경 규제"
       ],
       "risks": [
-        "글로벌 경기 둔화 시 발주 지연"
+        "운임 하락"
       ],
       "relay_source": "방산조선",
       "relay_verified": true
     },
     {
       "sector": "반도체",
-      "thesis": "단기 기술주 매도세에도 AI 수요와 저평가 매력으로 중장기 반등 가능. 다만 당장은 방어적 접근 필요.",
+      "thesis": "AI 투자 우려로 단기 조정 불가피하나, 장기 AI 수요는 구조적 성장. 현재는 과매도 구간.",
       "demand_supply": "균형",
       "asp_trend": "하락",
-      "global_alignment": "역행",
-      "confidence": 5,
+      "global_alignment": "동조",
+      "confidence": 4,
       "catalysts": [
-        "AI 투자 재개",
-        "재고 조정 완료"
+        "AI 장기 수요"
       ],
       "risks": [
-        "미중 갈등 재점화",
-        "나스닥 추가 하락"
+        "SOX 급락",
+        "관세 불확실성"
       ],
-      "relay_source": "없음",
+      "relay_source": "해당없음",
       "relay_verified": false
     }
   ],
   "sector_priority": {
     "attack": [
-      "원전/전력인프라"
+      "원전/전력"
     ],
     "watch": [
       "방산",
@@ -84,18 +85,19 @@
     "avoid": [
       "반도체",
       "IT/소프트웨어",
-      "2차전지",
-      "금융"
+      "금융",
+      "2차전지"
     ]
   },
-  "max_new_buys": 2,
+  "max_new_buys": 1,
   "risk_factors": [
-    "중동 갈등 확산으로 유가 150달러 가능성",
-    "미국 인플레이션 재점화로 긴축 가속",
-    "한국 증시 변동성 미국의 3배"
+    "중동 전쟁 확산 리스크",
+    "유가 150달러 가능성",
+    "미국 인플레이션 재점화",
+    "나스닥 추가 급락"
   ],
-  "cash_reserve_suggestion": 60,
-  "global_summary": "중동 지정학 리스크와 유가 급등으로 글로벌 스태그플레이션 우려 확산. 방어적 포지셔닝 필수.",
+  "cash_reserve_suggestion": 70,
+  "global_summary": "중동 지정학 리스크와 미국 인플레이션 우려로 글로벌 위험회피 모드 전환. 에너지/방산 외 대부분 섹터 회피 필요.",
   "relay_alerts": [
     {
       "pattern": "방산조선→기계",
@@ -104,7 +106,7 @@
     },
     {
       "pattern": "반도체→IT서비스",
-      "status": "대기",
+      "status": "발화",
       "action": "무시"
     }
   ]

@@ -1,33 +1,33 @@
 {
-  "date": "2026-03-08",
-  "data_date": "2026-03-06",
-  "stale_days": 2,
+  "date": "2026-03-11",
+  "data_date": "2026-03-10",
+  "stale_days": 1,
   "indicators": {
     "net_liquidity": {
-      "value": 5795.3,
-      "z": 1.58,
-      "change_20d": 99.5
+      "value": 5796.6,
+      "z": 1.49,
+      "change_20d": 90.5
     },
     "m2_yoy_pct": {
       "value": 3.78,
-      "z": -2.54
+      "z": -2.28
     },
     "reserves": {
       "value": 2967.9,
-      "z": 0.52,
+      "z": 0.47,
       "change_20d": 0.0
     },
     "rrp": {
-      "value": 1.5,
-      "change_20d": 0.2
+      "value": 0.3,
+      "change_20d": -0.8
     },
     "tga": {
       "value": 832.1,
-      "change_20d": -76.7
+      "change_20d": -83.3
     },
     "walcl": {
       "value": 6628.9,
-      "change_20d": 23.0
+      "change_20d": 6.5
     }
   },
   "regime": "AMPLE",
@@ -37,5 +37,5 @@
     "reserve_stress": false
   },
   "composite_direction": "MILD_AMPLE",
-  "composite_score": 0.304
+  "composite_score": 0.294
 }

@@ -1,1 +1,11 @@
-{"strategy_a": {"name": "Quantum v10.3 + v3 Brain", "alloc": 60}, "strategy_b": {"name": "ETF 3\ucd95 \ub85c\ud14c\uc774\uc158", "alloc": 40}, "updated_at": "2026-03-02 18:57:02"}
+{
+  "strategy_a": {
+    "name": "Quantum v10.5 + v3 Brain + 컨센서스",
+    "alloc": 60
+  },
+  "strategy_b": {
+    "name": "ETF 3축 + 프레데터 + AI필터",
+    "alloc": 40
+  },
+  "updated_at": "2026-03-11 13:48:09"
+}

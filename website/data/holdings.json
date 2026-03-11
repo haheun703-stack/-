@@ -1,88 +1,148 @@
 {
   "holdings": [
     {
-      "ticker": "003570",
-      "name": "SNT다이내믹스",
-      "quantity": 60,
-      "avg_price": 59633.3333,
-      "current_price": 49900,
-      "eval_amount": 2994000,
-      "pnl_amount": -584000,
-      "pnl_pct": -16.32
-    },
-    {
       "ticker": "005380",
       "name": "현대차",
       "quantity": 3,
       "avg_price": 612000.0,
-      "current_price": 548000,
-      "eval_amount": 1644000,
-      "pnl_amount": -192000,
-      "pnl_pct": -10.45
+      "current_price": 543000,
+      "eval_amount": 1629000,
+      "pnl_amount": -207000,
+      "pnl_pct": -11.27
     },
     {
       "ticker": "010140",
       "name": "삼성중공업",
       "quantity": 80,
       "avg_price": 29037.5,
-      "current_price": 27200,
-      "eval_amount": 2176000,
-      "pnl_amount": -147000,
-      "pnl_pct": -6.32
+      "current_price": 29250,
+      "eval_amount": 2340000,
+      "pnl_amount": 17000,
+      "pnl_pct": 0.73
     },
     {
       "ticker": "010950",
       "name": "S-Oil",
       "quantity": 25,
       "avg_price": 121600.0,
-      "current_price": 134700,
-      "eval_amount": 3367500,
-      "pnl_amount": 327500,
-      "pnl_pct": 10.77
+      "current_price": 114200,
+      "eval_amount": 2855000,
+      "pnl_amount": -185000,
+      "pnl_pct": -6.08
     },
     {
       "ticker": "024060",
       "name": "흥구석유",
-      "quantity": 100,
+      "quantity": 50,
       "avg_price": 28350.0,
-      "current_price": 32700,
-      "eval_amount": 3270000,
-      "pnl_amount": 435000,
-      "pnl_pct": 15.34
+      "current_price": 24000,
+      "eval_amount": 1200000,
+      "pnl_amount": -217500,
+      "pnl_pct": -15.34
+    },
+    {
+      "ticker": "033100",
+      "name": "제룡전기",
+      "quantity": 21,
+      "avg_price": 51100.0,
+      "current_price": 50650,
+      "eval_amount": 1063650,
+      "pnl_amount": -9450,
+      "pnl_pct": -0.88
+    },
+    {
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "quantity": 14,
+      "avg_price": 102300.0,
+      "current_price": 102600,
+      "eval_amount": 1436400,
+      "pnl_amount": 4200,
+      "pnl_pct": 0.29
+    },
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "quantity": 17,
+      "avg_price": 325176.4706,
+      "current_price": 318000,
+      "eval_amount": 5406000,
+      "pnl_amount": -122000,
+      "pnl_pct": -2.2
     },
     {
       "ticker": "064350",
       "name": "현대로템",
       "quantity": 1,
       "avg_price": 226500.0,
-      "current_price": 225500,
-      "eval_amount": 225500,
-      "pnl_amount": -1000,
-      "pnl_pct": -0.44
+      "current_price": 207000,
+      "eval_amount": 207000,
+      "pnl_amount": -19500,
+      "pnl_pct": -8.6
     },
     {
       "ticker": "068270",
       "name": "셀트리온",
       "quantity": 13,
       "avg_price": 242500.0,
-      "current_price": 211500,
-      "eval_amount": 2749500,
-      "pnl_amount": -403000,
-      "pnl_pct": -12.78
+      "current_price": 213000,
+      "eval_amount": 2769000,
+      "pnl_amount": -383500,
+      "pnl_pct": -12.16
     },
     {
-      "ticker": "323410",
-      "name": "카카오뱅크",
-      "quantity": 73,
-      "avg_price": 27900.0,
-      "current_price": 24050,
-      "eval_amount": 1755650,
-      "pnl_amount": -281050,
-      "pnl_pct": -13.79
+      "ticker": "103590",
+      "name": "일진전기",
+      "quantity": 15,
+      "avg_price": 81100.0,
+      "current_price": 81500,
+      "eval_amount": 1222500,
+      "pnl_amount": 6000,
+      "pnl_pct": 0.49
+    },
+    {
+      "ticker": "105560",
+      "name": "KB금융",
+      "quantity": 10,
+      "avg_price": 156000.0,
+      "current_price": 155200,
+      "eval_amount": 1552000,
+      "pnl_amount": -8000,
+      "pnl_pct": -0.51
+    },
+    {
+      "ticker": "138930",
+      "name": "BNK금융지주",
+      "quantity": 50,
+      "avg_price": 19180.0,
+      "current_price": 19420,
+      "eval_amount": 971000,
+      "pnl_amount": 12000,
+      "pnl_pct": 1.25
+    },
+    {
+      "ticker": "161390",
+      "name": "한국타이어앤테크놀로지",
+      "quantity": 20,
+      "avg_price": 59700.0,
+      "current_price": 60500,
+      "eval_amount": 1210000,
+      "pnl_amount": 16000,
+      "pnl_pct": 1.34
+    },
+    {
+      "ticker": "272210",
+      "name": "한화시스템",
+      "quantity": 20,
+      "avg_price": 162200.0,
+      "current_price": 149800,
+      "eval_amount": 2996000,
+      "pnl_amount": -248000,
+      "pnl_pct": -7.64
     }
   ],
-  "total_eval": 25700829,
-  "total_pnl": -845550,
-  "available_cash": 14644895,
-  "fetched_at": "2026-03-05 22:00:42"
+  "total_eval": 26857550,
+  "total_pnl": -1344750,
+  "available_cash": 2869036,
+  "fetched_at": "2026-03-11 13:48:09"
 }

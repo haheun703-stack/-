@@ -1,112 +1,334 @@
 {
-  "date": "2026-03-08",
-  "generated_at": "2026-03-08 07:00",
-  "reports": [],
-  "report_boost_map": {},
+  "date": "2026-03-11",
+  "generated_at": "2026-03-11 07:00",
+  "reports": [
+    {
+      "stock_name": "케이카",
+      "stock_code": "381970",
+      "title": "케이카 사기 좋은 날",
+      "broker": "하나증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90867&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "RFHIC",
+      "stock_code": "218410",
+      "title": "나올 재료 감안 시 이번엔 텐베거가 예상됩니..",
+      "broker": "하나증권",
+      "target_price": 100000,
+      "opinion": "Buy",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90866&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "DN오토모티브",
+      "stock_code": "007340",
+      "title": "글로벌에서 가장 저평가된 공작기계 회사",
+      "broker": "하나증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90865&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "성광벤드",
+      "stock_code": "014620",
+      "title": "미국 LNG 수주 올해부터가 시작",
+      "broker": "신한투자증권",
+      "target_price": 40000,
+      "opinion": "매수",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90864&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "롯데웰푸드",
+      "stock_code": "280360",
+      "title": "신한 Premier Corporate Day 후기",
+      "broker": "신한투자증권",
+      "target_price": 140000,
+      "opinion": "매수",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90863&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "로킷헬스케어",
+      "stock_code": "376900",
+      "title": "재생의료 성장 사이클 확인 구간",
+      "broker": "IBK투자증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90862&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "비츠로셀",
+      "stock_code": "082920",
+      "title": "주력 전방산업 호조, 주가 레벨업",
+      "broker": "신한투자증권",
+      "target_price": 25500,
+      "opinion": "매수",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90861&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "원익IPS",
+      "stock_code": "240810",
+      "title": "메모리 장비 투자 수혜 확대",
+      "broker": "키움증권",
+      "target_price": 160000,
+      "opinion": "Buy",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90860&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "티에스아이",
+      "stock_code": "277880",
+      "title": "이차전지 전극공정(믹싱) 장비 기업",
+      "broker": "한국IR협의회",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90859&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "이엔셀",
+      "stock_code": "456070",
+      "title": "세 개의 스위치: CDMO + EN001 + 일본 진출",
+      "broker": "한국IR협의회",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90858&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "삼성전자",
+      "stock_code": "005930",
+      "title": "주가 매력도가 더 높아졌다",
+      "broker": "미래에셋증권",
+      "target_price": 275000,
+      "opinion": "매수",
+      "date": "26.03.10",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=90857&page=1",
+      "boost": 5,
+      "tag": "매수"
+    }
+  ],
+  "report_boost_map": {
+    "014620": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "신한투자증권",
+      "target_price": 40000,
+      "title": "미국 LNG 수주 올해부터가 시작"
+    },
+    "280360": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "신한투자증권",
+      "target_price": 140000,
+      "title": "신한 Premier Corporate Day 후기"
+    },
+    "082920": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "신한투자증권",
+      "target_price": 25500,
+      "title": "주력 전방산업 호조, 주가 레벨업"
+    },
+    "005930": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 275000,
+      "title": "주가 매력도가 더 높아졌다"
+    }
+  },
   "perplexity_themes": {
     "hot_themes": [
       {
-        "theme": "방산",
-        "catalyst": "미국-이란 전쟁 장기화 우려로 방산주 강세 지속",
+        "theme": "AI 반도체",
+        "catalyst": "브로드컴 실적 호조로 AI 반도체 수요 확인 및 삼성전자·SK하이닉스 실적 전망 개선",
         "urgency": "HIGH",
-        "stocks": [
-          "LIG넥스원",
-          "한화에어로스페이스",
-          "한국항공우주"
-        ]
-      },
-      {
-        "theme": "정유·에너지",
-        "catalyst": "호르무즈 해협 봉쇄 우려로 원유·LNG 공급 차질 및 유가 급등",
-        "urgency": "HIGH",
-        "stocks": [
-          "S-Oil",
-          "SK이노베이션",
-          "GS"
-        ]
-      },
-      {
-        "theme": "해운·운송",
-        "catalyst": "전쟁 리스크로 해상 운임 및 보험료 상승 기대",
-        "urgency": "HIGH",
-        "stocks": [
-          "HMM",
-          "팬오션",
-          "흥아해운"
-        ]
-      },
-      {
-        "theme": "반도체",
-        "catalyst": "브로드컴 실적 호조로 AI 반도체 수요 확인 및 반등",
-        "urgency": "MEDIUM",
         "stocks": [
           "삼성전자",
           "SK하이닉스",
-          "리노공업"
+          "테크윙",
+          "에이팩트",
+          "솔브레인"
         ]
       },
       {
-        "theme": "통신장비",
-        "catalyst": "MWC 2026 개막으로 5G 통신 장비주 수혜",
+        "theme": "반도체 후공정",
+        "catalyst": "HBM 전용 검사장비 수주 및 후공정 사업 호조로 테크윙 등 급등",
+        "urgency": "HIGH",
+        "stocks": [
+          "테크윙",
+          "에이팩트",
+          "솔브레인"
+        ]
+      },
+      {
+        "theme": "방위산업",
+        "catalyst": "UAE 정부의 천궁-II 요격미사일 조기 공급 요청 공시",
         "urgency": "MEDIUM",
         "stocks": [
-          "삼성전자",
-          "SK텔레콤",
-          "LG유플러스"
+          "한일단조"
+        ]
+      },
+      {
+        "theme": "원전",
+        "catalyst": "여야 의원 방미사절단의 대미 원전 투자 사업 제시 계획",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "우리기술"
+        ]
+      },
+      {
+        "theme": "AI·로봇 데이터센터",
+        "catalyst": "현대차그룹 새만금 AI·로봇 데이터센터 설립 투자 결정",
+        "urgency": "LOW",
+        "stocks": [
+          "서진시스템"
         ]
       }
     ],
     "breaking_catalysts": [
       {
-        "stock_name": "HLB",
-        "catalyst": "BlackRock 지분 인수 공시",
+        "stock_name": "테크윙",
+        "catalyst": "SK하이닉스로부터 HBM 전용 검사장비 수주",
         "impact": "positive",
-        "source": "jusikdante"
+        "source": "티스토리 주식이야기"
       },
       {
-        "stock_name": "LIG넥스원",
-        "catalyst": "미국-이란 전쟁 리스크 수혜 상한가",
+        "stock_name": "에이팩트",
+        "catalyst": "반도체 후공정 사업 경영권 매각 본격화",
         "impact": "positive",
-        "source": "한국경제TV"
+        "source": "티스토리 주식이야기"
       },
       {
-        "stock_name": "S-Oil",
-        "catalyst": "유가 급등 수혜 급등",
+        "stock_name": "우리기술",
+        "catalyst": "여야 의원 방미사절단 원전 투자 사업 제시",
         "impact": "positive",
-        "source": "한국경제TV"
+        "source": "티스토리 주식이야기"
       },
       {
-        "stock_name": "에임드바이오",
-        "catalyst": "KOSDAQ150 편입",
+        "stock_name": "솔브레인",
+        "catalyst": "미래에셋자산운용 지분 확대 및 소부장 국산화 실적 개선",
         "impact": "positive",
-        "source": "jusikdante"
+        "source": "티스토리 주식이야기"
       },
       {
-        "stock_name": "리노공업",
-        "catalyst": "반도체 소부장 강세",
+        "stock_name": "한일단조",
+        "catalyst": "UAE 천궁-II 조기 공급 요청",
         "impact": "positive",
-        "source": "jusikdante"
+        "source": "티스토리 주식이야기"
+      },
+      {
+        "stock_name": "서진시스템",
+        "catalyst": "현대차그룹 새만금 AI·로봇 데이터센터 투자 결정",
+        "impact": "positive",
+        "source": "티스토리 주식이야기"
+      },
+      {
+        "stock_name": "삼성전자",
+        "catalyst": "브로드컴 실적 호조에 따른 AI 반도체 수요 확인",
+        "impact": "positive",
+        "source": "Domaine de la Jaeb"
+      },
+      {
+        "stock_name": "SK하이닉스",
+        "catalyst": "빅테크 AI 인프라 투자 확대 실적 전망",
+        "impact": "positive",
+        "source": "brunch.co.kr"
       }
     ],
     "sector_outlook": {
       "bullish": [
-        "방산",
-        "정유",
-        "해운"
+        "반도체",
+        "IT",
+        "건설"
       ],
       "bearish": [
-        "항공",
-        "자동차"
+        "정유",
+        "농업"
       ]
     }
   },
-  "candidate_news": [],
-  "news_boost_map": {},
+  "candidate_news": [
+    {
+      "stock_name": "두산에너빌리티",
+      "date": "2026-03-10",
+      "title": "[마켓파워] 부진에도 자사주 2000억 소각한 두산밥캣…최대 수혜자는 두산에너빌리티",
+      "source": "아시아투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE05NGo0R2hMUWcwTS1ndTVQVk5ZX1lveUpfOE8yYVlkY01pWlFTYXdLbW5NNlVkdFkzdUJJR2ZaUHp0anIwYV9UdVVKZGhHaDE4bklKY1F0TWhQY3FMTi1vS2IzNHRla3FHUzY5c2d3?oc=5"
+    },
+    {
+      "stock_name": "두산에너빌리티",
+      "date": "2026-03-10",
+      "title": "[특징주] 우리기술ㆍ두산에너빌리티 등 원전株↑⋯원전 폐기물 입찰 앞둬",
+      "source": "이투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5OM2JvSnM4enAxUzREN25YMlRsM1U0MXlpY0hTWWtqYTdXY2RlcG5nTGtpMXRuSDVYMl9YQkdiLXNnTEF5UXJjWFZWNmRtenpKcnMzZg?oc=5"
+    },
+    {
+      "stock_name": "한국콜마",
+      "date": "2026-03-10",
+      "title": "우정바이오 주주 콜마홀딩스, 우정바이오 주식등의 수 변동 없어…총 지분율 47.22%",
+      "source": "디지털투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE51d0ZtdFpaRXBReEVtZzFTdC1JYVY4MHRMWEN1RUZGSXEzaE80SzFUVzJqRGI5OWo1b1JURnlOZkxGdzdKNTJhekNoS0pnTTd5YUwzWWtTS3E0dkgzREZFRjZHWFdNNnBMZW5JR2dkdnp0YkE?oc=5"
+    },
+    {
+      "stock_name": "셀트리온",
+      "date": "2026-03-10",
+      "title": "10조매도 외국인 셀트리온은 샀다 전쟁 영향 적은 삼성전자 우선주도",
+      "source": "중소기업신문",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBSN3U2QmQyRnR5QzZZS01mbmNFWnJjM3FUSEtBLTdCWG1UUWFOT2JQcGZHY2xKdXpZZFhGN2J5b3lKSHg5eTloT0E1OEs5dmprRUZqd3N1dVg0akR3TFlQRE9mVDc3Zm5LUkFYSA?oc=5"
+    }
+  ],
+  "news_boost_map": {
+    "두산에너빌리티": {
+      "boost": 3,
+      "reason": "[마켓파워] 부진에도 자사주 2000억 소각한 두산밥캣…최대 수혜자는 두"
+    },
+    "한국콜마": {
+      "boost": 3,
+      "reason": "우정바이오 주주 콜마홀딩스, 우정바이오 주식등의 수 변동 없어…총 지분율"
+    },
+    "셀트리온": {
+      "boost": 5,
+      "reason": "10조매도 외국인 셀트리온은 샀다 전쟁 영향 적은 삼성전자 우선주도"
+    }
+  },
   "stats": {
-    "total_reports": 0,
-    "positive_reports": 0,
+    "total_reports": 11,
+    "positive_reports": 4,
     "negative_reports": 0,
-    "news_alerts": 0,
+    "news_alerts": 4,
     "themes_count": 5
   }
 }

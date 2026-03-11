@@ -158,5 +158,37 @@
         "alert_level": 0
       }
     }
+  },
+  {
+    "date": "2026-03-11",
+    "active_alerts": [
+      "ai_semiconductor"
+    ],
+    "execution_ready": [
+      "ai_semiconductor"
+    ],
+    "total_alert_score": 5,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 4,
+        "alert_level": 5
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
   }
 ]

@@ -30,11 +30,13 @@ v8 변경: 전략D(매집추적 소스) — 거래량폭발 이후 매집 진행
 v9 변경: 전략E(Perplexity 인텔리전스) — 미국장 이벤트 → 한국 섹터/종목 파급 보정
 
 Usage:
-    python scripts/scan_tomorrow_picks.py
+    python scripts/scan_tomorrow_picks.py            # 기본 모드
+    python scripts/scan_tomorrow_picks.py --mode war  # 공포탐욕 모드
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import sys
@@ -55,6 +57,18 @@ DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_PATH = DATA_DIR / "tomorrow_picks.json"
+
+# ──────────────────────────────────────────
+# 공포탐욕(war) 모드 오버라이드 설정
+# ──────────────────────────────────────────
+WAR_MODE_OVERRIDES = {
+    "min_sources": 1,            # 1소스만으로도 추천 (기본 3)
+    "min_sources_alt_score": 55, # 대체 점수 기준 완화 (기본 70)
+    "veto_avoid": False,         # AI AVOID 거부권 비활성
+    "pool_only": True,           # 컨센서스 풀 내 종목만 추천
+    "dynamic_slots": False,      # 슬롯 고정 (bearish에서 축소 방지)
+    "label": "[공포탐욕]",
+}
 
 # ──────────────────────────────────────────
 # 전략 그룹 정의: 스윙(3~7일) vs 단타(1~3일)
@@ -1181,7 +1195,21 @@ def classify_pick(
 # ──────────────────────────────────────────
 
 def main():
+    parser = argparse.ArgumentParser(description="내일 추천 종목 통합 스캐너")
+    parser.add_argument("--mode", choices=["normal", "war"], default="normal",
+                        help="실행 모드: normal(기본), war(공포탐욕)")
+    args = parser.parse_args()
+
+    is_war_mode = args.mode == "war"
+    mode_label = WAR_MODE_OVERRIDES["label"] if is_war_mode else "[기본]"
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    if is_war_mode:
+        print(f"\n{'='*60}")
+        print(f"  🔥 공포탐욕 모드 활성화 — 바닥잡이 설정 적용")
+        print(f"  min_sources=1 | pool_only=true | veto_avoid=false")
+        print(f"{'='*60}\n")
 
     name_map = build_name_map()
 
@@ -1252,6 +1280,10 @@ def main():
     consensus_pool_cfg = yaml_config.get("consensus_pool", {})
     consensus_pool_enabled = consensus_pool_cfg.get("enabled", False)
     consensus_pool_only = consensus_pool_cfg.get("pool_only", False)
+    # 공포탐욕 모드: pool_only 강제 활성화
+    if is_war_mode:
+        consensus_pool_enabled = True
+        consensus_pool_only = WAR_MODE_OVERRIDES["pool_only"]
     consensus_pool = {}  # ticker → {upside_pct, composite_score, grade, forward_per, ...}
     if consensus_pool_enabled:
         cs_data = load_json("consensus_screening.json")
@@ -1657,7 +1689,10 @@ def main():
 
     # AI 거부권: AVOID 종목은 최종 추천에서 제외
     ai_veto_cfg = yaml_config.get("ai_brain", {}).get("stock_selection", {})
-    if ai_veto_cfg.get("veto_avoid", False):
+    veto_avoid_active = ai_veto_cfg.get("veto_avoid", False)
+    if is_war_mode:
+        veto_avoid_active = WAR_MODE_OVERRIDES["veto_avoid"]
+    if veto_avoid_active:
         ai_vetoed = [r for r in buyable if r.get("ai_action") == "AVOID"]
         if ai_vetoed:
             buyable = [r for r in buyable if r.get("ai_action") != "AVOID"]
@@ -1675,7 +1710,10 @@ def main():
     ai_sel_cfg = yaml_config.get("ai_brain", {}).get("stock_selection", {})
     base_swing = STRATEGY_GROUPS["swing"]["slots"]  # 5
     base_short = STRATEGY_GROUPS["short"]["slots"]  # 5
-    if ai_sel_cfg.get("dynamic_slots", False) and ai_brain_data:
+    dynamic_slots_active = ai_sel_cfg.get("dynamic_slots", False)
+    if is_war_mode:
+        dynamic_slots_active = WAR_MODE_OVERRIDES["dynamic_slots"]
+    if dynamic_slots_active and ai_brain_data:
         sentiment = ai_brain_data.get("market_sentiment", "neutral")
         # bullish: +2/+2 (총14), neutral: 기본(총10), bearish: -1/-1 (총8→10보장)
         slot_adj = {"bullish": 2, "neutral": 0, "bearish": -1}.get(sentiment, 0)
@@ -1693,6 +1731,9 @@ def main():
     # 최소 소스 수 필터 (복합 조건: 소스 N개+ OR 소스 (N-1)개 + 고점수)
     min_sources = ai_sel_cfg.get("min_sources", 0)
     alt_score = ai_sel_cfg.get("min_sources_alt_score", 70)
+    if is_war_mode:
+        min_sources = WAR_MODE_OVERRIDES["min_sources"]
+        alt_score = WAR_MODE_OVERRIDES["min_sources_alt_score"]
     if min_sources >= 2:
         before_cnt = len(buyable)
         buyable = [
@@ -1768,7 +1809,7 @@ def main():
         grade_stats[g] = grade_stats.get(g, 0) + 1
 
     print(f"\n{'='*60}")
-    print(f"[내일 추천] 총 {len(results)}건 (TOP10: {len(top5)}건)")
+    print(f"{mode_label} [내일 추천] 총 {len(results)}건 (TOP10: {len(top5)}건)")
     for g in ["적극매수", "매수", "관심매수", "관찰", "보류", "데이터부족"]:
         cnt = grade_stats.get(g, 0)
         if cnt:
@@ -1803,7 +1844,7 @@ def main():
 
     if top5:
         print(f"\n{'─'*60}")
-        print(f"  ★ TOP 10 내일 매수 추천 (스윙 {len(top5_swing)} + 단타 {len(top5_short)}) ★")
+        print(f"  ★ {mode_label} TOP 10 내일 매수 추천 (스윙 {len(top5_swing)} + 단타 {len(top5_short)}) ★")
         print(f"{'─'*60}")
         idx = 1
         if top5_swing:
@@ -1884,6 +1925,8 @@ def main():
         "generated_at": now.strftime("%Y-%m-%d %H:%M"),
         "target_date": target.strftime("%Y-%m-%d"),
         "target_date_label": f"{target.month}/{target.day}({calendar.day_abbr[target.weekday()]})",
+        "mode": "war" if is_war_mode else "normal",
+        "mode_label": mode_label,
         "total_candidates": len(results),
         "stats": grade_stats,
         "top5": [r["ticker"] for r in top5],
@@ -1913,9 +1956,17 @@ def main():
         } if consensus_pool_enabled else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
-    print(f"\n[저장] {OUTPUT_PATH}")
+
+    if is_war_mode:
+        # 공포탐욕 모드: 별도 파일 저장 (기본 모드 결과를 덮어쓰지 않음)
+        war_path = DATA_DIR / "tomorrow_picks_war.json"
+        with open(war_path, "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
+        print(f"\n[저장] {war_path}")
+    else:
+        with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
+        print(f"\n[저장] {OUTPUT_PATH}")
     print(f"[대상일] {output['target_date_label']} ({output['target_date']})")
 
 
