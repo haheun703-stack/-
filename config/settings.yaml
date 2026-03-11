@@ -1898,6 +1898,38 @@ consensus_scanner:
 # 컨센서스 풀 → 내일 추천 통합 (전략 J)
 # scan_consensus.py 결과를 scan_tomorrow_picks.py에 연동
 # ============================================================
+# ============================================================
+# KRX 국적별 외국인 수급 스캐너
+# KRX Data Marketplace HARD API → 국적별 거래량 일별 수집 + 추이 분석
+# ============================================================
+nationality_scanner:
+  enabled: true
+  fetch_delay_sec: 0.3            # KRX API 요청 간격
+  min_data_days: 3                # 분석 최소 데이터 일수
+
+  # 국적 그룹 분류 (시그널 판정용)
+  country_groups:
+    institutional: ["영국", "룩셈부르크", "아일랜드", "노르웨이", "스위스", "네덜란드", "프랑스", "독일", "스웨덴"]
+    asia: ["중국", "홍콩", "싱가포르", "대만", "일본"]
+    hedge: ["케이맨제도", "케이맨", "버뮤다", "영국령 버진아일랜", "영국령버진아일", "BVI"]
+    middle_east: ["사우디아라비아", "카타르", "쿠웨이트", "아랍에미리트"]
+
+  # 스코어링 배점 (총 -50 ~ +50)
+  scoring:
+    inst_trend_max: 15            # 기관 추세 최대 ±15
+    asia_trend_max: 15            # 아시아 추세 최대 ±15
+    consecutive_max: 10           # 연속 매집/이탈 ±10
+    hedge_max: 5                  # 헤지펀드 ±5
+    kis_direction_max: 10         # KIS 외국인 순매수 방향 ±10
+
+  # 시그널 등급 커트라인
+  thresholds:
+    strong_buy: 30                # ≥30: 강력매수
+    buy: 15                       # ≥15: 매수
+    neutral: -10                  # >-10: 중립
+    caution: -25                  # >-25: 주의
+    # ≤-25: 매도
+
 consensus_pool:
   enabled: true                   # 컨센서스 풀 연동 활성화
   pool_only: false                # true: 풀 내 종목만 추천 / false: 풀 외 종목도 추천 (보너스만)

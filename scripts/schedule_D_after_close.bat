@@ -115,6 +115,11 @@ echo [%date% %time%] [9c.7/29] ETF 투자자 수급 수집 >> logs\schedule.log
 python -u -X utf8 scripts\collect_etf_investor_flow.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9c.7/29] FAILED >> logs\schedule.log
 
+REM 9c.9단계: KRX 국적별 외국인 수급 수집 + 분석 (T+1 지연 데이터)
+echo [%date% %time%] [9c.9/29] KRX 국적별 외국인 수급 >> logs\schedule.log
+python -u -X utf8 scripts\scan_nationality.py --send >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [9c.9/29] FAILED >> logs\schedule.log
+
 python -u -X utf8 scripts\sector_daily_report.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [9d/29] FAILED (리포트) >> logs\schedule.log
 
