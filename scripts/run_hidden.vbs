@@ -9,4 +9,5 @@ Dim batPath
 batPath = WScript.Arguments(0)
 
 Set shell = CreateObject("WScript.Shell")
-shell.Run """" & batPath & """", 0, True
+' cmd /c로 실행 + stdin을 NUL에서 읽어 대화형 명령(time 등) 행(hang) 방지
+shell.Run "cmd /c """ & batPath & """ < NUL", 0, True

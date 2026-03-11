@@ -35,13 +35,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from scripts.backfill_us_kr_history import (
-    DB_PATH,
-    US_SYMBOLS,
-    KR_SYMBOLS,
-    _clamp,
-    _calc_overnight_score,
-)
+import importlib.util
+
+_backfill_path = project_root / "scripts" / "archive" / "backfill" / "backfill_us_kr_history.py"
+_spec = importlib.util.spec_from_file_location("backfill_us_kr_history", _backfill_path)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+
+# backfill이 archive로 이동되어 DB_PATH가 잘못됨 → 프로젝트 루트 기준으로 재설정
+DB_PATH = project_root / "data" / "us_market" / "us_kr_history.db"
+US_SYMBOLS = _mod.US_SYMBOLS
+KR_SYMBOLS = _mod.KR_SYMBOLS
+_clamp = _mod._clamp
+_calc_overnight_score = _mod._calc_overnight_score
 
 # 최소 이 날짜 이후의 신규 데이터만 추가
 MIN_LOOKBACK_DAYS = 10

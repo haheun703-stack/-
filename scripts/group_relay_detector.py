@@ -26,7 +26,13 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.group_relay_backtest import find_csv_by_ticker, load_daily_closes
+import importlib.util as _ilu
+_grb_path = PROJECT_ROOT / "scripts" / "archive" / "analysis" / "group_relay_backtest.py"
+_grb_spec = _ilu.spec_from_file_location("group_relay_backtest", _grb_path)
+_grb_mod = _ilu.module_from_spec(_grb_spec)
+_grb_spec.loader.exec_module(_grb_mod)
+find_csv_by_ticker = _grb_mod.find_csv_by_ticker
+load_daily_closes = _grb_mod.load_daily_closes
 
 logger = logging.getLogger(__name__)
 

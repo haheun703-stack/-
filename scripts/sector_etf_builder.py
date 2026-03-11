@@ -269,11 +269,10 @@ def _safe_nearest_business_day() -> str:
 
 
 def _safe_etf_ohlcv(start: str, end: str, etf_code: str):
-    """pykrx get_etf_ohlcv_by_date 안전 래퍼.
+    """pykrx ETF OHLCV 안전 래퍼.
 
-    pykrx 내부 버그: 일부 ETF에서 KeyError('isin') 발생 후
-    깨진 logging.info(args, kwargs) 호출 → TypeError + 수백 줄 stderr 출력.
-    로깅 레벨 임시 상향 + stderr 리다이렉트로 노이즈 완전 억제.
+    get_etf_ohlcv_by_date가 빈 DataFrame 반환하는 pykrx 버그 대응:
+    1차) ETF 전용 API → 2차) 주식 API로 폴백 (ETF도 조회 가능).
     """
     root = logging.getLogger()
     orig_level = root.level
@@ -281,7 +280,11 @@ def _safe_etf_ohlcv(start: str, end: str, etf_code: str):
     stderr_capture = io.StringIO()
     try:
         with contextlib.redirect_stderr(stderr_capture):
-            return krx.get_etf_ohlcv_by_date(start, end, etf_code)
+            df = krx.get_etf_ohlcv_by_date(start, end, etf_code)
+            if df is not None and not df.empty:
+                return df
+            # ETF API 실패 → 주식 API로 폴백
+            return krx.get_market_ohlcv_by_date(start, end, etf_code)
     except (KeyError, TypeError, Exception):
         return None
     finally:
