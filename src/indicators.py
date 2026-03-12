@@ -8,6 +8,8 @@ Step 2: indicators.py — 기술적 지표 계산 엔진
 """
 
 import logging
+import os
+from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +20,40 @@ from .ou_estimator import OUEstimator
 from .smart_money import calc_institutional_streak, calc_smart_money_z
 
 logger = logging.getLogger(__name__)
+
+
+# ──────────────────────────────────────────────
+# Multiprocessing Worker (process_all 병렬화용)
+# ──────────────────────────────────────────────
+
+def _mp_process_stock(args):
+    """Worker: 단일 종목 지표 계산 (multiprocessing)"""
+    fpath_str, processed_dir, macro_path = args
+    fpath = Path(fpath_str)
+    ticker = fpath.stem
+    try:
+        df = pd.read_parquet(fpath)
+        if len(df) < 200:
+            return (ticker, False, "skip")
+
+        if macro_path:
+            macro_p = Path(macro_path)
+            if macro_p.exists():
+                macro_df = pd.read_parquet(macro_p)
+                macro_df.index = pd.to_datetime(macro_df.index)
+                df.index = pd.to_datetime(df.index)
+                for col in macro_df.columns:
+                    if col not in df.columns:
+                        df = df.join(macro_df[[col]], how="left")
+                df = df.ffill()
+
+        engine = IndicatorEngine()
+        result = engine.compute_all(df)
+        save_path = Path(processed_dir) / f"{ticker}.parquet"
+        result.to_parquet(save_path)
+        return (ticker, True, "")
+    except Exception as e:
+        return (ticker, False, str(e))
 
 
 class IndicatorEngine:
@@ -791,41 +827,82 @@ class IndicatorEngine:
         return None
 
     def process_all(self) -> int:
-        """raw 디렉토리의 모든 parquet을 처리하여 processed에 저장"""
+        """raw 디렉토리의 모든 parquet을 처리하여 processed에 저장 (멀티프로세싱)"""
         raw_files = sorted(self.raw_dir.glob("*.parquet"))
         if not raw_files:
             logger.error("data/raw에 parquet 파일이 없습니다")
             return 0
 
-        # L4 매크로 데이터 사전 로드
+        macro_path = Path("data/macro/global_indices.parquet")
+        macro_str = str(macro_path) if macro_path.exists() else None
+        processed_str = str(self.processed_dir)
+
+        num_workers = min(8, max(1, (os.cpu_count() or 4) - 1))
+        logger.info(
+            f"📈 지표 계산 시작: {len(raw_files)}종목, "
+            f"{num_workers} workers (multiprocessing)"
+        )
+
+        # Windows spawn 대응: PYTHONPATH 확보
+        project_root = str(Path(__file__).resolve().parent.parent)
+        existing = os.environ.get("PYTHONPATH", "")
+        if project_root not in existing:
+            os.environ["PYTHONPATH"] = (
+                project_root + (os.pathsep + existing if existing else "")
+            )
+
+        args_list = [(str(f), processed_str, macro_str) for f in raw_files]
+        processed_count = 0
+        error_count = 0
+
+        try:
+            with Pool(num_workers) as pool:
+                for ticker, success, msg in tqdm(
+                    pool.imap_unordered(_mp_process_stock, args_list),
+                    total=len(raw_files),
+                    desc="📈 지표 계산",
+                ):
+                    if success:
+                        processed_count += 1
+                    elif msg != "skip":
+                        error_count += 1
+                        logger.error(f"{ticker} 지표 계산 실패: {msg}")
+        except Exception as e:
+            logger.warning(f"멀티프로세싱 실패, 순차 처리로 전환: {e}")
+            return self._process_all_sequential()
+
+        logger.info(
+            f"✅ 지표 계산 완료: {processed_count}종목 "
+            f"(오류: {error_count}, workers: {num_workers})"
+        )
+        return processed_count
+
+    def _process_all_sequential(self) -> int:
+        """순차 처리 (멀티프로세싱 실패 시 fallback)"""
+        raw_files = sorted(self.raw_dir.glob("*.parquet"))
         macro_df = self._load_macro_data()
 
         processed_count = 0
-        for fpath in tqdm(raw_files, desc="📈 지표 계산"):
+        for fpath in tqdm(raw_files, desc="📈 지표 계산 (순차)"):
             ticker = fpath.stem
             try:
                 df = pd.read_parquet(fpath)
-                if len(df) < 200:  # 200일 미만 데이터는 지표 계산 불가
-                    logger.debug(f"{ticker}: 데이터 부족 ({len(df)}일), 건너뜀")
+                if len(df) < 200:
                     continue
-
-                # L4 매크로 데이터 merge (날짜 기준)
                 if macro_df is not None:
                     df.index = pd.to_datetime(df.index)
                     for col in macro_df.columns:
                         if col not in df.columns:
                             df = df.join(macro_df[[col]], how="left")
                     df = df.ffill()
-
                 result = self.compute_all(df)
                 save_path = self.processed_dir / f"{ticker}.parquet"
                 result.to_parquet(save_path)
                 processed_count += 1
-
             except Exception as e:
                 logger.error(f"{ticker} 지표 계산 실패: {e}")
 
-        logger.info(f"✅ 지표 계산 완료: {processed_count}종목")
+        logger.info(f"✅ 지표 계산 완료 (순차): {processed_count}종목")
         return processed_count
 
 

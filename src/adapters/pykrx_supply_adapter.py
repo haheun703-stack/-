@@ -11,8 +11,12 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pandas as pd
 
@@ -38,6 +42,9 @@ class PykrxSupplyAdapter:
     def __init__(self, lookback_days: int = 60):
         self.lookback_days = lookback_days
         self._pykrx = None
+        self._blacklist_path = Path("data/supply_blacklist.json")
+        self._max_fails = 3
+        self._blacklist_reset_days = 30
 
     def _ensure_pykrx(self):
         """pykrx 지연 임포트 (설치 안 된 환경 대응)"""
@@ -211,26 +218,129 @@ class PykrxSupplyAdapter:
         return result
 
     # ─────────────────────────────────────────
-    # 일괄 수집
+    # 블랙리스트 관리
     # ─────────────────────────────────────────
-    def collect_all(self, tickers: list[str]) -> dict:
-        """전 종목 수급 데이터 일괄 수집
+    def _load_blacklist(self) -> dict:
+        """반복 실패 종목 블랙리스트 로드"""
+        if self._blacklist_path.exists():
+            try:
+                with open(self._blacklist_path, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {"tickers": {}, "updated_at": ""}
+
+    def _save_blacklist(self, bl: dict):
+        """블랙리스트 저장"""
+        self._blacklist_path.parent.mkdir(parents=True, exist_ok=True)
+        bl["updated_at"] = datetime.today().strftime("%Y-%m-%d %H:%M")
+        with open(self._blacklist_path, "w", encoding="utf-8") as f:
+            json.dump(bl, f, ensure_ascii=False, indent=2)
+
+    def _is_blacklisted(self, ticker: str, bl: dict) -> bool:
+        """블랙리스트 여부 (30일 경과 시 자동 해제)"""
+        info = bl.get("tickers", {}).get(ticker)
+        if not info or info.get("fail_count", 0) < self._max_fails:
+            return False
+        last_fail = info.get("last_fail", "")
+        if last_fail:
+            try:
+                days = (datetime.today() - datetime.strptime(last_fail, "%Y-%m-%d")).days
+                if days >= self._blacklist_reset_days:
+                    return False
+            except ValueError:
+                pass
+        return True
+
+    def _record_failure(self, ticker: str, bl: dict, reason: str):
+        """실패 기록 (연속 실패 카운트 증가)"""
+        tickers = bl.setdefault("tickers", {})
+        info = tickers.setdefault(ticker, {"fail_count": 0})
+        info["fail_count"] = info.get("fail_count", 0) + 1
+        info["last_fail"] = datetime.today().strftime("%Y-%m-%d")
+        info["reason"] = reason[:100]
+
+    def _record_success(self, ticker: str, bl: dict):
+        """성공 시 블랙리스트에서 제거"""
+        if ticker in bl.get("tickers", {}):
+            del bl["tickers"][ticker]
+
+    # ─────────────────────────────────────────
+    # 일괄 수집 (병렬 + 블랙리스트)
+    # ─────────────────────────────────────────
+    def _collect_single(self, ticker: str) -> tuple:
+        """단일 종목 수급 수집 (스레드용)"""
+        try:
+            short = self.fetch_short_selling(ticker)
+            flow = self.fetch_investor_flow(ticker)
+            return (ticker, {"short": short, "flow": flow}, None)
+        except ImportError:
+            raise
+        except Exception as e:
+            return (ticker, {"short": None, "flow": None}, str(e))
+
+    def collect_all(self, tickers: list[str], max_workers: int = 5) -> dict:
+        """전 종목 수급 데이터 병렬 수집 (블랙리스트 적용)
 
         Returns:
             {ticker: {"short": ShortSellingData, "flow": InvestorFlowData}}
         """
-        results = {}
-        for ticker in tickers:
-            logger.info(f"[수급 수집] {ticker}")
-            try:
-                short = self.fetch_short_selling(ticker)
-                flow = self.fetch_investor_flow(ticker)
-                results[ticker] = {"short": short, "flow": flow}
-            except ImportError:
-                logger.error("pykrx 미설치, 수급 수집 중단")
-                break
-            except Exception as e:
-                logger.warning(f"[{ticker}] 수급 수집 실패: {e}")
-                results[ticker] = {"short": None, "flow": None}
+        # pykrx 사전 확인
+        try:
+            self._ensure_pykrx()
+        except ImportError:
+            logger.error("pykrx 미설치, 수급 수집 중단")
+            return {}
 
+        bl = self._load_blacklist()
+
+        # 블랙리스트 필터링
+        active = []
+        skipped_count = 0
+        for t in tickers:
+            if self._is_blacklisted(t, bl):
+                skipped_count += 1
+            else:
+                active.append(t)
+        if skipped_count:
+            logger.info(f"[블랙리스트] {skipped_count}종목 스킵 (연속 {self._max_fails}회+ 실패)")
+
+        total = len(active)
+        logger.info(f"[수급 수집] {total}종목 병렬 수집 시작 (workers={max_workers})")
+        t0 = time.time()
+
+        results = {}
+        err_count = 0
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(self._collect_single, t): t for t in active}
+            for i, future in enumerate(as_completed(futures), 1):
+                ticker = futures[future]
+                try:
+                    t, data, err = future.result()
+                    if err:
+                        err_count += 1
+                        self._record_failure(t, bl, err)
+                        results[t] = {"short": None, "flow": None}
+                    else:
+                        self._record_success(t, bl)
+                        results[t] = data
+                except Exception as e:
+                    err_count += 1
+                    self._record_failure(ticker, bl, str(e))
+                    results[ticker] = {"short": None, "flow": None}
+
+                if i % 100 == 0:
+                    elapsed = time.time() - t0
+                    logger.info(
+                        f"  수급 진행: {i}/{total} ({elapsed:.0f}초) | 오류: {err_count}"
+                    )
+
+        elapsed = time.time() - t0
+        logger.info(
+            f"[수급 수집] 완료: {total}종목, {elapsed:.0f}초 ({elapsed/60:.1f}분) | "
+            f"오류: {err_count} | 블랙리스트: {len(bl.get('tickers', {}))}종목"
+        )
+
+        self._save_blacklist(bl)
         return results

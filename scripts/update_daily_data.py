@@ -450,31 +450,40 @@ def update_all(target_date: str = None, check_only: bool = False):
 
     start_time = time.time()
 
-    for i, csv_path in enumerate(csv_files):
-        result = update_single_csv(csv_path, target_date)
+    # 병렬 수집 (ThreadPoolExecutor)
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        if result["status"] == "ok":
-            updated += 1
-            logger.info(f"  [{i+1}/{total}] {result['file']}: +{result['new_rows']}행 추가")
-            # 무결성 이슈 수집
-            integrity = result.get("integrity", {})
-            if integrity.get("errors"):
-                integrity_issues.append((result["file"], integrity["errors"]))
-        elif result["status"] == "error":
-            errors += 1
-            error_list.append(f"{result['file']}: {result['error']}")
-            logger.warning(f"  [{i+1}/{total}] {result['file']}: 오류 - {result['error']}")
-        else:
-            skipped += 1
+    max_workers = 10
+    logger.info(f"CSV 병렬 업데이트 시작 (workers={max_workers})")
 
-        # FDR rate limit (초당 5회 정도)
-        if result["status"] == "ok":
-            time.sleep(0.3)
+    done_count = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(update_single_csv, p, target_date): p
+            for p in csv_files
+        }
+        for future in as_completed(futures):
+            done_count += 1
+            result = future.result()
 
-        # 진행률 (100개마다)
-        if (i + 1) % 100 == 0:
-            elapsed = time.time() - start_time
-            logger.info(f"  --- 진행: {i+1}/{total} ({elapsed:.0f}초) | 업데이트: {updated} | 스킵: {skipped} | 오류: {errors}")
+            if result["status"] == "ok":
+                updated += 1
+                integrity = result.get("integrity", {})
+                if integrity.get("errors"):
+                    integrity_issues.append((result["file"], integrity["errors"]))
+            elif result["status"] == "error":
+                errors += 1
+                error_list.append(f"{result['file']}: {result['error']}")
+            else:
+                skipped += 1
+
+            # 진행률 (200개마다)
+            if done_count % 200 == 0:
+                elapsed = time.time() - start_time
+                logger.info(
+                    f"  --- 진행: {done_count}/{total} ({elapsed:.0f}초) | "
+                    f"업데이트: {updated} | 스킵: {skipped} | 오류: {errors}"
+                )
 
     elapsed = time.time() - start_time
 
