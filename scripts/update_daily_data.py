@@ -464,7 +464,13 @@ def update_all(target_date: str = None, check_only: bool = False):
         }
         for future in as_completed(futures):
             done_count += 1
-            result = future.result()
+            try:
+                result = future.result()
+            except Exception as exc:
+                errors += 1
+                csv_path = futures[future]
+                error_list.append(f"{csv_path.stem}: worker crash - {exc}")
+                continue
 
             if result["status"] == "ok":
                 updated += 1

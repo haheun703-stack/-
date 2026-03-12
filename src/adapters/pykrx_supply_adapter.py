@@ -273,7 +273,18 @@ class PykrxSupplyAdapter:
         try:
             short = self.fetch_short_selling(ticker)
             flow = self.fetch_investor_flow(ticker)
-            return (ticker, {"short": short, "flow": flow}, None)
+
+            # 빈 결과 감지: fetch 내부에서 에러가 삼켜져 default 값만 남은 경우
+            # (Expecting value 등 pykrx JSON 파싱 실패)
+            # ※ short.total_volume은 공매도 금지 기간에 정상 0이므로 제외
+            #    수급(flow) 3종이 모두 0 = 데이터 자체가 없는 종목
+            is_empty = (
+                flow.foreign_net == 0
+                and flow.institution_net == 0
+                and flow.individual_net == 0
+            )
+            err = "empty_response" if is_empty else None
+            return (ticker, {"short": short, "flow": flow}, err)
         except ImportError:
             raise
         except Exception as e:
@@ -321,10 +332,9 @@ class PykrxSupplyAdapter:
                     if err:
                         err_count += 1
                         self._record_failure(t, bl, err)
-                        results[t] = {"short": None, "flow": None}
                     else:
                         self._record_success(t, bl)
-                        results[t] = data
+                    results[t] = data  # 빈 결과도 보존 (downstream 기본값 처리)
                 except Exception as e:
                     err_count += 1
                     self._record_failure(ticker, bl, str(e))
