@@ -333,7 +333,12 @@ def _classify_shock_type(latest, prev, special_rules: list, nightwatch: dict) ->
 def _run_level2_pattern(df: pd.DataFrame, latest, prev) -> dict:
     """Level 2 패턴매칭 실행. DB 없으면 스킵."""
     try:
-        from scripts.archive.backfill.backfill_us_kr_history import PatternMatcher
+        import importlib.util as _ilu
+        _bf_path = Path(__file__).resolve().parent / "archive" / "backfill" / "backfill_us_kr_history.py"
+        _sp = _ilu.spec_from_file_location("backfill_us_kr_history", _bf_path)
+        _bm = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_bm)
+        PatternMatcher = _bm.PatternMatcher
     except ImportError:
         return {"status": "import_error", "pattern_adjustment": 0, "confidence": 0}
 

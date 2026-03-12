@@ -32,7 +32,12 @@ def main():
 
     # 3) 통합 아침 브리핑 — 1건 텔레그램
     try:
-        from scripts.send_market_briefing import build_unified_morning
+        import importlib.util
+        _briefing_path = Path(__file__).resolve().parent / "archive" / "legacy_wrappers" / "send_market_briefing.py"
+        _spec = importlib.util.spec_from_file_location("send_market_briefing", _briefing_path)
+        _mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        build_unified_morning = _mod.build_unified_morning
         from src.telegram_sender import send_message
         msg = build_unified_morning()
         ok = send_message(msg)
