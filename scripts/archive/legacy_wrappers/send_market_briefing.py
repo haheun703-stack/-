@@ -557,7 +557,18 @@ def build_unified_morning() -> str:
             parts.append(f"{sector}({sizing})")
         L.append(f"\n\U0001f4e6 ETF: {' | '.join(parts)}")
 
-    # ── 6. 전략 요약 ──
+    # ── 6. 네 마녀의 날 경고 ──
+    try:
+        from src.use_cases.market_calendar import check_witching_proximity
+        witching = check_witching_proximity()
+        if witching["warning_level"] in ("CRITICAL", "HIGH"):
+            L.append(f"\n{witching['message']}")
+        elif witching["warning_level"] == "MODERATE":
+            L.append(f"\n{witching['message']}")
+    except Exception:
+        pass  # 캘린더 모듈 실패 시 무시
+
+    # ── 7. 전략 요약 ──
     L.append("")
     if prob["down_prob"] >= 60:
         L.append("\u279c 갭다운 예상 \u2014 우량주 저가매수 기회")

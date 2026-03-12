@@ -344,6 +344,11 @@ if "%DOW%"=="4" (
     echo [%date% %time%] [25.5/30] 주간 리포트 스킵 (금요일 아님) >> logs\schedule.log
 )
 
+REM 26단계: 네 마녀의 날 전일 텔레그램 경고
+echo [%date% %time%] [26/31] 네 마녀의 날 체크 >> logs\schedule.log
+python -u -X utf8 -c "from src.use_cases.market_calendar import check_witching_proximity; w=check_witching_proximity(); print(w['warning_level'], w['message']); exec('from src.telegram_sender import send_message; send_message(w[\"message\"])') if w['warning_level']=='HIGH' else None" >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [26/31] FAILED >> logs\schedule.log
+
 REM ══════════════════════════════════════════════
-echo [%date% %time%] BAT-D 완료 (30단계 순차 실행) >> logs\schedule.log
+echo [%date% %time%] BAT-D 완료 (31단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log

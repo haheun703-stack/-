@@ -1590,6 +1590,22 @@ def main():
             score_detail["total"] = round(boosted, 1)
             source_names.append("컨센서스")
 
+        # ── 전략K: 네 마녀의 날 감점 ──
+        witching_penalty = 0
+        witching_tag = ""
+        try:
+            from src.use_cases.market_calendar import check_witching_proximity
+            witching = check_witching_proximity()
+            if witching["warning_level"] in ("CRITICAL", "HIGH", "MODERATE"):
+                penalty_map = {"CRITICAL": -10, "HIGH": -5, "MODERATE": -3}
+                witching_penalty = penalty_map[witching["warning_level"]]
+                boosted = max(score_detail["total"] + witching_penalty, 0)
+                score_detail["total"] = round(boosted, 1)
+                label = {"CRITICAL": "만기당일", "HIGH": "만기D-1", "MODERATE": "만기주간"}
+                witching_tag = f"⚠️{label[witching['warning_level']]}({witching_penalty})"
+        except Exception:
+            pass
+
         # 이름 결정
         name = ""
         for s in sources:
@@ -1669,6 +1685,8 @@ def main():
             "consensus_upside": consensus_upside,
             "consensus_score": consensus_score,
             "consensus_fper": consensus_fper,
+            "witching_penalty": witching_penalty,
+            "witching_tag": witching_tag,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
