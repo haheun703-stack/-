@@ -349,6 +349,10 @@ echo [%date% %time%] [26/31] 네 마녀의 날 체크 >> logs\schedule.log
 python -u -X utf8 -c "from src.use_cases.market_calendar import check_witching_proximity; w=check_witching_proximity(); print(w['warning_level'], w['message']); exec('from src.telegram_sender import send_message; send_message(w[\"message\"])') if w['warning_level']=='HIGH' else None" >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [26/31] FAILED >> logs\schedule.log
 
+REM 27단계: BAT-D 완료 텔레그램 알림
+echo [%date% %time%] [27/31] BAT-D 완료 알림 >> logs\schedule.log
+python -u -X utf8 -c "from src.telegram_sender import send_message; send_message('✅ BAT-D 완료\n종가·수급·지표·스캔 전체 업데이트 완료')" >> logs\schedule.log 2>&1
+
 REM ══════════════════════════════════════════════
 echo [%date% %time%] BAT-D 완료 (31단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log
