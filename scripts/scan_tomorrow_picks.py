@@ -1,7 +1,7 @@
 """
-내일 추천 종목 통합 스캐너 — 9개 시그널 교차 검증
+내일 추천 종목 통합 스캐너 — 12개 시그널 교차 검증
 
-9개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
+12개 시그널 소스를 통합하여 최종 매수 추천 종목을 산출합니다.
 
 소스:
   1. 섹터릴레이 picks (relay_trading_signal.json)
@@ -28,6 +28,7 @@
 v7 변경: 전략A(수급폭발 소스) + 전략B(MACD 3중 필터) + 전략C(US섹터 부스트)
 v8 변경: 전략D(매집추적 소스) — 거래량폭발 이후 매집 진행 중 종목
 v9 변경: 전략E(Perplexity 인텔리전스) — 미국장 이벤트 → 한국 섹터/종목 파급 보정
+v10 변경: 전략L(국적별 수급 7 Secrets) — 킬필터 + 부스트 + 소스
 
 Usage:
     python scripts/scan_tomorrow_picks.py            # 기본 모드
@@ -77,7 +78,7 @@ STRATEGY_GROUPS = {
     "swing": {
         "label": "스윙(3~7일)",
         "slots": 5,
-        "sources": {"릴레이", "그룹순환", "눌림목", "퀀텀", "동반매수", "이벤트촉매", "이벤트", "밸류체인"},
+        "sources": {"릴레이", "그룹순환", "눌림목", "퀀텀", "동반매수", "이벤트촉매", "이벤트", "밸류체인", "국적수급"},
         "overlap_pairs": [("릴레이", "그룹순환")],
     },
     "short": {
@@ -436,6 +437,52 @@ def collect_value_chain() -> dict[str, dict]:
                 "detail": f"{sector} 소부장 ({'+'.join(leader_names)}↑)",
             }
     return result
+
+
+# ──────────────────────────────────────────
+# 전략 L: 국적별 수급 7 Secrets (nationality_signal.json)
+# ──────────────────────────────────────────
+
+def load_nationality_signals() -> dict:
+    """국적별 수급 시그널 로드 → {ticker: signal_dict}.
+
+    Returns:
+        {
+            ticker: {
+                "signal": "STRONG_BUY" | "BUY" | "NEUTRAL" | "CAUTION" | "SELL",
+                "score": float (-28 ~ +53),
+                "pattern": str,         # QUIET_ACCUM, ABSORPTION 등
+                "inst_trend": float,    # 기관 추세
+                "hedge_trend": float,   # 헤지 추세
+                "retail_pattern": str,  # RETAIL_SUPPORT 등
+                "name": str,
+            }
+        }
+    """
+    data = load_json("krx_nationality/nationality_signal.json")
+    if not data:
+        return {}
+    result = {}
+    for sig in data.get("signals", []):
+        ticker = sig.get("ticker", "")
+        if ticker:
+            result[ticker] = sig
+    return result
+
+
+def get_nationality_kill_tickers(nat_signals: dict) -> set[str]:
+    """국적별 수급 SELL 시그널 종목 → 킬 필터.
+
+    기관장기 전면 이탈(SELL) 패턴이면 매수 후보에서 제외.
+    조건: signal == SELL AND score <= -10
+    """
+    kills = set()
+    for ticker, sig in nat_signals.items():
+        signal = sig.get("signal", "")
+        score = sig.get("score", 0)
+        if signal == "SELL" and score <= -10:
+            kills.add(ticker)
+    return kills
 
 
 def load_dart_avoid_tickers() -> set[str]:
@@ -1231,6 +1278,18 @@ def main():
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
           f"매집추적:{len(src10)} 이벤트촉매:{len(src11)} 밸류체인:{len(src12)}")
 
+    # 전략 L: 국적별 수급 7 Secrets
+    nat_signals = load_nationality_signals()
+    nat_kill_tickers = set()
+    if nat_signals:
+        nat_kill_tickers = get_nationality_kill_tickers(nat_signals)
+        nat_buy = sum(1 for s in nat_signals.values() if s.get("signal") in ("STRONG_BUY", "BUY"))
+        nat_sell = sum(1 for s in nat_signals.values() if s.get("signal") in ("CAUTION", "SELL"))
+        print(f"[국적수급 7S] {len(nat_signals)}종목 | "
+              f"매수시그널:{nat_buy} 주의/매도:{nat_sell} 킬:{len(nat_kill_tickers)}")
+    else:
+        print("[국적수급 7S] 데이터 없음 — 전략L 스킵")
+
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
@@ -1332,6 +1391,15 @@ def main():
 
     # AVOID 종목 제외
     all_tickers -= avoid_tickers
+
+    # 국적수급 킬 필터: 기관 전면 이탈(SELL, score ≤ -10) 종목 제외
+    if nat_kill_tickers:
+        before_nat = len(all_tickers)
+        all_tickers -= nat_kill_tickers
+        killed_names = [nat_signals[t].get("name", t) for t in nat_kill_tickers if t in nat_signals]
+        if killed_names:
+            print(f"[국적수급 킬] {before_nat} → {len(all_tickers)}종목 | "
+                  f"제외: {', '.join(killed_names[:5])}")
 
     # 컨센서스 풀 필터 (pool_only 모드)
     if consensus_pool_enabled and consensus_pool_only and consensus_pool:
@@ -1606,6 +1674,56 @@ def main():
         except Exception:
             pass
 
+        # ── 전략L: 국적별 수급 7 Secrets (부스트/감점 + 소스) ──
+        nat_bonus = 0.0
+        nat_tag = ""
+        nat_signal_str = ""
+        nat_score_val = 0.0
+        nat_pattern = ""
+        if nat_signals and ticker in nat_signals:
+            ns = nat_signals[ticker]
+            nat_signal_str = ns.get("signal", "NEUTRAL")
+            nat_score_val = ns.get("score", 0)
+            nat_pattern = ns.get("pattern", "")
+            retail_pat = ns.get("retail_pattern", "")
+
+            # 부스트/감점 매핑
+            bonus_map = {
+                "STRONG_BUY": 8,   # 기관 매집 + 가속도 → 최고 가산
+                "BUY": 5,          # 기관 확인 매수
+                "NEUTRAL": 0,
+                "CAUTION": -3,     # 이탈 징후
+                "SELL": -5,        # 전면 이탈 (킬에서 걸러졌을 수도 있지만 잔여 감점)
+            }
+            nat_bonus = float(bonus_map.get(nat_signal_str, 0))
+
+            # 패턴 보너스: 조용한 매집(+3), 흡수 매집(+2)
+            if nat_pattern == "QUIET_ACCUM":
+                nat_bonus += 3
+            elif nat_pattern == "ABSORPTION":
+                nat_bonus += 2
+
+            # 개인 역류 보정: 지지(+1), 추격(-2)
+            if retail_pat == "RETAIL_SUPPORT":
+                nat_bonus += 1
+            elif retail_pat == "RETAIL_FOMO":
+                nat_bonus -= 2
+
+            nat_bonus = round(nat_bonus, 1)
+
+            if nat_bonus != 0:
+                boosted = max(min(score_detail["total"] + nat_bonus, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+
+            # 태그 생성
+            pat_str = f",{nat_pattern}" if nat_pattern and nat_pattern != "MIXED" else ""
+            retail_str = f",{retail_pat}" if retail_pat else ""
+            nat_tag = f"국적:{nat_signal_str}({nat_score_val:+.0f}{pat_str}{retail_str})"
+
+            # BUY/STRONG_BUY면 소스로 추가
+            if nat_signal_str in ("STRONG_BUY", "BUY"):
+                source_names.append("국적수급")
+
         # 이름 결정
         name = ""
         for s in sources:
@@ -1687,6 +1805,11 @@ def main():
             "consensus_fper": consensus_fper,
             "witching_penalty": witching_penalty,
             "witching_tag": witching_tag,
+            "nat_bonus": nat_bonus,
+            "nat_tag": nat_tag,
+            "nat_signal": nat_signal_str,
+            "nat_score": nat_score_val,
+            "nat_pattern": nat_pattern,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
@@ -1858,7 +1981,8 @@ def main():
         intel_str = f"  🌐{r['intel_tag']}" if r.get("intel_tag") else ""
         report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
         cons_str = f"  📊{r['consensus_tag']}" if r.get("consensus_tag") else ""
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}")
+        nat_str = f"  🌍{r['nat_tag']}" if r.get("nat_tag") else ""
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}")
 
     if top5:
         print(f"\n{'─'*60}")
@@ -1972,6 +2096,14 @@ def main():
             "pool_size": len(consensus_pool),
             "matched": sum(1 for r in results if r.get("consensus_bonus", 0) > 0),
         } if consensus_pool_enabled else {},
+        "nationality_signal": {
+            "enabled": bool(nat_signals),
+            "total_stocks": len(nat_signals),
+            "kill_count": len(nat_kill_tickers),
+            "boosted": sum(1 for r in results if r.get("nat_bonus", 0) > 0),
+            "penalized": sum(1 for r in results if r.get("nat_bonus", 0) < 0),
+            "as_source": sum(1 for r in results if "국적수급" in r.get("sources", [])),
+        } if nat_signals else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
