@@ -124,8 +124,13 @@ class SmartEntryEngine:
     ):
         self.intraday = intraday_adapter
         self.order = order_adapter
-        self.dry_run = dry_run
         self.config = config or {}
+
+        # 안전장치: dry_run=False인데 order_adapter 없으면 강제 dry_run
+        if not dry_run and order_adapter is None:
+            logger.warning("[SmartEntry] dry_run=False이지만 order_adapter=None → 강제 dry_run=True")
+            dry_run = True
+        self.dry_run = dry_run
 
         # 설정값
         entry_cfg = self.config.get("smart_entry", {})
@@ -174,50 +179,48 @@ class SmartEntryEngine:
     def _init_audit_db(self):
         """주문 감사 로그 DB 초기화."""
         self._audit_db.parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(str(self._audit_db))
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS order_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ts TEXT NOT NULL,
-            action TEXT NOT NULL,
-            ticker TEXT,
-            name TEXT,
-            price INTEGER,
-            qty INTEGER,
-            order_id TEXT,
-            org_no TEXT,
-            status TEXT,
-            message TEXT
-        )""")
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS session_log (
-            date TEXT PRIMARY KEY,
-            started_at TEXT,
-            mode TEXT,
-            max_stocks INTEGER,
-            max_amount INTEGER,
-            candidates INTEGER,
-            filled INTEGER,
-            skipped INTEGER
-        )""")
-        conn.commit()
-        conn.close()
+        with sqlite3.connect(str(self._audit_db)) as conn:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("""
+            CREATE TABLE IF NOT EXISTS order_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ts TEXT NOT NULL,
+                action TEXT NOT NULL,
+                ticker TEXT,
+                name TEXT,
+                price INTEGER,
+                qty INTEGER,
+                order_id TEXT,
+                org_no TEXT,
+                status TEXT,
+                message TEXT
+            )""")
+            conn.execute("""
+            CREATE TABLE IF NOT EXISTS session_log (
+                date TEXT PRIMARY KEY,
+                started_at TEXT,
+                mode TEXT,
+                max_stocks INTEGER,
+                max_amount INTEGER,
+                candidates INTEGER,
+                filled INTEGER,
+                skipped INTEGER
+            )""")
+            conn.commit()
 
     def _log_order(self, action: str, c: CandidateState, status: str = "", message: str = ""):
         """주문 이벤트를 감사 DB에 기록."""
         if self.dry_run:
             return
         try:
-            conn = sqlite3.connect(str(self._audit_db))
-            conn.execute(
-                "INSERT INTO order_log (ts, action, ticker, name, price, qty, order_id, org_no, status, message) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (datetime.now().isoformat(), action, c.ticker, c.name,
-                 c.order_price, c.order_qty, c.order_id, c.org_no, status, message),
-            )
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(str(self._audit_db)) as conn:
+                conn.execute(
+                    "INSERT INTO order_log (ts, action, ticker, name, price, qty, order_id, org_no, status, message) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (datetime.now().isoformat(), action, c.ticker, c.name,
+                     c.order_price, c.order_qty, c.order_id, c.org_no, status, message),
+                )
+                conn.commit()
         except Exception as e:
             logger.warning("[감사] DB 기록 실패: %s", e)
 
@@ -226,16 +229,15 @@ class SmartEntryEngine:
         if self.dry_run:
             return
         try:
-            conn = sqlite3.connect(str(self._audit_db))
-            conn.execute(
-                "INSERT OR REPLACE INTO session_log (date, started_at, mode, max_stocks, max_amount, candidates, filled, skipped) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (datetime.now().strftime("%Y-%m-%d"), datetime.now().isoformat(),
-                 "LIVE", self.max_stocks, self.max_amount_per_stock,
-                 report["total_candidates"], report["filled"], report["skipped"]),
-            )
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(str(self._audit_db)) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO session_log (date, started_at, mode, max_stocks, max_amount, candidates, filled, skipped) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (datetime.now().strftime("%Y-%m-%d"), datetime.now().isoformat(),
+                     "LIVE", self.max_stocks, self.max_amount_per_stock,
+                     report["total_candidates"], report["filled"], report["skipped"]),
+                )
+                conn.commit()
         except Exception as e:
             logger.warning("[감사] 세션 기록 실패: %s", e)
 
@@ -332,6 +334,7 @@ class SmartEntryEngine:
             result = {}
             for buy in v3.get("buys", []):
                 result[buy["ticker"]] = {
+                    "name": buy.get("name", ""),
                     "conviction": buy.get("conviction", 5),
                     "size_pct": buy.get("size_pct", 10.0),
                     "entry_price": buy.get("entry_price", 0),
@@ -452,6 +455,7 @@ class SmartEntryEngine:
     def place_initial_orders(self) -> int:
         """전일종가 -0.5% 지정가 매수 접수 (Phase 1)"""
         placed = 0
+        total_amount = 0
         for c in self.candidates:
             if c.prev_close <= 0:
                 continue
@@ -465,11 +469,23 @@ class SmartEntryEngine:
             c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
 
+            # 총 투자금 상한 체크
+            order_amount = c.order_price * c.order_qty
+            if total_amount + order_amount > self.max_total_amount:
+                logger.info(
+                    "[상한] %s 스킵 — 총 투자금 %s + %s > 상한 %s원",
+                    c.name, f"{total_amount:,}", f"{order_amount:,}",
+                    f"{self.max_total_amount:,}",
+                )
+                c.decision = EntryDecision.SKIP
+                continue
+
             if c.paper_mode:
                 logger.info(
                     "[PAPER] 역발상 분석 대상: %s(%s) %d원 × %d주 (분석만, 주문 안 함)",
                     c.name, c.ticker, order_price, c.order_qty,
                 )
+                total_amount += order_amount
                 placed += 1
                 continue
 
@@ -479,6 +495,7 @@ class SmartEntryEngine:
                     c.name, c.ticker, order_price, c.order_qty,
                     f"{order_price * c.order_qty:,}", c.prev_close, self.initial_discount,
                 )
+                total_amount += order_amount
                 placed += 1
             else:
                 if c.order_qty <= 0:
@@ -511,6 +528,7 @@ class SmartEntryEngine:
                 if order.status.value != "failed":
                     c.order_id = order.order_id
                     c.org_no = order.org_no
+                    total_amount += order_amount
                     placed += 1
                     logger.info(
                         "[주문] 초기 지정가: %s %d원 × %d주 = %s원 (주문번호=%s, org=%s)",
@@ -751,9 +769,10 @@ class SmartEntryEngine:
             return 5  # 중립
 
         # 09:05 이후 형성된 봉만 필터
+        cutoff = datetime.now().strftime("%Y-%m-%d 09:05")
         recent = [
             cd for cd in candles
-            if cd.get("timestamp", "") >= datetime.now().strftime("%Y-%m-%d 09:0")
+            if cd.get("timestamp", "") >= cutoff
         ]
         c.candle_count = len(recent)
 
@@ -1088,9 +1107,9 @@ class SmartEntryEngine:
     def _modify_order(self, c: CandidateState, new_price: int):
         """주문 정정"""
         old = c.order_price
-        c.order_price = new_price
 
         if self.dry_run:
+            c.order_price = new_price
             logger.info(
                 "[DRY] 주문 정정: %s %d → %d원 (현재가 %d)",
                 c.name, old, new_price, c.current_price,
@@ -1101,6 +1120,7 @@ class SmartEntryEngine:
                 order_obj = Order(order_id=c.order_id, ticker=c.ticker, org_no=c.org_no)
                 result = self.order.modify(order_obj, new_price, c.order_qty)
                 if result.status.value != "failed":
+                    c.order_price = new_price
                     c.order_id = result.order_id or c.order_id
                     c.org_no = result.org_no or c.org_no
                     logger.info(
@@ -1109,6 +1129,11 @@ class SmartEntryEngine:
                     )
                     self._log_order("MODIFY", c, status="PENDING",
                                     message=f"{old} → {new_price}")
+                else:
+                    logger.warning(
+                        "[정정 실패] %s: %d → %d원 시도 실패, 원래 가격 유지",
+                        c.name, old, new_price,
+                    )
 
     def _cancel_order(self, c: CandidateState):
         """주문 취소"""
@@ -1429,6 +1454,14 @@ class SmartEntryEngine:
                 )
                 self._log_order("FILLED", c, status="FILLED",
                                 message=f"체결가 {c.filled_price:,}원")
+            elif status.status.value == "partial":
+                filled_qty = int(getattr(status, "filled_qty", 0) or 0)
+                if filled_qty > 0:
+                    c.filled_price = int(status.filled_price or c.order_price)
+                    logger.info(
+                        "[부분체결] %s %d원 %d/%d주",
+                        c.name, c.filled_price, filled_qty, c.order_qty,
+                    )
 
     def _wait_until(self, hour: int, minute: int):
         """특정 시각까지 대기 (dry_run이면 즉시 리턴)"""
@@ -1448,19 +1481,6 @@ class SmartEntryEngine:
 
     @staticmethod
     def _tick_round(price: int, reference: int) -> int:
-        """호가 단위 맞춤 (KRX 규칙)"""
-        if reference < 2000:
-            tick = 1
-        elif reference < 5000:
-            tick = 5
-        elif reference < 20000:
-            tick = 10
-        elif reference < 50000:
-            tick = 50
-        elif reference < 200000:
-            tick = 100
-        elif reference < 500000:
-            tick = 500
-        else:
-            tick = 1000
-        return (price // tick) * tick
+        """호가 단위 맞춤 (KRX 규칙) — 공통 유틸 위임."""
+        from src.entities.trading_models import tick_round
+        return tick_round(price, reference)

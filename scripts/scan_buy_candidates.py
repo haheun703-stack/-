@@ -13,6 +13,7 @@ v10.0: 4축 100점 제거, Kill 중복 제거, Trap 제거
 
 import argparse
 import io
+import os
 import re
 import sys
 import time
@@ -108,12 +109,21 @@ def load_positions() -> dict:
 
 
 def save_positions(data: dict):
-    """positions.json 저장."""
+    """positions.json 원자적 저장 (임시파일 → rename)."""
+    import tempfile
     POSITIONS_FILE.parent.mkdir(exist_ok=True)
-    POSITIONS_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2, default=str),
-        encoding="utf-8",
+    content = json.dumps(data, ensure_ascii=False, indent=2, default=str)
+    tmp_fd, tmp_path = tempfile.mkstemp(
+        dir=str(POSITIONS_FILE.parent), suffix=".tmp"
     )
+    try:
+        with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        os.replace(tmp_path, str(POSITIONS_FILE))
+    except BaseException:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
 
 
 def calc_position_guide(sig: dict, capital: float, held_count: int, max_pos: int | None = None) -> dict:

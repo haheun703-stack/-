@@ -89,6 +89,7 @@ class TradeAdvisor(BaseAgent):
         self.buy_thresholds = settings.get("buy_thresholds", {})
         self.sell_thresholds = settings.get("sell_thresholds", {})
         self.perplexity_enabled = settings.get("perplexity_enabled", True)
+        self._signal_engine = None  # 지연 초기화 캐시
 
     # ═══════════════════════════════════════════
     # 매수 분석
@@ -174,7 +175,9 @@ class TradeAdvisor(BaseAgent):
         if df.empty:
             return {"grade": "N/A", "score": 0, "signal": False}
 
-        engine = SignalEngine()
+        if self._signal_engine is None:
+            self._signal_engine = SignalEngine()
+        engine = self._signal_engine
         result = engine.calculate_signal(ticker, df, len(df) - 1)
         return {
             "grade": result.get("grade", "F"),

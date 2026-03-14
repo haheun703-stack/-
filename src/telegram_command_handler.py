@@ -64,22 +64,9 @@ def _parse_amount(text: str) -> int | None:
 
 
 def _tick_round(price: int, reference: int) -> int:
-    """호가 단위 맞춤 (KRX 규칙)."""
-    if reference < 2000:
-        tick = 1
-    elif reference < 5000:
-        tick = 5
-    elif reference < 20000:
-        tick = 10
-    elif reference < 50000:
-        tick = 50
-    elif reference < 200000:
-        tick = 100
-    elif reference < 500000:
-        tick = 500
-    else:
-        tick = 1000
-    return (price // tick) * tick
+    """호가 단위 맞춤 (KRX 규칙) — 공통 유틸 위임."""
+    from src.entities.trading_models import tick_round
+    return tick_round(price, reference)
 
 
 class TelegramCommandBot:

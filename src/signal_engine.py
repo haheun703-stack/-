@@ -161,7 +161,7 @@ class SignalEngine:
             self.martin_engine = MartinMomentumEngine(
                 n_fast=martin_cfg.get("n_fast", 8),
                 n_slow=martin_cfg.get("n_slow", 24),
-                epsilon=martin_cfg.get("epsilon", 0.6),
+                epsilon=martin_cfg.get("epsilon", 0.05),
                 sigmoid_k=martin_cfg.get("sigmoid_k", 5.0),
                 min_confidence=martin_cfg.get("min_confidence", 0.3),
                 target_sigma=vol_cfg.get("target_sigma", 0.02),
@@ -918,10 +918,12 @@ class SignalEngine:
                 tc_cfg = self.triggers_cfg.get("trend_continuation", {})
                 original_min = tc_cfg.get("min_conditions", 5)
                 tc_cfg["min_conditions"] = max(original_min - 1, 3)
-            trend_cont = self.check_trend_continuation(df, idx)
-            # 원복
-            if news_score_boost >= 0.08:
-                tc_cfg["min_conditions"] = original_min
+            try:
+                trend_cont = self.check_trend_continuation(df, idx)
+            finally:
+                # 원복 — 예외 발생 시에도 반드시 복원
+                if news_score_boost >= 0.08:
+                    tc_cfg["min_conditions"] = original_min
             if trend_cont.trigger_type == TriggerType.TREND_CONT:
                 diag.add_layer(LayerResult(
                     name="L0_trend_cont",

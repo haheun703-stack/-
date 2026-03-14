@@ -146,10 +146,20 @@ def sync(apply: bool = False) -> None:
 
     # 6. 적용
     if apply:
-        POSITIONS_FILE.write_text(
-            json.dumps(positions, ensure_ascii=False, indent=2),
-            encoding="utf-8",
+        import os
+        import tempfile
+        content = json.dumps(positions, ensure_ascii=False, indent=2)
+        tmp_fd, tmp_path = tempfile.mkstemp(
+            dir=str(POSITIONS_FILE.parent), suffix=".tmp"
         )
+        try:
+            with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
+                f.write(content)
+            os.replace(tmp_path, str(POSITIONS_FILE))
+        except BaseException:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
         print(f"\n[적용 완료] {POSITIONS_FILE} 저장됨")
     else:
         print(f"\n[DRY-RUN] --apply 옵션으로 실행하면 실제 저장됩니다.")

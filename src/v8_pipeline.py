@@ -63,7 +63,7 @@ class QuantumPipelineV8:
           R3: OBV 선행 → 가격보다 수급 먼저 전환 (91건 50%+)
         """
         cfg = self.ratio_boost_cfg
-        max_boost = cfg.get('max_boost', 0.05)
+        max_boost = cfg.get('max_boost', 0.10)
         details = {}
         conditions_met = 0
 

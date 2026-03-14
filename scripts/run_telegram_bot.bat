@@ -4,6 +4,7 @@ title Quantum Master — Telegram Bot
 color 0B
 
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 call venv\Scripts\activate.bat
 
 echo.

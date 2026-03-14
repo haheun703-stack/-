@@ -290,3 +290,29 @@ class HoldScore:
             "hold_days_adjustment": self.hold_days_adjustment,
             "trailing_tightness": self.trailing_tightness,
         }
+
+
+# ─── 공통 유틸: 호가 단위 맞춤 ────────────────────────
+
+def tick_round(price: int, reference: int) -> int:
+    """KRX 호가 단위 맞춤.
+
+    Args:
+        price: 맞출 가격
+        reference: 호가 단위 결정 기준가
+    """
+    if reference < 2000:
+        tick = 1
+    elif reference < 5000:
+        tick = 5
+    elif reference < 20000:
+        tick = 10
+    elif reference < 50000:
+        tick = 50
+    elif reference < 200000:
+        tick = 100
+    elif reference < 500000:
+        tick = 500
+    else:
+        tick = 1000
+    return (price // tick) * tick

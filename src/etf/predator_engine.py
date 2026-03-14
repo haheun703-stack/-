@@ -105,7 +105,7 @@ class PredatorEngine:
 
             # 가속도 점수 (0~100)
             # 순위 상승 + 단기 수익률 + 모멘텀 스코어 종합
-            ret_5 = cur.get("ret_5", 0)
+            ret_5 = cur.get("ret_5", cur.get("5d", 0))
             accel_score = self._calc_accel_score(rank_change, ret_5, mom_score, cur_rank)
 
             results.append(SectorAcceleration(
@@ -117,8 +117,8 @@ class PredatorEngine:
                 rank_velocity=rank_velocity,
                 momentum_score=mom_score,
                 ret_5d=ret_5,
-                ret_20d=cur.get("ret_20", 0),
-                ret_60d=cur.get("ret_60", 0),
+                ret_20d=cur.get("ret_20", cur.get("20d", 0)),
+                ret_60d=cur.get("ret_60", cur.get("60d", 0)),
                 acceleration_score=accel_score,
             ))
 

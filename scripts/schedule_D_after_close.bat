@@ -321,7 +321,7 @@ REM 23.5단계: Brain 대시보드 데이터 빌드 + API 업로드
 echo [%date% %time%] [23.5/29] Brain 대시보드 빌드+업로드 >> logs\schedule.log
 python -u -X utf8 scripts\build_brain_upload.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [23.5a/29] FAILED (빌드) >> logs\schedule.log
-python -u -X utf8 -c "import requests,json,pathlib; d=json.loads(pathlib.Path('website/data/brain_data_upload.json').read_text(encoding='utf-8')); r=requests.post('https://www.ppwangga.com/api/brain',headers={'X-API-Key':'e_Yws1RwLkUwg1vlXFqpbbRe-GMp7MRugnsrPfuF99M','Content-Type':'application/json'},json=d,timeout=30); print(f'Brain API: {r.status_code}')" >> logs\schedule.log 2>&1
+python -u -X utf8 -c "import requests,json,pathlib,os; from dotenv import load_dotenv; load_dotenv(pathlib.Path('D:/sub-agent-project/.env')); d=json.loads(pathlib.Path('website/data/brain_data_upload.json').read_text(encoding='utf-8')); r=requests.post('https://www.ppwangga.com/api/brain',headers={'X-API-Key':os.environ.get('JARVIS_API_KEY',''),'Content-Type':'application/json'},json=d,timeout=30); print(f'Brain API: {r.status_code}')" >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [23.5b/29] FAILED (업로드) >> logs\schedule.log
 
 REM 24단계: 저녁 통합 텔레그램 (보유종목+DART+추천+밸류체인 → 1건)

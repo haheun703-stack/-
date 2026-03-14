@@ -64,6 +64,7 @@ class Position:
     peak_price: float = 0.0
     half_sold: bool = False
     half_sold_pnl: float = 0.0
+    half_sell_price: float = 0.0
     days_held: int = 0
 
 
@@ -409,7 +410,6 @@ def run_backtest(data_dict, name_map, mode, kospi_df):
             low = float(row["low"])
             close_d = float(row["close"])
             pos.days_held += 1
-            pos.peak_price = max(pos.peak_price, high)
 
             exit_reason = None
             sell_price = 0.0
@@ -421,13 +421,14 @@ def run_backtest(data_dict, name_map, mode, kospi_df):
 
             # 1차 익절: +10% → 반매도
             if not pos.half_sold and high >= pos.buy_price * 1.10:
-                sell_price = pos.buy_price * 1.10
+                sell_price = pos.buy_price * 1.10 * (1 - SLIPPAGE)
                 half_shares = pos.shares // 2
                 if half_shares > 0:
                     proceeds = half_shares * sell_price * (1 - COMMISSION - TAX)
                     half_cost = half_shares * pos.buy_price * (1 + COMMISSION)
                     cash += proceeds
                     pos.half_sold = True
+                    pos.half_sell_price = sell_price
                     pos.half_sold_pnl = (sell_price / pos.buy_price - 1) - COMMISSION * 2 - TAX
                     pos.shares -= half_shares
                     day_pnl += proceeds - half_cost
@@ -435,30 +436,33 @@ def run_backtest(data_dict, name_map, mode, kospi_df):
             # 트레일링 (반매도 후 -8%)
             if pos.half_sold and low <= pos.peak_price * 0.92:
                 exit_reason = "trailing"
-                sell_price = pos.peak_price * 0.92
+                sell_price = pos.peak_price * 0.92 * (1 - SLIPPAGE)
             elif low <= stop_price:
                 exit_reason = "stop"
-                sell_price = stop_price
+                sell_price = stop_price * (1 - SLIPPAGE)
             elif high >= pos.target:
                 exit_reason = "target"
-                sell_price = pos.target
+                sell_price = pos.target * (1 - SLIPPAGE)
             elif pos.days_held >= 15 and not pos.half_sold:
                 if close_d < pos.buy_price * 1.03:
                     exit_reason = "time_stop"
-                    sell_price = close_d
+                    sell_price = close_d * (1 - SLIPPAGE)
             elif pos.days_held >= 20:
                 exit_reason = "timeout"
-                sell_price = close_d
+                sell_price = close_d * (1 - SLIPPAGE)
+
+            # peak_price는 청산 체크 후 업데이트 (트레일링 지연 방지)
+            pos.peak_price = max(pos.peak_price, high)
 
             if exit_reason:
                 proceeds = pos.shares * sell_price * (1 - COMMISSION - TAX)
                 cost = pos.shares * pos.buy_price
                 pnl = proceeds - cost + (pos.half_sold_pnl * pos.allocated * 0.5 if pos.half_sold else 0)
-                pnl_pct = (sell_price / pos.buy_price - 1) if not pos.half_sold else (
-                    (pos.half_sold_pnl + (sell_price / pos.buy_price - 1)) / 2
-                )
+                half_gross = (pos.half_sell_price / pos.buy_price - 1) if pos.half_sold else 0
+                remain_gross = sell_price / pos.buy_price - 1
+                pnl_pct_gross = (half_gross + remain_gross) / 2 if pos.half_sold else remain_gross
                 cash += proceeds
-                pnl_pct_net = pnl_pct - COMMISSION * 2 - TAX
+                pnl_pct_net = pnl_pct_gross - COMMISSION * 2 - TAX
                 day_pnl += pnl
 
                 trades.append({

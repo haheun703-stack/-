@@ -14,6 +14,7 @@ echo.
 
 REM 프로젝트 디렉토리 이동
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 
 REM 가상환경 활성화
 call venv\Scripts\activate.bat

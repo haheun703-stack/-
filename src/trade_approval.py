@@ -14,7 +14,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import tempfile
 import time
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -40,22 +42,9 @@ STATUS_TIMEOUT = "timeout"
 
 
 def _tick_round(price: int, reference: int) -> int:
-    """호가 단위 맞춤 (KRX 규칙)."""
-    if reference < 2000:
-        tick = 1
-    elif reference < 5000:
-        tick = 5
-    elif reference < 20000:
-        tick = 10
-    elif reference < 50000:
-        tick = 50
-    elif reference < 200000:
-        tick = 100
-    elif reference < 500000:
-        tick = 500
-    else:
-        tick = 1000
-    return (price // tick) * tick
+    """호가 단위 맞춤 (KRX 규칙) — 공통 유틸 위임."""
+    from src.entities.trading_models import tick_round
+    return tick_round(price, reference)
 
 
 class TradeApprovalGateway:
@@ -153,13 +142,14 @@ class TradeApprovalGateway:
         return self._request_approval(approval_id, text, trade_info, timeout)
 
     def update_approval(self, approval_id: str, status: str) -> None:
-        """승인 상태 업데이트 (TelegramCommandBot에서 호출)."""
-        approvals = self._load_approvals()
-        if approval_id in approvals:
-            approvals[approval_id]["status"] = status
-            approvals[approval_id]["responded_at"] = datetime.now().isoformat()
-            self._save_approvals(approvals)
-            logger.info("[승인] %s → %s", approval_id, status)
+        """승인 상태 업데이트 (TelegramCommandBot에서 호출, 잠금 사용)."""
+        with self._file_lock():
+            approvals = self._load_approvals()
+            if approval_id in approvals:
+                approvals[approval_id]["status"] = status
+                approvals[approval_id]["responded_at"] = datetime.now().isoformat()
+                self._save_approvals(approvals)
+                logger.info("[승인] %s → %s", approval_id, status)
 
     # ──────────────────────────────────────────
     # 내부 구현
@@ -187,15 +177,16 @@ class TradeApprovalGateway:
         return result
 
     def _write_pending(self, approval_id: str, trade_info: dict) -> None:
-        """승인 대기 상태를 JSON 파일에 기록."""
-        approvals = self._load_approvals()
-        approvals[approval_id] = {
-            "status": STATUS_PENDING,
-            "trade_info": trade_info,
-            "requested_at": datetime.now().isoformat(),
-            "responded_at": None,
-        }
-        self._save_approvals(approvals)
+        """승인 대기 상태를 JSON 파일에 기록 (잠금 사용)."""
+        with self._file_lock():
+            approvals = self._load_approvals()
+            approvals[approval_id] = {
+                "status": STATUS_PENDING,
+                "trade_info": trade_info,
+                "requested_at": datetime.now().isoformat(),
+                "responded_at": None,
+            }
+            self._save_approvals(approvals)
 
     def _poll_approval(self, approval_id: str, timeout: int) -> bool | None:
         """JSON 파일 폴링으로 승인/거부 상태 확인.
@@ -347,8 +338,41 @@ class TradeApprovalGateway:
             pass
 
     # ──────────────────────────────────────────
-    # JSON 파일 I/O
+    # JSON 파일 I/O (파일 잠금 + 원자적 쓰기)
     # ──────────────────────────────────────────
+
+    _LOCK_FILE = APPROVAL_FILE.parent / ".trade_approvals.lock"
+
+    @contextmanager
+    def _file_lock(self, timeout: float = 5.0):
+        """간단한 파일 기반 잠금 (프로세스 간 안전)."""
+        lock_path = self._LOCK_FILE
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        deadline = time.time() + timeout
+        fd = None
+        try:
+            while time.time() < deadline:
+                try:
+                    fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                    break
+                except FileExistsError:
+                    # 잠금 파일이 5초 이상 오래되면 강제 해제 (좀비 잠금)
+                    try:
+                        if lock_path.exists() and time.time() - lock_path.stat().st_mtime > 10:
+                            lock_path.unlink(missing_ok=True)
+                    except OSError:
+                        pass
+                    time.sleep(0.1)
+            else:
+                logger.warning("[승인] 파일 잠금 타임아웃 — 잠금 없이 진행")
+            yield
+        finally:
+            if fd is not None:
+                os.close(fd)
+            try:
+                lock_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
     def _load_approvals(self) -> dict:
         """승인 파일 로드. 오래된 항목은 자동 정리."""
@@ -373,10 +397,20 @@ class TradeApprovalGateway:
             return {}
 
     def _save_approvals(self, data: dict) -> None:
-        """승인 파일 저장."""
+        """승인 파일 원자적 저장 (임시파일 → rename)."""
         APPROVAL_FILE.parent.mkdir(parents=True, exist_ok=True)
         try:
-            with open(APPROVAL_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+            content = json.dumps(data, ensure_ascii=False, indent=2)
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                dir=str(APPROVAL_FILE.parent), suffix=".tmp"
+            )
+            try:
+                with os.fdopen(tmp_fd, "w", encoding="utf-8") as f:
+                    f.write(content)
+                os.replace(tmp_path, str(APPROVAL_FILE))
+            except BaseException:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
         except Exception as e:
             logger.error("[승인] 파일 저장 실패: %s", e)

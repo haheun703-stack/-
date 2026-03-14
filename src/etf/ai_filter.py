@@ -187,6 +187,17 @@ def apply_ai_filter(
             # PASS (또는 verdict 없는 주문 → 안전 PASS)
             filtered_queue.append(order)
 
+    # 50% PASS 안전장치: KILL 비율이 50% 초과 시 전체 PASS로 폴백
+    buy_orders = [o for o in order_queue if o.get("action") == "BUY"]
+    if buy_orders and len(killed_orders) > len(buy_orders) * 0.5:
+        logger.warning(
+            "[AI 안전장치] KILL %d/%d건 (>50%%) → 전체 PASS로 폴백",
+            len(killed_orders), len(buy_orders),
+        )
+        filtered_queue = list(order_queue)
+        killed_orders = []
+        held_orders = []
+
     stats = {
         "total": len(order_queue),
         "pass": len(filtered_queue),

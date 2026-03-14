@@ -87,7 +87,7 @@ class GateEngine:
         cfg = self.cfg.get('trend', {})
         ma_fast_period = cfg.get('ma_fast', 60)
         ma_slow_period = cfg.get('ma_slow', 120)
-        adx_min = cfg.get('adx_min', 18)
+        adx_min = cfg.get('adx_min', 14)
 
         ma_fast = row.get(f'sma_{ma_fast_period}', row.get(f'ma{ma_fast_period}', 0))
         ma_slow = row.get(f'sma_{ma_slow_period}', row.get(f'ma{ma_slow_period}', 0))
@@ -160,7 +160,7 @@ class GateEngine:
         조건: 52주 고점 대비 현재가 < 92%
         """
         cfg = self.cfg.get('overheat', {})
-        max_ratio = cfg.get('max_52w_ratio', 0.92)
+        max_ratio = cfg.get('max_52w_ratio', 0.95)
 
         close = row.get('close', 0)
         high_52w = row.get('high_252', row.get('high_52w', close))

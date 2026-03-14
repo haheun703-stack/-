@@ -64,7 +64,7 @@ class ScoringEngine:
             'momentum_decel': 0.15,
             'smart_money': 0.15,
         })
-        self.cutoffs = self.cfg.get('grade_cutoffs', {'A': 0.80, 'B': 0.65, 'C': 0.50})
+        self.cutoffs = self.cfg.get('grade_cutoffs', {'A': 0.65, 'B': 0.50, 'C': 0.35})
         self.pos_cfg = v8_cfg.get('position', {})
         # v10.1: 마스터 스위치 — use_short_selling_filter: false면 S5 공매도 보너스 비활성
         self._short_filter_enabled = config.get('use_short_selling_filter', False)

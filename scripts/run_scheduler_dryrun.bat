@@ -4,6 +4,7 @@ title Quantum Master v5.0 — Dry Run
 color 0E
 
 cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project
 call venv\Scripts\activate.bat
 
 echo.
