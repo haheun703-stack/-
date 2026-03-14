@@ -3,7 +3,10 @@
 버핏 철학: "확실한 것만으로 가격을 계산하고, 불확실한 것은 업사이드 보너스로 남긴다."
 기존 100점 체계 변경 없음. 안전마진은 독립 플래그(GREEN/YELLOW/RED)로 운영.
 
-데이터: consensus_screening.json (wisereport Forward EPS/PER/목표가)
+3단계 폴백 체인:
+  1순위: consensus_screening.json (wisereport Forward EPS, 216종목)
+  2순위: wisereport fetch_one() 실시간 크롤링
+  3순위: DART trailing EPS (fundamentals_historical.csv, 2,980종목)
 """
 
 from __future__ import annotations
@@ -14,6 +17,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,7 @@ class SafetyMarginResult:
     forward_per: float = 0.0
     forward_pbr: float = 0.0
     dividend_yield: float = 0.0
+    source: str = ""              # CONSENSUS / WISEREPORT / DART_TRAILING / NO_DATA
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -124,6 +129,75 @@ def _get_conservative_per(forward_per: float, cfg: dict) -> float:
     return max(floor, min(forward_per * discount, cap))
 
 
+# ─── 폴백: wisereport 실시간 크롤링 (2순위) ─────────
+
+def _fetch_wisereport_one(ticker: str) -> dict | None:
+    """wisereport에서 개별 종목 실시간 크롤링. 캐시 없는 종목용."""
+    try:
+        from src.adapters.consensus_scraper import ConsensusScraper
+        scraper = ConsensusScraper(max_retries=2, timeout=8)
+        data = scraper.fetch_one(ticker)
+        if data and data.get("forward_eps"):
+            data["_source"] = "WISEREPORT"
+            return data
+    except Exception as e:
+        logger.debug("[안전마진] wisereport 폴백 실패 %s: %s", ticker, e)
+    return None
+
+
+# ─── 폴백: DART trailing EPS (3순위) ───────────────
+
+_dart_hist_cache: pd.DataFrame | None = None
+
+
+def _load_dart_historical() -> pd.DataFrame:
+    """DART fundamentals_historical.csv 캐시 로드."""
+    global _dart_hist_cache
+    if _dart_hist_cache is not None:
+        return _dart_hist_cache
+    hist_path = DATA_DIR / "dart_cache" / "fundamentals_historical.csv"
+    if not hist_path.exists():
+        _dart_hist_cache = pd.DataFrame()
+        return _dart_hist_cache
+    try:
+        df = pd.read_csv(hist_path)
+        df["ticker"] = df["ticker"].astype(str).str.zfill(6)
+        _dart_hist_cache = df
+    except Exception as e:
+        logger.warning("[안전마진] DART 히스토리 로드 실패: %s", e)
+        _dart_hist_cache = pd.DataFrame()
+    return _dart_hist_cache
+
+
+def _calc_trailing_eps(ticker: str) -> dict | None:
+    """DART 캐시에서 trailing 4분기 EPS 합산 → synthetic consensus."""
+    df = _load_dart_historical()
+    if df.empty:
+        return None
+
+    sub = df[df["ticker"] == ticker].sort_values(["year", "quarter"]).tail(4)
+    if len(sub) < 2:
+        return None
+
+    trailing_eps = float(sub["eps"].sum())
+    if trailing_eps <= 0:
+        return None  # 적자 → 폴백 포기
+
+    company = str(sub.iloc[-1].get("company", ""))
+    return {
+        "ticker": ticker,
+        "name": company,
+        "forward_eps": trailing_eps,
+        "forward_per": 8.0,       # trailing이므로 보수적 기본값
+        "target_price": 0,
+        "analyst_count": 0,       # → sustainability_pass = False
+        "opinion_score": 0,
+        "dividend_yield": 0,
+        "forward_pbr": 0,
+        "_source": "DART_TRAILING",
+    }
+
+
 # ─── 메인 계산 ─────────────────────────────────────
 
 def calc_safety_margin(
@@ -131,24 +205,44 @@ def calc_safety_margin(
     name: str = "",
     close: int = 0,
     consensus: dict | None = None,
+    use_wisereport: bool = True,
 ) -> SafetyMarginResult:
     """단일 종목 안전마진 판정.
 
-    consensus: 외부에서 직접 전달 가능 (없으면 JSON에서 로드).
+    consensus: 외부에서 직접 전달 가능 (없으면 3단계 폴백).
+    use_wisereport: 배치 호출 시 False (느림 방지).
     """
     cfg = _load_config()
     result = SafetyMarginResult(ticker=ticker, name=name, close=close)
 
-    # 컨센서스 데이터 확보
+    # 컨센서스 데이터 확보 (3단계 폴백 체인)
+    data_source = "CONSENSUS"
     if consensus is None:
         pool = _load_consensus_pool()
         consensus = pool.get(ticker)
 
+    # 2순위: wisereport 실시간 크롤링
+    if not consensus and use_wisereport:
+        consensus = _fetch_wisereport_one(ticker)
+        if consensus:
+            data_source = "WISEREPORT"
+
+    # 3순위: DART trailing EPS
+    if not consensus:
+        consensus = _calc_trailing_eps(ticker)
+        if consensus:
+            data_source = "DART_TRAILING"
+
     if not consensus:
         result.signal = "NO_DATA"
         result.signal_label = "데이터없음"
-        result.reason = "컨센서스 데이터 없음"
+        result.reason = "컨센서스+DART 모두 데이터 없음"
+        result.source = "NO_DATA"
         return result
+
+    # 데이터 출처 기록
+    data_source = consensus.get("_source", data_source)
+    result.source = data_source
 
     # 기본 데이터 추출
     fwd_eps = float(consensus.get("forward_eps", 0) or 0)
@@ -223,17 +317,23 @@ def calc_safety_margin(
     )
 
     # ── 신호 판정 ──
+    src_tag = ""
+    if data_source == "DART_TRAILING":
+        src_tag = " (DART실적)"
+    elif data_source == "WISEREPORT":
+        src_tag = " (wisereport)"
+
     if not result.eps_positive:
         result.signal = "RED"
         result.signal_label = "위험"
-        result.reason = "EPS 적자 — 밸류에이션 앵커 없음"
+        result.reason = f"EPS 적자 — 밸류에이션 앵커 없음{src_tag}"
     elif result.floor_margin_pct >= 0 and result.sustainability_pass:
         # 현재가 ≤ 바닥가 + 지속성OK → GREEN
         result.signal = "GREEN"
         result.signal_label = "안전"
         result.reason = (
             f"바닥가({result.floor_price:,}) 이하 "
-            f"— 보수적으로 봐도 저평가"
+            f"— 보수적으로 봐도 저평가{src_tag}"
         )
     elif result.floor_margin_pct >= 0 and not result.sustainability_pass:
         # 현재가 ≤ 바닥가 + 지속성NG → YELLOW
@@ -244,14 +344,14 @@ def calc_safety_margin(
             parts.append(f"애널리스트 {analyst_cnt}명(<{cfg['min_analyst_count']})")
         if not result.opinion_sufficient:
             parts.append(f"투자의견 {opinion:.1f}(<{cfg['min_opinion_score']})")
-        result.reason = f"싸보이지만 데이터 부족: {', '.join(parts)}"
+        result.reason = f"싸보이지만 데이터 부족: {', '.join(parts)}{src_tag}"
     elif result.floor_margin_pct >= cfg["yellow_threshold_pct"]:
         # 바닥가 < 현재가 ≤ 바닥가×1.2 → YELLOW
         result.signal = "YELLOW"
         result.signal_label = "주의"
         result.reason = (
             f"바닥가 대비 {result.floor_margin_pct:+.1f}% "
-            f"— 약간 비싸지만 허용범위"
+            f"— 약간 비싸지만 허용범위{src_tag}"
         )
     else:
         # 현재가 > 바닥가×1.2 → RED
@@ -259,7 +359,7 @@ def calc_safety_margin(
         result.signal_label = "위험"
         result.reason = (
             f"바닥가 대비 {result.floor_margin_pct:+.1f}% "
-            f"— 안전마진 없음"
+            f"— 안전마진 없음{src_tag}"
         )
 
     return result
@@ -269,8 +369,12 @@ def calc_safety_margin(
 
 def safety_margin_batch(
     picks: list[dict],
+    use_wisereport: bool = False,
 ) -> list[SafetyMarginResult]:
-    """추천 종목 배치 안전마진 판정. picks = [{ticker, name, close}, ...]"""
+    """추천 종목 배치 안전마진 판정.
+
+    use_wisereport: True면 NO_DATA 종목에 wisereport 크롤링 시도 (느림).
+    """
     pool = _load_consensus_pool()
     results = []
     for pick in picks:
@@ -280,7 +384,10 @@ def safety_margin_batch(
         name = pick.get("name", "")
         close = int(pick.get("close", 0) or 0)
         consensus = pool.get(ticker)
-        r = calc_safety_margin(ticker, name, close, consensus)
+        r = calc_safety_margin(
+            ticker, name, close, consensus,
+            use_wisereport=use_wisereport,
+        )
         results.append(r)
 
     # GREEN → YELLOW → RED → NO_DATA 순 정렬
