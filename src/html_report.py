@@ -659,6 +659,61 @@ def _build_deep_dive_html(items: list[dict], date_str: str) -> str:
         both_buy = s.get("foreign_5d", 0) > 0 and s.get("inst_5d", 0) > 0
         both_badge = '<span class="dd-badge both">동시매수</span>' if both_buy else ""
 
+        # 안전마진 데이터
+        safety = item.get("safety", {})
+        sm_signal = safety.get("signal", "NO_DATA")
+        sm_label = safety.get("signal_label", "데이터없음")
+        sm_floor = safety.get("floor_price", 0)
+        sm_floor_pct = safety.get("floor_margin_pct", 0)
+        sm_reason = safety.get("reason", "")
+        sm_con_val = safety.get("conservative_value", 0)
+        sm_con_per = safety.get("conservative_per", 0)
+        sm_fwd_eps = safety.get("forward_eps", 0)
+        sm_disc_tgt = safety.get("discounted_target", 0)
+        sm_div_yield = safety.get("dividend_yield", 0)
+
+        if sm_signal == "GREEN":
+            sm_color = "#3fb950"
+            sm_icon = "🟢"
+        elif sm_signal == "YELLOW":
+            sm_color = "#d29922"
+            sm_icon = "🟡"
+        elif sm_signal == "RED":
+            sm_color = "#f85149"
+            sm_icon = "🔴"
+        else:
+            sm_color = "#8b949e"
+            sm_icon = "⚪"
+
+        safety_html = ""
+        if sm_signal != "NO_DATA":
+            safety_html = f"""
+            <div class="dd-section">
+                <div class="dd-section-title">
+                    <span>안전마진</span>
+                    <span style="color:{sm_color}">{sm_icon} {sm_label}</span>
+                </div>
+                <div class="dd-grid">
+                    <div class="dd-cell">
+                        <span class="dd-label">바닥가</span>
+                        <span class="dd-val" style="color:{sm_color}">{sm_floor:,}원 ({sm_floor_pct:+.1f}%)</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">보수적적정</span>
+                        <span class="dd-val">{sm_con_val:,}원 (EPS{sm_fwd_eps:,.0f}×{sm_con_per:.1f})</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">할인목표</span>
+                        <span class="dd-val">{sm_disc_tgt:,}원 (70%)</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">배당</span>
+                        <span class="dd-val">{sm_div_yield:.1f}%</span>
+                    </div>
+                </div>
+                <div class="dd-sub" style="color:{sm_color}">{sm_reason}</div>
+            </div>"""
+
         cards += f"""
         <div class="dd-card" style="border-left: 4px solid {sc_color}">
             <div class="dd-header">
@@ -715,6 +770,7 @@ def _build_deep_dive_html(items: list[dict], date_str: str) -> str:
                 </div>
                 <div class="dd-sub">MA5 {ma5_gap:+.1f}% / MA7 {ma7_gap:+.1f}%</div>
             </div>
+            {safety_html}
         </div>"""
 
     return f"""<!DOCTYPE html>

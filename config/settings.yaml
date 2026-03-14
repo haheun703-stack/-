@@ -1951,3 +1951,16 @@ options_expiry:
   # 알림
   telegram_alert_d1: true         # D-1 장마감 후 텔레그램 경고
   morning_briefing_warn: true     # 당일 아침 브리핑에 경고 포함
+
+# ── 안전마진 플래그 (정상화 EPS 기반) ──
+safety_margin:
+  enabled: true
+  per_discount_ratio: 0.70    # Forward PER 30% 할인
+  per_floor: 4.0              # 보수적 PER 하한
+  per_cap: 12.0               # 보수적 PER 상한
+  per_default: 7.0            # PER 없을 때 기본값
+  target_discount_ratio: 0.70 # 목표가 30% 할인
+  min_analyst_count: 3        # 지속성 판정 최소 애널리스트 수
+  min_opinion_score: 3.5      # 지속성 판정 최소 투자의견
+  yellow_threshold_pct: -20   # 바닥가 대비 이 % 이내면 YELLOW
+  save_history: true          # 일별 컨센서스 히스토리 저장

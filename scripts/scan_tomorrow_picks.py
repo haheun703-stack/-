@@ -1433,6 +1433,15 @@ def main():
 
     print(f"[통합] 고유 종목: {len(all_tickers)}개")
 
+    # 안전마진 컨센서스 풀 사전 로드
+    _safety_pool = {}
+    try:
+        from src.safety_margin import _load_consensus_pool
+        _safety_pool = _load_consensus_pool()
+        print(f"[안전마진] 컨센서스 풀 {len(_safety_pool)}종목 로드")
+    except Exception as e:
+        logger.warning("[안전마진] 풀 로드 실패: %s", e)
+
     # 종목별 통합
     results = []
     for ticker in all_tickers:
@@ -1817,6 +1826,25 @@ def main():
             "group_source_count": grp_src_cnt,
             "sar_trend": pq_data.get("sar_trend", 0) if pq_data else 0,
         }
+
+        # 안전마진 플래그
+        try:
+            from src.safety_margin import calc_safety_margin
+            sm = calc_safety_margin(
+                ticker, name, int(close),
+                consensus=_safety_pool.get(ticker),
+            )
+            rec["safety_signal"] = sm.signal
+            rec["safety_label"] = sm.signal_label
+            rec["safety_floor"] = sm.floor_price
+            rec["safety_floor_pct"] = sm.floor_margin_pct
+            rec["safety_reason"] = sm.reason
+        except Exception:
+            rec["safety_signal"] = "NO_DATA"
+            rec["safety_label"] = "데이터없음"
+            rec["safety_floor"] = 0
+            rec["safety_floor_pct"] = 0.0
+            rec["safety_reason"] = ""
 
         results.append(rec)
 

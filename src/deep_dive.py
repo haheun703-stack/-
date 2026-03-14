@@ -92,9 +92,10 @@ class DeepDiveResult:
     entry_timing: str = ""            # "진입적기" / "눌림대기" / "이격과대"
     verdict: str = ""                 # 종합판정
     score: int = 0                    # 딥다이브 점수 (0~100)
+    safety: dict = field(default_factory=dict)  # 안전마진 판정
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "ticker": self.ticker,
             "name": self.name,
             "close": self.close,
@@ -105,7 +106,9 @@ class DeepDiveResult:
             "entry_timing": self.entry_timing,
             "verdict": self.verdict,
             "score": self.score,
+            "safety": self.safety,
         }
+        return d
 
 
 # ─── 분석 함수 ─────────────────────────────────
@@ -347,6 +350,20 @@ def deep_dive(ticker: str, name: str = "") -> DeepDiveResult | None:
         verdicts.append("기관 매집 강력")
 
     result.verdict = " / ".join(verdicts)
+
+    # 6. 안전마진 플래그
+    try:
+        from src.safety_margin import calc_safety_margin
+        sm = calc_safety_margin(ticker, name, result.close)
+        result.safety = sm.to_dict()
+        # verdict에 안전마진 반영
+        if sm.signal == "GREEN":
+            verdicts.append("안전마진OK")
+        elif sm.signal == "RED":
+            verdicts.append("안전마진주의")
+        result.verdict = " / ".join(verdicts)
+    except Exception as e:
+        logger.debug("[딥다이브] 안전마진 실패: %s", e)
 
     return result
 
