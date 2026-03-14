@@ -2050,6 +2050,50 @@ def main():
         for r in rest[:10]:
             print(f"    - {r['name']}({r['ticker']}) {r['total_score']}점 [{r['grade']}]")
 
+    # ── 딥다이브 분석: TOP5 수급 + 급등패턴 + 이격 ──
+    deep_dive_data = []
+    dd_results = []
+    try:
+        from src.deep_dive import deep_dive_batch, format_deep_dive_telegram
+        dd_targets = (top5_swing + top5_short)[:5]
+        dd_results = deep_dive_batch(dd_targets, top_n=5)
+        if dd_results:
+            deep_dive_data = [r.to_dict() for r in dd_results]
+            dd_msg = format_deep_dive_telegram(dd_results)
+            print(f"\n{dd_msg}")
+    except Exception as e:
+        logger.warning("[딥다이브] 실행 실패: %s", e)
+        print(f"\n  ⚠ 딥다이브 분석 실패: {e}")
+
+    # ── 딥다이브 HTML 보고서 + 텔레그램 전송 ──
+    dd_png_path = None
+    if dd_results:
+        try:
+            from src.html_report import generate_deep_dive_report, send_report_to_telegram
+            dd_html, dd_png_path = generate_deep_dive_report(dd_results)
+            if dd_html.exists():
+                print(f"  딥다이브 HTML: {dd_html}")
+            if dd_png_path and dd_png_path.exists():
+                print(f"  딥다이브 PNG: {dd_png_path}")
+                caption = f"[딥다이브] TOP{len(dd_results)} 수급+급등패턴+이격 분석"
+                img_ok = send_report_to_telegram(dd_png_path, caption)
+                print(f"  딥다이브 이미지 전송: {'OK' if img_ok else 'FAIL'}")
+        except Exception as e:
+            logger.warning("[딥다이브 HTML] 실패: %s", e)
+            print(f"  ⚠ 딥다이브 HTML/전송 실패: {e}")
+
+    # 딥다이브 텍스트도 텔레그램 전송
+    if dd_results and deep_dive_data:
+        try:
+            from src.telegram_sender import send_message
+            dd_text_msg = format_deep_dive_telegram(dd_results)
+            if dd_text_msg:
+                send_message(dd_text_msg)
+                print("  딥다이브 텍스트 전송: OK")
+        except Exception as e:
+            logger.warning("[딥다이브 텍스트 전송] 실패: %s", e)
+            print(f"  ⚠ 딥다이브 텍스트 전송 실패: {e}")
+
     # 날짜 기입 + JSON 저장
     now = datetime.now()
     # 내일 날짜 (금→월, 토→월, 일→월)
@@ -2104,6 +2148,7 @@ def main():
             "penalized": sum(1 for r in results if r.get("nat_bonus", 0) < 0),
             "as_source": sum(1 for r in results if "국적수급" in r.get("sources", [])),
         } if nat_signals else {},
+        "deep_dive": deep_dive_data,
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 

@@ -513,6 +513,335 @@ def _build_html(
 </html>"""
 
 
+def generate_deep_dive_report(
+    deep_dive_results: list,
+    output_dir: Path = REPORT_DIR,
+) -> tuple[Path, Path | None]:
+    """딥다이브 분석 보고서 생성 (독립 HTML+PNG).
+
+    Args:
+        deep_dive_results: DeepDiveResult 리스트 (to_dict() 또는 원본 모두 가능)
+    Returns:
+        (html_path, png_path)
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+
+    # dict 또는 DeepDiveResult 모두 처리
+    items = []
+    for r in deep_dive_results:
+        if hasattr(r, "to_dict"):
+            items.append(r.to_dict())
+        else:
+            items.append(r)
+
+    if not items:
+        return Path(), None
+
+    html = _build_deep_dive_html(items, date_str)
+    html_path = output_dir / f"딥다이브_{date_str}.html"
+    html_path.write_text(html, encoding="utf-8")
+    logger.info("딥다이브 HTML 저장: %s", html_path)
+
+    png_path = html_path.with_suffix(".png")
+    try:
+        _html_to_png(html_path, png_path, width=700)
+        logger.info("딥다이브 PNG 변환 완료: %s", png_path)
+    except Exception as e:
+        logger.error("딥다이브 PNG 변환 실패: %s", e)
+        png_path = None
+
+    return html_path, png_path
+
+
+def _억원(val: float) -> str:
+    """원 → 억 변환 (HTML용)."""
+    if abs(val) >= 1e8:
+        return f"{val/1e8:+,.0f}억"
+    elif abs(val) >= 1e4:
+        return f"{val/1e4:+,.0f}만"
+    return f"{val:+,.0f}"
+
+
+def _supply_grade_color(grade: str) -> str:
+    """수급 등급 색상."""
+    n = len(grade)
+    if n >= 4:
+        return "#3fb950"
+    elif n >= 3:
+        return "#58a6ff"
+    elif n >= 2:
+        return "#d29922"
+    return "#8b949e"
+
+
+def _build_deep_dive_html(items: list[dict], date_str: str) -> str:
+    """딥다이브 보고서 HTML 생성."""
+    cards = ""
+    for i, item in enumerate(items, 1):
+        s = item.get("supply", {})
+        g = item.get("surge", {})
+        score = item.get("score", 0)
+        verdict = item.get("verdict", "")
+        name = item.get("name", "")
+        ticker = item.get("ticker", "")
+        close = item.get("close", 0)
+        timing = item.get("entry_timing", "")
+        ma5_gap = item.get("ma5_gap_pct", 0)
+        ma7_gap = item.get("ma7_gap_pct", 0)
+
+        # 점수 색상
+        if score >= 75:
+            sc_color = "#3fb950"
+        elif score >= 50:
+            sc_color = "#58a6ff"
+        else:
+            sc_color = "#f85149"
+
+        # 수급 등급
+        grade = s.get("grade", "★")
+        grade_color = _supply_grade_color(grade)
+
+        # 연속매수 텍스트
+        streaks = []
+        fs = s.get("foreign_streak", 0)
+        is_ = s.get("inst_streak", 0)
+        if fs > 0:
+            streaks.append(f"외인 {fs}일 연속매수")
+        if is_ > 0:
+            streaks.append(f"기관 {is_}일 연속매수")
+        streak_html = " / ".join(streaks) if streaks else "연속매수 없음"
+
+        # 거래량 확인
+        confirms = []
+        if s.get("foreign_vol_confirm"):
+            confirms.append("외인거래량 확인")
+        if s.get("inst_vol_confirm"):
+            confirms.append("기관거래량 확인")
+        confirm_html = " / ".join(confirms) if confirms else ""
+
+        # 급등패턴
+        surge_verdict = g.get("verdict", "데이터없음")
+        if surge_verdict == "추세지속형":
+            sv_color = "#3fb950"
+        elif surge_verdict == "날고끝형":
+            sv_color = "#f85149"
+        else:
+            sv_color = "#d29922"
+
+        surge_detail = ""
+        if g.get("total_surges", 0) > 0:
+            surge_detail = (
+                f'+5%↑ {g["total_surges"]}회 → '
+                f'D+5 상승:{g.get("continue_count", 0)} '
+                f'하락:{g.get("fade_count", 0)} '
+                f'({g.get("continue_rate", 0):.0f}%)<br>'
+                f'D+5 평균: {g.get("avg_d5_return", 0):+.1f}%'
+            )
+            if g.get("latest_surge_date"):
+                surge_detail += (
+                    f'<br>최근: {g["latest_surge_date"]} → '
+                    f'D+5 {g.get("latest_surge_d5", 0):+.1f}%'
+                )
+
+        # 이격 색상
+        if timing == "진입적기":
+            t_color = "#3fb950"
+        elif timing == "눌림대기":
+            t_color = "#d29922"
+        elif timing == "이격과대":
+            t_color = "#f85149"
+        else:
+            t_color = "#8b949e"
+
+        # 동시매수 표시
+        both_buy = s.get("foreign_5d", 0) > 0 and s.get("inst_5d", 0) > 0
+        both_badge = '<span class="dd-badge both">동시매수</span>' if both_buy else ""
+
+        cards += f"""
+        <div class="dd-card" style="border-left: 4px solid {sc_color}">
+            <div class="dd-header">
+                <div class="dd-rank" style="color:{sc_color}">#{i}</div>
+                <div class="dd-info">
+                    <div class="dd-name">{name}</div>
+                    <div class="dd-code">{ticker} | {close:,}원</div>
+                </div>
+                <div class="dd-score" style="color:{sc_color}">{score}<span class="dd-unit">/100</span></div>
+            </div>
+            <div class="dd-verdict">{verdict}</div>
+
+            <div class="dd-section">
+                <div class="dd-section-title">
+                    <span>수급 정밀</span>
+                    <span style="color:{grade_color}">{grade}</span>
+                    {both_badge}
+                </div>
+                <div class="dd-grid">
+                    <div class="dd-cell">
+                        <span class="dd-label">외인 5일</span>
+                        <span class="dd-val {'up' if s.get('foreign_5d',0)>0 else 'down'}">{_억원(s.get('foreign_5d',0))}</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">외인 20일</span>
+                        <span class="dd-val {'up' if s.get('foreign_20d',0)>0 else 'down'}">{_억원(s.get('foreign_20d',0))}</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">기관 5일</span>
+                        <span class="dd-val {'up' if s.get('inst_5d',0)>0 else 'down'}">{_억원(s.get('inst_5d',0))}</span>
+                    </div>
+                    <div class="dd-cell">
+                        <span class="dd-label">기관 20일</span>
+                        <span class="dd-val {'up' if s.get('inst_20d',0)>0 else 'down'}">{_억원(s.get('inst_20d',0))}</span>
+                    </div>
+                </div>
+                <div class="dd-sub">{streak_html}</div>
+                {"<div class='dd-sub confirm'>" + confirm_html + "</div>" if confirm_html else ""}
+                <div class="dd-sub">OBV 5일: {s.get('obv_5d_pct',0):+.1f}% | 거래량비: {s.get('vol_ratio',0):.2f}x</div>
+            </div>
+
+            <div class="dd-section">
+                <div class="dd-section-title">
+                    <span>급등 패턴</span>
+                    <span style="color:{sv_color}">{surge_verdict}</span>
+                </div>
+                <div class="dd-sub">{surge_detail if surge_detail else "최근 6개월 +5% 급등 없음"}</div>
+            </div>
+
+            <div class="dd-section">
+                <div class="dd-section-title">
+                    <span>이격 · 타이밍</span>
+                    <span style="color:{t_color}">{timing}</span>
+                </div>
+                <div class="dd-sub">MA5 {ma5_gap:+.1f}% / MA7 {ma7_gap:+.1f}%</div>
+            </div>
+        </div>"""
+
+    return f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>딥다이브 분석 - {date_str}</title>
+<style>
+    * {{ margin:0; padding:0; box-sizing:border-box; }}
+    body {{
+        font-family: 'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        padding: 16px;
+        max-width: 700px;
+        margin: 0 auto;
+    }}
+    .dd-title {{
+        text-align:center;
+        font-size:20px;
+        font-weight:800;
+        color:#58a6ff;
+        padding:16px 0 12px;
+        border-bottom:2px solid #30363d;
+        margin-bottom:16px;
+    }}
+    .dd-subtitle {{
+        text-align:center;
+        font-size:12px;
+        color:#8b949e;
+        margin-top:4px;
+    }}
+    .dd-card {{
+        background:#161b22;
+        border:1px solid #30363d;
+        border-radius:10px;
+        padding:14px;
+        margin-bottom:12px;
+    }}
+    .dd-header {{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:6px;
+    }}
+    .dd-rank {{ font-size:18px; font-weight:900; min-width:28px; }}
+    .dd-name {{ font-size:16px; font-weight:700; }}
+    .dd-code {{ font-size:11px; color:#8b949e; }}
+    .dd-score {{
+        margin-left:auto;
+        font-size:28px;
+        font-weight:800;
+    }}
+    .dd-unit {{ font-size:12px; color:#8b949e; }}
+    .dd-verdict {{
+        font-size:12px;
+        color:#c9d1d9;
+        padding:6px 10px;
+        background:#1a1e26;
+        border-radius:6px;
+        margin-bottom:10px;
+    }}
+    .dd-section {{
+        border-top:1px solid #21262d;
+        padding-top:8px;
+        margin-top:8px;
+    }}
+    .dd-section-title {{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        font-size:13px;
+        font-weight:700;
+        margin-bottom:6px;
+    }}
+    .dd-grid {{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:4px 16px;
+        margin-bottom:6px;
+    }}
+    .dd-cell {{
+        display:flex;
+        justify-content:space-between;
+        font-size:12px;
+        padding:2px 0;
+    }}
+    .dd-label {{ color:#8b949e; }}
+    .dd-val.up {{ color:#3fb950; }}
+    .dd-val.down {{ color:#f85149; }}
+    .dd-sub {{
+        font-size:11px;
+        color:#8b949e;
+        padding:2px 0;
+    }}
+    .dd-sub.confirm {{ color:#3fb950; }}
+    .dd-badge {{
+        font-size:10px;
+        padding:2px 6px;
+        border-radius:4px;
+        font-weight:700;
+    }}
+    .dd-badge.both {{
+        background:#1a3a2a;
+        color:#3fb950;
+    }}
+    .dd-footer {{
+        text-align:center;
+        font-size:10px;
+        color:#484f58;
+        padding:12px 0;
+        border-top:1px solid #21262d;
+        margin-top:8px;
+    }}
+</style>
+</head>
+<body>
+<div class="dd-title">
+    딥다이브 분석 TOP{len(items)}
+    <div class="dd-subtitle">{date_str} | 수급 + 급등패턴 + 이격</div>
+</div>
+{cards}
+<div class="dd-footer">Quantum Master | 딥다이브 자동 분석 — 투자 판단은 본인 책임</div>
+</body>
+</html>"""
+
+
 def _rank_to_grade(rank: int) -> str:
     """순위 → 등급 변환 (1=S, 2=A, 3=B, 4=C, 5+=D)."""
     return {1: "S", 2: "A", 3: "B", 4: "C"}.get(rank, "D")
