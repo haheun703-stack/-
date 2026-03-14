@@ -206,11 +206,13 @@ def calc_safety_margin(
     close: int = 0,
     consensus: dict | None = None,
     use_wisereport: bool = True,
+    use_dart: bool = True,
 ) -> SafetyMarginResult:
     """단일 종목 안전마진 판정.
 
-    consensus: 외부에서 직접 전달 가능 (없으면 3단계 폴백).
-    use_wisereport: 배치 호출 시 False (느림 방지).
+    consensus: 외부에서 직접 전달 가능 (없으면 폴백).
+    use_wisereport: True면 wisereport fetch_one 시도 (2순위).
+    use_dart: True면 DART trailing EPS 폴백 (3순위).
     """
     cfg = _load_config()
     result = SafetyMarginResult(ticker=ticker, name=name, close=close)
@@ -227,8 +229,8 @@ def calc_safety_margin(
         if consensus:
             data_source = "WISEREPORT"
 
-    # 3순위: DART trailing EPS
-    if not consensus:
+    # 3순위: DART trailing EPS (옵션)
+    if not consensus and use_dart:
         consensus = _calc_trailing_eps(ticker)
         if consensus:
             data_source = "DART_TRAILING"
@@ -370,10 +372,12 @@ def calc_safety_margin(
 def safety_margin_batch(
     picks: list[dict],
     use_wisereport: bool = False,
+    use_dart: bool = True,
 ) -> list[SafetyMarginResult]:
     """추천 종목 배치 안전마진 판정.
 
     use_wisereport: True면 NO_DATA 종목에 wisereport 크롤링 시도 (느림).
+    use_dart: False면 DART trailing EPS 폴백 비활성.
     """
     pool = _load_consensus_pool()
     results = []
@@ -387,6 +391,7 @@ def safety_margin_batch(
         r = calc_safety_margin(
             ticker, name, close, consensus,
             use_wisereport=use_wisereport,
+            use_dart=use_dart,
         )
         results.append(r)
 
