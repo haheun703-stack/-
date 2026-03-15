@@ -1,11 +1,11 @@
 """
 FLOWX Supabase 업로드 — 장마감 후 실행
 
-ETF 시그널 + 중국자금 흐름을 Supabase에 업로드.
+ETF 시그널 + 외국인 자금 흐름을 Supabase에 업로드.
 BAT-D 마지막 단계에서 호출.
 
 Usage:
-    python scripts/upload_flowx.py            # ETF + 중국자금
+    python scripts/upload_flowx.py            # ETF + 외국인 자금
     python scripts/upload_flowx.py --dry-run  # 업로드 안 하고 데이터만 확인
 """
 
@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.adapters.flowx_uploader import (
     FlowxUploader,
     build_etf_signal_rows,
-    build_china_flow_rows,
+    build_foreign_flow_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def main():
 
     # 데이터 변환
     etf_rows = build_etf_signal_rows()
-    china_rows = build_china_flow_rows()
+    foreign_rows = build_foreign_flow_rows()
 
     print(f"\n[FLOWX] ETF 시그널: {len(etf_rows)}건")
     for r in etf_rows:
@@ -52,12 +52,23 @@ def main():
     hold = [r for r in etf_rows if r["signal"] == "HOLD"]
     print(f"  BUY/SELL: {len(buy_sell)}건, HOLD: {len(hold)}건")
 
-    print(f"\n[FLOWX] 중국자금: {len(china_rows)}건")
-    inflow = [r for r in china_rows if r["signal"] == "INFLOW"]
+    print(f"\n[FLOWX] 외국인 자금: {len(foreign_rows)}건")
+    inflow = [r for r in foreign_rows if r["signal"] == "INFLOW"]
+    outflow = [r for r in foreign_rows if r["signal"] == "OUTFLOW"]
+    neutral = [r for r in foreign_rows if r["signal"] == "NEUTRAL"]
     if inflow:
-        print(f"  INFLOW 종목:")
+        print(f"  INFLOW ({len(inflow)}건):")
         for r in inflow:
-            print(f"    {r['name']:12s} z={r['z_score']:.1f} score={r['score']}")
+            print(f"    {r['name']:16s} z={r['z_score']:+.2f} score={r['score']}")
+    if outflow:
+        print(f"  OUTFLOW ({len(outflow)}건):")
+        for r in outflow:
+            print(f"    {r['name']:16s} z={r['z_score']:+.2f} score={r['score']}")
+    print(f"  NEUTRAL: {len(neutral)}건 (업로드 제외)")
+
+    # 듀얼출력 필터: NEUTRAL 제외, INFLOW/OUTFLOW만 업로드
+    foreign_filtered = [r for r in foreign_rows if r["signal"] != "NEUTRAL"]
+    print(f"  -> 업로드 대상: {len(foreign_filtered)}건 (INFLOW+OUTFLOW)")
 
     if args.dry_run:
         print("\n[DRY-RUN] 업로드 스킵")
@@ -69,10 +80,10 @@ def main():
         print("\n[FLOWX] Supabase 미연결 — .env에 SUPABASE_URL/KEY 설정 필요")
         return
 
-    ok1 = uploader.upload_etf_signals(etf_rows)
-    ok2 = uploader.upload_china_flow(china_rows)
+    ok1 = uploader.upload_etf_signals(etf_rows)          # 전체 (HOLD 포함, 섹터 순위용)
+    ok2 = uploader.upload_foreign_flow(foreign_filtered)  # INFLOW/OUTFLOW만
 
-    print(f"\n[FLOWX] 업로드 완료: ETF={'OK' if ok1 else 'FAIL'}, 중국자금={'OK' if ok2 else 'FAIL'}")
+    print(f"\n[FLOWX] 업로드 완료: ETF={'OK' if ok1 else 'FAIL'} ({len(etf_rows)}건), 외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
 
 
 if __name__ == "__main__":

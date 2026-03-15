@@ -1,13 +1,13 @@
 """FLOWX Supabase 업로드 어댑터.
 
 퀀트봇 데이터를 FLOWX PRO 대시보드용 Supabase DB에 업로드.
-담당 테이블: etf_signals, china_flow, paper_trades
+담당 테이블: etf_signals, foreign_flow, paper_trades
 
 Usage:
     from src.adapters.flowx_uploader import FlowxUploader
     uploader = FlowxUploader()
     uploader.upload_etf_signals(rows)
-    uploader.upload_china_flow(rows)
+    uploader.upload_foreign_flow(rows)
     uploader.upload_paper_trade(trade)
 """
 
@@ -67,20 +67,23 @@ class FlowxUploader:
             logger.error("[FLOWX] ETF 시그널 업로드 실패: %s", e)
             return False
 
-    # ── 중국자금 흐름 ──────────────────────────────
+    # ── 외국인 자금 흐름 ─────────────────────────────
 
-    def upload_china_flow(self, rows: list[dict]) -> bool:
-        """중국자금 흐름 업로드 (UPSERT on date+code)."""
+    def upload_foreign_flow(self, rows: list[dict]) -> bool:
+        """외국인 자금 흐름 업로드 (UPSERT on date+code).
+
+        Supabase 테이블명: china_flow (기존 테이블 재활용, 스키마 동일).
+        """
         if not self.is_active or not rows:
             return False
         try:
             result = self.client.table("china_flow").upsert(
                 rows, on_conflict="date,code"
             ).execute()
-            logger.info("[FLOWX] 중국자금 업로드: %d건", len(rows))
+            logger.info("[FLOWX] 외국인 자금 업로드: %d건", len(rows))
             return True
         except Exception as e:
-            logger.error("[FLOWX] 중국자금 업로드 실패: %s", e)
+            logger.error("[FLOWX] 외국인 자금 업로드 실패: %s", e)
             return False
 
     # ── 페이퍼 트레이딩 ──────────────────────────────
@@ -175,29 +178,35 @@ def build_etf_signal_rows(date_str: str = "") -> list[dict]:
     return rows
 
 
-def build_china_flow_rows(date_str: str = "") -> list[dict]:
-    """기존 JSON → china_flow 테이블 포맷 변환.
+def build_foreign_flow_rows(date_str: str = "") -> list[dict]:
+    """국적별 외국인 수급 → foreign_flow 테이블 포맷 변환.
 
-    소스: data/china_money/china_money_signal.json
+    소스: data/krx_nationality/nationality_signal.json
+    시그널 매핑:
+      - foreign_direction=="BUY" → INFLOW
+      - signal=="SELL" or foreign_direction=="SELL" → OUTFLOW
+      - 나머지 → NEUTRAL
     """
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
 
-    cm_path = DATA_DIR / "china_money" / "china_money_signal.json"
-    if not cm_path.exists():
+    sig_path = DATA_DIR / "krx_nationality" / "nationality_signal.json"
+    if not sig_path.exists():
         return []
 
-    with open(cm_path, encoding="utf-8") as f:
-        cm = json.load(f)
+    with open(sig_path, encoding="utf-8") as f:
+        data = json.load(f)
 
     rows = []
-    for sig in cm.get("signals", []):
-        # SURGE/INFLOW → INFLOW, NORMAL → NEUTRAL, 나머지 매핑
-        raw_signal = sig.get("signal", "NORMAL")
-        if raw_signal in ("SURGE", "INFLOW", "SECTOR_FOCUS"):
+    for sig in data.get("signals", []):
+        # 시그널 매핑: 외국인 순매수/순매도 방향 기준
+        foreign_dir = sig.get("foreign_direction", "NEUTRAL")
+        raw_signal = sig.get("signal", "NEUTRAL")
+
+        if foreign_dir == "BUY":
             mapped = "INFLOW"
-        elif raw_signal == "WATCH":
-            mapped = "NEUTRAL"
+        elif foreign_dir == "SELL" or raw_signal == "SELL":
+            mapped = "OUTFLOW"
         else:
             mapped = "NEUTRAL"
 
@@ -207,9 +216,8 @@ def build_china_flow_rows(date_str: str = "") -> list[dict]:
             "name": sig.get("name", ""),
             "signal": mapped,
             "score": sig.get("score", 0),
-            "z_score": round(sig.get("foreign_zscore", 0), 2),
-            "change_5d_pct": round(sig.get("change_5d_pct", 0), 2)
-                if sig.get("change_5d_pct") else 0,
+            "z_score": round(sig.get("inst_zscore", 0), 2),
+            "change_5d_pct": round(sig.get("price_change_pct", 0), 2),
         })
 
     return rows
