@@ -324,7 +324,7 @@ if errorlevel 1 echo [%date% %time%] [23.5a/29] FAILED (빌드) >> logs\schedule
 python -u -X utf8 -c "import requests,json,pathlib,os; from dotenv import load_dotenv; load_dotenv(pathlib.Path('D:/sub-agent-project/.env')); d=json.loads(pathlib.Path('website/data/brain_data_upload.json').read_text(encoding='utf-8')); r=requests.post('https://www.ppwangga.com/api/brain',headers={'X-API-Key':os.environ.get('JARVIS_API_KEY',''),'Content-Type':'application/json'},json=d,timeout=30); print(f'Brain API: {r.status_code}')" >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [23.5b/29] FAILED (업로드) >> logs\schedule.log
 
-REM 23.7단계: FLOWX Supabase 업로드 (ETF 시그널 + 중국자금)
+REM 23.7단계: FLOWX Supabase 업로드 (ETF 시그널 + 외국인 자금)
 echo [%date% %time%] [23.7/31] FLOWX Supabase 업로드 >> logs\schedule.log
 python -u -X utf8 scripts\upload_flowx.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [23.7/31] FAILED >> logs\schedule.log
