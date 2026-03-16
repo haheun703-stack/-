@@ -99,7 +99,8 @@ class TriggerEngine:
         elif rsi_in_range:
             # RSI 범위 내: 중심(45)에 가까울수록 강
             center = (rsi_range[0] + rsi_range[1]) / 2
-            dist = abs(rsi - center) / (rsi_range[1] - rsi_range[0]) * 2
+            range_diff = max(rsi_range[1] - rsi_range[0], 1)  # 0 분모 보호
+            dist = abs(rsi - center) / range_diff * 2
             strength = max(0.3, 0.6 - dist * 0.3)
 
         reason = ""

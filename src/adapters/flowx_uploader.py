@@ -274,6 +274,8 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
 
         confidence = float(item.get("confidence", 0))
         close = _get_close(ticker)
+        if close <= 0:
+            continue  # 종가 없으면 스킵 (stop_loss=0 방지)
         impact_pct = float(item.get("expected_impact_pct", 5))
 
         # grade: confidence → AA/A/B
@@ -313,6 +315,8 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
 
         grade = "AA" if grade_kr == "적극매수" else "A"
         close = pick.get("close", 0) or _get_close(ticker)
+        if close <= 0:
+            continue  # 종가 없으면 스킵 (stop_loss=0 방지)
 
         rows.append({
             "date": date_str,

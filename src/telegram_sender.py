@@ -334,6 +334,10 @@ def _split_message(text: str, max_length: int) -> list[str]:
     current = ""
 
     for line in text.split("\n"):
+        # 라인 자체가 max_length 초과 시 강제 분할
+        while len(line) > max_length:
+            chunks.append(line[:max_length])
+            line = line[max_length:]
         if len(current) + len(line) + 1 > max_length:
             if current:
                 chunks.append(current)

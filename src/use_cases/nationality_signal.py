@@ -555,7 +555,7 @@ def _calc_retail_metrics(inv_df: pd.DataFrame | None) -> dict:
         # 5일 / 20일 합계
         tail5 = inv_df.tail(5)
         retail_5d = int(tail5["개인"].sum()) if len(tail5) > 0 else 0
-        retail_20d = int(inv_df.tail(20)["개인"].sum()) if len(inv_df) >= 5 else 0
+        retail_20d = int(inv_df.tail(20)["개인"].sum()) if len(inv_df) >= 20 else 0
 
         foreign_5d = int(tail5["외국인합계"].sum()) if "외국인합계" in tail5.columns else 0
         inst_5d = int(tail5["기관합계"].sum()) if "기관합계" in tail5.columns else 0

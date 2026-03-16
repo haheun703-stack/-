@@ -399,7 +399,7 @@ class Shield:
             if total > max_sector_pct or is_overlap:
                 if total > max_sector_pct * 1.5:
                     severity = "DANGER"
-                elif total > max_sector_pct:
+                elif total > max_sector_pct or is_overlap:
                     severity = "WARNING"
                 else:
                     severity = "OK"

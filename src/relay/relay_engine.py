@@ -59,10 +59,10 @@ class RelayEngine:
 
         # 1) 데이터 로드
         us_data = load_us_leaders()
-        us_overnight = self._load_json("us_market/overnight_signal.json")
-        ai_judgment = self._load_json("ai_brain_judgment.json")
-        market_news = self._load_json("market_news.json")
-        sector_momentum = self._load_json("sector_rotation/sector_momentum.json")
+        us_overnight = self._load_json("us_market/overnight_signal.json") or {}
+        ai_judgment = self._load_json("ai_brain_judgment.json") or {}
+        market_news = self._load_json("market_news.json") or {}
+        sector_momentum = self._load_json("sector_rotation/sector_momentum.json") or {}
 
         # 2) 섹터별 판정
         results = {}

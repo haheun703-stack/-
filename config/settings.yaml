@@ -1492,10 +1492,12 @@ brain_v3_integration:
   # 레짐별 max_new_buys 상한 (v3 Phase 1 결과를 클램핑)
   regime_slot_cap:
     BULL: 99                         # 제한 없음 (v3 자체 설정 따름)
+    PRE_BULL: 8                      # 강세 전환 조짐
     CAUTION: 5
-    BEAR: 2
-    CRISIS: 0                        # 신규진입 금지
     PRE_BEAR: 1
+    BEAR: 2
+    PRE_CRISIS: 0                    # 위기 전환 조짐 → 신규진입 금지
+    CRISIS: 0                        # 신규진입 금지
 
   # BRAIN confidence → min_conviction 상향
   confidence_conviction_map:
@@ -1955,12 +1957,12 @@ options_expiry:
 # ── 안전마진 플래그 (정상화 EPS 기반) ──
 safety_margin:
   enabled: true
-  per_discount_ratio: 0.70    # Forward PER 30% 할인
+  per_discount_ratio: 0.80    # Forward PER 20% 할인 (완화: 0.70→0.80)
   per_floor: 4.0              # 보수적 PER 하한
-  per_cap: 12.0               # 보수적 PER 상한
-  per_default: 7.0            # PER 없을 때 기본값
-  target_discount_ratio: 0.70 # 목표가 30% 할인
+  per_cap: 15.0               # 보수적 PER 상한 (완화: 12→15)
+  per_default: 8.0            # PER 없을 때 기본값 (완화: 7→8)
+  target_discount_ratio: 0.75 # 목표가 25% 할인 (완화: 0.70→0.75)
   min_analyst_count: 3        # 지속성 판정 최소 애널리스트 수
   min_opinion_score: 3.5      # 지속성 판정 최소 투자의견
-  yellow_threshold_pct: -20   # 바닥가 대비 이 % 이내면 YELLOW
+  yellow_threshold_pct: -30   # 바닥가 대비 이 % 이내면 YELLOW (완화: -20→-30)
   save_history: true          # 일별 컨센서스 히스토리 저장
