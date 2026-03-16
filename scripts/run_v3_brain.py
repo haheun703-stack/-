@@ -193,7 +193,7 @@ async def run_phase0() -> dict:
 
     try:
         agent = O1StrategistAgent()
-        result = await agent.deep_analyze()
+        result = await asyncio.wait_for(agent.deep_analyze(), timeout=180)
 
         # 저장
         output_path = DATA_DIR / "o1_deep_analysis.json"
@@ -296,7 +296,11 @@ async def run_phase1(dry_run: bool = False, o1_context: dict | None = None) -> d
         logger.info("o1 Deep Thinking 컨텍스트 주입 완료")
 
     agent = StrategicBrainAgent()
-    result = await agent.analyze(context)
+    try:
+        result = await asyncio.wait_for(agent.analyze(context), timeout=180)
+    except asyncio.TimeoutError:
+        logger.error("Phase 1 Claude API 타임아웃 (180초)")
+        return {"error": "API_TIMEOUT", "regime": "UNKNOWN", "regime_confidence": 0}
 
     # ── 결과 저장 ──
     settings = _load_settings()
@@ -370,7 +374,13 @@ async def run_phase2(strategic_result: dict) -> dict:
 
     # ── Agent 2B 실행 ──
     agent = SectorStrategistAgent()
-    result = await agent.focus(strategic_result, sector_flow, relay_db)
+    try:
+        result = await asyncio.wait_for(
+            agent.focus(strategic_result, sector_flow, relay_db), timeout=180
+        )
+    except asyncio.TimeoutError:
+        logger.error("Phase 2 Claude API 타임아웃 (180초)")
+        return SectorStrategistAgent._fallback_result("API 타임아웃")
 
     # ── 결과 저장 ──
     settings = _load_settings()
@@ -511,13 +521,20 @@ async def run_phase3_4(
     enable_vision = upgrade.get("vision_enabled", False)
 
     agent = DeepAnalystAgent()
-    passed = await agent.analyze_batch(
-        candidates=filtered,
-        industry_thesis=industry_thesis,
-        sector_focus=sector_focus,
-        min_conviction=min_conviction,
-        enable_vision=enable_vision,
-    )
+    try:
+        passed = await asyncio.wait_for(
+            agent.analyze_batch(
+                candidates=filtered,
+                industry_thesis=industry_thesis,
+                sector_focus=sector_focus,
+                min_conviction=min_conviction,
+                enable_vision=enable_vision,
+            ),
+            timeout=600,  # 배치 분석은 종목 수에 따라 오래 걸림
+        )
+    except asyncio.TimeoutError:
+        logger.error("Phase 4 Claude API 타임아웃 (600초)")
+        passed = []
 
     # ── 결과 로그 ──
     logger.info("-" * 60)
@@ -614,7 +631,13 @@ async def run_phase5(
         result["reasoning"] = "Deep Analyst 통과 종목이 없어 매수 보류"
     else:
         agent = PortfolioBrainAgent()
-        result = await agent.decide(deep_picks, positions, strategic_for_p5)
+        try:
+            result = await asyncio.wait_for(
+                agent.decide(deep_picks, positions, strategic_for_p5), timeout=180
+            )
+        except asyncio.TimeoutError:
+            logger.error("Phase 5 Claude API 타임아웃 (180초)")
+            result = PortfolioBrainAgent._fallback_result("API 타임아웃", strategic_for_p5)
 
     # ── BRAIN 종목당 배분 상한 적용 ──
     if brain_cap and brain_cap.get("capped") and result.get("buys"):

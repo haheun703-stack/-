@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 
 class BaseAgent:
@@ -84,4 +87,8 @@ class BaseAgent:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
             text = text.split("```")[1].split("```")[0]
-        return json.loads(text.strip())
+        try:
+            return json.loads(text.strip())
+        except (json.JSONDecodeError, IndexError) as e:
+            logger.warning("JSON 파싱 실패: %s — 원문: %s", e, text[:200])
+            return {"error": f"JSON 파싱 실패: {e}", "raw_text": text[:500]}

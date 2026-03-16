@@ -914,6 +914,8 @@ class SignalEngine:
         if not grade_passed:
             # ── v3.2: Grade F 우회 — 추세 지속(Trend Continuation) 체크 ──
             # 뉴스 부스트가 높으면 min_conditions 완화 (5→4)
+            original_min = None
+            tc_cfg = None
             if news_score_boost >= 0.08:
                 tc_cfg = self.triggers_cfg.get("trend_continuation", {})
                 original_min = tc_cfg.get("min_conditions", 5)
