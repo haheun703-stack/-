@@ -13,6 +13,7 @@ HMM 기반 3-상태 레짐 감지
 """
 
 import logging
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -148,3 +149,92 @@ class RegimeDetector:
             return False, "low_accum"
 
         return True, ""
+
+
+# ═══════════════════════════════════════════════════════════
+# 수급 레짐 판별기 (Supply-Demand Regime Detector)
+# ═══════════════════════════════════════════════════════════
+# 종목별 수급 상태 → NORMAL vs MOMENTUM 레짐 판별
+# NORMAL:   평균회귀 구간 → RSI/과열 필터 활성
+# MOMENTUM: 수급 주도 구간 → RSI 필터 비활성, 수급이탈 시 즉시 탈출
+# 핵심: "기관이 사고 있으면 RSI 80이어도 괜찮다"
+
+
+@dataclass
+class SupplyRegimeSignal:
+    """수급 레짐 판별 결과."""
+    regime: str       # "MOMENTUM" or "NORMAL"
+    score: float      # 0.0 ~ 1.0
+    vol_ratio: float  # 거래량 / 20일 평균
+    smart_flow: str   # "STRONG" / "WEAK" / "NEUTRAL"
+
+
+def detect_supply_regime(row: pd.Series, threshold: float = 0.55) -> SupplyRegimeSignal:
+    """종목별 수급 레짐 판별.
+
+    5가지 축으로 레짐 스코어 계산 (0.0~1.0):
+      (A) 거래량 폭증: 0.25
+      (B) 스마트머니 유입: 0.30  ← 핵심
+      (C) OBV 추세: 0.15
+      (D) 가격 추세: 0.15
+      (E) RSI 모멘텀: 0.15
+
+    score >= threshold → MOMENTUM
+    """
+    score = 0.0
+
+    # ─── (A) 거래량 폭증 (0.25) ───
+    vol = float(row.get('volume', 0) or 0)
+    vol_ma20 = float(row.get('volume_ma20', 0) or 0)
+    if vol_ma20 <= 0:
+        vol_ma20 = float(row.get('volume_ma5', 0) or 0)
+
+    vol_ratio = vol / vol_ma20 if vol_ma20 > 0 else 1.0
+    if vol_ratio > 3.0:
+        score += 0.25
+    elif vol_ratio > 1.5:
+        score += 0.15
+
+    # ─── (B) 스마트머니 유입 (0.30) — 핵심! ───
+    inst_5d = float(row.get('inst_net_5d', 0) or 0)
+    foreign_5d = float(row.get('foreign_net_5d', 0) or 0)
+    inst_20d = float(row.get('inst_net_20d', 0) or 0)
+    foreign_20d = float(row.get('foreign_net_20d', 0) or 0)
+
+    smart_5d = inst_5d + foreign_5d
+    smart_20d = inst_20d + foreign_20d
+
+    if smart_5d > 0 and smart_20d > 0:
+        score += 0.30
+        smart_flow = "STRONG"
+    elif smart_5d > 0:
+        score += 0.15
+        smart_flow = "WEAK"
+    else:
+        smart_flow = "NEUTRAL"
+
+    # ─── (C) OBV 추세 (0.15) ───
+    obv_trend = float(row.get('obv_trend_5d', 0) or 0)
+    if obv_trend > 0:
+        score += 0.15
+
+    # ─── (D) 가격 추세 (0.15) ───
+    close = float(row.get('close', 0) or 0)
+    sma20 = float(row.get('sma_20', 0) or 0)
+    if sma20 > 0 and close > sma20:
+        score += 0.15
+
+    # ─── (E) RSI 모멘텀 (0.15) ───
+    rsi = float(row.get('rsi_14', 50) or 50)
+    if rsi > 50:
+        score += 0.15
+
+    # ─── 판정 ───
+    regime = "MOMENTUM" if score >= threshold else "NORMAL"
+
+    return SupplyRegimeSignal(
+        regime=regime,
+        score=round(score, 2),
+        vol_ratio=round(vol_ratio, 2),
+        smart_flow=smart_flow,
+    )
