@@ -1111,46 +1111,20 @@ def run_pipeline(
 
 
 # =========================================================
-# Grok 뉴스 검색
+# Perplexity 뉴스 검색 (구 Grok → Perplexity 전환)
 # =========================================================
 
 def fetch_grok_news(name: str, ticker: str) -> dict | None:
-    """Grok API로 종목 심층 분석 (동기 직접 호출)."""
+    """Perplexity API로 종목 심층 분석 (함수명 호환 유지)."""
     try:
-        import requests as _req
-        from dotenv import load_dotenv as _ld
-        _ld(Path(__file__).resolve().parent.parent / ".env")
-
-        from src.adapters.grok_news_adapter import GrokNewsAdapter
-        adapter = GrokNewsAdapter()
+        import asyncio
+        from src.adapters.perplexity_news_adapter import PerplexityNewsAdapter
+        adapter = PerplexityNewsAdapter()
         if not adapter.api_key:
             return None
-
-        prompt = adapter._deep_analysis_prompt(name, ticker)
-        payload = {
-            "model": "grok-4-1-fast",
-            "input": [
-                {"role": "system", "content": (
-                    "너는 한국 주식시장 전문 리서치 애널리스트다. "
-                    "웹과 X(트위터)를 검색해서 종목의 최신 뉴스뿐 아니라, "
-                    "아직 해소되지 않은 과거 이슈, 실적 전망, 수급 동향을 "
-                    "종합적으로 분석한다. 반드시 요청된 JSON 형식으로만 응답한다."
-                )},
-                {"role": "user", "content": prompt},
-            ],
-            "tools": [{"type": "web_search"}, {"type": "x_search"}],
-        }
-        resp = _req.post(
-            "https://api.x.ai/v1/responses",
-            headers=adapter.headers,
-            json=payload,
-            timeout=120,
-        )
-        if resp.status_code != 200:
-            return None
-        return adapter._parse_response(resp.json())
+        return asyncio.run(adapter.search_deep_analysis(name, ticker))
     except Exception as e:
-        print(f"  ! Grok fail ({name}): {e}")
+        print(f"  ! Perplexity fail ({name}): {e}")
         return None
 
 

@@ -124,19 +124,19 @@ def _load_settings() -> dict:
 
 
 def _expand_with_grok(alerts: list[ThemeAlert]) -> list[ThemeAlert]:
-    """Grok API로 각 테마의 관련주 확장"""
+    """Perplexity API로 각 테마의 관련주 확장 (구 Grok → 전환)"""
     try:
-        from src.adapters.grok_news_adapter import GrokNewsAdapter
+        from src.adapters.perplexity_news_adapter import PerplexityNewsAdapter
     except ImportError:
-        logger.warning("GrokNewsAdapter 임포트 실패 — Grok 확장 건너뜀")
+        logger.warning("PerplexityNewsAdapter 임포트 실패 — 테마 확장 건너뜀")
         return alerts
 
-    api_key = os.getenv("XAI_API_KEY", "")
+    api_key = os.getenv("PERPLEXITY_API_KEY", "")
     if not api_key:
-        logger.warning("XAI_API_KEY 미설정 — Grok 확장 건너뜀")
+        logger.warning("PERPLEXITY_API_KEY 미설정 — 테마 확장 건너뜀")
         return alerts
 
-    adapter = GrokNewsAdapter(api_key=api_key)
+    adapter = PerplexityNewsAdapter(api_key=api_key)
 
     for alert in alerts:
         known_names = [s.name for s in alert.related_stocks]

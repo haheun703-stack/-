@@ -195,14 +195,14 @@ def _parse_news_grade(grade_str: str):
 
 
 def step_news_scan(send_telegram: bool = False):
-    """v3.1 Grok API 뉴스 자동 스캔"""
+    """v3.1 Perplexity API 뉴스 자동 스캔 (구 Grok → 전환)"""
     import asyncio
-    from src.adapters.grok_news_adapter import GrokNewsAdapter
+    from src.adapters.perplexity_news_adapter import PerplexityNewsAdapter
     from src.use_cases.news_gate import NewsGateUseCase
 
-    logger.info("[News Scan] Grok API 뉴스 스캔 시작")
+    logger.info("[News Scan] Perplexity API 뉴스 스캔 시작")
 
-    adapter = GrokNewsAdapter()
+    adapter = PerplexityNewsAdapter()
     gate = NewsGateUseCase()
 
     # 시장 전체 뉴스 조회 (async 메서드)
@@ -722,7 +722,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--news-scan",
         action="store_true",
-        help="Grok API 뉴스 자동 스캔 (XAI_API_KEY 필요)",
+        help="Perplexity API 뉴스 자동 스캔 (PERPLEXITY_API_KEY 필요)",
     )
     parser.add_argument(
         "--smart-scan",
