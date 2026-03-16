@@ -80,7 +80,8 @@ def _load_json(name: str) -> dict | list:
     if path.exists():
         try:
             return json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning("JSON 로드 실패 %s: %s", name, e)
             return {}
     return {}
 

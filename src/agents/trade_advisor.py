@@ -31,7 +31,8 @@ def _load_settings() -> dict:
         with open(CONFIG_PATH, encoding="utf-8") as f:
             cfg = yaml.safe_load(f) or {}
         return cfg.get("trade_advisor", {})
-    except Exception:
+    except (OSError, yaml.YAMLError) as e:
+        logger.warning("trade_advisor 설정 로드 실패: %s", e)
         return {}
 
 

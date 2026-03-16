@@ -984,6 +984,12 @@ v8_hybrid:
       max_boost: 0.10            # 최대 부스트 (3/3 충족: +0.10, 2/3: +0.067)
       min_conditions: 2          # 최소 충족 조건 수 (2/3 이상)
       bb_atr_optimal: [3.0, 8.0] # R1: BB/ATR 비율 적정 범위 (91건 중앙 4.05)
+      # R2: 조용한 매집 임계값
+      quiet_vol_surge_max: 1.3          # 거래량 급등 상한
+      quiet_vol_contraction_max: 1.5    # 거래량 수축 상한
+      quiet_price_trend_max: 0.05       # 5일 가격변동 상한 (5%)
+      # R3: OBV 선행 임계값
+      obv_lead_price_max: 0.03          # OBV 양성 + 가격 미상승 기준 (3%)
 
   # ─── Phase 3: Triggers (OR) ───
   triggers:
@@ -1106,6 +1112,7 @@ smart_entry:
   order_deadline: 1030           # 주문 마감 시각 (HHMM)
   adapt_interval_sec: 120        # 적응형 정정 간격 (초)
   gap_position_scale: 0.5        # 갭업 진입 시 포지션 축소 비율
+  gap_chase_limit_pct: 1.5       # 수급 강할 때 최대 추격 허용 (전일종가 +1.5%)
   # VWAP 3중 확인 시스템 (60 EMA + VWAP + MACD Histogram)
   vwap_enabled: true               # 3중 확인 활성화
   # 기관 알고 70%+가 VWAP 기준 매매. 3중 확인 = 가짜 신호 극적 감소
@@ -1765,6 +1772,16 @@ brain:
   # 안전장치
   max_daily_change_pct: 20    # 일일 최대 변경폭 (%p)
   confirmation_days: 2         # 레짐 변경 시 확인 대기 일수
+
+  # NightWatch 보정 파라미터
+  nw_adjustment:
+    bond_veto_sector_cut_ratio: 0.5    # 채권 비토 시 섹터 축소 비율
+    strong_negative_scale: 0.80         # 강한 부정 시 투자 축소 배수
+    negative_leverage_cut_ratio: 0.3    # 부정 시 레버리지 축소 비율
+    positive_min_cash: 15               # 긍정 확대 시 최소 현금(%)
+    positive_max_boost: 5.0             # 긍정 확대 시 최대 이동(%p)
+    positive_sector_ratio: 0.6          # 긍정 확대 시 섹터 배분 비율
+    positive_swing_ratio: 0.4           # 긍정 확대 시 스윙 배분 비율
 
   # 텔레그램 브리핑
   telegram_briefing: true

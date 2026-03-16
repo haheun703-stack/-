@@ -21,8 +21,7 @@ from __future__ import annotations
 
 import json
 import logging
-import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -479,23 +478,26 @@ class Brain:
         adj_list = []
         warn_list = []
 
-        # 채권 자경단 비토 → 레버리지 즉시 0, 섹터 반토막
+        nw_cfg = self.settings.get("brain", {}).get("nw_adjustment", {})
+
+        # 채권 자경단 비토 → 레버리지 즉시 0, 섹터 축소
         if bv_veto:
             if result_arms["etf_leverage"] > 0:
                 freed = result_arms["etf_leverage"]
                 result_arms["etf_leverage"] = 0
                 result_arms["cash"] += freed
                 adj_list.append(f"채권 비토: 레버리지 {freed:.0f}%→0%, 현금으로 이동")
-            sector_cut = result_arms["etf_sector"] * 0.5
+            bv_cut_ratio = nw_cfg.get("bond_veto_sector_cut_ratio", 0.5)
+            sector_cut = result_arms["etf_sector"] * bv_cut_ratio
             result_arms["etf_sector"] -= sector_cut
             result_arms["cash"] += sector_cut
-            adj_list.append(f"채권 비토: 섹터 50% 축소 (-{sector_cut:.0f}%p)")
+            adj_list.append(f"채권 비토: 섹터 {bv_cut_ratio*100:.0f}% 축소 (-{sector_cut:.0f}%p)")
             warn_list.append("채권 자경단 비토 발동 — 방어 모드")
             return {"arms": result_arms, "adjustments": adj_list, "warnings": warn_list}
 
-        # 강한 부정 (-0.4 이하) → 투자 20% 추가 축소
+        # 강한 부정 (-0.4 이하) → 투자 추가 축소
         if nw_score <= self.NW_THRESHOLDS["strong_negative"]:
-            scale = 0.80
+            scale = nw_cfg.get("strong_negative_scale", 0.80)
             invest_arms = self.INVEST_ARMS
             freed = 0
             for a in invest_arms:
@@ -503,22 +505,27 @@ class Brain:
                 result_arms[a] -= cut
                 freed += cut
             result_arms["cash"] += freed
-            adj_list.append(f"NW 강한 부정({nw_score:+.3f}): 투자 20% 축소")
+            adj_list.append(f"NW 강한 부정({nw_score:+.3f}): 투자 {(1-scale)*100:.0f}% 축소")
 
         # 부정 (-0.2 ~ -0.4) → 레버리지만 축소
         elif nw_score <= self.NW_THRESHOLDS["negative"]:
             if result_arms["etf_leverage"] > 0:
-                cut = result_arms["etf_leverage"] * 0.3
+                lev_cut_ratio = nw_cfg.get("negative_leverage_cut_ratio", 0.3)
+                cut = result_arms["etf_leverage"] * lev_cut_ratio
                 result_arms["etf_leverage"] -= cut
                 result_arms["cash"] += cut
-                adj_list.append(f"NW 부정({nw_score:+.3f}): 레버리지 30% 축소")
+                adj_list.append(f"NW 부정({nw_score:+.3f}): 레버리지 {lev_cut_ratio*100:.0f}% 축소")
 
         # 긍정 (+0.2 이상) → 소폭 확대 (현금에서 이동)
         elif nw_score >= self.NW_THRESHOLDS["positive"]:
-            if result_arms["cash"] > 15:  # 최소 현금 15% 유지
-                boost = min(5.0, result_arms["cash"] - 15)
-                result_arms["etf_sector"] += boost * 0.6
-                result_arms["swing"] += boost * 0.4
+            min_cash = nw_cfg.get("positive_min_cash", 15)
+            max_boost = nw_cfg.get("positive_max_boost", 5.0)
+            sec_ratio = nw_cfg.get("positive_sector_ratio", 0.6)
+            swg_ratio = nw_cfg.get("positive_swing_ratio", 0.4)
+            if result_arms["cash"] > min_cash:
+                boost = min(max_boost, result_arms["cash"] - min_cash)
+                result_arms["etf_sector"] += boost * sec_ratio
+                result_arms["swing"] += boost * swg_ratio
                 result_arms["cash"] -= boost
                 adj_list.append(f"NW 긍정({nw_score:+.3f}): 투자 +{boost:.0f}%p 확대")
 

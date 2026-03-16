@@ -1092,9 +1092,10 @@ class SmartEntryEngine:
                         # bid1이 전일종가 이하면 OK, 아니면 전일종가
                         if bid1 <= max_price:
                             return bid1
-                        # 갭업이지만 수급 강하면 시가 -1% 수준까지 허용
+                        # 갭업이지만 수급 강하면 전일종가+α까지 허용
                         if c.bid_ask_ratio >= self.min_bid_ask_ratio:
-                            gap_limit = int(c.prev_close * 1.015)  # 최대 +1.5%
+                            chase_pct = self.config.get("smart_entry", {}).get("gap_chase_limit_pct", 1.5) / 100
+                            gap_limit = int(c.prev_close * (1 + chase_pct))
                             return min(bid1, gap_limit)
                 except Exception:
                     pass

@@ -89,8 +89,9 @@ class QuantumPipelineV8:
         price_trend = abs(row.get('price_trend_5d', 0) or 0)
 
         # 91건 패턴: 69% 거래량 < 20d 평균, 가격 5일 변동 작음
-        quiet_vol = vol_surge < 1.3 and vol_contraction < 1.5
-        small_price_move = price_trend < 0.05  # 5일 5% 미만
+        quiet_vol = (vol_surge < cfg.get('quiet_vol_surge_max', 1.3)
+                     and vol_contraction < cfg.get('quiet_vol_contraction_max', 1.5))
+        small_price_move = price_trend < cfg.get('quiet_price_trend_max', 0.05)
         r2_hit = quiet_vol and small_price_move
         if r2_hit:
             conditions_met += 1
@@ -101,7 +102,7 @@ class QuantumPipelineV8:
         price_trend_raw = row.get('price_trend_5d', 0) or 0
 
         # OBV 양성이면서 가격이 강하게 상승하지 않는 경우
-        r3_hit = obv_trend > 0 and price_trend_raw < 0.03
+        r3_hit = obv_trend > 0 and price_trend_raw < cfg.get('obv_lead_price_max', 0.03)
         if r3_hit:
             conditions_met += 1
         details['r3_obv_lead'] = round(obv_trend, 4)
@@ -199,8 +200,10 @@ class QuantumPipelineV8:
             result["v8_action"] = "WATCH" if grade_result.grade == "C" else "SKIP"
             return result
 
-        # 등급별 포지션 비율
-        position_ratio = 1.0 if grade_result.grade == "A" else 0.5
+        # 등급별 포지션 비율 (settings.yaml strategy.grades 참조)
+        grades_cfg = self.config.get("strategy", {}).get("grades", {})
+        grade_info = grades_cfg.get(grade_result.grade, {})
+        position_ratio = grade_info.get("position_ratio", 1.0 if grade_result.grade == "A" else 0.5)
         result["position_ratio"] = position_ratio
 
         # 등급별 타겟 설정
