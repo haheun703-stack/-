@@ -1,13 +1,14 @@
 """FLOWX Supabase 업로드 어댑터.
 
 퀀트봇 데이터를 FLOWX PRO 대시보드용 Supabase DB에 업로드.
-담당 테이블: etf_signals, foreign_flow, paper_trades
+담당 테이블: etf_signals, foreign_flow, paper_trades, short_signals
 
 Usage:
     from src.adapters.flowx_uploader import FlowxUploader
     uploader = FlowxUploader()
     uploader.upload_etf_signals(rows)
     uploader.upload_foreign_flow(rows)
+    uploader.upload_ai_picks(rows)
     uploader.upload_paper_trade(trade)
 """
 
@@ -84,6 +85,22 @@ class FlowxUploader:
             return True
         except Exception as e:
             logger.error("[FLOWX] 외국인 자금 업로드 실패: %s", e)
+            return False
+
+    # ── AI 추천 (short_signals) ─────────────────────
+
+    def upload_ai_picks(self, rows: list[dict]) -> bool:
+        """AI 추천 종목 업로드 (UPSERT on date+code)."""
+        if not self.is_active or not rows:
+            return False
+        try:
+            result = self.client.table("short_signals").upsert(
+                rows, on_conflict="date,code"
+            ).execute()
+            logger.info("[FLOWX] AI 추천 업로드: %d건", len(rows))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] AI 추천 업로드 실패: %s", e)
             return False
 
     # ── 페이퍼 트레이딩 ──────────────────────────────
@@ -221,6 +238,114 @@ def build_foreign_flow_rows(date_str: str = "") -> list[dict]:
         })
 
     return rows
+
+
+def build_ai_pick_rows(date_str: str = "") -> list[dict]:
+    """AI 추천 종목 → short_signals 테이블 포맷 변환.
+
+    소스: data/tomorrow_picks.json
+      - ai_largecap: AI 두뇌 대형주 추천 (confidence 기반)
+      - picks: 전략 종합 추천 (적극매수/매수 등급만)
+
+    short_signals 스키마:
+        date, code, name, grade, total_score, foreign_detail,
+        inst_support, entry_price, stop_loss, target_price,
+        holding_days, signal_type, volume_ratio, momentum_regime
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    picks_path = DATA_DIR / "tomorrow_picks.json"
+    if not picks_path.exists():
+        return []
+
+    with open(picks_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    seen_codes: set[str] = set()
+
+    # 1) ai_largecap → AI 두뇌 추천 (텔레그램 AI 대형주)
+    for item in data.get("ai_largecap", []):
+        ticker = item.get("ticker", "")
+        if not ticker or ticker in seen_codes:
+            continue
+        seen_codes.add(ticker)
+
+        confidence = float(item.get("confidence", 0))
+        close = _get_close(ticker)
+        impact_pct = float(item.get("expected_impact_pct", 5))
+
+        # grade: confidence → AA/A/B
+        if confidence >= 0.85:
+            grade = "AA"
+        elif confidence >= 0.75:
+            grade = "A"
+        else:
+            grade = "B"
+
+        rows.append({
+            "date": date_str,
+            "code": ticker,
+            "name": item.get("name", ""),
+            "grade": grade,
+            "total_score": round(confidence * 100, 1),
+            "foreign_detail": None,
+            "inst_support": False,
+            "entry_price": close,
+            "stop_loss": int(close * 0.92),  # -8% 기본 손절
+            "target_price": int(close * (1 + impact_pct / 100)),
+            "holding_days": 5,
+            "signal_type": "BUY",
+            "volume_ratio": 1.0,
+            "momentum_regime": "AI_BRAIN",
+        })
+
+    # 2) picks → 적극매수/매수 등급만
+    for pick in data.get("picks", []):
+        ticker = pick.get("ticker", "")
+        grade_kr = pick.get("grade", "")
+        if not ticker or ticker in seen_codes:
+            continue
+        if grade_kr not in ("적극매수", "매수"):
+            continue
+        seen_codes.add(ticker)
+
+        grade = "AA" if grade_kr == "적극매수" else "A"
+        close = pick.get("close", 0) or _get_close(ticker)
+
+        rows.append({
+            "date": date_str,
+            "code": ticker,
+            "name": pick.get("name", ""),
+            "grade": grade,
+            "total_score": round(pick.get("total_score", 0), 1),
+            "foreign_detail": None,
+            "inst_support": bool(pick.get("inst_5d", 0) > 0),
+            "entry_price": pick.get("entry_price", close),
+            "stop_loss": pick.get("stop_loss", int(close * 0.92)),
+            "target_price": pick.get("target_price", int(close * 1.1)),
+            "holding_days": 5,
+            "signal_type": "BUY",
+            "volume_ratio": round(pick.get("ret_5d", 0) / 5, 1) if pick.get("ret_5d") else 1.0,
+            "momentum_regime": "QUANT",
+        })
+
+    return rows
+
+
+def _get_close(ticker: str) -> int:
+    """parquet에서 최신 종가 조회."""
+    pq = DATA_DIR / "processed" / f"{ticker}.parquet"
+    if pq.exists():
+        try:
+            import pandas as pd
+            df = pd.read_parquet(pq)
+            if len(df) > 0:
+                return int(df.iloc[-1]["close"])
+        except Exception:
+            pass
+    return 0
 
 
 def build_paper_trade(
