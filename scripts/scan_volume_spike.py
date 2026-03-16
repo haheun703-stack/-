@@ -34,12 +34,15 @@ logger = logging.getLogger(__name__)
 DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
+KOSPI_PATH = DATA_DIR / "kospi_index.csv"
 OUTPUT_PATH = DATA_DIR / "volume_spike_watchlist.json"
 
 # ── 파라미터 ──
 SPIKE_VOL_Z = 3.0              # vol_z 임계치
 SPIKE_VSR = 3.0                # volume_surge_ratio 임계치
 SPIKE_AMOUNT_RATIO = 3.0       # 거래대금 20일MA 대비 배율 (AND 조건)
+# 레짐 게이트: BEAR/CRISIS에서는 스파이크 매수 비활성
+REGIME_GATE_ENABLED = True     # False로 끄면 레짐 무시
 PULLBACK_MIN_PCT = -3.0        # 조정 최소 % (스파이크 고가 대비)
 PULLBACK_MAX_PCT = -10.0       # 조정 최대 %
 WATCHLIST_EXPIRY_DAYS = 30     # 감시 기간 (일)
@@ -243,8 +246,55 @@ def _calc_spike_score(
     return min(score, 100)
 
 
+def get_kospi_regime() -> str:
+    """KOSPI 레짐 판별 (v10.3 기준).
+
+    BULL: MA20 위 + RV20 < 50%ile
+    CAUTION: MA20 위 + RV20 >= 50%ile
+    BEAR: MA20~MA60 사이
+    CRISIS: MA60 아래
+    """
+    try:
+        df = pd.read_csv(KOSPI_PATH, index_col=0, parse_dates=True)
+        if len(df) < 60:
+            return "UNKNOWN"
+        col = "close"
+        close = df[col].iloc[-1]
+        ma20 = df[col].rolling(20).mean().iloc[-1]
+        ma60 = df[col].rolling(60).mean().iloc[-1]
+        rv_pctile = df[col].pct_change().rolling(20).std().rank(pct=True).iloc[-1]
+
+        if close > ma20 and rv_pctile < 0.5:
+            return "BULL"
+        elif close > ma20:
+            return "CAUTION"
+        elif close > ma60:
+            return "BEAR"
+        else:
+            return "CRISIS"
+    except Exception as e:
+        logger.warning("KOSPI 레짐 판별 실패: %s", e)
+        return "UNKNOWN"
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    # ── 레짐 게이트 ──
+    regime = get_kospi_regime()
+    print(f"[레짐] KOSPI: {regime}")
+
+    if REGIME_GATE_ENABLED and regime in ("BEAR", "CRISIS"):
+        print(f"[레짐 게이트] {regime} → 스파이크 매수 비활성. 하락장에서 스파이크는 투매.")
+        # watchlist는 유지하되 새 스파이크 감지/시그널 발동 안 함
+        existing = load_existing_watchlist()
+        existing["regime"] = regime
+        existing["regime_gate"] = "BLOCKED"
+        existing["date"] = datetime.now().strftime("%Y-%m-%d")
+        with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+            json.dump(existing, f, ensure_ascii=False, indent=2, default=str)
+        print(f"[저장] {OUTPUT_PATH} (레짐 게이트 차단)")
+        return
 
     name_map = build_name_map()
 
@@ -269,6 +319,8 @@ def main():
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "scanned_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "regime": regime,
+        "regime_gate": "PASS",
         "watching": watching,
         "signals": signals,
         "stats": {
