@@ -63,6 +63,11 @@ echo [%date% %time%] [4/29] KOSPI 인덱스 업데이트 >> logs\schedule.log
 python -u -X utf8 scripts\update_kospi_index.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [4/29] FAILED >> logs\schedule.log
 
+REM 4.5단계: 전종목 5분봉/15분봉 수집 (오후 거래대금 분석용)
+echo [%date% %time%] [4.5/31] 분봉 데이터 수집 >> logs\schedule.log
+python -u -X utf8 scripts\collect_intraday_candles.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [4.5/31] FAILED >> logs\schedule.log
+
 REM ══════════════════════════════════════════════
 REM  PHASE 2: 지표 계산 (~10분)
 REM ══════════════════════════════════════════════

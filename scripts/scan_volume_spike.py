@@ -39,6 +39,7 @@ OUTPUT_PATH = DATA_DIR / "volume_spike_watchlist.json"
 # ── 파라미터 ──
 SPIKE_VOL_Z = 3.0              # vol_z 임계치
 SPIKE_VSR = 3.0                # volume_surge_ratio 임계치
+SPIKE_AMOUNT_RATIO = 3.0       # 거래대금 20일MA 대비 배율 (AND 조건)
 PULLBACK_MIN_PCT = -3.0        # 조정 최소 % (스파이크 고가 대비)
 PULLBACK_MAX_PCT = -10.0       # 조정 최대 %
 WATCHLIST_EXPIRY_DAYS = 30     # 감시 기간 (일)
@@ -75,7 +76,7 @@ def scan_new_spikes(name_map: dict) -> dict[str, dict]:
         ticker = pq.stem
         try:
             df = pd.read_parquet(pq)
-            if len(df) < 5:
+            if len(df) < 21:
                 continue
             last = df.iloc[-1]
             vol_z = float(last.get("vol_z", 0) or 0)
@@ -89,6 +90,19 @@ def scan_new_spikes(name_map: dict) -> dict[str, dict]:
             if vol_z >= SPIKE_VOL_Z or vsr >= SPIKE_VSR:
                 close = float(last.get("close", 0))
                 high = float(last.get("high", close))
+                volume = float(last.get("volume", 0) or 0)
+
+                # ── 거래대금 AND 필터 (저가주 거짓 신호 제거) ──
+                amount = close * volume
+                amount_ma20 = (df["close"] * df["volume"]).rolling(20).mean().iloc[-1]
+                if amount_ma20 > 0:
+                    amount_ratio = amount / amount_ma20
+                else:
+                    amount_ratio = 0.0
+
+                if amount_ratio < SPIKE_AMOUNT_RATIO:
+                    continue  # 거래대금 기준 미달 → 스킵
+
                 rsi = float(last.get("rsi_14", 50) or 50)
                 foreign_5d = float(last.get("foreign_net_5d", 0) or 0)
 
@@ -98,6 +112,7 @@ def scan_new_spikes(name_map: dict) -> dict[str, dict]:
                     "spike_high": round(max(high, close), 0),
                     "vol_z": round(vol_z, 2),
                     "vsr": round(vsr, 2),
+                    "amount_ratio": round(amount_ratio, 2),
                     "name": name_map.get(ticker, ticker),
                     "rsi_at_spike": round(rsi, 1) if not pd.isna(rsi) else 50,
                     "status": "watching",
@@ -267,6 +282,13 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2, default=str)
 
     print(f"[저장] {OUTPUT_PATH}")
+
+    # 신규 스파이크 요약 출력
+    if new_spikes:
+        print(f"\n  신규 스파이크:")
+        for t, info in list(new_spikes.items())[:10]:
+            ar = info.get("amount_ratio", 0)
+            print(f"    {info['name']}({t}) vol_z:{info['vol_z']} vsr:{info['vsr']} 거래대금:{ar:.1f}x")
 
     # 시그널 요약 출력
     if signals:
