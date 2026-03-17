@@ -161,8 +161,11 @@ def load_json(rel_path: str) -> dict | list:
     fp = DATA_DIR / rel_path
     if not fp.exists():
         return {}
-    with open(fp, encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(fp, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return {}
 
 
 def build_name_map() -> dict[str, str]:
@@ -786,9 +789,10 @@ def calc_integrated_score(
     if n_sources >= 2 and dual_days >= 3:
         multi_score += 3  # 다른 소스와 겹칠 때만 소액 보너스
 
-    # ── 학습 가중치 적용 (축2 계산 전) ──
+    # ── 학습 가중치 적용 (축2 계산 전, 복사본 사용) ──
     learning_w = _load_learning_weights()
     if learning_w:
+        sources = [dict(s) for s in sources]  # shallow copy로 원본 보호
         for s in sources:
             key = _SOURCE_NAME_MAP.get(s.get("source", ""))
             if key and key in learning_w:
@@ -1863,7 +1867,7 @@ def main():
         try:
             from src.safety_margin import calc_safety_margin
             sm = calc_safety_margin(
-                ticker, name, int(close),
+                ticker, name, score_detail["close"],
                 consensus=_safety_pool.get(ticker),
             )
             rec["safety_signal"] = sm.signal

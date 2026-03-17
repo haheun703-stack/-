@@ -90,8 +90,8 @@ def _load_config() -> dict:
         for k, v in sm.items():
             if k in defaults:
                 defaults[k] = v
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("[안전마진] settings.yaml 로드 실패, 기본값 사용: %s", e)
     return defaults
 
 
@@ -230,11 +230,17 @@ def _calc_trailing_eps(ticker: str) -> dict | None:
     if df.empty:
         return None
 
-    sub = df[df["ticker"] == ticker].sort_values(["year", "quarter"]).tail(4)
+    sub = (df[df["ticker"] == ticker]
+           .drop_duplicates(subset=["year", "quarter"], keep="last")
+           .sort_values(["year", "quarter"])
+           .tail(4))
     if len(sub) < 2:
         return None
 
-    trailing_eps = float(sub["eps"].sum())
+    valid_eps = sub["eps"].dropna()
+    if len(valid_eps) < 2:
+        return None  # 유효 분기 2개 미만 → 폴백 포기
+    trailing_eps = float(valid_eps.sum()) * (4 / len(valid_eps))  # 연율화
     if trailing_eps <= 0:
         return None  # 적자 → 폴백 포기
 
@@ -243,7 +249,8 @@ def _calc_trailing_eps(ticker: str) -> dict | None:
     sector = sector_map.get(ticker, "")
     default_per = _SECTOR_DEFAULT_PER.get(sector, _SECTOR_DEFAULT_PER_FALLBACK)
 
-    company = str(sub.iloc[-1].get("company", ""))
+    raw_company = sub.iloc[-1].get("company", "")
+    company = str(raw_company) if pd.notna(raw_company) else ""
     return {
         "ticker": ticker,
         "name": company,

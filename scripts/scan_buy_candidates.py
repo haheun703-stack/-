@@ -317,7 +317,7 @@ def _calc_trix_counter_csv(df: pd.DataFrame, idx: int) -> int:
     if pd.isna(t_now) or pd.isna(s_now):
         return 0
     current_above = t_now > s_now
-    for i in range(idx, max(idx - 60, -1), -1):
+    for i in range(idx, max(idx - 60, 0) - 1, -1):
         t = df["TRIX"].iloc[i]
         s = df["TRIX_Signal"].iloc[i]
         if pd.isna(t) or pd.isna(s):
@@ -564,7 +564,7 @@ def calc_trix_counter(df: pd.DataFrame, idx: int) -> int:
 
     current_above = t_now > s_now
 
-    for i in range(idx, max(idx - 60, -1), -1):
+    for i in range(idx, max(idx - 60, 0) - 1, -1):
         t = trix_col.iloc[i]
         s = sig_col.iloc[i]
         if pd.isna(t) or pd.isna(s):

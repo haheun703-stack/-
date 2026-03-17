@@ -601,7 +601,7 @@ def _compute_learning_weights(cum: dict) -> dict:
     weights: dict = {}
     for name, stats in signals.items():
         if stats.get("days_tracked", 0) < MIN_DAYS:
-            weights[name] = {"multiplier": 1.0, "reason": "데이터 부족 (<5일)"}
+            weights[name] = {"multiplier": 1.0, "reason": f"데이터 부족 (<{MIN_DAYS}일)"}
             continue
         hr = stats["hit_rate"]
         raw = 0.5 + (hr / baseline) * 0.5

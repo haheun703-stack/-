@@ -899,7 +899,7 @@ async def _send_telegram_summary(
         for arm in arms_data:
             pct = arm.get("adjusted_pct", 0)
             if pct > 0:
-                label = arm_labels.get(arm["name"], arm["name"])
+                label = arm_labels.get(arm.get("name", "?"), arm.get("name", "?"))
                 parts.append(f"{label} {pct:.1f}%")
         if parts:
             lines.append(f"🥧 배분: {' │ '.join(parts)}")
