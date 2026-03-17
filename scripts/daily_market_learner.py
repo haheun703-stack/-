@@ -438,6 +438,75 @@ def _guess_block_reason(snap: dict) -> str:
     return " + ".join(reasons)
 
 
+def _analyze_sar_blocks(missed: list[dict], snapshots: list[dict]) -> dict:
+    """SAR 차단 종목의 진짜 놓침 vs 정당 차단 비율 분석.
+
+    판정 기준:
+      MISS: MA60↑ + RSI 35~65 + 52주고점 대비 -5%↓ → 기술적 양호한데 차단
+      OK:   MA60↓ or RSI>70 or 신고가권(할인 -3%↑) → 차단 정당
+      ?:    애매한 경우
+    """
+    sar_blocked = [m for m in missed if "SAR" in m.get("blocked_by", "")]
+    if not sar_blocked:
+        return {"total": 0, "genuine_miss": 0, "noise_block": 0, "ambiguous": 0,
+                "miss_rate": 0.0, "top_misses": []}
+
+    # snapshots에서 종목별 데이터 조회 (MA60, 52주고점 등)
+    snap_map = {s["ticker"]: s for s in snapshots}
+
+    genuine, noise, ambiguous = 0, 0, 0
+    top_misses = []
+
+    for m in sar_blocked:
+        ticker = m.get("ticker", "")
+        snap = snap_map.get(ticker, {})
+        y_rsi = snap.get("y_rsi", m.get("yesterday_indicators", {}).get("rsi", 50))
+
+        # parquet에서 MA60, 52주 할인 확인
+        pq = PROCESSED_DIR / f"{ticker}.parquet"
+        above_ma60 = False
+        discount = 0.0
+        if pq.exists():
+            try:
+                df = pd.read_parquet(pq)
+                if len(df) >= 60:
+                    last = df.iloc[-1]
+                    close = float(last.get("close", 0))
+                    sma60 = float(last.get("sma_60", 0))
+                    above_ma60 = close > sma60 > 0
+                    high_52w = float(
+                        df["close"].rolling(250).max().iloc[-1]
+                        if len(df) >= 250
+                        else df["close"].max()
+                    )
+                    discount = (close / high_52w - 1) * 100 if high_52w > 0 else 0
+            except Exception:
+                pass
+
+        if above_ma60 and 35 <= y_rsi <= 65 and discount <= -5:
+            genuine += 1
+            top_misses.append({
+                "ticker": ticker, "name": m.get("name", ""),
+                "ret_1d": m.get("ret_1d", 0), "verdict": "MISS",
+            })
+        elif not above_ma60 or y_rsi > 70 or discount > -3:
+            noise += 1
+        else:
+            ambiguous += 1
+
+    total = len(sar_blocked)
+    top_misses.sort(key=lambda x: -x["ret_1d"])
+
+    return {
+        "total": total,
+        "genuine_miss": genuine,
+        "noise_block": noise,
+        "ambiguous": ambiguous,
+        "miss_rate": round(genuine / total * 100, 1) if total > 0 else 0.0,
+        "top_misses": top_misses[:5],
+    }
+
+
 # ═══════════════════════════════════════════════
 # Phase 4: Cumulative Learning DB
 # ═══════════════════════════════════════════════
@@ -456,12 +525,13 @@ def phase4_cumulative_update(
         "daily_log": [],
     }
 
-    # 오늘 로그 추가
+    # 오늘 로그 추가 (중복 방지: 같은 날짜 덮어쓰기)
     day_entry = {"date": today_date}
     for sig_name, sig_data in accuracy.items():
         day_entry[f"{sig_name}_hr"] = sig_data.get("hit_rate", 0)
         day_entry[f"{sig_name}_n"] = sig_data.get("total", 0)
         day_entry[f"{sig_name}_ret"] = sig_data.get("avg_ret", 0)
+    cum["daily_log"] = [d for d in cum["daily_log"] if d.get("date") != today_date]
     cum["daily_log"].append(day_entry)
 
     # rolling window 유지
@@ -644,6 +714,7 @@ def phase6_save_and_send(
     today_date: str, snapshots: list[dict], accuracy: dict,
     missed: list[dict], cumulative: dict, ai_insight: str,
     send_telegram: bool = True,
+    sar_analysis: dict | None = None,
 ):
     """결과 저장 + 텔레그램."""
     # ── 스냅샷 요약 ──
@@ -673,6 +744,7 @@ def phase6_save_and_send(
         "summary": summary,
         "signal_accuracy": accuracy,
         "missed_opportunities": missed,
+        "sar_block_analysis": sar_analysis,
         "ai_insight": ai_insight,
     }
     daily_path = LEARNING_DIR / f"{today_date}.json"
@@ -692,7 +764,8 @@ def phase6_save_and_send(
         return
 
     msg = _build_telegram_message(
-        today_date, summary, accuracy, missed, cumulative, ai_insight
+        today_date, summary, accuracy, missed, cumulative, ai_insight,
+        sar_analysis=sar_analysis,
     )
     try:
         from src.telegram_sender import send_message
@@ -708,6 +781,7 @@ def phase6_save_and_send(
 def _build_telegram_message(
     date_str: str, summary: dict, accuracy: dict,
     missed: list[dict], cumulative: dict, ai_insight: str,
+    sar_analysis: dict | None = None,
 ) -> str:
     lines = [f"📚 일일 시장 학습 ({date_str[5:]})", ""]
 
@@ -749,6 +823,18 @@ def _build_telegram_message(
         lines.append("⚠️ 놓친 급등주:")
         for m in missed[:3]:
             lines.append(f"  {m['name']} +{m['ret_1d']}% ({m['blocked_by']})")
+        lines.append("")
+
+    # SAR 차단 분석
+    if sar_analysis and sar_analysis.get("total", 0) > 0:
+        sa = sar_analysis
+        lines.append(
+            f"🔍 SAR 차단 분석: {sa['total']}건 중 "
+            f"놓침 {sa['genuine_miss']}건({sa['miss_rate']:.0f}%) / "
+            f"정당 {sa['noise_block']}건"
+        )
+        for tm in sa.get("top_misses", [])[:3]:
+            lines.append(f"  {tm['name']} +{tm['ret_1d']:.1f}% [MISS]")
         lines.append("")
 
     # AI 인사이트
@@ -807,6 +893,13 @@ def run_daily_learner(
 
     # Phase 3
     missed = phase3_missed_opportunities(snapshots, accuracy, cfg)
+    sar_analysis = _analyze_sar_blocks(missed, snapshots)
+    if sar_analysis["total"] > 0:
+        logger.info(
+            "[Phase 3] SAR 차단 분석: %d건 중 MISS %d건(%.0f%%), OK %d건",
+            sar_analysis["total"], sar_analysis["genuine_miss"],
+            sar_analysis["miss_rate"], sar_analysis["noise_block"],
+        )
 
     # Phase 4
     cumulative = phase4_cumulative_update(today_date, accuracy, cfg)
@@ -828,6 +921,7 @@ def run_daily_learner(
     phase6_save_and_send(
         today_date, snapshots, accuracy, missed,
         cumulative, ai_insight, send_telegram,
+        sar_analysis=sar_analysis,
     )
 
     # 콘솔 요약

@@ -169,8 +169,63 @@ def _load_dart_historical() -> pd.DataFrame:
     return _dart_hist_cache
 
 
+# 섹터별 보수적 기본 PER (DART trailing용)
+# 실제 시장 PER 대비 50~60% 할인한 보수적 값
+_SECTOR_DEFAULT_PER: dict[str, float] = {
+    # 고성장 기술
+    "반도체 제조업": 15.0,
+    "전자 부품 제조업": 12.0,
+    "특수 목적용 기계 제조업": 12.0,  # 반도체 장비 다수 포함
+    "일반 목적용 기계 제조업": 10.0,
+    "소프트웨어 개발 및 공급업": 15.0,
+    "컴퓨터 프로그래밍, 시스템 통합 및 관리업": 14.0,
+    "통신 및 방송장비 제조업": 12.0,
+    "자연과학 및 공학 연구개발업": 16.0,
+    # 바이오/헬스
+    "의약품 제조업": 18.0,
+    "기초 의약 물질 및 생물학적 제제 제조업": 20.0,
+    "의료용 기기 제조업": 15.0,
+    # 제조/소재
+    "자동차 신품 부품 제조업": 8.0,
+    "기타 화학제품 제조업": 8.0,
+    "기초 화학물질 제조업": 7.0,
+    "1차 철강 제조업": 6.0,
+    "플라스틱 제품 제조업": 8.0,
+    # 금융
+    "은행 및 저축기관": 5.0,
+    "금융 지원 서비스업": 8.0,
+    "기타 금융업": 7.0,
+}
+_SECTOR_DEFAULT_PER_FALLBACK = 8.0  # 매핑 없는 섹터
+
+_dart_sector_cache: dict[str, str] | None = None
+
+
+def _load_dart_sector_map() -> dict[str, str]:
+    """DART fundamentals_all.csv에서 ticker→sector_name 매핑."""
+    global _dart_sector_cache
+    if _dart_sector_cache is not None:
+        return _dart_sector_cache
+    all_path = DATA_DIR / "dart_cache" / "fundamentals_all.csv"
+    if not all_path.exists():
+        _dart_sector_cache = {}
+        return _dart_sector_cache
+    try:
+        fa = pd.read_csv(all_path, dtype={"ticker": str}, usecols=["ticker", "sector_name"])
+        fa["ticker"] = fa["ticker"].astype(str).str.zfill(6)
+        fa = fa.drop_duplicates("ticker", keep="last")
+        _dart_sector_cache = dict(zip(fa["ticker"], fa["sector_name"]))
+    except Exception:
+        _dart_sector_cache = {}
+    return _dart_sector_cache
+
+
 def _calc_trailing_eps(ticker: str) -> dict | None:
-    """DART 캐시에서 trailing 4분기 EPS 합산 → synthetic consensus."""
+    """DART 캐시에서 trailing 4분기 EPS 합산 → synthetic consensus.
+
+    섹터별 기본 PER 적용: 반도체(15), 바이오(18~20), 금융(5~7) 등.
+    일률적 PER 8 → -80% 왜곡 방지.
+    """
     df = _load_dart_historical()
     if df.empty:
         return None
@@ -183,12 +238,17 @@ def _calc_trailing_eps(ticker: str) -> dict | None:
     if trailing_eps <= 0:
         return None  # 적자 → 폴백 포기
 
+    # 섹터별 기본 PER 결정
+    sector_map = _load_dart_sector_map()
+    sector = sector_map.get(ticker, "")
+    default_per = _SECTOR_DEFAULT_PER.get(sector, _SECTOR_DEFAULT_PER_FALLBACK)
+
     company = str(sub.iloc[-1].get("company", ""))
     return {
         "ticker": ticker,
         "name": company,
         "forward_eps": trailing_eps,
-        "forward_per": 8.0,       # trailing이므로 보수적 기본값
+        "forward_per": default_per,
         "target_price": 0,
         "analyst_count": 0,       # → sustainability_pass = False
         "opinion_score": 0,
