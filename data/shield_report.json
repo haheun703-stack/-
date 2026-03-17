@@ -1,42 +1,56 @@
 {
-  "timestamp": "2026-03-07T21:04:47.903732",
+  "timestamp": "2026-03-16T18:40:47.389932",
   "overall_level": "ORANGE",
-  "sector_overlaps": [],
+  "sector_overlaps": [
+    {
+      "sector": "방산",
+      "swing_holdings": [
+        "한미반도체(042700, 13.9%)",
+        "현대로템(064350, 0.6%)",
+        "한화시스템(272210, 7.8%)"
+      ],
+      "etf_holdings": [],
+      "total_exposure_pct": 22.3,
+      "limit_pct": 30,
+      "severity": "WARNING"
+    },
+    {
+      "sector": "에너지화학",
+      "swing_holdings": [
+        "미래에셋증권(006800, 6.1%)",
+        "S-Oil(010950, 7.9%)",
+        "흥구석유(024060, 6.8%)"
+      ],
+      "etf_holdings": [],
+      "total_exposure_pct": 20.8,
+      "limit_pct": 30,
+      "severity": "WARNING"
+    }
+  ],
   "mdd_status": {
-    "peak_equity": 40345724,
-    "current_equity": 40345724,
+    "peak_equity": 40863823,
+    "current_equity": 40863823,
     "current_mdd_pct": 0.0,
     "max_mdd_pct": 0.0,
     "max_mdd_date": "",
     "killswitch_level": "NONE",
     "killswitch_action": ""
   },
-  "stock_alerts": [
-    {
-      "ticker": "003570",
-      "name": "SNT다이내믹스",
-      "pnl_pct": -16.32,
-      "alert_type": "DEEP_LOSS",
-      "message": "SNT다이내믹스(003570) -16.3%"
-    }
-  ],
+  "stock_alerts": [],
   "systemic_risk": {
-    "simultaneous_decline_count": 5,
+    "simultaneous_decline_count": 2,
     "decline_tickers": [
-      "SNT다이내믹스(-16.3%)",
-      "현대차(-10.4%)",
-      "삼성중공업(-6.3%)",
-      "셀트리온(-12.8%)",
-      "카카오뱅크(-13.8%)"
+      "현대차(-9.6%)",
+      "셀트리온(-12.4%)"
     ],
-    "avg_decline_pct": -11.93,
-    "severity": "DANGER",
-    "message": "5개 종목 동시 -5.0%+ 하락"
+    "avg_decline_pct": -11.0,
+    "severity": "WARNING",
+    "message": "2개 종목 동시 하락 중"
   },
   "correlation_breakdowns": [
     {
       "pair_name": "gold_spy",
-      "current_corr": 0.1467,
+      "current_corr": 0.1826,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -44,7 +58,7 @@
     },
     {
       "pair_name": "dollar_spy",
-      "current_corr": -0.0512,
+      "current_corr": -0.0971,
       "normal_sign": "negative",
       "breakdown_threshold": 0.4,
       "is_breakdown": false,
@@ -52,7 +66,7 @@
     },
     {
       "pair_name": "bond_spy",
-      "current_corr": 0.056,
+      "current_corr": 0.0875,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -60,23 +74,23 @@
     },
     {
       "pair_name": "oil_spy",
-      "current_corr": -0.155,
+      "current_corr": -0.2949,
       "normal_sign": "positive",
       "breakdown_threshold": -0.3,
       "is_breakdown": false,
-      "severity": "OK"
+      "severity": "WARNING"
     }
   ],
   "brain_overrides": {
     "shield_level": "ORANGE",
-    "arm_adjustments": {
-      "swing": -10,
-      "etf_sector": -5,
-      "cash": 15
-    },
-    "frozen_sectors": [],
+    "arm_adjustments": {},
+    "frozen_sectors": [
+      "방산",
+      "에너지화학"
+    ],
     "messages": [
-      "S3: 5개 동시하락 (avg -11.9%)"
+      "S1: 방산 22.3% (한도 30%)",
+      "S1: 에너지화학 20.8% (한도 30%)"
     ]
   },
   "warnings": []

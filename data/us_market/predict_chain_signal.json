@@ -1,36 +1,42 @@
 {
   "version": "1.0",
   "stage1_asian_risk": {
-    "audjpy_ret_pct": 0.121,
+    "audjpy_ret_pct": 0.1816,
     "audjpy_signal": "NEUTRAL",
-    "usdcnh_ret_pct": 0.0624,
+    "usdcnh_ret_pct": -0.1057,
     "cnh_signal": "STABLE",
-    "es_futures_ret_pct": 0.2042,
-    "score": 0.040836,
+    "es_futures_ret_pct": -0.0825,
+    "score": -0.016506,
     "direction": "NEUTRAL"
   },
   "stage2_europe_open": {
-    "dax_30m_ret_pct": -0.3984,
-    "dax_signal": "BEAR",
-    "eurusd_30m_ret_pct": 0.0815,
+    "dax_30m_ret_pct": -0.1572,
+    "dax_signal": "WEAK_BEAR",
+    "eurusd_30m_ret_pct": 0.0916,
     "eurusd_signal": "NEUTRAL",
-    "es_futures_30m_pct": -0.051,
-    "score": -0.560193,
-    "direction": "BEAR"
+    "es_futures_30m_pct": -0.0112,
+    "score": -0.045465,
+    "direction": "NEUTRAL"
   },
   "stage3_divergence": {
-    "hyg_vs_futures_gap": 16.7248,
-    "tnx_ret_pct": 0.0245,
-    "gold_ret_pct": 0.0097,
-    "alerts": [],
-    "alert_count": 0,
+    "hyg_vs_futures_gap": 19.2033,
+    "tnx_ret_pct": 0.6577,
+    "gold_ret_pct": -0.9114,
+    "alerts": [
+      {
+        "type": "SMART_MONEY_RISK_ON",
+        "desc": "금리↑(+0.66%) + 금↓(-0.91%)",
+        "action": "강매수"
+      }
+    ],
+    "alert_count": 1,
     "invalidate": false,
-    "boost": false
+    "boost": true
   },
   "final_signal": "NEUTRAL",
-  "final_score": -34.9833,
-  "confidence": 17.4916,
+  "final_score": -4.5928,
+  "confidence": 2.2964,
   "direction_match": false,
   "divergence_alert": false,
-  "timestamp": "2026-03-05 20:06:38 KST"
+  "timestamp": "2026-03-16 19:18:56 KST"
 }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-04 19:21",
+  "generated_at": "2026-03-16 18:50",
   "fired_sectors": [
     {
       "sector": "반도체",
@@ -8,133 +8,199 @@
         {
           "ticker": "000660",
           "name": "SK하이닉스",
-          "change_pct": -9.58,
+          "change_pct": 7.03,
           "weight": 27.72
         },
         {
           "ticker": "005930",
           "name": "삼성전자",
-          "change_pct": -11.74,
+          "change_pct": 2.83,
           "weight": 23.19
         }
       ],
-      "avg_leader_change": -10.66,
+      "avg_leader_change": 4.93,
       "candidates": [
         {
-          "ticker": "084370",
-          "name": "유진테크",
-          "tier": "tier2",
-          "weight": 1.45,
-          "change_pct": -9.1,
-          "gap_pct": -1.56,
-          "score": 25,
+          "ticker": "042700",
+          "name": "한미반도체",
+          "tier": "tier1",
+          "weight": 7.99,
+          "change_pct": -1.8,
+          "gap_pct": 6.73,
+          "score": 36,
           "score_detail": {
-            "gap": 0,
+            "gap": 21,
             "tech": 15,
-            "flow": 10,
+            "flow": 0,
             "value": 0
           },
-          "rsi": 54.0,
-          "bb_pos": 0.552,
-          "vol_z": 0.88,
+          "rsi": 59.8,
+          "bb_pos": 0.668,
+          "vol_z": -0.72,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
           "f_consec": 0,
           "target_gap_pct": null,
           "reasons": [
-            "RSI 54 적정"
+            "미반영 6.7%"
           ]
-        },
-        {
-          "ticker": "089030",
-          "name": "테크윙",
-          "tier": "tier2",
-          "weight": 1.06,
-          "change_pct": -0.58,
-          "gap_pct": -10.08,
-          "score": 22,
-          "score_detail": {
-            "gap": 0,
-            "tech": 19,
-            "flow": 3,
-            "value": 0
-          },
-          "rsi": 59.8,
-          "bb_pos": 0.992,
-          "vol_z": 5.68,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": []
         },
         {
           "ticker": "058470",
           "name": "리노공업",
           "tier": "tier1",
           "weight": 4.54,
-          "change_pct": -9.51,
-          "gap_pct": -1.15,
-          "score": 18,
+          "change_pct": -1.32,
+          "gap_pct": 6.25,
+          "score": 35,
           "score_detail": {
-            "gap": 0,
+            "gap": 20,
             "tech": 15,
-            "flow": 3,
+            "flow": 0,
             "value": 0
           },
-          "rsi": 58.6,
-          "bb_pos": 0.588,
-          "vol_z": 2.5,
+          "rsi": 56.8,
+          "bb_pos": 0.616,
+          "vol_z": -0.36,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
           "f_consec": 0,
           "target_gap_pct": null,
-          "reasons": []
+          "reasons": [
+            "미반영 6.2%"
+          ]
         },
         {
-          "ticker": "218410",
-          "name": "RFHIC",
+          "ticker": "039030",
+          "name": "이오테크닉스",
           "tier": "tier2",
-          "weight": 0.78,
-          "change_pct": -10.66,
-          "gap_pct": -0.0,
-          "score": 18,
+          "weight": 2.88,
+          "change_pct": -0.12,
+          "gap_pct": 5.05,
+          "score": 31,
           "score_detail": {
-            "gap": 0,
+            "gap": 16,
             "tech": 15,
-            "flow": 3,
+            "flow": 0,
             "value": 0
           },
-          "rsi": 58.9,
-          "bb_pos": 0.666,
-          "vol_z": 3.19,
+          "rsi": 54.3,
+          "bb_pos": 0.601,
+          "vol_z": -1.34,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 1,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 5.0%",
+            "RSI 54 적정"
+          ]
+        },
+        {
+          "ticker": "183300",
+          "name": "코미코",
+          "tier": "tier2",
+          "weight": 0.6,
+          "change_pct": 1.18,
+          "gap_pct": 3.75,
+          "score": 31,
+          "score_detail": {
+            "gap": 12,
+            "tech": 19,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 52.9,
+          "bb_pos": 0.646,
+          "vol_z": -0.96,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
           "f_consec": 0,
           "target_gap_pct": null,
-          "reasons": []
+          "reasons": [
+            "미반영 3.8%",
+            "RSI 53 적정"
+          ]
+        },
+        {
+          "ticker": "348210",
+          "name": "넥스틴",
+          "tier": "tier2",
+          "weight": 0.53,
+          "change_pct": 2.01,
+          "gap_pct": 2.92,
+          "score": 28,
+          "score_detail": {
+            "gap": 9,
+            "tech": 19,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 51.5,
+          "bb_pos": 0.619,
+          "vol_z": -0.86,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 2.9%",
+            "RSI 52 적정"
+          ]
+        },
+        {
+          "ticker": "403870",
+          "name": "HPSP",
+          "tier": "tier2",
+          "weight": 1.87,
+          "change_pct": 2.81,
+          "gap_pct": 2.12,
+          "score": 26,
+          "score_detail": {
+            "gap": 7,
+            "tech": 19,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 52.1,
+          "bb_pos": 0.529,
+          "vol_z": -0.41,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 1,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 2.1%",
+            "RSI 52 적정"
+          ]
+        },
+        {
+          "ticker": "240810",
+          "name": "원익IPS",
+          "tier": "tier1",
+          "weight": 3.38,
+          "change_pct": 1.76,
+          "gap_pct": 3.17,
+          "score": 25,
+          "score_detail": {
+            "gap": 10,
+            "tech": 15,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 53.2,
+          "bb_pos": 0.511,
+          "vol_z": -1.06,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 1,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 3.2%",
+            "RSI 53 적정"
+          ]
         }
       ]
-    },
-    {
-      "sector": "2차전지",
-      "etf_code": "305540",
-      "leaders": [
-        {
-          "ticker": "373220",
-          "name": "LG에너지솔루션",
-          "change_pct": -11.58,
-          "weight": 12.68
-        },
-        {
-          "ticker": "051910",
-          "name": "LG화학",
-          "change_pct": -14.96,
-          "weight": 11.64
-        }
-      ],
-      "avg_leader_change": -13.27,
-      "candidates": []
     },
     {
       "sector": "IT",
@@ -143,253 +209,48 @@
         {
           "ticker": "005930",
           "name": "삼성전자",
-          "change_pct": -11.74,
+          "change_pct": 2.83,
           "weight": 22.99
         },
         {
           "ticker": "000660",
           "name": "SK하이닉스",
-          "change_pct": -9.58,
+          "change_pct": 7.03,
           "weight": 22.65
         },
         {
           "ticker": "402340",
           "name": "SK스퀘어",
-          "change_pct": -12.74,
+          "change_pct": 5.24,
           "weight": 18.88
         }
       ],
-      "avg_leader_change": -11.35,
+      "avg_leader_change": 5.03,
       "candidates": [
         {
-          "ticker": "009150",
-          "name": "삼성전기",
+          "ticker": "042700",
+          "name": "한미반도체",
           "tier": "tier1",
-          "weight": 6.33,
-          "change_pct": -11.37,
-          "gap_pct": 0.02,
-          "score": 18,
+          "weight": 3.13,
+          "change_pct": -1.8,
+          "gap_pct": 6.83,
+          "score": 36,
           "score_detail": {
-            "gap": 0,
-            "tech": 15,
-            "flow": 3,
-            "value": 0
-          },
-          "rsi": 52.2,
-          "bb_pos": 0.535,
-          "vol_z": 1.8,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 2,
-          "target_gap_pct": null,
-          "reasons": [
-            "RSI 52 적정"
-          ]
-        }
-      ]
-    },
-    {
-      "sector": "헬스케어",
-      "etf_code": "143860",
-      "leaders": [
-        {
-          "ticker": "068270",
-          "name": "셀트리온",
-          "change_pct": -12.27,
-          "weight": 21.38
-        }
-      ],
-      "avg_leader_change": -12.27,
-      "candidates": [
-        {
-          "ticker": "226950",
-          "name": "올릭스",
-          "tier": "tier2",
-          "weight": 1.22,
-          "change_pct": -15.86,
-          "gap_pct": 3.59,
-          "score": 41,
-          "score_detail": {
-            "gap": 11,
-            "tech": 15,
-            "flow": 15,
-            "value": 0
-          },
-          "rsi": 57.1,
-          "bb_pos": 0.77,
-          "vol_z": 0.16,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 7,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 3.6%"
-          ]
-        },
-        {
-          "ticker": "310210",
-          "name": "보로노이",
-          "tier": "tier2",
-          "weight": 1.35,
-          "change_pct": -16.01,
-          "gap_pct": 3.74,
-          "score": 40,
-          "score_detail": {
-            "gap": 12,
-            "tech": 15,
-            "flow": 13,
-            "value": 0
-          },
-          "rsi": 56.7,
-          "bb_pos": 0.658,
-          "vol_z": 2.07,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 1,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 3.7%"
-          ]
-        },
-        {
-          "ticker": "000250",
-          "name": "삼천당제약",
-          "tier": "tier1",
-          "weight": 4.39,
-          "change_pct": -14.46,
-          "gap_pct": 2.19,
-          "score": 32,
-          "score_detail": {
-            "gap": 7,
-            "tech": 15,
-            "flow": 10,
-            "value": 0
-          },
-          "rsi": 58.5,
-          "bb_pos": 0.649,
-          "vol_z": 0.25,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 1,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 2.2%"
-          ]
-        },
-        {
-          "ticker": "389470",
-          "name": "인벤티지랩",
-          "tier": "tier2",
-          "weight": 0.46,
-          "change_pct": -10.99,
-          "gap_pct": -1.28,
-          "score": 15,
-          "score_detail": {
-            "gap": 0,
+            "gap": 21,
             "tech": 15,
             "flow": 0,
             "value": 0
           },
-          "rsi": 52.1,
-          "bb_pos": 0.664,
-          "vol_z": -0.12,
+          "rsi": 59.8,
+          "bb_pos": 0.668,
+          "vol_z": -0.72,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
           "f_consec": 0,
           "target_gap_pct": null,
           "reasons": [
-            "RSI 52 적정"
+            "미반영 6.8%"
           ]
-        }
-      ]
-    },
-    {
-      "sector": "바이오",
-      "etf_code": "364970",
-      "leaders": [
-        {
-          "ticker": "068270",
-          "name": "셀트리온",
-          "change_pct": -12.27,
-          "weight": 31.37
-        }
-      ],
-      "avg_leader_change": -12.27,
-      "candidates": []
-    },
-    {
-      "sector": "에너지화학",
-      "etf_code": "139250",
-      "leaders": [
-        {
-          "ticker": "034730",
-          "name": "SK",
-          "change_pct": -13.04,
-          "weight": 15.42
-        },
-        {
-          "ticker": "051910",
-          "name": "LG화학",
-          "change_pct": -14.96,
-          "weight": 15.19
-        },
-        {
-          "ticker": "267250",
-          "name": "HD현대",
-          "change_pct": -10.14,
-          "weight": 14.35
-        },
-        {
-          "ticker": "096770",
-          "name": "SK이노베이션",
-          "change_pct": -16.73,
-          "weight": 10.52
-        }
-      ],
-      "avg_leader_change": -13.72,
-      "candidates": []
-    },
-    {
-      "sector": "소프트웨어",
-      "etf_code": "157490",
-      "leaders": [
-        {
-          "ticker": "035720",
-          "name": "카카오",
-          "change_pct": -16.28,
-          "weight": 23.07
-        },
-        {
-          "ticker": "259960",
-          "name": "크래프톤",
-          "change_pct": -10.59,
-          "weight": 10.25
-        }
-      ],
-      "avg_leader_change": -13.44,
-      "candidates": [
-        {
-          "ticker": "263750",
-          "name": "펄어비스",
-          "tier": "tier2",
-          "weight": 2.68,
-          "change_pct": -10.0,
-          "gap_pct": -3.44,
-          "score": 18,
-          "score_detail": {
-            "gap": 0,
-            "tech": 15,
-            "flow": 3,
-            "value": 0
-          },
-          "rsi": 55.8,
-          "bb_pos": 0.58,
-          "vol_z": 2.06,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": []
         }
       ]
     },
@@ -400,57 +261,71 @@
         {
           "ticker": "047810",
           "name": "한국항공우주",
-          "change_pct": -19.79,
+          "change_pct": 4.65,
           "weight": 21.9
-        },
-        {
-          "ticker": "012450",
-          "name": "한화에어로스페이스",
-          "change_pct": -7.61,
-          "weight": 17.95
-        },
-        {
-          "ticker": "272210",
-          "name": "한화시스템",
-          "change_pct": -20.93,
-          "weight": 16.74
-        },
-        {
-          "ticker": "064350",
-          "name": "현대로템",
-          "change_pct": -18.88,
-          "weight": 15.89
-        },
-        {
-          "ticker": "079550",
-          "name": "LIG넥스원",
-          "change_pct": -6.35,
-          "weight": 12.74
         }
       ],
-      "avg_leader_change": -14.71,
-      "candidates": []
-    },
-    {
-      "sector": "조선",
-      "etf_code": "494670",
-      "leaders": [
+      "avg_leader_change": 4.65,
+      "candidates": [
         {
-          "ticker": "329180",
-          "name": "HD현대중공업",
-          "change_pct": -13.39,
-          "weight": 23.34
+          "ticker": "189300",
+          "name": "인텔리안테크",
+          "tier": "tier2",
+          "weight": 2.74,
+          "change_pct": -6.9,
+          "gap_pct": 11.55,
+          "score": 40,
+          "score_detail": {
+            "gap": 25,
+            "tech": 15,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 59.1,
+          "bb_pos": 0.696,
+          "vol_z": -0.74,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 11.6%"
+          ]
         },
         {
-          "ticker": "009540",
-          "name": "HD한국조선해양",
-          "change_pct": -14.16,
-          "weight": 20.89
+          "ticker": "099320",
+          "name": "쎄트렉아이",
+          "tier": "tier1",
+          "weight": 3.69,
+          "change_pct": -0.51,
+          "gap_pct": 5.16,
+          "score": 31,
+          "score_detail": {
+            "gap": 16,
+            "tech": 15,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 55.7,
+          "bb_pos": 0.714,
+          "vol_z": -1.15,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 1,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 5.2%"
+          ]
         }
-      ],
-      "avg_leader_change": -13.78,
-      "candidates": []
+      ]
     }
   ],
-  "no_fire_sectors": []
+  "no_fire_sectors": [
+    "2차전지",
+    "헬스케어",
+    "바이오",
+    "에너지화학",
+    "소프트웨어",
+    "조선"
+  ]
 }

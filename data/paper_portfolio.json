@@ -10,6 +10,30 @@
       "equity": 15000000,
       "capital": 15000000,
       "positions": 0
+    },
+    {
+      "date": "2026-03-11",
+      "equity": 15000000,
+      "capital": 15000000,
+      "positions": 0
+    },
+    {
+      "date": "2026-03-12",
+      "equity": 15000000,
+      "capital": 15000000,
+      "positions": 0
+    },
+    {
+      "date": "2026-03-13",
+      "equity": 15000000,
+      "capital": 15000000,
+      "positions": 0
+    },
+    {
+      "date": "2026-03-16",
+      "equity": 15000000,
+      "capital": 15000000,
+      "positions": 0
     }
   ],
   "cooldown_until": "",
@@ -22,5 +46,5 @@
     "max_equity": 15000000,
     "mdd": 0.0
   },
-  "updated": "2026-03-08 21:59"
+  "updated": "2026-03-16 19:20"
 }

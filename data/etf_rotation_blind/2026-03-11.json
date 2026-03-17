@@ -1,27 +1,27 @@
 {
   "date": "2026-03-11",
-  "timestamp": "2026-03-11 14:30:59",
+  "timestamp": "2026-03-11 19:14:09",
   "regime": "BEAR",
   "effective_regime": "BEAR",
   "warning_score": -10,
-  "kospi_close": 5532.59,
+  "kospi_close": 5609.95,
   "kospi_ma20_above": false,
   "kospi_ma60_above": true,
   "us_overnight_grade": 3,
   "us_overnight_signal": "neutral",
   "momentum_sectors": 20,
-  "smart_money_count": 9,
+  "smart_money_count": 2,
   "supply_count": 25,
   "five_axis_score": 65.0,
   "allocation": {
-    "sector": 10.0,
+    "sector": 18.0,
     "leverage": 0,
-    "index": 15.0,
-    "gold": 16.2,
+    "index": 18.0,
+    "gold": 13.5,
     "small_cap": 0,
-    "bonds": 8.8,
-    "dollar": 3.8,
-    "cash": 33.8
+    "bonds": 4.5,
+    "dollar": 4.5,
+    "cash": 14.5
   },
   "order_queue": [
     {
@@ -29,8 +29,8 @@
       "code": "069500",
       "name": "KODEX 200",
       "action": "BUY",
-      "target_weight_pct": 6.3,
-      "reason": "신규 진입: 목표 6.3%",
+      "target_weight_pct": 7.56,
+      "reason": "신규 진입: 목표 7.6%",
       "priority": 3
     },
     {
@@ -38,8 +38,8 @@
       "code": "278530",
       "name": "KODEX MSCI Korea TR",
       "action": "BUY",
-      "target_weight_pct": 2.7,
-      "reason": "신규 진입: 목표 2.7%",
+      "target_weight_pct": 3.24,
+      "reason": "신규 진입: 목표 3.2%",
       "priority": 3
     }
   ],

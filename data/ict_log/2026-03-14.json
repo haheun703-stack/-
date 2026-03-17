@@ -1,0 +1,43 @@
+{
+  "date": "2026-03-14",
+  "total_checks": 2,
+  "adjustments": {
+    "positive": 0,
+    "negative": 0,
+    "neutral": 2
+  },
+  "filtered_out": 0,
+  "avg_adjustment": 0.0,
+  "records": [
+    {
+      "symbol": "267260",
+      "name": "HD현대일렉트릭",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.0,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [],
+      "reason": "ICT 데이터 없음, 기존 로직 유지",
+      "suggested_target": null,
+      "suggested_stop": null,
+      "filtered": false
+    },
+    {
+      "symbol": "298040",
+      "name": "효성중공업",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.0,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [],
+      "reason": "ICT 데이터 없음, 기존 로직 유지",
+      "suggested_target": null,
+      "suggested_stop": null,
+      "filtered": false
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "date": "2026-03-12",
+  "generated_at": "2026-03-12 19:47",
+  "total_stocks": 50,
+  "summary": {
+    "SURGE": 0,
+    "INFLOW": 0,
+    "SECTOR_FOCUS": 1,
+    "WATCH": 5,
+    "NORMAL": 44
+  },
+  "signals": [
+    {
+      "date": "2026-03-12",
+      "ticker": "012450",
+      "name": "한화에어로스페이스",
+      "signal": "SECTOR_FOCUS",
+      "score": 33,
+      "reasons": [
+        "외국인 강매수 (z=1.7)",
+        "외국인 3일 연속 순매수",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 244624,
+      "foreign_zscore": 1.72,
+      "ewy_decouple": false,
+      "consecutive_days": 3,
+      "pct_change_5d": 6.08
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "329180",
+      "name": "HD현대중공업",
+      "signal": "WATCH",
+      "score": 25,
+      "reasons": [
+        "외국인 14일 연속 순매수",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 84395,
+      "foreign_zscore": 0.02,
+      "ewy_decouple": false,
+      "consecutive_days": 14,
+      "pct_change_5d": 8.05
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "010140",
+      "name": "삼성중공업",
+      "signal": "WATCH",
+      "score": 25,
+      "reasons": [
+        "외국인 강매수 (z=1.1)",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 7173255,
+      "foreign_zscore": 1.05,
+      "ewy_decouple": false,
+      "consecutive_days": 2,
+      "pct_change_5d": 13.42
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "128940",
+      "name": "한미약품",
+      "signal": "WATCH",
+      "score": 25,
+      "reasons": [
+        "외국인 강매수 (z=1.2)",
+        "스텔스 매수 (주가 -6.0% but 외국인↑)"
+      ],
+      "foreign_net_5d": 132848,
+      "foreign_zscore": 1.24,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": -5.97
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "011200",
+      "name": "HMM",
+      "signal": "WATCH",
+      "score": 23,
+      "reasons": [
+        "외국인 강매수 (z=1.0)",
+        "외국인 4일 연속 순매수"
+      ],
+      "foreign_net_5d": 999789,
+      "foreign_zscore": 1.03,
+      "ewy_decouple": false,
+      "consecutive_days": 4,
+      "pct_change_5d": 1.88
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "105560",
+      "name": "KB금융",
+      "signal": "WATCH",
+      "score": 15,
+      "reasons": [
+        "외국인 강매수 (z=1.5)"
+      ],
+      "foreign_net_5d": -246737,
+      "foreign_zscore": 1.46,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": 0.13
+    }
+  ],
+  "top_foreign_buyers": [
+    {
+      "date": "2026-03-12",
+      "ticker": "010140",
+      "name": "삼성중공업",
+      "signal": "WATCH",
+      "score": 25,
+      "reasons": [
+        "외국인 강매수 (z=1.1)",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 7173255,
+      "foreign_zscore": 1.05,
+      "ewy_decouple": false,
+      "consecutive_days": 2,
+      "pct_change_5d": 13.42
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 1957404,
+      "foreign_zscore": -0.0,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": 14.36
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "011200",
+      "name": "HMM",
+      "signal": "WATCH",
+      "score": 23,
+      "reasons": [
+        "외국인 강매수 (z=1.0)",
+        "외국인 4일 연속 순매수"
+      ],
+      "foreign_net_5d": 999789,
+      "foreign_zscore": 1.03,
+      "ewy_decouple": false,
+      "consecutive_days": 4,
+      "pct_change_5d": 1.88
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "003490",
+      "name": "대한항공",
+      "signal": "NORMAL",
+      "score": 0,
+      "reasons": [],
+      "foreign_net_5d": 311821,
+      "foreign_zscore": -0.77,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": -1.02
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "066570",
+      "name": "LG전자",
+      "signal": "NORMAL",
+      "score": 0,
+      "reasons": [],
+      "foreign_net_5d": 277119,
+      "foreign_zscore": -0.05,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": -1.21
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "012450",
+      "name": "한화에어로스페이스",
+      "signal": "SECTOR_FOCUS",
+      "score": 33,
+      "reasons": [
+        "외국인 강매수 (z=1.7)",
+        "외국인 3일 연속 순매수",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 244624,
+      "foreign_zscore": 1.72,
+      "ewy_decouple": false,
+      "consecutive_days": 3,
+      "pct_change_5d": 6.08
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "047810",
+      "name": "한국항공우주",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 163692,
+      "foreign_zscore": 0.52,
+      "ewy_decouple": false,
+      "consecutive_days": 2,
+      "pct_change_5d": 0.45
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "128940",
+      "name": "한미약품",
+      "signal": "WATCH",
+      "score": 25,
+      "reasons": [
+        "외국인 강매수 (z=1.2)",
+        "스텔스 매수 (주가 -6.0% but 외국인↑)"
+      ],
+      "foreign_net_5d": 132848,
+      "foreign_zscore": 1.24,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": -5.97
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "032830",
+      "name": "삼성생명",
+      "signal": "NORMAL",
+      "score": 0,
+      "reasons": [],
+      "foreign_net_5d": 131188,
+      "foreign_zscore": 0.87,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": 2.1
+    },
+    {
+      "date": "2026-03-12",
+      "ticker": "018260",
+      "name": "삼성에스디에스",
+      "signal": "NORMAL",
+      "score": 8,
+      "reasons": [
+        "외국인 4일 연속 순매수"
+      ],
+      "foreign_net_5d": 115620,
+      "foreign_zscore": -0.78,
+      "ewy_decouple": false,
+      "consecutive_days": 4,
+      "pct_change_5d": -2.94
+    }
+  ]
+}

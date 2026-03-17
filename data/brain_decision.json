@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-03-08T19:33:24.083831",
+  "timestamp": "2026-03-16T18:40:51.780593",
   "effective_regime": "CAUTION",
   "kospi_regime": "CAUTION",
-  "nightwatch_score": -0.06,
-  "vix_level": 29.5,
+  "nightwatch_score": 0.04,
+  "vix_level": 27.2,
   "confidence": 0.65,
   "arms": [
     {
       "name": "swing",
       "base_pct": 30,
-      "adjusted_pct": 12.5,
-      "delta_pct": -17.5,
-      "reason": "축소 17.5%p",
+      "adjusted_pct": 22.5,
+      "delta_pct": -7.5,
+      "reason": "축소 7.5%p",
       "frozen": true
     },
     {
@@ -73,22 +73,24 @@
     {
       "name": "cash",
       "base_pct": 35.0,
-      "adjusted_pct": 33.8,
-      "delta_pct": -1.2,
-      "reason": "축소 1.2%p",
+      "adjusted_pct": 23.8,
+      "delta_pct": -11.2,
+      "reason": "축소 11.2%p",
       "frozen": false
     }
   ],
-  "total_invest_pct": 66.2,
-  "cash_pct": 33.8,
+  "total_invest_pct": 76.2,
+  "cash_pct": 23.8,
   "adjustments": [
-    "VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75",
-    "2D 선제방어: credit_z=0.2, MOVE_z=2.8",
-    "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
+    "VIX 보정: 27.2 (HIGH) → 투자비중 ×0.75",
+    "2D 선제방어: credit_z=-3.0, MOVE_z=2.6",
+    "COT: S&P 매도 포지셔닝 → 리스크ARM -5%p",
+    "SHIELD: S1: 방산 22.3% (한도 30%)",
+    "SHIELD: S1: 에너지화학 20.8% (한도 30%)"
   ],
   "warnings": [
     "SHIELD 방어 등급: ORANGE",
-    "레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
+    "레짐 변경 감지: PRE_BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
   ],
-  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: -0.060 | VIX: 29.5 (HIGH) | US: NEUTRAL\n\n자본 배분:\n      개별스윙  12.5% ██\n     섹터ETF  10.0% ██\n      레버리지   0.0% \n     지수ETF  15.0% ███\n      금ETF  16.2% ███\n       소형주   0.0% \n        채권   8.8% █\n        달러   3.8% \n        현금  33.8% ██████\n\n유동성 사이클:\n  Net Liquidity: 5,795.3B (z=+1.58, 20d: +99.5B)\n  M2 YoY: +3.78% (z=-2.54)\n  은행 지준: 2,967.9B (z=+0.52)\n  RRP: 1.5B (20d: +0.2B) | TGA: 832.1B (20d: -76.7B)\n  유동성 레짐: AMPLE (score=+0.304, 2일 전)\n\nCOT Slow Eye (주간):\n    S&P 500 E-mini: z=+2.23 (BULLISH)\n        Gold COMEX: z=-1.25 (BULLISH)\n        10Y T-Note: z=-0.12 (NEUTRAL)\n     WTI Crude Oil: z=+0.87 (NEUTRAL)\n              복합방향: MILD_BULLISH (데이터 4일 전)\n\nv3 캡: CAUTION → 신규 최대 5종목, 종목당 2.5%\n\n보정:\n  · VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75\n  · 2D 선제방어: credit_z=0.2, MOVE_z=2.8\n  · SHIELD: S3: 5개 동시하락 (avg -11.9%)\n\n경고:\n  ! SHIELD 방어 등급: ORANGE\n  ! 레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
+  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: +0.040 | VIX: 27.2 (HIGH) | US: NEUTRAL\n\n자본 배분:\n      개별스윙  22.5% ████\n     섹터ETF  10.0% ██\n      레버리지   0.0% \n     지수ETF  15.0% ███\n      금ETF  16.2% ███\n       소형주   0.0% \n        채권   8.8% █\n        달러   3.8% \n        현금  23.8% ████\n\n유동성 사이클:\n  Net Liquidity: 5,807.7B (z=+1.54, 20d: +101.0B)\n  M2 YoY: +3.78% (z=-1.99)\n  은행 지준: 2,967.9B (z=+0.39)\n  RRP: 0.4B (20d: +0.0B) | TGA: 838.2B (20d: -77.1B)\n  유동성 레짐: AMPLE (score=+0.278, 3일 전)\n\nCOT Slow Eye (주간):\n    S&P 500 E-mini: z=-1.25 (BEARISH)\n        Gold COMEX: z=-1.19 (BULLISH)\n        10Y T-Note: z=-0.55 (NEUTRAL)\n     WTI Crude Oil: z=+1.44 (NEUTRAL)\n              복합방향: NEUTRAL (데이터 6일 전)\n\nv3 캡: CAUTION → 신규 최대 5종목, 종목당 4.5%\n\nICT 전술 레벨:\n  현대차 517,000 | ↑전일고 529,500(+2.4%) | ↓전일저 501,000(-3.1%)\n  미래에셋증권 69,500 | ↑전일고 71,400(+2.7%) | ↓전일저 66,500(-4.3%)\n  삼성중공업 30,700 | ↑전일고 31,450(+2.4%) | ↓전일저 29,950(-2.4%)\n  S-Oil 108,000 | ↑월간고 120,000(+11.1%) | ↓전일저 107,200(-0.7%)\n  흥구석유 24,600 | ↑전일고 29,450(+19.7%) | ↓전일저 24,250(-1.4%)\n  한미반도체 305,500 | ↑전일고 313,000(+2.5%) | ↓전일저 299,000(-2.1%)\n  현대로템 198,500 | ↑전일고 201,500(+1.5%) | ↓전일저 195,100(-1.7%)\n  셀트리온 205,500 | ↑전일고 208,000(+1.2%) | ↓월간저 201,500(-1.9%)\n  RFHIC 84,800 | ↑전일고 87,600(+3.3%) | ↓전일저 80,500(-5.1%)\n  한화시스템 144,400 | ↑전일고 149,300(+3.4%) | ↓전일저 140,900(-2.4%)\n  ---\n  현대차 ▽EqLow 525,000 x2(+1.5%)\n  현대차 ▽EqLow 504,500 x2(-2.4%)\n  현대차 △EqHigh 517,500 x2(+0.1%)\n  현대차 △EqHigh 515,333 x3(-0.3%) ★\n  미래에셋증권 ▽EqLow 67,550 x2(-2.8%)\n  미래에셋증권 ▽EqLow 66,550 x3(-4.2%) ★\n  미래에셋증권 △EqHigh 68,950 x2(-0.8%)\n  미래에셋증권 △EqHigh 68,300 x2(-1.7%)\n  삼성중공업 ▽EqLow 29,975 x2(-2.4%)\n  삼성중공업 ▽EqLow 29,850 x2(-2.8%)\n  삼성중공업 △EqHigh 30,425 x2(-0.9%)\n  삼성중공업 △EqHigh 31,025 x2(+1.1%)\n  S-Oil ▽EqLow 107,300 x2(-0.6%)\n  S-Oil ▽EqLow 105,200 x2(-2.6%)\n  S-Oil △EqHigh 107,250 x2(-0.7%)\n  S-Oil △EqHigh 102,300 x2(-5.3%)\n  흥구석유 ▽EqLow 14,277 x3(-42.0%) ★\n  흥구석유 ▽EqLow 13,980 x2(-43.2%)\n  흥구석유 △EqHigh 22,850 x2(-7.1%)\n  흥구석유 △EqHigh 30,500 x2(+24.0%)\n  한미반도체 ▽EqLow 303,500 x2(-0.7%)\n  한미반도체 ▽EqLow 200,167 x3(-34.5%) ★\n  한미반도체 △EqHigh 313,250 x2(+2.5%)\n  한미반도체 △EqHigh 208,333 x3(-31.8%) ★\n  현대로템 ▽EqLow 200,200 x5(+0.9%) ★\n  현대로템 ▽EqLow 195,050 x2(-1.7%)\n  현대로템 △EqHigh 205,833 x3(+3.7%) ★\n  현대로템 △EqHigh 191,000 x2(-3.8%)\n  셀트리온 ▽EqLow 205,500 x3(+0.0%) ★\n  셀트리온 ▽EqLow 206,750 x6(+0.6%) ★\n  셀트리온 △EqHigh 204,750 x2(-0.4%)\n  셀트리온 △EqHigh 208,000 x2(+1.2%)\n  RFHIC ▽EqLow 46,800 x2(-44.8%)\n  RFHIC ▽EqLow 46,500 x2(-45.2%)\n  RFHIC △EqHigh 51,533 x3(-39.2%) ★\n  RFHIC △EqHigh 49,650 x3(-41.5%) ★\n  한화시스템 ▽EqLow 101,933 x3(-29.4%) ★\n  한화시스템 ▽EqLow 89,433 x3(-38.1%) ★\n  한화시스템 △EqHigh 111,850 x2(-22.5%)\n  한화시스템 △EqHigh 106,350 x3(-26.4%) ★\n\n보정:\n  · VIX 보정: 27.2 (HIGH) → 투자비중 ×0.75\n  · 2D 선제방어: credit_z=-3.0, MOVE_z=2.6\n  · COT: S&P 매도 포지셔닝 → 리스크ARM -5%p\n  · SHIELD: S1: 방산 22.3% (한도 30%)\n  · SHIELD: S1: 에너지화학 20.8% (한도 30%)\n\n경고:\n  ! SHIELD 방어 등급: ORANGE\n  ! 레짐 변경 감지: PRE_BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
 }

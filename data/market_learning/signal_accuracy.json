@@ -1,0 +1,111 @@
+{
+  "updated_at": "2026-03-17",
+  "window_days": 20,
+  "signals": {
+    "tomorrow_picks": {
+      "total": 14,
+      "hit": 4,
+      "hit_rate": 28.6,
+      "avg_ret": -0.23,
+      "days_tracked": 1
+    },
+    "pullback_scan": {
+      "total": 30,
+      "hit": 15,
+      "hit_rate": 50.0,
+      "avg_ret": 0.49,
+      "days_tracked": 1
+    },
+    "whale_detect": {
+      "total": 33,
+      "hit": 9,
+      "hit_rate": 27.3,
+      "avg_ret": -0.12,
+      "days_tracked": 1
+    },
+    "accumulation_tracker": {
+      "total": 30,
+      "hit": 14,
+      "hit_rate": 46.7,
+      "avg_ret": 0.3,
+      "days_tracked": 1
+    },
+    "dart_event": {
+      "total": 155,
+      "hit": 44,
+      "hit_rate": 28.4,
+      "avg_ret": -0.85,
+      "days_tracked": 1
+    },
+    "volume_spike": {
+      "total": 54,
+      "hit": 15,
+      "hit_rate": 27.8,
+      "avg_ret": -1.05,
+      "days_tracked": 1
+    },
+    "dual_buying": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "days_tracked": 0
+    },
+    "safety_margin": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "days_tracked": 0
+    },
+    "ai_v3_picks": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "days_tracked": 0
+    },
+    "overnight_signal": {
+      "total": 1,
+      "hit": 0,
+      "hit_rate": 0.0,
+      "avg_ret": -0.91,
+      "days_tracked": 1
+    }
+  },
+  "daily_log": [
+    {
+      "date": "2026-03-17",
+      "tomorrow_picks_hr": 28.6,
+      "tomorrow_picks_n": 14,
+      "tomorrow_picks_ret": -0.23,
+      "pullback_scan_hr": 50.0,
+      "pullback_scan_n": 30,
+      "pullback_scan_ret": 0.49,
+      "whale_detect_hr": 27.3,
+      "whale_detect_n": 33,
+      "whale_detect_ret": -0.12,
+      "accumulation_tracker_hr": 46.7,
+      "accumulation_tracker_n": 30,
+      "accumulation_tracker_ret": 0.3,
+      "dart_event_hr": 28.4,
+      "dart_event_n": 155,
+      "dart_event_ret": -0.85,
+      "volume_spike_hr": 29.6,
+      "volume_spike_n": 54,
+      "volume_spike_ret": -1.05,
+      "dual_buying_hr": 0,
+      "dual_buying_n": 0,
+      "dual_buying_ret": 0,
+      "safety_margin_hr": 0,
+      "safety_margin_n": 0,
+      "safety_margin_ret": 0,
+      "ai_v3_picks_hr": 0,
+      "ai_v3_picks_n": 0,
+      "ai_v3_picks_ret": 0,
+      "overnight_signal_hr": 0.0,
+      "overnight_signal_n": 1,
+      "overnight_signal_ret": -0.91
+    }
+  ]
+}

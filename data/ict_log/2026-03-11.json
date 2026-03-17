@@ -1,14 +1,66 @@
 {
   "date": "2026-03-11",
-  "total_checks": 2,
+  "total_checks": 5,
   "adjustments": {
-    "positive": 0,
+    "positive": 1,
     "negative": 0,
-    "neutral": 2
+    "neutral": 4
   },
   "filtered_out": 0,
-  "avg_adjustment": 0.0,
+  "avg_adjustment": 0.03,
   "records": [
+    {
+      "symbol": "278470",
+      "name": "에이피알",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.05,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [
+        "NEAR_SUPPORT"
+      ],
+      "reason": "지지 근접: 전일저 299,500 (-0.7%)",
+      "suggested_target": 313000,
+      "suggested_stop": 299500,
+      "filtered": false
+    },
+    {
+      "symbol": "011210",
+      "name": "현대위아",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.0,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [
+        "EQ_LOW_SWEEP_REVERSAL",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "EqLow Sweep: 89,100 x2 이탈 후 반등 (유동성 흡수) / EqHigh 저항: 89,600 x2 (+0.2%)",
+      "suggested_target": 90300,
+      "suggested_stop": 86100,
+      "filtered": false
+    },
+    {
+      "symbol": "267260",
+      "name": "HD현대일렉트릭",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.1,
+      "conviction_before": 8,
+      "conviction_delta": 1,
+      "conviction_after": 9,
+      "tags": [
+        "EQ_LOW_SWEEP_REVERSAL"
+      ],
+      "reason": "EqLow Sweep: 933,500 x2 이탈 후 반등 (유동성 흡수)",
+      "suggested_target": 970000,
+      "suggested_stop": 919000,
+      "filtered": false
+    },
     {
       "symbol": "298040",
       "name": "효성중공업",
@@ -19,14 +71,14 @@
       "conviction_delta": 0,
       "conviction_after": 8,
       "tags": [],
-      "reason": "ICT 데이터 없음, 기존 로직 유지",
-      "suggested_target": null,
-      "suggested_stop": null,
+      "reason": "ICT 특이사항 없음",
+      "suggested_target": 2615000,
+      "suggested_stop": 2484000,
       "filtered": false
     },
     {
-      "symbol": "000500",
-      "name": "가온전선",
+      "symbol": "267270",
+      "name": "HD현대건설기계",
       "signal_type": "buy",
       "daily_bias": "unknown",
       "confidence_adjust": 0.0,
@@ -34,9 +86,9 @@
       "conviction_delta": 0,
       "conviction_after": 7,
       "tags": [],
-      "reason": "ICT 데이터 없음, 기존 로직 유지",
-      "suggested_target": null,
-      "suggested_stop": null,
+      "reason": "ICT 특이사항 없음",
+      "suggested_target": 132200,
+      "suggested_stop": 126200,
       "filtered": false
     }
   ]

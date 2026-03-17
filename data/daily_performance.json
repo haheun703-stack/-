@@ -95,5 +95,71 @@
       }
     ],
     "v3_picks_avg_pnl": 0.0
+  },
+  {
+    "date": "2026-03-11",
+    "regime_predicted": "중립",
+    "regime_confidence": 0.7,
+    "attack_sectors": [
+      "방산",
+      "조선",
+      "원전/SMR"
+    ],
+    "avoid_sectors": [
+      "정유",
+      "IT/소프트웨어"
+    ],
+    "kospi_change_pct": 1.4,
+    "regime_hit": false
+  },
+  {
+    "date": "2026-03-12",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.85,
+    "attack_sectors": [
+      "에너지/정유",
+      "방산"
+    ],
+    "avoid_sectors": [
+      "반도체",
+      "IT/플랫폼",
+      "바이오"
+    ],
+    "kospi_change_pct": -0.48,
+    "regime_hit": true
+  },
+  {
+    "date": "2026-03-13",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.85,
+    "attack_sectors": [
+      "에너지/정유",
+      "전력기기",
+      "방산"
+    ],
+    "avoid_sectors": [
+      "반도체",
+      "IT서비스",
+      "소프트웨어",
+      "금융"
+    ],
+    "kospi_change_pct": -1.72,
+    "regime_hit": true
+  },
+  {
+    "date": "2026-03-16",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.85,
+    "attack_sectors": [
+      "에너지/정유",
+      "원전/전력"
+    ],
+    "avoid_sectors": [
+      "반도체",
+      "2차전지",
+      "IT/소프트웨어"
+    ],
+    "kospi_change_pct": 1.14,
+    "regime_hit": false
   }
 ]

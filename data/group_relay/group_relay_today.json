@@ -1,62 +1,7 @@
 {
-  "scan_time": "2026-03-07T18:35:00.823357",
+  "scan_time": "2026-03-16T18:59:10.096522",
   "fire_threshold": 3.0,
-  "fired_groups": [
-    {
-      "group": "한화",
-      "leader_name": "한화에어로스페이스",
-      "leader_change": 7.24,
-      "leader_volume_ratio": 1.07,
-      "waiting_subsidiaries": [
-        {
-          "ticker": "082740",
-          "name": "한화엔진",
-          "tier": "tier2",
-          "change_pct": 1.26,
-          "volume_ratio": 0.43,
-          "rsi": 42.22845367377505,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "score": 55.0,
-          "reasons": [
-            "대기중(+1.3%)",
-            "RSI42(적정)",
-            "tier2"
-          ]
-        },
-        {
-          "ticker": "009830",
-          "name": "한화솔루션",
-          "tier": "tier1",
-          "change_pct": 16.67,
-          "volume_ratio": 3.71,
-          "rsi": 60.17112069102381,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "score": 30,
-          "reasons": [
-            "거래량3.7x",
-            "tier1"
-          ]
-        },
-        {
-          "ticker": "042660",
-          "name": "한화오션",
-          "tier": "tier1",
-          "change_pct": 3.77,
-          "volume_ratio": 0.55,
-          "rsi": 45.31462851531656,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "score": 30,
-          "reasons": [
-            "RSI45(적정)",
-            "tier1"
-          ]
-        }
-      ]
-    }
-  ],
-  "no_fire": false,
-  "summary": "그룹 발화: 한화(한화에어로스페이스 +7.2%)"
+  "fired_groups": [],
+  "no_fire": true,
+  "summary": "오늘 발화한 대장주 없음"
 }

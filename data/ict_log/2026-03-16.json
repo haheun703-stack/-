@@ -1,0 +1,30 @@
+{
+  "date": "2026-03-16",
+  "total_checks": 1,
+  "adjustments": {
+    "positive": 1,
+    "negative": 0,
+    "neutral": 0
+  },
+  "filtered_out": 0,
+  "avg_adjustment": 0.1,
+  "records": [
+    {
+      "symbol": "011210",
+      "name": "현대위아",
+      "signal_type": "buy",
+      "daily_bias": "unknown",
+      "confidence_adjust": 0.1,
+      "conviction_before": 8,
+      "conviction_delta": 1,
+      "conviction_after": 9,
+      "tags": [
+        "EQ_LOW_SWEEP_REVERSAL"
+      ],
+      "reason": "EqLow Sweep: 82,500 x2 이탈 후 반등 (유동성 흡수)",
+      "suggested_target": 85600,
+      "suggested_stop": 81800,
+      "filtered": false
+    }
+  ]
+}

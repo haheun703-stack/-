@@ -1,0 +1,15 @@
+{
+  "date": "2026-03-16",
+  "timestamp": "2026-03-16 19:18:58",
+  "final_signal": "NEUTRAL",
+  "final_score": -4.5928,
+  "confidence": 2.2964,
+  "direction_match": false,
+  "s1_direction": "NEUTRAL",
+  "s1_score": -0.016506,
+  "s2_direction": "NEUTRAL",
+  "s2_score": -0.045465,
+  "s2_dax_30m": -0.1572,
+  "divergence_alerts": 1,
+  "divergence_alert": false
+}

@@ -1,53 +1,11 @@
 {
-  "collected_at": "2026-03-07T15:40:01.456526",
+  "collected_at": "2026-03-16T18:39:23.895391",
   "etf_count": 24,
   "etfs": {
     "157500": {
       "name": "TIGER 증권",
       "sector": "증권",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -246000000,
-          "inst_net": 2000000,
-          "foreign_net": 232000000,
-          "close": 11990
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -23000000,
-          "inst_net": -322000000,
-          "foreign_net": 539000000,
-          "close": 11705
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 364000000,
-          "inst_net": 842000000,
-          "foreign_net": -1079000000,
-          "close": 11970
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 153000000,
-          "inst_net": -445000000,
-          "foreign_net": 204000000,
-          "close": 12935
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 2045000000,
-          "inst_net": -2425000000,
-          "foreign_net": 124000000,
-          "close": 12840
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 48000000,
-          "inst_net": 268000000,
-          "foreign_net": -216000000,
-          "close": 13350
-        },
         {
           "date": "2026-01-28",
           "individual_net": 3719000000,
@@ -215,6 +173,48 @@
           "inst_net": 355000000,
           "foreign_net": -1795000000,
           "close": 18265
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 86000000,
+          "inst_net": -1043000000,
+          "foreign_net": 1056000000,
+          "close": 17395
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 12466000000,
+          "inst_net": -15223000000,
+          "foreign_net": 226000000,
+          "close": 17725
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 985000000,
+          "inst_net": -989000000,
+          "foreign_net": -528000000,
+          "close": 18940
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 3006000000,
+          "inst_net": -2291000000,
+          "foreign_net": -846000000,
+          "close": 18685
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 5426000000,
+          "inst_net": -7293000000,
+          "foreign_net": 784000000,
+          "close": 18325
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 500000000,
+          "inst_net": -327000000,
+          "foreign_net": -186000000,
+          "close": 18580
         }
       ]
     },
@@ -222,48 +222,6 @@
       "name": "KODEX 은행",
       "sector": "은행",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -1450000000,
-          "inst_net": 2158000000,
-          "foreign_net": -639000000,
-          "close": 12968
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 190000000,
-          "inst_net": -1432000000,
-          "foreign_net": 1233000000,
-          "close": 13052
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -107000000,
-          "inst_net": -56000000,
-          "foreign_net": 208000000,
-          "close": 13162
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -421000000,
-          "inst_net": 760000000,
-          "foreign_net": -351000000,
-          "close": 13326
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 138000000,
-          "inst_net": 1357000000,
-          "foreign_net": -1501000000,
-          "close": 13301
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 175000000,
-          "inst_net": 229000000,
-          "foreign_net": -435000000,
-          "close": 13788
-        },
         {
           "date": "2026-01-28",
           "individual_net": -202000000,
@@ -431,6 +389,48 @@
           "inst_net": -102000000,
           "foreign_net": 131000000,
           "close": 14915
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 496000000,
+          "inst_net": -763000000,
+          "foreign_net": 266000000,
+          "close": 14410
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 87000000,
+          "inst_net": -60000000,
+          "foreign_net": -57000000,
+          "close": 14810
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -855000000,
+          "inst_net": 464000000,
+          "foreign_net": 391000000,
+          "close": 15190
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 313000000,
+          "inst_net": 139000000,
+          "foreign_net": -423000000,
+          "close": 15010
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 500000000,
+          "inst_net": -2189000000,
+          "foreign_net": 1679000000,
+          "close": 14760
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -415000000,
+          "inst_net": 854000000,
+          "foreign_net": -423000000,
+          "close": 14710
         }
       ]
     },
@@ -438,48 +438,6 @@
       "name": "KODEX 반도체",
       "sector": "반도체",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 3722000000,
-          "inst_net": -5219000000,
-          "foreign_net": 2717000000,
-          "close": 70500
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -5424000000,
-          "inst_net": 9158000000,
-          "foreign_net": -3723000000,
-          "close": 70705
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -6055000000,
-          "inst_net": 11552000000,
-          "foreign_net": -5534000000,
-          "close": 72025
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -576000000,
-          "inst_net": -6025000000,
-          "foreign_net": 6947000000,
-          "close": 72200
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -8326000000,
-          "inst_net": 7453000000,
-          "foreign_net": 545000000,
-          "close": 73445
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 11190000000,
-          "inst_net": -15636000000,
-          "foreign_net": 1100000000,
-          "close": 78105
-        },
         {
           "date": "2026-01-28",
           "individual_net": 28116000000,
@@ -647,6 +605,48 @@
           "inst_net": -937000000,
           "foreign_net": -1187000000,
           "close": 102335
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 23139000000,
+          "inst_net": -25112000000,
+          "foreign_net": 1110000000,
+          "close": 93250
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -10930000000,
+          "inst_net": 10948000000,
+          "foreign_net": -1411000000,
+          "close": 99220
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 479000000,
+          "inst_net": 2067000000,
+          "foreign_net": -2308000000,
+          "close": 98400
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 9002000000,
+          "inst_net": -8323000000,
+          "foreign_net": -191000000,
+          "close": 98100
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 7314000000,
+          "inst_net": -5777000000,
+          "foreign_net": -1677000000,
+          "close": 96935
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -2863000000,
+          "inst_net": 3224000000,
+          "foreign_net": -974000000,
+          "close": 99470
         }
       ]
     },
@@ -654,48 +654,6 @@
       "name": "KODEX 2차전지산업",
       "sector": "2차전지",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -313000000,
-          "inst_net": 1139000000,
-          "foreign_net": -867000000,
-          "close": 15325
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 4864000000,
-          "inst_net": -2891000000,
-          "foreign_net": -2020000000,
-          "close": 15100
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 4113000000,
-          "inst_net": -13798000000,
-          "foreign_net": 8592000000,
-          "close": 16350
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 8104000000,
-          "inst_net": -5313000000,
-          "foreign_net": -4168000000,
-          "close": 16320
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 340000000,
-          "inst_net": -5993000000,
-          "foreign_net": 5335000000,
-          "close": 17095
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -2531000000,
-          "inst_net": 7917000000,
-          "foreign_net": -5270000000,
-          "close": 17160
-        },
         {
           "date": "2026-01-28",
           "individual_net": 6646000000,
@@ -863,6 +821,48 @@
           "inst_net": 828000000,
           "foreign_net": -2725000000,
           "close": 17215
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 2927000000,
+          "inst_net": -812000000,
+          "foreign_net": -2080000000,
+          "close": 16435
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 1210000000,
+          "inst_net": -1624000000,
+          "foreign_net": -10000000,
+          "close": 16755
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -126000000,
+          "inst_net": 131000000,
+          "foreign_net": 37000000,
+          "close": 16810
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 2457000000,
+          "inst_net": -3496000000,
+          "foreign_net": 793000000,
+          "close": 16760
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 5322000000,
+          "inst_net": -2220000000,
+          "foreign_net": -3147000000,
+          "close": 16185
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 1982000000,
+          "inst_net": -3720000000,
+          "foreign_net": 1781000000,
+          "close": 15935
         }
       ]
     },
@@ -870,48 +870,6 @@
       "name": "KODEX 바이오",
       "sector": "바이오",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 179000000,
-          "inst_net": -1622000000,
-          "foreign_net": 1492000000,
-          "close": 12215
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 2769000000,
-          "inst_net": -5255000000,
-          "foreign_net": 2767000000,
-          "close": 11600
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -479000000,
-          "inst_net": 2467000000,
-          "foreign_net": -1858000000,
-          "close": 11820
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -1297000000,
-          "inst_net": -612000000,
-          "foreign_net": 1815000000,
-          "close": 12460
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 5690000000,
-          "inst_net": -7834000000,
-          "foreign_net": 2387000000,
-          "close": 13160
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -626000000,
-          "inst_net": 4203000000,
-          "foreign_net": -3548000000,
-          "close": 13210
-        },
         {
           "date": "2026-01-28",
           "individual_net": 262000000,
@@ -1079,6 +1037,48 @@
           "inst_net": 705000000,
           "foreign_net": -1300000000,
           "close": 13185
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -703000000,
+          "inst_net": -154000000,
+          "foreign_net": 846000000,
+          "close": 12505
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -604000000,
+          "inst_net": 2390000000,
+          "foreign_net": -1719000000,
+          "close": 12840
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -1328000000,
+          "inst_net": 771000000,
+          "foreign_net": 982000000,
+          "close": 13010
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 26000000,
+          "inst_net": -1203000000,
+          "foreign_net": 1171000000,
+          "close": 13130
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -1402000000,
+          "inst_net": 1204000000,
+          "foreign_net": 368000000,
+          "close": 13470
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -531000000,
+          "inst_net": 1237000000,
+          "foreign_net": -688000000,
+          "close": 13175
         }
       ]
     },
@@ -1086,48 +1086,6 @@
       "name": "TIGER 헬스케어",
       "sector": "헬스케어",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -168000000,
-          "inst_net": -858000000,
-          "foreign_net": 1026000000,
-          "close": 50075
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 1786000000,
-          "inst_net": -522000000,
-          "foreign_net": -1268000000,
-          "close": 46975
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 154000000,
-          "inst_net": 1461000000,
-          "foreign_net": -1630000000,
-          "close": 47655
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -563000000,
-          "inst_net": -3723000000,
-          "foreign_net": 4277000000,
-          "close": 49865
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -1338000000,
-          "inst_net": -3715000000,
-          "foreign_net": 5048000000,
-          "close": 52365
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -47000000,
-          "inst_net": -473000000,
-          "foreign_net": 521000000,
-          "close": 52815
-        },
         {
           "date": "2026-01-28",
           "individual_net": -154000000,
@@ -1295,6 +1253,48 @@
           "inst_net": 2178000000,
           "foreign_net": -2154000000,
           "close": 51670
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -226000000,
+          "inst_net": -505000000,
+          "foreign_net": 735000000,
+          "close": 50180
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 122000000,
+          "inst_net": 119000000,
+          "foreign_net": -241000000,
+          "close": 50700
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 97000000,
+          "inst_net": -632000000,
+          "foreign_net": 534000000,
+          "close": 50700
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 194000000,
+          "inst_net": -235000000,
+          "foreign_net": 348000000,
+          "close": 50840
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 70000000,
+          "inst_net": -599000000,
+          "foreign_net": 530000000,
+          "close": 51080
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -255000000,
+          "inst_net": 77000000,
+          "foreign_net": 191000000,
+          "close": 50065
         }
       ]
     },
@@ -1302,48 +1302,6 @@
       "name": "TIGER 200 IT",
       "sector": "IT",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -186000000,
-          "inst_net": 914000000,
-          "foreign_net": -562000000,
-          "close": 65643
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -368000000,
-          "inst_net": -204000000,
-          "foreign_net": 569000000,
-          "close": 65873
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 144000000,
-          "inst_net": -46000000,
-          "foreign_net": -112000000,
-          "close": 67677
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 992000000,
-          "inst_net": 127000000,
-          "foreign_net": -1130000000,
-          "close": 67752
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -43000000,
-          "inst_net": 319000000,
-          "foreign_net": -258000000,
-          "close": 67302
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -836000000,
-          "inst_net": -131000000,
-          "foreign_net": 747000000,
-          "close": 69961
-        },
         {
           "date": "2026-01-28",
           "individual_net": 789000000,
@@ -1511,6 +1469,48 @@
           "inst_net": 59000000,
           "foreign_net": 227000000,
           "close": 82000
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -847000000,
+          "inst_net": 572000000,
+          "foreign_net": 309000000,
+          "close": 76020
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 362000000,
+          "inst_net": -48000000,
+          "foreign_net": -394000000,
+          "close": 81815
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -126000000,
+          "inst_net": 236000000,
+          "foreign_net": -271000000,
+          "close": 82510
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 850000000,
+          "inst_net": -1018000000,
+          "foreign_net": 266000000,
+          "close": 81630
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 1353000000,
+          "inst_net": 705000000,
+          "foreign_net": -2059000000,
+          "close": 79510
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -817000000,
+          "inst_net": -995000000,
+          "foreign_net": 1917000000,
+          "close": 81895
         }
       ]
     },
@@ -1518,48 +1518,6 @@
       "name": "KODEX 건설",
       "sector": "건설",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 90000000,
-          "inst_net": -80000000,
-          "foreign_net": -11000000,
-          "close": 5135
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -261000000,
-          "inst_net": 533000000,
-          "foreign_net": -272000000,
-          "close": 5140
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -321000000,
-          "inst_net": 320000000,
-          "foreign_net": 116000000,
-          "close": 5080
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 137000000,
-          "inst_net": -212000000,
-          "foreign_net": 62000000,
-          "close": 5130
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 163000000,
-          "inst_net": -85000000,
-          "foreign_net": -74000000,
-          "close": 5105
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -420000000,
-          "inst_net": 473000000,
-          "foreign_net": -50000000,
-          "close": 5155
-        },
         {
           "date": "2026-01-28",
           "individual_net": 120000000,
@@ -1727,6 +1685,48 @@
           "inst_net": 275000000,
           "foreign_net": -276000000,
           "close": 6375
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 41000000,
+          "inst_net": -54000000,
+          "foreign_net": 33000000,
+          "close": 6100
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 857000000,
+          "inst_net": -1034000000,
+          "foreign_net": 175000000,
+          "close": 6270
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 1116000000,
+          "inst_net": -898000000,
+          "foreign_net": -244000000,
+          "close": 6415
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 830000000,
+          "inst_net": -1097000000,
+          "foreign_net": 267000000,
+          "close": 6550
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 1241000000,
+          "inst_net": -2154000000,
+          "foreign_net": 909000000,
+          "close": 6865
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 413000000,
+          "inst_net": -140000000,
+          "foreign_net": -275000000,
+          "close": 6645
         }
       ]
     },
@@ -1734,48 +1734,6 @@
       "name": "TIGER 200 금융",
       "sector": "금융",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -116000000,
-          "inst_net": 90000000,
-          "foreign_net": 28000000,
-          "close": 13417
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -251000000,
-          "inst_net": 266000000,
-          "foreign_net": -16000000,
-          "close": 13452
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 32000000,
-          "inst_net": -40000000,
-          "foreign_net": 8000000,
-          "close": 13561
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 135000000,
-          "inst_net": -126000000,
-          "foreign_net": -9000000,
-          "close": 13890
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 17000000,
-          "inst_net": -13000000,
-          "foreign_net": -4000000,
-          "close": 13811
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 18000000,
-          "inst_net": -7000000,
-          "foreign_net": -11000000,
-          "close": 14304
-        },
         {
           "date": "2026-01-28",
           "individual_net": -260000000,
@@ -1943,6 +1901,48 @@
           "inst_net": 24000000,
           "foreign_net": 49000000,
           "close": 16040
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 57000000,
+          "inst_net": -5000000,
+          "foreign_net": 11000000,
+          "close": 15485
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 83000000,
+          "inst_net": -33000000,
+          "foreign_net": -50000000,
+          "close": 15800
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 98000000,
+          "inst_net": -83000000,
+          "foreign_net": -15000000,
+          "close": 16365
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": -27000000,
+          "inst_net": 18000000,
+          "foreign_net": -15000000,
+          "close": 16165
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 13000000,
+          "inst_net": -15000000,
+          "foreign_net": -11000000,
+          "close": 15945
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 106000000,
+          "inst_net": -128000000,
+          "foreign_net": 22000000,
+          "close": 15860
         }
       ]
     },
@@ -1950,48 +1950,6 @@
       "name": "KODEX 에너지화학",
       "sector": "에너지화학",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -80000000,
-          "inst_net": 35000000,
-          "foreign_net": 25000000,
-          "close": 14105
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -97000000,
-          "inst_net": 133000000,
-          "foreign_net": -36000000,
-          "close": 13940
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -8000000,
-          "inst_net": -11000000,
-          "foreign_net": 20000000,
-          "close": 14415
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 104000000,
-          "inst_net": -140000000,
-          "foreign_net": -22000000,
-          "close": 14590
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -239000000,
-          "inst_net": 180000000,
-          "foreign_net": 2000000,
-          "close": 14630
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 31000000,
-          "inst_net": -26000000,
-          "foreign_net": -5000000,
-          "close": 14575
-        },
         {
           "date": "2026-01-28",
           "individual_net": 491000000,
@@ -2159,6 +2117,48 @@
           "inst_net": 170000000,
           "foreign_net": -97000000,
           "close": 16110
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 257000000,
+          "inst_net": -259000000,
+          "foreign_net": 2000000,
+          "close": 15190
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -298000000,
+          "inst_net": 301000000,
+          "foreign_net": -2000000,
+          "close": 15470
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 56000000,
+          "inst_net": -65000000,
+          "foreign_net": 7000000,
+          "close": 15800
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": -42000000,
+          "inst_net": 13000000,
+          "foreign_net": 30000000,
+          "close": 15810
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 132000000,
+          "inst_net": -175000000,
+          "foreign_net": -51000000,
+          "close": 15080
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -68000000,
+          "inst_net": 55000000,
+          "foreign_net": 11000000,
+          "close": 14835
         }
       ]
     },
@@ -2166,48 +2166,6 @@
       "name": "TIGER 200 철강소재",
       "sector": "철강소재",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 274000000,
-          "inst_net": -271000000,
-          "foreign_net": -3000000,
-          "close": 14255
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 11000000,
-          "inst_net": -13000000,
-          "foreign_net": 2000000,
-          "close": 14285
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 37000000,
-          "inst_net": -39000000,
-          "foreign_net": 2000000,
-          "close": 14245
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -24000000,
-          "inst_net": 4000000,
-          "foreign_net": 19000000,
-          "close": 14490
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 176000000,
-          "inst_net": -157000000,
-          "foreign_net": -19000000,
-          "close": 14905
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 68000000,
-          "inst_net": -63000000,
-          "foreign_net": -5000000,
-          "close": 14790
-        },
         {
           "date": "2026-01-28",
           "individual_net": -108000000,
@@ -2375,6 +2333,48 @@
           "inst_net": -63000000,
           "foreign_net": 5000000,
           "close": 14795
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 42000000,
+          "inst_net": -42000000,
+          "foreign_net": 0,
+          "close": 13815
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 11000000,
+          "inst_net": -9000000,
+          "foreign_net": -1000000,
+          "close": 13995
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 188000000,
+          "inst_net": -188000000,
+          "foreign_net": -3000000,
+          "close": 14270
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 105000000,
+          "inst_net": -101000000,
+          "foreign_net": 0,
+          "close": 14280
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 25000000,
+          "inst_net": -25000000,
+          "foreign_net": -1000000,
+          "close": 13980
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 28000000,
+          "inst_net": -28000000,
+          "foreign_net": 0,
+          "close": 13675
         }
       ]
     },
@@ -2382,48 +2382,6 @@
       "name": "TIGER 소프트웨어",
       "sector": "소프트웨어",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 67000000,
-          "inst_net": -705000000,
-          "foreign_net": 817000000,
-          "close": 9760
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -770000000,
-          "inst_net": 1921000000,
-          "foreign_net": -1127000000,
-          "close": 9555
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -63000000,
-          "inst_net": 760000000,
-          "foreign_net": -604000000,
-          "close": 9625
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 6848000000,
-          "inst_net": -7815000000,
-          "foreign_net": 104000000,
-          "close": 10060
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -5240000000,
-          "inst_net": 2056000000,
-          "foreign_net": 3609000000,
-          "close": 10280
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -206000000,
-          "inst_net": 1289000000,
-          "foreign_net": -1107000000,
-          "close": 10435
-        },
         {
           "date": "2026-01-28",
           "individual_net": -949000000,
@@ -2591,6 +2549,48 @@
           "inst_net": 1493000000,
           "foreign_net": -1477000000,
           "close": 9285
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -22000000,
+          "inst_net": -300000000,
+          "foreign_net": 315000000,
+          "close": 8990
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -213000000,
+          "inst_net": 314000000,
+          "foreign_net": -98000000,
+          "close": 9260
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -153000000,
+          "inst_net": -146000000,
+          "foreign_net": 298000000,
+          "close": 9210
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 10000000,
+          "inst_net": -299000000,
+          "foreign_net": 287000000,
+          "close": 9185
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -188000000,
+          "inst_net": 205000000,
+          "foreign_net": -17000000,
+          "close": 9290
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -20000000,
+          "inst_net": -200000000,
+          "foreign_net": 219000000,
+          "close": 9215
         }
       ]
     },
@@ -2598,48 +2598,6 @@
       "name": "TIGER 미디어컨텐츠",
       "sector": "미디어",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -243000000,
-          "inst_net": -390000000,
-          "foreign_net": 664000000,
-          "close": 5805
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 626000000,
-          "inst_net": 231000000,
-          "foreign_net": -861000000,
-          "close": 5600
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -26000000,
-          "inst_net": -383000000,
-          "foreign_net": 410000000,
-          "close": 5705
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -50000000,
-          "inst_net": 191000000,
-          "foreign_net": -98000000,
-          "close": 5840
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -259000000,
-          "inst_net": -537000000,
-          "foreign_net": 1143000000,
-          "close": 6020
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -536000000,
-          "inst_net": 970000000,
-          "foreign_net": -416000000,
-          "close": 5985
-        },
         {
           "date": "2026-01-28",
           "individual_net": -134000000,
@@ -2807,6 +2765,48 @@
           "inst_net": 796000000,
           "foreign_net": -513000000,
           "close": 5400
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -60000000,
+          "inst_net": 124000000,
+          "foreign_net": -63000000,
+          "close": 5185
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 4000000,
+          "inst_net": 86000000,
+          "foreign_net": -155000000,
+          "close": 5330
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -18000000,
+          "inst_net": 11000000,
+          "foreign_net": -65000000,
+          "close": 5345
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 23000000,
+          "inst_net": -209000000,
+          "foreign_net": 119000000,
+          "close": 5345
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 133000000,
+          "inst_net": -168000000,
+          "foreign_net": -26000000,
+          "close": 5375
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -36000000,
+          "inst_net": -235000000,
+          "foreign_net": 272000000,
+          "close": 5295
         }
       ]
     },
@@ -2814,48 +2814,6 @@
       "name": "TIGER K게임",
       "sector": "게임",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -42000000,
-          "inst_net": 40000000,
-          "foreign_net": 2000000,
-          "close": 6500
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -25000000,
-          "inst_net": 44000000,
-          "foreign_net": -19000000,
-          "close": 6325
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 112000000,
-          "inst_net": -125000000,
-          "foreign_net": 14000000,
-          "close": 6470
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -230000000,
-          "inst_net": 223000000,
-          "foreign_net": 7000000,
-          "close": 6635
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 28000000,
-          "inst_net": -35000000,
-          "foreign_net": 6000000,
-          "close": 7050
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 48000000,
-          "inst_net": -36000000,
-          "foreign_net": -11000000,
-          "close": 7190
-        },
         {
           "date": "2026-01-28",
           "individual_net": -443000000,
@@ -3023,6 +2981,48 @@
           "inst_net": -8000000,
           "foreign_net": 27000000,
           "close": 6650
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -54000000,
+          "inst_net": 61000000,
+          "foreign_net": -6000000,
+          "close": 6725
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 96000000,
+          "inst_net": -99000000,
+          "foreign_net": 3000000,
+          "close": 6765
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -106000000,
+          "inst_net": 118000000,
+          "foreign_net": -12000000,
+          "close": 6635
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 30000000,
+          "inst_net": -31000000,
+          "foreign_net": 1000000,
+          "close": 6585
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -39000000,
+          "inst_net": 27000000,
+          "foreign_net": 12000000,
+          "close": 6870
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 57000000,
+          "inst_net": -48000000,
+          "foreign_net": -9000000,
+          "close": 6890
         }
       ]
     },
@@ -3030,48 +3030,6 @@
       "name": "TIGER 인터넷TOP10",
       "sector": "인터넷",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 73000000,
-          "inst_net": -258000000,
-          "foreign_net": 176000000,
-          "close": 4760
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 303000000,
-          "inst_net": -472000000,
-          "foreign_net": 211000000,
-          "close": 4680
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 15000000,
-          "inst_net": 365000000,
-          "foreign_net": -379000000,
-          "close": 4795
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -1061000000,
-          "inst_net": 393000000,
-          "foreign_net": 667000000,
-          "close": 4990
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -309000000,
-          "inst_net": 1233000000,
-          "foreign_net": -923000000,
-          "close": 5020
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -1000000000,
-          "inst_net": 861000000,
-          "foreign_net": 139000000,
-          "close": 5060
-        },
         {
           "date": "2026-01-28",
           "individual_net": -567000000,
@@ -3239,6 +3197,48 @@
           "inst_net": -23000000,
           "foreign_net": -6000000,
           "close": 5040
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -385000000,
+          "inst_net": 789000000,
+          "foreign_net": -403000000,
+          "close": 4930
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -32000000,
+          "inst_net": 106000000,
+          "foreign_net": -58000000,
+          "close": 5015
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -267000000,
+          "inst_net": 258000000,
+          "foreign_net": 9000000,
+          "close": 4975
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 102000000,
+          "inst_net": -101000000,
+          "foreign_net": -1000000,
+          "close": 4975
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -191000000,
+          "inst_net": 166000000,
+          "foreign_net": 25000000,
+          "close": 4980
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -125000000,
+          "inst_net": 53000000,
+          "foreign_net": 72000000,
+          "close": 4950
         }
       ]
     },
@@ -3246,48 +3246,6 @@
       "name": "TIGER K방산&우주",
       "sector": "방산",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 7249000000,
-          "inst_net": -7010000000,
-          "foreign_net": -636000000,
-          "close": 40825
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 5435000000,
-          "inst_net": -6791000000,
-          "foreign_net": 976000000,
-          "close": 40700
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 1482000000,
-          "inst_net": -931000000,
-          "foreign_net": -832000000,
-          "close": 39910
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 3217000000,
-          "inst_net": -4487000000,
-          "foreign_net": 1355000000,
-          "close": 39830
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 1649000000,
-          "inst_net": -754000000,
-          "foreign_net": -1089000000,
-          "close": 40195
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 5000000000,
-          "inst_net": -4238000000,
-          "foreign_net": -564000000,
-          "close": 39550
-        },
         {
           "date": "2026-01-28",
           "individual_net": -1350000000,
@@ -3455,6 +3413,48 @@
           "inst_net": -12659000000,
           "foreign_net": -4223000000,
           "close": 51490
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 10782000000,
+          "inst_net": -11626000000,
+          "foreign_net": 693000000,
+          "close": 49850
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -11222000000,
+          "inst_net": 9518000000,
+          "foreign_net": 1687000000,
+          "close": 49225
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -3256000000,
+          "inst_net": 4443000000,
+          "foreign_net": -1086000000,
+          "close": 48180
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 583000000,
+          "inst_net": -580000000,
+          "foreign_net": -170000000,
+          "close": 49050
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 2340000000,
+          "inst_net": -4252000000,
+          "foreign_net": 1871000000,
+          "close": 48300
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 884000000,
+          "inst_net": 25000000,
+          "foreign_net": -883000000,
+          "close": 48350
         }
       ]
     },
@@ -3462,48 +3462,6 @@
       "name": "TIGER 조선TOP10",
       "sector": "조선",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 693000000,
-          "inst_net": 1341000000,
-          "foreign_net": -2299000000,
-          "close": 31580
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 1048000000,
-          "inst_net": -2064000000,
-          "foreign_net": 1093000000,
-          "close": 30875
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -881000000,
-          "inst_net": 217000000,
-          "foreign_net": 635000000,
-          "close": 30215
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -1476000000,
-          "inst_net": 2416000000,
-          "foreign_net": -1000000000,
-          "close": 30770
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 1633000000,
-          "inst_net": -2878000000,
-          "foreign_net": 1081000000,
-          "close": 30255
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 2437000000,
-          "inst_net": -634000000,
-          "foreign_net": -1931000000,
-          "close": 30200
-        },
         {
           "date": "2026-01-28",
           "individual_net": -2471000000,
@@ -3671,6 +3629,48 @@
           "inst_net": -2364000000,
           "foreign_net": -1200000000,
           "close": 28350
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 5464000000,
+          "inst_net": -5236000000,
+          "foreign_net": 1235000000,
+          "close": 28500
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 6992000000,
+          "inst_net": -6340000000,
+          "foreign_net": -854000000,
+          "close": 28580
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -19599000000,
+          "inst_net": 14479000000,
+          "foreign_net": 6929000000,
+          "close": 29695
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 88000000,
+          "inst_net": -1065000000,
+          "foreign_net": 974000000,
+          "close": 30510
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 3006000000,
+          "inst_net": -2930000000,
+          "foreign_net": -171000000,
+          "close": 30210
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 2713000000,
+          "inst_net": -1361000000,
+          "foreign_net": -1500000000,
+          "close": 29340
         }
       ]
     },
@@ -3678,48 +3678,6 @@
       "name": "TIGER 삼성그룹",
       "sector": "삼성그룹",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -91000000,
-          "inst_net": 34000000,
-          "foreign_net": 50000000,
-          "close": 21765
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -30000000,
-          "inst_net": 378000000,
-          "foreign_net": -68000000,
-          "close": 21845
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 174000000,
-          "inst_net": -352000000,
-          "foreign_net": 197000000,
-          "close": 22380
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 553000000,
-          "inst_net": -350000000,
-          "foreign_net": -251000000,
-          "close": 22440
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 418000000,
-          "inst_net": -471000000,
-          "foreign_net": -15000000,
-          "close": 22435
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -104000000,
-          "inst_net": 81000000,
-          "foreign_net": 23000000,
-          "close": 22890
-        },
         {
           "date": "2026-01-28",
           "individual_net": 406000000,
@@ -3887,6 +3845,48 @@
           "inst_net": -264000000,
           "foreign_net": 393000000,
           "close": 24970
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 138000000,
+          "inst_net": 454000000,
+          "foreign_net": -592000000,
+          "close": 23725
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 93000000,
+          "inst_net": -36000000,
+          "foreign_net": -57000000,
+          "close": 24550
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 237000000,
+          "inst_net": -466000000,
+          "foreign_net": 229000000,
+          "close": 25125
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 218000000,
+          "inst_net": -608000000,
+          "foreign_net": 835000000,
+          "close": 24910
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 155000000,
+          "inst_net": 1803000000,
+          "foreign_net": -1958000000,
+          "close": 24565
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -36000000,
+          "inst_net": -508000000,
+          "foreign_net": 544000000,
+          "close": 24610
         }
       ]
     },
@@ -3894,48 +3894,6 @@
       "name": "TIGER 현대차그룹플러스",
       "sector": "현대차그룹",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 13324000000,
-          "inst_net": -10697000000,
-          "foreign_net": -2211000000,
-          "close": 57470
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 9279000000,
-          "inst_net": -10460000000,
-          "foreign_net": 962000000,
-          "close": 61245
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 21473000000,
-          "inst_net": -24062000000,
-          "foreign_net": 2381000000,
-          "close": 59490
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 6624000000,
-          "inst_net": -6282000000,
-          "foreign_net": -460000000,
-          "close": 58560
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 733000000,
-          "inst_net": 304000000,
-          "foreign_net": -1092000000,
-          "close": 57240
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 3394000000,
-          "inst_net": -4458000000,
-          "foreign_net": 1054000000,
-          "close": 56600
-        },
         {
           "date": "2026-01-28",
           "individual_net": 11201000000,
@@ -4103,6 +4061,48 @@
           "inst_net": -2470000000,
           "foreign_net": -877000000,
           "close": 62430
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 940000000,
+          "inst_net": -407000000,
+          "foreign_net": 3000000,
+          "close": 57700
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 3290000000,
+          "inst_net": -5504000000,
+          "foreign_net": 1779000000,
+          "close": 59850
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 4353000000,
+          "inst_net": -4221000000,
+          "foreign_net": -533000000,
+          "close": 60150
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 2025000000,
+          "inst_net": -1249000000,
+          "foreign_net": -801000000,
+          "close": 60300
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 2584000000,
+          "inst_net": -4071000000,
+          "foreign_net": 1621000000,
+          "close": 59650
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 2804000000,
+          "inst_net": -1565000000,
+          "foreign_net": -1224000000,
+          "close": 58435
         }
       ]
     },
@@ -4110,48 +4110,6 @@
       "name": "TIGER KRX300",
       "sector": "KRX300",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 32000000,
-          "inst_net": -32000000,
-          "foreign_net": 0,
-          "close": 32503
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 18000000,
-          "inst_net": -19000000,
-          "foreign_net": 0,
-          "close": 32773
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -78000000,
-          "inst_net": 78000000,
-          "foreign_net": 0,
-          "close": 33232
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -2000000,
-          "inst_net": 2000000,
-          "foreign_net": 0,
-          "close": 33327
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 164000000,
-          "inst_net": -164000000,
-          "foreign_net": 0,
-          "close": 33372
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -96000000,
-          "inst_net": 96000000,
-          "foreign_net": 0,
-          "close": 34426
-        },
         {
           "date": "2026-01-28",
           "individual_net": 74000000,
@@ -4319,6 +4277,48 @@
           "inst_net": -19000000,
           "foreign_net": 8000000,
           "close": 38445
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 4000000,
+          "inst_net": -5000000,
+          "foreign_net": 1000000,
+          "close": 36130
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -66000000,
+          "inst_net": 63000000,
+          "foreign_net": 3000000,
+          "close": 38150
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -69000000,
+          "inst_net": 75000000,
+          "foreign_net": -6000000,
+          "close": 38500
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 38000000,
+          "inst_net": -37000000,
+          "foreign_net": -1000000,
+          "close": 38455
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 18000000,
+          "inst_net": -15000000,
+          "foreign_net": -3000000,
+          "close": 37700
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -39000000,
+          "inst_net": 33000000,
+          "foreign_net": 6000000,
+          "close": 38120
         }
       ]
     },
@@ -4326,48 +4326,6 @@
       "name": "TIGER 코리아TOP10",
       "sector": "코리아TOP10",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": 3501000000,
-          "inst_net": -2939000000,
-          "foreign_net": -551000000,
-          "close": 25224
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 445000000,
-          "inst_net": 63000000,
-          "foreign_net": 402000000,
-          "close": 25663
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 5018000000,
-          "inst_net": -5268000000,
-          "foreign_net": 234000000,
-          "close": 25857
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 5015000000,
-          "inst_net": -4925000000,
-          "foreign_net": -962000000,
-          "close": 26052
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": 975000000,
-          "inst_net": 205000000,
-          "foreign_net": -640000000,
-          "close": 25578
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 206000000,
-          "inst_net": -3515000000,
-          "foreign_net": 2946000000,
-          "close": 26736
-        },
         {
           "date": "2026-01-28",
           "individual_net": 12186000000,
@@ -4535,6 +4493,48 @@
           "inst_net": -6265000000,
           "foreign_net": -1851000000,
           "close": 30600
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 9121000000,
+          "inst_net": -12099000000,
+          "foreign_net": 2728000000,
+          "close": 28175
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": 1487000000,
+          "inst_net": -1452000000,
+          "foreign_net": 570000000,
+          "close": 30155
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 10409000000,
+          "inst_net": -10728000000,
+          "foreign_net": 649000000,
+          "close": 30635
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 7599000000,
+          "inst_net": -7317000000,
+          "foreign_net": -485000000,
+          "close": 30335
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 11723000000,
+          "inst_net": -8885000000,
+          "foreign_net": -3548000000,
+          "close": 29770
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -3491000000,
+          "inst_net": 2515000000,
+          "foreign_net": 1102000000,
+          "close": 30120
         }
       ]
     },
@@ -4542,48 +4542,6 @@
       "name": "KODEX 보험",
       "sector": "보험",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -435000000,
-          "inst_net": 453000000,
-          "foreign_net": -19000000,
-          "close": 12915
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 2000000,
-          "inst_net": -17000000,
-          "foreign_net": 4000000,
-          "close": 12965
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": -68000000,
-          "inst_net": -28000000,
-          "foreign_net": 126000000,
-          "close": 12975
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": 95000000,
-          "inst_net": -19000000,
-          "foreign_net": -75000000,
-          "close": 13180
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -12000000,
-          "inst_net": 62000000,
-          "foreign_net": -50000000,
-          "close": 13145
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -97000000,
-          "inst_net": 81000000,
-          "foreign_net": 16000000,
-          "close": 13385
-        },
         {
           "date": "2026-01-28",
           "individual_net": 32000000,
@@ -4751,6 +4709,48 @@
           "inst_net": 233000000,
           "foreign_net": 38000000,
           "close": 15735
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -79000000,
+          "inst_net": 23000000,
+          "foreign_net": 57000000,
+          "close": 15030
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -141000000,
+          "inst_net": 258000000,
+          "foreign_net": -117000000,
+          "close": 15535
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 316000000,
+          "inst_net": -418000000,
+          "foreign_net": 102000000,
+          "close": 16085
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 251000000,
+          "inst_net": -231000000,
+          "foreign_net": -17000000,
+          "close": 15560
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -57000000,
+          "inst_net": 56000000,
+          "foreign_net": 1000000,
+          "close": 15350
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 8000000,
+          "inst_net": -2000000,
+          "foreign_net": -6000000,
+          "close": 15260
         }
       ]
     },
@@ -4758,48 +4758,6 @@
       "name": "KODEX 자동차",
       "sector": "자동차",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -2199000000,
-          "inst_net": 10211000000,
-          "foreign_net": -6957000000,
-          "close": 31739
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": -851000000,
-          "inst_net": -3966000000,
-          "foreign_net": 4674000000,
-          "close": 34179
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 1714000000,
-          "inst_net": 454000000,
-          "foreign_net": -1605000000,
-          "close": 33076
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -1243000000,
-          "inst_net": -4658000000,
-          "foreign_net": 6036000000,
-          "close": 32343
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -1731000000,
-          "inst_net": 4890000000,
-          "foreign_net": -3247000000,
-          "close": 31829
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": 3289000000,
-          "inst_net": -629000000,
-          "foreign_net": -2830000000,
-          "close": 31629
-        },
         {
           "date": "2026-01-28",
           "individual_net": 1327000000,
@@ -4967,6 +4925,48 @@
           "inst_net": -959000000,
           "foreign_net": 324000000,
           "close": 32890
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": 392000000,
+          "inst_net": -1542000000,
+          "foreign_net": 789000000,
+          "close": 30665
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -89000000,
+          "inst_net": 569000000,
+          "foreign_net": -744000000,
+          "close": 31735
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": 206000000,
+          "inst_net": 329000000,
+          "foreign_net": -719000000,
+          "close": 31950
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": 620000000,
+          "inst_net": -268000000,
+          "foreign_net": -452000000,
+          "close": 31985
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": 816000000,
+          "inst_net": -1005000000,
+          "foreign_net": 78000000,
+          "close": 31280
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": -106000000,
+          "inst_net": -27000000,
+          "foreign_net": 136000000,
+          "close": 30850
         }
       ]
     },
@@ -4974,48 +4974,6 @@
       "name": "KODEX 핀테크",
       "sector": "핀테크",
       "days": [
-        {
-          "date": "2026-01-20",
-          "individual_net": -35000000,
-          "inst_net": -173000000,
-          "foreign_net": 207000000,
-          "close": 13320
-        },
-        {
-          "date": "2026-01-21",
-          "individual_net": 163000000,
-          "inst_net": 456000000,
-          "foreign_net": -620000000,
-          "close": 13000
-        },
-        {
-          "date": "2026-01-22",
-          "individual_net": 23000000,
-          "inst_net": -267000000,
-          "foreign_net": 275000000,
-          "close": 13265
-        },
-        {
-          "date": "2026-01-23",
-          "individual_net": -162000000,
-          "inst_net": 86000000,
-          "foreign_net": 75000000,
-          "close": 13730
-        },
-        {
-          "date": "2026-01-26",
-          "individual_net": -370000000,
-          "inst_net": 595000000,
-          "foreign_net": -225000000,
-          "close": 14125
-        },
-        {
-          "date": "2026-01-27",
-          "individual_net": -88000000,
-          "inst_net": -193000000,
-          "foreign_net": 280000000,
-          "close": 14370
-        },
         {
           "date": "2026-01-28",
           "individual_net": -521000000,
@@ -5183,6 +5141,48 @@
           "inst_net": 94000000,
           "foreign_net": -104000000,
           "close": 12750
+        },
+        {
+          "date": "2026-03-09",
+          "individual_net": -9000000,
+          "inst_net": -130000000,
+          "foreign_net": 66000000,
+          "close": 12415
+        },
+        {
+          "date": "2026-03-10",
+          "individual_net": -167000000,
+          "inst_net": 196000000,
+          "foreign_net": -3000000,
+          "close": 12755
+        },
+        {
+          "date": "2026-03-11",
+          "individual_net": -203000000,
+          "inst_net": 171000000,
+          "foreign_net": 39000000,
+          "close": 12545
+        },
+        {
+          "date": "2026-03-12",
+          "individual_net": -26000000,
+          "inst_net": 20000000,
+          "foreign_net": 5000000,
+          "close": 12595
+        },
+        {
+          "date": "2026-03-13",
+          "individual_net": -26000000,
+          "inst_net": 59000000,
+          "foreign_net": -32000000,
+          "close": 12880
+        },
+        {
+          "date": "2026-03-16",
+          "individual_net": 2000000,
+          "inst_net": -40000000,
+          "foreign_net": 39000000,
+          "close": 12640
         }
       ]
     }

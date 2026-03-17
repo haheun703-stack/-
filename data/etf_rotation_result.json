@@ -8,13 +8,26 @@
     "small_cap": 0,
     "bonds": 8.8,
     "dollar": 3.8,
-    "cash": 33.8
+    "cash": 23.8
   },
   "sector_result": {
-    "buy_candidates": [],
+    "buy_candidates": [
+      {
+        "code": "463250",
+        "name": "TIGER K방산&우주",
+        "sector": "방산",
+        "signal": "BUY",
+        "composite_score": 88.5,
+        "momentum_rank": 3,
+        "momentum_score": 32.596,
+        "smart_money_type": "theme_money",
+        "supply_score": 95,
+        "reason": "모멘텀 3위 | Theme Money 감지 | 수급 95점"
+      }
+    ],
     "sell_signals": [],
     "current_positions": [],
-    "summary": "[섹터 ETF] 매수후보 0종: 없음 | 매도시그널: 없음"
+    "summary": "[섹터 ETF] 매수후보 1종: TIGER K방산&우주(88점) | 매도시그널: 없음"
   },
   "leverage_result": {
     "decision": {
@@ -58,287 +71,266 @@
   "predator_result": {
     "accelerations": [
       {
-        "sector": "현대차그룹",
+        "sector": "IT",
+        "code": "",
+        "current_rank": 5,
+        "prev_rank": 14,
+        "rank_change": 9,
+        "acceleration_score": 71.24,
+        "ret_5d": 7.73,
+        "ret_20d": 9.93,
+        "ret_60d": 52.5
+      },
+      {
+        "sector": "건설",
         "code": "",
         "current_rank": 1,
+        "prev_rank": 5,
+        "rank_change": 4,
+        "acceleration_score": 66.99,
+        "ret_5d": 7.99,
+        "ret_20d": 13.0,
+        "ret_60d": 51.3
+      },
+      {
+        "sector": "게임",
+        "code": "",
+        "current_rank": 7,
         "prev_rank": 13,
-        "rank_change": 12,
-        "acceleration_score": 70.83,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
+        "rank_change": 6,
+        "acceleration_score": 59.45,
+        "ret_5d": 2.45,
+        "ret_20d": -1.92,
+        "ret_60d": 6.9
+      },
+      {
+        "sector": "증권",
+        "code": "",
+        "current_rank": 4,
+        "prev_rank": 6,
+        "rank_change": 2,
+        "acceleration_score": 59.29,
+        "ret_5d": 6.81,
+        "ret_20d": 12.81,
+        "ret_60d": 85.61
       },
       {
         "sector": "반도체",
         "code": "",
         "current_rank": 2,
-        "prev_rank": 8,
-        "rank_change": 6,
-        "acceleration_score": 62.76,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "철강소재",
-        "code": "",
-        "current_rank": 8,
-        "prev_rank": 14,
-        "rank_change": 6,
-        "acceleration_score": 56.33,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "인터넷",
-        "code": "",
-        "current_rank": 10,
-        "prev_rank": 17,
-        "rank_change": 7,
-        "acceleration_score": 55.94,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "건설",
-        "code": "",
-        "current_rank": 4,
-        "prev_rank": 7,
-        "rank_change": 3,
-        "acceleration_score": 55.37,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "IT",
-        "code": "",
-        "current_rank": 3,
-        "prev_rank": 4,
-        "rank_change": 1,
-        "acceleration_score": 52.94,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "삼성그룹",
-        "code": "",
-        "current_rank": 5,
-        "prev_rank": 5,
+        "prev_rank": 2,
         "rank_change": 0,
-        "acceleration_score": 49.05,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "에너지화학",
-        "code": "",
-        "current_rank": 6,
-        "prev_rank": 6,
-        "rank_change": 0,
-        "acceleration_score": 47.98,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "보험",
-        "code": "",
-        "current_rank": 9,
-        "prev_rank": 9,
-        "rank_change": 0,
-        "acceleration_score": 44.76,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "소프트웨어",
-        "code": "",
-        "current_rank": 16,
-        "prev_rank": 19,
-        "rank_change": 3,
-        "acceleration_score": 43.58,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "바이오",
-        "code": "",
-        "current_rank": 18,
-        "prev_rank": 20,
-        "rank_change": 2,
-        "acceleration_score": 41.83,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "헬스케어",
-        "code": "",
-        "current_rank": 14,
-        "prev_rank": 15,
-        "rank_change": 1,
-        "acceleration_score": 41.15,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "2차전지",
-        "code": "",
-        "current_rank": 11,
-        "prev_rank": 10,
-        "rank_change": -1,
-        "acceleration_score": 40.87,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "방산",
-        "code": "",
-        "current_rank": 13,
-        "prev_rank": 12,
-        "rank_change": -1,
-        "acceleration_score": 38.73,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "미디어",
-        "code": "",
-        "current_rank": 19,
-        "prev_rank": 18,
-        "rank_change": -1,
-        "acceleration_score": 36.58,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "증권",
-        "code": "",
-        "current_rank": 7,
-        "prev_rank": 1,
-        "rank_change": -6,
-        "acceleration_score": 36.4,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      },
-      {
-        "sector": "게임",
-        "code": "",
-        "current_rank": 20,
-        "prev_rank": 16,
-        "rank_change": -4,
-        "acceleration_score": 31.33,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
+        "acceleration_score": 57.4,
+        "ret_5d": 6.17,
+        "ret_20d": 14.71,
+        "ret_60d": 74.16
       },
       {
         "sector": "조선",
         "code": "",
-        "current_rank": 17,
-        "prev_rank": 11,
-        "rank_change": -6,
-        "acceleration_score": 27.83,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
+        "current_rank": 6,
+        "prev_rank": 8,
+        "rank_change": 2,
+        "acceleration_score": 53.93,
+        "ret_5d": 2.95,
+        "ret_20d": 5.31,
+        "ret_60d": 6.85
       },
       {
-        "sector": "금융",
+        "sector": "소프트웨어",
         "code": "",
-        "current_rank": 12,
-        "prev_rank": 2,
-        "rank_change": -10,
-        "acceleration_score": 24.05,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
+        "current_rank": 13,
+        "prev_rank": 18,
+        "rank_change": 5,
+        "acceleration_score": 51.31,
+        "ret_5d": 2.5,
+        "ret_20d": -6.3,
+        "ret_60d": -1.71
       },
       {
-        "sector": "은행",
+        "sector": "미디어",
         "code": "",
-        "current_rank": 15,
-        "prev_rank": 3,
-        "rank_change": -12,
-        "acceleration_score": 20.83,
-        "ret_5d": 0,
-        "ret_20d": 0,
-        "ret_60d": 0
-      }
-    ],
-    "convictions": [
+        "current_rank": 14,
+        "prev_rank": 19,
+        "rank_change": 5,
+        "acceleration_score": 49.92,
+        "ret_5d": 2.12,
+        "ret_20d": -13.62,
+        "ret_60d": -2.67
+      },
+      {
+        "sector": "삼성그룹",
+        "code": "",
+        "current_rank": 9,
+        "prev_rank": 10,
+        "rank_change": 1,
+        "acceleration_score": 49.62,
+        "ret_5d": 3.73,
+        "ret_20d": 3.12,
+        "ret_60d": 29.32
+      },
+      {
+        "sector": "보험",
+        "code": "",
+        "current_rank": 11,
+        "prev_rank": 12,
+        "rank_change": 1,
+        "acceleration_score": 46.09,
+        "ret_5d": 2.07,
+        "ret_20d": -5.73,
+        "ret_60d": 12.88
+      },
+      {
+        "sector": "방산",
+        "code": "",
+        "current_rank": 3,
+        "prev_rank": 1,
+        "rank_change": -2,
+        "acceleration_score": 45.18,
+        "ret_5d": -3.01,
+        "ret_20d": 22.08,
+        "ret_60d": 73.86
+      },
       {
         "sector": "현대차그룹",
         "code": "",
-        "level": "HIGH",
-        "score": 85.83,
-        "weight_pct": 3.33,
-        "reasons": [
-          "확신 HIGH",
-          "가속도 71점",
-          "기관 순매수",
-          "순위 12단계 급상승"
-        ]
+        "current_rank": 10,
+        "prev_rank": 9,
+        "rank_change": -1,
+        "acceleration_score": 43.0,
+        "ret_5d": 1.27,
+        "ret_20d": 4.34,
+        "ret_60d": 36.31
       },
       {
-        "sector": "반도체",
+        "sector": "인터넷",
         "code": "",
-        "level": "HIGH",
-        "score": 77.75999999999999,
-        "weight_pct": 3.33,
-        "reasons": [
-          "확신 HIGH",
-          "가속도 63점",
-          "기관 순매수",
-          "순위 6단계 급상승"
-        ]
+        "current_rank": 12,
+        "prev_rank": 11,
+        "rank_change": -1,
+        "acceleration_score": 40.14,
+        "ret_5d": 0.41,
+        "ret_20d": 3.66,
+        "ret_60d": 6.0
+      },
+      {
+        "sector": "바이오",
+        "code": "",
+        "current_rank": 15,
+        "prev_rank": 16,
+        "rank_change": 1,
+        "acceleration_score": 40.03,
+        "ret_5d": -0.06,
+        "ret_20d": -8.01,
+        "ret_60d": -6.11
       },
       {
         "sector": "철강소재",
         "code": "",
+        "current_rank": 19,
+        "prev_rank": 20,
+        "rank_change": 1,
+        "acceleration_score": 39.24,
+        "ret_5d": -1.01,
+        "ret_20d": -6.37,
+        "ret_60d": 8.23
+      },
+      {
+        "sector": "헬스케어",
+        "code": "",
+        "current_rank": 15,
+        "prev_rank": 15,
+        "rank_change": 0,
+        "acceleration_score": 38.14,
+        "ret_5d": -0.23,
+        "ret_20d": -3.02,
+        "ret_60d": 4.16
+      },
+      {
+        "sector": "에너지화학",
+        "code": "",
+        "current_rank": 8,
+        "prev_rank": 3,
+        "rank_change": -5,
+        "acceleration_score": 34.7,
+        "ret_5d": -2.86,
+        "ret_20d": -1.07,
+        "ret_60d": 13.38
+      },
+      {
+        "sector": "2차전지",
+        "code": "",
+        "current_rank": 20,
+        "prev_rank": 17,
+        "rank_change": -3,
+        "acceleration_score": 29.95,
+        "ret_5d": -3.76,
+        "ret_20d": -6.69,
+        "ret_60d": -0.13
+      },
+      {
+        "sector": "금융",
+        "code": "",
+        "current_rank": 17,
+        "prev_rank": 4,
+        "rank_change": -13,
+        "acceleration_score": 22.85,
+        "ret_5d": 2.42,
+        "ret_20d": -3.06,
+        "ret_60d": 24.62
+      },
+      {
+        "sector": "은행",
+        "code": "",
+        "current_rank": 18,
+        "prev_rank": 7,
+        "rank_change": -11,
+        "acceleration_score": 21.91,
+        "ret_5d": 1.29,
+        "ret_20d": -7.62,
+        "ret_60d": 17.69
+      }
+    ],
+    "convictions": [
+      {
+        "sector": "IT",
+        "code": "",
         "level": "HIGH",
-        "score": 91.33,
-        "weight_pct": 3.33,
+        "score": 86.24,
+        "weight_pct": 4.0,
         "reasons": [
           "확신 HIGH",
-          "가속도 56점",
-          "외인+기관 동시매수",
-          "스텔스 매집",
+          "가속도 71점",
+          "기관 순매수",
+          "순위 9단계 급상승"
+        ]
+      },
+      {
+        "sector": "건설",
+        "code": "",
+        "level": "HIGH",
+        "score": 71.99,
+        "weight_pct": 4.0,
+        "reasons": [
+          "확신 HIGH",
+          "가속도 67점",
+          "순위 4단계 상승"
+        ]
+      },
+      {
+        "sector": "게임",
+        "code": "",
+        "level": "MID",
+        "score": 69.45,
+        "weight_pct": 2.0,
+        "reasons": [
+          "확신 MID",
+          "가속도 59점",
           "순위 6단계 급상승"
         ]
       }
     ],
     "event_triggers": [
-      {
-        "triggered": true,
-        "trigger_type": "SMART_MONEY",
-        "sector": "에너지화학",
-        "reason": "에너지화학 스마트머니 스텔스 매집 감지"
-      },
-      {
-        "triggered": true,
-        "trigger_type": "SMART_MONEY",
-        "sector": "2차전지",
-        "reason": "2차전지 스마트머니 스텔스 매집 감지"
-      },
-      {
-        "triggered": true,
-        "trigger_type": "SMART_MONEY",
-        "sector": "바이오",
-        "reason": "바이오 스마트머니 스텔스 매집 감지"
-      },
       {
         "triggered": true,
         "trigger_type": "SMART_MONEY",
@@ -348,17 +340,11 @@
       {
         "triggered": true,
         "trigger_type": "SMART_MONEY",
-        "sector": "철강소재",
-        "reason": "철강소재 스마트머니 스텔스 매집 감지"
-      },
-      {
-        "triggered": true,
-        "trigger_type": "SMART_MONEY",
-        "sector": "미디어",
-        "reason": "미디어 스마트머니 스텔스 매집 감지"
+        "sector": "방산",
+        "reason": "방산 스마트머니 스텔스 매집 감지"
       }
     ],
-    "summary": "[프레데터] 가속도 TOP3: 현대차그룹(71) > 반도체(63) > 철강소재(56) | 배분: 현대차그룹 HIGH(3.3%) | 반도체 HIGH(3.3%) | 철강소재 HIGH(3.3%) | 트리거: 6건 발동"
+    "summary": "[프레데터] 가속도 TOP3: IT(71) > 건설(67) > 게임(59) | 배분: IT HIGH(4.0%) | 건설 HIGH(4.0%) | 게임 MID(2.0%) | 트리거: 2건 발동"
   },
   "passive_results": {
     "gold": {
@@ -402,6 +388,15 @@
   },
   "order_queue": [
     {
+      "axis": "sector",
+      "code": "463250",
+      "name": "TIGER K방산&우주",
+      "action": "BUY",
+      "target_weight_pct": 10.0,
+      "reason": "모멘텀 3위 | Theme Money 감지 | 수급 95점",
+      "priority": 2
+    },
+    {
       "axis": "index",
       "code": "069500",
       "name": "KODEX 200",
@@ -420,27 +415,73 @@
       "priority": 3
     }
   ],
-  "timestamp": "2026-03-11T14:30:59.763203",
+  "timestamp": "2026-03-16T18:40:54.927793",
   "brain": {
-    "timestamp": "2026-03-08T19:33:24.083831",
+    "timestamp": "2026-03-16T18:40:51.780593",
     "confidence": 0.65,
     "adjustments": [
-      "VIX 보정: 29.5 (HIGH) → 투자비중 ×0.75",
-      "2D 선제방어: credit_z=0.2, MOVE_z=2.8",
-      "SHIELD: S3: 5개 동시하락 (avg -11.9%)"
+      "VIX 보정: 27.2 (HIGH) → 투자비중 ×0.75",
+      "2D 선제방어: credit_z=-3.0, MOVE_z=2.6",
+      "COT: S&P 매도 포지셔닝 → 리스크ARM -5%p",
+      "SHIELD: S1: 방산 22.3% (한도 30%)",
+      "SHIELD: S1: 에너지화학 20.8% (한도 30%)"
     ],
     "warnings": [
       "SHIELD 방어 등급: ORANGE",
-      "레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
+      "레짐 변경 감지: PRE_BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
     ]
+  },
+  "order_queue_original": [
+    {
+      "axis": "sector",
+      "code": "463250",
+      "name": "TIGER K방산&우주",
+      "action": "BUY",
+      "target_weight_pct": 10.0,
+      "reason": "모멘텀 3위 | Theme Money 감지 | 수급 95점",
+      "priority": 2
+    },
+    {
+      "axis": "index",
+      "code": "069500",
+      "name": "KODEX 200",
+      "action": "BUY",
+      "target_weight_pct": 6.3,
+      "reason": "신규 진입: 목표 6.3%",
+      "priority": 3
+    },
+    {
+      "axis": "index",
+      "code": "278530",
+      "name": "KODEX MSCI Korea TR",
+      "action": "BUY",
+      "target_weight_pct": 2.7,
+      "reason": "신규 진입: 목표 2.7%",
+      "priority": 3
+    }
+  ],
+  "ai_filter": {
+    "stats": {
+      "total": 3,
+      "pass": 3,
+      "kill": 0,
+      "hold": 0
+    },
+    "killed": [],
+    "held": [],
+    "warnings": [
+      "중동 군사 작전 확대 시 유가 추가 급등 및 글로벌 리스크오프 가능성",
+      "외국인 매도세가 3월에도 지속될 경우 KOSPI 추가 하락 압력",
+      "AI 파괴 우려 확산으로 기술주 및 반도체 섹터 변동성 지속 예상"
+    ],
+    "market_assessment": "중동 지정학 리스크와 외국인 대규모 이탈로 높은 변동성 구간, 방산·에너지 섹터 수혜 vs 기술주 압력",
+    "risk_level": "high"
   },
   "leading_regime": {
     "effective_regime": "BEAR",
-    "warning_score": -10,
+    "warning_score": 0,
     "original_regime": "BEAR",
     "override_reason": "보정 없음",
-    "score_breakdown": {
-      "l2_bullish": -10
-    }
+    "score_breakdown": {}
   }
 }
