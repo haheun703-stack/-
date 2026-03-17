@@ -365,7 +365,12 @@ def _check_overnight(snapshots: list[dict]) -> dict:
     avg_ret = round(sum(rets) / len(rets), 2) if rets else 0
     is_bull = grade in ("STRONG_BULL", "MILD_BULL")
     is_bear = grade in ("STRONG_BEAR", "MILD_BEAR")
-    hit = (is_bull and avg_ret > 0) or (is_bear and avg_ret < 0)
+    is_neutral = grade == "NEUTRAL"
+    hit = (
+        (is_bull and avg_ret > 0)
+        or (is_bear and avg_ret < 0)
+        or (is_neutral and abs(avg_ret) < 0.5)  # NEUTRAL: 변동 ±0.5% 이내면 적중
+    )
     return {
         "total": 1,
         "hit": 1 if hit else 0,

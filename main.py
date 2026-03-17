@@ -45,6 +45,8 @@ from pathlib import Path
 
 import yaml
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -52,7 +54,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("backtest.log", encoding="utf-8"),
+        logging.FileHandler(PROJECT_ROOT / "backtest.log", encoding="utf-8"),
     ],
 )
 logger = logging.getLogger(__name__)
@@ -272,7 +274,7 @@ def step_smart_scan(send_telegram: bool = False):
     logger.info("[Smart Scan] 전종목 매집 단계 스캔 시작")
     detector = AccumulationDetector()
 
-    processed_dir = Path("data/processed")
+    processed_dir = PROJECT_ROOT / "data" / "processed"
     files = sorted(processed_dir.glob("*.parquet"))
 
     if not files:
@@ -347,7 +349,7 @@ def step_telegram(results: dict = None):
     else:
         # 저장된 CSV에서 결과 로드 후 전송
         import pandas as pd
-        results_dir = Path("results")
+        results_dir = PROJECT_ROOT / "results"
         trades_df = pd.read_csv(results_dir / "trades_log.csv") if (results_dir / "trades_log.csv").exists() else pd.DataFrame()
         equity_df = pd.read_csv(results_dir / "daily_equity.csv") if (results_dir / "daily_equity.csv").exists() else pd.DataFrame()
         signals_df = pd.read_csv(results_dir / "signals_log.csv") if (results_dir / "signals_log.csv").exists() else pd.DataFrame()
@@ -388,7 +390,7 @@ def step_report(results: dict = None):
         )
     else:
         # 저장된 CSV에서 로드
-        results_dir = Path("results")
+        results_dir = PROJECT_ROOT / "results"
         trades_df = pd.read_csv(results_dir / "trades_log.csv") if (results_dir / "trades_log.csv").exists() else pd.DataFrame()
         equity_df = pd.read_csv(results_dir / "daily_equity.csv") if (results_dir / "daily_equity.csv").exists() else pd.DataFrame()
         signals_df = pd.read_csv(results_dir / "signals_log.csv") if (results_dir / "signals_log.csv").exists() else pd.DataFrame()
@@ -492,7 +494,7 @@ def cmd_stock_buy(args):
     engine = create_live_engine()
 
     # 시그널 로드
-    signals_path = Path("results/signals_log.csv")
+    signals_path = PROJECT_ROOT / "results" / "signals_log.csv"
     if not signals_path.exists():
         logger.error("[stock_buy] signals_log.csv 없음 — 먼저 backtest 실행 필요")
         return
@@ -563,7 +565,7 @@ def cmd_positions(args):
     import yaml
     from src.use_cases.position_tracker import PositionTracker
 
-    with open("config/settings.yaml", "r", encoding="utf-8") as f:
+    with open(PROJECT_ROOT / "config" / "settings.yaml", "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     tracker = PositionTracker(config)
@@ -613,7 +615,7 @@ def cmd_emergency_stop(args):
     from src.use_cases.position_tracker import PositionTracker
     from src.use_cases.safety_guard import SafetyGuard
 
-    with open("config/settings.yaml", "r", encoding="utf-8") as f:
+    with open(PROJECT_ROOT / "config" / "settings.yaml", "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     tracker = PositionTracker(config)

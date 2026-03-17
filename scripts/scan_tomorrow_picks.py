@@ -67,19 +67,32 @@ _SOURCE_NAME_MAP = {
     "이벤트": "dart_event",
     "수급폭발": "volume_spike",
     "동반매수": "dual_buying",
+    "릴레이": "relay_signal",
+    "그룹순환": "group_relay",
+    "퀀텀": "quantum_signal",
+    "이벤트촉매": "dart_event",
+    "밸류체인": "value_chain",
 }
 
 
+_learning_weights_cache: dict | None = None
+
+
 def _load_learning_weights() -> dict:
-    """learning_weights.json 로드. 실패 시 빈 dict (기본 multiplier 1.0)."""
+    """learning_weights.json 로드 (모듈 레벨 캐싱). 실패 시 빈 dict."""
+    global _learning_weights_cache
+    if _learning_weights_cache is not None:
+        return _learning_weights_cache
     path = DATA_DIR / "market_learning" / "learning_weights.json"
     try:
         if path.exists():
             data = json.loads(path.read_text(encoding="utf-8"))
-            return data.get("weights", {})
+            _learning_weights_cache = data.get("weights", {})
+            return _learning_weights_cache
     except Exception:
         pass
-    return {}
+    _learning_weights_cache = {}
+    return _learning_weights_cache
 
 
 # ──────────────────────────────────────────

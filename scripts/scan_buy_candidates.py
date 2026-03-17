@@ -22,7 +22,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
@@ -635,7 +636,7 @@ def detect_regime() -> dict:
     import yaml
     from datetime import date
 
-    with open("config/settings.yaml", "r", encoding="utf-8") as f:
+    with open(PROJECT_ROOT / "config" / "settings.yaml", "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     today = date.today()
@@ -824,7 +825,7 @@ def get_kospi_regime() -> dict:
 def load_overnight_signal() -> dict:
     """US Overnight Signal JSON 로드. 없으면 neutral 반환."""
     import json
-    signal_path = Path("data/us_market/overnight_signal.json")
+    signal_path = PROJECT_ROOT / "data" / "us_market" / "overnight_signal.json"
     if not signal_path.exists():
         return {"composite": "neutral", "score": 0.0, "sector_signals": {}}
     try:
@@ -1281,7 +1282,7 @@ def scan_all(
     import yaml
     blacklist_set = set()
     try:
-        with open("config/settings.yaml", encoding="utf-8") as f:
+        with open(PROJECT_ROOT / "config" / "settings.yaml", encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
         bl = cfg.get("strategy", {}).get("blacklist") or []
         for item in bl:
