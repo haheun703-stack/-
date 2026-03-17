@@ -168,6 +168,12 @@ class SmartEntryEngine:
         if not self.dry_run:
             self._init_audit_db()
 
+        # ─── NXT (넥스트레이드) 프리마켓 연동 ───
+        nxt_cfg = self.config.get("nxt", {})
+        self.nxt_enabled = nxt_cfg.get("enabled", False)
+        self.nxt_premarket_alert = nxt_cfg.get("premarket_alert", True)
+        self._nxt_adjustments: dict[str, float] = {}  # ticker → 가격조정%
+
         # 종목별 상태
         self.candidates: list[CandidateState] = []
         self.results: list[dict] = []
@@ -452,6 +458,55 @@ class SmartEntryEngine:
                     len(self.candidates), v3_count, len(self.candidates) - v3_count)
         return len(self.candidates)
 
+    # ──────────────────────────────────────────
+    # NXT 프리마켓 연동
+    # ──────────────────────────────────────────
+
+    def _apply_nxt_premarket(self):
+        """NXT 프리마켓 데이터 로드 → 가격 조정 맵 생성"""
+        try:
+            from src.use_cases.nxt_signal import NxtSignalAnalyzer
+            analyzer = NxtSignalAnalyzer(self.config)
+            adjustments = analyzer.get_premarket_price_adjustments()
+            if adjustments:
+                self._nxt_adjustments = adjustments
+                logger.info("[Phase0/NXT] 프리마켓 가격 조정: %d종목 — %s",
+                            len(adjustments),
+                            ", ".join(f"{t}:{v:+.1f}%" for t, v in list(adjustments.items())[:5]))
+
+                # 텔레그램 알림 (갭업 큰 종목)
+                if self.nxt_premarket_alert:
+                    big_gaps = {t: v for t, v in adjustments.items() if abs(v) >= 1.0}
+                    if big_gaps:
+                        self._send_nxt_alert(big_gaps)
+            else:
+                logger.info("[Phase0/NXT] 프리마켓 데이터 없음 또는 조정 불필요")
+        except Exception as e:
+            logger.warning("[Phase0/NXT] 프리마켓 반영 실패 (무시하고 진행): %s", e)
+
+    def _send_nxt_alert(self, big_gaps: dict[str, float]):
+        """NXT 프리마켓 큰 갭업/갭다운 텔레그램 알림"""
+        try:
+            from src.telegram_sender import send_message
+            lines = ["[NXT 프리마켓 알림]"]
+            for ticker, adj in sorted(big_gaps.items(), key=lambda x: -abs(x[1])):
+                direction = "갭업" if adj > 0 else "갭다운"
+                lines.append(f"  {ticker}: {direction} {abs(adj):.1f}%")
+            send_message("\n".join(lines))
+        except Exception as e:
+            logger.debug("[NXT알림] 텔레그램 전송 실패: %s", e)
+
+    def _is_nxt_tradeable(self, ticker: str) -> bool:
+        """NXT 마스터에 해당 종목이 있는지 확인"""
+        try:
+            master_path = Path("data/nxt/nxt_master.json")
+            if not master_path.exists():
+                return False
+            data = json.loads(master_path.read_text(encoding="utf-8"))
+            return ticker in set(data.get("tickers", []))
+        except Exception:
+            return False
+
     def place_initial_orders(self) -> int:
         """전일종가 -0.5% 지정가 매수 접수 (Phase 1)"""
         placed = 0
@@ -461,10 +516,16 @@ class SmartEntryEngine:
                 continue
 
             # 지정가 = 전일종가 × (1 - discount)
+            # NXT 프리마켓 가격 조정 반영
+            nxt_adj = self._nxt_adjustments.get(c.ticker, 0)
+            effective_discount = self.initial_discount - nxt_adj  # 갭업이면 할인 축소
             order_price = self._tick_round(
-                int(c.prev_close * (1 - self.initial_discount / 100)),
+                int(c.prev_close * (1 - effective_discount / 100)),
                 c.prev_close,
             )
+            if nxt_adj != 0:
+                logger.info("[NXT] %s 가격 조정: 할인 %.1f%% → %.1f%% (NXT %+.1f%%)",
+                            c.name, self.initial_discount, effective_discount, nxt_adj)
             c.order_price = order_price
             c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
@@ -1293,6 +1354,10 @@ class SmartEntryEngine:
                 return self.generate_report()
             elif cash > 0:
                 logger.info("[잔고] 주문가능금액 %s원 — 정상", f"{cash:,.0f}")
+
+        # Phase 0: NXT 프리마켓 데이터 반영 (08:00~08:55 데이터 활용)
+        if self.nxt_enabled:
+            self._apply_nxt_premarket()
 
         # Phase 1: 종목 로드 + 초기 지정가
         count = self.load_picks()

@@ -1992,6 +1992,28 @@ market_learner:
     - ai_v3_picks
     - overnight_signal
 
+# ─── NXT (넥스트레이드) 대체거래소 ───
+nxt:
+  enabled: true
+  master_path: "data/nxt/nxt_master.json"
+  collect_premarket: true         # 프리마켓 수집 (08:00~08:55)
+  collect_aftermarket: true       # 애프터마켓 수집 (15:35~19:55)
+  pre_interval_sec: 300           # 프리 수집 간격 (5분)
+  after_interval_sec: 600         # 애프터 수집 간격 (10분)
+  premarket_alert: true           # 프리마켓 이상 시 텔레그램
+  aftermarket_signal: true        # 애프터 수급 시그널 생성
+
+  # 수급 시그널 임계값
+  net_buy_strong_ratio: 0.60      # 순매수비율 60% 이상 → 강한 매집
+  premium_threshold_pct: 0.3      # 프리미엄 0.3% 이상 → BUY 시그널
+  min_volume: 500                 # 최소 거래량 (주)
+
+  # 프리마켓 매도 전략 (데이터 축적 후 활성화)
+  pre_sell:
+    enabled: false                # 아직 비활성 (최소 2주 데이터 축적 후)
+    gap_up_threshold: 1.5         # 갭업 1.5% 이상 시 매도 고려
+    min_volume: 1000              # 최소 거래량
+
 safety_margin:
   enabled: true
   per_discount_ratio: 0.80    # Forward PER 20% 할인 (완화: 0.70→0.80)
