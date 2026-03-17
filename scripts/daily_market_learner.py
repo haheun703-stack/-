@@ -1,0 +1,843 @@
+"""
+Daily Market Learner — 84종목 유니버스 일일 학습 시스템
+
+BAT-D 20.5단계: scan_tomorrow_picks 이후, daily_archive 이전에 실행.
+이 시점에서 data/ JSON들은 아직 "어제" 데이터 → parquet은 "오늘" 데이터.
+
+6-Phase 파이프라인:
+  Phase 1: Universe Snapshot (84종목 오늘 실적)
+  Phase 2: Signal Accuracy (10개 시그널 적중 검증)
+  Phase 3: Missed Opportunity (놓친 급등주 역추적)
+  Phase 4: Cumulative Update (누적 적중률 갱신)
+  Phase 5: AI Synthesis (Claude 인사이트, 선택)
+  Phase 6: Save + Telegram
+
+Usage:
+    python scripts/daily_market_learner.py              # 기본 실행
+    python scripts/daily_market_learner.py --no-send    # 텔레그램 미발송
+    python scripts/daily_market_learner.py --no-ai      # AI 인사이트 생략
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from dotenv import load_dotenv
+load_dotenv(PROJECT_ROOT / ".env")
+
+import pandas as pd
+import yaml
+
+logger = logging.getLogger(__name__)
+
+# ── 경로 ──
+DATA_DIR = PROJECT_ROOT / "data"
+PROCESSED_DIR = DATA_DIR / "processed"
+CSV_DIR = PROJECT_ROOT / "stock_data_daily"
+LEARNING_DIR = DATA_DIR / "market_learning"
+ACCURACY_PATH = LEARNING_DIR / "signal_accuracy.json"
+INDEX_PATH = LEARNING_DIR / "_index.json"
+SETTINGS_PATH = PROJECT_ROOT / "config" / "settings.yaml"
+
+
+# ═══════════════════════════════════════════════
+# 설정 로드
+# ═══════════════════════════════════════════════
+
+def _load_config() -> dict:
+    defaults = {
+        "enabled": True,
+        "ai_synthesis": True,
+        "ai_model": "claude-sonnet-4-5",
+        "rolling_window_days": 20,
+        "min_return_pct": 3.0,
+        "send_telegram": True,
+        "signals_to_track": [
+            "tomorrow_picks", "pullback_scan", "whale_detect",
+            "accumulation_tracker", "dart_event", "volume_spike",
+            "dual_buying", "safety_margin", "ai_v3_picks",
+            "overnight_signal",
+        ],
+    }
+    try:
+        with open(SETTINGS_PATH, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        for k, v in cfg.get("market_learner", {}).items():
+            if k in defaults:
+                defaults[k] = v
+    except Exception:
+        pass
+    return defaults
+
+
+# ═══════════════════════════════════════════════
+# 헬퍼
+# ═══════════════════════════════════════════════
+
+def _load_json(path: Path) -> dict | list | None:
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _save_json(path: Path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def _build_name_map() -> dict[str, str]:
+    """ticker → 종목명 매핑 (CSV 파일명에서 추출)."""
+    name_map = {}
+    if not CSV_DIR.exists():
+        return name_map
+    for csv_path in CSV_DIR.glob("*.csv"):
+        stem = csv_path.stem
+        parts = stem.split("_", 1)
+        if len(parts) == 2:
+            name_map[parts[0]] = parts[1]
+    return name_map
+
+
+def _sf(v) -> float:
+    """NaN-safe float."""
+    if v is None:
+        return 0.0
+    try:
+        fv = float(v)
+        return 0.0 if pd.isna(fv) else round(fv, 2)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+# ═══════════════════════════════════════════════
+# Phase 1: Universe Daily Snapshot
+# ═══════════════════════════════════════════════
+
+def phase1_universe_snapshot(name_map: dict) -> list[dict]:
+    """84종목 parquet에서 오늘의 실적 스냅샷 추출."""
+    snapshots = []
+    for pq_path in sorted(PROCESSED_DIR.glob("*.parquet")):
+        ticker = pq_path.stem
+        try:
+            df = pd.read_parquet(pq_path)
+            if len(df) < 2:
+                continue
+            today = df.iloc[-1]
+            yesterday = df.iloc[-2]
+
+            close_t = _sf(today.get("close", 0))
+            close_y = _sf(yesterday.get("close", 0))
+            ret_1d = round((close_t / close_y - 1) * 100, 2) if close_y > 0 else 0.0
+
+            vol = _sf(today.get("volume", 0))
+            vol_ma20 = _sf(today.get("volume_ma20", 0))
+            vol_ratio = round(vol / vol_ma20, 2) if vol_ma20 > 0 else 0.0
+
+            snapshots.append({
+                "ticker": ticker,
+                "name": name_map.get(ticker, ticker),
+                "close": close_t,
+                "ret_1d": ret_1d,
+                "volume_ratio": vol_ratio,
+                "rsi": _sf(today.get("rsi_14", 0)),
+                "adx": _sf(today.get("adx_14", 0)),
+                "sar_trend": int(_sf(today.get("sar_trend", 0))),
+                "trix_bull": bool(today.get("trix_golden_cross", False)),
+                "foreign_5d": _sf(today.get("foreign_net_5d", 0)),
+                "bb_position": _sf(today.get("bb_position", 0)),
+                # 어제 지표 (missed opportunity 역추적용)
+                "y_rsi": _sf(yesterday.get("rsi_14", 0)),
+                "y_adx": _sf(yesterday.get("adx_14", 0)),
+                "y_sar_trend": int(_sf(yesterday.get("sar_trend", 0))),
+            })
+        except Exception as e:
+            logger.debug("Parquet 로드 실패 %s: %s", ticker, e)
+
+    snapshots.sort(key=lambda x: x["ret_1d"], reverse=True)
+    logger.info("[Phase 1] 유니버스 스냅샷: %d종목", len(snapshots))
+    return snapshots
+
+
+# ═══════════════════════════════════════════════
+# Phase 2: Signal Accuracy Check
+# ═══════════════════════════════════════════════
+
+def phase2_signal_accuracy(
+    snapshots: list[dict], cfg: dict
+) -> dict[str, dict]:
+    """어제 시그널 vs 오늘 수익률 비교."""
+    # 오늘 수익률 맵
+    ret_map = {s["ticker"]: s["ret_1d"] for s in snapshots}
+    results = {}
+
+    tracked = cfg.get("signals_to_track", [])
+
+    # 1. tomorrow_picks
+    if "tomorrow_picks" in tracked:
+        results["tomorrow_picks"] = _check_tomorrow_picks(ret_map)
+
+    # 2. pullback_scan
+    if "pullback_scan" in tracked:
+        results["pullback_scan"] = _check_pullback(ret_map)
+
+    # 3. whale_detect
+    if "whale_detect" in tracked:
+        results["whale_detect"] = _check_whale(ret_map)
+
+    # 4. accumulation_tracker
+    if "accumulation_tracker" in tracked:
+        results["accumulation_tracker"] = _check_accumulation(ret_map)
+
+    # 5. dart_event
+    if "dart_event" in tracked:
+        results["dart_event"] = _check_dart_event(ret_map)
+
+    # 6. volume_spike
+    if "volume_spike" in tracked:
+        results["volume_spike"] = _check_volume_spike(ret_map)
+
+    # 7. dual_buying
+    if "dual_buying" in tracked:
+        results["dual_buying"] = _check_dual_buying(ret_map)
+
+    # 8. safety_margin
+    if "safety_margin" in tracked:
+        results["safety_margin"] = _check_safety_margin(ret_map)
+
+    # 9. ai_v3_picks
+    if "ai_v3_picks" in tracked:
+        results["ai_v3_picks"] = _check_ai_v3(ret_map)
+
+    # 10. overnight_signal
+    if "overnight_signal" in tracked:
+        results["overnight_signal"] = _check_overnight(snapshots)
+
+    logger.info("[Phase 2] 시그널 적중 검증: %d개 소스", len(results))
+    return results
+
+
+def _accuracy_stat(tickers: list[str], ret_map: dict) -> dict:
+    """공통: 시그널 종목 리스트 → 적중 통계."""
+    returns = []
+    for t in tickers:
+        if t in ret_map:
+            returns.append(ret_map[t])
+    if not returns:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0, "tickers": []}
+    hit = sum(1 for r in returns if r > 0)
+    return {
+        "total": len(returns),
+        "hit": hit,
+        "hit_rate": round(hit / len(returns) * 100, 1),
+        "avg_ret": round(sum(returns) / len(returns), 2),
+        "tickers": tickers[:10],  # 상위 10개만
+    }
+
+
+def _check_tomorrow_picks(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "tomorrow_picks.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    buy_grades = {"적극매수", "매수", "관심매수"}
+    tickers = [
+        p["ticker"] for p in data.get("picks", [])
+        if p.get("grade") in buy_grades
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_pullback(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "pullback_scan.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = [
+        c["ticker"] for c in data.get("candidates", [])
+        if c.get("grade") == "매수대기"
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_whale(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "whale_detect.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = [
+        item["ticker"] for item in data.get("items", [])
+        if item.get("grade") in ("세력포착", "매집의심")
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_accumulation(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "accumulation_tracker.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = [
+        item["ticker"] for item in data.get("items", [])
+        if item.get("phase") == "재돌파"
+    ][:30]  # 최대 30개
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_dart_event(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "dart_event_signals.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = [
+        s["ticker"] for s in data.get("signals", [])
+        if s.get("action") == "BUY"
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_volume_spike(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "volume_spike_watchlist.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    watching = data.get("watching", {})
+    tickers = [
+        t for t, info in watching.items()
+        if info.get("status") == "signal"
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_dual_buying(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "dual_buying_watch.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = []
+    for grade_key in ("s_grade", "a_grade", "b_grade"):
+        for item in data.get(grade_key, []):
+            t = item.get("ticker", "")
+            if t:
+                tickers.append(t)
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_safety_margin(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "safety_margin_daily.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    tickers = [
+        item.get("ticker", "") for item in data.get("green", [])
+        if item.get("ticker")
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_ai_v3(ret_map: dict) -> dict:
+    data = _load_json(DATA_DIR / "ai_v3_picks.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    # ai_v3_picks는 리스트 or dict
+    picks = data if isinstance(data, list) else data.get("picks", [])
+    tickers = [
+        p.get("ticker", "") for p in picks
+        if p.get("action") in ("BUY", "적극매수", "매수")
+           or p.get("confidence", 0) >= 0.7
+    ]
+    return _accuracy_stat(tickers, ret_map)
+
+
+def _check_overnight(snapshots: list[dict]) -> dict:
+    data = _load_json(DATA_DIR / "us_market" / "overnight_signal.json")
+    if not data:
+        return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
+    grade = data.get("final_grade", data.get("grade", "NEUTRAL"))
+    # 유니버스 평균 수익률로 판정
+    rets = [s["ret_1d"] for s in snapshots if s["ret_1d"] != 0]
+    avg_ret = round(sum(rets) / len(rets), 2) if rets else 0
+    is_bull = grade in ("STRONG_BULL", "MILD_BULL")
+    is_bear = grade in ("STRONG_BEAR", "MILD_BEAR")
+    hit = (is_bull and avg_ret > 0) or (is_bear and avg_ret < 0)
+    return {
+        "total": 1,
+        "hit": 1 if hit else 0,
+        "hit_rate": 100.0 if hit else 0.0,
+        "avg_ret": avg_ret,
+        "grade": grade,
+    }
+
+
+# ═══════════════════════════════════════════════
+# Phase 3: Missed Opportunity Detector
+# ═══════════════════════════════════════════════
+
+def phase3_missed_opportunities(
+    snapshots: list[dict], accuracy: dict, cfg: dict
+) -> list[dict]:
+    """오늘 급등했지만 어제 시그널이 없었던 종목 역추적."""
+    min_ret = cfg.get("min_return_pct", 3.0)
+    top_movers = [s for s in snapshots if s["ret_1d"] >= min_ret]
+
+    # 모든 시그널에 등장한 종목 집합
+    signal_tickers = set()
+    for sig_name, sig_data in accuracy.items():
+        for t in sig_data.get("tickers", []):
+            signal_tickers.add(t)
+
+    missed = []
+    for mover in top_movers:
+        ticker = mover["ticker"]
+        had_signals = [
+            sig_name for sig_name, sig_data in accuracy.items()
+            if ticker in sig_data.get("tickers", [])
+        ]
+        if not had_signals:
+            # 어떤 게이트가 차단했는지 추정
+            blocked_by = _guess_block_reason(mover)
+            missed.append({
+                "ticker": ticker,
+                "name": mover["name"],
+                "ret_1d": mover["ret_1d"],
+                "had_signals": [],
+                "blocked_by": blocked_by,
+                "yesterday_indicators": {
+                    "rsi": mover.get("y_rsi", 0),
+                    "adx": mover.get("y_adx", 0),
+                    "sar_trend": mover.get("y_sar_trend", 0),
+                },
+                "in_universe": True,
+            })
+
+    logger.info("[Phase 3] 놓친 급등주: %d건 (+%.1f%% 이상)", len(missed), min_ret)
+    return missed
+
+
+def _guess_block_reason(snap: dict) -> str:
+    """어제 지표 기반으로 차단 사유 추정."""
+    reasons = []
+    y_adx = snap.get("y_adx", 0)
+    y_rsi = snap.get("y_rsi", 0)
+    y_sar = snap.get("y_sar_trend", 0)
+
+    if y_adx < 14:
+        reasons.append(f"G1_ADX ({y_adx:.0f}<14)")
+    if y_rsi > 70:
+        reasons.append(f"과열 (RSI {y_rsi:.0f})")
+    if y_sar == -1:
+        reasons.append("SAR 하락추세")
+    if not reasons:
+        reasons.append("시그널 미감지 (조건 불충족)")
+    return " + ".join(reasons)
+
+
+# ═══════════════════════════════════════════════
+# Phase 4: Cumulative Learning DB
+# ═══════════════════════════════════════════════
+
+def phase4_cumulative_update(
+    today_date: str, accuracy: dict, cfg: dict
+) -> dict:
+    """Rolling N일 누적 적중률 갱신."""
+    window = cfg.get("rolling_window_days", 20)
+
+    # 기존 누적 데이터 로드
+    cum = _load_json(ACCURACY_PATH) or {
+        "updated_at": "",
+        "window_days": window,
+        "signals": {},
+        "daily_log": [],
+    }
+
+    # 오늘 로그 추가
+    day_entry = {"date": today_date}
+    for sig_name, sig_data in accuracy.items():
+        day_entry[f"{sig_name}_hr"] = sig_data.get("hit_rate", 0)
+        day_entry[f"{sig_name}_n"] = sig_data.get("total", 0)
+        day_entry[f"{sig_name}_ret"] = sig_data.get("avg_ret", 0)
+    cum["daily_log"].append(day_entry)
+
+    # rolling window 유지
+    cum["daily_log"] = cum["daily_log"][-window:]
+    cum["updated_at"] = today_date
+    cum["window_days"] = window
+
+    # 시그널별 누적 통계 재계산
+    signals_cum = {}
+    for sig_name in accuracy:
+        total_sum = 0
+        hit_sum = 0
+        ret_list = []
+        for day in cum["daily_log"]:
+            n = day.get(f"{sig_name}_n", 0)
+            hr = day.get(f"{sig_name}_hr", 0)
+            ret = day.get(f"{sig_name}_ret", 0)
+            total_sum += n
+            hit_sum += int(n * hr / 100) if n > 0 else 0
+            if n > 0:
+                ret_list.append(ret)
+        signals_cum[sig_name] = {
+            "total": total_sum,
+            "hit": hit_sum,
+            "hit_rate": round(hit_sum / total_sum * 100, 1) if total_sum > 0 else 0,
+            "avg_ret": round(sum(ret_list) / len(ret_list), 2) if ret_list else 0,
+            "days_tracked": len([d for d in cum["daily_log"] if d.get(f"{sig_name}_n", 0) > 0]),
+        }
+    cum["signals"] = signals_cum
+
+    _save_json(ACCURACY_PATH, cum)
+    logger.info("[Phase 4] 누적 적중률 갱신 (window=%d일)", window)
+    return cum
+
+
+# ═══════════════════════════════════════════════
+# Phase 5: AI Synthesis
+# ═══════════════════════════════════════════════
+
+def phase5_ai_synthesis(
+    snapshot_summary: dict, accuracy: dict,
+    missed: list[dict], cumulative: dict, cfg: dict,
+) -> str:
+    """Claude Sonnet으로 학습 인사이트 생성."""
+    if not cfg.get("ai_synthesis", True):
+        return ""
+
+    try:
+        from anthropic import Anthropic
+    except ImportError:
+        logger.warning("anthropic 패키지 없음 — AI 인사이트 생략")
+        return ""
+
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return ""
+
+    model = cfg.get("ai_model", "claude-sonnet-4-5")
+
+    # 시그널 적중 요약
+    acc_lines = []
+    for sig, stat in accuracy.items():
+        if stat.get("total", 0) > 0:
+            acc_lines.append(
+                f"  {sig}: {stat['hit']}/{stat['total']} "
+                f"({stat['hit_rate']}%) avg {stat['avg_ret']:+.1f}%"
+            )
+    acc_text = "\n".join(acc_lines) if acc_lines else "  (시그널 없음)"
+
+    # 놓친 종목 요약
+    missed_text = "\n".join(
+        f"  {m['name']} +{m['ret_1d']}% — {m['blocked_by']}"
+        for m in missed[:5]
+    ) if missed else "  (없음)"
+
+    # 누적 베스트/워스트
+    cum_signals = cumulative.get("signals", {})
+    best = max(cum_signals.items(), key=lambda x: x[1].get("hit_rate", 0), default=("없음", {}))
+    worst = min(
+        [(k, v) for k, v in cum_signals.items() if v.get("total", 0) > 5],
+        key=lambda x: x[1].get("hit_rate", 0),
+        default=("없음", {}),
+    )
+
+    prompt = (
+        f"오늘 한국 주식시장 84종목 학습 결과:\n\n"
+        f"시장: 상승 {snapshot_summary['up_count']}종목, "
+        f"하락 {snapshot_summary['down_count']}종목, "
+        f"평균 수익률 {snapshot_summary['avg_ret']:+.2f}%\n\n"
+        f"시그널 적중률:\n{acc_text}\n\n"
+        f"놓친 급등주:\n{missed_text}\n\n"
+        f"20일 누적 최고: {best[0]} ({best[1].get('hit_rate', 0)}%)\n"
+        f"20일 누적 최저: {worst[0]} ({worst[1].get('hit_rate', 0)}%)\n\n"
+        f"이 데이터에서 배울 수 있는 핵심 인사이트 3줄로 요약해줘. "
+        f"각 줄은 30자 이내. 한국어로."
+    )
+
+    try:
+        client = Anthropic(api_key=api_key)
+        resp = client.messages.create(
+            model=model,
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        insight = resp.content[0].text.strip()
+        logger.info("[Phase 5] AI 인사이트 생성 완료")
+        return insight
+    except Exception as e:
+        logger.warning("[Phase 5] AI 인사이트 실패: %s", e)
+        return ""
+
+
+# ═══════════════════════════════════════════════
+# Phase 6: Save + Telegram
+# ═══════════════════════════════════════════════
+
+def phase6_save_and_send(
+    today_date: str, snapshots: list[dict], accuracy: dict,
+    missed: list[dict], cumulative: dict, ai_insight: str,
+    send_telegram: bool = True,
+):
+    """결과 저장 + 텔레그램."""
+    # ── 스냅샷 요약 ──
+    up_count = sum(1 for s in snapshots if s["ret_1d"] > 0)
+    down_count = sum(1 for s in snapshots if s["ret_1d"] < 0)
+    flat_count = len(snapshots) - up_count - down_count
+    vol_spike = [s for s in snapshots if s["volume_ratio"] >= 2.0]
+    rets = [s["ret_1d"] for s in snapshots]
+    avg_ret = round(sum(rets) / len(rets), 2) if rets else 0
+
+    summary = {
+        "date": today_date,
+        "total": len(snapshots),
+        "up_count": up_count,
+        "down_count": down_count,
+        "flat_count": flat_count,
+        "avg_ret": avg_ret,
+        "vol_spike_count": len(vol_spike),
+        "top5": [{"name": s["name"], "ret": s["ret_1d"]} for s in snapshots[:5]],
+        "bottom5": [{"name": s["name"], "ret": s["ret_1d"]} for s in snapshots[-5:]],
+    }
+
+    # ── 일별 JSON 저장 ──
+    daily_data = {
+        "date": today_date,
+        "generated_at": datetime.now().isoformat(),
+        "summary": summary,
+        "signal_accuracy": accuracy,
+        "missed_opportunities": missed,
+        "ai_insight": ai_insight,
+    }
+    daily_path = LEARNING_DIR / f"{today_date}.json"
+    _save_json(daily_path, daily_data)
+    logger.info("일별 학습 저장: %s", daily_path)
+
+    # ── 인덱스 갱신 ──
+    idx = _load_json(INDEX_PATH) or {"start_date": today_date, "logs": []}
+    if today_date not in idx.get("logs", []):
+        idx["logs"].append(today_date)
+    idx["total_days"] = len(idx["logs"])
+    _save_json(INDEX_PATH, idx)
+
+    # ── 텔레그램 메시지 ──
+    if not send_telegram:
+        logger.info("텔레그램 미발송 (--no-send)")
+        return
+
+    msg = _build_telegram_message(
+        today_date, summary, accuracy, missed, cumulative, ai_insight
+    )
+    try:
+        from src.telegram_sender import send_message
+        ok = send_message(msg)
+        if ok:
+            logger.info("텔레그램 발송 성공")
+        else:
+            logger.warning("텔레그램 발송 실패")
+    except Exception as e:
+        logger.error("텔레그램 오류: %s", e)
+
+
+def _build_telegram_message(
+    date_str: str, summary: dict, accuracy: dict,
+    missed: list[dict], cumulative: dict, ai_insight: str,
+) -> str:
+    lines = [f"📚 일일 시장 학습 ({date_str[5:]})", ""]
+
+    # 유니버스 요약
+    lines.append(
+        f"📊 유니버스: ↑{summary['up_count']} / ↓{summary['down_count']} "
+        f"/ 거래량폭발 {summary['vol_spike_count']}종목"
+    )
+    lines.append(f"   평균 수익률: {summary['avg_ret']:+.2f}%")
+    lines.append("")
+
+    # 시그널 적중률
+    lines.append("🎯 시그널 적중률 (오늘):")
+    sig_labels = {
+        "tomorrow_picks": "추천",
+        "pullback_scan": "눌림목",
+        "whale_detect": "세력",
+        "accumulation_tracker": "매집",
+        "dart_event": "DART",
+        "volume_spike": "수급폭발",
+        "dual_buying": "동반매수",
+        "safety_margin": "안전마진",
+        "ai_v3_picks": "AI추천",
+        "overnight_signal": "오버나잇",
+    }
+    for sig_name, sig_data in accuracy.items():
+        total = sig_data.get("total", 0)
+        if total == 0:
+            continue
+        label = sig_labels.get(sig_name, sig_name)
+        hit = sig_data.get("hit", 0)
+        hr = sig_data.get("hit_rate", 0)
+        avg = sig_data.get("avg_ret", 0)
+        lines.append(f"  {label}: {hit}/{total} ({hr}%) avg {avg:+.1f}%")
+    lines.append("")
+
+    # 놓친 급등주
+    if missed:
+        lines.append("⚠️ 놓친 급등주:")
+        for m in missed[:3]:
+            lines.append(f"  {m['name']} +{m['ret_1d']}% ({m['blocked_by']})")
+        lines.append("")
+
+    # AI 인사이트
+    if ai_insight:
+        lines.append("🧠 AI 인사이트:")
+        for line in ai_insight.split("\n")[:3]:
+            lines.append(f"  {line.strip()}")
+        lines.append("")
+
+    # 20일 누적
+    cum_sigs = cumulative.get("signals", {})
+    cum_parts = []
+    for sig_name in ("tomorrow_picks", "pullback_scan", "whale_detect"):
+        if sig_name in cum_sigs and cum_sigs[sig_name].get("total", 0) > 0:
+            label = sig_labels.get(sig_name, sig_name)
+            hr = cum_sigs[sig_name]["hit_rate"]
+            cum_parts.append(f"{label} {hr}%")
+    if cum_parts:
+        lines.append(f"📈 20일 누적: {' | '.join(cum_parts)}")
+
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════
+# 메인
+# ═══════════════════════════════════════════════
+
+def run_daily_learner(
+    send_telegram: bool = True,
+    use_ai: bool = True,
+) -> dict:
+    """메인 학습 루프."""
+    cfg = _load_config()
+    if not cfg.get("enabled", True):
+        logger.info("market_learner 비활성화")
+        return {}
+
+    if not use_ai:
+        cfg["ai_synthesis"] = False
+
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    name_map = _build_name_map()
+
+    logger.info("=" * 50)
+    logger.info("[Daily Market Learner] %s 시작", today_date)
+    logger.info("=" * 50)
+
+    # Phase 1
+    snapshots = phase1_universe_snapshot(name_map)
+    if not snapshots:
+        logger.warning("스냅샷 없음 — 종료")
+        return {}
+
+    # Phase 2
+    accuracy = phase2_signal_accuracy(snapshots, cfg)
+
+    # Phase 3
+    missed = phase3_missed_opportunities(snapshots, accuracy, cfg)
+
+    # Phase 4
+    cumulative = phase4_cumulative_update(today_date, accuracy, cfg)
+
+    # 스냅샷 요약 (Phase 5용)
+    rets = [s["ret_1d"] for s in snapshots]
+    snapshot_summary = {
+        "up_count": sum(1 for r in rets if r > 0),
+        "down_count": sum(1 for r in rets if r < 0),
+        "avg_ret": round(sum(rets) / len(rets), 2) if rets else 0,
+    }
+
+    # Phase 5
+    ai_insight = phase5_ai_synthesis(
+        snapshot_summary, accuracy, missed, cumulative, cfg
+    )
+
+    # Phase 6
+    phase6_save_and_send(
+        today_date, snapshots, accuracy, missed,
+        cumulative, ai_insight, send_telegram,
+    )
+
+    # 콘솔 요약
+    _print_console_summary(snapshots, accuracy, missed, cumulative)
+
+    return {
+        "date": today_date,
+        "universe_count": len(snapshots),
+        "signals_checked": len(accuracy),
+        "missed_count": len(missed),
+    }
+
+
+def _print_console_summary(snapshots, accuracy, missed, cumulative):
+    """콘솔 출력."""
+    print("\n" + "=" * 60)
+    print("📚 Daily Market Learner — 학습 결과")
+    print("=" * 60)
+
+    up = sum(1 for s in snapshots if s["ret_1d"] > 0)
+    dn = sum(1 for s in snapshots if s["ret_1d"] < 0)
+    print(f"\n유니버스: {len(snapshots)}종목 (↑{up} / ↓{dn})")
+
+    print(f"\n  TOP 3: ", end="")
+    for s in snapshots[:3]:
+        print(f"{s['name']} {s['ret_1d']:+.1f}%  ", end="")
+    print(f"\n  BOT 3: ", end="")
+    for s in snapshots[-3:]:
+        print(f"{s['name']} {s['ret_1d']:+.1f}%  ", end="")
+    print()
+
+    print("\n시그널 적중:")
+    for sig_name, stat in accuracy.items():
+        total = stat.get("total", 0)
+        if total == 0:
+            continue
+        print(f"  {sig_name:20s}: {stat['hit']}/{total} "
+              f"({stat['hit_rate']}%) avg {stat['avg_ret']:+.2f}%")
+
+    if missed:
+        print(f"\n놓친 급등주 ({len(missed)}건):")
+        for m in missed[:5]:
+            print(f"  {m['name']:12s} +{m['ret_1d']}% — {m['blocked_by']}")
+
+    cum_sigs = cumulative.get("signals", {})
+    if cum_sigs:
+        print(f"\n20일 누적 적중률:")
+        for sig, stat in sorted(cum_sigs.items(), key=lambda x: -x[1].get("hit_rate", 0)):
+            if stat.get("total", 0) > 0:
+                print(f"  {sig:20s}: {stat['hit_rate']}% "
+                      f"(n={stat['total']}, avg {stat['avg_ret']:+.2f}%)")
+    print()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="일일 시장 학습 시스템")
+    parser.add_argument("--no-send", action="store_true", help="텔레그램 미발송")
+    parser.add_argument("--no-ai", action="store_true", help="AI 인사이트 생략")
+    parser.add_argument("-v", "--verbose", action="store_true", help="상세 로그")
+    args = parser.parse_args()
+
+    level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
+    )
+
+    run_daily_learner(
+        send_telegram=not args.no_send,
+        use_ai=not args.no_ai,
+    )
+
+
+if __name__ == "__main__":
+    main()

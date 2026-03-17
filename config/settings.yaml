@@ -1972,6 +1972,26 @@ options_expiry:
   morning_briefing_warn: true     # 당일 아침 브리핑에 경고 포함
 
 # ── 안전마진 플래그 (정상화 EPS 기반) ──
+# ─── 일일 시장 학습 ───
+market_learner:
+  enabled: true
+  ai_synthesis: true
+  ai_model: "claude-sonnet-4-5"
+  rolling_window_days: 20
+  min_return_pct: 3.0              # 놓친 기회 기준 (+3% 이상)
+  send_telegram: true
+  signals_to_track:
+    - tomorrow_picks
+    - pullback_scan
+    - whale_detect
+    - accumulation_tracker
+    - dart_event
+    - volume_spike
+    - dual_buying
+    - safety_margin
+    - ai_v3_picks
+    - overnight_signal
+
 safety_margin:
   enabled: true
   per_discount_ratio: 0.80    # Forward PER 20% 할인 (완화: 0.70→0.80)

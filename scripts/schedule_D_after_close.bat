@@ -282,6 +282,11 @@ echo [%date% %time%] [20/29] 내일 추천 종목 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [20/29] FAILED >> logs\schedule.log
 
+REM 20.5단계: 일일 시장 학습 (84종목 시그널 적중 검증 + 누적 학습)
+echo [%date% %time%] [20.5/29] 일일 시장 학습 >> logs\schedule.log
+python -u -X utf8 scripts\daily_market_learner.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [20.5/29] FAILED >> logs\schedule.log
+
 REM 20.7단계: 멀티전략 포트폴리오 배분
 echo [%date% %time%] [20.7/29] 포트폴리오 배분 >> logs\schedule.log
 python -u -X utf8 scripts\portfolio_allocator.py >> logs\schedule.log 2>&1
