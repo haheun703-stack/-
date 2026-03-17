@@ -45,6 +45,7 @@ PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 LEARNING_DIR = DATA_DIR / "market_learning"
 ACCURACY_PATH = LEARNING_DIR / "signal_accuracy.json"
+WEIGHTS_PATH = LEARNING_DIR / "learning_weights.json"
 INDEX_PATH = LEARNING_DIR / "_index.json"
 SETTINGS_PATH = PROJECT_ROOT / "config" / "settings.yaml"
 
@@ -492,8 +493,70 @@ def phase4_cumulative_update(
     cum["signals"] = signals_cum
 
     _save_json(ACCURACY_PATH, cum)
+
+    # ── learning_weights.json 생성 (피드백 루프 핵심) ──
+    _compute_learning_weights(cum)
+
     logger.info("[Phase 4] 누적 적중률 갱신 (window=%d일)", window)
     return cum
+
+
+def _compute_learning_weights(cum: dict) -> dict:
+    """signal_accuracy → score_multiplier 변환.
+
+    적중률이 평균보다 높은 시그널은 가중치 UP, 낮으면 DOWN.
+    scan_tomorrow_picks.py 축2(개별점수)에서 소비.
+
+    공식: multiplier = 0.5 + (hit_rate / baseline) * 0.5
+    범위: clamp(0.5, 1.5)
+    조건: days_tracked >= 3 (초기 3일부터 적용, 데이터 안정화 후 상향 가능)
+    """
+    MIN_DAYS = 3
+
+    signals = cum.get("signals", {})
+    if not signals:
+        return {}
+
+    # 전체 평균 적중률 (baseline)
+    rates = [
+        s["hit_rate"]
+        for s in signals.values()
+        if s.get("days_tracked", 0) >= MIN_DAYS
+    ]
+    if not rates:
+        logger.info("[Weights] 충분한 데이터 없음 (%d일 미만) — 기본값 유지", MIN_DAYS)
+        return {}
+    baseline = max(sum(rates) / len(rates), 10)  # 최소 10% (0 나누기 방지)
+
+    weights: dict = {}
+    for name, stats in signals.items():
+        if stats.get("days_tracked", 0) < MIN_DAYS:
+            weights[name] = {"multiplier": 1.0, "reason": "데이터 부족 (<5일)"}
+            continue
+        hr = stats["hit_rate"]
+        raw = 0.5 + (hr / baseline) * 0.5
+        multiplier = round(max(0.5, min(1.5, raw)), 2)
+        weights[name] = {
+            "multiplier": multiplier,
+            "hit_rate": hr,
+            "avg_ret": stats["avg_ret"],
+            "total": stats["total"],
+            "days_tracked": stats["days_tracked"],
+            "reason": f"적중률 {hr}% (baseline {baseline:.1f}%)",
+        }
+
+    result = {
+        "updated_at": cum.get("updated_at", ""),
+        "baseline_hit_rate": round(baseline, 1),
+        "min_days_required": MIN_DAYS,
+        "weights": weights,
+    }
+    _save_json(WEIGHTS_PATH, result)
+    logger.info(
+        "[Weights] learning_weights.json 갱신 — baseline %.1f%%, %d개 시그널",
+        baseline, len(weights),
+    )
+    return result
 
 
 # ═══════════════════════════════════════════════

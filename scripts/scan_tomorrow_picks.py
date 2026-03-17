@@ -59,6 +59,29 @@ PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_PATH = DATA_DIR / "tomorrow_picks.json"
 
+# ── 학습 피드백 루프: 시그널 소스별 적중률 → 가중치 ──
+_SOURCE_NAME_MAP = {
+    "눌림목": "pullback_scan",
+    "세력감지": "whale_detect",
+    "매집추적": "accumulation_tracker",
+    "이벤트": "dart_event",
+    "수급폭발": "volume_spike",
+    "동반매수": "dual_buying",
+}
+
+
+def _load_learning_weights() -> dict:
+    """learning_weights.json 로드. 실패 시 빈 dict (기본 multiplier 1.0)."""
+    path = DATA_DIR / "market_learning" / "learning_weights.json"
+    try:
+        if path.exists():
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return data.get("weights", {})
+    except Exception:
+        pass
+    return {}
+
+
 # ──────────────────────────────────────────
 # 공포탐욕(war) 모드 오버라이드 설정
 # ──────────────────────────────────────────
@@ -762,6 +785,15 @@ def calc_integrated_score(
         dual_days = max(dual_days, int(dd))
     if n_sources >= 2 and dual_days >= 3:
         multi_score += 3  # 다른 소스와 겹칠 때만 소액 보너스
+
+    # ── 학습 가중치 적용 (축2 계산 전) ──
+    learning_w = _load_learning_weights()
+    if learning_w:
+        for s in sources:
+            key = _SOURCE_NAME_MAP.get(s.get("source", ""))
+            if key and key in learning_w:
+                m = learning_w[key].get("multiplier", 1.0)
+                s["score"] = s["score"] * m
 
     # ── 축2: 개별 점수 평균 (20점) ──
     avg_src_score = np.mean([s["score"] for s in sources]) if sources else 0

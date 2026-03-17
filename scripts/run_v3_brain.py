@@ -268,17 +268,67 @@ async def run_phase1(dry_run: bool = False, o1_context: dict | None = None) -> d
         _save_json(output_path, result)
         return result
 
-    # ── 피드백 로드 (있으면) ──
-    feedback = ""
+    # ── 피드백 로드 (기존 weekly + 시그널 적중률 + 놓친 급등주) ──
+    feedback_parts = []
+
+    # 1) 기존 weekly_accuracy
     feedback_path = DATA_DIR / "weekly_accuracy.json"
     if feedback_path.exists():
         try:
             fb = _load_json(feedback_path)
             if fb.get("feedback_text"):
-                feedback = fb["feedback_text"]
-                logger.info("주간 피드백 로드 완료 (%d자)", len(feedback))
+                feedback_parts.append(fb["feedback_text"])
         except Exception:
             pass
+
+    # 2) 시그널 적중률 랭킹 (learning loop)
+    accuracy_path = DATA_DIR / "market_learning" / "signal_accuracy.json"
+    if accuracy_path.exists():
+        try:
+            sa = _load_json(accuracy_path)
+            signals = sa.get("signals", {})
+            if signals:
+                ranked = sorted(
+                    signals.items(),
+                    key=lambda x: x[1].get("hit_rate", 0),
+                    reverse=True,
+                )
+                lines = ["[시그널 적중률 — 최근 20일]"]
+                for name, stats in ranked:
+                    hr = stats.get("hit_rate", 0)
+                    n = stats.get("total", 0)
+                    ret = stats.get("avg_ret", 0)
+                    trust = "신뢰↑" if hr >= 45 else "보통" if hr >= 30 else "신뢰↓"
+                    lines.append(f"  {name}: {hr}% ({n}건, avg {ret:+.2f}%) — {trust}")
+                feedback_parts.append("\n".join(lines))
+                logger.info("시그널 적중률 피드백 로드 (%d개 시그널)", len(signals))
+        except Exception:
+            pass
+
+    # 3) 어제 놓친 급등주 TOP3
+    try:
+        learning_dir = DATA_DIR / "market_learning"
+        idx = _load_json(learning_dir / "_index.json") or {}
+        logs = idx.get("logs", [])
+        if logs:
+            latest_file = learning_dir / f"{logs[-1]}.json"
+            if latest_file.exists():
+                latest = _load_json(latest_file)
+                missed = (latest or {}).get("missed_opportunities", [])[:3]
+                if missed:
+                    lines = ["[어제 놓친 급등주]"]
+                    for m in missed:
+                        lines.append(
+                            f"  {m.get('name', m.get('ticker',''))} "
+                            f"+{m.get('ret_1d', 0):.1f}% ({m.get('blocked_by', '')})"
+                        )
+                    feedback_parts.append("\n".join(lines))
+    except Exception:
+        pass
+
+    feedback = "\n\n".join(feedback_parts) if feedback_parts else ""
+    if feedback:
+        logger.info("통합 피드백 로드 완료 (%d자, %d개 섹션)", len(feedback), len(feedback_parts))
 
     # ── Agent 2A 실행 ──
     context = {
