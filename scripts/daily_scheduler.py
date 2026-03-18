@@ -1157,115 +1157,34 @@ class DailyScheduler:
         이중 스케줄링 방지를 위해 데몬 모드 차단.
         개별 Phase 실행은 --run-now 옵션으로 가능.
         """
-        sys.exit(
+        # ── 스케줄 데몬 비활성화 (schtasks BAT 전용 운영) ──
+        print(
             "\n"
             "╔══════════════════════════════════════════════════╗\n"
-            "║  이중 스케줄링 방지: daily_scheduler 데몬 비활성화  ║\n"
-            "║  schtasks(BAT-A~G) 전용 운영 중                   ║\n"
-            "║                                                  ║\n"
+            "║  스케줄 데몬 비활성화: schtasks(BAT) 전용 운영 중  ║\n"
             "║  개별 Phase 실행: --run-now <PHASE>               ║\n"
             "║  스케줄 확인:     --dry-run                       ║\n"
+            "║                                                  ║\n"
+            "║  텔레그램 명령봇 활성 — 명령 수신 대기 중...       ║\n"
             "╚══════════════════════════════════════════════════╝\n"
         )
-        import schedule as sched
 
-        logger.info("=" * 60)
-        logger.info("  v5.0 일일 스케줄러 시작")
-        logger.info("  모드: %s | 실주문: %s", self.mode, "ON" if self.enabled else "OFF")
-        logger.info("=" * 60)
-
-        S = self.schedule  # shorthand
-
-        # === 미장 마감 + 한국장 준비 ===
-        sched.every().day.at(S.get("daily_reset", "00:00")).do(
-            self._safe_run, self.phase_daily_reset)
-        sched.every().day.at(S.get("us_close_collect", "06:10")).do(
-            self._safe_run, self.phase_us_close_collect)
-        sched.every().day.at(S.get("macro_collect", "07:00")).do(
-            self._safe_run, self.phase_macro_collect)
-        sched.every().day.at(S.get("theme_scan", "07:10")).do(
-            self._safe_run, self.phase_theme_scan)
-        sched.every().day.at(S.get("news_briefing", "07:20")).do(
-            self._safe_run, self.phase_news_briefing)
-        sched.every().day.at(S.get("morning_briefing", "07:30")).do(
-            self._safe_run, self.phase_morning_briefing)
-        sched.every().day.at(S.get("etf_briefing", "08:00")).do(
-            self._safe_run, self.phase_etf_briefing)
-        sched.every().day.at(S.get("trade_prep", "08:20")).do(
-            self._safe_run, self.phase_trade_prep)
-
-        # === 한국장 운영 ===
-        sched.every().day.at(S.get("buy_execution", "09:02")).do(
-            self._safe_run, self.phase_buy_execution)
-        sched.every().day.at(S.get("monitor_start", "09:10")).do(
-            self._safe_run, self.phase_intraday_monitor)
-
-        # === 장중 수급 스냅샷 4회 ===
-        sched.every().day.at(S.get("supply_snapshot_1", "09:30")).do(
-            self._safe_run, self.phase_supply_snapshot, 1)
-        sched.every().day.at(S.get("supply_snapshot_2", "11:00")).do(
-            self._safe_run, self.phase_supply_snapshot, 2)
-        sched.every().day.at(S.get("supply_snapshot_3", "13:30")).do(
-            self._safe_run, self.phase_supply_snapshot, 3)
-        sched.every().day.at(S.get("supply_snapshot_4", "15:00")).do(
-            self._safe_run, self.phase_supply_snapshot, 4)
-
-        # === 매도 + 장마감 데이터 ===
-        sched.every().day.at(S.get("sell_execution", "15:25")).do(
-            self._safe_run, self.phase_sell_execution)
-        sched.every().day.at(S.get("tick_snapshot", "15:32")).do(
-            self._safe_run, self.phase_tick_snapshot)
-        sched.every().day.at(S.get("candle_archive", "15:35")).do(
-            self._safe_run, self.phase_candle_archive)
-        sched.every().day.at(S.get("close_data_collect", "15:40")).do(
-            self._safe_run, self.phase_close_data_collect)
-        # Phase 8-2 제거 (8-1에서 update_all 통합 호출)
-        sched.every().day.at(S.get("parquet_update", "16:10")).do(
-            self._safe_run, self.phase_parquet_update)
-        sched.every().day.at(S.get("indicator_calc", "16:20")).do(
-            self._safe_run, self.phase_indicator_calc)
-        sched.every().day.at(S.get("data_verify", "16:30")).do(
-            self._safe_run, self.phase_data_verify)
-        sched.every().day.at(S.get("etf_signal", "16:35")).do(
-            self._safe_run, self.phase_etf_signal)
-        sched.every().day.at(S.get("kospi_update", "16:40")).do(
-            self._safe_run, self.phase_kospi_update)
-
-        # === 수급 확정 + 스캔 + 리포트 ===
-        sched.every().day.at(S.get("supply_final", "18:20")).do(
-            self._safe_run, self.phase_supply_final)
-        sched.every().day.at(S.get("relay_check", "18:30")).do(
-            self._safe_run, self.phase_relay_check)
-        sched.every().day.at(S.get("group_relay_check", "18:35")).do(
-            self._safe_run, self.phase_group_relay_check)
-        sched.every().day.at(S.get("evening_scan", "18:40")).do(
-            self._safe_run, self.phase_evening_scan)
-        sched.every().day.at(S.get("evening_briefing", "19:00")).do(
-            self._safe_run, self.phase_evening_briefing)
-        sched.every().day.at(S.get("eod_journal", "19:30")).do(
-            self._safe_run, self.phase_eod_journal)
-
-        # === 일요일 밤 미장 체크 ===
-        sched.every().day.at(S.get("sunday_night_check", "21:00")).do(
-            self._safe_run, self.phase_sunday_night_check)
-
-        logger.info("등록된 스케줄 (%d건):", len(sched.get_jobs()))
-        for job in sched.get_jobs():
-            logger.info("  %s", job)
-
-        # 텔레그램 명령 봇 시작 (백그라운드 스레드)
+        # 텔레그램 명령 봇 시작 (메인 스레드에서 대기)
         try:
             from src.telegram_command_handler import TelegramCommandBot
             self._cmd_bot = TelegramCommandBot(scheduler=self)
             self._cmd_bot.start()
+            logger.info("[스케줄러] 텔레그램 명령봇 활성 — 명령 수신 대기 중")
+            self._notify("텔레그램 명령봇 활성 (스케줄 데몬 OFF, BAT 전용)")
         except Exception as e:
             logger.warning("[스케줄러] 텔레그램 명령 봇 시작 실패: %s", e)
+            sys.exit("텔레그램 명령봇 시작 실패 — 터미널 종료")
 
-        self._notify("v5.0 스케줄러 시작됨 (명령봇 활성)")
-
+        # 스케줄 데몬 대신 텔레그램 봇만 유지하는 대기 루프
+        import time as _time
         while True:
             try:
-                sched.run_pending()
+                _time.sleep(60)
                 from src.use_cases.safety_guard import SafetyGuard
                 guard = SafetyGuard(self.config)
                 if guard.check_reboot_trigger():
