@@ -172,6 +172,57 @@ class FlowxUploader:
             logger.error("[FLOWX] 성적표 업로드 실패: %s", e)
             return False
 
+    # ── 시그널 조회 ──────────────────────────────────
+
+    def fetch_open_signals(self, bot_type: str = "") -> list[dict]:
+        """OPEN 상태 시그널 조회."""
+        if not self.is_active:
+            return []
+        try:
+            q = self.client.table("signals").select("*").eq("status", "OPEN")
+            if bot_type:
+                q = q.eq("bot_type", bot_type)
+            result = q.execute()
+            return result.data or []
+        except Exception as e:
+            logger.error("[FLOWX] 시그널 조회 실패: %s", e)
+            return []
+
+    def fetch_signals_by_period(
+        self, bot_type: str, status_list: list[str], from_date: str
+    ) -> list[dict]:
+        """기간별 시그널 조회 (성적표 집계용)."""
+        if not self.is_active:
+            return []
+        try:
+            q = (
+                self.client.table("signals")
+                .select("*")
+                .in_("status", status_list)
+                .gte("signal_date", from_date)
+            )
+            if bot_type and bot_type != "ALL":
+                q = q.eq("bot_type", bot_type)
+            result = q.execute()
+            return result.data or []
+        except Exception as e:
+            logger.error("[FLOWX] 기간별 시그널 조회 실패: %s", e)
+            return []
+
+    def close_signal(self, signal_id: str, close_data: dict) -> bool:
+        """시그널 종료 (CLOSED/STOPPED)."""
+        if not self.is_active or not signal_id:
+            return False
+        try:
+            self.client.table("signals").update(close_data).eq(
+                "id", signal_id
+            ).execute()
+            logger.info("[FLOWX] 시그널 종료: %s → %s", signal_id[:8], close_data.get("status", "?"))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 시그널 종료 실패: %s", e)
+            return False
+
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:
