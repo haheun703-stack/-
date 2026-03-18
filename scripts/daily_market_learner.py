@@ -366,10 +366,15 @@ def _check_overnight(snapshots: list[dict]) -> dict:
     is_bull = grade in ("STRONG_BULL", "MILD_BULL")
     is_bear = grade in ("STRONG_BEAR", "MILD_BEAR")
     is_neutral = grade == "NEUTRAL"
+    # NEUTRAL은 측정 불가 → 적중률 계산에서 제외 (total=0)
+    if is_neutral:
+        return {
+            "total": 0, "hit": 0, "hit_rate": 0, "avg_ret": avg_ret,
+            "grade": grade, "note": "NEUTRAL 제외 (방향성 판단 없음)",
+        }
     hit = (
         (is_bull and avg_ret > 0)
         or (is_bear and avg_ret < 0)
-        or (is_neutral and abs(avg_ret) < 0.5)  # NEUTRAL: 변동 ±0.5% 이내면 적중
     )
     return {
         "total": 1,

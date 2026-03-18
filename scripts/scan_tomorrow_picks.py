@@ -812,6 +812,15 @@ def calc_integrated_score(
                 m = learning_w[key].get("multiplier", 1.0)
                 s["score"] = s["score"] * m
 
+    # ── 승자 소스 교차 보너스 ──
+    src_names = {s.get("source", "") for s in sources}
+    has_pullback = "눌림목" in src_names
+    has_accumulation = "매집추적" in src_names
+    if has_pullback and has_accumulation:
+        multi_score += 5  # 적중률 TOP2 동시 발생 → 강한 시그널
+    elif has_pullback or has_accumulation:
+        multi_score += 2  # 단독이라도 승자 소스 가산
+
     # ── 축2: 개별 점수 평균 (20점) ──
     avg_src_score = np.mean([s["score"] for s in sources]) if sources else 0
     individual_score = min(avg_src_score / 100 * 20, 20)
@@ -822,7 +831,7 @@ def calc_integrated_score(
     close = 0; price_change = 0; ma20 = 0; ma60 = 0
     stoch_k = 50; stoch_d = 50; trix_gx = False; macd_rising = False
     ret_5d = 0; ret_20d = 0; low_20d = 0
-    trix = 0; trix_signal = 0
+    trix = 0; trix_signal = 0; volume_surge = False
 
     if parquet_data:
         rsi = parquet_data.get("rsi", 50)
@@ -846,6 +855,8 @@ def calc_integrated_score(
         ret_5d = parquet_data.get("ret_5d", 0)
         ret_20d = parquet_data.get("ret_20d", 0)
         low_20d = parquet_data.get("low_20d", 0)
+        volume_surge = (parquet_data.get("vol_z", 0) >= 1.5
+                        or parquet_data.get("volume_surge_ratio", 0) >= 1.5)
 
     # ── 축3: 기술적 지지 (25점) ──
     tech_score = 0
@@ -954,10 +965,20 @@ def calc_integrated_score(
         overheat_penalty += 2
         overheat_flags.append(f"5일 +{ret_5d:.0f}% 급등주의")
 
-    # SAR 하향 + 가격 < SAR → 하락추세 페널티
+    # SAR 하향 + 가격 < SAR → 하락추세 페널티 (반전 근접 시 감면)
     if sar_trend == -1 and 0 < sar_val and close < sar_val:
-        overheat_penalty += 3
-        overheat_flags.append("SAR↓")
+        sar_gap_pct = (sar_val - close) / close * 100 if close > 0 else 99
+        if sar_gap_pct <= 2.0 and adx >= 25:
+            # SAR 반전 근접(2% 이내) + 추세 강도 있음 → 감면
+            overheat_penalty += 1
+            overheat_flags.append(f"SAR↓근접({sar_gap_pct:.1f}%)")
+        elif sar_gap_pct <= 3.0 and volume_surge:
+            # 거래량 급증 시에도 감면
+            overheat_penalty += 1
+            overheat_flags.append(f"SAR↓+거래량({sar_gap_pct:.1f}%)")
+        else:
+            overheat_penalty += 3
+            overheat_flags.append("SAR↓")
 
     overheat_penalty = min(overheat_penalty, 25)
 

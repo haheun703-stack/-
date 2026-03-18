@@ -55,6 +55,9 @@ DEFAULT_TARGETS = [
     {"ticker": "011690", "name": "와이투솔루션", "qty": 200, "desc": "전력인프라"},
     {"ticker": "028050", "name": "삼성E&A", "qty": 60, "desc": "건설 Tier2"},
     {"ticker": "064350", "name": "현대로템", "qty": 5, "desc": "방산 Tier1"},
+    {"ticker": "042660", "name": "한화오션", "qty": 22, "desc": "조선 Tier1"},
+    {"ticker": "329180", "name": "HD한국조선해양", "qty": 4, "desc": "조선 Tier1"},
+    {"ticker": "488080", "name": "TIGER반도체레버", "qty": 62, "desc": "반도체 2x"},
 ]
 
 # ─── 설정 ───

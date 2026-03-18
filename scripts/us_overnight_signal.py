@@ -967,13 +967,13 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     l2_adj = l2.get("pattern_adjustment", 0)
     combined_100 = max(-100.0, min(100.0, ensemble_100 + l2_adj))
 
-    if combined_100 >= 50:
+    if combined_100 >= 40:
         grade = "STRONG_BULL"
-    elif combined_100 >= 20:
+    elif combined_100 >= 10:
         grade = "MILD_BULL"
-    elif combined_100 > -20:
+    elif combined_100 > -10:
         grade = "NEUTRAL"
-    elif combined_100 > -50:
+    elif combined_100 > -40:
         grade = "MILD_BEAR"
     else:
         grade = "STRONG_BEAR"
