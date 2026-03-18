@@ -103,6 +103,75 @@ class FlowxUploader:
             logger.error("[FLOWX] AI 추천 업로드 실패: %s", e)
             return False
 
+    # ── 모닝 브리핑 ──────────────────────────────────
+
+    def upload_morning_briefing(self, briefing: dict) -> bool:
+        """모닝 브리핑 업로드 (UPSERT on date)."""
+        if not self.is_active or not briefing:
+            return False
+        try:
+            import json as _json
+            row = {
+                "date": briefing["date"],
+                "market_status": briefing.get("market_status", "NEUTRAL"),
+                "us_summary": briefing.get("us_summary", ""),
+                "kr_summary": briefing.get("kr_summary", ""),
+                "news_picks": _json.loads(_json.dumps(briefing.get("news_picks", []))),
+                "sector_focus": _json.loads(_json.dumps(briefing.get("sector_focus", []))),
+            }
+            result = self.client.table("morning_briefings").upsert(
+                row, on_conflict="date"
+            ).execute()
+            logger.info("[FLOWX] 모닝 브리핑 업로드: %s", briefing["date"])
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 모닝 브리핑 업로드 실패: %s", e)
+            return False
+
+    # ── 시그널 로깅 ──────────────────────────────────
+
+    def insert_signal(self, signal: dict) -> bool:
+        """시그널 INSERT (STEP 2/3용)."""
+        if not self.is_active or not signal:
+            return False
+        try:
+            result = self.client.table("signals").insert(signal).execute()
+            logger.info("[FLOWX] 시그널 기록: %s %s %s",
+                        signal.get("bot_type", "?"),
+                        signal.get("signal_type", "?"),
+                        signal.get("ticker_name", "?"))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 시그널 기록 실패: %s", e)
+            return False
+
+    def update_signal_performance(self, signal_id: str, updates: dict) -> bool:
+        """시그널 수익률/상태 업데이트 (STEP 2용)."""
+        if not self.is_active or not signal_id:
+            return False
+        try:
+            result = self.client.table("signals").update(updates).eq(
+                "id", signal_id
+            ).execute()
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 시그널 업데이트 실패: %s", e)
+            return False
+
+    def upsert_scoreboard(self, rows: list[dict]) -> bool:
+        """성적표 집계 UPSERT (STEP 2용)."""
+        if not self.is_active or not rows:
+            return False
+        try:
+            result = self.client.table("scoreboard").upsert(
+                rows, on_conflict="bot_type,period"
+            ).execute()
+            logger.info("[FLOWX] 성적표 업로드: %d건", len(rows))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 성적표 업로드 실패: %s", e)
+            return False
+
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:
