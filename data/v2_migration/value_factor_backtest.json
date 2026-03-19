@@ -1,0 +1,290 @@
+{
+  "V1_EBITDA_EV": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 153,
+        "avg_monthly_return": 0.030333,
+        "cumulative_return": 1.7534,
+        "pf": 3.9728,
+        "sharpe": 1.6713
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 153,
+        "avg_monthly_return": 0.029062,
+        "cumulative_return": 1.64,
+        "pf": 4.0272,
+        "sharpe": 1.6316
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 153,
+        "avg_monthly_return": 0.021461,
+        "cumulative_return": 1.0599,
+        "pf": 3.0854,
+        "sharpe": 1.4791
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 153,
+        "avg_monthly_return": 0.015843,
+        "cumulative_return": 0.7091,
+        "pf": 2.5521,
+        "sharpe": 1.3053
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 155,
+        "avg_monthly_return": 0.014003,
+        "cumulative_return": 0.6122,
+        "pf": 2.7258,
+        "sharpe": 1.3148
+      }
+    ],
+    "top_pf": 2.7258,
+    "top_minus_bottom": -0.01633,
+    "monotonic": false,
+    "n_common": 767
+  },
+  "V2_FCF_Yield": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.01309,
+        "cumulative_return": 0.5309,
+        "pf": 2.0353,
+        "sharpe": 0.8976
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.030312,
+        "cumulative_return": 1.7356,
+        "pf": 3.5273,
+        "sharpe": 1.6133
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.039537,
+        "cumulative_return": 2.7619,
+        "pf": 5.0032,
+        "sharpe": 2.0485
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.019401,
+        "cumulative_return": 0.9253,
+        "pf": 2.9295,
+        "sharpe": 1.4267
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 201,
+        "avg_monthly_return": 0.010898,
+        "cumulative_return": 0.4427,
+        "pf": 2.2236,
+        "sharpe": 1.007
+      }
+    ],
+    "top_pf": 2.2236,
+    "top_minus_bottom": -0.002192,
+    "monotonic": false,
+    "n_common": 1001
+  },
+  "V_Composite_BULL": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.029665,
+        "cumulative_return": 1.6849,
+        "pf": 3.7552,
+        "sharpe": 1.6114
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.0266,
+        "cumulative_return": 1.4432,
+        "pf": 3.6603,
+        "sharpe": 1.6329
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.02403,
+        "cumulative_return": 1.231,
+        "pf": 3.1905,
+        "sharpe": 1.4766
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.01917,
+        "cumulative_return": 0.89,
+        "pf": 2.5243,
+        "sharpe": 1.2472
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 201,
+        "avg_monthly_return": 0.013445,
+        "cumulative_return": 0.5813,
+        "pf": 2.6428,
+        "sharpe": 1.2745
+      }
+    ],
+    "top_pf": 2.6428,
+    "top_minus_bottom": -0.01622,
+    "monotonic": false,
+    "n_common": 1001
+  },
+  "V_Composite_CAUTION": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.029927,
+        "cumulative_return": 1.7116,
+        "pf": 3.8045,
+        "sharpe": 1.6357
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.026485,
+        "cumulative_return": 1.4355,
+        "pf": 3.6954,
+        "sharpe": 1.6412
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.023663,
+        "cumulative_return": 1.2016,
+        "pf": 3.1642,
+        "sharpe": 1.4488
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.01923,
+        "cumulative_return": 0.8933,
+        "pf": 2.5224,
+        "sharpe": 1.2461
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 201,
+        "avg_monthly_return": 0.013609,
+        "cumulative_return": 0.5902,
+        "pf": 2.6681,
+        "sharpe": 1.2844
+      }
+    ],
+    "top_pf": 2.6681,
+    "top_minus_bottom": -0.016318,
+    "monotonic": false,
+    "n_common": 1001
+  },
+  "V_Composite_BEAR": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.027068,
+        "cumulative_return": 1.4619,
+        "pf": 3.5195,
+        "sharpe": 1.5267
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.022885,
+        "cumulative_return": 1.1268,
+        "pf": 2.8422,
+        "sharpe": 1.302
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.031878,
+        "cumulative_return": 1.897,
+        "pf": 3.7507,
+        "sharpe": 1.7342
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.018559,
+        "cumulative_return": 0.8714,
+        "pf": 2.8219,
+        "sharpe": 1.3986
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 201,
+        "avg_monthly_return": 0.012648,
+        "cumulative_return": 0.54,
+        "pf": 2.6266,
+        "sharpe": 1.2539
+      }
+    ],
+    "top_pf": 2.6266,
+    "top_minus_bottom": -0.01442,
+    "monotonic": false,
+    "n_common": 1001
+  },
+  "V_Composite_CRISIS": {
+    "quintiles": [
+      {
+        "quintile": 1,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.025759,
+        "cumulative_return": 1.3525,
+        "pf": 3.3407,
+        "sharpe": 1.4602
+      },
+      {
+        "quintile": 2,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.024262,
+        "cumulative_return": 1.2327,
+        "pf": 3.0497,
+        "sharpe": 1.3803
+      },
+      {
+        "quintile": 3,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.03174,
+        "cumulative_return": 1.8783,
+        "pf": 3.7087,
+        "sharpe": 1.7036
+      },
+      {
+        "quintile": 4,
+        "n_stocks": 200,
+        "avg_monthly_return": 0.018532,
+        "cumulative_return": 0.8686,
+        "pf": 2.7736,
+        "sharpe": 1.3865
+      },
+      {
+        "quintile": 5,
+        "n_stocks": 201,
+        "avg_monthly_return": 0.012729,
+        "cumulative_return": 0.544,
+        "pf": 2.6526,
+        "sharpe": 1.251
+      }
+    ],
+    "top_pf": 2.6526,
+    "top_minus_bottom": -0.01303,
+    "monotonic": false,
+    "n_common": 1001
+  }
+}
