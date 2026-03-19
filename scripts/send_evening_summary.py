@@ -333,6 +333,48 @@ def _section_intel() -> list[str]:
 # 메인 빌더
 # ───────────────────────────────────────
 
+def _section_journal() -> list[str]:
+    """MARKET JOURNAL 일간 저널 요약 (2026-03-20 STEP 9)."""
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    jpath = DATA_DIR / "market_journal" / "daily" / f"{today_str}.json"
+    data = _load_json_path(jpath)
+    if not data:
+        return []
+
+    m = data.get("market", {})
+    movers = data.get("movers", {})
+    if not m.get("kospi_close"):
+        return []
+
+    REGIME_E = {"BULL": "🟢", "CAUTION": "🟡", "BEAR": "🟠", "CRISIS": "🔴"}
+    lines = ["\n━━━━ 📊 일간 저널 ━━━━"]
+    re = REGIME_E.get(m.get("regime", ""), "⚪")
+    lines.append(
+        f"  KOSPI {m['kospi_change_pct']:+.1f}% ({m['kospi_close']:,.0f})"
+        f" | KOSDAQ {m['kosdaq_change_pct']:+.1f}%"
+        f" | {re}{m.get('regime', '?')}"
+    )
+    parts = []
+    if m.get("foreign_net_bil"):
+        parts.append(f"외인{m['foreign_net_bil']:+,.0f}억")
+    if m.get("institution_net_bil"):
+        parts.append(f"기관{m['institution_net_bil']:+,.0f}억")
+    if m.get("usd_krw"):
+        parts.append(f"환율{m['usd_krw']:,.0f}")
+    if parts:
+        lines.append(f"  {' | '.join(parts)}")
+
+    # 급등/급락 TOP3
+    if movers.get("급등_top5"):
+        top3 = [f"{s['name']}{s['change_pct']:+.1f}%" for s in movers["급등_top5"][:3]]
+        lines.append(f"  🔥 {' | '.join(top3)}")
+    if movers.get("급락_top5"):
+        bot3 = [f"{s['name']}{s['change_pct']:+.1f}%" for s in movers["급락_top5"][:3]]
+        lines.append(f"  💧 {' | '.join(bot3)}")
+
+    return lines
+
+
 def _section_eye_events() -> list[str]:
     """INTRADAY EYE 장중 감시 이벤트 요약 (2026-03-20 STEP 8)."""
     today_str = datetime.now().strftime("%Y-%m-%d")
@@ -455,6 +497,7 @@ def build_evening_summary(morning: bool = False) -> str:
             "╚══════════════════════╝",
         ]
         # 저녁: 전체 섹션
+        L.extend(_section_journal())
         L.extend(_section_holdings())
         L.extend(_section_eye_events())
         L.extend(_section_dart())

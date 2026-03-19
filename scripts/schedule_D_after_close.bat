@@ -354,6 +354,11 @@ echo [%date% %time%] [23.7/31] FLOWX Supabase 업로드 >> logs\schedule.log
 python -u -X utf8 scripts\upload_flowx.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [23.7/31] FAILED >> logs\schedule.log
 
+REM 23.9단계: Market Journal 일간 기록 + 학습 + 금요일 주간/월말 보고
+echo [%date% %time%] [23.9/31] Market Journal >> logs\schedule.log
+python -u -X utf8 scripts\market_journal.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [23.9/31] FAILED >> logs\schedule.log
+
 REM 24단계: 저녁 통합 텔레그램 (보유종목+DART+추천+밸류체인 → 1건)
 echo [%date% %time%] [24/29] 저녁 통합 리포트 >> logs\schedule.log
 python -u -X utf8 scripts\send_evening_summary.py --send >> logs\schedule.log 2>&1
