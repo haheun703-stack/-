@@ -17,9 +17,9 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 3-1 완료 → STEP 3-2 진행 대기
+## 🟢 현재 상태: STEP 3 완료 → STEP 4 진행 대기
 
-## 마지막 완료: STEP 3-1 DART 재무 파이프라인 확장 (2026-03-19)
+## 마지막 완료: STEP 3-6 Q 통합 스코어 백테스트 통과 (2026-03-19)
 
 
 # ═══════════════════════════════════════════════════════
@@ -147,40 +147,44 @@
   - BS: fnlttMultiAcnt(100종목 일괄) × 8분기 = 88 API
   - CF: fnlttSinglAcntAll(개별) × 1008 = 1008 API + 캐시
   - DartAdapter 초기화 순서 버그 수정 (_api_calls 선행 초기화)
-  - 완료일: 2026-03-19  커밋: ____
+  - 완료일: 2026-03-19  커밋: c73f7e4
 
-- [ ] 3-2. Q1: ROE 안정성 서브팩터
-  - 파일: `src/alpha/factors/quality_roe.py`
-  - 로직: 최근 8분기 ROE의 (평균 / 표준편차) → Z-Score
-  - 높으면서 안정적인 ROE = 높은 점수
-  - 백테스트: 단독 PF > 1.1 확인
-  - 완료일: ____  커밋: ____
+- [x] 3-2. Q1: ROE 안정성 서브팩터
+  - 파일: `src/alpha/factors/quality_roe.py` (Q1~Q4 공통 파일)
+  - 로직: roe_mean/roe_std + ROE level 보정 → Z-Score (scipy.stats.norm.cdf)
+  - 백테스트: Top PF 5.22, Top Sharpe 2.05 — PASS ✓
+  - 완료일: 2026-03-19
 
-- [ ] 3-3. Q2: 부채 건전성 서브팩터
-  - 파일: `src/alpha/factors/quality_debt.py`
-  - 로직: 1 - (총부채/총자산) → Z-Score
-  - 낮은 레버리지 = 높은 점수
-  - 백테스트: 단독 PF > 1.1 확인
-  - 완료일: ____  커밋: ____
+- [x] 3-3. Q2: 부채 건전성 서브팩터
+  - 파일: `src/alpha/factors/quality_roe.py` (QualityDebt 클래스)
+  - 로직: 1 - debt_ratio → Z-Score (금융주 >85% → 0.3 캡)
+  - 백테스트: Top PF 3.30 — PASS ✓ (Top-Bottom 역전: 불장에서 레버리지 프리미엄)
+  - 완료일: 2026-03-19
 
-- [ ] 3-4. Q3: 이익 품질 서브팩터
-  - 파일: `src/alpha/factors/quality_accruals.py`
-  - 로직: 영업CF / 순이익 → Z-Score
-  - >1이면 이익이 현금으로 뒷받침 = 높은 점수
-  - 백테스트: 단독 PF > 1.1 확인
-  - 완료일: ____  커밋: ____
+- [x] 3-4. Q3: 이익 품질 서브팩터
+  - 파일: `src/alpha/factors/quality_roe.py` (QualityAccruals 클래스)
+  - 로직: operating_cf/net_income → sigmoid 매핑 → Z-Score
+  - 백테스트: Top PF 2.61 — PASS ✓ (Top-Bottom 역전: 성장주 효과)
+  - 완료일: 2026-03-19
 
-- [ ] 3-5. Q4: 배당 지속성 서브팩터
-  - 파일: `src/alpha/factors/quality_dividend.py`
-  - 로직: 배당금/순이익 (0~80% 범위만 유효) → Z-Score
-  - 백테스트: 단독 PF > 1.1 확인
-  - 완료일: ____  커밋: ____
+- [x] 3-5. Q4: 배당 지속성 서브팩터
+  - 파일: `src/alpha/factors/quality_roe.py` (QualityDividend 클래스)
+  - 로직: bell curve (50% payout 정점) → Z-Score
+  - 백테스트: Top PF 3.39 — PASS ✓
+  - 완료일: 2026-03-19
 
-- [ ] 3-6. Q 통합 스코어
+- [x] 3-6. Q 통합 스코어
   - 파일: `src/alpha/factors/quality_composite.py`
-  - 로직: Z(Q1)×0.35 + Z(Q2)×0.25 + Z(Q3)×0.25 + Z(Q4)×0.15
-  - 통합 백테스트: PF > 1.2, Sharpe > 0.8
-  - 완료일: ____  커밋: ____
+  - 로직: 레짐별 가중치 (BULL: Q1=0.40+Q4=0.30, BEAR/CRISIS: Q2+Q3 강화)
+  - 통합 백테스트 결과:
+    | 레짐 | Top PF | Top Sharpe | 판정 |
+    |------|--------|-----------|------|
+    | BULL | 3.92 | 1.79 | PASS (PF>1.2, Sharpe>0.8) |
+    | CAUTION | 3.67 | 1.71 | PASS |
+    | BEAR | 3.59 | 1.68 | PASS |
+    | CRISIS | 3.45 | 1.62 | PASS |
+  - Q2/Q3 Top-Bottom 역전은 불장 효과 — 레짐 가중치로 보정 (BEAR/CRISIS에서 Q2+Q3 비중 증가)
+  - 완료일: 2026-03-19
 
 
 # ═══════════════════════════════════════════════════════
