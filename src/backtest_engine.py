@@ -207,10 +207,18 @@ class BacktestEngine:
         # Alpha Engine — L1 REGIME + L4 RISK (Phase I)
         self.alpha = AlphaEngine(self.config)
 
+        # Alpha V2 — 4팩터 통합 스코어러 (STEP 6)
+        self._v2_scorer = None
+        v2_cfg = self.config.get("alpha_v2", {})
+        if v2_cfg.get("enabled", False) and v2_cfg.get("use_unified_scorer", False):
+            from .alpha.factors.unified_scorer import UnifiedV2Scorer
+            self._v2_scorer = UnifiedV2Scorer(self.config)
+
         logger.info(
-            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s, alpha=%s",
+            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s, alpha=%s, v2=%s",
             self.risk_norm_enabled, self.max_hold_days,
             self.tax_rate * 100, self.dynamic_slippage, self.alpha.enabled,
+            self._v2_scorer is not None,
         )
 
         # 상태
@@ -943,6 +951,12 @@ class BacktestEngine:
                 signals = self.signal_engine.scan_universe(
                     data_dict, idx, held_positions=self.positions
                 )
+
+                # V2 4팩터 재채점 (게이트/트리거 유지, 스코어링만 V2)
+                if self._v2_scorer is not None:
+                    signals = self._v2_scorer.rescore_signals(
+                        signals, data_dict, idx, alpha_level,
+                    )
 
                 for sig in signals:
                     self.signal_log.append({

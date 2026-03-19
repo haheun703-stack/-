@@ -2131,6 +2131,7 @@ alpha_engine:
 # ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
 alpha_v2:
   enabled: false                      # true로 바꾸면 V2 활성화
+  use_unified_scorer: false           # true면 4팩터 통합 스코어러 (Phase 2)
   # Phase 1: 기존 5축 레짐별 재가중치 (STEP 1 Sharpe 비율 기반)
   # S5(수급) 0.96 >> S4(모멘텀) 0.53 > S3(OU) 0.47 > S1(에너지) 0.29 > S2(밸류) 0.16
   scorer_weights:

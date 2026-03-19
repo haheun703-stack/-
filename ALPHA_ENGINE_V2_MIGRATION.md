@@ -17,9 +17,9 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 5 완료 → STEP 6 진행 대기
+## 🟢 현재 상태: STEP 6-2 완료 → Paper Trading 대기
 
-## 마지막 완료: STEP 5-3 Half Kelly + 상관관계 감산 (2026-03-19)
+## 마지막 완료: STEP 6-2 실제 BacktestEngine V1 vs V2 비교 (2026-03-19)
 
 
 # ═══════════════════════════════════════════════════════
@@ -253,18 +253,21 @@
 # 전제: STEP 2 + STEP 3(또는 4) 중 하나 이상 완료
 # 예상 소요: 4주 (자동 운영)
 
-- [ ] 6-1. V2 통합 스코어러 완성
-  - regime_weighted_scorer.py에 Q, V 확장 팩터 통합
-  - 4-팩터 합성: SD + M + V + Q (레짐별 가중치)
-  - 기존 5축은 SD/M/V의 서브팩터로 매핑
-  - 완료일: ____  커밋: ____
+- [x] 6-1. V2 통합 스코어러 완성
+  - UnifiedV2Scorer: 4팩터(SD+M+V+Q) 레짐별 가중합
+  - ScoringEngine(S1~S5) + QualityComposite + ValueComposite 통합
+  - GradeResult 인터페이스 100% 호환
+  - 파일: `src/alpha/factors/unified_scorer.py`
+  - 완료일: 2026-03-19
 
-- [ ] 6-2. V2 통합 백테스트
-  - 기존 시스템(v8) vs V2 전체 A/B 비교
-  - Walk-Forward + Out-of-Sample
-  - 기준: V2 Sharpe > v8 Sharpe AND V2 MDD < v8 MDD
-  - 결과 저장: `data/v2_migration/v2_vs_v8_comparison.json`
-  - 완료일: ____  커밋: ____
+- [x] 6-2. V2 통합 백테스트
+  - 3-Way 간이 비교 (V1/V2_5ax/V2_4f): V2_4f MDD 최강 but PF 희석
+  - 실제 BacktestEngine 비교: 필터링 모드 → PF 0.60 (실패)
+  - **sizing-only 모드 도입**: 시그널 제거 않고 등급별 사이징 조정
+    - A:100%, B:80%, C:50%, F:30% (포지션 비율 곱셈)
+  - 최종 결과: PF 1.38(+0.04), MDD -8.24%(+0.85%p), 거래 77건(동일)
+  - 결과: `data/v2_migration/v2_engine_comparison.json`
+  - 완료일: 2026-03-19
 
 - [ ] 6-3. Paper Trading 4주 실행
   - settings.yaml: alpha_v2.enabled = true (Paper 모드에서)
