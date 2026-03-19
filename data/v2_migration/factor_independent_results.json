@@ -1,0 +1,68 @@
+{
+  "S1_energy_exhaustion": {
+    "sharpe": 0.29,
+    "pf": 1.14,
+    "mdd": -9.7,
+    "win_rate": 42.2,
+    "trades": 232,
+    "total_return": 5.48,
+    "avg_hold_days": 11.7,
+    "avg_win": 12.06,
+    "avg_loss": -7.72
+  },
+  "S2_valuation": {
+    "sharpe": 0.16,
+    "pf": 1.01,
+    "mdd": -9.42,
+    "win_rate": 42.5,
+    "trades": 228,
+    "total_return": 2.34,
+    "avg_hold_days": 11.9,
+    "avg_win": 9.09,
+    "avg_loss": -6.66
+  },
+  "S3_ou_reversion": {
+    "sharpe": 0.47,
+    "pf": 1.21,
+    "mdd": -12.79,
+    "win_rate": 47.7,
+    "trades": 220,
+    "total_return": 8.52,
+    "avg_hold_days": 12.3,
+    "avg_win": 8.36,
+    "avg_loss": -6.31
+  },
+  "S4_momentum_decel": {
+    "sharpe": 0.53,
+    "pf": 1.11,
+    "mdd": -15.69,
+    "win_rate": 43.5,
+    "trades": 230,
+    "total_return": 10.22,
+    "avg_hold_days": 11.8,
+    "avg_win": 9.77,
+    "avg_loss": -6.8
+  },
+  "S5_supply_demand": {
+    "sharpe": 0.96,
+    "pf": 1.32,
+    "mdd": -11.26,
+    "win_rate": 46.4,
+    "trades": 224,
+    "total_return": 21.77,
+    "avg_hold_days": 12.1,
+    "avg_win": 10.1,
+    "avg_loss": -6.63
+  },
+  "current_combined": {
+    "sharpe": 0.13,
+    "pf": 1.33,
+    "mdd": -26.17,
+    "win_rate": 41.8,
+    "trades": 141,
+    "total_return": 1.79,
+    "avg_hold_days": 12.2,
+    "avg_win": 12.38,
+    "avg_loss": -6.68
+  }
+}
