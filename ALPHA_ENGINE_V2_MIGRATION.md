@@ -17,7 +17,7 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 7 완료 — LENS LAYER
+## 🟢 현재 상태: STEP 8 진행 중 — INTRADAY EYE
 
 ## 마지막 완료: STEP 6-2 실제 BacktestEngine V1 vs V2 비교 (2026-03-19)
 
@@ -333,6 +333,54 @@
   - V1 vs V2+LENS 비교: 동일 결과 (PF 1.34, MDD -9.09%)
   - LENS asymmetry min_rr이 기존 base_min_rr 이하 → 비파괴적 확인
   - 결과: data/v2_migration/v2_lens_comparison.json
+  - 완료일: 2026-03-20
+
+
+# ═══════════════════════════════════════════════════════
+# STEP 8: INTRADAY EYE — 장중 실시간 위험 감시
+# ═══════════════════════════════════════════════════════
+# 목적: 보유 종목 + KOSPI에 대해 5분 간격 장중 모니터링
+#       이벤트 기반 알림 (0~3건/일), 방어 우선
+# 원칙: brain.py 수정 ❌, signal_engine.py 수정 ❌, 기존 BAT 영향 ❌
+#       독립 스크립트 1개 + Task Scheduler 등록
+# API 부하: 5분당 6~8콜 (KIS rate limit 이내)
+
+- [x] 8-1. IntradayEye 기본 구조 생성
+  - 파일: scripts/intraday_eye.py
+  - IntradayEye 클래스 + main loop (5분 간격, 09:05~15:20)
+  - _KisLite 경량 래퍼 (fetch_price, fetch_balance, fetch_investor)
+  - settings.yaml에 intraday_eye 섹션 추가
+  - 완료일: 2026-03-20
+
+- [x] 8-2. 감지기 구현 (방어 우선)
+  - EYE-02: 급락 감지 (전일종가 대비 -3% 이하)
+  - EYE-05: 시장 급변 (KOSPI ±1.5%)
+  - EYE-01: 수급 반전 (외국인+기관 쌍매도, 최소 1000주)
+  - EYE-03: 거래량 폭발 (당일 > 평균 × 3배)
+  - EYE-04: 이평선 이탈 (간이 판정 -2%)
+  - EYE-06: 목표가 접근 (매입가 대비 +8%)
+  - EYE-07: 신규 기회 (워치리스트 +3%)
+  - 완료일: 2026-03-20
+
+- [x] 8-3. 텔레그램 알림 포맷
+  - _format_alert(): 감지기별 이모지 + 종목명(코드) + 현재가 + 등락률 + 사유
+  - _fire_alert(): 쿨다운 체크 → send_message() 호출
+  - 완료일: 2026-03-20
+
+- [x] 8-4. 쿨다운 로직 + settings.yaml
+  - _Cooldown 클래스: 종목+감지기 키 기반, 30분 기본
+  - settings.yaml intraday_eye 섹션: 7개 감지기 임계값 전체 파라미터화
+  - 완료일: 2026-03-20
+
+- [x] 8-5. BAT 스케줄러 등록
+  - scripts/schedule_K_intraday_eye.bat
+  - PYTHONPATH + sys.path + 주말/공휴일 가드
+  - Task Scheduler: QM_K_IntradayEye, 매일 08:55
+  - 완료일: 2026-03-20
+
+- [x] 8-6. 저녁 요약 EYE 섹션 + 커밋
+  - send_evening_summary.py에 _section_eye_events() 추가
+  - data/eye_events/YYYY-MM-DD.json → 감지기별 집계 + 주요 5건
   - 완료일: 2026-03-20
 
 

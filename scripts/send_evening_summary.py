@@ -333,6 +333,58 @@ def _section_intel() -> list[str]:
 # 메인 빌더
 # ───────────────────────────────────────
 
+def _section_eye_events() -> list[str]:
+    """INTRADAY EYE 장중 감시 이벤트 요약 (2026-03-20 STEP 8)."""
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    eye_path = DATA_DIR / "eye_events" / f"{today_str}.json"
+    data = _load_json_path(eye_path)
+    if not data or not data.get("events"):
+        return []
+
+    events = data["events"]
+    lines = [f"\n━━━━ 👁 장중 감시 ({len(events)}건) ━━━━"]
+
+    # 감지기별 집계
+    eye_counts: dict[str, int] = {}
+    for e in events:
+        eid = e.get("eye_id", "?")
+        eye_counts[eid] = eye_counts.get(eid, 0) + 1
+
+    EYE_NAMES = {
+        "EYE-01": "수급반전", "EYE-02": "급락", "EYE-03": "거래량폭발",
+        "EYE-04": "MA이탈", "EYE-05": "시장급변", "EYE-06": "목표접근",
+        "EYE-07": "신규기회",
+    }
+    EYE_EMOJI = {
+        "EYE-01": "🔄", "EYE-02": "🔻", "EYE-03": "💥",
+        "EYE-04": "📉", "EYE-05": "🌊", "EYE-06": "🎯", "EYE-07": "✨",
+    }
+
+    for eid, cnt in sorted(eye_counts.items()):
+        emoji = EYE_EMOJI.get(eid, "👁")
+        name = EYE_NAMES.get(eid, eid)
+        lines.append(f"  {emoji} {name}: {cnt}건")
+
+    # 주요 이벤트 최대 5건
+    for e in events[:5]:
+        t = e.get("time", "?")
+        emoji = EYE_EMOJI.get(e.get("eye_id", ""), "👁")
+        lines.append(f"    {t} {emoji} {e.get('name', '?')} {e.get('reason', '')[:30]}")
+
+    return lines
+
+
+def _load_json_path(path) -> dict:
+    """Path 객체로 직접 JSON 로드."""
+    try:
+        if path.exists():
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+
 def _section_us_overnight() -> list[str]:
     """US Overnight 시그널 요약 (아침 리포트용)."""
     sig = _load("overnight_signal.json")
@@ -404,6 +456,7 @@ def build_evening_summary(morning: bool = False) -> str:
         ]
         # 저녁: 전체 섹션
         L.extend(_section_holdings())
+        L.extend(_section_eye_events())
         L.extend(_section_dart())
         L.extend(_section_picks())
         L.extend(_section_consensus())
