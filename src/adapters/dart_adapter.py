@@ -44,15 +44,15 @@ class DartAdapter:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # 고유번호 매핑 (ticker → corp_code)
-        self._corp_code_map: dict[str, str] = {}
-        self._load_corp_codes()
+        # API 호출 카운터 (일일 제한 관리) — _load_corp_codes보다 먼저 초기화
+        self._api_calls = 0
 
         # 메모리 캐시 (세션 내 중복 호출 방지)
         self._finstate_cache: dict[str, pd.DataFrame] = {}
 
-        # API 호출 카운터 (일일 제한 관리)
-        self._api_calls = 0
+        # 고유번호 매핑 (ticker → corp_code)
+        self._corp_code_map: dict[str, str] = {}
+        self._load_corp_codes()
 
     @property
     def is_available(self) -> bool:

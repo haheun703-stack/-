@@ -17,9 +17,9 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 2 완료 → STEP 3 진행 대기
+## 🟢 현재 상태: STEP 3-1 완료 → STEP 3-2 진행 대기
 
-## 마지막 완료: STEP 2 레짐별 팩터 가중치 재편 (2026-03-19)
+## 마지막 완료: STEP 3-1 DART 재무 파이프라인 확장 (2026-03-19)
 
 
 # ═══════════════════════════════════════════════════════
@@ -122,7 +122,7 @@
   - 기존 로직은 V2 OFF 시 그대로 유지 (안전한 토글)
   - B등급(0.50) 커트라인: RegimeWeightedScorer 내장 (grade_cutoffs.B=0.50)
   - V2 활성 시: SignalEngine 게이트/트리거 유지 + 스코어링만 V2로 대체
-  - 완료일: 2026-03-19  커밋: ____
+  - 완료일: 2026-03-19  커밋: 4146247
 
 
 # ═══════════════════════════════════════════════════════
@@ -132,18 +132,22 @@
 # 전제: STEP 2 완료 불필요 (병렬 가능 — 데이터 파이프라인이라서)
 # 예상 소요: 2~3 세션
 
-- [ ] 3-1. DART 재무 파이프라인 확장
-  - 파일: `src/adapters/dart_financial_adapter.py` (신규 또는 dart_adapter.py 확장)
+- [x] 3-1. DART 재무 파이프라인 확장
+  - 신규: `src/adapters/dart_financial_adapter.py` (DartFinancialAdapter)
+  - 러너: `scripts/v2_collect_financial_data.py` (--test/--bs-only 플래그)
   - 추가 수집 항목:
-    - 분기별 ROE (최근 8분기)
-    - 총부채 / 총자산
-    - 영업현금흐름 / 순이익 (Accruals Ratio)
-    - 연간 배당금 / 순이익 (배당성향)
-    - EBITDA (V팩터용)
-    - Free Cash Flow (V팩터용)
-  - 저장: `data/v2_migration/financial_quarterly.json` 또는 SQLite 테이블
-  - 유니버스 84종목 전체 대상
-  - 완료일: ____  커밋: ____
+    - 분기별 ROE (최근 8분기, 연환산) ✅
+    - 총부채 / 총자산 ✅
+    - 영업현금흐름 / 순이익 (Accruals Ratio) ✅
+    - 배당금 / 순이익 (배당성향) ✅
+    - EBITDA (영업이익×1.2 근사) ✅
+    - FCF = 영업CF - CAPEX(유형+무형) ✅
+  - 저장: `data/v2_migration/financial_quarterly.json` (2.8MB)
+  - 수집 범위: 1008종목 (우선주 제외, DART 커버 기준)
+  - BS: fnlttMultiAcnt(100종목 일괄) × 8분기 = 88 API
+  - CF: fnlttSinglAcntAll(개별) × 1008 = 1008 API + 캐시
+  - DartAdapter 초기화 순서 버그 수정 (_api_calls 선행 초기화)
+  - 완료일: 2026-03-19  커밋: ____
 
 - [ ] 3-2. Q1: ROE 안정성 서브팩터
   - 파일: `src/alpha/factors/quality_roe.py`
@@ -296,4 +300,6 @@
 | 2026-03-19 | 0 | STEP 0 사전 준비 완료 | ✅ | 브랜치+설정+디렉토리 |
 | 2026-03-19 | 1 | STEP 1 독립 팩터 백테스트 | ✅ | S5 Sharpe 0.96 압도적 1위 |
 | 2026-03-19 | 2 | STEP 2 레짐별 가중치 (2-1~2-3) | ✅ | MDD 2.8pp 개선, PF 1.33 |
+| 2026-03-19 | 2-4 | scan_buy V2 분기 삽입 | ✅ | 커밋 4146247 |
+| 2026-03-19 | 3-1 | DART 재무 파이프라인 확장 | ✅ | 1008종목, BS+CF, 2.8MB |
 | | | | | |
