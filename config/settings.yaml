@@ -2087,3 +2087,43 @@ cpi_tracker:
     cpi_warning: 4.0        # CPI > 4% → WARNING
     cpi_alert: 5.0           # CPI > 5% → ALERT
     unemployment_rising: 0.3 # 3개월 상승폭 > 0.3%p → 상승 추세
+
+# ============================================================
+# Alpha Engine — L1 REGIME + L4 RISK (Phase I)
+# ============================================================
+alpha_engine:
+  enabled: false                      # true로 켜면 Alpha Engine 활성화
+  regime:
+    hysteresis_upgrade_days: 3        # 업그레이드 확인 일수 (다운그레이드는 즉시)
+    params:
+      BULL:
+        max_positions: 5
+        position_pct: 0.20            # 종목당 최대 비중
+        stop_mult: 2.0                # ATR 손절 배수
+        cash_min_pct: 0.25            # 최소 현금 비중
+      CAUTION:
+        max_positions: 3
+        position_pct: 0.15
+        stop_mult: 1.5
+        cash_min_pct: 0.30
+      BEAR:
+        max_positions: 2
+        position_pct: 0.10
+        stop_mult: 1.5
+        cash_min_pct: 0.40
+      CRISIS:
+        max_positions: 0
+        position_pct: 0.00
+        stop_mult: 1.0
+        cash_min_pct: 0.65
+  risk:
+    daily_loss_limit: -0.03           # 일일 -3%
+    weekly_loss_limit: -0.05          # 주간 -5%
+    mdd_circuit_breaker: -0.15        # MDD -15% 서킷브레이커
+    x1_stop_mult: 2.0                # X1 Hard Stop ATR 배수
+    x2_consecutive_days: 3            # X2 수급 이탈 연속일
+    x3_trailing_mult: 2.5            # X3 트레일링 ATR 배수
+    x4_max_hold_days: 10             # X4 시간 청산 기준일
+    x4_min_pnl_pct: 0.02             # X4 시간 청산 최소 수익
+    x5_target_mult: 4.0              # X5 목표 ATR 배수
+    x5_partial_pct: 0.50             # X5 부분청산 비율

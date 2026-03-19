@@ -17,6 +17,7 @@ import pandas as pd
 import yaml
 from tqdm import tqdm
 
+from .alpha.engine import AlphaEngine
 from .position_sizer import PositionSizer
 from .quant_metrics import assess_reliability, calc_full_metrics, print_metrics
 from .regime_gate import RegimeGate
@@ -203,10 +204,13 @@ class BacktestEngine:
         for w in config_warnings:
             logger.warning("Config: %s", w)
 
+        # Alpha Engine — L1 REGIME + L4 RISK (Phase I)
+        self.alpha = AlphaEngine(self.config)
+
         logger.info(
-            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s",
+            "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s, alpha=%s",
             self.risk_norm_enabled, self.max_hold_days,
-            self.tax_rate * 100, self.dynamic_slippage,
+            self.tax_rate * 100, self.dynamic_slippage, self.alpha.enabled,
         )
 
         # 상태
@@ -649,6 +653,29 @@ class BacktestEngine:
             if high > pos.highest_price:
                 pos.highest_price = high
 
+            # Alpha Engine X1-X5 청산 규칙 (Point D)
+            if self.alpha.enabled:
+                alpha_exit = self.alpha.check_exits(
+                    entry_price=pos.entry_price,
+                    current_price=close,
+                    highest_price=pos.highest_price,
+                    atr_value=pos.atr_value,
+                    hold_days=hold_days,
+                    partial_sold=pos.partial_sold,
+                    df=df,
+                    idx=idx,
+                )
+                if alpha_exit is not None and alpha_exit.triggered:
+                    reason = f"alpha_{alpha_exit.rule.name}"
+                    if alpha_exit.partial_pct < 1.0:
+                        sell_shares = max(1, int(pos.shares * alpha_exit.partial_pct))
+                        self._execute_sell(pos, close, date_str, reason, shares=sell_shares)
+                        pos.partial_sold = True
+                    else:
+                        self._execute_sell(pos, close, date_str, reason)
+                    if pos not in self.positions:
+                        continue
+
             # v6.1: 극한 변동성 시 포지션 긴급 관리
             if (hasattr(self.signal_engine, 'extreme_vol_detector')
                     and self.signal_engine.extreme_vol_enabled
@@ -826,6 +853,9 @@ class BacktestEngine:
             if len(candidates) > 0:
                 end_idx = int(candidates[-1]) + 1
 
+        # Alpha Engine 상태 초기화
+        self.alpha.reset(self.initial_capital)
+
         logger.info(f"백테스트 v3.0 시작: {all_dates[start_idx]} ~ {all_dates[min(end_idx-1, len(all_dates)-1)]}")
         logger.info(f"  초기자본: {self.initial_capital:,}원 | 종목수: {len(data_dict)} | 6-Layer Pipeline")
 
@@ -876,6 +906,9 @@ class BacktestEngine:
 
             # ── 2.5 시장 체제 감지 (7D Regime Gate) ──
             regime = self.regime_gate.detect(data_dict, idx)
+
+            # Alpha Engine: 레짐 변환 + 파라미터 추출 (Point B)
+            alpha_level, alpha_params = self.alpha.get_regime(regime)
 
             # 체제 변화 로깅 (매일이 아닌 변화 시점만)
             if not self.regime_log or self.regime_log[-1]["regime"] != regime.regime:
@@ -956,6 +989,30 @@ class BacktestEngine:
                             pos_mult = short_profile.get("position_scale_mult", 1.0)
                             base_stage = sig.get("entry_stage_pct", 0.40)
                             scaled_stage = base_stage * regime.position_scale * pos_mult
+
+                            # Alpha Engine VETO 검사 (Point C)
+                            if self.alpha.enabled:
+                                # 포지션 사이저와 동일한 방식으로 투입금 추정
+                                _stop_dist = sig["atr_value"] * self.atr_stop_mult
+                                if _stop_dist > 0:
+                                    _risk_amt = self.cash * self.position_sizer.max_risk_pct
+                                    _est_shares = int(_risk_amt / _stop_dist)
+                                    _est_shares = int(_est_shares * sig.get("position_ratio", 0.67) * scaled_stage)
+                                    est_investment = _est_shares * next_open
+                                else:
+                                    est_investment = 0
+                                portfolio_value = self._calc_portfolio_value(data_dict, idx)
+                                veto = self.alpha.veto_buy(
+                                    regime_level=alpha_level,
+                                    regime_params=alpha_params,
+                                    capital=portfolio_value,
+                                    cash=self.cash,
+                                    num_positions=mode_a_count,
+                                    investment_amount=est_investment,
+                                )
+                                if veto.vetoed:
+                                    continue
+
                             self._execute_buy(
                                 sig, next_open,
                                 stage_pct=scaled_stage,
@@ -1010,6 +1067,22 @@ class BacktestEngine:
 
             # ── 4. 에쿼티 커브 ──
             portfolio_value = self._calc_portfolio_value(data_dict, idx)
+
+            # Alpha Engine 일일 업데이트
+            if self.alpha.enabled:
+                self.alpha.update_equity(portfolio_value)
+                prev_value = self.equity_curve[-1]["portfolio_value"] if self.equity_curve else self.initial_capital
+                daily_pnl_pct = (portfolio_value - prev_value) / prev_value if prev_value > 0 else 0.0
+                self.alpha.end_of_day(daily_pnl_pct)
+
+                # 포트폴리오 레벨 방어선 체크
+                port_exit = self.alpha.check_portfolio()
+                if port_exit and port_exit.triggered:
+                    logger.warning(
+                        "  Alpha 포트폴리오 방어선: %s (%s)",
+                        port_exit.rule.value, port_exit.details,
+                    )
+
             self.equity_curve.append({
                 "date": date_str,
                 "portfolio_value": round(portfolio_value),
