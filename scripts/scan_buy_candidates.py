@@ -835,6 +835,23 @@ def load_overnight_signal() -> dict:
         return {"composite": "neutral", "score": 0.0, "sector_signals": {}}
 
 
+def _load_lens_context() -> dict | None:
+    """LENS context JSON 로드. 비활성이거나 없으면 None."""
+    import json
+    lens_path = PROJECT_ROOT / "data" / "lens_context.json"
+    if not lens_path.exists():
+        return None
+    try:
+        with open(lens_path, "r", encoding="utf-8") as f:
+            ctx = json.load(f)
+        # 비활성 상태 체크 (lens_enabled=false로 생성된 기본값)
+        if ctx.get("game_board", {}).get("reason", "") == "lens_enabled=false":
+            return None
+        return ctx
+    except Exception:
+        return None
+
+
 def run_pipeline(
     candidates: list[dict],
     use_short_filter: bool = False,
@@ -1084,6 +1101,46 @@ def run_pipeline(
         killed_list.extend(us_killed)
         survivors = [s for s in survivors if not s.get("us_sector_killed")]
         print(f"  US 섹터 Kill: {len(us_killed)}종목 제거")
+
+    # ─── LENS LAYER (STEP 7-6) ─────────────────────────────────────
+    lens_ctx = _load_lens_context()
+    if lens_ctx and lens_ctx.get("game_board", {}).get("mode") != "DEFENSIVE":
+        # mode가 기본값(DEFENSIVE)이 아닌 경우에만 로깅
+        print(f"  LENS: {lens_ctx['game_board']['mode']} | {lens_ctx['game_board'].get('reason','')}")
+
+    if lens_ctx:
+        # 1) Flow Map: hot/cold 섹터 → rank_score 가중
+        flow_adj = lens_ctx.get("flow_map", {}).get("sector_weight_adjustments", {})
+        if flow_adj:
+            for sig in survivors:
+                sig_sector = sig.get("sector", "")
+                for sector_name, mult in flow_adj.items():
+                    if sector_name and sector_name in sig_sector:
+                        sig["v9_rank_score"] = round(sig["v9_rank_score"] * mult, 4)
+                        sig["lens_flow_mult"] = mult
+                        break
+
+        # 2) Asymmetry: min_rr_ratio 미달 → kill
+        min_rr = lens_ctx.get("asymmetry", {}).get("min_rr_ratio", 0)
+        if min_rr > 0:
+            rr_killed = []
+            rr_passed = []
+            for sig in survivors:
+                rr = sig.get("risk_reward", 0)
+                if rr < min_rr:
+                    sig["v9_kill_reasons"] = [f"LENS_RR ({rr:.2f}<{min_rr:.1f})"]
+                    rr_killed.append(sig)
+                else:
+                    rr_passed.append(sig)
+            if rr_killed:
+                killed_list.extend(rr_killed)
+                print(f"  LENS R:R 필터 (min={min_rr:.1f}): {len(rr_killed)}종목 제거")
+            survivors = rr_passed
+
+        # 3) game_board mode → 각 시그널에 태깅
+        for sig in survivors:
+            sig["lens_mode"] = lens_ctx.get("game_board", {}).get("mode", "DEFENSIVE")
+    # ─── END LENS LAYER ──────────────────────────────────────────
 
     # Tags (sd_cross, density 태그 포함)
     for sig in survivors:
@@ -1726,6 +1783,14 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
     regime_emoji = {"BULL": "\u2601", "CAUTION": "\u26a0", "BEAR": "\u274c", "CRISIS": "\U0001f6a8"}.get(kr["regime"], "?")
     lines.append(f"\u2550\u2550 KOSPI \ub808\uc9d0: {kr['regime']} {regime_emoji} ({kr['slots']}\uc2ac\ub86f) \u2550\u2550")
     lines.append(f"  KOSPI {kr['close']:,.0f} | MA20 {kr['ma20']:,.0f} | MA60 {kr['ma60']:,.0f} | RV%ile {kr['rv_pct']:.0%}")
+
+    # -- LENS 모드 --
+    lens_ctx = _load_lens_context()
+    if lens_ctx:
+        gb = lens_ctx.get("game_board", {})
+        asym = lens_ctx.get("asymmetry", {})
+        mode_emoji = {"AGGRESSIVE": "\u2694", "BALANCED": "\u2696", "DEFENSIVE": "\U0001f6e1", "RETREAT": "\U0001f6a8"}.get(gb.get("mode", ""), "")
+        lines.append(f"  LENS: {gb.get('mode','')} {mode_emoji} | R:R\u2265{asym.get('min_rr_ratio',0):.1f}")
     lines.append("")
 
     # -- 스캔 통계 --

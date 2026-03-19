@@ -17,7 +17,7 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 6-2 완료 → Paper Trading 대기
+## 🟢 현재 상태: STEP 7 완료 — LENS LAYER
 
 ## 마지막 완료: STEP 6-2 실제 BacktestEngine V1 vs V2 비교 (2026-03-19)
 
@@ -280,6 +280,60 @@
   - 통과 시: alpha_v2.enabled = true (라이브)
   - 미통과 시: 파라미터 조정 후 2주 추가 Paper
   - 완료일: ____  커밋: ____
+
+
+# ═══════════════════════════════════════════════════════
+# STEP 7: LENS LAYER — BRAIN ↔ SignalEngine 맥락 연결
+# ═══════════════════════════════════════════════════════
+# 목적: BRAIN 출력(brain_decision.json)을 읽어 lens_context.json 생성
+#       → scan_buy + signal_engine에 맥락(섹터가중치, 밸류트랩, R:R)을 전달
+# 원칙: brain.py 수정 ❌, shield.py 수정 ❌, LENS는 독립 레이어
+# 토글: alpha_v2.lens_enabled: false
+
+- [x] 7-1. LensLayer 기본 구조 생성
+  - 파일: src/alpha/lens_layer.py + src/alpha/lens/__init__.py
+  - 입력: brain_decision.json, investor_flow.json
+  - 출력: data/lens_context.json
+  - settings.yaml에 alpha_v2.lens_enabled + lens 설정 추가
+  - 완료일: 2026-03-20
+
+- [x] 7-2. LENS 1: GAME BOARD (공격/방어 모드)
+  - 파일: src/alpha/lens/game_board.py
+  - brain.effective_regime + confidence → AGGRESSIVE/BALANCED/DEFENSIVE/RETREAT
+  - 완료일: 2026-03-20
+
+- [x] 7-3. LENS 2: FLOW MAP (섹터 자금흐름 → 종목 가중치)
+  - 파일: src/alpha/lens/flow_map.py
+  - investor_flow 5일 누적 Z-Score → hot/cold 섹터 판별
+  - hot ×1.2 부스트, cold ×0.8 패널티
+  - 완료일: 2026-03-20
+
+- [x] 7-4. LENS 3: STRUCTURAL VALUE (밸류트랩 필터)
+  - 파일: src/alpha/lens/structural_value.py
+  - 레짐별 min_quality_score + STRICT/NORMAL 밸류에이션 모드
+  - 완료일: 2026-03-20
+
+- [x] 7-5. LENS 4: ASYMMETRY (레짐별 R:R 동적 조정)
+  - 파일: src/alpha/lens/asymmetry.py
+  - BULL:1.2, CAUTION:1.5, PRE_BEAR:1.5, BEAR:2.0, CRISIS:3.0 최소 R:R
+  - 완료일: 2026-03-20
+
+- [x] 7-6. scan_buy_candidates.py에 LENS 연동
+  - lens_context.json 로딩 → flow_map 섹터 가중치 + asymmetry R:R 필터
+  - lens_enabled=false면 기존과 100% 동일
+  - 텔레그램 메시지에 LENS 모드 표시
+  - 완료일: 2026-03-20
+
+- [x] 7-7. BAT 스케줄러에 LENS 실행 추가
+  - BAT-D 11.25단계: BRAIN → LENS → ETF 순서
+  - scripts/run_lens.py 래퍼 생성
+  - 완료일: 2026-03-20
+
+- [x] 7-8. LENS 통합 백테스트
+  - V1 vs V2+LENS 비교: 동일 결과 (PF 1.34, MDD -9.09%)
+  - LENS asymmetry min_rr이 기존 base_min_rr 이하 → 비파괴적 확인
+  - 결과: data/v2_migration/v2_lens_comparison.json
+  - 완료일: 2026-03-20
 
 
 # ═══════════════════════════════════════════════════════

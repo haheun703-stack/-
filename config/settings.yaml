@@ -2154,6 +2154,16 @@ alpha_v2:
     corr_penalty: 0.70                # 고상관 시 사이즈 × 0.7 (30% 감축)
     sector_max_pct: 0.30              # 동일 섹터 합산 비중 상한 30%
     kelly_default: 0.50               # 데이터 부족 시 기본 Kelly 배수
+  # STEP 7: LENS LAYER
+  lens_enabled: false                   # true로 켜면 LENS 활성화
+  lens:
+    flow_map:
+      hot_boost: 1.2                    # hot 섹터 가중치 배수
+      cold_penalty: 0.8                 # cold 섹터 가중치 배수
+      top_n: 3                          # 상위/하위 N개 섹터
+    structural_value:
+      trap_filter_enabled: true         # 밸류트랩 필터 ON/OFF
+    asymmetry: {}                       # 레짐별 오버라이드 (비어있으면 기본값)
   backtest:
     min_trades: 200
     min_pf: 1.3

@@ -214,6 +214,14 @@ class BacktestEngine:
             from .alpha.factors.unified_scorer import UnifiedV2Scorer
             self._v2_scorer = UnifiedV2Scorer(self.config)
 
+        # LENS LAYER — 레짐별 동적 R:R (STEP 7)
+        self._lens_enabled = v2_cfg.get("lens_enabled", False)
+        self._lens_cfg = v2_cfg.get("lens", {})
+        self._lens_asymmetry = None
+        if self._lens_enabled:
+            from .alpha.lens import asymmetry as _lens_asym_mod
+            self._lens_asymmetry = _lens_asym_mod
+
         logger.info(
             "BacktestEngine v6.2: risk_norm=%s, max_hold=%d, tax=%.2f%%, dyn_slip=%s, alpha=%s, v2=%s",
             self.risk_norm_enabled, self.max_hold_days,
@@ -992,6 +1000,16 @@ class BacktestEngine:
                     # 손익비 기준: 공매도 체제에 따라 상향 가능 (v8.3)
                     profile_min_rr = short_profile.get("min_rr_ratio", 1.5)
                     base_min_rr = max(profile_min_rr, 1.5 if sig["trigger_type"] == "impulse" else 2.0)
+
+                    # LENS asymmetry: 레짐별 동적 min_rr 오버라이드 (STEP 7)
+                    if self._lens_asymmetry is not None:
+                        _lens_regime = {
+                            "favorable": "BULL", "neutral": "CAUTION",
+                            "caution": "BEAR", "hostile": "CRISIS",
+                        }.get(regime.regime, "CAUTION")
+                        _asym = self._lens_asymmetry.compute(_lens_regime, self._lens_cfg)
+                        base_min_rr = max(base_min_rr, _asym["min_rr_ratio"])
+
                     if sig["risk_reward_ratio"] < base_min_rr:
                         continue
 

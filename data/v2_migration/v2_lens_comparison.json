@@ -1,0 +1,23 @@
+{
+  "v1": {
+    "label": "V1_baseline",
+    "pf": 1.337,
+    "return": 5.6,
+    "mdd": -9.09,
+    "trades": 77,
+    "win_rate": 31.2,
+    "sharpe": -0.04,
+    "avg_hold": 205
+  },
+  "v2_lens": {
+    "label": "V2_LENS",
+    "pf": 1.337,
+    "return": 5.6,
+    "mdd": -9.09,
+    "trades": 77,
+    "win_rate": 31.2,
+    "sharpe": -0.04,
+    "avg_hold": 205
+  },
+  "verdict": "PASS"
+}
