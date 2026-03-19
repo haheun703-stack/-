@@ -17,9 +17,9 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 4 완료 → STEP 5 진행 대기
+## 🟢 현재 상태: STEP 5 완료 → STEP 6 진행 대기
 
-## 마지막 완료: STEP 4-3 V 통합 스코어 — 기존 S2 대비 164% 개선 (2026-03-19)
+## 마지막 완료: STEP 5-3 Half Kelly + 상관관계 감산 (2026-03-19)
 
 
 # ═══════════════════════════════════════════════════════
@@ -223,27 +223,27 @@
 # 전제: STEP 1 완료 (적중률 데이터 필요)
 # 예상 소요: 1~2 세션
 
-- [ ] 5-1. 상관관계 매트릭스 구축
+- [x] 5-1. 상관관계 매트릭스 구축
   - 파일: `src/alpha/factors/correlation_matrix.py`
-  - 로직: 84종목 60일 롤링 상관계수 매트릭스
-  - 매일 장 마감 후 업데이트 (BAT-D에 추가)
-  - 저장: `data/v2_migration/correlation_matrix.json`
-  - 완료일: ____  커밋: ____
+  - 60일 롤링 상관계수 행렬 (1015종목, ret1 기반)
+  - 검증: 삼성-하이닉스 0.85 (고상관), 삼성-카카오 0.60 (중간)
+  - 저장: `data/v2_migration/correlation_matrix.json` (|corr|>0.3만 저장)
+  - 완료일: 2026-03-19
 
-- [ ] 5-2. 상관관계 기반 사이즈 감산
-  - position_sizer.py 확장 (V2 분기)
-  - if corr(A,B) > 0.7: size_A *= 0.7, size_B *= 0.7
-  - 동일 섹터 합산 비중 30% 상한
-  - 완료일: ____  커밋: ____
+- [x] 5-2. 상관관계 기반 사이즈 감산
+  - 파일: `src/alpha/position_sizer_v2.py` (PositionSizerV2)
+  - 기존 PositionSizer 래핑 — 원본 코드 수정 없음
+  - corr > 0.7: size × 0.7 (30% 감축)
+  - 검증: 삼성(33주) + 하이닉스 진입 → 23주 (corr 0.85 → 감산 적용)
+  - settings.yaml: `sizing.corr_threshold/corr_penalty` 추가
+  - 완료일: 2026-03-19
 
-- [ ] 5-3. Half Kelly 사이징 (선택사항)
-  - position_sizer.py에 Kelly 모드 추가
-  - 전제: signal_accuracy.json의 적중률 데이터 활용
-  - Kelly% = (win_rate × avg_win - loss_rate × avg_loss) / avg_win
-  - Half_Kelly = Kelly% / 2
-  - final_size = min(atr_size, half_kelly_size, regime_max)
-  - alpha_v2.sizing.use_kelly = true로 활성화
-  - 완료일: ____  커밋: ____
+- [x] 5-3. Half Kelly 사이징
+  - 파일: `src/alpha/position_sizer_v2.py` (_calc_half_kelly 메서드)
+  - signal_accuracy.json 적중률 활용
+  - Kelly = (p×b - q) / b, Half Kelly = Kelly / 2, clamped [0.1, 1.0]
+  - use_kelly: false (검증 후 활성화)
+  - 완료일: 2026-03-19
 
 
 # ═══════════════════════════════════════════════════════

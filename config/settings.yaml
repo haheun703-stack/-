@@ -2149,6 +2149,10 @@ alpha_v2:
     stop_atr_mult: 2.0                # ATR x 2 손절
     use_kelly: false                  # Kelly 사이징 (검증 후 활성화)
     use_correlation: false            # 상관관계 감산 (검증 후 활성화)
+    corr_threshold: 0.70              # 이 이상이면 고상관 판정
+    corr_penalty: 0.70                # 고상관 시 사이즈 × 0.7 (30% 감축)
+    sector_max_pct: 0.30              # 동일 섹터 합산 비중 상한 30%
+    kelly_default: 0.50               # 데이터 부족 시 기본 Kelly 배수
   backtest:
     min_trades: 200
     min_pf: 1.3
