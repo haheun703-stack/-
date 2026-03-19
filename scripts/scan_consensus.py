@@ -452,19 +452,19 @@ def run_scan(
         json.dump(result, f, ensure_ascii=False, indent=2, default=_default)
     logger.info(f"저장: {OUTPUT_PATH}")
 
-    # ── 6. 텔레그램 발송 ──
+    # ── 6. 텔레그램 발송 — 비활성화 (2026-03-20) ──
+    # NOTE: 컨센서스 결과는 저녁 통합 리포트로 통합.
+    # text + photo 이중 발송 제거, send_photo()도 telegram_sender.py에 미정의.
     if send_telegram and top_picks:
-        _send_telegram(result)
+        logger.info("컨센서스 텔레그램 개별 발송 비활성화 (저녁 통합 리포트로 통합)")
 
-    # ── 7. HTML 보고서 ──
+    # ── 7. HTML 보고서 (저장만, 텔레그램 미발송) ──
     try:
         from src.consensus_report import generate_consensus_report
         html_path, png_path = generate_consensus_report(result)
         logger.info(f"HTML: {html_path}")
         if png_path:
             logger.info(f"PNG: {png_path}")
-            if send_telegram:
-                _send_telegram_photo(png_path)
     except ImportError:
         logger.debug("consensus_report 미구현 — HTML 스킵")
     except Exception as e:

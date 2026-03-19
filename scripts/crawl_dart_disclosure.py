@@ -247,46 +247,15 @@ def process_disclosures(raw_items: list[dict],
 # ══════════════════════════════════════════
 
 def send_dart_alerts(tier1_items: list[dict], universe_hits: list[dict]):
-    """tier1 공시 + 유니버스 관련 공시 텔레그램 알림"""
-    try:
-        from src.telegram_sender import send_message
-    except ImportError:
-        logger.warning("telegram_sender import 실패 — 알림 스킵")
-        return
+    """tier1 공시 + 유니버스 관련 공시 텔레그램 알림
 
-    # tier1 즉시 알림
-    for item in tier1_items[:5]:  # 최대 5건
-        emoji = "🔴"
-        msg = (
-            f"{emoji} <b>DART 공시 감지 [즉시]</b>\n\n"
-            f"📌 {item['corp_name']} ({item['stock_code']})\n"
-            f"📋 {item['report_nm'][:60]}\n"
-            f"🏷 분류: {item['keyword']}\n"
-            f"📅 {item['rcept_dt']}\n"
-            f"🔗 <a href=\"{item['url']}\">공시 원문</a>\n\n"
-            f"⏰ 뉴스 기사보다 선행 정보입니다."
-        )
-        try:
-            send_message(msg, parse_mode="HTML")
-            logger.info("  텔레그램 전송: [tier1] %s", item["corp_name"])
-        except Exception as e:
-            logger.warning("  텔레그램 전송 실패: %s", e)
-
-    # 유니버스 관련 공시 (tier1이 아닌 것만)
-    tier1_urls = {i["url"] for i in tier1_items}
-    uni_only = [h for h in universe_hits if h["url"] not in tier1_urls]
-    if uni_only:
-        lines = [f"🟡 <b>우리 종목 DART 공시 ({len(uni_only)}건)</b>\n"]
-        for h in uni_only[:8]:
-            lines.append(
-                f"• {h['corp_name']}({h['stock_code']}) — {h['keyword'] or h['tier']}\n"
-                f"  {h['report_nm'][:50]}"
-            )
-        try:
-            send_message("\n".join(lines), parse_mode="HTML")
-            logger.info("  텔레그램 전송: 유니버스 공시 %d건", len(uni_only))
-        except Exception as e:
-            logger.warning("  텔레그램 전송 실패: %s", e)
+    NOTE(2026-03-20): 개별 즉시발송 비활성화.
+    저녁 통합 리포트(send_evening_summary.py)에 DART 섹션이 포함되어
+    이중 발송 방지. --alert 플래그도 어떤 BAT에서도 사용하지 않음.
+    자동매매 재개 후 필요하면 다시 활성화.
+    """
+    logger.info("DART 텔레그램 개별 발송 비활성화 (저녁 통합 리포트로 통합)")
+    return
 
 
 # ══════════════════════════════════════════

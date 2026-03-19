@@ -167,20 +167,8 @@ def main():
             logger.info("텔레그램 알림 전송 완료")
         except Exception as e:
             logger.warning("텔레그램 전송 실패: %s", e)
-    elif not args.no_telegram:
-        # SURGE/INFLOW 없어도 간단 요약은 전송
-        try:
-            from src.telegram_sender import send_message
-            short_msg = (
-                f"🇨🇳 차이나머니 스캔 완료\n"
-                f"스캔: {data['total_stocks']}종목\n"
-                f"SURGE {summary.get('SURGE', 0)} | INFLOW {summary.get('INFLOW', 0)} | "
-                f"WATCH {summary.get('WATCH', 0)}\n"
-                f"특이 시그널 없음"
-            )
-            send_message(short_msg)
-        except Exception as e:
-            logger.warning("텔레그램 전송 실패: %s", e)
+    # NOTE(2026-03-20): "특이 시그널 없음" 노이즈 메시지 제거.
+    # SURGE/INFLOW가 있을 때만 위 블록에서 발송됨.
 
     logger.info("차이나머니 수급 감지 완료")
 

@@ -5,6 +5,7 @@
   - data/picks_history.json        → 보유종목 재판정 결과 (monitor_action)
   - data/dart_disclosures.json     → DART 공시 (tier1 + universe)
   - data/tomorrow_picks.json       → 내일 추천 TOP10
+  - data/consensus_screening.json  → 컨센서스 스크리닝 TOP (2026-03-20 통합)
   - data/value_chain_relay.json    → 밸류체인 발화 현황
   - data/market_intelligence.json  → Perplexity 인텔리전스
 
@@ -151,6 +152,22 @@ def _section_picks() -> list[str]:
     if others:
         _fmt(others, "📌 기타", "⚪")
 
+    return lines
+
+
+def _section_consensus() -> list[str]:
+    """컨센서스 스크리닝 TOP5 요약 (2026-03-20 통합)."""
+    data = _load("consensus_screening.json")
+    if not data:
+        return []
+    picks = data.get("top_picks", [])[:5]
+    if not picks:
+        return []
+    lines = ["\n━━━━ 🏛️ 컨센서스 TOP5 ━━━━"]
+    for p in picks:
+        fper = f"PER{p['forward_per']:.0f}" if p.get("forward_per") else ""
+        upside = f"+{p['upside_pct']:.0f}%" if p.get("upside_pct") else ""
+        lines.append(f"  #{p.get('rank', '?')} {p['name']}({p['ticker']}) {upside} {fper} [{p.get('grade', '')}]")
     return lines
 
 
@@ -389,6 +406,7 @@ def build_evening_summary(morning: bool = False) -> str:
         L.extend(_section_holdings())
         L.extend(_section_dart())
         L.extend(_section_picks())
+        L.extend(_section_consensus())
         L.extend(_section_ai_largecap())
         L.extend(_section_ai_vs_bot())
         L.extend(_section_ai_accuracy())

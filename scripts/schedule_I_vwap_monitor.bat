@@ -34,6 +34,12 @@ if "%IS_HOLIDAY%"=="1" (
     goto :eof
 )
 
+REM ── 자동매매 OFF 기간 VWAP 비활성화 (2026-03-20) ──
+REM 자동매매 재개 시 아래 주석 해제
+REM 이유: dry_run=True 상태에서 5~15건/일 텔레그램 노이즈
+echo [%date% %time%] BAT-I 스킵: 자동매매 OFF 기간 VWAP 비활성화 >> logs\schedule.log
+goto :eof
+
 echo ========================================
 echo [QM-I] VWAP 모니터 (08:55~14:00)
 echo   09:00 개장 갭 분석
