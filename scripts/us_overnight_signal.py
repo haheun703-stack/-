@@ -208,6 +208,24 @@ def _check_special_rules(latest, prev) -> list[dict]:
             "global_position_cap": 0.8,
         })
 
+    # R10: 천연가스 급등 +5%+ → 데이터센터/전력주 관심
+    ung_ret = _ret("ung_ret_1d")
+    if ung_ret >= 0.05:
+        triggered.append({
+            "name": "NATGAS_SPIKE",
+            "desc": f"천연가스(UNG) {ung_ret*100:+.1f}% 급등 -> 전력/데이터센터 관심",
+            "alert_sectors": ["전력", "가스", "데이터센터"],
+        })
+
+    # R11: 우라늄 급등 +5%+ → 원전/SMR 관련주 알림
+    ura_ret = _ret("ura_ret_1d")
+    if ura_ret >= 0.05:
+        triggered.append({
+            "name": "URANIUM_SPIKE",
+            "desc": f"우라늄(URA) {ura_ret*100:+.1f}% 급등 -> 원전/SMR 관심",
+            "alert_sectors": ["원전", "에너지"],
+        })
+
     return triggered
 
 
@@ -771,7 +789,7 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     if gld_ret != 0:
         # 금 상승 = risk-off = 주식 약세 → 역방향
         gold_signal = -max(-0.5, min(0.5, gld_ret * 30))
-        commodity_score += gold_signal * 0.30  # 금 30%
+        commodity_score += gold_signal * 0.20  # 금 20%
         commodity_data["gold"] = {
             "ret_1d": round(gld_ret * 100, 2),
             "ret_5d": round(gld_ret5 * 100, 2),
@@ -786,7 +804,7 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     if uso_ret != 0:
         # 원유 급락 = 수요 둔화 경고
         oil_signal = max(-0.5, min(0.5, uso_ret * 20))
-        commodity_score += oil_signal * 0.25  # 원유 25%
+        commodity_score += oil_signal * 0.20  # 원유 20%
         commodity_data["oil"] = {
             "ret_1d": round(uso_ret * 100, 2),
             "ret_5d": round(uso_ret5 * 100, 2),
@@ -800,7 +818,7 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     copx_above = int(latest.get("copx_above_sma20", 0) or 0)
     if copx_ret != 0:
         copper_signal = max(-0.5, min(0.5, copx_ret * 25))
-        commodity_score += copper_signal * 0.30  # 구리 30%
+        commodity_score += copper_signal * 0.15  # 구리 15%
         commodity_data["copper"] = {
             "ret_1d": round(copx_ret * 100, 2),
             "ret_5d": round(copx_ret5 * 100, 2),
@@ -817,7 +835,34 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
             "ret_5d": round(slv_ret5 * 100, 2),
             "signal": "up" if slv_ret > 0.005 else ("down" if slv_ret < -0.005 else "neutral"),
         }
-        commodity_score += max(-0.3, min(0.3, slv_ret * 15)) * 0.15  # 은 15%
+        commodity_score += max(-0.3, min(0.3, slv_ret * 15)) * 0.10  # 은 10%
+
+    # 천연가스(UNG): 데이터센터 전력 수요 → 에너지 전환 지표
+    ung_ret = float(latest.get("ung_ret_1d", 0) or 0)
+    ung_ret5 = float(latest.get("ung_ret_5d", 0) or 0)
+    ung_above = int(latest.get("ung_above_sma20", 0) or 0)
+    if ung_ret != 0:
+        ung_signal = max(-0.5, min(0.5, ung_ret * 20))
+        commodity_score += ung_signal * 0.20  # 천연가스 20%
+        commodity_data["natgas"] = {
+            "ret_1d": round(ung_ret * 100, 2),
+            "ret_5d": round(ung_ret5 * 100, 2),
+            "above_sma20": bool(ung_above),
+            "signal": "demand_up" if ung_ret > 0.01 else ("demand_down" if ung_ret < -0.01 else "neutral"),
+        }
+
+    # 우라늄(URA): 원전/SMR 수요
+    ura_ret = float(latest.get("ura_ret_1d", 0) or 0)
+    ura_ret5 = float(latest.get("ura_ret_5d", 0) or 0)
+    ura_above = int(latest.get("ura_above_sma20", 0) or 0)
+    if ura_ret != 0:
+        commodity_data["uranium"] = {
+            "ret_1d": round(ura_ret * 100, 2),
+            "ret_5d": round(ura_ret5 * 100, 2),
+            "above_sma20": bool(ura_above),
+            "signal": "demand_up" if ura_ret > 0.01 else ("demand_down" if ura_ret < -0.01 else "neutral"),
+        }
+        commodity_score += max(-0.3, min(0.3, ura_ret * 15)) * 0.15  # 우라늄 15%
 
     # 구리/금 비율 (경기 확장/수축 판단)
     cg_ratio = float(latest.get("copper_gold_ratio", 0) or 0)
@@ -994,7 +1039,8 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
 
     # 원자재 요약
     commod_parts = []
-    for key, sym in [("gold", "Au"), ("oil", "Oil"), ("copper", "Cu")]:
+    for key, sym in [("gold", "Au"), ("oil", "Oil"), ("copper", "Cu"),
+                     ("natgas", "NG"), ("uranium", "U")]:
         c = signal.get("commodities", {}).get(key, {})
         if c:
             commod_parts.append(f"{sym}{c['ret_1d']:+.1f}%")
@@ -1079,7 +1125,8 @@ def format_telegram_message(signal: dict) -> str:
     if commod:
         lines.append("\n[ 원자재 ]")
         for key, label in [("gold", "금(GLD)"), ("silver", "은(SLV)"),
-                           ("oil", "유(USO)"), ("copper", "구리(COPX)")]:
+                           ("oil", "유(USO)"), ("copper", "구리(COPX)"),
+                           ("natgas", "가스(UNG)"), ("uranium", "우라늄(URA)")]:
             c = commod.get(key, {})
             if c:
                 sma = ">" if c.get("above_sma20") else "<"

@@ -64,11 +64,15 @@ TICKERS = {
     "^VIX": "VIX",
     "TLT": "Treasury20Y",
     "UUP": "DollarIndex",
-    # 원자재 (금/은/원유/구리)
+    # 원자재 (금/은/원유/구리/천연가스/우라늄/농산물/리튬)
     "GLD": "Gold",
     "SLV": "Silver",
     "USO": "WTI_Oil",
     "COPX": "Copper_Miners",
+    "UNG": "NaturalGas",
+    "URA": "Uranium",
+    "DBA": "Agriculture",
+    "LIT": "Lithium",
     # 한국 프록시
     "EWY": "KoreaETF",
     # ── NIGHTWATCH 기존 ──
@@ -129,8 +133,8 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "tlt_close" in df.columns:
         df["tlt_ret_1d"] = df["tlt_close"].pct_change()
 
-    # 원자재 파생 지표 (금/은/원유/구리)
-    for prefix in ["gld", "slv", "uso", "copx"]:
+    # 원자재 파생 지표 (금/은/원유/구리/천연가스/우라늄/농산물/리튬)
+    for prefix in ["gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit"]:
         col = f"{prefix}_close"
         if col in df.columns:
             df[f"{prefix}_ret_1d"] = df[col].pct_change()
@@ -186,7 +190,7 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "spy_close" in df.columns:
         spy_ret = df["spy_close"].pct_change(5)
         for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx", "ewy",
-                        "gld", "slv", "uso", "copx"]:
+                        "gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit"]:
             col = f"{prefix}_close"
             if col in df.columns:
                 sector_ret = df[col].pct_change(5)

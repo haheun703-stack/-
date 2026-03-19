@@ -585,7 +585,7 @@ live_trading:
     max_single_pct: 0.40            # 단일 종목 최대 40%
     max_portfolio_risk_pct: 0.06
     initial_capital: 30000000       # 3천만원 (사용자 설정)
-    cash_reserve_pct: 0.20          # 서보성 원칙: 현금 비중 20% 항상 유보
+    cash_reserve_pct: 0.25          # 서보성 원칙: 현금 비중 25% 항상 유보 (3~4년 주기 폭락 대비)
     # 분할매수 비율 (서보성 원칙: 1회 올인 금지)
     split_buy:
       entry_1st: 0.50              # 1차 진입: 배정 비중의 50%
@@ -2059,3 +2059,31 @@ flowx:
   tiers:
     free_picks_limit: 2             # FREE 유저 추천 종목 수
     free_scoreboard: "hit_rate_only"  # FREE 유저 성적표 범위
+
+# ============================================================
+# Master Brain — 전체 시스템 통합 두뇌 (30+ 소스 → 추론 체인)
+# ============================================================
+master_brain:
+  enabled: true
+  model: "claude-opus-4-20250514"
+  max_tokens: 16000
+  max_reasoning_chains: 8
+  output_path: "data/master_brain_judgment.json"
+  telegram_notify: true
+
+# ============================================================
+# CPI / 인플레이션 트래커 (FRED API)
+# ============================================================
+cpi_tracker:
+  enabled: true
+  fred_api_key_env: "FRED_API_KEY"
+  output_path: "data/macro/cpi_data.json"
+  series:
+    cpi: "CPIAUCSL"
+    core_pce: "PCEPILFE"
+    unemployment: "UNRATE"
+    fed_funds: "FEDFUNDS"
+  stagflation:
+    cpi_warning: 4.0        # CPI > 4% → WARNING
+    cpi_alert: 5.0           # CPI > 5% → ALERT
+    unemployment_rising: 0.3 # 3개월 상승폭 > 0.3%p → 상승 추세

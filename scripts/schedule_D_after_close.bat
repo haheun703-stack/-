@@ -257,6 +257,11 @@ echo [%date% %time%] [19.6/29] 보유종목 재판정 >> logs\schedule.log
 python -u -X utf8 scripts\position_monitor.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [19.6/29] FAILED >> logs\schedule.log
 
+REM 19.65단계: CPI/매크로 데이터 갱신 (FRED API — 월간, 매일 호출해도 무방)
+echo [%date% %time%] [19.65/31] CPI 트래커 >> logs\schedule.log
+python -u -X utf8 scripts\update_cpi_data.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [19.65/31] FAILED (CPI) >> logs\schedule.log
+
 REM 19.7단계: Perplexity 시장 인텔리전스 (전략E — US 이벤트→KR 파급 분석)
 echo [%date% %time%] [19.7/29] Perplexity 인텔리전스 >> logs\schedule.log
 python -u -X utf8 scripts\perplexity_market_intel.py >> logs\schedule.log 2>&1
@@ -296,6 +301,11 @@ REM 20.8단계: 3단 예측 체인 (유럽장 DAX 30분 → 미국장 방향 선
 echo [%date% %time%] [20.8/29] 3단 예측 체인 >> logs\schedule.log
 python -u -X utf8 scripts\run_predict_chain.py --send --blind >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [20.8/29] FAILED >> logs\schedule.log
+
+REM 20.9단계: Master Brain 통합 판단 (30+ 소스 → Claude Opus 추론 체인)
+echo [%date% %time%] [20.9/31] Master Brain 통합 판단 >> logs\schedule.log
+python -u -X utf8 scripts\run_master_brain.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [20.9/31] FAILED (Master Brain) >> logs\schedule.log
 
 REM ══════════════════════════════════════════════
 REM  PHASE 6: 아카이브 + 보고서 (~1분)

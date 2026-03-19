@@ -1,0 +1,121 @@
+{
+  "date": "2024-12-20",
+  "market_regime": {
+    "overall": "BEAR",
+    "kospi_regime": "CAUTION",
+    "us_overnight": "STRONG_BEAR",
+    "stagflation": "NONE",
+    "summary": "Fed 매파전환+원달러 1505원+중동리스크로 극도의 리스크오프"
+  },
+  "reasoning_chains": [
+    {
+      "chain_id": 1,
+      "cause": "Fed 금리 동결 장기화 시사 + 매파적 톤",
+      "sector_impact": "기술주/성장주 급락, 달러 강세로 신흥국 통화 약세",
+      "action": "KODEX 인버스 매수 + 현금 비중 40% 확대",
+      "confidence": 0.85,
+      "timeframe": "단기(1주)"
+    },
+    {
+      "chain_id": 2,
+      "cause": "중동 전쟁 확대 + 호르무즈 해협 리스크",
+      "sector_impact": "유가 급등(브렌트유 $100+ 가능), 정유/에너지 수혜",
+      "action": "S-Oil, GS 매수 + USO(원유 ETF) 소량 편입",
+      "confidence": 0.8,
+      "timeframe": "중기(1~3개월)"
+    },
+    {
+      "chain_id": 3,
+      "cause": "원달러 1505원 돌파 + 환율 급등",
+      "sector_impact": "수입원가 부담 확대, 내수주 부담 + 수출주 혼조",
+      "action": "KODEX 미국달러선물 편입 + 내수주 회피",
+      "confidence": 0.75,
+      "timeframe": "단기(1주)"
+    },
+    {
+      "chain_id": 4,
+      "cause": "VIX 25 돌파 + 리스크오프 심화",
+      "sector_impact": "변동성 급증, 안전자산 선호 확대",
+      "action": "KODEX 골드선물 편입 + 채권형 ETF 검토",
+      "confidence": 0.7,
+      "timeframe": "중기(1~3개월)"
+    }
+  ],
+  "unified_picks": {
+    "individual_stocks": [
+      {
+        "ticker": "010950",
+        "name": "S-Oil",
+        "action": "BUY",
+        "reason": "중동 리스크로 유가 급등, 정유 마진 개선 기대",
+        "chain_ref": 2
+      },
+      {
+        "ticker": "078930",
+        "name": "GS",
+        "action": "BUY",
+        "reason": "정유/에너지 자회사 보유, 유가 상승 수혜",
+        "chain_ref": 2
+      }
+    ],
+    "sector_etf": [
+      {
+        "ticker": "251340",
+        "name": "KODEX 코스닥150선물인버스",
+        "action": "BUY",
+        "reason": "PRE_BEAR 레짐 진입, 기술주 약세 방어",
+        "chain_ref": 1
+      }
+    ],
+    "leverage_inverse": [
+      {
+        "ticker": "114800",
+        "name": "KODEX 인버스",
+        "action": "BUY",
+        "reason": "US STRONG_BEAR + Fed 매파전환",
+        "chain_ref": 1
+      }
+    ],
+    "commodity_etf": [
+      {
+        "ticker": "USO",
+        "name": "United States Oil Fund",
+        "action": "BUY",
+        "reason": "호르무즈 해협 리스크, 유가 $100+ 가능성",
+        "chain_ref": 2
+      },
+      {
+        "ticker": "132030",
+        "name": "KODEX 골드선물",
+        "action": "BUY",
+        "reason": "안전자산 수요 증가, 달러 강세에도 금 수요 지속",
+        "chain_ref": 4
+      }
+    ],
+    "index_etf": [
+      {
+        "ticker": "261240",
+        "name": "KODEX 미국달러선물",
+        "action": "BUY",
+        "reason": "원달러 1505원 돌파, 추가 약세 방어",
+        "chain_ref": 3
+      }
+    ]
+  },
+  "cash_strategy": {
+    "target_cash_pct": 40,
+    "current_cash_pct": 0,
+    "action": "현보유 종목 정리 후 현금 40% 확보 긴급",
+    "reason": "BEAR 레짐 진입 + Fed 매파전환으로 추가 하락 대비"
+  },
+  "risk_alerts": [
+    "Fed 금리 동결 장기화로 글로벌 유동성 급격 축소",
+    "원달러 1505원 돌파, 1520원까지 상승 가능성",
+    "중동 전쟁 확대 시 유가 $130+ 급등 시나리오",
+    "VIX 25 돌파로 변동성 장세 진입",
+    "현재 현금 0%로 극도로 위험한 상황"
+  ],
+  "daily_summary": "Fed 매파전환+원달러 1505원+중동리스크 3중고. 인버스ETF+현금 40%+정유주로 방어전략 필수",
+  "model": "claude-opus-4-20250514",
+  "generated_at": "2026-03-19 20:25"
+}
