@@ -2131,6 +2131,14 @@ alpha_engine:
 # ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
 alpha_v2:
   enabled: false                      # true로 바꾸면 V2 활성화
+  # Phase 1: 기존 5축 레짐별 재가중치 (STEP 1 Sharpe 비율 기반)
+  # S5(수급) 0.96 >> S4(모멘텀) 0.53 > S3(OU) 0.47 > S1(에너지) 0.29 > S2(밸류) 0.16
+  scorer_weights:
+    bull:     { S1: 0.12, S2: 0.08, S3: 0.15, S4: 0.25, S5: 0.40 }
+    caution:  { S1: 0.12, S2: 0.07, S3: 0.19, S4: 0.22, S5: 0.40 }
+    bear:     { S1: 0.25, S2: 0.10, S3: 0.30, S4: 0.10, S5: 0.25 }
+    crisis:   { S1: 0.00, S2: 0.00, S3: 0.00, S4: 0.00, S5: 0.00 }
+  # Phase 2: 최종 4팩터 (Q/V 팩터 구축 후 전환 — STEP 3~4 완료 필요)
   factor_weights:
     bull:    { sd: 0.30, momentum: 0.35, value: 0.15, quality: 0.20 }
     caution: { sd: 0.25, momentum: 0.20, value: 0.25, quality: 0.30 }
