@@ -1269,6 +1269,19 @@ def scan_all(
     engine = SignalEngine("config/settings.yaml")
     scanner = MarketSignalScanner()
 
+    # V2 레짐별 스코어러 (alpha_v2.enabled 시)
+    _v2_enabled = engine.config.get("alpha_v2", {}).get("enabled", False)
+    _v2_scorer = None
+    _v2_regime_level = None
+    if _v2_enabled:
+        from src.alpha.factors.regime_weighted_scorer import RegimeWeightedScorer
+        from src.alpha.regime import AlphaRegime
+
+        _v2_scorer = RegimeWeightedScorer(engine.config)
+        _alpha_regime = AlphaRegime(engine.config)
+        _v2_regime_level = _alpha_regime.detect_live()
+        print(f"  V2 스코어러 활성: 레짐={_v2_regime_level.value}")
+
     # FundamentalEngine (Earnings Momentum용)
     _fundamental_engine = None
     try:
@@ -1332,6 +1345,15 @@ def scan_all(
             continue
 
         grade = result["grade"]
+
+        # V2: 레짐별 가중합으로 재스코어링 (게이트/트리거는 SignalEngine 유지)
+        if _v2_enabled and _v2_scorer is not None:
+            _row_v2 = df.iloc[idx]
+            _v2_gr = _v2_scorer.score(_row_v2, _v2_regime_level)
+            grade = _v2_gr.grade
+            result["zone_score"] = _v2_gr.total_score
+            result["grade"] = grade
+
         stats["passed_pipeline"] += 1
 
         trigger_type = result.get("trigger_type", "none")
