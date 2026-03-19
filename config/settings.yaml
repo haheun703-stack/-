@@ -2127,3 +2127,22 @@ alpha_engine:
     x4_min_pnl_pct: 0.02             # X4 시간 청산 최소 수익
     x5_target_mult: 4.0              # X5 목표 ATR 배수
     x5_partial_pct: 0.50             # X5 부분청산 비율
+
+# ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
+alpha_v2:
+  enabled: false                      # true로 바꾸면 V2 활성화
+  factor_weights:
+    bull:    { sd: 0.30, momentum: 0.35, value: 0.15, quality: 0.20 }
+    caution: { sd: 0.25, momentum: 0.20, value: 0.25, quality: 0.30 }
+    bear:    { sd: 0.15, momentum: 0.10, value: 0.40, quality: 0.35 }
+    crisis:  { sd: 0.00, momentum: 0.00, value: 0.00, quality: 0.00 }
+  sizing:
+    risk_pct: 0.01                    # 거래당 1% 리스크
+    stop_atr_mult: 2.0                # ATR x 2 손절
+    use_kelly: false                  # Kelly 사이징 (검증 후 활성화)
+    use_correlation: false            # 상관관계 감산 (검증 후 활성화)
+  backtest:
+    min_trades: 200
+    min_pf: 1.3
+    min_sharpe: 1.0
+    max_mdd: -0.15
