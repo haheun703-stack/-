@@ -43,18 +43,65 @@ class ExecutionAlpha:
         """VWAP 기반 동적 할인율로 진입가 계산.
 
         Phase 1: 전일 VWAP vs 전일종가 비교 → 할인율 조정
-          VWAP > 종가 → 매수 우위 → 할인 축소 (-0.3%)
-          VWAP < 종가 → 매도 압력 → 할인 확대 (-0.8%)
-
-        Phase 3+: 장중 VWAP 대비 현재가 위치
-          현재가 < VWAP → AGGRESSIVE (현재가 근처 지정가)
-          현재가 ≈ VWAP → LIMIT_AT_VWAP
-          현재가 > VWAP+0.5% → WAIT
-          현재가 > VWAP+1% → SKIP
+          VWAP > 종가 → 매수 우위 (장중 매수세 강) → 할인 축소
+          VWAP < 종가 → 매도 압력 (후반 올린 것) → 할인 확대
         """
-        # STEP 3에서 구현
+        if not self.dynamic_cfg.get("enabled", True):
+            base_discount = self.dynamic_cfg.get("base_discount_pct", 0.5)
+            return int(prev_close * (1 - base_discount / 100))
+
         base_discount = self.dynamic_cfg.get("base_discount_pct", 0.5)
-        return int(prev_close * (1 - base_discount / 100))
+        adj_range = self.dynamic_cfg.get("vwap_adj_range_pct", 0.3)
+
+        # 전일 VWAP 조회 (intraday_adapter 없으면 기본값)
+        prev_vwap = self._fetch_prev_day_vwap(ticker)
+
+        if prev_vwap <= 0:
+            # 데이터 없으면 기본 할인율
+            discount = base_discount
+        elif prev_vwap > prev_close:
+            # VWAP > 종가: 장중 매수 우위 → 할인 축소 (base - adj)
+            discount = base_discount - adj_range
+        elif prev_vwap < prev_close * 0.995:
+            # VWAP < 종가-0.5%: 후반 끌어올림 → 할인 확대 (base + adj)
+            discount = base_discount + adj_range
+        else:
+            # VWAP ≈ 종가: 기본
+            discount = base_discount
+
+        # 할인율 클램핑 (0.1% ~ 1.0%)
+        discount = max(0.1, min(1.0, discount))
+
+        entry_price = int(prev_close * (1 - discount / 100))
+        logger.info(
+            "EX-1 동적진입: %s — 전일VWAP=%.0f, 종가=%d, 할인=%.1f%% → %d원",
+            ticker, prev_vwap, prev_close, discount, entry_price,
+        )
+        return entry_price
+
+    def _fetch_prev_day_vwap(self, ticker: str) -> float:
+        """전일 1분봉으로 VWAP 계산."""
+        if not self.intraday:
+            return 0.0
+        try:
+            candles = self.intraday.fetch_full_day_1m_candles(ticker)
+            if not candles:
+                return 0.0
+            cum_tp_vol = 0.0
+            cum_vol = 0
+            for cd in candles:
+                h = cd.get("high", 0)
+                low = cd.get("low", 0)
+                cl = cd.get("close", 0)
+                v = cd.get("volume", 0)
+                if h > 0 and low > 0 and cl > 0 and v > 0:
+                    typical = (h + low + cl) / 3.0
+                    cum_tp_vol += typical * v
+                    cum_vol += v
+            return cum_tp_vol / cum_vol if cum_vol > 0 else 0.0
+        except Exception as e:
+            logger.warning("EX-1 전일VWAP 조회 실패: %s — %s", ticker, e)
+            return 0.0
 
     def calc_vwap_price_limit(self, vwap: float) -> int:
         """Phase 4: VWAP 기반 가격 상한 (이 이상이면 정정 보류)."""

@@ -531,16 +531,27 @@ class SmartEntryEngine:
                 continue
 
             # 지정가 = 전일종가 × (1 - discount)
-            # NXT 프리마켓 가격 조정 반영
-            nxt_adj = self._nxt_adjustments.get(c.ticker, 0)
-            effective_discount = self.initial_discount - nxt_adj  # 갭업이면 할인 축소
-            order_price = self._tick_round(
-                int(c.prev_close * (1 - effective_discount / 100)),
-                c.prev_close,
-            )
+            # EX-1: ExecutionAlpha 동적 진입가 (활성화 시)
+            if self.exec_alpha:
+                nxt_adj = self._nxt_adjustments.get(c.ticker, 0)
+                base_price = self.exec_alpha.calc_dynamic_entry_price(
+                    c.prev_close, c.ticker, phase="1"
+                )
+                # NXT 조정은 별도 반영
+                if nxt_adj != 0:
+                    base_price = int(base_price * (1 + nxt_adj / 100))
+                order_price = self._tick_round(base_price, c.prev_close)
+            else:
+                # 기존 로직: NXT 프리마켓 가격 조정 반영
+                nxt_adj = self._nxt_adjustments.get(c.ticker, 0)
+                effective_discount = self.initial_discount - nxt_adj
+                order_price = self._tick_round(
+                    int(c.prev_close * (1 - effective_discount / 100)),
+                    c.prev_close,
+                )
             if nxt_adj != 0:
-                logger.info("[NXT] %s 가격 조정: 할인 %.1f%% → %.1f%% (NXT %+.1f%%)",
-                            c.name, self.initial_discount, effective_discount, nxt_adj)
+                logger.info("[NXT] %s 가격 조정: NXT %+.1f%% 반영 → %d원",
+                            c.name, nxt_adj, order_price)
             c.order_price = order_price
             c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
@@ -1150,6 +1161,16 @@ class SmartEntryEngine:
 
         # 원칙: 전일종가보다 싸게 (또는 같게)
         max_price = c.prev_close
+
+        # EX-1: VWAP 가격상한 — VWAP+premium% 이상이면 정정 보류
+        if self.exec_alpha and c.vwap > 0:
+            vwap_limit = self.exec_alpha.calc_vwap_price_limit(c.vwap)
+            if c.current_price > vwap_limit:
+                logger.info(
+                    "[EX-1] %s 정정 보류: 현재가 %d > VWAP상한 %d (VWAP=%.0f)",
+                    c.name, c.current_price, vwap_limit, c.vwap,
+                )
+                return c.order_price  # 기존 주문가 유지
 
         # 갭다운/플랫: 현재가 -1틱 (전일종가 이하 보장)
         if c.gap_type in (GapType.GAP_DOWN, GapType.FLAT):
