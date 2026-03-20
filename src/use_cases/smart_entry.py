@@ -738,6 +738,23 @@ class SmartEntryEngine:
                     f"갭 +{c.gap_pct:.1f}% → 호가({ob_score}) + 캔들({candle_score}) + 수급({flow_score}) = {total}"
                 )
 
+            # ── EX-2: 스프레드 분석 가감 ──
+            spread_adj = 0
+            if self.exec_alpha:
+                try:
+                    ob_raw = self.intraday.fetch_orderbook(c.ticker)
+                    spread = self.exec_alpha.analyze_spread(ob_raw, c.prev_close)
+                    c.spread_bps = spread["spread_bps"]
+                    c.spread_timing = spread["timing"]
+                    spread_adj = spread["score_adj"]
+                    if spread_adj != 0:
+                        total = max(0, min(30, total + spread_adj))
+                        c.decision_reasons.append(
+                            f"[스프레드] {spread['spread_bps']:.0f}bps → {spread['timing']} ({spread_adj:+d}점)"
+                        )
+                except Exception as e:
+                    logger.debug("[EX-2] %s 스프레드 분석 스킵: %s", c.ticker, e)
+
             # ── [채널 2] AI 두뇌 보정 ──
             if self.ai_adj_enabled:
                 ai_adj = self._get_ai_brain_adjustment(c.ticker)

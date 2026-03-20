@@ -113,20 +113,73 @@ class ExecutionAlpha:
     def analyze_spread(self, orderbook: dict, reference_price: int) -> dict:
         """기존 fetch_orderbook() 결과를 재활용하여 스프레드 분석.
 
+        추가 API 호출 0 — _analyze_orderbook()에서 이미 가져온 데이터 활용.
+
         Returns:
             {
                 "spread_bps": float,        # 스프레드 (basis points)
                 "depth_ratio": float,       # 매수/매도 잔량비
                 "timing": str,              # "aggressive" / "normal" / "patient"
                 "recommended_price": int,   # 추천 주문가
+                "score_adj": int,           # 점수 가감 (-2 ~ +2)
             }
         """
-        # STEP 4에서 구현
+        if not self.spread_cfg.get("enabled", True):
+            return {
+                "spread_bps": 0.0,
+                "depth_ratio": 1.0,
+                "timing": "normal",
+                "recommended_price": reference_price,
+                "score_adj": 0,
+            }
+
+        asks = orderbook.get("asks", [])
+        bids = orderbook.get("bids", [])
+        depth_levels = self.spread_cfg.get("depth_levels", 3)
+
+        # 스프레드 계산: 최우선 매도호가 - 최우선 매수호가
+        if asks and bids:
+            best_ask = asks[0].get("price", 0)
+            best_bid = bids[0].get("price", 0)
+            mid_price = (best_ask + best_bid) / 2 if (best_ask + best_bid) > 0 else reference_price
+            spread_bps = (best_ask - best_bid) / mid_price * 10000 if mid_price > 0 else 0
+        else:
+            spread_bps = 0.0
+            mid_price = reference_price
+
+        # 매수/매도 잔량비 (depth_levels 호가)
+        ask_vol = sum(a.get("volume", 0) for a in asks[:depth_levels]) if asks else 0
+        bid_vol = sum(b.get("volume", 0) for b in bids[:depth_levels]) if bids else 0
+        depth_ratio = bid_vol / ask_vol if ask_vol > 0 else 1.0
+
+        # 타이밍 판정
+        tight_bps = self.spread_cfg.get("tight_bps", 10)
+        wide_bps = self.spread_cfg.get("wide_bps", 30)
+
+        if spread_bps < tight_bps:
+            timing = "aggressive"  # 유동성 풍부 → 즉시 진입 유리
+            score_adj = 2
+            recommended = int(mid_price) if bids else reference_price
+        elif spread_bps > wide_bps:
+            timing = "patient"     # 유동성 부족 → 눌림 대기
+            score_adj = -2
+            recommended = bids[0].get("price", reference_price) if bids else reference_price
+        else:
+            timing = "normal"
+            score_adj = 0
+            recommended = bids[0].get("price", reference_price) if bids else reference_price
+
+        logger.info(
+            "EX-2 스프레드: 스프레드=%.1fbps, 잔량비=%.2f → %s (%+d점)",
+            spread_bps, depth_ratio, timing, score_adj,
+        )
+
         return {
-            "spread_bps": 0.0,
-            "depth_ratio": 1.0,
-            "timing": "normal",
-            "recommended_price": reference_price,
+            "spread_bps": round(spread_bps, 1),
+            "depth_ratio": round(depth_ratio, 2),
+            "timing": timing,
+            "recommended_price": recommended,
+            "score_adj": score_adj,
         }
 
     # ── EX-3: 프로그램 매도 프록시 ──────────────────────
