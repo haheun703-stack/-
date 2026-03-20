@@ -1626,8 +1626,10 @@ nightwatch:
   ensemble_weights:
     existing: 0.70             # 2-way (KR 비활성 시): L1(70%) + NW(30%)
     nightwatch: 0.30
-    existing_with_kr: 0.50     # 3-way (KR 활성 시): L1_US(50%) + KR(20%) + NW(30%)
-    kr_closing: 0.20
+    # 3-way 최적 (780일 백테스트: Pearson +0.012, 방향적중 51%)
+    existing_with_kr: 0.40     # L1_US 40%
+    kr_closing: 0.30           # KR 수급 30%
+    # nightwatch: 0.30 (위와 공유)
 
   # NIGHTWATCH 내부 레이어 가중치 (4개 레이어, 합=1.0)
   layer_weights:
