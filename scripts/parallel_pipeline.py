@@ -179,6 +179,8 @@ def build_pipeline() -> list[Step]:
              depends=["20.9"]),
         Step("23.9", "Market Journal",       s + "market_journal.py",
              depends=["20.9"]),
+        Step("24.5", "NXT 추천 엔진",          s + "nxt_recommend.py --no-telegram",
+             depends=["20.9"], optional=True),
         Step("25",   "페이퍼 트레이딩",        s + "paper_trader.py",
              depends=["20.9"]),
 
