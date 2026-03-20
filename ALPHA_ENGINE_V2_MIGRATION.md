@@ -17,7 +17,7 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 10 완료 — SCENARIO ENGINE + JGIS 연동
+## 🟢 현재 상태: STEP 11 완료 — EVENT CALENDAR
 
 ## 마지막 완료: STEP 9 MARKET JOURNAL (2026-03-20)
 
@@ -496,6 +496,45 @@
 
 
 # ═══════════════════════════════════════════════════════
+# STEP 11: EVENT CALENDAR — 글로벌 이벤트 캘린더 내장
+# ═══════════════════════════════════════════════════════
+# 목적: 매년 반복되는 구조적 이벤트(FOMC, MSCI, 주총, 어닝시즌 등)를
+#       퀀트봇이 자체적으로 인지하고 시나리오/LENS에 반영
+# 원칙: brain.py 수정 ❌, signal_engine.py 수정 ❌
+#       SCENARIO ENGINE(STEP 10) 확장
+
+- [x] 11-1. Static Calendar JSON (2026년 이벤트)
+  - 파일: data/scenarios/event_calendar_2026.json (신규)
+  - FOMC 8회, MSCI 4회, Triple Witching 4회, BOK 5회, 어닝시즌 8구간
+  - 한국 주총, 잭슨홀, 미국 중간선거, Russell 리밸런싱 포함
+  - 이벤트 타입별 과거 패턴 + 영향 섹터 + scenario_event_map
+  - recurring: 옵션만기일 12회, 시즌널리티(strong/weak/sell_in_may/santa_rally)
+  - 완료일: 2026-03-20
+
+- [x] 11-2. EventCalendar 모듈
+  - 파일: src/alpha/event_calendar.py (신규, ~260 lines)
+  - get_upcoming(days=7): 향후 N일 이벤트 + 한국 옵션만기일 자동 포함
+  - get_scenario_boost(): 시나리오별 이벤트 부스트 (HIGH +20, MEDIUM +10)
+  - get_earnings_season(): 현재 어닝시즌 구간 확인
+  - get_seasonality(): 월별 강약 + 특수 시즌 (sell_in_may 등)
+  - format_weekly_briefing(): 텔레그램 브리핑 포맷 (D-N 카운트다운)
+  - CLI: python -m src.alpha.event_calendar [days]
+  - 완료일: 2026-03-20
+
+- [x] 11-3. scenario_detector 연동
+  - _evaluate_trigger()에서 EventCalendar.get_scenario_boost() 호출
+  - 이벤트 임박 시 관련 시나리오 점수에 +20/+10 가산
+  - CLI에 이벤트 캘린더 브리핑 출력 추가
+  - 완료일: 2026-03-20
+
+- [x] 11-4. BAT-D 연동 + 테스트
+  - scenario_detector.py 내부에서 자동 호출 (BAT-D 별도 수정 불필요)
+  - 테스트: Triple Witching(오늘) + 한국 주총(D-6) 정상 감지
+  - 시나리오 부스트: FOMC 7일 이내 없음 → 0 (정상)
+  - 완료일: 2026-03-20
+
+
+# ═══════════════════════════════════════════════════════
 # 참고: 각 STEP의 독립성
 # ═══════════════════════════════════════════════════════
 # 
@@ -525,4 +564,7 @@
 | 2026-03-19 | 2 | STEP 2 레짐별 가중치 (2-1~2-3) | ✅ | MDD 2.8pp 개선, PF 1.33 |
 | 2026-03-19 | 2-4 | scan_buy V2 분기 삽입 | ✅ | 커밋 4146247 |
 | 2026-03-19 | 3-1 | DART 재무 파이프라인 확장 | ✅ | 1008종목, BS+CF, 2.8MB |
+| 2026-03-20 | 10 | SCENARIO ENGINE | ✅ | 8 시나리오, 커밋 bcbf059 |
+| 2026-03-20 | 10-6 | JGIS 데이터 파이프라인 | ✅ | 공유폴더 방식, 커밋 6215b91 |
+| 2026-03-20 | 11 | EVENT CALENDAR | ✅ | 32 이벤트, 시즌널리티 |
 | | | | | |

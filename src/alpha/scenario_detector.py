@@ -52,7 +52,7 @@ def _load_jgis_config() -> dict:
 
 
 class ScenarioDetector:
-    """시나리오 트리거 감지 + Phase 관리 + JGIS 연동."""
+    """시나리오 트리거 감지 + Phase 관리 + JGIS 연동 + 이벤트 캘린더."""
 
     def __init__(self):
         self.chains = self._load_json(_CHAINS_PATH)
@@ -63,6 +63,13 @@ class ScenarioDetector:
         self.macro = self._load_json(_MACRO_PATH) or {}
         self.news = self._load_json(_NEWS_PATH) or {}
         self.dart = self._load_json(_DART_PATH) or {}
+
+        # 이벤트 캘린더 (STEP 11)
+        try:
+            from src.alpha.event_calendar import EventCalendar
+            self.event_cal = EventCalendar()
+        except Exception:
+            self.event_cal = None
 
         # JGIS 연동
         self.jgis_cfg = _load_jgis_config()
@@ -308,6 +315,13 @@ class ScenarioDetector:
             if matched:
                 score += 30
                 reasons.append(detail)
+
+        # 3. 이벤트 캘린더 부스트 (STEP 11)
+        if self.event_cal and sid:
+            event_boost = self.event_cal.get_scenario_boost(sid, days=7)
+            if event_boost > 0:
+                score += event_boost
+                reasons.append(f"이벤트 임박 +{event_boost}")
 
         return score, reasons
 
@@ -601,6 +615,16 @@ def main():
                 print(f"  {sec}: {data.get('score', 0)} ({data.get('direction', '?')})")
     else:
         print("\n[JGIS] 미연동 (jgis_integration.enabled=false 또는 파일 없음)")
+
+    # 이벤트 캘린더 (STEP 11)
+    if detector.event_cal:
+        cal_msg = detector.event_cal.format_weekly_briefing(days=7)
+        if cal_msg:
+            print(f"\n{cal_msg}")
+        else:
+            print("\n[캘린더] 향후 7일 이벤트 없음")
+    else:
+        print("\n[캘린더] 이벤트 캘린더 미로드")
 
     # 변경 사항
     if changes:
