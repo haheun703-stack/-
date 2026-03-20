@@ -393,6 +393,11 @@ REM 27단계: BAT-D 완료 (텔레그램 비활성화 2026-03-20, 정보 없는 
 REM 저녁 통합 리포트(24단계)가 실질적 완료 알림 역할을 대신함
 echo [%date% %time%] [27/31] BAT-D 완료 (텔레그램 OFF) >> logs\schedule.log
 
+REM 28단계: 데이터 무결성 체크 (14개 항목 점검 → 텔레그램)
+echo [%date% %time%] [28/31] 데이터 건강검진 >> logs\schedule.log
+python -u -X utf8 scripts\data_health_check.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [28/31] FAILED >> logs\schedule.log
+
 REM ══════════════════════════════════════════════
 echo [%date% %time%] BAT-D 완료 (31단계 순차 실행) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log
