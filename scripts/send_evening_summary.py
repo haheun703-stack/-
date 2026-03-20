@@ -301,6 +301,45 @@ def _section_ai_accuracy() -> list[str]:
     return lines
 
 
+def _section_nxt_picks() -> list[str]:
+    """NXT 추천 종목 요약."""
+    nxt_path = DATA_DIR / "nxt" / "nxt_picks.json"
+    if not nxt_path.exists():
+        return []
+    data = json.loads(nxt_path.read_text(encoding="utf-8"))
+    picks = data.get("picks", [])
+    if not picks:
+        return []
+
+    summary = data.get("summary", {})
+    lines = ["\n━━━━ 🌙 NXT 추천 ━━━━"]
+    lines.append(
+        f"  적극 {summary.get('nxt_적극매수', 0)} / "
+        f"매수 {summary.get('nxt_매수', 0)} / "
+        f"관심 {summary.get('nxt_관심', 0)}"
+    )
+
+    grade_emoji = {
+        "NXT적극매수": "🔴",
+        "NXT매수": "🟠",
+        "NXT관심": "🟡",
+    }
+    for i, p in enumerate(picks[:5], 1):
+        emoji = grade_emoji.get(p.get("nxt_grade", ""), "⚪")
+        nxt_tag = ""
+        if p.get("has_nxt_data"):
+            nxt_tag = f" P{p['nxt_premium_pct']:+.1f}% V{p['nxt_volume']:,}"
+            if p.get("suggested_price", 0) > 0:
+                nxt_tag += f" →{p['suggested_price']:,}원"
+        lines.append(
+            f"  {emoji} {i}. {p.get('name', p['ticker'])} "
+            f"[{p.get('main_grade', '')}→{p.get('nxt_grade', '')}]"
+            f"{nxt_tag}"
+        )
+
+    return lines
+
+
 def _section_intel() -> list[str]:
     """Perplexity 시장 인텔리전스 요약 (무드+핫테마만)."""
     data = _load("market_intelligence.json")
@@ -507,6 +546,7 @@ def build_evening_summary(morning: bool = False) -> str:
         L.extend(_section_ai_vs_bot())
         L.extend(_section_ai_accuracy())
         L.extend(_section_value_chain())
+        L.extend(_section_nxt_picks())
         L.extend(_section_intel())
 
     # 빈 내용 체크
