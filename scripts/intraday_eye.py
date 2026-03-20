@@ -364,8 +364,9 @@ class IntradayEye:
         워치리스트 종목 중 전일 대비 +3% 이상 → 매수 기회 시그널
         """
         threshold = self.settings.get("eye07_opp_pct", 3.0)
+        held_tickers = {h["ticker"] for h in self.holdings}
         for ticker in self.watchlist:
-            if ticker in price_data_map:
+            if ticker in held_tickers:
                 continue  # 이미 보유 중이면 스킵
 
             p = self.kis.fetch_price(ticker)

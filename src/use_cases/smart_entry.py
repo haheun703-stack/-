@@ -576,7 +576,7 @@ class SmartEntryEngine:
                     "[PAPER] 역발상 분석 대상: %s(%s) %d원 × %d주 (분석만, 주문 안 함)",
                     c.name, c.ticker, order_price, c.order_qty,
                 )
-                total_amount += order_amount
+                # paper_mode는 실매수 아니므로 total_amount에 합산하지 않음
                 placed += 1
                 continue
 
@@ -1486,8 +1486,8 @@ class SmartEntryEngine:
             self.update_orders()
             self._check_fills()
 
-            # 모든 종목 체결 완료 시 조기 종료
-            if all(c.is_filled or c.decision == EntryDecision.SKIP for c in self.candidates):
+            # 모든 종목 체결 완료 시 조기 종료 (paper_mode는 주문 없으므로 제외)
+            if all(c.paper_mode or c.is_filled or c.decision == EntryDecision.SKIP for c in self.candidates):
                 logger.info("[Phase4] 전 종목 체결/스킵 완료 → 조기 종료")
                 break
 

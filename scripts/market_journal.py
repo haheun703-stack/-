@@ -615,7 +615,7 @@ def _learn_pattern_match(today_str: str, conn: sqlite3.Connection) -> dict | Non
         "similar_count": len(similar),
         "next_day_up_pct": round(up_count / len(next_day_changes) * 100, 1),
         "next_day_avg_change": round(avg_change, 2),
-        "condition": f"레짐={t_regime}, VIX≈{t_vix:.0f}, 외인={'매수' if t_foreign > 0 else '매도'}",
+        "condition": f"레짐={t_regime}, VIX≈{(t_vix or 0):.0f}, 외인={'매수' if t_foreign > 0 else '매도'}",
     }
     log.info("패턴매칭: %d건 유사일 → 다음날 상승 %.0f%%", len(similar), insight["next_day_up_pct"])
     return insight
