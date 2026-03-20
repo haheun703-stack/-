@@ -126,29 +126,80 @@ class ExecutionAlpha:
     ) -> dict | None:
         """체결 완료 후 품질 기록 → order_audit.db.
 
+        vs_vwap_bps 부호 규칙:
+          BUY:  양수 = 좋음 (VWAP보다 싸게 매수)
+          SELL: 양수 = 좋음 (VWAP보다 비싸게 매도)
+
         Returns:
-            품질 측정 dict 또는 None (disabled)
+            품질 측정 dict 또는 None (disabled/vwap=0)
         """
-        # STEP 2에서 구현
-        return None
+        if not self.quality_cfg.get("enabled", True):
+            return None
+        if vwap <= 0 or filled_price <= 0:
+            return None
+
+        self._ensure_db()
+
+        # VWAP 대비 체결 품질 (bps)
+        raw_bps = (filled_price - vwap) / vwap * 10000
+        # BUY: 싸게 살수록 좋음 → 부호 반전 (음수→양수)
+        # SELL: 비싸게 팔수록 좋음 → 그대로
+        vs_vwap_bps = -raw_bps if side.upper() == "BUY" else raw_bps
+
+        ts = datetime.now().isoformat()
+
+        with sqlite3.connect(str(_AUDIT_DB)) as conn:
+            conn.execute(
+                """INSERT INTO execution_quality
+                   (ts, side, ticker, filled_price, order_price,
+                    vwap, prev_close, vs_vwap_bps, spread_bps, exit_rule, phase)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (ts, side.upper(), ticker, filled_price, order_price,
+                 vwap, prev_close, vs_vwap_bps, spread_bps, exit_rule, phase),
+            )
+
+        result = {
+            "side": side.upper(),
+            "ticker": ticker,
+            "filled_price": filled_price,
+            "vwap": round(vwap, 1),
+            "vs_vwap_bps": round(vs_vwap_bps, 1),
+            "spread_bps": round(spread_bps, 1),
+        }
+
+        # 경고 임계값 초과 시 로그
+        threshold = self.quality_cfg.get("alert_threshold_bps", 50)
+        if vs_vwap_bps < -threshold:
+            logger.warning(
+                "EX-5 슬리피지 경고: %s %s %s — vs_vwap=%+.1fbps (임계: -%dbps)",
+                side, ticker, f"{filled_price:,}원", vs_vwap_bps, threshold,
+            )
+        else:
+            logger.info(
+                "EX-5 품질: %s %s %s — vs_vwap=%+.1fbps",
+                side, ticker, f"{filled_price:,}원", vs_vwap_bps,
+            )
+
+        return result
 
     def daily_quality_report(self, date_str: str) -> dict:
-        """일간 실행 품질 리포트.
+        """일간 실행 품질 리포트 (JOURNAL/텔레그램 연동).
 
         Returns:
             {
                 "date": str,
                 "buy_count": int,
                 "sell_count": int,
-                "avg_buy_quality_bps": float,   # 양수=좋음
+                "avg_buy_quality_bps": float,
                 "avg_sell_quality_bps": float,
                 "total_saved_won": int,
                 "best": dict | None,
                 "worst": dict | None,
             }
         """
-        # STEP 2에서 구현
-        return {
+        self._ensure_db()
+
+        empty = {
             "date": date_str,
             "buy_count": 0,
             "sell_count": 0,
@@ -157,6 +208,61 @@ class ExecutionAlpha:
             "total_saved_won": 0,
             "best": None,
             "worst": None,
+        }
+
+        try:
+            with sqlite3.connect(str(_AUDIT_DB)) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute(
+                    """SELECT side, ticker, filled_price, vwap, vs_vwap_bps,
+                              order_price, spread_bps, exit_rule, phase
+                       FROM execution_quality
+                       WHERE ts LIKE ? || '%'
+                       ORDER BY vs_vwap_bps DESC""",
+                    (date_str,),
+                ).fetchall()
+        except sqlite3.OperationalError:
+            return empty
+
+        if not rows:
+            return empty
+
+        buys = [r for r in rows if r["side"] == "BUY"]
+        sells = [r for r in rows if r["side"] == "SELL"]
+
+        avg_buy = sum(r["vs_vwap_bps"] for r in buys) / len(buys) if buys else 0.0
+        avg_sell = sum(r["vs_vwap_bps"] for r in sells) / len(sells) if sells else 0.0
+
+        # 절약 금액 추정: BUY는 (VWAP - filled) × qty(1주 가정), SELL은 반대
+        total_saved = 0
+        for r in rows:
+            if r["side"] == "BUY":
+                total_saved += int(r["vwap"] - r["filled_price"])
+            else:
+                total_saved += int(r["filled_price"] - r["vwap"])
+
+        def _row_to_dict(r):
+            return {
+                "ticker": r["ticker"],
+                "side": r["side"],
+                "filled_price": r["filled_price"],
+                "vwap": r["vwap"],
+                "vs_vwap_bps": round(r["vs_vwap_bps"], 1),
+            }
+
+        all_rows = list(rows)
+        best = _row_to_dict(all_rows[0]) if all_rows else None
+        worst = _row_to_dict(all_rows[-1]) if all_rows else None
+
+        return {
+            "date": date_str,
+            "buy_count": len(buys),
+            "sell_count": len(sells),
+            "avg_buy_quality_bps": round(avg_buy, 1),
+            "avg_sell_quality_bps": round(avg_sell, 1),
+            "total_saved_won": total_saved,
+            "best": best,
+            "worst": worst,
         }
 
     # ── 내부 유틸 ────────────────────────────────────

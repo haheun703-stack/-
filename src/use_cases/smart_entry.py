@@ -1535,6 +1535,15 @@ class SmartEntryEngine:
                 )
                 self._log_order("FILLED", c, status="FILLED",
                                 message=f"체결가 {c.filled_price:,}원")
+                # EX-5: 실행 품질 기록
+                if self.exec_alpha and c.vwap > 0:
+                    q = self.exec_alpha.record_quality(
+                        "BUY", c.ticker, c.filled_price, c.vwap,
+                        c.prev_close, c.order_price,
+                        spread_bps=c.spread_bps, phase="fill",
+                    )
+                    if q:
+                        c.exec_quality_bps = q["vs_vwap_bps"]
             elif status.status.value == "partial":
                 filled_qty = int(getattr(status, "filled_qty", 0) or 0)
                 if filled_qty > 0:
