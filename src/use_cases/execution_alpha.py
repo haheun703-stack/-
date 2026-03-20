@@ -192,22 +192,93 @@ class ExecutionAlpha:
     ) -> dict:
         """3중 프록시: 거래량폭발+음봉, KOSPI연동하락, 기관동시매도.
 
+        KIS API 프로그램 매매 데이터 미제공 → 3중 프록시로 우회.
+        추가 API 호출 0 — Phase 3 기존 데이터 100% 재활용.
+
         Returns:
             {
-                "selling_active": bool,     # 프로그램 매도 감지
+                "selling_active": bool,     # 프로그램 매도 감지 (2/3 이상)
                 "volume_spike_sell": bool,   # 거래량폭발+음봉
                 "kospi_correlated": bool,    # KOSPI 연동 하락
                 "institutional_dump": bool,  # 기관 동시 매도
                 "absorption_complete": bool, # 소화 완료 여부
+                "score_adj": int,           # 점수 가감
             }
         """
-        # STEP 5에서 구현
+        if not self.program_cfg.get("enabled", True):
+            return {
+                "selling_active": False,
+                "volume_spike_sell": False,
+                "kospi_correlated": False,
+                "institutional_dump": False,
+                "absorption_complete": False,
+                "score_adj": 0,
+            }
+
+        vol_spike_mult = self.program_cfg.get("volume_spike_mult", 3.0)
+        kospi_drop_pct = self.program_cfg.get("kospi_drop_pct", -0.5)
+        absorption_bars = self.program_cfg.get("absorption_bars", 2)
+
+        # ── P1: 거래량 폭발 + 음봉 ──
+        volume_spike_sell = False
+        if candles_5m and len(candles_5m) >= 4:
+            # 최근 20봉 평균 거래량
+            vols = [c.get("volume", 0) for c in candles_5m]
+            avg_vol = sum(vols[:-1]) / max(len(vols) - 1, 1) if len(vols) > 1 else 0
+            latest = candles_5m[-1]
+            latest_vol = latest.get("volume", 0)
+            latest_bearish = latest.get("close", 0) < latest.get("open", 0)
+
+            if avg_vol > 0 and latest_vol >= avg_vol * vol_spike_mult and latest_bearish:
+                volume_spike_sell = True
+
+        # ── P2: KOSPI 연동 하락 ──
+        kospi_correlated = kospi_change_pct <= kospi_drop_pct
+
+        # ── P3: 기관 동시 매도 ──
+        foreign_net = investor_flow.get("foreign_net_buy", 0)
+        inst_net = investor_flow.get("inst_net_buy", 0)
+        institutional_dump = (foreign_net < 0 and inst_net < 0)
+
+        # 감지 카운트 (2/3 이상이면 selling_active)
+        signals = [volume_spike_sell, kospi_correlated, institutional_dump]
+        active_count = sum(signals)
+        selling_active = active_count >= 2
+
+        # ── 소화 완료 판정 ──
+        absorption_complete = False
+        if selling_active and candles_5m and len(candles_5m) >= absorption_bars + 1:
+            # 마지막 N봉이 양봉이면 소화 완료
+            tail = candles_5m[-absorption_bars:]
+            bullish_count = sum(
+                1 for c in tail if c.get("close", 0) > c.get("open", 0)
+            )
+            if bullish_count >= absorption_bars:
+                absorption_complete = True
+
+        # 점수 가감
+        if absorption_complete:
+            score_adj = 3   # 소화 후 반등 → 보너스
+        elif selling_active:
+            score_adj = -3  # 프로그램 매도 진행 중 → 페널티
+        else:
+            score_adj = 0
+
+        if selling_active:
+            logger.info(
+                "EX-3 프로그램매도: P1=%s P2=%s P3=%s → %s (소화=%s, %+d점)",
+                volume_spike_sell, kospi_correlated, institutional_dump,
+                "감지" if not absorption_complete else "소화완료",
+                absorption_complete, score_adj,
+            )
+
         return {
-            "selling_active": False,
-            "volume_spike_sell": False,
-            "kospi_correlated": False,
-            "institutional_dump": False,
-            "absorption_complete": False,
+            "selling_active": selling_active,
+            "volume_spike_sell": volume_spike_sell,
+            "kospi_correlated": kospi_correlated,
+            "institutional_dump": institutional_dump,
+            "absorption_complete": absorption_complete,
+            "score_adj": score_adj,
         }
 
     # ── EX-5: 실행 품질 측정 ──────────────────────────

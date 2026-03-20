@@ -755,6 +755,24 @@ class SmartEntryEngine:
                 except Exception as e:
                     logger.debug("[EX-2] %s 스프레드 분석 스킵: %s", c.ticker, e)
 
+            # ── EX-3: 프로그램 매도 프록시 감지 ──
+            if self.exec_alpha:
+                try:
+                    candles = self.intraday.fetch_minute_candles(c.ticker, period=5)
+                    kospi = self.intraday.fetch_market_index().get("change_pct", 0)
+                    flow = self.intraday.fetch_investor_flow(c.ticker)
+                    prog = self.exec_alpha.detect_program_selling(candles, kospi, flow)
+                    prog_adj = prog["score_adj"]
+                    if prog["selling_active"]:
+                        c.program_signal = "소화완료" if prog["absorption_complete"] else "매도감지"
+                    if prog_adj != 0:
+                        total = max(0, min(30, total + prog_adj))
+                        c.decision_reasons.append(
+                            f"[프로그램] {c.program_signal} ({prog_adj:+d}점)"
+                        )
+                except Exception as e:
+                    logger.debug("[EX-3] %s 프로그램 감지 스킵: %s", c.ticker, e)
+
             # ── [채널 2] AI 두뇌 보정 ──
             if self.ai_adj_enabled:
                 ai_adj = self._get_ai_brain_adjustment(c.ticker)
@@ -762,7 +780,7 @@ class SmartEntryEngine:
                     total = max(0, min(30, total + ai_adj))
                     c.decision_reasons.append(f"[AI보정] {ai_adj:+d}점 → 최종 {total}/30")
 
-            # 판단 기준: 3축 합산 + VWAP 보너스 + AI 보정 (총 0~30)
+            # 판단 기준: 3축 합산 + VWAP + 스프레드 + 프로그램 + AI 보정 (총 0~30)
             if total >= 18:
                 c.decision = EntryDecision.BUY
                 c.decision_reasons.append("→ 진입 결정 (강한 신호)")
