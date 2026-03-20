@@ -106,6 +106,12 @@ class CandidateState:
     v3_conviction: int = 0          # v3 conviction (1~10)
     v3_size_pct: float = 0.0        # v3 비중 (%, 계좌 대비)
 
+    # Execution Alpha (EX-1~EX-5)
+    spread_bps: float = 0.0          # 호가 스프레드 (bps)
+    spread_timing: str = ""          # "aggressive" / "normal" / "patient"
+    program_signal: str = ""         # 프로그램 매도 프록시 상태
+    exec_quality_bps: float = 0.0    # 실행 품질 (vs VWAP, bps)
+
     # 페이퍼 트레이딩 모드
     paper_mode: bool = False        # True면 분석만, 실매매 안 함
 
@@ -173,6 +179,15 @@ class SmartEntryEngine:
         self.nxt_enabled = nxt_cfg.get("enabled", False)
         self.nxt_premarket_alert = nxt_cfg.get("premarket_alert", True)
         self._nxt_adjustments: dict[str, float] = {}  # ticker → 가격조정%
+
+        # ─── Execution Alpha (EX-1~EX-5) ───
+        ea_cfg = self.config.get("execution_alpha", {})
+        if ea_cfg.get("enabled"):
+            from src.use_cases.execution_alpha import ExecutionAlpha
+            self.exec_alpha = ExecutionAlpha(self.config, intraday_adapter)
+            logger.info("[SmartEntry] ExecutionAlpha 활성화")
+        else:
+            self.exec_alpha = None
 
         # 종목별 상태
         self.candidates: list[CandidateState] = []

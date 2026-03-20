@@ -2246,3 +2246,47 @@ jgis_integration:
   sentiment_boost: 0.15        # 센티먼트 70+ 섹터 부스트
   sentiment_penalty: 0.15      # 센티먼트 30- 섹터 패널티
   relay_min_confidence: 70     # US→KR 릴레이 최소 신뢰도
+
+# ============================================================
+# Execution Alpha — 매매 실행 품질 개선 (EX-1 ~ EX-5)
+# ============================================================
+execution_alpha:
+  enabled: false                    # true로 바꾸면 활성화
+
+  # ── EX-1: VWAP 기반 동적 진입 ──
+  dynamic_entry:
+    enabled: true
+    base_discount_pct: 0.5          # 기본 할인율 (%)
+    vwap_adj_range_pct: 0.3         # ±0.3% VWAP 기반 조정 범위
+    vwap_premium_limit_pct: 0.5     # VWAP+0.5% 이상이면 진입 보류
+
+  # ── EX-2: 호가창 스프레드 분석 ──
+  spread_analysis:
+    enabled: true
+    tight_bps: 10                   # <10bps = 유동성 풍부 → aggressive
+    wide_bps: 30                    # >30bps = 유동성 부족 → patient
+    depth_levels: 3                 # 분석할 호가 레벨 수
+
+  # ── EX-3: 프로그램 매도 프록시 ──
+  program_proxy:
+    enabled: true
+    volume_spike_mult: 3.0          # 20봉 평균 × 3배 + 음봉 → 프로그램 매도 추정
+    kospi_drop_pct: -0.5            # KOSPI -0.5% 이상 + 동반 하락 → 연동
+    absorption_bars: 2              # 양봉 2개 연속 + VWAP 복귀 → 소화 완료
+
+  # ── EX-4: 스마트 매도 (X1~X5 유형별) ──
+  smart_sell:
+    enabled: true
+    x1_method: "market_immediate"   # X1 하드스톱 → 즉시 시장가
+    x5_premium_pct: 0.3             # X5 목표가 → 지정가 +0.3%
+    x5_timeout_min: 5               # X5 미체결 시 5분 → 시장가
+    x3_premium_pct: 0.2             # X3 트레일링 → 지정가 +0.2%
+    x3_timeout_min: 2               # X3 미체결 시 2분 → 시장가
+    x4_timeout_min: 15              # X4 시간제한 → VWAP 기준 15분 대기
+    x2_premium_pct: 0.1             # X2 수급이탈 → 지정가 +0.1%
+    x2_timeout_min: 5               # X2 미체결 시 5분 → 시장가
+
+  # ── EX-5: 실행 품질 측정 ──
+  quality_tracking:
+    enabled: true
+    alert_threshold_bps: 50         # 50bps 이상 슬리피지 시 경고
