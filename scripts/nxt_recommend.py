@@ -158,14 +158,27 @@ def _load_nxt_signal() -> dict:
     return picks_map
 
 
+def _load_learning_weights() -> dict:
+    """학습 가중치 로드 (nxt_track_results.py가 생성)."""
+    weights_path = NXT_DIR / "nxt_learning_weights.json"
+    if not weights_path.exists():
+        return {}
+    try:
+        return json.loads(weights_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
 def generate_nxt_picks(target_date: str | None = None) -> dict:
     """
     NXT 추천 엔진 메인 로직.
 
     tomorrow_picks × 애프터마켓 수급 → 교차 추천.
+    학습 가중치(nxt_learning_weights.json)가 있으면 스코어 보정.
     """
     today = target_date or date.today().isoformat()
     name_map = _build_name_map()
+    learning = _load_learning_weights()
 
     # 1. tomorrow_picks 로드 (본장 추천)
     main_picks = _load_tomorrow_picks()
@@ -237,6 +250,12 @@ def generate_nxt_picks(target_date: str | None = None) -> dict:
         # NXT 데이터 존재 여부
         has_nxt = bool(nxt_info)
         has_volume = nxt_volume >= MIN_VOLUME
+
+        # 학습 가중치 반영 (데이터 10건 이상일 때만)
+        if learning and learning.get("data_points", 0) >= 10:
+            # NXT 데이터 보너스 보정
+            if has_nxt:
+                score += learning.get("nxt_data_bonus", 0)
 
         # 추천 등급 결정
         if score >= 120:

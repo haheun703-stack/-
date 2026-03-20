@@ -102,6 +102,8 @@ def build_pipeline() -> list[Step]:
              depends=["5"]),
         Step("19",   "추천 성과 추적",          s + "track_pick_results.py",
              depends=["5"]),
+        Step("19.1", "NXT 성과 추적",          s + "nxt_track_results.py",
+             depends=["5"], optional=True),
         Step("19.5", "기관 목표가",            s + "calc_institutional_targets.py",
              depends=["5"]),
         Step("19.6", "보유종목 재판정",         s + "position_monitor.py",

@@ -1,0 +1,220 @@
+{
+  "records": [
+    {
+      "picks_date": "2026-03-18",
+      "eval_date": "2026-03-19",
+      "total": 10,
+      "wins": 5,
+      "avg_close_return": -0.21,
+      "avg_high_return": 1.62,
+      "details": [
+        {
+          "ticker": "402030",
+          "name": "코난테크놀로지",
+          "nxt_grade": "NXT매수",
+          "total_score": 110,
+          "base_price": 19040,
+          "actual_open": 19000,
+          "actual_close": 18760,
+          "actual_high": 19000,
+          "open_return_pct": -0.21,
+          "close_return_pct": -1.47,
+          "high_return_pct": -0.21,
+          "is_win": false,
+          "nxt_premium_pct": -0.73,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "217270",
+          "name": "넵튠",
+          "nxt_grade": "NXT매수",
+          "total_score": 110,
+          "base_price": 4360,
+          "actual_open": 4350,
+          "actual_close": 4235,
+          "actual_high": 4350,
+          "open_return_pct": -0.23,
+          "close_return_pct": -2.87,
+          "high_return_pct": -0.23,
+          "is_win": false,
+          "nxt_premium_pct": -0.46,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "084850",
+          "name": "아이티엠반도체",
+          "nxt_grade": "NXT매수",
+          "total_score": 100,
+          "base_price": 10450,
+          "actual_open": 10200,
+          "actual_close": 10120,
+          "actual_high": 10290,
+          "open_return_pct": -2.39,
+          "close_return_pct": -3.16,
+          "high_return_pct": -1.53,
+          "is_win": false,
+          "nxt_premium_pct": -3.24,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "032640",
+          "name": "LG유플러스",
+          "nxt_grade": "NXT매수",
+          "total_score": 100,
+          "base_price": 15460,
+          "actual_open": 15210,
+          "actual_close": 15620,
+          "actual_high": 15620,
+          "open_return_pct": -1.62,
+          "close_return_pct": 1.03,
+          "high_return_pct": 1.03,
+          "is_win": true,
+          "nxt_premium_pct": -2.15,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "074600",
+          "name": "원익QnC",
+          "nxt_grade": "NXT매수",
+          "total_score": 95,
+          "base_price": 33567,
+          "actual_open": 33000,
+          "actual_close": 33750,
+          "actual_high": 33950,
+          "open_return_pct": -1.69,
+          "close_return_pct": 0.55,
+          "high_return_pct": 1.14,
+          "is_win": true,
+          "nxt_premium_pct": 1.95,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "229640",
+          "name": "LS에코에너지",
+          "nxt_grade": "NXT매수",
+          "total_score": 95,
+          "base_price": 44621,
+          "actual_open": 43850,
+          "actual_close": 44000,
+          "actual_high": 44550,
+          "open_return_pct": -1.73,
+          "close_return_pct": -1.39,
+          "high_return_pct": -0.16,
+          "is_win": false,
+          "nxt_premium_pct": 1.46,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "475960",
+          "name": "토모큐브",
+          "nxt_grade": "NXT매수",
+          "total_score": 95,
+          "base_price": 53566,
+          "actual_open": 56000,
+          "actual_close": 54800,
+          "actual_high": 56000,
+          "open_return_pct": 4.54,
+          "close_return_pct": 2.3,
+          "high_return_pct": 4.54,
+          "is_win": true,
+          "nxt_premium_pct": 6.94,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "126700",
+          "name": "하이비젼시스템",
+          "nxt_grade": "NXT매수",
+          "total_score": 95,
+          "base_price": 18280,
+          "actual_open": 18950,
+          "actual_close": 18400,
+          "actual_high": 18950,
+          "open_return_pct": 3.67,
+          "close_return_pct": 0.66,
+          "high_return_pct": 3.67,
+          "is_win": true,
+          "nxt_premium_pct": 4.56,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "200470",
+          "name": "에이팩트",
+          "nxt_grade": "NXT매수",
+          "total_score": 95,
+          "base_price": 7688,
+          "actual_open": 7910,
+          "actual_close": 7940,
+          "actual_high": 8300,
+          "open_return_pct": 2.89,
+          "close_return_pct": 3.28,
+          "high_return_pct": 7.96,
+          "is_win": true,
+          "nxt_premium_pct": 9.15,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        },
+        {
+          "ticker": "025000",
+          "name": "KPX케미칼",
+          "nxt_grade": "NXT관심",
+          "total_score": 83,
+          "base_price": 49700,
+          "actual_open": 49700,
+          "actual_close": 49200,
+          "actual_high": 49700,
+          "open_return_pct": 0.0,
+          "close_return_pct": -1.01,
+          "high_return_pct": 0.0,
+          "is_win": false,
+          "nxt_premium_pct": 0.4,
+          "nxt_net_buy_ratio": 0.5,
+          "had_nxt_data": true
+        }
+      ],
+      "win_rate": 50.0
+    }
+  ],
+  "stats": {
+    "period_days": 1,
+    "total_picks": 10,
+    "total_wins": 5,
+    "win_rate": 50.0,
+    "avg_close_return": -0.21,
+    "avg_high_return": 1.62,
+    "by_grade": {
+      "NXT매수": {
+        "total": 9,
+        "wins": 5,
+        "win_rate": 55.6,
+        "avg_return": -0.12
+      },
+      "NXT관심": {
+        "total": 1,
+        "wins": 0,
+        "win_rate": 0.0,
+        "avg_return": -1.01
+      }
+    },
+    "nxt_data_win_rate": {
+      "with_nxt": {
+        "total": 10,
+        "win_rate": 50.0,
+        "avg_return": -0.21
+      },
+      "without_nxt": {
+        "total": 0,
+        "win_rate": 0,
+        "avg_return": 0
+      }
+    },
+    "updated_at": "2026-03-20T20:28:45.859974"
+  }
+}
