@@ -99,6 +99,13 @@ def extend_single(parquet_path: Path, end_date: str) -> dict:
             else:
                 new_rows[col] = 0.0  # 없는 컬럼은 0으로 채움
 
+        # 수급 컬럼이 기존 parquet에 없으면 미리 추가 (전체 유니버스 수급 수집)
+        for supply_col in ["기관합계", "외국인합계", "개인"]:
+            if supply_col not in df.columns:
+                df[supply_col] = 0.0
+            if supply_col not in new_rows.columns:
+                new_rows[supply_col] = 0.0
+
         # 투자자 매매동향 업데이트 시도 (pykrx → KIS fallback)
         inv_df = None
         try:
