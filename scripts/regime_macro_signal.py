@@ -44,6 +44,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 KOSPI_CSV = DATA_DIR / "kospi_index.csv"
 REGIME_JSON = DATA_DIR / "kospi_regime.json"
 US_SIGNAL_JSON = DATA_DIR / "us_market" / "overnight_signal.json"
+DERIVATIVES_JSON = DATA_DIR / "derivatives" / "derivatives_signal.json"
 OUTPUT_PATH = DATA_DIR / "regime_macro_signal.json"
 
 # 레짐 순서 (상위→하위)
@@ -259,7 +260,31 @@ def main():
     else:
         macro_score += 0
 
-    macro_score = min(macro_score, 100)
+    # 축6: 파생 시그널 보정 (±10점, 보너스/패널티)
+    deriv_data = load_json(DERIVATIVES_JSON)
+    deriv_composite = deriv_data.get("composite", {})
+    deriv_score_raw = deriv_composite.get("score", 0)
+    deriv_grade = deriv_composite.get("grade", "NEUTRAL")
+
+    if deriv_grade == "STRONG_BULL":
+        macro_score += 10
+    elif deriv_grade == "MILD_BULL":
+        macro_score += 5
+    elif deriv_grade == "MILD_BEAR":
+        macro_score -= 5
+    elif deriv_grade == "STRONG_BEAR":
+        macro_score -= 10
+    # NEUTRAL → 보정 없음
+
+    scores["deriv_grade"] = deriv_grade
+    scores["deriv_score"] = round(deriv_score_raw, 1)
+
+    # 풋콜 반전 시그널 경고
+    pc_reversal = deriv_data.get("put_call_proxy", {}).get("reversal", "")
+    if pc_reversal:
+        scores["deriv_reversal"] = pc_reversal
+
+    macro_score = max(0, min(macro_score, 100))
 
     # ── 6. 전환 확률 추정 ──
     # 간단 휴리스틱: 매크로 점수 기반
@@ -315,6 +340,7 @@ def main():
     logger.info("  전환 확률: %d%%", transition_prob)
     logger.info("  MA20 기울기(5d): %.2f%%, MA60 기울기(10d): %.2f%%", ma20_slope, ma60_slope)
     logger.info("  VIX: %.1f, US: %s, EWY 5d: %.1f%%", vix_level, us_grade, ewy_5d)
+    logger.info("  파생: %s (%+.1f)", deriv_grade, deriv_score_raw)
     logger.info("  추천: %s", recommendation)
     logger.info("  저장: %s", OUTPUT_PATH)
 

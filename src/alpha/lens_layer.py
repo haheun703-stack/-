@@ -19,7 +19,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from src.alpha.lens import game_board, flow_map, structural_value, asymmetry
+from src.alpha.lens import game_board, flow_map, structural_value, asymmetry, derivatives_lens
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +59,12 @@ class LensLayer:
 
         regime = brain.get("effective_regime", "CAUTION")
 
-        # 4개 렌즈 실행
+        # 5개 렌즈 실행
         lens_1 = game_board.compute(brain)
         lens_2 = flow_map.compute(flow_data, self.lens_cfg)
         lens_3 = structural_value.compute(regime, self.lens_cfg)
         lens_4 = asymmetry.compute(regime, self.lens_cfg)
+        lens_5 = derivatives_lens.compute()
 
         ctx = {
             "timestamp": datetime.now().isoformat(),
@@ -73,14 +74,17 @@ class LensLayer:
             "flow_map": lens_2,
             "structural_value": lens_3,
             "asymmetry": lens_4,
+            "derivatives": lens_5,
         }
 
         self._save(ctx)
         logger.info(
-            "LENS 완료: mode=%s, hot=%s, min_rr=%.1f",
+            "LENS 완료: mode=%s, hot=%s, min_rr=%.1f, deriv=%s(%+.0f)",
             lens_1.get("mode"),
             lens_2.get("hot_sectors", []),
             lens_4.get("min_rr_ratio", 0),
+            lens_5.get("composite_grade", "?"),
+            lens_5.get("composite_score", 0),
         )
         return ctx
 
@@ -125,5 +129,15 @@ class LensLayer:
                 "min_rr_ratio": 1.5,
                 "target_atr_mult": 3.0,
                 "stop_atr_mult": 2.0,
+            },
+            "derivatives": {
+                "available": False,
+                "composite_score": 0,
+                "composite_grade": "NEUTRAL",
+                "basis_status": "FLAT",
+                "put_call_status": "NEUTRAL",
+                "put_call_reversal": "",
+                "flow_direction": "중립",
+                "program_signal": "없음",
             },
         }

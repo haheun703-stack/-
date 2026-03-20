@@ -87,6 +87,11 @@ echo [%date% %time%] [6/29] US Overnight Signal >> logs\schedule.log
 python -u -X utf8 scripts\us_overnight_signal.py --update >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [6/29] FAILED >> logs\schedule.log
 
+REM 6.5단계: 파생 시그널 수집 (ETF 프록시 → 선물베이시스+풋콜+프로그램)
+echo [%date% %time%] [6.5/31] 파생 시그널 수집 >> logs\schedule.log
+python -u -X utf8 scripts\derivatives_collector.py >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [6.5/31] FAILED >> logs\schedule.log
+
 REM 7단계: US-KR 패턴매칭 DB 일일 누적
 echo [%date% %time%] [7/29] US-KR 패턴DB >> logs\schedule.log
 python -u -X utf8 scripts\update_us_kr_daily.py >> logs\schedule.log 2>&1
