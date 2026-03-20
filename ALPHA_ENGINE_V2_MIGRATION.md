@@ -17,9 +17,9 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 9 진행 중 — MARKET JOURNAL
+## 🟢 현재 상태: STEP 10 진행 중 — SCENARIO ENGINE
 
-## 마지막 완료: STEP 8 INTRADAY EYE (2026-03-20)
+## 마지막 완료: STEP 9 MARKET JOURNAL (2026-03-20)
 
 
 # ═══════════════════════════════════════════════════════
@@ -437,6 +437,50 @@
   - 1단계(지금): 통계 누적 + 인사이트 텍스트
   - 2단계(3개월 후): 등급별 적중률→사이징, 과열통계→LENS 패널티
   - 완료일: 2026-03-20
+
+
+# ═══════════════════════════════════════════════════════
+# STEP 10: SCENARIO ENGINE — 시나리오 기반 섹터 체인 자동 추적
+# ═══════════════════════════════════════════════════════
+# 목적: "앞을 내다보는 능력" — 이벤트 감지 시 인과 체인에 따라
+#       다음 섹터를 LENS 2(FLOW MAP)에 자동 반영
+# 원칙: brain.py 수정 ❌, signal_engine.py 수정 ❌
+#       LENS LAYER 확장 (flow_map 가중치 조정)
+#       시나리오는 JSON 사전 정의 + 이벤트 트리거 활성화
+
+- [x] 10-1. 시나리오 체인 데이터베이스 생성
+  - 파일: data/scenarios/scenario_chains.json (신규)
+  - 8개 시나리오 × 2~5 Phase = ~25개 섹터 체인
+  - WAR_MIDDLE_EAST, WAR_UKRAINE, FED_RATE_CUT/HIKE,
+    CHINA_STIMULUS, USD_KRW_SPIKE, OIL_SPIKE, SEMICONDUCTOR_CYCLE_UP
+  - JSON 편집으로 시나리오 추가/수정 가능
+  - 완료일: 2026-03-21
+
+- [x] 10-2. 시나리오 트리거 감지기
+  - 파일: src/alpha/scenario_detector.py (신규)
+  - 입력: overnight_signal, regime_macro_signal, market_news, dart_event_signals
+  - 키워드 매칭(3건↑=40점) + 시장 시그널 매칭(30점) → score >= 40 활성화
+  - Phase 자동 전환 (경과일 기반), 상호배타 그룹 정리 (CUT/HIKE)
+  - 출력: data/scenarios/active_scenarios.json
+  - 테스트: 4개 시나리오 활성화 (WAR 120점, FED 60, OIL 50, SEMI 40)
+  - 완료일: 2026-03-21
+
+- [x] 10-3. LENS LAYER 연동 (시나리오 → 종목 가중치)
+  - 파일: src/alpha/lens/flow_map.py 수정
+  - active_scenarios.json 읽어 hot +0.2 / cold -0.2 가중치 합산
+  - lens_context.json flow_map.active_scenarios 섹션 자동 포함
+  - 완료일: 2026-03-21
+
+- [x] 10-4. 텔레그램 시나리오 알림
+  - format_scenario_alert(): 활성화/Phase전환/비활성화 포맷팅
+  - scenario_detector.py main()에서 --dry-run 지원
+  - 완료일: 2026-03-21
+
+- [x] 10-5. BAT-D 연동 + 테스트
+  - BAT-D 11.23단계 (LENS 직전): python -m src.alpha.scenario_detector
+  - BRAIN(11.2) → SCENARIO(11.23) → LENS(11.25) 순서
+  - dry-run 테스트 통과
+  - 완료일: 2026-03-21
 
 
 # ═══════════════════════════════════════════════════════

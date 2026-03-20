@@ -153,7 +153,12 @@ echo [%date% %time%] [11.2/29] BRAIN 자본배분 >> logs\schedule.log
 python -u -X utf8 scripts\run_brain.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [11.2/29] FAILED >> logs\schedule.log
 
-REM 11.25단계: LENS LAYER (BRAIN → 4렌즈 분석 → lens_context.json)
+REM 11.23단계: SCENARIO ENGINE (시나리오 감지 → active_scenarios.json → LENS에 반영)
+echo [%date% %time%] [11.23/31] SCENARIO ENGINE >> logs\schedule.log
+python -u -X utf8 -m src.alpha.scenario_detector >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [11.23/31] FAILED >> logs\schedule.log
+
+REM 11.25단계: LENS LAYER (BRAIN → 4렌즈 분석 + 시나리오 가중치 → lens_context.json)
 echo [%date% %time%] [11.25/29] LENS LAYER >> logs\schedule.log
 python -u -X utf8 scripts\run_lens.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [11.25/29] FAILED >> logs\schedule.log
