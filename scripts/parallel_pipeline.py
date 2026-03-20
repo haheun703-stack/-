@@ -64,6 +64,8 @@ def build_pipeline() -> list[Step]:
         Step("13",   "DART 공시",             s + "crawl_dart_disclosure.py"),
         Step("14",   "시장 뉴스",              s + "crawl_market_news.py"),
         Step("19.65","CPI 트래커",            s + "update_cpi_data.py"),
+        Step("19.66","원자재 가격",           s + "fetch_commodity_prices.py", optional=True),
+        Step("19.67","ECOS 한국매크로",       s + "fetch_ecos_macro.py", optional=True),
 
         # ═══ LEVEL 1: 기초 데이터 완료 후 지표 계산 ═══
         Step("5",    "기술지표 35개",          s + "rebuild_indicators.py",

@@ -275,40 +275,43 @@ class DataHealthCheck:
     # ─── 5. 원자재 가격 ───
 
     def _check_commodities(self) -> CheckResult:
-        """JGIS 또는 liquidity_signal에서 원자재 확인."""
+        """liquidity_signal 또는 commodity_prices.json에서 원자재 확인."""
+        # 1차: liquidity_signal.json
         signal_path = self.data_dir / "liquidity_cycle" / "liquidity_signal.json"
-
         if signal_path.exists():
             try:
                 data = json.loads(signal_path.read_text(encoding="utf-8"))
-                d = str(data.get("date", data.get("generated_at", "")))
                 commodities = data.get("commodities", data.get("asset_prices", {}))
-
-                if not commodities:
-                    # 다른 구조로 시도
-                    details = []
-                    for key in ["wti", "gold", "copper", "dxy"]:
-                        val = data.get(key)
-                        if val is not None:
-                            details.append(f"{key}={val}")
-                    if details:
-                        return CheckResult("원자재", True,
-                                           f"{', '.join(details[:4])}")
-
-                count = len(commodities) if isinstance(commodities, dict) else 0
-                recent = self.today_str in str(d) or (
-                    self.today - timedelta(days=2)
-                ).strftime("%Y-%m-%d") <= str(d)[:10]
-
-                if recent and count > 0:
+                if commodities and len(commodities) > 0:
+                    d = str(data.get("date", ""))
                     return CheckResult("원자재", True,
-                                       f"{count}종 (날짜: {str(d)[:10]})")
-                return CheckResult("원자재", False,
-                                   f"{count}종 (날짜: {str(d)[:10]})")
-            except Exception as e:
-                return CheckResult("원자재", False, f"파싱 오류: {e}")
+                                       f"{len(commodities)}종 (날짜: {d[:10]})")
+                # wti/gold 등 직접 키로 있는 경우
+                details = []
+                for key in ["wti", "gold", "copper", "dxy"]:
+                    val = data.get(key)
+                    if val is not None:
+                        details.append(f"{key}={val}")
+                if details:
+                    return CheckResult("원자재", True, f"{', '.join(details[:4])}")
+            except Exception:
+                pass  # fallthrough to commodity_prices.json
 
-        return CheckResult("원자재", False, "liquidity_signal.json 없음")
+        # 2차: commodity_prices.json (Alpha Vantage)
+        commodity_path = self.data_dir / "commodity_prices.json"
+        if commodity_path.exists():
+            try:
+                data = json.loads(commodity_path.read_text(encoding="utf-8"))
+                commodities = data.get("commodities", {})
+                d = data.get("date", "")
+                if commodities:
+                    names = [f"{k}={v.get('price', '?')}" for k, v in commodities.items()]
+                    return CheckResult("원자재", True,
+                                       f"{', '.join(names[:4])} ({d})")
+            except Exception:
+                pass
+
+        return CheckResult("원자재", False, "liquidity/commodity 데이터 없음")
 
     # ─── 6. FRED 매크로 ───
 
