@@ -1599,6 +1599,20 @@ ai_upgrade:
   perplexity_max_thesis_checks: 3          # 최대 thesis 검증 수
 
 # ============================================================
+# US OVERNIGHT — 한국 수급 레이어 + 인버스 시그널
+# ============================================================
+us_overnight:
+  # L1.5 한국 장마감 수급 레이어
+  kr_closing_layer:
+    enabled: true                     # true → L1.5 활성화
+    weight_without_nw: 0.80           # NW 비활성 시: L1(80%) + KR(20%)
+    weight_kr_only: 0.20
+
+  # 인버스 ETF 대응 시그널
+  inverse_signal:
+    enabled: false                    # Phase 2에서 활성화 예정
+
+# ============================================================
 # NIGHTWATCH — 글로벌 시장 야간 수호자 (v1.0)
 # ============================================================
 # 기존 US Overnight과 앙상블:
@@ -1608,10 +1622,12 @@ ai_upgrade:
 nightwatch:
   enabled: true
 
-  # 앙상블 가중치 (기존 vs NIGHTWATCH)
+  # 앙상블 가중치 (기존 vs NIGHTWATCH vs KR)
   ensemble_weights:
-    existing: 0.70
+    existing: 0.70             # 2-way (KR 비활성 시): L1(70%) + NW(30%)
     nightwatch: 0.30
+    existing_with_kr: 0.50     # 3-way (KR 활성 시): L1_US(50%) + KR(20%) + NW(30%)
+    kr_closing: 0.20
 
   # NIGHTWATCH 내부 레이어 가중치 (4개 레이어, 합=1.0)
   layer_weights:

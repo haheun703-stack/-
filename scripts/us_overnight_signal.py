@@ -58,6 +58,8 @@ US_KR_SECTOR_MAP = {
 
 DB_PATH = US_DIR / "us_kr_history.db"
 CONFIG_PATH = Path("config/settings.yaml")
+KR_FLOW_CSV = Path("data/kospi_investor_flow.csv")
+KR_REGIME_PATH = Path("data/regime_macro_signal.json")
 
 
 def _load_settings() -> dict:
@@ -554,6 +556,107 @@ def _compute_sector_momentum(df: pd.DataFrame) -> dict:
 NIGHTWATCH_BLIND_DIR = Path("data/us_market/nightwatch_blind")
 
 
+def _compute_kr_closing_score() -> dict:
+    """L1.5 한국 장마감 수급 레이어.
+
+    입력:
+        1. kospi_investor_flow.csv — 외국인/기관/개인 KOSPI 순매수 (억 단위)
+        2. regime_macro_signal.json — KOSPI 레짐 (BULL/CAUTION/BEAR/CRISIS)
+
+    점수 범위: -1.0 ~ +1.0
+    """
+    result = {
+        "enabled": True,
+        "score": 0.0,
+        "details": {},
+    }
+
+    # ── 1. 수급 흐름 (50%) ──
+    flow_score = 0.0
+    flow_detail = {}
+    try:
+        if KR_FLOW_CSV.exists():
+            flow_df = pd.read_csv(KR_FLOW_CSV, parse_dates=["Date"], index_col="Date")
+            if len(flow_df) >= 5:
+                recent = flow_df.tail(5)
+                foreign_5d = recent["foreign_net"].sum()
+                inst_5d = recent["inst_net"].sum()
+
+                # 외국인 5일 순매수 합계 → 점수 (±5만억 기준으로 ±1.0)
+                foreign_score = max(-1.0, min(1.0, foreign_5d / 50000))
+                # 기관 5일 순매수 합계 → 점수
+                inst_score = max(-1.0, min(1.0, inst_5d / 30000))
+
+                # 외국인 60%, 기관 40%
+                flow_score = foreign_score * 0.60 + inst_score * 0.40
+
+                # 3일 연속 동방향 보너스
+                last3_foreign = recent["foreign_net"].tail(3)
+                if (last3_foreign > 0).all():
+                    flow_score = min(1.0, flow_score + 0.15)
+                elif (last3_foreign < 0).all():
+                    flow_score = max(-1.0, flow_score - 0.15)
+
+                flow_detail = {
+                    "foreign_5d": int(foreign_5d),
+                    "inst_5d": int(inst_5d),
+                    "foreign_score": round(foreign_score, 3),
+                    "inst_score": round(inst_score, 3),
+                    "foreign_3d_streak": "buy" if (last3_foreign > 0).all() else (
+                        "sell" if (last3_foreign < 0).all() else "mixed"
+                    ),
+                }
+    except Exception as e:
+        logger.warning(f"KR 수급 데이터 로딩 실패: {e}")
+
+    result["details"]["flow"] = flow_detail
+    result["details"]["flow_score"] = round(flow_score, 4)
+
+    # ── 2. KOSPI 레짐 (50%) ──
+    regime_score = 0.0
+    regime_detail = {}
+    try:
+        if KR_REGIME_PATH.exists():
+            regime_data = json.loads(KR_REGIME_PATH.read_text(encoding="utf-8"))
+            regime = regime_data.get("current_regime", "CAUTION")
+            macro_score = regime_data.get("macro_score", 50)
+            history = regime_data.get("regime_history_5d", [])
+
+            regime_map = {
+                "BULL": 0.6, "CAUTION": 0.0, "BEAR": -0.5, "CRISIS": -1.0,
+            }
+            regime_score = regime_map.get(regime, 0.0)
+
+            # macro_score(0~100) → 보정 (50 기준: ±0.3)
+            macro_adj = (macro_score - 50) / 50 * 0.3
+            regime_score = max(-1.0, min(1.0, regime_score + macro_adj))
+
+            # 레짐 트렌드 보정: 최근 5일 중 BEAR/CRISIS 비율
+            if history:
+                bearish_count = sum(1 for r in history if r in ("BEAR", "CRISIS"))
+                if bearish_count >= 4:
+                    regime_score = min(regime_score, -0.3)
+                bullish_count = sum(1 for r in history if r == "BULL")
+                if bullish_count >= 4:
+                    regime_score = max(regime_score, 0.3)
+
+            regime_detail = {
+                "regime": regime,
+                "macro_score": macro_score,
+                "regime_history_5d": history,
+            }
+    except Exception as e:
+        logger.warning(f"KR 레짐 데이터 로딩 실패: {e}")
+
+    result["details"]["regime"] = regime_detail
+    result["details"]["regime_score"] = round(regime_score, 4)
+
+    # ── 종합 ──
+    combined = flow_score * 0.50 + regime_score * 0.50
+    result["score"] = round(max(-1.0, min(1.0, combined)), 4)
+    return result
+
+
 def _save_nightwatch_blind_log(signal: dict, score: float, ensemble_score: float):
     """NIGHTWATCH 블라인드 테스트 — 기존 vs 앙상블 일별 비교 기록."""
     settings = _load_settings()
@@ -941,11 +1044,27 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     # ─── 7. 특수 상황 룰 ───
     signal["special_rules"] = _check_special_rules(latest, prev)
 
+    # ─── 7.5 L1.5 한국 장마감 수급 레이어 ───
+    settings = _load_settings()
+    kr_layer_cfg = settings.get("us_overnight", {}).get("kr_closing_layer", {})
+    kr_enabled = kr_layer_cfg.get("enabled", False)
+    kr_result = None
+
+    if kr_enabled:
+        kr_result = _compute_kr_closing_score()
+        signal["kr_closing"] = kr_result
+        logger.info(
+            f"L1.5 KR: score={kr_result['score']:+.4f} "
+            f"flow={kr_result['details'].get('flow_score', 0):+.4f} "
+            f"regime={kr_result['details'].get('regime_score', 0):+.4f}"
+        )
+    else:
+        signal["kr_closing"] = {"enabled": False}
+
     # ─── 8. NIGHTWATCH 앙상블 ───
     ensemble_score = score  # 기본값: 기존 L1 score
     nw_result = None
 
-    settings = _load_settings()
     nw_enabled = settings.get("nightwatch", {}).get("enabled", False)
 
     if nw_enabled:
@@ -957,9 +1076,21 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
             signal["nightwatch"] = nw_result
 
             ens_w = settings.get("nightwatch", {}).get("ensemble_weights", {})
-            w_existing = ens_w.get("existing", 0.70)
-            w_nw = ens_w.get("nightwatch", 0.30)
-            ensemble_score = score * w_existing + nw_result["nightwatch_score"] * w_nw
+            if kr_enabled and kr_result:
+                # 3-way: L1_US(50%) + L1.5_KR(20%) + NW(30%)
+                w_us = ens_w.get("existing_with_kr", 0.50)
+                w_kr = ens_w.get("kr_closing", 0.20)
+                w_nw = ens_w.get("nightwatch", 0.30)
+                ensemble_score = (
+                    score * w_us
+                    + kr_result["score"] * w_kr
+                    + nw_result["nightwatch_score"] * w_nw
+                )
+            else:
+                # 2-way: 기존 L1(70%) + NW(30%)
+                w_existing = ens_w.get("existing", 0.70)
+                w_nw = ens_w.get("nightwatch", 0.30)
+                ensemble_score = score * w_existing + nw_result["nightwatch_score"] * w_nw
 
             # 채권 자경단 비토
             if nw_result.get("bond_vigilante_veto"):
@@ -992,6 +1123,12 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
             signal["nightwatch"] = {"error": str(e)}
     else:
         signal["nightwatch"] = {"enabled": False}
+        # NW 없이 KR만 활성화된 경우: L1(80%) + KR(20%)
+        if kr_enabled and kr_result:
+            w_us = kr_layer_cfg.get("weight_without_nw", 0.80)
+            w_kr = kr_layer_cfg.get("weight_kr_only", 0.20)
+            ensemble_score = score * w_us + kr_result["score"] * w_kr
+            signal["ensemble_score"] = round(ensemble_score, 4)
 
     # ─── 8.5. 충격 유형 분류 (CORTEX 차용) ───
     shock = _classify_shock_type(
@@ -1119,6 +1256,30 @@ def format_telegram_message(signal: dict) -> str:
     vix = signal.get("vix", {})
     if vix:
         lines.append(f"\nVIX: {vix['level']} (z:{vix['zscore']:+.1f}) [{vix['status']}]")
+
+    # KR 수급
+    kr = signal.get("kr_closing", {})
+    if kr.get("enabled"):
+        kr_s = kr.get("score", 0)
+        det = kr.get("details", {})
+        flow = det.get("flow", {})
+        regime = det.get("regime", {})
+        streak = flow.get("foreign_3d_streak", "?")
+        streak_icon = {"buy": "↑", "sell": "↓"}.get(streak, "—")
+        lines.append(
+            f"\n[ KR 수급 ] Score: {kr_s:+.4f}"
+        )
+        if flow:
+            lines.append(
+                f"  외국인 5D: {flow.get('foreign_5d', 0):+,}억 "
+                f"({streak_icon}{streak}) | "
+                f"기관 5D: {flow.get('inst_5d', 0):+,}억"
+            )
+        if regime:
+            lines.append(
+                f"  레짐: {regime.get('regime', '?')} "
+                f"(매크로 {regime.get('macro_score', 0)})"
+            )
 
     # 원자재
     commod = signal.get("commodities", {})
