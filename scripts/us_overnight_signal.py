@@ -553,6 +553,67 @@ def _compute_sector_momentum(df: pd.DataFrame) -> dict:
     return result
 
 
+# 인버스 ETF 후보 (코스피200 기반)
+INVERSE_ETF_CANDIDATES = [
+    {"ticker": "252670", "name": "KODEX 200선물인버스2X", "leverage": 2, "type": "index"},
+    {"ticker": "114800", "name": "KODEX 인버스", "leverage": 1, "type": "index"},
+    {"ticker": "145670", "name": "KINDEX 200선물인버스", "leverage": 1, "type": "index"},
+    {"ticker": "251340", "name": "KODEX 코스닥150선물인버스", "leverage": 1, "type": "kosdaq"},
+]
+
+
+def _compute_inverse_signal(
+    grade: str, combined_100: float, shock: dict, vix_info: dict, cfg: dict,
+) -> dict:
+    """인버스 ETF 대응 시그널 생성.
+
+    조건:
+        - STRONG_BEAR → 적극 인버스 (2X 추천)
+        - MILD_BEAR + VIX 경계 이상 → 소극 인버스 (1X 추천)
+        - 충격 유형이 COMPOUND/GEOPOLITICAL → 인버스 부스트
+    """
+    result = {
+        "enabled": True,
+        "recommend": False,
+        "strength": "none",  # none / mild / strong
+        "etf_picks": [],
+        "reason": "",
+    }
+
+    vix_level = vix_info.get("level", 20)
+    shock_type = shock.get("shock_type", "NONE") if isinstance(shock, dict) else "NONE"
+
+    if grade == "STRONG_BEAR":
+        result["recommend"] = True
+        result["strength"] = "strong"
+        result["reason"] = f"STRONG_BEAR ({combined_100:+.1f}) → 적극 인버스"
+        # 2X 우선 추천
+        result["etf_picks"] = [
+            e for e in INVERSE_ETF_CANDIDATES if e["leverage"] == 2
+        ] or INVERSE_ETF_CANDIDATES[:1]
+
+    elif grade == "MILD_BEAR" and vix_level >= 25:
+        result["recommend"] = True
+        result["strength"] = "mild"
+        result["reason"] = f"MILD_BEAR + VIX {vix_level:.0f} → 소극 인버스"
+        # 1X 추천
+        result["etf_picks"] = [
+            e for e in INVERSE_ETF_CANDIDATES if e["leverage"] == 1
+        ][:2]
+
+    elif grade == "MILD_BEAR" and shock_type in ("COMPOUND", "GEOPOLITICAL", "LIQUIDITY"):
+        result["recommend"] = True
+        result["strength"] = "mild"
+        result["reason"] = (
+            f"MILD_BEAR + {shock_type} 충격 → 방어 인버스"
+        )
+        result["etf_picks"] = [
+            e for e in INVERSE_ETF_CANDIDATES if e["leverage"] == 1
+        ][:2]
+
+    return result
+
+
 NIGHTWATCH_BLIND_DIR = Path("data/us_market/nightwatch_blind")
 
 
@@ -1165,6 +1226,15 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     signal["ensemble_score_100"] = ensemble_100
     signal["combined_score_100"] = round(combined_100, 1)
 
+    # ─── 9. 인버스 ETF 대응 시그널 ───
+    inv_cfg = settings.get("us_overnight", {}).get("inverse_signal", {})
+    if inv_cfg.get("enabled", False):
+        signal["inverse_signal"] = _compute_inverse_signal(
+            grade, combined_100, shock, signal.get("vix", {}), inv_cfg,
+        )
+    else:
+        signal["inverse_signal"] = {"enabled": False}
+
     # 전략 C: US→KR 섹터 모멘텀 (전 섹터 사전 포지셔닝)
     signal["sector_momentum"] = _compute_sector_momentum(df)
 
@@ -1375,6 +1445,14 @@ def format_telegram_message(signal: dict) -> str:
     killed_sectors = [s for s, v in kills.items() if v.get("killed")]
     if killed_sectors:
         lines.append(f"\n[ 섹터 KILL ] {', '.join(killed_sectors)}")
+
+    # 인버스 시그널
+    inv = signal.get("inverse_signal", {})
+    if inv.get("recommend"):
+        strength_icon = {"strong": "🔴", "mild": "🟡"}.get(inv.get("strength"), "")
+        lines.append(f"\n{strength_icon}[ 인버스 대응 ] {inv.get('reason', '')}")
+        for etf in inv.get("etf_picks", []):
+            lines.append(f"  → {etf['name']} ({etf['ticker']}) {etf['leverage']}X")
 
     return "\n".join(lines)
 
