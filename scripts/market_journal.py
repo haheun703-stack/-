@@ -456,6 +456,23 @@ def _collect_trades(today_str: str) -> dict:
     return {"buys": buys, "sells": sells, "total_realized_pnl": total_pnl}
 
 
+def _collect_execution_quality(today_str: str) -> dict:
+    """EX-5: 실행 품질 리포트 수집."""
+    try:
+        from src.use_cases.execution_alpha import ExecutionAlpha
+        # settings 없이도 quality_tracking만 동작
+        ea = ExecutionAlpha({"execution_alpha": {"enabled": True, "quality_tracking": {"enabled": True}}})
+        return ea.daily_quality_report(today_str)
+    except Exception as e:
+        log.debug("실행 품질 수집 스킵: %s", e)
+        return {
+            "date": today_str,
+            "buy_count": 0, "sell_count": 0,
+            "avg_buy_quality_bps": 0.0, "avg_sell_quality_bps": 0.0,
+            "total_saved_won": 0, "best": None, "worst": None,
+        }
+
+
 def record_daily(today_str: str, conn: sqlite3.Connection) -> dict:
     """일간 기록: 시장 개요 + 무버 + 보유 + 매매 → JSON + SQLite."""
     name_map = _build_name_map()
@@ -465,12 +482,16 @@ def record_daily(today_str: str, conn: sqlite3.Connection) -> dict:
     holdings_data = _collect_holdings(today_str, name_map)
     trades = _collect_trades(today_str)
 
+    # EX-5: 실행 품질 수집
+    exec_quality = _collect_execution_quality(today_str)
+
     daily = {
         "date": today_str,
         "market": overview,
         "movers": movers,
         "holdings": holdings_data,
         "trades": trades,
+        "execution_quality": exec_quality,
         "created_at": datetime.now().isoformat(),
     }
 
