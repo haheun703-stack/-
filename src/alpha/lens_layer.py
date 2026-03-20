@@ -23,7 +23,8 @@ from src.alpha.lens import game_board, flow_map, structural_value, asymmetry, de
 
 logger = logging.getLogger(__name__)
 
-_DATA_DIR = Path("data")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_DATA_DIR = _PROJECT_ROOT / "data"
 _BRAIN_PATH = _DATA_DIR / "brain_decision.json"
 _FLOW_PATH = _DATA_DIR / "sector_rotation" / "investor_flow.json"
 _OUTPUT_PATH = _DATA_DIR / "lens_context.json"

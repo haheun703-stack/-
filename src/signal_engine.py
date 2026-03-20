@@ -1065,6 +1065,14 @@ class SignalEngine:
             regime_passed = True
             regime_reason = ""
 
+        # result["regime"] 설정 (Master Controller 레짐 점수용)
+        if not pd.isna(p_accum) and p_accum >= 0.5:
+            result["regime"] = "accumulation"
+        elif not pd.isna(p_accum) and p_accum >= 0.3:
+            result["regime"] = "recovery"
+        else:
+            result["regime"] = "distribution"
+
         diag.add_layer(LayerResult(
             name="L1_regime",
             passed=regime_passed,
@@ -1280,7 +1288,15 @@ class SignalEngine:
         ))
         if not trigger_passed:
             if self.consensus_mode:
-                pass
+                # consensus_mode: trigger 미통과 시 기본 TriggerResult로 후속 평가 진행
+                active_trigger = TriggerResult(
+                    trigger_type=TriggerType.NONE,
+                    conditions_met={},
+                    conditions_count=0,
+                    stop_loss_pct=0.07,
+                    entry_stage_pct=0.0,
+                    confidence=0.0,
+                )
             else:
                 # ── v7.0 SETUP 시그널: 게이트 통과 + 트리거 대기 + TGCI 확인 ──
                 tgci_cfg = self.config.get("tgci", {})

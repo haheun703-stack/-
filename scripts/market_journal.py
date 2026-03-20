@@ -876,9 +876,9 @@ def generate_weekly_report(today_str: str, conn: sqlite3.Connection, send: bool 
         return None
 
     # 집계
-    kospi_start = rows[0][1]
-    kospi_end = rows[-1][1]
-    kospi_weekly = round((kospi_end / kospi_start - 1) * 100, 2) if kospi_start else 0
+    kospi_start = rows[0][1] or 0
+    kospi_end = rows[-1][1] or 0
+    kospi_weekly = round((kospi_end / kospi_start - 1) * 100, 2) if kospi_start > 0 else 0
     weekly_foreign = sum(r[4] or 0 for r in rows)
     regimes = [r[3] for r in rows]
     regime_main = max(set(regimes), key=regimes.count)
@@ -995,9 +995,9 @@ def generate_monthly_report(today_str: str, conn: sqlite3.Connection, send: bool
         log.warning("월간 데이터 없음: %s", month_start_str)
         return None
 
-    kospi_start = rows[0][1]
-    kospi_end = rows[-1][1]
-    kospi_monthly = round((kospi_end / kospi_start - 1) * 100, 2) if kospi_start else 0
+    kospi_start = rows[0][1] or 0
+    kospi_end = rows[-1][1] or 0
+    kospi_monthly = round((kospi_end / kospi_start - 1) * 100, 2) if kospi_start > 0 else 0
     port_return = sum(r[6] or 0 for r in rows)
     total_buys = sum(r[7] or 0 for r in rows)
     total_sells = sum(r[8] or 0 for r in rows)

@@ -16,8 +16,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_DERIVATIVES_PATH = Path("data") / "derivatives" / "derivatives_signal.json"
-_SHORT_SIGNAL_PATH = Path("data") / "short_selling" / "daily_short.json"
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_DERIVATIVES_PATH = _PROJECT_ROOT / "data" / "derivatives" / "derivatives_signal.json"
+_SHORT_SIGNAL_PATH = _PROJECT_ROOT / "data" / "short_selling" / "daily_short.json"
 
 
 def compute() -> dict:

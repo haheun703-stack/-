@@ -10,7 +10,6 @@ toggle: execution_alpha.enabled: false → 기존 동작 100% 동일
 
 from __future__ import annotations
 
-import json
 import logging
 import sqlite3
 from datetime import datetime
@@ -18,7 +17,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_DATA_DIR = Path("data")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_DATA_DIR = _PROJECT_ROOT / "data"
 _AUDIT_DB = _DATA_DIR / "order_audit.db"
 
 

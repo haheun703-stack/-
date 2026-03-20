@@ -19,7 +19,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_SHORT_SIGNAL_PATH = Path("data") / "short_selling" / "daily_short.json"
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_SHORT_SIGNAL_PATH = _PROJECT_ROOT / "data" / "short_selling" / "daily_short.json"
 
 # 레짐별 최소 퀄리티 스코어
 _REGIME_MIN_QUALITY = {

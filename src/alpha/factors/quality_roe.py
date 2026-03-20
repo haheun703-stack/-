@@ -186,7 +186,7 @@ class QualityDividend:
 
 def _load_quality() -> dict:
     """financial_quarterly.json에서 quality 섹션 로드."""
-    path = Path("data/v2_migration/financial_quarterly.json")
+    path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "v2_migration" / "financial_quarterly.json"
     if not path.exists():
         logger.warning("financial_quarterly.json 없음 — 빈 데이터 사용")
         return {}

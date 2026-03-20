@@ -310,6 +310,10 @@ class SmartEntryEngine:
                 return max(qty, 1)
 
         qty = self.max_amount_per_stock // c.order_price
+        # 갭업 종목 포지션 축소
+        if c.gap_type in (GapType.GAP_UP, GapType.BIG_GAP):
+            qty = max(1, int(qty * self.gap_position_scale))
+            logger.info("[갭축소] %s: 갭업 → 수량 ×%.0f%% = %d주", c.name, self.gap_position_scale * 100, qty)
         return max(qty, 1)  # 최소 1주
 
     def _get_available_cash(self) -> float:
@@ -759,7 +763,7 @@ class SmartEntryEngine:
             if self.exec_alpha:
                 try:
                     candles = self.intraday.fetch_minute_candles(c.ticker, period=5)
-                    kospi = self.intraday.fetch_market_index().get("change_pct", 0)
+                    kospi = self.intraday.fetch_market_index().get("kospi_change_pct", 0)
                     flow = self.intraday.fetch_investor_flow(c.ticker)
                     prog = self.exec_alpha.detect_program_selling(candles, kospi, flow)
                     prog_adj = prog["score_adj"]
@@ -1601,11 +1605,12 @@ class SmartEntryEngine:
                     if q:
                         c.exec_quality_bps = q["vs_vwap_bps"]
             elif status.status.value == "partial":
-                filled_qty = int(getattr(status, "filled_qty", 0) or 0)
+                filled_qty = int(getattr(status, "filled_quantity", 0) or 0)
                 if filled_qty > 0:
                     c.filled_price = int(status.filled_price or c.order_price)
+                    c.order_qty = max(1, c.order_qty - filled_qty)
                     logger.info(
-                        "[부분체결] %s %d원 %d/%d주",
+                        "[부분체결] %s %d원 %d주 체결, 잔여 %d주",
                         c.name, c.filled_price, filled_qty, c.order_qty,
                     )
 

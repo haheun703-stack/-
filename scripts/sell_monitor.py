@@ -252,7 +252,7 @@ def execute_sell(
     if exit_rule:
         try:
             import yaml
-            with open("config/settings.yaml", "r", encoding="utf-8") as f:
+            with open(str(ROOT / "config" / "settings.yaml"), "r", encoding="utf-8") as f:
                 settings = yaml.safe_load(f)
             ea_cfg = settings.get("execution_alpha", {})
             if ea_cfg.get("enabled") and ea_cfg.get("smart_sell", {}).get("enabled"):
@@ -683,6 +683,7 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
             sell_result = execute_sell(
                 broker, ticker, name, qty, final_action, dry_run,
                 use_limit=use_limit, limit_premium_pct=limit_premium,
+                exit_rule=decision.get("exit_rule", ""),
             )
             sells_executed.append({
                 "ticker": ticker,

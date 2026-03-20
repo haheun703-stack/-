@@ -27,8 +27,9 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-_ACTIVE_SCENARIOS_PATH = Path("data/scenarios/active_scenarios.json")
-_CHAINS_PATH = Path("data/scenarios/scenario_chains.json")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_ACTIVE_SCENARIOS_PATH = _PROJECT_ROOT / "data" / "scenarios" / "active_scenarios.json"
+_CHAINS_PATH = _PROJECT_ROOT / "data" / "scenarios" / "scenario_chains.json"
 
 # JGIS 공유 폴더
 _JGIS_DEFAULT_PATH = Path("D:/shared-bot-data/jgis_to_quant")
@@ -202,7 +203,7 @@ def _apply_scenario_adjustments(adjustments: dict) -> list[dict]:
 def _load_jgis_config() -> dict:
     """settings.yaml에서 jgis_integration 설정 로드."""
     try:
-        cfg_path = Path("config/settings.yaml")
+        cfg_path = _PROJECT_ROOT / "config" / "settings.yaml"
         with open(cfg_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f) or {}
         return cfg.get("jgis_integration", {})

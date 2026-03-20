@@ -14,26 +14,9 @@ from __future__ import annotations
 import logging
 import time
 
+from src.entities.trading_models import Order, OrderSide, OrderType, OrderStatus, tick_round
+
 logger = logging.getLogger(__name__)
-
-
-# 호가 단위 반올림 (10원 ~ 1000원)
-def _tick_round(price: int, reference: int) -> int:
-    if reference >= 500_000:
-        tick = 1000
-    elif reference >= 100_000:
-        tick = 500
-    elif reference >= 50_000:
-        tick = 100
-    elif reference >= 10_000:
-        tick = 50
-    elif reference >= 5_000:
-        tick = 10
-    elif reference >= 1_000:
-        tick = 5
-    else:
-        tick = 1
-    return (price // tick) * tick
 
 
 class SmartSellExecutor:
@@ -126,7 +109,7 @@ class SmartSellExecutor:
         dry_run: bool,
     ) -> dict:
         """지정가 접수 → timeout 후 미체결 시 시장가 전환."""
-        limit_price = _tick_round(
+        limit_price = tick_round(
             int(price * (1 + premium_pct / 100)), price
         )
         logger.info(
@@ -144,20 +127,18 @@ class SmartSellExecutor:
             }
 
         # 1단계: 지정가 접수
-        result = self.order.sell_limit(ticker, limit_price, qty)
-        if result.status.value == "failed":
+        order = self.order.sell_limit(ticker, limit_price, qty)
+        if order.status.value == "failed":
             # 지정가 실패 → 즉시 시장가
             logger.warning("SmartSell: %s 지정가 실패 → 시장가 전환", ticker)
             return self._market_immediate(ticker, qty, price, dry_run)
-
-        order_id = result.order_id
 
         # 2단계: timeout 동안 30초 간격 체결 확인
         check_interval = 30
         max_checks = (timeout_min * 60) // check_interval
         for i in range(max_checks):
             time.sleep(check_interval)
-            status = self.order.get_order_status(order_id)
+            status = self.order.get_order_status(order.order_id)
             if status.status.value == "filled":
                 filled_price = int(status.filled_price or limit_price)
                 logger.info(
@@ -170,14 +151,28 @@ class SmartSellExecutor:
                     "qty": qty,
                     "filled": True,
                     "detail": f"지정가 {filled_price:,}원 체결",
-                    "order_id": order_id,
+                    "order_id": order.order_id,
                 }
+            # 부분 체결 시 잔여 수량 갱신
+            if status.status.value == "partial" and status.filled_quantity > 0:
+                qty = order.quantity - status.filled_quantity
 
-        # 3단계: 미체결 → 취소 → 시장가
+        # 3단계: 미체결 → 취소 → 시장가 (잔여 수량만)
         logger.info("SmartSell: %s %d분 미체결 → 취소 + 시장가", ticker, timeout_min)
-        self.order.cancel(order_id)
+        cancelled = self.order.cancel(order)
+        if not cancelled:
+            logger.warning("SmartSell: %s 취소 실패 → 시장가 전환 중단", ticker)
+            return {
+                "method": "limit_cancel_failed",
+                "price": limit_price,
+                "qty": qty,
+                "filled": False,
+                "detail": "취소 실패 → 시장가 전환 중단 (이중 매도 방지)",
+                "order_id": order.order_id,
+            }
         time.sleep(1)
-        return self._market_immediate(ticker, qty, price, dry_run=False)
+        remaining = qty if qty > 0 else order.quantity
+        return self._market_immediate(ticker, remaining, price, dry_run=False)
 
     def _patient_sell(
         self, ticker: str, qty: int, price: int, dry_run: bool
@@ -212,22 +207,20 @@ class SmartSellExecutor:
                             cum_tp_vol += (h + l + cl) / 3.0 * v
                             cum_vol += v
                     if cum_vol > 0:
-                        vwap_price = _tick_round(int(cum_tp_vol / cum_vol), price)
+                        vwap_price = tick_round(int(cum_tp_vol / cum_vol), price)
             except Exception as e:
                 logger.warning("SmartSell X4: VWAP 조회 실패 → 현재가 사용: %s", e)
 
         # VWAP 이상 지정가
         limit_price = max(price, vwap_price)
-        result = self.order.sell_limit(ticker, limit_price, qty)
-        if result.status.value == "failed":
+        order = self.order.sell_limit(ticker, limit_price, qty)
+        if order.status.value == "failed":
             return self._market_immediate(ticker, qty, price, dry_run=False)
-
-        order_id = result.order_id
 
         # Phase 1: timeout분 대기
         for i in range(timeout * 2):  # 30초 간격
             time.sleep(30)
-            status = self.order.get_order_status(order_id)
+            status = self.order.get_order_status(order.order_id)
             if status.status.value == "filled":
                 return {
                     "method": "patient_filled",
@@ -235,21 +228,21 @@ class SmartSellExecutor:
                     "qty": qty,
                     "filled": True,
                     "detail": f"X4 VWAP 지정가 체결 ({(i + 1) * 30}초)",
-                    "order_id": order_id,
+                    "order_id": order.order_id,
                 }
 
         # Phase 2: 현재가로 정정 → 5분 대기
         logger.info("SmartSell X4: %s %d분 미체결 → 현재가 정정 + 5분", ticker, timeout)
         try:
-            new_price_resp = self.order.fetch_current_price(ticker)
-            new_price = int(new_price_resp) if new_price_resp else price
+            resp = self.order.fetch_current_price(ticker)
+            new_price = int(resp.get("current_price", price)) if isinstance(resp, dict) else int(resp or price)
         except Exception:
             new_price = price
-        self.order.modify(order_id, new_price, qty)
+        self.order.modify(order, new_price, qty)
 
         for i in range(10):  # 5분 = 30초 × 10
             time.sleep(30)
-            status = self.order.get_order_status(order_id)
+            status = self.order.get_order_status(order.order_id)
             if status.status.value == "filled":
                 return {
                     "method": "patient_modified_filled",
@@ -257,11 +250,21 @@ class SmartSellExecutor:
                     "qty": qty,
                     "filled": True,
                     "detail": f"X4 정정 후 체결 ({new_price:,}원)",
-                    "order_id": order_id,
+                    "order_id": order.order_id,
                 }
 
         # Phase 3: 시장가
         logger.info("SmartSell X4: %s 최종 시장가 전환", ticker)
-        self.order.cancel(order_id)
+        cancelled = self.order.cancel(order)
+        if not cancelled:
+            logger.warning("SmartSell X4: %s 취소 실패 → 시장가 전환 중단", ticker)
+            return {
+                "method": "patient_cancel_failed",
+                "price": limit_price,
+                "qty": qty,
+                "filled": False,
+                "detail": "X4 취소 실패 → 이중 매도 방지",
+                "order_id": order.order_id,
+            }
         time.sleep(1)
         return self._market_immediate(ticker, qty, price, dry_run=False)
