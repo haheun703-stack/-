@@ -17,6 +17,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 _DERIVATIVES_PATH = Path("data") / "derivatives" / "derivatives_signal.json"
+_SHORT_SIGNAL_PATH = Path("data") / "short_selling" / "daily_short.json"
 
 
 def compute() -> dict:
@@ -82,6 +83,14 @@ def compute() -> dict:
     if flow.get("inverse_vol_z", 0) > 2.0:
         warnings.append("인버스 거래량 급증 — 헤지 수요 확대")
 
+    # 공매도 시장 데이터 연동
+    short_ctx = _load_short_market()
+    if short_ctx["available"]:
+        if short_ctx["sh4_triggered"]:
+            warnings.append(f"시장 공매도 급증 ({short_ctx['surge_ratio_pct']:.0f}% 종목)")
+        if short_ctx["avg_risk"] > 0.3:
+            warnings.append(f"평균 공매도 리스크 높음 ({short_ctx['avg_risk']:+.2f})")
+
     result = {
         "available": True,
         "composite_score": composite.get("score", 0),
@@ -91,12 +100,35 @@ def compute() -> dict:
         "put_call_reversal": pc.get("reversal", ""),
         "flow_direction": flow_dir,
         "program_signal": prog,
+        "short_market": short_ctx,
     }
 
     if warnings:
         result["warning"] = " | ".join(warnings)
 
     return result
+
+
+def _load_short_market() -> dict:
+    """공매도 시장 시그널 로드."""
+    try:
+        with open(_SHORT_SIGNAL_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {"available": False, "sh4_triggered": False, "surge_ratio_pct": 0, "avg_risk": 0}
+
+    market = data.get("market_signal", {})
+    if not market.get("available"):
+        return {"available": False, "sh4_triggered": False, "surge_ratio_pct": 0, "avg_risk": 0}
+
+    return {
+        "available": True,
+        "sh4_triggered": market.get("sh4_triggered", False),
+        "surge_ratio_pct": market.get("surge_ratio_pct", 0),
+        "avg_risk": market.get("avg_risk", 0),
+        "surge_count": market.get("surge_count", 0),
+        "cover_count": market.get("cover_count", 0),
+    }
 
 
 def _default() -> dict:
@@ -109,4 +141,5 @@ def _default() -> dict:
         "put_call_reversal": "",
         "flow_direction": "중립",
         "program_signal": "없음",
+        "short_market": {"available": False, "sh4_triggered": False, "surge_ratio_pct": 0, "avg_risk": 0},
     }

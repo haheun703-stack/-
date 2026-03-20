@@ -124,6 +124,13 @@ class LensLayer:
                 "min_quality_score": 0.4,
                 "valuation_mode": "NORMAL",
                 "trap_filter": False,
+                "short_selling": {
+                    "available": False,
+                    "surge_tickers": [],
+                    "cover_tickers": [],
+                    "extreme_tickers": [],
+                    "market_pressure": "NORMAL",
+                },
             },
             "asymmetry": {
                 "min_rr_ratio": 1.5,
@@ -139,5 +146,6 @@ class LensLayer:
                 "put_call_reversal": "",
                 "flow_direction": "중립",
                 "program_signal": "없음",
+                "short_market": {"available": False, "sh4_triggered": False, "surge_ratio_pct": 0, "avg_risk": 0},
             },
         }

@@ -1026,6 +1026,13 @@ supply_demand:
     balance_danger_pct: 3.0         # 상장주식수 대비 3%+ → 모니터링
     lending_increase_warn: 20       # 대차잔고 5일 변화율 20%+ → 경고
     overheated_halt: true           # 과열종목 지정 시 자동매매 중단
+    # ── SH1~SH4 시그널 설정 (collect_short_selling.py) ──
+    signals:
+      sh1_threshold: 0.50            # SH1: 5일 변화율 50%+ → 급증
+      sh3_percentile: 0.90           # SH3: 역대 90%ile → 극단
+    scoring:
+      sh4_market_ratio: 1.5          # SH4 시장 배수 (미사용 예비)
+      regime_penalty_sh4: 5          # SH4 트리거 시 REGIME -5점
 
   # ── L3: 체결강도 (Phase 2) ──
   execution:

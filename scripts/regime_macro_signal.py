@@ -45,6 +45,7 @@ KOSPI_CSV = DATA_DIR / "kospi_index.csv"
 REGIME_JSON = DATA_DIR / "kospi_regime.json"
 US_SIGNAL_JSON = DATA_DIR / "us_market" / "overnight_signal.json"
 DERIVATIVES_JSON = DATA_DIR / "derivatives" / "derivatives_signal.json"
+SHORT_SELLING_JSON = DATA_DIR / "short_selling" / "daily_short.json"
 OUTPUT_PATH = DATA_DIR / "regime_macro_signal.json"
 
 # 레짐 순서 (상위→하위)
@@ -284,6 +285,18 @@ def main():
     if pc_reversal:
         scores["deriv_reversal"] = pc_reversal
 
+    # 축7: 공매도 시그널 보정 (±5점)
+    short_data = load_json(SHORT_SELLING_JSON)
+    short_market = short_data.get("market_signal", {})
+    short_adj = short_market.get("macro_score_adj", 0)
+
+    if short_adj != 0:
+        macro_score += short_adj
+
+    scores["short_adj"] = short_adj
+    scores["short_surge_count"] = short_market.get("surge_count", 0)
+    scores["short_cover_count"] = short_market.get("cover_count", 0)
+
     macro_score = max(0, min(macro_score, 100))
 
     # ── 6. 전환 확률 추정 ──
@@ -341,6 +354,10 @@ def main():
     logger.info("  MA20 기울기(5d): %.2f%%, MA60 기울기(10d): %.2f%%", ma20_slope, ma60_slope)
     logger.info("  VIX: %.1f, US: %s, EWY 5d: %.1f%%", vix_level, us_grade, ewy_5d)
     logger.info("  파생: %s (%+.1f)", deriv_grade, deriv_score_raw)
+    if short_adj != 0:
+        logger.info("  공매도: 급증 %d개 / 커버 %d개 → %+d점",
+                     short_market.get("surge_count", 0),
+                     short_market.get("cover_count", 0), short_adj)
     logger.info("  추천: %s", recommendation)
     logger.info("  저장: %s", OUTPUT_PATH)
 

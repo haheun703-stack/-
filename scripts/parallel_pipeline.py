@@ -65,6 +65,7 @@ def build_pipeline() -> list[Step]:
         Step("14",   "시장 뉴스",              s + "crawl_market_news.py"),
         Step("19.65","CPI 트래커",            s + "update_cpi_data.py"),
         Step("6.5",  "파생 시그널",            s + "derivatives_collector.py"),
+        Step("4.7",  "공매도 시그널",          s + "collect_short_selling.py"),
         Step("19.66","원자재 가격",           s + "fetch_commodity_prices.py", optional=True),
         Step("19.67","ECOS 한국매크로",       s + "fetch_ecos_macro.py", optional=True),
 
@@ -94,7 +95,7 @@ def build_pipeline() -> list[Step]:
         Step("12.7", "밸류체인 릴레이",         s + "scan_value_chain.py",
              depends=["5"]),
         Step("13.5", "레짐 매크로",            s + "regime_macro_signal.py",
-             depends=["5", "6", "6.5"]),
+             depends=["5", "6", "6.5", "4.7"]),
         Step("15",   "세력감지",               s + "scan_whale_detect.py",
              depends=["5"]),
         Step("17",   "동반매수",               s + "scan_dual_buying.py",
