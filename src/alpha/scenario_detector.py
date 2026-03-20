@@ -6,7 +6,11 @@
 brain.py 수정 ❌, signal_engine.py 수정 ❌
 LENS LAYER 확장만 사용.
 
-실행: BAT-D 11.3단계 (LENS 직전)
+JGIS 연동: D:/shared-bot-data/jgis_to_quant/ 에서 정보봇 데이터 읽기.
+  - daily_intelligence.json → 키워드 매칭 우선 사용 (fallback: 자체 뉴스)
+  - breaking_alerts.json → 긴급 뉴스 (INTRADAY EYE에서도 호출)
+
+실행: BAT-D 11.23단계 (LENS 직전)
 출력: data/scenarios/active_scenarios.json
 """
 
@@ -17,6 +21,8 @@ import logging
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
+import yaml
+
 logger = logging.getLogger(__name__)
 
 _DATA_DIR = Path("data")
@@ -24,23 +30,45 @@ _SCENARIO_DIR = _DATA_DIR / "scenarios"
 _CHAINS_PATH = _SCENARIO_DIR / "scenario_chains.json"
 _ACTIVE_PATH = _SCENARIO_DIR / "active_scenarios.json"
 
-# 데이터 소스
+# 데이터 소스 (자체)
 _OVERNIGHT_PATH = _DATA_DIR / "us_market" / "overnight_signal.json"
 _MACRO_PATH = _DATA_DIR / "regime_macro_signal.json"
 _NEWS_PATH = _DATA_DIR / "market_news.json"
 _DART_PATH = _DATA_DIR / "dart_event_signals.json"
 
+# JGIS 공유 폴더 (정보봇 → 퀀트봇)
+_JGIS_DEFAULT_PATH = Path("D:/shared-bot-data/jgis_to_quant")
+
+
+def _load_jgis_config() -> dict:
+    """settings.yaml에서 jgis_integration 설정 로드."""
+    try:
+        cfg_path = Path("config/settings.yaml")
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        return cfg.get("jgis_integration", {})
+    except Exception:
+        return {}
+
 
 class ScenarioDetector:
-    """시나리오 트리거 감지 + Phase 관리."""
+    """시나리오 트리거 감지 + Phase 관리 + JGIS 연동."""
 
     def __init__(self):
         self.chains = self._load_json(_CHAINS_PATH)
-        self.active = self._load_json(_ACTIVE_PATH) or {}
+        raw_active = self._load_json(_ACTIVE_PATH) or {}
+        # active_scenarios.json은 {"updated": ..., "scenarios": {...}} 구조
+        self.active = raw_active.get("scenarios", raw_active) if isinstance(raw_active, dict) else {}
         self.overnight = self._load_json(_OVERNIGHT_PATH) or {}
         self.macro = self._load_json(_MACRO_PATH) or {}
         self.news = self._load_json(_NEWS_PATH) or {}
         self.dart = self._load_json(_DART_PATH) or {}
+
+        # JGIS 연동
+        self.jgis_cfg = _load_jgis_config()
+        self.jgis_enabled = self.jgis_cfg.get("enabled", False)
+        self.jgis_path = Path(self.jgis_cfg.get("shared_path", str(_JGIS_DEFAULT_PATH)))
+        self.jgis_intel: dict | None = None  # lazy load
 
     def detect(self) -> dict:
         """모든 시나리오 스캔 → 활성/비활성 판별 → active_scenarios.json 저장.
@@ -175,6 +203,61 @@ class ScenarioDetector:
         return result
 
     # ------------------------------------------------------------------
+    # JGIS 긴급 뉴스 + 센티먼트
+    # ------------------------------------------------------------------
+
+    def check_breaking_alerts(self) -> list[dict]:
+        """JGIS breaking_alerts.json 체크 — 미읽은 긴급 뉴스 반환.
+
+        INTRADAY EYE에서도 호출 가능.
+        읽은 후 read_by_quant=true 처리.
+        """
+        if not self.jgis_enabled:
+            return []
+
+        alert_file = self.jgis_cfg.get("files", {}).get(
+            "breaking_alerts", "breaking_alerts.json")
+        alert_path = self.jgis_path / alert_file
+        data = self._load_json(alert_path)
+        if not data:
+            return []
+
+        alerts = data.get("alerts", [])
+        unread = [a for a in alerts if not a.get("read_by_quant", False)]
+
+        if unread:
+            # 읽음 처리
+            for a in unread:
+                a["read_by_quant"] = True
+            try:
+                with open(alert_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+            except OSError as e:
+                logger.warning("breaking_alerts 읽음 처리 실패: %s", e)
+
+            logger.info("[JGIS] 긴급 뉴스 %d건 수신", len(unread))
+
+        return unread
+
+    def get_jgis_sector_sentiment(self) -> dict:
+        """JGIS daily_intelligence.json에서 섹터 센티먼트 반환.
+
+        flow_map.py에서 직접 호출하지 않고, 이 메서드를 통해 접근.
+        Returns:
+            {sector_name: {"score": int, "direction": str}, ...}
+        """
+        if not self.jgis_enabled:
+            return {}
+
+        if self.jgis_intel is None:
+            intel_file = self.jgis_cfg.get("files", {}).get(
+                "daily_intelligence", "daily_intelligence.json")
+            intel_path = self.jgis_path / intel_file
+            self.jgis_intel = self._load_json(intel_path) or {}
+
+        return self.jgis_intel.get("sector_sentiment", {})
+
+    # ------------------------------------------------------------------
     # 상호 배타 시나리오 정리
     # ------------------------------------------------------------------
 
@@ -206,10 +289,11 @@ class ScenarioDetector:
         score = 0
         reasons = []
 
-        # 1. 키워드 매칭 (뉴스 + DART) — 최소 3건 이상이어야 점수 부여
+        # 1. 키워드 매칭 (JGIS 우선 → 자체 뉴스 fallback) — 최소 3건
         keywords = trigger.get("keywords", [])
+        sid = scenario.get("id", "")
         if keywords:
-            hits = self._check_keywords(keywords)
+            hits = self._check_keywords(keywords, scenario_id=sid)
             if hits >= 3:
                 score += min(40 + (hits - 3) * 5, 60)  # 3건부터 40, 히트당 +5, 최대 60
                 reasons.append(f"키워드 {hits}건")
@@ -227,8 +311,56 @@ class ScenarioDetector:
 
         return score, reasons
 
-    def _check_keywords(self, keywords: list[str]) -> int:
-        """뉴스 + DART 제목에서 키워드 매칭 횟수."""
+    def _check_keywords(self, keywords: list[str], scenario_id: str = "") -> int:
+        """키워드 매칭: JGIS 우선 → 자체 뉴스 fallback."""
+
+        # 1) JGIS daily_intelligence.json 우선 사용
+        if self.jgis_enabled:
+            jgis_hits = self._check_keywords_jgis(keywords, scenario_id)
+            if jgis_hits >= 0:  # -1이면 파일 없음 → fallback
+                return jgis_hits
+
+        # 2) fallback: 자체 뉴스/DART 데이터
+        return self._check_keywords_local(keywords)
+
+    def _check_keywords_jgis(self, keywords: list[str], scenario_id: str) -> int:
+        """JGIS daily_intelligence.json에서 키워드 매칭.
+
+        Returns:
+            매칭 횟수. 파일 없으면 -1 (fallback 트리거).
+        """
+        if self.jgis_intel is None:
+            intel_file = self.jgis_cfg.get("files", {}).get(
+                "daily_intelligence", "daily_intelligence.json")
+            intel_path = self.jgis_path / intel_file
+            self.jgis_intel = self._load_json(intel_path)
+            if self.jgis_intel is None:
+                self.jgis_intel = {}  # 파일 없음 마킹
+
+        if not self.jgis_intel:
+            return -1  # fallback 트리거
+
+        hits = 0
+
+        # scenario_keywords에서 직접 매칭 (정보봇이 이미 계산)
+        scenario_kw = self.jgis_intel.get("scenario_keywords", {})
+        if scenario_id and scenario_id in scenario_kw:
+            return scenario_kw[scenario_id].get("count", 0)
+
+        # headline에서 키워드 서치
+        all_headlines = (self.jgis_intel.get("global_headlines", [])
+                         + self.jgis_intel.get("korea_headlines", []))
+        for headline in all_headlines:
+            title = headline.get("title", "")
+            for kw in keywords:
+                if kw in title:
+                    hits += 1
+                    break  # 같은 헤드라인에서 중복 방지
+
+        return hits
+
+    def _check_keywords_local(self, keywords: list[str]) -> int:
+        """자체 뉴스 + DART 제목에서 키워드 매칭 횟수 (fallback)."""
         hits = 0
         # 뉴스 제목 검색
         articles = self.news.get("articles", [])
@@ -452,6 +584,23 @@ def main():
         for c in chains:
             print(f"  {c['scenario_name']} P{c['phase']}: "
                   f"HOT={c['hot_sectors']} COLD={c['cold_sectors']}")
+
+    # JGIS 연동 상태
+    if detector.jgis_enabled:
+        breaking = detector.check_breaking_alerts()
+        if breaking:
+            print(f"\n[JGIS] 긴급 뉴스 {len(breaking)}건:")
+            for a in breaking:
+                print(f"  [{a.get('severity', '?')}] {a.get('title', '?')}")
+        sentiment = detector.get_jgis_sector_sentiment()
+        if sentiment:
+            print(f"\n[JGIS] 섹터 센티먼트: {len(sentiment)}개 섹터")
+            for sec, data in sorted(sentiment.items(),
+                                     key=lambda x: x[1].get("score", 50),
+                                     reverse=True)[:5]:
+                print(f"  {sec}: {data.get('score', 0)} ({data.get('direction', '?')})")
+    else:
+        print("\n[JGIS] 미연동 (jgis_integration.enabled=false 또는 파일 없음)")
 
     # 변경 사항
     if changes:

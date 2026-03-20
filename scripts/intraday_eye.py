@@ -5,7 +5,7 @@ INTRADAY EYE — 장중 실시간 위험/기회 감시 시스템
 위험(급락, 시장급변) 또는 기회(목표 접근, 신규 기회) 발생 시
 텔레그램 이벤트 알림 (0~3건/일).
 
-7개 감지기:
+8개 감지기:
   EYE-01: 수급 반전 (외국인+기관 순매도 전환)
   EYE-02: 급락 감지 (전일종가 대비 -3% 이하)
   EYE-03: 거래량 폭발 (5분 거래량 > 20일 평균 × 3)
@@ -13,6 +13,7 @@ INTRADAY EYE — 장중 실시간 위험/기회 감시 시스템
   EYE-05: 시장 급변 (KOSPI 등락 ±1.5%)
   EYE-06: 목표가 접근 (수익률 +8% 이상)
   EYE-07: 신규 기회 (워치리스트 종목 시그널)
+  EYE-08: 긴급 뉴스 (JGIS 정보봇 breaking_alerts 감지)
 
 독립 실행: brain.py/signal_engine.py 수정 없음.
 API 부하: 5분당 6~8콜 (KIS rate limit 이내)
@@ -381,6 +382,71 @@ class IntradayEye:
                 )
             time.sleep(0.1)
 
+    def _eye08_breaking_news(self):
+        """EYE-08: JGIS 긴급 뉴스 — breaking_alerts.json 체크"""
+        try:
+            from src.alpha.scenario_detector import ScenarioDetector
+        except ImportError:
+            return
+
+        detector = ScenarioDetector()
+        alerts = detector.check_breaking_alerts()
+        if not alerts:
+            return
+
+        for alert in alerts:
+            severity = alert.get("severity", "MEDIUM")
+            title = alert.get("title", "알 수 없는 뉴스")
+            source = alert.get("source", "")
+            scenarios = alert.get("scenarios_triggered", [])
+            sectors = alert.get("sectors_impact", {})
+
+            # 쿨다운 체크 (같은 제목은 하루 1회)
+            key = f"EYE-08:{title[:20]}"
+            if not self.cooldown.can_fire(key):
+                continue
+
+            # 메시지 포맷
+            lines = [
+                f"🚨 [긴급 뉴스] {title}",
+                f"출처: {source} | 심각도: {severity}",
+            ]
+            if scenarios:
+                lines.append(f"시나리오 활성: {', '.join(scenarios)}")
+            if sectors:
+                for sec, impact in sectors.items():
+                    lines.append(f"  {sec}: {impact}")
+
+            # 보유종목 영향 체크
+            if self.holdings and sectors:
+                # 간단한 매칭: 보유종목 이름에 섹터명 포함 여부
+                for h in self.holdings:
+                    name = h.get("name", "")
+                    for sec in sectors:
+                        if sec in name:
+                            lines.append(f"  → 보유: {name} ({sec} 관련)")
+
+            msg = "\n".join(lines)
+
+            event = {
+                "time": datetime.now().strftime("%H:%M"),
+                "eye_id": "EYE-08",
+                "ticker": "",
+                "name": title[:30],
+                "price": 0,
+                "change_pct": 0,
+                "reason": f"JGIS 긴급뉴스 [{severity}]",
+            }
+            self._events.append(event)
+
+            if self.dry_run:
+                logger.info("[DRY-RUN] %s", msg.replace("\n", " | "))
+            else:
+                send_message(msg)
+                logger.info("[SENT] EYE-08 긴급뉴스: %s", title[:30])
+
+            self.cooldown.mark_fired(key)
+
     # ─── 메인 사이클 ───
 
     def run_cycle(self):
@@ -429,6 +495,12 @@ class IntradayEye:
         # 3) 워치리스트 신규 기회 (EYE-07)
         if self.watchlist:
             self._eye07_new_opportunity(price_data_map)
+
+        # 4) JGIS 긴급 뉴스 (EYE-08)
+        try:
+            self._eye08_breaking_news()
+        except Exception as e:
+            logger.debug("[EYE-08] 긴급뉴스 체크 실패 (무시): %s", e)
 
         logger.info("[EYE] === 사이클 완료 (이벤트 누적 %d건) ===", len(self._events))
 

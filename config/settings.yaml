@@ -2206,3 +2206,18 @@ intraday_eye:
     - "432320"                    # 달바글로벌
     - "090430"                    # 아모레퍼시픽
     - "051900"                    # LG생활건강
+
+# ============================================================
+# 정보봇(JGIS) ↔ 퀀트봇 데이터 파이프라인
+# ============================================================
+jgis_integration:
+  enabled: true
+  shared_path: "D:/shared-bot-data/jgis_to_quant"
+  files:
+    daily_intelligence: "daily_intelligence.json"    # 매일 08:00 정보봇이 생성
+    breaking_alerts: "breaking_alerts.json"           # 긴급 뉴스 발생 시 생성
+    sector_flow: "sector_flow_jgis.json"             # US→KR 릴레이 + 글로벌 자금흐름
+  fallback_on_missing: true    # 파일 없으면 자체 로직으로 fallback
+  sentiment_boost: 0.15        # 센티먼트 70+ 섹터 부스트
+  sentiment_penalty: 0.15      # 센티먼트 30- 섹터 패널티
+  relay_min_confidence: 70     # US→KR 릴레이 최소 신뢰도

@@ -17,7 +17,7 @@
 # ═══════════════════════════════════════════════════════
 
 
-## 🟢 현재 상태: STEP 10 진행 중 — SCENARIO ENGINE
+## 🟢 현재 상태: STEP 10 완료 — SCENARIO ENGINE + JGIS 연동
 
 ## 마지막 완료: STEP 9 MARKET JOURNAL (2026-03-20)
 
@@ -480,6 +480,18 @@
   - BAT-D 11.23단계 (LENS 직전): python -m src.alpha.scenario_detector
   - BRAIN(11.2) → SCENARIO(11.23) → LENS(11.25) 순서
   - dry-run 테스트 통과
+  - 완료일: 2026-03-21
+
+- [x] 10-6. 정보봇(JGIS) ↔ 퀀트봇 데이터 파이프라인
+  - 공유 폴더: D:\shared-bot-data\jgis_to_quant\
+  - daily_intelligence.json: 뉴스 키워드 + 섹터 센티먼트 (매일 08:00)
+  - breaking_alerts.json: 긴급 뉴스 (비정기, read_by_quant 처리)
+  - sector_flow_jgis.json: US→KR 릴레이 + 글로벌 자금흐름
+  - scenario_detector.py: JGIS 우선 → 자체 뉴스 fallback 키워드 매칭
+  - flow_map.py: 센티먼트 ±0.15 + US→KR 릴레이 +0.1 가중치
+  - intraday_eye.py: EYE-08 긴급뉴스 감지기 추가 (5분마다 체크)
+  - settings.yaml: jgis_integration 섹션 추가
+  - 정보봇 미가동 시 fallback 정상 동작 확인
   - 완료일: 2026-03-21
 
 

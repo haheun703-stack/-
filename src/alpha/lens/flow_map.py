@@ -7,6 +7,11 @@ STEP 10 확장: 시나리오 엔진 활성 시 해당 섹터 가중치를 추가
   hot_sectors  → +0.2 부스트
   cold_sectors → -0.2 패널티
 
+JGIS 연동: 정보봇의 섹터 센티먼트 + US→KR 릴레이로 추가 가중치.
+  센티먼트 70+ → +0.15 부스트
+  센티먼트 30- → -0.15 패널티
+  US→KR 릴레이 (confidence 70+) → +0.1 부스트
+
 hot  섹터 종목: position_ratio × 1.2~1.3
 cold 섹터 종목: position_ratio × 0.7~0.8
 """
@@ -18,10 +23,15 @@ import logging
 from pathlib import Path
 from statistics import mean, stdev
 
+import yaml
+
 logger = logging.getLogger(__name__)
 
 _ACTIVE_SCENARIOS_PATH = Path("data/scenarios/active_scenarios.json")
 _CHAINS_PATH = Path("data/scenarios/scenario_chains.json")
+
+# JGIS 공유 폴더
+_JGIS_DEFAULT_PATH = Path("D:/shared-bot-data/jgis_to_quant")
 
 
 def compute(flow_data: dict, lens_cfg: dict) -> dict:
@@ -98,7 +108,10 @@ def compute(flow_data: dict, lens_cfg: dict) -> dict:
     # ── STEP 10: 시나리오 가중치 합산 ──
     scenario_info = _apply_scenario_adjustments(adjustments)
 
-    # hot/cold 재평가 (시나리오로 인해 새 섹터가 추가될 수 있음)
+    # ── JGIS: 정보봇 센티먼트 + US→KR 릴레이 ──
+    jgis_info = _apply_jgis_adjustments(adjustments)
+
+    # hot/cold 재평가 (시나리오/JGIS로 인해 새 섹터가 추가될 수 있음)
     all_hot = set(hot)
     all_cold = set(cold)
     for sector, mult in adjustments.items():
@@ -113,6 +126,7 @@ def compute(flow_data: dict, lens_cfg: dict) -> dict:
         "flow_direction": direction,
         "sector_weight_adjustments": adjustments,
         "active_scenarios": scenario_info,
+        "jgis_intel": jgis_info,
     }
 
 
@@ -181,6 +195,89 @@ def _apply_scenario_adjustments(adjustments: dict) -> list[dict]:
                      scenario["name"], state.get("current_phase", 1),
                      current.get("hot_sectors", []), scenario_boost,
                      current.get("cold_sectors", []), scenario_penalty)
+
+    return info
+
+
+def _load_jgis_config() -> dict:
+    """settings.yaml에서 jgis_integration 설정 로드."""
+    try:
+        cfg_path = Path("config/settings.yaml")
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        return cfg.get("jgis_integration", {})
+    except Exception:
+        return {}
+
+
+def _apply_jgis_adjustments(adjustments: dict) -> dict:
+    """JGIS daily_intelligence + sector_flow_jgis 를 읽어
+    섹터 센티먼트와 US→KR 릴레이 가중치를 adjustments에 반영.
+
+    Returns:
+        JGIS 인텔리전스 정보 dict (LENS 컨텍스트용)
+    """
+    jgis_cfg = _load_jgis_config()
+    if not jgis_cfg.get("enabled", False):
+        return {}
+
+    shared_path = Path(jgis_cfg.get("shared_path", str(_JGIS_DEFAULT_PATH)))
+    files_cfg = jgis_cfg.get("files", {})
+    sentiment_boost = jgis_cfg.get("sentiment_boost", 0.15)
+    sentiment_penalty = jgis_cfg.get("sentiment_penalty", 0.15)
+    relay_min_conf = jgis_cfg.get("relay_min_confidence", 70)
+
+    info: dict = {"source": "jgis", "applied": False}
+
+    # 1. 섹터 센티먼트 (daily_intelligence.json)
+    intel_path = shared_path / files_cfg.get("daily_intelligence", "daily_intelligence.json")
+    try:
+        with open(intel_path, "r", encoding="utf-8") as f:
+            intel = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        intel = {}
+
+    sentiment = intel.get("sector_sentiment", {})
+    if sentiment:
+        info["applied"] = True
+        info["sentiment_sectors"] = len(sentiment)
+        for sector, data in sentiment.items():
+            score = data.get("score", 50)
+            if score >= 70:
+                base = adjustments.get(sector, 1.0)
+                adjustments[sector] = round(base + sentiment_boost, 2)
+                logger.info("[JGIS] 센티먼트 부스트: %s score=%d (+%.2f)",
+                            sector, score, sentiment_boost)
+            elif score <= 30:
+                base = adjustments.get(sector, 1.0)
+                adjustments[sector] = round(base - sentiment_penalty, 2)
+                logger.info("[JGIS] 센티먼트 패널티: %s score=%d (-%.2f)",
+                            sector, score, sentiment_penalty)
+
+    # 2. US→KR 릴레이 (sector_flow_jgis.json)
+    relay_path = shared_path / files_cfg.get("sector_flow", "sector_flow_jgis.json")
+    try:
+        with open(relay_path, "r", encoding="utf-8") as f:
+            relay = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        relay = {}
+
+    us_to_kr = relay.get("us_to_kr_relay", {})
+    if us_to_kr:
+        info["applied"] = True
+        info["relay_sectors"] = len(us_to_kr)
+        for sector, data in us_to_kr.items():
+            if data.get("confidence", 0) >= relay_min_conf:
+                base = adjustments.get(sector, 1.0)
+                adjustments[sector] = round(base + 0.1, 2)
+                logger.info("[JGIS] US→KR 릴레이: %s conf=%d (+0.1)",
+                            sector, data["confidence"])
+
+    # 글로벌 자금흐름 정보 (참고용)
+    global_flow = relay.get("global_flow", {})
+    if global_flow:
+        info["risk_appetite"] = global_flow.get("risk_appetite", "")
+        info["money_direction"] = global_flow.get("money_direction", "")
 
     return info
 
