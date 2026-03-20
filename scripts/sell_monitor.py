@@ -239,13 +239,45 @@ def _tick_round(price: int, reference: int) -> int:
 def execute_sell(
     broker, ticker: str, name: str, qty: int, sell_type: str,
     dry_run: bool, use_limit: bool = True, limit_premium_pct: float = 0.5,
+    exit_rule: str = "",
 ) -> dict:
     """매도 실행 — 지정가 우선, 시장가 fallback.
 
     Args:
         use_limit: True=지정가 매도(+premium%), False=시장가 매도
         limit_premium_pct: 지정가 매도 시 현재가 대비 프리미엄 (기본 +0.5%)
+        exit_rule: "X1"~"X5" (SmartSell 활성 시 유형별 전략)
     """
+    # EX-4: SmartSellExecutor 위임 (활성화 시)
+    if exit_rule:
+        try:
+            import yaml
+            with open("config/settings.yaml", "r", encoding="utf-8") as f:
+                settings = yaml.safe_load(f)
+            ea_cfg = settings.get("execution_alpha", {})
+            if ea_cfg.get("enabled") and ea_cfg.get("smart_sell", {}).get("enabled"):
+                from src.use_cases.smart_sell import SmartSellExecutor
+                executor = SmartSellExecutor(settings)
+                # 현재가 조회
+                current = 0
+                try:
+                    price_resp = broker.fetch_price(ticker)
+                    current = int(price_resp.get("output", {}).get("stck_prpr", 0))
+                except Exception:
+                    pass
+                if current > 0:
+                    result = executor.execute(ticker, qty, exit_rule, current, dry_run)
+                    logger.info(
+                        "[SmartSell] %s %s: %s", name, exit_rule, result.get("detail", "")
+                    )
+                    return {
+                        "status": "ok" if result["filled"] else "pending",
+                        "ticker": ticker,
+                        "qty": result["qty"],
+                        "smart_sell": result,
+                    }
+        except Exception as e:
+            logger.warning("[SmartSell] 위임 실패 → 기존 로직: %s", e)
     if sell_type == "PARTIAL_SELL":
         qty = max(1, qty // 2)  # 50% 매도
 
