@@ -41,6 +41,7 @@ class Step:
     depends: list[str] = field(default_factory=list)  # 선행 단계 ID
     friday_only: bool = False        # 금요일만 실행
     optional: bool = False           # 실패해도 전체 중단 안 함
+    timeout: int = 600               # 초 단위 타임아웃 (기본 10분)
 
 
 def build_pipeline() -> list[Step]:
@@ -51,11 +52,11 @@ def build_pipeline() -> list[Step]:
 
     return [
         # ═══ LEVEL 0: 독립 데이터 수집 (동시 12개) ═══
-        Step("1",    "CSV 전종목 종가",         s + "update_daily_data.py"),
-        Step("2",    "Parquet 증분",           s + "extend_parquet_data.py"),
+        Step("1",    "CSV 전종목 종가",         s + "update_daily_data.py",    timeout=900),
+        Step("2",    "Parquet 증분",           s + "extend_parquet_data.py",  timeout=2400),
         Step("3",    "수급 데이터",             s + "collect_supply_data.py"),
         Step("4",    "KOSPI 인덱스",           s + "update_kospi_index.py"),
-        Step("4.5",  "분봉 데이터",            s + "collect_intraday_candles.py"),
+        Step("4.5",  "분봉 데이터",            s + "collect_intraday_candles.py", timeout=1800),
         Step("7",    "US-KR 패턴DB",          s + "update_us_kr_daily.py"),
         Step("9c.5", "차이나머니",             s + "crawl_china_money.py"),
         Step("9c.7", "ETF 투자자 수급",        s + "collect_etf_investor_flow.py"),
@@ -242,6 +243,16 @@ class PipelineRunner:
                     pass
         return False
 
+    def _kill_proc_tree(self, pid: int):
+        """Windows에서 프로세스 트리 전체 종료 (shell=True로 생긴 자식까지)."""
+        try:
+            subprocess.run(
+                f"taskkill /F /T /PID {pid}",
+                shell=True, capture_output=True, timeout=10,
+            )
+        except Exception:
+            pass
+
     def _run_step(self, step: Step) -> tuple[str, bool, float, str]:
         """단일 단계 실행. (id, success, elapsed, output)"""
         start = time.time()
@@ -252,22 +263,34 @@ class PipelineRunner:
             return step.id, True, 0.1, "(dry run)"
 
         logger.info("[START] %s: %s", step.id, step.name)
+        step_timeout = step.timeout  # 단계별 타임아웃
 
         try:
-            result = subprocess.run(
+            proc = subprocess.Popen(
                 step.cmd,
                 shell=True,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
-                timeout=600,  # 10분 타임아웃
                 cwd=str(PROJECT_ROOT),
                 env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT)},
             )
+            try:
+                stdout, stderr = proc.communicate(timeout=step_timeout)
+            except subprocess.TimeoutExpired:
+                self._kill_proc_tree(proc.pid)
+                proc.kill()
+                proc.wait(timeout=5)
+                elapsed = time.time() - start
+                logger.error("[TIMEOUT] %s: %s (%.1fs, limit=%ds)",
+                             step.id, step.name, elapsed, step_timeout)
+                return step.id, False, elapsed, f"TIMEOUT ({step_timeout}s 초과)"
+
             elapsed = time.time() - start
-            success = result.returncode == 0
-            output = result.stdout[-500:] if result.stdout else ""
+            success = proc.returncode == 0
+            output = stdout[-500:] if stdout else ""
             if not success:
-                output += f"\nSTDERR: {result.stderr[-300:]}" if result.stderr else ""
+                output += f"\nSTDERR: {stderr[-300:]}" if stderr else ""
                 logger.warning("[FAIL] %s: %s (%.1fs)\n%s",
                                step.id, step.name, elapsed, output)
             else:
@@ -275,10 +298,6 @@ class PipelineRunner:
 
             return step.id, success, elapsed, output
 
-        except subprocess.TimeoutExpired:
-            elapsed = time.time() - start
-            logger.error("[TIMEOUT] %s: %s (%.1fs)", step.id, step.name, elapsed)
-            return step.id, False, elapsed, "TIMEOUT (10분 초과)"
         except Exception as e:
             elapsed = time.time() - start
             logger.error("[ERROR] %s: %s — %s", step.id, step.name, e)
