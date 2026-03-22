@@ -210,8 +210,8 @@ def fetch_holdings() -> list[dict]:
             i_net = supply_demand.get("inst_net", 0)
             sd_str = f" | 외인{f_net:+,} 기관{i_net:+,}"
         logger.info(
-            "  %s: %+.1f%% (목표 %d→진행 %.0f%%){sd}".format(sd=sd_str),
-            name, pnl_pct, target_price, progress,
+            "  %s: %+.1f%% (목표 %d→진행 %.0f%%)%s",
+            name, pnl_pct, target_price, progress, sd_str,
         )
 
     return positions, broker

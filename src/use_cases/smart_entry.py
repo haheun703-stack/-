@@ -183,9 +183,13 @@ class SmartEntryEngine:
         # ─── Execution Alpha (EX-1~EX-5) ───
         ea_cfg = self.config.get("execution_alpha", {})
         if ea_cfg.get("enabled"):
-            from src.use_cases.execution_alpha import ExecutionAlpha
-            self.exec_alpha = ExecutionAlpha(self.config, intraday_adapter)
-            logger.info("[SmartEntry] ExecutionAlpha 활성화")
+            try:
+                from src.use_cases.execution_alpha import ExecutionAlpha
+                self.exec_alpha = ExecutionAlpha(self.config, intraday_adapter)
+                logger.info("[SmartEntry] ExecutionAlpha 활성화")
+            except Exception as e:
+                logger.warning("[SmartEntry] ExecutionAlpha 초기화 실패 → 비활성화: %s", e)
+                self.exec_alpha = None
         else:
             self.exec_alpha = None
 
@@ -1185,7 +1189,7 @@ class SmartEntryEngine:
                 self._cancel_order(c)
                 continue
 
-            if c.decision in (EntryDecision.BUY, EntryDecision.WAIT, EntryDecision.HOLDING):
+            if c.decision in (EntryDecision.BUY, EntryDecision.WAIT):
                 new_price = self._calc_adaptive_price(c)
                 if new_price != c.order_price and new_price > 0:
                     self._modify_order(c, new_price)

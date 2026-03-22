@@ -369,19 +369,22 @@ class IntradayEye:
             if ticker in held_tickers:
                 continue  # 이미 보유 중이면 스킵
 
-            p = self.kis.fetch_price(ticker)
-            if not p or not p.get("current_price"):
-                continue
-            change = p.get("change_pct", 0)
-            if change >= threshold:
-                # 종목명 조회 (간이)
-                name = ticker  # 기본값
-                self._fire_alert(
-                    "EYE-07", ticker, name,
-                    p["current_price"], change,
-                    f"워치리스트 급등 +{change:.1f}% (임계: +{threshold}%)",
-                )
-            time.sleep(0.1)
+            try:
+                p = self.kis.fetch_price(ticker)
+                if not p or not p.get("current_price"):
+                    continue
+                change = p.get("change_pct", 0)
+                if change >= threshold:
+                    name = ticker
+                    self._fire_alert(
+                        "EYE-07", ticker, name,
+                        p["current_price"], change,
+                        f"워치리스트 급등 +{change:.1f}% (임계: +{threshold}%)",
+                    )
+            except Exception as e:
+                logger.warning("[EYE-07] %s 조회 실패: %s", ticker, e)
+            finally:
+                time.sleep(0.1)
 
     def _eye08_breaking_news(self):
         """EYE-08: JGIS 긴급 뉴스 — breaking_alerts.json 체크"""
