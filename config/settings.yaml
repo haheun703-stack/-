@@ -1687,11 +1687,11 @@ nightwatch:
     # RED:    주식↓ + 금리↑ (DIVERGENCE) → 절대 금지
     # YELLOW: 주식↓ + 금리↓ (CORRECTION) → 최대 1종목, 반토막 포지션
     # GREEN:  주식↑ + 금리 안정 (NORMAL)  → 정상 운영
-    red_action: "block"           # block = 매수 0건
+    red_action: "block"           # block = 매수 0건 (기본)
     yellow_max_survivors: 1       # 최대 통과 종목 수
     yellow_position_mult: 0.5     # 포지션 반토막
     # grade 기반 추가 필터
-    strong_bear_action: "block"   # STRONG_BEAR → 매수 0건
+    strong_bear_action: "block"   # STRONG_BEAR → 매수 0건 (기본)
     mild_bear_max_survivors: 2    # MILD_BEAR → 최대 2종목
     # shock_type 기반
     compound_action: "restrict"   # COMPOUND → MILD_BEAR와 동일 취급
@@ -1699,6 +1699,17 @@ nightwatch:
     # 거래량 필터 (v12.3 수급 프록시)
     # vol_5d / vol_20d >= threshold → 거래량 증가 종목만 통과
     vol_filter_threshold: 0.85   # 백테스트 최적값 (승률 50→58%, PF 1.70→2.37)
+    # ─── 역발상 우회 (swing_philosophy.enabled 시 RED에서도 우량주 선별 매수) ───
+    # "워런 버핏은 전쟁 전후에 샀다" — RED ≠ 전면금지, RED = 까다롭게 고른다
+    contrarian_override:
+      enabled: true               # swing_philosophy.enabled도 함께 켜져야 작동
+      red_max_survivors: 2        # RED 시 최대 통과 종목 수
+      red_position_mult: 0.3     # RED 시 포지션 30% (분할진입 1단계)
+      red_min_grade: "B"          # B등급 이상 통과 (대형주는 하락장에서 B등급)
+      red_min_market_cap_억: 5000 # 시총 5000억 이상 (대형주)
+      strong_bear_max_survivors: 3  # STRONG_BEAR 시 최대 3종목
+      strong_bear_position_mult: 0.4  # 포지션 40%
+      strong_bear_min_grade: "B"  # B등급 이상 (대형 우량주 포함)
 
 # ─── 3단 예측 체인 (유럽장 오픈 기반) ───
 predict_chain:
@@ -2296,7 +2307,7 @@ execution_alpha:
 # enabled: false → 기존 동작 100% 동일
 # ══════════════════════════════════════════════════════
 swing_philosophy:
-  enabled: false
+  enabled: true
 
   # SW-1: 레짐별 동적 손절 (ATR 배수)
   dynamic_stop:
@@ -2338,3 +2349,18 @@ swing_philosophy:
     enabled: true
     grace_days: 2
     min_pnl_for_hold: 0.05
+
+  # SW-7: 줍줍 모드 — 52주 고점 대비 할인가 분할 매수
+  # "어디까지 떨어지면 줍줍이다" + "우량주/대형주 위주 분할매수"
+  bargain_hunter:
+    enabled: true
+    # 52주 고점 대비 낙폭별 매수 강도
+    tiers:
+      - { drop_pct: -20, label: "관심매수", position_mult: 0.3 }
+      - { drop_pct: -30, label: "적극매수", position_mult: 0.5 }
+      - { drop_pct: -40, label: "줍줍매수", position_mult: 0.8 }
+    # 대형주/우량주 필터
+    min_market_cap_억: 5000     # 시총 5000억 이상
+    require_grade_a: true        # A등급 이상
+    # 출력 옵션
+    show_target_prices: true     # "XX원까지 떨어지면 줍줍" 표시

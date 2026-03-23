@@ -154,6 +154,7 @@ def calc_position_guide(sig: dict, capital: float, held_count: int, max_pos: int
     except Exception:
         pass
 
+    fresh_mult = 1.0  # 기본값 (SW-5에서는 미사용이지만 반환에 필요)
     grade = sig.get("position_grade", "B")
     if _sw5_active:
         # 확신 사이징: 등급별 비중 직접 결정
@@ -678,17 +679,21 @@ def detect_regime() -> dict:
     return {"status": status}
 
 
-def kill_filters(sig: dict) -> tuple[bool, list[str]]:
-    """Kill Filters — K3~K10.
+def kill_filters(sig: dict, contrarian_mode: bool = False) -> tuple[bool, list[str]]:
+    """Kill Filters — K3~K12.
 
     K3: 트리거 미발동
-    K4: 유동성 < 50억
+    K4: 유동성 < 50억 (역발상: 20억)
     K5: 시총 < 5,000억
     K6: 저가주 < 5,000원
     K7: 스팩/리츠/우선주
-    K8: TRIX 데드크로스 (필수 방향 필터)
-    K9: 고점 대비 -20% 이상 폭락 (추세 붕괴)
-    K10: 대추세 붕괴 (MA120 아래)
+    K8: TRIX 데드크로스 (역발상: 면제 — 하락장에선 전 종목 DC)
+    K9: 투매 거래량 (역발상: 면제 — 패닉셀링 = 매수 기회)
+    K10: 늦은과열
+    K11: 52주 고점 대비 -20% 이상 (역발상: 면제 — "줍줍" 대상)
+    K12: MA120 하회 (역발상: 면제 — 하락장에선 전 종목 MA120↓)
+
+    contrarian_mode: True면 K8/K9/K11/K12 면제 (워런 버핏 모드)
     """
     kills = []
 
@@ -697,10 +702,12 @@ def kill_filters(sig: dict) -> tuple[bool, list[str]]:
     if trigger in ("none", "waiting", "setup"):
         kills.append(f"K3:Trigger({trigger})")
 
-    # K4: 20일 평균 거래대금 < 50억
+    # K4: 20일 평균 거래대금 (역발상: 20억, 일반: 50억)
     avg_tv = sig.get("avg_trading_value_20d", 0)
-    if avg_tv < 5_000_000_000:
-        kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억<50억)")
+    k4_threshold = 2_000_000_000 if contrarian_mode else 5_000_000_000
+    k4_label = "20억" if contrarian_mode else "50억"
+    if avg_tv < k4_threshold:
+        kills.append(f"K4:유동성({avg_tv / 1e8:.0f}억<{k4_label})")
 
     # K5: 시가총액 < 5,000억 (소형주 제외)
     market_cap = sig.get("market_cap", 0)
@@ -725,8 +732,8 @@ def kill_filters(sig: dict) -> tuple[bool, list[str]]:
     freshness = calc_freshness_mult(counter, rsi, vol_c)
     sig["freshness_mult"] = freshness
 
-    if freshness == 0.0:
-        # Kill 사유 상세화
+    if freshness == 0.0 and not contrarian_mode:
+        # Kill 사유 상세화 (역발상 모드에서는 K8/K9/K10 면제)
         if counter <= 0:
             kills.append(f"K8:TRIX_DC({counter:+d}일차)")
         elif counter >= 16:
@@ -736,13 +743,13 @@ def kill_filters(sig: dict) -> tuple[bool, list[str]]:
         if counter >= 8 and rsi > 65:
             kills.append(f"K10:늦은과열(GC+{counter},RSI{rsi:.0f})")
 
-    # K11: 52주 고점 대비 -20% 이상 → 추세 붕괴/폭락
+    # K11: 52주 고점 대비 -20% 이상 → 추세 붕괴/폭락 (역발상: 면제)
     drawdown = sig.get("drawdown_from_high", 0)
-    if drawdown < -20:
+    if drawdown < -20 and not contrarian_mode:
         kills.append(f"K11:폭락({drawdown:.0f}%)")
 
-    # K12: 현재가 < MA120 → 장기 대추세 붕괴
-    if not sig.get("above_ma120", True):
+    # K12: 현재가 < MA120 → 장기 대추세 붕괴 (역발상: 면제)
+    if not sig.get("above_ma120", True) and not contrarian_mode:
         kills.append(f"K12:MA120하회")
 
     return len(kills) == 0, kills
@@ -992,17 +999,86 @@ def run_pipeline(
         print(f"\n  ═══ MACRO GATE: {color_emoji} {macro_gate_color} ({cross_regime} / {us_grade}{compound_str}) → {cap_str}, pos×{macro_gate_pos_mult:.1f} ═══")
 
         if macro_gate_cap == 0:
-            print(f"  >>> 매수 전면 차단 — 후보 {len(candidates)}건 전량 KILL <<<")
-            return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
+            # ─── 역발상 우회 체크 ───
+            _contrarian_ov = _mg.get("contrarian_override", {})
+            _sw_cfg_gate = _full_cfg.get("swing_philosophy", {})
+            _contrarian_active = (
+                _contrarian_ov.get("enabled", False)
+                and _sw_cfg_gate.get("enabled", False)
+            )
+            if _contrarian_active:
+                # RED/STRONG_BEAR별 파라미터
+                if us_grade == "STRONG_BEAR":
+                    _co_cap = _contrarian_ov.get("strong_bear_max_survivors", 3)
+                    _co_mult = _contrarian_ov.get("strong_bear_position_mult", 0.4)
+                    _co_grade = _contrarian_ov.get("strong_bear_min_grade", "A")
+                else:
+                    _co_cap = _contrarian_ov.get("red_max_survivors", 2)
+                    _co_mult = _contrarian_ov.get("red_position_mult", 0.3)
+                    _co_grade = _contrarian_ov.get("red_min_grade", "A")
+                _co_min_cap = _contrarian_ov.get("red_min_market_cap_억", 5000)
+
+                # 등급 필터: A등급 이상만 (SignalEngine grade: A/B/C/F)
+                _grade_order = {"S": 0, "A": 1, "B": 2, "C": 3, "F": 4}
+                _min_grade_idx = _grade_order.get(_co_grade, 1)
+                _quality = [
+                    c for c in candidates
+                    if _grade_order.get(c.get("grade", "F"), 4) <= _min_grade_idx
+                ]
+
+                # 시총 필터: 대형주만 (market_cap은 원 단위, 1억=1e8)
+                if _co_min_cap > 0:
+                    _has_cap = any(c.get("market_cap", 0) > 0 for c in _quality)
+                    if _has_cap:
+                        _quality = [
+                            c for c in _quality
+                            if c.get("market_cap", 0) / 1e8 >= _co_min_cap
+                        ]
+                    else:
+                        print(f"      (시총 데이터 없음 — 시총 필터 건너뜀)")
+                        # 시총 0이면 필터 건너뜀 (API 실패 대비)
+
+                if _quality:
+                    # 통합 점수 높은 순 정렬 → cap 수만큼 통과
+                    _quality.sort(key=lambda c: c.get("composite_score", 0), reverse=True)
+                    _passed = _quality[:_co_cap]
+                    _passed_tickers = {c["ticker"] for c in _passed}
+                    _killed = [
+                        dict(c, v9_kill_reasons=["MACRO_GATE_RED"])
+                        for c in candidates if c["ticker"] not in _passed_tickers
+                    ]
+                    # 포지션 배수 축소 적용
+                    macro_gate_pos_mult = _co_mult
+                    macro_gate_cap = _co_cap
+                    _names = ", ".join(f'{c["name"]}({c.get("grade","?")})' for c in _passed)
+                    print(f"  >>> 역발상 우회: {len(candidates)}건 중 {len(_passed)}건 통과 (pos×{_co_mult}) <<<")
+                    print(f"      통과: {_names}")
+                    candidates = _passed  # 이후 kill filter → rank → tag 계속 진행
+                else:
+                    print(f"  >>> 역발상 모드이나 {_co_grade}등급+시총{_co_min_cap}억 충족 0건 → 전량 KILL <<<")
+                    return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
+            else:
+                print(f"  >>> 매수 전면 차단 — 후보 {len(candidates)}건 전량 KILL <<<")
+                return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
 
     # ─── END MACRO GATE ───────────────────────────────────────────
+
+    # 역발상 모드 판정: RED에서 contrarian override로 통과한 경우
+    _is_contrarian = (
+        macro_gate_enabled
+        and macro_gate_color == "RED"
+        and macro_gate_cap is not None
+        and macro_gate_cap > 0  # 원래 cap=0이었으나 contrarian으로 변경됨
+    )
+    if _is_contrarian:
+        print(f"  Kill 필터: 역발상 모드 (K8/K9/K11/K12 면제)")
 
     killed_list = []
     survivors = []
 
     for sig in candidates:
-        # Kill Filters (K3~K7)
-        passed, kill_reasons = kill_filters(sig)
+        # Kill Filters (K3~K12, 역발상 모드 시 K8/K9/K11/K12 면제)
+        passed, kill_reasons = kill_filters(sig, contrarian_mode=_is_contrarian)
         if not passed:
             sig["v9_kill_reasons"] = kill_reasons
             killed_list.append(sig)
@@ -1012,7 +1088,8 @@ def run_pipeline(
 
     # ─── 거래량 필터 (v12.3 수급 프록시) ───
     # vol_surge (= vol_5d / vol_20d) >= threshold → 거래량 증가 종목만 통과
-    vol_thr = _mg.get("vol_filter_threshold", 0) if macro_gate_enabled else 0
+    # 역발상 모드: 거래량 필터 건너뜀 (하락장에서 거래량 감소는 자연스러운 현상)
+    vol_thr = _mg.get("vol_filter_threshold", 0) if (macro_gate_enabled and not _is_contrarian) else 0
     if vol_thr > 0:
         vol_passed = []
         vol_killed_count = 0
@@ -1186,6 +1263,46 @@ def run_pipeline(
 
     # 순위 정렬
     survivors.sort(key=lambda s: s["v9_rank_score"], reverse=True)
+
+    # ─── SW-7: 줍줍 태그 (52주 고점 대비 낙폭 기반) ───
+    _sw7_cfg = _full_cfg.get("swing_philosophy", {})
+    if _sw7_cfg.get("enabled") and _sw7_cfg.get("bargain_hunter", {}).get("enabled"):
+        _bh = _sw7_cfg["bargain_hunter"]
+        _bh_tiers = sorted(_bh.get("tiers", []), key=lambda t: t["drop_pct"])  # -40, -30, -20 순
+        for sig in survivors:
+            pct_of_52w = sig.get("pct_of_52w_high", 1.0)
+            drop = (pct_of_52w - 1.0) * 100  # 예: 0.70 → -30%
+            sig["bargain_drop_pct"] = round(drop, 1)
+            sig["bargain_tier"] = None
+            sig["bargain_position_mult"] = 1.0
+            for tier in _bh_tiers:
+                if drop <= tier["drop_pct"]:
+                    sig["bargain_tier"] = tier["label"]
+                    sig["bargain_position_mult"] = tier["position_mult"]
+                    break  # 가장 깊은 할인 적용
+            # 줍줍 가격 목표 계산 (52주 고점 × 할인율)
+            entry_price = sig.get("entry_price", 0)
+            if pct_of_52w > 0 and entry_price > 0:
+                high_52w = int(entry_price / pct_of_52w) if pct_of_52w > 0 else 0
+                sig["high_52w"] = high_52w
+                sig["bargain_targets"] = {}
+                for tier in _bh_tiers:
+                    target = int(high_52w * (1.0 + tier["drop_pct"] / 100))
+                    sig["bargain_targets"][tier["label"]] = target
+        # 줍줍 요약 출력
+        _bargains = [s for s in survivors if s.get("bargain_tier")]
+        if _bargains:
+            print(f"\n  ─── 줍줍 레이더: {len(_bargains)}종목 할인 영역 ───")
+            for s in _bargains:
+                print(f"    {s['name']}({s['ticker']}): 52주 고점 대비 {s['bargain_drop_pct']:.0f}% → [{s['bargain_tier']}]")
+        if _bh.get("show_target_prices"):
+            print(f"\n  ─── 줍줍 목표가 (52주 고점 기준) ───")
+            for sig in survivors[:10]:
+                targets = sig.get("bargain_targets", {})
+                if targets:
+                    t_str = " / ".join(f"{k}:{v:,}원" for k, v in targets.items())
+                    now_str = f"현재:{sig['entry_price']:,}원 ({sig['bargain_drop_pct']:.0f}%)"
+                    print(f"    {sig['name']}: {now_str} → {t_str}")
 
     # ─── MACRO GATE: YELLOW cap 적용 (최종 정렬 후) ───
     if macro_gate_enabled and macro_gate_cap is not None and macro_gate_cap > 0:
