@@ -8,7 +8,7 @@ ETF 추천 엔진 — "대한민국 1등 추세저격"
 입력:
   brain_decision.json, overnight_signal.json, derivatives_signal.json,
   regime_macro_signal.json, active_scenarios.json, scenario_chains.json,
-  investor_flow.json, etf_universe.json
+  investor_flow.json, etf_universe.json, active_macro_chains.json
 
 출력:
   data/etf_recommendations.json
@@ -177,6 +177,7 @@ class ETFSectorEngine:
         self.flow = _load_json(DATA_DIR / "sector_rotation" / "investor_flow.json") or {}
         self.etf_universe = _load_json(DATA_DIR / "etf_universe.json") or {}
         self.etf_volume = _load_json(DATA_DIR / "etf_volume_monitor.json") or {}
+        self.macro_chains = _load_json(DATA_DIR / "active_macro_chains.json") or {}
 
     def compute_sector_signals(self) -> list[dict]:
         """섹터별 추세 전조 감지 → HOT 섹터 Top 3."""
@@ -187,6 +188,7 @@ class ETFSectorEngine:
         self._indicator_3_sector_flow(sectors)
         self._indicator_4_news_sentiment(sectors)
         self._indicator_5_etf_volume(sectors)
+        self._indicator_6_macro_chain(sectors)
 
         # 상위 3개 섹터 = HOT (최소 2개 선행지표 일치 = 40점)
         ranked = sorted(sectors.items(), key=lambda x: x[1]["score"], reverse=True)
@@ -321,6 +323,40 @@ class ETFSectorEngine:
                     f"ETF 거래량 {ratio:.1f}배 폭발 ({item.get('name', '')})"
                 )
 
+    # ── 선행지표 6: 매크로 체인 (원자재/환율/금리 연동) ──
+    def _indicator_6_macro_chain(self, sectors: dict) -> None:
+        """활성 매크로 체인의 수혜/피해 섹터 점수 반영."""
+        active = self.macro_chains.get("active_chains", [])
+        if not active:
+            return
+
+        for chain in active:
+            chain_name = chain.get("name", "")
+
+            # 수혜 섹터 +20
+            for b in chain.get("beneficiaries", []):
+                if b.get("type") == "sector":
+                    sector = self._normalize_sector(b.get("sector", ""))
+                    if not sector:
+                        continue
+                    sectors.setdefault(sector, {"score": 0, "reasons": []})
+                    sectors[sector]["score"] += 20
+                    sectors[sector]["reasons"].append(
+                        f"매크로 수혜: {chain_name} → {b.get('reason', '')}"
+                    )
+
+            # 피해 섹터 -15
+            for v in chain.get("victims", []):
+                if v.get("type") == "sector":
+                    sector = self._normalize_sector(v.get("sector", ""))
+                    if not sector:
+                        continue
+                    sectors.setdefault(sector, {"score": 0, "reasons": []})
+                    sectors[sector]["score"] -= 15
+                    sectors[sector]["reasons"].append(
+                        f"매크로 피해: {chain_name} → {v.get('reason', '')}"
+                    )
+
     # ── 헬퍼 ──
     def _normalize_sector(self, raw: str) -> str:
         """비표준 섹터명 정규화."""
@@ -359,6 +395,7 @@ class ETFRecommendationEngine:
         self.sector_engine = ETFSectorEngine()
         self.etf_universe = _load_json(DATA_DIR / "etf_universe.json") or {}
         self.brain = _load_json(DATA_DIR / "brain_decision.json") or {}
+        self.macro_chains = _load_json(DATA_DIR / "active_macro_chains.json") or {}
 
     def generate_recommendations(self) -> dict:
         """ETF 추천 생성 → data/etf_recommendations.json 저장."""
@@ -456,6 +493,26 @@ class ETFRecommendationEngine:
                         "target": "위기 지속 시 비중 확대",
                     })
 
+        # ── 5. 매크로 체인 직접 ETF 추천 (원자재/환율 수혜 ETF) ──
+        for chain in self.macro_chains.get("active_chains", []):
+            chain_name = chain.get("name", "")
+            for b in chain.get("beneficiaries", []):
+                if b.get("type") == "etf":
+                    ticker = b.get("ticker", "")
+                    if ticker:
+                        recommendations["etf_picks"].append({
+                            "category": "매크로",
+                            "ticker": ticker,
+                            "name": b.get("name", ticker),
+                            "action": "BUY",
+                            "reason": [f"매크로: {chain_name}", b.get("reason", "")],
+                            "confidence": 0.65,
+                            "holding_period": "3~7일",
+                            "portfolio_pct": 5,
+                            "stop_loss": "매크로 조건 해소 시",
+                            "target": "추세 지속 시 유지",
+                        })
+
         # BRAIN ARM 비중 참조 — etf_dollar ARM이 높으면 달러 ETF 추가
         for arm in self.brain.get("arms", []):
             if arm.get("name") == "etf_dollar" and arm.get("adjusted_pct", 0) >= 8:
@@ -535,6 +592,7 @@ def format_etf_telegram(recommendations: dict) -> str:
         "인버스": "🔴",
         "레버리지": "🟢",
         "섹터": "🟢",
+        "매크로": "🟠",
         "헤지": "🟡",
     }
 
@@ -567,15 +625,23 @@ def format_etf_telegram(recommendations: dict) -> str:
 # ============================================================
 
 def run_etf_engine() -> dict:
-    """ETF 추천 엔진 실행 + 텔레그램 발송."""
+    """ETF 추천 엔진 실행 + 매크로 체인 감지 + 텔레그램 3단 발송."""
     print("=" * 50)
-    print("ETF 추천 엔진 실행")
+    print("ETF 추천 엔진 실행 (매크로 체인 통합)")
     print("=" * 50)
 
+    # ── 1단계: 매크로 체인 감지 (가장 먼저!) ──
+    from src.alpha.macro_chain_detector import MacroChainDetector, format_macro_telegram
+    detector = MacroChainDetector()
+    active_chains = detector.detect()
+    print(f"\n매크로 체인: {len(active_chains)}건 활성")
+    for chain in active_chains:
+        print(f"  [{chain['id']}] {chain['name']}")
+
+    # ── 2단계: ETF 추천 엔진 ──
     engine = ETFRecommendationEngine()
     result = engine.generate_recommendations()
 
-    # 결과 출력
     direction = result["market_direction"]
     picks = result["etf_picks"]
     hot = result.get("hot_sectors", [])
@@ -597,19 +663,31 @@ def run_etf_engine() -> dict:
         else:
             print(f"    근거: {reasons}")
 
-    # 텔레그램 발송
-    telegram_text = format_etf_telegram(result)
-    if telegram_text:
+    # ── 3단계: 텔레그램 3단 발송 (매크로→ETF→종목) ──
+    telegram_parts = []
+
+    # 1단: 매크로 시그널
+    macro_text = format_macro_telegram(active_chains)
+    if macro_text:
+        telegram_parts.append(macro_text)
+
+    # 2단: ETF 추천
+    etf_text = format_etf_telegram(result)
+    if etf_text:
+        telegram_parts.append(etf_text)
+
+    # 3단 합체 후 발송
+    if telegram_parts:
+        combined = "\n\n".join(telegram_parts)
         try:
             sys.path.insert(0, str(PROJECT_ROOT))
             from src.telegram_sender import send_message
-            send_message(telegram_text)
-            print("\n텔레그램 ETF 추천 발송 완료")
+            send_message(combined)
+            print("\n텔레그램 3단 발송 완료 (매크로→ETF)")
         except Exception as e:
             print(f"\n텔레그램 발송 실패: {e}")
-            # 실패해도 JSON은 저장됨
     else:
-        print("\n추천 ETF 없음 — 텔레그램 미발송")
+        print("\n시그널 없음 — 텔레그램 미발송")
 
     return result
 

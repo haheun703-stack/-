@@ -332,7 +332,12 @@ echo [%date% %time%] [20.9/31] Master Brain 통합 판단 >> logs\schedule.log
 python -u -X utf8 scripts\run_master_brain.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [20.9/31] FAILED (Master Brain) >> logs\schedule.log
 
-REM 20.95단계: ETF 추천 엔진 (방향+섹터+시나리오→ETF 추천 + 텔레그램)
+REM 20.92단계: 매크로 체인 감지 (원자재/환율/금리 → 수혜/피해 자동 매칭)
+echo [%date% %time%] [20.92/31] 매크로 체인 감지 >> logs\schedule.log
+python -u -X utf8 -m src.alpha.macro_chain_detector >> logs\schedule.log 2>&1
+if errorlevel 1 echo [%date% %time%] [20.92/31] FAILED >> logs\schedule.log
+
+REM 20.95단계: ETF 추천 엔진 (매크로+방향+섹터+시나리오→ETF 추천 + 텔레그램 3단)
 echo [%date% %time%] [20.95/31] ETF 추천 엔진 >> logs\schedule.log
 python -u -X utf8 -m src.alpha.etf_engine >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [20.95/31] FAILED >> logs\schedule.log
