@@ -72,6 +72,27 @@
       ]
     },
     {
+      "id": "GOLD_CRASH_WITH_VIX_HIGH",
+      "name": "금 투매 + 공포 (마진콜 패닉)",
+      "trigger": {
+        "indicators": ["gold", "vix"],
+        "condition": "gold.ret_5d <= -5 AND vix.level >= 25"
+      },
+      "overrides": ["GOLD_DOWN"],
+      "beneficiaries": [
+        {"type": "etf", "ticker": "132030", "name": "KODEX 골드선물(H)",
+         "reason": "패닉 투매 후 금 반등 매수 기회", "impact": "STRONG_POSITIVE"},
+        {"type": "etf", "ticker": "252670", "name": "KODEX 200선물인버스2X",
+         "reason": "마진콜 확산 → 시장 추가 하락 가능", "impact": "POSITIVE"},
+        {"type": "warning", "message": "금까지 투매 = 마진콜 패닉. GOLD_DOWN의 '리스크온' 해석은 틀림. 현금 확보 우선"}
+      ],
+      "victims": [
+        {"type": "sector", "sector": "성장주", "reason": "유동성 경색 → 성장주 추가 타격"},
+        {"type": "sector", "sector": "소형주", "reason": "마진콜 패닉 → 소형주 투매"},
+        {"type": "warning", "message": "금 -5%+ & VIX 25+ = 패닉 셀링(마진콜). 리스크온이 아님!"}
+      ]
+    },
+    {
       "id": "COPPER_UP",
       "name": "구리 가격 상승",
       "trigger": {

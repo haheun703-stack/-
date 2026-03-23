@@ -55,17 +55,28 @@ class MacroChainDetector:
         """현재 활성화된 매크로 체인 판별."""
         chains = self.chain_map.get("chains", [])
         active_chains = []
+        active_ids = set()
 
         for chain in chains:
             trigger = chain.get("trigger", {})
             indicator = trigger.get("indicator", "")
+            indicators = trigger.get("indicators", [])  # 크로스 인디케이터
             condition = trigger.get("condition", "")
 
-            current = self.macro_data.get(indicator)
-            if not current:
-                continue
-
-            triggered = self._evaluate_condition(condition, current)
+            if indicators:
+                # 크로스 인디케이터: dot notation (gold.ret_5d, vix.level)
+                all_present = all(self.macro_data.get(ind) for ind in indicators)
+                if not all_present:
+                    continue
+                triggered = self._evaluate_condition(condition, self.macro_data,
+                                                     cross_indicator=True)
+                current = {ind: self.macro_data[ind] for ind in indicators}
+                indicator = "+".join(indicators)
+            else:
+                current = self.macro_data.get(indicator)
+                if not current:
+                    continue
+                triggered = self._evaluate_condition(condition, current)
 
             if triggered:
                 active_chains.append({
@@ -77,7 +88,19 @@ class MacroChainDetector:
                     "beneficiaries": chain.get("beneficiaries", []),
                     "victims": chain.get("victims", []),
                 })
+                active_ids.add(chain["id"])
                 logger.info("매크로 체인 활성: %s (%s)", chain["name"], indicator)
+
+        # overrides 처리: 상위 체인이 활성이면 하위 체인 제거
+        override_targets = set()
+        for chain in self.chain_map.get("chains", []):
+            if chain["id"] in active_ids:
+                for ov in chain.get("overrides", []):
+                    override_targets.add(ov)
+        if override_targets:
+            active_chains = [c for c in active_chains if c["id"] not in override_targets]
+            for ov_id in override_targets:
+                logger.info("매크로 체인 오버라이드: %s 제거 (상위 체인 활성)", ov_id)
 
         # 저장
         result = {
@@ -183,8 +206,13 @@ class MacroChainDetector:
 
         return data
 
-    def _evaluate_condition(self, condition: str, current: dict) -> bool:
-        """조건 문자열을 평가. 안전한 평가만 수행."""
+    def _evaluate_condition(self, condition: str, current: dict,
+                            *, cross_indicator: bool = False) -> bool:
+        """조건 문자열을 평가. 안전한 평가만 수행.
+
+        cross_indicator=True 면 current는 {indicator: {field: val}} 형태이고
+        조건은 'gold.ret_5d <= -5 AND vix.level >= 25' 같은 dot notation.
+        """
         if not condition or not current:
             return False
 
@@ -192,29 +220,42 @@ class MacroChainDetector:
             # OR로 분리 → 하나라도 True면 활성
             or_parts = [p.strip() for p in condition.split(" OR ")]
             for part in or_parts:
-                if self._evaluate_single(part, current):
+                if self._evaluate_single(part, current, cross_indicator=cross_indicator):
                     return True
 
             # AND로 분리 → 모두 True여야 활성
             if " AND " in condition and " OR " not in condition:
                 and_parts = [p.strip() for p in condition.split(" AND ")]
-                return all(self._evaluate_single(p, current) for p in and_parts)
+                return all(self._evaluate_single(p, current,
+                           cross_indicator=cross_indicator) for p in and_parts)
 
             return False
         except Exception as e:
             logger.warning("조건 평가 실패: %s — %s", condition, e)
             return False
 
-    def _evaluate_single(self, expr: str, current: dict) -> bool:
-        """단일 비교 표현식 평가. ex: 'ret_5d >= 5'"""
+    def _evaluate_single(self, expr: str, current: dict,
+                          *, cross_indicator: bool = False) -> bool:
+        """단일 비교 표현식 평가.
+
+        일반: 'ret_5d >= 5' — current에서 field 직접 조회
+        크로스: 'gold.ret_5d <= -5' — current[indicator][field] 조회
+        """
         try:
-            # 파싱: "field op value"
             for op in (">=", "<=", ">", "<", "=="):
                 if op in expr:
                     parts = expr.split(op, 1)
-                    field = parts[0].strip()
+                    field_path = parts[0].strip()
                     threshold = float(parts[1].strip())
-                    actual = current.get(field, 0)
+
+                    # dot notation: indicator.field
+                    if cross_indicator and "." in field_path:
+                        ind_name, field = field_path.split(".", 1)
+                        ind_data = current.get(ind_name, {})
+                        actual = ind_data.get(field, 0)
+                    else:
+                        actual = current.get(field_path, 0)
+
                     if actual is None:
                         return False
                     actual = float(actual)
@@ -306,6 +347,107 @@ def format_macro_telegram(active_chains: list[dict]) -> str:
 
 
 # ============================================================
+# 시나리오-수급 충돌 감지
+# ============================================================
+
+# 시나리오 → 관련 섹터 매핑
+SCENARIO_SECTOR_MAP = {
+    "WAR_MIDDLE_EAST": ["방산", "에너지화학"],
+    "OIL_SPIKE": ["에너지화학"],
+    "FED_RATE_CUT": ["IT", "바이오", "헬스케어"],
+    "SEMICONDUCTOR_CYCLE_UP": ["반도체", "IT"],
+    "CHINA_RECOVERY": ["철강소재", "2차전지"],
+    "US_RECESSION": ["인터넷", "소프트웨어"],
+    "KOREA_RATE_CUT": ["건설", "금융"],
+}
+
+
+def detect_scenario_supply_conflicts() -> list[dict]:
+    """시나리오 활성(50+)인데 관련 섹터 수급이 COLD → 충돌 경고 생성.
+
+    예: WAR_MIDDLE_EAST 70점인데 방산 -4,700억 순매도 = Phase 전환 가능성.
+    """
+    scenarios = _load_json(DATA_DIR / "scenarios" / "active_scenarios.json")
+    flow = _load_json(DATA_DIR / "sector_rotation" / "investor_flow.json")
+    if not scenarios or not flow:
+        return []
+
+    scenario_dict = scenarios.get("scenarios", {})
+    sector_list = flow.get("sectors", [])
+
+    # 섹터명 → 수급 데이터 매핑
+    flow_by_sector = {}
+    for s in sector_list:
+        name = s.get("sector", "")
+        total_flow = s.get("foreign_cum_bil", 0) + s.get("inst_cum_bil", 0)
+        flow_by_sector[name] = {
+            "total_flow_bil": round(total_flow, 1),
+            "foreign_cum": s.get("foreign_cum_bil", 0),
+            "inst_cum": s.get("inst_cum_bil", 0),
+            "price_change_5": s.get("price_change_5", 0),
+        }
+
+    conflicts = []
+    for sc_id, sc_data in scenario_dict.items():
+        score = sc_data.get("score", 0)
+        if score < 50:
+            continue
+
+        related_sectors = SCENARIO_SECTOR_MAP.get(sc_id, [])
+        for sector_name in related_sectors:
+            sf = flow_by_sector.get(sector_name)
+            if not sf:
+                continue
+
+            total_flow = sf["total_flow_bil"]
+            if total_flow < -500:  # 5일 순매도 500억 이상이면 충돌
+                conflicts.append({
+                    "scenario": sc_id,
+                    "scenario_score": score,
+                    "sector": sector_name,
+                    "total_flow_bil": total_flow,
+                    "price_change_5": sf["price_change_5"],
+                    "warning": (
+                        f"{sc_id}({score}점) 활성인데 "
+                        f"{sector_name} 수급 {total_flow:+,.0f}억 (5일) — "
+                        f"Phase 전환 가능성 주의"
+                    ),
+                })
+                logger.warning("시나리오-수급 충돌: %s(%d점) vs %s 수급 %+.0f억",
+                               sc_id, score, sector_name, total_flow)
+
+    # 결과 저장
+    if conflicts:
+        result = {
+            "timestamp": datetime.now().isoformat(),
+            "conflict_count": len(conflicts),
+            "conflicts": conflicts,
+        }
+        _save_json(DATA_DIR / "scenario_supply_conflicts.json", result)
+
+    return conflicts
+
+
+def format_conflict_telegram(conflicts: list[dict]) -> str:
+    """시나리오-수급 충돌을 텔레그램 메시지로 포맷."""
+    if not conflicts:
+        return ""
+
+    lines = ["\u26a0\ufe0f 시나리오-수급 충돌 감지", ""]
+    for c in conflicts:
+        lines.append(
+            f"\u2022 {c['scenario']}({c['scenario_score']}점) "
+            f"vs {c['sector']} {c['total_flow_bil']:+,.0f}억"
+        )
+        if c["price_change_5"]:
+            lines.append(f"  가격 5일: {c['price_change_5']:+.1f}%")
+        lines.append(f"  \u2192 Phase 전환 가능성 주의")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+# ============================================================
 # CLI
 # ============================================================
 
@@ -341,10 +483,21 @@ def run_macro_detector() -> list[dict]:
             elif b["type"] == "sector":
                 print(f"    수혜 섹터: {b.get('sector', '')} — {b['reason']}")
 
+    # 시나리오-수급 충돌 감지
+    conflicts = detect_scenario_supply_conflicts()
+    if conflicts:
+        print(f"\n시나리오-수급 충돌: {len(conflicts)}건")
+        for c in conflicts:
+            print(f"  {c['warning']}")
+    else:
+        print("\n시나리오-수급 충돌: 없음")
+
     # 텔레그램 프리뷰
     telegram_text = format_macro_telegram(active)
-    if telegram_text:
-        print(f"\n--- 텔레그램 프리뷰 ---\n{telegram_text}")
+    conflict_text = format_conflict_telegram(conflicts)
+    full_text = telegram_text + ("\n" + conflict_text if conflict_text else "")
+    if full_text.strip():
+        print(f"\n--- 텔레그램 프리뷰 ---\n{full_text}")
 
     return active
 

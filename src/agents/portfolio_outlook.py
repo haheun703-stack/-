@@ -82,6 +82,16 @@ SYSTEM_PROMPT = """\
 - 단기 기술적 하락 ≠ thesis 소멸 (구분 필수)
 - 수익 실현은 thesis 진행도 기준 (목표가 대비 %)
 
+### 3.5. 강제 매도 규칙 (HARD RULE — 반드시 적용)
+- **손절가 근접 + 수급 약 → HOLD 금지**
+  - 현재가가 손절가까지 -5% 이내 AND 섹터 수급 순매도 → TRIM 또는 SELL
+  - 촉매 DEAD + 손절가 근접 → SELL (예외 없음)
+  - 촉매 ALIVE라도 수급이 5일 연속 순매도(-1000억+) → TRIM
+- **수급 점수 판단 기준**
+  - 섹터 외인+기관 합산 5일 순매수 > 0 → 수급 양호
+  - 섹터 외인+기관 합산 5일 순매도 < -500억 → 수급 약화
+  - 섹터 외인+기관 합산 5일 순매도 < -2000억 → 수급 이탈
+
 ### 4. 시장 컨텍스트 반영
 - US Overnight bearish + VIX 스파이크 → 전체적 보수적 판단
 - KOSPI 레짐 BEAR/CRISIS → ADD 자제, TRIM 적극
@@ -218,6 +228,16 @@ class PortfolioOutlook(BaseAgent):
         # AI Brain 캐시
         data["ai_brain"] = self._get_ai_brain(ticker)
 
+        # 섹터 수급
+        data["sector_flow"] = self._get_sector_flow(data["sector"])
+
+        # 손절가 근접도
+        if data["stop_loss"] > 0 and data["current_price"] > 0:
+            dist_to_sl = (data["current_price"] - data["stop_loss"]) / data["current_price"] * 100
+            data["stop_loss_distance_pct"] = round(dist_to_sl, 1)
+        else:
+            data["stop_loss_distance_pct"] = 999
+
         return data
 
     def _get_technicals(self, ticker: str) -> dict:
@@ -310,6 +330,38 @@ JSON으로 응답:
                     }
         except Exception:
             pass
+        return None
+
+    def _get_sector_flow(self, sector: str) -> dict | None:
+        """investor_flow.json에서 섹터별 수급 데이터."""
+        try:
+            path = DATA_DIR / "sector_rotation" / "investor_flow.json"
+            if not path.exists():
+                return None
+            with open(path, encoding="utf-8") as f:
+                flow = json.load(f)
+
+            # 섹터명 매핑 (보유 종목 섹터 → investor_flow 섹터명)
+            sector_alias = {
+                "자동차": "현대차그룹", "증권": "증권", "조선": "조선",
+                "정유": "에너지화학", "반도체": "반도체", "방산": "방산",
+                "바이오": "바이오",
+            }
+            flow_sector = sector_alias.get(sector, sector)
+
+            for s in flow.get("sectors", []):
+                if s.get("sector") == flow_sector:
+                    total = s.get("foreign_cum_bil", 0) + s.get("inst_cum_bil", 0)
+                    status = "양호" if total > 0 else "약화" if total > -2000 else "이탈"
+                    return {
+                        "sector": flow_sector,
+                        "total_flow_bil": round(total, 0),
+                        "foreign_cum": round(s.get("foreign_cum_bil", 0), 0),
+                        "inst_cum": round(s.get("inst_cum_bil", 0), 0),
+                        "status": status,
+                    }
+        except Exception as e:
+            logger.warning("[Flow] %s 수급 실패: %s", sector, e)
         return None
 
     def _gather_market_context(self) -> dict:
@@ -419,6 +471,16 @@ JSON으로 응답:
                 lines.append(f"  5일 추세: {s.get('trend_5d', '?')} ({s.get('change_5d', 0):+.1f}%)")
             else:
                 lines.append("- 기술: parquet 데이터 없음")
+
+            # 손절가 근접도 + 수급
+            sl_dist = s.get("stop_loss_distance_pct", 999)
+            if sl_dist < 5:
+                lines.append(f"  ⚠ 손절가 근접: 현재가→손절가 {sl_dist:+.1f}%")
+            sf = s.get("sector_flow")
+            if sf:
+                lines.append(f"- 섹터 수급({sf['sector']}): {sf['total_flow_bil']:+,.0f}억 "
+                             f"(외인 {sf['foreign_cum']:+,.0f}, 기관 {sf['inst_cum']:+,.0f}) "
+                             f"[{sf['status']}]")
 
             # 촉매
             cat = s.get("catalyst")

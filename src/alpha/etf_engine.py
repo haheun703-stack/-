@@ -531,6 +531,13 @@ class ETFRecommendationEngine:
                         "target": "원화 약세 지속 시 유지",
                     })
 
+        # ── 진입 타이밍 부여 ──
+        vix = direction.get("vix_level", 20)
+        mkt_dir = direction.get("direction", "NEUTRAL")
+        for pick in recommendations["etf_picks"]:
+            pick["entry_timing"] = self._calc_entry_timing(
+                pick["category"], vix, mkt_dir)
+
         # ── 중복 제거 (같은 ticker 2번 추천 방지) ──
         seen = set()
         unique_picks = []
@@ -546,6 +553,34 @@ class ETFRecommendationEngine:
         logger.info("ETF 추천 %d건 생성 → %s", len(unique_picks), out_path)
 
         return recommendations
+
+    @staticmethod
+    def _calc_entry_timing(category: str, vix: float, mkt_dir: str) -> str:
+        """카테고리 + 시장 상황 기반 진입 타이밍 결정."""
+        high_vol = vix >= 25
+
+        if category == "인버스":
+            if high_vol:
+                return "09:00~09:30 갭 하락 확인 후 진입 (투매 마무리 대기)"
+            return "09:30 이후 하락 추세 확인 시 진입"
+
+        if category == "레버리지":
+            if high_vol:
+                return "10:00 이후 반등 확인 시 진입 (변동성 주의)"
+            return "09:30 이후 상승 추세 확인 시 진입"
+
+        if category == "섹터":
+            if mkt_dir == "BEARISH":
+                return "갭 하락 소화 후 10:00~10:30 VWAP 하회 시 분할 매수"
+            return "09:30~10:00 VWAP 기준 매수 (VWAP 하회 시 우선)"
+
+        if category == "헤지":
+            return "장중 수시 (시급도 낮음, 종가 부근 매수 가능)"
+
+        if category == "매크로":
+            return "09:30 이후 원자재/환율 추세 확인 후 진입"
+
+        return "09:30~10:00 추세 확인 후 진입"
 
     def _find_etf(self, category: str, etf_type: str, underlying: str = None) -> dict | None:
         """유니버스에서 카테고리+타입으로 ETF 검색."""
@@ -615,7 +650,95 @@ def format_etf_telegram(recommendations: dict) -> str:
             f"포트 {pick.get('portfolio_pct', 0)}%"
         )
         lines.append(f"  손절: {pick.get('stop_loss', '-')}")
+        entry = pick.get("entry_timing")
+        if entry:
+            lines.append(f"  진입: {entry}")
         lines.append("")
+
+    return "\n".join(lines)
+
+
+# ============================================================
+# 시간별 액션 플랜 생성 (텔레그램 전용, 보고서 미포함)
+# ============================================================
+
+def generate_action_plan(etf_picks: list[dict], portfolio_outlook: list[dict] | None = None) -> str:
+    """ETF 추천 + 보유종목 판단 → 시간대별 액션 플랜 텔레그램 메시지.
+
+    6번 개선사항: 사용자 전용 (보고서 미포함, 텔레그램만).
+    """
+    actions = []  # (시간순서, 시간, 액션, 종목명, 비고)
+
+    # ── ETF 추천 → 시간대 배정 ──
+    for pick in etf_picks:
+        cat = pick.get("category", "")
+        name = pick.get("name", "")
+        ticker = pick.get("ticker", "")
+        pct = pick.get("portfolio_pct", 0)
+        entry = pick.get("entry_timing", "")
+
+        if "09:00" in entry or "장 시작" in entry:
+            time_slot = "09:00~09:30"
+            order = 1
+        elif "09:30" in entry:
+            time_slot = "09:30~10:00"
+            order = 2
+        elif "10:00" in entry or "10:30" in entry:
+            time_slot = "10:00~10:30"
+            order = 3
+        elif "종가" in entry or "수시" in entry:
+            time_slot = "14:30~15:20"
+            order = 5
+        else:
+            time_slot = "09:30~10:00"
+            order = 2
+
+        action_str = f"매수 {name}({ticker}) 포트 {pct}%"
+        note = pick.get("stop_loss", "")
+        actions.append((order, time_slot, action_str, cat, note))
+
+    # ── 보유종목 판단 → 매도 액션 ──
+    if portfolio_outlook:
+        for h in portfolio_outlook:
+            action = h.get("action", "HOLD")
+            if action in ("SELL", "TRIM"):
+                name = h.get("name", h.get("ticker", ""))
+                ticker = h.get("ticker", "")
+                pnl = h.get("pnl_pct", 0)
+
+                if action == "SELL":
+                    time_slot = "09:00~09:05"
+                    order = 0
+                    action_str = f"전량 매도 {name}({ticker}) [{pnl:+.1f}%]"
+                else:
+                    time_slot = "09:30~10:00"
+                    order = 2
+                    action_str = f"50% 매도 {name}({ticker}) [{pnl:+.1f}%]"
+
+                reason = h.get("reason", "")
+                actions.append((order, time_slot, action_str, "매도", reason[:30]))
+
+    if not actions:
+        return ""
+
+    # 시간순 정렬
+    actions.sort(key=lambda x: x[0])
+
+    lines = ["\U0001f4cb 내일 액션 플랜", ""]
+    prev_time = ""
+    for order, time_slot, action_str, cat, note in actions:
+        if time_slot != prev_time:
+            lines.append(f"\u23f0 {time_slot}")
+            prev_time = time_slot
+        cat_emoji = {"매도": "\U0001f534", "인버스": "\U0001f534",
+                     "레버리지": "\U0001f7e2", "섹터": "\U0001f7e2",
+                     "헤지": "\U0001f7e1", "매크로": "\U0001f7e0"}.get(cat, "\u26aa")
+        lines.append(f"  {cat_emoji} {action_str}")
+        if note:
+            lines.append(f"     \u2514 {note}")
+
+    lines.append("")
+    lines.append("\u26a0 조건부: 장 초반 갭/추세 확인 후 실행. 급변 시 보류.")
 
     return "\n".join(lines)
 
@@ -663,7 +786,17 @@ def run_etf_engine() -> dict:
         else:
             print(f"    근거: {reasons}")
 
-    # ── 3단계: 텔레그램 3단 발송 (매크로→ETF→종목) ──
+    # ── 3단계: 시나리오-수급 충돌 감지 ──
+    from src.alpha.macro_chain_detector import (
+        detect_scenario_supply_conflicts, format_conflict_telegram
+    )
+    conflicts = detect_scenario_supply_conflicts()
+    if conflicts:
+        print(f"\n시나리오-수급 충돌: {len(conflicts)}건")
+        for c in conflicts:
+            print(f"  {c['warning']}")
+
+    # ── 4단계: 텔레그램 발송 (매크로→충돌→ETF) ──
     telegram_parts = []
 
     # 1단: 매크로 시그널
@@ -671,23 +804,42 @@ def run_etf_engine() -> dict:
     if macro_text:
         telegram_parts.append(macro_text)
 
+    # 1.5단: 시나리오-수급 충돌
+    conflict_text = format_conflict_telegram(conflicts)
+    if conflict_text:
+        telegram_parts.append(conflict_text)
+
     # 2단: ETF 추천
     etf_text = format_etf_telegram(result)
     if etf_text:
         telegram_parts.append(etf_text)
 
-    # 3단 합체 후 발송
+    # 합체 후 발송
     if telegram_parts:
         combined = "\n\n".join(telegram_parts)
         try:
             sys.path.insert(0, str(PROJECT_ROOT))
             from src.telegram_sender import send_message
             send_message(combined)
-            print("\n텔레그램 3단 발송 완료 (매크로→ETF)")
+            print("\n텔레그램 3단 발송 완료 (매크로→충돌→ETF)")
         except Exception as e:
             print(f"\n텔레그램 발송 실패: {e}")
     else:
         print("\n시그널 없음 — 텔레그램 미발송")
+
+    # ── 5단계: 액션 플랜 (텔레그램 전용, 보고서 미포함) ──
+    portfolio = _load_json(DATA_DIR / "portfolio_outlook.json")
+    outlook_list = portfolio if isinstance(portfolio, list) else (
+        portfolio.get("results", []) if portfolio else []
+    )
+    action_plan = generate_action_plan(picks, outlook_list)
+    if action_plan:
+        try:
+            from src.telegram_sender import send_message
+            send_message(action_plan)
+            print("텔레그램 액션 플랜 발송 완료")
+        except Exception as e:
+            print(f"액션 플랜 텔레그램 발송 실패: {e}")
 
     return result
 

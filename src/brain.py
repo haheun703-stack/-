@@ -396,11 +396,18 @@ class Brain:
             pass
 
         # Fear Index 계산 (0~100, 높을수록 공포)
-        fear_index = min(100.0, max(0.0,
-            (vix_level - 15) * 3  # VIX 15→0, 25→30, 35→60
-            + abs(min(0, ewy_5d_ret * 100)) * 2  # EWY -5%→10, -10%→20
-            + abs(min(0, nw_score * 30))  # NW -0.5→15
-        ))
+        # v2: VIX 25+ 구간 증폭기 + EWY 가중치 상향
+        fear_base = (
+            (vix_level - 12) * 3     # VIX 20→24, 25→39, 30→54
+            + abs(min(0, ewy_5d_ret * 100)) * 4  # EWY -5%→20, -7%→28
+            + abs(min(0, nw_score * 25))  # NW -0.5→12.5
+        )
+        # VIX 고공포 구간 증폭
+        if vix_level >= 30:
+            fear_base *= 1.3
+        elif vix_level >= 25:
+            fear_base *= 1.2
+        fear_index = min(100.0, max(0.0, fear_base))
 
         if vix_level > 25 and ewy_5d_ret < -0.05:
             contrarian_opp = True
