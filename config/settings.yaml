@@ -2290,3 +2290,51 @@ execution_alpha:
   quality_tracking:
     enabled: true
     alert_threshold_bps: 50         # 50bps 이상 슬리피지 시 경고
+
+# ══════════════════════════════════════════════════════
+# Swing Philosophy — 기관형 스윙 트레이더 전환
+# enabled: false → 기존 동작 100% 동일
+# ══════════════════════════════════════════════════════
+swing_philosophy:
+  enabled: false
+
+  # SW-1: 레짐별 동적 손절 (ATR 배수)
+  dynamic_stop:
+    BULL: 2.5
+    CAUTION: 3.0
+    BEAR: 3.5
+    CRISIS: 2.0
+
+  # SW-2: 레짐별 동적 시간청산
+  dynamic_time:
+    BULL: { max_days: 15, min_pnl_pct: 0.02 }
+    CAUTION: { max_days: 20, min_pnl_pct: 0.01 }
+    BEAR: { max_days: 25, min_pnl_pct: 0.005 }
+    CRISIS: { max_days: 10, min_pnl_pct: 0.03 }
+
+  # SW-3: 역발상 매수 (하락장 진입)
+  contrarian:
+    BEAR: { slots: 3, grades: ["A"], require_quality: true, require_value: true }
+    CRISIS: { slots: 1, grades: ["A"], require_quality: true, require_value: true }
+
+  # SW-4: 3단계 분할 진입
+  staged_entry:
+    enabled: true
+    stages: [0.4, 0.4, 0.2]
+    dip_thresholds: [-0.02, -0.03]
+
+  # SW-5: 확신 기반 사이징
+  conviction_sizing:
+    enabled: true
+    base_pct: 0.10
+    s_grade_mult: 1.5
+    a_grade_mult: 1.2
+    b_grade_mult: 0.8
+    c_grade_mult: 0.5
+    max_single_pct: 0.25
+
+  # SW-6: 시나리오 무효화 청산
+  scenario_exit:
+    enabled: true
+    grace_days: 2
+    min_pnl_for_hold: 0.05

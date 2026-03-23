@@ -142,13 +142,21 @@ class AlphaEngine:
         partial_sold: bool = False,
         df: pd.DataFrame | None = None,
         idx: int = 0,
+        regime: str = "",
     ) -> ExitSignal | None:
-        """X1-X5 청산 규칙 검사.
+        """X1-X6 청산 규칙 검사.
 
         disabled → None (기존 청산 로직 그대로 사용).
         """
         if not self.enabled:
             return None
+
+        # SW-1/SW-2: 레짐 자동 감지 (regime 미전달 시)
+        if not regime and self.regime:
+            try:
+                regime = self.regime.current.value
+            except Exception:
+                pass
 
         return self.risk.check_exit_rules(
             entry_price=entry_price,
@@ -159,6 +167,7 @@ class AlphaEngine:
             partial_sold=partial_sold,
             df=df,
             idx=idx,
+            regime=regime,
         )
 
     # ──────────────────────────────────────────────

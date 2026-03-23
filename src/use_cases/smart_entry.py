@@ -115,6 +115,12 @@ class CandidateState:
     # 페이퍼 트레이딩 모드
     paper_mode: bool = False        # True면 분석만, 실매매 안 함
 
+    # SW-4: 분할 진입 (Swing Philosophy)
+    entry_stage: int = 0               # 현재 진입 단계 (0=미진입, 1=1차, 2=2차, 3=3차)
+    entry_context: str = ""            # 진입 시나리오 ID
+    staged_total_qty: int = 0          # 분할 총 목표 수량
+    staged_filled_qty: int = 0         # 분할 누적 체결 수량
+
 
 # ─── SmartEntryEngine ────────────────────────────────
 
@@ -563,6 +569,20 @@ class SmartEntryEngine:
             c.order_price = order_price
             c.order_qty = self._calc_order_qty(c)
             c.decision = EntryDecision.WAIT
+
+            # SW-4: 분할 진입 — 1차 40%만 주문
+            sw = self.config.get("swing_philosophy", {})
+            staged = sw.get("staged_entry", {})
+            if sw.get("enabled") and staged.get("enabled") and c.order_qty > 0:
+                stages = staged.get("stages", [0.4, 0.4, 0.2])
+                c.staged_total_qty = c.order_qty
+                c.order_qty = max(1, int(c.order_qty * stages[0]))
+                c.entry_stage = 1
+                c.staged_filled_qty = 0
+                logger.info(
+                    "[SW-4] %s 분할 진입 1차: %d주 / 총 %d주 (%.0f%%)",
+                    c.name, c.order_qty, c.staged_total_qty, stages[0] * 100,
+                )
 
             # 총 투자금 상한 체크
             order_amount = c.order_price * c.order_qty
@@ -1489,6 +1509,7 @@ class SmartEntryEngine:
 
             self.update_orders()
             self._check_fills()
+            self._check_staged_entry()
 
             # 모든 종목 체결 완료 시 조기 종료 (paper_mode는 주문 없으므로 제외)
             if all(c.paper_mode or c.is_filled or c.decision == EntryDecision.SKIP for c in self.candidates):
@@ -1608,6 +1629,15 @@ class SmartEntryEngine:
                     )
                     if q:
                         c.exec_quality_bps = q["vs_vwap_bps"]
+
+                # SW-4: 분할 체결 후 다음 스테이지 대기 기록
+                if c.entry_stage >= 1 and c.staged_total_qty > 0:
+                    c.staged_filled_qty += c.order_qty
+                    logger.info(
+                        "[SW-4] %s %d차 체결 완료 (%d/%d주)",
+                        c.name, c.entry_stage,
+                        c.staged_filled_qty, c.staged_total_qty,
+                    )
             elif status.status.value == "partial":
                 filled_qty = int(getattr(status, "filled_quantity", 0) or 0)
                 if filled_qty > 0:
@@ -1617,6 +1647,61 @@ class SmartEntryEngine:
                         "[부분체결] %s %d원 %d주 체결, 잔여 %d주",
                         c.name, c.filled_price, filled_qty, c.order_qty,
                     )
+
+    def _check_staged_entry(self):
+        """SW-4: 분할 2차/3차 추가매수 체크"""
+        sw = self.config.get("swing_philosophy", {})
+        staged = sw.get("staged_entry", {})
+        if not sw.get("enabled") or not staged.get("enabled"):
+            return
+
+        stages = staged.get("stages", [0.4, 0.4, 0.2])
+        dip_thresholds = staged.get("dip_thresholds", [-0.02, -0.03])
+
+        for c in self.candidates:
+            if not c.is_filled or c.entry_stage < 1 or c.staged_total_qty <= 0:
+                continue
+            if c.entry_stage >= len(stages):
+                continue  # 모든 스테이지 완료
+            if c.current_price <= 0 or c.filled_price <= 0:
+                continue
+
+            # 다음 스테이지 진입 조건: 현재가가 체결가 대비 dip_threshold 이하
+            next_idx = c.entry_stage  # 0-indexed: 1차=0, 2차=1, 3차=2
+            if next_idx - 1 >= len(dip_thresholds):
+                continue
+
+            dip_pct = (c.current_price - c.filled_price) / c.filled_price
+            threshold = dip_thresholds[next_idx - 1]
+
+            if dip_pct <= threshold:
+                add_qty = max(1, int(c.staged_total_qty * stages[next_idx]))
+                c.entry_stage += 1
+                logger.info(
+                    "[SW-4] %s %d차 추가매수 트리거: 하락 %.1f%% <= %.1f%%, %d주 추가",
+                    c.name, c.entry_stage, dip_pct * 100, threshold * 100, add_qty,
+                )
+
+                if self.dry_run:
+                    c.staged_filled_qty += add_qty
+                    logger.info(
+                        "[SW-4][DRY] %s %d차 추가매수 시뮬: %d주 (누적 %d/%d)",
+                        c.name, c.entry_stage, add_qty,
+                        c.staged_filled_qty, c.staged_total_qty,
+                    )
+                elif self.order:
+                    order_price = self._tick_round(c.current_price, c.prev_close)
+                    order = self.order.buy_limit(c.ticker, order_price, add_qty)
+                    if order.status.value != "failed":
+                        logger.info(
+                            "[SW-4] %s %d차 추가매수 접수: %d원 × %d주 (주문=%s)",
+                            c.name, c.entry_stage, order_price, add_qty, order.order_id,
+                        )
+                    else:
+                        logger.warning(
+                            "[SW-4] %s %d차 추가매수 실패: %s",
+                            c.name, c.entry_stage, order.message,
+                        )
 
     def _wait_until(self, hour: int, minute: int):
         """특정 시각까지 대기 (dry_run이면 즉시 리턴)"""

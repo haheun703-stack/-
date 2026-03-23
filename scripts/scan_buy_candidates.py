@@ -141,22 +141,47 @@ def calc_position_guide(sig: dict, capital: float, held_count: int, max_pos: int
         return {"alloc": 0, "pct": 0, "shares": 0, "label": "N/A"}
     base = capital / effective_max
 
-    # Grade 가중
-    grade_mult = {"S": 1.2, "A": 1.0, "B": 0.8}.get(
-        sig.get("position_grade", "B"), 0.8
-    )
+    # SW-5: 확신 기반 사이징 (swing_philosophy 활성 시)
+    _sw5_active = False
+    try:
+        import yaml as _yaml_sw5
+        _sw5_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+        with open(_sw5_path, encoding="utf-8") as _f_sw5:
+            _sw5_cfg = _yaml_sw5.safe_load(_f_sw5).get("swing_philosophy", {})
+        if _sw5_cfg.get("enabled") and _sw5_cfg.get("conviction_sizing", {}).get("enabled"):
+            _sw5_active = True
+            _conv = _sw5_cfg["conviction_sizing"]
+    except Exception:
+        pass
 
-    # Freshness 가중 (counter 기반)
-    counter = sig.get("trix_counter", 0)
-    if counter <= 3:
-        fresh_mult = 1.0
-    elif counter <= 7:
-        fresh_mult = 0.8
+    grade = sig.get("position_grade", "B")
+    if _sw5_active:
+        # 확신 사이징: 등급별 비중 직접 결정
+        grade_mult = {
+            "S": _conv.get("s_grade_mult", 1.5),
+            "A": _conv.get("a_grade_mult", 1.2),
+            "B": _conv.get("b_grade_mult", 0.8),
+            "C": _conv.get("c_grade_mult", 0.5),
+        }.get(grade, 0.5)
+        position_pct = _conv.get("base_pct", 0.10) * grade_mult
+        max_single = _conv.get("max_single_pct", 0.25)
+        position_pct = min(position_pct, max_single)
+        alloc = capital * position_pct
     else:
-        fresh_mult = 0.5
+        # Grade 가중 (기존 로직)
+        grade_mult = {"S": 1.2, "A": 1.0, "B": 0.8}.get(grade, 0.8)
 
-    alloc = base * grade_mult * fresh_mult
-    alloc = min(alloc, capital * 0.30)  # 30% 상한
+        # Freshness 가중 (counter 기반)
+        counter = sig.get("trix_counter", 0)
+        if counter <= 3:
+            fresh_mult = 1.0
+        elif counter <= 7:
+            fresh_mult = 0.8
+        else:
+            fresh_mult = 0.5
+
+        alloc = base * grade_mult * fresh_mult
+        alloc = min(alloc, capital * 0.30)  # 30% 상한
 
     price = sig.get("entry_price", 0)
     if price <= 0:
@@ -819,6 +844,19 @@ def get_kospi_regime() -> dict:
     else:
         regime, slots = "CRISIS", 0
 
+    # SW-3: 역발상 매수 — BEAR/CRISIS 슬롯 오버라이드
+    try:
+        import yaml as _yaml_sw
+        _sw_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+        with open(_sw_path, encoding="utf-8") as _f_sw:
+            _sw_cfg = _yaml_sw.safe_load(_f_sw).get("swing_philosophy", {})
+        if _sw_cfg.get("enabled"):
+            _contrarian = _sw_cfg.get("contrarian", {})
+            if regime in _contrarian:
+                slots = _contrarian[regime].get("slots", slots)
+    except Exception:
+        pass
+
     return {"regime": regime, "slots": slots, "close": close, "ma20": ma20, "ma60": ma60, "rv_pct": rv_pct}
 
 
@@ -1306,6 +1344,22 @@ def scan_all(
         held_names = [p.get("name", p["ticker"]) for p in pos_data["positions"]]
         print(f"  보유 중: {', '.join(held_names)} ({held_count}/{max_pos}슬롯)")
     print(f"  가용 슬롯: {available_slots} | 금일 진입 여유: {daily_entries_left}")
+
+    # SW-3: BEAR/CRISIS 역발상 모드 → grade 강제 필터
+    _sw3_regime = get_kospi_regime().get("regime", "CAUTION")
+    try:
+        import yaml as _yaml_sw3
+        _sw3_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+        with open(_sw3_path, encoding="utf-8") as _f_sw3:
+            _sw3_cfg = _yaml_sw3.safe_load(_f_sw3).get("swing_philosophy", {})
+        if _sw3_cfg.get("enabled") and _sw3_regime in ("BEAR", "CRISIS"):
+            _contrarian_cfg = _sw3_cfg.get("contrarian", {}).get(_sw3_regime, {})
+            if _contrarian_cfg:
+                _forced_grades = _contrarian_cfg.get("grades", ["A"])
+                grade_filter = "".join(_forced_grades)
+                print(f"  SW-3 역발상 모드: {_sw3_regime} → grade={grade_filter} 강제")
+    except Exception:
+        pass
 
     # 데이터 신선도 검증 (대책 D)
     freshness = validate_data_freshness()

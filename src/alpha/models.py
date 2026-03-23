@@ -102,6 +102,7 @@ class ExitRuleType(Enum):
     X3_TRAILING = "트레일링 스탑 (ATR×2.5)"
     X4_TIME_EXIT = "시간 청산 (10일+수익<2%)"
     X5_TARGET = "목표 도달 (ATR×4, 50% 부분청산)"
+    X6_SCENARIO_EXIT = "시나리오 무효화 (유예 종료)"
     XP_DAILY = "일일 포트폴리오 손실 -3%"
     XP_WEEKLY = "주간 포트폴리오 손실 -5%"
     XP_MDD = "MDD -15% 서킷브레이커"
