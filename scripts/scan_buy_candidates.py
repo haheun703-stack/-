@@ -1562,6 +1562,25 @@ def scan_all(
             pass
         print(f"  V2 스코어러 활성: 레짐={_v2_regime_level.value}")
 
+        # SW-3: 역발상 모드 사전 감지 → V2 스코어러 가중치 오버라이드
+        _sw_cfg_all = engine.config.get("swing_philosophy", {})
+        if _sw_cfg_all.get("enabled", False):
+            try:
+                _brain_path_sw3 = Path(__file__).resolve().parent.parent / "data" / "brain_decision.json"
+                if _brain_path_sw3.exists():
+                    with open(_brain_path_sw3, encoding="utf-8") as _bf_sw3:
+                        _brain_sw3 = json.load(_bf_sw3)
+                    if _brain_sw3.get("contrarian_opportunity", False):
+                        _sc_ov = _sw_cfg_all.get("contrarian", {}).get("scorer_override", {})
+                        if _sc_ov.get("enabled", False) and _sc_ov.get("weights"):
+                            _orig_weights = dict(_v2_scorer._weights.get(_v2_regime_str, {}))
+                            _v2_scorer._weights[_v2_regime_str] = _sc_ov["weights"]
+                            print(f"  SW-3: 역발상 팩터 오버라이드 활성")
+                            print(f"    원래: {_orig_weights}")
+                            print(f"    변경: {_sc_ov['weights']}")
+            except Exception as _sw3_err:
+                print(f"  SW-3 감지 실패 (무시): {_sw3_err}")
+
     # FundamentalEngine (Earnings Momentum용)
     _fundamental_engine = None
     try:

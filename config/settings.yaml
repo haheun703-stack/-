@@ -2329,6 +2329,14 @@ swing_philosophy:
   contrarian:
     BEAR: { slots: 3, grades: ["A"], require_quality: true, require_value: true }
     CRISIS: { slots: 1, grades: ["A"], require_quality: true, require_value: true }
+    # SW-3 보강: 역발상 V2 팩터 가중치 오버라이드
+    # 원래 4팩터: value 0.45, quality 0.35, sd 0.15, momentum 0.05
+    # S1~S5 매핑: S1(바닥) 0.15, S2(가치) 0.35, S3(반등) 0.25, S4(모멘텀) 0.05, S5(수급) 0.20
+    scorer_override:
+      enabled: true
+      weights: { S1: 0.15, S2: 0.35, S3: 0.25, S4: 0.05, S5: 0.20 }
+    # 4팩터 가중치 (UnifiedV2Scorer 전환 시 사용)
+    factor_override: { sd: 0.15, momentum: 0.05, value: 0.45, quality: 0.35 }
 
   # SW-4: 3단계 분할 진입
   staged_entry:
