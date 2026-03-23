@@ -62,6 +62,20 @@ def calc_market_probability(
     v2: 449일 학습, STOXX50 추가 / EWY 제거
     Features: soxx, vix_chg, vix_level, spy, qqq, stoxx50
     """
+    # ── 비거래일 데이터 감지: 모든 주요 지수 0% → 50/50 반환 ──
+    all_zero = (
+        abs(ewy_ret) < 0.01 and abs(spy_ret) < 0.01
+        and abs(qqq_ret) < 0.01 and abs(soxx_ret) < 0.01
+    )
+    if all_zero:
+        return {
+            "up_prob": 50,
+            "down_prob": 50,
+            "est_low": -0.3,
+            "est_high": 0.3,
+            "stale_data": True,
+        }
+
     model = _load_pred_model()
 
     if model and model.get("coef"):
@@ -109,11 +123,22 @@ def calc_market_probability(
     else:
         est_low, est_high = -0.3, 0.3
 
+    # 정합성 보정: up_prob와 est 방향 모순 방지
+    est_lo = min(est_low, est_high)
+    est_hi = max(est_low, est_high)
+
+    if up_prob >= 60 and est_hi < 0:
+        est_lo = round(base * 0.3, 1) if base > 0 else -0.2
+        est_hi = round(base * 1.0, 1) if base > 0 else 0.5
+    elif down_prob >= 60 and est_lo > 0:
+        est_lo = round(base * 1.0, 1) if base < 0 else -0.5
+        est_hi = round(base * 0.3, 1) if base < 0 else 0.2
+
     return {
         "up_prob": up_prob,
         "down_prob": down_prob,
-        "est_low": min(est_low, est_high),
-        "est_high": max(est_low, est_high),
+        "est_low": min(est_lo, est_hi),
+        "est_high": max(est_lo, est_hi),
     }
 
 
@@ -498,8 +523,15 @@ def build_unified_morning() -> str:
     L.append(f"\U0001f4ca 장전 브리핑 | {now}")
     L.append("\u2501" * 24)
 
+    # ── 비거래일 데이터 경고 ──
+    if prob.get("stale_data"):
+        L.append("\n\u26a0\ufe0f US 데이터 없음 (주말/공휴일)")
+        L.append("  KOSPI 예측 불가 — 보합 가정")
+
     # ── 1. KOSPI 예측 ──
-    if prob["down_prob"] >= 60:
+    if prob.get("stale_data"):
+        dir_icon, dir_label = "\u26aa", "보합 (데이터 없음)"
+    elif prob["down_prob"] >= 60:
         dir_icon, dir_label = "\U0001f534", "하락 우세"
     elif prob["up_prob"] >= 60:
         dir_icon, dir_label = "\U0001f7e2", "상승 우세"

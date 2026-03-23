@@ -10,8 +10,15 @@ import traceback
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.trading_calendar import should_run_bat
+
 
 def main():
+    # ── 비거래일 스킵 ──
+    if not should_run_bat("kr"):
+        from datetime import date
+        print(f"[SKIP] 한국 비거래일 ({date.today()}) — 브리핑 스킵")
+        return
     # 1) 테마 스캔 — 텔레그램 OFF (통합 메시지에서 읽어감)
     try:
         from scripts.theme_scan_runner import run_theme_scan

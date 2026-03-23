@@ -22,7 +22,7 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pathlib import Path
 
 import pandas as pd
@@ -30,6 +30,10 @@ import pandas as pd
 project_root = Path(__file__).resolve().parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
+
+from src.trading_calendar import (
+    is_us_trading_day, should_run_bat, last_us_trading_day,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -860,9 +864,20 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     if df.empty:
         return {"composite": "neutral", "score": 0.0, "error": "빈 데이터"}
 
-    latest = df.iloc[-1]
-    prev = df.iloc[-2] if len(df) > 1 else latest
-    us_date = df.index[-1]
+    # ── 거래일 필터: 비거래일(주말/공휴일) 행 제거 ──
+    # yfinance는 보통 거래일만 반환하지만, ffill 등으로 비거래일 행이
+    # 존재할 수 있음. 미국 거래일만 남겨서 ret_1d 계산 정확도 보장.
+    trading_mask = pd.Series(
+        [is_us_trading_day(idx.date()) for idx in df.index],
+        index=df.index,
+    )
+    df_trading = df[trading_mask]
+    if len(df_trading) < 2:
+        df_trading = df  # 필터 후 데이터 부족하면 원본 사용
+
+    latest = df_trading.iloc[-1]
+    prev = df_trading.iloc[-2] if len(df_trading) > 1 else latest
+    us_date = df_trading.index[-1]
 
     signal = {
         "date": datetime.now().strftime("%Y-%m-%d"),
@@ -1461,7 +1476,18 @@ def main():
     parser = argparse.ArgumentParser(description="US Overnight Signal 생성")
     parser.add_argument("--send", action="store_true", help="텔레그램 전송")
     parser.add_argument("--update", action="store_true", help="yfinance 최신 데이터 추가 후 생성")
+    parser.add_argument("--force", action="store_true", help="비거래일에도 강제 실행")
     args = parser.parse_args()
+
+    # ── 비거래일 스킵 가드 ──
+    today = date.today()
+    if not args.force and not should_run_bat("us", today):
+        logger.info(
+            f"비거래일 스킵 (오늘: {today}, {today.strftime('%A')}). "
+            f"마지막 미국 거래일: {last_us_trading_day(today)}. "
+            f"강제 실행: --force"
+        )
+        return
 
     if args.update:
         df = update_latest()

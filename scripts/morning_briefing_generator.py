@@ -23,10 +23,14 @@ import json
 import logging
 import math
 import sys
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from src.trading_calendar import (
+    should_run_bat, last_us_trading_day, get_stale_data_warning,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +53,12 @@ def _sigmoid(x: float) -> float:
 # ── KOSPI 상승 확률 계산 ──────────────────────────
 
 def _calc_kospi_probability(sig: dict) -> dict:
-    """로지스틱 회귀 기반 KOSPI 상승/하락 확률."""
+    """로지스틱 회귀 기반 KOSPI 상승/하락 확률.
+
+    데이터 정합성 체크:
+      - 모든 US 수익률이 0%이면 "데이터 없음" → 50/50 반환
+      - est_low/est_high와 up_prob 방향 정합 (이중 경로 모순 방지)
+    """
     idx = sig.get("index_direction", {})
     ewy_ret = idx.get("EWY", {}).get("ret_1d", 0)
     spy_ret = idx.get("SPY", {}).get("ret_1d", 0)
@@ -59,6 +68,24 @@ def _calc_kospi_probability(sig: dict) -> dict:
     us_vec = sig.get("l2_pattern", {}).get("today_us_vector", {})
     sox_ret = us_vec.get("us_soxx_chg", 0)
     vix_chg = us_vec.get("us_vix_chg", 0)
+
+    # ── 데이터 정합성 체크: 모든 주요 지수 0%이면 비거래일 데이터 ──
+    all_zero = (
+        abs(ewy_ret) < 0.01 and abs(spy_ret) < 0.01
+        and abs(qqq_ret) < 0.01 and abs(sox_ret) < 0.01
+    )
+    if all_zero:
+        logger.warning(
+            "US 수익률 전부 0% → 비거래일(주말/공휴일) 데이터. "
+            "KOSPI 예측 50/50 반환."
+        )
+        return {
+            "up_prob": 50,
+            "down_prob": 50,
+            "est_low": -0.3,
+            "est_high": 0.3,
+            "stale_data": True,
+        }
 
     # STOXX50 (yfinance)
     stoxx50_ret = 0.0
@@ -108,6 +135,7 @@ def _calc_kospi_probability(sig: dict) -> dict:
 
     down_prob = 100 - up_prob
 
+    # ── 레인지 추정 (est_low/est_high) ──
     base = sox_ret * 0.35 + spy_ret * 0.35 + stoxx50_ret * 0.3
     if abs(base) > 0.1:
         est_low = round(base * 0.5, 1)
@@ -115,11 +143,25 @@ def _calc_kospi_probability(sig: dict) -> dict:
     else:
         est_low, est_high = -0.3, 0.3
 
+    # ── 정합성 보정: up_prob와 est 방향이 모순되면 조정 ──
+    # 예: 모델이 65% 상승인데 est가 -0.7%~-0.3% → 하한을 0으로 올림
+    est_lo = min(est_low, est_high)
+    est_hi = max(est_low, est_high)
+
+    if up_prob >= 60 and est_hi < 0:
+        # 상승 우세인데 레인지가 전부 음수 → 레인지를 모델 기준으로 조정
+        est_lo = round(base * 0.3, 1) if base > 0 else -0.2
+        est_hi = round(base * 1.0, 1) if base > 0 else 0.5
+    elif down_prob >= 60 and est_lo > 0:
+        # 하락 우세인데 레인지가 전부 양수 → 반대로 조정
+        est_lo = round(base * 1.0, 1) if base < 0 else -0.5
+        est_hi = round(base * 0.3, 1) if base < 0 else 0.2
+
     return {
         "up_prob": up_prob,
         "down_prob": down_prob,
-        "est_low": min(est_low, est_high),
-        "est_high": max(est_low, est_high),
+        "est_low": min(est_lo, est_hi),
+        "est_high": max(est_lo, est_hi),
     }
 
 
@@ -127,6 +169,9 @@ def _calc_kospi_probability(sig: dict) -> dict:
 
 def _determine_market_status(prob: dict, regime: str) -> str:
     """BULL / BEAR / NEUTRAL / CAUTION 판정."""
+    # 비거래일 데이터이면 NEUTRAL 반환
+    if prob.get("stale_data"):
+        return "NEUTRAL"
     if regime == "CRISIS":
         return "BEAR"
     if prob["up_prob"] >= 60:
@@ -174,7 +219,15 @@ def generate_morning_briefing(date_str: str = "") -> dict:
     sox_ret = us_vec.get("us_soxx_chg", 0)
     ewy_ret = idx.get("EWY", {}).get("ret_1d", 0)
 
+    # ── 데이터 신선도 체크 ──
+    sig_date = sig.get("us_close_date", "")
+    stale_warning = get_stale_data_warning(sig_date)
+    if stale_warning:
+        logger.warning(f"Overnight Signal 데이터 경고: {stale_warning}")
+
     us_summary = f"SPY {spy_ret:+.1f}%, QQQ {qqq_ret:+.1f}%, SOXX {sox_ret:+.1f}%, VIX {vix:.1f} {vix_status}"
+    if stale_warning:
+        us_summary += f" [⚠️ {sig_date} 기준, 최신 아님]"
 
     # ── L2: 시장 인텔리전스 ──
     intel = _load_json(DATA_DIR / "market_intelligence.json")
