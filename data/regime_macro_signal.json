@@ -1,29 +1,31 @@
 {
-  "date": "2026-03-16",
-  "generated_at": "2026-03-16 18:50",
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20 21:49",
   "current_regime": "CAUTION",
   "transition_direction": "CAUTION 유지",
-  "transition_probability": 43,
-  "macro_score": 52,
+  "transition_probability": 44,
+  "macro_score": 51,
   "macro_grade": "보통",
   "position_multiplier": 1.0,
   "signals": {
-    "ma20_slope": 1.23,
-    "ma60_slope": 4.4,
+    "ma20_slope": 1.07,
+    "ma60_slope": 4.6,
     "gap_ma20_pct": 13.1,
-    "rv_current": 94.0,
-    "rv_declining": true,
-    "vix_level": 27.2,
+    "rv_current": 98.0,
+    "rv_declining": false,
+    "vix_level": 24.1,
     "us_grade": "NEUTRAL",
-    "ewy_5d": -4.72,
-    "regime_gap": "MA20 위 13.1%, RV 94%ile → CAUTION"
+    "ewy_5d": 9.17,
+    "deriv_grade": "MILD_BULL",
+    "deriv_score": 30.8,
+    "regime_gap": "MA20 위 13.1%, RV 98%ile → CAUTION"
   },
   "recommendation": "CAUTION 유지 가능성. 기본 포지션 유지.",
   "regime_history_5d": [
     "BEAR",
     "BEAR",
     "BEAR",
-    "BEAR",
-    "BEAR"
+    "CAUTION",
+    "CAUTION"
   ]
 }

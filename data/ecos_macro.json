@@ -1,0 +1,25 @@
+{
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20T19:56:39.368696",
+  "source": "ecos_bok",
+  "indicators": {
+    "base_rate": {
+      "value": 2.5,
+      "period": "202602",
+      "unit": "연%",
+      "label": "기준금리(%)"
+    },
+    "usd_krw": {
+      "value": 1486.0,
+      "period": "20260319",
+      "unit": "원",
+      "label": "원/달러 환율"
+    },
+    "cpi": {
+      "value": 118.4,
+      "period": "202602",
+      "unit": "2020=100",
+      "label": "소비자물가지수(2020=100)"
+    }
+  }
+}

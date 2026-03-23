@@ -1,448 +1,80 @@
 {
   "engine_version": "v3_retail_flow",
-  "analyzed_at": "2026-03-16T18:40:39.916713",
+  "analyzed_at": "2026-03-20T17:13:14.791199",
   "total_stocks": 31,
   "signals": [
     {
-      "ticker": "010130",
-      "name": "고려아연",
+      "ticker": "307950",
+      "name": "산일전기",
       "signal": "NEUTRAL",
-      "score": 11,
+      "score": 19,
       "reasons": [
-        "기관 매집 가속 (+0.35)",
-        "기관 집중 매집 이상치 (HHI=0.77, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 140% 흡수, 개인 3일 연속 매수)"
+        "기관 매집 가속 (+0.69)",
+        "기관 이상치 거래량 (Z=2.4σ)",
+        "영국+아시아 동반 진입 중",
+        "개인 항복 (20일 순매수 후 3일 연속 매도 전환 → 바닥 신호?)"
       ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.318,
-      "asia_trend": -0.466,
-      "hedge_trend": -0.634,
-      "inst_acceleration": 0.3501,
-      "asia_acceleration": -0.191,
-      "hhi": 0.7739,
+      "pattern": "INST_ACCEL",
+      "inst_trend": -0.003,
+      "asia_trend": -0.245,
+      "hedge_trend": -0.491,
+      "inst_acceleration": 0.6853,
+      "asia_acceleration": 0.546,
+      "hhi": 0.424,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.46,
-      "asia_zscore": -0.96,
-      "hedge_zscore": -1.07,
-      "price_change_pct": -3.96,
-      "vol_price_pattern": "ABANDON",
+      "inst_zscore": 2.39,
+      "asia_zscore": 0.66,
+      "hedge_zscore": -0.12,
+      "price_change_pct": 1.89,
+      "vol_price_pattern": "FLAT",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 58358000000,
-      "retail_net_20d": -63858000000,
-      "retail_foreign_ratio": 1.402,
-      "retail_consecutive": 3,
-      "retail_pattern": "RETAIL_SUPPORT",
+      "retail_net_5d": -2024000000,
+      "retail_net_20d": 29597000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": -3,
+      "retail_pattern": "RETAIL_CAPITUL",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 15463,
+          "volume": 156928,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 795,
+          "volume": 40472,
           "group": "asia"
         },
         {
+          "country": "스웨덴",
+          "volume": 34517,
+          "group": "institutional"
+        },
+        {
           "country": "케이맨 제도",
-          "volume": 707,
+          "volume": 18151,
           "group": "hedge"
         },
         {
           "country": "오스트레일리아",
-          "volume": 277,
+          "volume": 2367,
           "group": "europe_other"
         },
         {
-          "country": "프랑스",
-          "volume": 169,
-          "group": "institutional"
-        },
-        {
-          "country": "스위스",
-          "volume": 145,
-          "group": "institutional"
-        },
-        {
           "country": "미국",
-          "volume": 44,
+          "volume": 1449,
           "group": "americas"
         },
         {
           "country": "중국",
-          "volume": 14,
+          "volume": 1178,
           "group": "asia"
-        }
-      ]
-    },
-    {
-      "ticker": "352820",
-      "name": "하이브",
-      "signal": "NEUTRAL",
-      "score": 10,
-      "reasons": [
-        "기관 매집 가속 (+0.27)",
-        "개인 지지 (외국인 매도 130% 흡수, 개인 5일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.519,
-      "asia_trend": -0.502,
-      "hedge_trend": -0.481,
-      "inst_acceleration": 0.274,
-      "asia_acceleration": 0.6666,
-      "hhi": 0.5767,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.81,
-      "asia_zscore": -0.95,
-      "hedge_zscore": -0.96,
-      "price_change_pct": -0.99,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 88808000000,
-      "retail_net_20d": 23835000000,
-      "retail_foreign_ratio": 1.304,
-      "retail_consecutive": 5,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 77631,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 7354,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 6944,
-          "group": "asia"
-        },
-        {
-          "country": "스위스",
-          "volume": 5198,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 2721,
-          "group": "europe_other"
-        },
-        {
-          "country": "프랑스",
-          "volume": 1921,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 805,
-          "group": "americas"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 229,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "028260",
-      "name": "삼성물산",
-      "signal": "NEUTRAL",
-      "score": 6,
-      "reasons": [
-        "기관 매집 가속 (+0.19)",
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 148% 흡수, 개인 3일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.485,
-      "asia_trend": -0.488,
-      "hedge_trend": -0.447,
-      "inst_acceleration": 0.1911,
-      "asia_acceleration": 0.3681,
-      "hhi": 0.6449,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.86,
-      "asia_zscore": -0.21,
-      "hedge_zscore": -0.76,
-      "price_change_pct": -1.76,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 38253000000,
-      "retail_net_20d": 45858000000,
-      "retail_foreign_ratio": 1.475,
-      "retail_consecutive": 3,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 218322,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 22550,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 11665,
-          "group": "hedge"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 5775,
-          "group": "institutional"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 5000,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 2511,
-          "group": "europe_other"
-        },
-        {
-          "country": "미국",
-          "volume": 2280,
-          "group": "americas"
         },
         {
           "country": "캐나다",
-          "volume": 2170,
+          "volume": 377,
           "group": "americas"
-        }
-      ]
-    },
-    {
-      "ticker": "373220",
-      "name": "LG에너지솔루션",
-      "signal": "NEUTRAL",
-      "score": 6,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.06)",
-        "개인 지지 (외국인 매도 72% 흡수, 개인 2일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.36,
-      "asia_trend": -0.553,
-      "hedge_trend": -0.752,
-      "inst_acceleration": 0.0578,
-      "asia_acceleration": 0.4905,
-      "hhi": 0.7337,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.45,
-      "asia_zscore": -0.02,
-      "hedge_zscore": -1.38,
-      "price_change_pct": -0.95,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 63047000000,
-      "retail_net_20d": 106968000000,
-      "retail_foreign_ratio": 0.718,
-      "retail_consecutive": 2,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 205116,
-          "group": "institutional"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 18305,
-          "group": "asia"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 7045,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 4274,
-          "group": "europe_other"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 2020,
-          "group": "hedge"
-        },
-        {
-          "country": "미국",
-          "volume": 1624,
-          "group": "americas"
-        },
-        {
-          "country": "버뮤다",
-          "volume": 1440,
-          "group": "hedge"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 451,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "000270",
-      "name": "기아",
-      "signal": "NEUTRAL",
-      "score": 5,
-      "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.53, 영국)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.309,
-      "asia_trend": -0.582,
-      "hedge_trend": -0.711,
-      "inst_acceleration": 0.0482,
-      "asia_acceleration": 0.2331,
-      "hhi": 0.5341,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.54,
-      "asia_zscore": -0.53,
-      "hedge_zscore": -0.93,
-      "price_change_pct": 0.0,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 0,
-      "retail_net_20d": 0,
-      "retail_foreign_ratio": 0.0,
-      "retail_consecutive": 0,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 681026,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 87071,
-          "group": "asia"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 45258,
-          "group": "institutional"
-        },
-        {
-          "country": "프랑스",
-          "volume": 39215,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 31381,
-          "group": "hedge"
-        },
-        {
-          "country": "스위스",
-          "volume": 15513,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 10121,
-          "group": "americas"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 10000,
-          "group": "asia"
-        }
-      ]
-    },
-    {
-      "ticker": "035420",
-      "name": "NAVER",
-      "signal": "NEUTRAL",
-      "score": 5,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.12)",
-        "기관 집중 매집 이상치 (HHI=0.66, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "아시아 7일 연속 감소",
-        "개인 지지 (외국인 매도 161% 흡수, 개인 5일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.401,
-      "asia_trend": -0.605,
-      "hedge_trend": -0.615,
-      "inst_acceleration": 0.1181,
-      "asia_acceleration": 0.023,
-      "hhi": 0.6614,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.9,
-      "asia_zscore": -1.2,
-      "hedge_zscore": -0.99,
-      "price_change_pct": -1.8,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 190570000000,
-      "retail_net_20d": 782110000000,
-      "retail_foreign_ratio": 1.613,
-      "retail_consecutive": 5,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 312987,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 22546,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 14238,
-          "group": "asia"
-        },
-        {
-          "country": "미국",
-          "volume": 13472,
-          "group": "americas"
-        },
-        {
-          "country": "네덜란드",
-          "volume": 5530,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 5298,
-          "group": "europe_other"
-        },
-        {
-          "country": "스위스",
-          "volume": 4042,
-          "group": "institutional"
-        },
-        {
-          "country": "룩셈부르크",
-          "volume": 2269,
-          "group": "institutional"
         }
       ]
     },
@@ -450,366 +82,146 @@
       "ticker": "055550",
       "name": "신한지주",
       "signal": "NEUTRAL",
-      "score": 5,
+      "score": 15,
       "reasons": [
-        "기관 매집 가속 소폭 (+0.09)",
-        "기관 집중 매집 이상치 (HHI=0.56, 영국)",
-        "관심 상실 (기관↓ 주가↓)"
+        "기관 매집 가속 (+0.48)",
+        "기관 집중 매집 이상치 (HHI=0.65, 영국)",
+        "헤지 과열 (Z=3.7σ, 피크 경고)",
+        "영국 선행 매집, 아시아 미진입 → 선점 기회"
       ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.252,
-      "asia_trend": -0.282,
-      "hedge_trend": -0.137,
-      "inst_acceleration": 0.0908,
-      "asia_acceleration": 1.0458,
-      "hhi": 0.5627,
+      "pattern": "INST_ACCEL",
+      "inst_trend": 0.025,
+      "asia_trend": 0.273,
+      "hedge_trend": 1.66,
+      "inst_acceleration": 0.4764,
+      "asia_acceleration": -0.6442,
+      "hhi": 0.6477,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": 0.13,
-      "asia_zscore": 1.04,
-      "hedge_zscore": 1.32,
-      "price_change_pct": -1.21,
-      "vol_price_pattern": "ABANDON",
+      "inst_zscore": 1.66,
+      "asia_zscore": -0.16,
+      "hedge_zscore": 3.68,
+      "price_change_pct": 7.35,
+      "vol_price_pattern": "FLAT",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 733000000,
-      "retail_net_20d": -3819000000,
-      "retail_foreign_ratio": 0.017,
-      "retail_consecutive": 1,
+      "retail_net_5d": -27211000000,
+      "retail_net_20d": -60330000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": -4,
       "retail_pattern": "",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 1249002,
+          "volume": 1846854,
           "group": "institutional"
         },
         {
-          "country": "싱가포르",
-          "volume": 141283,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 128536,
+          "country": "버뮤다",
+          "volume": 295147,
           "group": "hedge"
         },
         {
+          "country": "싱가포르",
+          "volume": 46137,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 39184,
+          "group": "americas"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 22867,
+          "group": "hedge"
+        },
+        {
+          "country": "일본",
+          "volume": 22466,
+          "group": "asia"
+        },
+        {
           "country": "오스트레일리아",
-          "volume": 66574,
+          "volume": 19853,
           "group": "europe_other"
         },
         {
           "country": "아일랜드",
-          "volume": 47059,
+          "volume": 12120,
           "group": "institutional"
-        },
-        {
-          "country": "스위스",
-          "volume": 14823,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 12509,
-          "group": "americas"
-        },
-        {
-          "country": "버뮤다",
-          "volume": 8636,
-          "group": "hedge"
         }
       ]
     },
     {
-      "ticker": "103140",
-      "name": "풍산",
-      "signal": "CAUTION",
-      "score": 4,
+      "ticker": "207940",
+      "name": "삼성바이오로직스",
+      "signal": "NEUTRAL",
+      "score": 13,
       "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.60, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 177% 흡수, 개인 12일 연속 매수)"
+        "기관 매집 가속 (+0.46)",
+        "기관 집중 매집 이상치 (HHI=0.76, 영국)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.574,
-      "asia_trend": -0.654,
-      "hedge_trend": -0.805,
-      "inst_acceleration": 0.0183,
-      "asia_acceleration": -0.1482,
-      "hhi": 0.6015,
+      "inst_trend": -0.444,
+      "asia_trend": -0.473,
+      "hedge_trend": -0.819,
+      "inst_acceleration": 0.4616,
+      "asia_acceleration": -0.382,
+      "hhi": 0.7567,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.64,
-      "asia_zscore": -0.86,
-      "hedge_zscore": -1.06,
-      "price_change_pct": -6.5,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 53068000000,
-      "retail_net_20d": 199561000000,
-      "retail_foreign_ratio": 1.774,
-      "retail_consecutive": 12,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 194784,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 27499,
-          "group": "americas"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 20595,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 11768,
-          "group": "hedge"
-        },
-        {
-          "country": "중국",
-          "volume": 330,
-          "group": "asia"
-        },
-        {
-          "country": "대만",
-          "volume": 246,
-          "group": "asia"
-        },
-        {
-          "country": "스위스",
-          "volume": 240,
-          "group": "institutional"
-        },
-        {
-          "country": "캐나다",
-          "volume": 12,
-          "group": "americas"
-        }
-      ]
-    },
-    {
-      "ticker": "402340",
-      "name": "SK스퀘어",
-      "signal": "CAUTION",
-      "score": 4,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.14)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.456,
-      "asia_trend": -0.706,
-      "hedge_trend": -0.494,
-      "inst_acceleration": 0.1379,
-      "asia_acceleration": 0.3455,
-      "hhi": 0.4796,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.83,
-      "asia_zscore": -0.55,
-      "hedge_zscore": 0.12,
-      "price_change_pct": -0.53,
+      "inst_zscore": -0.42,
+      "asia_zscore": -1.1,
+      "hedge_zscore": -0.96,
+      "price_change_pct": 0.88,
       "vol_price_pattern": "FLAT",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 24465000000,
-      "retail_net_20d": 124065000000,
-      "retail_foreign_ratio": 0.219,
-      "retail_consecutive": -1,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 280738,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 25290,
-          "group": "hedge"
-        },
-        {
-          "country": "스위스",
-          "volume": 23707,
-          "group": "institutional"
-        },
-        {
-          "country": "영국령 버진아일랜드",
-          "volume": 23110,
-          "group": "hedge"
-        },
-        {
-          "country": "중국",
-          "volume": 20971,
-          "group": "asia"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 16893,
-          "group": "asia"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 3270,
-          "group": "asia"
-        },
-        {
-          "country": "미국",
-          "volume": 3109,
-          "group": "americas"
-        }
-      ]
-    },
-    {
-      "ticker": "000660",
-      "name": "SK하이닉스",
-      "signal": "CAUTION",
-      "score": 3,
-      "reasons": [
-        "기관 매집 가속 (+0.32)",
-        "함정 (기관↓ 주가+2.0% → 개인 주도)",
-        "외국인 순매수 439,217주"
-      ],
-      "pattern": "TRAP_WARNING",
-      "inst_trend": -0.287,
-      "asia_trend": 0.204,
-      "hedge_trend": -0.61,
-      "inst_acceleration": 0.3228,
-      "asia_acceleration": -0.1476,
-      "hhi": 0.6294,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": 0.25,
-      "asia_zscore": -0.37,
-      "hedge_zscore": -0.75,
-      "price_change_pct": 1.99,
-      "vol_price_pattern": "TRAP",
-      "foreign_net_5d": 439217,
-      "foreign_direction": "BUY",
-      "retail_net_5d": 0,
-      "retail_net_20d": 0,
+      "retail_net_5d": 8425000000,
+      "retail_net_20d": 33248000000,
       "retail_foreign_ratio": 0.0,
-      "retail_consecutive": 0,
+      "retail_consecutive": -1,
       "retail_pattern": "",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 2561925,
+          "volume": 27929,
           "group": "institutional"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 200890,
-          "group": "institutional"
-        },
-        {
-          "country": "홍콩",
-          "volume": 105301,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 97860,
-          "group": "hedge"
         },
         {
           "country": "미국",
-          "volume": 65800,
+          "volume": 1474,
           "group": "americas"
         },
         {
-          "country": "스위스",
-          "volume": 43448,
+          "country": "아일랜드",
+          "volume": 738,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 33388,
+          "volume": 542,
           "group": "asia"
-        },
-        {
-          "country": "일본",
-          "volume": 24300,
-          "group": "asia"
-        }
-      ]
-    },
-    {
-      "ticker": "005930",
-      "name": "삼성전자",
-      "signal": "CAUTION",
-      "score": 3,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.07)",
-        "외국인 순매도 -4,874,228주",
-        "개인 지지 (외국인 매도 80% 흡수, 개인 매수 중)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.434,
-      "asia_trend": -0.616,
-      "hedge_trend": -0.755,
-      "inst_acceleration": 0.0737,
-      "asia_acceleration": 0.7943,
-      "hhi": 0.4814,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.98,
-      "asia_zscore": -0.1,
-      "hedge_zscore": -0.85,
-      "price_change_pct": -0.68,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": -4874228,
-      "foreign_direction": "SELL",
-      "retail_net_5d": 716442000000,
-      "retail_net_20d": 13133576000000,
-      "retail_foreign_ratio": 0.8,
-      "retail_consecutive": -1,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 6501869,
-          "group": "institutional"
-        },
-        {
-          "country": "룩셈부르크",
-          "volume": 779520,
-          "group": "institutional"
         },
         {
           "country": "홍콩",
-          "volume": 360652,
+          "volume": 420,
           "group": "asia"
         },
         {
-          "country": "노르웨이",
-          "volume": 354454,
-          "group": "institutional"
+          "country": "케이맨 제도",
+          "volume": 405,
+          "group": "hedge"
         },
         {
-          "country": "일본",
-          "volume": 280732,
-          "group": "asia"
-        },
-        {
-          "country": "미국",
-          "volume": 198106,
-          "group": "americas"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 141555,
-          "group": "asia"
+          "country": "오스트레일리아",
+          "volume": 360,
+          "group": "europe_other"
         },
         {
           "country": "스위스",
-          "volume": 137706,
+          "volume": 141,
           "group": "institutional"
         }
       ]
@@ -817,595 +229,73 @@
     {
       "ticker": "009540",
       "name": "HD한국조선해양",
-      "signal": "CAUTION",
-      "score": 3,
+      "signal": "NEUTRAL",
+      "score": 9,
       "reasons": [
-        "기관 매집 감속 (-0.31)",
-        "영국 선행 매집, 아시아 미진입 → 선점 기회",
-        "외국인 순매수 60,453주"
-      ],
-      "pattern": "LEAD_PREEMPT",
-      "inst_trend": -0.074,
-      "asia_trend": -0.538,
-      "hedge_trend": -0.432,
-      "inst_acceleration": -0.3099,
-      "asia_acceleration": -0.1044,
-      "hhi": 0.3544,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.7,
-      "asia_zscore": -0.93,
-      "hedge_zscore": -0.39,
-      "price_change_pct": -2.5,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": 60453,
-      "foreign_direction": "BUY",
-      "retail_net_5d": -8449000000,
-      "retail_net_20d": -223484000000,
-      "retail_foreign_ratio": -0.323,
-      "retail_consecutive": 2,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 103193,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 29766,
-          "group": "americas"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 17457,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 12447,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 8370,
-          "group": "asia"
-        },
-        {
-          "country": "네덜란드",
-          "volume": 3564,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 2690,
-          "group": "europe_other"
-        },
-        {
-          "country": "버뮤다",
-          "volume": 2531,
-          "group": "hedge"
-        }
-      ]
-    },
-    {
-      "ticker": "064350",
-      "name": "현대로템",
-      "signal": "CAUTION",
-      "score": 3,
-      "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.67, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 128% 흡수, 개인 6일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.498,
-      "asia_trend": -0.529,
-      "hedge_trend": -0.904,
-      "inst_acceleration": -0.1234,
-      "asia_acceleration": -0.1943,
-      "hhi": 0.6735,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -1.11,
-      "asia_zscore": -0.94,
-      "hedge_zscore": -1.22,
-      "price_change_pct": -4.83,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 161364000000,
-      "retail_net_20d": -36151000000,
-      "retail_foreign_ratio": 1.278,
-      "retail_consecutive": 6,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 350578,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 44525,
-          "group": "asia"
-        },
-        {
-          "country": "룩셈부르크",
-          "volume": 15145,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 7294,
-          "group": "hedge"
-        },
-        {
-          "country": "스위스",
-          "volume": 5871,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 4349,
-          "group": "americas"
-        },
-        {
-          "country": "대만",
-          "volume": 1022,
-          "group": "asia"
-        },
-        {
-          "country": "캐나다",
-          "volume": 709,
-          "group": "americas"
-        }
-      ]
-    },
-    {
-      "ticker": "090430",
-      "name": "아모레퍼시픽",
-      "signal": "CAUTION",
-      "score": 1,
-      "reasons": [
-        "기관 매집 감속 (-0.16)",
-        "기관 집중 매집 이상치 (HHI=0.72, 영국)",
-        "영국 선행 매집, 아시아 미진입 → 선점 기회",
+        "기관 매집 가속 (+0.19)",
+        "기관 집중 매집 이상치 (HHI=0.57, 영국)",
         "관심 상실 (기관↓ 주가↓)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.237,
-      "asia_trend": -0.795,
-      "hedge_trend": -0.567,
-      "inst_acceleration": -0.1609,
-      "asia_acceleration": 0.3314,
-      "hhi": 0.7187,
+      "inst_trend": -0.449,
+      "asia_trend": -0.66,
+      "hedge_trend": -0.706,
+      "inst_acceleration": 0.1858,
+      "asia_acceleration": 0.0712,
+      "hhi": 0.5696,
       "dominant_country": "영국",
       "dominant_group": "institutional",
       "inst_zscore": -0.59,
-      "asia_zscore": -0.64,
-      "hedge_zscore": -0.34,
-      "price_change_pct": -1.99,
+      "asia_zscore": -0.68,
+      "hedge_zscore": -1.07,
+      "price_change_pct": -3.69,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 4057000000,
-      "retail_net_20d": -36360000000,
-      "retail_foreign_ratio": 0.444,
+      "retail_net_5d": 2088000000,
+      "retail_net_20d": -176568000000,
+      "retail_foreign_ratio": 0.175,
       "retail_consecutive": 1,
       "retail_pattern": "",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 130435,
+          "volume": 105007,
           "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 9768,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 7647,
-          "group": "asia"
-        },
-        {
-          "country": "프랑스",
-          "volume": 2330,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1672,
-          "group": "europe_other"
         },
         {
           "country": "미국",
-          "volume": 1283,
+          "volume": 7848,
           "group": "americas"
         },
         {
-          "country": "스위스",
-          "volume": 969,
+          "country": "스웨덴",
+          "volume": 7628,
           "group": "institutional"
         },
         {
-          "country": "아일랜드",
-          "volume": 277,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "105560",
-      "name": "KB금융",
-      "signal": "CAUTION",
-      "score": 1,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.12)",
-        "관심 상실 (기관↓ 주가↓)",
-        "외국인 순매도 -263,946주",
-        "개인 항복 (20일 순매수 후 2일 연속 매도 전환 → 바닥 신호?)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.414,
-      "asia_trend": -0.632,
-      "hedge_trend": -0.659,
-      "inst_acceleration": 0.1189,
-      "asia_acceleration": 0.5377,
-      "hhi": 0.6048,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.52,
-      "asia_zscore": -0.84,
-      "hedge_zscore": -0.16,
-      "price_change_pct": -1.32,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": -263946,
-      "foreign_direction": "SELL",
-      "retail_net_5d": -10309000000,
-      "retail_net_20d": 114170000000,
-      "retail_foreign_ratio": 0.0,
-      "retail_consecutive": -2,
-      "retail_pattern": "RETAIL_CAPITUL",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 704372,
-          "group": "institutional"
+          "country": "싱가포르",
+          "volume": 7288,
+          "group": "asia"
         },
         {
           "country": "케이맨 제도",
-          "volume": 51897,
+          "volume": 2927,
           "group": "hedge"
+        },
+        {
+          "country": "일본",
+          "volume": 2615,
+          "group": "asia"
         },
         {
           "country": "룩셈부르크",
-          "volume": 51345,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 47147,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 19633,
-          "group": "europe_other"
-        },
-        {
-          "country": "미국",
-          "volume": 11240,
-          "group": "americas"
-        },
-        {
-          "country": "버뮤다",
-          "volume": 7384,
-          "group": "hedge"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 6128,
-          "group": "asia"
-        }
-      ]
-    },
-    {
-      "ticker": "307950",
-      "name": "산일전기",
-      "signal": "CAUTION",
-      "score": 1,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.07)",
-        "기관 집중 매집 이상치 (HHI=0.56, 영국)",
-        "함정 (기관↓ 주가+1.4% → 개인 주도)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.311,
-      "asia_trend": -0.559,
-      "hedge_trend": -0.569,
-      "inst_acceleration": 0.0689,
-      "asia_acceleration": 0.0906,
-      "hhi": 0.5645,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.83,
-      "asia_zscore": -0.69,
-      "hedge_zscore": -1.3,
-      "price_change_pct": 1.45,
-      "vol_price_pattern": "TRAP",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 7550000000,
-      "retail_net_20d": 10673000000,
-      "retail_foreign_ratio": 0.555,
-      "retail_consecutive": -1,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 75449,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 14716,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 9877,
-          "group": "hedge"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1976,
-          "group": "europe_other"
-        },
-        {
-          "country": "중국",
-          "volume": 374,
-          "group": "asia"
-        },
-        {
-          "country": "영국령 버진아일랜드",
-          "volume": 254,
-          "group": "hedge"
-        },
-        {
-          "country": "캐나다",
-          "volume": 238,
-          "group": "americas"
-        },
-        {
-          "country": "프랑스",
-          "volume": 193,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "042700",
-      "name": "한미반도체",
-      "signal": "CAUTION",
-      "score": 0,
-      "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.73, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "아시아 7일 연속 감소",
-        "개인 지지 (외국인 매도 79% 흡수, 개인 2일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.55,
-      "asia_trend": -0.795,
-      "hedge_trend": -0.766,
-      "inst_acceleration": 0.0052,
-      "asia_acceleration": 0.0219,
-      "hhi": 0.7328,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.79,
-      "asia_zscore": -1.07,
-      "hedge_zscore": -0.8,
-      "price_change_pct": -4.0,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 99029000000,
-      "retail_net_20d": -666283000000,
-      "retail_foreign_ratio": 0.787,
-      "retail_consecutive": 2,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 425769,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 36626,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 29296,
-          "group": "asia"
-        },
-        {
-          "country": "중국",
-          "volume": 2330,
-          "group": "asia"
-        },
-        {
-          "country": "미국",
-          "volume": 1803,
-          "group": "americas"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 1500,
-          "group": "asia"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 803,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 529,
-          "group": "europe_other"
-        }
-      ]
-    },
-    {
-      "ticker": "047810",
-      "name": "한국항공우주",
-      "signal": "CAUTION",
-      "score": 0,
-      "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.79, 영국)",
-        "함정 (기관↓ 주가+9.0% → 개인 주도)",
-        "외국인 순매수 211,437주"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.506,
-      "asia_trend": -0.813,
-      "hedge_trend": -0.891,
-      "inst_acceleration": -0.0351,
-      "asia_acceleration": 0.1124,
-      "hhi": 0.7944,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.98,
-      "asia_zscore": -0.86,
-      "hedge_zscore": -1.03,
-      "price_change_pct": 9.01,
-      "vol_price_pattern": "TRAP",
-      "foreign_net_5d": 211437,
-      "foreign_direction": "BUY",
-      "retail_net_5d": -29936000000,
-      "retail_net_20d": -41048000000,
-      "retail_foreign_ratio": -0.788,
-      "retail_consecutive": -4,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 263445,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 12218,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 10824,
-          "group": "asia"
-        },
-        {
-          "country": "프랑스",
-          "volume": 2292,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 2095,
-          "group": "americas"
-        },
-        {
-          "country": "홍콩",
-          "volume": 1561,
-          "group": "asia"
-        },
-        {
-          "country": "중국",
-          "volume": 806,
-          "group": "asia"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 789,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "071050",
-      "name": "한국금융지주",
-      "signal": "CAUTION",
-      "score": 0,
-      "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.64, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "아시아 3일 연속 감소",
-        "개인 지지 (외국인 매도 81% 흡수, 개인 8일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.37,
-      "asia_trend": -0.271,
-      "hedge_trend": -0.352,
-      "inst_acceleration": -0.0771,
-      "asia_acceleration": 0.0045,
-      "hhi": 0.641,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -1.16,
-      "asia_zscore": -1.19,
-      "hedge_zscore": -1.27,
-      "price_change_pct": -2.61,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 74588000000,
-      "retail_net_20d": 165870000000,
-      "retail_foreign_ratio": 0.81,
-      "retail_consecutive": 8,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 102760,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 12213,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 4729,
-          "group": "hedge"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 3817,
-          "group": "europe_other"
-        },
-        {
-          "country": "미국",
-          "volume": 1878,
-          "group": "americas"
-        },
-        {
-          "country": "중국",
-          "volume": 1349,
-          "group": "asia"
-        },
-        {
-          "country": "프랑스",
-          "volume": 697,
+          "volume": 1299,
           "group": "institutional"
         },
         {
           "country": "덴마크",
-          "volume": 606,
+          "volume": 1289,
           "group": "other"
         }
       ]
@@ -1413,440 +303,371 @@
     {
       "ticker": "272210",
       "name": "한화시스템",
-      "signal": "CAUTION",
-      "score": 0,
+      "signal": "NEUTRAL",
+      "score": 8,
       "reasons": [
-        "기관 집중 매집 이상치 (HHI=0.61, 영국)",
-        "관심 상실 (기관↓ 주가↓)",
-        "아시아 7일 연속 감소",
-        "개인 지지 (외국인 매도 146% 흡수, 개인 2일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.614,
-      "asia_trend": -0.772,
-      "hedge_trend": -0.84,
-      "inst_acceleration": -0.0101,
-      "asia_acceleration": 0.0373,
-      "hhi": 0.614,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -1.17,
-      "asia_zscore": -1.44,
-      "hedge_zscore": -1.17,
-      "price_change_pct": -5.21,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 82269000000,
-      "retail_net_20d": 195914000000,
-      "retail_foreign_ratio": 1.457,
-      "retail_consecutive": 2,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 431610,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 72143,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 44774,
-          "group": "asia"
-        },
-        {
-          "country": "미국",
-          "volume": 2902,
-          "group": "americas"
-        },
-        {
-          "country": "중국",
-          "volume": 2510,
-          "group": "asia"
-        },
-        {
-          "country": "대만",
-          "volume": 2394,
-          "group": "asia"
-        },
-        {
-          "country": "아일랜드",
-          "volume": 1759,
-          "group": "institutional"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1416,
-          "group": "europe_other"
-        }
-      ]
-    },
-    {
-      "ticker": "051900",
-      "name": "LG생활건강",
-      "signal": "CAUTION",
-      "score": -1,
-      "reasons": [
+        "기관 매집 가속 소폭 (+0.06)",
+        "기관 집중 매집 이상치 (HHI=0.57, 영국)",
         "관심 상실 (기관↓ 주가↓)",
         "개인 지지 (외국인 매도 179% 흡수, 개인 2일 연속 매수)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.79,
-      "asia_trend": -0.92,
-      "hedge_trend": -0.618,
-      "inst_acceleration": -0.0241,
-      "asia_acceleration": 0.0819,
-      "hhi": 0.5982,
+      "inst_trend": -0.712,
+      "asia_trend": -0.87,
+      "hedge_trend": -0.879,
+      "inst_acceleration": 0.0553,
+      "asia_acceleration": 0.039,
+      "hhi": 0.5748,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.49,
-      "asia_zscore": -0.5,
-      "hedge_zscore": -0.36,
-      "price_change_pct": -3.02,
+      "inst_zscore": -0.95,
+      "asia_zscore": -1.06,
+      "hedge_zscore": -1.04,
+      "price_change_pct": -2.09,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 5380000000,
-      "retail_net_20d": 25561000000,
+      "retail_net_5d": 68537000000,
+      "retail_net_20d": 285826000000,
       "retail_foreign_ratio": 1.791,
       "retail_consecutive": 2,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 25794,
+          "volume": 344712,
           "group": "institutional"
         },
         {
+          "country": "미국",
+          "volume": 37558,
+          "group": "americas"
+        },
+        {
           "country": "싱가포르",
-          "volume": 3533,
+          "volume": 37475,
           "group": "asia"
         },
         {
           "country": "케이맨 제도",
-          "volume": 2792,
+          "volume": 28033,
           "group": "hedge"
         },
         {
-          "country": "프랑스",
-          "volume": 946,
-          "group": "institutional"
-        },
-        {
           "country": "오스트레일리아",
-          "volume": 437,
+          "volume": 6775,
           "group": "europe_other"
         },
         {
-          "country": "스위스",
-          "volume": 287,
+          "country": "아일랜드",
+          "volume": 2434,
           "group": "institutional"
         },
         {
-          "country": "홍콩",
-          "volume": 79,
+          "country": "중국",
+          "volume": 1874,
           "group": "asia"
         },
         {
-          "country": "일본",
-          "volume": 10,
+          "country": "홍콩",
+          "volume": 1111,
           "group": "asia"
         }
       ]
     },
     {
-      "ticker": "068270",
-      "name": "셀트리온",
-      "signal": "CAUTION",
-      "score": -1,
+      "ticker": "035720",
+      "name": "카카오",
+      "signal": "NEUTRAL",
+      "score": 7,
       "reasons": [
+        "기관 매집 가속 (+0.17)",
         "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 273% 흡수, 개인 3일 연속 매수)"
+        "개인 지지 (외국인 매도 243% 흡수, 개인 매수 중)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.385,
-      "asia_trend": -0.717,
-      "hedge_trend": -0.612,
-      "inst_acceleration": -0.0281,
-      "asia_acceleration": 0.4778,
-      "hhi": 0.6136,
+      "inst_trend": -0.564,
+      "asia_trend": -0.26,
+      "hedge_trend": -0.781,
+      "inst_acceleration": 0.1668,
+      "asia_acceleration": 0.2118,
+      "hhi": 0.5404,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.74,
-      "asia_zscore": -0.49,
-      "hedge_zscore": -0.05,
-      "price_change_pct": -4.31,
+      "inst_zscore": -0.86,
+      "asia_zscore": 0.4,
+      "hedge_zscore": -0.99,
+      "price_change_pct": -2.53,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 80527000000,
-      "retail_net_20d": -403270000000,
-      "retail_foreign_ratio": 2.73,
-      "retail_consecutive": 3,
+      "retail_net_5d": 37489000000,
+      "retail_net_20d": 5544000000,
+      "retail_foreign_ratio": 2.434,
+      "retail_consecutive": -1,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 234705,
+          "volume": 638316,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 118427,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 35036,
+          "group": "americas"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 32665,
+          "group": "hedge"
+        },
+        {
+          "country": "일본",
+          "volume": 15225,
+          "group": "asia"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 14648,
+          "group": "institutional"
+        },
+        {
+          "country": "프랑스",
+          "volume": 10915,
+          "group": "institutional"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 8907,
+          "group": "europe_other"
+        }
+      ]
+    },
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "signal": "NEUTRAL",
+      "score": 7,
+      "reasons": [
+        "기관 매집 가속 (+0.17)",
+        "기관 집중 매집 이상치 (HHI=0.73, 영국)",
+        "함정 (기관↓ 주가+2.8% → 개인 주도)",
+        "개인 지지 (외국인 매도 95% 흡수, 개인 매수 중)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.431,
+      "asia_trend": -0.822,
+      "hedge_trend": -0.72,
+      "inst_acceleration": 0.1748,
+      "asia_acceleration": 0.023,
+      "hhi": 0.73,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.44,
+      "asia_zscore": -0.78,
+      "hedge_zscore": -1.05,
+      "price_change_pct": 2.82,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 53564000000,
+      "retail_net_20d": -692508000000,
+      "retail_foreign_ratio": 0.952,
+      "retail_consecutive": -2,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 415843,
           "group": "institutional"
         },
         {
           "country": "케이맨 제도",
-          "volume": 23994,
+          "volume": 29439,
           "group": "hedge"
         },
         {
           "country": "싱가포르",
-          "volume": 22285,
+          "volume": 27632,
+          "group": "asia"
+        },
+        {
+          "country": "스웨덴",
+          "volume": 4874,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 4319,
+          "group": "americas"
+        },
+        {
+          "country": "중국",
+          "volume": 2383,
           "group": "asia"
         },
         {
           "country": "오스트레일리아",
-          "volume": 6416,
+          "volume": 2187,
           "group": "europe_other"
         },
         {
-          "country": "버뮤다",
-          "volume": 6180,
-          "group": "hedge"
-        },
-        {
-          "country": "미국",
-          "volume": 4594,
-          "group": "americas"
-        },
-        {
-          "country": "스위스",
-          "volume": 1627,
+          "country": "아일랜드",
+          "volume": 1357,
           "group": "institutional"
-        },
-        {
-          "country": "남아프리카 공화국",
-          "volume": 1092,
-          "group": "other"
         }
       ]
     },
     {
       "ticker": "005380",
       "name": "현대차",
-      "signal": "CAUTION",
-      "score": -2,
+      "signal": "NEUTRAL",
+      "score": 6,
       "reasons": [
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 97% 흡수, 개인 10일 연속 매수)"
+        "기관 매집 가속 소폭 (+0.06)",
+        "개인 지지 (외국인 매도 103% 흡수, 개인 2일 연속 매수)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.579,
-      "asia_trend": -0.667,
-      "hedge_trend": -0.448,
-      "inst_acceleration": -0.0206,
-      "asia_acceleration": -0.1849,
-      "hhi": 0.5576,
+      "inst_trend": -0.556,
+      "asia_trend": -0.548,
+      "hedge_trend": -0.529,
+      "inst_acceleration": 0.06,
+      "asia_acceleration": 0.1264,
+      "hhi": 0.5309,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -1.25,
-      "asia_zscore": -0.93,
-      "hedge_zscore": -0.77,
-      "price_change_pct": -4.53,
-      "vol_price_pattern": "ABANDON",
+      "inst_zscore": -1.17,
+      "asia_zscore": -0.36,
+      "hedge_zscore": -1.09,
+      "price_change_pct": -0.96,
+      "vol_price_pattern": "FLAT",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 809109000000,
-      "retail_net_20d": 1215321000000,
-      "retail_foreign_ratio": 0.973,
-      "retail_consecutive": 10,
+      "retail_net_5d": 570626000000,
+      "retail_net_20d": 1922459000000,
+      "retail_foreign_ratio": 1.034,
+      "retail_consecutive": 2,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 312679,
+          "volume": 229716,
           "group": "institutional"
         },
         {
           "country": "케이맨 제도",
-          "volume": 62286,
+          "volume": 28447,
           "group": "hedge"
         },
         {
           "country": "싱가포르",
-          "volume": 19568,
+          "volume": 27375,
           "group": "asia"
         },
         {
-          "country": "노르웨이",
-          "volume": 11067,
-          "group": "institutional"
+          "country": "오스트레일리아",
+          "volume": 9526,
+          "group": "europe_other"
         },
         {
           "country": "미국",
-          "volume": 7877,
+          "volume": 7585,
           "group": "americas"
         },
         {
-          "country": "덴마크",
-          "volume": 3205,
-          "group": "other"
-        },
-        {
-          "country": "중국",
-          "volume": 2042,
+          "country": "일본",
+          "volume": 6557,
           "group": "asia"
         },
         {
-          "country": "버뮤다",
-          "volume": 1887,
-          "group": "hedge"
+          "country": "아일랜드",
+          "volume": 4042,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 2225,
+          "group": "asia"
         }
       ]
     },
     {
-      "ticker": "006400",
-      "name": "삼성SDI",
+      "ticker": "035420",
+      "name": "NAVER",
       "signal": "CAUTION",
-      "score": -2,
+      "score": 4,
       "reasons": [
+        "기관 집중 매집 이상치 (HHI=0.65, 영국)",
         "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 98% 흡수, 개인 3일 연속 매수)"
+        "개인 지지 (외국인 매도 205% 흡수, 개인 3일 연속 매수)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.529,
-      "asia_trend": -0.582,
-      "hedge_trend": -0.723,
-      "inst_acceleration": 0.0217,
-      "asia_acceleration": -0.2665,
-      "hhi": 0.5118,
+      "inst_trend": -0.446,
+      "asia_trend": -0.314,
+      "hedge_trend": -0.73,
+      "inst_acceleration": -0.0244,
+      "asia_acceleration": -0.2017,
+      "hhi": 0.6476,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.84,
-      "asia_zscore": -1.33,
-      "hedge_zscore": -1.05,
-      "price_change_pct": -4.25,
+      "inst_zscore": -0.9,
+      "asia_zscore": -0.57,
+      "hedge_zscore": -1.17,
+      "price_change_pct": -1.12,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 137388000000,
-      "retail_net_20d": -374135000000,
-      "retail_foreign_ratio": 0.984,
+      "retail_net_5d": 117631000000,
+      "retail_net_20d": 633298000000,
+      "retail_foreign_ratio": 2.053,
       "retail_consecutive": 3,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 140261,
-          "group": "institutional"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 18509,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 12074,
-          "group": "hedge"
-        },
-        {
-          "country": "네덜란드",
-          "volume": 11026,
+          "volume": 261181,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 3876,
+          "volume": 24808,
           "group": "asia"
-        },
-        {
-          "country": "룩셈부르크",
-          "volume": 2514,
-          "group": "institutional"
-        },
-        {
-          "country": "말레이시아",
-          "volume": 2500,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1861,
-          "group": "europe_other"
-        }
-      ]
-    },
-    {
-      "ticker": "180640",
-      "name": "한진칼",
-      "signal": "CAUTION",
-      "score": -2,
-      "reasons": [
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 117% 흡수, 개인 4일 연속 매수)"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.424,
-      "asia_trend": -0.495,
-      "hedge_trend": -0.512,
-      "inst_acceleration": 0.0486,
-      "asia_acceleration": -0.0363,
-      "hhi": 0.6317,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.65,
-      "asia_zscore": -0.26,
-      "hedge_zscore": -0.89,
-      "price_change_pct": -3.65,
-      "vol_price_pattern": "ABANDON",
-      "foreign_net_5d": 0,
-      "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 10318000000,
-      "retail_net_20d": -17676000000,
-      "retail_foreign_ratio": 1.167,
-      "retail_consecutive": 4,
-      "retail_pattern": "RETAIL_SUPPORT",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 79945,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 12199,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 6606,
-          "group": "hedge"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1721,
-          "group": "europe_other"
         },
         {
           "country": "미국",
-          "volume": 924,
+          "volume": 13583,
           "group": "americas"
         },
         {
-          "country": "스위스",
-          "volume": 240,
-          "group": "institutional"
+          "country": "케이맨 제도",
+          "volume": 9606,
+          "group": "hedge"
         },
         {
           "country": "아일랜드",
-          "volume": 222,
+          "volume": 4780,
           "group": "institutional"
         },
         {
-          "country": "대만",
-          "volume": 153,
+          "country": "홍콩",
+          "volume": 3994,
           "group": "asia"
+        },
+        {
+          "country": "스위스",
+          "volume": 3595,
+          "group": "institutional"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 2862,
+          "group": "europe_other"
         }
       ]
     },
@@ -1854,296 +675,513 @@
       "ticker": "329180",
       "name": "HD현대중공업",
       "signal": "CAUTION",
-      "score": -2,
+      "score": 4,
       "reasons": [
-        "기관 매집 감속 (-0.24)",
-        "외국인 순매수 33,930주"
+        "기관 매집 가속 (+0.31)",
+        "관심 상실 (기관↓ 주가↓)"
       ],
       "pattern": "MIXED",
-      "inst_trend": -0.07,
-      "asia_trend": -0.482,
-      "hedge_trend": -0.539,
-      "inst_acceleration": -0.2368,
-      "asia_acceleration": 0.4755,
-      "hhi": 0.332,
+      "inst_trend": -0.342,
+      "asia_trend": 0.835,
+      "hedge_trend": -0.712,
+      "inst_acceleration": 0.3089,
+      "asia_acceleration": -1.2874,
+      "hhi": 0.5374,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.52,
-      "asia_zscore": -0.18,
-      "hedge_zscore": -1.19,
-      "price_change_pct": -1.19,
-      "vol_price_pattern": "FLAT",
-      "foreign_net_5d": 33930,
-      "foreign_direction": "BUY",
-      "retail_net_5d": -48652000000,
-      "retail_net_20d": -299955000000,
-      "retail_foreign_ratio": -2.362,
-      "retail_consecutive": -1,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 91726,
-          "group": "institutional"
-        },
-        {
-          "country": "미국",
-          "volume": 27814,
-          "group": "americas"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 21718,
-          "group": "institutional"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 9202,
-          "group": "asia"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 7126,
-          "group": "hedge"
-        },
-        {
-          "country": "대만",
-          "volume": 5322,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 3142,
-          "group": "europe_other"
-        },
-        {
-          "country": "스위스",
-          "volume": 2009,
-          "group": "institutional"
-        }
-      ]
-    },
-    {
-      "ticker": "012450",
-      "name": "한화에어로스페이스",
-      "signal": "CAUTION",
-      "score": -4,
-      "reasons": [
-        "기관 매집 가속 소폭 (+0.13)",
-        "함정 (기관↓ 주가+4.7% → 개인 주도)",
-        "아시아 9일 연속 감소",
-        "외국인 순매수 206,911주"
-      ],
-      "pattern": "FULL_EXIT",
-      "inst_trend": -0.549,
-      "asia_trend": -0.735,
-      "hedge_trend": -0.792,
-      "inst_acceleration": 0.13,
-      "asia_acceleration": 0.0666,
-      "hhi": 0.4758,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -0.82,
-      "asia_zscore": -1.49,
-      "hedge_zscore": -0.6,
-      "price_change_pct": 4.68,
-      "vol_price_pattern": "TRAP",
-      "foreign_net_5d": 206911,
-      "foreign_direction": "BUY",
-      "retail_net_5d": -351133000000,
-      "retail_net_20d": -312906000000,
-      "retail_foreign_ratio": -1.167,
-      "retail_consecutive": 1,
-      "retail_pattern": "",
-      "top_countries": [
-        {
-          "country": "영국",
-          "volume": 167345,
-          "group": "institutional"
-        },
-        {
-          "country": "영국령 버진아일랜드",
-          "volume": 19160,
-          "group": "hedge"
-        },
-        {
-          "country": "캐나다",
-          "volume": 19135,
-          "group": "americas"
-        },
-        {
-          "country": "노르웨이",
-          "volume": 14968,
-          "group": "institutional"
-        },
-        {
-          "country": "케이맨 제도",
-          "volume": 12625,
-          "group": "hedge"
-        },
-        {
-          "country": "싱가포르",
-          "volume": 9386,
-          "group": "asia"
-        },
-        {
-          "country": "오스트레일리아",
-          "volume": 1670,
-          "group": "europe_other"
-        },
-        {
-          "country": "미국",
-          "volume": 1382,
-          "group": "americas"
-        }
-      ]
-    },
-    {
-      "ticker": "207940",
-      "name": "삼성바이오로직스",
-      "signal": "CAUTION",
-      "score": -5,
-      "reasons": [
-        "기관 매집 감속 (-0.38)",
-        "기관 집중 매집 이상치 (HHI=0.71, 영국)",
-        "기관 거래량 급감 (Z=-2.2σ)",
-        "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 140% 흡수, 개인 3일 연속 매수)"
-      ],
-      "pattern": "MIXED",
-      "inst_trend": -0.14,
-      "asia_trend": -0.61,
-      "hedge_trend": -0.661,
-      "inst_acceleration": -0.3848,
-      "asia_acceleration": 0.2145,
-      "hhi": 0.7129,
-      "dominant_country": "영국",
-      "dominant_group": "institutional",
-      "inst_zscore": -2.18,
-      "asia_zscore": -0.71,
-      "hedge_zscore": -1.16,
-      "price_change_pct": -5.37,
+      "inst_zscore": -0.64,
+      "asia_zscore": -0.35,
+      "hedge_zscore": -1.07,
+      "price_change_pct": -4.77,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 40476000000,
-      "retail_net_20d": 41260000000,
-      "retail_foreign_ratio": 1.401,
+      "retail_net_5d": -21284000000,
+      "retail_net_20d": -312942000000,
+      "retail_foreign_ratio": -0.398,
+      "retail_consecutive": 2,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 93570,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 12719,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 10961,
+          "group": "americas"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 5408,
+          "group": "hedge"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 2751,
+          "group": "europe_other"
+        },
+        {
+          "country": "스웨덴",
+          "volume": 2038,
+          "group": "institutional"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 938,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 885,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "373220",
+      "name": "LG에너지솔루션",
+      "signal": "CAUTION",
+      "score": 4,
+      "reasons": [
+        "기관 집중 매집 이상치 (HHI=0.83, 영국)",
+        "관심 상실 (기관↓ 주가↓)",
+        "개인 지지 (외국인 매도 200% 흡수, 개인 3일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.365,
+      "asia_trend": -0.349,
+      "hedge_trend": -0.807,
+      "inst_acceleration": -0.1176,
+      "asia_acceleration": -0.7251,
+      "hhi": 0.8273,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -1.02,
+      "asia_zscore": -0.8,
+      "hedge_zscore": -1.14,
+      "price_change_pct": -1.31,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 48022000000,
+      "retail_net_20d": 144353000000,
+      "retail_foreign_ratio": 1.995,
       "retail_consecutive": 3,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 20803,
+          "volume": 113544,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 1682,
+          "volume": 3300,
           "group": "asia"
         },
         {
-          "country": "말레이시아",
-          "volume": 500,
-          "group": "asia"
+          "country": "오스트레일리아",
+          "volume": 2695,
+          "group": "europe_other"
         },
         {
-          "country": "미국",
-          "volume": 396,
-          "group": "americas"
-        },
-        {
-          "country": "버뮤다",
-          "volume": 291,
+          "country": "케이맨 제도",
+          "volume": 1629,
           "group": "hedge"
         },
         {
           "country": "아일랜드",
-          "volume": 291,
+          "volume": 1252,
           "group": "institutional"
         },
         {
-          "country": "스위스",
-          "volume": 280,
+          "country": "홍콩",
+          "volume": 781,
+          "group": "asia"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 616,
           "group": "institutional"
         },
         {
-          "country": "케이맨 제도",
-          "volume": 245,
-          "group": "hedge"
+          "country": "미국",
+          "volume": 432,
+          "group": "americas"
         }
       ]
     },
     {
-      "ticker": "035720",
-      "name": "카카오",
+      "ticker": "047810",
+      "name": "한국항공우주",
       "signal": "CAUTION",
-      "score": -6,
+      "score": 3,
       "reasons": [
-        "기관 매집 감속 (-0.28)",
+        "기관 집중 매집 이상치 (HHI=0.62, 영국)",
         "관심 상실 (기관↓ 주가↓)",
-        "개인 지지 (외국인 매도 378% 흡수, 개인 6일 연속 매수)"
+        "개인 지지 (외국인 매도 82% 흡수, 개인 3일 연속 매수)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.463,
-      "asia_trend": -0.679,
-      "hedge_trend": -0.754,
-      "inst_acceleration": -0.2834,
-      "asia_acceleration": 0.0752,
-      "hhi": 0.6111,
+      "inst_trend": -0.316,
+      "asia_trend": -0.588,
+      "hedge_trend": -0.717,
+      "inst_acceleration": -0.0385,
+      "asia_acceleration": -0.2217,
+      "hhi": 0.6218,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -1.48,
-      "asia_zscore": -0.57,
-      "hedge_zscore": -1.18,
-      "price_change_pct": -1.38,
+      "inst_zscore": -0.4,
+      "asia_zscore": -0.58,
+      "hedge_zscore": -0.72,
+      "price_change_pct": -8.07,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 72635000000,
-      "retail_net_20d": 212742000000,
-      "retail_foreign_ratio": 3.78,
-      "retail_consecutive": 6,
+      "retail_net_5d": 56084000000,
+      "retail_net_20d": 13009000000,
+      "retail_foreign_ratio": 0.818,
+      "retail_consecutive": 3,
       "retail_pattern": "RETAIL_SUPPORT",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 576205,
+          "volume": 340730,
           "group": "institutional"
         },
         {
+          "country": "노르웨이",
+          "volume": 32688,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 16800,
+          "group": "americas"
+        },
+        {
           "country": "싱가포르",
-          "volume": 80196,
+          "volume": 15571,
           "group": "asia"
         },
         {
           "country": "케이맨 제도",
-          "volume": 36093,
+          "volume": 14975,
           "group": "hedge"
         },
         {
-          "country": "룩셈부르크",
-          "volume": 22191,
-          "group": "institutional"
-        },
-        {
           "country": "오스트레일리아",
-          "volume": 9642,
+          "volume": 6912,
           "group": "europe_other"
         },
         {
-          "country": "미국",
-          "volume": 8618,
-          "group": "americas"
+          "country": "아일랜드",
+          "volume": 2364,
+          "group": "institutional"
         },
         {
-          "country": "아일랜드",
-          "volume": 5105,
+          "country": "홍콩",
+          "volume": 2116,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "051900",
+      "name": "LG생활건강",
+      "signal": "CAUTION",
+      "score": 3,
+      "reasons": [
+        "기관 매집 가속 (+0.17)",
+        "함정 (기관↓ 주가+5.1% → 개인 주도)",
+        "외국인 순매수 14,976주"
+      ],
+      "pattern": "TRAP_WARNING",
+      "inst_trend": -0.444,
+      "asia_trend": -0.136,
+      "hedge_trend": -0.63,
+      "inst_acceleration": 0.1745,
+      "asia_acceleration": -0.5659,
+      "hhi": 0.6751,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -1.05,
+      "asia_zscore": -0.41,
+      "hedge_zscore": -0.91,
+      "price_change_pct": 5.14,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 14976,
+      "foreign_direction": "BUY",
+      "retail_net_5d": -3390000000,
+      "retail_net_20d": 29649000000,
+      "retail_foreign_ratio": -0.197,
+      "retail_consecutive": -1,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 31156,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 3940,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 1136,
+          "group": "hedge"
+        },
+        {
+          "country": "스위스",
+          "volume": 1031,
           "group": "institutional"
         },
         {
           "country": "프랑스",
-          "volume": 4103,
+          "volume": 445,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 182,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 180,
+          "group": "americas"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 170,
+          "group": "institutional"
+        }
+      ]
+    },
+    {
+      "ticker": "068270",
+      "name": "셀트리온",
+      "signal": "CAUTION",
+      "score": 3,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.09)",
+        "관심 상실 (기관↓ 주가↓)",
+        "아시아 4일 연속 증가"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.39,
+      "asia_trend": -0.258,
+      "hedge_trend": -0.648,
+      "inst_acceleration": 0.0916,
+      "asia_acceleration": -0.1191,
+      "hhi": 0.6491,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.62,
+      "asia_zscore": -0.06,
+      "hedge_zscore": -0.86,
+      "price_change_pct": -1.94,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 10432000000,
+      "retail_net_20d": -227869000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": 2,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 199163,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 21395,
+          "group": "asia"
+        },
+        {
+          "country": "말레이시아",
+          "volume": 10000,
+          "group": "asia"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 4749,
+          "group": "europe_other"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 4216,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 3792,
+          "group": "hedge"
+        },
+        {
+          "country": "홍콩",
+          "volume": 2462,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 1207,
+          "group": "americas"
+        }
+      ]
+    },
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "signal": "CAUTION",
+      "score": 2,
+      "reasons": [
+        "개인 지지 (외국인 매도 81% 흡수, 개인 2일 연속 매수)"
+      ],
+      "pattern": "MIXED",
+      "inst_trend": -0.31,
+      "asia_trend": -0.161,
+      "hedge_trend": -0.6,
+      "inst_acceleration": 0.005,
+      "asia_acceleration": 0.3316,
+      "hhi": 0.4645,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -1.31,
+      "asia_zscore": 0.73,
+      "hedge_zscore": -1.24,
+      "price_change_pct": 0.72,
+      "vol_price_pattern": "FLAT",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 283402000000,
+      "retail_net_20d": 597311000000,
+      "retail_foreign_ratio": 0.806,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 459793,
+          "group": "institutional"
+        },
+        {
+          "country": "일본",
+          "volume": 126059,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 33040,
+          "group": "americas"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 19650,
+          "group": "asia"
+        },
+        {
+          "country": "프랑스",
+          "volume": 17740,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 17320,
+          "group": "hedge"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 13334,
+          "group": "institutional"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 6875,
+          "group": "institutional"
+        }
+      ]
+    },
+    {
+      "ticker": "064350",
+      "name": "현대로템",
+      "signal": "CAUTION",
+      "score": 2,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.08)",
+        "관심 상실 (기관↓ 주가↓)",
+        "개인 지지 (외국인 매도 117% 흡수, 개인 10일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.636,
+      "asia_trend": -0.733,
+      "hedge_trend": -0.945,
+      "inst_acceleration": 0.0754,
+      "asia_acceleration": -0.1314,
+      "hhi": 0.6599,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.96,
+      "asia_zscore": -1.31,
+      "hedge_zscore": -1.01,
+      "price_change_pct": -6.64,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 163559000000,
+      "retail_net_20d": 145432000000,
+      "retail_foreign_ratio": 1.174,
+      "retail_consecutive": 10,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 221034,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 17014,
+          "group": "americas"
+        },
+        {
+          "country": "노르웨이",
+          "volume": 13386,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 11296,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 5177,
+          "group": "hedge"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 3385,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 1420,
+          "group": "asia"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 406,
           "group": "institutional"
         }
       ]
@@ -2152,73 +1190,297 @@
       "ticker": "096770",
       "name": "SK이노베이션",
       "signal": "CAUTION",
-      "score": -7,
+      "score": 2,
       "reasons": [
-        "기관 매집 감속 (-0.37)",
-        "영국+아시아 동반 진입 중",
-        "관심 상실 (기관↓ 주가↓)"
+        "기관 매집 가속 (+0.26)",
+        "기관 집중 매집 이상치 (HHI=0.73, 영국)",
+        "함정 (기관↓ 주가+2.7% → 개인 주도)",
+        "아시아 3일 연속 감소"
       ],
-      "pattern": "MIXED",
-      "inst_trend": -0.166,
-      "asia_trend": -0.348,
-      "hedge_trend": -0.016,
-      "inst_acceleration": -0.372,
-      "asia_acceleration": -0.4383,
-      "hhi": 0.4228,
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.522,
+      "asia_trend": -0.575,
+      "hedge_trend": -0.664,
+      "inst_acceleration": 0.2565,
+      "asia_acceleration": 0.0324,
+      "hhi": 0.7329,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -0.61,
-      "asia_zscore": -0.6,
-      "hedge_zscore": -0.24,
-      "price_change_pct": -8.54,
+      "inst_zscore": -1.66,
+      "asia_zscore": -1.37,
+      "hedge_zscore": -1.35,
+      "price_change_pct": 2.71,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": -8786000000,
+      "retail_net_20d": 134893000000,
+      "retail_foreign_ratio": -24.271,
+      "retail_consecutive": -1,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 149179,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 8929,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 6571,
+          "group": "americas"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 4664,
+          "group": "hedge"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 1968,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 1915,
+          "group": "asia"
+        },
+        {
+          "country": "중국",
+          "volume": 712,
+          "group": "asia"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 460,
+          "group": "europe_other"
+        }
+      ]
+    },
+    {
+      "ticker": "012450",
+      "name": "한화에어로스페이스",
+      "signal": "CAUTION",
+      "score": 1,
+      "reasons": [
+        "기관 집중 매집 이상치 (HHI=0.66, 영국)",
+        "관심 상실 (기관↓ 주가↓)",
+        "아시아 9일 연속 감소",
+        "개인 지지 (외국인 매도 152% 흡수, 개인 2일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.598,
+      "asia_trend": -0.819,
+      "hedge_trend": -0.766,
+      "inst_acceleration": -0.0924,
+      "asia_acceleration": -0.0488,
+      "hhi": 0.6649,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -1.34,
+      "asia_zscore": -1.42,
+      "hedge_zscore": -1.05,
+      "price_change_pct": -5.44,
       "vol_price_pattern": "ABANDON",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 54915000000,
-      "retail_net_20d": 102180000000,
+      "retail_net_5d": 158546000000,
+      "retail_net_20d": -266635000000,
+      "retail_foreign_ratio": 1.524,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 73426,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 7901,
+          "group": "americas"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 4095,
+          "group": "hedge"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 1730,
+          "group": "asia"
+        },
+        {
+          "country": "노르웨이",
+          "volume": 1387,
+          "group": "institutional"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 1109,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 516,
+          "group": "asia"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 206,
+          "group": "europe_other"
+        }
+      ]
+    },
+    {
+      "ticker": "352820",
+      "name": "하이브",
+      "signal": "CAUTION",
+      "score": 1,
+      "reasons": [
+        "영국+아시아 동반 진입 중",
+        "관심 상실 (기관↓ 주가↓)",
+        "개인 지지 (외국인 매도 210% 흡수, 개인 3일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.282,
+      "asia_trend": -0.235,
+      "hedge_trend": -0.457,
+      "inst_acceleration": -0.0521,
+      "asia_acceleration": 0.1854,
+      "hhi": 0.5966,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.43,
+      "asia_zscore": 0.51,
+      "hedge_zscore": -1.29,
+      "price_change_pct": -5.75,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 195615000000,
+      "retail_net_20d": 254953000000,
+      "retail_foreign_ratio": 2.101,
+      "retail_consecutive": 3,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 84413,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 16548,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 4556,
+          "group": "hedge"
+        },
+        {
+          "country": "미국",
+          "volume": 3792,
+          "group": "americas"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 802,
+          "group": "europe_other"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 639,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 384,
+          "group": "asia"
+        },
+        {
+          "country": "스위스",
+          "volume": 143,
+          "group": "institutional"
+        }
+      ]
+    },
+    {
+      "ticker": "402340",
+      "name": "SK스퀘어",
+      "signal": "CAUTION",
+      "score": 1,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.12)",
+        "영국 선행 매집, 아시아 미진입 → 선점 기회",
+        "함정 (기관↓ 주가+3.6% → 개인 주도)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.278,
+      "asia_trend": -0.51,
+      "hedge_trend": -0.499,
+      "inst_acceleration": 0.1158,
+      "asia_acceleration": -0.1896,
+      "hhi": 0.5109,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.21,
+      "asia_zscore": -0.65,
+      "hedge_zscore": -1.09,
+      "price_change_pct": 3.58,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": -5935000000,
+      "retail_net_20d": 172112000000,
       "retail_foreign_ratio": 0.0,
       "retail_consecutive": 2,
       "retail_pattern": "",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 395535,
+          "volume": 303378,
           "group": "institutional"
         },
         {
-          "country": "케이맨 제도",
-          "volume": 111294,
-          "group": "hedge"
-        },
-        {
           "country": "노르웨이",
-          "volume": 73624,
+          "volume": 63592,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 53373,
+          "volume": 24173,
           "group": "asia"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 16275,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 10665,
+          "group": "hedge"
         },
         {
           "country": "오스트레일리아",
-          "volume": 4818,
+          "volume": 5472,
           "group": "europe_other"
         },
         {
-          "country": "중국",
-          "volume": 3007,
-          "group": "asia"
-        },
-        {
           "country": "미국",
-          "volume": 2368,
+          "volume": 3742,
           "group": "americas"
         },
         {
-          "country": "프랑스",
-          "volume": 1302,
-          "group": "institutional"
+          "country": "태국",
+          "volume": 3505,
+          "group": "other"
         }
       ]
     },
@@ -2226,70 +1488,812 @@
       "ticker": "000990",
       "name": "DB하이텍",
       "signal": "CAUTION",
-      "score": -8,
+      "score": 0,
       "reasons": [
-        "함정 (기관↓ 주가+3.4% → 개인 주도)"
+        "기관 매집 가속 (+0.17)",
+        "기관 집중 매집 이상치 (HHI=0.62, 영국)",
+        "함정 (기관↓ 주가+2.8% → 개인 주도)",
+        "개인 추격 매수 (주가+2.8% + 개인 가속 + 스마트머니 이탈)"
       ],
       "pattern": "FULL_EXIT",
-      "inst_trend": -0.584,
-      "asia_trend": -0.455,
-      "hedge_trend": -0.762,
-      "inst_acceleration": -0.0068,
-      "asia_acceleration": -0.0069,
-      "hhi": 0.4674,
+      "inst_trend": -0.46,
+      "asia_trend": -0.464,
+      "hedge_trend": -0.726,
+      "inst_acceleration": 0.1735,
+      "asia_acceleration": 0.1859,
+      "hhi": 0.6242,
       "dominant_country": "영국",
       "dominant_group": "institutional",
-      "inst_zscore": -1.3,
-      "asia_zscore": -1.17,
-      "hedge_zscore": -1.03,
-      "price_change_pct": 3.41,
+      "inst_zscore": -0.34,
+      "asia_zscore": -0.63,
+      "hedge_zscore": -0.86,
+      "price_change_pct": 2.8,
       "vol_price_pattern": "TRAP",
       "foreign_net_5d": 0,
       "foreign_direction": "NEUTRAL",
-      "retail_net_5d": 0,
-      "retail_net_20d": 0,
-      "retail_foreign_ratio": 0.0,
-      "retail_consecutive": 0,
-      "retail_pattern": "",
+      "retail_net_5d": 8850000000,
+      "retail_net_20d": 73000000,
+      "retail_foreign_ratio": 0.269,
+      "retail_consecutive": 1,
+      "retail_pattern": "RETAIL_FOMO",
       "top_countries": [
         {
           "country": "영국",
-          "volume": 99406,
+          "volume": 163305,
           "group": "institutional"
         },
         {
           "country": "싱가포르",
-          "volume": 27091,
+          "volume": 29420,
           "group": "asia"
         },
         {
           "country": "케이맨 제도",
-          "volume": 17567,
+          "volume": 10918,
           "group": "hedge"
         },
         {
           "country": "오스트레일리아",
-          "volume": 5530,
+          "volume": 3192,
           "group": "europe_other"
         },
         {
           "country": "중국",
-          "volume": 2120,
+          "volume": 2404,
+          "group": "asia"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 697,
+          "group": "institutional"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 500,
+          "group": "institutional"
+        },
+        {
+          "country": "대만",
+          "volume": 55,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "090430",
+      "name": "아모레퍼시픽",
+      "signal": "CAUTION",
+      "score": 0,
+      "reasons": [
+        "기관 매집 가속 (+0.25)",
+        "함정 (기관↓ 주가+6.1% → 개인 주도)"
+      ],
+      "pattern": "TRAP_WARNING",
+      "inst_trend": -0.105,
+      "asia_trend": -0.505,
+      "hedge_trend": -0.461,
+      "inst_acceleration": 0.2476,
+      "asia_acceleration": -0.107,
+      "hhi": 0.6909,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": 0.01,
+      "asia_zscore": -0.43,
+      "hedge_zscore": -0.56,
+      "price_change_pct": 6.1,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": -9596000000,
+      "retail_net_20d": -19902000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": -1,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 138097,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 9348,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 6725,
+          "group": "hedge"
+        },
+        {
+          "country": "스위스",
+          "volume": 3235,
+          "group": "institutional"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 2204,
+          "group": "europe_other"
+        },
+        {
+          "country": "홍콩",
+          "volume": 1618,
+          "group": "asia"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 1228,
+          "group": "institutional"
+        },
+        {
+          "country": "스페인",
+          "volume": 1068,
+          "group": "other"
+        }
+      ]
+    },
+    {
+      "ticker": "010130",
+      "name": "고려아연",
+      "signal": "CAUTION",
+      "score": -2,
+      "reasons": [
+        "관심 상실 (기관↓ 주가↓)",
+        "개인 지지 (외국인 매도 126% 흡수, 개인 2일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.374,
+      "asia_trend": -0.567,
+      "hedge_trend": -0.774,
+      "inst_acceleration": 0.0057,
+      "asia_acceleration": 0.61,
+      "hhi": 0.6648,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.74,
+      "asia_zscore": -0.0,
+      "hedge_zscore": -0.78,
+      "price_change_pct": -1.55,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 65461000000,
+      "retail_net_20d": -28852000000,
+      "retail_foreign_ratio": 1.263,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 12939,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 1875,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 729,
+          "group": "hedge"
+        },
+        {
+          "country": "스위스",
+          "volume": 160,
+          "group": "institutional"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 139,
+          "group": "europe_other"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 85,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 65,
+          "group": "americas"
+        },
+        {
+          "country": "중국",
+          "volume": 16,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "071050",
+      "name": "한국금융지주",
+      "signal": "CAUTION",
+      "score": -3,
+      "reasons": [
+        "헤지 과열 (Z=4.4σ, 피크 경고)"
+      ],
+      "pattern": "HEDGE_OVERHEAT",
+      "inst_trend": -0.391,
+      "asia_trend": -0.474,
+      "hedge_trend": 0.687,
+      "inst_acceleration": -0.0295,
+      "asia_acceleration": 0.2177,
+      "hhi": 0.3171,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.98,
+      "asia_zscore": -0.43,
+      "hedge_zscore": 4.37,
+      "price_change_pct": 0.43,
+      "vol_price_pattern": "FLAT",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 51061000000,
+      "retail_net_20d": 188724000000,
+      "retail_foreign_ratio": 0.508,
+      "retail_consecutive": -1,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 87703,
+          "group": "institutional"
+        },
+        {
+          "country": "버뮤다",
+          "volume": 80000,
+          "group": "hedge"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 15959,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 7025,
+          "group": "hedge"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 6603,
+          "group": "europe_other"
+        },
+        {
+          "country": "스웨덴",
+          "volume": 5567,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 3692,
+          "group": "americas"
+        },
+        {
+          "country": "일본",
+          "volume": 2768,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "103140",
+      "name": "풍산",
+      "signal": "CAUTION",
+      "score": -5,
+      "reasons": [
+        "관심 상실 (기관↓ 주가↓)",
+        "아시아 4일 연속 감소",
+        "개인 지지 (외국인 매도 134% 흡수, 개인 3일 연속 매수)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.569,
+      "asia_trend": -0.802,
+      "hedge_trend": -0.811,
+      "inst_acceleration": -0.0883,
+      "asia_acceleration": -0.009,
+      "hhi": 0.5298,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.84,
+      "asia_zscore": -0.77,
+      "hedge_zscore": -0.66,
+      "price_change_pct": -3.61,
+      "vol_price_pattern": "ABANDON",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 19954000000,
+      "retail_net_20d": 198726000000,
+      "retail_foreign_ratio": 1.34,
+      "retail_consecutive": 3,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 120491,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 34047,
+          "group": "hedge"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 12704,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 5190,
+          "group": "americas"
+        },
+        {
+          "country": "캐나다",
+          "volume": 300,
+          "group": "americas"
+        },
+        {
+          "country": "중국",
+          "volume": 182,
           "group": "asia"
         },
         {
           "country": "스위스",
-          "volume": 1058,
+          "volume": 103,
+          "group": "institutional"
+        },
+        {
+          "country": "대만",
+          "volume": 33,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "180640",
+      "name": "한진칼",
+      "signal": "CAUTION",
+      "score": -6,
+      "reasons": [
+        "함정 (기관↓ 주가+10.7% → 개인 주도)",
+        "개인 지지 (외국인 매도 120% 흡수, 개인 매수 중)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.263,
+      "asia_trend": -0.242,
+      "hedge_trend": -0.533,
+      "inst_acceleration": 0.0332,
+      "asia_acceleration": 0.193,
+      "hhi": 0.6107,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.41,
+      "asia_zscore": 0.32,
+      "hedge_zscore": -0.58,
+      "price_change_pct": 10.73,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 16778000000,
+      "retail_net_20d": 22545000000,
+      "retail_foreign_ratio": 1.205,
+      "retail_consecutive": -1,
+      "retail_pattern": "RETAIL_SUPPORT",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 71973,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 13642,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 5985,
+          "group": "hedge"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 1376,
+          "group": "europe_other"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 682,
           "group": "institutional"
         },
         {
           "country": "영국령 버진아일랜드",
-          "volume": 196,
+          "volume": 129,
           "group": "hedge"
         },
         {
           "country": "대만",
-          "volume": 135,
+          "volume": 124,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 94,
+          "group": "americas"
+        }
+      ]
+    },
+    {
+      "ticker": "005930",
+      "name": "삼성전자",
+      "signal": "CAUTION",
+      "score": -7,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.11)",
+        "기관 집중 매집 이상치 (HHI=0.62, 영국)",
+        "함정 (기관↓ 주가+2.8% → 개인 주도)",
+        "외국인 순매도 -6,445,138주",
+        "개인 추격 매수 (주가+2.8% + 개인 가속 + 스마트머니 이탈)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.306,
+      "asia_trend": -0.283,
+      "hedge_trend": -0.673,
+      "inst_acceleration": 0.1055,
+      "asia_acceleration": -0.4177,
+      "hhi": 0.6247,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.36,
+      "asia_zscore": -0.51,
+      "hedge_zscore": -0.44,
+      "price_change_pct": 2.84,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": -6445138,
+      "foreign_direction": "SELL",
+      "retail_net_5d": 405941000000,
+      "retail_net_20d": 15841046000000,
+      "retail_foreign_ratio": 0.244,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_FOMO",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 8042788,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 360836,
+          "group": "hedge"
+        },
+        {
+          "country": "프랑스",
+          "volume": 332279,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 326962,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 258043,
+          "group": "americas"
+        },
+        {
+          "country": "룩셈부르크",
+          "volume": 217478,
+          "group": "institutional"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 137305,
+          "group": "institutional"
+        },
+        {
+          "country": "영국령 버진아일랜드",
+          "volume": 118000,
+          "group": "hedge"
+        }
+      ]
+    },
+    {
+      "ticker": "028260",
+      "name": "삼성물산",
+      "signal": "CAUTION",
+      "score": -7,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.10)",
+        "영국+아시아 동반 진입 중",
+        "함정 (기관↓ 주가+6.4% → 개인 주도)",
+        "개인 추격 매수 (주가+6.4% + 개인 가속 + 스마트머니 이탈)"
+      ],
+      "pattern": "TRAP_WARNING",
+      "inst_trend": -0.322,
+      "asia_trend": 0.023,
+      "hedge_trend": -0.595,
+      "inst_acceleration": 0.0997,
+      "asia_acceleration": -0.1664,
+      "hhi": 0.6092,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.09,
+      "asia_zscore": 0.46,
+      "hedge_zscore": -0.28,
+      "price_change_pct": 6.44,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 21773000000,
+      "retail_net_20d": 40084000000,
+      "retail_foreign_ratio": 0.203,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_FOMO",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 262211,
+          "group": "institutional"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 20131,
+          "group": "hedge"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 18648,
+          "group": "asia"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 8007,
+          "group": "institutional"
+        },
+        {
+          "country": "말레이시아",
+          "volume": 6488,
+          "group": "asia"
+        },
+        {
+          "country": "일본",
+          "volume": 5189,
+          "group": "asia"
+        },
+        {
+          "country": "스위스",
+          "volume": 5032,
+          "group": "institutional"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 4748,
+          "group": "europe_other"
+        }
+      ]
+    },
+    {
+      "ticker": "006400",
+      "name": "삼성SDI",
+      "signal": "CAUTION",
+      "score": -9,
+      "reasons": [
+        "기관 매집 가속 소폭 (+0.07)",
+        "함정 (기관↓ 주가+3.0% → 개인 주도)",
+        "개인 추격 매수 (주가+3.0% + 개인 가속 + 스마트머니 이탈)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.46,
+      "asia_trend": -0.566,
+      "hedge_trend": -0.8,
+      "inst_acceleration": 0.0667,
+      "asia_acceleration": 0.4285,
+      "hhi": 0.6215,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.67,
+      "asia_zscore": -0.57,
+      "hedge_zscore": -0.85,
+      "price_change_pct": 2.96,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 12295000000,
+      "retail_net_20d": -217451000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": 2,
+      "retail_pattern": "RETAIL_FOMO",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 145977,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 12807,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 7381,
+          "group": "hedge"
+        },
+        {
+          "country": "일본",
+          "volume": 5608,
+          "group": "asia"
+        },
+        {
+          "country": "미국",
+          "volume": 4918,
+          "group": "americas"
+        },
+        {
+          "country": "오스트레일리아",
+          "volume": 4447,
+          "group": "europe_other"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 1723,
+          "group": "institutional"
+        },
+        {
+          "country": "홍콩",
+          "volume": 1086,
+          "group": "asia"
+        }
+      ]
+    },
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "signal": "SELL",
+      "score": -11,
+      "reasons": [
+        "기관 매집 감속 (-0.18)",
+        "영국 선행 매집, 아시아 미진입 → 선점 기회",
+        "함정 (기관↓ 주가+3.8% → 개인 주도)",
+        "아시아 3일 연속 감소"
+      ],
+      "pattern": "TRAP_WARNING",
+      "inst_trend": -0.19,
+      "asia_trend": -0.378,
+      "hedge_trend": -0.666,
+      "inst_acceleration": -0.1766,
+      "asia_acceleration": 0.2692,
+      "hhi": 0.6078,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -0.66,
+      "asia_zscore": -1.35,
+      "hedge_zscore": -0.87,
+      "price_change_pct": 3.81,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": -544939000000,
+      "retail_net_20d": 4286596000000,
+      "retail_foreign_ratio": 0.0,
+      "retail_consecutive": 2,
+      "retail_pattern": "",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 1604737,
+          "group": "institutional"
+        },
+        {
+          "country": "스위스",
+          "volume": 94973,
+          "group": "institutional"
+        },
+        {
+          "country": "노르웨이",
+          "volume": 88956,
+          "group": "institutional"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 48019,
+          "group": "institutional"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 45843,
+          "group": "asia"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 44534,
+          "group": "hedge"
+        },
+        {
+          "country": "일본",
+          "volume": 30418,
+          "group": "asia"
+        },
+        {
+          "country": "영국령 버진아일랜드",
+          "volume": 26010,
+          "group": "hedge"
+        }
+      ]
+    },
+    {
+      "ticker": "105560",
+      "name": "KB금융",
+      "signal": "SELL",
+      "score": -18,
+      "reasons": [
+        "기관 매집 감속 (-0.24)",
+        "함정 (기관↓ 주가+3.0% → 개인 주도)",
+        "개인 추격 매수 (주가+3.0% + 개인 가속 + 스마트머니 이탈)"
+      ],
+      "pattern": "FULL_EXIT",
+      "inst_trend": -0.396,
+      "asia_trend": -0.312,
+      "hedge_trend": 1.738,
+      "inst_acceleration": -0.2354,
+      "asia_acceleration": -0.582,
+      "hhi": 0.3771,
+      "dominant_country": "영국",
+      "dominant_group": "institutional",
+      "inst_zscore": -1.1,
+      "asia_zscore": -1.07,
+      "hedge_zscore": 1.95,
+      "price_change_pct": 2.99,
+      "vol_price_pattern": "TRAP",
+      "foreign_net_5d": 0,
+      "foreign_direction": "NEUTRAL",
+      "retail_net_5d": 3476000000,
+      "retail_net_20d": 48667000000,
+      "retail_foreign_ratio": 0.042,
+      "retail_consecutive": 1,
+      "retail_pattern": "RETAIL_FOMO",
+      "top_countries": [
+        {
+          "country": "영국",
+          "volume": 366418,
+          "group": "institutional"
+        },
+        {
+          "country": "버뮤다",
+          "volume": 178381,
+          "group": "hedge"
+        },
+        {
+          "country": "케이맨 제도",
+          "volume": 52649,
+          "group": "hedge"
+        },
+        {
+          "country": "싱가포르",
+          "volume": 30348,
+          "group": "asia"
+        },
+        {
+          "country": "아일랜드",
+          "volume": 16089,
+          "group": "institutional"
+        },
+        {
+          "country": "스위스",
+          "volume": 6584,
+          "group": "institutional"
+        },
+        {
+          "country": "미국",
+          "volume": 6216,
+          "group": "americas"
+        },
+        {
+          "country": "홍콩",
+          "volume": 5047,
           "group": "asia"
         }
       ]
@@ -2298,162 +2302,168 @@
   "summary": {
     "strong_buy": 0,
     "buy": 0,
-    "neutral": 7,
-    "caution": 24,
-    "sell": 0
+    "neutral": 8,
+    "caution": 21,
+    "sell": 2
   },
   "sector_flow": {
-    "소재": {
-      "direction": "OUTFLOW",
-      "avg_score": 7.5,
-      "avg_inst_trend": -0.446,
-      "stocks": 2
-    },
-    "엔터": {
-      "direction": "OUTFLOW",
-      "avg_score": 10.0,
-      "avg_inst_trend": -0.519,
+    "전기장비": {
+      "direction": "MIXED",
+      "avg_score": 19.0,
+      "avg_inst_trend": -0.003,
       "stocks": 1
-    },
-    "지주": {
-      "direction": "OUTFLOW",
-      "avg_score": 2.7,
-      "avg_inst_trend": -0.455,
-      "stocks": 3
-    },
-    "배터리": {
-      "direction": "OUTFLOW",
-      "avg_score": 2.0,
-      "avg_inst_trend": -0.445,
-      "stocks": 2
-    },
-    "자동차": {
-      "direction": "OUTFLOW",
-      "avg_score": 1.5,
-      "avg_inst_trend": -0.444,
-      "stocks": 2
-    },
-    "IT": {
-      "direction": "OUTFLOW",
-      "avg_score": -0.5,
-      "avg_inst_trend": -0.432,
-      "stocks": 2
     },
     "금융": {
       "direction": "OUTFLOW",
-      "avg_score": 2.0,
-      "avg_inst_trend": -0.345,
+      "avg_score": -2.0,
+      "avg_inst_trend": -0.254,
       "stocks": 3
     },
-    "반도체": {
+    "바이오": {
       "direction": "OUTFLOW",
-      "avg_score": -0.5,
-      "avg_inst_trend": -0.464,
-      "stocks": 4
+      "avg_score": 8.0,
+      "avg_inst_trend": -0.417,
+      "stocks": 2
     },
     "조선": {
-      "direction": "MIXED",
-      "avg_score": 0.5,
-      "avg_inst_trend": -0.072,
+      "direction": "OUTFLOW",
+      "avg_score": 6.5,
+      "avg_inst_trend": -0.396,
       "stocks": 2
     },
     "방산": {
       "direction": "OUTFLOW",
-      "avg_score": -0.2,
-      "avg_inst_trend": -0.542,
+      "avg_score": 3.5,
+      "avg_inst_trend": -0.566,
       "stocks": 4
+    },
+    "IT": {
+      "direction": "OUTFLOW",
+      "avg_score": 5.5,
+      "avg_inst_trend": -0.505,
+      "stocks": 2
+    },
+    "반도체": {
+      "direction": "OUTFLOW",
+      "avg_score": -2.8,
+      "avg_inst_trend": -0.347,
+      "stocks": 4
+    },
+    "자동차": {
+      "direction": "OUTFLOW",
+      "avg_score": 4.0,
+      "avg_inst_trend": -0.433,
+      "stocks": 2
+    },
+    "배터리": {
+      "direction": "OUTFLOW",
+      "avg_score": -2.5,
+      "avg_inst_trend": -0.412,
+      "stocks": 2
     },
     "소비재": {
       "direction": "OUTFLOW",
-      "avg_score": 0.0,
-      "avg_inst_trend": -0.514,
-      "stocks": 2
-    },
-    "전기장비": {
-      "direction": "OUTFLOW",
-      "avg_score": 1.0,
-      "avg_inst_trend": -0.311,
-      "stocks": 1
-    },
-    "바이오": {
-      "direction": "OUTFLOW",
-      "avg_score": -3.0,
-      "avg_inst_trend": -0.263,
+      "avg_score": 1.5,
+      "avg_inst_trend": -0.275,
       "stocks": 2
     },
     "에너지": {
       "direction": "OUTFLOW",
-      "avg_score": -7.0,
-      "avg_inst_trend": -0.166,
+      "avg_score": 2.0,
+      "avg_inst_trend": -0.522,
       "stocks": 1
+    },
+    "엔터": {
+      "direction": "OUTFLOW",
+      "avg_score": 1.0,
+      "avg_inst_trend": -0.282,
+      "stocks": 1
+    },
+    "지주": {
+      "direction": "OUTFLOW",
+      "avg_score": -4.0,
+      "avg_inst_trend": -0.288,
+      "stocks": 3
+    },
+    "소재": {
+      "direction": "OUTFLOW",
+      "avg_score": -3.5,
+      "avg_inst_trend": -0.471,
+      "stocks": 2
     }
   },
   "patterns": {
-    "FULL_EXIT": [
-      "고려아연",
-      "하이브",
-      "삼성물산",
-      "LG에너지솔루션",
-      "기아",
-      "NAVER",
-      "신한지주",
-      "풍산",
-      "SK스퀘어",
-      "삼성전자",
-      "현대로템",
-      "아모레퍼시픽",
-      "KB금융",
+    "INST_ACCEL": [
       "산일전기",
-      "한미반도체",
-      "한국항공우주",
-      "한국금융지주",
+      "신한지주"
+    ],
+    "FULL_EXIT": [
+      "삼성바이오로직스",
+      "HD한국조선해양",
       "한화시스템",
-      "LG생활건강",
-      "셀트리온",
-      "현대차",
-      "삼성SDI",
-      "한진칼",
-      "한화에어로스페이스",
       "카카오",
-      "DB하이텍"
+      "한미반도체",
+      "현대차",
+      "NAVER",
+      "LG에너지솔루션",
+      "한국항공우주",
+      "셀트리온",
+      "현대로템",
+      "SK이노베이션",
+      "한화에어로스페이스",
+      "하이브",
+      "SK스퀘어",
+      "DB하이텍",
+      "고려아연",
+      "풍산",
+      "한진칼",
+      "삼성전자",
+      "삼성SDI",
+      "KB금융"
     ],
     "TRAP_WARNING": [
+      "LG생활건강",
+      "아모레퍼시픽",
+      "삼성물산",
       "SK하이닉스"
     ],
-    "LEAD_PREEMPT": [
-      "HD한국조선해양"
+    "HEDGE_OVERHEAT": [
+      "한국금융지주"
     ]
   },
   "retail_summary": {
     "patterns": {
-      "RETAIL_SUPPORT": [
-        "고려아연",
-        "하이브",
-        "삼성물산",
-        "LG에너지솔루션",
-        "NAVER",
-        "풍산",
-        "삼성전자",
-        "현대로템",
-        "한미반도체",
-        "한국금융지주",
-        "한화시스템",
-        "LG생활건강",
-        "셀트리온",
-        "현대차",
-        "삼성SDI",
-        "한진칼",
-        "삼성바이오로직스",
-        "카카오"
-      ],
       "RETAIL_CAPITUL": [
+        "산일전기"
+      ],
+      "RETAIL_SUPPORT": [
+        "한화시스템",
+        "카카오",
+        "한미반도체",
+        "현대차",
+        "NAVER",
+        "LG에너지솔루션",
+        "한국항공우주",
+        "기아",
+        "현대로템",
+        "한화에어로스페이스",
+        "하이브",
+        "고려아연",
+        "풍산",
+        "한진칼"
+      ],
+      "RETAIL_FOMO": [
+        "DB하이텍",
+        "삼성전자",
+        "삼성물산",
+        "삼성SDI",
         "KB금융"
       ]
     },
     "retail_buying_stocks": 23,
-    "retail_selling_stocks": 5,
-    "support_count": 18,
-    "fomo_count": 0,
+    "retail_selling_stocks": 8,
+    "support_count": 14,
+    "fomo_count": 5,
     "smart_diverge_count": 0
   }
 }

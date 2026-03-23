@@ -1,0 +1,31 @@
+{
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20T19:54:11.238346",
+  "source": "alpha_vantage",
+  "commodities": {
+    "wti": {
+      "price": 93.39,
+      "date": "2026-03-16",
+      "source": "alpha_vantage"
+    },
+    "gold": {
+      "price": 426.41,
+      "change_pct": "-4.1215",
+      "date": "2026-03-19",
+      "symbol": "GLD",
+      "source": "alpha_vantage"
+    },
+    "copper": {
+      "price": 12986.60681818182,
+      "date": "2026-01-01",
+      "source": "alpha_vantage"
+    },
+    "dxy": {
+      "price": 27.58,
+      "change_pct": "-0.9695",
+      "date": "2026-03-19",
+      "symbol": "UUP",
+      "source": "alpha_vantage"
+    }
+  }
+}

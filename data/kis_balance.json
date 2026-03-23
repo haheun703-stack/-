@@ -1,108 +1,78 @@
 {
   "holdings": [
     {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "quantity": 10,
+      "avg_price": 1007000.0,
+      "current_price": 1007000,
+      "eval_amount": 10070000,
+      "pnl_amount": 0,
+      "pnl_pct": 0.0
+    },
+    {
       "ticker": "005380",
       "name": "현대차",
       "quantity": 3,
       "avg_price": 612000.0,
-      "current_price": 553000,
-      "eval_amount": 1659000,
-      "pnl_amount": -177000,
-      "pnl_pct": -9.64
-    },
-    {
-      "ticker": "006800",
-      "name": "미래에셋증권",
-      "quantity": 37,
-      "avg_price": 64462.1622,
-      "current_price": 67100,
-      "eval_amount": 2482700,
-      "pnl_amount": 97600,
-      "pnl_pct": 4.09
+      "current_price": 517000,
+      "eval_amount": 1551000,
+      "pnl_amount": -285000,
+      "pnl_pct": -15.52
     },
     {
       "ticker": "010140",
       "name": "삼성중공업",
-      "quantity": 80,
-      "avg_price": 29037.5,
-      "current_price": 27600,
-      "eval_amount": 2208000,
-      "pnl_amount": -115000,
-      "pnl_pct": -4.95
+      "quantity": 10,
+      "avg_price": 28650.0,
+      "current_price": 28550,
+      "eval_amount": 285500,
+      "pnl_amount": -1000,
+      "pnl_pct": -0.34
     },
     {
-      "ticker": "010950",
-      "name": "S-Oil",
-      "quantity": 25,
-      "avg_price": 121600.0,
-      "current_price": 129700,
-      "eval_amount": 3242500,
-      "pnl_amount": 202500,
-      "pnl_pct": 6.66
-    },
-    {
-      "ticker": "024060",
-      "name": "흥구석유",
-      "quantity": 100,
-      "avg_price": 28350.0,
-      "current_price": 27600,
-      "eval_amount": 2760000,
-      "pnl_amount": -75000,
-      "pnl_pct": -2.64
+      "ticker": "042660",
+      "name": "한화오션",
+      "quantity": 10,
+      "avg_price": 129500.0,
+      "current_price": 129100,
+      "eval_amount": 1291000,
+      "pnl_amount": -4000,
+      "pnl_pct": -0.3
     },
     {
       "ticker": "042700",
       "name": "한미반도체",
       "quantity": 17,
       "avg_price": 325176.4706,
-      "current_price": 333500,
-      "eval_amount": 5669500,
-      "pnl_amount": 141500,
-      "pnl_pct": 2.55
+      "current_price": 309500,
+      "eval_amount": 5261500,
+      "pnl_amount": -266500,
+      "pnl_pct": -4.82
     },
     {
       "ticker": "064350",
       "name": "현대로템",
       "quantity": 1,
       "avg_price": 226500.0,
-      "current_price": 233000,
-      "eval_amount": 233000,
-      "pnl_amount": 6500,
-      "pnl_pct": 2.86
-    },
-    {
-      "ticker": "068270",
-      "name": "셀트리온",
-      "quantity": 13,
-      "avg_price": 242500.0,
-      "current_price": 212500,
-      "eval_amount": 2762500,
-      "pnl_amount": -390000,
-      "pnl_pct": -12.37
-    },
-    {
-      "ticker": "218410",
-      "name": "RFHIC",
-      "quantity": 26,
-      "avg_price": 72400.0,
-      "current_price": 71500,
-      "eval_amount": 1859000,
-      "pnl_amount": -23400,
-      "pnl_pct": -1.24
+      "current_price": 180100,
+      "eval_amount": 180100,
+      "pnl_amount": -46400,
+      "pnl_pct": -20.48
     },
     {
       "ticker": "272210",
       "name": "한화시스템",
       "quantity": 20,
       "avg_price": 162200.0,
-      "current_price": 158900,
-      "eval_amount": 3178000,
-      "pnl_amount": -66000,
-      "pnl_pct": -2.03
+      "current_price": 136000,
+      "eval_amount": 2720000,
+      "pnl_amount": -524000,
+      "pnl_pct": -16.15
     }
   ],
-  "total_eval": 26369945,
-  "total_pnl": -398300,
-  "available_cash": 14493878,
-  "fetched_at": "2026-03-08 01:22:22"
+  "total_eval": 26504810,
+  "total_pnl": -1126900,
+  "available_cash": 3055949,
+  "fetched_at": "2026-03-22 19:01:57"
 }

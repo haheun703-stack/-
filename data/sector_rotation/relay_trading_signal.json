@@ -1,21 +1,49 @@
 {
-  "date": "2026-03-16",
+  "date": "2026-03-20",
   "portfolio": 30000000,
   "fired_count": 1,
-  "signal_count": 1,
+  "signal_count": 3,
   "signals": [
     {
       "super_sector": "금융",
-      "lead": "생명보험",
-      "follow": "손해보험",
-      "lead_return": 6.99,
+      "lead": "증권",
+      "follow": "생명보험",
+      "lead_return": 4.31,
       "confidence": "HIGH",
-      "win_rate": 75.0,
-      "best_lag": 3,
+      "win_rate": 70.6,
+      "best_lag": 1,
       "weight_pct": 5.0,
       "invest_amount": 1500000,
       "profit_target": 5.0,
-      "timeout_days": 4,
+      "timeout_days": 2,
+      "picks": []
+    },
+    {
+      "super_sector": "금융",
+      "lead": "증권",
+      "follow": "손해보험",
+      "lead_return": 4.31,
+      "confidence": "HIGH",
+      "win_rate": 76.5,
+      "best_lag": 1,
+      "weight_pct": 5.0,
+      "invest_amount": 1500000,
+      "profit_target": 5.0,
+      "timeout_days": 2,
+      "picks": []
+    },
+    {
+      "super_sector": "금융",
+      "lead": "증권",
+      "follow": "은행",
+      "lead_return": 4.31,
+      "confidence": "HIGH",
+      "win_rate": 68.8,
+      "best_lag": 2,
+      "weight_pct": 5.0,
+      "invest_amount": 1500000,
+      "profit_target": 5.0,
+      "timeout_days": 3,
       "picks": []
     }
   ]

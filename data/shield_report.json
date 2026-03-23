@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-16T18:40:47.389932",
+  "timestamp": "2026-03-20T17:51:28.798566",
   "overall_level": "ORANGE",
   "sector_overlaps": [
     {
@@ -50,7 +50,7 @@
   "correlation_breakdowns": [
     {
       "pair_name": "gold_spy",
-      "current_corr": 0.1826,
+      "current_corr": 0.2068,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -58,7 +58,7 @@
     },
     {
       "pair_name": "dollar_spy",
-      "current_corr": -0.0971,
+      "current_corr": -0.1455,
       "normal_sign": "negative",
       "breakdown_threshold": 0.4,
       "is_breakdown": false,
@@ -66,7 +66,7 @@
     },
     {
       "pair_name": "bond_spy",
-      "current_corr": 0.0875,
+      "current_corr": 0.1497,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -74,11 +74,11 @@
     },
     {
       "pair_name": "oil_spy",
-      "current_corr": -0.2949,
+      "current_corr": -0.3102,
       "normal_sign": "positive",
       "breakdown_threshold": -0.3,
-      "is_breakdown": false,
-      "severity": "WARNING"
+      "is_breakdown": true,
+      "severity": "DANGER"
     }
   ],
   "brain_overrides": {

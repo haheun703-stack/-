@@ -1,0 +1,34 @@
+{
+  "signal_accuracy": {
+    "tomorrow_picks": {
+      "hit_rate": 86.5,
+      "total": 192,
+      "avg_ret": 1.66
+    },
+    "pullback_scan": {
+      "hit_rate": 62.5,
+      "total": 120,
+      "avg_ret": 1.45
+    },
+    "whale_detect": {
+      "hit_rate": 46.2,
+      "total": 130,
+      "avg_ret": 2.83
+    },
+    "accumulation_tracker": {
+      "hit_rate": 68.3,
+      "total": 120,
+      "avg_ret": 2.45
+    },
+    "dart_event": {
+      "hit_rate": 50.9,
+      "total": 740,
+      "avg_ret": 0.44
+    },
+    "volume_spike": {
+      "hit_rate": 34.2,
+      "total": 193,
+      "avg_ret": -0.48
+    }
+  }
+}

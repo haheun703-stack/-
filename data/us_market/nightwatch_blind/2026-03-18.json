@@ -1,0 +1,18 @@
+{
+  "date": "2026-03-18",
+  "timestamp": "2026-03-19 18:59:08",
+  "existing_grade": "MILD_BEAR",
+  "existing_combined_100": -27.9,
+  "ensemble_grade": "STRONG_BEAR",
+  "ensemble_combined_100": -52.2,
+  "nightwatch_score": -0.355,
+  "ensemble_score": -0.5,
+  "bond_vigilante_veto": true,
+  "l0_score": 0.0,
+  "l1_score": -0.8,
+  "l1_cross_regime": "VIGILANTE_VETO",
+  "l4_score": -0.3,
+  "spy_ret_1d": -1.3954,
+  "tnx_change_bp": 0.057,
+  "special_rules_count": 1
+}

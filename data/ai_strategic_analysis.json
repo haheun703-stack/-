@@ -1,105 +1,89 @@
 {
-  "analysis_date": "2026-03-16",
+  "analysis_date": "2026-03-22",
   "regime": "방어",
-  "regime_confidence": 0.85,
-  "regime_reasoning": "중동 전쟁으로 유가 $100 돌파, Fed 금리 불확실성 증대, VIX 상승으로 글로벌 리스크오프 심화. 한국 증시는 외인 이탈 가속화 예상.",
+  "regime_confidence": 0.8,
+  "regime_reasoning": "환율 1500원 돌파와 중동 지정학 리스크로 유가 급등, Fed 금리 동결 장기화로 글로벌 유동성 축소. 미국 반도체 ETF 50일선 이탈로 기술주 전반 약세 신호.",
   "industry_thesis": [
     {
-      "sector": "에너지/정유",
-      "thesis": "중동 전쟁 장기화로 원유 공급 차질 현실화. 정제마진 확대로 직접 수혜.",
+      "sector": "방산",
+      "thesis": "중동 지정학 리스크 확대로 글로벌 방산 수요 급증, K-방산 수출 구조 개선 논의 진행",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 9,
       "catalysts": [
-        "유가 $100 돌파",
-        "정제마진 강세"
+        "이란 리스크",
+        "글로벌 방산비 증가"
       ],
       "risks": [
-        "전쟁 조기 종료"
+        "평화 협상 시 급락"
       ],
-      "relay_source": "없음",
-      "relay_verified": false
+      "relay_source": "방산조선",
+      "relay_verified": true
     },
     {
       "sector": "원전/전력",
-      "thesis": "미국 SMR 승인과 K-원전 900조 시장 진출. AI 데이터센터 전력 수요 폭증.",
+      "thesis": "유가 100달러 시대 대체 에너지 주목, 원전 르네상스 지속",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 8,
       "catalysts": [
-        "SMR 승인",
-        "AI 전력 수요"
+        "에너지 안보",
+        "SMR 투자 확대"
       ],
       "risks": [
-        "프로젝트 지연"
+        "건설 지연"
       ],
-      "relay_source": "없음",
+      "relay_source": null,
       "relay_verified": false
     },
     {
-      "sector": "방산",
-      "thesis": "중동 전쟁 장기화로 방산 수요 급증. K-방산 수출 모멘텀 강화.",
-      "demand_supply": "공급부족",
-      "asp_trend": "상승",
-      "global_alignment": "동조",
-      "confidence": 8,
-      "catalysts": [
-        "전쟁 장기화",
-        "수출 확대"
-      ],
-      "risks": [
-        "평화 협상"
-      ],
-      "relay_source": "없음",
-      "relay_verified": false
-    },
-    {
-      "sector": "반도체",
-      "thesis": "Fed 불확실성과 나스닥 급락으로 단기 조정. 구조적 AI 수요는 여전히 유효.",
+      "sector": "기계",
+      "thesis": "방산 섹터 후행주로 방산 장비 및 부품 수요 확대 예상",
       "demand_supply": "균형",
-      "asp_trend": "하락",
-      "global_alignment": "동조",
-      "confidence": 4,
+      "asp_trend": "횡보",
+      "global_alignment": "독립",
+      "confidence": 7,
       "catalysts": [
-        "AI 수요"
+        "방산 수주 증가",
+        "환율 효과"
       ],
       "risks": [
-        "금리 인상",
-        "재고 증가"
+        "원자재 가격 상승"
       ],
-      "relay_source": "없음",
-      "relay_verified": false
+      "relay_source": "방산조선",
+      "relay_verified": true
     }
   ],
   "sector_priority": {
     "attack": [
-      "에너지/정유",
+      "방산",
       "원전/전력"
     ],
     "watch": [
-      "방산",
+      "기계",
       "조선"
     ],
     "avoid": [
       "반도체",
-      "2차전지",
-      "IT/소프트웨어"
+      "IT",
+      "금융",
+      "전기차/배터리"
     ]
   },
   "max_new_buys": 2,
   "risk_factors": [
-    "FOMC 매파적 결정",
-    "중동 전쟁 확전",
-    "유가 $100 돌파"
+    "환율 1500원 돌파로 통화정책 불확실성",
+    "유가 100달러 진입 가능성",
+    "AI disruption으로 기술주 밸류에이션 재평가"
   ],
   "cash_reserve_suggestion": 40,
-  "global_summary": "중동 전쟁으로 스태그플레이션 우려 확산. Fed 금리 불확실성에 나스닥 -2.47% 급락으로 기술주 전반 약세.",
+  "global_summary": "Fed 금리 동결 장기화와 중동 리스크로 안전자산 선호 강화. 에너지와 방산 중심의 가치주 로테이션 진행.",
   "relay_alerts": [
     {
       "pattern": "방산조선→기계",
-      "status": "대기",
+      "status": "발화",
       "action": "매수 준비"
     },
     {

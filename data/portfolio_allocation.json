@@ -1,6 +1,6 @@
 {
-  "date": "2026-03-16",
-  "generated_at": "2026-03-16 19:18",
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20 18:00",
   "regime": "CAUTION",
   "macro_grade": "보통",
   "position_multiplier": 1.0,
@@ -31,8 +31,8 @@
       "count": 1,
       "stocks": [
         {
-          "ticker": "067830",
-          "name": "세이브존I&C",
+          "ticker": "204610",
+          "name": "티쓰리",
           "score": 20,
           "source": "DART_자기주식취득"
         }
@@ -48,8 +48,8 @@
       "count": 1,
       "stocks": [
         {
-          "ticker": "003800",
-          "name": "에이스침대",
+          "ticker": "089860",
+          "name": "롯데렌탈",
           "score": 64.0,
           "source": "눌림목_매수대기"
         }

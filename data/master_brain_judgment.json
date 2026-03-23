@@ -1,121 +1,163 @@
 {
-  "date": "2024-12-20",
+  "date": "2025-01-11",
   "market_regime": {
-    "overall": "BEAR",
+    "overall": "CAUTION",
     "kospi_regime": "CAUTION",
-    "us_overnight": "STRONG_BEAR",
-    "stagflation": "NONE",
-    "summary": "Fed 매파전환+원달러 1505원+중동리스크로 극도의 리스크오프"
+    "us_overnight": "NEUTRAL",
+    "stagflation": "WARNING",
+    "summary": "원달러 1500원 돌파, 미국 금리동결 장기화, 원자재 급락, 중동 지정학 리스크 상존"
   },
   "reasoning_chains": [
     {
       "chain_id": 1,
-      "cause": "Fed 금리 동결 장기화 시사 + 매파적 톤",
-      "sector_impact": "기술주/성장주 급락, 달러 강세로 신흥국 통화 약세",
-      "action": "KODEX 인버스 매수 + 현금 비중 40% 확대",
+      "cause": "원달러 1500원 돌파 + Fed 긴축 지속",
+      "sector_impact": "수입의존 업종(전기차/배터리) 원가부담 급증, 수출주는 환차익",
+      "action": "KODEX 미국달러선물 매수, LG에너지솔루션 매도 회피",
       "confidence": 0.85,
       "timeframe": "단기(1주)"
     },
     {
       "chain_id": 2,
-      "cause": "중동 전쟁 확대 + 호르무즈 해협 리스크",
-      "sector_impact": "유가 급등(브렌트유 $100+ 가능), 정유/에너지 수혜",
-      "action": "S-Oil, GS 매수 + USO(원유 ETF) 소량 편입",
-      "confidence": 0.8,
-      "timeframe": "중기(1~3개월)"
-    },
-    {
-      "chain_id": 3,
-      "cause": "원달러 1505원 돌파 + 환율 급등",
-      "sector_impact": "수입원가 부담 확대, 내수주 부담 + 수출주 혼조",
-      "action": "KODEX 미국달러선물 편입 + 내수주 회피",
+      "cause": "원자재 전반 급락 (금 -4.1%, 원유 -3.5%, 구리 -3.4%)",
+      "sector_impact": "디플레이션 우려 → 안전자산 선호, 성장주 약세",
+      "action": "TIGER 단기통안채 편입, 성장주 비중 축소",
       "confidence": 0.75,
       "timeframe": "단기(1주)"
     },
     {
-      "chain_id": 4,
-      "cause": "VIX 25 돌파 + 리스크오프 심화",
-      "sector_impact": "변동성 급증, 안전자산 선호 확대",
-      "action": "KODEX 골드선물 편입 + 채권형 ETF 검토",
+      "chain_id": 3,
+      "cause": "중동 지정학 리스크 + 호르무즈 해협 긴장",
+      "sector_impact": "유가 $100+ 가능성 → 정유/에너지 수혜",
+      "action": "S-Oil 소량 매수, USO(원유 ETF) 관망",
       "confidence": 0.7,
       "timeframe": "중기(1~3개월)"
+    },
+    {
+      "chain_id": 4,
+      "cause": "건설 섹터 모멘텀 99.2 + 5일 수익률 9.32%",
+      "sector_impact": "부동산 PF 해결 기대감 + 정책 수혜",
+      "action": "대우건설 소량 편입, KODEX 건설 ETF 관찰",
+      "confidence": 0.65,
+      "timeframe": "단기(1주)"
+    },
+    {
+      "chain_id": 5,
+      "cause": "천연가스 -0.9% (상대적 선방) + 데이터센터 전력수요",
+      "sector_impact": "AI 인프라 확대 → 천연가스 중장기 수요 증가",
+      "action": "UNG ETF 분할매수 시작 ($14 이하)",
+      "confidence": 0.6,
+      "timeframe": "장기(3~6개월)"
     }
   ],
   "unified_picks": {
     "individual_stocks": [
       {
-        "ticker": "010950",
+        "ticker": "010140",
         "name": "S-Oil",
         "action": "BUY",
-        "reason": "중동 리스크로 유가 급등, 정유 마진 개선 기대",
-        "chain_ref": 2
+        "reason": "중동 리스크 헤지 + 외국인 순매수",
+        "chain_ref": 3
       },
       {
-        "ticker": "078930",
-        "name": "GS",
+        "ticker": "047040",
+        "name": "대우건설",
         "action": "BUY",
-        "reason": "정유/에너지 자회사 보유, 유가 상승 수혜",
-        "chain_ref": 2
+        "reason": "건설 섹터 최강 모멘텀",
+        "chain_ref": 4
+      },
+      {
+        "ticker": "066970",
+        "name": "LG유플러스",
+        "action": "WATCH",
+        "reason": "71.7점 적극매수 시그널, 눌림목 진입 대기",
+        "chain_ref": 0
+      },
+      {
+        "ticker": "051910",
+        "name": "LG에너지솔루션",
+        "action": "SELL",
+        "reason": "Tesla 급락 + 환율 부담",
+        "chain_ref": 1
       }
     ],
     "sector_etf": [
       {
-        "ticker": "251340",
-        "name": "KODEX 코스닥150선물인버스",
+        "ticker": "117700",
+        "name": "KODEX 건설",
+        "action": "WATCH",
+        "reason": "섹터 모멘텀 99.2 과열 주의",
+        "chain_ref": 4
+      },
+      {
+        "ticker": "091220",
+        "name": "TIGER 은행",
         "action": "BUY",
-        "reason": "PRE_BEAR 레짐 진입, 기술주 약세 방어",
-        "chain_ref": 1
+        "reason": "금리 고점 수혜 + 방어주",
+        "chain_ref": 2
       }
     ],
     "leverage_inverse": [
       {
-        "ticker": "114800",
-        "name": "KODEX 인버스",
-        "action": "BUY",
-        "reason": "US STRONG_BEAR + Fed 매파전환",
-        "chain_ref": 1
+        "ticker": "122630",
+        "name": "KODEX 레버리지",
+        "action": "HOLD",
+        "reason": "CAUTION 레짐 소량 유지",
+        "chain_ref": 0
       }
     ],
     "commodity_etf": [
       {
-        "ticker": "USO",
-        "name": "United States Oil Fund",
+        "ticker": "UNG",
+        "name": "United States Natural Gas Fund",
         "action": "BUY",
-        "reason": "호르무즈 해협 리스크, 유가 $100+ 가능성",
-        "chain_ref": 2
+        "reason": "데이터센터 전력 수요 + 바닥권",
+        "chain_ref": 5
       },
       {
-        "ticker": "132030",
-        "name": "KODEX 골드선물",
-        "action": "BUY",
-        "reason": "안전자산 수요 증가, 달러 강세에도 금 수요 지속",
-        "chain_ref": 4
+        "ticker": "USO",
+        "name": "United States Oil Fund",
+        "action": "WATCH",
+        "reason": "중동 리스크 모니터링",
+        "chain_ref": 3
+      },
+      {
+        "ticker": "GLD",
+        "name": "SPDR Gold Trust",
+        "action": "HOLD",
+        "reason": "급락 후 반등 대기",
+        "chain_ref": 2
       }
     ],
     "index_etf": [
       {
+        "ticker": "069500",
+        "name": "KODEX 200",
+        "action": "BUY",
+        "reason": "ETF 로테이션 신규 진입 신호",
+        "chain_ref": 0
+      },
+      {
         "ticker": "261240",
         "name": "KODEX 미국달러선물",
         "action": "BUY",
-        "reason": "원달러 1505원 돌파, 추가 약세 방어",
-        "chain_ref": 3
+        "reason": "원달러 1500원 돌파 헤지",
+        "chain_ref": 1
       }
     ]
   },
   "cash_strategy": {
-    "target_cash_pct": 40,
-    "current_cash_pct": 0,
-    "action": "현보유 종목 정리 후 현금 40% 확보 긴급",
-    "reason": "BEAR 레짐 진입 + Fed 매파전환으로 추가 하락 대비"
+    "target_cash_pct": 30,
+    "current_cash_pct": 100,
+    "action": "70% 분할 투자 진행",
+    "reason": "CAUTION 레짐 기준 30% 현금 유지, 나머지 분산 투자"
   },
   "risk_alerts": [
-    "Fed 금리 동결 장기화로 글로벌 유동성 급격 축소",
-    "원달러 1505원 돌파, 1520원까지 상승 가능성",
-    "중동 전쟁 확대 시 유가 $130+ 급등 시나리오",
-    "VIX 25 돌파로 변동성 장세 진입",
-    "현재 현금 0%로 극도로 위험한 상황"
+    "원달러 1500원 돌파 - 수입 원가 급증 리스크",
+    "원자재 전반 급락 - 디플레이션 경고 신호",
+    "VIX 24.1 - 변동성 확대 주의",
+    "중동 지정학 리스크 - 유가 $100+ 가능성"
   ],
-  "daily_summary": "Fed 매파전환+원달러 1505원+중동리스크 3중고. 인버스ETF+현금 40%+정유주로 방어전략 필수",
+  "daily_summary": "원달러 1500원 시대 + 원자재 급락 → 현금 30% 사수하며 환헤지(달러ETF) + 정유주 소량 편입",
   "model": "claude-opus-4-20250514",
-  "generated_at": "2026-03-19 20:25"
+  "generated_at": "2026-03-20 18:01"
 }

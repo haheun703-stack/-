@@ -349,5 +349,152 @@
         "alert_level": 0
       }
     }
+  },
+  {
+    "date": "2026-03-18",
+    "active_alerts": [
+      "ai_semiconductor",
+      "energy"
+    ],
+    "execution_ready": [
+      "energy"
+    ],
+    "total_alert_score": 7,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 1,
+        "alert_level": 2
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 4,
+        "alert_level": 5
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
+  },
+  {
+    "date": "2026-03-19",
+    "active_alerts": [],
+    "execution_ready": [],
+    "total_alert_score": 0,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
+  },
+  {
+    "date": "2026-03-20",
+    "active_alerts": [
+      "energy"
+    ],
+    "execution_ready": [],
+    "total_alert_score": 2,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 1,
+        "alert_level": 2
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
+  },
+  {
+    "date": "2026-03-21",
+    "active_alerts": [],
+    "execution_ready": [],
+    "total_alert_score": 0,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
+  },
+  {
+    "date": "2026-03-22",
+    "active_alerts": [],
+    "execution_ready": [],
+    "total_alert_score": 0,
+    "sector_phases": {
+      "ai_semiconductor": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "defense": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "energy": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "battery_ess": {
+        "phase": 0,
+        "alert_level": 0
+      },
+      "shipbuilding_lng": {
+        "phase": 0,
+        "alert_level": 0
+      }
+    }
   }
 ]

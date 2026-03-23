@@ -1,0 +1,124 @@
+{
+  "two_way": [
+    {
+      "config": "L1:100 NW:0",
+      "w_us": 1.0,
+      "w_nw": 0.0,
+      "pearson": -0.0271,
+      "spearman": -0.0251,
+      "direction_accuracy": 48.3,
+      "bull_avg_return": 0.13,
+      "bear_avg_return": 0.23
+    },
+    {
+      "config": "L1:80 NW:20",
+      "w_us": 0.8,
+      "w_nw": 0.2,
+      "pearson": -0.0272,
+      "spearman": -0.0253,
+      "direction_accuracy": 48.5,
+      "bull_avg_return": 0.14,
+      "bear_avg_return": 0.23
+    },
+    {
+      "config": "L1:70 NW:30 ★",
+      "w_us": 0.7,
+      "w_nw": 0.3,
+      "pearson": -0.0273,
+      "spearman": -0.0253,
+      "direction_accuracy": 47.9,
+      "bull_avg_return": 0.13,
+      "bear_avg_return": 0.3
+    },
+    {
+      "config": "L1:60 NW:40",
+      "w_us": 0.6,
+      "w_nw": 0.4,
+      "pearson": -0.0274,
+      "spearman": -0.0253,
+      "direction_accuracy": 49.2,
+      "bull_avg_return": 0.1,
+      "bear_avg_return": 0.32
+    },
+    {
+      "config": "L1:50 NW:50",
+      "w_us": 0.5,
+      "w_nw": 0.5,
+      "pearson": -0.0275,
+      "spearman": -0.0255,
+      "direction_accuracy": 51.2,
+      "bull_avg_return": 0.19,
+      "bear_avg_return": 0.39
+    }
+  ],
+  "three_way": [
+    {
+      "config": "US50 KR20 NW30 ★",
+      "w_us": 0.5,
+      "w_kr": 0.2,
+      "w_nw": 0.3,
+      "pearson": -0.0016,
+      "spearman": -0.0045,
+      "direction_accuracy": 49.4,
+      "bull_avg_return": 0.1,
+      "bear_avg_return": 0.11
+    },
+    {
+      "config": "US50 KR30 NW20",
+      "w_us": 0.5,
+      "w_kr": 0.3,
+      "w_nw": 0.2,
+      "pearson": 0.0073,
+      "spearman": 0.0063,
+      "direction_accuracy": 49.9,
+      "bull_avg_return": 0.09,
+      "bear_avg_return": 0.08
+    },
+    {
+      "config": "US40 KR30 NW30",
+      "w_us": 0.4,
+      "w_kr": 0.3,
+      "w_nw": 0.3,
+      "pearson": 0.0121,
+      "spearman": 0.0125,
+      "direction_accuracy": 51.0,
+      "bull_avg_return": 0.16,
+      "bear_avg_return": -0.0
+    },
+    {
+      "config": "US60 KR10 NW30",
+      "w_us": 0.6,
+      "w_kr": 0.1,
+      "w_nw": 0.3,
+      "pearson": -0.0153,
+      "spearman": -0.0175,
+      "direction_accuracy": 48.1,
+      "bull_avg_return": 0.14,
+      "bear_avg_return": 0.41
+    },
+    {
+      "config": "US40 KR20 NW40",
+      "w_us": 0.4,
+      "w_kr": 0.2,
+      "w_nw": 0.4,
+      "pearson": 0.003,
+      "spearman": 0.0013,
+      "direction_accuracy": 50.6,
+      "bull_avg_return": 0.13,
+      "bear_avg_return": 0.1
+    }
+  ],
+  "best": {
+    "config": "US40 KR30 NW30",
+    "w_us": 0.4,
+    "w_kr": 0.3,
+    "w_nw": 0.3,
+    "pearson": 0.0121,
+    "spearman": 0.0125,
+    "direction_accuracy": 51.0,
+    "bull_avg_return": 0.16,
+    "bear_avg_return": -0.0
+  },
+  "data_range": "2023-03-20 ~ 2026-03-19",
+  "total_days": 779
+}

@@ -273,5 +273,38 @@
     "total_invest": 76.2,
     "cash": 23.8,
     "adjustments_count": 5
+  },
+  {
+    "date": "2026-03-18",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": 0.05,
+    "vix": 22.4,
+    "confidence": 0.8,
+    "total_invest": 90.5,
+    "cash": 9.5,
+    "adjustments_count": 5
+  },
+  {
+    "date": "2026-03-19",
+    "regime": "PRE_BEAR",
+    "kospi_regime": "CAUTION",
+    "nw_score": -0.355,
+    "vix": 25.1,
+    "confidence": 0.3,
+    "total_invest": 56.6,
+    "cash": 43.4,
+    "adjustments_count": 7
+  },
+  {
+    "date": "2026-03-20",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": 0.0,
+    "vix": 24.1,
+    "confidence": 0.65,
+    "total_invest": 80.5,
+    "cash": 19.5,
+    "adjustments_count": 5
   }
 ]

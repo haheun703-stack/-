@@ -1,150 +1,152 @@
 {
-  "date": "2026-03-16",
-  "generated_at": "2026-03-16 07:01",
+  "date": "2026-03-23",
+  "generated_at": "2026-03-23 08:00",
   "reports": [],
   "report_boost_map": {},
   "perplexity_themes": {
     "hot_themes": [
       {
-        "theme": "AI 반도체 (HBM)",
-        "catalyst": "브로드컴 및 오라클 실적 호조와 한국 반도체 수출 +176%로 AI 수요 재확인[1][2][5]",
+        "theme": "반도체 HBM",
+        "catalyst": "미국 빅테크 AI 데이터센터 구축으로 HBM 및 DRAM 수요 급증, 삼성전자 SK하이닉스 실적 전망 호조[1][2][4]",
         "urgency": "HIGH",
         "stocks": [
           "삼성전자",
           "SK하이닉스",
-          "테크윙"
+          "마이크론"
         ]
       },
       {
-        "theme": "방위산업",
-        "catalyst": "UAE의 천궁-II 조기 공급 요청으로 중동 리스크 수혜 기대[4]",
+        "theme": "원전·전력",
+        "catalyst": "정부 자본시장 안정화 간담회 후 매수 사이드카 발동 및 원전 순환매 지속[1][3]",
         "urgency": "HIGH",
         "stocks": [
-          "한일단조",
-          "코츠테크놀로지"
+          "HD현대에너지솔루션",
+          "HM넥스",
+          "GS건설"
         ]
       },
       {
-        "theme": "원전",
-        "catalyst": "여야 의원 방미사절단의 대미 원전 투자 사업 제시 소식[4][6]",
+        "theme": "건설",
+        "catalyst": "코스피 건설업종 초급등, GS건설 대우건설 상한가 진입으로 업종 상승 탄력 두드러짐[1]",
         "urgency": "MEDIUM",
         "stocks": [
-          "우리기술"
+          "GS건설",
+          "대우건설",
+          "HD현대에너지솔루션"
         ]
       },
       {
-        "theme": "코리아 밸류업 지수",
-        "catalyst": "밸류업 개혁 정책 지속으로 지수 편입 종목 상승[3]",
+        "theme": "AI·2차전지",
+        "catalyst": "전일 급락 후 낙폭 과대 반등, 글로벌 AI 수요 및 2차전지 기술적 반등세[4]",
         "urgency": "MEDIUM",
         "stocks": [
-          "원텍",
-          "한미사이언스"
+          "삼성전자",
+          "SK하이닉스",
+          "LG에너지솔루션"
         ]
       },
       {
-        "theme": "2차전지 생산",
-        "catalyst": "전반적 시장 반등 속 생산 관련주 강세[3]",
+        "theme": "바이오",
+        "catalyst": "코스닥 반등과 함께 바이오 섹터 동반 상승, 경보제약 상한가[1][4]",
         "urgency": "LOW",
         "stocks": [
-          "LG에너지솔루션",
-          "SK이노베이션"
+          "경보제약",
+          "온코닉테라퓨틱스"
         ]
       }
     ],
     "breaking_catalysts": [
       {
         "stock_name": "삼성전자",
-        "catalyst": "15.6조 자사주 소각 발표",
+        "catalyst": "20만 원선 복귀 및 실적 전망 호조",
         "impact": "positive",
-        "source": "네이버 프리미엄 콘텐츠[5]"
+        "source": "성공투자 유튜브[1]"
       },
       {
-        "stock_name": "한일단조",
-        "catalyst": "UAE 천궁-II 조기 공급 요청",
+        "stock_name": "SK하이닉스",
+        "catalyst": "100만 원선 복귀 및 HBM 수요 급증",
         "impact": "positive",
-        "source": "티스토리[4]"
+        "source": "성공투자 유튜브[1]"
       },
       {
-        "stock_name": "코츠테크놀로지",
-        "catalyst": "UAE 천궁-II 조기 공급 요청",
+        "stock_name": "경보제약",
+        "catalyst": "상한가 진입",
         "impact": "positive",
-        "source": "티스토리[4]"
+        "source": "성공투자 유튜브[1]"
       },
       {
-        "stock_name": "테크윙",
-        "catalyst": "SK하이닉스 HBM 전용 검사장비 수주 기대",
+        "stock_name": "GS건설",
+        "catalyst": "초급등 및 건설업종 상승 주도",
         "impact": "positive",
-        "source": "티스토리[4]"
+        "source": "성공투자 유튜브[1]"
       },
       {
-        "stock_name": "우리기술",
-        "catalyst": "원전 감지제어시스템 사업 관련 대미 투자 소식",
+        "stock_name": "대우건설",
+        "catalyst": "초급등",
         "impact": "positive",
-        "source": "티스토리[4]"
+        "source": "성공투자 유튜브[1]"
       },
       {
-        "stock_name": "에이팩트",
-        "catalyst": "반도체 후공정 경영권 매각 본격화",
+        "stock_name": "HD현대에너지솔루션",
+        "catalyst": "상한가 근접 28.86% 상승",
         "impact": "positive",
-        "source": "티스토리[4]"
+        "source": "급등테마연구소 유튜브[3]"
+      },
+      {
+        "stock_name": "HM넥스",
+        "catalyst": "22% 이상 상승",
+        "impact": "positive",
+        "source": "급등테마연구소 유튜브[3]"
+      },
+      {
+        "stock_name": "온코닉테라퓨틱스",
+        "catalyst": "액티브 ETF 관련 급등세",
+        "impact": "positive",
+        "source": "급등테마연구소 유튜브[3]"
       }
     ],
     "sector_outlook": {
       "bullish": [
         "반도체",
-        "방위산업",
-        "원전"
+        "원전·전력",
+        "건설"
       ],
-      "bearish": [
-        "석유화학"
-      ]
+      "bearish": []
     }
   },
   "candidate_news": [
     {
-      "stock_name": "한화에어로스페이스",
-      "date": "2026-03-15",
-      "title": "한화시스템, KAI 주식 7년 만에 재매입",
-      "source": "SBS Biz",
+      "stock_name": "아이티엠반도체",
+      "date": "2026-03-22",
+      "title": "아이티엠반도체 투자분석 2026. 03. 22",
+      "source": "주달",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9QV1VUUDhvY094Q0k4TUxFMU84bG1uSDJyZ2NHYzBtcHpMOGUxS0x3Qkw0ZEVSSTlNT2tJWlBQRDE3Nm14TFBFS1BybTlaX28tX2pr?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5wTU9XZ1I4UVpfZkdNdkhlTzdvSkxxVEZpX1NqM1hJLTdFeFV1VWtzX1lETUNmRWM5Yl9XZ1hGZThhMkN5OXp5MXhkMDY5ZVo1TTNRaXdTWFdkVHdlWVJrMFVNLVZ3S1dXNDd0eDlHNnY4elk?oc=5"
     },
     {
-      "stock_name": "한국항공우주",
-      "date": "2026-03-15",
-      "title": "한화시스템, KAI 지분 0.58% 샀다…7년만에 재매입",
-      "source": "연합뉴스",
+      "stock_name": "에이팩트",
+      "date": "2026-03-22",
+      "title": "급등 축하합니다. (RF머트리얼즈, 아이엘, 에이팩트, 한일단조, 흥구석유, 모트렉스, 에스오에스랩, 한화시스템, 레이저옵텍, 서울반도체, 삼표시멘트, 다원넥스뷰, 성우하이텍 등)",
+      "source": "네이버 프리미엄콘텐츠",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9STV9wYW1LcDdfUXZsTmh4Q01JWkNDYWxhUnVyWGxHV3lFZDQyZlo0R2pOWmFpQ20ySnVMZkMwQUw4UjdHN3hKZW1lM2ptblY2OXI4U2t4QXZQamd4dWdwU9IBYEFVX3lxTE9STV9wYW1LcDdfUXZsTmh4Q01JWkNDYWxhUnVyWGxHV3lFZDQyZlo0R2pOWmFpQ20ySnVMZkMwQUw4UjdHN3hKZW1lM2ptblY2OXI4U2t4QXZQamd4dWdwUw?oc=5"
-    },
-    {
-      "stock_name": "유한양행",
-      "date": "2026-03-15",
-      "title": "9.4조 흥행 녹십자·동아ST·유한양행 잡은 ‘카나프테라퓨틱스’ 오늘(16일) 코스닥 상장",
-      "source": "뉴스웰",
-      "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE91Z0YySlM3Ymp6UHFZdXdMdk5oVjlOVnZudTBuSmR6eUJmcmFSMm8xa1Frell0S2pRbmZRV2hFT2pRdzdKemNhaUNxMU1jZkNQMDQwQm90RW1UdHlLdGlwSDRJWEp3VDhwR29sWA?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOS0xZUDNDTDl6U29kd2Nja2dJNDV0Z3o0TjNWMGRwZEQtUmFISkotWjJ1dVhHWVZkVEJpanZJTmZSc0RmMzRhMkFUYjlSbERhSGNSQmlOa2dWXy01Qk5USkRhbHlObDFrcVd2R3FiYjBBTzMzWWJPSUFvV2lXeVZfb0QxdE1JU3FZaTVV?oc=5"
     }
   ],
   "news_boost_map": {
-    "한화에어로스페이스": {
+    "아이티엠반도체": {
       "boost": 3,
-      "reason": "한화시스템, KAI 주식 7년 만에 재매입"
+      "reason": "아이티엠반도체 투자분석 2026. 03. 22"
     },
-    "한국항공우주": {
+    "에이팩트": {
       "boost": 3,
-      "reason": "한화시스템, KAI 지분 0.58% 샀다…7년만에 재매입"
-    },
-    "유한양행": {
-      "boost": 3,
-      "reason": "9.4조 흥행 녹십자·동아ST·유한양행 잡은 ‘카나프테라퓨틱스’ 오늘(1"
+      "reason": "급등 축하합니다. (RF머트리얼즈, 아이엘, 에이팩트, 한일단조, 흥구석"
     }
   },
   "stats": {
     "total_reports": 0,
     "positive_reports": 0,
     "negative_reports": 0,
-    "news_alerts": 3,
+    "news_alerts": 2,
     "themes_count": 5
   }
 }

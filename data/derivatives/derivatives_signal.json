@@ -1,0 +1,41 @@
+{
+  "date": "2026-03-20",
+  "generated_at": "2026-03-20 21:43",
+  "futures_basis": {
+    "available": true,
+    "basis_1d": 0.0711,
+    "basis_5d_avg": -1.1567,
+    "basis_20d_avg": -0.0562,
+    "status": "BACKWARDATION"
+  },
+  "put_call_proxy": {
+    "available": true,
+    "pc_ratio": 0.2632,
+    "pc_5d_avg": 0.3149,
+    "pc_20d_avg": 0.3641,
+    "pc_change_5d": -0.0518,
+    "status": "BULLISH",
+    "reversal": "",
+    "kosdaq_pc_latest": 0.1384,
+    "kosdaq_pc_5d": 0.1237
+  },
+  "leverage_flow": {
+    "available": true,
+    "leverage_vol_z": -0.87,
+    "inverse_vol_z": -1.07,
+    "spot_vol_z": -0.86,
+    "program_buy_est": false,
+    "program_sell_est": false,
+    "net_flow_1d_억": 9248.0,
+    "net_flow_5d_억": 43560.0
+  },
+  "composite": {
+    "score": 30.8,
+    "grade": "MILD_BULL",
+    "breakdown": {
+      "basis": -30,
+      "put_call": 30.8,
+      "flow": 30
+    }
+  }
+}

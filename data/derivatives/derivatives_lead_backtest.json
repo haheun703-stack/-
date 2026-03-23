@@ -1,0 +1,58 @@
+{
+  "period": "2025-11-03 ~ 2026-03-19",
+  "total_days": 92,
+  "correlations": {
+    "composite_score": {
+      "pearson": 0.0013,
+      "pearson_pval": 0.9901,
+      "spearman": -0.0114,
+      "spearman_pval": 0.9145
+    },
+    "pc_ratio": {
+      "pearson": 0.0963,
+      "pearson_pval": 0.361,
+      "spearman": 0.0629,
+      "spearman_pval": 0.5517
+    },
+    "basis_5d": {
+      "pearson": 0.1086,
+      "pearson_pval": 0.3026,
+      "spearman": 0.0222,
+      "spearman_pval": 0.8339
+    },
+    "net_flow_5d": {
+      "pearson": -0.1578,
+      "pearson_pval": 0.1331,
+      "spearman": -0.0171,
+      "spearman_pval": 0.8712
+    }
+  },
+  "grade_performance": {
+    "STRONG_BULL": {
+      "count": 30,
+      "avg_return_pct": 0.54,
+      "win_rate": 63.3
+    },
+    "MILD_BULL": {
+      "count": 49,
+      "avg_return_pct": 0.42,
+      "win_rate": 61.2
+    },
+    "NEUTRAL": {
+      "count": 13,
+      "avg_return_pct": 0.28,
+      "win_rate": 76.9
+    }
+  },
+  "direction_accuracy": {
+    "bull": {
+      "correct": 49,
+      "total": 79
+    },
+    "bear": {
+      "correct": 0,
+      "total": 0
+    },
+    "overall_pct": 62.0
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "timestamp": "2026-03-20T21:48:57.109947",
+  "regime": "CAUTION",
+  "confidence": 0.65,
+  "game_board": {
+    "mode": "DEFENSIVE",
+    "reason": "CAUTION 레짐 + 신뢰도 65%"
+  },
+  "flow_map": {
+    "hot_sectors": [
+      "헬스케어",
+      "정유",
+      "방위산업ETF",
+      "에너지화학",
+      "성장주",
+      "방산",
+      "IT",
+      "금융",
+      "바이오",
+      "석유개발"
+    ],
+    "cold_sectors": [
+      "소프트웨어",
+      "항공",
+      "보험",
+      "화학",
+      "은행",
+      "증권",
+      "미디어",
+      "플라스틱",
+      "여행"
+    ],
+    "flow_direction": "강한 섹터 쏠림",
+    "sector_weight_adjustments": {
+      "에너지화학": 1.2,
+      "헬스케어": 1.2,
+      "금융": 1.2,
+      "소프트웨어": 0.8,
+      "증권": 0.8,
+      "미디어": 0.8,
+      "방산": 1.3,
+      "방위산업ETF": 1.2,
+      "항공": 0.6,
+      "여행": 0.8,
+      "반도체": 1.1,
+      "성장주": 1.2,
+      "바이오": 1.2,
+      "IT": 1.2,
+      "은행": 0.8,
+      "보험": 0.8,
+      "정유": 1.2,
+      "석유개발": 1.2,
+      "화학": 0.8,
+      "플라스틱": 0.8,
+      "에너지": 0.85,
+      "2차전지": 1.1
+    },
+    "active_scenarios": [
+      {
+        "id": "WAR_MIDDLE_EAST",
+        "phase": 1,
+        "phase_name": "즉시 반응 (D+0~2)",
+        "hot_now": [
+          "방산",
+          "방위산업ETF"
+        ],
+        "cold_now": [
+          "항공",
+          "여행",
+          "반도체"
+        ],
+        "next_phase": "유가 전파 (D+2~7)",
+        "next_hot": [
+          "정유",
+          "에너지"
+        ],
+        "days_active": 0
+      },
+      {
+        "id": "FED_RATE_CUT",
+        "phase": 1,
+        "phase_name": "즉시 (D+0~7)",
+        "hot_now": [
+          "성장주",
+          "바이오",
+          "IT"
+        ],
+        "cold_now": [
+          "은행",
+          "보험"
+        ],
+        "next_phase": "유동성 확산 (D+7~30)",
+        "next_hot": [
+          "부동산",
+          "리츠",
+          "건설"
+        ],
+        "days_active": 0
+      },
+      {
+        "id": "OIL_SPIKE",
+        "phase": 1,
+        "phase_name": "즉시 (D+0~3)",
+        "hot_now": [
+          "정유",
+          "석유개발"
+        ],
+        "cold_now": [
+          "항공",
+          "화학",
+          "플라스틱"
+        ],
+        "next_phase": "대안 에너지 (D+7~30)",
+        "next_hot": [
+          "원자력",
+          "태양광",
+          "풍력",
+          "LNG"
+        ],
+        "days_active": 0
+      },
+      {
+        "id": "SEMICONDUCTOR_CYCLE_UP",
+        "phase": 1,
+        "phase_name": "대장주 (D+0~7)",
+        "hot_now": [
+          "반도체"
+        ],
+        "cold_now": [],
+        "next_phase": "장비/소재 (D+7~30)",
+        "next_hot": [
+          "반도체장비",
+          "반도체소재"
+        ],
+        "days_active": 0
+      }
+    ],
+    "jgis_intel": {
+      "source": "jgis",
+      "applied": true,
+      "sentiment_sectors": 6,
+      "relay_sectors": 5,
+      "risk_appetite": "NEUTRAL",
+      "money_direction": "보합"
+    }
+  },
+  "structural_value": {
+    "min_quality_score": 0.4,
+    "valuation_mode": "NORMAL",
+    "trap_filter": true
+  },
+  "asymmetry": {
+    "min_rr_ratio": 1.5,
+    "target_atr_mult": 3.0,
+    "stop_atr_mult": 2.0
+  },
+  "derivatives": {
+    "available": true,
+    "composite_score": 30.8,
+    "composite_grade": "MILD_BULL",
+    "basis_status": "BACKWARDATION",
+    "put_call_status": "BULLISH",
+    "put_call_reversal": "",
+    "flow_direction": "롱 강세",
+    "program_signal": "없음"
+  }
+}

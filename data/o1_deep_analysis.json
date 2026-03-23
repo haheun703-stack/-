@@ -1,82 +1,82 @@
 {
-  "analysis_date": "2026-03-16",
+  "analysis_date": "2026-03-22",
   "macro_analysis": {
-    "global_liquidity": "미국 금리 인하 여부 불확실, 달러 인덱스 상승과 VIX 상승으로 시장 변동성 확대",
+    "global_liquidity": "미국 금리 인상 압력과 달러 강세, 이란 리스크로 VIX가 상승하며 글로벌 유동성이 다소 긴축 국면에 진입",
     "coupling_status": "동조",
-    "cycle_position": "late",
+    "cycle_position": "mid",
     "geopolitical_risk_score": 8,
     "key_macro_insights": [
-      "1단계: 중동 전쟁 장기화로 유가 상승 → 글로벌 인플레이션 압력 가속",
-      "2단계: 인플레이션 우려로 Fed 등 중앙은행의 매파적 스탠스 강화 → 유동성 축소",
-      "3단계: 위험자산 선호도 하락 → 한국 포함 신흥시장 하방 압력 증가"
+      "왜 유동성 긴축인가? ①이란 지정학 불안으로 유가가 상승 → 인플레이션 우려 확대 → 미 연준의 긴축 사이클 강화. ②환율 상승(원·달러 레벨 1500원 근접) 시 한국은행도 금리 인상 고려",
+      "왜 미-한 시장 동조화인가? ①금융시장 개방도 높아 ETF(예: EWY) 자금 유입/유출 동반; ②글로벌 섹터 로테이션이 공통 발생",
+      "왜 중기 사이클인가? ①지속적 물가 부담으로 즉각적 경기 침체가 아니라 성장 엔진이 남아 있음; ②기업들의 실적 ‘둔화→회복’ 국면 혼재"
     ],
-    "macro_regime": "RISK_OFF",
-    "confidence": 0.75
+    "macro_regime": "TRANSITION",
+    "confidence": 0.85
   },
   "micro_analysis": [
     {
       "sector": "반도체",
-      "earnings_cycle": "recovery",
-      "leading_indicators": "메모리 가격 하락 폭 축소, 고객사 재고 조정 마무리 신호",
-      "valuation_rerating": "상향",
-      "supply_demand_shift": "매집",
-      "conviction": 8,
-      "contrarian_view": "전통적 사이클 회복을 앞두고 있지만, 중동 리스크로 수요둔화 가능성도 고려"
+      "earnings_cycle": "trough",
+      "leading_indicators": "수출 반등 신호는 제한적, IT 수요 회복은 지연",
+      "valuation_rerating": "유지",
+      "supply_demand_shift": "중립",
+      "conviction": 7,
+      "contrarian_view": "AI Disruption 우려 과도, 중장기적으로 데이터센터 투자 재개 가능"
     },
     {
       "sector": "2차전지",
       "earnings_cycle": "expansion",
-      "leading_indicators": "EV 수요 지속 증가, 배터리 원자재 가격 상승세",
-      "valuation_rerating": "유지",
-      "supply_demand_shift": "중립",
-      "conviction": 7,
-      "contrarian_view": "에너지 가격 급등에 따른 물류비 부담이 실적 변동성 요인이 될 수 있음"
+      "leading_indicators": "글로벌 전기차 수요 증가, 원자재 가격 변동성 제한",
+      "valuation_rerating": "상향",
+      "supply_demand_shift": "매집",
+      "conviction": 8,
+      "contrarian_view": "일시적 원자재 가격 급등 시 마진 압박이 단기 리스크이나 성장 스토리는 유효"
     },
     {
       "sector": "조선",
       "earnings_cycle": "recovery",
-      "leading_indicators": "LNG선 발주 확대, 수주잔고 상승 추세",
+      "leading_indicators": "수주 잔고 증가, LNG선·초대형 원유 운반선 발주 확대로 ASP 개선",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
       "conviction": 6,
-      "contrarian_view": "유가 급등이 해운사 투자 지연을 유발할 수 있어 중장기적 관찰 필요"
+      "contrarian_view": "이란 정세불안이 에너지 운송 수요를 자극하나 글로벌 경기 둔화 시 발주 지연 가능"
     },
     {
       "sector": "방산",
       "earnings_cycle": "expansion",
-      "leading_indicators": "국방 예산 확대, 해외 수출 계약 증가",
+      "leading_indicators": "방산 수주문의 해외 확대, 지정학적 긴장 감안 시 지속적 성장 예상",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
       "conviction": 9,
-      "contrarian_view": "전쟁 장기화 시 추가적 수혜 가능성이 크지만, 외교적 해소 시 빠른 이익 실현이 나올 수 있음"
+      "contrarian_view": "현재 주가 수준이 ‘전쟁 프리미엄’을 다소 과도하게 반영 중일 수도 있음"
     },
     {
       "sector": "바이오",
       "earnings_cycle": "contraction",
-      "leading_indicators": "R&D 지출 확대 대비 임상 진전 더뎌 수익화 지연",
+      "leading_indicators": "임상 결과 대기 상태, R&D 지출 확대 대비 매출 성장 둔화",
       "valuation_rerating": "하향",
       "supply_demand_shift": "분배",
       "conviction": 5,
-      "contrarian_view": "장기적으로 기술력 보유 기업은 반등 여지 있으나 현재는 투자심리 낮음"
+      "contrarian_view": "단기적 실적 압박 있으나 혁신 신약 모멘텀 발생 시 점진적 반등 가능"
     }
   ],
-  "cross_sector_dynamics": "전반적 유가 급등으로 제조·수출 기업(반도체·조선)에 비용 부담 증가. 방산은 지정학적 갈등 심화로 호조. 2차전지는 전동화 트렌드로 견조하지만 원자재비 변동성 증가. 바이오는 외부 환경 영향보다 기술·임상 성과가 주가를 주도.",
+  "cross_sector_dynamics": "에너지 및 방산 호조로 전통 산업 섹터가 부각되며, 반도체·IT의 약세를 일부 상쇄. 건설·조선 등 인프라·수주형 산업은 유가·환율 상승 시 원가 부담 우려 있으나 방산·화학·소재 수요가 동반 확대될 수 있음",
   "risk_scenarios": [
     {
-      "scenario": "FOMC에서 예상보다 매파적 금리 인상",
-      "probability": 0.6,
+      "scenario": "유가 추가 급등으로 인한 글로벌 경기 둔화",
+      "probability": 0.4,
       "impact": "high"
     },
     {
-      "scenario": "중동 분쟁 장기화로 원유 공급망 구조적 훼손",
-      "probability": 0.5,
-      "impact": "high"
-    },
-    {
-      "scenario": "유가 급등세 단기 조정",
+      "scenario": "환율 1500원 돌파 및 한은 긴축 속도 증가",
       "probability": 0.3,
+      "impact": "medium"
+    },
+    {
+      "scenario": "AI Disruption 우려가 기술업종 전반 이익 훼손",
+      "probability": 0.2,
       "impact": "medium"
     }
   ],
-  "actionable_summary": "유가 급등과 정책 불확실성으로 한국 증시 전반 약세 전망. 방산·조선 등 지정학 리스크 수혜 부문 주시. Fed 매파 기조 시 외인 자금 유출 가속되므로 포트폴리오 방어적 편입 필요."
+  "actionable_summary": "①유가 상승과 지정학 리스크로 방산·에너지 중심의 가치주 로테이션이 예상됨. ②반도체·IT는 단기 약세 가능하나 AI 및 데이터센터 투자로 중기 반등 여지 있음. ③환율 1500원 초과 시 통화정책 급변에 대비 필요"
 }
