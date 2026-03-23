@@ -10,21 +10,10 @@ call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
 set PYTHONPATH=D:\sub-agent-project
 
-REM ── 주말 가드 ──
-for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
-if "%DOW%"=="5" (
-    echo [%date% %time%] BAT-F 스킵: 토요일 >> D:\sub-agent-project\logs\schedule.log
-    goto :eof
-)
-if "%DOW%"=="6" (
-    echo [%date% %time%] BAT-F 스킵: 일요일 >> D:\sub-agent-project\logs\schedule.log
-    goto :eof
-)
-
-REM ── 공휴일 가드 ──
-for /f %%a in ('python -c "from datetime import date; import holidays; print(1 if date.today() in holidays.KR(years=date.today().year) else 0)"') do set IS_HOLIDAY=%%a
-if "%IS_HOLIDAY%"=="1" (
-    echo [%date% %time%] BAT-F 스킵: 공휴일 >> D:\sub-agent-project\logs\schedule.log
+REM ── 거래일 가드 (trading_calendar 사용) ──
+python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
+if errorlevel 1 (
+    echo [%date% %time%] BAT-F 스킵: 비거래일 >> D:\sub-agent-project\logs\schedule.log
     goto :eof
 )
 
