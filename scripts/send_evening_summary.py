@@ -60,6 +60,16 @@ def _section_holdings() -> list[str]:
         "PARTIAL_SELL": "부분매도", "FULL_SELL": "전량매도",
     }
 
+    # portfolio_outlook.json에서 SD V2 패턴 로드
+    outlook = _load("portfolio_outlook.json")
+    sd_map = {}
+    _SD_EMOJI = {"A": "\U0001f7e2", "B": "\U0001f535", "C": "\U0001f7e1",
+                 "D": "\U0001f7e0", "F": "\U0001f534", "X": "\u26aa"}
+    for r in (outlook.get("results", []) if isinstance(outlook, dict) else []):
+        sd = r.get("sd_v2")
+        if sd:
+            sd_map[r.get("ticker", "")] = sd
+
     lines.append("")
     lines.append("━━━━ 💼 보유종목 현황 ━━━━")
     for rec in monitored:
@@ -67,6 +77,7 @@ def _section_holdings() -> list[str]:
         emoji = ACTION_EMOJI.get(action, "\u26aa")
         label = ACTION_LABEL.get(action, action)
         name = rec.get("name", rec.get("ticker", "?"))
+        ticker = rec.get("ticker", "")
         target = rec.get("monitor_target", 0)
         pnl = rec.get("pnl_pct", 0)
         pnl_bar = "▲" if pnl > 0 else ("▼" if pnl < 0 else "─")
@@ -74,6 +85,14 @@ def _section_holdings() -> list[str]:
             f"  {emoji} {name} {pnl_bar}{pnl:+.1f}% → {label}"
             + (f" (🎯{target:,.0f})" if target else "")
         )
+        # SD V2 수급 패턴 한 줄 표시
+        sd = sd_map.get(ticker)
+        if sd:
+            pat = sd.get("pattern", "X")
+            pat_e = _SD_EMOJI.get(pat, "\u26aa")
+            f20 = sd.get("foreign_net_20d", 0)
+            i20 = sd.get("inst_net_20d", 0)
+            lines.append(f"     {pat_e}{pat}({sd.get('pattern_name','')}) 외{f20:+,.0f}억 기{i20:+,.0f}억")
 
     return lines
 

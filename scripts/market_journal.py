@@ -946,6 +946,17 @@ def generate_weekly_report(today_str: str, conn: sqlite3.Connection, send: bool 
         except Exception:
             pass
 
+    # ── SD V2 주간 수급 전환 ──
+    try:
+        from src.alpha.factors.sd_transition_tracker import get_transitions, format_transition_report
+        transitions = get_transitions(today_str, days_back=7)
+        if transitions.get("transitions"):
+            sd_report = format_transition_report(transitions)
+            lines.append("")
+            lines.append(sd_report)
+    except Exception as e:
+        log.warning("SD 전환 분석 실패: %s", e)
+
     report = "\n".join(lines)
 
     # JSON 저장

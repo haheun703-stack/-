@@ -87,6 +87,16 @@ SYSTEM_PROMPT = """\
   - 현재가가 손절가까지 -5% 이내 AND 섹터 수급 순매도 → TRIM 또는 SELL
   - 촉매 DEAD + 손절가 근접 → SELL (예외 없음)
   - 촉매 ALIVE라도 수급이 5일 연속 순매도(-1000억+) → TRIM
+- **수급 패턴 F(물림) → SELL 강력 검토**
+  - F패턴 = 스마트머니(외인+기관) 이탈 + 개인이 받는 중 → 가장 위험한 수급 형태
+  - F + 촉매 DEAD → SELL 확정
+  - F + 촉매 ALIVE → TRIM (스마트머니가 빠지는 이유가 있음)
+- **수급 패턴별 행동 가이드**
+  - A(스텔스매집): 외인 조용히 매집 + 가격 횡보 → ADD 검토 (최고 기회)
+  - B(스마트머니합류): 외인+기관 동반 매수 → HOLD/ADD
+  - C(추세확인): 추세 매수세 → HOLD
+  - D(초기전환): 방향 전환 초기 → HOLD (관찰)
+  - F(물림): 스마트머니 이탈 → TRIM/SELL (위 HARD RULE 참조)
 - **수급 점수 판단 기준**
   - 섹터 외인+기관 합산 5일 순매수 > 0 → 수급 양호
   - 섹터 외인+기관 합산 5일 순매도 < -500억 → 수급 약화
@@ -156,10 +166,12 @@ class PortfolioOutlook(BaseAgent):
                          "reason": f"AI 분석 실패: {e}",
                          "confidence": 0} for h in holdings]
 
-        # 보유 정보 병합
+        # 보유 정보 + SD V2 병합
+        sd_map = {s["ticker"]: s.get("sd_v2") for s in stock_data}
         for r in results:
+            ticker = r.get("ticker", "")
             for h in holdings:
-                if h["ticker"] == r.get("ticker"):
+                if h["ticker"] == ticker:
                     r["name"] = h["name"]
                     r["shares"] = h["shares"]
                     r["entry_price"] = h["entry_price"]
@@ -168,6 +180,9 @@ class PortfolioOutlook(BaseAgent):
                         (h["current_price"] - h["entry_price"]) / h["entry_price"] * 100, 1
                     ) if h["entry_price"] > 0 else 0
                     break
+            # SD V2 수급 패턴 병합
+            if ticker in sd_map and sd_map[ticker]:
+                r["sd_v2"] = sd_map[ticker]
 
         logger.info("[Outlook] 분석 완료: %d종목", len(results))
         return results
@@ -230,6 +245,9 @@ class PortfolioOutlook(BaseAgent):
 
         # 섹터 수급
         data["sector_flow"] = self._get_sector_flow(data["sector"])
+
+        # SD V2 개별 종목 수급 패턴
+        data["sd_v2"] = self._get_sd_v2(ticker)
 
         # 손절가 근접도
         if data["stop_loss"] > 0 and data["current_price"] > 0:
@@ -331,6 +349,35 @@ JSON으로 응답:
         except Exception:
             pass
         return None
+
+    def _get_sd_v2(self, ticker: str) -> dict | None:
+        """parquet에서 SD V2 수급 패턴 계산."""
+        try:
+            import pandas as pd
+            from src.alpha.factors.sd_score_v2 import compute_sd_features, format_sd_summary
+
+            parquet_path = DATA_DIR / "processed" / f"{ticker}.parquet"
+            if not parquet_path.exists():
+                return None
+
+            df = pd.read_parquet(parquet_path)
+            if len(df) < 20:
+                return None
+
+            idx = len(df) - 1
+            feat = compute_sd_features(df, idx, ticker)
+            return {
+                "pattern": feat.pattern,
+                "pattern_name": feat.pattern_name,
+                "sd_score": round(feat.sd_score, 2),
+                "foreign_net_20d": round(feat.foreign_net_20d, 0),
+                "inst_net_20d": round(feat.inst_net_20d, 0),
+                "individual_net_20d": round(feat.individual_net_20d, 0),
+                "summary": format_sd_summary(feat),
+            }
+        except Exception as e:
+            logger.warning("[SD V2] %s 계산 실패: %s", ticker, e)
+            return None
 
     def _get_sector_flow(self, sector: str) -> dict | None:
         """investor_flow.json에서 섹터별 수급 데이터."""
@@ -476,6 +523,17 @@ JSON으로 응답:
             sl_dist = s.get("stop_loss_distance_pct", 999)
             if sl_dist < 5:
                 lines.append(f"  ⚠ 손절가 근접: 현재가→손절가 {sl_dist:+.1f}%")
+
+            # SD V2 개별 종목 수급 패턴 (핵심)
+            sd = s.get("sd_v2")
+            if sd:
+                lines.append(f"- 수급 패턴: {sd['pattern']}({sd['pattern_name']}) SD={sd['sd_score']}")
+                lines.append(f"  외인 {sd['foreign_net_20d']:+,.0f}억 | "
+                             f"기관 {sd['inst_net_20d']:+,.0f}억 | "
+                             f"개인 {sd['individual_net_20d']:+,.0f}억 (20일)")
+                if sd["pattern"] == "F":
+                    lines.append(f"  ⚠⚠ 물림 패턴(F) — 스마트머니 이탈, 개인이 받는 중! SELL 강력 검토!")
+
             sf = s.get("sector_flow")
             if sf:
                 lines.append(f"- 섹터 수급({sf['sector']}): {sf['total_flow_bil']:+,.0f}억 "

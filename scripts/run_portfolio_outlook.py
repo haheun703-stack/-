@@ -17,6 +17,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# SD V2 패턴 이모지
+_SD_EMOJI = {"A": "\U0001f7e2", "B": "\U0001f535", "C": "\U0001f7e1",
+             "D": "\U0001f7e0", "F": "\U0001f534", "X": "\u26aa"}
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
@@ -92,6 +96,18 @@ def format_telegram(results: list[dict]) -> str:
 
         lines.append(f"{dir_icon} {name} {direction} ({confidence}%)")
         lines.append(f"   {action_str} | 수익률 {pnl:+.1f}%")
+
+        # SD V2 수급 패턴 표시
+        sd = r.get("sd_v2")
+        if sd:
+            pat = sd.get("pattern", "X")
+            pat_name = sd.get("pattern_name", "")
+            pat_emoji = _SD_EMOJI.get(pat, "\u26aa")
+            f20 = sd.get("foreign_net_20d", 0)
+            i20 = sd.get("inst_net_20d", 0)
+            ind20 = sd.get("individual_net_20d", 0)
+            lines.append(f"   수급: {pat_emoji}{pat}({pat_name}) 외{f20:+,.0f}억 기{i20:+,.0f}억 개{ind20:+,.0f}억")
+
         lines.append(f"   촉매: {cat_icon} {catalyst}")
         lines.append(f"   📌 {reason}")
         if risk:
@@ -121,6 +137,77 @@ def format_telegram(results: list[dict]) -> str:
     lines.append("💡 최종 판단은 항상 사용자 확인 후 실행")
 
     return "\n".join(lines)
+
+
+def check_pattern_transitions(results: list[dict]) -> str | None:
+    """보유 종목 수급 패턴 전환 감지 → F전환 시 경고 메시지."""
+    history_path = Path("data/sd_patterns_history.json")
+
+    # 현재 패턴 수집
+    current = {}
+    for r in results:
+        sd = r.get("sd_v2")
+        if sd:
+            current[r.get("ticker", "")] = {
+                "name": r.get("name", ""),
+                "pattern": sd.get("pattern", "X"),
+                "pattern_name": sd.get("pattern_name", ""),
+                "foreign_net_20d": sd.get("foreign_net_20d", 0),
+                "inst_net_20d": sd.get("inst_net_20d", 0),
+                "individual_net_20d": sd.get("individual_net_20d", 0),
+            }
+
+    # 이전 패턴 로드
+    previous = {}
+    if history_path.exists():
+        try:
+            with open(history_path, encoding="utf-8") as f:
+                prev_data = json.load(f)
+            previous = prev_data.get("patterns", {})
+        except Exception:
+            pass
+
+    # 전환 감지
+    alerts = []
+    for ticker, cur in current.items():
+        prev_pat = previous.get(ticker, {}).get("pattern", "X")
+        cur_pat = cur["pattern"]
+        if prev_pat != cur_pat and prev_pat != "X":
+            name = cur["name"]
+            if cur_pat == "F":
+                # F 전환 = 가장 위험한 경고
+                alerts.append(
+                    f"\U0001f6a8 {name}: {prev_pat}→F(물림) 전환!\n"
+                    f"   외{cur['foreign_net_20d']:+,.0f}억 기{cur['inst_net_20d']:+,.0f}억 "
+                    f"개{cur['individual_net_20d']:+,.0f}억"
+                )
+            elif prev_pat == "F" and cur_pat in ("A", "B", "D"):
+                # F에서 탈출 = 좋은 신호
+                alerts.append(f"\U0001f7e2 {name}: F→{cur_pat}({cur['pattern_name']}) 탈출!")
+            elif cur_pat in ("A", "B") and prev_pat not in ("A", "B"):
+                # 매집 전환
+                alerts.append(f"\U0001f535 {name}: {prev_pat}→{cur_pat}({cur['pattern_name']}) 매집 시작")
+
+    # 현재 패턴 저장 (다음 비교용)
+    save_data = {
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "patterns": current,
+    }
+    with open(history_path, "w", encoding="utf-8") as f:
+        json.dump(save_data, f, ensure_ascii=False, indent=2)
+
+    if not alerts:
+        return None
+
+    msg_lines = [
+        "\U0001f4ca [수급 패턴 전환 경고]",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    msg_lines.extend(alerts)
+    msg_lines.append("")
+    msg_lines.append("💡 F(물림) = 스마트머니 이탈 + 개인 흡수 → 매도 검토 필수")
+    return "\n".join(msg_lines)
 
 
 def save_results(results: list[dict]):
@@ -167,11 +254,20 @@ def main():
     msg = format_telegram(results)
     print(msg)
 
+    # 수급 패턴 전환 경고 체크
+    transition_msg = check_pattern_transitions(results)
+    if transition_msg:
+        print(transition_msg)
+
     # 전송
     if not args.dry:
         from src.telegram_sender import send_message
         ok = send_message(msg)
-        logger.info("[텔레그램] 전송 %s", "성공" if ok else "실패")
+        logger.info("[텔레그램] 방향성 전송 %s", "성공" if ok else "실패")
+        # F패턴 전환 경고 별도 전송
+        if transition_msg:
+            ok2 = send_message(transition_msg)
+            logger.info("[텔레그램] 수급 전환 경고 전송 %s", "성공" if ok2 else "실패")
     else:
         logger.info("[DRY] 텔레그램 미전송")
 

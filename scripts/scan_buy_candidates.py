@@ -690,7 +690,7 @@ def detect_regime() -> dict:
 
 
 def kill_filters(sig: dict, contrarian_mode: bool = False) -> tuple[bool, list[str]]:
-    """Kill Filters — K3~K12.
+    """Kill Filters — K3~K13.
 
     K3: 트리거 미발동
     K4: 유동성 < 50억 (역발상: 20억)
@@ -702,6 +702,7 @@ def kill_filters(sig: dict, contrarian_mode: bool = False) -> tuple[bool, list[s
     K10: 늦은과열
     K11: 52주 고점 대비 -20% 이상 (역발상: 면제 — "줍줍" 대상)
     K12: MA120 하회 (역발상: 면제 — 하락장에선 전 종목 MA120↓)
+    K13: SD V2 패턴 F(물림) — 스마트머니 이탈 + 개인 흡수 = 절대 매수 금지
 
     contrarian_mode: True면 K8/K9/K11/K12 면제 (워런 버핏 모드)
     """
@@ -761,6 +762,10 @@ def kill_filters(sig: dict, contrarian_mode: bool = False) -> tuple[bool, list[s
     # K12: 현재가 < MA120 → 장기 대추세 붕괴 (역발상: 면제)
     if not sig.get("above_ma120", True) and not contrarian_mode:
         kills.append(f"K12:MA120하회")
+
+    # K13: SD V2 패턴 F(물림) — 스마트머니 이탈 + 개인 흡수 중 = 절대 매수 금지
+    if sig.get("sd_pattern") == "F":
+        kills.append(f"K13:물림(외+기관 매도, 개인 매수)")
 
     return len(kills) == 0, kills
 
@@ -1092,20 +1097,22 @@ def run_pipeline(
 
                 print(f"      필터: 등급{_co_grade}={_step1} → 시총={_step2} → V2팩터={_step3}")
 
-                # 4) SD V2 패턴 F(물림) 차단 — 스마트머니 이탈 종목은 역발상에서도 제외
+                # 4) SD V2 패턴 필터 — 역발상에서는 A/B(스텔스매집/스마트머니합류)만 통과
                 _before_sd = len(_quality)
                 _sd_killed = []
                 _sd_passed = []
+                _SD_CONTRARIAN_ALLOW = {"A", "B"}  # 역발상: 스마트머니 매집 확인된 종목만
                 for c in _quality:
-                    if c.get("sd_pattern") == "F":
-                        _sd_killed.append(c)
-                    else:
+                    pat = c.get("sd_pattern", "X")
+                    if pat in _SD_CONTRARIAN_ALLOW:
                         _sd_passed.append(c)
+                    else:
+                        _sd_killed.append(c)
                 _quality = _sd_passed
                 if _sd_killed:
-                    _killed_names = ", ".join(f'{c["name"]}(F:{c.get("sd_pattern_name","물림")})' for c in _sd_killed)
-                    print(f"      SD V2 F패턴 차단: {_killed_names}")
-                print(f"      → SD필터={len(_quality)} (F차단 {_before_sd - len(_quality)}건)")
+                    _killed_names = ", ".join(f'{c["name"]}({c.get("sd_pattern","X")}:{c.get("sd_pattern_name","")})' for c in _sd_killed)
+                    print(f"      SD V2 필터 (A/B만 통과): {_killed_names} 제외")
+                print(f"      → SD필터={len(_quality)} (차단 {_before_sd - len(_quality)}건)")
 
                 if _quality:
                     _quality.sort(key=lambda c: c.get("composite_score", 0), reverse=True)
@@ -2021,6 +2028,32 @@ def scan_all(
     stats["brain_max_pos"] = max_pos  # BRAIN 조절된 최대 슬롯
 
     stats["elapsed_sec"] = round(time.time() - t0, 1)
+
+    # ── SD V2 일별 패턴 저장 (전환 추적용) ──
+    try:
+        from src.alpha.factors.sd_score_v2 import compute_sd_features as _sd_save_fn
+        from src.alpha.factors.sd_transition_tracker import save_daily_patterns
+
+        _sd_all = {}
+        for _ticker, _df in data_dict.items():
+            if len(_df) < 20:
+                continue
+            _idx = len(_df) - 1
+            _feat = _sd_save_fn(_df, _idx, _ticker)
+            _sd_all[_ticker] = {
+                "name": name_map.get(_ticker, _ticker),
+                "pattern": _feat.pattern,
+                "pattern_name": _feat.pattern_name,
+                "sd_score": round(_feat.sd_score, 4),
+                "foreign_net_20d": round(_feat.foreign_net_20d, 1),
+                "inst_net_20d": round(_feat.inst_net_20d, 1),
+                "individual_net_20d": round(_feat.individual_net_20d, 1),
+            }
+        save_daily_patterns(today_str, _sd_all)
+        stats["sd_pattern_saved"] = len(_sd_all)
+    except Exception as e:
+        print(f"  SD 패턴 저장 실패: {e}")
+
     return survivors, stats
 
 
