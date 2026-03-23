@@ -1533,7 +1533,7 @@ def scan_all(
     print(f"scan: {pq_label}{csv_label} | grade={grade_filter} | news={'ON' if use_news else 'OFF'}")
 
     # SignalEngine 초기화
-    engine = SignalEngine("config/settings.yaml")
+    engine = SignalEngine(str(PROJECT_ROOT / "config" / "settings.yaml"))
     scanner = MarketSignalScanner()
 
     # V2 레짐별 스코어러 (alpha_v2.enabled 시)

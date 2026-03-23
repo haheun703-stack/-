@@ -92,7 +92,7 @@ def step_backtest(
     """Step 3~7: v3.0 6-Layer Pipeline 백테스트"""
     from src.backtest_engine import BacktestEngine
 
-    config_path = "config/settings.yaml"
+    config_path = str(PROJECT_ROOT / "config" / "settings.yaml")
 
     # --sample 모드: OU/Regime 파라미터 자동 완화
     if use_sample:
