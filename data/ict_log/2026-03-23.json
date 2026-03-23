@@ -1,0 +1,90 @@
+{
+  "date": "2026-03-23",
+  "total_checks": 4,
+  "adjustments": {
+    "positive": 0,
+    "negative": 3,
+    "neutral": 1
+  },
+  "filtered_out": 0,
+  "avg_adjustment": -0.1375,
+  "records": [
+    {
+      "symbol": "278470",
+      "name": "에이피알",
+      "signal_type": "buy",
+      "daily_bias": "bearish",
+      "confidence_adjust": -0.1,
+      "conviction_before": 8,
+      "conviction_delta": -1,
+      "conviction_after": 7,
+      "tags": [
+        "BIAS_AGAINST",
+        "NEAR_SUPPORT"
+      ],
+      "reason": "당일 bias bearish (OR저 이탈) / 지지 근접: 전일저 358,000 (-0.4%)",
+      "suggested_target": 377000,
+      "suggested_stop": 358000,
+      "filtered": false
+    },
+    {
+      "symbol": "011210",
+      "name": "현대위아",
+      "signal_type": "buy",
+      "daily_bias": "bearish",
+      "confidence_adjust": -0.05,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [
+        "BIAS_AGAINST",
+        "NEAR_SUPPORT",
+        "NARROW_OR",
+        "EQ_LOW_SWEEP_REVERSAL",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "당일 bias bearish (OR저 이탈) / 지지 근접: 전일저 84,100 (-0.9%) / OR 극도 좁음 (ATR 대비 0.13) → 축적 가능 / EqLow Sweep: 84,520 x5 이탈 후 반등 (유동성 흡수) / EqHigh 저항: 85,250 x2 (+0.4%)",
+      "suggested_target": 86300,
+      "suggested_stop": 84100,
+      "filtered": false
+    },
+    {
+      "symbol": "267270",
+      "name": "HD현대건설기계",
+      "signal_type": "buy",
+      "daily_bias": "bearish",
+      "confidence_adjust": -0.2,
+      "conviction_before": 8,
+      "conviction_delta": -2,
+      "conviction_after": 6,
+      "tags": [
+        "BIAS_AGAINST",
+        "NEAR_SUPPORT",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "당일 bias bearish (OR저 이탈) / 지지 근접: 전일저 131,200 (-1.4%) / EqHigh 저항: 133,400 x2 (+0.3%)",
+      "suggested_target": 138000,
+      "suggested_stop": 131200,
+      "filtered": false
+    },
+    {
+      "symbol": "298040",
+      "name": "효성중공업",
+      "signal_type": "buy",
+      "daily_bias": "bearish",
+      "confidence_adjust": -0.2,
+      "conviction_before": 8,
+      "conviction_delta": -2,
+      "conviction_after": 6,
+      "tags": [
+        "BIAS_AGAINST",
+        "NEAR_SUPPORT",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "당일 bias bearish (OR저 이탈) / 지지 근접: 전일저 2,701,000 (-1.2%) / EqHigh 저항: 2,760,000 x2 (+0.9%)",
+      "suggested_target": 2777000,
+      "suggested_stop": 2701000,
+      "filtered": false
+    }
+  ]
+}

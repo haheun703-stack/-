@@ -211,5 +211,22 @@
     ],
     "kospi_change_pct": -2.43,
     "regime_hit": true
+  },
+  {
+    "date": "2026-03-23",
+    "regime_predicted": "방어",
+    "regime_confidence": 0.85,
+    "attack_sectors": [
+      "방산",
+      "정유/에너지"
+    ],
+    "avoid_sectors": [
+      "반도체",
+      "IT서비스",
+      "화학",
+      "항공"
+    ],
+    "kospi_change_pct": -6.49,
+    "regime_hit": true
   }
 ]

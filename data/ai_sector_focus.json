@@ -1,81 +1,110 @@
 {
-  "analysis_date": "2026-03-22",
+  "analysis_date": "2026-03-23",
   "focus_sectors": [
+    {
+      "sector": "건설",
+      "entry_timing": "즉시진입",
+      "size_weight": 1.5,
+      "thesis_alignment": "thesis없음",
+      "momentum_rank": 1,
+      "momentum_score": 95.3,
+      "rsi": 59.9,
+      "smart_money": false,
+      "relay_source": null,
+      "reasoning": "모멘텀 압도적 1위이나 thesis 부재로 구조적 근거 불명확. ADX 34.8 강세 지속 중이므로 단기 모멘텀 추종 전략으로 소량 진입"
+    },
     {
       "sector": "방산",
       "entry_timing": "눌림대기",
       "size_weight": 1.0,
-      "thesis_alignment": "약한일치",
-      "momentum_rank": 5,
-      "momentum_score": 58.4,
-      "rsi": 49.7,
+      "thesis_alignment": "불일치",
+      "momentum_rank": 11,
+      "momentum_score": 48.4,
+      "rsi": 43.4,
       "smart_money": false,
       "relay_source": null,
-      "reasoning": "thesis 확신도 9/10이나 모멘텀 5위·RSI 49로 아직 초기 단계, ADX 42.1로 강한 추세 형성 중이나 외인·기관 모두 매도로 눌림목 진입 대기 필요"
+      "reasoning": "thesis 확신도 9/10 최고이나 모멘텀 11위로 괴리 심각. 외인/기관 모두 순매도. RSI 43.4로 과매도 구간이므로 반등 눌림목 대기 후 진입"
     },
     {
       "sector": "에너지화학",
       "entry_timing": "즉시진입",
-      "size_weight": 0.8,
-      "thesis_alignment": "강한일치",
-      "momentum_rank": 17,
-      "momentum_score": 35.8,
-      "rsi": 52.1,
-      "smart_money": true,
+      "size_weight": 1.2,
+      "thesis_alignment": "약한일치",
+      "momentum_rank": 9,
+      "momentum_score": 51.1,
+      "rsi": 43.8,
+      "smart_money": false,
       "relay_source": null,
-      "reasoning": "원전/전력 thesis와 연계된 에너지 섹터, 유일한 스마트머니 유입 섹터로 기관·외인 동반 매수, RSI 52로 과열 없이 진입 가능"
+      "reasoning": "정유/에너지 thesis(확신 8/10)와 중위권 모멘텀 일치. 기관 +387 유입. RSI 43.8 저평가 구간이므로 즉시 진입 가능"
+    },
+    {
+      "sector": "조선",
+      "entry_timing": "관망",
+      "size_weight": 0.5,
+      "thesis_alignment": "약한일치",
+      "momentum_rank": 18,
+      "momentum_score": 29.7,
+      "rsi": 36.6,
+      "smart_money": false,
+      "relay_source": null,
+      "reasoning": "thesis 확신 7/10이나 모멘텀 하위권(18위). ADX 14.3으로 추세 부재. 관찰 섹터이나 릴레이 소스 역할 불가능하므로 관망"
     },
     {
       "sector": "기계",
       "entry_timing": "매수준비",
-      "size_weight": 0.7,
+      "size_weight": 0.8,
       "thesis_alignment": "강한일치",
       "momentum_rank": null,
       "momentum_score": null,
       "rsi": null,
-      "smart_money": null,
-      "relay_source": "방산",
-      "reasoning": "방산→기계 릴레이(승률 74.1%, 지연 2일) 발화 단계, thesis 확신도 7/10으로 방산 후행주 포지션, 1~2일 후 진입 타이밍"
+      "smart_money": false,
+      "relay_source": "방산조선",
+      "reasoning": "방산조선→기계 릴레이 '대기→매수 준비' 단계(승률 74.1%, 지연 2일). 소스 섹터 모멘텀 약하나 1~2일 후 타겟 진입 준비"
     }
   ],
   "screening_boost": [
-    "방산",
+    "건설",
     "에너지화학",
+    "방산",
     "기계"
   ],
   "screening_suppress": [
-    "건설",
     "반도체",
     "IT",
-    "금융",
-    "증권",
-    "전기차",
-    "배터리"
+    "인터넷",
+    "삼성그룹",
+    "헬스케어",
+    "증권"
   ],
   "sector_warnings": [
     {
-      "sector": "건설",
-      "warning": "모멘텀 1위(99.2점)·BB 97.5%로 극단적 과열, thesis 부재로 구조적 근거 없는 단기 급등",
-      "severity": "high"
-    },
-    {
       "sector": "반도체",
-      "warning": "회피 섹터임에도 모멘텀 2위(92.9점), 외인 -22,905 대량 매도 vs 기관 +22,688 매수로 수급 충돌",
+      "warning": "thesis 회피 섹터임에도 모멘텀 2위. AI 디스럽션 우려 속 외인/기관 대량 순매도(-4.7만주) 진행 중. 추가 조정 가능성 높음",
       "severity": "high"
     },
     {
       "sector": "IT",
-      "warning": "회피 섹터임에도 모멘텀 3위(80.8점), 반도체→IT 릴레이 패턴(승률 88.2%) 대기 중이나 방어 레짐에서 무시 권장",
-      "severity": "medium"
+      "warning": "thesis 회피 섹터이나 모멘텀 3위. 반도체 동반 조정 가능성. 외인/기관 -4.9만주 순매도로 수급 악화",
+      "severity": "high"
     },
     {
       "sector": "방산",
-      "warning": "최고 확신 thesis(9/10)와 모멘텀 5위 괴리, 외인·기관 모두 매도 중으로 조정 국면 진입 가능성",
+      "warning": "최고 확신 thesis(9/10)와 모멘텀(11위) 극심한 괴리. 시장이 아직 중동 리스크를 가격에 반영하지 않았거나 thesis 오류 가능성",
+      "severity": "medium"
+    },
+    {
+      "sector": "조선",
+      "warning": "thesis 관찰 섹터이나 모멘텀 18위 하위권. 방산조선→기계 릴레이 소스 역할 불가. BB% 0.1로 하단 이탈 직전",
       "severity": "medium"
     },
     {
       "sector": "증권",
-      "warning": "모멘텀 6위(57.9점)이나 회피 섹터(금융), 증권→보험·은행 릴레이 잠재력 있으나 방어 레짐에서 배제",
+      "warning": "증권→손해보험 릴레이 '발화' 단계이나 모멘텀 최하위(20위). 소스 섹터 붕괴로 릴레이 무효화 가능성 높음",
+      "severity": "high"
+    },
+    {
+      "sector": "건설",
+      "warning": "모멘텀 1위이나 구조적 thesis 부재. 스마트머니 미유입. 단기 과열 후 급락 리스크 존재",
       "severity": "low"
     }
   ]

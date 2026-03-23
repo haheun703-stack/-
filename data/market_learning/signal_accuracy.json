@@ -1,48 +1,48 @@
 {
-  "updated_at": "2026-03-20",
+  "updated_at": "2026-03-23",
   "window_days": 20,
   "signals": {
     "tomorrow_picks": {
-      "total": 192,
-      "hit": 166,
-      "hit_rate": 86.5,
-      "avg_ret": 1.66,
-      "days_tracked": 4
+      "total": 251,
+      "hit": 170,
+      "hit_rate": 67.7,
+      "avg_ret": 0.33,
+      "days_tracked": 5
     },
     "pullback_scan": {
-      "total": 120,
-      "hit": 75,
-      "hit_rate": 62.5,
-      "avg_ret": 1.45,
-      "days_tracked": 4
+      "total": 150,
+      "hit": 78,
+      "hit_rate": 52.0,
+      "avg_ret": 0.29,
+      "days_tracked": 5
     },
     "whale_detect": {
-      "total": 130,
-      "hit": 60,
-      "hit_rate": 46.2,
-      "avg_ret": 2.83,
-      "days_tracked": 4
+      "total": 171,
+      "hit": 62,
+      "hit_rate": 36.3,
+      "avg_ret": 1.37,
+      "days_tracked": 5
     },
     "accumulation_tracker": {
-      "total": 120,
-      "hit": 82,
-      "hit_rate": 68.3,
-      "avg_ret": 2.45,
-      "days_tracked": 4
+      "total": 150,
+      "hit": 88,
+      "hit_rate": 58.7,
+      "avg_ret": 1.23,
+      "days_tracked": 5
     },
     "dart_event": {
-      "total": 740,
-      "hit": 377,
-      "hit_rate": 50.9,
-      "avg_ret": 0.44,
-      "days_tracked": 4
+      "total": 902,
+      "hit": 384,
+      "hit_rate": 42.6,
+      "avg_ret": -0.75,
+      "days_tracked": 5
     },
     "volume_spike": {
-      "total": 193,
-      "hit": 66,
-      "hit_rate": 34.2,
-      "avg_ret": -0.48,
-      "days_tracked": 4
+      "total": 235,
+      "hit": 70,
+      "hit_rate": 29.8,
+      "avg_ret": -1.26,
+      "days_tracked": 5
     },
     "dual_buying": {
       "total": 0,
@@ -66,11 +66,11 @@
       "days_tracked": 0
     },
     "overnight_signal": {
-      "total": 2,
-      "hit": 1,
-      "hit_rate": 50.0,
-      "avg_ret": -1.26,
-      "days_tracked": 2
+      "total": 3,
+      "hit": 2,
+      "hit_rate": 66.7,
+      "avg_ret": -2.57,
+      "days_tracked": 3
     }
   },
   "daily_log": [
@@ -205,6 +205,39 @@
       "overnight_signal_hr": 0,
       "overnight_signal_n": 0,
       "overnight_signal_ret": 2.28
+    },
+    {
+      "date": "2026-03-23",
+      "tomorrow_picks_hr": 6.8,
+      "tomorrow_picks_n": 59,
+      "tomorrow_picks_ret": -5.02,
+      "pullback_scan_hr": 10.0,
+      "pullback_scan_n": 30,
+      "pullback_scan_ret": -4.36,
+      "whale_detect_hr": 7.3,
+      "whale_detect_n": 41,
+      "whale_detect_ret": -4.44,
+      "accumulation_tracker_hr": 20.0,
+      "accumulation_tracker_n": 30,
+      "accumulation_tracker_ret": -3.62,
+      "dart_event_hr": 4.9,
+      "dart_event_n": 162,
+      "dart_event_ret": -5.54,
+      "volume_spike_hr": 11.9,
+      "volume_spike_n": 42,
+      "volume_spike_ret": -4.35,
+      "dual_buying_hr": 0,
+      "dual_buying_n": 0,
+      "dual_buying_ret": 0,
+      "safety_margin_hr": 0,
+      "safety_margin_n": 0,
+      "safety_margin_ret": 0,
+      "ai_v3_picks_hr": 0,
+      "ai_v3_picks_n": 0,
+      "ai_v3_picks_ret": 0,
+      "overnight_signal_hr": 100.0,
+      "overnight_signal_n": 1,
+      "overnight_signal_ret": -5.19
     }
   ]
 }

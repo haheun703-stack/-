@@ -1,0 +1,104 @@
+{
+  "date": "2026-03-23",
+  "time": "14:40",
+  "holdings_orderbook": {
+    "000660": {
+      "name": "SK하이닉스",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 936000,
+        "volume": 10843
+      },
+      "top_ask": {
+        "price": 937000,
+        "volume": 1750
+      }
+    },
+    "010140": {
+      "name": "삼성중공업",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 26250,
+        "volume": 74504
+      },
+      "top_ask": {
+        "price": 26300,
+        "volume": 17652
+      }
+    },
+    "034020": {
+      "name": "두산에너빌리티",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 101900,
+        "volume": 2785
+      },
+      "top_ask": {
+        "price": 102000,
+        "volume": 628
+      }
+    },
+    "042700": {
+      "name": "한미반도체",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 303000,
+        "volume": 959
+      },
+      "top_ask": {
+        "price": 303500,
+        "volume": 737
+      }
+    },
+    "064350": {
+      "name": "현대로템",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 169400,
+        "volume": 209
+      },
+      "top_ask": {
+        "price": 169500,
+        "volume": 392
+      }
+    },
+    "078930": {
+      "name": "GS",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 65500,
+        "volume": 51
+      },
+      "top_ask": {
+        "price": 65600,
+        "volume": 303
+      }
+    },
+    "272210": {
+      "name": "한화시스템",
+      "bid_total": 0,
+      "ask_total": 0,
+      "bid_ask_ratio": 0,
+      "top_bid": {
+        "price": 125100,
+        "volume": 1346
+      },
+      "top_ask": {
+        "price": 125200,
+        "volume": 381
+      }
+    }
+  }
+}

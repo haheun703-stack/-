@@ -1,22 +1,23 @@
 {
-  "updated": "2026-03-20T21:02:27.262385",
+  "updated": "2026-03-23T20:54:03.353591",
   "scenarios": {
     "WAR_MIDDLE_EAST": {
       "first_detected": "2026-03-20",
-      "current_phase": 1,
-      "days_active": 0,
-      "score": 70,
+      "current_phase": 3,
+      "days_active": 3,
+      "score": 100,
       "reasons": [
         "키워드 2건 (약)",
         "WTI 1d +3.5% (>=3.0%)",
-        "Gold 1d +4.1% (>=1.5%)"
+        "Gold 1d +3.1% (>=1.5%)",
+        "VIX 26.8 >= 25"
       ],
-      "last_phase_change": "2026-03-20"
+      "last_phase_change": "2026-03-23"
     },
     "FED_RATE_CUT": {
       "first_detected": "2026-03-20",
       "current_phase": 1,
-      "days_active": 0,
+      "days_active": 3,
       "score": 45,
       "reasons": [
         "키워드 4건"
@@ -26,7 +27,7 @@
     "OIL_SPIKE": {
       "first_detected": "2026-03-20",
       "current_phase": 1,
-      "days_active": 0,
+      "days_active": 3,
       "score": 55,
       "reasons": [
         "키워드 6건"
@@ -36,7 +37,7 @@
     "SEMICONDUCTOR_CYCLE_UP": {
       "first_detected": "2026-03-20",
       "current_phase": 1,
-      "days_active": 0,
+      "days_active": 3,
       "score": 40,
       "reasons": [
         "키워드 3건"

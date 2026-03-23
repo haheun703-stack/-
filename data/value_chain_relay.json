@@ -1,135 +1,13 @@
 {
-  "generated_at": "2026-03-20 17:45",
-  "fired_sectors": [
-    {
-      "sector": "에너지화학",
-      "etf_code": "139250",
-      "leaders": [
-        {
-          "ticker": "034730",
-          "name": "SK",
-          "change_pct": 4.05,
-          "weight": 15.42
-        },
-        {
-          "ticker": "096770",
-          "name": "SK이노베이션",
-          "change_pct": 3.26,
-          "weight": 10.52
-        }
-      ],
-      "avg_leader_change": 3.65,
-      "candidates": [
-        {
-          "ticker": "298020",
-          "name": "효성티앤씨",
-          "tier": "tier2",
-          "weight": 1.2,
-          "change_pct": -5.53,
-          "gap_pct": 9.18,
-          "score": 44,
-          "score_detail": {
-            "gap": 25,
-            "tech": 19,
-            "flow": 0,
-            "value": 0
-          },
-          "rsi": 51.5,
-          "bb_pos": 0.511,
-          "vol_z": -0.14,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 9.2%",
-            "RSI 52 적정"
-          ]
-        },
-        {
-          "ticker": "004000",
-          "name": "롯데정밀화학",
-          "tier": "tier2",
-          "weight": 0.87,
-          "change_pct": -2.77,
-          "gap_pct": 6.42,
-          "score": 35,
-          "score_detail": {
-            "gap": 20,
-            "tech": 15,
-            "flow": 0,
-            "value": 0
-          },
-          "rsi": 57.6,
-          "bb_pos": 0.704,
-          "vol_z": 0.15,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 6.4%"
-          ]
-        },
-        {
-          "ticker": "011170",
-          "name": "롯데케미칼",
-          "tier": "tier2",
-          "weight": 1.8,
-          "change_pct": 2.18,
-          "gap_pct": 1.47,
-          "score": 34,
-          "score_detail": {
-            "gap": 5,
-            "tech": 19,
-            "flow": 10,
-            "value": 0
-          },
-          "rsi": 56.7,
-          "bb_pos": 0.63,
-          "vol_z": 0.62,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 1.5%"
-          ]
-        },
-        {
-          "ticker": "120110",
-          "name": "코오롱인더",
-          "tier": "tier2",
-          "weight": 1.42,
-          "change_pct": -0.57,
-          "gap_pct": 4.22,
-          "score": 28,
-          "score_detail": {
-            "gap": 13,
-            "tech": 15,
-            "flow": 0,
-            "value": 0
-          },
-          "rsi": 58.6,
-          "bb_pos": 0.683,
-          "vol_z": -0.58,
-          "foreign_5d": 0.0,
-          "inst_5d": 0.0,
-          "f_consec": 0,
-          "target_gap_pct": null,
-          "reasons": [
-            "미반영 4.2%"
-          ]
-        }
-      ]
-    }
-  ],
+  "generated_at": "2026-03-23 20:56",
+  "fired_sectors": [],
   "no_fire_sectors": [
     "반도체",
     "2차전지",
     "IT",
     "헬스케어",
     "바이오",
+    "에너지화학",
     "소프트웨어",
     "방산",
     "조선"

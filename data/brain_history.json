@@ -306,5 +306,18 @@
     "total_invest": 80.5,
     "cash": 19.5,
     "adjustments_count": 5
+  },
+  {
+    "date": "2026-03-23",
+    "regime": "PRE_BEAR",
+    "kospi_regime": "CAUTION",
+    "nw_score": -0.395,
+    "vix": 26.8,
+    "confidence": 0.3,
+    "total_invest": 48.2,
+    "cash": 51.8,
+    "adjustments_count": 12,
+    "contrarian": true,
+    "fear_index": 91.5
   }
 ]

@@ -1,36 +1,36 @@
 {
   "version": "1.0",
   "stage1_asian_risk": {
-    "audjpy_ret_pct": 0.2696,
+    "audjpy_ret_pct": -0.1915,
     "audjpy_signal": "NEUTRAL",
-    "usdcnh_ret_pct": -0.0552,
-    "cnh_signal": "STABLE",
-    "es_futures_ret_pct": -0.1497,
-    "score": -0.02994,
-    "direction": "NEUTRAL"
+    "usdcnh_ret_pct": -0.2204,
+    "cnh_signal": "CNH_STRONG",
+    "es_futures_ret_pct": 1.6026,
+    "score": 0.35,
+    "direction": "BULL"
   },
   "stage2_europe_open": {
-    "dax_30m_ret_pct": 0.0389,
-    "dax_signal": "WEAK_BULL",
-    "eurusd_30m_ret_pct": -0.0232,
+    "dax_30m_ret_pct": -0.163,
+    "dax_signal": "WEAK_BEAR",
+    "eurusd_30m_ret_pct": -0.0347,
     "eurusd_signal": "NEUTRAL",
-    "es_futures_30m_pct": -0.0375,
-    "score": 0.003216,
+    "es_futures_30m_pct": 0.1264,
+    "score": -0.019544,
     "direction": "NEUTRAL"
   },
   "stage3_divergence": {
-    "hyg_vs_futures_gap": -25.818,
-    "tnx_ret_pct": 0.1404,
-    "gold_ret_pct": -0.3302,
+    "hyg_vs_futures_gap": 179.0258,
+    "tnx_ret_pct": 0.2054,
+    "gold_ret_pct": 3.2725,
     "alerts": [],
     "alert_count": 0,
     "invalidate": false,
     "boost": false
   },
   "final_signal": "NEUTRAL",
-  "final_score": -0.8389,
-  "confidence": 0.4194,
+  "final_score": 10.9796,
+  "confidence": 5.4898,
   "direction_match": false,
   "divergence_alert": false,
-  "timestamp": "2026-03-20 17:44:56 KST"
+  "timestamp": "2026-03-23 21:13:50 KST"
 }

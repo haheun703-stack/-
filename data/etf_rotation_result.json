@@ -1,83 +1,83 @@
 {
-  "regime": "CAUTION",
+  "regime": "PRE_BEAR",
   "allocation": {
-    "sector": 8.0,
+    "sector": 0,
     "leverage": 0,
-    "index": 18.0,
-    "gold": 13.5,
+    "index": 0,
+    "gold": 12.5,
     "small_cap": 0,
-    "bonds": 4.5,
-    "dollar": 9.5,
-    "cash": 19.5
+    "bonds": 17.5,
+    "dollar": 11.2,
+    "cash": 51.8
   },
   "sector_result": {
     "buy_candidates": [],
     "sell_signals": [],
     "current_positions": [],
-    "summary": "[섹터 ETF] 매수후보 0종: 없음 | 매도시그널: 없음"
+    "summary": "스킵"
   },
   "leverage_result": {
     "decision": {
-      "signal": "NO_ENTRY",
-      "etf_code": "",
-      "etf_name": "",
-      "multiplier": 0,
-      "confidence": 0,
-      "reason": "CAUTION 레짐 - 레버리지 진입 금지",
-      "risk_note": ""
+      "signal": "BUY",
+      "etf_code": "114800",
+      "etf_name": "KODEX 인버스",
+      "multiplier": -1.0,
+      "confidence": 73.5,
+      "reason": "레짐: PRE_BEAR | US야간: 5등급(strong_negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 인버스",
+      "risk_note": "⚠️ 1.0배 - 변동성 감가 주의"
     },
-    "position_action": "NO_ENTRY",
-    "summary": "[레버리지] 진입대기 (CAUTION) | CAUTION 레짐 - 레버리지 진입 금지"
+    "position_action": "BUY",
+    "summary": "[레버리지] 매수: KODEX 인버스 (신뢰도 74%) | 레짐: PRE_BEAR | US야간: 5등급(strong_negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 인버스"
   },
   "index_result": {
     "targets": [
       {
         "code": "069500",
         "name": "KODEX 200",
-        "target_weight_pct": 12.6,
+        "target_weight_pct": 0.0,
         "current_weight_pct": 0,
-        "action": "BUY",
-        "amount_delta_pct": 12.6,
-        "reason": "신규 진입: 목표 12.6%"
+        "action": "HOLD",
+        "amount_delta_pct": 0.0,
+        "reason": "비중 유지 (차이 0.0%p < 2.0%p)"
       },
       {
         "code": "278530",
         "name": "KODEX MSCI Korea TR",
-        "target_weight_pct": 5.4,
+        "target_weight_pct": 0.0,
         "current_weight_pct": 0,
-        "action": "BUY",
-        "amount_delta_pct": 5.4,
-        "reason": "신규 진입: 목표 5.4%"
+        "action": "HOLD",
+        "amount_delta_pct": 0.0,
+        "reason": "비중 유지 (차이 0.0%p < 2.0%p)"
       }
     ],
-    "total_index_allocation_pct": 18.0,
-    "regime": "CAUTION",
-    "ma_adjustment": 1.0,
-    "summary": "[지수 ETF] CAUTION / 목표 18.0% | KODEX 200: BUY | KODEX MSCI Korea TR: BUY"
+    "total_index_allocation_pct": 0.0,
+    "regime": "PRE_BEAR",
+    "ma_adjustment": 0.6,
+    "summary": "[지수 ETF] PRE_BEAR / 목표 0.0% | 변동 없음"
   },
   "predator_result": {
     "accelerations": [
       {
-        "sector": "IT",
+        "sector": "헬스케어",
         "code": "",
-        "current_rank": 3,
-        "prev_rank": 7,
-        "rank_change": 4,
-        "acceleration_score": 64.12,
-        "ret_5d": 7.12,
-        "ret_20d": 13.76,
-        "ret_60d": 71.9
+        "current_rank": 5,
+        "prev_rank": 15,
+        "rank_change": 10,
+        "acceleration_score": 63.58,
+        "ret_5d": -3.56,
+        "ret_20d": -10.99,
+        "ret_60d": 2.94
       },
       {
-        "sector": "반도체",
+        "sector": "인터넷",
         "code": "",
-        "current_rank": 2,
-        "prev_rank": 5,
-        "rank_change": 3,
-        "acceleration_score": 61.92,
-        "ret_5d": 5.29,
-        "ret_20d": 17.4,
-        "ret_60d": 91.95
+        "current_rank": 4,
+        "prev_rank": 12,
+        "rank_change": 8,
+        "acceleration_score": 61.17,
+        "ret_5d": -3.54,
+        "ret_20d": -3.73,
+        "ret_60d": 6.47
       },
       {
         "sector": "건설",
@@ -85,246 +85,240 @@
         "current_rank": 1,
         "prev_rank": 1,
         "rank_change": 0,
-        "acceleration_score": 61.1,
-        "ret_5d": 9.32,
-        "ret_20d": 18.3,
-        "ret_60d": 68.2
+        "acceleration_score": 59.73,
+        "ret_5d": 7.67,
+        "ret_20d": 11.1,
+        "ret_60d": 69.58
+      },
+      {
+        "sector": "IT",
+        "code": "",
+        "current_rank": 3,
+        "prev_rank": 5,
+        "rank_change": 2,
+        "acceleration_score": 53.71,
+        "ret_5d": -1.18,
+        "ret_20d": -0.88,
+        "ret_60d": 57.65
       },
       {
         "sector": "삼성그룹",
         "code": "",
-        "current_rank": 4,
-        "prev_rank": 6,
-        "rank_change": 2,
-        "acceleration_score": 57.24,
-        "ret_5d": 4.34,
-        "ret_20d": 4.65,
-        "ret_60d": 43.75
+        "current_rank": 6,
+        "prev_rank": 9,
+        "rank_change": 3,
+        "acceleration_score": 52.26,
+        "ret_5d": -1.16,
+        "ret_20d": -7.63,
+        "ret_60d": 34.47
       },
       {
-        "sector": "철강소재",
+        "sector": "반도체",
         "code": "",
-        "current_rank": 9,
-        "prev_rank": 17,
-        "rank_change": 8,
-        "acceleration_score": 56.28,
-        "ret_5d": -2.98,
-        "ret_20d": -4.45,
-        "ret_60d": 12.55
-      },
-      {
-        "sector": "보험",
-        "code": "",
-        "current_rank": 11,
-        "prev_rank": 18,
-        "rank_change": 7,
-        "acceleration_score": 54.56,
-        "ret_5d": -0.37,
-        "ret_20d": -6.04,
-        "ret_60d": 14.56
+        "current_rank": 2,
+        "prev_rank": 2,
+        "rank_change": 0,
+        "acceleration_score": 51.0,
+        "ret_5d": -1.52,
+        "ret_20d": 5.64,
+        "ret_60d": 76.8
       },
       {
         "sector": "현대차그룹",
         "code": "",
         "current_rank": 7,
-        "prev_rank": 8,
-        "rank_change": 1,
-        "acceleration_score": 49.2,
-        "ret_5d": 0.66,
-        "ret_20d": 4.29,
-        "ret_60d": 44.75
-      },
-      {
-        "sector": "인터넷",
-        "code": "",
-        "current_rank": 8,
         "prev_rank": 10,
-        "rank_change": 2,
-        "acceleration_score": 48.67,
-        "ret_5d": -0.8,
-        "ret_20d": 2.28,
-        "ret_60d": 9.67
+        "rank_change": 3,
+        "acceleration_score": 49.48,
+        "ret_5d": -3.21,
+        "ret_20d": -7.29,
+        "ret_60d": 37.13
       },
       {
-        "sector": "게임",
+        "sector": "2차전지",
+        "code": "",
+        "current_rank": 14,
+        "prev_rank": 20,
+        "rank_change": 6,
+        "acceleration_score": 48.05,
+        "ret_5d": -2.23,
+        "ret_20d": -13.4,
+        "ret_60d": 7.82
+      },
+      {
+        "sector": "철강소재",
         "code": "",
         "current_rank": 13,
-        "prev_rank": 18,
-        "rank_change": 5,
-        "acceleration_score": 46.25,
-        "ret_5d": -3.57,
-        "ret_20d": -7.9,
-        "ret_60d": -0.16
-      },
-      {
-        "sector": "금융",
-        "code": "",
-        "current_rank": 12,
-        "prev_rank": 13,
-        "rank_change": 1,
-        "acceleration_score": 45.05,
-        "ret_5d": 2.1,
-        "ret_20d": -5.98,
-        "ret_60d": 31.91
-      },
-      {
-        "sector": "은행",
-        "code": "",
-        "current_rank": 18,
-        "prev_rank": 20,
-        "rank_change": 2,
-        "acceleration_score": 44.28,
-        "ret_5d": 2.94,
-        "ret_20d": -8.87,
-        "ret_60d": 24.76
-      },
-      {
-        "sector": "방산",
-        "code": "",
-        "current_rank": 5,
-        "prev_rank": 3,
-        "rank_change": -2,
-        "acceleration_score": 41.93,
-        "ret_5d": -4.34,
-        "ret_20d": 16.73,
-        "ret_60d": 68.81
-      },
-      {
-        "sector": "증권",
-        "code": "",
-        "current_rank": 6,
-        "prev_rank": 2,
-        "rank_change": -4,
-        "acceleration_score": 40.19,
-        "ret_5d": -0.94,
-        "ret_20d": 0.6,
-        "ret_60d": 82.27
+        "prev_rank": 19,
+        "rank_change": 6,
+        "acceleration_score": 47.26,
+        "ret_5d": -4.46,
+        "ret_20d": -13.68,
+        "ret_60d": 7.93
       },
       {
         "sector": "바이오",
         "code": "",
-        "current_rank": 15,
+        "current_rank": 12,
         "prev_rank": 15,
-        "rank_change": 0,
-        "acceleration_score": 38.18,
-        "ret_5d": -0.18,
-        "ret_20d": -8.19,
-        "ret_60d": -6.75
+        "rank_change": 3,
+        "acceleration_score": 43.3,
+        "ret_5d": -4.2,
+        "ret_20d": -15.06,
+        "ret_60d": -10.16
+      },
+      {
+        "sector": "은행",
+        "code": "",
+        "current_rank": 15,
+        "prev_rank": 18,
+        "rank_change": 3,
+        "acceleration_score": 43.2,
+        "ret_5d": -0.46,
+        "ret_20d": -16.2,
+        "ret_60d": 17.46
+      },
+      {
+        "sector": "보험",
+        "code": "",
+        "current_rank": 10,
+        "prev_rank": 11,
+        "rank_change": 1,
+        "acceleration_score": 43.12,
+        "ret_5d": -2.78,
+        "ret_20d": -12.97,
+        "ret_60d": 10.4
+      },
+      {
+        "sector": "에너지화학",
+        "code": "",
+        "current_rank": 9,
+        "prev_rank": 8,
+        "rank_change": -1,
+        "acceleration_score": 41.88,
+        "ret_5d": -1.36,
+        "ret_20d": -12.33,
+        "ret_60d": 17.4
+      },
+      {
+        "sector": "게임",
+        "code": "",
+        "current_rank": 8,
+        "prev_rank": 7,
+        "rank_change": -1,
+        "acceleration_score": 35.75,
+        "ret_5d": -11.1,
+        "ret_20d": -13.12,
+        "ret_60d": -3.01
+      },
+      {
+        "sector": "금융",
+        "code": "",
+        "current_rank": 19,
+        "prev_rank": 17,
+        "rank_change": -2,
+        "acceleration_score": 32.67,
+        "ret_5d": -2.59,
+        "ret_20d": -16.44,
+        "ret_60d": 23.62
       },
       {
         "sector": "소프트웨어",
         "code": "",
         "current_rank": 16,
-        "prev_rank": 14,
-        "rank_change": -2,
-        "acceleration_score": 33.88,
-        "ret_5d": -1.14,
-        "ret_20d": -7.3,
-        "ret_60d": -0.27
-      },
-      {
-        "sector": "조선",
-        "code": "",
-        "current_rank": 9,
-        "prev_rank": 4,
-        "rank_change": -5,
-        "acceleration_score": 32.01,
-        "ret_5d": -4.8,
-        "ret_20d": 3.16,
-        "ret_60d": 10.88
-      },
-      {
-        "sector": "헬스케어",
-        "code": "",
-        "current_rank": 14,
-        "prev_rank": 9,
-        "rank_change": -5,
-        "acceleration_score": 30.06,
-        "ret_5d": -0.71,
-        "ret_20d": -3.03,
-        "ret_60d": 5.22
+        "prev_rank": 13,
+        "rank_change": -3,
+        "acceleration_score": 27.61,
+        "ret_5d": -6.57,
+        "ret_20d": -13.77,
+        "ret_60d": -4.6
       },
       {
         "sector": "미디어",
         "code": "",
-        "current_rank": 20,
-        "prev_rank": 16,
-        "rank_change": -4,
-        "acceleration_score": 29.7,
-        "ret_5d": -1.96,
-        "ret_20d": -13.74,
-        "ret_60d": -6.43
-      },
-      {
-        "sector": "에너지화학",
-        "code": "",
         "current_rank": 17,
-        "prev_rank": 11,
-        "rank_change": -6,
-        "acceleration_score": 26.66,
-        "ret_5d": -1.41,
-        "ret_20d": -0.12,
-        "ret_60d": 20.33
+        "prev_rank": 14,
+        "rank_change": -3,
+        "acceleration_score": 26.0,
+        "ret_5d": -8.5,
+        "ret_20d": -20.12,
+        "ret_60d": -14.47
       },
       {
-        "sector": "2차전지",
+        "sector": "방산",
         "code": "",
-        "current_rank": 19,
-        "prev_rank": 11,
+        "current_rank": 11,
+        "prev_rank": 3,
         "rank_change": -8,
-        "acceleration_score": 22.28,
-        "ret_5d": -2.46,
-        "ret_20d": -3.43,
-        "ret_60d": 6.83
+        "acceleration_score": 20.29,
+        "ret_5d": -12.54,
+        "ret_20d": -1.3,
+        "ret_60d": 53.96
+      },
+      {
+        "sector": "증권",
+        "code": "",
+        "current_rank": 20,
+        "prev_rank": 4,
+        "rank_change": -16,
+        "acceleration_score": 15.7,
+        "ret_5d": -6.16,
+        "ret_20d": -17.07,
+        "ret_60d": 72.54
+      },
+      {
+        "sector": "조선",
+        "code": "",
+        "current_rank": 18,
+        "prev_rank": 6,
+        "rank_change": -12,
+        "acceleration_score": 12.5,
+        "ret_5d": -10.82,
+        "ret_20d": -16.38,
+        "ret_60d": 4.14
       }
     ],
     "convictions": [
       {
-        "sector": "IT",
+        "sector": "헬스케어",
         "code": "",
         "level": "HIGH",
-        "score": 74.12,
-        "weight_pct": 3.2,
+        "score": 91.58,
+        "weight_pct": 0.0,
         "reasons": [
           "확신 HIGH",
           "가속도 64점",
-          "기관 순매수",
-          "순위 4단계 상승"
+          "외인 순매수",
+          "스텔스 매집",
+          "순위 10단계 급상승"
         ]
       },
       {
-        "sector": "반도체",
+        "sector": "인터넷",
         "code": "",
         "level": "HIGH",
-        "score": 71.92,
-        "weight_pct": 3.2,
+        "score": 71.17,
+        "weight_pct": 0.0,
         "reasons": [
           "확신 HIGH",
-          "가속도 62점",
-          "기관 순매수",
-          "순위 3단계 상승"
+          "가속도 61점",
+          "순위 8단계 급상승"
         ]
       },
       {
         "sector": "건설",
         "code": "",
         "level": "MID",
-        "score": 66.1,
-        "weight_pct": 1.6,
+        "score": 64.72999999999999,
+        "weight_pct": 0.0,
         "reasons": [
           "확신 MID",
-          "가속도 61점",
+          "가속도 60점",
           "기관 순매수"
         ]
       }
     ],
     "event_triggers": [
-      {
-        "triggered": true,
-        "trigger_type": "SURGE",
-        "sector": "건설",
-        "reason": "건설 일간 +5.8% 급등"
-      },
       {
         "triggered": true,
         "trigger_type": "SMART_MONEY",
@@ -336,15 +330,9 @@
         "trigger_type": "SMART_MONEY",
         "sector": "바이오",
         "reason": "바이오 스마트머니 스텔스 매집 감지"
-      },
-      {
-        "triggered": true,
-        "trigger_type": "SMART_MONEY",
-        "sector": "에너지화학",
-        "reason": "에너지화학 스마트머니 스텔스 매집 감지"
       }
     ],
-    "summary": "[프레데터] 가속도 TOP3: IT(64) > 반도체(62) > 건설(61) | 배분: IT HIGH(3.2%) | 반도체 HIGH(3.2%) | 건설 MID(1.6%) | 트리거: 4건 발동"
+    "summary": "[프레데터] 가속도 TOP3: 헬스케어(64) > 인터넷(61) > 건설(60) | 배분: 헬스케어 HIGH(0.0%) | 인터넷 HIGH(0.0%) | 건설 MID(0.0%) | 트리거: 2건 발동"
   },
   "passive_results": {
     "gold": {
@@ -352,8 +340,8 @@
       "signal": "BUY",
       "etf_code": "132030",
       "etf_name": "KODEX 골드선물(H)",
-      "allocation_pct": 13.5,
-      "reason": "금 ETF 14% (CAUTION)"
+      "allocation_pct": 12.5,
+      "reason": "금 ETF 12% (PRE_BEAR)"
     },
     "small_cap": {
       "arm": "small_cap",
@@ -361,23 +349,23 @@
       "etf_code": "229200",
       "etf_name": "KODEX 코스닥150",
       "allocation_pct": 0,
-      "reason": "소형주 ETF 비중 0% (CAUTION)"
+      "reason": "소형주 ETF 비중 0% (PRE_BEAR)"
     },
     "bonds": {
       "arm": "bonds",
       "signal": "BUY",
       "etf_code": "114820",
       "etf_name": "KODEX 국고채10년",
-      "allocation_pct": 4.5,
-      "reason": "채권 ETF 4% (CAUTION)"
+      "allocation_pct": 17.5,
+      "reason": "채권 ETF 18% (PRE_BEAR)"
     },
     "dollar": {
       "arm": "dollar",
       "signal": "BUY",
       "etf_code": "261240",
       "etf_name": "KODEX 미국달러선물",
-      "allocation_pct": 9.5,
-      "reason": "달러 ETF 10% (CAUTION)"
+      "allocation_pct": 11.2,
+      "reason": "달러 ETF 11% (PRE_BEAR)"
     }
   },
   "risk_check": {
@@ -388,83 +376,74 @@
   },
   "order_queue": [
     {
-      "axis": "index",
-      "code": "069500",
-      "name": "KODEX 200",
+      "axis": "leverage",
+      "code": "114800",
+      "name": "KODEX 인버스",
       "action": "BUY",
-      "target_weight_pct": 12.6,
-      "reason": "신규 진입: 목표 12.6%",
-      "priority": 3
-    },
-    {
-      "axis": "index",
-      "code": "278530",
-      "name": "KODEX MSCI Korea TR",
-      "action": "BUY",
-      "target_weight_pct": 5.4,
-      "reason": "신규 진입: 목표 5.4%",
-      "priority": 3
+      "target_weight_pct": 0,
+      "reason": "레짐: PRE_BEAR | US야간: 5등급(strong_negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 인버스",
+      "priority": 2
     }
   ],
-  "timestamp": "2026-03-20T17:51:36.461253",
+  "timestamp": "2026-03-23T20:54:05.741309",
   "brain": {
-    "timestamp": "2026-03-20T17:51:35.411816",
-    "confidence": 0.65,
+    "timestamp": "2026-03-23T20:54:03.080797",
+    "confidence": 0.3,
     "adjustments": [
-      "VIX 보정: 24.1 (ELEVATED) → 투자비중 ×0.90",
+      "레짐 보정: CAUTION→PRE_BEAR (US=STRONG_BEAR, NW=-0.395)",
+      "VIX 보정: 26.8 (HIGH) → 투자비중 ×0.75",
+      "NW 부정(-0.395): 레버리지 30% 축소",
+      "2D 선제방어: credit_z=0.3, MOVE_z=3.9",
       "COT: S&P 매도 포지셔닝 → 리스크ARM -5%p",
-      "충격 보정: LIQUIDITY (확신도 25%)",
-      "SHIELD: S1: 방산 22.3% (한도 30%)",
-      "SHIELD: S1: 에너지화학 20.8% (한도 30%)"
+      "충격 보정: RATE (확신도 65%)",
+      "SHIELD: S1: 반도체 38.5% (한도 30%)",
+      "SHIELD: S1: 방산 27.6% (한도 30%)",
+      "SHIELD: S2: LEVEL_3 (MDD -27.7%) 전량 현금화",
+      "SHIELD: S3: 3개 동시하락 (avg -17.4%)",
+      "일일 변경 ±20%p 제한 적용",
+      "CONTRARIAN: VIX 26.8 + EWY 5일 -5.5% = 과매도 (Fear=92)"
     ],
     "warnings": [
-      "SHIELD 방어 등급: ORANGE"
+      "SHIELD 방어 등급: RED",
+      "레짐 변경 감지: CAUTION→PRE_BEAR. 2일 확인 대기 중. 배분 동결."
     ]
   },
   "order_queue_original": [
     {
-      "axis": "index",
-      "code": "069500",
-      "name": "KODEX 200",
+      "axis": "leverage",
+      "code": "114800",
+      "name": "KODEX 인버스",
       "action": "BUY",
-      "target_weight_pct": 12.6,
-      "reason": "신규 진입: 목표 12.6%",
-      "priority": 3
-    },
-    {
-      "axis": "index",
-      "code": "278530",
-      "name": "KODEX MSCI Korea TR",
-      "action": "BUY",
-      "target_weight_pct": 5.4,
-      "reason": "신규 진입: 목표 5.4%",
-      "priority": 3
+      "target_weight_pct": 0,
+      "reason": "레짐: PRE_BEAR | US야간: 5등급(strong_negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 인버스",
+      "priority": 2
     }
   ],
   "ai_filter": {
     "stats": {
-      "total": 2,
-      "pass": 2,
+      "total": 1,
+      "pass": 1,
       "kill": 0,
       "hold": 0
     },
     "killed": [],
     "held": [],
     "warnings": [
-      "이란 지정학 긴장 지속 시 VIX 추가 상승 가능성 - 섹터 ETF 신규 매수는 당분간 보류 권장",
-      "유가 $120 돌파로 환율 1,500원 근접 - 수입 의존 섹터(IT부품, 화학원료) 수익성 압박 주의",
-      "AI 디스럽션 우려로 기술주 약세 지속 - 반도체/IT 섹터 ETF 매수 시 타이밍 신중 검토 필요"
+      "환율 1,500원 돌파로 수입 인플레이션 압력 증가, 한은 금리 인상 가능성 주의",
+      "유가 $120 고점에서 급반락 리스크 존재 - 인버스 포지션은 단기 방어용으로 제한 권장",
+      "AI 디스럽션 우려로 기술주 약세 지속 중이나, 밸류 로테이션(에너지/방산/조선)은 강세 - 섹터 다각화 검토 필요"
     ],
-    "market_assessment": "지정학 리스크와 유가 급등으로 변동성 확대, 다만 가치주 로테이션과 인플레 둔화로 KOSPI 5,781 안정세 유지",
-    "risk_level": "medium"
+    "market_assessment": "중동 지정학 리스크 고조, 유가 $120 돌파, VIX 8% 상승으로 BEAR 레짐 인버스 포지션 타당",
+    "risk_level": "high"
   },
   "leading_regime": {
-    "effective_regime": "CAUTION",
-    "warning_score": -10,
-    "original_regime": "CAUTION",
-    "override_reason": "보정 없음",
+    "effective_regime": "BEAR",
+    "warning_score": 55,
+    "original_regime": "BEAR",
+    "override_reason": "원본 레짐(BEAR)이 이미 보정보다 하위 → 유지",
     "score_breakdown": {
-      "l2_bullish": -10
+      "us_grade_5": 40,
+      "ewy_drop_5pct": 15
     }
   }
 }

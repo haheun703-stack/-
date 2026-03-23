@@ -2,10 +2,10 @@
   "initial_capital": 40345724,
   "peak_equity": 40863823,
   "peak_date": "2026-03-20",
-  "current_equity": 40863823,
-  "current_mdd_pct": 0.0,
-  "max_mdd_pct": 0.0,
-  "max_mdd_date": "",
+  "current_equity": 29560759,
+  "current_mdd_pct": -27.66,
+  "max_mdd_pct": -27.66,
+  "max_mdd_date": "2026-03-23",
   "daily_log": [
     {
       "date": "2026-03-07",
@@ -46,6 +46,11 @@
       "date": "2026-03-20",
       "equity": 40863823,
       "mdd_pct": 0.0
+    },
+    {
+      "date": "2026-03-23",
+      "equity": 29560759,
+      "mdd_pct": -27.66
     }
   ],
   "alert_history": []

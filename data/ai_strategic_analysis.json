@@ -1,95 +1,113 @@
 {
-  "analysis_date": "2026-03-22",
+  "analysis_date": "2026-03-23",
   "regime": "방어",
-  "regime_confidence": 0.8,
-  "regime_reasoning": "환율 1500원 돌파와 중동 지정학 리스크로 유가 급등, Fed 금리 동결 장기화로 글로벌 유동성 축소. 미국 반도체 ETF 50일선 이탈로 기술주 전반 약세 신호.",
+  "regime_confidence": 0.85,
+  "regime_reasoning": "중동 지정학 리스크 급격히 상승하며 호르무즈 해협 폐쇄 위협까지 부상. 환율 1,500원 돌파와 외국인 자금 이탈 가속화로 시장 극도의 불안정 상태.",
   "industry_thesis": [
     {
       "sector": "방산",
-      "thesis": "중동 지정학 리스크 확대로 글로벌 방산 수요 급증, K-방산 수출 구조 개선 논의 진행",
+      "thesis": "중동 긴장 고조로 방산 수요 폭증 확실시. K9 자주포 등 한국 방산 제품 긴급 발주 증가 예상.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 9,
       "catalysts": [
-        "이란 리스크",
-        "글로벌 방산비 증가"
+        "중동 분쟁 확대",
+        "NATO 방산비 증액"
       ],
       "risks": [
-        "평화 협상 시 급락"
-      ],
-      "relay_source": "방산조선",
-      "relay_verified": true
-    },
-    {
-      "sector": "원전/전력",
-      "thesis": "유가 100달러 시대 대체 에너지 주목, 원전 르네상스 지속",
-      "demand_supply": "공급부족",
-      "asp_trend": "상승",
-      "global_alignment": "동조",
-      "confidence": 8,
-      "catalysts": [
-        "에너지 안보",
-        "SMR 투자 확대"
-      ],
-      "risks": [
-        "건설 지연"
+        "단기 과열 가능성"
       ],
       "relay_source": null,
       "relay_verified": false
     },
     {
-      "sector": "기계",
-      "thesis": "방산 섹터 후행주로 방산 장비 및 부품 수요 확대 예상",
+      "sector": "정유/에너지",
+      "thesis": "유가 110달러 돌파 전망. 호르무즈 해협 리스크로 정유사 재고자산 가치 상승과 마진 개선 동시 진행.",
+      "demand_supply": "공급부족",
+      "asp_trend": "상승",
+      "global_alignment": "동조",
+      "confidence": 8,
+      "catalysts": [
+        "유가 급등",
+        "정제마진 개선"
+      ],
+      "risks": [
+        "수요 둔화 가능성"
+      ],
+      "relay_source": null,
+      "relay_verified": false
+    },
+    {
+      "sector": "조선",
+      "thesis": "LNG선 발주 붐 지속. 중동 리스크로 에너지 운반선 수요 급증하나 글로벌 경기 둔화 리스크 상존.",
       "demand_supply": "균형",
       "asp_trend": "횡보",
       "global_alignment": "독립",
       "confidence": 7,
       "catalysts": [
-        "방산 수주 증가",
-        "환율 효과"
+        "LNG선 수주",
+        "에너지 운반선 수요"
       ],
       "risks": [
-        "원자재 가격 상승"
+        "글로벌 경기 둔화"
       ],
       "relay_source": "방산조선",
       "relay_verified": true
+    },
+    {
+      "sector": "반도체",
+      "thesis": "AI 디스럽션 우려로 단기 조정 불가피하나 중장기 AI 인프라 수요는 오히려 확대될 전망.",
+      "demand_supply": "균형",
+      "asp_trend": "하락",
+      "global_alignment": "역행",
+      "confidence": 5,
+      "catalysts": [
+        "AI 인프라 투자"
+      ],
+      "risks": [
+        "밸류에이션 재평가",
+        "외국인 이탈"
+      ],
+      "relay_source": null,
+      "relay_verified": false
     }
   ],
   "sector_priority": {
     "attack": [
       "방산",
-      "원전/전력"
+      "정유/에너지"
     ],
     "watch": [
-      "기계",
-      "조선"
+      "조선",
+      "유틸리티"
     ],
     "avoid": [
       "반도체",
-      "IT",
-      "금융",
-      "전기차/배터리"
+      "IT서비스",
+      "화학",
+      "항공"
     ]
   },
   "max_new_buys": 2,
   "risk_factors": [
-    "환율 1500원 돌파로 통화정책 불확실성",
-    "유가 100달러 진입 가능성",
-    "AI disruption으로 기술주 밸류에이션 재평가"
+    "호르무즈 해협 봉쇄 위협",
+    "환율 1,500원 돌파",
+    "외국인 대규모 이탈",
+    "AI 디스럽션 우려"
   ],
-  "cash_reserve_suggestion": 40,
-  "global_summary": "Fed 금리 동결 장기화와 중동 리스크로 안전자산 선호 강화. 에너지와 방산 중심의 가치주 로테이션 진행.",
+  "cash_reserve_suggestion": 60,
+  "global_summary": "미국 나스닥 -3.38% 급락하며 기술주 밸류에이션 재평가 진행. VIX 30 근접하며 극도의 공포 상태.",
   "relay_alerts": [
     {
       "pattern": "방산조선→기계",
-      "status": "발화",
+      "status": "대기",
       "action": "매수 준비"
     },
     {
-      "pattern": "반도체→IT서비스",
-      "status": "대기",
-      "action": "무시"
+      "pattern": "증권→손해보험",
+      "status": "발화",
+      "action": "주의"
     }
   ]
 }

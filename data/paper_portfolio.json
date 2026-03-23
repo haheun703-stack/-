@@ -52,6 +52,12 @@
       "equity": 15000000,
       "capital": 15000000,
       "positions": 0
+    },
+    {
+      "date": "2026-03-23",
+      "equity": 15000000,
+      "capital": 15000000,
+      "positions": 0
     }
   ],
   "cooldown_until": "",
@@ -64,5 +70,5 @@
     "max_equity": 15000000,
     "mdd": 0.0
   },
-  "updated": "2026-03-20 18:01"
+  "updated": "2026-03-23 21:15"
 }

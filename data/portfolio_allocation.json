@@ -1,6 +1,6 @@
 {
-  "date": "2026-03-20",
-  "generated_at": "2026-03-20 18:00",
+  "date": "2026-03-23",
+  "generated_at": "2026-03-23 21:13",
   "regime": "CAUTION",
   "macro_grade": "보통",
   "position_multiplier": 1.0,
@@ -31,9 +31,9 @@
       "count": 1,
       "stocks": [
         {
-          "ticker": "204610",
-          "name": "티쓰리",
-          "score": 20,
+          "ticker": "095660",
+          "name": "네오위즈",
+          "score": 22,
           "source": "DART_자기주식취득"
         }
       ]
@@ -48,8 +48,8 @@
       "count": 1,
       "stocks": [
         {
-          "ticker": "089860",
-          "name": "롯데렌탈",
+          "ticker": "139130",
+          "name": "iM금융지주",
           "score": 64.0,
           "source": "눌림목_매수대기"
         }

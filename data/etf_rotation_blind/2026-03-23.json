@@ -1,0 +1,42 @@
+{
+  "date": "2026-03-23",
+  "timestamp": "2026-03-23 20:54:22",
+  "regime": "BEAR",
+  "effective_regime": "BEAR",
+  "warning_score": 55,
+  "kospi_close": 5405.75,
+  "kospi_ma20_above": false,
+  "kospi_ma60_above": true,
+  "us_overnight_grade": 5,
+  "us_overnight_signal": "strong_negative",
+  "momentum_sectors": 20,
+  "smart_money_count": 3,
+  "supply_count": 25,
+  "five_axis_score": 65.0,
+  "allocation": {
+    "sector": 0,
+    "leverage": 0,
+    "index": 0,
+    "gold": 12.5,
+    "small_cap": 0,
+    "bonds": 17.5,
+    "dollar": 11.2,
+    "cash": 51.8
+  },
+  "order_queue": [
+    {
+      "axis": "leverage",
+      "code": "114800",
+      "name": "KODEX 인버스",
+      "action": "BUY",
+      "target_weight_pct": 0,
+      "reason": "레짐: PRE_BEAR | US야간: 5등급(strong_negative) | 5축: 65점 | 🎯 섹터정밀: KODEX 인버스",
+      "priority": 2
+    }
+  ],
+  "sector_candidates": [],
+  "leverage_action": null,
+  "index_action": null,
+  "risk_level": null,
+  "risk_summary": null
+}

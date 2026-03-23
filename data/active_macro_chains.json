@@ -1,0 +1,299 @@
+{
+  "timestamp": "2026-03-23T21:14:41.575246",
+  "date": "2026-03-23",
+  "active_count": 5,
+  "active_chains": [
+    {
+      "id": "OIL_UP",
+      "name": "유가 상승",
+      "indicator": "oil",
+      "current_value": {
+        "ret_1d": 3.47,
+        "ret_5d": 1.28,
+        "signal": "demand_up",
+        "above_sma20": true,
+        "price": 97.47,
+        "trend": "상승"
+      },
+      "condition": "ret_5d >= 5 OR ret_1d >= 3",
+      "beneficiaries": [
+        {
+          "type": "stock",
+          "tickers": [
+            "010950:S-Oil",
+            "078930:GS",
+            "267250:HD현대"
+          ],
+          "reason": "정유 마진 확대",
+          "impact": "STRONG_POSITIVE"
+        },
+        {
+          "type": "etf",
+          "ticker": "117460",
+          "name": "KODEX 에너지화학",
+          "reason": "에너지 섹터 직접 수혜",
+          "impact": "STRONG_POSITIVE"
+        },
+        {
+          "type": "sector",
+          "sector": "에너지",
+          "reason": "유가 상승 수혜"
+        }
+      ],
+      "victims": [
+        {
+          "type": "sector",
+          "sector": "항공",
+          "tickers": [
+            "003490:대한항공",
+            "020560:아시아나"
+          ],
+          "reason": "연료비 폭탄",
+          "impact": "STRONG_NEGATIVE"
+        },
+        {
+          "type": "sector",
+          "sector": "화학",
+          "reason": "원가 상승"
+        }
+      ]
+    },
+    {
+      "id": "GOLD_CRASH_WITH_VIX_HIGH",
+      "name": "금 투매 + 공포 (마진콜 패닉)",
+      "indicator": "gold+vix",
+      "current_value": {
+        "gold": {
+          "ret_1d": -3.06,
+          "ret_5d": -10.3,
+          "signal": "risk_on",
+          "above_sma20": false,
+          "price": 4550
+        },
+        "vix": {
+          "level": 26.8,
+          "zscore": 1.94,
+          "status": "공포"
+        }
+      },
+      "condition": "gold.ret_5d <= -5 AND vix.level >= 25",
+      "beneficiaries": [
+        {
+          "type": "etf",
+          "ticker": "132030",
+          "name": "KODEX 골드선물(H)",
+          "reason": "패닉 투매 후 금 반등 매수 기회",
+          "impact": "STRONG_POSITIVE"
+        },
+        {
+          "type": "etf",
+          "ticker": "252670",
+          "name": "KODEX 200선물인버스2X",
+          "reason": "마진콜 확산 → 시장 추가 하락 가능",
+          "impact": "POSITIVE"
+        },
+        {
+          "type": "warning",
+          "message": "금까지 투매 = 마진콜 패닉. GOLD_DOWN의 '리스크온' 해석은 틀림. 현금 확보 우선"
+        }
+      ],
+      "victims": [
+        {
+          "type": "sector",
+          "sector": "성장주",
+          "reason": "유동성 경색 → 성장주 추가 타격"
+        },
+        {
+          "type": "sector",
+          "sector": "소형주",
+          "reason": "마진콜 패닉 → 소형주 투매"
+        },
+        {
+          "type": "warning",
+          "message": "금 -5%+ & VIX 25+ = 패닉 셀링(마진콜). 리스크온이 아님!"
+        }
+      ]
+    },
+    {
+      "id": "COPPER_CRASH",
+      "name": "구리 급락 (경기 침체 시그널)",
+      "indicator": "copper",
+      "current_value": {
+        "ret_1d": -4.56,
+        "ret_5d": -9.57,
+        "signal": "contraction",
+        "above_sma20": false,
+        "price": 4.85
+      },
+      "condition": "ret_5d <= -8",
+      "beneficiaries": [
+        {
+          "type": "etf",
+          "ticker": "252670",
+          "name": "KODEX 200선물인버스2X",
+          "reason": "경기 침체 시그널 → 시장 하락 베팅"
+        },
+        {
+          "type": "etf",
+          "ticker": "132030",
+          "name": "KODEX 골드선물(H)",
+          "reason": "안전자산 수요"
+        }
+      ],
+      "victims": [
+        {
+          "type": "sector",
+          "sector": "2차전지",
+          "reason": "수요 둔화 시그널"
+        },
+        {
+          "type": "sector",
+          "sector": "철강",
+          "reason": "원자재 수요 감소"
+        },
+        {
+          "type": "warning",
+          "message": "구리 급락 = 글로벌 경기 둔화 선행 지표"
+        }
+      ]
+    },
+    {
+      "id": "VIX_SPIKE",
+      "name": "VIX 급등 (공포)",
+      "indicator": "vix",
+      "current_value": {
+        "level": 26.8,
+        "zscore": 1.94,
+        "status": "공포"
+      },
+      "condition": "level >= 25",
+      "beneficiaries": [
+        {
+          "type": "etf",
+          "ticker": "132030",
+          "name": "KODEX 골드선물(H)",
+          "reason": "안전자산 수요"
+        },
+        {
+          "type": "etf",
+          "ticker": "252670",
+          "name": "KODEX 200선물인버스2X",
+          "reason": "시장 하락 헤지"
+        },
+        {
+          "type": "etf",
+          "ticker": "261240",
+          "name": "KODEX 미국달러선물",
+          "reason": "달러 강세 기대"
+        }
+      ],
+      "victims": [
+        {
+          "type": "sector",
+          "sector": "소형주",
+          "reason": "유동성 축소 → 소형주 타격"
+        },
+        {
+          "type": "sector",
+          "sector": "레버리지",
+          "reason": "변동성 리스크 확대"
+        }
+      ]
+    },
+    {
+      "id": "USD_KRW_DOWN",
+      "name": "원화 강세 (환율 하락)",
+      "indicator": "usd_krw",
+      "current_value": {
+        "level": 0,
+        "ret_5d": -0.393,
+        "proxy": true
+      },
+      "condition": "ret_5d <= -1.5 OR level <= 1300",
+      "beneficiaries": [
+        {
+          "type": "sector",
+          "sector": "내수",
+          "reason": "수입 원가 하락"
+        },
+        {
+          "type": "warning",
+          "message": "외국인 유입 가속 가능성 — 원화 강세 → 환차익 기대 매수"
+        }
+      ],
+      "victims": [
+        {
+          "type": "stock",
+          "tickers": [
+            "005380:현대차",
+            "000270:기아"
+          ],
+          "reason": "수출기업 환차손"
+        }
+      ]
+    }
+  ],
+  "macro_snapshot": {
+    "gold": {
+      "ret_1d": -3.06,
+      "ret_5d": -10.3,
+      "signal": "risk_on",
+      "above_sma20": false,
+      "price": 4550
+    },
+    "oil": {
+      "ret_1d": 3.47,
+      "ret_5d": 1.28,
+      "signal": "demand_up",
+      "above_sma20": true,
+      "price": 97.47,
+      "trend": "상승"
+    },
+    "copper": {
+      "ret_1d": -4.56,
+      "ret_5d": -9.57,
+      "signal": "contraction",
+      "above_sma20": false,
+      "price": 4.85
+    },
+    "silver": {
+      "ret_1d": -6.33,
+      "ret_5d": -15.37,
+      "signal": "down",
+      "above_sma20": false
+    },
+    "natgas": {
+      "ret_1d": -1.35,
+      "ret_5d": -1.98,
+      "signal": "demand_down",
+      "above_sma20": true
+    },
+    "uranium": {
+      "ret_1d": -3.79,
+      "ret_5d": -5.78,
+      "signal": "demand_down",
+      "above_sma20": false
+    },
+    "vix": {
+      "level": 26.8,
+      "zscore": 1.94,
+      "status": "공포"
+    },
+    "global_flow": {
+      "risk_appetite": "NEUTRAL",
+      "money_direction": "보합",
+      "em_flow": "신흥국 보합",
+      "dollar_trend": "강세"
+    },
+    "usd_krw": {
+      "level": 0,
+      "ret_5d": -0.393,
+      "proxy": true
+    },
+    "us_10y": {
+      "level": 0,
+      "ret_5d": 0,
+      "proxy": true
+    }
+  }
+}

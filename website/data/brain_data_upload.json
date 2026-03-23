@@ -1,102 +1,104 @@
 {
   "strategic": {
-    "analysis_date": "2026-03-16",
+    "analysis_date": "2026-03-23",
     "regime": "방어",
     "regime_confidence": 0.85,
-    "regime_reasoning": "중동 전쟁으로 유가 $100 돌파, Fed 금리 불확실성 증대, VIX 상승으로 글로벌 리스크오프 심화. 한국 증시는 외인 이탈 가속화 예상.",
+    "regime_reasoning": "중동 지정학 리스크 급격히 상승하며 호르무즈 해협 폐쇄 위협까지 부상. 환율 1,500원 돌파와 외국인 자금 이탈 가속화로 시장 극도의 불안정 상태.",
     "industry_thesis": [
       {
-        "sector": "에너지/정유",
-        "thesis": "중동 전쟁 장기화로 원유 공급 차질 현실화. 정제마진 확대로 직접 수혜.",
+        "sector": "방산",
+        "thesis": "중동 긴장 고조로 방산 수요 폭증 확실시. K9 자주포 등 한국 방산 제품 긴급 발주 증가 예상.",
         "demand_supply": "공급부족",
         "asp_trend": "상승",
         "global_alignment": "동조",
         "confidence": 9,
         "catalysts": [
-          "유가 $100 돌파",
-          "정제마진 강세"
+          "중동 분쟁 확대",
+          "NATO 방산비 증액"
         ],
         "risks": [
-          "전쟁 조기 종료"
+          "단기 과열 가능성"
         ],
-        "relay_source": "없음",
+        "relay_source": null,
         "relay_verified": false
       },
       {
-        "sector": "원전/전력",
-        "thesis": "미국 SMR 승인과 K-원전 900조 시장 진출. AI 데이터센터 전력 수요 폭증.",
+        "sector": "정유/에너지",
+        "thesis": "유가 110달러 돌파 전망. 호르무즈 해협 리스크로 정유사 재고자산 가치 상승과 마진 개선 동시 진행.",
         "demand_supply": "공급부족",
         "asp_trend": "상승",
         "global_alignment": "동조",
         "confidence": 8,
         "catalysts": [
-          "SMR 승인",
-          "AI 전력 수요"
+          "유가 급등",
+          "정제마진 개선"
         ],
         "risks": [
-          "프로젝트 지연"
+          "수요 둔화 가능성"
         ],
-        "relay_source": "없음",
+        "relay_source": null,
         "relay_verified": false
       },
       {
-        "sector": "방산",
-        "thesis": "중동 전쟁 장기화로 방산 수요 급증. K-방산 수출 모멘텀 강화.",
-        "demand_supply": "공급부족",
-        "asp_trend": "상승",
-        "global_alignment": "동조",
-        "confidence": 8,
+        "sector": "조선",
+        "thesis": "LNG선 발주 붐 지속. 중동 리스크로 에너지 운반선 수요 급증하나 글로벌 경기 둔화 리스크 상존.",
+        "demand_supply": "균형",
+        "asp_trend": "횡보",
+        "global_alignment": "독립",
+        "confidence": 7,
         "catalysts": [
-          "전쟁 장기화",
-          "수출 확대"
+          "LNG선 수주",
+          "에너지 운반선 수요"
         ],
         "risks": [
-          "평화 협상"
+          "글로벌 경기 둔화"
         ],
-        "relay_source": "없음",
-        "relay_verified": false
+        "relay_source": "방산조선",
+        "relay_verified": true
       },
       {
         "sector": "반도체",
-        "thesis": "Fed 불확실성과 나스닥 급락으로 단기 조정. 구조적 AI 수요는 여전히 유효.",
+        "thesis": "AI 디스럽션 우려로 단기 조정 불가피하나 중장기 AI 인프라 수요는 오히려 확대될 전망.",
         "demand_supply": "균형",
         "asp_trend": "하락",
-        "global_alignment": "동조",
-        "confidence": 4,
+        "global_alignment": "역행",
+        "confidence": 5,
         "catalysts": [
-          "AI 수요"
+          "AI 인프라 투자"
         ],
         "risks": [
-          "금리 인상",
-          "재고 증가"
+          "밸류에이션 재평가",
+          "외국인 이탈"
         ],
-        "relay_source": "없음",
+        "relay_source": null,
         "relay_verified": false
       }
     ],
     "sector_priority": {
       "attack": [
-        "에너지/정유",
-        "원전/전력"
+        "방산",
+        "정유/에너지"
       ],
       "watch": [
-        "방산",
-        "조선"
+        "조선",
+        "유틸리티"
       ],
       "avoid": [
         "반도체",
-        "2차전지",
-        "IT/소프트웨어"
+        "IT서비스",
+        "화학",
+        "항공"
       ]
     },
     "max_new_buys": 2,
     "risk_factors": [
-      "FOMC 매파적 결정",
-      "중동 전쟁 확전",
-      "유가 $100 돌파"
+      "호르무즈 해협 봉쇄 위협",
+      "환율 1,500원 돌파",
+      "외국인 대규모 이탈",
+      "AI 디스럽션 우려"
     ],
-    "cash_reserve_suggestion": 40,
-    "global_summary": "중동 전쟁으로 스태그플레이션 우려 확산. Fed 금리 불확실성에 나스닥 -2.47% 급락으로 기술주 전반 약세.",
+    "cash_reserve_suggestion": 60,
+    "global_summary": "미국 나스닥 -3.38% 급락하며 기술주 밸류에이션 재평가 진행. VIX 30 근접하며 극도의 공포 상태.",
     "relay_alerts": [
       {
         "pattern": "방산조선→기계",
@@ -104,232 +106,376 @@
         "action": "매수 준비"
       },
       {
-        "pattern": "반도체→IT서비스",
-        "status": "대기",
-        "action": "무시"
+        "pattern": "증권→손해보험",
+        "status": "발화",
+        "action": "주의"
       }
     ]
   },
   "sector_focus": {
-    "analysis_date": "2026-03-16",
+    "analysis_date": "2026-03-23",
     "focus_sectors": [
       {
-        "sector": "방산",
+        "sector": "건설",
         "entry_timing": "즉시진입",
-        "size_weight": 1.0,
-        "thesis_alignment": "강한일치",
-        "momentum_rank": 3,
-        "momentum_score": 77.1,
-        "rsi": 57.9,
+        "size_weight": 1.5,
+        "thesis_alignment": "thesis없음",
+        "momentum_rank": 1,
+        "momentum_score": 95.3,
+        "rsi": 59.9,
         "smart_money": false,
         "relay_source": null,
-        "reasoning": "중동 전쟁 장기화 thesis(확신 8/10)와 모멘텀 3위(77.1점) 일치. ADX 상승+RSI 건전. 테마 BUY 신호"
+        "reasoning": "모멘텀 압도적 1위이나 thesis 부재로 구조적 근거 불명확. ADX 34.8 강세 지속 중이므로 단기 모멘텀 추종 전략으로 소량 진입"
       },
       {
-        "sector": "조선",
-        "entry_timing": "즉시진입",
-        "size_weight": 0.8,
-        "thesis_alignment": "약한일치",
-        "momentum_rank": 6,
-        "momentum_score": 62.6,
-        "rsi": 50.0,
-        "smart_money": true,
-        "relay_source": "방산",
-        "reasoning": "방산 모멘텀 지속 시 릴레이 타겟(승률 74.1%, 2일 지연). Smart Money 유입 중"
+        "sector": "방산",
+        "entry_timing": "눌림대기",
+        "size_weight": 1.0,
+        "thesis_alignment": "불일치",
+        "momentum_rank": 11,
+        "momentum_score": 48.4,
+        "rsi": 43.4,
+        "smart_money": false,
+        "relay_source": null,
+        "reasoning": "thesis 확신도 9/10 최고이나 모멘텀 11위로 괴리 심각. 외인/기관 모두 순매도. RSI 43.4로 과매도 구간이므로 반등 눌림목 대기 후 진입"
       },
       {
         "sector": "에너지화학",
-        "entry_timing": "눌림대기",
-        "size_weight": 0.7,
-        "thesis_alignment": "불일치",
-        "momentum_rank": 8,
-        "momentum_score": 50.5,
-        "rsi": 44.6,
+        "entry_timing": "즉시진입",
+        "size_weight": 1.2,
+        "thesis_alignment": "약한일치",
+        "momentum_rank": 9,
+        "momentum_score": 51.1,
+        "rsi": 43.8,
         "smart_money": false,
         "relay_source": null,
-        "reasoning": "원유 공급 차질 thesis(확신 9/10)지만 모멘텀 8위+외인/기관 매도. BB 16.1%로 저점권 접근 중"
+        "reasoning": "정유/에너지 thesis(확신 8/10)와 중위권 모멘텀 일치. 기관 +387 유입. RSI 43.8 저평가 구간이므로 즉시 진입 가능"
+      },
+      {
+        "sector": "조선",
+        "entry_timing": "관망",
+        "size_weight": 0.5,
+        "thesis_alignment": "약한일치",
+        "momentum_rank": 18,
+        "momentum_score": 29.7,
+        "rsi": 36.6,
+        "smart_money": false,
+        "relay_source": null,
+        "reasoning": "thesis 확신 7/10이나 모멘텀 하위권(18위). ADX 14.3으로 추세 부재. 관찰 섹터이나 릴레이 소스 역할 불가능하므로 관망"
+      },
+      {
+        "sector": "기계",
+        "entry_timing": "매수준비",
+        "size_weight": 0.8,
+        "thesis_alignment": "강한일치",
+        "momentum_rank": null,
+        "momentum_score": null,
+        "rsi": null,
+        "smart_money": false,
+        "relay_source": "방산조선",
+        "reasoning": "방산조선→기계 릴레이 '대기→매수 준비' 단계(승률 74.1%, 지연 2일). 소스 섹터 모멘텀 약하나 1~2일 후 타겟 진입 준비"
       }
     ],
     "screening_boost": [
+      "건설",
+      "에너지화학",
       "방산",
-      "조선"
+      "기계"
     ],
     "screening_suppress": [
       "반도체",
       "IT",
-      "건설",
-      "2차전지",
-      "소프트웨어"
+      "인터넷",
+      "삼성그룹",
+      "헬스케어",
+      "증권"
     ],
     "sector_warnings": [
       {
         "sector": "반도체",
-        "warning": "thesis 확신도 4/10 + 모멘텀 2위 괴리. Fed 불확실성으로 단기 조정 국면. 외인 -7701억 매도",
-        "severity": "high"
-      },
-      {
-        "sector": "건설",
-        "warning": "모멘텀 1위(90.0점)이나 thesis 부재. ADX 하락 전환+외인/기관 동반 매도로 과열 후 조정 가능성",
+        "warning": "thesis 회피 섹터임에도 모멘텀 2위. AI 디스럽션 우려 속 외인/기관 대량 순매도(-4.7만주) 진행 중. 추가 조정 가능성 높음",
         "severity": "high"
       },
       {
         "sector": "IT",
-        "warning": "반도체 릴레이 타겟이나 소스 조정 국면. 외인 -8077억 매도+ADX 24.6 약세. 릴레이 무효",
+        "warning": "thesis 회피 섹터이나 모멘텀 3위. 반도체 동반 조정 가능성. 외인/기관 -4.9만주 순매도로 수급 악화",
+        "severity": "high"
+      },
+      {
+        "sector": "방산",
+        "warning": "최고 확신 thesis(9/10)와 모멘텀(11위) 극심한 괴리. 시장이 아직 중동 리스크를 가격에 반영하지 않았거나 thesis 오류 가능성",
         "severity": "medium"
       },
       {
-        "sector": "에너지화학",
-        "warning": "강한 thesis에도 모멘텀 8위+외인/기관 매도. 아직 시장 인식 부족. 저점 확인 후 진입 필요",
+        "sector": "조선",
+        "warning": "thesis 관찰 섹터이나 모멘텀 18위 하위권. 방산조선→기계 릴레이 소스 역할 불가. BB% 0.1로 하단 이탈 직전",
         "severity": "medium"
       },
       {
         "sector": "증권",
-        "warning": "모멘텀 4위이나 방어 레짐에서 금융주 회전율 저하. 외인 -3575억 매도로 지속성 의문",
+        "warning": "증권→손해보험 릴레이 '발화' 단계이나 모멘텀 최하위(20위). 소스 섹터 붕괴로 릴레이 무효화 가능성 높음",
+        "severity": "high"
+      },
+      {
+        "sector": "건설",
+        "warning": "모멘텀 1위이나 구조적 thesis 부재. 스마트머니 미유입. 단기 과열 후 급락 리스크 존재",
         "severity": "low"
       }
     ]
   },
   "group_relay": {
-    "scan_time": "2026-03-16T18:59:10.096522",
+    "scan_time": "2026-03-23T20:58:51.969511",
     "fire_threshold": 3.0,
     "fired_groups": [],
     "no_fire": true,
     "summary": "오늘 발화한 대장주 없음"
   },
   "whale": {
-    "updated_at": "2026-03-16 18:53",
-    "total_detected": 66,
+    "updated_at": "2026-03-23 20:57",
+    "total_detected": 101,
     "stats": {
-      "세력포착": 3,
-      "매집의심": 30,
-      "이상감지": 33
+      "세력포착": 6,
+      "매집의심": 35,
+      "이상감지": 59,
+      "이탈경고": 1
     },
     "items": [
       {
-        "ticker": "078070",
-        "name": "유비쿼스홀딩스",
-        "close": 14850,
-        "price_change": 7.22,
-        "volume": 983892,
-        "trading_value_m": 14610.8,
-        "rsi": 69.99,
-        "adx": 46.03,
-        "bb_position": 1.08,
-        "volume_surge_ratio": 3.98,
+        "ticker": "098070",
+        "name": "한텍",
+        "close": 60200,
+        "price_change": 25.68,
+        "volume": 2622272,
+        "trading_value_m": 157860.77,
+        "rsi": 81.43,
+        "adx": 41.4,
+        "bb_position": 1.31,
+        "volume_surge_ratio": 8.75,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 0.0,
+        "foreign_5d": 3859000000.0,
         "grade": "세력포착",
-        "strength": 4.05,
+        "strength": 5.92,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.3277182499319369,
-            "vsr": 4.0,
+            "strength": 2.915406665104607,
+            "vsr": 8.7,
             "direction": "상승폭발",
-            "price_change": 7.22,
-            "desc": "거래량 4.0배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 2.723977937347587,
-            "min_bb_width": 0.09,
-            "curr_bb_width": 0.4,
-            "expansion": 4.45,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (4.4배) +거래량"
-          }
-        ]
-      },
-      {
-        "ticker": "033160",
-        "name": "엠케이전자",
-        "close": 16010,
-        "price_change": 11.96,
-        "volume": 2819082,
-        "trading_value_m": 45133.5,
-        "rsi": 77.53,
-        "adx": 45.26,
-        "bb_position": 1.19,
-        "volume_surge_ratio": 2.83,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "세력포착",
-        "strength": 3.94,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 0.9439300275883067,
-            "vsr": 2.8,
-            "direction": "상승폭발",
-            "price_change": 11.96,
-            "desc": "거래량 2.8배 폭발 (상승폭발)"
+            "price_change": 25.68,
+            "desc": "거래량 8.7배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
             "strength": 3.0,
-            "min_bb_width": 0.08,
-            "curr_bb_width": 0.72,
-            "expansion": 9.19,
+            "min_bb_width": 0.12,
+            "curr_bb_width": 0.66,
+            "expansion": 5.57,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (9.2배) +거래량"
+            "desc": "BB 수축→폭발 (5.6배) +거래량"
           }
         ]
       },
       {
-        "ticker": "007340",
-        "name": "DN오토모티브",
-        "close": 35850,
-        "price_change": 29.89,
-        "volume": 1478038,
-        "trading_value_m": 52987.66,
-        "rsi": 71.9,
-        "adx": 26.87,
-        "bb_position": 1.07,
-        "volume_surge_ratio": 4.52,
+        "ticker": "100090",
+        "name": "SK오션플랜트",
+        "close": 27400,
+        "price_change": 7.24,
+        "volume": 12456250,
+        "trading_value_m": 341301.25,
+        "rsi": 78.0,
+        "adx": 38.54,
+        "bb_position": 1.25,
+        "volume_surge_ratio": 7.34,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -1793000000.0,
+        "foreign_5d": -20869000000.0,
         "grade": "세력포착",
-        "strength": 2.91,
+        "strength": 4.62,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.5062588132473584,
-            "vsr": 4.5,
+            "strength": 2.44546836233406,
+            "vsr": 7.3,
             "direction": "상승폭발",
-            "price_change": 29.89,
-            "desc": "거래량 4.5배 폭발 (상승폭발)"
+            "price_change": 7.24,
+            "desc": "거래량 7.3배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.403072567951187,
-            "min_bb_width": 0.24,
-            "curr_bb_width": 0.43,
-            "expansion": 1.81,
+            "strength": 2.179189490874627,
+            "min_bb_width": 0.16,
+            "curr_bb_width": 0.55,
+            "expansion": 3.36,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (1.8배) +거래량"
+            "desc": "BB 수축→폭발 (3.4배) +거래량"
           }
         ]
       },
       {
-        "ticker": "091700",
-        "name": "파트론",
-        "close": 8370,
-        "price_change": -2.45,
-        "volume": 407356,
-        "trading_value_m": 3409.57,
-        "rsi": 58.54,
-        "adx": 34.02,
-        "bb_position": 0.68,
-        "volume_surge_ratio": 0.66,
+        "ticker": "053690",
+        "name": "한미글로벌",
+        "close": 27050,
+        "price_change": -0.55,
+        "volume": 2479764,
+        "trading_value_m": 67077.62,
+        "rsi": 74.5,
+        "adx": 42.92,
+        "bb_position": 1.1,
+        "volume_surge_ratio": 4.44,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 0.0,
+        "foreign_5d": -4662000000.0,
+        "grade": "세력포착",
+        "strength": 3.68,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.4787902511493172,
+            "vsr": 4.4,
+            "direction": "횡보폭발",
+            "price_change": -0.55,
+            "desc": "거래량 4.4배 폭발 (횡보폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.200056077512053,
+            "min_bb_width": 0.16,
+            "curr_bb_width": 0.53,
+            "expansion": 3.4,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.4배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "100840",
+        "name": "SNT에너지",
+        "close": 54200,
+        "price_change": 1.69,
+        "volume": 1961808,
+        "trading_value_m": 106329.99,
+        "rsi": 67.49,
+        "adx": 30.74,
+        "bb_position": 1.07,
+        "volume_surge_ratio": 4.77,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 1752000000.0,
+        "grade": "세력포착",
+        "strength": 3.05,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.5912522202756811,
+            "vsr": 4.8,
+            "direction": "상승폭발",
+            "price_change": 1.69,
+            "desc": "거래량 4.8배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.461407019758047,
+            "min_bb_width": 0.2,
+            "curr_bb_width": 0.39,
+            "expansion": 1.92,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (1.9배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "018000",
+        "name": "유니슨",
+        "close": 1650,
+        "price_change": -1.9,
+        "volume": 29758983,
+        "trading_value_m": 49102.32,
+        "rsi": 72.28,
+        "adx": 46.8,
+        "bb_position": 1.08,
+        "volume_surge_ratio": 3.72,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -2111000000.0,
+        "grade": "세력포착",
+        "strength": 2.87,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.2404827911426477,
+            "vsr": 3.7,
+            "direction": "하락폭발",
+            "price_change": -1.9,
+            "desc": "거래량 3.7배 폭발 (하락폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.6279668581073252,
+            "min_bb_width": 0.24,
+            "curr_bb_width": 0.55,
+            "expansion": 2.26,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.3배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "352820",
+        "name": "하이브",
+        "close": 290500,
+        "price_change": -15.55,
+        "volume": 931451,
+        "trading_value_m": 270586.52,
+        "rsi": 29.08,
+        "adx": 32.5,
+        "bb_position": -0.15,
+        "volume_surge_ratio": 3.13,
+        "above_ma20": false,
+        "above_ma60": false,
+        "foreign_5d": -71739000000.0,
+        "grade": "세력포착",
+        "strength": 2.61,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.043090002293463,
+            "vsr": 3.1,
+            "direction": "하락폭발",
+            "price_change": -15.55,
+            "desc": "거래량 3.1배 폭발 (하락폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.5619934775140976,
+            "min_bb_width": 0.14,
+            "curr_bb_width": 0.29,
+            "expansion": 2.12,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.1배) +거래량"
+          }
+        ]
+      },
+      {
+        "ticker": "000390",
+        "name": "삼화페인트",
+        "close": 9660,
+        "price_change": -4.73,
+        "volume": 950315,
+        "trading_value_m": 9180.04,
+        "rsi": 51.91,
+        "adx": 42.81,
+        "bb_position": 0.54,
+        "volume_surge_ratio": 0.23,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 1165000000.0,
         "grade": "매집의심",
         "strength": 3.0,
         "pattern_count": 1,
@@ -337,28 +483,144 @@
           {
             "pattern": "P4_OBV다이버전스",
             "strength": 3.0,
-            "price_chg_10d": -0.83,
-            "obv_chg_10d": 42.94,
-            "obv_trend_5d": 0.4,
+            "price_chg_10d": 0.94,
+            "obv_chg_10d": 30.44,
+            "obv_trend_5d": 0.18,
             "vol_contracted": true,
-            "desc": "가격 -0.8% vs OBV +42.9% (은밀매집 +저거래량)"
+            "desc": "가격 +0.9% vs OBV +30.4% (은밀매집 +저거래량)"
           }
         ]
       },
       {
-        "ticker": "088980",
-        "name": "맥쿼리인프라",
-        "close": 11300,
-        "price_change": -0.88,
-        "volume": 1274743,
-        "trading_value_m": 14404.6,
-        "rsi": 47.18,
-        "adx": 17.29,
-        "bb_position": 0.31,
-        "volume_surge_ratio": 0.51,
+        "ticker": "010955",
+        "name": "S-Oil우",
+        "close": 54100,
+        "price_change": -5.75,
+        "volume": 25641,
+        "trading_value_m": 1387.18,
+        "rsi": 45.66,
+        "adx": 24.56,
+        "bb_position": 0.22,
+        "volume_surge_ratio": 0.27,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": -178000000.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": -3.57,
+            "obv_chg_10d": 45.47,
+            "obv_trend_5d": 0.28,
+            "vol_contracted": true,
+            "desc": "가격 -3.6% vs OBV +45.5% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "030000",
+        "name": "제일기획",
+        "close": 20350,
+        "price_change": -4.46,
+        "volume": 298925,
+        "trading_value_m": 6083.12,
+        "rsi": 42.62,
+        "adx": 28.77,
+        "bb_position": 0.29,
+        "volume_surge_ratio": 0.69,
         "above_ma20": false,
         "above_ma60": false,
-        "foreign_5d": 2630000000.0,
+        "foreign_5d": 570000000.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": -1.21,
+            "obv_chg_10d": 43.29,
+            "obv_trend_5d": 0.51,
+            "vol_contracted": true,
+            "desc": "가격 -1.2% vs OBV +43.3% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "051500",
+        "name": "CJ프레시웨이",
+        "close": 30950,
+        "price_change": -7.47,
+        "volume": 51073,
+        "trading_value_m": 1580.71,
+        "rsi": 48.05,
+        "adx": 31.35,
+        "bb_position": 0.34,
+        "volume_surge_ratio": 0.63,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": -295000000.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": -4.77,
+            "obv_chg_10d": 25.06,
+            "obv_trend_5d": 0.09,
+            "vol_contracted": true,
+            "desc": "가격 -4.8% vs OBV +25.1% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "091700",
+        "name": "파트론",
+        "close": 8080,
+        "price_change": -3.81,
+        "volume": 293445,
+        "trading_value_m": 2371.04,
+        "rsi": 50.89,
+        "adx": 24.33,
+        "bb_position": 0.38,
+        "volume_surge_ratio": 0.52,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": 1245000000.0,
+        "grade": "매집의심",
+        "strength": 3.0,
+        "pattern_count": 1,
+        "patterns": [
+          {
+            "pattern": "P4_OBV다이버전스",
+            "strength": 3.0,
+            "price_chg_10d": -2.06,
+            "obv_chg_10d": 25.82,
+            "obv_trend_5d": 0.05,
+            "vol_contracted": true,
+            "desc": "가격 -2.1% vs OBV +25.8% (은밀매집 +저거래량)"
+          }
+        ]
+      },
+      {
+        "ticker": "271940",
+        "name": "일진하이솔루스",
+        "close": 16440,
+        "price_change": -6.06,
+        "volume": 89066,
+        "trading_value_m": 1464.25,
+        "rsi": 50.95,
+        "adx": 20.85,
+        "bb_position": 0.44,
+        "volume_surge_ratio": 0.47,
+        "above_ma20": false,
+        "above_ma60": true,
+        "foreign_5d": 9000000.0,
         "grade": "매집의심",
         "strength": 2.8,
         "pattern_count": 1,
@@ -366,309 +628,106 @@
           {
             "pattern": "P4_OBV다이버전스",
             "strength": 2.8,
-            "price_chg_10d": -0.26,
-            "obv_chg_10d": 59.45,
-            "obv_trend_5d": -0.12,
+            "price_chg_10d": -3.58,
+            "obv_chg_10d": 92.88,
+            "obv_trend_5d": -0.06,
             "vol_contracted": true,
-            "desc": "가격 -0.3% vs OBV +59.5% (은밀매집 +저거래량)"
+            "desc": "가격 -3.6% vs OBV +92.9% (은밀매집 +저거래량)"
           }
         ]
       },
       {
-        "ticker": "089860",
-        "name": "롯데렌탈",
-        "close": 32150,
-        "price_change": -0.77,
-        "volume": 34136,
-        "trading_value_m": 1097.47,
-        "rsi": 47.44,
-        "adx": 23.51,
-        "bb_position": 0.28,
+        "ticker": "071055",
+        "name": "한국금융지주우",
+        "close": 157000,
+        "price_change": -8.72,
+        "volume": 27387,
+        "trading_value_m": 4299.76,
+        "rsi": 45.93,
+        "adx": 18.53,
+        "bb_position": 0.2,
         "volume_surge_ratio": 0.5,
         "above_ma20": false,
         "above_ma60": true,
-        "foreign_5d": 0.0,
+        "foreign_5d": 4857000000.0,
         "grade": "매집의심",
-        "strength": 2.8,
+        "strength": 2.63,
         "pattern_count": 1,
         "patterns": [
           {
             "pattern": "P4_OBV다이버전스",
-            "strength": 2.8,
-            "price_chg_10d": -2.58,
-            "obv_chg_10d": 77.89,
-            "obv_trend_5d": -0.18,
+            "strength": 2.6265092054515407,
+            "price_chg_10d": -3.44,
+            "obv_chg_10d": 20.27,
+            "obv_trend_5d": 0.2,
             "vol_contracted": true,
-            "desc": "가격 -2.6% vs OBV +77.9% (은밀매집 +저거래량)"
+            "desc": "가격 -3.4% vs OBV +20.3% (은밀매집 +저거래량)"
           }
         ]
       },
       {
-        "ticker": "020000",
-        "name": "한섬",
-        "close": 23900,
-        "price_change": 1.49,
-        "volume": 74935,
-        "trading_value_m": 1790.95,
-        "rsi": 64.46,
-        "adx": 30.39,
-        "bb_position": 0.75,
-        "volume_surge_ratio": 0.39,
+        "ticker": "052710",
+        "name": "아모텍",
+        "close": 12920,
+        "price_change": -3.94,
+        "volume": 235408,
+        "trading_value_m": 3041.47,
+        "rsi": 54.28,
+        "adx": 23.55,
+        "bb_position": 0.5,
+        "volume_surge_ratio": 0.3,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 0.0,
+        "foreign_5d": -441000000.0,
         "grade": "매집의심",
-        "strength": 2.66,
+        "strength": 2.57,
         "pattern_count": 1,
         "patterns": [
           {
             "pattern": "P4_OBV다이버전스",
-            "strength": 2.6616615881899377,
-            "price_chg_10d": 2.14,
-            "obv_chg_10d": 20.62,
-            "obv_trend_5d": 0.8,
+            "strength": 2.5738797917778213,
+            "price_chg_10d": 2.46,
+            "obv_chg_10d": 19.74,
+            "obv_trend_5d": 0.11,
             "vol_contracted": true,
-            "desc": "가격 +2.1% vs OBV +20.6% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "278280",
-        "name": "천보",
-        "close": 46800,
-        "price_change": -1.89,
-        "volume": 29551,
-        "trading_value_m": 1382.99,
-        "rsi": 43.84,
-        "adx": 36.78,
-        "bb_position": 0.28,
-        "volume_surge_ratio": 0.34,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 0.0,
-        "grade": "매집의심",
-        "strength": 2.21,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.2073622571761082,
-            "price_chg_10d": -4.49,
-            "obv_chg_10d": 19.07,
-            "obv_trend_5d": -0.0,
-            "vol_contracted": true,
-            "desc": "가격 -4.5% vs OBV +19.1% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "489500",
-        "name": "엘케이켐",
-        "close": 34200,
-        "price_change": -1.3,
-        "volume": 57042,
-        "trading_value_m": 1950.84,
-        "rsi": 46.35,
-        "adx": 22.49,
-        "bb_position": 0.31,
-        "volume_surge_ratio": 0.17,
-        "above_ma20": false,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "매집의심",
-        "strength": 2.12,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.116220293410202,
-            "price_chg_10d": -0.58,
-            "obv_chg_10d": 15.16,
-            "obv_trend_5d": 0.01,
-            "vol_contracted": true,
-            "desc": "가격 -0.6% vs OBV +15.2% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "038500",
-        "name": "삼표시멘트",
-        "close": 17100,
-        "price_change": -6.04,
-        "volume": 5267182,
-        "trading_value_m": 90068.81,
-        "rsi": 57.15,
-        "adx": 27.82,
-        "bb_position": 0.7,
-        "volume_surge_ratio": 0.38,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -5832000000.0,
-        "grade": "매집의심",
-        "strength": 2.0,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.0027804907649744,
-            "price_chg_10d": 0.59,
-            "obv_chg_10d": 14.03,
-            "obv_trend_5d": 0.13,
-            "vol_contracted": true,
-            "desc": "가격 +0.6% vs OBV +14.0% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "017670",
-        "name": "SK텔레콤",
-        "close": 76300,
-        "price_change": 1.73,
-        "volume": 415991,
-        "trading_value_m": 31740.11,
-        "rsi": 52.41,
-        "adx": 28.92,
-        "bb_position": 0.35,
-        "volume_surge_ratio": 0.32,
-        "above_ma20": false,
-        "above_ma60": true,
-        "foreign_5d": -6250000000.0,
-        "grade": "매집의심",
-        "strength": 1.87,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 1.8716562497357623,
-            "price_chg_10d": -2.43,
-            "obv_chg_10d": 15.72,
-            "obv_trend_5d": -0.02,
-            "vol_contracted": true,
-            "desc": "가격 -2.4% vs OBV +15.7% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "048410",
-        "name": "현대바이오",
-        "close": 15750,
-        "price_change": -5.63,
-        "volume": 2637239,
-        "trading_value_m": 41536.51,
-        "rsi": 56.65,
-        "adx": 25.97,
-        "bb_position": 0.55,
-        "volume_surge_ratio": 0.36,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "매집의심",
-        "strength": 1.77,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 1.7711758570377363,
-            "price_chg_10d": -3.55,
-            "obv_chg_10d": 11.71,
-            "obv_trend_5d": 0.13,
-            "vol_contracted": true,
-            "desc": "가격 -3.6% vs OBV +11.7% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "214320",
-        "name": "이노션",
-        "close": 19540,
-        "price_change": -0.26,
-        "volume": 66157,
-        "trading_value_m": 1292.71,
-        "rsi": 51.1,
-        "adx": 29.61,
-        "bb_position": 0.39,
-        "volume_surge_ratio": 0.38,
-        "above_ma20": false,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "매집의심",
-        "strength": 1.48,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 1.4826156917329734,
-            "price_chg_10d": -1.36,
-            "obv_chg_10d": 11.83,
-            "obv_trend_5d": -0.02,
-            "vol_contracted": true,
-            "desc": "가격 -1.4% vs OBV +11.8% (은밀매집 +저거래량)"
+            "desc": "가격 +2.5% vs OBV +19.7% (은밀매집 +저거래량)"
           }
         ]
       },
       {
         "ticker": "088350",
         "name": "한화생명",
-        "close": 4705,
-        "price_change": -1.36,
-        "volume": 6122334,
-        "trading_value_m": 28805.58,
-        "rsi": 51.86,
-        "adx": 30.39,
-        "bb_position": 0.38,
-        "volume_surge_ratio": 0.22,
+        "close": 4800,
+        "price_change": -8.22,
+        "volume": 7928419,
+        "trading_value_m": 38056.41,
+        "rsi": 51.25,
+        "adx": 35.38,
+        "bb_position": 0.4,
+        "volume_surge_ratio": 0.38,
         "above_ma20": false,
         "above_ma60": true,
-        "foreign_5d": -22543000000.0,
+        "foreign_5d": 589000000.0,
         "grade": "매집의심",
-        "strength": 1.46,
+        "strength": 2.48,
         "pattern_count": 1,
         "patterns": [
           {
             "pattern": "P4_OBV다이버전스",
-            "strength": 1.4600251980433616,
-            "price_chg_10d": -2.08,
-            "obv_chg_10d": 8.6,
-            "obv_trend_5d": 0.04,
+            "strength": 2.4843652018513387,
+            "price_chg_10d": 2.35,
+            "obv_chg_10d": 18.84,
+            "obv_trend_5d": 0.19,
             "vol_contracted": true,
-            "desc": "가격 -2.1% vs OBV +8.6% (은밀매집 +저거래량)"
-          }
-        ]
-      },
-      {
-        "ticker": "009410",
-        "name": "태영건설",
-        "close": 1837,
-        "price_change": 0.27,
-        "volume": 567033,
-        "trading_value_m": 1041.64,
-        "rsi": 55.95,
-        "adx": 27.01,
-        "bb_position": 0.63,
-        "volume_surge_ratio": 0.66,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 0.0,
-        "grade": "매집의심",
-        "strength": 1.44,
-        "pattern_count": 1,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 1.4367839834434921,
-            "price_chg_10d": 2.28,
-            "obv_chg_10d": 8.37,
-            "obv_trend_5d": 0.11,
-            "vol_contracted": true,
-            "desc": "가격 +2.3% vs OBV +8.4% (은밀매집 +저거래량)"
+            "desc": "가격 +2.3% vs OBV +18.8% (은밀매집 +저거래량)"
           }
         ]
       }
     ]
   },
   "dual_buying": {
-    "date": "2026-03-16",
-    "scanned_at": "2026-03-16 18:58",
+    "date": "2026-03-23",
+    "scanned_at": "2026-03-23 20:58",
     "s_grade": [],
     "a_grade": [],
     "b_grade": [],
@@ -682,9 +741,9 @@
     }
   },
   "v3_picks": {
-    "decision_date": "2026-03-16",
+    "decision_date": "2026-03-23",
     "regime": "방어",
-    "available_slots": 2,
+    "available_slots": 0,
     "current_holdings": 10,
     "cash_pct_before": 0.0,
     "cash_pct_after": 0.0,
@@ -693,153 +752,188 @@
       {
         "ticker": "011210",
         "name": "현대위아",
-        "skip_reason": "현금 부족 (현재 0%)"
+        "skip_reason": "보유 종목 한도 초과 (10/10)"
+      },
+      {
+        "ticker": "278470",
+        "name": "에이피알",
+        "skip_reason": "보유 종목 한도 초과 (10/10)"
+      },
+      {
+        "ticker": "267270",
+        "name": "HD현대건설기계",
+        "skip_reason": "보유 종목 한도 초과 (10/10)"
+      },
+      {
+        "ticker": "298040",
+        "name": "효성중공업",
+        "skip_reason": "보유 종목 한도 초과 (10/10)"
       }
     ],
     "portfolio_warnings": [
-      "현금 비중 0%로 방어 레짐 권고(50%) 대비 심각한 부족",
-      "포트폴리오가 풀 포지션 상태로 리스크 관리 불가",
-      "기존 보유 종목 중 손실 종목 정리 후 현금 확보 필요"
+      "현금 비중 0%로 방어 레짐 권고(60%) 대비 과도한 리스크 노출",
+      "보유 종목 수 10개로 이미 한도 도달, 추가 매수 불가",
+      "셀트리온(-12.4%), 현대차(-9.6%) 등 손실 종목 손절 고려 필요"
     ],
-    "reasoning": "방어 레짐에서 현금 비중 0%는 매우 위험한 상태로, FOMC 매파적 결정과 중동 전쟁 확전 리스크에 대응 불가능. 현대위아가 높은 conviction을 보이나, 현금이 없어 매수 불가. 우선 손실 종목(현대차 -9.6%, 셀트리온 -12.4%) 정리로 현금 확보가 급선무."
+    "reasoning": "방어 레짐에서 현금 비중 0%는 극도로 위험한 포지션이며, 이미 보유 종목이 10개로 한도에 도달해 추가 매수가 불가능합니다. 호르무즈 해협 봉쇄 위협과 환율 1,500원 돌파라는 중대 리스크 상황에서는 손실 종목 정리 후 현금 비중 확대가 시급합니다."
   },
   "news": {
     "market_sentiment": "bearish",
     "key_themes": [
-      "중동 전쟁 장기화로 유가 급등 및 스태그플레이션 우려",
-      "FOMC 금리 인하 불확실성과 글로벌 기술주 약세",
-      "원전·SMR 수요 증가 및 K-원전 해외 진출 가속",
-      "AI 데이터센터 투자 확대 지속"
+      "중동 지정학 리스크 고조 - 호르무즈 해협 폐쇄 위협",
+      "원화 급락 및 환율 1,500원 돌파로 인한 수입 비용 증가",
+      "AI 디스럽션 우려로 기술주 밸류에이션 재평가",
+      "유가 급등으로 에너지 비용 부담 확대",
+      "외국인 자금 이탈 및 코스피 서킷브레이커 발동"
     ],
     "direction": "neutral",
     "sector_outlook": {
-      "에너지/정제": {
+      "에너지/정유": {
         "direction": "positive",
-        "reason": "중동 전쟁으로 유가 $100 급등. 정제마진 강세 예상되며 S-Oil, SK이노베이션 등 정제사 수혜"
-      },
-      "원전": {
-        "direction": "positive",
-        "reason": "미국 SMR 승인 및 K-원전 900조 시장 선점 기대. 현대건설, 두산에너빌리티 등 수혜"
-      },
-      "반도체": {
-        "direction": "negative",
-        "reason": "Fed 금리 불확실성과 Nasdaq 2.47% 하락. 삼성전자 -10.15%, 기술주 전반 약세 지속"
-      },
-      "2차전지": {
-        "direction": "negative",
-        "reason": "글로벌 경기 둔화 우려로 수요 전망 악화. LG에너지솔루션 -7.96%, 전기차 수요 감소"
-      },
-      "IT/소프트웨어": {
-        "direction": "negative",
-        "reason": "Nasdaq 약세와 Fed 정책 불확실성. 네이버 AI 투자 확대도 단기 수혜 불명확"
-      },
-      "금융": {
-        "direction": "neutral",
-        "reason": "금리·환율 급등으로 방향성 불명확. FOMC 결과 대기 국면"
+        "reason": "호르무즈 해협 긴장으로 유가 110달러 전망, 에너지 섹터 +9.54% 강세 확인. 정유사 마진 개선 기대."
       },
       "조선": {
         "direction": "neutral",
-        "reason": "K-방산 수혜 가능하나 구체적 수주 공시 부재. 관찰 필요"
+        "reason": "삼성중공업 LNG선 대규모 수주 긍정적이나 지정학 리스크로 해상운임·보험료 부담 증가."
       },
-      "바이오": {
+      "IT/반도체": {
+        "direction": "negative",
+        "reason": "AI 디스럽션 우려로 나스닥 3.38% 하락 주도. IT 섹터 밸류에이션 재평가 진행 중, 외국인 자금 이탈 지속."
+      },
+      "화학": {
+        "direction": "negative",
+        "reason": "유가 급등으로 나프타 등 원재료 비용 급증, 가격 전가력 제한적으로 수익성 악화 예상."
+      },
+      "은행": {
         "direction": "neutral",
-        "reason": "매크로 직접 영향 제한적. 개별 파이프라인 모니터링 필요"
+        "reason": "금리 상승 시 NIM 개선 기대하나 경기 둔화 우려로 대손비용 증가 리스크 공존."
+      },
+      "항공": {
+        "direction": "negative",
+        "reason": "유가 급등으로 항공유 비용 급증, 지정학 리스크로 중동 노선 차질 우려."
+      },
+      "유틸리티": {
+        "direction": "positive",
+        "reason": "유틸리티 섹터 +10.36% 강세 확인. 에너지 인프라 수요 증가 기대."
+      },
+      "바이오/제약": {
+        "direction": "neutral",
+        "reason": "환율 상승으로 수출 수익성 개선 가능하나 시장 전반적 약세로 단기 불확실."
+      },
+      "게임/엔터": {
+        "direction": "negative",
+        "reason": "외국인 자금 이탈과 시장 약세로 방어력 부족한 게임·엔터 섹터 압박 예상."
+      },
+      "자동차": {
+        "direction": "neutral",
+        "reason": "환율 상승으로 수출 경쟁력 개선 가능하나 유가 급등으로 소비자 구매력 약화 우려."
       }
     }
   },
   "journal": {
-    "total_picks": 11,
+    "total_picks": 10,
     "hit_rate": 0.0,
     "avg_return": 0.0,
     "period": "2026-03-02 ~ 2026-03-03",
     "days": [
       {
-        "date": "2026-03-17 (TOP 7 추천)",
+        "date": "2026-03-24 (TOP 7 추천)",
         "day_return": 0.0,
         "picks": [
           {
-            "ticker": "004170",
-            "name": "신세계",
+            "ticker": "031440",
+            "name": "신세계푸드",
             "grade": "적극매수",
-            "score": 71.6,
+            "score": 79.2,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "눌림목, 이벤트, 컨센서스"
+            "reasoning": "눌림목, 수급폭발, 매집추적"
           },
           {
-            "ticker": "251270",
-            "name": "넷마블",
+            "ticker": "200470",
+            "name": "에이팩트",
+            "grade": "적극매수",
+            "score": 73.2,
+            "entry_price": 0,
+            "current_price": 0,
+            "result_pct": 0.0,
+            "hit": false,
+            "reasoning": "퀀텀, 이벤트, 매집추적, 리포트"
+          },
+          {
+            "ticker": "006110",
+            "name": "삼아알미늄",
             "grade": "매수",
-            "score": 67.3,
+            "score": 68.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "수급폭발, 매집추적, 컨센서스"
+            "reasoning": "수급폭발, 매집추적"
           },
           {
-            "ticker": "001040",
-            "name": "CJ",
+            "ticker": "475960",
+            "name": "토모큐브",
             "grade": "매수",
-            "score": 60.0,
+            "score": 67.4,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "세력감지, 수급폭발, 컨센서스"
+            "reasoning": "눌림목, 퀀텀, 매집추적"
           },
           {
-            "ticker": "034020",
-            "name": "두산에너빌리티",
-            "grade": "관심매수",
-            "score": 72.2,
+            "ticker": "084850",
+            "name": "아이티엠반도체",
+            "grade": "매수",
+            "score": 66.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "매집추적, 인텔리전스, AI두뇌, 컨센서스"
+            "reasoning": "수급폭발, 매집추적, 리포트"
           },
           {
-            "ticker": "141080",
-            "name": "리가켐바이오",
-            "grade": "관심매수",
-            "score": 60.6,
+            "ticker": "013030",
+            "name": "하이록코리아",
+            "grade": "매수",
+            "score": 66.7,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "매집추적"
+            "reasoning": "수급폭발, 매집추적"
           },
           {
-            "ticker": "001800",
-            "name": "오리온홀딩스",
-            "grade": "관심매수",
-            "score": 59.8,
+            "ticker": "322000",
+            "name": "HD현대에너지솔루션",
+            "grade": "매수",
+            "score": 64.8,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "매집추적"
-          },
-          {
-            "ticker": "000100",
-            "name": "유한양행",
-            "grade": "관심매수",
-            "score": 59.0,
-            "entry_price": 0,
-            "current_price": 0,
-            "result_pct": 0.0,
-            "hit": false,
-            "reasoning": "수급폭발, 리포트, 컨센서스"
+            "reasoning": "수급폭발, 매집추적, 리포트"
           }
         ]
       },
       {
-        "date": "2026-03-17 (AI 대형주)",
+        "date": "2026-03-24 (AI 대형주)",
         "day_return": 0.0,
         "picks": [
+          {
+            "ticker": "010140",
+            "name": "삼성중공업",
+            "grade": "AI high",
+            "score": 88,
+            "entry_price": 0,
+            "current_price": 0,
+            "result_pct": 0.0,
+            "hit": false,
+            "reasoning": "LNG선 릴레이 수주로 1.15조 잭팟, 연간 목표 21% 조기 달성. 구체적 수주 실적 확인."
+          },
           {
             "ticker": "010950",
             "name": "S-Oil",
@@ -849,486 +943,280 @@
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "중동 전쟁으로 유가가 $100 급등하며 정제마진 강세 예상. 복수 언론에서 국제유가 상승 시 S-Oil이 수혜 종목으로 언급되고 상위 1% 투자자들의 매수 확인됨."
+            "reasoning": "호르무즈 해협 긴장으로 유가 110달러 전망, 정유사 마진 개선 기대. 에너지 섹터 +9.54% 강세 확인."
           },
           {
             "ticker": "096770",
             "name": "SK이노베이션",
             "grade": "AI high",
-            "score": 80,
+            "score": 82,
             "entry_price": 0,
             "current_price": 0,
             "result_pct": 0.0,
             "hit": false,
-            "reasoning": "중동 전쟁으로 유가 급등 시 정제 부문 수익성 개선 예상. 에너지 섹터 전반 수혜 가능."
-          },
-          {
-            "ticker": "000720",
-            "name": "현대건설",
-            "grade": "AI medium",
-            "score": 75,
-            "entry_price": 0,
-            "current_price": 0,
-            "result_pct": 0.0,
-            "hit": false,
-            "reasoning": "북유럽 에너지 전환 핵심 파트너로 부상하며 K-원전 영토 확대. 원전 수주 모멘텀 지속."
-          },
-          {
-            "ticker": "034020",
-            "name": "두산에너빌리티",
-            "grade": "AI medium",
-            "score": 75,
-            "entry_price": 0,
-            "current_price": 0,
-            "result_pct": 0.0,
-            "hit": false,
-            "reasoning": "미국 빌 게이츠 SMR 승인 및 글로벌 원전 수요 증가. K-원전 900조 시장 선점 기대."
+            "reasoning": "유가 상승으로 정유 부문 수익성 개선. 에너지 섹터 강세 수혜주."
           }
         ]
       }
     ]
   },
   "china_money": {
-    "date": "2026-03-16",
-    "generated_at": "2026-03-16 18:38",
+    "date": "2026-03-18",
+    "generated_at": "2026-03-18 21:03",
     "total_stocks": 50,
     "summary": {
       "SURGE": 0,
       "INFLOW": 0,
-      "SECTOR_FOCUS": 8,
-      "WATCH": 9,
-      "NORMAL": 33
+      "SECTOR_FOCUS": 0,
+      "WATCH": 5,
+      "NORMAL": 45
     },
     "signals": [
       {
-        "date": "2026-03-16",
-        "ticker": "000660",
-        "name": "SK하이닉스",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
+        "date": "2026-03-18",
+        "ticker": "051900",
+        "name": "LG생활건강",
+        "signal": "WATCH",
+        "score": 23,
         "reasons": [
           "외국인 강매수 (z=1.0)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
+          "외국인 3일 연속 순매수"
         ],
-        "foreign_net_5d": 439217,
-        "foreign_zscore": 1.0,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": 16.51
+        "foreign_net_5d": 14976,
+        "foreign_zscore": 1.01,
+        "ewy_decouple": false,
+        "consecutive_days": 3,
+        "pct_change_5d": -1.01
       },
       {
-        "date": "2026-03-16",
-        "ticker": "012450",
-        "name": "한화에어로스페이스",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
+        "date": "2026-03-18",
+        "ticker": "017670",
+        "name": "SK텔레콤",
+        "signal": "WATCH",
+        "score": 18,
         "reasons": [
-          "외국인 강매수 (z=1.4)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 206911,
-        "foreign_zscore": 1.42,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 2.93
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "034020",
-        "name": "두산에너빌리티",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
-        "reasons": [
-          "외국인 강매수 (z=1.0)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 4125304,
-        "foreign_zscore": 1.02,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 9.88
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "036570",
-        "name": "엔씨소프트",
-        "signal": "SECTOR_FOCUS",
-        "score": 38,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
           "외국인 3일 연속 순매수",
           "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 73884,
-        "foreign_zscore": -0.24,
-        "ewy_decouple": true,
+        "foreign_net_5d": 51268,
+        "foreign_zscore": 0.09,
+        "ewy_decouple": false,
         "consecutive_days": 3,
-        "pct_change_5d": 5.85
+        "pct_change_5d": 4.24
       },
       {
-        "date": "2026-03-16",
-        "ticker": "329180",
-        "name": "HD현대중공업",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
+        "date": "2026-03-18",
+        "ticker": "010950",
+        "name": "S-Oil",
+        "signal": "WATCH",
+        "score": 18,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
+          "외국인 3일 연속 순매수",
+          "스텔스 매수 (주가 -3.5% but 외국인↑)"
+        ],
+        "foreign_net_5d": 318280,
+        "foreign_zscore": 0.76,
+        "ewy_decouple": false,
+        "consecutive_days": 3,
+        "pct_change_5d": -3.49
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "009830",
+        "name": "한화솔루션",
+        "signal": "WATCH",
+        "score": 18,
+        "reasons": [
+          "외국인 3일 연속 순매수",
           "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 33930,
-        "foreign_zscore": -0.89,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 1.22
+        "foreign_net_5d": 288736,
+        "foreign_zscore": -0.1,
+        "ewy_decouple": false,
+        "consecutive_days": 3,
+        "pct_change_5d": -1.17
       },
       {
-        "date": "2026-03-16",
-        "ticker": "010140",
-        "name": "삼성중공업",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 4564242,
-        "foreign_zscore": 0.36,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 0.7
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "000880",
-        "name": "한화",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 26064,
-        "foreign_zscore": -1.24,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": 0.16
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "003490",
-        "name": "대한항공",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 330118,
-        "foreign_zscore": -0.43,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 10.04
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "047810",
-        "name": "한국항공우주",
+        "date": "2026-03-18",
+        "ticker": "005930",
+        "name": "삼성전자",
         "signal": "WATCH",
-        "score": 28,
+        "score": 15,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인 4일 연속 순매수"
+          "외국인 강매수 (z=1.5)"
         ],
-        "foreign_net_5d": 211437,
-        "foreign_zscore": 0.51,
-        "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": 9.82
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "066570",
-        "name": "LG전자",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 23428,
-        "foreign_zscore": -0.28,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 0.71
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "032830",
-        "name": "삼성생명",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 22626,
-        "foreign_zscore": 0.43,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 5.74
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "018260",
-        "name": "삼성에스디에스",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 112641,
-        "foreign_zscore": -0.75,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": -0.06
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "011200",
-        "name": "HMM",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 505176,
-        "foreign_zscore": 0.94,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 1.45
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "009540",
-        "name": "한국조선해양",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 60453,
-        "foreign_zscore": -0.6,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": 2.38
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "128940",
-        "name": "한미약품",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 40835,
-        "foreign_zscore": -0.67,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 3.84
+        "foreign_net_5d": -6445138,
+        "foreign_zscore": 1.55,
+        "ewy_decouple": false,
+        "consecutive_days": 2,
+        "pct_change_5d": 9.74
       }
     ],
     "top_foreign_buyers": [
       {
-        "date": "2026-03-16",
+        "date": "2026-03-18",
         "ticker": "010140",
         "name": "삼성중공업",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
+        "signal": "NORMAL",
+        "score": 10,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
           "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 4564242,
-        "foreign_zscore": 0.36,
-        "ewy_decouple": true,
+        "foreign_net_5d": 2283126,
+        "foreign_zscore": -0.23,
+        "ewy_decouple": false,
         "consecutive_days": 0,
-        "pct_change_5d": 0.7
+        "pct_change_5d": 1.04
       },
       {
-        "date": "2026-03-16",
+        "date": "2026-03-18",
         "ticker": "034020",
         "name": "두산에너빌리티",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
+        "signal": "NORMAL",
+        "score": 10,
         "reasons": [
-          "외국인 강매수 (z=1.0)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
           "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 4125304,
-        "foreign_zscore": 1.02,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 9.88
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "011200",
-        "name": "HMM",
-        "signal": "WATCH",
-        "score": 20,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 505176,
-        "foreign_zscore": 0.94,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 1.45
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "000660",
-        "name": "SK하이닉스",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
-        "reasons": [
-          "외국인 강매수 (z=1.0)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 439217,
-        "foreign_zscore": 1.0,
-        "ewy_decouple": true,
+        "foreign_net_5d": 1996496,
+        "foreign_zscore": 0.15,
+        "ewy_decouple": false,
         "consecutive_days": 1,
-        "pct_change_5d": 16.51
+        "pct_change_5d": 6.24
       },
       {
-        "date": "2026-03-16",
-        "ticker": "003490",
-        "name": "대한항공",
-        "signal": "SECTOR_FOCUS",
-        "score": 30,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 330118,
-        "foreign_zscore": -0.43,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 10.04
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "047810",
-        "name": "한국항공우주",
+        "date": "2026-03-18",
+        "ticker": "010950",
+        "name": "S-Oil",
         "signal": "WATCH",
-        "score": 28,
+        "score": 18,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인 4일 연속 순매수"
+          "외국인 3일 연속 순매수",
+          "스텔스 매수 (주가 -3.5% but 외국인↑)"
         ],
-        "foreign_net_5d": 211437,
-        "foreign_zscore": 0.51,
-        "ewy_decouple": true,
-        "consecutive_days": 4,
-        "pct_change_5d": 9.82
+        "foreign_net_5d": 318280,
+        "foreign_zscore": 0.76,
+        "ewy_decouple": false,
+        "consecutive_days": 3,
+        "pct_change_5d": -3.49
       },
       {
-        "date": "2026-03-16",
-        "ticker": "012450",
-        "name": "한화에어로스페이스",
-        "signal": "SECTOR_FOCUS",
-        "score": 45,
-        "reasons": [
-          "외국인 강매수 (z=1.4)",
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
-          "외국인+기관 동시 순매수 (5일)"
-        ],
-        "foreign_net_5d": 206911,
-        "foreign_zscore": 1.42,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": 2.93
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "018260",
-        "name": "삼성에스디에스",
+        "date": "2026-03-18",
+        "ticker": "009830",
+        "name": "한화솔루션",
         "signal": "WATCH",
-        "score": 20,
+        "score": 18,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
-        ],
-        "foreign_net_5d": 112641,
-        "foreign_zscore": -0.75,
-        "ewy_decouple": true,
-        "consecutive_days": 0,
-        "pct_change_5d": -0.06
-      },
-      {
-        "date": "2026-03-16",
-        "ticker": "036570",
-        "name": "엔씨소프트",
-        "signal": "SECTOR_FOCUS",
-        "score": 38,
-        "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)",
           "외국인 3일 연속 순매수",
           "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 73884,
-        "foreign_zscore": -0.24,
-        "ewy_decouple": true,
+        "foreign_net_5d": 288736,
+        "foreign_zscore": -0.1,
+        "ewy_decouple": false,
         "consecutive_days": 3,
-        "pct_change_5d": 5.85
+        "pct_change_5d": -1.17
       },
       {
-        "date": "2026-03-16",
-        "ticker": "009540",
-        "name": "한국조선해양",
-        "signal": "WATCH",
-        "score": 20,
+        "date": "2026-03-18",
+        "ticker": "035720",
+        "name": "카카오",
+        "signal": "NORMAL",
+        "score": 0,
+        "reasons": [],
+        "foreign_net_5d": 221552,
+        "foreign_zscore": 0.37,
+        "ewy_decouple": false,
+        "consecutive_days": 0,
+        "pct_change_5d": 1.18
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "032830",
+        "name": "삼성생명",
+        "signal": "NORMAL",
+        "score": 0,
+        "reasons": [],
+        "foreign_net_5d": 107537,
+        "foreign_zscore": 0.68,
+        "ewy_decouple": false,
+        "consecutive_days": 2,
+        "pct_change_5d": 3.75
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "018260",
+        "name": "삼성에스디에스",
+        "signal": "NORMAL",
+        "score": 0,
+        "reasons": [],
+        "foreign_net_5d": 96393,
+        "foreign_zscore": -0.73,
+        "ewy_decouple": false,
+        "consecutive_days": 0,
+        "pct_change_5d": 2.2
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "329180",
+        "name": "HD현대중공업",
+        "signal": "NORMAL",
+        "score": 0,
+        "reasons": [],
+        "foreign_net_5d": 94382,
+        "foreign_zscore": -0.63,
+        "ewy_decouple": false,
+        "consecutive_days": 2,
+        "pct_change_5d": 0.0
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "036570",
+        "name": "엔씨소프트",
+        "signal": "NORMAL",
+        "score": 10,
         "reasons": [
-          "EWY 디커플링 (EWY -4.7% but 외국인↑)"
+          "외국인+기관 동시 순매수 (5일)"
         ],
-        "foreign_net_5d": 60453,
-        "foreign_zscore": -0.6,
-        "ewy_decouple": true,
-        "consecutive_days": 1,
-        "pct_change_5d": 2.38
+        "foreign_net_5d": 72449,
+        "foreign_zscore": 0.14,
+        "ewy_decouple": false,
+        "consecutive_days": 0,
+        "pct_change_5d": 9.52
+      },
+      {
+        "date": "2026-03-18",
+        "ticker": "034730",
+        "name": "SK",
+        "signal": "NORMAL",
+        "score": 8,
+        "reasons": [
+          "외국인 4일 연속 순매수"
+        ],
+        "foreign_net_5d": 54760,
+        "foreign_zscore": 0.63,
+        "ewy_decouple": false,
+        "consecutive_days": 4,
+        "pct_change_5d": -1.95
       }
     ]
   },
   "brain_decision": {
-    "timestamp": "2026-03-16T18:40:51.780593",
-    "effective_regime": "CAUTION",
+    "timestamp": "2026-03-23T20:54:03.080797",
+    "effective_regime": "PRE_BEAR",
     "kospi_regime": "CAUTION",
-    "nightwatch_score": 0.04,
-    "vix_level": 27.2,
-    "confidence": 0.65,
+    "nightwatch_score": -0.395,
+    "vix_level": 26.8,
+    "confidence": 0.3,
     "arms": [
       {
         "name": "swing",
         "base_pct": 30,
-        "adjusted_pct": 22.5,
-        "delta_pct": -7.5,
-        "reason": "축소 7.5%p",
+        "adjusted_pct": 7.0,
+        "delta_pct": -23.0,
+        "reason": "축소 23.0%p",
         "frozen": true
       },
       {
         "name": "etf_sector",
-        "base_pct": 20.0,
-        "adjusted_pct": 10.0,
-        "delta_pct": -10.0,
-        "reason": "축소 10.0%p",
-        "frozen": true
-      },
-      {
-        "name": "etf_leverage",
         "base_pct": 0.0,
         "adjusted_pct": 0,
         "delta_pct": 0.0,
@@ -1336,19 +1224,27 @@
         "frozen": true
       },
       {
+        "name": "etf_leverage",
+        "base_pct": 15.0,
+        "adjusted_pct": 0,
+        "delta_pct": -15.0,
+        "reason": "축소 15.0%p",
+        "frozen": true
+      },
+      {
         "name": "etf_index",
-        "base_pct": 20.0,
-        "adjusted_pct": 15.0,
-        "delta_pct": -5.0,
-        "reason": "축소 5.0%p",
+        "base_pct": 0.0,
+        "adjusted_pct": 0,
+        "delta_pct": 0.0,
+        "reason": "변경 없음",
         "frozen": true
       },
       {
         "name": "etf_gold",
-        "base_pct": 15.0,
-        "adjusted_pct": 16.2,
-        "delta_pct": 1.2,
-        "reason": "확대 1.2%p",
+        "base_pct": 10.0,
+        "adjusted_pct": 12.5,
+        "delta_pct": 2.5,
+        "reason": "확대 2.5%p",
         "frozen": true
       },
       {
@@ -1361,155 +1257,184 @@
       },
       {
         "name": "etf_bonds",
-        "base_pct": 5.0,
-        "adjusted_pct": 8.8,
-        "delta_pct": 3.8,
-        "reason": "확대 3.8%p",
+        "base_pct": 10.0,
+        "adjusted_pct": 17.5,
+        "delta_pct": 7.5,
+        "reason": "확대 7.5%p",
         "frozen": true
       },
       {
         "name": "etf_dollar",
-        "base_pct": 5.0,
-        "adjusted_pct": 3.8,
-        "delta_pct": -1.2,
-        "reason": "축소 1.2%p",
+        "base_pct": 15.0,
+        "adjusted_pct": 11.2,
+        "delta_pct": -3.8,
+        "reason": "축소 3.8%p",
         "frozen": true
       },
       {
         "name": "cash",
-        "base_pct": 35.0,
-        "adjusted_pct": 23.8,
-        "delta_pct": -11.2,
-        "reason": "축소 11.2%p",
+        "base_pct": 50.0,
+        "adjusted_pct": 51.8,
+        "delta_pct": 1.8,
+        "reason": "확대 1.8%p",
         "frozen": false
       }
     ],
-    "total_invest_pct": 76.2,
-    "cash_pct": 23.8,
+    "total_invest_pct": 48.2,
+    "cash_pct": 51.8,
     "adjustments": [
-      "VIX 보정: 27.2 (HIGH) → 투자비중 ×0.75",
-      "2D 선제방어: credit_z=-3.0, MOVE_z=2.6",
+      "레짐 보정: CAUTION→PRE_BEAR (US=STRONG_BEAR, NW=-0.395)",
+      "VIX 보정: 26.8 (HIGH) → 투자비중 ×0.75",
+      "NW 부정(-0.395): 레버리지 30% 축소",
+      "2D 선제방어: credit_z=0.3, MOVE_z=3.9",
       "COT: S&P 매도 포지셔닝 → 리스크ARM -5%p",
-      "SHIELD: S1: 방산 22.3% (한도 30%)",
-      "SHIELD: S1: 에너지화학 20.8% (한도 30%)"
+      "충격 보정: RATE (확신도 65%)",
+      "SHIELD: S1: 반도체 38.5% (한도 30%)",
+      "SHIELD: S1: 방산 27.6% (한도 30%)",
+      "SHIELD: S2: LEVEL_3 (MDD -27.7%) 전량 현금화",
+      "SHIELD: S3: 3개 동시하락 (avg -17.4%)",
+      "일일 변경 ±20%p 제한 적용",
+      "CONTRARIAN: VIX 26.8 + EWY 5일 -5.5% = 과매도 (Fear=92)"
     ],
     "warnings": [
-      "SHIELD 방어 등급: ORANGE",
-      "레짐 변경 감지: PRE_BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
+      "SHIELD 방어 등급: RED",
+      "레짐 변경 감지: CAUTION→PRE_BEAR. 2일 확인 대기 중. 배분 동결."
     ]
   },
   "shield_report": {
-    "timestamp": "2026-03-16T18:40:47.389932",
-    "overall_level": "ORANGE",
+    "timestamp": "2026-03-23T20:54:00.156916",
+    "overall_level": "RED",
     "mdd_status": {
       "peak_equity": 40863823,
-      "current_equity": 40863823,
-      "current_mdd_pct": 0.0,
-      "max_mdd_pct": 0.0,
-      "max_mdd_date": "",
-      "killswitch_level": "NONE",
-      "killswitch_action": ""
+      "current_equity": 29560759,
+      "current_mdd_pct": -27.66,
+      "max_mdd_pct": -27.66,
+      "max_mdd_date": "2026-03-23",
+      "killswitch_level": "LEVEL_3",
+      "killswitch_action": "전량 현금화 + 수동모드"
     },
-    "stock_alerts": [],
+    "stock_alerts": [
+      {
+        "ticker": "005380",
+        "name": "현대차",
+        "pnl_pct": -15.52,
+        "alert_type": "DEEP_LOSS",
+        "message": "현대차(005380) -15.5%"
+      },
+      {
+        "ticker": "064350",
+        "name": "현대로템",
+        "pnl_pct": -20.48,
+        "alert_type": "DEEP_LOSS",
+        "message": "현대로템(064350) -20.5%"
+      },
+      {
+        "ticker": "272210",
+        "name": "한화시스템",
+        "pnl_pct": -16.15,
+        "alert_type": "DEEP_LOSS",
+        "message": "한화시스템(272210) -16.1%"
+      }
+    ],
     "systemic_risk": {
-      "simultaneous_decline_count": 2,
+      "simultaneous_decline_count": 3,
       "decline_tickers": [
-        "현대차(-9.6%)",
-        "셀트리온(-12.4%)"
+        "현대차(-15.5%)",
+        "현대로템(-20.5%)",
+        "한화시스템(-16.1%)"
       ],
-      "avg_decline_pct": -11.0,
-      "severity": "WARNING",
-      "message": "2개 종목 동시 하락 중"
+      "avg_decline_pct": -17.38,
+      "severity": "DANGER",
+      "message": "3개 종목 동시 -5.0%+ 하락"
     },
     "sector_overlaps": [
       {
-        "sector": "방산",
+        "sector": "반도체",
         "swing_holdings": [
-          "한미반도체(042700, 13.9%)",
-          "현대로템(064350, 0.6%)",
-          "한화시스템(272210, 7.8%)"
+          "SK하이닉스(000660, 34.1%)",
+          "한화오션(042660, 4.4%)"
         ],
         "etf_holdings": [],
-        "total_exposure_pct": 22.3,
+        "total_exposure_pct": 38.5,
         "limit_pct": 30,
         "severity": "WARNING"
       },
       {
-        "sector": "에너지화학",
+        "sector": "방산",
         "swing_holdings": [
-          "미래에셋증권(006800, 6.1%)",
-          "S-Oil(010950, 7.9%)",
-          "흥구석유(024060, 6.8%)"
+          "한미반도체(042700, 17.8%)",
+          "현대로템(064350, 0.6%)",
+          "한화시스템(272210, 9.2%)"
         ],
         "etf_holdings": [],
-        "total_exposure_pct": 20.8,
+        "total_exposure_pct": 27.6,
         "limit_pct": 30,
         "severity": "WARNING"
       }
     ]
   },
   "cot_signal": {
-    "date": "2026-03-16",
-    "report_date": "2026-03-10",
+    "date": "2026-03-23",
+    "report_date": "2026-03-17",
     "stale_days": 6,
     "composite_direction": "NEUTRAL",
     "composite_score": -0.075,
     "contracts": {
       "sp500": {
         "label": "S&P 500 E-mini",
-        "net": 898852,
-        "long": 1095733,
-        "short": 196881,
-        "z": -1.25,
-        "slow_z": 0.13,
-        "fast_z": -1.25,
+        "net": 886828,
+        "long": 1086532,
+        "short": 199704,
+        "z": -1.31,
+        "slow_z": -0.13,
+        "fast_z": -1.31,
         "fast_z_used": true,
         "direction": "BEARISH",
-        "net_change_1w": -105916,
-        "net_change_4w": -25844,
-        "percentile_52w": 51.9
+        "net_change_1w": -12024,
+        "net_change_4w": -90037,
+        "percentile_52w": 44.2
       },
       "gold": {
         "label": "Gold COMEX",
-        "net": 98399,
-        "long": 125077,
-        "short": 26678,
-        "z": -1.19,
-        "slow_z": -1.19,
-        "fast_z": -0.83,
+        "net": 102043,
+        "long": 130147,
+        "short": 28104,
+        "z": -1.02,
+        "slow_z": -1.02,
+        "fast_z": -0.53,
         "fast_z_used": false,
         "direction": "BULLISH",
-        "net_change_1w": 482,
-        "net_change_4w": 6377,
-        "percentile_52w": 13.5
+        "net_change_1w": 3644,
+        "net_change_4w": 6150,
+        "percentile_52w": 19.2
       },
       "treasury10y": {
         "label": "10Y T-Note",
-        "net": 2044727,
-        "long": 3006688,
-        "short": 961961,
-        "z": -0.55,
-        "slow_z": -0.55,
-        "fast_z": -0.54,
+        "net": 2087270,
+        "long": 2965354,
+        "short": 878084,
+        "z": -0.34,
+        "slow_z": -0.34,
+        "fast_z": -0.2,
         "fast_z_used": false,
         "direction": "NEUTRAL",
-        "net_change_1w": -53809,
-        "net_change_4w": -101432,
-        "percentile_52w": 15.4
+        "net_change_1w": 42543,
+        "net_change_4w": -173543,
+        "percentile_52w": 38.5
       },
       "crude_oil": {
         "label": "WTI Crude Oil",
-        "net": 92122,
-        "long": 189998,
-        "short": 97876,
-        "z": 1.44,
-        "slow_z": 0.53,
-        "fast_z": 1.44,
+        "net": 96371,
+        "long": 189353,
+        "short": 92982,
+        "z": 1.41,
+        "slow_z": 0.6,
+        "fast_z": 1.41,
         "fast_z_used": true,
         "direction": "NEUTRAL",
-        "net_change_1w": 23737,
-        "net_change_4w": 12976,
-        "percentile_52w": 65.4
+        "net_change_1w": 4249,
+        "net_change_4w": 32586,
+        "percentile_52w": 69.2
       }
     },
     "signals": {
@@ -1520,38 +1445,38 @@
     }
   },
   "liquidity_signal": {
-    "date": "2026-03-16",
-    "data_date": "2026-03-13",
-    "stale_days": 3,
+    "date": "2026-03-22",
+    "data_date": "2026-03-20",
+    "stale_days": 2,
     "regime": "AMPLE",
     "composite_direction": "MILD_AMPLE",
-    "composite_score": 0.278,
+    "composite_score": 0.245,
     "indicators": {
       "net_liquidity": {
-        "value": 5807.7,
-        "z": 1.54,
-        "change_20d": 101.0
+        "value": 5802.1,
+        "z": 1.19,
+        "change_20d": 102.3
       },
       "m2_yoy_pct": {
         "value": 3.78,
-        "z": -1.99
+        "z": -1.58
       },
       "reserves": {
         "value": 2967.9,
-        "z": 0.39,
+        "z": 0.23,
         "change_20d": 0.0
       },
       "rrp": {
-        "value": 0.4,
-        "change_20d": 0.0
+        "value": 0.8,
+        "change_20d": -0.1
       },
       "tga": {
-        "value": 838.2,
-        "change_20d": -77.1
+        "value": 853.1,
+        "change_20d": -59.7
       },
       "walcl": {
-        "value": 6646.3,
-        "change_20d": 24.0
+        "value": 6655.9,
+        "change_20d": 42.5
       }
     },
     "signals": {
@@ -1561,46 +1486,69 @@
     }
   },
   "regime_macro": {
-    "date": "2026-03-16",
+    "date": "2026-03-23",
     "current_regime": "CAUTION",
     "macro_score": 52,
     "macro_grade": "보통",
     "position_multiplier": 1.0,
     "signals": {
-      "ma20_slope": 1.23,
-      "ma60_slope": 4.4,
+      "ma20_slope": 0.32,
+      "ma60_slope": 4.72,
       "gap_ma20_pct": 13.1,
-      "rv_current": 94.0,
-      "rv_declining": true,
-      "vix_level": 27.2,
+      "rv_current": 100.0,
+      "rv_declining": false,
+      "vix_level": 26.8,
       "us_grade": "NEUTRAL",
-      "ewy_5d": -4.72,
-      "regime_gap": "MA20 위 13.1%, RV 94%ile → CAUTION"
+      "ewy_5d": 1.31,
+      "deriv_grade": "STRONG_BULL",
+      "deriv_score": 79.4,
+      "short_adj": 0,
+      "short_surge_count": 61,
+      "short_cover_count": 79,
+      "regime_gap": "MA20 위 13.1%, RV 100%ile → CAUTION"
     },
     "recommendation": "CAUTION 유지 가능성. 기본 포지션 유지."
   },
   "perplexity": {
-    "verification_date": "2026-03-14",
-    "overall_confidence": 0.81,
+    "verification_date": "2026-03-18",
+    "overall_confidence": 0.69,
     "stock_verifications": [
       {
-        "ticker": "267260",
-        "name": "HD현대일lek트릭",
-        "confidence_score": 0.4,
-        "verdict": "PARTIALLY_CONFIRMED",
+        "ticker": "278470",
+        "name": "에이피알",
+        "confidence_score": 0.15,
+        "verdict": "HALLUCINATION_DETECTED",
         "summary": "",
         "additional_findings": [
-          "2026년 매출 가이던스 4.35조원, 수주 42.2억달러 제시(보수적 전망)[1][2][5][6]",
-          "증권사 2026년 영업이익 전망 1.2~1.3조원 수준, Outperform 유지 및 목표가 상향[1][2][3]",
-          "4분기 호실적(매출 42.6%↑, 영업이익 93%↑)으로 주가 강세 기록[3][7]"
+          "에이피알의 핵심 사업은 뷰티테크 분야이며, 2026년 매출액 2조 866억원(+42% YoY), 영업이익 4,704억원(+37% YoY) 성장 전망[1]",
+          "2026년 하반기 EBD(에너지 기반 디바이스) 의료기기 출시 예정으로 신사업 확대 중[3][4]",
+          "인도 시장 진출 및 유럽 법인 영업 개시(2026년 3월) 등 해외 확장 진행 중[4][5]"
+        ]
+      },
+      {
+        "ticker": "011210",
+        "name": "현대위아",
+        "confidence_score": 0.75,
+        "verdict": "PARTIALLY_CONFIRMED",
+        "summary": "AI의 'K-방산 수출 직접 수혜주' 판단은 사실이나, '파워팩 핵심 공급사'라는 주장은 오류. 현대위아는 화포(포열) 제조사이지 파워팩 공급사가 아님. 또한 독일 부품 의존도로 인한 수출 제약 리스크가 존재하나 AI가 언급하지 않음.",
+        "additional_findings": [
+          "현대위아는 국내 유일의 화포 제작사로 1977년 이후 약 2만 문의 포열 생산 경력 보유[3]",
+          "K2 전차용 120mm 포열도 제조하며 터키 알타이 전차에도 기술 수출[6]",
+          "경량화 105mm 자주포(최대 사거리 18km)로 사우디 등 신규 시장 개척 중[2][3][5]"
         ]
       }
     ],
     "thesis_verifications": [
       {
-        "sector": "정유",
+        "sector": "에너지/정제",
         "confidence_score": 0.95,
         "verdict": "CONFIRMED",
+        "summary": ""
+      },
+      {
+        "sector": "원전",
+        "confidence_score": 0.65,
+        "verdict": "PARTIALLY_CONFIRMED",
         "summary": ""
       },
       {
@@ -1608,15 +1556,48 @@
         "confidence_score": 0.95,
         "verdict": "CONFIRMED",
         "summary": ""
-      },
-      {
-        "sector": "전력기기",
-        "confidence_score": 0.95,
-        "verdict": "CONFIRMED",
-        "summary": ""
       }
     ],
-    "warnings": [],
-    "hallucination_flags": []
+    "warnings": [
+      "환각 감지: 에이피알 — AI 촉매 주장이 사실과 다름"
+    ],
+    "hallucination_flags": [
+      {
+        "ticker": "278470",
+        "name": "에이피알",
+        "catalyst_verification": [
+          {
+            "claim": "방산 최우선 부스트 대상으로 thesis 강력 부합",
+            "verified": false,
+            "evidence": "검색 결과에서 에이피알의 주요 사업은 뷰티 디바이스(부스터 프로, 스킨부스터 등) 및 화장품 관련 제품입니다. 방산(국방산업) 관련 사업이나 정부 방산 부스트 대상이라는 언급이 전혀 없습니다. 다만 병역지정업체 선정이라는 R&D 공신력 관련 소식만 있습니다.",
+            "source": "[1][2][3][4][5][6]"
+          },
+          {
+            "claim": "60일선 돌파 후 재진입 시점",
+            "verified": "unverifiable",
+            "evidence": "기술적 분석(차트 패턴, 이동평균선)에 대한 정보가 검색 결과에 없습니다. 현재가는 349,000원(2026년 3월 17일 기준)으로 기록되어 있으나, 60일선 위치나 돌파 여부에 대한 데이터가 없습니다.",
+            "source": "[4]"
+          }
+        ],
+        "risk_verification": [
+          {
+            "claim": "주장된 리스크: 없음",
+            "verified": false,
+            "actual_status": "여러 리스크 요인이 존재합니다: (1) 높은 밸류에이션 - PER 30.7배, PBR 19.17배로 매우 높음[1]; (2) 대규모 CAPEX 투자 계획 - 2026년 500억원 규모[3]; (3) 신사업(EBD 의료기기) 출시 성공 불확실성[4]; (4) 유럽 법인 영업 개시 지연(2026년 3월부터 본격 개시 예정)[5]",
+            "source": "[1][3][4][5]"
+          }
+        ],
+        "additional_findings": [
+          "에이피알의 핵심 사업은 뷰티테크 분야이며, 2026년 매출액 2조 866억원(+42% YoY), 영업이익 4,704억원(+37% YoY) 성장 전망[1]",
+          "2026년 하반기 EBD(에너지 기반 디바이스) 의료기기 출시 예정으로 신사업 확대 중[3][4]",
+          "인도 시장 진출 및 유럽 법인 영업 개시(2026년 3월) 등 해외 확장 진행 중[4][5]",
+          "CES 2026 참가로 글로벌 K-뷰티테크 위상 강화 추진[6]",
+          "목표주가는 330,000원~360,000원 범위로 현재가 349,000원 대비 상승여력 제한적[3][5]",
+          "방산 관련 사업이나 정부 부스트 대상이라는 근거가 전혀 없음 - AI의 주요 판단 근거가 사실과 맞지 않음"
+        ],
+        "confidence_score": 0.15,
+        "verdict": "HALLUCINATION_DETECTED"
+      }
+    ]
   }
 }
