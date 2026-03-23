@@ -383,18 +383,30 @@ class ScoringEngine:
     # S5: 수급/스마트머니 스코어 (가중치 0.15)
     # ═══════════════════════════════════════════════════════
     def score_smart_money(self, row: pd.Series) -> ScoreResult:
-        """v12.5 수급/스마트머니 — 7개 구성요소 + ETF 왜곡 보정
+        """수급/스마트머니 — SD V2 우선, 없으면 V1 폴백.
 
-        (a) OBV 다이버전스      0.25  기술적 매집 신호
-        (b) 외국인 연속 매수     0.20  연속일수 구간별 채점
-        (c) 기관 연속 매수       0.20  연속일수 구간별 채점 (ETF 왜곡 할인)
-        (d) DRS                 0.15  분배 리스크
-        (e) 수급 다이버전스   ±0.10  기관매집/쌍매도 (ETF 왜곡 시 할인)
-        (f) 공매도 보너스        0.05
-        (g) 연기금 보너스        0.05
+        SD V2: 금액 기반 멀티타임프레임 (5/20/60일) + 5패턴 분류
+        V1 (legacy): 연속일수 기반 7개 구성요소 + ETF 왜곡 보정
         """
         w = self.weights.get('smart_money', 0.15)
         cfg = self.cfg.get('smart_money', {})
+
+        # ── SD V2 스코어가 있으면 직접 사용 (scan_buy에서 주입) ──
+        sd_v2_score = row.get('sd_score_v2', None)
+        if sd_v2_score is not None and sd_v2_score >= 0:
+            bd = {
+                'source': 'SD_V2',
+                'sd_score': round(float(sd_v2_score), 4),
+                'sd_pattern': str(row.get('sd_pattern', 'X')),
+            }
+            return ScoreResult(
+                name="S5_SmartMoney",
+                score=min(float(sd_v2_score), 1.0),
+                weight=w,
+                breakdown=bd,
+            )
+
+        # ── V1 폴백: 기존 연속일수 기반 로직 ──
         score = 0.0
         bd = {}
 

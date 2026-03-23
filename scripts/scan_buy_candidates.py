@@ -518,6 +518,10 @@ def quick_csv_score(df: pd.DataFrame, idx: int) -> dict | None:
         inst_streak = _calc_streak_csv(i_series)
         inst_net_5d = int(df["Inst_Net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
 
+    # SD Score V2 (CSV 경로)
+    from src.alpha.factors.sd_score_v2 import compute_sd_features as _compute_sd_csv
+    _sd_csv = _compute_sd_csv(df, idx, "CSV")
+
     # OBV 추세
     obv = row.get("OBV", 0) or 0
     obv_20 = df["OBV"].iloc[max(0, idx - 20)] if "OBV" in df.columns else 0
@@ -549,6 +553,12 @@ def quick_csv_score(df: pd.DataFrame, idx: int) -> dict | None:
         "inst_streak": inst_streak,
         "foreign_amount_5d": foreign_net_5d,
         "inst_amount_5d": inst_net_5d,
+        "sd_pattern": _sd_csv.pattern,
+        "sd_pattern_name": _sd_csv.pattern_name,
+        "sd_score_v2": _sd_csv.sd_score,
+        "foreign_net_20d": _sd_csv.foreign_net_20d,
+        "inst_net_20d": _sd_csv.inst_net_20d,
+        "individual_net_20d": _sd_csv.individual_net_20d,
         "foreign_net_5d": float(foreign_net_5d),
         "short_balance_chg_5d": 0.0,
         "pct_of_52w_high": pct_of_52w,
@@ -1081,6 +1091,21 @@ def run_pipeline(
                 _step3 = len(_quality)
 
                 print(f"      필터: 등급{_co_grade}={_step1} → 시총={_step2} → V2팩터={_step3}")
+
+                # 4) SD V2 패턴 F(물림) 차단 — 스마트머니 이탈 종목은 역발상에서도 제외
+                _before_sd = len(_quality)
+                _sd_killed = []
+                _sd_passed = []
+                for c in _quality:
+                    if c.get("sd_pattern") == "F":
+                        _sd_killed.append(c)
+                    else:
+                        _sd_passed.append(c)
+                _quality = _sd_passed
+                if _sd_killed:
+                    _killed_names = ", ".join(f'{c["name"]}(F:{c.get("sd_pattern_name","물림")})' for c in _sd_killed)
+                    print(f"      SD V2 F패턴 차단: {_killed_names}")
+                print(f"      → SD필터={len(_quality)} (F차단 {_before_sd - len(_quality)}건)")
 
                 if _quality:
                     _quality.sort(key=lambda c: c.get("composite_score", 0), reverse=True)
@@ -1690,7 +1715,7 @@ def scan_all(
         row = df.iloc[idx]
         name = name_map.get(ticker, ticker)
 
-        # 수급 streak 계산
+        # 수급 streak 계산 (하위 호환)
         foreign_streak = 0
         inst_streak = 0
         foreign_amount_5d = 0
@@ -1705,6 +1730,12 @@ def scan_all(
             i_series = df["inst_net"].iloc[max(0, idx - 19) : idx + 1].fillna(0)
             inst_streak = _calc_streak(i_series)
             inst_amount_5d = int(df["inst_net"].iloc[max(0, idx - 4) : idx + 1].fillna(0).sum())
+
+        # ── SD Score V2: 금액 기반 멀티프레임 수급 분석 ──
+        from src.alpha.factors.sd_score_v2 import compute_sd_features
+        sd_v2 = compute_sd_features(df, idx, ticker)
+        sd_pattern = sd_v2.pattern        # A/B/C/D/F/X
+        sd_score_v2 = sd_v2.sd_score      # 0.0~1.0
 
         sig = {
             "ticker": ticker,
@@ -1732,6 +1763,13 @@ def scan_all(
             "inst_streak": inst_streak,
             "foreign_amount_5d": foreign_amount_5d,
             "inst_amount_5d": inst_amount_5d,
+            # SD V2 수급 패턴
+            "sd_pattern": sd_pattern,
+            "sd_pattern_name": sd_v2.pattern_name,
+            "sd_score_v2": sd_score_v2,
+            "foreign_net_20d": sd_v2.foreign_net_20d,
+            "inst_net_20d": sd_v2.inst_net_20d,
+            "individual_net_20d": sd_v2.individual_net_20d,
             # SD 교차필터 (Part 2: 외국인 × 공매도)
             "foreign_net_5d": float(row.get("foreign_net_5d", 0) or 0),
             "short_balance_chg_5d": float(row.get("short_balance_chg_5d", 0) or 0),
@@ -2184,28 +2222,30 @@ def format_telegram_message(candidates: list[dict], stats: dict) -> str:
                 f"{guide['shares']}주 \u00d7 {guide['price']:,}원"
             )
 
-        # 수급 정보 (streak + 5일 순매수 금액)
+        # ── SD V2 수급 패턴 표시 ──
+        sd_pat = sig.get("sd_pattern", "X")
+        sd_pat_name = sig.get("sd_pattern_name", "")
+        sd_v2_score = sig.get("sd_score_v2", 0)
+        f_20d = sig.get("foreign_net_20d", 0)
+        i_20d = sig.get("inst_net_20d", 0)
+        ind_20d = sig.get("individual_net_20d", 0)
+
+        pat_emoji = {"A": "\U0001f7e2", "B": "\U0001f535", "C": "\U0001f7e1",
+                     "D": "\U0001f7e0", "F": "\U0001f534", "X": "\u26aa"}.get(sd_pat, "\u26aa")
+        lines.append(
+            f"수급 {pat_emoji}{sd_pat}({sd_pat_name}) SD={sd_v2_score:.2f}"
+            f" | 외{f_20d:+,.0f}억 기{i_20d:+,.0f}억 개{ind_20d:+,.0f}억 (20d)"
+        )
+        # 하위호환: 기존 streak 정보도 표시
         f_streak = sig.get("foreign_streak", 0)
         i_streak = sig.get("inst_streak", 0)
-        f_amt = sig.get("foreign_amount_5d", 0)
-        i_amt = sig.get("inst_amount_5d", 0)
-        if f_streak != 0 or i_streak != 0 or f_amt != 0 or i_amt != 0:
-            supply_parts = []
-            if f_streak > 0:
-                supply_parts.append(f"\uc678\uc778 {f_streak}D\uc5f0\uc18d\ub9e4\uc218")
-            elif f_streak < 0:
-                supply_parts.append(f"\uc678\uc778 {abs(f_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
-            if f_amt != 0:
-                f_sign = "+" if f_amt > 0 else ""
-                supply_parts.append(f"\uc678\uc778\u0035D {f_sign}{f_amt/1e4:,.0f}\ub9cc")
-            if i_streak > 0:
-                supply_parts.append(f"\uae30\uad00 {i_streak}D\uc5f0\uc18d\ub9e4\uc218")
-            elif i_streak < 0:
-                supply_parts.append(f"\uae30\uad00 {abs(i_streak)}D\uc5f0\uc18d\ub9e4\ub3c4")
-            if i_amt != 0:
-                i_sign = "+" if i_amt > 0 else ""
-                supply_parts.append(f"\uae30\uad00\u0035D {i_sign}{i_amt/1e4:,.0f}\ub9cc")
-            lines.append(f"\uc218\uae09: {' | '.join(supply_parts)}")
+        if f_streak != 0 or i_streak != 0:
+            streak_parts = []
+            if f_streak != 0:
+                streak_parts.append(f"외인{f_streak:+d}일")
+            if i_streak != 0:
+                streak_parts.append(f"기관{i_streak:+d}일")
+            lines[-1] += f" | {'·'.join(streak_parts)}"
 
         # 태그
         if tags:

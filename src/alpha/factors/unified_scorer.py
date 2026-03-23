@@ -221,6 +221,18 @@ class UnifiedV2Scorer:
                 continue
 
             row = df.iloc[idx]
+
+            # SD V2 주입: parquet row에 sd_score_v2가 없으면 직접 계산
+            if 'sd_score_v2' not in row.index:
+                try:
+                    from src.alpha.factors.sd_score_v2 import compute_sd_features
+                    sd_feat = compute_sd_features(df, idx, ticker)
+                    row = row.copy()
+                    row['sd_score_v2'] = sd_feat.sd_score
+                    row['sd_pattern'] = sd_feat.pattern
+                except Exception:
+                    pass
+
             result = self.score(row, ticker, regime_level)
 
             # 기존 signal dict 업데이트 (gate/trigger 정보는 유지)
