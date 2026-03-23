@@ -999,66 +999,105 @@ def run_pipeline(
         print(f"\n  ═══ MACRO GATE: {color_emoji} {macro_gate_color} ({cross_regime} / {us_grade}{compound_str}) → {cap_str}, pos×{macro_gate_pos_mult:.1f} ═══")
 
         if macro_gate_cap == 0:
-            # ─── 역발상 우회 체크 ───
+            # ─── 역발상 우회 체크 (긴급1+2 통합) ───
             _contrarian_ov = _mg.get("contrarian_override", {})
             _sw_cfg_gate = _full_cfg.get("swing_philosophy", {})
+
+            # BRAIN contrarian_opportunity 확인
+            _brain_path = Path(__file__).resolve().parent.parent / "data" / "brain_decision.json"
+            _brain_contrarian = False
+            _brain_fear = 0.0
+            try:
+                if _brain_path.exists():
+                    with open(_brain_path, encoding="utf-8") as _bf:
+                        _brain_data = json.load(_bf)
+                    _brain_contrarian = _brain_data.get("contrarian_opportunity", False)
+                    _brain_fear = _brain_data.get("fear_index", 0)
+            except Exception:
+                pass
+
             _contrarian_active = (
                 _contrarian_ov.get("enabled", False)
                 and _sw_cfg_gate.get("enabled", False)
+                and _brain_contrarian  # BRAIN이 "이건 기회"라고 판단해야 작동
             )
+
             if _contrarian_active:
-                # RED/STRONG_BEAR별 파라미터
-                if us_grade == "STRONG_BEAR":
-                    _co_cap = _contrarian_ov.get("strong_bear_max_survivors", 3)
-                    _co_mult = _contrarian_ov.get("strong_bear_position_mult", 0.4)
-                    _co_grade = _contrarian_ov.get("strong_bear_min_grade", "A")
-                else:
-                    _co_cap = _contrarian_ov.get("red_max_survivors", 2)
-                    _co_mult = _contrarian_ov.get("red_position_mult", 0.3)
-                    _co_grade = _contrarian_ov.get("red_min_grade", "A")
-                _co_min_cap = _contrarian_ov.get("red_min_market_cap_억", 5000)
+                _co_cond = _contrarian_ov.get("conditions", {})
+                _co_cap = _contrarian_ov.get("cap", 2)
+                _co_mult = _contrarian_ov.get("position_mult", 0.3)
+                _co_grade = _co_cond.get("min_grade", "A")
+                _co_min_cap = _co_cond.get("min_market_cap_억", 5000)
+                _co_min_q = _co_cond.get("min_quality_score", 0.6)
+                _co_min_v = _co_cond.get("min_value_score", 0.6)
+                _co_min_pos = _co_cond.get("min_positive_factors", 3)
+                _co_trap = _co_cond.get("trap_filter", True)
 
-                # 등급 필터: A등급 이상만 (SignalEngine grade: A/B/C/F)
+                print(f"  BRAIN: contrarian=True (Fear={_brain_fear:.0f})")
+
+                # 1) 등급 필터
                 _grade_order = {"S": 0, "A": 1, "B": 2, "C": 3, "F": 4}
-                _min_grade_idx = _grade_order.get(_co_grade, 1)
-                _quality = [
-                    c for c in candidates
-                    if _grade_order.get(c.get("grade", "F"), 4) <= _min_grade_idx
-                ]
+                _min_idx = _grade_order.get(_co_grade, 1)
+                _quality = [c for c in candidates
+                            if _grade_order.get(c.get("grade", "F"), 4) <= _min_idx]
+                _step1 = len(_quality)
 
-                # 시총 필터: 대형주만 (market_cap은 원 단위, 1억=1e8)
-                if _co_min_cap > 0:
-                    _has_cap = any(c.get("market_cap", 0) > 0 for c in _quality)
-                    if _has_cap:
-                        _quality = [
-                            c for c in _quality
-                            if c.get("market_cap", 0) / 1e8 >= _co_min_cap
-                        ]
+                # 2) 시총 필터
+                _has_cap = any(c.get("market_cap", 0) > 0 for c in _quality)
+                if _co_min_cap > 0 and _has_cap:
+                    _quality = [c for c in _quality
+                                if c.get("market_cap", 0) / 1e8 >= _co_min_cap]
+                elif not _has_cap:
+                    print(f"      (시총 데이터 없음 — 시총 필터 건너뜀)")
+                _step2 = len(_quality)
+
+                # 3) V2 팩터 필터 (Q_Score, V_Score, 4팩터 양수)
+                # V2 스코어가 후보에 있으면 적용, 없으면 건너뜀
+                _v2_filtered = []
+                for c in _quality:
+                    q_score = c.get("quality_score", c.get("q_score", -1))
+                    v_score = c.get("value_score", c.get("v_score", -1))
+                    factor_scores = c.get("factor_scores", {})
+
+                    # Q/V 스코어가 없으면(-1) 필터 건너뜀
+                    q_ok = q_score >= _co_min_q if q_score >= 0 else True
+                    v_ok = v_score >= _co_min_v if v_score >= 0 else True
+
+                    # 4팩터 양수 개수
+                    if factor_scores:
+                        pos_count = sum(1 for v in factor_scores.values() if v > 0)
+                        pos_ok = pos_count >= _co_min_pos
                     else:
-                        print(f"      (시총 데이터 없음 — 시총 필터 건너뜀)")
-                        # 시총 0이면 필터 건너뜀 (API 실패 대비)
+                        pos_ok = True  # 데이터 없으면 통과
+
+                    # 밸류트랩 필터
+                    trap_ok = True
+                    if _co_trap and c.get("is_value_trap", False):
+                        trap_ok = False
+
+                    if q_ok and v_ok and pos_ok and trap_ok:
+                        _v2_filtered.append(c)
+                _quality = _v2_filtered
+                _step3 = len(_quality)
+
+                print(f"      필터: 등급{_co_grade}={_step1} → 시총={_step2} → V2팩터={_step3}")
 
                 if _quality:
-                    # 통합 점수 높은 순 정렬 → cap 수만큼 통과
                     _quality.sort(key=lambda c: c.get("composite_score", 0), reverse=True)
                     _passed = _quality[:_co_cap]
                     _passed_tickers = {c["ticker"] for c in _passed}
-                    _killed = [
-                        dict(c, v9_kill_reasons=["MACRO_GATE_RED"])
-                        for c in candidates if c["ticker"] not in _passed_tickers
-                    ]
-                    # 포지션 배수 축소 적용
                     macro_gate_pos_mult = _co_mult
                     macro_gate_cap = _co_cap
                     _names = ", ".join(f'{c["name"]}({c.get("grade","?")})' for c in _passed)
                     print(f"  >>> 역발상 우회: {len(candidates)}건 중 {len(_passed)}건 통과 (pos×{_co_mult}) <<<")
                     print(f"      통과: {_names}")
-                    candidates = _passed  # 이후 kill filter → rank → tag 계속 진행
+                    candidates = _passed
                 else:
-                    print(f"  >>> 역발상 모드이나 {_co_grade}등급+시총{_co_min_cap}억 충족 0건 → 전량 KILL <<<")
+                    print(f"  >>> 역발상 조건 충족 0건 → 전량 KILL <<<")
                     return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
             else:
-                print(f"  >>> 매수 전면 차단 — 후보 {len(candidates)}건 전량 KILL <<<")
+                _reason = "BRAIN contrarian=False" if not _brain_contrarian else "설정 비활성"
+                print(f"  >>> 매수 전면 차단 ({_reason}) — 후보 {len(candidates)}건 전량 KILL <<<")
                 return [], [dict(c, v9_kill_reasons=["MACRO_GATE_RED"]) for c in candidates]
 
     # ─── END MACRO GATE ───────────────────────────────────────────
@@ -1501,6 +1540,9 @@ def scan_all(
     _v2_enabled = engine.config.get("alpha_v2", {}).get("enabled", False)
     _v2_scorer = None
     _v2_regime_level = None
+    _v2_regime_str = "CAUTION"
+    _v_scorer = None
+    _q_scorer = None
     if _v2_enabled:
         from src.alpha.factors.regime_weighted_scorer import RegimeWeightedScorer
         from src.alpha.regime import AlphaRegime
@@ -1508,6 +1550,16 @@ def scan_all(
         _v2_scorer = RegimeWeightedScorer(engine.config)
         _alpha_regime = AlphaRegime(engine.config)
         _v2_regime_level = _alpha_regime.detect_live()
+        _v2_regime_str = _v2_regime_level.value if _v2_regime_level else "CAUTION"
+
+        # V/Q 스코어러 (contrarian 필터용)
+        try:
+            from src.alpha.factors.value_composite import ValueComposite
+            from src.alpha.factors.quality_composite import QualityComposite
+            _v_scorer = ValueComposite(engine.config)
+            _q_scorer = QualityComposite(engine.config)
+        except Exception:
+            pass
         print(f"  V2 스코어러 활성: 레짐={_v2_regime_level.value}")
 
     # FundamentalEngine (Earnings Momentum용)
@@ -1581,6 +1633,23 @@ def scan_all(
             grade = _v2_gr.grade
             result["zone_score"] = _v2_gr.total_score
             result["grade"] = grade
+
+            # V/Q 스코어 + 4팩터 (contrarian 필터용)
+            if _v_scorer:
+                try:
+                    result["value_score"] = _v_scorer.score(ticker, _v2_regime_str)
+                except Exception:
+                    result["value_score"] = -1
+            if _q_scorer:
+                try:
+                    result["quality_score"] = _q_scorer.score(ticker, _v2_regime_str)
+                except Exception:
+                    result["quality_score"] = -1
+            # 4팩터 개별 점수 (GradeResult.scores)
+            if hasattr(_v2_gr, "scores") and _v2_gr.scores:
+                result["factor_scores"] = {
+                    s.name: s.score for s in _v2_gr.scores
+                }
 
         stats["passed_pipeline"] += 1
 

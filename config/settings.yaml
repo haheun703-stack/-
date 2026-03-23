@@ -1702,14 +1702,16 @@ nightwatch:
     # ─── 역발상 우회 (swing_philosophy.enabled 시 RED에서도 우량주 선별 매수) ───
     # "워런 버핏은 전쟁 전후에 샀다" — RED ≠ 전면금지, RED = 까다롭게 고른다
     contrarian_override:
-      enabled: true               # swing_philosophy.enabled도 함께 켜져야 작동
-      red_max_survivors: 2        # RED 시 최대 통과 종목 수
-      red_position_mult: 0.3     # RED 시 포지션 30% (분할진입 1단계)
-      red_min_grade: "B"          # B등급 이상 통과 (대형주는 하락장에서 B등급)
-      red_min_market_cap_억: 5000 # 시총 5000억 이상 (대형주)
-      strong_bear_max_survivors: 3  # STRONG_BEAR 시 최대 3종목
-      strong_bear_position_mult: 0.4  # 포지션 40%
-      strong_bear_min_grade: "B"  # B등급 이상 (대형 우량주 포함)
+      enabled: true               # BRAIN contrarian_opportunity도 true여야 작동
+      cap: 2                      # RED에서 최대 2종목 통과
+      position_mult: 0.3          # 포지션 30% (분할진입 1단계)
+      conditions:
+        min_grade: "A"              # A등급 필수
+        min_quality_score: 0.6      # Q_Score >= 0.6
+        min_value_score: 0.6        # V_Score >= 0.6
+        min_market_cap_억: 5000     # 시총 5,000억 이상
+        min_positive_factors: 3     # 4팩터(SD/M/V/Q) 중 3개+ 양수
+        trap_filter: true           # LENS 3 밸류트랩 종목 제외
 
 # ─── 3단 예측 체인 (유럽장 오픈 기반) ───
 predict_chain:

@@ -77,6 +77,11 @@ class BrainDecision:
     warnings: list[str]         # 경고 사항
     briefing: str               # 텔레그램 브리핑 텍스트
 
+    # 긴급2: contrarian 시그널
+    contrarian_opportunity: bool = False
+    contrarian_reason: str = ""
+    fear_index: float = 0.0
+
     def to_dict(self) -> dict:
         return {
             "timestamp": self.timestamp,
@@ -91,6 +96,9 @@ class BrainDecision:
             "adjustments": self.adjustments,
             "warnings": self.warnings,
             "briefing": self.briefing,
+            "contrarian_opportunity": self.contrarian_opportunity,
+            "contrarian_reason": self.contrarian_reason,
+            "fear_index": round(self.fear_index, 1),
         }
 
 
@@ -371,6 +379,40 @@ class Brain:
             ict_data=ict_data,
         )
 
+        # ── 12.5. Contrarian 시그널 판단 ──
+        # "워런 버핏은 전쟁 전후에 샀다" — 공포 = 기회
+        contrarian_opp = False
+        contrarian_reason = ""
+        fear_index = 0.0
+
+        # EWY 5일 수익률 로드
+        ewy_5d_ret = 0.0
+        try:
+            import pandas as pd
+            us_df = pd.read_parquet(DATA_DIR / "us_market" / "us_daily.parquet")
+            if "ewy_ret_5d" in us_df.columns and len(us_df) > 0:
+                ewy_5d_ret = float(us_df["ewy_ret_5d"].iloc[-1])
+        except Exception:
+            pass
+
+        # Fear Index 계산 (0~100, 높을수록 공포)
+        fear_index = min(100.0, max(0.0,
+            (vix_level - 15) * 3  # VIX 15→0, 25→30, 35→60
+            + abs(min(0, ewy_5d_ret * 100)) * 2  # EWY -5%→10, -10%→20
+            + abs(min(0, nw_score * 30))  # NW -0.5→15
+        ))
+
+        if vix_level > 25 and ewy_5d_ret < -0.05:
+            contrarian_opp = True
+            contrarian_reason = f"VIX {vix_level:.1f} + EWY 5일 {ewy_5d_ret*100:.1f}% = 과매도"
+        elif vix_level > 30:
+            contrarian_opp = True
+            contrarian_reason = f"VIX {vix_level:.1f} 극단 공포"
+
+        if contrarian_opp:
+            adjustments.append(f"CONTRARIAN: {contrarian_reason} (Fear={fear_index:.0f})")
+            logger.info("CONTRARIAN 기회 감지: %s", contrarian_reason)
+
         decision = BrainDecision(
             timestamp=datetime.now().isoformat(),
             effective_regime=effective_regime,
@@ -382,6 +424,9 @@ class Brain:
             adjustments=adjustments,
             warnings=warnings,
             briefing=briefing,
+            contrarian_opportunity=contrarian_opp,
+            contrarian_reason=contrarian_reason,
+            fear_index=fear_index,
         )
 
         # ── 13. 저장 ──
@@ -927,6 +972,8 @@ class Brain:
             "total_invest": data["total_invest_pct"],
             "cash": data["cash_pct"],
             "adjustments_count": len(data["adjustments"]),
+            "contrarian": data.get("contrarian_opportunity", False),
+            "fear_index": data.get("fear_index", 0),
         })
         history = history[-90:]
         with open(BRAIN_HISTORY_PATH, "w", encoding="utf-8") as f:
