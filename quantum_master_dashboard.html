@@ -430,7 +430,7 @@ body::before {
 
 <!-- HEADER -->
 <header class="header">
-  <div class="logo">QUANTUM MASTER <span>FLOWX v2.0</span></div>
+  <div class="logo">퀀트 시스템 <span>PRO</span></div>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="timestamp" id="ts">2026-03-24 15:47:32</span>
@@ -447,8 +447,8 @@ body::before {
   <!-- ZONE 1: 오늘의 판단 — 동적 렌더링 -->
   <div class="zone">
     <div class="zone-header">
-      <span class="zone-label">ZONE 01 — BRAIN + LENS</span>
-      <span class="zone-title">오늘의 판단</span>
+      <span class="zone-label">오늘의 판단</span>
+      <span class="zone-title">AI 종합 분석</span>
     </div>
     <div class="z1-grid" id="zone1Content"></div>
   </div>
@@ -456,8 +456,8 @@ body::before {
   <!-- ZONE 2: 액션 — 동적 렌더링 -->
   <div class="zone">
     <div class="zone-header">
-      <span class="zone-label">ZONE 02 — ACTION (풀 공개)</span>
-      <span class="zone-title">종목 추천 + 기술지표</span>
+      <span class="zone-label">종목 추천</span>
+      <span class="zone-title">기술지표 · 수급 · 매집 전체 공개</span>
     </div>
     <div class="zone-body">
       <div class="action-list" id="zone2List"></div>
@@ -467,8 +467,8 @@ body::before {
   <!-- ZONE 3: 성과 — 동적 렌더링 -->
   <div class="zone">
     <div class="zone-header">
-      <span class="zone-label">ZONE 03 — PERFORMANCE</span>
-      <span class="zone-title">성과 추적 (Paper Trading)</span>
+      <span class="zone-label">포트폴리오</span>
+      <span class="zone-title">모의투자 성과</span>
     </div>
     <div class="zone-body" id="zone3Content"></div>
   </div>
@@ -479,8 +479,8 @@ body::before {
     <!-- ZONE 4: 섹터 -->
     <div class="zone">
       <div class="zone-header">
-        <span class="zone-label">ZONE 04 — SECTOR</span>
-        <span class="zone-title">섹터 흐름 + 릴레이</span>
+        <span class="zone-label">섹터 순환</span>
+        <span class="zone-title">업종별 흐름 TOP 10</span>
       </div>
       <div class="zone-body" style="padding:12px 16px">
         <div class="sector-list" id="sectorList"></div>
@@ -490,12 +490,12 @@ body::before {
     <!-- ZONE 5: 수급 -->
     <div class="zone">
       <div class="zone-header">
-        <span class="zone-label">ZONE 05 — SD V2</span>
-        <span class="zone-title">수급 레이더</span>
+        <span class="zone-label">외국인 · 기관 수급</span>
+        <span class="zone-title">자금 흐름 분석</span>
       </div>
       <div class="zone-body" style="padding:12px 16px" id="zone5Content">
         <div class="supply-grid" id="supplyGrid"></div>
-        <div class="sd-title">SD V2 — 매집/분산 패턴</div>
+        <div class="sd-title">매집 · 분산 패턴 감지</div>
         <div class="sd-list" id="sdList"></div>
       </div>
     </div>
@@ -505,8 +505,8 @@ body::before {
   <!-- ZONE 7: ETF 추천 -->
   <div class="zone">
     <div class="zone-header">
-      <span class="zone-label">ZONE 07 — ETF</span>
-      <span class="zone-title">ETF 추천</span>
+      <span class="zone-label">ETF 추천</span>
+      <span class="zone-title">매크로 · 섹터 · 테마별 ETF</span>
     </div>
     <div class="zone-body" id="zone7Content"></div>
   </div>
@@ -515,7 +515,7 @@ body::before {
 
 <!-- FOOTER -->
 <footer class="footer">
-  <span class="footer-left">QUANTUM MASTER FLOWX · SignalEngine 10-Layer · 35+ signals active</span>
+  <span class="footer-left">퀀트 시스템 · 10단계 시그널엔진 · 35+ 시그널 가동</span>
   <span class="signal-count" id="signalCount">다음 스캔: 15:30:00</span>
 </footer>
 
@@ -525,7 +525,7 @@ body::before {
 //  데이터 소스: dashboard_state.json (dashboard_data.py가 생성)
 // ══════════════════════════════════════════════
 
-const DATA_URL = 'data/dashboard_state.json';
+const DATA_URL = 'website/data/dashboard_state.json';
 let STATE = null;
 
 // ── 유틸리티 ──
@@ -562,10 +562,10 @@ function renderTrustBar(z6, z1) {
   if (!z6) { bar.innerHTML = ''; return; }
 
   const items = [
-    { label: 'WHALE', val: z6.whale_detect },
-    { label: 'VOLUME', val: z6.volume_spike },
-    { label: 'PICKS', val: z6.tomorrow_picks },
-    { label: 'BRAIN', val: z6.brain },
+    { label: 'AI추천', val: z6.tomorrow_picks },
+    { label: '세력탐지', val: z6.whale_detect },
+    { label: '거래량적중', val: z6.volume_spike },
+    { label: 'AI브레인', val: z6.brain },
   ];
 
   let html = items.map(i => {
@@ -624,21 +624,21 @@ function renderZone1(z) {
     </div>
     <div class="z1-info">
       <div class="info-row">
-        <span class="info-tag tag-market">MARKET</span>
+        <span class="info-tag tag-market">시장</span>
         <div>
           <div class="info-text">KOSPI ${z.kospi ? z.kospi.toLocaleString() : '—'} (${z.kospi_chg > 0 ? '+' : ''}${z.kospi_chg}%)</div>
-          <div class="info-sub">VIX ${z.vix} · BRAIN Score ${z.brain_score}</div>
+          <div class="info-sub">VIX ${z.vix} · AI 신뢰도 ${z.brain_score}점</div>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-tag tag-regime">REGIME</span>
+        <span class="info-tag tag-regime">시장국면</span>
         <div>
           <div class="info-text">${esc(z.regime)}${z.regime_transition ? ` → <span style="color:var(--amber)">${esc(z.regime_transition)} (${z.transition_prob}%)</span>` : ''}</div>
           <div class="info-sub">${esc(z.macro_grade)}</div>
         </div>
       </div>
       ${z.lens_summary ? `<div class="info-row" style="border:none">
-        <span class="info-tag tag-brain">LENS</span>
+        <span class="info-tag tag-brain">AI분석</span>
         <div><div class="info-text">${esc(z.lens_summary)}</div></div>
       </div>` : ''}
     </div>`;
@@ -652,6 +652,8 @@ function renderZone2(items) {
   el.innerHTML = items.map(a => {
     const act = (a.action || 'WATCH').toUpperCase();
     const cls = act === 'BUY' ? 'buy' : act === 'SELL' ? 'sell' : 'watch';
+    const actKr = act === 'BUY' ? '매수' : act === 'SELL' ? '매도' : '관찰';
+    const stratKr = a.strategy === 'AI_BRAIN' ? 'AI 판단' : a.strategy === 'SCAN' ? '스캔 발굴' : (a.strategy || '');
 
     // 기술지표 칩
     let techChips = '';
@@ -709,9 +711,9 @@ function renderZone2(items) {
     if (a.score_breakdown) {
       const sb = a.score_breakdown;
       breakdown = `<div class="sc-breakdown">
-        <span>기술:${sb.tech}</span><span>수급:${sb.flow}</span>
-        <span>개별:${sb.individual}</span><span>안전:${sb.safety}</span>
-        <span>과열:${sb.overheat}</span><span>멀티:${sb.multi}</span>
+        <span>기술분석 ${sb.tech}</span><span>수급 ${sb.flow}</span>
+        <span>개별종목 ${sb.individual}</span><span>안전도 ${sb.safety}</span>
+        <span>과열 ${sb.overheat}</span><span>복합 ${sb.multi}</span>
       </div>`;
     }
 
@@ -733,9 +735,9 @@ function renderZone2(items) {
       <div class="sc-header">
         <span class="sc-grade">${esc(a.grade)}</span>
         <span class="sc-name">${esc(a.name)} <em>${esc(a.ticker)}</em></span>
-        <span class="sc-badge">${act}</span>
-        <span class="sc-score">${a.score}</span>
-        <span class="sc-strategy">${esc(a.strategy)}</span>
+        <span class="sc-badge">${actKr}</span>
+        <span class="sc-score">${a.score}점</span>
+        <span class="sc-strategy">${esc(stratKr)}</span>
       </div>
       <div class="sc-reason">${esc(a.reason || '')}</div>
       ${hasTech ? `<div class="sc-detail">
@@ -839,10 +841,11 @@ function renderZone7(items) {
   if (items[0] && items[0]._market_direction) {
     const m = items[0];
     const dc = m._market_direction === 'BULL' ? 'var(--green)' : m._market_direction === 'BEAR' ? 'var(--red)' : 'var(--amber)';
+    const dirKr = m._market_direction === 'BULL' ? '상승' : m._market_direction === 'BEAR' ? '하락' : '횡보';
     html += `<div class="etf-market-bar">
-      시장 방향: <span style="color:${dc};font-weight:700">${esc(m._market_direction)}</span>
-      (score ${m._market_score}, conf ${m._market_confidence}%)
-      · ${esc(m._regime)} · VIX ${m._vix}
+      시장 방향: <span style="color:${dc};font-weight:700">${dirKr}</span>
+      (점수 ${m._market_score}, 신뢰도 ${m._market_confidence}%)
+      · 레짐: ${esc(m._regime)} · VIX ${m._vix}
       ${m._reasons ? '<br>' + m._reasons.map(r => esc(r)).join(' · ') : ''}
     </div>`;
     items = items.slice(1);
@@ -865,8 +868,8 @@ function renderZone7(items) {
         <div class="etf-detail">${esc(reasonStr)}</div>
         ${details.length ? `<div class="etf-detail">${esc(details.join(' · '))}</div>` : ''}
       </div>
-      <span class="etf-action-badge ${actCls}">${esc(e.action)}</span>
-      <span class="etf-conf" style="color:${e.confidence >= 60 ? 'var(--green)' : 'var(--amber)'}">${e.confidence}%</span>
+      <span class="etf-action-badge ${actCls}">${e.action === 'BUY' ? '매수' : '관찰'}</span>
+      <span class="etf-conf" style="color:${e.confidence >= 60 ? 'var(--green)' : 'var(--amber)'}">신뢰 ${e.confidence}%</span>
       ${e.portfolio_pct ? `<span class="etf-pct">${e.portfolio_pct}%</span>` : ''}
     </div>`;
   }).join('');
@@ -980,7 +983,7 @@ function renderAll() {
   const foot = document.querySelector('.footer-left');
   if (foot) {
     const signals = STATE.zone6 ? STATE.zone6.active_signals || 0 : 0;
-    foot.textContent = `QUANTUM MASTER FLOWX · SignalEngine 10-Layer · ${signals} signals active`;
+    foot.textContent = `퀀트 시스템 · 10단계 시그널엔진 · ${signals}개 시그널 가동`;
   }
 }
 
