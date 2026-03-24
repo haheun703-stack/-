@@ -204,20 +204,22 @@ def _collect_market_overview(today_str: str) -> dict:
     # VIX fallback: parquet 마지막 행에서
     if not overview["vix"]:
         try:
-            sample = next(PARQUET_DIR.glob("*.parquet"))
-            df = pd.read_parquet(sample, columns=["vix_close"])
-            if not df.empty:
-                overview["vix"] = round(float(df.iloc[-1]["vix_close"]), 1)
+            samples = list(PARQUET_DIR.glob("*.parquet"))
+            if samples:
+                df = pd.read_parquet(samples[0], columns=["vix_close"])
+                if not df.empty:
+                    overview["vix"] = round(float(df.iloc[-1]["vix_close"]), 1)
         except Exception:
             pass
 
     # USD/KRW fallback
     if not overview["usd_krw"]:
         try:
-            sample = next(PARQUET_DIR.glob("*.parquet"))
-            df = pd.read_parquet(sample, columns=["usdkrw_close"])
-            if not df.empty:
-                overview["usd_krw"] = round(float(df.iloc[-1]["usdkrw_close"]), 1)
+            samples = list(PARQUET_DIR.glob("*.parquet"))
+            if samples:
+                df = pd.read_parquet(samples[0], columns=["usdkrw_close"])
+                if not df.empty:
+                    overview["usd_krw"] = round(float(df.iloc[-1]["usdkrw_close"]), 1)
         except Exception:
             pass
 

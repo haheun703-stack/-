@@ -212,7 +212,7 @@ def _merge_pick_detail(entry: dict, pick: dict):
     entry["rsi"] = round(pick.get("rsi", 0), 1)
     entry["adx"] = round(pick.get("adx", 0), 1)
     entry["stoch_k"] = round(pick.get("stoch_k", 0), 1)
-    entry["stoch_d"] = round(pick.get("stoch_d", 0), 1) if pick.get("stoch_d") else None
+    entry["stoch_d"] = round(pick.get("stoch_d", 0), 1) if pick.get("stoch_d") is not None else None
     entry["bb_position"] = round(pick.get("bb_position", 0), 2)
     entry["above_ma20"] = pick.get("above_ma20", False)
     entry["above_ma60"] = pick.get("above_ma60", False)
@@ -284,10 +284,10 @@ def build_zone3() -> dict:
     week_return = 0
     month_return = 0
     if len(equity_list) >= 5:
-        week_eq = equity_list[-5]["equity"]
+        week_eq = equity_list[-min(5, len(equity_list))]["equity"]
         week_return = round((latest_equity / week_eq - 1) * 100, 2) if week_eq > 0 else 0
     if len(equity_list) >= 20:
-        month_eq = equity_list[-20]["equity"]
+        month_eq = equity_list[-min(20, len(equity_list))]["equity"]
         month_return = round((latest_equity / month_eq - 1) * 100, 2) if month_eq > 0 else 0
 
     # 통계
@@ -482,15 +482,17 @@ def build_zone5() -> dict:
                         "sd_score": round(sd_score, 3),
                     })
 
-    # KOSPI 수급 총합 (etf_investor_flow에서)
+    # KOSPI 수급 총합 (etf_investor_flow에서 최근일 합산)
     etf_flow = _load_json("etf_investor_flow.json")
-    supply_summary = {}
+    supply_summary = {"foreign": 0, "inst": 0, "indiv": 0}
     if isinstance(etf_flow, dict):
-        supply_summary = {
-            "foreign": etf_flow.get("foreign_total", 0),
-            "inst": etf_flow.get("inst_total", 0),
-            "indiv": etf_flow.get("indiv_total", 0),
-        }
+        for _ticker, info in etf_flow.get("etfs", {}).items():
+            days = info.get("days", [])
+            if days:
+                last = days[-1]
+                supply_summary["foreign"] += last.get("foreign_net", 0)
+                supply_summary["inst"] += last.get("inst_net", 0)
+                supply_summary["indiv"] += last.get("individual_net", 0)
 
     return {
         "foreign_flow": foreign_flow,

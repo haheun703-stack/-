@@ -844,8 +844,13 @@ class Brain:
                 result[name] = max(0, result[name])
                 clamped = True
 
-        # 현금은 나머지
+        # 투자비중 합계 95% 상한 (현금 최소 5%)
         invest = sum(result.get(a, 0) for a in self.INVEST_ARMS)
+        if invest > 95.0:
+            scale = 95.0 / invest
+            for name in self.INVEST_ARMS:
+                result[name] = round(result.get(name, 0) * scale, 2)
+            invest = sum(result.get(a, 0) for a in self.INVEST_ARMS)
         result["cash"] = max(5.0, 100.0 - invest)
 
         return result, clamped

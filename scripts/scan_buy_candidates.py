@@ -588,8 +588,8 @@ def calc_trix_counter(df: pd.DataFrame, idx: int) -> int:
 
     양수: GC N일차 (+1 = 어제 크로스), 음수: DC N일차.
     """
-    trix_col = df.get("trix")
-    sig_col = df.get("trix_signal")
+    trix_col = df["trix"] if "trix" in df.columns else None
+    sig_col = df["trix_signal"] if "trix_signal" in df.columns else None
     if trix_col is None or sig_col is None:
         return 0
 
@@ -1798,8 +1798,8 @@ def scan_all(
                 float(row.get("close", 0) or 0) > float(row.get("sma_120", 0) or 0)
             ),
             "drawdown_from_high": float(
-                (float(row.get("close", 0) or 0)
-                 / df["high"].iloc[max(0, idx - 252) : idx + 1].max() - 1) * 100
+                ((float(row.get("close", 0) or 0)
+                  / df["high"].iloc[max(0, idx - 252) : idx + 1].max()) - 1) * 100
                 if df["high"].iloc[max(0, idx - 252) : idx + 1].max() > 0 else 0
             ),
             "vol_contraction": float(

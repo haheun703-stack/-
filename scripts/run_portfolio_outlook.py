@@ -21,7 +21,8 @@ from pathlib import Path
 _SD_EMOJI = {"A": "\U0001f7e2", "B": "\U0001f535", "C": "\U0001f7e1",
              "D": "\U0001f7e0", "F": "\U0001f534", "X": "\u26aa"}
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -141,7 +142,7 @@ def format_telegram(results: list[dict]) -> str:
 
 def check_pattern_transitions(results: list[dict]) -> str | None:
     """보유 종목 수급 패턴 전환 감지 → F전환 시 경고 메시지."""
-    history_path = Path("data/sd_patterns_history.json")
+    history_path = PROJECT_ROOT / "data" / "sd_patterns_history.json"
 
     # 현재 패턴 수집
     current = {}
@@ -222,7 +223,7 @@ def save_results(results: list[dict]):
         },
         "results": results,
     }
-    path = Path("data/portfolio_outlook.json")
+    path = PROJECT_ROOT / "data" / "portfolio_outlook.json"
     with open(path, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2, default=str)
     logger.info("[저장] %s", path)

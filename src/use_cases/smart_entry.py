@@ -1668,7 +1668,7 @@ class SmartEntryEngine:
 
             # 다음 스테이지 진입 조건: 현재가가 체결가 대비 dip_threshold 이하
             next_idx = c.entry_stage  # 0-indexed: 1차=0, 2차=1, 3차=2
-            if next_idx - 1 >= len(dip_thresholds):
+            if next_idx - 1 >= len(dip_thresholds) or next_idx >= len(stages):
                 continue
 
             dip_pct = (c.current_price - c.filled_price) / c.filled_price

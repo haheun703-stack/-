@@ -504,7 +504,7 @@ class IntradayEye:
         try:
             self._eye08_breaking_news()
         except Exception as e:
-            logger.debug("[EYE-08] 긴급뉴스 체크 실패 (무시): %s", e)
+            logger.warning("[EYE-08] 긴급뉴스 체크 실패: %s", e)
 
         logger.info("[EYE] === 사이클 완료 (이벤트 누적 %d건) ===", len(self._events))
 

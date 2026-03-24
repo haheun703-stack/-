@@ -270,6 +270,9 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
             continue
 
         avg_price = pos["avg_price"]
+        if avg_price <= 0:
+            logger.warning("[check_exits] %s avg_price=0, 스킵", ticker)
+            continue
         peak_price = pos.get("peak_price", avg_price)
         pnl_pct = price / avg_price - 1
 

@@ -204,6 +204,16 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             summary = data.get("output2", [{}])
             summary_item = summary[0] if summary else {}
 
+            cash = int(
+                summary_item.get("dnca_tot_amt", 0)
+                or summary_item.get("prvs_rcdl_excc_amt", 0)
+                or summary_item.get("nass_amt", 0)
+            )
+            if cash <= 0 and summary_item:
+                logger.warning(
+                    "[잔고] available_cash=0 — 필드 확인 필요: keys=%s",
+                    list(summary_item.keys())[:10],
+                )
             return {
                 "holdings": [
                     {
@@ -220,10 +230,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                 ],
                 "total_eval": int(summary_item.get("tot_evlu_amt", 0)),
                 "total_pnl": int(summary_item.get("evlu_pfls_smtl_amt", 0)),
-                "available_cash": int(
-                    summary_item.get("dnca_tot_amt", 0)
-                    or summary_item.get("prvs_rcdl_excc_amt", 0)
-                ),
+                "available_cash": cash,
             }
         except Exception as e:
             logger.error("[잔고] 조회 실패: %s", e)

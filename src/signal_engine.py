@@ -1340,7 +1340,7 @@ class SignalEngine:
         else:
             pct_stop = close * (1 - stop_pct)
             atr_stop = close - atr_val * self.strategy["atr_stop_multiplier"]
-            stop_price = min(pct_stop, atr_stop)
+            stop_price = max(pct_stop, atr_stop)
 
         target_price = close + atr_val * self.strategy["atr_target_multiplier"]
 
