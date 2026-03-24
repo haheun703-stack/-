@@ -1,0 +1,280 @@
+{
+  "generated_at": "2026-03-24T20:56:50.005315",
+  "zone1": {
+    "verdict": "관망",
+    "cash_pct": 71,
+    "buy_pct": 29,
+    "regime": "CAUTION",
+    "regime_transition": "BEAR 접근",
+    "transition_prob": 70,
+    "macro_grade": "현금비중 확대",
+    "vix": 26.1,
+    "kospi": 0,
+    "kospi_chg": 0,
+    "brain_score": 100.0,
+    "shield_status": "RED",
+    "lens_summary": "",
+    "updated_at": "2026-03-24T19:13:34.587803"
+  },
+  "zone2": [
+    {
+      "ticker": "042660",
+      "name": "한화오션",
+      "action": "BUY",
+      "grade": "A",
+      "score": 80,
+      "reason": "K-방산 수출 교두보 확대 기대. KADEX 2026 개최 및 방산 성장 지속 전망. 조선 수주 호조.",
+      "strategy": "AI_BRAIN"
+    },
+    {
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "action": "BUY",
+      "grade": "A",
+      "score": 80,
+      "reason": "원전·SMR·수소 에너지 밸류체인 확장 뉴스. 에너지 섹터 강세 및 경기순환주 선도 수혜.",
+      "strategy": "AI_BRAIN"
+    },
+    {
+      "ticker": "051910",
+      "name": "LG화학",
+      "action": "BUY",
+      "grade": "A",
+      "score": 75,
+      "reason": "가치주 회전 심화로 에너지/화학 섹터 실적 개선 전망. 경기순환주 선도 수혜. 유틸리티·에너지·소재 섹터 주",
+      "strategy": "AI_BRAIN"
+    },
+    {
+      "ticker": "010950",
+      "name": "S-Oil",
+      "action": "WATCH",
+      "grade": "B",
+      "score": 46,
+      "close": 108400,
+      "stop_loss": 102980,
+      "target_price": 119240,
+      "reason": "RSI 47 최적",
+      "strategy": "SCAN"
+    },
+    {
+      "ticker": "009540",
+      "name": "HD한국조선해양",
+      "action": "WATCH",
+      "grade": "B",
+      "score": 46,
+      "close": 379500,
+      "stop_loss": 368010,
+      "target_price": 451110,
+      "reason": "RSI 41 최적",
+      "strategy": "SCAN"
+    },
+    {
+      "ticker": "005490",
+      "name": "POSCO홀딩스",
+      "action": "WATCH",
+      "grade": "B",
+      "score": 45,
+      "close": 339500,
+      "stop_loss": 318000,
+      "target_price": 382500,
+      "reason": "RSI 46 최적",
+      "strategy": "SCAN"
+    }
+  ],
+  "zone3": {
+    "equity": 29987920,
+    "initial_capital": 30000000,
+    "total_return_pct": -0.04,
+    "week_return_pct": 0,
+    "month_return_pct": 0,
+    "win_rate": 0,
+    "pf": 0,
+    "mdd": 0.0,
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "positions": [
+      {
+        "ticker": "042660",
+        "name": "한화오션",
+        "pnl_pct": -0.12,
+        "days": 0,
+        "strategy": "AI_BRAIN",
+        "grade": "A"
+      },
+      {
+        "ticker": "034020",
+        "name": "두산에너빌리티",
+        "pnl_pct": -0.11,
+        "days": 0,
+        "strategy": "AI_BRAIN",
+        "grade": "A"
+      },
+      {
+        "ticker": "051910",
+        "name": "LG화학",
+        "pnl_pct": -0.11,
+        "days": 0,
+        "strategy": "AI_BRAIN",
+        "grade": "A"
+      }
+    ],
+    "recent_trades": []
+  },
+  "zone4": [
+    {
+      "name": "건설",
+      "score": 93.4,
+      "ret_5d": 3.61,
+      "rsi": 55.8,
+      "rank": 1,
+      "signal": "매수",
+      "relay": null
+    },
+    {
+      "name": "반도체",
+      "score": 88.7,
+      "ret_5d": 1.26,
+      "rsi": 55.4,
+      "rank": 2,
+      "signal": "매수",
+      "relay": null
+    },
+    {
+      "name": "IT",
+      "score": 75.0,
+      "ret_5d": 0.49,
+      "rsi": 53.5,
+      "rank": 3,
+      "signal": "매수",
+      "relay": null
+    },
+    {
+      "name": "삼성그룹",
+      "score": 66.8,
+      "ret_5d": -0.44,
+      "rsi": 50.7,
+      "rank": 4,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "2차전지",
+      "score": 58.9,
+      "ret_5d": 0.45,
+      "rsi": 48.1,
+      "rank": 5,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "헬스케어",
+      "score": 57.6,
+      "ret_5d": -1.46,
+      "rsi": 45.9,
+      "rank": 6,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "방산",
+      "score": 50.8,
+      "ret_5d": -8.07,
+      "rsi": 47.7,
+      "rank": 7,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "철강소재",
+      "score": 50.3,
+      "ret_5d": -1.83,
+      "rsi": 45.5,
+      "rank": 8,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "현대차그룹",
+      "score": 50.3,
+      "ret_5d": -3.39,
+      "rsi": 46.8,
+      "rank": 8,
+      "signal": "관찰",
+      "relay": null
+    },
+    {
+      "name": "인터넷",
+      "score": 50.0,
+      "ret_5d": -2.99,
+      "rsi": 46.2,
+      "rank": 10,
+      "signal": "관찰",
+      "relay": null
+    }
+  ],
+  "zone5": {
+    "foreign_flow": [
+      {
+        "ticker": "068270",
+        "name": "셀트리온",
+        "direction": "NEUTRAL",
+        "score": 46,
+        "z_score": 3.18
+      },
+      {
+        "ticker": "402340",
+        "name": "SK스퀘어",
+        "direction": "NEUTRAL",
+        "score": 40,
+        "z_score": 3.41
+      },
+      {
+        "ticker": "071050",
+        "name": "한국금융지주",
+        "direction": "NEUTRAL",
+        "score": 37,
+        "z_score": 2.09
+      },
+      {
+        "ticker": "352820",
+        "name": "하이브",
+        "direction": "NEUTRAL",
+        "score": 32,
+        "z_score": 4.19
+      },
+      {
+        "ticker": "180640",
+        "name": "한진칼",
+        "direction": "NEUTRAL",
+        "score": 25,
+        "z_score": 2.65
+      }
+    ],
+    "sd_patterns": [],
+    "supply_summary": {
+      "foreign": 0,
+      "inst": 0,
+      "indiv": 0
+    }
+  },
+  "zone6": {
+    "tomorrow_picks": 67.7,
+    "whale_detect": 43.3,
+    "volume_spike": 36.1,
+    "brain": 60.0,
+    "recent_10": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "active_signals": 7
+  }
+}

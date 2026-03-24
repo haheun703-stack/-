@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Master — FLOWX</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0c10;
+  --bg2:      #0f1218;
+  --bg3:      #161b24;
+  --border:   #1e2736;
+  --border2:  #2a3545;
+  --text:     #e2e8f0;
+  --muted:    #5a6a82;
+  --muted2:   #3d4e63;
+  --green:    #00e59b;
+  --green2:   #003d2b;
+  --green3:   #001f16;
+  --amber:    #f5a623;
+  --amber2:   #3d2800;
+  --red:      #ff4d6d;
+  --red2:     #3d0012;
+  --blue:     #38bdf8;
+  --blue2:    #0c2a3d;
+  --purple:   #a78bfa;
+  --purple2:  #1e1040;
+  --mono:     'Space Mono', monospace;
+  --sans:     'Noto Sans KR', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── SCAN LINE EFFECT ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,155,0.01) 2px, rgba(0,229,155,0.01) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+.logo span { color: var(--muted); font-size: 11px; margin-left: 8px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.timestamp { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* ── ZONE 6 (신뢰도 — 상단 바) ── */
+.trust-bar {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  padding: 0 24px;
+}
+.trust-bar::-webkit-scrollbar { display: none; }
+.trust-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.trust-item:first-child { padding-left: 0; }
+.trust-label { color: var(--muted); font-size: 11px; letter-spacing: 0.05em; }
+.trust-val {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+.trust-bar-mini {
+  width: 60px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.trust-bar-fill { height: 100%; border-radius: 2px; }
+.recent-hits {
+  display: flex; gap: 3px; align-items: center;
+}
+.hit-dot {
+  width: 8px; height: 8px; border-radius: 1px;
+}
+
+/* ── MAIN GRID ── */
+.main { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── ZONE CARD ── */
+.zone {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.zone-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.zone-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+}
+.zone-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.zone-body { padding: 16px; }
+
+/* ── ZONE 1: 오늘의 판단 ── */
+.z1-grid { display: grid; grid-template-columns: 180px 1fr; gap: 0; }
+.z1-verdict {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 16px;
+  border-right: 1px solid var(--border);
+  gap: 8px;
+}
+.verdict-badge {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--mono);
+  border: 2px solid;
+  margin-bottom: 4px;
+}
+.verdict-badge.watch  { border-color: var(--amber); color: var(--amber); background: var(--amber2); }
+.verdict-badge.buy    { border-color: var(--green); color: var(--green); background: var(--green3); }
+.verdict-badge.sell   { border-color: var(--red);   color: var(--red);   background: var(--red2);   }
+.alloc-row { display: flex; gap: 8px; }
+.alloc-chip {
+  font-family: var(--mono); font-size: 11px;
+  padding: 3px 8px; border-radius: 3px;
+}
+.alloc-chip.cash  { background: var(--blue2);   color: var(--blue);   }
+.alloc-chip.buy   { background: var(--green3);  color: var(--green);  }
+
+.z1-info { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.info-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; padding-bottom: 0; }
+.info-tag {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 7px; border-radius: 3px;
+  white-space: nowrap; flex-shrink: 0;
+  letter-spacing: 0.05em;
+}
+.tag-market  { background: var(--blue2);   color: var(--blue);   }
+.tag-regime  { background: var(--purple2); color: var(--purple); }
+.tag-macro   { background: var(--amber2);  color: var(--amber);  }
+.tag-brain   { background: var(--green3);  color: var(--green);  }
+.info-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+.info-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── ZONE 2: 액션 ── */
+.action-list { display: flex; flex-direction: column; gap: 10px; }
+.action-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-radius: 5px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.action-item:hover { opacity: 0.85; }
+.action-item.buy  { background: var(--green3); border-color: rgba(0,229,155,0.25); }
+.action-item.watch{ background: #1a1600;       border-color: rgba(245,166,35,0.2); }
+.action-item.sell { background: var(--red2);   border-color: rgba(255,77,109,0.25);}
+.action-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.action-item.buy  .action-icon { background: var(--green); color: #000; }
+.action-item.watch .action-icon{ background: var(--amber); color: #000; }
+.action-item.sell .action-icon { background: var(--red);   color: #fff; }
+.action-main { flex: 1; }
+.action-stock { font-size: 14px; font-weight: 500; color: var(--text); }
+.action-stock em { font-style: normal; color: var(--muted); font-size: 12px; margin-left: 6px; }
+.action-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.action-grade {
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  flex-shrink: 0;
+}
+.action-item.buy  .action-grade { color: var(--green); }
+.action-item.watch .action-grade{ color: var(--amber); }
+.action-item.sell .action-grade { color: var(--red);   }
+.action-why {
+  font-size: 11px; padding: 3px 8px;
+  border-radius: 3px; white-space: nowrap;
+  flex-shrink: 0;
+}
+.action-item.buy  .action-why { background: rgba(0,229,155,0.12); color: var(--green); }
+.action-item.watch .action-why{ background: rgba(245,166,35,0.12); color: var(--amber); }
+.action-item.sell .action-why { background: rgba(255,77,109,0.12); color: var(--red);  }
+
+/* ── ZONE 3: 성과 ── */
+.perf-grid { display: grid; grid-template-columns: repeat(3, 1fr) 1fr; gap: 1px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+.perf-cell {
+  background: var(--bg3);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.perf-label { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
+.perf-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+.perf-val.pos { color: var(--green); }
+.perf-val.neg { color: var(--red);   }
+.perf-val.neu { color: var(--text);  }
+.perf-sub { font-size: 10px; color: var(--muted); }
+
+.positions-list { display: flex; flex-direction: column; gap: 6px; }
+.pos-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border-radius: 4px;
+  border-left: 3px solid;
+}
+.pos-row.pos { border-color: var(--green); }
+.pos-row.neg { border-color: var(--red);   }
+.pos-name { font-size: 13px; font-weight: 500; flex: 1; }
+.pos-return { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+.pos-row.pos .pos-return { color: var(--green); }
+.pos-row.neg .pos-return { color: var(--red);   }
+.pos-days { font-size: 11px; color: var(--muted); }
+.pos-bar-wrap { width: 80px; }
+.pos-bar { height: 3px; border-radius: 2px; }
+.pos-row.pos .pos-bar { background: var(--green); }
+.pos-row.neg .pos-bar { background: var(--red);   }
+
+/* ── BOTTOM GRID (Zone 4 + 5) ── */
+.bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ── ZONE 4: 섹터 ── */
+.sector-list { display: flex; flex-direction: column; gap: 6px; }
+.sector-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sector-row:last-child { border-bottom: none; }
+.sector-name { font-size: 12px; width: 80px; flex-shrink: 0; color: var(--text); }
+.sector-bar-wrap { flex: 1; position: relative; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+.sector-bar-fill { height: 100%; border-radius: 3px; }
+.sector-pct { font-family: var(--mono); font-size: 11px; width: 44px; text-align: right; }
+.sector-signal { font-size: 10px; padding: 1px 6px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
+.relay-arrow {
+  font-size: 10px; color: var(--green);
+  font-family: var(--mono);
+  flex-shrink: 0;
+}
+
+/* ── ZONE 5: 수급 레이더 ── */
+.supply-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.supply-cell {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px 12px;
+}
+.supply-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.supply-who { font-size: 11px; color: var(--muted); }
+.supply-amount { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+.supply-cell.net-buy  .supply-amount { color: var(--green); }
+.supply-cell.net-sell .supply-amount { color: var(--red);   }
+.supply-flow { font-size: 10px; color: var(--muted); }
+.supply-bar { height: 3px; border-radius: 2px; margin-top: 6px; }
+.supply-cell.net-buy  .supply-bar { background: var(--green); }
+.supply-cell.net-sell .supply-bar { background: var(--red);   }
+
+.sd-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em; }
+.sd-list { display: flex; flex-direction: column; gap: 6px; }
+.sd-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+.sd-grade {
+  font-family: var(--mono); font-size: 13px; font-weight: 700;
+  width: 18px; flex-shrink: 0;
+}
+.sd-grade.A { color: var(--green); }
+.sd-grade.B { color: #7dd3fc; }
+.sd-grade.C { color: var(--amber); }
+.sd-grade.D { color: #fb923c; }
+.sd-grade.F { color: var(--red); }
+.sd-stock { font-size: 12px; flex: 1; }
+.sd-pattern {
+  font-size: 10px; padding: 2px 7px; border-radius: 3px;
+  white-space: nowrap;
+}
+.pat-accum  { background: var(--green3); color: var(--green); }
+.pat-dist   { background: var(--red2);   color: var(--red);   }
+.pat-watch  { background: var(--amber2); color: var(--amber); }
+.sd-days { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+/* ── FOOTER ── */
+.footer {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg2);
+}
+.footer-left { font-family: var(--mono); font-size: 10px; color: var(--muted2); }
+.signal-count { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* ── REFRESH BUTTON ── */
+.refresh-btn {
+  font-family: var(--mono); font-size: 10px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.15s;
+}
+.refresh-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* ── BLINK ── */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.blink { animation: blink 1.2s infinite; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">QUANTUM MASTER <span>FLOWX v2.0</span></div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <span class="timestamp" id="ts">2026-03-24 15:47:32</span>
+    <button class="refresh-btn" onclick="refreshData()">REFRESH</button>
+  </div>
+</header>
+
+<!-- ZONE 6: 신뢰도 바 (상단) — 동적 렌더링 -->
+<div class="trust-bar" id="trustBar"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ZONE 1: 오늘의 판단 — 동적 렌더링 -->
+  <div class="zone">
+    <div class="zone-header">
+      <span class="zone-label">ZONE 01 — BRAIN + LENS</span>
+      <span class="zone-title">오늘의 판단</span>
+    </div>
+    <div class="z1-grid" id="zone1Content"></div>
+  </div>
+
+  <!-- ZONE 2: 액션 — 동적 렌더링 -->
+  <div class="zone">
+    <div class="zone-header">
+      <span class="zone-label">ZONE 02 — ACTION</span>
+      <span class="zone-title">오늘 할 일</span>
+    </div>
+    <div class="zone-body">
+      <div class="action-list" id="zone2List"></div>
+    </div>
+  </div>
+
+  <!-- ZONE 3: 성과 — 동적 렌더링 -->
+  <div class="zone">
+    <div class="zone-header">
+      <span class="zone-label">ZONE 03 — PERFORMANCE</span>
+      <span class="zone-title">성과 추적 (Paper Trading)</span>
+    </div>
+    <div class="zone-body" id="zone3Content"></div>
+  </div>
+
+  <!-- ZONE 4 + 5 -->
+  <div class="bottom-grid">
+
+    <!-- ZONE 4: 섹터 -->
+    <div class="zone">
+      <div class="zone-header">
+        <span class="zone-label">ZONE 04 — SECTOR</span>
+        <span class="zone-title">섹터 흐름 + 릴레이</span>
+      </div>
+      <div class="zone-body" style="padding:12px 16px">
+        <div class="sector-list" id="sectorList"></div>
+      </div>
+    </div>
+
+    <!-- ZONE 5: 수급 -->
+    <div class="zone">
+      <div class="zone-header">
+        <span class="zone-label">ZONE 05 — SD V2</span>
+        <span class="zone-title">수급 레이더</span>
+      </div>
+      <div class="zone-body" style="padding:12px 16px" id="zone5Content">
+        <div class="supply-grid" id="supplyGrid"></div>
+        <div class="sd-title">SD V2 — 매집/분산 패턴</div>
+        <div class="sd-list" id="sdList"></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span class="footer-left">QUANTUM MASTER FLOWX · SignalEngine 10-Layer · 35+ signals active</span>
+  <span class="signal-count" id="signalCount">다음 스캔: 15:30:00</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════
+//  Quantum Master FLOWX — Dynamic Renderer v2
+//  데이터 소스: dashboard_state.json (dashboard_data.py가 생성)
+// ══════════════════════════════════════════════
+
+const DATA_URL = 'data/dashboard_state.json';
+let STATE = null;
+
+// ── 유틸리티 ──
+function valColor(v) {
+  if (v > 0) return 'var(--green)';
+  if (v < 0) return 'var(--red)';
+  return 'var(--text)';
+}
+function valClass(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu'; }
+function pctStr(v) { return (v > 0 ? '+' : '') + v.toFixed(2) + '%'; }
+function signalColor(sig) {
+  if (sig === '매수') return 'var(--green)';
+  if (sig === '관찰') return 'var(--blue)';
+  if (sig === '주의') return 'var(--amber)';
+  return 'var(--red)';
+}
+function moneyStr(v) {
+  if (!v) return '0';
+  const abs = Math.abs(v);
+  const sign = v >= 0 ? '+' : '-';
+  if (abs >= 100000000) return sign + (abs / 100000000).toFixed(0) + '억';
+  if (abs >= 10000) return sign + (abs / 10000).toFixed(0) + '만';
+  return sign + abs.toLocaleString();
+}
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── ZONE 6: 신뢰도 바 (상단) ──
+function renderTrustBar(z6, z1) {
+  const bar = document.getElementById('trustBar');
+  if (!z6) { bar.innerHTML = ''; return; }
+
+  const items = [
+    { label: 'WHALE', val: z6.whale_detect },
+    { label: 'VOLUME', val: z6.volume_spike },
+    { label: 'PICKS', val: z6.tomorrow_picks },
+    { label: 'BRAIN', val: z6.brain },
+  ];
+
+  let html = items.map(i => {
+    const c = i.val >= 60 ? 'var(--green)' : i.val >= 45 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="trust-item">
+      <span class="trust-label">${esc(i.label)}</span>
+      <span class="trust-val" style="color:${c}">${i.val}%</span>
+      <div class="trust-bar-mini"><div class="trust-bar-fill" style="width:${i.val}%;background:${c}"></div></div>
+    </div>`;
+  }).join('');
+
+  // 최근 10건
+  const recent = z6.recent_10 || [];
+  const hits = recent.filter(x => x === 1).length;
+  html += `<div class="trust-item">
+    <span class="trust-label">최근 10건</span>
+    <div class="recent-hits">${recent.map(h =>
+      `<div class="hit-dot" style="background:${h ? 'var(--green)' : 'var(--muted2)'}"></div>`
+    ).join('')}</div>
+    <span class="trust-val" style="color:var(--green);font-size:12px">${hits}/10</span>
+  </div>`;
+
+  // SHIELD 상태
+  const shield = z1 ? z1.shield_status : 'NORMAL';
+  const shieldColor = shield === 'RED' ? 'var(--red)' : shield === 'YELLOW' ? 'var(--amber)' : 'var(--green)';
+  const shieldLabel = shield === 'RED' ? '경고' : shield === 'YELLOW' ? '주의' : '정상';
+  html += `<div class="trust-item">
+    <span class="trust-label">SHIELD</span>
+    <span class="trust-val" style="color:${shieldColor};font-size:12px">${shieldLabel}</span>
+  </div>`;
+
+  // 활성 시그널
+  html += `<div class="trust-item">
+    <span class="trust-label">활성 시그널</span>
+    <span class="trust-val blink" style="color:var(--purple)">${z6.active_signals || 0}</span>
+  </div>`;
+
+  bar.innerHTML = html;
+}
+
+// ── ZONE 1: 오늘의 판단 ──
+function renderZone1(z) {
+  const el = document.getElementById('zone1Content');
+  if (!z) { el.innerHTML = '<div style="padding:20px;color:var(--muted)">데이터 없음</div>'; return; }
+
+  const verdictMap = { '매수':'buy', '관망':'watch', '회피':'sell', '중립':'watch' };
+  const vc = verdictMap[z.verdict] || 'watch';
+
+  el.innerHTML = `
+    <div class="z1-verdict">
+      <div class="verdict-badge ${vc}">${esc(z.verdict)}</div>
+      <div class="alloc-row">
+        <span class="alloc-chip cash">현금 ${z.cash_pct}%</span>
+        <span class="alloc-chip buy">매수 ${z.buy_pct}%</span>
+      </div>
+    </div>
+    <div class="z1-info">
+      <div class="info-row">
+        <span class="info-tag tag-market">MARKET</span>
+        <div>
+          <div class="info-text">KOSPI ${z.kospi ? z.kospi.toLocaleString() : '—'} (${z.kospi_chg > 0 ? '+' : ''}${z.kospi_chg}%)</div>
+          <div class="info-sub">VIX ${z.vix} · BRAIN Score ${z.brain_score}</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-tag tag-regime">REGIME</span>
+        <div>
+          <div class="info-text">${esc(z.regime)}${z.regime_transition ? ` → <span style="color:var(--amber)">${esc(z.regime_transition)} (${z.transition_prob}%)</span>` : ''}</div>
+          <div class="info-sub">${esc(z.macro_grade)}</div>
+        </div>
+      </div>
+      ${z.lens_summary ? `<div class="info-row" style="border:none">
+        <span class="info-tag tag-brain">LENS</span>
+        <div><div class="info-text">${esc(z.lens_summary)}</div></div>
+      </div>` : ''}
+    </div>`;
+}
+
+// ── ZONE 2: 액션 ──
+function renderZone2(items) {
+  const el = document.getElementById('zone2List');
+  if (!items || !items.length) { el.innerHTML = '<div style="padding:12px;color:var(--muted)">오늘 액션 없음</div>'; return; }
+
+  el.innerHTML = items.map(a => {
+    const act = (a.action || 'WATCH').toUpperCase();
+    const cls = act === 'BUY' ? 'buy' : act === 'SELL' ? 'sell' : 'watch';
+    const icon = act === 'BUY' ? 'BUY' : act === 'SELL' ? 'SEL' : 'WTC';
+    const detail = [];
+    if (a.score) detail.push(`Score ${a.score}`);
+    if (a.stop_loss) detail.push(`손절 ${a.stop_loss.toLocaleString()}원`);
+    if (a.target_price) detail.push(`목표 ${a.target_price.toLocaleString()}원`);
+    if (a.close) detail.push(`현재가 ${a.close.toLocaleString()}원`);
+
+    return `<div class="action-item ${cls}">
+      <div class="action-icon">${icon}</div>
+      <div class="action-main">
+        <div class="action-stock">${esc(a.name)} <em>${esc(a.ticker)}</em></div>
+        <div class="action-detail">${esc(detail.join(' · '))}</div>
+      </div>
+      <span class="action-grade">${esc(a.grade)}</span>
+      <span class="action-why">${esc(a.reason || a.strategy || '')}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── ZONE 3: 성과 ──
+function renderZone3(z) {
+  const el = document.getElementById('zone3Content');
+  if (!z) { el.innerHTML = '<div style="padding:12px;color:var(--muted)">데이터 없음</div>'; return; }
+
+  const eqStr = z.equity ? z.equity.toLocaleString() + '원' : '—';
+  const totRet = z.total_return_pct || 0;
+  const weekRet = z.week_return_pct || 0;
+  const monthRet = z.month_return_pct || 0;
+  const wr = z.win_rate || 0;
+  const pf = z.pf || 0;
+  const mdd = z.mdd || 0;
+  const tt = z.total_trades || 0;
+
+  let html = `<div class="perf-grid">
+    <div class="perf-cell">
+      <span class="perf-label">총 자산</span>
+      <span class="perf-val ${valClass(totRet)}">${eqStr}</span>
+      <span class="perf-sub">${pctStr(totRet)} (초기 ${(z.initial_capital||0).toLocaleString()}원)</span>
+    </div>
+    <div class="perf-cell">
+      <span class="perf-label">이번 주</span>
+      <span class="perf-val ${valClass(weekRet)}">${pctStr(weekRet)}</span>
+    </div>
+    <div class="perf-cell">
+      <span class="perf-label">승률 / PF</span>
+      <span class="perf-val neu">${wr}% <span style="font-size:13px;color:var(--muted)">/</span> ${pf}</span>
+      <span class="perf-sub">총 ${tt}건 (${z.wins||0}승 ${z.losses||0}패)</span>
+    </div>
+    <div class="perf-cell">
+      <span class="perf-label">MDD</span>
+      <span class="perf-val neg">${mdd ? mdd.toFixed(1) + '%' : '—'}</span>
+      <span class="perf-sub">한도 -10%</span>
+    </div>
+  </div>`;
+
+  // 보유 포지션
+  const pos = z.positions || [];
+  if (pos.length) {
+    html += '<div class="positions-list">';
+    html += pos.map(p => {
+      const pnl = p.pnl_pct || 0;
+      const cls = valClass(pnl);
+      const barW = Math.min(Math.abs(pnl) * 10, 100);
+      return `<div class="pos-row ${cls}">
+        <span class="pos-name">${esc(p.name)} <span style="color:var(--muted);font-size:10px">${p.grade||''}</span></span>
+        <div class="pos-bar-wrap"><div class="pos-bar" style="width:${barW}%"></div></div>
+        <span class="pos-return">${pctStr(pnl)}</span>
+        <span class="pos-days">D+${p.days||0}</span>
+      </div>`;
+    }).join('');
+    html += '</div>';
+  } else {
+    html += '<div style="padding:8px;color:var(--muted);font-size:12px">보유 포지션 없음</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+// ── ZONE 4: 섹터 ──
+function renderZone4(sectors) {
+  const el = document.getElementById('sectorList');
+  if (!sectors || !sectors.length) { el.innerHTML = '<div style="color:var(--muted)">데이터 없음</div>'; return; }
+
+  el.innerHTML = sectors.map(s => {
+    const c = signalColor(s.signal);
+    return `<div class="sector-row">
+      <span class="sector-name">${esc(s.name)}</span>
+      <div class="sector-bar-wrap">
+        <div class="sector-bar-fill" style="width:${s.score}%;background:${c}"></div>
+      </div>
+      <span class="sector-pct" style="color:${c}">${s.score}%</span>
+      <span class="sector-signal" style="background:${c}22;color:${c}">${esc(s.signal)}</span>
+      ${s.relay ? `<span class="relay-arrow">FIRE</span>` : '<span style="width:44px"></span>'}
+    </div>`;
+  }).join('');
+}
+
+// ── ZONE 5: 수급 레이더 ──
+function renderZone5(z) {
+  // 수급 요약
+  const grid = document.getElementById('supplyGrid');
+  const sum = z.supply_summary || {};
+  const players = [
+    { who: '외국인', val: sum.foreign || 0 },
+    { who: '기관', val: sum.inst || 0 },
+    { who: '개인', val: sum.indiv || 0 },
+  ];
+
+  grid.innerHTML = players.map(p => {
+    const cls = p.val >= 0 ? 'net-buy' : 'net-sell';
+    const barW = Math.min(Math.abs(p.val) / 10000000 * 100, 100);
+    return `<div class="supply-cell ${cls}">
+      <div class="supply-header">
+        <span class="supply-who">${esc(p.who)}</span>
+        <span class="supply-amount">${moneyStr(p.val)}</span>
+      </div>
+      <div class="supply-bar" style="width:${barW}%"></div>
+    </div>`;
+  }).join('');
+
+  // SD 패턴
+  const sdEl = document.getElementById('sdList');
+  const patterns = z.sd_patterns || [];
+  if (!patterns.length) {
+    // 외국인 흐름 대체 표시
+    const flows = z.foreign_flow || [];
+    if (flows.length) {
+      sdEl.innerHTML = flows.map(f => {
+        const dirCls = f.direction === 'BUY' ? 'pat-accum' : f.direction === 'SELL' ? 'pat-dist' : 'pat-watch';
+        return `<div class="sd-row">
+          <span class="sd-grade B">—</span>
+          <span class="sd-stock">${esc(f.name)}</span>
+          <span class="sd-pattern ${dirCls}">${esc(f.direction)} z${f.z_score}</span>
+          <span class="sd-days">score ${f.score}</span>
+        </div>`;
+      }).join('');
+    } else {
+      sdEl.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px">패턴 감지 없음</div>';
+    }
+    return;
+  }
+  sdEl.innerHTML = patterns.map(d => {
+    const patCls = d.pattern === '매집' ? 'pat-accum' : d.pattern === '분산' ? 'pat-dist' : 'pat-watch';
+    return `<div class="sd-row">
+      <span class="sd-grade ${d.grade}">${esc(d.grade)}</span>
+      <span class="sd-stock">${esc(d.name)}</span>
+      <span class="sd-pattern ${patCls}">${esc(d.pattern)} ${d.pattern_name ? '(' + esc(d.pattern_name) + ')' : ''}</span>
+      <span class="sd-days">${d.sd_score}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── 타임스탬프 ──
+function updateTime() {
+  document.getElementById('ts').textContent = new Date().toLocaleString('ko-KR', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  }).replace(/\. /g, '-').replace('.', '');
+}
+
+// ── 카운트다운 ──
+function updateCountdown() {
+  const now = new Date();
+  const close = new Date(); close.setHours(15, 30, 0, 0);
+  const diff = close - now;
+  if (diff > 0) {
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('signalCount').textContent =
+      `다음 스캔까지: ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else {
+    document.getElementById('signalCount').textContent = '장 마감 후 — 다음 갱신: 16:30';
+  }
+}
+
+// ── 데이터 로드 & 전체 렌더링 ──
+async function loadData() {
+  try {
+    const res = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    STATE = await res.json();
+    renderAll();
+  } catch (e) {
+    console.warn('[FLOWX] 데이터 로드 실패:', e.message);
+  }
+}
+
+function renderAll() {
+  if (!STATE) return;
+  renderTrustBar(STATE.zone6, STATE.zone1);
+  renderZone1(STATE.zone1);
+  renderZone2(STATE.zone2);
+  renderZone3(STATE.zone3);
+  renderZone4(STATE.zone4);
+  renderZone5(STATE.zone5);
+
+  // 푸터 시그널 수 갱신
+  const foot = document.querySelector('.footer-left');
+  if (foot) {
+    const signals = STATE.zone6 ? STATE.zone6.active_signals || 0 : 0;
+    foot.textContent = `QUANTUM MASTER FLOWX · SignalEngine 10-Layer · ${signals} signals active`;
+  }
+}
+
+function refreshData() {
+  document.querySelector('.refresh-btn').textContent = 'LOADING...';
+  loadData().finally(() => {
+    document.querySelector('.refresh-btn').textContent = 'REFRESH';
+    updateTime();
+  });
+}
+
+// ── 초기화 ──
+loadData();
+updateTime();
+updateCountdown();
+setInterval(updateTime, 1000);
+setInterval(updateCountdown, 1000);
+setInterval(loadData, 300000); // 5분마다 자동 갱신
+</script>
+</body>
+</html>
