@@ -1,6 +1,6 @@
 """
 =============================================================
-  Quantum Master FLOWX — 데이터 커넥터 v2
+  Quantum Master FLOWX — 데이터 커넥터 v3 (풀 공개)
   dashboard_data.py
 =============================================================
   역할: 실제 시스템 데이터 파일들을 읽어 dashboard_state.json 생성
@@ -9,11 +9,12 @@
 =============================================================
   데이터 소스 (모두 BAT-D/D2에서 자동 생성):
     Zone 1: brain_decision.json + regime_macro_signal.json + lens_context.json
-    Zone 2: tomorrow_picks.json (ai_largecap + picks)
+    Zone 2: tomorrow_picks.json (ai_largecap + picks) — 기술지표 풀 공개
     Zone 3: paper_portfolio.json (통합 Paper Trading)
-    Zone 4: sector_rotation/sector_momentum.json + group_relay
+    Zone 4: sector_rotation/sector_momentum.json + etf_trading_signal + group_relay
     Zone 5: krx_nationality/nationality_signal.json + sd_pattern_daily
     Zone 6: market_learning/signal_accuracy.json
+    Zone 7: etf_recommendations.json + etf_trading_signal.json — ETF 추천
 =============================================================
 """
 
@@ -111,7 +112,8 @@ def build_zone1() -> dict:
 # ZONE 2: 액션 (tomorrow_picks → 오늘 할 일)
 # ──────────────────────────────────────────────
 
-def build_zone2(max_items: int = 6) -> list[dict]:
+def build_zone2(max_items: int = 10) -> list[dict]:
+    """종목 풀 공개 — 기술지표, 점수 분해, 매집단계, 안전마진, AI 판단 전부 노출"""
     picks_data = _load_json("tomorrow_picks.json")
     if not picks_data:
         return []
@@ -119,8 +121,15 @@ def build_zone2(max_items: int = 6) -> list[dict]:
     actions = []
     seen = set()
 
+    # picks에서 상세 데이터 인덱스 구축 (ticker → pick dict)
+    picks_index = {}
+    for pick in picks_data.get("picks", []):
+        t = pick.get("ticker", "")
+        if t:
+            picks_index[t] = pick
+
     # AI 대형주 (confidence 순)
-    for item in picks_data.get("ai_largecap", [])[:3]:
+    for item in picks_data.get("ai_largecap", [])[:5]:
         ticker = item.get("ticker", "")
         if not ticker or ticker in seen:
             continue
@@ -129,15 +138,24 @@ def build_zone2(max_items: int = 6) -> list[dict]:
         conf = item.get("confidence", 0)
         grade = "AA" if conf >= 0.85 else "A" if conf >= 0.75 else "B"
 
-        actions.append({
+        entry = {
             "ticker": ticker,
             "name": item.get("name", ""),
             "action": "BUY" if conf >= 0.7 else "WATCH",
             "grade": grade,
             "score": round(conf * 100),
-            "reason": item.get("reasoning", "")[:60],
+            "reason": item.get("reasoning", ""),
             "strategy": "AI_BRAIN",
-        })
+            "ai_confidence": round(conf * 100),
+            "ai_urgency": item.get("urgency", ""),
+            "expected_impact": item.get("expected_impact_pct", 0),
+        }
+
+        # picks에 같은 종목이 있으면 기술지표 병합
+        if ticker in picks_index:
+            _merge_pick_detail(entry, picks_index[ticker])
+
+        actions.append(entry)
 
     # 전략 종합 picks (score 순)
     picks_sorted = sorted(
@@ -145,7 +163,7 @@ def build_zone2(max_items: int = 6) -> list[dict]:
         key=lambda x: x.get("total_score", 0),
         reverse=True,
     )
-    for pick in picks_sorted[:5]:
+    for pick in picks_sorted[:8]:
         ticker = pick.get("ticker", "")
         if not ticker or ticker in seen:
             continue
@@ -153,7 +171,6 @@ def build_zone2(max_items: int = 6) -> list[dict]:
 
         grade_kr = pick.get("grade", "")
         score = pick.get("total_score", 0)
-        close = pick.get("close", 0)
 
         if grade_kr == "적극매수":
             action, grade = "BUY", "AA"
@@ -165,22 +182,87 @@ def build_zone2(max_items: int = 6) -> list[dict]:
             action, grade = "WATCH", "C"
 
         reasons = pick.get("reasons", [])
-        reason_str = reasons[0] if reasons else ""
 
-        actions.append({
+        entry = {
             "ticker": ticker,
             "name": pick.get("name", ""),
             "action": action,
             "grade": grade,
             "score": round(score),
-            "close": close,
-            "stop_loss": pick.get("stop_loss", 0),
-            "target_price": pick.get("target_price", 0),
-            "reason": reason_str[:60],
+            "reason": " · ".join(reasons[:4]),
             "strategy": "SCAN",
-        })
+        }
+        _merge_pick_detail(entry, pick)
+        actions.append(entry)
 
     return actions[:max_items]
+
+
+def _merge_pick_detail(entry: dict, pick: dict):
+    """picks 상세 데이터를 entry에 병합 — 기술지표 풀 공개"""
+    # 가격 정보
+    entry["close"] = pick.get("close", 0)
+    entry["price_change"] = round(pick.get("price_change", 0), 2)
+    entry["stop_loss"] = pick.get("stop_loss", 0)
+    entry["target_price"] = pick.get("target_price", 0)
+    entry["entry_price"] = pick.get("entry_price", 0)
+    entry["entry_condition"] = pick.get("entry_condition", "")
+
+    # 기술지표
+    entry["rsi"] = round(pick.get("rsi", 0), 1)
+    entry["adx"] = round(pick.get("adx", 0), 1)
+    entry["stoch_k"] = round(pick.get("stoch_k", 0), 1)
+    entry["stoch_d"] = round(pick.get("stoch_d", 0), 1) if pick.get("stoch_d") else None
+    entry["bb_position"] = round(pick.get("bb_position", 0), 2)
+    entry["above_ma20"] = pick.get("above_ma20", False)
+    entry["above_ma60"] = pick.get("above_ma60", False)
+    entry["ma5_gap"] = round(pick.get("ma5_gap_pct", 0), 1)
+    entry["sar_trend"] = pick.get("sar_trend", 0)
+
+    # 수급
+    entry["foreign_5d"] = pick.get("foreign_5d", 0)
+    entry["inst_5d"] = pick.get("inst_5d", 0)
+
+    # 매집 단계
+    entry["accum_phase"] = pick.get("accum_phase", "")
+    entry["accum_days"] = pick.get("accum_days", 0)
+    entry["accum_return"] = round(pick.get("accum_return", 0), 1)
+
+    # 안전마진
+    entry["safety_signal"] = pick.get("safety_signal", "")
+    entry["safety_label"] = pick.get("safety_label", "")
+
+    # 점수 분해
+    sb = pick.get("score_breakdown", {})
+    if sb:
+        entry["score_breakdown"] = {
+            "multi": sb.get("multi", 0),
+            "individual": round(sb.get("individual", 0), 1),
+            "tech": round(sb.get("tech", 0), 1),
+            "flow": round(sb.get("flow", 0), 1),
+            "safety": round(sb.get("safety", 0), 1),
+            "overheat": round(sb.get("overheat", 0), 1),
+        }
+
+    # AI 판단 (picks 내장)
+    if pick.get("ai_action"):
+        entry["ai_action"] = pick["ai_action"]
+        entry["ai_tag"] = pick.get("ai_tag", "")
+    if pick.get("ai_bonus"):
+        entry["ai_bonus"] = round(pick["ai_bonus"], 1)
+
+    # 과열 경고
+    entry["overheat_flags"] = pick.get("overheat_flags", [])
+
+    # 52주 낙폭
+    entry["drawdown"] = round(pick.get("drawdown", 0), 1)
+
+    # 컨센서스
+    entry["consensus_upside"] = round(pick.get("consensus_upside", 0), 1)
+
+    # 전략 타입
+    if pick.get("strategy"):
+        entry["trade_strategy"] = pick["strategy"]
 
 
 # ──────────────────────────────────────────────
@@ -285,11 +367,19 @@ def build_zone3() -> dict:
 def build_zone4(top_n: int = 10) -> list[dict]:
     sm = _load_json("sector_rotation/sector_momentum.json")
     relay = _load_json("group_relay/group_relay_today.json")
+    etf_sig = _load_json("sector_rotation/etf_trading_signal.json")
 
     # 릴레이 fired 그룹
     fired_set = set()
     for g in relay.get("fired_groups", []):
         fired_set.add(g.get("group", ""))
+
+    # ETF 시그널 인덱스 (섹터명 → 상세)
+    etf_index = {}
+    for item in etf_sig.get("watch_list", []) + etf_sig.get("smart_sectors", []) + etf_sig.get("smart_money_etf", []):
+        s = item.get("sector", "")
+        if s:
+            etf_index[s] = item
 
     sectors = []
     for sec in sm.get("sectors", [])[:top_n]:
@@ -314,7 +404,7 @@ def build_zone4(top_n: int = 10) -> list[dict]:
         if name in fired_set:
             relay_target = "FIRE"
 
-        sectors.append({
+        row = {
             "name": name,
             "score": score,
             "ret_5d": ret_5,
@@ -322,7 +412,19 @@ def build_zone4(top_n: int = 10) -> list[dict]:
             "rank": rank,
             "signal": signal,
             "relay": relay_target,
-        })
+        }
+
+        # ETF 코드 연결
+        if name in etf_index:
+            ei = etf_index[name]
+            row["etf_code"] = ei.get("etf_code", "")
+            row["etf_signal"] = ei.get("signal", "")
+            row["etf_sizing"] = ei.get("sizing", "")
+            row["bb_pct"] = round(ei.get("bb_pct", 0), 1)
+            row["stoch_k"] = round(ei.get("stoch_k", 0), 1)
+            row["adx"] = round(ei.get("adx", 0), 1)
+
+        sectors.append(row)
 
     return sectors
 
@@ -436,6 +538,77 @@ def build_zone6() -> dict:
 
 
 # ──────────────────────────────────────────────
+# ZONE 7: ETF 추천 (매크로 + 섹터 + 테마)
+# ──────────────────────────────────────────────
+
+def build_zone7() -> list[dict]:
+    """ETF 추천 풀 공개 — 카테고리, 신뢰도, 진입타이밍, 손절, 비중"""
+    recs = _load_json("etf_recommendations.json")
+    if not recs:
+        return []
+
+    etfs = []
+
+    # 시장 방향
+    mkt = recs.get("market_direction", {})
+
+    # ETF 추천
+    for pick in recs.get("etf_picks", []):
+        reasons = pick.get("reason", [])
+        if isinstance(reasons, str):
+            reasons = [reasons]
+
+        etfs.append({
+            "category": pick.get("category", ""),
+            "ticker": pick.get("ticker", ""),
+            "name": pick.get("name", ""),
+            "action": pick.get("action", "WATCH"),
+            "confidence": round(pick.get("confidence", 0) * 100),
+            "holding_period": pick.get("holding_period", ""),
+            "portfolio_pct": pick.get("portfolio_pct", 0),
+            "stop_loss": pick.get("stop_loss", ""),
+            "target": pick.get("target", ""),
+            "entry_timing": pick.get("entry_timing", ""),
+            "reasons": reasons[:3],
+        })
+
+    # 핫 섹터 ETF (중복 제거)
+    seen_tickers = {e["ticker"] for e in etfs}
+    for hs in recs.get("hot_sectors", []):
+        etf_info = hs.get("etf", {})
+        ticker = etf_info.get("ticker", "")
+        if ticker and ticker not in seen_tickers:
+            seen_tickers.add(ticker)
+            reasons = hs.get("reasons", [])
+            etfs.append({
+                "category": "섹터",
+                "ticker": ticker,
+                "name": etf_info.get("name", ""),
+                "action": "WATCH",
+                "confidence": round(hs.get("score", 0)),
+                "holding_period": "",
+                "portfolio_pct": 0,
+                "stop_loss": "",
+                "target": "",
+                "entry_timing": "",
+                "reasons": reasons[:3],
+            })
+
+    # 시장 방향 정보 첨부
+    if etfs and mkt:
+        etfs.insert(0, {
+            "_market_direction": mkt.get("direction", ""),
+            "_market_score": round(mkt.get("score", 0), 2),
+            "_market_confidence": round(mkt.get("confidence", 0) * 100),
+            "_regime": mkt.get("regime", ""),
+            "_vix": mkt.get("vix_level", 0),
+            "_reasons": mkt.get("reasons", [])[:3],
+        })
+
+    return etfs
+
+
+# ──────────────────────────────────────────────
 # 통합 빌드 & 저장
 # ──────────────────────────────────────────────
 
@@ -450,6 +623,7 @@ def build_state() -> dict:
         "zone4": build_zone4(),
         "zone5": build_zone5(),
         "zone6": build_zone6(),
+        "zone7": build_zone7(),
     }
 
     # 저장
@@ -464,12 +638,14 @@ def build_state() -> dict:
     z1 = state["zone1"]
     z3 = state["zone3"]
     z6 = state["zone6"]
+    z7_count = len([e for e in state["zone7"] if "ticker" in e])
     print(f"  Zone1: {z1['verdict']} (현금{z1['cash_pct']}%, 레짐={z1['regime']})")
-    print(f"  Zone2: {len(state['zone2'])}종목 액션")
+    print(f"  Zone2: {len(state['zone2'])}종목 풀 공개")
     print(f"  Zone3: 자산 {z3['equity']:,}원 ({z3['total_return_pct']:+.1f}%) 보유 {len(z3['positions'])}종목")
     print(f"  Zone4: {len(state['zone4'])}섹터")
     print(f"  Zone5: SD {len(state['zone5'].get('sd_patterns', []))}종목")
     print(f"  Zone6: picks {z6['tomorrow_picks']}% whale {z6['whale_detect']}%")
+    print(f"  Zone7: ETF {z7_count}종목")
 
     return state
 

@@ -187,48 +187,108 @@ body::before {
 .info-text { font-size: 13px; color: var(--text); line-height: 1.4; }
 .info-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* ── ZONE 2: 액션 ── */
-.action-list { display: flex; flex-direction: column; gap: 10px; }
-.action-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 14px;
+/* ── ZONE 2: 종목 풀 공개 카드 ── */
+.action-list { display: flex; flex-direction: column; gap: 12px; }
+.stock-card {
+  border-radius: 6px; border: 1px solid; overflow: hidden;
+}
+.stock-card.buy  { border-color: rgba(0,229,155,0.3); background: var(--green3); }
+.stock-card.watch{ border-color: rgba(245,166,35,0.25); background: #1a1600; }
+.stock-card.sell { border-color: rgba(255,77,109,0.3); background: var(--red2); }
+
+.sc-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sc-grade { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+.stock-card.buy  .sc-grade { color: var(--green); }
+.stock-card.watch .sc-grade { color: var(--amber); }
+.stock-card.sell .sc-grade  { color: var(--red); }
+.sc-name { font-size: 14px; font-weight: 600; flex: 1; }
+.sc-name em { font-style: normal; color: var(--muted); font-size: 11px; margin-left: 6px; }
+.sc-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 700; }
+.stock-card.buy  .sc-badge { background: var(--green); color: #000; }
+.stock-card.watch .sc-badge { background: var(--amber); color: #000; }
+.stock-card.sell .sc-badge  { background: var(--red); color: #fff; }
+.sc-score { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--text); }
+.sc-strategy { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+
+.sc-reason { padding: 8px 14px; font-size: 12px; color: var(--muted); line-height: 1.5; border-bottom: 1px solid var(--border); }
+
+.sc-detail { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+.sc-prices { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; }
+.sc-prices span { display: flex; align-items: center; gap: 4px; }
+.sc-prices .label { color: var(--muted); font-size: 10px; }
+
+.sc-tech { display: flex; gap: 6px; flex-wrap: wrap; }
+.tech-chip {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); white-space: nowrap;
+}
+.tech-chip.good { border-color: rgba(0,229,155,0.3); color: var(--green); }
+.tech-chip.warn { border-color: rgba(245,166,35,0.3); color: var(--amber); }
+.tech-chip.bad  { border-color: rgba(255,77,109,0.3); color: var(--red); }
+
+.sc-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.sc-tag {
+  font-size: 10px; padding: 2px 7px; border-radius: 3px;
+  white-space: nowrap;
+}
+.sc-tag.accum { background: var(--green3); color: var(--green); }
+.sc-tag.safe-green { background: var(--green3); color: var(--green); }
+.sc-tag.safe-yellow { background: var(--amber2); color: var(--amber); }
+.sc-tag.safe-red { background: var(--red2); color: var(--red); }
+.sc-tag.ai { background: var(--purple2); color: var(--purple); }
+.sc-tag.flow-buy { background: var(--green3); color: var(--green); }
+.sc-tag.flow-sell { background: var(--red2); color: var(--red); }
+
+.sc-breakdown {
+  display: flex; gap: 4px; font-family: var(--mono); font-size: 10px;
+}
+.sc-breakdown span {
+  padding: 1px 5px; border-radius: 2px;
+  background: var(--bg3); color: var(--muted);
+}
+
+/* ── ZONE 7: ETF 추천 ── */
+.etf-list { display: flex; flex-direction: column; gap: 8px; }
+.etf-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
   border-radius: 5px;
-  border: 1px solid;
-  cursor: pointer;
-  transition: opacity 0.15s;
+  background: var(--bg3);
+  border: 1px solid var(--border);
 }
-.action-item:hover { opacity: 0.85; }
-.action-item.buy  { background: var(--green3); border-color: rgba(0,229,155,0.25); }
-.action-item.watch{ background: #1a1600;       border-color: rgba(245,166,35,0.2); }
-.action-item.sell { background: var(--red2);   border-color: rgba(255,77,109,0.25);}
-.action-icon {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
-  flex-shrink: 0;
+.etf-cat {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 7px; border-radius: 3px;
+  white-space: nowrap; flex-shrink: 0;
 }
-.action-item.buy  .action-icon { background: var(--green); color: #000; }
-.action-item.watch .action-icon{ background: var(--amber); color: #000; }
-.action-item.sell .action-icon { background: var(--red);   color: #fff; }
-.action-main { flex: 1; }
-.action-stock { font-size: 14px; font-weight: 500; color: var(--text); }
-.action-stock em { font-style: normal; color: var(--muted); font-size: 12px; margin-left: 6px; }
-.action-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.action-grade {
-  font-family: var(--mono); font-size: 16px; font-weight: 700;
-  flex-shrink: 0;
+.etf-cat.sector { background: var(--blue2); color: var(--blue); }
+.etf-cat.macro  { background: var(--purple2); color: var(--purple); }
+.etf-cat.theme  { background: var(--amber2); color: var(--amber); }
+.etf-main { flex: 1; }
+.etf-name { font-size: 13px; font-weight: 500; }
+.etf-name em { font-style: normal; color: var(--muted); font-size: 11px; margin-left: 6px; }
+.etf-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.etf-conf { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+.etf-pct { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.etf-action-badge {
+  font-family: var(--mono); font-size: 10px; padding: 2px 8px;
+  border-radius: 3px; font-weight: 700;
 }
-.action-item.buy  .action-grade { color: var(--green); }
-.action-item.watch .action-grade{ color: var(--amber); }
-.action-item.sell .action-grade { color: var(--red);   }
-.action-why {
-  font-size: 11px; padding: 3px 8px;
-  border-radius: 3px; white-space: nowrap;
-  flex-shrink: 0;
+.etf-action-badge.buy  { background: var(--green); color: #000; }
+.etf-action-badge.watch{ background: var(--amber); color: #000; }
+.etf-market-bar {
+  padding: 8px 14px; font-size: 11px; color: var(--muted);
+  background: var(--bg3); border-radius: 5px;
+  border: 1px solid var(--border); margin-bottom: 10px;
+  font-family: var(--mono);
 }
-.action-item.buy  .action-why { background: rgba(0,229,155,0.12); color: var(--green); }
-.action-item.watch .action-why{ background: rgba(245,166,35,0.12); color: var(--amber); }
-.action-item.sell .action-why { background: rgba(255,77,109,0.12); color: var(--red);  }
 
 /* ── ZONE 3: 성과 ── */
 .perf-grid { display: grid; grid-template-columns: repeat(3, 1fr) 1fr; gap: 1px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
@@ -396,8 +456,8 @@ body::before {
   <!-- ZONE 2: 액션 — 동적 렌더링 -->
   <div class="zone">
     <div class="zone-header">
-      <span class="zone-label">ZONE 02 — ACTION</span>
-      <span class="zone-title">오늘 할 일</span>
+      <span class="zone-label">ZONE 02 — ACTION (풀 공개)</span>
+      <span class="zone-title">종목 추천 + 기술지표</span>
     </div>
     <div class="zone-body">
       <div class="action-list" id="zone2List"></div>
@@ -440,6 +500,15 @@ body::before {
       </div>
     </div>
 
+  </div>
+
+  <!-- ZONE 7: ETF 추천 -->
+  <div class="zone">
+    <div class="zone-header">
+      <span class="zone-label">ZONE 07 — ETF</span>
+      <span class="zone-title">ETF 추천</span>
+    </div>
+    <div class="zone-body" id="zone7Content"></div>
   </div>
 
 </main>
@@ -575,7 +644,7 @@ function renderZone1(z) {
     </div>`;
 }
 
-// ── ZONE 2: 액션 ──
+// ── ZONE 2: 종목 풀 공개 카드 ──
 function renderZone2(items) {
   const el = document.getElementById('zone2List');
   if (!items || !items.length) { el.innerHTML = '<div style="padding:12px;color:var(--muted)">오늘 액션 없음</div>'; return; }
@@ -583,21 +652,98 @@ function renderZone2(items) {
   el.innerHTML = items.map(a => {
     const act = (a.action || 'WATCH').toUpperCase();
     const cls = act === 'BUY' ? 'buy' : act === 'SELL' ? 'sell' : 'watch';
-    const icon = act === 'BUY' ? 'BUY' : act === 'SELL' ? 'SEL' : 'WTC';
-    const detail = [];
-    if (a.score) detail.push(`Score ${a.score}`);
-    if (a.stop_loss) detail.push(`손절 ${a.stop_loss.toLocaleString()}원`);
-    if (a.target_price) detail.push(`목표 ${a.target_price.toLocaleString()}원`);
-    if (a.close) detail.push(`현재가 ${a.close.toLocaleString()}원`);
 
-    return `<div class="action-item ${cls}">
-      <div class="action-icon">${icon}</div>
-      <div class="action-main">
-        <div class="action-stock">${esc(a.name)} <em>${esc(a.ticker)}</em></div>
-        <div class="action-detail">${esc(detail.join(' · '))}</div>
+    // 기술지표 칩
+    let techChips = '';
+    if (a.rsi) {
+      const rc = a.rsi <= 30 ? 'good' : a.rsi >= 70 ? 'bad' : a.rsi <= 45 ? 'good' : '';
+      techChips += `<span class="tech-chip ${rc}">RSI ${a.rsi}</span>`;
+    }
+    if (a.adx) {
+      const ac = a.adx >= 25 ? 'good' : '';
+      techChips += `<span class="tech-chip ${ac}">ADX ${a.adx}</span>`;
+    }
+    if (a.bb_position !== undefined && a.bb_position !== null) {
+      const bc = a.bb_position < 0.3 ? 'good' : a.bb_position > 0.8 ? 'bad' : '';
+      techChips += `<span class="tech-chip ${bc}">BB ${(a.bb_position * 100).toFixed(0)}%</span>`;
+    }
+    if (a.stoch_k) {
+      const sc = a.stoch_k < 20 ? 'good' : a.stoch_k > 80 ? 'bad' : '';
+      techChips += `<span class="tech-chip ${sc}">Stoch ${a.stoch_k}</span>`;
+    }
+    if (a.ma5_gap) {
+      techChips += `<span class="tech-chip">MA5 ${a.ma5_gap > 0 ? '+' : ''}${a.ma5_gap}%</span>`;
+    }
+    if (a.above_ma60) techChips += `<span class="tech-chip good">MA60↑</span>`;
+    if (a.sar_trend === -1) techChips += `<span class="tech-chip bad">SAR↓</span>`;
+    else if (a.sar_trend === 1) techChips += `<span class="tech-chip good">SAR↑</span>`;
+
+    // 태그
+    let tags = '';
+    if (a.accum_phase) tags += `<span class="sc-tag accum">${esc(a.accum_phase)} ${a.accum_days}일</span>`;
+    if (a.safety_signal) {
+      const safeClass = a.safety_signal === 'GREEN' ? 'safe-green' : a.safety_signal === 'YELLOW' ? 'safe-yellow' : 'safe-red';
+      tags += `<span class="sc-tag ${safeClass}">안전: ${esc(a.safety_label || a.safety_signal)}</span>`;
+    }
+    if (a.ai_tag) tags += `<span class="sc-tag ai">${esc(a.ai_tag)}</span>`;
+
+    // 수급 태그
+    if (a.foreign_5d) {
+      const fv = a.foreign_5d;
+      const fc = fv > 0 ? 'flow-buy' : 'flow-sell';
+      tags += `<span class="sc-tag ${fc}">외인5d ${moneyStr(fv)}</span>`;
+    }
+    if (a.inst_5d) {
+      const iv = a.inst_5d;
+      const ic = iv > 0 ? 'flow-buy' : 'flow-sell';
+      tags += `<span class="sc-tag ${ic}">기관5d ${moneyStr(iv)}</span>`;
+    }
+
+    // 과열 경고
+    if (a.overheat_flags && a.overheat_flags.length) {
+      tags += a.overheat_flags.map(f => `<span class="sc-tag safe-yellow">${esc(f)}</span>`).join('');
+    }
+
+    // 점수 분해
+    let breakdown = '';
+    if (a.score_breakdown) {
+      const sb = a.score_breakdown;
+      breakdown = `<div class="sc-breakdown">
+        <span>기술:${sb.tech}</span><span>수급:${sb.flow}</span>
+        <span>개별:${sb.individual}</span><span>안전:${sb.safety}</span>
+        <span>과열:${sb.overheat}</span><span>멀티:${sb.multi}</span>
+      </div>`;
+    }
+
+    // 가격 라인
+    let prices = '';
+    if (a.close) {
+      prices += `<span><span class="label">현재가</span> <b style="color:${valColor(a.price_change||0)}">${a.close.toLocaleString()}원</b>`;
+      if (a.price_change) prices += ` (${a.price_change > 0 ? '+' : ''}${a.price_change}%)`;
+      prices += '</span>';
+    }
+    if (a.stop_loss) prices += `<span><span class="label">손절</span> ${a.stop_loss.toLocaleString()}</span>`;
+    if (a.target_price) prices += `<span><span class="label">목표</span> ${a.target_price.toLocaleString()}</span>`;
+    if (a.drawdown) prices += `<span><span class="label">52주낙폭</span> <span style="color:var(--red)">${a.drawdown}%</span></span>`;
+    if (a.consensus_upside) prices += `<span><span class="label">컨센</span> <span style="color:var(--green)">+${a.consensus_upside}%</span></span>`;
+
+    const hasTech = techChips || tags || breakdown || prices;
+
+    return `<div class="stock-card ${cls}">
+      <div class="sc-header">
+        <span class="sc-grade">${esc(a.grade)}</span>
+        <span class="sc-name">${esc(a.name)} <em>${esc(a.ticker)}</em></span>
+        <span class="sc-badge">${act}</span>
+        <span class="sc-score">${a.score}</span>
+        <span class="sc-strategy">${esc(a.strategy)}</span>
       </div>
-      <span class="action-grade">${esc(a.grade)}</span>
-      <span class="action-why">${esc(a.reason || a.strategy || '')}</span>
+      <div class="sc-reason">${esc(a.reason || '')}</div>
+      ${hasTech ? `<div class="sc-detail">
+        ${prices ? `<div class="sc-prices">${prices}</div>` : ''}
+        ${techChips ? `<div class="sc-tech">${techChips}</div>` : ''}
+        ${tags ? `<div class="sc-tags">${tags}</div>` : ''}
+        ${breakdown}
+      </div>` : ''}
     </div>`;
   }).join('');
 }
@@ -661,15 +807,17 @@ function renderZone3(z) {
   el.innerHTML = html;
 }
 
-// ── ZONE 4: 섹터 ──
+// ── ZONE 4: 섹터 + ETF ──
 function renderZone4(sectors) {
   const el = document.getElementById('sectorList');
   if (!sectors || !sectors.length) { el.innerHTML = '<div style="color:var(--muted)">데이터 없음</div>'; return; }
 
   el.innerHTML = sectors.map(s => {
     const c = signalColor(s.signal);
+    const etfInfo = s.etf_code ? `<span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${s.etf_code}</span>` : '';
+    const etfSig = s.etf_signal ? `<span style="font-size:9px;color:var(--blue);margin-left:4px">${esc(s.etf_signal)}</span>` : '';
     return `<div class="sector-row">
-      <span class="sector-name">${esc(s.name)}</span>
+      <span class="sector-name">${esc(s.name)}${etfInfo ? '<br>'+etfInfo+etfSig : ''}</span>
       <div class="sector-bar-wrap">
         <div class="sector-bar-fill" style="width:${s.score}%;background:${c}"></div>
       </div>
@@ -678,6 +826,53 @@ function renderZone4(sectors) {
       ${s.relay ? `<span class="relay-arrow">FIRE</span>` : '<span style="width:44px"></span>'}
     </div>`;
   }).join('');
+}
+
+// ── ZONE 7: ETF 추천 ──
+function renderZone7(items) {
+  const el = document.getElementById('zone7Content');
+  if (!items || !items.length) { el.innerHTML = '<div style="padding:12px;color:var(--muted)">ETF 추천 없음</div>'; return; }
+
+  let html = '';
+
+  // 시장 방향 헤더 (첫 번째 항목이 _market_direction일 수 있음)
+  if (items[0] && items[0]._market_direction) {
+    const m = items[0];
+    const dc = m._market_direction === 'BULL' ? 'var(--green)' : m._market_direction === 'BEAR' ? 'var(--red)' : 'var(--amber)';
+    html += `<div class="etf-market-bar">
+      시장 방향: <span style="color:${dc};font-weight:700">${esc(m._market_direction)}</span>
+      (score ${m._market_score}, conf ${m._market_confidence}%)
+      · ${esc(m._regime)} · VIX ${m._vix}
+      ${m._reasons ? '<br>' + m._reasons.map(r => esc(r)).join(' · ') : ''}
+    </div>`;
+    items = items.slice(1);
+  }
+
+  html += '<div class="etf-list">';
+  html += items.map(e => {
+    const catCls = e.category === '섹터' ? 'sector' : e.category === '매크로' ? 'macro' : 'theme';
+    const actCls = e.action === 'BUY' ? 'buy' : 'watch';
+    const details = [];
+    if (e.holding_period) details.push(`보유 ${e.holding_period}`);
+    if (e.stop_loss) details.push(`손절: ${e.stop_loss}`);
+    if (e.entry_timing) details.push(e.entry_timing);
+    const reasonStr = (e.reasons || []).join(' · ');
+
+    return `<div class="etf-card">
+      <span class="etf-cat ${catCls}">${esc(e.category)}</span>
+      <div class="etf-main">
+        <div class="etf-name">${esc(e.name)} <em>${esc(e.ticker)}</em></div>
+        <div class="etf-detail">${esc(reasonStr)}</div>
+        ${details.length ? `<div class="etf-detail">${esc(details.join(' · '))}</div>` : ''}
+      </div>
+      <span class="etf-action-badge ${actCls}">${esc(e.action)}</span>
+      <span class="etf-conf" style="color:${e.confidence >= 60 ? 'var(--green)' : 'var(--amber)'}">${e.confidence}%</span>
+      ${e.portfolio_pct ? `<span class="etf-pct">${e.portfolio_pct}%</span>` : ''}
+    </div>`;
+  }).join('');
+  html += '</div>';
+
+  el.innerHTML = html;
 }
 
 // ── ZONE 5: 수급 레이더 ──
@@ -779,6 +974,7 @@ function renderAll() {
   renderZone3(STATE.zone3);
   renderZone4(STATE.zone4);
   renderZone5(STATE.zone5);
+  renderZone7(STATE.zone7);
 
   // 푸터 시그널 수 갱신
   const foot = document.querySelector('.footer-left');
