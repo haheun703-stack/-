@@ -392,16 +392,16 @@ echo [%date% %time%] [24/29] 저녁 통합 리포트 >> logs\schedule.log
 python -u -X utf8 scripts\send_evening_summary.py --send >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [24/29] FAILED >> logs\schedule.log
 
-REM 25단계: 역발상 페이퍼 트레이딩 (일일 스캔 + 가상 매매)
-echo [%date% %time%] [25/30] 역발상 페이퍼 트레이딩 >> logs\schedule.log
-python -u -X utf8 scripts\paper_trader.py >> logs\schedule.log 2>&1
+REM 25단계: 통합 페이퍼 트레이딩 (scan_buy 추천 → 가상 매매 + FLOWX 업로드)
+echo [%date% %time%] [25/30] 통합 페이퍼 트레이딩 >> logs\schedule.log
+python -u -X utf8 scripts\paper_trading_unified.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [25/30] FAILED >> logs\schedule.log
 
-REM 25.5단계: 금요일 → 역발상 주간 리포트
+REM 25.5단계: 금요일 → 주간 리포트
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
-    echo [%date% %time%] [25.5/30] 역발상 주간 리포트 >> logs\schedule.log
-    python -u -X utf8 scripts\paper_trader.py --weekly >> logs\schedule.log 2>&1
+    echo [%date% %time%] [25.5/30] 페이퍼 주간 리포트 >> logs\schedule.log
+    python -u -X utf8 scripts\paper_trading_unified.py --weekly >> logs\schedule.log 2>&1
     if errorlevel 1 echo [%date% %time%] [25.5/30] FAILED >> logs\schedule.log
 ) else (
     echo [%date% %time%] [25.5/30] 주간 리포트 스킵 (금요일 아님) >> logs\schedule.log
