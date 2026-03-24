@@ -48,15 +48,13 @@ echo [%date% %time%] [1/29] CSV 전종목 업데이트 >> logs\schedule.log
 python -u -X utf8 scripts\update_daily_data.py >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [1/29] FAILED >> logs\schedule.log
 
-REM 2단계: Parquet 유니버스 증분 업데이트 (pykrx)
-echo [%date% %time%] [2/29] Parquet 증분 업데이트 >> logs\schedule.log
-python -u -X utf8 scripts\extend_parquet_data.py >> logs\schedule.log 2>&1
+REM 2단계: Parquet 유니버스 증분 업데이트 — 종가만 (수급은 BAT-D2 18:30에서 수집)
+echo [%date% %time%] [2/29] Parquet 증분 업데이트 (종가만, 수급 스킵) >> logs\schedule.log
+python -u -X utf8 scripts\extend_parquet_data.py --skip-supply >> logs\schedule.log 2>&1
 if errorlevel 1 echo [%date% %time%] [2/29] FAILED >> logs\schedule.log
 
-REM 3단계: 수급 데이터 수집 (외인/기관 매매동향)
-echo [%date% %time%] [3/29] 수급 데이터 수집 >> logs\schedule.log
-python -u -X utf8 scripts\collect_supply_data.py >> logs\schedule.log 2>&1
-if errorlevel 1 echo [%date% %time%] [3/29] FAILED >> logs\schedule.log
+REM 3단계: 수급 데이터 수집 → BAT-D2(18:30)로 이관됨
+echo [%date% %time%] [3/29] 수급 수집 스킵 (BAT-D2 18:30 담당) >> logs\schedule.log
 
 REM 4단계: KOSPI 인덱스 업데이트 (레짐 판별용)
 echo [%date% %time%] [4/29] KOSPI 인덱스 업데이트 >> logs\schedule.log

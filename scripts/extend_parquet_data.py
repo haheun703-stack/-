@@ -44,8 +44,79 @@ except ImportError:
     KIS_INVESTOR_AVAILABLE = False
 
 
-def extend_single(parquet_path: Path, end_date: str) -> dict:
-    """단일 parquet 파일 증분 업데이트"""
+def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
+                      end_date: str, ticker: str) -> dict:
+    """OHLCV 이미 존재하는 날짜에 수급(기관/외인/개인)만 채워넣기.
+
+    수급이 0인 최근 N일을 찾아서 pykrx로 수급만 재수집.
+    """
+    result = {"ticker": ticker, "status": "skip", "new_rows": 0}
+
+    supply_cols = ["기관합계", "외국인합계", "개인"]
+    for col in supply_cols:
+        if col not in df.columns:
+            df[col] = 0.0
+
+    # 수급이 0인 최근 행 찾기 (최대 최근 5일)
+    recent = df.tail(5)
+    zero_mask = (recent[supply_cols].abs().sum(axis=1) == 0)
+    zero_dates = recent[zero_mask].index
+
+    if len(zero_dates) == 0:
+        return result  # 수급 이미 있음
+
+    fetch_start = zero_dates.min().strftime("%Y%m%d")
+    fetch_end = zero_dates.max().strftime("%Y%m%d")
+
+    inv_df = None
+    try:
+        inv_df = krx.get_market_trading_value_by_date(fetch_start, fetch_end, ticker)
+        if inv_df is not None and not inv_df.empty:
+            inv_df.index.name = "date"
+        else:
+            inv_df = None
+        time.sleep(0.3)
+    except Exception:
+        inv_df = None
+
+    # pykrx 실패 → KIS fallback
+    if inv_df is None and KIS_INVESTOR_AVAILABLE:
+        try:
+            kis_df = kis_fetch_investor(ticker)
+            if kis_df is not None and not kis_df.empty:
+                kis_df.index.name = "date"
+                inv_df = kis_df
+        except Exception:
+            pass
+
+    if inv_df is None:
+        return result
+
+    filled = 0
+    inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
+    for kr_col, en_col in inv_col_map.items():
+        if kr_col in inv_df.columns:
+            common_idx = inv_df.index.intersection(zero_dates)
+            if len(common_idx) > 0:
+                df.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
+                filled = len(common_idx)
+
+    if filled > 0:
+        df.to_parquet(parquet_path)
+        result["status"] = "ok"
+        result["new_rows"] = filled
+
+    return result
+
+
+def extend_single(parquet_path: Path, end_date: str, *,
+                   skip_supply: bool = False, supply_only: bool = False) -> dict:
+    """단일 parquet 파일 증분 업데이트
+
+    Args:
+        skip_supply: True → 수급(투자자 매매동향) 스킵, 종가/거래량만
+        supply_only: True → OHLCV 이미 있는 날짜에 수급만 채워넣기
+    """
     ticker = parquet_path.stem
     result = {"ticker": ticker, "status": "skip", "new_rows": 0}
 
@@ -58,6 +129,10 @@ def extend_single(parquet_path: Path, end_date: str) -> dict:
 
     last_date = df.index.max()
     last_date_str = last_date.strftime("%Y%m%d")
+
+    # ── supply_only 모드: 기존 OHLCV 행에 수급만 채워넣기 ──
+    if supply_only:
+        return _fill_supply_only(df, parquet_path, end_date, ticker)
 
     # 이미 최신이면 skip
     if last_date_str >= end_date:
@@ -107,51 +182,53 @@ def extend_single(parquet_path: Path, end_date: str) -> dict:
                 new_rows[supply_col] = 0.0
 
         # 투자자 매매동향 업데이트 시도 (pykrx → KIS fallback)
-        inv_df = None
-        try:
-            inv_df = krx.get_market_trading_value_by_date(fetch_start, end_date, ticker)
-            if inv_df is not None and not inv_df.empty:
-                inv_df.index.name = "date"
-            else:
-                inv_df = None
-            time.sleep(0.3)
-        except Exception:
+        if not skip_supply:
             inv_df = None
-
-        # pykrx 실패 → KIS API fallback
-        if inv_df is None and KIS_INVESTOR_AVAILABLE:
             try:
-                kis_df = kis_fetch_investor(ticker)
-                if kis_df is not None and not kis_df.empty:
-                    kis_df.index.name = "date"
-                    inv_df = kis_df
-                    logger.debug("[%s] KIS fallback 수급 조회 성공", ticker)
-            except Exception as e:
-                logger.debug("[%s] KIS fallback 실패: %s", ticker, e)
+                inv_df = krx.get_market_trading_value_by_date(fetch_start, end_date, ticker)
+                if inv_df is not None and not inv_df.empty:
+                    inv_df.index.name = "date"
+                else:
+                    inv_df = None
+                time.sleep(0.3)
+            except Exception:
+                inv_df = None
 
-        if inv_df is not None:
-            inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
-            for kr_col, en_col in inv_col_map.items():
-                if kr_col in inv_df.columns and en_col in new_rows.columns:
-                    common_idx = inv_df.index.intersection(new_rows.index)
-                    if len(common_idx) > 0:
-                        new_rows.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
+            # pykrx 실패 → KIS API fallback
+            if inv_df is None and KIS_INVESTOR_AVAILABLE:
+                try:
+                    kis_df = kis_fetch_investor(ticker)
+                    if kis_df is not None and not kis_df.empty:
+                        kis_df.index.name = "date"
+                        inv_df = kis_df
+                        logger.debug("[%s] KIS fallback 수급 조회 성공", ticker)
+                except Exception as e:
+                    logger.debug("[%s] KIS fallback 실패: %s", ticker, e)
+
+            if inv_df is not None:
+                inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
+                for kr_col, en_col in inv_col_map.items():
+                    if kr_col in inv_df.columns and en_col in new_rows.columns:
+                        common_idx = inv_df.index.intersection(new_rows.index)
+                        if len(common_idx) > 0:
+                            new_rows.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
 
         # 펀더멘탈 업데이트 시도
-        try:
-            fund_df = krx.get_market_fundamental_by_date(fetch_start, end_date, ticker)
-            if fund_df is not None and not fund_df.empty:
-                fund_df.index.name = "date"
-                fund_col_map = {"BPS": "fund_BPS", "PER": "fund_PER", "PBR": "fund_PBR",
-                                "EPS": "fund_EPS", "DIV": "fund_DIV", "DPS": "fund_DPS"}
-                for kr_col, en_col in fund_col_map.items():
-                    if kr_col in fund_df.columns and en_col in new_rows.columns:
-                        common_idx = fund_df.index.intersection(new_rows.index)
-                        if len(common_idx) > 0:
-                            new_rows.loc[common_idx, en_col] = fund_df.loc[common_idx, kr_col]
-            time.sleep(0.3)
-        except Exception:
-            pass
+        if not skip_supply:
+            try:
+                fund_df = krx.get_market_fundamental_by_date(fetch_start, end_date, ticker)
+                if fund_df is not None and not fund_df.empty:
+                    fund_df.index.name = "date"
+                    fund_col_map = {"BPS": "fund_BPS", "PER": "fund_PER", "PBR": "fund_PBR",
+                                    "EPS": "fund_EPS", "DIV": "fund_DIV", "DPS": "fund_DPS"}
+                    for kr_col, en_col in fund_col_map.items():
+                        if kr_col in fund_df.columns and en_col in new_rows.columns:
+                            common_idx = fund_df.index.intersection(new_rows.index)
+                            if len(common_idx) > 0:
+                                new_rows.loc[common_idx, en_col] = fund_df.loc[common_idx, kr_col]
+                time.sleep(0.3)
+            except Exception:
+                pass
 
         # 기존 + 신규 합치기
         combined = pd.concat([df, new_rows])
@@ -175,6 +252,10 @@ def extend_single(parquet_path: Path, end_date: str) -> dict:
 def main():
     parser = argparse.ArgumentParser(description="parquet 데이터 증분 업데이트")
     parser.add_argument("--end", type=str, default=None, help="종료일 (YYYYMMDD)")
+    parser.add_argument("--skip-supply", action="store_true",
+                        help="수급(투자자 매매동향) 수집 스킵 — 종가/거래량만 수집")
+    parser.add_argument("--supply-only", action="store_true",
+                        help="수급만 재수집 (OHLCV는 이미 있는 종목만)")
     args = parser.parse_args()
 
     if not PYKRX_AVAILABLE:
@@ -185,7 +266,8 @@ def main():
     raw_dir = project_root / "data" / "raw"
     parquets = sorted(raw_dir.glob("*.parquet"))
 
-    logger.info(f"증분 업데이트 시작: {len(parquets)}종목 → {end_date}까지")
+    mode = "supply-only" if args.supply_only else ("ohlcv-only" if args.skip_supply else "full")
+    logger.info(f"증분 업데이트 시작: {len(parquets)}종목 → {end_date}까지 (모드: {mode})")
 
     updated = 0
     skipped = 0
@@ -193,7 +275,9 @@ def main():
     error_list = []
 
     for i, p in enumerate(parquets):
-        result = extend_single(p, end_date)
+        result = extend_single(p, end_date,
+                               skip_supply=args.skip_supply,
+                               supply_only=args.supply_only)
 
         if result["status"] == "ok":
             updated += 1
