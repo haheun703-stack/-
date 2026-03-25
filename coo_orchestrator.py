@@ -289,8 +289,6 @@ class COOOrchestrator:
 
         # 명령어 조립
         if cmd.startswith("-m ") or cmd.startswith("-c "):
-            full_cmd = [VENV_PYTHON, "-u", "-X", "utf8"] + cmd.split(None, 1)
-            # -m module.name 또는 -c "code" 형태
             flag = cmd[:2]
             rest = cmd[3:]
             full_cmd = [VENV_PYTHON, "-u", "-X", "utf8", flag, rest]
@@ -307,7 +305,7 @@ class COOOrchestrator:
                 cwd=str(PROJECT_ROOT),
                 capture_output=True,
                 text=True,
-                timeout=600,  # 10분 타임아웃
+                timeout=2400,  # 40분 타임아웃 (CSV 업데이트 25분 소요)
                 env={
                     **__import__("os").environ,
                     "PYTHONPATH": str(PROJECT_ROOT),

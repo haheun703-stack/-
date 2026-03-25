@@ -37,7 +37,7 @@ if errorlevel 1 (
 
 REM ── COO Orchestrator 실행 (7그룹 66단계) ──
 echo [%date% %time%] COO Orchestrator 시작 >> logs\schedule.log
-python -u -X utf8 coo_orchestrator.py >> logs\schedule.log 2>&1
+python -u -X utf8 coo_orchestrator.py >> logs\coo_bat.log 2>&1
 if errorlevel 1 (
     echo [%date% %time%] COO 실패 — 원본 BAT-D 폴백 실행 >> logs\schedule.log
     call scripts\schedule_D_original.bat
