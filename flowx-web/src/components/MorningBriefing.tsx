@@ -164,10 +164,8 @@ function PickCard({ pick }: { pick: NewsPick }) {
         {pick.reason && (
           <p className="text-gray-500 text-xs max-w-[200px] truncate">{pick.reason}</p>
         )}
-        {pick.signals && pick.signals.length > 0 && (
-          <p className="text-gray-600 text-xs">
-            {pick.signals.slice(0, 2).join(", ")}
-          </p>
+        {pick.signals && (
+          <p className="text-gray-600 text-xs">{pick.signals}</p>
         )}
       </div>
     </div>

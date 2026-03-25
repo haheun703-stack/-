@@ -69,30 +69,55 @@ export interface NewsPick {
   name: string;
   grade: string;
   score: number;
-  signals: string[];
+  signals: string;   // 백엔드 계약: 문자열 (", " join)
   reason?: string;
 }
 
-/** Supabase에서 오는 다양한 news_pick 포맷을 통일 */
+/**
+ * Supabase에서 오는 다양한 news_pick 포맷을 통일.
+ * Python 백엔드 flowx_data_contract.py의 NewsPick.from_any()와 동일 로직.
+ *
+ * 지원 포맷:
+ *   1. {name: string, ticker, grade, score, signals}  — 정상
+ *   2. {title: string, ticker}                         — 구버전
+ *   3. {code: {name, ticker}, name: {name, ticker}}   — 크래시 원인
+ *   4. "삼성전자"                                       — 문자열
+ */
 export function normalizeNewsPick(raw: RawNewsPick): NewsPick {
-  // 포맷 1: {name: string, ticker: string, grade, score, signals}
-  // 포맷 2: {title: string, ticker: string}
-  // 포맷 3: {code: {name, ticker}, name: {name, ticker}, reason: string}
-  let name = "";
-  let ticker = "";
+  if (typeof raw === "string") {
+    return { ticker: "", name: raw, grade: "", score: 0, signals: "" };
+  }
+  if (!raw || typeof raw !== "object") {
+    return { ticker: "", name: "N/A", grade: "", score: 0, signals: "" };
+  }
 
+  // ── name 추출 ──
+  let name = "";
   if (typeof raw.name === "string") {
     name = raw.name;
   } else if (raw.name && typeof raw.name === "object" && raw.name.name) {
-    name = raw.name.name;
-  } else if (typeof raw.title === "string") {
+    name = raw.name.name;  // 중첩 객체 풀기
+  }
+  if (!name && typeof raw.title === "string") {
     name = raw.title;
   }
 
+  // ── ticker 추출 ──
+  let ticker = "";
   if (typeof raw.ticker === "string" && raw.ticker.length <= 10) {
     ticker = raw.ticker;
+  } else if (raw.name && typeof raw.name === "object" && raw.name.ticker) {
+    ticker = raw.name.ticker;
   } else if (raw.code && typeof raw.code === "object" && raw.code.ticker) {
     ticker = raw.code.ticker;
+  }
+
+  // ── signals: 배열이면 join, 문자열이면 그대로 ──
+  let signals = "";
+  if (Array.isArray(raw.signals)) {
+    signals = raw.signals.filter(Boolean).join(", ");
+  } else if (typeof raw.signals === "string") {
+    signals = raw.signals;
   }
 
   return {
@@ -100,7 +125,7 @@ export function normalizeNewsPick(raw: RawNewsPick): NewsPick {
     name: name || "N/A",
     grade: typeof raw.grade === "string" ? raw.grade : "",
     score: typeof raw.score === "number" ? raw.score : 0,
-    signals: Array.isArray(raw.signals) ? raw.signals : [],
+    signals,
     reason: typeof raw.reason === "string" ? raw.reason : undefined,
   };
 }
