@@ -43,6 +43,85 @@ def _load_json(path: str | Path, default=None):
 
 
 # ──────────────────────────────────────────────
+# FLOWX 상황별 메시지 생성기
+# ──────────────────────────────────────────────
+
+def _build_flowx_message(
+    regime: str,
+    shield_level: str,
+    brain: dict,
+    regime_data: dict,
+    vix: float,
+) -> dict:
+    """
+    3가지 상황별 FLOWX 메시지 생성.
+    상황 1: 방어 (SHIELD RED/ORANGE 또는 BEAR/CRISIS)
+    상황 2: 공격 (RECOVERY/BULL)
+    상황 3: 관망 (그 외, 신호 충돌)
+    """
+    confidence = brain.get("confidence", 0.5)
+    nw_score = brain.get("nightwatch_score", 0)
+    fgn_days = brain.get("foreign_consecutive_buy_days", 0)
+
+    # SHIELD RED 사유 추출
+    shield_warnings = brain.get("shield_warnings", [])
+    red_reason = shield_warnings[0] if shield_warnings else "리스크 상승"
+
+    # 상황 1: 방어
+    if shield_level in ("RED", "ORANGE") or regime in ("BEAR", "CRISIS", "PRE_CRISIS", "PANIC"):
+        return {
+            "situation": "방어",
+            "headline": "지금은 지키는 게 버는 겁니다",
+            "reason": f"SHIELD {shield_level}: {red_reason}. 레짐 {regime}. 신규 진입 없음.",
+            "action_down": "보유 종목 손절선 엄수. 이탈 시 즉시 청산.",
+            "action_up": "반등해도 추매 없음. 레짐 전환 확인 후 재진입.",
+            "next_signal": "외국인 순매수 전환 + KOSPI RSI 45 돌파 시 재판단",
+        }
+
+    # 상황 2: 공격
+    if regime in ("RECOVERY", "BULL", "PRE_BULL"):
+        return {
+            "situation": "공격",
+            "headline": "상승 초입 — 올라탈 타이밍입니다",
+            "reason": (
+                f"레짐 {regime}. "
+                f"외국인 {fgn_days}일 순매수. "
+                f"VIX {vix:.1f}. NightWatch {nw_score:+.2f}."
+            ),
+            "action_up": "추매 조건: 20일선 위 + 거래량 1.5배 양봉 확인 시 25% 추가.",
+            "action_partial": "+8% 도달 시 절반 익절, 나머지는 목표가 추적.",
+            "action_down": "손절선 유지. -3% 이탈 시 전량 청산.",
+        }
+
+    # 상황 3: 관망
+    bull_signals = 0
+    bear_signals = 0
+    if nw_score > 0.2:
+        bull_signals += 1
+    elif nw_score < -0.2:
+        bear_signals += 1
+    if vix < 20:
+        bull_signals += 1
+    elif vix > 25:
+        bear_signals += 1
+    if fgn_days > 3:
+        bull_signals += 1
+    elif fgn_days < -3:
+        bear_signals += 1
+
+    return {
+        "situation": "관망",
+        "headline": "방향이 불명확합니다 — 현금이 포지션입니다",
+        "reason": (
+            f"상승신호 {bull_signals}개 vs 하락신호 {bear_signals}개. "
+            f"레짐 {regime}. 우위 없음."
+        ),
+        "action": "신규 진입 없음. 기존 포지션 손절선 유지.",
+        "next_signal": "다음 판단: 오늘 14:30 프리클로즈 스캔",
+    }
+
+
+# ──────────────────────────────────────────────
 # ZONE 1: 오늘의 판단 (BRAIN + LENS + REGIME)
 # ──────────────────────────────────────────────
 
@@ -90,6 +169,11 @@ def build_zone1() -> dict:
     kospi_close = regime.get("kospi_close", 0)
     kospi_chg = regime.get("kospi_change_pct", 0)
 
+    # ── FLOWX 상황별 메시지 생성 ──
+    flowx_message = _build_flowx_message(
+        effective_regime, shield_level, brain, regime, vix,
+    )
+
     return {
         "verdict": verdict,
         "cash_pct": cash_pct,
@@ -105,6 +189,7 @@ def build_zone1() -> dict:
         "shield_status": shield_level,
         "lens_summary": lens_summary[:100] if lens_summary else "",
         "updated_at": brain.get("timestamp", ""),
+        "flowx_message": flowx_message,
     }
 
 
