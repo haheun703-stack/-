@@ -643,34 +643,44 @@ def _compute_kr_closing_score() -> dict:
         if KR_FLOW_CSV.exists():
             flow_df = pd.read_csv(KR_FLOW_CSV, parse_dates=["Date"], index_col="Date")
             if len(flow_df) >= 5:
-                recent = flow_df.tail(5)
-                foreign_5d = recent["foreign_net"].sum()
-                inst_5d = recent["inst_net"].sum()
+                # stale 방어: 마지막 날짜가 5달력일(≈3영업일) 이상 과거면 중립 처리
+                last_flow_date = flow_df.index[-1]
+                flow_gap_days = (pd.Timestamp.now() - last_flow_date).days
+                if flow_gap_days > 5:
+                    logger.warning(
+                        "investor_flow.csv stale: last_date=%s (%d일 전), L1.5 → 0.0",
+                        last_flow_date.strftime("%Y-%m-%d"), flow_gap_days,
+                    )
+                    flow_detail = {"stale": True, "last_date": str(last_flow_date.date()), "gap_days": flow_gap_days}
+                else:
+                    recent = flow_df.tail(5)
+                    foreign_5d = recent["foreign_net"].sum()
+                    inst_5d = recent["inst_net"].sum()
 
-                # 외국인 5일 순매수 합계 → 점수 (±5만억 기준으로 ±1.0)
-                foreign_score = max(-1.0, min(1.0, foreign_5d / 50000))
-                # 기관 5일 순매수 합계 → 점수
-                inst_score = max(-1.0, min(1.0, inst_5d / 30000))
+                    # 외국인 5일 순매수 합계 → 점수 (±5만억 기준으로 ±1.0)
+                    foreign_score = max(-1.0, min(1.0, foreign_5d / 50000))
+                    # 기관 5일 순매수 합계 → 점수
+                    inst_score = max(-1.0, min(1.0, inst_5d / 30000))
 
-                # 외국인 60%, 기관 40%
-                flow_score = foreign_score * 0.60 + inst_score * 0.40
+                    # 외국인 60%, 기관 40%
+                    flow_score = foreign_score * 0.60 + inst_score * 0.40
 
-                # 3일 연속 동방향 보너스
-                last3_foreign = recent["foreign_net"].tail(3)
-                if (last3_foreign > 0).all():
-                    flow_score = min(1.0, flow_score + 0.15)
-                elif (last3_foreign < 0).all():
-                    flow_score = max(-1.0, flow_score - 0.15)
+                    # 3일 연속 동방향 보너스
+                    last3_foreign = recent["foreign_net"].tail(3)
+                    if (last3_foreign > 0).all():
+                        flow_score = min(1.0, flow_score + 0.15)
+                    elif (last3_foreign < 0).all():
+                        flow_score = max(-1.0, flow_score - 0.15)
 
-                flow_detail = {
-                    "foreign_5d": int(foreign_5d),
-                    "inst_5d": int(inst_5d),
-                    "foreign_score": round(foreign_score, 3),
-                    "inst_score": round(inst_score, 3),
-                    "foreign_3d_streak": "buy" if (last3_foreign > 0).all() else (
-                        "sell" if (last3_foreign < 0).all() else "mixed"
-                    ),
-                }
+                    flow_detail = {
+                        "foreign_5d": int(foreign_5d),
+                        "inst_5d": int(inst_5d),
+                        "foreign_score": round(foreign_score, 3),
+                        "inst_score": round(inst_score, 3),
+                        "foreign_3d_streak": "buy" if (last3_foreign > 0).all() else (
+                            "sell" if (last3_foreign < 0).all() else "mixed"
+                        ),
+                    }
     except Exception as e:
         logger.warning(f"KR 수급 데이터 로딩 실패: {e}")
 

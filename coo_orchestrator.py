@@ -54,6 +54,7 @@ PIPELINE_GROUPS = [
             {"name": "CSV 전종목 업데이트", "cmd": "scripts/update_daily_data.py"},
             {"name": "Parquet 증분 업데이트", "cmd": "scripts/extend_parquet_data.py --skip-supply"},
             {"name": "KOSPI 인덱스", "cmd": "scripts/update_kospi_index.py"},
+            {"name": "투자자수급", "cmd": "scripts/collect_investor_flow.py"},
             {"name": "분봉 데이터 수집", "cmd": "scripts/collect_intraday_candles.py"},
         ],
     },
