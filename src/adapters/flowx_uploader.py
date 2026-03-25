@@ -375,9 +375,12 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
 
-    picks_path = DATA_DIR / "tomorrow_picks.json"
+    # FLOWX 모드 JSON 우선 로드 (없으면 기본 tomorrow_picks.json 폴백)
+    flowx_path = DATA_DIR / "tomorrow_picks_flowx.json"
+    picks_path = flowx_path if flowx_path.exists() else DATA_DIR / "tomorrow_picks.json"
     if not picks_path.exists():
         return []
+    is_flowx = picks_path == flowx_path
 
     with open(picks_path, encoding="utf-8") as f:
         data = json.load(f)
@@ -423,17 +426,19 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             "momentum_regime": "AI_BRAIN",
         })
 
-    # 2) picks → 적극매수/매수 등급만
+    # 2) picks → 적극매수/매수 (FLOWX: 관심매수도 포함)
+    allowed_grades = {"적극매수", "매수", "관심매수"} if is_flowx else {"적극매수", "매수"}
     for pick in data.get("picks", []):
         ticker = pick.get("ticker", "")
         grade_kr = pick.get("grade", "")
         if not ticker or ticker in seen_codes:
             continue
-        if grade_kr not in ("적극매수", "매수"):
+        if grade_kr not in allowed_grades:
             continue
         seen_codes.add(ticker)
 
-        grade = "AA" if grade_kr == "적극매수" else "A"
+        grade_map = {"적극매수": "AA", "매수": "A", "관심매수": "B"}
+        grade = grade_map.get(grade_kr, "B")
         close = pick.get("close", 0) or _get_close(ticker)
         if close <= 0:
             continue  # 종가 없으면 스킵 (stop_loss=0 방지)

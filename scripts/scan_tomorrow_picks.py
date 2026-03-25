@@ -108,6 +108,22 @@ WAR_MODE_OVERRIDES = {
 }
 
 # ──────────────────────────────────────────
+# FLOWX 공개추천 모드 오버라이드 설정
+# 주린이(개인투자자) 대상 — 시장 상황과 무관하게 3~5일 상승 종목 추천
+# ──────────────────────────────────────────
+FLOWX_MODE_OVERRIDES = {
+    "min_sources": 1,            # 1소스만으로도 추천 (기본 3)
+    "min_sources_alt_score": 50, # 대체 점수 기준 완화 (기본 70)
+    "veto_avoid": False,         # AI AVOID 거부권 비활성
+    "pool_only": False,          # 컨센서스 풀 제한 없음
+    "dynamic_slots": False,      # 슬롯 고정 (bearish에서 축소 방지)
+    "regime_boost_floor": 0.8,   # 레짐 부스트 최소값 보장 (BEAR에서도 0.8x 이상)
+    "accumulation_boost": 1.3,   # 매집추적 소스 추가 가산 (적중률 1위 소스 강화)
+    "min_top_count": 5,          # TOP 최소 5개 보장 (관찰 등급까지 승격)
+    "label": "[FLOWX]",
+}
+
+# ──────────────────────────────────────────
 # 전략 그룹 정의: 스윙(3~7일) vs 단타(1~3일)
 # ──────────────────────────────────────────
 STRATEGY_GROUPS = {
@@ -1315,14 +1331,32 @@ def main():
     parser = argparse.ArgumentParser(description="내일 추천 종목 통합 스캐너")
     parser.add_argument("--mode", choices=["normal", "war"], default="normal",
                         help="실행 모드: normal(기본), war(공포탐욕)")
+    parser.add_argument("--flowx", action="store_true",
+                        help="FLOWX 공개추천 모드 (주린이 대상, 필터 완화)")
+    parser.add_argument("--no-send", action="store_true",
+                        help="텔레그램 전송 생략 (테스트용)")
     args = parser.parse_args()
 
     is_war_mode = args.mode == "war"
-    mode_label = WAR_MODE_OVERRIDES["label"] if is_war_mode else "[기본]"
+    is_flowx_mode = args.flowx
+    no_send = args.no_send
+
+    # FLOWX 모드가 war 모드보다 우선
+    if is_flowx_mode:
+        mode_label = FLOWX_MODE_OVERRIDES["label"]
+    elif is_war_mode:
+        mode_label = WAR_MODE_OVERRIDES["label"]
+    else:
+        mode_label = "[기본]"
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-    if is_war_mode:
+    if is_flowx_mode:
+        print(f"\n{'='*60}")
+        print(f"  📡 FLOWX 공개추천 모드 — 주린이 대상 공격적 추천")
+        print(f"  min_sources=1 | veto=off | regime_floor=0.8 | 매집부스트=1.3x")
+        print(f"{'='*60}\n")
+    elif is_war_mode:
         print(f"\n{'='*60}")
         print(f"  🔥 공포탐욕 모드 활성화 — 바닥잡이 설정 적용")
         print(f"  min_sources=1 | pool_only=true | veto_avoid=false")
@@ -1409,8 +1443,10 @@ def main():
     consensus_pool_cfg = yaml_config.get("consensus_pool", {})
     consensus_pool_enabled = consensus_pool_cfg.get("enabled", False)
     consensus_pool_only = consensus_pool_cfg.get("pool_only", False)
-    # 공포탐욕 모드: pool_only 강제 활성화
-    if is_war_mode:
+    # 공포탐욕/FLOWX 모드: pool_only 오버라이드
+    if is_flowx_mode:
+        consensus_pool_only = FLOWX_MODE_OVERRIDES["pool_only"]
+    elif is_war_mode:
         consensus_pool_enabled = True
         consensus_pool_only = WAR_MODE_OVERRIDES["pool_only"]
     consensus_pool = {}  # ticker → {upside_pct, composite_score, grade, forward_per, ...}
@@ -1541,6 +1577,13 @@ def main():
         if source_names == ["눌림목"]:
             continue
 
+        # FLOWX 모드: 매집추적 소스 부스트 (적중률 1위 소스 강화)
+        if is_flowx_mode and "매집추적" in source_names:
+            acc_boost = FLOWX_MODE_OVERRIDES["accumulation_boost"]
+            for s in sources:
+                if s.get("source") == "매집추적":
+                    s["score"] = s["score"] * acc_boost
+
         # parquet 기술적 데이터
         pq_data = get_parquet_data(ticker)
 
@@ -1560,8 +1603,12 @@ def main():
         score_detail = calc_integrated_score(ticker, sources, pq_data, grp_src_cnt)
 
         # 레짐 부스트 적용 (v6): 매크로 점수에 따라 최종 점수 보정
-        if regime_mult != 1.0:
-            boosted = min(score_detail["total"] * regime_mult, 100)
+        # FLOWX 모드: floor 보장 (BEAR에서도 0.8x 이상)
+        effective_regime = regime_mult
+        if is_flowx_mode and effective_regime < FLOWX_MODE_OVERRIDES["regime_boost_floor"]:
+            effective_regime = FLOWX_MODE_OVERRIDES["regime_boost_floor"]
+        if effective_regime != 1.0:
+            boosted = min(score_detail["total"] * effective_regime, 100)
             score_detail["total"] = round(boosted, 1)
 
         # 전략 C: US섹터 모멘텀 부스트 (가산, 최대 ±5점)
@@ -1929,7 +1976,9 @@ def main():
     # AI 거부권: AVOID 종목은 최종 추천에서 제외
     ai_veto_cfg = yaml_config.get("ai_brain", {}).get("stock_selection", {})
     veto_avoid_active = ai_veto_cfg.get("veto_avoid", False)
-    if is_war_mode:
+    if is_flowx_mode:
+        veto_avoid_active = FLOWX_MODE_OVERRIDES["veto_avoid"]
+    elif is_war_mode:
         veto_avoid_active = WAR_MODE_OVERRIDES["veto_avoid"]
     if veto_avoid_active:
         ai_vetoed = [r for r in buyable if r.get("ai_action") == "AVOID"]
@@ -1950,7 +1999,9 @@ def main():
     base_swing = STRATEGY_GROUPS["swing"]["slots"]  # 5
     base_short = STRATEGY_GROUPS["short"]["slots"]  # 5
     dynamic_slots_active = ai_sel_cfg.get("dynamic_slots", False)
-    if is_war_mode:
+    if is_flowx_mode:
+        dynamic_slots_active = FLOWX_MODE_OVERRIDES["dynamic_slots"]
+    elif is_war_mode:
         dynamic_slots_active = WAR_MODE_OVERRIDES["dynamic_slots"]
     if dynamic_slots_active and ai_brain_data:
         sentiment = ai_brain_data.get("market_sentiment", "neutral")
@@ -1970,7 +2021,10 @@ def main():
     # 최소 소스 수 필터 (복합 조건: 소스 N개+ OR 소스 (N-1)개 + 고점수)
     min_sources = ai_sel_cfg.get("min_sources", 0)
     alt_score = ai_sel_cfg.get("min_sources_alt_score", 70)
-    if is_war_mode:
+    if is_flowx_mode:
+        min_sources = FLOWX_MODE_OVERRIDES["min_sources"]
+        alt_score = FLOWX_MODE_OVERRIDES["min_sources_alt_score"]
+    elif is_war_mode:
         min_sources = WAR_MODE_OVERRIDES["min_sources"]
         alt_score = WAR_MODE_OVERRIDES["min_sources_alt_score"]
     if min_sources >= 2:
@@ -2027,6 +2081,26 @@ def main():
         top5_short.extend(extras)
 
     top5 = top5_swing + top5_short
+
+    # FLOWX 모드: TOP 최소 보장 — buyable이 부족하면 관찰 등급까지 승격
+    if is_flowx_mode and len(top5) < FLOWX_MODE_OVERRIDES["min_top_count"]:
+        need = FLOWX_MODE_OVERRIDES["min_top_count"] - len(top5)
+        top5_tickers_tmp = {r["ticker"] for r in top5}
+        # 관찰 등급까지 포함하여 점수순 승격
+        fallback_pool = [r for r in results
+                         if r["grade"] in ("관찰", "보류")
+                         and r["ticker"] not in top5_tickers_tmp
+                         and r.get("close", 0) <= MAX_PRICE_FOR_PICK]
+        fallback_pool.sort(key=lambda x: -x["total_score"])
+        promoted = fallback_pool[:need]
+        for r in promoted:
+            r["flowx_promoted"] = True
+            r["original_grade"] = r["grade"]
+            r["grade"] = "관심매수"
+        top5.extend(promoted)
+        if promoted:
+            print(f"[FLOWX] TOP 부족 → {len(promoted)}종목 승격 (관찰→관심매수)")
+
     for r in top5:
         r["is_top5"] = True
 
@@ -2173,15 +2247,16 @@ def main():
                 print(f"  딥다이브 HTML: {dd_html}")
             if dd_png_path and dd_png_path.exists():
                 print(f"  딥다이브 PNG: {dd_png_path}")
-                caption = f"[딥다이브] TOP{len(dd_results)} 수급+급등패턴+이격 분석"
-                img_ok = send_report_to_telegram(dd_png_path, caption)
-                print(f"  딥다이브 이미지 전송: {'OK' if img_ok else 'FAIL'}")
+                if not no_send:
+                    caption = f"[딥다이브] TOP{len(dd_results)} 수급+급등패턴+이격 분석"
+                    img_ok = send_report_to_telegram(dd_png_path, caption)
+                    print(f"  딥다이브 이미지 전송: {'OK' if img_ok else 'FAIL'}")
         except Exception as e:
             logger.warning("[딥다이브 HTML] 실패: %s", e)
             print(f"  ⚠ 딥다이브 HTML/전송 실패: {e}")
 
     # 딥다이브 텍스트도 텔레그램 전송
-    if dd_results and deep_dive_data:
+    if dd_results and deep_dive_data and not no_send:
         try:
             from src.telegram_sender import send_message
             dd_text_msg = format_deep_dive_telegram(dd_results)
@@ -2209,7 +2284,7 @@ def main():
         "generated_at": now.strftime("%Y-%m-%d %H:%M"),
         "target_date": target.strftime("%Y-%m-%d"),
         "target_date_label": f"{target.month}/{target.day}({calendar.day_abbr[target.weekday()]})",
-        "mode": "war" if is_war_mode else "normal",
+        "mode": "flowx" if is_flowx_mode else ("war" if is_war_mode else "normal"),
         "mode_label": mode_label,
         "total_candidates": len(results),
         "stats": grade_stats,
@@ -2250,7 +2325,13 @@ def main():
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    if is_war_mode:
+    if is_flowx_mode:
+        # FLOWX 모드: 별도 파일 저장 (기본 모드 결과를 덮어쓰지 않음)
+        flowx_path = DATA_DIR / "tomorrow_picks_flowx.json"
+        with open(flowx_path, "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
+        print(f"\n[저장] {flowx_path}")
+    elif is_war_mode:
         # 공포탐욕 모드: 별도 파일 저장 (기본 모드 결과를 덮어쓰지 않음)
         war_path = DATA_DIR / "tomorrow_picks_war.json"
         with open(war_path, "w", encoding="utf-8") as f:

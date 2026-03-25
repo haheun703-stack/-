@@ -44,6 +44,12 @@ if errorlevel 1 (
     goto :eof
 )
 
+REM ── FLOWX 공개추천 스캔 (COO 완료 후) ──
+echo [%date% %time%] FLOWX 공개추천 스캔 시작 >> logs\schedule.log
+python -u -X utf8 scripts\scan_tomorrow_picks.py --flowx >> logs\schedule.log 2>&1
+echo [%date% %time%] FLOWX 업로드 >> logs\schedule.log
+python -u -X utf8 scripts\upload_flowx.py >> logs\schedule.log 2>&1
+
 REM ── 금요일 주간 보고서 (COO에 미포함) ──
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
