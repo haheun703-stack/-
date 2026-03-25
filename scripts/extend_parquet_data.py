@@ -47,6 +47,13 @@ try:
 except ImportError:
     KIS_INVESTOR_AVAILABLE = False
 
+# FinanceDataReader fallback (OHLCV)
+try:
+    import FinanceDataReader as fdr
+    FDR_AVAILABLE = True
+except ImportError:
+    FDR_AVAILABLE = False
+
 
 def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
                       end_date: str, ticker: str) -> dict:
@@ -146,16 +153,44 @@ def extend_single(parquet_path: Path, end_date: str, *,
     fetch_start = (last_date + timedelta(days=1)).strftime("%Y%m%d")
 
     try:
-        # OHLCV (pykrx 반환: 시가/고가/저가/종가/거래량/등락률 — 6컬럼)
-        new_ohlcv = krx.get_market_ohlcv_by_date(fetch_start, end_date, ticker, adjusted=True)
+        # OHLCV 조회: pykrx → FDR fallback 체인
+        new_ohlcv = None
+        ohlcv_source = "pykrx"
+
+        # 1차: pykrx
+        try:
+            new_ohlcv = krx.get_market_ohlcv_by_date(fetch_start, end_date, ticker, adjusted=True)
+            if new_ohlcv is not None and not new_ohlcv.empty:
+                new_ohlcv.index.name = "date"
+                col_map = {"시가": "open", "고가": "high", "저가": "low", "종가": "close",
+                            "거래량": "volume", "등락률": "price_change", "거래대금": "trading_value"}
+                new_ohlcv = new_ohlcv.rename(columns=col_map)
+            else:
+                new_ohlcv = None
+        except Exception as e:
+            logger.debug("[%s] pykrx OHLCV 실패: %s", ticker, e)
+            new_ohlcv = None
+
+        # 2차: FDR fallback
+        if new_ohlcv is None and FDR_AVAILABLE:
+            try:
+                fdr_start = f"{fetch_start[:4]}-{fetch_start[4:6]}-{fetch_start[6:]}"
+                fdr_end = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:]}"
+                fdr_df = fdr.DataReader(ticker, fdr_start, fdr_end)
+                if fdr_df is not None and not fdr_df.empty:
+                    fdr_df.index = pd.to_datetime(fdr_df.index)
+                    fdr_df.index.name = "date"
+                    col_map = {"Open": "open", "High": "high", "Low": "low",
+                               "Close": "close", "Volume": "volume", "Change": "price_change"}
+                    fdr_df = fdr_df.rename(columns=col_map)
+                    new_ohlcv = fdr_df
+                    ohlcv_source = "fdr"
+                    logger.debug("[%s] FDR fallback OHLCV 성공", ticker)
+            except Exception as e:
+                logger.debug("[%s] FDR OHLCV 실패: %s", ticker, e)
+
         if new_ohlcv is None or new_ohlcv.empty:
             return result
-
-        new_ohlcv.index.name = "date"
-        # pykrx 한글 컬럼 → 영문 매핑
-        col_map = {"시가": "open", "고가": "high", "저가": "low", "종가": "close",
-                    "거래량": "volume", "등락률": "price_change", "거래대금": "trading_value"}
-        new_ohlcv = new_ohlcv.rename(columns=col_map)
 
         # trading_value 컬럼이 없으면 0으로 추가
         if "trading_value" not in new_ohlcv.columns:
@@ -245,6 +280,8 @@ def extend_single(parquet_path: Path, end_date: str, *,
         result["status"] = "ok"
         result["new_rows"] = len(new_rows)
         result["new_end"] = combined.index.max().strftime("%Y-%m-%d")
+        if ohlcv_source != "pykrx":
+            result["ohlcv_source"] = ohlcv_source
 
     except Exception as e:
         result["status"] = "error"
