@@ -212,7 +212,7 @@ class KRXSession:
 # 수집 대상 종목
 # ═══════════════════════════════════════════════════
 
-# 보유 + 워치 + 주요 대형주 + 방산/조선/반도체 핵심
+# 보유 + 워치 + 주요 대형주 + 방산/조선/반도체 핵심 (항상 추적)
 DEFAULT_TARGETS = [
     # 보유 + 관심
     ("005930", "삼성전자"),
@@ -251,14 +251,147 @@ DEFAULT_TARGETS = [
 ]
 
 
+def _load_dynamic_universe() -> list[tuple[str, str]]:
+    """데이터 파일에서 추적 대상 종목을 동적으로 로드.
+
+    소스:
+      1. event_catalyst.json — 이벤트 촉매 종목
+      2. tomorrow_picks.json — 추천 후보 TOP
+      3. tomorrow_picks_flowx.json — FLOWX 추천 TOP
+      4. accumulation_tracker.json — 매집 추적 종목
+      5. whale_detect.json — 세력 감지 종목
+      6. volume_spike_watchlist.json — 눌림목/수급폭발
+      7. relay/relay_signal.json — 릴레이 발화 종목
+      8. portfolio_allocation.json — 보유 종목
+
+    Returns:
+        [(ticker, name), ...] — 중복 제거됨
+    """
+    seen: set[str] = set()
+    result: list[tuple[str, str]] = []
+
+    def _add(ticker: str, name: str):
+        if ticker and ticker not in seen and len(ticker) == 6:
+            seen.add(ticker)
+            result.append((ticker, name or ticker))
+
+    # 1. 이벤트 촉매
+    try:
+        ec = json.loads((DATA_DIR.parent / "event_catalyst.json").read_text(encoding="utf-8"))
+        for s in ec.get("stocks", []):
+            _add(s.get("ticker", ""), s.get("name", ""))
+    except Exception:
+        pass
+
+    # 2~3. 추천 TOP (일반 + FLOWX)
+    for fname in ["tomorrow_picks.json", "tomorrow_picks_flowx.json"]:
+        try:
+            tp = json.loads((DATA_DIR.parent / fname).read_text(encoding="utf-8"))
+            for p in tp.get("picks", []):
+                if isinstance(p, dict):
+                    _add(p.get("ticker", ""), p.get("name", ""))
+        except Exception:
+            pass
+
+    # 4. 매집 추적
+    try:
+        at = json.loads((DATA_DIR.parent / "accumulation_tracker.json").read_text(encoding="utf-8"))
+        tracking = at.get("tracking", at.get("stocks", {}))
+        if isinstance(tracking, dict):
+            for tk, info in tracking.items():
+                name = info.get("name", "") if isinstance(info, dict) else ""
+                _add(tk, name)
+        elif isinstance(tracking, list):
+            for item in tracking:
+                if isinstance(item, dict):
+                    _add(item.get("ticker", ""), item.get("name", ""))
+    except Exception:
+        pass
+
+    # 5. 세력 감지
+    try:
+        wd = json.loads((DATA_DIR.parent / "whale_detect.json").read_text(encoding="utf-8"))
+        for key in ["detected", "signals", "stocks"]:
+            items = wd.get(key, [])
+            if isinstance(items, list):
+                for item in items:
+                    if isinstance(item, dict):
+                        _add(item.get("ticker", ""), item.get("name", ""))
+            elif isinstance(items, dict):
+                for tk, info in items.items():
+                    name = info.get("name", "") if isinstance(info, dict) else ""
+                    _add(tk, name)
+    except Exception:
+        pass
+
+    # 6. 눌림목/수급폭발
+    for fname in ["volume_spike_watchlist.json", "smallcap_explosion.json"]:
+        try:
+            vs = json.loads((DATA_DIR.parent / fname).read_text(encoding="utf-8"))
+            for key in ["watchlist", "candidates", "signals", "stocks"]:
+                items = vs.get(key, [])
+                if isinstance(items, list):
+                    for item in items:
+                        if isinstance(item, dict):
+                            _add(item.get("ticker", item.get("code", "")),
+                                 item.get("name", ""))
+        except Exception:
+            pass
+
+    # 7. 릴레이 발화 종목
+    try:
+        rs = json.loads((DATA_DIR.parent / "relay" / "relay_signal.json").read_text(encoding="utf-8"))
+        for sector in rs.get("fired_sectors", rs.get("sectors", [])):
+            if isinstance(sector, dict):
+                for stock in sector.get("stocks", sector.get("picks", [])):
+                    if isinstance(stock, dict):
+                        _add(stock.get("ticker", ""), stock.get("name", ""))
+    except Exception:
+        pass
+
+    # 8. 보유 종목
+    try:
+        pa = json.loads((DATA_DIR.parent / "portfolio_allocation.json").read_text(encoding="utf-8"))
+        for h in pa.get("holdings", pa.get("positions", [])):
+            if isinstance(h, dict):
+                _add(h.get("ticker", h.get("code", "")), h.get("name", ""))
+    except Exception:
+        pass
+
+    logger.info(f"동적 유니버스: {len(result)}종목 로드")
+    return result
+
+
+def build_full_universe() -> list[tuple[str, str]]:
+    """DEFAULT_TARGETS + 동적 유니버스 합산 (중복 제거)."""
+    seen: set[str] = set()
+    merged: list[tuple[str, str]] = []
+
+    # 기본 대상 우선
+    for ticker, name in DEFAULT_TARGETS:
+        if ticker not in seen:
+            seen.add(ticker)
+            merged.append((ticker, name))
+
+    # 동적 추가
+    for ticker, name in _load_dynamic_universe():
+        if ticker not in seen:
+            seen.add(ticker)
+            merged.append((ticker, name))
+
+    logger.info(f"전체 유니버스: 기본 {len(DEFAULT_TARGETS)} + 동적 {len(merged) - len(DEFAULT_TARGETS)} = {len(merged)}종목")
+    return merged
+
+
 def get_target_isins(krx: KRXSession) -> list[tuple[str, str, str]]:
-    """대상 종목들의 ISIN을 일괄 조회.
+    """대상 종목들의 ISIN을 일괄 조회 (전체 유니버스).
 
     Returns:
         [(ticker, name, isin), ...]
     """
+    universe = build_full_universe()
     results = []
-    for ticker, name in DEFAULT_TARGETS:
+    for ticker, name in universe:
         isin, found_name = krx.find_isin(name)
         if isin:
             results.append((ticker, found_name or name, isin))
