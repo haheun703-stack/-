@@ -283,6 +283,13 @@ class Shield:
         # ── 3. S2: MDD 관리 ──
         mdd_status = self._check_mdd(portfolio_value, equity_tracker)
 
+        # ── 3.5. 킬스위치 자동 회복 ──
+        recovery = self._check_recovery(mdd_status)
+        if recovery["triggered"]:
+            mdd_status.killswitch_level = "NONE"
+            mdd_status.killswitch_action = ""
+            warnings.append(recovery["message"])
+
         # ── 4. S3: 종목별 손절 통합 ──
         stock_alerts = self._check_stock_alerts(holdings)
         systemic_risk = self._check_systemic_risk(holdings)
@@ -296,17 +303,28 @@ class Shield:
             correlation_breakdowns
         )
 
+        # 킬스위치 회복 시 최소 ORANGE 보장 (GREEN 직행 방지)
+        if recovery["triggered"] and overall_level == "GREEN":
+            overall_level = "ORANGE"
+
         # ── 6. BRAIN 보정 지시 생성 ──
         brain_overrides = self._build_brain_overrides(
             overlaps, mdd_status, stock_alerts, systemic_risk,
             correlation_breakdowns, overall_level
         )
 
+        # 회복 트리거 정보를 brain_overrides에 기록
+        if recovery["triggered"]:
+            brain_overrides["recovery_triggered"] = True
+            brain_overrides["recovery_reason"] = recovery["message"]
+
         # ── 7. 텔레그램 메시지 ──
         telegram_msg = self._build_telegram_message(
             overall_level, overlaps, mdd_status, stock_alerts, systemic_risk,
             correlation_breakdowns, portfolio_value
         )
+        if recovery["triggered"]:
+            telegram_msg = f"⚡ SHIELD 완화: LEVEL_3 → ORANGE (반등 신호 감지)\n\n{telegram_msg}"
 
         report = ShieldReport(
             timestamp=datetime.now().isoformat(),
@@ -651,6 +669,92 @@ class Shield:
             logger.warning("S4: %d개 상관관계 붕괴 감지", breakdown_count)
 
         return breakdowns
+
+    # ────────────────────────────────────────
+    # S5: 킬스위치 자동 회복
+    # ────────────────────────────────────────
+    def _check_recovery(self, mdd: MddStatus) -> dict:
+        """킬스위치 LEVEL_3 상태에서 반등 신호 감지 시 자동 해제.
+
+        조건 (2개 동시 충족):
+          1. KOSPI 3일 누적 수익률 >= +3%
+          2. VIX 전일 대비 -10% 이상 하락
+
+        Returns:
+            {"triggered": bool, "message": str, "kospi_3d": float, "vix_chg": float}
+        """
+        result = {"triggered": False, "message": "", "kospi_3d": 0.0, "vix_chg": 0.0}
+
+        # 킬스위치가 LEVEL_3이 아니면 해당 없음
+        if mdd.killswitch_level != "LEVEL_3":
+            return result
+
+        recovery_cfg = self.shield_cfg.get("recovery", {})
+        kospi_threshold = recovery_cfg.get("kospi_3d_pct", 3.0)
+        vix_threshold = recovery_cfg.get("vix_drop_pct", -10.0)
+
+        # ── 조건1: KOSPI 3일 누적 수익률 ──
+        kospi_3d = self._get_kospi_3d_return()
+        result["kospi_3d"] = kospi_3d
+
+        # ── 조건2: VIX 전일비 변화율 ──
+        vix_chg = self._get_vix_daily_change()
+        result["vix_chg"] = vix_chg
+
+        cond1 = kospi_3d >= kospi_threshold
+        cond2 = vix_chg <= vix_threshold
+
+        if cond1 and cond2:
+            result["triggered"] = True
+            result["message"] = (
+                f"킬스위치 회복: KOSPI 3일 {kospi_3d:+.1f}% (≥{kospi_threshold}%) "
+                f"+ VIX {vix_chg:+.1f}% (≤{vix_threshold}%)"
+            )
+            logger.info("SHIELD 킬스위치 회복 트리거: %s", result["message"])
+        else:
+            logger.info(
+                "SHIELD 회복 미충족: KOSPI 3일 %+.1f%% (%s), VIX %+.1f%% (%s)",
+                kospi_3d, "OK" if cond1 else "미달",
+                vix_chg, "OK" if cond2 else "미달",
+            )
+
+        return result
+
+    def _get_kospi_3d_return(self) -> float:
+        """KOSPI 최근 3일 누적 수익률 (%)."""
+        try:
+            if pd is None:
+                return 0.0
+            csv_path = DATA_DIR / "kospi_index.csv"
+            if not csv_path.exists():
+                return 0.0
+            df = pd.read_csv(csv_path)
+            if len(df) < 4:
+                return 0.0
+            closes = df["close"].dropna()
+            if len(closes) < 4:
+                return 0.0
+            return float((closes.iloc[-1] / closes.iloc[-4] - 1) * 100)
+        except Exception as e:
+            logger.warning("KOSPI 3일 수익률 계산 실패: %s", e)
+            return 0.0
+
+    def _get_vix_daily_change(self) -> float:
+        """VIX 전일 대비 변화율 (%)."""
+        try:
+            if pd is None:
+                return 0.0
+            parquet_path = DATA_DIR / "us_market" / "us_daily.parquet"
+            if not parquet_path.exists():
+                return 0.0
+            df = pd.read_parquet(parquet_path, columns=["vix_close"])
+            vix = df["vix_close"].dropna()
+            if len(vix) < 2:
+                return 0.0
+            return float((vix.iloc[-1] / vix.iloc[-2] - 1) * 100)
+        except Exception as e:
+            logger.warning("VIX 변화율 계산 실패: %s", e)
+            return 0.0
 
     # ────────────────────────────────────────
     # 종합 판정
