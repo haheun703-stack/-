@@ -312,6 +312,10 @@ def main():
             position_mult = mult
             break
 
+    # CAUTION 레짐이면 최소 ×0.75 보장 (BEAR/CRISIS는 ×0.5 유지)
+    if current_regime == "CAUTION" and position_mult < 0.75:
+        position_mult = 0.75
+
     # 레짐 갭 설명
     regime_gap_desc = (
         f"MA20 위 {gap_ma20_pct:.1f}%, RV {rv_current:.0f}%ile → {current_regime}"
