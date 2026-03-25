@@ -27,8 +27,15 @@ export default function SignalScoreboard({ isPaid = false }: { isPaid?: boolean 
       ]);
       const sb = await sbRes.json();
       const sigs = await sigRes.json();
-      setScoreboard(sb);
-      setSignals(Array.isArray(sigs) ? sigs : []);
+      // scoreboard 필드명 호환 (loss_count↔lose_count, avg_return↔avg_return_pct)
+      if (sb && !sb.error) {
+        sb.lose_count = sb.lose_count ?? sb.loss_count ?? 0;
+        sb.avg_return_pct = sb.avg_return_pct ?? sb.avg_return ?? 0;
+      }
+      setScoreboard(sb?.error ? null : sb);
+      // signals API가 {signals: [...]} 또는 [...] 형태일 수 있음
+      const sigArr = Array.isArray(sigs) ? sigs : (Array.isArray(sigs?.signals) ? sigs.signals : []);
+      setSignals(sigArr);
       setLoading(false);
     }
     load();

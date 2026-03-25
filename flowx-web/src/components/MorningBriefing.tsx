@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { MorningBriefing as BriefingType, NewsPick } from "@/lib/types";
-import { FREE_PICKS_LIMIT } from "@/lib/types";
+import { FREE_PICKS_LIMIT, normalizeNewsPick } from "@/lib/types";
 import PaywallBlur from "./PaywallBlur";
 
 const STATUS_ICONS: Record<string, { icon: string; color: string; label: string }> = {
@@ -44,8 +44,10 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
     );
   }
 
-  const statusInfo = STATUS_ICONS[briefing.market_status] || STATUS_ICONS.NEUTRAL;
-  const picks = briefing.news_picks || [];
+  const status = briefing.market_status || briefing.direction || "NEUTRAL";
+  const statusInfo = STATUS_ICONS[status] || STATUS_ICONS.NEUTRAL;
+  const rawPicks = briefing.news_picks || [];
+  const picks = rawPicks.map(normalizeNewsPick);
   const freePicks = picks.slice(0, FREE_PICKS_LIMIT);
   const paidPicks = picks.slice(FREE_PICKS_LIMIT);
 
@@ -141,18 +143,27 @@ function PickCard({ pick }: { pick: NewsPick }) {
   return (
     <div className="flex items-center justify-between bg-gray-900 rounded-lg p-3 border border-gray-800">
       <div className="flex items-center gap-3">
-        <span
-          className={`${gradeColors[pick.grade] || "bg-gray-600"} text-white text-xs px-2 py-0.5 rounded font-bold`}
-        >
-          {pick.grade}
-        </span>
+        {pick.grade && (
+          <span
+            className={`${gradeColors[pick.grade] || "bg-gray-600"} text-white text-xs px-2 py-0.5 rounded font-bold`}
+          >
+            {pick.grade}
+          </span>
+        )}
         <div>
           <span className="text-white text-sm font-medium">{pick.name}</span>
-          <span className="text-gray-500 text-xs ml-2">{pick.ticker}</span>
+          {pick.ticker && (
+            <span className="text-gray-500 text-xs ml-2">{pick.ticker}</span>
+          )}
         </div>
       </div>
       <div className="text-right">
-        <p className="text-blue-400 text-sm font-bold">{pick.score}점</p>
+        {pick.score > 0 && (
+          <p className="text-blue-400 text-sm font-bold">{pick.score}점</p>
+        )}
+        {pick.reason && (
+          <p className="text-gray-500 text-xs max-w-[200px] truncate">{pick.reason}</p>
+        )}
         {pick.signals && pick.signals.length > 0 && (
           <p className="text-gray-600 text-xs">
             {pick.signals.slice(0, 2).join(", ")}

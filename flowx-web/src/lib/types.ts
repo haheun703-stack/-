@@ -50,14 +50,19 @@ export interface SignalSummary {
 export interface MorningBriefing {
   id: string;
   date: string;
-  market_status: string;
+  market_status?: string;
+  direction?: string;
+  market_phase?: string;
   us_summary: string | null;
   kr_summary: string | null;
-  news_picks: NewsPick[];
+  news_picks: RawNewsPick[];
   sector_focus: string[];
   full_report: string | null;
   created_at: string;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type RawNewsPick = Record<string, any>;
 
 export interface NewsPick {
   ticker: string;
@@ -65,6 +70,39 @@ export interface NewsPick {
   grade: string;
   score: number;
   signals: string[];
+  reason?: string;
+}
+
+/** Supabase에서 오는 다양한 news_pick 포맷을 통일 */
+export function normalizeNewsPick(raw: RawNewsPick): NewsPick {
+  // 포맷 1: {name: string, ticker: string, grade, score, signals}
+  // 포맷 2: {title: string, ticker: string}
+  // 포맷 3: {code: {name, ticker}, name: {name, ticker}, reason: string}
+  let name = "";
+  let ticker = "";
+
+  if (typeof raw.name === "string") {
+    name = raw.name;
+  } else if (raw.name && typeof raw.name === "object" && raw.name.name) {
+    name = raw.name.name;
+  } else if (typeof raw.title === "string") {
+    name = raw.title;
+  }
+
+  if (typeof raw.ticker === "string" && raw.ticker.length <= 10) {
+    ticker = raw.ticker;
+  } else if (raw.code && typeof raw.code === "object" && raw.code.ticker) {
+    ticker = raw.code.ticker;
+  }
+
+  return {
+    ticker: ticker || "",
+    name: name || "N/A",
+    grade: typeof raw.grade === "string" ? raw.grade : "",
+    score: typeof raw.score === "number" ? raw.score : 0,
+    signals: Array.isArray(raw.signals) ? raw.signals : [],
+    reason: typeof raw.reason === "string" ? raw.reason : undefined,
+  };
 }
 
 // FREE 티어 제한
