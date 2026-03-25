@@ -611,6 +611,74 @@ def build_zone7() -> list[dict]:
 
 
 # ──────────────────────────────────────────────
+# ZONE 8: Market Pulse (실시간 시장 인텔리전스)
+# ──────────────────────────────────────────────
+
+def build_zone8() -> dict:
+    """Market Pulse 데이터 (market_pulse.json) 로드."""
+    pulse = _load_json("market_pulse.json")
+    if not pulse:
+        return {"status": "no_data", "message": "Market Pulse 미실행"}
+
+    mkt = pulse.get("market_direction", {})
+    picks = pulse.get("top_picks", [])
+    etf_recs = pulse.get("etf_recommendations", [])
+    sectors = pulse.get("sector_rankings", {})
+
+    # 섹터 랭킹 정렬
+    sector_ranking = sorted(
+        [{"sector": k, **v} for k, v in sectors.items()],
+        key=lambda x: x.get("avg_change_pct", 0),
+        reverse=True,
+    )
+
+    return {
+        "timestamp": pulse.get("timestamp", ""),
+        "direction": mkt.get("direction", "UNKNOWN"),
+        "direction_comment": mkt.get("comment", ""),
+        "tomorrow": mkt.get("tomorrow", ""),
+        "etf_call": mkt.get("etf_call", ""),
+        "kospi_lever_pct": mkt.get("kospi_lever_pct", 0),
+        "etf_recommendations": [
+            {
+                "ticker": e.get("ticker", ""),
+                "name": e.get("name", ""),
+                "action": e.get("action", ""),
+                "reason": e.get("reason", ""),
+            }
+            for e in etf_recs[:5]
+        ],
+        "sector_ranking": [
+            {
+                "sector": s["sector"],
+                "change_pct": s.get("avg_change_pct", 0),
+                "leader": s.get("leader", ""),
+                "leader_change": s.get("leader_change", 0),
+            }
+            for s in sector_ranking[:5]
+        ],
+        "top_picks": [
+            {
+                "rank": p.get("rank", 0),
+                "ticker": p.get("ticker", ""),
+                "name": p.get("name", ""),
+                "sector": p.get("sector", ""),
+                "price": p.get("price", 0),
+                "change_pct": p.get("change_pct", 0),
+                "vwap_est": p.get("vwap_est", 0),
+                "entry_price": p.get("entry_price", 0),
+                "target_price": p.get("target_price", 0),
+                "stop_price": p.get("stop_price", 0),
+                "risk_reward": p.get("risk_reward", 0),
+                "position_comment": p.get("position_comment", ""),
+                "supply_comment": p.get("supply_comment", ""),
+            }
+            for p in picks[:5]
+        ],
+    }
+
+
+# ──────────────────────────────────────────────
 # 통합 빌드 & 저장
 # ──────────────────────────────────────────────
 
@@ -626,6 +694,7 @@ def build_state() -> dict:
         "zone5": build_zone5(),
         "zone6": build_zone6(),
         "zone7": build_zone7(),
+        "zone8": build_zone8(),
     }
 
     # 저장
@@ -641,6 +710,7 @@ def build_state() -> dict:
     z3 = state["zone3"]
     z6 = state["zone6"]
     z7_count = len([e for e in state["zone7"] if "ticker" in e])
+    z8 = state["zone8"]
     print(f"  Zone1: {z1['verdict']} (현금{z1['cash_pct']}%, 레짐={z1['regime']})")
     print(f"  Zone2: {len(state['zone2'])}종목 풀 공개")
     print(f"  Zone3: 자산 {z3['equity']:,}원 ({z3['total_return_pct']:+.1f}%) 보유 {len(z3['positions'])}종목")
@@ -648,6 +718,7 @@ def build_state() -> dict:
     print(f"  Zone5: SD {len(state['zone5'].get('sd_patterns', []))}종목")
     print(f"  Zone6: picks {z6['tomorrow_picks']}% whale {z6['whale_detect']}%")
     print(f"  Zone7: ETF {z7_count}종목")
+    print(f"  Zone8: Pulse {z8.get('direction', '?')} TOP {len(z8.get('top_picks', []))}종목")
 
     return state
 

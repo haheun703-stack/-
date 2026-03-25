@@ -1,0 +1,861 @@
+{
+  "timestamp": "2026-03-25 12:41:19",
+  "market_direction": {
+    "direction": "STRONG_BULL",
+    "comment": "강한 상승일 — 추세 추종 유리",
+    "etf_call": "레버리지 보유 유지, 인버스 금지",
+    "tomorrow": "상승 연장 가능 (양시장 동반 강세)",
+    "kospi_lever_pct": 3.2,
+    "kosdaq_lever_pct": 2.63,
+    "inverse2x_pct": -3.03,
+    "etf_data": {
+      "122630": {
+        "name": "KODEX 레버리지",
+        "change_pct": 3.2,
+        "price": 84935
+      },
+      "252670": {
+        "name": "KODEX 200선물인버스2X",
+        "change_pct": -3.03,
+        "price": 256
+      },
+      "229200": {
+        "name": "KODEX 코스닥150레버리지",
+        "change_pct": 2.63,
+        "price": 19920
+      },
+      "251340": {
+        "name": "KODEX 코스닥150선물인버스",
+        "change_pct": -2.64,
+        "price": 2025
+      }
+    }
+  },
+  "sector_etfs": [
+    {
+      "ticker": "385590",
+      "name": "KODEX K-미래차",
+      "sector": "자동차",
+      "change_pct": 2.65,
+      "price": 18195,
+      "volume": 376
+    },
+    {
+      "ticker": "091170",
+      "name": "KODEX 은행",
+      "sector": "금융",
+      "change_pct": 2.5,
+      "price": 14965,
+      "volume": 353469
+    },
+    {
+      "ticker": "140710",
+      "name": "KODEX 운송",
+      "sector": "운송",
+      "change_pct": 2.04,
+      "price": 6765,
+      "volume": 29010
+    },
+    {
+      "ticker": "117460",
+      "name": "KODEX 에너지화학",
+      "sector": "에너지/화학",
+      "change_pct": 2.03,
+      "price": 15350,
+      "volume": 30201
+    },
+    {
+      "ticker": "455850",
+      "name": "KODEX K-방산",
+      "sector": "방산",
+      "change_pct": 1.98,
+      "price": 26990,
+      "volume": 1565222
+    },
+    {
+      "ticker": "091160",
+      "name": "KODEX 반도체",
+      "sector": "반도체",
+      "change_pct": 1.75,
+      "price": 101880,
+      "volume": 2852708
+    },
+    {
+      "ticker": "102780",
+      "name": "KODEX 삼성그룹",
+      "sector": "삼성",
+      "change_pct": 1.4,
+      "price": 18445,
+      "volume": 343003
+    },
+    {
+      "ticker": "139260",
+      "name": "KODEX 미디어&엔터",
+      "sector": "엔터",
+      "change_pct": 1.31,
+      "price": 85185,
+      "volume": 247820
+    },
+    {
+      "ticker": "364960",
+      "name": "KODEX K-신재생에너지",
+      "sector": "에너지",
+      "change_pct": 1.2,
+      "price": 7140,
+      "volume": 14280
+    },
+    {
+      "ticker": "117680",
+      "name": "KODEX 철강",
+      "sector": "철강/소재",
+      "change_pct": 0.92,
+      "price": 14825,
+      "volume": 26590
+    }
+  ],
+  "sector_rankings": {
+    "전력인프라": {
+      "avg_change_pct": 4.22,
+      "leader": "효성중공업",
+      "leader_change": 8.96,
+      "stocks": [
+        {
+          "ticker": "298040",
+          "name": "효성중공업",
+          "sector": "전력인프라",
+          "price": 2943000,
+          "change_pct": 8.96,
+          "volume": 50781,
+          "high": 2960000,
+          "low": 2771000,
+          "prev_close": 2701000,
+          "open": 2779000,
+          "amount": 146550059500,
+          "vwap_est": 2891000,
+          "_score": 8.96
+        },
+        {
+          "ticker": "267260",
+          "name": "HD현대일렉트릭",
+          "sector": "전력인프라",
+          "price": 983000,
+          "change_pct": 6.27,
+          "volume": 94068,
+          "high": 990000,
+          "low": 950000,
+          "prev_close": 925000,
+          "open": 960000,
+          "amount": 91999003500,
+          "vwap_est": 974000,
+          "_score": 6.27
+        },
+        {
+          "ticker": "267270",
+          "name": "HD현대인프라코어",
+          "sector": "전력인프라",
+          "price": 136300,
+          "change_pct": 3.02,
+          "volume": 215374,
+          "high": 140700,
+          "low": 136000,
+          "prev_close": 132300,
+          "open": 136800,
+          "amount": 29840893650,
+          "vwap_est": 137500,
+          "_score": 3.02
+        },
+        {
+          "ticker": "034020",
+          "name": "두산에너빌리티",
+          "sector": "전력인프라",
+          "price": 102800,
+          "change_pct": 2.7,
+          "volume": 2319774,
+          "high": 104800,
+          "low": 101300,
+          "prev_close": 100100,
+          "open": 102400,
+          "amount": 238911703650,
+          "vwap_est": 102500,
+          "_score": 2.7
+        },
+        {
+          "ticker": "009540",
+          "name": "한국전력",
+          "sector": "전력인프라",
+          "price": 380000,
+          "change_pct": 0.13,
+          "volume": 121427,
+          "high": 389000,
+          "low": 374000,
+          "prev_close": 379500,
+          "open": 388000,
+          "amount": 46112276500,
+          "vwap_est": 381000,
+          "_score": 0.13
+        }
+      ]
+    },
+    "방산": {
+      "avg_change_pct": 2.36,
+      "leader": "현대로템",
+      "leader_change": 6.18,
+      "stocks": [
+        {
+          "ticker": "064350",
+          "name": "현대로템",
+          "sector": "방산",
+          "price": 188900,
+          "change_pct": 6.18,
+          "volume": 620473,
+          "high": 189100,
+          "low": 176000,
+          "prev_close": 177900,
+          "open": 178500,
+          "amount": 114222569250,
+          "vwap_est": 184500,
+          "_score": 6.18
+        },
+        {
+          "ticker": "012450",
+          "name": "한화에어로스페이스",
+          "sector": "방산",
+          "price": 1367000,
+          "change_pct": 2.4,
+          "volume": 88665,
+          "high": 1375000,
+          "low": 1332000,
+          "prev_close": 1335000,
+          "open": 1362000,
+          "amount": 120637991500,
+          "vwap_est": 1358000,
+          "_score": 2.4
+        },
+        {
+          "ticker": "272210",
+          "name": "한화시스템",
+          "sector": "방산",
+          "price": 129500,
+          "change_pct": 1.73,
+          "volume": 592502,
+          "high": 131000,
+          "low": 125100,
+          "prev_close": 127300,
+          "open": 126900,
+          "amount": 76116397650,
+          "vwap_est": 128500,
+          "_score": 1.73
+        },
+        {
+          "ticker": "047810",
+          "name": "한국항공우주",
+          "sector": "방산",
+          "price": 177900,
+          "change_pct": 0.91,
+          "volume": 275413,
+          "high": 182600,
+          "low": 176200,
+          "prev_close": 176300,
+          "open": 181000,
+          "amount": 49407464050,
+          "vwap_est": 178500,
+          "_score": 0.91
+        },
+        {
+          "ticker": "042660",
+          "name": "한화오션",
+          "sector": "방산",
+          "price": 123000,
+          "change_pct": 0.57,
+          "volume": 471008,
+          "high": 124800,
+          "low": 121100,
+          "prev_close": 122300,
+          "open": 123700,
+          "amount": 58073013750,
+          "vwap_est": 122500,
+          "_score": 0.57
+        }
+      ]
+    },
+    "반도체": {
+      "avg_change_pct": 1.38,
+      "leader": "HPSP",
+      "leader_change": 2.05,
+      "stocks": [
+        {
+          "ticker": "403870",
+          "name": "HPSP",
+          "sector": "반도체",
+          "price": 49750,
+          "change_pct": 2.05,
+          "volume": 1768543,
+          "high": 51200,
+          "low": 48900,
+          "prev_close": 48750,
+          "open": 49500,
+          "amount": 88433210500,
+          "vwap_est": 49950,
+          "_score": 2.05
+        },
+        {
+          "ticker": "000660",
+          "name": "SK하이닉스",
+          "sector": "반도체",
+          "price": 1002000,
+          "change_pct": 1.62,
+          "volume": 2931540,
+          "high": 1042000,
+          "low": 1000000,
+          "prev_close": 986000,
+          "open": 1016000,
+          "amount": 3001182187500,
+          "vwap_est": 1014000,
+          "_score": 1.62
+        },
+        {
+          "ticker": "005930",
+          "name": "삼성전자",
+          "sector": "반도체",
+          "price": 191900,
+          "change_pct": 1.16,
+          "volume": 13455635,
+          "high": 196400,
+          "low": 191400,
+          "prev_close": 189700,
+          "open": 193700,
+          "amount": 2617630244700,
+          "vwap_est": 193000,
+          "_score": 1.16
+        },
+        {
+          "ticker": "042700",
+          "name": "한미반도체",
+          "sector": "반도체",
+          "price": 298500,
+          "change_pct": 0.67,
+          "volume": 393330,
+          "high": 304000,
+          "low": 296500,
+          "prev_close": 296500,
+          "open": 300500,
+          "amount": 117971923750,
+          "vwap_est": 299500,
+          "_score": 0.67
+        }
+      ]
+    },
+    "금융": {
+      "avg_change_pct": 2.82,
+      "leader": "한국금융지주",
+      "leader_change": 4.03,
+      "stocks": [
+        {
+          "ticker": "071050",
+          "name": "한국금융지주",
+          "sector": "금융",
+          "price": 219500,
+          "change_pct": 4.03,
+          "volume": 146387,
+          "high": 224500,
+          "low": 216000,
+          "prev_close": 211000,
+          "open": 217000,
+          "amount": 32399689250,
+          "vwap_est": 220000,
+          "_score": 4.03
+        },
+        {
+          "ticker": "003540",
+          "name": "대신증권",
+          "sector": "금융",
+          "price": 39750,
+          "change_pct": 2.98,
+          "volume": 122469,
+          "high": 40250,
+          "low": 39400,
+          "prev_close": 38600,
+          "open": 39550,
+          "amount": 4875423075,
+          "vwap_est": 39800,
+          "_score": 2.98
+        },
+        {
+          "ticker": "055550",
+          "name": "신한지주",
+          "sector": "금융",
+          "price": 92500,
+          "change_pct": 2.78,
+          "volume": 723979,
+          "high": 94000,
+          "low": 91800,
+          "prev_close": 90000,
+          "open": 92500,
+          "amount": 67260281450,
+          "vwap_est": 92700,
+          "_score": 2.78
+        },
+        {
+          "ticker": "105560",
+          "name": "KB금융",
+          "sector": "금융",
+          "price": 150200,
+          "change_pct": 2.25,
+          "volume": 943778,
+          "high": 152800,
+          "low": 149100,
+          "prev_close": 146900,
+          "open": 152100,
+          "amount": 142902537800,
+          "vwap_est": 150500,
+          "_score": 2.25
+        },
+        {
+          "ticker": "086790",
+          "name": "하나금융지주",
+          "sector": "금융",
+          "price": 108700,
+          "change_pct": 2.07,
+          "volume": 408460,
+          "high": 110700,
+          "low": 108000,
+          "prev_close": 106500,
+          "open": 109800,
+          "amount": 44663361400,
+          "vwap_est": 109000,
+          "_score": 2.07
+        }
+      ]
+    },
+    "조선": {
+      "avg_change_pct": -0.1,
+      "leader": "삼성중공업",
+      "leader_change": 0.38,
+      "stocks": [
+        {
+          "ticker": "010140",
+          "name": "삼성중공업",
+          "sector": "조선",
+          "price": 26500,
+          "change_pct": 0.38,
+          "volume": 2383526,
+          "high": 27250,
+          "low": 26250,
+          "prev_close": 26400,
+          "open": 27100,
+          "amount": 63457796300,
+          "vwap_est": 26650,
+          "_score": 0.38
+        },
+        {
+          "ticker": "329180",
+          "name": "HD현대중공업",
+          "sector": "조선",
+          "price": 513000,
+          "change_pct": -0.58,
+          "volume": 155562,
+          "high": 526000,
+          "low": 505000,
+          "prev_close": 516000,
+          "open": 524000,
+          "amount": 79889056000,
+          "vwap_est": 514000,
+          "_score": -0.58
+        }
+      ]
+    },
+    "2차전지": {
+      "avg_change_pct": -0.14,
+      "leader": "삼성SDI",
+      "leader_change": 1.01,
+      "stocks": [
+        {
+          "ticker": "006400",
+          "name": "삼성SDI",
+          "sector": "2차전지",
+          "price": 401500,
+          "change_pct": 1.01,
+          "volume": 306679,
+          "high": 411500,
+          "low": 399500,
+          "prev_close": 397500,
+          "open": 401000,
+          "amount": 124195352500,
+          "vwap_est": 404000,
+          "_score": 1.01
+        },
+        {
+          "ticker": "051910",
+          "name": "LG화학",
+          "sector": "2차전지",
+          "price": 313500,
+          "change_pct": -0.16,
+          "volume": 108945,
+          "high": 323000,
+          "low": 311500,
+          "prev_close": 314000,
+          "open": 319500,
+          "amount": 34743515750,
+          "vwap_est": 316000,
+          "_score": -0.16
+        },
+        {
+          "ticker": "373220",
+          "name": "LG에너지솔루션",
+          "sector": "2차전지",
+          "price": 387500,
+          "change_pct": -1.27,
+          "volume": 251816,
+          "high": 400000,
+          "low": 386500,
+          "prev_close": 392500,
+          "open": 392000,
+          "amount": 99250222000,
+          "vwap_est": 391000,
+          "_score": -1.27
+        }
+      ]
+    },
+    "바이오": {
+      "avg_change_pct": 1.92,
+      "leader": "삼성바이오로직스",
+      "leader_change": 2.0,
+      "stocks": [
+        {
+          "ticker": "207940",
+          "name": "삼성바이오로직스",
+          "sector": "바이오",
+          "price": 1578000,
+          "change_pct": 2.0,
+          "volume": 21360,
+          "high": 1607000,
+          "low": 1540000,
+          "prev_close": 1547000,
+          "open": 1578000,
+          "amount": 33937851000,
+          "vwap_est": 1575000,
+          "_score": 2.0
+        },
+        {
+          "ticker": "068270",
+          "name": "셀트리온",
+          "sector": "바이오",
+          "price": 203250,
+          "change_pct": 1.83,
+          "volume": 318071,
+          "high": 206000,
+          "low": 200000,
+          "prev_close": 199600,
+          "open": 202000,
+          "amount": 64790171750,
+          "vwap_est": 203000,
+          "_score": 1.83
+        }
+      ]
+    },
+    "자동차": {
+      "avg_change_pct": 1.37,
+      "leader": "현대차",
+      "leader_change": 1.63,
+      "stocks": [
+        {
+          "ticker": "005380",
+          "name": "현대차",
+          "sector": "자동차",
+          "price": 500000,
+          "change_pct": 1.63,
+          "volume": 747975,
+          "high": 518000,
+          "low": 498500,
+          "prev_close": 492000,
+          "open": 509000,
+          "amount": 379617255250,
+          "vwap_est": 505000,
+          "_score": 1.63
+        },
+        {
+          "ticker": "012330",
+          "name": "현대모비스",
+          "sector": "자동차",
+          "price": 398500,
+          "change_pct": 1.53,
+          "volume": 103232,
+          "high": 403000,
+          "low": 395500,
+          "prev_close": 392500,
+          "open": 400000,
+          "amount": 41266960000,
+          "vwap_est": 399000,
+          "_score": 1.53
+        },
+        {
+          "ticker": "000270",
+          "name": "기아",
+          "sector": "자동차",
+          "price": 159400,
+          "change_pct": 0.95,
+          "volume": 606283,
+          "high": 163300,
+          "low": 158700,
+          "prev_close": 157900,
+          "open": 160600,
+          "amount": 97692686400,
+          "vwap_est": 160000,
+          "_score": 0.95
+        }
+      ]
+    },
+    "플랫폼": {
+      "avg_change_pct": 1.02,
+      "leader": "카카오",
+      "leader_change": 1.56,
+      "stocks": [
+        {
+          "ticker": "035720",
+          "name": "카카오",
+          "sector": "플랫폼",
+          "price": 48950,
+          "change_pct": 1.56,
+          "volume": 815675,
+          "high": 50300,
+          "low": 48850,
+          "prev_close": 48200,
+          "open": 49650,
+          "amount": 40395151725,
+          "vwap_est": 49350,
+          "_score": 1.56
+        },
+        {
+          "ticker": "035420",
+          "name": "NAVER",
+          "sector": "플랫폼",
+          "price": 214500,
+          "change_pct": 0.47,
+          "volume": 262400,
+          "high": 218000,
+          "low": 214000,
+          "prev_close": 213500,
+          "open": 216500,
+          "amount": 56791553750,
+          "vwap_est": 215500,
+          "_score": 0.47
+        }
+      ]
+    },
+    "에너지/화학": {
+      "avg_change_pct": 1.26,
+      "leader": "S-Oil",
+      "leader_change": 3.41,
+      "stocks": [
+        {
+          "ticker": "010950",
+          "name": "S-Oil",
+          "sector": "에너지/화학",
+          "price": 112100,
+          "change_pct": 3.41,
+          "volume": 300096,
+          "high": 112800,
+          "low": 108400,
+          "prev_close": 108400,
+          "open": 108700,
+          "amount": 33367302950,
+          "vwap_est": 111000,
+          "_score": 3.41
+        },
+        {
+          "ticker": "096770",
+          "name": "SK이노베이션",
+          "sector": "에너지/화학",
+          "price": 113100,
+          "change_pct": 2.72,
+          "volume": 239442,
+          "high": 114700,
+          "low": 111000,
+          "prev_close": 110100,
+          "open": 111700,
+          "amount": 27025105000,
+          "vwap_est": 112500,
+          "_score": 2.72
+        },
+        {
+          "ticker": "011170",
+          "name": "롯데케미칼",
+          "sector": "에너지/화학",
+          "price": 78500,
+          "change_pct": -2.36,
+          "volume": 117630,
+          "high": 82100,
+          "low": 78300,
+          "prev_close": 80400,
+          "open": 81600,
+          "amount": 9408043900,
+          "vwap_est": 79600,
+          "_score": -2.36
+        }
+      ]
+    },
+    "철강/소재": {
+      "avg_change_pct": 0.68,
+      "leader": "현대제철",
+      "leader_change": 0.99,
+      "stocks": [
+        {
+          "ticker": "004020",
+          "name": "현대제철",
+          "sector": "철강/소재",
+          "price": 35600,
+          "change_pct": 0.99,
+          "volume": 322317,
+          "high": 36250,
+          "low": 35350,
+          "prev_close": 35250,
+          "open": 35850,
+          "amount": 11528049125,
+          "vwap_est": 35700,
+          "_score": 0.99
+        },
+        {
+          "ticker": "005490",
+          "name": "POSCO홀딩스",
+          "sector": "철강/소재",
+          "price": 340750,
+          "change_pct": 0.37,
+          "volume": 147257,
+          "high": 345000,
+          "low": 338500,
+          "prev_close": 339500,
+          "open": 343500,
+          "amount": 50406297000,
+          "vwap_est": 341000,
+          "_score": 0.37
+        }
+      ]
+    }
+  },
+  "top_picks": [
+    {
+      "rank": 1,
+      "ticker": "298040",
+      "name": "효성중공업",
+      "sector": "전력인프라",
+      "price": 2943000,
+      "change_pct": 8.96,
+      "volume": 50781,
+      "high": 2960000,
+      "low": 2771000,
+      "vwap_est": 2891000,
+      "entry_price": 2891000,
+      "target_price": 3090000,
+      "stop_price": 2825000,
+      "risk_reward": 3.0,
+      "position_comment": "VWAP(2,891,000) 근접 — 진입 적정 구간",
+      "supply_comment": "거래량 저조 — 유동성 주의"
+    },
+    {
+      "rank": 2,
+      "ticker": "267260",
+      "name": "HD현대일렉트릭",
+      "sector": "전력인프라",
+      "price": 983000,
+      "change_pct": 6.27,
+      "volume": 94068,
+      "high": 990000,
+      "low": 950000,
+      "vwap_est": 974000,
+      "entry_price": 974000,
+      "target_price": 1032000,
+      "stop_price": 943000,
+      "risk_reward": 1.9,
+      "position_comment": "VWAP(974,000) 근접 — 진입 적정 구간",
+      "supply_comment": "거래량 저조 — 유동성 주의"
+    },
+    {
+      "rank": 3,
+      "ticker": "064350",
+      "name": "현대로템",
+      "sector": "방산",
+      "price": 188900,
+      "change_pct": 6.18,
+      "volume": 620473,
+      "high": 189100,
+      "low": 176000,
+      "vwap_est": 184500,
+      "entry_price": 184500,
+      "target_price": 198000,
+      "stop_price": 181000,
+      "risk_reward": 3.9,
+      "position_comment": "VWAP(184,500) 상회 중 — 눌림 대기 유리",
+      "supply_comment": "거래량 활발 (50만+ 주) — 수급 양호"
+    },
+    {
+      "rank": 4,
+      "ticker": "071050",
+      "name": "한국금융지주",
+      "sector": "금융",
+      "price": 219500,
+      "change_pct": 4.03,
+      "volume": 146387,
+      "high": 224500,
+      "low": 216000,
+      "vwap_est": 220000,
+      "entry_price": 216000,
+      "target_price": 231000,
+      "stop_price": 211500,
+      "risk_reward": 3.3,
+      "position_comment": "VWAP(220,000) 근접 — 진입 적정 구간",
+      "supply_comment": "거래량 보통"
+    },
+    {
+      "rank": 5,
+      "ticker": "010950",
+      "name": "S-Oil",
+      "sector": "에너지/화학",
+      "price": 112100,
+      "change_pct": 3.41,
+      "volume": 300096,
+      "high": 112800,
+      "low": 108400,
+      "vwap_est": 111000,
+      "entry_price": 111000,
+      "target_price": 117500,
+      "stop_price": 107500,
+      "risk_reward": 1.9,
+      "position_comment": "VWAP(111,000) 근접 — 진입 적정 구간",
+      "supply_comment": "거래량 보통"
+    }
+  ],
+  "etf_recommendations": [
+    {
+      "ticker": "122630",
+      "name": "KODEX 레버리지",
+      "action": "매수",
+      "reason": "상승장 (+3.2%) — 추세 추종",
+      "entry": "시초가 또는 오전 눌림",
+      "exit": "종가 매도 (당일 트레이딩)"
+    },
+    {
+      "ticker": "385590",
+      "name": "KODEX K-미래차",
+      "action": "관심",
+      "reason": "자동차 섹터 강세 (+2.6%)",
+      "entry": "내일 시초 또는 눌림 시",
+      "exit": "섹터 모멘텀 꺾일 때"
+    },
+    {
+      "ticker": "091170",
+      "name": "KODEX 은행",
+      "action": "관심",
+      "reason": "금융 섹터 강세 (+2.5%)",
+      "entry": "내일 시초 또는 눌림 시",
+      "exit": "섹터 모멘텀 꺾일 때"
+    },
+    {
+      "ticker": "140710",
+      "name": "KODEX 운송",
+      "action": "관심",
+      "reason": "운송 섹터 강세 (+2.0%)",
+      "entry": "내일 시초 또는 눌림 시",
+      "exit": "섹터 모멘텀 꺾일 때"
+    }
+  ]
+}

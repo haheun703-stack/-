@@ -30,4 +30,7 @@ echo ========================================
 
 python -u -X utf8 scripts/run_midday_analysis.py >> logs\schedule.log 2>&1
 
+echo [%date% %time%] BAT-H Market Pulse 시작 >> logs\schedule.log
+python -u -X utf8 scripts/market_pulse.py --no-send >> logs\schedule.log 2>&1
+
 echo [%date% %time%] BAT-H 완료 >> logs\schedule.log
