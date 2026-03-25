@@ -4,7 +4,7 @@
 KOSPI 레짐 기반 동적 가중치를 배분한다.
 
 입력:
-  - data/kospi_regime.json
+  - kospi_index.csv (실시간 레짐 계산)
   - data/regime_macro_signal.json (전략1 출력)
   - data/tomorrow_picks.json (최종 추천 종목)
   - data/scan_cache.json (퀀텀 시그널)
@@ -257,8 +257,9 @@ def main():
     logger.info("  멀티전략 포트폴리오 배분 — 전략 2")
     logger.info("=" * 60)
 
-    # 레짐 로드
-    regime_data = load_json("kospi_regime.json")
+    # 레짐 실시간 계산 (공용 함수)
+    from src.utils.kospi_regime_calc import get_kospi_regime
+    regime_data = get_kospi_regime()
     regime = regime_data.get("regime", "CAUTION")
 
     # 매크로 시그널 로드

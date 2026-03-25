@@ -3,12 +3,11 @@
 KOSPI 레짐(BULL/CAUTION/BEAR/CRISIS) + US Overnight 시그널을 결합하여
 레짐 전환 방향과 매크로 방향 시그널을 생성한다.
 
-기존 kospi_regime.json은 현재 상태만 제공하지만,
 이 스크립트는 전환 방향, 속도, 포지션 배수를 추가 판단한다.
+레짐은 kospi_index.csv에서 실시간 계산한다 (공용 함수 사용).
 
 입력:
-  - data/kospi_index.csv (KOSPI 일봉)
-  - data/kospi_regime.json (현재 레짐)
+  - data/kospi_index.csv (KOSPI 일봉 + 실시간 레짐 계산)
   - data/us_market/overnight_signal.json (US 시그널)
 
 출력:
@@ -42,7 +41,6 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = PROJECT_ROOT / "data"
 KOSPI_CSV = DATA_DIR / "kospi_index.csv"
-REGIME_JSON = DATA_DIR / "kospi_regime.json"
 US_SIGNAL_JSON = DATA_DIR / "us_market" / "overnight_signal.json"
 DERIVATIVES_JSON = DATA_DIR / "derivatives" / "derivatives_signal.json"
 SHORT_SELLING_JSON = DATA_DIR / "short_selling" / "daily_short.json"
@@ -71,7 +69,7 @@ def load_json(path: Path) -> dict:
 
 def classify_regime(close: float, ma20: float, ma60: float,
                     rv_pct: float) -> str:
-    """단일 시점 레짐 분류 (kospi_regime.json 로직 재현)"""
+    """단일 시점 레짐 분류 (MA20/MA60 + RV 기반)"""
     if close > ma20:
         return "BULL" if rv_pct < 50 else "CAUTION"
     elif close > ma60:
@@ -127,8 +125,9 @@ def main():
         r = classify_regime(row["close"], row["ma20"], row["ma60"], row["rv_pct"])
         regime_history.append(r)
 
-    # 현재 레짐
-    regime_data = load_json(REGIME_JSON)
+    # 현재 레짐 (공용 함수로 실시간 계산)
+    from src.utils.kospi_regime_calc import get_kospi_regime as _calc_regime
+    regime_data = _calc_regime()
     current_regime = regime_data.get("regime", "CAUTION")
     current_close = regime_data.get("close", df["close"].iloc[-1])
     current_ma20 = regime_data.get("ma20", df["ma20"].iloc[-1])

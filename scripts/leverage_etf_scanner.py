@@ -46,7 +46,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 LEVERAGE_DIR = DATA_DIR / "leverage_etf"
 UNIVERSE_PATH = LEVERAGE_DIR / "leverage_universe.json"
 OUT_PATH = LEVERAGE_DIR / "leverage_etf_scan.json"
-REGIME_PATH = DATA_DIR / "kospi_regime.json"
+# REGIME_PATH 제거 — 공용 함수 사용
 US_SIGNAL_PATH = DATA_DIR / "overnight_signal.json"
 
 
@@ -60,11 +60,9 @@ def load_universe() -> dict:
 
 
 def load_regime() -> dict:
-    """kospi_regime.json → regime, close, slots 등."""
-    if REGIME_PATH.exists():
-        with open(REGIME_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    return {"regime": "CAUTION", "close": 0, "slots": 3}
+    """KOSPI 레짐 실시간 계산 (공용 함수)."""
+    from src.utils.kospi_regime_calc import get_kospi_regime
+    return get_kospi_regime()
 
 
 def load_us_signal() -> dict:

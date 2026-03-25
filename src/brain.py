@@ -10,7 +10,7 @@
   4. 안전장치 — 2일 확인, ±20%p 제한, 잔고 확인
 
 데이터 흐름:
-  kospi_regime.json ─┐
+  kospi_index.csv (실시간 레짐 계산) ─┐
   overnight_signal.json ─┤
   regime_macro_signal.json ─┼→ BRAIN.compute()
   positions.json ─┤           → BrainDecision(배분 비율 + 이유)
@@ -183,7 +183,8 @@ class Brain:
         warnings = []
 
         # ── 1. 입력 데이터 수집 ──
-        kospi = self._load_json(DATA_DIR / "kospi_regime.json")
+        from src.utils.kospi_regime_calc import get_kospi_regime as _calc_regime
+        kospi = _calc_regime()
         us_signal = self._load_json(DATA_DIR / "us_market" / "overnight_signal.json")
         macro = self._load_json(DATA_DIR / "regime_macro_signal.json")
         positions = self._load_json(DATA_DIR / "positions.json")

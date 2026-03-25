@@ -835,51 +835,8 @@ def get_kospi_regime() -> dict:
 
     반환: {"regime": str, "slots": int, "close": float, "ma20": float, "ma60": float, "rv_pct": float}
     """
-    kospi_path = Path(__file__).resolve().parent.parent / "data" / "kospi_index.csv"
-    if not kospi_path.exists():
-        return {"regime": "CAUTION", "slots": 3, "close": 0, "ma20": 0, "ma60": 0, "rv_pct": 0.5}
-
-    df = pd.read_csv(kospi_path, index_col="Date", parse_dates=True).sort_index()
-    df["ma20"] = df["close"].rolling(20).mean()
-    df["ma60"] = df["close"].rolling(60).mean()
-    log_ret = np.log(df["close"] / df["close"].shift(1))
-    df["rv20"] = log_ret.rolling(20).std() * np.sqrt(252) * 100
-    df["rv20_pct"] = df["rv20"].rolling(252, min_periods=60).apply(
-        lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False
-    )
-
-    if len(df) < 60:
-        return {"regime": "CAUTION", "slots": 3, "close": 0, "ma20": 0, "ma60": 0, "rv_pct": 0.5}
-
-    row = df.iloc[-1]
-    close = float(row["close"])
-    ma20 = float(row["ma20"]) if not pd.isna(row["ma20"]) else 0
-    ma60 = float(row["ma60"]) if not pd.isna(row["ma60"]) else 0
-    rv_pct = float(row.get("rv20_pct", 0.5)) if not pd.isna(row.get("rv20_pct", 0.5)) else 0.5
-
-    if ma20 == 0 or ma60 == 0:
-        regime, slots = "CAUTION", 3
-    elif close > ma20:
-        regime, slots = ("BULL", 5) if rv_pct < 0.50 else ("CAUTION", 3)
-    elif close > ma60:
-        regime, slots = "BEAR", 2
-    else:
-        regime, slots = "CRISIS", 0
-
-    # SW-3: 역발상 매수 — BEAR/CRISIS 슬롯 오버라이드
-    try:
-        import yaml as _yaml_sw
-        _sw_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
-        with open(_sw_path, encoding="utf-8") as _f_sw:
-            _sw_cfg = _yaml_sw.safe_load(_f_sw).get("swing_philosophy", {})
-        if _sw_cfg.get("enabled"):
-            _contrarian = _sw_cfg.get("contrarian", {})
-            if regime in _contrarian:
-                slots = _contrarian[regime].get("slots", slots)
-    except Exception:
-        pass
-
-    return {"regime": regime, "slots": slots, "close": close, "ma20": ma20, "ma60": ma60, "rv_pct": rv_pct}
+    from src.utils.kospi_regime_calc import get_kospi_regime as _calc_regime
+    return _calc_regime()
 
 
 def load_overnight_signal() -> dict:

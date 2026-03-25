@@ -464,24 +464,8 @@ def calc_kospi_regime() -> dict:
     """
     kospi_path = _PATHS["kospi_csv"]
 
-    # Fallback: kospi_regime.json
     if not kospi_path.exists():
-        regime_path = DATA_DIR / "kospi_regime.json"
-        if regime_path.exists():
-            raw = _safe_json_load(regime_path)
-            if raw:
-                close = raw.get("close", 0)
-                ma20 = raw.get("ma20", 0)
-                ma60 = raw.get("ma60", 0)
-                return {
-                    "regime": raw.get("regime", "CAUTION"),
-                    "close": close,
-                    "ma20": ma20,
-                    "ma60": ma60,
-                    "ma20_above": close > ma20 if ma20 > 0 else False,
-                    "ma60_above": close > ma60 if ma60 > 0 else False,
-                }
-        logger.warning("KOSPI: 데이터 없음 → 기본 CAUTION")
+        logger.warning("KOSPI: kospi_index.csv 없음 → 기본 CAUTION")
         return _default_regime()
 
     try:
