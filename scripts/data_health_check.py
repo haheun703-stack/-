@@ -3,7 +3,7 @@
 매일 BAT-D 완료 후 (또는 독립 실행) 모든 데이터 소스를 점검하고
 결과를 텔레그램으로 보낸다.
 
-15개 항목:
+17개 항목:
   1. 종가 데이터 (Parquet)
   2. 수급 데이터 (종목별)
   3. 수급 데이터 (섹터별)
@@ -19,6 +19,8 @@
   13. Supabase 업로드
   14. 스케줄러 실행 로그
   15. 파이프라인 에러율
+  16. KOSPI 인덱스 신선도
+  17. 투자자수급 신선도
 
 실행:
   python -u -X utf8 scripts/data_health_check.py
@@ -71,7 +73,7 @@ class CheckResult:
 # ──────────────────────────────────────────────
 
 class DataHealthCheck:
-    """15개 데이터 소스 무결성 검진."""
+    """17개 데이터 소스 무결성 검진."""
 
     def __init__(self, check_date: date | None = None):
         self.today = check_date or date.today()
@@ -81,7 +83,7 @@ class DataHealthCheck:
         self.is_weekday = self.today.weekday() < 5
 
     def run_full_check(self) -> list[CheckResult]:
-        """전체 15개 항목 점검."""
+        """전체 17개 항목 점검."""
         checks = [
             self._check_price_data,         # 1. 종가
             self._check_supply_stocks,       # 2. 수급(종목)
@@ -98,6 +100,8 @@ class DataHealthCheck:
             self._check_uploads,            # 13. 업로드
             self._check_scheduler,          # 14. 스케줄러
             self._check_pipeline_errors,    # 15. 파이프라인 에러율
+            self._check_kospi_index,        # 16. KOSPI 인덱스
+            self._check_investor_flow,      # 17. 투자자수급
         ]
 
         results = []
@@ -565,6 +569,60 @@ class DataHealthCheck:
                 )
         except Exception as e:
             return CheckResult("파이프라인", True, f"체크 불가: {e}")
+
+    # ─── 16. KOSPI 인덱스 신선도 ───
+
+    def _check_kospi_index(self) -> CheckResult:
+        """kospi_index.csv 마지막 날짜가 3영업일(≈5달력일) 이내인지."""
+        csv_path = self.data_dir / "kospi_index.csv"
+        if not csv_path.exists():
+            return CheckResult("KOSPI인덱스", False, "kospi_index.csv 없음")
+
+        try:
+            import pandas as pd
+            df = pd.read_csv(csv_path)
+            if df.empty:
+                return CheckResult("KOSPI인덱스", False, "CSV 비어있음")
+
+            date_col = "Date" if "Date" in df.columns else df.columns[0]
+            last_date_str = str(df[date_col].iloc[-1])[:10]
+            last_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
+            gap = (self.today - last_date).days
+
+            if gap <= 5:
+                return CheckResult("KOSPI인덱스", True,
+                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행)")
+            return CheckResult("KOSPI인덱스", False,
+                               f"STALE: {last_date_str} ({gap}일 전) — 갱신 필요!")
+        except Exception as e:
+            return CheckResult("KOSPI인덱스", False, f"파싱 오류: {e}")
+
+    # ─── 17. 투자자수급 신선도 ───
+
+    def _check_investor_flow(self) -> CheckResult:
+        """kospi_investor_flow.csv 마지막 날짜가 3영업일(≈5달력일) 이내인지."""
+        csv_path = self.data_dir / "kospi_investor_flow.csv"
+        if not csv_path.exists():
+            return CheckResult("투자자수급", False, "kospi_investor_flow.csv 없음")
+
+        try:
+            import pandas as pd
+            df = pd.read_csv(csv_path)
+            if df.empty:
+                return CheckResult("투자자수급", False, "CSV 비어있음")
+
+            date_col = "Date" if "Date" in df.columns else df.columns[0]
+            last_date_str = str(df[date_col].iloc[-1])[:10]
+            last_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
+            gap = (self.today - last_date).days
+
+            if gap <= 5:
+                return CheckResult("투자자수급", True,
+                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행)")
+            return CheckResult("투자자수급", False,
+                               f"STALE: {last_date_str} ({gap}일 전) — 수집 파이프라인 확인!")
+        except Exception as e:
+            return CheckResult("투자자수급", False, f"파싱 오류: {e}")
 
     # ─── 14. 스케줄러 로그 ───
 
