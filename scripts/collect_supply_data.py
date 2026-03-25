@@ -88,6 +88,9 @@ def main():
 
     logger.info(f"수급 데이터 수집 시작: {len(tickers)}종목, 기준일={date}")
 
+    from src.pipeline_alert import PipelineErrorTracker
+    tracker = PipelineErrorTracker("collect_supply_data")
+
     # Phase 1: pykrx 수집
     adapter = PykrxSupplyAdapter(lookback_days=60)
 
@@ -95,7 +98,19 @@ def main():
         collected = adapter.collect_all(tickers)
     except ImportError:
         logger.error("pykrx 미설치: pip install pykrx")
+        tracker.record("pykrx", "ImportError: pykrx 미설치")
+        tracker.finalize(total=len(tickers))
         return
+    except Exception as e:
+        logger.error("pykrx 수집 실패: %s", e)
+        tracker.record("pykrx_collect_all", e)
+        tracker.finalize(total=len(tickers))
+        return
+
+    # 수집 실패 종목 추적
+    failed_tickers = set(tickers) - set(collected.keys())
+    for t in failed_tickers:
+        tracker.record(t, "수급 데이터 수집 실패")
 
     # 분석
     analyzer = SupplyDemandAnalyzer()
@@ -118,6 +133,9 @@ def main():
 
     # 저장
     save_results(scores, date)
+
+    # 에러 집계 + 알림
+    tracker.finalize(total=len(tickers))
 
     logger.info(f"\n총 {len(scores)}종목 수급 분석 완료")
 

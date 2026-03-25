@@ -113,8 +113,8 @@ def _try_pykrx_update(tickers: list[str], date_str: str) -> dict[str, dict]:
                         "short_balance": int(row.get("공매도잔고", 0)),
                     }
             logger.info(f"pykrx KOSPI 공매도 잔고: {len(result)}종목")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("KOSPI 공매도 잔고 조회 실패: %s", e)
 
     if not result:
         # KOSDAQ도 시도
@@ -127,8 +127,8 @@ def _try_pykrx_update(tickers: list[str], date_str: str) -> dict[str, dict]:
                         result[ticker] = {
                             "short_balance": int(row.get("공매도잔고", 0)),
                         }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("KOSDAQ 공매도 잔고 조회 실패: %s", e)
 
     return result
 
@@ -144,7 +144,8 @@ def _load_from_parquet(tickers: list[str]) -> dict[str, pd.DataFrame]:
             df = pd.read_parquet(f)
             if "short_balance" in df.columns:
                 data[ticker] = df
-        except Exception:
+        except Exception as e:
+            logger.debug("parquet 읽기 실패 %s: %s", ticker, e)
             continue
     return data
 
@@ -343,6 +344,8 @@ def _generate_alerts(
 
 def collect_short_selling_signal() -> dict:
     """공매도 시그널 수집 + 종합 신호 생성."""
+    from src.pipeline_alert import PipelineErrorTracker
+    tracker = PipelineErrorTracker("collect_short_selling")
     logger.info("=== 공매도/대차잔고 시그널 수집 시작 ===")
 
     cfg = _load_settings().get("signals", {})
@@ -385,9 +388,13 @@ def collect_short_selling_signal() -> dict:
         if df is None:
             continue
 
-        sig = _compute_stock_signals(ticker, df, cfg)
-        if sig:
-            stock_signals.append(sig)
+        try:
+            sig = _compute_stock_signals(ticker, df, cfg)
+            if sig:
+                stock_signals.append(sig)
+        except Exception as e:
+            tracker.record(ticker, e)
+            logger.warning("시그널 계산 실패 %s: %s", ticker, e)
 
     logger.info(f"종목별 시그널: {len(stock_signals)}종목 분석 완료")
 
@@ -447,7 +454,10 @@ def collect_short_selling_signal() -> dict:
     # 9. 히스토리 추가
     _save_history(signal)
 
-    # 10. 로그
+    # 10. 에러 집계 + 알림
+    tracker.finalize(total=len(tickers))
+
+    # 11. 로그
     ms = market_signal
     logger.info(
         f"공매도 시그널: 급증 {ms.get('surge_count', 0)}개 | "

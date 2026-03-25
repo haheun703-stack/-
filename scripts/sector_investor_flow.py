@@ -100,7 +100,7 @@ def fetch_stock_trading(ticker: str, start: str, end: str) -> pd.DataFrame | Non
                 if not df.empty:
                     return df
         except Exception as e:
-            logger.debug("%s KIS 수급 조회 실패: %s", ticker, e)
+            logger.warning("%s KIS 수급 조회 실패: %s", ticker, e)
 
     # 2) pykrx fallback
     if PYKRX_AVAILABLE:
@@ -111,7 +111,7 @@ def fetch_stock_trading(ticker: str, start: str, end: str) -> pd.DataFrame | Non
                 df.index = pd.to_datetime(df.index)
                 return df
         except Exception as e:
-            logger.debug("%s pykrx 수급 조회 실패: %s", ticker, e)
+            logger.warning("%s pykrx 수급 조회 실패: %s", ticker, e)
 
     return None
 
@@ -127,6 +127,8 @@ def analyze_sector_flow(
     top_stocks: int = 5,
 ) -> list[dict]:
     """섹터별 상위 종목의 수급을 합산하여 섹터 수준 흐름 분석."""
+    from src.pipeline_alert import PipelineErrorTracker
+    tracker = PipelineErrorTracker("sector_investor_flow")
 
     try:
         if not PYKRX_AVAILABLE:
@@ -179,6 +181,7 @@ def analyze_sector_flow(
             df = fetch_stock_trading(ticker, start_date, end_date)
             total_api_calls += 1
             if df is None:
+                tracker.record(ticker, "수급 데이터 없음 (KIS+pykrx 모두 실패)")
                 continue
 
             # 최근 N일만
@@ -230,6 +233,9 @@ def analyze_sector_flow(
                      sector_name, sector_foreign_cum / 1e8, cum_days, sector_inst_cum / 1e8)
 
     logger.info("총 API 호출: %d회", total_api_calls)
+
+    # 에러 집계 + 알림
+    tracker.finalize(total=total_api_calls)
 
     # 외인 누적 내림차순 정렬
     results.sort(key=lambda x: x["foreign_cum_bil"], reverse=True)

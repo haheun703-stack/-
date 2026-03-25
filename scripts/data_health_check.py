@@ -3,7 +3,7 @@
 매일 BAT-D 완료 후 (또는 독립 실행) 모든 데이터 소스를 점검하고
 결과를 텔레그램으로 보낸다.
 
-14개 항목:
+15개 항목:
   1. 종가 데이터 (Parquet)
   2. 수급 데이터 (종목별)
   3. 수급 데이터 (섹터별)
@@ -18,6 +18,7 @@
   12. 학습 기록
   13. Supabase 업로드
   14. 스케줄러 실행 로그
+  15. 파이프라인 에러율
 
 실행:
   python -u -X utf8 scripts/data_health_check.py
@@ -70,7 +71,7 @@ class CheckResult:
 # ──────────────────────────────────────────────
 
 class DataHealthCheck:
-    """14개 데이터 소스 무결성 검진."""
+    """15개 데이터 소스 무결성 검진."""
 
     def __init__(self, check_date: date | None = None):
         self.today = check_date or date.today()
@@ -80,7 +81,7 @@ class DataHealthCheck:
         self.is_weekday = self.today.weekday() < 5
 
     def run_full_check(self) -> list[CheckResult]:
-        """전체 14개 항목 점검."""
+        """전체 15개 항목 점검."""
         checks = [
             self._check_price_data,         # 1. 종가
             self._check_supply_stocks,       # 2. 수급(종목)
@@ -96,6 +97,7 @@ class DataHealthCheck:
             self._check_learning,           # 12. 학습
             self._check_uploads,            # 13. 업로드
             self._check_scheduler,          # 14. 스케줄러
+            self._check_pipeline_errors,    # 15. 파이프라인 에러율
         ]
 
         results = []
@@ -533,6 +535,36 @@ class DataHealthCheck:
         return CheckResult("업로드", passed,
                            f"{found}/{len(upload_files)} — {', '.join(details)}",
                            count=found, total=len(upload_files))
+
+    # ─── 15. 파이프라인 에러율 ───
+
+    def _check_pipeline_errors(self) -> CheckResult:
+        """최근 24시간 파이프라인 에러율 확인."""
+        try:
+            from src.pipeline_alert import get_recent_error_rate
+            stats = get_recent_error_rate(hours=24)
+
+            if stats["total_runs"] == 0:
+                return CheckResult("파이프라인", True, "기록 없음 (정상)")
+
+            rate = stats["error_rate_pct"]
+            errors = stats["total_errors"]
+            scripts = stats["scripts_with_errors"]
+
+            if rate < 5:
+                return CheckResult(
+                    "파이프라인", True,
+                    f"에러율 {rate}% ({errors}건) — 정상",
+                    count=errors, total=stats["total_runs"],
+                )
+            else:
+                return CheckResult(
+                    "파이프라인", False,
+                    f"에러율 {rate}% ({errors}건) — {', '.join(scripts)}",
+                    count=errors, total=stats["total_runs"],
+                )
+        except Exception as e:
+            return CheckResult("파이프라인", True, f"체크 불가: {e}")
 
     # ─── 14. 스케줄러 로그 ───
 
