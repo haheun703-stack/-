@@ -46,6 +46,8 @@ DB_PATH = PROJECT_ROOT / "data" / "krx_nationality" / "nationality.db"
 CHINA_SIGNAL_PATH = PROJECT_ROOT / "data" / "china_money" / "china_money_signal.json"
 OUTPUT_PATH = PROJECT_ROOT / "data" / "krx_nationality" / "nationality_signal.json"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
+RAW_DIR = PROJECT_ROOT / "data" / "raw"
+SECTOR_MAP_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "stock_to_sector.json"
 
 
 # ═══════════════════════════════════════════════════
@@ -71,8 +73,8 @@ for _group, _countries in COUNTRY_GROUPS.items():
     for _c in _countries:
         COUNTRY_TO_GROUP[_c] = _group
 
-# 섹터 분류 (교차 종목 흐름용)
-TICKER_SECTOR = {
+# 섹터 분류 (교차 종목 흐름용) — 기본 매핑
+_TICKER_SECTOR_BASE = {
     "005930": "반도체", "000660": "반도체", "042700": "반도체", "000990": "반도체",
     "012450": "방산", "064350": "방산", "047810": "방산", "272210": "방산",
     "009540": "조선", "329180": "조선",
@@ -88,6 +90,26 @@ TICKER_SECTOR = {
     "096770": "에너지",
     "352820": "엔터",
 }
+
+
+def _build_ticker_sector() -> dict[str, str]:
+    """stock_to_sector.json에서 동적 섹터 매핑 로드 (기본 매핑 우선)."""
+    result = {}
+    # 1차: stock_to_sector.json (399종목)
+    try:
+        if SECTOR_MAP_PATH.exists():
+            data = json.loads(SECTOR_MAP_PATH.read_text(encoding="utf-8"))
+            for ticker, sectors in data.items():
+                if isinstance(sectors, list) and sectors:
+                    result[ticker] = sectors[0]  # 첫 번째가 주 섹터
+    except Exception:
+        pass
+    # 2차: 기본 매핑으로 덮어쓰기 (수동 정밀 분류 우선)
+    result.update(_TICKER_SECTOR_BASE)
+    return result
+
+
+TICKER_SECTOR = _build_ticker_sector()
 
 
 # ═══════════════════════════════════════════════════
@@ -445,12 +467,22 @@ def _detect_lead_lag(
 # ═══════════════════════════════════════════════════
 
 def _load_price_data(ticker: str, days: int = 10) -> list[float]:
-    """stock_data_daily CSV에서 최근 N일 종가 로드.
+    """최근 N일 종가 로드 (parquet 우선, CSV 폴백).
 
     Returns:
         [price_old, ..., price_recent] (오름차순)
     """
-    # CSV 파일 찾기 (종목명_ticker.csv)
+    # 1차: data/raw/*.parquet (VPS 호환)
+    parquet_path = RAW_DIR / f"{ticker}.parquet"
+    if parquet_path.exists():
+        try:
+            df = pd.read_parquet(parquet_path)
+            if "close" in df.columns:
+                return df["close"].dropna().tail(days).tolist()
+        except Exception:
+            pass
+
+    # 2차: stock_data_daily CSV 폴백
     pattern = f"*_{ticker}.csv"
     matches = list(CSV_DIR.glob(pattern))
     if not matches:
