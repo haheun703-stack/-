@@ -2168,7 +2168,7 @@ alpha_engine:
 
 # ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
 alpha_v2:
-  enabled: false                      # true로 바꾸면 V2 활성화
+  enabled: true                       # V2 활성화 (2026-03-25, 백테스트 PF 1.375 확인)
   use_unified_scorer: false           # true면 4팩터 통합 스코어러 (Phase 2)
   # Phase 1: 기존 5축 레짐별 재가중치 (STEP 1 Sharpe 비율 기반)
   # S5(수급) 0.96 >> S4(모멘텀) 0.53 > S3(OU) 0.47 > S1(에너지) 0.29 > S2(밸류) 0.16
@@ -2193,7 +2193,7 @@ alpha_v2:
     sector_max_pct: 0.30              # 동일 섹터 합산 비중 상한 30%
     kelly_default: 0.50               # 데이터 부족 시 기본 Kelly 배수
   # STEP 7: LENS LAYER
-  lens_enabled: false                   # true로 켜면 LENS 활성화
+  lens_enabled: true                    # LENS 활성화 (2026-03-25, 비파괴 PASS 확인)
   lens:
     flow_map:
       hot_boost: 1.2                    # hot 섹터 가중치 배수
