@@ -99,6 +99,7 @@ class _KisLite:
                 "prev_close": int(o.get("stck_sdpr", 0)),
                 "high_price": int(o.get("stck_hgpr", 0)),
                 "low_price": int(o.get("stck_lwpr", 0)),
+                "name": o.get("hts_kor_isnm", ""),
             }
         except Exception as e:
             logger.error("[KIS] %s 현재가 조회 실패: %s", ticker, e)
@@ -375,7 +376,7 @@ class IntradayEye:
                     continue
                 change = p.get("change_pct", 0)
                 if change >= threshold:
-                    name = ticker
+                    name = p.get("name") or ticker
                     self._fire_alert(
                         "EYE-07", ticker, name,
                         p["current_price"], change,
