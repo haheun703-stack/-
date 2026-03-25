@@ -15,6 +15,13 @@ call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
 set PYTHONPATH=D:\sub-agent-project
 
+REM ── 거래일 가드 (trading_calendar 사용) ──
+python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
+if errorlevel 1 (
+    echo [%date% %time%] BAT-A 스킵: 비거래일 >> logs\schedule.log
+    goto :eof
+)
+
 REM ── PHASE 1: 미국장 데이터 업데이트 ──
 
 REM 1) US 시장 데이터 업데이트 + Overnight Signal (원자재 포함)

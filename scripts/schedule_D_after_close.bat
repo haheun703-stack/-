@@ -28,14 +28,10 @@ for %%F in (logs\schedule.log) do (
     )
 )
 
-REM ── 주말 가드 (토일: Claude/Perplexity API 비용 낭비 방지) ──
-for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
-if "%DOW%"=="5" (
-    echo [%date% %time%] BAT-D 스킵: 토요일 >> logs\schedule.log
-    goto :eof
-)
-if "%DOW%"=="6" (
-    echo [%date% %time%] BAT-D 스킵: 일요일 >> logs\schedule.log
+REM ── 거래일 가드 (trading_calendar 사용 — 주말+공휴일 체크) ──
+python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
+if errorlevel 1 (
+    echo [%date% %time%] BAT-D 스킵: 비거래일 >> logs\schedule.log
     goto :eof
 )
 

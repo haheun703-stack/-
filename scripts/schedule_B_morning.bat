@@ -15,6 +15,13 @@ call D:\sub-agent-project\venv\Scripts\activate.bat
 cd /d D:\sub-agent-project
 set PYTHONPATH=D:\sub-agent-project
 
+REM ── 거래일 가드 (trading_calendar 사용) ──
+python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
+if errorlevel 1 (
+    echo [%date% %time%] BAT-B 스킵: 비거래일 >> logs\schedule.log
+    goto :eof
+)
+
 REM 1단계: 증권사 리포트 스캔 (텔레그램 미발송, JSON만 저장)
 echo [%date% %time%] [1/2] 증권사 리포트 스캔 >> logs\schedule.log
 python -u -X utf8 scripts\crawl_morning_reports.py >> logs\schedule.log 2>&1
