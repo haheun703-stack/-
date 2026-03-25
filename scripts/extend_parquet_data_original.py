@@ -1,23 +1,19 @@
 """기존 parquet 데이터를 최신 날짜까지 증분 업데이트
 
 기존 data/raw/*.parquet 파일의 마지막 날짜 이후 데이터를 pykrx에서 가져와 추가.
-ThreadPoolExecutor 병렬 처리로 1,071종목을 5분 이내에 완료.
+전체 재수집(3~4시간) 대신 증분 업데이트(3~5분)로 빠르게 처리.
 
 사용법:
   python scripts/extend_parquet_data.py                    # 오늘까지
   python scripts/extend_parquet_data.py --end 20250214     # 특정 날짜까지
-  python scripts/extend_parquet_data.py --sample 50        # 50종목 샘플 테스트
-  python scripts/extend_parquet_data.py --workers 3        # 워커 수 조정
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -253,43 +249,6 @@ def extend_single(parquet_path: Path, end_date: str, *,
     return result
 
 
-def _worker_fn(parquet_path: Path, end_date: str, skip_supply: bool, supply_only: bool) -> dict:
-    """워커 스레드에서 실행되는 단일 종목 처리 함수."""
-    try:
-        result = extend_single(parquet_path, end_date,
-                               skip_supply=skip_supply,
-                               supply_only=supply_only)
-        # per-thread rate limit (pykrx 보호)
-        if result["status"] == "ok":
-            time.sleep(0.3)
-        return result
-    except Exception as e:
-        return {"ticker": parquet_path.stem, "status": "error", "error": str(e), "new_rows": 0}
-
-
-def _save_pipeline_errors(error_list: list, script_name: str = "extend_parquet_data"):
-    """에러 로그를 data/pipeline_errors.json에 저장."""
-    out_path = project_root / "data" / "pipeline_errors.json"
-    entry = {
-        "script": script_name,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "errors": error_list,
-    }
-    # 기존 파일이 있으면 append (최근 7일치만 유지)
-    history = []
-    if out_path.exists():
-        try:
-            history = json.loads(out_path.read_text(encoding="utf-8"))
-            if not isinstance(history, list):
-                history = []
-        except Exception:
-            history = []
-    history.append(entry)
-    # 최근 50건만 유지
-    history = history[-50:]
-    out_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
 def main():
     parser = argparse.ArgumentParser(description="parquet 데이터 증분 업데이트")
     parser.add_argument("--end", type=str, default=None, help="종료일 (YYYYMMDD)")
@@ -297,100 +256,61 @@ def main():
                         help="수급(투자자 매매동향) 수집 스킵 — 종가/거래량만 수집")
     parser.add_argument("--supply-only", action="store_true",
                         help="수급만 재수집 (OHLCV는 이미 있는 종목만)")
-    parser.add_argument("--sample", type=int, default=0,
-                        help="테스트용: N종목만 샘플 실행")
-    parser.add_argument("--workers", type=int, default=5,
-                        help="병렬 워커 수 (기본 5, 최대 5)")
     args = parser.parse_args()
 
     if not PYKRX_AVAILABLE:
         logger.error("pykrx 미설치. 종료.")
         return
 
-    max_workers = min(args.workers, 5)  # 5 이상 올리지 않음
-
     end_date = args.end or datetime.today().strftime("%Y%m%d")
     raw_dir = project_root / "data" / "raw"
     parquets = sorted(raw_dir.glob("*.parquet"))
 
-    if args.sample > 0:
-        parquets = parquets[:args.sample]
-        logger.info(f"샘플 모드: {args.sample}종목만 실행")
-
     mode = "supply-only" if args.supply_only else ("ohlcv-only" if args.skip_supply else "full")
-    logger.info(f"증분 업데이트 시작: {len(parquets)}종목 → {end_date}까지 (모드: {mode}, workers: {max_workers})")
+    logger.info(f"증분 업데이트 시작: {len(parquets)}종목 → {end_date}까지 (모드: {mode})")
 
-    t_start = time.time()
     updated = 0
     skipped = 0
     errors = 0
     error_list = []
-    done_count = 0
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {
-            executor.submit(_worker_fn, p, end_date, args.skip_supply, args.supply_only): p
-            for p in parquets
-        }
+    for i, p in enumerate(parquets):
+        result = extend_single(p, end_date,
+                               skip_supply=args.skip_supply,
+                               supply_only=args.supply_only)
 
-        for future in as_completed(futures):
-            done_count += 1
-            result = future.result()
+        if result["status"] == "ok":
+            updated += 1
+            logger.info(f"  [{i+1}/{len(parquets)}] {result['ticker']}: +{result['new_rows']}행 → {result.get('new_end', '')}")
+        elif result["status"] == "error":
+            errors += 1
+            error_list.append(f"{result['ticker']}: {result.get('error', '')}")
+            logger.warning(f"  [{i+1}/{len(parquets)}] {result['ticker']}: 오류 - {result.get('error', '')}")
+        else:
+            skipped += 1
 
-            if result["status"] == "ok":
-                updated += 1
-                logger.info(f"  [{done_count}/{len(parquets)}] {result['ticker']}: +{result['new_rows']}행 → {result.get('new_end', '')}")
-            elif result["status"] == "error":
-                errors += 1
-                error_list.append({"code": result["ticker"], "error": result.get("error", "")})
-                logger.warning(f"  [{done_count}/{len(parquets)}] {result['ticker']}: 오류 - {result.get('error', '')}")
-            else:
-                skipped += 1
+        # pykrx rate limit
+        if result["status"] == "ok":
+            time.sleep(0.5)
 
-            if done_count % 50 == 0:
-                elapsed = time.time() - t_start
-                logger.info(f"  --- 진행: {done_count}/{len(parquets)} | 업데이트: {updated} | 스킵: {skipped} | 에러: {errors} | {elapsed:.0f}초")
+        if (i + 1) % 20 == 0:
+            logger.info(f"  --- 진행: {i+1}/{len(parquets)} | 업데이트: {updated} | 스킵: {skipped}")
 
-    elapsed = time.time() - t_start
     logger.info(f"\n{'='*50}")
     logger.info(f"증분 업데이트 완료 (→ {end_date})")
     logger.info(f"  업데이트: {updated}종목")
     logger.info(f"  스킵(최신): {skipped}종목")
     logger.info(f"  오류: {errors}종목")
-    logger.info(f"  소요시간: {elapsed:.1f}초 ({elapsed/60:.1f}분)")
     if error_list:
         for e in error_list[:10]:
-            logger.info(f"    - {e['code']}: {e['error']}")
+            logger.info(f"    - {e}")
     logger.info(f"{'='*50}")
-
-    # 에러 기록 저장
-    _save_pipeline_errors(error_list)
-
-    # 에러율 5% 이상이면 텔레그램 알림
-    total = len(parquets)
-    if total > 0 and len(error_list) > 0:
-        error_rate = len(error_list) / total * 100
-        if error_rate >= 5:
-            try:
-                from src.telegram_sender import send_message
-                top_errors = ", ".join(e["code"] for e in error_list[:5])
-                msg = (
-                    f"⚠️ 데이터 파이프라인 경고\n"
-                    f"스크립트: extend_parquet_data\n"
-                    f"전체: {total}종목 | 실패: {len(error_list)}건 ({error_rate:.1f}%)\n"
-                    f"주요 실패: {top_errors}\n"
-                    f"전체 로그: data/pipeline_errors.json"
-                )
-                send_message(msg)
-                logger.info("텔레그램 에러 알림 발송 완료")
-            except Exception as e:
-                logger.warning(f"텔레그램 알림 실패: {e}")
 
     # 검증
     if updated > 0:
-        sample_p = parquets[0]
-        df = pd.read_parquet(sample_p)
-        logger.info(f"\n검증: {sample_p.stem} → {df.index.min().date()} ~ {df.index.max().date()} ({len(df)}rows)")
+        sample = parquets[0]
+        df = pd.read_parquet(sample)
+        logger.info(f"\n검증: {sample.stem} → {df.index.min().date()} ~ {df.index.max().date()} ({len(df)}rows)")
 
 
 if __name__ == "__main__":
