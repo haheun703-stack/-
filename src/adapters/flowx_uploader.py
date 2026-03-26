@@ -443,7 +443,12 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
         if close <= 0:
             continue  # 종가 없으면 스킵 (stop_loss=0 방지)
 
-        rows.append({
+        # 시나리오 필드 (scan_tomorrow_picks.py에서 생성)
+        sc_tag = pick.get("scenario_tag", "")
+        sc_narrative = pick.get("scenario_narrative", "")
+        sc_rr = pick.get("scenario_risk_reward", {})
+
+        row = {
             "date": date_str,
             "code": ticker,
             "name": pick.get("name", ""),
@@ -458,7 +463,20 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             "signal_type": "BUY",
             "volume_ratio": round(pick.get("ret_5d", 0) / 5, 1) if pick.get("ret_5d") else 1.0,
             "momentum_regime": "QUANT",
-        })
+        }
+        # 시나리오 데이터가 있으면 추가 (Supabase 컬럼 있을 때만 유효)
+        if sc_tag:
+            row["scenario_tag"] = sc_tag
+            row["narrative"] = sc_narrative[:200] if sc_narrative else ""
+            rr_parts = []
+            if sc_rr.get("commodity"):
+                rr_parts.append(f"{sc_rr['commodity']}")
+            if sc_rr.get("cost_gap_pct") is not None:
+                rr_parts.append(f"갭{sc_rr['cost_gap_pct']:.0f}%")
+            if sc_rr.get("zone"):
+                rr_parts.append(sc_rr["zone"])
+            row["risk_reward"] = " ".join(rr_parts) if rr_parts else ""
+        rows.append(row)
 
     return rows
 

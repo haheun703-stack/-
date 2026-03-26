@@ -662,6 +662,124 @@ def load_market_intelligence() -> dict:
     return load_json("market_intelligence.json")
 
 
+# ── 전략 M: 시나리오 뉴스 부스트 (원자재 원가 갭 + 시나리오 체인) ──
+
+# 시나리오별 관련 원자재 매핑
+_SCENARIO_COMMODITY_MAP = {
+    "WAR_MIDDLE_EAST": ["wti", "gold"],
+    "WAR_UKRAINE_ESCALATION": ["natural_gas", "gold"],
+    "OIL_SPIKE": ["wti", "natural_gas"],
+    "COMMODITY_SUPERCYCLE": ["copper", "tio2", "aluminum", "uranium"],
+    "AI_POWER_DEMAND": ["uranium", "natural_gas"],
+    "SPACEX_IPO": [],
+    "SEMICONDUCTOR_CYCLE_UP": [],
+    "FED_RATE_CUT": [],
+    "FED_RATE_HIKE": [],
+    "CHINA_STIMULUS": ["copper", "aluminum"],
+    "USD_KRW_SPIKE": [],
+}
+
+
+def load_scenario_data() -> dict:
+    """활성 시나리오 + 원자재 원가 갭 + 시나리오 체인 로드."""
+    scenarios = load_json("scenarios/active_scenarios.json")
+    commodities = load_json("commodity_prices.json")
+    chains = load_json("scenarios/scenario_chains.json")
+    return {
+        "active": scenarios.get("scenarios", {}),
+        "commodities": commodities.get("commodities", {}),
+        "chains": chains.get("scenarios", []),
+    }
+
+
+def build_scenario_ticker_map(scenario_data: dict) -> dict[str, list[dict]]:
+    """시나리오 체인 → 티커별 시나리오 매핑 구축.
+
+    Returns: {ticker: [{scenario_id, scenario_name, phase, logic, ...}, ...]}
+    """
+    ticker_map: dict[str, list[dict]] = {}
+    active = scenario_data["active"]
+    chains = scenario_data["chains"]
+
+    for chain in chains:
+        sc_id = chain.get("id", "")
+        sc_name = chain.get("name", "")
+
+        # 활성 시나리오가 아니면 스킵
+        if sc_id not in active:
+            continue
+        sc_info = active[sc_id]
+        current_phase = sc_info.get("current_phase", 0)
+        sc_score = sc_info.get("score", 0)
+
+        # score 10 미만이면 의미 없음 → 스킵
+        if sc_score < 10:
+            continue
+
+        for phase_info in chain.get("chain", []):
+            phase_num = phase_info.get("phase", 0)
+            # 현재 phase ±1 범위까지 유효 (약간 선행 허용)
+            if abs(phase_num - current_phase) > 1:
+                continue
+
+            for ticker_str in phase_info.get("hot_tickers", []):
+                # "012450:한화에어로스페이스" 형태 파싱
+                parts = ticker_str.split(":", 1)
+                ticker = parts[0]
+
+                if ticker not in ticker_map:
+                    ticker_map[ticker] = []
+
+                ticker_map[ticker].append({
+                    "scenario_id": sc_id,
+                    "scenario_name": sc_name,
+                    "scenario_score": sc_score,
+                    "phase": phase_num,
+                    "phase_name": phase_info.get("name", ""),
+                    "logic": phase_info.get("logic", ""),
+                    "hot_sectors": phase_info.get("hot_sectors", []),
+                })
+
+    return ticker_map
+
+
+def build_scenario_narrative(
+    scenarios: list[dict], commodities: dict
+) -> tuple[str, str, dict]:
+    """종목의 시나리오 기반 narrative 생성.
+
+    Returns: (scenario_tag, narrative, risk_reward)
+    """
+    if not scenarios:
+        return "", "", {}
+
+    # 가장 점수 높은 시나리오 선택
+    best = max(scenarios, key=lambda x: x["scenario_score"])
+    tag = best["scenario_id"]
+
+    # 1-line narrative
+    narrative = f"{best['scenario_name']} → {best['phase_name']}: {best['logic']}"
+
+    # risk_reward: 관련 원자재 cost gap 기반
+    risk_reward: dict = {}
+    related = _SCENARIO_COMMODITY_MAP.get(tag, [])
+    for comm_key in related:
+        if comm_key in commodities:
+            comm = commodities[comm_key]
+            gap = comm.get("cost_gap", {})
+            if gap:
+                risk_reward = {
+                    "commodity": comm.get("name", comm_key),
+                    "price": comm.get("price", 0),
+                    "cost_gap_pct": gap.get("gap_pct", 0),
+                    "zone": gap.get("zone", ""),
+                    "downside_limited": gap.get("zone") in ("buy", "watch"),
+                }
+                break
+
+    return tag, narrative, risk_reward
+
+
 def load_ai_brain_data() -> dict:
     """AI 두뇌 판단 결과 로드 (전략 H)."""
     return load_json("ai_brain_judgment.json")
@@ -1400,6 +1518,17 @@ def main():
     sector_boost_map = load_sector_momentum_boost()
     inst_targets = load_institutional_targets()
     intel = load_market_intelligence()
+
+    # 전략 M: 시나리오 뉴스 부스트 (원자재 원가 갭 + 시나리오 체인)
+    scenario_data = load_scenario_data()
+    scenario_ticker_map = build_scenario_ticker_map(scenario_data)
+    if scenario_ticker_map:
+        active_sc = {s_id: s["score"] for s_id, s in scenario_data["active"].items() if s.get("score", 0) >= 10}
+        print(f"[시나리오] {len(active_sc)}개 활성, {len(scenario_ticker_map)}종목 매핑 "
+              f"({', '.join(f'{k}:{v}점' for k, v in sorted(active_sc.items(), key=lambda x: -x[1])[:3])})")
+    else:
+        print("[시나리오] 활성 시나리오 없음 — 전략M 스킵")
+
     if inst_targets:
         print(f"[기관목표가] {len(inst_targets)}종목 로드됨")
     if avoid_tickers:
@@ -1850,6 +1979,28 @@ def main():
             if nat_signal_str in ("STRONG_BUY", "BUY"):
                 source_names.append("국적수급")
 
+        # ── 전략M: 시나리오 뉴스 부스트 (원자재 원가 갭 + 시나리오 체인) ──
+        scenario_bonus = 0.0
+        scenario_tag = ""
+        scenario_narrative = ""
+        scenario_risk_reward: dict = {}
+        if ticker in scenario_ticker_map:
+            matched_scenarios = scenario_ticker_map[ticker]
+            best_sc = max(matched_scenarios, key=lambda x: x["scenario_score"])
+
+            # 시나리오 점수 기반 부스트 (최대 +10점)
+            # score 30→+3, 50→+5, 70→+7, 100→+10
+            scenario_bonus = round(min(best_sc["scenario_score"] * 0.1, 10), 1)
+
+            # narrative 생성
+            scenario_tag, scenario_narrative, scenario_risk_reward = \
+                build_scenario_narrative(matched_scenarios, scenario_data["commodities"])
+
+            if scenario_bonus > 0:
+                boosted = max(min(score_detail["total"] + scenario_bonus, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+                source_names.append("시나리오")
+
         # 이름 결정
         name = ""
         for s in sources:
@@ -1936,6 +2087,10 @@ def main():
             "nat_signal": nat_signal_str,
             "nat_score": nat_score_val,
             "nat_pattern": nat_pattern,
+            "scenario_bonus": scenario_bonus,
+            "scenario_tag": scenario_tag,
+            "scenario_narrative": scenario_narrative,
+            "scenario_risk_reward": scenario_risk_reward,
             "ma5_gap_pct": pq_data.get("ma5_gap_pct", 0) if pq_data else 0,
             "ma7_gap_pct": pq_data.get("ma7_gap_pct", 0) if pq_data else 0,
             "ma5_entry": entry_info.get("ma5_entry", ""),
@@ -2154,7 +2309,12 @@ def main():
         report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
         cons_str = f"  📊{r['consensus_tag']}" if r.get("consensus_tag") else ""
         nat_str = f"  🌍{r['nat_tag']}" if r.get("nat_tag") else ""
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}")
+        sc_str = ""
+        if r.get("scenario_tag"):
+            rr = r.get("scenario_risk_reward", {})
+            rr_str = f" [{rr['commodity']} {rr['zone']}]" if rr.get("zone") else ""
+            sc_str = f"\n     📰 {r['scenario_narrative']}{rr_str}"
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{sc_str}")
 
     if top5:
         print(f"\n{'─'*60}")
@@ -2321,6 +2481,17 @@ def main():
             "penalized": sum(1 for r in results if r.get("nat_bonus", 0) < 0),
             "as_source": sum(1 for r in results if "국적수급" in r.get("sources", [])),
         } if nat_signals else {},
+        "scenario_info": {
+            "active_count": len(scenario_data["active"]),
+            "matched_stocks": sum(1 for r in results if r.get("scenario_bonus", 0) > 0),
+            "top_scenarios": [
+                {"id": s_id, "score": s["score"], "phase": s["current_phase"]}
+                for s_id, s in sorted(
+                    scenario_data["active"].items(),
+                    key=lambda x: -x[1].get("score", 0)
+                )[:3]
+            ],
+        } if scenario_data.get("active") else {},
         "deep_dive": deep_dive_data,
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
