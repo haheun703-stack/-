@@ -3,7 +3,7 @@
 매일 BAT-D 완료 후 (또는 독립 실행) 모든 데이터 소스를 점검하고
 결과를 텔레그램으로 보낸다.
 
-18개 항목:
+19개 항목:
   1. 종가 데이터 (Parquet)
   2. 수급 데이터 (종목별)
   3. 수급 데이터 (섹터별)
@@ -22,6 +22,7 @@
   16. KOSPI 인덱스 신선도
   17. 투자자수급 신선도
   18. 수급이면분석 신선도 (supply_demand/)
+  19. 수급스냅샷 신선도 (supply_snapshots/)
 
 실행:
   python -u -X utf8 scripts/data_health_check.py
@@ -84,7 +85,7 @@ class DataHealthCheck:
         self.is_weekday = self.today.weekday() < 5
 
     def run_full_check(self) -> list[CheckResult]:
-        """전체 18개 항목 점검."""
+        """전체 19개 항목 점검."""
         checks = [
             self._check_price_data,         # 1. 종가
             self._check_supply_stocks,       # 2. 수급(종목)
@@ -104,6 +105,7 @@ class DataHealthCheck:
             self._check_kospi_index,        # 16. KOSPI 인덱스
             self._check_investor_flow,      # 17. 투자자수급
             self._check_supply_demand,      # 18. 수급이면분석
+            self._check_supply_snapshots,   # 19. 수급스냅샷
         ]
 
         results = []
@@ -245,40 +247,62 @@ class DataHealthCheck:
     # ─── 4. 국적별 수급 ───
 
     def _check_nationality(self) -> CheckResult:
-        """nationality DB 또는 JSON 확인."""
+        """nationality signal JSON + DB 신선도 동시 확인.
+
+        재발방지: signal은 정상인데 DB 수집이 403으로 중단된 사고 (2026-03-25~26).
+        """
         json_path = self.data_dir / "krx_nationality" / "nationality_signal.json"
         db_path = self.data_dir / "krx_nationality" / "nationality.db"
 
+        signal_ok = False
+        signal_info = ""
+        db_ok = False
+        db_info = ""
+
+        # Signal JSON 체크
         if json_path.exists():
             try:
                 data = json.loads(json_path.read_text(encoding="utf-8"))
-                # analyzed_at 또는 date 필드
                 d = str(data.get("analyzed_at", data.get("date",
                         data.get("trade_date", ""))))
                 yesterday = (self.today - timedelta(days=1)).strftime("%Y-%m-%d")
                 if self.today_str in d or yesterday in d or self.today_compact in d:
                     count = data.get("total_stocks", len(data.get("signals", [])))
-                    return CheckResult("국적별수급", True,
-                                       f"{count}종목 ({d[:10]})")
-                return CheckResult("국적별수급", False,
-                                   f"오래된 데이터: {d[:10]}")
+                    signal_ok = True
+                    signal_info = f"signal={count}종목({d[:10]})"
+                else:
+                    signal_info = f"signal STALE({d[:10]})"
             except Exception as e:
-                return CheckResult("국적별수급", False, f"JSON 파싱 오류: {e}")
+                signal_info = f"signal 오류: {e}"
 
+        # DB 신선도 체크
         if db_path.exists():
             try:
                 conn = sqlite3.connect(str(db_path))
                 cursor = conn.execute(
-                    "SELECT MAX(trade_date) FROM nationality_data"
+                    "SELECT date, stock_count, status FROM collect_log "
+                    "ORDER BY date DESC LIMIT 1"
                 )
                 row = cursor.fetchone()
                 conn.close()
-                if row and row[0]:
-                    return CheckResult("국적별수급", True, f"DB 최신: {row[0]}")
+                if row:
+                    last_date, stock_count, status = row
+                    gap = (self.today - datetime.strptime(last_date, "%Y-%m-%d").date()).days
+                    if gap <= 5 and stock_count > 0:
+                        db_ok = True
+                        db_info = f"db={last_date}({stock_count}종목)"
+                    elif stock_count == 0:
+                        db_info = f"db={last_date}(0종목! API오류)"
+                    else:
+                        db_info = f"db STALE({last_date}, {gap}일전)"
             except Exception:
-                pass
+                db_info = "db 쿼리 실패"
 
-        return CheckResult("국적별수급", False, "데이터 없음")
+        passed = signal_ok and db_ok
+        msg = f"{signal_info} | {db_info}" if db_info else signal_info
+        if not signal_ok and not db_ok:
+            msg = msg or "데이터 없음"
+        return CheckResult("국적별수급", passed, msg)
 
     # ─── 5. 원자재 가격 ───
 
@@ -667,6 +691,54 @@ class DataHealthCheck:
                 "수급이면분석", False,
                 f"STALE: {latest} ({gap}일 전) — BAT-D2 스케줄 또는 load_tickers 확인!",
             )
+
+    # ─── 19. 수급 스냅샷 (supply_snapshots/) 신선도 ───
+
+    def _check_supply_snapshots(self) -> CheckResult:
+        """supply_snapshots/ 장중 스냅샷이 오늘(평일) 생성되었는지.
+
+        재발방지: 데몬 비활성화 후 20일간 스냅샷 미수집 사고 (2026-03-06~26).
+        """
+        snap_dir = self.data_dir / "supply_snapshots"
+        if not snap_dir.exists():
+            return CheckResult("수급스냅샷", False, "supply_snapshots/ 디렉토리 없음")
+
+        # 주말이면 스킵 (장중 스냅샷은 평일에만)
+        if not self.is_weekday:
+            return CheckResult("수급스냅샷", True, "주말 — 스냅샷 불필요")
+
+        today_compact = self.today.strftime("%Y%m%d")
+        today_snaps = list(snap_dir.glob(f"{today_compact}_snap*.json"))
+
+        if today_snaps:
+            # 빈 파일 감지
+            non_empty = 0
+            for sf in today_snaps:
+                try:
+                    data = json.loads(sf.read_text(encoding="utf-8"))
+                    if data.get("stocks"):
+                        non_empty += 1
+                except Exception:
+                    pass
+            if non_empty > 0:
+                return CheckResult(
+                    "수급스냅샷", True,
+                    f"오늘 {len(today_snaps)}개 스냅샷 ({non_empty}개 데이터有)",
+                )
+            return CheckResult(
+                "수급스냅샷", False,
+                f"오늘 {len(today_snaps)}개 스냅샷 — 전부 stocks 비어있음!",
+            )
+
+        # 오늘 스냅샷 없으면 최신 파일 확인
+        all_snaps = sorted(snap_dir.glob("*_snap*.json"))
+        if all_snaps:
+            latest = all_snaps[-1].stem.split("_")[0]
+            return CheckResult(
+                "수급스냅샷", False,
+                f"오늘 스냅샷 없음 — 최신: {latest} (BAT-SNAP 스케줄 확인!)",
+            )
+        return CheckResult("수급스냅샷", False, "스냅샷 파일 0개")
 
     # ─── 14. 스케줄러 로그 ───
 

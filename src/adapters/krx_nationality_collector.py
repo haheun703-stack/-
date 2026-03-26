@@ -460,13 +460,24 @@ def collect_and_store(
 
     total_rows = 0
     success_count = 0
+    consecutive_fail = 0
 
     for ticker, name, isin in targets:
         countries = krx.fetch_nationality(isin, date)
         if not countries:
+            consecutive_fail += 1
+            # 재발방지: 5연속 실패 시 재로그인 (403/세션만료 대응)
+            if consecutive_fail >= 5 and success_count == 0:
+                logger.warning("5연속 실패 — 세션 재로그인 시도")
+                if krx.login():
+                    consecutive_fail = 0
+                else:
+                    logger.error("재로그인 실패 — 수집 중단")
+                    break
             continue
 
         success_count += 1
+        consecutive_fail = 0
         for country, vol in countries.items():
             conn.execute(
                 "INSERT OR REPLACE INTO nationality_daily "
@@ -477,21 +488,28 @@ def collect_and_store(
 
         time.sleep(delay)
 
+    # 0종목이면 API 에러 상태 반환 (재발방지: 403 무음 실패 방지)
+    if success_count == 0 and len(targets) > 0:
+        status = "API_ERROR"
+        logger.error(f"수집 실패: {date} — {len(targets)}종목 시도했으나 0종목 성공 (API 오류 의심)")
+    else:
+        status = "OK"
+
     # 수집 로그
     conn.execute(
         "INSERT OR REPLACE INTO collect_log (date, collected_at, stock_count, status) "
         "VALUES (?, ?, ?, ?)",
-        (date, datetime.now().isoformat(), success_count, "OK"),
+        (date, datetime.now().isoformat(), success_count, status),
     )
     conn.commit()
     conn.close()
 
-    logger.info(f"수집 완료: {date} / {success_count}종목 / {total_rows}행")
+    logger.info(f"수집 완료: {date} / {success_count}종목 / {total_rows}행 / {status}")
     return {
         "date": date,
         "stocks": success_count,
         "rows": total_rows,
-        "status": "OK",
+        "status": status,
     }
 
 

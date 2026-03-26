@@ -80,6 +80,21 @@ def main():
             logger.error("KRX 로그인 실패 — 중단")
             sys.exit(1)
 
+        # 재발방지: 0종목 수집 시 텔레그램 경보
+        # 사고 이력: 403 에러로 0종목인데 status=OK → 2일간 무음 실패 (2026-03-25~26)
+        if result.get("stocks", 0) == 0 and result["status"] != "SKIP":
+            logger.error("국적별 수급 0종목 수집 — API 오류 의심!")
+            try:
+                from src.telegram_sender import send_message
+                send_message(
+                    "🚨 국적별 수급 0종목 수집\n"
+                    f"날짜: {result['date']}\n"
+                    f"status: {result['status']}\n"
+                    "KRX API 403/세션 만료 확인 필요"
+                )
+            except Exception:
+                pass
+
     # ─── 분석 ───
     logger.info("=== 국적별 수급 분석 ===")
     signals = run_analysis()
