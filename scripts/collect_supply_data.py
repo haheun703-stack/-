@@ -40,17 +40,68 @@ logger = logging.getLogger(__name__)
 
 
 def load_tickers(config_path: str = "config/settings.yaml") -> list[str]:
-    """config에서 모니터링 종목 로드"""
+    """모니터링 종목 동적 로드 (보유종목 + 추천후보 + config 폴백).
+
+    기존 config만 의존하던 방식 → 동적 소스에서 자동 수집.
+    사고 이력: config에 tickers 비어있어 21일간 수집 중단 (2026-03-05~26).
+    """
+    seen: set[str] = set()
+    result: list[str] = []
+
+    def _add(ticker: str):
+        if ticker and ticker not in seen and len(ticker) == 6 and ticker.isdigit():
+            seen.add(ticker)
+            result.append(ticker)
+
+    # 1차: 보유 종목 (가장 중요)
+    try:
+        pos_path = project_root / "data" / "positions.json"
+        if pos_path.exists():
+            pos_data = json.loads(pos_path.read_text(encoding="utf-8"))
+            positions = pos_data if isinstance(pos_data, list) else pos_data.get("positions", [])
+            for p in positions:
+                _add(p.get("ticker", ""))
+    except Exception:
+        pass
+
+    # 2차: 내일 추천 종목
+    for fname in ("tomorrow_picks.json", "tomorrow_picks_flowx.json"):
+        try:
+            path = project_root / "data" / fname
+            if path.exists():
+                data = json.loads(path.read_text(encoding="utf-8"))
+                for pick in data.get("picks", []):
+                    _add(pick.get("ticker", ""))
+        except Exception:
+            pass
+
+    # 3차: 스캔 캐시 상위 종목
+    try:
+        cache_path = project_root / "data" / "scan_cache.json"
+        if cache_path.exists():
+            data = json.loads(cache_path.read_text(encoding="utf-8"))
+            for item in data.get("candidates", [])[:50]:
+                _add(item.get("ticker", ""))
+    except Exception:
+        pass
+
+    # 4차: config 폴백
     try:
         with open(config_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
-        tickers = cfg.get("supply_demand", {}).get("tickers", [])
-        if not tickers:
-            tickers = cfg.get("universe", {}).get("tickers", [])
-        return tickers
-    except Exception as e:
-        logger.warning(f"config 로드 실패: {e}")
-        return []
+        for t in cfg.get("supply_demand", {}).get("tickers", []):
+            _add(t)
+        for t in cfg.get("universe", {}).get("tickers", []):
+            _add(t)
+    except Exception:
+        pass
+
+    if result:
+        logger.info(f"동적 종목 로드: {len(result)}종목 (보유+추천+스캔+config)")
+    else:
+        logger.warning("동적 종목 로드 실패 — 모든 소스 비어있음")
+
+    return result
 
 
 def save_results(results: dict, date: str):

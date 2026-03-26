@@ -400,13 +400,17 @@ class DailyScheduler:
         tickers = set()
 
         # 1. 보유 종목
+        # 사고 이력: positions.json이 배열 구조인데 .get("positions") 호출 → 항상 빈 리스트 (2026-03-06~)
         try:
             pos_path = Path("data/positions.json")
             if pos_path.exists():
                 with open(pos_path, encoding="utf-8") as f:
                     pos_data = json.load(f)
-                for p in pos_data.get("positions", []):
-                    tickers.add(p["ticker"])
+                positions = pos_data if isinstance(pos_data, list) else pos_data.get("positions", [])
+                for p in positions:
+                    t = p.get("ticker", "") if isinstance(p, dict) else ""
+                    if t:
+                        tickers.add(t)
         except Exception:
             pass
 
