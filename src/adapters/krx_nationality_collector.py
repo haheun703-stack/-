@@ -421,19 +421,10 @@ def collect_and_store(
         {"date": "20260310", "stocks": 30, "rows": 450, "status": "OK"}
     """
     if date is None:
-        # 전 거래일 (T-1) 자동 계산
-        today = datetime.now()
-        if today.hour < 18:
-            # 18시 이전이면 T-2 (오늘 데이터 아직 없을 수 있음)
-            d = today - timedelta(days=1)
-        else:
-            d = today
-        # 주말 스킵
+        # 전 거래일 (T-1) 자동 계산: 항상 어제 (주말 스킵)
+        # 사고 이력: T-2 로직이 과도하여 이미 SKIP된 날짜만 계산 → 매일 0건 (2026-03-25~)
+        d = datetime.now() - timedelta(days=1)
         while d.weekday() >= 5:  # 5=토, 6=일
-            d -= timedelta(days=1)
-        # 하루 더 빼기 (T+1 지연)
-        d -= timedelta(days=1)
-        while d.weekday() >= 5:
             d -= timedelta(days=1)
         date = d.strftime("%Y%m%d")
 
