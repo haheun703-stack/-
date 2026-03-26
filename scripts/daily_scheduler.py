@@ -353,7 +353,19 @@ class DailyScheduler:
             # 수집 대상: 보유종목 + 관심종목 (전일 스캔 결과)
             tickers = self._get_supply_tickers()
             if not tickers:
-                logger.info("[📸 수급 %d차] 수집 대상 없음 — 스킵", snapshot_num)
+                logger.warning("[📸 수급 %d차] 수집 대상 없음 — 스킵", snapshot_num)
+                # 재발방지: 무음 실패 방지 — 1차 스냅샷에서만 알림 (중복 방지)
+                # 사고 이력: positions.json 파싱 버그로 20일간 빈 종목 (2026-03-06~)
+                if snapshot_num == 1:
+                    try:
+                        from src.telegram_sender import send_message
+                        send_message(
+                            "🚨 수급 스냅샷 종목 0개\n"
+                            "_get_supply_tickers() 빈 리스트\n"
+                            "positions.json / scan_cache.json 확인 필요"
+                        )
+                    except Exception:
+                        pass
                 return
 
             now_str = datetime.now().strftime("%H:%M")

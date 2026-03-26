@@ -135,6 +135,17 @@ def main():
 
     if not tickers:
         logger.error("수집할 종목이 없습니다. --tickers 또는 config 확인")
+        # 재발방지: 무음 실패 방지 — 텔레그램으로 즉시 알림
+        # 사고 이력: 21일간 빈 종목으로 수집 중단됐으나 아무도 몰랐음 (2026-03-05~26)
+        try:
+            from src.telegram_sender import send_message
+            send_message(
+                "🚨 수급 수집 실패: 종목 0개\n"
+                "load_tickers() 빈 리스트 반환\n"
+                "positions.json / scan_cache.json / config 확인 필요"
+            )
+        except Exception:
+            pass
         return
 
     logger.info(f"수급 데이터 수집 시작: {len(tickers)}종목, 기준일={date}")

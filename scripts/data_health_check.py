@@ -3,7 +3,7 @@
 매일 BAT-D 완료 후 (또는 독립 실행) 모든 데이터 소스를 점검하고
 결과를 텔레그램으로 보낸다.
 
-17개 항목:
+18개 항목:
   1. 종가 데이터 (Parquet)
   2. 수급 데이터 (종목별)
   3. 수급 데이터 (섹터별)
@@ -21,6 +21,7 @@
   15. 파이프라인 에러율
   16. KOSPI 인덱스 신선도
   17. 투자자수급 신선도
+  18. 수급이면분석 신선도 (supply_demand/)
 
 실행:
   python -u -X utf8 scripts/data_health_check.py
@@ -83,7 +84,7 @@ class DataHealthCheck:
         self.is_weekday = self.today.weekday() < 5
 
     def run_full_check(self) -> list[CheckResult]:
-        """전체 17개 항목 점검."""
+        """전체 18개 항목 점검."""
         checks = [
             self._check_price_data,         # 1. 종가
             self._check_supply_stocks,       # 2. 수급(종목)
@@ -102,6 +103,7 @@ class DataHealthCheck:
             self._check_pipeline_errors,    # 15. 파이프라인 에러율
             self._check_kospi_index,        # 16. KOSPI 인덱스
             self._check_investor_flow,      # 17. 투자자수급
+            self._check_supply_demand,      # 18. 수급이면분석
         ]
 
         results = []
@@ -623,6 +625,48 @@ class DataHealthCheck:
                                f"STALE: {last_date_str} ({gap}일 전) — 수집 파이프라인 확인!")
         except Exception as e:
             return CheckResult("투자자수급", False, f"파싱 오류: {e}")
+
+    # ─── 18. 수급이면분석 (supply_demand/) 신선도 ───
+
+    def _check_supply_demand(self) -> CheckResult:
+        """supply_demand/ JSON의 최신 날짜가 3영업일(≈5달력일) 이내인지.
+
+        재발방지: config tickers 비어 21일간 수집 중단 사고 (2026-03-05~26).
+        """
+        sd_dir = self.data_dir / "supply_demand"
+        if not sd_dir.exists():
+            return CheckResult("수급이면분석", False, "supply_demand/ 디렉토리 없음")
+
+        json_files = sorted(sd_dir.glob("*.json"))
+        if not json_files:
+            return CheckResult("수급이면분석", False, "JSON 파일 0개 — 수집 중단 의심!")
+
+        latest = json_files[-1].stem  # e.g. "20260326"
+        try:
+            latest_date = datetime.strptime(latest, "%Y%m%d").date()
+        except ValueError:
+            return CheckResult("수급이면분석", False, f"파일명 파싱 실패: {latest}")
+
+        gap = (self.today - latest_date).days
+
+        # 파일 크기로 빈 파일 감지
+        size_kb = json_files[-1].stat().st_size / 1024
+
+        if gap <= 5 and size_kb > 1:
+            return CheckResult(
+                "수급이면분석", True,
+                f"최신: {latest} ({gap}일 전, {size_kb:.0f}KB, {len(json_files)}일치)",
+            )
+        elif size_kb <= 1:
+            return CheckResult(
+                "수급이면분석", False,
+                f"빈 파일: {latest} ({size_kb:.1f}KB) — collect_supply_data 확인!",
+            )
+        else:
+            return CheckResult(
+                "수급이면분석", False,
+                f"STALE: {latest} ({gap}일 전) — BAT-D2 스케줄 또는 load_tickers 확인!",
+            )
 
     # ─── 14. 스케줄러 로그 ───
 
