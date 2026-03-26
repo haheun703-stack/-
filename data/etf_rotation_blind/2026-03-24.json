@@ -1,0 +1,32 @@
+{
+  "date": "2026-03-24",
+  "timestamp": "2026-03-24 19:13:39",
+  "regime": "BEAR",
+  "effective_regime": "BEAR",
+  "warning_score": -10,
+  "kospi_close": 5553.92,
+  "kospi_ma20_above": false,
+  "kospi_ma60_above": true,
+  "us_overnight_grade": 3,
+  "us_overnight_signal": "neutral",
+  "momentum_sectors": 20,
+  "smart_money_count": 5,
+  "supply_count": 25,
+  "five_axis_score": 65.0,
+  "allocation": {
+    "sector": 0,
+    "leverage": 0,
+    "index": 0,
+    "gold": 16.2,
+    "small_cap": 0,
+    "bonds": 8.8,
+    "dollar": 3.8,
+    "cash": 71.2
+  },
+  "order_queue": [],
+  "sector_candidates": [],
+  "leverage_action": null,
+  "index_action": null,
+  "risk_level": null,
+  "risk_summary": null
+}

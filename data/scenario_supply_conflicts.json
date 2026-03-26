@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-03-23T21:14:41.599747",
+  "timestamp": "2026-03-25T22:20:54.424101",
   "conflict_count": 1,
   "conflicts": [
     {
       "scenario": "WAR_MIDDLE_EAST",
-      "scenario_score": 100,
+      "scenario_score": 70,
       "sector": "방산",
-      "total_flow_bil": -5257.6,
-      "price_change_5": -12.54,
-      "warning": "WAR_MIDDLE_EAST(100점) 활성인데 방산 수급 -5,258억 (5일) — Phase 전환 가능성 주의"
+      "total_flow_bil": -1197.2,
+      "price_change_5": -0.47,
+      "warning": "WAR_MIDDLE_EAST(70점) 활성인데 방산 수급 -1,197억 (5일) — Phase 전환 가능성 주의"
     }
   ]
 }

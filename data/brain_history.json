@@ -319,5 +319,83 @@
     "adjustments_count": 12,
     "contrarian": true,
     "fear_index": 91.5
+  },
+  {
+    "date": "2026-03-24",
+    "regime": "CAUTION",
+    "kospi_regime": "CAUTION",
+    "nw_score": 0.095,
+    "vix": 26.1,
+    "confidence": 0.65,
+    "total_invest": 28.8,
+    "cash": 71.2,
+    "adjustments_count": 7,
+    "contrarian": false,
+    "fear_index": 53.0
+  },
+  {
+    "date": "2026-03-25",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": -0.06,
+    "vix": 27.0,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 7,
+    "contrarian": false,
+    "fear_index": 67.2
+  },
+  {
+    "date": "2026-03-25",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": -0.06,
+    "vix": 27.0,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 7,
+    "contrarian": false,
+    "fear_index": 67.2
+  },
+  {
+    "date": "2026-03-25",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": -0.06,
+    "vix": 27.0,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 7,
+    "contrarian": false,
+    "fear_index": 67.2
+  },
+  {
+    "date": "2026-03-25",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": -0.06,
+    "vix": 27.0,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 7,
+    "contrarian": false,
+    "fear_index": 67.2
+  },
+  {
+    "date": "2026-03-26",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": 0.0,
+    "vix": 25.3,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 8,
+    "contrarian": true,
+    "fear_index": 73.1
   }
 ]

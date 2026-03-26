@@ -1,143 +1,170 @@
 {
-  "date": "2025-01-13",
+  "date": "2025-01-16",
   "market_regime": {
     "overall": "BEAR",
-    "kospi_regime": "CAUTION",
-    "us_overnight": "STRONG_BEAR",
+    "kospi_regime": "BEAR",
+    "us_overnight": "MILD_BEAR",
     "stagflation": "NONE",
-    "summary": "US 금리충격+호르무즈 리스크+환율 1500원 돌파로 극도의 위험 국면"
+    "summary": "BEAR 레짐 유지, 금/은/구리 급등(GOLD_SPIKE)으로 안전자산 선호 강화, VIX 25 경계선"
   },
   "reasoning_chains": [
     {
       "chain_id": 1,
-      "cause": "US STRONG_BEAR(-53.6) 금리충격+VIX 27 공포",
-      "sector_impact": "전체 위험자산 급락, 방어자산 선호",
-      "action": "KODEX 인버스 매수로 하락 헤지",
+      "cause": "금/은/구리 동반 급등(+3.0~3.6%) + VIX 25 돌파",
+      "sector_impact": "안전자산 선호 강화, 위험자산 회피",
+      "action": "KODEX 골드선물(H) 매수, 현금 비중 40% 확대",
       "confidence": 0.85,
       "timeframe": "단기(1주)"
     },
     {
       "chain_id": 2,
-      "cause": "호르무즈 해협 봉쇄 위협+유가 급등",
-      "sector_impact": "정유사 마진 개선, 에너지섹터 +9.54% 강세",
-      "action": "S-Oil 매수 (외국인 순매수 3위)",
-      "confidence": 0.85,
+      "cause": "미-이란 휴전 협상 불확실성 + 호르무즈 해협 리스크",
+      "sector_impact": "방산주 수혜 지속, 원유 변동성 확대",
+      "action": "한화오션/한화에어로스페이스 매수, KBSTAR 원유선물혼합 관망",
+      "confidence": 0.75,
       "timeframe": "중기(1~3개월)"
     },
     {
       "chain_id": 3,
-      "cause": "환율 1500원 돌파+원화 급락",
-      "sector_impact": "수출주 수혜, 내수주 타격",
-      "action": "삼성중공업 매수 (LNG선 1.15조 수주)",
-      "confidence": 0.88,
+      "cause": "ARM Holdings 자체칩 판매로 16% 급등",
+      "sector_impact": "반도체 장비 수요 증가 기대감",
+      "action": "한미반도체 관찰, KODEX 반도체 소량 매수",
+      "confidence": 0.65,
       "timeframe": "중기(1~3개월)"
     },
     {
       "chain_id": 4,
-      "cause": "원자재 전반 급락 (금 -3.1%, 구리 -4.6%, 은 -6.3%)",
-      "sector_impact": "디플레이션 우려, 안전자산 약세",
-      "action": "원자재 ETF 관망, 현금 비중 확대",
-      "confidence": 0.75,
+      "cause": "CPI 2.66% 상승세 전환 + Core PCE 3.06%",
+      "sector_impact": "금리인하 불확실성 증대, 성장주 압박",
+      "action": "KODEX 인버스 소량 보유, 레버리지 ETF 회피",
+      "confidence": 0.7,
       "timeframe": "단기(1주)"
     },
     {
       "chain_id": 5,
-      "cause": "MDD -27.7% 도달+보유종목 10개 풀",
-      "sector_impact": "포트폴리오 리스크 과대",
-      "action": "손실종목 정리 후 현금 60% 확보",
-      "confidence": 0.9,
-      "timeframe": "즉시"
+      "cause": "K-방산 역대 최대 수출 전망 + KF-21 양산",
+      "sector_impact": "방산 밸류체인 전체 수혜",
+      "action": "HD현대일렉트릭/HD현대중공업 매수",
+      "confidence": 0.8,
+      "timeframe": "중기(1~3개월)"
     }
   ],
   "unified_picks": {
     "individual_stocks": [
       {
-        "ticker": "010950",
-        "name": "S-Oil",
+        "ticker": "047820",
+        "name": "한화오션",
         "action": "BUY",
-        "reason": "호르무즈 리스크+유가 110달러 전망+외국인 순매수",
+        "reason": "K-방산 수출 급증, 서유럽 공급망 진입",
         "chain_ref": 2
       },
       {
-        "ticker": "096770",
-        "name": "SK이노베이션",
+        "ticker": "012450",
+        "name": "한화에어로스페이스",
         "action": "BUY",
-        "reason": "유가 상승으로 정유부문 수익성 개선",
+        "reason": "방산 수주잔고 역대급, 눌림목 매수 기회",
         "chain_ref": 2
       },
       {
-        "ticker": "010140",
-        "name": "삼성중공업",
+        "ticker": "267260",
+        "name": "HD현대일렉트릭",
         "action": "BUY",
-        "reason": "LNG선 1.15조 릴레이 수주+환율 수혜",
-        "chain_ref": 3
+        "reason": "퀀텀 최고점수(62.9), 방산 관련",
+        "chain_ref": 5
       },
       {
-        "ticker": "034020",
-        "name": "두산에너빌리티",
+        "ticker": "329180",
+        "name": "HD현대중공업",
         "action": "WATCH",
-        "reason": "외국인 순매수 2위, 에너지 전환 수혜 관찰",
-        "chain_ref": 2
+        "reason": "AI두뇌 추천, 미국 조선업 모멘텀",
+        "chain_ref": 5
+      },
+      {
+        "ticker": "042700",
+        "name": "한미반도체",
+        "action": "WATCH",
+        "reason": "ARM 수혜 가능성, 직접 수혜 확인 필요",
+        "chain_ref": 3
       }
     ],
     "sector_etf": [
       {
-        "ticker": "140700",
-        "name": "KODEX 에너지화학",
+        "ticker": "091180",
+        "name": "KODEX 반도체",
         "action": "BUY",
-        "reason": "에너지섹터 +9.54% 강세 지속",
-        "chain_ref": 2
+        "reason": "반도체 장비 수요 증가 기대",
+        "chain_ref": 3
+      },
+      {
+        "ticker": "266410",
+        "name": "KODEX 농업선물(H)",
+        "action": "HOLD",
+        "reason": "인플레이션 헤지",
+        "chain_ref": 4
       }
     ],
     "leverage_inverse": [
       {
+        "ticker": "251340",
+        "name": "KODEX 코스닥150선물인버스",
+        "action": "BUY",
+        "reason": "BEAR 레짐 방어 도구",
+        "chain_ref": 4
+      },
+      {
         "ticker": "114800",
         "name": "KODEX 인버스",
-        "action": "BUY",
-        "reason": "PRE_BEAR 레짐+US 5등급 금리충격",
-        "chain_ref": 1
+        "action": "HOLD",
+        "reason": "헤지 목적 소량 보유",
+        "chain_ref": 4
       }
     ],
     "commodity_etf": [
       {
-        "ticker": "USO",
-        "name": "United States Oil Fund",
+        "ticker": "132030",
+        "name": "KODEX 골드선물(H)",
         "action": "BUY",
-        "reason": "호르무즈 리스크로 유가 $130 가능성",
-        "chain_ref": 2
+        "reason": "GOLD_SPIKE 시그널, 안전자산 선호",
+        "chain_ref": 1
       },
       {
-        "ticker": "GLD",
-        "name": "SPDR Gold Shares",
+        "ticker": "261240",
+        "name": "TIGER 경기방어채권",
+        "action": "BUY",
+        "reason": "안전자산 대체재",
+        "chain_ref": 1
+      },
+      {
+        "ticker": "261220",
+        "name": "KBSTAR 원유선물혼합",
         "action": "WATCH",
-        "reason": "금 -3.1% 급락, 바닥 확인 필요",
-        "chain_ref": 4
+        "reason": "호르무즈 리스크 모니터링",
+        "chain_ref": 2
       }
     ],
     "index_etf": [
       {
         "ticker": "069500",
         "name": "KODEX KOSPI200",
-        "action": "SELL",
-        "reason": "서킷브레이커 발동+외국인 이탈",
+        "action": "HOLD",
+        "reason": "BEAR 레짐, 최소 보유",
         "chain_ref": 1
       }
     ]
   },
   "cash_strategy": {
-    "target_cash_pct": 60,
-    "current_cash_pct": 0,
-    "action": "손실종목 즉시 정리하여 현금 60% 확보",
-    "reason": "MDD -27.7%+BEAR 레짐 진입+호르무즈 리스크"
+    "target_cash_pct": 40,
+    "current_cash_pct": 25,
+    "action": "현금 비중 25% → 40%로 확대",
+    "reason": "BEAR 레짐 + VIX 25 돌파 + GOLD_SPIKE 시그널"
   },
   "risk_alerts": [
-    "호르무즈 해협 봉쇄 시 유가 $130+ 급등 가능",
-    "환율 1500원 돌파로 수입물가 급등 우려",
-    "VIX 27 도달, 추가 패닉셀링 가능성",
-    "MDD -27.7%로 리스크 관리 최우선",
-    "외국인 대규모 이탈로 코스피 추가 하락 위험"
+    "VIX 25 경계선 돌파 - 변동성 급증 주의",
+    "미-이란 휴전 협상 결렬 시 유가 $130+ 시나리오",
+    "현재 MDD -27.7% - 추가 하락 방어 필수",
+    "SHIELD RED 경고 - 상관관계 붕괴(oil_spy)"
   ],
-  "daily_summary": "US 금리충격(-53.6)+호르무즈 위협+환율 1500원으로 극한 방어모드. 현금 60% 확보 후 에너지/조선 선별 매수",
+  "daily_summary": "BEAR 레짐 지속, 금/구리 급등으로 안전자산 선호 강화. 방산/조선 선별 매수하되 현금 40% 사수",
   "model": "claude-opus-4-20250514",
-  "generated_at": "2026-03-23 21:14"
+  "generated_at": "2026-03-26 18:49"
 }

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-23T20:54:00.156916",
+  "timestamp": "2026-03-26T17:59:00.705624",
   "overall_level": "RED",
   "sector_overlaps": [
     {
@@ -31,7 +31,7 @@
     "current_equity": 29560759,
     "current_mdd_pct": -27.66,
     "max_mdd_pct": -27.66,
-    "max_mdd_date": "2026-03-23",
+    "max_mdd_date": "2026-03-26",
     "killswitch_level": "LEVEL_3",
     "killswitch_action": "전량 현금화 + 수동모드"
   },
@@ -72,7 +72,7 @@
   "correlation_breakdowns": [
     {
       "pair_name": "gold_spy",
-      "current_corr": 0.2422,
+      "current_corr": 0.2186,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -80,7 +80,7 @@
     },
     {
       "pair_name": "dollar_spy",
-      "current_corr": -0.1666,
+      "current_corr": -0.1917,
       "normal_sign": "negative",
       "breakdown_threshold": 0.4,
       "is_breakdown": false,
@@ -88,7 +88,7 @@
     },
     {
       "pair_name": "bond_spy",
-      "current_corr": 0.2359,
+      "current_corr": 0.2645,
       "normal_sign": "negative",
       "breakdown_threshold": 0.3,
       "is_breakdown": false,
@@ -96,7 +96,7 @@
     },
     {
       "pair_name": "oil_spy",
-      "current_corr": -0.3258,
+      "current_corr": -0.387,
       "normal_sign": "positive",
       "breakdown_threshold": -0.3,
       "is_breakdown": true,

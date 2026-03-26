@@ -1,107 +1,41 @@
 {
-  "market_sentiment": "bearish",
+  "market_sentiment": "neutral",
   "key_themes": [
-    "중동 지정학 리스크 고조 - 호르무즈 해협 폐쇄 위협",
-    "원화 급락 및 환율 1,500원 돌파로 인한 수입 비용 증가",
-    "AI 디스럽션 우려로 기술주 밸류에이션 재평가",
-    "유가 급등으로 에너지 비용 부담 확대",
-    "외국인 자금 이탈 및 코스피 서킷브레이커 발동"
+    "미-이란 휴전 협상 불확실성으로 변동성 지속",
+    "K-방산 수출 호조 및 KF-21 양산 본궤도",
+    "SMR(소형모듈원전) 상용화 가시화 및 원전 생태계 확장",
+    "반도체 업황 회복 기대감 vs 미국 금리인하 불확실성",
+    "휴머노이드·양자내성암호 등 미래기술 테마 부상"
   ],
   "stock_judgments": [
     {
-      "ticker": "010950",
-      "name": "S-Oil",
-      "action": "BUY",
-      "confidence": 0.85,
-      "reasoning": "호르무즈 해협 긴장으로 유가 110달러 전망, 정유사 마진 개선 기대. 에너지 섹터 +9.54% 강세 확인.",
-      "catalysts": [
-        "유가 급등",
-        "중동 공급 차질 우려"
-      ],
-      "risks": [
-        "환율 상승으로 원재료 수입 비용 증가"
-      ],
-      "urgency": "high",
-      "expected_impact_pct": 8
-    },
-    {
-      "ticker": "096770",
-      "name": "SK이노베이션",
-      "action": "BUY",
-      "confidence": 0.82,
-      "reasoning": "유가 상승으로 정유 부문 수익성 개선. 에너지 섹터 강세 수혜주.",
-      "catalysts": [
-        "유가 급등",
-        "정유 마진 확대"
-      ],
-      "risks": [
-        "배터리 사업 부진",
-        "환율 리스크"
-      ],
-      "urgency": "high",
-      "expected_impact_pct": 7
-    },
-    {
-      "ticker": "010140",
-      "name": "삼성중공업",
-      "action": "BUY",
-      "confidence": 0.88,
-      "reasoning": "LNG선 릴레이 수주로 1.15조 잭팟, 연간 목표 21% 조기 달성. 구체적 수주 실적 확인.",
-      "catalysts": [
-        "LNG선 대규모 수주",
-        "수주 목표 조기 달성"
-      ],
-      "risks": [
-        "환율 상승",
-        "해상운임 증가"
-      ],
-      "urgency": "high",
-      "expected_impact_pct": 9
-    },
-    {
-      "ticker": "009540",
-      "name": "HD한국조선해양",
+      "ticker": "042700",
+      "name": "한미반도체",
       "action": "WATCH",
       "confidence": 0.65,
-      "reasoning": "휴머노이드 용접 자동화 실증 추진. 조선 수주 환경은 지정학 리스크로 단기 불확실.",
+      "reasoning": "ARM Holdings 자체칩 판매 시작으로 16% 급등. 반도체 장비 수요 증가 기대되나 직접적 수혜 확인 필요",
       "catalysts": [
-        "휴머노이드 기술 도입"
+        "글로벌 반도체 장비 수요 증가"
       ],
       "risks": [
-        "해상운임 및 보험료 증가",
-        "지정학적 불확실성"
+        "미국 금리인하 지연"
       ],
       "urgency": "medium",
-      "expected_impact_pct": 5
+      "expected_impact_pct": 3
     },
     {
-      "ticker": "042660",
-      "name": "한화오션",
+      "ticker": "000660",
+      "name": "SK하이닉스",
       "action": "WATCH",
-      "confidence": 0.6,
-      "reasoning": "조선 수주 잔고 양호하나 지정학 리스크로 해상운임·보험료 부담 증가.",
+      "confidence": 0.7,
+      "reasoning": "미국 상장 추진 보도로 관심 증가. 다만 미국장 반도체 섹터 혼조세이며 금리인하 불확실성 존재",
       "catalysts": [
-        "LNG선 수요"
+        "미국 상장 추진",
+        "AI 메모리 수요"
       ],
       "risks": [
-        "해상운임 급등",
-        "보험료 증가"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "329180",
-      "name": "HD현대중공업",
-      "action": "WATCH",
-      "confidence": 0.62,
-      "reasoning": "휴머노이드 용접 기술 개발 중. 조선 섹터는 지정학 리스크로 단기 불확실.",
-      "catalysts": [
-        "휴머노이드 기술"
-      ],
-      "risks": [
-        "해상운임 증가",
-        "수주 환경 악화"
+        "연준 매파 기조",
+        "미국 상장 타이밍 불확실"
       ],
       "urgency": "medium",
       "expected_impact_pct": 4
@@ -109,292 +43,144 @@
     {
       "ticker": "005930",
       "name": "삼성전자",
-      "action": "AVOID",
-      "confidence": 0.75,
-      "reasoning": "AI 디스럽션 우려로 나스닥 3.38% 하락 주도. 외국인 자금 이탈 지속.",
-      "catalysts": [],
-      "risks": [
-        "AI 밸류에이션 재평가",
-        "외국인 매도",
-        "환율 급등"
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "미국 나스닥 반도체 섹터 강세(0.77%↑) 속 반사이익 기대. 단, 국내 증시는 환율 및 금리 리스크 존재",
+      "catalysts": [
+        "글로벌 반도체 업황 회복"
       ],
-      "urgency": "high",
-      "expected_impact_pct": -6
+      "risks": [
+        "원화 약세",
+        "금리인하 지연"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
     },
     {
-      "ticker": "000660",
-      "name": "SK하이닉스",
-      "action": "AVOID",
-      "confidence": 0.78,
-      "reasoning": "AI 디스럽션 우려와 나스닥 급락. IT 섹터 밸류에이션 재평가 진행 중.",
-      "catalysts": [],
-      "risks": [
-        "AI 우려",
-        "외국인 매도",
-        "나스닥 약세"
+      "ticker": "009150",
+      "name": "삼성전기",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "ARM 자체칩 판매로 부품 수요 증가 가능성. 그러나 직접적 수혜 뉴스 부재",
+      "catalysts": [
+        "반도체 부품 수요"
       ],
-      "urgency": "high",
-      "expected_impact_pct": -7
+      "risks": [
+        "간접 수혜에 그칠 가능성"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
     },
     {
-      "ticker": "035420",
-      "name": "NAVER",
-      "action": "AVOID",
-      "confidence": 0.72,
-      "reasoning": "AI 비즈니스 모델 위협 우려로 IT/소프트웨어 섹터 투자심리 악화.",
-      "catalysts": [],
+      "ticker": "042660",
+      "name": "한화오션",
+      "action": "BUY",
+      "confidence": 0.85,
+      "reasoning": "K-방산 수출 급증 및 서유럽 공급망 파트너 진입. 올해 역대 최대 수출 전망으로 실적 개선 확실",
+      "catalysts": [
+        "K-방산 수출 확대",
+        "서유럽 방산 생태계 진입",
+        "은행 보증 확대"
+      ],
       "risks": [
-        "AI 디스럽션",
-        "외국인 이탈"
+        "지정학 리스크 완화시 조정 가능"
       ],
       "urgency": "high",
-      "expected_impact_pct": -5
+      "expected_impact_pct": 8
     },
     {
-      "ticker": "035720",
-      "name": "카카오",
-      "action": "AVOID",
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "action": "BUY",
+      "confidence": 0.9,
+      "reasoning": "SMR 2033년 조기 상용화 전망 및 경주 SMR 유치 총력. 원전 전주기 생태계 구축 수혜 확실. DL이앤씨 SMR 표준화 설계 계약도 생태계 확장 신호",
+      "catalysts": [
+        "SMR 상용화 가시화",
+        "중동 전쟁으로 원전 중요성 재확인",
+        "원전 생태계 확장"
+      ],
+      "risks": [
+        "상용화 일정 지연 가능성"
+      ],
+      "urgency": "high",
+      "expected_impact_pct": 10
+    },
+    {
+      "ticker": "329180",
+      "name": "HD현대중공업",
+      "action": "BUY",
+      "confidence": 0.85,
+      "reasoning": "K-방산 수출 호조 및 KF-21 양산 본격화. 방산 수출이 새 동력이 되며 4대 강국 도약 시동",
+      "catalysts": [
+        "K-방산 수출 확대",
+        "KF-21 양산",
+        "서유럽 방산 진출"
+      ],
+      "risks": [
+        "규제·금융·인증 3중 장벽"
+      ],
+      "urgency": "high",
+      "expected_impact_pct": 9
+    },
+    {
+      "ticker": "009540",
+      "name": "HD한국조선해양",
+      "action": "BUY",
+      "confidence": 0.8,
+      "reasoning": "K-방산 수출 확대 수혜. 조선 방산 복합 경쟁력으로 수출 다변화 기대",
+      "catalysts": [
+        "K-방산 수출",
+        "조선 수주 호조"
+      ],
+      "risks": [
+        "글로벌 경기 둔화"
+      ],
+      "urgency": "medium",
+      "expected_impact_pct": 7
+    },
+    {
+      "ticker": "010140",
+      "name": "삼성중공업",
+      "action": "WATCH",
       "confidence": 0.7,
-      "reasoning": "AI 디스럽션 우려와 IT 섹터 밸류에이션 재평가로 약세 예상.",
-      "catalysts": [],
+      "reasoning": "K-방산 및 조선 섹터 전반 호조. 그러나 직접적인 방산 수주 뉴스 부재",
+      "catalysts": [
+        "조선 수주 증가"
+      ],
       "risks": [
-        "AI 우려",
-        "외국인 매도"
+        "방산 비중 상대적으로 낮음"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 5
+    },
+    {
+      "ticker": "267260",
+      "name": "HD현대일렉트릭",
+      "action": "BUY",
+      "confidence": 0.85,
+      "reasoning": "SMR 및 원전 생태계 확장 수혜. 전력기기 수요 증가 확실. 중동 원전 재확인으로 수출 모멘텀",
+      "catalysts": [
+        "SMR 상용화",
+        "원전 생태계 확장",
+        "전력 인프라 수요"
+      ],
+      "risks": [
+        "프로젝트 지연"
       ],
       "urgency": "high",
-      "expected_impact_pct": -5
+      "expected_impact_pct": 9
     },
     {
-      "ticker": "373220",
-      "name": "LG에너지솔루션",
-      "action": "WATCH",
-      "confidence": 0.55,
-      "reasoning": "환율 상승으로 수출 경쟁력 개선 가능하나, 글로벌 EV 수요 둔화 우려.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "EV 수요 둔화",
-        "배터리 마진 압박"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "006400",
-      "name": "삼성SDI",
-      "action": "WATCH",
-      "confidence": 0.58,
-      "reasoning": "환율 상승 수혜 가능하나 배터리 섹터 전반적 수요 불확실성.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "EV 수요 둔화",
-        "경쟁 심화"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "051910",
-      "name": "LG화학",
-      "action": "AVOID",
-      "confidence": 0.68,
-      "reasoning": "유가 급등으로 나프타 등 원재료 비용 급증, 가격 전가력 제한적.",
-      "catalysts": [],
-      "risks": [
-        "원재료 비용 급증",
-        "유가 110달러 전망"
-      ],
-      "urgency": "high",
-      "expected_impact_pct": -5
-    },
-    {
-      "ticker": "011170",
-      "name": "롯데케미칼",
-      "action": "AVOID",
-      "confidence": 0.7,
-      "reasoning": "유가 급등으로 원재료 비용 부담 확대, 화학 섹터 수익성 악화 예상.",
-      "catalysts": [],
-      "risks": [
-        "원재료 비용 급증",
-        "가격 전가력 제한"
-      ],
-      "urgency": "high",
-      "expected_impact_pct": -6
-    },
-    {
-      "ticker": "003670",
-      "name": "포스코퓨처엠",
+      "ticker": "241560",
+      "name": "두산밥캣",
       "action": "WATCH",
       "confidence": 0.6,
-      "reasoning": "2차전지 소재 수요는 있으나 환율·원재료 비용 상승으로 마진 압박.",
+      "reasoning": "두산 그룹 전반의 인프라 수요 증가 가능성. 직접 뉴스 부재",
       "catalysts": [
-        "2차전지 소재 수요"
+        "건설 장비 수요"
       ],
       "risks": [
-        "원재료 비용 증가",
-        "환율 리스크"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "011200",
-      "name": "HMM",
-      "action": "WATCH",
-      "confidence": 0.62,
-      "reasoning": "호르무즈 해협 긴장으로 해상운임 상승 가능하나 보험료 급등 부담.",
-      "catalysts": [
-        "해상운임 상승 가능"
-      ],
-      "risks": [
-        "보험료 급등",
-        "지정학 리스크"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "028260",
-      "name": "삼성물산",
-      "action": "WATCH",
-      "confidence": 0.58,
-      "reasoning": "건설 및 상사 부문 환율 수혜 가능하나 원자재 비용 상승 우려.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "원자재 비용 증가"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "047050",
-      "name": "포스코인터내셔널",
-      "action": "WATCH",
-      "confidence": 0.6,
-      "reasoning": "에너지 트레이딩 부문 유가 상승 수혜 가능하나 불확실성 높음.",
-      "catalysts": [
-        "유가 상승"
-      ],
-      "risks": [
-        "지정학 리스크"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "000810",
-      "name": "삼성화재",
-      "action": "WATCH",
-      "confidence": 0.55,
-      "reasoning": "금리 상승 시 보험사 수익성 개선 가능하나 시장 불안으로 불확실.",
-      "catalysts": [
-        "금리 상승"
-      ],
-      "risks": [
-        "시장 불안",
-        "주식 투자 손실"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "032830",
-      "name": "삼성생명",
-      "action": "WATCH",
-      "confidence": 0.54,
-      "reasoning": "금리 상승 수혜 가능하나 시장 전반적 약세로 단기 불확실.",
-      "catalysts": [
-        "금리 상승"
-      ],
-      "risks": [
-        "시장 약세",
-        "투자 손실"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "055550",
-      "name": "신한지주",
-      "action": "WATCH",
-      "confidence": 0.6,
-      "reasoning": "금리 상승 시 은행 NIM 개선 기대하나 경기 둔화 우려로 대손 리스크.",
-      "catalysts": [
-        "금리 상승",
-        "NIM 개선"
-      ],
-      "risks": [
-        "경기 둔화",
-        "대손 증가"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "086790",
-      "name": "하나금융지주",
-      "action": "WATCH",
-      "confidence": 0.59,
-      "reasoning": "금리 상승 수혜 가능하나 시장 불안과 대손비용 우려.",
-      "catalysts": [
-        "금리 상승"
-      ],
-      "risks": [
-        "대손 증가",
-        "시장 불안"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "105560",
-      "name": "KB금융",
-      "action": "WATCH",
-      "confidence": 0.58,
-      "reasoning": "금리 상승 시 NIM 개선 기대하나 경기 둔화 리스크 상존.",
-      "catalysts": [
-        "금리 상승"
-      ],
-      "risks": [
-        "경기 둔화",
-        "대손비용"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "316140",
-      "name": "우리금융지주",
-      "action": "WATCH",
-      "confidence": 0.57,
-      "reasoning": "금리 상승 수혜 가능하나 시장 불확실성으로 단기 관망 필요.",
-      "catalysts": [
-        "금리 상승"
-      ],
-      "risks": [
-        "대손 리스크",
-        "시장 불안"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "000270",
-      "name": "기아",
-      "action": "WATCH",
-      "confidence": 0.56,
-      "reasoning": "환율 상승으로 수출 경쟁력 개선 가능하나 유가 급등으로 수요 둔화 우려.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "유가 급등",
-        "수요 둔화"
+        "간접 수혜"
       ],
       "urgency": "low",
       "expected_impact_pct": 3
@@ -403,14 +189,30 @@
       "ticker": "005380",
       "name": "현대차",
       "action": "WATCH",
-      "confidence": 0.55,
-      "reasoning": "환율 상승 수혜 가능하나 유가 급등으로 소비자 구매력 약화 우려.",
+      "confidence": 0.75,
+      "reasoning": "자기주식 처분 공시로 긍정적이나 시장 반응 지켜봐야. 국내 첫 0.5t 전기트럭 등 전동화 모멘텀 존재",
       "catalysts": [
-        "환율 상승"
+        "자기주식 처분",
+        "전동화 확대"
       ],
       "risks": [
-        "유가 급등",
-        "수요 감소"
+        "처분 목적 및 시장 소화력 불확실"
+      ],
+      "urgency": "medium",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "현대차 그룹 전반의 전동화 모멘텀 공유. 직접 뉴스는 부재",
+      "catalysts": [
+        "전동화",
+        "자율주행"
+      ],
+      "risks": [
+        "간접 수혜"
       ],
       "urgency": "low",
       "expected_impact_pct": 3
@@ -419,161 +221,233 @@
       "ticker": "012330",
       "name": "현대모비스",
       "action": "WATCH",
-      "confidence": 0.54,
-      "reasoning": "완성차 연동 실적이나 환율 상승 수혜와 유가 급등 리스크 공존.",
+      "confidence": 0.65,
+      "reasoning": "전동화 부품 수요 증가 기대. 현대차 그룹 계열사 수혜",
       "catalysts": [
-        "환율 상승"
+        "전동화 부품"
       ],
       "risks": [
-        "완성차 수요 둔화"
+        "직접 뉴스 부재"
       ],
       "urgency": "low",
       "expected_impact_pct": 3
     },
     {
-      "ticker": "003490",
-      "name": "대한항공",
-      "action": "AVOID",
-      "confidence": 0.75,
-      "reasoning": "유가 급등으로 항공유 비용 급증, 지정학 리스크로 중동 노선 차질 우려.",
-      "catalysts": [],
-      "risks": [
-        "유가 급등",
-        "항공유 비용 증가",
-        "지정학 리스크"
+      "ticker": "373220",
+      "name": "LG에너지솔루션",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "전고체배터리 ETF 1위 수익률 언급으로 테마 부각. 그러나 직접 실적 개선 뉴스 없음",
+      "catalysts": [
+        "전고체배터리 테마"
       ],
-      "urgency": "high",
-      "expected_impact_pct": -8
+      "risks": [
+        "테마주 성격, 실적 가시성 부족"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
     },
     {
-      "ticker": "015760",
-      "name": "한국전력",
+      "ticker": "006400",
+      "name": "삼성SDI",
       "action": "WATCH",
-      "confidence": 0.65,
-      "reasoning": "유틸리티 섹터 +10.36% 강세 확인. 유가 상승 시 발전 비용 증가하나 섹터 수혜.",
+      "confidence": 0.7,
+      "reasoning": "전고체배터리 및 배터리 섹터 관심 증가. SOL 전고체배터리 ETF 언급",
       "catalysts": [
-        "유틸리티 섹터 강세"
+        "전고체배터리 개발"
       ],
       "risks": [
-        "발전 비용 증가"
+        "상용화 시기 불확실"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "051910",
+      "name": "LG화학",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "배터리 소재 수요 증가 가능성. 직접 뉴스 부재",
+      "catalysts": [
+        "배터리 소재"
+      ],
+      "risks": [
+        "간접 수혜"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "003670",
+      "name": "포스코퓨처엠",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "배터리 소재 업체. 전고체배터리 테마 수혜 가능",
+      "catalysts": [
+        "배터리 소재 수요"
+      ],
+      "risks": [
+        "실적 가시성 부족"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "055550",
+      "name": "신한지주",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "K-방산 수출 확대로 은행 보증 시장 확대 수혜. 조 단위 보증 언급",
+      "catalysts": [
+        "방산 보증 확대"
+      ],
+      "risks": [
+        "간접 수혜, 금리 리스크"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "105560",
+      "name": "KB금융",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "K-방산 보증 시장 확대 수혜 가능",
+      "catalysts": [
+        "방산 보증"
+      ],
+      "risks": [
+        "금리 리스크"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "086790",
+      "name": "하나금융지주",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "방산 보증 시장 확대 간접 수혜",
+      "catalysts": [
+        "방산 보증"
+      ],
+      "risks": [
+        "금리 리스크"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "316140",
+      "name": "우리금융지주",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "방산 보증 시장 간접 수혜",
+      "catalysts": [
+        "방산 보증"
+      ],
+      "risks": [
+        "금리 리스크"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "035420",
+      "name": "NAVER",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "미국 나스닥 SW주 약세 영향. AI 및 양자내성암호 테마 부상하나 직접 뉴스 없음",
+      "catalysts": [
+        "AI 기술"
+      ],
+      "risks": [
+        "미국 SW주 부진",
+        "금리 리스크"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 2
+    },
+    {
+      "ticker": "035720",
+      "name": "카카오",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "미국 SW주 약세 영향. 직접 호재 부재",
+      "catalysts": [
+        "AI"
+      ],
+      "risks": [
+        "미국 SW주 부진"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 2
+    },
+    {
+      "ticker": "323410",
+      "name": "카카오뱅크",
+      "action": "WATCH",
+      "confidence": 0.55,
+      "reasoning": "금리 리스크로 금융주 전반 부담. 직접 뉴스 없음",
+      "catalysts": [],
+      "risks": [
+        "금리인하 지연"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 1
+    },
+    {
+      "ticker": "018260",
+      "name": "삼성에스디에스",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "양자내성암호 테마 부상. 구글 2029년 차세대 암호체계 전면 도입 발표. IT 서비스 수혜 가능",
+      "catalysts": [
+        "양자내성암호",
+        "보안 수요"
+      ],
+      "risks": [
+        "직접 사업 확인 필요"
       ],
       "urgency": "medium",
       "expected_impact_pct": 5
     },
     {
-      "ticker": "034020",
-      "name": "두산에너빌리티",
-      "action": "WATCH",
-      "confidence": 0.63,
-      "reasoning": "유틸리티/에너지 인프라 수요 증가 기대하나 원자재 비용 상승 우려.",
-      "catalysts": [
-        "에너지 인프라 수요"
-      ],
+      "ticker": "036570",
+      "name": "엔씨소프트",
+      "action": "AVOID",
+      "confidence": 0.8,
+      "reasoning": "미국 SW주 급락(-3.5%) 여파. 게임주 전반 약세 우려",
+      "catalysts": [],
       "risks": [
-        "원자재 비용 증가"
+        "미국 SW섹터 부진",
+        "게임 업황 부진"
       ],
-      "urgency": "medium",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "267260",
-      "name": "HD현대일렉트릭",
-      "action": "WATCH",
-      "confidence": 0.6,
-      "reasoning": "전력 인프라 수요 증가 예상하나 원자재 비용 상승 부담.",
-      "catalysts": [
-        "전력 인프라 수요"
-      ],
-      "risks": [
-        "원자재 비용 증가"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": 4
-    },
-    {
-      "ticker": "068270",
-      "name": "셀트리온",
-      "action": "WATCH",
-      "confidence": 0.58,
-      "reasoning": "환율 상승으로 수출 수익성 개선 가능하나 시장 전반적 약세.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "시장 약세"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "207940",
-      "name": "삼성바이오로직스",
-      "action": "WATCH",
-      "confidence": 0.57,
-      "reasoning": "환율 상승 수혜 가능하나 시장 불안으로 단기 불확실.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "시장 불안"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "028300",
-      "name": "HLB",
-      "action": "WATCH",
-      "confidence": 0.56,
-      "reasoning": "바이오 섹터는 환율 수혜 가능하나 시장 전반 약세로 불확실.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "시장 약세"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "196170",
-      "name": "알테오젠",
-      "action": "WATCH",
-      "confidence": 0.55,
-      "reasoning": "환율 상승 수혜 가능하나 시장 불안으로 관망 필요.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "시장 약세"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
+      "urgency": "high",
+      "expected_impact_pct": -5
     },
     {
       "ticker": "259960",
       "name": "크래프톤",
       "action": "AVOID",
-      "confidence": 0.65,
-      "reasoning": "외국인 자금 이탈과 IT 섹터 약세로 게임주 압박 예상.",
+      "confidence": 0.75,
+      "reasoning": "미국 SW주 부진 영향. 게임주 약세 예상",
       "catalysts": [],
       "risks": [
-        "외국인 매도",
-        "IT 섹터 약세"
+        "미국 SW섹터 부진"
       ],
       "urgency": "medium",
-      "expected_impact_pct": -5
+      "expected_impact_pct": -4
     },
     {
-      "ticker": "036570",
-      "name": "엔씨소프트",
+      "ticker": "263750",
+      "name": "펄어비스",
       "action": "AVOID",
-      "confidence": 0.63,
-      "reasoning": "게임 섹터 전반적 약세, 외국인 이탈 지속.",
+      "confidence": 0.75,
+      "reasoning": "게임주 전반 약세 우려",
       "catalysts": [],
       "risks": [
-        "외국인 매도",
-        "시장 약세"
+        "미국 SW섹터 부진"
       ],
       "urgency": "medium",
       "expected_impact_pct": -4
@@ -582,12 +456,11 @@
       "ticker": "112040",
       "name": "위메이드",
       "action": "AVOID",
-      "confidence": 0.62,
-      "reasoning": "게임 섹터 약세와 외국인 자금 이탈 지속.",
+      "confidence": 0.75,
+      "reasoning": "게임주 약세 예상",
       "catalysts": [],
       "risks": [
-        "외국인 매도",
-        "시장 불안"
+        "SW섹터 부진"
       ],
       "urgency": "medium",
       "expected_impact_pct": -4
@@ -595,69 +468,228 @@
     {
       "ticker": "352820",
       "name": "하이브",
-      "action": "AVOID",
+      "action": "WATCH",
       "confidence": 0.6,
-      "reasoning": "엔터 섹터는 시장 약세 시 방어력 약함, 외국인 매도 우려.",
+      "reasoning": "엔터주. 미국장 영향 제한적이나 특별 호재 부재",
       "catalysts": [],
       "risks": [
-        "외국인 매도",
-        "시장 약세"
+        "업황 부진"
       ],
-      "urgency": "medium",
-      "expected_impact_pct": -4
-    },
-    {
-      "ticker": "041510",
-      "name": "에스엠",
-      "action": "AVOID",
-      "confidence": 0.58,
-      "reasoning": "엔터 섹터 전반적 약세 예상.",
-      "catalysts": [],
-      "risks": [
-        "시장 약세"
-      ],
-      "urgency": "medium",
-      "expected_impact_pct": -4
+      "urgency": "low",
+      "expected_impact_pct": 2
     },
     {
       "ticker": "035900",
       "name": "JYP Ent.",
-      "action": "AVOID",
-      "confidence": 0.57,
-      "reasoning": "엔터 섹터 시장 약세 시 방어력 부족.",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "엔터주. 직접 뉴스 없음",
       "catalysts": [],
       "risks": [
-        "시장 약세"
+        "업황 부진"
       ],
-      "urgency": "medium",
-      "expected_impact_pct": -4
+      "urgency": "low",
+      "expected_impact_pct": 2
     },
     {
-      "ticker": "018260",
-      "name": "삼성에스디에스",
-      "action": "AVOID",
-      "confidence": 0.68,
-      "reasoning": "AI 디스럽션 우려로 IT 서비스 섹터 밸류에이션 재평가.",
+      "ticker": "041510",
+      "name": "에스엠",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "엔터주. 특별 호재 없음",
+      "catalysts": [],
+      "risks": [],
+      "urgency": "low",
+      "expected_impact_pct": 2
+    },
+    {
+      "ticker": "003490",
+      "name": "대한항공",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "미-이란 휴전 협상 진전시 유가 안정 수혜 가능. 그러나 협상 불확실성 지속",
+      "catalysts": [
+        "휴전 기대",
+        "유가 안정"
+      ],
+      "risks": [
+        "협상 결렬시 유가 급등"
+      ],
+      "urgency": "medium",
+      "expected_impact_pct": 5
+    },
+    {
+      "ticker": "011200",
+      "name": "HMM",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "중동 정세 안정시 해운 수요 개선 가능. 협상 불확실성",
+      "catalysts": [
+        "휴전 기대"
+      ],
+      "risks": [
+        "물동량 감소"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "010950",
+      "name": "S-Oil",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "이란 협상 이견으로 유가 상승. 정제마진 개선 가능하나 불확실",
+      "catalysts": [
+        "유가 상승"
+      ],
+      "risks": [
+        "휴전시 유가 급락"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "015760",
+      "name": "한국전력",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "SMR 및 원전 생태계 확장 수혜 가능. 전력 수요 증가",
+      "catalysts": [
+        "원전 확대",
+        "SMR"
+      ],
+      "risks": [
+        "전기료 인상 불확실"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "028260",
+      "name": "삼성물산",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "건설 및 EPC. SMR 프로젝트 수혜 가능",
+      "catalysts": [
+        "SMR 건설"
+      ],
+      "risks": [
+        "프로젝트 지연"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "000720",
+      "name": "현대건설",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "SMR 및 원전 건설 수혜 가능",
+      "catalysts": [
+        "원전 건설"
+      ],
+      "risks": [
+        "수주 경쟁"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "005490",
+      "name": "POSCO홀딩스",
+      "action": "WATCH",
+      "confidence": 0.7,
+      "reasoning": "포스코그룹 생산 자동화(뉴로메카) 및 수소 생태계 확장. 휴머노이드 및 수소 테마",
+      "catalysts": [
+        "수소 생태계",
+        "자동화"
+      ],
+      "risks": [
+        "철강 업황"
+      ],
+      "urgency": "medium",
+      "expected_impact_pct": 5
+    },
+    {
+      "ticker": "047050",
+      "name": "포스코인터내셔널",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "포스코 그룹 수소 생태계 수혜 가능",
+      "catalysts": [
+        "수소"
+      ],
+      "risks": [
+        "실적 가시성"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "066570",
+      "name": "LG전자",
+      "action": "WATCH",
+      "confidence": 0.65,
+      "reasoning": "휴머노이드 로봇 테마. 아마존 휴머노이드 스타트업 인수 소식",
+      "catalysts": [
+        "휴머노이드",
+        "로봇"
+      ],
+      "risks": [
+        "직접 사업 불확실"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 4
+    },
+    {
+      "ticker": "003550",
+      "name": "LG",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "LG 그룹 전반 테마 수혜 가능",
+      "catalysts": [
+        "휴머노이드"
+      ],
+      "risks": [
+        "지주사 할인"
+      ],
+      "urgency": "low",
+      "expected_impact_pct": 3
+    },
+    {
+      "ticker": "034730",
+      "name": "SK",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "SK 그룹 반도체 및 배터리 수혜 간접 반영",
       "catalysts": [],
       "risks": [
-        "AI 우려",
-        "IT 섹터 약세"
+        "지주사 할인"
       ],
-      "urgency": "high",
-      "expected_impact_pct": -5
+      "urgency": "low",
+      "expected_impact_pct": 2
+    },
+    {
+      "ticker": "402340",
+      "name": "SK스퀘어",
+      "action": "WATCH",
+      "confidence": 0.6,
+      "reasoning": "SK 그룹 IT 계열사. 직접 뉴스 없음",
+      "catalysts": [],
+      "risks": [],
+      "urgency": "low",
+      "expected_impact_pct": 2
     },
     {
       "ticker": "017670",
       "name": "SK텔레콤",
       "action": "WATCH",
-      "confidence": 0.55,
-      "reasoning": "통신주는 방어주 성격이나 AI 인프라 투자 부담 있음.",
+      "confidence": 0.6,
+      "reasoning": "AI 및 통신 수요. 직접 뉴스 부재",
       "catalysts": [
-        "방어주 성격"
+        "AI"
       ],
-      "risks": [
-        "AI 인프라 투자 부담"
-      ],
+      "risks": [],
       "urgency": "low",
       "expected_impact_pct": 2
     },
@@ -665,14 +697,10 @@
       "ticker": "030200",
       "name": "KT",
       "action": "WATCH",
-      "confidence": 0.54,
-      "reasoning": "방어주 성격으로 시장 불안 시 상대적 안정성 기대.",
-      "catalysts": [
-        "방어주"
-      ],
-      "risks": [
-        "AI 인프라 부담"
-      ],
+      "confidence": 0.6,
+      "reasoning": "통신 수요. 직접 뉴스 없음",
+      "catalysts": [],
+      "risks": [],
       "urgency": "low",
       "expected_impact_pct": 2
     },
@@ -680,107 +708,58 @@
       "ticker": "032640",
       "name": "LG유플러스",
       "action": "WATCH",
-      "confidence": 0.53,
-      "reasoning": "통신 방어주 성격이나 시장 전반 약세로 제한적 수혜.",
-      "catalysts": [
-        "방어주"
-      ],
-      "risks": [
-        "시장 약세"
-      ],
+      "confidence": 0.6,
+      "reasoning": "통신주. 특별 호재 없음",
+      "catalysts": [],
+      "risks": [],
       "urgency": "low",
       "expected_impact_pct": 2
-    },
-    {
-      "ticker": "005490",
-      "name": "POSCO홀딩스",
-      "action": "WATCH",
-      "confidence": 0.58,
-      "reasoning": "철강 수요는 불확실하나 환율 상승으로 수출 경쟁력 개선 가능.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "철강 수요 둔화"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "004020",
-      "name": "현대제철",
-      "action": "WATCH",
-      "confidence": 0.56,
-      "reasoning": "환율 상승 수혜 가능하나 원재료 비용 증가 부담.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "원재료 비용 증가"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
-    },
-    {
-      "ticker": "010130",
-      "name": "고려아연",
-      "action": "WATCH",
-      "confidence": 0.57,
-      "reasoning": "비철금속 가격 변동성 높으나 환율 상승 수혜 가능.",
-      "catalysts": [
-        "환율 상승"
-      ],
-      "risks": [
-        "원자재 가격 변동성"
-      ],
-      "urgency": "low",
-      "expected_impact_pct": 3
     }
   ],
   "sector_outlook": {
-    "에너지/정유": {
+    "방산": {
       "direction": "positive",
-      "reason": "호르무즈 해협 긴장으로 유가 110달러 전망, 에너지 섹터 +9.54% 강세 확인. 정유사 마진 개선 기대."
+      "reason": "K-방산 수출 급증 및 서유럽 공급망 진입. KF-21 양산 본격화로 올해 역대 최대 수출 전망"
+    },
+    "원전/SMR": {
+      "direction": "positive",
+      "reason": "SMR 2033년 조기 상용화 가시화. 중동 전쟁으로 원전 중요성 재확인. 경주 SMR 유치 및 생태계 구축 가속"
+    },
+    "반도체": {
+      "direction": "neutral",
+      "reason": "ARM 자체칩 판매로 업황 개선 기대하나 미국 금리인하 불확실성 및 환율 리스크 존재"
+    },
+    "배터리": {
+      "direction": "neutral",
+      "reason": "전고체배터리 테마 부각되나 상용화 시기 불확실. 실적 가시성 부족"
+    },
+    "게임/SW": {
+      "direction": "negative",
+      "reason": "미국 나스닥 SW주 급락(-3.5%) 여파. 게임주 전반 약세 우려"
+    },
+    "금융": {
+      "direction": "neutral",
+      "reason": "K-방산 보증 확대로 일부 수혜 가능하나 연준 매파 기조로 금리 리스크 지속"
     },
     "조선": {
-      "direction": "neutral",
-      "reason": "삼성중공업 LNG선 대규모 수주 긍정적이나 지정학 리스크로 해상운임·보험료 부담 증가."
-    },
-    "IT/반도체": {
-      "direction": "negative",
-      "reason": "AI 디스럽션 우려로 나스닥 3.38% 하락 주도. IT 섹터 밸류에이션 재평가 진행 중, 외국인 자금 이탈 지속."
-    },
-    "화학": {
-      "direction": "negative",
-      "reason": "유가 급등으로 나프타 등 원재료 비용 급증, 가격 전가력 제한적으로 수익성 악화 예상."
-    },
-    "은행": {
-      "direction": "neutral",
-      "reason": "금리 상승 시 NIM 개선 기대하나 경기 둔화 우려로 대손비용 증가 리스크 공존."
-    },
-    "항공": {
-      "direction": "negative",
-      "reason": "유가 급등으로 항공유 비용 급증, 지정학 리스크로 중동 노선 차질 우려."
-    },
-    "유틸리티": {
       "direction": "positive",
-      "reason": "유틸리티 섹터 +10.36% 강세 확인. 에너지 인프라 수요 증가 기대."
-    },
-    "바이오/제약": {
-      "direction": "neutral",
-      "reason": "환율 상승으로 수출 수익성 개선 가능하나 시장 전반적 약세로 단기 불확실."
-    },
-    "게임/엔터": {
-      "direction": "negative",
-      "reason": "외국인 자금 이탈과 시장 약세로 방어력 부족한 게임·엔터 섹터 압박 예상."
+      "reason": "K-방산 및 조선 수주 호조. 방산-조선 복합 경쟁력 부각"
     },
     "자동차": {
       "direction": "neutral",
-      "reason": "환율 상승으로 수출 경쟁력 개선 가능하나 유가 급등으로 소비자 구매력 약화 우려."
+      "reason": "전동화 모멘텀 존재하나 직접적 실적 개선 뉴스 부족. 현대차 자기주식 처분은 중립적"
+    },
+    "화학": {
+      "direction": "neutral",
+      "reason": "특별한 재료 없음. 업황 회복 지연"
+    },
+    "항공/해운": {
+      "direction": "neutral",
+      "reason": "미-이란 휴전 협상 불확실성. 유가 변동성으로 방향성 불명확"
     }
   },
-  "date": "2026-03-23",
-  "generated_at": "2026-03-23 21:01",
+  "date": "2026-03-26",
+  "generated_at": "2026-03-26 18:22",
   "model": "claude-sonnet-4-5-20250929",
   "news_count": 70
 }

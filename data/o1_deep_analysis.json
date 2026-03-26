@@ -1,77 +1,71 @@
 {
-  "analysis_date": "2026-03-23",
+  "analysis_date": "2026-03-26",
   "macro_analysis": {
-    "global_liquidity": "미국 금리는 여전히 높은 수준을 유지하며 달러 인덱스와 VIX가 동시에 상승, 글로벌 유동성 축소 흐름이 가속화되는 양상",
-    "coupling_status": "부분적 디커플링 (미국은 하락 전환했으나 한국 폭락 폭이 훨씬 심화)",
+    "global_liquidity": "미국 금리 동결 기조 속 휴전 기대에 따른 채권 랠리로 완만한 유동성 개선 흐름이 감지됨",
+    "coupling_status": "동조",
     "cycle_position": "late",
-    "geopolitical_risk_score": 8,
+    "geopolitical_risk_score": 7,
     "key_macro_insights": [
-      "왜1: 중동 지정학 리스크 → 에너지 수급·환율 변동성 증가 → 외국인 투자심리 위축",
-      "왜2: AI Disruption 우려 → 기술주 밸류에이션 재평가 → 글로벌 위험회피 심리 확대",
-      "왜3: 美 금리인상 가능성 지속 → 유동성 경색 → 신흥국 증시 자금 유출 가속"
+      "중동 휴전 협상 기대가 글로벌 위험자산 선호를 자극",
+      "연준의 금리 동결에도 인플레이션 불확실성으로 달러 강세 가능성 유지"
     ],
-    "macro_regime": "RISK_OFF",
-    "confidence": 0.85
+    "macro_regime": "RISK_ON",
+    "confidence": 0.75
   },
   "micro_analysis": [
     {
       "sector": "반도체",
       "earnings_cycle": "recovery",
-      "leading_indicators": "AI 수요로 인한 견조한 수주 증가, ASP 소폭 상승",
+      "leading_indicators": "DRAM·파운드리 수주잔고 추세 개선, ASP 하락 폭 축소",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
       "conviction": 8,
-      "contrarian_view": "AI Disruption 장기화에도 반도체 수요는 오히려 확대될 수 있음"
+      "contrarian_view": "단기 재고 부담은 여전하나 장기 업사이클 가능성을 선반영 중"
     },
     {
       "sector": "2차전지",
       "earnings_cycle": "expansion",
-      "leading_indicators": "EV·ESS 수요 확대로 출하량 증가, 수주잔고 고공행진",
-      "valuation_rerating": "상향",
-      "supply_demand_shift": "매집",
+      "leading_indicators": "전기차 생산 확대에 따른 배터리 수요 증가, OEM 신규 계약 지속",
+      "valuation_rerating": "유지",
+      "supply_demand_shift": "중립",
       "conviction": 7,
-      "contrarian_view": "소재 가격 변동성에 대한 과소평가 가능성이 존재"
+      "contrarian_view": "유럽 투자 확대와 경쟁심화로 수익성 압박 가능성 상존"
     },
     {
       "sector": "조선",
-      "earnings_cycle": "recovery",
-      "leading_indicators": "수주잔고 지속 증가, 선가(ASP) 상승 흐름 유지",
+      "earnings_cycle": "expansion",
+      "leading_indicators": "LNG선 등 고부가가치 선박 발주 증가로 수주잔고 확충",
       "valuation_rerating": "상향",
-      "supply_demand_shift": "중립",
-      "conviction": 7,
-      "contrarian_view": "단기적으로 중동 리스크 심화 시 에너지 운반선 발주는 증가할 수 있으나, 글로벌 경기 둔화가 이어지면 예상보다 빠른 꺾임 가능"
+      "supply_demand_shift": "매집",
+      "conviction": 8,
+      "contrarian_view": ""
     },
     {
       "sector": "방산",
       "earnings_cycle": "expansion",
-      "leading_indicators": "중동·국지 분쟁 우려로 국방 예산 증가, 신규 수출 계약 발표",
+      "leading_indicators": "글로벌 지정학 위기에 따른 해외 방산 수주 확대",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
       "conviction": 9,
-      "contrarian_view": "시장 컨센서스보다 신규 무기체계 개발이 더 빠를 수 있어 실적 상향 여지 큼"
+      "contrarian_view": "중동 휴전 이후 방산 수요 둔화 가능성은 감안 필요"
     },
     {
       "sector": "바이오",
-      "earnings_cycle": "contraction",
-      "leading_indicators": "주요 임상 지연, R&D 비용 급증",
-      "valuation_rerating": "하향",
-      "supply_demand_shift": "분배",
+      "earnings_cycle": "recovery",
+      "leading_indicators": "R&D 생산성 개선 기대, 임상 성과 발표 지속",
+      "valuation_rerating": "유지",
+      "supply_demand_shift": "중립",
       "conviction": 6,
-      "contrarian_view": "장기적 파이프라인은 풍부하지만 단기 모멘텀 부재로 시장 관심 이탈"
+      "contrarian_view": "대규모 투자 유치 이후 파이프라인 위험성 재평가 여지 존재"
     }
   ],
-  "cross_sector_dynamics": "중동 긴장으로 방산과 에너지화학 섹터 동반 상승 가능성이 높으며, 반도체와 2차전지는 AI 수요 및 EV 확장에 따른 중장기 고성장 지위로 서로 간 주도 섹터 역할을 강화할 전망",
+  "cross_sector_dynamics": "방산·조선은 지정학적 이슈와 에너지 운송 수요에 의해 동반 상승 추세를 이어가는 반면, 반도체와 2차전지는 하이테크 분야 투자심리 개선으로 매집세 강화. 바이오는 신약 기대감에 실적 개선 흐름이 있지만, 연구개발 성공 여부에 따른 변동성 내재.",
   "risk_scenarios": [
     {
-      "scenario": "중동 분쟁 장기화로 원유 가격 급등 및 글로벌 경제 타격",
-      "probability": 0.7,
-      "impact": "high"
-    },
-    {
-      "scenario": "AI Disruption 지속으로 기술주 밸류에이션 과도 조정",
-      "probability": 0.5,
+      "scenario": "미-이란 휴전 협상 결렬로 중동지역 긴장 재점화",
+      "probability": 0.4,
       "impact": "high"
     }
   ],
-  "actionable_summary": "중동 지정학적 불확실성이 한국 증시에 높은 프리미엄으로 반영되어 외인 이탈 위험이 커졌습니다. 반도체·2차전지 등 기술주 단기 조정에도 중장기 성장성은 유효합니다. 매크로 레짐이 RISK_OFF이므로 현금 비중 유지를 추천하되, 방산과 일부 조선주 분할 매수를 고려해볼 수 있습니다."
+  "actionable_summary": "중동 휴전 여부가 글로벌 위험선호를 좌우하며 한국 증시에도 영향. 방산·반도체·조선 등 모멘텀 높은 섹터에 매집세 유지될 전망. 인플레이션 지속 가능성으로 연준 정책 불확실성이 남아 공격적 매수 시점은 신중 검토 필요."
 }

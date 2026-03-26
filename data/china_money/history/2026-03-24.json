@@ -1,0 +1,196 @@
+{
+  "date": "2026-03-24",
+  "generated_at": "2026-03-24 19:11",
+  "total_stocks": 50,
+  "summary": {
+    "SURGE": 0,
+    "INFLOW": 0,
+    "SECTOR_FOCUS": 1,
+    "WATCH": 1,
+    "NORMAL": 48
+  },
+  "signals": [
+    {
+      "date": "2026-03-24",
+      "ticker": "051900",
+      "name": "LG생활건강",
+      "signal": "SECTOR_FOCUS",
+      "score": 30,
+      "reasons": [
+        "외국인 강매수 (z=1.7)",
+        "외국인 7일 연속 순매수"
+      ],
+      "foreign_net_5d": 67882,
+      "foreign_zscore": 1.72,
+      "ewy_decouple": false,
+      "consecutive_days": 7,
+      "pct_change_5d": 2.88
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "010950",
+      "name": "S-Oil",
+      "signal": "WATCH",
+      "score": 18,
+      "reasons": [
+        "외국인 3일 연속 순매수",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 456505,
+      "foreign_zscore": 0.8,
+      "ewy_decouple": false,
+      "consecutive_days": 3,
+      "pct_change_5d": 1.78
+    }
+  ],
+  "top_foreign_buyers": [
+    {
+      "date": "2026-03-24",
+      "ticker": "003490",
+      "name": "대한항공",
+      "signal": "NORMAL",
+      "score": 0,
+      "reasons": [],
+      "foreign_net_5d": 715451,
+      "foreign_zscore": 0.16,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": 0.0
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "010950",
+      "name": "S-Oil",
+      "signal": "WATCH",
+      "score": 18,
+      "reasons": [
+        "외국인 3일 연속 순매수",
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 456505,
+      "foreign_zscore": 0.8,
+      "ewy_decouple": false,
+      "consecutive_days": 3,
+      "pct_change_5d": 1.78
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "032830",
+      "name": "삼성생명",
+      "signal": "NORMAL",
+      "score": 8,
+      "reasons": [
+        "외국인 3일 연속 순매수"
+      ],
+      "foreign_net_5d": 273632,
+      "foreign_zscore": 0.6,
+      "ewy_decouple": false,
+      "consecutive_days": 3,
+      "pct_change_5d": 2.3
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "034020",
+      "name": "두산에너빌리티",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "스텔스 매수 (주가 -4.1% but 외국인↑)"
+      ],
+      "foreign_net_5d": 272213,
+      "foreign_zscore": -0.12,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": -4.12
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "373220",
+      "name": "LG에너지솔루션",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 142390,
+      "foreign_zscore": 0.18,
+      "ewy_decouple": false,
+      "consecutive_days": 2,
+      "pct_change_5d": 3.15
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "000100",
+      "name": "유한양행",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "스텔스 매수 (주가 -3.9% but 외국인↑)"
+      ],
+      "foreign_net_5d": 117836,
+      "foreign_zscore": -0.3,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": -3.92
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "066570",
+      "name": "LG전자",
+      "signal": "NORMAL",
+      "score": 0,
+      "reasons": [],
+      "foreign_net_5d": 98774,
+      "foreign_zscore": 0.06,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": -0.17
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "034730",
+      "name": "SK",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 68163,
+      "foreign_zscore": 0.48,
+      "ewy_decouple": false,
+      "consecutive_days": 0,
+      "pct_change_5d": 1.03
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "051900",
+      "name": "LG생활건강",
+      "signal": "SECTOR_FOCUS",
+      "score": 30,
+      "reasons": [
+        "외국인 강매수 (z=1.7)",
+        "외국인 7일 연속 순매수"
+      ],
+      "foreign_net_5d": 67882,
+      "foreign_zscore": 1.72,
+      "ewy_decouple": false,
+      "consecutive_days": 7,
+      "pct_change_5d": 2.88
+    },
+    {
+      "date": "2026-03-24",
+      "ticker": "003670",
+      "name": "포스코퓨처엠",
+      "signal": "NORMAL",
+      "score": 10,
+      "reasons": [
+        "외국인+기관 동시 순매수 (5일)"
+      ],
+      "foreign_net_5d": 54514,
+      "foreign_zscore": 0.19,
+      "ewy_decouple": false,
+      "consecutive_days": 1,
+      "pct_change_5d": 1.71
+    }
+  ]
+}

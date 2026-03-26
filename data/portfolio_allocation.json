@@ -1,16 +1,16 @@
 {
-  "date": "2026-03-23",
-  "generated_at": "2026-03-23 21:13",
-  "regime": "CAUTION",
-  "macro_grade": "보통",
-  "position_multiplier": 1.0,
+  "date": "2026-03-26",
+  "generated_at": "2026-03-26 18:48",
+  "regime": "BEAR",
+  "macro_grade": "방어적",
+  "position_multiplier": 0.7,
   "total_budget_pct": 100,
   "max_single_stock_pct": 15,
-  "cash_reserve_pct": 0,
-  "total_positions": 3,
+  "cash_reserve_pct": 20,
+  "total_positions": 6,
   "allocations": {
     "모멘텀": {
-      "weight": 25,
+      "weight": 10,
       "count": 1,
       "stocks": [
         {
@@ -22,34 +22,52 @@
       ]
     },
     "수급추종": {
-      "weight": 25,
+      "weight": 20,
       "count": 0,
       "stocks": []
     },
     "이벤트": {
-      "weight": 15,
-      "count": 1,
+      "weight": 20,
+      "count": 2,
       "stocks": [
         {
-          "ticker": "095660",
-          "name": "네오위즈",
+          "ticker": "462860",
+          "name": "더즌",
           "score": 22,
+          "source": "DART_자기주식취득"
+        },
+        {
+          "ticker": "215090",
+          "name": "솔디펜스",
+          "score": 20,
           "source": "DART_자기주식취득"
         }
       ]
     },
     "섹터순환": {
-      "weight": 20,
+      "weight": 15,
       "count": 0,
       "stocks": []
     },
     "안전마진": {
-      "weight": 15,
-      "count": 1,
+      "weight": 35,
+      "count": 3,
       "stocks": [
         {
-          "ticker": "139130",
-          "name": "iM금융지주",
+          "ticker": "002960",
+          "name": "한국쉘석유",
+          "score": 64.0,
+          "source": "눌림목_매수대기"
+        },
+        {
+          "ticker": "125020",
+          "name": "티씨머티리얼즈",
+          "score": 64.0,
+          "source": "눌림목_매수대기"
+        },
+        {
+          "ticker": "267980",
+          "name": "매일유업",
           "score": 64.0,
           "source": "눌림목_매수대기"
         }

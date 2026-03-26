@@ -1,48 +1,213 @@
 {
-  "timestamp": "2026-03-23T20:54:04.826227",
-  "regime": "CAUTION",
-  "confidence": 0.5,
+  "timestamp": "2026-03-26T17:59:04.983335",
+  "regime": "BEAR",
+  "confidence": 0.75,
   "game_board": {
     "mode": "DEFENSIVE",
-    "reason": "lens_enabled=false"
+    "reason": "BEAR 레짐 — 방어 모드"
   },
   "flow_map": {
-    "hot_sectors": [],
-    "cold_sectors": [],
-    "flow_direction": "비활성",
-    "sector_weight_adjustments": {}
+    "hot_sectors": [
+      "금",
+      "정유",
+      "달러",
+      "채권",
+      "바이오",
+      "석유개발",
+      "에너지화학",
+      "은행",
+      "금융"
+    ],
+    "cold_sectors": [
+      "건설",
+      "소형주",
+      "플라스틱",
+      "화학",
+      "IT",
+      "반도체",
+      "보험",
+      "항공"
+    ],
+    "flow_direction": "방어적 자금 이동",
+    "sector_weight_adjustments": {
+      "에너지화학": 1.2,
+      "금융": 1.2,
+      "은행": 1.0,
+      "건설": 0.8,
+      "반도체": 1.1,
+      "IT": 1.0,
+      "금": 1.2,
+      "달러": 1.2,
+      "채권": 1.2,
+      "성장주": 1.0,
+      "소형주": 0.8,
+      "바이오": 1.2,
+      "보험": 0.8,
+      "정유": 1.2,
+      "석유개발": 1.2,
+      "항공": 0.8,
+      "화학": 0.8,
+      "플라스틱": 0.8,
+      "에너지": 0.85,
+      "방산": 1.1,
+      "2차전지": 1.1
+    },
+    "active_scenarios": [
+      {
+        "id": "WAR_MIDDLE_EAST",
+        "phase": 3,
+        "phase_name": "안전자산 이동 (D+3~14)",
+        "hot_now": [
+          "금",
+          "달러",
+          "채권"
+        ],
+        "cold_now": [
+          "성장주",
+          "소형주"
+        ],
+        "next_phase": "2차 파급 (D+7~30)",
+        "next_hot": [
+          "해운",
+          "천연가스",
+          "원자력"
+        ],
+        "days_active": 6
+      },
+      {
+        "id": "FED_RATE_CUT",
+        "phase": 1,
+        "phase_name": "즉시 (D+0~7)",
+        "hot_now": [
+          "성장주",
+          "바이오",
+          "IT"
+        ],
+        "cold_now": [
+          "은행",
+          "보험"
+        ],
+        "next_phase": "유동성 확산 (D+7~30)",
+        "next_hot": [
+          "부동산",
+          "리츠",
+          "건설"
+        ],
+        "days_active": 6
+      },
+      {
+        "id": "OIL_SPIKE",
+        "phase": 1,
+        "phase_name": "즉시 (D+0~3)",
+        "hot_now": [
+          "정유",
+          "석유개발"
+        ],
+        "cold_now": [
+          "항공",
+          "화학",
+          "플라스틱"
+        ],
+        "next_phase": "대안 에너지 (D+7~30)",
+        "next_hot": [
+          "원자력",
+          "태양광",
+          "풍력",
+          "LNG"
+        ],
+        "days_active": 6
+      },
+      {
+        "id": "SEMICONDUCTOR_CYCLE_UP",
+        "phase": 1,
+        "phase_name": "대장주 (D+0~7)",
+        "hot_now": [
+          "반도체"
+        ],
+        "cold_now": [],
+        "next_phase": "장비/소재 (D+7~30)",
+        "next_hot": [
+          "반도체장비",
+          "반도체소재"
+        ],
+        "days_active": 6
+      }
+    ],
+    "jgis_intel": {
+      "source": "jgis",
+      "applied": true,
+      "sentiment_sectors": 6,
+      "relay_sectors": 5,
+      "risk_appetite": "NEUTRAL",
+      "money_direction": "보합"
+    }
   },
   "structural_value": {
-    "min_quality_score": 0.4,
-    "valuation_mode": "NORMAL",
-    "trap_filter": false,
+    "min_quality_score": 0.5,
+    "valuation_mode": "STRICT",
+    "trap_filter": true,
     "short_selling": {
-      "available": false,
-      "surge_tickers": [],
-      "cover_tickers": [],
-      "extreme_tickers": [],
-      "market_pressure": "NORMAL"
+      "available": true,
+      "surge_tickers": [
+        "214450",
+        "475150",
+        "000120",
+        "011170",
+        "005940",
+        "241520",
+        "234340",
+        "189300",
+        "051910",
+        "440110"
+      ],
+      "cover_tickers": [
+        "267270",
+        "308430",
+        "316140",
+        "499790",
+        "213420",
+        "036620",
+        "082920",
+        "023530",
+        "090460",
+        "009830"
+      ],
+      "extreme_tickers": [
+        "058470",
+        "000490",
+        "016590",
+        "021240",
+        "022100",
+        "030520",
+        "047810",
+        "065350",
+        "088350",
+        "101360"
+      ],
+      "market_pressure": "MODERATE"
     }
   },
   "asymmetry": {
-    "min_rr_ratio": 1.5,
-    "target_atr_mult": 3.0,
+    "min_rr_ratio": 2.0,
+    "target_atr_mult": 4.0,
     "stop_atr_mult": 2.0
   },
   "derivatives": {
-    "available": false,
-    "composite_score": 0,
-    "composite_grade": "NEUTRAL",
-    "basis_status": "FLAT",
+    "available": true,
+    "composite_score": 76.0,
+    "composite_grade": "STRONG_BULL",
+    "basis_status": "CONTANGO",
     "put_call_status": "NEUTRAL",
     "put_call_reversal": "",
-    "flow_direction": "중립",
+    "flow_direction": "롱 강세",
     "program_signal": "없음",
     "short_market": {
-      "available": false,
+      "available": true,
       "sh4_triggered": false,
-      "surge_ratio_pct": 0,
-      "avg_risk": 0
+      "surge_ratio_pct": 9.2,
+      "avg_risk": 0.04,
+      "surge_count": 61,
+      "cover_count": 79
     }
   }
 }

@@ -1,0 +1,659 @@
+{
+  "date": "2026-03-25",
+  "market": {
+    "date": "2026-03-25",
+    "kospi_close": 5642.2,
+    "kospi_change_pct": 1.59,
+    "kosdaq_close": 0,
+    "kosdaq_change_pct": 0,
+    "regime": "BEAR",
+    "usd_krw": 1440.9,
+    "vix": 27.0,
+    "foreign_net_bil": 0,
+    "institution_net_bil": 0,
+    "market_event": " | 가치주 로테이션, 방산/에너지, 반도체 슈퍼사이클"
+  },
+  "movers": {
+    "급등_top5": [
+      {
+        "ticker": "084850",
+        "name": "아이티엠반도체",
+        "change_pct": 30.0,
+        "volume_ratio": 0.56,
+        "foreign_net_5d": -144000000.0,
+        "inst_net_5d": 75000000.0,
+        "close": 12610.0,
+        "reason_tags": [
+          "기관_매수",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "051980",
+        "name": "중앙첨단소재",
+        "change_pct": 29.97,
+        "volume_ratio": 4.6,
+        "foreign_net_5d": 1783000000.0,
+        "inst_net_5d": -2000000.0,
+        "close": 1700.0,
+        "reason_tags": [
+          "외인_매수",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "003000",
+        "name": "부광약품",
+        "change_pct": 29.96,
+        "volume_ratio": 5.05,
+        "foreign_net_5d": 414000000.0,
+        "inst_net_5d": 5018000000.0,
+        "close": 9240.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "348370",
+        "name": "엔켐",
+        "change_pct": 29.88,
+        "volume_ratio": 3.05,
+        "foreign_net_5d": 16422000000.0,
+        "inst_net_5d": -7968000000.0,
+        "close": 38900.0,
+        "reason_tags": [
+          "외인_매수",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "100790",
+        "name": "미래에셋벤처투자",
+        "change_pct": 29.81,
+        "volume_ratio": 3.36,
+        "foreign_net_5d": -2225000000.0,
+        "inst_net_5d": 601000000.0,
+        "close": 27000.0,
+        "reason_tags": [
+          "기관_매수",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      }
+    ],
+    "급락_top5": [
+      {
+        "ticker": "017960",
+        "name": "한국카본",
+        "change_pct": -11.97,
+        "volume_ratio": 2.25,
+        "foreign_net_5d": 29355000000.0,
+        "inst_net_5d": -23696000000.0,
+        "close": 41200.0,
+        "reason_tags": [
+          "외인_매수",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "234340",
+        "name": "헥토파이낸셜",
+        "change_pct": -11.75,
+        "volume_ratio": 1.83,
+        "foreign_net_5d": -890000000.0,
+        "inst_net_5d": 2435000000.0,
+        "close": 27050.0,
+        "reason_tags": [
+          "기관_매수",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "086820",
+        "name": "바이오솔루션",
+        "change_pct": -8.46,
+        "volume_ratio": 0.82,
+        "foreign_net_5d": -418000000.0,
+        "inst_net_5d": 51000000.0,
+        "close": 11250.0,
+        "reason_tags": [
+          "기관_매수",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "214370",
+        "name": "케어젠",
+        "change_pct": -8.19,
+        "volume_ratio": 2.82,
+        "foreign_net_5d": 10201000000.0,
+        "inst_net_5d": -11138000000.0,
+        "close": 96400.0,
+        "reason_tags": [
+          "외인_매수",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "124500",
+        "name": "아이티센글로벌",
+        "change_pct": -7.91,
+        "volume_ratio": 1.08,
+        "foreign_net_5d": 12772000000.0,
+        "inst_net_5d": 3271000000.0,
+        "close": 51200.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "대폭등락"
+        ]
+      }
+    ],
+    "거래량_폭발_top5": [
+      {
+        "ticker": "215600",
+        "name": "신라젠",
+        "change_pct": 12.64,
+        "volume_ratio": 7.62,
+        "foreign_net_5d": -1234000000.0,
+        "inst_net_5d": 8000000.0,
+        "close": 3920.0,
+        "reason_tags": [
+          "기관_매수",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "293490",
+        "name": "카카오게임즈",
+        "change_pct": 3.43,
+        "volume_ratio": 6.69,
+        "foreign_net_5d": 187000000.0,
+        "inst_net_5d": 844000000.0,
+        "close": 14470.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "비정상_거래량"
+        ]
+      },
+      {
+        "ticker": "348150",
+        "name": "고바이오랩",
+        "change_pct": 13.15,
+        "volume_ratio": 5.23,
+        "foreign_net_5d": 2000000.0,
+        "inst_net_5d": 0.0,
+        "close": 5850.0,
+        "reason_tags": [
+          "외인_매수",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "003000",
+        "name": "부광약품",
+        "change_pct": 29.96,
+        "volume_ratio": 5.05,
+        "foreign_net_5d": 414000000.0,
+        "inst_net_5d": 5018000000.0,
+        "close": 9240.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "037460",
+        "name": "삼지전자",
+        "change_pct": 16.23,
+        "volume_ratio": 5.0,
+        "foreign_net_5d": 78000000.0,
+        "inst_net_5d": 492000000.0,
+        "close": 26850.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      }
+    ],
+    "수급_쏠림_top5": [
+      {
+        "ticker": "240810",
+        "name": "원익IPS",
+        "change_pct": -3.41,
+        "volume_ratio": 0.59,
+        "foreign_net_5d": 41735000000.0,
+        "inst_net_5d": 44227000000.0,
+        "close": 130100.0,
+        "reason_tags": [
+          "수급_쌍끌이"
+        ]
+      },
+      {
+        "ticker": "373220",
+        "name": "LG에너지솔루션",
+        "change_pct": -1.02,
+        "volume_ratio": 0.69,
+        "foreign_net_5d": 61550000000.0,
+        "inst_net_5d": 15092000000.0,
+        "close": 388500.0,
+        "reason_tags": [
+          "수급_쌍끌이"
+        ]
+      },
+      {
+        "ticker": "066970",
+        "name": "엘앤에프",
+        "change_pct": 15.28,
+        "volume_ratio": 3.61,
+        "foreign_net_5d": 21813000000.0,
+        "inst_net_5d": 37092000000.0,
+        "close": 144100.0,
+        "reason_tags": [
+          "수급_쌍끌이",
+          "비정상_거래량",
+          "대폭등락"
+        ]
+      },
+      {
+        "ticker": "192820",
+        "name": "코스맥스",
+        "change_pct": 1.76,
+        "volume_ratio": 0.51,
+        "foreign_net_5d": 20541000000.0,
+        "inst_net_5d": 27342000000.0,
+        "close": 196900.0,
+        "reason_tags": [
+          "수급_쌍끌이"
+        ]
+      },
+      {
+        "ticker": "161890",
+        "name": "한국콜마",
+        "change_pct": 1.92,
+        "volume_ratio": 0.83,
+        "foreign_net_5d": 9272000000.0,
+        "inst_net_5d": 35451000000.0,
+        "close": 79700.0,
+        "reason_tags": [
+          "수급_쌍끌이"
+        ]
+      }
+    ],
+    "수급_이탈_top5": [
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "change_pct": 1.16,
+        "volume_ratio": 0.51,
+        "foreign_net_5d": -4611065000000.0,
+        "inst_net_5d": -1472486000000.0,
+        "close": 191900.0,
+        "reason_tags": [
+          "수급_쌍매도"
+        ]
+      },
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "change_pct": 1.72,
+        "volume_ratio": 0.79,
+        "foreign_net_5d": -1647409000000.0,
+        "inst_net_5d": -746017000000.0,
+        "close": 1003000.0,
+        "reason_tags": [
+          "수급_쌍매도"
+        ]
+      },
+      {
+        "ticker": "005380",
+        "name": "현대차",
+        "change_pct": 1.58,
+        "volume_ratio": 0.45,
+        "foreign_net_5d": -724686000000.0,
+        "inst_net_5d": -207430000000.0,
+        "close": 499750.0,
+        "reason_tags": [
+          "수급_쌍매도"
+        ]
+      },
+      {
+        "ticker": "005935",
+        "name": "삼성전자우",
+        "change_pct": 0.3,
+        "volume_ratio": 0.34,
+        "foreign_net_5d": -459710000000.0,
+        "inst_net_5d": 60174000000.0,
+        "close": 134500.0,
+        "reason_tags": [
+          "기관_매수"
+        ]
+      },
+      {
+        "ticker": "000270",
+        "name": "기아",
+        "change_pct": 0.44,
+        "volume_ratio": 0.41,
+        "foreign_net_5d": -294199000000.0,
+        "inst_net_5d": -30809000000.0,
+        "close": 158600.0,
+        "reason_tags": [
+          "수급_쌍매도"
+        ]
+      }
+    ]
+  },
+  "holdings": {
+    "portfolio_return": 0.0,
+    "holdings": [
+      {
+        "ticker": "278470",
+        "name": "에이피알",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 329500.0,
+        "unrealized_pct": 0,
+        "today_change_pct": -0.9,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "모멘텀"
+      },
+      {
+        "ticker": "439090",
+        "name": "마녀공장",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 11780.0,
+        "unrealized_pct": 0,
+        "today_change_pct": -0.84,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "이벤트"
+      },
+      {
+        "ticker": "122640",
+        "name": "예스티",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 22650.0,
+        "unrealized_pct": 0,
+        "today_change_pct": -3.21,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "이벤트"
+      },
+      {
+        "ticker": "035810",
+        "name": "이지홀딩스",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 5790.0,
+        "unrealized_pct": 0,
+        "today_change_pct": -1.19,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "안전마진"
+      },
+      {
+        "ticker": "125020",
+        "name": "티씨머티리얼즈",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 5140.0,
+        "unrealized_pct": 0,
+        "today_change_pct": 2.39,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "안전마진"
+      },
+      {
+        "ticker": "171090",
+        "name": "선익시스템",
+        "entry_date": "",
+        "entry_price": 0,
+        "current_price": 96100.0,
+        "unrealized_pct": 0,
+        "today_change_pct": 3.11,
+        "days_held": 0,
+        "status": "HEALTHY",
+        "strategy": "안전마진"
+      }
+    ],
+    "eye_alerts_today": [
+      {
+        "time": "12:19",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 136500,
+        "change_pct": 3.17,
+        "reason": "워치리스트 급등 +3.2% (임계: +3.0%)"
+      },
+      {
+        "time": "12:19",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 219000,
+        "change_pct": 3.79,
+        "reason": "워치리스트 급등 +3.8% (임계: +3.0%)"
+      },
+      {
+        "time": "12:51",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 136700,
+        "change_pct": 3.33,
+        "reason": "워치리스트 급등 +3.3% (임계: +3.0%)"
+      },
+      {
+        "time": "12:51",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 220500,
+        "change_pct": 4.5,
+        "reason": "워치리스트 급등 +4.5% (임계: +3.0%)"
+      },
+      {
+        "time": "13:08",
+        "eye_id": "EYE-07",
+        "ticker": "103140",
+        "name": "103140",
+        "price": 96500,
+        "change_pct": 3.21,
+        "reason": "워치리스트 급등 +3.2% (임계: +3.0%)"
+      },
+      {
+        "time": "13:24",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 136800,
+        "change_pct": 3.4,
+        "reason": "워치리스트 급등 +3.4% (임계: +3.0%)"
+      },
+      {
+        "time": "13:24",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 221500,
+        "change_pct": 4.98,
+        "reason": "워치리스트 급등 +5.0% (임계: +3.0%)"
+      },
+      {
+        "time": "13:40",
+        "eye_id": "EYE-07",
+        "ticker": "103140",
+        "name": "103140",
+        "price": 97000,
+        "change_pct": 3.74,
+        "reason": "워치리스트 급등 +3.7% (임계: +3.0%)"
+      },
+      {
+        "time": "13:56",
+        "eye_id": "EYE-06",
+        "ticker": "062040",
+        "name": "산일전기",
+        "price": 165900,
+        "change_pct": 8.57,
+        "reason": "수익률 +8.3% (목표 +8.0% 도달)"
+      },
+      {
+        "time": "13:56",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 137100,
+        "change_pct": 3.63,
+        "reason": "워치리스트 급등 +3.6% (임계: +3.0%)"
+      },
+      {
+        "time": "13:56",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 220500,
+        "change_pct": 4.5,
+        "reason": "워치리스트 급등 +4.5% (임계: +3.0%)"
+      },
+      {
+        "time": "14:12",
+        "eye_id": "EYE-07",
+        "ticker": "103140",
+        "name": "103140",
+        "price": 97600,
+        "change_pct": 4.39,
+        "reason": "워치리스트 급등 +4.4% (임계: +3.0%)"
+      },
+      {
+        "time": "14:28",
+        "eye_id": "EYE-06",
+        "ticker": "062040",
+        "name": "산일전기",
+        "price": 167000,
+        "change_pct": 9.29,
+        "reason": "수익률 +9.0% (목표 +8.0% 도달)"
+      },
+      {
+        "time": "14:28",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 136800,
+        "change_pct": 3.4,
+        "reason": "워치리스트 급등 +3.4% (임계: +3.0%)"
+      },
+      {
+        "time": "14:28",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 221000,
+        "change_pct": 4.74,
+        "reason": "워치리스트 급등 +4.7% (임계: +3.0%)"
+      },
+      {
+        "time": "14:45",
+        "eye_id": "EYE-07",
+        "ticker": "103140",
+        "name": "103140",
+        "price": 97400,
+        "change_pct": 4.17,
+        "reason": "워치리스트 급등 +4.2% (임계: +3.0%)"
+      },
+      {
+        "time": "15:01",
+        "eye_id": "EYE-06",
+        "ticker": "062040",
+        "name": "산일전기",
+        "price": 165700,
+        "change_pct": 8.44,
+        "reason": "수익률 +8.2% (목표 +8.0% 도달)"
+      },
+      {
+        "time": "15:01",
+        "eye_id": "EYE-07",
+        "ticker": "267270",
+        "name": "267270",
+        "price": 136400,
+        "change_pct": 3.1,
+        "reason": "워치리스트 급등 +3.1% (임계: +3.0%)"
+      },
+      {
+        "time": "15:01",
+        "eye_id": "EYE-07",
+        "ticker": "071050",
+        "name": "071050",
+        "price": 220250,
+        "change_pct": 4.38,
+        "reason": "워치리스트 급등 +4.4% (임계: +3.0%)"
+      },
+      {
+        "time": "15:17",
+        "eye_id": "EYE-07",
+        "ticker": "103140",
+        "name": "103140",
+        "price": 97400,
+        "change_pct": 4.17,
+        "reason": "워치리스트 급등 +4.2% (임계: +3.0%)"
+      }
+    ]
+  },
+  "trades": {
+    "buys": [
+      {
+        "ticker": "010950",
+        "name": "S-Oil",
+        "price": 108400,
+        "reason": "관심매수"
+      },
+      {
+        "ticker": "011170",
+        "name": "롯데케미칼",
+        "price": 80400,
+        "reason": "관심매수"
+      },
+      {
+        "ticker": "034020",
+        "name": "두산에너빌리티",
+        "price": 104280,
+        "reason": "관심매수"
+      },
+      {
+        "ticker": "074600",
+        "name": "원익QnC",
+        "price": 32550,
+        "reason": "관심매수"
+      },
+      {
+        "ticker": "118990",
+        "name": "모트렉스",
+        "price": 8780,
+        "reason": "관심매수"
+      }
+    ],
+    "sells": [],
+    "total_realized_pnl": 0
+  },
+  "execution_quality": {
+    "date": "2026-03-25",
+    "buy_count": 0,
+    "sell_count": 0,
+    "avg_buy_quality_bps": 0.0,
+    "avg_sell_quality_bps": 0.0,
+    "total_saved_won": 0,
+    "best": null,
+    "worst": null
+  },
+  "created_at": "2026-03-25T22:21:10.483913"
+}

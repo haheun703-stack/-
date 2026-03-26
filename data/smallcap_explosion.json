@@ -1,39 +1,68 @@
 {
-  "scan_date": "2026-03-23",
-  "scanned_at": "2026-03-23 20:56",
-  "total_detected": 64,
+  "scan_date": "2026-03-26",
+  "scanned_at": "2026-03-26 18:06",
+  "total_detected": 93,
   "grade_summary": {
-    "PRIMARY": 32,
-    "ALERT": 3,
-    "WATCH": 24,
+    "PRIMARY": 67,
+    "ALERT": 5,
+    "WATCH": 16,
     "WARNING": 5
   },
   "primary_supply": {
-    "CONFIRMED": 25,
-    "PARTIAL": 7
+    "CONFIRMED": 29,
+    "PARTIAL": 38
   },
   "signals": [
     {
-      "ticker": "046120",
-      "name": "오르비텍",
-      "close": 13990,
-      "change_pct": 2.1,
-      "trading_value_억": 1086.4,
+      "ticker": "100790",
+      "name": "미래에셋벤처투자",
+      "close": 28250,
+      "change_pct": 4.6,
+      "trading_value_억": 1001.4,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 5.9,
-      "vol_ratio_5_20": 1.6,
+      "obv_trend": 3.0,
+      "vol_ratio_5_20": 1.92,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.5,
+          "vol_ratio": 9.1,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 36.1,
+          "vol_accel": 3.03
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "003000",
+      "name": "부광약품",
+      "close": 9330,
+      "change_pct": 1.0,
+      "trading_value_억": 409.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 3.3,
+      "vol_ratio_5_20": 2.45,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 4.2,
           "breakout": "60일_신고가"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 4,
-          "cum_return": 48.7,
-          "vol_accel": 2.16
+          "cum_return": 55.8,
+          "vol_accel": 3.76
         }
       ],
       "pattern_names": [
@@ -43,102 +72,21 @@
       "combined_count": 2
     },
     {
-      "ticker": "006360",
-      "name": "GS건설",
-      "close": 31850,
-      "change_pct": 0.2,
-      "trading_value_억": 652.4,
+      "ticker": "007810",
+      "name": "코리아써키트",
+      "close": 80700,
+      "change_pct": 1.5,
+      "trading_value_억": 366.7,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 13.4,
-      "vol_ratio_5_20": 2.4,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.9,
-          "breakout": "BB상단_돌파"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 44.8,
-          "vol_accel": 2.99
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "131970",
-      "name": "두산테스나",
-      "close": 103700,
-      "change_pct": 1.3,
-      "trading_value_억": 542.6,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 6.0,
-      "vol_ratio_5_20": 1.9,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 9,
-          "cum_return": 65.7,
-          "vol_accel": 1.68
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "100090",
-      "name": "SK오션플랜트",
-      "close": 27400,
-      "change_pct": 7.2,
-      "trading_value_억": 465.2,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 2.7,
-      "vol_ratio_5_20": 3.18,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 11.0,
-          "breakout": "60일_신고가"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 45.4,
-          "vol_accel": 5.16
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "069540",
-      "name": "빛과전자",
-      "close": 2845,
-      "change_pct": 29.9,
-      "trading_value_억": 438.7,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 19.1,
-      "vol_ratio_5_20": 1.9,
+      "obv_trend": 1.0,
+      "vol_ratio_5_20": 1.81,
       "patterns": [
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 92.6,
-          "vol_accel": 2.59
+          "cum_return": 32.7,
+          "vol_accel": 2.25
         }
       ],
       "pattern_names": [
@@ -147,159 +95,55 @@
       "combined_count": 1
     },
     {
-      "ticker": "217590",
-      "name": "티엠씨",
-      "close": 27950,
-      "change_pct": 18.4,
-      "trading_value_억": 282.8,
+      "ticker": "108860",
+      "name": "셀바스AI",
+      "close": 16750,
+      "change_pct": 23.8,
+      "trading_value_억": 341.5,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 29.5,
-      "vol_ratio_5_20": 3.07,
+      "obv_trend": 0.9,
+      "vol_ratio_5_20": 3.11,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 6.2,
+          "vol_ratio": 24.8,
           "breakout": "60일_신고가"
         },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 102.4,
-          "vol_accel": 3.55
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "098070",
-      "name": "한텍",
-      "close": 60200,
-      "change_pct": 25.7,
-      "trading_value_억": 180.5,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 1.4,
-      "vol_ratio_5_20": 2.7,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 14.8,
-          "breakout": "60일_신고가"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 52.4,
-          "vol_accel": 4.0
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "096350",
-      "name": "대창솔루션",
-      "close": 3870,
-      "change_pct": 3.8,
-      "trading_value_억": 135.1,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 5.7,
-      "vol_ratio_5_20": 2.04,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 6,
-          "cum_return": 59.9,
-          "vol_accel": 2.31
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "046970",
-      "name": "우리로",
-      "close": 3520,
-      "change_pct": 29.9,
-      "trading_value_억": 131.9,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 1.4,
-      "vol_ratio_5_20": 2.9,
-      "patterns": [
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 119.3,
-          "vol_accel": 4.54
+          "cum_return": 56.4,
+          "vol_accel": 5.08
         }
       ],
       "pattern_names": [
+        "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "combined_count": 1
+      "combined_count": 2
     },
     {
-      "ticker": "090460",
-      "name": "비에이치",
-      "close": 23000,
-      "change_pct": 3.8,
-      "trading_value_억": 107.9,
+      "ticker": "014970",
+      "name": "삼륭물산",
+      "close": 10440,
+      "change_pct": 6.1,
+      "trading_value_억": 275.3,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 0.7,
-      "vol_ratio_5_20": 1.75,
+      "obv_trend": 6.3,
+      "vol_ratio_5_20": 3.74,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
           "vol_ratio": 4.3,
-          "breakout": "60일_신고가"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 24.5,
-          "vol_accel": 2.45
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "330860",
-      "name": "네패스아크",
-      "close": 28000,
-      "change_pct": 12.0,
-      "trading_value_억": 83.5,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 1.4,
-      "vol_ratio_5_20": 2.71,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 11.1,
-          "breakout": "60일_신고가"
+          "breakout": "BB상단_돌파"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 5,
-          "cum_return": 55.6,
-          "vol_accel": 4.32
+          "cum_return": 60.4,
+          "vol_accel": 5.53
         }
       ],
       "pattern_names": [
@@ -309,137 +153,21 @@
       "combined_count": 2
     },
     {
-      "ticker": "039560",
-      "name": "다산네트웍스",
-      "close": 5110,
-      "change_pct": 2.4,
-      "trading_value_억": 72.1,
+      "ticker": "060280",
+      "name": "큐렉소",
+      "close": 17260,
+      "change_pct": 15.1,
+      "trading_value_억": 197.0,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 1.3,
-      "vol_ratio_5_20": 1.89,
+      "obv_trend": 0.4,
+      "vol_ratio_5_20": 1.97,
       "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.6,
-          "breakout": "BB상단_돌파"
-        },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 21.4,
-          "vol_accel": 2.51
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "234690",
-      "name": "녹십자웰빙",
-      "close": 11800,
-      "change_pct": 12.8,
-      "trading_value_억": 37.6,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 0.8,
-      "vol_ratio_5_20": 2.25,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 6.2,
-          "breakout": "60일_신고가"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 30.1,
-          "vol_accel": 2.86
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "001515",
-      "name": "SK증권우",
-      "close": 5440,
-      "change_pct": 30.0,
-      "trading_value_억": 24.8,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 0.9,
-      "vol_ratio_5_20": 2.73,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 15.7,
-          "breakout": "BB상단_돌파"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 87.6,
-          "vol_accel": 4.48
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "104480",
-      "name": "티케이케미칼",
-      "close": 2330,
-      "change_pct": 0.2,
-      "trading_value_억": 24.1,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 0.2,
-      "vol_ratio_5_20": 2.12,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 5.0,
-          "breakout": "60일_신고가"
-        },
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 24.7,
-          "vol_accel": 3.35
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT",
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 2
-    },
-    {
-      "ticker": "005680",
-      "name": "삼영전자",
-      "close": 16650,
-      "change_pct": 5.6,
-      "trading_value_억": 21.7,
-      "grade": "PRIMARY",
-      "supply_grade": "CONFIRMED",
-      "obv_trend": 3.3,
-      "vol_ratio_5_20": 2.31,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 7,
-          "cum_return": 36.8,
-          "vol_accel": 1.9
+          "cum_return": 22.1,
+          "vol_accel": 3.09
         }
       ],
       "pattern_names": [
@@ -448,26 +176,26 @@
       "combined_count": 1
     },
     {
-      "ticker": "109070",
-      "name": "주성코퍼레이션",
-      "close": 1357,
-      "change_pct": 10.8,
-      "trading_value_억": 19.9,
+      "ticker": "361390",
+      "name": "제노코",
+      "close": 35400,
+      "change_pct": 8.8,
+      "trading_value_억": 137.3,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 12.6,
-      "vol_ratio_5_20": 3.35,
+      "obv_trend": 3.5,
+      "vol_ratio_5_20": 1.6,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 27.1,
+          "vol_ratio": 3.8,
           "breakout": "60일_신고가"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 52.5,
-          "vol_accel": 5.49
+          "streak": 3,
+          "cum_return": 27.8,
+          "vol_accel": 2.26
         }
       ],
       "pattern_names": [
@@ -477,26 +205,26 @@
       "combined_count": 2
     },
     {
-      "ticker": "376180",
-      "name": "피코그램",
-      "close": 3300,
-      "change_pct": 12.2,
-      "trading_value_억": 14.3,
+      "ticker": "272550",
+      "name": "삼양패키징",
+      "close": 15280,
+      "change_pct": 7.2,
+      "trading_value_억": 136.9,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 0.2,
-      "vol_ratio_5_20": 2.69,
+      "obv_trend": -371.6,
+      "vol_ratio_5_20": 3.92,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 19.2,
-          "breakout": "60일_신고가"
+          "vol_ratio": 7.7,
+          "breakout": "BB상단_돌파"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 6,
-          "cum_return": 32.8,
-          "vol_accel": 4.11
+          "streak": 5,
+          "cum_return": 32.4,
+          "vol_accel": 6.01
         }
       ],
       "pattern_names": [
@@ -506,55 +234,78 @@
       "combined_count": 2
     },
     {
-      "ticker": "003300",
-      "name": "한일홀딩스",
-      "close": 19480,
-      "change_pct": 6.3,
-      "trading_value_억": 13.0,
+      "ticker": "451760",
+      "name": "컨텍",
+      "close": 20000,
+      "change_pct": 1.5,
+      "trading_value_억": 104.6,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 7.9,
-      "vol_ratio_5_20": 2.46,
+      "obv_trend": 1.8,
+      "vol_ratio_5_20": 1.59,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 24.9,
-          "breakout": "60일_신고가"
-        },
-        {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 10.3,
-          "vol_accel": 3.98
+          "streak": 3,
+          "cum_return": 22.3,
+          "vol_accel": 2.4
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "combined_count": 2
+      "combined_count": 1
     },
     {
-      "ticker": "285800",
-      "name": "진영",
-      "close": 1684,
-      "change_pct": 13.8,
-      "trading_value_억": 12.7,
+      "ticker": "215600",
+      "name": "신라젠",
+      "close": 4000,
+      "change_pct": 1.4,
+      "trading_value_억": 77.8,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 2.9,
-      "vol_ratio_5_20": 3.59,
+      "obv_trend": 1.4,
+      "vol_ratio_5_20": 2.54,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 13.0,
+          "vol_ratio": 4.5,
           "breakout": "BB상단_돌파"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 24.1,
-          "vol_accel": 5.75
+          "cum_return": 18.2,
+          "vol_accel": 3.59
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "264450",
+      "name": "유비쿼스",
+      "close": 16820,
+      "change_pct": 2.2,
+      "trading_value_억": 70.4,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 3.5,
+      "vol_ratio_5_20": 1.95,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 5.7,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 26.8,
+          "vol_accel": 3.04
         }
       ],
       "pattern_names": [
@@ -566,24 +317,82 @@
     {
       "ticker": "037230",
       "name": "한국팩키지",
-      "close": 2100,
-      "change_pct": 9.4,
-      "trading_value_억": 11.9,
+      "close": 2935,
+      "change_pct": 29.9,
+      "trading_value_억": 61.0,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 0.1,
-      "vol_ratio_5_20": 3.19,
+      "obv_trend": 1.5,
+      "vol_ratio_5_20": 3.9,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 57.3,
+          "vol_ratio": 4.1,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 8,
+          "cum_return": 64.0,
+          "vol_accel": 5.12
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "033790",
+      "name": "피노",
+      "close": 7120,
+      "change_pct": 17.5,
+      "trading_value_억": 60.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 1.3,
+      "vol_ratio_5_20": 2.4,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 17.0,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 57.3,
+          "vol_accel": 3.79
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "131370",
+      "name": "알서포트",
+      "close": 2720,
+      "change_pct": 5.4,
+      "trading_value_억": 59.7,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.6,
+      "vol_ratio_5_20": 3.79,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 9.8,
           "breakout": "BB상단_돌파"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 17.3,
-          "vol_accel": 5.2
+          "streak": 3,
+          "cum_return": 23.6,
+          "vol_accel": 5.58
         }
       ],
       "pattern_names": [
@@ -593,26 +402,72 @@
       "combined_count": 2
     },
     {
-      "ticker": "036190",
-      "name": "금화피에스시",
-      "close": 40450,
-      "change_pct": 4.3,
-      "trading_value_억": 10.6,
+      "ticker": "208370",
+      "name": "셀바스헬스케어",
+      "close": 4800,
+      "change_pct": 6.3,
+      "trading_value_억": 49.0,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 1.0,
-      "vol_ratio_5_20": 2.04,
+      "obv_trend": 0.4,
+      "vol_ratio_5_20": 2.63,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 14.3,
+          "vol_accel": 4.26
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "396270",
+      "name": "넥스트칩",
+      "close": 4160,
+      "change_pct": 1.0,
+      "trading_value_억": 43.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 3.9,
+      "vol_ratio_5_20": 1.73,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 14.1,
+          "vol_accel": 1.46
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "014160",
+      "name": "대영포장",
+      "close": 1409,
+      "change_pct": 30.0,
+      "trading_value_억": 41.0,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.2,
+      "vol_ratio_5_20": 3.59,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 5.0,
+          "vol_ratio": 92.9,
           "breakout": "60일_신고가"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 17.6,
-          "vol_accel": 3.09
+          "cum_return": 35.5,
+          "vol_accel": 5.85
         }
       ],
       "pattern_names": [
@@ -622,26 +477,78 @@
       "combined_count": 2
     },
     {
-      "ticker": "101970",
-      "name": "우양에이치씨",
-      "close": 14910,
-      "change_pct": 8.0,
-      "trading_value_억": 8.4,
+      "ticker": "009580",
+      "name": "무림P&P",
+      "close": 3005,
+      "change_pct": 10.3,
+      "trading_value_억": 37.9,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 5.6,
-      "vol_ratio_5_20": 3.04,
+      "obv_trend": 4.5,
+      "vol_ratio_5_20": 3.8,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 27.3,
+          "vol_ratio": 14.5,
+          "breakout": "BB상단_돌파"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 7,
+          "cum_return": 25.2,
+          "vol_accel": 6.11
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "243840",
+      "name": "신흥에스이씨",
+      "close": 7260,
+      "change_pct": 0.7,
+      "trading_value_억": 36.1,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.9,
+      "vol_ratio_5_20": 1.54,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 18.2,
+          "vol_accel": 2.06
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "004440",
+      "name": "삼일씨엔에스",
+      "close": 9950,
+      "change_pct": 10.8,
+      "trading_value_억": 32.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 4.0,
+      "vol_ratio_5_20": 3.49,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 11.8,
           "breakout": "60일_신고가"
         },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 25.4,
-          "vol_accel": 4.92
+          "cum_return": 57.2,
+          "vol_accel": 5.58
         }
       ],
       "pattern_names": [
@@ -651,21 +558,79 @@
       "combined_count": 2
     },
     {
-      "ticker": "005750",
-      "name": "대림바스",
-      "close": 6020,
-      "change_pct": 0.8,
-      "trading_value_억": 7.4,
+      "ticker": "011280",
+      "name": "태림포장",
+      "close": 2495,
+      "change_pct": 13.4,
+      "trading_value_억": 31.5,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 1.0,
+      "obv_trend": 0.5,
+      "vol_ratio_5_20": 3.62,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 92.1,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 33.9,
+          "vol_accel": 5.98
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "084990",
+      "name": "헬릭스미스",
+      "close": 7020,
+      "change_pct": 16.6,
+      "trading_value_억": 24.9,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": -0.4,
+      "vol_ratio_5_20": 1.6,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 8.4,
+          "breakout": "20일_돌파"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 28.3,
+          "vol_accel": 2.37
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "179530",
+      "name": "애드바이오텍",
+      "close": 2800,
+      "change_pct": 4.9,
+      "trading_value_억": 14.7,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 3.8,
       "vol_ratio_5_20": 1.93,
       "patterns": [
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 9.5,
-          "vol_accel": 2.53
+          "streak": 6,
+          "cum_return": 60.0,
+          "vol_accel": 1.76
         }
       ],
       "pattern_names": [
@@ -674,66 +639,314 @@
       "combined_count": 1
     },
     {
-      "ticker": "042110",
-      "name": "에스씨디",
-      "close": 1455,
-      "change_pct": 0.3,
-      "trading_value_억": 6.6,
+      "ticker": "102260",
+      "name": "동성케미컬",
+      "close": 4365,
+      "change_pct": 6.6,
+      "trading_value_억": 13.4,
       "grade": "PRIMARY",
       "supply_grade": "CONFIRMED",
-      "obv_trend": 0.2,
-      "vol_ratio_5_20": 2.25,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 9.4,
-          "vol_accel": 2.39
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "000250",
-      "name": "삼천당제약",
-      "close": 941000,
-      "change_pct": 3.7,
-      "trading_value_억": 2854.1,
-      "grade": "PRIMARY",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.5,
-      "vol_ratio_5_20": 1.06,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 28.9,
-          "vol_accel": 1.43
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "117580",
-      "name": "대성에너지",
-      "close": 11590,
-      "change_pct": 4.0,
-      "trading_value_억": 707.3,
-      "grade": "PRIMARY",
-      "supply_grade": "PARTIAL",
-      "obv_trend": -0.8,
-      "vol_ratio_5_20": 1.01,
+      "obv_trend": 1.0,
+      "vol_ratio_5_20": 2.41,
       "patterns": [
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 18.6,
+          "cum_return": 9.1,
+          "vol_accel": 3.74
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "291650",
+      "name": "압타머사이언스",
+      "close": 1847,
+      "change_pct": 0.5,
+      "trading_value_억": 12.9,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 3.9,
+      "vol_ratio_5_20": 1.51,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 5,
+          "cum_return": 25.9,
+          "vol_accel": 1.71
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "476080",
+      "name": "M83",
+      "close": 6590,
+      "change_pct": 1.9,
+      "trading_value_억": 9.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.5,
+      "vol_ratio_5_20": 1.55,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 9.5,
+          "vol_accel": 2.36
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "460870",
+      "name": "에스엠씨지",
+      "close": 4065,
+      "change_pct": 10.5,
+      "trading_value_억": 8.0,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.7,
+      "vol_ratio_5_20": 1.93,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 7.7,
+          "breakout": "20일_돌파"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 15.2,
+          "vol_accel": 2.28
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "317690",
+      "name": "퀀타매트릭스",
+      "close": 3950,
+      "change_pct": 5.1,
+      "trading_value_억": 5.9,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": -0.0,
+      "vol_ratio_5_20": 1.52,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 13.3,
+          "vol_accel": 2.2
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "083420",
+      "name": "그린케미칼",
+      "close": 5890,
+      "change_pct": 3.3,
+      "trading_value_억": 5.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "obv_trend": 0.0,
+      "vol_ratio_5_20": 1.82,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 8.5,
+          "vol_accel": 2.75
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "010170",
+      "name": "대한광통신",
+      "close": 9300,
+      "change_pct": 1.4,
+      "trading_value_억": 2894.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 4.0,
+      "vol_ratio_5_20": 0.84,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 26.5,
+          "vol_accel": 1.0
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "027360",
+      "name": "아주IB투자",
+      "close": 8920,
+      "change_pct": 4.7,
+      "trading_value_억": 1589.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 4.2,
+      "vol_ratio_5_20": 1.4,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 4.5,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 37.2,
+          "vol_accel": 2.17
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "196170",
+      "name": "알테오젠",
+      "close": 381000,
+      "change_pct": 6.3,
+      "trading_value_억": 1533.2,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 0.1,
+      "vol_ratio_5_20": 1.0,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 15.3,
+          "vol_accel": 1.25
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "476830",
+      "name": "알지노믹스",
+      "close": 227000,
+      "change_pct": 3.4,
+      "trading_value_억": 1291.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 19.6,
+      "vol_ratio_5_20": 0.75,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 10.2,
+          "vol_accel": 0.81
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "347700",
+      "name": "스피어",
+      "close": 50100,
+      "change_pct": 8.6,
+      "trading_value_억": 886.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": -0.4,
+      "vol_ratio_5_20": 1.2,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 19.1,
+          "vol_accel": 1.54
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "950160",
+      "name": "코오롱티슈진",
+      "close": 119800,
+      "change_pct": 17.1,
+      "trading_value_억": 753.0,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": -0.5,
+      "vol_ratio_5_20": 1.27,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 5.3,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 33.0,
+          "vol_accel": 1.82
+        }
+      ],
+      "pattern_names": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 2
+    },
+    {
+      "ticker": "062040",
+      "name": "산일전기",
+      "close": 168600,
+      "change_pct": 1.7,
+      "trading_value_억": 424.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 0.3,
+      "vol_ratio_5_20": 1.27,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 10.4,
           "vol_accel": 1.56
         }
       ],
@@ -743,21 +956,21 @@
       "combined_count": 1
     },
     {
-      "ticker": "023160",
-      "name": "태광",
-      "close": 35850,
-      "change_pct": 0.4,
-      "trading_value_억": 201.3,
+      "ticker": "138040",
+      "name": "메리츠금융지주",
+      "close": 114200,
+      "change_pct": 2.5,
+      "trading_value_억": 357.5,
       "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 1.5,
-      "vol_ratio_5_20": 1.39,
+      "obv_trend": -1.9,
+      "vol_ratio_5_20": 1.07,
       "patterns": [
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
-          "cum_return": 24.5,
-          "vol_accel": 1.95
+          "cum_return": 8.5,
+          "vol_accel": 1.01
         }
       ],
       "pattern_names": [
@@ -766,95 +979,72 @@
       "combined_count": 1
     },
     {
-      "ticker": "192820",
-      "name": "코스맥스",
-      "close": 198000,
-      "change_pct": 1.0,
-      "trading_value_억": 195.8,
+      "ticker": "120110",
+      "name": "코오롱인더",
+      "close": 80500,
+      "change_pct": 2.2,
+      "trading_value_억": 350.5,
       "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 2.4,
-      "vol_ratio_5_20": 1.24,
+      "obv_trend": 2.1,
+      "vol_ratio_5_20": 1.09,
       "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 5,
-          "cum_return": 16.0,
-          "vol_accel": 1.8
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "001120",
-      "name": "LX인터내셔널",
-      "close": 47200,
-      "change_pct": 0.1,
-      "trading_value_억": 122.9,
-      "grade": "PRIMARY",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.3,
-      "vol_ratio_5_20": 0.94,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 3,
-          "cum_return": 9.6,
-          "vol_accel": 1.16
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "394280",
-      "name": "오픈엣지테크놀로지",
-      "close": 16970,
-      "change_pct": 0.4,
-      "trading_value_억": 52.7,
-      "grade": "PRIMARY",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.3,
-      "vol_ratio_5_20": 1.32,
-      "patterns": [
-        {
-          "pattern": "C_CONSECUTIVE_MOMENTUM",
-          "streak": 4,
-          "cum_return": 13.6,
-          "vol_accel": 1.8
-        }
-      ],
-      "pattern_names": [
-        "C_CONSECUTIVE_MOMENTUM"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "179530",
-      "name": "애드바이오텍",
-      "close": 2120,
-      "change_pct": 10.2,
-      "trading_value_억": 8.6,
-      "grade": "PRIMARY",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.6,
-      "vol_ratio_5_20": 1.46,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 5.3,
-          "breakout": "20일_돌파"
-        },
         {
           "pattern": "C_CONSECUTIVE_MOMENTUM",
           "streak": 3,
           "cum_return": 21.1,
-          "vol_accel": 2.07
+          "vol_accel": 1.5
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "486990",
+      "name": "노타",
+      "close": 44050,
+      "change_pct": 4.0,
+      "trading_value_억": 295.0,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 2.4,
+      "vol_ratio_5_20": 1.15,
+      "patterns": [
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 9.9,
+          "vol_accel": 1.58
+        }
+      ],
+      "pattern_names": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "combined_count": 1
+    },
+    {
+      "ticker": "009420",
+      "name": "한올바이오파마",
+      "close": 64400,
+      "change_pct": 11.2,
+      "trading_value_억": 271.5,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "obv_trend": 0.3,
+      "vol_ratio_5_20": 1.19,
+      "patterns": [
+        {
+          "pattern": "A_VOLUME_BREAKOUT",
+          "vol_ratio": 3.7,
+          "breakout": "60일_신고가"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 23.1,
+          "vol_accel": 1.6
         }
       ],
       "pattern_names": [
@@ -864,409 +1054,240 @@
       "combined_count": 2
     },
     {
-      "ticker": "298020",
-      "name": "효성티앤씨",
-      "close": 381000,
-      "change_pct": 3.8,
-      "trading_value_억": 168.8,
-      "grade": "ALERT",
+      "ticker": "082740",
+      "name": "한화엔진",
+      "close": 49200,
+      "change_pct": 0.9,
+      "trading_value_억": 246.1,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 0.6,
-      "vol_ratio_5_20": 1.24,
+      "obv_trend": 0.1,
+      "vol_ratio_5_20": 1.02,
       "patterns": [
         {
-          "pattern": "B_SHAKEOUT_REVERSAL",
-          "drop_pct": -5.5,
-          "bounce_pct": 3.8,
-          "drop_day": -1,
-          "vol_ratio": 1.5,
-          "trend_5d": 14.2
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 8.7,
+          "vol_accel": 1.19
         }
       ],
       "pattern_names": [
-        "B_SHAKEOUT_REVERSAL"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "039310",
-      "name": "세중",
-      "close": 2205,
-      "change_pct": 10.4,
-      "trading_value_억": 8.4,
-      "grade": "ALERT",
+      "ticker": "023530",
+      "name": "롯데쇼핑",
+      "close": 114100,
+      "change_pct": 2.5,
+      "trading_value_억": 155.5,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 1.3,
-      "vol_ratio_5_20": 2.26,
+      "obv_trend": -12.7,
+      "vol_ratio_5_20": 1.2,
       "patterns": [
         {
-          "pattern": "B_SHAKEOUT_REVERSAL",
-          "drop_pct": -12.8,
-          "bounce_pct": 10.4,
-          "drop_day": -1,
-          "vol_ratio": 1.6,
-          "trend_5d": 34.5
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 13.4,
+          "vol_accel": 1.0
         }
       ],
       "pattern_names": [
-        "B_SHAKEOUT_REVERSAL"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "213420",
-      "name": "덕산네오룩스",
-      "close": 48500,
-      "change_pct": 1.1,
-      "trading_value_억": 135.1,
-      "grade": "ALERT",
-      "supply_grade": "NONE",
-      "obv_trend": 2.9,
-      "vol_ratio_5_20": 1.17,
-      "patterns": [
-        {
-          "pattern": "B_SHAKEOUT_REVERSAL",
-          "drop_pct": -5.0,
-          "bounce_pct": 9.0,
-          "drop_day": -2,
-          "vol_ratio": 2.3,
-          "trend_5d": 1.9
-        }
-      ],
-      "pattern_names": [
-        "B_SHAKEOUT_REVERSAL"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "003280",
-      "name": "흥아해운",
-      "close": 3625,
-      "change_pct": 19.6,
-      "trading_value_억": 3028.7,
-      "grade": "WATCH",
+      "ticker": "170920",
+      "name": "엘티씨",
+      "close": 34850,
+      "change_pct": 1.3,
+      "trading_value_억": 143.3,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 14.3,
-      "vol_ratio_5_20": 1.36,
+      "obv_trend": 2.6,
+      "vol_ratio_5_20": 0.9,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.5,
-          "breakout": "BB상단_돌파"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 15.6,
+          "vol_accel": 0.85
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "375500",
-      "name": "DL이앤씨",
-      "close": 66200,
-      "change_pct": -1.8,
-      "trading_value_억": 461.8,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 13.2,
-      "vol_ratio_5_20": 2.16,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 4.5,
-          "breakout": "BB상단_돌파"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "261780",
-      "name": "차백신연구소",
-      "close": 5300,
-      "change_pct": 29.9,
-      "trading_value_억": 263.0,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 3.6,
-      "vol_ratio_5_20": 3.85,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 7.7,
-          "breakout": "60일_신고가"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "100840",
-      "name": "SNT에너지",
-      "close": 54200,
-      "change_pct": 1.7,
-      "trading_value_억": 222.7,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 1.2,
-      "vol_ratio_5_20": 2.24,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 6.0,
-          "breakout": "60일_신고가"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "053690",
-      "name": "한미글로벌",
-      "close": 27050,
-      "change_pct": -0.6,
-      "trading_value_억": 151.1,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.8,
-      "vol_ratio_5_20": 2.92,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 5.4,
-          "breakout": "BB상단_돌파"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "037030",
-      "name": "파워넷",
-      "close": 4600,
-      "change_pct": 21.2,
-      "trading_value_억": 134.3,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 2.3,
-      "vol_ratio_5_20": 3.52,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.7,
-          "breakout": "60일_신고가"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "018000",
-      "name": "유니슨",
-      "close": 1650,
-      "change_pct": -1.9,
-      "trading_value_억": 133.4,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 1.1,
-      "vol_ratio_5_20": 2.66,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 4.3,
-          "breakout": "BB상단_돌파"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "038110",
-      "name": "에코플라스틱",
-      "close": 3910,
-      "change_pct": 29.9,
-      "trading_value_억": 89.7,
-      "grade": "WATCH",
+      "ticker": "318060",
+      "name": "그래피",
+      "close": 48600,
+      "change_pct": 3.3,
+      "trading_value_억": 139.1,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
       "obv_trend": 0.4,
-      "vol_ratio_5_20": 3.27,
+      "vol_ratio_5_20": 1.04,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 38.7,
-          "breakout": "60일_신고가"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 10.2,
+          "vol_accel": 0.84
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "321550",
-      "name": "티움바이오",
-      "close": 10900,
-      "change_pct": 8.2,
-      "trading_value_억": 65.3,
-      "grade": "WATCH",
+      "ticker": "358570",
+      "name": "지아이이노베이션",
+      "close": 14510,
+      "change_pct": 5.9,
+      "trading_value_억": 113.8,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 1.6,
-      "vol_ratio_5_20": 2.13,
+      "obv_trend": -0.4,
+      "vol_ratio_5_20": 0.82,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 4.1,
-          "breakout": "60일_신고가"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 11.8,
+          "vol_accel": 0.81
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "008700",
-      "name": "아남전자",
-      "close": 1743,
-      "change_pct": -1.7,
-      "trading_value_억": 61.3,
-      "grade": "WATCH",
+      "ticker": "003720",
+      "name": "삼영",
+      "close": 7880,
+      "change_pct": 7.2,
+      "trading_value_억": 82.8,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 0.6,
-      "vol_ratio_5_20": 3.59,
+      "obv_trend": 0.2,
+      "vol_ratio_5_20": 0.95,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 2.6,
-          "breakout": "BB상단_돌파"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 16.6,
+          "vol_accel": 1.24
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "089150",
-      "name": "케이씨티",
-      "close": 3520,
-      "change_pct": 10.5,
-      "trading_value_억": 52.0,
-      "grade": "WATCH",
+      "ticker": "160980",
+      "name": "싸이맥스",
+      "close": 25050,
+      "change_pct": 0.6,
+      "trading_value_억": 82.5,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 0.4,
-      "vol_ratio_5_20": 3.6,
+      "obv_trend": -0.2,
+      "vol_ratio_5_20": 0.99,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 17.9,
-          "breakout": "BB상단_돌파"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 14.9,
+          "vol_accel": 1.09
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "189860",
-      "name": "서전기전",
-      "close": 7150,
-      "change_pct": 15.1,
-      "trading_value_억": 49.7,
-      "grade": "WATCH",
-      "supply_grade": "PARTIAL",
-      "obv_trend": 0.5,
-      "vol_ratio_5_20": 3.01,
-      "patterns": [
-        {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 26.6,
-          "breakout": "60일_신고가"
-        }
-      ],
-      "pattern_names": [
-        "A_VOLUME_BREAKOUT"
-      ],
-      "combined_count": 1
-    },
-    {
-      "ticker": "004960",
-      "name": "한신공영",
-      "close": 17030,
-      "change_pct": -3.9,
-      "trading_value_억": 47.2,
-      "grade": "WATCH",
+      "ticker": "078160",
+      "name": "메디포스트",
+      "close": 24550,
+      "change_pct": 13.7,
+      "trading_value_억": 74.2,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
       "obv_trend": 0.8,
-      "vol_ratio_5_20": 2.24,
+      "vol_ratio_5_20": 1.09,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 8.6,
-          "breakout": "BB상단_돌파"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 21.2,
+          "vol_accel": 1.36
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "340440",
-      "name": "세림B&G",
-      "close": 1733,
-      "change_pct": 20.9,
-      "trading_value_억": 45.9,
-      "grade": "WATCH",
+      "ticker": "086450",
+      "name": "동국제약",
+      "close": 20550,
+      "change_pct": 2.8,
+      "trading_value_억": 73.9,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 4.0,
-      "vol_ratio_5_20": 3.9,
+      "obv_trend": 5.3,
+      "vol_ratio_5_20": 1.19,
       "patterns": [
         {
-          "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 17.0,
-          "breakout": "60일_신고가"
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 14.9,
+          "vol_accel": 1.44
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "C_CONSECUTIVE_MOMENTUM"
       ],
       "combined_count": 1
     },
     {
-      "ticker": "014970",
-      "name": "삼륭물산",
-      "close": 8510,
-      "change_pct": 29.9,
-      "trading_value_억": 38.9,
-      "grade": "WATCH",
+      "ticker": "389650",
+      "name": "넥스트바이오메디컬",
+      "close": 80400,
+      "change_pct": 5.8,
+      "trading_value_억": 73.7,
+      "grade": "PRIMARY",
       "supply_grade": "PARTIAL",
-      "obv_trend": 0.6,
-      "vol_ratio_5_20": 3.68,
+      "obv_trend": 0.7,
+      "vol_ratio_5_20": 1.43,
       "patterns": [
         {
           "pattern": "A_VOLUME_BREAKOUT",
-          "vol_ratio": 27.6,
+          "vol_ratio": 3.7,
           "breakout": "20일_돌파"
+        },
+        {
+          "pattern": "C_CONSECUTIVE_MOMENTUM",
+          "streak": 3,
+          "cum_return": 11.7,
+          "vol_accel": 1.6
         }
       ],
       "pattern_names": [
-        "A_VOLUME_BREAKOUT"
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
       ],
-      "combined_count": 1
+      "combined_count": 2
     }
   ]
 }

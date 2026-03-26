@@ -1,0 +1,386 @@
+{
+  "date": "2026-03-26",
+  "generated_at": "2026-03-26T21:16:32.801866",
+  "total_articles": 125,
+  "scenario_hits": {
+    "SEMICONDUCTOR_CYCLE_UP": 2,
+    "WAR_MIDDLE_EAST": 87,
+    "OIL_SPIKE": 11,
+    "SPACEX_IPO": 5,
+    "FED_RATE_CUT": 1,
+    "COMMODITY_SUPERCYCLE": 2
+  },
+  "active_scenarios": {
+    "WAR_MIDDLE_EAST": {
+      "first_detected": "2026-03-20",
+      "current_phase": 3,
+      "days_active": 6,
+      "score": 67,
+      "reasons": [
+        "키워드 87건 (강)",
+        "Gold 1d +3.0089% (>=1.5%)"
+      ],
+      "news_count": 87,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-23"
+    },
+    "FED_RATE_CUT": {
+      "first_detected": "2026-03-20",
+      "current_phase": 0,
+      "days_active": 6,
+      "score": 5,
+      "reasons": [
+        "키워드 1건 (미약)"
+      ],
+      "news_count": 1,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "OIL_SPIKE": {
+      "first_detected": "2026-03-20",
+      "current_phase": 2,
+      "days_active": 6,
+      "score": 48,
+      "reasons": [
+        "키워드 11건 (강)",
+        "WTI $89.33 >= $85"
+      ],
+      "news_count": 11,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "SEMICONDUCTOR_CYCLE_UP": {
+      "first_detected": "2026-03-20",
+      "current_phase": 0,
+      "days_active": 6,
+      "score": 15,
+      "reasons": [
+        "키워드 2건 (약)"
+      ],
+      "news_count": 2,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "SPACEX_IPO": {
+      "first_detected": "2026-03-26",
+      "current_phase": 1,
+      "days_active": 0,
+      "score": 39,
+      "reasons": [
+        "키워드 5건 (강)"
+      ],
+      "news_count": 5,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "COMMODITY_SUPERCYCLE": {
+      "first_detected": "2026-03-26",
+      "current_phase": 3,
+      "days_active": 0,
+      "score": 60,
+      "reasons": [
+        "키워드 2건 (약)",
+        "구리 갭 135.5% (과열)",
+        "TiO2 갭 14.3% (매수구간!)"
+      ],
+      "news_count": 2,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    }
+  },
+  "buy_signals": [
+    {
+      "commodity": "tio2",
+      "name": "TiO2 (티타늄 다이옥사이드)",
+      "price": 3200,
+      "gap_pct": 14.3,
+      "zone": "buy",
+      "signal_strength": "strong",
+      "related_scenarios": [
+        "COMMODITY_SUPERCYCLE"
+      ],
+      "related_etf": [
+        "REMX",
+        "SETM",
+        "COPJ",
+        "COPX",
+        "URNM",
+        "URA"
+      ],
+      "related_kr": [
+        "006260:LS",
+        "034020:두산에너빌리티",
+        "103140:풍산"
+      ]
+    }
+  ],
+  "top_news": [
+    {
+      "headline": "U.S. Postal Service seeks 8% fuel surcharge for package deliveries as Iran war raises oil prices",
+      "source": "CNBC",
+      "matched_keywords": [
+        "iran",
+        "war",
+        "israel"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://www.cnbc.com/2026/03/25/us-postal-fuel-surcharge-package-deliveries-iran-oil.html",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "How the Iran war could rattle the global economy long after hostilities end",
+      "source": "CNBC",
+      "matched_keywords": [
+        "iran",
+        "war",
+        "hormuz"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://www.cnbc.com/2026/03/25/the-iran-war-could-rattle-the-global-economy-long-after-hostilities-end.html",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Jamie Dimon says Iran war makes Middle East peace prospects better in the long term",
+      "source": "CNBC",
+      "matched_keywords": [
+        "iran",
+        "middle east",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://www.cnbc.com/2026/03/24/jamie-dimon-iran-war-middle-east-peace-prospects-long-term.html",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Tel Aviv hit as Iran fires waves of missiles at Israel - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "missile",
+        "israel"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNSDdmUzU3amJDSE1WQXFKbTNfWnBCNnF1X1kteDBybkZ5WDNHcFFWb180X01NS3dlVFh4bm5SNTI2dkE1SmVKNHNjZFNoNVBWZGpOdWFlWUdscmtlLUtFT0l0WWNnSS1CZ3BoYm5NRDBUQzRQVnJQcm5uMTFCV2lqQWhnMkRLalVSV055dVpiSUNKd2pY?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Middle East War Pressures Copper Prices, Could Impact Nickel Production",
+      "source": "SeekingAlpha",
+      "matched_keywords": [
+        "iran",
+        "middle east",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "COPX",
+      "url": "https://finnhub.io/api/news?id=c9dd4df6b6095d3d7e71c03531834e06bee65cb4b236f961a4fd0b86000f452a",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Space stocks rally on reports of SpaceX's imminent IPO filing",
+      "source": "CNBC",
+      "matched_keywords": [
+        "spacex",
+        "ipo",
+        "rocket lab"
+      ],
+      "weight": 1.3,
+      "symbol": "",
+      "url": "https://www.cnbc.com/2026/03/25/space-stocks-.html",
+      "scenario": "SPACEX_IPO"
+    },
+    {
+      "headline": "Rocket Lab: Waiting Is Hard",
+      "source": "SeekingAlpha",
+      "matched_keywords": [
+        "rocket lab",
+        "rklb",
+        "launch"
+      ],
+      "weight": 1.3,
+      "symbol": "RKLB",
+      "url": "https://finnhub.io/api/news?id=ac033c479d64e2c12233e449e1b7f5ca507fb95569eeb4e6045e1ba42a767916",
+      "scenario": "SPACEX_IPO"
+    },
+    {
+      "headline": "What's Going On With Rocket Lab Stock Monday?",
+      "source": "Benzinga",
+      "matched_keywords": [
+        "rocket lab",
+        "rklb",
+        "launch"
+      ],
+      "weight": 1.3,
+      "symbol": "RKLB",
+      "url": "https://finnhub.io/api/news?id=da6cf0ebde2f35341c2aca24eabe552b38552a5a4bfeb67b24339d43a8abf205",
+      "scenario": "SPACEX_IPO"
+    },
+    {
+      "headline": "Oil Surges 5% As Trump's Ceasefire Hopes Dim, Bitcoin Slips Below $70,000: What's Moving Markets Tuesday?",
+      "source": "Benzinga",
+      "matched_keywords": [
+        "oil price",
+        "crude oil",
+        "oil surge"
+      ],
+      "weight": 1.2,
+      "symbol": "XLE",
+      "url": "https://finnhub.io/api/news?id=793054b093622fa8cdf36ee4d6f961d8f8c51698ef7fbf18be05879d3923df74",
+      "avg_sentiment": 0.177,
+      "scenario": "OIL_SPIKE"
+    },
+    {
+      "headline": "Commodities: Shifting War Outlook",
+      "source": "SeekingAlpha",
+      "matched_keywords": [
+        "oil price",
+        "brent",
+        "wti"
+      ],
+      "weight": 1.2,
+      "symbol": "COPX",
+      "url": "https://finnhub.io/api/news?id=913838bd492663882951a92deeddb94418efb0521a48dbf630b6dc5115dca421",
+      "avg_sentiment": 0.177,
+      "scenario": "OIL_SPIKE"
+    },
+    {
+      "headline": "OECD: Iran war erases global growth upgrade, fans inflation - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOVW5Ob1pLVWZxV0hZUkNtMDJ6RlpEenRLaVBaNTVDaEJ5Wms4b3pGYTZyVjZaTVkzTDR6VXJvX2ZEcUgxSGV1NmIzQndpSFlHMDVxZmlvVmdMX2czR2lLdm56dGVZNlg5cmhwUG5VMF9CV3NJMmwySW9zYWlhTklPd21WVDVReGF0c3BwcVBkV3liVTZtZG5SS2ZvSkpTVWV6MHBmVHRIRWU?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "China urges peace talks in Iran war - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNQzVsbDFXT2lJNlJfLWw3dzdTSnV5a2xjVTBISUpIUkdQbmtTbmxETlVYdHRwR3l0RHRFMTR2Vlh5YTFBT2dwcjV1SzVYX1EzMVE0T0x3dzhZaHZXSnVsZ2t1bUJ6Tkw1YVNIOVh1NkVCV29nWmFENVlfQUlLdUZWWFlpdFR5d00?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Israel took Iran's Araqchi, Qalibaf off hit list after Pakistan request to US, Pakistani source says - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "israel"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxONWRqbGduSHA3LXJPTjA3dmpwdzhkSFQwUzRuODRqNzIydkZPeHhnOC1oZk5Ic0VibVd5VlNuY3NqUHkxYzliZ0phWlVyZGlWR0N6Qmd3bmFacE9wRmV1Z0hFSUNMZUE4ZFV3WE5DUTd3TUlod09YVHBmREJxRlN0c2M4SkFrVjZ2TlZwQ1QzS3FFeHJQaVJfQ0t4ZWdaZ1hacG9EUVc3S0FDRkFUZ0puMW5WNndRTWZUU01BUEhRWEFYZ3l4WmpF?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Europe scales back climate goals to ease Iran war energy shock - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQanJsYmlYX2ZmdHJpV0lYWWlHT3FkWm4tYzZSclliTTJOUVNnZE1zQV9UV29kVW5KREtFcGdsT3dSSVZRbl9sUDJRdU1kNXZCYVdRM1ZqSVhEc01wWkdVZmlsN1Z3cEVKeHlfNUF6MXBaS2t2N1M0V2VhSjhfNkM4SlROeTA1UHYzekxkVlVGbExIa2x5Rml6SUN6VXZ0SGROZGVJS0RtZUNBcTZnZUN1NHNuSHdLQQ?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Iran war damage to Qatar hits global LNG outlook, upends Asia demand growth - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOdjBvWFc1RVJOWVZRRHFTV3BfaUtObWRKRzFYYUhoLTVDQzAxM2hWZFJZb0kySlFhTVhQb0Jsd1BSQU5ob3Fjc21uNjBDTmI0N2F0UTAyYmdwTndNZFV3LWM2aW5EWkE1eWRjVWdsaXpPTlFYeTU2R0YtU2lIdTFGRmZGQWtxNnFENndhMTZnVWNfSXYwNlYyVTZWN0IzRWI5VDExZWZPSnE4Zy1jY0dhUkhyZHl5dmxCcjdHaHNVT0M?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Thai fishing industry nears a standstill as Iran war pushes up fuel costs - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPY21kOWd2dEVPOHRKOTZRN2JkRWFxSFo5VEhZUGFSUkJYNFNuZUpQZ1BwOGVlbEE2c3Q3aVE3Q0tLaVlNalVMMlU5M0FMV3BqdzNZN1FOU2FiVDdnMlBFb1hFeDEwWV92ejZrMVRwemZqekhpOF9yOUZDclJ0WW1CSnVwWGhBMFZYcHdPWDY0Ui1BaUlGLXM0dklvVHh0aF9WRXRxNXNpcGc3N2FNaldCRjJzWlU3VTZrcFdkcjZtMkg?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Used EV sales jump in Europe as Iran war drives up petrol prices - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxOQWhFdkNYempSRUNrY0JuRTJ6dDE4cWN6NkFsYmtGUlRPcFJvdFFwVlVJbHRHYnJNU2dDQzFsbnpBLUxJOFdEVmhNVU4xaHFjdUJTMXg2Nl8wOXVCZWFNYzU5aFBxeTJQUFRadW5aMFJrRnhMOEFnOWcta0paRjlscnA4d0E5N0JYOF8tYXYxcmFGQnN0d1NZM3V5TkIwSmJNRDlmd1NuaUdMaU91QjIw?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "Philippines suspends spot power sales as Iran war sends prices soaring - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQeWU3MExnV1VucjVlLTRoWUZuakJhNHNmbnZQbVF2M3dSY0Zja3E0ZmhEclBQTHV2NjlsNXFhVUVsRHY0ay1OZk5wQk9SNl9CeWhHdGJhb1NnTmxBY2l3WVB4eXdURFo2OVktbWNnbHl4WXE0V3BxUjNPZjlyN0hpcVBwcVUtWEpkY3hTQnphc1RlXzJTSjYtdjFZZ3FtX0tsOTBCU09reUN3bTI0Nm92aDVkcnlzN3c?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "ADNOC CEO calls any Iran curbs on Hormuz passage 'economic terrorism' - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "hormuz"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOdzhpWFdRTDhqYll1VHlta0hKcm9oQTV2VEs3bXNaOVhKQ19GVDZUX28wWUs4UkYzbmxLRFMxdFZFdXhFWTlvSE5wTXhVTGoyOHJGQ1pxOGNvWERILTdCSHNkQ2gxNGtWaVBGLWMwc2hiSlJKMTROaGFMX2d5bW4zMmo2VGc5Tng0bUowZ3dNUmpFUkY2UjZFTl91d0l3NW85c0l0SUJieG1ZaFRDMnM1bktNVjF3WFJqWGc?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    },
+    {
+      "headline": "G7 allies meet against backdrop of wars in Ukraine and Iran, with unpredictable US - Reuters",
+      "source": "Reuters",
+      "matched_keywords": [
+        "iran",
+        "war"
+      ],
+      "weight": 1.5,
+      "symbol": "",
+      "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOS0hsMVl2STZQYkZWa0o1RDloVFBOZnQ2M1pNQ1VxTjZNUmZ2OGtaV1BWNGU2dmN2N3dLR2V6OXJicGRGLUpac2RtRjRRaGVHZktQOVNQMnhXdkttZFFJOVJkYXY3Z3BUZXpycmcyNURBSjFyQXVzZlplY0taYUNYQ1pYY01Rdk1jeGlfSjhHS2pUeHRLc3lxME5xbFZhWEE3UkFQVUJlTk10UVVjSVdkNjBwOUUtbnF4QVFlTg?oc=5",
+      "avg_sentiment": 0.177,
+      "scenario": "WAR_MIDDLE_EAST"
+    }
+  ]
+}

@@ -1,3 +1,6 @@
 date,surge_count,cover_count,extreme_count,avg_risk,macro_adj,data_source
 2026-03-20,61,79,120,0.04,0,parquet_history
 2026-03-23,61,79,120,0.04,0,parquet_history
+2026-03-24,61,79,120,0.04,0,parquet_history
+2026-03-25,61,79,120,0.04,0,parquet_history
+2026-03-26,61,79,120,0.04,0,parquet_history

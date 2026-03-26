@@ -1,0 +1,44 @@
+{
+  "signal_accuracy": {
+    "tomorrow_picks": {
+      "hit_rate": 67.7,
+      "total": 251,
+      "avg_ret": 0.33
+    },
+    "pullback_scan": {
+      "hit_rate": 58.3,
+      "total": 180,
+      "avg_ret": 0.8
+    },
+    "whale_detect": {
+      "hit_rate": 43.3,
+      "total": 208,
+      "avg_ret": 1.11
+    },
+    "accumulation_tracker": {
+      "hit_rate": 60.0,
+      "total": 180,
+      "avg_ret": 1.38
+    },
+    "dart_event": {
+      "hit_rate": 43.4,
+      "total": 938,
+      "avg_ret": -0.57
+    },
+    "volume_spike": {
+      "hit_rate": 36.1,
+      "total": 277,
+      "avg_ret": -0.83
+    }
+  },
+  "flow_effectiveness": {
+    "dual_buy": {
+      "avg_5d": -1.62,
+      "count": 5
+    },
+    "inst_only": {
+      "avg_5d": -0.83,
+      "count": 1
+    }
+  }
+}

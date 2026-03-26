@@ -1,152 +1,672 @@
 {
-  "date": "2026-03-23",
-  "generated_at": "2026-03-23 08:00",
-  "reports": [],
-  "report_boost_map": {},
+  "date": "2026-03-26",
+  "generated_at": "2026-03-26 07:01",
+  "reports": [
+    {
+      "stock_name": "SNT모티브",
+      "stock_code": "064960",
+      "title": "그룹사 로봇역량 집합!",
+      "broker": "대신증권",
+      "target_price": 49000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91070&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "LG유플러스",
+      "stock_code": "032640",
+      "title": "늦바람이 무섭다",
+      "broker": "대신증권",
+      "target_price": 20000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91069&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "KT",
+      "stock_code": "030200",
+      "title": "시장을 이기는 KT",
+      "broker": "대신증권",
+      "target_price": 74000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91068&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "SK텔레콤",
+      "stock_code": "017670",
+      "title": "가장 높은 재투자수익률",
+      "broker": "대신증권",
+      "target_price": 97000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91067&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "삼성전기",
+      "stock_code": "009150",
+      "title": "새로운 역사가 진행, 추가로 도약을 예상",
+      "broker": "대신증권",
+      "target_price": 550000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91066&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "네오티스",
+      "stock_code": "085910",
+      "title": "마이크로비트 사업을 통한 실적 퀀텀점프",
+      "broker": "한국IR협의회",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91065&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "SK하이닉스",
+      "stock_code": "000660",
+      "title": "ADR 발행과 의미",
+      "broker": "미래에셋증권",
+      "target_price": 1540000,
+      "opinion": "매수",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91064&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "HDC",
+      "stock_code": "012630",
+      "title": "나에겐 아직, 자사주 17%가 있다",
+      "broker": "한화투자증권",
+      "target_price": 34000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91063&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "풀무원",
+      "stock_code": "017810",
+      "title": "바른 먹거리로 국내외 실적 개선",
+      "broker": "DS투자증권",
+      "target_price": 17000,
+      "opinion": "매수",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91062&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "우리넷",
+      "stock_code": "115440",
+      "title": "올해 우리넷 주가는 오를 수 밖에 없습니다",
+      "broker": "하나증권",
+      "target_price": 15000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91061&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "삼성전기",
+      "stock_code": "009150",
+      "title": "아직 호황의 초입",
+      "broker": "하나증권",
+      "target_price": 550000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91060&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "SNT모티브",
+      "stock_code": "064960",
+      "title": "로보틱스 지분 100% 인수. 스맥 지분경쟁 참..",
+      "broker": "하나증권",
+      "target_price": 40000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91059&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "대한해운",
+      "stock_code": "005880",
+      "title": "P/B 0.3배, 안정적 현금흐름",
+      "broker": "하나증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91058&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "피에스케이",
+      "stock_code": "319660",
+      "title": "높아지는 2026년 실적 눈높이",
+      "broker": "하나증권",
+      "target_price": 105000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91057&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "대성하이텍",
+      "stock_code": "129920",
+      "title": "[NDR 후기] 양파 같은 사업 확장",
+      "broker": "유안타증권",
+      "target_price": 0,
+      "opinion": "없음",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91056&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "대한유화",
+      "stock_code": "006650",
+      "title": "2026년 나프타 프리미엄 복병을 만나다!",
+      "broker": "유안타증권",
+      "target_price": 200000,
+      "opinion": "Buy",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91055&page=1",
+      "boost": 0,
+      "tag": "중립"
+    },
+    {
+      "stock_name": "이랜텍",
+      "stock_code": "054210",
+      "title": "멀티플 리레이팅의 원년",
+      "broker": "SK증권",
+      "target_price": 18000,
+      "opinion": "매수",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91054&page=1",
+      "boost": 5,
+      "tag": "매수"
+    },
+    {
+      "stock_name": "엘앤에프",
+      "stock_code": "066970",
+      "title": "LFP 수주: 끝이 아닌 시작",
+      "broker": "미래에셋증권",
+      "target_price": 180000,
+      "opinion": "매수",
+      "date": "26.03.25",
+      "url": "https://finance.naver.com/research/company_read.naver?nid=91053&page=1",
+      "boost": 5,
+      "tag": "매수"
+    }
+  ],
+  "report_boost_map": {
+    "000660": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 1540000,
+      "title": "ADR 발행과 의미"
+    },
+    "017810": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "DS투자증권",
+      "target_price": 17000,
+      "title": "바른 먹거리로 국내외 실적 개선"
+    },
+    "054210": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "SK증권",
+      "target_price": 18000,
+      "title": "멀티플 리레이팅의 원년"
+    },
+    "066970": {
+      "boost": 5,
+      "tag": "매수",
+      "broker": "미래에셋증권",
+      "target_price": 180000,
+      "title": "LFP 수주: 끝이 아닌 시작"
+    }
+  },
   "perplexity_themes": {
     "hot_themes": [
       {
-        "theme": "반도체 HBM",
-        "catalyst": "미국 빅테크 AI 데이터센터 구축으로 HBM 및 DRAM 수요 급증, 삼성전자 SK하이닉스 실적 전망 호조[1][2][4]",
+        "theme": "반도체 (메모리·후공정)",
+        "catalyst": "삼성전자 15.6조 자사주 소각, SK하이닉스 역대 기록적 실적 전망, 오라클 실적 서프라이즈로 AI·클라우드 수요 재확인[1][3]",
         "urgency": "HIGH",
         "stocks": [
           "삼성전자",
           "SK하이닉스",
-          "마이크론"
+          "테크윙",
+          "에이팩트"
         ]
       },
       {
-        "theme": "원전·전력",
-        "catalyst": "정부 자본시장 안정화 간담회 후 매수 사이드카 발동 및 원전 순환매 지속[1][3]",
+        "theme": "5G·통신장비·6G",
+        "catalyst": "MWC 2026에서 6G 상용화 로드맵 공개, Qualcomm '6G는 AI-Native' 선언, 삼성·LG 포함 30여 글로벌 기업 연합체 구성[1][5]",
         "urgency": "HIGH",
         "stocks": [
-          "HD현대에너지솔루션",
-          "HM넥스",
-          "GS건설"
-        ]
-      },
-      {
-        "theme": "건설",
-        "catalyst": "코스피 건설업종 초급등, GS건설 대우건설 상한가 진입으로 업종 상승 탄력 두드러짐[1]",
-        "urgency": "MEDIUM",
-        "stocks": [
-          "GS건설",
-          "대우건설",
-          "HD현대에너지솔루션"
-        ]
-      },
-      {
-        "theme": "AI·2차전지",
-        "catalyst": "전일 급락 후 낙폭 과대 반등, 글로벌 AI 수요 및 2차전지 기술적 반등세[4]",
-        "urgency": "MEDIUM",
-        "stocks": [
           "삼성전자",
-          "SK하이닉스",
-          "LG에너지솔루션"
+          "LG전자",
+          "통신장비 관련주"
         ]
       },
       {
-        "theme": "바이오",
-        "catalyst": "코스닥 반등과 함께 바이오 섹터 동반 상승, 경보제약 상한가[1][4]",
-        "urgency": "LOW",
+        "theme": "광통신 (광케이블·광섬유)",
+        "catalyst": "AI 데이터센터 인프라 구축 수요 증가로 광통신 장비 수요 급증[4]",
+        "urgency": "MEDIUM",
         "stocks": [
-          "경보제약",
-          "온코닉테라퓨틱스"
+          "한국첨단소재",
+          "성호전자"
+        ]
+      },
+      {
+        "theme": "방위산업·방산",
+        "catalyst": "미·이란 긴장 지속, UAE의 한국 '천궁-Ⅱ' 조기 공급 요청으로 방위산업 테마 상승[8]",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "한일단조",
+          "코츠테크놀로지"
+        ]
+      },
+      {
+        "theme": "풍력에너지·신재생에너지",
+        "catalyst": "글로벌 에너지 전환 추세 및 중동 지정학적 리스크로 대체에너지 수요 증가[4]",
+        "urgency": "MEDIUM",
+        "stocks": [
+          "LS마린솔루션",
+          "SK이터닉스"
         ]
       }
     ],
     "breaking_catalysts": [
       {
         "stock_name": "삼성전자",
-        "catalyst": "20만 원선 복귀 및 실적 전망 호조",
+        "catalyst": "15.6조 규모 자사주 소각 발표 및 역대 기록적 실적 전망",
         "impact": "positive",
-        "source": "성공투자 유튜브[1]"
+        "source": "2026년 3월 11일 특징주 분석[1]"
       },
       {
         "stock_name": "SK하이닉스",
-        "catalyst": "100만 원선 복귀 및 HBM 수요 급증",
+        "catalyst": "역대 기록적 실적 전망 및 HBM 검사장비 수주 확대",
         "impact": "positive",
-        "source": "성공투자 유튜브[1]"
+        "source": "2026년 3월 11일 특징주 분석[1]"
       },
       {
-        "stock_name": "경보제약",
-        "catalyst": "상한가 진입",
+        "stock_name": "테크윙",
+        "catalyst": "SK하이닉스로부터 고대역폭메모리(HBM) 전용 검사장비 '큐브' 공급",
         "impact": "positive",
-        "source": "성공투자 유튜브[1]"
+        "source": "2026년 3월 5일 상승률 TOP30[8]"
       },
       {
-        "stock_name": "GS건설",
-        "catalyst": "초급등 및 건설업종 상승 주도",
+        "stock_name": "에이팩트",
+        "catalyst": "반도체 후공정 사업 확대 및 경영권 매각 본격화",
         "impact": "positive",
-        "source": "성공투자 유튜브[1]"
+        "source": "2026년 3월 5일 상승률 TOP30[8]"
       },
       {
-        "stock_name": "대우건설",
-        "catalyst": "초급등",
+        "stock_name": "한일단조",
+        "catalyst": "UAE의 한국 '천궁-Ⅱ' 조기 공급 요청으로 방위산업 테마 상승",
         "impact": "positive",
-        "source": "성공투자 유튜브[1]"
+        "source": "2026년 3월 5일 상승률 TOP30[8]"
       },
       {
-        "stock_name": "HD현대에너지솔루션",
-        "catalyst": "상한가 근접 28.86% 상승",
+        "stock_name": "우리기술",
+        "catalyst": "여야 의원 방미사절단의 대미투자 사업으로 원자력발전소 건설 제시 계획",
         "impact": "positive",
-        "source": "급등테마연구소 유튜브[3]"
-      },
-      {
-        "stock_name": "HM넥스",
-        "catalyst": "22% 이상 상승",
-        "impact": "positive",
-        "source": "급등테마연구소 유튜브[3]"
-      },
-      {
-        "stock_name": "온코닉테라퓨틱스",
-        "catalyst": "액티브 ETF 관련 급등세",
-        "impact": "positive",
-        "source": "급등테마연구소 유튜브[3]"
+        "source": "2026년 3월 5일 상승률 TOP30[8]"
       }
     ],
     "sector_outlook": {
       "bullish": [
-        "반도체",
-        "원전·전력",
-        "건설"
+        "반도체 (메모리·후공정·검사장비)",
+        "5G·통신장비·6G",
+        "방위산업·방산"
       ],
-      "bearish": []
+      "bearish": [
+        "항공 (유가 급등·원유 수송 통로 통제 우려)",
+        "금융·증권 (변동성 확대로 인한 단기 조정 가능)"
+      ]
     }
   },
   "candidate_news": [
     {
-      "stock_name": "아이티엠반도체",
-      "date": "2026-03-22",
-      "title": "아이티엠반도체 투자분석 2026. 03. 22",
-      "source": "주달",
+      "stock_name": "HD현대일렉트릭",
+      "date": "2026-03-25",
+      "title": "변압기가 모자란다...효성중공업·HD현대일렉트릭, 역대급 호황에 주가 고공행진",
+      "source": "핀포인트뉴스",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5wTU9XZ1I4UVpfZkdNdkhlTzdvSkxxVEZpX1NqM1hJLTdFeFV1VWtzX1lETUNmRWM5Yl9XZ1hGZThhMkN5OXp5MXhkMDY5ZVo1TTNRaXdTWFdkVHdlWVJrMFVNLVZ3S1dXNDd0eDlHNnY4elk?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5TT0JSN1pLY1Z0aVdsNmVURldIVVpDWFFLclQtQlNpS1o5YmZtYU5EVm9HVks3ejN6eVBQTkprTG55UkdmaXFDeDluUjJ0TjRxTEFENS0tX2E0NFpWb1hSX283ZF91NXJtYVQzN2xQd2dPd1HSAXdBVV95cUxQWFAtWFhwVXlPaVdvTWFpQkdwUGpPM3dBQzMzR1pXVmFsWkk2V29Vek5JTkJWTXAzZnBpMWUwVFhiRV9tM1AzQWt0Vl8wMnhOZzdFZHRQQU81UDh4UjhmbUdJcVNsQThzeGpON2dIUlVsaWlEVDVsdw?oc=5"
     },
     {
-      "stock_name": "에이팩트",
-      "date": "2026-03-22",
-      "title": "급등 축하합니다. (RF머트리얼즈, 아이엘, 에이팩트, 한일단조, 흥구석유, 모트렉스, 에스오에스랩, 한화시스템, 레이저옵텍, 서울반도체, 삼표시멘트, 다원넥스뷰, 성우하이텍 등)",
-      "source": "네이버 프리미엄콘텐츠",
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK증권, 주식병합·자사주 소각 단행…‘동전주 탈피’ 속도",
+      "source": "이지경제",
       "impact": "medium",
-      "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOS0xZUDNDTDl6U29kd2Nja2dJNDV0Z3o0TjNWMGRwZEQtUmFISkotWjJ1dVhHWVZkVEJpanZJTmZSc0RmMzRhMkFUYjlSbERhSGNSQmlOa2dWXy01Qk5USkRhbHlObDFrcVd2R3FiYjBBTzMzWWJPSUFvV2lXeVZfb0QxdE1JU3FZaTVV?oc=5"
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5xZ0d0aEtNVmNQSXFoT254cWV0ckx5ZWtybEljZjI5dUVES2IzTmJaNi1KdzhuUlBGTk5kbjNnTFhILVlPajN3NlFmTHUzUmZhLTRpQ19KXzg3UkRsdXR1TTJseG1BY2p1TTJwWUhR?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美주식예탁증서 상장 추진… “현금 100조원 확보”",
+      "source": "동아일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTFAtd18zc3RZMDhNUlpMYk5tTWNPTzFNNGxTTFktcnRaVkFJZWczTjQ2NkRxOEs3TThpUklwSHRhTlM5bWxKQWtoR1JLSUk4Sll1NFpNWEh4MTh3Sjk0bFJqYmtMUmZkcTJ3VmRDNVgzaUVjZ3RvS2c?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 증시 ‘주식예탁증서’ 상장 절차 착수",
+      "source": "부산일보",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBTTmp1WDgtb1dTRXJfTmxLTGRGUy1wUXRpNl8tUXFBRzJNUDZ0ejNVREdQemI3OVJyV2p0SU1MZTFRbDhpYk9JbHBJME1mZVZocWkyRUY5Q1U1dWxSeVJvUm9kdnZkZVZ6TExPQUw3N25uYmVh?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "\"SK하이닉스 10조 ADR 효과 미미…발행주식 15% 취득해 상장해야\"",
+      "source": "v.daum.net",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE1sY2Jwb2s2QlVWMzFUSXo4ZlZaNTk3UDcyVW9lTUlJMzFMblB0dEFRdTAyNFQ3UFZlNlZNQ1Y2bnRnNHB0azZvUkoxelEySzA?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "“마이크론만큼 주가 올라?” 미국에도 상장하는 SK하이닉스…국장이냐, 미장이냐 [투자360]",
+      "source": "헤럴드경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFB0bWhoVWtZNEFnVVNrb19XQ2ozWEl6YVhqVW9lc3BmREFwYWpWUEpmUDlGcldySGV5bXdDNDMzRXJUMERVMDM2V2padk9RWEVZU21tVEJB?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 올해 하반기 ADR 상장 추진…“순현금 100조원 확보 목표”",
+      "source": "경향신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5RN2lDb2ZuZ1I5dW1nRGFqOWNRTy1xbTY1ZUtaWnU1OEwteXNPYlJJZlhQV0xnalctaWtxTVlvOWxlcVJoSUtzTF8xbXc0bzE2NE9OejF6QTlnQdIBX0FVX3lxTE9XalhEQ2VVRmo2R19CeWNvbG90b2hrelJlbGQwZFAwQlZXN0R0dHkwWW5PUXBVYk1FRTg2NVpOUjRlN3RkZkxvdjhBX2gyeFpFTTZGRzlKNUNfRzAzYmFJ?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 주식예탁증서 상장 ‘첫발’",
+      "source": "경기신문",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5jTjlteUtYNng2QUNrUGFQREF2dHFKY3pfT0ltdTMtQndBajU3dk1hdXJSMlpfLWJTQ2E1anRrbVBFUnp4cTdWWktoamZjUEtFczhTamVMTWwzeWQyNk1RTENB?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK바이오사이언스, 최대주주등 소유주식수 62,813주 감소",
+      "source": "매일경제 마켓",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5vUG1QV1dCSEg1V2MwRC1LZklSeTZiazlRejFFNU5OUUNGYlFzdUtjRGZDTmJIbDZXUXIzMEZ5WGtrWTUxanBmWHBaS2Q5dnZGd3c?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 증권거래위 ADR 등록 신청서 제출",
+      "source": "오피니언뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBDVWNaX0FPLWxSY00zZFdMZGRoSjU4Wkd2VVZNaWwtNE1FQkhOZmY2d2o4bTY5SXpoTmthbTlyb2xtbV9TWnF5QWlVV0ZPdTNGOGFyaTRjbnVGR282amNIdXk0UkpnNDktT3Vva3o5SlI2QQ?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, ADR 상장 시동…\"주가 뛸 것\"",
+      "source": "한국경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE15MHhtZkp0dmowTE8xQnYzMUdHZnlVRUdKOGhqdlZmMURUNF9HbzdDS1hxS2lyanhjRnh4QjZYM1NEU25KMTVJZ0o3V0VTNWpvbG40bFdyUW90UdIBVEFVX3lxTE0yYkl1cnFRejRlQjd4cDY0WkF3SXVsZ3EwamdpSFZlcXVNVEV6TTA1dHk2OVd4ZkZlM1BRT0xpemlVdGctSHhZWGRJYmtUOHVwM1RWRg?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "“현금 충분한데 신주 발행?”…한국거버넌스포럼, SK하이닉스 ADR 상장 방식 반대 - 조선비즈",
+      "source": "Chosunbiz",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQUlhncmNzaDk5M09EN0tUMkR2YURnR3NMYlVRZUdTV1RDMTdkT3QwdlRWdU0wSjhfTkt5cWVfSUxEQnl1YXpidmhmSkpwbnpJS1NzRzZyQmtHRXBNLU5JM1lzUUdpVTZ3MHRIdHViUVNEaHJtY2x4NU5QRU4zMk4zTUswWC1RREpX0gGcAUFVX3lxTE9HNXA3dlo2LTV0RlVmdlpKdEQwbjhJQnVsSGhhSWFzUElhd0k3ZWxfWUhoRXVqMXA0QUd1dnR4QXZrcGwtMHFCRmlCM1VjWmhjMW5iLVl3VTZEMXhnQ2tlWU9fbFA0Zzk5aE1LNXYtNHFCdXI0aXNNazJkZG1Ib1ZFVWdJWGdiU3JsejlZem1VV0pnUkRXcTl5RjFiTQ?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 SEC에 ADR 등록 신청…미국 증시 진출 본격화",
+      "source": "스트레이트뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE13ci1wVmNIcVRMQ2hJM2V2aGh6NkJVd2RjTmNOS21VVmlmMC1SbTVoNkhncVVqakVfR2F5NDlWRG1TUWRFLWFoVVNlMVFxSmF2UTB6VHpkbDlIb0tHRnFmT2QtNXNyMEFrc0MwS2tTREJxcXPSAXdBVV95cUxQUFN3UU1qd1JubDhhd3Iwc2ZyWjFEYzl6eU1zNmhkcDYwSFZFWW43MjlxWXRLbkU2UE1CYzU1UnVaNDdtbk92OHk4V2MzaEdnSUpsNTRsc2xVNEJGR2MzVXU0TWpOcTltTGRnWTdwTDJVSkR0RzJLTQ?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스 주식, 미국으로 간다… '연내 상장' 목표",
+      "source": "서울와이어",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE54UUp6MXk1RzNhSDBKeUNueGlxbm5RN0REZFNPeHRmYWdOQ3lmVHpxc0U0ZlpseXp5c3ZZeFBpUUJ1SGFoM1p0Nk1DY3I2SUtrWHN2R3JnTFVaNWVrRmRuOS1zT0stNnBNVTBVSg?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "주요주주 미래에셋자산운용, SK리츠 주식 보유 변동 보고",
+      "source": "디지털투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFA0ZWFoY0tEWmFmSmZvT3F6b1dmejJFQi1Tc3FEVVV1WEhNQmtWQTFyTGxxUW5vdnlidUFoU1N1WGlCUTUxYWQxWS11d3pWSldSb1RLcTJfZjFpdk1yTDVWNTgyLTlaZWFwZlRGZjNQZ3NFX2s?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK증권, -7.13% VI 발동 - 조선비즈",
+      "source": "Chosunbiz",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQRW11Y2NHRWVELTZtSmhmYkJhZ1FWMzdrU3g2ZWMzUDc5ZkZzdE1OQm5IZE5oZUpyYkxuT1Q2RnBsYnRwQ00tR2tfbG9fanE2UEJWUlJPcnJ3Vmt2WEtUMmxPTU81dTNiUVE1ZjhtTEI3VUhJZXA0aW5fc1hEZVVRN0Itc9IBlwFBVV95cUxNLVFLR19ST1Y0bTJ5QVBZbG5XdmF5RXZPcHh6UDAyZEJIVldFc0Q4WVgzNGdiOUl3eElKV28tYlZBOE5GWnVaMEVPSU9EQ25LeGl6OVdnZU5fbzNjNTM4WnhUQ1M1NHBWYmY4bEVzZy1mY2o1MnBDbUtHMzg5di0xbmw4VkxMNmd4UzRMQXZwaDFNdGFjWUtN?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK바이오사이언스 최대주주등 소유주식, 보통주 6만2813주 감소",
+      "source": "디지털투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5LZ0wyQWJ4OFNJNENBS1pNeEFzV1hjZ09ZZnJpUHcyUU9UNFlmSWhQYk0xVlBDdW5QcjkteEZYZ0ZRTnk2RUdscFRLZzFHMGg4OVhxeTkwQUg2TEFLajZoV3ZodjUwQTFOX0ZoaDJxazJFcGM?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 증시 상장 시동... “현금 넘치는 회사 신주 발행 방식은 안된다”는 지적도",
+      "source": "v.daum.net",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9rTGV1MGhuS2ZoUDJuZXFHM2NDZjJEalNWelU4SHVkaTlrNGdmSGktQUQzdmhVWnUyRllSdk80NWUwZ0FGSTVYVWNaTkZxeHc?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "[뉴스인사이드_뉴스톡톡] SK하이닉스, 미국 주식예탁증서(ADR) 상장 추진",
+      "source": "뉴스인사이드",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBHUzJZaFhocmE1QlVVcjVzZDBIeTRiTE5ZVW52TFRuX241VmZtRGQtbVhsZFlTV0lqODh2X2lBTjhvNFY4OVliN2ZSQXVnejB6WTJQb0NVYm9kRGE5bWxIcFY0Z2FWdElHTGhUa3Jn?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "1억원 이상 매도체결 상위 20 종목(코스피)",
+      "source": "매일경제 마켓",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE01WUF5U2c2SUlhRHFEWmtfRURJWl8wRDA1bHp2VWdZWW51R3FjQlhVZWNPNW9QMDA5Y3Ytak92ajlxQVltdEwwRURoaU9jNUNZc3c?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, '주식도 수출'…ADR 상장으로 글로벌 도약 선언",
+      "source": "edaily.co.kr",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOWDM5bzhPZWlkQ25LRElUaHhQQ085VTc1REZvcWhNVFRQUHY3TnFKUlpVTEVYd3d2UHRqSHlZbVZtU01GR1FKY0pQMWVlUkhZc2pZb1NHNGg1Mk9hTi1rS0RZbVphY2xDdUc5U3lreTBEcTdpMWVTNURMenRRb2YwNg?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK스퀘어 임원 15인에 583억 자사주 지급 성과보상 및 주주가치 제고 연계",
+      "source": "데이터투자",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1qMTBWQ1lJWlVReEp1OTJIRkx2alNSdWVWSnRla3pXTkY4ZU5xa1lwNHdISFNaUll4bWE1eU9ERHNWY1dfRWwzOWdiZW8wNU1URWN5MjlmdFRPdFVIbE5FMll6WEw2OW1XLV9EQTlCNlRaMEE?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK증권우 주가, 3월 25일 장중 장중 한때 상한가 8,630원 22.06% 상승",
+      "source": "topstarnews.net",
+      "impact": "high",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBXQ3NzR0JTVExJNWY2LVp3OGJXMkhLWVlCNm1Nb3lLbTZwV0daRjZYT2Q4cWw4N1ZBbDV1WXJtYTE4N1NqdllzYlBrZEp6X2JjU0kybmQ3VWFnalRaMWJnUm94Z2diNHd0NHlNaWxFUUFnUQ?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스 주식 미장에서 산다...美 ADR 상장 본격 착수 \"연내 완료 목표\"",
+      "source": "생생비즈플러스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBZWUljMnQ1X214bTc5cFNiUWpSdVZPOTRqQVlWUHNIcUtUTVNsUzBqbHAyN1MtM25jb2ZHajg0bWwtaUU1WTNVNGRlaHFPQjBXT1ZNVzhONXBiQkpmS1NmWWhCVTNoU2Vsa0liaw?oc=5"
+    },
+    {
+      "stock_name": "SK",
+      "date": "2026-03-25",
+      "title": "SK하이닉스, 美 ADR 상장 추진…곽노정 “주주가치 제고 방향으로 추진”",
+      "source": "이투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE44WHctX3ZUSndHQ3E4WFVyTV9VOG9LZFRmdTVGVVh5VUZFeFZWNnBtRXNCWXk0NEV3bEdzS2t2U0pSN0JQcDBuZHkzSkZTZi1YaUFGN1A5X1ZIc3RUdm44eUNtTmhYRXJ0ckZmaWRKRkJuSkg4?oc=5"
+    },
+    {
+      "stock_name": "S-Oil",
+      "date": "2026-03-25",
+      "title": "S-Oil 주가, 3월 25일 장중 110,200원 1.66% 상승",
+      "source": "topstarnews.net",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5jMWdEY2lGemZWVnhNSFpvdUJKaFliU0F4eE1VMk12dmlLcHhxVU9hRWNPdmdwaVo0RmpBd2pNbHRsSExBR004UGhTakdiNVYzTmNGbDhlR1NvR0U1M2JpX01lNFZEY0p0S0FxN0hRbEM2dw?oc=5"
+    },
+    {
+      "stock_name": "LG에너지솔루션",
+      "date": "2026-03-25",
+      "title": "삼전닉스에 현대차까지 쓸어담고, 한화에어로는 ‘차익실현’ [주식 초고수는 지금]",
+      "source": "매일경제",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFA4MDhJdkw4MHBUWGpRb3RNaXlDUzlGd2duNmRNR2ZST3Exem9YNmw5cDYwcTlidnA2MEpDSjFMRE14MTNsLWZTMkE4WGoxWVNmQVE?oc=5"
+    },
+    {
+      "stock_name": "롯데쇼핑",
+      "date": "2026-03-25",
+      "title": "국민연금이 찍었다…주가 60% 급등한 종목",
+      "source": "한국경제TV",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE56N0o5ZFk1a0lFNDRWTUhUN1V5YkNPTVJVUmhVdHZ3VEcwTUt1ZERhckhsVDVUZXhpUHZGM1ZfVEQzdlZscDAzVFJ1MmY2NGFXNHpBTkdWdkFucFMwSXY1X1lYNHU1dndmZHlBZmZmYmhVSFBFdEZj?oc=5"
+    },
+    {
+      "stock_name": "한국전력",
+      "date": "2026-03-25",
+      "title": "한국전력공사, 제65기 재무제표 승인·주당 1542원 현금배당 결의",
+      "source": "디지털투데이",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBXZzc1NGNhQ0JxUlRpalhOeGpnM2tzYmxtUmRqdEhTdFY3TkhsT2dOZi1JQWN2UGw1ZjFJSmd1SlNGSnFfeTROOU5MdjNOY1pzcm00ZG1kYl9mT21QZmJNQnBlZXd5MTR0bWNaWEs0Vk1qSUk?oc=5"
+    },
+    {
+      "stock_name": "한국전력",
+      "date": "2026-03-25",
+      "title": "한국전력 주가, 3월 25일 장중 46,450원 지난 종가 대비 하락세",
+      "source": "topstarnews.net",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9NVzFMRnBtaS1SVkpqSTZQRFZPUF9pV1lpcldST3l2dVFNZFRDZnhUQUJkMjdNV3czcVpJRlFxUVZ3S18yUFllRE1kazE4Z3hWVm9ZbF9hTjJSRjRBOEh5N2MxUWpMNGJJZnJPdEJleXBuQQ?oc=5"
+    },
+    {
+      "stock_name": "SK이노베이션",
+      "date": "2026-03-25",
+      "title": "SK이노베이션 주가, 3월 25일 114,100원 3.63% 상승 마감",
+      "source": "topstarnews.net",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFA4dXJMMVVqRG1rM0VLX3puZlpqRnkwWTlCcVB2U2JaV3U2T3pnZ3gwRWZjZm12ZEp6NWRuMGpKWWJUM3F5cm1Uc1YtTXQxNXFrOTlVNVBxdm1zQUdpNlJhOW9NMjFEUXZTQWp6RHgtekFXUQ?oc=5"
+    },
+    {
+      "stock_name": "SK이노베이션",
+      "date": "2026-03-25",
+      "title": "SK이노베이션 주가 상승 중",
+      "source": "아시아뉴스통신",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE4tMUdiNmhpbnh3OF9hdW1KYmQ2bVdYaDdwSnZlSllsWVA5SFZsS0ZadURWNVFSZHVNa1c0ZVR0aWhiMC1oWHBwTlNtZFo4Vl9lREwzM2RHQlAzTTNh?oc=5"
+    },
+    {
+      "stock_name": "코난테크놀로지",
+      "date": "2026-03-25",
+      "title": "\"생성형 AI, 이제 실적으로 증명\"... SKAI·코난테크놀로지 등 소프트웨어주 주가 방긋",
+      "source": "핀포인트뉴스",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBxVi0yNXB2emowLVdQTnN0R2lkd1gxMXIyQzBRQ0VFeFNXWU9qczZnWXJGdlQ4c1ZVY0J5WXNhaTFlcTZWWm9ncm4tLXV6LXJ6em9oRDZxTDdiV05wSzNtRHkyNXk1bjhwNlkzRmlvMUVEMVE?oc=5"
+    },
+    {
+      "stock_name": "잉글우드랩",
+      "date": "2026-03-25",
+      "title": "셀트리온, '2052억' 규모 장질환 신약 후보물질 도입...고바이오랩과 글로벌 독점 계약",
+      "source": "데이터투자",
+      "impact": "medium",
+      "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFBtRnlQbGhLMlZJUFVKQ29Kak1RTUpFcWlFTlV3UjNmZ1c5ZzJEbjM2ekxNTWFUdE5VS05BNFFZR2pibHdZLW5XSm1lYkprMG9NRlVWOTFrd2xoajEwTDBUVFFKczU0MkROXy1VLWtvS1RRN1k?oc=5"
     }
   ],
   "news_boost_map": {
-    "아이티엠반도체": {
+    "HD현대일렉트릭": {
       "boost": 3,
-      "reason": "아이티엠반도체 투자분석 2026. 03. 22"
+      "reason": "변압기가 모자란다...효성중공업·HD현대일렉트릭, 역대급 호황에 주가 고"
     },
-    "에이팩트": {
+    "SK": {
+      "boost": 5,
+      "reason": "SK증권우 주가, 3월 25일 장중 장중 한때 상한가 8,630원 22."
+    },
+    "S-Oil": {
       "boost": 3,
-      "reason": "급등 축하합니다. (RF머트리얼즈, 아이엘, 에이팩트, 한일단조, 흥구석"
+      "reason": "S-Oil 주가, 3월 25일 장중 110,200원 1.66% 상승"
+    },
+    "LG에너지솔루션": {
+      "boost": 3,
+      "reason": "삼전닉스에 현대차까지 쓸어담고, 한화에어로는 ‘차익실현’ [주식 초고수는"
+    },
+    "롯데쇼핑": {
+      "boost": 3,
+      "reason": "국민연금이 찍었다…주가 60% 급등한 종목"
+    },
+    "한국전력": {
+      "boost": 3,
+      "reason": "한국전력공사, 제65기 재무제표 승인·주당 1542원 현금배당 결의"
+    },
+    "SK이노베이션": {
+      "boost": 3,
+      "reason": "SK이노베이션 주가, 3월 25일 114,100원 3.63% 상승 마감"
+    },
+    "코난테크놀로지": {
+      "boost": 3,
+      "reason": "\"생성형 AI, 이제 실적으로 증명\"... SKAI·코난테크놀로지 등 소"
+    },
+    "잉글우드랩": {
+      "boost": 3,
+      "reason": "셀트리온, '2052억' 규모 장질환 신약 후보물질 도입...고바이오랩과"
     }
   },
   "stats": {
-    "total_reports": 0,
-    "positive_reports": 0,
+    "total_reports": 18,
+    "positive_reports": 4,
     "negative_reports": 0,
-    "news_alerts": 2,
+    "news_alerts": 34,
     "themes_count": 5
   }
 }

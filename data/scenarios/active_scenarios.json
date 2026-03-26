@@ -1,48 +1,81 @@
 {
-  "updated": "2026-03-23T20:54:03.353591",
+  "updated": "2026-03-26T21:16:32.800799",
   "scenarios": {
     "WAR_MIDDLE_EAST": {
       "first_detected": "2026-03-20",
       "current_phase": 3,
-      "days_active": 3,
-      "score": 100,
+      "days_active": 6,
+      "score": 67,
       "reasons": [
-        "키워드 2건 (약)",
-        "WTI 1d +3.5% (>=3.0%)",
-        "Gold 1d +3.1% (>=1.5%)",
-        "VIX 26.8 >= 25"
+        "키워드 87건 (강)",
+        "Gold 1d +3.0089% (>=1.5%)"
       ],
+      "news_count": 87,
+      "last_evaluated": "2026-03-26",
       "last_phase_change": "2026-03-23"
     },
     "FED_RATE_CUT": {
       "first_detected": "2026-03-20",
-      "current_phase": 1,
-      "days_active": 3,
-      "score": 45,
+      "current_phase": 0,
+      "days_active": 6,
+      "score": 5,
       "reasons": [
-        "키워드 4건"
+        "키워드 1건 (미약)"
       ],
-      "last_phase_change": "2026-03-20"
+      "news_count": 1,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
     },
     "OIL_SPIKE": {
       "first_detected": "2026-03-20",
-      "current_phase": 1,
-      "days_active": 3,
-      "score": 55,
+      "current_phase": 2,
+      "days_active": 6,
+      "score": 48,
       "reasons": [
-        "키워드 6건"
+        "키워드 11건 (강)",
+        "WTI $89.33 >= $85"
       ],
-      "last_phase_change": "2026-03-20"
+      "news_count": 11,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
     },
     "SEMICONDUCTOR_CYCLE_UP": {
       "first_detected": "2026-03-20",
-      "current_phase": 1,
-      "days_active": 3,
-      "score": 40,
+      "current_phase": 0,
+      "days_active": 6,
+      "score": 15,
       "reasons": [
-        "키워드 3건"
+        "키워드 2건 (약)"
       ],
-      "last_phase_change": "2026-03-20"
+      "news_count": 2,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "SPACEX_IPO": {
+      "first_detected": "2026-03-26",
+      "current_phase": 1,
+      "days_active": 0,
+      "score": 39,
+      "reasons": [
+        "키워드 5건 (강)"
+      ],
+      "news_count": 5,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
+    },
+    "COMMODITY_SUPERCYCLE": {
+      "first_detected": "2026-03-26",
+      "current_phase": 3,
+      "days_active": 0,
+      "score": 60,
+      "reasons": [
+        "키워드 2건 (약)",
+        "구리 갭 135.5% (과열)",
+        "TiO2 갭 14.3% (매수구간!)"
+      ],
+      "news_count": 2,
+      "last_evaluated": "2026-03-26",
+      "last_phase_change": "2026-03-26"
     }
   }
 }

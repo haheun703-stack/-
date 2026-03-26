@@ -1,0 +1,101 @@
+{
+  "date": "2026-03-25",
+  "total_checks": 5,
+  "adjustments": {
+    "positive": 1,
+    "negative": 1,
+    "neutral": 3
+  },
+  "filtered_out": 0,
+  "avg_adjustment": 0.02,
+  "records": [
+    {
+      "symbol": "278470",
+      "name": "에이피알",
+      "signal_type": "buy",
+      "daily_bias": "bearish",
+      "confidence_adjust": -0.1,
+      "conviction_before": 8,
+      "conviction_delta": -1,
+      "conviction_after": 7,
+      "tags": [
+        "BIAS_AGAINST",
+        "NEAR_SUPPORT"
+      ],
+      "reason": "당일 bias bearish (OR저 이탈) / 지지 근접: 월간고 332,000 (-0.1%)",
+      "suggested_target": 342000,
+      "suggested_stop": 332000,
+      "filtered": false
+    },
+    {
+      "symbol": "011210",
+      "name": "현대위아",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": 0.15,
+      "conviction_before": 8,
+      "conviction_delta": 2,
+      "conviction_after": 10,
+      "tags": [
+        "NARROW_OR",
+        "EQ_LOW_SWEEP_REVERSAL"
+      ],
+      "reason": "OR 극도 좁음 (ATR 대비 0.18) → 축적 가능 / EqLow Sweep: 81,425 x4 이탈 후 반등 (유동성 흡수)",
+      "suggested_target": 83200,
+      "suggested_stop": 80200,
+      "filtered": false
+    },
+    {
+      "symbol": "298040",
+      "name": "효성중공업",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": 0.0,
+      "conviction_before": 8,
+      "conviction_delta": 0,
+      "conviction_after": 8,
+      "tags": [],
+      "reason": "ICT 특이사항 없음",
+      "suggested_target": 2759000,
+      "suggested_stop": 2608000,
+      "filtered": false
+    },
+    {
+      "symbol": "267260",
+      "name": "HD현대일렉트릭",
+      "signal_type": "buy",
+      "daily_bias": "bullish",
+      "confidence_adjust": 0.05,
+      "conviction_before": 7,
+      "conviction_delta": 0,
+      "conviction_after": 7,
+      "tags": [
+        "BIAS_ALIGNED",
+        "EQ_LOW_SWEEP_REVERSAL",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "당일 bias bullish 일치 / EqLow Sweep: 907,000 x2 이탈 후 반등 (유동성 흡수) / EqHigh 저항: 926,500 x2 (+0.2%)",
+      "suggested_target": 954000,
+      "suggested_stop": 896000,
+      "filtered": false
+    },
+    {
+      "symbol": "267270",
+      "name": "HD현대건설기계",
+      "signal_type": "buy",
+      "daily_bias": "neutral",
+      "confidence_adjust": 0.0,
+      "conviction_before": 7,
+      "conviction_delta": 0,
+      "conviction_after": 7,
+      "tags": [
+        "EQ_LOW_SWEEP_REVERSAL",
+        "NEAR_EQ_HIGH"
+      ],
+      "reason": "EqLow Sweep: 131,050 x2 이탈 후 반등 (유동성 흡수) / EqHigh 저항: 132,950 x2 (+0.5%)",
+      "suggested_target": 138000,
+      "suggested_stop": 129600,
+      "filtered": false
+    }
+  ]
+}

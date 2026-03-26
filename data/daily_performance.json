@@ -228,5 +228,54 @@
     ],
     "kospi_change_pct": -6.49,
     "regime_hit": true
+  },
+  {
+    "date": "2026-03-24",
+    "regime_predicted": "중립",
+    "regime_confidence": 0.7,
+    "attack_sectors": [
+      "에너지/정유",
+      "조선/방산"
+    ],
+    "avoid_sectors": [
+      "IT서비스",
+      "소프트웨어",
+      "게임",
+      "엔터테인먼트"
+    ],
+    "kospi_change_pct": 2.74,
+    "regime_hit": false
+  },
+  {
+    "date": "2026-03-25",
+    "regime_predicted": "중립",
+    "regime_confidence": 0.75,
+    "attack_sectors": [
+      "방산/조선",
+      "에너지/화학",
+      "원전/SMR"
+    ],
+    "avoid_sectors": [
+      "IT/소프트웨어",
+      "항공/운송"
+    ],
+    "kospi_change_pct": 1.59,
+    "regime_hit": false
+  },
+  {
+    "date": "2026-03-26",
+    "regime_predicted": "중립",
+    "regime_confidence": 0.7,
+    "attack_sectors": [
+      "방산",
+      "조선",
+      "원전/SMR"
+    ],
+    "avoid_sectors": [
+      "게임/SW",
+      "금융"
+    ],
+    "kospi_change_pct": -3.22,
+    "regime_hit": false
   }
 ]

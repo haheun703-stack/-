@@ -1,656 +1,653 @@
 {
-  "date": "2026-03-23",
-  "us_close_date": "2026-03-20",
-  "generated_at": "2026-03-23 14:26",
+  "date": "2026-03-26",
+  "us_close_date": "2026-03-25",
+  "generated_at": "2026-03-26 17:52",
   "index_direction": {
     "EWY": {
-      "ret_1d": -6.71,
-      "ret_5d": 1.31,
+      "ret_1d": -0.78,
+      "ret_5d": -5.25,
       "above_sma20": false
     },
     "QQQ": {
-      "ret_1d": -1.85,
-      "ret_5d": -1.96,
+      "ret_1d": 0.66,
+      "ret_5d": -0.88,
       "above_sma20": false
     },
     "SPY": {
-      "ret_1d": -1.7,
-      "ret_5d": -2.07,
+      "ret_1d": 0.56,
+      "ret_5d": -0.45,
       "above_sma20": false
     },
     "DIA": {
-      "ret_1d": -1.12,
-      "ret_5d": -2.26,
+      "ret_1d": 0.64,
+      "ret_5d": 0.67,
       "above_sma20": false
     }
   },
   "vix": {
-    "level": 26.8,
-    "zscore": 1.94,
-    "status": "공포"
+    "level": 25.3,
+    "zscore": 1.32,
+    "status": "경계"
   },
   "commodities": {
     "gold": {
-      "ret_1d": -3.06,
-      "ret_5d": -10.3,
+      "ret_1d": 3.01,
+      "ret_5d": -2.37,
       "above_sma20": false,
-      "signal": "risk_on"
+      "signal": "risk_off"
     },
     "oil": {
-      "ret_1d": 3.47,
-      "ret_5d": 1.28,
+      "ret_1d": -1.0,
+      "ret_5d": -3.38,
       "above_sma20": true,
-      "signal": "demand_up"
+      "signal": "demand_down"
     },
     "copper": {
-      "ret_1d": -4.56,
-      "ret_5d": -9.57,
+      "ret_1d": 3.62,
+      "ret_5d": 4.5,
       "above_sma20": false,
-      "signal": "contraction"
+      "signal": "expansion"
     },
     "silver": {
-      "ret_1d": -6.33,
-      "ret_5d": -15.37,
-      "signal": "down"
+      "ret_1d": 3.59,
+      "ret_5d": -0.72,
+      "signal": "up"
     },
     "natgas": {
-      "ret_1d": -1.35,
-      "ret_5d": -1.98,
-      "above_sma20": true,
-      "signal": "demand_down"
+      "ret_1d": 1.11,
+      "ret_5d": -5.57,
+      "above_sma20": false,
+      "signal": "demand_up"
     },
     "uranium": {
-      "ret_1d": -3.79,
-      "ret_5d": -5.78,
+      "ret_1d": 1.58,
+      "ret_5d": 1.41,
       "above_sma20": false,
-      "signal": "demand_down"
+      "signal": "demand_up"
     },
     "copper_gold_ratio": {
-      "ratio": 0.1671,
-      "sma20": 0.1797,
-      "regime": "contraction"
+      "ratio": 0.1817,
+      "sma20": 0.1761,
+      "regime": "expansion"
     }
   },
   "sector_signals": {
     "반도체": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:+1.0%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
     },
     "IT": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:+1.0%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
     },
     "소프트웨어": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:+1.0%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
     },
     "전자부품": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:+1.0%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
     },
     "디스플레이": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLK 1D:+0.0%, 상대강도5D:+1.0%"
+      "driver": "XLK 1D:+0.0%, 상대강도5D:-0.8%"
     },
     "은행": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:+2.5%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:+1.2%"
     },
     "증권": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:+2.5%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:+1.2%"
     },
     "보험": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:+2.5%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:+1.2%"
     },
     "금융": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLF 1D:+0.0%, 상대강도5D:+2.5%"
+      "driver": "XLF 1D:+0.0%, 상대강도5D:+1.2%"
     },
     "에너지": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+4.9%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+2.5%"
     },
     "정유": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+4.9%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+2.5%"
     },
     "화학": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLE 1D:+0.0%, 상대강도5D:+4.9%"
+      "driver": "XLE 1D:+0.0%, 상대강도5D:+2.5%"
     },
     "조선": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+1.1%"
     },
     "기계": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+1.1%"
     },
     "건설": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+1.1%"
     },
     "자동차": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+1.1%"
     },
     "운송": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLI 1D:+0.0%, 상대강도5D:+0.3%"
+      "driver": "XLI 1D:+0.0%, 상대강도5D:+1.1%"
     },
     "제약": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.9%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.2%"
     },
     "바이오": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.9%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.2%"
     },
     "의료기기": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.9%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.2%"
     },
     "헬스케어": {
       "signal": "neutral",
       "score": 0.0,
-      "driver": "XLV 1D:+0.0%, 상대강도5D:-0.9%"
+      "driver": "XLV 1D:+0.0%, 상대강도5D:+0.2%"
     },
     "철강금속": {
-      "signal": "bearish",
-      "score": -0.5,
-      "driver": "GLD 1D:-3.1%, 상대강도5D:-8.2%"
+      "signal": "neutral",
+      "score": 0.0,
+      "driver": "GLD 1D:+3.0%, 상대강도5D:-1.9%"
     }
   },
-  "composite": "bearish",
-  "score": -0.348,
+  "composite": "neutral",
+  "score": -0.093,
   "l2_pattern": {
     "sample_count": 98,
     "status": "ok",
     "kospi": {
-      "mean_chg": -0.719,
-      "median_chg": -0.509,
-      "std": 2.124,
-      "positive_rate": 35.7
+      "mean_chg": 0.386,
+      "median_chg": 0.233,
+      "std": 1.26,
+      "positive_rate": 62.2
     },
     "kospi_open_gap": {
-      "mean_gap": -5.628,
-      "median_gap": -0.441
+      "mean_gap": -0.685,
+      "median_gap": 0.317
     },
     "sectors": {
       "반도체": {
-        "mean_chg": -0.98,
-        "positive_rate": 41.2,
+        "mean_chg": 0.694,
+        "positive_rate": 69.1,
         "sample_count": 97
       },
       "2차전지": {
-        "mean_chg": -1.292,
-        "positive_rate": 26.8,
+        "mean_chg": 0.322,
+        "positive_rate": 46.4,
         "sample_count": 97
       },
       "바이오": {
-        "mean_chg": -0.643,
-        "positive_rate": 34.0,
+        "mean_chg": 0.183,
+        "positive_rate": 57.7,
         "sample_count": 97
       },
       "은행": {
-        "mean_chg": -0.152,
-        "positive_rate": 40.6,
-        "sample_count": 96
+        "mean_chg": 0.137,
+        "positive_rate": 51.5,
+        "sample_count": 97
       },
       "철강": {
-        "mean_chg": -1.073,
-        "positive_rate": 27.8,
+        "mean_chg": 0.385,
+        "positive_rate": 50.5,
         "sample_count": 97
       },
       "IT": {
-        "mean_chg": -0.744,
-        "positive_rate": 37.1,
+        "mean_chg": 0.519,
+        "positive_rate": 62.9,
         "sample_count": 97
       },
       "에너지": {
-        "mean_chg": -0.95,
-        "positive_rate": 30.9,
+        "mean_chg": 0.235,
+        "positive_rate": 49.5,
         "sample_count": 97
       },
       "내수": {
-        "mean_chg": -0.745,
-        "positive_rate": 34.4,
-        "sample_count": 96
+        "mean_chg": 0.481,
+        "positive_rate": 66.0,
+        "sample_count": 97
       }
     },
-    "pattern_adjustment": -3.6,
+    "pattern_adjustment": 1.9,
     "confidence": 1.0,
     "today_us_vector": {
-      "us_nasdaq_chg": -1.8482,
-      "us_sp500_chg": -1.702,
-      "us_vix_chg": 11.3051,
-      "us_soxx_chg": -2.2604,
-      "us_dollar_chg": 0.3626,
-      "us_ewy_chg": -6.7052
+      "us_nasdaq_chg": 0.6576,
+      "us_sp500_chg": 0.5573,
+      "us_vix_chg": -6.0111,
+      "us_soxx_chg": 1.2404,
+      "us_dollar_chg": 0.1808,
+      "us_ewy_chg": -0.7845
     }
   },
   "sector_kills": {
     "반도체": {
       "killed": false,
-      "driver_ret": -2.26,
+      "driver_ret": 1.24,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "전자부품": {
       "killed": false,
-      "driver_ret": -2.26,
+      "driver_ret": 1.24,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "디스플레이": {
       "killed": false,
-      "driver_ret": -2.26,
+      "driver_ret": 1.24,
       "threshold_pct": -3.0,
       "sensitivity": 0.95
     },
     "IT": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -3.5,
       "sensitivity": 0.7
     },
     "소프트웨어": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -3.5,
       "sensitivity": 0.7
     },
     "에너지": {
       "killed": false,
-      "driver_ret": 3.47,
+      "driver_ret": -1.0,
       "threshold_pct": -4.0,
       "sensitivity": 0.85
     },
     "정유": {
       "killed": false,
-      "driver_ret": 3.47,
+      "driver_ret": -1.0,
       "threshold_pct": -4.0,
       "sensitivity": 0.85
     },
     "화학": {
       "killed": false,
-      "driver_ret": 3.47,
+      "driver_ret": -1.0,
       "threshold_pct": -4.0,
       "sensitivity": 0.8
     },
     "은행": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "증권": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "금융": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -5.0,
       "sensitivity": 0.5
     },
     "제약": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "바이오": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "의료기기": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "헬스케어": {
       "killed": false,
-      "driver_ret": -1.85,
+      "driver_ret": 0.66,
       "threshold_pct": -5.0,
       "sensitivity": 0.45
     },
     "조선": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "기계": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "건설": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "자동차": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     },
     "운송": {
       "killed": false,
-      "driver_ret": -1.7,
+      "driver_ret": 0.56,
       "threshold_pct": -7.0,
       "sensitivity": 0.25
     }
   },
   "special_rules": [
     {
-      "name": "BOND_VIGILANTE",
-      "desc": "채권 자경단 발동 → 포지션 축소",
-      "global_position_cap": 0.3
+      "name": "GOLD_SPIKE",
+      "desc": "금(GLD) +3.0% 급등 -> risk-off 경계",
+      "global_position_cap": 0.8
     }
   ],
   "kr_closing": {
     "enabled": true,
-    "score": -0.497,
+    "score": -0.795,
     "details": {
       "flow": {
-        "foreign_5d": -140576,
-        "inst_5d": -37499,
+        "foreign_5d": -112891,
+        "inst_5d": -18910,
         "foreign_score": -1.0,
-        "inst_score": -1.0,
-        "foreign_3d_streak": "mixed"
+        "inst_score": -0.63,
+        "foreign_3d_streak": "sell"
       },
       "flow_score": -1.0,
       "regime": {
-        "regime": "CAUTION",
-        "macro_score": 51,
+        "regime": "BEAR",
+        "macro_score": 35,
         "regime_history_5d": [
-          "BEAR",
-          "BEAR",
-          "BEAR",
           "CAUTION",
-          "CAUTION"
+          "CAUTION",
+          "BEAR",
+          "BEAR",
+          "BEAR"
         ]
       },
-      "regime_score": 0.006
+      "regime_score": -0.59
     }
   },
   "nightwatch": {
     "version": "2.0",
-    "nightwatch_score": -0.395,
-    "bond_vigilante_veto": true,
+    "nightwatch_score": 0.0,
+    "bond_vigilante_veto": false,
     "layers": {
       "L0_leading": {
-        "hyg_ret_5d": -0.3535,
+        "hyg_ret_5d": -0.3013,
         "hyg_status": "NORMAL",
-        "hyg_spy_divergence": 1.7181,
+        "hyg_spy_divergence": 0.1504,
         "credit_divergence": false,
-        "vix_term_ratio": 0.9763,
+        "vix_term_ratio": 0.9883,
         "vix_term_status": "NORMAL",
         "score": 0.0
       },
       "L1_bond_vigilante": {
-        "spy_ret_1d": -1.702,
-        "tnx_change_bp": 0.11,
-        "tyx_change_bp": 0.108,
+        "spy_ret_1d": 0.5573,
+        "tnx_change_bp": -0.064,
+        "tyx_change_bp": -0.044,
         "yield_spread_10_30": -0.569,
-        "cross_regime": "VIGILANTE_VETO",
+        "cross_regime": "NEUTRAL",
         "spread_inversion_veto": false,
-        "score": -0.8,
-        "veto": true
+        "score": 0.0,
+        "veto": false
       },
       "L2_regime_transition": {
-        "credit_spread_z": 0.32,
+        "credit_spread_z": -0.51,
         "credit_status": "NORMAL",
-        "move_z": 3.88,
-        "move_level": 108.8,
-        "move_status": "WARNING",
-        "yield_curve_10_3m": 0.773,
+        "move_z": 2.01,
+        "move_level": 97.6,
+        "move_status": "NORMAL",
+        "yield_curve_10_3m": 0.708,
         "curve_status": "NEUTRAL",
         "dual_alarm": false,
-        "score": -0.2
+        "score": 0.0
       },
       "L4_fx_triangle": {
-        "usdjpy_change_pct": 0.9882,
-        "usdkrw_change_pct": 1.0414,
+        "usdjpy_change_pct": 0.4652,
+        "usdkrw_change_pct": 0.2369,
         "yen_carry_status": "STABLE",
-        "krw_status": "WEAK",
+        "krw_status": "STABLE",
         "asia_risk_off": false,
         "yen_carry_unwind": false,
-        "score": -0.3
+        "score": 0.0
       }
     }
   },
-  "ensemble_score": -0.5,
+  "ensemble_score": -0.2758,
   "shock_type": {
-    "shock_type": "RATE",
-    "confidence": 0.65,
-    "description": "금리 충격 (채권/금리 급변)",
+    "shock_type": "NONE",
+    "confidence": 0.0,
+    "description": "특이 충격 없음",
     "scores": {
-      "RATE": 65,
-      "LIQUIDITY": 25
+      "GEOPOLITICAL": 15
     },
     "signals": {
-      "tnx_spike_bp": 11.0,
-      "bond_vigilante_veto": true,
-      "copper_crash": -4.56
+      "gold_risk_off": 3.01
     }
   },
-  "grade": "STRONG_BEAR",
-  "l1_score_100": -34.8,
-  "ensemble_score_100": -50.0,
-  "combined_score_100": -53.6,
+  "grade": "MILD_BEAR",
+  "l1_score_100": -9.3,
+  "ensemble_score_100": -27.6,
+  "combined_score_100": -25.7,
   "inverse_signal": {
     "enabled": false
   },
   "sector_momentum": {
     "반도체": {
-      "us_etf": "XLK",
-      "consecutive_up": 0,
+      "us_etf": "SOXX",
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.51,
-      "boost": 0.0
+      "ret_1d_pct": 1.24,
+      "ret_5d_pct": 1.48,
+      "boost": 3.0
     },
     "IT": {
       "us_etf": "XLK",
-      "consecutive_up": 0,
+      "consecutive_up": 1,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.51,
+      "ret_1d_pct": 0.45,
+      "ret_5d_pct": -1.21,
       "boost": 0.0
     },
     "소프트웨어": {
       "us_etf": "XLK",
-      "consecutive_up": 0,
+      "consecutive_up": 1,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.51,
+      "ret_1d_pct": 0.45,
+      "ret_5d_pct": -1.21,
       "boost": 0.0
     },
     "전자부품": {
-      "us_etf": "XLK",
-      "consecutive_up": 0,
+      "us_etf": "SOXX",
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.51,
-      "boost": 0.0
+      "ret_1d_pct": 1.24,
+      "ret_5d_pct": 1.48,
+      "boost": 3.0
     },
     "디스플레이": {
-      "us_etf": "XLK",
-      "consecutive_up": 0,
+      "us_etf": "SOXX",
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.51,
-      "boost": 0.0
+      "ret_1d_pct": 1.24,
+      "ret_5d_pct": 1.48,
+      "boost": 3.0
     },
     "은행": {
       "us_etf": "XLF",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -0.45,
-      "boost": 0.0
+      "ret_1d_pct": 0.12,
+      "ret_5d_pct": 0.71,
+      "boost": 3.0
     },
     "증권": {
       "us_etf": "XLF",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -0.45,
-      "boost": 0.0
+      "ret_1d_pct": 0.12,
+      "ret_5d_pct": 0.71,
+      "boost": 3.0
     },
     "보험": {
       "us_etf": "XLF",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -0.45,
-      "boost": 0.0
+      "ret_1d_pct": 0.12,
+      "ret_5d_pct": 0.71,
+      "boost": 3.0
     },
     "금융": {
       "us_etf": "XLF",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -0.45,
-      "boost": 0.0
+      "ret_1d_pct": 0.12,
+      "ret_5d_pct": 0.71,
+      "boost": 3.0
     },
     "에너지": {
       "us_etf": "XLE",
       "consecutive_up": 0,
-      "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": 2.44,
+      "consecutive_down": 1,
+      "ret_1d_pct": -0.44,
+      "ret_5d_pct": 2.04,
       "boost": 0.0
     },
     "정유": {
       "us_etf": "XLE",
       "consecutive_up": 0,
-      "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": 2.44,
+      "consecutive_down": 1,
+      "ret_1d_pct": -0.44,
+      "ret_5d_pct": 2.04,
       "boost": 0.0
     },
     "화학": {
       "us_etf": "XLE",
       "consecutive_up": 0,
-      "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": 2.44,
+      "consecutive_down": 1,
+      "ret_1d_pct": -0.44,
+      "ret_5d_pct": 2.04,
       "boost": 0.0
     },
     "조선": {
       "us_etf": "XLI",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.64,
-      "boost": 0.0
+      "ret_1d_pct": 0.67,
+      "ret_5d_pct": 0.63,
+      "boost": 3.0
     },
     "기계": {
       "us_etf": "XLI",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.64,
-      "boost": 0.0
+      "ret_1d_pct": 0.67,
+      "ret_5d_pct": 0.63,
+      "boost": 3.0
     },
     "건설": {
       "us_etf": "XLI",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.64,
-      "boost": 0.0
+      "ret_1d_pct": 0.67,
+      "ret_5d_pct": 0.63,
+      "boost": 3.0
     },
     "자동차": {
       "us_etf": "XLI",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.64,
-      "boost": 0.0
+      "ret_1d_pct": 0.67,
+      "ret_5d_pct": 0.63,
+      "boost": 3.0
     },
     "운송": {
       "us_etf": "XLI",
-      "consecutive_up": 0,
+      "consecutive_up": 3,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -2.64,
-      "boost": 0.0
+      "ret_1d_pct": 0.67,
+      "ret_5d_pct": 0.63,
+      "boost": 3.0
     },
     "제약": {
       "us_etf": "XLV",
-      "consecutive_up": 0,
+      "consecutive_up": 2,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -3.76,
-      "boost": 0.0
+      "ret_1d_pct": 1.0,
+      "ret_5d_pct": -0.25,
+      "boost": 1.0
     },
     "바이오": {
       "us_etf": "XLV",
-      "consecutive_up": 0,
+      "consecutive_up": 2,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -3.76,
-      "boost": 0.0
+      "ret_1d_pct": 1.0,
+      "ret_5d_pct": -0.25,
+      "boost": 1.0
     },
     "의료기기": {
       "us_etf": "XLV",
-      "consecutive_up": 0,
+      "consecutive_up": 2,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -3.76,
-      "boost": 0.0
+      "ret_1d_pct": 1.0,
+      "ret_5d_pct": -0.25,
+      "boost": 1.0
     },
     "헬스케어": {
       "us_etf": "XLV",
-      "consecutive_up": 0,
+      "consecutive_up": 2,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -3.76,
-      "boost": 0.0
+      "ret_1d_pct": 1.0,
+      "ret_5d_pct": -0.25,
+      "boost": 1.0
     },
     "철강금속": {
       "us_etf": "GLD",
-      "consecutive_up": 0,
+      "consecutive_up": 2,
       "consecutive_down": 0,
-      "ret_1d_pct": 0.0,
-      "ret_5d_pct": -10.22,
-      "boost": 0.0
+      "ret_1d_pct": 3.01,
+      "ret_5d_pct": -2.37,
+      "boost": 1.0
     }
   },
-  "summary": "US STRONG_BEAR (-53.6 L2:-3.6 NW:-0.40 VETO!) | SPY -1.7% QQQ -1.9% | VIX 27 (공포) | Au-3.1% Oil+3.5% Cu-4.6% NG-1.4% U-3.8%"
+  "summary": "US MILD_BEAR (-25.7 L2:+1.9 NW:+0.00) | SPY +0.6% QQQ +0.7% | VIX 25 (경계) | Au+3.0% Oil-1.0% Cu+3.6% NG+1.1% U+1.6%"
 }

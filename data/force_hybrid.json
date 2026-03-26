@@ -1,1059 +1,1047 @@
 {
-  "updated_at": "2026-03-23 20:58",
+  "updated_at": "2026-03-26 18:14",
   "supply_demand_health": {
-    "score": 48.4,
+    "score": 49.4,
     "alert": "주의",
     "alert_color": "#F59E0B",
     "alert_desc": "수급 혼조 — 매수/매도 혼재",
     "total_stocks": 1022,
     "foreign": {
-      "net_5d": -7126138258553,
-      "net_today": -3916060363920,
-      "buying_count": 509,
-      "buying_ratio": 49.8
+      "net_5d": -8361317258553,
+      "net_today": -44167363920,
+      "buying_count": 543,
+      "buying_ratio": 53.1
     },
     "institution": {
-      "net_5d": -870587232525,
-      "net_today": -3981106666399,
-      "buying_count": 458,
-      "buying_ratio": 44.8
+      "net_5d": -2640372232525,
+      "net_today": 13661333601,
+      "buying_count": 449,
+      "buying_ratio": 43.9
     },
     "kospi": {}
   },
   "anomaly": {
-    "total_detected": 772,
+    "total_detected": 643,
     "stats": {
-      "세력포착": 54,
-      "매집의심": 35,
-      "이상감지": 683
+      "세력포착": 47,
+      "매집의심": 36,
+      "이상감지": 560
     },
     "items": [
       {
-        "ticker": "098070",
-        "name": "한텍",
-        "close": 60200,
-        "price_change": 25.68,
-        "volume": 2622272,
-        "rsi": 81.43,
-        "volume_surge_ratio": 8.75,
+        "ticker": "108860",
+        "name": "셀바스AI",
+        "close": 16750,
+        "price_change": 23.8,
+        "volume": 23108199,
+        "rsi": 74.87,
+        "volume_surge_ratio": 11.42,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 3859000000.0,
+        "foreign_5d": 2104000000.0,
         "grade": "세력포착",
-        "strength": 8.42,
+        "strength": 8.14,
         "pattern_count": 3,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.915406665104607,
-            "vsr": 8.7,
+            "strength": 3.0,
+            "vsr": 11.4,
             "direction": "상승폭발",
-            "price_change": 25.68,
-            "desc": "거래량 8.7배 폭발 (상승폭발)"
+            "price_change": 23.8,
+            "desc": "거래량 11.4배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 3.0,
-            "expansion": 5.57,
+            "strength": 2.6436468573558556,
+            "expansion": 4.29,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (5.6배) +거래량"
+            "desc": "BB 수축→폭발 (4.3배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 49211,
-            "gap_pct": 22.33,
+            "vwap_20": 14632,
+            "gap_pct": 14.48,
             "direction": "상방돌파",
-            "desc": "VWAP20 대비 +22.3% (상방돌파)"
+            "desc": "VWAP20 대비 +14.5% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "084850",
+        "name": "아이티엠반도체",
+        "close": 13250,
+        "price_change": 5.08,
+        "volume": 1177121,
+        "rsi": 69.63,
+        "volume_surge_ratio": 8.43,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -144000000.0,
+        "grade": "세력포착",
+        "strength": 7.37,
+        "pattern_count": 3,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.809124013298177,
+            "vsr": 8.4,
+            "direction": "상승폭발",
+            "price_change": 5.08,
+            "desc": "거래량 8.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 2.0620260192586612,
+            "expansion": 3.12,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.1배) +거래량"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 11631,
+            "gap_pct": 13.92,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +13.9% (상방돌파)"
           }
         ]
       },
       {
         "ticker": "100090",
         "name": "SK오션플랜트",
-        "close": 27400,
-        "price_change": 7.24,
-        "volume": 12456250,
-        "rsi": 78.0,
-        "volume_surge_ratio": 7.34,
+        "close": 28700,
+        "price_change": 14.57,
+        "volume": 14732074,
+        "rsi": 72.31,
+        "volume_surge_ratio": 5.38,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -20869000000.0,
+        "foreign_5d": -28075000000.0,
         "grade": "세력포착",
-        "strength": 7.0,
+        "strength": 6.48,
         "pattern_count": 3,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.44546836233406,
-            "vsr": 7.3,
+            "strength": 1.7947973712636978,
+            "vsr": 5.4,
             "direction": "상승폭발",
-            "price_change": 7.24,
-            "desc": "거래량 7.3배 폭발 (상승폭발)"
+            "price_change": 14.57,
+            "desc": "거래량 5.4배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 2.179189490874627,
-            "expansion": 3.36,
+            "strength": 2.459764677777308,
+            "expansion": 3.92,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (3.4배) +거래량"
+            "desc": "BB 수축→폭발 (3.9배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.3783188017977563,
-            "vwap_20": 24488,
-            "gap_pct": 11.89,
+            "strength": 2.2229060492937247,
+            "vwap_20": 25829,
+            "gap_pct": 11.11,
             "direction": "상방돌파",
-            "desc": "VWAP20 대비 +11.9% (상방돌파)"
+            "desc": "VWAP20 대비 +11.1% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "00088K",
-        "name": "00088K",
-        "close": 43600,
-        "price_change": -9.45,
-        "volume": 76667,
-        "rsi": 38.67,
-        "volume_surge_ratio": 0.95,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -2980000000.0,
+        "ticker": "007570",
+        "name": "일양약품",
+        "close": 13630,
+        "price_change": 4.44,
+        "volume": 825272,
+        "rsi": 99.99,
+        "volume_surge_ratio": 20.0,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 0.0,
         "grade": "세력포착",
-        "strength": 6.47,
-        "pattern_count": 3,
+        "strength": 6.0,
+        "pattern_count": 2,
         "patterns": [
           {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 0.9671258620657744,
-            "expansion": 1.93,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (1.9배)"
-          },
-          {
-            "pattern": "P5_수급이탈",
+            "pattern": "P1_거래량폭발",
             "strength": 3.0,
-            "f_5d": -2980000000.0,
-            "i_5d": -1702000000.0,
-            "desc": "외인(-2,980,000,000)+기관(-1,702,000,000) 동시매도 5일 지속"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 50960,
-            "gap_pct": -14.44,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -14.4% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "053690",
-        "name": "한미글로벌",
-        "close": 27050,
-        "price_change": -0.55,
-        "volume": 2479764,
-        "rsi": 74.5,
-        "volume_surge_ratio": 4.44,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -4662000000.0,
-        "grade": "세력포착",
-        "strength": 6.11,
-        "pattern_count": 3,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.4787902511493172,
-            "vsr": 4.4,
-            "direction": "횡보폭발",
-            "price_change": -0.55,
-            "desc": "거래량 4.4배 폭발 (횡보폭발)"
-          },
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 2.200056077512053,
-            "expansion": 3.4,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (3.4배) +거래량"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.430191974373699,
-            "vwap_20": 24119,
-            "gap_pct": 12.15,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +12.2% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "100840",
-        "name": "SNT에너지",
-        "close": 54200,
-        "price_change": 1.69,
-        "volume": 1961808,
-        "rsi": 67.49,
-        "volume_surge_ratio": 4.77,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 1752000000.0,
-        "grade": "세력포착",
-        "strength": 5.4,
-        "pattern_count": 3,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.5912522202756811,
-            "vsr": 4.8,
+            "vsr": 20.0,
             "direction": "상승폭발",
-            "price_change": 1.69,
-            "desc": "거래량 4.8배 폭발 (상승폭발)"
+            "price_change": 4.44,
+            "desc": "거래량 20.0배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.461407019758047,
-            "expansion": 1.92,
+            "strength": 3.0,
+            "expansion": 16230302.69,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (1.9배) +거래량"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.3449610226869,
-            "vwap_20": 48512,
-            "gap_pct": 11.72,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +11.7% (상방돌파)"
+            "desc": "BB 수축→폭발 (16230302.7배) +거래량"
           }
         ]
       },
       {
-        "ticker": "131970",
-        "name": "두산테스나",
-        "close": 103700,
-        "price_change": 1.27,
-        "volume": 1014973,
-        "rsi": 79.33,
-        "volume_surge_ratio": 1.94,
+        "ticker": "348150",
+        "name": "고바이오랩",
+        "close": 6240,
+        "price_change": -7.14,
+        "volume": 6595230,
+        "rsi": 70.94,
+        "volume_surge_ratio": 15.54,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -5030000000.0,
+        "foreign_5d": 69000000.0,
         "grade": "세력포착",
-        "strength": 5.38,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 2.881610666465372,
-            "expansion": 4.76,
-            "vol_confirm": true,
-            "desc": "BB 수축→폭발 (4.8배) +거래량"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 78602,
-            "gap_pct": 31.93,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +31.9% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "018000",
-        "name": "유니슨",
-        "close": 1650,
-        "price_change": -1.9,
-        "volume": 29758983,
-        "rsi": 72.28,
-        "volume_surge_ratio": 3.72,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -2111000000.0,
-        "grade": "세력포착",
-        "strength": 5.37,
+        "strength": 5.51,
         "pattern_count": 3,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.2404827911426477,
-            "vsr": 3.7,
+            "strength": 3.0,
+            "vsr": 15.5,
             "direction": "하락폭발",
-            "price_change": -1.9,
-            "desc": "거래량 3.7배 폭발 (하락폭발)"
+            "price_change": -7.14,
+            "desc": "거래량 15.5배 폭발 (하락폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.6279668581073252,
-            "expansion": 2.26,
+            "strength": 1.5928814716725632,
+            "expansion": 2.19,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (2.3배) +거래량"
+            "desc": "BB 수축→폭발 (2.2배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 1442,
-            "gap_pct": 14.43,
+            "strength": 0.915647042759975,
+            "vwap_20": 5967,
+            "gap_pct": 4.58,
             "direction": "상방돌파",
-            "desc": "VWAP20 대비 +14.4% (상방돌파)"
+            "desc": "VWAP20 대비 +4.6% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "160190",
-        "name": "하이젠알앤엠",
-        "close": 37650,
-        "price_change": -27.74,
-        "volume": 1375093,
-        "rsi": 26.66,
-        "volume_surge_ratio": 7.98,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 1463000000.0,
+        "ticker": "033790",
+        "name": "피노",
+        "close": 7120,
+        "price_change": 17.49,
+        "volume": 7999200,
+        "rsi": 67.25,
+        "volume_surge_ratio": 9.83,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -53000000.0,
         "grade": "세력포착",
-        "strength": 5.16,
+        "strength": 5.5,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.660173959741619,
-            "vsr": 8.0,
-            "direction": "하락폭발",
-            "price_change": -27.74,
-            "desc": "거래량 8.0배 폭발 (하락폭발)"
+            "strength": 3.0,
+            "vsr": 9.8,
+            "direction": "상승폭발",
+            "price_change": 17.49,
+            "desc": "거래량 9.8배 폭발 (상승폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 50955,
-            "gap_pct": -26.11,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -26.1% (하방이탈)"
+            "vwap_20": 6181,
+            "gap_pct": 15.18,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +15.2% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "352820",
-        "name": "하이브",
-        "close": 290500,
-        "price_change": -15.55,
-        "volume": 931451,
-        "rsi": 29.08,
-        "volume_surge_ratio": 3.13,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -71739000000.0,
+        "ticker": "178920",
+        "name": "PI첨단소재",
+        "close": 25350,
+        "price_change": 13.42,
+        "volume": 1893944,
+        "rsi": 67.25,
+        "volume_surge_ratio": 4.45,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -1593000000.0,
         "grade": "세력포착",
-        "strength": 5.11,
+        "strength": 5.5,
         "pattern_count": 3,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.043090002293463,
-            "vsr": 3.1,
-            "direction": "하락폭발",
-            "price_change": -15.55,
-            "desc": "거래량 3.1배 폭발 (하락폭발)"
+            "strength": 1.4843661798248373,
+            "vsr": 4.5,
+            "direction": "상승폭발",
+            "price_change": 13.42,
+            "desc": "거래량 4.5배 폭발 (상승폭발)"
           },
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.5619934775140976,
-            "expansion": 2.12,
+            "strength": 1.5300104535346997,
+            "expansion": 2.06,
             "vol_confirm": true,
             "desc": "BB 수축→폭발 (2.1배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 350889,
-            "gap_pct": -17.21,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -17.2% (하방이탈)"
+            "strength": 2.489225302045588,
+            "vwap_20": 22544,
+            "gap_pct": 12.45,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +12.4% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "263750",
-        "name": "펄어비스",
-        "close": 41750,
-        "price_change": 0.6,
-        "volume": 3531461,
-        "rsi": 36.7,
-        "volume_surge_ratio": 2.13,
+        "ticker": "458870",
+        "name": "씨어스테크놀로지",
+        "close": 57900,
+        "price_change": 10.71,
+        "volume": 333936,
+        "rsi": 27.68,
+        "volume_surge_ratio": 2.06,
         "above_ma20": false,
         "above_ma60": false,
-        "foreign_5d": -2112000000.0,
+        "foreign_5d": -10623000000.0,
         "grade": "세력포착",
-        "strength": 5.01,
+        "strength": 5.5,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 2.508093361119377,
-            "expansion": 4.02,
+            "strength": 3.0,
+            "expansion": 5.97,
             "vol_confirm": true,
-            "desc": "BB 수축→폭발 (4.0배) +거래량"
+            "desc": "BB 수축→폭발 (6.0배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 52620,
-            "gap_pct": -20.66,
+            "vwap_20": 127672,
+            "gap_pct": -54.65,
             "direction": "하방이탈",
-            "desc": "VWAP20 대비 -20.7% (하방이탈)"
+            "desc": "VWAP20 대비 -54.6% (하방이탈)"
           }
         ]
       },
       {
-        "ticker": "330860",
-        "name": "네패스아크",
-        "close": 28000,
-        "price_change": 12.0,
-        "volume": 2199135,
-        "rsi": 74.28,
-        "volume_surge_ratio": 7.37,
+        "ticker": "100790",
+        "name": "미래에셋벤처투자",
+        "close": 28250,
+        "price_change": 4.63,
+        "volume": 23034617,
+        "rsi": 66.77,
+        "volume_surge_ratio": 6.51,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 3792000000.0,
+        "foreign_5d": -2225000000.0,
         "grade": "세력포착",
-        "strength": 4.96,
+        "strength": 4.67,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 2.4573497484052926,
-            "vsr": 7.4,
+            "strength": 2.170971918819493,
+            "vsr": 6.5,
             "direction": "상승폭발",
-            "price_change": 12.0,
-            "desc": "거래량 7.4배 폭발 (상승폭발)"
+            "price_change": 4.63,
+            "desc": "거래량 6.5배 폭발 (상승폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 23889,
-            "gap_pct": 17.21,
+            "vwap_20": 24622,
+            "gap_pct": 14.74,
             "direction": "상방돌파",
-            "desc": "VWAP20 대비 +17.2% (상방돌파)"
+            "desc": "VWAP20 대비 +14.7% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "285130",
-        "name": "SK케미칼",
-        "close": 55100,
-        "price_change": -5.97,
-        "volume": 65569,
-        "rsi": 39.41,
-        "volume_surge_ratio": 1.1,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -793000000.0,
+        "ticker": "243840",
+        "name": "신흥에스이씨",
+        "close": 7260,
+        "price_change": 0.69,
+        "volume": 1126284,
+        "rsi": 66.58,
+        "volume_surge_ratio": 2.3,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 651000000.0,
         "grade": "세력포착",
-        "strength": 4.61,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.5,
-            "price_chg_10d": -3.16,
-            "obv_chg_10d": 181.03,
-            "vol_contracted": false,
-            "desc": "가격 -3.2% vs OBV +181.0% (은밀매집)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.107046707092879,
-            "vwap_20": 61588,
-            "gap_pct": -10.54,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -10.5% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "086900",
-        "name": "메디톡스",
-        "close": 100900,
-        "price_change": -6.23,
-        "volume": 50643,
-        "rsi": 26.59,
-        "volume_surge_ratio": 0.94,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -494000000.0,
-        "grade": "세력포착",
-        "strength": 4.16,
+        "strength": 4.53,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.659663358261104,
-            "expansion": 3.32,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (3.3배)"
+            "strength": 2.034355719801572,
+            "expansion": 3.07,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (3.1배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 117778,
-            "gap_pct": -14.33,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -14.3% (하방이탈)"
+            "vwap_20": 6273,
+            "gap_pct": 15.73,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +15.7% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "122870",
-        "name": "와이지엔터테인먼트",
-        "close": 54000,
-        "price_change": -9.7,
-        "volume": 403890,
-        "rsi": 29.05,
-        "volume_surge_ratio": 1.15,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 3658000000.0,
+        "ticker": "084990",
+        "name": "헬릭스미스",
+        "close": 7020,
+        "price_change": 16.61,
+        "volume": 2180980,
+        "rsi": 63.06,
+        "volume_surge_ratio": 6.18,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 141000000.0,
+        "grade": "세력포착",
+        "strength": 4.48,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.0583624241314014,
+            "vsr": 6.2,
+            "direction": "상승폭발",
+            "price_change": 16.61,
+            "desc": "거래량 6.2배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.424225207585322,
+            "vwap_20": 6261,
+            "gap_pct": 12.12,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +12.1% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "131030",
+        "name": "옵투스제약",
+        "close": 18370,
+        "price_change": 4.73,
+        "volume": 1922301,
+        "rsi": 82.42,
+        "volume_surge_ratio": 1.58,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 1260000000.0,
+        "grade": "세력포착",
+        "strength": 4.34,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.8397681229756662,
+            "expansion": 2.68,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.7배) +거래량"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 13633,
+            "gap_pct": 34.74,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +34.7% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "066970",
+        "name": "엘앤에프",
+        "close": 144500,
+        "price_change": -0.55,
+        "volume": 1039926,
+        "rsi": 68.46,
+        "volume_surge_ratio": 1.73,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 22355000000.0,
+        "grade": "세력포착",
+        "strength": 4.24,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.7386345861872956,
+            "expansion": 2.48,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.5배) +거래량"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 121588,
+            "gap_pct": 18.84,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +18.8% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "060280",
+        "name": "큐렉소",
+        "close": 17260,
+        "price_change": 15.07,
+        "volume": 10070516,
+        "rsi": 57.15,
+        "volume_surge_ratio": 8.84,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 763000000.0,
         "grade": "세력포착",
         "strength": 4.15,
         "pattern_count": 2,
         "patterns": [
           {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.946718509869011,
+            "vsr": 8.8,
+            "direction": "상승폭발",
+            "price_change": 15.07,
+            "desc": "거래량 8.8배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 1.2040272340513525,
+            "vwap_20": 16280,
+            "gap_pct": 6.02,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +6.0% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "012630",
+        "name": "HDC",
+        "close": 30150,
+        "price_change": 8.45,
+        "volume": 399370,
+        "rsi": 72.76,
+        "volume_surge_ratio": 1.79,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 869000000.0,
+        "grade": "세력포착",
+        "strength": 4.09,
+        "pattern_count": 2,
+        "patterns": [
+          {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.646850494513038,
-            "expansion": 3.29,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (3.3배)"
+            "strength": 1.587459473806831,
+            "expansion": 2.17,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.2배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 66141,
-            "gap_pct": -18.36,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -18.4% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "003300",
-        "name": "한일홀딩스",
-        "close": 19480,
-        "price_change": 6.27,
-        "volume": 757433,
-        "rsi": 75.97,
-        "volume_surge_ratio": 11.57,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -1195000000.0,
-        "grade": "세력포착",
-        "strength": 4.02,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 3.0,
-            "vsr": 11.6,
-            "direction": "상승폭발",
-            "price_change": 6.27,
-            "desc": "거래량 11.6배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 1.022891890276938,
-            "vwap_20": 18532,
-            "gap_pct": 5.11,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +5.1% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "460930",
-        "name": "현대힘스",
-        "close": 19830,
-        "price_change": 10.04,
-        "volume": 4459692,
-        "rsi": 60.88,
-        "volume_surge_ratio": 8.97,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -3308000000.0,
-        "grade": "세력포착",
-        "strength": 3.92,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 2.9897507150003304,
-            "vsr": 9.0,
-            "direction": "상승폭발",
-            "price_change": 10.04,
-            "desc": "거래량 9.0배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 0.9323648286934505,
-            "vwap_20": 18947,
-            "gap_pct": 4.66,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +4.7% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "375500",
-        "name": "DL이앤씨",
-        "close": 66200,
-        "price_change": -1.78,
-        "volume": 2665506,
-        "rsi": 73.87,
-        "volume_surge_ratio": 3.82,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -24385000000.0,
-        "grade": "세력포착",
-        "strength": 3.77,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.273738832948202,
-            "vsr": 3.8,
-            "direction": "하락폭발",
-            "price_change": -1.78,
-            "desc": "거래량 3.8배 폭발 (하락폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 56620,
-            "gap_pct": 16.92,
+            "vwap_20": 25799,
+            "gap_pct": 16.87,
             "direction": "상방돌파",
             "desc": "VWAP20 대비 +16.9% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "114090",
-        "name": "GKL",
-        "close": 11760,
-        "price_change": -4.31,
-        "volume": 295480,
-        "rsi": 38.29,
-        "volume_surge_ratio": 1.11,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -379000000.0,
-        "grade": "세력포착",
-        "strength": 3.74,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.5,
-            "price_chg_10d": -0.68,
-            "obv_chg_10d": 548.07,
-            "vol_contracted": false,
-            "desc": "가격 -0.7% vs OBV +548.1% (은밀매집)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 1.2411616078935217,
-            "vwap_20": 12538,
-            "gap_pct": -6.21,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -6.2% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "025860",
-        "name": "남해화학",
-        "close": 8040,
-        "price_change": -3.37,
-        "volume": 3026046,
-        "rsi": 51.75,
-        "volume_surge_ratio": 0.79,
+        "ticker": "064290",
+        "name": "인텍플러스",
+        "close": 18120,
+        "price_change": 4.86,
+        "volume": 556509,
+        "rsi": 60.19,
+        "volume_surge_ratio": 2.03,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -1049000000.0,
+        "foreign_5d": -3048000000.0,
         "grade": "세력포착",
-        "strength": 3.73,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.5,
-            "price_chg_10d": -2.66,
-            "obv_chg_10d": 48.2,
-            "vol_contracted": false,
-            "desc": "가격 -2.7% vs OBV +48.2% (은밀매집)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 1.2330977565873336,
-            "vwap_20": 8568,
-            "gap_pct": -6.17,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -6.2% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "090460",
-        "name": "비에이치",
-        "close": 23000,
-        "price_change": 3.84,
-        "volume": 1740025,
-        "rsi": 70.08,
-        "volume_surge_ratio": 3.7,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 5446000000.0,
-        "grade": "세력포착",
-        "strength": 3.73,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.2342090452675485,
-            "vsr": 3.7,
-            "direction": "상승폭발",
-            "price_change": 3.84,
-            "desc": "거래량 3.7배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 19590,
-            "gap_pct": 17.41,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +17.4% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "092220",
-        "name": "KEC",
-        "close": 1705,
-        "price_change": 21.18,
-        "volume": 68902476,
-        "rsi": 73.13,
-        "volume_surge_ratio": 3.58,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": 3210000000.0,
-        "grade": "세력포착",
-        "strength": 3.69,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 1.1921256346335645,
-            "vsr": 3.6,
-            "direction": "상승폭발",
-            "price_change": 21.18,
-            "desc": "거래량 3.6배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 1334,
-            "gap_pct": 27.83,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +27.8% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "100120",
-        "name": "뷰웍스",
-        "close": 24300,
-        "price_change": -8.13,
-        "volume": 88125,
-        "rsi": 45.27,
-        "volume_surge_ratio": 0.96,
-        "above_ma20": false,
-        "above_ma60": true,
-        "foreign_5d": -850000000.0,
-        "grade": "세력포착",
-        "strength": 3.58,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P4_OBV다이버전스",
-            "strength": 2.5,
-            "price_chg_10d": -2.21,
-            "obv_chg_10d": 26.25,
-            "vol_contracted": false,
-            "desc": "가격 -2.2% vs OBV +26.2% (은밀매집)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 1.0834518315255903,
-            "vwap_20": 25692,
-            "gap_pct": -5.42,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -5.4% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "025980",
-        "name": "아난티",
-        "close": 6740,
-        "price_change": -9.53,
-        "volume": 2816247,
-        "rsi": 35.91,
-        "volume_surge_ratio": 1.36,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 3800000000.0,
-        "grade": "세력포착",
-        "strength": 3.53,
+        "strength": 3.98,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P3_BB스퀴즈",
-            "strength": 1.0343313309535378,
-            "expansion": 2.07,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (2.1배)"
+            "strength": 1.5439354435076897,
+            "expansion": 2.09,
+            "vol_confirm": true,
+            "desc": "BB 수축→폭발 (2.1배) +거래량"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 7995,
-            "gap_pct": -15.69,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -15.7% (하방이탈)"
+            "strength": 2.432329976500389,
+            "vwap_20": 16155,
+            "gap_pct": 12.16,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +12.2% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "161580",
-        "name": "필옵틱스",
-        "close": 38100,
-        "price_change": -5.93,
-        "volume": 248052,
-        "rsi": 35.86,
-        "volume_surge_ratio": 0.66,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": -1087000000.0,
-        "grade": "세력포착",
-        "strength": 3.51,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 1.0123117442215204,
-            "expansion": 2.02,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (2.0배)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 46186,
-            "gap_pct": -17.51,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -17.5% (하방이탈)"
-          }
-        ]
-      },
-      {
-        "ticker": "036190",
-        "name": "금화피에스시",
-        "close": 40450,
-        "price_change": 4.25,
-        "volume": 108902,
-        "rsi": 72.23,
-        "volume_surge_ratio": 4.18,
+        "ticker": "950160",
+        "name": "코오롱티슈진",
+        "close": 119800,
+        "price_change": 17.11,
+        "volume": 2731608,
+        "rsi": 65.41,
+        "volume_surge_ratio": 4.38,
         "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": -227000000.0,
+        "foreign_5d": -3406000000.0,
         "grade": "세력포착",
-        "strength": 3.41,
+        "strength": 3.96,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 1.3917232962405632,
-            "vsr": 4.2,
+            "strength": 1.4588637126685648,
+            "vsr": 4.4,
             "direction": "상승폭발",
-            "price_change": 4.25,
-            "desc": "거래량 4.2배 폭발 (상승폭발)"
-          },
-          {
-            "pattern": "P7_VWAP이탈",
-            "strength": 2.0204696136232547,
-            "vwap_20": 36739,
-            "gap_pct": 10.1,
-            "direction": "상방돌파",
-            "desc": "VWAP20 대비 +10.1% (상방돌파)"
-          }
-        ]
-      },
-      {
-        "ticker": "006360",
-        "name": "GS건설",
-        "close": 31850,
-        "price_change": 0.16,
-        "volume": 5470699,
-        "rsi": 78.88,
-        "volume_surge_ratio": 2.71,
-        "above_ma20": true,
-        "above_ma60": true,
-        "foreign_5d": -68013000000.0,
-        "grade": "세력포착",
-        "strength": 3.4,
-        "pattern_count": 2,
-        "patterns": [
-          {
-            "pattern": "P1_거래량폭발",
-            "strength": 0.9025025524196253,
-            "vsr": 2.7,
-            "direction": "횡보폭발",
-            "price_change": 0.16,
-            "desc": "거래량 2.7배 폭발 (횡보폭발)"
+            "price_change": 17.11,
+            "desc": "거래량 4.4배 폭발 (상승폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 26311,
-            "gap_pct": 21.05,
+            "vwap_20": 106073,
+            "gap_pct": 12.94,
             "direction": "상방돌파",
-            "desc": "VWAP20 대비 +21.1% (상방돌파)"
+            "desc": "VWAP20 대비 +12.9% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "482630",
-        "name": "삼양엔씨켐",
-        "close": 16160,
-        "price_change": -12.36,
-        "volume": 516089,
-        "rsi": 33.98,
-        "volume_surge_ratio": 2.89,
-        "above_ma20": false,
-        "above_ma60": false,
-        "foreign_5d": 740000000.0,
+        "ticker": "027360",
+        "name": "아주IB투자",
+        "close": 8920,
+        "price_change": 4.69,
+        "volume": 68788456,
+        "rsi": 71.91,
+        "volume_surge_ratio": 4.06,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -2439000000.0,
         "grade": "세력포착",
-        "strength": 3.39,
+        "strength": 3.85,
         "pattern_count": 2,
         "patterns": [
           {
             "pattern": "P1_거래량폭발",
-            "strength": 0.9621009705570508,
-            "vsr": 2.9,
-            "direction": "하락폭발",
-            "price_change": -12.36,
-            "desc": "거래량 2.9배 폭발 (하락폭발)"
+            "strength": 1.3540538456902274,
+            "vsr": 4.1,
+            "direction": "상승폭발",
+            "price_change": 4.69,
+            "desc": "거래량 4.1배 폭발 (상승폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.4248040233947554,
-            "vwap_20": 18390,
-            "gap_pct": -12.12,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -12.1% (하방이탈)"
+            "strength": 2.5,
+            "vwap_20": 6836,
+            "gap_pct": 30.49,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +30.5% (상방돌파)"
           }
         ]
       },
       {
         "ticker": "323280",
         "name": "태성",
-        "close": 62600,
-        "price_change": -10.06,
-        "volume": 367954,
-        "rsi": 41.16,
-        "volume_surge_ratio": 0.72,
+        "close": 56000,
+        "price_change": -5.08,
+        "volume": 330480,
+        "rsi": 34.8,
+        "volume_surge_ratio": 0.64,
         "above_ma20": false,
+        "above_ma60": false,
+        "foreign_5d": 4194000000.0,
+        "grade": "세력포착",
+        "strength": 3.74,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P3_BB스퀴즈",
+            "strength": 1.2433628878588323,
+            "expansion": 2.49,
+            "vol_confirm": false,
+            "desc": "BB 수축→폭발 (2.5배)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 71126,
+            "gap_pct": -21.27,
+            "direction": "하방이탈",
+            "desc": "VWAP20 대비 -21.3% (하방이탈)"
+          }
+        ]
+      },
+      {
+        "ticker": "003000",
+        "name": "부광약품",
+        "close": 9330,
+        "price_change": 0.97,
+        "volume": 15754314,
+        "rsi": 82.97,
+        "volume_surge_ratio": 3.62,
+        "above_ma20": true,
         "above_ma60": true,
-        "foreign_5d": 3562000000.0,
+        "foreign_5d": 414000000.0,
+        "grade": "세력포착",
+        "strength": 3.71,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.2061632765629076,
+            "vsr": 3.6,
+            "direction": "횡보폭발",
+            "price_change": 0.97,
+            "desc": "거래량 3.6배 폭발 (횡보폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 7343,
+            "gap_pct": 27.05,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +27.1% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "179900",
+        "name": "유티아이",
+        "close": 17020,
+        "price_change": -14.77,
+        "volume": 1289784,
+        "rsi": 37.97,
+        "volume_surge_ratio": 6.3,
+        "above_ma20": false,
+        "above_ma60": false,
+        "foreign_5d": -563000000.0,
+        "grade": "세력포착",
+        "strength": 3.64,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 2.101254414595118,
+            "vsr": 6.3,
+            "direction": "하락폭발",
+            "price_change": -14.77,
+            "desc": "거래량 6.3배 폭발 (하락폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 1.5366044918767252,
+            "vwap_20": 18436,
+            "gap_pct": -7.68,
+            "direction": "하방이탈",
+            "desc": "VWAP20 대비 -7.7% (하방이탈)"
+          }
+        ]
+      },
+      {
+        "ticker": "361390",
+        "name": "제노코",
+        "close": 35400,
+        "price_change": 8.76,
+        "volume": 1290572,
+        "rsi": 68.38,
+        "volume_surge_ratio": 3.41,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": 4474000000.0,
+        "grade": "세력포착",
+        "strength": 3.64,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.138063772548091,
+            "vsr": 3.4,
+            "direction": "상승폭발",
+            "price_change": 8.76,
+            "desc": "거래량 3.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 29214,
+            "gap_pct": 21.18,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +21.2% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "009420",
+        "name": "한올바이오파마",
+        "close": 64400,
+        "price_change": 11.23,
+        "volume": 1379823,
+        "rsi": 62.3,
+        "volume_surge_ratio": 3.39,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -3381000000.0,
+        "grade": "세력포착",
+        "strength": 3.53,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.1315981248489984,
+            "vsr": 3.4,
+            "direction": "상승폭발",
+            "price_change": 11.23,
+            "desc": "거래량 3.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.400350990540989,
+            "vwap_20": 57499,
+            "gap_pct": 12.0,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +12.0% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "138490",
+        "name": "코오롱ENP",
+        "close": 15380,
+        "price_change": 3.43,
+        "volume": 410074,
+        "rsi": 70.6,
+        "volume_surge_ratio": 2.73,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -11000000.0,
+        "grade": "세력포착",
+        "strength": 3.41,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.9086317400692008,
+            "vsr": 2.7,
+            "direction": "상승폭발",
+            "price_change": 3.43,
+            "desc": "거래량 2.7배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.5,
+            "vwap_20": 13168,
+            "gap_pct": 16.8,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +16.8% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "100120",
+        "name": "뷰웍스",
+        "close": 29400,
+        "price_change": -2.65,
+        "volume": 445732,
+        "rsi": 63.04,
+        "volume_surge_ratio": 3.82,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -1189000000.0,
         "grade": "세력포착",
         "strength": 3.38,
         "pattern_count": 2,
         "patterns": [
           {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 0.8824073650651509,
-            "expansion": 1.76,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (1.8배)"
+            "pattern": "P1_거래량폭발",
+            "strength": 1.2727467154598784,
+            "vsr": 3.8,
+            "direction": "하락폭발",
+            "price_change": -2.65,
+            "desc": "거래량 3.8배 폭발 (하락폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 72122,
-            "gap_pct": -13.2,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -13.2% (하방이탈)"
+            "strength": 2.1062994644880773,
+            "vwap_20": 26599,
+            "gap_pct": 10.53,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +10.5% (상방돌파)"
           }
         ]
       },
       {
-        "ticker": "000880",
-        "name": "한화",
-        "close": 108600,
-        "price_change": -10.02,
-        "volume": 381928,
-        "rsi": 39.68,
-        "volume_surge_ratio": 0.87,
+        "ticker": "114090",
+        "name": "GKL",
+        "close": 11790,
+        "price_change": -1.75,
+        "volume": 238999,
+        "rsi": 39.78,
+        "volume_surge_ratio": 0.93,
         "above_ma20": false,
         "above_ma60": false,
-        "foreign_5d": -25112000000.0,
+        "foreign_5d": -637000000.0,
         "grade": "세력포착",
-        "strength": 3.36,
+        "strength": 3.38,
         "pattern_count": 2,
         "patterns": [
           {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 0.8637473524197186,
-            "expansion": 1.73,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (1.7배)"
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.5,
+            "price_chg_10d": -1.59,
+            "obv_chg_10d": 176.03,
+            "vol_contracted": false,
+            "desc": "가격 -1.6% vs OBV +176.0% (은밀매집)"
           },
           {
             "pattern": "P7_VWAP이탈",
-            "strength": 2.5,
-            "vwap_20": 129175,
-            "gap_pct": -15.93,
+            "strength": 0.8802054237176883,
+            "vwap_20": 12333,
+            "gap_pct": -4.4,
             "direction": "하방이탈",
-            "desc": "VWAP20 대비 -15.9% (하방이탈)"
+            "desc": "VWAP20 대비 -4.4% (하방이탈)"
           }
         ]
       },
       {
-        "ticker": "277810",
-        "name": "레인보우로보틱스",
-        "close": 594000,
-        "price_change": -9.86,
-        "volume": 243031,
-        "rsi": 37.61,
-        "volume_surge_ratio": 0.95,
+        "ticker": "030000",
+        "name": "제일기획",
+        "close": 19830,
+        "price_change": -1.1,
+        "volume": 533286,
+        "rsi": 38.68,
+        "volume_surge_ratio": 1.24,
         "above_ma20": false,
         "above_ma60": false,
-        "foreign_5d": 23009000000.0,
+        "foreign_5d": -706000000.0,
         "grade": "세력포착",
-        "strength": 3.36,
+        "strength": 3.34,
         "pattern_count": 2,
         "patterns": [
           {
-            "pattern": "P3_BB스퀴즈",
-            "strength": 0.8626805772846983,
-            "expansion": 1.73,
-            "vol_confirm": false,
-            "desc": "BB 수축→폭발 (1.7배)"
+            "pattern": "P4_OBV다이버전스",
+            "strength": 2.5,
+            "price_chg_10d": -4.2,
+            "obv_chg_10d": 30.46,
+            "vol_contracted": false,
+            "desc": "가격 -4.2% vs OBV +30.5% (은밀매집)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 0.8449698427430707,
+            "vwap_20": 20705,
+            "gap_pct": -4.22,
+            "direction": "하방이탈",
+            "desc": "VWAP20 대비 -4.2% (하방이탈)"
+          }
+        ]
+      },
+      {
+        "ticker": "251370",
+        "name": "와이엠티",
+        "close": 15300,
+        "price_change": 4.72,
+        "volume": 461569,
+        "rsi": 63.41,
+        "volume_surge_ratio": 2.5,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -153000000.0,
+        "grade": "세력포착",
+        "strength": 3.33,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 0.8334071370695629,
+            "vsr": 2.5,
+            "direction": "상승폭발",
+            "price_change": 4.72,
+            "desc": "거래량 2.5배 폭발 (상승폭발)"
           },
           {
             "pattern": "P7_VWAP이탈",
             "strength": 2.5,
-            "vwap_20": 768015,
-            "gap_pct": -22.66,
-            "direction": "하방이탈",
-            "desc": "VWAP20 대비 -22.7% (하방이탈)"
+            "vwap_20": 13276,
+            "gap_pct": 15.25,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +15.2% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "078160",
+        "name": "메디포스트",
+        "close": 24550,
+        "price_change": 13.66,
+        "volume": 1022921,
+        "rsi": 59.36,
+        "volume_surge_ratio": 3.4,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -750000000.0,
+        "grade": "세력포착",
+        "strength": 3.15,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.1321106368901896,
+            "vsr": 3.4,
+            "direction": "상승폭발",
+            "price_change": 13.66,
+            "desc": "거래량 3.4배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 2.0142026511651823,
+            "vwap_20": 22304,
+            "gap_pct": 10.07,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +10.1% (상방돌파)"
+          }
+        ]
+      },
+      {
+        "ticker": "215600",
+        "name": "신라젠",
+        "close": 4000,
+        "price_change": 1.39,
+        "volume": 7425550,
+        "rsi": 62.18,
+        "volume_surge_ratio": 3.9,
+        "above_ma20": true,
+        "above_ma60": true,
+        "foreign_5d": -1022000000.0,
+        "grade": "세력포착",
+        "strength": 2.93,
+        "pattern_count": 2,
+        "patterns": [
+          {
+            "pattern": "P1_거래량폭발",
+            "strength": 1.298741174013014,
+            "vsr": 3.9,
+            "direction": "상승폭발",
+            "price_change": 1.39,
+            "desc": "거래량 3.9배 폭발 (상승폭발)"
+          },
+          {
+            "pattern": "P7_VWAP이탈",
+            "strength": 1.6316875044434198,
+            "vwap_20": 3698,
+            "gap_pct": 8.16,
+            "direction": "상방돌파",
+            "desc": "VWAP20 대비 +8.2% (상방돌파)"
           }
         ]
       }
@@ -1061,297 +1049,139 @@
   },
   "event_radar": {
     "mood": "긴장",
-    "mood_desc": "HIGH 임팩트 뉴스 19건 — 변동성 주의",
-    "event_count": 38,
-    "high_impact": 19,
-    "medium_impact": 19,
+    "mood_desc": "HIGH 임팩트 뉴스 11건 — 변동성 주의",
+    "event_count": 44,
+    "high_impact": 11,
+    "medium_impact": 33,
     "events": [
       {
-        "title": "일본·한국 증시 급락 출발; 코스피 6% 폭락하며 서킷브레이커 발동; 금값 장중 3% 하락",
-        "source": "TradingKey",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQRk96Z0o4M25vb1dzeVRyVVZRal9OU1FUQk1vaGhXcWNWek1iS3djS3Q5cDBLUkNBQmxGV1Jkenp1XzVkenZqY0c2dm1udmVnYjBvbGhsMlI2bXlPN1VqZXVOeGprUEo4bVhRdVUxdE9GYWRZSWRfa25fZVJqZy1oQUp4RmV0cmlEMEFMU09qN2FuR3VfNmlTYmVfY181OTA?oc=5"
-      },
-      {
-        "title": "중동 긴장 고조… 유가 폭등·환율 상승한 한국 증시 하락, 코스피 5,400대 추락",
-        "source": "공감신문",
-        "date": "2026-03-23",
-        "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFAtNXZoNGJVYTVQN2pJVWNaeHU2UzhyV0VEOVljMlVkVFdFNjQwRW9zRXlDckg1U2ZmVElKeVpSWk5iTVRLR2llZEJGVks3ekhmV0VDTnZiWmpCUUZRci1OcmhwenR6WXg5?oc=5"
-      },
-      {
-        "title": "韓美 통화정책 수장 동시 교체…증시 떠난 외인 관망세 더 짙어지나",
-        "source": "ebn.co.kr",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5IRjVtcExBZDBGczgzR1A5S3VMbmUtS0VvTks4WGdlM3p4SVE2cnJ5cXl4REpMSjNFUXVmNng0eFlXaU1SQ0ZJMEpodWx4UXA0NlJxZ2taQ3VFdWFtWWtUVlk1dlpldHhC?oc=5"
-      },
-      {
-        "title": "검은 월요일… 코스피 급락, 환율·금리 폭등",
-        "source": "세상을 바꾸는 시민언론 민들레",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFB2UlR1M1ZtTV9WY2daN3lNRTN4X05jc3NSLUpTRjlsSGtCejlDX1o5NlNqbkZRSkZxV05pS2ZyZ2YtSEpBVHQ2UGtuWGhBc0tNcmRCRkF6dEhINWNTZGpwZC11eHRQdjVDZEUwNA?oc=5"
-      },
-      {
-        "title": "다시 뛰는 금리·환율…실물경제, ‘중동 쇼크’에 벼랑 끝으로",
-        "source": "직썰",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE82bE1ZM3JJcVp2SGlfSHNMR29lT2IxRFd0S0RjcFlLTG50OWl6dGpBNVRTbTdnc3ZHWVZVOTJVUlNySF9JYzBuWncyT3JVNkpUdWFMdmktTGNHTXM1a1hoRXp3dEdMWEZf0gFsQVVfeXFMTjhaVWxWRjBwQmFLbURybGF2UUg4ZDlDeWphbG5DTmo0SUhDbDNqcERKbkdCN1FTeHhtR2d0ajlzSElsYmtwUXZMSGF4X2xsaG52ajNFNWVCay1GNkVtVF8xaWtISy0zdElvU2tf?oc=5"
-      },
-      {
-        "title": "취임 전부터 환율·물가 난제 맞은 신현송… 씨티은행 “금리인상 신호 낼수도”",
-        "source": "문화일보",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9CcDNOZ1hEWVVydjhGSndoSHpWY2lfZDRHam03Q0ZlWTk2ZEhVNEFXeG5tWVRSOFFPcnJTdnY4YzVGZHRNLVpXb0NaSVZsS3Rj?oc=5"
-      },
-      {
-        "title": "환율이 1,500원/달러를 돌파하며 한국 경제에 다방면의 압박이 가해지고 있다.",
-        "source": "Vietnam.vn",
-        "date": "2026-03-23",
-        "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNQU9BcE5Pb1BaTGxUTU9feFQ4a0g1d1BidHlUNEpxeFphOEVPVGRQY3FvMnBpR1dzN0VfaXliSTJLeElqenNLZ2hxVDROakhHTkJEZ0U0cm05NXo0VENYZ3hPbFZyU0k0YW5mRXo0eXpaYUFfV1lYYXVlYmlab1gtSFF6WlpyYzdNTHlQS285cUQ?oc=5"
-      },
-      {
-        "title": "중동발 공포에 환율·금리 치솟고 주가 급락…한국경제 먹구름",
+        "title": "'기업 암살자' 해외 공매도 스타, 뜻밖의 발언 \"한국 주식여전히 싸죠\"",
         "source": "네이트",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE0tZ3p2Ni16YU1lMFBCTWdxTU1pNEMyNkJ3ZVU3ZGVVSUkxb05NZnlualpLRDFvVkduR1E1NWlLQXFfOE85M2xNVGRnUE15aDBReE5N?oc=5"
+      },
+      {
+        "title": "[경제쏙] SK하이닉스 미국 상장 추진‥국내 주가 영향은?",
+        "source": "MBC 뉴스",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMieEFVX3lxTE1vemtlZjJVT2l5TnJKZGJ3MmJoY1I2dFZkd0hGOEtjTDFycDFnZGhYdVFjM2s3V3BsRWl3TTVESDdLSDExMXB5VkFmNlQ5akNqOWJKak41V2JSdS1KMVUzTUthVDNxTm5IVTZkRXMxc29yNV9Zd042VtIBeEFVX3lxTFB0MjZOTHJBSDY2RTR2SXYwMV9XNTREZzF2MUF0OS1qeFI2MDFrcDVQRDRVMXNXOEd1U3RXQ3ZCYU1la1RzZVdhUjBaVG9oUTE3M2ZrU0hKRklnMFoyVnRzQU81RXpGN3NwR1hSVDZhNFd5c2hlcHpVQg?oc=5"
+      },
+      {
+        "title": "NH투자증권 “올해 핵심 과제, IMA·AI 대전환”",
+        "source": "ceodaily.co.kr",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTFBJQ0sxYVc2WTgzTDhtcGdlaU9qYmE4OTRYWkFEQW8zSGhxeGRWY1gtd192aFhaUnljcVZtM0lUSmFMYVhZcnlyWmQ5ZWhBc3RWVzBWbzRnWjJ1RWtyQmZKUHp3Tk9PVkpDSkNB0gFwQVVfeXFMUGtOZmJLejd1SVNnVkJ5b0lsSTMxZ3FhOS1ucTdWLWdOMlZkeGVvNjdVWG5tdUdCZFRHRGtCUGtoVW9uTEpmTnVTa3Q0a3FnLUtRS1Y0UjRpeTNGSk94UHFzdk1NLTdyTmRyWWVydV9pdQ?oc=5"
+      },
+      {
+        "title": "\"물가 진전 없으면 금리인하 없다\"…미 연준 동결에 원화 '휘청'",
+        "source": "동행일보",
+        "date": "2026-03-26",
         "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE0walQtQnoxYjRiRjZaS05SQzFwdmIyOWp5eDRiN0tObnNfYWZUZHVFYjVxc19NNWtJQXNBajVpRklYSUpkbEZHb194dS1Qa3l3aGtv?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBBSWU5OFYwOS1fWWI3RXl2TV9waDFWbEo3UG1yb3dOc0twOEdDbXhseXI5MllmcTRMZ3JUajRzZms3bFNVNlBPOE5Pc1dRNGMtUmRrSkI4OVladGNBUnJJOU5sem9ET2M?oc=5"
       },
       {
-        "title": "환율 1,520원 위협...채권시장도 '패닉'",
-        "source": "v.daum.net",
-        "date": "2026-03-23",
+        "title": "'중동 사태'에도 홀로 주춤했던 현대로템, 우주테마 더해지며 '방산 소외주' 벗어날까",
+        "source": "비즈니스포스트",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9wanNLNExRVTZsZThBeUx1S2tOZnJuTWpFcnE0OWR5LW1RNkFjN2ktNFRLaVhWZXA5cjlUZFY1Uy1FLTRoekc0enI2azM5MWx3SVBRaDJmNDNWcktEdUhrb1d5Nmk1cFdwRFdXOGdqYmhMTmc?oc=5"
+      },
+      {
+        "title": "K-방산 '수출 급증'에 은행도 '웃음 꽃'…조 단위 보증 시장 확대",
+        "source": "ebn.co.kr",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1PZm1mNHZZN2F0blh4SGZJWHRIMFYtcDNxNDJkeWprZmVMM2o5c2N1TXlpdHYyT2c1eGZQeWxpS0l1a3FuRVk3VDBRdlIyYnMzTUtjVDhEVXJyaUxXVDNyNUZBcldtUjRu?oc=5"
+      },
+      {
+        "title": "\"올해 역대 최대수출…K방산 다시 주목할 때\"",
+        "source": "네이트",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE93djc2aGN4al9xcmZNQ0RUZm8yUFVZQ3ExOG9MY1U0MzRRazIwR2ZzbGVHcDFXNjU3WlRidDIwM2Q1cjFCc3dSQWhhT3Z4cjZyWDJV?oc=5"
+      },
+      {
+        "title": "[심층진단] ‘K-방산’ 서유럽 안보 생태계 진입... 단순 수출 넘어 ‘공급망 파트너’로 체질 개선",
+        "source": "뉴스밸류",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9ENHFHRTZsMHQtM0Q4YW4welYtNlNTdFFTeDFVTVIzdl9oQmIySFZBQjVET1ZHSG80VmE0ZzN5eWdoNC13dEZYOThpbGZPNHE1eHVudEhxMDNvcVVvTUhjMXk1M0lxZUhIbnc?oc=5"
+      },
+      {
+        "title": "경주 SMR 유치 총력전…원전 전주기 생태계 구축 ‘승부수’",
+        "source": "전기신문",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE0wSGlTZjBVbm5HQlozZHJ4UTBvc1lMQW1VTzJoSWttV0xzcF8xYy1uT1hTdjRzaGZ3ZFBBbVBVZWw3bVpDVVNzaTFlTHNLUlRUYnhJYmRVLWI1MF9HSjIwTU5CY2xQTmlKQlhlUtIBcEFVX3lxTE8xc1ZvdC1MaUY2VjRhcnl6QzQ1YmtBT2g2Vldyc1hWUkVwN1d2TlRaYmtSTEJlWGFwNUFUeTdxXzZXWWRxdERlZWtqaGxuOGxEOFJBRW12TzBiRzlRLThDal9zaXZ0YTZpVUh4a2JONzU?oc=5"
+      },
+      {
+        "title": "[원자력 세미나] “SMR 경쟁은 누가 먼저 실증을 보여주느냐의 싸움”",
+        "source": "기후에너지데이터뱅크",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFBNVXFpTU9BZFgwQ2E4cUdMNlU2djlLNDZNazZGdnV2WFhFT2hpR3VGWVZxczNtZUNVQklybTNDMG9fRDM2THRyUE44VUhDd1d6Y25CY0tWTTdGV1hmWlE?oc=5"
+      },
+      {
+        "title": "롤스로이스·스투즈비크 원전 동맹, 유럽 에너지 지형도 바꾼다",
+        "source": "에너지안전신문",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE8yZmtUcFZsaDYxalczeGRlS3FoVDJKcVNOT2JhZ25PaF9ZdHNYMTNmbm8yMnRBdmhGUUx4N1o0VV9ZZFBBTnpwcWRoWGJjSGJkSzRITko4b3JGdVBJZmFONWNmalE?oc=5"
+      },
+      {
+        "title": "[원자력 세미나] “중동 전쟁으로 원전 중요성 재확인… SMR, 재생에너지 보완 역할”",
+        "source": "에너지경제신문",
+        "date": "2026-03-26",
         "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE1Mb1B5N05yZWhxTWwwNE9CVTVOYU1kUTN6RjFyRmZPeEZnREwydldUbTJUdkgyWGFSRWhVUFVDbzhQVW80d0xZUFluS0RuUEk?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE0xQXdyQjRIcDFUUzhRMDFkR1ZudUZPWmEzUzRhMzV5d3VObFFxZGowczZhOWJTb3ZWcXBJamd1Q0dHUFg3RGxjbkU1RUpQdWpNcHZwUjVNWWhyczA?oc=5"
       },
       {
-        "title": "환율 1510원·금리 변수 확대…가계 생활비 부담 어디까지 늘어나나",
-        "source": "이코노미사이언스",
-        "date": "2026-03-23",
+        "title": "[원자력 세미나] 에너지 위기 대안 ‘SMR’…“2033년 조기 상용화 가능”",
+        "source": "에너지경제신문",
+        "date": "2026-03-26",
         "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTFB0OUxacWJnQWRZMWhRODBYMDYwdTZEaGY4akI4bmpUVDFWWVNFN3ljanN4S2dNSXc5el8wTjFqei1vWmdVZ2c1MjI2NV9DTURsOTNVeEJOM2xWSFNDdGI3enpuTzBxQWFfbFVUVnFSRQ?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFA2cTVhWF9ya3VjQzNxbVdrUGl2Zy1ReGpFWGJ3MWxrM2VEUkJEcjRtYndpcE5FRDVNYld4SkxEWjhXNEVaTGpZVmVvZGJ6RU9KcUhfdkYzWl9WX3M?oc=5"
       },
       {
-        "title": "구미시, 방산 전문교육…K-방산 핵심 인재 키운다",
-        "source": "경북신문",
-        "date": "2026-03-23",
+        "title": "구글, 양자 시대 보안 전환 시동…2029년까지 차세대 암호체계 전면 도입",
+        "source": "양자신문",
+        "date": "2026-03-26",
         "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE9uSFVUU1lLbUdOTjNNOHZLWElqRk1ZOXpZV3V5VW1zY0QyeU9hQXZRUWxGbVJWN2VkXzc3eW1CRjd5bjYweDhGQ1c0MEVZcFAxSVZnUHIySFM?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE01NWZtNF9mQ2NLYWZQYVFaemVNckhEXzZrS21OblRkSXFJaHpNS3VfQzBFcWFYSkQtTjdvekZSVFExQ1dmbmNXQlNSNWhMbGhnZl9yTVNDMDd4YUNvZThTdTBaX0lPSWZmLXItOThuUQ?oc=5"
       },
       {
-        "title": "한화시스템 8.1% 하락…변동성 장세 속 K-방산 기대와 단기 조정 공존",
-        "source": "CBC뉴스",
-        "date": "2026-03-23",
+        "title": "④ 수소 생태계 확장 가속도…그룹 역량 총동원, 복안은",
+        "source": "톱데일리",
+        "date": "2026-03-26",
         "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5uUGFZc2lGVGd2d3BYaXFfM0NOYnY1RmtEMXBHX2dGSkw3dkdEUThPdEFySktCcmJDM3pycUM3OGRDWHZlTTlSTk5XTjV2a04td0FEZlU3NWtEcG5xNUgzY2FHVTZETlZu?oc=5"
-      },
-      {
-        "title": "삼성중공업, LNG선 ′릴레이 수주′…1.15조 잭팟에 목표 21% 조기 달성",
-        "source": "메가경제",
-        "date": "2026-03-23",
-        "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBFMHNnMV9ZTlRCMzQ2YmVPZ25rUURlYjhzdDlUZWRNSjN5d0xmcV9rUGtTVDJzV1pZQ3RoTHJSQURMTFZnVnV1YWdMdEt6VFctYVhyakZ4WWFfLWJ6Yks4d29GRjVCZWpSYzV6cnJYdkxGYUly0gFyQVVfeXFMUFp5OU5IWmlrNEluWG5PZmxrR2lxdGtxbGpKOC11dWk5ZS1CXzBWdmVVLVFFbDE0ZC1IU3NDeE02MERkV3NzUmtSMDdIdHJiYlJHRklNSFRLSHBRR1pNSk9rMWwtZHdNRXlJQ0YyeHFTeFJB?oc=5"
-      },
-      {
-        "title": "삼성중공업, LNG선 3척 잇단 수주…1.15조 확보·목표 21% 달성",
-        "source": "산경투데이",
-        "date": "2026-03-23",
-        "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9HanNVSUphT3oyNU1tUjM3YTlpNGdWakp4ZEEydkNHXzdid1dneVByQlQ0OGRmbWt5UDZkVFU4WHlVODcxY3NxZmZ5Sk94Zzgyd0hhLWZkZnVzc1h4WUUwWUN6RTFNeTFlR1ZZRmxsWF_SAXRBVV95cUxPV0NFZmJBdlJIOVFQcTZib0h4N3BLYlh1SFdxa2J0czl6aTdrbTUtaGo2TkJ5Z0VvLXhDOW9xMXBZcFVtbUhEZGJQVldZNzVueGNHeGlyTEtWTW1nWjhwZjVQUXcwTlZNNlR6Tk1ZNUZOS0YwYQ?oc=5"
-      },
-      {
-        "title": "[초점] \"1.4년이면 본전 뽑는다\"…AI데이터센터 수익",
-        "source": "경제타임스",
-        "date": "2026-03-23",
-        "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE42LVp0N1ByVE1hcUtYOVBrSkJGSHBiRHBVclJXTFBDRmJDWkdOblNGQUExenRyX1RpZmVRaGl5eW5NSmJaVjR4Q0JIbmdmZDVrcFNV?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFBxOF95UVRHRXZWX0xoUXR0XzlsSjRZam02dG5rYmdSai1jdTZMb09XV2Vvai13czBnbTVWSWFKbkk0ekVIV09CRzdoUmxYVHJE?oc=5"
       }
     ],
     "theme_hits": [
       {
-        "theme": "원자재급등",
-        "keyword": "금값",
-        "news_title": "일본·한국 증시 급락 출발; 코스피 6% 폭락하며 서킷브레이커 발동; 금값 장중 3% 하락",
-        "news_date": "2026-03-23",
-        "impact": "high",
-        "stocks": [
-          {
-            "ticker": "010950",
-            "name": "S-Oil",
-            "order": 1
-          },
-          {
-            "ticker": "096770",
-            "name": "SK이노베이션",
-            "order": 1
-          }
-        ]
-      },
-      {
-        "theme": "지정학리스크",
-        "keyword": "중동",
-        "news_title": "중동 긴장 고조… 유가 폭등·환율 상승한 한국 증시 하락, 코스피 5,400대 추락",
-        "news_date": "2026-03-23",
+        "theme": "공매도",
+        "keyword": "공매도",
+        "news_title": "'기업 암살자' 해외 공매도 스타, 뜻밖의 발언 \"한국 주식여전히 싸죠\"",
+        "news_date": "2026-03-26",
         "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "012450",
-            "name": "한화에어로스페이스",
-            "order": 1
-          },
-          {
-            "ticker": "047810",
-            "name": "한국항공우주",
-            "order": 1
-          },
-          {
-            "ticker": "079550",
-            "name": "LIG넥스원",
-            "order": 1
-          },
-          {
-            "ticker": "064350",
-            "name": "현대로템",
-            "order": 1
-          },
-          {
-            "ticker": "272210",
-            "name": "한화시스템",
-            "order": 2
-          }
-        ]
+        "stocks": []
       },
       {
-        "theme": "이란_중동",
-        "keyword": "중동 긴장",
-        "news_title": "중동 긴장 고조… 유가 폭등·환율 상승한 한국 증시 하락, 코스피 5,400대 추락",
-        "news_date": "2026-03-23",
+        "theme": "상장_IPO",
+        "keyword": "상장",
+        "news_title": "[경제쏙] SK하이닉스 미국 상장 추진‥국내 주가 영향은?",
+        "news_date": "2026-03-26",
         "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "012450",
-            "name": "한화에어로스페이스",
-            "order": 1
-          },
-          {
-            "ticker": "079550",
-            "name": "LIG넥스원",
-            "order": 1
-          },
-          {
-            "ticker": "064350",
-            "name": "현대로템",
-            "order": 1
-          },
-          {
-            "ticker": "272210",
-            "name": "한화시스템",
-            "order": 1
-          },
-          {
-            "ticker": "093190",
-            "name": "퍼스텍",
-            "order": 2
-          }
-        ]
+        "stocks": []
       },
       {
-        "theme": "원자재급등",
-        "keyword": "유가",
-        "news_title": "중동 긴장 고조… 유가 폭등·환율 상승한 한국 증시 하락, 코스피 5,400대 추락",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "010950",
-            "name": "S-Oil",
-            "order": 1
-          },
-          {
-            "ticker": "096770",
-            "name": "SK이노베이션",
-            "order": 1
-          }
-        ]
-      },
-      {
-        "theme": "워시_연준",
-        "keyword": "통화정책",
-        "news_title": "韓美 통화정책 수장 동시 교체…증시 떠난 외인 관망세 더 짙어지나",
-        "news_date": "2026-03-23",
-        "impact": "high",
-        "stocks": [
-          {
-            "ticker": "105560",
-            "name": "KB금융",
-            "order": 1
-          },
-          {
-            "ticker": "055550",
-            "name": "신한지주",
-            "order": 1
-          },
-          {
-            "ticker": "000810",
-            "name": "삼성화재",
-            "order": 1
-          },
-          {
-            "ticker": "005830",
-            "name": "DB손해보험",
-            "order": 2
-          },
-          {
-            "ticker": "005930",
-            "name": "삼성전자",
-            "order": 2
-          }
-        ]
-      },
-      {
-        "theme": "지정학리스크",
-        "keyword": "중동",
-        "news_title": "다시 뛰는 금리·환율…실물경제, ‘중동 쇼크’에 벼랑 끝으로",
-        "news_date": "2026-03-23",
-        "impact": "high",
-        "stocks": [
-          {
-            "ticker": "012450",
-            "name": "한화에어로스페이스",
-            "order": 1
-          },
-          {
-            "ticker": "047810",
-            "name": "한국항공우주",
-            "order": 1
-          },
-          {
-            "ticker": "079550",
-            "name": "LIG넥스원",
-            "order": 1
-          },
-          {
-            "ticker": "064350",
-            "name": "현대로템",
-            "order": 1
-          },
-          {
-            "ticker": "272210",
-            "name": "한화시스템",
-            "order": 2
-          }
-        ]
-      },
-      {
-        "theme": "금리인상_고금리",
-        "keyword": "금리인상",
-        "news_title": "취임 전부터 환율·물가 난제 맞은 신현송… 씨티은행 “금리인상 신호 낼수도”",
-        "news_date": "2026-03-23",
+        "theme": "금리인하",
+        "keyword": "금리인하",
+        "news_title": "\"물가 진전 없으면 금리인하 없다\"…미 연준 동결에 원화 '휘청'",
+        "news_date": "2026-03-26",
         "impact": "high",
         "stocks": [
           {
@@ -1375,17 +1205,340 @@
             "order": 1
           },
           {
-            "ticker": "000810",
-            "name": "삼성화재",
+            "ticker": "395400",
+            "name": "SK리츠",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "방산",
+        "keyword": "방산",
+        "news_title": "'중동 사태'에도 홀로 주춤했던 현대로템, 우주테마 더해지며 '방산 소외주' 벗어날까",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
             "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "079550",
+            "name": "LIG넥스원",
+            "order": 1
+          },
+          {
+            "ticker": "064350",
+            "name": "현대로템",
+            "order": 1
+          },
+          {
+            "ticker": "272210",
+            "name": "한화시스템",
+            "order": 1
+          }
+        ]
+      },
+      {
+        "theme": "우주항공",
+        "keyword": "우주",
+        "news_title": "'중동 사태'에도 홀로 주춤했던 현대로템, 우주테마 더해지며 '방산 소외주' 벗어날까",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
+            "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "298040",
+            "name": "효성중공업",
+            "order": 2
+          },
+          {
+            "ticker": "000720",
+            "name": "현대건설",
+            "order": 3
           }
         ]
       },
       {
         "theme": "지정학리스크",
         "keyword": "중동",
-        "news_title": "중동발 공포에 환율·금리 치솟고 주가 급락…한국경제 먹구름",
-        "news_date": "2026-03-23",
+        "news_title": "'중동 사태'에도 홀로 주춤했던 현대로템, 우주테마 더해지며 '방산 소외주' 벗어날까",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
+            "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "079550",
+            "name": "LIG넥스원",
+            "order": 1
+          },
+          {
+            "ticker": "064350",
+            "name": "현대로템",
+            "order": 1
+          },
+          {
+            "ticker": "272210",
+            "name": "한화시스템",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "방산",
+        "keyword": "방산",
+        "news_title": "K-방산 '수출 급증'에 은행도 '웃음 꽃'…조 단위 보증 시장 확대",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
+            "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "079550",
+            "name": "LIG넥스원",
+            "order": 1
+          },
+          {
+            "ticker": "064350",
+            "name": "현대로템",
+            "order": 1
+          },
+          {
+            "ticker": "272210",
+            "name": "한화시스템",
+            "order": 1
+          }
+        ]
+      },
+      {
+        "theme": "대규모수주",
+        "keyword": "조 단위",
+        "news_title": "K-방산 '수출 급증'에 은행도 '웃음 꽃'…조 단위 보증 시장 확대",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": []
+      },
+      {
+        "theme": "방산",
+        "keyword": "방산",
+        "news_title": "\"올해 역대 최대수출…K방산 다시 주목할 때\"",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
+            "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "079550",
+            "name": "LIG넥스원",
+            "order": 1
+          },
+          {
+            "ticker": "064350",
+            "name": "현대로템",
+            "order": 1
+          },
+          {
+            "ticker": "272210",
+            "name": "한화시스템",
+            "order": 1
+          }
+        ]
+      },
+      {
+        "theme": "방산",
+        "keyword": "방산",
+        "news_title": "[심층진단] ‘K-방산’ 서유럽 안보 생태계 진입... 단순 수출 넘어 ‘공급망 파트너’로 체질 개선",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "012450",
+            "name": "한화에어로스페이스",
+            "order": 1
+          },
+          {
+            "ticker": "047810",
+            "name": "한국항공우주",
+            "order": 1
+          },
+          {
+            "ticker": "079550",
+            "name": "LIG넥스원",
+            "order": 1
+          },
+          {
+            "ticker": "064350",
+            "name": "현대로템",
+            "order": 1
+          },
+          {
+            "ticker": "272210",
+            "name": "한화시스템",
+            "order": 1
+          }
+        ]
+      },
+      {
+        "theme": "원전",
+        "keyword": "원전",
+        "news_title": "경주 SMR 유치 총력전…원전 전주기 생태계 구축 ‘승부수’",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "009540",
+            "name": "한국전력",
+            "order": 1
+          },
+          {
+            "ticker": "034020",
+            "name": "두산에너빌리티",
+            "order": 1
+          },
+          {
+            "ticker": "267260",
+            "name": "HD현대일렉트릭",
+            "order": 2
+          },
+          {
+            "ticker": "092200",
+            "name": "디아이씨",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "원전",
+        "keyword": "원자력",
+        "news_title": "[원자력 세미나] “SMR 경쟁은 누가 먼저 실증을 보여주느냐의 싸움”",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "009540",
+            "name": "한국전력",
+            "order": 1
+          },
+          {
+            "ticker": "034020",
+            "name": "두산에너빌리티",
+            "order": 1
+          },
+          {
+            "ticker": "267260",
+            "name": "HD현대일렉트릭",
+            "order": 2
+          },
+          {
+            "ticker": "092200",
+            "name": "디아이씨",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "원전",
+        "keyword": "원전",
+        "news_title": "롤스로이스·스투즈비크 원전 동맹, 유럽 에너지 지형도 바꾼다",
+        "news_date": "2026-03-26",
+        "impact": "medium",
+        "stocks": [
+          {
+            "ticker": "009540",
+            "name": "한국전력",
+            "order": 1
+          },
+          {
+            "ticker": "034020",
+            "name": "두산에너빌리티",
+            "order": 1
+          },
+          {
+            "ticker": "267260",
+            "name": "HD현대일렉트릭",
+            "order": 2
+          },
+          {
+            "ticker": "092200",
+            "name": "디아이씨",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "원전",
+        "keyword": "원전",
+        "news_title": "[원자력 세미나] “중동 전쟁으로 원전 중요성 재확인… SMR, 재생에너지 보완 역할”",
+        "news_date": "2026-03-26",
+        "impact": "high",
+        "stocks": [
+          {
+            "ticker": "009540",
+            "name": "한국전력",
+            "order": 1
+          },
+          {
+            "ticker": "034020",
+            "name": "두산에너빌리티",
+            "order": 1
+          },
+          {
+            "ticker": "267260",
+            "name": "HD현대일렉트릭",
+            "order": 2
+          },
+          {
+            "ticker": "092200",
+            "name": "디아이씨",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "theme": "지정학리스크",
+        "keyword": "전쟁",
+        "news_title": "[원자력 세미나] “중동 전쟁으로 원전 중요성 재확인… SMR, 재생에너지 보완 역할”",
+        "news_date": "2026-03-26",
         "impact": "high",
         "stocks": [
           {
@@ -1412,714 +1565,558 @@
             "ticker": "272210",
             "name": "한화시스템",
             "order": 2
-          }
-        ]
-      },
-      {
-        "theme": "방산",
-        "keyword": "방산",
-        "news_title": "구미시, 방산 전문교육…K-방산 핵심 인재 키운다",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "012450",
-            "name": "한화에어로스페이스",
-            "order": 1
-          },
-          {
-            "ticker": "047810",
-            "name": "한국항공우주",
-            "order": 1
-          },
-          {
-            "ticker": "079550",
-            "name": "LIG넥스원",
-            "order": 1
-          },
-          {
-            "ticker": "064350",
-            "name": "현대로템",
-            "order": 1
-          },
-          {
-            "ticker": "272210",
-            "name": "한화시스템",
-            "order": 1
-          }
-        ]
-      },
-      {
-        "theme": "방산",
-        "keyword": "방산",
-        "news_title": "한화시스템 8.1% 하락…변동성 장세 속 K-방산 기대와 단기 조정 공존",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "012450",
-            "name": "한화에어로스페이스",
-            "order": 1
-          },
-          {
-            "ticker": "047810",
-            "name": "한국항공우주",
-            "order": 1
-          },
-          {
-            "ticker": "079550",
-            "name": "LIG넥스원",
-            "order": 1
-          },
-          {
-            "ticker": "064350",
-            "name": "현대로템",
-            "order": 1
-          },
-          {
-            "ticker": "272210",
-            "name": "한화시스템",
-            "order": 1
-          }
-        ]
-      },
-      {
-        "theme": "조선",
-        "keyword": "수주",
-        "news_title": "삼성중공업, LNG선 ′릴레이 수주′…1.15조 잭팟에 목표 21% 조기 달성",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "009540",
-            "name": "한국전력",
-            "order": 3
-          },
-          {
-            "ticker": "329180",
-            "name": "HD현대중공업",
-            "order": 1
-          },
-          {
-            "ticker": "267250",
-            "name": "HD현대에너지솔루션",
-            "order": 2
-          }
-        ]
-      },
-      {
-        "theme": "대규모수주",
-        "keyword": "수주",
-        "news_title": "삼성중공업, LNG선 ′릴레이 수주′…1.15조 잭팟에 목표 21% 조기 달성",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": []
-      },
-      {
-        "theme": "조선",
-        "keyword": "수주",
-        "news_title": "삼성중공업, LNG선 3척 잇단 수주…1.15조 확보·목표 21% 달성",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "009540",
-            "name": "한국전력",
-            "order": 3
-          },
-          {
-            "ticker": "329180",
-            "name": "HD현대중공업",
-            "order": 1
-          },
-          {
-            "ticker": "267250",
-            "name": "HD현대에너지솔루션",
-            "order": 2
-          }
-        ]
-      },
-      {
-        "theme": "대규모수주",
-        "keyword": "수주",
-        "news_title": "삼성중공업, LNG선 3척 잇단 수주…1.15조 확보·목표 21% 달성",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": []
-      },
-      {
-        "theme": "클라우드_데이터센터",
-        "keyword": "데이터센터",
-        "news_title": "[초점] \"1.4년이면 본전 뽑는다\"…AI데이터센터 수익",
-        "news_date": "2026-03-23",
-        "impact": "medium",
-        "stocks": [
-          {
-            "ticker": "267260",
-            "name": "HD현대일렉트릭",
-            "order": 1
-          },
-          {
-            "ticker": "298040",
-            "name": "효성중공업",
-            "order": 1
-          },
-          {
-            "ticker": "003230",
-            "name": "삼양식품",
-            "order": 3
           }
         ]
       }
     ],
     "surging_stock_news": [
       {
-        "stock_name": "한텍",
-        "title": "한텍(098070) 소폭 상승세 +3.34%, 4거래일 연속 상승",
+        "stock_name": "셀바스AI",
+        "title": "셀바스AI(108860) 급등세 기록중 +20.10%, 3거래일 연속 상승",
         "source": "매일경제 마켓",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9YNDVRaVNwSFZMbDRRYVhhbTFNWDVpYmxqekVOSUFVTW9KOV9FWmhxcTFLb1d6MklWNWNnV3l3UmNuZzhTR3Btc19MRWwxakhSemc?oc=5"
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE84UFloMEdqdjRZVnhWSVNYemlmYkxSRDN2SFFqeFozOS05OVhSUTc4WXlXRGJpMWtrSm5NNmp6RGNYUlp4QW1vQzg1Zm43c19hLXc?oc=5"
       },
       {
-        "stock_name": "하이브",
-        "title": "[속보]4만명밖에 안와서? 하이브 주가 13%대 급락",
-        "source": "문화일보",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE5RbUxHN3lCZHg0UGJqLUhudGxHand2M2FuaGlJMENHX3ZGYmtXcTZhWm91OWVRS24xdVVIMElkUzkzR04yNE9zcmlzLVZLeUdZ?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "BTS 보러 26만명 온다더니 겨우 4만명! 광화문 공연 다음날 하이브 주가는 17% 뚝",
-        "source": "조선일보",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQNmN2cHQ3WjVzVldidUEzMTBYR2ZWWmRlbnd6WDZ4WjYzbnlUUmhyQ3g4VFZDUmJDOU51R2lEaWNiQU51ZGFjVzN4US1wcXA3ZlVVSHdQWDBHR01fY19uaC04Um9CNWhOeFNLU09EYXBQUVB2V3J0NzBUV0prNDRySmxRcw?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "BTS 공연효과 끝났나…하이브 장초반 13%대 급락 [이런국장 저런주식]",
-        "source": "서울경제신문",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5TZDhfd0VEWmNWYl9OdnlIYWV5ZmVHRFRfZ0pQYjVMYXdDRDZMM201cnJMUE5zU1ZQLWg4T1lLTkZabDlsLTU0eVFQM1RhNTNxdkHSAVNBVV95cUxNZ2x1ckdmVTB2V1BsbFZiQU4tSHgyTS1kTXg4Q3dud29kWU1DOURTMUxoYWhJUTlrN2dqcGxqbFhRaHBsbGRaOTBkbUZFNkhGMzFKWQ?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "[TOP이슈] BTS 완전체 공연에도 하이브 주가 13% 하락세…“방시혁, BTS 담보로 자산 끌어와”",
-        "source": "톱스타뉴스",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9xSUszVkRVQXo2MEFKaU1felFfaFhjbWZWbmpJb1lFakFtWlRyc05OREdRcko0WVRoZnVQS2JHd3Zhb3p0VG9ZWWdOMTJZZjAyVDBQd183bFJ3eGNpdE9HV01ZWjY3cWJmSm56Nm5WUFdfZw?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "하이브 주식, 15%대 급락…BTS 공연 끝나자 ‘재료 소멸’ 인식",
-        "source": "segye.com",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5MLXNoX2tvb3ZkZGVVUnpnYjFNZlFIblNnYldwZWxiYjhMdnpPZzZLajFFekhCQ0hCQ1hBblIyRTRldVJTQmtkT1VrRk16dW5PcWM1WDVB0gFUQVVfeXFMTndRVkRXV2Z0WXlMUk1jaW1kNjZ2eFFMYXpXV0ZxTkROOFFEZXBSeVJMNk1BRkw0T3ZyTXczYjBzeEZUY0NGMnhheXplM0hMbzhseldD?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "BTS 공연효과 끝났나…하이브 장초반 급락 [이런국장 저런주식]",
-        "source": "네이트",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE51NzVoSTVpUVREVVBxZFZyUTdmWkJ3bWFFWlRVNmg0eVN0eVdDelhETExxbnIzWHRVOTFxWEhKckwzVnlLZ29weEozSElTVXMxdGh5cDJnVDl3RHVRQ1hyZg?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "하이브 주가, 3월 23일 장중 295,500원 14.00% 하락",
-        "source": "중앙이코노미뉴스",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBNQ0tRQVg1VDl5enFoUFYzbVNwQUlNd05KV25GSVFReFlrWlF2OFF3ZWs3OGVWS19ERm9ocWpsOTZLVnZJcGJybGRCeHhiWWhzQWc4Nk85Q3F3QWUwNTM0cndscDJ2eU9KVWRDbE9qbTNtdw?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "BTS 아미, 유통계 휩쓸었다…하이브 주가는 급락",
-        "source": "한국경제TV",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9TeWJRN05wRW1IVDQxLWtUdS1ZNlZPOExDQURJUWFfZ0RKRlRVZVRvcngwblpETjZpU1NoSEM0LXdFaFA4MEQ3Qm5nS1g5aTgzNXh2bDZ4TEE3dlNWU1Q3aGxCRC1ycUdoWGFSd3VVbjh1OVM3eHd3?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "\"BTS 컴백 효과 하루만에 끝났나\"…하이브 주가 15%대 급락",
-        "source": "네이트",
-        "date": "2026-03-23",
-        "impact": "high",
-        "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5yeEIxNEhVZVRSQkQ2NjAyOWJPc2o0WXNRZ0R4VUxfN0d0eGNzc201RFZTSlRzS0N4Z3BhZ0FtUDcwXzROaWpDWFhYZlZvaFFIbzNN?oc=5"
-      },
-      {
-        "stock_name": "현대힘스",
-        "title": "현대힘스 주가 NXT서 2만원선 회복…12%↑",
+        "stock_name": "셀바스AI",
+        "title": "셀바스AI 주가 7%↑ 14000원선 회복…변덕이 심한 장세",
         "source": "CBC뉴스",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5IZ2JVazc2OHUzaDZnakZtNnNvN0lQQUtmYnJPRTBneHN6bzRZWTVvYzdRUGs0T2NhNmpUNnNtTGJHUXhvTm1hOTRTWXg2dUJFbkVFTm1DbW1MUU1BYVVJVEhVN2QyMS00?oc=5"
-      },
-      {
-        "stock_name": "KEC",
-        "title": "KEC(092220) 급등세 기록중 +21.17%, 52주 신고가",
-        "source": "매일경제 마켓",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFB6SWItT2RPUDNHaldJdU92MTB0SjctbkRSdWhfckpOMEw4aGlqdHJCQjhKSm9SQlFRZEh0aFBMTlJZb21yTWlfSl82Ui1URlNDelE?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFAwMXMtMVhIRDR3QnNOYUtKNEl1Qlo5eEJvZ3dZSnFhZGozVngtdHFUM0JwNjRrd2xUYjR2R1RQNUk0RmhfUHdISVNPY1Z0Qi1MdlgwSXZVZ2trOFhZa1lfRC1WOWJKZThj?oc=5"
       },
       {
-        "stock_name": "KEC",
-        "title": "KEC 주가, 3월 23일 장중 1,670원대 기록하며 강세",
-        "source": "톱스타뉴스",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE4taDBrUnNYZklWTDZiby0zREJPWElGMlh3ODd2TzBoZjROY0ctMlJVczdLdUVnWEdiczRNMy1RYTQxRW9yd0RYamJudk80dTFBX1BFV3ZfaDRnNk1KODZjVmQwR3RrTGQyZE9ZRUFEcnZRdw?oc=5"
-      },
-      {
-        "stock_name": "KEC",
-        "title": "한국전자홀딩스(006200) 상승폭 확대 +16.09%",
-        "source": "매일경제 마켓",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE8xdnBlTkVwYUtoRDY3MEJqM0Z4dDlkUzdLYU5Xd1lLcXZScEtWS3hrODZxcGppRE1JSVZXa0tsaUNzYlVvaWx3TGMxZVBqdUl1OXc?oc=5"
-      },
-      {
-        "stock_name": "KEC",
-        "title": "오후장 기술적 분석 특징주 A(코스피)",
-        "source": "매일경제 마켓",
-        "date": "2026-03-23",
+        "stock_name": "셀바스AI",
+        "title": "셀바스AI 주가, 힘찬 괴성... 왜?",
+        "source": "금강일보",
+        "date": "2026-03-26",
         "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1nM3FUNWkxRE12czU3RVI2akJfc0N4TlB5eFdUWHFSdVExOGhHdTR3QmtsMEdXajFXbHo1VFNMMm1qdWw5VTUyUUtpMzl5a2hVdFE?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1Wemc3UGkzR2dJaElmQ3NYazZLcTQtLXVNdmdQbEtCbHNxdVd0RmhFY3ljVFVTVTZ6MDZ5a1hHRGZUZ19oUi1BeXhZaHJXZFhRcVR4Qndzb2pTTExZOVJpcnc5RGYyWlJzSHc?oc=5"
       },
       {
-        "stock_name": "옵투스제약",
-        "title": "옵투스제약(131030) 소폭 상승세 +4.36%",
-        "source": "매일경제 마켓",
-        "date": "2026-03-23",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE0wdXk5TGVwZUN1VU1qcm82NXQ3bG5hTWltb3FfUi1WRi15MnZIYlBFRFBDZ2lNY0poN3ZXREE2c1lPUnRFV0tldHBRdG1zenh0NGc?oc=5"
-      },
-      {
-        "stock_name": "하이젠알앤엠",
-        "title": "[주민센터] KCC·대한전선·에스피지·하이젠알앤엠",
-        "source": "네이버 프리미엄콘텐츠",
-        "date": "2026-03-22",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE1tYUZFWFBYZEFTb3N4cG9xMmpUc0tVc3B1ZXpuRG1CQUVHVng2dllDUWhsdEpLTWdwQWpGTkNPSFh1LVI1WEROaWVoS0lKZHJ2TVVKTHJDSFpfUDdtcHl4X1Z0ZXlDVDNyNXhadmd1LUJvS3VWVFFiRlljTkl2Wms?oc=5"
-      },
-      {
-        "stock_name": "하이브",
-        "title": "‘SM 주가조작 혐의’ 카카오 창업자 김범수, 2심 시작…“하이브 방해 의도 無”",
-        "source": "톱스타뉴스",
-        "date": "2026-03-21",
-        "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9NYTVjbTY1bzRwNERsRW12amR3LWZsWXlGdk9jT0JtdFBJTlJLbVZuU0t0MlRVWkVzWjhrSjRuaG9ubnlWb09EMzNoalg1OVJmaDRkeXhENVJKNk1iMFBkYmFYeXRLSkZoTUdKWDhzVC1Sdw?oc=5"
-      },
-      {
-        "stock_name": "네패스아크",
-        "title": "네패스아크 주가 파죽지세… AI 반도체 다음 타자는 '뉴로모픽' 낙점",
-        "source": "핀포인트뉴스",
-        "date": "2026-03-21",
+        "stock_name": "셀바스AI",
+        "title": "셀바스AI, +6.50% VI 발동 - 조선비즈",
+        "source": "Chosunbiz",
+        "date": "2026-03-26",
         "impact": "medium",
-        "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE50a1VRQnhIZW5sdUlZUVBKeVY5OU1mcXZTUlZQTjVwSXd0NlNtaVc5ZFN5dEVZT1VYaTdaX3M5NTUyemFUMDI5X01rR0pRVWRabTZaRmVGU1RqWWRQZDAtdlFlVFhCQTVEYzc4RTl5TTRUNFXSAXdBVV95cUxPTUZSNVdKLWVKQlFuNTlpUVl6SXBRUl9mVjV4dGhHdVpEWHY2c3YzdERxREVWWlNvaklyM3Jzbkx2b0tXTEN6bzd3a3U3VXRlS2U0c3BDaHFuWW9wTVB5UTJXWmlaWHktM0VPSEZCRVFJQUtVTUtmWQ?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPa2k1SHRXUkhHckRYa3R6bDB4WENxMmdCRjIyTHU3R3VKRGZfN015WVlhRFctLVZ1aGVRYTVSZC1oRkxOblJmRThuelljS2JycjJqOXBOV0ZKczNUZ0k5UWFpaDcwbFc3czRETUlpaVUzT3luQkJqRVpxRFYybGhyelI0WdIBlwFBVV95cUxONVJTTjM3R3NmLXRrUlFPR3FCMGpsMHRsRWxNbmQwRThsNHdYUkxIUHlKRlVxbFViRmFBTHlaNHhkc19MWTN0ODhXeF9ma2Y4MkVET1pMWks5Nnd6SDAwNGxmaUxoSDJlUnlDTHc4TUdhRjg3VzNoWkRnRDFKZEhDNWRfVG9YMGhLMjRLclZNZ0w4TENXa1Ew?oc=5"
       },
       {
-        "stock_name": "한텍",
-        "title": "2026년 03월 3주차 주식 인사이트 복기",
-        "source": "네이버 프리미엄콘텐츠",
-        "date": "2026-03-20",
+        "stock_name": "셀바스AI",
+        "title": "셀바스헬스케어(208370) 소폭 상승세 +3.10%, 3거래일 연속 상승",
+        "source": "매일경제 마켓",
+        "date": "2026-03-26",
         "impact": "low",
-        "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNV0loWXZGQTFYS1BvN2RyaXI0LXdCR0tYeS1PZ0ttUU00b3VTckIzSFc2MThHQ041NzJRSzk4VVM5cTRVTUcwUFZJSkpQY25WZjVIQTZLc3RYbFpWaFluNWkyRlZRNmFWdURLU25SVnl2NDM1cG1oQVVBZmVtT3VHS0VnOHY2eVBEekE?oc=5"
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1razBMT3F4MHE5djdzdzJXRG53SEdsN0dmUmxlT3ZnSXdYdmVCUFpkcVdqLTJnRFZXWDhROEZUNnJ1NFhwY2xDNTVBZDcxMklmZFE?oc=5"
+      },
+      {
+        "stock_name": "셀바스AI",
+        "title": "셀바스AI, +9.61% 상승폭 확대 - 조선비즈",
+        "source": "Chosunbiz",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPMlFHSjcteEpuanhnVWxtREF5Q0NXQ1JGMU9SanJQX0FSQm5jbl9FZXRtZThndDhHYzE0eUJuSEJQWXhKdktHV3V0ZVQzemRNb1E2dzdFRlVteU15SzZGVDhTNVVfbkhQTkZpWUJ4RGZxY1lDaWhpTmxkQWhSQ29tUS1BZ9IBlwFBVV95cUxNMmVvZTUzYzAyZjE1QUxmd2NaWE1wRm9lNzk0Z1VZaHRicG5DcE9PbzBPS1pSNVYyLThGU0RRUDBqc2NFRkxqRGg3cmxMWlNWTEtMVGpCZkFXOE0yYUxUbVNCU2hMVlYzZmpkQlZpQUp2SmRRMVRyZVhPUElpeGJOcFpXM3Q3VUYzSTEwemt2ajM5cmdOUXdn?oc=5"
+      },
+      {
+        "stock_name": "셀바스AI",
+        "title": "코스닥 하락률 상위 20종목(직전 30분 기준)",
+        "source": "매일경제 마켓",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE51amhCVTF0VzQyeExWQUpQTktwTkluME5LS1JKak9CNkV2QVFiYzhSWlAzbG5PamZyUVNCXzZVZl9uaFZxa2pUU1VVNzE3aTNXc3c?oc=5"
+      },
+      {
+        "stock_name": "SK오션플랜트",
+        "title": "SK오션플랜트(100090) 소폭 상승세 +4.59%",
+        "source": "매일경제 마켓",
+        "date": "2026-03-26",
+        "impact": "low",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9JMm5QcDJaeTh3UHBXcUFfQWRENDNUZHh5Sk42SWtIUmJOTXFiekhBSHZObEFGS3Q1THk1cENoWGpJM28ycFB3QUpBbmJiR18yckE?oc=5"
+      },
+      {
+        "stock_name": "SK오션플랜트",
+        "title": "SK오션플랜트 주가, 3월 26일 장중 24,450원 2.40% 하락",
+        "source": "topstarnews.net",
+        "date": "2026-03-26",
+        "impact": "low",
+        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9PaWxuUG9kdVZ4Vjl3S08yZFFaVENHR0JBcnp5ZGxhUm9WTTRCMTNYLUlWOV9YMW52bWR1MTk0TlFkaENyVEpxb3haUHFMXzlzbWtJMU1Fb1lickpkVjJRWjQ5VVk2VEIya2JtdDRkNWZKdw?oc=5"
+      },
+      {
+        "stock_name": "SK오션플랜트",
+        "title": "SK오션플랜트 주가, 급등세... 왜?",
+        "source": "금강일보",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1Xa2dkOVlsOElxTEhPeG9FWGI1N2NKSDhURXliamVIYjlxQ0FhaWJ3aXpRZW9ieXFUdzN3ZjY3bmhfWklHZjBuWS1SdjV1ZmNrU0s3Y1BSTVZuQVJGZGdBc1lMQWRjaUJhcWc?oc=5"
+      },
+      {
+        "stock_name": "피노",
+        "title": "피노, +29.87% 상한가 - 조선비즈",
+        "source": "Chosunbiz",
+        "date": "2026-03-26",
+        "impact": "high",
+        "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxObnZkX1N2M1g5SWRJeXNNZFl5RkxEaVNtRVpEUFEzNC0tMTl5ZkJ5WkVwTWo3UUM2SzZCUGQyaUxsRDlMOXBwRC1Ncno3V29udmVHcmMwOGstUFJ5dExwVHpJUVVSQjhxamk3amxfVU11R2RVdkdXUi1KUkFReTk4OVFfY9IBlwFBVV95cUxNZUZfN1gzRWFVSTBkdm5sTktlY241OUIwWTVBUmwwMk9seVlCNGpSQXRoZmdIUzRocjJCeDhGbzFPZUdpN2l2WXVJaWpta0EtQmNxY3lxVXFaVDhVWkpwQm9sRlltWGZqVUNVM25RdGkzeEpXYk1teHNKSFhXcUFmRkgyamg5cDFJd05pWHc3TGhpN3FKYk5B?oc=5"
+      },
+      {
+        "stock_name": "피노",
+        "title": "피노, +18.65% 52주 신고가 - 조선비즈",
+        "source": "Chosunbiz",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNMkRHNEgzblptejhyTjYxbnZUR3ZoS19kYjNMQVRmR3ZfWTJqRXBTWUJRLTA5aVFzZFZTbXFkM3U5eHpwY3JJTk1mWm4wU1IwRTA4ZDNRT0lfUmJIR0hCOW1SQldBSWJITENRWHlReFhVOTlWU0p2amU4OVhlSmhCTkdoa9IBlwFBVV95cUxNalBscmdBakViVXZDa0sxcktLSXVWQ2RMeG9wazgwLUFRa0FnWjdONHRGX2xOUUk2WmJLaUpPemMwT3k2Qk9pczFNd0RJSG9nc0wxRUFFMkFHd2Rvc0gxMFl1NUJDT2Y1aXR2cTJtUTdHTVdBT0ZKM0lVVGFZTzhtZ1JzTzlua2ZDSVhQNEhhbHliWGZuNG1n?oc=5"
+      },
+      {
+        "stock_name": "피노",
+        "title": "오후장 기술적 분석 특징주 A(코스닥)",
+        "source": "매일경제 마켓",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9kT2NCYmNsb1JSQThNN05qUUNnbi13Qm00aEd3cS0xLUtIdHNFamRnZG93ZXBRVDQ3czkxOVYxaHctX0VPaTAzMmdPLWpZUURnelE?oc=5"
+      },
+      {
+        "stock_name": "PI첨단소재",
+        "title": "PI첨단소재 주가, 3월 26일 장중 26,250원 17.45% 상승",
+        "source": "topstarnews.net",
+        "date": "2026-03-26",
+        "impact": "low",
+        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBwTC1VdUZsS2hvd19MaDJHak9LbGFPeHRkZ3BoaVZSVE9MMzRLRVpDT0dUMkVTQ0ZkcEFHcmZnZkt4VWF5alVxVDhWalZjREtfQy1aUmVJZzdEUFZXaEhSdzZDSUxXTkt2OXVwaXFNWjVPUQ?oc=5"
+      },
+      {
+        "stock_name": "큐렉소",
+        "title": "큐렉소 주가, 3월 26일 장중 18,090원 20.60% 상승",
+        "source": "topstarnews.net",
+        "date": "2026-03-26",
+        "impact": "low",
+        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5nVTZaekhrVUFlclkxSmhNRTFpSmY3ZmpVSl91dk1mTW5pbmVlN0E3QzNrb3FUVzJfZklCQWs0azBLSHgtZnoxb1lhZzU0WTZnQkxOZmtmTWdjNjRQcUtTcTNCWHlvd0hEN1JwWlYyaVUzUQ?oc=5"
+      },
+      {
+        "stock_name": "큐렉소",
+        "title": "오전장 기술적 분석 특징주 A(코스닥)",
+        "source": "매일경제 마켓",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5ELUR6RWIzZXZ1bFpxNDNPcEtnSExRRlBvWnNoOWxuZkdRN2U2NGNwV2N3RlRITjRlZm44OUdzOFVzakhzSkU4clVKbHhLYXhrLUE?oc=5"
+      },
+      {
+        "stock_name": "코오롱티슈진",
+        "title": "코오롱티슈진 주가 장중 20%대 급등, 무릎 골관절염 약 임상 3상 통과 기대감",
+        "source": "비즈니스포스트",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTFB2LVF4cno0clF2RHIwbHFfM1gzUU5BOGg3TlFVWUVsSTRiYjhrLWZQeWdWdFlOV2loVGtsM2Q5NUg1QjlRWEt2ZTFOLVNyeWZRWHgxYTlzQUt5QzFsY25ZekwtVEp3c0lyUU5sUnROQ291dUU?oc=5"
+      },
+      {
+        "stock_name": "코오롱티슈진",
+        "title": "[특징주] 코오롱티슈진, 3상 데이터 취합만 남았다... 임상 잭팟 기대",
+        "source": "와이드경제",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBpMFlKU1pJZm1EcjgyczVSb0RmUFRiVWVhMFJTZmZabnJZVDdtanMweFdZWFEydXV1SUQwb2ZtOXlPT1NzM0hjcE55Y2NQRmpOZ3Rycm1ucjVSN1hZdjQxQXlEWlFrTXFEUkpqcw?oc=5"
+      },
+      {
+        "stock_name": "코오롱티슈진",
+        "title": "\"골관절염 치료제 임상 성공 확률↑\"…코오롱티슈진, 신고가",
+        "source": "mt.co.kr",
+        "date": "2026-03-26",
+        "impact": "medium",
+        "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5YRlhxbVl6WUZTRlVnTWt4ZjZoc3dkM1VCdUNfNEk4R2VlSjB5TVdaaTZ6ZHlQcnlVbkdMckhGT2hDalh0dmZfdWpFZ0VNUTZhaV9VNWJ5aUp4R3ZjckZYMFR0MHNJRGY0?oc=5"
+      },
+      {
+        "stock_name": "코오롱티슈진",
+        "title": "코오롱티슈진 주가, 3월 26일 장중 123,800원 20.92% 상승",
+        "source": "topstarnews.net",
+        "date": "2026-03-26",
+        "impact": "low",
+        "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE8tRjBXSWFBWjlMUEpxV3dsb05aLUlVMzY2aTd5OUt1eF9hM09tU001TERNWUZ6U1hBUGwyT0c1ZjU3dV9YNTY4LUZVZ2VEM3dNSGd0NXRDeXpGeGdBa0ZDeDlIWnU5Q293Y0R2NTZXdmYtUQ?oc=5"
       }
     ],
     "dart_disclosures": [
       {
-        "title": "[공시] 제이스코홀딩스 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
+        "title": "[공시] 코아스 — [기재정정]주요사항보고서(유상증자결정)",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "제이스코홀딩스",
-        "stock_code": "023440",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902737"
+        "keyword": "유상증자",
+        "corp_name": "코아스",
+        "stock_code": "071950",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001499"
       },
       {
-        "title": "[공시] 제이스코홀딩스 — 기타시장안내              (상장폐지 관련)",
+        "title": "[공시] 콘텐트리중앙 — 타법인주식및출자증권취득결정",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "제이스코홀딩스",
-        "stock_code": "023440",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902720"
+        "keyword": "타법인주식및출자증권취득결정",
+        "corp_name": "콘텐트리중앙",
+        "stock_code": "036420",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803434"
       },
       {
-        "title": "[공시] 투비소프트 — 기타시장안내              (상장폐지 관련)",
+        "title": "[공시] JW홀딩스 — [기재정정]단일판매ㆍ공급계약체결(자율공시)",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "투비소프트",
-        "stock_code": "079970",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902717"
+        "keyword": "공급계약체결",
+        "corp_name": "JW홀딩스",
+        "stock_code": "096760",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803402"
       },
       {
-        "title": "[공시] 투비소프트 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
+        "title": "[공시] NHN벅스 — [기재정정]최대주주변경을수반하는주식양수도계약체결",
         "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "투비소프트",
-        "stock_code": "079970",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902716"
-      },
-      {
-        "title": "[공시] 다원시스 — 기타시장안내              (상장폐지 관련)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "다원시스",
-        "stock_code": "068240",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902734"
-      },
-      {
-        "title": "[공시] 다원시스 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "다원시스",
-        "stock_code": "068240",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902728"
-      },
-      {
-        "title": "[공시] 롤링스톤 — 기타시장안내              (상장폐지 관련)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "롤링스톤",
-        "stock_code": "214610",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902714"
-      },
-      {
-        "title": "[공시] 롤링스톤 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "롤링스톤",
-        "stock_code": "214610",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902729"
-      },
-      {
-        "title": "[공시] 삼영이엔씨 — 기타시장안내              (상장폐지 관련)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "삼영이엔씨",
-        "stock_code": "065570",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902719"
-      },
-      {
-        "title": "[공시] 삼영이엔씨 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "삼영이엔씨",
-        "stock_code": "065570",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902715"
-      },
-      {
-        "title": "[공시] 제일엠앤에스 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "제일엠앤에스",
-        "stock_code": "412540",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902704"
-      },
-      {
-        "title": "[공시] 제일엠앤에스 — 기타시장안내              (상장폐지 관련)",
-        "source": "DART",
-        "date": "2026-03-23",
-        "impact": "high",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "제일엠앤에스",
-        "stock_code": "412540",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902703"
-      },
-      {
-        "title": "[공시] 엔켐 — [기재정정]최대주주변경을수반하는주식담보제공계약체결",
-        "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
         "keyword": "최대주주변경",
-        "corp_name": "엔켐",
-        "stock_code": "348370",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902656"
+        "corp_name": "NHN벅스",
+        "stock_code": "104200",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326903228"
       },
       {
-        "title": "[공시] 아이톡시 — 기타시장안내              (상장폐지 관련)",
+        "title": "[공시] 웅진 — 주요사항보고서(자기주식처분결정)",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "자기주식처분",
+        "corp_name": "웅진",
+        "stock_code": "016880",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001350"
+      },
+      {
+        "title": "[공시] 현대자동차 — 주요사항보고서(자기주식처분결정)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "자기주식처분",
+        "corp_name": "현대자동차",
+        "stock_code": "005380",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001343"
+      },
+      {
+        "title": "[공시] 더존비즈온 — 최대주주등소유주식변동신고서(최대주주변경시)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "최대주주변경",
+        "corp_name": "더존비즈온",
+        "stock_code": "012510",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803260"
+      },
+      {
+        "title": "[공시] 애경산업 — 최대주주등소유주식변동신고서(최대주주변경시)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "최대주주변경",
+        "corp_name": "애경산업",
+        "stock_code": "018250",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803252"
+      },
+      {
+        "title": "[공시] 광동제약 — 주요사항보고서(자기주식처분결정)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "자기주식처분",
+        "corp_name": "광동제약",
+        "stock_code": "009290",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001287"
+      },
+      {
+        "title": "[공시] 한창 — 기타시장안내              (감사의견 거절 관련 상장폐지 절차 미진행 안내)",
+        "source": "DART",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
         "keyword": "상장폐지",
-        "corp_name": "아이톡시",
-        "stock_code": "052770",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902701"
+        "corp_name": "한창",
+        "stock_code": "005110",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803136"
       },
       {
-        "title": "[공시] 옵티코어 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
+        "title": "[공시] 애경산업 — 최대주주변경",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "옵티코어",
-        "stock_code": "380540",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902705"
+        "keyword": "최대주주변경",
+        "corp_name": "애경산업",
+        "stock_code": "018250",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326802354"
       },
       {
-        "title": "[공시] 아이톡시 — 주권매매거래정지기간변경              (상장폐지 사유 발생)",
+        "title": "[공시] 더존비즈온 — 최대주주변경",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "아이톡시",
-        "stock_code": "052770",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902699"
+        "keyword": "최대주주변경",
+        "corp_name": "더존비즈온",
+        "stock_code": "012510",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803041"
       },
       {
-        "title": "[공시] KD — 기타시장안내              (상장폐지 관련)",
+        "title": "[공시] 워트 — 단일판매ㆍ공급계약체결",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "KD",
-        "stock_code": "044180",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902698"
+        "keyword": "공급계약체결",
+        "corp_name": "워트",
+        "stock_code": "396470",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326903063"
       },
       {
-        "title": "[공시] KD — 주권매매거래정지              (상장폐지 사유발생)",
+        "title": "[공시] 폴라리스AI파마 — [기재정정]주요사항보고서(전환사채권발행결정)",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "KD",
-        "stock_code": "044180",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902688"
+        "keyword": "전환사채",
+        "corp_name": "폴라리스AI파마",
+        "stock_code": "041910",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001332"
       },
       {
-        "title": "[공시] 드래곤플라이 — 주권매매거래정지기간변경              (상장폐지 사유 해소)",
+        "title": "[공시] 인화정공 — 주식분할결정",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "드래곤플라이",
-        "stock_code": "030350",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902667"
+        "keyword": "분할",
+        "corp_name": "인화정공",
+        "stock_code": "101930",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326902616"
       },
       {
-        "title": "[공시] 드래곤플라이 — 기타시장안내              (감사의견 관련 형식적 상장폐지 사유해소 및 매매거래정",
+        "title": "[공시] 한성크린텍 — [기재정정]단일판매ㆍ공급계약체결(자율공시)",
         "source": "DART",
-        "date": "2026-03-23",
+        "date": "2026-03-26",
         "impact": "high",
         "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "corp_name": "드래곤플라이",
-        "stock_code": "030350",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902664"
+        "keyword": "공급계약체결",
+        "corp_name": "한성크린텍",
+        "stock_code": "066980",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326902469"
+      },
+      {
+        "title": "[공시] 다보링크 — [기재정정]최대주주변경을수반하는주식양수도계약체결",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "최대주주변경",
+        "corp_name": "다보링크",
+        "stock_code": "340360",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326902776"
+      },
+      {
+        "title": "[공시] LS — 주요사항보고서(자기주식처분결정)(자회사의 주요경영사항)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "자기주식처분",
+        "corp_name": "LS",
+        "stock_code": "006260",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326802758"
+      },
+      {
+        "title": "[공시] 차백신연구소 — 전환사채(해외전환사채포함)발행후만기전사채취득",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "전환사채",
+        "corp_name": "차백신연구소",
+        "stock_code": "261780",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326902982"
+      },
+      {
+        "title": "[공시] 피엔티엠에스 — 주요사항보고서(전환사채권발행결정)",
+        "source": "DART",
+        "date": "2026-03-26",
+        "impact": "high",
+        "tier": "tier1_즉시",
+        "keyword": "전환사채",
+        "corp_name": "피엔티엠에스",
+        "stock_code": "257370",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001094"
       }
     ],
     "dart_universe": [
       {
-        "corp_name": "필옵틱스",
-        "stock_code": "161580",
-        "report_nm": "[기재정정]감사보고서제출              (2023사업연도)",
-        "rcept_dt": "20260323",
+        "corp_name": "SKC",
+        "stock_code": "011790",
+        "report_nm": "대표이사(대표집행임원)변경(안내공시)",
+        "rcept_dt": "20260326",
         "tier": "tier3_참고",
-        "keyword": "정정",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902673",
-        "in_universe": true
-      },
-      {
-        "corp_name": "필옵틱스",
-        "stock_code": "161580",
-        "report_nm": "[기재정정]감사보고서제출              (2022사업연도)",
-        "rcept_dt": "20260323",
-        "tier": "tier3_참고",
-        "keyword": "정정",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902665",
-        "in_universe": true
-      },
-      {
-        "corp_name": "필옵틱스",
-        "stock_code": "161580",
-        "report_nm": "[기재정정]감사보고서제출              (2021사업연도)",
-        "rcept_dt": "20260323",
-        "tier": "tier3_참고",
-        "keyword": "정정",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902663",
-        "in_universe": true
-      },
-      {
-        "corp_name": "엔켐",
-        "stock_code": "348370",
-        "report_nm": "[기재정정]최대주주변경을수반하는주식담보제공계약체결",
-        "rcept_dt": "20260323",
-        "tier": "tier1_즉시",
-        "keyword": "최대주주변경",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902656",
-        "in_universe": true
-      },
-      {
-        "corp_name": "필옵틱스",
-        "stock_code": "161580",
-        "report_nm": "[기재정정]감사보고서제출              (2020사업연도)",
-        "rcept_dt": "20260323",
-        "tier": "tier3_참고",
-        "keyword": "정정",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902646",
-        "in_universe": true
-      },
-      {
-        "corp_name": "옵티코어",
-        "stock_code": "380540",
-        "report_nm": "주권매매거래정지기간변경              (상장폐지 사유 발생)",
-        "rcept_dt": "20260323",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902705",
-        "in_universe": true
-      },
-      {
-        "corp_name": "엔케이젠바이오텍코리아",
-        "stock_code": "182400",
-        "report_nm": "기타시장안내              (관리종목 및 투자주의 환기종목 사유 일부 해제 관련 시장조치 미진행)",
-        "rcept_dt": "20260323",
-        "tier": "tier1_즉시",
-        "keyword": "관리종목",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902652",
-        "in_universe": true
-      },
-      {
-        "corp_name": "금양",
-        "stock_code": "001570",
-        "report_nm": "기타시장안내              (상장폐지 관련 안내)",
-        "rcept_dt": "20260323",
-        "tier": "tier1_즉시",
-        "keyword": "상장폐지",
+        "keyword": "임원",
         "market": "유가증권",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323802565",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803495",
         "in_universe": true
       },
       {
-        "corp_name": "이수앱지스",
-        "stock_code": "086890",
-        "report_nm": "전환사채(해외전환사채포함)발행후만기전사채취득",
-        "rcept_dt": "20260323",
-        "tier": "tier1_즉시",
-        "keyword": "전환사채",
+        "corp_name": "HDC",
+        "stock_code": "012630",
+        "report_nm": "대표이사(대표집행임원)변경(안내공시)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "임원",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803490",
+        "in_universe": true
+      },
+      {
+        "corp_name": "오름테라퓨틱",
+        "stock_code": "475830",
+        "report_nm": "[기재정정]주주총회소집공고",
+        "rcept_dt": "20260326",
+        "tier": "tier2_중요",
+        "keyword": "주주총회소집",
         "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902628",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001503",
         "in_universe": true
       },
       {
-        "corp_name": "엔케이젠바이오텍코리아",
-        "stock_code": "182400",
-        "report_nm": "[기재정정]감사보고서제출              (2024사업연도)",
-        "rcept_dt": "20260323",
+        "corp_name": "SPC삼립",
+        "stock_code": "005610",
+        "report_nm": "대표이사(대표집행임원)변경(안내공시)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "임원",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803468",
+        "in_universe": true
+      },
+      {
+        "corp_name": "롯데케미칼",
+        "stock_code": "011170",
+        "report_nm": "주주총회소집결의",
+        "rcept_dt": "20260326",
+        "tier": "tier2_중요",
+        "keyword": "주주총회소집",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326802755",
+        "in_universe": true
+      },
+      {
+        "corp_name": "유진증권",
+        "stock_code": "001200",
+        "report_nm": "[첨부정정]일괄신고서(기타파생결합증권)",
+        "rcept_dt": "20260326",
         "tier": "tier3_참고",
         "keyword": "정정",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323902569",
-        "in_universe": true
-      },
-      {
-        "corp_name": "케이프",
-        "stock_code": "064820",
-        "report_nm": "소송등의제기ㆍ신청(경영권분쟁소송)              (의결권행사허용가처분)",
-        "rcept_dt": "20260323",
-        "tier": "tier3_참고",
-        "keyword": "소송",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323901776",
-        "in_universe": true
-      },
-      {
-        "corp_name": "HLB생명과학",
-        "stock_code": "067630",
-        "report_nm": "사업보고서 (2025.12)",
-        "rcept_dt": "20260323",
-        "tier": "tier2_중요",
-        "keyword": "사업보고서",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323001728",
-        "in_universe": true
-      },
-      {
-        "corp_name": "에이스테크",
-        "stock_code": "088800",
-        "report_nm": "사업보고서 (2025.12)",
-        "rcept_dt": "20260323",
-        "tier": "tier2_중요",
-        "keyword": "사업보고서",
-        "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323001723",
-        "in_universe": true
-      },
-      {
-        "corp_name": "코오롱",
-        "stock_code": "002020",
-        "report_nm": "사업보고서 (2025.12)",
-        "rcept_dt": "20260323",
-        "tier": "tier2_중요",
-        "keyword": "사업보고서",
         "market": "유가증권",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323001718",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001477",
         "in_universe": true
       },
       {
-        "corp_name": "지투파워",
-        "stock_code": "388050",
-        "report_nm": "사업보고서 (2025.12)",
-        "rcept_dt": "20260323",
+        "corp_name": "유진증권",
+        "stock_code": "001200",
+        "report_nm": "[첨부정정]일괄신고서(기타파생결합사채)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "정정",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001472",
+        "in_universe": true
+      },
+      {
+        "corp_name": "유진증권",
+        "stock_code": "001200",
+        "report_nm": "[첨부정정]일괄신고서(파생결합사채-주가연계파생결합사채)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "정정",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001468",
+        "in_universe": true
+      },
+      {
+        "corp_name": "유진증권",
+        "stock_code": "001200",
+        "report_nm": "[첨부정정]일괄신고서(파생결합증권-주가연계증권)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "정정",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326001464",
+        "in_universe": true
+      },
+      {
+        "corp_name": "오름테라퓨틱",
+        "stock_code": "475830",
+        "report_nm": "[기재정정]주주총회소집결의",
+        "rcept_dt": "20260326",
         "tier": "tier2_중요",
-        "keyword": "사업보고서",
+        "keyword": "주주총회소집",
         "market": "코스닥",
-        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323001706",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326903254",
+        "in_universe": true
+      },
+      {
+        "corp_name": "대한항공",
+        "stock_code": "003490",
+        "report_nm": "신규시설투자등",
+        "rcept_dt": "20260326",
+        "tier": "tier2_중요",
+        "keyword": "투자",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326802930",
+        "in_universe": true
+      },
+      {
+        "corp_name": "JW홀딩스",
+        "stock_code": "096760",
+        "report_nm": "[기재정정]단일판매ㆍ공급계약체결(자율공시)",
+        "rcept_dt": "20260326",
+        "tier": "tier1_즉시",
+        "keyword": "공급계약체결",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803402",
+        "in_universe": true
+      },
+      {
+        "corp_name": "서연",
+        "stock_code": "007860",
+        "report_nm": "대표이사(대표집행임원)변경(안내공시)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "임원",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803388",
+        "in_universe": true
+      },
+      {
+        "corp_name": "지역난방공사",
+        "stock_code": "071320",
+        "report_nm": "[기재정정]정기주주총회결과",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "정정",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803251",
+        "in_universe": true
+      },
+      {
+        "corp_name": "HD건설기계",
+        "stock_code": "267270",
+        "report_nm": "대표이사(대표집행임원)변경(안내공시)",
+        "rcept_dt": "20260326",
+        "tier": "tier3_참고",
+        "keyword": "임원",
+        "market": "유가증권",
+        "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260326803138",
         "in_universe": true
       }
     ]

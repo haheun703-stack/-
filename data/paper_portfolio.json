@@ -1,74 +1,148 @@
 {
-  "created": "2026-03-08 21:58",
-  "initial_capital": 15000000,
-  "capital": 15000000,
-  "positions": {},
+  "created": "2026-03-24 20:33",
+  "initial_capital": 30000000,
+  "capital": 1062960.6300000022,
+  "positions": {
+    "042660": {
+      "name": "한화오션",
+      "ticker": "042660",
+      "entry_date": "2026-03-24",
+      "avg_price": 122441,
+      "qty": 29,
+      "cost": 3550779,
+      "peak_price": 125700.0,
+      "strategy": "AI_BRAIN",
+      "grade": "A",
+      "reason": "K-방산 수출 교두보 확대 기대. KADEX 2026 개최 및 방산 성장 지속 전망. 조선 수주 호조.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "034020": {
+      "name": "두산에너빌리티",
+      "ticker": "034020",
+      "entry_date": "2026-03-24",
+      "avg_price": 100215,
+      "qty": 35,
+      "cost": 3507529,
+      "peak_price": 103400.0,
+      "strategy": "AI_BRAIN",
+      "grade": "A",
+      "reason": "원전·SMR·수소 에너지 밸류체인 확장 뉴스. 에너지 섹터 강세 및 경기순환주 선도 수혜.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "051910": {
+      "name": "LG화학",
+      "ticker": "051910",
+      "entry_date": "2026-03-24",
+      "avg_price": 314361,
+      "qty": 11,
+      "cost": 3457972,
+      "peak_price": 315000.0,
+      "strategy": "AI_BRAIN",
+      "grade": "A",
+      "reason": "가치주 회전 심화로 에너지/화학 섹터 실적 개선 전망. 경기순환주 선도 수혜. 유틸리티·에너지·소재 섹터 주도.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "096770": {
+      "name": "SK이노베이션",
+      "ticker": "096770",
+      "entry_date": "2026-03-25",
+      "avg_price": 113330,
+      "qty": 39,
+      "cost": 4419877,
+      "peak_price": 113200.0,
+      "strategy": "AI_BRAIN",
+      "grade": "AA",
+      "reason": "중동 지정학 긴장 고조로 에너지 섹터 +9.54% 급등. 미국 에너지 주도 가치주 로테이션 수혜. 유가 랠리 지속 시 실적 개선 확실.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "010950": {
+      "name": "S-Oil",
+      "ticker": "010950",
+      "entry_date": "2026-03-25",
+      "avg_price": 113130,
+      "qty": 39,
+      "cost": 4412068,
+      "peak_price": 113000.0,
+      "strategy": "AI_BRAIN",
+      "grade": "AA",
+      "reason": "고유가 수혜 직접 대상. 미국 에너지 +8.20% 랠리와 중동 전쟁 리스크가 정제마진 개선 촉진. 가치주 로테이션 핵심 수혜주.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "078930": {
+      "name": "GS",
+      "ticker": "078930",
+      "entry_date": "2026-03-25",
+      "avg_price": 69880,
+      "qty": 51,
+      "cost": 3563894,
+      "peak_price": 69800.0,
+      "strategy": "AI_BRAIN",
+      "grade": "A",
+      "reason": "에너지 섹터 강세와 정유 밸류체인 수혜. GS칼텍스 실적 개선 기대로 지주사 가치 재평가 가능성.",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "329180": {
+      "name": "HD현대중공업",
+      "ticker": "329180",
+      "entry_date": "2026-03-26",
+      "avg_price": 511588,
+      "qty": 8,
+      "cost": 4092701,
+      "peak_price": 511000.0,
+      "strategy": "AI_BRAIN",
+      "grade": "AA",
+      "reason": "K-방산 수출 호조 및 KF-21 양산 본격화. 방산 수출이 새 동력이 되며 4대 강국 도약 시동",
+      "trailing_active": false,
+      "t1_sold": false
+    },
+    "267260": {
+      "name": "HD현대일렉트릭",
+      "ticker": "267260",
+      "entry_date": "2026-03-26",
+      "avg_price": 966110,
+      "qty": 2,
+      "cost": 1932220,
+      "peak_price": 965000.0,
+      "strategy": "AI_BRAIN",
+      "grade": "AA",
+      "reason": "SMR 및 원전 생태계 확장 수혜. 전력기기 수요 증가 확실. 중동 원전 재확인으로 수출 모멘텀",
+      "trailing_active": false,
+      "t1_sold": false
+    }
+  },
   "closed_trades": [],
   "daily_equity": [
     {
-      "date": "2026-03-06",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
+      "date": "2026-03-24",
+      "equity": 29987920,
+      "capital": 19483720,
+      "positions": 3
     },
     {
-      "date": "2026-03-11",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
+      "date": "2026-03-25",
+      "equity": 30143681,
+      "capital": 7087881,
+      "positions": 6
     },
     {
-      "date": "2026-03-12",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-13",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-16",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-18",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-18",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-20",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
-    },
-    {
-      "date": "2026-03-23",
-      "equity": 15000000,
-      "capital": 15000000,
-      "positions": 0
+      "date": "2026-03-26",
+      "equity": 29889961,
+      "capital": 1062961,
+      "positions": 8
     }
   ],
-  "cooldown_until": "",
-  "monthly_loss": {},
   "stats": {
     "total_trades": 0,
     "wins": 0,
     "losses": 0,
-    "total_pnl_pct": 0.0,
-    "max_equity": 15000000,
-    "mdd": 0.0
+    "max_equity": 30143681,
+    "mdd": -0.84
   },
-  "updated": "2026-03-23 21:15"
+  "updated": "2026-03-26 18:50"
 }

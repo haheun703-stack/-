@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-24T21:52:13.767748",
+  "generated_at": "2026-03-25T13:06:01.159478",
   "zone1": {
     "verdict": "관망",
     "cash_pct": 71,
@@ -14,7 +14,15 @@
     "brain_score": 100.0,
     "shield_status": "RED",
     "lens_summary": "",
-    "updated_at": "2026-03-24T19:13:34.587803"
+    "updated_at": "2026-03-24T19:13:34.587803",
+    "flowx_message": {
+      "situation": "방어",
+      "headline": "지금은 지키는 게 버는 겁니다",
+      "reason": "SHIELD RED: 리스크 상승. 레짐 CAUTION. 신규 진입 없음.",
+      "action_down": "보유 종목 손절선 엄수. 이탈 시 즉시 청산.",
+      "action_up": "반등해도 추매 없음. 레짐 전환 확인 후 재진입.",
+      "next_signal": "외국인 순매수 전환 + KOSPI RSI 45 돌파 시 재판단"
+    }
   },
   "zone2": [
     {
@@ -275,7 +283,7 @@
       "name": "S-Oil",
       "action": "WATCH",
       "grade": "B",
-      "score": 46,
+      "score": 48,
       "reason": "RSI 47 최적 · MA60 위 · MACD 상승전환 · 외인+기관 동시매수",
       "strategy": "SCAN",
       "close": 108400,
@@ -323,7 +331,7 @@
       "name": "HD한국조선해양",
       "action": "WATCH",
       "grade": "B",
-      "score": 46,
+      "score": 47,
       "reason": "RSI 41 최적 · 기관 순매수 · ADX 27 강추세 · ⚠ SAR↓",
       "strategy": "SCAN",
       "close": 379500,
@@ -371,7 +379,7 @@
       "name": "롯데케미칼",
       "action": "WATCH",
       "grade": "C",
-      "score": 42,
+      "score": 43,
       "reason": "2중 시그널 · RSI 52 최적 · 추세 만점 · TRIX 골든크로스",
       "strategy": "SCAN",
       "close": 80400,
@@ -476,7 +484,7 @@
         "ticker": "042660",
         "name": "한화오션",
         "pnl_pct": -0.12,
-        "days": 0,
+        "days": 1,
         "strategy": "AI_BRAIN",
         "grade": "A"
       },
@@ -484,7 +492,7 @@
         "ticker": "034020",
         "name": "두산에너빌리티",
         "pnl_pct": -0.11,
-        "days": 0,
+        "days": 1,
         "strategy": "AI_BRAIN",
         "grade": "A"
       },
@@ -492,7 +500,7 @@
         "ticker": "051910",
         "name": "LG화학",
         "pnl_pct": -0.11,
-        "days": 0,
+        "days": 1,
         "strategy": "AI_BRAIN",
         "grade": "A"
       }
@@ -661,9 +669,9 @@
     ],
     "sd_patterns": [],
     "supply_summary": {
-      "foreign": 0,
-      "inst": 0,
-      "indiv": 0
+      "foreign": 7000000000,
+      "inst": 7411000000,
+      "indiv": -11061000000
     }
   },
   "zone6": {
@@ -762,5 +770,148 @@
         "달러 강세 기대"
       ]
     }
-  ]
+  ],
+  "zone8": {
+    "timestamp": "2026-03-25 12:41:19",
+    "direction": "STRONG_BULL",
+    "direction_comment": "강한 상승일 — 추세 추종 유리",
+    "tomorrow": "상승 연장 가능 (양시장 동반 강세)",
+    "etf_call": "레버리지 보유 유지, 인버스 금지",
+    "kospi_lever_pct": 3.2,
+    "etf_recommendations": [
+      {
+        "ticker": "122630",
+        "name": "KODEX 레버리지",
+        "action": "매수",
+        "reason": "상승장 (+3.2%) — 추세 추종"
+      },
+      {
+        "ticker": "385590",
+        "name": "KODEX K-미래차",
+        "action": "관심",
+        "reason": "자동차 섹터 강세 (+2.6%)"
+      },
+      {
+        "ticker": "091170",
+        "name": "KODEX 은행",
+        "action": "관심",
+        "reason": "금융 섹터 강세 (+2.5%)"
+      },
+      {
+        "ticker": "140710",
+        "name": "KODEX 운송",
+        "action": "관심",
+        "reason": "운송 섹터 강세 (+2.0%)"
+      }
+    ],
+    "sector_ranking": [
+      {
+        "sector": "전력인프라",
+        "change_pct": 4.22,
+        "leader": "효성중공업",
+        "leader_change": 8.96
+      },
+      {
+        "sector": "금융",
+        "change_pct": 2.82,
+        "leader": "한국금융지주",
+        "leader_change": 4.03
+      },
+      {
+        "sector": "방산",
+        "change_pct": 2.36,
+        "leader": "현대로템",
+        "leader_change": 6.18
+      },
+      {
+        "sector": "바이오",
+        "change_pct": 1.92,
+        "leader": "삼성바이오로직스",
+        "leader_change": 2.0
+      },
+      {
+        "sector": "반도체",
+        "change_pct": 1.38,
+        "leader": "HPSP",
+        "leader_change": 2.05
+      }
+    ],
+    "top_picks": [
+      {
+        "rank": 1,
+        "ticker": "298040",
+        "name": "효성중공업",
+        "sector": "전력인프라",
+        "price": 2943000,
+        "change_pct": 8.96,
+        "vwap_est": 2891000,
+        "entry_price": 2891000,
+        "target_price": 3090000,
+        "stop_price": 2825000,
+        "risk_reward": 3.0,
+        "position_comment": "VWAP(2,891,000) 근접 — 진입 적정 구간",
+        "supply_comment": "거래량 저조 — 유동성 주의"
+      },
+      {
+        "rank": 2,
+        "ticker": "267260",
+        "name": "HD현대일렉트릭",
+        "sector": "전력인프라",
+        "price": 983000,
+        "change_pct": 6.27,
+        "vwap_est": 974000,
+        "entry_price": 974000,
+        "target_price": 1032000,
+        "stop_price": 943000,
+        "risk_reward": 1.9,
+        "position_comment": "VWAP(974,000) 근접 — 진입 적정 구간",
+        "supply_comment": "거래량 저조 — 유동성 주의"
+      },
+      {
+        "rank": 3,
+        "ticker": "064350",
+        "name": "현대로템",
+        "sector": "방산",
+        "price": 188900,
+        "change_pct": 6.18,
+        "vwap_est": 184500,
+        "entry_price": 184500,
+        "target_price": 198000,
+        "stop_price": 181000,
+        "risk_reward": 3.9,
+        "position_comment": "VWAP(184,500) 상회 중 — 눌림 대기 유리",
+        "supply_comment": "거래량 활발 (50만+ 주) — 수급 양호"
+      },
+      {
+        "rank": 4,
+        "ticker": "071050",
+        "name": "한국금융지주",
+        "sector": "금융",
+        "price": 219500,
+        "change_pct": 4.03,
+        "vwap_est": 220000,
+        "entry_price": 216000,
+        "target_price": 231000,
+        "stop_price": 211500,
+        "risk_reward": 3.3,
+        "position_comment": "VWAP(220,000) 근접 — 진입 적정 구간",
+        "supply_comment": "거래량 보통"
+      },
+      {
+        "rank": 5,
+        "ticker": "010950",
+        "name": "S-Oil",
+        "sector": "에너지/화학",
+        "price": 112100,
+        "change_pct": 3.41,
+        "vwap_est": 111000,
+        "entry_price": 111000,
+        "target_price": 117500,
+        "stop_price": 107500,
+        "risk_reward": 1.9,
+        "position_comment": "VWAP(111,000) 근접 — 진입 적정 구간",
+        "supply_comment": "거래량 보통"
+      }
+    ]
+  }
 }

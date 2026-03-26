@@ -1,40 +1,40 @@
 {
-  "date": "2026-03-23",
-  "generated_at": "2026-03-23 20:52",
+  "date": "2026-03-26",
+  "generated_at": "2026-03-26 17:52",
   "futures_basis": {
     "available": true,
-    "basis_1d": 7.6462,
-    "basis_5d_avg": 0.6809,
-    "basis_20d_avg": 0.4393,
+    "basis_1d": 3.9664,
+    "basis_5d_avg": 1.252,
+    "basis_20d_avg": 0.6826,
     "status": "CONTANGO"
   },
   "put_call_proxy": {
     "available": true,
-    "pc_ratio": 0.3507,
-    "pc_5d_avg": 0.3096,
-    "pc_20d_avg": 0.3679,
-    "pc_change_5d": 0.0412,
+    "pc_ratio": 0.3768,
+    "pc_5d_avg": 0.3425,
+    "pc_20d_avg": 0.381,
+    "pc_change_5d": 0.0343,
     "status": "NEUTRAL",
     "reversal": "",
-    "kosdaq_pc_latest": 0.1273,
-    "kosdaq_pc_5d": 0.1176
+    "kosdaq_pc_latest": 0.1739,
+    "kosdaq_pc_5d": 0.1375
   },
   "leverage_flow": {
     "available": true,
-    "leverage_vol_z": 0.4,
-    "inverse_vol_z": -0.27,
-    "spot_vol_z": 0.39,
+    "leverage_vol_z": -0.42,
+    "inverse_vol_z": -0.58,
+    "spot_vol_z": -0.83,
     "program_buy_est": false,
     "program_sell_est": false,
-    "net_flow_1d_억": 9785.0,
-    "net_flow_5d_억": 47110.0
+    "net_flow_1d_억": 6554.0,
+    "net_flow_5d_억": 43789.0
   },
   "composite": {
-    "score": 79.4,
+    "score": 76.0,
     "grade": "STRONG_BULL",
     "breakdown": {
       "basis": 30,
-      "put_call": 19.4,
+      "put_call": 16.0,
       "flow": 30
     }
   }

@@ -1,12 +1,52 @@
 {
-  "generated_at": "2026-03-23 20:56",
-  "fired_sectors": [],
+  "generated_at": "2026-03-26 18:07",
+  "fired_sectors": [
+    {
+      "sector": "바이오",
+      "etf_code": "364970",
+      "leaders": [
+        {
+          "ticker": "196170",
+          "name": "알테오젠",
+          "change_pct": 6.28,
+          "weight": 18.33
+        }
+      ],
+      "avg_leader_change": 6.28,
+      "candidates": [
+        {
+          "ticker": "141080",
+          "name": "리가켐바이오",
+          "tier": "tier1",
+          "weight": 3.33,
+          "change_pct": -3.28,
+          "gap_pct": 9.56,
+          "score": 40,
+          "score_detail": {
+            "gap": 25,
+            "tech": 15,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 55.7,
+          "bb_pos": 0.721,
+          "vol_z": -0.23,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 9.6%"
+          ]
+        }
+      ]
+    }
+  ],
   "no_fire_sectors": [
     "반도체",
     "2차전지",
     "IT",
     "헬스케어",
-    "바이오",
     "에너지화학",
     "소프트웨어",
     "방산",

@@ -1,103 +1,104 @@
 {
-  "analysis_date": "2026-03-23",
-  "regime": "방어",
-  "regime_confidence": 0.85,
-  "regime_reasoning": "중동 지정학 리스크 급격히 상승하며 호르무즈 해협 폐쇄 위협까지 부상. 환율 1,500원 돌파와 외국인 자금 이탈 가속화로 시장 극도의 불안정 상태.",
+  "analysis_date": "2026-03-26",
+  "regime": "중립",
+  "regime_confidence": 0.7,
+  "regime_reasoning": "미-이란 휴전 협상 불확실성과 미국 금리 동결 기조가 상충. 한국 주력 섹터(방산/조선/원전)는 구조적 호재 지속되나 글로벌 매크로 리스크로 전면적 공격 제약.",
   "industry_thesis": [
     {
       "sector": "방산",
-      "thesis": "중동 긴장 고조로 방산 수요 폭증 확실시. K9 자주포 등 한국 방산 제품 긴급 발주 증가 예상.",
+      "thesis": "K-방산 수출 급증과 KF-21 양산 본격화로 역대 최대 수출 전망. 중동 지정학 리스크가 오히려 한국 방산 수요를 증가시키는 역설적 구조.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 9,
       "catalysts": [
-        "중동 분쟁 확대",
-        "NATO 방산비 증액"
+        "서유럽 공급망 진입",
+        "KF-21 양산",
+        "중동 긴장 지속"
       ],
       "risks": [
-        "단기 과열 가능성"
+        "휴전 타결 시 수요 둔화"
       ],
       "relay_source": null,
-      "relay_verified": false
+      "relay_verified": true
     },
     {
-      "sector": "정유/에너지",
-      "thesis": "유가 110달러 돌파 전망. 호르무즈 해협 리스크로 정유사 재고자산 가치 상승과 마진 개선 동시 진행.",
+      "sector": "조선",
+      "thesis": "방산-조선 복합 경쟁력 부각. LNG선 수주 호조와 방산 연계 수주로 장기 수주잔고 확대.",
       "demand_supply": "공급부족",
       "asp_trend": "상승",
       "global_alignment": "동조",
       "confidence": 8,
       "catalysts": [
-        "유가 급등",
-        "정제마진 개선"
+        "에너지 운송 수요 증가",
+        "조선-방산 시너지"
       ],
       "risks": [
-        "수요 둔화 가능성"
-      ],
-      "relay_source": null,
-      "relay_verified": false
-    },
-    {
-      "sector": "조선",
-      "thesis": "LNG선 발주 붐 지속. 중동 리스크로 에너지 운반선 수요 급증하나 글로벌 경기 둔화 리스크 상존.",
-      "demand_supply": "균형",
-      "asp_trend": "횡보",
-      "global_alignment": "독립",
-      "confidence": 7,
-      "catalysts": [
-        "LNG선 수주",
-        "에너지 운반선 수요"
-      ],
-      "risks": [
-        "글로벌 경기 둔화"
+        "중국 조선업 경쟁"
       ],
       "relay_source": "방산조선",
       "relay_verified": true
     },
     {
-      "sector": "반도체",
-      "thesis": "AI 디스럽션 우려로 단기 조정 불가피하나 중장기 AI 인프라 수요는 오히려 확대될 전망.",
-      "demand_supply": "균형",
-      "asp_trend": "하락",
-      "global_alignment": "역행",
-      "confidence": 5,
+      "sector": "원전/SMR",
+      "thesis": "SMR 2033년 조기 상용화 가시화. 중동 전쟁으로 에너지 안보 중요성 재확인되며 원전 생태계 전반 수혜.",
+      "demand_supply": "공급부족",
+      "asp_trend": "상승",
+      "global_alignment": "동조",
+      "confidence": 8,
       "catalysts": [
-        "AI 인프라 투자"
+        "경주 SMR 유치",
+        "에너지 안보 강화",
+        "탄소중립 정책"
       ],
       "risks": [
-        "밸류에이션 재평가",
-        "외국인 이탈"
+        "기술 검증 지연"
       ],
       "relay_source": null,
       "relay_verified": false
+    },
+    {
+      "sector": "반도체",
+      "thesis": "ARM 자체칩 판매로 업황 개선 기대하나 재고 부담 잔존. 장기 업사이클 선반영 중이나 단기 불확실성 상존.",
+      "demand_supply": "균형",
+      "asp_trend": "횡보",
+      "global_alignment": "동조",
+      "confidence": 6,
+      "catalysts": [
+        "AI 수요 증가",
+        "업황 회복 기대"
+      ],
+      "risks": [
+        "재고 조정 지속",
+        "미국 금리 불확실성"
+      ],
+      "relay_source": null,
+      "relay_verified": true
     }
   ],
   "sector_priority": {
     "attack": [
       "방산",
-      "정유/에너지"
+      "조선",
+      "원전/SMR"
     ],
     "watch": [
-      "조선",
-      "유틸리티"
+      "반도체",
+      "기계"
     ],
     "avoid": [
-      "반도체",
-      "IT서비스",
-      "화학",
-      "항공"
+      "게임/SW",
+      "금융"
     ]
   },
-  "max_new_buys": 2,
+  "max_new_buys": 3,
   "risk_factors": [
-    "호르무즈 해협 봉쇄 위협",
-    "환율 1,500원 돌파",
-    "외국인 대규모 이탈",
-    "AI 디스럽션 우려"
+    "미-이란 휴전 협상 결렬 가능성",
+    "미국 금리인하 불확실성",
+    "환율 변동성"
   ],
-  "cash_reserve_suggestion": 60,
-  "global_summary": "미국 나스닥 -3.38% 급락하며 기술주 밸류에이션 재평가 진행. VIX 30 근접하며 극도의 공포 상태.",
+  "cash_reserve_suggestion": 30,
+  "global_summary": "미-이란 휴전 기대로 위험선호 개선되나 여전한 불확실성. 한국은 방산/조선/원전 등 구조적 강자 섹터 중심으로 선별 매수 유효.",
   "relay_alerts": [
     {
       "pattern": "방산조선→기계",
@@ -105,8 +106,8 @@
       "action": "매수 준비"
     },
     {
-      "pattern": "증권→손해보험",
-      "status": "발화",
+      "pattern": "반도체→IT서비스",
+      "status": "대기",
       "action": "주의"
     }
   ]
