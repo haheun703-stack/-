@@ -1,0 +1,162 @@
+# ============================================================
+# 원자재 생산원가 데이터베이스 (Cost Floor DB)
+# ============================================================
+# "하방 갭이 적은 상태에서 상방을 먹으러 간다"
+# cost_gap = (시장가 - 생산원가) / 생산원가 * 100
+#
+# 갭 분류:
+#   0~15%  = 🟢 매수 구간 (바닥 근처, 하방 제한)
+#   15~40% = 🟡 관찰 (스프링 압축 가능)
+#   40~80% = 🟠 보류 (상당 부분 반영)
+#   80%+   = 🔴 과열 (프리미엄 포함, 하방 큼)
+#
+# 업데이트: 분기 1회 (생산원가는 급변하지 않음)
+# 출처: Wood Mackenzie, CRU Group, UxC, IEA, 증권사 리포트
+# ============================================================
+
+version: "1.0"
+updated: "2026-03-26"
+
+commodities:
+  # --- 에너지 ---
+  wti:
+    name: "WTI 원유"
+    production_cost: 45.0
+    unit: "USD/barrel"
+    source: "US shale breakeven (Permian Basin avg)"
+    notes: "사우디 $10, 러시아 $40, 미국 셰일 $45~55"
+    api: "eia"  # EIA API 사용
+    buy_zone_gap: 20    # 갭 20% 이하면 매수 신호
+    related_etf_us: ["XLE", "XOP", "ERX"]
+    related_kr: ["010950:S-Oil", "267250:HD현대"]
+
+  natural_gas:
+    name: "천연가스"
+    production_cost: 2.50
+    unit: "USD/MMBtu"
+    source: "US Henry Hub breakeven"
+    notes: "셰일가스 $2.0~3.0, LNG 수출 기준 $3.0+"
+    api: "alpha_vantage"
+    function: "NATURAL_GAS"
+    buy_zone_gap: 25
+    related_etf_us: ["UNG", "BOIL"]
+    related_kr: []
+
+  # --- 금속 ---
+  copper:
+    name: "구리"
+    production_cost: 5500
+    unit: "USD/metric ton"
+    source: "Wood Mackenzie global C1+sustaining cost"
+    notes: "칠레/페루 $4,500, 콩고 $5,000, 글로벌 평균 $5,500"
+    api: "alpha_vantage"
+    function: "COPPER"
+    buy_zone_gap: 25
+    related_etf_us: ["COPX", "COPJ", "CPER"]
+    related_kr: ["006260:LS", "103140:풍산"]
+
+  gold:
+    name: "금"
+    production_cost: 1400
+    unit: "USD/oz"
+    source: "AISC (All-In Sustaining Cost) global avg"
+    notes: "대형 광산 $1,200, 중소형 $1,500+"
+    api: "alpha_vantage"
+    symbol: "GLD"  # ETF proxy
+    price_multiplier: 10  # GLD price * 10 ≈ gold per oz
+    buy_zone_gap: 15
+    related_etf_us: ["GLD", "GDX", "NUGT"]
+    related_kr: []
+
+  aluminum:
+    name: "알루미늄"
+    production_cost: 2200
+    unit: "USD/metric ton"
+    source: "CRU Group global smelting cost"
+    notes: "중국 $2,000(석탄전력), 유럽 $2,800(전력비)"
+    api: "alpha_vantage"
+    function: "ALUMINUM"
+    buy_zone_gap: 20
+    related_etf_us: []
+    related_kr: ["018470:조일알미늄"]
+
+  # --- 특수 원자재 (대화 핵심) ---
+  tio2:
+    name: "TiO2 (티타늄 다이옥사이드)"
+    production_cost: 2800
+    unit: "USD/metric ton"
+    source: "CRU TiO2 Cost Report 2025"
+    notes: "원료(일메나이트) + 가공(황산법/염소법). 최근 북미 +8.4% 상승"
+    api: "manual"  # API 없음, 수동 업데이트 또는 뉴스 기반
+    current_price: 3200   # 수동 업데이트
+    price_date: "2026-03"
+    buy_zone_gap: 15
+    related_etf_us: []
+    related_tickers_us: ["TROX:Tronox", "CC:Chemours", "KRO:Kronos"]
+    related_kr: []
+
+  uranium:
+    name: "우라늄"
+    production_cost: 50
+    unit: "USD/lb"
+    source: "UxC avg production cost (ISL + conventional)"
+    notes: "ISL(in-situ) $30~40, 지하광산 $50~70, 카자흐 $30"
+    api: "manual"
+    current_price: 72
+    price_date: "2026-03"
+    buy_zone_gap: 30
+    related_etf_us: ["URNM", "URA"]
+    related_tickers_us: ["CCJ:Cameco", "NXE:NexGen", "UEC:Uranium Energy"]
+    related_kr: ["034020:두산에너빌리티"]
+
+  silver:
+    name: "은"
+    production_cost: 18
+    unit: "USD/oz"
+    source: "AISC global avg (primary silver mines)"
+    notes: "바이프로덕트 $10, 전문광산 $18~22"
+    api: "alpha_vantage"
+    symbol: "SLV"
+    price_multiplier: 1
+    buy_zone_gap: 20
+    related_etf_us: ["SLV", "SIL", "AGQ"]
+    related_kr: []
+
+  # --- 석유화학/나프타 ---
+  naphtha:
+    name: "나프타"
+    production_cost: 550
+    unit: "USD/metric ton"
+    source: "정유 원가 기준 (WTI 연동)"
+    notes: "WTI $80 기준 나프타 $650 정도. WTI에 연동"
+    api: "manual"
+    current_price: 720
+    price_date: "2026-03"
+    buy_zone_gap: 20
+    related_etf_us: []
+    related_kr: ["011170:롯데케미칼", "010060:OCI"]
+
+# ============================================================
+# 갭 분류 기준
+# ============================================================
+gap_zones:
+  buy:
+    max_pct: 15
+    label: "매수 구간"
+    emoji: "🟢"
+    description: "생산원가 근처. 하방 제한, 상방 열림"
+  watch:
+    max_pct: 40
+    label: "관찰"
+    emoji: "🟡"
+    description: "스프링 압축 가능. 시나리오 촉매 대기"
+  hold:
+    max_pct: 80
+    label: "보류"
+    emoji: "🟠"
+    description: "상당 부분 반영. 추가 상승 여지 제한적"
+  overheated:
+    max_pct: 999
+    label: "과열"
+    emoji: "🔴"
+    description: "프리미엄 포함. 하방 리스크 큼"

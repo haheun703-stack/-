@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "updated": "2026-03-21",
+  "version": "2.0",
+  "updated": "2026-03-26",
   "scenarios": [
     {
       "id": "WAR_MIDDLE_EAST",
@@ -319,6 +319,128 @@
           "etf": [],
           "cold_sectors": [],
           "logic": "주문 증가 → 후방 밸류체인 수혜"
+        }
+      ]
+    },
+    {
+      "id": "SPACEX_IPO",
+      "name": "SpaceX IPO / 우주산업 재평가",
+      "trigger_conditions": {
+        "keywords": ["SpaceX", "IPO", "스타링크", "위성", "로켓", "우주"],
+        "market_signals": {}
+      },
+      "chain": [
+        {
+          "phase": 1,
+          "name": "IPO 뉴스 (D+0~3)",
+          "day_range": [0, 3],
+          "hot_sectors": ["우주항공", "방산"],
+          "hot_tickers": ["012450:한화에어로스페이스", "047810:한국항공우주", "347700:스피어"],
+          "etf": ["UFO", "ARKX", "ITA"],
+          "cold_sectors": [],
+          "logic": "SpaceX IPO → 우주 섹터 전체 밸류에이션 재평가. 한국 우주/방산 동반"
+        },
+        {
+          "phase": 2,
+          "name": "관련주 확산 (D+3~14)",
+          "day_range": [3, 14],
+          "hot_sectors": ["위성통신", "특수소재", "발사체부품"],
+          "hot_tickers": ["347700:스피어", "298040:효성중공업"],
+          "etf": [],
+          "cold_sectors": [],
+          "logic": "IPO 확정 후 밸류체인 2차 수혜. 특수합금/위성부품 공급업체"
+        },
+        {
+          "phase": 3,
+          "name": "실적 반영 (D+14~60)",
+          "day_range": [14, 60],
+          "hot_sectors": ["우주인프라", "방위산업"],
+          "hot_tickers": [],
+          "etf": [],
+          "cold_sectors": [],
+          "logic": "IPO 이후 실적 기대감 → 밸류체인 전반 재평가"
+        }
+      ]
+    },
+    {
+      "id": "COMMODITY_SUPERCYCLE",
+      "name": "원자재 슈퍼사이클 (구리/TiO2/우라늄)",
+      "trigger_conditions": {
+        "keywords": ["구리", "원자재", "슈퍼사이클", "TiO2", "우라늄", "희토류"],
+        "market_signals": {
+          "copper_above": 10000
+        }
+      },
+      "chain": [
+        {
+          "phase": 1,
+          "name": "원가 상승 감지 (D+0~7)",
+          "day_range": [0, 7],
+          "hot_sectors": ["광산", "비철금속", "소재"],
+          "hot_tickers": ["006260:LS", "103140:풍산"],
+          "etf": ["COPX", "COPJ", "URNM", "URA", "REMX", "SETM"],
+          "cold_sectors": [],
+          "logic": "원자재 가격 상승 → 광산/비철금속 직접 수혜. 원가 갭 매수 구간 종목 우선"
+        },
+        {
+          "phase": 2,
+          "name": "미반영 종목 발굴 (D+7~30)",
+          "day_range": [7, 30],
+          "hot_sectors": ["코팅", "특수화학", "원전"],
+          "hot_tickers": ["034020:두산에너빌리티"],
+          "etf": [],
+          "cold_sectors": [],
+          "logic": "원가 올랐으나 주가 미반영 종목 캐치업. TiO2 관련주(TROX,CC) 핵심"
+        },
+        {
+          "phase": 3,
+          "name": "인프라 투자 확대 (D+30~90)",
+          "day_range": [30, 90],
+          "hot_sectors": ["건설장비", "플랜트", "인프라"],
+          "hot_tickers": [],
+          "etf": [],
+          "cold_sectors": ["소비재"],
+          "logic": "원자재 수요 → 광산/인프라 투자 확대 → 건설장비 수혜"
+        }
+      ]
+    },
+    {
+      "id": "AI_POWER_DEMAND",
+      "name": "AI 데이터센터 전력 수요 폭증",
+      "trigger_conditions": {
+        "keywords": ["데이터센터", "전력", "AI전력", "원전", "SMR", "전력부족"],
+        "market_signals": {}
+      },
+      "chain": [
+        {
+          "phase": 1,
+          "name": "전력 인프라 (D+0~14)",
+          "day_range": [0, 14],
+          "hot_sectors": ["전력기기", "유틸리티", "변압기"],
+          "hot_tickers": ["267260:HD현대일렉트릭", "034020:두산에너빌리티"],
+          "etf": ["XLU", "UTSL"],
+          "cold_sectors": [],
+          "logic": "AI 전력 수요 → 전력기기/유틸리티 구조적 성장. 변압기/초고압 수혜"
+        },
+        {
+          "phase": 2,
+          "name": "원전/SMR (D+7~30)",
+          "day_range": [7, 30],
+          "hot_sectors": ["원자력", "우라늄"],
+          "hot_tickers": ["034020:두산에너빌리티"],
+          "etf": ["URNM", "URA"],
+          "cold_sectors": [],
+          "logic": "AI 전력 해법으로 원전 부각 → 우라늄 수요 증가"
+        },
+        {
+          "phase": 3,
+          "name": "재생에너지 (D+14~60)",
+          "day_range": [14, 60],
+          "hot_sectors": ["태양광", "풍력", "ESS"],
+          "hot_tickers": [],
+          "etf": ["TAN", "ICLN"],
+          "cold_sectors": [],
+          "logic": "장기 전력 수요 → 재생에너지 투자 가속"
         }
       ]
     }
