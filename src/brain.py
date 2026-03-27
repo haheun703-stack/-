@@ -306,6 +306,15 @@ class Brain:
                 shock_conf = shock.get("confidence", 0) if isinstance(shock, dict) else 0
                 adjustments.append(f"충격 보정: {shock_type} (확신도 {shock_conf:.0%})")
 
+        # ── 6.2. TIER2 섹터 컴포짓 시그널 보정 ──
+        sector_comp = self._load_json(
+            DATA_DIR / "sector_rotation" / "sector_composite.json"
+        )
+        sc_adj = self._apply_sector_composite(arms, sector_comp)
+        if sc_adj:
+            arms = sc_adj["arms"]
+            adjustments.extend(sc_adj["adjustments"])
+
         # ── 6.5. SHIELD 방어 보정 ──
         shield_report = self._load_json(DATA_DIR / "shield_report.json")
         shield_overrides = shield_report.get("brain_overrides", {})
@@ -794,6 +803,64 @@ class Brain:
             if arm in result:
                 result[arm] = max(0, result[arm] + delta)
         return result
+
+    # ────────────────────────────────────────
+    # 6.2. 섹터 컴포짓 시그널 보정
+    # ────────────────────────────────────────
+    def _apply_sector_composite(
+        self, arms: dict, sector_comp: dict
+    ) -> dict | None:
+        """TIER2 섹터 컴포짓 → etf_sector ARM 동적 조정.
+
+        Rules:
+          - STRONG_ROTATION 3개+ → etf_sector +5%p
+          - EXODUS 3개+ → etf_sector -5%p, cash +5%p
+          - 평균 컴포짓 60+ → etf_sector +3%p (전체 강세)
+          - 평균 컴포짓 35- → etf_sector -3%p (전체 약세)
+        """
+        if not sector_comp or "sectors" not in sector_comp:
+            return None
+
+        strong = sector_comp.get("strong_sectors", [])
+        exodus = sector_comp.get("exodus_sectors", [])
+        avg = sector_comp.get("avg_composite", 50)
+
+        result = dict(arms)
+        adj_msgs = []
+
+        # STRONG 섹터 다수 → 섹터 투자 확대
+        if len(strong) >= 3:
+            result["etf_sector"] = result.get("etf_sector", 0) + 5
+            adj_msgs.append(
+                f"섹터 강세: STRONG {len(strong)}개({', '.join(strong[:3])}) → sector+5%p"
+            )
+        elif len(strong) >= 1:
+            result["etf_sector"] = result.get("etf_sector", 0) + 2
+            adj_msgs.append(
+                f"섹터 양호: STRONG {len(strong)}개({', '.join(strong)}) → sector+2%p"
+            )
+
+        # EXODUS 섹터 다수 → 방어
+        if len(exodus) >= 3:
+            result["etf_sector"] = max(0, result.get("etf_sector", 0) - 5)
+            result["cash"] = result.get("cash", 0) + 5
+            adj_msgs.append(
+                f"섹터 이탈: EXODUS {len(exodus)}개 → sector-5%p, cash+5%p"
+            )
+
+        # 전체 평균 기반 미세 조정
+        if avg >= 60 and not adj_msgs:
+            result["etf_sector"] = result.get("etf_sector", 0) + 3
+            adj_msgs.append(f"섹터 평균 강세(avg={avg:.0f}) → sector+3%p")
+        elif avg <= 35:
+            result["etf_sector"] = max(0, result.get("etf_sector", 0) - 3)
+            result["cash"] = result.get("cash", 0) + 3
+            adj_msgs.append(f"섹터 평균 약세(avg={avg:.0f}) → sector-3%p, cash+3%p")
+
+        if not adj_msgs:
+            return None
+
+        return {"arms": result, "adjustments": adj_msgs}
 
     # ────────────────────────────────────────
     # 7. 정규화

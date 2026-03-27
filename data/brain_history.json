@@ -397,5 +397,18 @@
     "adjustments_count": 8,
     "contrarian": true,
     "fear_index": 73.1
+  },
+  {
+    "date": "2026-03-27",
+    "regime": "BEAR",
+    "kospi_regime": "BEAR",
+    "nw_score": 0.0,
+    "vix": 25.3,
+    "confidence": 0.75,
+    "total_invest": 43.8,
+    "cash": 56.2,
+    "adjustments_count": 9,
+    "contrarian": true,
+    "fear_index": 73.1
   }
 ]
