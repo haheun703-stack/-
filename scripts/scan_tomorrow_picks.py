@@ -1392,6 +1392,7 @@ def get_parquet_data(ticker: str) -> dict | None:
             "macd_rising": macd_rising,
             "low_20d": low_20d,
             "vol_z": float(last.get("vol_z", 0) or 0),
+            "vol_ratio": float(last["volume"]) / float(df["volume"].mean()) if "volume" in df.columns and df["volume"].mean() > 0 else 0,
             "volume_surge_ratio": float(last.get("volume_surge_ratio", 0) or 0),
             "macd": float(last.get("macd", 0) or 0),
             "macd_signal": float(last.get("macd_signal", 0) or 0),
@@ -1778,14 +1779,21 @@ def main():
         # 통합 점수 계산 (그룹별 유효 소스 수 반영)
         score_detail = calc_integrated_score(ticker, sources, pq_data, grp_src_cnt)
 
-        # 레짐 부스트 적용 (v6): 매크로 점수에 따라 최종 점수 보정
-        # FLOWX 모드: floor 보장 (BEAR에서도 0.8x 이상)
-        # 공매도 체제: position_scale_mult 추가 적용 (reopened→×0.7)
+        # 레짐 부스트 적용 (v7): 교차검증 시그널 바이패스
+        # - 2개 이상 독립 소스 교차검증 + 거래량 2x → 레짐 감쇠 면제
+        # - BEAR 모드 = "진입 금지"가 아니라 "조건 강화"
         effective_regime = regime_mult
         if is_flowx_mode and effective_regime < FLOWX_MODE_OVERRIDES["regime_boost_floor"]:
             effective_regime = FLOWX_MODE_OVERRIDES["regime_boost_floor"]
         if short_summary.get("enabled") and short_pos_scale < 1.0:
             effective_regime *= short_pos_scale
+
+        # v7 교차검증 바이패스: 2소스 이상 + 거래량 2배 이상 → 레짐 감쇠 면제
+        vol_ratio = pq_data.get("vol_ratio", 0) if pq_data else 0
+        cross_validated = len(source_names) >= 2 and vol_ratio >= 2.0
+        if cross_validated and effective_regime < 1.0:
+            effective_regime = 1.0  # 감쇠 면제 (부스트는 아님)
+
         if effective_regime != 1.0:
             boosted = min(score_detail["total"] * effective_regime, 100)
             score_detail["total"] = round(boosted, 1)
