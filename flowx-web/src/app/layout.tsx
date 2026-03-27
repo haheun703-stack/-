@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,24 +38,24 @@ export default function RootLayout({
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <a
+              <Link
                 href="/"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
               >
                 대시보드
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/quant"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
               >
                 퀀트
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/signals"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
               >
                 시그널
-              </a>
+              </Link>
             </div>
           </div>
         </nav>

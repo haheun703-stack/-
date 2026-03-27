@@ -17,13 +17,21 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function load() {
-      const res = await fetch("/api/briefing");
-      const data = await res.json();
-      setBriefing(data);
+      try {
+        const res = await fetch("/api/briefing", { signal: controller.signal });
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        const data = await res.json();
+        setBriefing(data);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setBriefing(null);
+      }
       setLoading(false);
     }
     load();
+    return () => controller.abort();
   }, []);
 
   if (loading) {
