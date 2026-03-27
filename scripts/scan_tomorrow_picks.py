@@ -1870,7 +1870,8 @@ def main():
             if report_bonus > 0:
                 source_names.append("리포트")
 
-        # 전략 H: AI 두뇌 보너스 (최대 ±20점, confidence 비례)
+        # 전략 H: AI 두뇌 보너스 (참고 수준, settings.yaml bonus_max 적용)
+        ai_bonus_max = yaml_config.get("ai_brain", {}).get("bonus_max", 5)
         ai_bonus = 0.0
         ai_tag = ""
         ai_action = ""
@@ -1881,21 +1882,16 @@ def main():
             confidence = j.get("confidence", 0)
             ai_urgency = j.get("urgency", "")
             if ai_action == "BUY":
-                # confidence 0.60→+8, 0.75→+14, 0.85→+18, 0.90→+20
-                ai_bonus = round(confidence * 24 - 6, 1)
-                # urgency 가산: high→+3, medium→+1
-                if ai_urgency == "high":
-                    ai_bonus += 3
-                elif ai_urgency == "medium":
-                    ai_bonus += 1
-                ai_tag = f"AI:BUY({confidence:.0%},{ai_urgency})"
+                # confidence 0.70→+2, 0.85→+4, 0.95→+5 (참고 수준)
+                ai_bonus = round(confidence * ai_bonus_max - 1, 1)
+                ai_tag = f"AI:BUY({confidence:.0%})"
             elif ai_action == "WATCH":
-                ai_bonus = round(confidence * 4 - 1, 1)  # 0.6→+1.4, 0.7→+1.8
+                ai_bonus = round(confidence * 1.5 - 0.5, 1)
                 ai_tag = "AI:WATCH"
             elif ai_action == "AVOID":
-                ai_bonus = round(-confidence * 24 + 2, 1)  # 0.7→-14.8, 0.8→-17.2
+                ai_bonus = round(-confidence * ai_bonus_max + 1, 1)
                 ai_tag = f"AI:AVOID({confidence:.0%})"
-        ai_bonus = round(max(min(ai_bonus, 20), -20), 1)
+        ai_bonus = round(max(min(ai_bonus, ai_bonus_max), -ai_bonus_max), 1)
         if ai_bonus != 0:
             boosted = max(min(score_detail["total"] + ai_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
@@ -2406,52 +2402,8 @@ def main():
                   f"{r['total_score']}점 [{r['grade']}] ({r['n_sources']}소스: {srcs})")
         print(f"{'─'*60}")
 
-    # ── AI 대형주 참고 섹션: AI BUY인데 TOP/관심에 없는 종목 ──
-    # v5: 수급 검증 추가 — AI가 추천해도 수급 역행이면 경고 태그
-    ai_largecap = []
-    if ai_brain_judgments:
-        used_all = top5_tickers | {w["ticker"] for w in watchlist5}
-        for t, j in ai_brain_judgments.items():
-            if j.get("action") != "BUY" or t in used_all:
-                continue
-            # v5: parquet에서 수급 데이터 조회
-            pq = get_parquet_data(t)
-            f5d = pq.get("foreign_5d", 0) if pq else 0
-            i5d = pq.get("inst_5d", 0) if pq else 0
-            flow_tag = ""
-            if f5d < -50_000_000_000 and i5d < -50_000_000_000:
-                flow_tag = "수급역행(동시대량매도)"
-            elif f5d < 0 and i5d < 0:
-                flow_tag = "수급주의(동시매도)"
-            elif f5d < 0:
-                flow_tag = "외인매도"
-            ai_largecap.append({
-                "ticker": t,
-                "name": j.get("name", ""),
-                "confidence": j.get("confidence", 0),
-                "reasoning": j.get("reasoning", ""),
-                "urgency": j.get("urgency", ""),
-                "expected_impact_pct": j.get("expected_impact_pct", 0),
-                "foreign_5d": f5d,
-                "inst_5d": i5d,
-                "flow_warning": flow_tag,
-            })
-        ai_largecap.sort(key=lambda x: -x["confidence"])
-
-    if ai_largecap:
-        print(f"\n{'─'*60}")
-        print(f"  🧠 AI 대형주 참고 ({len(ai_largecap)}종목) — Bot 시그널 미검출, AI 판단만")
-        print(f"{'─'*60}")
-        for r in ai_largecap:
-            urg = " 🔥" if r["urgency"] == "high" else ""
-            flow_warn = f" ⚠{r['flow_warning']}" if r.get("flow_warning") else ""
-            f5 = r.get("foreign_5d", 0) / 1e8
-            i5 = r.get("inst_5d", 0) / 1e8
-            print(f"    {r['name']}({r['ticker']}) "
-                  f"AI확신:{r['confidence']:.0%}{urg} "
-                  f"외인{f5:+.0f}억 기관{i5:+.0f}억"
-                  f"{flow_warn}"
-                  f" | {r['reasoning'][:40]}")
+    # AI 대형주 참고 섹션 제거 — 시그널 기반 추천이 주체 (v6)
+    ai_largecap = []  # 하위 호환용 빈 리스트
 
     # 나머지 관찰 종목 간략 출력
     rest = [r for r in results if r["grade"] in buyable_grades

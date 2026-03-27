@@ -409,57 +409,10 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
     rows = []
     seen_codes: set[str] = set()
 
-    # 1) ai_largecap → AI 두뇌 추천 (텔레그램 AI 대형주)
-    # v5: 수급 역행 종목은 FLOWX 업로드에서 제외
-    for item in data.get("ai_largecap", []):
-        ticker = item.get("ticker", "")
-        if not ticker or ticker in seen_codes:
-            continue
+    # v6: AI 대형주 독립 섹션 제거 — 시그널 기반 picks만 사용
+    # (ai_largecap은 이제 항상 빈 리스트)
 
-        # v5: 수급 역행 필터 — 동시매도 종목은 AI 추천에서도 제외
-        flow_warn = item.get("flow_warning", "")
-        if "동시대량매도" in flow_warn:
-            logger.info("[FLOWX] AI추천 수급역행 제외: %s (%s)", item.get("name", ticker), flow_warn)
-            continue
-
-        seen_codes.add(ticker)
-
-        confidence = float(item.get("confidence", 0))
-        close = _get_close(ticker)
-        if close <= 0:
-            continue  # 종가 없으면 스킵 (stop_loss=0 방지)
-        impact_pct = float(item.get("expected_impact_pct", 5))
-
-        # grade: confidence → AA/A/B, 수급 경고 시 다운그레이드
-        if confidence >= 0.85:
-            grade = "AA"
-        elif confidence >= 0.75:
-            grade = "A"
-        else:
-            grade = "B"
-
-        # v5: 수급 주의(동시매도) 시 등급 한 단계 하향
-        if "동시매도" in flow_warn and grade in ("AA", "A"):
-            grade = {"AA": "A", "A": "B"}.get(grade, grade)
-
-        rows.append({
-            "date": date_str,
-            "code": ticker,
-            "name": item.get("name", ""),
-            "grade": grade,
-            "total_score": round(confidence * 100, 1),
-            "foreign_detail": flow_warn if flow_warn else None,
-            "inst_support": False,
-            "entry_price": close,
-            "stop_loss": int(close * 0.92),  # -8% 기본 손절
-            "target_price": int(close * (1 + impact_pct / 100)),
-            "holding_days": 5,
-            "signal_type": "BUY",
-            "volume_ratio": 1.0,
-            "momentum_regime": "AI_BRAIN",
-        })
-
-    # 2) picks → 적극매수/매수 (FLOWX: 관심매수도 포함)
+    # picks → 적극매수/매수 (FLOWX: 관심매수도 포함)
     allowed_grades = {"적극매수", "매수", "관심매수"} if is_flowx else {"적극매수", "매수"}
     for pick in data.get("picks", []):
         ticker = pick.get("ticker", "")

@@ -1321,12 +1321,12 @@ ai_brain:
   model: "claude-sonnet-4-5-20250929"
   max_news_items: 70          # 최대 뉴스 수
   max_stock_judgments: 50     # 최대 종목 판단 수 (커버리지 확대)
-  bonus_max: 20               # scan_tomorrow_picks 최대 보너스 (±20점, confidence 비례)
+  bonus_max: 5                # scan_tomorrow_picks 최대 보너스 (±5점, AI는 참고 수준)
   daily_call_limit: 3         # 일일 API 호출 한도 (비용 안전장치)
   universe_filter: true       # 84종목 유니버스 밖 종목 필터링
-  # [채널 1] AI 독립 추천 슬롯 (12개 소스에 없어도 AI BUY면 추천 가능)
+  # [채널 1] AI 독립 추천 슬롯 — 비활성화 (시그널 기반 추천이 주체)
   independent_pick:
-    enabled: true
+    enabled: false
     max_count: 5               # 최대 독립 추천 종목 수
     min_confidence: 0.70       # 최소 AI 신뢰도
   # [종목선정 강화] AI 섹터 필터 + 거부권 + 동적 슬롯
