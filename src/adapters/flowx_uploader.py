@@ -244,6 +244,34 @@ class FlowxUploader:
             logger.error("[FLOWX] 시나리오 대시보드 업로드 실패: %s", e)
             return False
 
+    # ── 자비스 컨트롤타워 ─────────────────────────────
+
+    def upload_jarvis_data(self, jarvis_data: dict, date_str: str) -> bool:
+        """자비스 컨트롤타워 데이터 업로드 (UPSERT on date).
+
+        jarvis_data 구조:
+          picks: {target_date_label, mode_label, total_candidates, stats, picks[]}
+          accuracy: {pullback_scan: {hit_rate, total}, ...}
+          brain: {regime, vix, cash_ratio}
+          shield: {status, max_drawdown}
+        """
+        if not self.is_active or not jarvis_data:
+            return False
+        try:
+            row = {
+                "date": date_str,
+                "data": jarvis_data,
+            }
+            result = self.client.table("quant_jarvis").upsert(
+                row, on_conflict="date"
+            ).execute()
+            n_picks = len(jarvis_data.get("picks", {}).get("picks", []))
+            logger.info("[FLOWX] 자비스 컨트롤타워 업로드: %s (%d종목)", date_str, n_picks)
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 자비스 업로드 실패: %s", e)
+            return False
+
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:
@@ -465,6 +493,66 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
         rows.append(row)
 
     return rows
+
+
+def build_jarvis_payload() -> dict:
+    """자비스 컨트롤타워 데이터 통합 빌드.
+
+    data/tomorrow_picks.json + brain_decision.json + shield_report.json +
+    market_learning/signal_accuracy.json 통합.
+    """
+    def _load(name: str) -> dict:
+        p = DATA_DIR / name
+        if not p.exists():
+            return {}
+        try:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    picks_raw = _load("tomorrow_picks.json")
+    brain = _load("brain_decision.json")
+    shield = _load("shield_report.json")
+
+    # signal_accuracy: 최신 학습 데이터에서
+    acc_raw = {}
+    learn_idx = _load("market_learning/_index.json")
+    latest_learn = learn_idx.get("latest", "")
+    if latest_learn:
+        learn = _load(f"market_learning/{latest_learn}.json")
+        acc_raw = learn.get("signal_accuracy", {})
+
+    # picks 요약 (전체 picks는 너무 크므로 관찰 이상만)
+    all_picks = picks_raw.get("picks", [])
+    buyable_grades = {"적극매수", "매수", "관심매수", "관찰"}
+    buyable = [p for p in all_picks if p.get("grade") in buyable_grades]
+    buyable.sort(key=lambda x: -x.get("total_score", 0))
+
+    # 상위 20개만 전송 (Supabase JSONB 크기 제한)
+    top_picks = buyable[:20]
+
+    return {
+        "picks": {
+            "target_date_label": picks_raw.get("target_date_label", ""),
+            "mode_label": picks_raw.get("mode_label", ""),
+            "total_candidates": picks_raw.get("total_candidates", 0),
+            "stats": picks_raw.get("stats", {}),
+            "picks": top_picks,
+        },
+        "accuracy": acc_raw,
+        "brain": {
+            "regime": brain.get("regime", brain.get("direction", "NEUTRAL")),
+            "vix": brain.get("vix", 0),
+            "cash_ratio": brain.get("cash_ratio", brain.get("cash_pct", 0)),
+            "recommendation": brain.get("recommendation", ""),
+        },
+        "shield": {
+            "status": shield.get("status", "YELLOW"),
+            "sector_concentration": shield.get("sector_concentration", 0),
+            "max_drawdown": shield.get("max_drawdown", 0),
+        },
+    }
 
 
 def _get_close(ticker: str) -> int:

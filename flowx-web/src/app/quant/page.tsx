@@ -1,12 +1,12 @@
-import QuantDashboard from "@/components/QuantDashboard";
+import JarvisControlTower from "@/components/JarvisControlTower";
 
 export default function QuantPage() {
   return (
     <div>
       <h1 className="text-white text-2xl font-bold mb-6">
-        시나리오 퀀트 대시보드
+        퀀트 시스템
       </h1>
-      <QuantDashboard />
+      <JarvisControlTower />
     </div>
   );
 }

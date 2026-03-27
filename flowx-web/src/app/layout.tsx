@@ -51,6 +51,12 @@ export default function RootLayout({
                 퀀트
               </Link>
               <Link
+                href="/scenarios"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                시나리오
+              </Link>
+              <Link
                 href="/signals"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
               >
