@@ -4,8 +4,8 @@ REM  BAT-N: FLOWX 시그널 기록
 REM  스케줄: 매일 08:20 KST (QM_N_SignalLog)
 REM  BAT-D(스캔) 이후 실행 — tomorrow_picks.json 기준
 REM ═══════════════════════════════════════════════
-set PYTHONPATH=D:\sub-agent-project
-cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
+cd /d D:\sub-agent-project_퀀트봇
 
 call venv\Scripts\activate.bat
 

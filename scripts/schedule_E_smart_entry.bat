@@ -2,7 +2,7 @@
 REM ============================================================
 REM  Quantum Master - BAT-E: AI 스마트 진입 (LIVE)
 REM  스케줄: 매일 08:50 (월~금, 장 시작 10분 전)
-REM  등록: schtasks /create /tn "QM_E_SmartEntry" /tr "D:\sub-agent-project\scripts\schedule_E_smart_entry.bat" /sc daily /st 08:50
+REM  등록: schtasks /create /tn "QM_E_SmartEntry" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_E_smart_entry.bat" /sc daily /st 08:50
 REM
 REM  매수 소스: v3 AI Brain picks (우선) + 기존 TOP 7 (보조)
 REM  안전장치:
@@ -14,12 +14,12 @@ REM    - 당일 중복 실행 방지 (order_audit.db)
 REM    - 모든 주문 감사 로그 기록
 REM ============================================================
 
-echo [%date% %time%] BAT-E 시작: AI 스마트 진입 (LIVE) >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] BAT-E 시작: AI 스마트 진입 (LIVE) >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 REM ── 거래일 가드 (trading_calendar 사용) ──
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"

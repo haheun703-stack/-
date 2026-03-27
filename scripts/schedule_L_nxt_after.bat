@@ -2,18 +2,18 @@
 REM ============================================================
 REM  Quantum Master - BAT-L: NXT 애프터마켓 데이터 수집
 REM  스케줄: 매일 15:35 (월~금, 장 마감 직후)
-REM  등록: schtasks /create /tn "QM_L_NXT_After" /tr "D:\sub-agent-project\scripts\schedule_L_nxt_after.bat" /sc daily /st 15:35
+REM  등록: schtasks /create /tn "QM_L_NXT_After" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_L_nxt_after.bat" /sc daily /st 15:35
 REM
 REM  NXT 애프터마켓 (15:30~20:00) 체결/수급 데이터 수집
 REM  종료 후 NXT 시그널 분석 + NXT 추천 엔진
 REM ============================================================
 
-echo [%date% %time%] BAT-L 시작: NXT 애프터마켓 수집 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] BAT-L 시작: NXT 애프터마켓 수집 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 REM ── 거래일 가드 (trading_calendar 사용) ──
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"

@@ -2,19 +2,19 @@
 REM ============================================================
 REM  Quantum Master - BAT-D2: 수급 데이터 확정 후 수집
 REM  스케줄: 매일 18:30 (KRX 투자자별 매매동향 확정 18:10 이후)
-REM  등록: schtasks /create /tn "QM_D2_Supply" /tr "wscript.exe D:\sub-agent-project\scripts\run_hidden.vbs D:\sub-agent-project\scripts\schedule_D2_supply.bat" /sc daily /st 18:30
+REM  등록: schtasks /create /tn "QM_D2_Supply" /tr "wscript.exe D:\sub-agent-project_퀀트봇\scripts\run_hidden.vbs D:\sub-agent-project_퀀트봇\scripts\schedule_D2_supply.bat" /sc daily /st 18:30
 REM
 REM  역할: parquet 수급 채워넣기 + collect_supply + SD V2 패턴 저장
 REM  예상 소요: ~15분
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
-echo [%date% %time%] BAT-D2 시작: 수급 데이터 확정 후 수집 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_퀀트봇\logs\schedule.log
+echo [%date% %time%] BAT-D2 시작: 수급 데이터 확정 후 수집 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 if not exist logs mkdir logs
 

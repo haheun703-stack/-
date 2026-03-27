@@ -94,6 +94,8 @@ def main():
     parser = argparse.ArgumentParser(description="유니버스 분봉 수집 → parquet 아카이브")
     parser.add_argument("--dry-run", action="store_true", help="005930 1종목만 테스트")
     parser.add_argument("--tickers", type=str, help="수집 종목 (쉼표 구분)")
+    parser.add_argument("--top-n", type=int, default=0,
+                        help="유니버스 상위 N종목만 수집 (시총순, 0=전체)")
     args = parser.parse_args()
 
     date_str = datetime.now().strftime("%Y-%m-%d")
@@ -106,6 +108,9 @@ def main():
         tickers = [t.strip().zfill(6) for t in args.tickers.split(",")]
     else:
         tickers = load_universe()
+        if args.top_n > 0 and args.top_n < len(tickers):
+            tickers = tickers[:args.top_n]
+            logger.info("유니버스 상위 %d종목만 수집 (전체 %d)", args.top_n, len(load_universe()))
     logger.info("수집 대상: %d종목, 날짜: %s", len(tickers), date_str)
 
     # KIS 어댑터 초기화

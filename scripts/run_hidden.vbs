@@ -1,5 +1,5 @@
 ' run_hidden.vbs — BAT 파일을 숨김 창으로 실행
-' 사용법: wscript.exe run_hidden.vbs "D:\sub-agent-project\scripts\schedule_X.bat"
+' 사용법: wscript.exe run_hidden.vbs "D:\sub-agent-project_퀀트봇\scripts\schedule_X.bat"
 If WScript.Arguments.Count = 0 Then
     WScript.Echo "Usage: wscript run_hidden.vbs <bat_file_path>"
     WScript.Quit 1

@@ -3,17 +3,17 @@ chcp 65001 >nul
 REM ============================================================
 REM  Quantum Master - BAT-B: 장전 통합 브리핑 (텔레그램 1건)
 REM  스케줄: 매일 07:00 (월~금, 장 시작 전)
-REM  등록: schtasks /create /tn "QM_B_Morning" /tr "D:\sub-agent-project\scripts\schedule_B_morning.bat" /sc daily /st 07:00
+REM  등록: schtasks /create /tn "QM_B_Morning" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_B_morning.bat" /sc daily /st 07:00
 REM
 REM  변경 이력: 기존 3~4건 개별 발송 → 1건 통합 (2026-02-28)
 REM  BAT-C (ETF 시그널) 기능을 흡수하여 BAT-C 폐지
 REM ============================================================
 
-echo [%date% %time%] BAT-B 시작: 장전 통합 브리핑 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] BAT-B 시작: 장전 통합 브리핑 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 REM ── 거래일 가드 (trading_calendar 사용) ──
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"

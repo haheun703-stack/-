@@ -2,20 +2,20 @@
 REM ============================================================
 REM  Quantum Master - BAT-D: COO Orchestrator 래핑 버전
 REM  스케줄: 매일 16:30 (월~금, 종가 확정 후)
-REM  등록: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
+REM  등록: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
 REM
 REM  [v2] 기존 31단계 순차 실행 → COO Orchestrator 위임
 REM       원본 백업: scripts\schedule_D_original.bat
 REM       COO: 7그룹 66단계, 폴백 핸들러, FLOWX 보장
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
-echo [%date% %time%] BAT-D 시작: COO Orchestrator >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_퀀트봇\logs\schedule.log
+echo [%date% %time%] BAT-D 시작: COO Orchestrator >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 if not exist logs mkdir logs
 

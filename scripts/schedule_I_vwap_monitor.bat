@@ -3,18 +3,18 @@ chcp 65001 >nul
 REM ============================================================
 REM  Quantum Master - BAT-I: 장중 VWAP 모니터
 REM  스케줄: 매일 08:55 (월~금, 장 시작 5분 전)
-REM  등록: schtasks /create /tn "QM_I_VWAP" /tr "D:\sub-agent-project\scripts\schedule_I_vwap_monitor.bat" /sc daily /st 08:55
+REM  등록: schtasks /create /tn "QM_I_VWAP" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_I_vwap_monitor.bat" /sc daily /st 08:55
 REM
 REM  09:00 개장 갭 → 09:30 VWAP 기준선 → 14:00까지 모니터링
 REM  VWAP 눌림/회복 알림 + 11:30 AI 분석 통합
 REM  장중 약 5시간 실행 (long-running)
 REM ============================================================
 
-echo [%date% %time%] BAT-I 시작: VWAP 모니터 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] BAT-I 시작: VWAP 모니터 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 REM ── 거래일 가드 (trading_calendar 사용) ──
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"

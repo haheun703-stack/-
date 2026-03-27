@@ -5,17 +5,17 @@ REM  기존 schedule_D_after_close.bat의 병렬 버전
 REM
 REM  효과: 50분 → 25~30분 (의존성 DAG 기반 병렬 실행)
 REM
-REM  등록: schtasks /create /tn "QM_D_Parallel" /tr "D:\sub-agent-project\scripts\schedule_D_parallel.bat" /sc daily /st 16:30
+REM  등록: schtasks /create /tn "QM_D_Parallel" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_D_parallel.bat" /sc daily /st 16:30
 REM  (기존 QM_D_AfterClose와 동시 등록 X — 하나만 선택)
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
-echo [%date% %time%] BAT-D PARALLEL 시작 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_퀀트봇\logs\schedule.log
+echo [%date% %time%] BAT-D PARALLEL 시작 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 if not exist logs mkdir logs
 

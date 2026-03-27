@@ -3,21 +3,21 @@ REM ============================================================
 REM  Quantum Master - BAT-SNAP: 장중 수급 스냅샷
 REM  스케줄: 매일 09:30 / 11:00 / 13:30 / 15:00 (4회)
 REM  등록:
-REM    schtasks /create /tn "QM_SNAP1" /tr "wscript.exe D:\sub-agent-project\scripts\run_hidden.vbs D:\sub-agent-project\scripts\schedule_SNAP_supply.bat 1" /sc daily /st 09:30
-REM    schtasks /create /tn "QM_SNAP2" /tr "wscript.exe D:\sub-agent-project\scripts\run_hidden.vbs D:\sub-agent-project\scripts\schedule_SNAP_supply.bat 2" /sc daily /st 11:00
-REM    schtasks /create /tn "QM_SNAP3" /tr "wscript.exe D:\sub-agent-project\scripts\run_hidden.vbs D:\sub-agent-project\scripts\schedule_SNAP_supply.bat 3" /sc daily /st 13:30
-REM    schtasks /create /tn "QM_SNAP4" /tr "wscript.exe D:\sub-agent-project\scripts\run_hidden.vbs D:\sub-agent-project\scripts\schedule_SNAP_supply.bat 4" /sc daily /st 15:00
+REM    schtasks /create /tn "QM_SNAP1" /tr "wscript.exe D:\sub-agent-project_퀀트봇\scripts\run_hidden.vbs D:\sub-agent-project_퀀트봇\scripts\schedule_SNAP_supply.bat 1" /sc daily /st 09:30
+REM    schtasks /create /tn "QM_SNAP2" /tr "wscript.exe D:\sub-agent-project_퀀트봇\scripts\run_hidden.vbs D:\sub-agent-project_퀀트봇\scripts\schedule_SNAP_supply.bat 2" /sc daily /st 11:00
+REM    schtasks /create /tn "QM_SNAP3" /tr "wscript.exe D:\sub-agent-project_퀀트봇\scripts\run_hidden.vbs D:\sub-agent-project_퀀트봇\scripts\schedule_SNAP_supply.bat 3" /sc daily /st 13:30
+REM    schtasks /create /tn "QM_SNAP4" /tr "wscript.exe D:\sub-agent-project_퀀트봇\scripts\run_hidden.vbs D:\sub-agent-project_퀀트봇\scripts\schedule_SNAP_supply.bat 4" /sc daily /st 15:00
 REM
 REM  사고 이력: 데몬 비활성화(093f9ea) 후 20일간 스냅샷 미수집 (2026-03-06~26)
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
-echo [%date% %time%] BAT-SNAP 시작: 수급 스냅샷 %1차 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_퀀트봇\logs\schedule.log
+echo [%date% %time%] BAT-SNAP 시작: 수급 스냅샷 %1차 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 if not exist logs mkdir logs
 

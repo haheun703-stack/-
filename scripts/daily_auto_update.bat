@@ -11,4 +11,4 @@ REM    QM_D_AfterClose  16:30  schedule_D_after_close.bat
 REM ============================================================
 
 echo 장마감 전체 데이터 수집을 수동 실행합니다...
-call D:\sub-agent-project\scripts\schedule_D_after_close.bat
+call D:\sub-agent-project_퀀트봇\scripts\schedule_D_after_close.bat

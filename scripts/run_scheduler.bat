@@ -13,8 +13,8 @@ echo  [%date% %time%] 스케줄러 시작
 echo.
 
 REM 프로젝트 디렉토리 이동
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 REM 가상환경 활성화
 call venv\Scripts\activate.bat

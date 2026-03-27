@@ -9,7 +9,7 @@
 - `.env` 절대 커밋 금지
 
 ## 필수 규칙
-- **BAT 파일**: `set PYTHONPATH=D:\sub-agent-project` 필수 + `sys.path.insert(0, ...)` 안전장치
+- **BAT 파일**: `set PYTHONPATH=D:\sub-agent-project_퀀트봇` 필수 + `sys.path.insert(0, ...)` 안전장치
 - **버전 업그레이드**: 즉시 git add → commit → tag → push
 - **클린 아키텍처**: entities/ → use_cases/ → adapters/ → agents/ (안쪽→바깥 import 금지)
 

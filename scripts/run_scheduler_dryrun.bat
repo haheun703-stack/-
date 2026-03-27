@@ -3,8 +3,8 @@ chcp 65001 >nul
 title Quantum Master v5.0 — Dry Run
 color 0E
 
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 call venv\Scripts\activate.bat
 
 echo.

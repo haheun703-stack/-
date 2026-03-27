@@ -281,13 +281,16 @@ class DataHealthCheck:
                 conn = sqlite3.connect(str(db_path))
                 cursor = conn.execute(
                     "SELECT date, stock_count, status FROM collect_log "
+                    "WHERE stock_count > 0 "
                     "ORDER BY date DESC LIMIT 1"
                 )
                 row = cursor.fetchone()
                 conn.close()
                 if row:
                     last_date, stock_count, status = row
-                    gap = (self.today - datetime.strptime(last_date, "%Y-%m-%d").date()).days
+                    # date 형식: YYYYMMDD 또는 YYYY-MM-DD 모두 지원
+                    fmt = "%Y%m%d" if "-" not in str(last_date) else "%Y-%m-%d"
+                    gap = (self.today - datetime.strptime(str(last_date), fmt).date()).days
                     if gap <= 5 and stock_count > 0:
                         db_ok = True
                         db_info = f"db={last_date}({stock_count}종목)"

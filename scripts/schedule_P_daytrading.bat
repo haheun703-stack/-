@@ -6,8 +6,8 @@ REM    1차: 09:05 KST (QM_P1_DaySignal) — 단타 시그널 기록
 REM    2차: 15:20 KST (QM_P2_DayClose)  — 일괄 청산 + 성적표
 REM  사용법: schedule_P_daytrading.bat [log|close]
 REM ═══════════════════════════════════════════════
-set PYTHONPATH=D:\sub-agent-project
-cd /d D:\sub-agent-project
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
+cd /d D:\sub-agent-project_퀀트봇
 
 call venv\Scripts\activate.bat
 

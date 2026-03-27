@@ -55,7 +55,6 @@ PIPELINE_GROUPS = [
             {"name": "Parquet 증분 업데이트", "cmd": "scripts/extend_parquet_data.py --skip-supply"},
             {"name": "KOSPI 인덱스", "cmd": "scripts/update_kospi_index.py"},
             {"name": "투자자수급", "cmd": "scripts/collect_investor_flow.py"},
-            {"name": "분봉 데이터 수집", "cmd": "scripts/collect_intraday_candles.py"},
         ],
     },
     {
@@ -168,6 +167,15 @@ PIPELINE_GROUPS = [
             {"name": "저녁 통합 리포트", "cmd": "scripts/send_evening_summary.py --send"},
             {"name": "페이퍼 트레이딩", "cmd": "scripts/paper_trading_unified.py"},
             {"name": "데이터 건강검진", "cmd": "scripts/data_health_check.py"},
+        ],
+    },
+    {
+        "group": "분봉아카이브",
+        "description": "장마감 분봉 수집 (non-critical, 타임아웃 허용)",
+        "critical": False,
+        "fallback": "skip_silently",
+        "steps": [
+            {"name": "분봉 데이터 수집", "cmd": "scripts/collect_intraday_candles.py --top-n 200"},
         ],
     },
 ]
@@ -326,7 +334,7 @@ class COOOrchestrator:
                 logger.info("  [OK] %s", name)
 
         except subprocess.TimeoutExpired:
-            step_result["error"] = "TIMEOUT (600s)"
+            step_result["error"] = f"TIMEOUT ({2400}s)"
             logger.error("  [TIMEOUT] %s", name)
         except Exception as e:
             step_result["error"] = str(e)

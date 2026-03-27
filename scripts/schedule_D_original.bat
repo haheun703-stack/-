@@ -2,20 +2,20 @@
 REM ============================================================
 REM  Quantum Master - BAT-D: 장마감 후 전체 데이터 수집 + 스캔
 REM  스케줄: 매일 16:30 (월~금, 종가 확정 후)
-REM  등록: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
+REM  등록: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project_퀀트봇\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
 REM
 REM  예상 소요: ~50분 (16:30 → 17:20)
 REM  순서: 기초데이터 → 지표 → 분석 → DART+뉴스+스캔 → 추천 (29단계)
 REM  안전장치: 각 단계 실패 시 로그 기록 후 다음 단계 계속 진행
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project\logs\schedule.log
-echo [%date% %time%] BAT-D 시작: 장마감 전체 데이터 수집 >> D:\sub-agent-project\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_퀀트봇\logs\schedule.log
+echo [%date% %time%] BAT-D 시작: 장마감 전체 데이터 수집 >> D:\sub-agent-project_퀀트봇\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project
-set PYTHONPATH=D:\sub-agent-project
+call D:\sub-agent-project_퀀트봇\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_퀀트봇
+set PYTHONPATH=D:\sub-agent-project_퀀트봇
 
 if not exist logs mkdir logs
 
