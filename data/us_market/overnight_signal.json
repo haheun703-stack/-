@@ -1,7 +1,7 @@
 {
-  "date": "2026-03-26",
+  "date": "2026-03-27",
   "us_close_date": "2026-03-25",
-  "generated_at": "2026-03-26 17:52",
+  "generated_at": "2026-03-27 22:22",
   "index_direction": {
     "EWY": {
       "ret_1d": -0.78,
@@ -382,22 +382,22 @@
   ],
   "kr_closing": {
     "enabled": true,
-    "score": -0.795,
+    "score": -0.6732,
     "details": {
       "flow": {
-        "foreign_5d": -112891,
-        "inst_5d": -18910,
+        "foreign_5d": -133165,
+        "inst_5d": -474,
         "foreign_score": -1.0,
-        "inst_score": -0.63,
+        "inst_score": -0.016,
         "foreign_3d_streak": "sell"
       },
-      "flow_score": -1.0,
+      "flow_score": -0.7563,
       "regime": {
         "regime": "BEAR",
         "macro_score": 35,
         "regime_history_5d": [
           "CAUTION",
-          "CAUTION",
+          "BEAR",
           "BEAR",
           "BEAR",
           "BEAR"
@@ -452,7 +452,7 @@
       }
     }
   },
-  "ensemble_score": -0.2758,
+  "ensemble_score": -0.2393,
   "shock_type": {
     "shock_type": "NONE",
     "confidence": 0.0,
@@ -466,8 +466,8 @@
   },
   "grade": "MILD_BEAR",
   "l1_score_100": -9.3,
-  "ensemble_score_100": -27.6,
-  "combined_score_100": -25.7,
+  "ensemble_score_100": -23.9,
+  "combined_score_100": -22.0,
   "inverse_signal": {
     "enabled": false
   },
@@ -649,5 +649,5 @@
       "boost": 1.0
     }
   },
-  "summary": "US MILD_BEAR (-25.7 L2:+1.9 NW:+0.00) | SPY +0.6% QQQ +0.7% | VIX 25 (경계) | Au+3.0% Oil-1.0% Cu+3.6% NG+1.1% U+1.6%"
+  "summary": "US MILD_BEAR (-22.0 L2:+1.9 NW:+0.00) | SPY +0.6% QQQ +0.7% | VIX 25 (경계) | Au+3.0% Oil-1.0% Cu+3.6% NG+1.1% U+1.6%"
 }

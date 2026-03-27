@@ -12,7 +12,11 @@ export async function GET() {
     .limit(1);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[API /quant] Supabase error:", error.message);
+    return NextResponse.json(
+      { error: "데이터 조회 중 오류가 발생했습니다" },
+      { status: 500 },
+    );
   }
 
   const row = data?.[0];

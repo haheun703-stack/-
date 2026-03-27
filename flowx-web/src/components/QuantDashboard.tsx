@@ -14,17 +14,25 @@ export default function QuantDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function load() {
       try {
-        const res = await fetch("/api/quant");
+        const res = await fetch("/api/quant", { signal: controller.signal });
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
         const json = await res.json();
-        setData(json);
-      } catch {
+        if (!json || !json.market_status) {
+          setData(null);
+        } else {
+          setData(json);
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setData(null);
       }
       setLoading(false);
     }
     load();
+    return () => controller.abort();
   }, []);
 
   if (loading) {
@@ -70,7 +78,7 @@ export default function QuantDashboard() {
       </section>
 
       {/* 4. 시나리오 연동 종목 */}
-      {data.scenario_stocks.length > 0 && (
+      {(data.scenario_stocks?.length ?? 0) > 0 && (
         <section>
           <h2 className="text-white text-xl font-bold mb-4">시나리오 연동 종목</h2>
           <ScenarioStockCard stocks={data.scenario_stocks} />
@@ -78,7 +86,7 @@ export default function QuantDashboard() {
       )}
 
       {/* 5. ETF 매핑 */}
-      {data.etf_map.length > 0 && (
+      {(data.etf_map?.length ?? 0) > 0 && (
         <section>
           <h2 className="text-white text-xl font-bold mb-4">시나리오별 ETF 매핑</h2>
           <ScenarioETFMap etfMap={data.etf_map} />

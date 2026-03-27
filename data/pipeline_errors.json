@@ -95,5 +95,26 @@
     "errors": 0,
     "error_rate_pct": 0.0,
     "samples": []
+  },
+  {
+    "script": "extend_parquet_data",
+    "timestamp": "2026-03-27 22:21:17",
+    "errors": []
+  },
+  {
+    "script": "collect_short_selling",
+    "timestamp": "2026-03-27 22:22",
+    "total": 1036,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "samples": []
+  },
+  {
+    "script": "sector_investor_flow",
+    "timestamp": "2026-03-27 22:23",
+    "total": 95,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "samples": []
   }
 ]
