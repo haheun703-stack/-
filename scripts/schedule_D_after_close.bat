@@ -1,63 +1,63 @@
 @echo off
 REM ============================================================
-REM  Quantum Master - BAT-D: COO Orchestrator ëž˜í•‘ ë²„ì „
-REM  ìŠ¤ì¼€ì¤„: ë§¤ì¼ 16:30 (ì›”~ê¸ˆ, ì¢…ê°€ í™•ì • í›„)
-REM  ë“±ë¡: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project_í€€íŠ¸ë´‡\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
+REM  Quantum Master - BAT-D: COO Orchestrator ·¡ÇÎ ¹öÀü
+REM  ½ºÄÉÁÙ: ¸ÅÀÏ 16:30 (¿ù~±Ý, Á¾°¡ È®Á¤ ÈÄ)
+REM  µî·Ï: schtasks /create /tn "QM_D_AfterClose" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_D_after_close.bat" /sc daily /st 16:30
 REM
-REM  [v2] ê¸°ì¡´ 31ë‹¨ê³„ ìˆœì°¨ ì‹¤í–‰ â†’ COO Orchestrator ìœ„ìž„
-REM       ì›ë³¸ ë°±ì—…: scripts\schedule_D_original.bat
-REM       COO: 7ê·¸ë£¹ 66ë‹¨ê³„, í´ë°± í•¸ë“¤ëŸ¬, FLOWX ë³´ìž¥
+REM  [v2] ±âÁ¸ 31´Ü°è ¼øÂ÷ ½ÇÇà ¡æ COO Orchestrator À§ÀÓ
+REM       ¿øº» ¹é¾÷: scripts\schedule_D_original.bat
+REM       COO: 7±×·ì 66´Ü°è, Æú¹é ÇÚµé·¯, FLOWX º¸Àå
 REM ============================================================
 
-echo [%date% %time%] ================================================== >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
-echo [%date% %time%] BAT-D ì‹œìž‘: COO Orchestrator >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] ================================================== >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
+echo [%date% %time%] BAT-D ½ÃÀÛ: COO Orchestrator >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
 if not exist logs mkdir logs
 
-REM â”€â”€ ë¡œê·¸ ë¡œí…Œì´ì…˜ (10MB ì´ˆê³¼ ì‹œ ë°±ì—…) â”€â”€
+REM -- ·Î±× ·ÎÅ×ÀÌ¼Ç (10MB ÃÊ°ú ½Ã ¹é¾÷) --
 for %%F in (logs\schedule.log) do (
     if %%~zF GTR 10000000 (
-        echo [%date% %time%] ë¡œê·¸ ë¡œí…Œì´ì…˜: %%~zF bytes >> logs\schedule.log
+        echo [%date% %time%] ·Î±× ·ÎÅ×ÀÌ¼Ç: %%~zF bytes >> logs\schedule.log
         copy /Y logs\schedule.log logs\schedule.log.old >nul 2>&1
-        echo [%date% %time%] BAT-D ì‹œìž‘ (ë¡œí…Œì´ì…˜ í›„) > logs\schedule.log
+        echo [%date% %time%] BAT-D ½ÃÀÛ (·ÎÅ×ÀÌ¼Ç ÈÄ) > logs\schedule.log
     )
 )
 
-REM â”€â”€ ê±°ëž˜ì¼ ê°€ë“œ (trading_calendar ì‚¬ìš© â€” ì£¼ë§+ê³µíœ´ì¼ ì²´í¬) â”€â”€
+REM -- °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë -- ÁÖ¸»+°øÈÞÀÏ Ã¼Å©) --
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-D ìŠ¤í‚µ: ë¹„ê±°ëž˜ì¼ >> logs\schedule.log
+    echo [%date% %time%] BAT-D ½ºÅµ: ºñ°Å·¡ÀÏ >> logs\schedule.log
     goto :eof
 )
 
-REM â”€â”€ COO Orchestrator ì‹¤í–‰ (7ê·¸ë£¹ 66ë‹¨ê³„) â”€â”€
-echo [%date% %time%] COO Orchestrator ì‹œìž‘ >> logs\schedule.log
+REM -- COO Orchestrator ½ÇÇà (7±×·ì 66´Ü°è) --
+echo [%date% %time%] COO Orchestrator ½ÃÀÛ >> logs\schedule.log
 python -u -X utf8 coo_orchestrator.py >> logs\coo_bat.log 2>&1
 if errorlevel 1 (
-    echo [%date% %time%] COO ì‹¤íŒ¨ â€” ì›ë³¸ BAT-D í´ë°± ì‹¤í–‰ >> logs\schedule.log
+    echo [%date% %time%] COO ½ÇÆÐ -- ¿øº» BAT-D Æú¹é ½ÇÇà >> logs\schedule.log
     call scripts\schedule_D_original.bat
     goto :eof
 )
 
-REM â”€â”€ FLOWX ê³µê°œì¶”ì²œ ìŠ¤ìº” (COO ì™„ë£Œ í›„) â”€â”€
-echo [%date% %time%] FLOWX ê³µê°œì¶”ì²œ ìŠ¤ìº” ì‹œìž‘ >> logs\schedule.log
+REM -- FLOWX °ø°³ÃßÃµ ½ºÄµ (COO ¿Ï·á ÈÄ) --
+echo [%date% %time%] FLOWX °ø°³ÃßÃµ ½ºÄµ ½ÃÀÛ >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py --flowx >> logs\schedule.log 2>&1
-echo [%date% %time%] FLOWX ì—…ë¡œë“œ >> logs\schedule.log
+echo [%date% %time%] FLOWX ¾÷·Îµå >> logs\schedule.log
 python -u -X utf8 scripts\upload_flowx.py >> logs\schedule.log 2>&1
 
-REM â”€â”€ ê¸ˆìš”ì¼ ì£¼ê°„ ë³´ê³ ì„œ (COOì— ë¯¸í¬í•¨) â”€â”€
+REM -- ±Ý¿äÀÏ ÁÖ°£ º¸°í¼­ (COO¿¡ ¹ÌÆ÷ÇÔ) --
 for /f "tokens=1" %%a in ('python -c "from datetime import datetime; print(datetime.now().weekday())"') do set DOW=%%a
 if "%DOW%"=="4" (
-    echo [%date% %time%] ê¸ˆìš”ì¼ ì£¼ê°„ ë³´ê³ ì„œ >> logs\schedule.log
+    echo [%date% %time%] ±Ý¿äÀÏ ÁÖ°£ º¸°í¼­ >> logs\schedule.log
     python -u -X utf8 src\daily_archive.py --weekly >> logs\schedule.log 2>&1
     python -u -X utf8 scripts\run_v3_brain.py --weekly-review >> logs\schedule.log 2>&1
     python -u -X utf8 scripts\paper_trading_unified.py --weekly >> logs\schedule.log 2>&1
 )
 
-echo [%date% %time%] BAT-D ì™„ë£Œ (COO Orchestrator) >> logs\schedule.log
+echo [%date% %time%] BAT-D ¿Ï·á (COO Orchestrator) >> logs\schedule.log
 echo [%date% %time%] ================================================== >> logs\schedule.log

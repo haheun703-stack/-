@@ -1,16 +1,16 @@
 @echo off
-REM â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-REM  BAT-O: FLOWX ì‹œê·¸ë„ ì„±ê³¼ì¶”ì  + ì¢…ë£Œ + ì„±ì í‘œ
-REM  ìŠ¤ì¼€ì¤„: ë§¤ì¼ 16:10 KST (QM_O_SignalTrack)
-REM  ì¥ë§ˆê° í›„ ì‹¤í–‰ â€” í˜„ì¬ê°€ ì—…ë°ì´íŠ¸ + ì¢…ë£Œ íŒì • + ì§‘ê³„
-REM â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
+REM ===============================================
+REM  BAT-O: FLOWX ½Ã±×³Î ¼º°úÃßÀû + Á¾·á + ¼ºÀûÇ¥
+REM  ½ºÄÉÁÙ: ¸ÅÀÏ 16:10 KST (QM_O_SignalTrack)
+REM  Àå¸¶°¨ ÈÄ ½ÇÇà -- ÇöÀç°¡ ¾÷µ¥ÀÌÆ® + Á¾·á ÆÇÁ¤ + Áı°è
+REM ===============================================
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
+cd /d D:\sub-agent-project_ÄöÆ®º¿
 
 call venv\Scripts\activate.bat
 
-echo [%date% %time%] BAT-O ì‹œê·¸ë„ ì„±ê³¼ì¶”ì  ì‹œì‘
+echo [%date% %time%] BAT-O ½Ã±×³Î ¼º°úÃßÀû ½ÃÀÛ
 python -u -X utf8 scripts/cron_signal_tracker.py --mode track >> logs\signal_tracker.log 2>&1
-echo [%date% %time%] BAT-O ì‹œê·¸ë„ ì„±ê³¼ì¶”ì  ì™„ë£Œ
+echo [%date% %time%] BAT-O ½Ã±×³Î ¼º°úÃßÀû ¿Ï·á
 
 deactivate

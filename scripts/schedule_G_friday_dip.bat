@@ -1,26 +1,26 @@
 @echo off
 REM ============================================================
-REM BAT-G: ê¸ˆìš”ì¼ íˆ¬ë§¤ ì—­ë§¤ìˆ˜ ìŠ¤ìºë„ˆ
-REM ì‹¤í–‰: ë§¤ì£¼ ê¸ˆìš”ì¼ 14:00 (Windows ì‘ì—… ìŠ¤ì¼€ì¤„ëŸ¬)
+REM BAT-G: ±İ¿äÀÏ Åõ¸Å ¿ª¸Å¼ö ½ºÄ³³Ê
+REM ½ÇÇà: ¸ÅÁÖ ±İ¿äÀÏ 14:00 (Windows ÀÛ¾÷ ½ºÄÉÁÙ·¯)
 REM ============================================================
 
 chcp 65001 >nul
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
-REM ê¸ˆìš”ì¼ í™•ì¸ (schtasksì—ì„œ ì œì–´í•˜ì§€ë§Œ ì´ì¤‘ ì•ˆì „ì¥ì¹˜)
+REM ±İ¿äÀÏ È®ÀÎ (schtasks¿¡¼­ Á¦¾îÇÏÁö¸¸ ÀÌÁß ¾ÈÀüÀåÄ¡)
 for /f %%a in ('python -c "from datetime import date; print(date.today().weekday())"') do set DOW=%%a
 if NOT "%DOW%"=="4" (
-    echo [%date% %time%] BAT-G ìŠ¤í‚µ: ê¸ˆìš”ì¼ ì•„ë‹˜ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] BAT-G ½ºÅµ: ±İ¿äÀÏ ¾Æ´Ô >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
     goto :eof
 )
 
-echo [%date% %time%] BAT-G ì‹œì‘: ê¸ˆìš”ì¼ íˆ¬ë§¤ ìŠ¤ìºë„ˆ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-G ½ÃÀÛ: ±İ¿äÀÏ Åõ¸Å ½ºÄ³³Ê >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
-python -u -X utf8 scripts/friday_dip_scanner.py --scan --telegram >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log 2>&1
+python -u -X utf8 scripts/friday_dip_scanner.py --scan --telegram >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] [FAIL] BAT-G ê¸ˆìš”ì¼ íˆ¬ë§¤ ìŠ¤ìºë„ˆ ì‹¤íŒ¨ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] [FAIL] BAT-G ±İ¿äÀÏ Åõ¸Å ½ºÄ³³Ê ½ÇÆĞ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 )
 
-echo [%date% %time%] BAT-G ì™„ë£Œ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-G ¿Ï·á >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log

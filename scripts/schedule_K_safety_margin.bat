@@ -1,27 +1,27 @@
 @echo off
 chcp 65001 >nul
 REM ============================================================
-REM  Quantum Master - BAT-K: ì•ˆì „ë§ˆì§„ ì¼ì¼ ìŠ¤ìº”
-REM  ìŠ¤ì¼€ì¤„: ë§¤ì¼ 07:30 (ì›”~ê¸ˆ, BAT-B ë‹¤ìŒ)
-REM  ë“±ë¡: schtasks /create /tn "QM_K_SafetyMargin" /tr "D:\sub-agent-project_í€€íŠ¸ë´‡\scripts\schedule_K_safety_margin.bat" /sc daily /st 07:30
+REM  Quantum Master - BAT-K: ¾ÈÀü¸¶Áø ÀÏÀÏ ½ºÄµ
+REM  ½ºÄÉÁÙ: ¸ÅÀÏ 07:30 (¿ù~±İ, BAT-B ´ÙÀ½)
+REM  µî·Ï: schtasks /create /tn "QM_K_SafetyMargin" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_K_safety_margin.bat" /sc daily /st 07:30
 REM
-REM  ì»¨ì„¼ì„œìŠ¤ ê¸°ë°˜ GREEN/YELLOW íŒë³„ â†’ í…”ë ˆê·¸ë¨ ì•Œë¦¼
-REM  DART í´ë°± OFF, wisereport fetch_one í™œì„±
+REM  ÄÁ¼¾¼­½º ±â¹İ GREEN/YELLOW ÆÇº° ¡æ ÅÚ·¹±×·¥ ¾Ë¸²
+REM  DART Æú¹é OFF, wisereport fetch_one È°¼º
 REM ============================================================
 
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
-REM â”€â”€ ê±°ë˜ì¼ ê°€ë“œ (trading_calendar ì‚¬ìš©) â”€â”€
+REM ¦¡¦¡ °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë) ¦¡¦¡
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-K ìŠ¤í‚µ: ë¹„ê±°ë˜ì¼ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] BAT-K ½ºÅµ: ºñ°Å·¡ÀÏ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
     goto :eof
 )
 
-echo [%date% %time%] BAT-K ì‹œì‘: ì•ˆì „ë§ˆì§„ ìŠ¤ìº” >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-K ½ÃÀÛ: ¾ÈÀü¸¶Áø ½ºÄµ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
-python -u -X utf8 scripts\scan_safety_margin.py >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log 2>&1
+python -u -X utf8 scripts\scan_safety_margin.py >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log 2>&1
 
-echo [%date% %time%] BAT-K ì™„ë£Œ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-K ¿Ï·á >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log

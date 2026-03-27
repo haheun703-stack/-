@@ -1,28 +1,28 @@
 @echo off
 chcp 65001 >nul
 REM ============================================
-REM BAT-F: ìŠ¤ë‚˜ì´í¼ ì›Œì¹˜ ì¼ì¼ ìŠ¤ìº”
-REM ë§¤ì¼ 17:30 ì‹¤í–‰ (ì¥ë§ˆê° í›„)
-REM ë“±ë¡: schtasks /create /tn "QM_F_SniperWatch" /tr "D:\sub-agent-project_í€€íŠ¸ë´‡\scripts\schedule_F_sniper_watch.bat" /sc daily /st 17:30
+REM BAT-F: ½º³ªÀÌÆÛ ¿öÄ¡ ÀÏÀÏ ½ºÄµ
+REM ¸ÅÀÏ 17:30 ½ÇÇà (Àå¸¶°¨ ÈÄ)
+REM µî·Ï: schtasks /create /tn "QM_F_SniperWatch" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_F_sniper_watch.bat" /sc daily /st 17:30
 REM ============================================
 
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
-REM â”€â”€ ê±°ë˜ì¼ ê°€ë“œ (trading_calendar ì‚¬ìš©) â”€â”€
+REM ¦¡¦¡ °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë) ¦¡¦¡
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-F ìŠ¤í‚µ: ë¹„ê±°ë˜ì¼ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] BAT-F ½ºÅµ: ºñ°Å·¡ÀÏ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
     goto :eof
 )
 
-echo [%date% %time%] BAT-F ìŠ¤ë‚˜ì´í¼ ì›Œì¹˜ ì‹œì‘ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-F ½º³ªÀÌÆÛ ¿öÄ¡ ½ÃÀÛ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
-REM v13: --telegram ì œê±° â†’ ì €ë… í†µí•© ë¦¬í¬íŠ¸ì— í¡ìˆ˜ (JSONë§Œ ì €ì¥)
-python -u -X utf8 scripts/scan_value_trap.py >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log 2>&1
+REM v13: --telegram Á¦°Å ¡æ Àú³á ÅëÇÕ ¸®Æ÷Æ®¿¡ Èí¼ö (JSON¸¸ ÀúÀå)
+python -u -X utf8 scripts/scan_value_trap.py >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] BAT-F ìŠ¤ë‚˜ì´í¼ ì›Œì¹˜ ì‹¤íŒ¨ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] BAT-F ½º³ªÀÌÆÛ ¿öÄ¡ ½ÇÆĞ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 ) else (
-    echo [%date% %time%] BAT-F ìŠ¤ë‚˜ì´í¼ ì›Œì¹˜ ì™„ë£Œ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+    echo [%date% %time%] BAT-F ½º³ªÀÌÆÛ ¿öÄ¡ ¿Ï·á >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 )

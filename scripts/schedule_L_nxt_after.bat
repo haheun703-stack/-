@@ -1,55 +1,55 @@
 @echo off
 REM ============================================================
-REM  Quantum Master - BAT-L: NXT ì• í”„í„°ë§ˆì¼“ ë°ì´í„° ìˆ˜ì§‘
-REM  ìŠ¤ì¼€ì¤„: ë§¤ì¼ 15:35 (ì›”~ê¸ˆ, ìž¥ ë§ˆê° ì§í›„)
-REM  ë“±ë¡: schtasks /create /tn "QM_L_NXT_After" /tr "D:\sub-agent-project_í€€íŠ¸ë´‡\scripts\schedule_L_nxt_after.bat" /sc daily /st 15:35
+REM  Quantum Master - BAT-L: NXT ¾ÖÇÁÅÍ¸¶ÄÏ µ¥ÀÌÅÍ ¼öÁý
+REM  ½ºÄÉÁÙ: ¸ÅÀÏ 15:35 (¿ù~±Ý, Àå ¸¶°¨ Á÷ÈÄ)
+REM  µî·Ï: schtasks /create /tn "QM_L_NXT_After" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_L_nxt_after.bat" /sc daily /st 15:35
 REM
-REM  NXT ì• í”„í„°ë§ˆì¼“ (15:30~20:00) ì²´ê²°/ìˆ˜ê¸‰ ë°ì´í„° ìˆ˜ì§‘
-REM  ì¢…ë£Œ í›„ NXT ì‹œê·¸ë„ ë¶„ì„ + NXT ì¶”ì²œ ì—”ì§„
+REM  NXT ¾ÖÇÁÅÍ¸¶ÄÏ (15:30~20:00) Ã¼°á/¼ö±Þ µ¥ÀÌÅÍ ¼öÁý
+REM  Á¾·á ÈÄ NXT ½Ã±×³Î ºÐ¼® + NXT ÃßÃµ ¿£Áø
 REM ============================================================
 
-echo [%date% %time%] BAT-L ì‹œìž‘: NXT ì• í”„í„°ë§ˆì¼“ ìˆ˜ì§‘ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-L ½ÃÀÛ: NXT ¾ÖÇÁÅÍ¸¶ÄÏ ¼öÁý >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
-REM â”€â”€ ê±°ëž˜ì¼ ê°€ë“œ (trading_calendar ì‚¬ìš©) â”€â”€
+REM ¦¡¦¡ °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë) ¦¡¦¡
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-L ìŠ¤í‚µ: ë¹„ê±°ëž˜ì¼ >> logs\schedule.log
+    echo [%date% %time%] BAT-L ½ºÅµ: ºñ°Å·¡ÀÏ >> logs\schedule.log
     goto :eof
 )
 
 echo ========================================
-echo [QM-L] NXT ì• í”„í„°ë§ˆì¼“ ìˆ˜ì§‘ (15:35~20:00)
-echo   ìˆ˜ì§‘ ê°„ê²©: 10ë¶„
-echo   ì¢…ë£Œ í›„: NXT ì‹œê·¸ë„ ë¶„ì„ + ì¶”ì²œ ì—”ì§„
+echo [QM-L] NXT ¾ÖÇÁÅÍ¸¶ÄÏ ¼öÁý (15:35~20:00)
+echo   ¼öÁý °£°Ý: 10ºÐ
+echo   Á¾·á ÈÄ: NXT ½Ã±×³Î ºÐ¼® + ÃßÃµ ¿£Áø
 echo ========================================
 
-REM â”€â”€ 1ë‹¨ê³„: ì• í”„í„°ë§ˆì¼“ ë°ì´í„° ìˆ˜ì§‘ â”€â”€
-echo [%date% %time%] NXT ì• í”„í„°ë§ˆì¼“ ìˆ˜ì§‘ ì‹œìž‘ >> logs\schedule.log
+REM ¦¡¦¡ 1´Ü°è: ¾ÖÇÁÅÍ¸¶ÄÏ µ¥ÀÌÅÍ ¼öÁý ¦¡¦¡
+echo [%date% %time%] NXT ¾ÖÇÁÅÍ¸¶ÄÏ ¼öÁý ½ÃÀÛ >> logs\schedule.log
 python -u -X utf8 scripts/nxt_market_collector.py --session after >> logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] [FAIL] nxt_market_collector ì‹¤íŒ¨ (code=%ERRORLEVEL%) >> logs\schedule.log
+    echo [%date% %time%] [FAIL] nxt_market_collector ½ÇÆÐ (code=%ERRORLEVEL%) >> logs\schedule.log
 )
 
-REM â”€â”€ 2ë‹¨ê³„: NXT ì‹œê·¸ë„ ë¶„ì„ â”€â”€
-echo [%date% %time%] NXT ì‹œê·¸ë„ ë¶„ì„ ì‹œìž‘ >> logs\schedule.log
-python -u -X utf8 -c "import sys; sys.path.insert(0, 'D:\\sub-agent-project'); from src.use_cases.nxt_signal import NxtSignalAnalyzer; a = NxtSignalAnalyzer(); r = a.generate_signal(); print(f'NXT ì‹œê·¸ë„: STRONG_BUY={r[\"summary\"][\"after_strong_buy\"]}, BUY={r[\"summary\"][\"after_buy\"]}')" >> logs\schedule.log 2>&1
+REM ¦¡¦¡ 2´Ü°è: NXT ½Ã±×³Î ºÐ¼® ¦¡¦¡
+echo [%date% %time%] NXT ½Ã±×³Î ºÐ¼® ½ÃÀÛ >> logs\schedule.log
+python -u -X utf8 -c "import sys; sys.path.insert(0, 'D:\\sub-agent-project'); from src.use_cases.nxt_signal import NxtSignalAnalyzer; a = NxtSignalAnalyzer(); r = a.generate_signal(); print(f'NXT ½Ã±×³Î: STRONG_BUY={r[\"summary\"][\"after_strong_buy\"]}, BUY={r[\"summary\"][\"after_buy\"]}')" >> logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] [FAIL] nxt_signal ë¶„ì„ ì‹¤íŒ¨ (code=%ERRORLEVEL%) >> logs\schedule.log
+    echo [%date% %time%] [FAIL] nxt_signal ºÐ¼® ½ÇÆÐ (code=%ERRORLEVEL%) >> logs\schedule.log
 )
 
-REM â”€â”€ 3ë‹¨ê³„: NXT ì¶”ì²œ ì—”ì§„ (tomorrow_picks Ã— ì• í”„í„° ìˆ˜ê¸‰ êµì°¨) â”€â”€
-echo [%date% %time%] NXT ì¶”ì²œ ì—”ì§„ ì‹œìž‘ >> logs\schedule.log
+REM ¦¡¦¡ 3´Ü°è: NXT ÃßÃµ ¿£Áø (tomorrow_picks ¡¿ ¾ÖÇÁÅÍ ¼ö±Þ ±³Â÷) ¦¡¦¡
+echo [%date% %time%] NXT ÃßÃµ ¿£Áø ½ÃÀÛ >> logs\schedule.log
 python -u -X utf8 scripts/nxt_recommend.py >> logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] [FAIL] nxt_recommend ì‹¤íŒ¨ (code=%ERRORLEVEL%) >> logs\schedule.log
+    echo [%date% %time%] [FAIL] nxt_recommend ½ÇÆÐ (code=%ERRORLEVEL%) >> logs\schedule.log
 )
 
-echo [%date% %time%] BAT-L ì™„ë£Œ >> logs\schedule.log
+echo [%date% %time%] BAT-L ¿Ï·á >> logs\schedule.log
 echo ========================================
-echo [QM-L] ì™„ë£Œ
+echo [QM-L] ¿Ï·á
 echo ========================================

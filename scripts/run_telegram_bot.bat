@@ -1,25 +1,25 @@
 @echo off
 chcp 65001 >nul
-title Quantum Master â€” Telegram Bot
+title Quantum Master -- Telegram Bot
 color 0B
 
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 call venv\Scripts\activate.bat
 
 echo.
 echo  ====================================================
-echo   Quantum Master â€” í…”ë ˆê·¸ë¨ ëª…ë ¹ ë´‡ (ë…ë¦½ ì‹¤í–‰)
+echo   Quantum Master -- ÅÚ·¹±×·¥ ¸í·É º¿ (µ¶¸³ ½ÇÇà)
 echo  ====================================================
 echo.
-echo  í…”ë ˆê·¸ë¨ì—ì„œ /ì—°ê²° ì„ ë³´ë‚´ ì—°ê²°ì„ í™•ì¸í•˜ì„¸ìš”
-echo  ì¢…ë£Œ: Ctrl+C
-echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo  ÅÚ·¹±×·¥¿¡¼­ /¿¬°á À» º¸³» ¿¬°áÀ» È®ÀÎÇÏ¼¼¿ä
+echo  Á¾·á: Ctrl+C
+echo  ----------------------------------------
 echo.
 
 python -u -X utf8 src\telegram_command_handler.py
 
 echo.
-echo  [%date% %time%] ë´‡ ì¢…ë£Œë¨
+echo  [%date% %time%] º¿ Á¾·áµÊ
 echo.
 pause

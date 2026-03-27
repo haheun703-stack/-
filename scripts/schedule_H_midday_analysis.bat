@@ -1,36 +1,36 @@
 @echo off
 chcp 65001 >nul
 REM ============================================================
-REM  Quantum Master - BAT-H: 11:30 ìž¥ì¤‘ AI ë¶„ì„
-REM  ìŠ¤ì¼€ì¤„: ë§¤ì¼ 11:30 (ì›”~ê¸ˆ)
-REM  ë“±ë¡: schtasks /create /tn "QM_H_Midday" /tr "D:\sub-agent-project_í€€íŠ¸ë´‡\scripts\schedule_H_midday_analysis.bat" /sc daily /st 11:30
+REM  Quantum Master - BAT-H: 11:30 ÀåÁß AI ºÐ¼®
+REM  ½ºÄÉÁÙ: ¸ÅÀÏ 11:30 (¿ù~±Ý)
+REM  µî·Ï: schtasks /create /tn "QM_H_Midday" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_H_midday_analysis.bat" /sc daily /st 11:30
 REM
-REM  5ì¢…ëª© TradeAdvisor ë¶„ì„ â†’ í…”ë ˆê·¸ëž¨ ì „ì†¡
-REM  12:00 ë§¤ìˆ˜ íŒë‹¨ìš© ë°ì´í„° ì œê³µ
+REM  5Á¾¸ñ TradeAdvisor ºÐ¼® ¡æ ÅÚ·¹±×·¥ Àü¼Û
+REM  12:00 ¸Å¼ö ÆÇ´Ü¿ë µ¥ÀÌÅÍ Á¦°ø
 REM ============================================================
 
-echo [%date% %time%] BAT-H ì‹œìž‘: ìž¥ì¤‘ AI ë¶„ì„ >> D:\sub-agent-project_í€€íŠ¸ë´‡\logs\schedule.log
+echo [%date% %time%] BAT-H ½ÃÀÛ: ÀåÁß AI ºÐ¼® >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
 
-call D:\sub-agent-project_í€€íŠ¸ë´‡\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_í€€íŠ¸ë´‡
-set PYTHONPATH=D:\sub-agent-project_í€€íŠ¸ë´‡
+call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ÄöÆ®º¿
+set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
 
-REM â”€â”€ ê±°ëž˜ì¼ ê°€ë“œ (trading_calendar ì‚¬ìš©) â”€â”€
+REM ¦¡¦¡ °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë) ¦¡¦¡
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-H ìŠ¤í‚µ: ë¹„ê±°ëž˜ì¼ >> logs\schedule.log
+    echo [%date% %time%] BAT-H ½ºÅµ: ºñ°Å·¡ÀÏ >> logs\schedule.log
     goto :eof
 )
 
 echo ========================================
-echo [QM-H] 11:30 ìž¥ì¤‘ AI ë¶„ì„ (5ì¢…ëª©)
-echo   TradeAdvisor ë¶„ì„ â†’ í…”ë ˆê·¸ëž¨ ì „ì†¡
-echo   12:00 ë§¤ìˆ˜ íŒë‹¨ìš© ë°ì´í„°
+echo [QM-H] 11:30 ÀåÁß AI ºÐ¼® (5Á¾¸ñ)
+echo   TradeAdvisor ºÐ¼® ¡æ ÅÚ·¹±×·¥ Àü¼Û
+echo   12:00 ¸Å¼ö ÆÇ´Ü¿ë µ¥ÀÌÅÍ
 echo ========================================
 
 python -u -X utf8 scripts/run_midday_analysis.py >> logs\schedule.log 2>&1
 
-echo [%date% %time%] BAT-H Market Pulse ì‹œìž‘ >> logs\schedule.log
+echo [%date% %time%] BAT-H Market Pulse ½ÃÀÛ >> logs\schedule.log
 python -u -X utf8 scripts/market_pulse.py --no-send >> logs\schedule.log 2>&1
 
-echo [%date% %time%] BAT-H ì™„ë£Œ >> logs\schedule.log
+echo [%date% %time%] BAT-H ¿Ï·á >> logs\schedule.log
