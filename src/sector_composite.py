@@ -209,6 +209,63 @@ def compute_sector_composite() -> dict[str, Any]:
     return output
 
 
+# ── 섹터 부스트 승수 (SignalEngine 연동용) ──
+
+SECTOR_BOOST_MAP = {
+    "STRONG_ROTATION": 1.15,
+    "MODERATE_ROTATION": 1.05,
+    "NEUTRAL": 1.00,
+    "WEAK_ROTATION": 0.90,
+    "EXODUS": 0.75,
+}
+
+SECTOR_MAP_PATH = DATA_DIR / "sector_rotation" / "sector_map.json"
+
+
+def get_ticker_sector_boost() -> dict[str, dict]:
+    """종목코드 → {sector, regime, boost} 룩업 생성.
+
+    sector_map.json의 종목코드 → sector_composite.json의 레짐 매칭.
+
+    Returns:
+        {"005930": {"sector": "반도체", "regime": "WEAK_ROTATION", "boost": 0.90}, ...}
+    """
+    # sector_composite 로드
+    comp = _load_json(OUTPUT_PATH)
+    if not comp or "sectors" not in comp:
+        return {}
+
+    # 섹터명 → 레짐/부스트 매핑
+    regime_by_sector = {}
+    for s in comp["sectors"]:
+        regime_by_sector[s["sector"]] = {
+            "regime": s["regime"],
+            "boost": SECTOR_BOOST_MAP.get(s["regime"], 1.0),
+            "composite_score": s["composite_score"],
+        }
+
+    # sector_map에서 종목 → 섹터 역매핑
+    sector_map = _load_json(SECTOR_MAP_PATH)
+    if not sector_map:
+        return {}
+
+    result = {}
+    for sector_name, info in sector_map.items():
+        regime_info = regime_by_sector.get(sector_name)
+        if not regime_info:
+            continue
+        for stock in info.get("stocks", []):
+            code = stock.get("code", "")
+            if code and code not in result:
+                result[code] = {
+                    "sector": sector_name,
+                    "regime": regime_info["regime"],
+                    "boost": regime_info["boost"],
+                    "composite_score": regime_info["composite_score"],
+                }
+    return result
+
+
 # ── 단독 실행 ──
 if __name__ == "__main__":
     import sys

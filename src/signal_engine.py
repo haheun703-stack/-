@@ -1557,6 +1557,28 @@ class SignalEngine:
             except Exception as e:
                 logger.debug(f"{ticker} 시그널 실패: {e}")
 
+        # v14.0 TIER2: 섹터 컴포짓 부스트 — zone_score에 승수 적용
+        try:
+            from .sector_composite import get_ticker_sector_boost
+            boost_map = get_ticker_sector_boost()
+            if boost_map:
+                for sig in signals:
+                    info = boost_map.get(sig["ticker"])
+                    if info:
+                        orig = sig["zone_score"]
+                        sig["zone_score"] = min(1.0, orig * info["boost"])
+                        sig["sector_regime"] = info["regime"]
+                        sig["sector_boost"] = info["boost"]
+                        sig["sector_composite_score"] = info["composite_score"]
+                        if info["boost"] != 1.0:
+                            logger.debug(
+                                "%s sector_boost: %.2f→%.2f (×%.2f %s)",
+                                sig["ticker"], orig, sig["zone_score"],
+                                info["boost"], info["regime"],
+                            )
+        except Exception as e:
+            logger.debug("섹터 부스트 로드 실패 (정상 동작에 영향 없음): %s", e)
+
         signals.sort(key=lambda x: x["zone_score"], reverse=True)
 
         # v4.5: 섹터 제한 필터 (동일 섹터 최대 1종목)
