@@ -1,0 +1,973 @@
+{
+  "collected_at": "2026-03-27T09:50:05.132070",
+  "sector_count": 21,
+  "top_n": 2,
+  "sectors": {
+    "증권": {
+      "aggregate": {
+        "inst_net": 7950000000,
+        "foreign_net": -12102000000,
+        "inst_5d": -44852000000,
+        "inst_20d": 31329000000,
+        "foreign_5d": -72655000000,
+        "foreign_20d": -528306000000,
+        "inst_5d_억": -448.5,
+        "foreign_5d_억": -726.5,
+        "inst_20d_억": 313.3,
+        "foreign_20d_억": -5283.1,
+        "max_inst_consecutive": 1,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "006800": {
+          "inst_net": 16377000000,
+          "foreign_net": -23027000000,
+          "individual_net": 2059000000,
+          "inst_consecutive": 1,
+          "foreign_consecutive": 0,
+          "inst_5d": -21832000000,
+          "inst_20d": 33083000000,
+          "foreign_5d": -93049000000,
+          "foreign_20d": -385339000000,
+          "dual_buying_5d": false,
+          "name": "미래에셋증권"
+        },
+        "071050": {
+          "inst_net": -8427000000,
+          "foreign_net": 10925000000,
+          "individual_net": -2736000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 3,
+          "inst_5d": -23020000000,
+          "inst_20d": -1754000000,
+          "foreign_5d": 20394000000,
+          "foreign_20d": -142967000000,
+          "dual_buying_5d": false,
+          "name": "한국금융지주"
+        }
+      }
+    },
+    "은행": {
+      "aggregate": {
+        "inst_net": 32524000000,
+        "foreign_net": -25118000000,
+        "inst_5d": 70735000000,
+        "inst_20d": -32046000000,
+        "foreign_5d": -99178000000,
+        "foreign_20d": 26818000000,
+        "inst_5d_억": 707.4,
+        "foreign_5d_억": -991.8,
+        "inst_20d_억": -320.5,
+        "foreign_20d_억": 268.2,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 43.3
+      },
+      "stocks": {
+        "055550": {
+          "inst_net": 19046000000,
+          "foreign_net": -10721000000,
+          "individual_net": -8338000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 35221000000,
+          "inst_20d": -1381000000,
+          "foreign_5d": -38086000000,
+          "foreign_20d": 44222000000,
+          "dual_buying_5d": false,
+          "name": "신한지주"
+        },
+        "086790": {
+          "inst_net": 13478000000,
+          "foreign_net": -14397000000,
+          "individual_net": 893000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 35514000000,
+          "inst_20d": -30665000000,
+          "foreign_5d": -61092000000,
+          "foreign_20d": -17404000000,
+          "dual_buying_5d": false,
+          "name": "하나금융지주"
+        }
+      }
+    },
+    "반도체": {
+      "aggregate": {
+        "inst_net": -651843000000,
+        "foreign_net": -2817428000000,
+        "inst_5d": -2629042000000,
+        "inst_20d": -1004773000000,
+        "foreign_5d": -8333282000000,
+        "foreign_20d": -28089376000000,
+        "inst_5d_억": -26290.4,
+        "foreign_5d_억": -83332.8,
+        "inst_20d_억": -10047.7,
+        "foreign_20d_억": -280893.8,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "000660": {
+          "inst_net": -348275000000,
+          "foreign_net": -785430000000,
+          "individual_net": 1114180000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -206343000000,
+          "inst_20d": 866468000000,
+          "foreign_5d": -2363223000000,
+          "foreign_20d": -8498420000000,
+          "dual_buying_5d": false,
+          "name": "SK하이닉스"
+        },
+        "005930": {
+          "inst_net": -303568000000,
+          "foreign_net": -2031998000000,
+          "individual_net": 1985263000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2422699000000,
+          "inst_20d": -1871241000000,
+          "foreign_5d": -5970059000000,
+          "foreign_20d": -19590956000000,
+          "dual_buying_5d": false,
+          "name": "삼성전자"
+        }
+      }
+    },
+    "2차전지": {
+      "aggregate": {
+        "inst_net": -645000000,
+        "foreign_net": 36988000000,
+        "inst_5d": 4692000000,
+        "inst_20d": -194976000000,
+        "foreign_5d": 43767000000,
+        "foreign_20d": -108537000000,
+        "inst_5d_억": 46.9,
+        "foreign_5d_억": 437.7,
+        "inst_20d_억": -1949.8,
+        "foreign_20d_억": -1085.4,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 1,
+        "weighted_score": 100
+      },
+      "stocks": {
+        "006400": {
+          "inst_net": -3388000000,
+          "foreign_net": 23209000000,
+          "individual_net": -19977000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 3,
+          "inst_5d": 18836000000,
+          "inst_20d": -18547000000,
+          "foreign_5d": 25997000000,
+          "foreign_20d": -43540000000,
+          "dual_buying_5d": true,
+          "name": "삼성SDI"
+        },
+        "005490": {
+          "inst_net": 2743000000,
+          "foreign_net": 13779000000,
+          "individual_net": -16626000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 1,
+          "inst_5d": -14144000000,
+          "inst_20d": -176429000000,
+          "foreign_5d": 17770000000,
+          "foreign_20d": -64997000000,
+          "dual_buying_5d": false,
+          "name": "POSCO홀딩스"
+        }
+      }
+    },
+    "바이오": {
+      "aggregate": {
+        "inst_net": 53614000000,
+        "foreign_net": -63496000000,
+        "inst_5d": 33281000000,
+        "inst_20d": -121889000000,
+        "foreign_5d": -5603000000,
+        "foreign_20d": 406553000000,
+        "inst_5d_억": 332.8,
+        "foreign_5d_억": -56.0,
+        "inst_20d_억": -1218.9,
+        "foreign_20d_억": 4065.5,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 1,
+        "weighted_score": 88.5
+      },
+      "stocks": {
+        "068270": {
+          "inst_net": 15582000000,
+          "foreign_net": 6243000000,
+          "individual_net": -21454000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 3,
+          "inst_5d": 12151000000,
+          "inst_20d": -126148000000,
+          "foreign_5d": 9178000000,
+          "foreign_20d": 288978000000,
+          "dual_buying_5d": true,
+          "name": "셀트리온"
+        },
+        "196170": {
+          "inst_net": 38032000000,
+          "foreign_net": -69739000000,
+          "individual_net": 29687000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 21130000000,
+          "inst_20d": 4259000000,
+          "foreign_5d": -14781000000,
+          "foreign_20d": 117575000000,
+          "dual_buying_5d": false,
+          "name": "알테오젠"
+        }
+      }
+    },
+    "헬스케어": {
+      "aggregate": {
+        "inst_net": 23496000000,
+        "foreign_net": 4580000000,
+        "inst_5d": 16295000000,
+        "inst_20d": -219593000000,
+        "foreign_5d": 8822000000,
+        "foreign_20d": 398261000000,
+        "inst_5d_억": 162.9,
+        "foreign_5d_억": 88.2,
+        "inst_20d_억": -2195.9,
+        "foreign_20d_억": 3982.6,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 1,
+        "weighted_score": 100
+      },
+      "stocks": {
+        "068270": {
+          "inst_net": 15582000000,
+          "foreign_net": 6243000000,
+          "individual_net": -21454000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 3,
+          "inst_5d": 12151000000,
+          "inst_20d": -126148000000,
+          "foreign_5d": 9178000000,
+          "foreign_20d": 288978000000,
+          "dual_buying_5d": true,
+          "name": "셀트리온"
+        },
+        "207940": {
+          "inst_net": 7914000000,
+          "foreign_net": -1663000000,
+          "individual_net": -5248000000,
+          "inst_consecutive": 2,
+          "foreign_consecutive": 0,
+          "inst_5d": 4144000000,
+          "inst_20d": -93445000000,
+          "foreign_5d": -356000000,
+          "foreign_20d": 109283000000,
+          "dual_buying_5d": false,
+          "name": "삼성바이오로직스"
+        }
+      }
+    },
+    "IT": {
+      "aggregate": {
+        "inst_net": -651843000000,
+        "foreign_net": -2817428000000,
+        "inst_5d": -2629042000000,
+        "inst_20d": -1004773000000,
+        "foreign_5d": -8333282000000,
+        "foreign_20d": -28089376000000,
+        "inst_5d_억": -26290.4,
+        "foreign_5d_억": -83332.8,
+        "inst_20d_억": -10047.7,
+        "foreign_20d_억": -280893.8,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "005930": {
+          "inst_net": -303568000000,
+          "foreign_net": -2031998000000,
+          "individual_net": 1985263000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2422699000000,
+          "inst_20d": -1871241000000,
+          "foreign_5d": -5970059000000,
+          "foreign_20d": -19590956000000,
+          "dual_buying_5d": false,
+          "name": "삼성전자"
+        },
+        "000660": {
+          "inst_net": -348275000000,
+          "foreign_net": -785430000000,
+          "individual_net": 1114180000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -206343000000,
+          "inst_20d": 866468000000,
+          "foreign_5d": -2363223000000,
+          "foreign_20d": -8498420000000,
+          "dual_buying_5d": false,
+          "name": "SK하이닉스"
+        }
+      }
+    },
+    "건설": {
+      "aggregate": {
+        "inst_net": -13141000000,
+        "foreign_net": -13220000000,
+        "inst_5d": -34262000000,
+        "inst_20d": -248510000000,
+        "foreign_5d": -118991000000,
+        "foreign_20d": -27894000000,
+        "inst_5d_억": -342.6,
+        "foreign_5d_억": -1189.9,
+        "inst_20d_억": -2485.1,
+        "foreign_20d_억": -278.9,
+        "max_inst_consecutive": 2,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "000720": {
+          "inst_net": 1195000000,
+          "foreign_net": -2799000000,
+          "individual_net": 1695000000,
+          "inst_consecutive": 2,
+          "foreign_consecutive": 0,
+          "inst_5d": -39569000000,
+          "inst_20d": -206812000000,
+          "foreign_5d": -32414000000,
+          "foreign_20d": 82477000000,
+          "dual_buying_5d": false,
+          "name": "현대건설"
+        },
+        "028260": {
+          "inst_net": -14336000000,
+          "foreign_net": -10421000000,
+          "individual_net": 24398000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": 5307000000,
+          "inst_20d": -41698000000,
+          "foreign_5d": -86577000000,
+          "foreign_20d": -110371000000,
+          "dual_buying_5d": false,
+          "name": "삼성물산"
+        }
+      }
+    },
+    "금융": {
+      "aggregate": {
+        "inst_net": 53642000000,
+        "foreign_net": -33545000000,
+        "inst_5d": 160502000000,
+        "inst_20d": 272183000000,
+        "foreign_5d": -183792000000,
+        "foreign_20d": -284636000000,
+        "inst_5d_억": 1605.0,
+        "foreign_5d_억": -1837.9,
+        "inst_20d_억": 2721.8,
+        "foreign_20d_억": -2846.4,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 47.3
+      },
+      "stocks": {
+        "105560": {
+          "inst_net": 34596000000,
+          "foreign_net": -22824000000,
+          "individual_net": -11821000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 125281000000,
+          "inst_20d": 273564000000,
+          "foreign_5d": -145706000000,
+          "foreign_20d": -328858000000,
+          "dual_buying_5d": false,
+          "name": "KB금융"
+        },
+        "055550": {
+          "inst_net": 19046000000,
+          "foreign_net": -10721000000,
+          "individual_net": -8338000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 35221000000,
+          "inst_20d": -1381000000,
+          "foreign_5d": -38086000000,
+          "foreign_20d": 44222000000,
+          "dual_buying_5d": false,
+          "name": "신한지주"
+        }
+      }
+    },
+    "에너지화학": {
+      "aggregate": {
+        "inst_net": -2264000000,
+        "foreign_net": 23197000000,
+        "inst_5d": -3815000000,
+        "inst_20d": -163215000000,
+        "foreign_5d": 57706000000,
+        "foreign_20d": 42900000000,
+        "inst_5d_억": -38.1,
+        "foreign_5d_억": 577.1,
+        "inst_20d_억": -1632.2,
+        "foreign_20d_억": 429.0,
+        "max_inst_consecutive": 1,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 1,
+        "weighted_score": 95.0
+      },
+      "stocks": {
+        "034730": {
+          "inst_net": 1929000000,
+          "foreign_net": 12331000000,
+          "individual_net": -14064000000,
+          "inst_consecutive": 1,
+          "foreign_consecutive": 2,
+          "inst_5d": -11155000000,
+          "inst_20d": -53511000000,
+          "foreign_5d": 44161000000,
+          "foreign_20d": -1373000000,
+          "dual_buying_5d": false,
+          "name": "SK"
+        },
+        "051910": {
+          "inst_net": -4193000000,
+          "foreign_net": 10866000000,
+          "individual_net": -7165000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 3,
+          "inst_5d": 7340000000,
+          "inst_20d": -109704000000,
+          "foreign_5d": 13545000000,
+          "foreign_20d": 44273000000,
+          "dual_buying_5d": true,
+          "name": "LG화학"
+        }
+      }
+    },
+    "철강소재": {
+      "aggregate": {
+        "inst_net": -290000000,
+        "foreign_net": 12338000000,
+        "inst_5d": -46276000000,
+        "inst_20d": -255441000000,
+        "foreign_5d": 7726000000,
+        "foreign_20d": -160829000000,
+        "inst_5d_억": -462.8,
+        "foreign_5d_억": 77.3,
+        "inst_20d_억": -2554.4,
+        "foreign_20d_억": -1608.3,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 1,
+        "dual_buying_stocks": 0,
+        "weighted_score": 21.4
+      },
+      "stocks": {
+        "010130": {
+          "inst_net": -3033000000,
+          "foreign_net": -1441000000,
+          "individual_net": 4377000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -32132000000,
+          "inst_20d": -79012000000,
+          "foreign_5d": -10044000000,
+          "foreign_20d": -95832000000,
+          "dual_buying_5d": false,
+          "name": "고려아연"
+        },
+        "005490": {
+          "inst_net": 2743000000,
+          "foreign_net": 13779000000,
+          "individual_net": -16626000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 1,
+          "inst_5d": -14144000000,
+          "inst_20d": -176429000000,
+          "foreign_5d": 17770000000,
+          "foreign_20d": -64997000000,
+          "dual_buying_5d": false,
+          "name": "POSCO홀딩스"
+        }
+      }
+    },
+    "소프트웨어": {
+      "aggregate": {
+        "inst_net": -10853000000,
+        "foreign_net": 17742000000,
+        "inst_5d": -63364000000,
+        "inst_20d": -278308000000,
+        "foreign_5d": -41858000000,
+        "foreign_20d": -271778000000,
+        "inst_5d_억": -633.6,
+        "foreign_5d_억": -418.6,
+        "inst_20d_억": -2783.1,
+        "foreign_20d_억": -2717.8,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 3,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "035420": {
+          "inst_net": -10548000000,
+          "foreign_net": 2990000000,
+          "individual_net": 6223000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 1,
+          "inst_5d": -42816000000,
+          "inst_20d": -266029000000,
+          "foreign_5d": -30599000000,
+          "foreign_20d": -296254000000,
+          "dual_buying_5d": false,
+          "name": "NAVER"
+        },
+        "035720": {
+          "inst_net": -305000000,
+          "foreign_net": 14752000000,
+          "individual_net": -14182000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 3,
+          "inst_5d": -20548000000,
+          "inst_20d": -12279000000,
+          "foreign_5d": -11259000000,
+          "foreign_20d": 24476000000,
+          "dual_buying_5d": false,
+          "name": "카카오"
+        }
+      }
+    },
+    "미디어": {
+      "aggregate": {
+        "inst_net": 21482000000,
+        "foreign_net": 1058000000,
+        "inst_5d": -78933000000,
+        "inst_20d": -232345000000,
+        "foreign_5d": -78177000000,
+        "foreign_20d": -73853000000,
+        "inst_5d_억": -789.3,
+        "foreign_5d_억": -781.8,
+        "inst_20d_억": -2323.4,
+        "foreign_20d_억": -738.5,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 1,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "035760": {
+          "inst_net": -238000000,
+          "foreign_net": -465000000,
+          "individual_net": 701000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2782000000,
+          "inst_20d": -4868000000,
+          "foreign_5d": -1899000000,
+          "foreign_20d": -4459000000,
+          "dual_buying_5d": false,
+          "name": "CJ ENM"
+        },
+        "352820": {
+          "inst_net": 21720000000,
+          "foreign_net": 1523000000,
+          "individual_net": -23364000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 1,
+          "inst_5d": -76151000000,
+          "inst_20d": -227477000000,
+          "foreign_5d": -76278000000,
+          "foreign_20d": -69394000000,
+          "dual_buying_5d": false,
+          "name": "하이브"
+        }
+      }
+    },
+    "게임": {
+      "aggregate": {
+        "inst_net": -4278000000,
+        "foreign_net": -23080000000,
+        "inst_5d": -14709000000,
+        "inst_20d": -30818000000,
+        "foreign_5d": 26823000000,
+        "foreign_20d": -41286000000,
+        "inst_5d_억": -147.1,
+        "foreign_5d_억": 268.2,
+        "inst_20d_억": -308.2,
+        "foreign_20d_억": -412.9,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 61.7
+      },
+      "stocks": {
+        "263750": {
+          "inst_net": -4470000000,
+          "foreign_net": -22843000000,
+          "individual_net": 27391000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -17832000000,
+          "inst_20d": -42180000000,
+          "foreign_5d": 29214000000,
+          "foreign_20d": -21784000000,
+          "dual_buying_5d": false,
+          "name": "펄어비스"
+        },
+        "251270": {
+          "inst_net": 192000000,
+          "foreign_net": -237000000,
+          "individual_net": 60000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 3123000000,
+          "inst_20d": 11362000000,
+          "foreign_5d": -2391000000,
+          "foreign_20d": -19502000000,
+          "dual_buying_5d": false,
+          "name": "넷마블"
+        }
+      }
+    },
+    "인터넷": {
+      "aggregate": {
+        "inst_net": -10855000000,
+        "foreign_net": 2844000000,
+        "inst_5d": -15773000000,
+        "inst_20d": -10451000000,
+        "foreign_5d": -65159000000,
+        "foreign_20d": -407730000000,
+        "inst_5d_억": -157.7,
+        "foreign_5d_억": -651.6,
+        "inst_20d_억": -104.5,
+        "foreign_20d_억": -4077.3,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 1,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "012510": {
+          "inst_net": -307000000,
+          "foreign_net": -146000000,
+          "individual_net": 453000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": 27043000000,
+          "inst_20d": 255578000000,
+          "foreign_5d": -34560000000,
+          "foreign_20d": -111476000000,
+          "dual_buying_5d": false,
+          "name": "더존비즈온"
+        },
+        "035420": {
+          "inst_net": -10548000000,
+          "foreign_net": 2990000000,
+          "individual_net": 6223000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 1,
+          "inst_5d": -42816000000,
+          "inst_20d": -266029000000,
+          "foreign_5d": -30599000000,
+          "foreign_20d": -296254000000,
+          "dual_buying_5d": false,
+          "name": "NAVER"
+        }
+      }
+    },
+    "방산": {
+      "aggregate": {
+        "inst_net": 22883000000,
+        "foreign_net": 19470000000,
+        "inst_5d": 18002000000,
+        "inst_20d": 74241000000,
+        "foreign_5d": 60830000000,
+        "foreign_20d": 263614000000,
+        "inst_5d_억": 180.0,
+        "foreign_5d_억": 608.3,
+        "inst_20d_억": 742.4,
+        "foreign_20d_억": 2636.1,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 4,
+        "dual_buying_stocks": 1,
+        "weighted_score": 100
+      },
+      "stocks": {
+        "047810": {
+          "inst_net": 13361000000,
+          "foreign_net": -7913000000,
+          "individual_net": -5883000000,
+          "inst_consecutive": 1,
+          "foreign_consecutive": 0,
+          "inst_5d": -18805000000,
+          "inst_20d": -21855000000,
+          "foreign_5d": -29394000000,
+          "foreign_20d": 1096000000,
+          "dual_buying_5d": false,
+          "name": "한국항공우주"
+        },
+        "012450": {
+          "inst_net": 9522000000,
+          "foreign_net": 27383000000,
+          "individual_net": -36650000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 4,
+          "inst_5d": 36807000000,
+          "inst_20d": 96096000000,
+          "foreign_5d": 90224000000,
+          "foreign_20d": 262518000000,
+          "dual_buying_5d": true,
+          "name": "한화에어로스페이스"
+        }
+      }
+    },
+    "조선": {
+      "aggregate": {
+        "inst_net": 20165000000,
+        "foreign_net": -27961000000,
+        "inst_5d": -37361000000,
+        "inst_20d": -193024000000,
+        "foreign_5d": -128178000000,
+        "foreign_20d": 284138000000,
+        "inst_5d_억": -373.6,
+        "foreign_5d_억": -1281.8,
+        "inst_20d_억": -1930.2,
+        "foreign_20d_억": 2841.4,
+        "max_inst_consecutive": 3,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "042660": {
+          "inst_net": 17630000000,
+          "foreign_net": -13598000000,
+          "individual_net": -4191000000,
+          "inst_consecutive": 3,
+          "foreign_consecutive": 0,
+          "inst_5d": 16940000000,
+          "inst_20d": -60877000000,
+          "foreign_5d": -41917000000,
+          "foreign_20d": 41007000000,
+          "dual_buying_5d": false,
+          "name": "한화오션"
+        },
+        "329180": {
+          "inst_net": 2535000000,
+          "foreign_net": -14363000000,
+          "individual_net": 13112000000,
+          "inst_consecutive": 1,
+          "foreign_consecutive": 0,
+          "inst_5d": -54301000000,
+          "inst_20d": -132147000000,
+          "foreign_5d": -86261000000,
+          "foreign_20d": 243131000000,
+          "dual_buying_5d": false,
+          "name": "HD현대중공업"
+        }
+      }
+    },
+    "삼성그룹": {
+      "aggregate": {
+        "inst_net": -317904000000,
+        "foreign_net": -2042419000000,
+        "inst_5d": -2417392000000,
+        "inst_20d": -1912939000000,
+        "foreign_5d": -6056636000000,
+        "foreign_20d": -19701327000000,
+        "inst_5d_억": -24173.9,
+        "foreign_5d_억": -60566.4,
+        "inst_20d_억": -19129.4,
+        "foreign_20d_억": -197013.3,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "005930": {
+          "inst_net": -303568000000,
+          "foreign_net": -2031998000000,
+          "individual_net": 1985263000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2422699000000,
+          "inst_20d": -1871241000000,
+          "foreign_5d": -5970059000000,
+          "foreign_20d": -19590956000000,
+          "dual_buying_5d": false,
+          "name": "삼성전자"
+        },
+        "028260": {
+          "inst_net": -14336000000,
+          "foreign_net": -10421000000,
+          "individual_net": 24398000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": 5307000000,
+          "inst_20d": -41698000000,
+          "foreign_5d": -86577000000,
+          "foreign_20d": -110371000000,
+          "dual_buying_5d": false,
+          "name": "삼성물산"
+        }
+      }
+    },
+    "현대차그룹": {
+      "aggregate": {
+        "inst_net": -7178000000,
+        "foreign_net": -64541000000,
+        "inst_5d": -89199000000,
+        "inst_20d": -248165000000,
+        "foreign_5d": -1023428000000,
+        "foreign_20d": -3804317000000,
+        "inst_5d_억": -892.0,
+        "foreign_5d_억": -10234.3,
+        "inst_20d_억": -2481.7,
+        "foreign_20d_억": -38043.2,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 1,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "005380": {
+          "inst_net": -4926000000,
+          "foreign_net": -72414000000,
+          "individual_net": 77248000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -84342000000,
+          "inst_20d": -481788000000,
+          "foreign_5d": -773471000000,
+          "foreign_20d": -2726395000000,
+          "dual_buying_5d": false,
+          "name": "현대차"
+        },
+        "000270": {
+          "inst_net": -2252000000,
+          "foreign_net": 7873000000,
+          "individual_net": -5388000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 1,
+          "inst_5d": -4857000000,
+          "inst_20d": 233623000000,
+          "foreign_5d": -249957000000,
+          "foreign_20d": -1077922000000,
+          "dual_buying_5d": false,
+          "name": "기아"
+        }
+      }
+    },
+    "KRX300": {
+      "aggregate": {
+        "inst_net": -651843000000,
+        "foreign_net": -2817428000000,
+        "inst_5d": -2629042000000,
+        "inst_20d": -1004773000000,
+        "foreign_5d": -8333282000000,
+        "foreign_20d": -28089376000000,
+        "inst_5d_억": -26290.4,
+        "foreign_5d_억": -83332.8,
+        "inst_20d_억": -10047.7,
+        "foreign_20d_억": -280893.8,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "005930": {
+          "inst_net": -303568000000,
+          "foreign_net": -2031998000000,
+          "individual_net": 1985263000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2422699000000,
+          "inst_20d": -1871241000000,
+          "foreign_5d": -5970059000000,
+          "foreign_20d": -19590956000000,
+          "dual_buying_5d": false,
+          "name": "삼성전자"
+        },
+        "000660": {
+          "inst_net": -348275000000,
+          "foreign_net": -785430000000,
+          "individual_net": 1114180000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -206343000000,
+          "inst_20d": 866468000000,
+          "foreign_5d": -2363223000000,
+          "foreign_20d": -8498420000000,
+          "dual_buying_5d": false,
+          "name": "SK하이닉스"
+        }
+      }
+    },
+    "코리아TOP10": {
+      "aggregate": {
+        "inst_net": -651843000000,
+        "foreign_net": -2817428000000,
+        "inst_5d": -2629042000000,
+        "inst_20d": -1004773000000,
+        "foreign_5d": -8333282000000,
+        "foreign_20d": -28089376000000,
+        "inst_5d_억": -26290.4,
+        "foreign_5d_억": -83332.8,
+        "inst_20d_억": -10047.7,
+        "foreign_20d_억": -280893.8,
+        "max_inst_consecutive": 0,
+        "max_foreign_consecutive": 0,
+        "dual_buying_stocks": 0,
+        "weighted_score": 10.0
+      },
+      "stocks": {
+        "000660": {
+          "inst_net": -348275000000,
+          "foreign_net": -785430000000,
+          "individual_net": 1114180000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -206343000000,
+          "inst_20d": 866468000000,
+          "foreign_5d": -2363223000000,
+          "foreign_20d": -8498420000000,
+          "dual_buying_5d": false,
+          "name": "SK하이닉스"
+        },
+        "005930": {
+          "inst_net": -303568000000,
+          "foreign_net": -2031998000000,
+          "individual_net": 1985263000000,
+          "inst_consecutive": 0,
+          "foreign_consecutive": 0,
+          "inst_5d": -2422699000000,
+          "inst_20d": -1871241000000,
+          "foreign_5d": -5970059000000,
+          "foreign_20d": -19590956000000,
+          "dual_buying_5d": false,
+          "name": "삼성전자"
+        }
+      }
+    }
+  }
+}

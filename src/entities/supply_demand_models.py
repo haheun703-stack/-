@@ -156,6 +156,67 @@ class InvestorFlowData:
 
 
 # ═══════════════════════════════════════════════════
+# Layer 5-B: 기관 유형별 세분화 수급 (TIER2)
+# ═══════════════════════════════════════════════════
+@dataclass
+class InstitutionalDetailData:
+    """기관 유형별 세분화 수급 데이터
+
+    PyKRX get_market_trading_value_by_date() 컬럼 매핑:
+      금융투자 → securities_net
+      보험     → insurance_net
+      투신     → asset_mgmt_net
+      사모     → private_equity_net
+      은행     → bank_net
+      기타금융 → other_financial_net
+      연기금등 → pension_net
+    """
+
+    ticker: str
+    date: str
+
+    # 기관 유형별 당일 순매수 (원)
+    securities_net: int = 0       # 금융투자 (증권사 자기매매+HFT)
+    insurance_net: int = 0        # 보험
+    asset_mgmt_net: int = 0       # 투신 (자산운용사)
+    private_equity_net: int = 0   # 사모
+    bank_net: int = 0             # 은행
+    other_financial_net: int = 0  # 기타금융
+    pension_net: int = 0          # 연기금등
+
+    # 연기금 연속 순매수 일수
+    pension_consecutive_days: int = 0
+    # 연기금 누적 순매수
+    pension_cumulative_5d: int = 0
+    pension_cumulative_20d: int = 0
+    # 보험/투신 5일 누적
+    insurance_cumulative_5d: int = 0
+    asset_mgmt_cumulative_5d: int = 0
+
+    # 스마트머니 지수: (연기금+보험) / |기관합계| (0~1)
+    smart_money_ratio: float = 0.0
+
+    def to_dict(self) -> dict:
+        return {
+            "ticker": self.ticker,
+            "date": self.date,
+            "securities_net": self.securities_net,
+            "insurance_net": self.insurance_net,
+            "asset_mgmt_net": self.asset_mgmt_net,
+            "private_equity_net": self.private_equity_net,
+            "bank_net": self.bank_net,
+            "other_financial_net": self.other_financial_net,
+            "pension_net": self.pension_net,
+            "pension_consecutive_days": self.pension_consecutive_days,
+            "pension_cumulative_5d": self.pension_cumulative_5d,
+            "pension_cumulative_20d": self.pension_cumulative_20d,
+            "insurance_cumulative_5d": self.insurance_cumulative_5d,
+            "asset_mgmt_cumulative_5d": self.asset_mgmt_cumulative_5d,
+            "smart_money_ratio": self.smart_money_ratio,
+        }
+
+
+# ═══════════════════════════════════════════════════
 # Layer 6: 옵션/선물 이상 신호 (Phase 2)
 # ═══════════════════════════════════════════════════
 @dataclass

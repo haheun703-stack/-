@@ -21,10 +21,22 @@ from pathlib import Path
 import pandas as pd
 
 from src.entities.supply_demand_models import (
+    InstitutionalDetailData,
     InvestorFlowData,
     ProgramTradingData,
     ShortSellingData,
 )
+
+# PyKRX 컬럼명 → 모델 필드 매핑
+_INST_COL_MAP = {
+    "금융투자": "securities_net",
+    "보험": "insurance_net",
+    "투신": "asset_mgmt_net",
+    "사모": "private_equity_net",
+    "은행": "bank_net",
+    "기타금융": "other_financial_net",
+    "연기금등": "pension_net",
+}
 
 # KIS API fallback (pykrx 수급 장애 대비)
 try:
@@ -214,6 +226,78 @@ class PykrxSupplyAdapter:
 
         except Exception as e:
             logger.warning(f"[{ticker}] 투자자별 매매동향 파싱 실패: {e}")
+
+        return result
+
+    # ─────────────────────────────────────────
+    # Layer 5-B: 기관 유형별 세분화 (TIER2)
+    # ─────────────────────────────────────────
+    def fetch_institutional_detail(self, ticker: str) -> InstitutionalDetailData:
+        """기관 유형별(금투/보험/투신/사모/은행/기타금융/연기금) 세분화 수급.
+
+        PyKRX get_market_trading_value_by_date()는 기본적으로
+        금융투자, 보험, 투신, 사모, 은행, 기타금융, 연기금등 컬럼을 반환한다.
+        """
+        start, end = self._date_range(days=30)
+        today = datetime.today().strftime("%Y%m%d")
+
+        result = InstitutionalDetailData(ticker=ticker, date=today)
+
+        try:
+            stock = self._ensure_pykrx()
+            inv_df = stock.get_market_trading_value_by_date(start, end, ticker)
+            if inv_df is None or inv_df.empty:
+                return result
+        except Exception as e:
+            logger.debug(f"[{ticker}] 기관 세분화 수급 실패: {e}")
+            return result
+
+        try:
+            latest = inv_df.iloc[-1]
+
+            # 당일 기관 유형별 순매수
+            for col, attr in _INST_COL_MAP.items():
+                if col in inv_df.columns:
+                    setattr(result, attr, int(latest.get(col, 0)))
+
+            # 연기금 연속 순매수 일수
+            if "연기금등" in inv_df.columns:
+                pension_series = inv_df["연기금등"]
+                consecutive = 0
+                for val in reversed(pension_series.values):
+                    if val > 0:
+                        consecutive += 1
+                    else:
+                        break
+                result.pension_consecutive_days = consecutive
+
+                # 연기금 5/20일 누적
+                if len(inv_df) >= 5:
+                    result.pension_cumulative_5d = int(pension_series.tail(5).sum())
+                if len(inv_df) >= 20:
+                    result.pension_cumulative_20d = int(pension_series.tail(20).sum())
+
+            # 보험 5일 누적
+            if "보험" in inv_df.columns and len(inv_df) >= 5:
+                result.insurance_cumulative_5d = int(
+                    inv_df["보험"].tail(5).sum()
+                )
+
+            # 투신 5일 누적
+            if "투신" in inv_df.columns and len(inv_df) >= 5:
+                result.asset_mgmt_cumulative_5d = int(
+                    inv_df["투신"].tail(5).sum()
+                )
+
+            # 스마트머니 비율: (연기금+보험) / |기관합계|
+            if "기관합계" in inv_df.columns:
+                inst_total = abs(int(latest.get("기관합계", 0)))
+                if inst_total > 0:
+                    smart = abs(result.pension_net) + abs(result.insurance_net)
+                    result.smart_money_ratio = round(min(smart / inst_total, 1.0), 3)
+
+        except Exception as e:
+            logger.warning(f"[{ticker}] 기관 세분화 파싱 실패: {e}")
 
         return result
 
