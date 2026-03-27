@@ -1412,8 +1412,13 @@ def get_parquet_data(ticker: str) -> dict | None:
 def classify_pick(
     total_score: float, n_sources: int, rsi: float,
     has_data: bool = True, stoch_k: float = 50, ret_5d: float = 0,
+    foreign_5d: float = 0, inst_5d: float = 0,
 ) -> str:
-    """등급 분류 — 하드 필터 포함 (v4)
+    """등급 분류 — 수급 게이트 + 하드 필터 (v5)
+
+    수급 게이트 (v5 신규):
+      - 외인+기관 동시 대량매도 → 최대 "보류" (어떤 테마도 수급 역행 불가)
+      - 외인+기관 동시 순매도 → 최대 "관찰" (수급 확인 전까지 대기)
 
     하드 디스퀄:
       - parquet 데이터 없음 → 데이터부족
@@ -1424,6 +1429,17 @@ def classify_pick(
     if not has_data:
         return "데이터부족"
 
+    # ── v5 수급 게이트: 수급이 1순위 필터 ──
+    # 외인+기관 동시 대량매도 (각 -500억 이상) → 즉시 보류
+    HEAVY_SELL = -50_000_000_000  # -500억
+    if foreign_5d < HEAVY_SELL and inst_5d < HEAVY_SELL:
+        return "보류"
+
+    # 외인+기관 동시 순매도 → 최대 관찰 (수급 역행)
+    flow_cap = None
+    if foreign_5d < 0 and inst_5d < 0:
+        flow_cap = "관찰"
+
     # 하드 디스퀄: 극과열/추격매수는 관찰 이상 불가
     is_disqualified = stoch_k >= 90 or ret_5d >= 15 or rsi >= 78
 
@@ -1431,14 +1447,24 @@ def classify_pick(
         return "관찰" if total_score >= 40 else "보류"
 
     if total_score >= 70 and n_sources >= 2:
-        return "적극매수"
-    if total_score >= 60 and n_sources >= 2:
-        return "매수"
-    if total_score >= 55:
-        return "관심매수"
-    if total_score >= 40:
-        return "관찰"
-    return "보류"
+        grade = "적극매수"
+    elif total_score >= 60 and n_sources >= 2:
+        grade = "매수"
+    elif total_score >= 55:
+        grade = "관심매수"
+    elif total_score >= 40:
+        grade = "관찰"
+    else:
+        grade = "보류"
+
+    # 수급 캡 적용: 수급 역행이면 관찰까지만
+    if flow_cap:
+        grade_order = {"보류": 0, "데이터부족": 0, "관찰": 1, "관심매수": 2, "매수": 3, "적극매수": 4}
+        cap_level = grade_order.get(flow_cap, 1)
+        if grade_order.get(grade, 0) > cap_level:
+            grade = flow_cap
+
+    return grade
 
 
 # ──────────────────────────────────────────
@@ -2040,6 +2066,8 @@ def main():
             has_data=has_data,
             stoch_k=score_detail.get("stoch_k", 50),
             ret_5d=score_detail.get("ret_5d", 0),
+            foreign_5d=score_detail.get("foreign_5d", 0),
+            inst_5d=score_detail.get("inst_5d", 0),
         )
 
         entry_info = score_detail.get("entry_info", {})
@@ -2379,12 +2407,24 @@ def main():
         print(f"{'─'*60}")
 
     # ── AI 대형주 참고 섹션: AI BUY인데 TOP/관심에 없는 종목 ──
+    # v5: 수급 검증 추가 — AI가 추천해도 수급 역행이면 경고 태그
     ai_largecap = []
     if ai_brain_judgments:
         used_all = top5_tickers | {w["ticker"] for w in watchlist5}
         for t, j in ai_brain_judgments.items():
             if j.get("action") != "BUY" or t in used_all:
                 continue
+            # v5: parquet에서 수급 데이터 조회
+            pq = get_parquet_data(t)
+            f5d = pq.get("foreign_5d", 0) if pq else 0
+            i5d = pq.get("inst_5d", 0) if pq else 0
+            flow_tag = ""
+            if f5d < -50_000_000_000 and i5d < -50_000_000_000:
+                flow_tag = "수급역행(동시대량매도)"
+            elif f5d < 0 and i5d < 0:
+                flow_tag = "수급주의(동시매도)"
+            elif f5d < 0:
+                flow_tag = "외인매도"
             ai_largecap.append({
                 "ticker": t,
                 "name": j.get("name", ""),
@@ -2392,6 +2432,9 @@ def main():
                 "reasoning": j.get("reasoning", ""),
                 "urgency": j.get("urgency", ""),
                 "expected_impact_pct": j.get("expected_impact_pct", 0),
+                "foreign_5d": f5d,
+                "inst_5d": i5d,
+                "flow_warning": flow_tag,
             })
         ai_largecap.sort(key=lambda x: -x["confidence"])
 
@@ -2401,9 +2444,14 @@ def main():
         print(f"{'─'*60}")
         for r in ai_largecap:
             urg = " 🔥" if r["urgency"] == "high" else ""
+            flow_warn = f" ⚠{r['flow_warning']}" if r.get("flow_warning") else ""
+            f5 = r.get("foreign_5d", 0) / 1e8
+            i5 = r.get("inst_5d", 0) / 1e8
             print(f"    {r['name']}({r['ticker']}) "
                   f"AI확신:{r['confidence']:.0%}{urg} "
-                  f"| {r['reasoning'][:50]}")
+                  f"외인{f5:+.0f}억 기관{i5:+.0f}억"
+                  f"{flow_warn}"
+                  f" | {r['reasoning'][:40]}")
 
     # 나머지 관찰 종목 간략 출력
     rest = [r for r in results if r["grade"] in buyable_grades
