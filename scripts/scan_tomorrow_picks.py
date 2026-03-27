@@ -1512,6 +1512,22 @@ def main():
     else:
         print("[국적수급 7S] 데이터 없음 — 전략L 스킵")
 
+    # ── 공매도 체제 프로파일 ──
+    try:
+        from src.use_cases.short_regime_manager import get_short_regime_manager
+        short_mgr = get_short_regime_manager()
+        short_summary = short_mgr.summary()
+        if short_summary["enabled"]:
+            print(f"[공매도 체제] {short_summary['label']} | "
+                  f"포지션×{short_summary['profile'].get('position_scale_mult', 1.0)} | "
+                  f"슬롯×{short_summary['profile'].get('max_positions_scale', 1.0)} | "
+                  f"SA floor={short_summary['profile'].get('sa_floor', 0.55)}")
+        else:
+            short_summary = {"enabled": False, "profile": {}}
+    except Exception as e:
+        logger.debug("공매도 체제 로드 실패: %s", e)
+        short_summary = {"enabled": False, "profile": {}}
+
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
@@ -1677,6 +1693,11 @@ def main():
     except Exception as e:
         logger.warning("[안전마진] 풀 로드 실패: %s", e)
 
+    # 공매도 프로파일 사전 추출 (루프 내 참조용)
+    short_prof = short_summary.get("profile", {})
+    short_pos_scale = short_prof.get("position_scale_mult", 1.0)
+    short_slot_scale = short_prof.get("max_positions_scale", 1.0)
+
     # 종목별 통합
     results = []
     for ticker in all_tickers:
@@ -1733,9 +1754,12 @@ def main():
 
         # 레짐 부스트 적용 (v6): 매크로 점수에 따라 최종 점수 보정
         # FLOWX 모드: floor 보장 (BEAR에서도 0.8x 이상)
+        # 공매도 체제: position_scale_mult 추가 적용 (reopened→×0.7)
         effective_regime = regime_mult
         if is_flowx_mode and effective_regime < FLOWX_MODE_OVERRIDES["regime_boost_floor"]:
             effective_regime = FLOWX_MODE_OVERRIDES["regime_boost_floor"]
+        if short_summary.get("enabled") and short_pos_scale < 1.0:
+            effective_regime *= short_pos_scale
         if effective_regime != 1.0:
             boosted = min(score_detail["total"] * effective_regime, 100)
             score_detail["total"] = round(boosted, 1)
@@ -2173,6 +2197,14 @@ def main():
         swing_slots = base_swing
         short_slots = base_short
 
+    # 공매도 체제 슬롯 축소 (reopened/active → max_positions_scale 적용)
+    if short_summary.get("enabled") and short_slot_scale < 1.0:
+        orig_swing, orig_short = swing_slots, short_slots
+        swing_slots = max(2, int(swing_slots * short_slot_scale))
+        short_slots = max(2, int(short_slots * short_slot_scale))
+        print(f"[공매도 슬롯] ×{short_slot_scale} → "
+              f"스윙 {orig_swing}→{swing_slots} + 단타 {orig_short}→{short_slots}")
+
     # 최소 소스 수 필터 (복합 조건: 소스 N개+ OR 소스 (N-1)개 + 고점수)
     min_sources = ai_sel_cfg.get("min_sources", 0)
     alt_score = ai_sel_cfg.get("min_sources_alt_score", 70)
@@ -2493,6 +2525,13 @@ def main():
             ],
         } if scenario_data.get("active") else {},
         "deep_dive": deep_dive_data,
+        "short_selling_regime": {
+            "enabled": short_summary.get("enabled", False),
+            "status": short_summary.get("status", ""),
+            "label": short_summary.get("label", ""),
+            "slot_scale": short_slot_scale,
+            "position_scale": short_pos_scale,
+        } if short_summary.get("enabled") else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
