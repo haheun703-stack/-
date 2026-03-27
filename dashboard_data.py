@@ -818,6 +818,168 @@ def build_zone8() -> dict:
 
 
 # ──────────────────────────────────────────────
+# ZONE SCENARIO: 시나리오 기반 퀀트 대시보드 (FLOWX /quant)
+# ──────────────────────────────────────────────
+
+def build_zone_scenario() -> dict:
+    """시나리오 엔진 데이터를 FLOWX /quant 페이지용으로 결합."""
+
+    # ── 데이터 로드 ──
+    active_raw = _load_json("scenarios/active_scenarios.json", {})
+    chains_raw = _load_json("scenarios/scenario_chains.json", {})
+    commodity_raw = _load_json("commodity_prices.json", {})
+    picks_raw = _load_json("tomorrow_picks_flowx.json", {})
+    conflicts_raw = _load_json("scenario_supply_conflicts.json", {})
+
+    # zone1 데이터로 시장 상태 요약
+    brain = _load_json("brain_decision.json")
+    regime = _load_json("regime_macro_signal.json")
+    lens = _load_json("lens_context.json")
+
+    # ── 1) market_status ──
+    market_status = {
+        "verdict": brain.get("verdict", "N/A"),
+        "regime": regime.get("regime", "N/A"),
+        "kospi": regime.get("kospi_close", 0),
+        "kospi_chg": regime.get("kospi_change_pct", 0),
+        "vix": regime.get("vix", 0),
+        "cash_pct": brain.get("cash_pct", 0),
+        "shield_status": lens.get("shield", {}).get("status", "N/A"),
+        "updated_at": active_raw.get("updated", ""),
+    }
+
+    # ── 2) active_scenarios — 체인 타임라인 포함 ──
+    scenarios_dict = active_raw.get("scenarios", {})
+    chains_list = chains_raw.get("scenarios", [])
+    chains_map = {c["id"]: c for c in chains_list}
+
+    active_scenarios = []
+    for sid, sdata in scenarios_dict.items():
+        score = sdata.get("score", 0)
+        if score < 5:
+            continue  # 미약한 시나리오 제외
+
+        chain_def = chains_map.get(sid, {})
+        chain_phases = chain_def.get("chain", [])
+        current_phase = sdata.get("current_phase", 0)
+
+        # Phase 타임라인 구성
+        chain_timeline = []
+        for ph in chain_phases:
+            phase_num = ph.get("phase", 0)
+            chain_timeline.append({
+                "phase": phase_num,
+                "name": ph.get("name", ""),
+                "hot_sectors": ph.get("hot_sectors", []),
+                "cold_sectors": ph.get("cold_sectors", []),
+                "etf": ph.get("etf", []),
+                "is_current": phase_num == current_phase,
+            })
+
+        # 현재 Phase 정보
+        current_ph = next((p for p in chain_phases if p.get("phase") == current_phase), {})
+
+        # 다음 Phase 프리뷰
+        next_ph = next((p for p in chain_phases if p.get("phase") == current_phase + 1), None)
+
+        scenario_entry = {
+            "id": sid,
+            "name": chain_def.get("name", sid),
+            "current_phase": current_phase,
+            "total_phases": len(chain_phases),
+            "days_active": sdata.get("days_active", 0),
+            "score": score,
+            "reasons": sdata.get("reasons", []),
+            "phase_name": current_ph.get("name", ""),
+            "hot_sectors": current_ph.get("hot_sectors", []),
+            "cold_sectors": current_ph.get("cold_sectors", []),
+            "hot_tickers": [],
+            "etf": current_ph.get("etf", []),
+            "logic": current_ph.get("logic", ""),
+            "chain": chain_timeline,
+            "next_phase_name": next_ph.get("name", "") if next_ph else "",
+            "next_hot": next_ph.get("hot_sectors", []) if next_ph else [],
+        }
+
+        # hot_tickers 파싱: "012450:한화에어로스페이스" → {code, name}
+        for t in current_ph.get("hot_tickers", []):
+            parts = t.split(":", 1)
+            if len(parts) == 2:
+                scenario_entry["hot_tickers"].append({"code": parts[0], "name": parts[1]})
+
+        active_scenarios.append(scenario_entry)
+
+    # 점수순 정렬
+    active_scenarios.sort(key=lambda x: x["score"], reverse=True)
+
+    # ── 3) commodities ──
+    commodities = []
+    for key, cdata in commodity_raw.get("commodities", {}).items():
+        cg = cdata.get("cost_gap")
+        if not cg:
+            continue
+        commodities.append({
+            "key": key,
+            "name": cdata.get("name", key),
+            "price": cdata.get("price", 0),
+            "unit": cdata.get("unit", ""),
+            "production_cost": cg.get("production_cost", 0),
+            "gap_pct": cg.get("gap_pct", 0),
+            "zone": cg.get("zone", ""),
+        })
+
+    # ── 4) scenario_stocks — 시나리오 태그 있는 종목만 ──
+    scenario_stocks = []
+    for p in picks_raw.get("picks", []):
+        tag = p.get("scenario_tag", "")
+        if not tag:
+            continue
+        scenario_stocks.append({
+            "ticker": p.get("ticker", ""),
+            "name": p.get("name", ""),
+            "grade": p.get("grade", ""),
+            "total_score": p.get("total_score", 0),
+            "scenario_tag": tag,
+            "scenario_narrative": p.get("scenario_narrative", ""),
+            "scenario_bonus": p.get("scenario_bonus", 0),
+            "scenario_risk_reward": p.get("scenario_risk_reward", {}),
+            "rsi": p.get("rsi", 0),
+            "close": p.get("close", 0),
+            "entry_price": p.get("entry_price", 0),
+            "stop_loss": p.get("stop_loss", 0),
+            "target_price": p.get("target_price", 0),
+            "foreign_5d": p.get("foreign_5d", 0),
+            "inst_5d": p.get("inst_5d", 0),
+        })
+
+    # ── 5) etf_map — 활성 시나리오별 Phase ETF ──
+    etf_map = []
+    for sc in active_scenarios:
+        for ph in sc.get("chain", []):
+            etfs = ph.get("etf", [])
+            if etfs:
+                etf_map.append({
+                    "scenario_id": sc["id"],
+                    "scenario_name": sc["name"],
+                    "phase": ph["phase"],
+                    "phase_name": ph["name"],
+                    "etfs": etfs,
+                })
+
+    # ── 6) conflicts ──
+    conflicts = conflicts_raw.get("conflicts", [])
+
+    return {
+        "market_status": market_status,
+        "active_scenarios": active_scenarios,
+        "commodities": commodities,
+        "scenario_stocks": scenario_stocks,
+        "etf_map": etf_map,
+        "conflicts": conflicts,
+    }
+
+
+# ──────────────────────────────────────────────
 # 통합 빌드 & 저장
 # ──────────────────────────────────────────────
 
@@ -834,6 +996,7 @@ def build_state() -> dict:
         "zone6": build_zone6(),
         "zone7": build_zone7(),
         "zone8": build_zone8(),
+        "zone_scenario": build_zone_scenario(),
     }
 
     # 저장
@@ -859,6 +1022,8 @@ def build_state() -> dict:
     print(f"  Zone6: picks {z6['tomorrow_picks']}% whale {z6['whale_detect']}%")
     print(f"  Zone7: ETF {z7_count}종목")
     print(f"  Zone8: Pulse {z8.get('direction', '?')} TOP {len(z8.get('top_picks', []))}종목")
+    zs = state["zone_scenario"]
+    print(f"  Scenario: {len(zs['active_scenarios'])}개 활성 + 원자재 {len(zs['commodities'])}개 + 종목 {len(zs['scenario_stocks'])}개")
 
     return state
 

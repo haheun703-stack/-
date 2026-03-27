@@ -15,6 +15,7 @@ import argparse
 import json
 import logging
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -78,6 +79,17 @@ def main():
     foreign_filtered = [r for r in foreign_rows if r["signal"] != "NEUTRAL"]
     print(f"  -> 업로드 대상: {len(foreign_filtered)}건 (INFLOW+OUTFLOW)")
 
+    # ── 시나리오 대시보드 데이터 ──
+    from dashboard_data import build_zone_scenario
+    scenario_data = build_zone_scenario()
+    sc_count = len(scenario_data.get("active_scenarios", []))
+    cm_count = len(scenario_data.get("commodities", []))
+    st_count = len(scenario_data.get("scenario_stocks", []))
+    cf_count = len(scenario_data.get("conflicts", []))
+    print(f"\n[FLOWX] 시나리오 대시보드: {sc_count}개 시나리오, 원자재 {cm_count}개, 종목 {st_count}개, 충돌 {cf_count}건")
+    for sc in scenario_data.get("active_scenarios", []):
+        print(f"  {sc['name']} (P{sc['current_phase']}/{sc['total_phases']}) 점수={sc['score']} D+{sc['days_active']}")
+
     if args.dry_run:
         print("\n[DRY-RUN] 업로드 스킵")
         return
@@ -88,14 +100,18 @@ def main():
         print("\n[FLOWX] Supabase 미연결 — .env에 SUPABASE_URL/KEY 설정 필요")
         return
 
+    date_str = datetime.now().strftime("%Y-%m-%d")
+
     ok1 = uploader.upload_etf_signals(etf_rows)          # 전체 (HOLD 포함, 섹터 순위용)
     ok2 = uploader.upload_foreign_flow(foreign_filtered)  # INFLOW/OUTFLOW만
     ok3 = uploader.upload_ai_picks(ai_rows)              # AI 추천 (short_signals)
+    ok4 = uploader.upload_quant_scenarios(scenario_data, date_str)  # 시나리오 대시보드
 
     print(f"\n[FLOWX] 업로드 완료:")
     print(f"  ETF={'OK' if ok1 else 'FAIL'} ({len(etf_rows)}건)")
     print(f"  외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
     print(f"  AI추천={'OK' if ok3 else 'FAIL'} ({len(ai_rows)}건)")
+    print(f"  시나리오={'OK' if ok4 else 'FAIL'} ({sc_count}개 시나리오)")
 
 
 if __name__ == "__main__":

@@ -223,6 +223,27 @@ class FlowxUploader:
             logger.error("[FLOWX] 시그널 종료 실패: %s", e)
             return False
 
+    # ── 시나리오 대시보드 (FLOWX /quant) ─────────────
+
+    def upload_quant_scenarios(self, scenario_data: dict, date_str: str) -> bool:
+        """시나리오 대시보드 데이터 업로드 (UPSERT on date)."""
+        if not self.is_active or not scenario_data:
+            return False
+        try:
+            row = {
+                "date": date_str,
+                "data": scenario_data,
+            }
+            result = self.client.table("quant_scenario_dashboard").upsert(
+                row, on_conflict="date"
+            ).execute()
+            sc_count = len(scenario_data.get("active_scenarios", []))
+            logger.info("[FLOWX] 시나리오 대시보드 업로드: %s (%d개 시나리오)", date_str, sc_count)
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 시나리오 대시보드 업로드 실패: %s", e)
+            return False
+
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:

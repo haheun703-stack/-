@@ -44,6 +44,12 @@ export default function RootLayout({
                 대시보드
               </a>
               <a
+                href="/quant"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                퀀트
+              </a>
+              <a
                 href="/signals"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
               >
