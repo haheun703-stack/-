@@ -86,6 +86,8 @@ PIPELINE_GROUPS = [
             {"name": "ETF 투자자 수급", "cmd": "scripts/collect_etf_investor_flow.py"},
             {"name": "KRX 국적별 외국인", "cmd": "scripts/scan_nationality.py --send"},
             {"name": "섹터 일일 리포트", "cmd": "scripts/sector_daily_report.py"},
+            {"name": "TIER2 기관수급 수집", "cmd": "scripts/institutional_flow_collector.py --top-n 5"},
+            {"name": "TIER2 섹터 컴포짓", "cmd": "src/sector_composite.py"},
             {"name": "섹터 ETF 거래량", "cmd": "scripts/collect_etf_volume.py"},
             {"name": "ETF 마스터 빌드", "cmd": "scripts/update_etf_master.py"},
             {"name": "ETF 매매 시그널", "cmd": "scripts/etf_trading_signal.py"},
