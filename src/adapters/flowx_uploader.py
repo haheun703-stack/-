@@ -495,11 +495,90 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
     return rows
 
 
+def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dict:
+    """시장 맥락 가이드 자동 생성 — 구독자에게 '지금 왜 이걸 사야 하는지' 안내."""
+    regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
+    shield_status = shield.get("status", "YELLOW")
+
+    STRATEGY_MAP = {
+        "BULL": "모멘텀 추종 — 시그널 1개라도 진입 가능",
+        "CAUTION": "선별적 매수 — 2소스 교차검증 필수",
+        "BEAR": "교차검증 강화 — 2소스+거래량2x 통과 종목만",
+        "CRISIS": "전면 관망 — ETF 헷지 + 현금 위주",
+    }
+
+    sectors = sector_momentum.get("sectors", [])
+    hot = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[:3]]
+    cold = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[-3:]] if len(sectors) >= 6 else []
+
+    # 레짐+쉴드 조합 요약
+    if regime == "CRISIS" or shield_status == "RED":
+        summary = f"{regime} 시장 + SHIELD {shield_status} — 극보수적 운영"
+    elif regime == "BEAR":
+        summary = f"{regime} 시장 — 교차검증 통과 종목만 선별 진입"
+    elif regime == "CAUTION":
+        summary = f"{regime} 시장 — 선별적 매수, 손절 철저"
+    else:
+        summary = f"{regime} 시장 — 적극 매수 구간"
+
+    return {
+        "summary": summary,
+        "strategy": STRATEGY_MAP.get(regime, ""),
+        "hot_sectors": hot,
+        "cold_sectors": cold,
+        "vix": brain.get("vix", 0),
+        "cash_ratio": brain.get("cash_ratio", brain.get("cash_pct", 0)),
+    }
+
+
+def _build_sectors_data(sector_momentum: dict) -> dict:
+    """섹터 모멘텀 TOP 10 추출."""
+    sectors = sector_momentum.get("sectors", [])
+    top = []
+    for s in sectors[:10]:
+        top.append({
+            "rank": s.get("rank"),
+            "sector": s.get("sector"),
+            "etf_code": s.get("etf_code"),
+            "score": s.get("momentum_score", 0),
+            "ret_5": s.get("ret_5", 0),
+            "ret_20": s.get("ret_20", 0),
+            "rsi": s.get("rsi_14", 0),
+            "acceleration": s.get("acceleration", False),
+            "rank_change": s.get("rank_change", 0),
+        })
+    return {
+        "date": sector_momentum.get("date", ""),
+        "top": top,
+    }
+
+
+def _build_etf_picks(etf_result: dict) -> dict:
+    """ETF 배분 + 가속 섹터 추출."""
+    allocation = etf_result.get("allocation", {})
+    predator = etf_result.get("predator_result", {})
+    accelerations = predator.get("accelerations", [])[:5]
+
+    return {
+        "regime": etf_result.get("regime", "NEUTRAL"),
+        "allocation": allocation,
+        "accelerations": [
+            {
+                "sector": a.get("sector"),
+                "rank_change": a.get("rank_change", 0),
+                "score": a.get("acceleration_score", 0),
+                "ret_5d": a.get("ret_5d", 0),
+            }
+            for a in accelerations
+        ],
+    }
+
+
 def build_jarvis_payload() -> dict:
     """자비스 컨트롤타워 데이터 통합 빌드.
 
     data/tomorrow_picks.json + brain_decision.json + shield_report.json +
-    market_learning/signal_accuracy.json 통합.
+    market_learning/signal_accuracy.json + sector_momentum.json + etf_rotation_result.json 통합.
     """
     def _load(name: str) -> dict:
         p = DATA_DIR / name
@@ -514,6 +593,8 @@ def build_jarvis_payload() -> dict:
     picks_raw = _load("tomorrow_picks.json")
     brain = _load("brain_decision.json")
     shield = _load("shield_report.json")
+    sector_momentum = _load("sector_rotation/sector_momentum.json")
+    etf_result = _load("etf_rotation_result.json")
 
     # signal_accuracy: 최신 학습 데이터에서
     acc_raw = {}
@@ -542,9 +623,9 @@ def build_jarvis_payload() -> dict:
         },
         "accuracy": acc_raw,
         "brain": {
-            "regime": brain.get("regime", brain.get("direction", "NEUTRAL")),
-            "vix": brain.get("vix", 0),
-            "cash_ratio": brain.get("cash_ratio", brain.get("cash_pct", 0)),
+            "regime": brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL",
+            "vix": brain.get("vix") or brain.get("vix_level") or 0,
+            "cash_ratio": brain.get("cash_ratio") or brain.get("cash_pct") or 0,
             "recommendation": brain.get("recommendation", ""),
         },
         "shield": {
@@ -552,6 +633,10 @@ def build_jarvis_payload() -> dict:
             "sector_concentration": shield.get("sector_concentration", 0),
             "max_drawdown": shield.get("max_drawdown", 0),
         },
+        # Phase 1 신규: 시장 맥락 + 섹터 + ETF
+        "market_guide": _build_market_guide(brain, shield, sector_momentum),
+        "sectors": _build_sectors_data(sector_momentum),
+        "etf_picks": _build_etf_picks(etf_result),
     }
 
 

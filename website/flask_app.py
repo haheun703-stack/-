@@ -37,10 +37,10 @@ BRAIN_FILE = os.path.join(DATA_DIR, 'brain_data.json')
 for d in [DATA_DIR, REPORTS_DIR, DAILY_DIR, WEEKLY_DIR, MONTHLY_DIR]:
     os.makedirs(d, exist_ok=True)
 
-# ─── 사용자 설정 (원하는 대로 변경) ─────────────────────
-USERNAME = "ppwangga"
-PASSWORD_HASH = hashlib.sha256("gkgjs0907".encode()).hexdigest()
-API_KEY = "e_Yws1RwLkUwg1vlXFqpbbRe-GMp7MRugnsrPfuF99M"
+# ─── 사용자 설정 (.env에서 로드) ──────────────────────
+USERNAME = os.getenv("JARVIS_USER", "ppwangga")
+PASSWORD_HASH = hashlib.sha256(os.getenv("JARVIS_PASSWORD", "").encode()).hexdigest()
+API_KEY = os.getenv("JARVIS_API_KEY", "")
 
 # ─── 로그인 관리 ────────────────────────────────────────
 def login_required(f):
