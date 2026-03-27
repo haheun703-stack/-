@@ -449,10 +449,13 @@ def build_zone3() -> dict:
 # ZONE 4: 섹터 흐름 + 릴레이
 # ──────────────────────────────────────────────
 
-def build_zone4(top_n: int = 10) -> list[dict]:
+def build_zone4(top_n: int = 10) -> dict:
     sm = _load_json("sector_rotation/sector_momentum.json")
     relay = _load_json("group_relay/group_relay_today.json")
     etf_sig = _load_json("sector_rotation/etf_trading_signal.json")
+    # TIER2 데이터
+    composite = _load_json("sector_rotation/sector_composite.json")
+    inst_flow = _load_json("institutional_flow/accumulation_alert.json")
 
     # 릴레이 fired 그룹
     fired_set = set()
@@ -462,9 +465,16 @@ def build_zone4(top_n: int = 10) -> list[dict]:
     # ETF 시그널 인덱스 (섹터명 → 상세)
     etf_index = {}
     for item in etf_sig.get("watch_list", []) + etf_sig.get("smart_sectors", []) + etf_sig.get("smart_money_etf", []):
+        if not isinstance(item, dict):
+            continue
         s = item.get("sector", "")
         if s:
             etf_index[s] = item
+
+    # TIER2 컴포짓 인덱스 (섹터명 → 상세)
+    comp_index = {}
+    for s in composite.get("sectors", []):
+        comp_index[s["sector"]] = s
 
     sectors = []
     for sec in sm.get("sectors", [])[:top_n]:
@@ -509,9 +519,53 @@ def build_zone4(top_n: int = 10) -> list[dict]:
             row["stoch_k"] = round(ei.get("stoch_k", 0), 1)
             row["adx"] = round(ei.get("adx", 0), 1)
 
+        # TIER2 컴포짓 연결
+        ci = comp_index.get(name)
+        if ci:
+            row["composite_score"] = ci.get("composite_score", 0)
+            row["regime"] = ci.get("regime", "NEUTRAL")
+            row["inst_score"] = ci.get("institutional_score", 50)
+            row["inst_5d"] = ci.get("inst_5d_억", 0)
+            row["foreign_5d"] = ci.get("foreign_5d_억", 0)
+
         sectors.append(row)
 
-    return sectors
+    # TIER2 히트맵 — 전체 섹터 (컴포짓 점수 내림차순)
+    heatmap = []
+    for s in composite.get("sectors", []):
+        heatmap.append({
+            "sector": s["sector"],
+            "composite": s.get("composite_score", 50),
+            "regime": s.get("regime", "NEUTRAL"),
+            "momentum": s.get("momentum_score", 50),
+            "institutional": s.get("institutional_score", 50),
+            "inst_5d": s.get("inst_5d_억", 0),
+            "foreign_5d": s.get("foreign_5d_억", 0),
+        })
+
+    # 매집 알림 TOP 10
+    accum_alerts = []
+    for a in (inst_flow.get("stock_alerts", []))[:10]:
+        accum_alerts.append({
+            "ticker": a["ticker"],
+            "name": a["name"],
+            "sector": a["sector"],
+            "grade": a["grade"],
+            "inst_days": a.get("inst_consecutive", 0),
+            "foreign_days": a.get("foreign_consecutive", 0),
+            "inst_5d": a.get("inst_5d_억", 0),
+            "foreign_5d": a.get("foreign_5d_억", 0),
+            "dual": a.get("dual_buying", False),
+        })
+
+    return {
+        "sectors": sectors,
+        "heatmap": heatmap,
+        "accumulation_alerts": accum_alerts,
+        "regime_summary": composite.get("regime_summary", {}),
+        "strong_sectors": composite.get("strong_sectors", []),
+        "exodus_sectors": composite.get("exodus_sectors", []),
+    }
 
 
 # ──────────────────────────────────────────────
@@ -799,7 +853,8 @@ def build_state() -> dict:
     print(f"  Zone1: {z1['verdict']} (현금{z1['cash_pct']}%, 레짐={z1['regime']})")
     print(f"  Zone2: {len(state['zone2'])}종목 풀 공개")
     print(f"  Zone3: 자산 {z3['equity']:,}원 ({z3['total_return_pct']:+.1f}%) 보유 {len(z3['positions'])}종목")
-    print(f"  Zone4: {len(state['zone4'])}섹터")
+    z4 = state["zone4"]
+    print(f"  Zone4: {len(z4.get('sectors', []))}섹터 + 히트맵 {len(z4.get('heatmap', []))}개 + 매집 {len(z4.get('accumulation_alerts', []))}건")
     print(f"  Zone5: SD {len(state['zone5'].get('sd_patterns', []))}종목")
     print(f"  Zone6: picks {z6['tomorrow_picks']}% whale {z6['whale_detect']}%")
     print(f"  Zone7: ETF {z7_count}종목")
