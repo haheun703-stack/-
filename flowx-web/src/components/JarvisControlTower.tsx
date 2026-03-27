@@ -92,23 +92,24 @@ const GRADE_COLORS: Record<string, string> = {
   "보류": "bg-gray-700 text-gray-400",
 };
 
-const REGIME_DISPLAY: Record<string, { icon: string; color: string; bg: string }> = {
-  BULL: { icon: "🟢", color: "text-green-400", bg: "border-green-800/50" },
-  BEAR: { icon: "🔴", color: "text-red-400", bg: "border-red-800/50" },
-  CAUTION: { icon: "🟡", color: "text-yellow-400", bg: "border-yellow-800/50" },
-  NEUTRAL: { icon: "⚪", color: "text-gray-400", bg: "border-gray-800" },
+const REGIME_DISPLAY: Record<string, { icon: string; label: string; color: string; bg: string }> = {
+  BULL: { icon: "🟢", label: "상승장", color: "text-green-400", bg: "border-green-800/50" },
+  BEAR: { icon: "🔴", label: "하락장", color: "text-red-400", bg: "border-red-800/50" },
+  CAUTION: { icon: "🟡", label: "주의", color: "text-yellow-400", bg: "border-yellow-800/50" },
+  NEUTRAL: { icon: "⚪", label: "보합", color: "text-gray-400", bg: "border-gray-800" },
+  CRISIS: { icon: "🔴", label: "위기", color: "text-red-500", bg: "border-red-900/50" },
 };
 
-const SHIELD_DISPLAY: Record<string, { icon: string; color: string }> = {
-  GREEN: { icon: "🟢", color: "text-green-400" },
-  YELLOW: { icon: "🟡", color: "text-yellow-400" },
-  RED: { icon: "🔴", color: "text-red-400" },
+const SHIELD_DISPLAY: Record<string, { icon: string; label: string; color: string }> = {
+  GREEN: { icon: "🟢", label: "안전", color: "text-green-400" },
+  YELLOW: { icon: "🟡", label: "주의", color: "text-yellow-400" },
+  RED: { icon: "🔴", label: "위험", color: "text-red-400" },
 };
 
 const TAB_ITEMS = [
   { key: "recommend", label: "오늘의 추천", icon: "🎯" },
-  { key: "sectors", label: "섹터 분석", icon: "📊", soon: true },
-  { key: "signals", label: "시그널", icon: "📡", soon: true },
+  { key: "sectors", label: "업종 분석", icon: "📊", soon: true },
+  { key: "signals", label: "매매 신호", icon: "📡", soon: true },
   { key: "performance", label: "성과", icon: "📈", soon: true },
 ];
 
@@ -123,7 +124,7 @@ export default function JarvisControlTower() {
     const controller = new AbortController();
     async function load() {
       try {
-        const res = await fetch("/api/quant", { signal: controller.signal });
+        const res = await fetch("/api/quant-jarvis", { signal: controller.signal });
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         setData(await res.json());
       } catch (err) {
@@ -159,7 +160,7 @@ export default function JarvisControlTower() {
     );
   }
 
-  const { picks, accuracy, brain, shield, market_guide, sectors, etf_picks } = data;
+  const { picks, accuracy, brain, shield, market_guide, etf_picks } = data;
   const regime = brain?.regime || brain?.direction || "NEUTRAL";
   const regimeInfo = REGIME_DISPLAY[regime] || REGIME_DISPLAY.NEUTRAL;
   const shieldStatus = shield?.status || "YELLOW";
@@ -182,17 +183,17 @@ export default function JarvisControlTower() {
   return (
     <div className="space-y-6">
       {/* ★ 시장 맥락 배너 */}
-      {market_guide && <MarketGuideBanner guide={market_guide} regime={regime} regimeInfo={regimeInfo} />}
+      {market_guide && <MarketGuideBanner guide={market_guide} regimeInfo={regimeInfo} />}
 
       {/* 상태판 */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatusCard label="레짐" value={regime} icon={regimeInfo.icon} color={regimeInfo.color}
-          sub={brain?.vix ? `VIX ${brain.vix}` : undefined} />
-        <StatusCard label="SHIELD" value={shieldStatus} icon={shieldInfo.icon} color={shieldInfo.color}
-          sub={shield?.max_drawdown ? `MDD ${shield.max_drawdown.toFixed(1)}%` : undefined} />
-        <StatusCard label="현금비중" value={brain?.cash_ratio ? `${brain.cash_ratio}%` : "-"}
+        <StatusCard label="시장 분위기" value={regimeInfo.label} icon={regimeInfo.icon} color={regimeInfo.color}
+          sub={brain?.vix ? `공포지수 ${brain.vix}` : undefined} />
+        <StatusCard label="위험 방어" value={shieldInfo.label} icon={shieldInfo.icon} color={shieldInfo.color}
+          sub={shield?.max_drawdown ? `최대낙폭 ${shield.max_drawdown.toFixed(1)}%` : undefined} />
+        <StatusCard label="현금 비중" value={brain?.cash_ratio ? `${brain.cash_ratio}%` : "-"}
           icon="💰" color="text-blue-400" />
-        <StatusCard label="대상일" value={picks?.target_date_label ?? "-"}
+        <StatusCard label="추천 대상일" value={picks?.target_date_label ?? "-"}
           icon="📅" color="text-gray-300" sub={picks?.mode_label} />
       </section>
 
@@ -264,7 +265,7 @@ export default function JarvisControlTower() {
             </div>
 
             <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-              <h3 className="text-gray-400 text-xs mb-3">시그널 소스 활성도</h3>
+              <h3 className="text-gray-400 text-xs mb-3">매매 신호 감지 현황</h3>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(sourceCounts)
                   .sort(([, a], [, b]) => b - a)
@@ -282,7 +283,7 @@ export default function JarvisControlTower() {
           {/* 시그널 정확도 */}
           {accuracy && (
             <section>
-              <h2 className="text-white text-lg font-bold mb-3">시그널 정확도</h2>
+              <h2 className="text-white text-lg font-bold mb-3">매매 신호 적중률</h2>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {Object.entries(accuracy)
                   .filter(([, v]) => typeof v === "object" && v !== null && ((v as Record<string, number>).total ?? 0) > 0)
@@ -312,12 +313,10 @@ export default function JarvisControlTower() {
 
 function MarketGuideBanner({
   guide,
-  regime,
   regimeInfo,
 }: {
   guide: NonNullable<JarvisData["market_guide"]>;
-  regime: string;
-  regimeInfo: { icon: string; color: string; bg: string };
+  regimeInfo: { icon: string; label: string; color: string; bg: string };
 }) {
   const hot = guide.hot_sectors ?? [];
   const cold = guide.cold_sectors ?? [];
@@ -339,7 +338,7 @@ function MarketGuideBanner({
             guide.vix >= 20 ? "bg-yellow-900/50 text-yellow-400" :
             "bg-green-900/50 text-green-400"
           }`}>
-            VIX {guide.vix}
+            공포지수 {guide.vix}
           </span>
         )}
       </div>
@@ -383,7 +382,7 @@ function ETFSection({ etf }: { etf: NonNullable<JarvisData["etf_picks"]> }) {
 
   return (
     <section className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-      <h3 className="text-white text-sm font-bold mb-3">ETF 배분 전략</h3>
+      <h3 className="text-white text-sm font-bold mb-3">자산 배분 현황</h3>
 
       {/* 배분 바 */}
       {activeAlloc.length > 0 && (
@@ -412,7 +411,7 @@ function ETFSection({ etf }: { etf: NonNullable<JarvisData["etf_picks"]> }) {
       {/* 가속 섹터 */}
       {accel.length > 0 && (
         <div>
-          <p className="text-gray-500 text-xs mb-2">가속 섹터 (순위 급상승)</p>
+          <p className="text-gray-500 text-xs mb-2">급부상 업종 (순위 급상승)</p>
           <div className="flex flex-wrap gap-2">
             {accel.map((a) => (
               <span key={a.sector} className="bg-orange-900/30 text-orange-400 text-xs px-2 py-1 rounded border border-orange-800/30">
@@ -470,23 +469,23 @@ function PickRow({ pick }: { pick: PickItem }) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
         <div>
-          <span className="text-gray-500">외인5일</span>{" "}
+          <span className="text-gray-500">외국인 5일</span>{" "}
           <span className={f5 >= 0 ? "text-red-400" : "text-blue-400"}>
             {f5 >= 0 ? "+" : ""}{f5.toFixed(0)}억
           </span>
         </div>
         <div>
-          <span className="text-gray-500">기관5일</span>{" "}
+          <span className="text-gray-500">기관 5일</span>{" "}
           <span className={i5 >= 0 ? "text-red-400" : "text-blue-400"}>
             {i5 >= 0 ? "+" : ""}{i5.toFixed(0)}억
           </span>
         </div>
         <div>
-          <span className="text-gray-500">RSI</span>{" "}
+          <span className="text-gray-500">과열도</span>{" "}
           <span className="text-gray-300">{pick.rsi?.toFixed(0) ?? "-"}</span>
         </div>
         <div>
-          <span className="text-gray-500">Stoch</span>{" "}
+          <span className="text-gray-500">반등력</span>{" "}
           <span className="text-gray-300">{pick.stoch_k?.toFixed(0) ?? "-"}</span>
         </div>
       </div>

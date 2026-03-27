@@ -500,26 +500,32 @@ def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dic
     regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
     shield_status = shield.get("status", "YELLOW")
 
+    REGIME_KR = {"BULL": "상승장", "CAUTION": "주의", "BEAR": "하락장", "CRISIS": "위기", "NEUTRAL": "보합"}
+    SHIELD_KR = {"GREEN": "안전", "YELLOW": "주의", "RED": "위험"}
+
     STRATEGY_MAP = {
-        "BULL": "모멘텀 추종 — 시그널 1개라도 진입 가능",
-        "CAUTION": "선별적 매수 — 2소스 교차검증 필수",
-        "BEAR": "교차검증 강화 — 2소스+거래량2x 통과 종목만",
-        "CRISIS": "전면 관망 — ETF 헷지 + 현금 위주",
+        "BULL": "적극 매수 구간 — 상승 흐름을 타는 종목 위주로 진입",
+        "CAUTION": "선별 매수 — 여러 신호가 겹치는 종목만 골라서 진입",
+        "BEAR": "신중한 매수 — 2개 이상 신호 + 거래량 급증 종목만 진입",
+        "CRISIS": "매수 자제 — 현금 비중 높이고 방어 자산(금/채권) 위주",
     }
+
+    regime_kr = REGIME_KR.get(regime, regime)
+    shield_kr = SHIELD_KR.get(shield_status, shield_status)
 
     sectors = sector_momentum.get("sectors", [])
     hot = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[:3]]
     cold = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[-3:]] if len(sectors) >= 6 else []
 
-    # 레짐+쉴드 조합 요약
+    # 한글 요약
     if regime == "CRISIS" or shield_status == "RED":
-        summary = f"{regime} 시장 + SHIELD {shield_status} — 극보수적 운영"
+        summary = f"{regime_kr} + 위험 방어 {shield_kr} — 매수 자제, 현금 위주 운영"
     elif regime == "BEAR":
-        summary = f"{regime} 시장 — 교차검증 통과 종목만 선별 진입"
+        summary = f"{regime_kr} — 확실한 종목만 소량 진입"
     elif regime == "CAUTION":
-        summary = f"{regime} 시장 — 선별적 매수, 손절 철저"
+        summary = f"{regime_kr} — 선별 매수, 손절 라인 꼭 지키기"
     else:
-        summary = f"{regime} 시장 — 적극 매수 구간"
+        summary = f"{regime_kr} — 적극 매수 구간"
 
     return {
         "summary": summary,
