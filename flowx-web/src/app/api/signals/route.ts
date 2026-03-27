@@ -3,11 +3,22 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+const VALID_BOT_TYPES = ["QUANT", "DAYTRADING", "ALL"];
+const VALID_STATUSES = ["OPEN", "CLOSED", "STOPPED"];
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const botType = searchParams.get("bot_type") || "QUANT";
-  const status = searchParams.get("status"); // OPEN, CLOSED, STOPPED or null(all)
-  const limit = parseInt(searchParams.get("limit") || "20", 10);
+  const status = searchParams.get("status");
+  const rawLimit = parseInt(searchParams.get("limit") || "20", 10);
+  const limit = isNaN(rawLimit) ? 20 : Math.min(Math.max(rawLimit, 1), 100);
+
+  if (!VALID_BOT_TYPES.includes(botType)) {
+    return NextResponse.json({ error: "잘못된 bot_type" }, { status: 400 });
+  }
+  if (status && !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: "잘못된 status" }, { status: 400 });
+  }
 
   let query = supabase
     .from("signals")
@@ -23,7 +34,8 @@ export async function GET(request: Request) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[API /signals] Supabase error:", error.message);
+    return NextResponse.json({ error: "시그널 조회 중 오류가 발생했습니다" }, { status: 500 });
   }
 
   return NextResponse.json(data || []);

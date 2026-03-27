@@ -19,26 +19,35 @@ export default function SignalScoreboard({ isPaid = false }: { isPaid?: boolean 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function load() {
       setLoading(true);
-      const [sbRes, sigRes] = await Promise.all([
-        fetch(`/api/scoreboard?bot_type=${botType}&period=${period}`),
-        fetch(`/api/signals?bot_type=${botType}&limit=10`),
-      ]);
-      const sb = await sbRes.json();
-      const sigs = await sigRes.json();
-      // scoreboard 필드명 호환 (loss_count↔lose_count, avg_return↔avg_return_pct)
-      if (sb && !sb.error) {
-        sb.lose_count = sb.lose_count ?? sb.loss_count ?? 0;
-        sb.avg_return_pct = sb.avg_return_pct ?? sb.avg_return ?? 0;
+      try {
+        const [sbRes, sigRes] = await Promise.all([
+          fetch(`/api/scoreboard?bot_type=${botType}&period=${period}`, { signal: controller.signal }),
+          fetch(`/api/signals?bot_type=${botType}&limit=10`, { signal: controller.signal }),
+        ]);
+        if (!sbRes.ok || !sigRes.ok) throw new Error("API error");
+        const sb = await sbRes.json();
+        const sigs = await sigRes.json();
+        // scoreboard 필드명 호환 (loss_count↔lose_count, avg_return↔avg_return_pct)
+        if (sb && !sb.error) {
+          sb.lose_count = sb.lose_count ?? sb.loss_count ?? 0;
+          sb.avg_return_pct = sb.avg_return_pct ?? sb.avg_return ?? 0;
+        }
+        setScoreboard(sb?.error ? null : sb);
+        // signals API가 {signals: [...]} 또는 [...] 형태일 수 있음
+        const sigArr = Array.isArray(sigs) ? sigs : (Array.isArray(sigs?.signals) ? sigs.signals : []);
+        setSignals(sigArr);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setScoreboard(null);
+        setSignals([]);
       }
-      setScoreboard(sb?.error ? null : sb);
-      // signals API가 {signals: [...]} 또는 [...] 형태일 수 있음
-      const sigArr = Array.isArray(sigs) ? sigs : (Array.isArray(sigs?.signals) ? sigs.signals : []);
-      setSignals(sigArr);
       setLoading(false);
     }
     load();
+    return () => controller.abort();
   }, [botType, period]);
 
   if (loading) {
@@ -193,7 +202,7 @@ function SignalRow({ signal, locked }: { signal: Signal; locked: boolean }) {
     >
       <div className="flex items-center gap-3">
         <span
-          className={`${statusColors[signal.status]} text-white text-xs px-2 py-0.5 rounded`}
+          className={`${statusColors[signal.status] || "bg-gray-600"} text-white text-xs px-2 py-0.5 rounded`}
         >
           {signal.status}
         </span>
@@ -205,18 +214,18 @@ function SignalRow({ signal, locked }: { signal: Signal; locked: boolean }) {
             {locked ? "●●●●●●" : signal.ticker}
           </span>
         </div>
-        <span className={`${gradeColors[signal.grade]} text-xs font-bold`}>
+        <span className={`${gradeColors[signal.grade] || "text-gray-500"} text-xs font-bold`}>
           {signal.grade}
         </span>
       </div>
       <div className="text-right">
         <p
           className={`text-sm font-bold ${
-            signal.return_pct >= 0 ? "text-green-400" : "text-red-400"
+            (signal.return_pct ?? 0) >= 0 ? "text-green-400" : "text-red-400"
           }`}
         >
-          {signal.return_pct > 0 ? "+" : ""}
-          {signal.return_pct}%
+          {(signal.return_pct ?? 0) > 0 ? "+" : ""}
+          {signal.return_pct ?? 0}%
         </p>
         <p className="text-gray-600 text-xs">{signal.signal_date}</p>
       </div>

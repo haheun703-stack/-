@@ -3,10 +3,20 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+const VALID_BOT_TYPES = ["QUANT", "DAYTRADING", "ALL"];
+const VALID_PERIODS = ["30D", "60D", "90D", "ALL"];
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const botType = searchParams.get("bot_type") || "QUANT";
   const period = searchParams.get("period") || "30D";
+
+  if (!VALID_BOT_TYPES.includes(botType)) {
+    return NextResponse.json({ error: "잘못된 bot_type" }, { status: 400 });
+  }
+  if (!VALID_PERIODS.includes(period)) {
+    return NextResponse.json({ error: "잘못된 period" }, { status: 400 });
+  }
 
   const { data, error } = await supabase
     .from("scoreboard")
@@ -32,7 +42,8 @@ export async function GET(request: Request) {
         worst_signal: null,
       });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[API /scoreboard] Supabase error:", error.message);
+    return NextResponse.json({ error: "성적표 조회 중 오류가 발생했습니다" }, { status: 500 });
   }
 
   return NextResponse.json(data);
