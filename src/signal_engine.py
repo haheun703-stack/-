@@ -914,18 +914,18 @@ class SignalEngine:
         if not grade_passed:
             # ── v3.2: Grade F 우회 — 추세 지속(Trend Continuation) 체크 ──
             # 뉴스 부스트가 높으면 min_conditions 완화 (5→4)
-            original_min = None
-            tc_cfg = None
+            saved_min = None
             if news_score_boost >= 0.08:
                 tc_cfg = self.triggers_cfg.get("trend_continuation", {})
-                original_min = tc_cfg.get("min_conditions", 5)
-                tc_cfg["min_conditions"] = max(original_min - 1, 3)
+                saved_min = tc_cfg.get("min_conditions", 5)
+                # 원본 dict 변이 대신 복사본으로 임시 교체
+                tc_copy = {**tc_cfg, "min_conditions": max(saved_min - 1, 3)}
+                self.triggers_cfg["trend_continuation"] = tc_copy
             try:
                 trend_cont = self.check_trend_continuation(df, idx)
             finally:
-                # 원복 — 예외 발생 시에도 반드시 복원
-                if news_score_boost >= 0.08:
-                    tc_cfg["min_conditions"] = original_min
+                if saved_min is not None:
+                    self.triggers_cfg["trend_continuation"] = tc_cfg
             if trend_cont.trigger_type == TriggerType.TREND_CONT:
                 diag.add_layer(LayerResult(
                     name="L0_trend_cont",

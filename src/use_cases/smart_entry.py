@@ -172,11 +172,12 @@ class SmartEntryEngine:
         self.max_stocks = live_cfg.get("max_stocks", 1)
         self.max_amount_per_stock = live_cfg.get("max_amount_per_stock", 500_000)
         self.max_total_amount = live_cfg.get("max_total_amount", 500_000)
-        self.kill_switch_file = Path(live_cfg.get("kill_switch_file", "data/KILL_SWITCH"))
+        _proj_root = Path(__file__).resolve().parent.parent.parent
+        self.kill_switch_file = Path(live_cfg.get("kill_switch_file", str(_proj_root / "data" / "KILL_SWITCH")))
         self.v3_sizing_enabled = live_cfg.get("v3_sizing_enabled", False)
 
         # 감사 로그 DB
-        self._audit_db = Path("data/order_audit.db")
+        self._audit_db = _proj_root / "data" / "order_audit.db"
         if not self.dry_run:
             self._init_audit_db()
 
@@ -284,17 +285,17 @@ class SmartEntryEngine:
         if self.dry_run:
             return False
         try:
-            conn = sqlite3.connect(str(self._audit_db))
-            row = conn.execute(
-                "SELECT date FROM session_log WHERE date = ?",
-                (datetime.now().strftime("%Y-%m-%d"),),
-            ).fetchone()
-            conn.close()
-            if row:
-                logger.critical("[중복방지] 오늘(%s) 이미 라이브 세션 실행됨!", row[0])
-                return True
-        except Exception:
-            pass
+            with sqlite3.connect(str(self._audit_db)) as conn:
+                row = conn.execute(
+                    "SELECT date FROM session_log WHERE date = ?",
+                    (datetime.now().strftime("%Y-%m-%d"),),
+                ).fetchone()
+                if row:
+                    logger.critical("[중복방지] 오늘(%s) 이미 라이브 세션 실행됨!", row[0])
+                    return True
+        except Exception as e:
+            logger.error("[중복방지] 세션 확인 실패: %s — 안전하게 중복 간주", e)
+            return True
         return False
 
     def _calc_order_qty(self, c: CandidateState) -> int:
@@ -352,7 +353,7 @@ class SmartEntryEngine:
 
         Returns: {ticker: {conviction, size_pct, entry_price, stop_loss_pct, target_pct}}
         """
-        v3_path = Path("data/ai_v3_picks.json")
+        v3_path = Path(__file__).resolve().parent.parent.parent / "data" / "ai_v3_picks.json"
         if not v3_path.exists():
             return {}
 
@@ -574,7 +575,7 @@ class SmartEntryEngine:
             sw = self.config.get("swing_philosophy", {})
             staged = sw.get("staged_entry", {})
             if sw.get("enabled") and staged.get("enabled") and c.order_qty > 0:
-                stages = staged.get("stages", [0.4, 0.4, 0.2])
+                stages = staged.get("stages", [0.4, 0.4, 0.2]) or [0.4, 0.4, 0.2]
                 c.staged_total_qty = c.order_qty
                 c.order_qty = max(1, int(c.order_qty * stages[0]))
                 c.entry_stage = 1

@@ -62,6 +62,9 @@ class FlowxUploader:
             result = self.client.table("etf_signals").upsert(
                 rows, on_conflict="date,code"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] ETF 시그널 업로드 응답 비어있음")
+                return False
             logger.info("[FLOWX] ETF 시그널 업로드: %d건", len(rows))
             return True
         except Exception as e:
@@ -81,6 +84,9 @@ class FlowxUploader:
             result = self.client.table("china_flow").upsert(
                 rows, on_conflict="date,code"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 외국인 자금 업로드 응답 비어있음")
+                return False
             logger.info("[FLOWX] 외국인 자금 업로드: %d건", len(rows))
             return True
         except Exception as e:
@@ -97,6 +103,9 @@ class FlowxUploader:
             result = self.client.table("short_signals").upsert(
                 rows, on_conflict="date,code"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] AI 추천 업로드 응답 비어있음")
+                return False
             logger.info("[FLOWX] AI 추천 업로드: %d건", len(rows))
             return True
         except Exception as e:
@@ -122,6 +131,9 @@ class FlowxUploader:
             result = self.client.table("morning_briefings").upsert(
                 row, on_conflict="date"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 모닝 브리핑 업로드 응답 비어있음: %s", briefing["date"])
+                return False
             logger.info("[FLOWX] 모닝 브리핑 업로드: %s", briefing["date"])
             return True
         except Exception as e:
@@ -136,6 +148,9 @@ class FlowxUploader:
             return False
         try:
             result = self.client.table("signals").insert(signal).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 시그널 기록 응답 비어있음")
+                return False
             logger.info("[FLOWX] 시그널 기록: %s %s %s",
                         signal.get("bot_type", "?"),
                         signal.get("signal_type", "?"),
@@ -153,6 +168,9 @@ class FlowxUploader:
             result = self.client.table("signals").update(updates).eq(
                 "id", signal_id
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 시그널 업데이트 응답 비어있음: %s", signal_id[:8])
+                return False
             return True
         except Exception as e:
             logger.error("[FLOWX] 시그널 업데이트 실패: %s", e)
@@ -166,6 +184,9 @@ class FlowxUploader:
             result = self.client.table("scoreboard").upsert(
                 rows, on_conflict="bot_type,period"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 성적표 업로드 응답 비어있음")
+                return False
             logger.info("[FLOWX] 성적표 업로드: %d건", len(rows))
             return True
         except Exception as e:
@@ -214,9 +235,12 @@ class FlowxUploader:
         if not self.is_active or not signal_id:
             return False
         try:
-            self.client.table("signals").update(close_data).eq(
+            result = self.client.table("signals").update(close_data).eq(
                 "id", signal_id
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 시그널 종료 응답 비어있음: %s", signal_id[:8])
+                return False
             logger.info("[FLOWX] 시그널 종료: %s → %s", signal_id[:8], close_data.get("status", "?"))
             return True
         except Exception as e:
@@ -237,6 +261,9 @@ class FlowxUploader:
             result = self.client.table("quant_scenario_dashboard").upsert(
                 row, on_conflict="date"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 시나리오 대시보드 업로드 응답 비어있음: %s", date_str)
+                return False
             sc_count = len(scenario_data.get("active_scenarios", []))
             logger.info("[FLOWX] 시나리오 대시보드 업로드: %s (%d개 시나리오)", date_str, sc_count)
             return True
@@ -265,6 +292,9 @@ class FlowxUploader:
             result = self.client.table("quant_jarvis").upsert(
                 row, on_conflict="date"
             ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 자비스 업로드 응답 비어있음: %s", date_str)
+                return False
             n_picks = len(jarvis_data.get("picks", {}).get("picks", []))
             logger.info("[FLOWX] 자비스 컨트롤타워 업로드: %s (%d종목)", date_str, n_picks)
             return True
@@ -280,6 +310,9 @@ class FlowxUploader:
             return False
         try:
             result = self.client.table("paper_trades").insert(trade).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 매매기록 업로드 응답 비어있음")
+                return False
             side = trade.get("side", "?")
             name = trade.get("name", "?")
             price = trade.get("price", 0)
@@ -317,7 +350,7 @@ def build_etf_signal_rows(date_str: str = "") -> list[dict]:
                 "name": sec.get("sector", ""),
                 "signal": "HOLD",  # 기본값, 아래에서 order_queue로 오버라이드
                 "score": round(sec.get("momentum_score", 0), 1),
-                "change_1d": round(sec.get("ret_5", 0) / 5, 2) if sec.get("ret_5") else 0,
+                "change_1d": round(sec.get("ret_1", sec.get("ret_5", 0) / 5 if sec.get("ret_5") else 0), 2),
                 "change_5d": round(sec.get("ret_5", 0), 2),
                 "rsi": round(sec.get("rsi_14", 0), 1),
                 "sector_rotation_rank": sec.get("rank", 0),
@@ -475,7 +508,7 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             "target_price": pick.get("target_price", int(close * 1.1)),
             "holding_days": 5,
             "signal_type": "BUY",
-            "volume_ratio": round(pick.get("ret_5d", 0) / 5, 1) if pick.get("ret_5d") else 1.0,
+            "volume_ratio": round(pick.get("volume_ratio", 1.0), 1),
             "momentum_regime": "QUANT",
         }
         # 시나리오 데이터가 있으면 추가 (Supabase 컬럼 있을 때만 유효)
@@ -670,7 +703,7 @@ def _build_performance_data() -> dict:
     """최근 5일 시그널 적중률 + 시장 요약."""
     import glob
     learn_dir = DATA_DIR / "market_learning"
-    files = sorted(glob.glob(str(learn_dir / "2026-*.json")))[-5:]
+    files = sorted(glob.glob(str(learn_dir / "????-??-??.json")))[-5:]
 
     daily = []
     for fpath in files:
