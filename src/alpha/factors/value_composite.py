@@ -1,17 +1,15 @@
-"""Value Composite Score — 기존 S2 확장 (STEP 4-3)
+"""Value Composite Score — 기존 S2 확장 (STEP 4-3 + V3)
 
 기존 S2: PER할인(0.6) + EPS revision(0.4) = 0~1.0
-신규 V1: EBITDA/EV → Z-Score (0~1.0)
-신규 V2: FCF Yield → Z-Score (0~1.0)
-
-통합:
-  V_composite = S2_existing×0.40 + V1_EBITDA_EV×0.35 + V2_FCF_Yield×0.25
+V1: EBITDA/EV → Z-Score (0~1.0)
+V2: FCF Yield → Z-Score (0~1.0)
+V3: DCF+RIM 내재가치 upside → Z-Score (0~1.0)
 
 레짐별 가중치 조정:
-  BULL:    S2(0.50) V1(0.25) V2(0.25) — 모멘텀 밸류에이션 중시
-  CAUTION: S2(0.40) V1(0.35) V2(0.25) — 기본값
-  BEAR:    S2(0.30) V1(0.35) V2(0.35) — 현금흐름 중시
-  CRISIS:  S2(0.20) V1(0.35) V2(0.45) — FCF 생존력 중시
+  BULL:    S2(0.40) V1(0.20) V2(0.20) V3(0.20) — 시장PER 중시
+  CAUTION: S2(0.30) V1(0.25) V2(0.20) V3(0.25) — 내재가치 균형
+  BEAR:    S2(0.20) V1(0.25) V2(0.25) V3(0.30) — 현금흐름+내재가치
+  CRISIS:  S2(0.15) V1(0.25) V2(0.30) V3(0.30) — FCF 생존력+내재가치
 """
 
 from __future__ import annotations
@@ -22,15 +20,16 @@ from src.alpha.factors.value_ebitda_ev import (
     ValueEbitdaEV,
     ValueFCFYield,
 )
+from src.alpha.factors.value_intrinsic import ValueIntrinsic
 
 logger = logging.getLogger(__name__)
 
-# 레짐별 V 가중치
+# 레짐별 V 가중치 (V3 추가)
 _V_WEIGHTS = {
-    "BULL":    {"S2": 0.50, "V1": 0.25, "V2": 0.25},
-    "CAUTION": {"S2": 0.40, "V1": 0.35, "V2": 0.25},
-    "BEAR":    {"S2": 0.30, "V1": 0.35, "V2": 0.35},
-    "CRISIS":  {"S2": 0.20, "V1": 0.35, "V2": 0.45},
+    "BULL":    {"S2": 0.40, "V1": 0.20, "V2": 0.20, "V3": 0.20},
+    "CAUTION": {"S2": 0.30, "V1": 0.25, "V2": 0.20, "V3": 0.25},
+    "BEAR":    {"S2": 0.20, "V1": 0.25, "V2": 0.25, "V3": 0.30},
+    "CRISIS":  {"S2": 0.15, "V1": 0.25, "V2": 0.30, "V3": 0.30},
 }
 
 
@@ -44,6 +43,7 @@ class ValueComposite:
     ):
         self._v1 = ValueEbitdaEV(financial_data, market_cap_data)
         self._v2 = ValueFCFYield(financial_data, market_cap_data)
+        self._v3 = ValueIntrinsic(financial_data, market_cap_data)
 
         # 유니버스 Z-Score 캐시
         self._scores_cache: dict[str, dict[str, float]] | None = None
@@ -56,6 +56,7 @@ class ValueComposite:
         self._scores_cache = {
             "V1": self._v1.score_universe(),
             "V2": self._v2.score_universe(),
+            "V3": self._v3.score_universe(),
         }
 
     def score(
@@ -98,6 +99,12 @@ class ValueComposite:
             total += v2_scores[ticker] * weights["V2"]
             weight_sum += weights["V2"]
 
+        # V3 DCF+RIM 내재가치
+        v3_scores = self._scores_cache["V3"]
+        if ticker in v3_scores:
+            total += v3_scores[ticker] * weights["V3"]
+            weight_sum += weights["V3"]
+
         if weight_sum < 0.3:
             return 0.5  # 데이터 부족 → 중립
 
@@ -108,7 +115,7 @@ class ValueComposite:
         self._ensure_scores()
 
         all_tickers = set()
-        for key in ["V1", "V2"]:
+        for key in ["V1", "V2", "V3"]:
             all_tickers |= set(self._scores_cache[key].keys())
 
         result: dict[str, float] = {}
@@ -124,7 +131,7 @@ class ValueComposite:
         weights = _V_WEIGHTS.get(regime, _V_WEIGHTS["CAUTION"])
 
         breakdown = {}
-        for key in ["V1", "V2"]:
+        for key in ["V1", "V2", "V3"]:
             factor_scores = self._scores_cache[key]
             z_score = factor_scores.get(ticker, None)
             breakdown[key] = {
