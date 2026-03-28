@@ -495,12 +495,78 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
     return rows
 
 
+def _get_vix_grade(vix: float) -> str:
+    """VIX 값 → 등급 (brain.py VIX_BUCKETS 기준)."""
+    if vix < 15:
+        return "LOW"
+    if vix < 20:
+        return "NORMAL"
+    if vix < 25:
+        return "ELEVATED"
+    if vix < 30:
+        return "HIGH"
+    if vix < 40:
+        return "EXTREME"
+    return "PANIC"
+
+
+def _get_danger_mode(regime: str, vix: float, shield_status: str) -> str:
+    """레짐 + VIX + SHIELD 종합 → 위험 모드 결정.
+
+    Returns: NORMAL, WARNING, DANGER, PANIC
+    """
+    vix_grade = _get_vix_grade(vix)
+
+    # PANIC: VIX >= 40 OR CRISIS 레짐
+    if vix_grade == "PANIC" or regime == "CRISIS":
+        return "PANIC"
+
+    # DANGER: VIX EXTREME(30~40) + BEAR/CRISIS, 또는 SHIELD RED + BEAR
+    if vix_grade == "EXTREME" and regime in ("BEAR", "CRISIS"):
+        return "DANGER"
+    if shield_status == "RED" and regime == "BEAR":
+        return "DANGER"
+
+    # WARNING: BEAR 레짐 or VIX HIGH/EXTREME or SHIELD RED
+    if regime == "BEAR" or vix_grade in ("HIGH", "EXTREME") or shield_status == "RED":
+        return "WARNING"
+
+    return "NORMAL"
+
+
+def _check_data_stale(brain: dict) -> dict | None:
+    """brain_decision.json 타임스탬프 → stale 여부 (3일 초과 시 경고)."""
+    from datetime import datetime, timedelta
+    ts = brain.get("timestamp", "")
+    if not ts:
+        return None
+    try:
+        dt = datetime.fromisoformat(ts)
+        age = datetime.now() - dt
+        if age > timedelta(days=3):
+            return {
+                "stale": True,
+                "age_days": age.days,
+                "last_update": ts[:10],
+                "message": f"데이터가 {age.days}일 전 기준입니다. 최신 장 데이터가 반영되지 않았을 수 있습니다.",
+            }
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
 def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dict:
     """시장 맥락 가이드 자동 생성 — 구독자에게 '지금 왜 이걸 사야 하는지' 안내."""
     regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
     shield_status = shield.get("status", "YELLOW")
+    vix = brain.get("vix") or brain.get("vix_level") or 0
+    cash_ratio = brain.get("cash_ratio") or brain.get("cash_pct") or 0
 
-    REGIME_KR = {"BULL": "상승장", "CAUTION": "주의", "BEAR": "하락장", "CRISIS": "위기", "NEUTRAL": "보합"}
+    REGIME_KR = {
+        "BULL": "상승장", "CAUTION": "주의", "BEAR": "하락장",
+        "CRISIS": "위기", "NEUTRAL": "보합",
+        "PRE_BULL": "상승 전환 중", "PRE_BEAR": "하락 전환 중",
+    }
     SHIELD_KR = {"GREEN": "안전", "YELLOW": "주의", "RED": "위험"}
 
     STRATEGY_MAP = {
@@ -510,6 +576,10 @@ def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dic
         "CRISIS": "매수 자제 — 현금 비중 높이고 방어 자산(금/채권) 위주",
     }
 
+    # 위험 모드 결정
+    danger_mode = _get_danger_mode(regime, vix, shield_status)
+    vix_grade = _get_vix_grade(vix)
+
     regime_kr = REGIME_KR.get(regime, regime)
     shield_kr = SHIELD_KR.get(shield_status, shield_status)
 
@@ -517,23 +587,39 @@ def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dic
     hot = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[:3]]
     cold = [{"sector": s["sector"], "ret_5": s.get("ret_5", 0)} for s in sectors[-3:]] if len(sectors) >= 6 else []
 
-    # 한글 요약
-    if regime == "CRISIS" or shield_status == "RED":
+    # 한글 요약 (위험 모드 우선)
+    if danger_mode == "PANIC":
+        summary = "패닉 — 신규 매수 자제! 금/채권 방어 + 현금 55% 이상 유지"
+        strategy = "전면 방어 — 개별주 진입 금지, ETF(금/채권/인버스)로 자산 보호"
+    elif danger_mode == "DANGER":
+        summary = f"{regime_kr} + 공포지수 경고 — 방어 자산 위주, 개별주 최소화"
+        strategy = "방어 우선 — ETF 배분 유지, 개별주는 수급 통과 종목만 소량"
+    elif regime == "CRISIS" or shield_status == "RED":
         summary = f"{regime_kr} + 위험 방어 {shield_kr} — 매수 자제, 현금 위주 운영"
+        strategy = STRATEGY_MAP.get("CRISIS", "")
     elif regime == "BEAR":
         summary = f"{regime_kr} — 확실한 종목만 소량 진입"
+        strategy = STRATEGY_MAP.get("BEAR", "")
     elif regime == "CAUTION":
         summary = f"{regime_kr} — 선별 매수, 손절 라인 꼭 지키기"
+        strategy = STRATEGY_MAP.get("CAUTION", "")
     else:
         summary = f"{regime_kr} — 적극 매수 구간"
+        strategy = STRATEGY_MAP.get("BULL", "")
+
+    # stale 데이터 경고
+    stale_info = _check_data_stale(brain)
 
     return {
         "summary": summary,
-        "strategy": STRATEGY_MAP.get(regime, ""),
+        "strategy": strategy,
         "hot_sectors": hot,
         "cold_sectors": cold,
-        "vix": brain.get("vix", 0),
-        "cash_ratio": brain.get("cash_ratio", brain.get("cash_pct", 0)),
+        "vix": vix,
+        "vix_grade": vix_grade,
+        "cash_ratio": cash_ratio,
+        "danger_mode": danger_mode,
+        "stale": stale_info,
     }
 
 
@@ -602,19 +688,33 @@ def build_jarvis_payload() -> dict:
     sector_momentum = _load("sector_rotation/sector_momentum.json")
     etf_result = _load("etf_rotation_result.json")
 
-    # signal_accuracy: 최신 학습 데이터에서
-    acc_raw = {}
-    learn_idx = _load("market_learning/_index.json")
-    latest_learn = learn_idx.get("latest", "")
-    if latest_learn:
-        learn = _load(f"market_learning/{latest_learn}.json")
-        acc_raw = learn.get("signal_accuracy", {})
+    # signal_accuracy: 독립 파일 우선, 없으면 _index 경유
+    acc_file = _load("market_learning/signal_accuracy.json")
+    acc_raw = acc_file.get("signals", {})
+    if not acc_raw:
+        learn_idx = _load("market_learning/_index.json")
+        latest_learn = learn_idx.get("latest", "")
+        if latest_learn:
+            learn = _load(f"market_learning/{latest_learn}.json")
+            acc_raw = learn.get("signal_accuracy", {})
+
+    # 위험 모드 결정
+    regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
+    vix = brain.get("vix") or brain.get("vix_level") or 0
+    shield_status = shield.get("status", "YELLOW")
+    danger_mode = _get_danger_mode(regime, vix, shield_status)
 
     # picks 요약 (전체 picks는 너무 크므로 관찰 이상만)
     all_picks = picks_raw.get("picks", [])
     buyable_grades = {"적극매수", "매수", "관심매수", "관찰"}
     buyable = [p for p in all_picks if p.get("grade") in buyable_grades]
     buyable.sort(key=lambda x: -x.get("total_score", 0))
+
+    # PANIC/DANGER → 개별주 최대 3개 + "관찰" 이상만
+    if danger_mode == "PANIC":
+        buyable = [p for p in buyable if p.get("n_sources", 0) >= 3][:3]
+    elif danger_mode == "DANGER":
+        buyable = [p for p in buyable if p.get("n_sources", 0) >= 2][:5]
 
     # 상위 20개만 전송 (Supabase JSONB 크기 제한)
     top_picks = buyable[:20]
@@ -629,13 +729,15 @@ def build_jarvis_payload() -> dict:
         },
         "accuracy": acc_raw,
         "brain": {
-            "regime": brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL",
-            "vix": brain.get("vix") or brain.get("vix_level") or 0,
+            "regime": regime,
+            "vix": vix,
+            "vix_grade": _get_vix_grade(vix),
             "cash_ratio": brain.get("cash_ratio") or brain.get("cash_pct") or 0,
             "recommendation": brain.get("recommendation", ""),
+            "danger_mode": danger_mode,
         },
         "shield": {
-            "status": shield.get("status", "YELLOW"),
+            "status": shield_status,
             "sector_concentration": shield.get("sector_concentration", 0),
             "max_drawdown": shield.get("max_drawdown", 0),
         },

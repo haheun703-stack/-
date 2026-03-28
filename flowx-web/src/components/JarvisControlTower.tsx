@@ -48,8 +48,10 @@ interface JarvisData {
     regime?: string;
     direction?: string;
     vix?: number;
+    vix_grade?: string;
     cash_ratio?: number;
     recommendation?: string;
+    danger_mode?: string;
   } | null;
   shield: {
     status?: string;
@@ -62,7 +64,15 @@ interface JarvisData {
     hot_sectors?: { sector: string; ret_5: number }[];
     cold_sectors?: { sector: string; ret_5: number }[];
     vix?: number;
+    vix_grade?: string;
     cash_ratio?: number;
+    danger_mode?: string;
+    stale?: {
+      stale: boolean;
+      age_days: number;
+      last_update: string;
+      message: string;
+    } | null;
   } | null;
   sectors?: {
     date?: string;
@@ -81,6 +91,18 @@ interface JarvisData {
   updated_at?: string | null;
   date?: string | null;
 }
+
+/* ─── 아이콘 (유니코드 이스케이프) ─── */
+const ICO = {
+  WARN: "\u26A0\uFE0F",
+  STOP: "\uD83D\uDED1",
+  SIREN: "\uD83D\uDEA8",
+  SHIELD: "\uD83D\uDEE1\uFE0F",
+  CHART_DOWN: "\uD83D\uDCC9",
+  FIRE: "\uD83D\uDD25",
+  ICE: "\uD83E\uDDCA",
+  YELLOW_CIRCLE: "\uD83D\uDFE1",
+};
 
 /* ─── 상수 ─── */
 
@@ -320,39 +342,88 @@ function MarketGuideBanner({
 }) {
   const hot = guide.hot_sectors ?? [];
   const cold = guide.cold_sectors ?? [];
+  const dangerMode = guide.danger_mode ?? "NORMAL";
+  const stale = guide.stale;
+
+  // PANIC/DANGER 모드별 배너 스타일
+  const bannerStyle = dangerMode === "PANIC"
+    ? "bg-red-950 rounded-xl p-5 ring-2 ring-red-500/50"
+    : dangerMode === "DANGER"
+      ? "bg-red-950/60 rounded-xl p-5 ring-1 ring-red-800/50"
+      : `bg-gray-900 rounded-xl p-5 ${regimeInfo.bg ? `border ${regimeInfo.bg}` : ""}`;
+
+  const summaryColor = dangerMode === "PANIC"
+    ? "text-red-400"
+    : dangerMode === "DANGER"
+      ? "text-orange-400"
+      : regimeInfo.color;
+
+  const summaryIcon = dangerMode === "PANIC"
+    ? ICO.WARN
+    : dangerMode === "DANGER"
+      ? ICO.SIREN
+      : regimeInfo.icon;
 
   return (
-    <div className={`bg-gray-900 rounded-lg p-5 border ${regimeInfo.bg}`}>
+    <div className={bannerStyle}>
+      {/* stale 데이터 경고 */}
+      {stale && (
+        <div className="bg-yellow-900/30 text-yellow-400 text-xs px-3 py-2 rounded-lg mb-3">
+          {ICO.WARN} {stale.message}
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-3">
         <div>
-          <p className={`${regimeInfo.color} text-sm font-bold`}>
-            {regimeInfo.icon} {guide.summary}
+          <p className={`${summaryColor} text-sm font-bold`}>
+            {summaryIcon} {guide.summary}
           </p>
           {guide.strategy && (
             <p className="text-gray-400 text-xs mt-1">{guide.strategy}</p>
           )}
         </div>
-        {guide.vix != null && guide.vix > 0 && (
-          <span className={`text-xs px-2 py-1 rounded ${
-            guide.vix >= 30 ? "bg-red-900/50 text-red-400" :
-            guide.vix >= 20 ? "bg-yellow-900/50 text-yellow-400" :
-            "bg-green-900/50 text-green-400"
-          }`}>
-            공포지수 {guide.vix}
-          </span>
-        )}
+        <div className="flex gap-2">
+          {guide.vix != null && guide.vix > 0 && (
+            <span className={`text-xs px-2 py-1 rounded ${
+              guide.vix >= 40 ? "bg-red-900/80 text-red-300 font-bold animate-pulse" :
+              guide.vix >= 30 ? "bg-red-900/50 text-red-400" :
+              guide.vix >= 20 ? "bg-yellow-900/50 text-yellow-400" :
+              "bg-green-900/50 text-green-400"
+            }`}>
+              {ICO.CHART_DOWN} {guide.vix}
+            </span>
+          )}
+          {dangerMode !== "NORMAL" && (
+            <span className={`text-xs px-2 py-1 rounded font-bold ${
+              dangerMode === "PANIC" ? "bg-red-600 text-gray-200 animate-pulse" :
+              dangerMode === "DANGER" ? "bg-orange-900/50 text-orange-400" :
+              "bg-yellow-900/50 text-yellow-400"
+            }`}>
+              {dangerMode === "PANIC" ? `${ICO.STOP} PANIC` :
+               dangerMode === "DANGER" ? `${ICO.WARN} DANGER` :
+               `${ICO.YELLOW_CIRCLE} WARNING`}
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* PANIC 모드: 방어 가이드 강조 */}
+      {dangerMode === "PANIC" && (
+        <div className="bg-red-900/30 text-red-300 text-xs px-3 py-2 rounded-lg mb-3">
+          {ICO.SHIELD} <strong>ETF(금/채권) 95%</strong> + 개별주 5% 이하 | 현금 55% 이상 유지 권장
+        </div>
+      )}
 
       {(hot.length > 0 || cold.length > 0) && (
         <div className="flex flex-wrap gap-2 text-xs">
           {hot.map((s) => (
-            <span key={s.sector} className="bg-red-900/30 text-red-400 px-2 py-0.5 rounded-full border border-red-800/30">
-              🔥 {s.sector} {s.ret_5 > 0 ? `+${s.ret_5.toFixed(1)}%` : `${s.ret_5.toFixed(1)}%`}
+            <span key={s.sector} className="bg-red-900/30 text-red-400 px-2 py-0.5 rounded-full">
+              {ICO.FIRE} {s.sector} {s.ret_5 > 0 ? `+${s.ret_5.toFixed(1)}%` : `${s.ret_5.toFixed(1)}%`}
             </span>
           ))}
           {cold.map((s) => (
-            <span key={s.sector} className="bg-blue-900/20 text-blue-300/60 px-2 py-0.5 rounded-full border border-blue-800/20">
-              🧊 {s.sector} {s.ret_5.toFixed(1)}%
+            <span key={s.sector} className="bg-blue-900/20 text-blue-300/60 px-2 py-0.5 rounded-full">
+              {ICO.ICE} {s.sector} {s.ret_5.toFixed(1)}%
             </span>
           ))}
         </div>
