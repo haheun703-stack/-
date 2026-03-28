@@ -439,14 +439,15 @@ CHAIN_TICKERS = {
 }
 
 
-def fetch_intraday(tickers: dict | None = None, period: str = "5d") -> dict[str, pd.DataFrame]:
-    """yfinance로 5분봉 인트라데이 데이터 수집."""
+def fetch_intraday(tickers: dict | None = None, period: str = "5d", max_retries: int = 2) -> dict[str, pd.DataFrame]:
+    """yfinance로 5분봉 인트라데이 데이터 수집 (실패 시 재시도)."""
     import yfinance as yf
 
     if tickers is None:
         tickers = CHAIN_TICKERS
 
     result = {}
+    failed = []
     for ticker, label in tickers.items():
         try:
             obj = yf.Ticker(ticker)
@@ -456,8 +457,29 @@ def fetch_intraday(tickers: dict | None = None, period: str = "5d") -> dict[str,
                 logger.debug(f"  {ticker} ({label}): {len(df)}봉")
             else:
                 logger.warning(f"  {ticker} ({label}): 데이터 없음")
+                failed.append((ticker, label))
         except Exception as e:
             logger.warning(f"  {ticker} ({label}): 실패 — {e}")
+            failed.append((ticker, label))
+
+    # 실패 종목 재시도
+    for attempt in range(max_retries):
+        if not failed:
+            break
+        import time as _time
+        _time.sleep(3)
+        retry_list = failed[:]
+        failed = []
+        for ticker, label in retry_list:
+            try:
+                df = yf.Ticker(ticker).history(period=period, interval="5m")
+                if df is not None and not df.empty:
+                    result[ticker] = df
+                    logger.info(f"  {ticker} ({label}): 재시도 성공 ({attempt+1}회)")
+                else:
+                    failed.append((ticker, label))
+            except Exception:
+                failed.append((ticker, label))
 
     return result
 

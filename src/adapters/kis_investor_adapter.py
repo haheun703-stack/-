@@ -45,8 +45,8 @@ KIS_APP_SECRET = os.getenv("KIS_APP_SECRET", "")
 _token_cache: dict = {"token": "", "expires": 0}
 
 
-def _issue_token() -> str:
-    """KIS 접근 토큰 발급 (캐시 활용)."""
+def _issue_token(max_retries: int = 3) -> str:
+    """KIS 접근 토큰 발급 (캐시 활용, rate limit 재시도)."""
     now = time.time()
     if _token_cache["token"] and _token_cache["expires"] > now:
         return _token_cache["token"]
@@ -57,18 +57,33 @@ def _issue_token() -> str:
         "appkey": KIS_APP_KEY,
         "appsecret": KIS_APP_SECRET,
     }
-    resp = requests.post(url, json=body, timeout=10)
-    data = resp.json()
 
-    token = data.get("access_token", "")
-    if not token:
-        raise RuntimeError(f"KIS 토큰 발급 실패: {data}")
+    last_error = None
+    for attempt in range(max_retries):
+        resp = requests.post(url, json=body, timeout=10)
+        data = resp.json()
 
-    # 토큰 유효기간 (보통 24시간, 안전하게 23시간 캐시)
-    _token_cache["token"] = token
-    _token_cache["expires"] = now + 23 * 3600
-    logger.info("KIS 토큰 발급 성공")
-    return token
+        token = data.get("access_token", "")
+        if token:
+            _token_cache["token"] = token
+            _token_cache["expires"] = time.time() + 23 * 3600
+            logger.info("KIS 토큰 발급 성공")
+            return token
+
+        error_code = data.get("error_code", "")
+        last_error = data
+
+        # EGW00133: 1분당 1회 제한 → 65초 대기 후 재시도
+        if error_code == "EGW00133" and attempt < max_retries - 1:
+            wait = 65
+            logger.warning("KIS 토큰 rate limit — %d초 대기 후 재시도 (%d/%d)",
+                           wait, attempt + 1, max_retries)
+            time.sleep(wait)
+            continue
+
+        break
+
+    raise RuntimeError(f"KIS 토큰 발급 실패: {last_error}")
 
 
 def fetch_investor_by_ticker(ticker: str) -> pd.DataFrame:
