@@ -16,10 +16,11 @@
 ## AWS Lightsail 배포
 - **인스턴스**: Bodyhunter-60GB (Seoul), RAM 2GB (서비스 3개 공유)
 - **고정 IP**: 13.209.153.221 (KIS API 화이트리스트 등록됨)
-- **SSH**: `ssh -i "_tmp_zips/lightsail_60gb.pem" ubuntu@13.209.153.221`
+- **SSH 키**: `D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem` (단타봇 프로젝트에 위치, 복사 불필요)
+- **SSH 접속**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221`
 - **서버 경로**: `/home/ubuntu/quantum-master/`
 - **서비스**: `quantum-scheduler.service` (systemd)
-- **배포**: `git pull && sudo systemctl restart quantum-scheduler`
+- **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull && sudo systemctl restart quantum-scheduler"`
 - **로그**: `sudo journalctl -u quantum-scheduler --no-pager -n 50`
 
 ## 시스템 상세 참조
