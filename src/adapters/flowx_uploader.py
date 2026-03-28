@@ -666,6 +666,97 @@ def _build_etf_picks(etf_result: dict) -> dict:
     }
 
 
+def _build_performance_data() -> dict:
+    """최근 5일 시그널 적중률 + 시장 요약."""
+    import glob
+    learn_dir = DATA_DIR / "market_learning"
+    files = sorted(glob.glob(str(learn_dir / "2026-*.json")))[-5:]
+
+    daily = []
+    for fpath in files:
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                d = json.load(f)
+            acc = d.get("signal_accuracy", {})
+            summary = d.get("summary", {})
+            # 적중률 평균 (total > 0인 소스만)
+            rates = [v["hit_rate"] for v in acc.values() if isinstance(v, dict) and v.get("total", 0) > 0]
+            avg_hit = round(sum(rates) / len(rates), 1) if rates else 0
+            daily.append({
+                "date": d.get("date", ""),
+                "avg_hit_rate": avg_hit,
+                "market_avg_ret": summary.get("avg_ret", 0),
+                "up_ratio": round(summary.get("up_count", 0) / max(summary.get("total", 1), 1) * 100, 1),
+                "sources": {
+                    k: {"hit_rate": v.get("hit_rate", 0), "total": v.get("total", 0), "avg_ret": v.get("avg_ret", 0)}
+                    for k, v in acc.items()
+                    if isinstance(v, dict) and v.get("total", 0) > 0
+                },
+            })
+        except Exception:
+            continue
+
+    # 최신일 상세
+    latest = daily[-1] if daily else {}
+
+    return {
+        "daily_trend": daily,
+        "latest": latest,
+    }
+
+
+def _build_signals_data(all_picks: list, accuracy: dict) -> dict:
+    """매매 신호 분석 데이터 구축."""
+    from collections import Counter
+
+    # 소스별 감지 수
+    source_counts: dict[str, int] = Counter()
+    for p in all_picks:
+        for src in p.get("sources", []):
+            source_counts[src] += 1
+
+    # 교차검증 분포
+    ns_dist = Counter(p.get("n_sources", 0) for p in all_picks)
+    single = sum(v for k, v in ns_dist.items() if k == 1)
+    double = sum(v for k, v in ns_dist.items() if k == 2)
+    triple_plus = sum(v for k, v in ns_dist.items() if k >= 3)
+
+    # 소스 조합 TOP 5 (2소스 이상)
+    combo_counts: dict[str, int] = Counter()
+    for p in all_picks:
+        srcs = sorted(p.get("sources", []))
+        if len(srcs) >= 2:
+            combo_counts["+".join(srcs)] += 1
+    top_combos = [
+        {"combo": k, "count": v}
+        for k, v in combo_counts.most_common(5)
+    ]
+
+    # 소스별 활성도 + 정확도 합산
+    sources_detail = []
+    for src, cnt in source_counts.most_common(12):
+        acc = accuracy.get(src, {})
+        hit_rate = acc.get("hit_rate", 0) if isinstance(acc, dict) else 0
+        total = acc.get("total", 0) if isinstance(acc, dict) else 0
+        sources_detail.append({
+            "source": src,
+            "count": cnt,
+            "hit_rate": hit_rate,
+            "total_tested": total,
+        })
+
+    return {
+        "total": len(all_picks),
+        "sources": sources_detail,
+        "cross_validation": {
+            "single": single,
+            "double": double,
+            "triple_plus": triple_plus,
+        },
+        "top_combos": top_combos,
+    }
+
+
 def build_jarvis_payload() -> dict:
     """자비스 컨트롤타워 데이터 통합 빌드.
 
@@ -745,6 +836,10 @@ def build_jarvis_payload() -> dict:
         "market_guide": _build_market_guide(brain, shield, sector_momentum),
         "sectors": _build_sectors_data(sector_momentum),
         "etf_picks": _build_etf_picks(etf_result),
+        # Phase 3: 매매 신호 분석
+        "signals": _build_signals_data(all_picks, acc_raw),
+        # Phase 4: 성과
+        "performance": _build_performance_data(),
     }
 
 
