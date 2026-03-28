@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { MorningBriefing as BriefingType, NewsPick } from "@/lib/types";
 import { FREE_PICKS_LIMIT, normalizeNewsPick } from "@/lib/types";
 import PaywallBlur from "./PaywallBlur";
@@ -70,7 +71,7 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
           <p className="text-gray-500 text-sm">{briefing.date}</p>
         </div>
         <span
-          className={`${statusInfo.color} text-lg font-bold bg-gray-900 px-4 py-2 rounded-lg border border-gray-800`}
+          className={`${statusInfo.color} text-lg font-bold bg-gray-900 px-4 py-2 rounded-xl`}
         >
           {statusInfo.label}
         </span>
@@ -79,13 +80,13 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
       {/* 시장 요약 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {briefing.us_summary && (
-          <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <div className="bg-gray-900 rounded-lg p-4 ">
             <p className="text-gray-500 text-xs mb-2">🌍 US 야간</p>
             <p className="text-gray-200 text-sm">{briefing.us_summary}</p>
           </div>
         )}
         {briefing.kr_summary && (
-          <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+          <div className="bg-gray-900 rounded-lg p-4 ">
             <p className="text-gray-500 text-xs mb-2">🇰🇷 KR 전망</p>
             <p className="text-gray-200 text-sm">{briefing.kr_summary}</p>
           </div>
@@ -100,7 +101,7 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
             {briefing.sector_focus.map((sector) => (
               <span
                 key={sector}
-                className="bg-blue-900/30 text-blue-400 text-xs px-3 py-1 rounded-full border border-blue-800/50"
+                className="bg-blue-900/30 text-blue-400 text-xs px-3 py-1 rounded-full"
               >
                 {sector}
               </span>
@@ -141,15 +142,15 @@ export default function MorningBriefing({ isPaid = false }: { isPaid?: boolean }
 
 function PickCard({ pick }: { pick: NewsPick }) {
   const gradeColors: Record<string, string> = {
-    "적극매수": "bg-red-600",
-    "매수": "bg-green-600",
+    "\uc801\uadf9\ub9e4\uc218": "bg-red-600",
+    "\ub9e4\uc218": "bg-green-600",
     AA: "bg-red-600",
     A: "bg-green-600",
     B: "bg-blue-600",
   };
 
-  return (
-    <div className="flex items-center justify-between bg-gray-900 rounded-lg p-3 border border-gray-800">
+  const inner = (
+    <div className="flex items-center justify-between bg-gray-900 rounded-xl p-3 hover:bg-gray-800/70 transition-colors">
       <div className="flex items-center gap-3">
         {pick.grade && (
           <span
@@ -178,4 +179,9 @@ function PickCard({ pick }: { pick: NewsPick }) {
       </div>
     </div>
   );
+
+  if (pick.ticker) {
+    return <Link href={`/stock/${pick.ticker}`}>{inner}</Link>;
+  }
+  return inner;
 }
