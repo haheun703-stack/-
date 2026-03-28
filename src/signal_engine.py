@@ -770,6 +770,9 @@ class SignalEngine:
             "news_action": "ignore",
             "accum_phase": "none",
             "divergence_type": "none",
+            # v3.2 TRIX 다이버전스
+            "trix_divergence": "none",
+            "trix_div_strength": 0.0,
         }
 
         # 진단 레코드
@@ -1209,10 +1212,12 @@ class SignalEngine:
             logger.warning("매집 감지 실패 %s: %s", ticker, e)
             accum_signal = None
 
-        # v3.1 OBV 다이버전스 감지
+        # v3.2 OBV + TRIX 다이버전스 통합 감지
         try:
-            div_signal = self.div_scanner.scan(df)
+            div_signal = self.div_scanner.scan_all(df)
             result["divergence_type"] = div_signal.type
+            result["trix_divergence"] = div_signal.trix_type
+            result["trix_div_strength"] = div_signal.trix_strength
         except Exception as e:
             logger.warning("다이버전스 감지 실패 %s: %s", ticker, e)
             div_signal = None
@@ -1225,6 +1230,10 @@ class SignalEngine:
             # 매집 Phase2+ 이면 SmartZ 낮아도 통과 허용
             sm_passed = True
             sm_reason = ""
+        elif not sm_passed and div_signal and div_signal.trix_type == "bullish" and div_signal.trix_strength >= 0.3:
+            # v3.2 TRIX 불리시 다이버전스 (강도 0.3+)도 SmartZ 통과 보조
+            sm_passed = True
+            sm_reason = ""
 
         diag.add_layer(LayerResult(
             name="L4_smart_money",
@@ -1234,6 +1243,8 @@ class SignalEngine:
                 "accum_phase": accum_signal.phase if accum_signal else "none",
                 "accum_score": accum_signal.score_modifier if accum_signal else 0,
                 "divergence": div_signal.type if div_signal else "none",
+                "trix_div": div_signal.trix_type if div_signal else "none",
+                "trix_div_str": div_signal.trix_strength if div_signal else 0.0,
             },
         ))
         accum_score_val = accum_signal.score_modifier if accum_signal else 0

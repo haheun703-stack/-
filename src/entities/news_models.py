@@ -159,6 +159,9 @@ class DivergenceSignal:
     obv_trend: str = "unknown"    # falling / rising / flat
     lookback_days: int = 30
     reason: str = ""
+    # v3.2 TRIX 다이버전스 (극값 기반)
+    trix_type: str = "none"       # bullish / bearish / none
+    trix_strength: float = 0.0    # 0.0 ~ 1.0 연속 스코어
 
 
 # ============================================================
