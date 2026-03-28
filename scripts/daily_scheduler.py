@@ -348,7 +348,7 @@ class DailyScheduler:
 
         try:
             from src.adapters.kis_intraday_adapter import KisIntradayAdapter
-            adapter = KisIntradayAdapter(self.config)
+            adapter = KisIntradayAdapter()
 
             # 수집 대상: 보유종목 + 관심종목 (전일 스캔 결과)
             tickers = self._get_supply_tickers()
