@@ -153,25 +153,36 @@ class SmartSellExecutor:
                     "detail": f"지정가 {filled_price:,}원 체결",
                     "order_id": order.order_id,
                 }
-            # 부분 체결 시 잔여 수량 갱신
+            # 부분 체결 시 누적 체결 수량 추적
             if status.status.value == "partial" and status.filled_quantity > 0:
-                qty = order.quantity - status.filled_quantity
+                cumulative_filled = status.filled_quantity
 
         # 3단계: 미체결 → 취소 → 시장가 (잔여 수량만)
-        logger.info("SmartSell: %s %d분 미체결 → 취소 + 시장가", ticker, timeout_min)
+        cumulative_filled = getattr(status, "filled_quantity", 0) or 0
+        remaining = qty - cumulative_filled
+        if remaining <= 0:
+            logger.info("SmartSell: %s 대기 중 전량 체결됨 (%d주)", ticker, qty)
+            return {
+                "method": "limit_filled_during_wait",
+                "price": limit_price,
+                "qty": qty,
+                "filled": True,
+                "detail": f"대기 중 전량 체결 {qty}주",
+                "order_id": order.order_id,
+            }
+        logger.info("SmartSell: %s %d분 미체결 → 취소 + 시장가 (잔여 %d주)", ticker, timeout_min, remaining)
         cancelled = self.order.cancel(order)
         if not cancelled:
             logger.warning("SmartSell: %s 취소 실패 → 시장가 전환 중단", ticker)
             return {
                 "method": "limit_cancel_failed",
                 "price": limit_price,
-                "qty": qty,
+                "qty": remaining,
                 "filled": False,
                 "detail": "취소 실패 → 시장가 전환 중단 (이중 매도 방지)",
                 "order_id": order.order_id,
             }
         time.sleep(1)
-        remaining = qty if qty > 0 else order.quantity
         return self._market_immediate(ticker, remaining, price, dry_run=False)
 
     def _patient_sell(

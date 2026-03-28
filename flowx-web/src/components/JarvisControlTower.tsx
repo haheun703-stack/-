@@ -177,7 +177,7 @@ export default function JarvisControlTower() {
     const controller = new AbortController();
     async function load() {
       try {
-        const res = await fetch("/api/quant-jarvis", { signal: controller.signal });
+        const res = await fetch("/api/quant", { signal: controller.signal });
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         setData(await res.json());
       } catch (err) {

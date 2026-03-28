@@ -504,7 +504,7 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             "foreign_detail": None,
             "inst_support": bool(pick.get("inst_5d", 0) > 0),
             "entry_price": pick.get("entry_price", close),
-            "stop_loss": pick.get("stop_loss", int(close * 0.92)),
+            "stop_loss": pick.get("stop_loss") or int(close * 0.92),
             "target_price": pick.get("target_price", int(close * 1.1)),
             "holding_days": 5,
             "signal_type": "BUY",

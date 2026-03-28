@@ -172,7 +172,8 @@ class SmartEntryEngine:
         self.max_stocks = live_cfg.get("max_stocks", 1)
         self.max_amount_per_stock = live_cfg.get("max_amount_per_stock", 500_000)
         self.max_total_amount = live_cfg.get("max_total_amount", 500_000)
-        _proj_root = Path(__file__).resolve().parent.parent.parent
+        self._proj_root = Path(__file__).resolve().parent.parent.parent
+        _proj_root = self._proj_root
         self.kill_switch_file = Path(live_cfg.get("kill_switch_file", str(_proj_root / "data" / "KILL_SWITCH")))
         self.v3_sizing_enabled = live_cfg.get("v3_sizing_enabled", False)
 
@@ -395,7 +396,7 @@ class SmartEntryEngine:
           - v3 picks에 포함된 종목은 v3_backed=True, v3_size_pct 설정
           - v3 picks 우선 정렬 (conviction 기반)
         """
-        path = Path(picks_path) if picks_path else Path("data/tomorrow_picks.json")
+        path = Path(picks_path) if picks_path else self._proj_root / "data" / "tomorrow_picks.json"
         if not path.exists():
             logger.error("[로드] %s 없음", path)
             return 0
@@ -529,7 +530,7 @@ class SmartEntryEngine:
     def _is_nxt_tradeable(self, ticker: str) -> bool:
         """NXT 마스터에 해당 종목이 있는지 확인"""
         try:
-            master_path = Path("data/nxt/nxt_master.json")
+            master_path = self._proj_root / "data" / "nxt" / "nxt_master.json"
             if not master_path.exists():
                 return False
             data = json.loads(master_path.read_text(encoding="utf-8"))
@@ -835,7 +836,7 @@ class SmartEntryEngine:
         """[채널 2] AI 두뇌 판단에 따른 진입 점수 보정."""
         if self._ai_judgments_cache is None:
             try:
-                ai_path = Path("data/ai_brain_judgment.json")
+                ai_path = self._proj_root / "data" / "ai_brain_judgment.json"
                 if not ai_path.exists():
                     self._ai_judgments_cache = {}
                 else:
@@ -1094,7 +1095,7 @@ class SmartEntryEngine:
         """
         try:
             import pandas as pd
-            parquet_path = Path(f"data/processed/{c.ticker}.parquet")
+            parquet_path = self._proj_root / "data" / "processed" / f"{c.ticker}.parquet"
             if not parquet_path.exists():
                 logger.warning("[일봉] %s parquet 없음", c.ticker)
                 return
@@ -1525,7 +1526,7 @@ class SmartEntryEngine:
         report = self.generate_report()
 
         # 결과 저장
-        report_path = Path("data/smart_entry_report.json")
+        report_path = self._proj_root / "data" / "smart_entry_report.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
@@ -1590,7 +1591,7 @@ class SmartEntryEngine:
         report = self.generate_report()
 
         # 결과 저장
-        report_path = Path("data/smart_entry_report.json")
+        report_path = self._proj_root / "data" / "smart_entry_report.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)

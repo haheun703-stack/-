@@ -217,7 +217,7 @@ class LiveTradingEngine:
         # 체결 대기
         filled_order = self._wait_for_fill(order)
 
-        if filled_order.status in (OrderStatus.FILLED, OrderStatus.PENDING):
+        if filled_order.status == OrderStatus.FILLED:
             # 포지션 등록
             pos = self.tracker.add_position(filled_order, signal)
             # 텔레그램 알림
@@ -401,7 +401,7 @@ class LiveTradingEngine:
 
             # 15:20 장중 모니터링 종료
             now = datetime.now()
-            if now.hour >= 15 and now.minute >= 20:
+            if now.hour > 15 or (now.hour == 15 and now.minute >= 20):
                 logger.info("[모니터] 15:20 — 장중 모니터링 종료")
                 break
 
@@ -540,7 +540,7 @@ class LiveTradingEngine:
         try:
             import pandas as pd
 
-            kospi_path = Path("data/kospi_index.csv")
+            kospi_path = Path(__file__).resolve().parent.parent.parent / "data" / "kospi_index.csv"
             if not kospi_path.exists():
                 logger.warning("[레짐] kospi_index.csv 없음 → 기본값 %d", self.max_positions)
                 return self.max_positions

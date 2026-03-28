@@ -24,7 +24,10 @@ export async function GET() {
       return NextResponse.json(null);
     }
 
-    return NextResponse.json({ ...row.data, date: row.date });
+    const payload = typeof row.data === "object" && row.data !== null
+      ? { ...row.data, date: row.date }
+      : { date: row.date };
+    return NextResponse.json(payload);
   } catch (e) {
     console.error("[API /scenarios] Unexpected error:", e);
     return NextResponse.json(

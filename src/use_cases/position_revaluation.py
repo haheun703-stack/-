@@ -105,39 +105,37 @@ class PositionRevaluationEngine:
 
     def _ensure_db_tables(self) -> None:
         try:
-            conn = sqlite3.connect(str(DB_PATH))
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS position_targets (
-                    date TEXT NOT NULL,
-                    ticker TEXT NOT NULL,
-                    name TEXT,
-                    base_target REAL,
-                    report_adj REAL,
-                    news_adj REAL,
-                    supply_adj REAL,
-                    tech_adj REAL,
-                    dart_adj REAL,
-                    final_target REAL,
-                    action TEXT,
-                    reason TEXT,
-                    confidence REAL,
-                    pnl_pct REAL,
-                    current_price REAL,
-                    PRIMARY KEY (date, ticker)
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS position_adjustments (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT NOT NULL,
-                    ticker TEXT NOT NULL,
-                    source TEXT NOT NULL,
-                    reason TEXT,
-                    adj_pct REAL
-                )
-            """)
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(str(DB_PATH)) as conn:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS position_targets (
+                        date TEXT NOT NULL,
+                        ticker TEXT NOT NULL,
+                        name TEXT,
+                        base_target REAL,
+                        report_adj REAL,
+                        news_adj REAL,
+                        supply_adj REAL,
+                        tech_adj REAL,
+                        dart_adj REAL,
+                        final_target REAL,
+                        action TEXT,
+                        reason TEXT,
+                        confidence REAL,
+                        pnl_pct REAL,
+                        current_price REAL,
+                        PRIMARY KEY (date, ticker)
+                    )
+                """)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS position_adjustments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        date TEXT NOT NULL,
+                        ticker TEXT NOT NULL,
+                        source TEXT NOT NULL,
+                        reason TEXT,
+                        adj_pct REAL
+                    )
+                """)
         except Exception as e:
             logger.warning("DB 테이블 생성 실패: %s", e)
 
@@ -599,41 +597,39 @@ class PositionRevaluationEngine:
 
     def _save_to_db(self, result: MonitorResult) -> None:
         try:
-            conn = sqlite3.connect(str(DB_PATH))
-            for pt in result.positions:
-                adj = pt.adjustment
-                tech_adj = round(adj.macd_adj + adj.rsi_adj + adj.bb_adj, 4)
-                reason_str = " | ".join(pt.reasons[:5])
-                conn.execute(
-                    """INSERT OR REPLACE INTO position_targets
-                       (date, ticker, name, base_target, report_adj, news_adj,
-                        supply_adj, tech_adj, dart_adj, final_target,
-                        action, reason, confidence, pnl_pct, current_price)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (
-                        pt.date, pt.ticker, pt.name, pt.base_target,
-                        adj.report_adj, adj.news_adj, adj.supply_adj,
-                        tech_adj, adj.dart_adj, pt.final_target,
-                        pt.action.value, reason_str, pt.confidence,
-                        pt.pnl_pct, pt.current_price,
-                    ),
-                )
-                # 개별 조정 이력
-                for source, val in [
-                    ("report", adj.report_adj), ("news", adj.news_adj),
-                    ("supply", adj.supply_adj), ("macd", adj.macd_adj),
-                    ("rsi", adj.rsi_adj), ("bb", adj.bb_adj),
-                    ("dart", adj.dart_adj),
-                ]:
-                    if val != 0:
-                        conn.execute(
-                            """INSERT INTO position_adjustments
-                               (date, ticker, source, reason, adj_pct)
-                               VALUES (?,?,?,?,?)""",
-                            (pt.date, pt.ticker, source, "", val),
-                        )
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(str(DB_PATH)) as conn:
+                for pt in result.positions:
+                    adj = pt.adjustment
+                    tech_adj = round(adj.macd_adj + adj.rsi_adj + adj.bb_adj, 4)
+                    reason_str = " | ".join(pt.reasons[:5])
+                    conn.execute(
+                        """INSERT OR REPLACE INTO position_targets
+                           (date, ticker, name, base_target, report_adj, news_adj,
+                            supply_adj, tech_adj, dart_adj, final_target,
+                            action, reason, confidence, pnl_pct, current_price)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                        (
+                            pt.date, pt.ticker, pt.name, pt.base_target,
+                            adj.report_adj, adj.news_adj, adj.supply_adj,
+                            tech_adj, adj.dart_adj, pt.final_target,
+                            pt.action.value, reason_str, pt.confidence,
+                            pt.pnl_pct, pt.current_price,
+                        ),
+                    )
+                    # 개별 조정 이력
+                    for source, val in [
+                        ("report", adj.report_adj), ("news", adj.news_adj),
+                        ("supply", adj.supply_adj), ("macd", adj.macd_adj),
+                        ("rsi", adj.rsi_adj), ("bb", adj.bb_adj),
+                        ("dart", adj.dart_adj),
+                    ]:
+                        if val != 0:
+                            conn.execute(
+                                """INSERT INTO position_adjustments
+                                   (date, ticker, source, reason, adj_pct)
+                                   VALUES (?,?,?,?,?)""",
+                                (pt.date, pt.ticker, source, "", val),
+                            )
             logger.info("DB 저장 완료: %d건", len(result.positions))
         except Exception as e:
             logger.warning("DB 저장 실패: %s", e)

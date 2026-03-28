@@ -32,9 +32,10 @@ from src.use_cases.ports import CurrentPricePort
 
 logger = logging.getLogger(__name__)
 
-POSITIONS_FILE = Path("data/positions.json")
-TRADES_FILE = Path("data/trades_history.json")
-PERFORMANCE_FILE = Path("data/daily_performance.json")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+POSITIONS_FILE = _PROJECT_ROOT / "data" / "positions.json"
+TRADES_FILE = _PROJECT_ROOT / "data" / "trades_history.json"
+PERFORMANCE_FILE = _PROJECT_ROOT / "data" / "daily_performance.json"
 
 # 4단계 부분청산 R배수 (backtest_engine과 동일)
 PARTIAL_EXIT_R = [2, 4, 8, 10]
@@ -442,6 +443,7 @@ class PositionTracker:
     def sync_with_broker(self, holdings: list[dict]) -> None:
         """한투 실잔고와 동기화 (불일치 감지)"""
         broker_map = {h["ticker"]: h for h in holdings}
+        orphaned = []
         for pos in self.positions:
             if pos.ticker in broker_map:
                 broker_qty = broker_map[pos.ticker]["quantity"]
@@ -456,6 +458,9 @@ class PositionTracker:
                     "[동기화] %s 트래커에만 존재 (실잔고 없음) — 제거",
                     pos.ticker,
                 )
+                orphaned.append(pos)
+        for pos in orphaned:
+            self.positions.remove(pos)
         # 트래커에 없는 종목 경고
         tracked = {p.ticker for p in self.positions}
         for ticker in broker_map:
@@ -504,7 +509,7 @@ class PositionTracker:
     def _get_ai_action_for_ticker(self, ticker: str) -> str | None:
         """[채널 4] 해당 종목의 AI 두뇌 판단(BUY/WATCH/AVOID) 조회."""
         try:
-            ai_path = Path("data/ai_brain_judgment.json")
+            ai_path = _PROJECT_ROOT / "data" / "ai_brain_judgment.json"
             if not ai_path.exists():
                 return None
             data = json.loads(ai_path.read_text(encoding="utf-8"))

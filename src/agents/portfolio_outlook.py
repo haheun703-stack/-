@@ -579,7 +579,11 @@ JSON으로 응답:
         elif "```" in text:
             text = text.split("```")[1].split("```")[0]
 
-        parsed = json.loads(text.strip())
+        try:
+            parsed = json.loads(text.strip())
+        except json.JSONDecodeError as e:
+            logger.warning("[Outlook] JSON 파싱 실패: %s — 원문: %s", e, text[:200])
+            return []
         if isinstance(parsed, dict):
             parsed = [parsed]
         return parsed

@@ -19,7 +19,8 @@ from src.macro.macro_aggregator import MacroAggregator
 
 logger = logging.getLogger(__name__)
 
-OUTPUT_PATH = Path("data/master_brain_judgment.json")
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+OUTPUT_PATH = _PROJECT_ROOT / "data" / "master_brain_judgment.json"
 
 # ─── 시스템 프롬프트 ───────────────────────────────────────────────
 
