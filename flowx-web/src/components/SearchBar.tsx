@@ -45,7 +45,7 @@ export default function SearchBar() {
   }, []);
 
   const search = useCallback(async (q: string) => {
-    if (!q.trim()) {
+    if (!q.trim() || q.trim().length < 2) {
       setResults([]);
       setOpen(false);
       return;
@@ -165,10 +165,13 @@ export default function SearchBar() {
         </div>
       )}
 
-      {open && results.length === 0 && !loading && query.trim() && (
+      {open && results.length === 0 && !loading && query.trim().length >= 2 && (
         <div className="absolute top-full mt-2 right-0 w-80 bg-gray-900 rounded-xl shadow-2xl z-50 p-4">
-          <p className="text-gray-500 text-sm text-center">
-            검색 결과가 없습니다
+          <p className="text-gray-400 text-sm text-center mb-1">
+            {"\uAC80\uC0C9"} {"\uACB0\uACFC\uAC00"} {"\uC5C6\uC2B5\uB2C8\uB2E4"}
+          </p>
+          <p className="text-gray-600 text-xs text-center">
+            FLOWX{"\uAC00"} {"\uBD84\uC11D\uD55C"} {"\uC885\uBAA9\uB9CC"} {"\uAC80\uC0C9"} {"\uAC00\uB2A5\uD569\uB2C8\uB2E4"}
           </p>
         </div>
       )}

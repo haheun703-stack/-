@@ -196,6 +196,32 @@ export default function StockDetailPage() {
       )}
 
       {/* 왜 지금? (why-now-engine) */}
+      {pick && !pick.why_now && pick.reasons.length > 0 && (
+        <section className="bg-gray-900 rounded-xl p-5 space-y-4">
+          <h2 className="text-gray-200 font-bold">{"\uC65C"} {"\uC9C0\uAE08"} {"\uC774"} {"\uC885\uBAA9\uC778\uAC00"}</h2>
+          <div>
+            <p className="text-gray-500 text-xs mb-2">{"\uBD84\uC11D"} {"\uADFC\uAC70"}</p>
+            <div className="flex flex-wrap gap-2">
+              {pick.reasons.filter((r) => !r.startsWith("\u26A0")).map((r, i) => (
+                <span
+                  key={i}
+                  className="bg-blue-900/20 text-blue-300 text-xs px-2.5 py-1 rounded-lg"
+                >
+                  {r}
+                </span>
+              ))}
+            </div>
+            {pick.reasons.filter((r) => r.startsWith("\u26A0")).length > 0 && (
+              <div className="mt-3 space-y-1">
+                {pick.reasons.filter((r) => r.startsWith("\u26A0")).map((w, i) => (
+                  <p key={i} className="text-yellow-400 text-sm">{w}</p>
+                ))}
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600 text-xs">{"\uC0C1\uC138"} AI {"\uBD84\uC11D\uC740"} {"\uB2E4\uC74C"} {"\uC5C5\uB370\uC774\uD2B8\uC5D0\uC11C"} {"\uBC18\uC601\uB429\uB2C8\uB2E4"}</p>
+        </section>
+      )}
       {pick?.why_now && (
         <section className="bg-gray-900 rounded-xl p-5 space-y-4">
           <h2 className="text-white font-bold">왜 지금 이 종목인가</h2>
