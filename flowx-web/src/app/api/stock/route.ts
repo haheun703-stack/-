@@ -43,6 +43,9 @@ export async function GET(request: Request) {
             ? [found.reason as string]
             : [];
 
+        // why_now 엔진 데이터
+        const whyNow = found.why_now as Record<string, unknown> | undefined;
+
         pick = {
           grade: String(found.grade || ""),
           score: typeof found.total_score === "number" ? found.total_score : 0,
@@ -52,6 +55,7 @@ export async function GET(request: Request) {
           stop_loss: typeof found.stop_loss === "number" ? found.stop_loss : 0,
           target_price: typeof found.target_price === "number" ? found.target_price : 0,
           n_sources: typeof found.n_sources === "number" ? found.n_sources : signals.length,
+          why_now: whyNow ?? null,
         };
       }
     }

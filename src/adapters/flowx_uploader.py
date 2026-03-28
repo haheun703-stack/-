@@ -843,6 +843,17 @@ def build_jarvis_payload() -> dict:
     # 상위 20개만 전송 (Supabase JSONB 크기 제한)
     top_picks = buyable[:20]
 
+    # why-now-engine: AI 판단을 pick에 병합
+    ai_judgments = _load("ai_brain_judgment.json")
+    ai_map: dict[str, dict] = {}
+    for j in ai_judgments.get("stock_judgments", []):
+        t = j.get("ticker", "")
+        if t:
+            ai_map[t] = j
+
+    for pick in top_picks:
+        pick["why_now"] = _build_why_now(pick, ai_map.get(pick.get("ticker", ""), {}))
+
     return {
         "picks": {
             "target_date_label": picks_raw.get("target_date_label", ""),
@@ -874,6 +885,64 @@ def build_jarvis_payload() -> dict:
         # Phase 4: 성과
         "performance": _build_performance_data(),
     }
+
+
+def _build_why_now(pick: dict, ai_judgment: dict) -> dict:
+    """왜 지금 이 종목인가 — 5가지 소스를 카테고리별 통합."""
+    why: dict = {"technical": [], "macro": None, "entry": None, "safety": None, "warnings": []}
+
+    # 1) 기술적 근거 (reasons 중 ⚠ 제외)
+    for r in pick.get("reasons", []):
+        if isinstance(r, str):
+            if r.startswith("\u26a0"):
+                why["warnings"].append(r.lstrip("\u26a0 "))
+            else:
+                why["technical"].append(r)
+
+    # 2) 거시/AI 분석 (ai_brain_judgment)
+    reasoning = ai_judgment.get("reasoning", "")
+    if reasoning:
+        catalysts = ai_judgment.get("catalysts", [])
+        confidence = ai_judgment.get("confidence", 0)
+        why["macro"] = {
+            "reasoning": reasoning,
+            "catalysts": catalysts[:3] if isinstance(catalysts, list) else [],
+            "confidence": round(confidence, 2) if isinstance(confidence, (int, float)) else 0,
+        }
+    # ai_tag 보조 (AI 판단은 없지만 태그만 있는 경우)
+    elif pick.get("ai_tag"):
+        why["macro"] = {
+            "reasoning": pick["ai_tag"],
+            "catalysts": [],
+            "confidence": 0,
+        }
+
+    # 3) 진입 조건
+    entry_cond = pick.get("entry_condition", "")
+    if entry_cond:
+        why["entry"] = entry_cond
+
+    # 4) 안전성 평가
+    safety = pick.get("safety_reason", "")
+    if safety:
+        why["safety"] = safety
+
+    # 5) 과열 경고 보강
+    for flag in pick.get("overheat_flags", []):
+        if isinstance(flag, str) and flag not in why["warnings"]:
+            why["warnings"].append(flag)
+
+    # 보너스 태그 (시나리오/컨센서스/수급)
+    tags = []
+    for key, label in [("scenario_tag", "시나리오"), ("consensus_tag", "컨센서스"), ("nat_tag", "수급")]:
+        tag = pick.get(key, "")
+        bonus = pick.get(key.replace("_tag", "_bonus"), 0)
+        if tag:
+            tags.append({"label": label, "tag": tag, "bonus": round(bonus, 1) if bonus else 0})
+    if tags:
+        why["bonus_tags"] = tags
+
+    return why
 
 
 def _get_close(ticker: str) -> int:

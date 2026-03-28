@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
+interface WhyNow {
+  technical: string[];
+  macro: { reasoning: string; catalysts: string[]; confidence: number } | null;
+  entry: string | null;
+  safety: string | null;
+  warnings: string[];
+  bonus_tags?: { label: string; tag: string; bonus: number }[];
+}
+
 interface StockDetail {
   ticker: string;
   name: string;
@@ -17,6 +26,7 @@ interface StockDetail {
     stop_loss: number;
     target_price: number;
     n_sources: number;
+    why_now?: WhyNow | null;
   };
   // recent signals
   recentSignals: {
@@ -180,6 +190,108 @@ export default function StockDetailPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 왜 지금? (why-now-engine) */}
+      {pick?.why_now && (
+        <section className="bg-gray-900 rounded-xl p-5 space-y-4">
+          <h2 className="text-white font-bold">왜 지금 이 종목인가</h2>
+
+          {/* 기술적 근거 */}
+          {pick.why_now.technical.length > 0 && (
+            <div>
+              <p className="text-gray-500 text-xs mb-2">기술적 근거</p>
+              <div className="flex flex-wrap gap-2">
+                {pick.why_now.technical.map((t, i) => (
+                  <span
+                    key={i}
+                    className="bg-blue-900/20 text-blue-300 text-xs px-2.5 py-1 rounded-lg"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI 거시 분석 */}
+          {pick.why_now.macro && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-gray-500 text-xs">AI 거시 분석</p>
+                {pick.why_now.macro.confidence > 0 && (
+                  <span className="text-xs text-emerald-400 font-mono">
+                    {Math.round(pick.why_now.macro.confidence * 100)}%
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                {pick.why_now.macro.reasoning}
+              </p>
+              {pick.why_now.macro.catalysts.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {pick.why_now.macro.catalysts.map((c, i) => (
+                    <span
+                      key={i}
+                      className="bg-emerald-900/20 text-emerald-300 text-xs px-2.5 py-1 rounded-lg"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 진입 조건 */}
+          {pick.why_now.entry && (
+            <div>
+              <p className="text-gray-500 text-xs mb-1">진입 조건</p>
+              <p className="text-gray-300 text-sm">{pick.why_now.entry}</p>
+            </div>
+          )}
+
+          {/* 보너스 태그 */}
+          {pick.why_now.bonus_tags && pick.why_now.bonus_tags.length > 0 && (
+            <div>
+              <p className="text-gray-500 text-xs mb-2">추가 분석</p>
+              <div className="flex flex-wrap gap-2">
+                {pick.why_now.bonus_tags.map((bt, i) => (
+                  <span
+                    key={i}
+                    className="bg-purple-900/20 text-purple-300 text-xs px-2.5 py-1 rounded-lg"
+                  >
+                    {bt.label}: {bt.tag}
+                    {bt.bonus > 0 && ` +${bt.bonus}`}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 안전성 */}
+          {pick.why_now.safety && (
+            <div>
+              <p className="text-gray-500 text-xs mb-1">안전성 평가</p>
+              <p className="text-gray-400 text-sm">{pick.why_now.safety}</p>
+            </div>
+          )}
+
+          {/* 경고 */}
+          {pick.why_now.warnings.length > 0 && (
+            <div>
+              <p className="text-gray-500 text-xs mb-2">주의사항</p>
+              <div className="space-y-1">
+                {pick.why_now.warnings.map((w, i) => (
+                  <p key={i} className="text-yellow-400 text-sm flex items-start gap-2">
+                    <span className="shrink-0">{"⚠"}</span>
+                    {w}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
         </section>
