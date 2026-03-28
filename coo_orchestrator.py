@@ -84,6 +84,7 @@ PIPELINE_GROUPS = [
             {"name": "차이나머니 수급", "cmd": "scripts/crawl_china_money.py"},
             {"name": "ETF 투자자 수급", "cmd": "scripts/collect_etf_investor_flow.py"},
             {"name": "KRX 국적별 외국인", "cmd": "scripts/scan_nationality.py --send"},
+            {"name": "외인소진율 수집", "cmd": "scripts/collect_foreign_exhaustion.py"},
             {"name": "섹터 일일 리포트", "cmd": "scripts/sector_daily_report.py"},
             {"name": "TIER2 기관수급 수집", "cmd": "scripts/institutional_flow_collector.py --top-n 5"},
             {"name": "TIER2 섹터 컴포짓", "cmd": "src/sector_composite.py"},
