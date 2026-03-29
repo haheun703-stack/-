@@ -55,6 +55,7 @@ PIPELINE_GROUPS = [
             {"name": "Parquet 증분 업데이트", "cmd": "scripts/extend_parquet_data.py --skip-supply"},
             {"name": "KOSPI 인덱스", "cmd": "scripts/update_kospi_index.py"},
             {"name": "투자자수급", "cmd": "scripts/collect_investor_flow.py"},
+            {"name": "ECOS 매크로 수집", "cmd": "scripts/fetch_ecos_macro.py"},
         ],
     },
     {
@@ -101,6 +102,7 @@ PIPELINE_GROUPS = [
         "steps": [
             {"name": "SHIELD 방어 점검", "cmd": "scripts/run_shield.py --send"},
             {"name": "COT Slow Eye", "cmd": "scripts/run_cot_tracker.py"},
+            {"name": "매크로 레짐 분석", "cmd": "-m src.use_cases.macro_regime"},
             {"name": "BRAIN 자본배분", "cmd": "scripts/run_brain.py"},
             {"name": "SCENARIO ENGINE", "cmd": "-m src.alpha.scenario_detector"},
             {"name": "LENS LAYER", "cmd": "scripts/run_lens.py"},
@@ -153,6 +155,7 @@ PIPELINE_GROUPS = [
             {"name": "Master Brain 통합", "cmd": "scripts/run_master_brain.py"},
             {"name": "매크로 체인 감지", "cmd": "-m src.alpha.macro_chain_detector"},
             {"name": "ETF 추천 엔진", "cmd": "-m src.alpha.etf_engine"},
+            {"name": "킬러픽 생성", "cmd": "scripts/build_killer_picks.py"},
         ],
     },
     {

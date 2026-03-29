@@ -204,7 +204,7 @@ class IntradayEye:
     # KOSPI 지수 코드 (KIS API)
     KOSPI_TICKER = "0001"
 
-    def __init__(self, dry_run: bool = False):
+    def __init__(self, dry_run: bool = False, killer_picks: bool = False):
         self.dry_run = dry_run
         self.settings = _load_settings()
         self.cooldown = _Cooldown(self.settings.get("cooldown_minutes", 30))
@@ -213,7 +213,11 @@ class IntradayEye:
         # 보유종목 (세션 시작 시 1회 로드, 5분봉마다 갱신하지 않음)
         self.holdings: list[dict] = []
         # 워치리스트 종목
-        self.watchlist: list[str] = self.settings.get("watchlist", [])
+        self.watchlist: list[str] = list(self.settings.get("watchlist", []))
+
+        # 킬러픽 종목 워치리스트 자동 추가
+        if killer_picks:
+            self._load_killer_watchlist()
 
         # 전일종가 캐시 (세션 중 고정)
         self._prev_close: dict[str, int] = {}
@@ -225,6 +229,25 @@ class IntradayEye:
 
         # 이전 사이클 데이터 (KOSPI 전 체크용)
         self._prev_kospi_price: int = 0
+
+    def _load_killer_watchlist(self):
+        """킬러픽 종목을 워치리스트에 추가."""
+        p = DATA_DIR / "killer_picks.json"
+        if not p.exists():
+            logger.warning("[EYE] killer_picks.json 없음 — 킬러픽 워치리스트 스킵")
+            return
+        with open(p, encoding="utf-8") as f:
+            kp = json.load(f)
+        extra = set()
+        for s in kp.get("cross_validated_top5", []):
+            extra.add(s["ticker"])
+        for e in kp.get("etf_top5", []):
+            if e.get("ticker") and e["ticker"] != "cash":
+                extra.add(e["ticker"])
+        new = extra - set(self.watchlist)
+        if new:
+            self.watchlist.extend(sorted(new))
+            logger.info("[EYE] 킬러픽에서 %d종목 워치리스트 추가 (총 %d)", len(new), len(self.watchlist))
 
     def _load_holdings(self):
         """KIS 잔고에서 보유종목 로드"""
@@ -576,6 +599,8 @@ def main():
     parser = argparse.ArgumentParser(description="INTRADAY EYE — 장중 실시간 감시")
     parser.add_argument("--once", action="store_true", help="1회만 실행 후 종료")
     parser.add_argument("--dry-run", action="store_true", help="텔레그램 미발송 (로그만)")
+    parser.add_argument("--killer-picks", action="store_true",
+                        help="킬러픽 종목을 워치리스트에 추가")
     args = parser.parse_args()
 
     # 로깅 설정
@@ -591,7 +616,7 @@ def main():
         ],
     )
 
-    eye = IntradayEye(dry_run=args.dry_run)
+    eye = IntradayEye(dry_run=args.dry_run, killer_picks=args.killer_picks)
     eye.run_loop(once=args.once)
 
 

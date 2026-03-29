@@ -1,5 +1,5 @@
 """
-장중 VWAP 모니터 — 5종목 실시간 추적 + 텔레그램 알림
+장중 VWAP 모니터 — 실시간 추적 + 텔레그램 알림
 
 BAT 스케줄: 08:55 시작 → 09:00 장 시작 대기 → 14:00 자동 종료
 
@@ -15,8 +15,10 @@ BAT 스케줄: 08:55 시작 → 09:00 장 시작 대기 → 14:00 자동 종료
   6. 14:00   최종 요약 + 종료
 
 사용법:
-  python scripts/run_vwap_monitor.py               # 라이브 (장중)
-  python scripts/run_vwap_monitor.py --simulate     # 시뮬레이션 (테스트)
+  python scripts/run_vwap_monitor.py                    # 라이브 (기본 종목)
+  python scripts/run_vwap_monitor.py --killer-picks      # 킬러픽 종목 자동 로딩
+  python scripts/run_vwap_monitor.py --simulate          # 시뮬레이션 (테스트)
+  python scripts/run_vwap_monitor.py --killer-picks --simulate
   python scripts/run_vwap_monitor.py --targets 005930:10 000660:5
 
 VWAP 계산:
@@ -71,6 +73,46 @@ SUMMARY_INTERVAL_SEC = 1800  # 30분마다 현황 요약
 API_RETRY_MAX = 3            # API 호출 실패 시 재시도 횟수
 API_RETRY_DELAY = 10         # 재시도 대기 (초)
 API_CIRCUIT_BREAKER_WAIT = 60  # 서킷브레이커 감지 시 대기 (초)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 킬러픽 종목 로더
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def load_killer_picks_targets() -> list[dict]:
+    """killer_picks.json에서 교차검증 TOP + ETF 종목 추출."""
+    p = Path("data/killer_picks.json")
+    if not p.exists():
+        print("[ERROR] data/killer_picks.json 없음 — 먼저 build_killer_picks.py 실행")
+        sys.exit(1)
+    with open(p, encoding="utf-8") as f:
+        kp = json.load(f)
+
+    targets = []
+    seen = set()
+
+    # 교차검증 종목
+    for s in kp.get("cross_validated_top5", []):
+        t = s["ticker"]
+        if t not in seen:
+            targets.append({
+                "ticker": t, "name": s["name"], "qty": 0,
+                "desc": f"교차검증#{s.get('rank', 0)} {s.get('action', '')}",
+            })
+            seen.add(t)
+
+    # ETF 종목
+    for e in kp.get("etf_top5", []):
+        t = e["ticker"]
+        if t not in seen:
+            targets.append({
+                "ticker": t, "name": e["name"], "qty": 0,
+                "desc": f"ETF {e.get('category', '')} {e.get('action', '')}",
+            })
+            seen.add(t)
+
+    print(f"[킬러픽] {len(targets)}종목 로딩 완료 ({kp.get('date', '')})")
+    return targets
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -736,12 +778,16 @@ def main():
     parser = argparse.ArgumentParser(description="장중 VWAP 모니터")
     parser.add_argument("--simulate", action="store_true",
                         help="시뮬레이션 모드 (가짜 데이터, 빠른 실행)")
+    parser.add_argument("--killer-picks", action="store_true",
+                        help="킬러픽에서 대상 종목 자동 로딩")
     parser.add_argument("--targets", nargs="*",
                         help="종목 직접 지정 (예: 005930:10 000660:5)")
     args = parser.parse_args()
 
-    # 대상 종목
-    if args.targets:
+    # 대상 종목 (우선순위: --killer-picks > --targets > 기본값)
+    if args.killer_picks:
+        targets = load_killer_picks_targets()
+    elif args.targets:
         from src.stock_name_resolver import ticker_to_name
         targets = []
         for t in args.targets:

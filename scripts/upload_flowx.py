@@ -107,11 +107,19 @@ def main():
     ok3 = uploader.upload_ai_picks(ai_rows)              # AI 추천 (short_signals)
     ok4 = uploader.upload_quant_scenarios(scenario_data, date_str)  # 시나리오 대시보드
 
+    # ── 퀀트 6개 독립 테이블 ──
+    print("\n[FLOWX] 퀀트 6테이블 업로드...")
+    q6 = uploader.upload_all_quant_tables(date_str)
+    q6_ok = sum(v for v in q6.values())
+
     print(f"\n[FLOWX] 업로드 완료:")
     print(f"  ETF={'OK' if ok1 else 'FAIL'} ({len(etf_rows)}건)")
     print(f"  외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
     print(f"  AI추천={'OK' if ok3 else 'FAIL'} ({len(ai_rows)}건)")
     print(f"  시나리오={'OK' if ok4 else 'FAIL'} ({sc_count}개 시나리오)")
+    print(f"  퀀트6테이블={q6_ok}/6 성공")
+    for k, v in q6.items():
+        print(f"    {k}={'OK' if v else 'FAIL'}")
 
 
 if __name__ == "__main__":

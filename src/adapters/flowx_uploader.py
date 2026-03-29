@@ -302,6 +302,111 @@ class FlowxUploader:
             logger.error("[FLOWX] 자비스 업로드 실패: %s", e)
             return False
 
+    # ── 퀀트 6개 테이블 (웹봇 독립 API용) ─────────────
+
+    def _upsert_date_data(self, table: str, data: dict, date_str: str, label: str) -> bool:
+        """공통 date+data UPSERT 패턴."""
+        if not self.is_active or not data:
+            return False
+        try:
+            row = {"date": date_str, "data": data}
+            result = self.client.table(table).upsert(row, on_conflict="date").execute()
+            if not result.data:
+                logger.warning("[FLOWX] %s 업로드 응답 비어있음: %s", label, date_str)
+                return False
+            logger.info("[FLOWX] %s 업로드: %s (%d chars)", label, date_str, len(json.dumps(data, ensure_ascii=False)))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] %s 업로드 실패: %s", label, e)
+            return False
+
+    def upload_market_brain(self, date_str: str) -> bool:
+        """brain_decision.json → quant_market_brain."""
+        p = DATA_DIR / "brain_decision.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_market_brain", json.load(f), date_str, "시장브레인")
+
+    def upload_sector_flow(self, date_str: str) -> bool:
+        """sector_institutional_flow.json → quant_sector_flow."""
+        p = DATA_DIR / "institutional_flow" / "sector_institutional_flow.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_sector_flow", json.load(f), date_str, "업종수급")
+
+    def upload_sector_momentum(self, date_str: str) -> bool:
+        """sector_composite.json → quant_sector_momentum."""
+        p = DATA_DIR / "sector_rotation" / "sector_composite.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_sector_momentum", json.load(f), date_str, "업종모멘텀")
+
+    def upload_sector_rotation(self, date_str: str) -> bool:
+        """etf_trading_signal.json → sector_rotation (다중행)."""
+        p = DATA_DIR / "sector_rotation" / "etf_trading_signal.json"
+        if not self.is_active or not p.exists():
+            return False
+        try:
+            with open(p, encoding="utf-8") as f:
+                raw = json.load(f)
+            signals = raw.get("smart_money_etf", [])
+            if not signals:
+                return False
+            rows = []
+            for i, s in enumerate(signals):
+                rows.append({
+                    "date": date_str,
+                    "rank": i + 1,
+                    "sector": s.get("sector", s.get("etf_sector", "")),
+                    "etf_code": s.get("etf_code", ""),
+                    "signal": s.get("signal", ""),
+                    "data": s,
+                })
+            # 기존 날짜 데이터 삭제 후 삽입
+            self.client.table("sector_rotation").delete().eq("date", date_str).execute()
+            result = self.client.table("sector_rotation").insert(rows).execute()
+            if not result.data:
+                logger.warning("[FLOWX] 섹터로테이션 업로드 응답 비어있음: %s", date_str)
+                return False
+            logger.info("[FLOWX] 섹터로테이션 업로드: %s (%d행)", date_str, len(rows))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] 섹터로테이션 업로드 실패: %s", e)
+            return False
+
+    def upload_etf_fund_flow(self, date_str: str) -> bool:
+        """sector_momentum.json → quant_etf_fund_flow."""
+        p = DATA_DIR / "sector_rotation" / "sector_momentum.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_etf_fund_flow", json.load(f), date_str, "ETF자금흐름")
+
+    def upload_etf_recommendation(self, date_str: str) -> bool:
+        """etf_recommendations.json → quant_etf_recommendation."""
+        p = DATA_DIR / "etf_recommendations.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_etf_recommendation", json.load(f), date_str, "ETF추천")
+
+    def upload_all_quant_tables(self, date_str: str) -> dict[str, bool]:
+        """6개 퀀트 테이블 일괄 업로드."""
+        results = {
+            "market_brain": self.upload_market_brain(date_str),
+            "sector_flow": self.upload_sector_flow(date_str),
+            "sector_momentum": self.upload_sector_momentum(date_str),
+            "sector_rotation": self.upload_sector_rotation(date_str),
+            "etf_fund_flow": self.upload_etf_fund_flow(date_str),
+            "etf_recommendation": self.upload_etf_recommendation(date_str),
+        }
+        ok = sum(v for v in results.values())
+        logger.info("[FLOWX] 퀀트 6테이블 업로드: %d/6 성공 %s", ok, results)
+        return results
+
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:
@@ -888,6 +993,10 @@ def build_jarvis_payload() -> dict:
         "cfo": _build_cfo_data(),
         "cto": _build_cto_data(),
         "fundamentals": _build_fundamentals_data(),
+        # Phase 6: 매크로 레짐
+        "macro": _build_macro_data(),
+        # Phase 7: 킬러픽 자비스 보고서
+        "killer_picks": _build_killer_picks_data(),
     }
 
 
@@ -1077,6 +1186,80 @@ def _build_fundamentals_data() -> dict:
                 "candidates_found": ta.get("candidates_found", 0),
                 "strong": ta.get("strong", [])[:15],
                 "early": ta.get("early", [])[:10],
+            }
+        except Exception:
+            pass
+
+    return result
+
+
+def _build_killer_picks_data() -> dict:
+    """킬러픽 자비스 보고서 → FLOWX payload."""
+    p = DATA_DIR / "killer_picks.json"
+    if not p.exists():
+        return {}
+    try:
+        with open(p, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _build_macro_data() -> dict:
+    """매크로 시장 흐름 → FLOWX payload.
+
+    data/macro/macro_regime.json 을 읽어
+    FLOWX 매크로 탭에 표시할 데이터를 구성한다.
+    details 배열 포함 (이전 vs 현재 비교 문장).
+    """
+    regime_path = DATA_DIR / "macro" / "macro_regime.json"
+    result = {}
+
+    if regime_path.exists():
+        try:
+            with open(regime_path, encoding="utf-8") as f:
+                data = json.load(f)
+
+            # 각 섹션에서 필요한 필드만 추출 (series 제외, details 포함)
+            rate = data.get("rate", {})
+            inf = data.get("inflation", {})
+            fx = data.get("fx", {})
+            erp = data.get("erp", {})
+
+            result = {
+                "date": data.get("date", ""),
+                "overall": data.get("overall", {}),
+                "rate": {
+                    "base_rate": rate.get("base_rate"),
+                    "bond_3y": rate.get("bond_3y"),
+                    "bond_10y": rate.get("bond_10y"),
+                    "spread_10y_3y": rate.get("spread_10y_3y"),
+                    "direction": rate.get("direction"),
+                    "signal": rate.get("signal"),
+                    "details": rate.get("details", []),
+                },
+                "inflation": {
+                    "cpi": inf.get("cpi"),
+                    "direction": inf.get("direction"),
+                    "signal": inf.get("signal"),
+                    "details": inf.get("details", []),
+                },
+                "fx": {
+                    "usd_krw": fx.get("usd_krw"),
+                    "direction": fx.get("direction"),
+                    "signal": fx.get("signal"),
+                    "details": fx.get("details", []),
+                },
+                "erp": {
+                    "erp": erp.get("erp"),
+                    "kospi_per": erp.get("kospi_per"),
+                    "verdict": erp.get("verdict"),
+                    "signal": erp.get("signal"),
+                    "details": erp.get("details", []),
+                },
+                "sectors": data.get("sectors", {}),
+                "strategy": data.get("strategy", {}),
+                "market_phase": data.get("market_phase", ""),
             }
         except Exception:
             pass
