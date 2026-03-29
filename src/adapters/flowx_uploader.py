@@ -884,6 +884,10 @@ def build_jarvis_payload() -> dict:
         "signals": _build_signals_data(all_picks, acc_raw),
         # Phase 4: 성과
         "performance": _build_performance_data(),
+        # Phase 5: CFO/CTO + 펀더멘탈
+        "cfo": _build_cfo_data(),
+        "cto": _build_cto_data(),
+        "fundamentals": _build_fundamentals_data(),
     }
 
 
@@ -957,6 +961,127 @@ def _get_close(ticker: str) -> int:
         except Exception:
             pass
     return 0
+
+
+def _build_cfo_data() -> dict:
+    """CFO 포트폴리오 건강 리포트 → FLOWX payload."""
+    p = DATA_DIR / "cfo_report.json"
+    if not p.exists():
+        return {}
+    try:
+        with open(p, encoding="utf-8") as f:
+            cfo = json.load(f)
+    except Exception:
+        return {}
+
+    health = cfo.get("health", {})
+    dd = cfo.get("drawdown", {})
+    budget = cfo.get("allocation_budget", {})
+
+    return {
+        "generated_at": cfo.get("generated_at", ""),
+        "health_score": health.get("overall_score", 0),
+        "risk_level": health.get("risk_level", ""),
+        "positions_count": health.get("positions_count", 0),
+        "cash_ratio": round(health.get("cash_ratio", 0) * 100, 1),
+        "max_sector_name": health.get("max_sector_name", ""),
+        "max_sector_pct": health.get("max_sector_pct", 0),
+        "var_95": round(health.get("estimated_var_95", 0) * 100, 1),
+        "warnings": health.get("warnings", []),
+        "recommendations": health.get("recommendations", []),
+        "drawdown_action": dd.get("action_label", ""),
+        "drawdown_pct": dd.get("current_drawdown_pct", 0),
+        "investable": budget.get("investable", 0),
+        "max_new_invest": budget.get("max_new_invest", 0),
+        "regime": budget.get("regime", ""),
+    }
+
+
+def _build_cto_data() -> dict:
+    """CTO 시스템 성과 리포트 → FLOWX payload."""
+    p = DATA_DIR / "cto_report.json"
+    if not p.exists():
+        return {}
+    try:
+        with open(p, encoding="utf-8") as f:
+            cto = json.load(f)
+    except Exception:
+        return {}
+
+    perf = cto.get("signal_performance", {})
+    data_health = cto.get("data_health", {})
+    suggestions = cto.get("weight_suggestions", [])
+
+    # 소스별 승률 요약 (상위 10)
+    sources_raw = perf.get("sources", {})
+    source_perf = sorted(
+        sources_raw.items(),
+        key=lambda x: x[1].get("total_picks", 0),
+        reverse=True,
+    )[:10]
+
+    return {
+        "generated_at": cto.get("generated_at", ""),
+        "total_records": perf.get("total_records", 0),
+        "source_performance": [
+            {
+                "source": src,
+                "win_rate": round(d.get("win_rate", 0) * 100, 1),
+                "avg_return": round(d.get("avg_return", 0), 2),
+                "total": d.get("total_picks", 0),
+                "decay": d.get("signal_decay", False),
+            }
+            for src, d in source_perf
+        ],
+        "decay_alerts": perf.get("decay_alerts", []),
+        "data_health_score": data_health.get("health_score", 0),
+        "stale_count": data_health.get("stale", 0),
+        "missing_count": data_health.get("missing", 0),
+        "suggestions": [
+            {"action": s.get("action", ""), "detail": s.get("detail", ""), "priority": s.get("priority", "")}
+            for s in suggestions[:8]
+        ],
+    }
+
+
+def _build_fundamentals_data() -> dict:
+    """실적 가속도 + 턴어라운드 → FLOWX payload."""
+    result = {}
+
+    # 실적 가속도
+    ea_path = DATA_DIR / "earnings_acceleration.json"
+    if ea_path.exists():
+        try:
+            with open(ea_path, encoding="utf-8") as f:
+                ea = json.load(f)
+            result["earnings"] = {
+                "date": ea.get("date", ""),
+                "total_analyzed": ea.get("total_analyzed", 0),
+                "status_counts": ea.get("status_counts", {}),
+                "turnaround_strong": ea.get("turnaround_strong", [])[:10],
+                "turnaround_early": ea.get("turnaround_early", [])[:10],
+                "accelerating": ea.get("accelerating", [])[:10],
+            }
+        except Exception:
+            pass
+
+    # 턴어라운드
+    ta_path = DATA_DIR / "turnaround_candidates.json"
+    if ta_path.exists():
+        try:
+            with open(ta_path, encoding="utf-8") as f:
+                ta = json.load(f)
+            result["turnaround"] = {
+                "date": ta.get("date", ""),
+                "total_screened": ta.get("total_screened", 0),
+                "candidates_found": ta.get("candidates_found", 0),
+                "strong": ta.get("strong", [])[:15],
+                "early": ta.get("early", [])[:10],
+            }
+        except Exception:
+            pass
+
+    return result
 
 
 def build_paper_trade(

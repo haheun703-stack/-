@@ -16,6 +16,7 @@ Phase 4 DeepAnalyst 통과 종목들을 받아서:
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -145,6 +146,7 @@ class PortfolioBrainAgent(BaseAgent):
         picks_text = self._format_picks(deep_picks)
         portfolio_text = self._format_portfolio(positions)
         regime_text = self._format_regime(strategic_result)
+        cfo_text = self._format_cfo()
 
         today = datetime.now().strftime("%Y-%m-%d")
         user_prompt = f"""\
@@ -152,12 +154,15 @@ class PortfolioBrainAgent(BaseAgent):
 
 {regime_text}
 
+{cfo_text}
+
 {portfolio_text}
 
 {picks_text}
 
 위 정보를 분석하여 오늘 실제 매수할 종목과 비중을 JSON으로 결정하세요.
 현금 비중과 섹터 집중도를 반드시 체크하세요.
+CFO 건강 점수와 경고를 반드시 참조하여 리스크를 관리하세요.
 """
 
         logger.info("v3 Portfolio Brain 결정 시작 (%d 후보)", len(deep_picks))
@@ -225,6 +230,44 @@ class PortfolioBrainAgent(BaseAgent):
 
         if sectors:
             lines.append(f"\n  섹터 분포: {sectors}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def _format_cfo() -> str:
+        """CFO 리포트 → 텍스트 (없으면 빈 문자열)"""
+        cfo_path = Path(__file__).resolve().parents[2] / "data" / "cfo_report.json"
+        if not cfo_path.exists():
+            return ""
+        try:
+            with open(cfo_path, encoding="utf-8") as f:
+                cfo = json.load(f)
+        except Exception:
+            return ""
+
+        health = cfo.get("health", {})
+        dd = cfo.get("drawdown", {})
+        budget = cfo.get("allocation_budget", {})
+
+        lines = ["[CFO 포트폴리오 건강 리포트]"]
+        lines.append(f"  건강 점수: {health.get('overall_score', 0):.0f}/100")
+        lines.append(f"  리스크 수준: {health.get('risk_level', '?')}")
+        lines.append(f"  보유 종목 수: {health.get('positions_count', 0)}")
+        lines.append(f"  현금 비율: {health.get('cash_ratio', 0):.1%}")
+        lines.append(f"  최대 섹터 집중: {health.get('max_sector_name', '?')} {health.get('max_sector_pct', 0):.0f}%")
+        lines.append(f"  추정 VaR(95%): {health.get('estimated_var_95', 0):.1%}")
+
+        warnings = health.get("warnings", [])
+        if warnings:
+            lines.append(f"  경고: {'; '.join(warnings)}")
+
+        recs = health.get("recommendations", [])
+        if recs:
+            lines.append(f"  권고: {'; '.join(recs)}")
+
+        lines.append(f"  낙폭 조치: {dd.get('action_label', '?')} ({dd.get('action', '?')})")
+        lines.append(f"  투자 가능 금액: {budget.get('investable', 0):,.0f}원")
+        lines.append(f"  신규투자 한도: {budget.get('max_new_invest', 0):,.0f}원")
 
         return "\n".join(lines)
 

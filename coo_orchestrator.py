@@ -127,6 +127,8 @@ PIPELINE_GROUPS = [
             {"name": "섹터 릴레이 시그널", "cmd": "scripts/relay_report.py"},
             {"name": "그룹 릴레이 감지", "cmd": "scripts/group_relay_detector.py"},
             {"name": "매집 추적 스캔", "cmd": "scripts/scan_accumulation_tracker.py"},
+            {"name": "실적 가속도 분석", "cmd": "scripts/scan_earnings_acceleration.py"},
+            {"name": "턴어라운드 스크리닝", "cmd": "scripts/scan_turnaround.py"},
         ],
     },
     {
@@ -168,6 +170,8 @@ PIPELINE_GROUPS = [
             {"name": "저녁 통합 리포트", "cmd": "scripts/send_evening_summary.py --send"},
             {"name": "페이퍼 트레이딩", "cmd": "scripts/paper_trading_unified.py"},
             {"name": "데이터 건강검진", "cmd": "scripts/data_health_check.py"},
+            {"name": "CFO 포트폴리오 리포트", "cmd": "src/use_cases/portfolio_cfo.py"},
+            {"name": "CTO 시스템 리포트", "cmd": "scripts/run_cto.py"},
         ],
     },
     {
