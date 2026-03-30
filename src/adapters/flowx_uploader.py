@@ -948,6 +948,19 @@ def build_jarvis_payload() -> dict:
     # 상위 20개만 전송 (Supabase JSONB 크기 제한)
     top_picks = buyable[:20]
 
+    # ── killer_picks 병합: 기관수급 조기감지 종목을 메인 추천에 통합 ──
+    killer_raw = _load("killer_picks.json")
+    if killer_raw:
+        existing_tickers = {p.get("ticker") for p in top_picks}
+        killer_items = _convert_killer_to_picks(killer_raw)
+        for ki in killer_items:
+            if ki["ticker"] not in existing_tickers:
+                top_picks.append(ki)
+                existing_tickers.add(ki["ticker"])
+        # 점수순 재정렬
+        top_picks.sort(key=lambda x: -x.get("total_score", 0))
+        top_picks = top_picks[:25]  # 병합 후 최대 25개
+
     # why-now-engine: AI 판단을 pick에 병합
     ai_judgments = _load("ai_brain_judgment.json")
     ai_map: dict[str, dict] = {}
@@ -957,7 +970,8 @@ def build_jarvis_payload() -> dict:
             ai_map[t] = j
 
     for pick in top_picks:
-        pick["why_now"] = _build_why_now(pick, ai_map.get(pick.get("ticker", ""), {}))
+        if "why_now" not in pick:
+            pick["why_now"] = _build_why_now(pick, ai_map.get(pick.get("ticker", ""), {}))
 
     return {
         "picks": {
@@ -1191,6 +1205,113 @@ def _build_fundamentals_data() -> dict:
             pass
 
     return result
+
+
+def _convert_killer_to_picks(killer_raw: dict) -> list[dict]:
+    """killer_picks.json → PickItem 형식으로 변환하여 메인 추천에 병합."""
+    GRADE_MAP = {
+        "STRONG": ("적극매수", 70),
+        "MODERATE": ("매수", 60),
+        "NOTABLE": ("관심매수", 50),
+        "EARLY_DUAL": ("관심매수", 55),
+        "EARLY_ACCEL": ("관심매수", 52),
+        "EARLY_SURGE": ("관심매수", 50),
+        "WATCH": ("관찰", 40),
+    }
+    items: list[dict] = []
+    seen: set[str] = set()
+
+    def _add(ticker: str, name: str, grade_key: str, sources: list[str],
+             reasons: list[str], extra: dict | None = None):
+        if not ticker or ticker in seen:
+            return
+        seen.add(ticker)
+        grade_label, base_score = GRADE_MAP.get(grade_key, ("관찰", 40))
+        item = {
+            "ticker": ticker,
+            "name": name,
+            "grade": grade_label,
+            "total_score": base_score,
+            "sources": sources,
+            "n_sources": len(sources),
+            "close": 0,
+            "rsi": 0,
+            "stoch_k": 0,
+            "foreign_5d": 0,
+            "inst_5d": 0,
+            "reasons": reasons,
+        }
+        if extra:
+            item.update(extra)
+        items.append(item)
+
+    # 1) cross_validated_top5: 교차검증 통과 (최고 신뢰)
+    for cv in killer_raw.get("cross_validated_top5", []):
+        conv = cv.get("conviction", "MEDIUM")
+        grade = "STRONG" if conv == "HIGH" else "MODERATE"
+        score = 75 if conv == "HIGH" else 65
+        _add(
+            cv.get("ticker", ""), cv.get("name", ""), grade,
+            sources=cv.get("matched_from", []),
+            reasons=cv.get("matched_from", []),
+            extra={
+                "total_score": score,
+                "entry_info": {
+                    "entry": cv.get("entry_price", 0),
+                    "stop": cv.get("stop_loss", 0),
+                    "target": cv.get("target_price", 0),
+                },
+                "close": cv.get("entry_price", 0),
+            },
+        )
+
+    # 2) early_detection.strong: 기관+외인 강매집
+    ed = killer_raw.get("early_detection", {})
+    for s in ed.get("strong", []):
+        inst_5d = s.get("inst_5d", 0)
+        frgn_5d = s.get("frgn_5d", 0)
+        reasons = []
+        if s.get("dual_today"):
+            reasons.append("기관+외인 동시매수")
+        reasons.append("기관 %d일 연속" % s.get("inst_consec", 0))
+        if s.get("chg_pct", 0) != 0:
+            reasons.append("등락 %+.1f%%" % s["chg_pct"])
+        _add(
+            s.get("ticker", ""), s.get("name", ""), "STRONG",
+            sources=["기관수급", "조기감지"],
+            reasons=reasons,
+            extra={"inst_5d": inst_5d, "foreign_5d": frgn_5d, "close": s.get("price", 0)},
+        )
+
+    # 3) early_detection.early: 조기 감지 (1~2일차)
+    for e in ed.get("early", []):
+        inst_5d = e.get("inst_5d", 0)
+        frgn_5d = e.get("frgn_5d", 0)
+        grade = e.get("grade", "EARLY_DUAL")
+        reasons = ["조기감지: %s" % grade]
+        if e.get("inst_consec", 0):
+            reasons.append("기관 %d일" % e["inst_consec"])
+        _add(
+            e.get("ticker", ""), e.get("name", ""), grade,
+            sources=["기관수급", "조기감지"],
+            reasons=reasons,
+            extra={"inst_5d": inst_5d, "foreign_5d": frgn_5d, "close": e.get("price", 0)},
+        )
+
+    # 4) institutional_picks: 기관매집 상위
+    for ip in killer_raw.get("institutional_picks", []):
+        _add(
+            ip.get("ticker", ""), ip.get("name", ""), ip.get("grade", "NOTABLE"),
+            sources=["기관수급"],
+            reasons=[ip.get("verdict", "")],
+            extra={
+                "total_score": 45 + min(ip.get("inst_consecutive", 0) * 3, 20),
+                "inst_5d": int(ip.get("inst_5d_bil", 0) * 1e8),
+                "foreign_5d": int(ip.get("foreign_5d_bil", 0) * 1e8),
+            },
+        )
+
+    return items
 
 
 def _build_killer_picks_data() -> dict:
