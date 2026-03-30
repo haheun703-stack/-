@@ -1,21 +1,23 @@
 """TIER2 — 섹터별 기관/외인 수급 수집 + 기관 매집 감지
 
-Phase 0-1: 섹터별 상위 종목의 기관/외인/개인 수급 30일 시계열 수집
+Phase 0-1: 섹터별 종목의 기관/외인/개인 수급 30일 시계열 수집
 Phase 0-2: 기관 매집 감지기 (연속 순매수 + 금액 임계치)
 
 데이터 소스: KIS API (FHKST01010900) — 30일 투자자별 매매동향
-수집 대상: sector_map.json의 섹터별 상위 N종목 (가중치 기준)
+수집 대상: sector_map.csv 전체 유니버스 (1,036종목) — 기본 모드
+          sector_map.json 섹터별 상위 N종목 — 레거시 모드 (--legacy)
 
 BAT-D Phase 3 이후 실행 권장.
 
 Usage:
-    python -u -X utf8 scripts/institutional_flow_collector.py
-    python -u -X utf8 scripts/institutional_flow_collector.py --top-n 5
+    python -u -X utf8 scripts/institutional_flow_collector.py          # 전체 유니버스
+    python -u -X utf8 scripts/institutional_flow_collector.py --legacy --top-n 5  # 레거시
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import logging
 import sys
@@ -35,7 +37,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # 경로
-SECTOR_MAP_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "sector_map.json"
+UNIVERSE_CSV_PATH = PROJECT_ROOT / "data" / "universe" / "sector_map.csv"
+SECTOR_MAP_JSON_PATH = PROJECT_ROOT / "data" / "sector_rotation" / "sector_map.json"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "institutional_flow"
 OUTPUT_PATH = OUTPUT_DIR / "sector_institutional_flow.json"
 ACCUMULATION_ALERT_PATH = OUTPUT_DIR / "accumulation_alert.json"
@@ -49,17 +52,40 @@ ACCUMULATION_CRITERIA = {
 }
 
 
-def load_sector_map() -> dict:
-    """sector_map.json 로드"""
-    if not SECTOR_MAP_PATH.exists():
-        logger.error(f"sector_map.json 없음: {SECTOR_MAP_PATH}")
+def load_universe_csv() -> dict[str, list[dict]]:
+    """sector_map.csv → {sector: [{"code": ticker, "name": name}]}
+
+    전체 유니버스 (1,036종목) 로드. '기타' 섹터(우선주)는 제외.
+    """
+    if not UNIVERSE_CSV_PATH.exists():
+        logger.error(f"sector_map.csv 없음: {UNIVERSE_CSV_PATH}")
         return {}
-    with open(SECTOR_MAP_PATH, encoding="utf-8") as f:
+    result: dict[str, list[dict]] = {}
+    with open(UNIVERSE_CSV_PATH, encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            sector = row.get("sector", "기타")
+            ticker = row.get("ticker", "")
+            name = row.get("name", ticker)
+            if not ticker or sector == "기타":
+                continue
+            result.setdefault(sector, []).append({"code": ticker, "name": name})
+    total = sum(len(v) for v in result.values())
+    logger.info(f"유니버스 CSV 로드: {len(result)}개 섹터, {total}종목 (기타 제외)")
+    return result
+
+
+def load_sector_map_json() -> dict:
+    """sector_map.json 로드 (레거시)"""
+    if not SECTOR_MAP_JSON_PATH.exists():
+        logger.error(f"sector_map.json 없음: {SECTOR_MAP_JSON_PATH}")
+        return {}
+    with open(SECTOR_MAP_JSON_PATH, encoding="utf-8") as f:
         return json.load(f)
 
 
 def get_sector_top_stocks(sector_map: dict, top_n: int = 5) -> dict:
-    """섹터별 상위 N종목 추출 (가중치 기준)"""
+    """섹터별 상위 N종목 추출 — 레거시 JSON용 (가중치 기준)"""
     result = {}
     for sector, info in sector_map.items():
         stocks = info.get("stocks", [])
@@ -381,21 +407,37 @@ def format_alert_text(stock_alerts: list[dict], sector_flows: list[dict]) -> str
 
 def main():
     parser = argparse.ArgumentParser(description="TIER2 섹터 수급 수집")
-    parser.add_argument("--top-n", type=int, default=5, help="섹터별 수집 종목 수 (기본 5)")
+    parser.add_argument("--legacy", action="store_true",
+                        help="레거시 모드: sector_map.json 상위 N종목만 스캔")
+    parser.add_argument("--top-n", type=int, default=5,
+                        help="레거시 모드 전용: 섹터별 수집 종목 수 (기본 5)")
     args = parser.parse_args()
 
     print("=" * 60)
     print("  TIER2 섹터별 기관/외인 수급 수집 + 매집 감지")
     print("=" * 60)
 
-    sector_map = load_sector_map()
-    if not sector_map:
-        print("sector_map.json 로드 실패")
-        return
-
-    sector_stocks = get_sector_top_stocks(sector_map, top_n=args.top_n)
-    total = sum(len(v) for v in sector_stocks.values())
-    print(f"\n수집 대상: {len(sector_stocks)}개 섹터 x 상위 {args.top_n}종목 = {total}종목")
+    if args.legacy:
+        # 레거시 모드: sector_map.json 상위 N종목
+        sector_map = load_sector_map_json()
+        if not sector_map:
+            print("sector_map.json 로드 실패")
+            return
+        sector_stocks = get_sector_top_stocks(sector_map, top_n=args.top_n)
+        total = sum(len(v) for v in sector_stocks.values())
+        print(f"\n[레거시] 수집 대상: {len(sector_stocks)}개 섹터 x 상위 {args.top_n}종목 = {total}종목")
+    else:
+        # 기본 모드: sector_map.csv 전체 유니버스
+        sector_stocks = load_universe_csv()
+        if not sector_stocks:
+            print("sector_map.csv 로드 실패, JSON 폴백 시도...")
+            sector_map = load_sector_map_json()
+            if not sector_map:
+                print("sector_map.json도 로드 실패")
+                return
+            sector_stocks = get_sector_top_stocks(sector_map, top_n=args.top_n)
+        total = sum(len(v) for v in sector_stocks.values())
+        print(f"\n[전체 유니버스] 수집 대상: {len(sector_stocks)}개 섹터, {total}종목")
 
     # 수집
     sector_results = collect_sector_flows(sector_stocks)
@@ -410,7 +452,8 @@ def main():
     output = {
         "collected_at": datetime.now().isoformat(),
         "sector_count": len(sector_results),
-        "top_n": args.top_n,
+        "mode": "legacy" if args.legacy else "full_universe",
+        "total_stocks": total,
         "sectors": {
             sector: {"aggregate": data["aggregate"], "stocks": data["stocks"]}
             for sector, data in sector_results.items()
