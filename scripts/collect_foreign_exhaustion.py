@@ -204,7 +204,8 @@ def _compute_signals(
         limit_qty = int(row.get("한도수량", 0))
         exhaustion = float(row.get("한도소진율", 0))
 
-        if limit_qty <= 0 or listed <= 0:
+        # KIS API는 상장주식수/한도수량 미제공 → 소진율 0이면 스킵
+        if exhaustion <= 0:
             continue
 
         # 5일 변화
