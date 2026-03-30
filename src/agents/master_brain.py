@@ -145,12 +145,12 @@ class MasterBrainAgent(BaseAgent):
         text = await self._ask_claude_stream(SYSTEM_MASTER_BRAIN, prompt_text)
         result = self._parse_json_response(text)
 
-        # 날짜 보정
-        if "date" not in result or result.get("error"):
-            if "error" in result:
-                logger.error(f"Master Brain JSON 파싱 실패: {result['error']}")
-                return self._fallback_result(data, result.get("raw_text", ""))
-            result["date"] = datetime.now().strftime("%Y-%m-%d")
+        # 에러 체크
+        if result.get("error"):
+            logger.error(f"Master Brain JSON 파싱 실패: {result['error']}")
+            return self._fallback_result(data, result.get("raw_text", ""))
+        # 날짜는 항상 오늘로 강제 (Claude 응답의 date를 신뢰하지 않음)
+        result["date"] = datetime.now().strftime("%Y-%m-%d")
 
         result["model"] = self.model
         result["generated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
