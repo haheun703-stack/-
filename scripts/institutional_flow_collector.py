@@ -137,9 +137,24 @@ def _analyze_investor_df(df) -> dict:
     # 쌍끌이 (기관+외국인 동시 5일 순매수)
     dual = inst_5d > 0 and foreign_5d > 0
 
+    # --- 조기 감지 지표 ---
+    inst_today = int(latest["기관합계"])
+    foreign_today = int(latest["외국인합계"])
+
+    # 오늘 DUAL (기관+외인 동시 매수)
+    dual_today = inst_today > 0 and foreign_today > 0
+
+    # 기관 가속 (오늘이 최근 5일 중 최대)
+    inst_vals = [int(v) for v in valid["기관합계"].tail(5).values]
+    inst_accel = inst_today > 0 and len(inst_vals) > 1 and inst_today >= max(inst_vals)
+
+    # 기관 대량 매수 (5일 평균 대비 3배+)
+    inst_abs_avg = sum(abs(v) for v in inst_vals) / max(len(inst_vals), 1)
+    inst_surge = inst_today > 0 and inst_abs_avg > 0 and inst_today >= inst_abs_avg * 3
+
     return {
-        "inst_net": int(latest["기관합계"]),
-        "foreign_net": int(latest["외국인합계"]),
+        "inst_net": inst_today,
+        "foreign_net": foreign_today,
         "individual_net": int(latest["개인"]),
         "inst_consecutive": inst_consec,
         "foreign_consecutive": foreign_consec,
@@ -148,6 +163,10 @@ def _analyze_investor_df(df) -> dict:
         "foreign_5d": foreign_5d,
         "foreign_20d": foreign_20d,
         "dual_buying_5d": dual,
+        # 조기 감지
+        "dual_today": dual_today,
+        "inst_accel": inst_accel,
+        "inst_surge": inst_surge,
     }
 
 
@@ -271,23 +290,41 @@ def detect_accumulation(sector_results: dict) -> list[dict]:
             inst_5d_억 = s.get("inst_5d", 0) / 1e8
             foreign_5d_억 = s.get("foreign_5d", 0) / 1e8
 
-            # 감지 조건
+            # 조기 감지 지표
+            dual_today = s.get("dual_today", False)
+            inst_accel = s.get("inst_accel", False)
+            inst_surge = s.get("inst_surge", False)
+
+            # 기존 감지 조건
             inst_accum = inst_consec >= c["min_consecutive_days"] or inst_5d_억 >= c["min_cumulative_5d_억"]
             foreign_accum = foreign_consec >= c["min_consecutive_days"] or foreign_5d_억 >= c["min_cumulative_5d_억_foreign"]
             dual = s.get("dual_buying_5d", False)
 
-            if not (inst_accum or foreign_accum):
+            # 조기 감지 조건 (1~2일차에 포착)
+            early_dual = dual_today and (inst_consec >= 1 or foreign_consec >= 1)
+            early_accel = inst_accel and inst_consec >= 2
+            early_surge = inst_surge
+
+            if not (inst_accum or foreign_accum or early_dual or early_accel or early_surge):
                 continue
 
-            # 등급 판정
+            # 등급 판정 — 기존 + EARLY 등급
             if dual and (inst_consec >= c["strong_consecutive_days"] or foreign_consec >= c["strong_consecutive_days"]):
-                grade = "STRONG"   # 쌍끌이 + 연속 5일+
+                grade = "STRONG"       # 쌍끌이 + 연속 5일+
             elif dual:
-                grade = "MODERATE" # 쌍끌이
+                grade = "MODERATE"     # 쌍끌이
             elif inst_consec >= c["strong_consecutive_days"] or foreign_consec >= c["strong_consecutive_days"]:
-                grade = "NOTABLE"  # 한쪽 강한 연속
+                grade = "NOTABLE"      # 한쪽 강한 연속
+            elif early_dual:
+                grade = "EARLY_DUAL"   # 오늘 기관+외인 동시 진입 (1~2일차)
+            elif early_accel:
+                grade = "EARLY_ACCEL"  # 2일 연속 + 오늘 가속
+            elif early_surge:
+                grade = "EARLY_SURGE"  # 오늘 대량 매수 (평균 3배+)
+            elif inst_accum or foreign_accum:
+                grade = "WATCH"        # 관심
             else:
-                grade = "WATCH"    # 관심
+                continue
 
             alerts.append({
                 "ticker": code,
@@ -300,10 +337,13 @@ def detect_accumulation(sector_results: dict) -> list[dict]:
                 "inst_20d_억": round(s.get("inst_20d", 0) / 1e8, 1),
                 "foreign_20d_억": round(s.get("foreign_20d", 0) / 1e8, 1),
                 "dual_buying": dual,
+                "dual_today": dual_today,
+                "inst_accel": inst_accel,
+                "inst_surge": inst_surge,
                 "grade": grade,
             })
 
-    grade_order = {"STRONG": 0, "MODERATE": 1, "NOTABLE": 2, "WATCH": 3}
+    grade_order = {"STRONG": 0, "MODERATE": 1, "NOTABLE": 2, "EARLY_DUAL": 3, "EARLY_ACCEL": 4, "EARLY_SURGE": 5, "WATCH": 6}
     alerts.sort(key=lambda x: (grade_order.get(x["grade"], 9), -abs(x["inst_5d_억"]) - abs(x["foreign_5d_억"])))
 
     # 같은 종목이 여러 섹터에 중복 감지된 경우 가장 높은 등급만 유지
@@ -361,10 +401,26 @@ def format_alert_text(stock_alerts: list[dict], sector_flows: list[dict]) -> str
     lines.append(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}")
     lines.append("")
 
-    # 매집 종목
+    # 조기 감지 종목 (EARLY_*)
+    early = [a for a in stock_alerts if a["grade"].startswith("EARLY_")]
+    if early:
+        lines.append("== 조기 감지 (1~2일차) ==")
+        for a in early[:10]:
+            tag_map = {"EARLY_DUAL": "DUAL진입", "EARLY_ACCEL": "가속", "EARLY_SURGE": "대량"}
+            tag = tag_map.get(a["grade"], a["grade"])
+            lines.append(
+                f"[{tag}] {a['name']}({a['ticker']}) [{a['sector']}]"
+            )
+            lines.append(
+                f"   기관 {a['inst_consecutive']}일/{a['inst_5d_억']:+.0f}억(5d) | "
+                f"외인 {a['foreign_consecutive']}일/{a['foreign_5d_억']:+.0f}억(5d)"
+            )
+        lines.append("")
+
+    # 매집 종목 (확정)
     strong = [a for a in stock_alerts if a["grade"] in ("STRONG", "MODERATE")]
     if strong:
-        lines.append("== 기관/외인 매집 감지 ==")
+        lines.append("== 기관/외인 매집 확정 ==")
         for a in strong[:10]:
             tag = "[DUAL]" if a["dual_buying"] else "[INST]" if a["inst_consecutive"] >= 3 else "[FRGN]"
             lines.append(
