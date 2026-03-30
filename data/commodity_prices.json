@@ -4,11 +4,11 @@
   "commodity_count": 9,
   "commodities": {
     "wti": {
-      "price": 89.33,
-      "date": "2026-03-23",
+      "price": 103.06,
+      "date": "2026-03-30",
       "source": "eia",
       "cost_gap": {
-        "gap_pct": 98.5,
+        "gap_pct": 129.0,
         "zone": "overheated",
         "emoji": "🔴",
         "production_cost": 45.0

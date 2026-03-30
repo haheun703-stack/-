@@ -969,6 +969,37 @@ def build_zone_scenario() -> dict:
     # ── 6) conflicts ──
     conflicts = conflicts_raw.get("conflicts", [])
 
+    # ── 7) deep_analysis — 시나리오별 심층분석 + 도표 HTML ──
+    deep_analyses = []
+    charts_dir = Path(DATA_DIR).parent / "시나리오 안에 있는 도표들"
+    for sc in active_scenarios:
+        chain_def = chains_map.get(sc["id"], {})
+        da = chain_def.get("deep_analysis")
+        if not da:
+            continue
+        entry = {
+            "scenario_id": sc["id"],
+            "title": da.get("title", ""),
+            "updated": da.get("updated", ""),
+            "summary": da.get("summary", ""),
+            "key_numbers": da.get("key_numbers", {}),
+            "beneficiaries": da.get("beneficiaries", []),
+            "oil_scenarios": da.get("oil_scenarios", []),
+            "charts_html": {},
+        }
+        # 도표 HTML 파일 로드
+        for chart_name in da.get("charts", []):
+            html_path = charts_dir / f"{chart_name}.html"
+            svg_path = charts_dir / f"{chart_name}.svg"
+            for p in (html_path, svg_path):
+                if p.exists():
+                    try:
+                        entry["charts_html"][chart_name] = p.read_text(encoding="utf-8")
+                    except Exception:
+                        pass
+                    break
+        deep_analyses.append(entry)
+
     return {
         "market_status": market_status,
         "active_scenarios": active_scenarios,
@@ -976,6 +1007,7 @@ def build_zone_scenario() -> dict:
         "scenario_stocks": scenario_stocks,
         "etf_map": etf_map,
         "conflicts": conflicts,
+        "deep_analyses": deep_analyses,
     }
 
 

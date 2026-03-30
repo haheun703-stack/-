@@ -4,65 +4,131 @@
   "scenarios": [
     {
       "id": "WAR_MIDDLE_EAST",
-      "name": "중동 전쟁/군사 충돌",
+      "name": "이란-미국 전쟁 (호르무즈 위기)",
       "trigger_conditions": {
-        "keywords": ["이란", "전쟁", "중동", "미사일", "호르무즈", "이스라엘", "공습"],
+        "keywords": ["이란", "전쟁", "중동", "미사일", "호르무즈", "이스라엘", "공습", "후티", "혁명수비대", "IRGC"],
         "market_signals": {
           "wti_change_1d_pct": 3.0,
           "gold_change_1d_pct": 1.5,
           "vix_above": 25
         }
       },
+      "deep_analysis": {
+        "title": "이란-미국 전쟁: 돈의 흐름과 구조적 수혜자",
+        "updated": "2026-03-31",
+        "summary": "전쟁을 끝낼 수 있는 자들이 전쟁 지속에서 가장 큰 이익을 본다는 역설. 방산업체 시총 $2,000억 증가, 무기계약 $480억, 러시아 추가 석유수입 연 $500억. 유일한 브레이크는 미국 유권자의 지갑(지지율 29%).",
+        "key_numbers": {
+          "wti_pre_war": 60,
+          "wti_current": 103,
+          "wti_peak": 119,
+          "wti_change_pct": 72,
+          "lpg_asia_change_pct": 53,
+          "lpg_europe_change_pct": 64,
+          "defense_market_cap_increase_bil": 200,
+          "arms_contracts_bil": 48,
+          "pentagon_budget_request_bil": 200,
+          "russia_extra_oil_income_annual_bil": 50,
+          "trump_network_deals_bil": 10.2,
+          "total_war_cost_bil_low": 590,
+          "total_war_cost_bil_high": 3500,
+          "trump_approval_pct": 29,
+          "americans_unwilling_high_gas_pct": 67
+        },
+        "beneficiaries": [
+          {
+            "name": "방산업체 5사",
+            "earned_bil": 200,
+            "type": "시총 증가",
+            "stop_condition": "없음 — 재보충 수요 3~5년 보장",
+            "tickers_us": ["LMT", "RTX", "NOC", "GD", "BA"],
+            "tickers_kr": ["012450:한화에어로스페이스", "079550:LIG넥스원", "047810:한국항공우주", "067390:한화시스템", "103560:풍산"]
+          },
+          {
+            "name": "트럼프 네트워크",
+            "earned_bil": 10.2,
+            "type": "사우디/UAE 비즈니스 딜",
+            "stop_condition": "중간선거 전 승리 선언 (2026 5~6월)"
+          },
+          {
+            "name": "이스라엘",
+            "earned_bil": 8,
+            "type": "방산수출 증가 + 전략적 이익",
+            "stop_condition": "이란 군사력 영구 무력화 (사실상 불가능)"
+          },
+          {
+            "name": "러시아",
+            "earned_bil": 45,
+            "type": "추가 석유수입 (연환산)",
+            "stop_condition": "없음 — 영원히 지속 희망"
+          },
+          {
+            "name": "IRGC",
+            "earned_bil": 0,
+            "type": "국내 권력 장악",
+            "stop_condition": "수용불가 조건 제시 → 전쟁 지속 = 권력 유지"
+          }
+        ],
+        "oil_scenarios": [
+          {"name": "조기 종전 (4월 내 휴전)", "wti_q2": 71, "wti_q4": 62, "probability": 20},
+          {"name": "GS 기본 전망", "wti_q2": 110, "wti_q4": 67, "probability": 45},
+          {"name": "장기전 (2개월+)", "wti_q2": 120, "wti_q4": 87, "probability": 25},
+          {"name": "극단 시나리오", "wti_q2": 147, "wti_q4": 130, "probability": 10}
+        ],
+        "charts": ["wti_crude_oil_price_trajectory_2026", "lpg_propane_price_impact_2026", "oil_price_scenario_forecast_2026", "iran_war_profit_tracker_by_beneficiary", "war_stop_condition_analysis"]
+      },
       "chain": [
         {
           "phase": 1,
-          "name": "즉시 반응 (D+0~2)",
+          "name": "기습 타격 (D+0~2)",
           "day_range": [0, 2],
           "hot_sectors": ["방산", "방위산업ETF"],
-          "hot_tickers": ["012450:한화에어로스페이스", "079550:LIG넥스원", "047810:한국항공우주", "064350:현대로템"],
+          "hot_tickers": ["012450:한화에어로스페이스", "079550:LIG넥스원", "047810:한국항공우주", "064350:현대로템", "067390:한화시스템", "103560:풍산"],
           "etf": ["TIGER 방산", "KODEX 방산"],
           "cold_sectors": ["항공", "여행", "반도체"],
-          "logic": "방산 직접 수혜. 항공/여행 유가부담+수요감소"
+          "logic": "방산 직접 수혜. LIG넥스원 천궁-II 실전검증(UAE 172/186발 요격, 92.5%), 한화에어로스페이스 시총 7조 증가. 풍산 탄약 소모품 직접 수혜",
+          "actual_returns": {"LIG넥스원": "+78% (5일)", "한화시스템": "+29% (1일)", "풍산": "+12% (1일)"}
         },
         {
           "phase": 2,
-          "name": "유가 전파 (D+2~7)",
+          "name": "유가 폭등 + 호르무즈 봉쇄 (D+2~7)",
           "day_range": [2, 7],
-          "hot_sectors": ["정유", "에너지"],
+          "hot_sectors": ["정유", "에너지", "해상보험"],
           "hot_tickers": ["010950:S-Oil", "267250:HD현대", "078930:GS"],
           "etf": ["TIGER 원유선물", "KODEX WTI"],
-          "cold_sectors": ["항공", "화학"],
-          "logic": "유가 급등 → 정유사 마진 확대. 항공 비용 폭탄"
+          "cold_sectors": ["항공", "화학", "자동차"],
+          "logic": "WTI $60→$119 폭등. 호르무즈 해협 봉쇄로 하루 1,100만배럴 손실. 해상보험료 12배 급등, 컨테이너당 $3,500 전쟁할증료",
+          "actual_returns": {"WTI": "+98% (전쟁 후)", "Brent": "+85%"}
         },
         {
           "phase": 3,
-          "name": "안전자산 이동 (D+3~14)",
+          "name": "안전자산 + 걸프 인프라 타격 (D+3~14)",
           "day_range": [3, 14],
-          "hot_sectors": ["금", "달러", "채권"],
-          "hot_tickers": [],
+          "hot_sectors": ["금", "달러", "채권", "원자력"],
+          "hot_tickers": ["034020:두산에너빌리티"],
           "etf": ["KODEX 골드선물", "TIGER 미국달러선물", "KODEX 국고채10년"],
-          "cold_sectors": ["성장주", "소형주"],
-          "logic": "위험회피 심화. 안전자산으로 자금 이동"
+          "cold_sectors": ["성장주", "소형주", "소비재"],
+          "logic": "이란 물귀신 작전 — 카타르 LNG, UAE 가스시설, 사우디 정유소 연쇄 공격. 금 +12%, 안전자산 이동 가속. 원전 대안에너지 부각"
         },
         {
           "phase": 4,
-          "name": "2차 파급 (D+7~30)",
+          "name": "공급망 재편 + 보험/해운 수혜 (D+7~30)",
           "day_range": [7, 30],
-          "hot_sectors": ["해운", "천연가스", "원자력"],
+          "hot_sectors": ["해운", "천연가스", "보험", "LPG"],
           "hot_tickers": ["011200:HMM", "028670:팬오션"],
           "etf": ["TIGER 200에너지화학"],
-          "cold_sectors": ["소비재", "유통"],
-          "logic": "공급망 차질 → 해운운임 상승. 에너지 대안 부각"
+          "cold_sectors": ["소비재", "유통", "외식"],
+          "logic": "호르무즈 우회로 운임 급등. LPG 아시아 +53%, 유럽 +64%. 해운사 전쟁할증 수취. 미국 200억달러 해상보험 프로그램 가동. 한국 LPG 미국산 67%로 물량은 안정적이나 가격 연동 상승",
+          "actual_returns": {"아시아 프로판 AFEI": "+53%", "유럽 ARA 프로판": "+64%"}
         },
         {
           "phase": 5,
-          "name": "회복기 (D+30~90)",
+          "name": "형식적 휴전 → 역발상 (D+30~90)",
           "day_range": [30, 90],
-          "hot_sectors": ["건설", "인프라", "재건"],
-          "hot_tickers": ["000720:현대건설", "047040:대우건설"],
+          "hot_sectors": ["자동차", "항공", "소비재", "건설", "인프라"],
+          "hot_tickers": ["005380:현대차", "000270:기아", "000720:현대건설"],
           "etf": [],
-          "cold_sectors": [],
-          "logic": "전쟁 후 재건 수요. 건설/인프라 수혜"
+          "cold_sectors": ["방산(차익실현)"],
+          "logic": "트럼프 5~6월 승리선언 시 역발상 전략. 현대차 -27%, 항공 -15%, 크루즈 -27% 폭락종목 안도랠리 15~20% 기대. 중동 재건수요로 건설/인프라. 단, 잔디깎기 패턴으로 진짜 평화 아닐 수 있음"
         }
       ]
     },

@@ -1,81 +1,65 @@
 {
-  "updated": "2026-03-26T21:16:32.800799",
+  "updated": "2026-03-31T09:00:00",
   "scenarios": {
     "WAR_MIDDLE_EAST": {
-      "first_detected": "2026-03-20",
-      "current_phase": 3,
-      "days_active": 6,
-      "score": 67,
+      "first_detected": "2026-03-02",
+      "current_phase": 4,
+      "days_active": 29,
+      "score": 92,
       "reasons": [
-        "키워드 87건 (강)",
-        "Gold 1d +3.0089% (>=1.5%)"
+        "WTI $103 (+72% 전쟁 전 대비)",
+        "호르무즈 해협 봉쇄 지속 — 하루 1,100만 배럴 손실",
+        "Gold +12%, VIX 25.3 (위험회피 심화)",
+        "이란 걸프 에너지 인프라 연쇄 공격 (카타르 LNG, UAE 가스, 사우디 정유소)",
+        "방산 5사 시총 $2,000억 증가, 무기계약 $480억 확정",
+        "트럼프 지지율 29% — 중간선거 전 휴전 압력 증가",
+        "LPG 아시아 +53%, 유럽 +64% — 에너지 가격 전방위 파급"
       ],
-      "news_count": 87,
-      "last_evaluated": "2026-03-26",
-      "last_phase_change": "2026-03-23"
-    },
-    "FED_RATE_CUT": {
-      "first_detected": "2026-03-20",
-      "current_phase": 0,
-      "days_active": 6,
-      "score": 5,
-      "reasons": [
-        "키워드 1건 (미약)"
-      ],
-      "news_count": 1,
-      "last_evaluated": "2026-03-26",
-      "last_phase_change": "2026-03-26"
-    },
-    "OIL_SPIKE": {
-      "first_detected": "2026-03-20",
-      "current_phase": 2,
-      "days_active": 6,
-      "score": 48,
-      "reasons": [
-        "키워드 11건 (강)",
-        "WTI $89.33 >= $85"
-      ],
-      "news_count": 11,
-      "last_evaluated": "2026-03-26",
-      "last_phase_change": "2026-03-26"
-    },
-    "SEMICONDUCTOR_CYCLE_UP": {
-      "first_detected": "2026-03-20",
-      "current_phase": 0,
-      "days_active": 6,
-      "score": 15,
-      "reasons": [
-        "키워드 2건 (약)"
-      ],
-      "news_count": 2,
-      "last_evaluated": "2026-03-26",
-      "last_phase_change": "2026-03-26"
+      "news_count": 342,
+      "last_evaluated": "2026-03-31",
+      "last_phase_change": "2026-03-27"
     },
     "SPACEX_IPO": {
       "first_detected": "2026-03-26",
       "current_phase": 1,
-      "days_active": 0,
+      "days_active": 5,
       "score": 39,
       "reasons": [
         "키워드 5건 (강)"
       ],
       "news_count": 5,
-      "last_evaluated": "2026-03-26",
+      "last_evaluated": "2026-03-31",
       "last_phase_change": "2026-03-26"
     },
     "COMMODITY_SUPERCYCLE": {
       "first_detected": "2026-03-26",
       "current_phase": 3,
-      "days_active": 0,
-      "score": 60,
+      "days_active": 5,
+      "score": 65,
       "reasons": [
-        "키워드 2건 (약)",
+        "전쟁 유가 폭등 → 원자재 전반 슈퍼사이클 가속",
         "구리 갭 135.5% (과열)",
-        "TiO2 갭 14.3% (매수구간!)"
+        "TiO2 갭 14.3% (매수구간)",
+        "금 $4,163 사상최고 — 안전자산 + 인플레 헤지"
       ],
-      "news_count": 2,
-      "last_evaluated": "2026-03-26",
+      "news_count": 12,
+      "last_evaluated": "2026-03-31",
       "last_phase_change": "2026-03-26"
+    },
+    "OIL_SPIKE": {
+      "first_detected": "2026-03-05",
+      "current_phase": 2,
+      "days_active": 26,
+      "score": 85,
+      "reasons": [
+        "WTI $103 — $95 트리거 초과",
+        "호르무즈 봉쇄 → 대안에너지(원전/LNG) Phase 2 진입",
+        "골드만삭스: Q3~Q4 Brent $71~$93 범위 전망",
+        "한국 자원안보 위기경보 '주의' 격상"
+      ],
+      "news_count": 156,
+      "last_evaluated": "2026-03-31",
+      "last_phase_change": "2026-03-12"
     }
   }
 }
