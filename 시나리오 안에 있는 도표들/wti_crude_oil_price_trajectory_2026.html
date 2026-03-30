@@ -1,0 +1,118 @@
+
+<div style="padding: 1rem 0;">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 1.5rem;">
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">전쟁 전 (2/27)</div>
+    <div style="font-size: 24px; font-weight: 500;">$60</div>
+    <div style="font-size: 12px; color: var(--color-text-secondary);">WTI 배럴당</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">현재 (3/30)</div>
+    <div style="font-size: 24px; font-weight: 500; color: var(--color-text-danger);">$103</div>
+    <div style="font-size: 12px; color: var(--color-text-danger);">+72% 급등</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">연중 최고</div>
+    <div style="font-size: 24px; font-weight: 500; color: var(--color-text-danger);">$119</div>
+    <div style="font-size: 12px; color: var(--color-text-secondary);">3/9 기록</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">YTD 변동</div>
+    <div style="font-size: 24px; font-weight: 500; color: var(--color-text-danger);">+76%</div>
+    <div style="font-size: 12px; color: var(--color-text-secondary);">연초 대비</div>
+  </div>
+</div>
+<div style="position: relative; width: 100%; height: 320px;">
+  <canvas id="wtiChart"></canvas>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--color-text-secondary);">
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #3266ad;"></span>WTI 실제가</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #E24B4A;"></span>Brent 실제가</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #EF9F27; opacity:0.5;"></span>골드만삭스 전망 (기본)</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #E24B4A; opacity:0.4;"></span>위험 시나리오</span>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#c2c0b6' : '#5F5E5A';
+
+new Chart(document.getElementById('wtiChart'), {
+  type: 'line',
+  data: {
+    labels: ['1월','2월 초','2/27\n전쟁 전','3/2','3/5','3/9\n최고점','3/13','3/18','3/23','3/28','3/30\n현재','4월\n전망','Q2\n전망','Q3\n전망','Q4\n전망'],
+    datasets: [
+      {
+        label: 'WTI',
+        data: [58, 64, 60, 76, 82, 119, 100, 95, 99, 93, 103, null, null, null, null],
+        borderColor: '#3266ad',
+        backgroundColor: 'rgba(50,102,173,0.08)',
+        borderWidth: 2.5,
+        fill: false,
+        tension: 0.3,
+        pointRadius: [3,3,5,3,3,5,3,3,3,3,5,0,0,0,0],
+        pointBackgroundColor: '#3266ad'
+      },
+      {
+        label: 'Brent',
+        data: [62, 68, 65, 82, 88, 120, 106, 100, 104, 97, 107, null, null, null, null],
+        borderColor: '#E24B4A',
+        borderWidth: 2,
+        fill: false,
+        tension: 0.3,
+        pointRadius: [3,3,5,3,3,5,3,3,3,3,5,0,0,0,0],
+        pointBackgroundColor: '#E24B4A'
+      },
+      {
+        label: 'GS 기본 전망 (WTI)',
+        data: [null,null,null,null,null,null,null,null,null,null,103, 95, 79, 73, 67],
+        borderColor: '#EF9F27',
+        borderWidth: 2,
+        borderDash: [6, 4],
+        fill: false,
+        tension: 0.3,
+        pointRadius: [0,0,0,0,0,0,0,0,0,0,0,4,4,4,4],
+        pointBackgroundColor: '#EF9F27',
+        pointStyle: 'triangle'
+      },
+      {
+        label: '위험 시나리오 (WTI)',
+        data: [null,null,null,null,null,null,null,null,null,null,103, 115, 105, 98, 93],
+        borderColor: 'rgba(226,75,74,0.4)',
+        borderWidth: 1.5,
+        borderDash: [3, 3],
+        fill: false,
+        tension: 0.3,
+        pointRadius: [0,0,0,0,0,0,0,0,0,0,0,4,4,4,4],
+        pointBackgroundColor: 'rgba(226,75,74,0.6)',
+        pointStyle: 'triangle'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      annotation: {}
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        ticks: { color: textColor, font: { size: 11 }, maxRotation: 0 }
+      },
+      y: {
+        min: 40,
+        max: 160,
+        grid: { color: gridColor },
+        ticks: {
+          color: textColor,
+          font: { size: 11 },
+          callback: v => '$' + v
+        }
+      }
+    }
+  }
+});
+</script>
