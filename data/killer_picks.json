@@ -1,0 +1,871 @@
+{
+  "date": "2026-03-30",
+  "target_label": "3/30(Mon)",
+  "generated_at": "2026-03-29 19:07",
+  "market_environment": {
+    "regime": "CAUTION",
+    "vix": 25.3,
+    "shield": "RED",
+    "mdd_pct": -27.7,
+    "cash_pct": 71.2,
+    "us_mood": "RISK_OFF",
+    "geopolitical_risk": 8,
+    "summary": "주의 모드 — 선별적 매수, 현금 확보 (VIX 25.3)"
+  },
+  "signal_validation": {
+    "best_signal": "tomorrow_picks",
+    "best_hit_rate": 67.6,
+    "best_avg_ret": 0.36,
+    "signal_summary": {
+      "tomorrow_picks": {
+        "hit_rate": 67.6,
+        "avg_ret": 0.36,
+        "total": 259
+      },
+      "pullback_scan": {
+        "hit_rate": 58.5,
+        "avg_ret": 1.01,
+        "total": 270
+      },
+      "whale_detect": {
+        "hit_rate": 48.3,
+        "avg_ret": 1.17,
+        "total": 346
+      },
+      "accumulation_tracker": {
+        "hit_rate": 59.3,
+        "avg_ret": 1.19,
+        "total": 270
+      },
+      "dart_event": {
+        "hit_rate": 43.9,
+        "avg_ret": -0.12,
+        "total": 1040
+      },
+      "volume_spike": {
+        "hit_rate": 41.1,
+        "avg_ret": -0.33,
+        "total": 406
+      },
+      "overnight_signal": {
+        "hit_rate": 50.0,
+        "avg_ret": -1.07,
+        "total": 6
+      }
+    },
+    "daily_trend": [
+      {
+        "date": "2026-03-23",
+        "accum_hr": 20.0,
+        "accum_ret": -3.62,
+        "picks_hr": 6.8,
+        "picks_ret": -5.02
+      },
+      {
+        "date": "2026-03-24",
+        "accum_hr": 66.7,
+        "accum_ret": 2.08,
+        "picks_hr": 0,
+        "picks_ret": 0
+      },
+      {
+        "date": "2026-03-25",
+        "accum_hr": 86.7,
+        "accum_ret": 3.99,
+        "picks_hr": 100.0,
+        "picks_ret": 1.96
+      },
+      {
+        "date": "2026-03-26",
+        "accum_hr": 33.3,
+        "accum_ret": -1.99,
+        "picks_hr": 25.0,
+        "picks_ret": -1.1
+      },
+      {
+        "date": "2026-03-27",
+        "accum_hr": 56.7,
+        "accum_ret": 0.49,
+        "picks_hr": 0,
+        "picks_ret": 0
+      }
+    ],
+    "insight": "매집 시그널이 반등일 평균 77% 적중"
+  },
+  "institutional_picks": [
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "sector": "반도체",
+      "inst_consecutive": 7,
+      "inst_5d_bil": 864.3,
+      "inst_20d_bil": 5798.3,
+      "foreign_5d_bil": -1780.3,
+      "dual_buying": false,
+      "grade": "NOTABLE",
+      "sector_rank": 10,
+      "verdict": "기관 7일 연속매수, 20일 +5,798억 대량 매집, 외인 매도 중 → 기관이 흡수"
+    },
+    {
+      "ticker": "079550",
+      "name": "LIG넥스원",
+      "sector": "방산",
+      "inst_consecutive": 5,
+      "inst_5d_bil": 1314.1,
+      "inst_20d_bil": 2280.7,
+      "foreign_5d_bil": 217.9,
+      "dual_buying": true,
+      "grade": "STRONG",
+      "sector_rank": 1,
+      "verdict": "기관 5일 연속매수, 20일 +2,281억 대량 매집, 외인+기관 동반매수"
+    },
+    {
+      "ticker": "462870",
+      "name": "시프트업",
+      "sector": "게임",
+      "inst_consecutive": 5,
+      "inst_5d_bil": 37.8,
+      "inst_20d_bil": 20.3,
+      "foreign_5d_bil": -2.9,
+      "dual_buying": false,
+      "grade": "NOTABLE",
+      "sector_rank": 2,
+      "verdict": "기관 5일 연속매수"
+    },
+    {
+      "ticker": "105560",
+      "name": "KB금융",
+      "sector": "은행",
+      "inst_consecutive": 4,
+      "inst_5d_bil": 1514.8,
+      "inst_20d_bil": 3189.8,
+      "foreign_5d_bil": -1620.8,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "consensus": {
+        "target": 192176,
+        "upside": 26.3,
+        "per": 9.09,
+        "pbr": 0.81,
+        "dividend": 2.53,
+        "grade": "A"
+      },
+      "sector_rank": 5,
+      "verdict": "기관 4일 연속, 20일 +3,190억 대량 매집, 외인 매도 중 → 기관이 흡수"
+    },
+    {
+      "ticker": "352820",
+      "name": "하이브",
+      "sector": "미디어",
+      "inst_consecutive": 4,
+      "inst_5d_bil": -214.8,
+      "inst_20d_bil": -2016.4,
+      "foreign_5d_bil": -519.9,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "sector_rank": 15,
+      "verdict": "기관 4일 연속, 외인 매도 중 → 기관이 흡수"
+    },
+    {
+      "ticker": "005490",
+      "name": "POSCO홀딩스",
+      "sector": "2차전지",
+      "inst_consecutive": 4,
+      "inst_5d_bil": -37.4,
+      "inst_20d_bil": -1542.9,
+      "foreign_5d_bil": -41.2,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "sector_rank": 4,
+      "verdict": "기관 4일 연속"
+    },
+    {
+      "ticker": "064350",
+      "name": "현대로템",
+      "sector": "방산",
+      "inst_consecutive": 4,
+      "inst_5d_bil": 531.0,
+      "inst_20d_bil": -1185.1,
+      "foreign_5d_bil": -187.1,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "sector_rank": 1,
+      "verdict": "기관 4일 연속"
+    },
+    {
+      "ticker": "068270",
+      "name": "셀트리온",
+      "sector": "바이오",
+      "inst_consecutive": 4,
+      "inst_5d_bil": 238.5,
+      "inst_20d_bil": -1040.3,
+      "foreign_5d_bil": 272.4,
+      "dual_buying": true,
+      "grade": "MODERATE",
+      "sector_rank": 3,
+      "verdict": "기관 4일 연속, 외인+기관 동반매수"
+    },
+    {
+      "ticker": "005940",
+      "name": "NH투자증권",
+      "sector": "증권",
+      "inst_consecutive": 4,
+      "inst_5d_bil": 221.7,
+      "inst_20d_bil": 945.7,
+      "foreign_5d_bil": -254.4,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "sector_rank": 13,
+      "verdict": "기관 4일 연속"
+    },
+    {
+      "ticker": "086280",
+      "name": "현대글로비스",
+      "sector": "현대차그룹",
+      "inst_consecutive": 4,
+      "inst_5d_bil": 12.2,
+      "inst_20d_bil": -817.6,
+      "foreign_5d_bil": -58.3,
+      "dual_buying": false,
+      "grade": "WATCH",
+      "sector_rank": 20,
+      "verdict": "기관 4일 연속"
+    }
+  ],
+  "retail_support": [
+    {
+      "ticker": "005930",
+      "name": "삼성전자",
+      "retail_net_5d_bil": 68338.2,
+      "retail_net_20d_bil": 188183.5,
+      "retail_consecutive": 7,
+      "absorb_rate": 89.0,
+      "pattern": "RETAIL_SUPPORT",
+      "vol_price_pattern": "FLAT",
+      "verdict": "개인 7일 연속 매수, 외인 매도 89% 흡수"
+    },
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "retail_net_5d_bil": 27802.2,
+      "retail_net_20d_bil": 79333.8,
+      "retail_consecutive": 2,
+      "absorb_rate": 100.0,
+      "pattern": "RETAIL_SUPPORT",
+      "vol_price_pattern": "ABSORB",
+      "verdict": "개인 2일 연속, 외인 매도 100% 흡수"
+    },
+    {
+      "ticker": "005380",
+      "name": "현대차",
+      "retail_net_5d_bil": 7350.7,
+      "retail_net_20d_bil": 32296.9,
+      "retail_consecutive": 7,
+      "absorb_rate": 109.0,
+      "pattern": "RETAIL_SUPPORT",
+      "vol_price_pattern": "FLAT",
+      "verdict": "개인 7일 연속 매수, 외인 매도 109% 흡수"
+    },
+    {
+      "ticker": "329180",
+      "name": "HD현대중공업",
+      "retail_net_5d_bil": 1468.9,
+      "retail_net_20d_bil": -805.0,
+      "retail_consecutive": 7,
+      "absorb_rate": 141.0,
+      "pattern": "RETAIL_SUPPORT",
+      "vol_price_pattern": "ABANDON",
+      "verdict": "개인 7일 연속 매수, 외인 매도 141% 흡수"
+    },
+    {
+      "ticker": "402340",
+      "name": "SK스퀘어",
+      "retail_net_5d_bil": 1264.0,
+      "retail_net_20d_bil": 3095.0,
+      "retail_consecutive": 3,
+      "absorb_rate": 167.0,
+      "pattern": "RETAIL_SUPPORT",
+      "vol_price_pattern": "ABANDON",
+      "verdict": "개인 3일 연속, 외인 매도 167% 흡수"
+    }
+  ],
+  "cross_validated_top5": [
+    {
+      "ticker": "086790",
+      "name": "하나금융지주",
+      "signals_matched": 4,
+      "matched_from": [
+        "기관4일연속",
+        "컨센서스A",
+        "눌림목매수대기",
+        "은행섹터강세"
+      ],
+      "consensus": {
+        "target": 141444,
+        "upside": 28.1,
+        "per": 7.14,
+        "pbr": 0.62,
+        "dividend": 4.02
+      },
+      "inst_consecutive": 4,
+      "inst_20d_bil": -101.5,
+      "entry_price": 110400,
+      "stop_loss": 104880,
+      "target_price": 141444,
+      "conviction": "HIGH",
+      "action": "매수",
+      "rank": 1
+    },
+    {
+      "ticker": "105560",
+      "name": "KB금융",
+      "signals_matched": 3,
+      "matched_from": [
+        "기관4일연속",
+        "컨센서스A",
+        "은행섹터강세"
+      ],
+      "consensus": {
+        "target": 192176,
+        "upside": 26.3,
+        "per": 9.09,
+        "pbr": 0.81,
+        "dividend": 2.53
+      },
+      "inst_consecutive": 4,
+      "inst_20d_bil": 3189.8,
+      "entry_price": 152200,
+      "stop_loss": 144590,
+      "target_price": 192176,
+      "conviction": "MEDIUM",
+      "action": "매수",
+      "rank": 2
+    },
+    {
+      "ticker": "055550",
+      "name": "신한지주",
+      "signals_matched": 3,
+      "matched_from": [
+        "기관4일연속",
+        "컨센서스A",
+        "은행섹터강세"
+      ],
+      "consensus": {
+        "target": 120059,
+        "upside": 28.4,
+        "per": 8.3,
+        "pbr": 0.69,
+        "dividend": 2.67
+      },
+      "inst_consecutive": 4,
+      "inst_20d_bil": 348.4,
+      "entry_price": 93500,
+      "stop_loss": 88825,
+      "target_price": 120059,
+      "conviction": "MEDIUM",
+      "action": "매수",
+      "rank": 3
+    },
+    {
+      "ticker": "079550",
+      "name": "LIG넥스원",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관5일연속",
+        "방산섹터강세"
+      ],
+      "inst_consecutive": 5,
+      "inst_20d_bil": 2280.7,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 4
+    },
+    {
+      "ticker": "012450",
+      "name": "한화에어로스페이스",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관0일연속",
+        "방산섹터강세"
+      ],
+      "inst_consecutive": 0,
+      "inst_20d_bil": 1023.5,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 5
+    },
+    {
+      "ticker": "316140",
+      "name": "우리금융지주",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관4일연속",
+        "은행섹터강세"
+      ],
+      "inst_consecutive": 4,
+      "inst_20d_bil": 432.9,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 6
+    },
+    {
+      "ticker": "251270",
+      "name": "넷마블",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관4일연속",
+        "게임섹터강세"
+      ],
+      "inst_consecutive": 4,
+      "inst_20d_bil": 184.1,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 7
+    },
+    {
+      "ticker": "196170",
+      "name": "알테오젠",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관4일연속",
+        "바이오섹터강세"
+      ],
+      "inst_consecutive": 4,
+      "inst_20d_bil": 98.0,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 8
+    },
+    {
+      "ticker": "462870",
+      "name": "시프트업",
+      "signals_matched": 2,
+      "matched_from": [
+        "기관5일연속",
+        "게임섹터강세"
+      ],
+      "inst_consecutive": 5,
+      "inst_20d_bil": 20.3,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 9
+    },
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "signals_matched": 2,
+      "matched_from": [
+        "컨센서스A",
+        "개인지지"
+      ],
+      "consensus": {
+        "target": 213846,
+        "upside": 37.3,
+        "per": 7.09,
+        "pbr": 0.91,
+        "dividend": 4.34
+      },
+      "entry_price": 155800,
+      "stop_loss": 148010,
+      "target_price": 213846,
+      "conviction": "LOW",
+      "action": "관찰",
+      "rank": 10
+    }
+  ],
+  "etf_top5": [
+    {
+      "rank": 1,
+      "ticker": "463250",
+      "name": "KODEX 방산",
+      "category": "섹터",
+      "signal": "기관 5일 +2,202억",
+      "sector_score": 88.0,
+      "regime": "STRONG_ROTATION",
+      "action": "BUY",
+      "sizing": "10~20%",
+      "reason": "방산 섹터 기관+외인 유입"
+    },
+    {
+      "rank": 2,
+      "ticker": "300610",
+      "name": "KODEX 게임",
+      "category": "섹터",
+      "signal": "기관 5일 +829억",
+      "sector_score": 85.5,
+      "regime": "STRONG_ROTATION",
+      "action": "BUY",
+      "sizing": "10~20%",
+      "reason": "게임 섹터 기관+외인 유입"
+    },
+    {
+      "rank": 3,
+      "ticker": "364970",
+      "name": "KODEX 바이오",
+      "category": "섹터",
+      "signal": "기관 5일 +617억",
+      "sector_score": 78.1,
+      "regime": "STRONG_ROTATION",
+      "action": "BUY",
+      "sizing": "10~20%",
+      "reason": "바이오 섹터 기관+외인 유입"
+    },
+    {
+      "rank": 4,
+      "ticker": "305540",
+      "name": "KODEX 2차전지",
+      "category": "섹터",
+      "signal": "기관 5일 +315억",
+      "sector_score": 76.3,
+      "regime": "STRONG_ROTATION",
+      "action": "BUY",
+      "sizing": "10~20%",
+      "reason": "2차전지 섹터 기관+외인 유입"
+    },
+    {
+      "rank": 5,
+      "ticker": "091220",
+      "name": "KODEX 은행",
+      "category": "섹터",
+      "signal": "기관 5일 +2,790억",
+      "sector_score": 62.4,
+      "regime": "MODERATE_ROTATION",
+      "action": "관심",
+      "sizing": "10~20%",
+      "reason": "은행 섹터 기관+외인 유입"
+    },
+    {
+      "rank": 6,
+      "ticker": "252670",
+      "name": "KODEX 200선물인버스2X",
+      "category": "인버스",
+      "signal": "US MILD_BEAR (-22점) + VIX 25.3 (공포)",
+      "action": "BUY",
+      "sizing": "10%",
+      "holding_period": "1~3일",
+      "entry_timing": "09:00~09:30 갭 하락 확인 후 진입 (투매 마무리 대기)",
+      "stop_loss": "기초지수 +2% 반등 시",
+      "reason": "US MILD_BEAR (-22점)"
+    },
+    {
+      "rank": 7,
+      "ticker": "132030",
+      "name": "KODEX 골드선물(H)",
+      "category": "헤지",
+      "signal": "VIX 25.3 + 레짐 CAUTION",
+      "action": "BUY",
+      "sizing": "5%",
+      "holding_period": "보유 유지",
+      "entry_timing": "장중 수시 (시급도 낮음, 종가 부근 매수 가능)",
+      "stop_loss": "VIX 20 이하 안정 시 축소",
+      "reason": "VIX 25.3"
+    },
+    {
+      "rank": 8,
+      "ticker": "261240",
+      "name": "KODEX 미국달러선물",
+      "category": "매크로",
+      "signal": "매크로: VIX 급등 (공포) + 달러 강세 기대",
+      "action": "BUY",
+      "sizing": "5%",
+      "holding_period": "3~7일",
+      "entry_timing": "09:30 이후 원자재/환율 추세 확인 후 진입",
+      "stop_loss": "매크로 조건 해소 시",
+      "reason": "매크로: VIX 급등 (공포)"
+    }
+  ],
+  "portfolio_suggestion": {
+    "defense_pct": 60,
+    "offense_pct": 40,
+    "defense": [
+      {
+        "name": "KODEX 200선물인버스2X",
+        "ticker": "252670",
+        "pct": 10
+      },
+      {
+        "name": "KODEX 골드선물(H)",
+        "ticker": "132030",
+        "pct": 5
+      },
+      {
+        "name": "KODEX 미국달러선물",
+        "ticker": "261240",
+        "pct": 5
+      },
+      {
+        "name": "KODEX 은행",
+        "ticker": "091220",
+        "pct": 15
+      },
+      {
+        "name": "현금",
+        "ticker": "cash",
+        "pct": 25
+      }
+    ],
+    "offense": [
+      {
+        "name": "하나금융지주",
+        "ticker": "086790",
+        "pct": 10
+      },
+      {
+        "name": "KB금융",
+        "ticker": "105560",
+        "pct": 10
+      },
+      {
+        "name": "신한지주",
+        "ticker": "055550",
+        "pct": 10
+      },
+      {
+        "name": "LIG넥스원",
+        "ticker": "079550",
+        "pct": 10
+      },
+      {
+        "name": "KODEX 방산",
+        "ticker": "463250",
+        "pct": 10
+      },
+      {
+        "name": "KODEX 게임",
+        "ticker": "300610",
+        "pct": 10
+      }
+    ]
+  },
+  "sector_analysis": {
+    "top_sectors": [
+      {
+        "sector": "방산",
+        "score": 88.0,
+        "regime": "STRONG_ROTATION",
+        "inst_5d": 2201.9,
+        "foreign_5d": 1508.7,
+        "ret_5d": 1.52
+      },
+      {
+        "sector": "게임",
+        "score": 85.5,
+        "regime": "STRONG_ROTATION",
+        "inst_5d": 829.1,
+        "foreign_5d": -52.1,
+        "ret_5d": 3.92
+      },
+      {
+        "sector": "바이오",
+        "score": 78.1,
+        "regime": "STRONG_ROTATION",
+        "inst_5d": 617.1,
+        "foreign_5d": 243.3,
+        "ret_5d": 1.86
+      },
+      {
+        "sector": "2차전지",
+        "score": 76.3,
+        "regime": "STRONG_ROTATION",
+        "inst_5d": 315.0,
+        "foreign_5d": 2262.1,
+        "ret_5d": 3.26
+      },
+      {
+        "sector": "은행",
+        "score": 62.4,
+        "regime": "MODERATE_ROTATION",
+        "inst_5d": 2790.2,
+        "foreign_5d": -3174.6,
+        "ret_5d": -2.34
+      }
+    ],
+    "avoid_sectors": [],
+    "money_flow": "에너지·방산 섹터로 투자심리가 이동하는 반면, 2차전지는 차익실현 압력이 커지면서 자금 유출이 관찰될 수 있습니다. 반도체는 경기 민감도와 밸류에이션 부담으로 한동안 주춤했지만 수"
+  },
+  "individual_deep_dive": [
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "sector": "반도체",
+      "question": "한미반도체 지금 매수 적기인가?",
+      "bull_case": "기관 7일 연속 매집, 20일 +5,798억 대량 유입, 반도체 실적 recovery, AI conviction 7/10",
+      "bear_case": "외인 5일 -1,780억 이탈, MDD -27.7%, SHIELD RED",
+      "verdict": "관망 — 리스크 우선 확인",
+      "entry_condition": "지지선 확인 후",
+      "target": ""
+    },
+    {
+      "ticker": "079550",
+      "name": "LIG넥스원",
+      "sector": "방산",
+      "question": "LIG넥스원 지금 매수 적기인가?",
+      "bull_case": "기관 5일 연속 매집, 20일 +2,281억 대량 유입, 방산 실적 expansion, AI conviction 8/10",
+      "bear_case": "MDD -27.7%, SHIELD RED",
+      "verdict": "분할매수 대기 — 지지선 확인 후",
+      "entry_condition": "지지선 확인 후",
+      "target": ""
+    },
+    {
+      "ticker": "462870",
+      "name": "시프트업",
+      "sector": "게임",
+      "question": "시프트업 지금 매수 적기인가?",
+      "bull_case": "기관 5일 연속 매집",
+      "bear_case": "MDD -27.7%, SHIELD RED",
+      "verdict": "분할매수 대기 — 지지선 확인 후",
+      "entry_condition": "지지선 확인 후",
+      "target": ""
+    }
+  ],
+  "early_detection": {
+    "scanned_at": "2026-03-30T22:04:46.401160",
+    "universe": 1032,
+    "detected": 378,
+    "strong": [
+      {
+        "ticker": "003670",
+        "name": "포스코퓨처엠",
+        "sector": "배터리",
+        "grade": "STRONG",
+        "inst_consec": 5,
+        "frgn_consec": 5,
+        "dual_today": true,
+        "inst_5d": 296373,
+        "frgn_5d": 159649,
+        "price": 214500,
+        "chg_pct": 2.6
+      },
+      {
+        "ticker": "005010",
+        "name": "휴스틸",
+        "sector": "철강",
+        "grade": "STRONG",
+        "inst_consec": 5,
+        "frgn_consec": 5,
+        "dual_today": true,
+        "inst_accel": true,
+        "inst_surge": true,
+        "inst_5d": 171413,
+        "frgn_5d": 512458,
+        "price": 5460,
+        "chg_pct": 4.2
+      },
+      {
+        "ticker": "064350",
+        "name": "현대로템",
+        "sector": "우주항공과국방",
+        "grade": "STRONG",
+        "inst_consec": 5,
+        "frgn_consec": 1,
+        "dual_today": true,
+        "inst_5d": 366829,
+        "frgn_5d": 53255,
+        "price": 180000,
+        "chg_pct": -2.3
+      },
+      {
+        "ticker": "001440",
+        "name": "대한전선",
+        "sector": "전기장비",
+        "grade": "STRONG",
+        "inst_consec": 5,
+        "frgn_consec": 1,
+        "dual_today": true,
+        "inst_5d": 439782,
+        "frgn_5d": 40906,
+        "price": 27800,
+        "chg_pct": -1.6
+      },
+      {
+        "ticker": "097950",
+        "name": "CJ제일제당",
+        "sector": "식품",
+        "grade": "STRONG",
+        "inst_consec": 5,
+        "frgn_consec": 5,
+        "dual_today": true,
+        "inst_5d": 97282,
+        "frgn_5d": 11532,
+        "price": 217500,
+        "chg_pct": 1.4
+      }
+    ],
+    "early": [
+      {
+        "ticker": "096770",
+        "name": "SK이노베이션",
+        "sector": "화학",
+        "grade": "EARLY_DUAL",
+        "inst_consec": 2,
+        "frgn_consec": 1,
+        "dual_today": true,
+        "inst_accel": true,
+        "inst_5d": 306182,
+        "frgn_5d": 85072,
+        "price": 113400,
+        "chg_pct": 1.8
+      },
+      {
+        "ticker": "282330",
+        "name": "BGF리테일",
+        "sector": "유통",
+        "grade": "EARLY_DUAL",
+        "inst_consec": 4,
+        "frgn_consec": 1,
+        "dual_today": true,
+        "inst_accel": true,
+        "inst_5d": 55548,
+        "frgn_5d": -7365,
+        "price": 138700,
+        "chg_pct": 6.4
+      },
+      {
+        "ticker": "317330",
+        "name": "덕산테코피아",
+        "sector": "반도체",
+        "grade": "MODERATE",
+        "inst_consec": 3,
+        "frgn_consec": 2,
+        "dual_today": true,
+        "inst_accel": true,
+        "inst_surge": true,
+        "inst_5d": 115322,
+        "frgn_5d": 188635,
+        "price": 18120,
+        "chg_pct": 14.1
+      },
+      {
+        "ticker": "047040",
+        "name": "대우건설",
+        "sector": "건설",
+        "grade": "EARLY_ACCEL",
+        "inst_consec": 3,
+        "frgn_consec": 0,
+        "inst_accel": true,
+        "inst_5d": -474336,
+        "frgn_5d": 1312175,
+        "price": 17340,
+        "chg_pct": 0.5
+      },
+      {
+        "ticker": "181710",
+        "name": "NHN",
+        "sector": "IT",
+        "grade": "EARLY_ACCEL",
+        "inst_consec": 3,
+        "frgn_consec": 0,
+        "inst_accel": true,
+        "inst_5d": 74732,
+        "frgn_5d": -678,
+        "price": 41900,
+        "chg_pct": 0.1
+      }
+    ],
+    "top_pick": {
+      "ticker": "181710",
+      "name": "NHN",
+      "reason": "기관 3일 가속 매집, 주가 미반영"
+    }
+  }
+}
