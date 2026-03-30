@@ -25,6 +25,7 @@ from src.adapters.flowx_uploader import (
     build_etf_signal_rows,
     build_foreign_flow_rows,
     build_ai_pick_rows,
+    build_jarvis_payload,
 )
 
 logger = logging.getLogger(__name__)
@@ -112,11 +113,20 @@ def main():
     q6 = uploader.upload_all_quant_tables(date_str)
     q6_ok = sum(v for v in q6.values())
 
+    # ── 자비스 컨트롤타워 (quant_jarvis) ──
+    print("\n[FLOWX] 자비스 컨트롤타워 빌드...")
+    jarvis = build_jarvis_payload()
+    n_picks = len(jarvis.get("picks", {}).get("picks", []))
+    regime = jarvis.get("brain", {}).get("regime", "?")
+    print(f"  picks={n_picks}건, regime={regime}")
+    ok5 = uploader.upload_jarvis_data(jarvis, date_str)
+
     print(f"\n[FLOWX] 업로드 완료:")
     print(f"  ETF={'OK' if ok1 else 'FAIL'} ({len(etf_rows)}건)")
     print(f"  외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
     print(f"  AI추천={'OK' if ok3 else 'FAIL'} ({len(ai_rows)}건)")
     print(f"  시나리오={'OK' if ok4 else 'FAIL'} ({sc_count}개 시나리오)")
+    print(f"  자비스={'OK' if ok5 else 'FAIL'} ({n_picks}종목)")
     print(f"  퀀트6테이블={q6_ok}/6 성공")
     for k, v in q6.items():
         print(f"    {k}={'OK' if v else 'FAIL'}")

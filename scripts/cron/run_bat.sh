@@ -80,12 +80,15 @@ case "$BAT" in
     $PY scripts/run_brain.py >> "$LOG" 2>&1 || true
     $PY scripts/run_v3_brain.py --no-telegram >> "$LOG" 2>&1 || true
     # --- G4: 추천 + FLOWX ---
+    $PY scripts/scan_earnings_acceleration.py >> "$LOG" 2>&1 || true
+    $PY scripts/scan_turnaround.py >> "$LOG" 2>&1 || true
     $PY scripts/scan_tomorrow_picks.py >> "$LOG" 2>&1 || true
     $PY scripts/scan_tomorrow_picks.py --flowx --no-send >> "$LOG" 2>&1 || true
     $PY scripts/upload_flowx.py >> "$LOG" 2>&1 || true
     $PY scripts/dashboard_data.py >> "$LOG" 2>&1 || true
     # --- G5: 기록 ---
     $PY scripts/market_journal.py >> "$LOG" 2>&1 || true
+    $PY scripts/daily_market_learner.py >> "$LOG" 2>&1 || true
     ;;
   J) # 17:00 KST — 포트폴리오 전망
     $PY scripts/run_portfolio_outlook.py >> "$LOG" 2>&1 || true
