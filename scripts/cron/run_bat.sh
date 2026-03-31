@@ -94,6 +94,8 @@ case "$BAT" in
     run_py scripts/scan_nationality.py
     run_py scripts/collect_foreign_exhaustion.py
     run_py scripts/collect_short_selling.py
+    run_py scripts/institutional_flow_collector.py
+    run_py scripts/scan_volume_spike.py
     # --- G2: 지표 + 릴레이 ---
     run_py scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
