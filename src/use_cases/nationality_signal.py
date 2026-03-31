@@ -1088,7 +1088,9 @@ def _apply_cross_flow(signals: list[NationalitySignal]) -> None:
 
 def run_analysis(db_path: Path = DB_PATH) -> list[NationalitySignal]:
     """전 종목 국적별 수급 시그널 생성 (v3 — 7 Secrets + Retail Flow)."""
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
     tickers = _get_all_tickers(conn)
     kis_foreign = _load_kis_foreign()
 

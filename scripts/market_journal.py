@@ -18,6 +18,7 @@ import json
 import logging
 import sqlite3
 import sys
+import time
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
@@ -182,17 +183,22 @@ def _collect_market_overview(today_str: str) -> dict:
         except Exception as e:
             log.warning("KOSPI CSV 로드 실패: %s", e)
 
-    # KOSDAQ from pykrx (1 API call)
-    try:
-        from pykrx import stock as krx
-        kq = krx.get_index_ohlcv_by_date(today_str.replace("-", ""),
-                                          today_str.replace("-", ""), "2001")
-        if not kq.empty:
-            row = kq.iloc[-1]
-            overview["kosdaq_close"] = round(float(row["종가"]), 1)
-            overview["kosdaq_change_pct"] = round(float(row["등락률"]), 2)
-    except Exception as e:
-        log.warning("KOSDAQ pykrx 실패: %s", e)
+    # KOSDAQ from pykrx (1 API call) — 인코딩 에러 대비 재시도
+    for attempt in range(3):
+        try:
+            from pykrx import stock as krx
+            kq = krx.get_index_ohlcv_by_date(today_str.replace("-", ""),
+                                              today_str.replace("-", ""), "2001")
+            if not kq.empty:
+                row = kq.iloc[-1]
+                overview["kosdaq_close"] = round(float(row["종가"]), 1)
+                overview["kosdaq_change_pct"] = round(float(row["등락률"]), 2)
+            break
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(5)
+            else:
+                log.warning("KOSDAQ pykrx 실패 (3회 재시도 후): %s", e)
 
     # 레짐 + 매크로
     regime = _load_json("regime_macro_signal.json")
@@ -223,21 +229,25 @@ def _collect_market_overview(today_str: str) -> dict:
         except Exception:
             pass
 
-    # 시장 외국인/기관 순매수 (pykrx)
-    try:
-        from pykrx import stock as krx
-        dt = today_str.replace("-", "")
-        inv = krx.get_market_trading_value_by_date(dt, dt, "KOSPI")
-        if not inv.empty:
-            row = inv.iloc[-1]
-            # pykrx 열: 기관합계, 외국인합계, 개인 등 (단위: 원)
-            for col in inv.columns:
-                if "외국인" in col:
-                    overview["foreign_net_bil"] = round(float(row[col]) / 1e8, 0)
-                elif "기관" in col and "합계" in col:
-                    overview["institution_net_bil"] = round(float(row[col]) / 1e8, 0)
-    except Exception as e:
-        log.warning("시장 수급 pykrx 실패: %s", e)
+    # 시장 외국인/기관 순매수 (pykrx) — 인코딩 에러 대비 재시도
+    for attempt in range(3):
+        try:
+            from pykrx import stock as krx
+            dt = today_str.replace("-", "")
+            inv = krx.get_market_trading_value_by_date(dt, dt, "KOSPI")
+            if not inv.empty:
+                row = inv.iloc[-1]
+                for col in inv.columns:
+                    if "외국인" in col:
+                        overview["foreign_net_bil"] = round(float(row[col]) / 1e8, 0)
+                    elif "기관" in col and "합계" in col:
+                        overview["institution_net_bil"] = round(float(row[col]) / 1e8, 0)
+            break
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(5)
+            else:
+                log.warning("시장 수급 pykrx 실패 (3회 재시도 후): %s", e)
 
     # market_event from brain_decision or market_intelligence
     intel = _load_json("market_intelligence.json")

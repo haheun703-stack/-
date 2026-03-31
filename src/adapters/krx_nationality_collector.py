@@ -67,7 +67,9 @@ CREATE TABLE IF NOT EXISTS collect_log (
 
 def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """DB 초기화 + 스키마 생성."""
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")  # 동시 읽기/쓰기 허용
+    conn.execute("PRAGMA busy_timeout=10000")  # 10초 대기
     conn.executescript(SCHEMA_SQL)
     conn.commit()
     return conn

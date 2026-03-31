@@ -102,33 +102,44 @@ def _try_pykrx_update(tickers: list[str], date_str: str) -> dict[str, dict]:
 
     result = {}
 
-    # 1. 전체 종목 공매도 잔고 (by_ticker)
-    try:
-        df = krx.get_shorting_balance_by_ticker(date_str, "KOSPI")
-        if not df.empty and len(df) > 10:
-            for ticker in tickers:
-                if ticker in df.index:
-                    row = df.loc[ticker]
-                    result[ticker] = {
-                        "short_balance": int(row.get("공매도잔고", 0)),
-                    }
-            logger.info(f"pykrx KOSPI 공매도 잔고: {len(result)}종목")
-    except Exception as e:
-        logger.warning("KOSPI 공매도 잔고 조회 실패: %s", e)
-
-    if not result:
-        # KOSDAQ도 시도
+    # 1. 전체 종목 공매도 잔고 (by_ticker) — 인코딩 에러 대비 재시도
+    for attempt in range(3):
         try:
-            df = krx.get_shorting_balance_by_ticker(date_str, "KOSDAQ")
-            if not df.empty:
+            df = krx.get_shorting_balance_by_ticker(date_str, "KOSPI")
+            if not df.empty and len(df) > 10:
                 for ticker in tickers:
                     if ticker in df.index:
                         row = df.loc[ticker]
                         result[ticker] = {
                             "short_balance": int(row.get("공매도잔고", 0)),
                         }
+                logger.info(f"pykrx KOSPI 공매도 잔고: {len(result)}종목")
+            break
         except Exception as e:
-            logger.warning("KOSDAQ 공매도 잔고 조회 실패: %s", e)
+            if attempt < 2:
+                logger.debug("KOSPI 공매도 재시도 %d/3: %s", attempt + 1, e)
+                time.sleep(5)
+            else:
+                logger.warning("KOSPI 공매도 잔고 조회 실패 (3회 재시도 후): %s", e)
+
+    if not result:
+        # KOSDAQ도 시도 — 인코딩 에러 대비 재시도
+        for attempt in range(3):
+            try:
+                df = krx.get_shorting_balance_by_ticker(date_str, "KOSDAQ")
+                if not df.empty:
+                    for ticker in tickers:
+                        if ticker in df.index:
+                            row = df.loc[ticker]
+                            result[ticker] = {
+                                "short_balance": int(row.get("공매도잔고", 0)),
+                            }
+                break
+            except Exception as e:
+                if attempt < 2:
+                    time.sleep(5)
+                else:
+                    logger.warning("KOSDAQ 공매도 잔고 조회 실패 (3회 재시도 후): %s", e)
 
     return result
 
