@@ -132,6 +132,7 @@ def aggregate_scoreboard(dry_run: bool = False) -> list[dict]:
                 "period": period_name,
                 **stats,
                 "calculated_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
             }
 
             # jsonb 필드는 json 직렬화

@@ -111,6 +111,8 @@ case "$BAT" in
     run_py scripts/scan_turnaround.py
     run_py scripts/scan_tomorrow_picks.py
     run_py scripts/scan_tomorrow_picks.py --flowx --no-send
+    run_py scripts/build_killer_picks.py
+    run_py scripts/run_cto.py
     run_py scripts/upload_flowx.py
     run_py scripts/dashboard_data.py
     # --- G5: 기록 ---

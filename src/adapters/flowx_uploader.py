@@ -120,6 +120,7 @@ class FlowxUploader:
             return False
         try:
             import json as _json
+            from datetime import datetime as _dt
             row = {
                 "date": briefing["date"],
                 "market_status": briefing.get("market_status", "NEUTRAL"),
@@ -127,6 +128,7 @@ class FlowxUploader:
                 "kr_summary": briefing.get("kr_summary", ""),
                 "news_picks": _json.loads(_json.dumps(briefing.get("news_picks", []))),
                 "sector_focus": _json.loads(_json.dumps(briefing.get("sector_focus", []))),
+                "updated_at": _dt.now().isoformat(),
             }
             result = self.client.table("morning_briefings").upsert(
                 row, on_conflict="date"
