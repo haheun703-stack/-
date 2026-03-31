@@ -89,7 +89,7 @@ case "$BAT" in
     run_py scripts/update_daily_data.py
     run_py scripts/extend_parquet_data.py --workers 2
     run_py scripts/update_kospi_index.py
-    run_py scripts/collect_intraday_candles.py
+    # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/scan_nationality.py
     run_py scripts/collect_foreign_exhaustion.py
