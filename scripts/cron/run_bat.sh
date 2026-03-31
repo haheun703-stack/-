@@ -118,6 +118,9 @@ case "$BAT" in
   J) # 17:00 KST — 포트폴리오 전망
     run_py scripts/run_portfolio_outlook.py
     ;;
+  HEALTH) # 18:00 KST — 자동 복구: 데이터 신선도 확인 → 낡으면 BAT 재실행
+    run_py scripts/health_check.py
+    ;;
   *)
     echo "[$(date +%H:%M:%S)] 알 수 없는 BAT: $BAT" >> "$LOG"
     ;;
