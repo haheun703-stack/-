@@ -101,11 +101,13 @@ case "$BAT" in
     run_py scripts/run_ict_levels.py
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/relay_report.py
-    # --- G3: 시그널 스캔 + BRAIN + SHIELD ---
+    # --- G3: 레짐 + BRAIN + SHIELD ---
+    run_py scripts/regime_macro_signal.py
     run_py scripts/scan_buy_candidates.py
     run_py scripts/run_shield.py --send
     run_py scripts/run_brain.py
     run_py scripts/run_v3_brain.py --no-telegram
+    run_py scripts/run_lens.py
     # --- G4: 추천 + FLOWX ---
     run_py scripts/scan_earnings_acceleration.py
     run_py scripts/scan_turnaround.py
@@ -113,11 +115,14 @@ case "$BAT" in
     run_py scripts/scan_tomorrow_picks.py --flowx --no-send
     run_py scripts/build_killer_picks.py
     run_py scripts/run_cto.py
+    run_py src/use_cases/portfolio_cfo.py
     run_py scripts/upload_flowx.py
     run_py scripts/dashboard_data.py
-    # --- G5: 기록 ---
+    run_py scripts/send_evening_summary.py --send
+    # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
     run_py scripts/daily_market_learner.py
+    run_py scripts/paper_trading_unified.py
     ;;
   J) # 17:00 KST — 포트폴리오 전망
     run_py scripts/run_portfolio_outlook.py
