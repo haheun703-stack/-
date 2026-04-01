@@ -71,6 +71,7 @@ case "$BAT" in
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/run_v3_brain.py --no-telegram
     run_py scripts/scan_tomorrow_picks.py
+    run_py scripts/market_sense_engine.py --send
     ;;
   B) # 07:00 KST — 장전 브리핑
     run_py scripts/crawl_morning_reports.py
@@ -132,6 +133,11 @@ case "$BAT" in
     run_py scripts/run_brain.py
     run_py scripts/run_v3_brain.py --no-telegram
     run_py scripts/run_lens.py
+    # --- G3.5: ETF 방향 트레이딩 + 눈치 엔진 ---
+    run_py scripts/market_sense_engine.py --send
+    run_py scripts/leverage_etf_scanner.py
+    run_py scripts/etf_trading_signal.py
+    run_py scripts/run_etf_rotation.py
     # --- G4: 추천 + FLOWX ---
     run_py scripts/scan_earnings_acceleration.py
     run_py scripts/scan_turnaround.py
