@@ -35,6 +35,7 @@ from dotenv import load_dotenv
 load_dotenv(QM / ".env")
 
 from src.telegram_sender import send_message
+from src.adapters.flowx_uploader import FlowxUploader
 
 TODAY = date.today().isoformat()  # "2026-03-31"
 RUN_BAT = QM / "scripts" / "cron" / "run_bat.sh"
@@ -124,6 +125,46 @@ def is_bat_fresh(bat_id: str) -> bool:
     if not results:
         return True  # 검사 대상 없으면 패스
     return all(results.values())
+
+
+# ══════════════════════════════════════════
+# 2-B. FLOWX Supabase 업로드 검증
+# ══════════════════════════════════════════
+
+def check_flowx_uploaded() -> bool:
+    """Supabase quant_jarvis 테이블에 오늘 날짜 데이터 존재 여부 확인."""
+    try:
+        uploader = FlowxUploader()
+        if not uploader.is_active:
+            log("[FLOWX] Supabase 미연결 — FLOWX 검증 스킵")
+            return True  # 연결 안 되면 검증 불가, 패스
+        result = uploader.client.table("quant_jarvis").select("date").eq("date", TODAY).execute()
+        exists = bool(result.data)
+        return exists
+    except Exception as e:
+        log(f"[FLOWX] Supabase 조회 실패: {e}")
+        return False
+
+
+def rerun_flowx() -> bool:
+    """upload_flowx.py 단독 재실행."""
+    log("[FLOWX-RERUN] upload_flowx.py 재실행 시작")
+    try:
+        result = subprocess.run(
+            [str(PY), "scripts/upload_flowx.py"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            cwd=str(QM),
+        )
+        log(f"[FLOWX-RERUN] 종료 (exit={result.returncode})")
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        log("[FLOWX-RERUN] 타임아웃 (300초 초과)")
+        return False
+    except Exception as e:
+        log(f"[FLOWX-RERUN] 실행 오류: {e}")
+        return False
 
 
 # ══════════════════════════════════════════
@@ -240,6 +281,25 @@ def main():
         else:
             failed.append(f"BAT-{bat_id}: {', '.join(stale2)}")
             log(f"[FAILED] BAT-{bat_id}: 복구 실패 — {', '.join(stale2)}")
+
+    # ── FLOWX Supabase 업로드 검증 (3차 안전장치) ──
+    flowx_ok = check_flowx_uploaded()
+    if flowx_ok:
+        log("[FLOWX] Supabase 오늘 데이터 확인 — 정상")
+    else:
+        log("[FLOWX] Supabase 오늘 데이터 없음 — 재업로드 시도")
+        all_ok = False
+        if not args.check_only:
+            rerun_ok = rerun_flowx()
+            # 재실행 후 다시 확인
+            if rerun_ok and check_flowx_uploaded():
+                recovered.append("FLOWX")
+                log("[FLOWX] 재업로드 성공")
+            else:
+                failed.append("FLOWX: Supabase 업로드 실패")
+                log("[FLOWX] 재업로드 후에도 실패")
+        else:
+            failed.append("FLOWX: Supabase 오늘 데이터 없음")
 
     # 결과 알림
     if all_ok:

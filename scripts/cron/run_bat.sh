@@ -148,6 +148,9 @@ case "$BAT" in
     run_py scripts/daily_market_learner.py
     run_py scripts/paper_trading_unified.py
     ;;
+  F) # 17:15 KST — FLOWX 업로드 보장 (BAT-D 실패 대비, upsert이라 중복 안전)
+    run_py scripts/upload_flowx.py
+    ;;
   J) # 17:00 KST — 포트폴리오 전망
     run_py scripts/run_portfolio_outlook.py
     ;;
