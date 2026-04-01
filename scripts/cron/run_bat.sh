@@ -17,16 +17,34 @@ export PYTHONPATH="$QM"
 set -a; source "$QM/.env" 2>/dev/null; set +a
 mkdir -p logs stock_data_daily
 
-# 실패 카운터 함수: 스크립트 실패 시 카운트 증가
+# 실패 카운터 함수: 개별 타임아웃 기본 300초, 긴 작업은 run_py_long 사용
 run_py() {
   local script="$1"; shift
-  $PY "$script" "$@" >> "$LOG" 2>&1
+  timeout 300 $PY "$script" "$@" >> "$LOG" 2>&1
   local rc=$?
-  if [ $rc -ne 0 ]; then
+  if [ $rc -eq 124 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo "[$(date +%H:%M:%S)] [WARN] $script 타임아웃 (300초 초과)" >> "$LOG"
+  elif [ $rc -ne 0 ]; then
     FAIL_COUNT=$((FAIL_COUNT + 1))
     echo "[$(date +%H:%M:%S)] [WARN] $script 실패 (exit=$rc)" >> "$LOG"
   fi
-  return 0  # || true 불필요 — 항상 성공 반환
+  return 0
+}
+
+# 긴 작업용 (타임아웃 900초 = 15분)
+run_py_long() {
+  local script="$1"; shift
+  timeout 900 $PY "$script" "$@" >> "$LOG" 2>&1
+  local rc=$?
+  if [ $rc -eq 124 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo "[$(date +%H:%M:%S)] [WARN] $script 타임아웃 (900초 초과)" >> "$LOG"
+  elif [ $rc -ne 0 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo "[$(date +%H:%M:%S)] [WARN] $script 실패 (exit=$rc)" >> "$LOG"
+  fi
+  return 0
 }
 
 # 텔레그램 실패 알림 함수
@@ -78,23 +96,29 @@ case "$BAT" in
   H) # 11:30 KST — 장중 분석
     run_py scripts/run_midday_analysis.py
     ;;
-  L) # 15:35 KST — NXT 장마감 후
-    run_py scripts/nxt_market_collector.py --session after
+  L) # 15:35 KST — NXT 장마감 후 (16:25까지만 수집, BAT-D 16:30 충돌 방지)
+    timeout 3000 $PY scripts/nxt_market_collector.py --session after >> "$LOG" 2>&1 &
     ;;
   O) # 16:10 KST — 시그널 트래킹
     run_py scripts/cron_signal_tracker.py --mode track
     ;;
   D) # 16:30 KST — 장마감 전체 파이프라인 (데이터 + 분석 + 추천)
+    # BAT-L(NXT)과 BAT-I(EYE) 잔여 프로세스 정리 — 동시 실행 시 KIS API 충돌 + OOM 방지
+    pkill -f "nxt_market_collector" >> "$LOG" 2>&1 || true
+    pkill -f "intraday_eye" >> "$LOG" 2>&1 || true
+    pkill -f "run_vwap_monitor" >> "$LOG" 2>&1 || true
+    sleep 2
+    echo "[$(date +%H:%M:%S)] [INFO] BAT-L/I 잔여 프로세스 정리 완료" >> "$LOG"
     # --- G1: 데이터 수집 ---
     run_py scripts/update_daily_data.py
-    run_py scripts/extend_parquet_data.py --workers 2
+    run_py_long scripts/extend_parquet_data.py --workers 2
     run_py scripts/update_kospi_index.py
     # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/scan_nationality.py
     run_py scripts/collect_foreign_exhaustion.py
     run_py scripts/collect_short_selling.py
-    run_py scripts/institutional_flow_collector.py
+    run_py_long scripts/institutional_flow_collector.py
     run_py scripts/scan_volume_spike.py
     # --- G2: 지표 + 릴레이 ---
     run_py scripts/rebuild_indicators.py
