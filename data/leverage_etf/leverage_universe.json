@@ -110,5 +110,40 @@
     "leverage": 2,
     "category": "원자재",
     "underlying": "금선물"
+  },
+  "KODEX 골드선물(H)": {
+    "etf_code": "132030",
+    "direction": "LONG",
+    "leverage": 1,
+    "category": "원자재",
+    "underlying": "금선물"
+  },
+  "KODEX WTI원유선물(H)": {
+    "etf_code": "261220",
+    "direction": "LONG",
+    "leverage": 1,
+    "category": "원자재",
+    "underlying": "WTI원유"
+  },
+  "TIGER 원유선물Enhanced(H)": {
+    "etf_code": "130680",
+    "direction": "LONG",
+    "leverage": 1,
+    "category": "원자재",
+    "underlying": "WTI원유"
+  },
+  "KODEX 은선물(H)": {
+    "etf_code": "144600",
+    "direction": "LONG",
+    "leverage": 1,
+    "category": "원자재",
+    "underlying": "은선물"
+  },
+  "TIGER 천연가스선물Enhanced(H)": {
+    "etf_code": "217770",
+    "direction": "LONG",
+    "leverage": 1,
+    "category": "원자재",
+    "underlying": "천연가스"
   }
 }

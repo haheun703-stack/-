@@ -57,6 +57,66 @@ ETF_SAFE = [
     {"code": "148070", "name": "KODEX 국고채10년", "mult": 0, "desc": "채권"},
 ]
 
+# ── 원자재 ETF 유니버스 ──
+# US 원자재 시그널(GLD/USO/COPX/UNG/URA/SLV)과 한국 ETF 매핑
+COMMODITY_ETF = {
+    "oil": {
+        "us_ticker": "USO",
+        "label": "원유(WTI)",
+        "etfs": [
+            {"code": "261220", "name": "KODEX WTI원유선물(H)", "mult": 1.0},
+            {"code": "130680", "name": "TIGER 원유선물Enhanced(H)", "mult": 1.0},
+        ],
+    },
+    "gold": {
+        "us_ticker": "GLD",
+        "label": "금",
+        "etfs": [
+            {"code": "225130", "name": "ACE 골드선물레버리지", "mult": 2.0},
+            {"code": "132030", "name": "KODEX 골드선물(H)", "mult": 1.0},
+        ],
+    },
+    "silver": {
+        "us_ticker": "SLV",
+        "label": "은",
+        "etfs": [
+            {"code": "144600", "name": "KODEX 은선물(H)", "mult": 1.0},
+        ],
+    },
+    "copper": {
+        "us_ticker": "COPX",
+        "label": "구리",
+        "etfs": [
+            {"code": "160580", "name": "TIGER 구리실물", "mult": 1.0},
+        ],
+    },
+    "natgas": {
+        "us_ticker": "UNG",
+        "label": "천연가스",
+        "etfs": [
+            {"code": "217770", "name": "TIGER 천연가스선물Enhanced(H)", "mult": 1.0},
+        ],
+    },
+    "uranium": {
+        "us_ticker": "URA",
+        "label": "우라늄/원전",
+        "etfs": [
+            {"code": "457990", "name": "HANARO 원자력iSelect", "mult": 1.0},
+        ],
+    },
+}
+
+# 시나리오 → 원자재 매핑 (활성 시나리오가 있으면 관련 원자재 부스트)
+SCENARIO_COMMODITY_MAP = {
+    "WAR_MIDDLE_EAST": ["oil", "gold"],
+    "OIL_SPIKE": ["oil", "natgas"],
+    "COMMODITY_SUPERCYCLE": ["copper", "oil", "gold", "silver"],
+    "CHINA_STIMULUS": ["copper", "silver"],
+    "NUCLEAR_RENAISSANCE": ["uranium"],
+    "INFLATION_SPIKE": ["gold", "silver", "oil"],
+    "GEOPOLITICAL_RISK": ["gold", "oil"],
+}
+
 
 def load_json(name: str) -> dict:
     path = DATA_DIR / name
@@ -108,7 +168,7 @@ def gather_signals() -> dict:
         "ewy_5d": round(ewy_5d, 2),
         "ewy_bonus": round(ewy_bonus, 1),
         "score": round(us_direction + ewy_bonus, 1),
-        "weight": 0.35,
+        "weight": 0.25,
     }
 
     # ── 축2: VIX 변화 (가중치 20%) ──
@@ -140,7 +200,7 @@ def gather_signals() -> dict:
         "level": round(vix_level, 1),
         "z_score": round(vix_z, 2),
         "score": vix_score,
-        "weight": 0.20,
+        "weight": 0.15,
     }
 
     # ── 축3: 파생 시그널 (가중치 15%) ──
@@ -237,7 +297,82 @@ def gather_signals() -> dict:
     signals["nxt"] = {
         "score": nxt_score,
         "detail": nxt_detail,
+        "weight": 0.10,
+    }
+
+    # ── 축6: 원자재 시그널 (가중치 15%) ──
+    commodity_scores = {}
+    commodity_alerts = []
+    index_dir = us.get("index_direction", {})
+
+    for comm_key, comm_info in COMMODITY_ETF.items():
+        us_ticker = comm_info["us_ticker"]
+        ticker_data = index_dir.get(us_ticker, {})
+        ret_1d = ticker_data.get("ret_1d", 0)
+        ret_5d = ticker_data.get("ret_5d", 0)
+
+        # 급등/급락 감지
+        if abs(ret_1d) >= 3:  # 하루 ±3% 이상 → 강한 시그널
+            commodity_alerts.append({
+                "commodity": comm_info["label"],
+                "change_1d": round(ret_1d, 2),
+                "change_5d": round(ret_5d, 2),
+                "etfs": comm_info["etfs"],
+                "direction": "LONG" if ret_1d > 0 else "SHORT",
+            })
+
+        # 점수 계산 (5일 추세 + 1일 모멘텀)
+        score = ret_1d * 10 + ret_5d * 5
+        commodity_scores[comm_key] = round(max(-100, min(100, score)), 1)
+
+    # 원자재 종합 점수 (전체 평균)
+    if commodity_scores:
+        avg_comm = sum(commodity_scores.values()) / len(commodity_scores)
+    else:
+        avg_comm = 0
+
+    signals["commodity"] = {
+        "scores": commodity_scores,
+        "alerts": commodity_alerts,
+        "score": round(avg_comm),
         "weight": 0.15,
+    }
+
+    # ── 축7: 시나리오 연동 (가중치 10%) ──
+    scenario_data = load_json("scenario_supply_conflicts.json")
+    active_scenarios = scenario_data.get("active_scenarios", [])
+
+    scenario_score = 0
+    scenario_commodity_boost = {}  # 시나리오가 부스트하는 원자재
+    scenario_detail = "없음"
+
+    if active_scenarios:
+        # 활성 시나리오 점수 합산
+        total_scenario = sum(s.get("score", 0) for s in active_scenarios)
+        scenario_score = min(total_scenario // 2, 100)  # 최대 100
+
+        # 시나리오별 관련 원자재 매핑
+        for sc in active_scenarios:
+            sc_name = sc.get("name", "")
+            boost_commodities = SCENARIO_COMMODITY_MAP.get(sc_name, [])
+            for comm in boost_commodities:
+                if comm not in scenario_commodity_boost:
+                    scenario_commodity_boost[comm] = 0
+                scenario_commodity_boost[comm] += sc.get("score", 0)
+
+        top_scenarios = [f"{s['name']}({s.get('score',0)})" for s in active_scenarios[:3]]
+        scenario_detail = ", ".join(top_scenarios)
+
+        # 시나리오 방향: 지정학 리스크는 보통 KOSPI에 부정적
+        if any("WAR" in s.get("name", "") for s in active_scenarios):
+            scenario_score = -scenario_score  # 전쟁 → KOSPI 부정적
+
+    signals["scenario"] = {
+        "active": [s.get("name") for s in active_scenarios],
+        "commodity_boost": scenario_commodity_boost,
+        "detail": scenario_detail,
+        "score": scenario_score,
+        "weight": 0.10,
     }
 
     return signals
@@ -305,12 +440,58 @@ def calculate_direction(signals: dict) -> dict:
     else:
         stop_pct, target_pct = -5.0, 7.0
 
+    # ── 원자재 ETF 추천 (급등/급락 감지 시) ──
+    commodity_picks = []
+    commodity_alerts = signals.get("commodity", {}).get("alerts", [])
+    scenario_boost = signals.get("scenario", {}).get("commodity_boost", {})
+
+    for alert in commodity_alerts:
+        comm_etfs = alert["etfs"]
+        if comm_etfs:
+            best_etf = comm_etfs[0]  # 레버리지 우선
+            # 시나리오 부스트가 있으면 신뢰도 증가
+            comm_key = next(
+                (k for k, v in COMMODITY_ETF.items() if v["label"] == alert["commodity"]),
+                None,
+            )
+            boost = scenario_boost.get(comm_key, 0)
+
+            commodity_picks.append({
+                "commodity": alert["commodity"],
+                "direction": alert["direction"],
+                "change_1d": alert["change_1d"],
+                "etf": best_etf,
+                "scenario_boost": boost,
+                "confidence": min(abs(alert["change_1d"]) * 15 + boost // 2, 95),
+            })
+
+    # 시나리오 활성 + 원자재 급등 없어도, 시나리오 부스트 높은 원자재 추천
+    for comm_key, boost_score in scenario_boost.items():
+        if boost_score >= 60 and comm_key in COMMODITY_ETF:
+            # 이미 alerts에 있으면 스킵
+            already = any(
+                p["commodity"] == COMMODITY_ETF[comm_key]["label"]
+                for p in commodity_picks
+            )
+            if not already:
+                comm = COMMODITY_ETF[comm_key]
+                if comm["etfs"]:
+                    commodity_picks.append({
+                        "commodity": comm["label"],
+                        "direction": "LONG",
+                        "change_1d": 0,
+                        "etf": comm["etfs"][0],
+                        "scenario_boost": boost_score,
+                        "confidence": min(boost_score // 2, 80),
+                    })
+
     return {
         "direction": direction,
         "direction_kr": direction_kr,
         "score": total,
         "confidence": round(confidence),
         "recommended_etf": pick,
+        "commodity_picks": commodity_picks,
         "stop_pct": stop_pct,
         "target_pct": target_pct,
         "etf_candidates": etfs,
@@ -434,6 +615,22 @@ def main():
     else:
         logger.info("  ★ 추천: 관망")
 
+    # ── 원자재 ETF 추천 ──
+    commodity_picks = result.get("commodity_picks", [])
+    if commodity_picks:
+        logger.info("")
+        logger.info("  ── 원자재 ETF 추천 ──")
+        for cp in commodity_picks:
+            etf = cp["etf"]
+            sc_boost = f" (시나리오 +{cp['scenario_boost']})" if cp["scenario_boost"] else ""
+            logger.info("  %s %s: %s (%s) — 신뢰도 %d%%%s",
+                        "▲" if cp["direction"] == "LONG" else "▼",
+                        cp["commodity"],
+                        etf["name"], etf["code"],
+                        cp["confidence"], sc_boost)
+            if cp["change_1d"]:
+                logger.info("    1일 %+.1f%% 변동", cp["change_1d"])
+
     # ── 적중률 기록 ──
     update_accuracy_log(result["direction"], result["score"])
 
@@ -456,6 +653,7 @@ def main():
         "score": result["score"],
         "confidence": result["confidence"],
         "recommended_etf": result["recommended_etf"],
+        "commodity_picks": result.get("commodity_picks", []),
         "stop_pct": result["stop_pct"],
         "target_pct": result["target_pct"],
         "signals": signals,
@@ -467,12 +665,18 @@ def main():
     logger.info("  저장: %s", OUTPUT_PATH)
 
     # ── 텔레그램 ──
-    if args.send and result["direction"] != "NEUTRAL":
+    if args.send and (result["direction"] != "NEUTRAL" or commodity_picks):
         try:
             from src.telegram_sender import send_message
 
             etf = result["recommended_etf"]
             etf_line = f"  추천: {etf['name']} ({etf['code']})" if etf else "  추천: 관망"
+
+            # 원자재 추천 라인
+            comm_lines = ""
+            for cp in commodity_picks:
+                arrow = "▲" if cp["direction"] == "LONG" else "▼"
+                comm_lines += f"\n  {arrow} {cp['commodity']}: {cp['etf']['name']} (신뢰 {cp['confidence']}%)"
 
             msg = (
                 f"🎯 <b>눈치 엔진</b> — {result['direction_kr']}\n\n"
@@ -485,6 +689,11 @@ def main():
                 f"  레짐: {signals['regime']['current']} ({signals['regime']['transition']})\n"
                 f"  NXT: {signals['nxt']['detail']}"
             )
+            if comm_lines:
+                msg += f"\n\n📦 <b>원자재 ETF</b>{comm_lines}"
+            if signals.get("scenario", {}).get("detail", "없음") != "없음":
+                msg += f"\n\n🎭 시나리오: {signals['scenario']['detail']}"
+
             send_message(msg)
             logger.info("  텔레그램 발송 완료")
         except Exception as e:
