@@ -811,11 +811,11 @@ master_controller:
 # false = 공매도 데이터가 스코어링/매매에 영향 안 줌
 # true  = 기존 v8.3 동작 (G4 게이트, SD교차, S5 점수, Regime Profile)
 # ════════════════════════════════════════════════════════════
-use_short_selling_filter: true
+use_short_selling_filter: false    # KRX 공매도 데이터 제공 중단 (2026-04)
 
 # ════════════════════════════════════════════════════════════
 # v8.3 공매도 체제 캘린더 + Regime Profile
-# (use_short_selling_filter: true → 캘린더+프로파일 활성, 데이터 수집은 항상)
+# (use_short_selling_filter: false    # KRX 공매도 데이터 제공 중단 (2026-04) → 캘린더+프로파일 활성, 데이터 수집은 항상)
 # ════════════════════════════════════════════════════════════
 short_selling_calendar:
   # status: "active" = 정상 공매도, "banned" = 금지, "reopened" = 금지 후 재개장

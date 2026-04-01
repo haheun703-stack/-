@@ -118,7 +118,7 @@ case "$BAT" in
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/scan_nationality.py
     run_py scripts/collect_foreign_exhaustion.py
-    run_py scripts/collect_short_selling.py
+    # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)
     run_py_long scripts/institutional_flow_collector.py
     run_py scripts/scan_volume_spike.py
     # --- G2: 지표 + 릴레이 ---

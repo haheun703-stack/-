@@ -68,7 +68,7 @@ PIPELINE_GROUPS = [
             {"name": "ICT 레벨+OR/IR", "cmd": "scripts/run_ict_levels.py"},
             {"name": "US Overnight Signal", "cmd": "scripts/us_overnight_signal.py --update"},
             {"name": "파생 시그널 수집", "cmd": "scripts/derivatives_collector.py"},
-            {"name": "공매도 시그널", "cmd": "scripts/collect_short_selling.py"},
+            # {"name": "공매도 시그널", "cmd": "scripts/collect_short_selling.py"},  # KRX 데이터 제공 중단
             {"name": "US-KR 패턴DB", "cmd": "scripts/update_us_kr_daily.py"},
         ],
     },
