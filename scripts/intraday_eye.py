@@ -230,6 +230,22 @@ class IntradayEye:
         # 이전 사이클 데이터 (KOSPI 전 체크용)
         self._prev_kospi_price: int = 0
 
+        # 종목명 매핑 (sector_map에서 로드)
+        self._name_map: dict[str, str] = self._load_name_map()
+
+    @staticmethod
+    def _load_name_map() -> dict[str, str]:
+        """sector_map.json에서 ticker→name 매핑 로드."""
+        p = DATA_DIR / "sector_map.json"
+        if not p.exists():
+            return {}
+        try:
+            with open(p, encoding="utf-8") as f:
+                sm = json.load(f)
+            return {s["ticker"]: s["name"] for s in sm.get("stocks", []) if s.get("ticker") and s.get("name")}
+        except Exception:
+            return {}
+
     def _load_killer_watchlist(self):
         """킬러픽 종목을 워치리스트에 추가."""
         p = DATA_DIR / "killer_picks.json"
@@ -399,7 +415,7 @@ class IntradayEye:
                     continue
                 change = p.get("change_pct", 0)
                 if change >= threshold:
-                    name = p.get("name") or ticker
+                    name = self._name_map.get(ticker) or p.get("name") or ticker
                     self._fire_alert(
                         "EYE-07", ticker, name,
                         p["current_price"], change,
