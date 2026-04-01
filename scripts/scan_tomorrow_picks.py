@@ -540,6 +540,46 @@ def get_nationality_kill_tickers(nat_signals: dict) -> set[str]:
     return kills
 
 
+def load_institutional_accumulation() -> dict[str, dict]:
+    """기관매집 조기감지 데이터 로드 → {ticker: alert_dict}.
+
+    EARLY_SURGE/EARLY_ACCEL/EARLY_DUAL/STRONG/MODERATE 등급별
+    scan_tomorrow_picks 점수 부스트에 사용.
+    """
+    data = load_json("institutional_flow/accumulation_alert.json")
+    if not data:
+        return {}
+    result = {}
+    for alert in data.get("stock_alerts", []):
+        ticker = alert.get("ticker", "")
+        if ticker:
+            result[ticker] = alert
+    return result
+
+
+def load_foreign_exhaustion() -> dict[str, dict]:
+    """외인소진율 데이터 로드 → {ticker: signal_dict}.
+
+    FE1(90%+한도임박), FE2(+5%p급등), FE3(70~89%+상승) 신호
+    scan_tomorrow_picks 점수 부스트에 사용.
+    """
+    data = load_json("foreign_exhaustion/daily_exhaustion.json")
+    if not data:
+        return {}
+    result = {}
+    # fe2 (소진율 급등) — 가장 유용한 조기 신호
+    for item in data.get("fe2_signals", []):
+        ticker = item.get("ticker", "")
+        if ticker:
+            result[ticker] = {**item, "fe_type": "FE2"}
+    # fe1 (한도 임박) — 추가 매수 제한 우려 → 오히려 주의
+    for item in data.get("fe1_signals", []):
+        ticker = item.get("ticker", "")
+        if ticker and ticker not in result:
+            result[ticker] = {**item, "fe_type": "FE1"}
+    return result
+
+
 def load_dart_avoid_tickers() -> set[str]:
     """DART AVOID 종목 티커 세트 (유상증자/관리종목 등)"""
     de = load_json("dart_event_signals.json")
@@ -1566,6 +1606,24 @@ def main():
     else:
         print("[국적수급 7S] 데이터 없음 — 전략L 스킵")
 
+    # ── 전략 N: 기관매집 조기감지 부스트 (accumulation_alert) ──
+    inst_accum = load_institutional_accumulation()
+    if inst_accum:
+        early_cnt = sum(1 for a in inst_accum.values() if a.get("grade", "").startswith("EARLY"))
+        strong_cnt = sum(1 for a in inst_accum.values() if a.get("grade") == "STRONG")
+        print(f"[기관매집] {len(inst_accum)}종목 | STRONG:{strong_cnt} 조기감지:{early_cnt}")
+    else:
+        print("[기관매집] 데이터 없음 — 전략N 스킵")
+
+    # ── 전략 O: 외인소진율 부스트 (daily_exhaustion) ──
+    fe_signals = load_foreign_exhaustion()
+    if fe_signals:
+        fe2_cnt = sum(1 for f in fe_signals.values() if f.get("fe_type") == "FE2")
+        fe1_cnt = sum(1 for f in fe_signals.values() if f.get("fe_type") == "FE1")
+        print(f"[외인소진율] {len(fe_signals)}종목 | 급등(FE2):{fe2_cnt} 한도임박(FE1):{fe1_cnt}")
+    else:
+        print("[외인소진율] 데이터 없음 — 전략O 스킵")
+
     # ── 공매도 체제 프로파일 ──
     try:
         from src.use_cases.short_regime_manager import get_short_regime_manager
@@ -2060,6 +2118,66 @@ def main():
             if nat_signal_str in ("STRONG_BUY", "BUY"):
                 source_names.append("국적수급")
 
+        # ── 전략N: 기관매집 조기감지 부스트 ──
+        # EARLY_SURGE(오늘 3배 대량) → +10, EARLY_ACCEL(가속) → +7
+        # EARLY_DUAL(기관+외인 동시) → +5, STRONG(장기 쌍끌이) → +8
+        # 기관 연속매수일이 길수록 추가 보너스
+        inst_accum_tag = ""
+        if ticker in inst_accum:
+            ia = inst_accum[ticker]
+            ia_grade = ia.get("grade", "")
+            inst_bonus_map = {
+                "EARLY_SURGE": 10,  # 오늘 대량 진입 (평균 3배+) — 가장 긴급
+                "STRONG": 8,        # 장기 쌍끌이 확인 — 확신도 높음
+                "EARLY_ACCEL": 7,   # 가속 매수 (2일+) — 추세 확인
+                "EARLY_DUAL": 5,    # 기관+외인 동시 진입 — 초기 신호
+                "MODERATE": 4,      # 쌍끌이 (단기)
+                "NOTABLE": 3,       # 한쪽 강함
+                "WATCH": 1,         # 관심
+            }
+            ia_bonus = float(inst_bonus_map.get(ia_grade, 0))
+
+            # 연속매수일 보너스: 기관 3일+이면 +2, 5일+이면 +3
+            inst_consec = ia.get("inst_consecutive", 0)
+            frgn_consec = ia.get("foreign_consecutive", 0)
+            max_consec = max(inst_consec, frgn_consec)
+            if max_consec >= 5:
+                ia_bonus += 3
+            elif max_consec >= 3:
+                ia_bonus += 2
+
+            # 쌍끌이(기관+외인) 동시 누적 보너스
+            if ia.get("dual_buying"):
+                ia_bonus += 2
+
+            if ia_bonus > 0:
+                boosted = max(min(score_detail["total"] + ia_bonus, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+                inst_accum_tag = f"기관:{ia_grade}(+{ia_bonus:.0f})"
+                if ia_grade.startswith("EARLY") or ia_grade == "STRONG":
+                    source_names.append("기관매집")
+
+        # ── 전략O: 외인소진율 부스트 ──
+        # FE2(급등): 5일간 소진율 +5%p 이상 급등 → +6점 (집중 매수 중)
+        # FE1(한도임박): 90%+ → +3점 (주의 but 인기 확인)
+        fe_tag = ""
+        if ticker in fe_signals:
+            fe = fe_signals[ticker]
+            fe_type = fe.get("fe_type", "")
+            fe_score = fe.get("score", 0)
+            if fe_type == "FE2":
+                fe_bonus = 6  # 소진율 급등 = 외인 집중 매수 중
+                fe_tag = f"외인급등(FE2,{fe_score}점)"
+            elif fe_type == "FE1":
+                fe_bonus = 3  # 한도 임박 = 인기는 확인
+                fe_tag = f"외인한도(FE1,{fe_score}점)"
+            else:
+                fe_bonus = 0
+            if fe_bonus > 0:
+                boosted = max(min(score_detail["total"] + fe_bonus, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+                source_names.append("외인소진")
+
         # ── 전략M: 시나리오 뉴스 부스트 (원자재 원가 갭 + 시나리오 체인) ──
         scenario_bonus = 0.0
         scenario_tag = ""
@@ -2170,6 +2288,8 @@ def main():
             "nat_signal": nat_signal_str,
             "nat_score": nat_score_val,
             "nat_pattern": nat_pattern,
+            "inst_accum_tag": inst_accum_tag,
+            "fe_tag": fe_tag,
             "scenario_bonus": scenario_bonus,
             "scenario_tag": scenario_tag,
             "scenario_narrative": scenario_narrative,
@@ -2400,12 +2520,14 @@ def main():
         report_str = f"  📋{r['report_tag']}" if r.get("report_tag") else ""
         cons_str = f"  📊{r['consensus_tag']}" if r.get("consensus_tag") else ""
         nat_str = f"  🌍{r['nat_tag']}" if r.get("nat_tag") else ""
+        ia_str = f"  🏛{r['inst_accum_tag']}" if r.get("inst_accum_tag") else ""
+        fe_str = f"  🔥{r['fe_tag']}" if r.get("fe_tag") else ""
         sc_str = ""
         if r.get("scenario_tag"):
             rr = r.get("scenario_risk_reward", {})
             rr_str = f" [{rr['commodity']} {rr['zone']}]" if rr.get("zone") else ""
             sc_str = f"\n     📰 {r['scenario_narrative']}{rr_str}"
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{sc_str}")
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}")
 
     if top5:
         print(f"\n{'─'*60}")
