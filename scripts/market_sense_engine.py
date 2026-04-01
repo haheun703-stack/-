@@ -303,11 +303,18 @@ def gather_signals() -> dict:
     # ── 축6: 원자재 시그널 (가중치 15%) ──
     commodity_scores = {}
     commodity_alerts = []
-    index_dir = us.get("index_direction", {})
+    # US overnight의 commodities 섹션에서 원자재 데이터 로드
+    us_commodities = us.get("commodities", {})
+    # US ticker → commodities 키 매핑
+    _US_COMM_KEY = {
+        "USO": "oil", "GLD": "gold", "COPX": "copper",
+        "UNG": "natgas", "URA": "uranium", "SLV": "silver",
+    }
 
     for comm_key, comm_info in COMMODITY_ETF.items():
         us_ticker = comm_info["us_ticker"]
-        ticker_data = index_dir.get(us_ticker, {})
+        comm_data_key = _US_COMM_KEY.get(us_ticker, comm_key)
+        ticker_data = us_commodities.get(comm_data_key, {})
         ret_1d = ticker_data.get("ret_1d", 0)
         ret_5d = ticker_data.get("ret_5d", 0)
 
