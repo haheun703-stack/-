@@ -941,11 +941,11 @@ def build_jarvis_payload() -> dict:
     buyable = [p for p in all_picks if p.get("grade") in buyable_grades]
     buyable.sort(key=lambda x: -x.get("total_score", 0))
 
-    # PANIC/DANGER → 개별주 최대 3개 + "관찰" 이상만
+    # PANIC/DANGER → 교차검증 필터만 적용, 개수 제한 완화
     if danger_mode == "PANIC":
-        buyable = [p for p in buyable if p.get("n_sources", 0) >= 3][:3]
+        buyable = [p for p in buyable if p.get("n_sources", 0) >= 2][:10]
     elif danger_mode == "DANGER":
-        buyable = [p for p in buyable if p.get("n_sources", 0) >= 2][:5]
+        buyable = [p for p in buyable if p.get("n_sources", 0) >= 2][:15]
 
     # 상위 20개만 전송 (Supabase JSONB 크기 제한)
     top_picks = buyable[:20]

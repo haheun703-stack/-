@@ -651,6 +651,30 @@ def load_regime_boost() -> float:
     return macro.get("position_multiplier", 1.0)
 
 
+def load_vix_level() -> float:
+    """brain_decision.json에서 VIX 로드 → 동적 손절폭 결정에 사용."""
+    brain = load_json("brain_decision.json")
+    return brain.get("vix_level", 20.0) if isinstance(brain, dict) else 20.0
+
+
+def calc_dynamic_stop_range(vix: float) -> tuple[float, float]:
+    """VIX 기반 동적 손절 범위 (최소%, 최대%) 반환.
+
+    VIX 낮음(<15) → 타이트 손절 (-3%~-5%) : 변동성 작으니 빨리 컷
+    VIX 보통(15~25) → 기본 (-4%~-6%)
+    VIX 높음(25~35) → 넓은 손절 (-5%~-8%) : 변동성 크니 여유
+    VIX 극단(>35) → 최대 (-6%~-10%) : 패닉 변동성 허용
+    """
+    if vix < 15:
+        return (0.97, 0.95)   # -3% ~ -5%
+    elif vix < 25:
+        return (0.96, 0.94)   # -4% ~ -6%
+    elif vix < 35:
+        return (0.95, 0.92)   # -5% ~ -8%
+    else:
+        return (0.94, 0.90)   # -6% ~ -10%
+
+
 def load_institutional_targets() -> dict:
     """기관 추정 목표가 데이터 로드."""
     data = load_json("institutional_targets.json")
@@ -1166,12 +1190,15 @@ def _calc_entry_stop(
         return {"entry": 0, "stop": 0, "target": 0, "condition": "데이터 부족",
                 "ma5_entry": ""}
 
-    # 손절가: 20일 저점 또는 MA20*0.98 중 현재가 아래에 있는 지지선 활용
+    # 손절가: VIX 기반 동적 범위 + 20일 저점/MA20 지지선 활용
     # (현재가 이상인 후보는 제외 — 한화에어로 버그 방지)
+    vix = load_vix_level()
+    stop_min_ratio, stop_max_ratio = calc_dynamic_stop_range(vix)
+    # stop_min_ratio: 최소 손절폭 (예: 0.97 = -3%), stop_max_ratio: 최대 손절폭 (예: 0.95 = -5%)
     stop_candidates = [v for v in [low_20d, ma20 * 0.98] if 0 < v < close]
-    stop = max(stop_candidates) if stop_candidates else close * 0.95
-    stop = max(stop, close * 0.93)   # 손절폭 최대 -7%
-    stop = min(stop, close * 0.95)   # 손절폭 최소 -5%
+    stop = max(stop_candidates) if stop_candidates else close * stop_min_ratio
+    stop = max(stop, close * stop_max_ratio)  # 손절폭 최대 제한
+    stop = min(stop, close * stop_min_ratio)  # 손절폭 최소 제한
 
     # ── MA5~MA7 진입 전략 ──
     # 핵심: 5일선~7일선 근처에서 진입해야 승률이 높다
@@ -1232,10 +1259,10 @@ def _calc_entry_stop(
     if ma5_entry and (stoch_k > 85 or rsi > 75):
         condition += f" (⚠ 과열: RSI {rsi:.0f}/Stoch {stoch_k:.0f})"
 
-    # ── 손절가를 entry 기준으로 재조정 ──
+    # ── 손절가를 entry 기준으로 재조정 (VIX 동적) ──
     # entry가 MA5 수준으로 낮아졌을 때 stop이 entry 근처면 R:R 무의미
-    stop = min(stop, entry * 0.95)   # entry 대비 최소 -5%
-    stop = max(stop, entry * 0.93)   # entry 대비 최대 -7%
+    stop = min(stop, entry * stop_min_ratio)   # entry 대비 최소 손절
+    stop = max(stop, entry * stop_max_ratio)   # entry 대비 최대 손절
 
     # 목표가: R:R 2:1 기준
     risk = entry - stop
