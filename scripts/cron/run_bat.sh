@@ -141,7 +141,7 @@ case "$BAT" in
     run_py scripts/run_cto.py
     run_py src/use_cases/portfolio_cfo.py
     run_py scripts/upload_flowx.py
-    run_py scripts/dashboard_data.py
+    # dashboard_data.py 제거 — 파일 미존재
     run_py scripts/send_evening_summary.py --send
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
