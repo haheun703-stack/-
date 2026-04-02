@@ -110,13 +110,15 @@ case "$BAT" in
     pkill -f "run_vwap_monitor" >> "$LOG" 2>&1 || true
     sleep 2
     echo "[$(date +%H:%M:%S)] [INFO] BAT-L/I 잔여 프로세스 정리 완료" >> "$LOG"
+    # .pyc 캐시 삭제 — git pull 후 구버전 캐시 실행 방지
+    find "$BASE" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     # --- G1: 데이터 수집 ---
     run_py scripts/update_daily_data.py
     run_py_long scripts/extend_parquet_data.py --workers 2
     run_py scripts/update_kospi_index.py
     # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
-    run_py scripts/scan_nationality.py
+    run_py_long scripts/scan_nationality.py
     run_py_long scripts/collect_foreign_exhaustion.py
     # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)
     run_py_long scripts/institutional_flow_collector.py
