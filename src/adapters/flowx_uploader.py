@@ -629,6 +629,11 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             if sc_rr.get("zone"):
                 rr_parts.append(sc_rr["zone"])
             row["risk_reward"] = " ".join(rr_parts) if rr_parts else ""
+        # v3 알파 시그널 보조 태그
+        if pick.get("alpha_v3_tag"):
+            sigs = pick.get("alpha_signals", [])
+            row["alpha_signals"] = "+".join(sigs) if sigs else ""
+            row["alpha_v3_score"] = pick.get("alpha_v3_score", 0)
         rows.append(row)
 
     return rows
