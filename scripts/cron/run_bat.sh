@@ -90,9 +90,9 @@ case "$BAT" in
     run_py scripts/smart_entry_runner.py --live --force
     run_py scripts/sell_monitor.py --dry-run
     ;;
-  I) # 08:55 KST — VWAP + EYE 킬러픽 모니터
+  I) # 08:55 KST — VWAP + EYE 킬러픽 모니터 (둘 다 장중 장기 실행)
     $PY scripts/intraday_eye.py --killer-picks >> "$LOG" 2>&1 &
-    run_py scripts/run_vwap_monitor.py --killer-picks
+    $PY scripts/run_vwap_monitor.py --killer-picks >> "$LOG" 2>&1 &
     ;;
   H) # 11:30 KST — 장중 분석
     run_py scripts/run_midday_analysis.py
@@ -121,6 +121,7 @@ case "$BAT" in
     # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)
     run_py_long scripts/institutional_flow_collector.py
     run_py scripts/scan_volume_spike.py
+    run_py scripts/sector_etf_builder.py --daily
     # --- G2: 지표 + 릴레이 ---
     run_py scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py

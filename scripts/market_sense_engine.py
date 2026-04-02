@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_PATH = DATA_DIR / "market_sense.json"
+KOSPI_CSV = DATA_DIR / "kospi_index.csv"
 
 # ── ETF 매핑 ──
 ETF_LONG = [
@@ -101,7 +102,7 @@ COMMODITY_ETF = {
         "us_ticker": "URA",
         "label": "우라늄/원전",
         "etfs": [
-            {"code": "457990", "name": "HANARO 원자력iSelect", "mult": 1.0},
+            {"code": "434730", "name": "HANARO 원자력iSelect", "mult": 1.0},
         ],
     },
 }
@@ -540,6 +541,82 @@ def update_accuracy_log(direction: str, score: float):
         json.dump(log, f, ensure_ascii=False, indent=2)
 
 
+def _auto_verify_all():
+    """kospi_index.csv를 이용해 미검증 기록 전부 자동 검증.
+
+    각 미검증 예측의 '다음 거래일' 등락률을 계산하여 채운다.
+    다음 거래일 데이터가 아직 없으면 해당 기록은 건너뛴다.
+    """
+    try:
+        import pandas as pd
+
+        if not KOSPI_CSV.exists():
+            return 0
+
+        df = pd.read_csv(KOSPI_CSV, index_col="Date", parse_dates=True)
+        if df.empty or len(df) < 2:
+            return 0
+
+        df = df.sort_index()
+        close_col = "Close" if "Close" in df.columns else "close"
+
+        log_path = DATA_DIR / "market_sense_log.json"
+        if not log_path.exists():
+            return 0
+
+        with open(log_path, encoding="utf-8") as f:
+            log = json.load(f)
+
+        verified_count = 0
+        for entry in log:
+            if entry.get("actual_change_pct") is not None:
+                continue  # 이미 검증됨
+
+            predict_date = entry.get("date")
+            if not predict_date:
+                continue
+
+            predict_dt = pd.Timestamp(predict_date)
+            after = df[df.index > predict_dt]
+            before = df[df.index <= predict_dt]
+            if after.empty or before.empty:
+                continue  # 다음 거래일 데이터 아직 없음
+
+            prev_close = before.iloc[-1][close_col]
+            next_close = after.iloc[0][close_col]
+            change_pct = round((next_close - prev_close) / prev_close * 100, 2)
+
+            entry["actual_change_pct"] = change_pct
+            predicted_up = entry.get("direction") in ("STRONG_LONG", "LONG")
+            predicted_down = entry.get("direction") in ("STRONG_SHORT", "SHORT")
+            actual_up = change_pct > 0.3
+            actual_down = change_pct < -0.3
+
+            if predicted_up and actual_up:
+                entry["hit"] = True
+            elif predicted_down and actual_down:
+                entry["hit"] = True
+            elif entry.get("direction") == "NEUTRAL" and abs(change_pct) < 0.5:
+                entry["hit"] = True
+            else:
+                entry["hit"] = False
+
+            hit_str = "적중" if entry["hit"] else "미스"
+            logger.info("  검증: %s 예측=%s 실제=%+.2f%% → %s",
+                        predict_date, entry["direction"], change_pct, hit_str)
+            verified_count += 1
+
+        if verified_count > 0:
+            with open(log_path, "w", encoding="utf-8") as f:
+                json.dump(log, f, ensure_ascii=False, indent=2)
+
+        return verified_count
+
+    except Exception as e:
+        logger.warning("자동 검증 실패: %s", e)
+        return 0
+
+
 def verify_yesterday(kospi_change_pct: float):
     """전날 예측 vs 실제 결과 검증."""
     log_path = DATA_DIR / "market_sense_log.json"
@@ -596,11 +673,22 @@ def main():
     logger.info("  눈치 엔진 — 시장 방향 감지 + ETF 추천")
     logger.info("=" * 60)
 
-    # 전날 검증
+    # 전날 검증 — --verify 인자 또는 kospi_index.csv 자동 감지
     if args.verify is not None:
-        result = verify_yesterday(args.verify)
-        if result:
-            logger.info("  적중률: %d/%d = %.1f%%", result["hits"], result["total"], result["rate"])
+        vr = verify_yesterday(args.verify)
+        if vr:
+            logger.info("  적중률: %d/%d = %.1f%%", vr["hits"], vr["total"], vr["rate"])
+    else:
+        cnt = _auto_verify_all()
+        if cnt > 0:
+            # 적중률 표시
+            log_path = DATA_DIR / "market_sense_log.json"
+            with open(log_path, encoding="utf-8") as f:
+                log = json.load(f)
+            verified = [e for e in log if e.get("hit") is not None]
+            if verified:
+                hits = sum(1 for e in verified if e["hit"])
+                logger.info("  적중률: %d/%d = %.1f%%", hits, len(verified), hits / len(verified) * 100)
 
     # ── 시그널 수집 ──
     signals = gather_signals()
