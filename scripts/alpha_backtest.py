@@ -617,6 +617,145 @@ def signal_dual_by_regime() -> dict:
     return total_summary
 
 
+# ─── 시그널 10: 복합 시그널 ───
+
+def signal_combo(combo_name: str = "all") -> dict:
+    """알파 입증 시그널들의 조합 백테스트."""
+
+    combos = {
+        "PULLBACK15_DUAL": {
+            "desc": "급락15%+쌍끌이",
+            "check": lambda df, i: _check_pullback_dual(df, i, gap=-15),
+        },
+        "PULLBACK10_DUAL": {
+            "desc": "급락10%+쌍끌이",
+            "check": lambda df, i: _check_pullback_dual(df, i, gap=-10),
+        },
+        "PULLBACK15_VOL3x": {
+            "desc": "급락15%+거래량3배+수급",
+            "check": lambda df, i: _check_pullback_vol(df, i, gap=-15, vol_mult=3.0),
+        },
+        "RSI25_DUAL": {
+            "desc": "RSI과매도25+쌍끌이",
+            "check": lambda df, i: _check_rsi_dual(df, i, rsi_th=25),
+        },
+        "BREAKOUT60_VOL3x_DUAL": {
+            "desc": "60일신고가+거래량3배+쌍끌이",
+            "check": lambda df, i: _check_breakout_vol_dual(df, i, lookback=60, vol_mult=3.0),
+        },
+    }
+
+    targets = combos if combo_name == "all" else {k: v for k, v in combos.items() if k == combo_name}
+    all_combo_results = {}
+
+    for cname, cdef in targets.items():
+        logger.info("=== 복합 시그널: %s (%s) ===", cname, cdef["desc"])
+
+        all_results = []
+        parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+        total = len(parquet_files)
+
+        for i, pf in enumerate(parquet_files):
+            ticker = pf.stem
+            df = load_parquet(ticker)
+            if df is None or len(df) < 80:
+                continue
+            if "기관합계" not in df.columns or "외국인합계" not in df.columns:
+                continue
+
+            # 각 날짜에 대해 시그널 체크
+            precomputed = _precompute(df)
+            signal_dates = []
+            for idx in range(60, len(df)):
+                if cdef["check"](df, idx):
+                    signal_dates.append(df.index[idx].strftime("%Y-%m-%d"))
+
+            if not signal_dates:
+                continue
+
+            ret_df = future_returns(df, signal_dates)
+            if ret_df.empty:
+                continue
+
+            ret_df["ticker"] = ticker
+            ret_df["signal"] = cname
+            all_results.append(ret_df)
+
+            if (i + 1) % 200 == 0:
+                logger.info("  진행: %d/%d", i + 1, total)
+
+        if not all_results:
+            logger.warning("  %s: 시그널 발생 0건", cname)
+            continue
+
+        result = pd.concat(all_results, ignore_index=True)
+        summary = _summarize(result, cname)
+        print_report(summary)
+        all_combo_results[cname] = summary
+
+    return all_combo_results
+
+
+# 복합 시그널 체크 헬퍼 — 캐시는 _precompute에서 미리 계산하지 않고 직접 계산
+def _precompute(df: pd.DataFrame) -> None:
+    """df에 파생 컬럼 추가 (캐시용)."""
+    if "_ma20" not in df.columns:
+        df["_ma20"] = df["close"].rolling(20).mean()
+    if "_gap20" not in df.columns:
+        df["_gap20"] = (df["close"] - df["_ma20"]) / df["_ma20"] * 100
+    if "_vol_ma20" not in df.columns:
+        df["_vol_ma20"] = df["volume"].rolling(20).mean()
+    if "_vol_ratio" not in df.columns:
+        df["_vol_ratio"] = df["volume"] / df["_vol_ma20"]
+    if "_rsi" not in df.columns:
+        df["_rsi"] = _calc_rsi(df["close"])
+    if "_high60" not in df.columns:
+        df["_high60"] = df["high"].rolling(60).max().shift(1)
+    if "_inst" not in df.columns:
+        df["_inst"] = df["기관합계"].fillna(0)
+    if "_foreign" not in df.columns:
+        df["_foreign"] = df["외국인합계"].fillna(0)
+
+
+def _check_pullback_dual(df, idx, gap=-15):
+    """급락 + 쌍끌이."""
+    return (
+        df["_gap20"].iloc[idx] <= gap
+        and df["_inst"].iloc[idx] > 0
+        and df["_foreign"].iloc[idx] > 0
+    )
+
+
+def _check_pullback_vol(df, idx, gap=-15, vol_mult=3.0):
+    """급락 + 거래량폭발 + 수급."""
+    return (
+        df["_gap20"].iloc[idx] <= gap
+        and df["_vol_ratio"].iloc[idx] >= vol_mult
+        and (df["_inst"].iloc[idx] > 0 or df["_foreign"].iloc[idx] > 0)
+    )
+
+
+def _check_rsi_dual(df, idx, rsi_th=25):
+    """RSI 과매도 + 쌍끌이."""
+    rsi_val = df["_rsi"].iloc[idx]
+    return (
+        pd.notna(rsi_val)
+        and rsi_val < rsi_th
+        and df["_inst"].iloc[idx] > 0
+        and df["_foreign"].iloc[idx] > 0
+    )
+
+
+def _check_breakout_vol_dual(df, idx, lookback=60, vol_mult=3.0):
+    """신고가 돌파 + 거래량폭발 + 쌍끌이."""
+    return (
+        df["close"].iloc[idx] > df["_high60"].iloc[idx]
+        and df["_vol_ratio"].iloc[idx] >= vol_mult
+        and df["_inst"].iloc[idx] > 0
+        and df["_foreign"].iloc[idx] > 0
+    ) if pd.notna(df["_high60"].iloc[idx]) else False
+
+
 # ─── 시그널 4: picks_history 사후 검증 ───
 
 def signal_picks_history() -> dict:
@@ -791,7 +930,7 @@ def print_report(results: dict):
 
 def main():
     parser = argparse.ArgumentParser(description="알파 백테스트")
-    parser.add_argument("--signal", choices=["inst", "foreign", "dual", "picks", "vol_inst", "rsi_inst", "pullback", "breakout", "regime", "all", "new"], default="all")
+    parser.add_argument("--signal", choices=["inst", "foreign", "dual", "picks", "vol_inst", "rsi_inst", "pullback", "breakout", "regime", "combo", "all", "new"], default="all")
     parser.add_argument("--min-consec", type=int, default=3, help="최소 연속 매수일 (기본 3)")
     parser.add_argument("--save", action="store_true", help="결과를 JSON으로 저장")
     args = parser.parse_args()
@@ -860,6 +999,10 @@ def main():
         if r:
             print_report(r)
             all_results[r["signal"]] = r
+
+    if args.signal in ("combo",):
+        combo_results = signal_combo()
+        all_results.update(combo_results)
 
     # 종합 판정
     if all_results:
