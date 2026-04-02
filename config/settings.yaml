@@ -2174,6 +2174,11 @@ alpha_engine:
     x5_target_mult: 4.0              # X5 목표 ATR 배수
     x5_partial_pct: 0.50             # X5 부분청산 비율
 
+# ─── ALPHA SCORING V3: 백테스트 입증 팩터 기반 (2026-04-02) ───
+alpha_v3:
+  enabled: true                        # v3 활성화 → scan_tomorrow_picks에서 alpha_scoring.py 사용
+  # 기존 5축 스코어링은 v3 OFF 시 폴백으로 유지
+
 # ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
 alpha_v2:
   enabled: true                       # V2 활성화 (2026-03-25, 백테스트 PF 1.375 확인)

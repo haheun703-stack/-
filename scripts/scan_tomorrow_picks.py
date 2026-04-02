@@ -691,6 +691,12 @@ def load_regime_boost() -> float:
     return macro.get("position_multiplier", 1.0)
 
 
+def load_regime_name() -> str:
+    """레짐 매크로 시그널에서 current_regime 문자열 로드 (BULL/NORMAL/BEAR/CRISIS)"""
+    macro = load_json("regime_macro_signal.json")
+    return macro.get("current_regime", "NORMAL")
+
+
 def load_vix_level() -> float:
     """brain_decision.json에서 VIX 로드 → 동적 손절폭 결정에 사용."""
     brain = load_json("brain_decision.json")
@@ -1373,6 +1379,30 @@ def _build_reasons(
     return pros + cons
 
 
+def get_parquet_raw_df(ticker: str, min_rows: int = 80) -> pd.DataFrame | None:
+    """parquet에서 raw DataFrame 반환 (alpha_scoring v3용).
+
+    alpha_scoring.calc_alpha_score()에 필요한 최소 80일 데이터 반환.
+    columns: close, high, low, volume, 기관합계, 외국인합계
+    """
+    pq_path = PROCESSED_DIR / f"{ticker}.parquet"
+    if not pq_path.exists():
+        return None
+    try:
+        df = pd.read_parquet(pq_path)
+        if len(df) < min_rows:
+            return None
+        # 필수 컬럼 확인
+        required = ["close", "high", "low", "volume"]
+        for col in required:
+            if col not in df.columns:
+                return None
+        return df
+    except Exception as e:
+        logger.warning("parquet raw 읽기 실패 %s: %s", ticker, e)
+        return None
+
+
 def get_parquet_data(ticker: str) -> dict | None:
     """parquet에서 최신 기술적 지표 추출 (확장판)"""
     pq_path = PROCESSED_DIR / f"{ticker}.parquet"
@@ -1643,6 +1673,7 @@ def main():
     # DART AVOID 필터 + 레짐 부스트 + 섹터 부스트 + 기관목표가 + 시장 인텔리전스
     avoid_tickers = load_dart_avoid_tickers()
     regime_mult = load_regime_boost()
+    regime_name = load_regime_name()  # v3용: BULL/NORMAL/BEAR/CRISIS
     sector_boost_map = load_sector_momentum_boost()
     inst_targets = load_institutional_targets()
     intel = load_market_intelligence()
@@ -1695,6 +1726,20 @@ def main():
     if yaml_path.exists():
         with open(yaml_path, encoding="utf-8") as f:
             yaml_config = yaml.safe_load(f) or {}
+
+    # ── Alpha Scoring v3 모드 확인 ──
+    alpha_v3_enabled = yaml_config.get("alpha_v3", {}).get("enabled", False)
+    if alpha_v3_enabled:
+        try:
+            from src.use_cases.alpha_scoring import calc_alpha_score as _v3_score
+            print(f"\n{'='*60}")
+            print(f"  🧬 Alpha Scoring v3 활성화 — 백테스트 입증 팩터 기반")
+            print(f"  Tier1(핵심): PULLBACK+VOL, PULLBACK+DUAL, BREAKOUT+VOL+DUAL")
+            print(f"  Tier2(보조): DUAL연속, VOL+INST, FOREIGN연속, 기관매집, 외인소진")
+            print(f"{'='*60}\n")
+        except ImportError as e:
+            logger.warning("alpha_scoring 모듈 임포트 실패: %s — v3 비활성화", e)
+            alpha_v3_enabled = False
 
     # 전략 J: 컨센서스 풀 (consensus_screening.json)
     consensus_pool_cfg = yaml_config.get("consensus_pool", {})
@@ -2302,6 +2347,41 @@ def main():
             "sar_trend": pq_data.get("sar_trend", 0) if pq_data else 0,
         }
 
+        # ── Alpha Scoring v3 오버라이드 ──
+        # v3 활성 시: 백테스트 입증 시그널 기반 점수/등급으로 교체
+        # 기존 부스트 전략의 태그(intel_tag, ai_tag 등)는 유지하되 점수만 v3 기반
+        if alpha_v3_enabled:
+            raw_df = get_parquet_raw_df(ticker)
+            if raw_df is not None:
+                ia_v3 = inst_accum.get(ticker, {})
+                fe_v3 = fe_signals.get(ticker, {})
+                v3_result = _v3_score(
+                    df=raw_df,
+                    ticker=ticker,
+                    name=name,
+                    regime=regime_name,
+                    inst_accum_days=ia_v3.get("inst_consecutive", ia_v3.get("days", 0)),
+                    inst_accum_grade=ia_v3.get("grade", ""),
+                    fe_grade=fe_v3.get("fe_type", ""),
+                )
+                # v3 활성 시 모든 종목을 v3 점수/등급으로 대체
+                # (기존 5축 부풀림 점수 방지)
+                rec["total_score"] = v3_result.total_score
+                rec["grade"] = v3_result.grade
+                rec["alpha_v3"] = True
+                rec["alpha_signals"] = [s.name for s in v3_result.signals if s.fired]
+                rec["alpha_tier1"] = v3_result.tier1_count
+                rec["alpha_tier2"] = v3_result.tier2_count
+                rec["alpha_overheat"] = v3_result.overheat_penalty
+                rec["alpha_regime_bonus"] = v3_result.regime_bonus
+                rec["score_breakdown"] = {
+                    "multi": 0, "individual": 0,
+                    "tech": 0, "flow": 0, "safety": 0,
+                    "overheat": abs(v3_result.overheat_penalty),
+                    "tier1": sum(s.score for s in v3_result.signals if s.fired and s.name.startswith(("PULLBACK", "BREAKOUT"))),
+                    "tier2": sum(s.score for s in v3_result.signals if s.fired and not s.name.startswith(("PULLBACK", "BREAKOUT"))),
+                }
+
         # 안전마진 플래그
         try:
             from src.safety_margin import calc_safety_margin
@@ -2397,7 +2477,8 @@ def main():
         before_cnt = len(buyable)
         buyable = [
             r for r in buyable
-            if r.get("n_sources", 0) >= min_sources
+            if r.get("alpha_v3")  # v3 시그널 기반은 소스 수 면제
+            or r.get("n_sources", 0) >= min_sources
             or (r.get("n_sources", 0) >= min_sources - 1
                 and r.get("total_score", 0) >= alt_score)
         ]
@@ -2527,7 +2608,14 @@ def main():
             rr = r.get("scenario_risk_reward", {})
             rr_str = f" [{rr['commodity']} {rr['zone']}]" if rr.get("zone") else ""
             sc_str = f"\n     📰 {r['scenario_narrative']}{rr_str}"
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}")
+        # v3 알파 시그널 표시
+        alpha_str = ""
+        if r.get("alpha_v3"):
+            sigs = r.get("alpha_signals", [])
+            t1 = r.get("alpha_tier1", 0)
+            t2 = r.get("alpha_tier2", 0)
+            alpha_str = f"\n     🧬 v3: T1={t1} T2={t2} [{'+'.join(sigs)}]"
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}{alpha_str}")
 
     if top5:
         print(f"\n{'─'*60}")
