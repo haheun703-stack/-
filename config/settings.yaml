@@ -2176,8 +2176,8 @@ alpha_engine:
 
 # ─── ALPHA SCORING V3: 백테스트 입증 팩터 기반 (2026-04-02) ───
 alpha_v3:
-  enabled: true                        # v3 활성화 → scan_tomorrow_picks에서 alpha_scoring.py 사용
-  # 기존 5축 스코어링은 v3 OFF 시 폴백으로 유지
+  enabled: true                        # v3 보조태그 표시 (점수/등급 영향 없음, 시그널 참고용)
+  # 기존 5축 스코어링이 메인, v3는 PULLBACK/VOL 등 팩터 시그널 표시만
 
 # ─── ALPHA ENGINE V2: 멀티팩터 (비활성 — 검증 완료 후 활성화) ───
 alpha_v2:

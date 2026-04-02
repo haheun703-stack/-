@@ -1727,19 +1727,17 @@ def main():
         with open(yaml_path, encoding="utf-8") as f:
             yaml_config = yaml.safe_load(f) or {}
 
-    # ── Alpha Scoring v3 모드 확인 ──
-    alpha_v3_enabled = yaml_config.get("alpha_v3", {}).get("enabled", False)
-    if alpha_v3_enabled:
+    # ── Alpha Scoring v3 (표시 전용) ──
+    # v3는 점수/등급에 영향 없이, 백테스트 팩터 시그널을 보조 태그로만 표시
+    alpha_v3_display = yaml_config.get("alpha_v3", {}).get("enabled", False)
+    _v3_score = None
+    if alpha_v3_display:
         try:
             from src.use_cases.alpha_scoring import calc_alpha_score as _v3_score
-            print(f"\n{'='*60}")
-            print(f"  🧬 Alpha Scoring v3 활성화 — 백테스트 입증 팩터 기반")
-            print(f"  Tier1(핵심): PULLBACK+VOL, PULLBACK+DUAL, BREAKOUT+VOL+DUAL")
-            print(f"  Tier2(보조): DUAL연속, VOL+INST, FOREIGN연속, 기관매집, 외인소진")
-            print(f"{'='*60}\n")
+            print(f"  [v3 보조태그] 백테스트 팩터 시그널 표시 활성")
         except ImportError as e:
-            logger.warning("alpha_scoring 모듈 임포트 실패: %s — v3 비활성화", e)
-            alpha_v3_enabled = False
+            logger.warning("alpha_scoring 모듈 임포트 실패: %s", e)
+            alpha_v3_display = False
 
     # 전략 J: 컨센서스 풀 (consensus_screening.json)
     consensus_pool_cfg = yaml_config.get("consensus_pool", {})
@@ -2347,10 +2345,9 @@ def main():
             "sar_trend": pq_data.get("sar_trend", 0) if pq_data else 0,
         }
 
-        # ── Alpha Scoring v3 오버라이드 ──
-        # v3 활성 시: 백테스트 입증 시그널 기반 점수/등급으로 교체
-        # 기존 부스트 전략의 태그(intel_tag, ai_tag 등)는 유지하되 점수만 v3 기반
-        if alpha_v3_enabled:
+        # ── Alpha Scoring v3 보조 태그 (표시 전용) ──
+        # 기존 점수/등급은 유지, v3 시그널은 참고 정보로만 추가
+        if alpha_v3_display and _v3_score is not None:
             raw_df = get_parquet_raw_df(ticker)
             if raw_df is not None:
                 ia_v3 = inst_accum.get(ticker, {})
@@ -2364,23 +2361,14 @@ def main():
                     inst_accum_grade=ia_v3.get("grade", ""),
                     fe_grade=fe_v3.get("fe_type", ""),
                 )
-                # v3 활성 시 모든 종목을 v3 점수/등급으로 대체
-                # (기존 5축 부풀림 점수 방지)
-                rec["total_score"] = v3_result.total_score
-                rec["grade"] = v3_result.grade
-                rec["alpha_v3"] = True
-                rec["alpha_signals"] = [s.name for s in v3_result.signals if s.fired]
-                rec["alpha_tier1"] = v3_result.tier1_count
-                rec["alpha_tier2"] = v3_result.tier2_count
-                rec["alpha_overheat"] = v3_result.overheat_penalty
-                rec["alpha_regime_bonus"] = v3_result.regime_bonus
-                rec["score_breakdown"] = {
-                    "multi": 0, "individual": 0,
-                    "tech": 0, "flow": 0, "safety": 0,
-                    "overheat": abs(v3_result.overheat_penalty),
-                    "tier1": sum(s.score for s in v3_result.signals if s.fired and s.name.startswith(("PULLBACK", "BREAKOUT"))),
-                    "tier2": sum(s.score for s in v3_result.signals if s.fired and not s.name.startswith(("PULLBACK", "BREAKOUT"))),
-                }
+                # 점수/등급은 건드리지 않고 보조 태그만 추가
+                fired = [s.name for s in v3_result.signals if s.fired]
+                if fired:
+                    rec["alpha_v3_tag"] = True
+                    rec["alpha_signals"] = fired
+                    rec["alpha_tier1"] = v3_result.tier1_count
+                    rec["alpha_tier2"] = v3_result.tier2_count
+                    rec["alpha_v3_score"] = v3_result.total_score
 
         # 안전마진 플래그
         try:
@@ -2477,8 +2465,7 @@ def main():
         before_cnt = len(buyable)
         buyable = [
             r for r in buyable
-            if r.get("alpha_v3")  # v3 시그널 기반은 소스 수 면제
-            or r.get("n_sources", 0) >= min_sources
+            if r.get("n_sources", 0) >= min_sources
             or (r.get("n_sources", 0) >= min_sources - 1
                 and r.get("total_score", 0) >= alt_score)
         ]
@@ -2608,13 +2595,14 @@ def main():
             rr = r.get("scenario_risk_reward", {})
             rr_str = f" [{rr['commodity']} {rr['zone']}]" if rr.get("zone") else ""
             sc_str = f"\n     📰 {r['scenario_narrative']}{rr_str}"
-        # v3 알파 시그널 표시
+        # v3 알파 시그널 보조 표시
         alpha_str = ""
-        if r.get("alpha_v3"):
+        if r.get("alpha_v3_tag"):
             sigs = r.get("alpha_signals", [])
             t1 = r.get("alpha_tier1", 0)
             t2 = r.get("alpha_tier2", 0)
-            alpha_str = f"\n     🧬 v3: T1={t1} T2={t2} [{'+'.join(sigs)}]"
+            v3s = r.get("alpha_v3_score", 0)
+            alpha_str = f"\n     🧬 v3({v3s:.0f}): T1={t1} T2={t2} [{'+'.join(sigs)}]"
         print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}{alpha_str}")
 
     if top5:
