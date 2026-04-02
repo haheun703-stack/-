@@ -6,6 +6,11 @@
     python scripts/alpha_backtest.py --signal foreign    # 외국인매집만
     python scripts/alpha_backtest.py --signal dual       # 쌍끌이만
     python scripts/alpha_backtest.py --signal picks      # 추천종목 사후검증
+    python scripts/alpha_backtest.py --signal vol_inst   # 거래량폭발+기관매수
+    python scripts/alpha_backtest.py --signal rsi_inst   # RSI과매도+기관매수
+    python scripts/alpha_backtest.py --signal pullback   # 이격도 역추세+수급
+    python scripts/alpha_backtest.py --signal breakout   # 신고가 돌파+수급
+    python scripts/alpha_backtest.py --signal regime     # 레짐별 분리검증
 
 핵심 질문: "이 시그널이 발생한 날 매수했으면 D+1/5/10/20에 얼마나 벌었나?"
 """
@@ -286,6 +291,332 @@ def signal_dual_buying(min_consec: int = 3) -> dict:
     return _summarize(result, "DUAL_BUY_%dd" % min_consec)
 
 
+# ─── 시그널 5: 거래량 폭발 + 기관 매수 ───
+
+def signal_volume_spike_inst(vol_mult: float = 2.5, lookback: int = 20) -> dict:
+    """거래량 평균 대비 N배 폭발 + 기관 순매수 동시 발생."""
+    logger.info("=== 시그널: 거래량폭발+기관매수 (vol×%.1f, %dMA) ===", vol_mult, lookback)
+
+    all_results = []
+    parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+    total = len(parquet_files)
+
+    for i, pf in enumerate(parquet_files):
+        ticker = pf.stem
+        df = load_parquet(ticker)
+        if df is None or len(df) < lookback + 20:
+            continue
+        if "기관합계" not in df.columns:
+            continue
+
+        vol_ma = df["volume"].rolling(lookback).mean()
+        vol_ratio = df["volume"] / vol_ma
+
+        inst = df["기관합계"].fillna(0)
+
+        signal_mask = (vol_ratio >= vol_mult) & (inst > 0) & (vol_ma > 0)
+        signal_dates = df.index[signal_mask].strftime("%Y-%m-%d").tolist()
+
+        if not signal_dates:
+            continue
+
+        ret_df = future_returns(df, signal_dates)
+        if ret_df.empty:
+            continue
+
+        ret_df["ticker"] = ticker
+        ret_df["signal"] = "VOL_SPIKE_INST"
+        all_results.append(ret_df)
+
+        if (i + 1) % 200 == 0:
+            logger.info("  진행: %d/%d", i + 1, total)
+
+    if not all_results:
+        logger.warning("  시그널 발생 0건")
+        return {}
+
+    result = pd.concat(all_results, ignore_index=True)
+    return _summarize(result, "VOL_SPIKE_INST_%.0fx" % vol_mult)
+
+
+# ─── 시그널 6: RSI 과매도 + 기관 매수 ───
+
+def _calc_rsi(close: pd.Series, period: int = 14) -> pd.Series:
+    """RSI 계산."""
+    delta = close.diff()
+    gain = delta.where(delta > 0, 0.0)
+    loss = -delta.where(delta < 0, 0.0)
+    avg_gain = gain.ewm(alpha=1 / period, min_periods=period).mean()
+    avg_loss = loss.ewm(alpha=1 / period, min_periods=period).mean()
+    rs = avg_gain / avg_loss.replace(0, np.nan)
+    return 100 - (100 / (1 + rs))
+
+
+def signal_rsi_oversold_inst(rsi_threshold: float = 30) -> dict:
+    """RSI < threshold (과매도) + 기관 순매수 동시 → 역추세 매수."""
+    logger.info("=== 시그널: RSI과매도+기관매수 (RSI<%d) ===", rsi_threshold)
+
+    all_results = []
+    parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+    total = len(parquet_files)
+
+    for i, pf in enumerate(parquet_files):
+        ticker = pf.stem
+        df = load_parquet(ticker)
+        if df is None or len(df) < 60:
+            continue
+        if "기관합계" not in df.columns:
+            continue
+
+        rsi = _calc_rsi(df["close"])
+        inst = df["기관합계"].fillna(0)
+
+        signal_mask = (rsi < rsi_threshold) & (inst > 0)
+        signal_dates = df.index[signal_mask].strftime("%Y-%m-%d").tolist()
+
+        if not signal_dates:
+            continue
+
+        ret_df = future_returns(df, signal_dates)
+        if ret_df.empty:
+            continue
+
+        ret_df["ticker"] = ticker
+        ret_df["signal"] = "RSI_OVERSOLD_INST"
+        all_results.append(ret_df)
+
+        if (i + 1) % 200 == 0:
+            logger.info("  진행: %d/%d", i + 1, total)
+
+    if not all_results:
+        logger.warning("  시그널 발생 0건")
+        return {}
+
+    result = pd.concat(all_results, ignore_index=True)
+    return _summarize(result, "RSI_OVERSOLD_INST_%d" % rsi_threshold)
+
+
+# ─── 시그널 7: 이격도 역추세 + 수급 ───
+
+def signal_pullback_supply(ma_period: int = 20, gap_pct: float = -10.0) -> dict:
+    """20MA 대비 N% 이상 이격(급락) + 기관 or 외인 순매수 → 반등 매수."""
+    logger.info("=== 시그널: 이격도역추세+수급 (%dMA, 이격<%.0f%%) ===", ma_period, gap_pct)
+
+    all_results = []
+    parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+    total = len(parquet_files)
+
+    for i, pf in enumerate(parquet_files):
+        ticker = pf.stem
+        df = load_parquet(ticker)
+        if df is None or len(df) < ma_period + 20:
+            continue
+        if "기관합계" not in df.columns or "외국인합계" not in df.columns:
+            continue
+
+        ma = df["close"].rolling(ma_period).mean()
+        gap = (df["close"] - ma) / ma * 100  # 이격도 %
+
+        inst = df["기관합계"].fillna(0)
+        foreign = df["외국인합계"].fillna(0)
+        supply_buy = (inst > 0) | (foreign > 0)
+
+        signal_mask = (gap <= gap_pct) & supply_buy & (ma > 0)
+        signal_dates = df.index[signal_mask].strftime("%Y-%m-%d").tolist()
+
+        if not signal_dates:
+            continue
+
+        ret_df = future_returns(df, signal_dates)
+        if ret_df.empty:
+            continue
+
+        ret_df["ticker"] = ticker
+        ret_df["signal"] = "PULLBACK_SUPPLY"
+        all_results.append(ret_df)
+
+        if (i + 1) % 200 == 0:
+            logger.info("  진행: %d/%d", i + 1, total)
+
+    if not all_results:
+        logger.warning("  시그널 발생 0건")
+        return {}
+
+    result = pd.concat(all_results, ignore_index=True)
+    return _summarize(result, "PULLBACK_%dMA_%.0fpct" % (ma_period, abs(gap_pct)))
+
+
+# ─── 시그널 8: 신고가 돌파 + 수급 ───
+
+def signal_breakout_supply(lookback: int = 60) -> dict:
+    """N일 신고가 돌파 + 기관+외인 쌍끌이 → 모멘텀 매수."""
+    logger.info("=== 시그널: 신고가돌파+쌍끌이 (%d일) ===", lookback)
+
+    all_results = []
+    parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+    total = len(parquet_files)
+
+    for i, pf in enumerate(parquet_files):
+        ticker = pf.stem
+        df = load_parquet(ticker)
+        if df is None or len(df) < lookback + 20:
+            continue
+        if "기관합계" not in df.columns or "외국인합계" not in df.columns:
+            continue
+
+        high_max = df["high"].rolling(lookback).max().shift(1)  # 직전 N일 최고가
+        breakout = df["close"] > high_max
+
+        inst = df["기관합계"].fillna(0)
+        foreign = df["외국인합계"].fillna(0)
+        dual = (inst > 0) & (foreign > 0)
+
+        signal_mask = breakout & dual
+        signal_dates = df.index[signal_mask].strftime("%Y-%m-%d").tolist()
+
+        if not signal_dates:
+            continue
+
+        ret_df = future_returns(df, signal_dates)
+        if ret_df.empty:
+            continue
+
+        ret_df["ticker"] = ticker
+        ret_df["signal"] = "BREAKOUT_DUAL"
+        all_results.append(ret_df)
+
+        if (i + 1) % 200 == 0:
+            logger.info("  진행: %d/%d", i + 1, total)
+
+    if not all_results:
+        logger.warning("  시그널 발생 0건")
+        return {}
+
+    result = pd.concat(all_results, ignore_index=True)
+    return _summarize(result, "BREAKOUT_%dd_DUAL" % lookback)
+
+
+# ─── 시그널 9: 레짐별 분리검증 (쌍끌이) ───
+
+def signal_dual_by_regime() -> dict:
+    """쌍끌이 3일 시그널을 시장 레짐(상승/하락/횡보)별로 분리 검증."""
+    logger.info("=== 시그널: 쌍끌이 레짐별 분리검증 ===")
+
+    # KOSPI 지수로 레짐 판단 (없으면 종목별 MA로 대체)
+    kospi_path = DATA_DIR / "kospi_index.csv"
+    kospi_regime = {}
+    if kospi_path.exists():
+        kdf = pd.read_csv(kospi_path, index_col=0, parse_dates=True)
+        close_col = "close" if "close" in kdf.columns else kdf.columns[0]
+        kdf = kdf.sort_index()
+        kma60 = kdf[close_col].rolling(60).mean()
+        kma20 = kdf[close_col].rolling(20).mean()
+        for d in kdf.index:
+            if pd.isna(kma60.get(d)) or pd.isna(kma20.get(d)):
+                continue
+            c = kdf.loc[d, close_col]
+            if c > kma60[d] and c > kma20[d]:
+                kospi_regime[d.strftime("%Y-%m-%d")] = "BULL"
+            elif c < kma60[d] and c < kma20[d]:
+                kospi_regime[d.strftime("%Y-%m-%d")] = "BEAR"
+            else:
+                kospi_regime[d.strftime("%Y-%m-%d")] = "SIDEWAYS"
+        logger.info("  KOSPI 레짐 %d일 로드", len(kospi_regime))
+    else:
+        logger.warning("  kospi_index.csv 없음 — 종목별 MA로 레짐 판단")
+
+    all_results = []
+    parquet_files = sorted(RAW_DIR.glob("*.parquet"))
+    total = len(parquet_files)
+
+    for i, pf in enumerate(parquet_files):
+        ticker = pf.stem
+        df = load_parquet(ticker)
+        if df is None or len(df) < 60:
+            continue
+        if "기관합계" not in df.columns or "외국인합계" not in df.columns:
+            continue
+
+        inst = df["기관합계"].fillna(0)
+        foreign = df["외국인합계"].fillna(0)
+        dual = ((inst > 0) & (foreign > 0)).astype(int)
+
+        consec = dual.copy()
+        for idx in range(1, len(consec)):
+            if consec.iloc[idx] == 1:
+                consec.iloc[idx] = consec.iloc[idx - 1] + 1
+            else:
+                consec.iloc[idx] = 0
+
+        signal_mask = (consec == 3)
+        signal_dates = df.index[signal_mask].strftime("%Y-%m-%d").tolist()
+
+        if not signal_dates:
+            continue
+
+        ret_df = future_returns(df, signal_dates)
+        if ret_df.empty:
+            continue
+
+        ret_df["ticker"] = ticker
+
+        # 레짐 배정
+        if kospi_regime:
+            ret_df["regime"] = ret_df["signal_date"].map(
+                lambda d: kospi_regime.get(d, "UNKNOWN")
+            )
+        else:
+            # 종목별 MA로 판단
+            ma60 = df["close"].rolling(60).mean()
+            ma20 = df["close"].rolling(20).mean()
+            regimes = []
+            for _, row in ret_df.iterrows():
+                d = pd.Timestamp(row["signal_date"])
+                if d in df.index and d in ma60.index and d in ma20.index:
+                    c = df.loc[d, "close"]
+                    m60 = ma60.get(d, np.nan)
+                    m20 = ma20.get(d, np.nan)
+                    if pd.notna(m60) and pd.notna(m20):
+                        if c > m60 and c > m20:
+                            regimes.append("BULL")
+                        elif c < m60 and c < m20:
+                            regimes.append("BEAR")
+                        else:
+                            regimes.append("SIDEWAYS")
+                    else:
+                        regimes.append("UNKNOWN")
+                else:
+                    regimes.append("UNKNOWN")
+            ret_df["regime"] = regimes
+
+        ret_df["signal"] = "DUAL_3d"
+        all_results.append(ret_df)
+
+        if (i + 1) % 200 == 0:
+            logger.info("  진행: %d/%d", i + 1, total)
+
+    if not all_results:
+        logger.warning("  시그널 발생 0건")
+        return {}
+
+    result = pd.concat(all_results, ignore_index=True)
+
+    # 전체 요약
+    total_summary = _summarize(result, "DUAL_3d_ALL_REGIMES")
+
+    # 레짐별 분리
+    regime_results = {}
+    for regime in ["BULL", "BEAR", "SIDEWAYS"]:
+        subset = result[result["regime"] == regime]
+        if len(subset) >= 10:
+            r = _summarize(subset, "DUAL_3d_%s" % regime)
+            regime_results[regime] = r
+            print_report(r)
+
+    total_summary["by_regime"] = regime_results
+    return total_summary
+
+
 # ─── 시그널 4: picks_history 사후 검증 ───
 
 def signal_picks_history() -> dict:
@@ -460,7 +791,7 @@ def print_report(results: dict):
 
 def main():
     parser = argparse.ArgumentParser(description="알파 백테스트")
-    parser.add_argument("--signal", choices=["inst", "foreign", "dual", "picks", "all"], default="all")
+    parser.add_argument("--signal", choices=["inst", "foreign", "dual", "picks", "vol_inst", "rsi_inst", "pullback", "breakout", "regime", "all", "new"], default="all")
     parser.add_argument("--min-consec", type=int, default=3, help="최소 연속 매수일 (기본 3)")
     parser.add_argument("--save", action="store_true", help="결과를 JSON으로 저장")
     args = parser.parse_args()
@@ -492,6 +823,40 @@ def main():
 
     if args.signal in ("picks", "all"):
         r = signal_picks_history()
+        if r:
+            print_report(r)
+            all_results[r["signal"]] = r
+
+    if args.signal in ("vol_inst", "new", "all"):
+        for mult in [2.0, 3.0]:
+            r = signal_volume_spike_inst(vol_mult=mult)
+            if r:
+                print_report(r)
+                all_results[r["signal"]] = r
+
+    if args.signal in ("rsi_inst", "new", "all"):
+        for threshold in [30, 25]:
+            r = signal_rsi_oversold_inst(rsi_threshold=threshold)
+            if r:
+                print_report(r)
+                all_results[r["signal"]] = r
+
+    if args.signal in ("pullback", "new", "all"):
+        for gap in [-10, -15]:
+            r = signal_pullback_supply(gap_pct=gap)
+            if r:
+                print_report(r)
+                all_results[r["signal"]] = r
+
+    if args.signal in ("breakout", "new", "all"):
+        for lb in [20, 60]:
+            r = signal_breakout_supply(lookback=lb)
+            if r:
+                print_report(r)
+                all_results[r["signal"]] = r
+
+    if args.signal in ("regime", "new", "all"):
+        r = signal_dual_by_regime()
         if r:
             print_report(r)
             all_results[r["signal"]] = r
