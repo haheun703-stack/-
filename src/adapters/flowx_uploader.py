@@ -128,7 +128,6 @@ class FlowxUploader:
                 "kr_summary": briefing.get("kr_summary", ""),
                 "news_picks": _json.loads(_json.dumps(briefing.get("news_picks", []))),
                 "sector_focus": _json.loads(_json.dumps(briefing.get("sector_focus", []))),
-                "updated_at": _dt.now().isoformat(),
             }
             result = self.client.table("morning_briefings").upsert(
                 row, on_conflict="date"
@@ -788,7 +787,7 @@ def _build_sectors_data(sector_momentum: dict) -> dict:
 def _build_etf_picks(etf_result: dict) -> dict:
     """ETF 배분 + 가속 섹터 추출."""
     allocation = etf_result.get("allocation", {})
-    predator = etf_result.get("predator_result", {})
+    predator = etf_result.get("predator_result") or {}
     accelerations = predator.get("accelerations", [])[:5]
 
     return {

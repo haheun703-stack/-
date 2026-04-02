@@ -230,9 +230,18 @@ def collect_candidates() -> list[dict]:
             "reason": reason_str[:80],
         })
 
-    # 3) top5_swing (스윙 전용, 있으면)
+    # 3) top5_swing (스윙 전용, 있으면 — ticker 문자열 또는 dict)
     for item in data.get("top5_swing", []):
-        ticker = item.get("ticker", "")
+        if isinstance(item, str):
+            ticker = item
+            item_name = ticker
+            item_score = 50
+        elif isinstance(item, dict):
+            ticker = item.get("ticker", "")
+            item_name = item.get("name", ticker)
+            item_score = item.get("total_score", 50)
+        else:
+            continue
         if not ticker or ticker in seen:
             continue
         price, _ = get_latest_price(ticker)
@@ -242,9 +251,9 @@ def collect_candidates() -> list[dict]:
         seen.add(ticker)
         candidates.append({
             "ticker": ticker,
-            "name": item.get("name", ticker),
+            "name": item_name,
             "grade": "A",
-            "score": round(item.get("total_score", 50), 1),
+            "score": round(item_score, 1),
             "price": price,
             "strategy": "SWING",
             "reason": "스윙 전략 추천",
