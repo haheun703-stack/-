@@ -74,24 +74,24 @@ def load_us_signal() -> dict:
 
 
 def fetch_etf_ohlcv(etf_code: str, days: int = 120) -> pd.DataFrame | None:
-    """pykrx로 ETF OHLCV 수집."""
+    """pykrx로 ETF OHLCV 수집.
+
+    NOTE: get_etf_ohlcv_by_date()는 pykrx 내부 KeyError('isin') 버그가 있어
+    get_market_ohlcv_by_date()로 대체 (ETF도 정상 조회됨).
+    """
     try:
         from pykrx import stock as pykrx_stock
 
         end = datetime.now().strftime("%Y%m%d")
         start = (datetime.now() - timedelta(days=days)).strftime("%Y%m%d")
-        df = pykrx_stock.get_etf_ohlcv_by_date(start, end, etf_code)
+        df = pykrx_stock.get_market_ohlcv_by_date(start, end, etf_code)
         if df is None or df.empty:
             return None
 
-        df.columns = [c.lower().replace("시가", "open").replace("고가", "high")
-                      .replace("저가", "low").replace("종가", "close")
-                      .replace("거래량", "volume").replace("거래대금", "value")
-                      .replace("nav", "nav").replace("기초지수", "base_idx")
-                      for c in df.columns]
-        # 한글 컬럼이 남아있으면 매핑
+        # 한글 컬럼 → 영문
         rename = {"시가": "open", "고가": "high", "저가": "low",
-                  "종가": "close", "거래량": "volume", "거래대금": "value"}
+                  "종가": "close", "거래량": "volume", "거래대금": "value",
+                  "등락률": "change_pct"}
         df.rename(columns=rename, inplace=True)
         df.index = pd.to_datetime(df.index)
         df.sort_index(inplace=True)
