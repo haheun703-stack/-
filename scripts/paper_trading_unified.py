@@ -1,4 +1,4 @@
-"""통합 Paper Trading 엔진 — scan_buy 추천 자동 가상 매매.
+"""통합 Paper Trading 엔진 — 1주 Rolling 방식.
 
 매일 장마감 후 BAT-D에서 실행:
   python -u -X utf8 scripts/paper_trading_unified.py
@@ -7,9 +7,16 @@
   1. tomorrow_picks.json에서 추천 종목 수집 (AI대형주 + 전략종합)
   2. 등급별 가상 포트폴리오 진입 (max 3개/일, max 8개 보유)
   3. 보유 종목 일별 현재가 업데이트 + 매도 조건 체크
-  4. 텔레그램 일일 리포트 ([PAPER] 태그)
-  5. FLOWX Supabase paper_trades 업로드
-  6. 금요일 주간 리포트
+  4. 금요일 주간 리밸런싱: 미추천 청산 → 겹치면 유지 → 신규 진입
+  5. 텔레그램 일일/주간 리포트 ([PAPER] 태그)
+  6. FLOWX Supabase paper_trades 업로드
+
+Rolling 규칙:
+  - 최대 보유일 5영업일 (MAX_HOLDING_DAYS=5)
+  - 매주 금요일(또는 --rebalance) 리밸런싱 강제 실행
+  - 리밸런싱: 이번 주 추천에 없는 보유종목 → 전량 청산
+  - 이번 주 추천에 있는 기존 보유 → 유지 (보유일 리셋)
+  - 새 추천 중 미보유 → 신규 진입
 
 데이터:
   - 입력: data/tomorrow_picks.json, data/processed/*.parquet
@@ -67,7 +74,7 @@ TAKE_PROFIT_T1_PCT = 0.10      # +10% 1차 익절 (50% 매도)
 TAKE_PROFIT_T2_PCT = 0.20      # +20% 2차 익절 (전량 매도)
 TRAILING_ACTIVATE_PCT = 0.08   # +8% 이후 트레일링 활성화
 TRAILING_STOP_PCT = -0.04      # 고점 대비 -4% 하락 시 매도
-MAX_HOLDING_DAYS = 15          # 최대 보유일 (거래일 기준)
+MAX_HOLDING_DAYS = 5           # 최대 보유일 (영업일 기준, 1주 Rolling)
 
 
 # ═══════════════════════════════════════════════
@@ -392,6 +399,90 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
 
 
 # ═══════════════════════════════════════════════
+# 주간 리밸런싱 (1주 Rolling)
+# ═══════════════════════════════════════════════
+
+def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[dict]:
+    """금요일 주간 리밸런싱: 미추천 청산, 겹치는 종목 유지, 신규 진입.
+
+    Returns:
+        exits: 리밸런싱으로 청산된 포지션 리스트
+    """
+    recommended_tickers = {c["ticker"] for c in candidates}
+    exits = []
+    codes_to_remove = []
+
+    for ticker, pos in list(pf["positions"].items()):
+        if ticker in recommended_tickers:
+            # 이번 주도 추천 → 유지, 보유일 리셋
+            logger.info("[REBALANCE] %s 유지 (이번 주 추천 포함)", pos["name"])
+            pos["entry_date"] = today_str
+            pos["trailing_active"] = False
+            pos["t1_sold"] = False
+            pos["peak_price"] = pos["avg_price"]
+            continue
+
+        # 미추천 → 전량 청산
+        price, _ = get_latest_price(ticker)
+        if price <= 0:
+            price = pos["avg_price"]
+
+        sell_price = price * (1 - SLIPPAGE_PCT)
+        proceeds = sell_price * pos["qty"] * (1 - TAX_PCT)
+        pf["capital"] += proceeds
+
+        final_pnl = sell_price / pos["avg_price"] - 1
+        days_held = 0
+        try:
+            days_held = (pd.Timestamp(today_str) - pd.Timestamp(pos["entry_date"])).days
+        except Exception:
+            pass
+
+        pf["closed_trades"].append({
+            "ticker": ticker,
+            "name": pos["name"],
+            "strategy": pos.get("strategy", ""),
+            "grade": pos.get("grade", ""),
+            "entry_date": pos.get("entry_date", ""),
+            "exit_date": today_str,
+            "avg_price": round(pos["avg_price"]),
+            "exit_price": round(sell_price),
+            "qty": pos["qty"],
+            "pnl_pct": round(final_pnl * 100, 2),
+            "exit_reason": "REBALANCE",
+            "days_held": days_held,
+        })
+
+        pf["stats"]["total_trades"] += 1
+        if final_pnl > 0:
+            pf["stats"]["wins"] += 1
+        else:
+            pf["stats"]["losses"] += 1
+
+        exits.append({
+            "ticker": ticker,
+            "name": pos["name"],
+            "reason": "REBALANCE",
+            "exit_price": round(sell_price),
+            "pnl_pct": round(final_pnl * 100, 2),
+            "qty": pos["qty"],
+            "partial": False,
+        })
+        codes_to_remove.append(ticker)
+
+    for ticker in codes_to_remove:
+        if ticker in pf["positions"]:
+            del pf["positions"][ticker]
+
+    return exits
+
+
+def is_rebalance_day() -> bool:
+    """금요일 여부 판단 (0=월, 4=금)."""
+    return datetime.now().weekday() == 4
+
+
+# ═══════════════════════════════════════════════
 # 신규 진입
 # ═══════════════════════════════════════════════
 
@@ -702,11 +793,20 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
 # 메인 일일 실행
 # ═══════════════════════════════════════════════
 
-def run_daily() -> dict:
-    """일일 Paper Trading 메인 루틴."""
+def run_daily(force_rebalance: bool = False) -> dict:
+    """일일 Paper Trading 메인 루틴.
+
+    Args:
+        force_rebalance: True면 요일 무관하게 리밸런싱 강제 실행
+    """
     today_str = datetime.now().strftime("%Y-%m-%d")
+    do_rebalance = force_rebalance or is_rebalance_day()
+    mode_tag = "리밸런싱" if do_rebalance else "일일"
+
     print("=" * 60)
-    print(f"  [PAPER] 통합 Paper Trading — {today_str}")
+    print(f"  [PAPER] {mode_tag} Paper Trading — {today_str}")
+    if do_rebalance:
+        print(f"  ** 1주 Rolling 리밸런싱 모드 **")
     print("=" * 60)
 
     # 1. 포트폴리오 로드
@@ -714,19 +814,32 @@ def run_daily() -> dict:
     print(f"  자본금: {pf['initial_capital']:,}원 | 현금: {pf['capital']:,}원")
     print(f"  보유: {len(pf['positions'])}종목")
 
-    # 2. 매도 체크 (기존 포지션)
-    exits = check_exits(pf, today_str)
-    if exits:
-        print(f"\n  매도 시그널: {len(exits)}건")
-        for x in exits:
-            print(f"    {x['name']} {x['pnl_pct']:+.1f}% [{x['reason']}]")
-
-    # 3. 추천 종목 수집
+    # 2. 추천 종목 수집 (리밸런싱 전에 필요)
     candidates = collect_candidates()
     print(f"\n  추천 후보: {len(candidates)}종목")
     for c in candidates[:5]:
         print(f"    [{c['grade']}] {c['name']} score={c['score']} "
               f"{c['price']:,}원 ({c['strategy']})")
+
+    # 3. 리밸런싱 또는 일반 매도 체크
+    exits = []
+    if do_rebalance:
+        # 금요일: 미추천 종목 강제 청산 + 추천 유지
+        exits = weekly_rebalance(pf, candidates, today_str)
+        if exits:
+            print(f"\n  리밸런싱 청산: {len(exits)}건")
+            for x in exits:
+                print(f"    {x['name']} {x['pnl_pct']:+.1f}% [{x['reason']}]")
+        kept = len(pf["positions"])
+        if kept > 0:
+            print(f"  유지: {kept}종목 (이번 주 추천 포함)")
+    else:
+        # 평일: 손절/익절/보유일 기반 매도
+        exits = check_exits(pf, today_str)
+        if exits:
+            print(f"\n  매도 시그널: {len(exits)}건")
+            for x in exits:
+                print(f"    {x['name']} {x['pnl_pct']:+.1f}% [{x['reason']}]")
 
     # 4. 신규 진입
     entries = enter_new_positions(pf, candidates, today_str)
@@ -746,6 +859,10 @@ def run_daily() -> dict:
     # 7. 텔레그램 리포트
     send_daily_report(today_str, entries, exits, pf, stats, len(candidates))
 
+    # 7-1. 리밸런싱일 → 주간 리포트도 자동 전송
+    if do_rebalance:
+        send_weekly_report(pf, stats)
+
     # 8. FLOWX 업로드
     upload_to_flowx(entries, exits, stats)
 
@@ -762,6 +879,7 @@ def run_daily() -> dict:
     return {
         "status": "ok",
         "date": today_str,
+        "rebalanced": do_rebalance,
         "entries": len(entries),
         "exits": len(exits),
         "candidates": len(candidates),
@@ -776,6 +894,7 @@ def run_daily() -> dict:
 def main():
     parser = argparse.ArgumentParser(description="통합 Paper Trading 엔진")
     parser.add_argument("--reset", action="store_true", help="포트폴리오 초기화 (3000만원)")
+    parser.add_argument("--rebalance", action="store_true", help="강제 리밸런싱 (금요일 아닌 날도)")
     parser.add_argument("--weekly", action="store_true", help="주간 리포트")
     parser.add_argument("--status", action="store_true", help="현재 상태")
     parser.add_argument("--dry-run", action="store_true", help="매매 없이 후보만 출력")
@@ -819,7 +938,7 @@ def main():
                   f"{c['price']:,}원 ({c['strategy']}) — {c['reason']}")
         return
 
-    result = run_daily()
+    result = run_daily(force_rebalance=args.rebalance)
     print(f"\n  결과: {json.dumps(result, ensure_ascii=False)}")
 
 
