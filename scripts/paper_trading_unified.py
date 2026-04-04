@@ -300,11 +300,90 @@ def collect_candidates() -> list[dict]:
 
 
 # ═══════════════════════════════════════════════
+# 수급 시그널
+# ═══════════════════════════════════════════════
+
+_SD_COLS = ["inst_net_5d", "foreign_net_5d", "inst_consecutive_buy",
+            "foreign_consecutive_buy", "inst_net_streak", "foreign_net_streak"]
+
+
+def get_supply_demand_signal(ticker: str) -> dict:
+    """parquet에서 수급 시그널 추출 → 보유/매도 판단 보정값 반환.
+
+    Returns:
+        {
+            "score": int,       # -2(강한 이탈) ~ +2(쌍끌이 매집)
+            "detail": str,      # 로그용 설명
+            "stop_adj": float,  # 손절선 보정 (양수=완화, 음수=강화)
+            "hold_adj": int,    # MAX_HOLD 보정일수
+        }
+    """
+    pq = PROCESSED_DIR / f"{ticker}.parquet"
+    if not pq.exists():
+        return {"score": 0, "detail": "no_data", "stop_adj": 0.0, "hold_adj": 0}
+    try:
+        df = pd.read_parquet(pq, columns=_SD_COLS)
+        if df.empty:
+            return {"score": 0, "detail": "empty", "stop_adj": 0.0, "hold_adj": 0}
+        row = df.iloc[-1]
+    except Exception:
+        return {"score": 0, "detail": "read_err", "stop_adj": 0.0, "hold_adj": 0}
+
+    inst_5d = float(row.get("inst_net_5d", 0) or 0)
+    foreign_5d = float(row.get("foreign_net_5d", 0) or 0)
+    inst_streak = int(row.get("inst_consecutive_buy", 0) or 0)
+    foreign_streak = int(row.get("foreign_consecutive_buy", 0) or 0)
+
+    score = 0
+    reasons = []
+
+    # 쌍끌이 (기관+외인 5일 양수) → 강한 매집
+    if inst_5d > 0 and foreign_5d > 0:
+        score += 2
+        reasons.append("쌍끌이매집")
+    # 한쪽만 매수
+    elif inst_5d > 0 or foreign_5d > 0:
+        score += 1
+        buyer = "기관" if inst_5d > 0 else "외인"
+        reasons.append(f"{buyer}매수")
+    # 쌍매도
+    elif inst_5d < 0 and foreign_5d < 0:
+        score -= 2
+        reasons.append("쌍매도")
+    # 한쪽만 매도
+    elif inst_5d < 0 or foreign_5d < 0:
+        score -= 1
+        seller = "기관" if inst_5d < 0 else "외인"
+        reasons.append(f"{seller}매도")
+
+    # 연속 매수 3일+ → 추가 부스트
+    if inst_streak >= 3 or foreign_streak >= 3:
+        score = min(score + 1, 2)
+        who = []
+        if inst_streak >= 3:
+            who.append(f"기관{inst_streak}연속")
+        if foreign_streak >= 3:
+            who.append(f"외인{foreign_streak}연속")
+        reasons.append("+".join(who))
+
+    # 보정값 계산
+    # score +2: 손절 2%p 완화, 보유일 +2
+    # score +1: 손절 1%p 완화, 보유일 +1
+    # score -1: 손절 1%p 강화, 보유일 -1
+    # score -2: 손절 2%p 강화, 보유일 -2
+    stop_adj = score * 0.01   # ±1~2%p
+    hold_adj = score           # ±1~2일
+
+    detail = " / ".join(reasons) if reasons else "중립"
+    return {"score": score, "detail": detail, "stop_adj": stop_adj, "hold_adj": hold_adj}
+
+
+# ═══════════════════════════════════════════════
 # 매도 체크
 # ═══════════════════════════════════════════════
 
 def check_exits(pf: dict, today_str: str) -> list[dict]:
-    """보유 종목 매도 조건 체크. 매도된 포지션 리스트 반환."""
+    """보유 종목 매도 조건 체크. 수급 시그널로 손절/보유일 동적 조정."""
     exits = []
     codes_to_remove = []
 
@@ -332,11 +411,22 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         except Exception:
             days_held = 0
 
+        # 수급 시그널 → 손절선/보유일 동적 조정
+        sd = get_supply_demand_signal(ticker)
+        adj_stop = STOP_LOSS_PCT + sd["stop_adj"]       # 예: -7% + 2% = -5% (완화)
+        adj_trailing = TRAILING_STOP_PCT + sd["stop_adj"]  # 트레일링도 같이 조정
+        adj_max_hold = MAX_HOLDING_DAYS + sd["hold_adj"]   # 예: 5 + 2 = 7일
+
+        if sd["score"] != 0:
+            logger.info("[수급] %s %s → 손절%.1f%% 보유%d일",
+                        pos["name"], sd["detail"],
+                        adj_stop * 100, adj_max_hold)
+
         exit_reason = None
         exit_qty = pos["qty"]  # 기본: 전량 매도
 
-        # 1. 손절
-        if pnl_pct <= STOP_LOSS_PCT:
+        # 1. 손절 (수급 보정 적용)
+        if pnl_pct <= adj_stop:
             exit_reason = "STOP_LOSS"
 
         # 2. 2차 익절 (+20%)
@@ -360,24 +450,29 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "pnl_pct": round(pnl_pct * 100, 2),
                 "qty": exit_qty,
                 "partial": True,
+                "supply_demand": sd["detail"],
             })
             # 트레일링 활성화
             pos["trailing_active"] = True
             continue
 
-        # 4. 트레일링 스탑
+        # 4. 트레일링 스탑 (수급 보정 적용)
         elif pos.get("trailing_active"):
             drop_from_peak = price / peak_price - 1
-            if drop_from_peak <= TRAILING_STOP_PCT:
+            if drop_from_peak <= adj_trailing:
                 exit_reason = "TRAILING_STOP"
 
         # 5. 트레일링 활성화 (고점 갱신 중)
         elif pnl_pct >= TRAILING_ACTIVATE_PCT:
             pos["trailing_active"] = True
 
-        # 6. 최대 보유일 초과
-        elif days_held >= MAX_HOLDING_DAYS:
+        # 6. 최대 보유일 초과 (수급 보정 적용)
+        elif days_held >= adj_max_hold:
             exit_reason = "MAX_HOLD"
+
+        # 7. 수급 이탈 경고: 수익 중인데 쌍매도 → 조기 매도
+        elif sd["score"] <= -2 and pnl_pct > 0 and days_held >= 2:
+            exit_reason = "SUPPLY_EXIT"
 
         # 전량 매도 처리
         if exit_reason:
@@ -400,6 +495,7 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "pnl_pct": round(final_pnl * 100, 2),
                 "exit_reason": exit_reason,
                 "days_held": days_held,
+                "supply_demand": sd["detail"],
             })
 
             pf["stats"]["total_trades"] += 1
@@ -416,6 +512,7 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "pnl_pct": round(final_pnl * 100, 2),
                 "qty": exit_qty,
                 "partial": False,
+                "supply_demand": sd["detail"],
             })
             codes_to_remove.append(ticker)
 

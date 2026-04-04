@@ -369,6 +369,27 @@ def _calc_claude_score(action: str) -> int:
     return {"HOLD": 1, "WATCH": 0, "PARTIAL_SELL": -1, "SELL_NOW": -2}.get(action, 0)
 
 
+def _calc_supply_score(pos: dict) -> tuple[int, str]:
+    """당일 수급 → 점수 (-2 ~ +2) + 사유.
+
+    외인+기관 쌍끌이 +2, 한쪽만 +1, 쌍매도 -2, 한쪽만매도 -1
+    """
+    f_net = pos.get("foreign_net", 0)
+    i_net = pos.get("inst_net", 0)
+    if f_net == 0 and i_net == 0:
+        return 0, ""
+
+    if f_net > 0 and i_net > 0:
+        return 2, "쌍끌이매수"
+    if f_net < 0 and i_net < 0:
+        return -2, "쌍매도"
+    if f_net > 0 or i_net > 0:
+        who = "외인" if f_net > 0 else "기관"
+        return 1, f"{who}매수"
+    who = "외인" if f_net < 0 else "기관"
+    return -1, f"{who}매도"
+
+
 def apply_consensus(
     claude_result: dict,
     gpt_result: dict,
@@ -432,11 +453,14 @@ def apply_consensus(
         # ── 점수 계산 ──
         gpt_score = _calc_gpt_score(catalyst_status, catalyst_strength, tomorrow_dir)
         claude_score = _calc_claude_score(claude_action)
-        combined_score = gpt_score + claude_score  # -4 ~ +3
+        supply_score, supply_detail = _calc_supply_score(pos)
+        combined_score = gpt_score + claude_score + supply_score  # -6 ~ +5
 
         score_info = {
             "gpt_score": gpt_score,
             "claude_score": claude_score,
+            "supply_score": supply_score,
+            "supply_detail": supply_detail,
             "combined_score": combined_score,
         }
 
@@ -494,6 +518,17 @@ def apply_consensus(
                 reduce_upgrades += 1
 
         # CATALYST_NEW는 Claude 판단 그대로 (새 촉매 방향에 따라 다름)
+
+        # ── 수급 보정 ──
+        # 쌍끌이(+2)인데 매도 → HOLD로 보호
+        if supply_score >= 2 and final_action in ("SELL_NOW", "PARTIAL_SELL"):
+            final_action = "HOLD"
+            override_reason = f"수급 쌍끌이 → 매도 보류 ({override_reason})" if override_reason else "수급 쌍끌이 → 매도 보류"
+        # 쌍매도(-2)인데 HOLD → PARTIAL_SELL 강화
+        elif supply_score <= -2 and final_action == "HOLD":
+            final_action = "PARTIAL_SELL"
+            override_reason = "수급 쌍매도 → REDUCE 원칙"
+            reduce_upgrades += 1
 
         final_decisions.append({
             "ticker": ticker,
@@ -604,7 +639,16 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
                     "tomorrow_direction": "",
                     "gpt_score": 0,
                     "claude_score": _calc_claude_score(p.get("action", "HOLD")),
-                    "combined_score": _calc_claude_score(p.get("action", "HOLD")),
+                    "supply_score": _calc_supply_score(
+                        next((pos for pos in positions if pos.get("ticker") == p.get("ticker")), {})
+                    )[0],
+                    "supply_detail": _calc_supply_score(
+                        next((pos for pos in positions if pos.get("ticker") == p.get("ticker")), {})
+                    )[1],
+                    "combined_score": _calc_claude_score(p.get("action", "HOLD"))
+                        + _calc_supply_score(
+                            next((pos for pos in positions if pos.get("ticker") == p.get("ticker")), {})
+                        )[0],
                 }
                 for p in claude_result.get("positions", [])
             ],
@@ -698,6 +742,8 @@ async def run_check(positions: list[dict], broker, check_type: str, dry_run: boo
                 "result": sell_result,
                 "gpt_score": decision.get("gpt_score", 0),
                 "claude_score": decision.get("claude_score", 0),
+                "supply_score": decision.get("supply_score", 0),
+                "supply_detail": decision.get("supply_detail", ""),
                 "combined_score": decision.get("combined_score", 0),
             })
 
@@ -741,9 +787,11 @@ def _send_dual_telegram(
             # 점수 브레이크다운
             gs = s.get("gpt_score", "")
             cs = s.get("claude_score", "")
+            ss = s.get("supply_score", 0)
             comb = s.get("combined_score", "")
             if gs != "" and cs != "":
-                lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {comb:+d}")
+                sd_part = f" + 수급{ss:+d}" if ss else ""
+                lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d}{sd_part} = {comb:+d}")
 
     # 촉매 오버라이드 (매도 보류) + REDUCE 승격
     overrides = [
@@ -763,7 +811,9 @@ def _send_dual_telegram(
                 lines.append(f"    내일: {o['tomorrow_direction']}")
             gs = o.get("gpt_score", 0)
             cs = o.get("claude_score", 0)
-            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {gs+cs:+d}")
+            ss = o.get("supply_score", 0)
+            sd_part = f" + 수급{ss:+d}" if ss else ""
+            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d}{sd_part} = {gs+cs+ss:+d}")
 
     if reduce_overrides:
         lines.append("")
@@ -773,7 +823,9 @@ def _send_dual_telegram(
             lines.append(f"    사유: {o['override_reason'][:50]}")
             gs = o.get("gpt_score", 0)
             cs = o.get("claude_score", 0)
-            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d} = {gs+cs:+d}")
+            ss = o.get("supply_score", 0)
+            sd_part = f" + 수급{ss:+d}" if ss else ""
+            lines.append(f"    점수: GPT{gs:+d} + Claude{cs:+d}{sd_part} = {gs+cs+ss:+d}")
 
     # 수동매수 보호
     if manual_alerts:
