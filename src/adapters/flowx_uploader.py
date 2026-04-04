@@ -700,6 +700,23 @@ def _get_vix_grade(vix: float) -> str:
     return "PANIC"
 
 
+def _fix_pick_names(picks: list[dict]) -> None:
+    """name이 숫자(코드)인 pick을 pykrx로 종목명 보정."""
+    bad = [p for p in picks if p.get("name", "").replace(".", "").isdigit()]
+    if not bad:
+        return
+    try:
+        from pykrx import stock as krx
+        for p in bad:
+            ticker = p.get("ticker", p.get("code", ""))
+            if ticker:
+                nm = krx.get_market_ticker_name(ticker)
+                if nm:
+                    p["name"] = nm
+    except Exception:
+        pass
+
+
 def _get_danger_mode(regime: str, vix: float, shield_status: str) -> str:
     """레짐 + VIX + SHIELD 종합 → 위험 모드 결정.
 
@@ -1012,6 +1029,9 @@ def build_jarvis_payload() -> dict:
         # 점수순 재정렬
         top_picks.sort(key=lambda x: -x.get("total_score", 0))
         top_picks = top_picks[:25]  # 병합 후 최대 25개
+
+    # ── name 보정: name이 숫자(코드)인 경우 종목명으로 치환 ──
+    _fix_pick_names(top_picks)
 
     # why-now-engine: AI 판단을 pick에 병합
     ai_judgments = _load("ai_brain_judgment.json")
@@ -1788,6 +1808,9 @@ def build_sniper_rows(date_str: str = "") -> list[dict]:
             "signal_type": signal_type,
             "score": int(c.get("score", 0)),
         })
+
+    # name이 코드인 행 보정
+    _fix_pick_names(rows)
 
     rows.sort(key=lambda x: -x["score"])
     return rows[:100]

@@ -200,11 +200,34 @@ def load_json(rel_path: str) -> dict | list:
 
 
 def build_name_map() -> dict[str, str]:
+    """종목코드 → 종목명 매핑 (CSV 우선, 없으면 pykrx 폴백)."""
     name_map = {}
     for csv in CSV_DIR.glob("*.csv"):
         parts = csv.stem.rsplit("_", 1)
         if len(parts) == 2:
             name_map[parts[1]] = parts[0]
+    if name_map:
+        return name_map
+    # VPS에 CSV 없을 경우 pykrx 폴백
+    try:
+        from pykrx import stock as krx
+        from datetime import timedelta
+        dt = datetime.now()
+        for _ in range(7):
+            ds = dt.strftime("%Y%m%d")
+            try:
+                for mkt in ("KOSPI", "KOSDAQ"):
+                    for t in krx.get_market_ticker_list(ds, market=mkt):
+                        if t not in name_map:
+                            name_map[t] = krx.get_market_ticker_name(t)
+                if name_map:
+                    logger.info("[picks] pykrx 종목명 %d건 로드", len(name_map))
+                    return name_map
+            except Exception:
+                pass
+            dt -= timedelta(days=1)
+    except ImportError:
+        pass
     return name_map
 
 
