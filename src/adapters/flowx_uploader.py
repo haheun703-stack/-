@@ -354,27 +354,15 @@ class FlowxUploader:
             return self._upsert_date_data("quant_sector_momentum", json.load(f), date_str, "업종모멘텀")
 
     def upload_sector_rotation(self, date_str: str) -> bool:
-        """etf_trading_signal.json → sector_rotation (다중행)."""
-        p = DATA_DIR / "sector_rotation" / "etf_trading_signal.json"
-        if not self.is_active or not p.exists():
+        """sector_composite + sector_momentum → sector_rotation (다중행).
+
+        지시서 D-5 스키마: date, sector, rank, score, ret_5d, ret_20d, momentum, flow, breadth
+        PK: (date, sector)
+        """
+        rows = build_sector_rotation_rows(date_str)
+        if not self.is_active or not rows:
             return False
         try:
-            with open(p, encoding="utf-8") as f:
-                raw = json.load(f)
-            signals = raw.get("smart_money_etf", [])
-            if not signals:
-                return False
-            rows = []
-            for i, s in enumerate(signals):
-                rows.append({
-                    "date": date_str,
-                    "rank": i + 1,
-                    "sector": s.get("sector", s.get("etf_sector", "")),
-                    "etf_code": s.get("etf_code", ""),
-                    "signal": s.get("signal", ""),
-                    "data": s,
-                })
-            # 기존 날짜 데이터 삭제 후 삽입
             self.client.table("sector_rotation").delete().eq("date", date_str).execute()
             result = self.client.table("sector_rotation").insert(rows).execute()
             if not result.data:
@@ -403,7 +391,7 @@ class FlowxUploader:
             return self._upsert_date_data("quant_etf_recommendation", json.load(f), date_str, "ETF추천")
 
     def upload_all_quant_tables(self, date_str: str) -> dict[str, bool]:
-        """6개 퀀트 테이블 일괄 업로드."""
+        """6개 퀀트 JSONB + 4개 Row 테이블 일괄 업로드."""
         results = {
             "market_brain": self.upload_market_brain(date_str),
             "sector_flow": self.upload_sector_flow(date_str),
@@ -411,10 +399,60 @@ class FlowxUploader:
             "sector_rotation": self.upload_sector_rotation(date_str),
             "etf_fund_flow": self.upload_etf_fund_flow(date_str),
             "etf_recommendation": self.upload_etf_recommendation(date_str),
+            "smart_money": self.upload_smart_money(date_str),
+            "etf_signals": self.upload_etf_signals_dashboard(date_str),
+            "relay": self.upload_relay(date_str),
+            "sniper": self.upload_sniper(date_str),
         }
         ok = sum(v for v in results.values())
-        logger.info("[FLOWX] 퀀트 6테이블 업로드: %d/6 성공 %s", ok, results)
+        logger.info("[FLOWX] 퀀트 10테이블 업로드: %d/10 성공 %s", ok, results)
         return results
+
+    # ── Row 테이블 4개 (대시보드 시그널) ──────────────
+
+    def _upload_rows(self, table: str, date_str: str, rows: list[dict],
+                     conflict_cols: str, label: str) -> bool:
+        """Row 테이블 공통 UPSERT 패턴."""
+        if not self.is_active or not rows:
+            return False
+        try:
+            for row in rows:
+                row["date"] = date_str
+            result = self.client.table(table).upsert(
+                rows, on_conflict=conflict_cols
+            ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] %s 업로드 응답 비어있음: %s", label, date_str)
+                return False
+            logger.info("[FLOWX] %s 업로드: %s (%d행)", label, date_str, len(rows))
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] %s 업로드 실패: %s", label, e)
+            return False
+
+    def upload_smart_money(self, date_str: str) -> bool:
+        """accumulation_alert.json → dashboard_smart_money (D-1)."""
+        rows = build_smart_money_rows(date_str)
+        return self._upload_rows("dashboard_smart_money", date_str, rows,
+                                 "date,ticker", "스마트머니")
+
+    def upload_etf_signals_dashboard(self, date_str: str) -> bool:
+        """sector_momentum + etf_volume_monitor → dashboard_etf_signals (D-2)."""
+        rows = build_etf_signals_rows(date_str)
+        return self._upload_rows("dashboard_etf_signals", date_str, rows,
+                                 "date,ticker", "ETF시그널대시보드")
+
+    def upload_relay(self, date_str: str) -> bool:
+        """group_relay_today + relay_trading_signal → dashboard_relay (D-3)."""
+        rows = build_relay_rows(date_str)
+        return self._upload_rows("dashboard_relay", date_str, rows,
+                                 "date,lead_sector,lag_sector", "릴레이")
+
+    def upload_sniper(self, date_str: str) -> bool:
+        """pullback_scan.json → dashboard_sniper (D-4)."""
+        rows = build_sniper_rows(date_str)
+        return self._upload_rows("dashboard_sniper", date_str, rows,
+                                 "date,ticker", "스나이퍼")
 
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
@@ -998,11 +1036,13 @@ def build_jarvis_payload() -> dict:
         "accuracy": acc_raw,
         "brain": {
             "regime": regime,
+            "direction": brain.get("direction", ""),
             "vix": vix,
             "vix_grade": _get_vix_grade(vix),
             "cash_ratio": brain.get("cash_ratio") or brain.get("cash_pct") or 0,
             "recommendation": brain.get("recommendation", ""),
             "danger_mode": danger_mode,
+            "score": brain.get("brain_score") or brain.get("score") or 0,
         },
         "shield": {
             "status": shield_status,
@@ -1436,3 +1476,318 @@ def build_paper_trade(
         "win_rate": round(wins / total * 100, 1) if total > 0 else None,
         "memo": memo,
     }
+
+
+# ── Row 테이블 빌더 함수 ─────────────────────────
+
+
+def build_sector_rotation_rows(date_str: str = "") -> list[dict]:
+    """sector_composite + sector_momentum → sector_rotation Row 테이블.
+
+    지시서 D-5: date, sector, rank, score, ret_5d, ret_20d, momentum, flow, breadth
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    # sector_composite: composite_score, institutional_score, ret_5, ret_20, inst/foreign 수급
+    comp_path = DATA_DIR / "sector_rotation" / "sector_composite.json"
+    # sector_momentum: momentum_score, rank, rsi, acceleration
+    mom_path = DATA_DIR / "sector_rotation" / "sector_momentum.json"
+
+    comp_data: dict = {}
+    if comp_path.exists():
+        with open(comp_path, encoding="utf-8") as f:
+            raw = json.load(f)
+        for s in raw.get("sectors", []):
+            comp_data[s.get("sector", "")] = s
+
+    mom_sectors: list = []
+    if mom_path.exists():
+        with open(mom_path, encoding="utf-8") as f:
+            mom_sectors = json.load(f).get("sectors", [])
+
+    rows = []
+    for s in mom_sectors:
+        sector = s.get("sector", "")
+        comp = comp_data.get(sector, {})
+        # flow = 외인+기관 5일 순매수 합산 (억원)
+        flow = round(comp.get("inst_5d_억", 0) + comp.get("foreign_5d_억", 0), 1)
+        rows.append({
+            "date": date_str,
+            "sector": sector,
+            "rank": s.get("rank", 0),
+            "score": round(comp.get("composite_score", s.get("momentum_score", 0)), 1),
+            "ret_5d": round(s.get("ret_5", 0), 2),
+            "ret_20d": round(s.get("ret_20", 0), 2),
+            "momentum": round(s.get("momentum_score", 0), 1),
+            "flow": flow,
+            "breadth": round(s.get("rel_strength", 0) / 100, 2) if s.get("rel_strength") else 0,
+        })
+    return rows
+
+
+def build_smart_money_rows(date_str: str = "") -> list[dict]:
+    """accumulation_alert.json → dashboard_smart_money Row 테이블.
+
+    지시서 D-1: date, ticker, name, sector, foreign_consec_days, inst_consec_days,
+    foreign_net_5d, inst_net_5d, signal_type, price, change_pct, score
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    p = DATA_DIR / "institutional_flow" / "accumulation_alert.json"
+    if not p.exists():
+        return []
+    with open(p, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for alert in data.get("stock_alerts", []):
+        f_consec = alert.get("foreign_consecutive", 0)
+        i_consec = alert.get("inst_consecutive", 0)
+        f_net = alert.get("foreign_5d_억", 0)
+        i_net = alert.get("inst_5d_억", 0)
+
+        # signal_type 결정
+        if alert.get("dual_buying"):
+            signal_type = "DUAL_BUY"
+        elif f_consec >= 3 or f_net > 0:
+            signal_type = "FOREIGN_BUY"
+        elif i_consec >= 3 or i_net > 0:
+            signal_type = "INST_BUY"
+        else:
+            signal_type = "FOREIGN_BUY"
+
+        # score: grade 기반
+        grade = alert.get("grade", "WATCH")
+        score_map = {"STRONG": 90, "MODERATE": 70, "NOTABLE": 50, "WATCH": 30}
+        base_score = score_map.get(grade, 30)
+        # 쌍끌이 보너스 + 연속일수 보너스
+        score = base_score + (10 if alert.get("dual_buying") else 0) + min(f_consec + i_consec, 10)
+
+        rows.append({
+            "date": date_str,
+            "ticker": alert.get("ticker", ""),
+            "name": alert.get("name", ""),
+            "sector": alert.get("sector", ""),
+            "foreign_consec_days": f_consec,
+            "inst_consec_days": i_consec,
+            "foreign_net_5d": round(f_net, 1),
+            "inst_net_5d": round(i_net, 1),
+            "signal_type": signal_type,
+            "price": 0,  # accumulation_alert에 가격 없음
+            "change_pct": 0,
+            "score": round(score, 1),
+        })
+
+    # score 기준 내림차순 정렬, 상위 50개
+    rows.sort(key=lambda x: -x["score"])
+    return rows[:50]
+
+
+def build_etf_signals_rows(date_str: str = "") -> list[dict]:
+    """sector_momentum + etf_volume_monitor → dashboard_etf_signals Row 테이블.
+
+    지시서 D-2: date, ticker, name, sector, close, change_pct, aum, aum_change,
+    aum_change_pct, volume, value, signal_type, score
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    # 섹터 모멘텀 데이터 (ETF 기본정보)
+    mom_path = DATA_DIR / "sector_rotation" / "sector_momentum.json"
+    # 거래량 모니터
+    vol_path = DATA_DIR / "etf_volume_monitor.json"
+
+    mom_map: dict = {}
+    if mom_path.exists():
+        with open(mom_path, encoding="utf-8") as f:
+            for s in json.load(f).get("sectors", []):
+                mom_map[s.get("etf_code", "")] = s
+
+    vol_map: dict = {}
+    if vol_path.exists():
+        with open(vol_path, encoding="utf-8") as f:
+            for e in json.load(f).get("etfs", []):
+                vol_map[e.get("ticker", "")] = e
+
+    rows = []
+    for code, s in mom_map.items():
+        vol_info = vol_map.get(code, {})
+        ret_5 = s.get("ret_5", 0)
+        vol_ratio = vol_info.get("volume_ratio", 0)
+        score = round(s.get("momentum_score", 0), 1)
+
+        # signal_type 결정: 거래량 + 수익률 조합
+        if vol_ratio >= 2.0 and ret_5 > 0:
+            signal_type = "대량 자금유입"
+        elif vol_ratio >= 2.0 and ret_5 < 0:
+            signal_type = "대량 자금유출"
+        elif vol_ratio >= 1.3 and ret_5 > 0:
+            signal_type = "자금유입"
+        elif vol_ratio >= 1.3 and ret_5 < 0:
+            signal_type = "자금유출"
+        elif ret_5 > 3:
+            signal_type = "강세 급등"
+        elif ret_5 > 1:
+            signal_type = "강세"
+        elif ret_5 < -3:
+            signal_type = "약세 급락"
+        elif ret_5 < -1:
+            signal_type = "약세"
+        else:
+            signal_type = "보합"
+
+        rows.append({
+            "date": date_str,
+            "ticker": code,
+            "name": s.get("sector", ""),
+            "sector": s.get("category", ""),
+            "close": 0,  # 섹터 ETF 종가 데이터 미보유
+            "change_pct": round(s.get("ret_5", 0) / 5, 2) if s.get("ret_5") else 0,
+            "aum": 0,
+            "aum_change": 0,
+            "aum_change_pct": 0,
+            "volume": vol_info.get("volume_today", 0),
+            "value": 0,
+            "signal_type": signal_type,
+            "score": score,
+        })
+
+    rows.sort(key=lambda x: -x["score"])
+    return rows[:100]
+
+
+def build_relay_rows(date_str: str = "") -> list[dict]:
+    """group_relay_today + relay_trading_signal → dashboard_relay Row 테이블.
+
+    지시서 D-3: date, lead_sector, lag_sector, lead_return_1d, lead_return_5d,
+    lead_breadth, lag_return_1d, lag_return_5d, gap, signal_type, score
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    relay_path = DATA_DIR / "group_relay" / "group_relay_today.json"
+    signal_path = DATA_DIR / "sector_rotation" / "relay_trading_signal.json"
+
+    rows = []
+
+    # 1) group_relay_today.json → fired_groups
+    if relay_path.exists():
+        with open(relay_path, encoding="utf-8") as f:
+            relay = json.load(f)
+        for group in relay.get("fired_groups", []):
+            leader = group.get("leader", {})
+            follower = group.get("follower", {})
+            gap = round(leader.get("ret_1d", 0) - follower.get("ret_1d", 0), 2)
+
+            # signal_type
+            fire_score = group.get("fire_score", 0)
+            if fire_score >= 5:
+                signal_type = "강한 매수 기회"
+            elif fire_score >= 3:
+                signal_type = "매수 기회"
+            else:
+                signal_type = "관심 구간"
+
+            rows.append({
+                "date": date_str,
+                "lead_sector": leader.get("sector", ""),
+                "lag_sector": follower.get("sector", ""),
+                "lead_return_1d": round(leader.get("ret_1d", 0), 2),
+                "lead_return_5d": round(leader.get("ret_5d", 0), 2),
+                "lead_breadth": round(leader.get("breadth", 0), 2),
+                "lag_return_1d": round(follower.get("ret_1d", 0), 2),
+                "lag_return_5d": round(follower.get("ret_5d", 0), 2),
+                "gap": gap,
+                "signal_type": signal_type,
+                "score": round(fire_score, 1),
+            })
+
+    # 2) relay_trading_signal.json → signals (보충)
+    if signal_path.exists():
+        with open(signal_path, encoding="utf-8") as f:
+            sig_data = json.load(f)
+        existing = {(r["lead_sector"], r["lag_sector"]) for r in rows}
+        for sig in sig_data.get("signals", []):
+            lead = sig.get("lead_sector", "")
+            lag = sig.get("lag_sector", "")
+            if (lead, lag) in existing:
+                continue
+            rows.append({
+                "date": date_str,
+                "lead_sector": lead,
+                "lag_sector": lag,
+                "lead_return_1d": round(sig.get("lead_ret_1d", 0), 2),
+                "lead_return_5d": round(sig.get("lead_ret_5d", 0), 2),
+                "lead_breadth": 0,
+                "lag_return_1d": round(sig.get("lag_ret_1d", 0), 2),
+                "lag_return_5d": round(sig.get("lag_ret_5d", 0), 2),
+                "gap": round(sig.get("gap", 0), 2),
+                "signal_type": sig.get("signal", "대기"),
+                "score": round(sig.get("score", 0), 1),
+            })
+
+    rows.sort(key=lambda x: -x["score"])
+    return rows[:100]
+
+
+def build_sniper_rows(date_str: str = "") -> list[dict]:
+    """pullback_scan.json → dashboard_sniper Row 테이블.
+
+    지시서 D-4: date, ticker, name, sector, close, change_pct, rsi, ma20_gap,
+    bb_position, adx, foreign_days, inst_days, exec_strength, vol_ratio, signal_type, score
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    p = DATA_DIR / "pullback_scan.json"
+    if not p.exists():
+        return []
+    with open(p, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for c in data.get("candidates", []):
+        grade = c.get("grade", "")
+
+        # signal_type: 기술지표 기반 분류
+        signals = c.get("signals", [])
+        rsi = c.get("rsi", 50)
+        bb_pct = c.get("bb_pct", 50)
+        stoch_gx = c.get("stoch_gx", False)
+
+        if stoch_gx and rsi < 30:
+            signal_type = "과매도 반등"
+        elif bb_pct < 15:
+            signal_type = "볼밴 하단"
+        elif c.get("f_streak", 0) >= 3 or c.get("i_streak", 0) >= 3:
+            signal_type = "수급 반전"
+        elif any("골든" in s or "GX" in s.upper() for s in signals):
+            signal_type = "골든크로스"
+        elif c.get("adx", 0) > 25 and c.get("macd_improving", False):
+            signal_type = "추세 시작"
+        else:
+            signal_type = grade  # 매수대기 / 조정진행
+
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "sector": "",  # pullback_scan에 섹터 없음
+            "close": c.get("close", 0),
+            "change_pct": round(c.get("ret_1", 0), 2),
+            "rsi": round(rsi, 1),
+            "ma20_gap": round(c.get("ma20_gap", 0), 1),
+            "bb_position": round(bb_pct / 100, 2),  # 0~100 → 0~1 변환
+            "adx": round(c.get("adx", 0), 1),
+            "foreign_days": c.get("f_streak", 0),
+            "inst_days": c.get("i_streak", 0),
+            "exec_strength": round(c.get("stoch_k", 0), 1),  # 체결강도 대용
+            "vol_ratio": round(c.get("detail", {}).get("flow", 0) / 10, 1) if c.get("detail", {}).get("flow") else 0,
+            "signal_type": signal_type,
+            "score": round(c.get("score", 0), 1),
+        })
+
+    rows.sort(key=lambda x: -x["score"])
+    return rows[:100]

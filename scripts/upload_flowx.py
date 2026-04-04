@@ -26,6 +26,11 @@ from src.adapters.flowx_uploader import (
     build_foreign_flow_rows,
     build_ai_pick_rows,
     build_jarvis_payload,
+    build_smart_money_rows,
+    build_etf_signals_rows,
+    build_relay_rows,
+    build_sniper_rows,
+    build_sector_rotation_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -91,6 +96,34 @@ def main():
     for sc in scenario_data.get("active_scenarios", []):
         print(f"  {sc['name']} (P{sc['current_phase']}/{sc['total_phases']}) 점수={sc['score']} D+{sc['days_active']}")
 
+    # ── Row 테이블 미리보기 ──
+    date_str_preview = datetime.now().strftime("%Y-%m-%d")
+    sm_rows = build_smart_money_rows(date_str_preview)
+    etf_sig_rows = build_etf_signals_rows(date_str_preview)
+    relay_rows = build_relay_rows(date_str_preview)
+    sniper_rows = build_sniper_rows(date_str_preview)
+    sr_rows = build_sector_rotation_rows(date_str_preview)
+
+    print(f"\n[FLOWX] 스마트머니: {len(sm_rows)}건")
+    for r in sm_rows[:5]:
+        print(f"  {r['signal_type']:12s} {r['name']:14s} 외인{r['foreign_consec_days']}일 기관{r['inst_consec_days']}일 점수={r['score']}")
+
+    print(f"\n[FLOWX] ETF 시그널 대시보드: {len(etf_sig_rows)}건")
+    for r in etf_sig_rows[:5]:
+        print(f"  {r['signal_type']:10s} {r['name']:12s} score={r['score']} vol={r['volume']:,}")
+
+    print(f"\n[FLOWX] 릴레이: {len(relay_rows)}건")
+    for r in relay_rows[:5]:
+        print(f"  {r['lead_sector']:8s}→{r['lag_sector']:8s} gap={r['gap']:+.1f}% {r['signal_type']} score={r['score']}")
+
+    print(f"\n[FLOWX] 스나이퍼: {len(sniper_rows)}건")
+    for r in sniper_rows[:5]:
+        print(f"  {r['name']:14s} RSI={r['rsi']} BB={r['bb_position']:.2f} ADX={r['adx']} {r['signal_type']} score={r['score']}")
+
+    print(f"\n[FLOWX] 섹터로테이션: {len(sr_rows)}건")
+    for r in sr_rows[:5]:
+        print(f"  #{r['rank']:2d} {r['sector']:8s} score={r['score']} 5d={r['ret_5d']:+.1f}% flow={r['flow']:+.0f}억")
+
     if args.dry_run:
         print("\n[DRY-RUN] 업로드 스킵")
         return
@@ -108,10 +141,10 @@ def main():
     ok3 = uploader.upload_ai_picks(ai_rows)              # AI 추천 (short_signals)
     ok4 = uploader.upload_quant_scenarios(scenario_data, date_str)  # 시나리오 대시보드
 
-    # ── 퀀트 6개 독립 테이블 ──
-    print("\n[FLOWX] 퀀트 6테이블 업로드...")
-    q6 = uploader.upload_all_quant_tables(date_str)
-    q6_ok = sum(v for v in q6.values())
+    # ── 퀀트 10개 독립 테이블 (JSONB 6 + Row 4) ──
+    print("\n[FLOWX] 퀀트 10테이블 업로드...")
+    q_all = uploader.upload_all_quant_tables(date_str)
+    q_ok = sum(v for v in q_all.values())
 
     # ── 자비스 컨트롤타워 (quant_jarvis) ──
     print("\n[FLOWX] 자비스 컨트롤타워 빌드...")
@@ -127,8 +160,8 @@ def main():
     print(f"  AI추천={'OK' if ok3 else 'FAIL'} ({len(ai_rows)}건)")
     print(f"  시나리오={'OK' if ok4 else 'FAIL'} ({sc_count}개 시나리오)")
     print(f"  자비스={'OK' if ok5 else 'FAIL'} ({n_picks}종목)")
-    print(f"  퀀트6테이블={q6_ok}/6 성공")
-    for k, v in q6.items():
+    print(f"  퀀트테이블={q_ok}/{len(q_all)} 성공")
+    for k, v in q_all.items():
         print(f"    {k}={'OK' if v else 'FAIL'}")
 
 
