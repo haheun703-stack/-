@@ -128,7 +128,7 @@ case "$BAT" in
     run_py scripts/collect_investor_flow.py
     run_py scripts/fetch_ecos_macro.py
     # --- G2: 지표 + 릴레이 ---
-    run_py scripts/rebuild_indicators.py
+    run_py_long scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/relay_report.py
