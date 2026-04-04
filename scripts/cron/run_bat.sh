@@ -141,6 +141,7 @@ case "$BAT" in
     run_py scripts/run_lens.py
     # --- G3.5: ETF 방향 트레이딩 + 눈치 엔진 ---
     run_py scripts/market_sense_engine.py --send
+    run_py scripts/jarvis_direction_engine.py --send
     run_py scripts/leverage_etf_scanner.py
     run_py scripts/etf_trading_signal.py
     run_py scripts/run_etf_rotation.py
