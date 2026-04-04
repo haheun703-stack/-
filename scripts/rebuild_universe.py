@@ -11,6 +11,7 @@
   python scripts/rebuild_universe.py --min-cap 0.3 --include-preferred --min-trading-value 20  # 거래대금 20억+
   python scripts/rebuild_universe.py --download-only     # 다운로드만
   python scripts/rebuild_universe.py --process-only      # 지표 계산만
+  python scripts/rebuild_universe.py --incremental       # BAT-D용: 누락분만 동기화
 """
 
 from __future__ import annotations
@@ -299,6 +300,51 @@ def cleanup_dropped(valid_tickers: set[str]) -> int:
 # 메인
 # ─────────────────────────────────────────────
 
+def incremental_sync() -> dict:
+    """BAT-D용 증분 동기화: universe.csv 기준으로 누락된 raw/processed만 보충.
+
+    pykrx 시총 조회를 하지 않으므로 빠르다 (보통 30초 이내).
+    Returns: {"raw_downloaded": N, "processed": N, "total_universe": N}
+    """
+    if not UNIVERSE_PATH.exists():
+        logger.warning("universe.csv 없음 — incremental 불가, 전체 재구성 필요")
+        return {"raw_downloaded": 0, "processed": 0, "total_universe": 0}
+
+    universe = pd.read_csv(UNIVERSE_PATH)
+    tickers = universe["ticker"].astype(str).str.zfill(6).tolist()
+    logger.info("유니버스: %d종목", len(tickers))
+
+    # 1) raw/ 누락분 다운로드
+    existing_raw = set(p.stem for p in RAW_DIR.glob("*.parquet"))
+    missing_raw = [t for t in tickers if t not in existing_raw]
+    raw_stats = {"success": 0, "skip": 0, "fail": 0}
+    if missing_raw:
+        logger.info("raw 누락: %d종목 → 다운로드", len(missing_raw))
+        raw_stats = download_raw(missing_raw)
+    else:
+        logger.info("raw 누락 없음")
+
+    # 2) processed/ 누락분 지표 계산
+    existing_processed = set(p.stem for p in PROCESSED_DIR.glob("*.parquet"))
+    existing_raw_after = set(p.stem for p in RAW_DIR.glob("*.parquet"))
+    missing_processed = [t for t in tickers if t in existing_raw_after and t not in existing_processed]
+    proc_stats = {"success": 0, "skip": 0, "fail": 0}
+    if missing_processed:
+        logger.info("processed 누락: %d종목 → 지표 계산", len(missing_processed))
+        proc_stats = process_all(missing_processed, workers=1)
+    else:
+        logger.info("processed 누락 없음")
+
+    result = {
+        "raw_downloaded": raw_stats["success"],
+        "processed": proc_stats["success"],
+        "total_universe": len(tickers),
+    }
+    logger.info("증분 동기화 완료: raw +%d, processed +%d (유니버스 %d종목)",
+                result["raw_downloaded"], result["processed"], result["total_universe"])
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="유니버스 재구성")
     parser.add_argument("--min-cap", type=float, default=0.2,
@@ -313,7 +359,19 @@ def main():
                         help="지표 계산만 실행")
     parser.add_argument("--no-cleanup", action="store_true",
                         help="탈락 종목 삭제 안 함")
+    parser.add_argument("--incremental", action="store_true",
+                        help="BAT-D용: 기존 universe.csv 기준 누락분만 동기화")
     args = parser.parse_args()
+
+    # --incremental 모드: 빠른 증분 동기화만
+    if args.incremental:
+        print("=" * 50)
+        print("  유니버스 증분 동기화 (BAT-D용)")
+        print("=" * 50)
+        result = incremental_sync()
+        print(f"\n완료: raw +{result['raw_downloaded']} | processed +{result['processed']} | "
+              f"유니버스 {result['total_universe']}종목")
+        return
 
     cap_억 = int(args.min_cap * 10000)
     print("=" * 50)

@@ -72,6 +72,8 @@ _SOURCE_NAME_MAP = {
     "퀀텀": "quantum_signal",
     "이벤트촉매": "dart_event",
     "밸류체인": "value_chain",
+    "기술촉매": "technical_trigger",
+    "이벤트섹터": "event_sector",
 }
 
 
@@ -130,8 +132,8 @@ STRATEGY_GROUPS = {
     "swing": {
         "label": "스윙(3~7일)",
         "slots": 5,
-        "sources": {"릴레이", "그룹순환", "눌림목", "퀀텀", "동반매수", "이벤트촉매", "이벤트", "밸류체인", "국적수급"},
-        "overlap_pairs": [("릴레이", "그룹순환")],
+        "sources": {"릴레이", "그룹순환", "눌림목", "퀀텀", "동반매수", "이벤트촉매", "이벤트", "밸류체인", "국적수급", "기술촉매", "이벤트섹터"},
+        "overlap_pairs": [("릴레이", "그룹순환"), ("기술촉매", "이벤트섹터")],
     },
     "short": {
         "label": "단타(1~3일)",
@@ -491,6 +493,180 @@ def collect_value_chain() -> dict[str, dict]:
                 "name": item.get("name", ""),
                 "detail": f"{sector} 소부장 ({'+'.join(leader_names)}↑)",
             }
+    return result
+
+
+def collect_technical_trigger() -> dict[str, dict]:
+    """소스13: 기술촉매 — processed/*.parquet 전수 스캔으로 급등 전조 패턴 감지.
+
+    3가지 트리거 (백테스트 입증 팩터 기반):
+      T1 PULLBACK_15: 고점 대비 -15%+, RSI<40, 외인 or 기관 매수전환 → 70점
+      T2 VOL_STOCH_REV: vol_z≥2.0, stoch<35 상승전환, close>MA60 → 65점
+      T3 BREAKOUT_60D: 60일 신고가, 외인+기관 동시 순매수 → 60점
+    """
+    result = {}
+    parquet_files = list(PROCESSED_DIR.glob("*.parquet"))
+    if not parquet_files:
+        return result
+
+    trigger_counts = {"T1": 0, "T2": 0, "T3": 0}
+
+    for pf in parquet_files:
+        ticker = pf.stem
+        try:
+            df = pd.read_parquet(pf).tail(25)
+            if len(df) < 10:
+                continue
+            last = df.iloc[-1]
+            close = float(last.get("close", 0))
+            if close <= 0:
+                continue
+
+            # 공통 지표
+            rsi = float(last.get("rsi_14", 50))
+            stoch_k = float(last.get("stoch_slow_k", 50))
+            stoch_d = float(last.get("stoch_slow_d", 50))
+            ma60 = float(last.get("sma_60", 0))
+            vol_z = float(last.get("vol_z", 0) or 0)
+            high_252 = float(last.get("high_252", close))
+            drawdown = ((close / high_252) - 1) * 100 if high_252 > 0 else 0
+
+            # 수급: 외인/기관 5일 합산
+            f5 = float(np.nansum(df.tail(5)["외국인합계"].values)) if "외국인합계" in df.columns else 0
+            i5 = float(np.nansum(df.tail(5)["기관합계"].values)) if "기관합계" in df.columns else 0
+
+            # 60일 최고가 (processed에 high_60이 없으면 직접 계산)
+            if "high" in df.columns and len(df) >= 20:
+                high_60d = float(df.tail(min(len(df), 25))["high"].max())
+            else:
+                high_60d = close
+
+            triggers = []
+
+            # T1: PULLBACK_15 — 고점대비 -15%+, RSI<40, 수급 전환
+            if drawdown <= -15 and rsi < 40 and (f5 > 0 or i5 > 0):
+                triggers.append(("PULLBACK_15", 70, f"낙폭{drawdown:.0f}% RSI{rsi:.0f}"))
+                trigger_counts["T1"] += 1
+
+            # T2: VOL_STOCH_REV — 거래량 폭발 + 스토캐스틱 바닥 반전 + MA60 위
+            if vol_z >= 2.0 and stoch_k < 35 and stoch_k > stoch_d and close > ma60 > 0:
+                triggers.append(("VOL_STOCH_REV", 65, f"vol_z{vol_z:.1f} Stoch{stoch_k:.0f}"))
+                trigger_counts["T2"] += 1
+
+            # T3: BREAKOUT_60D — 60일 신고가 + 외인+기관 동시 순매수
+            if close >= high_60d * 0.99 and f5 > 0 and i5 > 0:
+                triggers.append(("BREAKOUT_60D", 60, f"60일고가 외인+기관"))
+                trigger_counts["T3"] += 1
+
+            if triggers:
+                # 최고 점수 트리거 선택
+                best = max(triggers, key=lambda x: x[1])
+                result[ticker] = {
+                    "source": "기술촉매",
+                    "score": best[1],
+                    "name": "",  # name_map에서 나중에 채워짐
+                    "detail": f"{best[0]}: {best[2]}",
+                    "trigger": best[0],
+                }
+        except Exception:
+            continue
+
+    if result:
+        logger.info("[기술촉매] %d종목 감지 (T1:%d T2:%d T3:%d)",
+                    len(result), trigger_counts["T1"], trigger_counts["T2"], trigger_counts["T3"])
+        if len(result) > 100:
+            logger.warning("[기술촉매] 100종목 초과 (%d) — 트리거 조건 검토 필요", len(result))
+    return result
+
+
+def collect_event_sector_source() -> dict[str, dict]:
+    """소스14: 이벤트섹터 — market_intelligence의 sector_boost + key_events에서
+    relay_sectors 종목을 독립 소스로 추가.
+
+    sector_boost score≥3 이거나, key_events의 abs(kr_impact_score)≥3인 수혜 섹터의
+    relay_sectors 종목들을 후보풀에 진입시킨다.
+    """
+    result = {}
+    intel = load_json("market_intelligence.json")
+    if not intel:
+        return result
+
+    # relay_sectors.yaml 로드
+    relay_path = PROJECT_ROOT / "config" / "relay_sectors.yaml"
+    if not relay_path.exists():
+        return result
+    try:
+        with open(relay_path, encoding="utf-8") as f:
+            relay_cfg = yaml.safe_load(f) or {}
+    except Exception:
+        return result
+
+    sectors_cfg = relay_cfg.get("relay_engine", {}).get("sectors", {})
+
+    # 수혜 섹터 수집: key_events에서 kr_impact_score >= 3 (수혜 방향)인 섹터
+    boosted_sectors = {}  # sector_name → max_score
+    for evt in intel.get("key_events", []):
+        score = evt.get("kr_impact_score", 0)
+        direction = evt.get("kr_impact_direction", "")
+        if score >= 3 and direction == "수혜":
+            for sec in evt.get("kr_sectors_affected", []):
+                if sec not in boosted_sectors or score > boosted_sectors[sec]:
+                    boosted_sectors[sec] = score
+
+    # sector_boost에서도 추가 (양수 3 이상)
+    for sec, sb in intel.get("sector_boost", {}).items():
+        if sb >= 3:
+            if sec not in boosted_sectors or sb > boosted_sectors[sec]:
+                boosted_sectors[sec] = sb
+
+    if not boosted_sectors:
+        return result
+
+    # 섹터명 → relay_sectors 키 브릿지
+    SECTOR_RELAY_BRIDGE = {
+        "반도체": "ai_semiconductor",
+        "AI 반도체": "ai_semiconductor",
+        "IT/소프트웨어": "ai_semiconductor",
+        "방산": "defense",
+        "조선": "shipbuilding",
+        "화학/에너지": "energy",
+        "에너지": "energy",
+        "2차전지": "ev_battery",
+        "자동차": "ev_battery",
+        "바이오": "bio_pharma",
+        "원전": "nuclear",
+        "로봇": "robotics",
+    }
+
+    for sec_name, boost_score in boosted_sectors.items():
+        relay_key = SECTOR_RELAY_BRIDGE.get(sec_name)
+        if not relay_key or relay_key not in sectors_cfg:
+            continue
+
+        sector_data = sectors_cfg[relay_key]
+        # kr_leaders + kr_secondaries 종목 수집
+        all_stocks = []
+        for s in sector_data.get("kr_leaders", []):
+            all_stocks.append(s)
+        for s in sector_data.get("kr_secondaries", []):
+            all_stocks.append(s)
+
+        for s in all_stocks:
+            ticker = s.get("ticker", "")
+            if not ticker or ticker in result:
+                continue
+            # 점수: boost_score × 12 (상한 70)
+            score = min(boost_score * 12, 70)
+            result[ticker] = {
+                "source": "이벤트섹터",
+                "score": score,
+                "name": s.get("name", ""),
+                "detail": f"{sec_name} 수혜 (강도{boost_score})",
+            }
+
+    if result:
+        logger.info("[이벤트섹터] %d종목 | 수혜섹터: %s",
+                    len(result), ", ".join(f"{k}({v})" for k, v in boosted_sectors.items()))
     return result
 
 
@@ -1118,6 +1294,13 @@ def calc_integrated_score(
     elif dual_days >= 3:
         flow_score += 1
 
+    # 수급 반전 보너스 (v11): 10일 매도→2일 매수전환 시 가산
+    if parquet_data:
+        if parquet_data.get("foreign_reversal"):
+            flow_score += 3
+        if parquet_data.get("inst_reversal"):
+            flow_score += 2
+
     flow_score = min(flow_score, 20)
 
     # ── 축5: 안전 (10점, 기존 15→10) ──
@@ -1424,6 +1607,18 @@ def get_parquet_data(ticker: str) -> dict | None:
         f5 = float(np.nansum(df.tail(5)["외국인합계"].values)) if "외국인합계" in df.columns else 0
         i5 = float(np.nansum(df.tail(5)["기관합계"].values)) if "기관합계" in df.columns else 0
 
+        # 수급 반전 감지: 직전 10일 순매도 → 최근 2일 순매수 전환
+        foreign_reversal = False
+        inst_reversal = False
+        if "외국인합계" in df.columns and len(df) >= 12:
+            f_old = float(np.nansum(df.iloc[-12:-2]["외국인합계"].values))
+            f_new = float(np.nansum(df.tail(2)["외국인합계"].values))
+            foreign_reversal = (f_old < 0 and f_new > 0)
+        if "기관합계" in df.columns and len(df) >= 12:
+            i_old = float(np.nansum(df.iloc[-12:-2]["기관합계"].values))
+            i_new = float(np.nansum(df.tail(2)["기관합계"].values))
+            inst_reversal = (i_old < 0 and i_new > 0)
+
         # CSV fallback for foreign/inst
         if f5 == 0 and i5 == 0:
             csvs = list(CSV_DIR.glob(f"*_{ticker}.csv"))
@@ -1497,6 +1692,8 @@ def get_parquet_data(ticker: str) -> dict | None:
             "macd_histogram_prev": macd_hist_prev,
             "sar": float(last.get("sar", 0) or 0),
             "sar_trend": int(last.get("sar_trend", 0) or 0),
+            "foreign_reversal": foreign_reversal,
+            "inst_reversal": inst_reversal,
         }
     except Exception as e:
         logger.warning("parquet 읽기 실패 %s: %s", ticker, e)
@@ -1511,12 +1708,14 @@ def classify_pick(
     total_score: float, n_sources: int, rsi: float,
     has_data: bool = True, stoch_k: float = 50, ret_5d: float = 0,
     foreign_5d: float = 0, inst_5d: float = 0,
+    foreign_reversal: bool = False, inst_reversal: bool = False,
 ) -> str:
-    """등급 분류 — 수급 게이트 + 하드 필터 (v5)
+    """등급 분류 — 수급 게이트 + 하드 필터 (v5.1)
 
     수급 게이트 (v5 신규):
       - 외인+기관 동시 대량매도 → 최대 "보류" (어떤 테마도 수급 역행 불가)
       - 외인+기관 동시 순매도 → 최대 "관찰" (수급 확인 전까지 대기)
+    v5.1: 수급 반전 감지 시 게이트 면제
 
     하드 디스퀄:
       - parquet 데이터 없음 → 데이터부족
@@ -1534,9 +1733,11 @@ def classify_pick(
         return "보류"
 
     # 외인+기관 동시 순매도 → 최대 관찰 (수급 역행)
+    # v5.1: 수급 반전(10일 매도→2일 매수전환) 감지 시 캡 면제
     flow_cap = None
     if foreign_5d < 0 and inst_5d < 0:
-        flow_cap = "관찰"
+        if not (foreign_reversal or inst_reversal):
+            flow_cap = "관찰"
 
     # 하드 디스퀄: 극과열/추격매수는 관찰 이상 불가
     is_disqualified = stoch_k >= 90 or ret_5d >= 15 or rsi >= 78
@@ -1618,11 +1819,14 @@ def main():
     src10 = collect_accumulation_tracker()
     src11 = collect_event_catalyst()
     src12 = collect_value_chain()
+    src13 = collect_technical_trigger()
+    src14 = collect_event_sector_source()
 
     print(f"[소스 수집] 릴레이:{len(src1)} 그룹순환:{len(src2)} "
           f"눌림목:{len(src3)} 퀀텀:{len(src4)} 동반매수:{len(src5)} "
           f"세력감지:{len(src6)} 이벤트:{len(src7)} 수급폭발:{len(src9)} "
-          f"매집추적:{len(src10)} 이벤트촉매:{len(src11)} 밸류체인:{len(src12)}")
+          f"매집추적:{len(src10)} 이벤트촉매:{len(src11)} 밸류체인:{len(src12)} "
+          f"기술촉매:{len(src13)} 이벤트섹터:{len(src14)}")
 
     # 전략 L: 국적별 수급 7 Secrets
     nat_signals = load_nationality_signals()
@@ -1792,7 +1996,7 @@ def main():
 
     # 전체 종목 티커 수집
     all_tickers = set()
-    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11, src12]:
+    for src in [src1, src2, src3, src4, src5, src6, src7, src9, src10, src11, src12, src13, src14]:
         all_tickers.update(src.keys())
 
     # AVOID 종목 제외
@@ -1861,7 +2065,8 @@ def main():
         for src, label in [(src1, "릴레이"), (src2, "그룹순환"), (src3, "눌림목"),
                            (src4, "퀀텀"), (src5, "동반매수"), (src6, "세력감지"),
                            (src7, "이벤트"), (src9, "수급폭발"), (src10, "매집추적"),
-                           (src11, "이벤트촉매"), (src12, "밸류체인")]:
+                           (src11, "이벤트촉매"), (src12, "밸류체인"),
+                           (src13, "기술촉매"), (src14, "이벤트섹터")]:
             if ticker in src:
                 sources.append(src[ticker])
                 source_names.append(label)
@@ -1940,10 +2145,12 @@ def main():
             boosted = max(min(score_detail["total"] + target_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
 
-        # 전략 E: Perplexity 인텔리전스 보정 (최대 ±5점)
+        # 전략 E: Perplexity 인텔리전스 보정 (이벤트 강도 비례 동적 부스트)
+        # v11: ±5 고정 → 이벤트 강도(kr_impact_score) 비례 최대 +20/-15
         intel_bonus = 0.0
         intel_tag = ""
-        # E-1: 수혜/피해 종목 직접 매칭 (종목명 기반)
+
+        # E-1: 수혜/피해 종목 직접 매칭 (종목명 기반) — 가장 강한 이벤트 점수 적용
         cur_name = ""
         for s in sources:
             if s.get("name"):
@@ -1951,25 +2158,91 @@ def main():
                 break
         if not cur_name:
             cur_name = name_map.get(ticker, "")
+
+        # key_events에서 이 종목과 관련된 최대 이벤트 강도 계산
+        max_event_score = 0
+        max_event_urgency = ""
+        for evt in intel.get("key_events", []):
+            evt_score = abs(evt.get("kr_impact_score", 0))
+            if evt_score > abs(max_event_score):
+                # 종목 직접 매칭 확인
+                if cur_name in intel_beneficiary:
+                    max_event_score = evt_score
+                    max_event_urgency = evt.get("urgency", "")
+                elif cur_name in intel_risk:
+                    max_event_score = -evt_score
+                    max_event_urgency = evt.get("urgency", "")
+
         if cur_name in intel_beneficiary:
-            intel_bonus += 3.0
+            # 이벤트 강도 비례 부스트: score 4~5→+15, 2~3→+8, 1→+5
+            abs_score = abs(max_event_score) if max_event_score != 0 else 3
+            if abs_score >= 4:
+                intel_bonus = 15.0
+            elif abs_score >= 2:
+                intel_bonus = 8.0
+            else:
+                intel_bonus = 5.0
             intel_tag = "수혜"
         elif cur_name in intel_risk:
-            intel_bonus -= 3.0
+            abs_score = abs(max_event_score) if max_event_score != 0 else 3
+            if abs_score >= 4:
+                intel_bonus = -12.0
+            elif abs_score >= 2:
+                intel_bonus = -6.0
+            else:
+                intel_bonus = -3.0
             intel_tag = "피해"
-        # E-2: 섹터 부스트 (stock_to_sector → intel_sector_boost)
-        if intel_sector_boost:
+
+        # E-2: 섹터 부스트 (stock_to_sector → key_events 섹터 매칭)
+        if not intel_tag:
+            sts = _load_stock_to_sector()
+            stock_sectors = sts.get(ticker, [])
+            for evt in intel.get("key_events", []):
+                evt_score = evt.get("kr_impact_score", 0)
+                evt_dir = evt.get("kr_impact_direction", "")
+                evt_urg = evt.get("urgency", "")
+                for sec in evt.get("kr_sectors_affected", []):
+                    if sec in stock_sectors:
+                        # 강도 비례 부스트
+                        abs_s = abs(evt_score)
+                        if evt_dir == "수혜" and evt_score > 0:
+                            if abs_s >= 4:
+                                bonus = 12.0
+                            elif abs_s >= 2:
+                                bonus = 6.0
+                            else:
+                                bonus = 3.0
+                        elif evt_dir == "피해" and evt_score < 0:
+                            if abs_s >= 4:
+                                bonus = -10.0
+                            elif abs_s >= 2:
+                                bonus = -5.0
+                            else:
+                                bonus = -2.0
+                        else:
+                            continue
+                        if abs(bonus) > abs(intel_bonus):
+                            intel_bonus = bonus
+                            intel_tag = f"{sec}{'수혜' if bonus > 0 else '피해'}"
+                        break  # 첫 섹터 매칭만
+
+        # E-2b: sector_boost fallback (key_events에 안 걸리면)
+        if not intel_tag and intel_sector_boost:
             sts = _load_stock_to_sector()
             stock_sectors = sts.get(ticker, [])
             for sec in stock_sectors:
                 if sec in intel_sector_boost:
                     sb = intel_sector_boost[sec]
-                    intel_bonus += min(max(sb * 0.5, -2), 2)  # 섹터당 ±2 한도
+                    intel_bonus = min(max(sb * 2, -8), 8)
                     if not intel_tag:
                         intel_tag = f"{sec}{'수혜' if sb > 0 else '피해'}"
-                    break  # 첫 매칭만
+                    break
 
-        intel_bonus = round(max(min(intel_bonus, 5), -5), 1)
+        # BREAKING urgency → ×1.3 배율
+        if max_event_urgency == "BREAKING" and intel_bonus > 0:
+            intel_bonus = round(intel_bonus * 1.3, 1)
+
+        intel_bonus = round(max(min(intel_bonus, 20), -15), 1)
         if intel_bonus != 0:
             boosted = max(min(score_detail["total"] + intel_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
@@ -2260,6 +2533,8 @@ def main():
             ret_5d=score_detail.get("ret_5d", 0),
             foreign_5d=score_detail.get("foreign_5d", 0),
             inst_5d=score_detail.get("inst_5d", 0),
+            foreign_reversal=pq_data.get("foreign_reversal", False) if pq_data else False,
+            inst_reversal=pq_data.get("inst_reversal", False) if pq_data else False,
         )
 
         entry_info = score_detail.get("entry_info", {})

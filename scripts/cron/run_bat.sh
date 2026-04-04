@@ -115,6 +115,7 @@ case "$BAT" in
     # --- G1: 데이터 수집 ---
     run_py scripts/update_daily_data.py
     run_py_long scripts/extend_parquet_data.py --workers 2
+    run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
@@ -165,6 +166,11 @@ case "$BAT" in
     run_py scripts/market_journal.py
     run_py scripts/daily_market_learner.py
     run_py scripts/paper_trading_unified.py
+    # 금요일이면 유니버스 전체 재구성 (신규 상장/시총 변동 반영)
+    DOW=$(date +%u)
+    if [ "$DOW" = "5" ]; then
+        run_py_long scripts/rebuild_universe.py --min-cap 0.2 --no-cleanup
+    fi
     ;;
   F) # 17:15 KST — FLOWX 업로드 보장 (BAT-D 실패 대비, upsert이라 중복 안전)
     run_py scripts/upload_flowx.py
