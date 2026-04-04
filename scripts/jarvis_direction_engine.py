@@ -648,7 +648,7 @@ def compute_direction() -> dict:
 
     # ── 컴포넌트 요약 ──
     sense_dir = sense.get("direction", "NEUTRAL")
-    overnight_grade = overnight.get("final_grade", "NEUTRAL")
+    overnight_grade = overnight.get("grade", overnight.get("final_grade", "NEUTRAL"))
     regime_current = regime.get("current_regime", "CAUTION")
     regime_transition = regime.get("transition_direction", "")
 

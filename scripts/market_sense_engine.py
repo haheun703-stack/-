@@ -145,7 +145,7 @@ def gather_signals() -> dict:
 
     # ── 축1: US 야간 시그널 (가중치 35%) ──
     us = load_nested_json("us_market", "overnight_signal.json")
-    us_grade = us.get("final_grade", "NEUTRAL")
+    us_grade = us.get("grade", us.get("final_grade", "NEUTRAL"))
     us_score_raw = us.get("final_score", 0)
 
     # US 등급 → 방향 점수 (-100 ~ +100)
@@ -175,7 +175,7 @@ def gather_signals() -> dict:
     # ── 축2: VIX 변화 (가중치 20%) ──
     vix_data = us.get("vix", {})
     vix_level = vix_data.get("level", 20)
-    vix_z = vix_data.get("z_score", 0)
+    vix_z = vix_data.get("zscore", vix_data.get("z_score", 0))
 
     # VIX 높으면 부정적, 낮으면 긍정적
     if vix_level < 15:
