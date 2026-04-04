@@ -124,6 +124,8 @@ case "$BAT" in
     run_py_long scripts/institutional_flow_collector.py
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
+    run_py scripts/collect_investor_flow.py
+    run_py scripts/fetch_ecos_macro.py
     # --- G2: 지표 + 릴레이 ---
     run_py scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
@@ -141,6 +143,13 @@ case "$BAT" in
     run_py scripts/leverage_etf_scanner.py
     run_py scripts/etf_trading_signal.py
     run_py scripts/run_etf_rotation.py
+    # --- G3.9: 종목 스캔 (scan_tomorrow_picks 입력 데이터) ---
+    run_py scripts/scan_pullback.py
+    run_py scripts/scan_dual_buying.py
+    run_py scripts/scan_accumulation_tracker.py
+    run_py scripts/calc_institutional_targets.py
+    run_py_long scripts/perplexity_market_intel.py
+    run_py_long scripts/ai_news_brain.py
     # --- G4: 추천 + FLOWX ---
     run_py scripts/scan_earnings_acceleration.py
     run_py scripts/scan_turnaround.py
