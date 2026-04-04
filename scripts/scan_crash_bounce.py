@@ -65,17 +65,40 @@ def _sf(val, default=0):
 # ──────────────────────────────────────────
 
 def build_name_map() -> dict[str, str]:
-    """종목코드 → 종목명 매핑 (CSV 우선, 없으면 pykrx 폴백)."""
+    """종목코드 → 종목명 매핑 (universe.csv 우선 → CSV 폴백 → pykrx 폴백)."""
     name_map = {}
-    csv_dir = PROJECT_ROOT / "stock_data_daily"
-    for csv in csv_dir.glob("*.csv"):
-        parts = csv.stem.rsplit("_", 1)
-        if len(parts) == 2:
-            name, ticker = parts
-            name_map[ticker] = name
-    if name_map:
-        return name_map
 
+    # 1) universe.csv — rebuild_universe.py가 매일 G1에서 갱신 (가장 신뢰)
+    universe_path = PROJECT_ROOT / "data" / "universe.csv"
+    if universe_path.exists():
+        try:
+            import csv as csv_mod
+            with open(universe_path, encoding="utf-8") as f:
+                reader = csv_mod.DictReader(f)
+                for row in reader:
+                    t = row.get("ticker", "").strip()
+                    n = row.get("name", "").strip()
+                    if t and n:
+                        name_map[t] = n
+            if name_map:
+                logger.info("종목명 매핑: universe.csv %d건", len(name_map))
+                return name_map
+        except Exception as e:
+            logger.warning("universe.csv 로드 실패: %s", e)
+
+    # 2) stock_data_daily CSV 파일명 (로컬 전용)
+    csv_dir = PROJECT_ROOT / "stock_data_daily"
+    if csv_dir.exists():
+        for csv in csv_dir.glob("*.csv"):
+            parts = csv.stem.rsplit("_", 1)
+            if len(parts) == 2:
+                name, ticker = parts
+                name_map[ticker] = name
+        if name_map:
+            logger.info("종목명 매핑: stock_data_daily %d건", len(name_map))
+            return name_map
+
+    # 3) pykrx 폴백 (장중에만 안정적)
     try:
         from pykrx import stock as krx
         from datetime import timedelta

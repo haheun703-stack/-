@@ -707,14 +707,48 @@ def _get_vix_grade(vix: float) -> str:
     return "PANIC"
 
 
+def _load_universe_names() -> dict[str, str]:
+    """universe.csv에서 ticker→name 매핑 로드."""
+    name_map = {}
+    universe_path = Path(__file__).resolve().parent.parent.parent / "data" / "universe.csv"
+    if universe_path.exists():
+        try:
+            import csv as csv_mod
+            with open(universe_path, encoding="utf-8") as f:
+                reader = csv_mod.DictReader(f)
+                for row in reader:
+                    t = row.get("ticker", "").strip()
+                    n = row.get("name", "").strip()
+                    if t and n:
+                        name_map[t] = n
+        except Exception:
+            pass
+    return name_map
+
+
 def _fix_pick_names(picks: list[dict]) -> None:
-    """name이 숫자(코드)인 pick을 pykrx로 종목명 보정."""
+    """name이 숫자(코드)인 pick을 종목명으로 보정 (universe.csv → pykrx 폴백)."""
     bad = [p for p in picks if p.get("name", "").replace(".", "").isdigit()]
     if not bad:
         return
+
+    # 1) universe.csv 캐시 (빠름, 야간에도 동작)
+    uni_names = _load_universe_names()
+    still_bad = []
+    for p in bad:
+        ticker = p.get("ticker", p.get("code", ""))
+        if ticker and ticker in uni_names:
+            p["name"] = uni_names[ticker]
+        else:
+            still_bad.append(p)
+
+    if not still_bad:
+        return
+
+    # 2) pykrx 폴백 (장중에만 안정적)
     try:
         from pykrx import stock as krx
-        for p in bad:
+        for p in still_bad:
             ticker = p.get("ticker", p.get("code", ""))
             if ticker:
                 nm = krx.get_market_ticker_name(ticker)
