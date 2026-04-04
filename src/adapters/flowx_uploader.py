@@ -1651,7 +1651,7 @@ def build_etf_signals_rows(date_str: str = "") -> list[dict]:
             "volume": vol_info.get("volume_today", 0),
             "value": 0,
             "signal_type": signal_type,
-            "score": score,
+            "score": int(score),
         })
 
     rows.sort(key=lambda x: -x["score"])
@@ -1786,7 +1786,7 @@ def build_sniper_rows(date_str: str = "") -> list[dict]:
             "exec_strength": round(c.get("stoch_k", 0), 1),  # 체결강도 대용
             "vol_ratio": round(c.get("detail", {}).get("flow", 0) / 10, 1) if c.get("detail", {}).get("flow") else 0,
             "signal_type": signal_type,
-            "score": round(c.get("score", 0), 1),
+            "score": int(c.get("score", 0)),
         })
 
     rows.sort(key=lambda x: -x["score"])
