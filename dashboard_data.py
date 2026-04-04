@@ -1000,6 +1000,24 @@ def build_zone_scenario() -> dict:
                     break
         deep_analyses.append(entry)
 
+    # ── 8) event_calendar — 향후 30일 이벤트 ──
+    event_calendar = []
+    try:
+        from src.alpha.event_calendar import EventCalendar
+        cal = EventCalendar()
+        upcoming = cal.get_upcoming(days=30)
+        for ev in upcoming:
+            event_calendar.append({
+                "date": ev.get("date", ""),
+                "type": ev.get("type", ""),
+                "name": ev.get("name", ""),
+                "country": ev.get("country", ""),
+                "impact": ev.get("impact", "LOW"),
+                "pattern": ev.get("pattern", ""),
+            })
+    except Exception:
+        pass
+
     return {
         "market_status": market_status,
         "active_scenarios": active_scenarios,
@@ -1008,6 +1026,7 @@ def build_zone_scenario() -> dict:
         "etf_map": etf_map,
         "conflicts": conflicts,
         "deep_analyses": deep_analyses,
+        "event_calendar": event_calendar,
     }
 
 
