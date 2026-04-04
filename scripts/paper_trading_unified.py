@@ -29,7 +29,7 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
 DATA_DIR = PROJECT_ROOT / "data"
 PORTFOLIO_PATH = DATA_DIR / "paper_portfolio.json"
 PICKS_PATH = DATA_DIR / "tomorrow_picks.json"
+JARVIS_PATH = DATA_DIR / "jarvis_direction.json"
 PROCESSED_DIR = DATA_DIR / "processed"
 
 # 포지션 규칙
@@ -75,6 +76,16 @@ TAKE_PROFIT_T2_PCT = 0.20      # +20% 2차 익절 (전량 매도)
 TRAILING_ACTIVATE_PCT = 0.08   # +8% 이후 트레일링 활성화
 TRAILING_STOP_PCT = -0.04      # 고점 대비 -4% 하락 시 매도
 MAX_HOLDING_DAYS = 5           # 최대 보유일 (영업일 기준, 1주 Rolling)
+
+# ETF 방향 트레이딩 (JARVIS 연동)
+ETF_CAPITAL = 10_000_000       # 1,000만원 별도 자본 (개별 종목과 분리)
+ETF_MAP = {
+    "STRONG_LONG":  {"code": "122630", "name": "KODEX 레버리지"},
+    "LONG":         {"code": "069500", "name": "KODEX 200"},
+    "SHORT":        {"code": "114800", "name": "KODEX 인버스"},
+    "STRONG_SHORT": {"code": "252670", "name": "KODEX 200선물인버스2X"},
+}
+ETF_STOP_LOSS_PCT = -0.05      # ETF 손절 -5% (레버리지 특성 고려)
 
 
 # ═══════════════════════════════════════════════
@@ -141,6 +152,23 @@ def get_latest_price(ticker: str) -> tuple[float, str]:
         return float(last["close"]), df.index[-1].strftime("%Y-%m-%d")
     except Exception:
         return 0.0, ""
+
+
+def get_etf_price(code: str) -> float:
+    """ETF 현재가 조회 (parquet → pykrx 순 fallback)."""
+    price, _ = get_latest_price(code)
+    if price > 0:
+        return price
+    try:
+        from pykrx import stock as pykrx_stock
+        to_date = datetime.now().strftime("%Y%m%d")
+        from_date = (datetime.now() - timedelta(days=10)).strftime("%Y%m%d")
+        df = pykrx_stock.get_market_ohlcv_by_date(from_date, to_date, code)
+        if len(df) > 0:
+            return float(df["종가"].iloc[-1])
+    except Exception as e:
+        logger.warning("[ETF] %s pykrx 가격 조회 실패: %s", code, e)
+    return 0.0
 
 
 # ═══════════════════════════════════════════════
@@ -619,6 +647,200 @@ def calc_stats(pf: dict) -> dict:
 
 
 # ═══════════════════════════════════════════════
+# ETF 방향 트레이딩 (JARVIS 연동)
+# ═══════════════════════════════════════════════
+
+def _default_etf_state() -> dict:
+    return {
+        "capital": ETF_CAPITAL,
+        "position": None,
+        "closed_trades": [],
+        "daily_equity": [],
+    }
+
+
+def _close_etf_position(etf: dict, price: float, today_str: str, reason: str) -> dict:
+    """ETF 포지션 청산 공통 로직. 청산 결과 dict 반환."""
+    pos = etf["position"]
+    if not pos:
+        return {}
+
+    sell_price = price * (1 - SLIPPAGE_PCT)
+    proceeds = sell_price * pos["qty"] * (1 - TAX_PCT)
+    etf["capital"] += proceeds
+
+    pnl_pct = sell_price / pos["avg_price"] - 1
+    days_held = 0
+    try:
+        days_held = (pd.Timestamp(today_str) - pd.Timestamp(pos["entry_date"])).days
+    except Exception:
+        pass
+
+    trade = {
+        "code": pos["code"],
+        "name": pos["name"],
+        "direction": pos.get("direction", ""),
+        "entry_date": pos["entry_date"],
+        "exit_date": today_str,
+        "avg_price": pos["avg_price"],
+        "exit_price": round(sell_price),
+        "qty": pos["qty"],
+        "pnl_pct": round(pnl_pct * 100, 2),
+        "exit_reason": reason,
+        "days_held": days_held,
+    }
+    etf["closed_trades"].append(trade)
+    etf["position"] = None
+    return trade
+
+
+def manage_etf_position(pf: dict, today_str: str) -> dict:
+    """JARVIS 방향 기반 ETF 포지션 관리.
+
+    Returns:
+        {"action": "BUY"/"SELL"/"SWITCH"/"HOLD"/"SKIP", ...details}
+    """
+    etf = pf.setdefault("etf_trading", _default_etf_state())
+
+    # JARVIS 방향 로드
+    if not JARVIS_PATH.exists():
+        logger.info("[ETF] jarvis_direction.json 없음 → 스킵")
+        return {"action": "SKIP", "reason": "jarvis 없음"}
+
+    try:
+        with open(JARVIS_PATH, "r", encoding="utf-8") as f:
+            jarvis = json.load(f)
+    except Exception:
+        return {"action": "SKIP", "reason": "jarvis 파싱 실패"}
+
+    direction = jarvis.get("direction", "NEUTRAL")
+    meta_score = jarvis.get("meta_score", 0)
+    confidence = jarvis.get("confidence", 0)
+
+    current_pos = etf.get("position")
+    target_etf = ETF_MAP.get(direction)  # None if NEUTRAL
+
+    result = {
+        "action": "HOLD",
+        "direction": direction,
+        "meta_score": meta_score,
+        "confidence": confidence,
+    }
+
+    # ── Case 1: NEUTRAL → 포지션 있으면 청산 ──
+    if target_etf is None:
+        if current_pos:
+            price = get_etf_price(current_pos["code"])
+            if price <= 0:
+                price = current_pos["avg_price"]
+            trade = _close_etf_position(etf, price, today_str, "NEUTRAL_EXIT")
+            result.update({
+                "action": "SELL",
+                "name": trade["name"],
+                "pnl_pct": trade["pnl_pct"],
+                "reason": "방향 NEUTRAL 전환",
+            })
+        else:
+            result["reason"] = "NEUTRAL, 포지션 없음"
+        return result
+
+    # ── Case 2: 같은 ETF 보유 중 → 손절/유지 체크 ──
+    if current_pos and current_pos["code"] == target_etf["code"]:
+        price = get_etf_price(current_pos["code"])
+        if price > 0:
+            pnl = price / current_pos["avg_price"] - 1
+            if pnl <= ETF_STOP_LOSS_PCT:
+                trade = _close_etf_position(etf, price, today_str, "ETF_STOP_LOSS")
+                result.update({
+                    "action": "STOP_LOSS",
+                    "name": trade["name"],
+                    "pnl_pct": trade["pnl_pct"],
+                })
+            else:
+                result.update({
+                    "action": "HOLD",
+                    "name": current_pos["name"],
+                    "pnl_pct": round(pnl * 100, 2),
+                })
+        return result
+
+    # ── Case 3: 다른 ETF 보유 중 → 스위칭 ──
+    if current_pos and current_pos["code"] != target_etf["code"]:
+        price = get_etf_price(current_pos["code"])
+        if price <= 0:
+            price = current_pos["avg_price"]
+        sell_trade = _close_etf_position(etf, price, today_str, "DIRECTION_SWITCH")
+        result["sell_trade"] = {
+            "name": sell_trade["name"],
+            "pnl_pct": sell_trade["pnl_pct"],
+        }
+
+    # ── Case 4: 신규 매수 ──
+    price = get_etf_price(target_etf["code"])
+    if price <= 0:
+        result.update({"action": "SKIP", "reason": f"{target_etf['name']} 가격 없음"})
+        return result
+
+    buy_price = price * (1 + SLIPPAGE_PCT + COMMISSION_PCT)
+    buy_amount = min(etf["capital"] * 0.95, ETF_CAPITAL * 0.95)
+    qty = int(buy_amount / buy_price)
+    if qty <= 0:
+        result.update({"action": "SKIP", "reason": "ETF 자본 부족"})
+        return result
+
+    cost = buy_price * qty
+    if cost > etf["capital"]:
+        result.update({"action": "SKIP", "reason": "ETF 현금 부족"})
+        return result
+
+    etf["capital"] -= cost
+    etf["position"] = {
+        "code": target_etf["code"],
+        "name": target_etf["name"],
+        "entry_date": today_str,
+        "avg_price": round(buy_price),
+        "qty": qty,
+        "cost": round(cost),
+        "direction": direction,
+    }
+
+    action_type = "SWITCH" if "sell_trade" in result else "BUY"
+    result.update({
+        "action": action_type,
+        "name": target_etf["name"],
+        "price": round(price),
+        "qty": qty,
+        "cost": round(cost),
+    })
+    return result
+
+
+def update_etf_equity(pf: dict, today_str: str) -> float:
+    """ETF 일일 자산 평가. equity 반환."""
+    etf = pf.get("etf_trading")
+    if not etf:
+        return 0
+
+    equity = etf["capital"]
+    pos = etf.get("position")
+    if pos:
+        price = get_etf_price(pos["code"])
+        if price > 0:
+            equity += price * pos["qty"]
+        else:
+            equity += pos["avg_price"] * pos["qty"]
+
+    etf["daily_equity"] = [e for e in etf.get("daily_equity", []) if e["date"] != today_str]
+    etf["daily_equity"].append({
+        "date": today_str,
+        "equity": round(equity),
+        "position": pos["name"] if pos else None,
+        "direction": pos["direction"] if pos else None,
+    })
+    return equity
+
+
+# ═══════════════════════════════════════════════
 # FLOWX 업로드
 # ═══════════════════════════════════════════════
 
@@ -665,6 +887,7 @@ def send_daily_report(
     pf: dict,
     stats: dict,
     candidates_count: int,
+    etf_result: dict | None = None,
 ) -> None:
     """일일 Paper Trading 텔레그램 리포트."""
     try:
@@ -723,6 +946,26 @@ def send_daily_report(
                 f"  {emoji} {pos['name']} {pnl:+.1f}% "
                 f"({days}일, {pos.get('strategy', '')})"
             )
+
+    # ETF 방향 트레이딩 섹션
+    if etf_result and etf_result.get("action") != "SKIP":
+        lines.append("")
+        etf_state = pf.get("etf_trading", {})
+        etf_eq = etf_state.get("daily_equity", [{}])[-1].get("equity", ETF_CAPITAL) if etf_state.get("daily_equity") else ETF_CAPITAL
+        etf_ret = (etf_eq / ETF_CAPITAL - 1) * 100
+        lines.append(f"-- ETF 방향 ({etf_eq:,}원 {etf_ret:+.1f}%) --")
+        lines.append(f"  JARVIS: {etf_result.get('direction', '?')} "
+                      f"(점수 {etf_result.get('meta_score', 0):+.1f})")
+        action = etf_result.get("action", "")
+        if action in ("BUY", "SWITCH"):
+            lines.append(f"  매수: {etf_result.get('name', '')} "
+                          f"{etf_result.get('price', 0):,}원 x{etf_result.get('qty', 0)}주")
+        elif action in ("SELL", "STOP_LOSS"):
+            lines.append(f"  청산: {etf_result.get('name', '')} "
+                          f"{etf_result.get('pnl_pct', 0):+.1f}%")
+        elif action == "HOLD" and etf_result.get("name"):
+            lines.append(f"  유지: {etf_result.get('name', '')} "
+                          f"{etf_result.get('pnl_pct', 0):+.1f}%")
 
     msg = "\n".join(lines)
     try:
@@ -849,6 +1092,25 @@ def run_daily(force_rebalance: bool = False) -> dict:
             print(f"    [{e['grade']}] {e['name']} {e['price']:,}원 "
                   f"x{e['qty']}주 = {e['cost']:,}원")
 
+    # 4-1. ETF 방향 트레이딩 (JARVIS 연동)
+    etf_result = manage_etf_position(pf, today_str)
+    etf_equity = update_etf_equity(pf, today_str)
+    etf_action = etf_result.get("action", "SKIP")
+    print(f"\n  [ETF] JARVIS방향={etf_result.get('direction', '?')} "
+          f"| 액션={etf_action}")
+    if etf_action in ("BUY", "SWITCH"):
+        print(f"    매수: {etf_result.get('name', '')} "
+              f"{etf_result.get('price', 0):,}원 x{etf_result.get('qty', 0)}주")
+        if etf_action == "SWITCH":
+            st = etf_result.get("sell_trade", {})
+            print(f"    매도: {st.get('name', '')} {st.get('pnl_pct', 0):+.1f}%")
+    elif etf_action in ("SELL", "STOP_LOSS"):
+        print(f"    청산: {etf_result.get('name', '')} "
+              f"{etf_result.get('pnl_pct', 0):+.1f}% [{etf_action}]")
+    elif etf_action == "HOLD" and etf_result.get("name"):
+        print(f"    유지: {etf_result.get('name', '')} "
+              f"{etf_result.get('pnl_pct', 0):+.1f}%")
+
     # 5. 일일 자산 기록
     equity = update_equity(pf, today_str)
     stats = calc_stats(pf)
@@ -857,7 +1119,7 @@ def run_daily(force_rebalance: bool = False) -> dict:
     save_portfolio(pf)
 
     # 7. 텔레그램 리포트
-    send_daily_report(today_str, entries, exits, pf, stats, len(candidates))
+    send_daily_report(today_str, entries, exits, pf, stats, len(candidates), etf_result)
 
     # 7-1. 리밸런싱일 → 주간 리포트도 자동 전송
     if do_rebalance:
@@ -868,12 +1130,15 @@ def run_daily(force_rebalance: bool = False) -> dict:
 
     # 9. 콘솔 요약
     print(f"\n  {'='*40}")
-    print(f"  자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)")
+    print(f"  [종목] 자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)")
     print(f"  PF: {stats['pf']} | MDD: {stats['mdd']:.1f}%")
     print(f"  거래: {stats['total_trades']}건 "
           f"({stats['wins']}W/{stats['losses']}L) "
           f"승률 {stats['win_rate']:.0f}%")
     print(f"  보유: {stats['open_positions']}종목 | 현금: {stats['cash']:,}원")
+    if etf_equity > 0:
+        etf_return = (etf_equity / ETF_CAPITAL - 1) * 100
+        print(f"  [ETF]  자산: {etf_equity:,}원 ({etf_return:+.1f}%)")
     print("=" * 60)
 
     return {
@@ -883,6 +1148,7 @@ def run_daily(force_rebalance: bool = False) -> dict:
         "entries": len(entries),
         "exits": len(exits),
         "candidates": len(candidates),
+        "etf_action": etf_action,
         **stats,
     }
 
@@ -902,14 +1168,15 @@ def main():
 
     if args.reset:
         pf = _default_portfolio()
+        pf["etf_trading"] = _default_etf_state()
         save_portfolio(pf)
-        print("  [PAPER] 포트폴리오 초기화 완료 (3,000만원)")
+        print("  [PAPER] 포트폴리오 초기화 완료 (종목 3,000만 + ETF 1,000만)")
         return
 
     if args.status:
         pf = load_portfolio()
         stats = calc_stats(pf)
-        print(f"  자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)")
+        print(f"  [종목] 자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)")
         print(f"  PF: {stats['pf']} | MDD: {stats['mdd']:.1f}%")
         print(f"  거래: {stats['total_trades']}건 "
               f"({stats['wins']}W/{stats['losses']}L) 승률 {stats['win_rate']:.0f}%")
@@ -921,6 +1188,27 @@ def main():
                 pnl = (cur_price / pos["avg_price"] - 1) * 100 if cur_price > 0 else 0
                 print(f"    {pos['name']} {pnl:+.1f}% | "
                       f"진입 {pos['avg_price']:,}원 | {pos.get('strategy', '')}")
+        # ETF 상태
+        etf = pf.get("etf_trading", {})
+        if etf:
+            etf_eq_list = etf.get("daily_equity", [])
+            etf_eq = etf_eq_list[-1]["equity"] if etf_eq_list else etf.get("capital", ETF_CAPITAL)
+            etf_ret = (etf_eq / ETF_CAPITAL - 1) * 100
+            print(f"\n  [ETF] 자산: {etf_eq:,}원 ({etf_ret:+.1f}%)")
+            etf_pos = etf.get("position")
+            if etf_pos:
+                ep = get_etf_price(etf_pos["code"])
+                etf_pnl = (ep / etf_pos["avg_price"] - 1) * 100 if ep > 0 else 0
+                print(f"    {etf_pos['name']} {etf_pnl:+.1f}% "
+                      f"| 방향: {etf_pos.get('direction', '?')} "
+                      f"| 진입: {etf_pos['avg_price']:,}원")
+            else:
+                print(f"    포지션 없음 | 현금: {etf.get('capital', 0):,}원")
+            etf_trades = etf.get("closed_trades", [])
+            if etf_trades:
+                etf_wins = sum(1 for t in etf_trades if t["pnl_pct"] > 0)
+                print(f"    거래: {len(etf_trades)}건 "
+                      f"({etf_wins}W/{len(etf_trades)-etf_wins}L)")
         return
 
     if args.weekly:
