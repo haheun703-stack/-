@@ -54,13 +54,39 @@ OUTPUT_PATH = PROJECT_ROOT / "data" / "pullback_scan.json"
 # ──────────────────────────────────────────
 
 def build_name_map() -> dict[str, str]:
-    """CSV 파일명에서 종목코드 → 종목명 매핑"""
+    """종목코드 → 종목명 매핑 (CSV 우선, 없으면 pykrx 폴백)."""
     name_map = {}
+    # 1) CSV 파일명에서 매핑
     for csv in CSV_DIR.glob("*.csv"):
         parts = csv.stem.rsplit("_", 1)
         if len(parts) == 2:
             name, ticker = parts
             name_map[ticker] = name
+    if name_map:
+        return name_map
+
+    # 2) CSV 없으면 pykrx로 전체 종목명 일괄 조회
+    try:
+        from pykrx import stock as krx
+        from datetime import datetime, timedelta
+        date = datetime.now()
+        for _ in range(7):
+            date_str = date.strftime("%Y%m%d")
+            try:
+                for market in ["KOSPI", "KOSDAQ"]:
+                    tickers = krx.get_market_ticker_list(date_str, market=market)
+                    for t in tickers:
+                        if t not in name_map:
+                            name_map[t] = krx.get_market_ticker_name(t)
+                if name_map:
+                    logger.info("[pullback] pykrx 종목명 %d건 로드", len(name_map))
+                    return name_map
+            except Exception:
+                pass
+            date -= timedelta(days=1)
+    except ImportError:
+        pass
+
     return name_map
 
 
