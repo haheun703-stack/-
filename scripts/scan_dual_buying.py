@@ -1,6 +1,6 @@
 """외인+기관 동반매수 종목 스캔 → data/dual_buying_watch.json
 
-stock_data_daily/ CSV에서 외인+기관 동시 순매수 종목을 찾아
+data/processed/ Parquet에서 외인+기관 동시 순매수 종목을 찾아
 S/A/B 등급으로 분류하고 핵심필터 WATCH 리스트를 생성한다.
 
 사용법:
@@ -30,73 +30,107 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "stock_data_daily"
+PARQUET_DIR = PROJECT_ROOT / "data" / "processed"
 OUT_PATH = PROJECT_ROOT / "data" / "dual_buying_watch.json"
 
+# Parquet→레거시 컬럼 매핑
+_COL = {
+    "foreign": "외국인합계",
+    "inst": "기관합계",
+    "close": "close",
+    "volume": "volume",
+    "rsi": "rsi_14",
+}
 
-def scan_csv(csv_path: Path, uni_tickers: set[str]) -> dict | None:
-    """단일 CSV에서 동반매수 여부를 판정한다."""
-    parts = csv_path.stem.rsplit("_", 1)
-    if len(parts) != 2 or not parts[1].isdigit():
-        return None
 
-    name, ticker = parts[0], parts[1]
+def _load_ticker_names() -> dict[str, str]:
+    """종목코드 → 종목명 매핑 로드."""
+    mapping: dict[str, str] = {}
+    # etf_master 에서 로드
+    em_path = PROJECT_ROOT / "data" / "etf_master.json"
+    if em_path.exists():
+        try:
+            with open(em_path, encoding="utf-8") as f:
+                for item in json.load(f):
+                    if isinstance(item, dict) and item.get("ticker") and item.get("name"):
+                        mapping[item["ticker"]] = item["name"]
+        except Exception:
+            pass
+    # tomorrow_picks 에서 보충
+    tp_path = PROJECT_ROOT / "data" / "tomorrow_picks.json"
+    if tp_path.exists():
+        try:
+            with open(tp_path, encoding="utf-8") as f:
+                data = json.load(f)
+                for pick in data.get("picks", []):
+                    t = pick.get("ticker", "")
+                    n = pick.get("name", "")
+                    if t and n and t not in mapping:
+                        mapping[t] = n
+        except Exception:
+            pass
+    return mapping
+
+
+def scan_parquet(pq_path: Path) -> dict | None:
+    """단일 Parquet에서 동반매수 여부를 판정한다."""
+    ticker = pq_path.stem
 
     try:
-        df = pd.read_csv(csv_path)
+        df = pd.read_parquet(pq_path)
     except Exception:
         return None
 
-    if len(df) < 10 or "Foreign_Net" not in df.columns:
+    if len(df) < 10 or _COL["foreign"] not in df.columns:
         return None
 
     tail5 = df.tail(5)
-    f5 = tail5["Foreign_Net"].sum()
-    i5 = tail5["Inst_Net"].sum()
+    f5 = tail5[_COL["foreign"]].sum()
+    i5 = tail5[_COL["inst"]].sum()
 
     if f5 <= 0 or i5 <= 0:
         return None
 
     # 동반매수일 (5일 중 외인>0 & 기관>0인 날)
-    dual_days = int(((tail5["Foreign_Net"] > 0) & (tail5["Inst_Net"] > 0)).sum())
+    dual_days = int(((tail5[_COL["foreign"]] > 0) & (tail5[_COL["inst"]] > 0)).sum())
     if dual_days < 2:
         return None
 
     last = df.iloc[-1]
     prev = df.iloc[-2]
-    price = int(last["Close"])
-    chg = round((last["Close"] - prev["Close"]) / prev["Close"] * 100, 1)
-    rsi = round(float(last.get("RSI", 0)), 1)
+    price = int(last[_COL["close"]])
+    chg = round((last[_COL["close"]] - prev[_COL["close"]]) / prev[_COL["close"]] * 100, 1)
+    rsi = round(float(last.get(_COL["rsi"], 0)), 1)
 
     # 5일 수익률
     if len(df) >= 6:
-        p5 = df.iloc[-6]["Close"]
-        ret5 = round((last["Close"] - p5) / p5 * 100, 1)
+        p5 = df.iloc[-6][_COL["close"]]
+        ret5 = round((last[_COL["close"]] - p5) / p5 * 100, 1)
     else:
         ret5 = 0.0
 
     # 거래량 비율
-    avg_vol = df.tail(20)["Volume"].mean()
-    vol_ratio = round(last["Volume"] / avg_vol, 1) if avg_vol > 0 else 0.0
+    avg_vol = df.tail(20)[_COL["volume"]].mean()
+    vol_ratio = round(last[_COL["volume"]] / avg_vol, 1) if avg_vol > 0 else 0.0
 
     # 외인/기관 연속 매수일
     f_streak = 0
     for j in range(1, min(21, len(df))):
-        if df.iloc[-j]["Foreign_Net"] > 0:
+        if df.iloc[-j][_COL["foreign"]] > 0:
             f_streak += 1
         else:
             break
 
     i_streak = 0
     for j in range(1, min(21, len(df))):
-        if df.iloc[-j]["Inst_Net"] > 0:
+        if df.iloc[-j][_COL["inst"]] > 0:
             i_streak += 1
         else:
             break
 
     return {
         "ticker": ticker,
-        "name": name,
+        "name": ticker,  # 나중에 이름 매핑
         "price": price,
         "chg": chg,
         "ret5": ret5,
@@ -107,35 +141,29 @@ def scan_csv(csv_path: Path, uni_tickers: set[str]) -> dict | None:
         "f_streak": f_streak,
         "i_streak": i_streak,
         "vol_ratio": vol_ratio,
-        "is_universe": ticker in uni_tickers,
+        "is_universe": True,
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description="외인+기관 동반매수 WATCH 스캔")
-    parser.add_argument("--universe", action="store_true", help="유니버스 종목만")
+    parser.add_argument("--universe", action="store_true", help="유니버스 종목만 (기본: 전체)")
     args = parser.parse_args()
 
-    # 유니버스 티커
-    parquet_dir = PROJECT_ROOT / "data" / "processed"
-    uni_tickers = set(pf.stem for pf in parquet_dir.glob("*.parquet"))
+    pq_files = sorted(PARQUET_DIR.glob("*.parquet"))
 
-    csv_files = sorted(DATA_DIR.glob("*.csv"))
-    csv_files = [f for f in csv_files if not f.name.startswith("_")]
-
-    if args.universe:
-        csv_files = [
-            f for f in csv_files
-            if f.stem.rsplit("_", 1)[-1] in uni_tickers
-        ]
-
-    logger.info(f"스캔 대상: {len(csv_files)}개 CSV")
+    logger.info(f"스캔 대상: {len(pq_files)}개 Parquet")
 
     results = []
-    for f in csv_files:
-        r = scan_csv(f, uni_tickers)
+    for f in pq_files:
+        r = scan_parquet(f)
         if r:
             results.append(r)
+
+    # 종목명 매핑
+    name_map = _load_ticker_names()
+    for r in results:
+        r["name"] = name_map.get(r["ticker"], r["ticker"])
 
     # 등급 분류
     results.sort(
@@ -195,7 +223,7 @@ def main():
         "b_grade": b_grade,
         "core_watch": core_watch,
         "stats": {
-            "total_scanned": len(csv_files),
+            "total_scanned": len(pq_files),
             "total_found": len(results),
             "s": len(s_grade),
             "a": len(a_grade),

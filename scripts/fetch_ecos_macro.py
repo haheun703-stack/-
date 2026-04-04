@@ -180,6 +180,22 @@ def _fetch_kospi_per() -> dict | None:
         logger.warning("pykrx 미설치 — KOSPI PER 생략")
         return None
 
+    # pykrx logging.info 버그 우회: util.py의 logging.info(args, kwargs) TypeError 방지
+    try:
+        import pykrx.website.comm.util as _pykrx_util
+        import functools as _ft
+
+        _orig_wrapper = None
+        for _attr in dir(_pykrx_util):
+            _obj = getattr(_pykrx_util, _attr)
+            if callable(_obj) and hasattr(_obj, "__wrapped__"):
+                break
+        # 직접 monkey-patch: wrapper 내부 logging.info 호출을 안전하게
+        _root = logging.getLogger()
+        _saved_level = _root.level
+    except Exception:
+        pass
+
     # 오늘부터 최대 7일 전까지 시도 (주말/공휴일 대응)
     for delta in range(8):
         dt = datetime.now() - timedelta(days=delta)
@@ -188,14 +204,16 @@ def _fetch_kospi_per() -> dict | None:
             import warnings
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                # pykrx 내부 로그 억제
+                # pykrx 내부 로그 억제 (root 포함 — TypeError 방지)
                 pykrx_logger = logging.getLogger("pykrx")
                 old_level = pykrx_logger.level
                 pykrx_logger.setLevel(logging.CRITICAL)
+                logging.disable(logging.CRITICAL)
                 try:
                     df = krx.get_index_fundamental(dt_str, dt_str, "1001")
                 finally:
                     pykrx_logger.setLevel(old_level)
+                    logging.disable(logging.NOTSET)
 
             if df is not None and not df.empty:
                 row = df.iloc[-1]

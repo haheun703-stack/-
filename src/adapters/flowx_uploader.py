@@ -95,18 +95,26 @@ class FlowxUploader:
 
     # ── AI 추천 (short_signals) ─────────────────────
 
+    # Supabase short_signals 테이블에 없는 컬럼 (스키마 추가 전까지 제거)
+    _EXTRA_COLS = {"alpha_signals", "alpha_v3_score"}
+
     def upload_ai_picks(self, rows: list[dict]) -> bool:
         """AI 추천 종목 업로드 (UPSERT on date+code)."""
         if not self.is_active or not rows:
             return False
+        # Supabase 스키마에 없는 컬럼 제거
+        clean_rows = [
+            {k: v for k, v in row.items() if k not in self._EXTRA_COLS}
+            for row in rows
+        ]
         try:
             result = self.client.table("short_signals").upsert(
-                rows, on_conflict="date,code"
+                clean_rows, on_conflict="date,code"
             ).execute()
             if not result.data:
                 logger.warning("[FLOWX] AI 추천 업로드 응답 비어있음")
                 return False
-            logger.info("[FLOWX] AI 추천 업로드: %d건", len(rows))
+            logger.info("[FLOWX] AI 추천 업로드: %d건", len(clean_rows))
             return True
         except Exception as e:
             logger.error("[FLOWX] AI 추천 업로드 실패: %s", e)
