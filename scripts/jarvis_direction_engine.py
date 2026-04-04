@@ -216,11 +216,11 @@ def secret_decoupling() -> dict:
     if not KOSPI_CSV.exists():
         return {"score": 0, "detail": "KOSPI 데이터 없음"}
 
-    # US 5일 수익률
+    # US 5일 수익률 (ret_5d는 이미 % 단위: 1.66 = 1.66%)
     idx_dir = us.get("index_direction", {})
     spy_5d = idx_dir.get("SPY", {}).get("ret_5d", 0)
     qqq_5d = idx_dir.get("QQQ", {}).get("ret_5d", 0)
-    us_avg = (spy_5d + qqq_5d) / 2 * 100  # → %
+    us_avg = (spy_5d + qqq_5d) / 2  # 이미 %
 
     # KOSPI 5일 수익률
     try:
