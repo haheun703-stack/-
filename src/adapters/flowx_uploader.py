@@ -403,9 +403,10 @@ class FlowxUploader:
             "etf_signals": self.upload_etf_signals_dashboard(date_str),
             "relay": self.upload_relay(date_str),
             "sniper": self.upload_sniper(date_str),
+            "crash_bounce": self.upload_crash_bounce(date_str),
         }
         ok = sum(v for v in results.values())
-        logger.info("[FLOWX] 퀀트 10테이블 업로드: %d/10 성공 %s", ok, results)
+        logger.info("[FLOWX] 퀀트 %d테이블 업로드: %d/%d 성공 %s", len(results), ok, len(results), results)
         return results
 
     # ── Row 테이블 4개 (대시보드 시그널) ──────────────
@@ -453,6 +454,12 @@ class FlowxUploader:
         rows = build_sniper_rows(date_str)
         return self._upload_rows("dashboard_sniper", date_str, rows,
                                  "date,ticker", "스나이퍼")
+
+    def upload_crash_bounce(self, date_str: str) -> bool:
+        """crash_bounce_scan.json → dashboard_crash_bounce."""
+        rows = build_crash_bounce_rows(date_str)
+        return self._upload_rows("dashboard_crash_bounce", date_str, rows,
+                                 "date,ticker", "급락반등")
 
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
@@ -1814,3 +1821,54 @@ def build_sniper_rows(date_str: str = "") -> list[dict]:
 
     rows.sort(key=lambda x: -x["score"])
     return rows[:100]
+
+
+def build_crash_bounce_rows(date_str: str = "") -> list[dict]:
+    """crash_bounce_scan.json → dashboard_crash_bounce Row 테이블.
+
+    급락반등 포착기: 볼린저급락 반등 + 거래량폭발 반등 (STRONG_ALPHA 백테스트 검증)
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    p = DATA_DIR / "crash_bounce_scan.json"
+    if not p.exists():
+        return []
+    with open(p, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for c in data.get("candidates", []):
+        시그널들 = c.get("시그널", [])
+
+        if "볼린저급락 반등" in 시그널들 and "거래량폭발 반등" in 시그널들:
+            signal_type = "복합급락 반등"
+        elif "볼린저급락 반등" in 시그널들:
+            signal_type = "볼린저급락 반등"
+        elif "거래량폭발 반등" in 시그널들:
+            signal_type = "거래량폭발 반등"
+        else:
+            signal_type = "관심"
+
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": c.get("close", 0),
+            "change_pct": round(c.get("전일대비", 0), 2),
+            "gap_20ma": round(c.get("이격도_20일", 0), 1),
+            "bb_position": round(c.get("볼린저위치", 50) / 100, 2),
+            "volume_ratio": round(c.get("거래량배수", 0), 1),
+            "foreign_net": round(c.get("외인_당일", 0), 1),
+            "inst_net": round(c.get("기관_당일", 0), 1),
+            "foreign_days": c.get("외인연속매수", 0),
+            "inst_days": c.get("기관연속매수", 0),
+            "signal_type": signal_type,
+            "grade": c.get("등급", "관심"),
+            "score": int(c.get("점수", 0)),
+            "reasons": json.dumps(c.get("이유", []), ensure_ascii=False),
+        })
+
+    _fix_pick_names(rows)
+    rows.sort(key=lambda x: -x["score"])
+    return rows[:50]

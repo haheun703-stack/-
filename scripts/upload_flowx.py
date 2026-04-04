@@ -31,6 +31,7 @@ from src.adapters.flowx_uploader import (
     build_relay_rows,
     build_sniper_rows,
     build_sector_rotation_rows,
+    build_crash_bounce_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -119,6 +120,11 @@ def main():
     print(f"\n[FLOWX] 스나이퍼: {len(sniper_rows)}건")
     for r in sniper_rows[:5]:
         print(f"  {r['name']:14s} RSI={r['rsi']} BB={r['bb_position']:.2f} ADX={r['adx']} {r['signal_type']} score={r['score']}")
+
+    cb_rows = build_crash_bounce_rows(date_str_preview)
+    print(f"\n[FLOWX] 급락반등: {len(cb_rows)}건")
+    for r in cb_rows[:5]:
+        print(f"  {r['grade']:4s} {r['name']:14s} 이격={r['gap_20ma']:+.1f}% 거래량={r['volume_ratio']:.1f}배 {r['signal_type']} score={r['score']}")
 
     print(f"\n[FLOWX] 섹터로테이션: {len(sr_rows)}건")
     for r in sr_rows[:5]:
