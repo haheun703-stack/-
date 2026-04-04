@@ -1511,6 +1511,43 @@ def _calc_entry_stop(
     }
 
 
+_FIB_RATIOS = [0.236, 0.382, 0.500, 0.618, 0.786]
+
+
+def compute_stock_fibonacci(ticker: str) -> dict:
+    """개별 종목 피보나치 되돌림 레벨 계산 (20일/60일 스윙)."""
+    pq = PROCESSED_DIR / f"{ticker}.parquet"
+    if not pq.exists():
+        return {}
+    try:
+        df = pd.read_parquet(pq, columns=["high", "low", "close"])
+        if len(df) < 20:
+            return {}
+        close = float(df["close"].iloc[-1])
+        result = {}
+        for label, window in [("20d", 20), ("60d", 60)]:
+            if len(df) < window:
+                continue
+            recent = df.tail(window)
+            high = float(recent["high"].max())
+            low = float(recent["low"].min())
+            if high <= low:
+                continue
+            levels = sorted(round(high - (high - low) * r) for r in _FIB_RATIOS)
+            support = max((l for l in levels if l < close), default=None)
+            resistance = min((l for l in levels if l > close), default=None)
+            result[label] = {
+                "high": round(high),
+                "low": round(low),
+                "support": support,
+                "resistance": resistance,
+                "position_pct": round((close - low) / (high - low) * 100, 1),
+            }
+        return result
+    except Exception:
+        return {}
+
+
 def _build_reasons(
     n_sources, rsi, stoch_k, bb_pos, adx, above_ma20, above_ma60,
     trix_gx, macd_rising, foreign_5d, inst_5d, ret_5d, overheat_flags,
@@ -2618,6 +2655,7 @@ def main():
             "strategy": strategy,
             "group_source_count": grp_src_cnt,
             "sar_trend": pq_data.get("sar_trend", 0) if pq_data else 0,
+            "fibonacci": compute_stock_fibonacci(ticker),
         }
 
         # ── Alpha Scoring v3 보조 태그 (표시 전용) ──
@@ -2856,6 +2894,12 @@ def main():
         else:
             print(f"     진입:{r.get('entry_price',0):,}  손절:{r.get('stop_loss',0):,}  "
                   f"목표:{r.get('target_price',0):,} | {cond}")
+        fib = r.get("fibonacci", {}).get("20d", {})
+        fib_str = ""
+        if fib:
+            s = f"{fib['support']:,}" if fib.get("support") else "?"
+            rs = f"{fib['resistance']:,}" if fib.get("resistance") else "?"
+            fib_str = f"\n     📐 피보나치(20d): 지지 {s} | 저항 {rs} | 위치 {fib.get('position_pct', 0)}%"
         ma5g = r.get("ma5_gap_pct", 0)
         ma5e = r.get("ma5_entry", "")
         ma5_str = f"  📐 MA5 {ma5g:+.1f}% [{ma5e}]" if ma5e else ""
@@ -2878,7 +2922,7 @@ def main():
             t2 = r.get("alpha_tier2", 0)
             v3s = r.get("alpha_v3_score", 0)
             alpha_str = f"\n     🧬 v3({v3s:.0f}): T1={t1} T2={t2} [{'+'.join(sigs)}]"
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}{alpha_str}")
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}{alpha_str}{fib_str}")
 
     if top5:
         print(f"\n{'─'*60}")
