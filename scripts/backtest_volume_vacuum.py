@@ -27,31 +27,33 @@ sys.path.insert(0, str(PROJECT_ROOT))
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 
 
-def build_volume_profile(df: pd.DataFrame, window: int = 60, n_bins: int = 20):
-    """최근 window일의 가격대별 거래량 프로파일.
+def build_volume_profile_vec(lows: np.ndarray, highs: np.ndarray,
+                             volumes: np.ndarray, n_bins: int = 20):
+    """Vectorized 가격대별 거래량 프로파일.
 
-    Returns: (bins_edges, vol_by_bin, total_vol)
+    Returns: (bin_edges, vol_by_bin, total_vol)
     """
-    recent = df.tail(window)
-    price_low = recent["low"].min()
-    price_high = recent["high"].max()
+    valid = (volumes > 0) & ~np.isnan(volumes) & ~np.isnan(lows) & ~np.isnan(highs)
+    if valid.sum() < 5:
+        return None, None, 0
 
+    lo_arr = lows[valid]
+    hi_arr = highs[valid]
+    vol_arr = volumes[valid]
+
+    price_low = lo_arr.min()
+    price_high = hi_arr.max()
     if price_high <= price_low:
         return None, None, 0
 
     bin_edges = np.linspace(price_low, price_high, n_bins + 1)
     vol_by_bin = np.zeros(n_bins)
 
-    for _, row in recent.iterrows():
-        lo, hi, vol = row["low"], row["high"], row["volume"]
-        if vol <= 0 or np.isnan(vol):
-            continue
-        # 캔들이 걸치는 bin에 거래량 비례 배분
-        for b in range(n_bins):
-            bin_lo, bin_hi = bin_edges[b], bin_edges[b + 1]
-            overlap = max(0, min(hi, bin_hi) - max(lo, bin_lo))
-            candle_range = hi - lo if hi > lo else 1
-            vol_by_bin[b] += vol * (overlap / candle_range)
+    # vectorized: 각 bin에 대해 전체 캔들의 overlap 한꺼번에 계산
+    candle_range = np.maximum(hi_arr - lo_arr, 1.0)
+    for b in range(n_bins):
+        overlap = np.maximum(0, np.minimum(hi_arr, bin_edges[b + 1]) - np.maximum(lo_arr, bin_edges[b]))
+        vol_by_bin[b] = (vol_arr * overlap / candle_range).sum()
 
     total = vol_by_bin.sum()
     return bin_edges, vol_by_bin, total
@@ -117,7 +119,7 @@ def backtest_volume_vacuum():
 
     all_trades = []
 
-    for pq in parquets:
+    for pi, pq in enumerate(parquets):
         ticker = pq.stem
         try:
             df = pd.read_parquet(pq)
@@ -133,15 +135,21 @@ def backtest_volume_vacuum():
 
             has_supply = "기관합계" in df.columns and "외국인합계" in df.columns
 
+            # numpy 배열 미리 추출 (속도)
+            close_arr = df["close"].values
+            low_arr = df["low"].values
+            high_arr = df["high"].values
+            vol_arr = df["volume"].values
+
             # 60일 윈도우로 슬라이딩
             for i in range(60, len(df) - 6):
-                window = df.iloc[i - 60:i]
-                close = df.iloc[i]["close"]
+                close = close_arr[i]
 
                 if close <= 0 or np.isnan(close):
                     continue
 
-                bin_edges, vol_by_bin, total_vol = build_volume_profile(window)
+                bin_edges, vol_by_bin, total_vol = build_volume_profile_vec(
+                    low_arr[i - 60:i], high_arr[i - 60:i], vol_arr[i - 60:i])
                 if bin_edges is None:
                     continue
 
@@ -182,6 +190,9 @@ def backtest_volume_vacuum():
 
         except Exception:
             continue
+
+        if (pi + 1) % 200 == 0:
+            print(f"  ... {pi + 1}/{len(parquets)} 완료, 시그널 {len(all_trades)}건")
 
     # ── 결과 분석 ──
     if not all_trades:
