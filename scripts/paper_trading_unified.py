@@ -1140,6 +1140,13 @@ def run_daily(force_rebalance: bool = False) -> dict:
         force_rebalance: True면 요일 무관하게 리밸런싱 강제 실행
     """
     today_str = datetime.now().strftime("%Y-%m-%d")
+
+    # 주말 가드: 토(5)/일(6)에는 실행하지 않음
+    weekday = datetime.now().weekday()
+    if weekday >= 5:
+        print(f"  [PAPER] 주말({['월','화','수','목','금','토','일'][weekday]}) — Paper Trading 스킵")
+        return {"status": "skip", "reason": "weekend", "date": today_str}
+
     do_rebalance = force_rebalance or is_rebalance_day()
     mode_tag = "리밸런싱" if do_rebalance else "일일"
 
