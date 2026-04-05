@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 DATA_DIR = PROJECT_ROOT / "data"
-CSV_DIR = DATA_DIR / "csv"
+RAW_DIR = DATA_DIR / "raw"
 OUTPUT_PATH = DATA_DIR / "bio_cdmo_watch.json"
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,29 +84,16 @@ BIO_UNIVERSE = {
 
 
 def _load_ohlcv(ticker: str, days: int = 60) -> pd.DataFrame | None:
-    """parquet 또는 CSV에서 OHLCV 로드."""
-    # parquet 먼저
-    pq_path = DATA_DIR / "parquet" / f"{ticker}.parquet"
-    if pq_path.exists():
-        try:
-            df = pd.read_parquet(pq_path)
-            if "Date" in df.columns:
-                df = df.set_index("Date")
-            df.index = pd.to_datetime(df.index)
-            return df.tail(days)
-        except Exception:
-            pass
-
-    # CSV 폴백
-    csv_path = CSV_DIR / f"{ticker}.csv"
-    if csv_path.exists():
-        try:
-            df = pd.read_csv(csv_path, index_col=0, parse_dates=True)
-            return df.tail(days)
-        except Exception:
-            pass
-
-    return None
+    """data/raw/{ticker}.parquet에서 OHLCV 로드."""
+    pq_path = RAW_DIR / f"{ticker}.parquet"
+    if not pq_path.exists():
+        return None
+    try:
+        df = pd.read_parquet(pq_path)
+        df.index = pd.to_datetime(df.index)
+        return df.tail(days)
+    except Exception:
+        return None
 
 
 def _calc_rsi(series: pd.Series, period: int = 14) -> float:
@@ -189,7 +176,7 @@ def scan_bio_cdmo(target_date: str | None = None) -> dict:
         if df is None or len(df) < 20:
             continue
 
-        close = df["Close"] if "Close" in df.columns else df.get("close", pd.Series())
+        close = df["close"] if "close" in df.columns else df.get("Close", pd.Series())
         if close.empty:
             continue
 
