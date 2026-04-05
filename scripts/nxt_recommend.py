@@ -38,9 +38,9 @@ PICKS_PATH = NXT_DIR / "nxt_picks.json"
 
 # 등급별 기본 점수
 GRADE_SCORE = {
-    "적극매수": 100,
-    "매수": 70,
-    "관심매수": 40,
+    "강력 포착": 100, "적극매수": 100,
+    "포착": 70, "매수": 70,
+    "관심": 40, "관심매수": 40,
 }
 
 # NXT 추천 임계값
@@ -259,11 +259,11 @@ def generate_nxt_picks(target_date: str | None = None) -> dict:
 
         # 추천 등급 결정
         if score >= 120:
-            rec_grade = "NXT적극매수"
+            rec_grade = "NXT강력포착"
         elif score >= 90:
-            rec_grade = "NXT매수"
+            rec_grade = "NXT포착"
         elif score >= 60:
-            rec_grade = "NXT관심"
+            rec_grade = "NXT주목"
         else:
             rec_grade = "보류"
 
@@ -314,9 +314,9 @@ def generate_nxt_picks(target_date: str | None = None) -> dict:
         "nxt_active_count": len(nxt_active),
         "picks": top_picks,
         "summary": {
-            "nxt_적극매수": sum(1 for p in top_picks if p["nxt_grade"] == "NXT적극매수"),
-            "nxt_매수": sum(1 for p in top_picks if p["nxt_grade"] == "NXT매수"),
-            "nxt_관심": sum(1 for p in top_picks if p["nxt_grade"] == "NXT관심"),
+            "nxt_강력포착": sum(1 for p in top_picks if p["nxt_grade"] == "NXT강력포착"),
+            "nxt_포착": sum(1 for p in top_picks if p["nxt_grade"] == "NXT포착"),
+            "nxt_주목": sum(1 for p in top_picks if p["nxt_grade"] == "NXT주목"),
             "avg_premium": round(
                 sum(p["nxt_premium_pct"] for p in nxt_active) / len(nxt_active), 2
             ) if nxt_active else 0,
@@ -347,9 +347,9 @@ def _empty_result(today: str) -> dict:
         "nxt_active_count": 0,
         "picks": [],
         "summary": {
-            "nxt_적극매수": 0,
-            "nxt_매수": 0,
-            "nxt_관심": 0,
+            "nxt_강력포착": 0,
+            "nxt_포착": 0,
+            "nxt_주목": 0,
             "avg_premium": 0,
             "avg_net_buy": 0,
         },
@@ -373,17 +373,17 @@ def _send_telegram(result: dict):
 
     lines = [f"🌙 NXT 추천 ({result['date']})"]
     lines.append(
-        f"적극 {summary.get('nxt_적극매수', 0)} / "
-        f"매수 {summary.get('nxt_매수', 0)} / "
-        f"관심 {summary.get('nxt_관심', 0)}"
+        f"강력포착 {summary.get('nxt_강력포착', 0)} / "
+        f"포착 {summary.get('nxt_포착', 0)} / "
+        f"주목 {summary.get('nxt_주목', 0)}"
     )
     lines.append("")
 
     for i, p in enumerate(picks[:7], 1):
         grade_emoji = {
-            "NXT적극매수": "🔴",
-            "NXT매수": "🟠",
-            "NXT관심": "🟡",
+            "NXT강력포착": "🔴",
+            "NXT포착": "🟠",
+            "NXT주목": "🟡",
         }.get(p["nxt_grade"], "⚪")
 
         nxt_info = ""
@@ -430,9 +430,9 @@ def main():
 
     print(f"\n=== NXT 추천 엔진 ({result['date']}) ===")
     print(f"  분석: {result['total_evaluated']}종목, NXT거래: {result['nxt_active_count']}종목")
-    print(f"  NXT적극매수: {summary.get('nxt_적극매수', 0)}")
-    print(f"  NXT매수: {summary.get('nxt_매수', 0)}")
-    print(f"  NXT관심: {summary.get('nxt_관심', 0)}")
+    print(f"  NXT강력포착: {summary.get('nxt_강력포착', 0)}")
+    print(f"  NXT포착: {summary.get('nxt_포착', 0)}")
+    print(f"  NXT주목: {summary.get('nxt_주목', 0)}")
 
     if picks:
         print(f"\n  TOP {len(picks)}:")
