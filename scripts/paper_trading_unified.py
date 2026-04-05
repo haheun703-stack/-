@@ -75,7 +75,7 @@ TAKE_PROFIT_T1_PCT = 0.10      # +10% 1차 익절 (50% 매도)
 TAKE_PROFIT_T2_PCT = 0.20      # +20% 2차 익절 (전량 매도)
 TRAILING_ACTIVATE_PCT = 0.08   # +8% 이후 트레일링 활성화
 TRAILING_STOP_PCT = -0.04      # 고점 대비 -4% 하락 시 매도
-MAX_HOLDING_DAYS = 5           # 최대 보유일 (영업일 기준, 1주 Rolling)
+MAX_HOLDING_DAYS = int(os.environ.get("PAPER_MAX_HOLD", 5))  # 기본 5일, D+1=1
 
 # ETF 방향 트레이딩 (JARVIS 연동)
 ETF_CAPITAL = 10_000_000       # 1,000만원 별도 자본 (개별 종목과 분리)
