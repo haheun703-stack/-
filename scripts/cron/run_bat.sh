@@ -130,16 +130,24 @@ case "$BAT" in
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
     run_py scripts/fetch_ecos_macro.py
+    # COO 복원: ETF/섹터 수급 수집
+    run_py scripts/collect_etf_volume.py
+    run_py scripts/collect_etf_investor_flow.py
     # --- G2: 지표 + 릴레이 ---
     run_py_long scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/relay_report.py
+    # COO 복원: 섹터 분석
+    run_py scripts/sector_momentum.py --history
+    run_py scripts/sector_zscore.py --top 5
+    run_py_long scripts/sector_investor_flow.py --days 5
     # --- G3: 레짐 + BRAIN + SHIELD ---
     run_py scripts/regime_macro_signal.py
     run_py scripts/scan_buy_candidates.py
     run_py scripts/run_shield.py --send
     run_py scripts/run_brain.py
+    run_py scripts/run_master_brain.py
     run_py scripts/run_v3_brain.py --no-telegram
     run_py scripts/run_lens.py
     # --- G3.5: ETF 방향 트레이딩 + 눈치 엔진 ---
@@ -154,9 +162,17 @@ case "$BAT" in
     run_py scripts/scan_dual_buying.py
     run_py scripts/scan_accumulation_tracker.py
     run_py scripts/calc_institutional_targets.py
+    # COO 복원: 세력/밸류체인/공시/뉴스 스캔
+    run_py_long scripts/scan_whale_detect.py
+    run_py_long scripts/scan_force_hybrid.py
+    run_py scripts/scan_value_chain.py
+    run_py scripts/dart_event_signal.py
+    run_py scripts/crawl_market_news.py
     run_py_long scripts/perplexity_market_intel.py
     run_py_long scripts/ai_news_brain.py
     # --- G4: 추천 + FLOWX ---
+    # COO 복원: 성과 추적 (추천 전에 실행)
+    run_py scripts/track_pick_results.py
     run_py scripts/scan_earnings_acceleration.py
     run_py scripts/scan_turnaround.py
     run_py scripts/scan_tomorrow_picks.py
@@ -176,6 +192,7 @@ case "$BAT" in
     run_py scripts/market_journal.py
     run_py scripts/daily_market_learner.py
     run_py scripts/paper_trading_unified.py
+    run_py scripts/data_health_check.py
     # 금요일이면 유니버스 전체 재구성 (신규 상장/시총 변동 반영)
     DOW=$(date +%u)
     if [ "$DOW" = "5" ]; then
