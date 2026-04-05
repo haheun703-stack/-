@@ -72,6 +72,9 @@ case "$BAT" in
     run_py scripts/run_v3_brain.py --no-telegram
     run_py scripts/scan_tomorrow_picks.py
     run_py scripts/market_sense_engine.py --send
+    # NXT 모닝 추천 — 8시 프리마켓 전 텔레그램 발송
+    run_py src/use_cases/nxt_signal.py
+    run_py scripts/nxt_recommend.py
     ;;
   B) # 07:00 KST — 장전 브리핑
     run_py scripts/crawl_morning_reports.py
