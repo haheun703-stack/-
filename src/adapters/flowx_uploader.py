@@ -632,8 +632,9 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
     # v6: AI 대형주 독립 섹션 제거 — 시그널 기반 picks만 사용
     # (ai_largecap은 이제 항상 빈 리스트)
 
-    # picks → 적극매수/매수 (FLOWX: 관심매수도 포함)
-    allowed_grades = {"적극매수", "매수", "관심매수"} if is_flowx else {"적극매수", "매수"}
+    # picks → 강력 포착/포착 (FLOWX: 관심도 포함)
+    # 하위호환: scan_tomorrow_picks.py가 아직 구표현 출력 → 양쪽 허용
+    allowed_grades = {"강력 포착", "포착", "관심", "적극매수", "매수", "관심매수"} if is_flowx else {"강력 포착", "포착", "적극매수", "매수"}
     for pick in data.get("picks", []):
         ticker = pick.get("ticker", "")
         grade_kr = pick.get("grade", "")
@@ -643,7 +644,8 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             continue
         seen_codes.add(ticker)
 
-        grade_map = {"적극매수": "AA", "매수": "A", "관심매수": "B"}
+        grade_map = {"강력 포착": "AA", "포착": "A", "관심": "B",
+                     "적극매수": "AA", "매수": "A", "관심매수": "B"}
         grade = grade_map.get(grade_kr, "B")
         close = pick.get("close", 0) or _get_close(ticker)
         if close <= 0:
@@ -666,7 +668,7 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
             "stop_loss": pick.get("stop_loss") or int(close * 0.92),
             "target_price": pick.get("target_price", int(close * 1.1)),
             "holding_days": 5,
-            "signal_type": "BUY",
+            "signal_type": "PICK",
             "volume_ratio": round(pick.get("volume_ratio", 1.0), 1),
             "momentum_regime": "QUANT",
         }
@@ -1045,7 +1047,7 @@ def build_jarvis_payload() -> dict:
 
     # picks 요약 (전체 picks는 너무 크므로 관찰 이상만)
     all_picks = picks_raw.get("picks", [])
-    buyable_grades = {"적극매수", "매수", "관심매수", "관찰"}
+    buyable_grades = {"강력 포착", "포착", "관심", "관찰", "적극매수", "매수", "관심매수"}
     buyable = [p for p in all_picks if p.get("grade") in buyable_grades]
     buyable.sort(key=lambda x: -x.get("total_score", 0))
 
@@ -1325,12 +1327,12 @@ def _build_fundamentals_data() -> dict:
 def _convert_killer_to_picks(killer_raw: dict) -> list[dict]:
     """killer_picks.json → PickItem 형식으로 변환하여 메인 추천에 병합."""
     GRADE_MAP = {
-        "STRONG": ("적극매수", 70),
-        "MODERATE": ("매수", 60),
-        "NOTABLE": ("관심매수", 50),
-        "EARLY_DUAL": ("관심매수", 55),
-        "EARLY_ACCEL": ("관심매수", 52),
-        "EARLY_SURGE": ("관심매수", 50),
+        "STRONG": ("강력 포착", 70),
+        "MODERATE": ("포착", 60),
+        "NOTABLE": ("관심", 50),
+        "EARLY_DUAL": ("관심", 55),
+        "EARLY_ACCEL": ("관심", 52),
+        "EARLY_SURGE": ("관심", 50),
         "WATCH": ("관찰", 40),
     }
     items: list[dict] = []
@@ -1387,7 +1389,7 @@ def _convert_killer_to_picks(killer_raw: dict) -> list[dict]:
         frgn_5d = s.get("frgn_5d", 0)
         reasons = []
         if s.get("dual_today"):
-            reasons.append("기관+외인 동시매수")
+            reasons.append("기관+외인 동시유입")
         reasons.append("기관 %d일 연속" % s.get("inst_consec", 0))
         if s.get("chg_pct", 0) != 0:
             reasons.append("등락 %+.1f%%" % s["chg_pct"])
@@ -1611,7 +1613,7 @@ def build_smart_money_rows(date_str: str = "") -> list[dict]:
 
         # signal_type 결정
         if alert.get("dual_buying"):
-            signal_type = "DUAL_BUY"
+            signal_type = "DUAL_FLOW"
         elif f_consec >= 3 or f_net > 0:
             signal_type = "FOREIGN_BUY"
         elif i_consec >= 3 or i_net > 0:

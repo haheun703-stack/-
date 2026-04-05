@@ -158,11 +158,11 @@ def archive_daily(date_str: str | None = None):
     # ── 추천 종목 (tomorrow_picks.json) ──
     picks_data = _load_json("tomorrow_picks.json")
     picks = picks_data.get("picks", []) if picks_data else []
-    buy_grades = [p for p in picks if p.get("grade") in ("강력매수", "매수")]
-    watch_grades = [p for p in picks if p.get("grade") == "관심매수"]
+    buy_grades = [p for p in picks if p.get("grade") in ("강력 포착", "포착", "적극매수", "매수")]
+    watch_grades = [p for p in picks if p.get("grade") in ("관심", "관심매수")]
 
     for p in picks:
-        if p.get("grade") not in ("강력매수", "매수", "관심매수"):
+        if p.get("grade") not in ("강력 포착", "포착", "관심", "적극매수", "매수", "관심매수"):
             continue
         conn.execute("""
             INSERT OR REPLACE INTO daily_picks
@@ -230,7 +230,7 @@ def archive_daily(date_str: str | None = None):
 
     # ── 일일 요약 저장 ──
     avg_score = 0
-    scored_picks = [p for p in picks if p.get("total_score", 0) > 0 and p.get("grade") in ("강력매수", "매수", "관심매수")]
+    scored_picks = [p for p in picks if p.get("total_score", 0) > 0 and p.get("grade") in ("강력 포착", "포착", "관심", "적극매수", "매수", "관심매수")]
     if scored_picks:
         avg_score = round(sum(p["total_score"] for p in scored_picks) / len(scored_picks), 1)
 
@@ -286,7 +286,7 @@ def generate_weekly_report(week_end: str | None = None):
     # 해당 주 picks
     rows = conn.execute("""
         SELECT * FROM daily_picks
-        WHERE date BETWEEN ? AND ? AND grade IN ('강력매수', '매수', '관심매수')
+        WHERE date BETWEEN ? AND ? AND grade IN ('강력 포착', '포착', '관심', '적극매수', '매수', '관심매수')
         ORDER BY date, score DESC
     """, (week_start, week_end)).fetchall()
 
@@ -362,7 +362,7 @@ def generate_monthly_report(year_month: str | None = None):
 
     rows = conn.execute("""
         SELECT * FROM daily_picks
-        WHERE date LIKE ? AND grade IN ('강력매수', '매수', '관심매수')
+        WHERE date LIKE ? AND grade IN ('강력 포착', '포착', '관심', '적극매수', '매수', '관심매수')
         ORDER BY date, score DESC
     """, (f"{year_month}%",)).fetchall()
 

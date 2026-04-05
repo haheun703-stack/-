@@ -257,10 +257,10 @@ def build_zone2(max_items: int = 10) -> list[dict]:
         grade_kr = pick.get("grade", "")
         score = pick.get("total_score", 0)
 
-        if grade_kr == "적극매수":
-            action, grade = "BUY", "AA"
-        elif grade_kr == "매수":
-            action, grade = "BUY", "A"
+        if grade_kr in ("적극매수", "강력 포착"):
+            action, grade = "PICK", "AA"
+        elif grade_kr in ("매수", "포착"):
+            action, grade = "PICK", "A"
         elif score >= 45:
             action, grade = "WATCH", "B"
         else:
