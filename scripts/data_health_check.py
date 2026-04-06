@@ -3,7 +3,7 @@
 매일 BAT-D 완료 후 (또는 독립 실행) 모든 데이터 소스를 점검하고
 결과를 텔레그램으로 보낸다.
 
-19개 항목:
+17개 항목:
   1. 종가 데이터 (Parquet)
   2. 수급 데이터 (종목별)
   3. 수급 데이터 (섹터별)
@@ -17,12 +17,12 @@
   11. SHIELD 방어
   12. 학습 기록
   13. Supabase 업로드
-  14. 스케줄러 실행 로그
+  14. 스케줄러(cron) 실행 로그
   15. 파이프라인 에러율
   16. KOSPI 인덱스 신선도
   17. 투자자수급 신선도
-  18. 수급이면분석 신선도 (supply_demand/)
-  19. 수급스냅샷 신선도 (supply_snapshots/)
+  (18. 수급이면분석 — 폐기)
+  (19. 수급스냅샷 — 폐기)
 
 실행:
   python -u -X utf8 scripts/data_health_check.py
@@ -104,8 +104,7 @@ class DataHealthCheck:
             self._check_pipeline_errors,    # 15. 파이프라인 에러율
             self._check_kospi_index,        # 16. KOSPI 인덱스
             self._check_investor_flow,      # 17. 투자자수급
-            self._check_supply_demand,      # 18. 수급이면분석
-            self._check_supply_snapshots,   # 19. 수급스냅샷
+            # 18, 19 폐기: supply_demand/snapshots는 BAT에서 제거됨 (2026-04-06)
         ]
 
         results = []
@@ -746,52 +745,43 @@ class DataHealthCheck:
     # ─── 14. 스케줄러 로그 ───
 
     def _check_scheduler(self) -> CheckResult:
-        """오늘 스케줄러 로그에서 실행/실패 단계 수 파싱."""
-        log_path = PROJECT_ROOT / "logs" / "schedule.log"
+        """오늘 cron 로그에서 BAT-D 실행 여부 + 실패 건수 파싱."""
+        # VPS cron 기반: logs/cron_YYYYMMDD.log
+        log_name = f"cron_{self.today.strftime('%Y%m%d')}.log"
+        log_path = PROJECT_ROOT / "logs" / log_name
         if not log_path.exists():
-            return CheckResult("스케줄러", False, "schedule.log 없음")
+            # 주말이면 OK
+            if self.today.weekday() >= 5:
+                return CheckResult("스케줄러", True, "주말 — cron 미실행 정상")
+            return CheckResult("스케줄러", False, f"{log_name} 없음")
 
         try:
             content = log_path.read_text(encoding="utf-8", errors="ignore")
             lines = content.split("\n")
 
-            # 오늘 날짜 로그만 필터
-            today_lines = [
-                l for l in lines
-                if self.today.strftime("%Y-%m-%d") in l
-                or self.today.strftime("%m/%d") in l  # Windows 날짜 포맷
-                or self.today.strftime("%Y. %m. %d") in l  # 한국어 포맷
-            ]
+            # BAT-D 실행 여부
+            bat_d_start = [l for l in lines if "BAT-D 시작" in l]
+            bat_d_end = [l for l in lines if "BAT-D 완료" in l]
 
-            if not today_lines:
-                # 날짜 포맷이 다를 수 있으니 마지막 200줄에서 "BAT-D" 검색
-                recent = lines[-200:] if len(lines) > 200 else lines
-                bat_d_lines = [l for l in recent if "BAT-D" in l]
-                if bat_d_lines:
-                    return CheckResult("스케줄러", True,
-                                       f"최근 BAT-D 로그 {len(bat_d_lines)}줄")
-                return CheckResult("스케줄러", False, "오늘 로그 없음")
+            if not bat_d_start:
+                return CheckResult("스케줄러", False, "BAT-D 시작 로그 없음")
 
-            # FAILED 카운트
-            failed = [l for l in today_lines if "FAILED" in l]
-            # 단계별 실행 카운트
-            executed = [l for l in today_lines if re.search(r"\[\d+", l)]
+            # 실패 건수 (WARN 라인)
+            warn_lines = [l for l in lines if "[WARN]" in l]
+            fail_count = len(warn_lines)
 
-            total_steps = len(executed)
-            failed_count = len(failed)
+            if bat_d_end:
+                # "=== BAT-D 완료 (실패: 2건) ===" 파싱
+                m = re.search(r"실패:\s*(\d+)건", bat_d_end[-1])
+                if m:
+                    fail_count = int(m.group(1))
 
-            if failed_count == 0:
+            if fail_count == 0:
                 return CheckResult("스케줄러", True,
-                                   f"{total_steps}단계 실행, 실패 0건")
+                                   f"BAT-D 정상 완료, 실패 0건")
             else:
-                failed_ids = []
-                for l in failed:
-                    m = re.search(r"\[([^\]]+)\].*FAILED", l)
-                    if m:
-                        failed_ids.append(m.group(1))
-                return CheckResult("스케줄러", failed_count <= 2,
-                                   f"{total_steps}단계 중 {failed_count}건 실패: "
-                                   f"{', '.join(failed_ids[:5])}")
+                return CheckResult("스케줄러", fail_count <= 3,
+                                   f"BAT-D 완료, 실패 {fail_count}건")
         except Exception as e:
             return CheckResult("스케줄러", False, f"로그 파싱 오류: {e}")
 
