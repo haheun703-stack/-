@@ -200,8 +200,26 @@ def load_json(rel_path: str) -> dict | list:
 
 
 def build_name_map() -> dict[str, str]:
-    """종목코드 → 종목명 매핑 (CSV 우선, 없으면 pykrx 폴백)."""
+    """종목코드 → 종목명 매핑 (universe.csv 최우선 → CSV 폴백 → pykrx 폴백)."""
     name_map = {}
+    # 1) universe.csv (최우선 — VPS에서도 안정적)
+    uni_path = DATA_DIR / "universe.csv"
+    if uni_path.exists():
+        try:
+            import csv as csv_mod
+            with open(uni_path, encoding="utf-8-sig") as uf:
+                reader = csv_mod.DictReader(uf)
+                for row in reader:
+                    t = row.get("ticker", row.get("code", "")).strip()
+                    n = row.get("name", row.get("종목명", "")).strip()
+                    if t and n:
+                        name_map[t] = n
+        except Exception:
+            pass
+    if name_map:
+        logger.info("[picks] universe.csv 종목명 %d건 로드", len(name_map))
+        return name_map
+    # 2) stock_data_daily/ CSV 파일명
     for csv in CSV_DIR.glob("*.csv"):
         parts = csv.stem.rsplit("_", 1)
         if len(parts) == 2:

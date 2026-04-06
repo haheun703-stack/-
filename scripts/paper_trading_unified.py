@@ -1011,8 +1011,9 @@ def send_daily_report(
     if entries:
         lines.append(f"-- 신규 진입 ({len(entries)}건) --")
         for e in entries:
+            ename = ticker_to_name(e.get("ticker", "")) if e["name"] == e.get("ticker") else e["name"]
             lines.append(
-                f"  [{e['grade']}] {e['name']} {e['price']:,}원 "
+                f"  [{e['grade']}] {ename} {e['price']:,}원 "
                 f"x{e['qty']}주 ({e['strategy']})"
             )
         lines.append("")
@@ -1022,8 +1023,9 @@ def send_daily_report(
         for x in exits:
             emoji = "🟢" if x["pnl_pct"] > 0 else "🔴"
             partial = " (부분)" if x.get("partial") else ""
+            xname = ticker_to_name(x.get("ticker", "")) if x["name"] == x.get("ticker") else x["name"]
             lines.append(
-                f"  {emoji} {x['name']} {x['pnl_pct']:+.1f}% "
+                f"  {emoji} {xname} {x['pnl_pct']:+.1f}% "
                 f"[{x['reason']}]{partial}"
             )
         lines.append("")
@@ -1047,8 +1049,9 @@ def send_daily_report(
                 days = (pd.Timestamp(today_str) - pd.Timestamp(pos["entry_date"])).days
             except Exception:
                 pass
+            pname = ticker_to_name(ticker) if pos["name"] == ticker else pos["name"]
             lines.append(
-                f"  {emoji} {pos['name']} {pnl:+.1f}% "
+                f"  {emoji} {pname} {pnl:+.1f}% "
                 f"({days}일, {pos.get('strategy', '')})"
             )
 
@@ -1117,8 +1120,9 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
         lines.append(f"-- 금주 거래 ({len(week_trades)}건) --")
         for t in week_trades:
             emoji = "🟢" if t["pnl_pct"] > 0 else "🔴"
+            tname = ticker_to_name(t.get("ticker", "")) if t["name"] == t.get("ticker") else t["name"]
             lines.append(
-                f"  {emoji} {t['name']} {t['pnl_pct']:+.1f}% "
+                f"  {emoji} {tname} {t['pnl_pct']:+.1f}% "
                 f"[{t['exit_reason']}] {t.get('days_held', '?')}일"
             )
         lines.append("")
@@ -1128,7 +1132,8 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
         for ticker, pos in pf["positions"].items():
             cur_price, _ = get_latest_price(ticker)
             pnl = (cur_price / pos["avg_price"] - 1) * 100 if cur_price > 0 else 0
-            lines.append(f"  {pos['name']} {pnl:+.1f}% ({pos.get('strategy', '')})")
+            pname = ticker_to_name(ticker) if pos["name"] == ticker else pos["name"]
+            lines.append(f"  {pname} {pnl:+.1f}% ({pos.get('strategy', '')})")
 
     msg = "\n".join(lines)
     try:
