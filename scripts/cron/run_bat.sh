@@ -69,7 +69,7 @@ case "$BAT" in
     run_py scripts/fetch_liquidity_data.py
     run_py scripts/run_liquidity_signal.py
     run_py scripts/run_relay_engine.py --update --signal
-    run_py scripts/run_v3_brain.py --no-telegram
+    run_py_long scripts/run_v3_brain.py --no-telegram
     run_py scripts/scan_tomorrow_picks.py
     run_py scripts/market_sense_engine.py --send
     # NXT 모닝 추천 — 8시 프리마켓 전 텔레그램 발송
@@ -148,7 +148,7 @@ case "$BAT" in
     run_py scripts/run_shield.py --send
     run_py scripts/run_brain.py
     run_py scripts/run_master_brain.py
-    run_py scripts/run_v3_brain.py --no-telegram
+    run_py_long scripts/run_v3_brain.py --no-telegram
     run_py scripts/run_lens.py
     # --- G3.5: ETF 방향 트레이딩 + 눈치 엔진 ---
     run_py scripts/market_sense_engine.py --send
