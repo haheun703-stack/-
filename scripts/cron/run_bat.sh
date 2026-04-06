@@ -197,7 +197,7 @@ case "$BAT" in
     run_py scripts/scan_bio_cdmo.py
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
-    run_py scripts/daily_market_learner.py
+    run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
     run_py scripts/paper_trading_unified.py
     run_py scripts/data_health_check.py
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
