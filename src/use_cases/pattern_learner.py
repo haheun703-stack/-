@@ -1,10 +1,17 @@
-"""패턴 학습 엔진 — 급등/급락 원인 분석 + 패턴 누적 + 내일 후보 추출.
+"""패턴 학습 엔진 v2 — 급등/급락 원인 분석 + 패턴 누적 + 내일 후보 추출.
 
 daily_market_learner.py에서 호출.
 parquet 131개 컬럼에서 D-1 기술지표를 뽑아 "왜 올랐나/떨어졌나"를 분류하고,
 패턴별 통계를 누적하여 수익 확률을 학습한다.
 
-4/10 1차 완성 목표.
+v2 확장 (4/6):
+- 개인 수급 분석 (외인/기관 역산)
+- 국적별 외국인 분석 (nationality_signal.json)
+- ETF 선행성 분석 (etf_flow_xray.json)
+- 섹터 릴레이 연쇄 (group_relay_today.json)
+- 매크로 게이트 (vix/usdkrw/kospi in parquet)
+
+핵심: ETF/선물/채권 → 섹터 → 종목 흐름 + 개인 수급도 분석
 """
 
 from __future__ import annotations
@@ -23,6 +30,14 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
 PATTERN_STATS_PATH = DATA_DIR / "market_learning" / "pattern_stats.json"
+
+# 컨텍스트 데이터 경로
+NATIONALITY_SIGNAL_PATH = DATA_DIR / "krx_nationality" / "nationality_signal.json"
+ETF_XRAY_PATH = DATA_DIR / "etf_flow_xray.json"
+ETF_MASTER_PATH = DATA_DIR / "etf_master.json"
+RELAY_TODAY_PATH = DATA_DIR / "group_relay" / "group_relay_today.json"
+SECTOR_COMPOSITE_PATH = DATA_DIR / "sector_rotation" / "sector_composite.json"
+INVESTOR_FLOW_PATH = DATA_DIR / "sector_rotation" / "investor_flow.json"
 
 # ═══════════════════════════════════════════════
 # D-1 기술지표 수집 (parquet 131컬럼 중 핵심 추출)
@@ -53,6 +68,8 @@ _INDICATOR_COLS = [
     "gap_up_pct", "pullback_atr_zscore", "smart_z",
     # 피보나치 대용 (스윙 고/저)
     "high_20", "high_60", "rolling_low_10", "rolling_low_3",
+    # 매크로 (parquet에 포함됨)
+    "vix_close", "vix_zscore", "usdkrw_close", "kospi_close", "soxx_close",
 ]
 
 
@@ -110,6 +127,35 @@ def collect_deep_snapshot(ticker: str) -> dict | None:
         sma60 = _sf(yesterday.get("sma_60", 0))
         ma60_gap = round((close_y / sma60 - 1) * 100, 2) if sma60 > 0 else 0
 
+        # ── 개인 수급 역산 ──
+        fn5 = _sf(yesterday.get("foreign_net_5d", 0))
+        in5 = _sf(yesterday.get("inst_net_5d", 0))
+        fn20 = _sf(yesterday.get("foreign_net_20d", 0))
+        in20 = _sf(yesterday.get("inst_net_20d", 0))
+        retail_net_5d = -(fn5 + in5)
+        retail_net_20d = -(fn20 + in20)
+
+        # 개인 연속매수 추정 (최근 5일)
+        retail_consec = 0
+        if len(df) >= 7:
+            for i in range(-2, -7, -1):
+                row = df.iloc[i]
+                fn = _sf(row.get("foreign_net_5d", 0))
+                ins = _sf(row.get("inst_net_5d", 0))
+                rn = -(fn + ins)
+                if rn > 0:
+                    retail_consec += 1
+                elif rn < 0:
+                    retail_consec -= 1
+                else:
+                    break
+
+        # ── 매크로 상태 ──
+        vix = _sf(yesterday.get("vix_close", 20))
+        vix_z = _sf(yesterday.get("vix_zscore", 0))
+        usdkrw = _sf(yesterday.get("usdkrw_close", 1350))
+        kospi = _sf(yesterday.get("kospi_close", 2500))
+
         return {
             "ticker": ticker,
             "close_today": close_t,
@@ -120,6 +166,16 @@ def collect_deep_snapshot(ticker: str) -> dict | None:
             "ma60_gap": ma60_gap,
             "indicators": indicators,
             "fibonacci": fib,
+            # v2 추가
+            "retail_net_5d": round(retail_net_5d, 4),
+            "retail_net_20d": round(retail_net_20d, 4),
+            "retail_consecutive": retail_consec,
+            "macro": {
+                "vix": vix,
+                "vix_zscore": vix_z,
+                "usdkrw": usdkrw,
+                "kospi": kospi,
+            },
         }
     except Exception as e:
         logger.debug("collect_deep_snapshot %s 실패: %s", ticker, e)
@@ -171,15 +227,148 @@ def _calc_fibonacci(df: pd.DataFrame) -> dict:
 
 
 # ═══════════════════════════════════════════════
+# 컨텍스트 데이터 로더 (국적별 / ETF / 릴레이)
+# ═══════════════════════════════════════════════
+
+_context_cache: dict[str, Any] = {}
+
+
+def clear_context_cache():
+    """컨텍스트 캐시 초기화 (매 세션 시작 시 호출)."""
+    _context_cache.clear()
+
+
+def _load_json_safe(path: Path) -> Any:
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def load_market_context() -> dict:
+    """국적별/ETF/릴레이/섹터 컨텍스트 한 번에 로드 (세션 캐시)."""
+    if _context_cache:
+        return _context_cache
+
+    ctx: dict[str, Any] = {
+        "nationality": {},      # ticker -> {inst_zscore, asia_zscore, hedge_zscore, ...}
+        "etf_xray": {},         # sector -> {pairs: [{etf, stock, lag_corrs}]}
+        "etf_master": {},       # sector -> {score, grade, ret_5, foreign_5d, ...}
+        "relay_fired": {},      # sector -> {leaders, candidates}
+        "relay_tickers": set(), # fired sector에 속한 티커들
+        "sector_flow": {},      # sector -> {foreign_cum_bil, inst_cum_bil}
+    }
+
+    # 1. 국적별 신호
+    nat_data = _load_json_safe(NATIONALITY_SIGNAL_PATH)
+    if isinstance(nat_data, list):
+        for item in nat_data:
+            t = item.get("ticker", "")
+            if t:
+                ctx["nationality"][t] = {
+                    "signal": item.get("signal", ""),
+                    "score": item.get("score", 0),
+                    "pattern": item.get("pattern", ""),
+                    "inst_zscore": item.get("inst_zscore", 0),
+                    "asia_zscore": item.get("asia_zscore", 0),
+                    "hedge_zscore": item.get("hedge_zscore", 0),
+                    "inst_trend": item.get("inst_trend", 0),
+                    "asia_trend": item.get("asia_trend", 0),
+                    "hedge_trend": item.get("hedge_trend", 0),
+                    "retail_net_5d": item.get("retail_net_5d", 0),
+                    "retail_consecutive": item.get("retail_consecutive", 0),
+                }
+
+    # 2. ETF 선행성 X-ray
+    xray_data = _load_json_safe(ETF_XRAY_PATH)
+    if isinstance(xray_data, list):
+        for item in xray_data:
+            sector = item.get("sector", "")
+            if sector:
+                ctx["etf_xray"][sector] = item
+    elif isinstance(xray_data, dict):
+        # {sector: {pairs: [...]}} 구조
+        for sector, data in xray_data.items():
+            ctx["etf_xray"][sector] = data
+
+    # 3. ETF 마스터
+    etf_data = _load_json_safe(ETF_MASTER_PATH)
+    if isinstance(etf_data, list):
+        for item in etf_data:
+            sector = item.get("sector", "")
+            if sector:
+                ctx["etf_master"][sector] = {
+                    "etf_code": item.get("etf_code", ""),
+                    "score": item.get("score", 0),
+                    "grade": item.get("grade", ""),
+                    "ret_5": item.get("ret_5", 0),
+                    "ret_20": item.get("ret_20", 0),
+                    "rsi": item.get("rsi", 50),
+                    "foreign_5d": item.get("foreign_5d", 0),
+                    "inst_5d": item.get("inst_5d", 0),
+                    "is_smart": item.get("is_smart", False),
+                }
+
+    # 4. 섹터 릴레이 (당일 발화)
+    relay_data = _load_json_safe(RELAY_TODAY_PATH)
+    if isinstance(relay_data, dict):
+        for sector_info in relay_data.get("fired_sectors", []):
+            sector = sector_info.get("sector", "")
+            if not sector:
+                continue
+            ctx["relay_fired"][sector] = sector_info
+            for leader in sector_info.get("leaders", []):
+                ctx["relay_tickers"].add(leader.get("ticker", ""))
+            for cand in sector_info.get("candidates", []):
+                ctx["relay_tickers"].add(cand.get("ticker", ""))
+
+    # 5. 섹터별 투자자 흐름
+    flow_data = _load_json_safe(INVESTOR_FLOW_PATH)
+    if isinstance(flow_data, dict):
+        for sec_flow in flow_data.get("sectors", []):
+            sector = sec_flow.get("sector", "")
+            if sector:
+                ctx["sector_flow"][sector] = {
+                    "foreign_cum": sec_flow.get("foreign_cum_bil", 0),
+                    "inst_cum": sec_flow.get("inst_cum_bil", 0),
+                    "price_change_5": sec_flow.get("price_change_5", 0),
+                    "stealth": sec_flow.get("stealth_buying", False),
+                }
+
+    _context_cache.update(ctx)
+    return ctx
+
+
+def _get_stock_sector(ticker: str, ctx: dict) -> str:
+    """티커가 속한 섹터 찾기 (relay_fired 기준)."""
+    for sector, info in ctx.get("relay_fired", {}).items():
+        for leader in info.get("leaders", []):
+            if leader.get("ticker") == ticker:
+                return sector
+        for cand in info.get("candidates", []):
+            if cand.get("ticker") == ticker:
+                return sector
+    return ""
+
+
+# ═══════════════════════════════════════════════
 # 패턴 분류 — "왜 올랐나 / 왜 떨어졌나"
 # ═══════════════════════════════════════════════
 
-def classify_pattern(snap: dict) -> list[str]:
-    """D-1 기술지표 기반 패턴 분류. 복수 패턴 가능."""
+def classify_pattern(snap: dict, ctx: dict | None = None) -> list[str]:
+    """D-1 기술지표 + 수급 + 컨텍스트 기반 패턴 분류. 복수 패턴 가능.
+
+    v2: 개인수급, 국적별, ETF선행성, 섹터릴레이, 매크로 패턴 추가.
+    """
     ind = snap.get("indicators", {})
     fib = snap.get("fibonacci", {})
+    ctx = ctx or {}
     patterns = []
 
+    # ── 기술지표 ──
     rsi = ind.get("rsi_14", 50)
     bb = ind.get("bb_position", 0.5)
     macd_h = ind.get("macd_histogram", 0)
@@ -204,11 +393,35 @@ def classify_pattern(snap: dict) -> list[str]:
     vol_contract = ind.get("volume_contraction_ratio", 1)
     fib_zone = fib.get("close_vs_fib", "")
 
+    # ── v2: 개인 수급 ──
+    retail_5d = snap.get("retail_net_5d", 0)
+    retail_20d = snap.get("retail_net_20d", 0)
+    retail_consec = snap.get("retail_consecutive", 0)
+
+    # ── v2: 국적별 데이터 ──
+    ticker = snap.get("ticker", "")
+    nat = ctx.get("nationality", {}).get(ticker, {})
+    inst_zscore = nat.get("inst_zscore", 0)
+    asia_zscore = nat.get("asia_zscore", 0)
+    hedge_zscore = nat.get("hedge_zscore", 0)
+    nat_pattern = nat.get("pattern", "")
+
+    # ── v2: 매크로 ──
+    macro = snap.get("macro", {})
+    vix_z = macro.get("vix_zscore", 0)
+    usdkrw = macro.get("usdkrw", 1350)
+
+    # ── v2: 섹터/릴레이 ──
+    stock_sector = _get_stock_sector(ticker, ctx)
+    in_relay = ticker in ctx.get("relay_tickers", set())
+
     ret = snap.get("ret_1d", 0)
     is_gainer = ret > 0
 
     if is_gainer:
-        # === 급등 패턴 ===
+        # ═══════════════════════════════════
+        # === 급등 패턴 (기술지표 기반) ===
+        # ══════════════════════���════════════
 
         # 1. 눌림목 반등 (Pullback Bounce)
         if rsi < 40 and bb < 0.3 and ma20_gap < -5:
@@ -260,8 +473,76 @@ def classify_pattern(snap: dict) -> list[str]:
         if sar == -1 and ret > 3:  # 하락추세였는데 급등
             patterns.append("SAR_REVERSAL")
 
+        # ═══════════════════════════════════
+        # === v2: 개인 수급 패턴 (급등) ===
+        # ═════════════════════════════════��═
+
+        # 13. 개인+기관 쌍끌이 (외인 매도인데 개인+기관 매수)
+        if retail_5d > 0 and inst_5d > 0 and foreign_5d < 0:
+            patterns.append("RETAIL_INST_DUAL_BUY")
+
+        # 14. 스마트머니 vs 개인 (외인/기관 매수 + 개인 매도 = 전형적 기관 매집)
+        if (foreign_5d > 0 or inst_5d > 0) and retail_5d < 0 and retail_consec <= -2:
+            patterns.append("SMART_MONEY_ACCUM")
+
+        # 15. 개인 단독 매수 폭발 (외인/기관 미관여)
+        if retail_5d > 0 and retail_consec >= 3 and abs(foreign_5d) < 0.5 and abs(inst_5d) < 0.5:
+            patterns.append("RETAIL_SOLO_BUY")
+
+        # 16. 3자 동반 매수 (외인+기관+개인 모두 순매수)
+        if foreign_5d > 0 and inst_5d > 0 and retail_5d > 0:
+            patterns.append("TRIPLE_BUY")
+
+        # ═══════════════════════════════════
+        # === v2: 국적별 패턴 (급등) ===
+        # ═══════════════════════════════════
+
+        # 17. 기관계(영국/유럽) 조용한 매집
+        if inst_zscore > 2.0:
+            patterns.append("NATION_INST_ACCUM")
+
+        # 18. 아시아(싱가포르/중국) 동반 유입
+        if asia_zscore > 2.0:
+            patterns.append("NATION_ASIA_INFLOW")
+
+        # 19. 헤지펀드(케이맨) 포지션 빌딩
+        if hedge_zscore > 2.0:
+            patterns.append("NATION_HEDGE_BUILD")
+
+        # 20. 국적별 다중 매집 (2개 그룹 이상 동시)
+        if sum(1 for z in [inst_zscore, asia_zscore, hedge_zscore] if z > 1.5) >= 2:
+            patterns.append("NATION_MULTI_ACCUM")
+
+        # ══════════════════��════════════════
+        # === v2: ETF/섹터 릴레이 패턴 ===
+        # ═══════════════════════════════════
+
+        # 21. 섹터 릴레이 진입 (발화 섹터에 속한 종목)
+        if in_relay and stock_sector:
+            patterns.append("SECTOR_RELAY_ENTRY")
+
+        # 22. ETF 스마트머니 유입 섹터 (ETF에 외인+기관 동시 유입)
+        if stock_sector:
+            etf_info = ctx.get("etf_master", {}).get(stock_sector, {})
+            if etf_info.get("is_smart") or (etf_info.get("foreign_5d", 0) > 0 and etf_info.get("inst_5d", 0) > 0):
+                patterns.append("ETF_SMART_SECTOR")
+
+        # ═════════════════��═════════════════
+        # === v2: 매크로 컨디션 패턴 ===
+        # ═══════════════════════════════════
+
+        # 23. 공포 속 반등 (VIX 높을 때 급등 = 더 의미)
+        if vix_z > 1.5 and ret > 3:
+            patterns.append("FEAR_BOUNCE")
+
+        # 24. 환율 고점 매수 (1450+ 에서 급등 = 외인 복귀 기대)
+        if usdkrw > 1450 and foreign_5d > 0:
+            patterns.append("FX_HIGH_FOREIGN_BUY")
+
     else:
-        # === 급락 패턴 ===
+        # ═════════════════════════════��═════
+        # === 급락 패턴 (기술지표 기반) ===
+        # ═══════════════════════════════════
 
         # 1. 과열 후 이익실현
         if rsi > 70 or bb > 0.9:
@@ -289,6 +570,38 @@ def classify_pattern(snap: dict) -> list[str]:
         if sar == -1 and slope60 < 0 and rsi < 45:
             patterns.append("TREND_DOWN_CONTINUATION")
 
+        # ═══════════════════════════════════
+        # === v2: 개인 수급 패턴 (급락) ===
+        # ═══════════════════════════��═══════
+
+        # 7. 개인 패닉셀 (개인 대량 매도 + 외인/기관도 매도)
+        if retail_5d < 0 and foreign_5d < 0 and inst_5d < 0:
+            patterns.append("TRIPLE_SELL")
+
+        # 8. 개인만 홀딩 (외인/기관 이탈인데 개인만 매수)
+        if retail_5d > 0 and (foreign_5d < 0 or inst_5d < 0) and retail_consec >= 2:
+            patterns.append("RETAIL_BAGHOLDING")
+
+        # ═══════════════════��═══════════════
+        # === v2: 국적별 패턴 (급락) ===
+        # ══════════════════════════���════════
+
+        # 9. 헤지펀드 이탈
+        if hedge_zscore < -2.0:
+            patterns.append("NATION_HEDGE_EXIT")
+
+        # 10. 외인 전면 이탈 (기관+아시아+헤지 동반)
+        if sum(1 for z in [inst_zscore, asia_zscore, hedge_zscore] if z < -1.5) >= 2:
+            patterns.append("NATION_MULTI_EXIT")
+
+        # ════════════��══════════════════════
+        # === v2: 매크로 컨디션 (급락) ===
+        # ═══════════════════════════════════
+
+        # 11. VIX 급등 + 환율 급등 이중충격
+        if vix_z > 2.0 and usdkrw > 1450:
+            patterns.append("MACRO_DOUBLE_SHOCK")
+
     if not patterns:
         patterns.append("UNCLASSIFIED")
 
@@ -304,7 +617,20 @@ def analyze_movers(
     top_n_gainers: int = 30,
     top_n_losers: int = 20,
 ) -> dict:
-    """전체 종목에서 급등/급락 원인 분석. 패턴 분류 포함."""
+    """전체 종목에서 급등/급락 원인 분석. 패턴 분류 포함.
+
+    v2: 컨텍스트 데이터(국적별/ETF/릴레이/매크로) 자동 로드.
+    """
+    # 컨텍스트 로드 (세션 1회)
+    ctx = load_market_context()
+    ctx_nat_cnt = len(ctx.get("nationality", {}))
+    ctx_relay_cnt = len(ctx.get("relay_fired", {}))
+    ctx_etf_cnt = len(ctx.get("etf_master", {}))
+    logger.info(
+        "[패턴분석] 컨텍스트 로드 — 국적별 %d종목, 릴레이 %d섹터, ETF %d섹터",
+        ctx_nat_cnt, ctx_relay_cnt, ctx_etf_cnt,
+    )
+
     all_snaps = []
 
     for pq_path in sorted(PROCESSED_DIR.glob("*.parquet")):
@@ -322,9 +648,9 @@ def analyze_movers(
     losers.sort(key=lambda x: x["ret_1d"])
     losers = losers[:top_n_losers]
 
-    # 패턴 분류
+    # 패턴 분류 (v2: 컨텍스트 포함)
     for snap in gainers + losers:
-        snap["patterns"] = classify_pattern(snap)
+        snap["patterns"] = classify_pattern(snap, ctx=ctx)
 
     # 패턴 통계 (오늘만)
     pattern_counts: dict[str, dict] = {}
@@ -392,10 +718,15 @@ def _slim_movers(movers: list[dict]) -> list[dict]:
                 "slope_ma60": ind.get("slope_ma60", 0),
                 "pct_52w": ind.get("pct_of_52w_high", 0),
                 "short_ratio": ind.get("short_ratio", 0),
+                # v2: 개인 수급
+                "retail_net_5d": m.get("retail_net_5d", 0),
+                "retail_net_20d": m.get("retail_net_20d", 0),
+                "retail_consecutive": m.get("retail_consecutive", 0),
             },
             "ma20_gap": m.get("ma20_gap", 0),
             "ma60_gap": m.get("ma60_gap", 0),
             "fibonacci": m.get("fibonacci", {}),
+            "macro": m.get("macro", {}),
         })
     return result
 
@@ -535,9 +866,10 @@ def find_tomorrow_candidates(
 
         # "오늘"의 지표로 패턴 분류 (내일 급등할 조건인지 확인)
         # 트릭: ret_1d를 양수로 가정하여 급등 패턴 매칭
+        ctx = load_market_context()
         test_snap = snap.copy()
         test_snap["ret_1d"] = 5.0  # 가상 급등으로 설정해서 패턴 분류
-        matched = classify_pattern(test_snap)
+        matched = classify_pattern(test_snap, ctx=ctx)
 
         # 수익성 패턴과 교집합
         hits = [p for p in matched if p in profitable_patterns]
@@ -568,6 +900,9 @@ def find_tomorrow_candidates(
                 "inst_5d": snap["indicators"].get("inst_net_5d", 0),
                 "stoch_k": snap["indicators"].get("stoch_slow_k", 0),
                 "ma20_gap": snap.get("ma20_gap", 0),
+                # v2
+                "retail_net_5d": snap.get("retail_net_5d", 0),
+                "retail_consecutive": snap.get("retail_consecutive", 0),
             },
             "fibonacci": snap.get("fibonacci", {}),
         })
@@ -635,15 +970,28 @@ def build_pattern_summary(
                 lines.append(f"  {pname}: WR {wr}% (n={n}) avg+{avg_g:.1f}%")
             lines.append("")
 
+    # v2: 수급 구조 요약 (개인 포함)
+    if gainers:
+        retail_buy = sum(1 for g in gainers if g.get("key_indicators", {}).get("retail_net_5d", 0) > 0)
+        foreign_buy = sum(1 for g in gainers if g.get("key_indicators", {}).get("foreign_5d", 0) > 0)
+        inst_buy = sum(1 for g in gainers if g.get("key_indicators", {}).get("inst_5d", 0) > 0)
+        lines.append(
+            f"💰 수급 구조 (급등 {len(gainers)}건): "
+            f"외인매수 {foreign_buy} | 기관매수 {inst_buy} | 개인매수 {retail_buy}"
+        )
+        lines.append("")
+
     # 내일 후보
     if candidates:
         lines.append("🎯 내일 주목 (패턴 매칭):")
         for c in candidates[:5]:
             pats = "+".join(c["matched_patterns"][:2])
             ki = c["key_indicators"]
+            r5 = ki.get("retail_net_5d", 0)
+            supply_str = f"외{ki['foreign_5d']:+.0f}/기{ki['inst_5d']:+.0f}/개{r5:+.0f}"
             lines.append(
                 f"  {c['name']} RSI={ki['rsi']:.0f} BB={ki['bb_position']:.2f} "
-                f"수급={ki['foreign_5d']:+.0f}/{ki['inst_5d']:+.0f} [{pats}]"
+                f"{supply_str} [{pats}]"
             )
 
     return "\n".join(lines)
