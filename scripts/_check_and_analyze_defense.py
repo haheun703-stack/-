@@ -1,6 +1,8 @@
 """BAT-D 완료 감지 → 방산 종목 3/18 수급 자동 분석"""
 import sys, os, time
-sys.path.insert(0, r"D:\sub-agent-project_퀀트봇")
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 import pandas as pd
 import json

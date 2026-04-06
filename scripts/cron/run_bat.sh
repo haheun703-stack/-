@@ -120,7 +120,7 @@ case "$BAT" in
     sleep 2
     echo "[$(date +%H:%M:%S)] [INFO] BAT-L/I 잔여 프로세스 정리 완료" >> "$LOG"
     # .pyc 캐시 삭제 — git pull 후 구버전 캐시 실행 방지
-    find "$BASE" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+    find "$QM" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     # --- G1: 데이터 수집 ---
     run_py scripts/update_daily_data.py
     run_py_long scripts/extend_parquet_data.py --workers 2
