@@ -548,7 +548,7 @@ class DataHealthCheck:
         """JARVIS + Supabase 업로드 간접 확인 (파일 수정 시각)."""
         upload_files = {
             "brain_upload": PROJECT_ROOT / "website" / "data" / "brain_data_upload.json",
-            "journal": self.data_dir / "market_journal" / f"{self.today_str}.json",
+            "journal": self.data_dir / "market_journal" / "daily" / f"{self.today_str}.json",
         }
 
         found = 0

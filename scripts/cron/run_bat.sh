@@ -186,6 +186,7 @@ case "$BAT" in
     run_py scripts/build_killer_picks.py
     run_py scripts/run_cto.py
     run_py src/use_cases/portfolio_cfo.py
+    run_py scripts/build_brain_upload.py
     run_py scripts/upload_flowx.py
     # dashboard_data.py 제거 — 파일 미존재
     run_py scripts/send_evening_summary.py --send
@@ -202,6 +203,7 @@ case "$BAT" in
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
   F) # 17:15 KST — FLOWX 업로드 보장 (BAT-D 실패 대비, upsert이라 중복 안전)
+    run_py scripts/build_brain_upload.py
     run_py scripts/upload_flowx.py
     ;;
   J) # 17:00 KST — 포트폴리오 전망
