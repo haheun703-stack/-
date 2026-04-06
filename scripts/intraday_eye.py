@@ -140,8 +140,8 @@ class _KisLite:
                 return {"foreign_net": 0, "inst_net": 0}
             today = items[0] if items else {}
             return {
-                "foreign_net": int(today.get("frgn_ntby_qty", 0)),
-                "inst_net": int(today.get("orgn_ntby_qty", 0)),
+                "foreign_net": int(today.get("frgn_ntby_qty", 0) or 0),
+                "inst_net": int(today.get("orgn_ntby_qty", 0) or 0),
             }
         except Exception as e:
             logger.error("[KIS] %s 투자자 조회 실패: %s", ticker, e)

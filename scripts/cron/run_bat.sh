@@ -99,6 +99,12 @@ case "$BAT" in
     ;;
   H) # 11:30 KST — 장중 분석
     run_py scripts/run_midday_analysis.py
+    # 월/금 장중 유니버스 전체 재구성 (pykrx는 장중에만 안정적)
+    DOW_H=$(date +%u)
+    if [ "$DOW_H" = "1" ] || [ "$DOW_H" = "5" ]; then
+        echo "[$(date +%H:%M:%S)] [INFO] 유니버스 전체 재구성 시작 (DOW=$DOW_H)" >> "$LOG"
+        run_py_long scripts/rebuild_universe.py --min-cap 0.2 --no-cleanup
+    fi
     ;;
   L) # 15:35 KST — NXT 장마감 후 (16:25까지만 수집, BAT-D 16:30 충돌 방지)
     timeout 3000 $PY scripts/nxt_market_collector.py --session after >> "$LOG" 2>&1 &
@@ -193,11 +199,7 @@ case "$BAT" in
     run_py scripts/daily_market_learner.py
     run_py scripts/paper_trading_unified.py
     run_py scripts/data_health_check.py
-    # 금요일이면 유니버스 전체 재구성 (신규 상장/시총 변동 반영)
-    DOW=$(date +%u)
-    if [ "$DOW" = "5" ]; then
-        run_py_long scripts/rebuild_universe.py --min-cap 0.2 --no-cleanup
-    fi
+    # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
   F) # 17:15 KST — FLOWX 업로드 보장 (BAT-D 실패 대비, upsert이라 중복 안전)
     run_py scripts/upload_flowx.py

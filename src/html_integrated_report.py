@@ -7,12 +7,17 @@ daily_integrated_report.py에서 호출.
 from __future__ import annotations
 
 import logging
+import platform
 from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-OUTPUT_DIR = Path("D:/클로드 HTML 보고서")
+if platform.system() == "Windows":
+    OUTPUT_DIR = Path("D:/클로드 HTML 보고서")
+else:
+    OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "reports"
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _html_to_png(html_path: Path, png_path: Path, width: int = 800):

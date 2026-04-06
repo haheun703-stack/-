@@ -6,12 +6,17 @@ Usage:
 """
 
 import logging
+import platform
 from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-REPORT_DIR = Path("D:/클로드 HTML 보고서")
+if platform.system() == "Windows":
+    REPORT_DIR = Path("D:/클로드 HTML 보고서")
+else:
+    REPORT_DIR = Path(__file__).resolve().parent.parent / "data" / "reports"
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def generate_consensus_report(

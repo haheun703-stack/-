@@ -139,7 +139,11 @@ class JarvisUploader:
         results = []
 
         # 1) HTML 보고서 업로드 (장시작전 보고서)
-        html_dir = Path(r"D:\클로드 HTML 보고서")
+        import platform
+        if platform.system() == "Windows":
+            html_dir = Path(r"D:\클로드 HTML 보고서")
+        else:
+            html_dir = Path(__file__).resolve().parent.parent.parent / "data" / "reports"
         html_files = sorted(html_dir.glob(f"*{today}*.html")) if html_dir.exists() else []
         if not html_files:
             # 날짜 없는 최신 파일

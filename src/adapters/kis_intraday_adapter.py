@@ -98,16 +98,16 @@ class KisIntradayAdapter(IntradayDataPort):
             return {
                 "ticker": ticker,
                 "timestamp": now_str,
-                "current_price": int(output.get("stck_prpr", 0)),
-                "open_price": int(output.get("stck_oprc", 0)),
-                "high_price": int(output.get("stck_hgpr", 0)),
-                "low_price": int(output.get("stck_lwpr", 0)),
-                "volume": int(output.get("acml_vol", 0)),
-                "cum_volume": int(output.get("acml_vol", 0)),
-                "change_pct": float(output.get("prdy_ctrt", 0)),
-                "bid_price": int(output.get("bidp1", output.get("stck_prpr", 0))),
-                "ask_price": int(output.get("askp1", output.get("stck_prpr", 0))),
-                "strength": float(output.get("seln_cntg_smtn", 0)),
+                "current_price": int(output.get("stck_prpr", 0) or 0),
+                "open_price": int(output.get("stck_oprc", 0) or 0),
+                "high_price": int(output.get("stck_hgpr", 0) or 0),
+                "low_price": int(output.get("stck_lwpr", 0) or 0),
+                "volume": int(output.get("acml_vol", 0) or 0),
+                "cum_volume": int(output.get("acml_vol", 0) or 0),
+                "change_pct": float(output.get("prdy_ctrt", 0) or 0),
+                "bid_price": int(output.get("bidp1", 0) or output.get("stck_prpr", 0) or 0),
+                "ask_price": int(output.get("askp1", 0) or output.get("stck_prpr", 0) or 0),
+                "strength": float(output.get("seln_cntg_smtn", 0) or 0),
             }
         except Exception as e:
             logger.error("[KIS장중] %s 틱 조회 실패: %s", ticker, e)
@@ -150,11 +150,11 @@ class KisIntradayAdapter(IntradayDataPort):
                     if ts not in all_candles:
                         all_candles[ts] = {
                             "timestamp": ts,
-                            "open": int(c.get("stck_oprc", 0)),
-                            "high": int(c.get("stck_hgpr", 0)),
-                            "low": int(c.get("stck_lwpr", 0)),
-                            "close": int(c.get("stck_prpr", 0)),
-                            "volume": int(c.get("cntg_vol", 0)),
+                            "open": int(c.get("stck_oprc", 0) or 0),
+                            "high": int(c.get("stck_hgpr", 0) or 0),
+                            "low": int(c.get("stck_lwpr", 0) or 0),
+                            "close": int(c.get("stck_prpr", 0) or 0),
+                            "volume": int(c.get("cntg_vol", 0) or 0),
                         }
                     if earliest_hour is None or hour < earliest_hour:
                         earliest_hour = hour
@@ -206,11 +206,11 @@ class KisIntradayAdapter(IntradayDataPort):
                 ts = f"{now.strftime('%Y-%m-%d')} {hour[:2]}:{hour[2:4]}:00"
                 one_min.append({
                     "timestamp": ts,
-                    "open": int(c.get("stck_oprc", 0)),
-                    "high": int(c.get("stck_hgpr", 0)),
-                    "low": int(c.get("stck_lwpr", 0)),
-                    "close": int(c.get("stck_prpr", 0)),
-                    "volume": int(c.get("cntg_vol", 0)),
+                    "open": int(c.get("stck_oprc", 0) or 0),
+                    "high": int(c.get("stck_hgpr", 0) or 0),
+                    "low": int(c.get("stck_lwpr", 0) or 0),
+                    "close": int(c.get("stck_prpr", 0) or 0),
+                    "volume": int(c.get("cntg_vol", 0) or 0),
                 })
 
             if period == 1:
@@ -353,10 +353,10 @@ class KisIntradayAdapter(IntradayDataPort):
         )
         kospi_out = kospi_data.get("output", {})
         if kospi_out:
-            result["kospi"] = float(kospi_out.get("bstp_nmix_prpr", 0))
-            result["kospi_change_pct"] = float(kospi_out.get("bstp_nmix_prdy_ctrt", 0))
+            result["kospi"] = float(kospi_out.get("bstp_nmix_prpr", 0) or 0)
+            result["kospi_change_pct"] = float(kospi_out.get("bstp_nmix_prdy_ctrt", 0) or 0)
             result["kospi_volume"] = int(
-                float(kospi_out.get("acml_tr_pbmn", 0)) / 100_000_000
+                float(kospi_out.get("acml_tr_pbmn", 0) or 0) / 100_000_000
             )  # 원 → 억
 
         # KOSDAQ (1001)
@@ -370,10 +370,10 @@ class KisIntradayAdapter(IntradayDataPort):
         )
         kosdaq_out = kosdaq_data.get("output", {})
         if kosdaq_out:
-            result["kosdaq"] = float(kosdaq_out.get("bstp_nmix_prpr", 0))
-            result["kosdaq_change_pct"] = float(kosdaq_out.get("bstp_nmix_prdy_ctrt", 0))
+            result["kosdaq"] = float(kosdaq_out.get("bstp_nmix_prpr", 0) or 0)
+            result["kosdaq_change_pct"] = float(kosdaq_out.get("bstp_nmix_prdy_ctrt", 0) or 0)
             result["kosdaq_volume"] = int(
-                float(kosdaq_out.get("acml_tr_pbmn", 0)) / 100_000_000
+                float(kosdaq_out.get("acml_tr_pbmn", 0) or 0) / 100_000_000
             )
 
         return result
@@ -417,12 +417,12 @@ class KisIntradayAdapter(IntradayDataPort):
                     "timestamp": now_str,
                     "sector_code": code,
                     "sector_name": name,
-                    "index_value": float(output.get("bstp_nmix_prpr", 0)),
-                    "change_pct": float(output.get("bstp_nmix_prdy_ctrt", 0)),
+                    "index_value": float(output.get("bstp_nmix_prpr", 0) or 0),
+                    "change_pct": float(output.get("bstp_nmix_prdy_ctrt", 0) or 0),
                     "volume": int(
-                        float(output.get("acml_tr_pbmn", 0)) / 100_000_000
+                        float(output.get("acml_tr_pbmn", 0) or 0) / 100_000_000
                     ),
-                    "advance_count": int(output.get("stck_prpr_updn", 0)),
+                    "advance_count": int(output.get("stck_prpr_updn", 0) or 0),
                     "decline_count": 0,
                 })
 
