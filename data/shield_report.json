@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-26T17:59:00.705624",
+  "timestamp": "2026-03-27T22:33:45.372090",
   "overall_level": "RED",
   "sector_overlaps": [
     {
@@ -31,7 +31,7 @@
     "current_equity": 29560759,
     "current_mdd_pct": -27.66,
     "max_mdd_pct": -27.66,
-    "max_mdd_date": "2026-03-26",
+    "max_mdd_date": "2026-03-27",
     "killswitch_level": "LEVEL_3",
     "killswitch_action": "전량 현금화 + 수동모드"
   },

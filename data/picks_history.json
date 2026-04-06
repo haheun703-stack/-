@@ -1997,12 +1997,12 @@
       "high_price": 138000.0,
       "low_price": 131200.0,
       "day1_return": 4.23,
-      "status": "holding",
-      "settled_price": 133000.0,
-      "settled_return": 4.23,
+      "status": "expired",
+      "settled_price": 130100.0,
+      "settled_return": 1.96,
       "settled_date": "2026-03-20",
-      "latest_price": 129600.0,
-      "latest_return": 1.57
+      "latest_price": 130100.0,
+      "latest_return": 1.96
     },
     {
       "pick_date": "2026-03-19",
@@ -2119,8 +2119,8 @@
       "settled_price": 65300.0,
       "settled_return": -0.15,
       "settled_date": "2026-03-23",
-      "latest_price": 67800.0,
-      "latest_return": 3.67,
+      "latest_price": 67900.0,
+      "latest_return": 3.82,
       "monitor_action": "FULL_SELL",
       "monitor_target": 61309,
       "monitor_reasons": "외인 3일 연속순매수 | 볼린저 하단이탈 (0%)",
@@ -2204,8 +2204,8 @@
       "settled_price": 17940.0,
       "settled_return": -4.98,
       "settled_date": "2026-03-23",
-      "latest_price": 19070.0,
-      "latest_return": 1.01
+      "latest_price": 19000.0,
+      "latest_return": 0.64
     },
     {
       "pick_date": "2026-03-22",
@@ -2243,8 +2243,8 @@
       "settled_price": 4040.0,
       "settled_return": -4.6,
       "settled_date": "2026-03-23",
-      "latest_price": 4065.0,
-      "latest_return": -4.01
+      "latest_price": 4195.0,
+      "latest_return": -0.94
     },
     {
       "pick_date": "2026-03-22",
@@ -2285,8 +2285,8 @@
       "settled_price": 36400.0,
       "settled_return": -0.14,
       "settled_date": "2026-03-23",
-      "latest_price": 37000.0,
-      "latest_return": 1.51
+      "latest_price": 37050.0,
+      "latest_return": 1.65
     },
     {
       "pick_date": "2026-03-22",
@@ -2365,8 +2365,8 @@
       "settled_price": 15130.0,
       "settled_return": -4.36,
       "settled_date": "2026-03-23",
-      "latest_price": 15950.0,
-      "latest_return": 0.82
+      "latest_price": 16100.0,
+      "latest_return": 1.77
     },
     {
       "pick_date": "2026-03-22",
@@ -2446,8 +2446,8 @@
       "settled_price": 55600.0,
       "settled_return": -0.93,
       "settled_date": "2026-03-23",
-      "latest_price": 59400.0,
-      "latest_return": 5.84
+      "latest_price": 57600.0,
+      "latest_return": 2.64
     },
     {
       "pick_date": "2026-03-22",
@@ -2487,8 +2487,8 @@
       "settled_price": 68800.0,
       "settled_return": -3.64,
       "settled_date": "2026-03-23",
-      "latest_price": 69100.0,
-      "latest_return": -3.22
+      "latest_price": 68700.0,
+      "latest_return": -3.78
     },
     {
       "pick_date": "2026-03-24",
@@ -2527,8 +2527,8 @@
       "settled_price": 48800.0,
       "settled_return": -0.71,
       "settled_date": "2026-03-25",
-      "latest_price": 48850.0,
-      "latest_return": -0.61
+      "latest_price": 49350.0,
+      "latest_return": 0.41
     },
     {
       "pick_date": "2026-03-24",
@@ -2611,8 +2611,8 @@
       "settled_price": 59000.0,
       "settled_return": 6.12,
       "settled_date": "2026-03-25",
-      "latest_price": 59400.0,
-      "latest_return": 6.83
+      "latest_price": 57600.0,
+      "latest_return": 3.6
     },
     {
       "pick_date": "2026-03-24",
@@ -2651,8 +2651,8 @@
       "settled_price": 208500.0,
       "settled_return": 2.16,
       "settled_date": "2026-03-25",
-      "latest_price": 206500.0,
-      "latest_return": 1.18
+      "latest_price": 213500.0,
+      "latest_return": 4.61
     },
     {
       "pick_date": "2026-03-24",
@@ -2690,8 +2690,8 @@
       "settled_price": 35000.0,
       "settled_return": 5.07,
       "settled_date": "2026-03-25",
-      "latest_price": 32850.0,
-      "latest_return": -1.38
+      "latest_price": 31850.0,
+      "latest_return": -4.38
     },
     {
       "pick_date": "2026-03-24",
@@ -2731,8 +2731,8 @@
       "settled_price": 18150.0,
       "settled_return": -0.44,
       "settled_date": "2026-03-25",
-      "latest_price": 17370.0,
-      "latest_return": -4.72
+      "latest_price": 17160.0,
+      "latest_return": -5.87
     },
     {
       "pick_date": "2026-03-24",
@@ -2850,8 +2850,8 @@
       "settled_price": 112300.0,
       "settled_return": 3.6,
       "settled_date": "2026-03-26",
-      "latest_price": 112300.0,
-      "latest_return": 3.6
+      "latest_price": 109700.0,
+      "latest_return": 1.2
     },
     {
       "pick_date": "2026-03-25",
@@ -2894,8 +2894,8 @@
       "settled_price": 80500.0,
       "settled_return": 0.12,
       "settled_date": "2026-03-26",
-      "latest_price": 80500.0,
-      "latest_return": 0.12
+      "latest_price": 82700.0,
+      "latest_return": 2.86
     },
     {
       "pick_date": "2026-03-25",
@@ -2931,8 +2931,8 @@
       "settled_price": 100900.0,
       "settled_return": -3.24,
       "settled_date": "2026-03-26",
-      "latest_price": 100900.0,
-      "latest_return": -3.24
+      "latest_price": 98100.0,
+      "latest_return": -5.93
     },
     {
       "pick_date": "2026-03-25",
@@ -2971,8 +2971,8 @@
       "settled_price": 32850.0,
       "settled_return": 0.92,
       "settled_date": "2026-03-26",
-      "latest_price": 32850.0,
-      "latest_return": 0.92
+      "latest_price": 31850.0,
+      "latest_return": -2.15
     },
     {
       "pick_date": "2026-03-25",
@@ -3009,8 +3009,8 @@
       "settled_price": 8590.0,
       "settled_return": -2.16,
       "settled_date": "2026-03-26",
-      "latest_price": 8590.0,
-      "latest_return": -2.16
+      "latest_price": 8560.0,
+      "latest_return": -2.51
     },
     {
       "pick_date": "2026-03-26",
@@ -3044,6 +3044,46 @@
       ],
       "rsi": 43.97,
       "stoch_k": 27.27,
+      "open_price": 120500.0,
+      "close_price": 123200.0,
+      "high_price": 123400.0,
+      "low_price": 117300.0,
+      "day1_return": -0.48,
+      "status": "holding",
+      "settled_price": 123200.0,
+      "settled_return": -0.48,
+      "settled_date": "2026-03-27",
+      "latest_price": 123200.0,
+      "latest_return": -0.48
+    },
+    {
+      "pick_date": "2026-03-27",
+      "target_date": "2026-03-30",
+      "ticker": "329180",
+      "name": "HD현대중공업",
+      "grade": "관심매수",
+      "score": 63.6,
+      "n_sources": 1,
+      "sources": [
+        "AI두뇌독립",
+        "US모멘텀",
+        "AI두뇌",
+        "AI섹터",
+        "컨센서스",
+        "국적수급"
+      ],
+      "close_at_pick": 511000,
+      "entry_price": 518400,
+      "stop_loss": 485450,
+      "target_price": 584300,
+      "entry_condition": "MA5 하향이탈 -1.9%→반등확인 후",
+      "reasons": [
+        "RSI 37 최적",
+        "⚠ SAR↓",
+        "⚠ 외인+기관 동시매도"
+      ],
+      "rsi": 37.5,
+      "stoch_k": 15.5,
       "open_price": null,
       "close_price": null,
       "high_price": null,
@@ -3058,18 +3098,18 @@
     }
   ],
   "summary": {
-    "total_picks": 76,
-    "total_settled": 50,
+    "total_picks": 77,
+    "total_settled": 51,
     "hit_target": 8,
     "hit_stop": 34,
-    "expired": 8,
+    "expired": 9,
     "holding": 19,
     "pending": 7,
-    "win_rate": 22.0,
-    "avg_return": -2.22,
-    "avg_win": 6.6,
+    "win_rate": 23.5,
+    "avg_return": -2.13,
+    "avg_win": 6.21,
     "avg_loss": -4.7,
-    "profit_factor": 0.4,
-    "updated_at": "2026-03-26 18:18"
+    "profit_factor": 0.41,
+    "updated_at": "2026-03-27 22:37"
   }
 }

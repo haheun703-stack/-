@@ -1,207 +1,675 @@
 {
   "year": 2026,
-  "last_updated": "2026-03-20",
+  "last_updated": "2026-04-04",
   "note": "연초 확정 일정. DART 주총공고 등 동적 일정은 event_calendar.py가 별도 관리.",
-
   "events": [
-    {"date": "2026-01-28", "type": "FOMC", "name": "FOMC 1월 회의 (1일)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": ["성장주", "바이오"], "sectors_cold": ["은행"],
-     "pattern": "금리 동결 시 성장주 강세, 인하 시사 시 리츠/부동산 수혜"},
-
-    {"date": "2026-02-27", "type": "MSCI", "name": "MSCI 분기 리밸런싱 (2월)", "country": "GLOBAL", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": ["편입종목"], "sectors_cold": ["편출종목"],
-     "pattern": "D-5~D+1 편입종목 +2.8%, 편출종목 -1.5% (5년 평균)"},
-
-    {"date": "2026-03-12", "type": "KR_EARNINGS", "name": "한국 4Q 실적발표 마감", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["SEMICONDUCTOR_CYCLE_UP"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "어닝 서프라이즈 종목 D+1~5 초과수익 +3.2% (5년 평균)"},
-
-    {"date": "2026-03-18", "type": "FOMC", "name": "FOMC 3월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "점도표(SEP) 발표 회의. 연간 금리 경로 재설정"},
-
-    {"date": "2026-03-20", "type": "TRIPLE_WITCHING", "name": "Triple Witching (3월)", "country": "US", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "옵션만기 변동성 확대. 거래량 평균 +40%"},
-
-    {"date": "2026-03-26", "type": "KR_AGM", "name": "한국 정기주총 집중일", "country": "KR", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "배당확대/자사주소각 결의 종목 D+1 +1.8%, 행동주의 안건 변동성 2.1배"},
-
-    {"date": "2026-04-09", "type": "BOK", "name": "한국은행 금통위 (4월)", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["FED_RATE_CUT"],
-     "sectors_hot": ["건설", "부동산"], "sectors_cold": ["은행"],
-     "pattern": "금리 인하 시 건설/부동산 수혜"},
-
-    {"date": "2026-04-14", "type": "US_EARNINGS", "name": "미국 1Q 어닝시즌 시작 (대형은행)", "country": "US", "impact": "HIGH",
-     "scenarios": ["SEMICONDUCTOR_CYCLE_UP"],
-     "sectors_hot": ["반도체", "빅테크"], "sectors_cold": [],
-     "pattern": "JP Morgan, Goldman 시작 → 2주 후 빅테크 → 반도체"},
-
-    {"date": "2026-05-06", "type": "FOMC", "name": "FOMC 5월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "동결 기대 시 시장 안도, 서프라이즈 시 변동성 급등"},
-
-    {"date": "2026-05-15", "type": "KR_EARNINGS", "name": "한국 1Q 실적발표 마감", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["SEMICONDUCTOR_CYCLE_UP"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "삼성전자/하이닉스 가이던스가 반도체 섹터 방향 결정"},
-
-    {"date": "2026-05-22", "type": "BOK", "name": "한국은행 금통위 (5월)", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["FED_RATE_CUT"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "미국 FOMC 2주 후 → 한미 금리차 논의"},
-
-    {"date": "2026-05-29", "type": "MSCI", "name": "MSCI 반기 리밸런싱 (5월)", "country": "GLOBAL", "impact": "HIGH",
-     "scenarios": [],
-     "sectors_hot": ["편입종목"], "sectors_cold": ["편출종목"],
-     "pattern": "반기 리밸은 분기보다 영향 큼. D-10~D 편입 +4.1%"},
-
-    {"date": "2026-06-17", "type": "FOMC", "name": "FOMC 6월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "점도표 업데이트. 하반기 금리 전망 결정"},
-
-    {"date": "2026-06-19", "type": "TRIPLE_WITCHING", "name": "Triple Witching (6월)", "country": "US", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "분기말 옵션만기. Russell 리밸런싱과 겹쳐 변동성 극대"},
-
-    {"date": "2026-06-26", "type": "RUSSELL", "name": "Russell 리밸런싱", "country": "US", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": ["소형주"], "sectors_cold": [],
-     "pattern": "Russell 2000 편입 종목 D-5~D 급등. 소형주 변동성"},
-
-    {"date": "2026-07-14", "type": "US_EARNINGS", "name": "미국 2Q 어닝시즌 시작", "country": "US", "impact": "HIGH",
-     "scenarios": ["SEMICONDUCTOR_CYCLE_UP"],
-     "sectors_hot": ["반도체", "빅테크"], "sectors_cold": [],
-     "pattern": "TSMC 실적이 반도체 슈퍼사이클 확인/부정 핵심 이벤트"},
-
-    {"date": "2026-07-16", "type": "BOK", "name": "한국은행 금통위 (7월)", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["FED_RATE_CUT"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "하반기 첫 금통위. 하반기 금리 방향 시사"},
-
-    {"date": "2026-07-29", "type": "FOMC", "name": "FOMC 7월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "잭슨홀 4주 전. 시장이 잭슨홀 힌트 탐색"},
-
-    {"date": "2026-08-14", "type": "KR_EARNINGS", "name": "한국 2Q 실적발표 마감", "country": "KR", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "반기 실적 확인. 중간배당 공시 동반"},
-
-    {"date": "2026-08-27", "type": "JACKSON_HOLE", "name": "잭슨홀 심포지엄", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "Fed 의장 연설이 하반기 정책 방향 결정. 2022년 -3.4% 기록"},
-
-    {"date": "2026-08-28", "type": "MSCI", "name": "MSCI 분기 리밸런싱 (8월)", "country": "GLOBAL", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": ["편입종목"], "sectors_cold": ["편출종목"],
-     "pattern": "D-5~D+1 편입종목 +2.8%"},
-
-    {"date": "2026-09-16", "type": "FOMC", "name": "FOMC 9월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "점도표 업데이트. 9월은 역사적 약세 월 (SPY 평균 -1.1%)"},
-
-    {"date": "2026-09-18", "type": "TRIPLE_WITCHING", "name": "Triple Witching (9월)", "country": "US", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "9월 Triple Witching은 연중 변동성 최대"},
-
-    {"date": "2026-10-13", "type": "US_EARNINGS", "name": "미국 3Q 어닝시즌 시작", "country": "US", "impact": "HIGH",
-     "scenarios": ["SEMICONDUCTOR_CYCLE_UP"],
-     "sectors_hot": ["반도체", "빅테크"], "sectors_cold": [],
-     "pattern": "연말 랠리 여부를 결정하는 어닝시즌"},
-
-    {"date": "2026-10-15", "type": "BOK", "name": "한국은행 금통위 (10월)", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["FED_RATE_CUT"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "연말 금리 전망 확정"},
-
-    {"date": "2026-10-28", "type": "FOMC", "name": "FOMC 10월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "미국 중간선거(11월) 직전. 정치적 민감도 상승"},
-
-    {"date": "2026-11-03", "type": "US_ELECTION", "name": "미국 중간선거", "country": "US", "impact": "HIGH",
-     "scenarios": [],
-     "sectors_hot": ["방산", "인프라", "에너지"], "sectors_cold": ["헬스케어", "신재생"],
-     "pattern": "선거 후 불확실성 해소 → SPY D+1~30 평균 +2.3%"},
-
-    {"date": "2026-11-14", "type": "KR_EARNINGS", "name": "한국 3Q 실적발표 마감", "country": "KR", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "연말 배당 기대감과 겹쳐 배당주 강세"},
-
-    {"date": "2026-11-26", "type": "BOK", "name": "한국은행 금통위 (11월)", "country": "KR", "impact": "MEDIUM",
-     "scenarios": ["FED_RATE_CUT"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "연말 마지막 금통위. 내년 금리 전망"},
-
-    {"date": "2026-11-27", "type": "MSCI", "name": "MSCI 반기 리밸런싱 (11월)", "country": "GLOBAL", "impact": "HIGH",
-     "scenarios": [],
-     "sectors_hot": ["편입종목"], "sectors_cold": ["편출종목"],
-     "pattern": "연말 리밸은 연중 최대. D-10~D 편입 +4.5%"},
-
-    {"date": "2026-12-16", "type": "FOMC", "name": "FOMC 12월 회의 (2일차)", "country": "US", "impact": "HIGH",
-     "scenarios": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "내년 점도표. 산타랠리 vs FOMC 변동성 충돌"},
-
-    {"date": "2026-12-18", "type": "TRIPLE_WITCHING", "name": "Triple Witching (12월)", "country": "US", "impact": "MEDIUM",
-     "scenarios": [],
-     "sectors_hot": [], "sectors_cold": [],
-     "pattern": "연말 옵션만기. Tax Loss Harvesting과 겹쳐 변동성 극대"}
+    {
+      "date": "2026-01-28",
+      "type": "FOMC",
+      "name": "FOMC 1월 회의 (1일)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [
+        "성장주",
+        "바이오"
+      ],
+      "sectors_cold": [
+        "은행"
+      ],
+      "pattern": "금리 동결 시 성장주 강세, 인하 시사 시 리츠/부동산 수혜"
+    },
+    {
+      "date": "2026-02-27",
+      "type": "MSCI",
+      "name": "MSCI 분기 리밸런싱 (2월)",
+      "country": "GLOBAL",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [
+        "편입종목"
+      ],
+      "sectors_cold": [
+        "편출종목"
+      ],
+      "pattern": "D-5~D+1 편입종목 +2.8%, 편출종목 -1.5% (5년 평균)"
+    },
+    {
+      "date": "2026-03-12",
+      "type": "KR_EARNINGS",
+      "name": "한국 4Q 실적발표 마감",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "어닝 서프라이즈 종목 D+1~5 초과수익 +3.2% (5년 평균)"
+    },
+    {
+      "date": "2026-03-18",
+      "type": "FOMC",
+      "name": "FOMC 3월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "점도표(SEP) 발표 회의. 연간 금리 경로 재설정"
+    },
+    {
+      "date": "2026-03-20",
+      "type": "TRIPLE_WITCHING",
+      "name": "Triple Witching (3월)",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "옵션만기 변동성 확대. 거래량 평균 +40%"
+    },
+    {
+      "date": "2026-03-26",
+      "type": "KR_AGM",
+      "name": "한국 정기주총 집중일",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "배당확대/자사주소각 결의 종목 D+1 +1.8%, 행동주의 안건 변동성 2.1배"
+    },
+    {
+      "date": "2026-04-04",
+      "type": "US_DATA",
+      "name": "미국 3월 고용보고서",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "예상 상회 시 금리인하 기대 하락, 하회 시 인하 기대 상승"
+    },
+    {
+      "date": "2026-04-07",
+      "type": "KR_EARNINGS",
+      "name": "삼성전자 1Q 잠정실적 발표",
+      "country": "KR",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "전자부품"
+      ],
+      "sectors_cold": [],
+      "pattern": "HBM/AI칩 실적이 반도체 섹터 방향 결정. 어닝 서프라이즈 시 D+1~3 섹터 +3%"
+    },
+    {
+      "date": "2026-04-10",
+      "type": "BOK",
+      "name": "한국은행 금통위 (4월)",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [
+        "건설",
+        "부동산"
+      ],
+      "sectors_cold": [
+        "은행"
+      ],
+      "pattern": "금리 인하 시 건설/부동산 수혜"
+    },
+    {
+      "date": "2026-04-10",
+      "type": "US_DATA",
+      "name": "미국 3월 CPI",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "Core CPI 하락 시 금리인하 기대 상승 -> 성장주 강세"
+    },
+    {
+      "date": "2026-04-14",
+      "type": "US_EARNINGS",
+      "name": "미국 1Q 어닝시즌 시작 (대형은행)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "빅테크"
+      ],
+      "sectors_cold": [],
+      "pattern": "JP Morgan, Goldman 시작 → 2주 후 빅테크 → 반도체"
+    },
+    {
+      "date": "2026-04-14",
+      "type": "US_DATA",
+      "name": "미국 3월 PPI",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "CPI 선행지표. PPI 하락 -> 다음달 CPI 하락 기대"
+    },
+    {
+      "date": "2026-04-28",
+      "type": "KR_EARNINGS",
+      "name": "삼성전자 1Q 확정실적 발표",
+      "country": "KR",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "전자부품"
+      ],
+      "sectors_cold": [],
+      "pattern": "부문별 실적 공개. HBM 매출/마진 가이던스가 핵심"
+    },
+    {
+      "date": "2026-04-28",
+      "type": "FOMC",
+      "name": "FOMC 4월 회의 1일차",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "4/29 결과 발표. 금리 동결 예상이나 성명서 톤 변화 주목"
+    },
+    {
+      "date": "2026-04-29",
+      "type": "KR_EARNINGS",
+      "name": "SK하이닉스 1Q 실적발표",
+      "country": "KR",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "HBM"
+      ],
+      "sectors_cold": [],
+      "pattern": "HBM 수율/ASP 가이던스가 메모리 업종 방향 결정"
+    },
+    {
+      "date": "2026-05-06",
+      "type": "FOMC",
+      "name": "FOMC 5월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "동결 기대 시 시장 안도, 서프라이즈 시 변동성 급등"
+    },
+    {
+      "date": "2026-05-08",
+      "type": "US_DATA",
+      "name": "미국 4월 고용보고서",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "FOMC 직후 고용 데이터 -> 6월 금리 결정 핵심 변수"
+    },
+    {
+      "date": "2026-05-12",
+      "type": "MSCI",
+      "name": "MSCI 반기 리밸런싱 (5월)",
+      "country": "GLOBAL",
+      "impact": "HIGH",
+      "scenarios": [],
+      "sectors_hot": [
+        "편입종목"
+      ],
+      "sectors_cold": [
+        "편출종목"
+      ],
+      "pattern": "반기 리밸은 분기보다 영향 큼. D-10~D 편입 +4.1%"
+    },
+    {
+      "date": "2026-05-15",
+      "type": "KR_EARNINGS",
+      "name": "한국 1Q 실적발표 마감",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "삼성전자/하이닉스 가이던스가 반도체 섹터 방향 결정"
+    },
+    {
+      "date": "2026-05-28",
+      "type": "BOK",
+      "name": "한국은행 금통위 (5월)",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "미국 FOMC 2주 후 → 한미 금리차 논의"
+    },
+    {
+      "date": "2026-06-17",
+      "type": "FOMC",
+      "name": "FOMC 6월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "점도표 업데이트. 하반기 금리 전망 결정"
+    },
+    {
+      "date": "2026-06-19",
+      "type": "TRIPLE_WITCHING",
+      "name": "Triple Witching (6월)",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "분기말 옵션만기. Russell 리밸런싱과 겹쳐 변동성 극대"
+    },
+    {
+      "date": "2026-06-26",
+      "type": "RUSSELL",
+      "name": "Russell 리밸런싱",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [
+        "소형주"
+      ],
+      "sectors_cold": [],
+      "pattern": "Russell 2000 편입 종목 D-5~D 급등. 소형주 변동성"
+    },
+    {
+      "date": "2026-07-14",
+      "type": "US_EARNINGS",
+      "name": "미국 2Q 어닝시즌 시작",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "빅테크"
+      ],
+      "sectors_cold": [],
+      "pattern": "TSMC 실적이 반도체 슈퍼사이클 확인/부정 핵심 이벤트"
+    },
+    {
+      "date": "2026-07-16",
+      "type": "BOK",
+      "name": "한국은행 금통위 (7월)",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "하반기 첫 금통위. 하반기 금리 방향 시사"
+    },
+    {
+      "date": "2026-07-29",
+      "type": "FOMC",
+      "name": "FOMC 7월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "잭슨홀 4주 전. 시장이 잭슨홀 힌트 탐색"
+    },
+    {
+      "date": "2026-08-14",
+      "type": "KR_EARNINGS",
+      "name": "한국 2Q 실적발표 마감",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "반기 실적 확인. 중간배당 공시 동반"
+    },
+    {
+      "date": "2026-08-27",
+      "type": "JACKSON_HOLE",
+      "name": "잭슨홀 심포지엄",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "Fed 의장 연설이 하반기 정책 방향 결정. 2022년 -3.4% 기록"
+    },
+    {
+      "date": "2026-08-28",
+      "type": "MSCI",
+      "name": "MSCI 분기 리밸런싱 (8월)",
+      "country": "GLOBAL",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [
+        "편입종목"
+      ],
+      "sectors_cold": [
+        "편출종목"
+      ],
+      "pattern": "D-5~D+1 편입종목 +2.8%"
+    },
+    {
+      "date": "2026-09-16",
+      "type": "FOMC",
+      "name": "FOMC 9월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "점도표 업데이트. 9월은 역사적 약세 월 (SPY 평균 -1.1%)"
+    },
+    {
+      "date": "2026-09-18",
+      "type": "TRIPLE_WITCHING",
+      "name": "Triple Witching (9월)",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "9월 Triple Witching은 연중 변동성 최대"
+    },
+    {
+      "date": "2026-10-13",
+      "type": "US_EARNINGS",
+      "name": "미국 3Q 어닝시즌 시작",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "SEMICONDUCTOR_CYCLE_UP"
+      ],
+      "sectors_hot": [
+        "반도체",
+        "빅테크"
+      ],
+      "sectors_cold": [],
+      "pattern": "연말 랠리 여부를 결정하는 어닝시즌"
+    },
+    {
+      "date": "2026-10-15",
+      "type": "BOK",
+      "name": "한국은행 금통위 (10월)",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "연말 금리 전망 확정"
+    },
+    {
+      "date": "2026-10-28",
+      "type": "FOMC",
+      "name": "FOMC 10월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "미국 중간선거(11월) 직전. 정치적 민감도 상승"
+    },
+    {
+      "date": "2026-11-03",
+      "type": "US_ELECTION",
+      "name": "미국 중간선거",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [],
+      "sectors_hot": [
+        "방산",
+        "인프라",
+        "에너지"
+      ],
+      "sectors_cold": [
+        "헬스케어",
+        "신재생"
+      ],
+      "pattern": "선거 후 불확실성 해소 → SPY D+1~30 평균 +2.3%"
+    },
+    {
+      "date": "2026-11-14",
+      "type": "KR_EARNINGS",
+      "name": "한국 3Q 실적발표 마감",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "연말 배당 기대감과 겹쳐 배당주 강세"
+    },
+    {
+      "date": "2026-11-26",
+      "type": "BOK",
+      "name": "한국은행 금통위 (11월)",
+      "country": "KR",
+      "impact": "MEDIUM",
+      "scenarios": [
+        "FED_RATE_CUT"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "연말 마지막 금통위. 내년 금리 전망"
+    },
+    {
+      "date": "2026-11-27",
+      "type": "MSCI",
+      "name": "MSCI 반기 리밸런싱 (11월)",
+      "country": "GLOBAL",
+      "impact": "HIGH",
+      "scenarios": [],
+      "sectors_hot": [
+        "편입종목"
+      ],
+      "sectors_cold": [
+        "편출종목"
+      ],
+      "pattern": "연말 리밸은 연중 최대. D-10~D 편입 +4.5%"
+    },
+    {
+      "date": "2026-12-16",
+      "type": "FOMC",
+      "name": "FOMC 12월 회의 (2일차)",
+      "country": "US",
+      "impact": "HIGH",
+      "scenarios": [
+        "FED_RATE_CUT",
+        "FED_RATE_HIKE"
+      ],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "내년 점도표. 산타랠리 vs FOMC 변동성 충돌"
+    },
+    {
+      "date": "2026-12-18",
+      "type": "TRIPLE_WITCHING",
+      "name": "Triple Witching (12월)",
+      "country": "US",
+      "impact": "MEDIUM",
+      "scenarios": [],
+      "sectors_hot": [],
+      "sectors_cold": [],
+      "pattern": "연말 옵션만기. Tax Loss Harvesting과 겹쳐 변동성 극대"
+    }
   ],
-
   "recurring": {
     "KR_OPTIONS_EXPIRY": {
       "description": "한국 옵션만기일 (매월 둘째 목요일)",
-      "dates_2026": ["01-08", "02-12", "03-12", "04-09", "05-14", "06-11",
-                      "07-09", "08-13", "09-10", "10-08", "11-12", "12-10"],
+      "dates_2026": [
+        "01-08",
+        "02-12",
+        "03-12",
+        "04-09",
+        "05-14",
+        "06-11",
+        "07-09",
+        "08-13",
+        "09-10",
+        "10-08",
+        "11-12",
+        "12-10"
+      ],
       "impact": "LOW",
       "pattern": "만기 전일 변동성 확대, 만기 당일 방향 결정"
     },
     "EARNINGS_SEASONS": {
       "description": "실적 시즌 구간 (집중 발표 기간)",
-      "us_1q": ["2026-04-14", "2026-05-08"],
-      "us_2q": ["2026-07-14", "2026-08-07"],
-      "us_3q": ["2026-10-13", "2026-11-06"],
-      "us_4q": ["2027-01-13", "2027-02-06"],
-      "kr_4q": ["2026-01-20", "2026-03-12"],
-      "kr_1q": ["2026-04-20", "2026-05-15"],
-      "kr_2q": ["2026-07-20", "2026-08-14"],
-      "kr_3q": ["2026-10-20", "2026-11-14"]
+      "us_1q": [
+        "2026-04-14",
+        "2026-05-08"
+      ],
+      "us_2q": [
+        "2026-07-14",
+        "2026-08-07"
+      ],
+      "us_3q": [
+        "2026-10-13",
+        "2026-11-06"
+      ],
+      "us_4q": [
+        "2027-01-13",
+        "2027-02-06"
+      ],
+      "kr_4q": [
+        "2026-01-20",
+        "2026-03-12"
+      ],
+      "kr_1q": [
+        "2026-04-20",
+        "2026-05-15"
+      ],
+      "kr_2q": [
+        "2026-07-20",
+        "2026-08-14"
+      ],
+      "kr_3q": [
+        "2026-10-20",
+        "2026-11-14"
+      ]
     },
     "SEASONALITY": {
       "description": "월별 시즌널리티 (S&P 500 과거 20년 평균)",
-      "strong_months": [1, 4, 7, 10, 11, 12],
-      "weak_months": [2, 6, 8, 9],
-      "sell_in_may": {"start": "05-01", "end": "10-31", "avg_return": "-0.3%"},
-      "santa_rally": {"start": "12-20", "end": "01-03", "avg_return": "+1.3%"},
-      "september_effect": {"avg_return": "-1.1%"}
+      "strong_months": [
+        1,
+        4,
+        7,
+        10,
+        11,
+        12
+      ],
+      "weak_months": [
+        2,
+        6,
+        8,
+        9
+      ],
+      "sell_in_may": {
+        "start": "05-01",
+        "end": "10-31",
+        "avg_return": "-0.3%"
+      },
+      "santa_rally": {
+        "start": "12-20",
+        "end": "01-03",
+        "avg_return": "+1.3%"
+      },
+      "september_effect": {
+        "avg_return": "-1.1%"
+      }
     }
   },
-
   "scenario_event_map": {
-    "FOMC": ["FED_RATE_CUT", "FED_RATE_HIKE"],
-    "BOK": ["FED_RATE_CUT"],
-    "JACKSON_HOLE": ["FED_RATE_CUT", "FED_RATE_HIKE"],
+    "FOMC": [
+      "FED_RATE_CUT",
+      "FED_RATE_HIKE"
+    ],
+    "BOK": [
+      "FED_RATE_CUT"
+    ],
+    "JACKSON_HOLE": [
+      "FED_RATE_CUT",
+      "FED_RATE_HIKE"
+    ],
     "MSCI": [],
     "TRIPLE_WITCHING": [],
-    "US_EARNINGS": ["SEMICONDUCTOR_CYCLE_UP"],
-    "KR_EARNINGS": ["SEMICONDUCTOR_CYCLE_UP"],
+    "US_EARNINGS": [
+      "SEMICONDUCTOR_CYCLE_UP"
+    ],
+    "KR_EARNINGS": [
+      "SEMICONDUCTOR_CYCLE_UP"
+    ],
     "KR_AGM": [],
     "US_ELECTION": [],
     "RUSSELL": []

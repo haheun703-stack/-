@@ -1,16 +1,16 @@
 {
-  "date": "2026-03-26",
-  "generated_at": "2026-03-26 18:48",
-  "regime": "BEAR",
+  "date": "2026-03-27",
+  "generated_at": "2026-03-27 22:51",
+  "regime": "CAUTION",
   "macro_grade": "방어적",
   "position_multiplier": 0.7,
   "total_budget_pct": 100,
   "max_single_stock_pct": 15,
-  "cash_reserve_pct": 20,
-  "total_positions": 6,
+  "cash_reserve_pct": 0,
+  "total_positions": 3,
   "allocations": {
     "모멘텀": {
-      "weight": 10,
+      "weight": 25,
       "count": 1,
       "stocks": [
         {
@@ -22,52 +22,34 @@
       ]
     },
     "수급추종": {
-      "weight": 20,
+      "weight": 25,
       "count": 0,
       "stocks": []
     },
     "이벤트": {
-      "weight": 20,
-      "count": 2,
+      "weight": 15,
+      "count": 1,
       "stocks": [
         {
-          "ticker": "462860",
-          "name": "더즌",
-          "score": 22,
-          "source": "DART_자기주식취득"
-        },
-        {
-          "ticker": "215090",
-          "name": "솔디펜스",
+          "ticker": "232140",
+          "name": "와이씨",
           "score": 20,
-          "source": "DART_자기주식취득"
+          "source": "DART_공급계약체결"
         }
       ]
     },
     "섹터순환": {
-      "weight": 15,
+      "weight": 20,
       "count": 0,
       "stocks": []
     },
     "안전마진": {
-      "weight": 35,
-      "count": 3,
+      "weight": 15,
+      "count": 1,
       "stocks": [
         {
-          "ticker": "002960",
-          "name": "한국쉘석유",
-          "score": 64.0,
-          "source": "눌림목_매수대기"
-        },
-        {
-          "ticker": "125020",
-          "name": "티씨머티리얼즈",
-          "score": 64.0,
-          "source": "눌림목_매수대기"
-        },
-        {
-          "ticker": "267980",
-          "name": "매일유업",
+          "ticker": "004090",
+          "name": "한국석유",
           "score": 64.0,
           "source": "눌림목_매수대기"
         }

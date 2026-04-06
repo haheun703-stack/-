@@ -1,0 +1,243 @@
+{
+  "_handoff": "킬러픽 자비스 보고서 — 전 데이터소스 교차검증 추천 탭",
+  "_date": "2026-03-29",
+  "_from": "퀀트봇",
+  "_version": "v1",
+
+  "api_endpoint": "/api/quant-jarvis",
+  "data_key": "data.killer_picks",
+  "tab_name": "킬러픽",
+  "tab_icon": "Target",
+  "tab_description": "기관/개인/컨센서스/섹터 교차검증 추천",
+
+  "data_structure": {
+    "date": "YYYY-MM-DD (대상 날짜)",
+    "target_label": "3/30(Mon) 형식",
+    "generated_at": "생성 시각",
+    "market_environment": {
+      "regime": "NORMAL|CAUTION|BEAR|CRISIS",
+      "vix": "number",
+      "shield": "GREEN|YELLOW|RED",
+      "mdd_pct": "number (음수)",
+      "cash_pct": "number",
+      "us_mood": "RISK_ON|RISK_OFF|NEUTRAL",
+      "geopolitical_risk": "0~10",
+      "summary": "한줄 요약"
+    },
+    "signal_validation": {
+      "best_signal": "string (시그널명)",
+      "best_hit_rate": "number %",
+      "best_avg_ret": "number %",
+      "signal_summary": {"시그널명": {"hit_rate": "n", "avg_ret": "n", "total": "n"}},
+      "daily_trend": [{"date": "str", "accum_hr": "n", "accum_ret": "n", "picks_hr": "n", "picks_ret": "n"}],
+      "insight": "string 핵심 인사이트"
+    },
+    "institutional_picks": [{
+      "ticker": "6자리", "name": "종목명", "sector": "섹터",
+      "inst_consecutive": "기관연속매수일", "inst_5d_bil": "억",
+      "inst_20d_bil": "억", "foreign_5d_bil": "억",
+      "dual_buying": "boolean", "grade": "STRONG|MODERATE|NOTABLE|WATCH",
+      "consensus": {"target": "n", "upside": "n", "per": "n", "pbr": "n", "dividend": "n", "grade": "S|A|B"},
+      "sector_rank": "number",
+      "verdict": "string 한줄 판단"
+    }],
+    "retail_support": [{
+      "ticker": "6자리", "name": "종목명",
+      "retail_net_5d_bil": "억", "retail_net_20d_bil": "억",
+      "retail_consecutive": "연속매수일", "absorb_rate": "% (외인매도 흡수율)",
+      "pattern": "RETAIL_SUPPORT|SMART_DIVERGE",
+      "verdict": "string"
+    }],
+    "cross_validated_top5": [{
+      "rank": "1~10", "ticker": "6자리", "name": "종목명",
+      "signals_matched": "교차시그널수 (2~6)",
+      "matched_from": ["기관4일연속", "컨센서스A", ...],
+      "consensus": {"target": "n", "upside": "n", "per": "n", "pbr": "n", "dividend": "n"},
+      "inst_consecutive": "number", "inst_20d_bil": "억",
+      "entry_price": "진입가", "stop_loss": "손절가", "target_price": "목표가",
+      "conviction": "HIGH|MEDIUM|LOW",
+      "action": "매수|관심매수|관찰"
+    }],
+    "etf_top5": [{
+      "rank": "number", "ticker": "ETF코드", "name": "ETF명",
+      "category": "섹터|스마트머니|인버스|헤지|매크로",
+      "signal": "string 시그널 설명",
+      "action": "BUY|관심",
+      "sizing": "비중 %",
+      "reason": "string"
+    }],
+    "portfolio_suggestion": {
+      "defense_pct": "number", "offense_pct": "number",
+      "defense": [{"name": "str", "ticker": "str", "pct": "number"}],
+      "offense": [{"name": "str", "ticker": "str", "pct": "number"}]
+    },
+    "sector_analysis": {
+      "top_sectors": [{"sector": "str", "score": "n", "regime": "str", "inst_5d": "억"}],
+      "avoid_sectors": ["섹터명"],
+      "money_flow": "string"
+    },
+    "individual_deep_dive": [{
+      "ticker": "6자리", "name": "종목명", "sector": "섹터",
+      "question": "질문형 제목",
+      "bull_case": "string 상승논리",
+      "bear_case": "string 하락논리",
+      "verdict": "string 최종판단",
+      "entry_condition": "string 진입조건",
+      "target": "string 목표가"
+    }]
+  },
+
+  "ui_design": {
+    "section_1_시장환경": {
+      "layout": "4열 카드 그리드 (모바일 2열)",
+      "cards": [
+        {"label": "레짐", "value": "regime", "color_rules": {"NORMAL": "emerald", "CAUTION": "amber", "BEAR": "red", "CRISIS": "red"}},
+        {"label": "VIX", "value": "vix", "color_rules": {"<20": "emerald", "20~25": "amber", ">25": "red"}},
+        {"label": "SHIELD", "value": "shield", "color_rules": {"GREEN": "emerald", "YELLOW": "amber", "RED": "red"}},
+        {"label": "현금비중", "value": "cash_pct", "suffix": "%"}
+      ],
+      "summary_bar": "summary 텍스트를 배경색 카드로 표시 (레짐별 색상)"
+    },
+
+    "section_2_시그널검증": {
+      "layout": "수평 바 차트 + 일별 트렌드 미니 차트",
+      "content": [
+        "signal_summary를 수평 바 차트로 (hit_rate 기준 정렬)",
+        "daily_trend를 5일 미니 라인 차트 (적중률 + 수익률)",
+        "insight 텍스트를 하단 인사이트 카드로"
+      ],
+      "bar_chart": {
+        "x": "hit_rate",
+        "label": "시그널명 (한글 매핑 필요)",
+        "color": "hit_rate > 55 ? emerald : amber"
+      },
+      "name_mapping": {
+        "tomorrow_picks": "종합추천",
+        "pullback_scan": "눌림목",
+        "accumulation_tracker": "매집추적",
+        "whale_detect": "세력감지",
+        "dart_event": "공시이벤트",
+        "volume_spike": "거래량폭발",
+        "overnight_signal": "야간신호"
+      }
+    },
+
+    "section_3_교차검증TOP": {
+      "layout": "카드 리스트 (각 종목 1카드)",
+      "card_structure": {
+        "header": "#rank name (ticker)",
+        "badge": "conviction (HIGH=emerald, MEDIUM=blue, LOW=gray)",
+        "action_badge": "action (매수=emerald, 관심매수=amber, 관찰=gray)",
+        "body": [
+          "matched_from 태그 (각각 작은 뱃지로)",
+          "컨센서스: 목표가 upside% | PER | PBR | 배당",
+          "기관: inst_consecutive일 연속 | 20일 inst_20d_bil억"
+        ],
+        "footer": "진입가 entry_price | 손절 stop_loss | 목표 target_price"
+      }
+    },
+
+    "section_4_ETF추천": {
+      "layout": "2분할 (방어형 좌 + 공격형 우)",
+      "card_structure": {
+        "left": "category가 인버스/헤지/매크로인 ETF",
+        "right": "category가 섹터/스마트머니인 ETF",
+        "each_card": "name + action뱃지 + sizing + signal텍스트"
+      }
+    },
+
+    "section_5_포트폴리오제안": {
+      "layout": "도넛 차트 + 종목 리스트",
+      "donut": {
+        "inner_text": "방어 defense_pct% / 공격 offense_pct%",
+        "segments": "defense + offense 합산 (종목별 pct)"
+      },
+      "list": "defense/offense 각각 테이블 (종목명 + 비중%)"
+    },
+
+    "section_6_기관매집": {
+      "layout": "수평 막대 (inst_consecutive 기준)",
+      "bar": {
+        "x": "inst_consecutive (연속매수일)",
+        "label": "name",
+        "color": "grade별 (STRONG=emerald, MODERATE=blue, NOTABLE=amber, WATCH=gray)",
+        "annotation": "inst_20d_bil억 텍스트"
+      },
+      "dual_buying_badge": "dual_buying=true이면 별모양 뱃지"
+    },
+
+    "section_7_개인지지": {
+      "layout": "카드 리스트 (최대 5개)",
+      "card": {
+        "header": "name (ticker)",
+        "gauge": "absorb_rate% (원형 게이지)",
+        "body": "retail_consecutive일 연속 | 5일 retail_net_5d_bil억",
+        "verdict_text": "verdict"
+      }
+    },
+
+    "section_8_딥다이브": {
+      "layout": "아코디언 (종목별 펼치기/접기)",
+      "accordion": {
+        "header": "question (질문형)",
+        "body": [
+          {"label": "강점", "value": "bull_case", "icon": "TrendingUp", "color": "emerald"},
+          {"label": "약점", "value": "bear_case", "icon": "TrendingDown", "color": "red"},
+          {"label": "판단", "value": "verdict", "icon": "Target", "color": "blue"},
+          {"label": "진입조건", "value": "entry_condition"},
+          {"label": "목표", "value": "target"}
+        ]
+      }
+    }
+  },
+
+  "design_rules": {
+    "theme": "다크 테마 (bg-gray-900)",
+    "border": "사용 금지 → bg-white/5 배경 구분",
+    "text_color": "text-gray-200 기본, 강조=text-white",
+    "rounded": "rounded-xl",
+    "padding": "p-4 sm:p-6",
+    "font_numbers": "font-variant-numeric: tabular-nums",
+    "conviction_colors": {
+      "HIGH": "bg-emerald-500/20 text-emerald-400",
+      "MEDIUM": "bg-blue-500/20 text-blue-400",
+      "LOW": "bg-gray-500/20 text-gray-400"
+    },
+    "action_colors": {
+      "매수": "bg-emerald-500/20 text-emerald-400",
+      "관심매수": "bg-amber-500/20 text-amber-400",
+      "관찰": "bg-gray-500/20 text-gray-400",
+      "BUY": "bg-emerald-500/20 text-emerald-400"
+    }
+  },
+
+  "null_handling": {
+    "consensus_missing": "컨센서스 없음 뱃지",
+    "empty_array": "섹션 자체를 숨김 (빈 배열이면)",
+    "zero_values": "'-' 표시"
+  },
+
+  "example_actual_data_20260330": {
+    "date": "2026-03-30",
+    "market_environment": {
+      "regime": "CAUTION",
+      "vix": 25.3,
+      "shield": "RED",
+      "mdd_pct": -27.7,
+      "cash_pct": 71.2,
+      "summary": "주의 모드 — 선별적 매수, 현금 확보 (VIX 25.3)"
+    },
+    "cross_validated_top5": [
+      {
+        "rank": 1, "ticker": "086790", "name": "하나금융지주",
+        "signals_matched": 4,
+        "matched_from": ["기관4일연속", "컨센서스A", "눌림목매수대기", "은행섹터강세"],
+        "conviction": "HIGH", "action": "매수"
+      }
+    ],
+    "etf_top5": [
+      {"rank": 1, "ticker": "463250", "name": "KODEX 방산", "category": "섹터", "action": "BUY"},
+      {"rank": 5, "ticker": "252670", "name": "KODEX 200선물인버스2X", "category": "인버스", "action": "BUY"}
+    ]
+  }
+}

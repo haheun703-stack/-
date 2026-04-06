@@ -5,7 +5,7 @@
   "current_equity": 29560759,
   "current_mdd_pct": -27.66,
   "max_mdd_pct": -27.66,
-  "max_mdd_date": "2026-03-26",
+  "max_mdd_date": "2026-03-27",
   "daily_log": [
     {
       "date": "2026-03-07",
@@ -64,6 +64,11 @@
     },
     {
       "date": "2026-03-26",
+      "equity": 29560759,
+      "mdd_pct": -27.66
+    },
+    {
+      "date": "2026-03-27",
       "equity": 29560759,
       "mdd_pct": -27.66
     }

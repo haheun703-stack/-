@@ -1,0 +1,1838 @@
+{
+  "date": "2026-03-27",
+  "generated_at": "2026-03-27T22:51:34.140801",
+  "summary": {
+    "date": "2026-03-27",
+    "total": 1036,
+    "up_count": 515,
+    "down_count": 464,
+    "flat_count": 57,
+    "avg_ret": 0.35,
+    "vol_spike_count": 46,
+    "top5": [
+      {
+        "name": "289080",
+        "ret": 30.0
+      },
+      {
+        "name": "217730",
+        "ret": 29.89
+      },
+      {
+        "name": "161000",
+        "ret": 22.58
+      },
+      {
+        "name": "078350",
+        "ret": 20.8
+      },
+      {
+        "name": "199800",
+        "ret": 20.13
+      }
+    ],
+    "bottom5": [
+      {
+        "name": "226590",
+        "ret": -7.95
+      },
+      {
+        "name": "003280",
+        "ret": -7.96
+      },
+      {
+        "name": "187660",
+        "ret": -8.08
+      },
+      {
+        "name": "062040",
+        "ret": -11.45
+      },
+      {
+        "name": "071320",
+        "ret": -11.97
+      }
+    ]
+  },
+  "signal_accuracy": {
+    "tomorrow_picks": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "tickers": []
+    },
+    "pullback_scan": {
+      "total": 30,
+      "hit": 21,
+      "hit_rate": 70.0,
+      "avg_ret": 1.1,
+      "tickers": [
+        "004090",
+        "171090",
+        "086790",
+        "241520",
+        "267980",
+        "281740",
+        "383310",
+        "002310",
+        "002960",
+        "006405"
+      ]
+    },
+    "whale_detect": {
+      "total": 46,
+      "hit": 27,
+      "hit_rate": 58.7,
+      "avg_ret": 1.24,
+      "tickers": [
+        "217730",
+        "033790",
+        "348150",
+        "108860",
+        "084990",
+        "078350",
+        "007570",
+        "066970",
+        "003300",
+        "008730"
+      ]
+    },
+    "accumulation_tracker": {
+      "total": 30,
+      "hit": 17,
+      "hit_rate": 56.7,
+      "avg_ret": 0.49,
+      "tickers": [
+        "160980",
+        "023530",
+        "052710",
+        "085620",
+        "001120",
+        "120110",
+        "119610",
+        "031330",
+        "032500",
+        "039570"
+      ]
+    },
+    "dart_event": {
+      "total": 28,
+      "hit": 14,
+      "hit_rate": 50.0,
+      "avg_ret": -0.03,
+      "tickers": [
+        "232140",
+        "272210",
+        "171090",
+        "053160",
+        "123860",
+        "038290",
+        "083790",
+        "474650",
+        "294870",
+        "010960"
+      ]
+    },
+    "volume_spike": {
+      "total": 45,
+      "hit": 22,
+      "hit_rate": 48.9,
+      "avg_ret": 0.92,
+      "tickers": [
+        "001250",
+        "089030",
+        "117580",
+        "000070",
+        "000100",
+        "000140",
+        "000155",
+        "000660",
+        "000815",
+        "003220"
+      ]
+    },
+    "dual_buying": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "tickers": []
+    },
+    "safety_margin": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "tickers": []
+    },
+    "ai_v3_picks": {
+      "total": 0,
+      "hit": 0,
+      "hit_rate": 0,
+      "avg_ret": 0,
+      "tickers": []
+    },
+    "overnight_signal": {
+      "total": 1,
+      "hit": 0,
+      "hit_rate": 0.0,
+      "avg_ret": 0.37,
+      "grade": "MILD_BEAR"
+    }
+  },
+  "missed_opportunities": [
+    {
+      "ticker": "289080",
+      "name": "289080",
+      "ret_1d": 30.0,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 52.9,
+        "adx": 16.39,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "161000",
+      "name": "161000",
+      "ret_1d": 22.58,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 43.18,
+        "adx": 31.2,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "199800",
+      "name": "199800",
+      "ret_1d": 20.13,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 42.65,
+        "adx": 26.28,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "263750",
+      "name": "263750",
+      "ret_1d": 15.75,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 47.55,
+        "adx": 27.8,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "424870",
+      "name": "424870",
+      "ret_1d": 15.5,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 47.71,
+        "adx": 27.79,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "100790",
+      "name": "100790",
+      "ret_1d": 15.22,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 66.77,
+        "adx": 28.22,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "008770",
+      "name": "008770",
+      "ret_1d": 13.11,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 42.38,
+        "adx": 18.91,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "181710",
+      "name": "181710",
+      "ret_1d": 13.11,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 50.25,
+        "adx": 22.09,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "371950",
+      "name": "371950",
+      "ret_1d": 12.47,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 43.42,
+        "adx": 18.31,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "002020",
+      "name": "002020",
+      "ret_1d": 10.79,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 57.74,
+        "adx": 32.92,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "036560",
+      "name": "036560",
+      "ret_1d": 10.19,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 46.08,
+        "adx": 33.65,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "278280",
+      "name": "278280",
+      "ret_1d": 9.47,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 46.9,
+        "adx": 24.18,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "121600",
+      "name": "121600",
+      "ret_1d": 9.16,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.41,
+        "adx": 19.81,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "456010",
+      "name": "456010",
+      "ret_1d": 8.87,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 43.87,
+        "adx": 25.15,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "241710",
+      "name": "241710",
+      "ret_1d": 8.74,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.09,
+        "adx": 29.8,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "192820",
+      "name": "192820",
+      "ret_1d": 8.58,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 52.97,
+        "adx": 32.59,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "047040",
+      "name": "047040",
+      "ret_1d": 8.55,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 67.73,
+        "adx": 60.48,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "086450",
+      "name": "086450",
+      "ret_1d": 8.52,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 60.12,
+        "adx": 25.9,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "131970",
+      "name": "131970",
+      "ret_1d": 8.3,
+      "had_signals": [],
+      "blocked_by": "과열 (RSI 73)",
+      "yesterday_indicators": {
+        "rsi": 72.94,
+        "adx": 60.43,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "052020",
+      "name": "052020",
+      "ret_1d": 8.27,
+      "had_signals": [],
+      "blocked_by": "과열 (RSI 72) + SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 71.54,
+        "adx": 45.2,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "251370",
+      "name": "251370",
+      "ret_1d": 8.17,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 63.41,
+        "adx": 27.14,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "499790",
+      "name": "499790",
+      "ret_1d": 7.99,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.03,
+        "adx": 23.76,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "126600",
+      "name": "126600",
+      "ret_1d": 7.96,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 45.48,
+        "adx": 41.47,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "001460",
+      "name": "001460",
+      "ret_1d": 7.85,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 49.5,
+        "adx": 35.67,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "483650",
+      "name": "483650",
+      "ret_1d": 7.67,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 41.83,
+        "adx": 20.63,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "000990",
+      "name": "000990",
+      "ret_1d": 7.57,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 37.76,
+        "adx": 30.73,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "018290",
+      "name": "018290",
+      "ret_1d": 7.3,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 39.93,
+        "adx": 25.86,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "085910",
+      "name": "085910",
+      "ret_1d": 7.3,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 59.87,
+        "adx": 27.1,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "230240",
+      "name": "230240",
+      "ret_1d": 7.13,
+      "had_signals": [],
+      "blocked_by": "과열 (RSI 72)",
+      "yesterday_indicators": {
+        "rsi": 71.56,
+        "adx": 48.24,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "007390",
+      "name": "007390",
+      "ret_1d": 6.9,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 35.29,
+        "adx": 39.37,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "028300",
+      "name": "028300",
+      "ret_1d": 6.71,
+      "had_signals": [],
+      "blocked_by": "G1_ADX (11<14)",
+      "yesterday_indicators": {
+        "rsi": 47.59,
+        "adx": 11.48,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "018250",
+      "name": "018250",
+      "ret_1d": 6.62,
+      "had_signals": [],
+      "blocked_by": "G1_ADX (10<14) + SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 49.22,
+        "adx": 10.21,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "090430",
+      "name": "090430",
+      "ret_1d": 6.18,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 48.35,
+        "adx": 22.17,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "140410",
+      "name": "140410",
+      "ret_1d": 6.18,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.8,
+        "adx": 48.1,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "257720",
+      "name": "257720",
+      "ret_1d": 6.01,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 42.42,
+        "adx": 24.12,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "950160",
+      "name": "950160",
+      "ret_1d": 6.01,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 65.41,
+        "adx": 28.31,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "326030",
+      "name": "326030",
+      "ret_1d": 5.91,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 39.22,
+        "adx": 27.89,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "356680",
+      "name": "356680",
+      "ret_1d": 5.9,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 45.05,
+        "adx": 17.6,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "011070",
+      "name": "011070",
+      "ret_1d": 5.78,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 58.82,
+        "adx": 25.37,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "425420",
+      "name": "425420",
+      "ret_1d": 5.67,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 64.68,
+        "adx": 65.03,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "005090",
+      "name": "005090",
+      "ret_1d": 5.56,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 63.28,
+        "adx": 53.57,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "278470",
+      "name": "278470",
+      "ret_1d": 5.48,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 48.59,
+        "adx": 32.29,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "000210",
+      "name": "000210",
+      "ret_1d": 5.39,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 63.85,
+        "adx": 40.82,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "002790",
+      "name": "002790",
+      "ret_1d": 5.39,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 47.22,
+        "adx": 28.01,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "180400",
+      "name": "180400",
+      "ret_1d": 5.38,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 51.56,
+        "adx": 29.67,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "259960",
+      "name": "259960",
+      "ret_1d": 5.38,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 52.08,
+        "adx": 23.97,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "094170",
+      "name": "094170",
+      "ret_1d": 5.33,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 53.6,
+        "adx": 27.57,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "064290",
+      "name": "064290",
+      "ret_1d": 5.24,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 60.19,
+        "adx": 38.68,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "204620",
+      "name": "204620",
+      "ret_1d": 5.2,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 54.92,
+        "adx": 31.56,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "450080",
+      "name": "450080",
+      "ret_1d": 5.01,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 56.09,
+        "adx": 28.09,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "034230",
+      "name": "034230",
+      "ret_1d": 4.94,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 44.95,
+        "adx": 18.97,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "194700",
+      "name": "194700",
+      "ret_1d": 4.87,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 46.69,
+        "adx": 22.25,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "352480",
+      "name": "352480",
+      "ret_1d": 4.87,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 37.78,
+        "adx": 24.01,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "300080",
+      "name": "300080",
+      "ret_1d": 4.71,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 35.34,
+        "adx": 35.15,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "047920",
+      "name": "047920",
+      "ret_1d": 4.7,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.67,
+        "adx": 15.63,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "137400",
+      "name": "137400",
+      "ret_1d": 4.64,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 49.74,
+        "adx": 20.87,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "003670",
+      "name": "003670",
+      "ret_1d": 4.5,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 46.55,
+        "adx": 27.38,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "087010",
+      "name": "087010",
+      "ret_1d": 4.48,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 48.21,
+        "adx": 24.23,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "353810",
+      "name": "353810",
+      "ret_1d": 4.45,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.12,
+        "adx": 18.17,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "170900",
+      "name": "170900",
+      "ret_1d": 4.44,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 38.12,
+        "adx": 39.23,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "200130",
+      "name": "200130",
+      "ret_1d": 4.42,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 31.92,
+        "adx": 49.58,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "216080",
+      "name": "216080",
+      "ret_1d": 4.36,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.28,
+        "adx": 17.47,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "383220",
+      "name": "383220",
+      "ret_1d": 4.33,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 44.03,
+        "adx": 16.89,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "144510",
+      "name": "144510",
+      "ret_1d": 4.3,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 47.52,
+        "adx": 23.9,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "418550",
+      "name": "418550",
+      "ret_1d": 4.29,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 46.42,
+        "adx": 24.68,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "251970",
+      "name": "251970",
+      "ret_1d": 4.27,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 36.9,
+        "adx": 30.76,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "078520",
+      "name": "078520",
+      "ret_1d": 4.22,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 61.4,
+        "adx": 37.62,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "095340",
+      "name": "095340",
+      "ret_1d": 4.17,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 63.72,
+        "adx": 59.02,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "282330",
+      "name": "282330",
+      "ret_1d": 4.16,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 54.4,
+        "adx": 16.74,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "007810",
+      "name": "007810",
+      "ret_1d": 4.09,
+      "had_signals": [],
+      "blocked_by": "과열 (RSI 71)",
+      "yesterday_indicators": {
+        "rsi": 71.29,
+        "adx": 42.38,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "139130",
+      "name": "139130",
+      "ret_1d": 4.06,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.13,
+        "adx": 20.38,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "365340",
+      "name": "365340",
+      "ret_1d": 3.99,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 49.86,
+        "adx": 22.58,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "340570",
+      "name": "340570",
+      "ret_1d": 3.97,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 50.3,
+        "adx": 32.06,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "039490",
+      "name": "039490",
+      "ret_1d": 3.94,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 47.69,
+        "adx": 16.53,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "108490",
+      "name": "108490",
+      "ret_1d": 3.87,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 45.54,
+        "adx": 14.52,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "462870",
+      "name": "462870",
+      "ret_1d": 3.86,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.51,
+        "adx": 19.07,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "020150",
+      "name": "020150",
+      "ret_1d": 3.82,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 52.24,
+        "adx": 30.85,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "112040",
+      "name": "112040",
+      "ret_1d": 3.82,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 35.11,
+        "adx": 41.45,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "082640",
+      "name": "082640",
+      "ret_1d": 3.81,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 59.09,
+        "adx": 45.61,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "389470",
+      "name": "389470",
+      "ret_1d": 3.78,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 42.35,
+        "adx": 37.26,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "348340",
+      "name": "348340",
+      "ret_1d": 3.76,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 42.01,
+        "adx": 24.45,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "064550",
+      "name": "064550",
+      "ret_1d": 3.72,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 42.71,
+        "adx": 22.79,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "115450",
+      "name": "115450",
+      "ret_1d": 3.72,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 49.1,
+        "adx": 21.6,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "175330",
+      "name": "175330",
+      "ret_1d": 3.67,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 50.19,
+        "adx": 31.2,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "044490",
+      "name": "044490",
+      "ret_1d": 3.64,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 54.05,
+        "adx": 31.71,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "161890",
+      "name": "161890",
+      "ret_1d": 3.62,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 60.33,
+        "adx": 31.35,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "005070",
+      "name": "005070",
+      "ret_1d": 3.61,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 49.22,
+        "adx": 24.84,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "027360",
+      "name": "027360",
+      "ret_1d": 3.59,
+      "had_signals": [],
+      "blocked_by": "과열 (RSI 72)",
+      "yesterday_indicators": {
+        "rsi": 71.91,
+        "adx": 48.31,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "323280",
+      "name": "323280",
+      "ret_1d": 3.57,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 34.8,
+        "adx": 35.86,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "214420",
+      "name": "214420",
+      "ret_1d": 3.56,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 39.65,
+        "adx": 30.76,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "032350",
+      "name": "032350",
+      "ret_1d": 3.55,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.7,
+        "adx": 23.79,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "290650",
+      "name": "290650",
+      "ret_1d": 3.53,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 39.7,
+        "adx": 27.96,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "000500",
+      "name": "000500",
+      "ret_1d": 3.5,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 52.97,
+        "adx": 25.09,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "069620",
+      "name": "069620",
+      "ret_1d": 3.47,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 47.01,
+        "adx": 16.02,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "001750",
+      "name": "001750",
+      "ret_1d": 3.44,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 56.79,
+        "adx": 27.66,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "030520",
+      "name": "030520",
+      "ret_1d": 3.44,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 39.63,
+        "adx": 23.23,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "200710",
+      "name": "200710",
+      "ret_1d": 3.4,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 65.45,
+        "adx": 40.22,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "141080",
+      "name": "141080",
+      "ret_1d": 3.39,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 55.75,
+        "adx": 32.14,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "005690",
+      "name": "005690",
+      "ret_1d": 3.36,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 53.72,
+        "adx": 14.49,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "225570",
+      "name": "225570",
+      "ret_1d": 3.35,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 42.16,
+        "adx": 27.88,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "372170",
+      "name": "372170",
+      "ret_1d": 3.34,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 43.11,
+        "adx": 25.78,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "298830",
+      "name": "298830",
+      "ret_1d": 3.33,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 42.56,
+        "adx": 14.44,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "096530",
+      "name": "096530",
+      "ret_1d": 3.32,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 42.97,
+        "adx": 29.82,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "214370",
+      "name": "214370",
+      "ret_1d": 3.3,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 35.93,
+        "adx": 48.9,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "016360",
+      "name": "016360",
+      "ret_1d": 3.28,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 47.36,
+        "adx": 16.7,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "065660",
+      "name": "065660",
+      "ret_1d": 3.26,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 52.32,
+        "adx": 25.21,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "073490",
+      "name": "073490",
+      "ret_1d": 3.25,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 55.76,
+        "adx": 31.62,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "338840",
+      "name": "338840",
+      "ret_1d": 3.25,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 63.15,
+        "adx": 34.51,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "065350",
+      "name": "065350",
+      "ret_1d": 3.2,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 36.23,
+        "adx": 17.31,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "217270",
+      "name": "217270",
+      "ret_1d": 3.2,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 34.89,
+        "adx": 38.42,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "089860",
+      "name": "089860",
+      "ret_1d": 3.16,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 45.38,
+        "adx": 24.67,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "069080",
+      "name": "069080",
+      "ret_1d": 3.15,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 41.41,
+        "adx": 33.65,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "221800",
+      "name": "221800",
+      "ret_1d": 3.15,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 47.1,
+        "adx": 16.96,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "215200",
+      "name": "215200",
+      "ret_1d": 3.13,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 51.26,
+        "adx": 28.63,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "234340",
+      "name": "234340",
+      "ret_1d": 3.11,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.85,
+        "adx": 44.03,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "389500",
+      "name": "389500",
+      "ret_1d": 3.11,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 43.08,
+        "adx": 18.56,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "092730",
+      "name": "092730",
+      "ret_1d": 3.1,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 40.58,
+        "adx": 38.96,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "179290",
+      "name": "179290",
+      "ret_1d": 3.09,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 48.89,
+        "adx": 45.46,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "298020",
+      "name": "298020",
+      "ret_1d": 3.08,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 55.55,
+        "adx": 16.42,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "439090",
+      "name": "439090",
+      "ret_1d": 3.07,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 43.85,
+        "adx": 42.25,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "058610",
+      "name": "058610",
+      "ret_1d": 3.06,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 38.51,
+        "adx": 38.61,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "376270",
+      "name": "376270",
+      "ret_1d": 3.04,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 54.64,
+        "adx": 27.73,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "243840",
+      "name": "243840",
+      "ret_1d": 3.03,
+      "had_signals": [],
+      "blocked_by": "시그널 미감지 (조건 불충족)",
+      "yesterday_indicators": {
+        "rsi": 66.58,
+        "adx": 38.41,
+        "sar_trend": 1
+      },
+      "in_universe": true
+    },
+    {
+      "ticker": "005940",
+      "name": "005940",
+      "ret_1d": 3.01,
+      "had_signals": [],
+      "blocked_by": "SAR 하락추세",
+      "yesterday_indicators": {
+        "rsi": 53.09,
+        "adx": 16.65,
+        "sar_trend": -1
+      },
+      "in_universe": true
+    }
+  ],
+  "sar_block_analysis": {
+    "total": 48,
+    "genuine_miss": 19,
+    "noise_block": 29,
+    "ambiguous": 0,
+    "miss_rate": 39.6,
+    "top_misses": [
+      {
+        "ticker": "161000",
+        "name": "161000",
+        "ret_1d": 22.58,
+        "verdict": "MISS"
+      },
+      {
+        "ticker": "263750",
+        "name": "263750",
+        "ret_1d": 15.75,
+        "verdict": "MISS"
+      },
+      {
+        "ticker": "008770",
+        "name": "008770",
+        "ret_1d": 13.11,
+        "verdict": "MISS"
+      },
+      {
+        "ticker": "371950",
+        "name": "371950",
+        "ret_1d": 12.47,
+        "verdict": "MISS"
+      },
+      {
+        "ticker": "036560",
+        "name": "036560",
+        "ret_1d": 10.19,
+        "verdict": "MISS"
+      }
+    ]
+  },
+  "ai_insight": "1. pullback_scan 70% 적중, 단기 최강 시그널\n\n2. SAR 하락추세 필터가 급등주 4개 차단함\n\n3. volume_spike는 20일간 41%로 개선 필요"
+}

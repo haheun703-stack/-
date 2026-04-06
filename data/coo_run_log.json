@@ -1,711 +1,742 @@
 {
-  "started_at": "2026-03-26T16:30:01.750358",
+  "started_at": "2026-03-27T22:20:35.041356",
   "dry_run": false,
   "groups": [
     {
       "group": "데이터수집",
       "description": "CSV/Parquet 종가 + KOSPI 인덱스 + 분봉",
       "critical": true,
-      "started_at": "2026-03-26T16:30:01.750828",
+      "started_at": "2026-03-27T22:20:35.045471",
       "steps": [
         {
           "name": "CSV 전종목 업데이트",
           "cmd": "scripts/update_daily_data.py",
-          "started_at": "2026-03-26T16:30:01.750833",
+          "started_at": "2026-03-27T22:20:35.045478",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:00:50.030858"
+          "finished_at": "2026-03-27T22:20:54.167541"
         },
         {
           "name": "Parquet 증분 업데이트",
           "cmd": "scripts/extend_parquet_data.py --skip-supply",
-          "started_at": "2026-03-26T17:00:50.030885",
+          "started_at": "2026-03-27T22:20:54.167548",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:02:42.196822"
+          "finished_at": "2026-03-27T22:21:17.398711"
         },
         {
           "name": "KOSPI 인덱스",
           "cmd": "scripts/update_kospi_index.py",
-          "started_at": "2026-03-26T17:02:42.196848",
+          "started_at": "2026-03-27T22:21:17.398718",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:02:53.742081"
+          "finished_at": "2026-03-27T22:21:21.771569"
         },
         {
           "name": "투자자수급",
           "cmd": "scripts/collect_investor_flow.py",
-          "started_at": "2026-03-26T17:02:53.742103",
+          "started_at": "2026-03-27T22:21:21.771575",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:02:55.230474"
-        },
-        {
-          "name": "분봉 데이터 수집",
-          "cmd": "scripts/collect_intraday_candles.py",
-          "started_at": "2026-03-26T17:02:55.230496",
-          "success": false,
-          "return_code": null,
-          "error": "TIMEOUT (600s)",
-          "finished_at": "2026-03-26T17:42:55.282243"
+          "finished_at": "2026-03-27T22:21:22.847909"
         }
       ],
       "success": true,
-      "failed_count": 1,
+      "failed_count": 0,
       "fallback_used": false,
-      "finished_at": "2026-03-26T17:42:55.282654",
-      "elapsed_seconds": 4373.5
+      "finished_at": "2026-03-27T22:21:22.847917",
+      "elapsed_seconds": 47.8
     },
     {
       "group": "지표계산",
       "description": "기술지표 + US 시그널 + 파생 + 공매도 + 패턴DB",
       "critical": true,
-      "started_at": "2026-03-26T17:42:55.283211",
+      "started_at": "2026-03-27T22:21:22.848009",
       "steps": [
         {
           "name": "기술지표 재계산",
           "cmd": "scripts/rebuild_indicators.py",
-          "started_at": "2026-03-26T17:42:55.283226",
+          "started_at": "2026-03-27T22:21:22.848011",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:50:21.921042"
+          "finished_at": "2026-03-27T22:22:17.113497"
         },
         {
           "name": "ICT 레벨+OR/IR",
           "cmd": "scripts/run_ict_levels.py",
-          "started_at": "2026-03-26T17:50:21.923102",
+          "started_at": "2026-03-27T22:22:17.113955",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:52:31.770110"
+          "finished_at": "2026-03-27T22:22:48.571324"
         },
         {
           "name": "US Overnight Signal",
           "cmd": "scripts/us_overnight_signal.py --update",
-          "started_at": "2026-03-26T17:52:31.770133",
+          "started_at": "2026-03-27T22:22:48.571331",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:52:33.534199"
+          "finished_at": "2026-03-27T22:22:52.176550"
         },
         {
           "name": "파생 시그널 수집",
           "cmd": "scripts/derivatives_collector.py",
-          "started_at": "2026-03-26T17:52:33.534226",
+          "started_at": "2026-03-27T22:22:52.176558",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:52:37.266753"
+          "finished_at": "2026-03-27T22:22:53.620002"
         },
         {
           "name": "공매도 시그널",
           "cmd": "scripts/collect_short_selling.py",
-          "started_at": "2026-03-26T17:52:37.266775",
+          "started_at": "2026-03-27T22:22:53.620009",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:52:53.048792"
+          "finished_at": "2026-03-27T22:22:57.668361"
         },
         {
           "name": "US-KR 패턴DB",
           "cmd": "scripts/update_us_kr_daily.py",
-          "started_at": "2026-03-26T17:52:53.048820",
+          "started_at": "2026-03-27T22:22:57.668368",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:53:04.390608"
+          "finished_at": "2026-03-27T22:23:04.273168"
         }
       ],
       "success": true,
       "failed_count": 0,
       "fallback_used": false,
-      "finished_at": "2026-03-26T17:53:04.390634",
-      "elapsed_seconds": 609.1
+      "finished_at": "2026-03-27T22:23:04.273176",
+      "elapsed_seconds": 101.4
     },
     {
       "group": "섹터ETF분석",
       "description": "섹터 모멘텀 + 수급 + ETF 마스터 + 시그널",
       "critical": false,
-      "started_at": "2026-03-26T17:53:04.391248",
+      "started_at": "2026-03-27T22:23:04.273252",
       "steps": [
         {
           "name": "섹터 ETF 시세",
           "cmd": "scripts/sector_etf_builder.py --daily",
-          "started_at": "2026-03-26T17:53:04.391264",
+          "started_at": "2026-03-27T22:23:04.273254",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:53:15.465234"
+          "finished_at": "2026-03-27T22:23:13.314203"
         },
         {
           "name": "섹터 모멘텀",
           "cmd": "scripts/sector_momentum.py --history",
-          "started_at": "2026-03-26T17:53:15.465256",
+          "started_at": "2026-03-27T22:23:13.314211",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:53:17.612903"
+          "finished_at": "2026-03-27T22:23:14.936521"
         },
         {
           "name": "섹터 z-score",
           "cmd": "scripts/sector_zscore.py --top 5",
-          "started_at": "2026-03-26T17:53:17.612927",
+          "started_at": "2026-03-27T22:23:14.936527",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:53:20.615482"
+          "finished_at": "2026-03-27T22:23:17.418383"
         },
         {
           "name": "섹터 수급",
           "cmd": "scripts/sector_investor_flow.py --days 5",
-          "started_at": "2026-03-26T17:53:20.615516",
+          "started_at": "2026-03-27T22:23:17.418392",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:55:57.967610"
+          "finished_at": "2026-03-27T22:23:47.088962"
         },
         {
           "name": "차이나머니 수급",
           "cmd": "scripts/crawl_china_money.py",
-          "started_at": "2026-03-26T17:55:57.967634",
-          "success": true,
-          "return_code": 0,
-          "error": null,
-          "finished_at": "2026-03-26T17:57:23.826966"
+          "started_at": "2026-03-27T22:23:47.088969",
+          "success": false,
+          "return_code": 1,
+          "error": "  File \"D:\\sub-agent-project_퀀트봇\\src\\adapters\\kis_investor_adapter.py\", line 65, in _issue_token\n    raise RuntimeError(f\"KIS 토큰 발급 실패: {data}\")\nRuntimeError: KIS 토큰 발급 실패: {'error_description': '접근토큰 발급 잠시 후 다시 시도하세요(1분당 1회)', 'error_code': 'EGW00133'}",
+          "finished_at": "2026-03-27T22:23:48.003135"
         },
         {
           "name": "ETF 투자자 수급",
           "cmd": "scripts/collect_etf_investor_flow.py",
-          "started_at": "2026-03-26T17:57:23.826993",
+          "started_at": "2026-03-27T22:23:48.003142",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:03.088309"
+          "finished_at": "2026-03-27T22:23:57.996473"
         },
         {
           "name": "KRX 국적별 외국인",
           "cmd": "scripts/scan_nationality.py --send",
-          "started_at": "2026-03-26T17:58:03.088319",
+          "started_at": "2026-03-27T22:23:57.996480",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:52.211043"
+          "finished_at": "2026-03-27T22:32:47.520337"
         },
         {
           "name": "섹터 일일 리포트",
           "cmd": "scripts/sector_daily_report.py",
-          "started_at": "2026-03-26T17:58:52.211068",
+          "started_at": "2026-03-27T22:32:47.520352",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:52.409665"
+          "finished_at": "2026-03-27T22:32:47.702429"
+        },
+        {
+          "name": "TIER2 기관수급 수집",
+          "cmd": "scripts/institutional_flow_collector.py --top-n 5",
+          "started_at": "2026-03-27T22:32:47.702436",
+          "success": true,
+          "return_code": 0,
+          "error": null,
+          "finished_at": "2026-03-27T22:33:39.157181"
+        },
+        {
+          "name": "TIER2 섹터 컴포짓",
+          "cmd": "src/sector_composite.py",
+          "started_at": "2026-03-27T22:33:39.157190",
+          "success": true,
+          "return_code": 0,
+          "error": null,
+          "finished_at": "2026-03-27T22:33:39.258968"
         },
         {
           "name": "섹터 ETF 거래량",
           "cmd": "scripts/collect_etf_volume.py",
-          "started_at": "2026-03-26T17:58:52.409691",
+          "started_at": "2026-03-27T22:33:39.258975",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:56.436540"
+          "finished_at": "2026-03-27T22:33:42.551689"
         },
         {
           "name": "ETF 마스터 빌드",
           "cmd": "scripts/update_etf_master.py",
-          "started_at": "2026-03-26T17:58:56.436562",
+          "started_at": "2026-03-27T22:33:42.551695",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:58.506066"
+          "finished_at": "2026-03-27T22:33:43.963255"
         },
         {
           "name": "ETF 매매 시그널",
           "cmd": "scripts/etf_trading_signal.py",
-          "started_at": "2026-03-26T17:58:58.506089",
+          "started_at": "2026-03-27T22:33:43.963262",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:58:59.597356"
+          "finished_at": "2026-03-27T22:33:44.661476"
         }
       ],
       "success": true,
-      "failed_count": 0,
+      "failed_count": 1,
       "fallback_used": false,
-      "finished_at": "2026-03-26T17:58:59.597380",
-      "elapsed_seconds": 355.2
+      "finished_at": "2026-03-27T22:33:44.661526",
+      "elapsed_seconds": 640.4
     },
     {
       "group": "BRAIN_SHIELD",
       "description": "SHIELD 방어 → BRAIN 배분 → LENS 맥락",
       "critical": false,
-      "started_at": "2026-03-26T17:58:59.597948",
+      "started_at": "2026-03-27T22:33:44.661648",
       "steps": [
         {
           "name": "SHIELD 방어 점검",
           "cmd": "scripts/run_shield.py --send",
-          "started_at": "2026-03-26T17:58:59.597962",
+          "started_at": "2026-03-27T22:33:44.661651",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:02.138344"
+          "finished_at": "2026-03-27T22:33:46.718678"
         },
         {
           "name": "COT Slow Eye",
           "cmd": "scripts/run_cot_tracker.py",
-          "started_at": "2026-03-26T17:59:02.138367",
+          "started_at": "2026-03-27T22:33:46.718684",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:03.023133"
+          "finished_at": "2026-03-27T22:33:47.454643"
         },
         {
           "name": "BRAIN 자본배분",
           "cmd": "scripts/run_brain.py",
-          "started_at": "2026-03-26T17:59:03.023153",
+          "started_at": "2026-03-27T22:33:47.454649",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:04.387861"
+          "finished_at": "2026-03-27T22:33:48.344775"
         },
         {
           "name": "SCENARIO ENGINE",
           "cmd": "-m src.alpha.scenario_detector",
-          "started_at": "2026-03-26T17:59:04.387883",
+          "started_at": "2026-03-27T22:33:48.344782",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:04.604203"
+          "finished_at": "2026-03-27T22:33:49.867740"
         },
         {
           "name": "LENS LAYER",
           "cmd": "scripts/run_lens.py",
-          "started_at": "2026-03-26T17:59:04.604226",
+          "started_at": "2026-03-27T22:33:49.867747",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:04.994327"
+          "finished_at": "2026-03-27T22:33:50.183761"
         },
         {
           "name": "ETF 3축 로테이션",
           "cmd": "scripts/run_etf_rotation.py --blind-test --no-telegram",
-          "started_at": "2026-03-26T17:59:04.994337",
+          "started_at": "2026-03-27T22:33:50.183767",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:11.027862"
+          "finished_at": "2026-03-27T22:33:52.532709"
         }
       ],
       "success": true,
       "failed_count": 0,
       "fallback_used": false,
-      "finished_at": "2026-03-26T17:59:11.027886",
-      "elapsed_seconds": 11.4
+      "finished_at": "2026-03-27T22:33:52.532717",
+      "elapsed_seconds": 7.9
     },
     {
       "group": "종목스캔",
       "description": "각종 스캔 + AI분석 + 내일 추천",
       "critical": false,
-      "started_at": "2026-03-26T17:59:11.028455",
+      "started_at": "2026-03-27T22:33:52.532862",
       "steps": [
         {
           "name": "레버리지 ETF 스캔",
           "cmd": "scripts/leverage_etf_scanner.py",
-          "started_at": "2026-03-26T17:59:11.028470",
+          "started_at": "2026-03-27T22:33:52.532864",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T17:59:13.175583"
+          "finished_at": "2026-03-27T22:33:53.782432"
         },
         {
           "name": "눌림목 스캔",
           "cmd": "scripts/scan_pullback.py",
-          "started_at": "2026-03-26T17:59:13.175597",
+          "started_at": "2026-03-27T22:33:53.782439",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:02:21.406534"
+          "finished_at": "2026-03-27T22:34:16.000346"
         },
         {
           "name": "수급 폭발 스캐너",
           "cmd": "scripts/scan_volume_spike.py",
-          "started_at": "2026-03-26T18:02:21.406556",
+          "started_at": "2026-03-27T22:34:16.000352",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:02:22.371023"
+          "finished_at": "2026-03-27T22:34:25.172743"
         },
         {
           "name": "소형주 급등 포착",
           "cmd": "scripts/scan_smallcap_explosion.py",
-          "started_at": "2026-03-26T18:02:22.371050",
+          "started_at": "2026-03-27T22:34:25.172758",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:07:49.681339"
+          "finished_at": "2026-03-27T22:35:00.389579"
         },
         {
           "name": "밸류체인 스캔",
           "cmd": "scripts/scan_value_chain.py",
-          "started_at": "2026-03-26T18:07:49.681360",
+          "started_at": "2026-03-27T22:35:00.389587",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:07:51.402595"
+          "finished_at": "2026-03-27T22:35:01.668607"
         },
         {
           "name": "DART 공시 크롤링",
           "cmd": "scripts/crawl_dart_disclosure.py",
-          "started_at": "2026-03-26T18:07:51.402618",
+          "started_at": "2026-03-27T22:35:01.668618",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:08:26.111089"
+          "finished_at": "2026-03-27T22:35:11.404412"
         },
         {
           "name": "레짐 매크로 시그널",
           "cmd": "scripts/regime_macro_signal.py",
-          "started_at": "2026-03-26T18:08:26.111115",
+          "started_at": "2026-03-27T22:35:11.404421",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:08:27.150570"
+          "finished_at": "2026-03-27T22:35:11.974708"
         },
         {
           "name": "시장 뉴스 크롤링",
           "cmd": "scripts/crawl_market_news.py",
-          "started_at": "2026-03-26T18:08:27.150597",
+          "started_at": "2026-03-27T22:35:11.974715",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:09:22.266854"
+          "finished_at": "2026-03-27T22:35:36.544089"
         },
         {
           "name": "세력감지 스캔",
           "cmd": "scripts/scan_whale_detect.py",
-          "started_at": "2026-03-26T18:09:22.266879",
+          "started_at": "2026-03-27T22:35:36.544096",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:11:16.060922"
+          "finished_at": "2026-03-27T22:35:54.760689"
         },
         {
           "name": "세력감지 하이브리드",
           "cmd": "scripts/scan_force_hybrid.py",
-          "started_at": "2026-03-26T18:11:16.060946",
+          "started_at": "2026-03-27T22:35:54.760695",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:14:00.586228"
+          "finished_at": "2026-03-27T22:36:26.661736"
         },
         {
           "name": "동반매수 스캔",
           "cmd": "scripts/scan_dual_buying.py",
-          "started_at": "2026-03-26T18:14:00.586253",
+          "started_at": "2026-03-27T22:36:26.661745",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:16:58.886060"
+          "finished_at": "2026-03-27T22:36:51.003822"
         },
         {
           "name": "섹터 릴레이 시그널",
           "cmd": "scripts/relay_report.py",
-          "started_at": "2026-03-26T18:16:58.886081",
+          "started_at": "2026-03-27T22:36:51.003828",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:17:32.453152"
+          "finished_at": "2026-03-27T22:36:57.372966"
         },
         {
           "name": "그룹 릴레이 감지",
           "cmd": "scripts/group_relay_detector.py",
-          "started_at": "2026-03-26T18:17:32.453174",
+          "started_at": "2026-03-27T22:36:57.372973",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:17:33.437114"
+          "finished_at": "2026-03-27T22:36:57.921958"
         },
         {
           "name": "매집 추적 스캔",
           "cmd": "scripts/scan_accumulation_tracker.py",
-          "started_at": "2026-03-26T18:17:33.437134",
+          "started_at": "2026-03-27T22:36:57.921964",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:18:31.783649"
+          "finished_at": "2026-03-27T22:37:06.233472"
         }
       ],
       "success": true,
       "failed_count": 0,
       "fallback_used": false,
-      "finished_at": "2026-03-26T18:18:31.783677",
-      "elapsed_seconds": 1160.8
+      "finished_at": "2026-03-27T22:37:06.233481",
+      "elapsed_seconds": 193.7
     },
     {
       "group": "추천생성",
       "description": "성과추적 + AI두뇌 + 내일 추천 통합",
       "critical": false,
-      "started_at": "2026-03-26T18:18:31.784207",
+      "started_at": "2026-03-27T22:37:06.233595",
       "steps": [
         {
           "name": "추천 성과 추적",
           "cmd": "scripts/track_pick_results.py",
-          "started_at": "2026-03-26T18:18:31.784220",
+          "started_at": "2026-03-27T22:37:06.233597",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:18:33.196221"
+          "finished_at": "2026-03-27T22:37:07.069095"
         },
         {
           "name": "DART 이벤트 시그널",
           "cmd": "scripts/dart_event_signal.py",
-          "started_at": "2026-03-26T18:18:33.196243",
+          "started_at": "2026-03-27T22:37:07.069101",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:18:35.407927"
+          "finished_at": "2026-03-27T22:37:08.313843"
         },
         {
           "name": "기관 목표가 계산",
           "cmd": "scripts/calc_institutional_targets.py",
-          "started_at": "2026-03-26T18:18:35.407950",
+          "started_at": "2026-03-27T22:37:08.313851",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:19:27.235373"
+          "finished_at": "2026-03-27T22:37:16.336656"
         },
         {
           "name": "보유종목 재판정",
           "cmd": "scripts/position_monitor.py",
-          "started_at": "2026-03-26T18:19:27.235397",
+          "started_at": "2026-03-27T22:37:16.336662",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:19:29.207348"
+          "finished_at": "2026-03-27T22:37:18.282580"
         },
         {
           "name": "CPI 트래커",
           "cmd": "scripts/update_cpi_data.py",
-          "started_at": "2026-03-26T18:19:29.207372",
+          "started_at": "2026-03-27T22:37:18.282587",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:19:32.543605"
+          "finished_at": "2026-03-27T22:37:20.819878"
         },
         {
           "name": "Perplexity 인텔리전스",
           "cmd": "scripts/perplexity_market_intel.py",
-          "started_at": "2026-03-26T18:19:32.543626",
+          "started_at": "2026-03-27T22:37:20.819884",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:20:41.502264"
+          "finished_at": "2026-03-27T22:37:40.303599"
         },
         {
           "name": "AI 두뇌 뉴스 분석",
           "cmd": "scripts/ai_news_brain.py",
-          "started_at": "2026-03-26T18:20:41.502289",
+          "started_at": "2026-03-27T22:37:40.303605",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:22:36.721133"
+          "finished_at": "2026-03-27T22:39:26.270768"
         },
         {
           "name": "v3 AI Brain",
           "cmd": "scripts/run_v3_brain.py --no-telegram",
-          "started_at": "2026-03-26T18:22:36.721157",
+          "started_at": "2026-03-27T22:39:26.270776",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:27:59.123673"
+          "finished_at": "2026-03-27T22:44:38.691537"
         },
         {
           "name": "컨센서스 스크리닝",
           "cmd": "scripts/scan_consensus.py --top 15 --send",
-          "started_at": "2026-03-26T18:27:59.123702",
+          "started_at": "2026-03-27T22:44:38.691549",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:35:43.151687"
+          "finished_at": "2026-03-27T22:49:05.612307"
         },
         {
           "name": "내일 추천 종목 스캔",
           "cmd": "scripts/scan_tomorrow_picks.py",
-          "started_at": "2026-03-26T18:35:43.151702",
+          "started_at": "2026-03-27T22:49:05.612318",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:47:53.170936"
+          "finished_at": "2026-03-27T22:51:22.166160"
         },
         {
           "name": "일일 시장 학습",
           "cmd": "scripts/daily_market_learner.py",
-          "started_at": "2026-03-26T18:47:53.170989",
+          "started_at": "2026-03-27T22:51:22.166168",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:48:34.325624"
+          "finished_at": "2026-03-27T22:51:35.619237"
         },
         {
           "name": "포트폴리오 배분",
           "cmd": "scripts/portfolio_allocator.py",
-          "started_at": "2026-03-26T18:48:34.325649",
+          "started_at": "2026-03-27T22:51:35.619244",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:48:35.426209"
+          "finished_at": "2026-03-27T22:51:36.173570"
         },
         {
           "name": "3단 예측 체인",
           "cmd": "scripts/run_predict_chain.py --send --blind",
-          "started_at": "2026-03-26T18:48:35.426245",
-          "success": true,
-          "return_code": 0,
-          "error": null,
-          "finished_at": "2026-03-26T18:48:43.279753"
+          "started_at": "2026-03-27T22:51:36.173577",
+          "success": false,
+          "return_code": 1,
+          "error": "22:51:37 [WARNING]   CL=F (원유선물): 실패 — 'NoneType' object is not subscriptable\n22:51:37 [INFO] 수집 완료: 0개 티커\n22:51:37 [ERROR] 최소 4개 티커 필요. 중단.",
+          "finished_at": "2026-03-27T22:51:37.931090"
         },
         {
           "name": "Master Brain 통합",
           "cmd": "scripts/run_master_brain.py",
-          "started_at": "2026-03-26T18:48:43.279776",
+          "started_at": "2026-03-27T22:51:37.931097",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:37.651531"
+          "finished_at": "2026-03-27T22:52:27.768730"
         },
         {
           "name": "매크로 체인 감지",
           "cmd": "-m src.alpha.macro_chain_detector",
-          "started_at": "2026-03-26T18:49:37.651546",
+          "started_at": "2026-03-27T22:52:27.768738",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:37.751734"
+          "finished_at": "2026-03-27T22:52:27.890655"
         },
         {
           "name": "ETF 추천 엔진",
           "cmd": "-m src.alpha.etf_engine",
-          "started_at": "2026-03-26T18:49:37.751762",
+          "started_at": "2026-03-27T22:52:27.890662",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:40.590955"
+          "finished_at": "2026-03-27T22:52:30.558891"
         }
       ],
       "success": true,
-      "failed_count": 0,
+      "failed_count": 1,
       "fallback_used": false,
-      "finished_at": "2026-03-26T18:49:40.590998",
-      "elapsed_seconds": 1868.8
+      "finished_at": "2026-03-27T22:52:30.558935",
+      "elapsed_seconds": 924.3
     },
     {
       "group": "FLOWX발행",
       "description": "아카이브 + 대시보드 + 텔레그램 + 페이퍼트레이딩",
       "critical": false,
-      "started_at": "2026-03-26T18:49:40.591756",
+      "started_at": "2026-03-27T22:52:30.559008",
       "steps": [
         {
           "name": "일일 아카이브",
           "cmd": "src/daily_archive.py",
-          "started_at": "2026-03-26T18:49:40.591775",
+          "started_at": "2026-03-27T22:52:30.559010",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:40.732162"
+          "finished_at": "2026-03-27T22:52:30.748114"
         },
         {
           "name": "v3 일일 리뷰",
           "cmd": "scripts/run_v3_brain.py --review",
-          "started_at": "2026-03-26T18:49:40.732171",
+          "started_at": "2026-03-27T22:52:30.748120",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:42.638261"
+          "finished_at": "2026-03-27T22:52:31.888366"
         },
         {
           "name": "JARVIS 업로드",
           "cmd": "-c \"from src.adapters.jarvis_uploader import main; main()\"",
-          "started_at": "2026-03-26T18:49:42.638282",
+          "started_at": "2026-03-27T22:52:31.888372",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:42.700434"
+          "finished_at": "2026-03-27T22:52:31.922386"
         },
         {
           "name": "Brain 대시보드 빌드",
           "cmd": "scripts/build_brain_upload.py",
-          "started_at": "2026-03-26T18:49:42.700468",
+          "started_at": "2026-03-27T22:52:31.922392",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:42.787231"
+          "finished_at": "2026-03-27T22:52:32.029205"
         },
         {
           "name": "FLOWX Supabase 업로드",
           "cmd": "scripts/upload_flowx.py",
-          "started_at": "2026-03-26T18:49:42.787254",
+          "started_at": "2026-03-27T22:52:32.029211",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:49:47.747164"
+          "finished_at": "2026-03-27T22:52:37.069019"
         },
         {
           "name": "Market Journal",
           "cmd": "scripts/market_journal.py",
-          "started_at": "2026-03-26T18:49:47.747175",
+          "started_at": "2026-03-27T22:52:37.069027",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:50:24.735601"
+          "finished_at": "2026-03-27T22:52:47.381535"
         },
         {
           "name": "저녁 통합 리포트",
           "cmd": "scripts/send_evening_summary.py --send",
-          "started_at": "2026-03-26T18:50:24.735626",
+          "started_at": "2026-03-27T22:52:47.381541",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:50:26.346060"
+          "finished_at": "2026-03-27T22:52:48.965412"
         },
         {
           "name": "페이퍼 트레이딩",
           "cmd": "scripts/paper_trading_unified.py",
-          "started_at": "2026-03-26T18:50:26.346082",
+          "started_at": "2026-03-27T22:52:48.965418",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:50:34.415768"
+          "finished_at": "2026-03-27T22:52:51.806717"
         },
         {
           "name": "데이터 건강검진",
           "cmd": "scripts/data_health_check.py",
-          "started_at": "2026-03-26T18:50:34.415778",
+          "started_at": "2026-03-27T22:52:51.806724",
           "success": true,
           "return_code": 0,
           "error": null,
-          "finished_at": "2026-03-26T18:50:38.145016"
+          "finished_at": "2026-03-27T22:52:54.822592"
         }
       ],
       "success": true,
       "failed_count": 0,
       "fallback_used": false,
-      "finished_at": "2026-03-26T18:50:38.145040",
-      "elapsed_seconds": 57.6
+      "finished_at": "2026-03-27T22:52:54.822599",
+      "elapsed_seconds": 24.3
+    },
+    {
+      "group": "분봉아카이브",
+      "description": "장마감 분봉 수집 (non-critical, 타임아웃 허용)",
+      "critical": false,
+      "started_at": "2026-03-27T22:52:54.822683",
+      "steps": [
+        {
+          "name": "분봉 데이터 수집",
+          "cmd": "scripts/collect_intraday_candles.py --top-n 200",
+          "started_at": "2026-03-27T22:52:54.822685",
+          "success": true,
+          "return_code": 0,
+          "error": null,
+          "finished_at": "2026-03-27T23:12:45.464961"
+        }
+      ],
+      "success": true,
+      "failed_count": 0,
+      "fallback_used": false,
+      "finished_at": "2026-03-27T23:12:45.464973",
+      "elapsed_seconds": 1190.6
     }
   ],
   "summary": {
-    "total_groups": 7,
-    "success_groups": 7,
-    "total_steps": 67,
-    "failed_steps": 1,
-    "success_rate": 98.5,
-    "elapsed_seconds": 8436.4,
-    "elapsed_minutes": 140.6,
+    "total_groups": 8,
+    "success_groups": 8,
+    "total_steps": 69,
+    "failed_steps": 2,
+    "success_rate": 97.1,
+    "elapsed_seconds": 3130.4,
+    "elapsed_minutes": 52.2,
     "fallbacks_used": 0
   },
-  "finished_at": "2026-03-26T18:50:38.146476"
+  "finished_at": "2026-03-27T23:12:45.465215"
 }

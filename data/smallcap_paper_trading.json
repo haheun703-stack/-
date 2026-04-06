@@ -3539,11 +3539,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 50974,
+      "pnl_pct": 29.5,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "417200",
@@ -3561,11 +3561,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 19475,
+      "pnl_pct": -14.8,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "050890",
@@ -3583,11 +3583,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 15975,
+      "pnl_pct": 25.3,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "046120",
@@ -3605,11 +3605,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11041,
+      "pnl_pct": 30.2,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "138080",
@@ -3627,11 +3627,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 39750,
+      "pnl_pct": 10.9,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "486990",
@@ -3649,11 +3649,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 39801,
+      "pnl_pct": -13.0,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "032500",
@@ -3670,11 +3670,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 33702,
+      "pnl_pct": 27.7,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "230240",
@@ -3692,11 +3692,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 24171,
+      "pnl_pct": -15.3,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "452280",
@@ -3714,11 +3714,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 14160,
+      "pnl_pct": -14.6,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "039980",
@@ -3736,11 +3736,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1758,
+      "pnl_pct": -14.0,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "388790",
@@ -3758,11 +3758,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4456,
+      "pnl_pct": -18.1,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "357580",
@@ -3779,11 +3779,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 20659,
+      "pnl_pct": -17.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "052020",
@@ -3801,11 +3801,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 15470,
+      "pnl_pct": -14.3,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "033160",
@@ -3823,11 +3823,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 18087,
+      "pnl_pct": 26.5,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "069540",
@@ -3845,11 +3845,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1937,
+      "pnl_pct": 36.8,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "100590",
@@ -3867,11 +3867,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4343,
+      "pnl_pct": -16.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "054620",
@@ -3889,11 +3889,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9000,
+      "pnl_pct": 0.4,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "036890",
@@ -3910,11 +3910,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 15773,
+      "pnl_pct": -10.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "333430",
@@ -3931,11 +3931,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 5213,
+      "pnl_pct": -13.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "041910",
@@ -3953,11 +3953,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9921,
+      "pnl_pct": 21.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "475580",
@@ -3975,11 +3975,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 14303,
+      "pnl_pct": 25.4,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "005010",
@@ -3996,11 +3996,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 5240,
+      "pnl_pct": 4.9,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "041020",
@@ -4018,11 +4018,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4496,
+      "pnl_pct": -11.8,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "098070",
@@ -4040,11 +4040,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 50470,
+      "pnl_pct": 19.2,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "065440",
@@ -4062,11 +4062,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 2490,
+      "pnl_pct": 12.9,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "382900",
@@ -4084,11 +4084,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 30861,
+      "pnl_pct": -12.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "088800",
@@ -4105,11 +4105,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 3920,
+      "pnl_pct": 8.9,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "023900",
@@ -4126,11 +4126,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9610,
+      "pnl_pct": -7.9,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "369370",
@@ -4147,11 +4147,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1304,
+      "pnl_pct": -23.5,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "360350",
@@ -4168,11 +4168,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 16577,
+      "pnl_pct": 21.7,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "307870",
@@ -4189,11 +4189,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1330,
+      "pnl_pct": 26.2,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "340360",
@@ -4211,11 +4211,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 2224,
+      "pnl_pct": 21.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "007120",
@@ -4233,11 +4233,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 2354,
+      "pnl_pct": 33.4,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "123010",
@@ -4254,11 +4254,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1645,
+      "pnl_pct": 37.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "072870",
@@ -4276,11 +4276,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11992,
+      "pnl_pct": -4.6,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "003920",
@@ -4298,11 +4298,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 51756,
+      "pnl_pct": -7.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "444530",
@@ -4320,11 +4320,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 7300,
+      "pnl_pct": -13.6,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "047040",
@@ -4342,11 +4342,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 16466,
+      "pnl_pct": 33.7,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "042660",
@@ -4363,11 +4363,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 122045,
+      "pnl_pct": -10.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "456160",
@@ -4384,11 +4384,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 102474,
+      "pnl_pct": -13.7,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "097230",
@@ -4405,11 +4405,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 24550,
+      "pnl_pct": -8.7,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "475830",
@@ -4426,11 +4426,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 118021,
+      "pnl_pct": -15.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "476060",
@@ -4447,11 +4447,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 22454,
+      "pnl_pct": -14.3,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "357880",
@@ -4469,11 +4469,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 3974,
+      "pnl_pct": -17.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "189300",
@@ -4490,11 +4490,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 124282,
+      "pnl_pct": -13.3,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "010060",
@@ -4511,11 +4511,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 209125,
+      "pnl_pct": 26.0,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "174900",
@@ -4532,11 +4532,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 76039,
+      "pnl_pct": -14.7,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "120110",
@@ -4553,11 +4553,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 80000,
+      "pnl_pct": 6.7,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "388050",
@@ -4574,11 +4574,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11190,
+      "pnl_pct": -6.4,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "131970",
@@ -4595,11 +4595,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 86801,
+      "pnl_pct": 26.5,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "036170",
@@ -4616,11 +4616,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4535,
+      "pnl_pct": -17.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "003000",
@@ -4637,11 +4637,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 7646,
+      "pnl_pct": 25.6,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "468530",
@@ -4658,11 +4658,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 73391,
+      "pnl_pct": -13.7,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "458870",
@@ -4679,11 +4679,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 142593,
+      "pnl_pct": -11.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "307750",
@@ -4700,11 +4700,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4615,
+      "pnl_pct": -4.5,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "100840",
@@ -4721,11 +4721,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 55589,
+      "pnl_pct": 23.4,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "060370",
@@ -4742,11 +4742,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 28873,
+      "pnl_pct": -12.5,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "033500",
@@ -4763,11 +4763,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 25587,
+      "pnl_pct": -11.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "009900",
@@ -4784,11 +4784,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9637,
+      "pnl_pct": -13.0,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "229640",
@@ -4805,11 +4805,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 42511,
+      "pnl_pct": -11.1,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "112290",
@@ -4826,11 +4826,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 24483,
+      "pnl_pct": -12.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "082920",
@@ -4847,11 +4847,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 31925,
+      "pnl_pct": 22.3,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "272110",
@@ -4868,11 +4868,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 35650,
+      "pnl_pct": -6.6,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "322510",
@@ -4890,11 +4890,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 7659,
+      "pnl_pct": -14.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "355150",
@@ -4912,11 +4912,11 @@
         "A_VOLUME_BREAKOUT",
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 23300,
+      "pnl_pct": 3.6,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "000210",
@@ -4933,11 +4933,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 55069,
+      "pnl_pct": 20.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "287840",
@@ -4954,11 +4954,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 44850,
+      "pnl_pct": -6.9,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "122640",
@@ -4975,11 +4975,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 22403,
+      "pnl_pct": -13.0,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "042370",
@@ -4996,11 +4996,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11440,
+      "pnl_pct": 4.7,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "075580",
@@ -5017,11 +5017,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 17100,
+      "pnl_pct": -5.2,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "371950",
@@ -5038,11 +5038,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 15828,
+      "pnl_pct": -17.5,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "010780",
@@ -5059,11 +5059,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 29974,
+      "pnl_pct": -10.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "338840",
@@ -5080,11 +5080,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 36221,
+      "pnl_pct": 26.4,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "314130",
@@ -5101,11 +5101,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9580,
+      "pnl_pct": 11.1,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "084110",
@@ -5122,11 +5122,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 66844,
+      "pnl_pct": -11.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "091700",
@@ -5143,11 +5143,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 8400,
+      "pnl_pct": -2.1,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "424870",
@@ -5164,11 +5164,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9760,
+      "pnl_pct": 9.7,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "003030",
@@ -5185,11 +5185,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 179453,
+      "pnl_pct": 18.8,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "019180",
@@ -5206,11 +5206,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 8300,
+      "pnl_pct": -3.6,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "297090",
@@ -5227,11 +5227,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9051,
+      "pnl_pct": 22.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "053690",
@@ -5248,11 +5248,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 24234,
+      "pnl_pct": 19.1,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "425040",
@@ -5269,11 +5269,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11662,
+      "pnl_pct": 22.5,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "001230",
@@ -5290,11 +5290,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9970,
+      "pnl_pct": -3.4,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "004100",
@@ -5311,11 +5311,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 3095,
+      "pnl_pct": -1.0,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "126720",
@@ -5332,11 +5332,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 26541,
+      "pnl_pct": -9.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "064820",
@@ -5353,11 +5353,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 10510,
+      "pnl_pct": -6.0,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "024880",
@@ -5374,11 +5374,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 6600,
+      "pnl_pct": 5.8,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "405100",
@@ -5395,11 +5395,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 16790,
+      "pnl_pct": -5.6,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "014940",
@@ -5416,11 +5416,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 6997,
+      "pnl_pct": -9.7,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "090470",
@@ -5437,11 +5437,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 9370,
+      "pnl_pct": 9.5,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "001530",
@@ -5458,11 +5458,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 20292,
+      "pnl_pct": -11.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "046940",
@@ -5479,11 +5479,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4460,
+      "pnl_pct": -6.4,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "142210",
@@ -5500,11 +5500,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 5183,
+      "pnl_pct": -9.9,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "388870",
@@ -5521,11 +5521,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11391,
+      "pnl_pct": 20.5,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "144510",
@@ -5542,11 +5542,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 23846,
+      "pnl_pct": -10.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "377480",
@@ -5563,11 +5563,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 15310,
+      "pnl_pct": -4.1,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "054950",
@@ -5584,11 +5584,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 24986,
+      "pnl_pct": -6.1,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "000725",
@@ -5605,11 +5605,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 65303,
+      "pnl_pct": -11.5,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "046970",
@@ -5626,11 +5626,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1886,
+      "pnl_pct": 22.4,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "205100",
@@ -5647,11 +5647,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 1836,
+      "pnl_pct": -9.1,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "092460",
@@ -5668,11 +5668,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 14992,
+      "pnl_pct": -7.7,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "037030",
@@ -5689,11 +5689,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 3537,
+      "pnl_pct": 17.3,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "032620",
@@ -5710,11 +5710,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 4055,
+      "pnl_pct": -0.6,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "094800",
@@ -5731,11 +5731,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 6681,
+      "pnl_pct": -7.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "402030",
@@ -5752,11 +5752,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 18099,
+      "pnl_pct": -10.4,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "117670",
@@ -5773,11 +5773,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 18051,
+      "pnl_pct": -12.2,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "084850",
@@ -5794,11 +5794,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 10405,
+      "pnl_pct": -9.5,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "005750",
@@ -5815,11 +5815,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 6242,
+      "pnl_pct": 17.8,
+      "result": "TP_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "105760",
@@ -5836,11 +5836,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 5520,
+      "pnl_pct": -1.1,
+      "result": "LOSS",
+      "status": "CLOSED"
     },
     {
       "ticker": "448280",
@@ -5857,11 +5857,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 11920,
+      "pnl_pct": 1.4,
+      "result": "WIN",
+      "status": "CLOSED"
     },
     {
       "ticker": "484120",
@@ -5878,11 +5878,11 @@
       "patterns": [
         "C_CONSECUTIVE_MOMENTUM"
       ],
-      "check_date": null,
-      "exit_price": null,
-      "pnl_pct": null,
-      "result": null,
-      "status": "OPEN"
+      "check_date": "2026-03-27",
+      "exit_price": 20470,
+      "pnl_pct": -10.8,
+      "result": "SL_HIT",
+      "status": "CLOSED"
     },
     {
       "ticker": "046120",
@@ -14573,16 +14573,1055 @@
       "pnl_pct": null,
       "result": null,
       "status": "OPEN"
+    },
+    {
+      "ticker": "027360",
+      "name": "아주IB투자",
+      "entry_date": "2026-03-27",
+      "entry_price": 9240,
+      "atr": 1066.3,
+      "sl_price": 7641,
+      "tp_price": 12439,
+      "sl_pct": -17.3,
+      "tp_pct": 34.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "263750",
+      "name": "펄어비스",
+      "entry_date": "2026-03-27",
+      "entry_price": 58800,
+      "atr": 7215.4,
+      "sl_price": 47977,
+      "tp_price": 80446,
+      "sl_pct": -18.4,
+      "tp_pct": 36.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "100790",
+      "name": "미래에셋벤처투자",
+      "entry_date": "2026-03-27",
+      "entry_price": 32550,
+      "atr": 3094.3,
+      "sl_price": 27909,
+      "tp_price": 41833,
+      "sl_pct": -14.3,
+      "tp_pct": 28.5,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "950160",
+      "name": "코오롱티슈진",
+      "entry_date": "2026-03-27",
+      "entry_price": 127000,
+      "atr": 10622.7,
+      "sl_price": 111066,
+      "tp_price": 158868,
+      "sl_pct": -12.5,
+      "tp_pct": 25.1,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "069540",
+      "name": "빛과전자",
+      "entry_date": "2026-03-27",
+      "entry_price": 3140,
+      "atr": 510.8,
+      "sl_price": 2374,
+      "tp_price": 4672,
+      "sl_pct": -24.4,
+      "tp_pct": 48.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "003000",
+      "name": "부광약품",
+      "entry_date": "2026-03-27",
+      "entry_price": 9600,
+      "atr": 817.9,
+      "sl_price": 8373,
+      "tp_price": 12054,
+      "sl_pct": -12.8,
+      "tp_pct": 25.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "007810",
+      "name": "코리아써키트",
+      "entry_date": "2026-03-27",
+      "entry_price": 84000,
+      "atr": 7353.0,
+      "sl_price": 72970,
+      "tp_price": 106059,
+      "sl_pct": -13.1,
+      "tp_pct": 26.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "060280",
+      "name": "큐렉소",
+      "entry_date": "2026-03-27",
+      "entry_price": 17460,
+      "atr": 1470.4,
+      "sl_price": 15254,
+      "tp_price": 21871,
+      "sl_pct": -12.6,
+      "tp_pct": 25.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "033790",
+      "name": "피노",
+      "entry_date": "2026-03-27",
+      "entry_price": 7250,
+      "atr": 883.6,
+      "sl_price": 5925,
+      "tp_price": 9901,
+      "sl_pct": -18.3,
+      "tp_pct": 36.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "264450",
+      "name": "유비쿼스",
+      "entry_date": "2026-03-27",
+      "entry_price": 16860,
+      "atr": 1312.1,
+      "sl_price": 14892,
+      "tp_price": 20796,
+      "sl_pct": -11.7,
+      "tp_pct": 23.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "002020",
+      "name": "코오롱",
+      "entry_date": "2026-03-27",
+      "entry_price": 69800,
+      "atr": 5660.6,
+      "sl_price": 61309,
+      "tp_price": 86782,
+      "sl_pct": -12.2,
+      "tp_pct": 24.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "243840",
+      "name": "신흥에스이씨",
+      "entry_date": "2026-03-27",
+      "entry_price": 7480,
+      "atr": 565.5,
+      "sl_price": 6632,
+      "tp_price": 9176,
+      "sl_pct": -11.3,
+      "tp_pct": 22.7,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "084990",
+      "name": "헬릭스미스",
+      "entry_date": "2026-03-27",
+      "entry_price": 8010,
+      "atr": 625.9,
+      "sl_price": 7071,
+      "tp_price": 9888,
+      "sl_pct": -11.7,
+      "tp_pct": 23.4,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "004440",
+      "name": "삼일씨엔에스",
+      "entry_date": "2026-03-27",
+      "entry_price": 10000,
+      "atr": 1086.2,
+      "sl_price": 8371,
+      "tp_price": 13259,
+      "sl_pct": -16.3,
+      "tp_pct": 32.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "106190",
+      "name": "하이텍팜",
+      "entry_date": "2026-03-27",
+      "entry_price": 25000,
+      "atr": 2263.8,
+      "sl_price": 21604,
+      "tp_price": 31791,
+      "sl_pct": -13.6,
+      "tp_pct": 27.2,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "251370",
+      "name": "와이엠티",
+      "entry_date": "2026-03-27",
+      "entry_price": 16550,
+      "atr": 1245.1,
+      "sl_price": 14682,
+      "tp_price": 20285,
+      "sl_pct": -11.3,
+      "tp_pct": 22.6,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "045510",
+      "name": "정원엔시스",
+      "entry_date": "2026-03-27",
+      "entry_price": 1145,
+      "atr": 169.3,
+      "sl_price": 891,
+      "tp_price": 1653,
+      "sl_pct": -22.2,
+      "tp_pct": 44.4,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "086670",
+      "name": "비엠티",
+      "entry_date": "2026-03-27",
+      "entry_price": 15490,
+      "atr": 1118.0,
+      "sl_price": 13813,
+      "tp_price": 18844,
+      "sl_pct": -10.8,
+      "tp_pct": 21.7,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "187870",
+      "name": "디바이스",
+      "entry_date": "2026-03-27",
+      "entry_price": 24000,
+      "atr": 2111.2,
+      "sl_price": 20833,
+      "tp_price": 30334,
+      "sl_pct": -13.2,
+      "tp_pct": 26.4,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "020400",
+      "name": "대동금속",
+      "entry_date": "2026-03-27",
+      "entry_price": 9380,
+      "atr": 711.0,
+      "sl_price": 8313,
+      "tp_price": 11513,
+      "sl_pct": -11.4,
+      "tp_pct": 22.7,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "004540",
+      "name": "깨끗한나라",
+      "entry_date": "2026-03-27",
+      "entry_price": 2115,
+      "atr": 115.4,
+      "sl_price": 1942,
+      "tp_price": 2461,
+      "sl_pct": -8.2,
+      "tp_pct": 16.4,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "225530",
+      "name": "HC보광산업",
+      "entry_date": "2026-03-27",
+      "entry_price": 4260,
+      "atr": 273.4,
+      "sl_price": 3850,
+      "tp_price": 5080,
+      "sl_pct": -9.6,
+      "tp_pct": 19.3,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "317690",
+      "name": "퀀타매트릭스",
+      "entry_date": "2026-03-27",
+      "entry_price": 4015,
+      "atr": 306.9,
+      "sl_price": 3555,
+      "tp_price": 4936,
+      "sl_pct": -11.5,
+      "tp_pct": 22.9,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "290520",
+      "name": "신도기연",
+      "entry_date": "2026-03-27",
+      "entry_price": 2470,
+      "atr": 253.5,
+      "sl_price": 2090,
+      "tp_price": 3230,
+      "sl_pct": -15.4,
+      "tp_pct": 30.8,
+      "grade": "PRIMARY",
+      "supply_grade": "CONFIRMED",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "347700",
+      "name": "스피어",
+      "entry_date": "2026-03-27",
+      "entry_price": 50900,
+      "atr": 5135.4,
+      "sl_price": 43197,
+      "tp_price": 66306,
+      "sl_pct": -15.1,
+      "tp_pct": 30.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "259960",
+      "name": "크래프톤",
+      "entry_date": "2026-03-27",
+      "entry_price": 254500,
+      "atr": 11481.7,
+      "sl_price": 237277,
+      "tp_price": 288945,
+      "sl_pct": -6.8,
+      "tp_pct": 13.5,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "138040",
+      "name": "메리츠금융지주",
+      "entry_date": "2026-03-27",
+      "entry_price": 116400,
+      "atr": 5768.1,
+      "sl_price": 107748,
+      "tp_price": 133704,
+      "sl_pct": -7.4,
+      "tp_pct": 14.9,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "052020",
+      "name": "에스티큐브",
+      "entry_date": "2026-03-27",
+      "entry_price": 19510,
+      "atr": 2064.3,
+      "sl_price": 16414,
+      "tp_price": 25703,
+      "sl_pct": -15.9,
+      "tp_pct": 31.7,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "213420",
+      "name": "덕산네오룩스",
+      "entry_date": "2026-03-27",
+      "entry_price": 53000,
+      "atr": 3785.9,
+      "sl_price": 47321,
+      "tp_price": 64358,
+      "sl_pct": -10.7,
+      "tp_pct": 21.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "023530",
+      "name": "롯데쇼핑",
+      "entry_date": "2026-03-27",
+      "entry_price": 114400,
+      "atr": 6956.8,
+      "sl_price": 103965,
+      "tp_price": 135270,
+      "sl_pct": -9.1,
+      "tp_pct": 18.2,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "000210",
+      "name": "DL",
+      "entry_date": "2026-03-27",
+      "entry_price": 62600,
+      "atr": 5348.4,
+      "sl_price": 54577,
+      "tp_price": 78645,
+      "sl_pct": -12.8,
+      "tp_pct": 25.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "358570",
+      "name": "지아이이노베이션",
+      "entry_date": "2026-03-27",
+      "entry_price": 14680,
+      "atr": 1144.6,
+      "sl_price": 12963,
+      "tp_price": 18114,
+      "sl_pct": -11.7,
+      "tp_pct": 23.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "420770",
+      "name": "기가비스",
+      "entry_date": "2026-03-27",
+      "entry_price": 78000,
+      "atr": 7127.8,
+      "sl_price": 67308,
+      "tp_price": 99383,
+      "sl_pct": -13.7,
+      "tp_pct": 27.4,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "338840",
+      "name": "와이바이오로직스",
+      "entry_date": "2026-03-27",
+      "entry_price": 34950,
+      "atr": 3299.4,
+      "sl_price": 30001,
+      "tp_price": 44848,
+      "sl_pct": -14.2,
+      "tp_pct": 28.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "086450",
+      "name": "동국제약",
+      "entry_date": "2026-03-27",
+      "entry_price": 22300,
+      "atr": 1227.3,
+      "sl_price": 20459,
+      "tp_price": 25982,
+      "sl_pct": -8.3,
+      "tp_pct": 16.5,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "A_VOLUME_BREAKOUT",
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "160980",
+      "name": "싸이맥스",
+      "entry_date": "2026-03-27",
+      "entry_price": 25600,
+      "atr": 1896.0,
+      "sl_price": 22756,
+      "tp_price": 31288,
+      "sl_pct": -11.1,
+      "tp_pct": 22.2,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "282330",
+      "name": "BGF리테일",
+      "entry_date": "2026-03-27",
+      "entry_price": 130300,
+      "atr": 4901.8,
+      "sl_price": 122947,
+      "tp_price": 145005,
+      "sl_pct": -5.6,
+      "tp_pct": 11.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "204620",
+      "name": "글로벌텍스프리",
+      "entry_date": "2026-03-27",
+      "entry_price": 5060,
+      "atr": 300.2,
+      "sl_price": 4610,
+      "tp_price": 5961,
+      "sl_pct": -8.9,
+      "tp_pct": 17.8,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "064290",
+      "name": "인텍플러스",
+      "entry_date": "2026-03-27",
+      "entry_price": 19070,
+      "atr": 1439.5,
+      "sl_price": 16911,
+      "tp_price": 23388,
+      "sl_pct": -11.3,
+      "tp_pct": 22.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "069620",
+      "name": "대웅제약",
+      "entry_date": "2026-03-27",
+      "entry_price": 167000,
+      "atr": 7697.2,
+      "sl_price": 155454,
+      "tp_price": 190092,
+      "sl_pct": -6.9,
+      "tp_pct": 13.8,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "092040",
+      "name": "아미코젠",
+      "entry_date": "2026-03-27",
+      "entry_price": 1829,
+      "atr": 155.8,
+      "sl_price": 1595,
+      "tp_price": 2296,
+      "sl_pct": -12.8,
+      "tp_pct": 25.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "102940",
+      "name": "코오롱생명과학",
+      "entry_date": "2026-03-27",
+      "entry_price": 64500,
+      "atr": 5188.4,
+      "sl_price": 56717,
+      "tp_price": 80065,
+      "sl_pct": -12.1,
+      "tp_pct": 24.1,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "376270",
+      "name": "HEM파마",
+      "entry_date": "2026-03-27",
+      "entry_price": 78000,
+      "atr": 5429.3,
+      "sl_price": 69856,
+      "tp_price": 94288,
+      "sl_pct": -10.4,
+      "tp_pct": 20.9,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "173130",
+      "name": "오파스넷",
+      "entry_date": "2026-03-27",
+      "entry_price": 7890,
+      "atr": 350.2,
+      "sl_price": 7365,
+      "tp_price": 8941,
+      "sl_pct": -6.7,
+      "tp_pct": 13.3,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "052860",
+      "name": "아이앤씨",
+      "entry_date": "2026-03-27",
+      "entry_price": 4370,
+      "atr": 255.4,
+      "sl_price": 3987,
+      "tp_price": 5136,
+      "sl_pct": -8.8,
+      "tp_pct": 17.5,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "466910",
+      "name": "엔에이치스팩30호",
+      "entry_date": "2026-03-27",
+      "entry_price": 4520,
+      "atr": 204.2,
+      "sl_price": 4214,
+      "tp_price": 5133,
+      "sl_pct": -6.8,
+      "tp_pct": 13.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "179290",
+      "name": "엠아이텍",
+      "entry_date": "2026-03-27",
+      "entry_price": 7010,
+      "atr": 267.7,
+      "sl_price": 6608,
+      "tp_price": 7813,
+      "sl_pct": -5.7,
+      "tp_pct": 11.5,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "009160",
+      "name": "SIMPAC",
+      "entry_date": "2026-03-27",
+      "entry_price": 4985,
+      "atr": 258.7,
+      "sl_price": 4597,
+      "tp_price": 5761,
+      "sl_pct": -7.8,
+      "tp_pct": 15.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
+    },
+    {
+      "ticker": "127710",
+      "name": "아시아경제",
+      "entry_date": "2026-03-27",
+      "entry_price": 1782,
+      "atr": 74.9,
+      "sl_price": 1670,
+      "tp_price": 2007,
+      "sl_pct": -6.3,
+      "tp_pct": 12.6,
+      "grade": "PRIMARY",
+      "supply_grade": "PARTIAL",
+      "patterns": [
+        "C_CONSECUTIVE_MOMENTUM"
+      ],
+      "check_date": null,
+      "exit_price": null,
+      "pnl_pct": null,
+      "result": null,
+      "status": "OPEN"
     }
   ],
   "summary": {
-    "total_trades": 166,
-    "wins": 82,
-    "losses": 84,
-    "win_rate": 49.4,
-    "avg_pnl": 4.1,
-    "total_pnl": 675.7,
-    "tp_hits": 48,
-    "sl_hits": 48
+    "total_trades": 277,
+    "wins": 125,
+    "losses": 152,
+    "win_rate": 45.1,
+    "avg_pnl": 2.9,
+    "total_pnl": 791.6,
+    "tp_hits": 77,
+    "sl_hits": 99
   }
 }

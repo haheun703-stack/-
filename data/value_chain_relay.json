@@ -1,42 +1,211 @@
 {
-  "generated_at": "2026-03-26 18:07",
+  "generated_at": "2026-03-27 22:35",
   "fired_sectors": [
     {
-      "sector": "바이오",
-      "etf_code": "364970",
+      "sector": "2차전지",
+      "etf_code": "305540",
       "leaders": [
         {
-          "ticker": "196170",
-          "name": "알테오젠",
-          "change_pct": 6.28,
-          "weight": 18.33
+          "ticker": "373220",
+          "name": "LG에너지솔루션",
+          "change_pct": 2.6,
+          "weight": 12.68
         }
       ],
-      "avg_leader_change": 6.28,
+      "avg_leader_change": 2.6,
       "candidates": [
         {
-          "ticker": "141080",
-          "name": "리가켐바이오",
-          "tier": "tier1",
-          "weight": 3.33,
-          "change_pct": -3.28,
-          "gap_pct": 9.56,
-          "score": 40,
+          "ticker": "299030",
+          "name": "하나기술",
+          "tier": "tier2",
+          "weight": 0.09,
+          "change_pct": 2.82,
+          "gap_pct": -0.22,
+          "score": 37,
           "score_detail": {
-            "gap": 25,
-            "tech": 15,
+            "gap": 0,
+            "tech": 22,
             "flow": 0,
+            "value": 15
+          },
+          "rsi": 48.8,
+          "bb_pos": 0.555,
+          "vol_z": -0.81,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": 12.4,
+          "reasons": [
+            "RSI 49 적정",
+            "목표가 상승여력 12%"
+          ]
+        },
+        {
+          "ticker": "093370",
+          "name": "후성",
+          "tier": "tier2",
+          "weight": 0.33,
+          "change_pct": 2.22,
+          "gap_pct": 0.38,
+          "score": 35,
+          "score_detail": {
+            "gap": 1,
+            "tech": 16,
+            "flow": 10,
+            "value": 8
+          },
+          "rsi": 50.5,
+          "bb_pos": 0.682,
+          "vol_z": -0.73,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": 9.5,
+          "reasons": [
+            "RSI 50 적정",
+            "목표가 상승여력 9%"
+          ]
+        },
+        {
+          "ticker": "247540",
+          "name": "에코프로비엠",
+          "tier": "tier1",
+          "weight": 8.52,
+          "change_pct": 1.81,
+          "gap_pct": 0.79,
+          "score": 31,
+          "score_detail": {
+            "gap": 2,
+            "tech": 19,
+            "flow": 10,
             "value": 0
           },
-          "rsi": 55.7,
-          "bb_pos": 0.721,
-          "vol_z": -0.23,
+          "rsi": 53.2,
+          "bb_pos": 0.661,
+          "vol_z": -0.48,
           "foreign_5d": 0.0,
           "inst_5d": 0.0,
           "f_consec": 0,
           "target_gap_pct": null,
           "reasons": [
-            "미반영 9.6%"
+            "RSI 53 적정"
+          ]
+        },
+        {
+          "ticker": "005420",
+          "name": "코스모화학",
+          "tier": "tier2",
+          "weight": 0.25,
+          "change_pct": 1.78,
+          "gap_pct": 0.82,
+          "score": 25,
+          "score_detail": {
+            "gap": 3,
+            "tech": 22,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 51.8,
+          "bb_pos": 0.696,
+          "vol_z": -0.18,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": null,
+          "reasons": [
+            "RSI 52 적정"
+          ]
+        },
+        {
+          "ticker": "336370",
+          "name": "솔루스첨단소재",
+          "tier": "tier2",
+          "weight": 0.24,
+          "change_pct": 0.11,
+          "gap_pct": 2.49,
+          "score": 23,
+          "score_detail": {
+            "gap": 8,
+            "tech": 15,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 57.2,
+          "bb_pos": 0.837,
+          "vol_z": -0.1,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": null,
+          "reasons": [
+            "미반영 2.5%"
+          ]
+        }
+      ]
+    },
+    {
+      "sector": "소프트웨어",
+      "etf_code": "157490",
+      "leaders": [
+        {
+          "ticker": "259960",
+          "name": "크래프톤",
+          "change_pct": 5.38,
+          "weight": 10.25
+        }
+      ],
+      "avg_leader_change": 5.38,
+      "candidates": [
+        {
+          "ticker": "192080",
+          "name": "더블유게임즈",
+          "tier": "tier2",
+          "weight": 0.82,
+          "change_pct": 0.4,
+          "gap_pct": 4.98,
+          "score": 35,
+          "score_detail": {
+            "gap": 16,
+            "tech": 19,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 47.3,
+          "bb_pos": 0.578,
+          "vol_z": -0.26,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": 2.2,
+          "reasons": [
+            "미반영 5.0%",
+            "RSI 47 적정"
+          ]
+        },
+        {
+          "ticker": "036570",
+          "name": "엔씨소프트",
+          "tier": "tier1",
+          "weight": 5.31,
+          "change_pct": 2.0,
+          "gap_pct": 3.38,
+          "score": 30,
+          "score_detail": {
+            "gap": 11,
+            "tech": 19,
+            "flow": 0,
+            "value": 0
+          },
+          "rsi": 54.5,
+          "bb_pos": 0.768,
+          "vol_z": -0.75,
+          "foreign_5d": 0.0,
+          "inst_5d": 0.0,
+          "f_consec": 0,
+          "target_gap_pct": 0.1,
+          "reasons": [
+            "미반영 3.4%",
+            "RSI 54 적정"
           ]
         }
       ]
@@ -44,11 +213,10 @@
   ],
   "no_fire_sectors": [
     "반도체",
-    "2차전지",
     "IT",
     "헬스케어",
+    "바이오",
     "에너지화학",
-    "소프트웨어",
     "방산",
     "조선"
   ]

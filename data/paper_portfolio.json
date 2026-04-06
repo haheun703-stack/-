@@ -135,6 +135,12 @@
       "equity": 29889961,
       "capital": 1062961,
       "positions": 8
+    },
+    {
+      "date": "2026-03-27",
+      "equity": 29416061,
+      "capital": 1062961,
+      "positions": 8
     }
   ],
   "stats": {
@@ -142,7 +148,7 @@
     "wins": 0,
     "losses": 0,
     "max_equity": 30143681,
-    "mdd": -0.84
+    "mdd": -2.41
   },
-  "updated": "2026-03-26 18:50"
+  "updated": "2026-03-27 22:52"
 }

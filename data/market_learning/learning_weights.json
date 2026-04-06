@@ -1,55 +1,55 @@
 {
-  "updated_at": "2026-03-26",
-  "baseline_hit_rate": 53.6,
+  "updated_at": "2026-03-27",
+  "baseline_hit_rate": 52.7,
   "min_days_required": 3,
   "weights": {
     "tomorrow_picks": {
-      "multiplier": 1.13,
+      "multiplier": 1.14,
       "hit_rate": 67.6,
       "avg_ret": 0.36,
       "total": 259,
       "days_tracked": 7,
-      "reason": "적중률 67.6% (baseline 53.6%)"
+      "reason": "적중률 67.6% (baseline 52.7%)"
     },
     "pullback_scan": {
-      "multiplier": 1.03,
-      "hit_rate": 57.1,
-      "avg_ret": 0.99,
-      "total": 240,
-      "days_tracked": 8,
-      "reason": "적중률 57.1% (baseline 53.6%)"
+      "multiplier": 1.06,
+      "hit_rate": 58.5,
+      "avg_ret": 1.01,
+      "total": 270,
+      "days_tracked": 9,
+      "reason": "적중률 58.5% (baseline 52.7%)"
     },
     "whale_detect": {
-      "multiplier": 0.94,
-      "hit_rate": 46.7,
-      "avg_ret": 1.16,
-      "total": 300,
-      "days_tracked": 8,
-      "reason": "적중률 46.7% (baseline 53.6%)"
+      "multiplier": 0.96,
+      "hit_rate": 48.3,
+      "avg_ret": 1.17,
+      "total": 346,
+      "days_tracked": 9,
+      "reason": "적중률 48.3% (baseline 52.7%)"
     },
     "accumulation_tracker": {
       "multiplier": 1.06,
-      "hit_rate": 59.6,
-      "avg_ret": 1.28,
-      "total": 240,
-      "days_tracked": 8,
-      "reason": "적중률 59.6% (baseline 53.6%)"
+      "hit_rate": 59.3,
+      "avg_ret": 1.19,
+      "total": 270,
+      "days_tracked": 9,
+      "reason": "적중률 59.3% (baseline 52.7%)"
     },
     "dart_event": {
-      "multiplier": 0.91,
-      "hit_rate": 43.8,
-      "avg_ret": -0.13,
-      "total": 1012,
-      "days_tracked": 8,
-      "reason": "적중률 43.8% (baseline 53.6%)"
+      "multiplier": 0.92,
+      "hit_rate": 43.9,
+      "avg_ret": -0.12,
+      "total": 1040,
+      "days_tracked": 9,
+      "reason": "적중률 43.9% (baseline 52.7%)"
     },
     "volume_spike": {
-      "multiplier": 0.88,
-      "hit_rate": 40.2,
-      "avg_ret": -0.48,
-      "total": 361,
-      "days_tracked": 8,
-      "reason": "적중률 40.2% (baseline 53.6%)"
+      "multiplier": 0.89,
+      "hit_rate": 41.1,
+      "avg_ret": -0.33,
+      "total": 406,
+      "days_tracked": 9,
+      "reason": "적중률 41.1% (baseline 52.7%)"
     },
     "dual_buying": {
       "multiplier": 1.0,
@@ -64,12 +64,12 @@
       "reason": "데이터 부족 (<3일)"
     },
     "overnight_signal": {
-      "multiplier": 1.06,
-      "hit_rate": 60.0,
-      "avg_ret": -1.36,
-      "total": 5,
-      "days_tracked": 5,
-      "reason": "적중률 60.0% (baseline 53.6%)"
+      "multiplier": 0.97,
+      "hit_rate": 50.0,
+      "avg_ret": -1.07,
+      "total": 6,
+      "days_tracked": 6,
+      "reason": "적중률 50.0% (baseline 52.7%)"
     }
   }
 }

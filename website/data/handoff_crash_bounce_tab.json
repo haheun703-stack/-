@@ -1,0 +1,179 @@
+{
+  "tab_name": "급락반등 포착기",
+  "tab_id": "crash-bounce",
+  "description": "극도로 빠진 종목 중 큰손(기관/외국인)이 매수하기 시작한 종목. 백테스트 검증 완료 (승률 60%+, 5일 수익 +3.3%)",
+  "supabase_table": "dashboard_crash_bounce",
+  "api_endpoint": "/api/crash-bounce",
+  "query": "SELECT * FROM dashboard_crash_bounce WHERE date = (SELECT MAX(date) FROM dashboard_crash_bounce) ORDER BY score DESC LIMIT 50",
+  "update_frequency": "매일 장마감 후 1회 (BAT-D G3.9)",
+  "data_source": "퀀트봇 scan_crash_bounce.py → crash_bounce_scan.json → FLOWX 업로드",
+
+  "ddl": "CREATE TABLE IF NOT EXISTS dashboard_crash_bounce (\n  date TEXT NOT NULL,\n  ticker TEXT NOT NULL,\n  name TEXT,\n  close FLOAT DEFAULT 0,\n  change_pct FLOAT DEFAULT 0,\n  gap_20ma FLOAT DEFAULT 0,\n  bb_position FLOAT DEFAULT 0,\n  volume_ratio FLOAT DEFAULT 0,\n  foreign_net FLOAT DEFAULT 0,\n  inst_net FLOAT DEFAULT 0,\n  foreign_days INT DEFAULT 0,\n  inst_days INT DEFAULT 0,\n  signal_type TEXT,\n  grade TEXT,\n  score INT DEFAULT 0,\n  reasons TEXT,\n  PRIMARY KEY (date, ticker)\n);\n\nALTER TABLE dashboard_crash_bounce ENABLE ROW LEVEL SECURITY;\nCREATE POLICY \"anon_read_crash_bounce\" ON dashboard_crash_bounce\n  FOR SELECT TO anon USING (true);",
+
+  "columns": {
+    "date": "날짜 (YYYY-MM-DD)",
+    "ticker": "종목코드 (6자리)",
+    "name": "종목명",
+    "close": "현재가 (원)",
+    "change_pct": "전일대비 등락률 (%)",
+    "gap_20ma": "20일 이동평균 이격도 (%, 음수=급락)",
+    "bb_position": "볼린저밴드 위치 (0~1, 0=하단 1=상단, 음수=하단이탈)",
+    "volume_ratio": "거래량 배수 (20일 평균 대비, 3.0=3배)",
+    "foreign_net": "외국인 당일 순매수 (억원)",
+    "inst_net": "기관 당일 순매수 (억원)",
+    "foreign_days": "외국인 연속 매수 일수",
+    "inst_days": "기관 연속 매수 일수",
+    "signal_type": "시그널 유형 (아래 참조)",
+    "grade": "등급 (아래 참조)",
+    "score": "종합 점수 (0~100)",
+    "reasons": "포착 이유 (JSON 배열 문자열)"
+  },
+
+  "signal_types": [
+    {"value": "복합급락 반등", "label": "복합급락 반등", "description": "볼린저급락 + 거래량폭발 동시 충족 (최강)", "color": "#FF0000", "badge": "BEST"},
+    {"value": "볼린저급락 반등", "label": "볼린저급락 반등", "description": "20일평균 -15% + 볼린저밴드 하단 이탈 + 큰손 매수", "color": "#FF6600"},
+    {"value": "거래량폭발 반등", "label": "거래량폭발 반등", "description": "20일평균 -15% + 거래량 3배+ + 큰손 매수", "color": "#FF9900"},
+    {"value": "관심", "label": "관심", "description": "조건 근접 (이격도 -12%~-15%)", "color": "#999999"}
+  ],
+
+  "grades": [
+    {"value": "적극매수", "label": "적극매수", "icon": "★", "color": "#FF0000", "bg": "#FFF0F0", "description": "두 시그널 동시 또는 쌍끌이(기관+외인) 수급"},
+    {"value": "매수", "label": "매수", "icon": "◎", "color": "#FF6600", "bg": "#FFF5E6", "description": "단일 시그널 + 기관 또는 외인 순매수"},
+    {"value": "관심", "label": "관심", "icon": "○", "color": "#999999", "bg": "#F5F5F5", "description": "조건 근접 — 추가 하락 시 매수 진입 대기"}
+  ],
+
+  "backtest_stats": {
+    "볼린저급락 반등": {
+      "period": "2019~2026 (7년)",
+      "samples": 1034,
+      "avg_return_d5": "+3.38%",
+      "win_rate": "60.2%",
+      "profit_factor": 2.64,
+      "description": "5일 보유 시 평균 +3.38% 수익, 10번 중 6번 수익"
+    },
+    "거래량폭발 반등": {
+      "period": "2019~2026 (7년)",
+      "samples": 75,
+      "avg_return_d5": "+3.31%",
+      "win_rate": "62.5%",
+      "profit_factor": 2.61,
+      "description": "5일 보유 시 평균 +3.31% 수익, 10번 중 6.3번 수익 (표본 적음)"
+    }
+  },
+
+  "sample_data": [
+    {
+      "date": "2026-04-04",
+      "ticker": "009420",
+      "name": "한세실업",
+      "close": 47050,
+      "change_pct": -13.51,
+      "gap_20ma": -15.9,
+      "bb_position": -0.09,
+      "volume_ratio": 4.0,
+      "foreign_net": -123.2,
+      "inst_net": 209.4,
+      "foreign_days": 0,
+      "inst_days": 1,
+      "signal_type": "복합급락 반등",
+      "grade": "적극매수",
+      "score": 100,
+      "reasons": "[\"20일 평균 대비 -15.9% 급락\",\"볼린저밴드 하단 이탈 (위치 -9%)\",\"거래량 평소의 4.0배 폭발\",\"기관 당일 매수\",\"5일간 -25.7% 하락 (낙폭과대)\"]"
+    }
+  ],
+
+  "ui_spec": {
+    "layout": "card_list_with_table",
+    "sections": [
+      {
+        "id": "summary_banner",
+        "type": "info_banner",
+        "description": "상단 배너 — 스캐너 설명 + 백테스트 신뢰도",
+        "content": {
+          "title": "급락반등 포착기",
+          "subtitle": "극도로 빠진 종목 중 큰손이 매수하기 시작한 종목",
+          "badge_text": "백테스트 검증",
+          "stats": [
+            {"label": "평균 수익 (5일)", "value": "+3.38%", "color": "red"},
+            {"label": "승률", "value": "60.2%", "color": "green"},
+            {"label": "손익비", "value": "2.64", "color": "blue"}
+          ],
+          "explanation": "7년간 1,034건의 실제 데이터로 검증한 시그널입니다. 주가가 평균보다 15% 이상 급락한 상태에서, 볼린저밴드 바닥을 이탈하고, 기관이나 외국인이 매수하기 시작하면 → 5일 안에 반등할 확률이 60%입니다."
+        }
+      },
+      {
+        "id": "grade_filter",
+        "type": "tab_filter",
+        "description": "등급별 필터 탭",
+        "options": ["전체", "적극매수", "매수", "관심"]
+      },
+      {
+        "id": "main_cards",
+        "type": "stock_card_list",
+        "description": "적극매수/매수 등급 종목을 카드형으로 표시",
+        "show_for_grades": ["적극매수", "매수"],
+        "card_layout": {
+          "header": "{grade_icon} {name} ({ticker})",
+          "badge": "{signal_type}",
+          "price_line": "{close:,}원 ({change_pct:+.1f}%)",
+          "metrics": [
+            {"label": "이격도", "value": "{gap_20ma:+.1f}%", "tooltip": "20일 이동평균 대비 얼마나 빠졌는지"},
+            {"label": "볼린저", "value": "{bb_position_pct}%", "tooltip": "볼린저밴드에서의 위치 (0%=바닥, 음수=바닥 이탈)"},
+            {"label": "거래량", "value": "{volume_ratio:.1f}배", "tooltip": "평소 대비 거래량 배수"},
+            {"label": "외인", "value": "{foreign_net:+.0f}억", "tooltip": "외국인 당일 순매수액"},
+            {"label": "기관", "value": "{inst_net:+.0f}억", "tooltip": "기관 당일 순매수액"}
+          ],
+          "reasons_section": {
+            "title": "포착 이유",
+            "items": "reasons (JSON 파싱)",
+            "icon_per_item": "→"
+          }
+        }
+      },
+      {
+        "id": "watch_table",
+        "type": "data_table",
+        "description": "관심 등급 종목은 테이블 형태로 간결하게",
+        "show_for_grades": ["관심"],
+        "columns": [
+          {"key": "name", "label": "종목명", "width": "120px"},
+          {"key": "close", "label": "현재가", "format": "number", "width": "90px"},
+          {"key": "gap_20ma", "label": "이격도", "format": "percent_signed", "width": "70px"},
+          {"key": "volume_ratio", "label": "거래량", "format": "x_times", "width": "70px"},
+          {"key": "foreign_net", "label": "외인", "format": "억원", "width": "70px"},
+          {"key": "inst_net", "label": "기관", "format": "억원", "width": "70px"}
+        ],
+        "sort_default": "score DESC"
+      },
+      {
+        "id": "backtest_footer",
+        "type": "expandable_section",
+        "description": "하단 접이식 — 백테스트 상세 통계",
+        "title": "백테스트 상세 보기",
+        "content": {
+          "table": [
+            {"시그널": "볼린저급락 반등", "기간": "2019~2026", "표본수": "1,034건", "5일 평균수익": "+3.38%", "승률": "60.2%", "손익비": "2.64"},
+            {"시그널": "거래량폭발 반등", "기간": "2019~2026", "표본수": "75건", "5일 평균수익": "+3.31%", "승률": "62.5%", "손익비": "2.61"}
+          ],
+          "glossary": [
+            {"term": "이격도", "definition": "현재 주가가 20일 이동평균선에서 얼마나 떨어져 있는지. -15%면 평균보다 15% 싸다는 뜻."},
+            {"term": "볼린저밴드", "definition": "주가의 통계적 상하한선. 하단 이탈은 '통계적으로 비정상적인 낙폭'을 의미."},
+            {"term": "거래량 배수", "definition": "최근 20일 평균 거래량 대비 오늘 거래량의 배수. 3배면 평소의 3배 거래."},
+            {"term": "쌍끌이", "definition": "기관과 외국인이 같은 날 동시에 순매수한 상태. 강력한 매수 신호."},
+            {"term": "승률", "definition": "이 조건으로 매수 후 5일 안에 수익이 난 비율."},
+            {"term": "손익비", "definition": "이익 총합 ÷ 손실 총합. 2.64면 잃는 것보다 2.64배 더 벌었다는 뜻."}
+          ]
+        }
+      }
+    ],
+
+    "empty_state": {
+      "icon": "🔍",
+      "title": "오늘은 급락반등 시그널이 없습니다",
+      "subtitle": "주가가 크게 빠지면서 큰손이 매수하는 종목이 나타나면 여기에 표시됩니다",
+      "note": "시장이 안정적일 때는 시그널이 없는 것이 정상입니다"
+    },
+
+    "disclaimer": "이 정보는 투자 권유가 아닙니다. 백테스트 결과는 과거 데이터 기반이며, 미래 수익을 보장하지 않습니다."
+  }
+}

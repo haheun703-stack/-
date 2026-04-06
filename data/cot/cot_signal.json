@@ -1,7 +1,7 @@
 {
-  "date": "2026-03-26",
+  "date": "2026-03-27",
   "report_date": "2026-03-17",
-  "stale_days": 9,
+  "stale_days": 10,
   "contracts": {
     "sp500": {
       "label": "S&P 500 E-mini",

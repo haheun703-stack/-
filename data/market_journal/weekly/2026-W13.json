@@ -1,0 +1,12 @@
+{
+  "week": "2026-W13",
+  "start": "2026-03-23",
+  "end": "2026-03-27",
+  "kospi_weekly_pct": -100.0,
+  "portfolio_return_pct": -27.66,
+  "total_buys": 15,
+  "total_sells": 0,
+  "realized_pnl": 0,
+  "regime_main": "BEAR",
+  "report_text": "📋 [주간 보고서] 2026-03-23 ~ 2026-03-27\n\n■ 시장 요약\n  KOSPI: 5,406→0 (-100.0%) | 주간 외인 +0억\n  레짐: BEAR 주도 (5일)\n\n■ 주간 성과\n  포트폴리오: -27.7% (KOSPI 대비 +72.3%p)\n  매수 15건 / 매도 0건 / 실현손익 +0원\n\n■ MVP: 아이티엠반도체 +30.0%\n■ WORST: 엔켐 -29.9%\n\n■ EYE 감지: 총 145건"
+}

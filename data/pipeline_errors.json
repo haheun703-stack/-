@@ -116,5 +116,13 @@
     "errors": 0,
     "error_rate_pct": 0.0,
     "samples": []
+  },
+  {
+    "script": "collect_foreign_exhaustion",
+    "timestamp": "2026-03-28 19:47",
+    "total": 0,
+    "errors": 0,
+    "error_rate_pct": 0,
+    "samples": []
   }
 ]

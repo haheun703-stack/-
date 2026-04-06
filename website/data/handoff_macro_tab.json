@@ -1,0 +1,207 @@
+{
+  "_handoff": "FLOWX 매크로 탭 — 웹봇 구현 명세 v3",
+  "_date": "2026-03-29",
+  "_from": "퀀트봇",
+  "_note": "v3: 대응 전략(strategy) 섹션 추가 — 조건별 행동 지침 + 종합 대응",
+
+  "api_endpoint": "/api/quant-jarvis",
+  "data_key": "data.macro",
+
+  "tab_name": "매크로",
+  "tab_icon": "TrendingUp (lucide-react)",
+  "tab_position": "성과 탭 뒤, CFO 탭 앞",
+
+  "data_structure": {
+    "date": "2026-03-29",
+    "overall": {
+      "score": "37.3 (0~100, 50=중립, 높을수록 주식에 유리)",
+      "grade": "우호적 | 중립(양호) | 중립(주의) | 비우호적",
+      "stance": "적극적 | 기본 유지 | 신중 | 방어적",
+      "description": "한줄 요약 (사용자 표시용)",
+      "suggested_cash_pct": "0~100 (BRAIN 현금비율 제안)",
+      "components": {
+        "rate": { "weight": 0.25, "score": "0~100" },
+        "inflation": { "weight": 0.20, "score": "0~100" },
+        "fx": { "weight": 0.15, "score": "0~100" },
+        "erp": { "weight": 0.25, "score": "0~100" },
+        "market": { "weight": 0.15, "score": "0~100" }
+      }
+    },
+    "rate": {
+      "base_rate": "2.5 (%, 한국은행 기준금리)",
+      "bond_3y": "3.582 (%, 국고채 3년)",
+      "bond_10y": "3.838 (%, 국고채 10년)",
+      "spread_10y_3y": "0.256 (%p, 10년-3년 스프레드)",
+      "direction": "긴축 | 완화 | 보합",
+      "signal": "첫번째 detail (요약용)",
+      "details": ["이전 vs 현재 비교 문장들 (배열, UI에 리스트로 표시)"]
+    },
+    "inflation": {
+      "cpi": "118.4 (2020=100)",
+      "direction": "상승 | 소폭상승 | 안정 | 둔화",
+      "signal": "첫번째 detail",
+      "details": ["비교 문장 배열"]
+    },
+    "fx": {
+      "usd_krw": "1506.2 (원)",
+      "direction": "원화약세 | 원화강세 | 보합",
+      "signal": "첫번째 detail",
+      "details": ["비교 문장 배열 (보통 3줄: 1개월/3개월/수준)"]
+    },
+    "erp": {
+      "erp": "ERP %p (null일 수 있음 — PER 미수집 시)",
+      "kospi_per": "KOSPI PER (null일 수 있음)",
+      "verdict": "주식 매우 유리 | 주식 우위 | 비슷 | 채권 유리 | 판단불가",
+      "signal": "한줄 설명",
+      "details": ["계산 과정 설명 배열"]
+    },
+    "sectors": {
+      "benefit_sectors": ["수혜 섹터 배열 (최대 5)"],
+      "avoid_sectors": ["주의 섹터 배열 (최대 3)"],
+      "logic": "금리=긴축, 환율=원화약세, 물가=소폭상승"
+    },
+    "strategy": {
+      "summary": "매크로 비우호적 — 방어 모드 전환 (한줄 종합 대응)",
+      "cash_action": "현금비중 조절 안내 (ex: 현금비중 70~80%로 확대)",
+      "entry_action": "신규 진입 전략 (ex: 신규 매수 자제, 방어주만 제한적 검토)",
+      "sector_action": "섹터별 대응 (ex: 수혜 섹터 편입, 주의 섹터 축소)",
+      "portfolio_tips": ["포트폴리오 팁 배열 (ex: 고배당·가치주 중심 포트폴리오 유지)"],
+      "condition_actions": [
+        {
+          "condition": "조건명 (ex: 금리 상승 (긴축))",
+          "actions": ["구체적 행동 지침 배열 (ex: 은행/금융/보험주 비중 확대)"]
+        }
+      ]
+    },
+    "market_phase": "BULL | CAUTION | BEAR | CRISIS"
+  },
+
+  "ui_design": {
+    "section_1_종합": {
+      "layout": "상단 풀넓이 카드",
+      "content": [
+        "매크로 종합 점수 (원형 게이지) — overall.score / 100",
+        "등급 뱃지 (overall.grade) + 스탠스 텍스트 (overall.stance)",
+        "한줄 설명 (overall.description)",
+        "컴포넌트 5개 수평 바 차트 (rate/inflation/fx/erp/market)"
+      ],
+      "color_rules": {
+        "우호적": "green (text-emerald-400)",
+        "중립(양호)": "blue (text-blue-400)",
+        "중립(주의)": "yellow (text-amber-400)",
+        "비우호적": "red (text-red-400)"
+      }
+    },
+    "section_2_지표카드": {
+      "layout": "2x2 그리드",
+      "cards": [
+        {
+          "title": "금리",
+          "main_value": "rate.base_rate + '% (기준금리)'",
+          "sub_values": ["국고채3년: rate.bond_3y%", "국고채10년: rate.bond_10y%", "스프레드: rate.spread_10y_3y%p"],
+          "direction_badge": "rate.direction (긴축=빨강, 완화=초록, 보합=회색)",
+          "details_list": "rate.details (각 줄을 리스트 아이템으로 표시)"
+        },
+        {
+          "title": "물가",
+          "main_value": "inflation.cpi + ' (2020=100)'",
+          "direction_badge": "inflation.direction",
+          "details_list": "inflation.details"
+        },
+        {
+          "title": "환율",
+          "main_value": "fx.usd_krw + '원'",
+          "direction_badge": "fx.direction (원화약세=빨강, 원화강세=초록, 보합=회색)",
+          "details_list": "fx.details"
+        },
+        {
+          "title": "주식 매력도",
+          "main_value": "erp.erp이 null이면 '수집중', 아니면 erp.erp + '%p'",
+          "sub_values": ["KOSPI PER: erp.kospi_per배"],
+          "direction_badge": "erp.verdict",
+          "details_list": "erp.details"
+        }
+      ]
+    },
+    "section_3_대응전략": {
+      "layout": "섹터 카드 아래, 풀넓이 카드",
+      "content": [
+        "종합 대응 (strategy.summary) — 볼드 텍스트",
+        "현금 전략 (strategy.cash_action) — 노란 강조",
+        "진입 전략 (strategy.entry_action)",
+        "섹터 전략 (strategy.sector_action)",
+        "포트폴리오 팁 (strategy.portfolio_tips) — 리스트",
+        "조건별 행동 (strategy.condition_actions) — 아코디언/접히는 카드",
+        "  각 condition_actions[i].condition = 카드 타이틀",
+        "  각 condition_actions[i].actions = 리스트 아이템"
+      ],
+      "color_rules": {
+        "방어 모드": "red (text-red-400)",
+        "신중": "amber (text-amber-400)",
+        "기본 유지": "blue (text-blue-400)",
+        "적극적": "green (text-emerald-400)"
+      }
+    },
+    "section_4_섹터": {
+      "layout": "하단 풀넓이",
+      "content": [
+        "수혜 섹터 (sectors.benefit_sectors) — 녹색 태그",
+        "주의 섹터 (sectors.avoid_sectors) — 빨간 태그",
+        "판단 근거 (sectors.logic) — 작은 텍스트"
+      ]
+    }
+  },
+
+  "design_rules": {
+    "theme": "다크 테마 (기존 FLOWX 통일)",
+    "border": "사용 금지 — bg-white/5 배경으로 구분",
+    "text_color": "text-gray-200 기본, 강조는 text-white",
+    "rounded": "rounded-xl",
+    "padding": "p-4 sm:p-6",
+    "font": "숫자는 tabular-nums, 단위는 text-xs text-gray-400",
+    "details_style": "details 배열 각 줄은 text-sm text-gray-300으로 렌더링"
+  },
+
+  "null_handling": {
+    "erp.erp가 null": "메인값에 '데이터 수집 중' 표시, details에 안내 문구",
+    "overall.score 없음": "전체 매크로 섹션 숨김",
+    "macro_key 없음": "매크로 탭 자체를 비활성 처리"
+  },
+
+  "example_actual_data_20260329": {
+    "overall": { "score": 37.3, "grade": "비우호적", "stance": "방어적" },
+    "rate": {
+      "direction": "긴축",
+      "details": [
+        "기준금리: 2.5% 동결 유지 (3개월전도 2.5%)",
+        "국고채10년: 1개월전 3.314% → 현재 3.838% (+0.52%p 급등, 긴축 신호)",
+        "3개월간 국고채10년 +0.60%p 상승 (금리 상승 추세)",
+        "장단기 스프레드 0.256%p — 정상"
+      ]
+    },
+    "fx": {
+      "direction": "원화약세",
+      "details": [
+        "원/달러: 1개월전 1435원 → 현재 1506원 (+71원, +4.9% 급등, 원화 급락)",
+        "3개월간 1461원 → 1506원 (+3.1%)",
+        "현재 고환율권 (1506원)"
+      ]
+    },
+    "sectors": {
+      "benefit_sectors": ["은행/금융", "보험", "자동차", "조선", "반도체"],
+      "avoid_sectors": ["성장주", "부동산/건설", "항공/여행"]
+    },
+    "strategy": {
+      "summary": "매크로 비우호적 — 방어 모드 전환",
+      "cash_action": "현금비중 70~80%로 확대, 손절 라인 엄격 관리",
+      "entry_action": "신규 매수 자제, 수출주/금융주 등 방어주만 제한적 검토",
+      "sector_action": "수혜 섹터(은행/금융, 보험, 자동차) 중심으로 편입, 성장주, 부동산/건설 등은 비중 축소",
+      "portfolio_tips": ["고배당·가치주 중심 포트폴리오 유지", "수출 비중 높은 대형주 선호", "인플레 방어 자산(에너지/금융) 비중 확대"],
+      "condition_actions": [
+        {"condition": "금리 상승 (긴축)", "actions": ["은행/금융/보험주 비중 확대", "성장주/바이오 신규 진입 자제", "부동산/건설주 경계"]},
+        {"condition": "원화 약세 (1506원)", "actions": ["수출주(자동차/조선/반도체) 비중 확대", "항공/여행주 회피", "달러 자산 보유 유지"]},
+        {"condition": "물가 소폭상승", "actions": ["에너지/원자재/소재주 관심", "필수소비재 방어 포지션", "고PER 성장주 경계"]}
+      ]
+    }
+  }
+}

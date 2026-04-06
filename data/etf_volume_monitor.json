@@ -1,97 +1,97 @@
 {
-  "date": "2026-03-26",
-  "generated_at": "2026-03-26 17:58",
+  "date": "2026-03-27",
+  "generated_at": "2026-03-27 22:33",
   "etf_count": 11,
   "explosions": 0,
   "etfs": [
     {
-      "ticker": "091230",
-      "name": "TIGER 반도체",
-      "sector": "반도체",
-      "volume_today": 593489,
-      "volume_avg_20d": 606792,
-      "volume_ratio": 0.98,
-      "explosion": false
-    },
-    {
-      "ticker": "143860",
-      "name": "TIGER 헬스케어",
-      "sector": "바이오",
-      "volume_today": 127734,
-      "volume_avg_20d": 133664,
-      "volume_ratio": 0.96,
-      "explosion": false
-    },
-    {
       "ticker": "228790",
       "name": "TIGER 화장품",
       "sector": "화장품",
-      "volume_today": 3406563,
-      "volume_avg_20d": 4020205,
-      "volume_ratio": 0.85,
+      "volume_today": 7000243,
+      "volume_avg_20d": 3977874,
+      "volume_ratio": 1.76,
       "explosion": false
     },
     {
-      "ticker": "161510",
-      "name": "ARIRANG 고배당주",
-      "sector": "고배당",
-      "volume_today": 1378064,
-      "volume_avg_20d": 2489744,
-      "volume_ratio": 0.55,
-      "explosion": false
-    },
-    {
-      "ticker": "139260",
-      "name": "TIGER 200IT",
-      "sector": "IT",
-      "volume_today": 401846,
-      "volume_avg_20d": 751587,
-      "volume_ratio": 0.53,
+      "ticker": "091230",
+      "name": "TIGER 반도체",
+      "sector": "반도체",
+      "volume_today": 671384,
+      "volume_avg_20d": 614196,
+      "volume_ratio": 1.09,
       "explosion": false
     },
     {
       "ticker": "266370",
       "name": "KODEX 2차전지산업",
       "sector": "2차전지",
-      "volume_today": 23625,
-      "volume_avg_20d": 51066,
-      "volume_ratio": 0.46,
+      "volume_today": 38436,
+      "volume_avg_20d": 50831,
+      "volume_ratio": 0.76,
       "explosion": false
     },
     {
-      "ticker": "152380",
-      "name": "KODEX 코스피대형주",
-      "sector": "대형주",
-      "volume_today": 4941,
-      "volume_avg_20d": 12629,
-      "volume_ratio": 0.39,
-      "explosion": false
-    },
-    {
-      "ticker": "117460",
-      "name": "KODEX 에너지화학",
-      "sector": "에너지",
-      "volume_today": 58969,
-      "volume_avg_20d": 162598,
-      "volume_ratio": 0.36,
-      "explosion": false
-    },
-    {
-      "ticker": "157490",
-      "name": "TIGER 소프트웨어",
-      "sector": "소프트웨어",
-      "volume_today": 130368,
-      "volume_avg_20d": 465282,
-      "volume_ratio": 0.28,
+      "ticker": "161510",
+      "name": "ARIRANG 고배당주",
+      "sector": "고배당",
+      "volume_today": 1481596,
+      "volume_avg_20d": 2411074,
+      "volume_ratio": 0.61,
       "explosion": false
     },
     {
       "ticker": "091220",
       "name": "TIGER 은행",
       "sector": "은행",
-      "volume_today": 21122,
-      "volume_avg_20d": 87795,
-      "volume_ratio": 0.24,
+      "volume_today": 48185,
+      "volume_avg_20d": 83848,
+      "volume_ratio": 0.57,
+      "explosion": false
+    },
+    {
+      "ticker": "139260",
+      "name": "TIGER 200IT",
+      "sector": "IT",
+      "volume_today": 372134,
+      "volume_avg_20d": 700525,
+      "volume_ratio": 0.53,
+      "explosion": false
+    },
+    {
+      "ticker": "157490",
+      "name": "TIGER 소프트웨어",
+      "sector": "소프트웨어",
+      "volume_today": 138621,
+      "volume_avg_20d": 445821,
+      "volume_ratio": 0.31,
+      "explosion": false
+    },
+    {
+      "ticker": "143860",
+      "name": "TIGER 헬스케어",
+      "sector": "바이오",
+      "volume_today": 40395,
+      "volume_avg_20d": 133894,
+      "volume_ratio": 0.3,
+      "explosion": false
+    },
+    {
+      "ticker": "117460",
+      "name": "KODEX 에너지화학",
+      "sector": "에너지",
+      "volume_today": 35120,
+      "volume_avg_20d": 155381,
+      "volume_ratio": 0.23,
+      "explosion": false
+    },
+    {
+      "ticker": "152380",
+      "name": "KODEX 코스피대형주",
+      "sector": "대형주",
+      "volume_today": 1810,
+      "volume_avg_20d": 12735,
+      "volume_ratio": 0.14,
       "explosion": false
     },
     {

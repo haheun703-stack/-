@@ -1,9 +1,9 @@
 {
-  "updated_at": "2026-03-26 17:59",
-  "kospi_regime": "BEAR",
-  "kospi_close": 5460.4599609375,
+  "updated_at": "2026-03-27 22:33",
+  "kospi_regime": "CAUTION",
+  "kospi_close": 0,
   "us_overnight": "NEUTRAL",
-  "recommendation": "관망 (하락 레짐이나 US 혼조)",
+  "recommendation": "소규모 LONG (과열 주의, 분할 필수)",
   "etf_count": 0,
   "etfs": []
 }

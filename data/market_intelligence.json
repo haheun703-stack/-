@@ -1,91 +1,108 @@
 {
-  "date": "2026-03-26",
-  "generated_at": "2026-03-26 18:20",
-  "us_market_summary": "3월 25일 미국 주식시장은 중동 휴전 전망으로 상승 마감하며 S&P 500은 0.5% 상승한 6591로, 다우는 300포인트(0.7%) 올랐고 나스닥은 0.8% 상승했다. 소형주와 ARM Holdings(+16%)가 강세를 보였으나, 이란과의 협상 불확실성으로 일부 조정이 관찰됐다.",
-  "us_market_mood": "RISK_ON",
-  "kr_open_forecast": "상승",
-  "kr_forecast_reason": "미국 주식 상승과 휴전 기대가 위험 선호 분위기를 확대하며 한국 반도체·IT 섹터 중심으로 장 초반 상승할 전망이다.",
+  "date": "2026-03-27",
+  "generated_at": "2026-03-27 22:37",
+  "us_market_summary": "미국 주식시장은 이란 지정학적 긴장과 유가 급등으로 전 지수가 하락했습니다. S&P 500은 1.7% 하락하여 6,477.16으로 마감했고, 나스닥은 2.4% 하락했습니다.",
+  "us_market_mood": "RISK_OFF",
+  "kr_open_forecast": "하락",
+  "kr_forecast_reason": "미국 주식시장의 광범위한 하락과 지정학적 긴장 심화로 인한 글로벌 리스크 회피 심리가 한국 주식시장에 부정적 영향을 미칠 것으로 예상됩니다.",
   "key_events": [
     {
-      "event": "미-이란 휴전 협상 전망",
+      "event": "이란 지정학적 긴장 심화 및 유가 급등",
       "category": "지정학",
-      "impact": "positive",
-      "urgency": "IMPORTANT",
-      "detail": "미국과 이란 간 휴전 협상 가능성으로 주식시장이 상승했으나, 협상 내용에 대한 이견으로 불확실성이 지속되고 있다.",
+      "impact": "negative",
+      "urgency": "BREAKING",
+      "detail": "트럼프 대통령의 이란 에너지 공격 10일 유예 선언에도 불구하고 유가가 급등했으며, 이란과의 지속적인 협상 불확실성이 투자자 심리를 악화시켰습니다.",
       "kr_sectors_affected": [
-        "방산"
+        "화학/에너지",
+        "자동차",
+        "조선"
       ],
       "kr_impact_direction": "피해",
       "kr_impact_score": -3
     },
     {
-      "event": "S&P 500 0.5% 상승 마감",
-      "category": "매크로",
-      "impact": "positive",
-      "urgency": "NORMAL",
-      "detail": "S&P 500이 6591로 0.5% 상승하며 200일 이동평균선 근처에서 거래됐고, 다우와 나스닥도 각각 0.7%와 0.8% 올랐다.",
+      "event": "기술주 광범위한 낙폭 및 NVIDIA 급락",
+      "category": "섹터",
+      "impact": "negative",
+      "urgency": "IMPORTANT",
+      "detail": "정보기술 섹터가 2.7% 하락했으며, NVIDIA는 Strong Buy 평가에도 불구하고 4.2% 급락했습니다.",
       "kr_sectors_affected": [
         "반도체",
         "IT/소프트웨어"
       ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 2
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -4
     },
     {
-      "event": "소형주 강세 (Russell 2000 0.9%↑)",
-      "category": "매크로",
-      "impact": "positive",
-      "urgency": "NORMAL",
-      "detail": "소형주 지수가 0.9% 상승하며 대형주를 앞지르며 시장의 위험 선호 심리를 반영했다.",
-      "kr_sectors_affected": [
-        "로봇/AI"
-      ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 1
-    },
-    {
-      "event": "ARM Holdings 16% 급등",
+      "event": "통신서비스 섹터 최대 낙폭 및 Meta 대규모 감원",
       "category": "섹터",
-      "impact": "positive",
+      "impact": "negative",
       "urgency": "IMPORTANT",
-      "detail": "ARM Holdings가 자체 칩 판매 시작 소식으로 16% 상승하며 S&P 500 내 3위 상승 종목이 됐다.",
+      "detail": "통신서비스 섹터가 3.5%로 최대 낙폭을 기록했으며, Meta는 감원 발표와 미국 배심원단의 소셜미디어 해로움 판정으로 약 7% 하락했습니다.",
       "kr_sectors_affected": [
-        "반도체"
+        "IT/소프트웨어"
       ],
-      "kr_impact_direction": "수혜",
-      "kr_impact_score": 4
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -2
     },
     {
-      "event": "채권 랠리 발생",
-      "category": "매크로",
-      "impact": "neutral",
-      "urgency": "NORMAL",
-      "detail": "휴전 전망 속 채권 랠리가 나타나며 금리 하락 기대가 주식 상승을 뒷받침했다.",
+      "event": "변동성 지수(VIX) 급등",
+      "category": "기술",
+      "impact": "negative",
+      "urgency": "IMPORTANT",
+      "detail": "공포지수 VIX가 8.3% 상승하여 27.44로 올라갔으며, 시장 불안심리가 고조되었습니다.",
       "kr_sectors_affected": [
         "금융"
       ],
-      "kr_impact_direction": "중립",
-      "kr_impact_score": 0
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -2
     },
     {
-      "event": "이란 협상 이견으로 주가 일부 하락",
-      "category": "지정학",
-      "impact": "negative",
-      "urgency": "BREAKING",
-      "detail": "미-이란 협상에서 양측 이견이 제기되며 주가가 일부 하락하고 유가가 상승했다.",
+      "event": "에너지 섹터 유일한 상승",
+      "category": "섹터",
+      "impact": "positive",
+      "urgency": "NORMAL",
+      "detail": "에너지 선택 섹터 SPDR(XLE)은 유가 급등으로 1.6% 상승했습니다.",
       "kr_sectors_affected": [
         "화학/에너지"
       ],
       "kr_impact_direction": "수혜",
       "kr_impact_score": 2
+    },
+    {
+      "event": "광범위한 섹터 동반 하락",
+      "category": "섹터",
+      "impact": "negative",
+      "urgency": "NORMAL",
+      "detail": "S&P 500의 11개 섹터 중 8개가 하락했으며, 산업재 섹터도 2.3% 하락했습니다.",
+      "kr_sectors_affected": [
+        "자동차",
+        "조선",
+        "철강"
+      ],
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -2
+    },
+    {
+      "event": "기술주 신저가 기록 확대",
+      "category": "기술",
+      "impact": "negative",
+      "urgency": "NORMAL",
+      "detail": "나스닥 컴포지트에서 신고가 121개 대비 신저가 202개가 기록되어 약세 심화를 나타냈습니다.",
+      "kr_sectors_affected": [
+        "반도체",
+        "IT/소프트웨어"
+      ],
+      "kr_impact_direction": "피해",
+      "kr_impact_score": -3
     }
   ],
   "event_stats": {
-    "total": 6,
+    "total": 7,
     "breaking": 1,
-    "important": 2,
-    "positive": 4,
-    "negative": 1
+    "important": 3,
+    "positive": 1,
+    "negative": 6
   },
   "sector_impacts": [],
   "sector_boost": {},

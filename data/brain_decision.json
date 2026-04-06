@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-03-27T11:37:18.766300",
-  "effective_regime": "BEAR",
-  "kospi_regime": "BEAR",
+  "timestamp": "2026-03-27T22:33:48.276777",
+  "effective_regime": "CAUTION",
+  "kospi_regime": "CAUTION",
   "nightwatch_score": 0.0,
   "vix_level": 25.3,
-  "confidence": 0.75,
+  "confidence": 0.6,
   "arms": [
     {
       "name": "swing",
@@ -12,39 +12,39 @@
       "adjusted_pct": 0,
       "delta_pct": -30,
       "reason": "축소 30.0%p",
-      "frozen": false
+      "frozen": true
     },
     {
       "name": "etf_sector",
-      "base_pct": 0.0,
+      "base_pct": 20.0,
       "adjusted_pct": 0,
-      "delta_pct": 0.0,
-      "reason": "변경 없음",
-      "frozen": false
+      "delta_pct": -20.0,
+      "reason": "축소 20.0%p",
+      "frozen": true
     },
     {
       "name": "etf_leverage",
-      "base_pct": 15.0,
-      "adjusted_pct": 0,
-      "delta_pct": -15.0,
-      "reason": "축소 15.0%p",
-      "frozen": false
-    },
-    {
-      "name": "etf_index",
       "base_pct": 0.0,
       "adjusted_pct": 0,
       "delta_pct": 0.0,
       "reason": "변경 없음",
-      "frozen": false
+      "frozen": true
+    },
+    {
+      "name": "etf_index",
+      "base_pct": 20.0,
+      "adjusted_pct": 0,
+      "delta_pct": -20.0,
+      "reason": "축소 20.0%p",
+      "frozen": true
     },
     {
       "name": "etf_gold",
-      "base_pct": 25.0,
-      "adjusted_pct": 23.8,
-      "delta_pct": -1.2,
-      "reason": "축소 1.2%p",
-      "frozen": false
+      "base_pct": 15.0,
+      "adjusted_pct": 16.2,
+      "delta_pct": 1.2,
+      "reason": "확대 1.2%p",
+      "frozen": true
     },
     {
       "name": "etf_small_cap",
@@ -52,40 +52,40 @@
       "adjusted_pct": 0,
       "delta_pct": 0.0,
       "reason": "변경 없음",
-      "frozen": false
+      "frozen": true
     },
     {
       "name": "etf_bonds",
-      "base_pct": 10.0,
-      "adjusted_pct": 12.5,
-      "delta_pct": 2.5,
-      "reason": "확대 2.5%p",
-      "frozen": false
+      "base_pct": 5.0,
+      "adjusted_pct": 8.8,
+      "delta_pct": 3.8,
+      "reason": "확대 3.8%p",
+      "frozen": true
     },
     {
       "name": "etf_dollar",
-      "base_pct": 10.0,
-      "adjusted_pct": 7.5,
-      "delta_pct": -2.5,
-      "reason": "축소 2.5%p",
-      "frozen": false
+      "base_pct": 5.0,
+      "adjusted_pct": 3.8,
+      "delta_pct": -1.2,
+      "reason": "축소 1.2%p",
+      "frozen": true
     },
     {
       "name": "cash",
-      "base_pct": 40.0,
-      "adjusted_pct": 56.2,
-      "delta_pct": 16.2,
-      "reason": "확대 16.2%p",
+      "base_pct": 35.0,
+      "adjusted_pct": 71.2,
+      "delta_pct": 36.2,
+      "reason": "확대 36.2%p",
       "frozen": false
     }
   ],
-  "total_invest_pct": 43.8,
-  "cash_pct": 56.2,
+  "total_invest_pct": 28.8,
+  "cash_pct": 71.2,
   "adjustments": [
     "VIX 보정: 25.3 (HIGH) → 투자비중 ×0.75",
     "2D 선제방어: credit_z=-0.5, MOVE_z=2.0",
     "COT: S&P 매도 포지셔닝 → 리스크ARM -5%p",
-    "섹터 양호: STRONG 2개(방산, 헬스케어) → sector+2%p",
+    "섹터 강세: STRONG 4개(방산, 게임, 바이오) → sector+5%p",
     "SHIELD: S1: 반도체 38.5% (한도 30%)",
     "SHIELD: S1: 방산 27.6% (한도 30%)",
     "SHIELD: S2: LEVEL_3 (MDD -27.7%) 전량 현금화",
@@ -93,9 +93,10 @@
     "CONTRARIAN: VIX 25.3 + EWY 5일 -5.3% = 과매도 (Fear=73)"
   ],
   "warnings": [
-    "SHIELD 방어 등급: RED"
+    "SHIELD 방어 등급: RED",
+    "레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결."
   ],
-  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: BEAR\nNW: +0.000 | VIX: 25.3 (HIGH) | US: MILD_BEAR\n\n자본 배분:\n      개별스윙   0.0% \n     섹터ETF   0.0% \n      레버리지   0.0% \n     지수ETF   0.0% \n      금ETF  23.8% ████\n       소형주   0.0% \n        채권  12.5% ██\n        달러   7.5% █\n        현금  56.2% ███████████\n\n유동성 사이클:\n  Net Liquidity: 5,802.1B (z=+1.08, 20d: +79.7B)\n  M2 YoY: +3.78% (z=-1.41)\n  은행 지준: 2,967.9B (z=+0.00)\n  RRP: 0.8B (20d: -3.0B) | TGA: 853.1B (20d: -34.6B)\n  유동성 레짐: AMPLE (score=+0.200, 1일 전)\n\nCOT Slow Eye (주간):\n    S&P 500 E-mini: z=-1.31 (BEARISH)\n        Gold COMEX: z=-1.02 (BULLISH)\n        10Y T-Note: z=-0.34 (NEUTRAL)\n     WTI Crude Oil: z=+1.41 (NEUTRAL)\n              복합방향: NEUTRAL (데이터 9일 전)\n\nv3 캡: BEAR → 신규 최대 2종목, 종목당 0.0%\n\n보정:\n  · VIX 보정: 25.3 (HIGH) → 투자비중 ×0.75\n  · 2D 선제방어: credit_z=-0.5, MOVE_z=2.0\n  · COT: S&P 매도 포지셔닝 → 리스크ARM -5%p\n  · 섹터 양호: STRONG 2개(방산, 헬스케어) → sector+2%p\n  · SHIELD: S1: 반도체 38.5% (한도 30%)\n  · SHIELD: S1: 방산 27.6% (한도 30%)\n  · SHIELD: S2: LEVEL_3 (MDD -27.7%) 전량 현금화\n  · SHIELD: S3: 3개 동시하락 (avg -17.4%)\n\n경고:\n  ! SHIELD 방어 등급: RED",
+  "briefing": "[ BRAIN 자본배분 브리핑 ]\n\n레짐: CAUTION\nNW: +0.000 | VIX: 25.3 (HIGH) | US: MILD_BEAR\n\n자본 배분:\n      개별스윙   0.0% \n     섹터ETF   0.0% \n      레버리지   0.0% \n     지수ETF   0.0% \n      금ETF  16.2% ███\n       소형주   0.0% \n        채권   8.8% █\n        달러   3.8% \n        현금  71.2% ██████████████\n\n유동성 사이클:\n  Net Liquidity: 5,802.1B (z=+1.08, 20d: +79.7B)\n  M2 YoY: +3.78% (z=-1.41)\n  은행 지준: 2,967.9B (z=+0.00)\n  RRP: 0.8B (20d: -3.0B) | TGA: 853.1B (20d: -34.6B)\n  유동성 레짐: AMPLE (score=+0.200, 1일 전)\n\nCOT Slow Eye (주간):\n    S&P 500 E-mini: z=-1.31 (BEARISH)\n        Gold COMEX: z=-1.02 (BULLISH)\n        10Y T-Note: z=-0.34 (NEUTRAL)\n     WTI Crude Oil: z=+1.41 (NEUTRAL)\n              복합방향: NEUTRAL (데이터 10일 전)\n\nv3 캡: CAUTION → 신규 최대 5종목, 종목당 0.0%\n\nICT 전술 레벨:\n  현대차 490,000 | ↑주간저 499,000(+1.8%) | ↓전일저 486,000(-0.8%)\n  미래에셋증권 65,300 | ↑주간저 66,600(+2.0%) | ↓전일저 65,100(-0.3%)\n  삼성중공업 26,350 | ↑월간저 26,500(+0.6%) | ↓전일저 26,300(-0.2%)\n  S-Oil 112,300 | ↑전일고 114,800(+2.2%) | ↓전일저 111,500(-0.7%)\n  흥구석유 21,000 | ↑전일고 22,000(+4.8%) | ↓주간저 19,440(-7.4%)\n  한미반도체 278,000 | ↑주간저 290,000(+4.3%) | ↓전일저 277,000(-0.4%)\n  현대로템 189,800 | ↑전일고 196,200(+3.4%) | ↓전일저 189,100(-0.4%)\n  셀트리온 203,000 | ↑전일고 207,750(+2.3%) | ↓전일저 201,500(-0.7%)\n  RFHIC 81,100 | ↑주간고 84,400(+4.1%) | ↓전일저 80,500(-0.7%)\n  한화시스템 129,700 | ↑주간저 135,700(+4.6%) | ↓전일저 129,200(-0.4%)\n  ---\n  현대차 ▽EqLow 490,500 x3(+0.1%) ★\n  현대차 ▽EqLow 485,500 x2(-0.9%)\n  현대차 △EqHigh 500,250 x2(+2.1%)\n  현대차 △EqHigh 506,500 x2(+3.4%)\n  미래에셋증권 ▽EqLow 66,562 x4(+1.9%) ★\n  미래에셋증권 ▽EqLow 67,533 x3(+3.4%) ★\n  미래에셋증권 △EqHigh 68,200 x2(+4.4%)\n  미래에셋증권 △EqHigh 68,450 x2(+4.8%)\n  삼성중공업 ▽EqLow 26,350 x2(+0.0%)\n  삼성중공업 ▽EqLow 26,283 x3(-0.3%) ★\n  삼성중공업 △EqHigh 27,625 x2(+4.8%)\n  삼성중공업 △EqHigh 27,800 x2(+5.5%)\n  S-Oil ▽EqLow 111,950 x2(-0.3%)\n  S-Oil ▽EqLow 111,100 x2(-1.1%)\n  S-Oil △EqHigh 113,100 x2(+0.7%)\n  S-Oil △EqHigh 114,750 x4(+2.2%) ★\n  흥구석유 ▽EqLow 21,225 x2(+1.1%)\n  흥구석유 ▽EqLow 18,895 x2(-10.0%)\n  흥구석유 △EqHigh 22,025 x2(+4.9%)\n  흥구석유 △EqHigh 22,850 x2(+8.8%)\n  한미반도체 ▽EqLow 296,250 x2(+6.6%)\n  한미반도체 ▽EqLow 300,000 x2(+7.9%)\n  한미반도체 △EqHigh 313,250 x4(+12.7%) ★\n  한미반도체 △EqHigh 318,250 x2(+14.5%)\n  현대로템 ▽EqLow 189,050 x2(-0.4%)\n  현대로템 ▽EqLow 195,050 x2(+2.8%)\n  현대로템 △EqHigh 191,850 x2(+1.1%)\n  현대로템 △EqHigh 195,550 x2(+3.0%)\n  셀트리온 ▽EqLow 202,667 x3(-0.2%) ★\n  셀트리온 ▽EqLow 204,000 x3(+0.5%) ★\n  셀트리온 △EqHigh 203,833 x3(+0.4%) ★\n  셀트리온 △EqHigh 204,750 x4(+0.9%) ★\n  RFHIC ▽EqLow 80,500 x2(-0.7%)\n  RFHIC ▽EqLow 77,950 x2(-3.9%)\n  RFHIC △EqHigh 80,400 x2(-0.9%)\n  RFHIC △EqHigh 83,300 x2(+2.7%)\n  한화시스템 ▽EqLow 129,350 x2(-0.3%)\n  한화시스템 ▽EqLow 135,850 x2(+4.7%)\n  한화시스템 △EqHigh 140,600 x2(+8.4%)\n  한화시스템 △EqHigh 146,850 x2(+13.2%)\n\n보정:\n  · VIX 보정: 25.3 (HIGH) → 투자비중 ×0.75\n  · 2D 선제방어: credit_z=-0.5, MOVE_z=2.0\n  · COT: S&P 매도 포지셔닝 → 리스크ARM -5%p\n  · 섹터 강세: STRONG 4개(방산, 게임, 바이오) → sector+5%p\n  · SHIELD: S1: 반도체 38.5% (한도 30%)\n  · SHIELD: S1: 방산 27.6% (한도 30%)\n  · SHIELD: S2: LEVEL_3 (MDD -27.7%) 전량 현금화\n  · SHIELD: S3: 3개 동시하락 (avg -17.4%)\n\n경고:\n  ! SHIELD 방어 등급: RED\n  ! 레짐 변경 감지: BEAR→CAUTION. 2일 확인 대기 중. 배분 동결.",
   "contrarian_opportunity": true,
   "contrarian_reason": "VIX 25.3 + EWY 5일 -5.3% = 과매도",
   "fear_index": 73.1

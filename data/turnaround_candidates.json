@@ -1,0 +1,753 @@
+{
+  "date": "2026-03-29",
+  "generated_at": "2026-03-29T16:36:18.207417",
+  "total_screened": 1008,
+  "candidates_found": 39,
+  "strong_count": 23,
+  "early_count": 16,
+  "strong": [
+    {
+      "ticker": "005010",
+      "name": "휴스틸",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -467312213.0,
+      "op_income_q1": -2742360456.0,
+      "op_income_latest": 11480729420.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 162093348574.0,
+      "revenue_prev": 155500460739.0,
+      "debt_ratio": 22.4,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "006650",
+      "name": "대한유화",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -9875334345.0,
+      "op_income_q1": -4595218151.0,
+      "op_income_latest": 42849309628.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 909918544910.0,
+      "revenue_prev": 846772033313.0,
+      "debt_ratio": 24.3,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "008060",
+      "name": "대덕",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -17590554092.0,
+      "op_income_q1": -19750907851.0,
+      "op_income_latest": 20967166044.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 367282650823.0,
+      "revenue_prev": 323844377289.0,
+      "debt_ratio": 18.9,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "010950",
+      "name": "S-Oil",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -21541000000.0,
+      "op_income_q1": -343971000000.0,
+      "op_income_latest": 229216000000.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 8415367000000.0,
+      "revenue_prev": 8048504000000.0,
+      "debt_ratio": 65.4,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "025980",
+      "name": "아난티",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -3224625922.0,
+      "op_income_q1": -2504768491.0,
+      "op_income_latest": 9185861253.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 73376166810.0,
+      "revenue_prev": 61851976514.0,
+      "debt_ratio": 53.8,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "038290",
+      "name": "마크로젠",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -3046063002.0,
+      "op_income_q1": -1528116388.0,
+      "op_income_latest": 1113944427.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 49063938611.0,
+      "revenue_prev": 48985110862.0,
+      "debt_ratio": 50.7,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "047310",
+      "name": "파워로직스",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -4102943782.0,
+      "op_income_q1": -5963275329.0,
+      "op_income_latest": 6131688812.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 182862888978.0,
+      "revenue_prev": 165921234705.0,
+      "debt_ratio": 44.1,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "058820",
+      "name": "CMG제약",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -1330451902.0,
+      "op_income_q1": -4605643742.0,
+      "op_income_latest": 1206206164.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 30401667963.0,
+      "revenue_prev": 22668933360.0,
+      "debt_ratio": 33.6,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "066970",
+      "name": "엘앤에프",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -140252572527.0,
+      "op_income_q1": -121188291178.0,
+      "op_income_latest": 22122023446.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 652296034667.0,
+      "revenue_prev": 520075586214.0,
+      "debt_ratio": 87.4,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "096770",
+      "name": "SK이노베이션",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -44638745000.0,
+      "op_income_q1": -417568625000.0,
+      "op_income_latest": 573474628000.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 20533220238000.0,
+      "revenue_prev": 19306626093000.0,
+      "debt_ratio": 64.0,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "112040",
+      "name": "위메이드",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -11336568831.0,
+      "op_income_q1": -28548447095.0,
+      "op_income_latest": 26308155889.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 163648297290.0,
+      "revenue_prev": 116820341975.0,
+      "debt_ratio": 50.9,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "170900",
+      "name": "동아에스티",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -4807929968.0,
+      "op_income_q1": -5825734993.0,
+      "op_income_latest": 13993471699.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 215927925580.0,
+      "revenue_prev": 193994436742.0,
+      "debt_ratio": 52.5,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "131970",
+      "name": "두산테스나",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -19133061000.0,
+      "op_income_q1": -2118273000.0,
+      "op_income_latest": 5285496000.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 83214080000.0,
+      "revenue_prev": 75900772000.0,
+      "debt_ratio": 39.3,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "182400",
+      "name": "엔케이젠바이오텍코리아",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -526531794.0,
+      "op_income_q1": -904994824.0,
+      "op_income_latest": 43793585.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 2205602717.0,
+      "revenue_prev": 2021139646.0,
+      "debt_ratio": 54.4,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "200710",
+      "name": "에이디테크놀로지",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -1551685227.0,
+      "op_income_q1": -1019789581.0,
+      "op_income_latest": 2668304819.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 36805859459.0,
+      "revenue_prev": 34026867815.0,
+      "debt_ratio": 54.8,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "242040",
+      "name": "나무기술",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -663671401.0,
+      "op_income_q1": -1223050654.0,
+      "op_income_latest": 2962126940.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 32226547843.0,
+      "revenue_prev": 18046739069.0,
+      "debt_ratio": 58.1,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "263750",
+      "name": "펄어비스",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -5242125423.0,
+      "op_income_q1": -11778547886.0,
+      "op_income_latest": 10618276764.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 106818121269.0,
+      "revenue_prev": 79561794975.0,
+      "debt_ratio": 28.3,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "290650",
+      "name": "엘앤씨바이오",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -433110640.0,
+      "op_income_q1": -245095355.0,
+      "op_income_latest": 2895731265.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 22555957084.0,
+      "revenue_prev": 20581453550.0,
+      "debt_ratio": 46.4,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "299030",
+      "name": "하나기술",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -1535278447.0,
+      "op_income_q1": -3052609027.0,
+      "op_income_latest": 4271448736.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 52459237910.0,
+      "revenue_prev": 17236371030.0,
+      "debt_ratio": 61.5,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "338220",
+      "name": "뷰노",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -3428094741.0,
+      "op_income_q1": -169471190.0,
+      "op_income_latest": 1016834418.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 10823959924.0,
+      "revenue_prev": 9254486654.0,
+      "debt_ratio": 35.6,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "466100",
+      "name": "클로봇",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -3382560996.0,
+      "op_income_q1": -1877880143.0,
+      "op_income_latest": 810608689.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 10734313731.0,
+      "revenue_prev": 7849410881.0,
+      "debt_ratio": 19.7,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "361390",
+      "name": "제노코",
+      "turnaround_type": "STRONG",
+      "score": 95,
+      "op_income_q2": -871646610.0,
+      "op_income_q1": -1397272134.0,
+      "op_income_latest": 378001295.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 17916803345.0,
+      "revenue_prev": 13980907549.0,
+      "debt_ratio": 45.3,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "009520",
+      "name": "포스코엠텍",
+      "turnaround_type": "STRONG",
+      "score": 90,
+      "op_income_q2": -795713321.0,
+      "op_income_q1": -3244441828.0,
+      "op_income_latest": 1736623220.0,
+      "deficit_reduction_pct": null,
+      "revenue_latest": 82877558086.0,
+      "revenue_prev": 89345921880.0,
+      "debt_ratio": 24.9,
+      "est_turnaround": "2025Q3",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    }
+  ],
+  "early": [
+    {
+      "ticker": "000670",
+      "name": "영풍",
+      "turnaround_type": "EARLY",
+      "score": 77.2,
+      "op_income_q2": -56269475855.0,
+      "op_income_q1": -94138666433.0,
+      "op_income_latest": -8761609647.0,
+      "deficit_reduction_pct": 90.7,
+      "revenue_latest": 749580770600.0,
+      "revenue_prev": 599848046104.0,
+      "debt_ratio": 29.8,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "086390",
+      "name": "유니테스트",
+      "turnaround_type": "EARLY",
+      "score": 77.0,
+      "op_income_q2": -3988571770.0,
+      "op_income_q1": -4392442188.0,
+      "op_income_latest": -443238797.0,
+      "deficit_reduction_pct": 89.9,
+      "revenue_latest": 31266450387.0,
+      "revenue_prev": 29198075486.0,
+      "debt_ratio": 42.7,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "144510",
+      "name": "지씨셀",
+      "turnaround_type": "EARLY",
+      "score": 76.5,
+      "op_income_q2": -5694913340.0,
+      "op_income_q1": -3374990390.0,
+      "op_income_latest": -397452517.0,
+      "deficit_reduction_pct": 88.2,
+      "revenue_latest": 45017043844.0,
+      "revenue_prev": 42954377336.0,
+      "debt_ratio": 23.7,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "012200",
+      "name": "계양전기",
+      "turnaround_type": "EARLY",
+      "score": 76.4,
+      "op_income_q2": -2735661492.0,
+      "op_income_q1": -8518397525.0,
+      "op_income_latest": -1015184939.0,
+      "deficit_reduction_pct": 88.1,
+      "revenue_latest": 102300583317.0,
+      "revenue_prev": 102181636363.0,
+      "debt_ratio": 79.5,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "348150",
+      "name": "고바이오랩",
+      "turnaround_type": "EARLY",
+      "score": 75.5,
+      "op_income_q2": -3465700188.0,
+      "op_income_q1": -2803110308.0,
+      "op_income_latest": -422630071.0,
+      "deficit_reduction_pct": 84.9,
+      "revenue_latest": 19260534464.0,
+      "revenue_prev": 17612801103.0,
+      "debt_ratio": 46.7,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "024060",
+      "name": "흥구석유",
+      "turnaround_type": "EARLY",
+      "score": 73.3,
+      "op_income_q2": -188407638.0,
+      "op_income_q1": -791133127.0,
+      "op_income_latest": -176127637.0,
+      "deficit_reduction_pct": 77.7,
+      "revenue_latest": 25114714053.0,
+      "revenue_prev": 26444392556.0,
+      "debt_ratio": 15.4,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "119830",
+      "name": "아이텍",
+      "turnaround_type": "EARLY",
+      "score": 72.7,
+      "op_income_q2": -1596593557.0,
+      "op_income_q1": -1553405028.0,
+      "op_income_latest": -378821354.0,
+      "deficit_reduction_pct": 75.6,
+      "revenue_latest": 14334340864.0,
+      "revenue_prev": 15464842233.0,
+      "debt_ratio": 21.6,
+      "est_turnaround": "약 0분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "277810",
+      "name": "레인보우로보틱스",
+      "turnaround_type": "EARLY",
+      "score": 69.5,
+      "op_income_q2": -1403140484.0,
+      "op_income_q1": -2057342968.0,
+      "op_income_latest": -719767639.0,
+      "deficit_reduction_pct": 65.0,
+      "revenue_latest": 10694822851.0,
+      "revenue_prev": 6223476913.0,
+      "debt_ratio": 6.9,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "287840",
+      "name": "인투셀",
+      "turnaround_type": "EARLY",
+      "score": 69.5,
+      "op_income_q2": -3409049683.0,
+      "op_income_q1": -3722416663.0,
+      "op_income_latest": -1299295954.0,
+      "deficit_reduction_pct": 65.1,
+      "revenue_latest": 1422502451.0,
+      "revenue_prev": 39402451.0,
+      "debt_ratio": 41.6,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "402030",
+      "name": "코난테크놀로지",
+      "turnaround_type": "EARLY",
+      "score": 69.5,
+      "op_income_q2": -3988860917.0,
+      "op_income_q1": -4451825396.0,
+      "op_income_latest": -1552078892.0,
+      "deficit_reduction_pct": 65.1,
+      "revenue_latest": 16463203450.0,
+      "revenue_prev": 3389582303.0,
+      "debt_ratio": 50.7,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "003120",
+      "name": "일성아이에스",
+      "turnaround_type": "EARLY",
+      "score": 68.9,
+      "op_income_q2": -1019579974.0,
+      "op_income_q1": -2286162368.0,
+      "op_income_latest": -845355695.0,
+      "deficit_reduction_pct": 63.0,
+      "revenue_latest": 16762411127.0,
+      "revenue_prev": 16255098547.0,
+      "debt_ratio": 3.5,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "085660",
+      "name": "차바이오텍",
+      "turnaround_type": "EARLY",
+      "score": 68.4,
+      "op_income_q2": -12509187910.0,
+      "op_income_q1": -20766895969.0,
+      "op_income_latest": -8056237322.0,
+      "deficit_reduction_pct": 61.2,
+      "revenue_latest": 318675034705.0,
+      "revenue_prev": 298895196431.0,
+      "debt_ratio": 67.4,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "344820",
+      "name": "KCC글라스",
+      "turnaround_type": "EARLY",
+      "score": 67.9,
+      "op_income_q2": -5624770087.0,
+      "op_income_q1": -35426443766.0,
+      "op_income_latest": -14238898636.0,
+      "deficit_reduction_pct": 59.8,
+      "revenue_latest": 481193255928.0,
+      "revenue_prev": 512917153727.0,
+      "debt_ratio": 40.2,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "289930",
+      "name": "웨이비스",
+      "turnaround_type": "EARLY",
+      "score": 65.9,
+      "op_income_q2": -2387041375.0,
+      "op_income_q1": -2497799005.0,
+      "op_income_latest": -1177700509.0,
+      "deficit_reduction_pct": 52.9,
+      "revenue_latest": 8278201355.0,
+      "revenue_prev": 8038844512.0,
+      "debt_ratio": 48.5,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "046890",
+      "name": "서울반도체",
+      "turnaround_type": "EARLY",
+      "score": 65.6,
+      "op_income_q2": -20658927620.0,
+      "op_income_q1": -7881350254.0,
+      "op_income_latest": -3778544986.0,
+      "deficit_reduction_pct": 52.1,
+      "revenue_latest": 256878685361.0,
+      "revenue_prev": 251578036373.0,
+      "debt_ratio": 45.0,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    },
+    {
+      "ticker": "225570",
+      "name": "넥슨게임즈",
+      "turnaround_type": "EARLY",
+      "score": 65.6,
+      "op_income_q2": -4892943326.0,
+      "op_income_q1": -21795674502.0,
+      "op_income_latest": -10478084857.0,
+      "deficit_reduction_pct": 51.9,
+      "revenue_latest": 50150094484.0,
+      "revenue_prev": 38572109458.0,
+      "debt_ratio": 34.8,
+      "est_turnaround": "약 1분기 후",
+      "quarters": [
+        "2025Q1",
+        "2025Q2",
+        "2025Q3"
+      ]
+    }
+  ]
+}

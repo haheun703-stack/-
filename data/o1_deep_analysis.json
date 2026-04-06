@@ -1,71 +1,82 @@
 {
-  "analysis_date": "2026-03-26",
+  "analysis_date": "2026-03-27",
   "macro_analysis": {
-    "global_liquidity": "미국 금리 동결 기조 속 휴전 기대에 따른 채권 랠리로 완만한 유동성 개선 흐름이 감지됨",
+    "global_liquidity": "미국 금리 인상 기조가 점차 완화될 가능성이 있지만, 달러 인덱스는 지정학적 리스크로 강세를 유지하고 있고, VIX 상승은 위험회피 심리가 확산되는 흐름을 보여줍니다.",
     "coupling_status": "동조",
     "cycle_position": "late",
-    "geopolitical_risk_score": 7,
+    "geopolitical_risk_score": 8,
     "key_macro_insights": [
-      "중동 휴전 협상 기대가 글로벌 위험자산 선호를 자극",
-      "연준의 금리 동결에도 인플레이션 불확실성으로 달러 강세 가능성 유지"
+      "이란 지정학적 긴장으로 유가 급등 → 에너지 관련 인플레이션 압력 재점화",
+      "금리 동결 기조 기대감에도 불구, 달러 강세 심화로 신흥국 자본 유출 위험",
+      "VIX 급등은 단기 변동성 확대를 시사하며 심리적 Risk-Off 환경 조성"
     ],
-    "macro_regime": "RISK_ON",
-    "confidence": 0.75
+    "macro_regime": "RISK_OFF",
+    "confidence": 0.78
   },
   "micro_analysis": [
     {
       "sector": "반도체",
       "earnings_cycle": "recovery",
-      "leading_indicators": "DRAM·파운드리 수주잔고 추세 개선, ASP 하락 폭 축소",
-      "valuation_rerating": "상향",
+      "leading_indicators": "메모리 반도체 가격 소폭 반등 신호, 수주잔고 안정화",
+      "valuation_rerating": "유지",
       "supply_demand_shift": "매집",
-      "conviction": 8,
-      "contrarian_view": "단기 재고 부담은 여전하나 장기 업사이클 가능성을 선반영 중"
+      "conviction": 7,
+      "contrarian_view": "분기 실적 저점 통과가 예측보다 빠를 것으로 전망"
     },
     {
       "sector": "2차전지",
       "earnings_cycle": "expansion",
-      "leading_indicators": "전기차 생산 확대에 따른 배터리 수요 증가, OEM 신규 계약 지속",
-      "valuation_rerating": "유지",
-      "supply_demand_shift": "중립",
-      "conviction": 7,
-      "contrarian_view": "유럽 투자 확대와 경쟁심화로 수익성 압박 가능성 상존"
+      "leading_indicators": "EV 배터리 수요 확대 지속, 소재 가격 변동성 증가",
+      "valuation_rerating": "하향",
+      "supply_demand_shift": "분배",
+      "conviction": 6,
+      "contrarian_view": "초기 시장 확대 속도 대비 수익성 부각이 지연되어 단기 부담 가능"
     },
     {
       "sector": "조선",
       "earnings_cycle": "expansion",
-      "leading_indicators": "LNG선 등 고부가가치 선박 발주 증가로 수주잔고 확충",
+      "leading_indicators": "LNG선·컨테이너선 신규발주 증가, 선가 상승 추세",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
       "conviction": 8,
-      "contrarian_view": ""
+      "contrarian_view": "중동 긴장으로 에너지 운송 선박 수요가 예상보다 더 늘어날 잠재력"
     },
     {
       "sector": "방산",
       "earnings_cycle": "expansion",
-      "leading_indicators": "글로벌 지정학 위기에 따른 해외 방산 수주 확대",
+      "leading_indicators": "정부 예산 확대, 수출 계약 확대",
       "valuation_rerating": "상향",
       "supply_demand_shift": "매집",
-      "conviction": 9,
-      "contrarian_view": "중동 휴전 이후 방산 수요 둔화 가능성은 감안 필요"
+      "conviction": 8,
+      "contrarian_view": "지정학적 리스크에 대한 예산 확대가 장기적으로 국내 업체에 더 큰 수혜 가능"
     },
     {
       "sector": "바이오",
       "earnings_cycle": "recovery",
-      "leading_indicators": "R&D 생산성 개선 기대, 임상 성과 발표 지속",
+      "leading_indicators": "R&D 파이프라인 확대, 임상 성공률 점진적 개선",
       "valuation_rerating": "유지",
       "supply_demand_shift": "중립",
       "conviction": 6,
-      "contrarian_view": "대규모 투자 유치 이후 파이프라인 위험성 재평가 여지 존재"
+      "contrarian_view": "임상데이터 불확실성에도 일부 혁신 신약 기대감이 시장 평균보다 높을 수 있음"
     }
   ],
-  "cross_sector_dynamics": "방산·조선은 지정학적 이슈와 에너지 운송 수요에 의해 동반 상승 추세를 이어가는 반면, 반도체와 2차전지는 하이테크 분야 투자심리 개선으로 매집세 강화. 바이오는 신약 기대감에 실적 개선 흐름이 있지만, 연구개발 성공 여부에 따른 변동성 내재.",
+  "cross_sector_dynamics": "에너지·방산 섹터로 투자심리가 이동하는 반면, 2차전지는 차익실현 압력이 커지면서 자금 유출이 관찰될 수 있습니다. 반도체는 경기 민감도와 밸류에이션 부담으로 한동안 주춤했지만 수요 회복 기대감이 유지되면서 저점 매수세가 늘어날 가능성이 높습니다.",
   "risk_scenarios": [
     {
-      "scenario": "미-이란 휴전 협상 결렬로 중동지역 긴장 재점화",
-      "probability": 0.4,
+      "scenario": "이란 지정학적 위기가 장기화되어 유가가 120달러 이상으로 급등",
+      "probability": 0.3,
       "impact": "high"
+    },
+    {
+      "scenario": "미국 연준의 금리 동결 기조가 예상보다 빨리 종료되어 추가 인상이 단행",
+      "probability": 0.2,
+      "impact": "medium"
+    },
+    {
+      "scenario": "중국 경기 회복 지연으로 수출주 침체 장기화",
+      "probability": 0.25,
+      "impact": "medium"
     }
   ],
-  "actionable_summary": "중동 휴전 여부가 글로벌 위험선호를 좌우하며 한국 증시에도 영향. 방산·반도체·조선 등 모멘텀 높은 섹터에 매집세 유지될 전망. 인플레이션 지속 가능성으로 연준 정책 불확실성이 남아 공격적 매수 시점은 신중 검토 필요."
+  "actionable_summary": "1) 지정학적 리스크와 연동된 방산·에너지 섹터 주목. 2) 반도체는 단기 변동성 대비 중장기 매집 유효. 3) 2차전지는 차익실현 압력 지속 모니터링 필요."
 }
