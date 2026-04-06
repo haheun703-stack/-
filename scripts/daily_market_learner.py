@@ -101,15 +101,31 @@ def _save_json(path: Path, data):
 
 
 def _build_name_map() -> dict[str, str]:
-    """ticker → 종목명 매핑 (CSV 파일명에서 추출)."""
+    """ticker → 종목명 매핑 (universe.csv 최우선 → CSV 파일명 폴백)."""
     name_map = {}
-    if not CSV_DIR.exists():
+    # 1) universe.csv (VPS에서도 안정적)
+    uni_path = DATA_DIR / "universe.csv"
+    if uni_path.exists():
+        try:
+            import csv as csv_mod
+            with open(uni_path, encoding="utf-8-sig") as f:
+                reader = csv_mod.DictReader(f)
+                for row in reader:
+                    t = row.get("ticker", row.get("code", "")).strip()
+                    n = row.get("name", row.get("종목명", "")).strip()
+                    if t and n:
+                        name_map[t] = n
+        except Exception:
+            pass
+    if name_map:
         return name_map
-    for csv_path in CSV_DIR.glob("*.csv"):
-        stem = csv_path.stem
-        parts = stem.split("_", 1)
-        if len(parts) == 2:
-            name_map[parts[0]] = parts[1]
+    # 2) stock_data_daily/ CSV 파일명 (폴백)
+    if CSV_DIR.exists():
+        for csv_path in CSV_DIR.glob("*.csv"):
+            stem = csv_path.stem
+            parts = stem.split("_", 1)
+            if len(parts) == 2:
+                name_map[parts[0]] = parts[1]
     return name_map
 
 
@@ -725,6 +741,9 @@ def phase6_save_and_send(
     missed: list[dict], cumulative: dict, ai_insight: str,
     send_telegram: bool = True,
     sar_analysis: dict | None = None,
+    pattern_analysis: dict | None = None,
+    pattern_text: str = "",
+    pattern_candidates: list | None = None,
 ):
     """결과 저장 + 텔레그램."""
     # ── 스냅샷 요약 ──
@@ -756,6 +775,8 @@ def phase6_save_and_send(
         "missed_opportunities": missed,
         "sar_block_analysis": sar_analysis,
         "ai_insight": ai_insight,
+        "pattern_analysis": pattern_analysis or {},
+        "pattern_candidates": pattern_candidates or [],
     }
     daily_path = LEARNING_DIR / f"{today_date}.json"
     _save_json(daily_path, daily_data)
@@ -776,6 +797,7 @@ def phase6_save_and_send(
     msg = _build_telegram_message(
         today_date, summary, accuracy, missed, cumulative, ai_insight,
         sar_analysis=sar_analysis,
+        pattern_text=pattern_text,
     )
     try:
         from src.telegram_sender import send_message
@@ -792,6 +814,7 @@ def _build_telegram_message(
     date_str: str, summary: dict, accuracy: dict,
     missed: list[dict], cumulative: dict, ai_insight: str,
     sar_analysis: dict | None = None,
+    pattern_text: str = "",
 ) -> str:
     lines = [f"📚 일일 시장 학습 ({date_str[5:]})", ""]
 
@@ -865,6 +888,11 @@ def _build_telegram_message(
     if cum_parts:
         lines.append(f"📈 20일 누적: {' | '.join(cum_parts)}")
 
+    # 패턴 학습 결과
+    if pattern_text:
+        lines.append("")
+        lines.append(pattern_text)
+
     return "\n".join(lines)
 
 
@@ -914,6 +942,28 @@ def run_daily_learner(
     # Phase 4
     cumulative = phase4_cumulative_update(today_date, accuracy, cfg)
 
+    # ── Phase 4.5: 패턴 학습 (급등/급락 원인 분석 + 누적 통계) ──
+    pattern_analysis = {}
+    pattern_stats = {}
+    pattern_candidates = []
+    try:
+        from src.use_cases.pattern_learner import (
+            analyze_movers, accumulate_patterns, find_tomorrow_candidates,
+            build_pattern_summary,
+        )
+        logger.info("[Phase 4.5] 패턴 학습 시작...")
+        pattern_analysis = analyze_movers(name_map)
+        pattern_stats = accumulate_patterns(pattern_analysis)
+        pattern_candidates = find_tomorrow_candidates(pattern_stats, name_map)
+        pattern_text = build_pattern_summary(pattern_analysis, pattern_stats, pattern_candidates)
+        logger.info("[Phase 4.5] 패턴 학습 완료 — 급등 %d건, 패턴 %d종, 내일 후보 %d건",
+                     len(pattern_analysis.get("gainers", [])),
+                     len(pattern_stats.get("patterns", {})),
+                     len(pattern_candidates))
+    except Exception as e:
+        logger.warning("[Phase 4.5] 패턴 학습 실패: %s", e)
+        pattern_text = ""
+
     # 스냅샷 요약 (Phase 5용)
     rets = [s["ret_1d"] for s in snapshots]
     snapshot_summary = {
@@ -932,20 +982,27 @@ def run_daily_learner(
         today_date, snapshots, accuracy, missed,
         cumulative, ai_insight, send_telegram,
         sar_analysis=sar_analysis,
+        pattern_analysis=pattern_analysis,
+        pattern_text=pattern_text,
+        pattern_candidates=pattern_candidates,
     )
 
     # 콘솔 요약
-    _print_console_summary(snapshots, accuracy, missed, cumulative)
+    _print_console_summary(snapshots, accuracy, missed, cumulative,
+                           pattern_analysis, pattern_candidates)
 
     return {
         "date": today_date,
         "universe_count": len(snapshots),
         "signals_checked": len(accuracy),
         "missed_count": len(missed),
+        "pattern_gainers": len(pattern_analysis.get("gainers", [])),
+        "pattern_candidates": len(pattern_candidates),
     }
 
 
-def _print_console_summary(snapshots, accuracy, missed, cumulative):
+def _print_console_summary(snapshots, accuracy, missed, cumulative,
+                           pattern_analysis=None, pattern_candidates=None):
     """콘솔 출력."""
     print("\n" + "=" * 60)
     print("📚 Daily Market Learner — 학습 결과")
@@ -983,6 +1040,25 @@ def _print_console_summary(snapshots, accuracy, missed, cumulative):
             if stat.get("total", 0) > 0:
                 print(f"  {sig:20s}: {stat['hit_rate']}% "
                       f"(n={stat['total']}, avg {stat['avg_ret']:+.2f}%)")
+
+    # 패턴 학습 결과
+    if pattern_analysis:
+        gainers = pattern_analysis.get("gainers", [])
+        losers = pattern_analysis.get("losers", [])
+        print(f"\n🔬 패턴 학습: 급등 {len(gainers)}건 / 급락 {len(losers)}건 분석")
+        for g in gainers[:3]:
+            patterns = ", ".join(g.get("patterns", [])[:2]) or "미분류"
+            print(f"  ↑ {g['name']:12s} {g['ret_1d']:+.1f}% [{patterns}]")
+        for l in losers[:3]:
+            patterns = ", ".join(l.get("patterns", [])[:2]) or "미분류"
+            print(f"  ↓ {l['name']:12s} {l['ret_1d']:+.1f}% [{patterns}]")
+
+    if pattern_candidates:
+        print(f"\n🎯 패턴 매칭 후보 ({len(pattern_candidates)}건):")
+        for c in pattern_candidates[:5]:
+            pats = "+".join(c.get("matched_patterns", [])[:2])
+            score = c.get("pattern_score", 0)
+            print(f"  {c['name']:12s} [{pats}] score={score:.0f}")
     print()
 
 
