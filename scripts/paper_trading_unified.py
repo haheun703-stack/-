@@ -38,6 +38,8 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.stock_name_resolver import ticker_to_name
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -294,6 +296,11 @@ def collect_candidates() -> list[dict]:
             "strategy": "SWING",
             "reason": "스윙 전략 추천",
         })
+
+    # 종목명 보정: name이 ticker 코드 그대로인 경우 resolver로 해결
+    for cand in candidates:
+        if cand["name"] == cand["ticker"] or not cand["name"]:
+            cand["name"] = ticker_to_name(cand["ticker"])
 
     # score 내림차순 정렬
     candidates.sort(key=lambda x: x["score"], reverse=True)
