@@ -917,6 +917,60 @@ def find_tomorrow_candidates(
 # 학습 인사이트 텍스트 생성
 # ═══════════════════════════════════════════════
 
+_PATTERN_LABELS = {
+    # 기술지표 (급등)
+    "PULLBACK_BOUNCE": "눌림목반등",
+    "OVERSOLD_BOUNCE": "과매도반등",
+    "BB_LOWER_BOUNCE": "BB하단반등",
+    "FIB_SUPPORT_BOUNCE": "피보나치지지",
+    "BREAKOUT": "신고가돌파",
+    "VOLUME_EXPLOSION": "거래량폭발",
+    "DUAL_BUY": "외인기관쌍끌이",
+    "SUPPLY_ACCUMULATION": "수급매집",
+    "MOMENTUM_CONTINUATION": "모멘텀지속",
+    "GOLDEN_CROSS": "골든크로스",
+    "SHORT_SQUEEZE": "숏커버",
+    "VOLUME_VACUUM_BREAK": "진공후폭발",
+    "SAR_REVERSAL": "추세전환",
+    # v2 개인
+    "RETAIL_INST_DUAL_BUY": "개인+기관쌍끌이",
+    "SMART_MONEY_ACCUM": "스마트머니매집",
+    "RETAIL_SOLO_BUY": "개인단독매수",
+    "TRIPLE_BUY": "3자동반매수",
+    # v2 국적별
+    "NATION_INST_ACCUM": "기관계매집",
+    "NATION_ASIA_INFLOW": "아시아유입",
+    "NATION_HEDGE_BUILD": "헤지펀드빌딩",
+    "NATION_MULTI_ACCUM": "다국적매집",
+    # v2 ETF/릴레이
+    "SECTOR_RELAY_ENTRY": "섹터릴레이",
+    "ETF_SMART_SECTOR": "ETF스마트섹터",
+    # v2 매크로
+    "FEAR_BOUNCE": "공포속반등",
+    "FX_HIGH_FOREIGN_BUY": "환율고점외인매수",
+    # 기술지표 (급락)
+    "OVERBOUGHT_SELLOFF": "과열매도",
+    "DUAL_SELL": "외인기관이탈",
+    "SUPPLY_EXODUS": "수급이탈",
+    "SUPPORT_BREAKDOWN": "지지선붕괴",
+    "PANIC_SELL": "패닉셀",
+    "LOW_VOLUME_DRIFT": "무관심하락",
+    "TREND_DOWN_CONTINUATION": "하락추세지속",
+    # v2 급락
+    "TRIPLE_SELL": "3자동반매도",
+    "RETAIL_BAGHOLDING": "개인물타기",
+    "NATION_HEDGE_EXIT": "헤지펀드이탈",
+    "NATION_MULTI_EXIT": "다국적이탈",
+    "MACRO_DOUBLE_SHOCK": "매크로이중충격",
+    "UNCLASSIFIED": "미분류",
+}
+
+
+def _pl(pname: str) -> str:
+    """패턴 영문명 → 한글 라벨."""
+    return _PATTERN_LABELS.get(pname, pname)
+
+
 def build_pattern_summary(
     analysis: dict,
     pattern_stats: dict,
@@ -928,7 +982,7 @@ def build_pattern_summary(
     # 급등 패턴 분석
     gainers = analysis.get("gainers", [])
     if gainers:
-        lines.append("🔥 급등 패턴 분석 (D-1 조건):")
+        lines.append("🔥 오늘 급등 원인 분석:")
         pattern_groups: dict[str, list] = {}
         for g in gainers[:15]:
             for p in g.get("patterns", []):
@@ -936,13 +990,13 @@ def build_pattern_summary(
         for pname, stocks in sorted(pattern_groups.items(), key=lambda x: -len(x[1]))[:5]:
             names = ", ".join(s["name"] for s in stocks[:3])
             avg_ret = sum(s["ret_1d"] for s in stocks) / len(stocks)
-            lines.append(f"  {pname}: {len(stocks)}건 avg+{avg_ret:.1f}% ({names})")
+            lines.append(f"  {_pl(pname)}: {len(stocks)}건 avg+{avg_ret:.1f}% ({names})")
         lines.append("")
 
     # 급락 패턴
     losers = analysis.get("losers", [])
     if losers:
-        lines.append("📉 급락 패턴:")
+        lines.append("📉 오늘 급락 원인:")
         pattern_groups2: dict[str, list] = {}
         for l in losers[:10]:
             for p in l.get("patterns", []):
@@ -950,7 +1004,7 @@ def build_pattern_summary(
         for pname, stocks in sorted(pattern_groups2.items(), key=lambda x: -len(x[1]))[:3]:
             names = ", ".join(s["name"] for s in stocks[:3])
             avg_ret = sum(s["ret_1d"] for s in stocks) / len(stocks)
-            lines.append(f"  {pname}: {len(stocks)}건 avg{avg_ret:.1f}% ({names})")
+            lines.append(f"  {_pl(pname)}: {len(stocks)}건 avg{avg_ret:.1f}% ({names})")
         lines.append("")
 
     # 누적 패턴 승률 TOP 5
@@ -962,12 +1016,12 @@ def build_pattern_summary(
             key=lambda x: -x[1].get("win_rate", 0),
         )
         if ranked:
-            lines.append("📊 누적 패턴 승률 TOP 5:")
+            lines.append("📊 학습 누적 TOP 5:")
             for pname, pdata in ranked[:5]:
                 wr = pdata.get("win_rate", 0)
                 n = pdata.get("sample_size", 0)
                 avg_g = pdata.get("avg_gain", 0)
-                lines.append(f"  {pname}: WR {wr}% (n={n}) avg+{avg_g:.1f}%")
+                lines.append(f"  {_pl(pname)}: WR {wr}% (n={n}) avg+{avg_g:.1f}%")
             lines.append("")
 
     # v2: 수급 구조 요약 (개인 포함)
@@ -985,13 +1039,27 @@ def build_pattern_summary(
     if candidates:
         lines.append("🎯 내일 주목 (패턴 매칭):")
         for c in candidates[:5]:
-            pats = "+".join(c["matched_patterns"][:2])
+            pats = "+".join(_pl(p) for p in c["matched_patterns"][:2])
             ki = c["key_indicators"]
-            r5 = ki.get("retail_net_5d", 0)
-            supply_str = f"외{ki['foreign_5d']:+.0f}/기{ki['inst_5d']:+.0f}/개{r5:+.0f}"
+            f5 = _to_eok(ki.get("foreign_5d", 0))
+            i5 = _to_eok(ki.get("inst_5d", 0))
+            r5 = _to_eok(ki.get("retail_net_5d", 0))
             lines.append(
-                f"  {c['name']} RSI={ki['rsi']:.0f} BB={ki['bb_position']:.2f} "
-                f"{supply_str} [{pats}]"
+                f"  {c['name']} RSI={ki['rsi']:.0f} BB={ki['bb_position']:.2f}"
+            )
+            lines.append(
+                f"    외{f5}/기{i5}/개{r5} [{pats}]"
             )
 
     return "\n".join(lines)
+
+
+def _to_eok(val: float) -> str:
+    """숫자를 억원 단위 문자열로 변환. 예: 5756000000 → '+57.6억'"""
+    if val == 0:
+        return "0"
+    eok = val / 1_0000_0000  # 억원
+    if abs(eok) >= 1:
+        return f"{eok:+.0f}억"
+    else:
+        return f"{eok:+.1f}억"
