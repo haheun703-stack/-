@@ -90,6 +90,53 @@ ETF_MAP = {
 }
 ETF_STOP_LOSS_PCT = -0.05      # ETF 손절 -5% (레버리지 특성 고려)
 
+# ── 알파 필터 설정 (2026-04-07 도입) ──
+# Shield 레벨별 최대 보유 수
+SHIELD_MAX_POSITIONS = {
+    "RED": 3,       # CRISIS/위기 → 3종목 집중
+    "YELLOW": 5,    # 경계 → 5종목
+    "GREEN": 8,     # 정상 → 기존 8종목
+}
+# STRONG_ALPHA 시그널 (백테스트 검증 PF>=2.0)
+STRONG_ALPHA_SIGNALS = {
+    "PULLBACK_20MA_15pct",  # PF=2.02
+    "PB15_BB",              # PF=2.64
+    "PB15_VOL3x",           # PF=2.61
+}
+# 알파 부스트 점수 (후보 정렬 시 가산)
+ALPHA_BOOST = 30    # STRONG_ALPHA → +30점 부스트
+PULLBACK_BOOST = 20 # pullback_scan 등재 → +20점 부스트
+SHIELD_PATH = DATA_DIR / "shield_report.json"
+PULLBACK_PATH = DATA_DIR / "pullback_scan.json"
+
+
+def get_shield_max_positions() -> int:
+    """Shield 레벨에 따른 동적 최대 보유 수 결정."""
+    try:
+        with open(SHIELD_PATH, "r", encoding="utf-8") as f:
+            shield = json.load(f)
+        level = shield.get("overall_level", "GREEN").upper()
+        max_pos = SHIELD_MAX_POSITIONS.get(level, MAX_POSITIONS)
+        logger.info("[ALPHA] Shield=%s → MAX_POSITIONS=%d", level, max_pos)
+        return max_pos
+    except Exception as e:
+        logger.warning("[ALPHA] Shield 읽기 실패: %s → 기본값 %d", e, MAX_POSITIONS)
+        return MAX_POSITIONS
+
+
+def _load_pullback_tickers() -> set:
+    """pullback_scan.json에서 풀백 종목 티커 세트 반환."""
+    try:
+        with open(PULLBACK_PATH, "r", encoding="utf-8") as f:
+            ps = json.load(f)
+        tickers = set()
+        for cand in ps.get("candidates", []):
+            if isinstance(cand, dict) and cand.get("ticker"):
+                tickers.add(cand["ticker"])
+        return tickers
+    except Exception:
+        return set()
+
 
 # ═══════════════════════════════════════════════
 # 포트폴리오 관리
@@ -195,13 +242,21 @@ def collect_candidates() -> list[dict]:
     candidates = []
     seen = set()
 
-    # 1) AI 대형주 (confidence >= 0.7)
+    # 알파 시그널 조회 준비: picks 데이터에서 ticker→alpha_signals 매핑
+    _picks_alpha = {}
+    for p in data.get("picks", []):
+        t = p.get("ticker", "")
+        if t:
+            _picks_alpha[t] = p.get("alpha_signals", [])
+    _pullback_tickers = _load_pullback_tickers()
+
+    # 1) AI 대형주 (confidence >= 0.75, B등급 제거)
     for item in data.get("ai_largecap", []):
         ticker = item.get("ticker", "")
         if not ticker or ticker in seen:
             continue
         conf = float(item.get("confidence", 0))
-        if conf < 0.7:
+        if conf < 0.75:     # B등급(0.70~0.75) 차단
             continue
 
         price, _ = get_latest_price(ticker)
@@ -210,10 +265,8 @@ def collect_candidates() -> list[dict]:
 
         if conf >= 0.85:
             grade = "AA"
-        elif conf >= 0.75:
-            grade = "A"
         else:
-            grade = "B"
+            grade = "A"
 
         seen.add(ticker)
         candidates.append({
@@ -252,7 +305,9 @@ def collect_candidates() -> list[dict]:
         elif grade_kr == "매수":
             grade = "A"
         else:
-            grade = "B"
+            # B등급(관심매수/관찰/보류) 차단
+            logger.debug("[ALPHA] %s B등급 제외 (grade=%s)", ticker, grade_kr)
+            continue
 
         seen.add(ticker)
         reasons = pick.get("reasons", [])
@@ -297,12 +352,85 @@ def collect_candidates() -> list[dict]:
             "reason": "스윙 전략 추천",
         })
 
+    # 4) ALPHA OVERRIDE: STRONG_ALPHA 시그널 보유 종목 → 등급 무시, AA 승격
+    #    기존 스코어링은 마이너스 알파 → 검증된 알파시그널이 있으면 직접 진입
+    for pick in data.get("picks", []):
+        ticker = pick.get("ticker", "")
+        if not ticker or ticker in seen:
+            continue
+        alpha_sigs = set(pick.get("alpha_signals", []))
+        strong_match = alpha_sigs & STRONG_ALPHA_SIGNALS
+        # pullback_scan + 수급 동시 확인 → STRONG 후보
+        in_pullback = ticker in _pullback_tickers
+        if not strong_match and not in_pullback:
+            continue
+
+        price = pick.get("close", 0)
+        if price <= 0:
+            price, _ = get_latest_price(ticker)
+        if price <= 0:
+            continue
+
+        # 알파 점수 산출: 기본 50 + 부스트
+        base_score = 50.0
+        alpha_tags = []
+        if strong_match:
+            base_score += ALPHA_BOOST
+            alpha_tags.extend(strong_match)
+        if in_pullback:
+            base_score += PULLBACK_BOOST
+            alpha_tags.append("PULLBACK_SCAN")
+
+        # 등급: STRONG_ALPHA 시그널 → AA, 풀백만 → A
+        alpha_grade = "AA" if strong_match else "A"
+
+        seen.add(ticker)
+        candidates.append({
+            "ticker": ticker,
+            "name": pick.get("name", ticker),
+            "grade": alpha_grade,
+            "score": base_score,
+            "price": float(price),
+            "strategy": "ALPHA",
+            "reason": ",".join(alpha_tags)[:80],
+            "alpha_boost": base_score - 50,
+            "alpha_tags": alpha_tags,
+        })
+        logger.info("[ALPHA] %s → %s 승격 (score=%.1f) [%s]",
+                    pick.get("name", ticker), alpha_grade, base_score,
+                    ",".join(alpha_tags))
+
     # 종목명 보정: name이 ticker 코드 그대로인 경우 resolver로 해결
     for cand in candidates:
         if cand["name"] == cand["ticker"] or not cand["name"]:
             cand["name"] = ticker_to_name(cand["ticker"])
 
-    # score 내림차순 정렬
+    # ── 기존 후보에도 알파 부스트 적용 ──
+    for cand in candidates:
+        if "alpha_boost" in cand:
+            continue  # 이미 ALPHA 소스에서 부스트됨
+        ticker = cand["ticker"]
+        alpha_sigs = set(_picks_alpha.get(ticker, []))
+        boost = 0
+        alpha_tags = []
+
+        strong_match = alpha_sigs & STRONG_ALPHA_SIGNALS
+        if strong_match:
+            boost += ALPHA_BOOST
+            alpha_tags.extend(strong_match)
+        if ticker in _pullback_tickers:
+            boost += PULLBACK_BOOST
+            alpha_tags.append("PULLBACK_SCAN")
+
+        if boost > 0:
+            cand["score"] += boost
+            cand["alpha_boost"] = boost
+            cand["alpha_tags"] = alpha_tags
+            logger.info("[ALPHA] %s(%s) +%d boost → score=%.1f [%s]",
+                        cand["name"], ticker, boost, cand["score"],
+                        ",".join(alpha_tags))
+
+    # score(부스트 포함) 내림차순 정렬
     candidates.sort(key=lambda x: x["score"], reverse=True)
     return candidates
 
@@ -620,10 +748,16 @@ def is_rebalance_day() -> bool:
 # ═══════════════════════════════════════════════
 
 def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> list[dict]:
-    """후보 종목 가상 매수. 진입한 종목 리스트 반환."""
+    """후보 종목 가상 매수. Shield 연동 + B등급 차단."""
     entries = []
-    slots_available = MAX_POSITIONS - len(pf["positions"])
+    # Shield 기반 동적 최대 보유 수
+    shield_max = get_shield_max_positions()
+    slots_available = shield_max - len(pf["positions"])
     new_today = 0
+
+    if slots_available <= 0:
+        logger.info("[ALPHA] 보유 %d / 한도 %d → 신규 진입 불가",
+                     len(pf["positions"]), shield_max)
 
     for cand in candidates:
         if new_today >= MAX_NEW_PER_DAY:
@@ -633,9 +767,14 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
         if cand["ticker"] in pf["positions"]:
             continue
 
-        # 사이징
+        # B등급 진입 차단 (안전장치 — collect_candidates에서 이미 필터하지만 2중 방어)
         grade = cand["grade"]
-        size_pct = SIZING.get(grade, SIZING["B"])
+        if grade == "B":
+            logger.info("[ALPHA] %s B등급 진입 차단", cand["name"])
+            continue
+
+        # 사이징
+        size_pct = SIZING.get(grade, SIZING["A"])  # B 없으므로 A를 기본값으로
         buy_amount = min(
             pf["initial_capital"] * size_pct,
             pf["capital"] * 0.90,  # 현금의 90%까지만
