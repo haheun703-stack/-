@@ -85,7 +85,7 @@ CHECKS = {
         "files": [
             {
                 "path": "data/ai_strategic_analysis.json",
-                "date_key": "date",
+                "date_key": "analysis_date",
                 "label": "미장분석",
             },
         ],

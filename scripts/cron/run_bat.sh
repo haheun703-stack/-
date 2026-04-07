@@ -176,6 +176,8 @@ case "$BAT" in
     run_py scripts/crawl_market_news.py
     run_py_long scripts/perplexity_market_intel.py
     run_py_long scripts/ai_news_brain.py
+    # COO 복원: 컨센서스 스크리너 (wisereport 목표가 + 기술적 분석)
+    run_py_long scripts/scan_consensus.py
     # --- G4: 추천 + FLOWX ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py
