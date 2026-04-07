@@ -2699,8 +2699,13 @@ def main():
             "fibonacci": compute_stock_fibonacci(ticker),
         }
 
-        # ── Alpha Scoring v3 보조 태그 (표시 전용) ──
-        # 기존 점수/등급은 유지, v3 시그널은 참고 정보로만 추가
+        # ── Alpha Scoring v3 태그 + STRONG_ALPHA 점수 반영 ──
+        # v3 시그널 중 검증된 STRONG_ALPHA → 점수 부스트 + 등급 재분류
+        # 실제 alpha_scoring.py Tier1 시그널명 사용
+        _STRONG_ALPHA_SIGS = {"PULLBACK15_VOL3x", "PULLBACK15_DUAL", "BREAKOUT60_VOL3x_DUAL"}
+        _MODERATE_ALPHA_SIGS = {"PULLBACK10_SUPPLY", "PULLBACK7_SUPPLY"}  # PF~1.5
+        _ALPHA_SCORE_BONUS = 15  # STRONG 1개당 +15점
+        _MODERATE_SCORE_BONUS = 8  # MODERATE 1개당 +8점
         if alpha_v3_display and _v3_score is not None:
             raw_df = get_parquet_raw_df(ticker)
             if raw_df is not None:
@@ -2715,7 +2720,6 @@ def main():
                     inst_accum_grade=ia_v3.get("grade", ""),
                     fe_grade=fe_v3.get("fe_type", ""),
                 )
-                # 점수/등급은 건드리지 않고 보조 태그만 추가
                 fired = [s.name for s in v3_result.signals if s.fired]
                 if fired:
                     rec["alpha_v3_tag"] = True
@@ -2723,6 +2727,36 @@ def main():
                     rec["alpha_tier1"] = v3_result.tier1_count
                     rec["alpha_tier2"] = v3_result.tier2_count
                     rec["alpha_v3_score"] = v3_result.total_score
+
+                    # STRONG/MODERATE ALPHA → 점수 부스트 + 등급 재분류
+                    strong_match = set(fired) & _STRONG_ALPHA_SIGS
+                    moderate_match = set(fired) & _MODERATE_ALPHA_SIGS
+                    alpha_bonus = (_ALPHA_SCORE_BONUS * len(strong_match)
+                                   + _MODERATE_SCORE_BONUS * len(moderate_match))
+                    if alpha_bonus > 0:
+                        old_score = rec["total_score"]
+                        new_score = round(min(old_score + alpha_bonus, 100), 1)
+                        rec["total_score"] = new_score
+                        rec["alpha_bonus"] = alpha_bonus
+                        score_detail["total"] = new_score
+                        # 등급 재분류 (부스트된 점수로)
+                        new_grade = classify_pick(
+                            new_score, len(sources), score_detail["rsi"],
+                            has_data=has_data,
+                            stoch_k=score_detail.get("stoch_k", 50),
+                            ret_5d=score_detail.get("ret_5d", 0),
+                            foreign_5d=score_detail.get("foreign_5d", 0),
+                            inst_5d=score_detail.get("inst_5d", 0),
+                            foreign_reversal=pq_data.get("foreign_reversal", False) if pq_data else False,
+                            inst_reversal=pq_data.get("inst_reversal", False) if pq_data else False,
+                        )
+                        matched = list(strong_match | moderate_match)
+                        if new_grade != rec["grade"]:
+                            logger.info("[ALPHA] %s: %s→%s (%.1f→%.1f +%d) [%s]",
+                                        name, rec["grade"], new_grade,
+                                        old_score, new_score, alpha_bonus,
+                                        ",".join(matched))
+                            rec["grade"] = new_grade
 
         # 안전마진 플래그
         try:

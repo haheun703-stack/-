@@ -97,11 +97,12 @@ SHIELD_MAX_POSITIONS = {
     "YELLOW": 5,    # 경계 → 5종목
     "GREEN": 8,     # 정상 → 기존 8종목
 }
-# STRONG_ALPHA 시그널 (백테스트 검증 PF>=2.0)
+# STRONG_ALPHA 시그널 (alpha_scoring.py Tier1, 백테스트 검증 PF>=1.8)
 STRONG_ALPHA_SIGNALS = {
-    "PULLBACK_20MA_15pct",  # PF=2.02
-    "PB15_BB",              # PF=2.64
-    "PB15_VOL3x",           # PF=2.61
+    "PULLBACK15_VOL3x",          # PF=2.58 (급락15%+거래량3배+수급)
+    "PULLBACK15_DUAL",           # PF=1.94 (급락15%+쌍끌이)
+    "BREAKOUT60_VOL3x_DUAL",    # PF=1.81 (60일돌파+거래량3배+쌍끌이)
+    "PULLBACK10_SUPPLY",         # PF=1.48 (급락10%+수급, 중급)
 }
 # 알파 부스트 점수 (후보 정렬 시 가산)
 ALPHA_BOOST = 30    # STRONG_ALPHA → +30점 부스트
