@@ -2702,7 +2702,7 @@ def main():
         # ── Alpha Scoring v3 태그 + STRONG_ALPHA 점수 반영 ──
         # v3 시그널 중 검증된 STRONG_ALPHA → 점수 부스트 + 등급 재분류
         # 실제 alpha_scoring.py Tier1 시그널명 사용
-        _STRONG_ALPHA_SIGS = {"PULLBACK15_VOL3x", "PULLBACK15_DUAL", "BREAKOUT60_VOL3x_DUAL"}
+        _STRONG_ALPHA_SIGS = {"PULLBACK15_VOL3x", "PULLBACK15_DUAL", "BREAKOUT60_VOL3x_DUAL", "MEGA_VOL_8x"}
         _MODERATE_ALPHA_SIGS = {"PULLBACK10_SUPPLY", "PULLBACK7_SUPPLY"}  # PF~1.5
         _ALPHA_SCORE_BONUS = 15  # STRONG 1개당 +15점
         _MODERATE_SCORE_BONUS = 8  # MODERATE 1개당 +8점

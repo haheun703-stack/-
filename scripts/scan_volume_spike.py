@@ -109,6 +109,7 @@ def scan_new_spikes(name_map: dict) -> dict[str, dict]:
                 rsi = float(last.get("rsi_14", 50) or 50)
                 foreign_5d = float(last.get("foreign_net_5d", 0) or 0)
 
+                is_mega = max(vol_z, vsr) >= 8.0
                 new_spikes[ticker] = {
                     "spike_date": today_str,
                     "spike_close": round(close, 0),
@@ -119,6 +120,7 @@ def scan_new_spikes(name_map: dict) -> dict[str, dict]:
                     "name": name_map.get(ticker, ticker),
                     "rsi_at_spike": round(rsi, 1) if not pd.isna(rsi) else 50,
                     "status": "watching",
+                    "mega_spike": is_mega,
                 }
         except Exception as e:
             logger.debug("스캔 실패 %s: %s", ticker, e)

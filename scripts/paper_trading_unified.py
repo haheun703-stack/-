@@ -103,6 +103,7 @@ STRONG_ALPHA_SIGNALS = {
     "PULLBACK15_DUAL",           # PF=1.94 (급락15%+쌍끌이)
     "BREAKOUT60_VOL3x_DUAL",    # PF=1.81 (60일돌파+거래량3배+쌍끌이)
     "PULLBACK10_SUPPLY",         # PF=1.48 (급락10%+수급, 중급)
+    "MEGA_VOL_8x",               # 메가거래량(8배+)+수급 (주간급등주 패턴)
 }
 # 알파 부스트 점수 (후보 정렬 시 가산)
 ALPHA_BOOST = 30    # STRONG_ALPHA → +30점 부스트
