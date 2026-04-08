@@ -47,6 +47,21 @@ run_py_long() {
   return 0
 }
 
+# 초대형 작업용 (타임아웃 1800초 = 30분) — KIS API 대량호출, parquet 전체확장
+run_py_xlong() {
+  local script="$1"; shift
+  timeout 1800 $PY "$script" "$@" >> "$LOG" 2>&1
+  local rc=$?
+  if [ $rc -eq 124 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo "[$(date +%H:%M:%S)] [WARN] $script 타임아웃 (1800초 초과)" >> "$LOG"
+  elif [ $rc -ne 0 ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+    echo "[$(date +%H:%M:%S)] [WARN] $script 실패 (exit=$rc)" >> "$LOG"
+  fi
+  return 0
+}
+
 # 텔레그램 실패 알림 함수
 send_fail_alert() {
   local msg="$1"
@@ -127,13 +142,13 @@ case "$BAT" in
     find "$QM" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     # --- G1: 데이터 수집 ---
     run_py scripts/update_daily_data.py
-    run_py_long scripts/extend_parquet_data.py --workers 2
+    run_py_xlong scripts/extend_parquet_data.py --workers 2
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
     run_py_long scripts/scan_nationality.py
-    run_py_long scripts/collect_foreign_exhaustion.py
+    run_py_xlong scripts/collect_foreign_exhaustion.py
     # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)
     run_py_long scripts/institutional_flow_collector.py
     run_py scripts/scan_volume_spike.py
