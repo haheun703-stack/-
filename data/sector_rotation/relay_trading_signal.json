@@ -1,9 +1,0 @@
-{
-  "date": "2026-03-27",
-  "portfolio": 30000000,
-  "fired_count": 0,
-  "signal_count": 0,
-  "signals": [],
-  "status": "NO_FIRE",
-  "message": "발화 섹터 없음 (기준: +3.5%, breadth 60%)"
-}

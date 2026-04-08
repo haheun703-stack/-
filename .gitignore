@@ -12,15 +12,8 @@ results/
 *.dat
 nul
 
-# data/ — 대용량 파일은 제외, JSON은 포함
-data/*.parquet
-data/*.csv
-data/*.db
-data/*.sqlite
-data/processed/
-data/us_market/*.parquet
-data/trade_journal/
-data/daily_snapshots/
+# data/ — 런타임 생성 데이터 전체 제외 (VPS git pull 덮어쓰기 방지)
+data/
 
 # 빌드/압축
 *.zip
@@ -81,28 +74,7 @@ _etf_ref/
 logs/
 reports/
 
-# data 캐시/임시 폴더
-data/dart_cache/
-data/fundamental_cache/
-data/intraday/
-data/macro/
-data/raw/
-data/signal_analysis/
-data/sniper_watch/
-data/universe/
-data/sector_rotation/etf_daily/
-data/sector_rotation/momentum/
-data/sector_rotation/daily_report.txt
-data/sector_rotation/wics_*.csv
-data/group_etf/
-data/group_rotation/
-data/signal_news/
-data/analysis_*.txt
-data/mechanical_universe_*.txt
-data/new_universe_tickers.txt
-data/scan_result.txt
-data/us_market/*.db
-data/value_trap_*.json
+# data 캐시/임시 폴더 (data/ 전체 제외로 개별 규칙 불필요)
 
 # docs 자동생성 (bkit)
 docs/.bkit-memory.json
