@@ -132,6 +132,8 @@ case "$BAT" in
     run_py scripts/cron_signal_tracker.py --mode track
     ;;
   D) # 16:30 KST — 장마감 전체 파이프라인 (데이터 + 분석 + 추천)
+    # 텔레그램 QUIET 모드: [EVENING],[PAPER],[NXT],[HEALTH] 태그만 발송
+    export TELEGRAM_QUIET=1
     # BAT-L(NXT)과 BAT-I(EYE) 잔여 프로세스 정리 — 동시 실행 시 KIS API 충돌 + OOM 방지
     pkill -f "nxt_market_collector" >> "$LOG" 2>&1 || true
     pkill -f "intraday_eye" >> "$LOG" 2>&1 || true

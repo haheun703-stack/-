@@ -549,6 +549,7 @@ def build_evening_summary(morning: bool = False) -> str:
         L.extend(_section_ai_vs_bot())
     else:
         L = [
+            "[EVENING]",
             "╔══════════════════════╗",
             f"  🤖 Quantum Master v10.3",
             f"  📅 {now} 장마감 리포트",

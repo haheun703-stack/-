@@ -210,7 +210,9 @@ def log(msg: str):
 def notify(msg: str):
     log(f"[NOTIFY] {msg}")
     try:
-        send_message(msg)
+        # QUIET 모드에서도 통과하도록 [HEALTH] 태그 추가
+        tagged = msg if msg.startswith("[HEALTH]") else f"[HEALTH] {msg}"
+        send_message(tagged)
     except Exception as e:
         log(f"[NOTIFY] 텔레그램 전송 실패: {e}")
 

@@ -371,7 +371,7 @@ def _send_telegram(result: dict):
         logger.info("NXT 추천 0건 → 텔레그램 스킵")
         return
 
-    lines = [f"🌙 NXT 추천 ({result['date']})"]
+    lines = [f"[NXT] 🌙 NXT 추천 ({result['date']})"]
     lines.append(
         f"강력포착 {summary.get('nxt_강력포착', 0)} / "
         f"포착 {summary.get('nxt_포착', 0)} / "

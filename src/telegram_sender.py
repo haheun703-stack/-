@@ -22,6 +22,11 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
+# ── QUIET 모드: 필수 메시지만 발송 (TELEGRAM_QUIET=1) ──
+# 허용 태그: 이 태그로 시작하는 메시지만 통과
+QUIET_MODE = os.getenv("TELEGRAM_QUIET", "0") == "1"
+QUIET_ALLOW_TAGS = {"[EVENING]", "[PAPER]", "[NXT]", "[ALERT]", "[HEALTH]", "[MDD]"}
+
 # 긴급 알림 폴백 로그 경로
 ALERT_FALLBACK_PATH = Path(__file__).resolve().parent.parent / "logs" / "emergency_alerts.log"
 
@@ -52,6 +57,13 @@ def send_message(
     if not TELEGRAM_BOT_TOKEN:
         logger.error("TELEGRAM_BOT_TOKEN이 설정되지 않았습니다 (.env 확인)")
         return False
+
+    # QUIET 모드: 허용 태그 메시지만 통과
+    if QUIET_MODE:
+        allowed = any(text.strip().startswith(tag) for tag in QUIET_ALLOW_TAGS)
+        if not allowed:
+            logger.debug("[QUIET] 메시지 차단 (첫 30자: %s)", text[:30])
+            return True  # 성공으로 리턴 (호출자 에러 방지)
 
     target_chat = chat_id or TELEGRAM_CHAT_ID
     if not target_chat:
