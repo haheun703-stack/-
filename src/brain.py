@@ -189,6 +189,7 @@ class Brain:
         macro = self._load_json(DATA_DIR / "regime_macro_signal.json")
         positions = self._load_json(DATA_DIR / "positions.json")
         prev_decision = self._load_json(BRAIN_OUTPUT_PATH)
+        us_macro = self._load_json(DATA_DIR / "us_quant_macro.json")
 
         kospi_regime = kospi.get("regime", "CAUTION")
         nw = us_signal.get("nightwatch", {})
@@ -204,9 +205,12 @@ class Brain:
         shock_type = shock.get("shock_type", "NONE") if isinstance(shock, dict) else "NONE"
         ensemble_score = float(us_signal.get("ensemble_score", 0.0))
         macro_score = macro.get("macro_score", 50)
+        us_strategy = us_macro.get("strategy_mode", "NEUTRAL")
+        us_macro_score = us_macro.get("macro_score", 50)
 
-        logger.info("BRAIN 입력: 레짐=%s, NW=%.3f, VIX=%.1f, US=%s, 충격=%s",
-                     kospi_regime, nw_score, vix_level, us_grade, shock_type)
+        logger.info("BRAIN 입력: 레짐=%s, NW=%.3f, VIX=%.1f, US=%s, 충격=%s, US매크로=%s(%d)",
+                     kospi_regime, nw_score, vix_level, us_grade, shock_type,
+                     us_strategy, us_macro_score)
 
         # ── 2. 유효 레짐 결정 (선행 보정) ──
         effective_regime = self._determine_effective_regime(
@@ -224,6 +228,23 @@ class Brain:
                 adjustments.append(
                     f"COMPOUND 충격 하향: {prev_regime}→{effective_regime} "
                     f"(확신도 {shock_conf:.0%})"
+                )
+
+        # ── 2.8. 미국 매크로 교차 보정 ──
+        if us_macro and us_strategy != "NEUTRAL":
+            prev_regime = effective_regime
+            if us_strategy in ("BEAR_DEFENSIVE", "BEAR_CASH"):
+                # US 매크로 약세 → 한국 강세여도 1단계 하향
+                if effective_regime in ("BULL", "PRE_BULL"):
+                    effective_regime = self._downgrade_regime(effective_regime)
+            elif us_strategy == "BULL_AGGRESSIVE" and us_macro_score >= 75:
+                # US 매크로 최강세 → 한국 약세면 1단계 상향
+                upgrade = {"BEAR": "PRE_BULL", "PRE_BEAR": "CAUTION"}
+                effective_regime = upgrade.get(effective_regime, effective_regime)
+            if effective_regime != prev_regime:
+                adjustments.append(
+                    f"US매크로 보정: {prev_regime}→{effective_regime} "
+                    f"(US={us_strategy}, score={us_macro_score})"
                 )
 
         # ── 3. 기본 배분 로드 (settings.yaml) ──
@@ -315,6 +336,12 @@ class Brain:
             arms = sc_adj["arms"]
             adjustments.extend(sc_adj["adjustments"])
 
+        # ── 6.3. 미국 섹터 로테이션 → 한국 섹터 부스트 ──
+        us_sec_adj = self._apply_us_sector_boost(arms, us_macro)
+        if us_sec_adj:
+            arms = us_sec_adj["arms"]
+            adjustments.extend(us_sec_adj["adjustments"])
+
         # ── 6.5. SHIELD 방어 보정 ──
         shield_report = self._load_json(DATA_DIR / "shield_report.json")
         shield_overrides = shield_report.get("brain_overrides", {})
@@ -353,6 +380,7 @@ class Brain:
             kospi_regime, effective_regime, nw_score, vix_level,
             macro_score, shock_type, confirmation["confirmed"],
             cot_nw_aligned=cot_nw_aligned,
+            us_macro_score=us_macro_score,
         )
 
         # ── 11. ArmAllocation 객체 생성 ──
@@ -387,6 +415,7 @@ class Brain:
             liq_signal=liq_signal,
             cot_signal=cot_signal,
             ict_data=ict_data,
+            us_macro=us_macro,
         )
 
         # ── 12.5. Contrarian 시그널 판단 ──
@@ -863,6 +892,46 @@ class Brain:
         return {"arms": result, "adjustments": adj_msgs}
 
     # ────────────────────────────────────────
+    # 6.3 미국 섹터 로테이션 부스트
+    # ────────────────────────────────────────
+    @staticmethod
+    def _apply_us_sector_boost(
+        arms: dict, us_macro: dict
+    ) -> dict | None:
+        """US 섹터 비중확대/축소 → etf_sector ARM 보정.
+
+        US 섹터 매핑 (us_quant_filter.py):
+          XLK→반도체/IT, XLE→정유, XLI→조선/방산,
+          XLF→금융, XLV→바이오, XLC→미디어 등
+        """
+        if not us_macro:
+            return None
+        ow = us_macro.get("sector_overweight", [])
+        uw = us_macro.get("sector_underweight", [])
+        if not ow and not uw:
+            return None
+
+        result = dict(arms)
+        msgs = []
+
+        # 비중확대 섹터 2개+ → etf_sector 부스트
+        if len(ow) >= 2:
+            result["etf_sector"] = result.get("etf_sector", 0) + 3
+            msgs.append(
+                f"US 섹터 강세({', '.join(ow[:3])}) → sector+3%p"
+            )
+
+        # 비중축소 섹터 3개+ → 방어
+        if len(uw) >= 3:
+            result["etf_sector"] = max(0, result.get("etf_sector", 0) - 3)
+            result["cash"] = result.get("cash", 0) + 3
+            msgs.append(
+                f"US 섹터 약세({', '.join(uw[:3])}) → sector-3%p, cash+3%p"
+            )
+
+        return {"arms": result, "adjustments": msgs} if msgs else None
+
+    # ────────────────────────────────────────
     # 7. 정규화
     # ────────────────────────────────────────
     @classmethod
@@ -961,6 +1030,7 @@ class Brain:
         macro_score: int, shock_type: str,
         confirmed: bool,
         cot_nw_aligned: str | None = None,
+        us_macro_score: int = 50,
     ) -> float:
         """결정 신뢰도 0~1."""
         conf = 0.50  # 기본
@@ -994,6 +1064,12 @@ class Brain:
         # 레짐 미확인 -0.15
         if not confirmed:
             conf -= 0.15
+
+        # US 매크로 점수 방향성 확인
+        if us_macro_score >= 70:
+            conf += 0.05  # US 매크로 강세 → 방향성 확신
+        elif us_macro_score <= 30:
+            conf -= 0.05  # US 매크로 약세 → 불확실성
 
         # COT-NW 교차검증 보정 (v13.8: cross_validation.enabled 체크)
         cot_cross_enabled = self.settings.get("cot_tracker", {}).get(
@@ -1135,6 +1211,7 @@ class Brain:
         liq_signal: dict | None = None,
         cot_signal: dict | None = None,
         ict_data: dict | None = None,
+        us_macro: dict | None = None,
     ) -> str:
         """텔레그램 브리핑 텍스트 생성."""
         lines = []
@@ -1204,6 +1281,25 @@ class Brain:
             comp_dir = cot_signal.get("composite_direction", "N/A")
             stale = cot_signal.get("stale_days", 0)
             lines.append(f"  {'복합방향':>16s}: {comp_dir} (데이터 {stale}일 전)")
+            lines.append("")
+
+        # US 매크로 필터
+        if us_macro and us_macro.get("strategy_mode"):
+            lines.append("US 매크로 필터:")
+            lines.append(
+                f"  전략: {us_macro['strategy_mode']} "
+                f"(점수: {us_macro.get('macro_score', '-')})"
+            )
+            pos = us_macro.get("position_limit", "-")
+            hmin = us_macro.get("hold_days_min", "-")
+            hmax = us_macro.get("hold_days_max", "-")
+            lines.append(f"  포지션: {pos}개 | 보유: {hmin}~{hmax}일")
+            ow = us_macro.get("sector_overweight", [])
+            uw = us_macro.get("sector_underweight", [])
+            if ow:
+                lines.append(f"  비중확대: {', '.join(ow)}")
+            if uw:
+                lines.append(f"  비중축소: {', '.join(uw)}")
             lines.append("")
 
         # v3 캡 정보

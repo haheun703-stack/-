@@ -86,6 +86,10 @@ case "$BAT" in
   M_morning) # 08:00 KST — 모닝 브리핑
     run_py scripts/cron_morning_briefing.py
     ;;
+  M_US) # 08:10 KST — 미국장 매크로 필터 (정보봇 07:55 후 실행)
+    run_py scripts/us_quant_filter.py
+    run_py scripts/upload_quant_us.py
+    ;;
   N) # 08:20 KST — 시그널 로그
     run_py scripts/cron_signal_tracker.py --mode log
     ;;
