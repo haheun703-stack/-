@@ -97,16 +97,21 @@ SHIELD_MAX_POSITIONS = {
     "YELLOW": 5,    # 경계 → 5종목
     "GREEN": 8,     # 정상 → 기존 8종목
 }
-# STRONG_ALPHA 시그널 (alpha_scoring.py Tier1, 백테스트 검증 PF>=1.8)
+# STRONG_ALPHA 시그널 (PF>=1.8, 백테스트 검증 → AA 승격 + 50점 부스트)
 STRONG_ALPHA_SIGNALS = {
     "PULLBACK15_VOL3x",          # PF=2.58 (급락15%+거래량3배+수급)
     "PULLBACK15_DUAL",           # PF=1.94 (급락15%+쌍끌이)
     "BREAKOUT60_VOL3x_DUAL",    # PF=1.81 (60일돌파+거래량3배+쌍끌이)
-    "PULLBACK10_SUPPLY",         # PF=1.48 (급락10%+수급, 중급)
     "MEGA_VOL_8x",               # 메가거래량(8배+)+수급 (주간급등주 패턴)
+}
+# MODERATE_ALPHA 시그널 (PF 1.4~1.8, 보조 → A 승격 + 30점 부스트)
+MODERATE_ALPHA_SIGNALS = {
+    "PULLBACK10_SUPPLY",         # PF=1.48 (급락10%+수급)
+    "PULLBACK7_SUPPLY",          # PF=1.35 (급락7%+수급)
 }
 # 알파 부스트 점수 (후보 정렬 시 가산)
 ALPHA_BOOST = 50    # STRONG_ALPHA → +50점 부스트 (100점 = AA 최상위)
+MODERATE_BOOST = 30  # MODERATE_ALPHA → +30점 부스트 (80점 = A급)
 PULLBACK_BOOST = 20 # pullback_scan 등재 → +20점 부스트
 SHIELD_PATH = DATA_DIR / "shield_report.json"
 PULLBACK_PATH = DATA_DIR / "pullback_scan.json"
@@ -304,7 +309,8 @@ def collect_candidates() -> list[dict]:
         # 알파 시그널 기반 등급 우회
         alpha_sigs = set(pick.get("alpha_signals", []))
         has_strong = bool(alpha_sigs & STRONG_ALPHA_SIGNALS)
-        has_multi = len(alpha_sigs) >= 3  # 3개+ WEAK 시그널 = 복합 강세
+        has_moderate = bool(alpha_sigs & MODERATE_ALPHA_SIGNALS)
+        has_multi = len(alpha_sigs) >= 3  # 3개+ 시그널 = 복합 강세
 
         grade_kr = pick.get("grade", "")
         if has_strong:
@@ -312,7 +318,7 @@ def collect_candidates() -> list[dict]:
             logger.info("[ALPHA-BYPASS] %s grade=%s → AA (STRONG: %s)",
                         pick.get("name", ticker), grade_kr,
                         ",".join(alpha_sigs & STRONG_ALPHA_SIGNALS))
-        elif has_multi and score >= 75:
+        elif (has_moderate or has_multi) and score >= 75:
             grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
             logger.info("[MULTI-SIG] %s grade=%s → A 승격 (시그널 %d개, score=%.1f)",
                         pick.get("name", ticker), grade_kr, len(alpha_sigs), score)
@@ -368,17 +374,17 @@ def collect_candidates() -> list[dict]:
             "reason": "스윙 전략 추천",
         })
 
-    # 4) ALPHA OVERRIDE: STRONG_ALPHA 시그널 보유 종목 → 등급 무시, AA 승격
-    #    기존 스코어링은 마이너스 알파 → 검증된 알파시그널이 있으면 직접 진입
+    # 4) ALPHA OVERRIDE: 검증된 알파시그널 보유 종목 → 등급 무시, 직접 진입
+    #    STRONG(PF>=1.8) → AA+50점, MODERATE(PF 1.4~1.8) → A+30점
     for pick in data.get("picks", []):
         ticker = pick.get("ticker", "")
         if not ticker or ticker in seen:
             continue
         alpha_sigs = set(pick.get("alpha_signals", []))
         strong_match = alpha_sigs & STRONG_ALPHA_SIGNALS
-        # pullback_scan + 수급 동시 확인 → STRONG 후보
+        moderate_match = alpha_sigs & MODERATE_ALPHA_SIGNALS
         in_pullback = ticker in _pullback_tickers
-        if not strong_match and not in_pullback:
+        if not strong_match and not moderate_match and not in_pullback:
             continue
 
         price = pick.get("close", 0)
@@ -387,17 +393,20 @@ def collect_candidates() -> list[dict]:
         if price <= 0:
             continue
 
-        # 알파 점수 산출: 기본 50 + 부스트
+        # 알파 점수 산출: 기본 50 + 부스트 (STRONG > MODERATE > PULLBACK)
         base_score = 50.0
         alpha_tags = []
         if strong_match:
-            base_score += ALPHA_BOOST
+            base_score += ALPHA_BOOST    # +50
             alpha_tags.extend(strong_match)
+        if moderate_match:
+            base_score += MODERATE_BOOST  # +30
+            alpha_tags.extend(moderate_match)
         if in_pullback:
-            base_score += PULLBACK_BOOST
+            base_score += PULLBACK_BOOST  # +20
             alpha_tags.append("PULLBACK_SCAN")
 
-        # 등급: STRONG_ALPHA 시그널 → AA, 풀백만 → A
+        # 등급: STRONG → AA, MODERATE/풀백 → A
         alpha_grade = "AA" if strong_match else "A"
 
         seen.add(ticker)
@@ -431,9 +440,13 @@ def collect_candidates() -> list[dict]:
         alpha_tags = []
 
         strong_match = alpha_sigs & STRONG_ALPHA_SIGNALS
+        moderate_match = alpha_sigs & MODERATE_ALPHA_SIGNALS
         if strong_match:
             boost += ALPHA_BOOST
             alpha_tags.extend(strong_match)
+        if moderate_match:
+            boost += MODERATE_BOOST
+            alpha_tags.extend(moderate_match)
         if ticker in _pullback_tickers:
             boost += PULLBACK_BOOST
             alpha_tags.append("PULLBACK_SCAN")
