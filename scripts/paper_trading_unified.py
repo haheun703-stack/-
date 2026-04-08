@@ -106,7 +106,7 @@ STRONG_ALPHA_SIGNALS = {
     "MEGA_VOL_8x",               # 메가거래량(8배+)+수급 (주간급등주 패턴)
 }
 # 알파 부스트 점수 (후보 정렬 시 가산)
-ALPHA_BOOST = 30    # STRONG_ALPHA → +30점 부스트
+ALPHA_BOOST = 50    # STRONG_ALPHA → +50점 부스트 (100점 = AA 최상위)
 PULLBACK_BOOST = 20 # pullback_scan 등재 → +20점 부스트
 SHIELD_PATH = DATA_DIR / "shield_report.json"
 PULLBACK_PATH = DATA_DIR / "pullback_scan.json"
@@ -281,13 +281,13 @@ def collect_candidates() -> list[dict]:
             "reason": item.get("reasoning", "")[:80],
         })
 
-    # 2) 전략 종합 picks (score >= 40, 상위 5개)
+    # 2) 전략 종합 picks (score >= 40, 상위 15개 — 시장 주도주 포착 확대)
     picks_sorted = sorted(
         data.get("picks", []),
         key=lambda x: x.get("total_score", 0),
         reverse=True,
     )
-    for pick in picks_sorted[:5]:
+    for pick in picks_sorted[:15]:
         ticker = pick.get("ticker", "")
         if not ticker or ticker in seen:
             continue
@@ -301,8 +301,22 @@ def collect_candidates() -> list[dict]:
         if price <= 0:
             continue
 
+        # 알파 시그널 기반 등급 우회
+        alpha_sigs = set(pick.get("alpha_signals", []))
+        has_strong = bool(alpha_sigs & STRONG_ALPHA_SIGNALS)
+        has_multi = len(alpha_sigs) >= 3  # 3개+ WEAK 시그널 = 복합 강세
+
         grade_kr = pick.get("grade", "")
-        if grade_kr == "적극매수":
+        if has_strong:
+            grade = "AA"  # STRONG_ALPHA → AA 강제
+            logger.info("[ALPHA-BYPASS] %s grade=%s → AA (STRONG: %s)",
+                        pick.get("name", ticker), grade_kr,
+                        ",".join(alpha_sigs & STRONG_ALPHA_SIGNALS))
+        elif has_multi and score >= 75:
+            grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
+            logger.info("[MULTI-SIG] %s grade=%s → A 승격 (시그널 %d개, score=%.1f)",
+                        pick.get("name", ticker), grade_kr, len(alpha_sigs), score)
+        elif grade_kr == "적극매수":
             grade = "AA"
         elif grade_kr == "매수":
             grade = "A"
