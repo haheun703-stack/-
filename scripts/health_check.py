@@ -47,36 +47,59 @@ LOG = QM / "logs" / f"health_{datetime.now():%Y%m%d_%H%M}.log"
 # 1. 검사 대상 정의
 # ══════════════════════════════════════════
 
-# BAT별 핵심 데이터 파일 + 날짜 키
+# BAT별 핵심 데이터 파일 + 날짜 키 + 개별 복구 스크립트
 # "해당 파일의 해당 키 값이 오늘 날짜를 포함하면 정상"
+#
+# recover_script: 개별 복구 스크립트 (BAT 전체 재실행 대신 단독 실행)
+# recover_args: 스크립트 실행 인자 (list)
+# recover_timeout: 개별 실행 타임아웃 (초)
+# priority: 의존성 순서 (낮은 숫자 먼저 실행)
+#
+# recover_script 없으면 → BAT 전체 재실행 fallback
 CHECKS = {
     "D": {
         "name": "장마감 전체 파이프라인",
         "files": [
             {
-                "path": "data/brain_decision.json",
-                "date_key": "timestamp",
-                "label": "BRAIN",
-            },
-            {
-                "path": "data/shield_report.json",
-                "date_key": "timestamp",
-                "label": "SHIELD",
-            },
-            {
                 "path": "data/institutional_flow/accumulation_alert.json",
                 "date_key": "detected_at",
                 "label": "기관수급",
+                "recover_script": "scripts/institutional_flow_collector.py",
+                "recover_timeout": 900,
+                "priority": 10,
             },
             {
                 "path": "data/volume_spike_watchlist.json",
                 "date_key": "date",
                 "label": "거래량급등",
+                "recover_script": "scripts/scan_volume_spike.py",
+                "recover_timeout": 300,
+                "priority": 20,
+            },
+            {
+                "path": "data/shield_report.json",
+                "date_key": "timestamp",
+                "label": "SHIELD",
+                "recover_script": "scripts/run_shield.py",
+                "recover_args": ["--send"],
+                "recover_timeout": 300,
+                "priority": 30,
+            },
+            {
+                "path": "data/brain_decision.json",
+                "date_key": "timestamp",
+                "label": "BRAIN",
+                "recover_script": "scripts/run_brain.py",
+                "recover_timeout": 300,
+                "priority": 40,
             },
             {
                 "path": "data/tomorrow_picks.json",
                 "date_key": "generated_at",
                 "label": "추천종목",
+                "recover_script": "scripts/scan_tomorrow_picks.py",
+                "recover_timeout": 600,
+                "priority": 50,
             },
         ],
     },
@@ -87,6 +110,7 @@ CHECKS = {
                 "path": "data/ai_strategic_analysis.json",
                 "date_key": "analysis_date",
                 "label": "미장분석",
+                # recover_script 없음 → BAT-A 전체 재실행 fallback
             },
         ],
     },
@@ -172,7 +196,7 @@ def rerun_flowx() -> bool:
 # ══════════════════════════════════════════
 
 def rerun_bat(bat_id: str) -> bool:
-    """run_bat.sh를 통해 BAT 재실행. 성공 시 True."""
+    """run_bat.sh를 통해 BAT 재실행. 성공 시 True. (Fallback — recover_script 없을 때만)"""
     log(f"[RERUN] BAT-{bat_id} 자동 재실행 시작")
     try:
         result = subprocess.run(
@@ -189,6 +213,45 @@ def rerun_bat(bat_id: str) -> bool:
         return False
     except Exception as e:
         log(f"[RERUN] BAT-{bat_id} 실행 오류: {e}")
+        return False
+
+
+def rerun_script(file_spec: dict) -> bool:
+    """개별 복구 스크립트 단독 실행. BAT 전체 재실행보다 훨씬 빠름.
+
+    file_spec 필수 키: recover_script
+    file_spec 선택 키: recover_args (list), recover_timeout (초), label
+    """
+    script = file_spec.get("recover_script")
+    if not script:
+        return False
+
+    args = file_spec.get("recover_args", []) or []
+    timeout = int(file_spec.get("recover_timeout", 300))
+    label = file_spec.get("label", script)
+
+    log(f"[RECOVER] {label} → {script} {' '.join(args)} (timeout={timeout}s)")
+    try:
+        result = subprocess.run(
+            [str(PY), script] + list(args),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(QM),
+        )
+        ok = result.returncode == 0
+        status = "OK" if ok else f"FAIL(exit={result.returncode})"
+        log(f"[RECOVER] {label} {status}")
+        if not ok and result.stderr:
+            # 마지막 5줄만 로그에 남김
+            tail = "\n".join(result.stderr.strip().splitlines()[-5:])
+            log(f"[RECOVER] {label} stderr:\n{tail}")
+        return ok
+    except subprocess.TimeoutExpired:
+        log(f"[RECOVER] {label} 타임아웃 ({timeout}초 초과)")
+        return False
+    except Exception as e:
+        log(f"[RECOVER] {label} 실행 오류: {e}")
         return False
 
 
@@ -256,30 +319,50 @@ def main():
 
     for bat_id, spec in CHECKS.items():
         results = check_freshness(bat_id)
-        stale = [k for k, v in results.items() if not v]
+        # stale 파일들을 file_spec 리스트로 수집 (recover_script 매핑 접근 위해)
+        stale_files = [f for f in spec["files"] if not results.get(f["label"], False)]
 
-        if not stale:
+        if not stale_files:
             log(f"[OK] BAT-{bat_id} ({spec['name']}): 전체 신선")
             continue
 
         # 낡은 데이터 발견
         all_ok = False
-        log(f"[STALE] BAT-{bat_id} ({spec['name']}): {', '.join(stale)}")
+        stale_labels = [f["label"] for f in stale_files]
+        log(f"[STALE] BAT-{bat_id} ({spec['name']}): {', '.join(stale_labels)}")
 
         if args.check_only:
-            failed.append(f"BAT-{bat_id}: {', '.join(stale)}")
+            failed.append(f"BAT-{bat_id}: {', '.join(stale_labels)}")
             continue
 
-        # 자동 재실행
-        rerun_bat(bat_id)
+        # ── 선택적 복구: 우선순위 순으로 개별 스크립트 실행 ──
+        # priority가 있는 파일은 의존 순서대로 실행 (기관수급 → 거래량 → SHIELD → BRAIN → picks)
+        stale_files.sort(key=lambda f: f.get("priority", 999))
+
+        recovered_labels = []
+        fallback_needed = False
+
+        for f in stale_files:
+            if f.get("recover_script"):
+                ok = rerun_script(f)
+                if ok:
+                    recovered_labels.append(f["label"])
+            else:
+                # 매핑 없으면 BAT 전체 재실행 fallback 필요
+                fallback_needed = True
+                log(f"[RECOVER] {f['label']}: recover_script 미정의 → BAT 전체 재실행 필요")
+
+        if fallback_needed:
+            log(f"[RERUN] BAT-{bat_id} 전체 재실행 fallback 시작")
+            rerun_bat(bat_id)
 
         # 재실행 후 검증
         results2 = check_freshness(bat_id)
         stale2 = [k for k, v in results2.items() if not v]
 
         if not stale2:
-            recovered.append(f"BAT-{bat_id}")
-            log(f"[RECOVERED] BAT-{bat_id}: 자동 복구 성공")
+            recovered.append(f"BAT-{bat_id}({', '.join(recovered_labels)})" if recovered_labels else f"BAT-{bat_id}")
+            log(f"[RECOVERED] BAT-{bat_id}: 복구 성공")
         else:
             failed.append(f"BAT-{bat_id}: {', '.join(stale2)}")
             log(f"[FAILED] BAT-{bat_id}: 복구 실패 — {', '.join(stale2)}")
