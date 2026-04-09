@@ -213,6 +213,14 @@ def calc_alpha_score(
         s4b.detail = f"이격{gap_today:.1f}%"
     result.signals.append(s4b)
 
+    # S6a: 메가 거래량 8배 + 수급 → Tier1급 20점 (주간급등주 패턴)
+    s6a = AlphaSignal("MEGA_VOL_8x")
+    if vol_today >= 8.0 and supply_buy and not s1.fired:
+        s6a.fired = True
+        s6a.score = 20
+        s6a.detail = f"vol×{vol_today:.1f} 메가거래량+수급"
+    result.signals.append(s6a)
+
     tier1_signals = [s for s in [s1, s2, s3, s4, s4b, s6a] if s.fired]
     result.tier1_count = len(tier1_signals)
 
@@ -251,14 +259,6 @@ def calc_alpha_score(
         s6.score = 10
         s6.detail = f"vol×{vol_today:.1f} 기관매수"
     result.signals.append(s6)
-
-    # S6a: 메가 거래량 8배 + 수급 → Tier1급 20점 (주간급등주 패턴)
-    s6a = AlphaSignal("MEGA_VOL_8x")
-    if vol_today >= 8.0 and supply_buy and not s1.fired:
-        s6a.fired = True
-        s6a.score = 20
-        s6a.detail = f"vol×{vol_today:.1f} 메가거래량+수급"
-    result.signals.append(s6a)
 
     # S6b: 거래량 2배 + 수급 (PF 1.38) → 5점
     s6b = AlphaSignal("VOL_SPIKE_2x_SUPPLY")
