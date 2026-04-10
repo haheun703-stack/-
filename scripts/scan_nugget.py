@@ -834,6 +834,198 @@ def send_telegram(nuggets: list[dict]):
         logger.warning("텔레그램 발송 실패: %s", e)
 
 
+# ═══════════════════════════════════════════════════
+# 알파 스캐너 업로드 (새 테이블)
+# ═══════════════════════════════════════════════════
+
+REGIME_KR = {"BULL": "상승장", "BULL_CAUTION": "상승 주의", "CAUTION": "주의",
+             "BEAR": "하락장", "CRISIS": "위기", "NEUTRAL": "보합"}
+SHIELD_KR = {"GREEN": "안전", "YELLOW": "주의", "RED": "경고"}
+SHIELD_POSITIONS = {"RED": 3, "YELLOW": 5, "GREEN": 8}
+
+
+def _load_context() -> dict:
+    """brain + shield → 상단 컨텍스트 바 데이터."""
+    ctx = {"regime": "CAUTION", "regime_kr": "주의",
+           "shield_status": "YELLOW", "shield_kr": "주의",
+           "max_drawdown": 0, "max_positions": 5}
+
+    brain_path = DATA_DIR / "brain_decision.json"
+    if brain_path.exists():
+        try:
+            with open(brain_path, encoding="utf-8") as f:
+                brain = json.load(f)
+            regime = brain.get("effective_regime", "CAUTION")
+            ctx["regime"] = regime
+            ctx["regime_kr"] = REGIME_KR.get(regime, regime)
+        except Exception:
+            pass
+
+    shield_path = DATA_DIR / "shield_report.json"
+    if shield_path.exists():
+        try:
+            with open(shield_path, encoding="utf-8") as f:
+                shield = json.load(f)
+            status = shield.get("overall_level", "YELLOW")
+            ctx["shield_status"] = status
+            ctx["shield_kr"] = SHIELD_KR.get(status, status)
+            ctx["max_positions"] = SHIELD_POSITIONS.get(status, 5)
+            mdd = shield.get("mdd_status", {})
+            ctx["max_drawdown"] = round(mdd.get("current_mdd_pct", 0), 1)
+        except Exception:
+            pass
+
+    return ctx
+
+
+def _load_sector_heat() -> list[dict]:
+    """sector_composite.json → 섹터 온도 히트맵."""
+    path = DATA_DIR / "sector_rotation" / "sector_composite.json"
+    if not path.exists():
+        return []
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        result = []
+        for s in data.get("sectors", []):
+            ret = s.get("ret_5", 0)
+            if ret >= 3:
+                temp = "HOT"
+            elif ret >= 0:
+                temp = "WARM"
+            elif ret >= -3:
+                temp = "COOL"
+            else:
+                temp = "COLD"
+            result.append({
+                "sector": s.get("sector", "?"),
+                "ret_5d": round(ret, 1),
+                "temperature": temp,
+            })
+        result.sort(key=lambda x: x["ret_5d"], reverse=True)
+        return result
+    except Exception:
+        return []
+
+
+def _load_smart_money() -> dict:
+    """tomorrow_picks.json → 스마트 머니 흐름."""
+    path = DATA_DIR / "tomorrow_picks.json"
+    empty = {"dual_buy": [], "inst_top": [], "fgn_top": []}
+    if not path.exists():
+        return empty
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        picks = data.get("picks", [])
+
+        def _to_item(p):
+            return {
+                "ticker": p.get("ticker", ""),
+                "name": p.get("name", ""),
+                "foreign_5d_억": round(p.get("foreign_5d", 0) / 1e8, 1),
+                "inst_5d_억": round(p.get("inst_5d", 0) / 1e8, 1),
+                "close": int(p.get("close", 0)),
+                "change_pct": round(p.get("ret_5d", 0), 1),
+            }
+
+        dual = [_to_item(p) for p in picks
+                if p.get("foreign_5d", 0) > 0 and p.get("inst_5d", 0) > 0]
+        dual.sort(key=lambda x: x["foreign_5d_억"] + x["inst_5d_억"], reverse=True)
+
+        inst = [_to_item(p) for p in picks if p.get("inst_5d", 0) > 0]
+        inst.sort(key=lambda x: x["inst_5d_억"], reverse=True)
+
+        fgn = [_to_item(p) for p in picks if p.get("foreign_5d", 0) > 0]
+        fgn.sort(key=lambda x: x["foreign_5d_억"], reverse=True)
+
+        return {"dual_buy": dual[:5], "inst_top": inst[:5], "fgn_top": fgn[:5]}
+    except Exception:
+        return empty
+
+
+def _load_portfolio() -> dict:
+    """brain_decision.json arms → 자산 배분."""
+    default = {"defense_pct": 50, "offense_pct": 50,
+               "allocation": {"주식": 50, "채권": 0, "금/달러": 0, "현금": 50}}
+    brain_path = DATA_DIR / "brain_decision.json"
+    if not brain_path.exists():
+        return default
+    try:
+        with open(brain_path, encoding="utf-8") as f:
+            brain = json.load(f)
+        arms = {a["name"]: a.get("adjusted_pct", 0) for a in brain.get("arms", [])}
+
+        stocks = (arms.get("swing", 0) + arms.get("etf_sector", 0) +
+                  arms.get("etf_leverage", 0) + arms.get("etf_index", 0) +
+                  arms.get("etf_small_cap", 0))
+        bonds = arms.get("etf_bonds", 0)
+        gold_dollar = arms.get("etf_gold", 0) + arms.get("etf_dollar", 0)
+        cash = arms.get("cash", 0)
+
+        offense = round(stocks)
+        defense = round(bonds + gold_dollar + cash)
+
+        return {
+            "defense_pct": int(defense),
+            "offense_pct": int(offense),
+            "allocation": {
+                "주식": round(stocks),
+                "채권": round(bonds),
+                "금/달러": round(gold_dollar),
+                "현금": round(cash),
+            },
+        }
+    except Exception:
+        return default
+
+
+def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
+    """알파 스캐너 데이터를 quant_alpha_scanner 테이블에 업로드.
+
+    brain/shield/섹터/수급/포트폴리오 + 종목 전체를 하나의 JSONB로 통합.
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    context = _load_context()
+    sector_heat = _load_sector_heat()
+    smart_money = _load_smart_money()
+    portfolio = _load_portfolio()
+
+    grade_summary = {
+        "GOLD": sum(1 for n in nuggets if n["grade"] == "GOLD"),
+        "SILVER": sum(1 for n in nuggets if n["grade"] == "SILVER"),
+        "BRONZE": sum(1 for n in nuggets if n["grade"] == "BRONZE"),
+    }
+
+    payload = {
+        "generated_at": datetime.now().isoformat(),
+        "date": date_str,
+        "context": context,
+        "sector_heat": sector_heat,
+        "grade_summary": grade_summary,
+        "candidates": nuggets,
+        "smart_money": smart_money,
+        "portfolio": portfolio,
+    }
+
+    try:
+        from src.adapters.flowx_uploader import FlowxUploader
+        uploader = FlowxUploader()
+        row = {"date": date_str, "data": payload}
+        uploader.client.table("quant_alpha_scanner").upsert(
+            row, on_conflict="date"
+        ).execute()
+        logger.info("[알파 스캐너] 업로드 완료: %s (%d종목, 섹터 %d, 수급 %d)",
+                    date_str, len(nuggets), len(sector_heat),
+                    len(smart_money.get("dual_buy", [])))
+        return True
+    except Exception as e:
+        logger.error("[알파 스캐너] 업로드 오류: %s", e)
+        return False
+
+
 def upload_flowx(nuggets: list[dict], date_str: str = ""):
     """노다지 결과를 FLOWX short_signals 테이블에 업로드.
 
@@ -918,7 +1110,8 @@ def main():
 
     # FLOWX 업로드
     if not args.dry_run:
-        upload_flowx(nuggets, date_str)
+        upload_flowx(nuggets, date_str)          # 기존 short_signals (하위호환)
+        upload_alpha_scanner(nuggets, date_str)   # 새 quant_alpha_scanner
 
     # 텔레그램
     if args.telegram:
