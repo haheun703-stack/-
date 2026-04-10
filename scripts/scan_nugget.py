@@ -992,6 +992,18 @@ def _load_company_profiles() -> dict:
         return {}
 
 
+def _load_asset_etf_performance() -> dict:
+    """asset_etf_performance.json 로드 — 자산군별 ETF 연간/월간 수익률."""
+    path = DATA_DIR / "asset_etf_performance.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 # 5축 점수 한글 라벨 (주린이 친화)
 AXIS_LABELS_KR = {
     "value": "싸게 살 수 있나",
@@ -1029,6 +1041,7 @@ def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
     smart_money = _load_smart_money()
     portfolio = _load_portfolio()
     profiles = _load_company_profiles()
+    etf_perf = _load_asset_etf_performance()
 
     # 종목 데이터에 프로파일 + 5축 라벨 추가
     candidates = _enrich_candidates(nuggets, profiles)
@@ -1049,6 +1062,7 @@ def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
         "axis_labels": AXIS_LABELS_KR,
         "smart_money": smart_money,
         "portfolio": portfolio,
+        "etf_performance": etf_perf,
     }
 
     try:

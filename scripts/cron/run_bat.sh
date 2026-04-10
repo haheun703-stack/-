@@ -183,6 +183,7 @@ case "$BAT" in
     run_py scripts/leverage_etf_scanner.py
     run_py scripts/etf_trading_signal.py
     run_py scripts/run_etf_rotation.py
+    run_py scripts/calc_asset_etf_performance.py
     # --- G3.9: 종목 스캔 (scan_tomorrow_picks 입력 데이터) ---
     run_py scripts/scan_pullback.py
     run_py scripts/scan_crash_bounce.py
