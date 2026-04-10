@@ -282,6 +282,144 @@ def calc_drawdown(ticker: str) -> dict | None:
     }
 
 
+PROCESSED_DIR = DATA_DIR / "processed"
+_FIB_RATIOS = [0.236, 0.382, 0.500, 0.618, 0.786]
+
+
+def calc_smart_prices(
+    ticker: str,
+    close: float,
+    low_252: float,
+    eps: float,
+    sector_avg_per: float,
+    intrinsic_engine=None,
+) -> dict:
+    """역산 가격 엔진 — 다중 방법론 통합.
+
+    Target: min(내재가치, 섹터PER×EPS)  보수적
+    Entry:  현재 종가 (피보나치 참조 추가)
+    Stop:   max(ATR×2, 52주 저점)  보수적
+
+    Returns:
+        entry_price, stop_loss, target_price, methods, risk_pct, reward_pct
+    """
+    methods = {}
+    targets = []
+    stops = []
+
+    # ── (1) DCF/RIM 내재가치 → Target ──
+    if intrinsic_engine is not None:
+        try:
+            iv = intrinsic_engine.score_raw(ticker)
+            if iv and iv.get("fair_value"):
+                fair = iv["fair_value"]
+                if fair > close:
+                    targets.append(fair)
+                    methods["intrinsic"] = {
+                        "fair_value": int(fair),
+                        "dcf": int(iv.get("dcf_value") or 0),
+                        "rim": int(iv.get("rim_value") or 0),
+                        "upside_pct": round(iv["upside"] * 100, 1),
+                    }
+        except Exception:
+            pass
+
+    # ── (2) 섹터PER × EPS → Target ──
+    if sector_avg_per > 0 and eps > 0:
+        sector_fair = sector_avg_per * eps
+        if sector_fair > close:
+            targets.append(sector_fair)
+            methods["sector_per"] = {
+                "fair_value": int(sector_fair),
+                "sector_avg_per": round(sector_avg_per, 1),
+                "eps": int(eps),
+                "upside_pct": round((sector_fair / close - 1) * 100, 1),
+            }
+
+    # ── (3) Parquet: 피보나치 + ATR ──
+    pq_path = PROCESSED_DIR / f"{ticker}.parquet"
+    if pq_path.exists():
+        try:
+            df = pd.read_parquet(pq_path, columns=["high", "low", "close"])
+            if len(df) >= 60:
+                # 피보나치 0.618 지지 (60일) → 진입 참조
+                recent_60 = df.tail(60)
+                fib_high = float(recent_60["high"].max())
+                fib_low = float(recent_60["low"].min())
+                if fib_high > fib_low:
+                    fib_618 = fib_high - (fib_high - fib_low) * 0.618
+                    fib_382 = fib_high - (fib_high - fib_low) * 0.382
+                    methods["fibonacci"] = {
+                        "fib_618": int(round(fib_618)),
+                        "fib_382": int(round(fib_382)),
+                        "60d_high": int(fib_high),
+                        "60d_low": int(fib_low),
+                    }
+
+                # ATR(20) → Stop Loss
+                if len(df) >= 21:
+                    recent = df.tail(21)
+                    h, l, c = recent["high"], recent["low"], recent["close"]
+                    tr = pd.concat([
+                        h - l,
+                        (h - c.shift(1)).abs(),
+                        (l - c.shift(1)).abs(),
+                    ], axis=1).max(axis=1)
+                    atr = float(tr.iloc[1:].mean())
+                    atr_stop = close - 2.0 * atr
+                    if atr_stop > 0:
+                        stops.append(atr_stop)
+                        methods["atr"] = {
+                            "atr_20": int(round(atr)),
+                            "multiplier": 2.0,
+                            "atr_stop": int(round(atr_stop)),
+                        }
+        except Exception:
+            pass
+
+    # ── 52주 저점 → Stop 참조 ──
+    if low_252 > 0:
+        stops.append(low_252)
+
+    # ══ 최종 가격 결정 ══
+
+    # Target: 보수적 (낮은 값) — 폴백 +30%
+    if targets:
+        target_price = int(round(min(targets), -1))
+    else:
+        target_price = int(round(close * 1.30, -1))
+        methods["target_fallback"] = "+30%"
+
+    # Entry: 현재 종가
+    entry_price = int(close)
+
+    # Stop: 보수적 (높은 값 = 더 타이트) — 폴백 -15%
+    if stops:
+        stop_loss = int(round(max(stops), -1))
+    else:
+        stop_loss = int(round(close * 0.85, -1))
+        methods["stop_fallback"] = "-15%"
+
+    # ── 안전장치 ──
+    if stop_loss >= entry_price:
+        stop_loss = int(round(entry_price * 0.85, -1))
+    if target_price <= entry_price:
+        target_price = int(round(entry_price * 1.20, -1))
+
+    risk = round((entry_price - stop_loss) / entry_price * 100, 1) if entry_price > 0 else 0
+    reward = round((target_price - entry_price) / entry_price * 100, 1) if entry_price > 0 else 0
+
+    return {
+        "entry_price": entry_price,
+        "stop_loss": stop_loss,
+        "target_price": target_price,
+        "methods": methods,
+        "risk_pct": risk,
+        "reward_pct": reward,
+        "rr_ratio": round(reward / risk, 2) if risk > 0 else 0,
+    }
+
+
 def get_regime() -> str:
     """현재 Brain 레짐 조회."""
     brain_path = DATA_DIR / "brain_decision.json"
@@ -338,6 +476,15 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
         q_scores = {}
 
     logger.info("Value 스코어: %d종목, Quality 스코어: %d종목", len(v_scores), len(q_scores))
+
+    # 5. 내재가치 엔진 (역산 가격용)
+    intrinsic_engine = None
+    try:
+        from src.alpha.factors.value_intrinsic import ValueIntrinsic
+        intrinsic_engine = ValueIntrinsic()
+        logger.info("ValueIntrinsic 엔진 초기화 완료")
+    except Exception as e:
+        logger.warning("ValueIntrinsic 초기화 실패 (폴백 사용): %s", e)
 
     # 5. 종목별 스캔
     candidates = []
@@ -422,10 +569,19 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
         else:
             grade = "WATCH"  # 45점 미만
 
-        # ── Entry/StopLoss/Target (장기 관점) ──
-        entry_price = int(close)
-        stop_loss = int(close * 0.85)     # -15% 손절 (장기)
-        target_price = int(close * 1.30)  # +30% 목표 (장기)
+        # ── 역산 가격 엔진 (내재가치/섹터PER/ATR/피보나치) ──
+        eps_val = pykrx.get("EPS", 0)
+        smart = calc_smart_prices(
+            ticker=ticker,
+            close=close,
+            low_252=dd_data["low_252"],
+            eps=eps_val,
+            sector_avg_per=sector_avg_per,
+            intrinsic_engine=intrinsic_engine,
+        )
+        entry_price = smart["entry_price"]
+        stop_loss = smart["stop_loss"]
+        target_price = smart["target_price"]
 
         candidates.append({
             "ticker": ticker,
@@ -433,7 +589,7 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
             "grade": grade,
             "total_score": round(total, 1),
             "market_cap_억": round(market_cap_억, 0),
-            "close": entry_price,
+            "close": int(close),
             "per": round(per, 1),
             "pbr": round(pbr, 2),
             "div_yield": round(div_yield, 2),
@@ -450,6 +606,10 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
             "entry_price": entry_price,
             "stop_loss": stop_loss,
             "target_price": target_price,
+            "risk_pct": smart["risk_pct"],
+            "reward_pct": smart["reward_pct"],
+            "rr_ratio": smart["rr_ratio"],
+            "price_methods": smart["methods"],
             # 개별 축 점수 (디버깅/표시용)
             "scores": {
                 "value": value_score,
@@ -541,6 +701,15 @@ def print_report(nuggets: list[dict]):
             f"P={scores['peer_value']:.0f} | "
             f"매출 {n['revenue_억'] or '?'}억 OPM {n['op_margin_pct'] or '?'}%"
         )
+        # 역산 가격 정보
+        methods = n.get("price_methods", {})
+        method_names = [k for k in methods if k not in ("target_fallback", "stop_fallback")]
+        rr = n.get("rr_ratio", 0)
+        print(
+            f"         진입 {n['entry_price']:,} → 목표 {n['target_price']:,} "
+            f"(손절 {n['stop_loss']:,}) | "
+            f"R:R {rr:.1f} | {','.join(method_names) or 'fallback'}"
+        )
 
     print(f"{'='*70}")
 
@@ -564,6 +733,19 @@ def send_telegram(nuggets: list[dict]):
 
     for n in gold + silver:
         emoji = "🥇" if n["grade"] == "GOLD" else "🥈"
+        methods = n.get("price_methods", {})
+        method_tags = []
+        if "intrinsic" in methods:
+            method_tags.append("DCF/RIM")
+        if "sector_per" in methods:
+            method_tags.append("섹터PER")
+        if "atr" in methods:
+            method_tags.append("ATR")
+        if "fibonacci" in methods:
+            method_tags.append("피보")
+        method_str = "+".join(method_tags) if method_tags else "기본"
+        rr = n.get("rr_ratio", 0)
+
         lines.append(
             f"{emoji} {n['name']} {n['total_score']:.0f}점"
         )
@@ -574,6 +756,9 @@ def send_telegram(nuggets: list[dict]):
         lines.append(
             f"  진입 {n['entry_price']:,} → 목표 {n['target_price']:,} "
             f"(손절 {n['stop_loss']:,})"
+        )
+        lines.append(
+            f"  R:R {rr:.1f} | {method_str}"
         )
         lines.append("")
 
