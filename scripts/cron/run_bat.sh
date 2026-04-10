@@ -217,6 +217,7 @@ case "$BAT" in
     run_py src/use_cases/nxt_signal.py
     run_py scripts/nxt_recommend.py --no-telegram
     run_py scripts/nxt_track_results.py
+    run_py scripts/scan_nugget.py
     run_py scripts/scan_bio_cdmo.py
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
