@@ -120,8 +120,8 @@ def fetch_volume_rank(broker: mojito.KoreaInvestment,
 
     results = []
     for item in items[:top_n]:
-        code = item.get("mksc_shrn_iscd", "").strip()
-        name = item.get("hts_kor_isnm", "").strip()
+        code = (item.get("mksc_shrn_iscd") or "").strip()
+        name = (item.get("hts_kor_isnm") or "").strip()
         if not code or not name:
             continue
         results.append({
@@ -169,8 +169,8 @@ def fetch_fluctuation_rank(broker: mojito.KoreaInvestment,
 
     results = []
     for item in items[:top_n]:
-        code = item.get("stck_shrn_iscd", "").strip()
-        name = item.get("hts_kor_isnm", "").strip()
+        code = (item.get("stck_shrn_iscd") or "").strip()
+        name = (item.get("hts_kor_isnm") or "").strip()
         if not code or not name:
             continue
         sign = item.get("prdy_vrss_sign", "3")
@@ -215,8 +215,8 @@ def fetch_volume_power(broker: mojito.KoreaInvestment,
 
     results = []
     for item in items[:top_n]:
-        code = item.get("stck_shrn_iscd", item.get("mksc_shrn_iscd", "")).strip()
-        name = item.get("hts_kor_isnm", "").strip()
+        code = (item.get("stck_shrn_iscd") or item.get("mksc_shrn_iscd") or "").strip()
+        name = (item.get("hts_kor_isnm") or "").strip()
         if not code or not name:
             continue
         results.append({
@@ -226,7 +226,7 @@ def fetch_volume_power(broker: mojito.KoreaInvestment,
             "price": int(item.get("stck_prpr", 0) or 0),
             "change_pct": float(item.get("prdy_ctrt", 0) or 0),
             "volume": int(item.get("acml_vol", 0) or 0),
-            "strength": float(item.get("tday_rltv", item.get("seln_cntg_smtn", 0)) or 0),
+            "strength": float(item.get("tday_rltv") or item.get("seln_cntg_smtn") or 0),
         })
 
     logger.info("체결강도상위: %d종목", len(results))
@@ -272,8 +272,8 @@ def fetch_foreign_institution(broker: mojito.KoreaInvestment,
 
         entries = []
         for item in items[:top_n]:
-            code = item.get("mksc_shrn_iscd", "").strip()
-            name = item.get("hts_kor_isnm", "").strip()
+            code = (item.get("mksc_shrn_iscd") or "").strip()
+            name = (item.get("hts_kor_isnm") or "").strip()
             if not code or not name:
                 continue
             entries.append({
@@ -327,8 +327,8 @@ def fetch_limit_price(broker: mojito.KoreaInvestment) -> dict:
 
         entries = []
         for item in items:
-            code = item.get("stck_shrn_iscd", item.get("mksc_shrn_iscd", "")).strip()
-            name = item.get("hts_kor_isnm", "").strip()
+            code = (item.get("stck_shrn_iscd") or item.get("mksc_shrn_iscd") or "").strip()
+            name = (item.get("hts_kor_isnm") or "").strip()
             if not code or not name:
                 continue
             entries.append({

@@ -148,14 +148,14 @@ def _extract_json(text: str) -> dict | None:
     if m:
         text = m.group(1)
     # { ... } 추출
-    m = re.search(r"\{[\s\S]*\}", text)
+    m = re.search(r"\{[\s\S]*?\}", text)
     if m:
         try:
             return json.loads(m.group(0))
         except json.JSONDecodeError:
             pass
     # [ ... ] 추출 (배열인 경우)
-    m = re.search(r"\[[\s\S]*\]", text)
+    m = re.search(r"\[[\s\S]*?\]", text)
     if m:
         try:
             arr = json.loads(m.group(0))
@@ -223,7 +223,7 @@ def build_profiles(stocks: list[dict], cache: dict, api_key: str,
         prompt = build_batch_prompt(batch)
         result = _call_perplexity(prompt, api_key)
 
-        if result and "stocks" in result:
+        if result and isinstance(result.get("stocks"), list):
             for item in result["stocks"]:
                 code = item.get("code", "").strip()
                 if not code:

@@ -79,7 +79,11 @@ def calc_52w(ticker: str) -> dict | None:
     if not pq.exists():
         return None
     try:
-        df = pd.read_parquet(pq, columns=["high", "low", "close"])
+        df = pd.read_parquet(pq)
+        required = {"high", "low", "close"}
+        if not required.issubset(df.columns):
+            return None
+        df = df[list(required)]
         if len(df) < 60:
             return None
         tail = df.tail(252)
