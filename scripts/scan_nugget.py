@@ -980,6 +980,42 @@ def _load_portfolio() -> dict:
         return default
 
 
+def _load_company_profiles() -> dict:
+    """company_profiles.json 캐시 로드."""
+    path = DATA_DIR / "company_profiles.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+# 5축 점수 한글 라벨 (주린이 친화)
+AXIS_LABELS_KR = {
+    "value": "싸게 살 수 있나",
+    "quality": "기업 체질",
+    "earnings": "돈 잘 버나",
+    "drawdown": "얼마나 빠졌나",
+    "peer_value": "같은 업종 내 순위",
+}
+
+
+def _enrich_candidates(nuggets: list[dict], profiles: dict) -> list[dict]:
+    """종목 데이터에 프로파일 + 5축 한글 라벨 추가."""
+    enriched = []
+    for n in nuggets:
+        item = dict(n)
+        code = item.get("ticker", item.get("code", ""))
+        prof = profiles.get(code, {})
+        item["company_desc"] = prof.get("desc", "")
+        item["drop_reason"] = prof.get("drop_reason", "")
+        item["axis_labels"] = AXIS_LABELS_KR
+        enriched.append(item)
+    return enriched
+
+
 def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
     """알파 스캐너 데이터를 quant_alpha_scanner 테이블에 업로드.
 
@@ -992,6 +1028,10 @@ def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
     sector_heat = _load_sector_heat()
     smart_money = _load_smart_money()
     portfolio = _load_portfolio()
+    profiles = _load_company_profiles()
+
+    # 종목 데이터에 프로파일 + 5축 라벨 추가
+    candidates = _enrich_candidates(nuggets, profiles)
 
     grade_summary = {
         "GOLD": sum(1 for n in nuggets if n["grade"] == "GOLD"),
@@ -1005,7 +1045,8 @@ def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
         "context": context,
         "sector_heat": sector_heat,
         "grade_summary": grade_summary,
-        "candidates": nuggets,
+        "candidates": candidates,
+        "axis_labels": AXIS_LABELS_KR,
         "smart_money": smart_money,
         "portfolio": portfolio,
     }
