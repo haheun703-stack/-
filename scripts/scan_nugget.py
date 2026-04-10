@@ -580,7 +580,7 @@ def send_telegram(nuggets: list[dict]):
     msg = "\n".join(lines)
 
     try:
-        from src.adapters.telegram_adapter import send_message
+        from src.telegram_sender import send_message
         send_message(msg)
         logger.info("텔레그램 노다지 알림 발송: GOLD %d + SILVER %d", len(gold), len(silver))
     except Exception as e:
