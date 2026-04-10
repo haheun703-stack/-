@@ -247,7 +247,7 @@ def check_data_health() -> dict:
         ("market_news", DATA_DIR / "market_news.json", 26, 100),
         ("ai_brain_judgment", DATA_DIR / "ai_brain_judgment.json", 26, 500),
         ("ai_v3_picks", DATA_DIR / "ai_v3_picks.json", 26, 200),
-        ("coo_run_log", DATA_DIR / "coo_run_log.json", 26, 200),
+        # coo_run_log 제거 — 레거시 COO 오케스트레이터 폐기, BAT-D 직접 실행으로 전환
         ("consensus_screening", DATA_DIR / "consensus_screening.json", 48, 1000),
         ("earnings_acceleration", DATA_DIR / "earnings_acceleration.json", 48, 200),
         ("cfo_report", DATA_DIR / "cfo_report.json", 48, 200),

@@ -169,6 +169,7 @@ case "$BAT" in
     run_py scripts/sector_momentum.py --history
     run_py scripts/sector_zscore.py --top 5
     run_py_long scripts/sector_investor_flow.py --days 5
+    run_py src/sector_composite.py
     # --- G3: 레짐 + BRAIN + SHIELD ---
     run_py scripts/regime_macro_signal.py
     run_py scripts/scan_buy_candidates.py
