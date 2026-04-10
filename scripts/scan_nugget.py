@@ -289,22 +289,24 @@ _FIB_RATIOS = [0.236, 0.382, 0.500, 0.618, 0.786]
 def calc_smart_prices(
     ticker: str,
     close: float,
+    high_252: float,
     low_252: float,
     eps: float,
     sector_avg_per: float,
     intrinsic_engine=None,
 ) -> dict:
-    """역산 가격 엔진 — 다중 방법론 통합.
+    """역산 가격 엔진 — 하방 치밀 + 상방 열림.
 
-    Target: min(내재가치, 섹터PER×EPS)  보수적
-    Entry:  현재 종가 (피보나치 참조 추가)
-    Stop:   max(ATR×2, 52주 저점)  보수적
+    상방(Target): max(내재가치, 섹터PER, 52주고점, 수급부스트) — 열린 목표
+    하방(Stop):   max(ATR×2, 52주 저점) — 치밀한 손절
+    분할매수 구간: 피보나치 0.382 / 0.618 / 현재가
 
     Returns:
-        entry_price, stop_loss, target_price, methods, risk_pct, reward_pct
+        entry_price, stop_loss, target_price, target_levels (분할매도용),
+        methods, risk_pct, reward_pct, rr_ratio
     """
     methods = {}
-    targets = []
+    targets = []    # (가격, 라벨) 튜플로 분할매도 구간 기록
     stops = []
 
     # ── (1) DCF/RIM 내재가치 → Target ──
@@ -314,7 +316,7 @@ def calc_smart_prices(
             if iv and iv.get("fair_value"):
                 fair = iv["fair_value"]
                 if fair > close:
-                    targets.append(fair)
+                    targets.append((fair, "내재가치"))
                     methods["intrinsic"] = {
                         "fair_value": int(fair),
                         "dcf": int(iv.get("dcf_value") or 0),
@@ -328,7 +330,7 @@ def calc_smart_prices(
     if sector_avg_per > 0 and eps > 0:
         sector_fair = sector_avg_per * eps
         if sector_fair > close:
-            targets.append(sector_fair)
+            targets.append((sector_fair, "섹터PER"))
             methods["sector_per"] = {
                 "fair_value": int(sector_fair),
                 "sector_avg_per": round(sector_avg_per, 1),
@@ -336,13 +338,21 @@ def calc_smart_prices(
                 "upside_pct": round((sector_fair / close - 1) * 100, 1),
             }
 
-    # ── (3) Parquet: 피보나치 + ATR ──
+    # ── (3) 52주 고점 회복 → Target ──
+    if high_252 > close:
+        targets.append((high_252, "52주고점"))
+        methods["recovery_52w"] = {
+            "high_252": int(high_252),
+            "recovery_pct": round((high_252 / close - 1) * 100, 1),
+        }
+
+    # ── (4) Parquet: 피보나치 + ATR + 수급 부스트 ──
     pq_path = PROCESSED_DIR / f"{ticker}.parquet"
     if pq_path.exists():
         try:
-            df = pd.read_parquet(pq_path, columns=["high", "low", "close"])
+            df = pd.read_parquet(pq_path)
             if len(df) >= 60:
-                # 피보나치 0.618 지지 (60일) → 진입 참조
+                # 피보나치 0.618 / 0.382 지지 (60일) → 분할매수 구간
                 recent_60 = df.tail(60)
                 fib_high = float(recent_60["high"].max())
                 fib_low = float(recent_60["low"].min())
@@ -374,6 +384,33 @@ def calc_smart_prices(
                             "multiplier": 2.0,
                             "atr_stop": int(round(atr_stop)),
                         }
+
+                # 수급 모멘텀 → Target 부스트 (20일 누적)
+                last_row = df.iloc[-1]
+                fgn_20d = float(last_row.get("foreign_net_20d", 0) or 0)
+                inst_20d = float(last_row.get("inst_net_20d", 0) or 0)
+
+                if fgn_20d > 0 and inst_20d > 0:
+                    # 쌍끌이 매수 → 52주 고점 × 1.2 오버슈트
+                    overshoot = high_252 * 1.20
+                    targets.append((overshoot, "수급오버슈트"))
+                    methods["supply_boost"] = {
+                        "foreign_20d_억": round(fgn_20d / 1e8, 1),
+                        "inst_20d_억": round(inst_20d / 1e8, 1),
+                        "type": "DUAL_INFLOW",
+                        "overshoot_target": int(overshoot),
+                    }
+                elif fgn_20d > 0 or inst_20d > 0:
+                    # 단일 주체 매수 → 52주 고점 × 1.1
+                    overshoot = high_252 * 1.10
+                    targets.append((overshoot, "수급단일"))
+                    buyer = "외인" if fgn_20d > inst_20d else "기관"
+                    methods["supply_boost"] = {
+                        "foreign_20d_억": round(fgn_20d / 1e8, 1),
+                        "inst_20d_억": round(inst_20d / 1e8, 1),
+                        "type": f"SINGLE_{buyer}",
+                        "overshoot_target": int(overshoot),
+                    }
         except Exception:
             pass
 
@@ -383,17 +420,24 @@ def calc_smart_prices(
 
     # ══ 최종 가격 결정 ══
 
-    # Target: 보수적 (낮은 값) — 폴백 +30%
+    # Target: 상방 열림 — max (폴백 +30%)
     if targets:
-        target_price = int(round(min(targets), -1))
+        targets_sorted = sorted(targets, key=lambda x: x[0])
+        target_price = int(round(targets_sorted[-1][0], -1))  # max
     else:
+        targets_sorted = []
         target_price = int(round(close * 1.30, -1))
         methods["target_fallback"] = "+30%"
+
+    # 분할매도 구간 (target_levels): 각 방법론의 가격을 오름차순
+    target_levels = []
+    for price, label in targets_sorted:
+        target_levels.append({"price": int(round(price, -1)), "label": label})
 
     # Entry: 현재 종가
     entry_price = int(close)
 
-    # Stop: 보수적 (높은 값 = 더 타이트) — 폴백 -15%
+    # Stop: 하방 치밀 — max(타이트) (폴백 -15%)
     if stops:
         stop_loss = int(round(max(stops), -1))
     else:
@@ -413,6 +457,7 @@ def calc_smart_prices(
         "entry_price": entry_price,
         "stop_loss": stop_loss,
         "target_price": target_price,
+        "target_levels": target_levels,
         "methods": methods,
         "risk_pct": risk,
         "reward_pct": reward,
@@ -569,11 +614,12 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
         else:
             grade = "WATCH"  # 45점 미만
 
-        # ── 역산 가격 엔진 (내재가치/섹터PER/ATR/피보나치) ──
+        # ── 역산 가격 엔진 (하방치밀 + 상방열림 + 수급부스트) ──
         eps_val = pykrx.get("EPS", 0)
         smart = calc_smart_prices(
             ticker=ticker,
             close=close,
+            high_252=dd_data["high_252"],
             low_252=dd_data["low_252"],
             eps=eps_val,
             sector_avg_per=sector_avg_per,
@@ -609,6 +655,7 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
             "risk_pct": smart["risk_pct"],
             "reward_pct": smart["reward_pct"],
             "rr_ratio": smart["rr_ratio"],
+            "target_levels": smart["target_levels"],
             "price_methods": smart["methods"],
             # 개별 축 점수 (디버깅/표시용)
             "scores": {
@@ -710,6 +757,11 @@ def print_report(nuggets: list[dict]):
             f"(손절 {n['stop_loss']:,}) | "
             f"R:R {rr:.1f} | {','.join(method_names) or 'fallback'}"
         )
+        # 분할매도 구간
+        levels = n.get("target_levels", [])
+        if len(levels) >= 2:
+            lvl_str = " → ".join(f"{lv['price']:,}({lv['label']})" for lv in levels)
+            print(f"         분할매도: {lvl_str}")
 
     print(f"{'='*70}")
 
@@ -739,6 +791,11 @@ def send_telegram(nuggets: list[dict]):
             method_tags.append("DCF/RIM")
         if "sector_per" in methods:
             method_tags.append("섹터PER")
+        if "recovery_52w" in methods:
+            method_tags.append("52W")
+        if "supply_boost" in methods:
+            boost_type = methods["supply_boost"].get("type", "")
+            method_tags.append("쌍끌이" if "DUAL" in boost_type else "수급")
         if "atr" in methods:
             method_tags.append("ATR")
         if "fibonacci" in methods:
@@ -757,6 +814,11 @@ def send_telegram(nuggets: list[dict]):
             f"  진입 {n['entry_price']:,} → 목표 {n['target_price']:,} "
             f"(손절 {n['stop_loss']:,})"
         )
+        # 분할매도 구간
+        levels = n.get("target_levels", [])
+        if len(levels) >= 2:
+            lvl_parts = [f"{lv['price']:,}({lv['label']})" for lv in levels]
+            lines.append(f"  분할매도: {' → '.join(lvl_parts)}")
         lines.append(
             f"  R:R {rr:.1f} | {method_str}"
         )
