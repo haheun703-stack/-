@@ -1,0 +1,396 @@
+# ══════════════════════════════════════════════════════════
+# 글로벌 대장주 → 한국 종목 연결 맵
+# ══════════════════════════════════════════════════════════
+# 용도: 섹터맵 페이지에서 "글로벌 대장주 → 한국 하위 종목" 연결 표시
+# 관리: 퀀트봇에서 생성, 정보봇에서 FLOWX UI 연동
+# 갱신: 분기 1회 수동 점검 (공급망 변동 시)
+#
+# 구조:
+#   글로벌 대장주 ticker → yfinance 심볼
+#   kr_stocks → 한국 종목 리스트
+#     ticker: 6자리 종목코드
+#     name: 종목명
+#     relation: 공급/경쟁/자회사/협력 중 택1
+#     detail: 구체적 연결 이유
+#     revenue_dependency: 매출 의존도 (높음/중간/낮음/불명)
+# ══════════════════════════════════════════════════════════
+
+sectors:
+
+  # ─────────────────────────────────────────
+  # 반도체
+  # ─────────────────────────────────────────
+  반도체:
+    etf_code: "091230"
+    global_leaders:
+
+      - ticker: "NVDA"
+        name: "NVIDIA"
+        exchange: "NASDAQ"
+        theme: "AI/GPU/HBM"
+        kr_stocks:
+          - { ticker: "000660", name: "SK하이닉스",     relation: "공급", detail: "HBM 독점 공급 (HBM3E/HBM4)", revenue_dependency: "높음" }
+          - { ticker: "005930", name: "삼성전자",       relation: "공급", detail: "HBM 2nd소스 + 파운드리", revenue_dependency: "중간" }
+          - { ticker: "042700", name: "한미반도체",     relation: "공급", detail: "HBM TC본딩 장비 독점", revenue_dependency: "높음" }
+          - { ticker: "095340", name: "ISC",           relation: "공급", detail: "GPU 테스트소켓", revenue_dependency: "중간" }
+          - { ticker: "058470", name: "리노공업",       relation: "공급", detail: "프로브카드 (웨이퍼 테스트)", revenue_dependency: "중간" }
+          - { ticker: "403870", name: "HPSP",          relation: "공급", detail: "고압 어닐링 장비", revenue_dependency: "중간" }
+          - { ticker: "240810", name: "원익IPS",       relation: "공급", detail: "CVD/ALD 증착장비", revenue_dependency: "낮음" }
+          - { ticker: "036930", name: "주성엔지니어링", relation: "공급", detail: "ALD 장비 (HBM 공정)", revenue_dependency: "중간" }
+
+      - ticker: "TSM"
+        name: "TSMC"
+        exchange: "NYSE"
+        theme: "파운드리/첨단공정"
+        kr_stocks:
+          - { ticker: "005930", name: "삼성전자",       relation: "경쟁", detail: "파운드리 2위 (3nm/2nm 경쟁)", revenue_dependency: "불명" }
+          - { ticker: "036930", name: "주성엔지니어링", relation: "공급", detail: "ALD/CVD 장비 납품", revenue_dependency: "중간" }
+          - { ticker: "319660", name: "피에스케이",     relation: "공급", detail: "드라이 세정/에칭 장비", revenue_dependency: "중간" }
+          - { ticker: "240810", name: "원익IPS",       relation: "공급", detail: "반도체 증착장비", revenue_dependency: "낮음" }
+          - { ticker: "067310", name: "하나마이크론",   relation: "공급", detail: "후공정 패키징/테스트", revenue_dependency: "중간" }
+
+      - ticker: "ASML"
+        name: "ASML"
+        exchange: "NASDAQ"
+        theme: "EUV 노광장비"
+        kr_stocks:
+          - { ticker: "000660", name: "SK하이닉스",     relation: "고객", detail: "EUV 장비 최대 사용처 중 하나", revenue_dependency: "불명" }
+          - { ticker: "005930", name: "삼성전자",       relation: "고객", detail: "EUV 장비 대량 도입 (파운드리+메모리)", revenue_dependency: "불명" }
+          - { ticker: "195870", name: "해성디에스",     relation: "공급", detail: "리드프레임/BGA 기판 (후공정)", revenue_dependency: "낮음" }
+
+      - ticker: "AVGO"
+        name: "Broadcom"
+        exchange: "NASDAQ"
+        theme: "통신반도체/네트워크"
+        kr_stocks:
+          - { ticker: "009150", name: "삼성전기",       relation: "공급", detail: "MLCC, RF모듈", revenue_dependency: "낮음" }
+          - { ticker: "222800", name: "심텍",           relation: "공급", detail: "FC-BGA 기판", revenue_dependency: "중간" }
+          - { ticker: "353200", name: "대덕전자",       relation: "공급", detail: "PCB/반도체기판", revenue_dependency: "낮음" }
+
+      - ticker: "MU"
+        name: "Micron"
+        exchange: "NASDAQ"
+        theme: "메모리반도체"
+        kr_stocks:
+          - { ticker: "000660", name: "SK하이닉스",     relation: "경쟁", detail: "DRAM/NAND 글로벌 2강", revenue_dependency: "불명" }
+          - { ticker: "005930", name: "삼성전자",       relation: "경쟁", detail: "메모리 1위 vs 3위", revenue_dependency: "불명" }
+
+  # ─────────────────────────────────────────
+  # 2차전지
+  # ─────────────────────────────────────────
+  2차전지:
+    etf_code: "305540"
+    global_leaders:
+
+      - ticker: "TSLA"
+        name: "Tesla"
+        exchange: "NASDAQ"
+        theme: "전기차/배터리"
+        kr_stocks:
+          - { ticker: "373220", name: "LG에너지솔루션", relation: "공급", detail: "원통형+파우치 배터리 공급 (미국/중국)", revenue_dependency: "높음" }
+          - { ticker: "006400", name: "삼성SDI",       relation: "공급", detail: "원통형 배터리 공급", revenue_dependency: "중간" }
+          - { ticker: "247540", name: "에코프로비엠",   relation: "공급", detail: "하이니켈 양극재 (NCA/NCM)", revenue_dependency: "높음" }
+          - { ticker: "003670", name: "포스코퓨처엠",   relation: "공급", detail: "양극재+음극재", revenue_dependency: "중간" }
+          - { ticker: "066970", name: "엘앤에프",       relation: "공급", detail: "양극재 (NCMA)", revenue_dependency: "높음" }
+          - { ticker: "278280", name: "천보",           relation: "공급", detail: "전해질 첨가제 (LiFSI)", revenue_dependency: "중간" }
+          - { ticker: "348370", name: "엔켐",           relation: "공급", detail: "전해액", revenue_dependency: "중간" }
+          - { ticker: "112610", name: "씨에스윈드",     relation: "공급", detail: "풍력타워 (에너지 연관)", revenue_dependency: "낮음" }
+
+      - ticker: "CATL"
+        name: "CATL (닝더스다이)"
+        exchange: "SHE"
+        theme: "배터리 글로벌 1위"
+        kr_stocks:
+          - { ticker: "247540", name: "에코프로비엠",   relation: "공급", detail: "양극재 공급", revenue_dependency: "중간" }
+          - { ticker: "003670", name: "포스코퓨처엠",   relation: "공급", detail: "양극재 공급", revenue_dependency: "중간" }
+          - { ticker: "373220", name: "LG에너지솔루션", relation: "경쟁", detail: "글로벌 배터리 1위 vs 2위", revenue_dependency: "불명" }
+
+      - ticker: "ALB"
+        name: "Albemarle"
+        exchange: "NYSE"
+        theme: "리튬 채굴/정제"
+        kr_stocks:
+          - { ticker: "003670", name: "포스코퓨처엠",   relation: "경쟁", detail: "리튬 가공 (아르헨티나 광산)", revenue_dependency: "불명" }
+          - { ticker: "051910", name: "LG화학",        relation: "고객", detail: "리튬 소재 사용", revenue_dependency: "낮음" }
+
+  # ─────────────────────────────────────────
+  # 스마트폰/IT
+  # ─────────────────────────────────────────
+  IT:
+    etf_code: "139260"
+    global_leaders:
+
+      - ticker: "AAPL"
+        name: "Apple"
+        exchange: "NASDAQ"
+        theme: "아이폰/맥/에어팟"
+        kr_stocks:
+          - { ticker: "011070", name: "LG이노텍",       relation: "공급", detail: "카메라모듈 독점 공급 (매출 70%+)", revenue_dependency: "높음" }
+          - { ticker: "009150", name: "삼성전기",       relation: "공급", detail: "MLCC (적층세라믹콘덴서)", revenue_dependency: "중간" }
+          - { ticker: "034220", name: "LG디스플레이",   relation: "공급", detail: "OLED 패널 (아이폰)", revenue_dependency: "높음" }
+          - { ticker: "090460", name: "비에이치",       relation: "공급", detail: "FPCB (연성회로기판)", revenue_dependency: "높음" }
+          - { ticker: "033240", name: "자화전자",       relation: "공급", detail: "카메라 액추에이터 (OIS)", revenue_dependency: "높음" }
+          - { ticker: "051370", name: "인터플렉스",     relation: "공급", detail: "FPCB", revenue_dependency: "중간" }
+          - { ticker: "005930", name: "삼성전자",       relation: "공급", detail: "OLED 디스플레이 + AP(경쟁)", revenue_dependency: "낮음" }
+
+      - ticker: "QCOM"
+        name: "Qualcomm"
+        exchange: "NASDAQ"
+        theme: "모바일AP/5G모뎀"
+        kr_stocks:
+          - { ticker: "005930", name: "삼성전자",       relation: "고객", detail: "갤럭시 스냅드래곤 탑재 + 파운드리 위탁", revenue_dependency: "불명" }
+          - { ticker: "009150", name: "삼성전기",       relation: "공급", detail: "RF모듈/안테나", revenue_dependency: "낮음" }
+
+  # ─────────────────────────────────────────
+  # 바이오/헬스케어
+  # ─────────────────────────────────────────
+  바이오:
+    etf_code: "364970"
+    global_leaders:
+
+      - ticker: "LLY"
+        name: "Eli Lilly"
+        exchange: "NYSE"
+        theme: "비만치료제 (GLP-1)"
+        kr_stocks:
+          - { ticker: "207940", name: "삼성바이오로직스", relation: "공급", detail: "CMO 위탁생산 (바이오의약품)", revenue_dependency: "중간" }
+          - { ticker: "196170", name: "알테오젠",       relation: "협력", detail: "SC제형 플랫폼 기술 (ALT-B4)", revenue_dependency: "높음" }
+
+      - ticker: "NVO"
+        name: "Novo Nordisk"
+        exchange: "NYSE"
+        theme: "비만치료제 (위고비/오젬픽)"
+        kr_stocks:
+          - { ticker: "207940", name: "삼성바이오로직스", relation: "공급", detail: "CMO 위탁생산", revenue_dependency: "중간" }
+          - { ticker: "068270", name: "셀트리온",       relation: "경쟁", detail: "바이오시밀러 경쟁", revenue_dependency: "불명" }
+
+      - ticker: "RHHBY"
+        name: "Roche"
+        exchange: "OTC"
+        theme: "항암제/진단"
+        kr_stocks:
+          - { ticker: "068270", name: "셀트리온",       relation: "경쟁", detail: "허셉틴/아바스틴 바이오시밀러", revenue_dependency: "높음" }
+          - { ticker: "207940", name: "삼성바이오로직스", relation: "공급", detail: "CMO 위탁생산", revenue_dependency: "중간" }
+
+      - ticker: "PFE"
+        name: "Pfizer"
+        exchange: "NYSE"
+        theme: "백신/항암제"
+        kr_stocks:
+          - { ticker: "302440", name: "SK바이오사이언스", relation: "공급", detail: "백신 CDMO 위탁생산", revenue_dependency: "중간" }
+
+  # ─────────────────────────────────────────
+  # 방산
+  # ─────────────────────────────────────────
+  방산:
+    etf_code: "463250"
+    global_leaders:
+
+      - ticker: "LMT"
+        name: "Lockheed Martin"
+        exchange: "NYSE"
+        theme: "전투기/미사일"
+        kr_stocks:
+          - { ticker: "047810", name: "한국항공우주",     relation: "협력", detail: "KF-21 공동개발, FA-50 수출", revenue_dependency: "중간" }
+          - { ticker: "012450", name: "한화에어로스페이스", relation: "공급", detail: "항공엔진/방산장비", revenue_dependency: "낮음" }
+          - { ticker: "079550", name: "LIG넥스원",       relation: "협력", detail: "미사일/유도무기 체계", revenue_dependency: "중간" }
+
+      - ticker: "RTX"
+        name: "RTX (Raytheon)"
+        exchange: "NYSE"
+        theme: "레이더/미사일방어"
+        kr_stocks:
+          - { ticker: "272210", name: "한화시스템",       relation: "협력", detail: "레이더/전자전 장비", revenue_dependency: "낮음" }
+          - { ticker: "012450", name: "한화에어로스페이스", relation: "경쟁", detail: "K9 자주포 글로벌 수출 경쟁", revenue_dependency: "불명" }
+
+      - ticker: "RHM.DE"
+        name: "Rheinmetall"
+        exchange: "XETRA"
+        theme: "전차/포탄"
+        kr_stocks:
+          - { ticker: "012450", name: "한화에어로스페이스", relation: "경쟁", detail: "포탄/장갑차 글로벌 경쟁", revenue_dependency: "불명" }
+          - { ticker: "064350", name: "현대로템",         relation: "경쟁", detail: "K2 전차 수출 경쟁", revenue_dependency: "불명" }
+
+  # ─────────────────────────────────────────
+  # 조선
+  # ─────────────────────────────────────────
+  조선:
+    etf_code: "494670"
+    global_leaders:
+
+      - ticker: "QE"
+        name: "Qatar Energy"
+        exchange: "비상장"
+        theme: "LNG 프로젝트 최대 발주처"
+        kr_stocks:
+          - { ticker: "009540", name: "HD한국조선해양",   relation: "공급", detail: "LNG선 수주 1위", revenue_dependency: "높음" }
+          - { ticker: "010140", name: "삼성중공업",       relation: "공급", detail: "LNG선 수주", revenue_dependency: "높음" }
+          - { ticker: "042660", name: "한화오션",         relation: "공급", detail: "LNG선 + 잠수함", revenue_dependency: "중간" }
+
+      - ticker: "SHEL"
+        name: "Shell"
+        exchange: "NYSE"
+        theme: "LNG/해양플랜트"
+        kr_stocks:
+          - { ticker: "329180", name: "HD현대중공업",     relation: "공급", detail: "FPSO/해양플랜트", revenue_dependency: "중간" }
+          - { ticker: "009540", name: "HD한국조선해양",   relation: "공급", detail: "LNG-FSRU", revenue_dependency: "중간" }
+
+  # ─────────────────────────────────────────
+  # 자동차
+  # ─────────────────────────────────────────
+  자동차:
+    etf_code: "138540"
+    global_leaders:
+
+      - ticker: "TM"
+        name: "Toyota"
+        exchange: "NYSE"
+        theme: "글로벌 자동차 1위"
+        kr_stocks:
+          - { ticker: "005380", name: "현대차",         relation: "경쟁", detail: "글로벌 판매 3위", revenue_dependency: "불명" }
+          - { ticker: "000270", name: "기아",           relation: "경쟁", detail: "글로벌 판매 7위", revenue_dependency: "불명" }
+          - { ticker: "012330", name: "현대모비스",     relation: "공급", detail: "현대차 부품 독점 공급", revenue_dependency: "높음" }
+
+      - ticker: "TSLA"
+        name: "Tesla"
+        exchange: "NASDAQ"
+        theme: "전기차/자율주행"
+        kr_stocks:
+          - { ticker: "005380", name: "현대차",         relation: "경쟁", detail: "아이오닉/EV 라인업 경쟁", revenue_dependency: "불명" }
+          - { ticker: "000270", name: "기아",           relation: "경쟁", detail: "EV6/EV9 경쟁", revenue_dependency: "불명" }
+          - { ticker: "204320", name: "만도",           relation: "공급", detail: "ADAS/전장 부품", revenue_dependency: "중간" }
+          - { ticker: "011210", name: "현대위아",       relation: "공급", detail: "전동화 구동부품", revenue_dependency: "낮음" }
+
+      - ticker: "GM"
+        name: "General Motors"
+        exchange: "NYSE"
+        theme: "미국 자동차 1위"
+        kr_stocks:
+          - { ticker: "373220", name: "LG에너지솔루션", relation: "공급", detail: "얼티엄셀즈 JV (배터리)", revenue_dependency: "높음" }
+          - { ticker: "012330", name: "현대모비스",     relation: "공급", detail: "전장 부품 납품", revenue_dependency: "낮음" }
+
+  # ─────────────────────────────────────────
+  # 소프트웨어/AI
+  # ─────────────────────────────────────────
+  소프트웨어:
+    etf_code: "157490"
+    global_leaders:
+
+      - ticker: "MSFT"
+        name: "Microsoft"
+        exchange: "NASDAQ"
+        theme: "AI/클라우드/오피스"
+        kr_stocks:
+          - { ticker: "035420", name: "네이버",         relation: "경쟁", detail: "하이퍼클로바X AI, 클라우드", revenue_dependency: "불명" }
+          - { ticker: "035720", name: "카카오",         relation: "경쟁", detail: "카나나 AI, 클라우드", revenue_dependency: "불명" }
+          - { ticker: "012510", name: "더존비즈온",     relation: "협력", detail: "MS Azure 기반 기업용 AI SaaS", revenue_dependency: "낮음" }
+
+      - ticker: "GOOGL"
+        name: "Google (Alphabet)"
+        exchange: "NASDAQ"
+        theme: "검색/AI/클라우드"
+        kr_stocks:
+          - { ticker: "035420", name: "네이버",         relation: "경쟁", detail: "검색/AI 경쟁 (한국 시장)", revenue_dependency: "불명" }
+          - { ticker: "181710", name: "NHN",           relation: "경쟁", detail: "클라우드/게임 플랫폼", revenue_dependency: "불명" }
+
+      - ticker: "META"
+        name: "Meta"
+        exchange: "NASDAQ"
+        theme: "SNS/메타버스/AI"
+        kr_stocks:
+          - { ticker: "035720", name: "카카오",         relation: "경쟁", detail: "메신저/소셜 플랫폼 경쟁", revenue_dependency: "불명" }
+
+  # ─────────────────────────────────────────
+  # 에너지/화학
+  # ─────────────────────────────────────────
+  에너지화학:
+    etf_code: "139250"
+    global_leaders:
+
+      - ticker: "XOM"
+        name: "ExxonMobil"
+        exchange: "NYSE"
+        theme: "정유/석유화학"
+        kr_stocks:
+          - { ticker: "010950", name: "S-Oil",         relation: "협력", detail: "사우디 아람코 자회사 (한국 정유)", revenue_dependency: "높음" }
+          - { ticker: "096770", name: "SK이노베이션",   relation: "경쟁", detail: "정유/석유화학", revenue_dependency: "불명" }
+          - { ticker: "078930", name: "GS",            relation: "경쟁", detail: "GS칼텍스 (정유)", revenue_dependency: "불명" }
+
+      - ticker: "SHEL"
+        name: "Shell"
+        exchange: "NYSE"
+        theme: "LNG/정유"
+        kr_stocks:
+          - { ticker: "096770", name: "SK이노베이션",   relation: "경쟁", detail: "정유/LNG", revenue_dependency: "불명" }
+          - { ticker: "051910", name: "LG화학",        relation: "경쟁", detail: "석유화학 글로벌 경쟁", revenue_dependency: "불명" }
+
+      - ticker: "BASFY"
+        name: "BASF"
+        exchange: "OTC"
+        theme: "화학 글로벌 1위"
+        kr_stocks:
+          - { ticker: "051910", name: "LG화학",        relation: "경쟁", detail: "석유화학/전지소재", revenue_dependency: "불명" }
+          - { ticker: "011170", name: "롯데케미칼",    relation: "경쟁", detail: "석유화학", revenue_dependency: "불명" }
+          - { ticker: "009830", name: "한화솔루션",     relation: "경쟁", detail: "태양광/화학", revenue_dependency: "불명" }
+
+  # ─────────────────────────────────────────
+  # 철강/소재
+  # ─────────────────────────────────────────
+  철강소재:
+    etf_code: "139240"
+    global_leaders:
+
+      - ticker: "MT"
+        name: "ArcelorMittal"
+        exchange: "NYSE"
+        theme: "철강 글로벌 1위"
+        kr_stocks:
+          - { ticker: "005490", name: "POSCO홀딩스",   relation: "경쟁", detail: "철강 글로벌 5위", revenue_dependency: "불명" }
+          - { ticker: "004020", name: "현대제철",       relation: "경쟁", detail: "전기로/고로 철강", revenue_dependency: "불명" }
+
+      - ticker: "FCX"
+        name: "Freeport-McMoRan"
+        exchange: "NYSE"
+        theme: "구리 채굴"
+        kr_stocks:
+          - { ticker: "010130", name: "고려아연",       relation: "경쟁", detail: "아연/구리 제련", revenue_dependency: "불명" }
+
+  # ─────────────────────────────────────────
+  # 게임/미디어
+  # ─────────────────────────────────────────
+  게임:
+    etf_code: "300610"
+    global_leaders:
+
+      - ticker: "NTDOY"
+        name: "Nintendo"
+        exchange: "OTC"
+        theme: "콘솔 게임"
+        kr_stocks:
+          - { ticker: "259960", name: "크래프톤",       relation: "경쟁", detail: "배틀그라운드 글로벌 경쟁", revenue_dependency: "불명" }
+          - { ticker: "251270", name: "넷마블",         relation: "경쟁", detail: "모바일 게임", revenue_dependency: "불명" }
+
+      - ticker: "TCEHY"
+        name: "Tencent"
+        exchange: "OTC"
+        theme: "게임/메신저/투자"
+        kr_stocks:
+          - { ticker: "259960", name: "크래프톤",       relation: "협력", detail: "배그 모바일 퍼블리싱 (중국)", revenue_dependency: "높음" }
+          - { ticker: "251270", name: "넷마블",         relation: "협력", detail: "투자/퍼블리싱 관계", revenue_dependency: "중간" }
+          - { ticker: "035720", name: "카카오",         relation: "협력", detail: "카카오게임즈 투자", revenue_dependency: "낮음" }
+
+
+# ══════════════════════════════════════════════════════════
+# 통계 요약
+# ══════════════════════════════════════════════════════════
+# 섹터 수: 10개
+# 글로벌 대장주: 26개
+# 한국 연결 종목: 약 80개 (중복 포함)
+# 고의존도(높음) 종목: ~15개 → 대장주 변동 시 즉시 연동
+#
+# 사용법 (정보봇):
+#   1. yfinance로 글로벌 대장주 시세 수집 (장전/장중)
+#   2. 대장주 변동률 > 3% 시 연결 한국 종목 알림
+#   3. FLOWX 섹터맵 페이지에서 "대장주 → 하위종목" 시각화
+#   4. revenue_dependency: "높음" 종목 우선 강조
+# ══════════════════════════════════════════════════════════
