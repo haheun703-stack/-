@@ -615,14 +615,33 @@ def scan_theme_smallcap(bluechips: list[dict], sector_rotation: list[dict]) -> l
     return smallcaps
 
 
+def load_universe_caps() -> dict[str, float]:
+    """universe.csv → {ticker: 시총(억원)}."""
+    csv_path = DATA_DIR / "universe.csv"
+    if not csv_path.exists():
+        return {}
+    result = {}
+    import csv
+    with open(csv_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            ticker = row.get("ticker", "")
+            cap_raw = row.get("market_cap", "0")
+            try:
+                result[ticker] = float(cap_raw) / 1e8  # 원→억원
+            except (ValueError, TypeError):
+                pass
+    return result
+
+
 def fetch_theme_smallcaps(hot_sectors: set[str], existing_codes: set[str]) -> list[dict]:
     """Perplexity로 핫 섹터의 테마 수혜 소형주를 추가 발굴.
 
     Args:
         hot_sectors: 대형주에서 도출된 핫 섹터 (방산, 2차전지 등)
-        existing_codes: 이미 추출된 소형주 코드 (중복 방지)
+        existing_codes: 이미 추출된 소형주 코드 (중복 방지, 대형주 코드 포함)
     Returns:
-        추가 소형주 리스트
+        추가 소형주 리스트 (시총 검증 통과 종목만)
     """
     api_key = os.getenv("PERPLEXITY_API_KEY", "")
     if not api_key:
@@ -708,19 +727,33 @@ def fetch_theme_smallcaps(hot_sectors: set[str], existing_codes: set[str]) -> li
             content = content[start:end]
 
         data = json.loads(content)
+
+        # 시총 검증용 데이터 로드
+        universe_caps = load_universe_caps()
+        MAX_CAP = 30000  # 억원 (소형주 상한)
+        MIN_CAP = 500    # 억원 (너무 작은 종목 제외)
+
         result = []
+        skipped = 0
         for theme in data.get("themes", []):
             sector = theme.get("sector", "")
             for s in theme.get("stocks", []):
                 code = s.get("code", "")
                 if not code or code in existing_codes:
                     continue
+                # 시총 검증: universe.csv에 있으면 시총 확인
+                cap = universe_caps.get(code, 0)
+                if cap > MAX_CAP:
+                    logger.info("[테마매핑] 시총 초과 제외: %s(%s) 시총 %.0f억",
+                                s.get("name", ""), code, cap)
+                    skipped += 1
+                    continue
                 result.append({
                     "code": code,
                     "name": s.get("name", ""),
                     "sector": sector,
                     "theme": sector,
-                    "cap": 0,  # Perplexity에서 시총 미제공
+                    "cap": cap if cap > 0 else 0,
                     "price": 0,
                     "drop_52w": 0,
                     "fib_zone": "",
@@ -731,7 +764,7 @@ def fetch_theme_smallcaps(hot_sectors: set[str], existing_codes: set[str]) -> li
                     "pbr": 0,
                     "ai_reason": s.get("reason", ""),
                 })
-        logger.info("[테마매핑] Perplexity %d종목 추가", len(result))
+        logger.info("[테마매핑] Perplexity %d종목 추가 (%d종목 시총초과 제외)", len(result), skipped)
         return result
 
     except Exception as e:
@@ -746,10 +779,52 @@ def fetch_theme_smallcaps(hot_sectors: set[str], existing_codes: set[str]) -> li
 PERPLEXITY_URL = "https://api.perplexity.ai/chat/completions"
 
 
+# 주요 대형주 영문 종목명 매핑 (Perplexity 검색 정확도 향상)
+KR_TO_EN = {
+    "삼성전자": "Samsung Electronics",
+    "SK하이닉스": "SK Hynix",
+    "현대차": "Hyundai Motor",
+    "기아": "Kia Corporation",
+    "삼성바이오로직스": "Samsung Biologics",
+    "셀트리온": "Celltrion",
+    "LG에너지솔루션": "LG Energy Solution",
+    "POSCO홀딩스": "POSCO Holdings",
+    "KB금융": "KB Financial Group",
+    "신한지주": "Shinhan Financial Group",
+    "하나금융지주": "Hana Financial Group",
+    "삼성SDI": "Samsung SDI",
+    "LG화학": "LG Chem",
+    "현대모비스": "Hyundai Mobis",
+    "NAVER": "NAVER Corp",
+    "카카오": "Kakao Corp",
+    "삼성물산": "Samsung C&T",
+    "한국전력": "KEPCO",
+    "SK이노베이션": "SK Innovation",
+    "S-Oil": "S-Oil Corporation",
+    "한화에어로스페이스": "Hanwha Aerospace",
+    "HD현대중공업": "HD Hyundai Heavy Industries",
+    "현대로템": "Hyundai Rotem",
+    "한화오션": "Hanwha Ocean",
+    "두산에너빌리티": "Doosan Enerbility",
+    "HD한국조선해양": "HD Korea Shipbuilding",
+    "LG전자": "LG Electronics",
+    "SK텔레콤": "SK Telecom",
+    "KT": "KT Corp",
+    "크래프톤": "Krafton",
+    "삼성전기": "Samsung Electro-Mechanics",
+    "삼성생명": "Samsung Life Insurance",
+    "HMM": "HMM Co Ltd",
+    "LS에코에너지": "LS Eco Energy",
+    "HD현대일렉트릭": "HD Hyundai Electric",
+    "한미반도체": "Hanmi Semiconductor",
+    "리노공업": "LEENO Industrial",
+}
+
+
 def fetch_global_views(bluechips: list[dict], top_n: int = 10) -> dict[str, dict]:
     """Perplexity Sonar로 상위 대형주의 해외 시각 수집.
 
-    API 비용 절감을 위해 배치 쿼리 (10종목을 1~2회 호출로 처리).
+    영문 종목명 포함 → 해외 소스 검색 정확도 향상.
     Returns: {code: {"summary": "...", "sentiment": "positive/neutral/negative", "source": "..."}}
     """
     api_key = os.getenv("PERPLEXITY_API_KEY", "")
@@ -759,14 +834,23 @@ def fetch_global_views(bluechips: list[dict], top_n: int = 10) -> dict[str, dict
 
     # 상위 N종목만 (등급순 정렬된 상태)
     targets = bluechips[:top_n]
-    stock_list = ", ".join(f"{b['name']}({b['code']})" for b in targets)
+    # 영문명 포함: "삼성전자/Samsung Electronics(005930)"
+    stock_lines = []
+    for b in targets:
+        en_name = KR_TO_EN.get(b["name"], "")
+        if en_name:
+            stock_lines.append(f"{b['name']} / {en_name} ({b['code']})")
+        else:
+            stock_lines.append(f"{b['name']} ({b['code']})")
+    stock_list = "\n".join(f"- {line}" for line in stock_lines)
 
-    prompt = f"""다음 한국 대형주에 대해 해외(영문) 투자 시각을 분석해주세요.
-각 종목별로 해외 애널리스트/기관/미디어의 최근 의견을 1~2줄로 요약하세요.
+    prompt = f"""Analyze recent overseas (English-language) investment views on these Korean large-cap stocks.
+For each stock, summarize analyst/institutional/media opinions in 1-2 sentences (respond in Korean).
 
-종목: {stock_list}
+Stocks:
+{stock_list}
 
-반드시 아래 JSON 형식으로만 응답하세요:
+Respond ONLY in this JSON format:
 {{
   "stocks": [
     {{
@@ -789,9 +873,11 @@ def fetch_global_views(bluechips: list[dict], top_n: int = 10) -> dict[str, dict
             {
                 "role": "system",
                 "content": (
-                    "You are a global equity analyst. "
-                    "Summarize recent overseas analyst views on Korean large-cap stocks. "
-                    "Respond in Korean. Output pure JSON only, no markdown."
+                    "You are a global equity analyst specializing in Korean stocks. "
+                    "Search for recent English-language analyst reports, news, and opinions "
+                    "about the given Korean stocks. Use Bloomberg, Reuters, Seeking Alpha, "
+                    "Goldman Sachs, Morgan Stanley, JP Morgan sources when available. "
+                    "Summarize findings in Korean. Output pure JSON only, no markdown."
                 ),
             },
             {"role": "user", "content": prompt},
@@ -806,13 +892,28 @@ def fetch_global_views(bluechips: list[dict], top_n: int = 10) -> dict[str, dict
         resp.raise_for_status()
         content = resp.json()["choices"][0]["message"]["content"]
 
-        # JSON 파싱 (코드블록 제거)
+        # JSON 파싱 (코드블록 제거 + 안전 추출)
         content = content.strip()
         if content.startswith("```"):
             content = content.split("\n", 1)[1] if "\n" in content else content[3:]
         if content.endswith("```"):
             content = content[:-3]
         content = content.strip()
+
+        # 안전한 JSON 추출: 첫 번째 { ... } 블록
+        start = content.find("{")
+        if start >= 0:
+            depth = 0
+            end = start
+            for i, ch in enumerate(content[start:], start):
+                if ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        end = i + 1
+                        break
+            content = content[start:end]
 
         data = json.loads(content)
         result = {}
@@ -979,7 +1080,8 @@ def main():
         hot_sectors -= INDEX_NAMES
         hot_sectors.discard("")
 
-        existing_codes = {s["code"] for s in smallcaps}
+        # 대형주 코드 + 이미 추출된 소형주 코드 → 중복/대형주 오추천 방지
+        existing_codes = {s["code"] for s in smallcaps} | {b["code"] for b in bluechips}
         ai_smallcaps = fetch_theme_smallcaps(hot_sectors, existing_codes)
         if ai_smallcaps:
             smallcaps.extend(ai_smallcaps)
