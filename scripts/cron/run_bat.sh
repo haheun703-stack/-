@@ -223,6 +223,7 @@ case "$BAT" in
     run_py scripts/scan_fibonacci.py
     run_py scripts/scan_market_ranking.py
     run_py scripts/scan_bio_cdmo.py
+    run_py scripts/scan_bluechip_checkup.py
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
     run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
