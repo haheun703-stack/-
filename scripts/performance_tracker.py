@@ -21,6 +21,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 logger = logging.getLogger(__name__)
@@ -33,7 +35,6 @@ def _get_latest_close(ticker: str) -> int:
     pq = DATA_DIR / "processed" / f"{ticker}.parquet"
     if pq.exists():
         try:
-            import pandas as pd
             df = pd.read_parquet(pq, columns=["close"])
             if len(df) > 0:
                 return int(df.iloc[-1]["close"])
@@ -47,7 +48,6 @@ def _get_sar_trend(ticker: str) -> int:
     pq = DATA_DIR / "processed" / f"{ticker}.parquet"
     if pq.exists():
         try:
-            import pandas as pd
             df = pd.read_parquet(pq, columns=["sar_trend"])
             if len(df) > 0 and "sar_trend" in df.columns:
                 return int(df.iloc[-1]["sar_trend"])

@@ -23,6 +23,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import yaml
+
 # PYTHONPATH 안전장치 (BAT 스케줄 실행 시 필수)
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -74,7 +76,6 @@ def _save_json(path: Path, data: dict) -> None:
 def _load_settings() -> dict:
     """settings.yaml의 ai_brain_v3 섹션 로드"""
     try:
-        import yaml
         settings_path = CONFIG_DIR / "settings.yaml"
         with open(settings_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
@@ -87,7 +88,6 @@ def _load_settings() -> dict:
 def _load_upgrade_settings() -> dict:
     """settings.yaml의 ai_upgrade 섹션 로드"""
     try:
-        import yaml
         settings_path = CONFIG_DIR / "settings.yaml"
         with open(settings_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
@@ -105,7 +105,6 @@ def _load_brain_cap() -> dict:
         dict: {regime, swing_pct, confidence, slot_cap, min_conviction, capped}
         실패 시 기본값 반환 (기존 로직 그대로 동작).
     """
-    import yaml
     try:
         settings_path = CONFIG_DIR / "settings.yaml"
         with open(settings_path, encoding="utf-8") as f:
