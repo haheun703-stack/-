@@ -67,9 +67,9 @@ CREATE TABLE IF NOT EXISTS collect_log (
 
 def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
     """DB 초기화 + 스키마 생성."""
-    conn = sqlite3.connect(str(db_path), timeout=30)
+    conn = sqlite3.connect(str(db_path), timeout=60)
     conn.execute("PRAGMA journal_mode=WAL")  # 동시 읽기/쓰기 허용
-    conn.execute("PRAGMA busy_timeout=10000")  # 10초 대기
+    conn.execute("PRAGMA busy_timeout=30000")  # 30초 대기 (기존 10초 → 확대)
     conn.executescript(SCHEMA_SQL)
     conn.commit()
     return conn
@@ -472,11 +472,20 @@ def collect_and_store(
         success_count += 1
         consecutive_fail = 0
         for country, vol in countries.items():
-            conn.execute(
-                "INSERT OR REPLACE INTO nationality_daily "
-                "(date, ticker, name, country, trade_vol) VALUES (?, ?, ?, ?, ?)",
-                (date, ticker, name, country, vol),
-            )
+            for _retry in range(3):
+                try:
+                    conn.execute(
+                        "INSERT OR REPLACE INTO nationality_daily "
+                        "(date, ticker, name, country, trade_vol) VALUES (?, ?, ?, ?, ?)",
+                        (date, ticker, name, country, vol),
+                    )
+                    break
+                except sqlite3.OperationalError as e:
+                    if "locked" in str(e) and _retry < 2:
+                        logger.warning(f"DB locked — {_retry+1}/3 재시도 ({ticker})")
+                        time.sleep(2 * (_retry + 1))
+                    else:
+                        raise
             total_rows += 1
 
         time.sleep(delay)
@@ -488,13 +497,23 @@ def collect_and_store(
     else:
         status = "OK"
 
-    # 수집 로그
-    conn.execute(
-        "INSERT OR REPLACE INTO collect_log (date, collected_at, stock_count, status) "
-        "VALUES (?, ?, ?, ?)",
-        (date, datetime.now().isoformat(), success_count, status),
-    )
-    conn.commit()
+    # 수집 로그 (DB lock 방어)
+    for _retry in range(3):
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO collect_log (date, collected_at, stock_count, status) "
+                "VALUES (?, ?, ?, ?)",
+                (date, datetime.now().isoformat(), success_count, status),
+            )
+            conn.commit()
+            break
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e) and _retry < 2:
+                logger.warning(f"DB locked (commit) — {_retry+1}/3 재시도")
+                time.sleep(3 * (_retry + 1))
+            else:
+                logger.error(f"DB locked 최종 실패: {e}")
+                raise
     conn.close()
 
     logger.info(f"수집 완료: {date} / {success_count}종목 / {total_rows}행 / {status}")
@@ -504,6 +523,72 @@ def collect_and_store(
         "rows": total_rows,
         "status": status,
     }
+
+
+def detect_and_fill_gaps(
+    lookback_days: int = 15,
+    max_fill: int = 5,
+    db_path: Path = DB_PATH,
+) -> list[dict]:
+    """최근 N일 내 누락된 거래일을 감지하고 자동 백필.
+
+    BAT-D 매 실행 시 호출 → 크래시/타임아웃으로 빠진 날짜를 자동 복구.
+    T+1 지연 감안: 어제(T-1)까지만 검사.
+
+    Args:
+        lookback_days: 검사할 과거 캘린더일 수
+        max_fill: 한 번에 최대 백필할 거래일 수 (BAT-D 타임아웃 방지)
+        db_path: SQLite 경로
+
+    Returns:
+        [{"date": "20260327", "stocks": 483, ...}, ...]
+    """
+    conn = init_db(db_path)
+
+    # DB에 이미 수집된 날짜 (stock_count > 0만)
+    rows = conn.execute(
+        "SELECT date FROM collect_log WHERE stock_count > 0"
+    ).fetchall()
+    collected = set(r[0] for r in rows)
+    conn.close()
+
+    # T-1까지의 평일 목록 생성
+    yesterday = datetime.now() - timedelta(days=1)
+    while yesterday.weekday() >= 5:
+        yesterday -= timedelta(days=1)
+
+    start = yesterday - timedelta(days=lookback_days)
+    missing = []
+    d = start
+    while d <= yesterday:
+        if d.weekday() < 5:  # 평일만
+            ds = d.strftime("%Y%m%d")
+            if ds not in collected:
+                missing.append(ds)
+        d += timedelta(days=1)
+
+    if not missing:
+        logger.info(f"gap 감지: 최근 {lookback_days}일 내 누락 없음")
+        return []
+
+    # 오래된 날짜부터 채우기 (max_fill 제한)
+    to_fill = missing[:max_fill]
+    logger.info(f"gap 감지: {len(missing)}건 누락 → {len(to_fill)}건 백필 시도 {to_fill}")
+
+    results = []
+    for date_str in to_fill:
+        r = collect_and_store(date_str, db_path)
+        results.append(r)
+        # 공휴일이면 0종목 → API_ERROR로 기록되지만 실제론 정상
+        # LOGIN_FAIL이면 더 이상 진행 불가
+        if r["status"] == "LOGIN_FAIL":
+            logger.error("gap 백필 중 로그인 실패 — 중단")
+            break
+
+    filled = sum(1 for r in results if r["status"] == "OK")
+    skipped = sum(1 for r in results if r["status"] == "SKIP")
+    logger.info(f"gap 백필 완료: {filled}건 성공, {skipped}건 스킵, 잔여 {len(missing) - len(to_fill)}건")
+    return results
 
 
 def backfill(days: int = 10, db_path: Path = DB_PATH) -> list[dict]:

@@ -21,7 +21,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.adapters.krx_nationality_collector import collect_and_store, backfill, DB_PATH
+from src.adapters.krx_nationality_collector import collect_and_store, backfill, detect_and_fill_gaps, DB_PATH
 from src.use_cases.nationality_signal import run_analysis, format_telegram
 
 logging.basicConfig(
@@ -70,6 +70,13 @@ def main():
 
     # ─── 수집 ───
     if not args.analyze:
+        # gap 자동 복구: T-1 수집 전 최근 15일 누락분 먼저 채우기
+        if not args.date:
+            gap_results = detect_and_fill_gaps(lookback_days=15, max_fill=5)
+            for gr in gap_results:
+                status_icon = "✅" if gr["status"] == "OK" else "⏭️" if gr["status"] == "SKIP" else "❌"
+                logger.info(f"  gap-fill {gr['date']}: {status_icon} {gr['stocks']}종목")
+
         logger.info("=== 국적별 외국인 수급 수집 ===")
         result = collect_and_store(date=args.date)
         logger.info(
