@@ -368,7 +368,7 @@ def main():
             log(f"[FAILED] BAT-{bat_id}: 복구 실패 — {', '.join(stale2)}")
 
     # ── Universe CSV 연령 검사 (pykrx 야간 불안정 대비) ──
-    universe_csv = QM / "stock_data_daily" / "universe.csv"
+    universe_csv = QM / "data" / "universe.csv"
     if universe_csv.exists():
         csv_mtime = datetime.fromtimestamp(universe_csv.stat().st_mtime)
         csv_age_days = (datetime.now() - csv_mtime).days
