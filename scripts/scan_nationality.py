@@ -102,6 +102,20 @@ def main():
             except Exception:
                 pass
 
+    # ─── T-0 당일 수집 시도 (장마감 후 데이터 가용 시) ───
+    if not args.analyze and not args.date and not args.backfill:
+        from datetime import datetime
+        now = datetime.now()
+        if now.weekday() < 5 and now.hour >= 16:  # 평일 16시 이후
+            today_str = now.strftime("%Y%m%d")
+            logger.info("=== T-0 당일(%s) 수집 시도 ===", today_str)
+            result_t0 = collect_and_store(date=today_str)
+            logger.info(
+                "T-0 수집: %s / %d종목 / %d행 / %s",
+                result_t0["date"], result_t0.get("stocks", 0),
+                result_t0.get("rows", 0), result_t0["status"],
+            )
+
     # ─── 분석 ───
     logger.info("=== 국적별 수급 분석 ===")
     signals = run_analysis()

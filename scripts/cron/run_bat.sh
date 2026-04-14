@@ -149,6 +149,7 @@ case "$BAT" in
     run_py scripts/update_kospi_index.py
     # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
     run_py scripts/us_overnight_signal.py --update
+    run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
     run_py_long scripts/scan_nationality.py
     run_py_xlong scripts/collect_foreign_exhaustion.py
     # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)

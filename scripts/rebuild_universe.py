@@ -53,6 +53,30 @@ except ImportError:
 # 1단계: 시총 기준 종목 선정
 # ─────────────────────────────────────────────
 
+def _get_nearest_business_day(date_str: str) -> str:
+    """pykrx 없이 로컬에서 최근 영업일 계산 (주말 스킵, 공휴일 미반영)."""
+    d = datetime.strptime(date_str, "%Y%m%d")
+    # 오늘이 주말이면 금요일로
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d.strftime("%Y%m%d")
+
+
+def _retry_pykrx(func, *args, retries: int = 3, delay: float = 2.0, **kwargs):
+    """pykrx API 호출 재시도 래퍼 (UnicodeDecodeError/네트워크 오류 방어)."""
+    for attempt in range(retries):
+        try:
+            return func(*args, **kwargs)
+        except (UnicodeDecodeError, ConnectionError, Exception) as e:
+            if attempt < retries - 1:
+                logger.warning("pykrx 호출 실패 (시도 %d/%d): %s — %.0f초 후 재시도",
+                               attempt + 1, retries, e, delay)
+                time.sleep(delay)
+                delay *= 1.5
+            else:
+                raise
+
+
 def select_universe(
     min_cap_trillion: float = 0.2,
     ref_date: str = "",
@@ -61,17 +85,21 @@ def select_universe(
 ) -> pd.DataFrame:
     """시총 기준 유니버스 선정. Returns DataFrame(ticker, name, market_cap)."""
     if not ref_date:
-        # 최근 거래일
-        ref_date = krx.get_nearest_business_day_in_a_week(
-            datetime.now().strftime("%Y%m%d"), prev=True
-        )
+        today_str = datetime.now().strftime("%Y%m%d")
+        try:
+            ref_date = _retry_pykrx(
+                krx.get_nearest_business_day_in_a_week, today_str, prev=True
+            )
+        except Exception as e:
+            logger.warning("pykrx 영업일 조회 실패 (%s) — 로컬 계산 fallback", e)
+            ref_date = _get_nearest_business_day(today_str)
 
     logger.info("시총 조회 기준일: %s", ref_date)
     min_cap = min_cap_trillion * 1e12
 
-    kospi = krx.get_market_cap(ref_date, market="KOSPI")
+    kospi = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSPI")
     time.sleep(0.5)
-    kosdaq = krx.get_market_cap(ref_date, market="KOSDAQ")
+    kosdaq = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSDAQ")
 
     all_cap = pd.concat([kospi, kosdaq])
     qualified = all_cap[all_cap["시가총액"] >= min_cap].copy()
