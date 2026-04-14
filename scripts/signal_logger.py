@@ -3,7 +3,7 @@
 tomorrow_picks.json에서 A등급 이상 종목을 Supabase signals 테이블에 기록.
 
 Grade 매핑:
-  적극매수 → AA, 매수 → A, 관심 → B
+  강력 포착 → AA, 포착 → A, 관심 → B
   ai_largecap: confidence ≥ 0.85 → AA, ≥ 0.75 → A, else → B
 
 실행 시점: 매일 08:20 (BAT-D 이후, scan_buy 완료 후)
@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # 등급 매핑: 한글 → 영문
-GRADE_MAP = {"적극매수": "AA", "매수": "A", "관심": "B", "보류": "C"}
+GRADE_MAP = {"강력 포착": "AA", "포착": "A", "관심": "B", "보류": "C",
+             "적극매수": "AA", "매수": "A", "관심매수": "B"}  # 하위호환
 
 # settings.yaml 최소 등급/점수 기본값
 DEFAULT_MIN_GRADE = "A"

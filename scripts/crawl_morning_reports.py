@@ -503,7 +503,7 @@ def main():
             watchable = [
                 p["ticker"]
                 for p in picks.get("picks", [])
-                if p.get("grade") in ("적극매수", "매수", "관심매수", "관찰")
+                if p.get("grade") in ("강력 포착", "포착", "관심", "관찰", "적극매수", "매수", "관심매수")
             ]
         except Exception:
             watchable = []

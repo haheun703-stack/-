@@ -408,8 +408,8 @@ class SmartEntryEngine:
         v3_map = self._load_v3_sizing()
 
         picks = data.get("picks", [])
-        # 적극매수 + 매수 + 관심매수만 (적극매수가 최상위 등급)
-        valid_grades = {"적극매수", "매수", "관심매수"}
+        # 강력 포착 + 포착 + 관심만 (강력 포착이 최상위 등급) — 하위호환 포함
+        valid_grades = {"강력 포착", "포착", "관심", "적극매수", "매수", "관심매수"}
 
         self.candidates = []
         seen_tickers = set()

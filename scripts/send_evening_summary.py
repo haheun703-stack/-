@@ -149,7 +149,8 @@ def _section_picks() -> list[str]:
     lines = [f"\n━━━━ 🏆 내일 추천 TOP{len(top_tickers)} {target_label} ━━━━"]
 
     MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
-    GRADE_EMOJI = {"적극매수": "🔥", "매수": "👍", "관심": "👀"}
+    GRADE_EMOJI = {"강력 포착": "🔥", "포착": "👍", "관심": "👀",
+                   "적극매수": "🔥", "매수": "👍"}  # 하위호환
 
     def _fmt(p_list, group_label, icon):
         if not p_list:
@@ -333,8 +334,8 @@ def _section_nxt_picks() -> list[str]:
     summary = data.get("summary", {})
     lines = ["\n━━━━ 🌙 NXT 추천 ━━━━"]
     lines.append(
-        f"  적극 {summary.get('nxt_적극매수', 0)} / "
-        f"매수 {summary.get('nxt_매수', 0)} / "
+        f"  강력 포착 {summary.get('nxt_강력 포착', summary.get('nxt_적극매수', 0))} / "
+        f"포착 {summary.get('nxt_포착', summary.get('nxt_매수', 0))} / "
         f"관심 {summary.get('nxt_관심', 0)}"
     )
 

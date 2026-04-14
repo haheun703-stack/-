@@ -21,8 +21,8 @@
   ● 겹치기 (두 조건 동시 충족 → 최고등급)
 
 등급:
-  ★ 적극매수 — 두 시그널 동시 또는 쌍끌이(기관+외인 동시) 수급
-  ◎ 매수     — 단일 시그널 + 기관 또는 외인 순매수
+  ★ 강력 포착 — 두 시그널 동시 또는 쌍끌이(기관+외인 동시) 수급
+  ◎ 포착     — 단일 시그널 + 기관 또는 외인 순매수
   ○ 관심     — 조건 근접 (이격 -12%~-15% 등)
 
 Usage:
@@ -232,9 +232,9 @@ def scan_crash_bounce(top_n: int = 30) -> dict:
 
             # ── 등급 ──
             if len(시그널) >= 2 or (시그널 and 쌍끌이):
-                등급 = "적극매수"
+                등급 = "강력 포착"
             elif 시그널:
-                등급 = "매수"
+                등급 = "포착"
             else:
                 등급 = "관심"
 
@@ -355,7 +355,7 @@ def print_report(report: dict) -> None:
     print("  " + "-" * 68)
 
     for r in report["candidates"]:
-        등급표시 = {"적극매수": "★", "매수": "◎", "관심": "○"}.get(r["등급"], " ")
+        등급표시 = {"강력 포착": "★", "포착": "◎", "관심": "○"}.get(r["등급"], " ")
         시그널_짧게 = "+".join(s.replace(" 반등", "") for s in r["시그널"])
         기관 = f"{r['기관_당일']:+.0f}억" if r['기관_당일'] != 0 else "-"
         외인 = f"{r['외인_당일']:+.0f}억" if r['외인_당일'] != 0 else "-"
@@ -366,7 +366,7 @@ def print_report(report: dict) -> None:
 
     print()
     for r in report["candidates"]:
-        if r["등급"] in ("적극매수", "매수"):
+        if r["등급"] in ("강력 포착", "포착"):
             print(f"  [{r['등급']}] {r['name']} ({r['ticker']})")
             for reason in r["이유"]:
                 print(f"    → {reason}")

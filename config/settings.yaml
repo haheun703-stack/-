@@ -2379,8 +2379,8 @@ swing_philosophy:
     enabled: true
     # 52주 고점 대비 낙폭별 매수 강도
     tiers:
-      - { drop_pct: -20, label: "관심매수", position_mult: 0.3 }
-      - { drop_pct: -30, label: "적극매수", position_mult: 0.5 }
+      - { drop_pct: -20, label: "관심", position_mult: 0.3 }
+      - { drop_pct: -30, label: "강력 포착", position_mult: 0.5 }
       - { drop_pct: -40, label: "줍줍매수", position_mult: 0.8 }
     # 대형주/우량주 필터
     min_market_cap_억: 5000     # 시총 5000억 이상

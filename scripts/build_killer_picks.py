@@ -333,7 +333,7 @@ def build_cross_validated_top5() -> list[dict]:
     # 기존 추천 (매수/관찰)
     picks_map = {}
     for p in tomorrow.get("picks", []):
-        if p.get("grade") in ("적극매수", "매수", "관심매수", "관찰"):
+        if p.get("grade") in ("강력 포착", "포착", "관심", "관찰", "적극매수", "매수", "관심매수"):
             picks_map[p["ticker"]] = p
 
     # 섹터 기관 수급 강한 섹터의 종목들

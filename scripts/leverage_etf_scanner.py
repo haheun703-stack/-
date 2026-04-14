@@ -375,7 +375,7 @@ def calc_leverage_score(
     if axis1 <= 5:
         grade = "방향불일치"
     elif total >= 75:
-        grade = "적극매수"
+        grade = "강력 포착"
     elif total >= 60:
         grade = "분할매수"
     elif total >= 45:
@@ -537,8 +537,8 @@ def scan_leverage_etfs(skip_flow: bool = False) -> dict:
         entry["reasons"] = reasons
         entry["score_breakdown"] = breakdown
 
-        # 분할매수 (적극매수/분할매수 등급만)
-        if grade in ("적극매수", "분할매수"):
+        # 분할매수 (강력 포착/분할매수 등급만)
+        if grade in ("강력 포착", "분할매수"):
             entry["split_buy"] = calc_split_buy(entry["close"])
 
         # 동적 상한선 (지수 LONG ETF만)
@@ -590,7 +590,7 @@ def scan_leverage_etfs(skip_flow: bool = False) -> dict:
     print(f"{'=' * 55}")
     print(f"  전체: {len(etfs)}개 ETF")
 
-    for g in ["적극매수", "분할매수", "관심", "대기", "부적합", "방향불일치"]:
+    for g in ["강력 포착", "분할매수", "관심", "대기", "부적합", "방향불일치"]:
         cnt = grades.get(g, 0)
         if cnt > 0:
             print(f"  {g}: {cnt}개")

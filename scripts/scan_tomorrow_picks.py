@@ -1824,11 +1824,11 @@ def classify_pick(
         return "관찰" if total_score >= 40 else "보류"
 
     if total_score >= 70 and n_sources >= 2:
-        grade = "적극매수"
+        grade = "강력 포착"
     elif total_score >= 60 and n_sources >= 2:
-        grade = "매수"
+        grade = "포착"
     elif total_score >= 55:
-        grade = "관심매수"
+        grade = "관심"
     elif total_score >= 40:
         grade = "관찰"
     else:
@@ -1836,7 +1836,7 @@ def classify_pick(
 
     # 수급 캡 적용: 수급 역행이면 관찰까지만
     if flow_cap:
-        grade_order = {"보류": 0, "데이터부족": 0, "관찰": 1, "관심매수": 2, "매수": 3, "적극매수": 4}
+        grade_order = {"보류": 0, "데이터부족": 0, "관찰": 1, "관심": 2, "포착": 3, "강력 포착": 4}
         cap_level = grade_order.get(flow_cap, 1)
         if grade_order.get(grade, 0) > cap_level:
             grade = flow_cap
@@ -2780,11 +2780,11 @@ def main():
         results.append(rec)
 
     # 정렬: 등급 → 점수
-    grade_order = {"적극매수": 0, "매수": 1, "관심매수": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
+    grade_order = {"강력 포착": 0, "포착": 1, "관심": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
 
     # ── TOP 선별: 전략 그룹별 슬롯 분리 ──
-    buyable_grades = {"적극매수", "매수", "관심매수"}
+    buyable_grades = {"강력 포착", "포착", "관심"}
     buyable = [r for r in results if r["grade"] in buyable_grades]
 
     # AI 거부권: AVOID 종목은 최종 추천에서 제외
@@ -2945,7 +2945,7 @@ def main():
 
     print(f"\n{'='*60}")
     print(f"{mode_label} [내일 추천] 총 {len(results)}건 (TOP10: {len(top5)}건)")
-    for g in ["적극매수", "매수", "관심매수", "관찰", "보류", "데이터부족"]:
+    for g in ["강력 포착", "포착", "관심", "관찰", "보류", "데이터부족"]:
         cnt = grade_stats.get(g, 0)
         if cnt:
             print(f"  {g}: {cnt}건")

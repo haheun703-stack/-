@@ -917,7 +917,7 @@
     <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;">
         {% for grade, count in market.picks_stats.items() %}
         {% if count > 0 %}
-        {% set colors = {'적극매수':'#DC2626','매수':'#F59E0B','관심매수':'#3B82F6','관찰':'#374151','보류':'#374151','데이터부족':'#374151'} %}
+        {% set colors = {'강력 포착':'#DC2626','포착':'#F59E0B','관심':'#3B82F6','관찰':'#374151','보류':'#374151','데이터부족':'#374151','적극매수':'#DC2626','매수':'#F59E0B','관심매수':'#3B82F6'} %}
         <span style="font-size:16px;padding:8px 16px;border-radius:12px;background:{{ colors.get(grade,'#374151') }}22;color:{{ colors.get(grade,'#9CA3AF') }};border:1px solid {{ colors.get(grade,'#4B5563') }}44;">{{ grade }} {{ count }}건</span>
         {% endif %}
         {% endfor %}
@@ -948,7 +948,7 @@
     {% if market.picks %}
     {% for pick in market.picks[:10] %}
     {% set rank = loop.index %}
-    {% set gs_bg = '#DC2626' if pick.grade == '적극매수' else '#F59E0B' if pick.grade == '매수' else '#3B82F6' %}
+    {% set gs_bg = '#DC2626' if pick.grade in ('강력 포착', '적극매수') else '#F59E0B' if pick.grade in ('포착', '매수') else '#3B82F6' %}
     {% set pick_score = pick.score|default(pick.total_score|default(0)) %}
     {% set pick_code = pick.code|default(pick.ticker|default('')) %}
     {% set score_color = '#EF4444' if pick_score >= 70 else '#F59E0B' if pick_score >= 55 else '#3B82F6' %}
@@ -966,7 +966,7 @@
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:{{ rank_bg }};color:{{ rank_fg }};font-size:17px;font-weight:700;">{{ rank }}</span>
                 <span style="font-weight:700;font-size:22px;color:#E5E7EB;">{{ pick.name }}</span>
                 <span style="font-size:15px;color:#6B7280;font-family:monospace;">{{ pick_code }}</span>
-                <span style="font-size:15px;padding:6px 14px;border-radius:8px;background:{{ gs_bg }};color:{{ '#fff' if pick.grade == '적극매수' else '#000' }};font-weight:600;">{{ pick.grade }}</span>
+                <span style="font-size:15px;padding:6px 14px;border-radius:8px;background:{{ gs_bg }};color:{{ '#fff' if pick.grade in ('강력 포착', '적극매수') else '#000' }};font-weight:600;">{{ pick.grade }}</span>
                 {# AI+봇 타입 배지 #}
                 {% if has_ai %}
                 <span style="font-size:15px;padding:6px 14px;border-radius:8px;background:rgba(139,92,246,0.15);color:#A78BFA;font-weight:600;">🤖 AI+봇</span>
@@ -1135,7 +1135,7 @@
             <div style="display:flex;align-items:center;gap:12px;flex:1;">
                 <span style="font-weight:700;font-size:17px;color:#E5E7EB;">{{ p.name }}</span>
                 <span style="font-size:13px;color:#6B7280;font-family:monospace;">{{ p.ticker }}</span>
-                {% set gs_bg = '#DC2626' if p.grade == '적극매수' else '#F59E0B' if p.grade == '매수' else '#3B82F6' %}
+                {% set gs_bg = '#DC2626' if p.grade in ('강력 포착', '적극매수') else '#F59E0B' if p.grade in ('포착', '매수') else '#3B82F6' %}
                 <span style="font-size:13px;padding:4px 10px;border-radius:8px;background:{{ gs_bg }}33;color:{{ gs_bg }};font-weight:600;">{{ p.grade }}</span>
                 <span style="font-size:14px;color:#6B7280;">{{ "%.0f"|format(p.score) }}점</span>
             </div>

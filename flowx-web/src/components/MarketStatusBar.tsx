@@ -3,9 +3,12 @@
 import type { MarketStatus } from "@/lib/types";
 
 const VERDICT_STYLE: Record<string, { color: string; bg: string }> = {
+  "강력 포착": { color: "text-green-400", bg: "bg-green-900/30" },
+  "포착": { color: "text-green-400", bg: "bg-green-900/30" },
+  "관망": { color: "text-yellow-400", bg: "bg-yellow-900/30" },
+  "경계": { color: "text-red-400", bg: "bg-red-900/30" },
   적극매수: { color: "text-green-400", bg: "bg-green-900/30" },
   매수: { color: "text-green-400", bg: "bg-green-900/30" },
-  관망: { color: "text-yellow-400", bg: "bg-yellow-900/30" },
   매도: { color: "text-red-400", bg: "bg-red-900/30" },
 };
 

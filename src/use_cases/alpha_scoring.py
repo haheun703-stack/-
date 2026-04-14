@@ -378,13 +378,13 @@ def calc_alpha_score(
     if disqualified and result.total_score < 50:
         result.grade = "보류"
     elif result.total_score >= 70 and result.tier1_count >= 1:
-        result.grade = "적극매수"
+        result.grade = "강력 포착"
     elif result.total_score >= 50 and (result.tier1_count >= 1 or result.tier2_count >= 3):
-        result.grade = "매수"
+        result.grade = "포착"
     elif result.total_score >= 35 and result.tier2_count >= 2:
-        result.grade = "매수"
+        result.grade = "포착"
     elif result.total_score >= 25:
-        result.grade = "관심매수"
+        result.grade = "관심"
     elif result.total_score >= 12:
         result.grade = "관찰"
     else:

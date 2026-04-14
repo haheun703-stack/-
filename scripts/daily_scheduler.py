@@ -729,8 +729,8 @@ class DailyScheduler:
                     count = len(data.get("top5", []))
                     stats = data.get("stats", {})
                     logger.info(
-                        "[Phase 10] BAT-D tomorrow_picks.json 사용 (top5=%d종목, 적극매수=%s)",
-                        count, stats.get("적극매수", 0),
+                        "[Phase 10] BAT-D tomorrow_picks.json 사용 (top5=%d종목, 강력 포착=%s)",
+                        count, stats.get("강력 포착", stats.get("적극매수", 0)),
                     )
                     self._notify(f"Phase 10: tomorrow_picks {count}종목 (BAT-D 결과)")
                     return
@@ -828,9 +828,9 @@ class DailyScheduler:
             pass
 
         lines.append(f"\U0001f4ca {target} 추천 | "
-                     f"\u2705\ufe0f\ufe0f\ufe0f\ufe0f\ufe0f 적극매수 {stats.get('적극매수', 0)} / "
-                     f"매수 {stats.get('매수', 0)} / "
-                     f"관심 {stats.get('관심매수', 0)}")
+                     f"\u2705\ufe0f\ufe0f\ufe0f\ufe0f\ufe0f 강력 포착 {stats.get('강력 포착', stats.get('적극매수', 0))} / "
+                     f"포착 {stats.get('포착', stats.get('매수', 0))} / "
+                     f"관심 {stats.get('관심', stats.get('관심매수', 0))}")
         lines.append("")
 
         # ── AI 대형주 추천 (v3 Brain) ──

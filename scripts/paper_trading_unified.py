@@ -67,9 +67,9 @@ TAX_PCT = 0.0018               # 매도세 0.18%
 
 # 등급별 사이징 (자본 대비 %)
 SIZING = {
-    "AA": 0.15,    # 적극매수/confidence>=0.85: 자본의 15%
-    "A": 0.12,     # 매수/confidence>=0.75: 12%
-    "B": 0.10,     # 관심매수/기타: 10%
+    "AA": 0.15,    # 강력 포착/confidence>=0.85: 자본의 15%
+    "A": 0.12,     # 포착/confidence>=0.75: 12%
+    "B": 0.10,     # 관심/기타: 10%
 }
 
 # 매도 규칙
@@ -322,12 +322,12 @@ def collect_candidates() -> list[dict]:
             grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
             logger.info("[MULTI-SIG] %s grade=%s → A 승격 (시그널 %d개, score=%.1f)",
                         pick.get("name", ticker), grade_kr, len(alpha_sigs), score)
-        elif grade_kr == "적극매수":
+        elif grade_kr in ("강력 포착", "적극매수"):
             grade = "AA"
-        elif grade_kr == "매수":
+        elif grade_kr in ("포착", "매수"):
             grade = "A"
         else:
-            # B등급(관심매수/관찰/보류) 차단
+            # B등급(관심/관찰/보류) 차단
             logger.debug("[ALPHA] %s B등급 제외 (grade=%s)", ticker, grade_kr)
             continue
 

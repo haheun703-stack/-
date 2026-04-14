@@ -269,7 +269,7 @@ def _check_tomorrow_picks(ret_map: dict) -> dict:
     data = _load_json(DATA_DIR / "tomorrow_picks.json")
     if not data:
         return {"total": 0, "hit": 0, "hit_rate": 0, "avg_ret": 0}
-    buy_grades = {"적극매수", "매수", "관심매수"}
+    buy_grades = {"강력 포착", "포착", "관심", "적극매수", "매수", "관심매수"}
     tickers = [
         p["ticker"] for p in data.get("picks", [])
         if p.get("grade") in buy_grades
@@ -365,7 +365,7 @@ def _check_ai_v3(ret_map: dict) -> dict:
     picks = data if isinstance(data, list) else data.get("picks", [])
     tickers = [
         p.get("ticker", "") for p in picks
-        if p.get("action") in ("BUY", "적극매수", "매수")
+        if p.get("action") in ("BUY", "강력 포착", "포착", "적극매수", "매수")
            or p.get("confidence", 0) >= 0.7
     ]
     return _accuracy_stat(tickers, ret_map)

@@ -542,7 +542,7 @@ def _exec_cmd(cmd, brain, market, holdings, metrics):
             name = p.get('name', '?')
             code = p.get('code', '')
             sigs = ', '.join(p.get('signals', [])[:3])
-            emoji = '🟢' if g == '적극매수' else '🟡' if g == '매수' else '⚪'
+            emoji = '🟢' if g in ('강력 포착', '적극매수') else '🟡' if g in ('포착', '매수') else '⚪'
             lines.append(f"{emoji} {i:>2}. {name}({code}) — {s}점 [{g}]")
             if sigs:
                 lines.append(f"     시그널: {sigs}")

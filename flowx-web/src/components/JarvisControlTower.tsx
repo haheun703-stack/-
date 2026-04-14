@@ -138,11 +138,14 @@ const ICO = {
 /* ─── 상수 ─── */
 
 const GRADE_COLORS: Record<string, string> = {
+  "강력 포착": "bg-red-600 text-white",
+  "포착": "bg-green-600 text-white",
+  "관심": "bg-blue-600 text-white",
+  "관찰": "bg-yellow-600 text-white",
+  "보류": "bg-gray-700 text-gray-400",
   "적극매수": "bg-red-600 text-white",
   "매수": "bg-green-600 text-white",
   "관심매수": "bg-blue-600 text-white",
-  "관찰": "bg-yellow-600 text-white",
-  "보류": "bg-gray-700 text-gray-400",
 };
 
 const REGIME_DISPLAY: Record<string, { icon: string; label: string; color: string; bg: string }> = {
@@ -221,7 +224,7 @@ export default function JarvisControlTower() {
 
   const allPicks = picks?.picks ?? [];
   const buyable = allPicks
-    .filter((p) => ["적극매수", "매수", "관심매수", "관찰"].includes(p.grade))
+    .filter((p) => ["강력 포착", "포착", "관심", "관찰", "적극매수", "매수", "관심매수"].includes(p.grade))
     .sort((a, b) => b.total_score - a.total_score);
 
   const stats = picks?.stats ?? {};

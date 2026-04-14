@@ -266,7 +266,7 @@ def generate_morning_briefing(date_str: str = "") -> dict:
     # ── L6: 추천 종목 ──
     picks_data = _load_json(DATA_DIR / "tomorrow_picks.json")
     picks = picks_data.get("picks", [])
-    top_picks = [p for p in picks if p.get("grade") in ("적극매수", "매수")][:5]
+    top_picks = [p for p in picks if p.get("grade") in ("강력 포착", "포착", "적극매수", "매수")][:5]
 
     news_picks = []
     for p in top_picks:

@@ -606,7 +606,7 @@ def build_ai_pick_rows(date_str: str = "") -> list[dict]:
 
     소스: data/tomorrow_picks.json
       - ai_largecap: AI 두뇌 대형주 추천 (confidence 기반)
-      - picks: 전략 종합 추천 (적극매수/매수 등급만)
+      - picks: 전략 종합 추천 (강력 포착/포착 등급만)
 
     short_signals 스키마:
         date, code, name, grade, total_score, foreign_detail,

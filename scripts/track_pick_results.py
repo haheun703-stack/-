@@ -262,7 +262,7 @@ def main():
             if top5_tickers:
                 top_picks = [p for p in picks if p["ticker"] in top5_tickers]
             else:
-                top_picks = [p for p in picks if p.get("grade") in ("적극매수", "매수", "관심매수")][:5]
+                top_picks = [p for p in picks if p.get("grade") in ("강력 포착", "포착", "관심", "적극매수", "매수", "관심매수")][:5]
 
             new_count = 0
             for p in top_picks:

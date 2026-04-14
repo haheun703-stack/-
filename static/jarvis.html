@@ -588,7 +588,7 @@ function renderTomorrowPicks() {
   const hasGroups = swingSet.size > 0 || shortSet.size > 0;
   let showPicks = top5List.length > 0
     ? picks.filter(p => top5List.includes(p.ticker))
-    : picks.filter(p => ['적극매수','매수','관심매수'].includes(p.grade)).slice(0, 10);
+    : picks.filter(p => ['강력 포착','포착','관심','적극매수','매수','관심매수'].includes(p.grade)).slice(0, 10);
   if (showPicks.length === 0) {
     el.innerHTML = '';
     return;
@@ -603,6 +603,9 @@ function renderTomorrowPicks() {
   }
 
   const gradeStyle = {
+    '강력 포착': { bg: '#DC2626', fg: '#fff', border: '#EF4444' },
+    '포착':     { bg: '#F59E0B', fg: '#000', border: '#FBBF24' },
+    '관심':     { bg: '#3B82F6', fg: '#fff', border: '#60A5FA' },
     '적극매수': { bg: '#DC2626', fg: '#fff', border: '#EF4444' },
     '매수':     { bg: '#F59E0B', fg: '#000', border: '#FBBF24' },
     '관심매수': { bg: '#3B82F6', fg: '#fff', border: '#60A5FA' },
@@ -922,6 +925,9 @@ function renderPicksHistory() {
     const pickLabel = (r.pick_date || '').slice(5); // MM-DD
 
     const gradeStyle2 = {
+      '강력 포착': { bg: '#DC2626', fg: '#fff' },
+      '포착':     { bg: '#F59E0B', fg: '#000' },
+      '관심':     { bg: '#3B82F6', fg: '#fff' },
       '적극매수': { bg: '#DC2626', fg: '#fff' },
       '매수':     { bg: '#F59E0B', fg: '#000' },
       '관심매수': { bg: '#3B82F6', fg: '#fff' },
@@ -3317,7 +3323,7 @@ function renderHistory() {
         const result = r.settled_price || r.latest_price || r.close_price || 0;
         const ret = r.settled_return != null ? r.settled_return : (r.latest_return != null ? r.latest_return : (r.day1_return || 0));
         const retColor = ret > 0 ? '#10B981' : ret < 0 ? '#EF4444' : '#6B7280';
-        const gradeColors = { '적극매수':'#DC2626', '매수':'#F59E0B', '관심매수':'#3B82F6' };
+        const gradeColors = { '강력 포착':'#DC2626', '포착':'#F59E0B', '관심':'#3B82F6', '적극매수':'#DC2626', '매수':'#F59E0B', '관심매수':'#3B82F6' };
         const gc = gradeColors[r.grade] || '#6B7280';
 
         html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:6px;font-size:11px;font-family:var(--mono)">
