@@ -367,6 +367,35 @@ def main():
             failed.append(f"BAT-{bat_id}: {', '.join(stale2)}")
             log(f"[FAILED] BAT-{bat_id}: 복구 실패 — {', '.join(stale2)}")
 
+    # ── Universe CSV 연령 검사 (pykrx 야간 불안정 대비) ──
+    universe_csv = QM / "stock_data_daily" / "universe.csv"
+    if universe_csv.exists():
+        csv_mtime = datetime.fromtimestamp(universe_csv.stat().st_mtime)
+        csv_age_days = (datetime.now() - csv_mtime).days
+        if csv_age_days <= 7:
+            log(f"[UNIVERSE] CSV {csv_age_days}일전 갱신 — 정상")
+        else:
+            all_ok = False
+            log(f"[UNIVERSE] CSV {csv_age_days}일전 갱신 — 장중 갱신 필요!")
+            if not args.check_only:
+                log("[UNIVERSE] rebuild_universe.py --incremental 시도")
+                ok = rerun_script({
+                    "recover_script": "scripts/rebuild_universe.py",
+                    "recover_args": ["--incremental"],
+                    "recover_timeout": 900,
+                    "label": "유니버스CSV",
+                })
+                if ok:
+                    recovered.append("유니버스CSV")
+                else:
+                    failed.append("유니버스CSV: 갱신 실패 (장중 BAT-H 대기)")
+            else:
+                failed.append(f"유니버스CSV: {csv_age_days}일 미갱신")
+    else:
+        all_ok = False
+        log("[UNIVERSE] CSV 파일 없음!")
+        failed.append("유니버스CSV: 파일 없음")
+
     # ── FLOWX Supabase 업로드 검증 (3차 안전장치) ──
     flowx_ok = check_flowx_uploaded()
     if flowx_ok:

@@ -144,27 +144,33 @@ class KRXSession:
             logger.error(f"KRX 로그인 에러: {e}")
             return False
 
-    def find_isin(self, keyword: str) -> tuple[str | None, str | None]:
-        """종목 검색 → (ISIN, 종목명)."""
-        try:
-            r = self.session.post(
-                f"{self.SEARCH_URL}?solrType=isu&solrIsuType=STK"
-                f"&solrKeyword={requests.utils.quote(keyword)}&rows=3&start=0",
-                headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-                timeout=10,
-            )
-            data = r.json()
-            if data.get("result"):
-                item = data["result"][0]
-                isin = item["isu_cd"]
-                name = item["isu_abbrv"]
-                if isinstance(isin, list):
-                    isin = isin[0]
-                if isinstance(name, list):
-                    name = name[0]
-                return isin, name
-        except Exception as e:
-            logger.warning(f"ISIN 검색 실패 [{keyword}]: {e}")
+    def find_isin(self, keyword: str, retries: int = 2) -> tuple[str | None, str | None]:
+        """종목 검색 → (ISIN, 종목명). 실패 시 재시도."""
+        for attempt in range(retries + 1):
+            try:
+                r = self.session.post(
+                    f"{self.SEARCH_URL}?solrType=isu&solrIsuType=STK"
+                    f"&solrKeyword={requests.utils.quote(keyword)}&rows=3&start=0",
+                    headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
+                    timeout=10,
+                )
+                data = r.json()
+                if data.get("result"):
+                    item = data["result"][0]
+                    isin = item["isu_cd"]
+                    name = item["isu_abbrv"]
+                    if isinstance(isin, list):
+                        isin = isin[0]
+                    if isinstance(name, list):
+                        name = name[0]
+                    return isin, name
+                # 결과 없음 → 재시도 의미 없음 (이름 변경 등)
+                break
+            except Exception as e:
+                if attempt < retries:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+                logger.warning(f"ISIN 검색 실패 [{keyword}]: {e}")
         return None, None
 
     def fetch_nationality(
@@ -388,18 +394,27 @@ def build_full_universe() -> list[tuple[str, str]]:
 def get_target_isins(krx: KRXSession) -> list[tuple[str, str, str]]:
     """대상 종목들의 ISIN을 일괄 조회 (전체 유니버스).
 
+    이름 검색 실패 시 종목코드로 재검색 (종목명 변경 대비).
+
     Returns:
         [(ticker, name, isin), ...]
     """
     universe = build_full_universe()
     results = []
+    fail_count = 0
     for ticker, name in universe:
         isin, found_name = krx.find_isin(name)
+        # 이름 실패 → 종목코드로 재검색 (종목명 변경/특수문자 대비)
+        if not isin and ticker:
+            isin, found_name = krx.find_isin(ticker)
         if isin:
             results.append((ticker, found_name or name, isin))
         else:
-            logger.warning(f"ISIN 못 찾음: {ticker} {name}")
+            fail_count += 1
+            logger.warning(f"ISIN 못 찾음: {ticker} {name} (이름+코드 모두 실패)")
         time.sleep(0.1)
+    if fail_count > 0:
+        logger.warning(f"ISIN 검색 실패 총 {fail_count}건 / {len(universe)}종목")
     return results
 
 

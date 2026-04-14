@@ -86,13 +86,14 @@ def _issue_token(max_retries: int = 3) -> str:
     raise RuntimeError(f"KIS 토큰 발급 실패: {last_error}")
 
 
-def fetch_investor_by_ticker(ticker: str) -> pd.DataFrame:
+def fetch_investor_by_ticker(ticker: str, _retry: int = 0) -> pd.DataFrame:
     """종목별 투자자 매매동향 30일치 조회.
 
     KIS API: FHKST01010900 (주식현재가 투자자)
 
     Args:
         ticker: 종목코드 (6자리)
+        _retry: 내부 재시도 카운터 (외부 호출 금지)
 
     Returns:
         DataFrame with columns:
@@ -120,7 +121,14 @@ def fetch_investor_by_ticker(ticker: str) -> pd.DataFrame:
     data = resp.json()
 
     if data.get("rt_cd") != "0":
-        logger.warning("[%s] KIS 투자자 조회 실패: %s", ticker, data.get("msg1", ""))
+        msg = data.get("msg1", "")
+        # rate limit 감지: "초당 거래건수를 초과" → 1초 대기 후 재시도 (최대 2회)
+        if "초당" in msg and _retry < 2:
+            wait = 1.0 + _retry * 0.5
+            logger.info("[%s] KIS rate limit — %.1f초 대기 후 재시도 (%d/2)", ticker, wait, _retry + 1)
+            time.sleep(wait)
+            return fetch_investor_by_ticker(ticker, _retry=_retry + 1)
+        logger.warning("[%s] KIS 투자자 조회 실패: %s", ticker, msg)
         return pd.DataFrame()
 
     rows = data.get("output", [])
@@ -157,13 +165,13 @@ def fetch_investor_by_ticker(ticker: str) -> pd.DataFrame:
 
 def fetch_investor_batch(
     tickers: list[str],
-    delay: float = 0.1,
+    delay: float = 0.35,
 ) -> dict[str, pd.DataFrame]:
     """여러 종목 투자자 매매동향 배치 조회.
 
     Args:
         tickers: 종목코드 리스트
-        delay: API 호출 간 대기 (초, rate limit 방지)
+        delay: API 호출 간 대기 (초, rate limit 방지). KIS 초당 제한 대비 0.35초 권장.
 
     Returns:
         {ticker: DataFrame}
