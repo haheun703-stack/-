@@ -363,8 +363,7 @@ class FlowxUploader:
         if not self.is_active or not rows:
             return False
         try:
-            self.client.table("sector_rotation").delete().eq("date", date_str).execute()
-            result = self.client.table("sector_rotation").insert(rows).execute()
+            result = self.client.table("sector_rotation").upsert(rows, on_conflict="date,sector").execute()
             if not result.data:
                 logger.warning("[FLOWX] 섹터로테이션 업로드 응답 비어있음: %s", date_str)
                 return False

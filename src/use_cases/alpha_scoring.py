@@ -143,7 +143,7 @@ def calc_alpha_score(
 
     # 마지막 날 수급이 모두 0이면 stale → 유효 마지막 날 탐색 (최대 10일 전까지)
     if (has_inst or has_foreign) and inst.iloc[-1] == 0 and foreign.iloc[-1] == 0:
-        for si in range(len(df) - 1, max(len(df) - 10, 0), -1):
+        for si in range(len(df) - 1, max(len(df) - 11, 0), -1):
             if inst.iloc[si] != 0 or foreign.iloc[si] != 0:
                 supply_idx = si - len(df)  # 음수 인덱스
                 break
