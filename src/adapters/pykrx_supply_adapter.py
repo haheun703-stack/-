@@ -203,6 +203,10 @@ class PykrxSupplyAdapter:
             result.institution_net = int(latest.get("기관합계", 0))
             result.individual_net = int(latest.get("개인", 0))
 
+            # 기타법인 (pykrx에서 제공)
+            if "기타법인" in inv_df.columns:
+                result.etc_corp_net = int(latest.get("기타법인", 0))
+
             # 연기금 (pykrx에서만 제공)
             if "연기금등" in inv_df.columns:
                 result.pension_net = int(latest.get("연기금등", 0))
@@ -218,10 +222,27 @@ class PykrxSupplyAdapter:
                         break
                 result.foreign_consecutive_days = consecutive
 
+            # 개인 연속 순매수 일수
+            if "개인" in inv_df.columns:
+                indiv_series = inv_df["개인"]
+                consecutive = 0
+                for val in reversed(indiv_series.values):
+                    if val > 0:
+                        consecutive += 1
+                    else:
+                        break
+                result.individual_consecutive_days = consecutive
+
             # 기관 20일 누적 순매수
             if "기관합계" in inv_df.columns and len(inv_df) >= 20:
                 result.institution_cumulative_20d = int(
                     inv_df["기관합계"].tail(20).sum()
+                )
+
+            # 개인 20일 누적 순매수
+            if "개인" in inv_df.columns and len(inv_df) >= 20:
+                result.individual_cumulative_20d = int(
+                    inv_df["개인"].tail(20).sum()
                 )
 
         except Exception as e:

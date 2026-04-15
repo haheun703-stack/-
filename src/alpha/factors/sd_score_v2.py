@@ -45,7 +45,11 @@ class SDFeatures:
     inst_net_60d: float = 0.0
 
     # 개인 누적 순매수 (억원)
+    individual_net_5d: float = 0.0
     individual_net_20d: float = 0.0
+
+    # 기타법인 누적 순매수 (억원)
+    etc_corp_net_20d: float = 0.0
 
     # 시총 대비 강도 (market_cap 있을 때만)
     foreign_intensity_20d: float = 0.0   # 양수=매집, 음수=이탈
@@ -73,7 +77,9 @@ class SDFeatures:
             "foreign_net_60d": round(self.foreign_net_60d, 1),
             "inst_net_5d": round(self.inst_net_5d, 1),
             "inst_net_20d": round(self.inst_net_20d, 1),
+            "individual_net_5d": round(self.individual_net_5d, 1),
             "individual_net_20d": round(self.individual_net_20d, 1),
+            "etc_corp_net_20d": round(self.etc_corp_net_20d, 1),
             "foreign_intensity_20d": round(self.foreign_intensity_20d, 6),
             "price_change_20d": round(self.price_change_20d, 2),
             "pattern_score": self.pattern_score,
@@ -120,6 +126,7 @@ def compute_sd_features(
     foreign_col = _find_col(df, ["외국인합계", "foreign_net", "Foreign_Net"])
     inst_col = _find_col(df, ["기관합계", "inst_net", "Inst_Net"])
     indiv_col = _find_col(df, ["개인", "individual_net", "Individual_Net"])
+    etc_corp_col = _find_col(df, ["기타법인", "etc_corp_net", "Etc_Corp_Net"])
     close_col = _find_col(df, ["close", "Close", "종가"])
     volume_col = _find_col(df, ["volume", "Volume", "거래량"])
 
@@ -153,7 +160,10 @@ def compute_sd_features(
     feat.inst_net_20d = _cumsum(inst_col, 20)
     feat.inst_net_60d = _cumsum(inst_col, min(60, idx + 1))
 
+    feat.individual_net_5d = _cumsum(indiv_col, 5)
     feat.individual_net_20d = _cumsum(indiv_col, 20)
+
+    feat.etc_corp_net_20d = _cumsum(etc_corp_col, 20)
 
     # ── 시총 대비 강도 ──
     if market_cap > 0:
@@ -348,6 +358,7 @@ def format_sd_summary(feat: SDFeatures) -> str:
         f"외{feat.foreign_net_20d:+,.0f}억(20d)",
         f"기{feat.inst_net_20d:+,.0f}억(20d)",
         f"개{feat.individual_net_20d:+,.0f}억(20d)",
+        f"법{feat.etc_corp_net_20d:+,.0f}억(20d)",
     ]
     if feat.foreign_intensity_20d != 0:
         parts.append(f"강도={feat.foreign_intensity_20d:.4f}")

@@ -63,7 +63,7 @@ def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
     """
     result = {"ticker": ticker, "status": "skip", "new_rows": 0}
 
-    supply_cols = ["기관합계", "외국인합계", "개인"]
+    supply_cols = ["기관합계", "외국인합계", "개인", "기타법인"]
     for col in supply_cols:
         if col not in df.columns:
             df[col] = 0.0
@@ -104,9 +104,11 @@ def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
         return result
 
     filled = 0
-    inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
+    inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인", "기타법인": "기타법인"}
     for kr_col, en_col in inv_col_map.items():
         if kr_col in inv_df.columns:
+            if en_col not in df.columns:
+                df[en_col] = 0.0
             common_idx = inv_df.index.intersection(zero_dates)
             if len(common_idx) > 0:
                 df.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]
@@ -214,7 +216,7 @@ def extend_single(parquet_path: Path, end_date: str, *,
                 new_rows[col] = 0.0  # 없는 컬럼은 0으로 채움
 
         # 수급 컬럼이 기존 parquet에 없으면 미리 추가 (전체 유니버스 수급 수집)
-        for supply_col in ["기관합계", "외국인합계", "개인"]:
+        for supply_col in ["기관합계", "외국인합계", "개인", "기타법인"]:
             if supply_col not in df.columns:
                 df[supply_col] = 0.0
             if supply_col not in new_rows.columns:
@@ -245,9 +247,11 @@ def extend_single(parquet_path: Path, end_date: str, *,
                     logger.debug("[%s] KIS fallback 실패: %s", ticker, e)
 
             if inv_df is not None:
-                inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인"}
+                inv_col_map = {"기관합계": "기관합계", "외국인합계": "외국인합계", "개인": "개인", "기타법인": "기타법인"}
                 for kr_col, en_col in inv_col_map.items():
-                    if kr_col in inv_df.columns and en_col in new_rows.columns:
+                    if kr_col in inv_df.columns:
+                        if en_col not in new_rows.columns:
+                            new_rows[en_col] = 0.0
                         common_idx = inv_df.index.intersection(new_rows.index)
                         if len(common_idx) > 0:
                             new_rows.loc[common_idx, en_col] = inv_df.loc[common_idx, kr_col]

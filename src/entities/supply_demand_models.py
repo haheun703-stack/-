@@ -137,8 +137,11 @@ class InvestorFlowData:
     institution_net: int = 0         # 기관 순매수 (원)
     pension_net: int = 0             # 연기금 순매수 (원)
     individual_net: int = 0          # 개인 순매수 (원)
+    etc_corp_net: int = 0            # 기타법인 순매수 (원)
     foreign_consecutive_days: int = 0  # 외국인 연속 순매수 일수
+    individual_consecutive_days: int = 0  # 개인 연속 순매수 일수
     institution_cumulative_20d: int = 0  # 기관 20일 누적 순매수 (원)
+    individual_cumulative_20d: int = 0   # 개인 20일 누적 순매수 (원)
     foreign_ownership_pct: float = 0.0  # 외국인 보유비율 (%)
     foreign_ownership_change: float = 0.0  # 보유비율 변화 (%p)
 
@@ -149,8 +152,12 @@ class InvestorFlowData:
             "foreign_net": self.foreign_net,
             "institution_net": self.institution_net,
             "pension_net": self.pension_net,
+            "individual_net": self.individual_net,
+            "etc_corp_net": self.etc_corp_net,
             "foreign_consecutive_days": self.foreign_consecutive_days,
+            "individual_consecutive_days": self.individual_consecutive_days,
             "institution_cumulative_20d": self.institution_cumulative_20d,
+            "individual_cumulative_20d": self.individual_cumulative_20d,
             "foreign_ownership_change": self.foreign_ownership_change,
         }
 

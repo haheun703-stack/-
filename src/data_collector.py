@@ -106,7 +106,7 @@ class DataCollector:
             # 필요한 것만 선택
             cols_needed = []
             for col in df.columns:
-                if "기관" in col or "외국인" in col or "개인" in col:
+                if "기관" in col or "외국인" in col or "개인" in col or "기타법인" in col:
                     cols_needed.append(col)
             if cols_needed:
                 df = df[cols_needed]

@@ -113,7 +113,7 @@ class SupplyDemandAnalyzer:
         return min(100, max(0, risk))
 
     # ─────────────────────────────────────────
-    # L5: 기관/외인 수급 (0-100, 높을수록 유리)
+    # L5: 기관/외인/개인 수급 (0-100, 높을수록 유리)
     # ─────────────────────────────────────────
     def _score_investor_flow(self, f: InvestorFlowData) -> float:
         score = 50.0  # 기본 중립
@@ -139,6 +139,14 @@ class SupplyDemandAnalyzer:
             score += 5  # 가장 장기 관점 투자자
         elif f.pension_net < 0:
             score -= 3
+
+        # 개인 수급 분석 (개인 주도 급등 감지)
+        # 개인 연속 순매수 5일+ = 개인 주도 상승 모멘텀
+        if f.individual_consecutive_days >= 5:
+            score += 5  # 개인 주도 상승세 (긍정)
+        # 개인만 매수하고 스마트머니 이탈 = 물림 위험 (함정률에서 처리)
+        if f.individual_net > 0 and f.foreign_net < 0 and f.institution_net < 0:
+            score -= 10  # 개인만 버티는 중 → 위험
 
         return min(100, max(0, score))
 
@@ -168,6 +176,11 @@ class SupplyDemandAnalyzer:
                 adj -= 10  # 외국인 5일+ 순매수 → 함정률 -10p
             if flow.institution_cumulative_20d > 0:
                 adj -= 5   # 기관 누적 양전환 → -5p
+            # 개인만 매수 + 스마트머니 이탈 → 함정률 급증
+            if (flow.individual_net > 0
+                    and flow.foreign_net < 0
+                    and flow.institution_net < 0):
+                adj += 10  # 물림 위험 → 함정률 +10p
 
         return max(-30, min(30, adj))
 
@@ -212,6 +225,11 @@ class SupplyDemandAnalyzer:
         # 외국인+기관 동시 순매도 → 에너지 감소
         if flow.foreign_net < 0 and flow.institution_net < 0:
             adj -= 0.10  # 쌍매도
+
+        # 개인+기관 동시 순매수 (외국인 부재) → 내수 에너지
+        if (flow.individual_net > 0 and flow.institution_net > 0
+                and flow.foreign_net <= 0):
+            adj += 0.05  # 내수 주도 상승 에너지
 
         return max(-0.2, min(0.2, adj))
 
