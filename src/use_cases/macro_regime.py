@@ -260,10 +260,12 @@ def _judge_fx(indicators: dict) -> dict:
     details = []
     score = 50
 
-    # 절대 수준
-    if usd_krw >= 1450:
-        level = "고환율권"
-        score -= 8  # 고환율 = 불안 요소
+    # 절대 수준 (2026-04 기준 뉴 노멀: 1500원대 고착)
+    if usd_krw >= 1550:
+        level = "초고환율권"
+        score -= 5  # 1550+만 불안 요소 (완화)
+    elif usd_krw >= 1450:
+        level = "고환율권"  # 뉴 노멀 — 감점 없음
     elif usd_krw >= 1300:
         level = "중고환율권"
     elif usd_krw >= 1150:
