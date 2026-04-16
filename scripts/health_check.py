@@ -170,6 +170,48 @@ def check_flowx_uploaded() -> bool:
         return False
 
 
+def check_signals_uploaded() -> bool:
+    """Supabase signals 테이블에 오늘 created_at 존재 여부 확인."""
+    try:
+        uploader = FlowxUploader()
+        if not uploader.is_active:
+            log("[SIGNALS] Supabase 미연결 — 검증 스킵")
+            return True
+        today_start = TODAY + "T00:00:00"
+        result = (
+            uploader.client.table("signals")
+            .select("created_at")
+            .gte("created_at", today_start)
+            .limit(1)
+            .execute()
+        )
+        return bool(result.data)
+    except Exception as e:
+        log(f"[SIGNALS] Supabase 조회 실패: {e}")
+        return False
+
+
+def rerun_signal_logger() -> bool:
+    """signal_logger.py 단독 재실행 — tomorrow_picks.json → signals 테이블 기록."""
+    log("[SIGNALS-RERUN] signal_logger.py 재실행 시작")
+    try:
+        result = subprocess.run(
+            [str(PY), "scripts/signal_logger.py"],
+            capture_output=True,
+            text=True,
+            timeout=180,
+            cwd=str(QM),
+        )
+        log(f"[SIGNALS-RERUN] 종료 (exit={result.returncode})")
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        log("[SIGNALS-RERUN] 타임아웃 (180초 초과)")
+        return False
+    except Exception as e:
+        log(f"[SIGNALS-RERUN] 실행 오류: {e}")
+        return False
+
+
 def rerun_flowx() -> bool:
     """upload_flowx.py 단독 재실행."""
     log("[FLOWX-RERUN] upload_flowx.py 재실행 시작")
@@ -385,8 +427,16 @@ def main():
                     "recover_timeout": 900,
                     "label": "유니버스CSV",
                 })
+                # ★ exit code만 믿지 않고 실제 CSV mtime 재확인 (거짓 OK 방지)
                 if ok:
-                    recovered.append("유니버스CSV")
+                    new_mtime = datetime.fromtimestamp(universe_csv.stat().st_mtime)
+                    new_age = (datetime.now() - new_mtime).days
+                    if new_age <= 7:
+                        recovered.append("유니버스CSV")
+                        log(f"[UNIVERSE] 복구 검증 통과 — CSV {new_age}일전 갱신")
+                    else:
+                        failed.append(f"유니버스CSV: rebuild exit=0이지만 CSV mtime 여전히 {new_age}일전 (--incremental 한계, BAT-H 장중 대기)")
+                        log(f"[UNIVERSE] 거짓 OK 차단 — rebuild 후에도 CSV 미갱신 ({new_age}일전)")
                 else:
                     failed.append("유니버스CSV: 갱신 실패 (장중 BAT-H 대기)")
             else:
@@ -414,6 +464,24 @@ def main():
                 log("[FLOWX] 재업로드 후에도 실패")
         else:
             failed.append("FLOWX: Supabase 오늘 데이터 없음")
+
+    # ── signals 테이블 (tracker) 신선도 검증 (4차 안전장치) ──
+    signals_ok = check_signals_uploaded()
+    if signals_ok:
+        log("[SIGNALS] Supabase signals 오늘 데이터 확인 — 정상")
+    else:
+        log("[SIGNALS] Supabase signals 오늘 데이터 없음 — signal_logger 재실행 시도")
+        all_ok = False
+        if not args.check_only:
+            rerun_ok = rerun_signal_logger()
+            if rerun_ok and check_signals_uploaded():
+                recovered.append("signals(tracker)")
+                log("[SIGNALS] 재실행 성공")
+            else:
+                failed.append("signals(tracker): Supabase 업로드 실패 (tomorrow_picks 부재 가능)")
+                log("[SIGNALS] 재실행 후에도 실패")
+        else:
+            failed.append("signals(tracker): Supabase 오늘 데이터 없음")
 
     # 결과 알림
     if all_ok:
