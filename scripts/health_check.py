@@ -191,6 +191,47 @@ def check_signals_uploaded() -> bool:
         return False
 
 
+def check_relay_uploaded() -> bool:
+    """Supabase dashboard_relay 테이블에 오늘 날짜 존재 여부 확인.
+
+    BAT-D G2(릴레이) 완료 전에 BAT-F(17:15) FLOWX 일괄 업로드가 먼저 실행되면
+    relay_trading_signal.json이 아직 없어 relay=False 순서 문제 발생.
+    HEALTH는 18:00에 실행되므로 파일이 이미 있어 재업로드 성공 가능.
+    """
+    try:
+        uploader = FlowxUploader()
+        if not uploader.is_active:
+            log("[RELAY] Supabase 미연결 — 검증 스킵")
+            return True
+        result = (
+            uploader.client.table("dashboard_relay")
+            .select("date")
+            .eq("date", TODAY)
+            .limit(1)
+            .execute()
+        )
+        return bool(result.data)
+    except Exception as e:
+        log(f"[RELAY] Supabase 조회 실패: {e}")
+        return False
+
+
+def rerun_relay_upload() -> bool:
+    """FLOWX relay 업로드만 단독 재실행 (FlowxUploader.upload_relay)."""
+    log("[RELAY-RERUN] dashboard_relay 재업로드 시작")
+    try:
+        uploader = FlowxUploader()
+        if not uploader.is_active:
+            log("[RELAY-RERUN] Supabase 미연결")
+            return False
+        ok = uploader.upload_relay(TODAY)
+        log(f"[RELAY-RERUN] 결과: {ok}")
+        return bool(ok)
+    except Exception as e:
+        log(f"[RELAY-RERUN] 실행 오류: {e}")
+        return False
+
+
 def rerun_signal_logger() -> bool:
     """signal_logger.py 단독 재실행 — tomorrow_picks.json → signals 테이블 기록."""
     log("[SIGNALS-RERUN] signal_logger.py 재실행 시작")
@@ -435,10 +476,28 @@ def main():
                         recovered.append("유니버스CSV")
                         log(f"[UNIVERSE] 복구 검증 통과 — CSV {new_age}일전 갱신")
                     else:
-                        failed.append(f"유니버스CSV: rebuild exit=0이지만 CSV mtime 여전히 {new_age}일전 (--incremental 한계, BAT-H 장중 대기)")
-                        log(f"[UNIVERSE] 거짓 OK 차단 — rebuild 후에도 CSV 미갱신 ({new_age}일전)")
+                        # --incremental은 CSV 미기록 구조 → 풀 rebuild fallback 시도
+                        log(f"[UNIVERSE] --incremental 후에도 CSV {new_age}일전 — 풀 rebuild fallback 시도")
+                        ok2 = rerun_script({
+                            "recover_script": "scripts/rebuild_universe.py",
+                            "recover_args": [],  # 풀 모드 (기본 --min-cap 0.2)
+                            "recover_timeout": 1200,
+                            "label": "유니버스CSV(풀)",
+                        })
+                        if ok2:
+                            new_mtime2 = datetime.fromtimestamp(universe_csv.stat().st_mtime)
+                            new_age2 = (datetime.now() - new_mtime2).days
+                            if new_age2 <= 1:
+                                recovered.append("유니버스CSV(풀rebuild)")
+                                log(f"[UNIVERSE] 풀 rebuild 복구 성공 — CSV {new_age2}일전 갱신")
+                            else:
+                                failed.append(f"유니버스CSV: 풀 rebuild 후에도 {new_age2}일 미갱신 (pykrx 이상, BAT-H 장중 대기)")
+                                log(f"[UNIVERSE] 풀 rebuild도 실패 — CSV {new_age2}일전")
+                        else:
+                            failed.append("유니버스CSV: 풀 rebuild 실행 실패 (pykrx 야간 불안정 가능, BAT-H 장중 대기)")
+                            log("[UNIVERSE] 풀 rebuild 실행 실패")
                 else:
-                    failed.append("유니버스CSV: 갱신 실패 (장중 BAT-H 대기)")
+                    failed.append("유니버스CSV: --incremental 실행 실패 (장중 BAT-H 대기)")
             else:
                 failed.append(f"유니버스CSV: {csv_age_days}일 미갱신")
     else:
@@ -482,6 +541,26 @@ def main():
                 log("[SIGNALS] 재실행 후에도 실패")
         else:
             failed.append("signals(tracker): Supabase 오늘 데이터 없음")
+
+    # ── dashboard_relay 테이블 신선도 검증 (5차 안전장치) ──
+    # BAT-D G2(17:19 relay_engine) < BAT-F(17:15 upload_flowx) 순서 역전으로
+    # relay=False 발생 가능. HEALTH 18:00에는 파일이 있으므로 재업로드하면 성공.
+    relay_ok = check_relay_uploaded()
+    if relay_ok:
+        log("[RELAY] Supabase dashboard_relay 오늘 데이터 확인 — 정상")
+    else:
+        log("[RELAY] Supabase dashboard_relay 오늘 데이터 없음 — 단독 재업로드 시도")
+        all_ok = False
+        if not args.check_only:
+            rerun_ok = rerun_relay_upload()
+            if rerun_ok and check_relay_uploaded():
+                recovered.append("dashboard_relay")
+                log("[RELAY] 재업로드 성공")
+            else:
+                failed.append("dashboard_relay: 재업로드 실패 (relay_trading_signal.json 확인 필요)")
+                log("[RELAY] 재업로드 후에도 실패")
+        else:
+            failed.append("dashboard_relay: Supabase 오늘 데이터 없음")
 
     # 결과 알림
     if all_ok:

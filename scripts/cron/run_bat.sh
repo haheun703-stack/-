@@ -196,6 +196,7 @@ case "$BAT" in
     run_py_long scripts/scan_whale_detect.py
     run_py_long scripts/scan_force_hybrid.py
     run_py scripts/scan_value_chain.py
+    run_py scripts/crawl_dart_disclosure.py
     run_py scripts/dart_event_signal.py
     run_py scripts/crawl_market_news.py
     run_py_long scripts/perplexity_market_intel.py
