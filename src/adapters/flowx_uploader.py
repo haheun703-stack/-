@@ -1187,8 +1187,11 @@ def build_jarvis_payload() -> dict:
     top_picks = buyable[:20]
 
     # ── killer_picks 병합: 기관수급 조기감지 종목을 메인 추천에 통합 ──
+    # picks_v2 사용 시에는 병합 스킵 (killer_picks는 score 스케일 다르고
+    # 별도 섹션 jarvis.killer_picks로 이미 표시됨. daily_pick_v2 결과 오염 방지)
+    using_v2 = picks_raw.get("source") == "daily_pick_v2"
     killer_raw = _load("killer_picks.json")
-    if killer_raw:
+    if killer_raw and not using_v2:
         existing_tickers = {p.get("ticker") for p in top_picks}
         killer_items = _convert_killer_to_picks(killer_raw)
         for ki in killer_items:
@@ -1220,6 +1223,7 @@ def build_jarvis_payload() -> dict:
             "mode_label": picks_raw.get("mode_label", ""),
             "total_candidates": picks_raw.get("total_candidates", 0),
             "stats": picks_raw.get("stats", {}),
+            "source": picks_raw.get("source", "legacy"),
             "picks": top_picks,
         },
         "accuracy": acc_raw,
