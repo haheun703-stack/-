@@ -14,6 +14,7 @@ Usage:
 
 from __future__ import annotations
 
+import csv
 import json
 import logging
 import os
@@ -1006,10 +1007,107 @@ def _build_signals_data(all_picks: list, accuracy: dict) -> dict:
     }
 
 
+def _grade_from_score_v2(score: float, has_warn: bool) -> str:
+    """daily_pick_v2 score → 등급 변환.
+
+    - 무경고 + 40+ : 강력 포착
+    - 무경고 + 30+ : 포착
+    - 무경고 + 25+ : 관심
+    - 무경고 + 20+ : 관찰
+    - 경고 있음    : 등급 1단계 하락
+    """
+    if has_warn:
+        if score >= 45:
+            return "포착"
+        if score >= 35:
+            return "관심"
+        return "관찰"
+    if score >= 40:
+        return "강력 포착"
+    if score >= 30:
+        return "포착"
+    if score >= 25:
+        return "관심"
+    return "관찰"
+
+
+def _load_picks_v2_as_items(date_str: str) -> list[dict]:
+    """data/picks_v2_{YYYYMMDD}.csv → PickItem 형식 배열.
+
+    FLOWX 프론트엔드 PickItem 스펙에 맞춰 변환:
+      ticker, name, grade, total_score, sources, n_sources, close, rsi,
+      stoch_k, foreign_5d, inst_5d, reasons, entry_price, stop_loss,
+      target_price, entry_info{entry, stop, target}
+    """
+    compact = date_str.replace("-", "")
+    csv_path = DATA_DIR / f"picks_v2_{compact}.csv"
+    if not csv_path.exists():
+        return []
+    items: list[dict] = []
+    try:
+        with open(csv_path, encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                try:
+                    score = float(row.get("score") or 0)
+                    close = float(row.get("close") or 0)
+                    tags_raw = row.get("tags", "") or ""
+                    warns_raw = row.get("warns", "") or ""
+                    has_warn = warns_raw not in ("", "-")
+                    tags = [t for t in tags_raw.split(",") if t and t != "-"]
+                    warns = [w for w in warns_raw.split(",") if w and w != "-"]
+                    fgn5 = float(row.get("fgn5") or 0) * 1e8  # 억 → 원
+                    inst5 = float(row.get("inst5") or 0) * 1e8
+                    rsi14 = float(row.get("rsi14") or 50)
+
+                    # 진입/손절/목표 (-7% / +10% 기본)
+                    entry_price = round(close)
+                    stop_loss = round(close * 0.93)
+                    target_price = round(close * 1.10)
+
+                    items.append({
+                        "ticker": row["ticker"],
+                        "name": row.get("name", row["ticker"]),
+                        "grade": _grade_from_score_v2(score, has_warn),
+                        "total_score": score,
+                        "sources": tags,
+                        "n_sources": len(tags),
+                        "close": close,
+                        "rsi": rsi14,
+                        "stoch_k": 0,  # daily_pick_v2 미계산
+                        "foreign_5d": fgn5,
+                        "inst_5d": inst5,
+                        "reasons": tags + ([f"⚠️ {w}" for w in warns] if warns else []),
+                        "entry_price": entry_price,
+                        "stop_loss": stop_loss,
+                        "target_price": target_price,
+                        "entry_info": {
+                            "entry": entry_price,
+                            "stop": stop_loss,
+                            "target": target_price,
+                        },
+                        # 부가 정보 (프론트엔드 추가 활용 가능)
+                        "ret60": float(row.get("ret60") or 0),
+                        "gap20": float(row.get("gap20") or 0),
+                        "avg20_tv": float(row.get("avg20_tv") or 0),
+                        "warns": warns_raw if has_warn else "",
+                    })
+                except (ValueError, KeyError) as e:
+                    logger.warning("[picks_v2] 행 변환 실패: %s | %s", e, row.get("ticker", "?"))
+    except Exception as e:
+        logger.error("[picks_v2] CSV 로드 실패: %s", e)
+        return []
+    # total_score 내림차순 정렬
+    items.sort(key=lambda x: -x.get("total_score", 0))
+    return items
+
+
 def build_jarvis_payload() -> dict:
     """자비스 컨트롤타워 데이터 통합 빌드.
 
-    data/tomorrow_picks.json + brain_decision.json + shield_report.json +
+    data/picks_v2_{date}.csv 우선 사용 (daily_pick_v2 체계 — 백테스트 근거),
+    없으면 data/tomorrow_picks.json 폴백.
+    + brain_decision.json + shield_report.json +
     market_learning/signal_accuracy.json + sector_momentum.json + etf_rotation_result.json 통합.
     """
     def _load(name: str) -> dict:
@@ -1027,6 +1125,35 @@ def build_jarvis_payload() -> dict:
     shield = _load("shield_report.json")
     sector_momentum = _load("sector_rotation/sector_momentum.json")
     etf_result = _load("etf_rotation_result.json")
+
+    # ── picks_v2 교체 (2026-04-16): daily_pick_v2 백테스트 근거 체계 우선 ──
+    # 기준일: picks_raw의 target_date, 없으면 오늘
+    _target_date = picks_raw.get("target_date") or picks_raw.get("date") or datetime.now().strftime("%Y-%m-%d")
+    picks_v2_items = _load_picks_v2_as_items(_target_date)
+    # 어제 날짜로도 시도 (BAT-D 16:30 ~ BAT-PICKV2 17:45 사이 로드되는 케이스)
+    if not picks_v2_items:
+        from datetime import timedelta as _td
+        try:
+            _d = datetime.strptime(_target_date, "%Y-%m-%d")
+            for _offset in [0, -1, -2, -3]:
+                _try = (_d + _td(days=_offset)).strftime("%Y-%m-%d")
+                picks_v2_items = _load_picks_v2_as_items(_try)
+                if picks_v2_items:
+                    logger.info("[jarvis] picks_v2 사용: %s (%d종목)", _try, len(picks_v2_items))
+                    break
+        except Exception:
+            pass
+    if picks_v2_items:
+        # picks_raw.picks를 picks_v2로 교체 (메타데이터는 유지)
+        picks_raw = {
+            **picks_raw,
+            "picks": picks_v2_items,
+            "total_candidates": len(picks_v2_items),
+            "source": "daily_pick_v2",
+        }
+        logger.info("[jarvis] picks_v2 적용 완료: %d종목", len(picks_v2_items))
+    else:
+        logger.warning("[jarvis] picks_v2 CSV 없음 — tomorrow_picks.json 폴백")
 
     # signal_accuracy: 독립 파일 우선, 없으면 _index 경유
     acc_file = _load("market_learning/signal_accuracy.json")
