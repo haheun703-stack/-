@@ -97,9 +97,13 @@ def select_universe(
     logger.info("시총 조회 기준일: %s", ref_date)
     min_cap = min_cap_trillion * 1e12
 
-    kospi = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSPI")
-    time.sleep(0.5)
-    kosdaq = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSDAQ")
+    try:
+        kospi = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSPI")
+        time.sleep(0.5)
+        kosdaq = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSDAQ")
+    except Exception as e:
+        logger.error("pykrx 시총 조회 실패: %s — FinanceDataReader fallback", e)
+        return _select_universe_fdr(min_cap_trillion, include_preferred)
 
     all_cap = pd.concat([kospi, kosdaq])
     qualified = all_cap[all_cap["시가총액"] >= min_cap].copy()
@@ -152,6 +156,70 @@ def select_universe(
         "포함" if include_preferred else "제외",
         len(excluded),
     )
+    return result
+
+
+def _select_universe_fdr(
+    min_cap_trillion: float = 0.2,
+    include_preferred: bool = False,
+) -> pd.DataFrame:
+    """FinanceDataReader 기반 유니버스 선정 (pykrx fallback).
+
+    fdr.StockListing은 KRX 사이트에서 직접 데이터를 가져오므로
+    pykrx 컬럼 불일치 문제를 회피할 수 있다.
+    """
+    try:
+        import FinanceDataReader as fdr
+    except ImportError:
+        logger.error("FinanceDataReader 미설치 — pip install finance-datareader")
+        if UNIVERSE_PATH.exists():
+            logger.warning("기존 universe.csv 유지")
+            existing = pd.read_csv(UNIVERSE_PATH)
+            existing["ticker"] = existing["ticker"].astype(str).str.zfill(6)
+            return existing
+        raise
+
+    logger.info("[fdr] KOSPI+KOSDAQ 시총 조회 시작")
+    kospi = fdr.StockListing("KOSPI")
+    time.sleep(0.3)
+    kosdaq = fdr.StockListing("KOSDAQ")
+
+    all_stocks = pd.concat([kospi, kosdaq], ignore_index=True)
+    min_cap = min_cap_trillion * 1e12
+
+    # Marcap 컬럼으로 시총 필터
+    cap_col = "Marcap" if "Marcap" in all_stocks.columns else "시가총액"
+    if cap_col not in all_stocks.columns:
+        logger.error("[fdr] 시총 컬럼 없음: %s", list(all_stocks.columns))
+        if UNIVERSE_PATH.exists():
+            existing = pd.read_csv(UNIVERSE_PATH)
+            existing["ticker"] = existing["ticker"].astype(str).str.zfill(6)
+            return existing
+        raise RuntimeError("fdr 시총 컬럼 없음")
+
+    all_stocks[cap_col] = pd.to_numeric(all_stocks[cap_col], errors="coerce").fillna(0)
+    qualified = all_stocks[all_stocks[cap_col] >= min_cap].copy()
+    qualified = qualified.sort_values(cap_col, ascending=False)
+
+    # Code 컬럼 정규화
+    code_col = "Code" if "Code" in qualified.columns else "Symbol"
+    name_col = "Name" if "Name" in qualified.columns else "종목명"
+
+    # 스팩/리츠/ETN/우선주 제거
+    rows = []
+    for _, row in qualified.iterrows():
+        ticker = str(row[code_col]).zfill(6)
+        name = str(row.get(name_col, ticker))
+        if _is_excluded(name, ticker, include_preferred=include_preferred):
+            continue
+        rows.append({
+            "ticker": ticker,
+            "name": name,
+            "market_cap": int(row[cap_col]),
+        })
+
+    result = pd.DataFrame(rows)
+    logger.info("[fdr] 유니버스 선정: %d종목 (시총 %.1f조 이상)", len(result), min_cap_trillion)
     return result
 
 

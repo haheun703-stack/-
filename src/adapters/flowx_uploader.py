@@ -446,6 +446,10 @@ class FlowxUploader:
     def upload_relay(self, date_str: str) -> bool:
         """group_relay_today + relay_trading_signal → dashboard_relay (D-3)."""
         rows = build_relay_rows(date_str)
+        if not rows:
+            # 발화 없음 = 정상 상황 (발화 조건 +3.5%, breadth 60% 미충족)
+            logger.info("[FLOWX] 릴레이 발화 없음 (%s) — 정상 스킵", date_str)
+            return True
         return self._upload_rows("dashboard_relay", date_str, rows,
                                  "date,lead_sector,lag_sector", "릴레이")
 
