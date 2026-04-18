@@ -391,7 +391,7 @@ def print_report(candidates: list[dict]):
         if not turn:
             turn = "-"
 
-        mkt = "NXT" if c.get("nxt_tradable", False) else "KRX"
+        mkt = "통합" if c.get("nxt_tradable", False) else "KRX"
 
         print(f"  {c['name'][:10]:>12} {c['close']:>8,} "
               f"{c['ret_d0']:>+5.1f}% {c['drop_pct']:>+5.0f}% "

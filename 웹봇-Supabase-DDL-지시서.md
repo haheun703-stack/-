@@ -272,6 +272,14 @@ CREATE POLICY "anon_read_etf_strategy" ON quant_etf_strategy
 - ETF 전략: `#2196F3` (파란색)
 - 공포 메시지: `#FF5722` (빨간/주황)
 
+### 시장 구분 표시 (★ 필수)
+
+- `nxt_tradable == true` → **"통합"** 배지 표시 (KRX 장중 + NXT 야간 모두 거래 가능)
+- `nxt_tradable == false` → **"KRX"** 배지 표시 (KRX 15:30 전에만 매수/매도 가능)
+- 🟡 NXT 주목 종목: 전부 "통합" (NXT 거래 가능 종목만 업로드)
+- 🟢 바닥 반등 종목: "통합" 또는 "KRX" 혼재 → 각 종목별 `nxt_tradable` 확인
+- 색상: 통합 = `#4A90D9` (파란), KRX = `#888888` (회색)
+
 ### ETF 전략 UI 로직
 - `direction == "BULL"` → 오를 때 ETF 강조 (bull_etfs)
 - `direction == "BEAR"` → 내릴 때 ETF 강조 (bear_etfs)
