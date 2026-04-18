@@ -32,6 +32,9 @@ from src.adapters.flowx_uploader import (
     build_sniper_rows,
     build_sector_rotation_rows,
     build_crash_bounce_rows,
+    build_nxt_picks_rows,
+    build_bottom_picks_rows,
+    build_etf_strategy_row,
 )
 
 logger = logging.getLogger(__name__)
@@ -130,6 +133,38 @@ def main():
     for r in sr_rows[:5]:
         print(f"  #{r['rank']:2d} {r['sector']:8s} score={r['score']} 5d={r['ret_5d']:+.1f}% flow={r['flow']:+.0f}억")
 
+    # ── 퀀트시스템 메인 3종 미리보기 ──
+    nxt_rows = build_nxt_picks_rows(date_str_preview)
+    print(f"\n[FLOWX] 🟡 NXT 주목 종목: {len(nxt_rows)}건")
+    for r in nxt_rows[:10]:
+        streak = ""
+        if r["foreign_streak"] >= 3:
+            streak += f"F{r['foreign_streak']}"
+        if r["inst_streak"] >= 3:
+            streak += f"I{r['inst_streak']}"
+        if r["dual_streak"] >= 2:
+            streak += f"D{r['dual_streak']}"
+        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% {streak:>8s} 점수={r['final_score']:.0f}")
+    if not nxt_rows:
+        print("  주목 종목 없음 — 쉬는 것도 전략입니다")
+
+    btm_rows = build_bottom_picks_rows(date_str_preview)
+    print(f"\n[FLOWX] 🟢 바닥에서 고개 든 종목: {len(btm_rows)}건")
+    for r in btm_rows[:10]:
+        turn = ""
+        if r.get("foreign_turn"):
+            turn += "외인↑"
+        if r.get("inst_turn"):
+            turn += "기관↑"
+        print(f"  {r['name']:12s} {r['close']:>8,}원 ▲{r['ret_d0']:>+5.1f}% {r['fib_zone']:>6s} {turn} 점수={r['final_score']:.0f}")
+
+    etf_strat = build_etf_strategy_row(date_str_preview)
+    if etf_strat:
+        print(f"\n[FLOWX] 📊 내일의 ETF 전략:")
+        print(f"  레짐={etf_strat['regime']} Shield={etf_strat['shield']} → 방향={etf_strat['direction']}")
+        print(f"  VIX={etf_strat['vix']} 공포={etf_strat['fear_index']}")
+        print(f"  메시지: {etf_strat['message']}")
+
     if args.dry_run:
         print("\n[DRY-RUN] 업로드 스킵")
         return
@@ -147,8 +182,8 @@ def main():
     ok3 = uploader.upload_ai_picks(ai_rows)              # AI 추천 (short_signals)
     ok4 = uploader.upload_quant_scenarios(scenario_data, date_str)  # 시나리오 대시보드
 
-    # ── 퀀트 10개 독립 테이블 (JSONB 6 + Row 4) ──
-    print("\n[FLOWX] 퀀트 10테이블 업로드...")
+    # ── 퀀트 독립 테이블 (JSONB 6 + Row 5 + 메인 3) ──
+    print("\n[FLOWX] 퀀트 14테이블 업로드...")
     q_all = uploader.upload_all_quant_tables(date_str)
     q_ok = sum(v for v in q_all.values())
 

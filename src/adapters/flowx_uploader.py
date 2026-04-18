@@ -391,7 +391,7 @@ class FlowxUploader:
             return self._upsert_date_data("quant_etf_recommendation", json.load(f), date_str, "ETF추천")
 
     def upload_all_quant_tables(self, date_str: str) -> dict[str, bool]:
-        """6개 퀀트 JSONB + 4개 Row 테이블 일괄 업로드."""
+        """퀀트 JSONB + Row + 메인화면 테이블 일괄 업로드."""
         results = {
             "market_brain": self.upload_market_brain(date_str),
             "sector_flow": self.upload_sector_flow(date_str),
@@ -404,6 +404,10 @@ class FlowxUploader:
             "relay": self.upload_relay(date_str),
             "sniper": self.upload_sniper(date_str),
             "crash_bounce": self.upload_crash_bounce(date_str),
+            # 퀀트시스템 메인 3종
+            "nxt_picks": self.upload_nxt_picks(date_str),
+            "bottom_picks": self.upload_bottom_picks(date_str),
+            "etf_strategy": self.upload_etf_strategy(date_str),
         }
         ok = sum(v for v in results.values())
         logger.info("[FLOWX] 퀀트 %d테이블 업로드: %d/%d 성공 %s", len(results), ok, len(results), results)
@@ -464,6 +468,44 @@ class FlowxUploader:
         rows = build_crash_bounce_rows(date_str)
         return self._upload_rows("dashboard_crash_bounce", date_str, rows,
                                  "date,ticker", "급락반등")
+
+    # ── 퀀트시스템 메인: NXT + 바닥반등 + ETF전략 ──────
+
+    def upload_nxt_picks(self, date_str: str) -> bool:
+        """scan_type1_relay → quant_nxt_picks."""
+        rows = build_nxt_picks_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] NXT 주목 종목 없음 (%s) — 정상 (쉬는 것도 전략)", date_str)
+            return True  # 없는 날은 정상
+        return self._upload_rows("quant_nxt_picks", date_str, rows,
+                                 "date,ticker", "NXT주목종목")
+
+    def upload_bottom_picks(self, date_str: str) -> bool:
+        """scan_type2_bottom → quant_bottom_picks."""
+        rows = build_bottom_picks_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 바닥반등 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_bottom_picks", date_str, rows,
+                                 "date,ticker", "바닥반등")
+
+    def upload_etf_strategy(self, date_str: str) -> bool:
+        """Brain+Shield → quant_etf_strategy."""
+        row = build_etf_strategy_row(date_str)
+        if not row or not self.is_active:
+            return False
+        try:
+            result = self.client.table("quant_etf_strategy").upsert(
+                [row], on_conflict="date"
+            ).execute()
+            if not result.data:
+                logger.warning("[FLOWX] ETF전략 업로드 응답 비어있음: %s", date_str)
+                return False
+            logger.info("[FLOWX] ETF전략 업로드: %s 방향=%s", date_str, row["direction"])
+            return True
+        except Exception as e:
+            logger.error("[FLOWX] ETF전략 업로드 실패: %s", e)
+            return False
 
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
@@ -2042,3 +2084,227 @@ def build_crash_bounce_rows(date_str: str = "") -> list[dict]:
     _fix_pick_names(rows)
     rows.sort(key=lambda x: -x["score"])
     return rows[:50]
+
+
+# ── NXT 주목 종목 (타입 1: 수급 릴레이) ───────────────
+
+def build_nxt_picks_rows(date_str: str = "") -> list[dict]:
+    """scan_type1_relay 결과 JSON → quant_nxt_picks 테이블 포맷.
+
+    소스: data/type1_relay_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"type1_relay_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[NXT] 타입1 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for c in data.get("candidates", []):
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": int(c.get("close", 0)),
+            "ret_d0": round(float(c.get("ret_d0", 0)), 2),
+            "vol_ratio": round(float(c.get("vol_ratio", 0)), 2),
+            "ma20_dev": round(float(c.get("ma20_dev", 0)), 2),
+            "rsi": round(float(c.get("rsi", 0)), 1),
+            "tv": round(float(c.get("tv", 0)), 1),
+            "foreign_net": round(float(c.get("foreign_net", 0)), 1),
+            "inst_net": round(float(c.get("inst_net", 0)), 1),
+            "foreign_streak": int(c.get("foreign_streak", 0)),
+            "inst_streak": int(c.get("inst_streak", 0)),
+            "dual_streak": int(c.get("dual_streak", 0)),
+            "foreign_cum": round(float(c.get("foreign_cum", 0)), 1),
+            "inst_cum": round(float(c.get("inst_cum", 0)), 1),
+            "accum_score": round(float(c.get("accum_score", 0)), 1),
+            "final_score": round(float(c.get("final_score", 0)), 1),
+        })
+
+    _fix_pick_names(rows)
+    rows.sort(key=lambda x: -x["final_score"])
+    logger.info("[NXT] 타입1 빌드: %d건 (%s)", len(rows), date_str)
+    return rows
+
+
+# ── 바닥 반등 종목 (타입 2: 바닥에서 고개) ────────────
+
+def build_bottom_picks_rows(date_str: str = "") -> list[dict]:
+    """scan_type2_bottom 결과 JSON → quant_bottom_picks 테이블 포맷.
+
+    소스: data/type2_bottom_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"type2_bottom_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[BOTTOM] 타입2 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for c in data.get("candidates", []):
+        # foreign_turn/inst_turn: JSON에서 문자열 "True"/"False"로 올 수 있음
+        ft = c.get("foreign_turn", False)
+        it = c.get("inst_turn", False)
+        if isinstance(ft, str):
+            ft = ft.lower() == "true"
+        if isinstance(it, str):
+            it = it.lower() == "true"
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": int(c.get("close", 0)),
+            "ret_d0": round(float(c.get("ret_d0", 0)), 2),
+            "fib_zone": str(c.get("fib_zone", "")),
+            "drop_pct": round(float(c.get("drop_pct", 0)), 1),
+            "vol_ratio": round(float(c.get("vol_ratio", 0)), 2),
+            "tv": round(float(c.get("tv", 0)), 1),
+            "rsi": round(float(c.get("rsi", 0)), 1),
+            "foreign_turn": ft,
+            "inst_turn": it,
+            "supply_score": round(float(c.get("supply_score", 0)), 1),
+            "final_score": round(float(c.get("final_score", 0)), 1),
+        })
+
+    _fix_pick_names(rows)
+    rows.sort(key=lambda x: -x["final_score"])
+    logger.info("[BOTTOM] 타입2 빌드: %d건 (%s)", len(rows), date_str)
+    return rows
+
+
+# ── 내일의 ETF 전략 (Brain/Shield → 방향 + ETF 추천) ──
+
+# ETF 매핑 — 실제 티커
+_ETF_BULL = [
+    {"ticker": "069500", "name": "KODEX 200", "desc": "코스피 대표 지수"},
+    {"ticker": "122630", "name": "KODEX 레버리지", "desc": "코스피200 2배"},
+    {"ticker": "091160", "name": "KODEX 반도체", "desc": "반도체 섹터"},
+    {"ticker": "364690", "name": "KODEX 방산", "desc": "방산 섹터"},
+    {"ticker": "396500", "name": "TIGER 2차전지TOP10", "desc": "2차전지 섹터"},
+]
+_ETF_BEAR = [
+    {"ticker": "114800", "name": "KODEX 인버스", "desc": "코스피200 -1배"},
+    {"ticker": "252670", "name": "KODEX 200선물인버스2X", "desc": "곱버스 (-2배)"},
+    {"ticker": "252710", "name": "TIGER 200선물인버스2X", "desc": "곱버스 (-2배)"},
+]
+_ETF_SAFE = [
+    {"ticker": "132030", "name": "KODEX 골드선물(H)", "desc": "금 ETF (안전자산)"},
+    {"ticker": "148070", "name": "KODEX 국고채10년", "desc": "채권 ETF"},
+    {"ticker": "261240", "name": "KODEX 미국달러선물", "desc": "달러 ETF (환헤지)"},
+]
+
+# 레짐 → 방향 매핑
+_REGIME_DIRECTION = {
+    "BULL":          "BULL",
+    "BULL_AGGRESSIVE": "BULL",
+    "PRE_BULL":      "BULL",
+    "CAUTION":       "NEUTRAL",
+    "PRE_BEAR":      "BEAR",
+    "BEAR":          "BEAR",
+    "PRE_CRISIS":    "BEAR",
+    "CRISIS":        "BEAR",
+}
+
+# 레짐+방향 → 메시지
+_REGIME_MESSAGES = {
+    ("BULL", "GREEN"):   "시장이 좋습니다. 레버리지로 적극 공격할 타이밍!",
+    ("BULL", "YELLOW"):  "상승 추세지만 Shield 주의. 분할 매수로 접근하세요.",
+    ("BULL", "RED"):     "레짐은 상승이지만 Shield RED — 방어 우선, 소량만.",
+    ("NEUTRAL", "GREEN"): "방향 불분명. 레버리지/인버스 모두 준비하되 관망 우선.",
+    ("NEUTRAL", "YELLOW"): "조심스러운 장입니다. 현금 비중 높이고 기회 대기.",
+    ("NEUTRAL", "RED"):   "불확실성 높음 + Shield RED. 인버스 헤지 고려하세요.",
+    ("BEAR", "GREEN"):    "하락 추세이지만 반등 기회. 인버스 수익 실현 준비.",
+    ("BEAR", "YELLOW"):   "하락장입니다. 곱버스로 수익 기회를 잡으세요!",
+    ("BEAR", "RED"):      "공포에 떨지 마세요! 시장이 빠지면 곱버스가 돈 법니다. 사이드카? 곱버스 사러 갑시다!",
+}
+
+
+def build_etf_strategy_row(date_str: str = "") -> dict | None:
+    """Brain + Shield → 내일의 ETF 전략 1행 생성.
+
+    소스: data/brain_decision.json + data/shield_report.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    # Brain 로드
+    brain_path = DATA_DIR / "brain_decision.json"
+    brain = {}
+    if brain_path.exists():
+        with open(brain_path, encoding="utf-8") as f:
+            brain = json.load(f)
+
+    # Shield 로드
+    shield_path = DATA_DIR / "shield_report.json"
+    shield = {}
+    if shield_path.exists():
+        with open(shield_path, encoding="utf-8") as f:
+            shield = json.load(f)
+
+    regime = brain.get("effective_regime", "CAUTION")
+    shield_level = shield.get("overall_level", "YELLOW")
+    vix = brain.get("vix_level", 0)
+    fear = brain.get("fear_index", 0)
+    contrarian = brain.get("contrarian_opportunity", False)
+
+    direction = _REGIME_DIRECTION.get(regime, "NEUTRAL")
+
+    # Shield RED이면 방향 하향 조정
+    if shield_level == "RED" and direction == "BULL":
+        direction = "NEUTRAL"
+
+    # 메시지 결정
+    msg_key = (direction, shield_level)
+    message = _REGIME_MESSAGES.get(msg_key, "시장 상황을 주시하세요.")
+
+    # 역발상 기회
+    if contrarian and fear > 60:
+        message += f" 🔥 역발상 기회 감지! (공포지수 {fear:.0f})"
+
+    # 추천 ETF 선정
+    bull_etfs = []
+    bear_etfs = []
+    safe_etfs = []
+
+    if direction == "BULL":
+        bull_etfs = _ETF_BULL[:4]   # 상위 4개
+        bear_etfs = _ETF_BEAR[:1]   # 헤지용 1개
+        safe_etfs = []
+    elif direction == "BEAR":
+        bull_etfs = []
+        bear_etfs = _ETF_BEAR       # 인버스 전체
+        safe_etfs = _ETF_SAFE[:2]   # 금+채권
+    else:  # NEUTRAL
+        bull_etfs = _ETF_BULL[:2]   # 소량 2개
+        bear_etfs = _ETF_BEAR[:2]   # 헤지 2개
+        safe_etfs = _ETF_SAFE       # 안전자산 전체
+
+    row = {
+        "date": date_str,
+        "regime": regime,
+        "shield": shield_level,
+        "direction": direction,
+        "vix": round(vix, 1),
+        "fear_index": round(fear, 1),
+        "contrarian": contrarian,
+        "bull_etfs": json.dumps(bull_etfs, ensure_ascii=False),
+        "bear_etfs": json.dumps(bear_etfs, ensure_ascii=False),
+        "safe_etfs": json.dumps(safe_etfs, ensure_ascii=False),
+        "message": message,
+    }
+
+    logger.info("[ETF전략] %s 방향=%s 레짐=%s Shield=%s", date_str, direction, regime, shield_level)
+    return row
