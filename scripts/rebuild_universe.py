@@ -98,9 +98,10 @@ def select_universe(
     min_cap = min_cap_trillion * 1e12
 
     try:
-        kospi = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSPI")
+        # get_market_ohlcv = get_market_cap 대체 (시가총액+거래대금 포함, JSONDecodeError ���도 낮음)
+        kospi = _retry_pykrx(krx.get_market_ohlcv, ref_date, market="KOSPI")
         time.sleep(0.5)
-        kosdaq = _retry_pykrx(krx.get_market_cap, ref_date, market="KOSDAQ")
+        kosdaq = _retry_pykrx(krx.get_market_ohlcv, ref_date, market="KOSDAQ")
     except Exception as e:
         logger.error("pykrx 시총 조회 실패: %s — FinanceDataReader fallback", e)
         return _select_universe_fdr(min_cap_trillion, include_preferred)
