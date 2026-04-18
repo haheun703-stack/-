@@ -57,150 +57,74 @@ except ImportError:
 
 
 # ════════════════════════════════════════════════════
-# KRX 전종목 일괄 조회
+# KRX 전종목 일괄 조회 (pykrx bulk mode)
 # ════════════════════════════════════════════════════
 
 class KRXBulkFetcher:
-    """KRX 전종목 OHLCV/PER/PBR 일괄 조회 (공개 STAT API).
+    """pykrx 전종목 일괄 모드 기반 OHLCV/PER/PBR 조회.
 
-    1회 호출로 KOSPI 또는 KOSDAQ 전종목 데이터 취득.
-    기존 pykrx 종목별 개별 호출(1071회) -> 일괄 2~4회로 대체.
+    get_market_ohlcv(date, market="ALL")  -> 1회 호출로 전종목 OHLCV
+    get_market_fundamental(date) × 2       -> KOSPI+KOSDAQ PER/PBR
+    기존 1071회 개별 호출 -> 3회 일괄 호출로 대체.
     """
 
-    BASE_URL = "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
-
-    def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                          "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/131.0.0.0 Safari/537.36",
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Accept-Language": "ko-KR,ko;q=0.9",
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": "https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd",
-        })
-        # 세션 쿠키 획득
-        try:
-            self.session.get(
-                "https://data.krx.co.kr/contents/MDC/MAIN/main/index.cmd",
-                timeout=10,
-            )
-        except Exception:
-            pass
-        self._logged_keys = False
-
-    @staticmethod
-    def _num(val) -> float:
-        """KRX 숫자 문자열 -> float (쉼표 제거)."""
-        if not val or val == "-" or val == "":
-            return 0.0
-        return float(str(val).replace(",", "").strip())
+    OHLCV_COL_MAP = {
+        "시가": "open", "고가": "high", "저가": "low", "종가": "close",
+        "거래량": "volume", "거래대금": "trading_value", "등락률": "price_change",
+    }
+    FUND_COL_MAP = {
+        "BPS": "fund_BPS", "PER": "fund_PER", "PBR": "fund_PBR",
+        "EPS": "fund_EPS", "DIV": "fund_DIV", "DPS": "fund_DPS",
+    }
 
     def fetch_all_ohlcv(self, date: str) -> dict[str, dict]:
-        """전종목 OHLCV 일괄 조회 (KOSPI + KOSDAQ, 총 2회 호출).
+        """전종목 OHLCV 일괄 조회 (market=ALL, 1회 호출).
 
         Returns:
             {ticker: {"open": .., "high": .., "low": .., "close": ..,
                       "volume": .., "trading_value": .., "price_change": ..}}
         """
-        result = {}
-        for mkt in ["STK", "KSQ"]:
-            try:
-                r = self.session.post(
-                    f"{self.BASE_URL}?bld=dbms/MDC/STAT/standard/MDCSTAT01501",
-                    data={
-                        "locale": "ko_KR",
-                        "mktId": mkt,
-                        "trdDd": date,
-                        "share": "1",
-                        "money": "1",
-                        "csvxls_isNo": "false",
-                    },
-                    timeout=30,
-                )
-                data = r.json()
-                rows = data.get("OutBlock_1", data.get("output", []))
-                if not rows:
-                    logger.warning(
-                        "KRX OHLCV %s %s: 빈 응답 (keys=%s)",
-                        mkt, date, list(data.keys())[:5],
-                    )
-                    continue
-
-                # 첫 호출 시 응답 키 로그 (디버깅)
-                if not self._logged_keys and rows:
-                    logger.info("KRX OHLCV 응답 키: %s", list(rows[0].keys()))
-                    self._logged_keys = True
-
-                for row in rows:
-                    ticker = row.get("ISU_SRT_CD", "")
-                    if not (len(ticker) == 6 and ticker.isdigit()):
-                        continue
-                    result[ticker] = {
-                        "open": self._num(row.get("TDD_OPNPRC")),
-                        "high": self._num(row.get("TDD_HGPRC")),
-                        "low": self._num(row.get("TDD_LWPRC")),
-                        "close": self._num(row.get("TDD_CLSPRC")),
-                        "volume": self._num(row.get("ACC_TRDVOL")),
-                        "trading_value": self._num(row.get("ACC_TRDVAL")),
-                        "price_change": self._num(row.get("FLUC_RT")),
-                    }
-                time.sleep(0.5)
-            except Exception as e:
-                logger.warning("KRX OHLCV %s %s 실패: %s", mkt, date, e)
-        if result:
-            logger.info("KRX OHLCV %s: %d종목 일괄 조회", date, len(result))
-        return result
+        if not PYKRX_AVAILABLE:
+            return {}
+        try:
+            df = krx.get_market_ohlcv(date, market="ALL")
+            if df is None or df.empty:
+                logger.warning("pykrx 일괄 OHLCV %s: 빈 결과", date)
+                return {}
+            df = df.rename(columns=self.OHLCV_COL_MAP)
+            # 필요한 컬럼만 추출 후 dict 변환
+            cols = [c for c in self.OHLCV_COL_MAP.values() if c in df.columns]
+            result = df[cols].to_dict(orient="index")
+            logger.info("pykrx 일괄 OHLCV %s: %d종목", date, len(result))
+            return result
+        except Exception as e:
+            logger.warning("pykrx 일괄 OHLCV %s 실패: %s", date, e)
+            return {}
 
     def fetch_all_fundamental(self, date: str) -> dict[str, dict]:
-        """전종목 PER/PBR/배당수익률 일괄 조회.
+        """전종목 PER/PBR 일괄 조회 (KOSPI + KOSDAQ, 2회 호출).
 
         Returns:
             {ticker: {"fund_BPS": .., "fund_PER": .., "fund_PBR": ..,
                       "fund_EPS": .., "fund_DIV": .., "fund_DPS": ..}}
         """
+        if not PYKRX_AVAILABLE:
+            return {}
         result = {}
-        for mkt in ["STK", "KSQ"]:
+        for market in ["KOSPI", "KOSDAQ"]:
             try:
-                r = self.session.post(
-                    f"{self.BASE_URL}?bld=dbms/MDC/STAT/standard/MDCSTAT03501",
-                    data={
-                        "locale": "ko_KR",
-                        "mktId": mkt,
-                        "trdDd": date,
-                        "share": "1",
-                        "money": "1",
-                        "csvxls_isNo": "false",
-                    },
-                    timeout=30,
-                )
-                data = r.json()
-                rows = data.get("output", data.get("OutBlock_1", []))
-                if not rows:
-                    logger.warning(
-                        "KRX 기본지표 %s %s: 빈 응답 (keys=%s)",
-                        mkt, date, list(data.keys())[:5],
-                    )
+                df = krx.get_market_fundamental(date, market=market)
+                if df is None or df.empty:
                     continue
-
-                for row in rows:
-                    ticker = row.get("ISU_SRT_CD", "")
-                    if not (len(ticker) == 6 and ticker.isdigit()):
-                        continue
-                    result[ticker] = {
-                        "fund_BPS": self._num(row.get("BPS")),
-                        "fund_PER": self._num(row.get("PER")),
-                        "fund_PBR": self._num(row.get("PBR")),
-                        "fund_EPS": self._num(row.get("EPS")),
-                        "fund_DIV": self._num(row.get("DIV")),
-                        "fund_DPS": self._num(row.get("DPS")),
-                    }
-                time.sleep(0.5)
+                df = df.rename(columns=self.FUND_COL_MAP)
+                cols = [c for c in self.FUND_COL_MAP.values() if c in df.columns]
+                partial = df[cols].to_dict(orient="index")
+                result.update(partial)
+                time.sleep(0.3)
             except Exception as e:
-                logger.warning("KRX 기본지표 %s %s 실패: %s", mkt, date, e)
+                logger.warning("pykrx 일괄 기본지표 %s %s 실패: %s", market, date, e)
         if result:
-            logger.info("KRX 기본지표 %s: %d종목 일괄 조회", date, len(result))
+            logger.info("pykrx 일괄 기본지표 %s: %d종목", date, len(result))
         return result
 
 
