@@ -1804,7 +1804,7 @@ def build_smart_money_rows(date_str: str = "") -> list[dict]:
         elif i_consec >= 3 or i_net > 0:
             signal_type = "INST_BUY"
         else:
-            signal_type = "FOREIGN_BUY"
+            signal_type = "WATCH"
 
         # score: grade 기반
         grade = alert.get("grade", "WATCH")

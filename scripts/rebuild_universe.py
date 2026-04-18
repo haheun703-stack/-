@@ -67,7 +67,7 @@ def _retry_pykrx(func, *args, retries: int = 3, delay: float = 2.0, **kwargs):
     for attempt in range(retries):
         try:
             return func(*args, **kwargs)
-        except (UnicodeDecodeError, ConnectionError, Exception) as e:
+        except (UnicodeDecodeError, ConnectionError, TimeoutError, OSError, ValueError) as e:
             if attempt < retries - 1:
                 logger.warning("pykrx 호출 실패 (시도 %d/%d): %s — %.0f초 후 재시도",
                                attempt + 1, retries, e, delay)

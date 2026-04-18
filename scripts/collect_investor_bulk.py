@@ -159,8 +159,10 @@ def collect_date(conn: sqlite3.Connection, date: str, investors: list[str]) -> d
                     sell_val, buy_val, net_val)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (row["date"], row["ticker"], row["name"], row["investor"],
-                 int(row["sell_vol"]), int(row["buy_vol"]), int(row["net_vol"]),
-                 int(row["sell_val"]), int(row["buy_val"]), int(row["net_val"])),
+                 int(float(row.get("sell_vol") or 0)), int(float(row.get("buy_vol") or 0)),
+                 int(float(row.get("net_vol") or 0)),
+                 int(float(row.get("sell_val") or 0)), int(float(row.get("buy_val") or 0)),
+                 int(float(row.get("net_val") or 0))),
             )
             rows_inserted += 1
         except Exception as e:
