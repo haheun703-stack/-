@@ -39,6 +39,19 @@ logger = logging.getLogger(__name__)
 
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 OUTPUT_DIR = PROJECT_ROOT / "data"
+NXT_MASTER_PATH = PROJECT_ROOT / "data" / "nxt" / "nxt_master.json"
+
+
+def load_nxt_tickers() -> set[str]:
+    """NXT 거래 가능 종목 티커 로드."""
+    if not NXT_MASTER_PATH.exists():
+        return set()
+    try:
+        with open(NXT_MASTER_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        return set(data.get("ticker_set", {}).keys())
+    except Exception:
+        return set()
 
 # ─── 바닥 조건 ───
 MIN_DROP_PCT = 30.0       # 52주 고점 대비 최소 하락률 (%)
@@ -238,9 +251,11 @@ def detect_supply_turn(df: pd.DataFrame) -> dict:
 
 
 def scan_type2(min_drop: float = 30.0, top_n: int = 30) -> list[dict]:
-    """타입 2 바닥 반등 스캔."""
+    """타입 2 바닥 반등 스캔. 각 종목에 NXT 거래 가능 여부 라벨."""
     csv_files = sorted(CSV_DIR.glob("*.csv"))
-    logger.info("CSV 파일: %d개 / 최소 하락률 %d%%", len(csv_files), min_drop)
+    nxt_tickers = load_nxt_tickers()
+    logger.info("CSV 파일: %d개 / 최소 하락률 %d%% / NXT %d종목",
+                len(csv_files), min_drop, len(nxt_tickers))
 
     candidates = []
     processed = 0
@@ -331,6 +346,7 @@ def scan_type2(min_drop: float = 30.0, top_n: int = 30) -> list[dict]:
             "inst_turn": supply["inst_turn"],
             "supply_score": supply["supply_score"],
             "final_score": round(min(score, 100), 1),
+            "nxt_tradable": ticker in nxt_tickers if nxt_tickers else True,
         })
 
         processed += 1
@@ -362,8 +378,8 @@ def print_report(candidates: list[dict]):
         return
 
     print(f"  {'종목':>12} {'종가':>8} {'수익률':>6} {'하락':>6} {'구간':>6} "
-          f"{'거래량':>5} {'외인':>6} {'기관':>6} {'전환':>4} {'점수':>5}")
-    print(f"  {'─' * 74}")
+          f"{'거래량':>5} {'외인':>6} {'기관':>6} {'전환':>4} {'점수':>5} {'시장':>4}")
+    print(f"  {'─' * 78}")
 
     for c in candidates:
         # 양전환 표시
@@ -375,13 +391,16 @@ def print_report(candidates: list[dict]):
         if not turn:
             turn = "-"
 
+        mkt = "NXT" if c.get("nxt_tradable", False) else "KRX"
+
         print(f"  {c['name'][:10]:>12} {c['close']:>8,} "
               f"{c['ret_d0']:>+5.1f}% {c['drop_pct']:>+5.0f}% "
               f"{c['fib_zone']:>6} "
               f"{c['vol_ratio']:>4.1f}x "
               f"{c['foreign_net']:>+5.0f} {c['inst_net']:>+5.0f} "
               f"{turn:>4} "
-              f"{c['final_score']:>5.0f}")
+              f"{c['final_score']:>5.0f} "
+              f"{mkt:>4}")
 
     print()
     print("  [해석]")

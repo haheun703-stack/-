@@ -210,6 +210,7 @@ CREATE TABLE IF NOT EXISTS quant_bottom_picks (
   inst_turn BOOLEAN DEFAULT false,    -- 기관 수급 양전환
   supply_score FLOAT DEFAULT 0,    -- 수급 점수 (0~100)
   final_score FLOAT DEFAULT 0,     -- 최종 점수 (0~100)
+  nxt_tradable BOOLEAN DEFAULT false, -- NXT 야간거래 가능 여부 (false=KRX만)
   PRIMARY KEY (date, ticker)
 );
 

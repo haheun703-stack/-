@@ -40,6 +40,23 @@ logger = logging.getLogger(__name__)
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 DB_PATH = PROJECT_ROOT / "data" / "investor_flow" / "investor_daily.db"
 OUTPUT_DIR = PROJECT_ROOT / "data"
+NXT_MASTER_PATH = PROJECT_ROOT / "data" / "nxt" / "nxt_master.json"
+
+
+def load_nxt_tickers() -> set[str]:
+    """NXT 거래 가능 종목 티커 로드."""
+    if not NXT_MASTER_PATH.exists():
+        logger.warning("NXT 마스터 없음: %s — NXT 필터 비활성", NXT_MASTER_PATH)
+        return set()
+    try:
+        with open(NXT_MASTER_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        tickers = set(data.get("ticker_set", {}).keys())
+        logger.info("NXT 마스터: %d종목 로드", len(tickers))
+        return tickers
+    except Exception as e:
+        logger.warning("NXT 마스터 로드 실패: %s", e)
+        return set()
 
 # ─── 시드 조건 ───
 SEED_RET_MIN = 1.0       # D+0 수익률 하한 (%)
@@ -197,11 +214,14 @@ def check_seed_condition(df: pd.DataFrame) -> dict | None:
 
 
 def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
-    """타입 1 수급 릴레이 스캔."""
+    """타입 1 수급 릴레이 스캔. NXT 거래 가능 종목만 포함."""
     csv_files = sorted(CSV_DIR.glob("*.csv"))
-    logger.info("CSV 파일: %d개 / 축적 최소 %d일", len(csv_files), min_accum_days)
+    nxt_tickers = load_nxt_tickers()
+    logger.info("CSV 파일: %d개 / 축적 최소 %d일 / NXT %d종목",
+                len(csv_files), min_accum_days, len(nxt_tickers))
 
     candidates = []
+    nxt_filtered = 0
     processed = 0
 
     for path in csv_files:
@@ -210,6 +230,11 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
         if len(parts) != 2:
             continue
         name, ticker = parts
+
+        # NXT 거래 불가 종목 제거 (NXT 마스터가 있을 때만)
+        if nxt_tickers and ticker not in nxt_tickers:
+            nxt_filtered += 1
+            continue
 
         df = load_csv_data(path)
         if df is None:
@@ -275,6 +300,8 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
     candidates.sort(key=lambda x: x["final_score"], reverse=True)
     candidates = candidates[:top_n]
 
+    if nxt_filtered:
+        logger.info("NXT 필터: %d종목 제외 (NXT 거래 불가)", nxt_filtered)
     logger.info("스캔 완료: %d후보 (상위 %d)", len(candidates), top_n)
     return candidates
 

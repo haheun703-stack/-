@@ -774,6 +774,15 @@ def _load_universe_names() -> dict[str, str]:
     return name_map
 
 
+def _parse_bool(val) -> bool:
+    """JSON에서 문자열/bool 혼재 처리."""
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        return val.lower() == "true"
+    return bool(val)
+
+
 def _fix_pick_names(picks: list[dict]) -> None:
     """name이 숫자(코드)인 pick을 종목명으로 보정 (universe.csv → pykrx 폴백)."""
     bad = [p for p in picks if p.get("name", "").replace(".", "").isdigit()]
@@ -2177,6 +2186,7 @@ def build_bottom_picks_rows(date_str: str = "") -> list[dict]:
             "inst_turn": it,
             "supply_score": round(float(c.get("supply_score", 0)), 1),
             "final_score": round(float(c.get("final_score", 0)), 1),
+            "nxt_tradable": _parse_bool(c.get("nxt_tradable", False)),
         })
 
     _fix_pick_names(rows)
