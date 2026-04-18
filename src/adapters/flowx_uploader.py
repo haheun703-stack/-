@@ -2171,6 +2171,14 @@ def build_bottom_picks_rows(date_str: str = "") -> list[dict]:
             ft = ft.lower() == "true"
         if isinstance(it, str):
             it = it.lower() == "true"
+        score = round(float(c.get("final_score", 0)), 1)
+        if score >= 80:
+            grade = "강력 포착"
+        elif score >= 65:
+            grade = "포착"
+        else:
+            grade = "관심"
+
         rows.append({
             "date": date_str,
             "ticker": c.get("ticker", ""),
@@ -2185,7 +2193,8 @@ def build_bottom_picks_rows(date_str: str = "") -> list[dict]:
             "foreign_turn": ft,
             "inst_turn": it,
             "supply_score": round(float(c.get("supply_score", 0)), 1),
-            "final_score": round(float(c.get("final_score", 0)), 1),
+            "final_score": score,
+            "grade": grade,
             "nxt_tradable": _parse_bool(c.get("nxt_tradable", False)),
         })
 
