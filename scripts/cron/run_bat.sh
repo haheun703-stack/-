@@ -219,6 +219,9 @@ case "$BAT" in
     run_py scripts/upload_flowx.py
     # dashboard_data.py 제거 — 파일 미존재
     run_py scripts/send_evening_summary.py --send
+    # --- G4.2: 타입 1/2 시드 스캐너 ---
+    run_py scripts/scan_type1_relay.py
+    run_py scripts/scan_type2_bottom.py
     # --- G4.5: NXT 추천 + 바이오 CDMO 감시 ---
     run_py src/use_cases/nxt_signal.py
     run_py scripts/nxt_recommend.py --no-telegram
