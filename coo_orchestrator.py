@@ -158,6 +158,8 @@ PIPELINE_GROUPS = [
             {"name": "킬러픽 생성", "cmd": "scripts/build_killer_picks.py"},
             {"name": "타입1 수급릴레이 스캔", "cmd": "scripts/scan_type1_relay.py"},
             {"name": "타입2 바닥반등 스캔", "cmd": "scripts/scan_type2_bottom.py"},
+            {"name": "급락반등 스캔", "cmd": "scripts/scan_crash_bounce.py"},
+            {"name": "피보나치 스캔", "cmd": "scripts/scan_fibonacci.py"},
         ],
     },
     {
