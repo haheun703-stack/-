@@ -2310,9 +2310,9 @@ def build_etf_strategy_row(date_str: str = "") -> dict | None:
         "vix": round(vix, 1),
         "fear_index": round(fear, 1),
         "contrarian": contrarian,
-        "bull_etfs": json.dumps(bull_etfs, ensure_ascii=False),
-        "bear_etfs": json.dumps(bear_etfs, ensure_ascii=False),
-        "safe_etfs": json.dumps(safe_etfs, ensure_ascii=False),
+        "bull_etfs": bull_etfs,
+        "bear_etfs": bear_etfs,
+        "safe_etfs": safe_etfs,
         "message": message,
     }
 
