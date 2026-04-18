@@ -156,6 +156,8 @@ PIPELINE_GROUPS = [
             {"name": "매크로 체인 감지", "cmd": "-m src.alpha.macro_chain_detector"},
             {"name": "ETF 추천 엔진", "cmd": "-m src.alpha.etf_engine"},
             {"name": "킬러픽 생성", "cmd": "scripts/build_killer_picks.py"},
+            {"name": "타입1 수급릴레이 스캔", "cmd": "scripts/scan_type1_relay.py"},
+            {"name": "타입2 바닥반등 스캔", "cmd": "scripts/scan_type2_bottom.py"},
         ],
     },
     {
