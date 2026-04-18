@@ -45,6 +45,8 @@ DB_PATH = DATA_DIR / "investor_daily.db"
 try:
     from pykrx import stock as krx
     PYKRX_OK = True
+    # pykrx 내부 로깅 버그 억제 (logging.info(args, kwargs) TypeError)
+    logging.getLogger("pykrx").setLevel(logging.WARNING)
 except ImportError:
     PYKRX_OK = False
     logger.error("pykrx 미설치")
@@ -116,6 +118,10 @@ def fetch_one_investor(date: str, market: str, investor: str) -> pd.DataFrame:
             return pd.DataFrame()
 
         df = df.reset_index()
+        # pykrx 반환 컬럼 수 검증 (8개: ticker, name, sell_vol, buy_vol, net_vol, sell_val, buy_val, net_val)
+        if len(df.columns) != 8:
+            logger.debug("  %s %s %s 컬럼 수 불일치 (%d)", date, market, investor, len(df.columns))
+            return pd.DataFrame()
         df.columns = ["ticker", "name", "sell_vol", "buy_vol", "net_vol",
                        "sell_val", "buy_val", "net_val"]
         df["investor"] = investor
