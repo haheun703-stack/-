@@ -106,7 +106,7 @@ def main():
     if not args.analyze and not args.date and not args.backfill:
         from datetime import datetime
         now = datetime.now()
-        if now.weekday() < 5 and now.hour >= 16:  # 평일 16시 이후
+        if now.weekday() < 5 and now.hour >= 17:  # 평일 17시 이후 (KRX T+0 데이터 지연 반영)
             today_str = now.strftime("%Y%m%d")
             logger.info("=== T-0 당일(%s) 수집 시도 ===", today_str)
             result_t0 = collect_and_store(date=today_str)
