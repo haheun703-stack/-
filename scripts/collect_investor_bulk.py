@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+"""전종목 투자자별 순매수 일괄 수집 — pykrx 벌크 모드
+
+핵심 4주체(외국인/기관합계/기타법인/개인) + 세부 7주체(연기금/투신/보험/은행/사모/금융투자/기타금융)
+KOSPI + KOSDAQ 전종목을 한 번에 수집하여 SQLite에 저장.
+
+Usage:
+    python scripts/collect_investor_bulk.py                    # 전일(T-1) 수집
+    python scripts/collect_investor_bulk.py --date 20260417    # 특정 날짜
+    python scripts/collect_investor_bulk.py --backfill 60      # 최근 60거래일 백필
+    python scripts/collect_investor_bulk.py --backfill 260     # 1년 백필
+    python scripts/collect_investor_bulk.py --core-only        # 핵심 4주체만
+
+데이터 출처: KRX STAT API (pykrx 경유, KRX_ID/KRX_PW 로그인 필요)
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import os
+import sqlite3
+import sys
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+import pandas as pd
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+DATA_DIR = PROJECT_ROOT / "data" / "investor_flow"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DB_PATH = DATA_DIR / "investor_daily.db"
+
+# ─── pykrx import ───
+try:
+    from pykrx import stock as krx
+    PYKRX_OK = True
+except ImportError:
+    PYKRX_OK = False
+    logger.error("pykrx 미설치")
+
+# ─── 투자자 유형 ───
+CORE_INVESTORS = ["외국인", "기관합계", "기타법인", "개인"]
+DETAIL_INVESTORS = ["연기금", "투신", "보험", "은행", "사모", "금융투자", "기타금융"]
+ALL_INVESTORS = CORE_INVESTORS + DETAIL_INVESTORS
+
+MARKETS = ["KOSPI", "KOSDAQ"]
+
+# ─── SQLite 스키마 ───
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS investor_daily (
+    date         TEXT NOT NULL,
+    ticker       TEXT NOT NULL,
+    name         TEXT NOT NULL,
+    investor     TEXT NOT NULL,
+    sell_vol     INTEGER NOT NULL DEFAULT 0,
+    buy_vol      INTEGER NOT NULL DEFAULT 0,
+    net_vol      INTEGER NOT NULL DEFAULT 0,
+    sell_val     INTEGER NOT NULL DEFAULT 0,
+    buy_val      INTEGER NOT NULL DEFAULT 0,
+    net_val      INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (date, ticker, investor)
+);
+
+CREATE INDEX IF NOT EXISTS idx_inv_ticker_date
+    ON investor_daily(ticker, date);
+
+CREATE INDEX IF NOT EXISTS idx_inv_date
+    ON investor_daily(date);
+
+CREATE TABLE IF NOT EXISTS collect_log (
+    date         TEXT NOT NULL,
+    collected_at TEXT NOT NULL,
+    investors    TEXT NOT NULL,
+    total_rows   INTEGER NOT NULL DEFAULT 0,
+    status       TEXT NOT NULL DEFAULT 'OK',
+    elapsed_sec  REAL NOT NULL DEFAULT 0,
+    PRIMARY KEY (date)
+);
+"""
+
+
+def init_db(db_path: Path = DB_PATH) -> sqlite3.Connection:
+    conn = sqlite3.connect(str(db_path), timeout=60)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    conn.executescript(SCHEMA_SQL)
+    conn.commit()
+    return conn
+
+
+def is_collected(conn: sqlite3.Connection, date: str) -> bool:
+    row = conn.execute(
+        "SELECT status FROM collect_log WHERE date = ?", (date,)
+    ).fetchone()
+    return row is not None and row[0] == "OK"
+
+
+def fetch_one_investor(date: str, market: str, investor: str) -> pd.DataFrame:
+    """단일 투자자 유형의 전종목 순매수 데이터 수집."""
+    try:
+        df = krx.get_market_net_purchases_of_equities_by_ticker(
+            date, date, market, investor
+        )
+        if df is None or df.empty:
+            return pd.DataFrame()
+
+        df = df.reset_index()
+        df.columns = ["ticker", "name", "sell_vol", "buy_vol", "net_vol",
+                       "sell_val", "buy_val", "net_val"]
+        df["investor"] = investor
+        df["date"] = date
+        return df
+    except Exception as e:
+        logger.warning("  %s %s %s 실패: %s", date, market, investor, e)
+        return pd.DataFrame()
+
+
+def collect_date(conn: sqlite3.Connection, date: str, investors: list[str]) -> dict:
+    """특정 날짜의 전종목 투자자별 수급 수집."""
+    t0 = time.time()
+    all_rows = []
+
+    for market in MARKETS:
+        for investor in investors:
+            df = fetch_one_investor(date, market, investor)
+            if len(df) > 0:
+                all_rows.append(df)
+            time.sleep(0.5)
+
+    if not all_rows:
+        return {"date": date, "rows": 0, "status": "EMPTY", "elapsed": time.time() - t0}
+
+    combined = pd.concat(all_rows, ignore_index=True)
+
+    # SQLite INSERT OR REPLACE
+    rows_inserted = 0
+    for _, row in combined.iterrows():
+        try:
+            conn.execute(
+                """INSERT OR REPLACE INTO investor_daily
+                   (date, ticker, name, investor, sell_vol, buy_vol, net_vol,
+                    sell_val, buy_val, net_val)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (row["date"], row["ticker"], row["name"], row["investor"],
+                 int(row["sell_vol"]), int(row["buy_vol"]), int(row["net_vol"]),
+                 int(row["sell_val"]), int(row["buy_val"]), int(row["net_val"])),
+            )
+            rows_inserted += 1
+        except Exception as e:
+            logger.debug("INSERT 실패 %s/%s: %s", row["ticker"], row["investor"], e)
+
+    elapsed = time.time() - t0
+
+    # 수집 로그
+    conn.execute(
+        """INSERT OR REPLACE INTO collect_log
+           (date, collected_at, investors, total_rows, status, elapsed_sec)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (date, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+         ",".join(investors), rows_inserted, "OK", round(elapsed, 1)),
+    )
+    conn.commit()
+
+    return {"date": date, "rows": rows_inserted, "status": "OK", "elapsed": elapsed}
+
+
+def get_trading_days(start_date: str, end_date: str) -> list[str]:
+    """거래일 목록 생성 (주말 제외)."""
+    start = datetime.strptime(start_date, "%Y%m%d")
+    end = datetime.strptime(end_date, "%Y%m%d")
+    days = []
+    d = start
+    while d <= end:
+        if d.weekday() < 5:
+            days.append(d.strftime("%Y%m%d"))
+        d += timedelta(days=1)
+    return days
+
+
+def main():
+    parser = argparse.ArgumentParser(description="전종목 투자자별 순매수 일괄 수집")
+    parser.add_argument("--date", type=str, default=None, help="수집 날짜 (YYYYMMDD)")
+    parser.add_argument("--backfill", type=int, default=0, help="최근 N거래일 백필")
+    parser.add_argument("--core-only", action="store_true", help="핵심 4주체만 수집")
+    parser.add_argument("--force", action="store_true", help="이미 수집된 날짜도 재수집")
+    args = parser.parse_args()
+
+    if not PYKRX_OK:
+        logger.error("pykrx 없음 — 종료")
+        sys.exit(1)
+
+    investors = CORE_INVESTORS if args.core_only else ALL_INVESTORS
+    conn = init_db()
+
+    logger.info("=== 투자자별 순매수 일괄 수집 ===")
+    logger.info("투자자: %s (%d유형)", ",".join(investors), len(investors))
+
+    if args.backfill > 0:
+        # 백필 모드
+        today = datetime.now()
+        dates = []
+        d = today - timedelta(days=1)
+        while len(dates) < args.backfill:
+            if d.weekday() < 5:
+                dates.append(d.strftime("%Y%m%d"))
+            d -= timedelta(days=1)
+        dates = sorted(dates)
+
+        logger.info("백필: %d거래일 (%s ~ %s)", len(dates), dates[0], dates[-1])
+
+        ok_count = 0
+        skip_count = 0
+        fail_count = 0
+
+        for i, dt in enumerate(dates):
+            if not args.force and is_collected(conn, dt):
+                skip_count += 1
+                continue
+
+            result = collect_date(conn, dt, investors)
+            status = result["status"]
+            if status == "OK":
+                ok_count += 1
+                logger.info("  [%d/%d] %s: %d행 (%.1f초)",
+                            i + 1, len(dates), dt, result["rows"], result["elapsed"])
+            else:
+                fail_count += 1
+                logger.warning("  [%d/%d] %s: %s", i + 1, len(dates), dt, status)
+
+        logger.info("백필 완료: OK %d / SKIP %d / FAIL %d", ok_count, skip_count, fail_count)
+
+    else:
+        # 단일 날짜 수집
+        if args.date:
+            target = args.date
+        else:
+            # T-1 (전일)
+            today = datetime.now()
+            d = today - timedelta(days=1)
+            while d.weekday() >= 5:
+                d -= timedelta(days=1)
+            target = d.strftime("%Y%m%d")
+
+        if not args.force and is_collected(conn, target):
+            logger.info("%s 이미 수집됨 (--force로 재수집 가능)", target)
+            conn.close()
+            return
+
+        result = collect_date(conn, target, investors)
+        logger.info("수집: %s / %d행 / %s / %.1f초",
+                     result["date"], result["rows"], result["status"], result["elapsed"])
+
+    # DB 통계
+    row_count = conn.execute("SELECT COUNT(*) FROM investor_daily").fetchone()[0]
+    date_count = conn.execute("SELECT COUNT(DISTINCT date) FROM investor_daily").fetchone()[0]
+    logger.info("DB 현황: %d행 / %d거래일", row_count, date_count)
+
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()
