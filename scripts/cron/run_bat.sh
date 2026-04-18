@@ -157,6 +157,8 @@ case "$BAT" in
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
+    run_py scripts/collect_investor_bulk.py --core-only
+    run_py scripts/sync_investor_to_csv.py
     run_py scripts/fetch_ecos_macro.py
     # COO 복원: ETF/섹터 수급 수집
     run_py scripts/collect_etf_volume.py
