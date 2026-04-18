@@ -240,6 +240,9 @@ case "$BAT" in
   J) # 17:00 KST — 포트폴리오 전망
     run_py scripts/run_portfolio_outlook.py
     ;;
+  PICKV2) # 17:45 KST - daily_pick_v2 (Silent Bet + 메인 스코어링)
+    run_py scripts/daily_pick_v2.py
+    ;;
   HEALTH) # 18:00 KST — 자동 복구: 데이터 신선도 확인 → 낡은 파일만 개별 스크립트 재실행
     # run_py_xlong(1800초): 선택적 복구 최악 케이스(5개 파일 stale = 2400초) 대비 마진 확보
     run_py_xlong scripts/health_check.py
