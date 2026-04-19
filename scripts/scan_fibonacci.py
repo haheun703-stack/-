@@ -33,10 +33,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 logger = logging.getLogger(__name__)
 
+import numpy as np
+
 DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
+STOCK_DAILY_DIR = PROJECT_ROOT / "stock_data_daily"
 UNIVERSE_PATH = DATA_DIR / "universe.csv"
 OUTPUT_PATH = DATA_DIR / "fib_scanner.json"
+
+# ─── 매수 적기 판정 기준 (백테스트 S7 근거) ───
+RSI_ENTRY_THRESHOLD = 40    # RSI < 40 = 과매도 구간
+SUPPLY_ENTRY_MIN = 5.0      # 외인|기관 순매수 최소 5억원
 
 
 # ═══════════════════════════════════════════════════
@@ -102,6 +109,62 @@ def calc_52w(ticker: str) -> dict | None:
         return None
 
 
+def _load_daily_technicals(ticker: str) -> dict:
+    """stock_data_daily CSV에서 RSI, 수급 등 기술적 데이터 로드.
+
+    Returns: {rsi, foreign_net, inst_net, vol_ratio} or empty dict on failure.
+    """
+    if not STOCK_DAILY_DIR.exists():
+        return {}
+    # 파일명: {종목명}_{종목코드}.csv — ticker로 glob
+    matches = list(STOCK_DAILY_DIR.glob(f"*_{ticker}.csv"))
+    if not matches:
+        return {}
+    try:
+        df = pd.read_csv(matches[0], encoding="utf-8-sig")
+        if len(df) < 20:
+            return {}
+        # 최근 행
+        last = df.iloc[-1]
+        rsi = float(last.get("RSI", np.nan))
+        foreign_net = float(last.get("Foreign_Net", 0))
+        inst_net = float(last.get("Inst_Net", 0))
+        volume = float(last.get("Volume", 0))
+
+        # 거래량 비율 (최근 / MA20)
+        vol_ma20 = df["Volume"].tail(20).mean()
+        vol_ratio = round(volume / vol_ma20, 2) if vol_ma20 > 0 else 1.0
+
+        return {
+            "rsi": round(rsi, 1) if not np.isnan(rsi) else None,
+            "foreign_net": round(foreign_net, 1),
+            "inst_net": round(inst_net, 1),
+            "vol_ratio": vol_ratio,
+        }
+    except Exception:
+        return {}
+
+
+def _classify_entry_grade(rsi: float | None, foreign_net: float,
+                          inst_net: float) -> str:
+    """매수 적기 등급 판정.
+
+    근거: 백테스트 S7 (Fib + 수급 + RSI < 40)
+      → D+5 +2.97%, WR 61.9%, PF 3.00 = STRONG_ALPHA
+    """
+    rsi_ok = rsi is not None and rsi < RSI_ENTRY_THRESHOLD
+    supply_ok = foreign_net >= SUPPLY_ENTRY_MIN or inst_net >= SUPPLY_ENTRY_MIN
+
+    if rsi_ok and supply_ok:
+        return "적기"       # RSI 과매도 + 수급 유입 = STRONG_ALPHA
+    elif rsi_ok:
+        return "관심"       # RSI 과매도만 (수급 미확인)
+    elif supply_ok:
+        return "수급 유입"  # 수급만 (RSI 미과매도)
+    else:
+        return "대기"       # 조건 미충족
+
+
 def calc_fib_levels(high: float, low: float) -> dict:
     """52주 고/저 기반 피보나치 레벨 계산.
 
@@ -117,7 +180,7 @@ def calc_fib_levels(high: float, low: float) -> dict:
 
 def build_fib_stock(ticker: str, name: str, sector: str, cap_억: float,
                     w52: dict, pykrx: dict) -> dict:
-    """개별 종목 피보나치 데이터 빌드."""
+    """개별 종목 피보나치 데이터 빌드 (RSI + 수급 + entry_grade 포함)."""
     close = w52["close"]
     fib = calc_fib_levels(w52["high_252"], w52["low_252"])
     zone, zone_label = _classify_fib_zone(w52["drop_pct"])
@@ -130,6 +193,14 @@ def build_fib_stock(ticker: str, name: str, sector: str, cap_억: float,
     # 현재가의 52주 범위 내 위치 (0~100%)
     rng = w52["high_252"] - w52["low_252"]
     position_pct = round((close - w52["low_252"]) / rng * 100, 1) if rng > 0 else 50
+
+    # ── RSI + 수급 로드 (백테스트 S7 근거) ──
+    tech = _load_daily_technicals(ticker)
+    rsi = tech.get("rsi")
+    foreign_net = tech.get("foreign_net", 0)
+    inst_net = tech.get("inst_net", 0)
+    vol_ratio = tech.get("vol_ratio", 1.0)
+    entry_grade = _classify_entry_grade(rsi, foreign_net, inst_net)
 
     return {
         "code": ticker,
@@ -151,6 +222,12 @@ def build_fib_stock(ticker: str, name: str, sector: str, cap_억: float,
         "upside": upside,
         "per": round(pykrx.get("PER", 0), 1),
         "pbr": round(pykrx.get("PBR", 0), 2),
+        # ── 신규: RSI + 수급 + 매수 적기 ──
+        "rsi": rsi,
+        "foreign_net": foreign_net,
+        "inst_net": inst_net,
+        "vol_ratio": vol_ratio,
+        "entry_grade": entry_grade,
     }
 
 
@@ -297,11 +374,42 @@ def load_sector_rotation() -> list[dict]:
 # 업로드 + 출력
 # ═══════════════════════════════════════════════════
 
+def _extract_entry_picks(fib_stocks: list, fib_leaders: list) -> list[dict]:
+    """매수 적기("적기") 종목만 추출 — 퀀트시스템 메인 노출용.
+
+    근거: 백테스트 S7 (Fib + RSI<40 + 수급) = D+5 +2.97%, WR 61.9%, PF 3.00
+    """
+    entry_picks = []
+    seen = set()
+    for stock in fib_stocks + fib_leaders:
+        if stock.get("entry_grade") == "적기" and stock["code"] not in seen:
+            entry_picks.append({
+                "code": stock["code"],
+                "name": stock["name"],
+                "price": stock["price"],
+                "drop": stock["drop"],
+                "rsi": stock.get("rsi"),
+                "foreign_net": stock.get("foreign_net", 0),
+                "inst_net": stock.get("inst_net", 0),
+                "fib_zone": stock["fib_zone"],
+                "target": stock["target"],
+                "upside": stock["upside"],
+                "sector": stock.get("sector", ""),
+                "cap": stock.get("cap", 0),
+            })
+            seen.add(stock["code"])
+    # 하락률 큰 순 (깊이 눌린 순)
+    entry_picks.sort(key=lambda x: x["drop"])
+    return entry_picks
+
+
 def upload_fib_scanner(fib_stocks: list, fib_leaders: list,
                        sector_rotation: list, date_str: str = "") -> bool:
     """quant_fib_scanner 테이블에 업로드."""
     if not date_str:
         date_str = datetime.now().strftime("%Y-%m-%d")
+
+    entry_picks = _extract_entry_picks(fib_stocks, fib_leaders)
 
     payload = {
         "generated_at": datetime.now().isoformat(),
@@ -309,10 +417,12 @@ def upload_fib_scanner(fib_stocks: list, fib_leaders: list,
         "fib_stocks": fib_stocks,
         "fib_leaders": fib_leaders,
         "sector_rotation": sector_rotation,
+        "entry_picks": entry_picks,
         "summary": {
             "fib_stocks_count": len(fib_stocks),
             "fib_leaders_count": len(fib_leaders),
             "sector_count": len(sector_rotation),
+            "entry_picks_count": len(entry_picks),
             "zones": {
                 zone: sum(1 for s in fib_stocks if s["fib_zone"] == zone)
                 for zone in ["DEEP", "MID", "MILD", "SHALLOW"]
@@ -341,6 +451,26 @@ def print_report(fib_stocks: list, fib_leaders: list, sector_rotation: list):
     print(f"  피보나치 스캐너 — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print(f"{'='*65}")
 
+    # ── 매수 적기 종목 (최상단 노출) ──
+    entry_picks = _extract_entry_picks(fib_stocks, fib_leaders)
+    if entry_picks:
+        print(f"\n  ★ 매수 적기 ({len(entry_picks)}종목) — RSI<40 + 수급 유입")
+        print(f"  {'─'*60}")
+        for s in entry_picks:
+            rsi_str = f"RSI {s['rsi']:.0f}" if s['rsi'] is not None else "RSI ?"
+            supply_parts = []
+            if s['foreign_net'] >= SUPPLY_ENTRY_MIN:
+                supply_parts.append(f"외인 +{s['foreign_net']:.0f}억")
+            if s['inst_net'] >= SUPPLY_ENTRY_MIN:
+                supply_parts.append(f"기관 +{s['inst_net']:.0f}억")
+            supply_str = " / ".join(supply_parts) if supply_parts else "수급 ?"
+            print(
+                f"    {s['name']:12s} ({s['code']}) {s['fib_zone']:6s} "
+                f"{rsi_str} | {supply_str} | 목표 {s['upside']:+.1f}%"
+            )
+    else:
+        print(f"\n  [매수 적기 종목 없음] — RSI<40 + 수급 조건 미충족")
+
     # 눌림목 zone별 요약
     zones = {}
     for s in fib_stocks:
@@ -351,9 +481,12 @@ def print_report(fib_stocks: list, fib_leaders: list, sector_rotation: list):
     )
     print(f"\n  [눌림목] {len(fib_stocks)}종목 — {zone_str}")
     for s in fib_stocks[:10]:
+        grade_mark = "★" if s.get("entry_grade") == "적기" else " "
+        rsi_str = f"RSI {s['rsi']:.0f}" if s.get('rsi') is not None else ""
         print(
-            f"    {s['fib_zone']:8s} {s['name']:12s} ({s['code']}) "
-            f"하락 {s['drop']:+.1f}% | {s['price']:,} → {s['target']:,} ({s['upside']:+.1f}%)"
+            f"   {grade_mark} {s['fib_zone']:8s} {s['name']:12s} ({s['code']}) "
+            f"하락 {s['drop']:+.1f}% | {s['price']:,} → {s['target']:,} "
+            f"({s['upside']:+.1f}%) {rsi_str}"
         )
     if len(fib_stocks) > 10:
         print(f"    ... 외 {len(fib_stocks) - 10}종목")
@@ -362,9 +495,12 @@ def print_report(fib_stocks: list, fib_leaders: list, sector_rotation: list):
     print(f"\n  [대형주 TOP 30] {len(fib_leaders)}종목")
     for s in fib_leaders[:10]:
         cap_조 = s['cap'] / 10000
+        grade_mark = "★" if s.get("entry_grade") == "적기" else " "
+        rsi_str = f"RSI {s['rsi']:.0f}" if s.get('rsi') is not None else ""
         print(
-            f"    {s['name']:12s} 시총 {cap_조:,.1f}조 | "
-            f"하락 {s['drop']:+.1f}% | 위치 {s['position_pct']:.0f}% | {s['fib_status']}"
+            f"   {grade_mark} {s['name']:12s} 시총 {cap_조:,.1f}조 | "
+            f"하락 {s['drop']:+.1f}% | 위치 {s['position_pct']:.0f}% | "
+            f"{s['entry_grade']:4s} {rsi_str}"
         )
     if len(fib_leaders) > 10:
         print(f"    ... 외 {len(fib_leaders) - 10}종목")
@@ -415,12 +551,14 @@ def main():
 
     # JSON 저장
     date_str = datetime.now().strftime("%Y-%m-%d")
+    entry_picks = _extract_entry_picks(fib_stocks, fib_leaders)
     report = {
         "date": date_str,
         "generated_at": datetime.now().isoformat(),
         "fib_stocks": fib_stocks,
         "fib_leaders": fib_leaders,
         "sector_rotation": sector_rotation,
+        "entry_picks": entry_picks,
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:

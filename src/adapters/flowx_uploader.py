@@ -1313,7 +1313,26 @@ def build_jarvis_payload() -> dict:
         "macro": _build_macro_data(),
         # Phase 7: 킬러픽 자비스 보고서
         "killer_picks": _build_killer_picks_data(),
+        # Phase 8: 피보나치 매수 적기 (백테스트 S7 근거: Fib+수급+RSI<40 = STRONG_ALPHA)
+        "fib_entry_picks": _build_fib_entry_picks(),
     }
+
+
+def _build_fib_entry_picks() -> list[dict]:
+    """fib_scanner.json에서 매수 적기(entry_picks) 종목 로드.
+
+    근거: 백테스트 S7 (Fib + RSI<40 + 수급) = D+5 +2.97%, WR 61.9%, PF 3.00
+    퀀트시스템 메인에서 "피보나치 매수 적기 N종목" 노출용.
+    """
+    fib_path = DATA_DIR / "fib_scanner.json"
+    if not fib_path.exists():
+        return []
+    try:
+        with open(fib_path, encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("entry_picks", [])
+    except Exception:
+        return []
 
 
 def _build_why_now(pick: dict, ai_judgment: dict) -> dict:
