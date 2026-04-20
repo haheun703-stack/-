@@ -54,8 +54,8 @@ except ImportError:
     logger.error("pykrx 미설치")
 
 # ─── 투자자 유형 ───
-CORE_INVESTORS = ["외국인", "기관합계", "기타법인", "개인"]
-DETAIL_INVESTORS = ["연기금", "투신", "보험", "은행", "사모", "금융투자", "기타금융"]
+CORE_INVESTORS = ["외국인", "기관합계", "기타법인", "개인", "연기금"]
+DETAIL_INVESTORS = ["투신", "보험", "은행", "사모", "금융투자", "기타금융"]
 ALL_INVESTORS = CORE_INVESTORS + DETAIL_INVESTORS
 
 MARKETS = ["KOSPI", "KOSDAQ"]
