@@ -75,14 +75,15 @@ def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str]) -> dict | 
     last5 = df.tail(5)
     last20 = df.tail(20)
 
-    # 수급 (억)
-    fgn5 = last5["외국인합계"].sum() / 1e8
-    inst5 = last5["기관합계"].sum() / 1e8
-    ind5 = last5["개인"].sum() / 1e8
+    # 수급 (억) — pykrx 버전에 따라 "외국인합계" 또는 "외국인"
+    _fgn_col = "외국인합계" if "외국인합계" in last5.columns else "외국인"
+    fgn5 = last5[_fgn_col].sum() / 1e8 if _fgn_col in last5.columns else 0.0
+    inst5 = last5["기관합계"].sum() / 1e8 if "기관합계" in last5.columns else 0.0
+    ind5 = last5["개인"].sum() / 1e8 if "개인" in last5.columns else 0.0
     etc5 = last5["기타법인"].sum() / 1e8 if "기타법인" in last5.columns else 0.0
-    fgn_t = today_row["외국인합계"] / 1e8
-    inst_t = today_row["기관합계"] / 1e8
-    ind_t = today_row["개인"] / 1e8
+    fgn_t = today_row[_fgn_col] / 1e8 if _fgn_col in today_row.index else 0.0
+    inst_t = today_row["기관합계"] / 1e8 if "기관합계" in today_row.index else 0.0
+    ind_t = today_row["개인"] / 1e8 if "개인" in today_row.index else 0.0
     etc_t = (today_row["기타법인"] / 1e8) if "기타법인" in today_row.index else 0.0
 
     # 유동성 (20일 평균 거래대금, volume*close 추정)
@@ -112,7 +113,7 @@ def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str]) -> dict | 
 
     # 분배 Phase 감지
     inst_heavy_sell_days = int(((last5["기관합계"] / 1e8) <= -100).sum())
-    fgn_heavy_sell_days = int(((last5["외국인합계"] / 1e8) <= -100).sum())
+    fgn_heavy_sell_days = int(((last5[_fgn_col] / 1e8) <= -100).sum()) if _fgn_col in last5.columns else 0
 
     return {
         "ticker": t,
