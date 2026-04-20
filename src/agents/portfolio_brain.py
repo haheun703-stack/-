@@ -96,36 +96,19 @@ Deep Analyst가 선별한 후보 종목들과 현재 포트폴리오 상태를 �
 
 
 class PortfolioBrainAgent(BaseAgent):
-    """v3 Agent 2E — 최종 포트폴리오 결정 (Opus)"""
+    """v3 Agent 2E — 최종 포트폴리오 결정 (Sonnet + Opus Advisor)"""
+
+    ADVISOR_INSTRUCTION = (
+        "포트폴리오 비중 배분을 확정하기 전에 advisor에게 검증받으세요: "
+        "1) 섹터 집중도 리스크, "
+        "2) 현금 비중 적정성, "
+        "3) conviction 대비 비중이 과대/과소한 종목. "
+        "advisor는 100단어 이내로 응답하세요."
+    )
 
     def __init__(self, model: str | None = None):
-        if model is None:
-            model = self._load_model_from_settings()
-        super().__init__(model=model)
-
-    @staticmethod
-    def _load_model_from_settings() -> str:
-        """settings.yaml에서 strategic_model 로드 (Opus)"""
-        try:
-            import yaml
-            settings_path = Path(__file__).resolve().parents[2] / "config" / "settings.yaml"
-            with open(settings_path, encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-            return cfg.get("ai_brain_v3", {}).get("strategic_model", "claude-sonnet-4-5-20250929")
-        except Exception:
-            return "claude-sonnet-4-5-20250929"
-
-    async def _ask_claude(self, system_prompt: str, user_prompt: str, max_tokens: int = 16000) -> str:
-        """Opus는 스트리밍 필수 — BaseAgent 오버라이드"""
-        if "opus" in self.model:
-            async with self.client.messages.stream(
-                model=self.model,
-                max_tokens=max_tokens,
-                system=system_prompt,
-                messages=[{"role": "user", "content": user_prompt}],
-            ) as stream:
-                return await stream.get_final_text()
-        return await super()._ask_claude(system_prompt, user_prompt, max_tokens)
+        from src.agents.base import MODEL_SONNET
+        super().__init__(model=model or MODEL_SONNET)
 
     async def decide(
         self,
@@ -165,10 +148,14 @@ class PortfolioBrainAgent(BaseAgent):
 CFO 건강 점수와 경고를 반드시 참조하여 리스크를 관리하세요.
 """
 
-        logger.info("v3 Portfolio Brain 결정 시작 (%d 후보)", len(deep_picks))
+        logger.info("v3 Portfolio Brain 결정 시작 (%d 후보, Sonnet+Opus Advisor)", len(deep_picks))
 
         try:
-            result = await self._ask_claude_json(SYSTEM_PORTFOLIO_BRAIN, user_prompt)
+            text = await self._ask_claude_with_advisor(
+                SYSTEM_PORTFOLIO_BRAIN, user_prompt,
+                advisor_instruction=self.ADVISOR_INSTRUCTION,
+            )
+            result = self._parse_json_response(text)
         except Exception as e:
             logger.error("v3 Portfolio Brain 실패: %s", e)
             return self._fallback_result(str(e), strategic_result)

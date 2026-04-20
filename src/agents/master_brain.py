@@ -114,35 +114,29 @@ SYSTEM_MASTER_BRAIN = """\
 
 
 class MasterBrainAgent(BaseAgent):
-    """전체 시스템 통합 두뇌 — Claude Opus 기반 추론 체인 생성."""
+    """전체 시스템 통합 두뇌 — Sonnet + Opus Advisor 패턴."""
 
-    def __init__(self, model: str = "claude-opus-4-20250514"):
-        super().__init__(model=model)
+    ADVISOR_INSTRUCTION = (
+        "전략 판단을 내리기 전에 advisor에게 논리적 허점과 "
+        "리스크 시나리오를 100단어 이내로 검증받으세요."
+    )
+
+    def __init__(self, model: str | None = None):
+        from src.agents.base import MODEL_SONNET
+        super().__init__(model=model or MODEL_SONNET)
         self.aggregator = MacroAggregator()
 
-    async def _ask_claude_stream(
-        self, system_prompt: str, user_prompt: str, max_tokens: int = 16000
-    ) -> str:
-        """Opus는 16K 토큰 시 스트리밍 필수 (SDK 타임아웃 방지)."""
-        chunks = []
-        async with self.client.messages.stream(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
-        ) as stream:
-            async for text in stream.text_stream:
-                chunks.append(text)
-        return "".join(chunks)
-
     async def think(self) -> dict:
-        """전체 데이터 수집 → Claude 추론 → 통합 판단."""
+        """전체 데이터 수집 → Sonnet+Opus Advisor 추론 → 통합 판단."""
         logger.info("Master Brain: 데이터 수집 시작...")
         data = self.aggregator.aggregate()
         prompt_text = self.aggregator.summarize_for_prompt(data)
 
-        logger.info(f"Master Brain: 프롬프트 {len(prompt_text)}자 → Claude Opus 호출 (스트리밍)...")
-        text = await self._ask_claude_stream(SYSTEM_MASTER_BRAIN, prompt_text)
+        logger.info(f"Master Brain: 프롬프트 {len(prompt_text)}자 → Sonnet+Opus Advisor...")
+        text = await self._ask_claude_with_advisor(
+            SYSTEM_MASTER_BRAIN, prompt_text,
+            advisor_instruction=self.ADVISOR_INSTRUCTION,
+        )
         result = self._parse_json_response(text)
 
         # 에러 체크
@@ -152,7 +146,7 @@ class MasterBrainAgent(BaseAgent):
         # 날짜는 항상 오늘로 강제 (Claude 응답의 date를 신뢰하지 않음)
         result["date"] = datetime.now().strftime("%Y-%m-%d")
 
-        result["model"] = self.model
+        result["model"] = "sonnet+opus_advisor"
         result["generated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
 
         # 저장

@@ -81,7 +81,7 @@ def classify_disclosures(
 
         client = anthropic.Anthropic(api_key=key)
         response = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-haiku-4-5-20251001",  # P2: 분류 작업 → Haiku 고정 (비용 최적화)
             max_tokens=200,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],

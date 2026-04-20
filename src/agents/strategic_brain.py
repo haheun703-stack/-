@@ -271,39 +271,24 @@ def _format_portfolio(data: dict | list) -> str:
 # ─── 에이전트 구현 ─────────────────────────────────────────────
 
 class StrategicBrainAgent(BaseAgent):
-    """v3 Agent 2A — 거시 해석 + 산업 구조 분석 (Opus)
+    """v3 Agent 2A — 거시 해석 + 산업 구조 분석
 
+    Sonnet + Opus Advisor 패턴으로 전환 (비용 최적화).
     기존 news_brain + macro_analyst의 상위 레이어.
     개별 뉴스 판단이 아닌 '산업 구조 해석'에 초점.
     """
 
+    ADVISOR_INSTRUCTION = (
+        "산업 구조 분석을 완료하기 전에 advisor에게 검증받으세요: "
+        "1) 수요/공급 판단의 논리적 허점, "
+        "2) 빠뜨린 리스크 시나리오, "
+        "3) 한국 시장 특수 요인 반영 여부. "
+        "advisor는 100단어 이내로 응답하세요."
+    )
+
     def __init__(self, model: str | None = None):
-        # settings.yaml에서 모델 읽기, 기본값은 Opus
-        if model is None:
-            model = self._load_model_from_settings()
-        super().__init__(model=model)
-
-    async def _ask_claude(self, system_prompt: str, user_prompt: str, max_tokens: int = 16000) -> str:
-        """Opus는 스트리밍 필수 — BaseAgent 오버라이드"""
-        async with self.client.messages.stream(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
-        ) as stream:
-            return await stream.get_final_text()
-
-    @staticmethod
-    def _load_model_from_settings() -> str:
-        """settings.yaml에서 strategic_model 로드"""
-        try:
-            import yaml
-            settings_path = Path(__file__).resolve().parents[2] / "config" / "settings.yaml"
-            with open(settings_path, encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-            return cfg.get("ai_brain_v3", {}).get("strategic_model", "claude-opus-4-20250514")
-        except Exception:
-            return "claude-opus-4-20250514"
+        from src.agents.base import MODEL_SONNET
+        super().__init__(model=model or MODEL_SONNET)
 
     async def analyze(self, context: dict) -> dict:
         """5개 소스를 종합 분석하여 전략적 판단 생성.
@@ -372,11 +357,15 @@ class StrategicBrainAgent(BaseAgent):
 """
 
         logger.info(
-            "v3 Strategic Brain 분석 시작 (모델: %s)", self.model
+            "v3 Strategic Brain 분석 시작 (Sonnet+Opus Advisor)"
         )
 
         try:
-            result = await self._ask_claude_json(system_prompt, user_prompt)
+            text = await self._ask_claude_with_advisor(
+                system_prompt, user_prompt,
+                advisor_instruction=self.ADVISOR_INSTRUCTION,
+            )
+            result = self._parse_json_response(text)
         except Exception as e:
             logger.error("v3 Strategic Brain 분석 실패: %s", e)
             return self._fallback_result(str(e))
