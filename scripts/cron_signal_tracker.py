@@ -54,35 +54,10 @@ def run_log_mode(dry_run: bool = False):
 def run_track_mode(dry_run: bool = False):
     """성과추적 모드 (16:10)."""
 
-    # STEP 1: 성과 업데이트
-    print("\n[1/3] 성과 업데이트...")
-    try:
-        from scripts.performance_tracker import update_performance
-        result = update_performance(dry_run=dry_run)
-        print(f"  완료: {result['updated']}/{result['total']}건 업데이트")
-    except Exception as e:
-        print(f"  [FAIL] 성과 업데이트 실패: {e}")
-        send_error_alert("성과 업데이트", str(e))
-
-    # STEP 2: 종료 판정
-    print("\n[2/3] 종료 판정...")
-    try:
-        from scripts.signal_closer import close_signals
-        result = close_signals(dry_run=dry_run)
-        print(f"  완료: CLOSED {result['closed']} / STOPPED {result['stopped']} / OPEN {result['open']}")
-    except Exception as e:
-        print(f"  [FAIL] 종료 판정 실패: {e}")
-        send_error_alert("종료 판정", str(e))
-
-    # STEP 3: 성적표 집계
-    print("\n[3/3] 성적표 집계...")
-    try:
-        from scripts.scoreboard_aggregator import aggregate_scoreboard
-        rows = aggregate_scoreboard(dry_run=dry_run)
-        print(f"  완료: {len(rows)}건 집계")
-    except Exception as e:
-        print(f"  [FAIL] 성적표 집계 실패: {e}")
-        send_error_alert("성적표 집계", str(e))
+    # STEP 1~3: 성과추적/종료판정/성적표 — 모듈 아카이브됨 (4/20)
+    # performance_tracker, signal_closer, scoreboard_aggregator →
+    # scripts/archive/deprecated/ 이동 완료. Supabase signals 테이블로 대체됨.
+    print("\n[1/3~3/3] 성과추적 기능 deprecated — Supabase signals 직접 관리로 전환됨")
 
 
 def main():

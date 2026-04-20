@@ -167,8 +167,8 @@ def score_valuation(fib: dict, consensus: dict) -> tuple[int, str]:
     score = 10  # 기본점수
     reasons = []
 
-    per = fib.get("per", 0) or consensus.get("forward_per", 0)
-    pbr = fib.get("pbr", 0) or consensus.get("forward_pbr", 0)
+    per = fib.get("per") or consensus.get("forward_per") or 0
+    pbr = fib.get("pbr") or consensus.get("forward_pbr") or 0
 
     # PER 기반 (낮을수록 좋음)
     if 0 < per <= 8:
