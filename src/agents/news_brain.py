@@ -70,8 +70,9 @@ SYSTEM_PROMPT = """\
 class NewsBrainAgent(BaseAgent):
     """뉴스 기반 정성적 종목 판단 AI 두뇌"""
 
-    def __init__(self, model: str = "claude-sonnet-4-5-20250929"):
-        super().__init__(model=model)
+    def __init__(self, model: str | None = None):
+        from src.agents.base import MODEL_HAIKU
+        super().__init__(model=model or MODEL_HAIKU)
 
     async def analyze_daily_news(
         self,

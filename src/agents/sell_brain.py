@@ -110,24 +110,11 @@ SYSTEM_SELL_BRAIN = """\
 
 
 class SellBrainAgent(BaseAgent):
-    """v3 Agent 4B/4C — 장중 AI 매도 판단 (Sonnet)"""
+    """v3 Agent 4B/4C — 장중 AI 매도 판단 (Haiku — 비용 최적화)"""
 
     def __init__(self, model: str | None = None):
-        if model is None:
-            model = self._load_model_from_settings()
-        super().__init__(model=model)
-
-    @staticmethod
-    def _load_model_from_settings() -> str:
-        """settings.yaml에서 tactical_model 로드"""
-        try:
-            import yaml
-            settings_path = Path(__file__).resolve().parents[2] / "config" / "settings.yaml"
-            with open(settings_path, encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-            return cfg.get("ai_brain_v3", {}).get("tactical_model", "claude-sonnet-4-5-20250929")
-        except Exception:
-            return "claude-sonnet-4-5-20250929"
+        from src.agents.base import MODEL_HAIKU
+        super().__init__(model=model or MODEL_HAIKU)
 
     async def check_sell(
         self,

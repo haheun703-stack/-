@@ -83,8 +83,9 @@ SYSTEM_PROMPT = """\
 class ETFBrainAgent(BaseAgent):
     """ETF 주문 필터링 AI 두뇌"""
 
-    def __init__(self, model: str = "claude-sonnet-4-5-20250929"):
-        super().__init__(model=model)
+    def __init__(self, model: str | None = None):
+        from src.agents.base import MODEL_HAIKU
+        super().__init__(model=model or MODEL_HAIKU)
 
     async def filter_orders(
         self,

@@ -84,7 +84,8 @@ class TradeAdvisor(BaseAgent):
 
     def __init__(self):
         settings = _load_settings()
-        model = settings.get("model", "claude-sonnet-4-5-20250929")
+        from src.agents.base import MODEL_HAIKU
+        model = settings.get("model", MODEL_HAIKU)
         super().__init__(model=model)
         self.settings = settings
         self.buy_thresholds = settings.get("buy_thresholds", {})
