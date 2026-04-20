@@ -82,6 +82,12 @@ class FlowxUploader:
         if not self.is_active or not rows:
             return False
         try:
+            # 배치 내 (date, code) 중복 제거 — 마지막 값 우선
+            deduped: dict[tuple, dict] = {}
+            for r in rows:
+                deduped[(r["date"], r["code"])] = r
+            rows = list(deduped.values())
+
             result = self.client.table("china_flow").upsert(
                 rows, on_conflict="date,code"
             ).execute()
@@ -622,7 +628,13 @@ def build_foreign_flow_rows(date_str: str = "") -> list[dict]:
         data = json.load(f)
 
     rows = []
+    seen_codes: set[str] = set()
     for sig in data.get("signals", []):
+        ticker = sig.get("ticker", "")
+        if not ticker or ticker in seen_codes:
+            continue
+        seen_codes.add(ticker)
+
         # 시그널 매핑: 외국인 순매수/순매도 방향 기준
         foreign_dir = sig.get("foreign_direction", "NEUTRAL")
         raw_signal = sig.get("signal", "NEUTRAL")
@@ -636,7 +648,7 @@ def build_foreign_flow_rows(date_str: str = "") -> list[dict]:
 
         rows.append({
             "date": date_str,
-            "code": sig.get("ticker", ""),
+            "code": ticker,
             "name": sig.get("name", ""),
             "signal": mapped,
             "score": sig.get("score", 0),
