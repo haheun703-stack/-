@@ -162,7 +162,7 @@ def load_from_db(db_path: Path) -> dict[str, pd.DataFrame]:
 
 
 def sync_csv(csv_path: Path, investor_df: pd.DataFrame, dry_run: bool = False) -> dict:
-    """단일 CSV 파일에 수급 데이터 동기화."""
+    """단일 CSV 파일에 수급 데이터 동기화 (벡터화 merge)."""
     try:
         df = pd.read_csv(csv_path, encoding="utf-8-sig")
     except Exception as e:
@@ -179,29 +179,26 @@ def sync_csv(csv_path: Path, investor_df: pd.DataFrame, dry_run: bool = False) -
         if col not in df.columns:
             df[col] = 0.0
 
-    # 수급 날짜 형식 통일
-    inv_dates = set(investor_df.index)
+    # investor_df 인덱스를 YYYY-MM-DD로 통일
+    inv = investor_df.copy()
+    inv.index = pd.to_datetime(inv.index).strftime("%Y-%m-%d")
+    inv = inv.rename(columns={
+        "foreign_net": "Foreign_Net",
+        "inst_net": "Inst_Net",
+        "corp_net": "Corp_Net",
+    })
 
-    updated = 0
-    for i, row in df.iterrows():
-        date_str = row["Date"]
-        date_key = date_str.replace("-", "")
+    # Date 기준 merge → 벡터화 업데이트 (iterrows 제거)
+    matching = df["Date"].isin(inv.index)
+    updated = int(matching.sum())
 
-        # 소스에서 해당 날짜 찾기 (YYYY-MM-DD 또는 YYYYMMDD)
-        inv_row = None
-        if date_str in inv_dates:
-            inv_row = investor_df.loc[date_str]
-        elif date_key in inv_dates:
-            inv_row = investor_df.loc[date_key]
+    if updated > 0:
+        df_indexed = df.set_index("Date")
+        df_indexed.update(inv)
+        df = df_indexed.reset_index()
 
-        if inv_row is not None:
-            df.at[i, "Foreign_Net"] = inv_row["foreign_net"]
-            df.at[i, "Inst_Net"] = inv_row["inst_net"]
-            df.at[i, "Corp_Net"] = inv_row["corp_net"]
-            updated += 1
-
-    if updated > 0 and not dry_run:
-        df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+        if not dry_run:
+            df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
     return {"status": "OK", "updated": updated}
 
