@@ -147,7 +147,8 @@ case "$BAT" in
     run_py_xlong scripts/extend_parquet_data.py --workers 2
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
-    # collect_intraday_candles.py 제거 — 종목선정에 미사용, smart_entry는 실시간 조회
+    # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
+    run_py scripts/sync_investor_to_csv.py
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
     run_py_xlong scripts/scan_nationality.py
@@ -158,7 +159,7 @@ case "$BAT" in
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
     run_py scripts/collect_investor_bulk.py --core-only
-    run_py scripts/sync_investor_to_csv.py
+    # sync_investor_to_csv → G1 상단으로 이동 (단타봇 데이터 선행 활용)
     run_py scripts/fetch_ecos_macro.py
     # COO 복원: ETF/섹터 수급 수집
     run_py scripts/collect_etf_volume.py

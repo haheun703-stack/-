@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""투자자별 순매수 DB → stock_data_daily CSV 동기화
+"""투자자별 순매수 → stock_data_daily CSV 동기화
 
-investor_daily.db에서 외국인/기관/기타법인 순매수(억원)를
-stock_data_daily/*.csv의 Foreign_Net/Inst_Net 컬럼에 반영.
-기타법인은 Corp_Net 신규 컬럼으로 추가.
+수급 데이터 소스 우선순위:
+  1) 단타봇 flow CSV (primary) — /home/ubuntu/bodyhunter/scalper-agent/data_store/flow/
+  2) investor_daily.db (fallback) — 단타봇 미수집 시 또는 로컬 환경
 
 Usage:
-    python scripts/sync_investor_to_csv.py              # 전체 동기화
+    python scripts/sync_investor_to_csv.py              # 자동감지 (VPS=단타봇, 로컬=DB)
+    python scripts/sync_investor_to_csv.py --source scalper  # 단타봇 강제
+    python scripts/sync_investor_to_csv.py --source db       # DB 강제
     python scripts/sync_investor_to_csv.py --dry-run    # 변경 미적용, 통계만
     python scripts/sync_investor_to_csv.py --ticker 005930  # 특정 종목만
 """
@@ -14,9 +16,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sqlite3
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -34,12 +38,94 @@ logger = logging.getLogger(__name__)
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 DB_PATH = PROJECT_ROOT / "data" / "investor_flow" / "investor_daily.db"
 
+# 단타봇 수급 데이터 경로 (같은 VPS)
+SCALPER_FLOW_DIR = Path("/home/ubuntu/bodyhunter/scalper-agent/data_store/flow")
+SCALPER_META_FILE = SCALPER_FLOW_DIR / "_last_update.json"
 
-def load_investor_data(db_path: Path) -> dict[str, pd.DataFrame]:
-    """DB에서 투자자별 순매수 데이터 로드 (티커별 그룹핑).
+
+def check_scalper_freshness() -> tuple[bool, str]:
+    """단타봇 수급 데이터 신선도 확인.
 
     Returns:
-        {ticker: DataFrame(date, foreign_net, inst_net, corp_net)} (억원 단위)
+        (is_fresh, message)
+    """
+    if not SCALPER_FLOW_DIR.exists():
+        return False, "단타봇 flow 디렉토리 없음"
+
+    if not SCALPER_META_FILE.exists():
+        return False, "_last_update.json 없음"
+
+    try:
+        meta = json.loads(SCALPER_META_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        return False, f"meta 파싱 실패: {e}"
+
+    scalper_date = meta.get("date", "")
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    if scalper_date != today:
+        return False, f"단타봇 수급 미갱신 (last={scalper_date}, today={today})"
+
+    count = meta.get("investor", 0)
+    if count < 100:
+        return False, f"수집 종목 부족 ({count}종목)"
+
+    return True, f"OK — {count}종목 수집 완료 ({scalper_date})"
+
+
+def load_from_scalper(flow_dir: Path) -> dict[str, pd.DataFrame]:
+    """단타봇 flow CSV에서 4유형 수급 로드.
+
+    Returns:
+        {ticker: DataFrame(index=date, cols=[foreign_net, inst_net, corp_net])} (억원 단위)
+    """
+    result = {}
+    csv_files = list(flow_dir.glob("*_investor.csv"))
+
+    for csv_path in csv_files:
+        ticker = csv_path.stem.replace("_investor", "")
+
+        # NXT 코드(영문 포함) 스킵 — 퀀트봇 stock_data_daily는 순수 숫자 6자리만
+        if not ticker.isdigit():
+            continue
+
+        try:
+            df = pd.read_csv(csv_path, encoding="utf-8")
+        except Exception:
+            continue
+
+        if "외국인_금액" not in df.columns:
+            continue
+
+        # 백만원 → 억원 변환 (1억 = 100백만)
+        df = df.rename(columns={
+            "외국인_금액": "foreign_net",
+            "기관_금액": "inst_net",
+            "기타법인_금액": "corp_net",
+        })
+
+        for col in ["foreign_net", "inst_net", "corp_net"]:
+            if col in df.columns:
+                df[col] = (df[col] / 100).round(1)
+            else:
+                df[col] = 0.0
+
+        # date 인덱스 설정
+        df["date"] = df["date"].astype(str)
+        df = df.set_index("date")[["foreign_net", "inst_net", "corp_net"]]
+        result[ticker] = df
+
+    logger.info("단타봇 로드: %d종목 / 평균 %d거래일",
+                len(result),
+                int(sum(len(v) for v in result.values()) / max(len(result), 1)))
+    return result
+
+
+def load_from_db(db_path: Path) -> dict[str, pd.DataFrame]:
+    """DB에서 투자자별 순매수 데이터 로드 (폴백용).
+
+    Returns:
+        {ticker: DataFrame(index=date, cols=[foreign_net, inst_net, corp_net])} (억원 단위)
     """
     if not db_path.exists():
         logger.error("DB 없음: %s", db_path)
@@ -47,7 +133,6 @@ def load_investor_data(db_path: Path) -> dict[str, pd.DataFrame]:
 
     conn = sqlite3.connect(str(db_path), timeout=30)
 
-    # 핵심 3주체 피벗: 외국인, 기관합계, 기타법인 (net_val = 순매수금액, 원 단위)
     query = """
     SELECT date, ticker,
            SUM(CASE WHEN investor = '외국인' THEN net_val ELSE 0 END) as foreign_net,
@@ -67,7 +152,6 @@ def load_investor_data(db_path: Path) -> dict[str, pd.DataFrame]:
     for col in ["foreign_net", "inst_net", "corp_net"]:
         df[col] = (df[col] / 1e8).round(1)
 
-    # 티커별 그룹핑
     result = {}
     for ticker, group in df.groupby("ticker"):
         group = group.set_index("date").sort_index()
@@ -95,16 +179,15 @@ def sync_csv(csv_path: Path, investor_df: pd.DataFrame, dry_run: bool = False) -
         if col not in df.columns:
             df[col] = 0.0
 
-    # DB 날짜 형식 통일
+    # 수급 날짜 형식 통일
     inv_dates = set(investor_df.index)
 
     updated = 0
     for i, row in df.iterrows():
         date_str = row["Date"]
-        # DB 키는 YYYYMMDD 형식일 수 있으므로 변환
         date_key = date_str.replace("-", "")
 
-        # DB에서 해당 날짜 찾기 (YYYY-MM-DD 또는 YYYYMMDD)
+        # 소스에서 해당 날짜 찾기 (YYYY-MM-DD 또는 YYYYMMDD)
         inv_row = None
         if date_str in inv_dates:
             inv_row = investor_df.loc[date_str]
@@ -124,14 +207,42 @@ def sync_csv(csv_path: Path, investor_df: pd.DataFrame, dry_run: bool = False) -
 
 
 def main():
-    parser = argparse.ArgumentParser(description="투자자별 순매수 DB→CSV 동기화")
+    parser = argparse.ArgumentParser(description="투자자별 순매수 → CSV 동기화")
     parser.add_argument("--dry-run", action="store_true", help="변경 미적용")
     parser.add_argument("--ticker", type=str, default=None, help="특정 종목만")
+    parser.add_argument("--source", choices=["auto", "scalper", "db"], default="auto",
+                        help="수급 소스 (auto=자동감지, scalper=단타봇, db=investor_daily.db)")
     args = parser.parse_args()
 
-    investor_data = load_investor_data(DB_PATH)
+    # 소스 결정
+    source = args.source
+    investor_data = {}
+
+    if source == "auto":
+        fresh, msg = check_scalper_freshness()
+        if fresh:
+            source = "scalper"
+            logger.info("소스: 단타봇 flow CSV (%s)", msg)
+        else:
+            source = "db"
+            logger.info("소스: investor_daily.db (단타봇 미사용: %s)", msg)
+
+    if source == "scalper":
+        fresh, msg = check_scalper_freshness()
+        if not fresh:
+            logger.warning("단타봇 데이터 비정상: %s → DB 폴백", msg)
+            source = "db"
+        else:
+            investor_data = load_from_scalper(SCALPER_FLOW_DIR)
+            if not investor_data:
+                logger.warning("단타봇 로드 실패 → DB 폴백")
+                source = "db"
+
+    if source == "db":
+        investor_data = load_from_db(DB_PATH)
+
     if not investor_data:
-        logger.error("수급 데이터 없음 — 먼저 collect_investor_bulk.py 실행")
+        logger.error("수급 데이터 없음 — 단타봇 + DB 모두 실패")
         sys.exit(1)
 
     csv_files = sorted(CSV_DIR.glob("*.csv"))
@@ -164,7 +275,7 @@ def main():
             logger.info("  %d종목 처리... (%d파일 업데이트)", processed, total_files)
 
     action = "시뮬레이션" if args.dry_run else "동기화"
-    logger.info("%s 완료: %d파일 / %d행 업데이트", action, total_files, total_updated)
+    logger.info("%s 완료: [%s] %d파일 / %d행 업데이트", action, source, total_files, total_updated)
 
 
 if __name__ == "__main__":
