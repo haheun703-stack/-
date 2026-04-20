@@ -134,7 +134,8 @@ def fetch_one_investor(date: str, market: str, investor: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def collect_date(conn: sqlite3.Connection, date: str, investors: list[str]) -> dict:
+def collect_date(conn: sqlite3.Connection, date: str, investors: list[str],
+                  update_log: bool = True) -> dict:
     """특정 날짜의 전종목 투자자별 수급 수집."""
     t0 = time.time()
     all_rows = []
@@ -172,14 +173,15 @@ def collect_date(conn: sqlite3.Connection, date: str, investors: list[str]) -> d
 
     elapsed = time.time() - t0
 
-    # 수집 로그
-    conn.execute(
-        """INSERT OR REPLACE INTO collect_log
-           (date, collected_at, investors, total_rows, status, elapsed_sec)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (date, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-         ",".join(investors), rows_inserted, "OK", round(elapsed, 1)),
-    )
+    # 수집 로그 (partial_mode에서는 기존 로그 덮어쓰기 방지)
+    if update_log:
+        conn.execute(
+            """INSERT OR REPLACE INTO collect_log
+               (date, collected_at, investors, total_rows, status, elapsed_sec)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (date, datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+             ",".join(investors), rows_inserted, "OK", round(elapsed, 1)),
+        )
     conn.commit()
 
     return {"date": date, "rows": rows_inserted, "status": "OK", "elapsed": elapsed}
@@ -202,7 +204,9 @@ def main():
     parser = argparse.ArgumentParser(description="전종목 투자자별 순매수 일괄 수집")
     parser.add_argument("--date", type=str, default=None, help="수집 날짜 (YYYYMMDD)")
     parser.add_argument("--backfill", type=int, default=0, help="최근 N거래일 백필")
-    parser.add_argument("--core-only", action="store_true", help="핵심 4주체만 수집")
+    parser.add_argument("--core-only", action="store_true", help="핵심 5주체만 수집")
+    parser.add_argument("--investors", type=str, default=None,
+                        help="특정 투자자만 수집 (쉼표 구분, 예: 연기금,투신)")
     parser.add_argument("--force", action="store_true", help="이미 수집된 날짜도 재수집")
     args = parser.parse_args()
 
@@ -210,7 +214,15 @@ def main():
         logger.error("pykrx 없음 — 종료")
         sys.exit(1)
 
-    investors = CORE_INVESTORS if args.core_only else ALL_INVESTORS
+    # --investors 지정 시 해당 유형만 수집 (is_collected 무시)
+    partial_mode = False
+    if args.investors:
+        investors = [x.strip() for x in args.investors.split(",")]
+        partial_mode = True
+    elif args.core_only:
+        investors = CORE_INVESTORS
+    else:
+        investors = ALL_INVESTORS
     conn = init_db()
 
     logger.info("=== 투자자별 순매수 일괄 수집 ===")
@@ -234,11 +246,11 @@ def main():
         fail_count = 0
 
         for i, dt in enumerate(dates):
-            if not args.force and is_collected(conn, dt):
+            if not partial_mode and not args.force and is_collected(conn, dt):
                 skip_count += 1
                 continue
 
-            result = collect_date(conn, dt, investors)
+            result = collect_date(conn, dt, investors, update_log=not partial_mode)
             status = result["status"]
             if status == "OK":
                 ok_count += 1
@@ -262,12 +274,12 @@ def main():
                 d -= timedelta(days=1)
             target = d.strftime("%Y%m%d")
 
-        if not args.force and is_collected(conn, target):
+        if not partial_mode and not args.force and is_collected(conn, target):
             logger.info("%s 이미 수집됨 (--force로 재수집 가능)", target)
             conn.close()
             return
 
-        result = collect_date(conn, target, investors)
+        result = collect_date(conn, target, investors, update_log=not partial_mode)
         logger.info("수집: %s / %d행 / %s / %.1f초",
                      result["date"], result["rows"], result["status"], result["elapsed"])
 
