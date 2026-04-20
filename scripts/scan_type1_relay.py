@@ -43,6 +43,84 @@ OUTPUT_DIR = PROJECT_ROOT / "data"
 NXT_MASTER_PATH = PROJECT_ROOT / "data" / "nxt" / "nxt_master.json"
 
 
+def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
+    """DB에서 최근 N거래일 수급 로드 → {ticker: DataFrame}.
+
+    CSV sync 없이 항상 DB 최신 데이터를 직접 참조.
+    """
+    if not DB_PATH.exists():
+        logger.warning("수급 DB 없음: %s", DB_PATH)
+        return {}
+
+    conn = sqlite3.connect(str(DB_PATH), timeout=30)
+
+    # 최근 N거래일 날짜 목록
+    dates_df = pd.read_sql_query(
+        f"SELECT DISTINCT date FROM investor_daily ORDER BY date DESC LIMIT {lookback_days}",
+        conn,
+    )
+    if dates_df.empty:
+        conn.close()
+        return {}
+
+    min_date = dates_df["date"].min()
+
+    df = pd.read_sql_query(
+        """
+        SELECT date, ticker,
+               SUM(CASE WHEN investor = '외국인' THEN net_val ELSE 0 END) as Foreign_Net,
+               SUM(CASE WHEN investor = '기관합계' THEN net_val ELSE 0 END) as Inst_Net,
+               SUM(CASE WHEN investor = '기타법인' THEN net_val ELSE 0 END) as Corp_Net
+        FROM investor_daily
+        WHERE investor IN ('외국인', '기관합계', '기타법인')
+          AND date >= ?
+        GROUP BY date, ticker
+        """,
+        conn,
+        params=[min_date],
+    )
+    conn.close()
+
+    if df.empty:
+        return {}
+
+    # 원 → 억원
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+        df[col] = (df[col] / 1e8).round(1)
+
+    # date: YYYYMMDD → YYYY-MM-DD (CSV Date 형식에 맞춤)
+    df["date"] = df["date"].apply(
+        lambda d: f"{str(d)[:4]}-{str(d)[4:6]}-{str(d)[6:]}" if len(str(d)) == 8 else str(d)
+    )
+
+    result = {}
+    for ticker, grp in df.groupby("ticker"):
+        inv = grp.set_index("date")[["Foreign_Net", "Inst_Net", "Corp_Net"]].sort_index()
+        result[ticker] = inv
+
+    logger.info("수급 DB 로드: %d종목 / 최근 %d거래일 (%s~)", len(result), lookback_days, min_date)
+    return result
+
+
+def merge_investor_to_csv(df: pd.DataFrame, inv_df: pd.DataFrame | None) -> pd.DataFrame:
+    """CSV DataFrame에 DB 수급 데이터를 머지. CSV 수급이 0이면 DB로 덮어씀."""
+    if inv_df is None or inv_df.empty:
+        return df
+
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+        if col not in df.columns:
+            df[col] = 0.0
+
+    date_strs = df["Date"].dt.strftime("%Y-%m-%d")
+    for i, date_str in enumerate(date_strs):
+        if date_str in inv_df.index:
+            df.at[df.index[i], "Foreign_Net"] = inv_df.loc[date_str, "Foreign_Net"]
+            df.at[df.index[i], "Inst_Net"] = inv_df.loc[date_str, "Inst_Net"]
+            df.at[df.index[i], "Corp_Net"] = inv_df.loc[date_str, "Corp_Net"]
+
+    return df
+
+
 def load_nxt_tickers() -> set[str]:
     """NXT 거래 가능 종목 티커 로드."""
     if not NXT_MASTER_PATH.exists():
@@ -217,8 +295,9 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
     """타입 1 수급 릴레이 스캔. NXT 거래 가능 종목만 포함."""
     csv_files = sorted(CSV_DIR.glob("*.csv"))
     nxt_tickers = load_nxt_tickers()
-    logger.info("CSV 파일: %d개 / 축적 최소 %d일 / NXT %d종목",
-                len(csv_files), min_accum_days, len(nxt_tickers))
+    investor_data = load_investor_from_db(lookback_days=15)
+    logger.info("CSV 파일: %d개 / 축적 최소 %d일 / NXT %d종목 / 수급DB %d종목",
+                len(csv_files), min_accum_days, len(nxt_tickers), len(investor_data))
 
     candidates = []
     nxt_filtered = 0
@@ -239,6 +318,9 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
         df = load_csv_data(path)
         if df is None:
             continue
+
+        # DB 수급 머지 (CSV 수급이 비어있어도 DB에서 채움)
+        df = merge_investor_to_csv(df, investor_data.get(ticker))
 
         # 1. 시드 조건 확인 (오늘 빨간봉)
         seed = check_seed_condition(df)
