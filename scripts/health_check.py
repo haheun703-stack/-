@@ -38,6 +38,7 @@ from src.telegram_sender import send_message
 from src.adapters.flowx_uploader import FlowxUploader
 
 TODAY = date.today().isoformat()  # "2026-03-31"
+TODAY_COMPACT = date.today().strftime("%Y%m%d")  # "20260331"
 RUN_BAT = QM / "scripts" / "cron" / "run_bat.sh"
 PY = QM / "venv" / "bin" / "python3.11"
 LOG = QM / "logs" / f"health_{datetime.now():%Y%m%d_%H%M}.log"
@@ -272,6 +273,163 @@ def rerun_flowx() -> bool:
     except Exception as e:
         log(f"[FLOWX-RERUN] 실행 오류: {e}")
         return False
+
+
+# ══════════════════════════════════════════
+# 2-C. 투자자수급 DB + CSV 검증 (L6, L7)
+# ══════════════════════════════════════════
+
+def check_investor_db() -> bool:
+    """investor_daily.db에 오늘 데이터 존재 확인."""
+    db_path = QM / "data" / "investor_flow" / "investor_daily.db"
+    if not db_path.exists():
+        log("[INVESTOR-DB] DB 파일 없음")
+        return False
+    try:
+        import sqlite3
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.execute(
+            "SELECT COUNT(*) FROM investor_daily WHERE date = ?",
+            (TODAY_COMPACT,)
+        )
+        count = cursor.fetchone()[0]
+        conn.close()
+        if count > 0:
+            log(f"[INVESTOR-DB] 오늘 데이터 {count}행 — 정상")
+            return True
+        log("[INVESTOR-DB] 오늘 데이터 0행!")
+        return False
+    except Exception as e:
+        log(f"[INVESTOR-DB] 조회 실패: {e}")
+        return False
+
+
+def rerun_investor_collect() -> bool:
+    """collect_investor_bulk --core-only + sync_investor_to_csv 재실행."""
+    log("[INVESTOR-RERUN] collect_investor_bulk --core-only 시작")
+    try:
+        r1 = subprocess.run(
+            [str(PY), "scripts/collect_investor_bulk.py", "--core-only"],
+            capture_output=True, text=True, timeout=600, cwd=str(QM),
+        )
+        if r1.returncode != 0:
+            log(f"[INVESTOR-RERUN] collect 실패 (exit={r1.returncode})")
+            return False
+        r2 = subprocess.run(
+            [str(PY), "scripts/sync_investor_to_csv.py"],
+            capture_output=True, text=True, timeout=300, cwd=str(QM),
+        )
+        log(f"[INVESTOR-RERUN] sync 완료 (exit={r2.returncode})")
+        return r2.returncode == 0
+    except subprocess.TimeoutExpired:
+        log("[INVESTOR-RERUN] 타임아웃")
+        return False
+    except Exception as e:
+        log(f"[INVESTOR-RERUN] 실행 오류: {e}")
+        return False
+
+
+def check_investor_csv_quality() -> bool:
+    """stock_data_daily/ 랜덤 10개 CSV에서 Foreign_Net이 실제 값인지."""
+    import csv as csv_mod
+    import random
+    csv_dir = QM / "stock_data_daily"
+    if not csv_dir.exists():
+        log("[INVESTOR-CSV] stock_data_daily/ 없음")
+        return False
+    csvs = list(csv_dir.glob("*.csv"))
+    if len(csvs) < 10:
+        log(f"[INVESTOR-CSV] CSV {len(csvs)}개 — 부족")
+        return False
+    samples = random.sample(csvs, 10)
+    has_data = 0
+    for p in samples:
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                reader = csv_mod.DictReader(f)
+                for row in reader:
+                    val = row.get("Foreign_Net", "")
+                    if val and val not in ("", "0", "0.0", "nan", "None"):
+                        has_data += 1
+                        break
+        except Exception:
+            continue
+    log(f"[INVESTOR-CSV] 샘플 10개 중 {has_data}개에 수급 데이터 있음")
+    return has_data >= 3  # 유니버스만 수급 있으므로 30% 이상이면 OK
+
+
+# ══════════════════════════════════════════
+# 2-D. FLOWX 14테이블 전수 검증 (L8)
+# ══════════════════════════════════════════
+
+FLOWX_TABLES = [
+    ("quant_jarvis", "date"),
+    ("quant_scenario_dashboard", "date"),
+    ("quant_sector_momentum", "date"),
+    ("quant_fib_scanner", "date"),
+    ("quant_alpha_scanner", "date"),
+    ("quant_market_ranking", "date"),
+    ("quant_bluechip_checkup", "date"),
+    ("dashboard_crash_bounce", "date"),
+    ("sector_rotation", "date"),
+    ("etf_signals", "date"),
+    ("china_flow", "date"),
+    ("short_signals", "date"),
+    ("morning_briefings", "date"),
+    ("dashboard_relay", "date"),
+]
+
+
+def check_flowx_all_tables() -> tuple:
+    """14개 FLOWX 테이블 전수 검증. (fresh_list, stale_list) 반환."""
+    try:
+        uploader = FlowxUploader()
+        if not uploader.is_active:
+            log("[FLOWX-ALL] Supabase 미연결 — 스킵")
+            return [], []
+    except Exception:
+        return [], []
+
+    fresh, stale = [], []
+    for table, date_col in FLOWX_TABLES:
+        try:
+            result = (
+                uploader.client.table(table)
+                .select(date_col)
+                .order(date_col, desc=True)
+                .limit(1)
+                .execute()
+            )
+            if result.data:
+                latest = str(result.data[0][date_col])[:10]
+                if latest == TODAY:
+                    fresh.append(table)
+                else:
+                    stale.append(f"{table}({latest})")
+            else:
+                stale.append(f"{table}(EMPTY)")
+        except Exception:
+            stale.append(f"{table}(ERR)")
+    log(f"[FLOWX-ALL] {len(fresh)}/{len(FLOWX_TABLES)} 신선, STALE: {len(stale)}")
+    return fresh, stale
+
+
+# ══════════════════════════════════════════
+# 2-E. AI 모델 에러 감지 (L9)
+# ══════════════════════════════════════════
+
+def check_ai_model_errors() -> tuple:
+    """오늘 cron 로그에서 AI 폴백/404 횟수 카운트. (fallback_count, error_404_count)"""
+    log_path = QM / "logs" / f"cron_{datetime.now():%Y%m%d}.log"
+    if not log_path.exists():
+        return 0, 0
+    try:
+        content = log_path.read_text(encoding="utf-8", errors="ignore")
+        fallback = content.count("Haiku 폴백") + content.count("haiku fallback")
+        err_404 = content.count("model_not_found") + content.lower().count("404 not found")
+        return fallback, err_404
+    except Exception:
+        return 0, 0
 
 
 # ══════════════════════════════════════════
@@ -562,24 +720,92 @@ def main():
         else:
             failed.append("dashboard_relay: Supabase 오늘 데이터 없음")
 
-    # 결과 알림
-    if all_ok:
-        log("=== 전체 정상 ===")
-        # 정상일 때는 알림 안 보냄 (조용히)
-        return
+    # ── L6: 투자자수급 DB ──
+    investor_ok = check_investor_db()
+    if not investor_ok:
+        all_ok = False
+        if not args.check_only:
+            rerun_ok = rerun_investor_collect()
+            if rerun_ok and check_investor_db():
+                recovered.append("수급DB")
+                log("[INVESTOR-DB] 재수집 성공")
+            else:
+                failed.append("수급DB: 재수집 후에도 0행")
+        else:
+            failed.append("수급DB: 오늘 데이터 없음")
 
-    msg_parts = []
+    # ── L7: 수급 CSV 품질 ──
+    csv_ok = check_investor_csv_quality()
+    if not csv_ok:
+        all_ok = False
+        if not args.check_only:
+            if investor_ok or check_investor_db():
+                log("[INVESTOR-CSV] sync_investor_to_csv 재실행")
+                subprocess.run(
+                    [str(PY), "scripts/sync_investor_to_csv.py"],
+                    capture_output=True, timeout=300, cwd=str(QM),
+                )
+                if check_investor_csv_quality():
+                    recovered.append("수급CSV")
+                else:
+                    failed.append("수급CSV: sync 재실행 후에도 품질 미달")
+            else:
+                failed.append("수급CSV: DB 데이터 없어 sync 불가")
+        else:
+            failed.append("수급CSV: Foreign_Net 데이터 없음")
+
+    # ── L8: FLOWX 14테이블 전수 ──
+    fresh_tables, stale_tables = check_flowx_all_tables()
+    if stale_tables:
+        all_ok = False
+        log(f"[FLOWX-ALL] STALE: {', '.join(stale_tables)}")
+        if not args.check_only:
+            rerun_flowx()
+            fresh2, stale2 = check_flowx_all_tables()
+            newly_fixed = len(stale_tables) - len(stale2)
+            if newly_fixed > 0:
+                recovered.append(f"FLOWX({newly_fixed}개 복구)")
+            if stale2:
+                failed.append(f"FLOWX: {', '.join(stale2[:5])}")
+        else:
+            failed.append(f"FLOWX: {', '.join(stale_tables[:5])}")
+    else:
+        log("[FLOWX-ALL] 14테이블 전체 신선 — 정상")
+
+    # ── L9: AI 모델 에러 ──
+    fallback_cnt, err_404_cnt = check_ai_model_errors()
+    if fallback_cnt >= 3 or err_404_cnt >= 1:
+        all_ok = False
+        failed.append(f"AI모델: 폴백 {fallback_cnt}회, 404 {err_404_cnt}회")
+        log(f"[AI-MODEL] 폴백={fallback_cnt}, 404={err_404_cnt} — 모델 설정 확인 필요")
+    elif fallback_cnt > 0:
+        log(f"[AI-MODEL] 폴백 {fallback_cnt}회 (정상 범위)")
+
+    # ══════════════════════════════════════════
+    # 종합 리포트 (항상 발송 — 정상/이상 무관)
+    # ══════════════════════════════════════════
+    data_fresh = is_bat_fresh("D")
+    flowx_total = len(FLOWX_TABLES)
+    flowx_ok_count = len(fresh_tables) if not stale_tables else len(fresh_tables)
+
+    summary_lines = [
+        f"📊 BAT-D 종합 검수 ({TODAY})",
+        "",
+        f"📂 데이터 JSON: {'✅' if data_fresh else '⚠️'}",
+        f"📈 수급DB: {'✅' if investor_ok else '❌'}",
+        f"📊 수급CSV: {'✅' if csv_ok else '❌'}",
+        f"🌐 FLOWX: {flowx_ok_count}/{flowx_total}" + (f" ⚠️STALE {len(stale_tables)}" if stale_tables else " ✅"),
+        f"🤖 AI모델: {'✅' if (fallback_cnt < 3 and err_404_cnt == 0) else '⚠️'}" + (f" (폴백{fallback_cnt})" if fallback_cnt else ""),
+    ]
+
     if recovered:
-        msg_parts.append(f"🔄 자동 복구 성공: {', '.join(recovered)}")
+        summary_lines.append(f"\n🔄 자동복구: {', '.join(recovered)}")
     if failed:
-        msg_parts.append(f"❌ 수동 개입 필요: {chr(10).join(failed)}")
+        summary_lines.append(f"\n❌ 수동확인:\n" + "\n".join(f"  • {f}" for f in failed))
+    if not recovered and not failed and all_ok:
+        summary_lines.append("\n✅ 전체 정상 — 내일 BAT 준비 완료")
 
-    if msg_parts:
-        notify("\n".join(msg_parts))
-    elif args.check_only and not all_ok:
-        stale_summary = "; ".join(failed) if failed else "일부 파일 낡음"
-        notify(f"⚠️ 데이터 신선도 경고: {stale_summary}")
-
+    notify("\n".join(summary_lines))
     log("=== Health Check 완료 ===")
 
 

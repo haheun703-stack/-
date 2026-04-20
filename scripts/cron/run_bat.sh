@@ -259,10 +259,14 @@ esac
 
 echo "[$(date +%H:%M:%S)] === BAT-$BAT 완료 (실패: ${FAIL_COUNT}건) ===" >> "$LOG"
 
-# 실패 알림: BAT-D는 3건 이상, 나머지는 전체 실패 시
-if [ "$BAT" = "D" ] && [ "$FAIL_COUNT" -ge 3 ]; then
-  send_fail_alert "⚠️ <b>BAT-$BAT</b> ${FAIL_COUNT}건 실패 — 로그 확인 필요
-<code>tail -50 $LOG</code>"
+# 실패 알림: BAT-D는 1건 이상이면 상세 스크립트 목록 발송, 나머지는 전체 실패 시
+if [ "$BAT" = "D" ] && [ "$FAIL_COUNT" -gt 0 ]; then
+  # WARN 라인에서 실패한 스크립트명 추출
+  FAIL_SCRIPTS=$(grep "\[WARN\]" "$LOG" | grep -oP 'scripts/\S+\.py|src/\S+\.py' | sort -u | sed 's/^/• /' | head -10)
+  send_fail_alert "[HEALTH] ⚠️ <b>BAT-D</b> ${FAIL_COUNT}건 실패
+
+<b>실패 스크립트:</b>
+<code>${FAIL_SCRIPTS}</code>"
 elif [ "$BAT" != "D" ] && [ "$FAIL_COUNT" -gt 0 ]; then
-  send_fail_alert "⚠️ <b>BAT-$BAT</b> ${FAIL_COUNT}건 실패"
+  send_fail_alert "[HEALTH] ⚠️ <b>BAT-$BAT</b> ${FAIL_COUNT}건 실패"
 fi

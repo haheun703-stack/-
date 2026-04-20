@@ -877,11 +877,11 @@ def main():
     report = generate_health_report(results, checker.today)
     print(report)
 
-    # 텔레그램 전송
+    # 텔레그램 전송 — [HEALTH] 태그로 QUIET 모드 통과
     if not args.no_telegram:
         try:
             from src.telegram_sender import send_message
-            send_message(report)
+            send_message(f"[HEALTH] {report}")
             logger.info("텔레그램 전송 완료")
         except Exception as e:
             logger.warning("텔레그램 전송 실패: %s", e)
