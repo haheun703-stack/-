@@ -143,12 +143,12 @@ case "$BAT" in
     # .pyc 캐시 삭제 — git pull 후 구버전 캐시 실행 방지
     find "$QM" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     # --- G1: 데이터 수집 ---
-    run_py scripts/update_daily_data.py
+    run_py_long scripts/update_daily_data.py
     run_py_xlong scripts/extend_parquet_data.py --workers 2
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
-    run_py scripts/sync_investor_to_csv.py
+    run_py_long scripts/sync_investor_to_csv.py
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
     run_py_xlong scripts/scan_nationality.py
@@ -158,7 +158,7 @@ case "$BAT" in
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
-    run_py scripts/collect_investor_bulk.py --core-only
+    run_py_long scripts/collect_investor_bulk.py --core-only
     run_py scripts/export_investor_for_scalper.py
     # sync_investor_to_csv → G1 상단으로 이동 (단타봇 데이터 선행 활용)
     run_py scripts/fetch_ecos_macro.py
