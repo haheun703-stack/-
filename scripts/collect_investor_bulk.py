@@ -267,9 +267,9 @@ def main():
         if args.date:
             target = args.date
         else:
-            # T-1 (전일)
+            # 당일 수집 (BAT-D 16:30 이후 실행 → KRX 15:30 이후 데이터 제공)
             today = datetime.now()
-            d = today - timedelta(days=1)
+            d = today
             while d.weekday() >= 5:
                 d -= timedelta(days=1)
             target = d.strftime("%Y%m%d")
