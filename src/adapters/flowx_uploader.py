@@ -1952,12 +1952,17 @@ def build_relay_rows(date_str: str = "") -> list[dict]:
     rows = []
 
     # 1) group_relay_today.json → fired_groups
+    seen_pairs = set()
     if relay_path.exists():
         with open(relay_path, encoding="utf-8") as f:
             relay = json.load(f)
         for group in relay.get("fired_groups", []):
             leader = group.get("leader", {})
             follower = group.get("follower", {})
+            pair_key = (leader.get("sector", ""), follower.get("sector", ""))
+            if pair_key in seen_pairs:
+                continue
+            seen_pairs.add(pair_key)
             gap = round(leader.get("ret_1d", 0) - follower.get("ret_1d", 0), 2)
 
             # signal_type
@@ -1971,8 +1976,8 @@ def build_relay_rows(date_str: str = "") -> list[dict]:
 
             rows.append({
                 "date": date_str,
-                "lead_sector": leader.get("sector", ""),
-                "lag_sector": follower.get("sector", ""),
+                "lead_sector": pair_key[0],
+                "lag_sector": pair_key[1],
                 "lead_return_1d": round(leader.get("ret_1d", 0), 2),
                 "lead_return_5d": round(leader.get("ret_5d", 0), 2),
                 "lead_breadth": round(leader.get("breadth", 0), 2),
@@ -1987,12 +1992,12 @@ def build_relay_rows(date_str: str = "") -> list[dict]:
     if signal_path.exists():
         with open(signal_path, encoding="utf-8") as f:
             sig_data = json.load(f)
-        existing = {(r["lead_sector"], r["lag_sector"]) for r in rows}
         for sig in sig_data.get("signals", []):
             lead = sig.get("lead_sector", "")
             lag = sig.get("lag_sector", "")
-            if (lead, lag) in existing:
+            if (lead, lag) in seen_pairs:
                 continue
+            seen_pairs.add((lead, lag))
             rows.append({
                 "date": date_str,
                 "lead_sector": lead,

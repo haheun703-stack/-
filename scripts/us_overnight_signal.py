@@ -406,7 +406,7 @@ def _run_level2_pattern(df: pd.DataFrame, latest, prev) -> dict:
 def update_latest() -> pd.DataFrame:
     """yfinance로 최신 데이터 추가 (증분)."""
     import yfinance as yf
-    from scripts.us_data_backfill import TICKERS, _calc_derived
+    from us_data_backfill import TICKERS, _calc_derived
 
     if not PARQUET_PATH.exists():
         logger.error(f"백필 데이터 없음: {PARQUET_PATH} → 먼저 us_overnight_backfill.py 실행")

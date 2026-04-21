@@ -549,7 +549,7 @@ def cmd_monitor(args):
 
 def cmd_scheduler(args):
     """v4.0 일일 스케줄러"""
-    from scripts.daily_scheduler import DailyScheduler, setup_logging
+    from scripts.archive.orphan_20260421.daily_scheduler import DailyScheduler, setup_logging
 
     setup_logging()
     scheduler = DailyScheduler()
