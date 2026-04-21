@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """전종목 투자자별 순매수 일괄 수집 — pykrx 벌크 모드
 
-핵심 4주체(외국인/기관합계/기타법인/개인) + 세부 7주체(연기금/투신/보험/은행/사모/금융투자/기타금융)
+핵심 6주체(외국인/기관합계/기타법인/개인/연기금/금융투자) + 세부 5주체(투신/보험/은행/사모/기타금융)
 KOSPI + KOSDAQ 전종목을 한 번에 수집하여 SQLite에 저장.
 
 Usage:
@@ -54,8 +54,8 @@ except ImportError:
     logger.error("pykrx 미설치")
 
 # ─── 투자자 유형 ───
-CORE_INVESTORS = ["외국인", "기관합계", "기타법인", "개인", "연기금"]
-DETAIL_INVESTORS = ["투신", "보험", "은행", "사모", "금융투자", "기타금융"]
+CORE_INVESTORS = ["외국인", "기관합계", "기타법인", "개인", "연기금", "금융투자"]
+DETAIL_INVESTORS = ["투신", "보험", "은행", "사모", "기타금융"]
 ALL_INVESTORS = CORE_INVESTORS + DETAIL_INVESTORS
 
 MARKETS = ["KOSPI", "KOSDAQ"]
