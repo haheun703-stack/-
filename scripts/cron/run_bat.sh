@@ -212,8 +212,8 @@ case "$BAT" in
     run_py scripts/track_pick_results.py
     run_py scripts/scan_earnings_acceleration.py
     run_py scripts/scan_turnaround.py
-    run_py scripts/scan_tomorrow_picks.py
-    run_py scripts/scan_tomorrow_picks.py --flowx --no-send
+    run_py_long scripts/scan_tomorrow_picks.py
+    run_py_long scripts/scan_tomorrow_picks.py --flowx --no-send
     run_py scripts/build_killer_picks.py
     run_py scripts/run_cto.py
     run_py src/use_cases/portfolio_cfo.py
