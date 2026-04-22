@@ -29,10 +29,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import sqlite3
+
 import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
+INVESTOR_DB = ROOT / "data" / "investor_flow" / "investor_daily.db"
 sys.path.insert(0, str(ROOT))
 
 UNIVERSE_CSV = ROOT / "data" / "universe.csv"
@@ -57,7 +60,40 @@ def load_universe() -> dict[str, str]:
     return dict(zip(uni["ticker"], uni["name"]))
 
 
-def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str]) -> dict | None:
+def load_pension_finance(today_str: str) -> dict[str, dict]:
+    """investor_daily.db에서 연기금/금융투자 최근 5거래일 수급을 종목별 로드."""
+    if not INVESTOR_DB.exists():
+        return {}
+    conn = sqlite3.connect(str(INVESTOR_DB))
+    try:
+        cur = conn.execute(
+            "SELECT DISTINCT date FROM investor_daily WHERE date <= ? ORDER BY date DESC LIMIT 5",
+            (today_str,),
+        )
+        dates_5 = [r[0] for r in cur.fetchall()]
+        if not dates_5:
+            return {}
+        ph = ",".join(["?"] * len(dates_5))
+        cur = conn.execute(
+            f"SELECT ticker, investor, SUM(net_val) FROM investor_daily "
+            f"WHERE investor IN ('연기금','금융투자') AND date IN ({ph}) "
+            f"GROUP BY ticker, investor",
+            dates_5,
+        )
+        result: dict[str, dict] = {}
+        for ticker, investor, net_val in cur.fetchall():
+            if ticker not in result:
+                result[ticker] = {"pension5": 0.0, "finance5": 0.0}
+            if investor == "연기금":
+                result[ticker]["pension5"] = round(net_val / 1e8, 1)
+            else:
+                result[ticker]["finance5"] = round(net_val / 1e8, 1)
+        return result
+    finally:
+        conn.close()
+
+
+def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str], pf_map: dict[str, dict] | None = None) -> dict | None:
     t = fp.stem
     if not t.isdigit() or len(t) != 6:
         return None
@@ -115,6 +151,11 @@ def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str]) -> dict | 
     inst_heavy_sell_days = int(((last5["기관합계"] / 1e8) <= -100).sum())
     fgn_heavy_sell_days = int(((last5[_fgn_col] / 1e8) <= -100).sum()) if _fgn_col in last5.columns else 0
 
+    # 연기금/금융투자 5일 수급 (investor_daily.db)
+    pf = (pf_map or {}).get(t, {})
+    pension5 = pf.get("pension5", 0.0)
+    finance5 = pf.get("finance5", 0.0)
+
     return {
         "ticker": t,
         "name": name_map.get(t, t),
@@ -135,6 +176,8 @@ def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str]) -> dict | 
         "ind_t": round(ind_t, 1),
         "etc_t": round(etc_t, 1),
         "avg20_tv": round(avg20_tv, 1),
+        "pension5": pension5,
+        "finance5": finance5,
         "inst_heavy_sell_days": inst_heavy_sell_days,
         "fgn_heavy_sell_days": fgn_heavy_sell_days,
     }
@@ -174,6 +217,22 @@ def score_row(r: dict) -> tuple[int, str, str]:
         s += 8
         tags.append("20MA눌림수급")
 
+    # === 연기금 / 금융투자 ===
+    pen5 = r.get("pension5", 0)
+    fin5 = r.get("finance5", 0)
+    if pen5 >= 50:
+        s += 12
+        tags.append("연기금매집")
+    elif pen5 >= 20:
+        s += 6
+        tags.append("연기금유입")
+    if fin5 >= 50:
+        s += 8
+        tags.append("금투매집")
+    elif fin5 >= 20:
+        s += 4
+        tags.append("금투유입")
+
     # === NEGATIVE (KISBOT 결함 반영) ===
     if f <= -500:
         s -= 30
@@ -208,6 +267,12 @@ def score_row(r: dict) -> tuple[int, str, str]:
     elif r["gap20"] <= -12:
         s -= 8
         warns.append("20MA이상급락")
+    if pen5 <= -50:
+        s -= 8
+        warns.append("연기금이탈")
+    if fin5 <= -50:
+        s -= 5
+        warns.append("금투매도")
 
     return s, ",".join(tags) if tags else "-", ",".join(warns) if warns else "-"
 
@@ -277,13 +342,14 @@ def generate_report(df: pd.DataFrame, today: pd.Timestamp, out_path: Path, silen
     lines.append(f"## 🥇 무경고 + 최우수 (score 30+, warns 전혀 없음) — 안전 핵심 [{len(tier1)}개]")
     lines.append("")
     if len(tier1):
-        lines.append("| 순위 | 종목 | 종가 | score | tags | ret60 | gap20 | 5일수급(외/기/개) |")
-        lines.append("|------|------|------|-------|------|-------|-------|------------------|")
+        lines.append("| 순위 | 종목 | 종가 | score | tags | ret60 | gap20 | 5일수급(외/기/개) | 연기금 | 금투 |")
+        lines.append("|------|------|------|-------|------|-------|-------|------------------|--------|------|")
         for i, (_, r) in enumerate(tier1.iterrows(), 1):
             lines.append(
                 f"| {i} | **{r['name']}** ({r['ticker']}) | {int(r['close']):,} | "
                 f"**{r['score']}** | {r['tags']} | {r['ret60']:+.1f}% | {r['gap20']:+.1f}% | "
-                f"{r['fgn5']:+.0f}/{r['inst5']:+.0f}/{r['ind5']:+.0f} |"
+                f"{r['fgn5']:+.0f}/{r['inst5']:+.0f}/{r['ind5']:+.0f} | "
+                f"{r.get('pension5',0):+.0f} | {r.get('finance5',0):+.0f} |"
             )
         lines.append("")
 
@@ -366,11 +432,15 @@ def main() -> int:
     name_map = load_universe()
     print(f"[daily_pick_v2] universe: {len(name_map)}개")
 
+    # 연기금/금융투자 수급 로드 (DB 1회 쿼리)
+    pf_map = load_pension_finance(today.strftime("%Y%m%d"))
+    print(f"[daily_pick_v2] 연기금/금투 수급: {len(pf_map)}종목")
+
     # 스캔 (전체)
     rows: list[dict] = []
     files = sorted(glob.glob(str(RAW_DIR / "*.parquet")))
     for fp in files:
-        r = scan_one(Path(fp), today, name_map)
+        r = scan_one(Path(fp), today, name_map, pf_map)
         if r is not None:
             rows.append(r)
     full_df = pd.DataFrame(rows)
