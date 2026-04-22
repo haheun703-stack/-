@@ -143,7 +143,7 @@ case "$BAT" in
     # .pyc 캐시 삭제 — git pull 후 구버전 캐시 실행 방지
     find "$QM" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     # --- G1: 데이터 수집 ---
-    run_py_long scripts/update_daily_data.py
+    run_py_xlong scripts/update_daily_data.py
     run_py_xlong scripts/extend_parquet_data.py --workers 2
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
