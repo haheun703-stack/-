@@ -423,7 +423,7 @@ class FlowxUploader:
 
     def _upload_rows(self, table: str, date_str: str, rows: list[dict],
                      conflict_cols: str, label: str) -> bool:
-        """Row 테이블 공통 UPSERT 패턴."""
+        """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도."""
         if not self.is_active or not rows:
             return False
         try:
@@ -438,6 +438,17 @@ class FlowxUploader:
             logger.info("[FLOWX] %s 업로드: %s (%d행)", label, date_str, len(rows))
             return True
         except Exception as e:
+            err_str = str(e)
+            # 컬럼 미존재 에러 → 해당 컬럼 제거 후 재시도
+            if "PGRST204" in err_str and "column" in err_str:
+                import re
+                m = re.search(r"the '(\w+)' column", err_str)
+                if m:
+                    bad_col = m.group(1)
+                    logger.warning("[FLOWX] %s: '%s' 컬럼 미존재 → 제거 후 재시도", label, bad_col)
+                    for row in rows:
+                        row.pop(bad_col, None)
+                    return self._upload_rows(table, date_str, rows, conflict_cols, label)
             logger.error("[FLOWX] %s 업로드 실패: %s", label, e)
             return False
 
