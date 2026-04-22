@@ -70,9 +70,11 @@ def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
         SELECT date, ticker,
                SUM(CASE WHEN investor = '외국인' THEN net_val ELSE 0 END) as Foreign_Net,
                SUM(CASE WHEN investor = '기관합계' THEN net_val ELSE 0 END) as Inst_Net,
-               SUM(CASE WHEN investor = '기타법인' THEN net_val ELSE 0 END) as Corp_Net
+               SUM(CASE WHEN investor = '기타법인' THEN net_val ELSE 0 END) as Corp_Net,
+               SUM(CASE WHEN investor = '연기금' THEN net_val ELSE 0 END) as Pension_Net,
+               SUM(CASE WHEN investor = '금융투자' THEN net_val ELSE 0 END) as Finance_Net
         FROM investor_daily
-        WHERE investor IN ('외국인', '기관합계', '기타법인')
+        WHERE investor IN ('외국인', '기관합계', '기타법인', '연기금', '금융투자')
           AND date >= ?
         GROUP BY date, ticker
         """,
@@ -85,7 +87,7 @@ def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
         return {}
 
     # 원 → 억원
-    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
         df[col] = (df[col] / 1e8).round(1)
 
     # date: YYYYMMDD → YYYY-MM-DD (CSV Date 형식에 맞춤)
@@ -95,7 +97,7 @@ def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
 
     result = {}
     for ticker, grp in df.groupby("ticker"):
-        inv = grp.set_index("date")[["Foreign_Net", "Inst_Net", "Corp_Net"]].sort_index()
+        inv = grp.set_index("date")[["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]].sort_index()
         result[ticker] = inv
 
     logger.info("수급 DB 로드: %d종목 / 최근 %d거래일 (%s~)", len(result), lookback_days, min_date)
@@ -107,16 +109,16 @@ def merge_investor_to_csv(df: pd.DataFrame, inv_df: pd.DataFrame | None) -> pd.D
     if inv_df is None or inv_df.empty:
         return df
 
-    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
         if col not in df.columns:
             df[col] = 0.0
 
     date_strs = df["Date"].dt.strftime("%Y-%m-%d")
     for i, date_str in enumerate(date_strs):
         if date_str in inv_df.index:
-            df.at[df.index[i], "Foreign_Net"] = inv_df.loc[date_str, "Foreign_Net"]
-            df.at[df.index[i], "Inst_Net"] = inv_df.loc[date_str, "Inst_Net"]
-            df.at[df.index[i], "Corp_Net"] = inv_df.loc[date_str, "Corp_Net"]
+            for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
+                if col in inv_df.columns:
+                    df.at[df.index[i], col] = inv_df.loc[date_str, col]
 
     return df
 
@@ -178,6 +180,8 @@ def detect_accumulation(df: pd.DataFrame, min_days: int = 3, net_min: float = 5.
     fn = recent.get("Foreign_Net", pd.Series([0]*len(recent)))
     ins = recent.get("Inst_Net", pd.Series([0]*len(recent)))
     crp = recent.get("Corp_Net", pd.Series([0]*len(recent)))
+    pen = recent.get("Pension_Net", pd.Series([0]*len(recent)))
+    fin = recent.get("Finance_Net", pd.Series([0]*len(recent)))
 
     def streak_and_cum(series, threshold=0):
         """연속 양수 일수 + 누적."""
@@ -193,6 +197,8 @@ def detect_accumulation(df: pd.DataFrame, min_days: int = 3, net_min: float = 5.
     f_streak, f_cum = streak_and_cum(fn)
     i_streak, i_cum = streak_and_cum(ins)
     c_streak, c_cum = streak_and_cum(crp)
+    p_streak, p_cum = streak_and_cum(pen)
+    fi_streak, fi_cum = streak_and_cum(fin)
 
     # 쌍끌이 연속일수 (외인+기관 동시 양수)
     dual_streak = 0
@@ -204,7 +210,7 @@ def detect_accumulation(df: pd.DataFrame, min_days: int = 3, net_min: float = 5.
         else:
             break
 
-    best_streak = max(f_streak, i_streak, c_streak)
+    best_streak = max(f_streak, i_streak, c_streak, p_streak, fi_streak)
 
     # 축적 점수 (100점 만점)
     score = 0
@@ -217,17 +223,33 @@ def detect_accumulation(df: pd.DataFrame, min_days: int = 3, net_min: float = 5.
     # 기타법인 축적
     if c_streak >= min_days and c_cum >= net_min * min_days:
         score += min(15, c_streak * 3 + c_cum / 20)
+    # 연기금 축적 (가중치 높음 — 국민연금급 자금)
+    if p_streak >= min_days and p_cum >= net_min * min_days:
+        score += min(20, p_streak * 5 + p_cum / 15)
+    # 금융투자 축적
+    if fi_streak >= min_days and fi_cum >= net_min * min_days:
+        score += min(15, fi_streak * 4 + fi_cum / 20)
     # 쌍끌이 보너스
     if dual_streak >= 2:
         score += min(25, dual_streak * 8)
+
+    # 연기금 5일 누적 (streak 관계없이)
+    pension_5d = float(pen.tail(5).sum())
+    finance_5d = float(fin.tail(5).sum())
 
     return {
         "foreign_streak": f_streak,
         "inst_streak": i_streak,
         "corp_streak": c_streak,
+        "pension_streak": p_streak,
+        "finance_streak": fi_streak,
         "foreign_cum": f_cum,
         "inst_cum": i_cum,
         "corp_cum": c_cum,
+        "pension_cum": p_cum,
+        "finance_cum": fi_cum,
+        "pension_5d": round(pension_5d, 1),
+        "finance_5d": round(finance_5d, 1),
         "dual_streak": dual_streak,
         "best_streak": best_streak,
         "accum_score": round(min(score, 100), 1),
@@ -338,6 +360,8 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
         today_fn = float(df.iloc[-1].get("Foreign_Net", 0) or 0)
         today_in = float(df.iloc[-1].get("Inst_Net", 0) or 0)
         today_cp = float(df.iloc[-1].get("Corp_Net", 0) or 0)
+        today_pen = float(df.iloc[-1].get("Pension_Net", 0) or 0)
+        today_fin = float(df.iloc[-1].get("Finance_Net", 0) or 0)
 
         # 최종 점수 = 축적점수 + 시드 품질 보너스
         final_score = accum["accum_score"]
@@ -351,6 +375,22 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
         # 쌍끌이 당일 보너스
         if today_fn > 10 and today_in > 10:
             final_score += 10
+        # 연기금 매집 보너스 (5일 누적 50억+)
+        if accum["pension_5d"] >= 50:
+            final_score += 12
+        elif accum["pension_5d"] >= 20:
+            final_score += 6
+        # 금투 매집 보너스 (5일 누적 50억+)
+        if accum["finance_5d"] >= 50:
+            final_score += 8
+        elif accum["finance_5d"] >= 20:
+            final_score += 4
+        # 연기금 이탈 페널티
+        if accum["pension_5d"] <= -50:
+            final_score -= 8
+        # 금투 매도 페널티
+        if accum["finance_5d"] <= -50:
+            final_score -= 5
 
         candidates.append({
             "ticker": ticker,
@@ -365,10 +405,16 @@ def scan_type1(min_accum_days: int = 3, top_n: int = 30) -> list[dict]:
             "foreign_net": round(today_fn, 1),
             "inst_net": round(today_in, 1),
             "corp_net": round(today_cp, 1),
+            "pension_net": round(today_pen, 1),
+            "finance_net": round(today_fin, 1),
             "foreign_streak": accum["foreign_streak"],
             "inst_streak": accum["inst_streak"],
+            "pension_streak": accum["pension_streak"],
+            "finance_streak": accum["finance_streak"],
             "foreign_cum": accum["foreign_cum"],
             "inst_cum": accum["inst_cum"],
+            "pension_5d": accum["pension_5d"],
+            "finance_5d": accum["finance_5d"],
             "dual_streak": accum["dual_streak"],
             "accum_score": accum["accum_score"],
             "final_score": round(min(final_score, 100), 1),
@@ -405,8 +451,8 @@ def print_report(candidates: list[dict]):
         return
 
     print(f"  {'종목':>12} {'종가':>8} {'수익률':>6} {'거래량':>5} {'MA20':>6} "
-          f"{'외인':>6} {'기관':>6} {'축적':>4} {'쌍끌이':>4} {'점수':>5}")
-    print(f"  {'─' * 74}")
+          f"{'외인':>6} {'기관':>6} {'연기금5d':>7} {'금투5d':>6} {'축적':>4} {'점수':>5}")
+    print(f"  {'─' * 84}")
 
     for c in candidates:
         # 축적 표시
@@ -415,14 +461,20 @@ def print_report(candidates: list[dict]):
             accum_str += f"F{c['foreign_streak']}"
         if c["inst_streak"] >= 3:
             accum_str += f"I{c['inst_streak']}"
+        if c.get("pension_streak", 0) >= 3:
+            accum_str += f"P{c['pension_streak']}"
 
         dual_str = f"D{c['dual_streak']}" if c["dual_streak"] >= 2 else ""
+
+        pen5 = c.get("pension_5d", 0)
+        fin5 = c.get("finance_5d", 0)
 
         print(f"  {c['name'][:10]:>12} {c['close']:>8,} "
               f"{c['ret_d0']:>+5.1f}% {c['vol_ratio']:>4.1f}x "
               f"{c['ma20_dev']:>+5.1f}% "
               f"{c['foreign_net']:>+5.0f} {c['inst_net']:>+5.0f} "
-              f"{accum_str:>4} {dual_str:>4} "
+              f"{pen5:>+6.0f} {fin5:>+5.0f} "
+              f"{accum_str:>6} "
               f"{c['final_score']:>5.0f}")
 
     print()

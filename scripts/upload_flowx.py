@@ -144,7 +144,14 @@ def main():
             streak += f"I{r['inst_streak']}"
         if r["dual_streak"] >= 2:
             streak += f"D{r['dual_streak']}"
-        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% {streak:>8s} 점수={r['final_score']:.0f}")
+        pen5 = r.get("pension_5d", 0)
+        fin5 = r.get("finance_5d", 0)
+        extra = ""
+        if pen5 >= 20:
+            extra += f" 연{pen5:+.0f}"
+        if fin5 >= 20:
+            extra += f" 금{fin5:+.0f}"
+        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% {streak:>8s}{extra} 점수={r['final_score']:.0f}")
     if not nxt_rows:
         print("  주목 종목 없음 — 쉬는 것도 전략입니다")
 
@@ -156,7 +163,16 @@ def main():
             turn += "외인↑"
         if r.get("inst_turn"):
             turn += "기관↑"
-        print(f"  {r['name']:12s} {r['close']:>8,}원 ▲{r['ret_d0']:>+5.1f}% {r['fib_zone']:>6s} {turn} 점수={r['final_score']:.0f}")
+        if r.get("pension_turn"):
+            turn += "연기금↑"
+        pen5 = r.get("pension_5d", 0)
+        fin5 = r.get("finance_5d", 0)
+        extra = ""
+        if pen5 >= 20:
+            extra += f" 연{pen5:+.0f}"
+        if fin5 >= 20:
+            extra += f" 금{fin5:+.0f}"
+        print(f"  {r['name']:12s} {r['close']:>8,}원 ▲{r['ret_d0']:>+5.1f}% {r['fib_zone']:>6s} {turn}{extra} 점수={r['final_score']:.0f}")
 
     etf_strat = build_etf_strategy_row(date_str_preview)
     if etf_strat:

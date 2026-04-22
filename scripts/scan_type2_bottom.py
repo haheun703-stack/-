@@ -63,9 +63,11 @@ def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
         SELECT date, ticker,
                SUM(CASE WHEN investor = '외국인' THEN net_val ELSE 0 END) as Foreign_Net,
                SUM(CASE WHEN investor = '기관합계' THEN net_val ELSE 0 END) as Inst_Net,
-               SUM(CASE WHEN investor = '기타법인' THEN net_val ELSE 0 END) as Corp_Net
+               SUM(CASE WHEN investor = '기타법인' THEN net_val ELSE 0 END) as Corp_Net,
+               SUM(CASE WHEN investor = '연기금' THEN net_val ELSE 0 END) as Pension_Net,
+               SUM(CASE WHEN investor = '금융투자' THEN net_val ELSE 0 END) as Finance_Net
         FROM investor_daily
-        WHERE investor IN ('외국인', '기관합계', '기타법인')
+        WHERE investor IN ('외국인', '기관합계', '기타법인', '연기금', '금융투자')
           AND date >= ?
         GROUP BY date, ticker
         """,
@@ -75,14 +77,14 @@ def load_investor_from_db(lookback_days: int = 15) -> dict[str, pd.DataFrame]:
     conn.close()
     if df.empty:
         return {}
-    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
         df[col] = (df[col] / 1e8).round(1)
     df["date"] = df["date"].apply(
         lambda d: f"{str(d)[:4]}-{str(d)[4:6]}-{str(d)[6:]}" if len(str(d)) == 8 else str(d)
     )
     result = {}
     for ticker, grp in df.groupby("ticker"):
-        inv = grp.set_index("date")[["Foreign_Net", "Inst_Net", "Corp_Net"]].sort_index()
+        inv = grp.set_index("date")[["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]].sort_index()
         result[ticker] = inv
     logger.info("수급 DB 로드: %d종목 / 최근 %d거래일 (%s~)", len(result), lookback_days, min_date)
     return result
@@ -92,15 +94,15 @@ def merge_investor_to_csv(df: pd.DataFrame, inv_df: pd.DataFrame | None) -> pd.D
     """CSV DataFrame에 DB 수급 데이터를 머지."""
     if inv_df is None or inv_df.empty:
         return df
-    for col in ["Foreign_Net", "Inst_Net", "Corp_Net"]:
+    for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
         if col not in df.columns:
             df[col] = 0.0
     date_strs = df["Date"].dt.strftime("%Y-%m-%d")
     for i, date_str in enumerate(date_strs):
         if date_str in inv_df.index:
-            df.at[df.index[i], "Foreign_Net"] = inv_df.loc[date_str, "Foreign_Net"]
-            df.at[df.index[i], "Inst_Net"] = inv_df.loc[date_str, "Inst_Net"]
-            df.at[df.index[i], "Corp_Net"] = inv_df.loc[date_str, "Corp_Net"]
+            for col in ["Foreign_Net", "Inst_Net", "Corp_Net", "Pension_Net", "Finance_Net"]:
+                if col in inv_df.columns:
+                    df.at[df.index[i], col] = inv_df.loc[date_str, col]
     return df
 
 
@@ -256,6 +258,8 @@ def detect_supply_turn(df: pd.DataFrame) -> dict:
     fn = recent.get("Foreign_Net", pd.Series([0]*len(recent))).fillna(0)
     ins = recent.get("Inst_Net", pd.Series([0]*len(recent))).fillna(0)
     crp = recent.get("Corp_Net", pd.Series([0]*len(recent))).fillna(0)
+    pen = recent.get("Pension_Net", pd.Series([0]*len(recent))).fillna(0)
+    fin = recent.get("Finance_Net", pd.Series([0]*len(recent))).fillna(0)
 
     # 최근 3일 vs 이전 5일 비교
     fn_recent3 = fn.tail(3).sum()
@@ -266,10 +270,20 @@ def detect_supply_turn(df: pd.DataFrame) -> dict:
     ins_prev5 = ins.iloc[:5].sum() if len(ins) >= 8 else ins.iloc[:3].sum()
     ins_turn = ins_recent3 > 0 and ins_prev5 <= 0
 
+    pen_recent3 = pen.tail(3).sum()
+    pen_prev5 = pen.iloc[:5].sum() if len(pen) >= 8 else pen.iloc[:3].sum()
+    pen_turn = pen_recent3 > 0 and pen_prev5 <= 0
+
     # 오늘 수급
     today_fn = float(fn.iloc[-1])
     today_in = float(ins.iloc[-1])
     today_cp = float(crp.iloc[-1])
+    today_pen = float(pen.iloc[-1])
+    today_fin = float(fin.iloc[-1])
+
+    # 5일 누적
+    pension_5d = float(pen.tail(5).sum())
+    finance_5d = float(fin.tail(5).sum())
 
     # 수급 점수 (100점)
     score = 0
@@ -279,6 +293,8 @@ def detect_supply_turn(df: pd.DataFrame) -> dict:
         score += 20
     if ins_turn:
         score += 20
+    if pen_turn:
+        score += 15
 
     # 오늘 양수
     if today_fn > 10:
@@ -300,14 +316,35 @@ def detect_supply_turn(df: pd.DataFrame) -> dict:
     if ins_recent3 > 30:
         score += 10
 
+    # 연기금/금투 5일 보너스
+    if pension_5d >= 50:
+        score += 12
+    elif pension_5d >= 20:
+        score += 6
+    if finance_5d >= 50:
+        score += 8
+    elif finance_5d >= 20:
+        score += 4
+
+    # 연기금 이탈 페널티
+    if pension_5d <= -50:
+        score -= 8
+    if finance_5d <= -50:
+        score -= 5
+
     return {
         "foreign_net": round(today_fn, 1),
         "inst_net": round(today_in, 1),
         "corp_net": round(today_cp, 1),
+        "pension_net": round(today_pen, 1),
+        "finance_net": round(today_fin, 1),
         "foreign_3d": round(float(fn_recent3), 1),
         "inst_3d": round(float(ins_recent3), 1),
+        "pension_5d": round(pension_5d, 1),
+        "finance_5d": round(finance_5d, 1),
         "foreign_turn": fn_turn,
         "inst_turn": ins_turn,
+        "pension_turn": pen_turn,
         "supply_score": round(min(score, 100), 1),
     }
 
@@ -406,10 +443,15 @@ def scan_type2(min_drop: float = 30.0, top_n: int = 30) -> list[dict]:
             "foreign_net": supply["foreign_net"],
             "inst_net": supply["inst_net"],
             "corp_net": supply["corp_net"],
+            "pension_net": supply["pension_net"],
+            "finance_net": supply["finance_net"],
             "foreign_3d": supply["foreign_3d"],
             "inst_3d": supply["inst_3d"],
+            "pension_5d": supply["pension_5d"],
+            "finance_5d": supply["finance_5d"],
             "foreign_turn": supply["foreign_turn"],
             "inst_turn": supply["inst_turn"],
+            "pension_turn": supply["pension_turn"],
             "supply_score": supply["supply_score"],
             "final_score": round(min(score, 100), 1),
             "nxt_tradable": ticker in nxt_tickers if nxt_tickers else True,
