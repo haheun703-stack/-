@@ -64,7 +64,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 # 프로젝트 루트 추가
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(PROJECT_ROOT)
 

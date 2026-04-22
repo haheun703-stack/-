@@ -207,7 +207,7 @@ case "$BAT" in
     run_py_long scripts/ai_news_brain.py
     # COO 복원: 컨센서스 스크리너 (wisereport 목표가 + 기술적 분석)
     run_py_long scripts/scan_consensus.py
-    # --- G4: 추천 + FLOWX ---
+    # --- G4: 추천 ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py
     run_py scripts/scan_earnings_acceleration.py
@@ -217,14 +217,10 @@ case "$BAT" in
     run_py scripts/build_killer_picks.py
     run_py scripts/run_cto.py
     run_py src/use_cases/portfolio_cfo.py
-    run_py scripts/build_brain_upload.py
-    run_py scripts/upload_flowx.py
-    # dashboard_data.py 제거 — 파일 미존재
-    run_py scripts/send_evening_summary.py --send
-    # --- G4.2: 타입 1/2 시드 스캐너 ---
+    # --- G4.2: 타입 1/2 시드 스캐너 (upload 전 실행 필수) ---
     run_py scripts/scan_type1_relay.py
     run_py scripts/scan_type2_bottom.py
-    # --- G4.5: NXT 추천 + 바이오 CDMO 감시 ---
+    # --- G4.5: NXT 추천 + 바이오 CDMO 감시 (upload 전 실행 필수) ---
     run_py src/use_cases/nxt_signal.py
     run_py scripts/nxt_recommend.py --no-telegram
     run_py scripts/nxt_track_results.py
@@ -233,6 +229,11 @@ case "$BAT" in
     run_py scripts/scan_market_ranking.py
     run_py scripts/scan_bio_cdmo.py
     run_py scripts/scan_bluechip_checkup.py
+    # --- G4.9: FLOWX 업로드 (모든 스캔 완료 후 일괄 업로드) ---
+    run_py scripts/build_brain_upload.py
+    run_py scripts/upload_flowx.py
+    # dashboard_data.py 제거 — 파일 미존재
+    run_py scripts/send_evening_summary.py --send
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
     run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
