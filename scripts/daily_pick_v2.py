@@ -217,9 +217,16 @@ def score_row(r: dict) -> tuple[int, str, str]:
         s += 8
         tags.append("20MA눌림수급")
 
-    # === 연기금 / 금융투자 ===
+    # === 기타법인 / 연기금 / 금융투자 (6유형 완전 반영) ===
+    e = r["etc5"]
     pen5 = r.get("pension5", 0)
     fin5 = r.get("finance5", 0)
+    if e >= 30:
+        s += 6
+        tags.append("기타법인매집")
+    elif e >= 10:
+        s += 3
+        tags.append("기타법인유입")
     if pen5 >= 50:
         s += 12
         tags.append("연기금매집")
@@ -267,6 +274,9 @@ def score_row(r: dict) -> tuple[int, str, str]:
     elif r["gap20"] <= -12:
         s -= 8
         warns.append("20MA이상급락")
+    if e <= -30:
+        s -= 5
+        warns.append("기타법인매도")
     if pen5 <= -50:
         s -= 8
         warns.append("연기금이탈")
@@ -342,14 +352,14 @@ def generate_report(df: pd.DataFrame, today: pd.Timestamp, out_path: Path, silen
     lines.append(f"## 🥇 무경고 + 최우수 (score 30+, warns 전혀 없음) — 안전 핵심 [{len(tier1)}개]")
     lines.append("")
     if len(tier1):
-        lines.append("| 순위 | 종목 | 종가 | score | tags | ret60 | gap20 | 5일수급(외/기/개) | 연기금 | 금투 |")
-        lines.append("|------|------|------|-------|------|-------|-------|------------------|--------|------|")
+        lines.append("| 순위 | 종목 | 종가 | score | tags | ret60 | gap20 | 5일수급(외/기/개) | 기타 | 연기금 | 금투 |")
+        lines.append("|------|------|------|-------|------|-------|-------|------------------|------|--------|------|")
         for i, (_, r) in enumerate(tier1.iterrows(), 1):
             lines.append(
                 f"| {i} | **{r['name']}** ({r['ticker']}) | {int(r['close']):,} | "
                 f"**{r['score']}** | {r['tags']} | {r['ret60']:+.1f}% | {r['gap20']:+.1f}% | "
                 f"{r['fgn5']:+.0f}/{r['inst5']:+.0f}/{r['ind5']:+.0f} | "
-                f"{r.get('pension5',0):+.0f} | {r.get('finance5',0):+.0f} |"
+                f"{r['etc5']:+.0f} | {r.get('pension5',0):+.0f} | {r.get('finance5',0):+.0f} |"
             )
         lines.append("")
 
