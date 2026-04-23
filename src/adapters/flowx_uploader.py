@@ -411,7 +411,7 @@ class FlowxUploader:
             "sniper": self.upload_sniper(date_str),
             "crash_bounce": self.upload_crash_bounce(date_str),
             # 퀀트시스템 메인 3종
-            "nxt_picks": self.upload_nxt_picks(date_str),
+            "supply_surge": self.upload_supply_surge(date_str),
             "bottom_picks": self.upload_bottom_picks(date_str),
             "etf_strategy": self.upload_etf_strategy(date_str),
         }
@@ -489,13 +489,17 @@ class FlowxUploader:
     # ── 퀀트시스템 메인: NXT + 바닥반등 + ETF전략 ──────
 
     def upload_nxt_picks(self, date_str: str) -> bool:
-        """scan_type1_relay → quant_nxt_picks."""
-        rows = build_nxt_picks_rows(date_str)
+        """scan_type1_relay → quant_nxt_picks. (레거시 — supply_surge로 교체됨)"""
+        return True  # 더 이상 사용하지 않음
+
+    def upload_supply_surge(self, date_str: str) -> bool:
+        """scan_supply_surge → quant_supply_surge."""
+        rows = build_supply_surge_rows(date_str)
         if not rows:
-            logger.info("[FLOWX] NXT 주목 종목 없음 (%s) — 정상 (쉬는 것도 전략)", date_str)
-            return True  # 없는 날은 정상
-        return self._upload_rows("quant_nxt_picks", date_str, rows,
-                                 "date,ticker", "NXT주목종목")
+            logger.info("[FLOWX] 수급급변 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_supply_surge", date_str, rows,
+                                 "date,ticker", "수급급변")
 
     def upload_bottom_picks(self, date_str: str) -> bool:
         """scan_type2_bottom → quant_bottom_picks."""
@@ -2191,6 +2195,90 @@ def build_nxt_picks_rows(date_str: str = "") -> list[dict]:
     _fix_pick_names(rows)
     rows.sort(key=lambda x: -x["final_score"])
     logger.info("[NXT] 타입1 빌드: %d건 (%s)", len(rows), date_str)
+    return rows
+
+
+# ── 수급 급변 종목 (scan_supply_surge) ────────────────
+
+def build_supply_surge_rows(date_str: str = "") -> list[dict]:
+    """scan_supply_surge 결과 JSON → quant_supply_surge 테이블 포맷.
+
+    소스: data/supply_surge_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"supply_surge_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[SURGE] 수급급변 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    # 매수 후보
+    for c in data.get("buy_candidates", []):
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": int(c.get("close", 0)),
+            "ret_d0": round(float(c.get("ret0", 0)), 2),
+            "supply_type": c.get("type", ""),
+            "base_score": round(float(c.get("base_score", 0)), 1),
+            "tech_score": round(float(c.get("tech_score", 0)), 1),
+            "streak_bonus": int(c.get("streak_bonus", 0)),
+            "final_score": round(float(c.get("final_score", 0)), 1),
+            "fgn": round(float(c.get("fgn", 0)), 1),
+            "inst": round(float(c.get("inst", 0)), 1),
+            "pension": round(float(c.get("pension", 0)), 1),
+            "finance": round(float(c.get("finance", 0)), 1),
+            "corp": round(float(c.get("corp", 0)), 1),
+            "retail": round(float(c.get("retail", 0)), 1),
+            "cum_fgn_5d": round(float(c.get("cum_fgn_5d", 0)), 1),
+            "cum_inst_5d": round(float(c.get("cum_inst_5d", 0)), 1),
+            "cum_pension_5d": round(float(c.get("cum_pension_5d", 0)), 1),
+            "ma20_dev": round(float(c.get("ma20_dev", 0)), 1),
+            "rsi": round(float(c.get("rsi", 0)), 1),
+            "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
+            "tech_flags": c.get("tech_flags", "-"),
+            "signal": "BUY",
+        })
+
+    # 매도 시그널 (개인추격)
+    for c in data.get("sell_signals", []):
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": int(c.get("close", 0)),
+            "ret_d0": round(float(c.get("ret0", 0)), 2),
+            "supply_type": "X_개인추격",
+            "base_score": -10,
+            "tech_score": 0,
+            "streak_bonus": 0,
+            "final_score": -10,
+            "fgn": round(float(c.get("fgn", 0)), 1),
+            "inst": round(float(c.get("inst", 0)), 1),
+            "pension": round(float(c.get("pension", 0)), 1),
+            "finance": round(float(c.get("finance", 0)), 1),
+            "corp": round(float(c.get("corp", 0)), 1),
+            "retail": round(float(c.get("retail", 0)), 1),
+            "cum_fgn_5d": 0,
+            "cum_inst_5d": 0,
+            "cum_pension_5d": 0,
+            "ma20_dev": round(float(c.get("ma20_dev", 0)), 1),
+            "rsi": round(float(c.get("rsi", 0)), 1),
+            "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
+            "tech_flags": "-",
+            "signal": "SELL",
+        })
+
+    _fix_pick_names(rows)
+    rows.sort(key=lambda x: -x["final_score"])
+    logger.info("[SURGE] 수급급변 빌드: %d건 (%s)", len(rows), date_str)
     return rows
 
 

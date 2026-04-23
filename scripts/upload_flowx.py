@@ -33,6 +33,7 @@ from src.adapters.flowx_uploader import (
     build_sector_rotation_rows,
     build_crash_bounce_rows,
     build_nxt_picks_rows,
+    build_supply_surge_rows,
     build_bottom_picks_rows,
     build_etf_strategy_row,
 )
@@ -133,27 +134,20 @@ def main():
     for r in sr_rows[:5]:
         print(f"  #{r['rank']:2d} {r['sector']:8s} score={r['score']} 5d={r['ret_5d']:+.1f}% flow={r['flow']:+.0f}억")
 
-    # ── 퀀트시스템 메인 3종 미리보기 ──
-    nxt_rows = build_nxt_picks_rows(date_str_preview)
-    print(f"\n[FLOWX] 🟡 NXT 주목 종목: {len(nxt_rows)}건")
-    for r in nxt_rows[:10]:
-        streak = ""
-        if r["foreign_streak"] >= 3:
-            streak += f"F{r['foreign_streak']}"
-        if r["inst_streak"] >= 3:
-            streak += f"I{r['inst_streak']}"
-        if r["dual_streak"] >= 2:
-            streak += f"D{r['dual_streak']}"
-        pen5 = r.get("pension_5d", 0)
-        fin5 = r.get("finance_5d", 0)
-        extra = ""
-        if pen5 >= 20:
-            extra += f" 연{pen5:+.0f}"
-        if fin5 >= 20:
-            extra += f" 금{fin5:+.0f}"
-        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% {streak:>8s}{extra} 점수={r['final_score']:.0f}")
-    if not nxt_rows:
-        print("  주목 종목 없음 — 쉬는 것도 전략입니다")
+    # ── 퀀트시스템 메인: 수급 급변 미리보기 ──
+    surge_rows = build_supply_surge_rows(date_str_preview)
+    buy_rows = [r for r in surge_rows if r.get("signal") == "BUY"]
+    sell_rows = [r for r in surge_rows if r.get("signal") == "SELL"]
+    print(f"\n[FLOWX] 수급 급변: 매수 {len(buy_rows)}건 / 매도 {len(sell_rows)}건")
+    for r in buy_rows[:10]:
+        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% "
+              f"{r['supply_type']:>14s} 외{r['fgn']:>+5.0f} 기{r['inst']:>+5.0f} "
+              f"연{r['pension']:>+4.0f} 점수={r['final_score']:.0f}")
+    for r in sell_rows[:5]:
+        print(f"  [매도] {r['name']:10s} {r['close']:>8,}원 개인{r['retail']:>+5.0f} "
+              f"외{r['fgn']:>+5.0f} 기{r['inst']:>+5.0f}")
+    if not surge_rows:
+        print("  수급 급변 없음")
 
     btm_rows = build_bottom_picks_rows(date_str_preview)
     print(f"\n[FLOWX] 🟢 바닥에서 고개 든 종목: {len(btm_rows)}건")
