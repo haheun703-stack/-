@@ -110,28 +110,43 @@ def is_collected(conn: sqlite3.Connection, date: str) -> bool:
     return row is not None and row[0] == "OK"
 
 
-def fetch_one_investor(date: str, market: str, investor: str) -> pd.DataFrame:
-    """단일 투자자 유형의 전종목 순매수 데이터 수집."""
-    try:
-        df = krx.get_market_net_purchases_of_equities_by_ticker(
-            date, date, market, investor
-        )
-        if df is None or df.empty:
-            return pd.DataFrame()
+def fetch_one_investor(date: str, market: str, investor: str,
+                       max_retries: int = 3) -> pd.DataFrame:
+    """단일 투자자 유형의 전종목 순매수 데이터 수집 (재시도 포함)."""
+    for attempt in range(max_retries):
+        try:
+            df = krx.get_market_net_purchases_of_equities_by_ticker(
+                date, date, market, investor
+            )
+            if df is None or df.empty:
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt  # 1s → 2s → 4s
+                    logger.info("  %s %s %s 빈 응답 → %d초 후 재시도 (%d/%d)",
+                                date, market, investor, wait, attempt + 1, max_retries)
+                    time.sleep(wait)
+                    continue
+                return pd.DataFrame()
 
-        df = df.reset_index()
-        # pykrx 반환 컬럼 수 검증 (8개: ticker, name, sell_vol, buy_vol, net_vol, sell_val, buy_val, net_val)
-        if len(df.columns) != 8:
-            logger.debug("  %s %s %s 컬럼 수 불일치 (%d)", date, market, investor, len(df.columns))
-            return pd.DataFrame()
-        df.columns = ["ticker", "name", "sell_vol", "buy_vol", "net_vol",
-                       "sell_val", "buy_val", "net_val"]
-        df["investor"] = investor
-        df["date"] = date
-        return df
-    except Exception as e:
-        logger.warning("  %s %s %s 실패: %s", date, market, investor, e)
-        return pd.DataFrame()
+            df = df.reset_index()
+            # pykrx 반환 컬럼 수 검증 (8개: ticker, name, sell_vol, buy_vol, net_vol, sell_val, buy_val, net_val)
+            if len(df.columns) != 8:
+                logger.debug("  %s %s %s 컬럼 수 불일치 (%d)", date, market, investor, len(df.columns))
+                return pd.DataFrame()
+            df.columns = ["ticker", "name", "sell_vol", "buy_vol", "net_vol",
+                           "sell_val", "buy_val", "net_val"]
+            df["investor"] = investor
+            df["date"] = date
+            return df
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait = 2 ** attempt
+                logger.warning("  %s %s %s 실패 → %d초 후 재시도 (%d/%d): %s",
+                               date, market, investor, wait, attempt + 1, max_retries, e)
+                time.sleep(wait)
+            else:
+                logger.warning("  %s %s %s 최종 실패 (%d회 시도): %s",
+                               date, market, investor, max_retries, e)
+    return pd.DataFrame()
 
 
 def collect_date(conn: sqlite3.Connection, date: str, investors: list[str],
