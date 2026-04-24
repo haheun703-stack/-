@@ -25,7 +25,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 # ── QUIET 모드: 필수 메시지만 발송 (TELEGRAM_QUIET=1) ──
 # 허용 태그: 이 태그로 시작하는 메시지만 통과
 QUIET_MODE = os.getenv("TELEGRAM_QUIET", "0") == "1"
-QUIET_ALLOW_TAGS = {"[EVENING]", "[PAPER]", "[NXT]", "[ALERT]", "[HEALTH]", "[MDD]"}
+QUIET_ALLOW_TAGS = {"[EVENING]", "[PAPER]", "[NXT]", "[ALERT]", "[HEALTH]", "[MDD]", "[BLUECHIP]"}
 
 # 긴급 알림 폴백 로그 경로
 ALERT_FALLBACK_PATH = Path(__file__).resolve().parent.parent / "logs" / "emergency_alerts.log"
