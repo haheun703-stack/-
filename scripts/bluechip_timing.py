@@ -27,7 +27,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -209,6 +208,7 @@ def enter_new_positions(
         if qty < 1:
             continue
         cost = buy_price * qty * (1 + COMMISSION_PCT)
+        pf["capital"] = pf.get("capital", INITIAL_CAPITAL) - cost
 
         pf["positions"][ticker] = {
             "name": cand["name"],
@@ -244,26 +244,26 @@ def enter_new_positions(
 # 3. Exit 로직
 # ═══════════════════════════════════════════════
 
-def check_supply_exit(ticker: str) -> tuple[bool, str]:
-    """외인+기관 3일 연속 순매도 확인."""
+def check_supply_exit(ticker: str, entry_date: str = "") -> tuple[bool, str]:
+    """외인+기관 3일 연속 순매도 확인. entry_date 이후만 판정."""
     if not DB_PATH.exists():
         return False, ""
     try:
         conn = sqlite3.connect(str(DB_PATH), timeout=30)
-        df = pd.read_sql_query(
-            """
+        query = """
             SELECT date,
                    SUM(CASE WHEN investor = '외국인'   THEN net_val ELSE 0 END) / 1e8 AS fgn,
                    SUM(CASE WHEN investor = '기관합계' THEN net_val ELSE 0 END) / 1e8 AS inst
             FROM investor_daily
             WHERE ticker = ?
-            GROUP BY date
-            ORDER BY date DESC
-            LIMIT ?
-            """,
-            conn,
-            params=[ticker, EXIT_FLOW_CONSECUTIVE + 2],
-        )
+        """
+        params: list = [ticker]
+        if entry_date:
+            query += " AND date >= ?"
+            params.append(entry_date)
+        query += " GROUP BY date ORDER BY date DESC LIMIT ?"
+        params.append(EXIT_FLOW_CONSECUTIVE + 2)
+        df = pd.read_sql_query(query, conn, params=params)
         conn.close()
     except Exception as e:
         logger.warning("수급 DB 쿼리 실패 (%s): %s", ticker, e)
@@ -318,9 +318,9 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
             exit_reason = "STOP_LOSS"
             detail = f"PnL {pnl_pct*100:+.1f}%"
 
-        # 2. 수급이탈 3일
+        # 2. 수급이탈 3일 (입장일 이후만 판정)
         if not exit_reason:
-            is_exit, flow_detail = check_supply_exit(ticker)
+            is_exit, flow_detail = check_supply_exit(ticker, pos.get("entry_date", ""))
             if is_exit:
                 exit_reason = "SUPPLY_EXIT"
                 detail = flow_detail
@@ -451,6 +451,7 @@ def print_report(
     pf: dict,
     surge_total: int,
     top100_match: int,
+    candidate_count: int = 0,
 ) -> str:
     """콘솔 리포트 출력 + 텔레그램 메시지 문자열 반환."""
     lines = []
@@ -496,7 +497,8 @@ def print_report(
     equity = pf["daily_equity"][-1]["equity"] if pf["daily_equity"] else INITIAL_CAPITAL
     lines.append(f"\n  총 거래: {total}건  승률: {wr:.1f}%  MDD: {stats.get('mdd', 0):.1f}%")
     lines.append(f"  자산: {equity:,.0f}원  수익률: {(equity/INITIAL_CAPITAL-1)*100:+.2f}%")
-    lines.append(f"  후보: surge {surge_total} → TOP100 {top100_match} → 양봉 {len(entries)}")
+    bullish = candidate_count if candidate_count else len(entries)
+    lines.append(f"  후보: surge {surge_total} → TOP100 {top100_match} → 양봉 {bullish} → 진입 {len(entries)}")
     lines.append(sep)
 
     report = "\n".join(lines)
@@ -587,6 +589,7 @@ def run_daily(dry_run: bool = False) -> dict:
     )
     tg_msg = print_report(
         today_str, entries, exits, pf, surge_total, top100_match,
+        candidate_count=len(candidates),
     )
 
     # 9. 텔레그램 (매도 or 매수 있을 때만)
