@@ -3,17 +3,18 @@
 # ============================================================
 # scan_sector_fire.py에서 사용
 # FIRE = Flow + Inflection + Rhythm + Energy
+# ETF는 섹터별 최적 상품 선정 (TIGER/KODEX/SOL 혼합)
 # ============================================================
 
 sectors:
   AI반도체:
     tickers: ["000660", "005930", "042700", "403870", "095340"]
-    etf: {code: "091230", name: "TIGER 반도체"}
+    etf: {code: "091160", name: "KODEX 반도체"}
     leverage_etf: {code: "488080", name: "TIGER 반도체TOP10레버리지"}
 
   2차전지:
     tickers: ["373220", "006400", "247540", "003670", "066970"]
-    etf: {code: "305540", name: "TIGER 2차전지테마"}
+    etf: {code: "305720", name: "KODEX 2차전지산업"}
     leverage_etf: null
 
   방산:
@@ -23,12 +24,12 @@ sectors:
 
   조선해운:
     tickers: ["329180", "042660", "082740", "071970", "009540"]
-    etf: {code: "494670", name: "TIGER 조선TOP10"}
+    etf: {code: "466920", name: "SOL 조선TOP3플러스"}
     leverage_etf: null
 
   전력기기:
     tickers: ["267260", "298040", "009150", "353200"]
-    etf: null
+    etf: {code: "487240", name: "KODEX AI전력핵심설비"}
     leverage_etf: null
 
   자동차:
@@ -38,12 +39,12 @@ sectors:
 
   금융:
     tickers: ["055550", "105560", "316140", "086790"]
-    etf: {code: "139270", name: "TIGER 200 금융"}
+    etf: {code: "091170", name: "KODEX 은행"}
     leverage_etf: null
 
   바이오:
     tickers: ["207940", "196170", "298380", "068760", "326030", "145020", "314930"]
-    etf: {code: "364970", name: "TIGER 바이오TOP10"}
+    etf: {code: "244580", name: "KODEX 바이오"}
     leverage_etf: null
 
   화장품소비재:
@@ -63,15 +64,15 @@ sectors:
 
   건설인프라:
     tickers: ["000720", "047040", "006360"]
-    etf: {code: "139220", name: "TIGER 200 건설"}
+    etf: {code: "117700", name: "KODEX 건설"}
     leverage_etf: null
 
   철강소재:
     tickers: ["005490", "004020", "010130"]
-    etf: {code: "139240", name: "TIGER 200 철강소재"}
+    etf: {code: "117680", name: "KODEX 철강"}
     leverage_etf: null
 
   로봇자동화:
     tickers: ["454910", "090460", "039030", "298060"]
-    etf: null
+    etf: {code: "445290", name: "KODEX 로봇액티브"}
     leverage_etf: null
