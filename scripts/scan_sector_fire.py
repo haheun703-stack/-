@@ -576,9 +576,10 @@ def print_report(sectors: list[dict], picks: list[dict]):
 def save_output(sectors: list[dict], picks: list[dict]):
     """JSON + CSV 저장."""
     today = datetime.now().strftime("%Y%m%d")
+    today_dash = datetime.now().strftime("%Y-%m-%d")
 
     output = {
-        "date": today,
+        "date": today_dash,
         "type": "sector_fire",
         "sector_count": len(sectors),
         "pick_count": len(picks),

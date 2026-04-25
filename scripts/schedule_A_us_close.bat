@@ -1,75 +1,70 @@
 @echo off
 REM ============================================================
-REM  Quantum Master - BAT-A: ¹ÌÀå ¸¶°¨ + ¾ÆÄ§ Àç½ºÄµ + ÅÚ·¹±×·¥
-REM  ½ºÄÉÁÙ: ¸ÅÀÏ 06:10 (¿ù~Åä, ¹ÌÀå ¸¶°¨ Á÷ÈÄ)
-REM  µî·Ï: schtasks /create /tn "QM_A_USClose" /tr "D:\sub-agent-project_ÄöÆ®º¿\scripts\schedule_A_us_close.bat" /sc daily /st 06:10
+REM  Quantum Master - BAT-A: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½Ä§ ï¿½ç½ºÄµ + ï¿½Ú·ï¿½ï¿½×·ï¿½
+REM  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ 06:10 (ï¿½ï¿½~ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+REM  ï¿½ï¿½ï¿½: schtasks /create /tn "QM_A_USClose" /tr "D:\sub-agent-project_ï¿½ï¿½Æ®ï¿½ï¿½\scripts\schedule_A_us_close.bat" /sc daily /st 06:10
 REM
-REM  [v3] ¹ÌÀå µ¥ÀÌÅÍ ¹Ý¿µ + ¸±·¹ÀÌ °æº¸ + ÃßÃµÁ¾¸ñ Àç½ºÄµ + ÅÚ·¹±×·¥
-REM       ¡æ BAT-E(08:50)°¡ ÃÖ½Å ÃßÃµÀ¸·Î ÀÚµ¿¸Å¼ö
+REM  [v3] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¿ï¿½ + ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½æº¸ + ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ ï¿½ç½ºÄµ + ï¿½Ú·ï¿½ï¿½×·ï¿½
+REM       ï¿½ï¿½ BAT-E(08:50)ï¿½ï¿½ ï¿½Ö½ï¿½ ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ï¿½Å¼ï¿½
 REM ============================================================
 
-echo [%date% %time%] BAT-A ½ÃÀÛ: ¹ÌÀå ¸¶°¨ + ¸±·¹ÀÌ + ¾ÆÄ§ Àç½ºÄµ >> D:\sub-agent-project_ÄöÆ®º¿\logs\schedule.log
+echo [%date% %time%] BAT-A ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½Ä§ ï¿½ç½ºÄµ >> D:\sub-agent-project_ï¿½ï¿½Æ®ï¿½ï¿½\logs\schedule.log
 
 chcp 65001 >nul
-call D:\sub-agent-project_ÄöÆ®º¿\venv\Scripts\activate.bat
-cd /d D:\sub-agent-project_ÄöÆ®º¿
-set PYTHONPATH=D:\sub-agent-project_ÄöÆ®º¿
+call D:\sub-agent-project_ï¿½ï¿½Æ®ï¿½ï¿½\venv\Scripts\activate.bat
+cd /d D:\sub-agent-project_ï¿½ï¿½Æ®ï¿½ï¿½
+set PYTHONPATH=D:\sub-agent-project_ï¿½ï¿½Æ®ï¿½ï¿½
 
-REM -- °Å·¡ÀÏ °¡µå (trading_calendar »ç¿ë) --
+REM -- ï¿½Å·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (trading_calendar ï¿½ï¿½ï¿½) --
 python -c "from src.trading_calendar import should_run_bat; exit(0 if should_run_bat('kr') else 1)"
 if errorlevel 1 (
-    echo [%date% %time%] BAT-A ½ºÅµ: ºñ°Å·¡ÀÏ >> logs\schedule.log
+    echo [%date% %time%] BAT-A ï¿½ï¿½Åµ: ï¿½ï¿½Å·ï¿½ï¿½ï¿½ >> logs\schedule.log
     goto :eof
 )
 
-REM -- PHASE 1: ¹Ì±¹Àå µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® --
+REM -- PHASE 1: ï¿½Ì±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® --
 
-REM 1) US ½ÃÀå µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® + Overnight Signal (¿øÀÚÀç Æ÷ÇÔ)
-echo [%date% %time%] [1/7] US Overnight Signal ¾÷µ¥ÀÌÆ® >> logs\schedule.log
+REM 1) US ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® + Overnight Signal (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+echo [%date% %time%] [1/7] US Overnight Signal ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® >> logs\schedule.log
 python -u -X utf8 scripts\us_overnight_signal.py --update >> logs\schedule.log 2>&1
 
-REM 2) US-KR ÆÐÅÏDB ÀÏÀÏ ´©Àû
-echo [%date% %time%] [2/7] US-KR ÆÐÅÏDB ¾÷µ¥ÀÌÆ® >> logs\schedule.log
+REM 2) US-KR ï¿½ï¿½ï¿½ï¿½DB ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+echo [%date% %time%] [2/7] US-KR ï¿½ï¿½ï¿½ï¿½DB ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® >> logs\schedule.log
 python -u -X utf8 scripts\update_us_kr_daily.py >> logs\schedule.log 2>&1
 
-REM 2.5) COT ÁÖ°£ ¾÷µ¥ÀÌÆ® (¸ÅÀÏ Ã¼Å©, ±Ý¿äÀÏ¿¡¸¸ ½ÇÁú º¯°æ)
-echo [%date% %time%] [2.5/7] COT ÁÖ°£ ¾÷µ¥ÀÌÆ® >> logs\schedule.log
+REM 2.5) COT ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® (ï¿½ï¿½ï¿½ï¿½ Ã¼Å©, ï¿½Ý¿ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+echo [%date% %time%] [2.5/7] COT ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® >> logs\schedule.log
 python -u -X utf8 scripts\fetch_cot_weekly.py >> logs\schedule.log 2>&1
 
-REM 2.7) À¯µ¿¼º »çÀÌÅ¬ µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® (FRED 5´ë ÁöÇ¥)
-echo [%date% %time%] [2.7/7] À¯µ¿¼º µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® >> logs\schedule.log
+REM 2.7) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å¬ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® (FRED 5ï¿½ï¿½ ï¿½ï¿½Ç¥)
+echo [%date% %time%] [2.7/7] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® >> logs\schedule.log
 python -u -X utf8 scripts\fetch_liquidity_data.py >> logs\schedule.log 2>&1
 
-REM 2.8) À¯µ¿¼º ½Ã±×³Î »ý¼º
-echo [%date% %time%] [2.8/7] À¯µ¿¼º ½Ã±×³Î »ý¼º >> logs\schedule.log
+REM 2.8) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã±×³ï¿½ ï¿½ï¿½ï¿½ï¿½
+echo [%date% %time%] [2.8/7] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã±×³ï¿½ ï¿½ï¿½ï¿½ï¿½ >> logs\schedule.log
 python -u -X utf8 scripts\run_liquidity_signal.py >> logs\schedule.log 2>&1
 
-REM 3) ¼½ÅÍ ¸±·¹ÀÌ ¿£Áø (US ´ëÀåÁÖ ¾÷µ¥ÀÌÆ® + °æº¸ ÆÇÁ¤, ÅÚ·¹±×·¥Àº ¾ÆÄ§ ÅëÇÕ¿¡ Èí¼ö)
-REM v13: --all ¡æ --update --signal (¸±·¹ÀÌ º°µµ ¾Ë¸² Á¦°Å, BAT-B ¾ÆÄ§ ºê¸®ÇÎ¿¡¼­ ÅëÇÕ)
-echo [%date% %time%] [3/7] ¼½ÅÍ ¸±·¹ÀÌ µ¥ÀÌÅÍ ¾÷µ¥ÀÌÆ® >> logs\schedule.log
+REM 3) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (US ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® + ï¿½æº¸ ï¿½ï¿½ï¿½ï¿½, ï¿½Ú·ï¿½ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½Ä§ ï¿½ï¿½ï¿½Õ¿ï¿½ ï¿½ï¿½ï¿½ï¿½)
+REM v13: --all ï¿½ï¿½ --update --signal (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¸ï¿½ ï¿½ï¿½ï¿½ï¿½, BAT-B ï¿½ï¿½Ä§ ï¿½ê¸®ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+echo [%date% %time%] [3/7] ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® >> logs\schedule.log
 python -u -X utf8 scripts\run_relay_engine.py --update --signal >> logs\schedule.log 2>&1
 
-REM 2.9) ¿øÀÚÀç °¡°Ý ¼öÁý + ¿ø°¡ °¸ ºÐ¼®
-echo [%date% %time%] [2.9/9] ¿øÀÚÀç °¡°Ý + ¿ø°¡ °¸ ¼öÁý >> logs\schedule.log
-python -u -X utf8 scripts\fetch_commodity_prices.py >> logs\schedule.log 2>&1
+REM 2.9) [ARCHIVED 4/21] fetch_commodity_prices.py, news_scenario_engine.py â€” orphan ì•„ì¹´ì´ë¸Œë¨
+REM      VPS run_bat.shì—ë„ ë¯¸í¬í•¨, ë°ì´í„° ë¯¸ìˆ˜ì§‘ ìƒíƒœ
 
-REM 2.95) ½Ã³ª¸®¿À ´º½º ¿£Áø (´º½º ¼öÁý + ½Ã³ª¸®¿À Æò°¡ + ¸Å¼ö½ÅÈ£)
-echo [%date% %time%] [2.95/9] ½Ã³ª¸®¿À ´º½º ¿£Áø >> logs\schedule.log
-python -u -X utf8 scripts\news_scenario_engine.py --no-sentiment >> logs\schedule.log 2>&1
+REM -- PHASE 2: ï¿½ï¿½Ä§ ï¿½ç½ºÄµ (ï¿½Ì±ï¿½ï¿½ï¿½ ï¿½Ý¿ï¿½) --
 
-REM -- PHASE 2: ¾ÆÄ§ Àç½ºÄµ (¹Ì±¹Àå ¹Ý¿µ) --
-
-REM 4) v3 AI Brain Àç½ÇÇà (¹ÌÀå µ¥ÀÌÅÍ ¹Ý¿µ ¡æ ai_v3_picks.json °»½Å)
-echo [%date% %time%] [4/7] v3 AI Brain ¾ÆÄ§ Àç½ºÄµ >> logs\schedule.log
+REM 4) v3 AI Brain ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ý¿ï¿½ ï¿½ï¿½ ai_v3_picks.json ï¿½ï¿½ï¿½ï¿½)
+echo [%date% %time%] [4/7] v3 AI Brain ï¿½ï¿½Ä§ ï¿½ç½ºÄµ >> logs\schedule.log
 python -u -X utf8 scripts\run_v3_brain.py --no-telegram >> logs\schedule.log 2>&1
-if errorlevel 1 echo [%date% %time%] v3 Brain ½ÇÆÐ (±âÁ¸ picks À¯Áö) >> logs\schedule.log
+if errorlevel 1 echo [%date% %time%] v3 Brain ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ picks ï¿½ï¿½ï¿½ï¿½) >> logs\schedule.log
 
-REM 5) ÃßÃµÁ¾¸ñ Àç½ºÄµ (overnight_signal + v3 picks ¹Ý¿µ)
-echo [%date% %time%] [5/7] ÃßÃµÁ¾¸ñ ¾ÆÄ§ Àç½ºÄµ >> logs\schedule.log
+REM 5) ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ ï¿½ç½ºÄµ (overnight_signal + v3 picks ï¿½Ý¿ï¿½)
+echo [%date% %time%] [5/7] ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä§ ï¿½ç½ºÄµ >> logs\schedule.log
 python -u -X utf8 scripts\scan_tomorrow_picks.py >> logs\schedule.log 2>&1
 
-REM 6) ¾ÆÄ§ ÅÚ·¹±×·¥ -- BAT-B (07:00) ÅëÇÕ ºê¸®ÇÎ¿¡¼­ 1°ÇÀ¸·Î ¹ß¼Û
-REM v13: BAT-A¿¡¼­´Â µ¥ÀÌÅÍ¸¸ ÁØºñ, BAT-B¿¡¼­ Áõ±Ç»ç+Å×¸¶+¸±·¹ÀÌ ÅëÇÕ 1°Ç ¹ß¼Û
-echo [%date% %time%] [6/7] ¾ÆÄ§ ÅÚ·¹±×·¥Àº BAT-B(07:00)¿¡¼­ ÅëÇÕ ¹ß¼Û >> logs\schedule.log
+REM 6) ï¿½ï¿½Ä§ ï¿½Ú·ï¿½ï¿½×·ï¿½ -- BAT-B (07:00) ï¿½ï¿½ï¿½ï¿½ ï¿½ê¸®ï¿½Î¿ï¿½ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß¼ï¿½
+REM v13: BAT-Aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½Øºï¿½, BAT-Bï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç»ï¿½+ï¿½×¸ï¿½+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ ï¿½ß¼ï¿½
+echo [%date% %time%] [6/7] ï¿½ï¿½Ä§ ï¿½Ú·ï¿½ï¿½×·ï¿½ï¿½ï¿½ BAT-B(07:00)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß¼ï¿½ >> logs\schedule.log
 
-echo [%date% %time%] BAT-A ¿Ï·á (9´Ü°è) >> logs\schedule.log
+echo [%date% %time%] BAT-A ï¿½Ï·ï¿½ (9ï¿½Ü°ï¿½) >> logs\schedule.log

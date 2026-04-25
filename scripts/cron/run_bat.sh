@@ -234,7 +234,7 @@ case "$BAT" in
     # --- G4.9: FLOWX 업로드 (모든 스캔 완료 후 일괄 업로드) ---
     run_py scripts/build_brain_upload.py
     run_py scripts/upload_flowx.py
-    # dashboard_data.py 제거 — 파일 미존재
+    # dashboard_data.py 단독실행 제거 — upload_flowx.py 내부 import로 통합 (루트에 파일 존재)
     run_py scripts/send_evening_summary.py --send
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
