@@ -219,6 +219,7 @@ case "$BAT" in
     run_py src/use_cases/portfolio_cfo.py
     # --- G4.2: 수급 급변 + 바닥반등 스캐너 (upload 전 실행 필수) ---
     run_py scripts/scan_supply_surge.py
+    run_py scripts/scan_sector_fire.py         # G4.2: 섹터 발화(FIRE) + 종목 매수 스캔
     run_py scripts/bluechip_timing.py          # G4.3: 우량주 TOP100 매매타이밍
     run_py scripts/scan_type2_bottom.py
     # --- G4.5: NXT 추천 + 바이오 CDMO 감시 (upload 전 실행 필수) ---

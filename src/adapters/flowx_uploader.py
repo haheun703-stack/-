@@ -414,6 +414,9 @@ class FlowxUploader:
             "supply_surge": self.upload_supply_surge(date_str),
             "bottom_picks": self.upload_bottom_picks(date_str),
             "etf_strategy": self.upload_etf_strategy(date_str),
+            # 섹터 발화 (FIRE)
+            "sector_fire": self.upload_sector_fire(date_str),
+            "sector_picks": self.upload_sector_picks(date_str),
         }
         ok = sum(v for v in results.values())
         logger.info("[FLOWX] 퀀트 %d테이블 업로드: %d/%d 성공 %s", len(results), ok, len(results), results)
@@ -500,6 +503,24 @@ class FlowxUploader:
             return True
         return self._upload_rows("quant_supply_surge", date_str, rows,
                                  "date,ticker", "수급급변")
+
+    def upload_sector_fire(self, date_str: str) -> bool:
+        """scan_sector_fire → quant_sector_fire."""
+        rows = build_sector_fire_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 섹터발화 데이터 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_sector_fire", date_str, rows,
+                                 "date,sector", "섹터발화")
+
+    def upload_sector_picks(self, date_str: str) -> bool:
+        """scan_sector_fire → quant_sector_picks."""
+        rows = build_sector_picks_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 섹터발화 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_sector_picks", date_str, rows,
+                                 "date,ticker", "섹터발화종목")
 
     def upload_bottom_picks(self, date_str: str) -> bool:
         """scan_type2_bottom → quant_bottom_picks."""
@@ -2471,3 +2492,99 @@ def build_etf_strategy_row(date_str: str = "") -> dict | None:
 
     logger.info("[ETF전략] %s 방향=%s 레짐=%s Shield=%s", date_str, direction, regime, shield_level)
     return row
+
+
+# ── 섹터 발화 (FIRE) ─────────────────────────────
+
+
+def build_sector_fire_rows(date_str: str = "") -> list[dict]:
+    """scan_sector_fire 결과 JSON → quant_sector_fire 테이블 포맷.
+
+    소스: data/sector_fire_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"sector_fire_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[FIRE] 섹터발화 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for s in data.get("sectors", []):
+        rows.append({
+            "date": date_str,
+            "sector": s.get("sector", ""),
+            "fire_score": round(float(s.get("fire_score", 0)), 1),
+            "fire_grade": s.get("fire_grade", "D"),
+            "flow_score": round(float(s.get("flow_score", 0)), 1),
+            "inflection_score": round(float(s.get("inflection_score", 0)), 1),
+            "rhythm_score": round(float(s.get("rhythm_score", 0)), 1),
+            "energy_score": round(float(s.get("energy_score", 0)), 1),
+            "overheat_penalty": round(float(s.get("overheat_penalty", 0)), 1),
+            "fgn_5d": round(float(s.get("fgn_5d", 0)), 1),
+            "inst_5d": round(float(s.get("inst_5d", 0)), 1),
+            "pension_5d": round(float(s.get("pension_5d", 0)), 1),
+            "fgn_reversal": round(float(s.get("fgn_reversal", 0)), 1),
+            "inst_reversal": round(float(s.get("inst_reversal", 0)), 1),
+            "ma20_avg_dev": round(float(s.get("ma20_avg_dev", 0)), 1),
+            "rsi_avg": round(float(s.get("rsi_avg", 50)), 1),
+            "vol_ratio_avg": round(float(s.get("vol_ratio_avg", 1)), 1),
+            "etf_code": s.get("etf_code"),
+            "etf_name": s.get("etf_name"),
+            "leverage_etf_code": s.get("leverage_etf_code"),
+            "leverage_etf_name": s.get("leverage_etf_name"),
+            "etf_recommend": s.get("etf_recommend", ""),
+        })
+
+    logger.info("[FIRE] 섹터발화 Row: %d행", len(rows))
+    return rows
+
+
+def build_sector_picks_rows(date_str: str = "") -> list[dict]:
+    """scan_sector_fire 결과 JSON → quant_sector_picks 테이블 포맷.
+
+    소스: data/sector_fire_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"sector_fire_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[FIRE] 섹터발화 종목 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for p in data.get("picks", []):
+        rows.append({
+            "date": date_str,
+            "sector": p.get("sector", ""),
+            "ticker": p.get("ticker", ""),
+            "name": p.get("name", ""),
+            "close": int(p.get("close", 0)),
+            "chg_1d": round(float(p.get("chg_1d", 0)), 2),
+            "buy_score": round(float(p.get("buy_score", 0)), 1),
+            "buy_grade": p.get("buy_grade", "SKIP"),
+            "ma20_dev": round(float(p.get("ma20_dev", 0)), 1),
+            "rsi": round(float(p.get("rsi", 50)), 1),
+            "vol_ratio": round(float(p.get("vol_ratio", 1)), 1),
+            "fgn_5d": round(float(p.get("fgn_5d", 0)), 1),
+            "inst_5d": round(float(p.get("inst_5d", 0)), 1),
+            "pension_5d": round(float(p.get("pension_5d", 0)), 1),
+            "fgn_reversal": round(float(p.get("fgn_reversal", 0)), 1),
+            "inst_reversal": round(float(p.get("inst_reversal", 0)), 1),
+            "fgn_streak": int(p.get("fgn_streak", 0)),
+            "surge_type": p.get("surge_type"),
+            "buy_reasons": p.get("buy_reasons", ""),
+        })
+
+    logger.info("[FIRE] 섹터발화 종목 Row: %d행", len(rows))
+    return rows
