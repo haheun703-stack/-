@@ -412,6 +412,7 @@ class FlowxUploader:
             "crash_bounce": self.upload_crash_bounce(date_str),
             # 퀀트시스템 메인 3종
             "supply_surge": self.upload_supply_surge(date_str),
+            "supply_chain": self.upload_supply_chain(date_str),
             "bottom_picks": self.upload_bottom_picks(date_str),
             "etf_strategy": self.upload_etf_strategy(date_str),
             # 섹터 발화 (FIRE)
@@ -503,6 +504,15 @@ class FlowxUploader:
             return True
         return self._upload_rows("quant_supply_surge", date_str, rows,
                                  "date,ticker", "수급급변")
+
+    def upload_supply_chain(self, date_str: str) -> bool:
+        """detect_supply_chain → quant_supply_chain."""
+        rows = build_supply_chain_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 바톤터치 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_supply_chain", date_str, rows,
+                                 "date,ticker", "바톤터치")
 
     def upload_sector_fire(self, date_str: str) -> bool:
         """scan_sector_fire → quant_sector_fire."""
@@ -2300,6 +2310,63 @@ def build_supply_surge_rows(date_str: str = "") -> list[dict]:
     _fix_pick_names(rows)
     rows.sort(key=lambda x: -x["final_score"])
     logger.info("[SURGE] 수급급변 빌드: %d건 (%s)", len(rows), date_str)
+    return rows
+
+
+# ── 수급 바톤터치 (detect_supply_chain) ────────────────
+
+def build_supply_chain_rows(date_str: str = "") -> list[dict]:
+    """detect_supply_chain 결과 JSON → quant_supply_chain 테이블 포맷.
+
+    소스: data/supply_chain_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"supply_chain_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[CHAIN] 바톤터치 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for c in data.get("baton_touches", []):
+        rows.append({
+            "date": date_str,
+            "ticker": c.get("ticker", ""),
+            "name": c.get("name", ""),
+            "close": int(c.get("close", 0)),
+            "ret_d0": round(float(c.get("ret0", 0)), 2),
+            "chain_type": c.get("chain_type", ""),
+            "from_leader": c.get("from_leader", ""),
+            "to_leader": c.get("to_leader", ""),
+            "base_score": round(float(c.get("base_score", 0)), 1),
+            "tech_score": round(float(c.get("tech_score", 0)), 1),
+            "streak_bonus": int(c.get("streak_bonus", 0)),
+            "final_score": round(float(c.get("final_score", 0)), 1),
+            "fgn": round(float(c.get("fgn", 0)), 1),
+            "inst": round(float(c.get("inst", 0)), 1),
+            "pension": round(float(c.get("pension", 0)), 1),
+            "finance": round(float(c.get("finance", 0)), 1),
+            "corp": round(float(c.get("corp", 0)), 1),
+            "retail": round(float(c.get("retail", 0)), 1),
+            "prev_fgn": round(float(c.get("prev_fgn", 0)), 1),
+            "prev_inst": round(float(c.get("prev_inst", 0)), 1),
+            "prev_pension": round(float(c.get("prev_pension", 0)), 1),
+            "price_cushion": round(float(c.get("price_cushion", 0)), 1),
+            "ma20_dev": round(float(c.get("ma20_dev", 0)), 1),
+            "rsi": round(float(c.get("rsi", 0)), 1),
+            "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
+            "tech_flags": c.get("tech_flags", "-"),
+            "signal": "BUY",
+        })
+
+    _fix_pick_names(rows)
+    rows.sort(key=lambda x: -x["final_score"])
+    logger.info("[CHAIN] 바톤터치 빌드: %d건 (%s)", len(rows), date_str)
     return rows
 
 

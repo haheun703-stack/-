@@ -34,6 +34,7 @@ from src.adapters.flowx_uploader import (
     build_crash_bounce_rows,
     build_nxt_picks_rows,
     build_supply_surge_rows,
+    build_supply_chain_rows,
     build_bottom_picks_rows,
     build_etf_strategy_row,
 )
@@ -148,6 +149,17 @@ def main():
               f"외{r['fgn']:>+5.0f} 기{r['inst']:>+5.0f}")
     if not surge_rows:
         print("  수급 급변 없음")
+
+    # ── 수급 바톤터치 미리보기 ──
+    chain_rows = build_supply_chain_rows(date_str_preview)
+    print(f"\n[FLOWX] 수급 바톤터치: {len(chain_rows)}건")
+    for r in chain_rows[:10]:
+        baton = f"{r.get('from_leader','?')}→{r.get('to_leader','?')}"
+        print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% "
+              f"{r.get('chain_type',''):>14s} {baton:>10s} "
+              f"받침{r.get('price_cushion',0):>+5.1f}% 점수={r.get('final_score',0):.0f}")
+    if not chain_rows:
+        print("  바톤터치 없음")
 
     btm_rows = build_bottom_picks_rows(date_str_preview)
     print(f"\n[FLOWX] 🟢 바닥에서 고개 든 종목: {len(btm_rows)}건")
