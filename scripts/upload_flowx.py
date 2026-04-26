@@ -37,6 +37,8 @@ from src.adapters.flowx_uploader import (
     build_supply_chain_rows,
     build_bottom_picks_rows,
     build_etf_strategy_row,
+    build_sector_fire_rows,
+    build_sector_picks_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -160,6 +162,20 @@ def main():
               f"받침{r.get('price_cushion',0):>+5.1f}% 점수={r.get('final_score',0):.0f}")
     if not chain_rows:
         print("  바톤터치 없음")
+
+    # ── 섹터 발화(FIRE) 미리보기 ──
+    sf_rows = build_sector_fire_rows(date_str_preview)
+    sp_rows = build_sector_picks_rows(date_str_preview)
+    print(f"\n[FLOWX] 섹터 발화(FIRE): {len(sf_rows)}섹터 / {len(sp_rows)}종목")
+    for r in sf_rows:
+        grade = r.get("fire_grade", "?")
+        if grade in ("S", "A", "B"):
+            print(f"  {grade} {r.get('sector',''):>8s} FIRE={r.get('fire_score',0):.0f} "
+                  f"F={r.get('flow',0):.0f} I={r.get('inflection',0):.0f} "
+                  f"R={r.get('rhythm',0):.0f} E={r.get('energy',0):.0f}")
+    for r in sp_rows[:10]:
+        print(f"  {r.get('sector',''):>8s} {r.get('name',''):>10s} "
+              f"buy_score={r.get('buy_score',0):.0f} {r.get('buy_grade','')}")
 
     btm_rows = build_bottom_picks_rows(date_str_preview)
     print(f"\n[FLOWX] 🟢 바닥에서 고개 든 종목: {len(btm_rows)}건")
