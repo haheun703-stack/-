@@ -80,6 +80,9 @@ def _fib_status(price: float, fib_382: float, fib_500: float, fib_618: float) ->
         return "61.8% 위 (회복 중)"
 
 
+MIN_HIGH_AGE_FIB = 60  # 52주 고점이 최소 60거래일 이전이어야 눌림목 인정
+
+
 def calc_52w(ticker: str) -> dict | None:
     """parquet에서 52주 고가/저가/현재가 계산."""
     pq = PROCESSED_DIR / f"{ticker}.parquet"
@@ -99,6 +102,13 @@ def calc_52w(ticker: str) -> dict | None:
         low_252 = float(tail["low"].min())
         if high_252 <= 0 or close <= 0:
             return None
+
+        # 고점 시점 체크: 최근 급등 후 급락은 "눌림목"이 아님
+        high_pos = tail["high"].values.argmax()
+        days_since_high = len(tail) - high_pos - 1
+        if days_since_high < MIN_HIGH_AGE_FIB:
+            return None
+
         return {
             "close": close,
             "high_252": high_252,
