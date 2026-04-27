@@ -148,7 +148,7 @@ def scan_one(fp: Path, today: pd.Timestamp, name_map: dict[str, str], pf_map: di
     vol5 = float(daily_chg.std()) if len(daily_chg) > 1 else 0.0
 
     # 분배 Phase 감지
-    inst_heavy_sell_days = int(((last5["기관합계"] / 1e8) <= -100).sum())
+    inst_heavy_sell_days = int(((last5["기관합계"] / 1e8) <= -100).sum()) if "기관합계" in last5.columns else 0
     fgn_heavy_sell_days = int(((last5[_fgn_col] / 1e8) <= -100).sum()) if _fgn_col in last5.columns else 0
 
     # 연기금/금융투자 5일 수급 (investor_daily.db)
