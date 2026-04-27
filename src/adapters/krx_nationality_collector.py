@@ -469,6 +469,8 @@ def collect_and_store(
     total_rows = 0
     success_count = 0
     consecutive_fail = 0
+    relogin_count = 0
+    MAX_RELOGIN = 3
 
     for ticker, name, isin in targets:
         countries = krx.fetch_nationality(isin, date)
@@ -476,7 +478,11 @@ def collect_and_store(
             consecutive_fail += 1
             # 재발방지: 5연속 실패 시 재로그인 (403/세션만료 대응)
             if consecutive_fail >= 5 and success_count == 0:
-                logger.warning("5연속 실패 — 세션 재로그인 시도")
+                relogin_count += 1
+                if relogin_count > MAX_RELOGIN:
+                    logger.error("재로그인 %d회 초과 — 수집 중단 (API 불가 판단)", MAX_RELOGIN)
+                    break
+                logger.warning("5연속 실패 — 세션 재로그인 시도 (%d/%d)", relogin_count, MAX_RELOGIN)
                 if krx.login():
                     consecutive_fail = 0
                 else:
