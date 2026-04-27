@@ -149,6 +149,9 @@ def load_csv_data(csv_path: Path) -> pd.DataFrame | None:
     return df
 
 
+MIN_HIGH_AGE = 60  # 52주 고점이 최소 60거래일(~3개월) 이전이어야 바닥 인정
+
+
 def calc_fib_data(df: pd.DataFrame) -> dict | None:
     """52주 피보나치 데이터 계산."""
     # 최근 250거래일 (약 1년)
@@ -162,6 +165,12 @@ def calc_fib_data(df: pd.DataFrame) -> dict | None:
 
     if high_52w <= low_52w or close <= 0:
         return None
+
+    # 고점 달성 시점 체크: 최근 급등 후 급락은 "바닥"이 아님
+    high_idx = recent["High"].idxmax()
+    days_since_high = len(recent) - recent.index.get_loc(high_idx) - 1
+    if days_since_high < MIN_HIGH_AGE:
+        return None  # 고점이 최근 60거래일 이내 → 급등급락, 바닥 아님
 
     drop_pct = (close / high_52w - 1) * 100  # 음수
     rng = high_52w - low_52w
@@ -190,6 +199,7 @@ def calc_fib_data(df: pd.DataFrame) -> dict | None:
         "drop_pct": round(drop_pct, 1),
         "position_pct": round(position_pct, 1),
         "fib_zone": fib_zone,
+        "days_since_high": days_since_high,
         **fibs,
     }
 
