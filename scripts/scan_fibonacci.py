@@ -103,17 +103,16 @@ def calc_52w(ticker: str) -> dict | None:
         if high_252 <= 0 or close <= 0:
             return None
 
-        # 고점 시점 체크: 최근 급등 후 급락은 "눌림목"이 아님
-        high_pos = tail["high"].values.argmax()
+        # 고점 시점 (눌림목 필터용 — 호출 측에서 판단)
+        high_pos = int(tail["high"].values.argmax())
         days_since_high = len(tail) - high_pos - 1
-        if days_since_high < MIN_HIGH_AGE_FIB:
-            return None
 
         return {
             "close": close,
             "high_252": high_252,
             "low_252": low_252,
             "drop_pct": round((close / high_252 - 1) * 100, 1),
+            "days_since_high": days_since_high,
         }
     except Exception:
         return None
@@ -294,6 +293,9 @@ def scan_fib_stocks(universe: pd.DataFrame, pykrx_data: dict,
         ticker = row["ticker"]
         w52 = calc_52w(ticker)
         if w52 is None or abs(w52["drop_pct"]) < 15:
+            continue
+        # 고점이 최근 60거래일 이내 → 급등급락, 눌림목 아님
+        if w52.get("days_since_high", 999) < MIN_HIGH_AGE_FIB:
             continue
 
         stock = build_fib_stock(
