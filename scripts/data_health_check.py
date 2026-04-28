@@ -686,7 +686,7 @@ class DataHealthCheck:
         elif size_kb <= 1:
             return CheckResult(
                 "수급이면분석", False,
-                f"빈 파일: {latest} ({size_kb:.1f}KB) — collect_supply_data 확인!",
+                f"빈 파일: {latest} ({size_kb:.1f}KB) — collect_investor_bulk 확인!",
             )
         else:
             return CheckResult(
