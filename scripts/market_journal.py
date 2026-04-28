@@ -183,16 +183,22 @@ def _collect_market_overview(today_str: str) -> dict:
         except Exception as e:
             log.warning("KOSPI CSV 로드 실패: %s", e)
 
-    # KOSDAQ from pykrx (1 API call) — 인코딩 에러 대비 재시도
+    # KOSDAQ from pykrx — 10일 범위 조회 후 종가 비교로 등락률 계산
     for attempt in range(3):
         try:
             from pykrx import stock as krx
-            kq = krx.get_index_ohlcv_by_date(today_str.replace("-", ""),
-                                              today_str.replace("-", ""), "2001")
+            end_dt = today_str.replace("-", "")
+            start_dt = (datetime.strptime(today_str, "%Y-%m-%d")
+                        - timedelta(days=10)).strftime("%Y%m%d")
+            kq = krx.get_index_ohlcv_by_date(start_dt, end_dt, "2001")
             if not kq.empty:
-                row = kq.iloc[-1]
-                overview["kosdaq_close"] = round(float(row["종가"]), 1)
-                overview["kosdaq_change_pct"] = round(float(row["등락률"]), 2)
+                overview["kosdaq_close"] = round(float(kq.iloc[-1]["종가"]), 1)
+                if "등락률" in kq.columns:
+                    overview["kosdaq_change_pct"] = round(
+                        float(kq.iloc[-1]["등락률"]), 2)
+                elif len(kq) >= 2 and kq.iloc[-2]["종가"] > 0:
+                    overview["kosdaq_change_pct"] = round(
+                        (kq.iloc[-1]["종가"] / kq.iloc[-2]["종가"] - 1) * 100, 2)
             break
         except Exception as e:
             if attempt < 2:
