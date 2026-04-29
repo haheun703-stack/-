@@ -234,6 +234,7 @@ case "$BAT" in
     run_py scripts/scan_bluechip_checkup.py
     # --- G4.9: FLOWX 업로드 (모든 스캔 완료 후 일괄 업로드) ---
     run_py scripts/build_brain_upload.py
+    run_py scripts/signal_logger.py              # G4.9: tomorrow_picks → signals 테이블 기록
     run_py scripts/upload_flowx.py
     # dashboard_data.py 단독실행 제거 — upload_flowx.py 내부 import로 통합 (루트에 파일 존재)
     run_py scripts/send_evening_summary.py --send
@@ -244,8 +245,9 @@ case "$BAT" in
     run_py scripts/data_health_check.py
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
-  F) # 17:15 KST — FLOWX 업로드 보장 (BAT-D 실패 대비, upsert이라 중복 안전)
+  F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
     run_py scripts/build_brain_upload.py
+    run_py scripts/signal_logger.py              # signals 테이블 재시도
     run_py scripts/upload_flowx.py
     ;;
   J) # 17:00 KST — 포트폴리오 전망
@@ -254,7 +256,7 @@ case "$BAT" in
   PICKV2) # 17:45 KST - daily_pick_v2 (Silent Bet + 메인 스코어링)
     run_py scripts/daily_pick_v2.py
     ;;
-  HEALTH) # 18:00 KST — 자동 복구: 데이터 신선도 확인 → 낡은 파일만 개별 스크립트 재실행
+  HEALTH) # 18:45 KST — 자동 복구: BAT-D 완료(~18:30) 후 신선도 확인 → 낡은 파일만 재실행
     # run_py_xlong(1800초): 선택적 복구 최악 케이스(5개 파일 stale = 2400초) 대비 마진 확보
     run_py_xlong scripts/health_check.py
     ;;
