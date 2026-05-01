@@ -355,8 +355,8 @@ def load_latest_prices(tickers: list[str]) -> dict[str, dict]:
                 "close_1y": c1y,
             }
             loaded += 1
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("raw parquet 읽기 실패 %s: %s", ticker, e)
 
     if result:
         sample_date = next(iter(result.values()), {}).get("date", "?")
