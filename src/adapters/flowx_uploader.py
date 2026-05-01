@@ -418,6 +418,8 @@ class FlowxUploader:
             # 섹터 발화 (FIRE)
             "sector_fire": self.upload_sector_fire(date_str),
             "sector_picks": self.upload_sector_picks(date_str),
+            # 실적 괴리 (GAP)
+            "valuation_gap": self.upload_valuation_gap(date_str),
         }
         ok = sum(v for v in results.values())
         logger.info("[FLOWX] 퀀트 %d테이블 업로드: %d/%d 성공 %s", len(results), ok, len(results), results)
@@ -531,6 +533,15 @@ class FlowxUploader:
             return True
         return self._upload_rows("quant_sector_picks", date_str, rows,
                                  "date,ticker", "섹터발화종목")
+
+    def upload_valuation_gap(self, date_str: str) -> bool:
+        """scan_valuation_gap → quant_valuation_gap."""
+        rows = build_valuation_gap_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 실적괴리 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_valuation_gap", date_str, rows,
+                                 "date,ticker", "실적괴리")
 
     def upload_bottom_picks(self, date_str: str) -> bool:
         """scan_type2_bottom → quant_bottom_picks."""
@@ -2654,4 +2665,55 @@ def build_sector_picks_rows(date_str: str = "") -> list[dict]:
         })
 
     logger.info("[FIRE] 섹터발화 종목 Row: %d행", len(rows))
+    return rows
+
+
+def build_valuation_gap_rows(date_str: str = "") -> list[dict]:
+    """scan_valuation_gap 결과 JSON → quant_valuation_gap 테이블 포맷.
+
+    소스: data/valuation_gap_{YYYYMMDD}.json
+    """
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    date_compact = date_str.replace("-", "")
+    json_path = DATA_DIR / f"valuation_gap_{date_compact}.json"
+    if not json_path.exists():
+        logger.info("[GAP] 실적괴리 결과 없음: %s", json_path)
+        return []
+
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    rows = []
+    for r in data:
+        rows.append({
+            "date": date_str,
+            "ticker": r.get("ticker", ""),
+            "name": r.get("name", ""),
+            "sector": r.get("sector", ""),
+            "grade": r.get("grade", "D"),
+            "score": round(float(r.get("score", 0)), 1),
+            "source": r.get("source", ""),
+            # 실적
+            "oi_yoy": round(float(r["oi_yoy"]), 1) if r.get("oi_yoy") is not None else None,
+            "rev_yoy": round(float(r["rev_yoy"]), 1) if r.get("rev_yoy") is not None else None,
+            "turnaround": r.get("turnaround", False),
+            # EPS & PER
+            "eps_annualized": round(float(r["eps_annualized"]), 0) if r.get("eps_annualized") is not None else None,
+            "calc_per": round(float(r["calc_per"]), 2) if r.get("calc_per") is not None else None,
+            "trailing_per": round(float(r["trailing_per"]), 1) if r.get("trailing_per") else None,
+            # 주가
+            "close": int(r.get("close", 0)),
+            "ret_3m": round(float(r["ret_3m"]), 2) if r.get("ret_3m") is not None else None,
+            "ret_6m": round(float(r["ret_6m"]), 2) if r.get("ret_6m") is not None else None,
+            "ret_1y": round(float(r["ret_1y"]), 2) if r.get("ret_1y") is not None else None,
+            # 괴리율 (핵심)
+            "gap": round(float(r["gap"]), 1) if r.get("gap") is not None else None,
+            # 재무건전성
+            "debt_ratio": round(float(r["debt_ratio"]), 3) if r.get("debt_ratio") is not None else None,
+            "roe": round(float(r["roe"]), 3) if r.get("roe") is not None else None,
+        })
+
+    logger.info("[GAP] 실적괴리 Row: %d행", len(rows))
     return rows
