@@ -489,13 +489,12 @@ def scan_sector_fire(
 
         sectors_result.append(fire)
 
-        # 종목 매수 스코어 (FIRE C등급 이상만)
-        if fire["fire_grade"] in ("S", "A", "B", "C"):
-            for t in tickers:
-                stock = calc_stock_buy_score(t, supply_df, dates_5, dates_10, surge_map)
-                if stock and stock["buy_score"] >= 20:
-                    stock["sector"] = sector_name
-                    picks_result.append(stock)
+        # 종목 매수 스코어 (전 등급 대상 — 섹터 카드 클릭 시 종목 표시용)
+        for t in tickers:
+            stock = calc_stock_buy_score(t, supply_df, dates_5, dates_10, surge_map)
+            if stock:
+                stock["sector"] = sector_name
+                picks_result.append(stock)
 
     # 정렬
     sectors_result.sort(key=lambda x: x["fire_score"], reverse=True)
@@ -538,14 +537,15 @@ def print_report(sectors: list[dict], picks: list[dict]):
               f"{etf_rec:>25}")
 
     # ── 종목 매수 후보 ──
-    print(f"\n  [종목 매수 후보] {len(picks)}종목 (BUY_SCORE >= 20)")
-    if picks:
+    picks_display = [p for p in picks if p["buy_score"] >= 20]
+    print(f"\n  [종목 매수 후보] {len(picks_display)}종목 (BUY_SCORE >= 20, 전체 {len(picks)}종목)")
+    if picks_display:
         print(f"  {'섹터':>10} {'종목':>10} {'종가':>9} {'등락':>6} "
               f"{'점수':>4} {'등급':>6} {'MA20':>6} {'RSI':>4} "
               f"{'외5d':>6} {'기5d':>6} {'연5d':>5} {'외반전':>6} {'기반전':>6} {'근거':>30}")
         print(f"  {'─' * 140}")
 
-        for p in picks:
+        for p in picks_display:
             reasons = p.get("buy_reasons", "")[:30]
             grade_str = p["buy_grade"]
             if grade_str == "STRONG":
