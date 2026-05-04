@@ -2664,6 +2664,22 @@ def build_sector_picks_rows(date_str: str = "") -> list[dict]:
             "buy_reasons": p.get("buy_reasons", ""),
         })
 
+    # 중복 ticker 제거: 복수 섹터에 걸친 종목은 buy_score 높은 쪽만 유지
+    # (PK = date + ticker 이므로 같은 ticker 2행이면 UPSERT 실패)
+    seen: dict[str, int] = {}  # ticker → rows index
+    for i, r in enumerate(rows):
+        tk = r["ticker"]
+        if tk in seen:
+            prev_idx = seen[tk]
+            if r["buy_score"] > rows[prev_idx]["buy_score"]:
+                rows[prev_idx] = None  # type: ignore
+                seen[tk] = i
+            else:
+                rows[i] = None  # type: ignore
+        else:
+            seen[tk] = i
+    rows = [r for r in rows if r is not None]
+
     logger.info("[FIRE] 섹터발화 종목 Row: %d행", len(rows))
     return rows
 
