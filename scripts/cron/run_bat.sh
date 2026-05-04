@@ -233,6 +233,8 @@ case "$BAT" in
     run_py scripts/scan_market_ranking.py
     run_py scripts/scan_bio_cdmo.py
     run_py scripts/scan_bluechip_checkup.py
+    # --- G4.6: EWY(MSCI Korea ETF) 보유종목 비중변화 수집 ---
+    run_py_long scripts/collect_ewy_holdings.py --monthly --upload --telegram
     # --- G4.9: FLOWX 업로드 (모든 스캔 완료 후 일괄 업로드) ---
     run_py scripts/build_brain_upload.py
     run_py scripts/signal_logger.py              # G4.9: tomorrow_picks → signals 테이블 기록

@@ -512,7 +512,50 @@ def calc_multi_month_returns(
         range_start, range_end, num_months, len(holdings),
     )
 
+    # per-stock 타임아웃 (pykrx hang 방지)
+    PER_STOCK_TIMEOUT = 30  # 초
+
+    def _fetch_ohlcv_with_timeout(pykrx_fn, start, end, ticker, timeout_sec):
+        """pykrx 호출에 타임아웃을 적용 (Linux signal / Windows threading)."""
+        import platform
+        if platform.system() != "Windows":
+            import signal as _sig
+
+            def _handler(signum, frame):
+                raise TimeoutError(f"{ticker} pykrx 타임아웃 ({timeout_sec}s)")
+
+            old = _sig.signal(_sig.SIGALRM, _handler)
+            _sig.alarm(timeout_sec)
+            try:
+                result = pykrx_fn(start, end, ticker)
+            finally:
+                _sig.alarm(0)
+                _sig.signal(_sig.SIGALRM, old)
+            return result
+        else:
+            # Windows: threading 기반 폴백
+            import threading
+            result_box = [None]
+            exc_box = [None]
+
+            def _worker():
+                try:
+                    result_box[0] = pykrx_fn(start, end, ticker)
+                except Exception as e:
+                    exc_box[0] = e
+
+            t = threading.Thread(target=_worker, daemon=True)
+            t.start()
+            t.join(timeout=timeout_sec)
+            if t.is_alive():
+                raise TimeoutError(f"{ticker} pykrx 타임아웃 ({timeout_sec}s)")
+            if exc_box[0]:
+                raise exc_box[0]
+            return result_box[0]
+
     stocks_result = []
+    ok_count = 0
+    skip_count = 0
     for idx, h in enumerate(holdings):
         ticker = h["code"]
         w_prev = prev_map.get(ticker, 0)
@@ -530,9 +573,14 @@ def calc_multi_month_returns(
         }
 
         try:
-            df = pykrx_mod.get_market_ohlcv(range_start, range_end, ticker)
+            df = _fetch_ohlcv_with_timeout(
+                pykrx_mod.get_market_ohlcv,
+                range_start, range_end, ticker,
+                PER_STOCK_TIMEOUT,
+            )
             if df.empty:
                 stocks_result.append(stock_entry)
+                skip_count += 1
                 time.sleep(0.03)
                 continue
 
@@ -559,12 +607,22 @@ def calc_multi_month_returns(
 
             # 최신 종가
             stock_entry["close"] = int(df.iloc[-1]["종가"])
+            ok_count += 1
 
+        except TimeoutError:
+            logger.warning("[EWY] %s 타임아웃 (%ds) — 스킵", ticker, PER_STOCK_TIMEOUT)
+            skip_count += 1
         except Exception as e:
             logger.debug("[EWY] %s 조회 실패: %s", ticker, e)
+            skip_count += 1
 
         stocks_result.append(stock_entry)
-        time.sleep(0.03)
+        time.sleep(0.05)
+
+        # 진행 로그 (20종목마다)
+        if (idx + 1) % 20 == 0:
+            logger.info("[EWY] 멀티월 진행: %d/%d (성공 %d, 스킵 %d)",
+                        idx + 1, len(holdings), ok_count, skip_count)
 
     # 비중순 정렬
     stocks_result.sort(key=lambda x: x["weight"], reverse=True)
