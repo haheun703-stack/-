@@ -447,94 +447,155 @@ def upload_to_supabase(date_str: str, as_of: str, total_stocks: int,
 
 
 # ─────────────────────────────────────────────
-# 6. 월별 수익률 계산 (MTD)
+# 6. 멀티 월별 수익률 비교 (최근 3개월)
 # ─────────────────────────────────────────────
 
-def calc_monthly_returns(holdings: list[dict], date_str: str) -> list[dict]:
-    """EWY 보유종목의 당월 수익률 계산 (월초 종가 → 최근 종가).
+def calc_multi_month_returns(
+    holdings: list[dict],
+    date_str: str,
+    num_months: int = 3,
+    prev_holdings: list[dict] | None = None,
+) -> dict:
+    """EWY 보유종목의 최근 N개월 수익률 비교.
 
-    pykrx로 당월 첫 거래일~현재까지 OHLCV를 조회.
-    Returns: [{"code","name","weight","open_price","close_price","change","change_pct"}, ...]
+    pykrx로 전체 기간 OHLCV를 한 번에 조회 후 월별 분리.
+    Returns: {
+        "months": [{"key": "2026-03", "label": "3월"}, ...],
+        "stocks": [{"rank","code","name","weight","close","weight_change",
+                     "returns":{"2026-03":-5.2, "2026-04":12.3, ...}}, ...],
+        "summary": {"2026-03": {"avg":..,"wavg":..,"up":..,"dn":..,"total":..}, ...}
+    }
     """
     try:
         from pykrx import stock as pykrx_mod
+        import pandas as pd
     except ImportError:
-        logger.warning("[EWY] pykrx 미설치 — 월별 수익률 계산 스킵")
-        return []
-
-    # 당월 1일 ~ date_str
-    dt = datetime.strptime(date_str, "%Y-%m-%d")
-    month_start = dt.replace(day=1).strftime("%Y%m%d")
-    month_end = dt.strftime("%Y%m%d")
-
-    results = []
-    for h in holdings:
-        ticker = h["code"]
-        try:
-            df = pykrx_mod.get_market_ohlcv(month_start, month_end, ticker)
-            if df.empty or len(df) < 1:
-                continue
-
-            open_price = int(df.iloc[0]["종가"])   # 월초 첫 거래일 종가
-            close_price = int(df.iloc[-1]["종가"])  # 최근 거래일 종가
-            if open_price == 0:
-                continue
-
-            change = close_price - open_price
-            change_pct = round((change / open_price) * 100, 2)
-
-            results.append({
-                "code": ticker,
-                "name": h["name"],
-                "weight": h["weight"],
-                "open_price": open_price,
-                "close_price": close_price,
-                "change": change,
-                "change_pct": change_pct,
-            })
-        except Exception:
-            pass
-        time.sleep(0.03)  # pykrx rate limit
-
-    results.sort(key=lambda x: x["weight"], reverse=True)
-    logger.info("[EWY] 월별 수익률: %d종목 계산 완료", len(results))
-    return results
-
-
-def build_monthly_summary(monthly: list[dict]) -> dict:
-    """월별 수익률 요약 통계."""
-    if not monthly:
+        logger.warning("[EWY] pykrx/pandas 미설치 — 월별 수익률 스킵")
         return {}
 
-    up = [m for m in monthly if m["change_pct"] > 0]
-    dn = [m for m in monthly if m["change_pct"] < 0]
+    import calendar
 
-    avg_simple = sum(m["change_pct"] for m in monthly) / len(monthly)
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
 
-    total_w = sum(m["weight"] for m in monthly)
-    avg_weighted = (
-        sum(m["weight"] * m["change_pct"] for m in monthly) / total_w
-        if total_w > 0 else 0
+    # 전일 비중 매핑 (weight_change 계산용)
+    prev_map = {}
+    if prev_holdings:
+        prev_map = {h["code"]: h.get("weight", 0) for h in prev_holdings}
+
+    # 월 경계 계산
+    months_info = []
+    for i in range(num_months - 1, -1, -1):
+        m = dt.month - i
+        y = dt.year
+        while m <= 0:
+            m += 12
+            y -= 1
+        m_key = f"{y:04d}-{m:02d}"
+        m_label = f"{m}월" + ("(MTD)" if i == 0 else "")
+        m_start = datetime(y, m, 1)
+        if i == 0:
+            m_end = dt
+        else:
+            last_day = calendar.monthrange(y, m)[1]
+            m_end = datetime(y, m, last_day)
+        months_info.append({
+            "key": m_key, "label": m_label,
+            "start": m_start, "end": m_end,
+        })
+
+    # 전체 조회 범위
+    range_start = months_info[0]["start"].strftime("%Y%m%d")
+    range_end = months_info[-1]["end"].strftime("%Y%m%d")
+
+    logger.info(
+        "[EWY] 멀티월 수익률: %s ~ %s (%d개월, %d종목)",
+        range_start, range_end, num_months, len(holdings),
     )
 
-    by_pct = sorted(monthly, key=lambda x: x["change_pct"], reverse=True)
+    stocks_result = []
+    for idx, h in enumerate(holdings):
+        ticker = h["code"]
+        w_prev = prev_map.get(ticker, 0)
+        w_change = round(h["weight"] - w_prev, 2) if w_prev else 0.0
+
+        stock_entry = {
+            "rank": h.get("rank", idx + 1),
+            "code": ticker,
+            "name": h["name"],
+            "weight": h["weight"],
+            "weight_change": w_change,
+            "close": 0,
+            "sector": h.get("sector", ""),
+            "returns": {},
+        }
+
+        try:
+            df = pykrx_mod.get_market_ohlcv(range_start, range_end, ticker)
+            if df.empty:
+                stocks_result.append(stock_entry)
+                time.sleep(0.03)
+                continue
+
+            # 월별 분리
+            for m in months_info:
+                m_start_ts = pd.Timestamp(m["start"])
+                m_end_ts = pd.Timestamp(m["end"])
+                mask = (df.index >= m_start_ts) & (df.index <= m_end_ts)
+                m_df = df[mask]
+
+                if m_df.empty or len(m_df) < 1:
+                    stock_entry["returns"][m["key"]] = None
+                    continue
+
+                open_p = int(m_df.iloc[0]["종가"])
+                close_p = int(m_df.iloc[-1]["종가"])
+                if open_p == 0:
+                    stock_entry["returns"][m["key"]] = None
+                    continue
+
+                stock_entry["returns"][m["key"]] = round(
+                    (close_p - open_p) / open_p * 100, 2
+                )
+
+            # 최신 종가
+            stock_entry["close"] = int(df.iloc[-1]["종가"])
+
+        except Exception as e:
+            logger.debug("[EWY] %s 조회 실패: %s", ticker, e)
+
+        stocks_result.append(stock_entry)
+        time.sleep(0.03)
+
+    # 비중순 정렬
+    stocks_result.sort(key=lambda x: x["weight"], reverse=True)
+
+    # 월별 요약 통계
+    summary = {}
+    for m in months_info:
+        key = m["key"]
+        valid = [s for s in stocks_result if s["returns"].get(key) is not None]
+        if valid:
+            avg = round(sum(s["returns"][key] for s in valid) / len(valid), 2)
+            total_w = sum(s["weight"] for s in valid)
+            wavg = (
+                round(sum(s["weight"] * s["returns"][key] for s in valid) / total_w, 2)
+                if total_w > 0 else 0.0
+            )
+            up = len([s for s in valid if s["returns"][key] > 0])
+            dn = len([s for s in valid if s["returns"][key] < 0])
+            total = len(valid)
+        else:
+            avg, wavg, up, dn, total = 0.0, 0.0, 0, 0, 0
+        summary[key] = {"avg": avg, "wavg": wavg, "up": up, "dn": dn, "total": total}
+
+    logger.info(
+        "[EWY] 멀티월 수익률 완료: %d종목 × %d개월", len(stocks_result), num_months
+    )
 
     return {
-        "total": len(monthly),
-        "up_count": len(up),
-        "down_count": len(dn),
-        "avg_simple": round(avg_simple, 2),
-        "avg_weighted": round(avg_weighted, 2),
-        "top5_up": [
-            {"name": m["name"], "change_pct": m["change_pct"],
-             "open_price": m["open_price"], "close_price": m["close_price"]}
-            for m in by_pct[:5]
-        ],
-        "top5_down": [
-            {"name": m["name"], "change_pct": m["change_pct"],
-             "open_price": m["open_price"], "close_price": m["close_price"]}
-            for m in by_pct[-5:]
-        ],
+        "months": [{"key": m["key"], "label": m["label"]} for m in months_info],
+        "stocks": stocks_result,
+        "summary": summary,
     }
 
 
@@ -681,49 +742,57 @@ def main():
     print(f"  저장: {out_path}")
     print(f"{'='*60}\n")
 
-    # 7. 월별 수익률 계산
-    monthly_perf = []
-    monthly_summary = {}
+    # 7. 멀티 월별 수익률 비교 (최근 3개월)
+    monthly_data = {}
     if args.monthly:
-        logger.info("[EWY] 월별 수익률 계산 시작...")
-        monthly_perf = calc_monthly_returns(holdings, date_str)
-        monthly_summary = build_monthly_summary(monthly_perf)
+        logger.info("[EWY] 멀티월 수익률 계산 시작 (최근 3개월)...")
+        monthly_data = calc_multi_month_returns(
+            holdings, date_str, num_months=3, prev_holdings=prev_holdings,
+        )
 
-        if monthly_summary:
-            dt = datetime.strptime(date_str, "%Y-%m-%d")
-            print(f"{'='*60}")
-            print(f"  {dt.month}월 MTD 수익률 (월초→{date_str})")
-            print(f"  상승 {monthly_summary['up_count']} / "
-                  f"하락 {monthly_summary['down_count']} "
-                  f"(총 {monthly_summary['total']}종목)")
-            print(f"  단순평균: {monthly_summary['avg_simple']:+.2f}% / "
-                  f"비중가중: {monthly_summary['avg_weighted']:+.2f}%")
-            print(f"{'='*60}")
+        if monthly_data and monthly_data.get("months"):
+            # 콘솔 리포트 — 월별 요약
+            print(f"\n{'='*74}")
+            months_labels = [m["label"] for m in monthly_data["months"]]
+            print(f"  월별 수익률 비교: {' / '.join(months_labels)}")
+            for m in monthly_data["months"]:
+                s = monthly_data["summary"].get(m["key"], {})
+                print(
+                    f"  {m['label']:>10s}: "
+                    f"상승 {s.get('up',0):>2d} / 하락 {s.get('dn',0):>2d} "
+                    f"| 단순 {s.get('avg',0):+.2f}% "
+                    f"/ 비중가중 {s.get('wavg',0):+.2f}%"
+                )
+            print(f"{'='*74}")
 
-            # TOP 30 출력
-            print(f"\n  {'순위':>4s} {'종목':<14s} {'비중':>6s} "
-                  f"{'월초':>10s} {'현재':>10s} {'등락률':>8s}")
-            print(f"  {'-'*58}")
-            for i, m in enumerate(monthly_perf[:30], 1):
-                sign = "+" if m["change_pct"] >= 0 else ""
-                print(f"  {i:>4d} {m['name']:<14s} {m['weight']:>5.2f}% "
-                      f"{m['open_price']:>10,d} {m['close_price']:>10,d} "
-                      f"{sign}{m['change_pct']:>+7.2f}%")
+            # TOP 30 테이블 (섹터발화 스타일)
+            month_keys = [m["key"] for m in monthly_data["months"]]
+            hdr = f"  {'#':>3s} {'종목':<12s} {'비중':>6s} {'변동':>6s} {'종가':>10s}"
+            for mk in month_keys:
+                hdr += f" {mk[-2:]+'월':>8s}"
+            print(hdr)
+            print(f"  {'-'*72}")
 
-            print(f"\n  [TOP 5 상승]")
-            for m in monthly_summary["top5_up"]:
-                print(f"    {m['name']:<14s} {m['change_pct']:>+7.2f}% "
-                      f"({m['open_price']:,d} → {m['close_price']:,d})")
-            print(f"  [TOP 5 하락]")
-            for m in monthly_summary["top5_down"]:
-                print(f"    {m['name']:<14s} {m['change_pct']:>+7.2f}% "
-                      f"({m['open_price']:,d} → {m['close_price']:,d})")
+            for i, s in enumerate(monthly_data["stocks"][:30], 1):
+                wc = s.get("weight_change", 0)
+                wc_str = f"{wc:+.2f}" if wc else "   -"
+                close_str = f"{s['close']:>10,d}" if s["close"] else "       N/A"
+                line = (
+                    f"  {i:>3d} {s['name']:<12s} "
+                    f"{s['weight']:>5.2f}% {wc_str:>6s} {close_str}"
+                )
+                for mk in month_keys:
+                    ret = s["returns"].get(mk)
+                    if ret is not None:
+                        line += f" {ret:>+7.2f}%"
+                    else:
+                        line += "      N/A"
+                print(line)
             print()
 
         # 결과 JSON에 추가 저장
         result_data = json.loads(out_path.read_text(encoding="utf-8"))
-        result_data["monthly_perf"] = monthly_perf
-        result_data["monthly_summary"] = monthly_summary
+        result_data["monthly_perf"] = monthly_data
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(result_data, f, ensure_ascii=False, indent=2)
 
@@ -737,7 +806,7 @@ def main():
             result_for_upload["new_entries"],
             result_for_upload["removed"],
             summary,
-            monthly_summary=monthly_summary or None,
+            monthly_summary=monthly_data or None,
         )
 
     # 8. 텔레그램
