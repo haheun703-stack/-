@@ -1,5 +1,5 @@
 # ============================================================
-# Sector FIRE Map — 14개 섹터 × 대표종목 × ETF 매핑
+# Sector FIRE Map — 16개 섹터 × 대표종목 × ETF 매핑
 # ============================================================
 # scan_sector_fire.py에서 사용
 # FIRE = Flow + Inflection + Rhythm + Energy
@@ -28,12 +28,17 @@ sectors:
     leverage_etf: null
 
   전력기기:
-    tickers: ["267260", "298040", "009150", "353200"]
+    tickers: ["267260", "298040", "103590", "010120", "034020", "062040", "033100"]
     etf: {code: "487240", name: "KODEX AI전력핵심설비"}
     leverage_etf: null
 
+  액침냉각:
+    tickers: ["083450", "011930", "078930", "096770", "018880", "036200"]
+    etf: null
+    leverage_etf: null
+
   자동차:
-    tickers: ["005380", "000270", "012330", "018880"]
+    tickers: ["005380", "000270", "012330"]
     etf: {code: "138540", name: "TIGER 현대차그룹+"}
     leverage_etf: null
 
