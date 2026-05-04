@@ -1,0 +1,751 @@
+#!/usr/bin/env python3
+"""EWY(iShares MSCI South Korea ETF) 보유종목 수집 + 비중 변화 분석.
+
+외인 패시브 자금 흐름 선행 감지:
+- 비중 증가 종목 = 패시브 외인 매수 유입 → 선취매 후보
+- 비중 감소 종목 = 패시브 외인 매도 압력 → 매수 회피
+- 신규 편입 = 강제 매수 발생 → 단기 수급 폭탄
+- 편출 = 강제 매도 → 급락 리스크
+
+실행:
+    python scripts/collect_ewy_holdings.py
+    python scripts/collect_ewy_holdings.py --upload   # Supabase 업로드 포함
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import io
+import json
+import logging
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+
+import time
+
+import requests
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+EWY_URL = (
+    "https://www.ishares.com/us/products/239681/"
+    "ishares-msci-south-korea-etf/1467271812596.ajax"
+    "?fileType=csv&fileName=EWY_holdings&dataType=fund"
+)
+DATA_DIR = PROJECT_ROOT / "data" / "ewy"
+UNIVERSE_CSV = PROJECT_ROOT / "data" / "universe.csv"
+
+# 비중 변동 분류 기준
+LARGE_THRESHOLD = 0.30   # 0.3%p 이상
+MEDIUM_THRESHOLD = 0.10  # 0.1%p 이상
+STABLE_THRESHOLD = 0.05  # 0.05%p 미만 → 안정
+
+
+# ─────────────────────────────────────────────
+# 1. 한글 종목명 매핑
+# ─────────────────────────────────────────────
+
+def load_name_map() -> dict[str, str]:
+    """universe.csv에서 ticker→한글명 매핑 로드."""
+    name_map = {}
+    if UNIVERSE_CSV.exists():
+        with open(UNIVERSE_CSV, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                name_map[row["ticker"]] = row["name"]
+    logger.info("[EWY] 종목명 매핑: %d종목 로드", len(name_map))
+    return name_map
+
+
+# ─────────────────────────────────────────────
+# 2. CSV 다운로드 + 파싱
+# ─────────────────────────────────────────────
+
+def download_ewy_csv() -> str:
+    """iShares 공식 CSV 다운로드."""
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+    resp = requests.get(EWY_URL, headers=headers, timeout=30)
+    resp.raise_for_status()
+    logger.info("[EWY] CSV 다운로드 완료: %d chars", len(resp.text))
+    return resp.text
+
+
+def parse_ewy_csv(raw_csv: str, name_map: dict[str, str]) -> dict:
+    """CSV 파싱 → 구조화된 dict 반환.
+
+    Returns:
+        {
+            "as_of": "May 01, 2026",
+            "holdings": [
+                {"code": "000660", "name": "SK하이닉스", "name_en": "SK HYNIX INC",
+                 "weight": 22.78, "sector": "Information Technology",
+                 "quantity": 5382737, "market_value": 4667071050.43},
+                ...
+            ]
+        }
+    """
+    lines = raw_csv.strip().split("\n")
+
+    # 메타데이터에서 기준일 추출
+    as_of = ""
+    header_idx = -1
+    for i, line in enumerate(lines):
+        if line.startswith("Fund Holdings as of"):
+            parts = line.split(",", 1)
+            if len(parts) >= 2:
+                as_of = parts[1].strip().strip('"')
+        if line.startswith("Ticker,Name"):
+            header_idx = i
+            break
+
+    if header_idx < 0:
+        logger.error("[EWY] CSV 헤더를 찾을 수 없음")
+        return {"as_of": as_of, "holdings": []}
+
+    # 데이터 행 파싱
+    data_text = "\n".join(lines[header_idx:])
+    reader = csv.DictReader(io.StringIO(data_text))
+
+    holdings = []
+    for row in reader:
+        ticker = (row.get("Ticker") or "").strip().strip('"')
+        asset_class = (row.get("Asset Class") or "").strip().strip('"')
+
+        # 주식만 필터 (현금, 선물, 기타 제외)
+        if asset_class != "Equity":
+            continue
+        # 6자리 숫자 종목코드만
+        if not ticker or not ticker.isdigit() or len(ticker) != 6:
+            continue
+
+        weight_str = (row.get("Weight (%)") or "0").strip().strip('"')
+        quantity_str = (row.get("Quantity") or "0").strip().strip('"').replace(",", "")
+        mv_str = (row.get("Market Value") or "0").strip().strip('"').replace(",", "")
+
+        try:
+            weight = float(weight_str)
+            quantity = int(float(quantity_str))
+            market_value = float(mv_str)
+        except (ValueError, TypeError):
+            continue
+
+        name_en = (row.get("Name") or "").strip().strip('"')
+        name_kr = name_map.get(ticker, name_en)
+        sector = (row.get("Sector") or "").strip().strip('"')
+
+        holdings.append({
+            "code": ticker,
+            "name": name_kr,
+            "name_en": name_en,
+            "weight": round(weight, 2),
+            "sector": sector,
+            "quantity": quantity,
+            "market_value": round(market_value, 2),
+        })
+
+    # 비중 내림차순 정렬
+    holdings.sort(key=lambda x: x["weight"], reverse=True)
+
+    # 순위 부여
+    for rank, h in enumerate(holdings, 1):
+        h["rank"] = rank
+
+    logger.info("[EWY] 파싱 완료: %d종목 (기준일: %s)", len(holdings), as_of)
+    return {"as_of": as_of, "holdings": holdings}
+
+
+# ─────────────────────────────────────────────
+# 3. 전일 비교 → 변동 분석
+# ─────────────────────────────────────────────
+
+def load_previous(data_dir: Path) -> dict | None:
+    """가장 최근 저장 데이터 로드 (비교용)."""
+    prev_path = data_dir / "ewy_holdings_prev.json"
+    if prev_path.exists():
+        with open(prev_path, encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+def classify_change(delta: float) -> tuple[str, str]:
+    """비중 변화 → (direction, magnitude) 분류."""
+    abs_d = abs(delta)
+    if abs_d < STABLE_THRESHOLD:
+        return ("STABLE", "STABLE")
+    direction = "UP" if delta > 0 else "DOWN"
+    if abs_d >= LARGE_THRESHOLD:
+        magnitude = "LARGE"
+    elif abs_d >= MEDIUM_THRESHOLD:
+        magnitude = "MEDIUM"
+    else:
+        magnitude = "SMALL"
+    return (direction, magnitude)
+
+
+def analyze_changes(
+    current: list[dict], previous: list[dict] | None
+) -> dict:
+    """전일 대비 비중 변화, 편입/편출 분석.
+
+    Returns:
+        {
+            "changes": [...],       # 비중 변동 (MEDIUM 이상만)
+            "new_entries": [...],   # 신규 편입
+            "removed": [...],      # 편출
+        }
+    """
+    if not previous:
+        return {"changes": [], "new_entries": [], "removed": []}
+
+    prev_map = {h["code"]: h for h in previous}
+    curr_map = {h["code"]: h for h in current}
+
+    prev_codes = set(prev_map.keys())
+    curr_codes = set(curr_map.keys())
+
+    # 신규 편입
+    new_entries = []
+    for code in curr_codes - prev_codes:
+        h = curr_map[code]
+        new_entries.append({
+            "code": code,
+            "name": h["name"],
+            "weight": h["weight"],
+            "sector": h["sector"],
+            "impact": "패시브 강제매수 예상",
+        })
+    new_entries.sort(key=lambda x: x["weight"], reverse=True)
+
+    # 편출
+    removed = []
+    for code in prev_codes - curr_codes:
+        h = prev_map[code]
+        removed.append({
+            "code": code,
+            "name": h["name"],
+            "weight": h.get("weight", 0),
+            "sector": h.get("sector", ""),
+            "impact": "패시브 강제매도 예상",
+        })
+    removed.sort(key=lambda x: x["weight"], reverse=True)
+
+    # 비중 변동 (양쪽 모두 존재하는 종목)
+    changes = []
+    for code in curr_codes & prev_codes:
+        c = curr_map[code]
+        p = prev_map[code]
+        delta = round(c["weight"] - p["weight"], 2)
+        direction, magnitude = classify_change(delta)
+
+        if magnitude in ("LARGE", "MEDIUM"):
+            changes.append({
+                "code": code,
+                "name": c["name"],
+                "weight": c["weight"],
+                "weight_prev": p["weight"],
+                "weight_change": delta,
+                "direction": direction,
+                "magnitude": magnitude,
+            })
+    changes.sort(key=lambda x: abs(x["weight_change"]), reverse=True)
+
+    return {
+        "changes": changes,
+        "new_entries": new_entries,
+        "removed": removed,
+    }
+
+
+# ─────────────────────────────────────────────
+# 4. 저장 + 요약
+# ─────────────────────────────────────────────
+
+def build_summary(
+    holdings: list[dict],
+    changes: list[dict],
+    new_entries: list[dict],
+    removed: list[dict],
+) -> str:
+    """FLOWX 표시용 요약 문자열 생성."""
+    parts = []
+
+    # TOP 3 종목
+    if holdings:
+        top3 = [f"{h['name']} {h['weight']}%" for h in holdings[:3]]
+        parts.append(f"TOP3: {', '.join(top3)}")
+
+    # 주요 변동
+    up_large = [c for c in changes if c["direction"] == "UP" and c["magnitude"] == "LARGE"]
+    dn_large = [c for c in changes if c["direction"] == "DOWN" and c["magnitude"] == "LARGE"]
+    if up_large:
+        names = ", ".join(c["name"] for c in up_large[:3])
+        parts.append(f"비중 급증: {names}")
+    if dn_large:
+        names = ", ".join(c["name"] for c in dn_large[:3])
+        parts.append(f"비중 급감: {names}")
+
+    # 편입/편출
+    if new_entries:
+        names = ", ".join(e["name"] for e in new_entries[:3])
+        parts.append(f"신규편입: {names}")
+    if removed:
+        names = ", ".join(e["name"] for e in removed[:3])
+        parts.append(f"편출: {names}")
+
+    if not parts:
+        parts.append("주요 변동 없음")
+
+    # 섹터 비중 계산
+    sector_weights: dict[str, float] = {}
+    for h in holdings:
+        sec = h["sector"]
+        sector_weights[sec] = sector_weights.get(sec, 0) + h["weight"]
+    top_sector = max(sector_weights, key=sector_weights.get) if sector_weights else ""
+    if top_sector:
+        parts.append(f"최대 섹터: {top_sector} {sector_weights[top_sector]:.1f}%")
+
+    return " | ".join(parts)
+
+
+def save_results(
+    data_dir: Path,
+    date_str: str,
+    as_of: str,
+    holdings: list[dict],
+    analysis: dict,
+    summary: str,
+) -> Path:
+    """JSON 저장 + prev 파일 갱신."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # top20 with prev weight
+    prev_data = load_previous(data_dir)
+    prev_map = {}
+    if prev_data and "holdings" in prev_data:
+        prev_map = {h["code"]: h for h in prev_data["holdings"]}
+
+    top20 = []
+    for h in holdings[:20]:
+        prev = prev_map.get(h["code"], {})
+        weight_prev = prev.get("weight", 0)
+        weight_change = round(h["weight"] - weight_prev, 2) if prev else 0
+        direction, _ = classify_change(weight_change) if prev else ("NEW", "NEW")
+
+        top20.append({
+            "rank": h["rank"],
+            "code": h["code"],
+            "name": h["name"],
+            "name_en": h["name_en"],
+            "weight": h["weight"],
+            "weight_prev": weight_prev,
+            "weight_change": weight_change,
+            "quantity": h["quantity"],
+            "sector": h["sector"],
+            "signal": direction,
+        })
+
+    result = {
+        "date": date_str,
+        "as_of": as_of,
+        "total_stocks": len(holdings),
+        "top20": top20,
+        "changes": analysis["changes"],
+        "new_entries": analysis["new_entries"],
+        "removed": analysis["removed"],
+        "summary": summary,
+        "holdings": holdings,  # 전체 보유종목 (로컬 보관용)
+    }
+
+    # 날짜별 파일 저장
+    out_path = data_dir / f"ewy_holdings_{date_str.replace('-', '')}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    logger.info("[EWY] 저장: %s", out_path)
+
+    # prev 파일 갱신 (다음 비교용)
+    prev_path = data_dir / "ewy_holdings_prev.json"
+    prev_save = {
+        "date": date_str,
+        "as_of": as_of,
+        "holdings": holdings,
+    }
+    with open(prev_path, "w", encoding="utf-8") as f:
+        json.dump(prev_save, f, ensure_ascii=False, indent=2)
+
+    return out_path
+
+
+# ─────────────────────────────────────────────
+# 5. Supabase 업로드
+# ─────────────────────────────────────────────
+
+def upload_to_supabase(date_str: str, as_of: str, total_stocks: int,
+                       top20: list, changes: list, new_entries: list,
+                       removed: list, summary: str, *,
+                       monthly_summary: dict | None = None) -> bool:
+    """quant_ewy_holdings 테이블에 UPSERT."""
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_KEY", "")
+    if not url or not key:
+        logger.warning("[EWY] SUPABASE_URL/KEY 미설정 — 업로드 스킵")
+        return False
+
+    try:
+        from supabase import create_client
+        client = create_client(url, key)
+    except Exception as e:
+        logger.error("[EWY] Supabase 연결 실패: %s", e)
+        return False
+
+    row = {
+        "date": date_str,
+        "as_of": as_of,
+        "total_stocks": total_stocks,
+        "top20": top20,
+        "changes": changes,
+        "new_entries": new_entries,
+        "removed": removed,
+        "summary": summary,
+    }
+    if monthly_summary:
+        row["monthly_perf"] = monthly_summary
+
+    try:
+        result = client.table("quant_ewy_holdings").upsert(
+            [row], on_conflict="date"
+        ).execute()
+        if result.data:
+            logger.info("[EWY] Supabase 업로드 완료: %s (%d종목)", date_str, total_stocks)
+            return True
+        else:
+            logger.warning("[EWY] Supabase 업로드 응답 비어있음")
+            return False
+    except Exception as e:
+        logger.error("[EWY] Supabase 업로드 실패: %s", e)
+        return False
+
+
+# ─────────────────────────────────────────────
+# 6. 월별 수익률 계산 (MTD)
+# ─────────────────────────────────────────────
+
+def calc_monthly_returns(holdings: list[dict], date_str: str) -> list[dict]:
+    """EWY 보유종목의 당월 수익률 계산 (월초 종가 → 최근 종가).
+
+    pykrx로 당월 첫 거래일~현재까지 OHLCV를 조회.
+    Returns: [{"code","name","weight","open_price","close_price","change","change_pct"}, ...]
+    """
+    try:
+        from pykrx import stock as pykrx_mod
+    except ImportError:
+        logger.warning("[EWY] pykrx 미설치 — 월별 수익률 계산 스킵")
+        return []
+
+    # 당월 1일 ~ date_str
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    month_start = dt.replace(day=1).strftime("%Y%m%d")
+    month_end = dt.strftime("%Y%m%d")
+
+    results = []
+    for h in holdings:
+        ticker = h["code"]
+        try:
+            df = pykrx_mod.get_market_ohlcv(month_start, month_end, ticker)
+            if df.empty or len(df) < 1:
+                continue
+
+            open_price = int(df.iloc[0]["종가"])   # 월초 첫 거래일 종가
+            close_price = int(df.iloc[-1]["종가"])  # 최근 거래일 종가
+            if open_price == 0:
+                continue
+
+            change = close_price - open_price
+            change_pct = round((change / open_price) * 100, 2)
+
+            results.append({
+                "code": ticker,
+                "name": h["name"],
+                "weight": h["weight"],
+                "open_price": open_price,
+                "close_price": close_price,
+                "change": change,
+                "change_pct": change_pct,
+            })
+        except Exception:
+            pass
+        time.sleep(0.03)  # pykrx rate limit
+
+    results.sort(key=lambda x: x["weight"], reverse=True)
+    logger.info("[EWY] 월별 수익률: %d종목 계산 완료", len(results))
+    return results
+
+
+def build_monthly_summary(monthly: list[dict]) -> dict:
+    """월별 수익률 요약 통계."""
+    if not monthly:
+        return {}
+
+    up = [m for m in monthly if m["change_pct"] > 0]
+    dn = [m for m in monthly if m["change_pct"] < 0]
+
+    avg_simple = sum(m["change_pct"] for m in monthly) / len(monthly)
+
+    total_w = sum(m["weight"] for m in monthly)
+    avg_weighted = (
+        sum(m["weight"] * m["change_pct"] for m in monthly) / total_w
+        if total_w > 0 else 0
+    )
+
+    by_pct = sorted(monthly, key=lambda x: x["change_pct"], reverse=True)
+
+    return {
+        "total": len(monthly),
+        "up_count": len(up),
+        "down_count": len(dn),
+        "avg_simple": round(avg_simple, 2),
+        "avg_weighted": round(avg_weighted, 2),
+        "top5_up": [
+            {"name": m["name"], "change_pct": m["change_pct"],
+             "open_price": m["open_price"], "close_price": m["close_price"]}
+            for m in by_pct[:5]
+        ],
+        "top5_down": [
+            {"name": m["name"], "change_pct": m["change_pct"],
+             "open_price": m["open_price"], "close_price": m["close_price"]}
+            for m in by_pct[-5:]
+        ],
+    }
+
+
+# ─────────────────────────────────────────────
+# 7. 텔레그램 보고
+# ─────────────────────────────────────────────
+
+def send_telegram_report(date_str: str, as_of: str, holdings: list[dict],
+                         analysis: dict) -> None:
+    """EWY 비중 변동 텔레그램 보고."""
+    token = os.environ.get("TELEGRAM_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if not token or not chat_id:
+        return
+
+    lines = [f"[EWY] MSCI Korea 보유종목 ({as_of})"]
+    lines.append(f"보유 {len(holdings)}종목\n")
+
+    # TOP 10
+    lines.append("--- TOP 10 ---")
+    for h in holdings[:10]:
+        arrow = ""
+        if h.get("rank", 0) <= 10:
+            # prev 비교는 간략히
+            lines.append(f"{h['rank']:2d}. {h['name']} {h['weight']}%")
+
+    # 주요 변동
+    if analysis["changes"]:
+        lines.append("\n--- 주요 변동 ---")
+        for c in analysis["changes"][:5]:
+            arrow = "+" if c["weight_change"] > 0 else ""
+            lines.append(
+                f"{'UP' if c['direction']=='UP' else 'DN'} {c['name']} "
+                f"{c['weight']}% ({arrow}{c['weight_change']}%p)"
+            )
+
+    if analysis["new_entries"]:
+        lines.append("\n--- 신규 편입 ---")
+        for e in analysis["new_entries"]:
+            lines.append(f"NEW {e['name']} {e['weight']}%")
+
+    if analysis["removed"]:
+        lines.append("\n--- 편출 ---")
+        for e in analysis["removed"]:
+            lines.append(f"OUT {e['name']} {e['weight']}%")
+
+    text = "\n".join(lines)
+
+    try:
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        requests.post(url, json={
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML",
+        }, timeout=10)
+        logger.info("[EWY] 텔레그램 보고 완료")
+    except Exception as e:
+        logger.warning("[EWY] 텔레그램 전송 실패: %s", e)
+
+
+# ─────────────────────────────────────────────
+# main
+# ─────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(description="EWY 보유종목 수집")
+    parser.add_argument("--upload", action="store_true", help="Supabase 업로드")
+    parser.add_argument("--telegram", action="store_true", help="텔레그램 보고")
+    parser.add_argument("--monthly", action="store_true", help="월별 수익률 계산")
+    parser.add_argument("--date", type=str, default=None, help="기준일 (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    date_str = args.date or datetime.now().strftime("%Y-%m-%d")
+    logger.info("[EWY] === 수집 시작: %s ===", date_str)
+
+    # 1. 종목명 매핑 로드
+    name_map = load_name_map()
+
+    # 2. CSV 다운로드 + 파싱
+    raw_csv = download_ewy_csv()
+    parsed = parse_ewy_csv(raw_csv, name_map)
+    holdings = parsed["holdings"]
+    as_of = parsed["as_of"]
+
+    if not holdings:
+        logger.error("[EWY] 파싱 결과 0종목 — 중단")
+        return
+
+    # 3. 전일 비교
+    prev_data = load_previous(DATA_DIR)
+    prev_holdings = prev_data["holdings"] if prev_data else None
+    analysis = analyze_changes(holdings, prev_holdings)
+
+    logger.info(
+        "[EWY] 분석: %d종목, 변동 %d건, 편입 %d건, 편출 %d건",
+        len(holdings),
+        len(analysis["changes"]),
+        len(analysis["new_entries"]),
+        len(analysis["removed"]),
+    )
+
+    # 4. 요약 생성
+    summary = build_summary(
+        holdings, analysis["changes"],
+        analysis["new_entries"], analysis["removed"]
+    )
+
+    # 5. 저장
+    out_path = save_results(
+        DATA_DIR, date_str, as_of, holdings, analysis, summary
+    )
+
+    # 6. 콘솔 리포트
+    print(f"\n{'='*60}")
+    print(f"  EWY MSCI Korea 보유종목 ({as_of})")
+    print(f"  보유 종목: {len(holdings)}개")
+    print(f"{'='*60}")
+    print("\n  [TOP 10]")
+    for h in holdings[:10]:
+        print(f"  {h['rank']:2d}. {h['name']:<12s} {h['weight']:6.2f}%  ({h['sector']})")
+
+    if analysis["changes"]:
+        print(f"\n  [주요 비중 변동 — 0.1%p 이상]")
+        for c in analysis["changes"][:10]:
+            arrow = "+" if c["weight_change"] > 0 else ""
+            tag = "UP" if c["direction"] == "UP" else "DN"
+            mag = f"[{c['magnitude']}]"
+            print(
+                f"  {tag} {c['name']:<12s} {c['weight']:6.2f}% "
+                f"({arrow}{c['weight_change']:+.2f}%p) {mag}"
+            )
+
+    if analysis["new_entries"]:
+        print(f"\n  [신규 편입]")
+        for e in analysis["new_entries"]:
+            print(f"  NEW {e['name']:<12s} {e['weight']:6.2f}%  {e['impact']}")
+
+    if analysis["removed"]:
+        print(f"\n  [편출]")
+        for e in analysis["removed"]:
+            print(f"  OUT {e['name']:<12s} {e['weight']:6.2f}%  {e['impact']}")
+
+    print(f"\n  요약: {summary}")
+    print(f"  저장: {out_path}")
+    print(f"{'='*60}\n")
+
+    # 7. 월별 수익률 계산
+    monthly_perf = []
+    monthly_summary = {}
+    if args.monthly:
+        logger.info("[EWY] 월별 수익률 계산 시작...")
+        monthly_perf = calc_monthly_returns(holdings, date_str)
+        monthly_summary = build_monthly_summary(monthly_perf)
+
+        if monthly_summary:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            print(f"{'='*60}")
+            print(f"  {dt.month}월 MTD 수익률 (월초→{date_str})")
+            print(f"  상승 {monthly_summary['up_count']} / "
+                  f"하락 {monthly_summary['down_count']} "
+                  f"(총 {monthly_summary['total']}종목)")
+            print(f"  단순평균: {monthly_summary['avg_simple']:+.2f}% / "
+                  f"비중가중: {monthly_summary['avg_weighted']:+.2f}%")
+            print(f"{'='*60}")
+
+            # TOP 30 출력
+            print(f"\n  {'순위':>4s} {'종목':<14s} {'비중':>6s} "
+                  f"{'월초':>10s} {'현재':>10s} {'등락률':>8s}")
+            print(f"  {'-'*58}")
+            for i, m in enumerate(monthly_perf[:30], 1):
+                sign = "+" if m["change_pct"] >= 0 else ""
+                print(f"  {i:>4d} {m['name']:<14s} {m['weight']:>5.2f}% "
+                      f"{m['open_price']:>10,d} {m['close_price']:>10,d} "
+                      f"{sign}{m['change_pct']:>+7.2f}%")
+
+            print(f"\n  [TOP 5 상승]")
+            for m in monthly_summary["top5_up"]:
+                print(f"    {m['name']:<14s} {m['change_pct']:>+7.2f}% "
+                      f"({m['open_price']:,d} → {m['close_price']:,d})")
+            print(f"  [TOP 5 하락]")
+            for m in monthly_summary["top5_down"]:
+                print(f"    {m['name']:<14s} {m['change_pct']:>+7.2f}% "
+                      f"({m['open_price']:,d} → {m['close_price']:,d})")
+            print()
+
+        # 결과 JSON에 추가 저장
+        result_data = json.loads(out_path.read_text(encoding="utf-8"))
+        result_data["monthly_perf"] = monthly_perf
+        result_data["monthly_summary"] = monthly_summary
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(result_data, f, ensure_ascii=False, indent=2)
+
+    # 8. Supabase 업로드
+    if args.upload:
+        result_for_upload = json.loads(out_path.read_text(encoding="utf-8"))
+        upload_to_supabase(
+            date_str, as_of, len(holdings),
+            result_for_upload["top20"],
+            result_for_upload["changes"],
+            result_for_upload["new_entries"],
+            result_for_upload["removed"],
+            summary,
+            monthly_summary=monthly_summary or None,
+        )
+
+    # 8. 텔레그램
+    if args.telegram:
+        send_telegram_report(date_str, as_of, holdings, analysis)
+
+    logger.info("[EWY] === 완료 ===")
+
+
+if __name__ == "__main__":
+    main()
