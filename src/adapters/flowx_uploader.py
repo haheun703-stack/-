@@ -159,11 +159,15 @@ class FlowxUploader:
     # ── 시그널 로깅 ──────────────────────────────────
 
     def insert_signal(self, signal: dict) -> bool:
-        """시그널 INSERT (STEP 2/3용)."""
+        """시그널 UPSERT (STEP 2/3용). BAT-F 재시도 시 중복 안전."""
         if not self.is_active or not signal:
             return False
         try:
-            result = self.client.table("signals").insert(signal).execute()
+            result = (
+                self.client.table("signals")
+                .upsert(signal, on_conflict="ticker,signal_date,bot_type")
+                .execute()
+            )
             if not result.data:
                 logger.warning("[FLOWX] 시그널 기록 응답 비어있음")
                 return False
@@ -430,8 +434,11 @@ class FlowxUploader:
     def _upload_rows(self, table: str, date_str: str, rows: list[dict],
                      conflict_cols: str, label: str) -> bool:
         """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도."""
-        if not self.is_active or not rows:
+        if not self.is_active:
             return False
+        if not rows:
+            logger.info("[FLOWX] %s: 데이터 0건 (정상 스킵)", label)
+            return True
         try:
             for row in rows:
                 row["date"] = date_str
