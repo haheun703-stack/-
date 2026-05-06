@@ -86,7 +86,7 @@ def send_message(
             payload["reply_markup"] = reply_markup
 
         sent = False
-        for attempt in range(2):  # 1회 재시도
+        for attempt in range(4):  # 최대 3회 재시도 (지수 백오프)
             try:
                 resp = requests.post(f"{API_BASE}/sendMessage", json=payload, timeout=10)
                 if resp.status_code == 200 and resp.json().get("ok"):
@@ -94,12 +94,17 @@ def send_message(
                         logger.debug(f"텔레그램 전송 성공 ({i+1}/{len(chunks)})")
                     sent = True
                     break
+                elif resp.status_code == 429:
+                    retry_after = int(resp.headers.get("Retry-After", 5))
+                    logger.warning(f"텔레그램 rate limit, {retry_after}초 대기 ({attempt+1}/4)")
+                    _time.sleep(retry_after)
+                    continue
                 else:
                     logger.error(f"텔레그램 전송 실패: {resp.status_code} {resp.text}")
             except requests.RequestException as e:
-                logger.error(f"텔레그램 전송 오류 ({attempt+1}/2): {e}")
-            if attempt == 0:
-                _time.sleep(3)  # 재시도 전 3초 대기
+                logger.error(f"텔레그램 전송 오류 ({attempt+1}/4): {e}")
+            if attempt < 3:
+                _time.sleep(2 ** attempt)  # 1, 2, 4초 지수 백오프
         if not sent:
             success = False
 

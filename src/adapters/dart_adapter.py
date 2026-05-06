@@ -182,7 +182,11 @@ class DartAdapter:
                 )
                 return None
 
-            df = pd.DataFrame(data["list"])
+            raw_list = data.get("list")
+            if not raw_list or not isinstance(raw_list, list):
+                logger.warning("DART 재무제표 응답에 list 필드 없음 (ticker=%s)", ticker)
+                return None
+            df = pd.DataFrame(raw_list)
 
             # 캐시 저장
             df.to_csv(cache_file, index=False)
@@ -497,7 +501,11 @@ class DartAdapter:
                 logger.debug(f"DART 다중회사 조회: {data.get('message')}")
                 return None
 
-            return pd.DataFrame(data["list"])
+            raw_list = data.get("list")
+            if not raw_list or not isinstance(raw_list, list):
+                logger.warning("DART 다중회사 응답에 list 필드 없음")
+                return None
+            return pd.DataFrame(raw_list)
 
         except Exception as e:
             logger.error(f"DART 다중회사 조회 오류: {e}")

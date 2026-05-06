@@ -547,8 +547,8 @@ class BacktestEngine:
         hold_days = 0
         try:
             hold_days = (pd.Timestamp(exit_date) - pd.Timestamp(pos.entry_date)).days
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("hold_days 계산 실패 (%s→%s): %s", pos.entry_date, exit_date, e)
 
         trade = Trade(
             ticker=pos.ticker,
@@ -599,8 +599,8 @@ class BacktestEngine:
         hold_days = 0
         try:
             hold_days = (pd.Timestamp(date_str) - pd.Timestamp(pos.entry_date)).days
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("hold_days 계산 실패 (%s→%s): %s", pos.entry_date, date_str, e)
 
         # 베이스 높이 역산 (target = entry + base_height × 3)
         base_height = (pos.target_price - pos.entry_price) / 3.0
@@ -662,8 +662,8 @@ class BacktestEngine:
             hold_days = 0
             try:
                 hold_days = (pd.Timestamp(date_str) - pd.Timestamp(pos.entry_date)).days
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("hold_days 계산 실패 (%s→%s): %s", pos.entry_date, date_str, e)
 
             # 0-1. 최고가 갱신 (적응형 청산에 필요)
             if high > pos.highest_price:
