@@ -39,6 +39,8 @@ from src.adapters.flowx_uploader import (
     build_etf_strategy_row,
     build_sector_fire_rows,
     build_sector_picks_rows,
+    build_surge_pullback_rows,
+    build_surge_pullback_summary,
 )
 
 logger = logging.getLogger(__name__)
@@ -195,6 +197,20 @@ def main():
         if fin5 >= 20:
             extra += f" 금{fin5:+.0f}"
         print(f"  {r['name']:12s} {r['close']:>8,}원 ▲{r['ret_d0']:>+5.1f}% {r['fib_zone']:>6s} {turn}{extra} 점수={r['final_score']:.0f}")
+
+    # ── 눌림목 엔진 미리보기 ──
+    sp_rows = build_surge_pullback_rows(date_str_preview)
+    sp_watching = [r for r in sp_rows if r.get("status") == "watching"]
+    sp_signals = [r for r in sp_rows if r.get("status") == "signal"]
+    print(f"\n[FLOWX] 눌림목 엔진: 감시중 {len(sp_watching)}건, 시그널 {len(sp_signals)}건")
+    for r in sp_signals:
+        print(f"  ★ {r['name']:12s} L{r['layer']} 급등{r['surge_pct']:+.1f}% "
+              f"→ 눌림{r['pullback_pct']:+.1f}% 진입{r['entry_price']:,}원")
+    for r in sp_watching[:10]:
+        print(f"  {r['name']:12s} L{r['layer']} D{r['watch_day']} "
+              f"급등{r['surge_pct']:+.1f}% 눌림{r['pullback_pct']:+.1f}% [{r['sector']}]")
+    if len(sp_watching) > 10:
+        print(f"  ... 외 {len(sp_watching)-10}건")
 
     etf_strat = build_etf_strategy_row(date_str_preview)
     if etf_strat:

@@ -424,6 +424,9 @@ class FlowxUploader:
             "sector_picks": self.upload_sector_picks(date_str),
             # 실적 괴리 (GAP)
             "valuation_gap": self.upload_valuation_gap(date_str),
+            # 눌림목 엔진
+            "surge_pullback": self.upload_surge_pullback(date_str),
+            "surge_pullback_summary": self.upload_surge_pullback_summary(date_str),
         }
         ok = sum(v for v in results.values())
         logger.info("[FLOWX] 퀀트 %d테이블 업로드: %d/%d 성공 %s", len(results), ok, len(results), results)
@@ -540,6 +543,22 @@ class FlowxUploader:
             return True
         return self._upload_rows("quant_sector_picks", date_str, rows,
                                  "date,ticker", "섹터발화종목")
+
+    def upload_surge_pullback(self, date_str: str) -> bool:
+        """surge_pullback_watchlist → quant_surge_pullback."""
+        rows = build_surge_pullback_rows(date_str)
+        if not rows:
+            logger.info("[FLOWX] 눌림목 종목 없음 (%s)", date_str)
+            return True
+        return self._upload_rows("quant_surge_pullback", date_str, rows,
+                                 "date,ticker", "눌림목")
+
+    def upload_surge_pullback_summary(self, date_str: str) -> bool:
+        """눌림목 엔진 요약 → quant_surge_pullback_summary (JSONB)."""
+        summary = build_surge_pullback_summary(date_str)
+        if not summary or not self.is_active:
+            return False
+        return self._upsert_date_data("quant_surge_pullback_summary", summary, date_str, "눌림목요약")
 
     def upload_valuation_gap(self, date_str: str) -> bool:
         """scan_valuation_gap → quant_valuation_gap."""
@@ -2740,3 +2759,127 @@ def build_valuation_gap_rows(date_str: str = "") -> list[dict]:
 
     logger.info("[GAP] 실적괴리 Row: %d행", len(rows))
     return rows
+
+
+# ═══════════════════════════════════════════════════════════
+# 눌림목 엔진 (상한가 눌림목 분할매수)
+# ═══════════════════════════════════════════════════════════
+
+def build_surge_pullback_rows(date_str: str = "") -> list[dict]:
+    """surge_pullback_watchlist.json + signals.json → quant_surge_pullback Row 테이블."""
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    wl_path = DATA_DIR / "surge_pullback_watchlist.json"
+    sig_path = DATA_DIR / "surge_pullback_signals.json"
+
+    # 워치리스트 (활성 감시 + 히스토리)
+    entries = []
+    if wl_path.exists():
+        with open(wl_path, encoding="utf-8") as f:
+            wl = json.load(f)
+        entries.extend(wl.get("entries", []))
+        entries.extend(wl.get("history", []))
+
+    # 시그널 기록
+    signals = []
+    if sig_path.exists():
+        with open(sig_path, encoding="utf-8") as f:
+            signals = json.load(f)
+
+    # 시그널 매핑 (ticker → 시그널 정보)
+    sig_map = {}
+    for s in signals:
+        sig_map[s["ticker"]] = s
+
+    rows = []
+    seen = set()
+    for e in entries:
+        ticker = e.get("ticker", "")
+        if not ticker or ticker in seen:
+            continue
+        seen.add(ticker)
+
+        status = e.get("status", "watching")
+        sig = sig_map.get(ticker, {})
+
+        rows.append({
+            "date": date_str,
+            "ticker": ticker,
+            "name": e.get("name", ""),
+            "layer": e.get("layer", 2),
+            "sector": ",".join(e.get("sectors", [])[:2]),
+            "status": status,
+            "surge_date": e.get("surge_date", ""),
+            "surge_pct": round(float(e.get("surge_pct", 0)), 1),
+            "surge_close": int(e.get("surge_close", 0)),
+            "peak_price": int(e.get("peak_price", 0)),
+            "latest_close": int(e.get("latest_close", 0)),
+            "pullback_pct": round(float(e.get("pullback_from_peak", 0)), 1),
+            "watch_day": int(e.get("watch_day", 0)),
+            "signal_date": sig.get("signal_date", e.get("signal_date")),
+            "entry_price": int(sig.get("entry_price", 0)),
+            "trading_value": int(e.get("trading_value", 0)),
+        })
+
+    logger.info("[눌림목] Surge Pullback Row: %d행", len(rows))
+    return rows
+
+
+def build_surge_pullback_summary(date_str: str = "") -> dict:
+    """눌림목 엔진 일일 요약 (JSONB 데이터용)."""
+    if not date_str:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+
+    wl_path = DATA_DIR / "surge_pullback_watchlist.json"
+    sig_path = DATA_DIR / "surge_pullback_signals.json"
+    perf_path = DATA_DIR / "surge_pullback_performance.json"
+
+    # 워치리스트
+    wl = {}
+    if wl_path.exists():
+        with open(wl_path, encoding="utf-8") as f:
+            wl = json.load(f)
+
+    active = [e for e in wl.get("entries", []) if e.get("status") == "watching"]
+    history = wl.get("history", [])
+    l1_active = [e for e in active if e.get("layer") == 1]
+    l2_active = [e for e in active if e.get("layer") == 2]
+
+    # 시그널
+    signals = []
+    if sig_path.exists():
+        with open(sig_path, encoding="utf-8") as f:
+            signals = json.load(f)
+
+    # 성과 추적
+    perf = {}
+    if perf_path.exists():
+        with open(perf_path, encoding="utf-8") as f:
+            perf = json.load(f)
+
+    return {
+        "date": date_str,
+        "updated": wl.get("updated"),
+        "active_count": len(active),
+        "l1_count": len(l1_active),
+        "l2_count": len(l2_active),
+        "total_signals": len(signals),
+        "history_count": len(history),
+        "active": [
+            {
+                "ticker": e["ticker"],
+                "name": e.get("name", ""),
+                "layer": e.get("layer", 2),
+                "sectors": e.get("sectors", [])[:2],
+                "surge_pct": round(float(e.get("surge_pct", 0)), 1),
+                "pullback_pct": round(float(e.get("pullback_from_peak", 0)), 1),
+                "watch_day": e.get("watch_day", 0),
+                "peak_price": int(e.get("peak_price", 0)),
+                "latest_close": int(e.get("latest_close", 0)),
+            }
+            for e in sorted(active, key=lambda x: x.get("pullback_from_peak", 0))
+        ],
+        "recent_signals": signals[-10:],
+        "performance": perf,
+    }

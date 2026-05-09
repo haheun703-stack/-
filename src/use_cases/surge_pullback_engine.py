@@ -673,6 +673,12 @@ class SurgePullbackEngine:
         if signals:
             self._save_signals(signals, fmt_date)
 
+        # ── Step 9: 수익률 추적 ──
+        try:
+            self.update_performance(fmt_date)
+        except Exception as e:
+            logger.warning("수익률 추적 실패: %s", str(e)[:60])
+
         # ── 결과 요약 ──
         active = [e for e in watchlist["entries"] if e["status"] == "watching"]
         result = {
@@ -715,6 +721,146 @@ class SurgePullbackEngine:
         with open(SIGNAL_PATH, "w", encoding="utf-8") as f:
             json.dump(existing, f, ensure_ascii=False, indent=2)
         logger.info("매수 시그널 %d건 저장 → %s", len(signals), SIGNAL_PATH)
+
+    # ──────────────────────────────────────────
+    # 8. 수익률 추적 (시그널 후 성과)
+    # ──────────────────────────────────────────
+    def update_performance(self, date_str: str | None = None):
+        """
+        과거 시그널들의 현재 수익률을 추적.
+        시그널 발생 후 5일/10일/20일 수익률 기록.
+        """
+        if date_str is None:
+            date_str = datetime.now().strftime("%Y%m%d")
+        fmt_date = date_str.replace("-", "")
+        target_date = pd.Timestamp(fmt_date)
+
+        if not SIGNAL_PATH.exists():
+            return
+
+        with open(SIGNAL_PATH, "r", encoding="utf-8") as f:
+            signals = json.load(f)
+
+        if not signals:
+            return
+
+        raw_dir = PROJECT_ROOT / "data" / "raw"
+        perf_path = PROJECT_ROOT / "data" / "surge_pullback_performance.json"
+
+        # 기존 성과 로드
+        perf = {}
+        if perf_path.exists():
+            try:
+                with open(perf_path, "r", encoding="utf-8") as f:
+                    perf = json.load(f)
+            except Exception:
+                pass
+
+        updated = 0
+        for sig in signals:
+            ticker = sig.get("ticker", "")
+            entry = sig.get("entry_price", 0)
+            sig_date = sig.get("signal_date", "")
+            if not ticker or not entry or not sig_date:
+                continue
+
+            key = f"{ticker}_{sig_date}"
+            if key not in perf:
+                perf[key] = {
+                    "ticker": ticker,
+                    "name": sig.get("name", ""),
+                    "layer": sig.get("layer", 2),
+                    "signal_date": sig_date,
+                    "entry_price": entry,
+                    "surge_pct": sig.get("surge_pct", 0),
+                    "status": "tracking",
+                    "max_gain": 0.0,
+                    "max_loss": 0.0,
+                    "current_pct": 0.0,
+                    "days_held": 0,
+                    "daily_prices": {},
+                }
+
+            # parquet에서 현재가 조회
+            pf = raw_dir / f"{ticker}.parquet"
+            if not pf.exists():
+                continue
+
+            try:
+                df = pd.read_parquet(pf)
+                df.index = pd.to_datetime(df.index)
+
+                # 컬럼 정규화
+                col_map = {}
+                for c in df.columns:
+                    cl = str(c).lower()
+                    if cl in ("close", "종가"):
+                        col_map[c] = "close"
+                if col_map:
+                    df = df.rename(columns=col_map)
+
+                if target_date not in df.index or "close" not in df.columns:
+                    continue
+
+                current_close = int(df.loc[target_date, "close"])
+                if current_close == 0:
+                    continue
+
+                pct = (current_close - entry) / entry * 100
+                p = perf[key]
+                p["current_pct"] = round(pct, 2)
+                p["current_price"] = current_close
+                p["latest_date"] = fmt_date
+
+                if pct > p.get("max_gain", 0):
+                    p["max_gain"] = round(pct, 2)
+                if pct < p.get("max_loss", 0):
+                    p["max_loss"] = round(pct, 2)
+
+                # 시그널 이후 거래일 계산
+                sig_ts = pd.Timestamp(sig_date.replace("-", ""))
+                mask = (df.index >= sig_ts) & (df.index <= target_date)
+                p["days_held"] = int(mask.sum())
+
+                # 일별 가격 기록 (최근 20일)
+                daily = p.get("daily_prices", {})
+                daily[fmt_date] = {"close": current_close, "pct": round(pct, 2)}
+                # 최근 20일만 유지
+                if len(daily) > 20:
+                    sorted_keys = sorted(daily.keys())
+                    for old_key in sorted_keys[:-20]:
+                        del daily[old_key]
+                p["daily_prices"] = daily
+
+                updated += 1
+
+            except Exception as e:
+                logger.debug("수익률 추적 실패 %s: %s", ticker, str(e)[:40])
+
+        # 통계 요약
+        active = [p for p in perf.values() if p.get("status") == "tracking"]
+        if active:
+            wins = sum(1 for p in active if p.get("current_pct", 0) > 0)
+            total = len(active)
+            avg_pct = sum(p.get("current_pct", 0) for p in active) / total
+            perf["_summary"] = {
+                "date": fmt_date,
+                "total_signals": total,
+                "wins": wins,
+                "losses": total - wins,
+                "win_rate": round(wins / total * 100, 1) if total > 0 else 0,
+                "avg_return": round(avg_pct, 2),
+                "best": max((p.get("current_pct", 0) for p in active), default=0),
+                "worst": min((p.get("current_pct", 0) for p in active), default=0),
+            }
+
+        # 저장
+        perf_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(perf_path, "w", encoding="utf-8") as f:
+            json.dump(perf, f, ensure_ascii=False, indent=2)
+
+        if updated:
+            logger.info("수익률 추적 업데이트: %d건", updated)
 
     # ──────────────────────────────────────────
     # 유틸: 워치리스트 현황 출력
