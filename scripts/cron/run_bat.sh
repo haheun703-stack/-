@@ -145,6 +145,7 @@ case "$BAT" in
     # --- G1: 데이터 수집 ---
     run_py_xlong scripts/update_daily_data.py
     run_py_xlong scripts/extend_parquet_data.py --workers 2
+    run_py_long scripts/update_raw_parquet.py
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
@@ -192,6 +193,7 @@ case "$BAT" in
     run_py scripts/calc_asset_etf_performance.py
     # --- G3.9: 종목 스캔 (scan_tomorrow_picks 입력 데이터) ---
     run_py scripts/scan_pullback.py
+    run_py scripts/scan_surge_pullback.py --telegram
     run_py scripts/scan_crash_bounce.py
     run_py scripts/scan_dual_buying.py
     run_py scripts/scan_accumulation_tracker.py
