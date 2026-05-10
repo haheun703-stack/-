@@ -47,13 +47,25 @@ PARQUET_PATH = US_DIR / "us_daily.parquet"
 SIGNAL_PATH = US_DIR / "overnight_signal.json"
 
 # 한국 섹터 매핑 (US ETF → KR 업종 키워드)
-# ★ SOXX를 반도체 PRIMARY 드라이버로 — XLK보다 우선 배치
+# ★ 핵심 섹터별 PRIMARY 드라이버 지정
 US_KR_SECTOR_MAP = {
-    "soxx": ["반도체", "전자부품", "디스플레이"],  # 반도체 PRIMARY
-    "xlk": ["IT", "소프트웨어"],                   # XLK는 IT/SW만 담당
+    # 반도체 (SOXX PRIMARY)
+    "soxx": ["반도체", "전자부품", "디스플레이"],
+    # 2차전지/배터리 (LIT PRIMARY) — 블룸에너지, LG에너지솔루션, 삼성SDI
+    "lit": ["2차전지", "전기전선"],
+    # 원전/전력기기 (URA PRIMARY) — 두산에너빌리티, HD현대일렉트릭
+    "ura": ["원전가스", "전력기기"],
+    # 클린에너지 (ICLN) — 블룸에너지, 태양광, 풍력 → 한국 전력/신재생
+    "icln": ["태양광", "풍력"],
+    # IT/SW
+    "xlk": ["IT", "소프트웨어"],
+    # 금융
     "xlf": ["은행", "증권", "보험", "금융"],
+    # 에너지/정유
     "xle": ["에너지", "정유", "화학"],
+    # 산업재
     "xli": ["조선", "기계", "건설", "자동차", "운송"],
+    # 헬스케어
     "xlv": ["제약", "바이오", "의료기기", "헬스케어"],
     # 원자재 → 한국 섹터
     "gld": ["철강금속"],
@@ -171,6 +183,30 @@ def _check_special_rules(latest, prev) -> list[dict]:
             "name": "SOXX_SURGE",
             "desc": f"SOXX {surge_type} 급등 (1D:{soxx_ret*100:+.1f}%, 5D:{soxx_5d*100:+.1f}%) -> 반도체 STRONG BUY",
             "sector_boost": ["반도체", "전자부품", "디스플레이"],
+            "boost_factor": 1.5,
+        })
+
+    # R3c: LIT 급등 → 2차전지/전기전선 BOOST
+    lit_ret = _ret("lit_ret_1d")
+    lit_5d = _ret("lit_ret_5d")
+    if lit_ret >= 0.03 or lit_5d >= 0.06:
+        surge_type = "1D" if lit_ret >= 0.03 else "5D"
+        triggered.append({
+            "name": "LIT_SURGE",
+            "desc": f"LIT {surge_type} 급등 (1D:{lit_ret*100:+.1f}%, 5D:{lit_5d*100:+.1f}%) -> 2차전지 STRONG BUY",
+            "sector_boost": ["2차전지", "전기전선"],
+            "boost_factor": 1.5,
+        })
+
+    # R3d: URA 급등 → 원전/전력기기 BOOST
+    ura_ret = _ret("ura_ret_1d")
+    ura_5d = _ret("ura_ret_5d")
+    if ura_ret >= 0.04 or ura_5d >= 0.08:
+        surge_type = "1D" if ura_ret >= 0.04 else "5D"
+        triggered.append({
+            "name": "URA_SURGE",
+            "desc": f"URA {surge_type} 급등 (1D:{ura_ret*100:+.1f}%, 5D:{ura_5d*100:+.1f}%) -> 원전/전력 STRONG BUY",
+            "sector_boost": ["원전가스", "전력기기"],
             "boost_factor": 1.5,
         })
 

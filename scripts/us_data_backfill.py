@@ -73,6 +73,7 @@ TICKERS = {
     "URA": "Uranium",
     "DBA": "Agriculture",
     "LIT": "Lithium",
+    "ICLN": "CleanEnergy",  # 블룸에너지/전력기기/태양광 프록시
     # 한국 프록시
     "EWY": "KoreaETF",
     # ── NIGHTWATCH 기존 ──
