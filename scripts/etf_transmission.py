@@ -113,11 +113,11 @@ class ETFTransmissionModel:
 
         return returns
 
-    def _compute_historical_beta(self, us_prefix: str, kr_ticker: str) -> Optional[float]:
-        """US ETF vs KR ETF 히스토리컬 베타 계산 (parquet 데이터 기반).
+    def _compute_historical_beta(self, us_prefix: str) -> Optional[float]:
+        """US ETF vs KR(EWY proxy) 히스토리컬 베타 계산 (parquet 데이터 기반).
 
-        60일 rolling correlation → beta 추정.
-        데이터 부족 시 None 반환 (기본값 사용).
+        120일 covariance → beta 추정.
+        데이터 부족 시 None 반환 (정적 beta 사용).
         """
         if self.parquet_df is None or self.parquet_df.empty:
             return None
@@ -217,7 +217,7 @@ class ETFTransmissionModel:
                 ret_type = "1D_normal"
 
             # Beta 계산 (동적 vs 정적)
-            dynamic_beta = self._compute_historical_beta(us_etf, "")
+            dynamic_beta = self._compute_historical_beta(us_etf)
             static_beta = etf_config["beta_us_kr"]
             beta_used = dynamic_beta if dynamic_beta else static_beta
 
@@ -328,36 +328,6 @@ class ETFTransmissionModel:
 
         return result
 
-    def get_stock_expected(self, ticker: str) -> Optional[dict]:
-        """특정 종목의 ETF 전파 기대수익 조회.
-
-        surge_pullback_engine에서 사용.
-        Returns:
-            {"expected_ret_pct": 7.4, "source_etf": "SOXX", "beta": 0.65, ...}
-            or None
-        """
-        result = self.compute(min_expected_pct=0.5)
-        for etf_key, trans in result.get("transmissions", {}).items():
-            for stock in trans.get("stocks", []):
-                if stock["ticker"] == ticker:
-                    return {
-                        "expected_ret_pct": stock["expected_ret_pct"],
-                        "source_etf": etf_key,
-                        "kr_etf": trans["kr_etf"],
-                        "beta": trans["beta_used"],
-                        "concentration": stock["concentration_factor"],
-                        "us_ret_1d_pct": trans["us_ret_1d_pct"],
-                        "us_ret_5d_pct": trans["us_ret_5d_pct"],
-                    }
-        return None
-
-    def get_boosted_tickers(self, threshold_pct: float = 3.0) -> list[dict]:
-        """기대수익률이 threshold 이상인 종목 리스트.
-
-        surge_pullback_engine에서 임계값 완화에 사용.
-        """
-        result = self.compute(min_expected_pct=threshold_pct)
-        return result.get("top_picks", [])
 
 
 def save_result(result: dict):

@@ -11,7 +11,6 @@
       {"ticker": "058470", "name": "리노공업", "weight": 4.9},
       {"ticker": "036930", "name": "주성엔지니어링", "weight": 4.5},
       {"ticker": "054450", "name": "텔레칩스", "weight": 3.8},
-      {"ticker": "185750", "name": "종근당", "weight": 0.0},
       {"ticker": "166090", "name": "하나마이크론", "weight": 3.2},
       {"ticker": "025560", "name": "미래산업", "weight": 2.8}
     ]
@@ -29,8 +28,7 @@
       {"ticker": "011790", "name": "SKC", "weight": 4.2},
       {"ticker": "298040", "name": "효성중공업", "weight": 3.5},
       {"ticker": "003670", "name": "포스코퓨처엠", "weight": 7.0},
-      {"ticker": "307950", "name": "현대오토에버", "weight": 2.5},
-      {"ticker": "012450", "name": "한화에어로스페이스", "weight": 0.0}
+      {"ticker": "307950", "name": "현대오토에버", "weight": 2.5}
     ]
   },
   "URA": {
@@ -44,8 +42,6 @@
       {"ticker": "298040", "name": "효성중공업", "weight": 12.0},
       {"ticker": "042670", "name": "HD현대인프라코어", "weight": 7.5},
       {"ticker": "112610", "name": "씨에스윈드", "weight": 6.0},
-      {"ticker": "003490", "name": "대한항공", "weight": 0.0},
-      {"ticker": "009540", "name": "HD한국조선해양", "weight": 0.0},
       {"ticker": "281820", "name": "케이씨텍", "weight": 5.0},
       {"ticker": "336260", "name": "두산퓨얼셀", "weight": 4.5}
     ]
@@ -76,11 +72,9 @@
       {"ticker": "079550", "name": "LIG넥스원", "weight": 18.0},
       {"ticker": "064350", "name": "현대로템", "weight": 15.0},
       {"ticker": "047810", "name": "한국항공우주", "weight": 12.0},
-      {"ticker": "014970", "name": "삼기이브이", "weight": 0.0},
       {"ticker": "298040", "name": "효성중공업", "weight": 5.0},
       {"ticker": "272210", "name": "한화시스템", "weight": 10.0},
       {"ticker": "000880", "name": "한화", "weight": 6.0},
-      {"ticker": "004380", "name": "삼익악기", "weight": 0.0},
       {"ticker": "082740", "name": "HSD엔진", "weight": 4.0}
     ]
   },
@@ -97,7 +91,6 @@
       {"ticker": "322000", "name": "현대에너지솔루션", "weight": 7.0},
       {"ticker": "094820", "name": "일진파워", "weight": 6.5},
       {"ticker": "281820", "name": "케이씨텍", "weight": 5.0},
-      {"ticker": "243070", "name": "휴온스", "weight": 0.0},
       {"ticker": "011790", "name": "SKC", "weight": 4.5}
     ]
   },
@@ -129,7 +122,6 @@
       {"ticker": "051910", "name": "LG화학", "weight": 15.0},
       {"ticker": "011170", "name": "롯데케미칼", "weight": 8.0},
       {"ticker": "006120", "name": "SK디스커버리", "weight": 5.5},
-      {"ticker": "003490", "name": "대한항공", "weight": 0.0},
       {"ticker": "010060", "name": "OCI홀딩스", "weight": 6.0},
       {"ticker": "009830", "name": "한화솔루션", "weight": 7.5},
       {"ticker": "011780", "name": "금호석유", "weight": 5.0}
@@ -157,7 +149,6 @@
     "updated": "2026-05-10",
     "source": "ETF 운용사 PDF + KOSCOM 공시 기반 (수동 큐레이션)",
     "notes": [
-      "weight=0인 종목은 해당 ETF와 무관한 종목 (제거 대상 마커)",
       "비중은 2026년 4~5월 기준 근사값",
       "beta_us_kr는 최근 1년 상관관계 기반 추정치",
       "향후 KIS API ETF PDF 엔드포인트 연동 시 자동 갱신 예정"
