@@ -377,9 +377,26 @@ class SurgePullbackEngine:
     # 0-B. ETF 전파 모델 연동 (v1.4)
     # ──────────────────────────────────────────
     _etf_transmission_cache: dict | None = None
+    _etf_sector_cache: dict | None = None  # 섹터별 KR ETF 기대수익
 
-    def _get_etf_transmission_boost(self, ticker: str) -> dict:
+    # US ETF → 한국 소분류 섹터 매핑 (섹터 레벨 간접 전파용)
+    _US_ETF_TO_SUBSECTORS = {
+        "SOXX": ["반도체", "AI데이터센터"],
+        "LIT": ["2차전지"],
+        "URA": ["원전가스", "전기전선"],
+        "BOTZ": ["로봇"],
+        "ITA": ["방산"],
+        "ICLN": ["태양광", "풍력"],
+        "XLF": ["증권", "은행"],
+        "XLE": ["석유화학"],
+        "XLK": ["AI데이터센터", "통신", "게임"],
+    }
+
+    def _get_etf_transmission_boost(self, ticker: str, sectors: list = None) -> dict:
         """ETF 전파 모델에서 해당 종목의 기대수익률 조회.
+
+        1단계: 종목이 ETF 구성종목 TOP10에 직접 있으면 → 정확한 비중 기반 수익
+        2단계: 없으면 → 해당 종목의 섹터로 간접 전파 (KR ETF 기대수익의 70%)
 
         Returns: {"expected_ret_pct": 7.4, "source_etf": "SOXX", ...} or empty dict
         """
@@ -389,28 +406,69 @@ class SurgePullbackEngine:
             if etf_path.exists():
                 try:
                     data = json.loads(etf_path.read_text(encoding="utf-8"))
-                    # ticker→결과 매핑 빌드
+                    # 1. ticker→결과 매핑 (직접 전파)
                     cache = {}
+                    sector_cache = {}
                     for etf_key, trans in data.get("transmissions", {}).items():
                         for stock in trans.get("stocks", []):
                             t = stock["ticker"]
-                            # 같은 종목 여러 ETF → 최대값 채택
                             if t not in cache or stock["expected_ret_pct"] > cache[t]["expected_ret_pct"]:
                                 cache[t] = {
                                     "expected_ret_pct": stock["expected_ret_pct"],
                                     "source_etf": etf_key,
                                     "kr_etf": trans.get("kr_etf", ""),
                                     "us_ret_1d_pct": trans.get("us_ret_1d_pct", 0),
+                                    "type": "direct",
+                                }
+                        # 2. 섹터별 KR ETF 기대수익 (간접 전파 용)
+                        kr_exp = trans.get("kr_etf_expected_pct", 0)
+                        subsectors = self._US_ETF_TO_SUBSECTORS.get(etf_key, [])
+                        for sub in subsectors:
+                            if sub not in sector_cache or kr_exp > sector_cache[sub]["kr_etf_expected_pct"]:
+                                sector_cache[sub] = {
+                                    "kr_etf_expected_pct": kr_exp,
+                                    "source_etf": etf_key,
+                                    "kr_etf": trans.get("kr_etf", ""),
+                                    "us_ret_1d_pct": trans.get("us_ret_1d_pct", 0),
                                 }
                     self._etf_transmission_cache = cache
-                    logger.info("ETF전파 캐시 로드: %d종목", len(cache))
+                    self._etf_sector_cache = sector_cache
+                    logger.info("ETF전파 캐시 로드: 직접 %d종목, 섹터 %d개",
+                               len(cache), len(sector_cache))
                 except Exception as e:
                     logger.warning("ETF전파 데이터 로드 실패: %s", e)
                     self._etf_transmission_cache = {}
+                    self._etf_sector_cache = {}
             else:
                 self._etf_transmission_cache = {}
+                self._etf_sector_cache = {}
 
-        return self._etf_transmission_cache.get(ticker, {})
+        # 1단계: 직접 매핑 (ETF 구성종목)
+        direct = self._etf_transmission_cache.get(ticker)
+        if direct:
+            return direct
+
+        # 2단계: 섹터 간접 전파 (구성종목이 아닌 동일 섹터 종목)
+        if not sectors:
+            sectors = KNOWN_SECTOR_MAP.get(ticker, [])
+            if not sectors and ticker in self.layer1_sectors:
+                sectors = self.layer1_sectors[ticker]
+
+        if sectors and self._etf_sector_cache:
+            for sub_sector in sectors:
+                sec_data = self._etf_sector_cache.get(sub_sector)
+                if sec_data and sec_data["kr_etf_expected_pct"] != 0:
+                    # 간접 전파: KR ETF 기대수익 × 0.7 (비구성종목 할인)
+                    indirect_ret = sec_data["kr_etf_expected_pct"] * 0.7
+                    return {
+                        "expected_ret_pct": round(indirect_ret, 2),
+                        "source_etf": sec_data["source_etf"],
+                        "kr_etf": sec_data["kr_etf"],
+                        "us_ret_1d_pct": sec_data["us_ret_1d_pct"],
+                        "type": "sector_indirect",
+                    }
+
+        return {}
 
     # ──────────────────────────────────────────
     # 0. 수급 확인 (investor_daily.db 조회)
@@ -1167,16 +1225,21 @@ class SurgePullbackEngine:
                                    fire_info["fire_grade"], pullback_threshold, effective_threshold)
 
                 # v1.4: ETF 전파 모델 — US ETF 급등 시 추가 임계값 완화
-                etf_boost = self._get_etf_transmission_boost(ticker)
+                etf_boost = self._get_etf_transmission_boost(ticker, entry.get("sectors", []))
                 entry["etf_expected_ret"] = etf_boost.get("expected_ret_pct", 0)
                 entry["etf_source"] = etf_boost.get("source_etf", "")
-                if etf_boost.get("expected_ret_pct", 0) >= 3.0:
-                    # US ETF 급등으로 기대수익 3%+ → 임계값 추가 5% 완화
-                    etf_discount = 0.05
+                # 직접 전파(ETF 구성종목): 3%+, 간접 전파(같은 섹터): 2%+
+                etf_threshold = 2.0 if etf_boost.get("type") == "sector_indirect" else 3.0
+                if etf_boost.get("expected_ret_pct", 0) >= etf_threshold:
+                    # US ETF 급등 기대수익 → 임계값 추가 완화
+                    # 직접: 5%, 간접: 3%
+                    etf_discount = 0.03 if etf_boost.get("type") == "sector_indirect" else 0.05
                     effective_threshold *= (1 - etf_discount)
-                    logger.info("  📡 ETF전파 적용: %s [%s %+.1f%%] — 기준 추가완화 %.1f%%",
+                    logger.info("  📡 ETF전파 적용: %s [%s %+.1f%% %s] — 기준 추가완화 %.1f%%",
                                entry["name"], etf_boost["source_etf"],
-                               etf_boost["expected_ret_pct"], effective_threshold)
+                               etf_boost["expected_ret_pct"],
+                               etf_boost.get("type", "direct"),
+                               effective_threshold)
 
                 # v1.3.1: 오차 허용 (3%) — 임계값 근처면 시그널 발동
                 tolerance = 0.03  # 3% 오차 허용
