@@ -63,6 +63,7 @@ class LimitUpScanner:
         self.max_days_since_last = lu_cfg.get("max_days_since_last", 10)
         self.position_pct = lu_cfg.get("position_pct", 0.10)
         self.max_positions = lu_cfg.get("max_positions", 5)
+        # ── v2 포지션 관리용 (현재 미사용, 향후 구현) ──
         self.take_profit = lu_cfg.get("take_profit", 0.10)
         self.add_threshold = lu_cfg.get("add_threshold", -0.10)
         self.max_adds = lu_cfg.get("max_adds", 3)
@@ -143,13 +144,10 @@ class LimitUpScanner:
                 if days_since > self.max_days_since_last:
                     continue
 
-                # 최종 종가 체크
-                last_close = int(dfp.iloc[-1]["close"])
-                if last_close < 1000:
-                    continue
-
-                # 전일 종가 (상한가 계산 기준)
+                # 최종 종가 체크 (= 다음날 전일종가 = 상한가 계산 기준)
                 prev_close = int(dfp.iloc[-1]["close"])
+                if prev_close < 1000:
+                    continue
 
                 candidates.append({
                     "ticker": ticker,
@@ -229,7 +227,10 @@ class LimitUpScanner:
                 logger.error("[LU스캐너] 루프 오류: %s", e)
                 await asyncio.sleep(5)
 
-        logger.info("[LU스캐너] 장 마감. 종료.")
+        logger.info(
+            "[LU스캐너] 장 마감 (15:20). 스캔 종료 — 포커스 %d종목, 체결 %d건",
+            len(self.focus_list), len(self.filled_today),
+        )
         self._save_state()
 
     async def _scan_candidates(self):
@@ -268,6 +269,16 @@ class LimitUpScanner:
 
     async def _monitor_focus(self):
         """포커스 종목 집중 감시 (10초 간격으로 풀림 체크)"""
+        # 타임아웃: 1시간 이상 경과한 포커스 종목 제거
+        now = datetime.now()
+        expired = [
+            t for t, info in self.focus_list.items()
+            if (now - datetime.fromisoformat(info["detected_at"])).seconds > 3600
+        ]
+        for t in expired:
+            logger.info("[LU스캐너] %s 포커스 타임아웃 (1시간)", t)
+            self.focus_list.pop(t)
+
         unlocked = []
 
         for ticker, info in list(self.focus_list.items()):
@@ -280,9 +291,13 @@ class LimitUpScanner:
             ask_price = tick.get("ask_price", 0)
 
             # 풀림 판정: 현재가 < 상한가 × unlock_threshold
-            # + 매도호가 존재 (= 매수 가능)
+            # + 매도호가가 현재가 근처에 존재 (= 실제 체결 가능)
             is_unlocked = current_price < limit_price * self.unlock_threshold
-            has_ask = ask_price > 0 and ask_price < limit_price
+            has_ask = (
+                ask_price > 0
+                and ask_price <= current_price * 1.01
+                and ask_price < limit_price
+            )
 
             if is_unlocked and has_ask:
                 logger.info(
@@ -340,6 +355,13 @@ class LimitUpScanner:
             entry["status"] = "DRY_RUN"
         else:
             # 실제 주문
+            if not self.order:
+                logger.error("[LU스캐너] %s Order 어댑터 미초기화. 매수 불가.", ticker)
+                entry["status"] = "FAILED"
+                entry["error"] = "Order adapter not initialized"
+                self.filled_today.append(entry)
+                self._send_alert(entry)
+                return
             try:
                 order_result = self.order.buy_limit(ticker, unlocked_price, quantity)
                 entry["order_id"] = getattr(order_result, "order_id", "N/A")
@@ -364,11 +386,8 @@ class LimitUpScanner:
         try:
             from src.telegram_sender import send_message
         except ImportError:
-            try:
-                from src.adapters.telegram_adapter import send_message
-            except ImportError:
-                logger.warning("[LU스캐너] 텔레그램 모듈 없음")
-                return
+            logger.warning("[LU스캐너] 텔레그램 모듈 없음 (src.telegram_sender)")
+            return
 
         mode = "🧪 DRY-RUN" if self.dry_run else "🔥 LIVE"
         msg = (
