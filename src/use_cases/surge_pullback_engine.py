@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 """
-상한가 눌림목 분할매수 엔진 v1.0
+상한가 눌림목 분할매수 엔진 v1.2
 ═══════════════════════════════════════════════
 
 2층 구조:
   Layer 1: v10c 큐레이션 93종목 (백테스트 검증, 고정)
   Layer 2: 일일 자동 발굴 (전 종목 스캔 → 품질 필터)
+
+v1.1 변경:
+  - 수급 확인 필터 추가: 시그널 발생 시 외국인/기관/금투/연기금 중
+    1주체 이상 순매수 확인 필요 (investor_daily.db 연동)
+
+v1.2 변경:
+  - 보유비중 프로파일 추가: KIS API 외국인 보유비중 + DB 누적 순매수 결합
+  - 수급 탄력성(supply elasticity) 점수 계산
+    → 누적 보유 大 + 최근 소량 매도 = 탄력성 높음 (반등 가능성↑)
 
 백테스트 최적 파라미터 (2025-11~2026-05, 6개월):
   - 급등 기준: 15%+
@@ -24,6 +33,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
+import sqlite3
+
 import pandas as pd
 import numpy as np
 
@@ -32,6 +43,57 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 WATCHLIST_PATH = PROJECT_ROOT / "data" / "surge_pullback_watchlist.json"
 SIGNAL_PATH = PROJECT_ROOT / "data" / "surge_pullback_signals.json"
+INVESTOR_DB_PATH = PROJECT_ROOT / "data" / "investor_flow" / "investor_daily.db"
+SECTOR_FIRE_DIR = PROJECT_ROOT / "data"
+
+# 수급 확인 대상 투자자 (이 중 1명이라도 순매수면 통과)
+SMART_INVESTORS = ["외국인", "기관합계", "금융투자", "연기금"]
+
+# ═══════════════════════════════════════════════════════
+# v1.3: 소분류 → 섹터발화 대분류 매핑
+# 눌림목 종목의 세부 섹터를 섹터발화(FIRE) 15개 대분류로 연결
+# ═══════════════════════════════════════════════════════
+SECTOR_TO_FIRE = {
+    # AI반도체 (FIRE 대분류)
+    "반도체": "AI반도체",
+    "AI데이터센터": "AI반도체",
+    # 전력기기
+    "전기전선": "전력기기",
+    "광통신": "전력기기",
+    "변압기": "전력기기",
+    "원전가스": "전력기기",
+    # 자동차
+    "자동차": "자동차",
+    # 로봇자동화
+    "로봇": "로봇자동화",
+    # 2차전지
+    "2차전지": "2차전지",
+    # 건설인프라
+    "건설": "건설인프라",
+    # 조선해운
+    "조선": "조선해운",
+    # 방산
+    "방산": "방산",
+    # 바이오
+    "바이오": "바이오",
+    # 금융
+    "증권": "금융",
+    "은행": "금융",
+    # 철강소재
+    "철강": "철강소재",
+    # 정유에너지
+    "석유화학": "정유에너지",
+    "태양광": "정유에너지",
+    "풍력": "정유에너지",
+    # 액침냉각
+    "액침냉각": "액침냉각",
+    # 화장품소비재
+    "화장품": "화장품소비재",
+    # IT플랫폼
+    "게임": "IT플랫폼",
+    "통신": "IT플랫폼",
+    "사이버보안": "IT플랫폼",
+}
 
 # ═══════════════════════════════════════════════════════
 # Layer 1: v10c 큐레이션 93종목 (백테스트 91.7% 승률)
@@ -154,8 +216,18 @@ KNOWN_SECTOR_MAP = {
     "307180": ["2차전지"], "126340": ["2차전지"], "006110": ["2차전지"],
     "089980": ["2차전지"], "259630": ["2차전지"], "047310": ["2차전지"],
     "382900": ["2차전지"], "025900": ["2차전지"], "452200": ["2차전지"],
-    # AI데이터센터
+    # AI데이터센터 / 액침냉각
     "307950": ["AI데이터센터"], "004710": ["액침냉각"],
+    # 자동차
+    "012330": ["자동차"], "005380": ["자동차"], "000270": ["자동차"],
+    "018880": ["자동차"], "161390": ["자동차"],
+    # 눌림목 종목 섹터 보강
+    "002020": ["화장품"], "052330": ["반도체"],  # 코오롱→화장품소비재, 코텍→반도체
+    "000540": ["전기전선"],  # 대한광통신→전력기기
+    "078890": ["반도체"],  # 덕산테코피아→AI반도체
+    "199800": ["바이오"],  # 툴젠→바이오
+    "028050": ["건설"],  # 삼성E&A
+    "138580": ["태양광"],  # 오이솔루션
     # 전기전선 확장
     "012200": ["전기전선"], "417200": ["전기전선"], "322180": ["전기전선"],
     "009470": ["전기전선"], "062040": ["전기전선"], "060370": ["전기전선"],
@@ -187,6 +259,9 @@ DEFAULT_CONFIG = {
     "fee_rate": 0.00315,          # 수수료+세금+슬리피지
     "holding_days": 20,           # 최대 보유일
     "layer2_sector_required": False,  # Layer2에 섹터 매칭 필수 여부
+    "supply_check_enabled": True,     # 수급 확인 필터 활성화 (v1.1)
+    "supply_lookback_days": 3,        # 수급 확인 기간 (최근 N거래일)
+    "ownership_profile_enabled": True,  # 보유비중 프로파일 활성화 (v1.2)
 }
 
 
@@ -216,9 +291,465 @@ class SurgePullbackEngine:
     def __init__(self, config: dict | None = None):
         self.config = {**DEFAULT_CONFIG, **(config or {})}
         self.layer1_set, self.layer1_sectors = _build_layer1_set()
+        self._sector_fire_cache: dict | None = None
         logger.info("Engine 초기화: Layer1 %d종목, 감시%d일, 급등%.0f%%→눌림%.0f%%",
                      len(self.layer1_set), self.config["watch_days"],
                      self.config["surge_threshold"], self.config["pullback_pct"])
+
+    # ──────────────────────────────────────────
+    # 0-A. 섹터발화 연동 (v1.3)
+    # ──────────────────────────────────────────
+    def load_sector_fire(self, date_str: str = "") -> dict:
+        """최신 sector_fire JSON 로드 → {섹터명: {fire_score, fire_grade, fgn_5d, inst_5d}}"""
+        if self._sector_fire_cache:
+            return self._sector_fire_cache
+
+        # 날짜 지정 또는 최신 파일 자동 탐색
+        if date_str:
+            target = SECTOR_FIRE_DIR / f"sector_fire_{date_str.replace('-', '')}.json"
+            candidates = [target] if target.exists() else []
+        else:
+            candidates = sorted(SECTOR_FIRE_DIR.glob("sector_fire_*.json"), reverse=True)
+
+        if not candidates:
+            logger.debug("섹터발화 데이터 없음")
+            return {}
+
+        fire_path = candidates[0]
+        try:
+            with open(fire_path, encoding="utf-8") as f:
+                data = json.load(f)
+            sectors = data.get("sectors", [])
+            result = {}
+            for s in sectors:
+                result[s["sector"]] = {
+                    "fire_score": s.get("fire_score", 0),
+                    "fire_grade": s.get("fire_grade", "D"),
+                    "fgn_5d": s.get("fgn_5d", 0),
+                    "inst_5d": s.get("inst_5d", 0),
+                    "rsi_avg": s.get("rsi_avg", 50),
+                }
+            self._sector_fire_cache = result
+            fire_date = data.get("date", fire_path.stem[-8:])
+            logger.info("섹터발화 로드: %s (%d섹터)", fire_date, len(result))
+            return result
+        except Exception as e:
+            logger.warning("섹터발화 로드 실패: %s", e)
+            return {}
+
+    def get_sector_fire_for_stock(self, ticker: str, sectors: list[str] = None) -> dict:
+        """종목의 섹터발화 상태 조회.
+
+        Returns: {fire_sector, fire_grade, fire_score, fgn_5d, inst_5d}
+        """
+        fire_data = self.load_sector_fire()
+        if not fire_data:
+            return {"fire_sector": "", "fire_grade": "?", "fire_score": 0,
+                    "fgn_5d": 0, "inst_5d": 0}
+
+        # 종목의 소분류 섹터 결정
+        if not sectors:
+            sectors = KNOWN_SECTOR_MAP.get(ticker, [])
+            if not sectors and ticker in self.layer1_sectors:
+                sectors = self.layer1_sectors[ticker]
+
+        # 소분류 → 대분류(FIRE) 매핑 후 가장 높은 발화 섹터 선택
+        best = {"fire_sector": "", "fire_grade": "D", "fire_score": 0,
+                "fgn_5d": 0, "inst_5d": 0}
+        for sub_sector in sectors:
+            fire_sector = SECTOR_TO_FIRE.get(sub_sector, "")
+            if not fire_sector:
+                continue
+            info = fire_data.get(fire_sector, {})
+            score = info.get("fire_score", 0)
+            # 매핑된 섹터 중 점수 가장 높은 것 선택 (0점이어도 매핑은 유지)
+            if score > best["fire_score"] or (not best["fire_sector"] and fire_sector):
+                best = {
+                    "fire_sector": fire_sector,
+                    "fire_grade": info.get("fire_grade", "D"),
+                    "fire_score": score,
+                    "fgn_5d": info.get("fgn_5d", 0),
+                    "inst_5d": info.get("inst_5d", 0),
+                }
+        return best
+
+    # ──────────────────────────────────────────
+    # 0. 수급 확인 (investor_daily.db 조회)
+    # ──────────────────────────────────────────
+    def check_supply_demand(self, ticker: str, date_str: str, lookback: int = 3) -> dict:
+        """
+        특정 종목의 최근 N일 투자자별 순매수 확인.
+        SMART_INVESTORS 중 1주체 이상 순매수(net_val > 0)면 confirmed=True.
+
+        반환: {
+            confirmed: bool,
+            buyers: ["외국인", ...],    # 순매수 주체 목록
+            detail: {투자자: 순매수금액(억)},
+            reason: "설명"
+        }
+        """
+        result = {
+            "confirmed": False,
+            "buyers": [],
+            "detail": {},
+            "reason": "수급 데이터 없음",
+        }
+
+        if not INVESTOR_DB_PATH.exists():
+            logger.warning("investor_daily.db 없음 — 수급 확인 스킵 (시그널 유지)")
+            result["confirmed"] = True  # DB 없으면 기존 로직 유지
+            result["reason"] = "DB 없음 (수급 필터 스킵)"
+            return result
+
+        fmt_date = date_str.replace("-", "")
+
+        try:
+            conn = sqlite3.connect(str(INVESTOR_DB_PATH))
+            cur = conn.cursor()
+
+            # 최근 lookback일의 투자자별 순매수 합산
+            cur.execute("""
+                SELECT investor, SUM(net_val) as total_net
+                FROM investor_daily
+                WHERE ticker = ? AND date <= ?
+                  AND investor IN (?, ?, ?, ?)
+                GROUP BY investor
+                ORDER BY date DESC
+                LIMIT ?
+            """, (ticker, fmt_date, *SMART_INVESTORS, lookback * len(SMART_INVESTORS)))
+
+            # 최근 N일 날짜를 구해서 합산
+            cur.execute("""
+                SELECT DISTINCT date FROM investor_daily
+                WHERE ticker = ? AND date <= ?
+                ORDER BY date DESC LIMIT ?
+            """, (ticker, fmt_date, lookback))
+            recent_dates = [r[0] for r in cur.fetchall()]
+
+            if not recent_dates:
+                conn.close()
+                result["confirmed"] = True  # 데이터 없으면 기존 로직 유지
+                result["reason"] = f"종목 {ticker} 수급 데이터 없음 (필터 스킵)"
+                return result
+
+            # 데이터 신선도 체크: 가장 최근 데이터가 5영업일 이상 오래되면 스킵
+            latest_data_date = recent_dates[0]
+            date_gap = int(fmt_date) - int(latest_data_date)
+            if date_gap > 7:  # 달력일 7일 이상 = 영업일 5일 이상 차이
+                conn.close()
+                result["confirmed"] = True
+                result["reason"] = f"수급 데이터 오래됨 ({latest_data_date}) — 필터 스킵"
+                return result
+
+            placeholders = ",".join(["?"] * len(recent_dates))
+            inv_placeholders = ",".join(["?"] * len(SMART_INVESTORS))
+            cur.execute(f"""
+                SELECT investor, SUM(net_val) as total_net
+                FROM investor_daily
+                WHERE ticker = ? AND date IN ({placeholders})
+                  AND investor IN ({inv_placeholders})
+                GROUP BY investor
+            """, (ticker, *recent_dates, *SMART_INVESTORS))
+
+            rows = cur.fetchall()
+            conn.close()
+
+            buyers = []
+            detail = {}
+            for inv, net_val in rows:
+                억 = round(net_val / 1e8, 1)
+                detail[inv] = 억
+                if net_val > 1e8:  # 최소 1억 이상 순매수만 인정
+                    buyers.append(inv)
+
+            result["detail"] = detail
+            result["buyers"] = buyers
+
+            if buyers:
+                result["confirmed"] = True
+                result["reason"] = f"{','.join(buyers)} 순매수 ({lookback}일)"
+            else:
+                result["confirmed"] = False
+                result["reason"] = f"스마트머니 순매수 없음 ({lookback}일)"
+
+        except Exception as e:
+            logger.warning("수급 확인 오류 %s: %s — 시그널 유지", ticker, str(e)[:60])
+            result["confirmed"] = True  # 오류 시 기존 로직 유지
+            result["reason"] = f"DB 오류 (필터 스킵)"
+
+        return result
+
+    # ──────────────────────────────────────────
+    # 0b. 보유비중 프로파일 (KIS API + DB 누적)
+    # ──────────────────────────────────────────
+    def calc_ownership_profile(self, ticker: str, date_str: str) -> dict:
+        """
+        종목의 투자자별 보유비중 프로파일 계산.
+
+        데이터 소스:
+          1) KIS API fetch_price → 외국인 보유비중/보유수량/발행주식수 (실시간)
+          2) investor_daily.db → 투자자별 누적 순매수량/금액 (이력 기반)
+
+        반환: {
+            total_shares: int,        # 발행주식수
+            frgn_pct: float,          # 외국인 보유비중 (%)
+            frgn_shares: int,         # 외국인 보유 주수
+            investors: {              # 투자자별 이력 프로파일
+                "외국인": {cum_net_vol, cum_net_val_억, r5d, r10d, r30d, trend},
+                "기관합계": ...,
+            },
+            elasticity_score: float,  # 수급 탄력성 (0~100)
+            elasticity_grade: str,    # A/B/C/D 등급
+            elasticity_reason: str,   # 판단 근거
+        }
+        """
+        fmt_date = date_str.replace("-", "")
+        profile = {
+            "total_shares": 0,
+            "frgn_pct": 0.0,
+            "frgn_shares": 0,
+            "investors": {},
+            "elasticity_score": 0.0,
+            "elasticity_grade": "N/A",
+            "elasticity_reason": "데이터 없음",
+        }
+
+        # ── 1) KIS API: 외국인 보유비중 + 발행주식수 ──
+        kis_data = self._fetch_kis_ownership(ticker)
+        profile["total_shares"] = kis_data.get("total_shares", 0)
+        profile["frgn_pct"] = kis_data.get("frgn_hldn_rto", 0.0)
+        profile["frgn_shares"] = kis_data.get("frgn_hldn_qty", 0)
+
+        # ── 2) DB: 투자자별 누적 순매수 + 기간별 추세 ──
+        db_profile = self._calc_db_cumulative(ticker, fmt_date)
+        profile["investors"] = db_profile
+
+        # ── 3) 수급 탄력성 점수 계산 ──
+        score, grade, reason = self._calc_elasticity(profile)
+        profile["elasticity_score"] = score
+        profile["elasticity_grade"] = grade
+        profile["elasticity_reason"] = reason
+
+        return profile
+
+    def _fetch_kis_ownership(self, ticker: str) -> dict:
+        """KIS API로 외국인 보유비중/발행주식수 조회 (선택적)."""
+        try:
+            import os
+            from dotenv import load_dotenv
+            load_dotenv(PROJECT_ROOT / ".env")
+
+            import mojito
+            is_mock = os.getenv("MODEL") != "REAL"
+            broker = mojito.KoreaInvestment(
+                api_key=os.getenv("KIS_APP_KEY"),
+                api_secret=os.getenv("KIS_APP_SECRET"),
+                acc_no=os.getenv("KIS_ACC_NO"),
+                mock=is_mock,
+            )
+            price_data = broker.fetch_price(ticker)
+            output = price_data.get("output", {})
+
+            total_shares = int(output.get("lstn_stcn", 0) or 0)
+            frgn_qty = int(output.get("frgn_hldn_qty", 0) or 0)
+            frgn_rto = float(output.get("frgn_hldn_rto", 0) or 0)
+
+            # API가 비중을 0으로 반환하는 경우 → 직접 계산
+            if frgn_rto == 0 and frgn_qty > 0 and total_shares > 0:
+                frgn_rto = round(frgn_qty / total_shares * 100, 2)
+
+            logger.info("  KIS 보유비중: %s 발행%s주 외국인%.1f%% (%s주)",
+                        ticker, f"{total_shares:,}", frgn_rto, f"{frgn_qty:,}")
+            return {
+                "total_shares": total_shares,
+                "frgn_hldn_qty": frgn_qty,
+                "frgn_hldn_rto": frgn_rto,
+            }
+        except Exception as e:
+            logger.warning("  KIS 보유비중 조회 실패 %s: %s", ticker, str(e)[:60])
+            return {"total_shares": 0, "frgn_hldn_qty": 0, "frgn_hldn_rto": 0.0}
+
+    def _calc_db_cumulative(self, ticker: str, fmt_date: str) -> dict:
+        """investor_daily.db에서 투자자별 누적/기간별 순매수 계산."""
+        investors = {}
+        if not INVESTOR_DB_PATH.exists():
+            return investors
+
+        try:
+            conn = sqlite3.connect(str(INVESTOR_DB_PATH))
+            cur = conn.cursor()
+
+            # 전체 투자자 종류
+            all_investors = ["외국인", "기관합계", "기타법인", "개인"]
+
+            for inv in all_investors:
+                # 전체 누적 (DB 전 기간)
+                cur.execute("""
+                    SELECT SUM(net_vol), SUM(net_val), COUNT(DISTINCT date)
+                    FROM investor_daily
+                    WHERE ticker = ? AND investor = ? AND date <= ?
+                """, (ticker, inv, fmt_date))
+                row = cur.fetchone()
+                cum_vol = row[0] or 0
+                cum_val = row[1] or 0
+                total_days = row[2] or 0
+
+                # 최근 N일 순매수 (5일, 10일, 30일)
+                periods = {"r5d": 5, "r10d": 10, "r30d": 30}
+                period_data = {}
+
+                for key, n in periods.items():
+                    cur.execute(f"""
+                        SELECT SUM(net_vol), SUM(net_val)
+                        FROM investor_daily
+                        WHERE ticker = ? AND investor = ? AND date IN (
+                            SELECT DISTINCT date FROM investor_daily
+                            WHERE ticker = ? AND date <= ?
+                            ORDER BY date DESC LIMIT ?
+                        )
+                    """, (ticker, inv, ticker, fmt_date, n))
+                    r = cur.fetchone()
+                    period_data[key] = {
+                        "net_vol": r[0] or 0,
+                        "net_val_억": round((r[1] or 0) / 1e8, 1),
+                    }
+
+                # 추세 판정: 최근 5일 vs 최근 30일 방향
+                r5 = period_data["r5d"]["net_vol"]
+                r30 = period_data["r30d"]["net_vol"]
+                if r5 > 0 and r30 > 0:
+                    trend = "지속매수"
+                elif r5 > 0 and r30 <= 0:
+                    trend = "매수전환"
+                elif r5 <= 0 and r30 > 0:
+                    trend = "소폭매도"
+                elif r5 < 0 and r30 < 0:
+                    trend = "지속매도"
+                else:
+                    trend = "중립"
+
+                investors[inv] = {
+                    "cum_net_vol": cum_vol,
+                    "cum_net_val_억": round(cum_val / 1e8, 1),
+                    "total_days": total_days,
+                    "r5d": period_data["r5d"],
+                    "r10d": period_data["r10d"],
+                    "r30d": period_data["r30d"],
+                    "trend": trend,
+                }
+
+            conn.close()
+        except Exception as e:
+            logger.warning("DB 누적 계산 오류 %s: %s", ticker, str(e)[:60])
+
+        return investors
+
+    def _calc_elasticity(self, profile: dict) -> tuple[float, str, str]:
+        """
+        수급 탄력성 점수 계산.
+
+        핵심 아이디어:
+          - 외국인/기관 보유비중이 크면 → 기본 점수 높음 (안전판 존재)
+          - 최근 소량 매도해도 누적 보유가 크면 → 한번 매수 시 반등 가능
+          - 최근 매수 전환 시 → 보너스 점수
+
+        점수 기준 (0~100):
+          A등급 (80+): 탄력 매우 높음 — 적극 매수 고려
+          B등급 (60~79): 탄력 양호 — 매수 가능
+          C등급 (40~59): 보통 — 추가 확인 필요
+          D등급 (0~39): 탄력 낮음 — 신중 접근
+        """
+        score = 0.0
+        reasons = []
+
+        frgn_pct = profile.get("frgn_pct", 0)
+        investors = profile.get("investors", {})
+        frgn = investors.get("외국인", {})
+        inst = investors.get("기관합계", {})
+
+        # ── 1) 외국인 보유비중 기본 점수 (0~30점) ──
+        if frgn_pct >= 40:
+            score += 30
+            reasons.append(f"외국인{frgn_pct:.1f}%↑↑")
+        elif frgn_pct >= 25:
+            score += 22
+            reasons.append(f"외국인{frgn_pct:.1f}%↑")
+        elif frgn_pct >= 10:
+            score += 15
+            reasons.append(f"외국인{frgn_pct:.1f}%")
+        elif frgn_pct > 0:
+            score += 5
+            reasons.append(f"외국인{frgn_pct:.1f}%↓")
+
+        # ── 2) 외국인 누적 보유 추세 (0~25점) ──
+        if frgn:
+            r5_val = frgn.get("r5d", {}).get("net_val_억", 0)
+            r30_val = frgn.get("r30d", {}).get("net_val_억", 0)
+            cum_val = frgn.get("cum_net_val_억", 0)
+
+            # 누적이 양수이고 최근 소폭 매도인 경우 → 탄력성 높음
+            if cum_val > 0 and r5_val < 0 and abs(r5_val) < cum_val * 0.05:
+                score += 25
+                reasons.append(f"외국인 누적+{cum_val:.0f}억 소폭조정({r5_val:+.0f}억)")
+            elif cum_val > 0 and r5_val > 0:
+                score += 20
+                reasons.append(f"외국인 누적+{cum_val:.0f}억 매수지속")
+            elif cum_val > 0:
+                score += 10
+                reasons.append(f"외국인 누적+{cum_val:.0f}억")
+            elif r5_val > 0:  # 최근 매수 전환
+                score += 15
+                reasons.append(f"외국인 매수전환({r5_val:+.0f}억)")
+
+        # ── 3) 기관 보유 추세 (0~25점) ──
+        if inst:
+            r5_val = inst.get("r5d", {}).get("net_val_억", 0)
+            r30_val = inst.get("r30d", {}).get("net_val_억", 0)
+            cum_val = inst.get("cum_net_val_억", 0)
+
+            if cum_val > 0 and r5_val < 0 and abs(r5_val) < cum_val * 0.05:
+                score += 25
+                reasons.append(f"기관 누적+{cum_val:.0f}억 소폭조정")
+            elif cum_val > 0 and r5_val > 0:
+                score += 20
+                reasons.append(f"기관 누적+{cum_val:.0f}억 매수지속")
+            elif cum_val > 0:
+                score += 10
+                reasons.append(f"기관 누적+{cum_val:.0f}억")
+            elif r5_val > 0:
+                score += 15
+                reasons.append(f"기관 매수전환({r5_val:+.0f}억)")
+
+        # ── 4) 동시 매수 보너스 (0~10점) ──
+        if frgn and inst:
+            f5 = frgn.get("r5d", {}).get("net_val_억", 0)
+            i5 = inst.get("r5d", {}).get("net_val_억", 0)
+            if f5 > 0 and i5 > 0:
+                score += 10
+                reasons.append("외국인+기관 동시매수")
+            # 역발상: 개인이 대량 매도 중이면 → 스마트머니가 받는 것
+            individual = investors.get("개인", {})
+            if individual:
+                p5 = individual.get("r5d", {}).get("net_val_억", 0)
+                if p5 < -10 and (f5 > 0 or i5 > 0):
+                    score += 10
+                    reasons.append(f"개인투매({p5:.0f}억)→스마트머니흡수")
+
+        # 점수 클램핑
+        score = min(100, max(0, score))
+
+        # 등급 판정
+        if score >= 80:
+            grade = "A"
+        elif score >= 60:
+            grade = "B"
+        elif score >= 40:
+            grade = "C"
+        else:
+            grade = "D"
+
+        reason = " / ".join(reasons) if reasons else "데이터 부족"
+        return round(score, 1), grade, reason
 
     # ──────────────────────────────────────────
     # 1. 급등주 발굴 (parquet 전 종목 스캔)
@@ -438,8 +969,8 @@ class SurgePullbackEngine:
         logger.info("워치리스트 저장: %d건 활성", len(watchlist["entries"]))
 
     def _make_entry(self, stock: dict, layer: int, date_str: str) -> dict:
-        """워치리스트 엔트리 생성"""
-        return {
+        """워치리스트 엔트리 생성 (편입 시 수급 기초데이터 포함)"""
+        entry = {
             "ticker": stock["ticker"],
             "name": stock["name"],
             "layer": layer,
@@ -455,7 +986,43 @@ class SurgePullbackEngine:
             "status": "watching",
             "signal_date": None,
             "trading_value": stock.get("trading_value", 0),
+            # v1.2: 수급 기초데이터 (편입 시점 스냅샷)
+            "frgn_pct": 0.0,
+            "frgn_cum": 0.0,
+            "inst_cum": 0.0,
+            "frgn_5d": 0.0,
+            "inst_5d": 0.0,
+            "total_shares": 0,
+            # v1.3: 섹터발화 연동
+            "fire_sector": "",
+            "fire_grade": "?",
+            "fire_score": 0,
         }
+
+        # 보유비중 조회 (편입 시점)
+        if self.config.get("ownership_profile_enabled", True):
+            try:
+                p = self.calc_ownership_profile(stock["ticker"], date_str)
+                entry["frgn_pct"] = p.get("frgn_pct", 0)
+                entry["total_shares"] = p.get("total_shares", 0)
+                inv = p.get("investors", {})
+                frgn = inv.get("외국인", {})
+                inst = inv.get("기관합계", {})
+                entry["frgn_cum"] = frgn.get("cum_net_val_억", 0)
+                entry["inst_cum"] = inst.get("cum_net_val_억", 0)
+                entry["frgn_5d"] = frgn.get("r5d", {}).get("net_val_억", 0)
+                entry["inst_5d"] = inst.get("r5d", {}).get("net_val_억", 0)
+                time.sleep(0.15)
+            except Exception as e:
+                logger.debug("편입 수급 조회 실패 %s: %s", stock["ticker"], str(e)[:40])
+
+        # v1.3: 섹터발화 태깅
+        fire_info = self.get_sector_fire_for_stock(stock["ticker"], entry["sectors"])
+        entry["fire_sector"] = fire_info["fire_sector"]
+        entry["fire_grade"] = fire_info["fire_grade"]
+        entry["fire_score"] = fire_info["fire_score"]
+
+        return entry
 
     # ──────────────────────────────────────────
     # 5. 피크 업데이트 + 눌림 체크
@@ -524,28 +1091,101 @@ class SurgePullbackEngine:
                     entry["pullback_from_peak"] = round(pullback, 2)
                     entry["latest_close"] = today_close
 
+                # v1.2: 수급 기초데이터 갱신 (DB 기반, KIS API는 편입 시만)
+                try:
+                    db_inv = self._calc_db_cumulative(ticker, fmt_date)
+                    frgn = db_inv.get("외국인", {})
+                    inst = db_inv.get("기관합계", {})
+                    entry["frgn_cum"] = frgn.get("cum_net_val_억", 0)
+                    entry["inst_cum"] = inst.get("cum_net_val_억", 0)
+                    entry["frgn_5d"] = frgn.get("r5d", {}).get("net_val_억", 0)
+                    entry["inst_5d"] = inst.get("r5d", {}).get("net_val_억", 0)
+                except Exception:
+                    pass
+
                 # 감시일 증가
                 entry["watch_day"] += 1
 
-                # ── 눌림 시그널 판정 ──
-                if pullback <= -pullback_threshold:
-                    entry["status"] = "signal"
-                    entry["signal_date"] = date_str
-                    signals.append({
-                        "ticker": ticker,
-                        "name": entry["name"],
-                        "layer": entry["layer"],
-                        "sectors": entry["sectors"],
-                        "surge_date": entry["surge_date"],
-                        "surge_pct": entry["surge_pct"],
-                        "peak_price": peak,
-                        "entry_price": today_close,
-                        "pullback_pct": round(pullback, 2),
-                        "watch_day": entry["watch_day"],
-                        "signal_date": date_str,
-                    })
-                    logger.info("  ★ BUY SIGNAL: %s %s (피크%d→현재%d, %.1f%% 눌림)",
-                               ticker, entry["name"], peak, today_close, pullback)
+                # v1.3: 섹터발화 갱신
+                fire_info = self.get_sector_fire_for_stock(ticker, entry.get("sectors", []))
+                entry["fire_sector"] = fire_info["fire_sector"]
+                entry["fire_grade"] = fire_info["fire_grade"]
+                entry["fire_score"] = fire_info["fire_score"]
+
+                # ── 눌림 시그널 판정 (v1.1 수급 + v1.3 발화등급 가중치) ──
+                # 발화 A/B 등급: 눌림 기준 완화 (-8%에서 시그널)
+                effective_threshold = pullback_threshold
+                if fire_info["fire_grade"] in ("A", "B") and fire_info["fire_score"] >= 40:
+                    effective_threshold = pullback_threshold * 0.8  # 10% → 8%
+                    if pullback <= -effective_threshold and pullback > -pullback_threshold:
+                        logger.info("  🔥 발화 가중치 적용: %s [%s %s등급] — 기준 %.1f%%→%.1f%%",
+                                   entry["name"], fire_info["fire_sector"],
+                                   fire_info["fire_grade"], pullback_threshold, effective_threshold)
+
+                if pullback <= -effective_threshold:
+                    # 수급 확인: 스마트머니 순매수 여부
+                    if self.config.get("supply_check_enabled", True):
+                        supply = self.check_supply_demand(
+                            ticker, date_str,
+                            lookback=self.config.get("supply_lookback_days", 3)
+                        )
+                    else:
+                        supply = {"confirmed": True, "buyers": [], "detail": {}, "reason": "필터 비활성"}
+
+                    if supply["confirmed"]:
+                        entry["status"] = "signal"
+                        entry["signal_date"] = date_str
+                        entry["supply_check"] = supply
+
+                        # v1.2: 보유비중 프로파일 계산
+                        ownership = {}
+                        if self.config.get("ownership_profile_enabled", True):
+                            try:
+                                ownership = self.calc_ownership_profile(ticker, date_str)
+                                entry["ownership_profile"] = ownership
+                                time.sleep(0.15)  # KIS API rate limit
+                            except Exception as e:
+                                logger.warning("  보유비중 프로파일 실패 %s: %s", ticker, str(e)[:40])
+
+                        signals.append({
+                            "ticker": ticker,
+                            "name": entry["name"],
+                            "layer": entry["layer"],
+                            "sectors": entry["sectors"],
+                            "surge_date": entry["surge_date"],
+                            "surge_pct": entry["surge_pct"],
+                            "peak_price": peak,
+                            "entry_price": today_close,
+                            "pullback_pct": round(pullback, 2),
+                            "watch_day": entry["watch_day"],
+                            "signal_date": date_str,
+                            "supply_buyers": supply["buyers"],
+                            "supply_detail": supply["detail"],
+                            "supply_reason": supply["reason"],
+                            # v1.2: 보유비중 정보
+                            "frgn_pct": ownership.get("frgn_pct", 0),
+                            "total_shares": ownership.get("total_shares", 0),
+                            "elasticity_score": ownership.get("elasticity_score", 0),
+                            "elasticity_grade": ownership.get("elasticity_grade", "N/A"),
+                            "elasticity_reason": ownership.get("elasticity_reason", ""),
+                            "ownership_investors": ownership.get("investors", {}),
+                            # v1.3: 섹터발화
+                            "fire_sector": fire_info["fire_sector"],
+                            "fire_grade": fire_info["fire_grade"],
+                            "fire_score": fire_info["fire_score"],
+                        })
+                        e_grade = ownership.get("elasticity_grade", "?")
+                        e_score = ownership.get("elasticity_score", 0)
+                        f_pct = ownership.get("frgn_pct", 0)
+                        logger.info("  ★ BUY SIGNAL: %s %s (피크%d→현재%d, %.1f%% 눌림) "
+                                   "[수급: %s] [탄력성: %s %.0f점, 외국인%.1f%%]",
+                                   ticker, entry["name"], peak, today_close, pullback,
+                                   supply["reason"], e_grade, e_score, f_pct)
+                    else:
+                        # 눌림은 도달했지만 수급 미확인 → 시그널 보류
+                        entry["supply_check"] = supply
+                        logger.info("  ⚠ PULLBACK OK but NO SUPPLY: %s %s (%.1f%% 눌림) — %s",
+                                   ticker, entry["name"], pullback, supply["reason"])
 
                 # ── 감시 만료 ──
                 elif entry["watch_day"] > watch_days_limit:

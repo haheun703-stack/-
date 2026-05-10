@@ -145,6 +145,38 @@ def print_result(result: dict):
                   f"피크: {s['peak_price']:,}원 | "
                   f"진입: {s['entry_price']:,}원 ({s['pullback_pct']:+.1f}%) | "
                   f"D{s['watch_day']}")
+            # v1.1: 수급 확인 정보
+            buyers = s.get("supply_buyers", [])
+            detail = s.get("supply_detail", {})
+            if buyers or detail:
+                parts = [f"{k}:{v:+.1f}억" for k, v in detail.items()]
+                print(f"     수급: {' | '.join(parts)}  ← {s.get('supply_reason', '')}")
+            # v1.2: 보유비중/탄력성 정보
+            e_grade = s.get("elasticity_grade", "")
+            e_score = s.get("elasticity_score", 0)
+            f_pct = s.get("frgn_pct", 0)
+            if e_grade and e_grade != "N/A":
+                total_shares = s.get("total_shares", 0)
+                ts_str = f"{total_shares/1e6:.0f}백만주" if total_shares else "?"
+                print(f"     보유: 외국인{f_pct:.1f}% | "
+                      f"발행{ts_str} | "
+                      f"탄력성 {e_grade}등급({e_score:.0f}점)")
+                e_reason = s.get("elasticity_reason", "")
+                if e_reason:
+                    print(f"     근거: {e_reason}")
+                # 투자자별 상세
+                inv_data = s.get("ownership_investors", {})
+                if inv_data:
+                    inv_parts = []
+                    for inv_name, inv_info in inv_data.items():
+                        if inv_name == "개인":
+                            continue  # 개인은 생략
+                        cum = inv_info.get("cum_net_val_억", 0)
+                        r5 = inv_info.get("r5d", {}).get("net_val_억", 0)
+                        trend = inv_info.get("trend", "")
+                        inv_parts.append(f"{inv_name}:누적{cum:+.0f}억/5일{r5:+.0f}억({trend})")
+                    if inv_parts:
+                        print(f"     누적: {' | '.join(inv_parts)}")
     else:
         print(f"\n 매수 시그널: 없음")
 

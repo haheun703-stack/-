@@ -2820,6 +2820,23 @@ def build_surge_pullback_rows(date_str: str = "") -> list[dict]:
             "signal_date": sig.get("signal_date", e.get("signal_date")),
             "entry_price": int(sig.get("entry_price", 0)),
             "trading_value": int(e.get("trading_value", 0)),
+            # v1.1: 수급 확인
+            "supply_buyers": sig.get("supply_buyers", []),
+            "supply_detail": sig.get("supply_detail", {}),
+            "supply_reason": sig.get("supply_reason", ""),
+            # v1.2: 수급 기초데이터 (워치리스트 엔트리 또는 시그널)
+            "frgn_pct": round(float(e.get("frgn_pct", sig.get("frgn_pct", 0))), 1),
+            "total_shares": int(e.get("total_shares", sig.get("total_shares", 0))),
+            "frgn_cum": round(float(e.get("frgn_cum", 0)), 1),
+            "inst_cum": round(float(e.get("inst_cum", 0)), 1),
+            "frgn_5d": round(float(e.get("frgn_5d", 0)), 1),
+            "inst_5d": round(float(e.get("inst_5d", 0)), 1),
+            "elasticity_score": round(float(sig.get("elasticity_score", 0)), 1),
+            "elasticity_grade": sig.get("elasticity_grade", ""),
+            # v1.3: 섹터발화
+            "fire_sector": e.get("fire_sector", ""),
+            "fire_grade": e.get("fire_grade", ""),
+            "fire_score": int(e.get("fire_score", 0)),
         })
 
     logger.info("[눌림목] Surge Pullback Row: %d행", len(rows))
