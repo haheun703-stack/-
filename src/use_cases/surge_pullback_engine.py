@@ -1224,22 +1224,24 @@ class SurgePullbackEngine:
                                    entry["name"], fire_info["fire_sector"],
                                    fire_info["fire_grade"], pullback_threshold, effective_threshold)
 
-                # v1.4: ETF 전파 모델 — US ETF 급등 시 추가 임계값 완화
+                # v1.4: ETF 전파 모델 — US ETF 급등 시 임계값 절대 완화 (최대 3%p)
                 etf_boost = self._get_etf_transmission_boost(ticker, entry.get("sectors", []))
                 entry["etf_expected_ret"] = etf_boost.get("expected_ret_pct", 0)
                 entry["etf_source"] = etf_boost.get("source_etf", "")
-                # 직접 전파(ETF 구성종목): 3%+, 간접 전파(같은 섹터): 2%+
-                etf_threshold = 2.0 if etf_boost.get("type") == "sector_indirect" else 3.0
-                if etf_boost.get("expected_ret_pct", 0) >= etf_threshold:
-                    # US ETF 급등 기대수익 → 임계값 추가 완화
-                    # 직접: 5%, 간접: 3%
-                    etf_discount = 0.03 if etf_boost.get("type") == "sector_indirect" else 0.05
-                    effective_threshold *= (1 - etf_discount)
-                    logger.info("  📡 ETF전파 적용: %s [%s %+.1f%% %s] — 기준 추가완화 %.1f%%",
-                               entry["name"], etf_boost["source_etf"],
-                               etf_boost["expected_ret_pct"],
-                               etf_boost.get("type", "direct"),
-                               effective_threshold)
+                etf_exp = etf_boost.get("expected_ret_pct", 0)
+                if etf_exp >= 2.0:
+                    # 기대수익 구간별 절대 완화 (percentage point 차감)
+                    # 2~3% → 1%p, 3~5% → 2%p, 5%+ → 3%p
+                    if etf_exp >= 5.0:
+                        etf_reduction = 3.0
+                    elif etf_exp >= 3.0:
+                        etf_reduction = 2.0
+                    else:
+                        etf_reduction = 1.0
+                    effective_threshold = max(5.0, effective_threshold - etf_reduction)
+                    logger.info("  📡 ETF전파 적용: %s [%s %+.1f%%] — 기준 -%dp → %.1f%%",
+                               entry["name"], etf_boost.get("source_etf", "?"),
+                               etf_exp, int(etf_reduction), effective_threshold)
 
                 # v1.3.1: 오차 허용 (3%) — 임계값 근처면 시그널 발동
                 tolerance = 0.03  # 3% 오차 허용
