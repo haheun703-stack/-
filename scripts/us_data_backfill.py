@@ -74,6 +74,8 @@ TICKERS = {
     "DBA": "Agriculture",
     "LIT": "Lithium",
     "ICLN": "CleanEnergy",  # 블룸에너지/전력기기/태양광 프록시
+    "BOTZ": "Robotics",    # 로봇자동화 (현대로보틱스, 레인보우)
+    "ITA": "Defense",      # 방산/항공 (한화에어로, LIG넥스원)
     # 한국 프록시
     "EWY": "KoreaETF",
     # ── NIGHTWATCH 기존 ──
