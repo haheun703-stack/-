@@ -416,6 +416,9 @@ class LimitUpScanner:
 
     def run_once(self) -> dict:
         """1회성 스캔 (테스트/디버그용)"""
+        if not self.intraday:
+            raise RuntimeError("intraday_adapter가 None — KIS 어댑터 초기화 실패. .env 확인 필요.")
+
         if not self.candidates:
             self.load_candidates()
 
