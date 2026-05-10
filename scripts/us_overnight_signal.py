@@ -1323,6 +1323,25 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     # 전략 C: US→KR 섹터 모멘텀 (전 섹터 사전 포지셔닝)
     signal["sector_momentum"] = _compute_sector_momentum(df)
 
+    # ─── 10. ETF 전파 모델 (개별종목 기대수익률) ───
+    try:
+        from scripts.etf_transmission import ETFTransmissionModel
+        etf_model = ETFTransmissionModel()
+        etf_result = etf_model.compute(min_expected_pct=1.5)
+        signal["etf_transmission"] = {
+            "computed_at": etf_result.get("computed_at"),
+            "active_etfs": list(etf_result.get("transmissions", {}).keys()),
+            "top_picks": etf_result.get("top_picks", [])[:10],
+            "summary": etf_result.get("summary", ""),
+        }
+        # 전체 결과도 별도 파일로 저장
+        from scripts.etf_transmission import save_result
+        save_result(etf_result)
+        logger.info(f"ETF전파: {etf_result.get('summary', 'N/A')}")
+    except Exception as e:
+        logger.warning(f"ETF 전파 모델 실패: {e}")
+        signal["etf_transmission"] = {"error": str(e)}
+
     # 요약 생성
     spy_ret = index_dir.get("SPY", {}).get("ret_1d", 0)
     qqq_ret = index_dir.get("QQQ", {}).get("ret_1d", 0)
@@ -1538,6 +1557,18 @@ def format_telegram_message(signal: dict) -> str:
         lines.append(f"\n{strength_icon}[ 인버스 대응 ] {inv.get('reason', '')}")
         for etf in inv.get("etf_picks", []):
             lines.append(f"  → {etf['name']} ({etf['ticker']}) {etf['leverage']}X")
+
+    # ETF 전파 모델 — 개별종목 기대수익
+    etf_trans = signal.get("etf_transmission", {})
+    top_picks = etf_trans.get("top_picks", [])
+    if top_picks:
+        lines.append(f"\n[ ETF전파 ] {', '.join(etf_trans.get('active_etfs', []))}")
+        for i, p in enumerate(top_picks[:5], 1):
+            lines.append(
+                f"  {i}. {p['name']} ({p['ticker']}) "
+                f"{p['expected_ret_pct']:+.1f}% "
+                f"[{p.get('source_etf', '?')}→{p.get('kr_etf', '')}]"
+            )
 
     return "\n".join(lines)
 

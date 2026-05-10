@@ -373,6 +373,45 @@ class SurgePullbackEngine:
                 }
         return best
 
+    # ─────────────────────────────────────��────
+    # 0-B. ETF 전파 모델 연동 (v1.4)
+    # ──────────────────────────────────────────
+    _etf_transmission_cache: dict | None = None
+
+    def _get_etf_transmission_boost(self, ticker: str) -> dict:
+        """ETF 전파 모델에서 해당 종목의 기대수익률 조회.
+
+        Returns: {"expected_ret_pct": 7.4, "source_etf": "SOXX", ...} or empty dict
+        """
+        # 캐시 로드 (세션당 1회)
+        if self._etf_transmission_cache is None:
+            etf_path = PROJECT_ROOT / "data" / "etf_transmission_result.json"
+            if etf_path.exists():
+                try:
+                    data = json.loads(etf_path.read_text(encoding="utf-8"))
+                    # ticker→결과 매핑 빌드
+                    cache = {}
+                    for etf_key, trans in data.get("transmissions", {}).items():
+                        for stock in trans.get("stocks", []):
+                            t = stock["ticker"]
+                            # 같은 종목 여러 ETF → 최대값 채택
+                            if t not in cache or stock["expected_ret_pct"] > cache[t]["expected_ret_pct"]:
+                                cache[t] = {
+                                    "expected_ret_pct": stock["expected_ret_pct"],
+                                    "source_etf": etf_key,
+                                    "kr_etf": trans.get("kr_etf", ""),
+                                    "us_ret_1d_pct": trans.get("us_ret_1d_pct", 0),
+                                }
+                    self._etf_transmission_cache = cache
+                    logger.info("ETF전파 캐시 로드: %d종목", len(cache))
+                except Exception as e:
+                    logger.warning("ETF전파 데이터 로드 실패: %s", e)
+                    self._etf_transmission_cache = {}
+            else:
+                self._etf_transmission_cache = {}
+
+        return self._etf_transmission_cache.get(ticker, {})
+
     # ──────────────────────────────────────────
     # 0. 수급 확인 (investor_daily.db 조회)
     # ──────────────────────────────────────────
@@ -1127,6 +1166,18 @@ class SurgePullbackEngine:
                                    entry["name"], fire_info["fire_sector"],
                                    fire_info["fire_grade"], pullback_threshold, effective_threshold)
 
+                # v1.4: ETF 전파 모델 — US ETF 급등 시 추가 임계값 완화
+                etf_boost = self._get_etf_transmission_boost(ticker)
+                entry["etf_expected_ret"] = etf_boost.get("expected_ret_pct", 0)
+                entry["etf_source"] = etf_boost.get("source_etf", "")
+                if etf_boost.get("expected_ret_pct", 0) >= 3.0:
+                    # US ETF 급등으로 기대수익 3%+ → 임계값 추가 5% 완화
+                    etf_discount = 0.05
+                    effective_threshold *= (1 - etf_discount)
+                    logger.info("  📡 ETF전파 적용: %s [%s %+.1f%%] — 기준 추가완화 %.1f%%",
+                               entry["name"], etf_boost["source_etf"],
+                               etf_boost["expected_ret_pct"], effective_threshold)
+
                 # v1.3.1: 오차 허용 (3%) — 임계값 근처면 시그널 발동
                 tolerance = 0.03  # 3% 오차 허용
                 trigger_threshold = effective_threshold * (1 - tolerance)  # 8% → 7.76%, 10% → 9.7%
@@ -1182,6 +1233,9 @@ class SurgePullbackEngine:
                             "fire_sector": fire_info["fire_sector"],
                             "fire_grade": fire_info["fire_grade"],
                             "fire_score": fire_info["fire_score"],
+                            # v1.4: ETF 전파
+                            "etf_expected_ret": etf_boost.get("expected_ret_pct", 0),
+                            "etf_source": etf_boost.get("source_etf", ""),
                         })
                         e_grade = ownership.get("elasticity_grade", "?")
                         e_score = ownership.get("elasticity_score", 0)

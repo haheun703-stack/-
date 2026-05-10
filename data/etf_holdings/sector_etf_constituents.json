@@ -1,0 +1,166 @@
+{
+  "SOXX": {
+    "kr_etf": {"ticker": "091230", "name": "TIGER 반도체", "aum_billion": 5200},
+    "beta_us_kr": 0.65,
+    "description": "필라델피아반도체 -> 한국 반도체 섹터",
+    "holdings": [
+      {"ticker": "000660", "name": "SK하이닉스", "weight": 28.5},
+      {"ticker": "005930", "name": "삼성전자", "weight": 22.3},
+      {"ticker": "042700", "name": "한미반도체", "weight": 7.2},
+      {"ticker": "403870", "name": "HPSP", "weight": 5.8},
+      {"ticker": "058470", "name": "리노공업", "weight": 4.9},
+      {"ticker": "036930", "name": "주성엔지니어링", "weight": 4.5},
+      {"ticker": "054450", "name": "텔레칩스", "weight": 3.8},
+      {"ticker": "185750", "name": "종근당", "weight": 0.0},
+      {"ticker": "166090", "name": "하나마이크론", "weight": 3.2},
+      {"ticker": "025560", "name": "미래산업", "weight": 2.8}
+    ]
+  },
+  "LIT": {
+    "kr_etf": {"ticker": "305540", "name": "TIGER 2차전지테마", "aum_billion": 3800},
+    "beta_us_kr": 0.55,
+    "description": "글로벌리튬배터리 -> 한국 2차전지 섹터",
+    "holdings": [
+      {"ticker": "373220", "name": "LG에너지솔루션", "weight": 25.0},
+      {"ticker": "006400", "name": "삼성SDI", "weight": 18.5},
+      {"ticker": "051910", "name": "LG화학", "weight": 12.0},
+      {"ticker": "247540", "name": "에코프로비엠", "weight": 8.5},
+      {"ticker": "086520", "name": "에코프로", "weight": 6.8},
+      {"ticker": "011790", "name": "SKC", "weight": 4.2},
+      {"ticker": "298040", "name": "효성중공업", "weight": 3.5},
+      {"ticker": "003670", "name": "포스코퓨처엠", "weight": 7.0},
+      {"ticker": "307950", "name": "현대오토에버", "weight": 2.5},
+      {"ticker": "012450", "name": "한화에어로스페이스", "weight": 0.0}
+    ]
+  },
+  "URA": {
+    "kr_etf": {"ticker": "396520", "name": "TIGER 원자력테마", "aum_billion": 1200},
+    "beta_us_kr": 0.50,
+    "description": "글로벌우라늄 -> 한국 원전/전력 섹터",
+    "holdings": [
+      {"ticker": "034020", "name": "두산에너빌리티", "weight": 22.0},
+      {"ticker": "267260", "name": "HD현대일렉트릭", "weight": 18.5},
+      {"ticker": "009830", "name": "한화솔루션", "weight": 8.0},
+      {"ticker": "298040", "name": "효성중공업", "weight": 12.0},
+      {"ticker": "042670", "name": "HD현대인프라코어", "weight": 7.5},
+      {"ticker": "112610", "name": "씨에스윈드", "weight": 6.0},
+      {"ticker": "003490", "name": "대한항공", "weight": 0.0},
+      {"ticker": "009540", "name": "HD한국조선해양", "weight": 0.0},
+      {"ticker": "281820", "name": "케이씨텍", "weight": 5.0},
+      {"ticker": "336260", "name": "두산퓨얼셀", "weight": 4.5}
+    ]
+  },
+  "BOTZ": {
+    "kr_etf": {"ticker": "396510", "name": "TIGER K로봇액티브", "aum_billion": 800},
+    "beta_us_kr": 0.50,
+    "description": "글로벌로봇/AI -> 한국 로봇자동화 섹터",
+    "holdings": [
+      {"ticker": "454910", "name": "현대로보틱스", "weight": 20.0},
+      {"ticker": "277810", "name": "레인보우로보틱스", "weight": 15.0},
+      {"ticker": "108320", "name": "LX세미콘", "weight": 5.0},
+      {"ticker": "042670", "name": "HD현대인프라코어", "weight": 10.0},
+      {"ticker": "017800", "name": "현대엘리베이터", "weight": 8.5},
+      {"ticker": "298040", "name": "효성중공업", "weight": 7.0},
+      {"ticker": "012450", "name": "한화에어로스페이스", "weight": 12.0},
+      {"ticker": "064350", "name": "현대로템", "weight": 8.0},
+      {"ticker": "204270", "name": "제이앤티씨", "weight": 4.5},
+      {"ticker": "090710", "name": "휴림로봇", "weight": 3.5}
+    ]
+  },
+  "ITA": {
+    "kr_etf": {"ticker": "464510", "name": "TIGER 방산", "aum_billion": 2500},
+    "beta_us_kr": 0.45,
+    "description": "미국방산항공 -> 한국 방산 섹터",
+    "holdings": [
+      {"ticker": "012450", "name": "한화에어로스페이스", "weight": 25.0},
+      {"ticker": "079550", "name": "LIG넥스원", "weight": 18.0},
+      {"ticker": "064350", "name": "현대로템", "weight": 15.0},
+      {"ticker": "047810", "name": "한국항공우주", "weight": 12.0},
+      {"ticker": "014970", "name": "삼기이브이", "weight": 0.0},
+      {"ticker": "298040", "name": "효성중공업", "weight": 5.0},
+      {"ticker": "272210", "name": "한화시스템", "weight": 10.0},
+      {"ticker": "000880", "name": "한화", "weight": 6.0},
+      {"ticker": "004380", "name": "삼익악기", "weight": 0.0},
+      {"ticker": "082740", "name": "HSD엔진", "weight": 4.0}
+    ]
+  },
+  "ICLN": {
+    "kr_etf": {"ticker": "368200", "name": "TIGER KRX신재생에너지", "aum_billion": 600},
+    "beta_us_kr": 0.40,
+    "description": "글로벌클린에너지 -> 한국 신재생/태양광 섹터",
+    "holdings": [
+      {"ticker": "009830", "name": "한화솔루션", "weight": 22.0},
+      {"ticker": "112610", "name": "씨에스윈드", "weight": 15.0},
+      {"ticker": "298040", "name": "효성중공업", "weight": 12.0},
+      {"ticker": "034020", "name": "두산에너빌리티", "weight": 10.0},
+      {"ticker": "336260", "name": "두산퓨얼셀", "weight": 8.0},
+      {"ticker": "322000", "name": "현대에너지솔루션", "weight": 7.0},
+      {"ticker": "094820", "name": "일진파워", "weight": 6.5},
+      {"ticker": "281820", "name": "케이씨텍", "weight": 5.0},
+      {"ticker": "243070", "name": "휴온스", "weight": 0.0},
+      {"ticker": "011790", "name": "SKC", "weight": 4.5}
+    ]
+  },
+  "XLF": {
+    "kr_etf": {"ticker": "091220", "name": "TIGER 은행", "aum_billion": 1500},
+    "beta_us_kr": 0.35,
+    "description": "미국금융 -> 한국 금융 섹터",
+    "holdings": [
+      {"ticker": "105560", "name": "KB금융", "weight": 22.0},
+      {"ticker": "055550", "name": "신한지주", "weight": 20.0},
+      {"ticker": "086790", "name": "하나금융지주", "weight": 15.0},
+      {"ticker": "316140", "name": "우리금융지주", "weight": 12.0},
+      {"ticker": "024110", "name": "기업은행", "weight": 8.0},
+      {"ticker": "138930", "name": "BNK금융지주", "weight": 5.5},
+      {"ticker": "139130", "name": "DGB금융지주", "weight": 4.5},
+      {"ticker": "175330", "name": "JB금융지주", "weight": 4.0},
+      {"ticker": "003540", "name": "대신증권", "weight": 3.0},
+      {"ticker": "016360", "name": "삼성증권", "weight": 3.5}
+    ]
+  },
+  "XLE": {
+    "kr_etf": {"ticker": "117460", "name": "KODEX 에너지화학", "aum_billion": 900},
+    "beta_us_kr": 0.40,
+    "description": "미국에너지 -> 한국 에너지/정유 섹터",
+    "holdings": [
+      {"ticker": "096770", "name": "SK이노베이션", "weight": 20.0},
+      {"ticker": "010950", "name": "S-Oil", "weight": 18.0},
+      {"ticker": "078930", "name": "GS", "weight": 12.0},
+      {"ticker": "051910", "name": "LG화학", "weight": 15.0},
+      {"ticker": "011170", "name": "롯데케미칼", "weight": 8.0},
+      {"ticker": "006120", "name": "SK디스커버리", "weight": 5.5},
+      {"ticker": "003490", "name": "대한항공", "weight": 0.0},
+      {"ticker": "010060", "name": "OCI홀딩스", "weight": 6.0},
+      {"ticker": "009830", "name": "한화솔루션", "weight": 7.5},
+      {"ticker": "011780", "name": "금호석유", "weight": 5.0}
+    ]
+  },
+  "XLK": {
+    "kr_etf": {"ticker": "139260", "name": "TIGER 200IT", "aum_billion": 3200},
+    "beta_us_kr": 0.55,
+    "description": "미국IT -> 한국 IT/SW 섹터",
+    "holdings": [
+      {"ticker": "005930", "name": "삼성전자", "weight": 30.0},
+      {"ticker": "000660", "name": "SK하이닉스", "weight": 20.0},
+      {"ticker": "035420", "name": "NAVER", "weight": 10.0},
+      {"ticker": "035720", "name": "카카오", "weight": 7.0},
+      {"ticker": "259960", "name": "크래프톤", "weight": 5.5},
+      {"ticker": "263750", "name": "펄어비스", "weight": 3.0},
+      {"ticker": "036570", "name": "엔씨소프트", "weight": 4.0},
+      {"ticker": "251270", "name": "넷마블", "weight": 3.5},
+      {"ticker": "017670", "name": "SK텔레콤", "weight": 5.0},
+      {"ticker": "030200", "name": "KT", "weight": 4.0}
+    ]
+  },
+  "_metadata": {
+    "version": "1.0",
+    "updated": "2026-05-10",
+    "source": "ETF 운용사 PDF + KOSCOM 공시 기반 (수동 큐레이션)",
+    "notes": [
+      "weight=0인 종목은 해당 ETF와 무관한 종목 (제거 대상 마커)",
+      "비중은 2026년 4~5월 기준 근사값",
+      "beta_us_kr는 최근 1년 상관관계 기반 추정치",
+      "향후 KIS API ETF PDF 엔드포인트 연동 시 자동 갱신 예정"
+    ]
+  }
+}
