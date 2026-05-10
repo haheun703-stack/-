@@ -1051,45 +1051,50 @@ class SurgePullbackEngine:
             try:
                 # parquet에서 당일 데이터 조회
                 pf = raw_dir / f"{ticker}.parquet"
-                if not pf.exists():
-                    logger.debug("  %s parquet 없음 — 스킵", ticker)
-                    continue
+                price_available = False
 
-                df = pd.read_parquet(pf)
-                df.index = pd.to_datetime(df.index)
+                if pf.exists():
+                    df = pd.read_parquet(pf)
+                    df.index = pd.to_datetime(df.index)
 
-                # 컬럼 정규화
-                col_map = {}
-                for c in df.columns:
-                    cl = str(c).lower()
-                    if cl in ("close", "종가"): col_map[c] = "close"
-                    elif cl in ("high", "고가"): col_map[c] = "high"
-                    elif cl in ("low", "저가"): col_map[c] = "low"
-                if col_map:
-                    df = df.rename(columns=col_map)
+                    # 컬럼 정규화
+                    col_map = {}
+                    for c in df.columns:
+                        cl = str(c).lower()
+                        if cl in ("close", "종가"): col_map[c] = "close"
+                        elif cl in ("high", "고가"): col_map[c] = "high"
+                        elif cl in ("low", "저가"): col_map[c] = "low"
+                    if col_map:
+                        df = df.rename(columns=col_map)
 
-                if target_date not in df.index:
-                    continue
+                    if target_date in df.index:
+                        row = df.loc[target_date]
+                        today_high = int(row.get("high", 0))
+                        today_close = int(row.get("close", 0))
 
-                row = df.loc[target_date]
-                today_high = int(row.get("high", 0))
-                today_close = int(row.get("close", 0))
+                        if today_close > 0:
+                            price_available = True
+                            # 피크 업데이트
+                            if today_high > entry["peak_price"]:
+                                entry["peak_price"] = today_high
+                                entry["peak_date"] = date_str
 
-                if today_close == 0:
-                    continue
+                            # 눌림 계산
+                            peak = entry["peak_price"]
+                            pullback = 0.0
+                            if peak > 0:
+                                pullback = (today_close - peak) / peak * 100
+                                entry["pullback_from_peak"] = round(pullback, 2)
+                                entry["latest_close"] = today_close
 
-                # 피크 업데이트
-                if today_high > entry["peak_price"]:
-                    entry["peak_price"] = today_high
-                    entry["peak_date"] = date_str
-
-                # 눌림 계산
-                peak = entry["peak_price"]
-                pullback = 0.0
-                if peak > 0:
-                    pullback = (today_close - peak) / peak * 100
-                    entry["pullback_from_peak"] = round(pullback, 2)
-                    entry["latest_close"] = today_close
+                # v1.3.1: parquet 데이터 없어도 저장된 pullback으로 판정
+                if not price_available:
+                    pullback = entry.get("pullback_from_peak", 0.0)
+                    if pullback == 0.0:
+                        continue
+                    peak = entry.get("peak_price", 0)
+                    today_close = entry.get("latest_close", 0)
+                    logger.info("  %s parquet 미갱신 — 저장값 사용 (%.1f%%)", entry["name"], pullback)
 
                 # v1.2: 수급 기초데이터 갱신 (DB 기반, KIS API는 편입 시만)
                 try:
@@ -1122,7 +1127,11 @@ class SurgePullbackEngine:
                                    entry["name"], fire_info["fire_sector"],
                                    fire_info["fire_grade"], pullback_threshold, effective_threshold)
 
-                if pullback <= -effective_threshold:
+                # v1.3.1: 오차 허용 (3%) — 임계값 근처면 시그널 발동
+                tolerance = 0.03  # 3% 오차 허용
+                trigger_threshold = effective_threshold * (1 - tolerance)  # 8% → 7.76%, 10% → 9.7%
+
+                if pullback <= -trigger_threshold:
                     # 수급 확인: 스마트머니 순매수 여부
                     if self.config.get("supply_check_enabled", True):
                         supply = self.check_supply_demand(
