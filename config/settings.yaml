@@ -2387,3 +2387,24 @@ swing_philosophy:
     require_grade_a: true        # A등급 이상
     # 출력 옵션
     show_target_prices: true     # "XX원까지 떨어지면 줍줍" 표시
+
+# ============================================================
+# 상한가 풀림 실시간 감지 엔진 (LimitUpScanner v1.0)
+# ============================================================
+# 백테스트 근거: 이력2회+ & 5일내 & 1천원+ → 64건 전승 (100%)
+# 장중 상한가 도달 → 풀림 감지 → 즉시 매수
+limit_up_scanner:
+  enabled: true
+  scan_interval_sec: 30          # 일반 폴링 간격 (초)
+  focus_interval_sec: 10         # 상한가 도달 후 집중 감시 간격
+  unlock_threshold: 0.99         # 상한가 × 0.99 이하면 풀림 판정
+  min_prev_limit_ups: 2          # 최소 이전 상한가 횟수 (3번째부터 진입)
+  max_days_since_last: 10        # 직전 상한가로부터 최대 일수
+  capital: 50000000              # 운용 자본 (5천만원)
+  position_pct: 0.10             # 종목당 비중 (10% = 500만원)
+  max_positions: 5               # 동시 최대 포지션
+  take_profit: 0.10              # 익절 +10% (평단가 기준)
+  add_threshold: -0.10           # 추매 -10%
+  max_adds: 3                    # 최대 추매 횟수
+  max_hold_days: 20              # 최대 보유일
+  dry_run: true                  # 테스트 모드 (true=주문 미실행)
