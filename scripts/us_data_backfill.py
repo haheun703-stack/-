@@ -136,8 +136,9 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "tlt_close" in df.columns:
         df["tlt_ret_1d"] = df["tlt_close"].pct_change()
 
-    # 원자재 파생 지표 (금/은/원유/구리/천연가스/우라늄/농산물/리튬)
-    for prefix in ["gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit"]:
+    # 원자재 + 섹터 ETF 파생 지표
+    for prefix in ["gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit",
+                   "icln", "botz", "ita"]:
         col = f"{prefix}_close"
         if col in df.columns:
             df[f"{prefix}_ret_1d"] = df[col].pct_change()
@@ -193,7 +194,8 @@ def _calc_derived(df: pd.DataFrame) -> pd.DataFrame:
     if "spy_close" in df.columns:
         spy_ret = df["spy_close"].pct_change(5)
         for prefix in ["xlk", "xlf", "xle", "xli", "xlv", "soxx", "ewy",
-                        "gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit"]:
+                        "gld", "slv", "uso", "copx", "ung", "ura", "dba", "lit",
+                        "icln", "botz", "ita"]:
             col = f"{prefix}_close"
             if col in df.columns:
                 sector_ret = df[col].pct_change(5)
