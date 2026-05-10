@@ -47,9 +47,10 @@ PARQUET_PATH = US_DIR / "us_daily.parquet"
 SIGNAL_PATH = US_DIR / "overnight_signal.json"
 
 # 한국 섹터 매핑 (US ETF → KR 업종 키워드)
+# ★ SOXX를 반도체 PRIMARY 드라이버로 — XLK보다 우선 배치
 US_KR_SECTOR_MAP = {
-    "xlk": ["반도체", "IT", "소프트웨어", "전자부품", "디스플레이"],
-    "soxx": ["반도체", "전자부품", "디스플레이"],
+    "soxx": ["반도체", "전자부품", "디스플레이"],  # 반도체 PRIMARY
+    "xlk": ["IT", "소프트웨어"],                   # XLK는 IT/SW만 담당
     "xlf": ["은행", "증권", "보험", "금융"],
     "xle": ["에너지", "정유", "화학"],
     "xli": ["조선", "기계", "건설", "자동차", "운송"],
@@ -160,6 +161,17 @@ def _check_special_rules(latest, prev) -> list[dict]:
             "name": "SOXX_CRASH",
             "desc": f"SOXX {soxx_ret*100:+.1f}% 폭락 -> 반도체 KILL",
             "sector_kill": ["반도체", "전자부품", "디스플레이"],
+        })
+
+    # R3b: SOXX +3% 급등 → 반도체 BOOST (한국 반도체 갭업 선행)
+    soxx_5d = _ret("soxx_ret_5d")
+    if soxx_ret >= 0.03 or soxx_5d >= 0.08:
+        surge_type = "1D" if soxx_ret >= 0.03 else "5D"
+        triggered.append({
+            "name": "SOXX_SURGE",
+            "desc": f"SOXX {surge_type} 급등 (1D:{soxx_ret*100:+.1f}%, 5D:{soxx_5d*100:+.1f}%) -> 반도체 STRONG BUY",
+            "sector_boost": ["반도체", "전자부품", "디스플레이"],
+            "boost_factor": 1.5,
         })
 
     # R4: NASDAQ -3% → 성장주 직격
@@ -1075,23 +1087,31 @@ def generate_signal(df: pd.DataFrame | None = None) -> dict:
     for us_etf, kr_sectors in US_KR_SECTOR_MAP.items():
         rel_col = f"{us_etf}_rel_spy_5d"
         ret_col = f"{us_etf}_ret_1d"
-        close_col = f"{us_etf}_close"
+        ret5_col = f"{us_etf}_ret_5d"
 
         rel_5d = float(latest.get(rel_col, 0) or 0)
         ret_1d = float(latest.get(ret_col, 0) or 0)
+        ret_5d = float(latest.get(ret5_col, 0) or 0)
 
-        # 섹터 판정
-        if rel_5d > 0.01 and ret_1d > 0:
+        # 섹터 판정 (v2: 5일 모멘텀 우선)
+        # ★ 5일 수익률 > 5% → 무조건 bullish (1일 눌림 무시)
+        if ret_5d > 0.05:
+            sec_signal = "strong_bullish"
+            sec_score = 1.0
+        elif ret_5d > 0.03 or (rel_5d > 0.01 and ret_1d > 0):
             sec_signal = "bullish"
             sec_score = 0.5
-        elif rel_5d < -0.01 and ret_1d < 0:
+        elif ret_5d < -0.05:
+            sec_signal = "strong_bearish"
+            sec_score = -1.0
+        elif ret_5d < -0.03 or (rel_5d < -0.01 and ret_1d < 0):
             sec_signal = "bearish"
             sec_score = -0.5
         else:
             sec_signal = "neutral"
             sec_score = 0.0
 
-        driver = f"{us_etf.upper()} 1D:{ret_1d*100:+.1f}%, 상대강도5D:{rel_5d*100:+.1f}%"
+        driver = f"{us_etf.upper()} 1D:{ret_1d*100:+.1f}%, 5D:{ret_5d*100:+.1f}%, 상대강도:{rel_5d*100:+.1f}%"
 
         for kr_sector in kr_sectors:
             if kr_sector not in sector_signals:
