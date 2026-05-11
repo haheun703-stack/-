@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SurgePullbackTracker from "./SurgePullbackTracker";
 
 /* ─── 타입 ─── */
 
@@ -167,6 +168,7 @@ const TAB_ITEMS = [
   { key: "sectors", label: "업종 분석", icon: "\uD83D\uDCCA" },
   { key: "signals", label: "매매 신호", icon: "\uD83D\uDCE1" },
   { key: "performance", label: "성과", icon: "\uD83D\uDCC8" },
+  { key: "surge-pullback", label: "눌림목", icon: "\uD83D\uDD25" },
 ];
 
 /* ─── 메인 컴포넌트 ─── */
@@ -372,6 +374,11 @@ export default function JarvisControlTower() {
       {/* 성과 탭 */}
       {activeTab === "performance" && (
         <PerformanceTab performance={data.performance} />
+      )}
+
+      {/* 눌림목 탭 */}
+      {activeTab === "surge-pullback" && (
+        <SurgePullbackTracker />
       )}
     </div>
   );
