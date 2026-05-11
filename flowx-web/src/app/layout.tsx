@@ -23,9 +23,9 @@ export const metadata: Metadata = {
 const NAV_LINKS = [
   { href: "/", label: "\uB300\uC2DC\uBCF4\uB4DC" },
   { href: "/quant", label: "\uD140\uD2B8" },
+  { href: "/sector-fire", label: "\uC139\uD130\uBC1C\uD654" },
   { href: "/scenarios", label: "\uC2DC\uB098\uB9AC\uC624" },
   { href: "/signals", label: "\uC2DC\uADF8\uB110" },
-  { href: "/surge-pullback", label: "\uB20C\uB9BC\uBAA9" },
 ];
 
 export default function RootLayout({
