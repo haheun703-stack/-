@@ -2643,6 +2643,19 @@ def build_sector_fire_rows(date_str: str = "") -> list[dict]:
             "leverage_etf_code": s.get("leverage_etf_code"),
             "leverage_etf_name": s.get("leverage_etf_name"),
             "etf_recommend": s.get("etf_recommend", ""),
+            # Structure Score 필드 (v2: FIRE×0.6 + Structure×0.4 = Composite)
+            "s1_score": int(s.get("s1_score", 0)),
+            "s1_ratio": round(float(s.get("s1_ratio", 0) or 0), 3),
+            "s2_score": int(s.get("s2_score", 0)),
+            "s2_stoch_k": round(float(s.get("s2_stoch_k") or 0), 1) if s.get("s2_stoch_k") is not None else None,
+            "s3_score": int(s.get("s3_score", 0)),
+            "structure_score": int(s.get("structure_score", 0)),
+            "structure_grade": s.get("structure_grade", ""),
+            "composite_score": int(s.get("composite_score", 0)),
+            "composite_grade": s.get("composite_grade", ""),
+            "market_kospi_stoch_k": round(float(s.get("market_kospi_stoch_k") or 0), 1) if s.get("market_kospi_stoch_k") is not None else None,
+            "market_vix": round(float(s.get("market_vix") or 0), 1) if s.get("market_vix") is not None else None,
+            "market_disparity": round(float(s.get("market_disparity") or 0), 1) if s.get("market_disparity") is not None else None,
         })
 
     logger.info("[FIRE] 섹터발화 Row: %d행", len(rows))

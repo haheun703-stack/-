@@ -573,6 +573,65 @@ def print_report(sectors: list[dict], picks: list[dict]):
     print(SEP)
 
 
+def merge_structure_score(sectors: list[dict]) -> list[dict]:
+    """structure_score JSON 로드 → 각 섹터에 S1/S2/S3/composite 병합."""
+    today = datetime.now().strftime("%Y%m%d")
+    ss_path = OUTPUT_DIR / f"structure_score_{today}.json"
+
+    if not ss_path.exists():
+        logger.info("[Structure] 파일 없음: %s — 스킵", ss_path)
+        return sectors
+
+    try:
+        with open(ss_path, encoding="utf-8") as f:
+            ss_data = json.load(f)
+    except Exception as e:
+        logger.warning("[Structure] JSON 로드 실패: %s", e)
+        return sectors
+
+    ss_sectors = ss_data.get("sectors", {})
+    market = ss_data.get("market_regime", {})
+
+    for s in sectors:
+        name = s.get("sector", "")
+        ss = ss_sectors.get(name, {})
+
+        s["s1_score"] = ss.get("s1_score", 0)
+        s["s1_ratio"] = ss.get("s1_ratio", 0.0)
+        s["s2_score"] = ss.get("s2_score", 0)
+        s["s2_stoch_k"] = ss.get("s2_stoch_k")
+        s["s3_score"] = ss.get("s3_score", 0)
+        s["structure_score"] = ss.get("total", 0)
+        s["structure_grade"] = ss.get("grade", "D")
+
+        # Composite = FIRE×0.6 + Structure×0.4
+        fire = s.get("fire_score", 0)
+        structure = s["structure_score"]
+        composite = round(fire * 0.6 + structure * 0.4, 1)
+        s["composite_score"] = composite
+
+        if composite >= 85:
+            s["composite_grade"] = "S+"
+        elif composite >= 70:
+            s["composite_grade"] = "S"
+        elif composite >= 55:
+            s["composite_grade"] = "A"
+        elif composite >= 40:
+            s["composite_grade"] = "B"
+        elif composite >= 25:
+            s["composite_grade"] = "C"
+        else:
+            s["composite_grade"] = "D"
+
+        # 시장 레짐 (모든 섹터 동일)
+        s["market_kospi_stoch_k"] = market.get("kospi_stoch_k")
+        s["market_vix"] = market.get("vix")
+        s["market_disparity"] = market.get("disparity")
+
+    logger.info("[Structure] 병합 완료: %d섹터", len(ss_sectors))
+    return sectors
+
+
 def save_output(sectors: list[dict], picks: list[dict]):
     """JSON + CSV 저장."""
     today = datetime.now().strftime("%Y%m%d")
@@ -610,6 +669,7 @@ def main():
     args = parser.parse_args()
 
     sectors, picks = scan_sector_fire(lookback=args.lookback)
+    sectors = merge_structure_score(sectors)
     print_report(sectors, picks)
     save_output(sectors, picks)
 

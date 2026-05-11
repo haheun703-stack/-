@@ -53,6 +53,7 @@ sectors:
               "018880", "036200", "119850",
               "066570", "028260", "017670"]
     etf: null
+    fallback_ticker: "083450"   # GST — S2 주봉 StochRSI 대체용
     leverage_etf: null
 
   자동차:
@@ -73,6 +74,7 @@ sectors:
   화장품소비재:
     tickers: ["090430", "285130", "377300"]
     etf: null
+    fallback_ticker: "090430"   # 아모레퍼시픽 — S2 주봉 StochRSI 대체용
     leverage_etf: null
 
   정유에너지:
