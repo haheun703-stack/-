@@ -100,18 +100,23 @@ def cmd_generate(config: dict):
     print(f"저장: {CANDIDATES_PATH}")
 
     if candidates:
-        print(f"\n{'순위':<4} {'종목':<8} {'상한가횟수':<10} {'마지막상한가':<12} {'경과일':<6} {'상한가(원)'}")
-        print("-" * 60)
-        for i, c in enumerate(candidates[:20], 1):
+        t1 = [c for c in candidates if c.get("tier") == "T1"]
+        t2 = [c for c in candidates if c.get("tier") == "T2"]
+        print(f"  T1(상한가 2회+): {len(t1)}종목 / T2(상한가1+급등2): {len(t2)}종목")
+
+        print(f"\n{'순위':<4} {'Tier':<5} {'종목':<8} {'상한가':<6} {'급등':<5} {'마지막이벤트':<12} {'경과일':<6} {'상한가(원)'}")
+        print("-" * 68)
+        for i, c in enumerate(candidates[:30], 1):
             print(
-                f"{i:<4} {c['ticker']:<8} "
-                f"{c['limit_up_count']:<10} "
+                f"{i:<4} {c.get('tier','?'):<5} {c['ticker']:<8} "
+                f"{c['limit_up_count']:<6} "
+                f"{c.get('surge_count', 0):<5} "
                 f"{c['last_limit_up']:<12} "
                 f"{c['days_since_last']:<6} "
                 f"{c['limit_price']:>10,}"
             )
-        if len(candidates) > 20:
-            print(f"  ... +{len(candidates) - 20}종목")
+        if len(candidates) > 30:
+            print(f"  ... +{len(candidates) - 30}종목")
 
 
 def cmd_scan(config: dict, live: bool):

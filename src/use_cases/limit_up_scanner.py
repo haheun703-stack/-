@@ -98,12 +98,14 @@ class LimitUpScanner:
 
     def generate_candidates(self, date_str: str | None = None) -> list[dict]:
         """
-        data/raw/*.parquet 스캔하여 상한가 이력 후보 생성.
+        data/raw/*.parquet 스캔하여 상한가/급등 이력 후보 생성.
         BAT-D에서 매일 호출.
 
-        조건:
-        - 최근 6개월 내 상한가 이력 min_prev_limit_ups회 이상
-        - 직전 상한가로부터 max_days_since_last일 이내
+        조건 (OR):
+        - Tier1: 최근 6개월 내 상한가(29%+) 이력 min_prev_limit_ups회 이상
+        - Tier2: 상한가 1회 + 10%+ 급등 2회 이상
+        공통:
+        - 직전 상한가/급등으로부터 max_days_since_last일 이내
         - 최종 종가 >= 1,000원
         """
         today = pd.Timestamp(date_str or datetime.now().strftime("%Y-%m-%d"))
@@ -111,6 +113,7 @@ class LimitUpScanner:
 
         candidates = []
         limit_up_pct = 29.0  # 상한가 기준 (+29% 이상)
+        surge_pct = 10.0     # 급등 기준 (+10% 이상)
 
         for fname in sorted(os.listdir(RAW_DIR)):
             if not fname.endswith(".parquet"):
@@ -135,25 +138,40 @@ class LimitUpScanner:
 
                 # 상한가 이벤트 추출
                 lu_dates = dfp.index[pct >= limit_up_pct].tolist()
-                if len(lu_dates) < self.min_prev_limit_ups:
+                # 10%+ 급등 이벤트 추출 (상한가 제외)
+                surge_dates = dfp.index[(pct >= surge_pct) & (pct < limit_up_pct)].tolist()
+
+                # Tier1: 상한가 2회+ / Tier2: 상한가 1회 + 급등 2회+
+                lu_count = len(lu_dates)
+                surge_count = len(surge_dates)
+                tier1 = lu_count >= self.min_prev_limit_ups
+                tier2 = lu_count >= 1 and surge_count >= 2
+                if not (tier1 or tier2):
                     continue
 
-                # 직전 상한가로부터 최대 일수 체크
-                last_lu = max(lu_dates)
-                days_since = (today - last_lu).days
+                # 직전 이벤트(상한가 또는 급등)로부터 최대 일수 체크
+                all_event_dates = lu_dates + surge_dates
+                last_event = max(all_event_dates)
+                days_since = (today - last_event).days
                 if days_since > self.max_days_since_last:
                     continue
+
+                # 직전 상한가 날짜 (없으면 급등 날짜)
+                last_lu = max(lu_dates) if lu_dates else max(surge_dates)
 
                 # 최종 종가 체크 (= 다음날 전일종가 = 상한가 계산 기준)
                 prev_close = int(dfp.iloc[-1]["close"])
                 if prev_close < 1000:
                     continue
 
+                tier = "T1" if tier1 else "T2"
                 candidates.append({
                     "ticker": ticker,
                     "prev_close": prev_close,
                     "limit_price": int(prev_close * 1.30),
-                    "limit_up_count": len(lu_dates),
+                    "limit_up_count": lu_count,
+                    "surge_count": surge_count,
+                    "tier": tier,
                     "last_limit_up": last_lu.strftime("%Y-%m-%d"),
                     "days_since_last": days_since,
                     "generated_at": today.strftime("%Y-%m-%d"),
@@ -161,8 +179,8 @@ class LimitUpScanner:
             except Exception as e:
                 logger.debug("[LU스캐너] %s 스캔 실패: %s", ticker, e)
 
-        # 상한가 횟수 내림차순 정렬
-        candidates.sort(key=lambda x: (-x["limit_up_count"], x["days_since_last"]))
+        # Tier1 우선, 상한가 횟수 내림차순 정렬
+        candidates.sort(key=lambda x: (0 if x["tier"] == "T1" else 1, -x["limit_up_count"], -x["surge_count"], x["days_since_last"]))
 
         # 저장
         CANDIDATES_PATH.parent.mkdir(parents=True, exist_ok=True)

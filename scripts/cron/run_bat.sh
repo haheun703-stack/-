@@ -213,6 +213,8 @@ case "$BAT" in
     run_py_long scripts/ai_news_brain.py
     # COO 복원: 컨센서스 스크리너 (wisereport 목표가 + 기술적 분석)
     run_py_long scripts/scan_consensus.py
+    # G3.9: 상한가 풀림 감시 후보 갱신 (일봉 수집 완료 후)
+    run_py scripts/run_limit_up_scanner.py --generate
     # --- G4: 추천 ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py
