@@ -2833,10 +2833,10 @@ def build_surge_pullback_rows(date_str: str = "") -> list[dict]:
             "inst_5d": round(float(e.get("inst_5d", 0)), 1),
             "elasticity_score": round(float(sig.get("elasticity_score", 0)), 1),
             "elasticity_grade": sig.get("elasticity_grade", ""),
-            # v1.3: 섹터발화
-            "fire_sector": e.get("fire_sector", ""),
-            "fire_grade": e.get("fire_grade", ""),
-            "fire_score": int(e.get("fire_score", 0)),
+            # v1.3: 섹터발화 (워치리스트 → 시그널 fallback)
+            "fire_sector": e.get("fire_sector") or sig.get("fire_sector", ""),
+            "fire_grade": e.get("fire_grade") or sig.get("fire_grade", ""),
+            "fire_score": int(e.get("fire_score") or sig.get("fire_score", 0)),
         })
 
     logger.info("[눌림목] Surge Pullback Row: %d행", len(rows))
