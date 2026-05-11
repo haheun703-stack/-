@@ -269,6 +269,97 @@ def run_backfill(engine: SurgePullbackEngine, start: str, end: str):
         current += timedelta(days=1)
 
 
+def run_enrich_signals(engine: SurgePullbackEngine):
+    """시그널 파일에서 탄력성/수급이 null인 항목을 재계산하여 채움."""
+    import json
+    sig_path = PROJECT_ROOT / "data" / "surge_pullback_signals.json"
+    if not sig_path.exists():
+        print("시그널 파일 없음")
+        return
+
+    with open(sig_path, encoding="utf-8") as f:
+        signals = json.load(f)
+
+    updated = 0
+    today_str = datetime.now().strftime("%Y%m%d")
+
+    for s in signals:
+        ticker = s.get("ticker", "")
+        name = s.get("name", "")
+
+        # elasticity/수급/FIRE 중 하나라도 null이면 재계산
+        needs_update = (
+            s.get("elasticity_score") is None
+            or s.get("frgn_pct") is None
+            or s.get("sectors") == ["미분류"]
+            or s.get("fire_sector") is None
+            or s.get("supply_buyers") is None
+        )
+        if not needs_update:
+            continue
+
+        sig_date = (s.get("signal_date") or today_str).replace("-", "")
+        print(f"  보강: {ticker} {name} (시그널 {sig_date})")
+
+        # 탄력성 재계산
+        try:
+            profile = engine.calc_ownership_profile(ticker, sig_date)
+            if profile.get("elasticity_grade") not in (None, "N/A"):
+                s["elasticity_score"] = profile["elasticity_score"]
+                s["elasticity_grade"] = profile["elasticity_grade"]
+                s["elasticity_reason"] = profile.get("elasticity_reason", "")
+                s["frgn_pct"] = profile.get("frgn_pct", 0)
+                s["total_shares"] = profile.get("total_shares", 0)
+                s["ownership_investors"] = profile.get("investors", {})
+                print(f"    → 탄력성 {profile['elasticity_grade']} {profile['elasticity_score']:.0f}점, "
+                      f"외국인 {profile.get('frgn_pct', 0):.1f}%")
+        except Exception as e:
+            print(f"    → 탄력성 실패: {e}")
+
+        # 수급 확인 재계산
+        if s.get("supply_buyers") is None:
+            try:
+                supply = engine.check_supply_demand(ticker, sig_date)
+                s["supply_buyers"] = supply.get("buyers", [])
+                s["supply_detail"] = supply.get("detail", {})
+                s["supply_reason"] = supply.get("reason", "")
+                if supply.get("buyers"):
+                    print(f"    → 수급: {supply['buyers']}")
+            except Exception as e:
+                print(f"    → 수급 실패: {e}")
+
+        # 섹터 재분류
+        if s.get("sectors") == ["미분류"] or not s.get("sectors"):
+            try:
+                sectors = engine.tag_sector(ticker, name)
+                if sectors and sectors != ["미분류"]:
+                    s["sectors"] = sectors
+                    print(f"    → 섹터: {sectors}")
+            except Exception:
+                pass
+
+        # FIRE 점수 계산
+        if s.get("fire_sector") is None:
+            try:
+                fire_info = engine.get_sector_fire_for_stock(ticker, s.get("sectors", []))
+                s["fire_sector"] = fire_info.get("fire_sector", "")
+                s["fire_grade"] = fire_info.get("fire_grade", "")
+                s["fire_score"] = fire_info.get("fire_score", 0)
+                if fire_info.get("fire_sector"):
+                    print(f"    → FIRE: {fire_info['fire_sector']} {fire_info['fire_grade']} {fire_info['fire_score']}점")
+            except Exception as e:
+                print(f"    → FIRE 실패: {e}")
+
+        updated += 1
+
+    if updated > 0:
+        with open(sig_path, "w", encoding="utf-8") as f:
+            json.dump(signals, f, ensure_ascii=False, indent=2)
+        print(f"\n총 {updated}건 보강 완료 → {sig_path}")
+    else:
+        print("보강 필요한 시그널 없음")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="상한가 눌림목 분할매수 스캐너"
@@ -277,6 +368,8 @@ def main():
                        help="스캔 날짜 (YYYYMMDD, 기본=오늘)")
     parser.add_argument("--backfill", nargs=2, metavar=("START", "END"),
                        help="백필 기간 (YYYYMMDD YYYYMMDD)")
+    parser.add_argument("--enrich", action="store_true",
+                       help="시그널 탄력성/수급 null 항목 보강")
     parser.add_argument("--status", action="store_true",
                        help="현재 워치리스트 상태만 출력")
     parser.add_argument("--telegram", action="store_true",
@@ -311,6 +404,11 @@ def main():
     # 상태 확인 모드
     if args.status:
         engine.print_status()
+        return
+
+    # 탄력성/수급 보강 모드
+    if args.enrich:
+        run_enrich_signals(engine)
         return
 
     # 백필 모드

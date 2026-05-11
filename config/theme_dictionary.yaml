@@ -42,6 +42,7 @@ themes:
     stocks:
       - {ticker: "267260", name: "HD현대일렉트릭", order: 1}
       - {ticker: "298040", name: "효성중공업", order: 1}
+      - {ticker: "053080", name: "케이엔솔", order: 2}
       - {ticker: "003230", name: "삼양식품", order: 3}
 
   사이버보안:
