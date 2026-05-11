@@ -116,6 +116,9 @@ case "$BAT" in
     $PY scripts/intraday_eye.py --killer-picks >> "$LOG" 2>&1 &
     $PY scripts/run_vwap_monitor.py --killer-picks >> "$LOG" 2>&1 &
     ;;
+  LU) # 08:55 KST — 상한가 풀림 실시간 감지 (장중 장기 실행, 15:20 자동 종료)
+    $PY scripts/run_limit_up_scanner.py --scan --dry-run >> "$LOG" 2>&1 &
+    ;;
   H) # 11:30 KST — 장중 분석
     run_py scripts/run_midday_analysis.py
     # 월/금 장중 유니버스 전체 재구성 (pykrx는 장중에만 안정적)
@@ -134,10 +137,11 @@ case "$BAT" in
   D) # 16:30 KST — 장마감 전체 파이프라인 (데이터 + 분석 + 추천)
     # 텔레그램 QUIET 모드: [EVENING],[PAPER],[NXT],[HEALTH] 태그만 발송
     export TELEGRAM_QUIET=1
-    # BAT-L(NXT)과 BAT-I(EYE) 잔여 프로세스 정리 — 동시 실행 시 KIS API 충돌 + OOM 방지
+    # BAT-L(NXT)과 BAT-I(EYE/VWAP/LU) 잔여 프로세스 정리 — 동시 실행 시 KIS API 충돌 + OOM 방지
     pkill -f "nxt_market_collector" >> "$LOG" 2>&1 || true
     pkill -f "intraday_eye" >> "$LOG" 2>&1 || true
     pkill -f "run_vwap_monitor" >> "$LOG" 2>&1 || true
+    pkill -f "run_limit_up_scanner" >> "$LOG" 2>&1 || true
     sleep 2
     echo "[$(date +%H:%M:%S)] [INFO] BAT-L/I 잔여 프로세스 정리 완료" >> "$LOG"
     # .pyc 캐시 삭제 — git pull 후 구버전 캐시 실행 방지
