@@ -88,7 +88,9 @@ export default function SectorFireDashboard() {
         const res = await fetch("/api/sector-fire", { signal: controller.signal });
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         const json = await res.json();
-        setData(json);
+        // API가 sectors 또는 data 키로 반환할 수 있음
+        const sectors = json.sectors ?? json.data ?? [];
+        setData({ sectors, date: json.date ?? null });
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setData(null);
