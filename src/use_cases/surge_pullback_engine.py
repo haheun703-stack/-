@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 """
-상한가 눌림목 분할매수 엔진 v1.2
+상한가 눌림목 분할매수 엔진 v2.0
 ═══════════════════════════════════════════════
 
 2층 구조:
   Layer 1: v10c 큐레이션 93종목 (백테스트 검증, 고정)
   Layer 2: 일일 자동 발굴 (전 종목 스캔 → 품질 필터)
 
-v1.1 변경:
-  - 수급 확인 필터 추가: 시그널 발생 시 외국인/기관/금투/연기금 중
-    1주체 이상 순매수 확인 필요 (investor_daily.db 연동)
+v2.0 변경 (2026-05-12):
+  - 연속급등(모멘텀) 시그널: 편입 후 추가 +10% 상승 시 즉시 시그널
+    → "눌림 없이 급등" 패턴 포착 (가온전선/한솔테크닉스류)
+  - 감시 기간 연장: 3→5일 (급등>25%면 7일)
+  - 동적 눌림 임계값: 급등폭 비례 (15~20%→-8%, 20~30%→-7%, 30%+→-6%)
+  - 수급 stale 차단: 데이터 5일+ 오래되면 시그널 차단 (기존: 통과)
+  - 만료 후 성과 추적: expired 종목 5일간 추적 → 놓친 기회 학습
 
 v1.2 변경:
   - 보유비중 프로파일 추가: KIS API 외국인 보유비중 + DB 누적 순매수 결합
   - 수급 탄력성(supply elasticity) 점수 계산
-    → 누적 보유 大 + 최근 소량 매도 = 탄력성 높음 (반등 가능성↑)
 
-백테스트 최적 파라미터 (2025-11~2026-05, 6개월):
+v1.1 변경:
+  - 수급 확인 필터 추가: 외국인/기관/금투/연기금 순매수 확인
+
+파라미터:
   - 급등 기준: 15%+
-  - 눌림 기준: 피크 대비 -10%
-  - 감시 기간: 3 거래일
-  - 최소 주가: 10,000원
-  - 최소 거래대금: 10억원/일
-  - v10c 결과: 91.7% 승률, +170% 수익 (5천만 시드)
+  - 눌림 기준: 동적 (급등폭 비례 6~8%)
+  - 감시 기간: 5~7 거래일 (동적)
+  - 모멘텀 기준: 편입 후 추가 +10%
 """
 from __future__ import annotations
 
@@ -250,8 +254,8 @@ KNOWN_SECTOR_MAP = {
 # ═══════════════════════════════════════════════════════
 DEFAULT_CONFIG = {
     "surge_threshold": 15.0,      # 급등 기준 (%)
-    "pullback_pct": 10.0,         # 눌림 기준 (피크 대비 %)
-    "watch_days": 3,              # 감시 기간 (거래일)
+    "pullback_pct": 10.0,         # 눌림 기준 (피크 대비 %) — v2.0: 동적 임계값 기본값
+    "watch_days": 5,              # v2.0: 감시 기간 3→5일 (급등>25%면 7일)
     "min_price": 10_000,          # 최소 주가 (원)
     "min_trading_value": 1_000_000_000,  # 최소 거래대금 (10억원)
     "capital": 50_000_000,        # 시드 (원)
@@ -262,6 +266,13 @@ DEFAULT_CONFIG = {
     "supply_check_enabled": True,     # 수급 확인 필터 활성화 (v1.1)
     "supply_lookback_days": 3,        # 수급 확인 기간 (최근 N거래일)
     "ownership_profile_enabled": True,  # 보유비중 프로파일 활성화 (v1.2)
+    # v2.0 신규 설정
+    "momentum_signal_enabled": True,   # 연속급등 감지 (눌림 없이 추가 +10% 시 즉시 시그널)
+    "momentum_threshold": 10.0,        # 연속급등 임계값 (편입 이후 추가 상승 %)
+    "dynamic_pullback_enabled": True,  # 급등폭 비례 동적 눌림 임계값
+    "supply_stale_block": True,        # 수급 데이터 stale 시 시그널 차단 (v1.1은 통과)
+    "supply_stale_max_days": 5,        # 수급 데이터 허용 최대 갭 (달력일)
+    "expired_tracking_days": 5,        # 만료 후 성과 추적 기간
 }
 
 
@@ -525,17 +536,29 @@ class SurgePullbackEngine:
 
             if not recent_dates:
                 conn.close()
-                result["confirmed"] = True  # 데이터 없으면 기존 로직 유지
-                result["reason"] = f"종목 {ticker} 수급 데이터 없음 (필터 스킵)"
+                # v2.0: 수급 데이터 없으면 차단 (stale_block 설정 시)
+                if self.config.get("supply_stale_block", True):
+                    result["confirmed"] = False
+                    result["reason"] = f"종목 {ticker} 수급 데이터 없음 — 시그널 차단"
+                else:
+                    result["confirmed"] = True
+                    result["reason"] = f"종목 {ticker} 수급 데이터 없음 (필터 스킵)"
                 return result
 
-            # 데이터 신선도 체크: 가장 최근 데이터가 5영업일 이상 오래되면 스킵
+            # v2.0: 데이터 신선도 체크 — stale 데이터 시 차단
             latest_data_date = recent_dates[0]
             date_gap = int(fmt_date) - int(latest_data_date)
-            if date_gap > 7:  # 달력일 7일 이상 = 영업일 5일 이상 차이
+            stale_max = self.config.get("supply_stale_max_days", 5)
+            if date_gap > stale_max:
                 conn.close()
-                result["confirmed"] = True
-                result["reason"] = f"수급 데이터 오래됨 ({latest_data_date}) — 필터 스킵"
+                if self.config.get("supply_stale_block", True):
+                    result["confirmed"] = False
+                    result["reason"] = (f"수급 데이터 {date_gap}일 오래됨 "
+                                       f"({latest_data_date}) — 시그널 차단")
+                else:
+                    result["confirmed"] = True
+                    result["reason"] = (f"수급 데이터 오래됨 "
+                                       f"({latest_data_date}) — 필터 스킵")
                 return result
 
             placeholders = ",".join(["?"] * len(recent_dates))
@@ -1122,25 +1145,97 @@ class SurgePullbackEngine:
         return entry
 
     # ──────────────────────────────────────────
-    # 5. 피크 업데이트 + 눌림 체크
+    # 5. 피크 업데이트 + 눌림 체크 (v2.0)
     # ──────────────────────────────────────────
+    def _calc_dynamic_pullback(self, surge_pct: float) -> float:
+        """v2.0: 급등폭 비례 동적 눌림 임계값.
+
+        강하게 급등한 종목일수록 눌림 기준을 낮춤 (약눌림 반등 포착).
+        - 15~20% 급등 → -8% 눌림
+        - 20~30% 급등 → -7% 눌림
+        - 30%+ 급등  → -6% 눌림
+        """
+        if not self.config.get("dynamic_pullback_enabled", True):
+            return self.config["pullback_pct"]
+
+        if surge_pct >= 30:
+            return 6.0
+        elif surge_pct >= 20:
+            return 7.0
+        elif surge_pct >= 15:
+            return 8.0
+        return self.config["pullback_pct"]
+
+    def _calc_dynamic_watch_days(self, surge_pct: float) -> int:
+        """v2.0: 급등폭에 따른 동적 감시 기간.
+
+        대형 급등(25%+)은 눌림에 시간이 더 걸리므로 감시 기간 연장.
+        """
+        base = self.config["watch_days"]  # 기본 5일
+        if surge_pct >= 25:
+            return max(base, 7)
+        return base
+
+    def _build_signal_dict(self, entry: dict, peak: int, today_close: int,
+                           pullback: float, date_str: str,
+                           supply: dict, ownership: dict,
+                           fire_info: dict, etf_boost: dict,
+                           signal_type: str = "pullback") -> dict:
+        """시그널 딕셔너리 생성 (pullback / momentum 공통)."""
+        return {
+            "ticker": entry["ticker"],
+            "name": entry["name"],
+            "layer": entry["layer"],
+            "sectors": entry["sectors"],
+            "surge_date": entry["surge_date"],
+            "surge_pct": entry["surge_pct"],
+            "peak_price": peak,
+            "entry_price": today_close,
+            "pullback_pct": round(pullback, 2),
+            "watch_day": entry["watch_day"],
+            "signal_date": date_str,
+            "signal_type": signal_type,  # v2.0: "pullback" 또는 "momentum"
+            "supply_buyers": supply.get("buyers", []),
+            "supply_detail": supply.get("detail", {}),
+            "supply_reason": supply.get("reason", ""),
+            # 보유비중 정보
+            "frgn_pct": ownership.get("frgn_pct", 0),
+            "total_shares": ownership.get("total_shares", 0),
+            "elasticity_score": ownership.get("elasticity_score", 0),
+            "elasticity_grade": ownership.get("elasticity_grade", "N/A"),
+            "elasticity_reason": ownership.get("elasticity_reason", ""),
+            "ownership_investors": ownership.get("investors", {}),
+            # 섹터발화
+            "fire_sector": fire_info.get("fire_sector", ""),
+            "fire_grade": fire_info.get("fire_grade", ""),
+            "fire_score": fire_info.get("fire_score", 0),
+            # ETF 전파
+            "etf_expected_ret": etf_boost.get("expected_ret_pct", 0),
+            "etf_source": etf_boost.get("source_etf", ""),
+        }
+
     def update_and_check(self, watchlist: dict, date_str: str) -> list[dict]:
         """
-        워치리스트 내 종목들의 최신 가격 업데이트 → 눌림 시그널 체크.
+        워치리스트 내 종목들의 최신 가격 업데이트 → 눌림/모멘텀 시그널 체크.
+
+        v2.0 변경:
+          - 연속급등 감지: 편입 이후 추가 +10% 상승 시 "momentum" 시그널
+          - 동적 감시 기간: 급등>25%면 7일, 그 외 5일
+          - 동적 눌림 임계값: 급등폭에 비례 (15~20%→-8%, 20~30%→-7%, 30%+→-6%)
+          - 수급 stale 차단: 데이터 5일+ 오래되면 시그널 차단
+
         parquet 기반 (pykrx 폴백).
         반환: 매수 시그널 리스트
         """
         fmt_date = date_str.replace("-", "")
         target_date = pd.Timestamp(fmt_date)
         signals = []
-        watch_days_limit = self.config["watch_days"]
-        pullback_threshold = self.config["pullback_pct"]
 
         active = [e for e in watchlist["entries"] if e["status"] == "watching"]
         if not active:
             return signals
 
-        logger.info("감시 종목 %d건 피크/눌림 체크", len(active))
+        logger.info("감시 종목 %d건 피크/눌림/모멘텀 체크", len(active))
         raw_dir = PROJECT_ROOT / "data" / "raw"
 
         for entry in active:
@@ -1214,24 +1309,78 @@ class SurgePullbackEngine:
                 entry["fire_grade"] = fire_info["fire_grade"]
                 entry["fire_score"] = fire_info["fire_score"]
 
-                # ── 눌림 시그널 판정 (v1.1 수급 + v1.3 발화등급 가중치) ──
-                # 발화 A/B 등급: 눌림 기준 완화 (-8%에서 시그널)
+                # v1.4: ETF 전파 모델
+                etf_boost = self._get_etf_transmission_boost(ticker, entry.get("sectors", []))
+                entry["etf_expected_ret"] = etf_boost.get("expected_ret_pct", 0)
+                entry["etf_source"] = etf_boost.get("source_etf", "")
+
+                # v2.0: 동적 감시 기간 (급등폭 기반)
+                surge_pct = entry.get("surge_pct", 15.0)
+                watch_days_limit = self._calc_dynamic_watch_days(surge_pct)
+
+                # ═══════════════════════════════════════════
+                # v2.0: 연속급등(모멘텀) 시그널 체크 — 눌림 전에 먼저 판정
+                # 편입 이후 추가 +10% 상승 시 즉시 "momentum" 시그널
+                # ═══════════════════════════════════════════
+                if (self.config.get("momentum_signal_enabled", True)
+                        and price_available and today_close > 0):
+                    surge_close = entry.get("surge_close", 0)
+                    momentum_threshold = self.config.get("momentum_threshold", 10.0)
+
+                    if surge_close > 0:
+                        gain_from_surge = (today_close - surge_close) / surge_close * 100
+                        entry["gain_from_surge"] = round(gain_from_surge, 2)
+
+                        if gain_from_surge >= momentum_threshold:
+                            # 모멘텀 시그널: 눌림 없이 연속 상승
+                            entry["status"] = "signal"
+                            entry["signal_date"] = date_str
+
+                            ownership = {}
+                            if self.config.get("ownership_profile_enabled", True):
+                                try:
+                                    ownership = self.calc_ownership_profile(ticker, date_str)
+                                    entry["ownership_profile"] = ownership
+                                    time.sleep(0.15)
+                                except Exception as e:
+                                    logger.warning("  보유비중 프로파일 실패 %s: %s",
+                                                   ticker, str(e)[:40])
+
+                            sig = self._build_signal_dict(
+                                entry, peak, today_close, pullback, date_str,
+                                {"confirmed": True, "buyers": [],
+                                 "detail": {}, "reason": "모멘텀 시그널 (수급 체크 생략)"},
+                                ownership, fire_info, etf_boost,
+                                signal_type="momentum",
+                            )
+                            signals.append(sig)
+                            logger.info(
+                                "  ★ MOMENTUM SIGNAL: %s %s "
+                                "(급등종가%d→현재%d, +%.1f%% 추가상승)",
+                                ticker, entry["name"],
+                                surge_close, today_close, gain_from_surge,
+                            )
+                            continue  # 모멘텀 시그널 발생 시 눌림 체크 스킵
+
+                # ═══════════════════════════════════════════
+                # 눌림 시그널 판정 (v2.0: 동적 임계값 + 수급 stale 차단)
+                # ═══════════════════════════════════════════
+
+                # v2.0: 동적 눌림 임계값 (급등폭 비례)
+                pullback_threshold = self._calc_dynamic_pullback(surge_pct)
+
+                # 발화 A/B 등급: 눌림 기준 추가 완화
                 effective_threshold = pullback_threshold
                 if fire_info["fire_grade"] in ("A", "B") and fire_info["fire_score"] >= 40:
-                    effective_threshold = pullback_threshold * 0.8  # 10% → 8%
+                    effective_threshold = pullback_threshold * 0.8
                     if pullback <= -effective_threshold and pullback > -pullback_threshold:
                         logger.info("  🔥 발화 가중치 적용: %s [%s %s등급] — 기준 %.1f%%→%.1f%%",
                                    entry["name"], fire_info["fire_sector"],
                                    fire_info["fire_grade"], pullback_threshold, effective_threshold)
 
                 # v1.4: ETF 전파 모델 — US ETF 급등 시 임계값 절대 완화 (최대 3%p)
-                etf_boost = self._get_etf_transmission_boost(ticker, entry.get("sectors", []))
-                entry["etf_expected_ret"] = etf_boost.get("expected_ret_pct", 0)
-                entry["etf_source"] = etf_boost.get("source_etf", "")
                 etf_exp = etf_boost.get("expected_ret_pct", 0)
                 if etf_exp >= 2.0:
-                    # 기대수익 구간별 절대 완화 (percentage point 차감)
-                    # 2~3% → 1%p, 3~5% → 2%p, 5%+ → 3%p
                     if etf_exp >= 5.0:
                         etf_reduction = 3.0
                     elif etf_exp >= 3.0:
@@ -1243,9 +1392,9 @@ class SurgePullbackEngine:
                                entry["name"], etf_boost.get("source_etf", "?"),
                                etf_exp, int(etf_reduction), effective_threshold)
 
-                # v1.3.1: 오차 허용 (3%) — 임계값 근처면 시그널 발동
-                tolerance = 0.03  # 3% 오차 허용
-                trigger_threshold = effective_threshold * (1 - tolerance)  # 8% → 7.76%, 10% → 9.7%
+                # 오차 허용 (3%)
+                tolerance = 0.03
+                trigger_threshold = effective_threshold * (1 - tolerance)
 
                 if pullback <= -trigger_threshold:
                     # 수급 확인: 스마트머니 순매수 여부
@@ -1262,53 +1411,31 @@ class SurgePullbackEngine:
                         entry["signal_date"] = date_str
                         entry["supply_check"] = supply
 
-                        # v1.2: 보유비중 프로파일 계산
+                        # 보유비중 프로파일 계산
                         ownership = {}
                         if self.config.get("ownership_profile_enabled", True):
                             try:
                                 ownership = self.calc_ownership_profile(ticker, date_str)
                                 entry["ownership_profile"] = ownership
-                                time.sleep(0.15)  # KIS API rate limit
+                                time.sleep(0.15)
                             except Exception as e:
                                 logger.warning("  보유비중 프로파일 실패 %s: %s", ticker, str(e)[:40])
 
-                        signals.append({
-                            "ticker": ticker,
-                            "name": entry["name"],
-                            "layer": entry["layer"],
-                            "sectors": entry["sectors"],
-                            "surge_date": entry["surge_date"],
-                            "surge_pct": entry["surge_pct"],
-                            "peak_price": peak,
-                            "entry_price": today_close,
-                            "pullback_pct": round(pullback, 2),
-                            "watch_day": entry["watch_day"],
-                            "signal_date": date_str,
-                            "supply_buyers": supply["buyers"],
-                            "supply_detail": supply["detail"],
-                            "supply_reason": supply["reason"],
-                            # v1.2: 보유비중 정보
-                            "frgn_pct": ownership.get("frgn_pct", 0),
-                            "total_shares": ownership.get("total_shares", 0),
-                            "elasticity_score": ownership.get("elasticity_score", 0),
-                            "elasticity_grade": ownership.get("elasticity_grade", "N/A"),
-                            "elasticity_reason": ownership.get("elasticity_reason", ""),
-                            "ownership_investors": ownership.get("investors", {}),
-                            # v1.3: 섹터발화
-                            "fire_sector": fire_info["fire_sector"],
-                            "fire_grade": fire_info["fire_grade"],
-                            "fire_score": fire_info["fire_score"],
-                            # v1.4: ETF 전파
-                            "etf_expected_ret": etf_boost.get("expected_ret_pct", 0),
-                            "etf_source": etf_boost.get("source_etf", ""),
-                        })
+                        sig = self._build_signal_dict(
+                            entry, peak, today_close, pullback, date_str,
+                            supply, ownership, fire_info, etf_boost,
+                            signal_type="pullback",
+                        )
+                        signals.append(sig)
                         e_grade = ownership.get("elasticity_grade", "?")
                         e_score = ownership.get("elasticity_score", 0)
                         f_pct = ownership.get("frgn_pct", 0)
                         logger.info("  ★ BUY SIGNAL: %s %s (피크%d→현재%d, %.1f%% 눌림) "
-                                   "[수급: %s] [탄력성: %s %.0f점, 외국인%.1f%%]",
+                                   "[수급: %s] [탄력성: %s %.0f점, 외국인%.1f%%] "
+                                   "[동적임계: %.1f%%]",
                                    ticker, entry["name"], peak, today_close, pullback,
-                                   supply["reason"], e_grade, e_score, f_pct)
+                                   supply["reason"], e_grade, e_score, f_pct,
+                                   effective_threshold)
                     else:
                         # 눌림은 도달했지만 수급 미확인 → 시그널 보류
                         entry["supply_check"] = supply
@@ -1318,9 +1445,11 @@ class SurgePullbackEngine:
                 # ── 감시 만료 ──
                 elif entry["watch_day"] > watch_days_limit:
                     entry["status"] = "expired"
-                    logger.info("  EXPIRE: %s %s (%d일 경과, 눌림 %.1f%%)",
+                    entry["expired_date"] = date_str  # v2.0: 만료일 기록
+                    logger.info("  EXPIRE: %s %s (%d일 경과, 눌림 %.1f%%, 감시한도 %d일)",
                                ticker, entry["name"],
-                               entry["watch_day"], entry.get("pullback_from_peak", 0))
+                               entry["watch_day"], entry.get("pullback_from_peak", 0),
+                               watch_days_limit)
 
             except Exception as e:
                 logger.warning("  %s 업데이트 실패: %s", ticker, str(e)[:60])
@@ -1447,8 +1576,17 @@ class SurgePullbackEngine:
         except Exception as e:
             logger.warning("수익률 추적 실패: %s", str(e)[:60])
 
+        # ── Step 10 (v2.0): 만료 종목 후속 성과 추적 ──
+        try:
+            self._track_expired_performance(fmt_date)
+        except Exception as e:
+            logger.warning("만료 후 추적 실패: %s", str(e)[:60])
+
         # ── 결과 요약 ──
         active = [e for e in watchlist["entries"] if e["status"] == "watching"]
+        # v2.0: 시그널 타입별 집계
+        pullback_sigs = [s for s in signals if s.get("signal_type") == "pullback"]
+        momentum_sigs = [s for s in signals if s.get("signal_type") == "momentum"]
         result = {
             "date": fmt_date,
             "new_layer1": new_l1,
@@ -1459,7 +1597,8 @@ class SurgePullbackEngine:
             "summary": (
                 f"[{fmt_date}] "
                 f"급등발굴: L1={len(new_l1)} L2={len(new_l2)} | "
-                f"매수시그널: {len(signals)}건 | "
+                f"매수시그널: {len(signals)}건 "
+                f"(눌림{len(pullback_sigs)}/모멘텀{len(momentum_sigs)}) | "
                 f"감시중: {len(active)}건 | "
                 f"만료: {len(expired)}건"
             ),
@@ -1629,6 +1768,145 @@ class SurgePullbackEngine:
 
         if updated:
             logger.info("수익률 추적 업데이트: %d건", updated)
+
+    # ──────────────────────────────────────────
+    # 9 (v2.0). 만료 후 성과 추적 — 놓친 기회 학습
+    # ──────────────────────────────────────────
+    def _track_expired_performance(self, date_str: str):
+        """
+        만료된 종목의 이후 성과를 추적하여 '놓친 기회'를 기록.
+        시그널 로직 개선을 위한 학습 데이터를 축적.
+        """
+        tracking_days = self.config.get("expired_tracking_days", 5)
+        if tracking_days <= 0:
+            return
+
+        fmt_date = date_str.replace("-", "")
+        target_date = pd.Timestamp(fmt_date)
+        raw_dir = PROJECT_ROOT / "data" / "raw"
+
+        # 워치리스트의 히스토리에서 만료 종목 조회
+        watchlist = self.load_watchlist()
+        history = watchlist.get("history", [])
+        expired_entries = [e for e in history
+                          if e.get("status") == "expired"
+                          and e.get("expired_date")]
+
+        if not expired_entries:
+            return
+
+        expired_perf_path = PROJECT_ROOT / "data" / "surge_pullback_expired_tracking.json"
+        expired_perf = {}
+        if expired_perf_path.exists():
+            try:
+                with open(expired_perf_path, "r", encoding="utf-8") as f:
+                    expired_perf = json.load(f)
+            except Exception:
+                pass
+
+        updated = 0
+        missed_opportunities = 0
+
+        for entry in expired_entries:
+            ticker = entry["ticker"]
+            expired_date = entry.get("expired_date", "")
+            if not expired_date:
+                continue
+
+            key = f"{ticker}_{expired_date}"
+
+            # 이미 추적 완료된 것은 스킵
+            if key in expired_perf and expired_perf[key].get("tracking_complete"):
+                continue
+
+            # 만료 후 경과일 계산
+            try:
+                exp_ts = pd.Timestamp(expired_date.replace("-", ""))
+                days_since = (target_date - exp_ts).days
+            except Exception:
+                continue
+
+            if days_since < 0 or days_since > tracking_days * 2:  # 달력일 기준 2배까지
+                if key in expired_perf:
+                    expired_perf[key]["tracking_complete"] = True
+                continue
+
+            # parquet에서 현재가 조회
+            pf = raw_dir / f"{ticker}.parquet"
+            if not pf.exists():
+                continue
+
+            try:
+                df = pd.read_parquet(pf)
+                df.index = pd.to_datetime(df.index)
+
+                col_map = {}
+                for c in df.columns:
+                    cl = str(c).lower()
+                    if cl in ("close", "종가"):
+                        col_map[c] = "close"
+                if col_map:
+                    df = df.rename(columns=col_map)
+
+                if target_date not in df.index or "close" not in df.columns:
+                    continue
+
+                current_close = int(df.loc[target_date, "close"])
+                if current_close <= 0:
+                    continue
+
+                expired_close = entry.get("latest_close", 0)
+                if expired_close <= 0:
+                    continue
+
+                pct_after = (current_close - expired_close) / expired_close * 100
+
+                if key not in expired_perf:
+                    expired_perf[key] = {
+                        "ticker": ticker,
+                        "name": entry.get("name", ""),
+                        "layer": entry.get("layer", 2),
+                        "surge_pct": entry.get("surge_pct", 0),
+                        "expired_date": expired_date,
+                        "expired_close": expired_close,
+                        "pullback_at_expiry": entry.get("pullback_from_peak", 0),
+                        "tracking_complete": False,
+                        "max_gain_after": 0.0,
+                        "max_loss_after": 0.0,
+                        "missed_opportunity": False,
+                        "daily": {},
+                    }
+
+                p = expired_perf[key]
+                p["daily"][fmt_date] = {
+                    "close": current_close,
+                    "pct": round(pct_after, 2),
+                }
+
+                if pct_after > p.get("max_gain_after", 0):
+                    p["max_gain_after"] = round(pct_after, 2)
+                if pct_after < p.get("max_loss_after", 0):
+                    p["max_loss_after"] = round(pct_after, 2)
+
+                # 놓친 기회: 만료 후 +10% 이상 상승
+                if pct_after >= 10:
+                    p["missed_opportunity"] = True
+                    missed_opportunities += 1
+
+                updated += 1
+
+            except Exception as e:
+                logger.debug("만료 추적 실패 %s: %s", ticker, str(e)[:40])
+
+        if updated > 0:
+            expired_perf_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(expired_perf_path, "w", encoding="utf-8") as f:
+                json.dump(expired_perf, f, ensure_ascii=False, indent=2)
+
+            if missed_opportunities > 0:
+                logger.warning("  ⚠ 놓친 기회 %d건 감지 (만료 후 +10%% 이상 상승)",
+                              missed_opportunities)
+            logger.info("만료 후 추적: %d건 업데이트", updated)
 
     # ──────────────────────────────────────────
     # 유틸: 워치리스트 현황 출력
