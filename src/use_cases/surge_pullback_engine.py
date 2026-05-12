@@ -12,8 +12,13 @@ v2.0 변경 (2026-05-12):
     → "눌림 없이 급등" 패턴 포착 (가온전선/한솔테크닉스류)
   - 감시 기간 연장: 3→5일 (급등>25%면 7일)
   - 동적 눌림 임계값: 급등폭 비례 (15~20%→-8%, 20~30%→-7%, 30%+→-6%)
-  - 수급 stale 차단: 데이터 5일+ 오래되면 시그널 차단 (기존: 통과)
+  - 수급 stale 차단: 데이터 7일+ 오래되면 시그널 차단 (기존: 통과)
   - 만료 후 성과 추적: expired 종목 5일간 추적 → 놓친 기회 학습
+
+v2.0.1 변경 (2026-05-12):
+  - 수급 stale 날짜 계산 버그 수정: int(YYYYMMDD) 뺄셈 → datetime 사용
+    (월 경계 넘을 때 71일 등 오류값 방지)
+  - stale 기본값 5→7일 (주말+공휴일 고려)
 
 v1.2 변경:
   - 보유비중 프로파일 추가: KIS API 외국인 보유비중 + DB 누적 순매수 결합
@@ -271,7 +276,7 @@ DEFAULT_CONFIG = {
     "momentum_threshold": 10.0,        # 연속급등 임계값 (편입 이후 추가 상승 %)
     "dynamic_pullback_enabled": True,  # 급등폭 비례 동적 눌림 임계값
     "supply_stale_block": True,        # 수급 데이터 stale 시 시그널 차단 (v1.1은 통과)
-    "supply_stale_max_days": 5,        # 수급 데이터 허용 최대 갭 (달력일)
+    "supply_stale_max_days": 7,        # 수급 데이터 허용 최대 갭 (달력일, 주말+공휴일 고려)
     "expired_tracking_days": 5,        # 만료 후 성과 추적 기간
 }
 
@@ -547,8 +552,14 @@ class SurgePullbackEngine:
 
             # v2.0: 데이터 신선도 체크 — stale 데이터 시 차단
             latest_data_date = recent_dates[0]
-            date_gap = int(fmt_date) - int(latest_data_date)
-            stale_max = self.config.get("supply_stale_max_days", 5)
+            # v2.0.1: 달력일 정확 계산 (월 경계 넘을 때 int 뺄셈 오류 수정)
+            try:
+                dt_now = datetime.strptime(fmt_date, "%Y%m%d")
+                dt_last = datetime.strptime(latest_data_date, "%Y%m%d")
+                date_gap = (dt_now - dt_last).days
+            except ValueError:
+                date_gap = 999  # 파싱 실패 시 stale 처리
+            stale_max = self.config.get("supply_stale_max_days", 7)
             if date_gap > stale_max:
                 conn.close()
                 if self.config.get("supply_stale_block", True):
