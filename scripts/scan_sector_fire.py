@@ -286,9 +286,14 @@ def calc_stock_buy_score(
     if close <= 0:
         return None
 
-    # 종목명
+    # 종목명 (수급 DB → CSV 파일명 fallback)
     ticker_supply = supply_df[supply_df["ticker"] == ticker]
-    name = str(ticker_supply["name"].iloc[0]) if not ticker_supply.empty else ticker
+    if not ticker_supply.empty:
+        name = str(ticker_supply["name"].iloc[0])
+    else:
+        # 수급 데이터 없는 종목: CSV 파일명(종목명_코드.csv)에서 추출
+        csv_matches = list(CSV_DIR.glob(f"*_{ticker}.csv"))
+        name = csv_matches[0].stem.rsplit("_", 1)[0] if csv_matches else ticker
 
     # 기술적 지표
     ma20_dev = last.get("ma20_dev", np.nan)
