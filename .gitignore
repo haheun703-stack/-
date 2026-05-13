@@ -90,6 +90,10 @@ memory/
 # fix 스크립트
 scripts/fix_tasks.ps1
 
+# archive 내 미추적 백테스트 (원래 untracked)
+scripts/archive/backtests/backtest_limit_up*.py
+scripts/archive/backtests/backtest_v[0-9]*.py
+
 # 참조 코드 (구현 완료 후 보존용)
 _etf_ref/
 
