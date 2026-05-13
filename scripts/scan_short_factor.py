@@ -29,6 +29,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import yaml
 
 from src.adapters.jgis_short_adapter import JgisShortAdapter, _safe_float, _safe_int
+from src.utils.atomic_io import atomic_write_json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -554,11 +555,9 @@ def main():
         logger.warning("유효 결과 없음 → 종료")
         return
 
-    # 출력 생성 + 저장
+    # 출력 생성 + 저장 (atomic write — scan_tomorrow_picks 동시 읽기 안전)
     output = build_output(results)
-
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
+    atomic_write_json(OUTPUT_PATH, output)
     logger.info("저장: %s (%d bytes)", OUTPUT_PATH, OUTPUT_PATH.stat().st_size)
 
     # 결과 출력

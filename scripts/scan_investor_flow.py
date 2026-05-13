@@ -41,6 +41,7 @@ from src.adapters.jgis_short_adapter import (
     load_investor_flow_history,
     load_investor_flow_summary_from_intel,
 )
+from src.utils.atomic_io import atomic_write_json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -721,10 +722,8 @@ def main():
         "advanced": advanced,
     }
 
-    # 저장
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+    # 저장 (atomic write — scan_tomorrow_picks가 동시 읽을 때 부분 기록 차단)
+    atomic_write_json(OUTPUT_PATH, output)
     logger.info("저장: %s (%d bytes)", OUTPUT_PATH, OUTPUT_PATH.stat().st_size)
 
     # 요약 출력
