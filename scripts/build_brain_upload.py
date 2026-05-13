@@ -299,6 +299,22 @@ def build_theme_intel():
     }
 
 
+def build_short_factors():
+    """공매도 3종 8시그널 + 4팩터 (정보봇 KIS API)"""
+    raw = load("short_selling/jgis_short_factor.json")
+    if not raw:
+        return {}
+    return {
+        "date": raw.get("date", ""),
+        "total_scanned": raw.get("total_scanned", 0),
+        "signal_summary": raw.get("signal_summary", {}),
+        "factor_summary": raw.get("factor_summary", {}),
+        "top_signals": raw.get("top_signals", [])[:15],
+        "top_short_cover": raw.get("top_short_cover", [])[:10],
+        "credit_risk_kills": raw.get("credit_risk_kills", [])[:10],
+    }
+
+
 def main():
     brain = {
         "strategic": build_strategic(),
@@ -318,6 +334,7 @@ def main():
         "regime_macro": build_regime_macro(),
         "perplexity": build_perplexity(),
         "theme_intel": build_theme_intel(),
+        "short_factors": build_short_factors(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -348,6 +365,11 @@ def main():
     ti = brain["theme_intel"]
     hot = ti.get("hot_themes", [])
     print(f"  Theme Intel: HOT={len(hot)}개, 유입TOP={ti.get('top_inflow', [])[:3]}")
+    sf = brain["short_factors"]
+    if sf:
+        print(f"  Short Factors: {sf.get('total_scanned', 0)}종목, signals={sf.get('signal_summary', {})}, kills={len(sf.get('credit_risk_kills', []))}")
+    else:
+        print("  Short Factors: 데이터 없음")
 
 
 if __name__ == "__main__":

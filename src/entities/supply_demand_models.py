@@ -32,6 +32,12 @@ class ShortSellingData:
     is_overheated: bool = False      # 공매도 과열종목 지정 여부
     short_spike_ratio: float = 1.0   # 40일 평균 대비 비율 (1.0=정상)
     avg_short_ratio_40d: float = 0.0 # 40일 평균 공매도 비중
+    # ── v2: 정보봇 KIS API 3종 통합 (2026-05) ──
+    credit_balance_qty: int = 0          # 신용잔고 수량
+    credit_balance_rate: float = 0.0     # 신용잔고율 (%)
+    loan_new_qty: int = 0                # 대차 신규 (주)
+    loan_repay_qty: int = 0              # 대차 상환 (주)
+    loan_balance_qty: int = 0            # 대차잔고 (주)
 
     def to_dict(self) -> dict:
         return {
@@ -45,6 +51,11 @@ class ShortSellingData:
             "lending_change_5d": self.lending_change_5d,
             "is_overheated": self.is_overheated,
             "short_spike_ratio": self.short_spike_ratio,
+            "credit_balance_qty": self.credit_balance_qty,
+            "credit_balance_rate": self.credit_balance_rate,
+            "loan_new_qty": self.loan_new_qty,
+            "loan_repay_qty": self.loan_repay_qty,
+            "loan_balance_qty": self.loan_balance_qty,
         }
 
 
@@ -295,4 +306,65 @@ class SupplyDemandScore:
             "options_signal": self.options_signal,
             "trap_adjustment": self.trap_adjustment,
             "smart_money_boost": self.smart_money_boost,
+        }
+
+
+# ═══════════════════════════════════════════════════
+# Layer 1-B: 공매도 3종 통합 8시그널 + 4팩터 (정보봇 KIS API)
+# ═══════════════════════════════════════════════════
+@dataclass
+class ShortFactorResult:
+    """공매도 3종 8시그널 + 4팩터 결과 (정보봇 데이터 기반)"""
+
+    ticker: str
+    date: str
+    name: str = ""
+
+    # 8 시그널 (bool)
+    short_extreme: bool = False          # 공매도 비중 >= 20%
+    short_surge: bool = False            # 전일대비 공매도 +5%p
+    short_balance_high: bool = False     # 공매도 잔고비율 >= 3%
+    credit_overheat: bool = False        # 신용잔고율 >= 5%
+    loan_surge: bool = False             # 대차잔고 전일대비 +20%
+    short_cover_rally: bool = False      # 대차상환 > 신규×3
+    loan_momentum: bool = False          # 대차잔고 5일 변화 ±15%+
+    short_credit_diverge: bool = False   # 공매도 >=10% & 신용 >=3%
+    active_signals: list = field(default_factory=list)
+
+    # 4 팩터 (0~100)
+    short_cover_factor: float = 0.0      # 숏커버 랠리 예측 (높을수록 반등 가능)
+    credit_risk_factor: float = 0.0      # 반대매매 리스크 (높을수록 위험)
+    inst_short_pressure: float = 0.0     # 기관 숏압력 (높을수록 하방 압력)
+    divergence_factor: float = 0.0       # 공매도+신용 동시 과열
+
+    # 원시 데이터 (디버깅/FLOWX)
+    short_ratio: float = 0.0
+    credit_balance_rate: float = 0.0
+    loan_balance_qty: int = 0
+    loan_new_qty: int = 0
+    loan_repay_qty: int = 0
+    cover_ratio: float = 0.0
+    loan_change_pct: float = 0.0         # 전일대비 대차잔고 변화율 (%)
+    loan_momentum_5d: float = 0.0        # 5일 대차잔고 변화율 (%)
+    change_pct: float = 0.0              # 주가 등락률 (%)
+
+    def to_dict(self) -> dict:
+        return {
+            "ticker": self.ticker,
+            "date": self.date,
+            "name": self.name,
+            "active_signals": self.active_signals,
+            "short_cover_factor": round(self.short_cover_factor, 1),
+            "credit_risk_factor": round(self.credit_risk_factor, 1),
+            "inst_short_pressure": round(self.inst_short_pressure, 1),
+            "divergence_factor": round(self.divergence_factor, 1),
+            "short_ratio": round(self.short_ratio, 2),
+            "credit_balance_rate": round(self.credit_balance_rate, 2),
+            "loan_balance_qty": self.loan_balance_qty,
+            "loan_new_qty": self.loan_new_qty,
+            "loan_repay_qty": self.loan_repay_qty,
+            "cover_ratio": round(self.cover_ratio, 2),
+            "loan_change_pct": round(self.loan_change_pct, 2),
+            "loan_momentum_5d": round(self.loan_momentum_5d, 2),
+            "change_pct": round(self.change_pct, 2),
         }

@@ -712,6 +712,15 @@ def collect_event_sector_source() -> dict[str, dict]:
 
 
 # ──────────────────────────────────────────
+# 공매도 3종 8시그널 + 4팩터 (jgis_short_factor.json)
+# ──────────────────────────────────────────
+
+def _load_jgis_short_factors() -> dict:
+    """공매도 3종 팩터 JSON 로드."""
+    return load_json("short_selling/jgis_short_factor.json")
+
+
+# ──────────────────────────────────────────
 # 전략 L: 국적별 수급 7 Secrets (nationality_signal.json)
 # ──────────────────────────────────────────
 
@@ -2089,6 +2098,32 @@ def main():
             print(f"[국적수급 킬] {before_nat} → {len(all_tickers)}종목 | "
                   f"제외: {', '.join(killed_names[:5])}")
 
+    # 공매도 3종 Credit Risk 킬게이트
+    jgis_short_factors = _load_jgis_short_factors()
+    jgis_credit_kill_tickers: set[str] = set()
+    if jgis_short_factors:
+        _jgis_int = yaml_config.get("jgis_short_selling", {}).get("integration", {})
+        _cr_kill_th = _jgis_int.get("credit_kill_threshold", 70)
+        _all_res = jgis_short_factors.get("all_results", {})
+        jgis_credit_kill_tickers = {
+            t for t, d in _all_res.items()
+            if d.get("credit_risk_factor", 0) >= _cr_kill_th
+        }
+        if jgis_credit_kill_tickers:
+            before_cr = len(all_tickers)
+            all_tickers -= jgis_credit_kill_tickers
+            killed_cr = [_all_res[t].get("name", t) for t in jgis_credit_kill_tickers if t in _all_res]
+            print(f"[공매도 킬] Credit Risk ≥{_cr_kill_th} | "
+                  f"{before_cr} → {len(all_tickers)}종목 | "
+                  f"제외: {', '.join(killed_cr[:5])}")
+        fac_sum = jgis_short_factors.get("factor_summary", {})
+        sig_sum = jgis_short_factors.get("signal_summary", {})
+        print(f"[공매도 3종] {jgis_short_factors.get('total_scanned', 0)}종목 스캔 | "
+              f"시그널: {dict(sig_sum)} | "
+              f"CR≥70:{fac_sum.get('credit_risk_high', 0)} SC≥70:{fac_sum.get('short_cover_high', 0)}")
+    else:
+        print("[공매도 3종] 데이터 없음 — 스킵")
+
     # 컨센서스 풀 필터 (pool_only 모드)
     if consensus_pool_enabled and consensus_pool_only and consensus_pool:
         before_cnt = len(all_tickers)
@@ -2512,6 +2547,32 @@ def main():
             if nat_signal_str in ("STRONG_BUY", "BUY"):
                 source_names.append("국적수급")
 
+        # ── 공매도 3종: Credit Risk 감산 + Short Cover 보너스 ──
+        jgis_short_tag = ""
+        if jgis_short_factors and ticker in jgis_short_factors.get("all_results", {}):
+            _jgis_r = jgis_short_factors["all_results"][ticker]
+            _cr = _jgis_r.get("credit_risk_factor", 0)
+            _sc = _jgis_r.get("short_cover_factor", 0)
+            _jgis_int = yaml_config.get("jgis_short_selling", {}).get("integration", {})
+            _cr_pen_th = _jgis_int.get("credit_penalty_threshold", 50)
+            _pen_max = _jgis_int.get("tomorrow_picks_penalty_max", 15)
+
+            jgis_adj = 0.0
+            # Credit Risk 감산 (50~100 → 0~-15점)
+            if _cr >= _cr_pen_th:
+                jgis_adj -= min((_cr - _cr_pen_th) / 50 * _pen_max, _pen_max)
+            # Short Cover 보너스 (숏커버 랠리 기회)
+            if _sc >= 70:
+                jgis_adj += 5
+
+            if jgis_adj != 0:
+                boosted = max(min(score_detail["total"] + jgis_adj, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+                sigs_str = "+".join(_jgis_r.get("active_signals", [])[:2])
+                jgis_short_tag = f"공매도:CR{_cr:.0f}/SC{_sc:.0f}({jgis_adj:+.0f})"
+                if sigs_str:
+                    jgis_short_tag += f"[{sigs_str}]"
+
         # ── 전략N: 기관매집 조기감지 부스트 ──
         # EARLY_SURGE(오늘 3배 대량) → +10, EARLY_ACCEL(가속) → +7
         # EARLY_DUAL(기관+외인 동시) → +5, STRONG(장기 쌍끌이) → +8
@@ -2685,6 +2746,18 @@ def main():
             "nat_score": nat_score_val,
             "nat_pattern": nat_pattern,
             "inst_accum_tag": inst_accum_tag,
+            "jgis_short_tag": jgis_short_tag,
+            "short_factors": (
+                {
+                    "credit_risk": _jgis_r.get("credit_risk_factor", 0),
+                    "short_cover": _jgis_r.get("short_cover_factor", 0),
+                    "inst_pressure": _jgis_r.get("inst_short_pressure", 0),
+                    "divergence": _jgis_r.get("divergence_factor", 0),
+                    "signals": _jgis_r.get("active_signals", []),
+                }
+                if jgis_short_factors and ticker in jgis_short_factors.get("all_results", {})
+                else {}
+            ),
             "fe_tag": fe_tag,
             "scenario_bonus": scenario_bonus,
             "scenario_tag": scenario_tag,
@@ -2997,7 +3070,8 @@ def main():
             t2 = r.get("alpha_tier2", 0)
             v3s = r.get("alpha_v3_score", 0)
             alpha_str = f"\n     🧬 v3({v3s:.0f}): T1={t1} T2={t2} [{'+'.join(sigs)}]"
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{sc_str}{alpha_str}{fib_str}")
+        jgis_str = f"  📉{r['jgis_short_tag']}" if r.get("jgis_short_tag") else ""
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{jgis_str}{sc_str}{alpha_str}{fib_str}")
 
     if top5:
         print(f"\n{'─'*60}")
@@ -3159,6 +3233,14 @@ def main():
             "slot_scale": short_slot_scale,
             "position_scale": short_pos_scale,
         } if short_summary.get("enabled") else {},
+        "jgis_short_selling": {
+            "enabled": bool(jgis_short_factors),
+            "total_scanned": jgis_short_factors.get("total_scanned", 0) if jgis_short_factors else 0,
+            "signal_summary": jgis_short_factors.get("signal_summary", {}) if jgis_short_factors else {},
+            "credit_kill_count": len(jgis_credit_kill_tickers) if jgis_short_factors else 0,
+            "penalized": sum(1 for r in results if r.get("short_factors", {}).get("credit_risk", 0) >= 50),
+            "short_cover_boosted": sum(1 for r in results if r.get("short_factors", {}).get("short_cover", 0) >= 70),
+        } if jgis_short_factors else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 

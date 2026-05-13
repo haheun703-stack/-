@@ -7,6 +7,7 @@ v7.0의 L2(OU), L3(Momentum) 게이트를 스코어로 전환한 핵심 모듈
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import pandas as pd
 
@@ -68,6 +69,11 @@ class ScoringEngine:
         self.pos_cfg = v8_cfg.get('position', {})
         # v10.1: 마스터 스위치 — use_short_selling_filter: false면 S5 공매도 보너스 비활성
         self._short_filter_enabled = config.get('use_short_selling_filter', False)
+        # v10.2: 정보봇 공매도 3종 (pykrx와 독립, 별도 마스터 스위치)
+        _jgis_cfg = config.get('jgis_short_selling', {})
+        self._jgis_short_enabled = _jgis_cfg.get('enabled', False)
+        self._jgis_int_cfg = _jgis_cfg.get('integration', {})
+        self._jgis_short_data: dict | None = None  # lazy load cache
 
     def score_all(self, row: pd.Series) -> GradeResult:
         """5개 스코어를 계산하고 가중합으로 등급을 결정합니다."""
@@ -483,8 +489,35 @@ class ScoringEngine:
         score += div_score
         bd['divergence'] = round(div_score, 3)
 
-        # (f) 공매도 보너스 (0~0.05)
-        if self._short_filter_enabled:
+        # (f) 공매도 3종 보너스/패널티 (정보봇 KIS API — -0.15 ~ +0.10)
+        if self._jgis_short_enabled:
+            factor_data = self._get_jgis_short_factor(row.get('ticker', ''))
+            if factor_data:
+                sc = factor_data.get('short_cover_factor', 0)
+                ip = factor_data.get('inst_short_pressure', 0)
+                bonus_max = self._jgis_int_cfg.get('s5_bonus_max', 0.10)
+                penalty_max = self._jgis_int_cfg.get('s5_penalty_max', -0.15)
+
+                short_score = 0.0
+                # 숏커버 보너스 (높을수록 반등 가능)
+                if sc >= 70:
+                    short_score += bonus_max
+                elif sc >= 50:
+                    short_score += 0.05
+
+                # 기관 숏압력 패널티 (높을수록 하방)
+                if ip >= 70:
+                    short_score += penalty_max
+                elif ip >= 50:
+                    short_score += -0.05
+
+                score += short_score
+                bd['jgis_short'] = round(short_score, 3)
+                bd['short_cover_f'] = round(sc, 1)
+                bd['credit_risk_f'] = round(factor_data.get('credit_risk_factor', 0), 1)
+
+        # (f-legacy) pykrx 기반 공매도 보너스 (0~0.05) — fallback
+        elif self._short_filter_enabled:
             short_ratio = row.get('short_ratio', 0)
             has_short_data = not pd.isna(short_ratio) and short_ratio > 0
 
@@ -514,3 +547,18 @@ class ScoringEngine:
             bd['pension'] = round(pension_score, 3)
 
         return ScoreResult(name="S5_SmartMoney", score=min(score, 1.0), weight=w, breakdown=bd)
+
+    def _get_jgis_short_factor(self, ticker: str) -> dict | None:
+        """jgis_short_factor.json에서 종목 데이터 조회 (lazy load + cache)."""
+        if self._jgis_short_data is None:
+            import json
+            path = Path(__file__).resolve().parent.parent / "data" / "short_selling" / "jgis_short_factor.json"
+            if path.exists():
+                try:
+                    data = json.loads(path.read_text(encoding="utf-8"))
+                    self._jgis_short_data = data.get("all_results", {})
+                except Exception:
+                    self._jgis_short_data = {}
+            else:
+                self._jgis_short_data = {}
+        return self._jgis_short_data.get(ticker)

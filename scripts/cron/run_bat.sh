@@ -218,6 +218,8 @@ case "$BAT" in
     run_py_long scripts/scan_consensus.py
     # G3.9: 상한가 풀림 감시 후보 갱신 (일봉 수집 완료 후)
     run_py scripts/run_limit_up_scanner.py --generate
+    # G3.9.5: 공매도 3종 8시그널 + 4팩터 (정보봇 KIS API)
+    run_py scripts/scan_short_factor.py
     # --- G4: 추천 ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py

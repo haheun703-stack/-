@@ -814,6 +814,36 @@ master_controller:
 use_short_selling_filter: false    # KRX 공매도 데이터 제공 중단 (2026-04)
 
 # ════════════════════════════════════════════════════════════
+# 정보봇 공매도 3종 통합 (KIS API 기반 — pykrx와 독립)
+# use_short_selling_filter 와 무관, 별도 마스터 스위치
+# 데이터 소스: 정보봇 supply_tracker CSV + daily_intelligence.json
+# ════════════════════════════════════════════════════════════
+jgis_short_selling:
+  enabled: true
+  csv_dir: "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker"
+  lookback_days: 20                  # CSV에서 최근 N일 로드
+
+  # 8 시그널 임계치
+  signals:
+    short_extreme_threshold: 20.0     # 공매도 비중 >= 20%
+    short_surge_delta: 5.0            # 전일대비 +5%p
+    short_balance_high: 3.0           # 잔고비율 >= 3%
+    credit_overheat: 5.0              # 신용잔고율 >= 5%
+    loan_surge_pct: 20.0              # 대차잔고 전일대비 +20%
+    cover_ratio_threshold: 3.0        # 상환 > 신규 × 3
+    loan_momentum_5d_pct: 15.0        # 대차 5일 변화 ±15%+
+    diverge_short_min: 10.0           # 공매도 >= 10%
+    diverge_credit_min: 3.0           # 신용 >= 3%
+
+  # S5/포트폴리오 통합 설정
+  integration:
+    s5_bonus_max: 0.10               # S5 숏커버 보너스 상한
+    s5_penalty_max: -0.15            # S5 숏압력 패널티 하한
+    credit_kill_threshold: 70         # Credit Risk >= 70 → 킬게이트
+    credit_penalty_threshold: 50      # Credit Risk >= 50 → 점수 감산
+    tomorrow_picks_penalty_max: 15    # scan_tomorrow_picks 최대 감산 점수
+
+# ════════════════════════════════════════════════════════════
 # v8.3 공매도 체제 캘린더 + Regime Profile
 # (use_short_selling_filter: false    # KRX 공매도 데이터 제공 중단 (2026-04) → 캘린더+프로파일 활성, 데이터 수집은 항상)
 # ════════════════════════════════════════════════════════════
