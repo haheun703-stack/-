@@ -37,7 +37,11 @@ logger = logging.getLogger("coo")
 
 DATA_DIR = PROJECT_ROOT / "data"
 LOGS_DIR = PROJECT_ROOT / "logs"
-VENV_PYTHON = str(PROJECT_ROOT / "venv" / "Scripts" / "python.exe")
+import platform
+if platform.system() == "Windows":
+    VENV_PYTHON = str(PROJECT_ROOT / "venv" / "Scripts" / "python.exe")
+else:
+    VENV_PYTHON = str(PROJECT_ROOT / "venv" / "bin" / "python3")
 
 
 # ═══════════════════════════════════════════════════════════════
