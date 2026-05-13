@@ -81,6 +81,7 @@ case "$BAT" in
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py
     run_py scripts/fetch_cot_weekly.py
+    run_py scripts/run_cot_tracker.py
     run_py scripts/fetch_liquidity_data.py
     run_py scripts/run_liquidity_signal.py
     run_py scripts/run_relay_engine.py --update --signal
@@ -170,11 +171,13 @@ case "$BAT" in
     # COO 복원: ETF/섹터 수급 수집
     run_py scripts/collect_etf_volume.py
     run_py scripts/collect_etf_investor_flow.py
+    run_py_long scripts/crawl_china_money.py --no-telegram
     # --- G2: 지표 + 릴레이 ---
     run_py_long scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/relay_report.py
+    run_py scripts/group_relay_detector.py
     # COO 복원: 섹터 분석
     run_py scripts/sector_momentum.py --history
     run_py scripts/sector_zscore.py --top 5
