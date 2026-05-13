@@ -2205,6 +2205,41 @@ def main():
     short_pos_scale = short_prof.get("position_scale_mult", 1.0)
     short_slot_scale = short_prof.get("max_positions_scale", 1.0)
 
+    # ── 투자자 수급 설정/시그널 캐싱 (종목 루프 ~500회 진입 전 1회 빌드) ──
+    _inv_pykrx_cfg = yaml_config.get("investor_flow_pykrx", {})
+    _inv_int_cfg = _inv_pykrx_cfg.get("integration", {})
+    _adv_cfg = _inv_pykrx_cfg.get("advanced", {})
+    _inv_b_mega = _inv_int_cfg.get("stock_bonus_mega", 15)
+    _inv_b_large = _inv_int_cfg.get("stock_bonus_large", 10)
+    _inv_b_medium = _inv_int_cfg.get("stock_bonus_medium", 5)
+    _inv_inst_w = _inv_int_cfg.get("inst_weight", 0.5)
+    _inv_pen_boost = _adv_cfg.get("pension", {}).get("market_boost", 0.03)
+
+    # 고급 전략 시그널 SET/MAP (루프 외 1회)
+    _adv = inv_flow_signal.get("advanced", {}) if inv_flow_signal else {}
+    _ct_set = {x["ticker"] for x in _adv.get("contrarian_tickers", [])}
+    _ab_map = {x["ticker"]: x for x in _adv.get("absorption_details", [])}
+    _cc_map = _adv.get("consecutive_flow", {})
+    _kd_set = set(_adv.get("kosdaq_tickers", []))
+    _rot_sig = _adv.get("rotation_signal")
+    _pension_buy = _adv.get("pension_signal") == "PENSION_BUY"
+    # enabled 플래그
+    _ct_enabled = bool(_adv_cfg.get("contrarian", {}).get("enabled"))
+    _ab_enabled = bool(_adv_cfg.get("absorption", {}).get("enabled"))
+    _cc_enabled = bool(_adv_cfg.get("consecutive", {}).get("enabled"))
+    _rot_enabled = bool(_adv_cfg.get("rotation", {}).get("enabled"))
+    # 보너스 값
+    _ct_bonus = _adv_cfg.get("contrarian", {}).get("bonus", 10)
+    _ab_cfg = _adv_cfg.get("absorption", {})
+    _ab_full = _ab_cfg.get("full_bonus", 12)
+    _ab_partial = _ab_cfg.get("partial_bonus", 8)
+    _ab_weak = _ab_cfg.get("weak_bonus", 5)
+    _cc_cfg = _adv_cfg.get("consecutive", {})
+    _cc_b5 = _cc_cfg.get("bonus_5d", 12)
+    _cc_b3 = _cc_cfg.get("bonus_3d", 8)
+    _cc_b2 = _cc_cfg.get("bonus_2d", 4)
+    _rot_bonus = _adv_cfg.get("rotation", {}).get("bonus", 5)
+
     # 종목별 통합
     results = []
     for ticker in all_tickers:
@@ -2269,16 +2304,12 @@ def main():
         if short_summary.get("enabled") and short_pos_scale < 1.0:
             effective_regime *= short_pos_scale
 
-        # 투자자 수급(pykrx): 시장 포지션 멀티플라이어
+        # 투자자 수급(pykrx): 시장 포지션 멀티플라이어 + 연기금 바닥 보정
         if inv_flow_signal:
             inv_market_mult = inv_flow_signal.get("market_position_mult", 1.0)
             effective_regime *= inv_market_mult
-            # 전략5: 연기금 바닥 — 시장 멀티 보정
-            _adv = inv_flow_signal.get("advanced", {})
-            _adv_cfg = yaml_config.get("investor_flow_pykrx", {}).get("advanced", {})
-            if _adv.get("pension_signal") == "PENSION_BUY":
-                _pen_boost = _adv_cfg.get("pension", {}).get("market_boost", 0.03)
-                effective_regime *= (1.0 + _pen_boost)
+            if _pension_buy:
+                effective_regime *= (1.0 + _inv_pen_boost)
 
         # v7 교차검증 바이패스: 2소스 이상 + 거래량 2배 이상 → 레짐 감쇠 면제
         vol_ratio = pq_data.get("vol_ratio", 0) if pq_data else 0
@@ -2619,117 +2650,103 @@ def main():
                 if sigs_str:
                     jgis_short_tag += f"[{sigs_str}]"
 
-        # ── 투자자 수급(pykrx): 외인/기관 TOP 보너스 ──
-        inv_flow_tag = ""
+        # ── 투자자 수급(pykrx): 외인/기관 TOP 보너스 + 고급 전략 5종 ──
+        # 캐싱된 변수: _inv_b_mega/_inv_b_large/_inv_b_medium, _inv_inst_w
+        #          _ct_set/_ab_map/_cc_map/_kd_set/_rot_sig (루프 외 1회 빌드)
+        # 태그는 list로 누적 후 join (prefix 누락 방지)
         inv_flow_bonus = 0.0
+        _base_label = ""        # 외인/기관 TOP 라벨
+        _adv_tag_parts: list[str] = []  # 고급 전략 태그 파편들
+        _adv_bonus = 0.0
+
+        # (A) 기본: 외인/기관 TOP 보너스
         if inv_flow_signal and ticker in inv_flow_signal.get("stock_scores", {}):
             _if_data = inv_flow_signal["stock_scores"][ticker]
-            _if_score = _if_data.get("flow_score", 0)
             _if_foreign = _if_data.get("foreign_amt_억", 0)
             _if_inst = _if_data.get("inst_amt_억", 0)
 
-            _inv_int = yaml_config.get("investor_flow_pykrx", {}).get("integration", {})
-            _b_mega = _inv_int.get("stock_bonus_mega", 15)
-            _b_large = _inv_int.get("stock_bonus_large", 10)
-            _b_medium = _inv_int.get("stock_bonus_medium", 5)
-
-            # 외인 TOP 매수 보너스
+            # 외인 TOP 매수/매도 보너스
             if _if_foreign >= 1000:
-                inv_flow_bonus = _b_mega
-                _if_label = f"외인+{_if_foreign:.0f}억"
+                inv_flow_bonus = _inv_b_mega
+                _base_label = f"외인+{_if_foreign:.0f}억"
             elif _if_foreign >= 500:
-                inv_flow_bonus = _b_large
-                _if_label = f"외인+{_if_foreign:.0f}억"
+                inv_flow_bonus = _inv_b_large
+                _base_label = f"외인+{_if_foreign:.0f}억"
             elif _if_foreign >= 100:
-                inv_flow_bonus = _b_medium
-                _if_label = f"외인+{_if_foreign:.0f}억"
+                inv_flow_bonus = _inv_b_medium
+                _base_label = f"외인+{_if_foreign:.0f}억"
             elif _if_foreign <= -1000:
-                inv_flow_bonus = -_b_mega
-                _if_label = f"외인{_if_foreign:.0f}억"
+                inv_flow_bonus = -_inv_b_mega
+                _base_label = f"외인{_if_foreign:.0f}억"
             elif _if_foreign <= -500:
-                inv_flow_bonus = -_b_large
-                _if_label = f"외인{_if_foreign:.0f}억"
+                inv_flow_bonus = -_inv_b_large
+                _base_label = f"외인{_if_foreign:.0f}억"
             elif _if_foreign <= -100:
-                inv_flow_bonus = -_b_medium
-                _if_label = f"외인{_if_foreign:.0f}억"
-            else:
-                _if_label = ""
+                inv_flow_bonus = -_inv_b_medium
+                _base_label = f"외인{_if_foreign:.0f}억"
 
-            # 기관 TOP 매수 보너스 (외인의 50% 가중치)
-            _inst_w = _inv_int.get("inst_weight", 0.5)
+            # 기관 TOP 매수/매도 보너스 (외인의 50% 가중치)
             if _if_inst >= 1000:
-                inv_flow_bonus += _b_mega * _inst_w
-                _if_label += f"/기관+{_if_inst:.0f}억"
+                inv_flow_bonus += _inv_b_mega * _inv_inst_w
+                _base_label += f"/기관+{_if_inst:.0f}억"
             elif _if_inst >= 500:
-                inv_flow_bonus += _b_large * _inst_w
-                _if_label += f"/기관+{_if_inst:.0f}억"
+                inv_flow_bonus += _inv_b_large * _inv_inst_w
+                _base_label += f"/기관+{_if_inst:.0f}억"
             elif _if_inst >= 100:
-                inv_flow_bonus += _b_medium * _inst_w
-                _if_label += f"/기관+{_if_inst:.0f}억"
+                inv_flow_bonus += _inv_b_medium * _inv_inst_w
+                _base_label += f"/기관+{_if_inst:.0f}억"
             elif _if_inst <= -1000:
-                inv_flow_bonus -= _b_mega * _inst_w
-                _if_label += f"/기관{_if_inst:.0f}억"
+                inv_flow_bonus -= _inv_b_mega * _inv_inst_w
+                _base_label += f"/기관{_if_inst:.0f}억"
             elif _if_inst <= -500:
-                inv_flow_bonus -= _b_large * _inst_w
-                _if_label += f"/기관{_if_inst:.0f}억"
+                inv_flow_bonus -= _inv_b_large * _inv_inst_w
+                _base_label += f"/기관{_if_inst:.0f}억"
 
-            if inv_flow_bonus != 0:
-                boosted = max(min(score_detail["total"] + inv_flow_bonus, 100), 0)
-                score_detail["total"] = round(boosted, 1)
-                inv_flow_tag = f"수급:{_if_label}({inv_flow_bonus:+.0f})"
+        # (B) 고급 전략 5종 — 캐싱된 SET/MAP 사용 (종목 무관 전역, 루프 외 빌드)
+        # 전략1: 역행 매수
+        if _ct_enabled and ticker in _ct_set:
+            _adv_bonus += _ct_bonus
+            _adv_tag_parts.append(f"역행+{_ct_bonus}")
 
-        # ── 투자자 수급 고급 전략 5종 ("시크릿 무기") ──
-        _adv = inv_flow_signal.get("advanced", {}) if inv_flow_signal else {}
-        _adv_cfg = yaml_config.get("investor_flow_pykrx", {}).get("advanced", {})
-        _adv_bonus = 0.0
-
-        # 전략1: 역행 매수 — 외인 MASS_SELL 장 + 기관 확신 매수
-        _ct_set = {x["ticker"] for x in _adv.get("contrarian_tickers", [])}
-        if _adv_cfg.get("contrarian", {}).get("enabled") and ticker in _ct_set:
-            _ct_b = _adv_cfg["contrarian"].get("bonus", 10)
-            _adv_bonus += _ct_b
-            inv_flow_tag += f"|역행+{_ct_b}"
-
-        # 전략2: 기관 흡수 — 외인 매도를 기관이 받아냄
-        _ab_map = {x["ticker"]: x for x in _adv.get("absorption_details", [])}
-        if _adv_cfg.get("absorption", {}).get("enabled") and ticker in _ab_map:
+        # 전략2: 기관 흡수
+        if _ab_enabled and ticker in _ab_map:
             _ab = _ab_map[ticker]
-            _ab_cfg = _adv_cfg["absorption"]
-            _ab_b = {"FULL": _ab_cfg.get("full_bonus", 12),
-                     "PARTIAL": _ab_cfg.get("partial_bonus", 8),
-                     "WEAK": _ab_cfg.get("weak_bonus", 5)}.get(_ab["grade"], 0)
+            _ab_b = {"FULL": _ab_full, "PARTIAL": _ab_partial,
+                     "WEAK": _ab_weak}.get(_ab["grade"], 0)
             _adv_bonus += _ab_b
-            inv_flow_tag += f"|흡수{_ab['grade']}+{_ab_b}"
+            _adv_tag_parts.append(f"흡수{_ab['grade']}+{_ab_b}")
 
-        # 전략3: 수급 연속성 — TOP N일 연속 등장
-        _cc_map = _adv.get("consecutive_flow", {})
-        if _adv_cfg.get("consecutive", {}).get("enabled") and ticker in _cc_map:
+        # 전략3: 수급 연속성
+        if _cc_enabled and ticker in _cc_map:
             _cc_days = _cc_map[ticker]
-            _cc_cfg = _adv_cfg["consecutive"]
-            _cc_b = (_cc_cfg.get("bonus_5d", 12) if _cc_days >= 5 else
-                     _cc_cfg.get("bonus_3d", 8) if _cc_days >= 3 else
-                     _cc_cfg.get("bonus_2d", 4))
+            _cc_b = (_cc_b5 if _cc_days >= 5 else
+                     _cc_b3 if _cc_days >= 3 else _cc_b2)
             _adv_bonus += _cc_b
-            inv_flow_tag += f"|연속{_cc_days}일+{_cc_b}"
+            _adv_tag_parts.append(f"연속{_cc_days}일+{_cc_b}")
 
-        # 전략4: 코스닥 로테이션 — 자금 이동 방향 매칭
-        _rot_sig = _adv.get("rotation_signal")
-        if _adv_cfg.get("rotation", {}).get("enabled") and _rot_sig:
-            _kd_set = set(_adv.get("kosdaq_tickers", []))
+        # 전략4: 코스닥 로테이션
+        if _rot_enabled and _rot_sig and _kd_set:
             _is_kosdaq = ticker in _kd_set
             if (_rot_sig == "KOSDAQ_FAVOR" and _is_kosdaq) or \
-               (_rot_sig == "KOSPI_FAVOR" and not _is_kosdaq and _kd_set):
-                _rot_b = _adv_cfg["rotation"].get("bonus", 5)
-                _adv_bonus += _rot_b
-                inv_flow_tag += f"|로테이션+{_rot_b}"
+               (_rot_sig == "KOSPI_FAVOR" and not _is_kosdaq):
+                _adv_bonus += _rot_bonus
+                _adv_tag_parts.append(f"로테이션+{_rot_bonus}")
 
-        # 고급 전략 합산 적용
-        if _adv_bonus != 0:
-            inv_flow_bonus += _adv_bonus
-            boosted = max(min(score_detail["total"] + _adv_bonus, 100), 0)
+        # 점수 적용 (기본 + 고급 합산을 한 번에 cap)
+        total_flow_bonus = inv_flow_bonus + _adv_bonus
+        if total_flow_bonus != 0:
+            boosted = max(min(score_detail["total"] + total_flow_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
-            if not inv_flow_tag.startswith("수급:"):
-                inv_flow_tag = f"수급:고급({_adv_bonus:+.0f})" + inv_flow_tag
+            inv_flow_bonus = total_flow_bonus
+
+        # 태그 조립 (prefix 보장)
+        _tag_parts = []
+        if _base_label:
+            _tag_parts.append(f"수급:{_base_label}({inv_flow_bonus:+.0f})")
+        elif _adv_tag_parts:
+            _tag_parts.append(f"수급:고급({_adv_bonus:+.0f})")
+        _tag_parts.extend(_adv_tag_parts)
+        inv_flow_tag = "|".join(_tag_parts)
 
         # ── 전략N: 기관매집 조기감지 부스트 ──
         # EARLY_SURGE(오늘 3배 대량) → +10, EARLY_ACCEL(가속) → +7
