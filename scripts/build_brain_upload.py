@@ -299,6 +299,27 @@ def build_theme_intel():
     }
 
 
+def build_investor_flow():
+    """투자자 수급 통합본 (정보봇 pykrx)"""
+    raw = load("investor_flow/investor_flow_signal.json")
+    if not raw:
+        return {}
+    return {
+        "date": raw.get("date", ""),
+        "source": raw.get("source", ""),
+        "market": raw.get("market", {}),
+        "market_signals": raw.get("market_signals", []),
+        "market_position_mult": raw.get("market_position_mult", 1.0),
+        "top_foreign_buy": raw.get("top_foreign_buy", [])[:10],
+        "top_foreign_sell": raw.get("top_foreign_sell", [])[:10],
+        "top_inst_buy": raw.get("top_inst_buy", [])[:10],
+        "top_inst_sell": raw.get("top_inst_sell", [])[:10],
+        "cross_divergence": raw.get("cross_divergence", []),
+        "critical_risk": raw.get("critical_risk", []),
+        "signal_count": raw.get("signal_count", 0),
+    }
+
+
 def build_short_factors():
     """공매도 3종 8시그널 + 4팩터 (정보봇 KIS API)"""
     raw = load("short_selling/jgis_short_factor.json")
@@ -335,6 +356,7 @@ def main():
         "perplexity": build_perplexity(),
         "theme_intel": build_theme_intel(),
         "short_factors": build_short_factors(),
+        "investor_flow": build_investor_flow(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

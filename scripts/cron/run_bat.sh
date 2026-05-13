@@ -220,6 +220,8 @@ case "$BAT" in
     run_py scripts/run_limit_up_scanner.py --generate
     # G3.9.5: 공매도 3종 8시그널 + 4팩터 (정보봇 KIS API)
     run_py scripts/scan_short_factor.py
+    # G3.9.6: 투자자 수급 통합본 시그널 (정보봇 pykrx)
+    run_py scripts/scan_investor_flow.py
     # --- G4: 추천 ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py

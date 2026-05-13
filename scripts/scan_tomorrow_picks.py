@@ -721,6 +721,15 @@ def _load_jgis_short_factors() -> dict:
 
 
 # ──────────────────────────────────────────
+# 투자자 수급 통합본 (investor_flow_signal.json)
+# ──────────────────────────────────────────
+
+def _load_investor_flow_signal() -> dict:
+    """투자자 수급 시그널 JSON 로드."""
+    return load_json("investor_flow/investor_flow_signal.json")
+
+
+# ──────────────────────────────────────────
 # 전략 L: 국적별 수급 7 Secrets (nationality_signal.json)
 # ──────────────────────────────────────────
 
@@ -2124,6 +2133,32 @@ def main():
     else:
         print("[공매도 3종] 데이터 없음 — 스킵")
 
+    # ── 투자자 수급(pykrx) 로드 + 교차분석 킬게이트 ──
+    inv_flow_signal = _load_investor_flow_signal()
+    if inv_flow_signal:
+        _inv_mkt = inv_flow_signal.get("market", {})
+        _inv_sigs = inv_flow_signal.get("market_signals", [])
+        _inv_src = inv_flow_signal.get("source", "unknown")
+        print(f"[투자자 수급] {inv_flow_signal.get('date','')} | "
+              f"외인:{_inv_mkt.get('foreign',0):+,}억 기관:{_inv_mkt.get('institution',0):+,}억 | "
+              f"시그널: {_inv_sigs} | src={_inv_src}")
+
+        # 교차분석 킬: SHORT_EXTREME + FOREIGN_MEGA_SELL → 제거
+        _inv_int = yaml_config.get("investor_flow_pykrx", {}).get("integration", {})
+        _cross_kill_on = _inv_int.get("cross_kill_enabled", True)
+        if _cross_kill_on and jgis_short_factors:
+            critical_risk = set(inv_flow_signal.get("critical_risk", []))
+            if critical_risk:
+                before_cr2 = len(all_tickers)
+                all_tickers -= critical_risk
+                _cr_names = [jgis_short_factors.get("all_results", {}).get(t, {}).get("name", t)
+                             for t in critical_risk]
+                print(f"[교차 킬] SHORT_EXTREME+MEGA_SELL | "
+                      f"{before_cr2} → {len(all_tickers)}종목 | "
+                      f"제외: {', '.join(_cr_names[:5])}")
+    else:
+        print("[투자자 수급] 데이터 없음 — 스킵")
+
     # 컨센서스 풀 필터 (pool_only 모드)
     if consensus_pool_enabled and consensus_pool_only and consensus_pool:
         before_cnt = len(all_tickers)
@@ -2233,6 +2268,11 @@ def main():
             effective_regime = FLOWX_MODE_OVERRIDES["regime_boost_floor"]
         if short_summary.get("enabled") and short_pos_scale < 1.0:
             effective_regime *= short_pos_scale
+
+        # 투자자 수급(pykrx): 시장 포지션 멀티플라이어
+        if inv_flow_signal:
+            inv_market_mult = inv_flow_signal.get("market_position_mult", 1.0)
+            effective_regime *= inv_market_mult
 
         # v7 교차검증 바이패스: 2소스 이상 + 거래량 2배 이상 → 레짐 감쇠 면제
         vol_ratio = pq_data.get("vol_ratio", 0) if pq_data else 0
@@ -2573,6 +2613,65 @@ def main():
                 if sigs_str:
                     jgis_short_tag += f"[{sigs_str}]"
 
+        # ── 투자자 수급(pykrx): 외인/기관 TOP 보너스 ──
+        inv_flow_tag = ""
+        inv_flow_bonus = 0.0
+        if inv_flow_signal and ticker in inv_flow_signal.get("stock_scores", {}):
+            _if_data = inv_flow_signal["stock_scores"][ticker]
+            _if_score = _if_data.get("flow_score", 0)
+            _if_foreign = _if_data.get("foreign_amt_억", 0)
+            _if_inst = _if_data.get("inst_amt_억", 0)
+
+            _inv_int = yaml_config.get("investor_flow_pykrx", {}).get("integration", {})
+            _b_mega = _inv_int.get("stock_bonus_mega", 15)
+            _b_large = _inv_int.get("stock_bonus_large", 10)
+            _b_medium = _inv_int.get("stock_bonus_medium", 5)
+
+            # 외인 TOP 매수 보너스
+            if _if_foreign >= 1000:
+                inv_flow_bonus = _b_mega
+                _if_label = f"외인+{_if_foreign:.0f}억"
+            elif _if_foreign >= 500:
+                inv_flow_bonus = _b_large
+                _if_label = f"외인+{_if_foreign:.0f}억"
+            elif _if_foreign >= 100:
+                inv_flow_bonus = _b_medium
+                _if_label = f"외인+{_if_foreign:.0f}억"
+            elif _if_foreign <= -1000:
+                inv_flow_bonus = -_b_mega
+                _if_label = f"외인{_if_foreign:.0f}억"
+            elif _if_foreign <= -500:
+                inv_flow_bonus = -_b_large
+                _if_label = f"외인{_if_foreign:.0f}억"
+            elif _if_foreign <= -100:
+                inv_flow_bonus = -_b_medium
+                _if_label = f"외인{_if_foreign:.0f}억"
+            else:
+                _if_label = ""
+
+            # 기관 TOP 매수 보너스 (외인의 50% 가중치)
+            _inst_w = _inv_int.get("inst_weight", 0.5)
+            if _if_inst >= 1000:
+                inv_flow_bonus += _b_mega * _inst_w
+                _if_label += f"/기관+{_if_inst:.0f}억"
+            elif _if_inst >= 500:
+                inv_flow_bonus += _b_large * _inst_w
+                _if_label += f"/기관+{_if_inst:.0f}억"
+            elif _if_inst >= 100:
+                inv_flow_bonus += _b_medium * _inst_w
+                _if_label += f"/기관+{_if_inst:.0f}억"
+            elif _if_inst <= -1000:
+                inv_flow_bonus -= _b_mega * _inst_w
+                _if_label += f"/기관{_if_inst:.0f}억"
+            elif _if_inst <= -500:
+                inv_flow_bonus -= _b_large * _inst_w
+                _if_label += f"/기관{_if_inst:.0f}억"
+
+            if inv_flow_bonus != 0:
+                boosted = max(min(score_detail["total"] + inv_flow_bonus, 100), 0)
+                score_detail["total"] = round(boosted, 1)
+                inv_flow_tag = f"수급:{_if_label}({inv_flow_bonus:+.0f})"
+
         # ── 전략N: 기관매집 조기감지 부스트 ──
         # EARLY_SURGE(오늘 3배 대량) → +10, EARLY_ACCEL(가속) → +7
         # EARLY_DUAL(기관+외인 동시) → +5, STRONG(장기 쌍끌이) → +8
@@ -2747,6 +2846,8 @@ def main():
             "nat_pattern": nat_pattern,
             "inst_accum_tag": inst_accum_tag,
             "jgis_short_tag": jgis_short_tag,
+            "inv_flow_bonus": inv_flow_bonus,
+            "inv_flow_tag": inv_flow_tag,
             "short_factors": (
                 {
                     "credit_risk": _jgis_r.get("credit_risk_factor", 0),
@@ -3071,7 +3172,8 @@ def main():
             v3s = r.get("alpha_v3_score", 0)
             alpha_str = f"\n     🧬 v3({v3s:.0f}): T1={t1} T2={t2} [{'+'.join(sigs)}]"
         jgis_str = f"  📉{r['jgis_short_tag']}" if r.get("jgis_short_tag") else ""
-        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{jgis_str}{sc_str}{alpha_str}{fib_str}")
+        inv_flow_str = f"  💰{r['inv_flow_tag']}" if r.get("inv_flow_tag") else ""
+        print(f"     근거: {reasons_str}{ma5_str}{intel_str}{report_str}{cons_str}{nat_str}{ia_str}{fe_str}{jgis_str}{inv_flow_str}{sc_str}{alpha_str}{fib_str}")
 
     if top5:
         print(f"\n{'─'*60}")
@@ -3241,6 +3343,18 @@ def main():
             "penalized": sum(1 for r in results if r.get("short_factors", {}).get("credit_risk", 0) >= 50),
             "short_cover_boosted": sum(1 for r in results if r.get("short_factors", {}).get("short_cover", 0) >= 70),
         } if jgis_short_factors else {},
+        "investor_flow": {
+            "enabled": bool(inv_flow_signal),
+            "date": inv_flow_signal.get("date", "") if inv_flow_signal else "",
+            "source": inv_flow_signal.get("source", "") if inv_flow_signal else "",
+            "market_signals": inv_flow_signal.get("market_signals", []) if inv_flow_signal else [],
+            "market_mult": inv_flow_signal.get("market_position_mult", 1.0) if inv_flow_signal else 1.0,
+            "foreign_total": inv_flow_signal.get("market", {}).get("foreign", 0) if inv_flow_signal else 0,
+            "inst_total": inv_flow_signal.get("market", {}).get("institution", 0) if inv_flow_signal else 0,
+            "critical_risk_count": len(inv_flow_signal.get("critical_risk", [])) if inv_flow_signal else 0,
+            "boosted": sum(1 for r in results if r.get("inv_flow_bonus", 0) > 0),
+            "penalized": sum(1 for r in results if r.get("inv_flow_bonus", 0) < 0),
+        } if inv_flow_signal else {},
     }
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 

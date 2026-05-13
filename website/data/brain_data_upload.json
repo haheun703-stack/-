@@ -2858,5 +2858,50 @@
         "price": 18200.0
       }
     ]
+  },
+  "investor_flow": {
+    "date": "20260513",
+    "source": "unknown",
+    "market": {
+      "foreign": -43329,
+      "institution": 16848,
+      "individual": 24916,
+      "kospi": {
+        "foreign": -37227,
+        "institution": 16876,
+        "individual": 18869,
+        "financial": 18852,
+        "insurance": -630,
+        "fund": 1250,
+        "bank": 67,
+        "pension": -2363,
+        "other_financial": -300,
+        "other_corp": 1483
+      },
+      "kosdaq": {
+        "foreign": -6102,
+        "institution": -28,
+        "individual": 6047,
+        "financial": 245,
+        "insurance": -27,
+        "fund": 368,
+        "bank": 4,
+        "pension": -532,
+        "other_financial": -86,
+        "other_corp": 83
+      }
+    },
+    "market_signals": [
+      "FOREIGN_MASS_SELL",
+      "INST_BUYING_HEAVY"
+    ],
+    "market_position_mult": 0.85,
+    "top_foreign_buy": [],
+    "top_foreign_sell": [],
+    "top_inst_buy": [],
+    "top_inst_sell": [],
+    "cross_divergence": [],
+    "critical_risk": [],
+    "signal_count": 2
   }
 }

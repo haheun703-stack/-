@@ -192,6 +192,106 @@ class JgisShortAdapter:
         return rows[-1]
 
 
+# ══════════════════════════════════════════════════════════
+# 투자자 수급 통합본 (pykrx investor_flow) 로드 함수
+# ══════════════════════════════════════════════════════════
+
+def _resolve_flow_dir(flow_dir: str | None = None) -> Path:
+    """investor_flow JSON 디렉토리 결정."""
+    if flow_dir:
+        return Path(flow_dir)
+    if CONFIG_PATH.exists():
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        return Path(cfg.get("investor_flow_pykrx", {}).get(
+            "flow_dir",
+            "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily",
+        ))
+    return Path("D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily")
+
+
+def load_investor_flow(date_str: str | None = None, flow_dir: str | None = None) -> dict | None:
+    """정보봇 supply_daily/{date}_investor_flow.json 로드.
+
+    Args:
+        date_str: "2026-05-13" 형식. None이면 오늘→어제→그제 자동 탐색.
+        flow_dir: 디렉토리 경로. None이면 settings.yaml 참조.
+
+    Returns:
+        파싱된 JSON dict 또는 None.
+    """
+    from datetime import datetime, timedelta
+
+    base = _resolve_flow_dir(flow_dir)
+    if not base.exists():
+        logger.warning("investor_flow 디렉토리 없음: %s", base)
+        return None
+
+    # 날짜 탐색: 지정 → 오늘 → 최근 5일 역순
+    if date_str:
+        candidates = [date_str]
+    else:
+        today = datetime.now()
+        candidates = [(today - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(5)]
+
+    for ds in candidates:
+        path = base / f"{ds}_investor_flow.json"
+        if path.exists():
+            try:
+                with open(path, encoding="utf-8") as f:
+                    data = json.load(f)
+                # top 리스트 존재 여부 체크
+                has_top = bool(data.get("foreign_top_buy") or data.get("foreign_top_sell"))
+                if not has_top:
+                    logger.info("investor_flow %s: TOP 리스트 비어있음 (pykrx 미수집?)", ds)
+                return data
+            except Exception as e:
+                logger.warning("investor_flow %s 로드 실패: %s", ds, e)
+    return None
+
+
+def load_investor_flow_history(days: int = 5, flow_dir: str | None = None) -> list[dict]:
+    """최근 N일 investor_flow JSON 로드 (연속 매수/매도 판정용).
+
+    Returns:
+        날짜 오름차순 정렬된 dict 리스트.
+    """
+    base = _resolve_flow_dir(flow_dir)
+    if not base.exists():
+        return []
+
+    files = sorted(base.glob("*_investor_flow.json"))
+    if not files:
+        return []
+
+    # 최근 N개
+    recent_files = files[-days:]
+    result = []
+    for path in recent_files:
+        try:
+            with open(path, encoding="utf-8") as f:
+                result.append(json.load(f))
+        except Exception:
+            continue
+    return result
+
+
+def load_investor_flow_summary_from_intel() -> dict | None:
+    """daily_intelligence.json → investor_flow_summary (향후 활성화).
+
+    Returns:
+        investor_flow_summary dict 또는 None (현재는 정보봇 미배포).
+    """
+    if not JGIS_JSON_PATH.exists():
+        return None
+    try:
+        with open(JGIS_JSON_PATH, encoding="utf-8") as f:
+            intel = json.load(f)
+        return intel.get("investor_flow_summary")
+    except Exception:
+        return None
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
