@@ -2273,6 +2273,12 @@ def main():
         if inv_flow_signal:
             inv_market_mult = inv_flow_signal.get("market_position_mult", 1.0)
             effective_regime *= inv_market_mult
+            # 전략5: 연기금 바닥 — 시장 멀티 보정
+            _adv = inv_flow_signal.get("advanced", {})
+            _adv_cfg = yaml_config.get("investor_flow_pykrx", {}).get("advanced", {})
+            if _adv.get("pension_signal") == "PENSION_BUY":
+                _pen_boost = _adv_cfg.get("pension", {}).get("market_boost", 0.03)
+                effective_regime *= (1.0 + _pen_boost)
 
         # v7 교차검증 바이패스: 2소스 이상 + 거래량 2배 이상 → 레짐 감쇠 면제
         vol_ratio = pq_data.get("vol_ratio", 0) if pq_data else 0
@@ -2671,6 +2677,59 @@ def main():
                 boosted = max(min(score_detail["total"] + inv_flow_bonus, 100), 0)
                 score_detail["total"] = round(boosted, 1)
                 inv_flow_tag = f"수급:{_if_label}({inv_flow_bonus:+.0f})"
+
+        # ── 투자자 수급 고급 전략 5종 ("시크릿 무기") ──
+        _adv = inv_flow_signal.get("advanced", {}) if inv_flow_signal else {}
+        _adv_cfg = yaml_config.get("investor_flow_pykrx", {}).get("advanced", {})
+        _adv_bonus = 0.0
+
+        # 전략1: 역행 매수 — 외인 MASS_SELL 장 + 기관 확신 매수
+        _ct_set = {x["ticker"] for x in _adv.get("contrarian_tickers", [])}
+        if _adv_cfg.get("contrarian", {}).get("enabled") and ticker in _ct_set:
+            _ct_b = _adv_cfg["contrarian"].get("bonus", 10)
+            _adv_bonus += _ct_b
+            inv_flow_tag += f"|역행+{_ct_b}"
+
+        # 전략2: 기관 흡수 — 외인 매도를 기관이 받아냄
+        _ab_map = {x["ticker"]: x for x in _adv.get("absorption_details", [])}
+        if _adv_cfg.get("absorption", {}).get("enabled") and ticker in _ab_map:
+            _ab = _ab_map[ticker]
+            _ab_cfg = _adv_cfg["absorption"]
+            _ab_b = {"FULL": _ab_cfg.get("full_bonus", 12),
+                     "PARTIAL": _ab_cfg.get("partial_bonus", 8),
+                     "WEAK": _ab_cfg.get("weak_bonus", 5)}.get(_ab["grade"], 0)
+            _adv_bonus += _ab_b
+            inv_flow_tag += f"|흡수{_ab['grade']}+{_ab_b}"
+
+        # 전략3: 수급 연속성 — TOP N일 연속 등장
+        _cc_map = _adv.get("consecutive_flow", {})
+        if _adv_cfg.get("consecutive", {}).get("enabled") and ticker in _cc_map:
+            _cc_days = _cc_map[ticker]
+            _cc_cfg = _adv_cfg["consecutive"]
+            _cc_b = (_cc_cfg.get("bonus_5d", 12) if _cc_days >= 5 else
+                     _cc_cfg.get("bonus_3d", 8) if _cc_days >= 3 else
+                     _cc_cfg.get("bonus_2d", 4))
+            _adv_bonus += _cc_b
+            inv_flow_tag += f"|연속{_cc_days}일+{_cc_b}"
+
+        # 전략4: 코스닥 로테이션 — 자금 이동 방향 매칭
+        _rot_sig = _adv.get("rotation_signal")
+        if _adv_cfg.get("rotation", {}).get("enabled") and _rot_sig:
+            _kd_set = set(_adv.get("kosdaq_tickers", []))
+            _is_kosdaq = ticker in _kd_set
+            if (_rot_sig == "KOSDAQ_FAVOR" and _is_kosdaq) or \
+               (_rot_sig == "KOSPI_FAVOR" and not _is_kosdaq and _kd_set):
+                _rot_b = _adv_cfg["rotation"].get("bonus", 5)
+                _adv_bonus += _rot_b
+                inv_flow_tag += f"|로테이션+{_rot_b}"
+
+        # 고급 전략 합산 적용
+        if _adv_bonus != 0:
+            inv_flow_bonus += _adv_bonus
+            boosted = max(min(score_detail["total"] + _adv_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            if not inv_flow_tag.startswith("수급:"):
+                inv_flow_tag = f"수급:고급({_adv_bonus:+.0f})" + inv_flow_tag
 
         # ── 전략N: 기관매집 조기감지 부스트 ──
         # EARLY_SURGE(오늘 3배 대량) → +10, EARLY_ACCEL(가속) → +7

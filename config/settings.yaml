@@ -865,6 +865,29 @@ investor_flow_pykrx:
     stock_bonus_medium: 5
     inst_weight: 0.5
     cross_kill_enabled: true
+  # ── 고급 전략 5종 ("시크릿 무기") ──
+  advanced:
+    contrarian:                        # 역행 매수: 약세장에서 기관이 고르는 종목
+      enabled: true
+      bonus: 10
+    absorption:                        # 기관 흡수: 외인 매도를 기관이 받아냄
+      enabled: true
+      full_bonus: 12                   # 흡수율 ≥50%
+      partial_bonus: 8                # 흡수율 ≥30%
+      weak_bonus: 5                   # 흡수율 <30%
+    consecutive:                       # 수급 연속성: TOP 리스트 N일 연속 등장
+      enabled: true
+      bonus_5d: 12
+      bonus_3d: 8
+      bonus_2d: 4
+    rotation:                          # 시장 로테이션: KOSPI↔KOSDAQ 자금 이동
+      enabled: true
+      divergence_threshold: 10000     # 외인 수급 발산 임계 (억원)
+      bonus: 5
+    pension:                           # 연기금 바닥: 약세장에서 연기금 대량 매수
+      enabled: true
+      buy_threshold: 500              # 연기금 순매수 ≥500억
+      market_boost: 0.03             # 시장 멀티플라이어 +3%
 
 # ════════════════════════════════════════════════════════════
 short_selling_calendar:
