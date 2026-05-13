@@ -66,6 +66,29 @@ monday_battle_plan.md
 news-early-detection-guide.html
 # paper_trader.py  # scripts/paper_trader.py는 추적 대상
 quantum_v8_spec.docx
+ALPHA_ENGINE_SPECIFICATION.docx
+FLOWX_EXPRESSION_CHANGE_DIRECTIVE.md
+FLOWX_TECHNICAL_SPEC.docx
+FLOWX_UPGRADE_MASTER_DIRECTIVE.docx
+QUANT_BOT_FULL_AUDIT.docx
+investment_analysis.html
+quant_secret_edge_4modules.html
+quantbot_sequence_master.html
+피보나치 기법 22.txt
+음성 260319_124105.txt
+웹봇-DDL-SQL-ONLY.sql
+
+# 한글 지시서 (사람용 문서)
+지시서_*
+★*
+
+# 참고 폴더
+KISOpenAPI_260320/
+미국장_퀀트봇/
+memory/
+
+# fix 스크립트
+scripts/fix_tasks.ps1
 
 # 참조 코드 (구현 완료 후 보존용)
 _etf_ref/

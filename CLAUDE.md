@@ -23,6 +23,11 @@
 - **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull && sudo systemctl restart quantum-scheduler"`
 - **로그**: `sudo journalctl -u quantum-scheduler --no-pager -n 50`
 
+## 금지 경로 (LOCK)
+- **`scripts/archive/`** — 폐기/백테스트 스크립트 보관소. **절대 참조·실행·import 금지**
+- **`_etf_ref/`** — 구현 완료 후 보존용 참조 코드. 참조 금지
+- 루트의 `.docx`, `.html`, 한글 지시서 파일 — 사람용 문서이며 코드가 아님. 무시할 것
+
 ## 시스템 상세 참조
 - **전체 시스템 맵**: `docs/SYSTEM_MAP.md` (8개 핵심 시스템, BAT 스케줄, 데이터 경로)
 - **설정**: `config/settings.yaml`, `config/relay_sectors.yaml`
