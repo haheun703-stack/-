@@ -126,52 +126,71 @@ def calc_sector_fire(
     rsi_avg = np.mean(rsis) if rsis else 50
     vol_avg = np.mean(vol_ratios) if vol_ratios else 1
 
-    # === FIRE 스코어 계산 ===
+    # === FIRE 스코어 계산 (v3: 주체별 분리 + 쌍끌이 + 방향성) ===
 
-    # F: Flow (0~25) — 5일 외인+기관 순매수
-    combined_flow = fgn_5d + inst_5d
-    if combined_flow >= 500:
-        flow_score = 25
-    elif combined_flow >= 200:
-        flow_score = 20
-    elif combined_flow >= 50:
-        flow_score = 15
-    elif combined_flow > 0:
-        flow_score = 8
-    elif combined_flow > -50:
-        flow_score = 3
-    else:
-        flow_score = 0
+    # F: Flow (0~25) — 주체별 독립 평가 후 합산 (외인·기관·연기금 각각 평가)
+    def _flow_sub(val: float) -> int:
+        """단일 주체 수급 점수 (0~10)."""
+        if val >= 300:
+            return 10
+        elif val >= 100:
+            return 8
+        elif val >= 30:
+            return 5
+        elif val > 0:
+            return 2
+        else:
+            return 0
 
-    # I: Inflection (0~20) — 수급 반전
+    fgn_flow = _flow_sub(fgn_5d)
+    inst_flow = _flow_sub(inst_5d)
+    pension_flow = _flow_sub(pension_5d)
+    # 외인(10) + 기관(10) + 연기금(5) = 최대 25
+    flow_score = min(25, fgn_flow + inst_flow + min(pension_flow, 5))
+
+    # 쌍끌이 보너스: 2주체 이상 동시 순매수 시 추가
+    dual_buy_count = sum(1 for v in [fgn_5d, inst_5d, pension_5d] if v > 0)
+    dual_buy_bonus = 0
+    if dual_buy_count >= 3:
+        dual_buy_bonus = 8   # 3주체 쌍끌이
+    elif dual_buy_count >= 2:
+        dual_buy_bonus = 4   # 2주체 쌍끌이
+
+    # I: Inflection (0~20) — 수급 반전 (방향 필터 추가)
+    # 반전 = 최근2일 - 이전3일이 양수 + 최근2일 자체가 양수여야 진짜 반전
     inflection_score = 0
-    if fgn_reversal > 100:
+    if fgn_reversal > 100 and fgn_r2 > 0:
         inflection_score += 12
-    elif fgn_reversal > 30:
+    elif fgn_reversal > 30 and fgn_r2 > 0:
         inflection_score += 8
-    elif fgn_reversal > 0:
+    elif fgn_reversal > 0 and fgn_r2 > 0:
         inflection_score += 3
 
-    if inst_reversal > 100:
+    if inst_reversal > 100 and inst_r2 > 0:
         inflection_score += 8
-    elif inst_reversal > 30:
+    elif inst_reversal > 30 and inst_r2 > 0:
         inflection_score += 5
-    elif inst_reversal > 0:
+    elif inst_reversal > 0 and inst_r2 > 0:
         inflection_score += 2
     inflection_score = min(inflection_score, 20)
 
-    # R: Rhythm (0~15) — MA20 이격도
+    # R: Rhythm (-5~15) — MA20 이격도 + 방향성 구분
     abs_dev = abs(ma20_avg)
     if abs_dev <= 5:
-        rhythm_score = 15  # 최적 눌림
+        rhythm_score = 15  # 최적 눌림목 구간
     elif abs_dev <= 10:
         rhythm_score = 10  # 양호
     elif abs_dev <= 15:
         rhythm_score = 5   # 확장
     elif abs_dev <= 20:
-        rhythm_score = 0   # 과열 영역
+        rhythm_score = 0   # 과열/과매도 영역
     else:
-        rhythm_score = -5  # 극단 과열
+        rhythm_score = -5  # 극단
+    # 방향성 보정: 하락(-) 과매도 구간은 감점, 상승(+) 과열은 더 감점
+    if ma20_avg < -15:
+        rhythm_score = min(rhythm_score, 0)   # 급락 중이면 리듬 점수 최대 0
+    if ma20_avg > 15:
+        rhythm_score = min(rhythm_score, -5)  # 급등 과열이면 감점 강화
 
     # E: Energy (0~25) — RSI + 거래량 + 수급 점증
     energy_score = 0
@@ -208,8 +227,11 @@ def calc_sector_fire(
         overheat -= 10
     if rsi_avg > 75:
         overheat -= 5
+    # 3주체 동시 매도 감산
+    if dual_buy_count == 0 and all(v < -100 for v in [fgn_5d, inst_5d]):
+        overheat -= 5  # 외인+기관 동시 대규모 매도
 
-    fire_score = max(0, min(100, flow_score + inflection_score + rhythm_score + energy_score + overheat))
+    fire_score = max(0, min(100, flow_score + inflection_score + rhythm_score + energy_score + dual_buy_bonus + overheat))
 
     # FIRE 등급
     if fire_score >= 80:
