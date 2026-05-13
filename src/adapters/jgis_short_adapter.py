@@ -196,18 +196,26 @@ class JgisShortAdapter:
 # 투자자 수급 통합본 (pykrx investor_flow) 로드 함수
 # ══════════════════════════════════════════════════════════
 
+def _load_inv_flow_cfg() -> dict:
+    """settings.yaml에서 investor_flow_pykrx 블록 로드 (1회용 helper)."""
+    if not CONFIG_PATH.exists():
+        return {}
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        return cfg.get("investor_flow_pykrx", {})
+    except Exception:
+        return {}
+
+
 def _resolve_flow_dir(flow_dir: str | None = None) -> Path:
     """investor_flow JSON 디렉토리 결정."""
     if flow_dir:
         return Path(flow_dir)
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, encoding="utf-8") as f:
-            cfg = yaml.safe_load(f) or {}
-        return Path(cfg.get("investor_flow_pykrx", {}).get(
-            "flow_dir",
-            "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily",
-        ))
-    return Path("D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily")
+    return Path(_load_inv_flow_cfg().get(
+        "flow_dir",
+        "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily",
+    ))
 
 
 def load_investor_flow(date_str: str | None = None, flow_dir: str | None = None) -> dict | None:
@@ -227,12 +235,15 @@ def load_investor_flow(date_str: str | None = None, flow_dir: str | None = None)
         logger.warning("investor_flow 디렉토리 없음: %s", base)
         return None
 
-    # 날짜 탐색: 지정 → 오늘 → 최근 5일 역순
+    # 날짜 탐색: 지정 → 오늘 → 최근 N일 역순 (lookback_days yaml 연동, 연휴 대비 +2일 여유)
     if date_str:
         candidates = [date_str]
     else:
         today = datetime.now()
-        candidates = [(today - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(5)]
+        _lookback = _load_inv_flow_cfg().get("lookback_days", 5)
+        # 주말/공휴일 fallback 여유: lookback + 4일까지 탐색
+        candidates = [(today - timedelta(days=d)).strftime("%Y-%m-%d")
+                      for d in range(_lookback + 4)]
 
     for ds in candidates:
         path = base / f"{ds}_investor_flow.json"

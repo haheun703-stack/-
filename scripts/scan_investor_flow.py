@@ -90,11 +90,24 @@ def detect_market_signals(
     f_today = current.get("foreign", 0)
     i_today = current.get("institution", 0)
 
-    # 전일 데이터 (history의 마지막-1이 전일)
+    # 전일 데이터 — current.date와 일치하는 history 인덱스 찾아 그 직전 항목 선택
+    # (fallback 로드로 current.date와 history[-1].date가 같을 수 있음)
     f_prev = None
+    cur_date = current.get("date")
     if len(history) >= 2:
-        prev = history[-2]
-        f_prev = prev.get("foreign", 0)
+        prev_idx = None
+        if cur_date:
+            for i in range(len(history) - 1, -1, -1):
+                if history[i].get("date") == cur_date and i >= 1:
+                    prev_idx = i - 1
+                    break
+        # 매칭 실패 시 마지막에서 2번째 (기존 동작 fallback)
+        if prev_idx is None:
+            prev_idx = -2
+        prev = history[prev_idx]
+        # current와 prev가 같은 날짜면 무효화 (2일 연속 판정 불가)
+        if prev.get("date") != cur_date:
+            f_prev = prev.get("foreign", 0)
 
     # 1) FOREIGN_MASS_SELL: 2일 연속 -threshold
     if f_prev is not None and f_today <= -mass_th and f_prev <= -mass_th:
@@ -131,6 +144,32 @@ def detect_market_signals(
 # 종목 레벨 시그널 + 수급 점수
 # ══════════════════════════════════════════════════════════
 
+def _calc_tier_score(
+    net_억: float,
+    tiers: dict,
+    side: str = "buy",
+) -> int:
+    """yaml 정의된 컷에 따라 100/70/40/20 점수 계산.
+
+    Args:
+        net_억: 순매수 금액 (억원, 매도면 음수)
+        tiers: {"mega": 1000, "large": 500, "medium": 100, "small": 0}
+        side: "buy"면 양수 점수, "sell"면 음수 점수
+    """
+    sign = 1 if side == "buy" else -1
+    abs_amt = abs(net_억)
+    mega = tiers.get("mega", 1000)
+    large = tiers.get("large", 500)
+    medium = tiers.get("medium", 100)
+    if abs_amt >= mega:
+        return 100 * sign
+    elif abs_amt >= large:
+        return 70 * sign
+    elif abs_amt >= medium:
+        return 40 * sign
+    return 20 * sign
+
+
 def compute_stock_signals(
     flow: dict,
     cfg: dict,
@@ -144,6 +183,7 @@ def compute_stock_signals(
     int_cfg = cfg.get("integration", {})
     mega_th = stk_cfg.get("mega_threshold", 1000)
     inst_weight = int_cfg.get("inst_weight", 0.5)
+    tiers = stk_cfg.get("score_tiers", {"mega": 1000, "large": 500, "medium": 100, "small": 0})
 
     stock_scores: dict[str, dict] = {}
     mega_buy: list[str] = []
@@ -167,15 +207,8 @@ def compute_stock_signals(
                 "msg": f"외인 {name} +{net_억:,.0f}억 순매수",
             })
 
-        # 수급 점수 (외인)
-        if net_억 >= 1000:
-            f_score = 100
-        elif net_억 >= 500:
-            f_score = 70
-        elif net_억 >= 100:
-            f_score = 40
-        else:
-            f_score = 20
+        # 수급 점수 (외인 매수)
+        f_score = _calc_tier_score(net_억, tiers, side="buy")
 
         stock_scores[ticker] = {
             "name": name,
@@ -205,14 +238,7 @@ def compute_stock_signals(
             })
 
         # 매도 종목은 음수 점수로
-        if net_억 <= -1000:
-            f_score = -100
-        elif net_억 <= -500:
-            f_score = -70
-        elif net_억 <= -100:
-            f_score = -40
-        else:
-            f_score = -20
+        f_score = _calc_tier_score(net_억, tiers, side="sell")
 
         if ticker not in stock_scores:
             stock_scores[ticker] = {
@@ -237,15 +263,7 @@ def compute_stock_signals(
         net_qty = item.get("net_qty", 0)
         net_억 = net_amt / _BILLION
 
-        if net_억 >= 1000:
-            i_score = 100
-        elif net_억 >= 500:
-            i_score = 70
-        elif net_억 >= 100:
-            i_score = 40
-        else:
-            i_score = 20
-
+        i_score = _calc_tier_score(net_억, tiers, side="buy")
         weighted = round(i_score * inst_weight)
 
         if ticker in stock_scores:
@@ -273,15 +291,7 @@ def compute_stock_signals(
         net_amt = item.get("net_amt", 0)
         net_억 = net_amt / _BILLION
 
-        if net_억 <= -1000:
-            i_score = -100
-        elif net_억 <= -500:
-            i_score = -70
-        elif net_억 <= -100:
-            i_score = -40
-        else:
-            i_score = -20
-
+        i_score = _calc_tier_score(net_억, tiers, side="sell")
         weighted = round(i_score * inst_weight)
 
         if ticker in stock_scores:

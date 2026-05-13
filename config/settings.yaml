@@ -856,6 +856,12 @@ investor_flow_pykrx:
     inst_heavy_threshold: 5000
   stock_signals:
     mega_threshold: 1000
+    # 종목 점수 컷 (억원 단위) — flow_score 계산 시 사용
+    score_tiers:
+      mega: 1000     # ≥1,000억 → 100점
+      large: 500     # ≥500억  → 70점
+      medium: 100    # ≥100억  → 40점
+      small: 0       # 그 외   → 20점
   integration:
     market_penalty_severe: -0.15
     market_penalty_moderate: -0.07
