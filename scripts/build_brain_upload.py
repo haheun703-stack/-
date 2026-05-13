@@ -283,6 +283,22 @@ def build_regime_macro():
     }
 
 
+def build_theme_intel():
+    """테마 인텔리전스 — fetch_theme_intel.py가 Supabase에서 가져온 데이터"""
+    raw = load("theme_intel.json")
+    if not raw:
+        return {}
+    return {
+        "fetched_at": raw.get("fetched_at", ""),
+        "hot_themes": raw.get("hot_themes", []),
+        "cold_themes": raw.get("cold_themes", []),
+        "top_inflow": raw.get("top_inflow", []),
+        "top_outflow": raw.get("top_outflow", []),
+        "signal": raw.get("signal", ""),
+        "rotation_signal": raw.get("rotation_signal", ""),
+    }
+
+
 def main():
     brain = {
         "strategic": build_strategic(),
@@ -301,6 +317,7 @@ def main():
         "liquidity_signal": build_liquidity_signal(),
         "regime_macro": build_regime_macro(),
         "perplexity": build_perplexity(),
+        "theme_intel": build_theme_intel(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -328,6 +345,9 @@ def main():
     print(f"  2D Macro: regime={rm.get('current_regime', 'N/A')}, score={rm.get('macro_score', 0)}, grade={rm.get('macro_grade', 'N/A')}")
     px = brain["perplexity"]
     print(f"  Perplexity: conf={px.get('overall_confidence', 0):.0%}, stocks={len(px.get('stock_verifications', []))}, warnings={len(px.get('warnings', []))}")
+    ti = brain["theme_intel"]
+    hot = ti.get("hot_themes", [])
+    print(f"  Theme Intel: HOT={len(hot)}개, 유입TOP={ti.get('top_inflow', [])[:3]}")
 
 
 if __name__ == "__main__":

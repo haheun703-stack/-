@@ -341,12 +341,33 @@ class FlowxUploader:
             return False
 
     def upload_market_brain(self, date_str: str) -> bool:
-        """brain_decision.json → quant_market_brain."""
+        """brain_decision.json → quant_market_brain (+ HOT 테마 병합)."""
         p = DATA_DIR / "brain_decision.json"
         if not p.exists():
             return False
         with open(p, encoding="utf-8") as f:
-            return self._upsert_date_data("quant_market_brain", json.load(f), date_str, "시장브레인")
+            data = json.load(f)
+
+        # theme_intel.json에서 HOT 테마를 hot_sectors에 병합
+        theme_p = DATA_DIR / "theme_intel.json"
+        if theme_p.exists():
+            try:
+                ti = json.loads(theme_p.read_text(encoding="utf-8"))
+                hot_themes = ti.get("hot_themes", [])
+                if hot_themes:
+                    existing = data.get("hot_sectors", [])
+                    if isinstance(existing, list):
+                        # 기존 섹터 뒤에 "[테마]HOT테마명" 형태로 추가
+                        themed = [f"[테마]{t}" for t in hot_themes[:10]]
+                        data["hot_sectors"] = existing + themed
+                    data["hot_themes"] = hot_themes[:10]
+                    data["theme_signal"] = ti.get("signal", "")
+                    data["theme_rotation"] = ti.get("rotation_signal", "")
+                    logger.info("[FLOWX] 시장브레인에 HOT테마 %d개 병합", len(hot_themes))
+            except Exception as e:
+                logger.warning("[FLOWX] theme_intel 병합 실패: %s", e)
+
+        return self._upsert_date_data("quant_market_brain", data, date_str, "시장브레인")
 
     def upload_sector_flow(self, date_str: str) -> bool:
         """sector_institutional_flow.json → quant_sector_flow."""

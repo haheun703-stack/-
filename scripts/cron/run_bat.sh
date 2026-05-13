@@ -245,6 +245,7 @@ case "$BAT" in
     # --- G4.6: EWY(MSCI Korea ETF) 보유종목 비중변화 수집 ---
     run_py_long scripts/collect_ewy_holdings.py --monthly --upload --telegram
     # --- G4.9: FLOWX 업로드 (모든 스캔 완료 후 일괄 업로드) ---
+    run_py scripts/fetch_theme_intel.py           # Supabase에서 테마 인텔 읽기 (단타봇이 올린 데이터)
     run_py scripts/build_brain_upload.py
     run_py scripts/signal_logger.py              # G4.9: tomorrow_picks → signals 테이블 기록
     run_py scripts/upload_flowx.py
@@ -258,6 +259,7 @@ case "$BAT" in
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
+    run_py scripts/fetch_theme_intel.py
     run_py scripts/build_brain_upload.py
     run_py scripts/signal_logger.py              # signals 테이블 재시도
     run_py scripts/upload_flowx.py
