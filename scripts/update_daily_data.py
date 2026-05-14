@@ -453,7 +453,8 @@ def update_all(target_date: str = None, check_only: bool = False):
     # 병렬 수집 (ThreadPoolExecutor)
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    max_workers = 10
+    # B5 최적화: 환경변수 override + 기본값 15 (10 대비 +50%, FDR rate limit 안전 범위)
+    max_workers = int(os.getenv("UPDATE_DAILY_WORKERS", "15"))
     logger.info(f"CSV 병렬 업데이트 시작 (workers={max_workers})")
 
     done_count = 0
