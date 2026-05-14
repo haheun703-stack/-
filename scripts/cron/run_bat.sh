@@ -251,8 +251,12 @@ case "$BAT" in
     # --- G4: 추천 ---
     # COO 복원: 성과 추적 (추천 전에 실행)
     run_py scripts/track_pick_results.py
-    run_py scripts/scan_earnings_acceleration.py
-    run_py scripts/scan_turnaround.py
+    # B2 최적화: [EA]+[TA] 병렬 실행 (독립적, 입력=read-only/출력=다른 파일)
+    run_py scripts/scan_earnings_acceleration.py &
+    EA_PID=$!
+    run_py scripts/scan_turnaround.py &
+    TA_PID=$!
+    wait $EA_PID $TA_PID
     run_py_long scripts/scan_tomorrow_picks.py
     run_py_long scripts/scan_tomorrow_picks.py --flowx --no-send
     run_py scripts/build_killer_picks.py
