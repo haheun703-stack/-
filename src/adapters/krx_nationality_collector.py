@@ -566,9 +566,10 @@ def detect_and_fill_gaps(
     """
     conn = init_db(db_path)
 
-    # DB에 이미 수집된 날짜 (stock_count > 0만)
+    # DB에 한 번이라도 시도한 날짜 (OK + API_ERROR + SKIP 모두 제외 대상)
+    # 공휴일/실패일을 매 BAT-D마다 재시도하는 BUG-2 해결 (2026-05-14)
     rows = conn.execute(
-        "SELECT date FROM collect_log WHERE stock_count > 0"
+        "SELECT date FROM collect_log WHERE status IN ('OK', 'SKIP', 'API_ERROR')"
     ).fetchall()
     collected = set(r[0] for r in rows)
     conn.close()
@@ -579,11 +580,34 @@ def detect_and_fill_gaps(
         yesterday -= timedelta(days=1)
 
     start = yesterday - timedelta(days=lookback_days)
+
+    # 실거래일 캘린더 조회 (공휴일 자동 제외, 실패/빈응답 시 평일 fallback)
+    trading_days: set[str] | None = None
+    try:
+        from pykrx import stock as pykrx_stock
+        biz_days = pykrx_stock.get_previous_business_days(
+            fromdate=start.strftime("%Y%m%d"),
+            todate=yesterday.strftime("%Y%m%d"),
+        )
+        if not biz_days:
+            raise ValueError("pykrx 거래일 캘린더 빈 응답 (인증 실패 가능성)")
+        trading_days = {d.strftime("%Y%m%d") for d in biz_days}
+        logger.debug(
+            f"거래일 캘린더: {len(trading_days)}일 ({start.date()}~{yesterday.date()})"
+        )
+    except Exception as e:
+        logger.warning(f"거래일 캘린더 조회 실패, 평일 fallback: {e}")
+        trading_days = None
+
     missing = []
     d = start
     while d <= yesterday:
         if d.weekday() < 5:  # 평일만
             ds = d.strftime("%Y%m%d")
+            # 공휴일 제외 (거래일 캘린더 사용 가능 시)
+            if trading_days is not None and ds not in trading_days:
+                d += timedelta(days=1)
+                continue
             if ds not in collected:
                 missing.append(ds)
         d += timedelta(days=1)
