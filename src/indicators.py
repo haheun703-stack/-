@@ -746,6 +746,9 @@ class IndicatorEngine:
         # 비관 극단 → 역발상 매수 신호
         # ──────────────────────────────────────────────
 
+        # 누적 컬럼 단편화 해소 (PerformanceWarning 방지)
+        result = result.copy()
+
         if "sentiment_pessimism" in result.columns:
             sp = result["sentiment_pessimism"].fillna(0.5)
             # 72. 센티먼트 비관도 (0~1)
@@ -779,33 +782,34 @@ class IndicatorEngine:
         # 가격 기반 클래식 Stochastic — StochRSI와 병행
         # ──────────────────────────────────────────────
 
-        # 76-77. Stochastics Slow %K, %D (14,3,3)
+        # 누적 컬럼 단편화 해소 (PerformanceWarning 방지)
+        result = result.copy()
+
+        # 76-83. Stoch Slow + Parabolic SAR (8컬럼 일괄 concat — fragmentation 방지)
         stoch_slow = self.calc_stochastic_slow(df, k_period=14, d_period=3, smooth=3)
-        result["stoch_slow_k"] = stoch_slow["stoch_slow_k"]
-        result["stoch_slow_d"] = stoch_slow["stoch_slow_d"]
-
-        # 78. Stoch Slow 골든크로스 (K가 D를 상향 돌파)
-        result["stoch_slow_golden"] = (
-            (result["stoch_slow_k"] > result["stoch_slow_d"]) &
-            (result["stoch_slow_k"].shift(1) <= result["stoch_slow_d"].shift(1))
-        ).astype(int)
-
-        # ──────────────────────────────────────────────
-        # v10.5 Parabolic SAR (79~83)
-        # 트레일링 스톱 + 추세 반전 탐지
-        # ──────────────────────────────────────────────
-
-        # 79-82. Parabolic SAR 4개 컬럼
         sar_df = self.calc_parabolic_sar(df)
-        result["sar"] = sar_df["sar"]
-        result["sar_trend"] = sar_df["sar_trend"]        # 1=상승, -1=하강
-        result["sar_af"] = sar_df["sar_af"]              # 가속계수 (0.02~0.20)
-        result["sar_ep"] = sar_df["sar_ep"]              # 극단점 (추세 내 최고/최저)
 
-        # 83. SAR 반전 신호 (전일 하강 → 오늘 상승 = 매수 반전)
-        result["sar_reversal_up"] = (
-            (result["sar_trend"] == 1) & (result["sar_trend"].shift(1) == -1)
+        # 골든크로스 / 반전 신호 (별도 계산)
+        stoch_slow_golden = (
+            (stoch_slow["stoch_slow_k"] > stoch_slow["stoch_slow_d"]) &
+            (stoch_slow["stoch_slow_k"].shift(1) <= stoch_slow["stoch_slow_d"].shift(1))
         ).astype(int)
+        sar_reversal_up = (
+            (sar_df["sar_trend"] == 1) & (sar_df["sar_trend"].shift(1) == -1)
+        ).astype(int)
+
+        # 한 번에 concat (PerformanceWarning: highly fragmented 해소)
+        new_cols = pd.DataFrame({
+            "stoch_slow_k": stoch_slow["stoch_slow_k"],
+            "stoch_slow_d": stoch_slow["stoch_slow_d"],
+            "stoch_slow_golden": stoch_slow_golden,
+            "sar": sar_df["sar"],
+            "sar_trend": sar_df["sar_trend"],
+            "sar_af": sar_df["sar_af"],
+            "sar_ep": sar_df["sar_ep"],
+            "sar_reversal_up": sar_reversal_up,
+        }, index=result.index)
+        result = pd.concat([result, new_cols], axis=1)
 
         return result
 
