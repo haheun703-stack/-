@@ -415,6 +415,21 @@ def calc_stock_buy_score(
     else:
         buy_grade = "SKIP"
 
+    # v2 시그널: 기관 강매수 (Q4) + 외인 매도 (Phase 4 백테스트 결과 기반)
+    # 활성화: SECTOR_FIRE_V2=1 (기본 OFF)
+    # 임계값: INST_Q4_THRESHOLD (기본 689억, Phase 3 측정값)
+    # 효과 (20일 백테스트): D+1 적중률 54.5%, D+5 평균 +4.95%
+    import os as _os
+    if _os.getenv("SECTOR_FIRE_V2", "0") == "1":
+        _q4 = float(_os.getenv("INST_Q4_THRESHOLD", "689"))
+        if inst_5d >= _q4 and fgn_5d <= 0:
+            reasons.append(f"INST_STRONG_BUY[V2:{inst_5d:.0f}억]")
+            # 등급 격상
+            if buy_grade == "WATCH":
+                buy_grade = "BUY"
+            elif buy_grade == "SKIP":
+                buy_grade = "WATCH"
+
     return {
         "ticker": ticker,
         "name": name[:10],
