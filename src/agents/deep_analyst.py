@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -169,7 +170,7 @@ class DeepAnalystAgent(BaseAgent):
         industry_thesis: list[dict],
         sector_focus: dict,
         min_conviction: int = 5,
-        max_concurrent: int = 3,
+        max_concurrent: int = int(os.getenv("DEEP_ANALYST_CONCURRENT", "5")),
         enable_vision: bool = False,
     ) -> list[dict]:
         """후보 종목 배치 분석 — conviction >= min_conviction만 통과.
