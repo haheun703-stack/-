@@ -35,7 +35,7 @@ def _track_usage(model: str, response):
 
 # ─── 모델 상수 ───
 MODEL_SONNET = "claude-sonnet-4-6"
-MODEL_OPUS = "claude-opus-4-6"
+MODEL_OPUS = "claude-opus-4-7"
 MODEL_HAIKU = "claude-haiku-4-5-20251001"
 
 
