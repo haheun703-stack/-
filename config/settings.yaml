@@ -820,7 +820,9 @@ use_short_selling_filter: false    # KRX 공매도 데이터 제공 중단 (2026
 # ════════════════════════════════════════════════════════════
 jgis_short_selling:
   enabled: true
-  csv_dir: "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker"
+  # csv_dir: OS 자동 분기 (Windows: D:/.../supply_tracker, Linux VPS: /home/ubuntu/jgis/data/supply_tracker)
+  # 강제 경로 지정 시 아래 주석 해제
+  # csv_dir: "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker"
   lookback_days: 20                  # CSV에서 최근 N일 로드
 
   # 8 시그널 임계치
@@ -849,7 +851,8 @@ jgis_short_selling:
 # ── 투자자 수급 통합본 (pykrx KRX 직접 + KIS) ──────────────
 investor_flow_pykrx:
   enabled: true
-  flow_dir: "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily"
+  # flow_dir: OS 자동 분기 (Windows: D:/.../supply_daily, Linux VPS: /home/ubuntu/jgis/data/supply_daily)
+  # flow_dir: "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily"
   lookback_days: 5
   market_signals:
     foreign_mass_threshold: 3000

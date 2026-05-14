@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -23,7 +24,23 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config" / "settings.yaml"
-JGIS_JSON_PATH = Path("D:/shared-bot-data/jgis_to_quant/daily_intelligence.json")
+
+# OS별 기본 경로 (Windows 로컬 / Linux VPS 자동 분기)
+_IS_POSIX = os.name == "posix"
+_DEFAULT_CSV_DIR = (
+    "/home/ubuntu/jgis/data/supply_tracker" if _IS_POSIX
+    else "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker"
+)
+_DEFAULT_JGIS_JSON = (
+    "/home/ubuntu/shared-bot-data/jgis_to_quant/daily_intelligence.json" if _IS_POSIX
+    else "D:/shared-bot-data/jgis_to_quant/daily_intelligence.json"
+)
+_DEFAULT_FLOW_DIR = (
+    "/home/ubuntu/jgis/data/supply_daily" if _IS_POSIX
+    else "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily"
+)
+
+JGIS_JSON_PATH = Path(_DEFAULT_JGIS_JSON)
 
 
 def _safe_float(val, default: float = 0.0) -> float:
@@ -52,10 +69,7 @@ class JgisShortAdapter:
 
         jgis_cfg = config.get("jgis_short_selling", {})
         self.enabled = jgis_cfg.get("enabled", False)
-        self.csv_dir = Path(jgis_cfg.get(
-            "csv_dir",
-            "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker",
-        ))
+        self.csv_dir = Path(jgis_cfg.get("csv_dir", _DEFAULT_CSV_DIR))
         self.lookback_days = jgis_cfg.get("lookback_days", 20)
 
     @staticmethod
@@ -212,10 +226,7 @@ def _resolve_flow_dir(flow_dir: str | None = None) -> Path:
     """investor_flow JSON 디렉토리 결정."""
     if flow_dir:
         return Path(flow_dir)
-    return Path(_load_inv_flow_cfg().get(
-        "flow_dir",
-        "D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily",
-    ))
+    return Path(_load_inv_flow_cfg().get("flow_dir", _DEFAULT_FLOW_DIR))
 
 
 def load_investor_flow(date_str: str | None = None, flow_dir: str | None = None) -> dict | None:
