@@ -287,6 +287,9 @@ case "$BAT" in
     run_py scripts/signal_logger.py              # G4.9: tomorrow_picks → signals 테이블 기록
     run_py scripts/upload_flowx.py
     # dashboard_data.py 단독실행 제거 — upload_flowx.py 내부 import로 통합 (루트에 파일 존재)
+    # G4.9.5: ETF 수급 자동 시그널 (Phase 8 백테스트 기반, theme 88.9% 적중률)
+    # 정보봇 16:28 업데이트 → 퀀트봇 BAT-D 후반부에서 fetch + 텔레그램
+    run_py scripts/fetch_etf_flow_daily.py --analyze --telegram
     run_py scripts/send_evening_summary.py --send
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
