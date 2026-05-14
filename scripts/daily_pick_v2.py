@@ -476,8 +476,16 @@ def main() -> int:
     df = df[df["ret1"] > -5].copy()
     print(f"[daily_pick_v2] 필터 후: {len(df)}개")
 
-    # 스코어링
-    df[["score", "tags", "warns"]] = df.apply(lambda r: pd.Series(score_row(r.to_dict())), axis=1)
+    # 스코어링 (빈 DataFrame 가드 — BUG-6 fix 2026-05-14)
+    if df.empty:
+        print("[daily_pick_v2] 필터 후 0개 — 빈 결과 컬럼만 추가하고 진행")
+        df["score"] = pd.Series(dtype=float)
+        df["tags"] = pd.Series(dtype=object)
+        df["warns"] = pd.Series(dtype=object)
+    else:
+        df[["score", "tags", "warns"]] = df.apply(
+            lambda r: pd.Series(score_row(r.to_dict())), axis=1
+        )
     df = df[df["score"] >= args.min_score].copy()
     df = df.sort_values("score", ascending=False).reset_index(drop=True)
 
