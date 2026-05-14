@@ -109,7 +109,12 @@ class _KisLite:
         """보유종목 목록 조회"""
         try:
             data = self.broker.fetch_balance()
-            holdings = data.get("output1", [])
+            # 응답 타입 방어 (mojito 내부 KeyError 'output1' 발생 케이스 대비, BUG-5)
+            if not isinstance(data, dict):
+                logger.warning("[KIS] 잔고 응답 비-dict (type=%s) → 빈 결과",
+                               type(data).__name__)
+                return []
+            holdings = data.get("output1") or []
             return [
                 {
                     "ticker": h.get("pdno", ""),
@@ -121,6 +126,10 @@ class _KisLite:
                 }
                 for h in holdings if int(h.get("hldg_qty", 0)) > 0
             ]
+        except KeyError as e:
+            # mojito broker.fetch_balance() 내부에서 'output1' 등 키 부재 시 발생
+            logger.warning("[KIS] 잔고 응답 키 부재(%s) → 일시적 응답 누락, 빈 결과", e)
+            return []
         except Exception as e:
             logger.error("[KIS] 잔고 조회 실패: %s", e)
             return []
