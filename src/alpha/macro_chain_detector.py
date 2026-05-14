@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -25,7 +26,11 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-SHARED_DATA_DIR = Path("D:/shared-bot-data/jgis_to_quant")
+# JGIS 공유 폴더 (정보봇 → 퀀트봇) — OS 자동 분기
+SHARED_DATA_DIR = Path(
+    "/home/ubuntu/shared-bot-data/jgis_to_quant" if os.name == "posix"
+    else "D:/shared-bot-data/jgis_to_quant"
+)
 
 
 def _load_json(path: Path) -> dict | None:

@@ -31,8 +31,12 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 _ACTIVE_SCENARIOS_PATH = _PROJECT_ROOT / "data" / "scenarios" / "active_scenarios.json"
 _CHAINS_PATH = _PROJECT_ROOT / "data" / "scenarios" / "scenario_chains.json"
 
-# JGIS 공유 폴더
-_JGIS_DEFAULT_PATH = Path("D:/shared-bot-data/jgis_to_quant")
+# JGIS 공유 폴더 — OS 자동 분기
+import os as _os
+_JGIS_DEFAULT_PATH = Path(
+    "/home/ubuntu/shared-bot-data/jgis_to_quant" if _os.name == "posix"
+    else "D:/shared-bot-data/jgis_to_quant"
+)
 
 
 def compute(flow_data: dict, lens_cfg: dict) -> dict:

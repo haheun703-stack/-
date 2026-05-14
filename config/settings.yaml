@@ -2345,7 +2345,9 @@ intraday_eye:
 # ============================================================
 jgis_integration:
   enabled: true
-  shared_path: "D:/shared-bot-data/jgis_to_quant"
+  # shared_path: OS 자동 분기 (Windows: D:/shared-bot-data/..., Linux VPS: /home/ubuntu/shared-bot-data/...)
+  # 강제 경로 지정 시 아래 주석 해제
+  # shared_path: "D:/shared-bot-data/jgis_to_quant"
   files:
     daily_intelligence: "daily_intelligence.json"    # 매일 08:00 정보봇이 생성
     breaking_alerts: "breaking_alerts.json"           # 긴급 뉴스 발생 시 생성

@@ -36,8 +36,12 @@ _MACRO_PATH = _DATA_DIR / "regime_macro_signal.json"
 _NEWS_PATH = _DATA_DIR / "market_news.json"
 _DART_PATH = _DATA_DIR / "dart_event_signals.json"
 
-# JGIS 공유 폴더 (정보봇 → 퀀트봇)
-_JGIS_DEFAULT_PATH = Path("D:/shared-bot-data/jgis_to_quant")
+# JGIS 공유 폴더 (정보봇 → 퀀트봇) — OS 자동 분기
+import os as _os
+_JGIS_DEFAULT_PATH = Path(
+    "/home/ubuntu/shared-bot-data/jgis_to_quant" if _os.name == "posix"
+    else "D:/shared-bot-data/jgis_to_quant"
+)
 
 
 def _load_jgis_config() -> dict:
