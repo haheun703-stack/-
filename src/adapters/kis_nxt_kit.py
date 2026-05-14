@@ -42,6 +42,7 @@ _load_env()
 
 _BASE = "https://openapi.koreainvestment.com:9443"
 _token_cache: dict = {"token": None, "time": None}
+_approval_cache: dict = {"key": None, "time": None}
 
 
 def get_token() -> str | None:
@@ -158,8 +159,18 @@ def get_supply_5day(code: str) -> dict | None:
 
 
 # === WebSocket 실시간 ===
-def get_approval_key() -> str | None:
-    """WebSocket 전용 approval_key (24시간)."""
+def get_approval_key(force_refresh: bool = False) -> str | None:
+    """WebSocket 전용 approval_key (24시간 캐시).
+
+    Args:
+        force_refresh: True면 캐시 무시하고 새로 발급 (자정 넘긴 stale key 대응).
+    """
+    if (
+        not force_refresh
+        and _approval_cache["key"]
+        and (datetime.now() - _approval_cache["time"]).total_seconds() < 24 * 3600
+    ):
+        return _approval_cache["key"]
     r = requests.post(
         f"{_BASE}/oauth2/Approval",
         headers={"content-type": "application/json"},
@@ -170,7 +181,29 @@ def get_approval_key() -> str | None:
         },
         timeout=10,
     )
-    return r.json().get("approval_key")
+    ak = r.json().get("approval_key")
+    if ak:
+        _approval_cache.update({"key": ak, "time": datetime.now()})
+    return ak
+
+
+def is_yangmaesoo_5d(rows: list[dict]) -> bool:
+    """5일 양매수 판정 — 외인+기관 동시 매수 3일+ (단타봇 5/14 검증 패턴).
+
+    Args:
+        rows: get_nx_supply() 반환 (최신순). 각 dict는 foreign_백만원/institution_백만원 필드 보유.
+
+    Returns:
+        True if 외인+기관 동시 매수 3일 이상 (최근 5일 중)
+    """
+    if not rows or len(rows) < 5:
+        return False
+    last5 = rows[:5]
+    co_buy_days = sum(
+        1 for r in last5
+        if r.get("foreign_백만원", 0) > 0 and r.get("institution_백만원", 0) > 0
+    )
+    return co_buy_days >= 3
 
 
 async def subscribe_realtime(codes: list[str], on_tick, tr_id: str = "H0STCNT0"):
