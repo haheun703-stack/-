@@ -3,7 +3,9 @@
 정보봇이 수집한 investor_flow.json에서 6종 시그널을 판정하고
 종목별 수급 점수를 산출합니다.
 
-데이터 소스: D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily/{date}_investor_flow.json
+데이터 소스 (OS 자동 분기, jgis_short_adapter):
+  - Windows: D:/Global_Stock_Overview_Scripter_정보봇/data/supply_daily/{date}_investor_flow.json
+  - Linux VPS: /home/ubuntu/jgis/data/supply_daily/{date}_investor_flow.json
 
 기본 6 시그널:
   시장 — FOREIGN_MASS_SELL/BUY, INST_BUYING_HEAVY/SELLING_HEAVY

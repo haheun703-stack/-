@@ -5,8 +5,10 @@
   - 4개 팩터 계산 (Short Cover / Credit Risk / Inst Pressure / Divergence)
   - universe.csv 대상 일괄 처리
 
-데이터 소스: D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker/{ticker}.csv
-출력: data/short_selling/jgis_short_factor.json
+데이터 소스 (OS 자동 분기, jgis_short_adapter):
+  - Windows: D:/Global_Stock_Overview_Scripter_정보봇/data/supply_tracker/{ticker}.csv
+  - Linux VPS: /home/ubuntu/jgis/data/supply_tracker/{ticker}.csv
+출력: data/short_selling/jgis_short_factor.json (atomic write)
 
 Usage:
   python -u -X utf8 scripts/scan_short_factor.py
