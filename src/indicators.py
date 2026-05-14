@@ -837,7 +837,7 @@ class IndicatorEngine:
         macro_str = str(macro_path) if macro_path.exists() else None
         processed_str = str(self.processed_dir)
 
-        num_workers = min(8, max(1, (os.cpu_count() or 4) - 1))
+        num_workers = int(os.getenv("INDICATORS_WORKERS", min(8, os.cpu_count() or 2)))
         logger.info(
             f"📈 지표 계산 시작: {len(raw_files)}종목, "
             f"{num_workers} workers (multiprocessing)"
