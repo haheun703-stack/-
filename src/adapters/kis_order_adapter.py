@@ -23,7 +23,29 @@ logger = logging.getLogger(__name__)
 
 
 class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
-    """한국투자증권 API 주문/잔고/현재가 어댑터"""
+    """한국투자증권 API 주문/잔고/현재가 어댑터
+
+    P0 가드레일 (5/14 추가, Phase 8 백테스트 기반):
+    - AUTO_TRADING_ENABLED=true 필수 (기본 false)
+    - AUTO_TRADING_MAX_QTY 종목당 최대 수량 (기본 1)
+    - AUTO_TRADING_WHITELIST 매매 화이트리스트 (theme ETF 20개)
+    - 거래시간 09:00~15:30 외 차단
+    - 휴장일 차단
+    """
+
+    # theme ETF 20개 (Phase 8 백테스트: dual_buy 적중률 88.9%, D+3 +1.52%)
+    THEME_ETF_WHITELIST = {
+        "487240", "487230",  # KODEX AI전력
+        "395160",            # KODEX AI반도체TOP2플러스
+        "466920",            # SOL 조선TOP3플러스
+        "367760", "367770",  # RISE 네트워크인프라/수소경제
+        "228810", "228800",  # TIGER 미디어컨텐츠/여행레저
+        "401170", "401470",  # RISE/KODEX 메타버스
+        "337160",            # KODEX 200ESG
+        "464310", "394660", "394670",  # TIGER 글로벌AI&로보틱스/자율주행/리튬
+        "411420",            # KODEX 미국나스닥AI테크액티브
+        "489030", "210780", "211560", "211900", "237370",  # 배당 ETF 5개
+    }
 
     def __init__(self):
         is_mock = os.getenv("MODEL") != "REAL"
@@ -35,7 +57,46 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         )
         self._is_mock = is_mock
         logger.info(
-            "KisOrderAdapter 초기화 (모드: %s)", "모의투자" if is_mock else "실전"
+            "KisOrderAdapter 초기화 (모드: %s, 가드레일: %s)",
+            "모의투자" if is_mock else "실전",
+            "ON" if os.getenv("AUTO_TRADING_ENABLED", "0") == "1" else "OFF (자동매매 비활성)",
+        )
+
+    # ──────────────────────────────────────────
+    # P0 가드레일 (모든 주문 진입 시 호출)
+    # ──────────────────────────────────────────
+    def _guard(self, ticker: str, quantity: int, side: str = "BUY"):
+        """주문 차단 가드레일. 실패 시 PermissionError/ValueError 발생."""
+        # 1. 자동매매 활성화 체크
+        if os.getenv("AUTO_TRADING_ENABLED", "0") != "1":
+            raise PermissionError(
+                "[GUARD] AUTO_TRADING_ENABLED=1 필수 (기본 비활성, 백테스트 60%+ 검증 후 활성)"
+            )
+        # 2. 종목당 최대 수량
+        max_qty = int(os.getenv("AUTO_TRADING_MAX_QTY", "1"))
+        if quantity > max_qty:
+            raise ValueError(f"[GUARD] 수량 한도 초과: {quantity} > {max_qty}")
+        # 3. 화이트리스트 (선택적, AUTO_TRADING_WHITELIST_ONLY=1일 때만)
+        if os.getenv("AUTO_TRADING_WHITELIST_ONLY", "0") == "1":
+            wl_env = os.getenv("AUTO_TRADING_WHITELIST", "")
+            wl = set(wl_env.split(",")) if wl_env else self.THEME_ETF_WHITELIST
+            if ticker not in wl:
+                raise PermissionError(
+                    f"[GUARD] 화이트리스트 외 종목: {ticker} (허용: {len(wl)}개)"
+                )
+        # 4. 거래시간 (09:00~15:30 KST)
+        from datetime import datetime, time as dtime
+        now = datetime.now().time()
+        if not (dtime(9, 0) <= now <= dtime(15, 30)):
+            raise RuntimeError(f"[GUARD] 거래시간 외: {now}")
+        # 5. 휴장일 (간이 체크 — 주말)
+        from datetime import date
+        if date.today().weekday() >= 5:
+            raise RuntimeError(f"[GUARD] 주말 휴장: {date.today()}")
+        # 6. 로그
+        logger.warning(
+            "[GUARD PASS] %s %s %d주 (max_qty=%d, mode=%s)",
+            side, ticker, quantity, max_qty, "MOCK" if self._is_mock else "REAL"
         )
 
     # ──────────────────────────────────────────
@@ -44,6 +105,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def buy_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매수"""
+        self._guard(ticker, quantity, "BUY")
         logger.info("[주문] 지정가 매수: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_buy_order(ticker, price, quantity)
@@ -60,6 +122,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def sell_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매도"""
+        self._guard(ticker, quantity, "SELL")
         logger.info("[주문] 지정가 매도: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_sell_order(ticker, price, quantity)
@@ -76,6 +139,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def buy_market(self, ticker: str, quantity: int) -> Order:
         """시장가 매수"""
+        self._guard(ticker, quantity, "BUY")
         logger.info("[주문] 시장가 매수: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_buy_order(ticker, quantity)
@@ -91,6 +155,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def sell_market(self, ticker: str, quantity: int) -> Order:
         """시장가 매도"""
+        self._guard(ticker, quantity, "SELL")
         logger.info("[주문] 시장가 매도: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_sell_order(ticker, quantity)
