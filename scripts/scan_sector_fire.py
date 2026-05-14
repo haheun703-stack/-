@@ -308,6 +308,9 @@ def calc_stock_buy_score(
     fgn_5d = t5["fgn"].sum() if not t5.empty else 0
     inst_5d = t5["inst"].sum() if not t5.empty else 0
     pension_5d = t5["pension"].sum() if not t5.empty else 0
+    # v3 산식용 (퐝가님 시그널 우선순위)
+    finance_5d = t5["finance"].sum() if not t5.empty else 0
+    corp_5d = t5["corp"].sum() if not t5.empty else 0
 
     # 반전 (최근2d vs 이전3d)
     recent_2d = ticker_supply[ticker_supply["date"].isin(dates_5[:2])]
@@ -415,19 +418,34 @@ def calc_stock_buy_score(
     else:
         buy_grade = "SKIP"
 
-    # v2 시그널: 기관 강매수 (Q4) + 외인 매도 (Phase 4 백테스트 결과 기반)
-    # 활성화: SECTOR_FIRE_V2=1 (기본 OFF)
-    # 임계값: INST_Q4_THRESHOLD (기본 689억, Phase 3 측정값)
-    # 효과 (20일 백테스트): D+1 적중률 54.5%, D+5 평균 +4.95%
+    # v3 산식: 퐝가님 시그널 우선순위 (Phase 5 백테스트 기반, 5/14)
+    # - 1단계: 금투 + 연기금 + 기타법인 (스마트 머니 진입)
+    # - 2단계: + 기관합계 (확인)
+    # - 3단계: + 외인 (완전 스윙 대박)
+    # 활성화: SECTOR_FIRE_V3=1 (기본 OFF, 1~3주 병행 운영 후 ON 결정)
+    # 효과 (20일 백테스트, 표본 22): D+1 +2.02% / 적중률 59.1%, D+3 +4.00%
+    # 주의: D+5 -0.35% → 차익실현은 D+3 이내 권장
     import os as _os
-    if _os.getenv("SECTOR_FIRE_V2", "0") == "1":
-        _q4 = float(_os.getenv("INST_Q4_THRESHOLD", "689"))
-        if inst_5d >= _q4 and fgn_5d <= 0:
-            reasons.append(f"INST_STRONG_BUY[V2:{inst_5d:.0f}억]")
-            # 등급 격상
+    if _os.getenv("SECTOR_FIRE_V3", "0") == "1":
+        _stage1 = (finance_5d > 0) and (pension_5d > 0) and (corp_5d > 0)
+        _stage2 = _stage1 and (inst_5d > 0)
+        _stage3 = _stage2 and (fgn_5d > 0)
+        if _stage3:
+            reasons.append(
+                f"V3_FULL_SWING[금투+{finance_5d:.0f}/연기금+{pension_5d:.0f}/"
+                f"기타+{corp_5d:.0f}/기관+{inst_5d:.0f}/외인+{fgn_5d:.0f}]"
+            )
+            # 최강 시그널: 등급 STRONG으로 격상
+            buy_grade = "STRONG"
+        elif _stage2:
+            reasons.append(f"V3_STAGE2_INST[금투+연+기타+기관]")
             if buy_grade == "WATCH":
                 buy_grade = "BUY"
             elif buy_grade == "SKIP":
+                buy_grade = "WATCH"
+        elif _stage1:
+            reasons.append(f"V3_STAGE1_SMART[금투+연+기타]")
+            if buy_grade == "SKIP":
                 buy_grade = "WATCH"
 
     return {
