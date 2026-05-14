@@ -47,6 +47,20 @@ run_py_long() {
   return 0
 }
 
+# exit code 반환 버전 (분기용, FAIL_COUNT 카운팅 안 함)
+# 3-봇 분업: sync 결과로 다음 단계를 결정해야 할 때만 사용
+run_py_long_check() {
+  local script="$1"; shift
+  timeout 900 $PY "$script" "$@" >> "$LOG" 2>&1
+  local rc=$?
+  if [ $rc -eq 124 ]; then
+    echo "[$(date +%H:%M:%S)] [INFO] $script 타임아웃 (900초 초과, fallback 분기)" >> "$LOG"
+  elif [ $rc -ne 0 ]; then
+    echo "[$(date +%H:%M:%S)] [INFO] $script 비정상 종료 (exit=$rc, fallback 분기)" >> "$LOG"
+  fi
+  return $rc
+}
+
 # 초대형 작업용 (타임아웃 1800초 = 30분) — KIS API 대량호출, parquet 전체확장
 run_py_xlong() {
   local script="$1"; shift
@@ -154,7 +168,11 @@ case "$BAT" in
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
-    run_py_long scripts/sync_investor_to_csv.py
+    # 3-봇 분업 (5/14): sync 성공 시 퀀트봇은 연기금+금융투자만 추가 수집 (~30-40분 단축)
+    SYNC_OK=0
+    if run_py_long_check scripts/sync_investor_to_csv.py; then
+        SYNC_OK=1
+    fi
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
     run_py_xlong scripts/scan_nationality.py
@@ -164,7 +182,15 @@ case "$BAT" in
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
-    run_py_long scripts/collect_investor_bulk.py --core-only
+    # 3-봇 분업 (5/14): sync 성공 시 퀀트봇 영역(연기금+금융투자)만 추가 수집
+    # sync 실패 시 6유형 풀 수집 fallback (안전망)
+    if [ "$SYNC_OK" = "1" ]; then
+        echo "[$(date +%H:%M:%S)] [INFO] 단타봇 sync 성공 → 퀀트봇 부분 수집 (연기금+금융투자)" >> "$LOG"
+        run_py_long scripts/collect_investor_bulk.py --investors 연기금,금융투자
+    else
+        echo "[$(date +%H:%M:%S)] [WARN] 단타봇 sync 실패 → 6유형 풀 수집 fallback" >> "$LOG"
+        run_py_long scripts/collect_investor_bulk.py --core-only
+    fi
     run_py scripts/export_investor_for_scalper.py
     # sync_investor_to_csv → G1 상단으로 이동 (단타봇 데이터 선행 활용)
     run_py scripts/fetch_ecos_macro.py
