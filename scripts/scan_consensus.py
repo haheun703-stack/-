@@ -289,7 +289,8 @@ def run_scan(
 
     min_turnover = cfg.get("min_turnover_억", 100)
     min_price = cfg.get("min_price", 5000)
-    delay = cfg.get("fetch_delay_sec", 0.5)
+    # B4 최적화: delay 기본 0.5→0.3 (-40%), 환경변수 CONSENSUS_DELAY로 override
+    delay = float(os.getenv("CONSENSUS_DELAY", str(cfg.get("fetch_delay_sec", 0.3))))
     thresholds = cfg.get("thresholds", {})
     min_upside = thresholds.get("min_upside_pct", min_upside)
     min_analysts = thresholds.get("min_analyst_count", 3)
