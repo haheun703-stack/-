@@ -1355,8 +1355,26 @@ def send_daily_report(
     except ImportError:
         return
 
+    # P0-7 위험감지 등급 (헤더에 표시)
+    risk_header = ""
+    try:
+        from src.utils.risk_gate import get_risk_status_safe, get_position_multiplier_safe
+        rs = get_risk_status_safe()
+        if rs:
+            level_kr = rs.get("level_kr", "정상")
+            score = rs.get("total_score", 0)
+            mult = get_position_multiplier_safe()
+            emoji = {"위기": "🔴", "위험": "🟠", "경고": "🟡", "주의": "🟢", "정상": "✅"}.get(level_kr, "ℹ️")
+            risk_header = f"{emoji} 위험감지: {level_kr} ({score}점) ×{mult}"
+    except Exception:
+        pass
+
     lines = [
         f"📋 [PAPER] 일일 리포트 ({today_str})",
+    ]
+    if risk_header:
+        lines.append(risk_header)
+    lines += [
         f"자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)",
         f"PF: {stats['pf']} | MDD: {stats['mdd']:.1f}% | "
         f"승률: {stats['win_rate']:.0f}% ({stats['wins']}W/{stats['losses']}L)",
@@ -1430,6 +1448,26 @@ def send_daily_report(
             lines.append(f"  유지: {etf_result.get('name', '')} "
                           f"{etf_result.get('pnl_pct', 0):+.1f}%")
 
+    # Phase 12 장중 학습 시그널 (어제 수집한 오늘 후보)
+    try:
+        today_compact = today_str.replace("-", "")
+        intra_sig = DATA_DIR / "intraday" / f"intraday_signals_{today_compact}.json"
+        if intra_sig.exists():
+            sig = json.loads(intra_sig.read_text(encoding="utf-8"))
+            cands = sig.get("candidates", [])[:5]
+            if cands:
+                lines.append("")
+                lines.append(f"-- 🧠 장중 학습 후보 ({len(cands)}건) --")
+                for c in cands:
+                    name = ticker_to_name(c.get("code", ""))
+                    lines.append(
+                        f"  {name} early {c.get('early_ret_pct', 0):+.1f}% "
+                        f"/ 체결강도 {c.get('strength_avg', 0):.0f} "
+                        f"/ 매수비 {c.get('buy_ratio', 0):.2f}"
+                    )
+    except Exception as e:
+        logger.warning(f"장중 학습 시그널 로드 실패: {e}")
+
     msg = "\n".join(lines)
     try:
         send_message(msg)
@@ -1489,6 +1527,42 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
             pnl = (cur_price / pos["avg_price"] - 1) * 100 if cur_price > 0 else 0
             pname = ticker_to_name(ticker) if pos["name"] == ticker else pos["name"]
             lines.append(f"  {pname} {pnl:+.1f}% ({pos.get('strategy', '')})")
+
+    # 🆕 시그널별 누적 적중률 (전체 closed_trades 기준)
+    all_trades = pf.get("closed_trades", [])
+    if len(all_trades) >= 5:
+        from collections import defaultdict
+        bucket = defaultdict(lambda: {"wins": 0, "losses": 0, "gains": 0.0, "losses_amt": 0.0, "total": 0})
+        for t in all_trades:
+            strat = t.get("strategy") or "기타"
+            pnl_pct = t.get("pnl_pct", 0)
+            b = bucket[strat]
+            b["total"] += 1
+            if pnl_pct > 0:
+                b["wins"] += 1
+                b["gains"] += pnl_pct
+            else:
+                b["losses"] += 1
+                b["losses_amt"] += abs(pnl_pct)
+
+        # WR + PF 계산
+        rows = []
+        for strat, b in bucket.items():
+            if b["total"] < 3:
+                continue
+            wr = b["wins"] / b["total"] * 100
+            pf_val = b["gains"] / b["losses_amt"] if b["losses_amt"] > 0 else 99.9
+            avg_ret = (b["gains"] - b["losses_amt"]) / b["total"]
+            rows.append((strat, b["total"], wr, pf_val, avg_ret))
+
+        rows.sort(key=lambda r: r[3], reverse=True)  # PF 내림차순
+
+        if rows:
+            lines.append("")
+            lines.append("-- 🎯 시그널별 누적 적중률 --")
+            for strat, n, wr, pf_val, avg in rows[:8]:
+                emoji = "🟢" if pf_val >= 1.5 else "🟡" if pf_val >= 1.0 else "🔴"
+                lines.append(f"  {emoji} {strat}: {n}건 WR {wr:.0f}% PF {pf_val:.2f} 평균 {avg:+.1f}%")
 
     msg = "\n".join(lines)
     try:
