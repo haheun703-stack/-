@@ -296,6 +296,9 @@ case "$BAT" in
     run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
     run_py scripts/paper_trading_unified.py
     run_py scripts/data_health_check.py
+    # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
+    # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
+    run_py scripts/bat_d_health_check.py
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
