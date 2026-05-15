@@ -425,28 +425,75 @@ def calc_stock_buy_score(
     # 활성화: SECTOR_FIRE_V3=1 (기본 OFF, 1~3주 병행 운영 후 ON 결정)
     # 효과 (20일 백테스트, 표본 22): D+1 +2.02% / 적중률 59.1%, D+3 +4.00%
     # 주의: D+5 -0.35% → 차익실현은 D+3 이내 권장
+    #
+    # v3.5 (5/16 추가): 약세장 보정 — KOSPI MA20 -2%↓ 시 stage1 단독으로도 BUY 격상
+    # 근거: 5/12~15 약세장 실측 — LG전자/두산로보틱스/하나마이크론/자화전자/영원무역
+    #       시장 -4.2% 동기간 +10~53% 상승, 모두 금투/연기금 단독 매수 패턴
+    # 활성화: SECTOR_FIRE_V35=1 (또는 V3=1 동시 적용)
     import os as _os
-    if _os.getenv("SECTOR_FIRE_V3", "0") == "1":
+    _v3_on = _os.getenv("SECTOR_FIRE_V3", "0") == "1"
+    _v35_on = _os.getenv("SECTOR_FIRE_V35", "0") == "1"
+
+    # v3.5 시장 레짐 판단 (약세장 = KOSPI 현재가가 MA20보다 -2% 이하)
+    _bear_mode = False
+    if _v35_on:
+        try:
+            import pandas as _pd
+            kospi_path = PROJECT_ROOT / "data" / "kospi_index.csv"
+            if kospi_path.exists():
+                _kdf = _pd.read_csv(kospi_path, encoding="utf-8-sig").tail(25)
+                if len(_kdf) >= 20:
+                    _kdf["MA20"] = _kdf["close"].rolling(20, min_periods=10).mean()
+                    _last = _kdf.iloc[-1]
+                    _dev = (_last["close"] - _last["MA20"]) / _last["MA20"] * 100
+                    _bear_mode = _dev <= -2.0
+        except Exception:
+            pass
+
+    if _v3_on or _v35_on:
         _stage1 = (finance_5d > 0) and (pension_5d > 0) and (corp_5d > 0)
         _stage2 = _stage1 and (inst_5d > 0)
         _stage3 = _stage2 and (fgn_5d > 0)
-        if _stage3:
-            reasons.append(
-                f"V3_FULL_SWING[금투+{finance_5d:.0f}/연기금+{pension_5d:.0f}/"
-                f"기타+{corp_5d:.0f}/기관+{inst_5d:.0f}/외인+{fgn_5d:.0f}]"
+
+        # v3.5 약세장 모드: stage1 단독으로도 BUY 격상 (외인 무시)
+        # 또는 inst_only (기관 단독 매수, finance/pension 중 하나라도 양수)
+        if _v35_on and _bear_mode:
+            _bear_alpha = (
+                # stage1 (Phase 5 stage1_only D+3 +2.68%)
+                _stage1
+                # 또는 금투 OR 연기금 단독 매수 (LG전자/두산로보틱스 패턴)
+                or (finance_5d >= 100 and inst_5d >= 0)
+                or (pension_5d >= 30 and inst_5d >= 0)
             )
-            # 최강 시그널: 등급 STRONG으로 격상
-            buy_grade = "STRONG"
-        elif _stage2:
-            reasons.append(f"V3_STAGE2_INST[금투+연+기타+기관]")
-            if buy_grade == "WATCH":
-                buy_grade = "BUY"
-            elif buy_grade == "SKIP":
-                buy_grade = "WATCH"
-        elif _stage1:
-            reasons.append(f"V3_STAGE1_SMART[금투+연+기타]")
-            if buy_grade == "SKIP":
-                buy_grade = "WATCH"
+            if _bear_alpha:
+                reasons.append(
+                    f"V35_BEAR_ALPHA[금투+{finance_5d:.0f}/연기금+{pension_5d:.0f}/기타+{corp_5d:.0f}]"
+                )
+                if buy_grade == "SKIP":
+                    buy_grade = "WATCH"
+                elif buy_grade == "WATCH":
+                    buy_grade = "BUY"
+                elif buy_grade == "BUY":
+                    buy_grade = "STRONG"
+
+        # v3 강세장 산식 (외인 합류 시)
+        if _v3_on:
+            if _stage3:
+                reasons.append(
+                    f"V3_FULL_SWING[금투+{finance_5d:.0f}/연기금+{pension_5d:.0f}/"
+                    f"기타+{corp_5d:.0f}/기관+{inst_5d:.0f}/외인+{fgn_5d:.0f}]"
+                )
+                buy_grade = "STRONG"
+            elif _stage2:
+                reasons.append(f"V3_STAGE2_INST[금투+연+기타+기관]")
+                if buy_grade == "WATCH":
+                    buy_grade = "BUY"
+                elif buy_grade == "SKIP":
+                    buy_grade = "WATCH"
+            elif _stage1:
+                reasons.append(f"V3_STAGE1_SMART[금투+연+기타]")
+                if buy_grade == "SKIP":
+                    buy_grade = "WATCH"
 
     return {
         "ticker": ticker,
