@@ -439,6 +439,39 @@ def collect_candidates() -> list[dict]:
                     pick.get("name", ticker), alpha_grade, base_score,
                     ",".join(alpha_tags))
 
+    # 5) INTRADAY 학습 시그널 (Phase 12c)
+    #    어제 장중 학습이 추출한 오늘 진입 후보 (early_ret + 체결강도 + 매수비율 통과)
+    today_compact = datetime.now().strftime("%Y%m%d")
+    intra_sig_path = DATA_DIR / "intraday" / f"intraday_signals_{today_compact}.json"
+    if intra_sig_path.exists():
+        try:
+            sig = json.loads(intra_sig_path.read_text(encoding="utf-8"))
+            for c in sig.get("candidates", [])[:10]:
+                ticker = c.get("code", "")
+                if not ticker or ticker in seen:
+                    continue
+                price, _ = get_latest_price(ticker)
+                if price <= 0:
+                    continue
+                seen.add(ticker)
+                candidates.append({
+                    "ticker": ticker,
+                    "name": ticker,
+                    "grade": "A",  # 학습 시그널은 A등급 (B 차단 통과)
+                    "score": 60.0 + min(c.get("early_ret_pct", 0) * 2, 30),
+                    "price": price,
+                    "strategy": "INTRADAY_LEARNED",
+                    "reason": (
+                        f"early {c.get('early_ret_pct', 0):+.2f}% / "
+                        f"strength {c.get('strength_avg', 0):.1f} / "
+                        f"buy_ratio {c.get('buy_ratio', 0):.2f}"
+                    ),
+                    "alpha_tags": ["INTRADAY_LEARNED"],
+                })
+            logger.info(f"[INTRADAY] 학습 시그널 {len(sig.get('candidates', []))}건 후보 합류")
+        except Exception as e:
+            logger.warning(f"[INTRADAY] 시그널 로드 실패: {e}")
+
     # 종목명 보정: name이 ticker 코드 그대로인 경우 resolver로 해결
     for cand in candidates:
         if cand["name"] == cand["ticker"] or not cand["name"]:
