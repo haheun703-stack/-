@@ -47,6 +47,23 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         "489030", "210780", "211560", "211900", "237370",  # 배당 ETF 5개
     }
 
+    # 인버스/레버리지 ETF (5/16 추가, 약세장/강세장 방향성 베팅 도구)
+    # 5/12~15 실측: KODEX 200선물인버스2X 4일 +7.3% (외인 5일 -25조 매도 패턴)
+    # 위험: 일일 변동성 高, 음의 복리, 단기용 (1~5일 보유 권장)
+    INVERSE_LEVERAGE_WHITELIST = {
+        # 인버스 (약세장 베팅)
+        "114800",  # KODEX 인버스 (1배)
+        "252670",  # KODEX 200선물인버스2X (2배 레버리지) ⭐
+        "251340",  # KODEX 코스닥150선물인버스
+        # 레버리지 (강세장 베팅)
+        "122630",  # KODEX 레버리지 (2배)
+        "233160",  # TIGER 코스닥150 레버리지 (2배)
+        "243880",  # TIGER 200IT레버리지 (2배)
+    }
+
+    # 자동매매 통합 화이트리스트 (theme + 인버스/레버리지)
+    AUTO_TRADING_WHITELIST = THEME_ETF_WHITELIST | INVERSE_LEVERAGE_WHITELIST
+
     def __init__(self):
         is_mock = os.getenv("MODEL") != "REAL"
         self.broker = mojito.KoreaInvestment(
@@ -77,9 +94,11 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         if quantity > max_qty:
             raise ValueError(f"[GUARD] 수량 한도 초과: {quantity} > {max_qty}")
         # 3. 화이트리스트 (선택적, AUTO_TRADING_WHITELIST_ONLY=1일 때만)
+        # 기본: theme + 인버스/레버리지 통합 (총 26개)
+        # AUTO_TRADING_WHITELIST 환경변수로 외부 override 가능
         if os.getenv("AUTO_TRADING_WHITELIST_ONLY", "0") == "1":
             wl_env = os.getenv("AUTO_TRADING_WHITELIST", "")
-            wl = set(wl_env.split(",")) if wl_env else self.THEME_ETF_WHITELIST
+            wl = set(wl_env.split(",")) if wl_env else self.AUTO_TRADING_WHITELIST
             if ticker not in wl:
                 raise PermissionError(
                     f"[GUARD] 화이트리스트 외 종목: {ticker} (허용: {len(wl)}개)"
