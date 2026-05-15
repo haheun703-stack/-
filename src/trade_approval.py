@@ -68,6 +68,16 @@ class TradeApprovalGateway:
         timeout_sec: int | None = None,
     ) -> bool:
         """매수 승인 요청. True=승인, False=거부/타임아웃."""
+        # ─── P0-7: 위험감지 자동 거부 게이트 (MSCI 차단 종목만) ───
+        try:
+            _reject, _reason = should_auto_reject(ticker)
+            if _reject:
+                logger.warning("[매수승인] 자동 거부: %s %s — %s", ticker, name, _reason)
+                return False
+        except Exception as _e:
+            logger.warning("[매수승인] 위험감지 자동거부 체크 실패: %s", _e)
+        # ─── P0-7 끝 ───
+
         timeout = timeout_sec or self.timeout
         approval_id = f"buy_{ticker}_{int(time.time())}"
         invest_amount = price * qty
@@ -82,6 +92,14 @@ class TradeApprovalGateway:
         )
         if reasoning:
             text += f"\n  \uc0ac\uc720: {reasoning[:100]}\n"
+        # ─── P0-7: 위험감지 정보 첨부 (사용자 결정 지원) ───
+        try:
+            _risk = get_risk_info_for_buy(ticker)
+            if _risk.get("available"):
+                text += _risk["message"]
+        except Exception as _e:
+            logger.warning("[매수승인] 위험감지 메시지 첨부 실패: %s", _e)
+        # ─── P0-7 끝 ───
         text += f"\u2501" * 20 + f"\n  \u23f3 {timeout}\ucd08 \ub0b4 \uc751\ub2f5 \ud544\uc694"
 
         trade_info = {
@@ -414,3 +432,4 @@ class TradeApprovalGateway:
                 raise
         except Exception as e:
             logger.error("[승인] 파일 저장 실패: %s", e)
+from src.adapters.risk_gate_helper import get_risk_info_for_buy, should_auto_reject  # P0-7-PATCH-APPLIED
