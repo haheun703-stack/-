@@ -89,6 +89,13 @@ ETF_MAP = {
     "STRONG_SHORT": {"code": "252670", "name": "KODEX 200선물인버스2X"},
 }
 ETF_STOP_LOSS_PCT = -0.05      # ETF 손절 -5% (레버리지 특성 고려)
+# 5/16 추가 (Phase 8/9 백테스트 + 5/12~15 학습):
+ETF_TAKE_PROFIT_T1 = 0.05      # ETF +5% 도달 시 trailing 활성화
+ETF_TAKE_PROFIT_T2 = 0.10      # ETF +10% 분할 익절 (50%, 단순화: 전량)
+ETF_TRAILING_STOP = -0.02      # +5% 도달 후 고점 -2% 하락 시 매도
+# 인버스/레버리지 보수적 (Phase 9 -21% 손실 학습)
+ETF_INVERSE_STOP_LOSS = -0.03  # 인버스 손절 -3% (Phase 9 -21% 방지)
+ETF_INVERSE_MAX_HOLD = 2       # 인버스 최대 보유 2일 (D+1~D+2)
 
 # ── 알파 필터 설정 (2026-04-07 도입) ──
 # Shield 레벨별 최대 보유 수
@@ -1017,23 +1024,60 @@ def manage_etf_position(pf: dict, today_str: str) -> dict:
             result["reason"] = "NEUTRAL, 포지션 없음"
         return result
 
-    # ── Case 2: 같은 ETF 보유 중 → 손절/유지 체크 ──
+    # ── Case 2: 같은 ETF 보유 중 → 손절/익절/트레일링/유지 체크 (5/16 강화) ──
     if current_pos and current_pos["code"] == target_etf["code"]:
         price = get_etf_price(current_pos["code"])
         if price > 0:
-            pnl = price / current_pos["avg_price"] - 1
-            if pnl <= ETF_STOP_LOSS_PCT:
-                trade = _close_etf_position(etf, price, today_str, "ETF_STOP_LOSS")
+            avg = current_pos["avg_price"]
+            pnl = price / avg - 1
+            # 고점 갱신
+            peak = current_pos.get("peak_price", avg)
+            if price > peak:
+                current_pos["peak_price"] = price
+                peak = price
+            peak_pct = (peak - avg) / avg
+            drop_from_peak = (price - peak) / peak if peak > 0 else 0
+
+            # 인버스 종목 구분
+            is_inverse = target_etf["code"] in ("114800", "252670", "251340")
+            stop_loss = ETF_INVERSE_STOP_LOSS if is_inverse else ETF_STOP_LOSS_PCT
+
+            # 보유일 (인버스는 D+2 강제 청산)
+            try:
+                entry_dt = datetime.strptime(current_pos["entry_date"], "%Y-%m-%d")
+                today_dt = datetime.strptime(today_str, "%Y-%m-%d")
+                days_held = (today_dt - entry_dt).days
+            except (ValueError, KeyError):
+                days_held = 0
+
+            exit_reason = None
+            # 1. 손절
+            if pnl <= stop_loss:
+                exit_reason = "ETF_STOP_LOSS"
+            # 2. 인버스 최대 보유 2일 강제 청산
+            elif is_inverse and days_held >= ETF_INVERSE_MAX_HOLD:
+                exit_reason = "INVERSE_MAX_HOLD"
+            # 3. +10% 분할 익절 T2 (전량, 단순화)
+            elif pnl >= ETF_TAKE_PROFIT_T2:
+                exit_reason = "ETF_TAKE_PROFIT_T2"
+            # 4. 트레일링 — +5% 도달 후 고점 -2% 하락
+            elif peak_pct >= ETF_TAKE_PROFIT_T1 and drop_from_peak <= ETF_TRAILING_STOP:
+                exit_reason = "ETF_TRAILING_STOP"
+
+            if exit_reason:
+                trade = _close_etf_position(etf, price, today_str, exit_reason)
                 result.update({
-                    "action": "STOP_LOSS",
+                    "action": exit_reason,
                     "name": trade["name"],
                     "pnl_pct": trade["pnl_pct"],
+                    "peak_pct": round(peak_pct * 100, 2),
                 })
             else:
                 result.update({
                     "action": "HOLD",
                     "name": current_pos["name"],
                     "pnl_pct": round(pnl * 100, 2),
+                    "peak_pct": round(peak_pct * 100, 2),
                 })
         return result
 
@@ -1075,6 +1119,7 @@ def manage_etf_position(pf: dict, today_str: str) -> dict:
         "qty": qty,
         "cost": round(cost),
         "direction": direction,
+        "peak_price": round(buy_price),  # 5/16: 트레일링용
     }
 
     action_type = "SWITCH" if "sell_trade" in result else "BUY"
