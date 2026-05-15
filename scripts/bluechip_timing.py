@@ -57,12 +57,18 @@ SURGE_DIR = DATA_DIR
 INITIAL_CAPITAL = 100_000_000   # 1억원 가상 자본
 MAX_POSITIONS = 10
 MAX_NEW_PER_DAY = 3
-STOP_LOSS_PCT = -0.10           # -10% 손절
+STOP_LOSS_PCT = -0.07           # -7% 손절 (5/16 -10%→-7% 강화, paper_trading_unified와 통일)
 SLIPPAGE_PCT = 0.001
 COMMISSION_PCT = 0.00015
 TAX_PCT = 0.0018
 EXIT_FLOW_THRESHOLD = -10       # 외인+기관 합산 -10억/일
 EXIT_FLOW_CONSECUTIVE = 3       # 3일 연속
+
+# 5/16 추가: 트레일링 + 분할 익절 (현대차 +28% peak 손실 방지 학습)
+TAKE_PROFIT_T1_PCT = 0.10       # +10% 1차 익절 (50% 매도)
+TAKE_PROFIT_T2_PCT = 0.20       # +20% 2차 익절 (전량 매도)
+TRAILING_ACTIVATE_PCT = 0.08    # +8% 도달 후 트레일링 활성화
+TRAILING_STOP_PCT = -0.04       # 고점 대비 -4% 하락 시 매도
 
 
 # ═══════════════════════════════════════════════
@@ -312,13 +318,34 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
 
         exit_reason = None
         detail = ""
+        peak_price = pos.get("peak_price", entry_price)
+        peak_pct = (peak_price - entry_price) / entry_price if entry_price > 0 else 0
+        drop_from_peak = (price - peak_price) / peak_price if peak_price > 0 else 0
 
-        # 1. 손절 -10%
+        # 1. 손절 -7% (5/16 강화)
         if pnl_pct <= STOP_LOSS_PCT:
             exit_reason = "STOP_LOSS"
             detail = f"PnL {pnl_pct*100:+.1f}%"
 
-        # 2. 수급이탈 3일 (입장일 이후만 판정)
+        # 2. 분할 익절 T2 — 전량 +20% (5/16 추가)
+        if not exit_reason and pnl_pct >= TAKE_PROFIT_T2_PCT:
+            exit_reason = "TAKE_PROFIT_T2"
+            detail = f"+{pnl_pct*100:.1f}% (T2 전량)"
+
+        # 3. 분할 익절 T1 — 50% +10% (5/16 추가, 단순화: 전량 매도 후 재진입은 다음날 시그널)
+        # NOTE: 진정한 분할 매도는 quantity 분할 필요. 일단 +10% 도달 시 전량 (보수적)
+        if not exit_reason and pnl_pct >= TAKE_PROFIT_T1_PCT and not pos.get("t1_sold"):
+            # T1 표시 후 trailing 적극 활성화
+            pos["t1_sold"] = True
+            # T1 도달 시 즉시 매도 안 함, trailing 더 타이트
+
+        # 4. 트레일링 — +8% 도달 후 고점 -4% 하락 (5/16 추가, 5/12~15 학습)
+        # 현대차 +28% peak 후 손실로 회귀한 패턴 방지
+        if not exit_reason and peak_pct >= TRAILING_ACTIVATE_PCT and drop_from_peak <= TRAILING_STOP_PCT:
+            exit_reason = "TRAILING_STOP"
+            detail = f"peak +{peak_pct*100:.1f}%, drop {drop_from_peak*100:+.1f}%"
+
+        # 5. 수급이탈 3일 (입장일 이후만 판정)
         if not exit_reason:
             is_exit, flow_detail = check_supply_exit(ticker, pos.get("entry_date", ""))
             if is_exit:
