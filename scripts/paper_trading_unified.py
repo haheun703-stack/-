@@ -29,6 +29,7 @@ import argparse
 import json
 import logging
 import os
+import sqlite3
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -96,6 +97,12 @@ ETF_TRAILING_STOP = -0.02      # +5% 도달 후 고점 -2% 하락 시 매도
 # 인버스/레버리지 보수적 (Phase 9 -21% 손실 학습)
 ETF_INVERSE_STOP_LOSS = -0.03  # 인버스 손절 -3% (Phase 9 -21% 방지)
 ETF_INVERSE_MAX_HOLD = 2       # 인버스 최대 보유 2일 (D+1~D+2)
+# Phase 11 정교화 — 인버스 진입 strict 조건
+INVERSE_STRICT_KOSPI_1D = -2.5      # KOSPI 1일 -2.5%↓
+INVERSE_STRICT_FOREIGN_5D_EOK = -50000  # 외인 5일 누적 -5조↓
+INVERSE_STRICT_FOREIGN_1D_EOK = -3000   # 외인 1일 -3000억↓
+INVESTOR_DB_PATH = DATA_DIR / "investor_flow" / "investor_daily.db"
+KOSPI_CSV_PATH = DATA_DIR / "kospi_index.csv"
 
 # ── 알파 필터 설정 (2026-04-07 도입) ──
 # Shield 레벨별 최대 보유 수
@@ -974,6 +981,53 @@ def _close_etf_position(etf: dict, price: float, today_str: str, reason: str) ->
     return trade
 
 
+def _is_inverse_strict_signal(today_str: str) -> tuple[bool, str]:
+    """Phase 11 검증된 strict 조건: KOSPI 1d -2.5%↓ AND 외인 5d -5조↓ AND 외인 1d -3000억↓.
+
+    인버스 진입 가드. 미달이면 매수 SKIP.
+    Returns: (통과여부, 사유)
+    """
+    try:
+        # KOSPI 1d
+        kdf = pd.read_csv(KOSPI_CSV_PATH, encoding="utf-8-sig")
+        kdf["Date"] = pd.to_datetime(kdf["Date"]).dt.strftime("%Y-%m-%d")
+        kdf = kdf.sort_values("Date")
+        today_kospi = kdf[kdf["Date"] == today_str]
+        if today_kospi.empty:
+            return (False, f"KOSPI {today_str} 데이터 없음")
+        prev_close = kdf.iloc[-2]["close"] if len(kdf) >= 2 else None
+        if prev_close is None:
+            return (False, "KOSPI 전일 데이터 없음")
+        ret_1d = (today_kospi.iloc[0]["close"] / prev_close - 1) * 100
+
+        # 외인 5d/1d
+        if not INVESTOR_DB_PATH.exists():
+            return (False, "investor_daily.db 없음")
+        conn = sqlite3.connect(INVESTOR_DB_PATH)
+        rows = conn.execute(
+            """SELECT date, SUM(net_val) as foreign_net
+               FROM investor_daily
+               WHERE investor='외국인'
+               GROUP BY date ORDER BY date DESC LIMIT 5""",
+        ).fetchall()
+        conn.close()
+        if len(rows) < 5:
+            return (False, f"외인 데이터 부족 ({len(rows)}일)")
+        foreign_5d_eok = sum(r[1] for r in rows) / 1e8
+        foreign_1d_eok = rows[0][1] / 1e8
+
+        # strict 판정
+        if ret_1d > INVERSE_STRICT_KOSPI_1D:
+            return (False, f"KOSPI 1d {ret_1d:+.2f}% (>{INVERSE_STRICT_KOSPI_1D}%)")
+        if foreign_5d_eok > INVERSE_STRICT_FOREIGN_5D_EOK:
+            return (False, f"외인 5d {foreign_5d_eok:+.0f}억 (>{INVERSE_STRICT_FOREIGN_5D_EOK}억)")
+        if foreign_1d_eok > INVERSE_STRICT_FOREIGN_1D_EOK:
+            return (False, f"외인 1d {foreign_1d_eok:+.0f}억 (>{INVERSE_STRICT_FOREIGN_1D_EOK}억)")
+        return (True, f"KOSPI {ret_1d:+.2f}% / 외인5d {foreign_5d_eok:+.0f}억 / 외인1d {foreign_1d_eok:+.0f}억")
+    except Exception as e:
+        return (False, f"strict 체크 실패: {e}")
+
+
 def manage_etf_position(pf: dict, today_str: str) -> dict:
     """JARVIS 방향 기반 ETF 포지션 관리.
 
@@ -1093,6 +1147,17 @@ def manage_etf_position(pf: dict, today_str: str) -> dict:
         }
 
     # ── Case 4: 신규 매수 ──
+    # Phase 11 가드: 인버스(SHORT/STRONG_SHORT) 진입 시 strict 조건 검증
+    if direction in ("SHORT", "STRONG_SHORT"):
+        ok, reason = _is_inverse_strict_signal(today_str)
+        if not ok:
+            result.update({
+                "action": "SKIP",
+                "reason": f"인버스 strict 미달 — {reason}",
+            })
+            return result
+        logger.info(f"[ETF] 인버스 strict 통과: {reason}")
+
     price = get_etf_price(target_etf["code"])
     if price <= 0:
         result.update({"action": "SKIP", "reason": f"{target_etf['name']} 가격 없음"})
