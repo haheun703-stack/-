@@ -115,6 +115,19 @@ def main():
     logger.info("차이나머니 수급 감지 시작 (Phase 1: KIS API + EWY 프록시)")
     logger.info("=" * 60)
 
+    # B: KIS 토큰 워밍업 (5/15 65초 rate limit 회피, 5/16 적용)
+    import time
+    try:
+        from src.adapters.kis_nxt_kit import get_token
+        token = get_token()
+        if token:
+            logger.info("[B-WARMUP] KIS 토큰 사전 발급 OK (rate limit 회피)")
+            time.sleep(3)  # 토큰 발급 후 안정화
+        else:
+            logger.warning("[B-WARMUP] 토큰 발급 실패 (계속 진행)")
+    except Exception as e:
+        logger.warning(f"[B-WARMUP] 워밍업 예외 (계속 진행): {e}")
+
     # 1. 유니버스 로드
     if args.test:
         # 테스트: 대형주 10종목만
