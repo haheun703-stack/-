@@ -824,8 +824,29 @@ def is_rebalance_day() -> bool:
 # ═══════════════════════════════════════════════
 
 def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> list[dict]:
-    """후보 종목 가상 매수. Shield 연동 + B등급 차단."""
+    """후보 종목 가상 매수. Shield 연동 + B등급 차단 + 위험감지 게이트(P0-7)."""
     entries = []
+
+    # ── P0-7 위험감지 게이트 (정보봇 SDK) ──
+    from src.utils.risk_gate import (
+        get_position_multiplier_safe,
+        should_block_new_entry_safe,
+        get_risk_status_safe,
+    )
+    risk_mult = get_position_multiplier_safe()  # 0.2~1.0
+    risk_block = should_block_new_entry_safe()  # CRISIS만 True
+    risk_status = get_risk_status_safe()
+    risk_level = risk_status.get("level_kr", "정상")
+    risk_score = risk_status.get("total_score", 0)
+
+    if risk_block:
+        logger.warning(f"[위험감지] {risk_level} ({risk_score}점) — 신규 진입 차단")
+        return []
+    if risk_mult < 1.0:
+        logger.info(
+            f"[위험감지] {risk_level} ({risk_score}점) — 매수금액 ×{risk_mult}"
+        )
+
     # Shield 기반 동적 최대 보유 수
     shield_max = get_shield_max_positions()
     slots_available = shield_max - len(pf["positions"])
@@ -849,10 +870,10 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
             logger.info("[ALPHA] %s B등급 진입 차단", cand["name"])
             continue
 
-        # 사이징
+        # 사이징 (P0-7: 위험감지 multiplier 적용)
         size_pct = SIZING.get(grade, SIZING["A"])  # B 없으므로 A를 기본값으로
         buy_amount = min(
-            pf["initial_capital"] * size_pct,
+            pf["initial_capital"] * size_pct * risk_mult,
             pf["capital"] * 0.90,  # 현금의 90%까지만
         )
 
@@ -1191,13 +1212,36 @@ def manage_etf_position(pf: dict, today_str: str) -> dict:
             return result
         logger.info(f"[ETF] 인버스 strict 통과: {reason}")
 
+    # P0-7 위험감지 게이트 (정보봇 SDK)
+    from src.utils.risk_gate import (
+        get_position_multiplier_safe,
+        should_block_new_entry_safe,
+        get_risk_status_safe,
+    )
+    risk_block = should_block_new_entry_safe()
+    risk_status = get_risk_status_safe()
+    risk_score = risk_status.get("total_score", 0)
+    risk_level = risk_status.get("level_kr", "정상")
+    if risk_block:
+        result.update({
+            "action": "SKIP",
+            "reason": f"위험감지 {risk_level} ({risk_score}점) — ETF 진입 차단",
+        })
+        return result
+
+    # 롱은 multiplier 적용, 인버스는 1.0 유지 (DANGER에 오히려 reasonable)
+    is_long_direction = direction in ("LONG", "STRONG_LONG")
+    etf_mult = get_position_multiplier_safe() if is_long_direction else 1.0
+    if etf_mult < 1.0:
+        logger.info(f"[ETF] 위험감지 {risk_level} ({risk_score}점) — 롱 매수금액 ×{etf_mult}")
+
     price = get_etf_price(target_etf["code"])
     if price <= 0:
         result.update({"action": "SKIP", "reason": f"{target_etf['name']} 가격 없음"})
         return result
 
     buy_price = price * (1 + SLIPPAGE_PCT + COMMISSION_PCT)
-    buy_amount = min(etf["capital"] * 0.95, ETF_CAPITAL * 0.95)
+    buy_amount = min(etf["capital"] * 0.95 * etf_mult, ETF_CAPITAL * 0.95 * etf_mult)
     qty = int(buy_amount / buy_price)
     if qty <= 0:
         result.update({"action": "SKIP", "reason": "ETF 자본 부족"})

@@ -190,15 +190,34 @@ def find_new_candidates(
 def enter_new_positions(
     pf: dict, candidates: list[dict], today_str: str,
 ) -> list[dict]:
-    """후보 종목 가상 매수."""
+    """후보 종목 가상 매수. 위험감지 게이트(P0-7) 적용."""
     entries = []
+
+    # P0-7 위험감지 게이트
+    from src.utils.risk_gate import (
+        get_position_multiplier_safe,
+        should_block_new_entry_safe,
+        get_risk_status_safe,
+    )
+    risk_mult = get_position_multiplier_safe()
+    risk_block = should_block_new_entry_safe()
+    risk_status = get_risk_status_safe()
+    risk_score = risk_status.get("total_score", 0)
+    risk_level = risk_status.get("level_kr", "정상")
+
+    if risk_block:
+        logger.warning("[위험감지] %s (%s점) — bluechip 신규 진입 차단", risk_level, risk_score)
+        return entries
+    if risk_mult < 1.0:
+        logger.info("[위험감지] %s (%s점) — 매수금액 ×%s", risk_level, risk_score, risk_mult)
+
     current_count = len(pf["positions"])
     slots = MAX_POSITIONS - current_count
     if slots <= 0:
         logger.info("포지션 한도 %d/%d — 신규 진입 불가", current_count, MAX_POSITIONS)
         return entries
 
-    size_per = INITIAL_CAPITAL / MAX_POSITIONS
+    size_per = (INITIAL_CAPITAL / MAX_POSITIONS) * risk_mult
     new_today = 0
 
     for cand in candidates:
