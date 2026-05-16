@@ -25,16 +25,17 @@ STRATEGY_KR: dict[str, str] = {
     "DIRECTION_SWITCH": "JARVIS 방향 전환",
 
     # ── Bluechip (우량주 TOP 30) ──
+    # 5/17 동기화: 웹봇 정본 따라 "매수" → "동반/진입" 일관화
     "BLUECHIP_STOP_LOSS": "우량주 손절",
     "BLUECHIP_SUPPLY_EXIT": "우량주 수급 이탈",
     "BLUECHIP_TRAILING_STOP": "우량주 트레일링",
     "BLUECHIP_TAKE_PROFIT_T1": "우량주 1차 익절",
     "BLUECHIP_TAKE_PROFIT_T2": "우량주 2차 익절",
     "BLUECHIP_MAX_HOLD": "우량주 보유 만료",
-    "BLUECHIP_A_쌍끌이": "우량주 쌍끌이 (외인+기관 동시 매수)",
-    "BLUECHIP_B_기관연기금": "우량주 기관·연기금 매수",
+    "BLUECHIP_A_쌍끌이": "우량주 쌍끌이 (외인+기관 동반)",
+    "BLUECHIP_B_기관연기금": "우량주 기관·연기금 동반",
     "BLUECHIP_C_3주체합류": "우량주 3주체 합류",
-    "BLUECHIP_D_외인폭발": "우량주 외인 폭발 매수",
+    "BLUECHIP_D_외인폭발": "우량주 외인 폭발 진입",
     "BLUECHIP_E_연기금매집": "우량주 연기금 매집",
     "BLUECHIP_F_금투기타": "우량주 금투·기타법인",
 
@@ -47,17 +48,18 @@ STRATEGY_KR: dict[str, str] = {
     "INTRADAY_LEARNED": "장중 학습 시그널",
     "PB15_BB": "15% 눌림목 + 볼린저밴드",
     "PULLBACK15_VOL3x": "눌림목 거래량 3배 폭증",
-    "PULLBACK15_DUAL": "눌림목 + 양매수",
+    "PULLBACK15_DUAL": "눌림목 + 양방향 동반",
     "PHASE5_STAGE3": "3단계 완성 시그널",
-    "PHASE8_THEME_DUAL": "테마 양매수",
+    "PHASE8_THEME_DUAL": "테마 양방향 동반",
     "FOREIGN_SURGE_PB": "외인 폭발 + 눌림목",
     "SILENT_GOLD_COMBO": "사일런트 골든 콤보",
     "LAGGARD_FOLLOW": "래거드 추격",
 
     # ── ETF 방향 (JARVIS) ──
-    "ETF_LONG_BUY": "ETF 롱 매수 (KODEX 200)",
+    # 5/17 동기화: BUY 액션 → "진입" (웹봇 가드 회피 + 의미 명료)
+    "ETF_LONG_BUY": "ETF 롱 진입 (KODEX 200)",
     "ETF_STRONG_LONG_BUY": "ETF 강한 롱 (KODEX 레버리지)",
-    "ETF_SHORT_BUY": "ETF 인버스 매수 (KODEX 인버스)",
+    "ETF_SHORT_BUY": "ETF 인버스 진입 (KODEX 인버스)",
     "ETF_STRONG_SHORT_BUY": "ETF 강한 인버스 (200선물인버스2X)",
     "ETF_LONG_SWITCH": "ETF 롱 스위칭",
     "ETF_STRONG_LONG_SWITCH": "ETF 강한 롱 스위칭",
