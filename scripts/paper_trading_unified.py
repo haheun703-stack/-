@@ -1416,13 +1416,16 @@ def send_daily_report(
         "",
     ]
 
+    # 한국어 매핑
+    from src.utils.strategy_kr import strategy_kr as _skr
+
     if entries:
         lines.append(f"-- 신규 진입 ({len(entries)}건) --")
         for e in entries:
             ename = ticker_to_name(e.get("ticker", "")) if e["name"] == e.get("ticker") else e["name"]
             lines.append(
                 f"  [{e['grade']}] {ename} {e['price']:,}원 "
-                f"x{e['qty']}주 ({e['strategy']})"
+                f"x{e['qty']}주 ({_skr(e['strategy'])})"
             )
         lines.append("")
 
@@ -1430,11 +1433,11 @@ def send_daily_report(
         lines.append(f"-- 매도 ({len(exits)}건) --")
         for x in exits:
             emoji = "🟢" if x["pnl_pct"] > 0 else "🔴"
-            partial = " (부분)" if x.get("partial") else ""
+            partial = " (부분 매도)" if x.get("partial") else ""
             xname = ticker_to_name(x.get("ticker", "")) if x["name"] == x.get("ticker") else x["name"]
             lines.append(
                 f"  {emoji} {xname} {x['pnl_pct']:+.1f}% "
-                f"[{x['reason']}]{partial}"
+                f"[{_skr(x['reason'])}]{partial}"
             )
         lines.append("")
 
@@ -1563,10 +1566,11 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
             pname = ticker_to_name(ticker) if pos["name"] == ticker else pos["name"]
             lines.append(f"  {pname} {pnl:+.1f}% ({pos.get('strategy', '')})")
 
-    # 🆕 시그널별 누적 적중률 (전체 closed_trades 기준)
+    # 🆕 시그널별 누적 적중률 (전체 closed_trades 기준) — 한국어 풀이
     all_trades = pf.get("closed_trades", [])
     if len(all_trades) >= 5:
         from collections import defaultdict
+        from src.utils.strategy_kr import strategy_kr, pf_grade
         bucket = defaultdict(lambda: {"wins": 0, "losses": 0, "gains": 0.0, "losses_amt": 0.0, "total": 0})
         for t in all_trades:
             strat = t.get("strategy") or "기타"
@@ -1580,7 +1584,7 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
                 b["losses"] += 1
                 b["losses_amt"] += abs(pnl_pct)
 
-        # WR + PF 계산
+        # 승률 + 손익비 계산
         rows = []
         for strat, b in bucket.items():
             if b["total"] < 3:
@@ -1590,14 +1594,15 @@ def send_weekly_report(pf: dict, stats: dict) -> None:
             avg_ret = (b["gains"] - b["losses_amt"]) / b["total"]
             rows.append((strat, b["total"], wr, pf_val, avg_ret))
 
-        rows.sort(key=lambda r: r[3], reverse=True)  # PF 내림차순
+        rows.sort(key=lambda r: r[3], reverse=True)  # 손익비 내림차순
 
         if rows:
             lines.append("")
-            lines.append("-- 🎯 시그널별 누적 적중률 --")
+            lines.append("-- 🎯 전략별 누적 성과 --")
             for strat, n, wr, pf_val, avg in rows[:8]:
-                emoji = "🟢" if pf_val >= 1.5 else "🟡" if pf_val >= 1.0 else "🔴"
-                lines.append(f"  {emoji} {strat}: {n}건 WR {wr:.0f}% PF {pf_val:.2f} 평균 {avg:+.1f}%")
+                emoji, grade = pf_grade(pf_val)
+                strat_kr = strategy_kr(strat)
+                lines.append(f"  {emoji} {strat_kr}: {n}건 승률 {wr:.0f}% 손익비 {pf_val:.2f} 평균 {avg:+.1f}%")
 
     msg = "\n".join(lines)
     try:
