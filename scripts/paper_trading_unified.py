@@ -1304,19 +1304,30 @@ def update_etf_equity(pf: dict, today_str: str) -> float:
 # FLOWX 업로드
 # ═══════════════════════════════════════════════
 
-def upload_to_flowx(entries: list[dict], exits: list[dict], stats: dict) -> None:
-    """FLOWX Supabase에 매매 기록 업로드."""
+def upload_to_flowx(entries: list[dict], exits: list[dict], stats: dict,
+                     etf_result: dict | None = None) -> None:
+    """FLOWX Supabase에 매매 기록 업로드 (Paper + ETF + 위험감지 메타)."""
     try:
         from src.adapters.flowx_uploader import FlowxUploader, build_paper_trade
         uploader = FlowxUploader()
         if not uploader.is_active:
             return
 
+        # 위험감지 메타 (모든 trade의 memo에 첨부)
+        risk_memo = ""
+        try:
+            from src.utils.risk_gate import get_risk_status_safe, get_position_multiplier_safe
+            rs = get_risk_status_safe()
+            if rs:
+                risk_memo = f" | 위험:{rs.get('level_kr', '-')}({rs.get('total_score', 0)}점) ×{get_position_multiplier_safe()}"
+        except Exception:
+            pass
+
         for e in entries:
             trade = build_paper_trade(
                 code=e["ticker"], name=e["name"], side="BUY",
                 price=e["price"], quantity=e["qty"],
-                strategy=e["strategy"], memo=f"등급:{e['grade']}",
+                strategy=e["strategy"], memo=f"등급:{e['grade']}{risk_memo}",
                 stats=stats,
             )
             uploader.upload_paper_trade(trade)
@@ -1326,12 +1337,36 @@ def upload_to_flowx(entries: list[dict], exits: list[dict], stats: dict) -> None
                 code=x["ticker"], name=x["name"], side="SELL",
                 price=x["exit_price"], quantity=x["qty"],
                 strategy=x["reason"], pnl_pct=x["pnl_pct"],
-                memo=f"{'부분' if x.get('partial') else '전량'}",
+                memo=f"{'부분' if x.get('partial') else '전량'}{risk_memo}",
                 stats=stats,
             )
             uploader.upload_paper_trade(trade)
 
-        logger.info("[FLOWX] Paper 업로드: BUY %d건, SELL %d건", len(entries), len(exits))
+        # ETF 매매도 paper_trades에 (strategy로 구분: ETF_BUY/ETF_SELL/ETF_SWITCH)
+        if etf_result and etf_result.get("action") in ("BUY", "SWITCH", "SELL",
+                                                       "ETF_STOP_LOSS", "ETF_TAKE_PROFIT_T2",
+                                                       "ETF_TRAILING_STOP", "INVERSE_MAX_HOLD"):
+            action = etf_result.get("action", "")
+            direction = etf_result.get("direction", "")
+            etf_strategy = f"ETF_{direction}_{action}"
+            # SELL 계열은 pnl_pct 첨부
+            etf_pnl = etf_result.get("pnl_pct")
+            side = "SELL" if action in ("SELL", "ETF_STOP_LOSS", "ETF_TAKE_PROFIT_T2",
+                                          "ETF_TRAILING_STOP", "INVERSE_MAX_HOLD") else "BUY"
+            etf_trade = build_paper_trade(
+                code=etf_result.get("code", ""),
+                name=etf_result.get("name", ""),
+                side=side,
+                price=etf_result.get("price", 0) or etf_result.get("exit_price", 0),
+                quantity=etf_result.get("qty", 0),
+                strategy=etf_strategy,
+                pnl_pct=etf_pnl,
+                memo=f"JARVIS{risk_memo}",
+                stats=stats,
+            )
+            uploader.upload_paper_trade(etf_trade)
+
+        logger.info("[FLOWX] Paper+ETF 업로드: BUY %d건, SELL %d건", len(entries), len(exits))
     except Exception as e:
         logger.warning("[FLOWX] Paper 업로드 실패: %s", e)
 
@@ -1671,8 +1706,8 @@ def run_daily(force_rebalance: bool = False) -> dict:
     if do_rebalance:
         send_weekly_report(pf, stats)
 
-    # 8. FLOWX 업로드
-    upload_to_flowx(entries, exits, stats)
+    # 8. FLOWX 업로드 (Paper + ETF + 위험감지 메타)
+    upload_to_flowx(entries, exits, stats, etf_result=etf_result)
 
     # 9. 콘솔 요약
     print(f"\n  {'='*40}")

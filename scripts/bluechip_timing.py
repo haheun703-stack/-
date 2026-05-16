@@ -642,6 +642,45 @@ def run_daily(dry_run: bool = False) -> dict:
     if (entries or exits) and not dry_run:
         send_telegram(tg_msg)
 
+    # 10. FLOWX 업로드 (Bluechip 매매를 flowx.kr/quant 페이지에 노출)
+    if (entries or exits) and not dry_run:
+        try:
+            from src.adapters.flowx_uploader import FlowxUploader, build_paper_trade
+            uploader = FlowxUploader()
+            if uploader.is_active:
+                # Bluechip 누적 통계 (간이)
+                total = len(pf.get("closed_trades", []))
+                wins = sum(1 for t in pf.get("closed_trades", []) if t.get("pnl_pct", 0) > 0)
+                stats = {
+                    "total_trades": total,
+                    "wins": wins,
+                    "pf": pf.get("pf", 0),
+                    "mdd": pf.get("mdd", 0),
+                }
+                for e in entries:
+                    trade = build_paper_trade(
+                        code=e["ticker"], name=e["name"], side="BUY",
+                        price=e["price"], quantity=e["qty"],
+                        strategy=f"BLUECHIP_{e['type']}",
+                        memo=f"점수:{e['score']}",
+                        stats=stats,
+                    )
+                    uploader.upload_paper_trade(trade)
+                for x in exits:
+                    trade = build_paper_trade(
+                        code=x["ticker"], name=x["name"], side="SELL",
+                        price=x.get("price", x.get("exit_price", 0)),
+                        quantity=x.get("qty", 0),
+                        strategy=f"BLUECHIP_{x.get('reason', '')}",
+                        pnl_pct=x.get("pnl_pct"),
+                        memo="bluechip",
+                        stats=stats,
+                    )
+                    uploader.upload_paper_trade(trade)
+                logger.info("[FLOWX] Bluechip 업로드: BUY %d건 SELL %d건", len(entries), len(exits))
+        except Exception as e:
+            logger.warning("[FLOWX] Bluechip 업로드 실패: %s", e)
+
     return {
         "entries": len(entries),
         "exits": len(exits),
