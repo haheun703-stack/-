@@ -37,7 +37,7 @@ from src.use_cases.threshold_calibration import (  # noqa: E402
 
 
 def cmd_check_only() -> int:
-    """데이터 가용성만 확인."""
+    """데이터 가용성만 확인 (대표 종목 + 데이터 분포)."""
     tickers = list_available_tickers()
     print(f"[정보봇 일봉] 종목 수: {len(tickers)}")
 
@@ -45,15 +45,48 @@ def cmd_check_only() -> int:
         print("❌ 정보봇 CSV 없음 — 심볼릭 링크 확인 필요")
         return 1
 
-    sample = tickers[0]
-    df = load_jgis_daily(sample)
+    # 대표 종목 우선 시도 (삼성전자/SK하이닉스/NAVER), 없으면 데이터 충분한 첫 종목
+    preferred = ["005930", "000660", "035420"]
+    sample = None
+    df = None
+    for cand in preferred:
+        if cand in tickers:
+            df = load_jgis_daily(cand)
+            if df is not None:
+                sample = cand
+                break
+
     if df is None:
-        print(f"❌ 샘플 로드 실패: {sample}")
+        # fallback: 앞 50종목 중 처음 성공하는 것
+        for cand in tickers[:50]:
+            df = load_jgis_daily(cand)
+            if df is not None:
+                sample = cand
+                break
+
+    if df is None:
+        print("❌ 대표 종목 + 앞 50종목 모두 min_rows=60 미달")
         return 1
 
     print(f"[샘플] {sample} — {len(df)}행, 컬럼 {len(df.columns)}개")
     print(f"       기간: {df.index.min().date()} ~ {df.index.max().date()}")
     print(f"       컬럼: {list(df.columns[:10])}... (총 {len(df.columns)}개)")
+
+    # 데이터 분포 (행 수)
+    row_counts = []
+    for t in tickers[:200]:  # 샘플 200종목 분포
+        d = load_jgis_daily(t, min_rows=1)
+        if d is not None:
+            row_counts.append(len(d))
+
+    if row_counts:
+        import statistics
+
+        print(
+            f"[분포 (앞 200종목 샘플)] "
+            f"min={min(row_counts)}, median={int(statistics.median(row_counts))}, "
+            f"max={max(row_counts)}, ≥60행 비율={sum(r >= 60 for r in row_counts) / len(row_counts):.1%}"
+        )
 
     return 0
 
