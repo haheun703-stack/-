@@ -29,10 +29,9 @@ schtasks /create /tn "QM_M_NXTPre" /tr "D:\sub-agent-project_��Ʈ��\scri
 powershell -Command "Set-ScheduledTask -TaskName 'QM_M_NXTPre' -Settings (New-ScheduledTaskSettingsSet -WakeToRun $true -StartWhenAvailable $true)" 2>nul
 echo   [4/18] QM_M_NXTPre (07:55)
 
-REM -- BAT-M: ��� �긮�� (08:00) --
-schtasks /create /tn "QM_M_MorningBriefing" /tr "D:\sub-agent-project_��Ʈ��\scripts\schedule_M_morning_briefing.bat" /sc daily /st 08:00 /f
-powershell -Command "Set-ScheduledTask -TaskName 'QM_M_MorningBriefing' -Settings (New-ScheduledTaskSettingsSet -WakeToRun $true -StartWhenAvailable $true)" 2>nul
-echo   [5/18] QM_M_MorningBriefing (08:00)
+REM -- BAT-M: ��� �긮�� [2026-05-18 ����] cron_morning_briefing.py + schedule_M_morning_briefing.bat ���� ��ü ��
+REM ��ü: VPS BAT-B (07:00) crontab �� scripts/run_morning_briefing.py
+REM ��� ��: schtasks /delete /tn "QM_M_MorningBriefing" /f �̹� ����
 
 REM -- BAT-N: �ñ׳� �α� (08:20) --
 schtasks /create /tn "QM_N_SignalLog" /tr "D:\sub-agent-project_��Ʈ��\scripts\schedule_N_signal_log.bat" /sc daily /st 08:20 /f
