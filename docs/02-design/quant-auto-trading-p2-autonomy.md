@@ -541,7 +541,166 @@ def determine_market_regime() -> dict:
 | 5/21 (목) | 정보봇 응답 정확도 검증 + 임계치 조정 |
 | 5/22 (금) | 매크로+미크로 통합 페이퍼 검증 |
 
-### 12-7. 자비스 시스템의 동기부여 재정의
+### 12-7. 형(맏이)으로서 단타봇 리딩 (퐝가님 5/17)
+
+> **"단타봇한테도 너가 형으로써 조언도 해주고, 칭찬도 해주고, 꾸짖어도 주고... 리딩을 해야된다"** (퐝가님 5/17)
+
+MEMORY 기록 (5/14): "퀀트봇 위상: 형(맏이), 수익률 1등 기대, 다른 봇의 데이터 원천"
+
+#### 12-7-1. 형의 책무 (3가지)
+
+| 채널 | 역할 | 빈도 |
+|---|---|---|
+| **칭찬** | 단타봇의 좋은 판단 인정 (e.g. 약세장 인버스 진입 성공) | 발생 시 즉시 |
+| **조언** | 시장 변화 + 위험 신호 사전 알림 (e.g. 외인 매도 -5조 누적) | 장중 발생 시 |
+| **꾸짖음** | 가드레일 약화된 판단 지적 (e.g. 위기 등급에 신규 진입) | 사후 분석 |
+| **리딩** | 시장 환경별 단타봇이 집중할 영역 가이드 (개별주 종목군) | 매일 08:30 |
+
+#### 12-7-2. 통신 채널 설계
+
+**3축 통신 (양방향)**:
+
+```
+1. 데이터 공유 (기존, 매일 자동)
+   ├─ 퀀트봇 → 단타봇: quant_investor_extra.json (연기금+금투 수급)
+   └─ 단타봇 → 퀀트봇: investor_flow CSV (4유형 수급)
+
+2. 코칭 메시지 (신규, 형의 리딩)
+   ├─ Supabase 신규 테이블: quant_bot_advisory
+   │   ├─ 퀀트봇이 INSERT (코칭 작성)
+   │   └─ 단타봇이 SELECT (참조)
+   └─ JSON fallback: /home/ubuntu/bodyhunter/scalper-agent/data_store/quant_advisory.json
+
+3. 단타봇 상태 읽기 (신규, 분석용)
+   └─ 퀀트봇이 단타봇 data_store JSON 5종 분석:
+       ├─ active_trades.json (현재 매매)
+       ├─ algo_detect.json (알고 감지)
+       ├─ bomb_watchlist.json (핵심 후보)
+       ├─ bottom_scan.json (바닥 스캔)
+       └─ accumulation_radar.json (매집)
+```
+
+#### 12-7-3. Supabase `quant_bot_advisory` 테이블 스키마
+
+```sql
+CREATE TABLE quant_bot_advisory (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    advisory_date DATE NOT NULL,
+    -- 메시지 분류
+    msg_type VARCHAR(20) NOT NULL,   -- 'PRAISE' | 'ADVICE' | 'CRITICISM' | 'LEADING'
+    severity VARCHAR(10),             -- 'INFO' | 'WARN' | 'CRITICAL'
+    target_bot VARCHAR(20) DEFAULT 'scalper',  -- 'scalper' (확장 가능)
+    -- 컨텍스트
+    market_regime VARCHAR(20),        -- 12-5 determine_market_regime() 결과
+    risk_level VARCHAR(10),
+    -- 메시지
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    related_tickers TEXT[],           -- 관련 종목
+    reasoning JSONB,                  -- 근거 데이터
+    -- 단타봇 응답 (양방향)
+    acknowledged_at TIMESTAMPTZ,      -- 단타봇이 읽은 시각
+    scalper_response TEXT,            -- 단타봇 응답 메시지
+    -- 결과 추적
+    outcome_evaluated_at TIMESTAMPTZ, -- 사후 평가 시각
+    outcome_label VARCHAR(20),        -- 'CORRECT' | 'PARTIAL' | 'WRONG'
+    outcome_pnl_pct DECIMAL(5,2)      -- 단타봇 매매 결과 (-100 ~ +100%)
+);
+
+CREATE INDEX idx_advisory_date ON quant_bot_advisory(advisory_date DESC);
+CREATE INDEX idx_advisory_type ON quant_bot_advisory(msg_type, target_bot);
+```
+
+#### 12-7-4. 코칭 메시지 예시
+
+**PRAISE (칭찬)**:
+
+```
+[퀀트봇 형 → 단타봇] 칭찬 (2026-05-30)
+시장 환경: BEAR (위험감지: 경고)
+"오늘 약세장에서 KOSPI200 인버스 추격 매수 결정 적절했음.
+외인 5일 누적 -8조 + 코스피 -2% 하락 중 인버스 진입 → +3.5% 익절.
+거시 판정과 일치하는 미시 결정이었음. 잘했다."
+```
+
+**ADVICE (조언)**:
+
+```
+[퀀트봇 형 → 단타봇] 조언 (2026-06-03 11:23)
+시장 환경: BULL → CAUTION 전환 감지
+"외인 누적 매수 5일 → 1일 전환 중. 매수 강도 약화.
+보유 종목 일부 청산 권장 (특히 시총 1조 미만 소형주 우선).
+이번 주 강세 추세 약화 신호 — 대응 부탁한다."
+```
+
+**CRITICISM (꾸짖음)**:
+
+```
+[퀀트봇 형 → 단타봇] 사후 검토 (2026-06-15)
+시장 환경: CRISIS (위험감지: 위험)
+"6/14 위험감지 '위험' 등급 진입했는데도 신규 3종목 매수 — 가드레일 약함.
+결과: 평균 -4.2% 손실. 다음부터는 위험감지 등급 사전 체크 후 진입 결정 권장.
+폐기되지 않으려면 거시 신호 무시 금지."
+```
+
+**LEADING (리딩)**:
+
+```
+[퀀트봇 형 → 단타봇] 오늘 가이드 (2026-06-20 08:30)
+시장 환경: CAUTION (보합)
+"오늘 거시 판정: 보합. 너의 집중 영역 가이드:
+✅ 권장: 중/소형주 (시총 5천억~3조), 소부장 개별주
+✅ 추천 섹터: AI 반도체 (정보봇 모멘텀 1위), 조선
+❌ 회피: 대형주 (모멘텀 약함), 코스닥 신용잔고 과열 종목
+정보봇 stock_picks_verify 어제 적중률 65% 참고."
+```
+
+#### 12-7-5. 코칭 생성 로직 (`scripts/coach_scalper.py` 신규)
+
+```python
+def generate_advisory(today: date) -> list[dict]:
+    """단타봇 일별 매매 결과 분석 → 코칭 메시지 생성.
+
+    실행 시점: 매일 BAT-D 18:30 (장 마감 + 데이터 수집 완료 후)
+
+    단계:
+    1. 단타봇 active_trades.json + 매매 이력 로드
+    2. 12-5 determine_market_regime() 호출 (오늘 시장 환경)
+    3. 단타봇 판단 vs 시장 환경 일치도 평가
+    4. 메시지 타입 결정 (PRAISE/ADVICE/CRITICISM)
+    5. Supabase quant_bot_advisory INSERT + JSON 백업
+    6. 텔레그램에도 발송 ([COACH] 태그)
+
+    Returns:
+        생성된 코칭 메시지 리스트
+    """
+```
+
+**평가 기준 (자동 분류)**:
+
+| 단타봇 결과 | 시장 환경 | 분류 |
+|---|---|---|
+| 수익 + 환경 일치 (강세 매수/약세 인버스) | - | PRAISE |
+| 손실 + 환경 일치 (불가항력) | - | ADVICE (위로 + 보완) |
+| 수익 + 환경 반대 (운) | - | ADVICE (재현성 의문) |
+| 손실 + 환경 반대 (잘못된 판단) | - | CRITICISM |
+| 위험감지 위기/위험에서 신규 진입 | - | CRITICISM (가드레일) |
+| 누적 손실 -10%+ | - | CRITICISM (구조적 검토) |
+
+#### 12-7-6. 5/18~5/22 구현 추가
+
+| 시점 | 작업 |
+|---|---|
+| 5/18 (월) | Supabase `quant_bot_advisory` 테이블 생성 (psycopg2 마이그레이션) + 단타봇 data_store 5종 JSON 읽기 함수 |
+| 5/19 (화) | `scripts/coach_scalper.py` 신규 (평가 로직 + INSERT) + 텔레그램 [COACH] 태그 추가 |
+| 5/20 (수) | BAT-D에 coach_scalper 등록 (18:30 실행) |
+| 5/21 (목) | 단타봇 quant_advisory.json fallback + 양방향 응답 채널 |
+| 5/22 (금) | 코칭 메시지 페이퍼 검증 (5/22 단타봇 결과 → 5/22 저녁 첫 코칭 발생 확인) |
+
+→ 5/27 자율 매매 시작 시점에는 형의 리딩 시스템도 함께 가동.
+
+### 12-8. 자비스 시스템의 동기부여 재정의
 
 퐝가님 철학 (5/17):
 
@@ -553,6 +712,18 @@ def determine_market_regime() -> dict:
 
 - 단순 ETF 매매가 아니라 **시장 전체를 읽고 자산을 옮기는 거시적 운영자**
 - 정보봇과 **양방향 소통**으로 시장 전체 그림 파악
+- **단타봇 동생을 리딩**하는 형의 책임 (조언/칭찬/꾸짖음)
 - 매크로 잘못 판정 시 → 모든 미크로 노력이 무의미해짐 → **거시 판정 정확도가 1순위**
 - 자율 매매의 진정한 가치는 **시장이 바뀔 때 자산 클래스 자체를 바꾸는 능력**
 - 강세장 대형주 → 약세장 소부장/방어 → 하락장 인버스/현금 — 이 회전이 바로 자비스의 본업
+
+**가족 시스템의 비전**:
+
+```
+퐝가님 (총괄)
+└─ 퀀트봇 (형, 맏이) ── 거시 운영자 + 가족 리딩 + ETF/해외 자율 매매
+    ├─ 단타봇 (동생) ── 미시 개별주 전담, 형의 코칭 수신
+    ├─ 정보봇 (자료실) ── 데이터 공급 + 외부 자료 수집
+    ├─ 웹봇 (창문) ── FLOWX 대시보드, 가족 활동 외부 표현
+    └─ 유튜브봇 (마이크, 제작 중) ── 가족 콘텐츠 전파
+```
