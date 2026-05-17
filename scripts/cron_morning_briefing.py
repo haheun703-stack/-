@@ -1,4 +1,4 @@
-"""[DEPRECATED 2026-05-17] FLOWX 모닝 브리핑 크론.
+"""[DEPRECATED 2026-05-17] FLOWX 모닝 브리핑 크론. 보존 결단 2026-05-18.
 
 폐지 사유 (커밋 c095e9a, 옵션 C):
   - 의존하던 morning_briefing_generator.py / theme_scan_runner.py가
@@ -9,6 +9,16 @@
 대체:
   - 통합 아침 브리핑은 BAT-B (07:00) scripts/run_morning_briefing.py 가 담당
   - 통합 함수는 src/use_cases/morning_briefing.build_unified_morning()
+
+★ 5/18 보존 결단 (자기반성 #4 해소):
+  - 삭제 vs 보존 결단: **보존** 선택 (재등록 위험 vs 삭제 비용 평가)
+  - 사유: Windows schtasks "QM_M_MorningBriefing" 등록 잔존 (5/18 확인).
+    schedule_M_morning_briefing.bat → 본 파일 호출. 매일 08:00 [DEPRECATED] 출력 후 종료.
+    파일만 삭제 시 schtasks가 ENOENT로 매일 실패 알림 발생 위험.
+  - ⚠️ 퐝가님 권고: Windows 작업 스케줄러에서 QM_M_MorningBriefing 작업 수동 해제 후
+    본 파일 + schedule_M_morning_briefing.bat 동반 삭제. PowerShell 1줄:
+        schtasks /delete /tn "QM_M_MorningBriefing" /f
+  - schtasks 해제 확인 후 다음 세션에서 파일 일괄 삭제 진행.
 
 Usage (실행 차단됨 — 참조용):
     python scripts/cron_morning_briefing.py            # → [DEPRECATED] 출력 후 종료

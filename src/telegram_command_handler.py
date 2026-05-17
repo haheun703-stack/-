@@ -707,8 +707,8 @@ class TelegramCommandBot:
         """리포트 — 장전 브리핑."""
         self._reply_kb("\u23f3 브리핑 생성 중...")
         try:
-            from scripts.send_market_briefing import build_briefing_message
-            msg = build_briefing_message()
+            from src.use_cases.morning_briefing import build_unified_morning
+            msg = build_unified_morning()
             self._reply_kb(msg)
         except Exception as e:
             self._reply_kb(f"\u274c 브리핑 실패: {e}")

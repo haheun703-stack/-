@@ -51,9 +51,3 @@ def load_daily_closes(ticker: str, min_rows: int = 60) -> pd.Series | None:
         return None
 
 
-def load_daily_returns(ticker: str, min_rows: int = 60) -> pd.Series | None:
-    """티커의 일별 수익률(%) Series 반환."""
-    closes = load_daily_closes(ticker, min_rows)
-    if closes is None:
-        return None
-    return closes.pct_change() * 100
