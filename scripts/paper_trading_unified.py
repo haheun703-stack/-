@@ -1404,6 +1404,17 @@ def send_daily_report(
     except Exception:
         pass
 
+    # 전일 대비 일일 손익 계산
+    daily_eq = pf.get("daily_equity", [])
+    today_eq = stats["equity"]
+    diff_line = ""
+    if len(daily_eq) >= 2:
+        prev_eq = daily_eq[-2].get("equity", today_eq)
+        diff = today_eq - prev_eq
+        diff_pct = (diff / prev_eq * 100) if prev_eq else 0
+        diff_emoji = "🟢" if diff > 0 else "🔴" if diff < 0 else "⚪"
+        diff_line = f"{diff_emoji} 일일: {diff:+,}원 ({diff_pct:+.2f}%)"
+
     lines = [
         f"📋 [PAPER] 일일 리포트 ({today_str})",
     ]
@@ -1411,6 +1422,10 @@ def send_daily_report(
         lines.append(risk_header)
     lines += [
         f"자산: {stats['equity']:,}원 ({stats['total_return_pct']:+.1f}%)",
+    ]
+    if diff_line:
+        lines.append(diff_line)
+    lines += [
         f"PF: {stats['pf']} | MDD: {stats['mdd']:.1f}% | "
         f"승률: {stats['win_rate']:.0f}% ({stats['wins']}W/{stats['losses']}L)",
         "",
@@ -1485,6 +1500,50 @@ def send_daily_report(
         elif action == "HOLD" and etf_result.get("name"):
             lines.append(f"  유지: {etf_result.get('name', '')} "
                           f"{etf_result.get('pnl_pct', 0):+.1f}%")
+
+    # picks_v2 내일 추천 TOP 5 (BAT-PICKV2 17:45 산출분, 17:50 시점에 일일 리포트 메시지에 포함)
+    try:
+        import csv
+        today_compact = today_str.replace("-", "")
+        picks_csv = DATA_DIR / f"picks_v2_{today_compact}.csv"
+        if picks_csv.exists():
+            with picks_csv.open("r", encoding="utf-8-sig") as f:
+                reader = csv.DictReader(f)
+                rows = sorted(
+                    [r for r in reader],
+                    key=lambda x: int(x.get("score", 0) or 0),
+                    reverse=True,
+                )[:5]
+            if rows:
+                lines.append("")
+                lines.append("-- 📅 내일 추천 TOP 5 (picks_v2) --")
+                for i, r in enumerate(rows, 1):
+                    name = r.get("name", "") or ticker_to_name(r.get("ticker", ""))
+                    lines.append(f"  {i}. {name} ({r.get('ticker', '')}) score {r.get('score', '?')}")
+    except Exception as e:
+        logger.warning(f"picks_v2 TOP 5 로드 실패: {e}")
+
+    # [LIVE] 실전 매매 섹션 (5/26 이후 활성. AUTO_TRADING_ENABLED=1 시 실제 데이터)
+    try:
+        if os.getenv("AUTO_TRADING_ENABLED", "0") == "1":
+            from src.utils.auto_trading_volume import get_today_volume
+            live = get_today_volume()
+            if live["total_trades"] > 0:
+                max_amount = int(os.getenv("AUTO_TRADING_MAX_AMOUNT", "300000"))
+                max_trades = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "5"))
+                lines.append("")
+                lines.append(f"-- 💵 [LIVE] 실전 매매 ({today_str}) --")
+                lines.append(
+                    f"  매수: {live['total_trades']}회 / {max_trades}회 | "
+                    f"금액: {live['total_amount']:,}원 / {max_amount:,}원 "
+                    f"({live['total_amount']/max_amount*100:.1f}%)"
+                )
+                for b in live["buys"][-3:]:  # 최근 3건
+                    lines.append(
+                        f"  • {b['ticker']} x{b['qty']}주 @{b['price']:,}원 ({b['ts'][11:19]})"
+                    )
+    except Exception as e:
+        logger.warning(f"[LIVE] 섹션 로드 실패: {e}")
 
     # Phase 12 장중 학습 시그널 (어제 수집한 오늘 후보)
     try:
