@@ -35,9 +35,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# .env 로드 (systemd/cron 환경에서 AUTO_TRADING_* 등 환경변수 읽기 보장)
+load_dotenv(PROJECT_ROOT / ".env")
 
 from src.stock_name_resolver import ticker_to_name
 
