@@ -127,5 +127,27 @@
 ### F4 후속조치
 
 - 5/18 (월) BAT-D 시간 확인 — 5/14 수준(106분) 회복 여부
+
+---
+
+## 카테고리 F-2: 5/17 전체 검수 발견 archive LOCK 위반 4건 (2026-05-17 등록·해결)
+
+c095e9a (F1~F3) 처리 후 잔존 검수 결과 **importlib 동적 로딩** 4건 추가 발견. 본 세션에서 일괄 해결.
+
+| # | 파일:라인 | archive 의존 | 위험도 | 처리 |
+| --- | --- | --- | --- | --- |
+| F-2-1 | `scripts/run_morning_briefing.py:37` | `archive/legacy_wrappers/send_market_briefing.py` (build_unified_morning) | 상 (BAT-B 07:00) | ✅ `src/use_cases/morning_briefing.py` 추출 + 정규 import |
+| F-2-2 | `scripts/us_overnight_signal.py:413` | `archive/backfill/backfill_us_kr_history.py` (PatternMatcher) | 중 (try 보호) | ✅ `src/utils/us_kr_history.py` 추출 + 정규 import |
+| F-2-3 | `scripts/update_us_kr_daily.py:40` | `archive/backfill/backfill_us_kr_history.py` (US_SYMBOLS 등) | 상 (모듈 최상위 import) | ✅ 위와 동일 모듈에서 import |
+| F-2-4 | `scripts/group_relay_detector.py:30` | `archive/analysis/group_relay_backtest.py` (find_csv_by_ticker 등) | 상 (모듈 최상위 import) | ✅ `src/utils/group_relay_loaders.py` 추출 + 정규 import |
+
+### 처리 결과
+- archive importlib 호출: **4건 → 0건**
+- LOCK 위반 grep: 코드 0건 (주석 2건만 잔존 — 위반 시도 차단 명시용)
+- 가드레일 단위테스트 13/13 PASSED 유지
+- 호출자 4건 import smoke test 통과
+
+### F-3: cron_morning_briefing.py DEPRECATED 처리 (옵션 C 완수)
+F3 처리(`c095e9a`)에서 cron 폐지는 됐으나 파일 자체는 dead code로 잔존, 내부에 archive import 시도(L65, L84) 잔존. 본 세션에서 `main()` 진입 즉시 종료 + DEPRECATED 명시로 실행 차단 (파일은 보존). 향후 정리는 별도 결정.
 - 회복 안 되면 KIS API rate limit / 토큰 캐시 검토
 

@@ -1,19 +1,18 @@
-"""FLOWX 모닝 브리핑 크론 — 매일 08:00 KST 실행
+"""[DEPRECATED 2026-05-17] FLOWX 모닝 브리핑 크론.
 
-순차 실행:
-  1) morning_briefing_generator.py → 브리핑 JSON 생성
-  2) FlowxUploader → Supabase morning_briefings 테이블 upsert
-  3) 텔레그램 발송
-     - 개인채널: 전체 브리핑
-     - FLOWX채널: 요약본 (상위 3개만)
-  4) 실패 시 텔레그램 에러 알림
+폐지 사유 (커밋 c095e9a, 옵션 C):
+  - 의존하던 morning_briefing_generator.py / theme_scan_runner.py가
+    scripts/archive/deprecated/로 폐기 (CLAUDE.md LOCK 규칙 적용 대상)
+  - VPS crontab BAT-M_morning 라인 제거 완료 — 호출 경로 0건
+  - 본 파일은 보존만 하고 실행 차단 (수동 실행 시 즉시 종료)
 
-BAT 스케줄:
-  scripts/schedule_M_morning_briefing.bat → 08:00 KST
+대체:
+  - 통합 아침 브리핑은 BAT-B (07:00) scripts/run_morning_briefing.py 가 담당
+  - 통합 함수는 src/use_cases/morning_briefing.build_unified_morning()
 
-Usage:
-    python scripts/cron_morning_briefing.py
-    python scripts/cron_morning_briefing.py --dry-run
+Usage (실행 차단됨 — 참조용):
+    python scripts/cron_morning_briefing.py            # → [DEPRECATED] 출력 후 종료
+    python scripts/cron_morning_briefing.py --dry-run  # → 동일
 """
 
 from __future__ import annotations
@@ -41,6 +40,14 @@ def send_error_alert(step: str, error: str):
 
 
 def main():
+    # [DEPRECATED 2026-05-17] CLAUDE.md LOCK 규칙(archive 참조 금지) 적용 + cron 폐지.
+    # 의존 모듈(morning_briefing_generator, theme_scan_runner)이 archive로 폐기됨.
+    # 대체: BAT-B → scripts/run_morning_briefing.py + src/use_cases/morning_briefing
+    print("[DEPRECATED] cron_morning_briefing.py는 폐지됨 (커밋 c095e9a, 옵션 C).")
+    print("            대체: BAT-B(07:00) → scripts/run_morning_briefing.py")
+    return
+
+    # ── 아래 코드는 보존만 (실행 차단) ──
     parser = argparse.ArgumentParser(description="FLOWX 모닝 브리핑 크론")
     parser.add_argument("--dry-run", action="store_true", help="업로드/발송 없이 생성만")
     args = parser.parse_args()
