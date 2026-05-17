@@ -1,3 +1,11 @@
+# ============================================================
+# DEPRECATED — 2026-05-17 이전 완료. 절대 수정·import·실행 금지.
+# 핵심 로직 이전 위치:
+#   - DB 백필/증분: scripts/update_us_kr_daily.py
+#   - Level 2 패턴 매칭: src/utils/us_kr_history.py + scripts/us_overnight_signal.py
+# CLAUDE.md LOCK 규칙: scripts/archive/ 참조·실행·import 모두 금지.
+# 이 파일은 히스토리 보존 목적으로만 유지.
+# ============================================================
 """US-KR Market History Backfill & Level 2 Pattern Matcher
 
 2년치 미국/한국 시장 데이터를 수집하여 패턴 매칭 DB 구축.

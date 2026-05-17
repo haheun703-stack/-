@@ -1,3 +1,11 @@
+# ============================================================
+# DEPRECATED — 2026-05-17 이전 완료. 절대 수정·import·실행 금지.
+# 핵심 로직 이전 위치:
+#   - 통합 아침 브리핑: src/use_cases/morning_briefing.py (build_unified_morning)
+#   - 호출자: scripts/run_morning_briefing.py (BAT-B 07:00)
+# CLAUDE.md LOCK 규칙: scripts/archive/ 참조·실행·import 모두 금지.
+# 이 파일은 히스토리 보존 목적으로만 유지.
+# ============================================================
 """
 장시작전 마켓 브리핑 텔레그램 발송 스크립트.
 

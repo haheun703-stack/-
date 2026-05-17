@@ -779,14 +779,98 @@ def generate_advisory(today: date) -> list[dict]:
 
 ---
 
+### 13-2-1. paper mirror 모드 동작 명세 (5/17 자기반성 #6 보강)
+
+**목적**: 실주문 0건 + live와 동일한 시그널/타이밍/사이즈 결정 흐름 → "결정 품질" 데이터화로 Day 4 live 승급 판단.
+
+**파일 구성**:
+- `src/use_cases/paper_mirror.py` (신규, P0)
+- `src/adapters/paper_order_adapter.py` (신규, P0 — `kis_order_adapter`의 미러, 인터페이스 동일)
+- `data/paper_mirror/{date}_{ticker}.json` (포지션 상태)
+- `logs/paper_mirror_{date}.log`
+
+#### (1) 진입 트리거 — live와 동일
+- chase_entry / tomorrow_picks / jarvis_etf 동일 시그널 사용
+- `kis_order_adapter` 가드레일 체크도 동일 통과해야 진입 (한도/횟수/시간/비거래일)
+- 차이는 **마지막 1줄**: `kis_order_adapter.place_order(...)` 대신 `paper_order_adapter.simulate_order(...)`
+
+#### (2) 체결 시뮬레이션 로직 (실주문 대체)
+| 항목 | 가정 | 근거 |
+|------|------|------|
+| 진입가 | 시그널 +1초 후 KIS 현재가 (`fetch_price`) | 실거래 주문 전송 지연 모사 |
+| 슬리피지 (매수) | 매도1호가(`ASK1`) 채택, 미수신 시 현재가 +0.05% | 시장가 매수 시 호가 1틱 위 체결 (코스피 대형주) |
+| 슬리피지 (매도) | 매수1호가(`BID1`) 채택, 미수신 시 현재가 -0.05% | 시장가 매도 시 호가 1틱 아래 체결 |
+| 체결 수량 | 100% 즉시 체결 가정 (10만원 사이즈 한정) | ETF/대형주 유동성 충분 |
+| 수수료 | 매수·매도 각 0.015% (KIS 키움 동일) | KIS Open Trading API 수수료 표 |
+| 거래세 | 매도 시 0.18% (코스피) / 0.20% (코스닥) | 2026 현행 |
+| 최소 호가 단위 | 종가 1000원 미만 1원 / 1만원 미만 5원 / 5만원 미만 10원 / 5만원+ 50원 | 한국거래소 호가 규정 |
+
+**보수적 가정 룰**: 호가창 `fetch_orderbook` 미수신 → 현재가 +0.10% 가산 (위 0.05%보다 2배). 데이터 부재를 불리하게 처리.
+
+#### (3) 실시간 호가 가정
+- API: KIS `inquire-asking-price` 5분 호출 제한 → 진입/청산 시점만 호출 (1일 ≤ 10회)
+- 호가창 잔량 제약: **잔량의 50% 이하만 체결 가능**으로 제한 (실거래 안전 마진). 초과 시 부분 체결 + 다음 호가로 잔여 체결
+- 호가창 SKIP 조건: ETF 시총 1조원+ → 잔량 무시 (체결 가능 가정), 그 외 종목은 강제 체크
+
+#### (4) 포지션 추적 + 가상 잔고
+- **가상 시작 잔고**: 1,000,000원 (Day 1~3 누적 ±α 추적)
+- **평가 주기**: 매 5분 KIS `fetch_price` → 평가손익 갱신, `data/paper_mirror/{date}_{ticker}.json` 업데이트
+- **강제 청산**: 15:20 KST (NXT 진입 안전마진 + live 가드레일과 동일)
+- **목표가/손절가**: live와 동일 산식 (`6-3-3` 레버리지/일반 ETF별 차등)
+
+#### (5) 자기반성 통합 (§13-4 동일 구조)
+- 진입 시 `data/reflection/{date}_{ticker}.json` 기록 (`mode: "paper_mirror"` 필드 추가)
+- 평가 시 D+1/D+3/D+5 종가 라벨링 (5/19부터 가능)
+- live 모드 데이터와 **동일 스키마** → 회귀 분석 시 mode 컬럼 필터만으로 분리/통합 분석
+
+#### (6) 텔레그램 알림 포맷
+```
+[PAPER] 진입 005930 삼성전자 @71,200 × 1주 (= 71,200원)
+  시그널: chase_entry (체결강도 178, 거래량 6.2x)
+  슬리피지 가정: +0.05% (ASK1 채택)
+  목표: 73,300 (+2.95%) / 손절: 70,000 (-1.69%)
+```
+
+#### (7) 승급 판정 데이터 (Day 3 → 4, §13-2 보강)
+| 지표 | 통과 기준 | 측정 |
+|------|----------|------|
+| 매매 건수 | ≥ 3건 | paper_mirror 진입 카운트 |
+| D+1 적중률 | ≥ 50% (양봉 종가) | reflection 라벨 |
+| 시뮬 손익 | ≥ -2% (절대값) | 가상 잔고 변동 |
+| 가드레일 위반 | 0건 | kis_order_adapter check 통과율 100% |
+| 호가창 미수신 | ≤ 30% (전체 진입 대비) | API 안정성 |
+
+**기준 1개라도 미달**: Day 1 재시작 + 사이즈 동결
+
+#### (8) 모드 스위치 (`.env`)
+```
+PAPER_MIRROR_MODE=off            # 5/27 출격일 on, 5/30 Day 4 승급 시 off
+PAPER_MIRROR_BUDGET=1000000      # 가상 시작 잔고
+PAPER_MIRROR_SLIPPAGE_BASE_PCT=0.05  # 호가 1틱 슬리피지 기본
+PAPER_MIRROR_SLIPPAGE_FALLBACK_PCT=0.10  # 호가창 미수신 시 보수적 가정
+PAPER_MIRROR_FORCE_CLOSE_TIME=15:20  # 강제 청산
+```
+
+#### (9) 명세의 한계 (정직 고백)
+- **슬리피지 0.05%는 코스피 대형주 가정**, 중형주·테마주는 0.1~0.3%로 보정 필요 → Week 2에 ticker별 historical bid-ask spread 측정 후 보정 테이블 적용
+- **체결 100% 즉시 가정**은 작은 사이즈(10만원) 한정 — Day 8~ 사이즈 확대 시 부분체결 모델 추가 필요
+- **호가창 잔량 50% 제한**은 임의 추정 — 5/27~30 실측 후 70~80%로 완화 가능
+- 위 3개는 §13-4 self_reflection에서 자동 측정 → §13-6 주간 회귀에 포함
+
+---
+
 ### 13-3. 체결강도 추격 추매 모듈 (셋팅, OFF 보존)
 
 **파일**: `src/use_cases/chase_entry.py` (신규)
 
-**트리거 조건** (AND):
+> ⚠️ **임계값 추정치 — 5/22 캘리브레이션 예정 (§13-7 #11, 자기반성 #5)**
+> 아래 수치는 모두 검증 없는 초기 추정. 정보봇 39컬럼 CSV(1~2년) 백테스트로
+> D+1/D+3 적중률 ≥ 50% 만족하는 최적값으로 5/22까지 교체. 근거치 도출 전 OFF 유지.
+
+**트리거 조건** (AND, 초기 추정치):
 - 화이트리스트 38개 종목 (§12-3)
-- 체결강도 ≥ 150 **3분 지속** (KIS `tday_rltv` 필드)
-- 거래량 5분 평균 ≥ 5x (직전 5일 동일 시간대 대비)
+- 체결강도 ≥ **150** (추정) **3분 지속** (추정) (KIS `tday_rltv` 필드)
+- 거래량 5분 평균 ≥ **5x** (추정) (직전 5일 동일 시간대 대비)
 - 시장 레짐 ∈ {STRONG_BULL, MILD_BULL} (§12-5)
 - 외인 + 금투 일중 누적 순매수 + (정보봇 실시간)
 
@@ -955,7 +1039,7 @@ CREATE INDEX idx_qsl_regime ON quant_self_learning(market_regime, label);
 
 ### 13-7. 5/18~5/22 구현 우선순위 (P2 일정 갱신)
 
-기존 §10/§12-6 계획에 **추가 4건**:
+기존 §10/§12-6 계획에 **추가 6건** (5/18 §13-2-1 paper mirror 명세 + 임계값 캘리브레이션 보강):
 
 | # | 항목 | 우선순위 | 소요 |
 |---|------|---------|------|
@@ -963,17 +1047,21 @@ CREATE INDEX idx_qsl_regime ON quant_self_learning(market_regime, label);
 | 7 | `src/use_cases/self_reflection.py` 골격 (D+1/D+3/D+5 평가) | **P0** | 3h |
 | 8 | Supabase `quant_self_learning` 테이블 + 어댑터 | **P0** | 2h |
 | 9 | `scripts/weekly_self_review.py` 골격 (분석 함수만, BAT 미등록) | P1 | 2h |
+| 10 | `src/use_cases/paper_mirror.py` + `src/adapters/paper_order_adapter.py` 골격 (§13-2-1 명세 따라) | **P0** | 4h |
+| 11 | §13-3 임계값(체결강도≥150, 거래량5x, 3분지속) 백테스트 캘리브레이션 (정보봇 39컬럼 CSV 1~2년) | **P0** | 6h |
 
-**전체 5/18~5/22 갱신 목록** (기존 5건 + 신규 4건 = 9건):
+**전체 5/18~5/22 갱신 목록** (기존 5건 + 신규 6건 = **11건**):
 1. ⭐ Supabase `quant_bot_advisory` 테이블 생성
 2. ⭐ `src/utils/intel_bot_query.py` 신규 (정보봇 5종 질의)
 3. ⭐ 화이트리스트 38개 확장 (kis_order_adapter.py)
 4. ⭐ `determine_market_regime()` 신규
-5. `fetch_orderbook` (KIS REST 호가창)
+5. `fetch_orderbook` (KIS REST 호가창) — paper mirror §13-2-1 (3) 의존
 6. ⭐ `src/use_cases/chase_entry.py` 골격 (OFF)
 7. ⭐ `src/use_cases/self_reflection.py` 골격
 8. ⭐ Supabase `quant_self_learning` 테이블
 9. `scripts/weekly_self_review.py` 골격
+10. ⭐ **paper_mirror.py + paper_order_adapter.py** (§13-2-1 명세, P0)
+11. ⭐ **§13-3 임계값 캘리브레이션** (정보봇 39컬럼 CSV 1~2년 백테스트로 체결강도/거래량/지속시간 최적값 산출, 추정치 → 근거치)
 
 5/23~5/26: 통합 테스트 + 페이퍼 미러 검증
 5/27 출격: paper mirror 모드로 1종목/10만원 시작 → Day 4 live 승급
