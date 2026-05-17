@@ -80,3 +80,52 @@
 - `smart_entry.py:697-698,784-795`: HOLDING 종목 적응형 정정 → 주석 "초기 지정가 유지"와 불일치
 - `scan_buy_candidates.py:1326`: `SignalEngine("config/settings.yaml")` 상대 경로
 - `_tick_round()` 5중 중복: smart_entry.py, telegram_command_handler.py, trade_approval.py, sell_monitor.py (trading_models.tick_round import로 통일)
+
+---
+
+## 카테고리 F: 5/15 BAT-D 실전 검증 발견 (2026-05-17 등록)
+
+| # | 이슈 | 영향 | 우선순위 |
+| --- | --- | --- | --- |
+| F1 | `scripts.etf_transmission` import 잔존 (실제 모듈은 `archive/deprecated/`로 폐기됨, 커밋 `d88d131`) — `ETF 전파 모델 실패` WARNING 2회 (06:10, 17:08) | LOCK 위반 시도 + 매일 WARNING 노이즈 (기능 미수행) | **P1** |
+| F2 | `scripts.theme_scan_runner` import 잔존 (실제 모듈은 archive 폐기됨) — `테마 스캔 스킵` | 같은 사유 (LOCK 위반 시도 + 노이즈) | **P1** |
+| F3 | `scripts.morning_briefing_generator` import 잔존 (실제 모듈은 archive 폐기됨) — BAT-M_morning 실패 1건의 직접 원인 | BAT-M_morning 매일 `[FAIL]` 카운트 (실패 4건의 일부) | **P1** |
+| F4 | BAT-D 소요시간 회귀: 5/14 106분 → 5/15 **123분** (+17분), update_daily_data 978초 → **1471초** (+50%) | 새 KIS 키 첫 정규 운영 → 캐시 부재 가능, 5/18~5/19 추이 관찰 후 확정 | P2 |
+| F5 | 스케줄러 메시지 충돌: `❌ 스케줄러: BAT-D 완료, 실패 4건` 직후 `=== BAT-D 완료 (실패: 0건) ===` | 카운트 정의 불일치 (sub-task vs 최종) — 정의 통일 필요 | P3 |
+
+### F1~F3 후속조치 (2026-05-17 호출 위치 식별 완료)
+
+모듈 3건은 의도적으로 `scripts/archive/deprecated/`로 폐기 완료 (커밋 `d88d131`). **CLAUDE.md LOCK 규칙에 따라 archive 참조·실행·import 금지** → 호출 코드에서 import/실행 부분을 제거해야 합니다.
+
+| 호출 파일 | 라인 | 내용 | try/except 보호 | 실패 영향 |
+| --- | --- | --- | --- | --- |
+| `scripts/us_overnight_signal.py` | L1326~1343 | ETF 전파 모델 호출 + 결과 활용 (L1562) | ✅ 보호됨 | WARNING 로그만 (signal 처리 계속) |
+| `scripts/run_morning_briefing.py` | L23~29 | 테마 스캔 (실험적 호출, 본격 morning briefing 아님) | ✅ 보호됨 | WARN 후 다음 단계 진행 |
+| `scripts/cron_morning_briefing.py` | L64~69 | 테마 스캔 | ✅ 보호됨 | WARN 후 다음 단계 진행 |
+| `scripts/cron_morning_briefing.py` | L83~93 | **morning_briefing_generator 호출 — 실패 시 `sys.exit(1)`로 종료** | ⚠️ 보호되지만 종료 | **BAT-M_morning 실패 1건의 직접 원인** |
+
+### F1~F3 처리 옵션 (퐝가님 결정 필요)
+
+**옵션 A. 단순 import 제거 (보수적)**
+
+- 4개 try/except 블록을 통째로 들어내고 결과 사용 부분 (us_overnight_signal L1562, cron_morning_briefing L84~ 이후 STEP 3/4) 정리
+- 효과: WARNING/FAIL 노이즈 0건, BAT-M_morning 실패 0건
+- 단점: morning_briefing 기능 자체가 사라짐 (이미 아무도 사용 안 함이 확실하면 OK)
+
+**옵션 B. 모듈 복구 + 재활성화**
+
+- archive 모듈 3건을 복구해서 `scripts/` 본가로 이동
+- 효과: 기능 활성화
+- 단점: 폐기 결정 (`d88d131`) 사유 확인 필요, 복구 비용 발생
+
+**옵션 C. 호출만 제거 + cron 등록도 제거 (BAT-M_morning 통째 폐지)**
+
+- 옵션 A + crontab/run_bat에서 BAT-M_morning 자체 제거
+- 효과: 가장 깔끔 (이미 결과를 안 쓰면 cron만 돌 가치 없음)
+- 권장도: ★★★ — 결과를 정말 안 쓴다면 cron 자체를 빼는 게 맞음
+
+### F4 후속조치
+
+- 5/18 (월) BAT-D 시간 확인 — 5/14 수준(106분) 회복 여부
+- 회복 안 되면 KIS API rate limit / 토큰 캐시 검토
+

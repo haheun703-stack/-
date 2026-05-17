@@ -113,9 +113,8 @@ case "$BAT" in
   K_safety) # 07:30 KST — 안전마진
     run_py scripts/scan_safety_margin.py
     ;;
-  M_morning) # 08:00 KST — 모닝 브리핑
-    run_py scripts/cron_morning_briefing.py
-    ;;
+  # M_morning) 폐지 (2026-05-17): morning_briefing_generator + theme_scan_runner는 archive/deprecated.
+  # CLAUDE.md LOCK 규칙 위반 + sys.exit(1)로 BAT-M_morning 매일 실패 카운트 누적 → 옵션 C로 통째 제거.
   M_US) # 08:10 KST — 미국장 매크로 필터 (정보봇 07:55 후 실행)
     run_py scripts/us_quant_filter.py
     run_py scripts/upload_quant_us.py

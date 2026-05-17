@@ -19,14 +19,8 @@ def main():
         from datetime import date
         print(f"[SKIP] 한국 비거래일 ({date.today()}) — 브리핑 스킵")
         return
-    # 1) 테마 스캔 — 텔레그램 OFF (통합 메시지에서 읽어감)
-    try:
-        from scripts.theme_scan_runner import run_theme_scan
-        run_theme_scan(use_grok=True, send_telegram=False)
-        print("[OK] 테마 스캔 완료 (JSON 저장)")
-    except Exception as e:
-        print(f"[WARN] 테마 스캔 실패: {e}")
-        traceback.print_exc()
+    # 1) 테마 스캔 — 폐지 (2026-05-17): theme_scan_runner는 archive/deprecated.
+    #    CLAUDE.md LOCK 규칙에 따라 호출 자체를 제거. 필요 시 모듈 복구 후 재활성화.
 
     # 2) 뉴스 스캔
     try:
