@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import date, datetime, time as dtime
 
 import mojito
 
@@ -17,7 +18,9 @@ from src.entities.trading_models import (
     OrderStatus,
     OrderType,
 )
+from src.trading_calendar import is_kr_trading_day
 from src.use_cases.ports import BalancePort, CurrentPricePort, OrderPort
+from src.utils.auto_trading_volume import check_daily_limits, record_buy
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +85,25 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     # ──────────────────────────────────────────
     # P0 가드레일 (모든 주문 진입 시 호출)
     # ──────────────────────────────────────────
-    def _guard(self, ticker: str, quantity: int, side: str = "BUY"):
-        """주문 차단 가드레일. 실패 시 PermissionError/ValueError 발생."""
+    def _guard(self, ticker: str, quantity: int, price: int | None = None, side: str = "BUY"):
+        """주문 차단 가드레일. 실패 시 PermissionError/ValueError/RuntimeError 발생.
+
+        Args:
+            ticker: 종목 코드
+            quantity: 수량
+            price: 주문 단가 (지정가만, 시장가는 None). 현재가 ±X% 검증에 사용.
+            side: BUY / SELL
+
+        Checks (9개):
+            1. AUTO_TRADING_ENABLED=1 활성화
+            2. AUTO_TRADING_MAX_QTY 수량 한도
+            3. AUTO_TRADING_WHITELIST_ONLY 화이트리스트
+            4. 거래시간 09:00~15:30
+            5. 거래일 (주말 + 공휴일, is_kr_trading_day)
+            6. 일일 매수 금액/횟수 한도 (BUY만)
+            7. 현재가 ±X% 범위 (지정가, price 전달 시)
+            8. 통과 로그
+        """
         # 1. 자동매매 활성화 체크
         if os.getenv("AUTO_TRADING_ENABLED", "0") != "1":
             raise PermissionError(
@@ -94,8 +114,6 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         if quantity > max_qty:
             raise ValueError(f"[GUARD] 수량 한도 초과: {quantity} > {max_qty}")
         # 3. 화이트리스트 (선택적, AUTO_TRADING_WHITELIST_ONLY=1일 때만)
-        # 기본: theme + 인버스/레버리지 통합 (총 26개)
-        # AUTO_TRADING_WHITELIST 환경변수로 외부 override 가능
         if os.getenv("AUTO_TRADING_WHITELIST_ONLY", "0") == "1":
             wl_env = os.getenv("AUTO_TRADING_WHITELIST", "")
             wl = set(wl_env.split(",")) if wl_env else self.AUTO_TRADING_WHITELIST
@@ -104,19 +122,74 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                     f"[GUARD] 화이트리스트 외 종목: {ticker} (허용: {len(wl)}개)"
                 )
         # 4. 거래시간 (09:00~15:30 KST)
-        from datetime import datetime, time as dtime
         now = datetime.now().time()
         if not (dtime(9, 0) <= now <= dtime(15, 30)):
             raise RuntimeError(f"[GUARD] 거래시간 외: {now}")
-        # 5. 휴장일 (간이 체크 — 주말)
-        from datetime import date
-        if date.today().weekday() >= 5:
-            raise RuntimeError(f"[GUARD] 주말 휴장: {date.today()}")
-        # 6. 로그
+        # 5. 거래일 (주말 + KRX 공휴일 통합)
+        if not is_kr_trading_day():
+            raise RuntimeError(f"[GUARD] KRX 휴장일: {date.today()}")
+        # 6. 일일 매수 금액/횟수 한도 (BUY만 적용 — SELL은 한도 무관)
+        if side == "BUY":
+            max_amount = int(os.getenv("AUTO_TRADING_MAX_AMOUNT", "300000"))
+            max_trades = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "5"))
+            # 지정가는 price, 시장가는 현재가 추정 (없으면 0으로 사전 검증만)
+            est_price = price if price is not None else self._estimate_price(ticker)
+            est_amount = quantity * est_price
+            ok, reason = check_daily_limits(est_amount, max_amount, max_trades)
+            if not ok:
+                raise ValueError(f"[GUARD] {reason}")
+        # 7. 현재가 ±X% 범위 검증 (지정가만)
+        if price is not None:
+            range_pct = float(os.getenv("AUTO_TRADING_PRICE_RANGE_PCT", "5"))
+            current = self._estimate_price(ticker)
+            if current > 0:
+                diff_pct = abs(price - current) / current * 100
+                if diff_pct > range_pct:
+                    raise ValueError(
+                        f"[GUARD] 지정가 현재가 ±{range_pct}% 초과: "
+                        f"지정 {price:,} vs 현재 {current:,} (편차 {diff_pct:.1f}%)"
+                    )
+        # 8. 통과 로그
         logger.warning(
-            "[GUARD PASS] %s %s %d주 (max_qty=%d, mode=%s)",
-            side, ticker, quantity, max_qty, "MOCK" if self._is_mock else "REAL"
+            "[GUARD PASS] %s %s %d주 @ %s (max_qty=%d, mode=%s)",
+            side, ticker, quantity,
+            f"{price:,}" if price else "시장가",
+            max_qty, "MOCK" if self._is_mock else "REAL"
         )
+
+    def _estimate_price(self, ticker: str) -> int:
+        """현재가 조회 (오류 시 0). 가드레일 검증 전용 (실제 주문에는 영향 없음)."""
+        try:
+            return int(self.fetch_current_price(ticker).get("current_price", 0))
+        except Exception:
+            return 0
+
+    def _send_telegram_alert(self, action: str, ticker: str, quantity: int,
+                              price: int, order_type: str = "지정가") -> None:
+        """매수/매도 시 텔레그램 알림. TELEGRAM_ALERT=0이면 스킵."""
+        if os.getenv("AUTO_TRADING_TELEGRAM_ALERT", "1") != "1":
+            return
+        try:
+            from src.telegram_sender import send_message
+            from src.utils.auto_trading_volume import get_today_volume
+            volume = get_today_volume()
+            max_amount = int(os.getenv("AUTO_TRADING_MAX_AMOUNT", "300000"))
+            max_trades = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "5"))
+            amount = quantity * price if price else 0
+            msg = (
+                f"[자동매매] {action}\n"
+                f"종목: {ticker}\n"
+                f"수량: {quantity}주\n"
+                f"가격: {price:,}원 ({order_type})\n"
+                f"금액: {amount:,}원\n"
+                f"일일 누적: {volume['total_amount']:,}원 / {max_amount:,}원 "
+                f"({volume['total_amount']/max_amount*100:.1f}%)\n"
+                f"일일 횟수: {volume['total_trades']}회 / {max_trades}회\n"
+                f"시각: {datetime.now().strftime('%H:%M:%S')}"
+            )
+            send_message(msg)
+        except Exception as e:
+            logger.warning("[자동매매 알림] 텔레그램 발송 실패: %s", e)
 
     # ──────────────────────────────────────────
     # OrderPort 구현
@@ -124,13 +197,17 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def buy_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매수"""
-        self._guard(ticker, quantity, "BUY")
+        self._guard(ticker, quantity, price=price, side="BUY")
         logger.info("[주문] 지정가 매수: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_buy_order(ticker, price, quantity)
-            return self._parse_order_response(
+            order = self._parse_order_response(
                 resp, ticker, OrderSide.BUY, OrderType.LIMIT, price, quantity
             )
+            if order.status == OrderStatus.PENDING:
+                record_buy(ticker, quantity, price)
+                self._send_telegram_alert("매수 접수", ticker, quantity, price, "지정가")
+            return order
         except Exception as e:
             logger.error("[주문] 지정가 매수 실패: %s — %s", ticker, e)
             return Order(
@@ -141,13 +218,16 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def sell_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매도"""
-        self._guard(ticker, quantity, "SELL")
+        self._guard(ticker, quantity, price=price, side="SELL")
         logger.info("[주문] 지정가 매도: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_sell_order(ticker, price, quantity)
-            return self._parse_order_response(
+            order = self._parse_order_response(
                 resp, ticker, OrderSide.SELL, OrderType.LIMIT, price, quantity
             )
+            if order.status == OrderStatus.PENDING:
+                self._send_telegram_alert("매도 접수", ticker, quantity, price, "지정가")
+            return order
         except Exception as e:
             logger.error("[주문] 지정가 매도 실패: %s — %s", ticker, e)
             return Order(
@@ -158,13 +238,18 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def buy_market(self, ticker: str, quantity: int) -> Order:
         """시장가 매수"""
-        self._guard(ticker, quantity, "BUY")
+        self._guard(ticker, quantity, price=None, side="BUY")
         logger.info("[주문] 시장가 매수: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_buy_order(ticker, quantity)
-            return self._parse_order_response(
+            order = self._parse_order_response(
                 resp, ticker, OrderSide.BUY, OrderType.MARKET, 0, quantity
             )
+            if order.status == OrderStatus.PENDING:
+                est_price = self._estimate_price(ticker)
+                record_buy(ticker, quantity, est_price)
+                self._send_telegram_alert("매수 접수", ticker, quantity, est_price, "시장가")
+            return order
         except Exception as e:
             logger.error("[주문] 시장가 매수 실패: %s — %s", ticker, e)
             return Order(
@@ -174,13 +259,17 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def sell_market(self, ticker: str, quantity: int) -> Order:
         """시장가 매도"""
-        self._guard(ticker, quantity, "SELL")
+        self._guard(ticker, quantity, price=None, side="SELL")
         logger.info("[주문] 시장가 매도: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_sell_order(ticker, quantity)
-            return self._parse_order_response(
+            order = self._parse_order_response(
                 resp, ticker, OrderSide.SELL, OrderType.MARKET, 0, quantity
             )
+            if order.status == OrderStatus.PENDING:
+                est_price = self._estimate_price(ticker)
+                self._send_telegram_alert("매도 접수", ticker, quantity, est_price, "시장가")
+            return order
         except Exception as e:
             logger.error("[주문] 시장가 매도 실패: %s — %s", ticker, e)
             return Order(
