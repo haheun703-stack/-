@@ -727,3 +727,274 @@ def generate_advisory(today: date) -> list[dict]:
     ├─ 웹봇 (창문) ── FLOWX 대시보드, 가족 활동 외부 표현
     └─ 유튜브봇 (마이크, 제작 중) ── 가족 콘텐츠 전파
 ```
+
+---
+
+## 13. 자기학습 루프 (Self-Learning Loop) — 퐝가님 5/17 핵심 지시
+
+### 13-1. 본질 — 매매가 아니라 학습
+
+> "페이퍼 트레이닝 이후에 1종목씩 매매를 하면서 보고 수정을 하지
+> 자기반성을 하면서... 그래야 학습이 되고 학습이 되야 성적이 오르지"
+> — 퐝가님 (5/17)
+
+**현재 진단** (5/17 검수 결과):
+- ❌ **추격 추매 셋팅 0%**: 장중 체결강도 급변 → 무반응 (BAT-D 16:30 1회 평가만)
+- ❌ **자기반성 루프 0%**: 매매 → 결과 기록만, 패턴 추출/코드 수정 자동화 없음
+- ❌ **점진 매매 미설계**: 1종목→다종목 단계 승급 기준 부재
+
+**목표 사이클**:
+
+```
+[1] 진입 (이유 기록)
+   ↓
+[2] D+1, D+3, D+5 자동 평가
+   ↓
+[3] 성공/실패 패턴 추출 (Supabase 적재)
+   ↓
+[4] 주간 회귀분석 → 코드 수정 후보 자동 제안
+   ↓
+[5] 퐝가님 승인 → 코드 반영 → 다음 사이클
+```
+
+매매 1회 = 학습 데이터 1건. **매매하지 않으면 학습도 없다.**
+
+---
+
+### 13-2. 4단계 점진 매매 (1종목부터)
+
+| 단계 | 기간 | 종목 수 | 종목당 금액 | 모드 | 목적 |
+|------|------|--------|----------|------|------|
+| Day 1~3 | 3영업일 | 1 | 10만원 | **paper mirror** | 실전 시뮬레이션 (실주문 X) |
+| Day 4~7 | 4영업일 | 1 | 50만원 | **live + self_reflection** | 첫 실거래, 자기반성 작동 |
+| Day 8~14 | 5영업일 | 2~3 | 각 50만원 | live + 학습 반영 | Week 1 학습 결과 코드 반영 후 확대 |
+| Day 15~ | 무기한 | 5 (화이트리스트) | 각 100~200만원 | live + 정상 운영 | 자율 매매 본 가동 |
+
+**승급 기준** (각 단계 통과 조건):
+- Day 3 → 4 승급: paper mirror 적중률 ≥ 50% (D+1 양봉)
+- Day 7 → 8 승급: live 손실 ≤ -5% (절대값) + 자기반성 리포트 1건 이상 생성
+- Day 14 → 15 승급: 주간 회귀분석에서 1건 이상 코드 수정 적용 + 백테스트 PASS
+
+**실패 시**: 직전 단계로 후퇴 (예: Day 7 손실 -7% → Day 1로 재시작, 사이즈 반감)
+
+---
+
+### 13-3. 체결강도 추격 추매 모듈 (셋팅, OFF 보존)
+
+**파일**: `src/use_cases/chase_entry.py` (신규)
+
+**트리거 조건** (AND):
+- 화이트리스트 38개 종목 (§12-3)
+- 체결강도 ≥ 150 **3분 지속** (KIS `tday_rltv` 필드)
+- 거래량 5분 평균 ≥ 5x (직전 5일 동일 시간대 대비)
+- 시장 레짐 ∈ {STRONG_BULL, MILD_BULL} (§12-5)
+- 외인 + 금투 일중 누적 순매수 + (정보봇 실시간)
+
+**진입 사이즈** (보유 종목 추매 / 신규 종목 진입):
+- 추매: 기존 평단의 30% 추가 (최대 2회, 평단 +3% 이내)
+- 신규: 화이트리스트 사이징 (ETF 100만원 / 대형주 200만원)
+
+**가드레일** (kis_order_adapter.py 기존 통과):
+- 일일 매수 한도 ≤ 300만원
+- 일일 매매 횟수 ≤ 5건
+- 가격 변동 폭 ≤ ±5%
+- 거래시간 09:00~15:20 (NXT 15:30 제외 안전마진)
+- 비거래일 차단
+
+**모드 스위치** (.env):
+```
+CHASE_ENTRY_MODE=off       # 5/27 첫 출격 시 off (셋팅만 보존)
+                # paper / shadow / live (수동 승급)
+CHASE_ENTRY_MAX_PER_DAY=2  # 일일 추격 매수 최대 2회
+```
+
+**시그니처** (의사 코드):
+```python
+def evaluate_chase_signal(ticker: str, now: datetime) -> ChaseDecision:
+    """체결강도 3분 지속 + 거래량 5x + 레짐 일치 → 추격 매수 결정.
+
+    Returns:
+        ChaseDecision(action='buy'|'add'|'skip', qty=int, reason=str)
+    """
+```
+
+---
+
+### 13-4. 자기반성 모듈 (Self-Reflection)
+
+**파일**: `src/use_cases/self_reflection.py` (신규)
+**데이터**: `data/reflection/{date}_{ticker}.json`
+
+**기록 항목** (진입 시점):
+```json
+{
+  "ticker": "005930",
+  "name": "삼성전자",
+  "entry_time": "2026-05-18 09:32:14",
+  "entry_price": 71200,
+  "qty": 7,
+  "signal_source": "chase_entry|tomorrow_picks|jarvis_etf",
+  "market_regime": "STRONG_BULL",
+  "trigger_features": {
+    "체결강도_3min_avg": 178,
+    "거래량_5min_ratio": 6.2,
+    "외인_누적_억원": 45.3,
+    "금투_누적_억원": 22.1
+  },
+  "expected_pattern": "급등 후 D+1 양봉 (PF 1.82 추정)",
+  "confidence": 0.74
+}
+```
+
+**평가 시점** (BAT-D 16:30 자동):
+- D+1 종가 → ret_1d 라벨링
+- D+3 종가 → ret_3d 라벨링
+- D+5 종가 → ret_5d 라벨링 + 최종 성공/실패 판정
+
+**라벨 규칙**:
+- **성공**: D+3 수익률 ≥ +2% OR D+5 수익률 ≥ +3%
+- **실패**: D+3 수익률 ≤ -3% OR -7% 손절 발동
+- **중립**: 그 외
+
+**자기반성 리포트** (D+5 또는 청산 시):
+```python
+def generate_reflection(trade: TradeRecord) -> ReflectionReport:
+    """매매 1건의 자기반성 리포트 생성.
+
+    Returns:
+        - 진입 이유 (어떤 시그널이 트리거)
+        - 실제 결과 vs 기대 (expected_pattern vs actual)
+        - 시장 환경 적합도 (레짐 일치/불일치)
+        - 개선 제안 (실패 시 — 어떤 조건을 추가/제거하면 차단됐을지)
+    """
+```
+
+**텔레그램 알림** (실패 시):
+```
+[REFLECTION] ❌ 삼성전자 -7% 손절
+진입: 체결강도 178 (3분), 외인 +45억
+실제: D+1 -2.1%, D+3 -5.4% → 손절
+원인 추정: 시장 레짐 STRONG_BULL 판정 오류
+                 (외인 음전환 미감지)
+개선 제안: regime 판정에 외인 추세 1시간 단위 평가 추가
+```
+
+---
+
+### 13-5. Supabase 학습 테이블 — `quant_self_learning`
+
+**스키마**:
+```sql
+CREATE TABLE quant_self_learning (
+  id BIGSERIAL PRIMARY KEY,
+  trade_date DATE NOT NULL,
+  ticker TEXT NOT NULL,
+  name TEXT,
+  signal_source TEXT,              -- chase_entry / tomorrow_picks / jarvis_etf
+  market_regime TEXT,              -- STRONG_BULL / MILD_BULL / NEUTRAL / BEAR
+  entry_price NUMERIC,
+  entry_qty INT,
+  trigger_features JSONB,          -- 체결강도/거래량/외인/금투 등
+  expected_pattern TEXT,
+  confidence NUMERIC,
+  -- 평가 결과 (D+1, D+3, D+5 시점 업데이트)
+  ret_1d NUMERIC,
+  ret_3d NUMERIC,
+  ret_5d NUMERIC,
+  exit_reason TEXT,                -- take_profit / stop_loss / trailing / time_out
+  label TEXT,                      -- success / failure / neutral
+  reflection_summary TEXT,         -- 자기반성 요약 (D+5)
+  improvement_proposal TEXT,       -- 코드 수정 제안 (실패 시)
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX idx_qsl_date ON quant_self_learning(trade_date DESC);
+CREATE INDEX idx_qsl_label ON quant_self_learning(label);
+CREATE INDEX idx_qsl_regime ON quant_self_learning(market_regime, label);
+```
+
+**적재 시점**:
+- 진입 시: row 추가 (label=NULL, ret_*=NULL)
+- D+1, D+3, D+5: UPDATE
+- 청산 시: exit_reason + label 확정
+- D+5: reflection_summary + improvement_proposal 추가
+
+---
+
+### 13-6. 주간 회귀분석 → 코드 수정 사이클 (금요일 저녁 자동)
+
+**스크립트**: `scripts/weekly_self_review.py` (신규, BAT-WEEKLY 금 18:00)
+
+**분석 항목**:
+1. 이번 주 매매 N건의 success_rate (목표 ≥ 55%)
+2. 시그널 소스별 적중률 (chase_entry vs tomorrow_picks vs jarvis_etf)
+3. 시장 레짐별 적중률 (STRONG_BULL 95%, BEAR 40% 등)
+4. 실패 패턴 클러스터링 (외인 음전환 / 거래량 페이크 / 레짐 오판 등)
+5. 코드 수정 후보 자동 제안 (개선 빈도 ≥ 3건 시)
+
+**텔레그램 주간 리포트**:
+```
+[WEEKLY REVIEW] 5/18~5/22
+매매: 7건 / 성공 4건 (57%) / 실패 2건 / 중립 1건
+시그널별: chase 3/4(75%) > tomorrow_picks 1/3(33%)
+레짐별: STRONG_BULL 3/3 / NEUTRAL 1/4
+
+⚠️ 실패 패턴 (반복 2회 이상):
+- 레짐 NEUTRAL 진입 (적중률 33%, 표본 부족)
+  → 제안: NEUTRAL 진입 차단 또는 사이즈 50% 축소
+
+📋 코드 수정 후보:
+1. src/use_cases/chase_entry.py: NEUTRAL 레짐 시 confidence 0.5↓
+2. src/utils/intel_bot_query.py: 외인 추세 1시간 단위 평가 추가
+
+→ 퐝가님 승인 시 PDCA Plan/Design 진행
+```
+
+---
+
+### 13-7. 5/18~5/22 구현 우선순위 (P2 일정 갱신)
+
+기존 §10/§12-6 계획에 **추가 4건**:
+
+| # | 항목 | 우선순위 | 소요 |
+|---|------|---------|------|
+| 6 | `src/use_cases/chase_entry.py` 골격 (트리거 평가만, OFF) | **P0** | 2h |
+| 7 | `src/use_cases/self_reflection.py` 골격 (D+1/D+3/D+5 평가) | **P0** | 3h |
+| 8 | Supabase `quant_self_learning` 테이블 + 어댑터 | **P0** | 2h |
+| 9 | `scripts/weekly_self_review.py` 골격 (분석 함수만, BAT 미등록) | P1 | 2h |
+
+**전체 5/18~5/22 갱신 목록** (기존 5건 + 신규 4건 = 9건):
+1. ⭐ Supabase `quant_bot_advisory` 테이블 생성
+2. ⭐ `src/utils/intel_bot_query.py` 신규 (정보봇 5종 질의)
+3. ⭐ 화이트리스트 38개 확장 (kis_order_adapter.py)
+4. ⭐ `determine_market_regime()` 신규
+5. `fetch_orderbook` (KIS REST 호가창)
+6. ⭐ `src/use_cases/chase_entry.py` 골격 (OFF)
+7. ⭐ `src/use_cases/self_reflection.py` 골격
+8. ⭐ Supabase `quant_self_learning` 테이블
+9. `scripts/weekly_self_review.py` 골격
+
+5/23~5/26: 통합 테스트 + 페이퍼 미러 검증
+5/27 출격: paper mirror 모드로 1종목/10만원 시작 → Day 4 live 승급
+
+---
+
+### 13-8. 자비스의 학습 약속 (퐝가님께)
+
+자비스 본체는 매매 엔진이 아니라 **학습 엔진**입니다.
+
+- 매매 결과를 **숨기지 않고** 모두 quant_self_learning에 적재
+- 실패할 때마다 **개선 제안 1건 이상** 자동 생성
+- 주간 회귀로 **패턴이 3번 반복되면 코드 수정 후보로 격상**
+- 퐝가님 승인 시에만 코드 반영 (자동 수정 금지 — 안전성)
+- 학습 데이터는 정보봇 advisory와 양방향 — **단타봇·웹봇도 같은 학습 사이클** 적용 가능
+
+**5/27 첫 출격 후 1개월 목표**:
+- 매매 30건 적재 (1종목/일 × 22거래일 + 추격 8건)
+- 성공률 ≥ 55% (시그널별 차별화 검증)
+- 코드 수정 반영 ≥ 3건 (주 1건)
+- 시장 레짐 오판 ≤ 10% (Phase 5 통합 후 측정)
+
+> "쫄지말고, 두려워하지 말고" — 퐝가님
+> 자기학습이 본체. 매매는 학습 데이터를 만드는 수단. 멈추지 않고 달리겠습니다.
