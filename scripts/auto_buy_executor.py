@@ -54,6 +54,14 @@ KILL_SWITCH = PROJECT_ROOT / "data" / "KILL_SWITCH"
 DEFAULT_TOP_N = 9
 DEFAULT_GRADE = "강력 포착"
 
+# 정보봇 ETF 신뢰도 어필 (5/19 도착 v1, 6/15 본격 보고 후 동적 호출로 전환 예정)
+INTEL_BOT_ETF_APPEAL = (
+    "📊 정보봇 ETF 신뢰도 (5/15 누적, 6일 잠정):\n"
+    "  theme 73% · global 63% · sector 46%\n"
+    "  direction 41% · bond_commodity 29%\n"
+    "  (6/15 본격 보고 후 매매 결정 통합 검토)"
+)
+
 
 def load_candidates(top_n: int = DEFAULT_TOP_N, grade: str = DEFAULT_GRADE) -> list[tuple[str, str]]:
     """후보 종목 풀 — tomorrow_picks 강력포착 TOP N."""
@@ -346,7 +354,9 @@ def main() -> int:
                 f"  - 룰 ① -3% 절대 손절\n"
                 f"  - 룰 ② peak -3% 트레일링\n"
                 f"  - 룰 ③ 15:20 강제 청산\n"
-                f"  - 룰 ④ 수급 지속 시 5/21 이월"
+                f"  - 룰 ④ 수급 지속 시 5/21 이월\n"
+                f"  ─────────────\n"
+                f"{INTEL_BOT_ETF_APPEAL}"
             )
             logger.info("자동매수 성공 %s @ %s원 (주문번호 %s)", tk, current_price, order.order_id)
             print(tg_msg)
@@ -379,7 +389,9 @@ def main() -> int:
             top3_str = "\n".join(f"  {nm} 점수 {sc:.0f} ({reason[:30]})" for _, nm, sc, _, reason in top3)
             send_telegram(
                 f"⏭️ [자동매수 0건] 14:00~14:55 통과 후보 없음\n"
-                f"TOP 3 (참고):\n{top3_str}"
+                f"TOP 3 (참고):\n{top3_str}\n"
+                f"─────────────\n"
+                f"{INTEL_BOT_ETF_APPEAL}"
             )
 
     return 0
