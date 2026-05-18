@@ -109,7 +109,7 @@ def fetch_sector_fire(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
 
 
 def fetch_theme_momentum(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
-    """테마 모멘텀 HOT/COLD."""
+    """테마 모멘텀 HOT/COLD — hot_themes(JSONB) 활용."""
     con = _connect()
     if not con or not _table_exists(con, "quant_theme_momentum"):
         if con:
@@ -121,27 +121,22 @@ def fetch_theme_momentum(date: Optional[str] = None, top_n: int = 5) -> list[dic
 
     try:
         cur = con.cursor()
-        # 컬럼 확인
-        cur.execute(
-            "SELECT column_name FROM information_schema.columns "
-            "WHERE table_schema='public' AND table_name='quant_theme_momentum'"
-        )
-        cols = {r[0] for r in cur.fetchall()}
-
-        # 점수 컬럼 추정
-        score_col = "momentum_score" if "momentum_score" in cols else (
-            "score" if "score" in cols else "rank"
-        )
         for d in _fallback_dates(date):
             cur.execute(
-                f"SELECT theme, {score_col} FROM quant_theme_momentum "
-                f"WHERE date=%s ORDER BY {score_col} DESC NULLS LAST LIMIT %s",
-                (d, top_n),
+                "SELECT hot_themes, rotation_signal, total_themes FROM quant_theme_momentum "
+                "WHERE date=%s LIMIT 1",
+                (d,),
             )
-            rows = cur.fetchall()
-            if rows:
+            row = cur.fetchone()
+            if row and row[0]:
+                hot = row[0] if isinstance(row[0], list) else []
                 con.close()
-                return [{"theme": r[0], "score": float(r[1] or 0), "date": d} for r in rows]
+                return [
+                    {"theme": (t.get("name") or t.get("theme") or str(t)) if isinstance(t, dict) else str(t),
+                     "score": float(t.get("score", 0)) if isinstance(t, dict) else 0,
+                     "date": d, "rotation": row[1]}
+                    for t in hot[:top_n]
+                ]
         con.close()
         return []
     except Exception as e:
@@ -157,7 +152,7 @@ def fetch_theme_momentum(date: Optional[str] = None, top_n: int = 5) -> list[dic
 
 
 def fetch_crash_bounce(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
-    """급락반등 후보 TOP N."""
+    """급락반등 후보 TOP N — change_pct(반등 폭) 정렬."""
     con = _connect()
     if not con or not _table_exists(con, "dashboard_crash_bounce"):
         if con:
@@ -169,25 +164,28 @@ def fetch_crash_bounce(date: Optional[str] = None, top_n: int = 5) -> list[dict]
 
     try:
         cur = con.cursor()
-        cur.execute(
-            "SELECT column_name FROM information_schema.columns "
-            "WHERE table_schema='public' AND table_name='dashboard_crash_bounce'"
-        )
-        cols = {r[0] for r in cur.fetchall()}
-
-        # 점수/등급 컬럼 추정
-        order_col = "score" if "score" in cols else ("grade" if "grade" in cols else "ticker")
-
         for d in _fallback_dates(date):
             cur.execute(
-                f"SELECT ticker, name, COALESCE({order_col}, '') as ord FROM dashboard_crash_bounce "
-                f"WHERE date=%s ORDER BY ord DESC LIMIT %s",
+                "SELECT ticker, name, change_pct, gap_20ma, volume_ratio, foreign_net, inst_net "
+                "FROM dashboard_crash_bounce WHERE date=%s "
+                "ORDER BY change_pct DESC NULLS LAST LIMIT %s",
                 (d, top_n),
             )
             rows = cur.fetchall()
             if rows:
                 con.close()
-                return [{"ticker": r[0], "name": r[1], "score_or_grade": str(r[2]), "date": d} for r in rows]
+                return [
+                    {
+                        "ticker": r[0], "name": r[1],
+                        "change_pct": float(r[2] or 0),
+                        "gap_20ma": float(r[3] or 0),
+                        "volume_ratio": float(r[4] or 0),
+                        "foreign_net": float(r[5] or 0),
+                        "inst_net": float(r[6] or 0),
+                        "date": d,
+                    }
+                    for r in rows
+                ]
         con.close()
         return []
     except Exception as e:
@@ -203,7 +201,7 @@ def fetch_crash_bounce(date: Optional[str] = None, top_n: int = 5) -> list[dict]
 
 
 def fetch_fibonacci(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
-    """피보나치 신호 TOP N."""
+    """피보나치 신호 TOP N — data(JSONB) 파싱."""
     con = _connect()
     if not con or not _table_exists(con, "quant_fib_scanner"):
         if con:
@@ -215,24 +213,31 @@ def fetch_fibonacci(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
 
     try:
         cur = con.cursor()
-        cur.execute(
-            "SELECT column_name FROM information_schema.columns "
-            "WHERE table_schema='public' AND table_name='quant_fib_scanner'"
-        )
-        cols = {r[0] for r in cur.fetchall()}
-
-        order_col = "score" if "score" in cols else ("ticker")
-
         for d in _fallback_dates(date):
             cur.execute(
-                f"SELECT ticker, name FROM quant_fib_scanner "
-                f"WHERE date=%s LIMIT %s",
-                (d, top_n),
+                "SELECT data FROM quant_fib_scanner WHERE date=%s LIMIT 1",
+                (d,),
             )
-            rows = cur.fetchall()
-            if rows:
+            row = cur.fetchone()
+            if row and row[0]:
+                # data는 JSONB (list 또는 dict 구조)
+                data = row[0]
+                items = []
+                if isinstance(data, list):
+                    items = data
+                elif isinstance(data, dict):
+                    # 예: {"stocks": [...]} 또는 {"items": [...]}
+                    items = data.get("stocks") or data.get("items") or data.get("results") or []
                 con.close()
-                return [{"ticker": r[0], "name": r[1], "date": d} for r in rows]
+                return [
+                    {
+                        "ticker": (it.get("ticker") or it.get("code", "")),
+                        "name": (it.get("name", "")),
+                        "data": it,
+                        "date": d,
+                    }
+                    for it in items[:top_n] if isinstance(it, dict)
+                ]
         con.close()
         return []
     except Exception as e:
