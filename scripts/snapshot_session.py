@@ -218,6 +218,21 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
     except Exception as e:
         logger.warning("supply_surge SELECT 실패: %s", e)
 
+    # vwap_monitor + intraday_eye (5/18 4번 작업)
+    vwap_state = {"dips": [], "overheats": []}
+    eye_events = []
+    eye_counts = {}
+    try:
+        from src.use_cases.vwap_eye_advisor import (
+            get_vwap_state, get_recent_eye_events, count_eye_per_ticker,
+        )
+
+        vwap_state = get_vwap_state()
+        eye_events = get_recent_eye_events(minutes=120)
+        eye_counts = count_eye_per_ticker(eye_events)
+    except Exception as e:
+        logger.warning("vwap+eye SELECT 실패: %s", e)
+
     # ETF 추천 (5/18 1번 작업 — 사장님 순차 진행)
     etf_rec = None
     try:
@@ -253,6 +268,11 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
             "size_won": etf_rec.suggested_size_won if etf_rec else 0,
         } if etf_rec else None,
         "supply_surge_top5": supply_surges,  # 3번 작업: 외인+기관 동반 매수
+        "vwap_dips_top3": vwap_state["dips"][:3],  # 4번 작업: VWAP 눌림
+        "vwap_overheats_top3": vwap_state["overheats"][:3],
+        "eye_event_counts": eye_counts,  # 종목별 EYE 알림 횟수 (HPSP 4번 = 황금 표준)
+        "eye_top_ticker": max(eye_counts, key=eye_counts.get) if eye_counts else None,
+        "eye_top_count": max(eye_counts.values()) if eye_counts else 0,
     }
     return snapshot
 
@@ -352,6 +372,10 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "inverse_etf_buy_ratio": inverse_buy_ratio,
         "etf_recommendation": snap.get("etf_recommendation"),  # 1번 작업: ETF 추천 통합
         "supply_surge_top5": snap.get("supply_surge_top5", []),  # 3번 작업: 외인+기관 동반 매수
+        "vwap_dips_top3": snap.get("vwap_dips_top3", []),  # 4번 작업: VWAP 눌림
+        "vwap_overheats_top3": snap.get("vwap_overheats_top3", []),  # 4번 작업: VWAP 과열
+        "eye_event_counts": snap.get("eye_event_counts", {}),  # 4번 작업: EYE 알림 횟수
+        "eye_top_ticker": snap.get("eye_top_ticker"),  # 4번 작업: EYE 황금 표준
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -448,6 +472,22 @@ def format_telegram(snap: dict) -> str:
             f"💎 수급폭발 TOP: {top['name']}({top['ticker']}) "
             f"[{top['supply_type']} {top['final_score']:.0f}점]"
         )
+
+    # VWAP 눌림 / 과열 (4번 작업, 5/18 신규)
+    dips = snap.get("vwap_dips_top3", [])
+    overheats = snap.get("vwap_overheats_top3", [])
+    if dips:
+        top_dip = dips[0]
+        lines.append(f"⬇️ VWAP 눌림 TOP: {top_dip['name']}({top_dip['ticker']}) {top_dip['vwap_dev_pct']:+.1f}%")
+    if overheats:
+        top_oh = overheats[0]
+        lines.append(f"⬆️ VWAP 과열 TOP: {top_oh['name']}({top_oh['ticker']}) {top_oh['vwap_dev_pct']:+.1f}%")
+
+    # EYE 황금 표준 (4번 작업, 5/18 신규)
+    eye_top = snap.get("eye_top_ticker")
+    eye_n = snap.get("eye_top_count", 0)
+    if eye_top and eye_n >= 2:
+        lines.append(f"✨ EYE 황금 표준: {eye_top} {eye_n}번 알림 (최근 2h)")
 
     return "\n".join(lines)
 
