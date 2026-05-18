@@ -73,18 +73,27 @@ def load_candidates(top_n: int = DEFAULT_TOP_N, grade: str = DEFAULT_GRADE) -> l
 
 
 def load_market_regime() -> str:
-    """advisory regime 로드 (기본 NEUTRAL).
+    """advisory regime 로드 — 안전선 ⑥ 정확화 (5/18 자아성찰 #5 해소).
 
-    5/18 잠정: snapshot_session.py 결과 파일 확인.
-    5/19+ 정밀화 예정.
+    경로: data/snapshots/{YYYYMMDD}/{HHMM}_session.json 중 최신 파일
+    snapshot_session.py가 매 10분 + 09:30/11:00/13:30/15:00 가동 → regime 필드 포함
     """
-    snap_path = PROJECT_ROOT / "data" / "snapshot_latest.json"
-    if not snap_path.exists():
+    today = datetime.now().strftime("%Y%m%d")
+    snap_dir = PROJECT_ROOT / "data" / "snapshots" / today
+    if not snap_dir.exists():
+        logger.warning("[regime] %s 디렉터리 없음 → NEUTRAL", snap_dir)
+        return "NEUTRAL"
+    files = sorted(snap_dir.glob("*_session.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not files:
+        logger.warning("[regime] %s 빈 디렉터리 → NEUTRAL", snap_dir)
         return "NEUTRAL"
     try:
-        data = json.loads(snap_path.read_text(encoding="utf-8"))
-        return data.get("regime", "NEUTRAL")
-    except Exception:
+        data = json.loads(files[0].read_text(encoding="utf-8"))
+        regime = data.get("regime", "NEUTRAL")
+        logger.info("[regime] %s → %s", files[0].name, regime)
+        return regime
+    except Exception as e:
+        logger.warning("[regime] %s 읽기 실패: %s → NEUTRAL", files[0].name, e)
         return "NEUTRAL"
 
 
@@ -110,6 +119,31 @@ def send_telegram(msg: str) -> None:
         send_message(msg)
     except Exception as e:
         logger.warning("텔레그램 발송 실패: %s", e)
+
+
+def check_vwap_gate(ticker: str, current_price: int) -> tuple[bool, str]:
+    """VWAP 과열 게이트 — 사장님 5/18 지시 "VWAP 보면서 매매" 적용.
+
+    배경: 자아성찰 #4 해소 — 자비스 자동매수가 VWAP 과열 종목 추격 차단
+
+    Returns:
+        (게이트 통과 여부, 메시지)
+    """
+    try:
+        from src.use_cases.vwap_eye_advisor import get_vwap_state
+        state = get_vwap_state(min_dip_dev=-1.5, min_overheat_dev=2.5)
+        # 과열 종목 차단
+        for stock in state.get("overheats", []):
+            if stock["ticker"] == ticker:
+                return False, f"VWAP 과열 ({stock['vwap_dev_pct']:+.2f}% > +2.5%)"
+        # 눌림 종목은 보너스 (메시지에 표시, 차단 X)
+        for stock in state.get("dips", []):
+            if stock["ticker"] == ticker:
+                return True, f"VWAP 눌림 보너스 ({stock['vwap_dev_pct']:+.2f}% ≤ -1.5%)"
+        return True, "VWAP 정상"
+    except Exception as e:
+        logger.warning("[VWAP 게이트] 실패 (PASS): %s", e)
+        return True, "VWAP 게이트 SKIP (오류)"
 
 
 class CachedBroker:
@@ -252,8 +286,14 @@ def main() -> int:
             today=today,
         )
 
+        # VWAP 게이트 (5/18 자아성찰 #4 — 사장님 지시 "VWAP 보면서 매매")
+        vwap_ok, vwap_msg = check_vwap_gate(tk, current_price)
+        if decision.action == "BUY" and not vwap_ok:
+            decision.action = "SKIP"
+            decision.reason = f"{vwap_msg}"
+
         decisions_log.append((tk, nm, sc.score, decision.action, decision.reason))
-        print(f"  [{decision.action}] {nm}({tk}) 점수 {sc.score} → {decision.reason}")
+        print(f"  [{decision.action}] {nm}({tk}) 점수 {sc.score} → {decision.reason} | {vwap_msg}")
 
         if decision.action != "BUY":
             continue

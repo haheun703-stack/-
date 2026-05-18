@@ -590,8 +590,15 @@ def main() -> int:
     )
 
     snap = take_snapshot(top_n=args.top)
+
+    # 5/18 자아성찰 #5 해소 — snap에 regime/risk_level 필드 명시 저장
+    # auto_buy_executor.load_market_regime이 이 필드 읽음 (안전선 ⑥)
+    regime, risk_level = determine_regime(snap)
+    snap["regime"] = regime
+    snap["risk_level"] = risk_level
+
     out_path = save_snapshot(snap)
-    print(f"[SAVED] {out_path.name} ({out_path.stat().st_size:,} bytes)")
+    print(f"[SAVED] {out_path.name} ({out_path.stat().st_size:,} bytes) regime={regime}")
     print(format_telegram(snap))
 
     # Supabase advisory INSERT (5/18 추가, 동생 단타봇이 SELECT)
