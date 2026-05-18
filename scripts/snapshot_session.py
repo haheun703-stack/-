@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sqlite3
 import statistics
 import sys
@@ -230,6 +231,145 @@ def save_snapshot(snap: dict) -> Path:
     return out_path
 
 
+def determine_regime(snap: dict) -> tuple[str, str]:
+    """시장 강도 + 인버스 강도 + KOSPI 변동으로 regime + risk 판정."""
+    intra = snap.get("intraday_strength_summary", {})
+    if not intra.get("db_exists"):
+        return "UNKNOWN", "MED"
+
+    market_str = intra.get("strength_mean") or 100
+    # KODEX 200선물인버스2X(252670) 강도 찾기 (top5에서)
+    inverse_str = 0
+    for r in intra.get("top5", []):
+        if r.get("code") == "252670":
+            inverse_str = r.get("avg_strength", 0)
+            break
+
+    # 간이 규칙 (5/18 학습 결과 반영, 5/22 캘리브레이션 후 보강 예정)
+    if inverse_str >= 150 and market_str < 90:
+        return "BEAR", "HIGH"
+    if inverse_str >= 120 and market_str < 95:
+        return "CAUTION", "MED"
+    if market_str >= 110:
+        return "MILD_BULL", "LOW"
+    if market_str >= 120:
+        return "STRONG_BULL", "LOW"
+    return "NEUTRAL", "MED"
+
+
+def insert_advisory_to_supabase(snap: dict) -> int | None:
+    """quant_bot_advisory INSERT — 동생 단타봇이 SELECT하는 형의 시장 진단."""
+    try:
+        import psycopg2
+        from psycopg2.extras import Json
+    except ImportError:
+        logger.warning("psycopg2 미설치 — advisory INSERT 스킵")
+        return None
+
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        logger.warning("DATABASE_URL 미설정 — advisory INSERT 스킵")
+        return None
+
+    intra = snap.get("intraday_strength_summary", {})
+    picks = snap.get("tomorrow_picks_top9", [])
+    regime, risk_level = determine_regime(snap)
+
+    market_str = intra.get("strength_mean")
+    inverse_str = None
+    inverse_buy_ratio = None
+    for r in intra.get("top5", []):
+        if r.get("code") == "252670":
+            inverse_str = r.get("avg_strength")
+            inverse_buy_ratio = r.get("buy_ratio_pct")
+            break
+
+    # KOSPI200(069500) 변동률 = picks에 없으므로 별도 측정 필요. 일단 None
+    kospi_chg = None
+
+    # 양봉 / 음봉 종목 카운트
+    n_pos = sum(1 for p in picks if p["current"] > p["open"])
+    n_total = len(picks)
+    avg_chg = (
+        sum(((p["current"] - p["open"]) / p["open"] * 100) for p in picks if p["open"] > 0) / n_total
+        if n_total > 0
+        else 0
+    )
+
+    top_pos_tickers = [
+        p["ticker"] for p in sorted(picks, key=lambda x: x["current"] - x["open"], reverse=True)[:5]
+    ]
+
+    title = f"[자동 advisory] {snap['time']} 시장 강도 {market_str} / 인버스 {inverse_str} ({regime})"
+    body = (
+        f"5/18 자동 스냅샷 #{snap['time']}. "
+        f"강력포착 TOP {n_total}: 평균 {avg_chg:+.2f}% (양봉 {n_pos}/{n_total}). "
+        f"시장 매크로: 강도 평균 {market_str}, 중앙 {intra.get('strength_median')}, "
+        f"인버스ETF 252670 강도 {inverse_str} (매수비율 {inverse_buy_ratio}%). "
+        f"동생 단타봇: regime={regime} risk={risk_level} 참고하여 진입 결정."
+    )
+
+    reasoning = {
+        "market_strength_mean": market_str,
+        "market_strength_median": intra.get("strength_median"),
+        "inverse_etf_strength": inverse_str,
+        "inverse_etf_buy_ratio": inverse_buy_ratio,
+        "top9_avg_chg_pct": round(avg_chg, 2),
+        "top9_positive_count": n_pos,
+        "top9_total": n_total,
+        "top9_records": [
+            {
+                "ticker": p["ticker"],
+                "name": p["name"],
+                "chg_pct": round((p["current"] - p["open"]) / p["open"] * 100, 2) if p["open"] > 0 else 0,
+                "program_ntby": p["program_ntby"],
+                "vol_ratio_pct": p["vol_ratio_pct"],
+            }
+            for p in picks
+        ],
+    }
+
+    try:
+        con = psycopg2.connect(url, connect_timeout=10)
+        cur = con.cursor()
+        cur.execute(
+            """
+            INSERT INTO quant_bot_advisory
+              (advisory_date, advisory_time, msg_type, severity, target_bot,
+               market_regime, market_strength_avg, inverse_etf_strength,
+               inverse_etf_buy_ratio, kospi_chg_pct, risk_level,
+               title, body, related_tickers, alert_codes, reasoning)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (
+                snap["date"],
+                snap["time"],
+                "SNAPSHOT" if "11:00" not in snap["time"] and "13:30" not in snap["time"] else "ADVICE",
+                "INFO" if regime in ("MILD_BULL", "NEUTRAL", "STRONG_BULL") else "WARN",
+                "scalper",
+                regime,
+                market_str,
+                inverse_str,
+                inverse_buy_ratio,
+                kospi_chg,
+                risk_level,
+                title,
+                body,
+                top_pos_tickers,
+                ["SNAPSHOT-AUTO"],
+                Json(reasoning),
+            ),
+        )
+        new_id = cur.fetchone()[0]
+        con.commit()
+        con.close()
+        return new_id
+    except Exception as e:
+        logger.error("advisory INSERT 실패: %s", e)
+        return None
+
+
 def format_telegram(snap: dict) -> str:
     picks = snap.get("tomorrow_picks_top9", [])
     intra = snap.get("intraday_strength_summary", {})
@@ -257,6 +397,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--top", type=int, default=DEFAULT_TOP_N)
     parser.add_argument("--no-tg", action="store_true", help="텔레그램 미발송")
+    parser.add_argument("--no-advisory", action="store_true", help="Supabase advisory INSERT 안 함")
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 
@@ -269,6 +410,14 @@ def main() -> int:
     out_path = save_snapshot(snap)
     print(f"[SAVED] {out_path.name} ({out_path.stat().st_size:,} bytes)")
     print(format_telegram(snap))
+
+    # Supabase advisory INSERT (5/18 추가, 동생 단타봇이 SELECT)
+    if not args.no_advisory:
+        advisory_id = insert_advisory_to_supabase(snap)
+        if advisory_id:
+            print(f"[ADVISORY] id={advisory_id} INSERT 성공 — 동생 SELECT 가능")
+        else:
+            print("[ADVISORY] INSERT 스킵 또는 실패")
 
     if not args.no_tg:
         try:
