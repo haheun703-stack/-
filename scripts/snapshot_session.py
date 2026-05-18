@@ -246,6 +246,15 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
     except Exception as e:
         logger.warning("intraday_signals SELECT 실패: %s", e)
 
+    # 다중 시그널 (6+7+9+10번 작업, 5/18)
+    multi_signals = {}
+    try:
+        from src.use_cases.multi_signal_advisor import fetch_all_advisory_signals
+
+        multi_signals = fetch_all_advisory_signals(date=today)
+    except Exception as e:
+        logger.warning("multi_signal SELECT 실패: %s", e)
+
     # ETF 추천 (5/18 1번 작업 — 사장님 순차 진행)
     etf_rec = None
     try:
@@ -288,6 +297,10 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
         "eye_top_count": max(eye_counts.values()) if eye_counts else 0,
         "intraday_signals": intraday_signals,  # 5번 작업: 막내 시그널
         "blocked_tickers": list(blocked_tickers),  # 5번 작업: NEGA 차단 종목
+        "sector_fire_top5": multi_signals.get("sector_fire_top5", []),  # 6번
+        "theme_momentum_top5": multi_signals.get("theme_momentum_top5", []),  # 7번
+        "crash_bounce_top5": multi_signals.get("crash_bounce_top5", []),  # 9번
+        "fibonacci_top5": multi_signals.get("fibonacci_top5", []),  # 10번
     }
     return snapshot
 
@@ -391,8 +404,12 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "vwap_overheats_top3": snap.get("vwap_overheats_top3", []),  # 4번 작업: VWAP 과열
         "eye_event_counts": snap.get("eye_event_counts", {}),  # 4번 작업: EYE 알림 횟수
         "eye_top_ticker": snap.get("eye_top_ticker"),  # 4번 작업: EYE 황금 표준
-        "intraday_signals_count": len(snap.get("intraday_signals", [])),  # 5번: 막내 시그널 수
-        "blocked_tickers": snap.get("blocked_tickers", []),  # 5번: NEGA 차단 종목
+        "intraday_signals_count": len(snap.get("intraday_signals", [])),  # 5번
+        "blocked_tickers": snap.get("blocked_tickers", []),  # 5번
+        "sector_fire_top5": snap.get("sector_fire_top5", []),  # 6번
+        "theme_momentum_top5": snap.get("theme_momentum_top5", []),  # 7번
+        "crash_bounce_top5": snap.get("crash_bounce_top5", []),  # 9번
+        "fibonacci_top5": snap.get("fibonacci_top5", []),  # 10번
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -515,6 +532,30 @@ def format_telegram(snap: dict) -> str:
         lines.append(f"🤖 막내 {emoji} {top['sentiment']} {top['impact_score']}: {top['title'][:40]}")
     if blocked:
         lines.append(f"🚫 NEGA 차단: {len(blocked)}건 ({', '.join(blocked[:3])})")
+
+    # 6번: 섹터발화
+    sf = snap.get("sector_fire_top5", [])
+    if sf:
+        top = sf[0]
+        lines.append(f"🔥 섹터발화 TOP: {top['sector']} {top['fire_grade']}({top['fire_score']:.0f}점)")
+
+    # 7번: 테마 모멘텀
+    tm = snap.get("theme_momentum_top5", [])
+    if tm:
+        top = tm[0]
+        lines.append(f"📈 테마 HOT: {top['theme']} ({top['score']:.0f})")
+
+    # 9번: 급락반등
+    cb = snap.get("crash_bounce_top5", [])
+    if cb:
+        names = [s["name"] for s in cb[:3]]
+        lines.append(f"🔄 급락반등: {', '.join(names)}")
+
+    # 10번: 피보나치
+    fb = snap.get("fibonacci_top5", [])
+    if fb:
+        names = [s["name"] for s in fb[:3]]
+        lines.append(f"📐 피보나치: {', '.join(names)}")
 
     return "\n".join(lines)
 
