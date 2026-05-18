@@ -197,8 +197,12 @@ def is_low_buy_ratio(
 # ────────────────────────────────────────────────────────────
 
 
-def evaluate_filters(broker, ticker: str, date: str) -> dict:
-    """4종 필터 모두 평가 → 종합 결과 dict 반환.
+def evaluate_filters(broker, ticker: str, date: str, include_dart: bool = True) -> dict:
+    """4종 (또는 5종) 필터 모두 평가 → 종합 결과 dict 반환.
+
+    Args:
+        broker, ticker, date
+        include_dart: True면 DART EYE ⑤ 포함 (5/18 막내 단축 후 가동)
 
     Returns:
         {
@@ -210,6 +214,7 @@ def evaluate_filters(broker, ticker: str, date: str) -> dict:
                 "program_selling": {...},
                 "low_volume": {...},
                 "low_buy_ratio": {...},
+                "dart_negative": {...}  # 5/18 추가
             }
         }
     """
@@ -217,6 +222,15 @@ def evaluate_filters(broker, ticker: str, date: str) -> dict:
     f2 = is_program_selling(broker, ticker)
     f3 = is_low_volume(broker, ticker)
     f4 = is_low_buy_ratio(ticker, date)
+
+    # 필터 ⑤ DART (5/18 추가, 막내 단축 결과)
+    f5 = (False, {"filter": "dart_negative", "verdict": "SKIPPED"})
+    if include_dart:
+        try:
+            from src.use_cases.dart_eye_filter import has_dart_negative
+            f5 = has_dart_negative(ticker)
+        except Exception as e:
+            logger.debug("DART 필터 실패: %s", e)
 
     skip_reasons = []
     if f1[0]:
@@ -227,6 +241,8 @@ def evaluate_filters(broker, ticker: str, date: str) -> dict:
         skip_reasons.append(f"거래부진({f3[1]['vol_ratio_pct']:.1f}%)")
     if f4[0]:
         skip_reasons.append(f"매도우세({f4[1].get('buy_ratio_pct', 'N/A')}%)")
+    if f5[0]:
+        skip_reasons.append(f"DART악재({f5[1].get('worst_score', 'N/A')}점)")
 
     should_skip = bool(skip_reasons)
 
@@ -239,6 +255,7 @@ def evaluate_filters(broker, ticker: str, date: str) -> dict:
             "program_selling": f2[1],
             "low_volume": f3[1],
             "low_buy_ratio": f4[1],
+            "dart_negative": f5[1],  # 5/18 추가
         },
     }
 
