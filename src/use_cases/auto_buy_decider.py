@@ -4,16 +4,16 @@
 - 사장님 손 0번, 매수 즉시 카톡 알림
 - 안전선 9건 ALL 통과 시만 매수
 
-안전선 9건:
-  ① 종합 점수 STRONG 90+ (80→90 격상)
-  ② EYE 필터 4종 모두 통과 (장기약세/프로그램매도+음봉/거래부진/매수비율)
-  ③ 14:00 이후 진입 (오전 변동성 회피)
-  ④ 일일 매수 0건 (1건 한도)
-  ⑤ 1주 10만원 한도 (kis_order_adapter)
-  ⑥ 시장 regime ∈ {MILD_BULL, NEUTRAL} (CAUTION/BEAR 차단)
-  ⑦ AUTO_TRADE_5_20=true 환경변수 (5/20만 적용)
-  ⑧ 막내 NEGA 0건 (5/21+, 5/19~5/20은 막내 1일치만이라 SKIP)
-  ⑨ 가격 변동 ±5% 이내 (kis_order_adapter)
+안전선 9건 (이 함수 8건 평가 + kis_order_adapter ⑨ 별도):
+  ① 종합 점수 STRONG 90+ (80→90 격상)            [should_auto_buy 평가]
+  ② EYE 필터 4종 모두 통과                         [should_auto_buy 평가]
+  ③ 14:00 이후 진입 (오전 변동성 회피)            [should_auto_buy 평가]
+  ④ 일일 매수 0건 (1건 한도)                      [should_auto_buy 평가]
+  ⑤ 1주 10만원 한도                                [should_auto_buy 평가]
+  ⑥ 시장 regime ∈ {MILD_BULL, NEUTRAL}            [should_auto_buy 평가]
+  ⑦ AUTO_TRADE_5_20=true 환경변수                 [should_auto_buy 평가]
+  ⑧ 막내 NEGA 0건 (5/21+, 5/19~5/20 SKIP)         [should_auto_buy 평가]
+  ⑨ 지정가 현재가 ±5% 이내                       [kis_order_adapter._guard 평가]
 
 사용:
   from src.use_cases.auto_buy_decider import should_auto_buy
@@ -174,6 +174,7 @@ def should_auto_buy(
 
     # 모든 체크 통과?
     all_passed = len(checks_failed) == 0
+    total_evaluated = len(checks_passed) + len(checks_failed)
 
     return BuyDecision(
         action="BUY" if all_passed else "SKIP",
@@ -182,7 +183,11 @@ def should_auto_buy(
         qty=MAX_QTY,
         estimated_price=current_price,
         estimated_amount=estimated_amount,
-        reason=f"안전선 {len(checks_passed)}/9 통과" if all_passed else f"안전선 {len(checks_failed)}건 미달",
+        reason=(
+            f"안전선 {len(checks_passed)}/{total_evaluated} 통과 (+ kis ⑨ 별도)"
+            if all_passed
+            else f"안전선 {len(checks_failed)}건 미달"
+        ),
         checks_passed=checks_passed,
         checks_failed=checks_failed,
     )
@@ -191,11 +196,12 @@ def should_auto_buy(
 def format_decision_for_telegram(d: BuyDecision) -> str:
     """텔레그램 알림 포맷."""
     if d.action == "BUY":
+        n = len(d.checks_passed)
         return (
             f"✅ [자동 매수 결정] {d.name}({d.ticker})\n"
             f"  수량: {d.qty}주 × {d.estimated_price:,}원 = {d.estimated_amount:,}원\n"
             f"  사유: {d.reason}\n"
-            f"  통과 9건: 모두 OK"
+            f"  통과 {n}건: 모두 OK (+ kis ⑨ 가격±5% 별도 검증)"
         )
     return (
         f"⛔ [자동 매수 SKIP] {d.name}({d.ticker})\n"
