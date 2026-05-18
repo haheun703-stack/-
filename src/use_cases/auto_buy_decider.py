@@ -74,8 +74,14 @@ def _check_5_20_env() -> tuple[bool, str]:
     return True, f"{ENV_FLAG_5_20}=true"
 
 
-def _check_daily_count(today: str, db_path: str = "data/paper_portfolio.json") -> tuple[bool, str]:
-    """안전선 ④ 일일 1건 초과 방지."""
+def _check_daily_count(today: str, db_path: str = "data/owner_rule_positions.json") -> tuple[bool, str]:
+    """안전선 ④ 일일 1건 초과 방지.
+
+    5/18 수정: paper_portfolio.json → owner_rule_positions.json (자아성찰 #1 해소)
+    - auto_buy_executor가 매수 성공 시 owner_rule_positions.json INSERT
+    - paper_portfolio는 paper_warmup_daily 모의 학습용 (자동매매와 분리)
+    - 같은 경로 사용 필수 (그렇지 않으면 5분 cron마다 안전선 ④ 무력화)
+    """
     import json
     from pathlib import Path
     p = Path(db_path)

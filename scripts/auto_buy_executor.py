@@ -35,6 +35,7 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -111,6 +112,39 @@ def send_telegram(msg: str) -> None:
         logger.warning("텔레그램 발송 실패: %s", e)
 
 
+class CachedBroker:
+    """KIS broker fetch_price TTL 캐시 wrapper (5/18 자아성찰 #2 해소).
+
+    배경: auto_buy_executor 가동 시 종목당 fetch_price 5회 호출:
+      - evaluate_filters 내부: 3회 (long_term_weak/program_selling/low_volume)
+      - calculate_integrated_score: 1회
+      - auto_buy_executor 본인: 1회
+
+    9종목 × 5 = 45회. TTL 캐시로 종목당 1회로 단축 + 평가-주문 사이 가격 일관성.
+
+    fetch_price 외 호출은 원본 broker로 위임 (create_limit_buy_order 등).
+    """
+
+    def __init__(self, broker, ttl_seconds: int = 60):
+        self._broker = broker
+        self._cache: dict = {}
+        self._ttl = ttl_seconds
+
+    def fetch_price(self, ticker: str):
+        now = time.time()
+        if ticker in self._cache:
+            ts, res = self._cache[ticker]
+            if now - ts < self._ttl:
+                return res
+        res = self._broker.fetch_price(ticker)
+        self._cache[ticker] = (now, res)
+        return res
+
+    def __getattr__(self, name):
+        # fetch_price 외 모든 메서드는 원본 broker로 위임
+        return getattr(self._broker, name)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="매수 결정만, 실제 주문 X")
@@ -155,7 +189,7 @@ def main() -> int:
     from src.use_cases.auto_buy_decider import should_auto_buy, format_decision_for_telegram
 
     data_adp = KisStockDataAdapter()
-    broker = data_adp.broker
+    broker = CachedBroker(data_adp.broker, ttl_seconds=60)  # 5/18 자아성찰 #2 — fetch_price 캐시
 
     # 시장 regime
     regime = load_market_regime()

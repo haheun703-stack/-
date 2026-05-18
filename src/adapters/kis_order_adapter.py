@@ -164,6 +164,40 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         except Exception:
             return 0
 
+    @staticmethod
+    def _adjust_to_tick(price: int) -> int:
+        """KOSPI/KOSDAQ 호가 단위로 가격 내림 보정 (5/18 자아성찰 #3 해소).
+
+        호가 단위 표 (2023+):
+          < 1,000원      : 1원
+          1,000~4,999    : 5원
+          5,000~19,999   : 10원
+          20,000~49,999  : 50원
+          50,000~199,999 : 100원
+          200,000~499,999: 500원
+          >= 500,000     : 1,000원
+
+        예: 52,150원 → 52,100원 (100원 단위)
+            644,000원 → 644,000원 (1,000원 단위, 이미 정렬됨)
+        """
+        if price <= 0:
+            return price
+        if price < 1_000:
+            tick = 1
+        elif price < 5_000:
+            tick = 5
+        elif price < 20_000:
+            tick = 10
+        elif price < 50_000:
+            tick = 50
+        elif price < 200_000:
+            tick = 100
+        elif price < 500_000:
+            tick = 500
+        else:
+            tick = 1_000
+        return (price // tick) * tick
+
     def _send_telegram_alert(self, action: str, ticker: str, quantity: int,
                               price: int, order_type: str = "지정가") -> None:
         """매수/매도 시 텔레그램 알림. TELEGRAM_ALERT=0이면 스킵."""
@@ -197,6 +231,11 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def buy_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매수"""
+        # 호가 단위 자동 보정 (5/18 자아성찰 #3 — KIS 거부 방지)
+        adjusted_price = self._adjust_to_tick(price)
+        if adjusted_price != price:
+            logger.info("[호가보정] %s: %d원 → %d원", ticker, price, adjusted_price)
+        price = adjusted_price
         self._guard(ticker, quantity, price=price, side="BUY")
         logger.info("[주문] 지정가 매수: %s %d주 @ %d원", ticker, quantity, price)
         try:
@@ -218,6 +257,11 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def sell_limit(self, ticker: str, price: int, quantity: int) -> Order:
         """지정가 매도"""
+        # 호가 단위 자동 보정 (5/18 자아성찰 #3)
+        adjusted_price = self._adjust_to_tick(price)
+        if adjusted_price != price:
+            logger.info("[호가보정] %s: %d원 → %d원", ticker, price, adjusted_price)
+        price = adjusted_price
         self._guard(ticker, quantity, price=price, side="SELL")
         logger.info("[주문] 지정가 매도: %s %d주 @ %d원", ticker, quantity, price)
         try:
