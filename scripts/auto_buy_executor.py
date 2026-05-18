@@ -362,6 +362,20 @@ def main() -> int:
             print(tg_msg)
             if not args.no_tg:
                 send_telegram(tg_msg)
+
+            # paper mirror 병행 시뮬 (5/18 사장님 결단 옵션 B, §13-2-1)
+            # 실주문 결정에 영향 0 — 예외 발생 시 무시
+            try:
+                from src.use_cases.paper_mirror import paper_record_entry
+                paper_result = paper_record_entry(tk, nm, current_price, sc.score, today)
+                if paper_result:
+                    logger.info(
+                        "[PAPER ✅] 시뮬 매수 동기화: %s @ %d원 (슬리피지 +%d원)",
+                        tk, paper_result["filled_price"], paper_result["slippage_abs"],
+                    )
+            except Exception as e:
+                logger.warning("[PAPER] 시뮬 실패 (무시, 실주문에 영향 0): %s", e)
+
             buy_executed = True
             break  # 일일 1건 한도
 

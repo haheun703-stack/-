@@ -225,6 +225,23 @@ def main() -> int:
             ok, msg = execute_sell(broker, tk, h["qty"], h["current_price"])
             emoji = "✅" if ok else "❌"
 
+            # paper mirror 청산 시뮬 (5/18 사장님 결단 옵션 B, §13-2-1)
+            # 실주문 결과와 무관하게 paper는 같은 결정으로 시뮬 (관찰자 역할)
+            try:
+                from src.use_cases.paper_mirror import paper_record_exit
+                paper_result = paper_record_exit(
+                    tk, h["current_price"],
+                    datetime.now().strftime("%Y-%m-%d"),
+                    verdict.action,
+                )
+                if paper_result:
+                    logger.info(
+                        "[PAPER ✅] 청산 시뮬 동기화: %s @ %d원 PnL %+.3f%%",
+                        tk, paper_result["filled_price"], paper_result["pnl_pct"],
+                    )
+            except Exception as e:
+                logger.warning("[PAPER] 시뮬 청산 실패 (무시, 실주문에 영향 0): %s", e)
+
             tg_msg = (
                 f"{emoji} [사장님 룰 자동 청산] {h['name']}({tk})\n"
                 f"  {verdict.action}\n"
