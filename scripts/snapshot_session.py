@@ -299,8 +299,10 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
         "blocked_tickers": list(blocked_tickers),  # 5번 작업: NEGA 차단 종목
         "sector_fire_top5": multi_signals.get("sector_fire_top5", []),  # 6번
         "theme_momentum_top5": multi_signals.get("theme_momentum_top5", []),  # 7번
+        "surge_pullback_top5": multi_signals.get("surge_pullback_top5", []),  # 8번
         "crash_bounce_top5": multi_signals.get("crash_bounce_top5", []),  # 9번
         "fibonacci_top5": multi_signals.get("fibonacci_top5", []),  # 10번
+        "valuation_gap_top5": multi_signals.get("valuation_gap_top5", []),  # 11번
     }
     return snapshot
 
@@ -408,8 +410,10 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "blocked_tickers": snap.get("blocked_tickers", []),  # 5번
         "sector_fire_top5": snap.get("sector_fire_top5", []),  # 6번
         "theme_momentum_top5": snap.get("theme_momentum_top5", []),  # 7번
+        "surge_pullback_top5": snap.get("surge_pullback_top5", []),  # 8번
         "crash_bounce_top5": snap.get("crash_bounce_top5", []),  # 9번
         "fibonacci_top5": snap.get("fibonacci_top5", []),  # 10번
+        "valuation_gap_top5": snap.get("valuation_gap_top5", []),  # 11번
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -545,6 +549,12 @@ def format_telegram(snap: dict) -> str:
         top = tm[0]
         lines.append(f"📈 테마 HOT: {top['theme']} ({top['score']:.0f})")
 
+    # 8번: 상한가 눌림목
+    sp = snap.get("surge_pullback_top5", [])
+    if sp:
+        top = sp[0]
+        lines.append(f"💎 상한가눌림 TOP: {top['name']}({top['ticker']}) 상한 {top['surge_pct']:.0f}% / 눌림 {top['pullback_pct']:+.1f}%")
+
     # 9번: 급락반등
     cb = snap.get("crash_bounce_top5", [])
     if cb:
@@ -556,6 +566,12 @@ def format_telegram(snap: dict) -> str:
     if fb:
         names = [s["name"] for s in fb[:3]]
         lines.append(f"📐 피보나치: {', '.join(names)}")
+
+    # 11번: 실적괴리
+    vg = snap.get("valuation_gap_top5", [])
+    if vg:
+        top = vg[0]
+        lines.append(f"💰 실적괴리 TOP: {top['name']}({top['ticker']}) {top['grade']}({top['score']:.0f}) OI {top['oi_yoy']:+.0f}%")
 
     return "\n".join(lines)
 

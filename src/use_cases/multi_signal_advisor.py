@@ -252,13 +252,116 @@ def fetch_fibonacci(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
 # ────────────────────────────────────────────────────────────
 
 
+# ────────────────────────────────────────────────────────────
+# 8번: 상한가 눌림목 (quant_surge_pullback)
+# ────────────────────────────────────────────────────────────
+
+
+def fetch_surge_pullback(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
+    """상한가 눌림목 종목 — pullback_pct 절대값 작은 순 (얕은 눌림)."""
+    con = _connect()
+    if not con or not _table_exists(con, "quant_surge_pullback"):
+        if con:
+            con.close()
+        return []
+
+    if not date:
+        date = datetime.now().strftime("%Y-%m-%d")
+
+    try:
+        cur = con.cursor()
+        for d in _fallback_dates(date):
+            cur.execute(
+                "SELECT ticker, name, sector, surge_date, surge_pct, "
+                "       surge_close, peak_price, latest_close, pullback_pct "
+                "FROM quant_surge_pullback WHERE date=%s "
+                "ORDER BY ABS(pullback_pct) ASC NULLS LAST LIMIT %s",
+                (d, top_n),
+            )
+            rows = cur.fetchall()
+            if rows:
+                con.close()
+                return [
+                    {
+                        "ticker": r[0], "name": r[1], "sector": r[2],
+                        "surge_date": str(r[3]) if r[3] else None,
+                        "surge_pct": float(r[4] or 0),
+                        "peak_price": int(r[6] or 0),
+                        "latest_close": int(r[7] or 0),
+                        "pullback_pct": float(r[8] or 0),
+                        "date": d,
+                    }
+                    for r in rows
+                ]
+        con.close()
+        return []
+    except Exception as e:
+        logger.warning("surge_pullback SELECT 실패: %s", e)
+        if con:
+            con.close()
+        return []
+
+
+# ────────────────────────────────────────────────────────────
+# 11번: 실적괴리 (quant_valuation_gap)
+# ────────────────────────────────────────────────────────────
+
+
+def fetch_valuation_gap(date: Optional[str] = None, top_n: int = 5) -> list[dict]:
+    """실적괴리 종목 — score TOP N (저평가 + 실적 좋음)."""
+    con = _connect()
+    if not con or not _table_exists(con, "quant_valuation_gap"):
+        if con:
+            con.close()
+        return []
+
+    if not date:
+        date = datetime.now().strftime("%Y-%m-%d")
+
+    try:
+        cur = con.cursor()
+        for d in _fallback_dates(date):
+            cur.execute(
+                "SELECT ticker, name, sector, grade, score, source, "
+                "       oi_yoy, rev_yoy, turnaround, eps_annualized "
+                "FROM quant_valuation_gap WHERE date=%s "
+                "ORDER BY score DESC NULLS LAST LIMIT %s",
+                (d, top_n),
+            )
+            rows = cur.fetchall()
+            if rows:
+                con.close()
+                return [
+                    {
+                        "ticker": r[0], "name": r[1], "sector": r[2],
+                        "grade": r[3], "score": float(r[4] or 0),
+                        "source": r[5],
+                        "oi_yoy": float(r[6] or 0),
+                        "rev_yoy": float(r[7] or 0),
+                        "turnaround": r[8],
+                        "eps_annualized": float(r[9] or 0),
+                        "date": d,
+                    }
+                    for r in rows
+                ]
+        con.close()
+        return []
+    except Exception as e:
+        logger.warning("valuation_gap SELECT 실패: %s", e)
+        if con:
+            con.close()
+        return []
+
+
 def fetch_all_advisory_signals(date: Optional[str] = None) -> dict:
-    """6번~10번 모든 시그널 한 번에 SELECT."""
+    """6번~11번 모든 시그널 한 번에 SELECT."""
     return {
         "sector_fire_top5": fetch_sector_fire(date, top_n=5),
         "theme_momentum_top5": fetch_theme_momentum(date, top_n=5),
+        "surge_pullback_top5": fetch_surge_pullback(date, top_n=5),  # 8번 NEW
         "crash_bounce_top5": fetch_crash_bounce(date, top_n=5),
         "fibonacci_top5": fetch_fibonacci(date, top_n=5),
+        "valuation_gap_top5": fetch_valuation_gap(date, top_n=5),  # 11번 NEW
     }
 
 
