@@ -233,6 +233,19 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
     except Exception as e:
         logger.warning("vwap+eye SELECT 실패: %s", e)
 
+    # 막내 intraday_signals (5/18 5번 작업, 5/19 막내 가동 후 자동 활성)
+    intraday_signals = []
+    blocked_tickers = set()
+    try:
+        from src.use_cases.intraday_signals_advisor import (
+            fetch_intraday_signals, get_nega_blocked_tickers,
+        )
+
+        intraday_signals = fetch_intraday_signals(min_impact=70)
+        blocked_tickers = get_nega_blocked_tickers(intraday_signals)
+    except Exception as e:
+        logger.warning("intraday_signals SELECT 실패: %s", e)
+
     # ETF 추천 (5/18 1번 작업 — 사장님 순차 진행)
     etf_rec = None
     try:
@@ -273,6 +286,8 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
         "eye_event_counts": eye_counts,  # 종목별 EYE 알림 횟수 (HPSP 4번 = 황금 표준)
         "eye_top_ticker": max(eye_counts, key=eye_counts.get) if eye_counts else None,
         "eye_top_count": max(eye_counts.values()) if eye_counts else 0,
+        "intraday_signals": intraday_signals,  # 5번 작업: 막내 시그널
+        "blocked_tickers": list(blocked_tickers),  # 5번 작업: NEGA 차단 종목
     }
     return snapshot
 
@@ -376,6 +391,8 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "vwap_overheats_top3": snap.get("vwap_overheats_top3", []),  # 4번 작업: VWAP 과열
         "eye_event_counts": snap.get("eye_event_counts", {}),  # 4번 작업: EYE 알림 횟수
         "eye_top_ticker": snap.get("eye_top_ticker"),  # 4번 작업: EYE 황금 표준
+        "intraday_signals_count": len(snap.get("intraday_signals", [])),  # 5번: 막내 시그널 수
+        "blocked_tickers": snap.get("blocked_tickers", []),  # 5번: NEGA 차단 종목
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -488,6 +505,16 @@ def format_telegram(snap: dict) -> str:
     eye_n = snap.get("eye_top_count", 0)
     if eye_top and eye_n >= 2:
         lines.append(f"✨ EYE 황금 표준: {eye_top} {eye_n}번 알림 (최근 2h)")
+
+    # 막내 intraday_signals (5번 작업, 5/18 신규)
+    sigs = snap.get("intraday_signals", [])
+    blocked = snap.get("blocked_tickers", [])
+    if sigs:
+        top = sigs[0]
+        emoji = {"NEGA": "🔴", "POSI": "🟢", "NEUT": "⚪"}.get(top["sentiment"], "⚪")
+        lines.append(f"🤖 막내 {emoji} {top['sentiment']} {top['impact_score']}: {top['title'][:40]}")
+    if blocked:
+        lines.append(f"🚫 NEGA 차단: {len(blocked)}건 ({', '.join(blocked[:3])})")
 
     return "\n".join(lines)
 
