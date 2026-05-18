@@ -209,6 +209,15 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
 
     intraday = collect_intraday_strength(today)
 
+    # supply_surge TOP 5 (5/18 3번 작업)
+    supply_surges = []
+    try:
+        from src.use_cases.supply_surge_advisor import fetch_recent_supply_surge
+
+        supply_surges = fetch_recent_supply_surge(top_n=5)
+    except Exception as e:
+        logger.warning("supply_surge SELECT 실패: %s", e)
+
     # ETF 추천 (5/18 1번 작업 — 사장님 순차 진행)
     etf_rec = None
     try:
@@ -243,6 +252,7 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
             "reasoning": etf_rec.reasoning if etf_rec else None,
             "size_won": etf_rec.suggested_size_won if etf_rec else 0,
         } if etf_rec else None,
+        "supply_surge_top5": supply_surges,  # 3번 작업: 외인+기관 동반 매수
     }
     return snapshot
 
@@ -341,6 +351,7 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "inverse_etf_strength": inverse_str,
         "inverse_etf_buy_ratio": inverse_buy_ratio,
         "etf_recommendation": snap.get("etf_recommendation"),  # 1번 작업: ETF 추천 통합
+        "supply_surge_top5": snap.get("supply_surge_top5", []),  # 3번 작업: 외인+기관 동반 매수
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -428,6 +439,15 @@ def format_telegram(snap: dict) -> str:
             lines.append(
                 f"📦 ETF {grade_emoji} {etf['grade']} {etf['name']}({etf['ticker']}) — {etf['reasoning'][:40]}"
             )
+
+    # 수급 폭발 (3번 작업, 5/18 신규)
+    surges = snap.get("supply_surge_top5", [])
+    if surges:
+        top = surges[0]
+        lines.append(
+            f"💎 수급폭발 TOP: {top['name']}({top['ticker']}) "
+            f"[{top['supply_type']} {top['final_score']:.0f}점]"
+        )
 
     return "\n".join(lines)
 
