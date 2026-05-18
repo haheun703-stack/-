@@ -209,6 +209,24 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
 
     intraday = collect_intraday_strength(today)
 
+    # ETF 추천 (5/18 1번 작업 — 사장님 순차 진행)
+    etf_rec = None
+    try:
+        from src.use_cases.etf_advisor import suggest_etf_position
+
+        # regime 미리 판정 (snap 완성 전이라 임시)
+        market_str = intraday.get("strength_mean", 100) if intraday.get("db_exists") else 100
+        inv_str = 100
+        for r in intraday.get("top5", []):
+            if r.get("code") == "252670":
+                inv_str = r.get("avg_strength", 100)
+                break
+        # 임시 regime (정식은 determine_regime() 호출 시점)
+        tmp_regime = "MILD_BULL" if market_str >= 100 else ("CAUTION" if inv_str > 120 else "NEUTRAL")
+        etf_rec = suggest_etf_position(tmp_regime, inv_str, market_str)
+    except Exception as e:
+        logger.warning("ETF advisor 실패: %s", e)
+
     snapshot = {
         "snapshot_at": now.isoformat(),
         "date": today,
@@ -217,6 +235,14 @@ def take_snapshot(top_n: int = DEFAULT_TOP_N) -> dict:
         "top1_weekly_8": weekly,
         "top1_monthly_6": monthly,
         "intraday_strength_summary": intraday,
+        "etf_recommendation": {
+            "action": etf_rec.action if etf_rec else None,
+            "ticker": etf_rec.ticker if etf_rec else None,
+            "name": etf_rec.name if etf_rec else None,
+            "grade": etf_rec.grade if etf_rec else None,
+            "reasoning": etf_rec.reasoning if etf_rec else None,
+            "size_won": etf_rec.suggested_size_won if etf_rec else 0,
+        } if etf_rec else None,
     }
     return snapshot
 
@@ -314,6 +340,7 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         "market_strength_median": intra.get("strength_median"),
         "inverse_etf_strength": inverse_str,
         "inverse_etf_buy_ratio": inverse_buy_ratio,
+        "etf_recommendation": snap.get("etf_recommendation"),  # 1번 작업: ETF 추천 통합
         "top9_avg_chg_pct": round(avg_chg, 2),
         "top9_positive_count": n_pos,
         "top9_total": n_total,
@@ -390,6 +417,18 @@ def format_telegram(snap: dict) -> str:
             f"(TOP {intra.get('top5', [{}])[0].get('code')} "
             f"강도 {intra.get('top5', [{}])[0].get('avg_strength')})"
         )
+
+    # ETF 추천 (1번 작업, 5/18 신규)
+    etf = snap.get("etf_recommendation")
+    if etf and etf.get("action"):
+        if etf["action"] in ("HOLD", "CASH_UP"):
+            lines.append(f"📦 ETF: {etf['action']} — {etf['reasoning']}")
+        else:
+            grade_emoji = {"STRONG": "🟢", "MEDIUM": "🟡", "WATCH": "🟠"}.get(etf.get("grade"), "⚪")
+            lines.append(
+                f"📦 ETF {grade_emoji} {etf['grade']} {etf['name']}({etf['ticker']}) — {etf['reasoning'][:40]}"
+            )
+
     return "\n".join(lines)
 
 
