@@ -78,6 +78,19 @@ def evaluate_owner_rule(
             trailing_active=trailing_active,
         )
 
+    # 거래정지 / 응답 누락 가드 (5/18 E2 보강) — 0원에 매도 시도 방지
+    if current_price <= 0:
+        return OwnerRuleVerdict(
+            action="HOLD",
+            reason="현재가 0 (거래정지/응답 누락) — 매도 보류, 다음 cron 재시도",
+            entry_price=entry_price,
+            current_price=current_price,
+            peak_price=peak_price,
+            pnl_pct=0,
+            peak_drop_pct=0,
+            trailing_active=trailing_active,
+        )
+
     # 진입가 대비 PnL
     pnl_pct = (current_price - entry_price) / entry_price
 

@@ -132,6 +132,22 @@ def main() -> int:
         pos = positions.get(tk, {})
 
         entry_price = pos.get("entry_price") or h["avg_price"]
+
+        # E3 보강 (5/18) — 진입가 미상 시 사장님 알림 + 자동 룰 평가 SKIP
+        if entry_price <= 0:
+            logger.warning(
+                "진입가 0 — %s: state entry_price=%s, KIS avg_price=%s",
+                tk, pos.get("entry_price"), h.get("avg_price"),
+            )
+            warning_msg = (
+                f"⚠️ [진입가 미상] {h['name']}({tk})\n"
+                f"  positions.json entry_price={pos.get('entry_price', 'None')}\n"
+                f"  KIS avg_price={h.get('avg_price', 0)}\n"
+                f"  → 수동 확인 필요 (자동 룰 평가 SKIP)"
+            )
+            send_telegram(warning_msg)
+            continue
+
         peak_price = max(pos.get("peak_price", 0), h["current_price"], entry_price)
         trailing_active = pos.get("trailing_active", False)
 
