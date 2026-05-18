@@ -79,18 +79,33 @@ def is_long_term_weak(broker, ticker: str, threshold_pct: float = THRESHOLD_W52_
 
 
 def is_program_selling(broker, ticker: str, threshold: int = THRESHOLD_PROGRAM_NTBY) -> tuple[bool, dict]:
-    """프로그램 순매수 < 임계 (음수면 매도 우세) → 회피."""
+    """프로그램 순매수 < 임계 AND 가격 음봉 → 회피.
+
+    5/18 라이브 검증에서 발견 (사장님 통찰):
+    - 프로그램 매도 + 가격 하락 = DB 반례 (진짜 위험) → 회피 ✅
+    - 프로그램 매도 + 가격 상승 = 외인/기관/연기금 매수 압도 = 매수 가능 (삼성전자 +4.62% 케이스)
+
+    따라서 단순 프로그램 매도 X, AND 음봉 조건으로 진짜 위험만 회피.
+    """
     out = fetch_price_safe(broker, ticker)
     if not out:
         return False, {"error": "fetch_price 실패"}
 
     pgtr = int(out.get("pgtr_ntby_qty", 0) or 0)
-    is_selling = pgtr < threshold
-    return is_selling, {
+    prdy_ctrt = float(out.get("prdy_ctrt", 0) or 0)
+
+    is_program_sell = pgtr < threshold
+    is_price_down = prdy_ctrt < 0
+    is_dangerous = is_program_sell and is_price_down  # AND 조건
+
+    return is_dangerous, {
         "filter": "program_selling",
         "pgtr_ntby_qty": pgtr,
-        "threshold": threshold,
-        "verdict": "SKIP" if is_selling else "PASS",
+        "prdy_ctrt": prdy_ctrt,
+        "is_program_sell": is_program_sell,
+        "is_price_down": is_price_down,
+        "verdict": "SKIP" if is_dangerous else "PASS",
+        "note": "프로그램 매도 + 음봉 동시 조건 (5/18 사장님 통찰 반영)",
     }
 
 
