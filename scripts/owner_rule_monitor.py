@@ -111,7 +111,8 @@ def main() -> int:
         return 0
 
     from src.adapters.kis_stock_data_adapter import KisStockDataAdapter
-    from src.use_cases.owner_rule import evaluate_owner_rule
+    from src.use_cases.owner_rule import evaluate_owner_rule, evaluate_hold_overnight
+    from src.use_cases.eye_filters import evaluate_filters
 
     adp = KisStockDataAdapter()
     broker = adp.broker
@@ -152,6 +153,55 @@ def main() -> int:
             "name": h["name"],
             "qty": h["qty"],
         }
+
+        # 사장님 룰 ④ — 15:20 강제 청산 직전 이월 평가 (5/18 추가)
+        if verdict.action == "SELL_FORCE_CLOSE":
+            # 수급 데이터 + EYE 평가 (장 마감 직전 시점)
+            try:
+                eye_res = evaluate_filters(broker, tk, datetime.now().strftime("%Y-%m-%d"))
+                px_resp = broker.fetch_price(tk).get("output", {})
+                # 외인+기관 일중 누적 (개략값 — 정확값은 BAT-D 16:30 후)
+                pgtr_eok = int(px_resp.get("pgtr_ntby_qty", 0) or 0) * h["current_price"] / 1e8
+
+                # 진입일 계산
+                entry_date_str = pos.get("entry_date", datetime.now().strftime("%Y-%m-%d"))
+                from datetime import date as _date
+                try:
+                    entry_d = _date.fromisoformat(entry_date_str)
+                    days_held = (_date.today() - entry_d).days
+                except Exception:
+                    days_held = 0
+
+                can_hold, hold_details = evaluate_hold_overnight(
+                    entry_price=entry_price,
+                    current_price=h["current_price"],
+                    peak_price=verdict.peak_price,
+                    trailing_active=verdict.trailing_active,
+                    days_held=days_held,
+                    foreign_net_eok=pgtr_eok,  # 프로그램으로 근사
+                    inst_net_eok=0.0,  # 정확값은 BAT-D 후
+                    pension_net_eok=0.0,
+                    eye_filter_passed=not eye_res["should_skip"],
+                )
+
+                if can_hold:
+                    # 이월 결정 — 청산 SKIP
+                    logger.info("이월 결정 %s: %s", tk, hold_details["reason"])
+                    positions[tk]["entry_date"] = pos.get("entry_date", datetime.now().strftime("%Y-%m-%d"))
+                    positions[tk]["days_held"] = days_held + 1
+                    positions[tk]["last_hold_check"] = datetime.now().isoformat()
+
+                    tg_msg = (
+                        f"🌙 [사장님 룰 ④ — 익일 이월] {h['name']}({tk})\n"
+                        f"  PnL {hold_details['pnl_pct']:+.2f}% | 보유 {days_held}일\n"
+                        f"  수급 +{hold_details['supply_total_eok']:.1f}억 | EYE PASS\n"
+                        f"  → 5/21 익일 보유 (최대 {5 - days_held}일 더)"
+                    )
+                    send_telegram(tg_msg)
+                    print(tg_msg)
+                    continue  # 청산 안 함, 다음 종목
+            except Exception as e:
+                logger.warning("룰 ④ 평가 실패 — 강제 청산 진행: %s", e)
 
         if verdict.action != "HOLD":
             # 자동 매도
