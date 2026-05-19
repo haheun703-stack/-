@@ -127,6 +127,61 @@ def is_weekly_oversold(weekly: list[dict], period: int = 14, threshold: float = 
     return k is not None and k < threshold
 
 
+def get_stock_daily(code: str, from_date: str, to_date: str) -> list[dict] | None:
+    """종목 일봉 OHLCV (Gate 3 MA20 dev 계산용).
+
+    Returns: [{date, open, high, low, close, volume}, ...] (최신→과거)
+    """
+    r = requests.get(
+        f"{_BASE}/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice",
+        headers=_headers("FHKST03010100"),
+        params={
+            "fid_cond_mrkt_div_code": "J",
+            "fid_input_iscd": code,
+            "fid_input_date_1": from_date,
+            "fid_input_date_2": to_date,
+            "fid_period_div_code": "D",
+            "fid_org_adj_prc": "0",
+        },
+        timeout=15,
+    )
+    if r.status_code != 200 or r.json().get("rt_cd") != "0":
+        return None
+    out = []
+    for row in r.json().get("output2", []):
+        try:
+            out.append({
+                "date": row.get("stck_bsop_date"),
+                "open": int(row.get("stck_oprc", 0) or 0),
+                "high": int(row.get("stck_hgpr", 0) or 0),
+                "low":  int(row.get("stck_lwpr", 0) or 0),
+                "close": int(row.get("stck_clpr", 0) or 0),
+                "volume": int(row.get("acml_vol", 0) or 0),
+            })
+        except Exception:
+            pass
+    return out
+
+
+def compute_ma20_dev(code: str) -> float | None:
+    """MA20 대비 현재가 편차 % (Gate 3).
+
+    차트영웅 룰 완화 버전: -5 ~ +5% = 저변동 진입 영역.
+    """
+    import datetime as dt
+    end = dt.date.today()
+    start = end - dt.timedelta(days=45)   # 영업일 20일 + 여유
+    daily = get_stock_daily(code, start.strftime("%Y%m%d"), end.strftime("%Y%m%d"))
+    if not daily or len(daily) < 20:
+        return None
+    closes = [d["close"] for d in daily[:20]]   # 최근 20영업일
+    ma20 = sum(closes) / 20
+    current = daily[0]["close"]
+    if ma20 <= 0:
+        return None
+    return round((current - ma20) / ma20 * 100, 2)
+
+
 if __name__ == "__main__":
     # 자가 검증
     print("=== KIS 주봉 어댑터 검증 (2026-05-19) ===")

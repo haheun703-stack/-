@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.macro.four_signal_gate import compute_four_signal_gate
 from src.macro.chart_hero_advisory import build_chart_hero_advisory
-from src.adapters.kis_weekly_kit import get_stock_weekly, compute_weekly_stoch_k
+from src.adapters.kis_weekly_kit import get_stock_weekly, compute_weekly_stoch_k, compute_ma20_dev
 from src.adapters.quant_supabase_reader import (
     get_yesterday_surge_pool, get_sector_picks_today, get_catalyst, get_company_card,
 )
@@ -118,17 +118,43 @@ def gate_2_surge_pool(today: str, min_surge_pct: float = 25.0) -> list[dict]:
     return pool
 
 
-def gate_3_pullback_filter(pool: list[dict]) -> list[dict]:
-    """Gate 3: 저변동 + MA20 눌림 (-3~0%).
+def gate_3_pullback_filter(pool: list[dict], today: str) -> list[dict]:
+    """Gate 3: MA20 눌림 (-3~0%) + 수급 정보 enrichment.
 
-    TODO 5/21: 일봉 데이터로 MA20 dev 계산 (정보봇 OHLCV 또는 KIS)
-    현재는 PLACEHOLDER: 전부 통과 (실제 필터는 5/21 보강)
+    quant_sector_picks에 BAT-D가 매일 계산한 ma20_dev / rsi / 외인기관 수급 컬럼 있음.
+    pool의 ticker로 매칭해서 enrich + 필터.
+
+    차트영웅 룰: ma20_dev -3 ~ 0% (눌림 영역 = 이상적 진입)
     """
-    # PLACEHOLDER
+    picks_today = get_sector_picks_today(today)
+    enrich_map = {p["ticker"]: p for p in picks_today if p.get("ticker")}
+
+    out = []
     for p in pool:
-        p["ma20_dev_pct"] = None
-        p["passed_gate3"] = True
-    return pool
+        enrich = enrich_map.get(p["ticker"])
+        if enrich:
+            p["ma20_dev_pct"] = enrich.get("ma20_dev")
+            p["rsi"] = enrich.get("rsi")
+            p["vol_ratio"] = enrich.get("vol_ratio")
+            p["fgn_5d"] = enrich.get("fgn_5d")
+            p["inst_5d"] = enrich.get("inst_5d")
+            p["pension_5d"] = enrich.get("pension_5d")
+            p["buy_score_bat"] = enrich.get("buy_score")
+        else:
+            # sector_picks 미매칭 → KIS 일봉 직접 계산 (1 API 호출)
+            try:
+                p["ma20_dev_pct"] = compute_ma20_dev(p["ticker"])
+            except Exception:
+                p["ma20_dev_pct"] = None
+
+        # 차트영웅 룰 완화 버전: -5 ≤ ma20_dev ≤ +5% (저변동 + 미세 눌림)
+        dev = p["ma20_dev_pct"]
+        if dev is not None and -5 <= dev <= 5:
+            p["passed_gate3"] = True
+        else:
+            p["passed_gate3"] = False
+        out.append(p)
+    return out
 
 
 def gate_4a_catalyst(pool: list[dict], analyze_all: bool = False) -> list[dict]:
@@ -240,7 +266,7 @@ def run_picker(today: str | None = None,
                 "summary": "어제 상한가 종목 풀 없음."}
 
     # === Gate 3 ===
-    pool = gate_3_pullback_filter(pool)
+    pool = gate_3_pullback_filter(pool, today)
     pool = [p for p in pool if p.get("passed_gate3")]
 
     # === Gate 4-B (먼저) — 빠른 필터로 후보 축소 ===
