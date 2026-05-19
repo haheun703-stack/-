@@ -300,8 +300,32 @@ def main() -> int:
             decision.action = "SKIP"
             decision.reason = f"{vwap_msg}"
 
+        # 진입 게이트 3종 (5/19 사장님 결단 — 분봉/호가창/체결강도, 단타봇 동급)
+        # BUY 결정 + VWAP 통과 시에만 평가 (불필요한 API 호출 방지)
+        gates_msg = ""
+        if decision.action == "BUY":
+            try:
+                from src.use_cases.entry_gates import check_all_entry_gates
+                gates = check_all_entry_gates(broker, tk, current_price=current_price)
+                gates_msg = gates["summary"]
+                if not gates["all_passed"]:
+                    decision.action = "SKIP"
+                    decision.reason = (
+                        f"진입 게이트 {gates['passed_count']}/3: {gates['summary']}"
+                    )
+                    logger.info("[GATES BLOCK] %s — %s", tk, decision.reason)
+                else:
+                    logger.info("[GATES OK] %s — %s", tk, gates_msg)
+            except Exception as e:
+                logger.warning("[GATES 평가 예외] %s: %s — BUY 진행", tk, e)
+                gates_msg = f"게이트 SKIP (예외: {e})"
+
         decisions_log.append((tk, nm, sc.score, decision.action, decision.reason))
-        print(f"  [{decision.action}] {nm}({tk}) 점수 {sc.score} → {decision.reason} | {vwap_msg}")
+        print(
+            f"  [{decision.action}] {nm}({tk}) 점수 {sc.score} → {decision.reason}"
+            f" | {vwap_msg}"
+            + (f" | gates: {gates_msg}" if gates_msg else "")
+        )
 
         if decision.action != "BUY":
             continue
