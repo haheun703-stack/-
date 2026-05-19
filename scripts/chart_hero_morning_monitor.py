@@ -1,0 +1,79 @@
+"""차트영웅 매매 — 매일 09:30 KST 보유 포지션 모니터링.
+
+흐름:
+  1. executor.monitor_positions()  보유 종목 현재가 조회
+  2. decide_action() 자동 판정    추매/익절/손절/HOLD
+  3. KIS 주문 실행 (real 모드)    또는 시뮬 (paper 모드)
+  4. 결과 보고 + 텔레그램 알림
+
+cron 등록 (VPS):
+  30 9 * * 1-5  cd ~/quantum-master && ./venv/bin/python3.11 scripts/chart_hero_morning_monitor.py --paper >> /tmp/chart_hero_morning.log 2>&1
+"""
+
+import argparse
+import datetime as dt
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from src.strategies.chart_hero_executor import ChartHeroExecutor
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--paper", action="store_true", default=True)
+    parser.add_argument("--real", action="store_true")
+    parser.add_argument("--capital", type=float, default=25_000_000)
+    args = parser.parse_args()
+
+    is_paper = not args.real
+    today = dt.date.today().isoformat()
+
+    print("=" * 70)
+    print(f"🔍 차트영웅 보유 포지션 모니터 ({today} {dt.datetime.now():%H:%M:%S})")
+    print(f"   모드: {'PAPER' if is_paper else '🔴 REAL'}")
+    print("=" * 70)
+
+    executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital)
+
+    if not executor.positions:
+        print("\n📭 보유 포지션 없음.")
+        return
+
+    print(f"\n[1] 보유 포지션: {len(executor.positions)}건")
+    for tk, p in executor.positions.items():
+        if p.get("is_closed"):
+            continue
+        held_days = (dt.date.today() - dt.date.fromisoformat(p["entry_date"])).days
+        print(f"   {tk} {p['name']:14} 평단={p['avg_price']:>10} "
+              f"수량={p['total_qty']:>4} 단계={p['stage']} D+{held_days}")
+
+    print(f"\n[2] 액션 실행")
+    results = executor.monitor_positions()
+    for r in results:
+        action = r.get("action", "?")
+        flag = {"HOLD": "  ", "ADD_BUY": "📥", "PARTIAL_SELL": "💰",
+                "STOPLOSS": "🛑", "FORCE_CLOSE": "🏁", "PRICE_FAIL": "❌"}.get(action, "?")
+        print(f"   {flag} {r}")
+
+    print(f"\n[3] 누적 요약")
+    summary = executor.get_summary()
+    for k, v in summary.items():
+        print(f"   {k}: {v}")
+
+    # 로그 저장
+    log_dir = Path("data/logs/chart_hero")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / f"morning_monitor_{today}.json"
+    log_file.write_text(json.dumps({
+        "date": today, "mode": "paper" if is_paper else "real",
+        "actions": results, "summary": summary,
+    }, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(f"\n💾 로그: {log_file}")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    main()

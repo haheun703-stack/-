@@ -75,6 +75,20 @@ class ChartHeroExecutor:
         amount = self.total_capital * (capital_pct / 100)
         return max(int(amount // price), 1)
 
+    # 고가주 필터: 1주 가격이 잔고의 max_single_share_pct% 초과면 제외
+    MAX_SINGLE_SHARE_PCT = 3.0   # 1주 가격 > 잔고 3% = 제외
+
+    def is_affordable(self, price: int) -> tuple[bool, str]:
+        """1주 가격이 잔고 대비 적정한지 판정.
+
+        2,500만 잔고 기준: 1주 75만 초과 = 제외.
+        한화에어로 128만, SK하이닉스 174만 등 제외.
+        """
+        share_pct = price / self.total_capital * 100
+        if share_pct > self.MAX_SINGLE_SHARE_PCT:
+            return False, f"1주 비중 {share_pct:.1f}% > {self.MAX_SINGLE_SHARE_PCT}% (고가주 제외)"
+        return True, f"1주 비중 {share_pct:.2f}% OK"
+
     def execute_d1_entry(self, picks_with_confirm: list[dict]) -> list[dict]:
         """D+1 양봉 확인된 종목 1차 진입 (긴장 타입 1.0%).
 
@@ -98,6 +112,12 @@ class ChartHeroExecutor:
                 continue
 
             price = p.get("entry_price_estimate") or p.get("current_price")
+            # 고가주 필터 (1주 비중 > 3% 제외)
+            affordable, msg = self.is_affordable(price)
+            if not affordable:
+                results.append({"ticker": ticker, "action": "SKIP_TOO_EXPENSIVE",
+                                "price": price, "reason": msg})
+                continue
             qty = self._compute_qty(INIT_WEIGHT_PCT, price)
 
             if self.paper:
