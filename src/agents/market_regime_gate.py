@@ -62,7 +62,8 @@ class MarketRegimeGate:
     }
 
     def __init__(self):
-        self.timestamp = datetime.now().isoformat()
+        # C2: timestamp 포맷을 다른 4명 워커와 통일 (YYYY-MM-DD HH:MM:SS)
+        self.timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def check_market_regime(self) -> dict:
         """현재 시장 약세 여부 판정.
@@ -71,7 +72,7 @@ class MarketRegimeGate:
             {
                 "agent": "market_regime_gate",
                 "status": "OK" | "FAIL",
-                "regime": "NORMAL" | "BEARISH" | "STRONG_BEARISH",
+                "regime": "NORMAL" | "BEARISH" | "STRONG_BEARISH" | "UNKNOWN",
                 "indicators": [{"ticker": ..., "name": ..., "current": ...,
                                 "change_pct": ..., "triggered": bool, "reason": ...}, ...],
                 "triggered_count": N,
@@ -79,6 +80,39 @@ class MarketRegimeGate:
                 "timestamp": "...",
             }
         """
+        # ──────────────────────────────────────────────────────────────
+        # C3-A: MODEL=REAL 검증 (fail-safe 디폴트)
+        # 모의투자 모드(MOCK)에서 시세 호출하면 모의서버 데이터로 잘못 판정.
+        # MODEL!=REAL이면 즉시 FAIL → KILL_SWITCH 자동 활성화.
+        # ──────────────────────────────────────────────────────────────
+        model = os.environ.get("MODEL", "MOCK")
+        if model != "REAL":
+            result = {
+                "agent": "market_regime_gate",
+                "status": "FAIL",
+                "regime": "UNKNOWN",
+                "indicators": [],
+                "triggered_count": 0,
+                "summary": f"MODEL={model} != REAL — 모의 모드 차단",
+                "timestamp": self.timestamp,
+            }
+            try:
+                from src.agents.kill_switch_manager import (
+                    activate_kill_switch,
+                    save_worker_report,
+                )
+                activate_kill_switch(
+                    reason=f"MarketRegimeGate fail-safe: MODEL={model} (실전 모드 아님)",
+                    source="MarketRegimeGate",
+                    send_tg=True,
+                )
+                save_worker_report("market_regime_gate", result)
+            except Exception as e:
+                logger.error(
+                    "[MarketRegimeGate] MODEL 검증 후 활성화 실패: %s", e
+                )
+            return result
+
         indicators: list[dict] = []
         triggered: list[str] = []
 
@@ -146,6 +180,41 @@ class MarketRegimeGate:
                     "error": str(e),
                     "triggered": False,
                 })
+
+        # ──────────────────────────────────────────────────────────────
+        # C3-B: fetch_price 다수 실패 시 fail-safe
+        # 3종목 중 2건 이상 fetch 실패 = 시장 데이터 수신 불가 → FAIL.
+        # 0건만 triggered인데 정상 판정하면 "데이터 없음 = NORMAL" 오판 위험.
+        # ──────────────────────────────────────────────────────────────
+        error_count = sum(1 for ind in indicators if "error" in ind)
+        if error_count >= 2:
+            result = {
+                "agent": "market_regime_gate",
+                "status": "FAIL",
+                "regime": "UNKNOWN",
+                "indicators": indicators,
+                "triggered_count": 0,
+                "error_count": error_count,
+                "summary": f"시장 데이터 수신 불가 ({error_count}/3 fetch 실패)",
+                "timestamp": self.timestamp,
+            }
+            try:
+                from src.agents.kill_switch_manager import (
+                    activate_kill_switch,
+                    save_worker_report,
+                )
+                activate_kill_switch(
+                    reason=f"MarketRegimeGate fail-safe: {error_count}/3 fetch 실패",
+                    source="MarketRegimeGate",
+                    send_tg=True,
+                )
+                save_worker_report("market_regime_gate", result)
+            except Exception as e:
+                logger.error(
+                    "[MarketRegimeGate] fetch 실패 fail-safe 처리 중 활성화 실패: %s",
+                    e,
+                )
+            return result
 
         # regime 판정 (1건 이상 = BEARISH, 2건 이상 = STRONG_BEARISH)
         if len(triggered) >= 2:

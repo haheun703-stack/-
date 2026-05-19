@@ -4,9 +4,10 @@
   5/19 단타봇 D-Day 사고(VERIFICATION_MODE=false 토글 OFF로 매매 0건)에서 얻은 교훈.
   → 자동매매가 OFF여도, 검수팀 자체가 OFF여도 사장님이 알아챌 수 없음.
 
-  Reporter는 EnvChecker / CodeAuditor / FlowMonitor / DataIntegrity 4명 워커가
-  data/agent_reports/{name}_latest.json 에 남긴 결과를 *읽기만* 해서 종합 보고한다.
-  → 워커 직접 호출 X (결합도 낮춤).
+  Reporter는 EnvChecker / CodeAuditor / FlowMonitor / DataIntegrity / MarketRegimeGate
+  5명 워커가 data/agent_reports/{name}_latest.json 에 남긴 결과를 *읽기만* 해서
+  종합 보고한다. → 워커 직접 호출 X (결합도 낮춤).
+  (5/19 MarketRegimeGate 추가: 시장 폭락장 검출 — 14:00 가동 직전 게이트)
 
   **핵심 안전망**: Reporter가 정해진 시각에 카톡 발송.
   카톡이 안 오면 = 검수팀 OFF = 사장님이 즉시 알아챔.
@@ -26,7 +27,7 @@
 
 워커 결과 스키마 (각 워커가 *_latest.json에 저장):
   {
-    "agent": "env_checker"|"code_auditor"|"flow_monitor"|"data_integrity",
+    "agent": "env_checker"|"code_auditor"|"flow_monitor"|"data_integrity"|"market_regime_gate",
     "status": "OK"|"FAIL"|"WARN",
     "timestamp": "YYYY-MM-DD HH:MM:SS",
     "total": N, "ok_count": N, "fail_count": N,
@@ -58,8 +59,14 @@ ENV_PATH = PROJECT_ROOT / ".env"
 DATA_DIR = PROJECT_ROOT / "data"
 REPORTS_DIR = DATA_DIR / "agent_reports"
 
-# 4명 워커
-WORKERS = ["env_checker", "code_auditor", "flow_monitor", "data_integrity"]
+# 5명 워커 (5/19: MarketRegimeGate 6번째 추가 — 시장 폭락장 검출)
+WORKERS = [
+    "env_checker",
+    "code_auditor",
+    "flow_monitor",
+    "data_integrity",
+    "market_regime_gate",
+]
 
 # 한국어 표시명
 WORKER_KR = {
@@ -67,6 +74,7 @@ WORKER_KR = {
     "code_auditor": "CodeAuditor",
     "flow_monitor": "FlowMonitor",
     "data_integrity": "DataIntegrity",
+    "market_regime_gate": "MarketRegimeGate",  # 6번째 (5/19 추가)
 }
 
 # 슬롯 정의
@@ -206,10 +214,10 @@ def _dday_text(now: datetime) -> str:
 
 
 class Reporter:
-    """4명 워커 결과 종합 → 사장님 카톡.
+    """5명 워커 결과 종합 → 사장님 카톡.
 
     public API:
-      collect_all()                — 4명 결과 dict 반환
+      collect_all()                — 5명 결과 dict 반환
       format_summary(results, slot) — 메시지 문자열 반환
       send(slot)                    — collect + format + 텔레그램
     """
@@ -223,7 +231,7 @@ class Reporter:
     # 수집
     # ──────────────────────────────────────────────────────────────
     def collect_all(self) -> dict:
-        """4명 워커의 최신 결과 수집.
+        """5명 워커의 최신 결과 수집.
 
         Returns:
           {
@@ -231,6 +239,7 @@ class Reporter:
             "code_auditor": ...,
             "flow_monitor": ...,
             "data_integrity": ...,
+            "market_regime_gate": ...,
           }
         """
         out: dict = {}
@@ -443,6 +452,7 @@ class Reporter:
             self._worker_line(results, "code_auditor"),
             self._worker_line(results, "flow_monitor"),
             self._worker_line(results, "data_integrity"),
+            self._worker_line(results, "market_regime_gate", "시장 폭락장 검출"),
             self._reporter_self_line(),
             "",
             f"📅 오늘: {date_str} ({weekday_kr}) {trading_kr}",
@@ -466,6 +476,7 @@ class Reporter:
             self._worker_line(results, "env_checker", "환경 게이트 점검"),
             self._worker_line(results, "code_auditor", "최종 코드 무결성"),
             self._worker_line(results, "data_integrity", "tomorrow_picks 신선도"),
+            self._worker_line(results, "market_regime_gate", "시장 폭락장 검출"),
             "⏰ FlowMonitor: 14:00부터 매 5분 추적 시작",
             self._reporter_self_line(),
             "",
@@ -564,7 +575,8 @@ class Reporter:
 
     # ── 슬롯 4: daily_close_1900 ─────────────────────────────────
     def _fmt_daily_close(self, results: dict) -> str:
-        # 오늘 검수 N건 = 4슬롯 × 4명 = 16개 (Reporter 자신 포함 시 20)
+        # 오늘 검수 N건 = 4슬롯 × 5명 = 20개 (Reporter 자신 포함 시 24)
+        # (5/19 MarketRegimeGate 6번째 워커 추가, Reporter 포함 6명)
         # 단순 표시 (정확한 카운트는 로그 누적 필요)
         ok, warn, fail = self._aggregate_state(results)
         issue_n = warn + fail
@@ -587,7 +599,7 @@ class Reporter:
             "",
             kill_status,
             "",
-            "오늘 검수팀 활동: 4회 × 5명 = 20개 점검",
+            "오늘 검수팀 활동: 4회 × 6명 = 24개 점검",
             f"이상 발견: {issue_n}건",
             f"내일 자동매매 cron: {next_dday}",
             "",
@@ -596,6 +608,7 @@ class Reporter:
             self._worker_line(results, "code_auditor"),
             self._worker_line(results, "flow_monitor"),
             self._worker_line(results, "data_integrity"),
+            self._worker_line(results, "market_regime_gate", "시장 폭락장 검출"),
             self._reporter_self_line(),
         ]
         msg = "\n".join(lines)
