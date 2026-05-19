@@ -72,6 +72,30 @@ def main():
         "actions": results, "summary": summary,
     }, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     print(f"\n💾 로그: {log_file}")
+
+    # 텔레그램 알림 (액션 있을 때만)
+    try:
+        actionable = [r for r in results if r.get("action") not in ("HOLD", "PRICE_FAIL")]
+        if actionable:
+            from src.telegram_sender import send_message
+            mode_kr = "PAPER" if is_paper else "🔴 REAL"
+            lines = [
+                f"🔍 차트영웅 보유 모니터 ({today})",
+                f"━━━━━━━━━━━━━━━━━━━━━━",
+                f"모드: {mode_kr} | 활성: {summary['active_count']}건 | PnL {summary['pnl_pct']}%",
+                f"",
+            ]
+            for r in actionable:
+                action_kr = {"ADD_BUY": "📥 추매", "PARTIAL_SELL": "💰 부분익절",
+                             "STOPLOSS": "🛑 손절", "FORCE_CLOSE": "🏁 강제청산"}.get(
+                    r.get("action"), r.get("action"))
+                lines.append(f"  {action_kr} {r.get('ticker')} "
+                             f"{r.get('qty', 0)}주 @ {r.get('price', 0):,}원")
+                lines.append(f"     이유: {r.get('reason', '')}")
+            send_message("\n".join(lines))
+    except Exception as e:
+        print(f"⚠️ 텔레그램 알림 실패: {e}")
+
     print("=" * 70)
 
 

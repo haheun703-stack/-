@@ -103,6 +103,31 @@ def main():
         "entry_results": results, "summary": summary,
     }, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     print(f"\n💾 로그: {log_file}")
+
+    # 6) 텔레그램 알림
+    try:
+        from src.telegram_sender import send_message
+        mode_kr = "PAPER 시뮬" if is_paper else "🔴 REAL 실전"
+        lines = [
+            f"📊 차트영웅 마감 사이클 ({today})",
+            f"━━━━━━━━━━━━━━━━━━━━━━",
+            f"모드: {mode_kr}",
+            f"매크로 게이트: {result['gate_1']['score']}/4 "
+            f"{'✓ GO' if result['gate_1']['passed'] else '🛑 차단'}",
+            f"진입: {summary['active_count']}건 "
+            f"(누적 PnL {summary['pnl_pct']}%)",
+        ]
+        for r in results:
+            if r.get("action") in ("PAPER_BUY", "REAL_BUY"):
+                lines.append(f"  ⭐ {r['ticker']} {r.get('qty')}주 @ {r.get('price'):,}원")
+            elif r.get("action") == "SKIP_TOO_EXPENSIVE":
+                lines.append(f"  ⏭️ {r['ticker']} 고가주 제외")
+            elif r.get("action") == "BLOCKED":
+                lines.append(f"  🚫 {r.get('reason', '')}")
+        send_message("\n".join(lines))
+    except Exception as e:
+        print(f"⚠️ 텔레그램 알림 실패: {e}")
+
     print("=" * 70)
 
 
