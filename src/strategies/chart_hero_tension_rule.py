@@ -96,6 +96,12 @@ def decide_action(pos: Position, current_price: float, today: date) -> dict:
         return {"action": "HOLD", "stage": pos.stage, "qty_pct": 0,
                 "reason": "이미 청산됨", "new_stage": pos.stage}
 
+    # C1: 방어 심층화 — current_price 무효 시 HOLD (거래정지/시간외 가짜 손절 방지)
+    if current_price is None or current_price <= 0:
+        return {"action": "HOLD", "stage": pos.stage, "qty_pct": 0,
+                "reason": f"current_price={current_price} 무효 — HOLD",
+                "new_stage": pos.stage}
+
     pnl = compute_pnl_pct(current_price, pos.avg_price)
     held = days_held(pos.entry_date, today)
 

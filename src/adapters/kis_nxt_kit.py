@@ -21,24 +21,10 @@ from datetime import datetime, time as dtime
 from pathlib import Path
 
 import requests
+# C4 보강: 표준 python-dotenv 사용 (따옴표/이스케이프 자동 처리)
+from dotenv import load_dotenv
 
-
-def _load_env():
-    """프로젝트 루트의 .env를 직접 파싱 (dotenv 외부 의존 없이)."""
-    if os.getenv("KIS_APP_KEY"):
-        return
-    p = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in p.read_text(encoding="utf-8").splitlines():
-            s = line.strip()
-            if "=" in s and not s.startswith("#"):
-                k, v = s.split("=", 1)
-                os.environ[k.strip()] = v.strip()
-    except Exception:
-        pass
-
-
-_load_env()
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 _BASE = "https://openapi.koreainvestment.com:9443"
 _token_cache: dict = {"token": None, "time": None}
@@ -85,9 +71,13 @@ def get_nx_price(code: str) -> dict | None:
     if r.status_code != 200 or r.json().get("rt_cd") != "0":
         return None
     o = r.json().get("output", {})
+    # C1 보강 #1: stck_prpr=0 (거래정지/시간외) 시 None 반환 — 가짜 손절 방지
+    price = int(o.get("stck_prpr", 0) or 0)
+    if price <= 0:
+        return None
     return {
         "code": code,
-        "price": int(o.get("stck_prpr", 0) or 0),
+        "price": price,
         "change_pct": float(o.get("prdy_ctrt", 0) or 0),
         "volume": int(o.get("acml_vol", 0) or 0),
         "open": int(o.get("stck_oprc", 0) or 0),

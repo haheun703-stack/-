@@ -16,6 +16,7 @@
   - chart_hero_advisory + four_signal_gate만 본다
 """
 
+import csv
 import datetime as dt
 import json
 import os
@@ -30,9 +31,10 @@ from src.strategies.chart_hero_tension_rule import (
 from src.strategies.d1_confirm import check_d1_candle
 
 
-# 포지션 상태 영구 저장 경로
-POSITIONS_FILE = "data/chart_hero_positions.json"
-PNL_LOG_FILE   = "data/chart_hero_pnl_log.csv"
+# 포지션 상태 영구 저장 경로 (#10: cron cwd 누락 사고 방지 — 절대경로화)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+POSITIONS_FILE = str(PROJECT_ROOT / "data/chart_hero_positions.json")
+PNL_LOG_FILE   = str(PROJECT_ROOT / "data/chart_hero_pnl_log.csv")
 
 
 class ChartHeroExecutor:
@@ -50,8 +52,9 @@ class ChartHeroExecutor:
         else:
             self.order = None
         self.positions: dict[str, dict] = self._load_positions()
-        self.weekly_loss_pct  = 0.0  # 실제 운영 시 PnL 로그에서 계산
-        self.monthly_loss_pct = 0.0
+        # C2: PnL 로그에서 누적 손실률 계산 (긴장 안전망)
+        self.weekly_loss_pct  = self._compute_loss_pct(days=7)
+        self.monthly_loss_pct = self._compute_loss_pct(days=30)
 
     def _load_positions(self) -> dict:
         p = Path(POSITIONS_FILE)
@@ -61,6 +64,53 @@ class ChartHeroExecutor:
             return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {}
+
+    # ─────────────────────────────────────────────────
+    # C2: PnL 누적 추적 (긴장 안전망 — 주-3%/월-5% 게이트)
+    # ─────────────────────────────────────────────────
+    def _load_pnl_log(self) -> list[dict]:
+        """PnL CSV 로그 읽기. 없으면 빈 리스트."""
+        p = Path(PNL_LOG_FILE)
+        if not p.exists():
+            return []
+        try:
+            with p.open(encoding="utf-8") as f:
+                return list(csv.DictReader(f))
+        except Exception:
+            return []
+
+    def _append_pnl_log(self, ticker: str, name: str, qty: int, price: int,
+                       avg_price: float, realized_pl: int, reason: str):
+        """매도 시 PnL 로그 1줄 append (#2: atomic 헤더 — race condition 방지)."""
+        p = Path(PNL_LOG_FILE)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        # 헤더 atomic write (1회만 — 동시 실행 중복 헤더 방지)
+        if not p.exists():
+            with p.open("w", encoding="utf-8", newline="") as f:
+                csv.writer(f).writerow(["date", "ticker", "name", "qty", "price",
+                                       "avg_price", "realized_pl", "reason"])
+        with p.open("a", encoding="utf-8", newline="") as f:
+            csv.writer(f).writerow([dt.date.today().isoformat(), ticker, name, qty,
+                                   price, avg_price, realized_pl, reason])
+
+    def _compute_loss_pct(self, days: int) -> float:
+        """최근 N일간 실현 손익률 (%). 음수면 손실 — 게이트 비교용."""
+        cutoff = dt.date.today() - dt.timedelta(days=days)
+        total = 0
+        for r in self._load_pnl_log():
+            try:
+                if dt.date.fromisoformat(r["date"]) >= cutoff:
+                    total += int(float(r["realized_pl"]))
+            except Exception:
+                continue
+        if self.total_capital <= 0:
+            return 0.0
+        return round(total / self.total_capital * 100, 2)
+
+    def _refresh_loss_pct(self):
+        """다회 실행 대비 매번 갱신 (entry/monitor 진입 직전 호출)."""
+        self.weekly_loss_pct  = self._compute_loss_pct(days=7)
+        self.monthly_loss_pct = self._compute_loss_pct(days=30)
 
     def _save_positions(self):
         p = Path(POSITIONS_FILE)
@@ -72,6 +122,9 @@ class ChartHeroExecutor:
         p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def _compute_qty(self, capital_pct: float, price: int) -> int:
+        # C1: price=0/None/음수 가드 (거래정지/시간외/응답 이상)
+        if price is None or price <= 0:
+            return 0
         amount = self.total_capital * (capital_pct / 100)
         return max(int(amount // price), 1)
 
@@ -84,6 +137,9 @@ class ChartHeroExecutor:
         2,500만 잔고 기준: 1주 75만 초과 = 제외.
         한화에어로 128만, SK하이닉스 174만 등 제외.
         """
+        # C1: price 검증 (None/0/음수 = 거래정지·시간외·응답 이상)
+        if price is None or price <= 0:
+            return False, f"price 무효({price}) — 거래정지/시간외 의심"
         share_pct = price / self.total_capital * 100
         if share_pct > self.MAX_SINGLE_SHARE_PCT:
             return False, f"1주 비중 {share_pct:.1f}% > {self.MAX_SINGLE_SHARE_PCT}% (고가주 제외)"
@@ -98,10 +154,13 @@ class ChartHeroExecutor:
             [{ticker, action, qty, price, result, ...}, ...]
         """
         results = []
-        # 게이트 체크 (주/월 누적 손실)
+        # C2: 게이트 직전 PnL 갱신 (장중 다회 실행 대비)
+        self._refresh_loss_pct()
         gate = check_entry_gate(self.weekly_loss_pct, self.monthly_loss_pct)
         if not gate["allow_new_entry"]:
-            return [{"action": "BLOCKED", "reason": gate["reason"]}]
+            return [{"action": "BLOCKED", "reason": gate["reason"],
+                     "weekly_loss_pct": self.weekly_loss_pct,
+                     "monthly_loss_pct": self.monthly_loss_pct}]
 
         for p in picks_with_confirm:
             if not p.get("will_enter"):
@@ -112,6 +171,11 @@ class ChartHeroExecutor:
                 continue
 
             price = p.get("entry_price_estimate") or p.get("current_price")
+            # C1: price 무효 시 진입 차단 (거래정지/시간외/응답 이상)
+            if price is None or price <= 0:
+                results.append({"ticker": ticker, "action": "SKIP_INVALID_PRICE",
+                                "price": price, "reason": f"price={price} 무효"})
+                continue
             # 고가주 필터 (1주 비중 > 3% 제외)
             affordable, msg = self.is_affordable(price)
             if not affordable:
@@ -119,6 +183,11 @@ class ChartHeroExecutor:
                                 "price": price, "reason": msg})
                 continue
             qty = self._compute_qty(INIT_WEIGHT_PCT, price)
+            # C1: qty=0이면 진입 불가
+            if qty <= 0:
+                results.append({"ticker": ticker, "action": "SKIP_INVALID_QTY",
+                                "price": price, "reason": f"qty={qty} 산출 불가"})
+                continue
 
             if self.paper:
                 # 시뮬레이션: 포지션만 등록
@@ -177,6 +246,9 @@ class ChartHeroExecutor:
         from src.adapters.kis_nxt_kit import get_nx_price
         today = dt.date.today()
         results = []
+        # #4: 추매(ADD_BUY)도 신규 자금 투입 → 게이트 적용
+        self._refresh_loss_pct()
+        gate = check_entry_gate(self.weekly_loss_pct, self.monthly_loss_pct)
 
         for ticker, d in list(self.positions.items()):
             if d.get("is_closed"):
@@ -186,7 +258,12 @@ class ChartHeroExecutor:
             if not p:
                 results.append({"ticker": ticker, "action": "PRICE_FAIL"})
                 continue
-            current_price = p.get("price") or p.get("current") or 0
+            # C1: price=0 폴백 제거 — 거래정지/시간외 시 가짜 -100% STOPLOSS 방지
+            current_price = p.get("price") or p.get("current")
+            if not current_price or current_price <= 0:
+                results.append({"ticker": ticker, "action": "PRICE_FAIL",
+                                "reason": f"current_price={current_price} 무효 (거래정지 의심)"})
+                continue
 
             pos = self._to_position_obj(d)
             action = decide_action(pos, current_price, today)
@@ -198,7 +275,16 @@ class ChartHeroExecutor:
 
             # 액션 실행 (paper or real)
             if action["action"] == "ADD_BUY":
+                # #4: 추매도 신규 자금 투입 → 주/월 게이트 적용 (매도는 항상 허용)
+                if not gate["allow_new_entry"]:
+                    results.append({"ticker": ticker, "action": "ADD_BUY_BLOCKED",
+                                    "reason": f"긴장 안전망: {gate['reason']}"})
+                    continue
                 add_qty = self._compute_qty(action["qty_pct"], current_price)
+                if add_qty <= 0:
+                    results.append({"ticker": ticker, "action": "ADD_BUY_SKIP",
+                                    "reason": f"qty={add_qty} 산출 불가"})
+                    continue
                 self._execute_add_buy(d, current_price, add_qty)
                 results.append({"ticker": ticker, "action": "ADD_BUY",
                                 "qty": add_qty, "price": current_price,
@@ -244,6 +330,12 @@ class ChartHeroExecutor:
         realized = (price - d["avg_price"]) * qty
         d["realized_pl"] = d.get("realized_pl", 0) + int(realized)
         d["total_qty"] -= qty
+        # C2: PnL 로그 CSV append (주/월 누적 손실 추적용)
+        self._append_pnl_log(
+            ticker=d["ticker"], name=d.get("name", ""),
+            qty=qty, price=price, avg_price=d["avg_price"],
+            realized_pl=int(realized), reason=action.get("reason", ""),
+        )
         if d["total_qty"] <= 0 or action["action"] in ("STOPLOSS", "FORCE_CLOSE"):
             d["is_closed"] = True
             d["close_reason"] = action["reason"]

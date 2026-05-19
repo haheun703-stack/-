@@ -25,24 +25,19 @@ import requests
 import datetime as dt
 from pathlib import Path
 
-# .env 로드 (kis_nxt_kit과 동일 패턴)
-def _load_env():
-    if os.getenv("PERPLEXITY_API_KEY"):
-        return
-    p = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in p.read_text(encoding="utf-8").splitlines():
-            s = line.strip()
-            if "=" in s and not s.startswith("#"):
-                k, v = s.split("=", 1)
-                os.environ[k.strip()] = v.strip()
-    except Exception:
-        pass
-
-_load_env()
+# C4: 표준 python-dotenv 사용 (3중 복제 _load_env 제거)
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 
 _PPLX_URL = "https://api.perplexity.ai/chat/completions"
+
+# C5: 한국 주식 ticker 검증 (6자리 숫자, 외국주/오타 차단 — 실주문 안전망)
+_KR_TICKER_RE = re.compile(r"^\d{6}$")
+
+def _is_valid_kr_ticker(t) -> bool:
+    """KOSPI/KOSDAQ ticker 형식 검증 (6자리 숫자만 허용)."""
+    return isinstance(t, str) and bool(_KR_TICKER_RE.match(t))
 
 
 def collect_target_consensus(target_date: str | None = None,
@@ -96,10 +91,15 @@ def collect_target_consensus(target_date: str | None = None,
         # 메타데이터 + upside_pct 자동 계산 (Perplexity 미제공 시) + 중복 제거
         seen = set()
         out = []
+        skipped_invalid = []
         for it in items:
             if not isinstance(it, dict):
                 continue
             tk = it.get("ticker")
+            # C5: LLM 응답 ticker 검증 — 외국주(AAPL)/5자리/None 차단
+            if not _is_valid_kr_ticker(tk):
+                skipped_invalid.append(tk)
+                continue
             if tk in seen:  # 같은 ticker 중복 제거 (첫 번째만)
                 continue
             seen.add(tk)
@@ -114,6 +114,11 @@ def collect_target_consensus(target_date: str | None = None,
             it["source"] = "perplexity_sonar_pro"
             it["report_type"] = it.get("report_type") or direction
             out.append(it)
+        # C5: 차단된 invalid ticker 가시성 (silent 차단 방지)
+        if skipped_invalid:
+            import sys
+            print(f"[C5] LLM invalid ticker 차단: {skipped_invalid[:5]} "
+                  f"(총 {len(skipped_invalid)}건)", file=sys.stderr)
         return out
     except Exception as e:
         return [{"error": f"{type(e).__name__}: {e}"}]

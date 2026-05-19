@@ -32,13 +32,16 @@ from src.strategies.chart_hero_executor import ChartHeroExecutor
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--paper", action="store_true", default=True, help="paper 모드")
-    parser.add_argument("--real", action="store_true", help="실전 모드 (KIS 주문)")
+    # C3: --paper / --real 상호배타 (둘 중 하나 반드시 지정 — 5/27 실전 전환 시 실수 방지)
+    mode_group = parser.add_mutually_exclusive_group(required=True)
+    mode_group.add_argument("--paper", action="store_true", help="paper 시뮬 모드")
+    mode_group.add_argument("--real", action="store_true", help="실전 모드 (KIS 주문)")
     parser.add_argument("--capital", type=float, default=25_000_000, help="잔고 (원)")
     parser.add_argument("--force", action="store_true", help="시각 윈도우 무시 (테스트용)")
     args = parser.parse_args()
 
-    is_paper = not args.real
+    # C3: 명시적 paper/real 판별 (default 의존 제거)
+    is_paper = args.paper
     today = dt.date.today().isoformat()
 
     print("=" * 70)

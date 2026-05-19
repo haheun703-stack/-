@@ -34,8 +34,10 @@ def get_next_trading_date(today: dt.date) -> dt.date:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--paper", action="store_true", default=True)
-    parser.add_argument("--real", action="store_true")
+    # C3: --paper / --real 상호배타 (둘 중 하나 반드시 지정 — 실수 방지)
+    mode_group = parser.add_mutually_exclusive_group(required=True)
+    mode_group.add_argument("--paper", action="store_true", help="paper 시뮬 모드")
+    mode_group.add_argument("--real", action="store_true", help="실전 모드 (KIS 주문)")
     parser.add_argument("--date", default=None, help="D0 (YYYY-MM-DD)")
     parser.add_argument("--live-catalyst", action="store_true",
                         help="Perplexity catalyst 실시간 fallback")
@@ -47,7 +49,7 @@ def main():
     print("=" * 70)
     print(f"📋 차트영웅 D0 후보 선정 ({today} {dt.datetime.now():%H:%M:%S})")
     print(f"   → 진입 예정일: {next_day} D+1 14:55")
-    print(f"   모드: {'PAPER' if not args.real else '🔴 REAL'}")
+    print(f"   모드: {'PAPER' if args.paper else '🔴 REAL'}")
     print("=" * 70)
 
     # 5-Gate 실행

@@ -16,21 +16,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
-
-def _load_env():
-    if os.getenv("SUPABASE_URL"):
-        return
-    p = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in p.read_text(encoding="utf-8").splitlines():
-            s = line.strip()
-            if "=" in s and not s.startswith("#"):
-                k, v = s.split("=", 1)
-                os.environ[k.strip()] = v.strip()
-    except Exception:
-        pass
-
-_load_env()
+# C4: 표준 python-dotenv 사용 (3중 복제 _load_env 제거, 따옴표/이스케이프 자동 처리)
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 
 _client = None
