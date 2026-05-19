@@ -328,7 +328,33 @@ class DataIntegrity:
         return item.ok, item.status
 
     def report_to_telegram(self, result: dict | None = None) -> None:
-        """missing/stale 항목 사장님 카톡 (정상이면 1줄, 이상이면 상세)."""
+        """missing/stale 항목 사장님 카톡 (정상이면 1줄, 이상이면 상세).
+
+        사장님 결단 C (2026-05-19): 도배 방지를 위해 디폴트 OFF.
+        AGENT_TELEGRAM_ENABLED=true 시만 발송.
+        KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
+        """
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            # result 인자가 없으면 build_report로 간이 카운트
+            missing_n = 0
+            stale_n = 0
+            if result is not None:
+                missing_n = len(result.get("missing", []))
+                stale_n = len(result.get("stale", []))
+            else:
+                try:
+                    report = self._build_report()
+                    missing_n = len(report.missing)
+                    stale_n = len(report.stale)
+                except Exception:
+                    pass
+            logger.info(
+                "[DataIntegrity] 결과 logger.info만 (AGENT_TELEGRAM_ENABLED=false): "
+                "missing=%d stale=%d",
+                missing_n, stale_n,
+            )
+            return
+
         try:
             from src.telegram_sender import send_message
         except Exception:
@@ -669,7 +695,7 @@ def _post_process_result(result: dict) -> None:
         if should_kill:
             try:
                 from src.agents.kill_switch_manager import activate_kill_switch
-                activate_kill_switch(reason=kill_reason, source="DataIntegrity", send_tg=False)
+                activate_kill_switch(reason=kill_reason, source="DataIntegrity", send_tg=True)  # 5/19 결단 C — RED 단일 채널만
             except Exception as e:
                 logger.warning(
                     "[DataIntegrity] activate_kill_switch 실패 (모듈 부재 가능): %s", e
@@ -691,7 +717,11 @@ def _post_process_result(result: dict) -> None:
 
 
 def run_once(send_tg: bool = True) -> dict:
-    """1회 실행 — CLI 진입점에서 사용."""
+    """1회 실행 — CLI 진입점에서 사용.
+
+    사장님 결단 C (2026-05-19): send_tg=True여도 AGENT_TELEGRAM_ENABLED=false면 발송 SKIP.
+    KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
+    """
     agent = DataIntegrity()
     report = agent.build_report()
     result = report.to_dict()
@@ -701,11 +731,16 @@ def run_once(send_tg: bool = True) -> dict:
     print(agent._format_telegram(report))
 
     if send_tg:
-        try:
-            from src.telegram_sender import send_message
-            send_message(agent._format_telegram(report))
-        except Exception as e:
-            logger.warning(f"텔레그램 전송 실패(무시): {e}")
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            logger.info(
+                "[DataIntegrity] run_once 텔레그램 SKIP (AGENT_TELEGRAM_ENABLED=false)"
+            )
+        else:
+            try:
+                from src.telegram_sender import send_message
+                send_message(agent._format_telegram(report))
+            except Exception as e:
+                logger.warning(f"텔레그램 전송 실패(무시): {e}")
 
     return result
 

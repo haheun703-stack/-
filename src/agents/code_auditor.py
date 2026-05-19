@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import ast
 import logging
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -154,7 +155,7 @@ class CodeAuditor:
             activate_kill_switch(
                 reason=f"코드 CRITICAL {critical_count}건: {first_critical.get('rule', 'unknown')}",
                 source="CodeAuditor",
-                send_tg=False,
+                send_tg=True,  # 5/19 사장님 결단 C — KILL_SWITCH RED 단일 채널만 카톡
             )
 
         # latest.json 저장
@@ -224,8 +225,26 @@ class CodeAuditor:
         - CRITICAL>0 or HIGH>0: 즉시 카톡 (상세)
         - CRITICAL=0 AND HIGH=0 AND MEDIUM>0: 카톡 SKIP (logger.info만, daily summary용)
         - 전부 0: 짧은 OK 1줄
+
+        사장님 결단 C (2026-05-19): 도배 방지를 위해 디폴트 OFF.
+        AGENT_TELEGRAM_ENABLED=true 시만 발송.
+        KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
         """
         from datetime import datetime
+
+        # 카운트 (가드 메시지에도 사용)
+        n_crit = len(result.get("critical", []))
+        n_high = len(result.get("high", []))
+        n_med = len(result.get("medium", []))
+
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            logger.info(
+                "[CodeAuditor] 결과 logger.info만 (AGENT_TELEGRAM_ENABLED=false): "
+                "CRITICAL=%d HIGH=%d MEDIUM=%d",
+                n_crit, n_high, n_med,
+            )
+            return
+
         try:
             from src.telegram_sender import send_message
         except Exception as e:
@@ -233,10 +252,7 @@ class CodeAuditor:
             return
 
         now = datetime.now().strftime("%H:%M")
-        # result["summary"]가 S1 표준 적용 후 str로 바뀜 → 카운트는 critical/high/medium 리스트에서 직접
-        n_crit = len(result.get("critical", []))
-        n_high = len(result.get("high", []))
-        n_med = len(result.get("medium", []))
+        # result["summary"]가 S1 표준 적용 후 str로 바뀜 → 카운트는 critical/high/medium 리스트에서 직접 (위에서 이미 산출)
 
         # C5 — MEDIUM만 있을 때 카톡 SKIP (도배 방지)
         if n_crit == 0 and n_high == 0:

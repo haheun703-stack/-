@@ -294,7 +294,7 @@ class EnvChecker:
             activate_kill_switch(
                 reason=f"환경변수/파일 {len(result['failed'])}건 FAIL: {fail_summary}",
                 source="EnvChecker",
-                send_tg=False,  # 텔레그램은 워커가 별도로 발송 (중복 방지)
+                send_tg=True,  # 5/19 사장님 결단 C — KILL_SWITCH RED 단일 채널만 카톡
             )
 
         # latest.json 저장 (Reporter가 읽음)
@@ -307,7 +307,21 @@ class EnvChecker:
         """비활성/실패 항목 사장님 카톡.
 
         status=OK면 짧게 1줄, FAIL이면 상세.
+
+        사장님 결단 C (2026-05-19): 도배 방지를 위해 디폴트 OFF.
+        AGENT_TELEGRAM_ENABLED=true 시만 발송.
+        KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
         """
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            logger.info(
+                "[EnvChecker] 결과 logger.info만 (AGENT_TELEGRAM_ENABLED=false): %s — "
+                "ok=%s fail=%s",
+                result.get("status", "?"),
+                result.get("ok_count", "?"),
+                result.get("fail_count", "?"),
+            )
+            return
+
         try:
             from src.telegram_sender import send_message
         except Exception as e:

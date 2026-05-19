@@ -6,6 +6,16 @@
 사용:
     from src.agents.kill_switch_manager import activate_kill_switch
     activate_kill_switch(reason="AUTO_TRADE_5_20=false", source="EnvChecker")
+
+환경변수 가드 (5/19 사장님 결단 C — 카톡 도배 방지):
+- AGENT_TELEGRAM_ENABLED=false (디폴트): 4명 워커 + Reporter 카톡 OFF (logger.info만)
+- AGENT_TELEGRAM_ENABLED=true: 4명 워커 + Reporter 카톡 ON (5/27+ 웹 대시보드 통합 검토 후 결정)
+- KILL_SWITCH RED 발동 카톡: 항상 ON (kill_switch_manager.activate_kill_switch send_tg=True가 디폴트)
+
+배경 (1년 패턴 + 5/19 단타봇 사고 통합):
+- 단타봇 사고: 카톡 누락 → 사장님이 매매 0건을 알아채지 못함
+- 퀀트봇 함정: 카톡 도배 (5명 워커 × 4슬롯 + 매매 cron) → 사장님이 무시 → 진짜 RED 묻힘
+- 결단 C: 평상시 카톡 OFF, 오직 KILL_SWITCH RED만 단일 채널로 알림
 """
 
 from __future__ import annotations

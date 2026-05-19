@@ -614,6 +614,10 @@ class Reporter:
 
         Returns:
           포맷된 메시지 (콘솔 출력 용)
+
+        사장님 결단 C (2026-05-19): 도배 방지를 위해 디폴트 OFF.
+        AGENT_TELEGRAM_ENABLED=true 시만 발송 (--no-tg와 별개로 환경변수도 가드).
+        KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
         """
         if slot not in SLOTS:
             raise ValueError(f"알 수 없는 슬롯: {slot} (허용: {list(SLOTS)})")
@@ -624,6 +628,16 @@ class Reporter:
         if dry_run:
             logger.info("[dry-run] slot=%s, 텔레그램 발송 SKIP", slot)
             self._save_self_report(slot, results, dry_run=True)
+            return msg
+
+        # 환경변수 가드 — dry_run=False여도 디폴트 OFF (5/19 결단 C)
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            logger.info(
+                "[Reporter] 슬롯=%s 텔레그램 SKIP (AGENT_TELEGRAM_ENABLED=false) — "
+                "stdout/latest.json만",
+                slot,
+            )
+            self._save_self_report(slot, results, dry_run=False)
             return msg
 
         try:

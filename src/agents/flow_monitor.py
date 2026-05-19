@@ -251,7 +251,22 @@ class FlowMonitor:
           - force=True → 무조건 발송
           - 14:55 이상 + buy_success=0 → 마감 진단 카톡
           - 그 외(단순 SKIP) → 발송 안 함 (도배 방지)
+
+        사장님 결단 C (2026-05-19): 도배 방지를 위해 디폴트 OFF.
+        AGENT_TELEGRAM_ENABLED=true 시만 발송 (force=True여도 무시).
+        KILL_SWITCH RED는 kill_switch_manager가 별도로 발송 (유일한 단일 채널).
         """
+        if os.environ.get("AGENT_TELEGRAM_ENABLED", "false").lower() != "true":
+            logger.info(
+                "[FlowMonitor] 결과 logger.info만 (AGENT_TELEGRAM_ENABLED=false): "
+                "buy_success=%s buy_failed=%s stage=%s ts=%s",
+                trace.get("buy_success", 0),
+                trace.get("buy_failed", 0),
+                trace.get("blocked_at_stage", "?"),
+                trace.get("timestamp", "?"),
+            )
+            return
+
         if not force and not self._matters(trace):
             logger.info(
                 "[FlowMonitor] matter_threshold 미충족 — 텔레그램 SKIP (force=False, %s)",
@@ -699,7 +714,7 @@ def _post_process_trace(trace: dict) -> None:
         if should_kill:
             try:
                 from src.agents.kill_switch_manager import activate_kill_switch
-                activate_kill_switch(reason=kill_reason, source="FlowMonitor", send_tg=False)
+                activate_kill_switch(reason=kill_reason, source="FlowMonitor", send_tg=True)  # 5/19 결단 C — RED 단일 채널만
             except Exception as e:
                 logger.warning("[FlowMonitor] activate_kill_switch 실패 (모듈 부재 가능): %s", e)
     except Exception as e:
