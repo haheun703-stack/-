@@ -156,6 +156,53 @@ def get_catalyst(date: str, ticker: str) -> Optional[dict]:
         return None
 
 
+def get_chart_hero_d1_candidates(date: str, min_continuity: int = 40) -> list[dict]:
+    """정보봇 권장 쿼리 — 차트영웅 D+1 매매 후보 자동 추출.
+
+    조건 (정보봇 5/19 가이드):
+      - surge_type ∈ {limit_up, strong}  급등 강도
+      - is_one_off_event = False          일회성 이슈 제외
+      - continuity_score >= 40            재료 연속성
+
+    Returns:
+        [{ticker, name, sector, catalyst_summary, catalyst_category,
+          continuity_score, sector_co_surge_n, news_count_5d,
+          smart_money_5d_pct, ...}]
+    """
+    client = _get_client()
+    if not client:
+        return []
+    try:
+        res = (client.table("quant_surge_catalyst")
+               .select("*")
+               .eq("date", date)
+               .in_("surge_type", ["limit_up", "strong"])
+               .eq("is_one_off_event", False)
+               .gte("continuity_score", min_continuity)
+               .order("continuity_score", desc=True)
+               .execute())
+        return res.data or []
+    except Exception as e:
+        print(f"[get_chart_hero_d1_candidates] error: {e}")
+        return []
+
+
+def get_catalyst_batch(date: str, tickers: list[str]) -> dict[str, dict]:
+    """여러 ticker의 catalyst 일괄 조회 → {ticker: row} 맵."""
+    client = _get_client()
+    if not client:
+        return {}
+    try:
+        res = (client.table("quant_surge_catalyst")
+               .select("*")
+               .eq("date", date)
+               .in_("ticker", tickers)
+               .execute())
+        return {r["ticker"]: r for r in (res.data or []) if r.get("ticker")}
+    except Exception:
+        return {}
+
+
 def get_market_brain_today(date: str) -> Optional[dict]:
     """단타봇용 advisory가 아닌, 우리 자체 brain 데이터 확인용."""
     client = _get_client()

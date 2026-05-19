@@ -35,6 +35,7 @@ from src.macro.chart_hero_advisory import build_chart_hero_advisory
 from src.adapters.kis_weekly_kit import get_stock_weekly, compute_weekly_stoch_k, compute_ma20_dev
 from src.adapters.quant_supabase_reader import (
     get_yesterday_surge_pool, get_sector_picks_today, get_catalyst, get_company_card,
+    get_chart_hero_d1_candidates, get_catalyst_batch,
 )
 from src.intel.analyst_target_collector import load_seed_csv, find_high_upside_picks
 from src.intel.perplexity_catalyst import analyze_catalyst, compute_continuity_score
@@ -61,49 +62,62 @@ def gate_1_macro(today: str) -> dict:
 
 
 def gate_2_surge_pool(today: str, min_surge_pct: float = 25.0) -> list[dict]:
-    """Gate 2: 어제 급등 종목 풀 (상한가/급등).
+    """Gate 2: 오늘(D0) 상한가/급등 종목 풀.
 
-    1차: Supabase quant_surge_pullback (어제 D0 surge_pct ≥ 25%)
-    2차: Supabase quant_sector_picks (오늘 BAT-D 종목 후보)
-    3차: 사장님 시드 데이터 (5/19, fallback)
+    시간 흐름 (정보봇 가이드 5/19 반영):
+      D0 16:30  정보봇 quant_surge_catalyst 작성 (catalyst_filled=True)
+      D0 17:00  본 picker 실행 → 다음날 진입 후보 저장
+      D+1 14:55 d1_confirm 양봉 확인 → 진입
+
+    1차: 정보봇 quant_surge_catalyst (D0 상한가+catalyst 분석 완료)
+    2차: quant_surge_pullback (어제 D-1 데이터, 보강용)
+    3차: 시드 CSV (fallback)
     """
     import datetime as dt
     yesterday = (dt.date.fromisoformat(today) - dt.timedelta(days=1)).isoformat()
-
-    # 1차: 어제 상한가 풀
     pool = []
-    surges = get_yesterday_surge_pool(yesterday, min_surge_pct)
-    for s in surges:
-        # 데이터 이상치 필터 (한국 일일 가격제한 ±30%)
-        sp = s.get("surge_pct", 0)
-        if sp and sp > 50:
+
+    # 1차: 정보봇 D0 catalyst (limit_up/strong, 일회성 X, continuity ≥ 40)
+    candidates = get_chart_hero_d1_candidates(today, min_continuity=40)
+    for c in candidates:
+        sp = c.get("surge_pct", 0)
+        if sp and sp > 50:    # 데이터 이상치 필터
             continue
         pool.append({
-            "ticker": s.get("ticker"),
-            "name": s.get("name", ""),
-            "current_price": s.get("surge_close", 0) or s.get("latest_close", 0),
-            "sector": s.get("sector", ""),
+            "ticker": c.get("ticker"),
+            "name": c.get("name", ""),
+            "current_price": c.get("surge_price", 0),
+            "sector": c.get("sector", ""),
             "surge_pct": sp,
-            "source": "quant_surge_pullback",
+            "surge_type": c.get("surge_type"),
+            "source": "jgis_chart_hero_catalyst",
+            # 정보봇 catalyst 정보 미리 inject (Gate 4-A에서 재확인)
+            "catalyst_summary": c.get("catalyst_summary"),
+            "catalyst_category": c.get("catalyst_category"),
+            "continuity_score": c.get("continuity_score"),
+            "is_one_off_event": c.get("is_one_off_event"),
+            "catalyst_source": "jgis_supabase",
         })
 
-    # 2차: 오늘 sector_picks 추가 (중복 제거)
-    if len(pool) < 5:
+    # 2차: 어제 surge_pullback 보강 (정보봇 catalyst 미커버 종목)
+    if len(pool) < 10:
         existing_tk = {p["ticker"] for p in pool}
-        picks = get_sector_picks_today(today)
-        for p in picks[:30]:
-            tk = p.get("ticker")
-            if tk and tk not in existing_tk:
-                pool.append({
-                    "ticker": tk,
-                    "name": p.get("name", ""),
-                    "current_price": p.get("close", 0),
-                    "sector": p.get("sector", ""),
-                    "buy_score": p.get("buy_score", 0),
-                    "source": "quant_sector_picks",
-                })
+        surges = get_yesterday_surge_pool(yesterday, min_surge_pct)
+        for s in surges:
+            tk = s.get("ticker")
+            sp = s.get("surge_pct", 0)
+            if not tk or tk in existing_tk or (sp and sp > 50):
+                continue
+            pool.append({
+                "ticker": tk,
+                "name": s.get("name", ""),
+                "current_price": s.get("surge_close", 0) or s.get("latest_close", 0),
+                "sector": s.get("sector", ""),
+                "surge_pct": sp,
+                "source": "quant_surge_pullback",
+            })
 
-    # 3차: fallback (Supabase 결과 0건 시)
+    # 3차: fallback
     if not pool:
         seed = load_seed_csv()
         for s in seed:
@@ -157,34 +171,55 @@ def gate_3_pullback_filter(pool: list[dict], today: str) -> list[dict]:
     return out
 
 
-def gate_4a_catalyst(pool: list[dict], analyze_all: bool = False) -> list[dict]:
-    """Gate 4-A: catalyst 연속성 ≥ 60.
+def gate_4a_catalyst(pool: list[dict], today: str,
+                     fallback_to_perplexity: bool = False) -> list[dict]:
+    """Gate 4-A: 정보봇 quant_surge_catalyst → catalyst 연속성 점수.
 
-    Args:
-        analyze_all: True면 Perplexity로 전체 분석 (비용 발생)
-                     False면 시드 또는 정보봇 quant_surge_catalyst 활용 (기본)
+    1차: 정보봇 Supabase (5/19~ 매일 16:30 갱신, get_catalyst_batch)
+    2차: Perplexity 자체 분석 (fallback, 비용 발생)
+
+    통과 기준: continuity_score ≥ 40 (정보봇 권장) OR ≥ MIN_CONTINUITY_SCORE(60, 우리 자체)
     """
+    if not pool:
+        return []
+    tickers = [p["ticker"] for p in pool if p.get("ticker")]
+    catalyst_map = get_catalyst_batch(today, tickers)
+
     out = []
     for p in pool:
-        if analyze_all:
-            c = analyze_catalyst(p["ticker"], p["name"])
-            cs = compute_continuity_score(c)
-            p["catalyst_category"] = c.get("catalyst_category", "기타")
-            p["catalyst_summary"] = c.get("catalyst_summary", "")
-            p["continuity_score"] = cs
-            p["is_one_off_event"] = c.get("is_one_off_event", False)
+        c = catalyst_map.get(p["ticker"])
+        if c:
+            p["catalyst_category"] = c.get("catalyst_category")
+            p["catalyst_summary"] = c.get("catalyst_summary")
+            p["continuity_score"] = c.get("continuity_score")
+            p["is_one_off_event"] = c.get("is_one_off_event")
+            p["surge_type"] = c.get("surge_type")
+            p["smart_money_5d_pct"] = c.get("smart_money_5d_pct")
+            p["news_count_5d"] = c.get("news_count_5d")
+            p["catalyst_source"] = "jgis_supabase"
+        elif fallback_to_perplexity:
+            # Perplexity fallback
+            pc = analyze_catalyst(p["ticker"], p["name"])
+            p["catalyst_category"] = pc.get("catalyst_category")
+            p["catalyst_summary"] = pc.get("catalyst_summary")
+            p["continuity_score"] = compute_continuity_score(pc)
+            p["is_one_off_event"] = pc.get("is_one_off_event")
+            p["catalyst_source"] = "perplexity_fallback"
         else:
-            # PLACEHOLDER: 정보봇 quant_surge_catalyst 조회 자리
             p["catalyst_category"] = None
-            p["catalyst_summary"] = None
-            p["continuity_score"] = None  # 정보봇 응답 대기
+            p["continuity_score"] = None
             p["is_one_off_event"] = None
+            p["catalyst_source"] = "none"
 
-        # 통과 기준
-        if p.get("continuity_score") is not None:
-            p["passed_gate4a"] = p["continuity_score"] >= MIN_CONTINUITY_SCORE
+        # 통과 기준: 정보봇 40 ≥ (정보봇 권장) OR 우리 60 ≥ (Perplexity 자체)
+        cs = p.get("continuity_score")
+        one_off = p.get("is_one_off_event")
+        if cs is None:
+            p["passed_gate4a"] = None   # 데이터 부재
+        elif one_off:
+            p["passed_gate4a"] = False  # 일회성 이슈 제외
         else:
-            p["passed_gate4a"] = None  # 데이터 부재 시 None
+            p["passed_gate4a"] = cs >= 40   # 정보봇 권장 기준 채택
         out.append(p)
     return out
 
@@ -273,9 +308,10 @@ def run_picker(today: str | None = None,
     pool = gate_4b_upside(pool)
     pool = [p for p in pool if p.get("passed_gate4b")]
 
-    # === Gate 4-A (catalyst) ===
-    pool = gate_4a_catalyst(pool, analyze_all=analyze_catalyst_live)
-    # Gate 4-A는 정보봇 데이터 없으면 None — 일단 통과로 간주 (5/21 정보봇 통합 후 강제)
+    # === Gate 4-A (catalyst, 정보봇 우선) ===
+    pool = gate_4a_catalyst(pool, today, fallback_to_perplexity=analyze_catalyst_live)
+    # passed_gate4a is False면 제외, None(데이터 부재)은 통과로 간주 (백업)
+    pool = [p for p in pool if p.get("passed_gate4a") is not False]
 
     # === Gate 5 (주봉 스토캐스틱) ===
     pool = gate_5_weekly_stoch(pool)
