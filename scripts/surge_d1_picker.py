@@ -33,6 +33,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.macro.four_signal_gate import compute_four_signal_gate
 from src.macro.chart_hero_advisory import build_chart_hero_advisory
 from src.adapters.kis_weekly_kit import get_stock_weekly, compute_weekly_stoch_k
+from src.adapters.quant_supabase_reader import (
+    get_yesterday_surge_pool, get_sector_picks_today, get_catalyst, get_company_card,
+)
 from src.intel.analyst_target_collector import load_seed_csv, find_high_upside_picks
 from src.intel.perplexity_catalyst import analyze_catalyst, compute_continuity_score
 
@@ -60,24 +63,58 @@ def gate_1_macro(today: str) -> dict:
 def gate_2_surge_pool(today: str, min_surge_pct: float = 25.0) -> list[dict]:
     """Gate 2: 어제 급등 종목 풀 (상한가/급등).
 
-    1차: Supabase quant_surge_pullback (정보봇 의존 X, 우리 자체)
-    2차: 사장님 시드 데이터 (5/19 시점)
-
-    TODO 5/21: Supabase 직접 조회 어댑터 작성
+    1차: Supabase quant_surge_pullback (어제 D0 surge_pct ≥ 25%)
+    2차: Supabase quant_sector_picks (오늘 BAT-D 종목 후보)
+    3차: 사장님 시드 데이터 (5/19, fallback)
     """
-    # PLACEHOLDER: 5/19 시드 32종목을 surge_pool로 사용 (백테스트용)
-    # 5/22 실전에는 Supabase quant_surge_pullback에서 어제(D-1) 상한가 풀 가져옴
-    seed = load_seed_csv()
+    import datetime as dt
+    yesterday = (dt.date.fromisoformat(today) - dt.timedelta(days=1)).isoformat()
+
+    # 1차: 어제 상한가 풀
     pool = []
-    for s in seed:
-        if not s.get("ticker"):
+    surges = get_yesterday_surge_pool(yesterday, min_surge_pct)
+    for s in surges:
+        # 데이터 이상치 필터 (한국 일일 가격제한 ±30%)
+        sp = s.get("surge_pct", 0)
+        if sp and sp > 50:
             continue
         pool.append({
-            "ticker": s["ticker"],
-            "name": s["name"],
-            "current_price": s.get("current_price", 0),
-            "source": "seed_5_19_target_uplift",  # 5/19 목표가 상향 = D-1 강한 종목 proxy
+            "ticker": s.get("ticker"),
+            "name": s.get("name", ""),
+            "current_price": s.get("surge_close", 0) or s.get("latest_close", 0),
+            "sector": s.get("sector", ""),
+            "surge_pct": sp,
+            "source": "quant_surge_pullback",
         })
+
+    # 2차: 오늘 sector_picks 추가 (중복 제거)
+    if len(pool) < 5:
+        existing_tk = {p["ticker"] for p in pool}
+        picks = get_sector_picks_today(today)
+        for p in picks[:30]:
+            tk = p.get("ticker")
+            if tk and tk not in existing_tk:
+                pool.append({
+                    "ticker": tk,
+                    "name": p.get("name", ""),
+                    "current_price": p.get("close", 0),
+                    "sector": p.get("sector", ""),
+                    "buy_score": p.get("buy_score", 0),
+                    "source": "quant_sector_picks",
+                })
+
+    # 3차: fallback (Supabase 결과 0건 시)
+    if not pool:
+        seed = load_seed_csv()
+        for s in seed:
+            if not s.get("ticker"):
+                continue
+            pool.append({
+                "ticker": s["ticker"], "name": s["name"],
+                "current_price": s.get("current_price", 0),
+                "source": "seed_5_19_target_uplift",
+            })
+
     return pool
 
 
