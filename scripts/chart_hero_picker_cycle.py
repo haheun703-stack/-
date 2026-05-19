@@ -3,11 +3,11 @@
 시간 흐름 (정보봇 통합 가이드 채택):
   D0 16:30  정보봇 quant_surge_catalyst 갱신 완료
   D0 17:30  본 사이클 → 5-Gate 통과 종목을 picks_d1.json 에 저장
-  D+1 14:55 chart_hero_entry_cycle 양봉 확인 + 진입
+  D+1 14:55 chart_hero_close_cycle 양봉 확인 + 진입 (D+1 종가 직전)
 
 저장 위치:
   data/chart_hero_picks_{D+1_date}.json
-    → 다음날 14:55 entry_cycle이 읽음
+    → 다음날 14:55 close_cycle이 읽음 (D+1 양봉 확인 후 종가 직전 진입)
 
 cron 등록:
   30 17 * * 1-5 cd ~/quantum-master && ./venv/bin/python3.11 scripts/chart_hero_picker_cycle.py --paper >> /tmp/chart_hero_picker.log 2>&1
