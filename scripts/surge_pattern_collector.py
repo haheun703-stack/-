@@ -56,6 +56,7 @@ INVESTOR_DB = QUANTUM_DATA / "investor_flow" / "investor_daily.db"
 SURGE_PCT = 10.0   # D-1 등락률 ≥ +10%
 LIMIT_PCT = 29.5   # 상한가 (한국 시장 ±30%)
 STRONG_PCT = 20.0  # 강세 ≥ +20%
+CHG_MAX = 35.0     # 상한선 (한국 ±30% + 여유) — 초과 시 액면분할/감자/권리락 이상치로 판단
 MIN_VOL = 1000     # 최소 거래량 (관리종목 노이즈 제거)
 
 
@@ -202,6 +203,9 @@ def extract_surge_stocks(target_date: str) -> list[dict]:
         if vol < MIN_VOL:
             continue
         if chg < SURGE_PCT:
+            continue
+        if chg > CHG_MAX:
+            # 액면분할/감자/권리락 이상치 — 5/20 dry-run 국일제지 +791%, 자연과환경 +711% 등
             continue
 
         if chg >= LIMIT_PCT:
