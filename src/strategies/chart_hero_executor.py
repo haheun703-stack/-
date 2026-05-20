@@ -70,13 +70,19 @@ class ChartHeroExecutor:
     # → 퀀트봇에서 같은 사고 재발 방지
     # ─────────────────────────────────────────────────
     def _load_hold_list(self) -> dict:
-        """config/hold_list.json 로드. 형식: {ticker: {name, reason, until}}"""
+        """config/hold_list.json 로드. 형식: {ticker: {name, reason, until}}
+
+        Minor 보강 (5/20 검수): `_` prefix 키 필터링 (메타/예시 오염 방지).
+        예: `_meta`, `_example_엘앤에프` 등은 실제 보호 항목이 아니므로 제외.
+        """
         # 우선 config/, 폴백으로 data/ (마이그레이션 호환)
         for path_str in ("config/hold_list.json", "data/hold_list.json"):
             p = Path(path_str)
             if p.exists():
                 try:
-                    return json.loads(p.read_text(encoding="utf-8"))
+                    data = json.loads(p.read_text(encoding="utf-8"))
+                    # `_` prefix 키 제외 (메타/예시 노이즈 차단)
+                    return {k: v for k, v in data.items() if not k.startswith("_")}
                 except Exception:
                     continue
         return {}

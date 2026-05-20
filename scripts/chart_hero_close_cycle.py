@@ -63,6 +63,20 @@ def main():
         msg = f"🛑 KILL_SWITCH 활성 — 차트영웅 매수 사이클 자동 차단 ({today})"
         print(f"\n{msg}")
         print("   해소: rm data/KILL_SWITCH (시장 회복 확인 후 수동 해소)")
+        # Minor 보강 (5/20 검수): 사후 감리 추적용 파일 로그 1줄
+        try:
+            log_dir = Path("data/logs/chart_hero")
+            log_dir.mkdir(parents=True, exist_ok=True)
+            (log_dir / f"close_cycle_{today}_BLOCKED.json").write_text(
+                json.dumps({
+                    "date": today,
+                    "mode": "paper" if is_paper else "real",
+                    "action": "BLOCKED",
+                    "reason": "KILL_SWITCH_ACTIVE",
+                    "timestamp": dt.datetime.now().isoformat(timespec="seconds"),
+                }, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
         try:
             from src.telegram_sender import send_message
             send_message(msg)
