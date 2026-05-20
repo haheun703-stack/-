@@ -43,14 +43,14 @@ ENV_PATH = PROJECT_ROOT / ".env"
 DATA_DIR = PROJECT_ROOT / "data"
 
 # 점검 대상 환경변수 — (키, 기대값 또는 검증함수, 설명)
+# 2026-05-21 일반화: 5/20 일회성 토글(AUTO_TRADE_5_20) 제거, AMOUNT/TRADES 메모리(.env) 값으로 통일
 REQUIRED_ENV_VARS: list[tuple[str, object, str]] = [
     ("MODEL", "REAL", "실계좌 모드 (모의투자 차단)"),
     ("AUTO_TRADING_ENABLED", "1", "KIS 어댑터 가드"),
-    ("AUTO_TRADE_5_20", "true", "5/20 출격 게이트"),
     ("PAPER_MIRROR_MODE", "true", "paper 시뮬 병행"),
-    ("AUTO_TRADING_MAX_QTY", "1", "1주 한도"),
-    ("AUTO_TRADING_MAX_AMOUNT", "100000", "10만원 한도"),
-    ("AUTO_TRADING_MAX_TRADES_PER_DAY", "1", "일일 1건"),
+    ("AUTO_TRADING_MAX_QTY", "1", "1주 한도 (워밍업)"),
+    ("AUTO_TRADING_MAX_AMOUNT", "3000000", "300만원 한도 (퐝가님 5/14 결단)"),
+    ("AUTO_TRADING_MAX_TRADES_PER_DAY", "15", "일일 15건 한도"),
     ("AUTO_TRADING_WHITELIST_ONLY", "0", "사장님 5/18 결단 (전종목 OK)"),
     ("AUTO_TRADING_TELEGRAM_ALERT", "1", "텔레그램 알림 ON"),
     ("KIS_APP_KEY", "_nonempty_min10", "KIS API 키 (길이 ≥10)"),
@@ -59,22 +59,24 @@ REQUIRED_ENV_VARS: list[tuple[str, object, str]] = [
 ]
 
 # 사전 조건 파일
+# 2026-05-21 일반화: KILL_SWITCH cond는 _check_kill_switch_with_grace가 시간 기반 처리 → 단순화
 REQUIRED_FILES: list[tuple[str, Path, dict]] = [
-    ("KILL_SWITCH",                  DATA_DIR / "KILL_SWITCH",
-     {"must_exist_until": "2026-05-20 06:00",
-      "must_absent_between": ("2026-05-20 06:00", "2026-05-20 16:00")}),
+    ("KILL_SWITCH",                  DATA_DIR / "KILL_SWITCH", {}),
     ("tomorrow_picks.json",          DATA_DIR / "tomorrow_picks.json",
      {"must_exist": True, "max_age_hours": 24}),
     ("owner_rule_positions.json",    DATA_DIR / "owner_rule_positions.json",
      {"must_exist": True}),
 ]
 
-# 5/20 cron 라인 키워드 (VPS crontab grep 검증)
+# cron 라인 키워드 (VPS crontab grep 검증)
+# 2026-05-21 일반화: 5/20 단일 일자 정규식 → 5월 일자 범위 [\d,\-]+ 매칭
+#   (실제 등록 cron: "0 6 21,22,26,27,28,29,30 5 *" 등 5/21~30 다중 일자)
+#   5/31+ 또는 6월+ 운영 시 cron 자체를 "* * 1-5"로 재일반화 필요
 REQUIRED_CRON_LINES: list[tuple[str, str]] = [
-    ("KILL_SWITCH 자동 삭제 06:00", r"0\s+6\s+20\s+5"),
-    ("KILL_SWITCH 자동 복구 16:00", r"0\s+16\s+20\s+5"),
-    ("auto_buy_executor 14:00-14:55", r"\*/5\s+14\s+20\s+5"),
-    ("owner_rule_monitor 9-15시", r"\*/5\s+9-15\s+20"),
+    ("KILL_SWITCH 자동 삭제 06:00", r"0\s+6\s+[\d,\-]+\s+5"),
+    ("KILL_SWITCH 자동 복구 16:00", r"0\s+16\s+[\d,\-]+\s+5"),
+    ("chart_hero close_cycle 14:55", r"55\s+14\s+\*\s+\*\s+1-5"),
+    ("owner_rule_monitor 9-15시", r"\*/5\s+9-15\s+[\d,\-]+\s+5"),
 ]
 
 
