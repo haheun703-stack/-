@@ -1,0 +1,15 @@
+{
+  "_meta": {
+    "created": "2026-05-20",
+    "purpose": "보호 종목 — 차트영웅 자동 매도 차단 (단타봇 200만원 손실 사건 재발 방지)",
+    "format": "ticker: {name, reason, until (YYYY-MM-DD), added_at}",
+    "note": "until 날짜 지나면 자동 만료 (보호 해제)",
+    "example_disabled": true
+  },
+  "_example_엘앤에프": {
+    "name": "엘앤에프",
+    "reason": "7월 실적 발표 대기 — 전력섹터 단가 인상 호재",
+    "until": "2026-07-31",
+    "added_at": "2026-05-20"
+  }
+}

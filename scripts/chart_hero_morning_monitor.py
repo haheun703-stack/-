@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.strategies.chart_hero_executor import ChartHeroExecutor
+from src.agents.kill_switch_manager import is_kill_switch_active
 
 
 def main():
@@ -41,8 +42,16 @@ def main():
     print(f"   모드: {'PAPER' if is_paper else '🔴 REAL'}")
     print("=" * 70)
 
+    # ★ P0 (5/20 추가): KILL_SWITCH 경고 (매도 액션은 손실 회피 차원에서 진행)
+    # morning_monitor는 매수(ADD_BUY)와 매도(STOPLOSS/PARTIAL_SELL) 모두 — 매도는 허용
+    # 매수 차단은 executor 내부 (executor가 KILL_SWITCH 체크하여 ADD_BUY 막음)
+    kill_switch_active = is_kill_switch_active()
+    if kill_switch_active:
+        print("\n🛑 KILL_SWITCH 활성 — 추매(ADD_BUY) 자동 차단, 매도(STOPLOSS/PARTIAL_SELL)는 진행")
+
     executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital,
-                                  max_qty_per_ticker=args.max_qty)
+                                  max_qty_per_ticker=args.max_qty,
+                                  kill_switch_active=kill_switch_active)
 
     if not executor.positions:
         print("\n📭 보유 포지션 없음.")

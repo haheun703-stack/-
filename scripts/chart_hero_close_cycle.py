@@ -29,6 +29,7 @@ from scripts.surge_d1_picker import run_picker
 from src.strategies.d1_confirm import monitor_picks, is_check_window
 from src.strategies.chart_hero_executor import ChartHeroExecutor
 from src.strategies.chart_hero_entry_filter import filter_picks_for_entry
+from src.agents.kill_switch_manager import is_kill_switch_active
 
 
 def main():
@@ -54,6 +55,20 @@ def main():
     print(f"   모드: {'PAPER 시뮬' if is_paper else '🔴 REAL 실전'}")
     print(f"   잔고: {args.capital:,.0f}원")
     print("=" * 70)
+
+    # ★ P0 (5/20 추가): KILL_SWITCH 체크 — 시장 패닉 시 매수 자동 차단
+    # MarketRegimeGate가 자동 활성화 (BEARISH 검출) 또는 사람 수동 활성화
+    # close_cycle은 매수 위주라 KILL_SWITCH 시 전체 차단
+    if is_kill_switch_active():
+        msg = f"🛑 KILL_SWITCH 활성 — 차트영웅 매수 사이클 자동 차단 ({today})"
+        print(f"\n{msg}")
+        print("   해소: rm data/KILL_SWITCH (시장 회복 확인 후 수동 해소)")
+        try:
+            from src.telegram_sender import send_message
+            send_message(msg)
+        except Exception:
+            pass
+        return
 
     # 시각 윈도우 체크 (force 옵션 없으면)
     if not args.force and not is_check_window():

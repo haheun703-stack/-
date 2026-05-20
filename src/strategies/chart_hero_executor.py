@@ -45,11 +45,16 @@ class ChartHeroExecutor:
     """
 
     def __init__(self, paper: bool = True, total_capital: float = 25_000_000,
-                 max_qty_per_ticker: int | None = None):
+                 max_qty_per_ticker: int | None = None,
+                 kill_switch_active: bool = False):
         self.paper = paper
         self.total_capital = total_capital  # 5/22 잔고 2,500만 시뮬
         # 5/20 추가: 1주차 워밍업 — 종목당 최대 수량 클램프 (None = 제한 없음)
         self.max_qty_per_ticker = max_qty_per_ticker
+        # ★ P0 (5/20 추가): KILL_SWITCH 외부 주입 — 매수 차단용
+        self.kill_switch_active = kill_switch_active
+        # ★ P3 (5/20 추가): 보호 종목 (Hold List) — 단타봇 200만원 손실 사건 재발 방지
+        self.hold_list = self._load_hold_list()
         if not paper:
             self.order = KisOrderAdapter()
         else:
@@ -58,6 +63,42 @@ class ChartHeroExecutor:
         # C2: PnL 로그에서 누적 손실률 계산 (긴장 안전망)
         self.weekly_loss_pct  = self._compute_loss_pct(days=7)
         self.monthly_loss_pct = self._compute_loss_pct(days=30)
+
+    # ─────────────────────────────────────────────────
+    # ★ P3 (5/20 추가): 보호 종목 (Hold List) 가드
+    # 단타봇 200만원 손실 사건: "7월 실적 발표 기대 종목 자동 매도"
+    # → 퀀트봇에서 같은 사고 재발 방지
+    # ─────────────────────────────────────────────────
+    def _load_hold_list(self) -> dict:
+        """config/hold_list.json 로드. 형식: {ticker: {name, reason, until}}"""
+        # 우선 config/, 폴백으로 data/ (마이그레이션 호환)
+        for path_str in ("config/hold_list.json", "data/hold_list.json"):
+            p = Path(path_str)
+            if p.exists():
+                try:
+                    return json.loads(p.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+        return {}
+
+    def _is_protected(self, ticker: str) -> tuple[bool, str]:
+        """ticker가 보호 종목인지 + 사유.
+
+        Returns:
+            (보호중 여부, 사유 메시지)
+        """
+        item = self.hold_list.get(ticker)
+        if not item:
+            return False, ""
+        until = item.get("until", "")
+        if until:
+            try:
+                until_date = dt.date.fromisoformat(until)
+                if dt.date.today() > until_date:
+                    return False, f"보호 만료 ({until})"
+            except Exception:
+                pass
+        return True, f"보호 종목: {item.get('name', '')} — {item.get('reason', '')} (until {until})"
 
     def _load_positions(self) -> dict:
         p = Path(POSITIONS_FILE)
@@ -161,6 +202,9 @@ class ChartHeroExecutor:
             [{ticker, action, qty, price, result, ...}, ...]
         """
         results = []
+        # ★ P0 (5/20 추가): KILL_SWITCH 이중 차단 (close_cycle에서 1차 차단했지만 직접 호출 대비)
+        if self.kill_switch_active:
+            return [{"action": "BLOCKED", "reason": "KILL_SWITCH 활성 — 시장 패닉 매수 차단"}]
         # C2: 게이트 직전 PnL 갱신 (장중 다회 실행 대비)
         self._refresh_loss_pct()
         gate = check_entry_gate(self.weekly_loss_pct, self.monthly_loss_pct)
@@ -282,6 +326,11 @@ class ChartHeroExecutor:
 
             # 액션 실행 (paper or real)
             if action["action"] == "ADD_BUY":
+                # ★ P0 (5/20): KILL_SWITCH 활성 시 추매 차단 (시장 패닉 매수 금지)
+                if self.kill_switch_active:
+                    results.append({"ticker": ticker, "action": "ADD_BUY_BLOCKED",
+                                    "reason": "KILL_SWITCH 활성 — 시장 패닉 매수 차단"})
+                    continue
                 # #4: 추매도 신규 자금 투입 → 주/월 게이트 적용 (매도는 항상 허용)
                 if not gate["allow_new_entry"]:
                     results.append({"ticker": ticker, "action": "ADD_BUY_BLOCKED",
@@ -297,6 +346,14 @@ class ChartHeroExecutor:
                                 "qty": add_qty, "price": current_price,
                                 "reason": action["reason"]})
             elif action["action"] in ("PARTIAL_SELL", "STOPLOSS", "FORCE_CLOSE"):
+                # ★ P3 (5/20): 보호 종목(Hold List) 매도 차단 — 단타봇 200만원 사건 재발 방지
+                protected, protect_msg = self._is_protected(ticker)
+                if protected:
+                    results.append({"ticker": ticker, "action": "SELL_BLOCKED_HOLD_LIST",
+                                    "reason": protect_msg, "original_action": action["action"]})
+                    # 텔레그램 알림 (실제 발송은 외부에서)
+                    print(f"   🛡️ {ticker} 매도 차단 (보호 종목): {protect_msg}")
+                    continue
                 sell_qty = int(d["total_qty"] * action["qty_pct"] / 100)
                 self._execute_sell(d, current_price, sell_qty, action)
                 results.append({"ticker": ticker, "action": action["action"],
