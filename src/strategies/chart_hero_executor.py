@@ -44,9 +44,12 @@ class ChartHeroExecutor:
     paper=False → KIS 실제 주문 (5/27 사장님 GO 후)
     """
 
-    def __init__(self, paper: bool = True, total_capital: float = 25_000_000):
+    def __init__(self, paper: bool = True, total_capital: float = 25_000_000,
+                 max_qty_per_ticker: int | None = None):
         self.paper = paper
         self.total_capital = total_capital  # 5/22 잔고 2,500만 시뮬
+        # 5/20 추가: 1주차 워밍업 — 종목당 최대 수량 클램프 (None = 제한 없음)
+        self.max_qty_per_ticker = max_qty_per_ticker
         if not paper:
             self.order = KisOrderAdapter()
         else:
@@ -126,7 +129,11 @@ class ChartHeroExecutor:
         if price is None or price <= 0:
             return 0
         amount = self.total_capital * (capital_pct / 100)
-        return max(int(amount // price), 1)
+        qty = max(int(amount // price), 1)
+        # 5/20 추가: 1주차 워밍업 max_qty 클램프 (paper/real 모두 적용 — 학습 일관성)
+        if self.max_qty_per_ticker is not None:
+            qty = min(qty, self.max_qty_per_ticker)
+        return qty
 
     # 고가주 필터: 1주 가격이 잔고의 max_single_share_pct% 초과면 제외
     MAX_SINGLE_SHARE_PCT = 3.0   # 1주 가격 > 잔고 3% = 제외

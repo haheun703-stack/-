@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.surge_d1_picker import run_picker
 from src.strategies.d1_confirm import monitor_picks, is_check_window
 from src.strategies.chart_hero_executor import ChartHeroExecutor
+from src.strategies.chart_hero_entry_filter import filter_picks_for_entry
 
 
 def main():
@@ -37,6 +38,10 @@ def main():
     mode_group.add_argument("--paper", action="store_true", help="paper 시뮬 모드")
     mode_group.add_argument("--real", action="store_true", help="실전 모드 (KIS 주문)")
     parser.add_argument("--capital", type=float, default=25_000_000, help="잔고 (원)")
+    parser.add_argument("--max-qty", type=int, default=None,
+                        help="종목당 최대 수량 (1주차 워밍업: 1)")
+    parser.add_argument("--no-entry-filter", action="store_true",
+                        help="VWAP+수급 진입 필터 비활성 (테스트용)")
     parser.add_argument("--force", action="store_true", help="시각 윈도우 무시 (테스트용)")
     args = parser.parse_args()
 
@@ -83,9 +88,29 @@ def main():
         print("\n→ D+1 양봉 확인 통과 종목 없음. 사이클 종료.")
         return
 
+    # 2-B) 진입 필터 (VWAP + 수급, Phase 1 — 5/20 추가)
+    if not args.no_entry_filter:
+        print(f"\n[2-B] 진입 필터 (VWAP + 수급) — {len(will_enter)}종목")
+        will_enter = filter_picks_for_entry(will_enter)
+        for p in will_enter:
+            fr = p.get("filter_result", {})
+            ok = p.get("will_enter_final", False)
+            mark = "✅" if ok else "🛑"
+            api_fail = fr.get("api_failures", [])
+            api_warn = f" ⚠️API실패={api_fail}" if api_fail else ""
+            print(f"   {mark} {p['name']:14} ({p['ticker']}) "
+                  f"VWAP아래={fr.get('vwap_below')} 수급+={fr.get('supply_positive')} "
+                  f"→ {fr.get('pass_count')}/{fr.get('pass_threshold')}{api_warn}")
+        # 필터 통과 종목만 추출
+        will_enter = [p for p in will_enter if p.get("will_enter_final")]
+        if not will_enter:
+            print("\n→ 진입 필터 통과 종목 없음. 사이클 종료.")
+            return
+
     # 3) 진입 실행
-    print(f"\n[3] 진입 실행 ({len(will_enter)}종목)")
-    executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital)
+    print(f"\n[3] 진입 실행 ({len(will_enter)}종목, max_qty={args.max_qty or '무제한'})")
+    executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital,
+                                  max_qty_per_ticker=args.max_qty)
     results = executor.execute_d1_entry(will_enter)
     for r in results:
         print(f"   {r}")

@@ -28,6 +28,8 @@ def main():
     mode_group.add_argument("--paper", action="store_true", help="paper 시뮬 모드")
     mode_group.add_argument("--real", action="store_true", help="실전 모드 (KIS 주문)")
     parser.add_argument("--capital", type=float, default=25_000_000)
+    parser.add_argument("--max-qty", type=int, default=None,
+                        help="종목당 최대 수량 (1주차 워밍업: 1)")
     args = parser.parse_args()
 
     # C3: 명시적 paper/real 판별 (default 의존 제거)
@@ -39,7 +41,8 @@ def main():
     print(f"   모드: {'PAPER' if is_paper else '🔴 REAL'}")
     print("=" * 70)
 
-    executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital)
+    executor = ChartHeroExecutor(paper=is_paper, total_capital=args.capital,
+                                  max_qty_per_ticker=args.max_qty)
 
     if not executor.positions:
         print("\n📭 보유 포지션 없음.")
