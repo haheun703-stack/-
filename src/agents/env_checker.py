@@ -50,7 +50,7 @@ REQUIRED_ENV_VARS: list[tuple[str, object, str]] = [
     ("PAPER_MIRROR_MODE", "true", "paper 시뮬 병행"),
     ("AUTO_TRADING_MAX_QTY", "1", "1주 한도 (워밍업)"),
     ("AUTO_TRADING_MAX_AMOUNT", "3000000", "300만원 한도 (퐝가님 5/14 결단)"),
-    ("AUTO_TRADING_MAX_TRADES_PER_DAY", "15", "일일 15건 한도"),
+    ("AUTO_TRADING_MAX_TRADES_PER_DAY", "5", "일일 5건 한도 (퐝가님 5/21 결단, 10→5 제한)"),
     ("AUTO_TRADING_WHITELIST_ONLY", "0", "사장님 5/18 결단 (전종목 OK)"),
     ("AUTO_TRADING_TELEGRAM_ALERT", "1", "텔레그램 알림 ON"),
     ("KIS_APP_KEY", "_nonempty_min10", "KIS API 키 (길이 ≥10)"),
