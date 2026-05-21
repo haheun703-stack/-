@@ -332,8 +332,8 @@ def _fetch_volume_power(broker, ticker: str) -> tuple[float, str]:
         headers = {
             "Content-Type": "application/json; charset=utf-8",
             "authorization": broker.access_token,
-            "appkey": broker.api_key,
-            "appsecret": broker.api_secret,
+            "appKey": broker.api_key,
+            "appSecret": broker.api_secret,
             "tr_id": "FHKST01010300",
         }
         params = {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": ticker}
