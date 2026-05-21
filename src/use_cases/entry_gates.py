@@ -385,15 +385,31 @@ def check_volume_power_gate(
       - 100  = 중립
       - 50-  = 강한 매도세
 
+    2026-05-21 추가: threshold<=0 시 게이트 비활성화 (퐝가님 결단).
+    배경: 5/21 자비스 12회 cron C게이트 0 반환 + KIS API 14:00 이후 이슈 추정 +
+    차트영웅 종가 매수 매매법에 단타봇 임계 150은 부적합 → 임시 비활성화 후
+    주말에 시간대별 임계 정합화 (project_chart_hero_521_day1_result.md TODO).
+
     Returns:
         {
           "passed": bool,
           "volume_power": float,
-          "source": "tday_rltv" | "calc" | "none",
+          "source": "ccnl_tday_rltv" | "fetch_price_fallback" | "none" | "disabled",
           "threshold": float,
           "reason": str,
         }
     """
+    # 비활성화 분기 (threshold<=0)
+    if threshold <= 0:
+        vp, source = _fetch_volume_power(broker, ticker)
+        return {
+            "passed": True,
+            "volume_power": round(vp, 2),
+            "source": "disabled",
+            "threshold": threshold,
+            "reason": f"체결강도 게이트 비활성화 (임계 {threshold:.0f}, 측정값 {vp:.1f} 로깅만)",
+        }
+
     vp, source = _fetch_volume_power(broker, ticker)
     passed = vp >= threshold
 
