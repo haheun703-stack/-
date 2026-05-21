@@ -64,20 +64,65 @@ INTEL_BOT_ETF_APPEAL = (
 
 
 def load_candidates(top_n: int = DEFAULT_TOP_N, grade: str = DEFAULT_GRADE) -> list[tuple[str, str]]:
-    """후보 종목 풀 — tomorrow_picks 강력포착 TOP N."""
+    """후보 종목 풀 — v3_brain AI 결정 (우선) + tomorrow_picks 강력포착 TOP N.
+
+    2026-05-21 추가 (퐝가님 결단): v3_brain ai_v3_picks.json 연동.
+    배경:
+      5/21 v3_brain 06:16에 HD현대일렉트릭 매수 결정 → 자비스 미연동으로 실행 안 됨.
+      HD현대일렉트릭 5/21 종가 +6.57% 폭등 = 기회 놓침.
+      → v3_brain buys 종목을 자비스 후보 풀에 prepend (우선순위 최상).
+
+    구조:
+      1. v3_brain buys (1~5건, AI 추천) - 별도 카운트
+      2. tomorrow_picks 강력포착 top_n건 (algorithm) - 중복 제외
+      합산: v3_brain N건 + tomorrow_picks M건 (최대 N+top_n건)
+    """
+    candidates: list[tuple[str, str]] = []
+    seen_tickers: set[str] = set()
+
+    # 1) v3_brain AI 결정 (우선순위 최상, 별도 카운트)
+    V3_BRAIN_PICKS = PROJECT_ROOT / "data" / "ai_v3_picks.json"
+    v3_count = 0
+    if V3_BRAIN_PICKS.exists():
+        try:
+            v3_data = json.loads(V3_BRAIN_PICKS.read_text(encoding="utf-8"))
+            for p in v3_data.get("buys", []):
+                ticker = p.get("ticker", "")
+                if ticker and ticker not in seen_tickers:
+                    name = p.get("name", ticker)
+                    candidates.append((ticker, name))
+                    seen_tickers.add(ticker)
+                    v3_count += 1
+                    logger.info("[v3_brain] %s %s conviction=%s strategy=%s",
+                                ticker, name, p.get("conviction"), p.get("strategy"))
+        except Exception as e:
+            logger.warning("v3_brain ai_v3_picks.json 로드 실패: %s", e)
+    else:
+        logger.info("[v3_brain] ai_v3_picks.json 없음 — tomorrow_picks만 사용")
+
+    # 2) tomorrow_picks 강력포착 (top_n까지)
+    tomorrow_count = 0
     if not TOMORROW_PICKS.exists():
-        logger.warning("tomorrow_picks.json 없음 — 후보 0건")
-        return []
+        logger.warning("tomorrow_picks.json 없음 — v3_brain %d건만", v3_count)
+        return candidates
     try:
         data = json.loads(TOMORROW_PICKS.read_text(encoding="utf-8"))
-        return [
-            (p.get("ticker", ""), p.get("name", p.get("ticker", "")))
-            for p in data.get("picks", [])
-            if p.get("grade") == grade
-        ][:top_n]
+        for p in data.get("picks", []):
+            if p.get("grade") != grade:
+                continue
+            ticker = p.get("ticker", "")
+            if ticker and ticker not in seen_tickers:
+                candidates.append((ticker, p.get("name", ticker)))
+                seen_tickers.add(ticker)
+                tomorrow_count += 1
+                if tomorrow_count >= top_n:
+                    break
     except Exception as e:
         logger.error("tomorrow_picks 로드 실패: %s", e)
-        return []
+
+    logger.info("[load_candidates] v3_brain %d + tomorrow_picks %d = 총 %d건",
+                v3_count, tomorrow_count, len(candidates))
+    return candidates
 
 
 def load_market_regime() -> str:
