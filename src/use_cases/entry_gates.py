@@ -317,38 +317,57 @@ def check_orderbook_gate(broker, ticker: str) -> dict[str, Any]:
 def _fetch_volume_power(broker, ticker: str) -> tuple[float, str]:
     """체결강도 (volume power) 계산.
 
-    KIS fetch_price output 필드:
-      - tday_rltv: 체결강도 (직접 제공, 0~999)
-      - shnu_cntg_smtn / seln_cntg_smtn: 매수/매도 체결량 합계 (fallback 계산)
+    2026-05-21 수정: 기존 mojito.fetch_price()는 inquire-price 엔드포인트라
+    체결강도 필드(tday_rltv) 미포함 → 5/21 자비스 9건 전부 체결강도=0 차단 사고.
+    KIS inquire-ccnl (TR_ID FHKST01010300) 직접 호출로 변경.
 
     Returns:
-        (volume_power, source) — source ∈ {"tday_rltv", "calc", "none"}
+        (volume_power, source) — source ∈ {"ccnl_tday_rltv", "fetch_price_fallback", "none"}
     """
+    import requests as _rq
+
+    # 1) KIS inquire-ccnl 직접 호출 (체결강도 정확 필드)
+    try:
+        url = "https://openapi.koreainvestment.com:9443/uapi/domestic-stock/v1/quotations/inquire-ccnl"
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "authorization": broker.access_token,
+            "appkey": broker.api_key,
+            "appsecret": broker.api_secret,
+            "tr_id": "FHKST01010300",
+        }
+        params = {"FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": ticker}
+        r = _rq.get(url, headers=headers, params=params, timeout=5)
+        data = r.json()
+        if data.get("rt_cd") == "0":
+            output = data.get("output", [])
+            first = output[0] if isinstance(output, list) and output else (output if isinstance(output, dict) else None)
+            if first:
+                raw = first.get("tday_rltv")
+                if raw not in (None, "", 0, "0"):
+                    vp = float(raw)
+                    if vp > 0:
+                        return vp, "ccnl_tday_rltv"
+        else:
+            logger.warning("[entry_gate C] inquire-ccnl rt_cd=%s msg=%s", data.get("rt_cd"), data.get("msg1"))
+    except Exception as e:
+        logger.warning("[entry_gate C] inquire-ccnl 예외 %s: %s", ticker, e)
+
+    # 2) fetch_price fallback (이전 코드 유지 — 만약 일부 종목 응답 다를 경우)
     try:
         out = broker.fetch_price(ticker).get("output", {})
-    except Exception as e:
-        logger.warning("[entry_gate C] fetch_price 실패 %s: %s", ticker, e)
-        return 0.0, "none"
-
-    # 1) 직접 제공 필드
-    try:
         raw = out.get("tday_rltv")
         if raw not in (None, "", 0, "0"):
             vp = float(raw)
             if vp > 0:
-                return vp, "tday_rltv"
-    except (TypeError, ValueError):
-        pass
-
-    # 2) 매수/매도 체결량으로 계산
-    try:
+                return vp, "fetch_price_fallback"
         buy_vol = int(out.get("shnu_cntg_smtn", 0) or 0)
         sell_vol = int(out.get("seln_cntg_smtn", 0) or 0)
         if sell_vol > 0:
-            return round((buy_vol / sell_vol) * 100.0, 2), "calc"
+            return round((buy_vol / sell_vol) * 100.0, 2), "fetch_price_fallback"
         if buy_vol > 0:
-            return 999.0, "calc"  # 매도 0 = 일방 매수
-    except (TypeError, ValueError):
+            return 999.0, "fetch_price_fallback"
+    except Exception:
         pass
 
     return 0.0, "none"
