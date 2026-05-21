@@ -32,14 +32,14 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# 안전선 임계값 (5/18 사장님 결단)
+# 안전선 임계값 (5/18 사장님 결단, 5/21 .env 동적 로드로 일반화)
 THRESHOLD_INTEGRATED_SCORE = 90.0   # 안전선 ① STRONG 90+
 EARLIEST_BUY_TIME = "14:00"          # 안전선 ③ 14:00 이후
-MAX_DAILY_BUYS = 1                   # 안전선 ④ 일일 1건
-MAX_QTY = 1                          # 안전선 ⑤ 1주
-MAX_AMOUNT = 100_000                 # 안전선 ⑤ 10만원
+MAX_DAILY_BUYS = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "15"))  # 안전선 ④ .env 동적
+MAX_QTY = int(os.getenv("AUTO_TRADING_MAX_QTY", "1"))                      # 안전선 ⑤ 1주 (.env)
+MAX_AMOUNT = int(os.getenv("AUTO_TRADING_MAX_AMOUNT", "3000000"))          # 안전선 ⑤ 300만원 (.env)
 ALLOWED_REGIMES = {"MILD_BULL", "NEUTRAL", "STRONG_BULL"}  # 안전선 ⑥
-ENV_FLAG_5_20 = "AUTO_TRADE_5_20"    # 안전선 ⑦
+ENV_FLAG_ENABLED = "AUTO_TRADING_ENABLED"  # 안전선 ⑦ (5/21 일반화: AUTO_TRADE_5_20 → AUTO_TRADING_ENABLED)
 
 
 @dataclass
@@ -67,11 +67,18 @@ def _check_time(now_str: Optional[str] = None) -> tuple[bool, str]:
 
 
 def _check_5_20_env() -> tuple[bool, str]:
-    """안전선 ⑦ AUTO_TRADE_5_20 환경변수."""
-    flag = os.environ.get(ENV_FLAG_5_20, "false").lower()
-    if flag != "true":
-        return False, f"{ENV_FLAG_5_20} != true (현재 {flag})"
-    return True, f"{ENV_FLAG_5_20}=true"
+    """안전선 ⑦ AUTO_TRADING_ENABLED 환경변수 (5/21 일반화).
+
+    레거시: AUTO_TRADE_5_20=true 도 호환 (.env 또는 코드 하위 호환).
+    """
+    enabled = os.environ.get(ENV_FLAG_ENABLED, "0").strip()
+    if enabled == "1":
+        return True, f"{ENV_FLAG_ENABLED}=1"
+    # 레거시 토글 호환
+    legacy = os.environ.get("AUTO_TRADE_5_20", "false").lower()
+    if legacy == "true":
+        return True, f"AUTO_TRADE_5_20=true (레거시 호환)"
+    return False, f"{ENV_FLAG_ENABLED} != 1 (현재 {enabled}) 및 AUTO_TRADE_5_20 != true"
 
 
 def _check_daily_count(today: str, db_path: str = "data/owner_rule_positions.json") -> tuple[bool, str]:
