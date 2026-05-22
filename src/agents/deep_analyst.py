@@ -239,33 +239,57 @@ class DeepAnalystAgent(BaseAgent):
 
     @staticmethod
     def _format_stock(data: dict) -> str:
-        """개별 종목 데이터 → 텍스트"""
+        """개별 종목 데이터 → 텍스트.
+
+        2026-05-22 옵션 A: None 안전 처리 + tomorrow_picks 12시그널 보조 섹션.
+        - scan_cache 종목: 기존 출력 그대로
+        - tomorrow_picks fallback: 누락 필드 N/A 표기 + 통합 시그널 섹션 추가
+        """
+        def _fmt(val, spec="", na="N/A"):
+            """None 안전 포맷."""
+            if val is None:
+                return na
+            try:
+                return f"{val:{spec}}" if spec else str(val)
+            except (TypeError, ValueError):
+                return na
+
         lines = [f"[종목 분석 대상]"]
         ticker = data.get("ticker", "?")
         name = data.get("name", "?")
         grade = data.get("grade", "?")
         zone_score = data.get("zone_score", 0)
+        source = data.get("source", "scan_cache")
 
         lines.append(f"종목: {name} ({ticker})")
-        lines.append(f"등급: {grade}, Zone Score: {zone_score:.4f}")
+        lines.append(f"등급: {grade}, Zone Score: {zone_score:.4f}, 소스: {source}")
+        sector = data.get("sector", "")
+        if sector:
+            lines.append(f"섹터: {sector}")
 
-        # 기술적 지표
+        # 기술적 지표 (None 안전)
         lines.append(f"\n[기술적 지표]")
-        lines.append(f"  RSI: {data.get('rsi', 0):.1f}")
-        lines.append(f"  ADX: {data.get('adx', 0):.1f} (+DI: {data.get('plus_di', 0):.1f}, -DI: {data.get('minus_di', 0):.1f})")
-        lines.append(f"  TRIX: {data.get('trix', 0):.4f} (Signal: {data.get('trix_signal', 0):.4f})")
+        lines.append(f"  RSI: {_fmt(data.get('rsi'), '.1f')}")
+        lines.append(
+            f"  ADX: {_fmt(data.get('adx'), '.1f')} "
+            f"(+DI: {_fmt(data.get('plus_di'), '.1f')}, -DI: {_fmt(data.get('minus_di'), '.1f')})"
+        )
+        lines.append(f"  TRIX: {_fmt(data.get('trix'), '.4f')} (Signal: {_fmt(data.get('trix_signal'), '.4f')})")
         lines.append(f"  MA60 위: {'O' if data.get('above_ma60') else 'X'}, MA120 위: {'O' if data.get('above_ma120') else 'X'}")
-        lines.append(f"  MA60 기울기: {data.get('slope_ma60', 0):.2f}%")
-        lines.append(f"  52주 고점 대비: {data.get('pct_of_52w_high', 0):.1%}")
-        lines.append(f"  고점 대비 하락: {data.get('drawdown_from_high', 0):.1f}%")
+        lines.append(f"  MA60 기울기: {_fmt(data.get('slope_ma60'), '.2f')}%")
+        lines.append(f"  52주 고점 대비: {_fmt(data.get('pct_of_52w_high'), '.1%')}")
+        lines.append(f"  고점 대비 하락: {_fmt(data.get('drawdown_from_high'), '.1f')}%")
 
-        # 수급
+        # 수급 (None 안전)
         lines.append(f"\n[수급]")
-        lines.append(f"  거래량 서지: {data.get('vol_surge', 0):.2f}x")
-        lines.append(f"  거래량 수축: {data.get('vol_contraction', 0):.2f}")
-        lines.append(f"  OBV 추세: {data.get('obv_trend', '?')}")
-        lines.append(f"  외국인 연속: {data.get('foreign_streak', 0)}일, 기관 연속: {data.get('inst_streak', 0)}일")
-        lines.append(f"  외국인 5일 순매수: {data.get('foreign_net_5d', 0):,.0f}")
+        lines.append(f"  거래량 서지: {_fmt(data.get('vol_surge'), '.2f')}x")
+        lines.append(f"  거래량 수축: {_fmt(data.get('vol_contraction'), '.2f')}")
+        lines.append(f"  OBV 추세: {data.get('obv_trend') or 'N/A'}")
+        lines.append(
+            f"  외국인 연속: {_fmt(data.get('foreign_streak'))}일, "
+            f"기관 연속: {_fmt(data.get('inst_streak'))}일"
+        )
+        lines.append(f"  외국인 5일 순매수: {_fmt(data.get('foreign_net_5d', 0), ',.0f')}")
 
         # 가격
         lines.append(f"\n[가격]")
@@ -292,6 +316,29 @@ class DeepAnalystAgent(BaseAgent):
             for key, val in scores.items():
                 if isinstance(val, (int, float)):
                     lines.append(f"  {key}: {val}")
+
+        # 2026-05-22 옵션 A: tomorrow_picks 통합 시그널 섹션
+        tp_sources = data.get("tomorrow_picks_sources") or []
+        if tp_sources:
+            tp_total = data.get("tomorrow_picks_total_score", 0)
+            tp_n = data.get("tomorrow_picks_n_sources", 0)
+            tp_details = data.get("tomorrow_picks_source_details") or []
+            tp_breakdown = data.get("tomorrow_picks_score_breakdown") or {}
+            tp_reasons = data.get("tomorrow_picks_reasons") or []
+            lines.append(f"\n[통합 시그널 (tomorrow_picks 12소스)]")
+            lines.append(f"  통합 점수: {tp_total} (소스 {tp_n}개)")
+            lines.append(f"  소스: {', '.join(str(s) for s in tp_sources[:7])}")
+            if tp_details:
+                lines.append(f"  상세 근거:")
+                for d in tp_details[:5]:
+                    lines.append(f"    - {d}")
+            if tp_breakdown:
+                bd_str = ", ".join(f"{k}={v}" for k, v in tp_breakdown.items())
+                lines.append(f"  점수 분해: {bd_str}")
+            if tp_reasons:
+                lines.append(f"  포착 이유:")
+                for r in tp_reasons[:5]:
+                    lines.append(f"    - {r}")
 
         return "\n".join(lines)
 

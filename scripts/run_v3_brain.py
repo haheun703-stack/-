@@ -85,6 +85,77 @@ def _load_settings() -> dict:
         return {}
 
 
+# ─── 5/22 옵션 A: tomorrow_picks → v3_brain 정합화 헬퍼 ──────────
+import csv
+from functools import lru_cache
+
+
+def _grade_from_score(total_score: float) -> str:
+    """tomorrow_picks total_score(0~100) → scan_cache grade 매핑.
+
+    80+ → A, 65~79 → B, 50~64 → C, else → D.
+    grade_filter 통계와 일관성 유지 (임의 'A' 강제 회피).
+    """
+    if total_score >= 80:
+        return "A"
+    if total_score >= 65:
+        return "B"
+    if total_score >= 50:
+        return "C"
+    return "D"
+
+
+@lru_cache(maxsize=1)
+def _build_sector_index() -> dict:
+    """relay_sectors.yaml + naver_sector_map.csv 통합 역색인 (ticker → sector). 1회 캐시."""
+    index: dict[str, str] = {}
+    # 1) relay_sectors.yaml (퀀트봇 자체 분류 — 우선)
+    try:
+        with open(CONFIG_DIR / "relay_sectors.yaml", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f) or {}
+        for sec in (cfg.get("relay_engine") or {}).get("sectors", {}).values():
+            name = sec.get("name", "")
+            entries = list(sec.get("kr_leaders") or []) + list(sec.get("kr_secondaries") or [])
+            for entry in entries:
+                t = str(entry.get("ticker") or "").strip().zfill(6)
+                if t and name:
+                    index.setdefault(t, name)  # relay 우선 (이미 있으면 유지)
+    except Exception as e:
+        logger.warning("relay_sectors.yaml 색인 실패: %s", e)
+    # 2) naver_sector_map.csv (정밀 분류 — fallback)
+    try:
+        with open(DATA_DIR / "sector_rotation" / "naver_sector_map.csv", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                t = (row.get("ticker") or "").strip().zfill(6)
+                s = (row.get("sector") or "").strip()
+                if t and s:
+                    index.setdefault(t, s)
+    except Exception as e:
+        logger.warning("naver_sector_map.csv 색인 실패: %s", e)
+    return index
+
+
+def _extract_sector(pick: dict) -> str:
+    """tomorrow_picks 종목 → sector 추출 (3단 폴백).
+
+    1. source_details "이벤트섹터:XXX" 또는 "섹터:XXX" 키워드 파싱
+    2. relay_sectors.yaml 역색인 (ticker 기반)
+    3. naver_sector_map.csv (정밀 분류)
+    실패 시 빈 문자열 (Phase 3 boost/suppress 무효 — 기존 동작 유지).
+    """
+    # 1) source_details 키워드 검색
+    for detail in (pick.get("source_details") or []):
+        if isinstance(detail, str):
+            for prefix in ["이벤트섹터:", "섹터:"]:
+                if prefix in detail:
+                    s = detail.split(prefix, 1)[1].strip().split()[0].split(",")[0].strip()
+                    if s:
+                        return s
+    # 2+3) ticker 기반 색인 (relay 우선 → naver)
+    ticker = str(pick.get("ticker") or "").strip().zfill(6)
+    return _build_sector_index().get(ticker, "") if ticker else ""
+
+
 def _load_upgrade_settings() -> dict:
     """settings.yaml의 ai_upgrade 섹션 로드"""
     try:
@@ -506,10 +577,13 @@ async def run_phase3_4(
                 candidates.append(k)
         logger.info("v9 killed 종목 %d개 복원 (AI가 재판단)", len(killed))
 
-    # 2026-05-22 v3_brain 부활: scan_cache.json 생성 코드 archive (4/21~) 이후 stale 상태.
-    # scan_cache 26건이지만 모두 4월 데이터 → Deep Analyst 통과 0건 (picks_history 404건 0건이 증거).
-    # 항상 tomorrow_picks 강력 포착으로 fallback (중복 ticker 제외).
-    # 토큰 비용 가드: 상위 V3_BRAIN_FALLBACK_MAX_PICKS (.env, 기본 20건)만 추가.
+    # 2026-05-22 옵션 A "제대로 된 통합": scan_cache 생성 코드 4/21 archive 이후 stale.
+    # 임시 fallback (commit 17f1920 + a304ab0)의 결함 4건 정리:
+    #   1. sector="" → Phase 3 boost/suppress 100% 실패 → sector 3단 폴백 추출
+    #   2. grade="A" 강제 → grade_filter 통계 모순 → _grade_from_score 동적 매핑
+    #   3. 누락 필드 0 → Deep Analyst 기술 부실 판단 → 명시적 None (0 false positive 회피)
+    #   4. 12시그널 정보 미전달 → sources/score_breakdown/reasons 보조 필드 추가
+    # 토큰 비용 가드: V3_BRAIN_FALLBACK_MAX_PICKS (.env, 기본 20건)
     import os
     fallback_max = int(os.environ.get("V3_BRAIN_FALLBACK_MAX_PICKS", "20"))
     if fallback_max > 0:
@@ -519,14 +593,21 @@ async def run_phase3_4(
         if strong_picks:
             existing_tickers = {c.get("ticker") for c in candidates}
             added = 0
+            sector_hits = 0
             for p in strong_picks[:fallback_max]:
-                if p.get("ticker") in existing_tickers:
+                ticker = p.get("ticker")
+                if ticker in existing_tickers:
                     continue
+                total_score = p.get("total_score", 0) or 0
+                sector = _extract_sector(p)
+                if sector:
+                    sector_hits += 1
                 candidates.append({
-                    "ticker": p.get("ticker"),
+                    # ── 기본 신원 (scan_cache 호환) ──
+                    "ticker": ticker,
                     "name": p.get("name"),
-                    "grade": "A",
-                    "zone_score": p.get("total_score", 0) / 100.0,
+                    "grade": _grade_from_score(total_score),
+                    "zone_score": total_score / 100.0,
                     "trigger_type": "tomorrow_picks_strong",
                     "confidence": 1.0,
                     "entry_price": p.get("entry_price", 0),
@@ -535,21 +616,40 @@ async def run_phase3_4(
                     "risk_reward": 0.0,
                     "rsi": p.get("rsi", 0),
                     "adx": p.get("adx", 0),
-                    "vol_surge": 0,
-                    "obv_trend": "up" if p.get("above_ma20") else "flat",
-                    "foreign_streak": 0,
-                    "inst_streak": 0,
+                    # ── scan_cache 전용 누락 필드 (명시적 None, 0 회피) ──
+                    "plus_di": None,
+                    "minus_di": None,
+                    "trix": None,
+                    "trix_signal": None,
+                    "slope_ma60": None,
+                    "above_ma60": p.get("above_ma60"),
+                    "above_ma120": None,
+                    "vol_surge": None,
+                    "vol_contraction": None,
+                    "obv_trend": "up" if p.get("above_ma20") else None,
+                    "foreign_streak": None,
+                    "inst_streak": None,
+                    "foreign_net_5d": p.get("foreign_5d", 0),
+                    "inst_net_5d": p.get("inst_5d", 0),
                     "foreign_amount_5d": p.get("foreign_5d", 0),
                     "inst_amount_5d": p.get("inst_5d", 0),
-                    "sector": "",
+                    "pct_of_52w_high": None,
+                    "drawdown_from_high": p.get("drawdown"),
+                    # ── sector 3단 폴백 추출 ──
+                    "sector": sector,
+                    # ── 12시그널 보조 필드 (Deep Analyst 정보 전달) ──
                     "source": "tomorrow_picks_fallback",
-                    "tomorrow_picks_total_score": p.get("total_score", 0),
+                    "tomorrow_picks_total_score": total_score,
                     "tomorrow_picks_n_sources": p.get("n_sources", 0),
+                    "tomorrow_picks_sources": p.get("sources", []),
+                    "tomorrow_picks_source_details": p.get("source_details", []),
+                    "tomorrow_picks_score_breakdown": p.get("score_breakdown", {}),
+                    "tomorrow_picks_reasons": p.get("reasons", []),
                 })
                 added += 1
             logger.warning(
-                "[v3_brain 부활] scan_cache %d건 stale → tomorrow_picks 강력 포착 %d/%d건 fallback",
-                len(candidates) - added, added, len(strong_picks),
+                "[v3_brain 옵션 A] scan_cache %d건 + tomorrow_picks 강력 포착 %d/%d건 fallback (sector 추출 %d/%d건)",
+                len(candidates) - added, added, len(strong_picks), sector_hits, added,
             )
 
     if not candidates:
