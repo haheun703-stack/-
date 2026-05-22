@@ -52,6 +52,8 @@ from typing import Any, Optional
 
 from src.use_cases.entry_score import calculate_entry_score
 from src.use_cases.market_regime_guard import get_kospi_regime
+from src.use_cases.ppa_whitelist_scorer import calculate_ppa_score
+from src.use_cases.dart_signal_scorer import calculate_dart_score
 
 logger = logging.getLogger(__name__)
 
@@ -296,8 +298,19 @@ def calculate_realtime_score(
     macro = _score_macro_regime()
     breakdown["매크로_KOSPI"] = {"score": macro["score"], "reason": macro["reason"]}
 
+    # === 6. PPA 화이트리스트 + jgis 교차 검증 (5/22 신규) ===
+    ppa = calculate_ppa_score(ticker)
+    breakdown["PPA_화이트리스트"] = {"score": ppa["score"], "reason": ppa["reason"]}
+
+    # === 7. DART 공시 + 자체 수급 교차 검증 (5/22 신규) ===
+    dart = calculate_dart_score(ticker)
+    breakdown["DART_공시"] = {"score": dart["score"], "reason": dart["reason"]}
+
     # === 합산 ===
-    total = es_score + intel_sm["score"] + intel_sn["score"] + sector["score"] + macro["score"]
+    total = (
+        es_score + intel_sm["score"] + intel_sn["score"] + sector["score"]
+        + macro["score"] + ppa["score"] + dart["score"]
+    )
 
     # === 진입/홀드/매도 결정 ===
     if total >= SCORE_STRONG_BUY:
@@ -326,6 +339,8 @@ def calculate_realtime_score(
         "intel_sniper": intel_sn,
         "sector_momentum": sector,
         "macro": macro,
+        "ppa_whitelist": ppa,
+        "dart_signal": dart,
         "reasoning": reasoning,
     }
 

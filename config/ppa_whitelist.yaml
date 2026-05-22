@@ -1,0 +1,387 @@
+whitelist:
+  005090:
+    name: SGC에너지
+    category: 발전사
+    weight: 25
+    source: ppa_35
+  '015760':
+    name: 한국전력
+    category: 발전사
+    weight: 25
+    source: ppa_35
+  '034020':
+    name: 두산에너빌리티
+    category: 발전사
+    weight: 25
+    source: ppa_35
+  078930:
+    name: GS
+    category: 발전사
+    weight: 25
+    source: ppa_35
+  '036460':
+    name: 한국가스공사
+    category: 발전사
+    weight: 25
+    source: ppa_35
+  '030200':
+    name: KT
+    category: 데이터센터
+    weight: 25
+    source: ppa_35
+  '017670':
+    name: SK텔레콤
+    category: 데이터센터
+    weight: 25
+    source: ppa_35
+  '035420':
+    name: NAVER
+    category: 데이터센터
+    weight: 25
+    source: ppa_35
+  '032640':
+    name: LG유플러스
+    category: 데이터센터
+    weight: 25
+    source: ppa_35
+  '267260':
+    name: HD현대일렉트릭
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '010120':
+    name: LS ELECTRIC
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '006260':
+    name: LS
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '001440':
+    name: 대한전선
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '000500':
+    name: 가온전선
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '006340':
+    name: 대원전선
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '189860':
+    name: 서전기전
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  006910:
+    name: 보성파워텍
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '007610':
+    name: 선도전기
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '051600':
+    name: 한전KPS
+    category: 전력기기
+    weight: 20
+    source: ppa_35
+  '000720':
+    name: 현대건설
+    category: 건설
+    weight: 5
+    source: ppa_35
+  '006360':
+    name: GS건설
+    category: 건설
+    weight: 5
+    source: ppa_35
+  023960:
+    name: 에스씨엔지니어링
+    category: 건설
+    weight: 5
+    source: ppa_35
+  011930:
+    name: 신성이엔지
+    category: 건설
+    weight: 10
+    source: ppa_35
+  '044340':
+    name: 위닉스
+    category: 냉각공조
+    weight: 10
+    source: ppa_35
+  005930:
+    name: 삼성전자
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '000660':
+    name: SK하이닉스
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '042700':
+    name: 한미반도체
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '003160':
+    name: 디아이
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  058470:
+    name: 리노공업
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  095340:
+    name: ISC
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '067310':
+    name: 하나마이크론
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '357780':
+    name: 솔브레인
+    category: 메모리
+    weight: 5
+    source: ppa_35
+  '403870':
+    name: HPSP
+    category: semiconductor_backend
+    weight: 18
+    biz: 고압어닐링 장비 1위, SK하이닉스 HBM 후공정 핵심
+    source: secondary_37
+  039030:
+    name: 이오테크닉스
+    category: semiconductor_backend
+    weight: 18
+    biz: 레이저 마킹/절단 장비, AI 반도체 수요
+    source: secondary_37
+  098460:
+    name: 고영
+    category: semiconductor_backend
+    weight: 18
+    biz: 3D SPI/AOI 머신비전 검사장비
+    source: secondary_37
+  080220:
+    name: 제주반도체
+    category: semiconductor_backend
+    weight: 18
+    biz: 메모리 모듈/IoT 반도체
+    source: secondary_37
+  '222800':
+    name: 심텍
+    category: semiconductor_backend
+    weight: 18
+    biz: PCB (메모리 모듈/AI 서버)
+    source: secondary_37
+  '036710':
+    name: 심텍홀딩스
+    category: semiconductor_backend
+    weight: 18
+    biz: 심텍 모회사
+    source: secondary_37
+  064290:
+    name: 인텍플러스
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 검사장비 (외관/3D)
+    source: secondary_37
+  078890:
+    name: 가온그룹
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 검사 + 통신장비
+    source: secondary_37
+  '348350':
+    name: 위드텍
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 미세입자/이온 측정
+    source: secondary_37
+  '353200':
+    name: 대덕전자
+    category: semiconductor_backend
+    weight: 18
+    biz: PCB (AI 서버용 고다층)
+    source: secondary_37
+  '064760':
+    name: 티씨케이
+    category: semiconductor_backend
+    weight: 18
+    biz: 흑연/SiC 후공정 소재
+    source: secondary_37
+  094360:
+    name: 칩스앤미디어
+    category: semiconductor_backend
+    weight: 18
+    biz: 비디오 IP (반도체 설계자산)
+    source: secondary_37
+  '166090':
+    name: 하나머티리얼즈
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 식각공정 소재 (실리콘 부품)
+    source: secondary_37
+  031980:
+    name: 피에스케이홀딩스
+    category: semiconductor_backend
+    weight: 18
+    biz: PR Strip 장비
+    source: secondary_37
+  '007660':
+    name: 이수페타시스
+    category: semiconductor_backend
+    weight: 18
+    biz: AI 서버용 고다층 PCB
+    source: secondary_37
+  000990:
+    name: DB하이텍
+    category: semiconductor_backend
+    weight: 18
+    biz: 파운드리 (8인치)
+    source: secondary_37
+  '394280':
+    name: 오픈엣지테크놀로지
+    category: semiconductor_backend
+    weight: 18
+    biz: AI 반도체 IP (HBM 인터페이스)
+    source: secondary_37
+  005290:
+    name: 동진쎄미켐
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 EUV 포토레지스트/CMP 슬러리
+    source: secondary_37
+  '265520':
+    name: AP시스템
+    category: semiconductor_backend
+    weight: 18
+    biz: 디스플레이/반도체 ELA 장비
+    source: secondary_37
+  090460:
+    name: 비에이치
+    category: semiconductor_backend
+    weight: 18
+    biz: FPCB (스마트폰/반도체)
+    source: secondary_37
+  '281820':
+    name: 케이씨텍
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 CMP/세정 장비
+    source: secondary_37
+  '440110':
+    name: 파두
+    category: semiconductor_backend
+    weight: 18
+    biz: SSD 컨트롤러 (HBM 연관)
+    source: secondary_37
+  092070:
+    name: 디엔에프
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 전구체 (High-K)
+    source: secondary_37
+  061970:
+    name: LB세미콘
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 후공정 (Bumping/WLP)
+    source: secondary_37
+  '295310':
+    name: 에이치브이엠
+    category: semiconductor_backend
+    weight: 18
+    biz: 반도체 가스/케미컬 자재
+    source: secondary_37
+  '229640':
+    name: LS에코에너지
+    category: power_grid_extended
+    weight: 22
+    biz: 전선/송배전 (LS그룹)
+    source: secondary_37
+  '336260':
+    name: 두산퓨얼셀
+    category: power_grid_extended
+    weight: 22
+    biz: 수소 연료전지
+    source: secondary_37
+  '322000':
+    name: HD현대에너지솔루션
+    category: power_grid_extended
+    weight: 22
+    biz: 태양광 모듈
+    source: secondary_37
+  '103590':
+    name: 일진전기
+    category: power_grid_extended
+    weight: 22
+    biz: 전선/변압기 (송배전)
+    source: secondary_37
+  '489790':
+    name: 한화비전
+    category: power_grid_extended
+    weight: 22
+    biz: 한화 영상감시/AI 비전
+    source: secondary_37
+  '277810':
+    name: 레인보우로보틱스
+    category: ai_robotics
+    weight: 15
+    biz: 휴머노이드/협동로봇 (삼성전자 투자)
+    source: secondary_37
+  '108490':
+    name: 로보티즈
+    category: ai_robotics
+    weight: 15
+    biz: 로봇 액추에이터/서비스 로봇
+    source: secondary_37
+  '204320':
+    name: HL만도
+    category: ai_robotics
+    weight: 15
+    biz: 자율주행 부품 (현대모비스 경쟁사)
+    source: secondary_37
+  018880:
+    name: 한온시스템
+    category: ai_robotics
+    weight: 15
+    biz: 전기차 공조/열관리 (Tesla 공급망)
+    source: secondary_37
+  '064350':
+    name: 현대로템
+    category: defense_shipbuilding
+    weight: 12
+    biz: K2 전차/방산/철도
+    source: secondary_37
+  082740:
+    name: 한화엔진
+    category: defense_shipbuilding
+    weight: 12
+    biz: 선박 엔진 (한화오션 자회사)
+    source: secondary_37
+  '178320':
+    name: 서진시스템
+    category: defense_shipbuilding
+    weight: 12
+    biz: 5G 통신장비/방산 케이스
+    source: secondary_37
+meta:
+  total: 69
+  source: jgis ai_datacenter_ppa + intel_secondary 5/22
+  extracted_at: '2026-05-22'
