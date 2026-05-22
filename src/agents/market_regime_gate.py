@@ -31,14 +31,84 @@ cron 등록 (5/20 가동 직전):
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# ───────────────────────────────────────────────────────────────
+# 5/22 09:00 사고 보강: fail-safe retry + 임계 완화
+# 배경: KIS access_token 1회 실패 → KILL_SWITCH 영구 활성화 → 1주차 워밍업 둘째날
+#       매수 0건. 일시적 네트워크/토큰 장애를 "시장 붕괴"로 오판한 결함.
+# 조치: ① fetch retry 3회 + 5초 대기, ② adapter 초기화 retry (25초 대기, KIS 토큰
+#       1분 제한 회피), ③ fail-safe 임계 완화 — 1차 실패는 warning만, 연속 2회 cron
+#       실패에만 KILL_SWITCH 활성화, ④ 성공 시 카운터 자동 리셋.
+# ───────────────────────────────────────────────────────────────
+
+FAIL_COUNTER_PATH = PROJECT_ROOT / "data" / "market_regime_fail_count.json"
+FAIL_COUNTER_THRESHOLD = 2  # 연속 N회 cron 실패 시에만 KILL_SWITCH
+FAIL_COUNTER_TTL_MIN = 90   # 카운터 자동 만료 (다음 cron까지 ~30분 + 여유)
+KIS_INIT_RETRY_WAIT_SEC = 25  # KIS 토큰 1분 제한 회피 (5초 + 25초 = 30초)
+FETCH_RETRY_COUNT = 3
+FETCH_RETRY_WAIT_SEC = 5
+
+
+def _read_fail_counter() -> dict:
+    """연속 실패 카운터 읽기 (TTL 만료 시 0 반환)."""
+    if not FAIL_COUNTER_PATH.exists():
+        return {"count": 0, "last_reason": None, "updated_at": None}
+    try:
+        data = json.loads(FAIL_COUNTER_PATH.read_text())
+        updated = data.get("updated_at")
+        if updated:
+            updated_dt = datetime.fromisoformat(updated)
+            elapsed_min = (datetime.now() - updated_dt).total_seconds() / 60
+            if elapsed_min > FAIL_COUNTER_TTL_MIN:
+                return {"count": 0, "last_reason": None, "updated_at": None}
+        return data
+    except Exception:
+        return {"count": 0, "last_reason": None, "updated_at": None}
+
+
+def _write_fail_counter(count: int, reason: str) -> None:
+    """연속 실패 카운터 저장."""
+    FAIL_COUNTER_PATH.parent.mkdir(parents=True, exist_ok=True)
+    FAIL_COUNTER_PATH.write_text(json.dumps({
+        "count": count,
+        "last_reason": reason,
+        "updated_at": datetime.now().isoformat(),
+    }, ensure_ascii=False, indent=2))
+
+
+def _reset_fail_counter() -> None:
+    """성공 시 카운터 리셋."""
+    if FAIL_COUNTER_PATH.exists():
+        try:
+            FAIL_COUNTER_PATH.unlink()
+        except Exception:
+            pass
+
+
+def _send_warning_tg(msg: str) -> None:
+    """Warning 텔레그램 (KILL_SWITCH 활성화 X, 일시 장애 통지용)."""
+    try:
+        import requests
+        bot = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+        if bot and chat:
+            requests.post(
+                f"https://api.telegram.org/bot{bot}/sendMessage",
+                json={"chat_id": chat, "text": msg},
+                timeout=5,
+            )
+    except Exception as e:
+        logger.warning("[MarketRegimeGate] warning 텔레그램 실패: %s", e)
 
 
 class MarketRegimeGate:
@@ -116,16 +186,25 @@ class MarketRegimeGate:
         indicators: list[dict] = []
         triggered: list[str] = []
 
-        # KIS adapter (지연 import — 로컬 dry-run에서 mojito 미설치/키 누락 대비)
+        # KIS adapter (5/22 보강: 2회 retry — KIS 토큰 1분 제한 회피)
         broker = None
         adapter_err: str | None = None
-        try:
-            from src.adapters.kis_stock_data_adapter import KisStockDataAdapter
-            adp = KisStockDataAdapter()
-            broker = adp.broker
-        except Exception as e:
-            adapter_err = f"KIS adapter 초기화 실패: {e}"
-            logger.warning("[MarketRegimeGate] %s", adapter_err)
+        for attempt in range(2):
+            try:
+                from src.adapters.kis_stock_data_adapter import KisStockDataAdapter
+                adp = KisStockDataAdapter()
+                broker = adp.broker
+                if broker is not None:
+                    break
+            except Exception as e:
+                adapter_err = f"KIS adapter 초기화 실패(attempt={attempt+1}/2): {e}"
+                logger.warning("[MarketRegimeGate] %s", adapter_err)
+                if attempt == 0:
+                    logger.info(
+                        "[MarketRegimeGate] %d초 대기 후 재시도 (KIS 토큰 1분 제한 회피)",
+                        KIS_INIT_RETRY_WAIT_SEC,
+                    )
+                    time.sleep(KIS_INIT_RETRY_WAIT_SEC)
 
         for ticker, name in self.TICKERS.items():
             if broker is None:
@@ -136,8 +215,33 @@ class MarketRegimeGate:
                     "triggered": False,
                 })
                 continue
+            # 5/22 보강: fetch_price 3회 retry + 5초 대기 (일시 네트워크 장애 회복)
+            px = None
+            fetch_err: str | None = None
+            for attempt in range(FETCH_RETRY_COUNT):
+                try:
+                    px = broker.fetch_price(ticker).get("output", {})
+                    if px:
+                        break
+                except Exception as e:
+                    fetch_err = str(e)
+                    logger.warning(
+                        "[MarketRegimeGate] fetch_price %s 실패(attempt=%d/%d): %s",
+                        ticker, attempt + 1, FETCH_RETRY_COUNT, fetch_err,
+                    )
+                if attempt < FETCH_RETRY_COUNT - 1:
+                    time.sleep(FETCH_RETRY_WAIT_SEC)
+
+            if not px:
+                indicators.append({
+                    "ticker": ticker,
+                    "name": name,
+                    "error": fetch_err or f"empty output after {FETCH_RETRY_COUNT} retries",
+                    "triggered": False,
+                })
+                continue
+
             try:
-                px = broker.fetch_price(ticker).get("output", {})
                 chg = float(px.get("prdy_ctrt", 0) or 0)
                 current = int(px.get("stck_prpr", 0) or 0)
 
@@ -186,8 +290,44 @@ class MarketRegimeGate:
         # 3종목 중 2건 이상 fetch 실패 = 시장 데이터 수신 불가 → FAIL.
         # 0건만 triggered인데 정상 판정하면 "데이터 없음 = NORMAL" 오판 위험.
         # ──────────────────────────────────────────────────────────────
+        # 5/22 09:00 사고 보강: 1차 실패는 warning만, 연속 N회 실패에만 KILL_SWITCH
         error_count = sum(1 for ind in indicators if "error" in ind)
         if error_count >= 2:
+            reason_text = f"{error_count}/3 fetch 실패"
+            counter = _read_fail_counter()
+            new_count = counter.get("count", 0) + 1
+
+            if new_count < FAIL_COUNTER_THRESHOLD:
+                # 1차 실패 — warning 텔레그램만, KILL_SWITCH 활성화 X
+                _write_fail_counter(new_count, reason_text)
+                warning_msg = (
+                    f"⚠️ [MarketRegimeGate] WARNING ({new_count}/{FAIL_COUNTER_THRESHOLD})\n"
+                    f"시장 데이터 일시 수신 실패: {reason_text}\n"
+                    f"다음 cron(약 30분 후) 재시도 — KILL_SWITCH 미활성화\n"
+                    f"연속 {FAIL_COUNTER_THRESHOLD}회 실패 시 자동 차단"
+                )
+                _send_warning_tg(warning_msg)
+                logger.warning(
+                    "[MarketRegimeGate] 1차 fetch 실패 — warning만 (count=%d/%d)",
+                    new_count, FAIL_COUNTER_THRESHOLD,
+                )
+                return {
+                    "agent": "market_regime_gate",
+                    "status": "FAIL_TRANSIENT",
+                    "regime": "UNKNOWN",
+                    "indicators": indicators,
+                    "triggered_count": 0,
+                    "error_count": error_count,
+                    "fail_counter": new_count,
+                    "summary": (
+                        f"시장 데이터 일시 수신 실패 ({reason_text}, "
+                        f"{new_count}/{FAIL_COUNTER_THRESHOLD}회) — warning만"
+                    ),
+                    "timestamp": self.timestamp,
+                }
+
+            # 연속 FAIL_COUNTER_THRESHOLD 회 이상 — KILL_SWITCH 활성화
+            _write_fail_counter(new_count, reason_text)
             result = {
                 "agent": "market_regime_gate",
                 "status": "FAIL",
@@ -195,7 +335,11 @@ class MarketRegimeGate:
                 "indicators": indicators,
                 "triggered_count": 0,
                 "error_count": error_count,
-                "summary": f"시장 데이터 수신 불가 ({error_count}/3 fetch 실패)",
+                "fail_counter": new_count,
+                "summary": (
+                    f"시장 데이터 수신 불가 ({reason_text}, "
+                    f"연속 {new_count}회) — KILL_SWITCH 활성화"
+                ),
                 "timestamp": self.timestamp,
             }
             try:
@@ -204,14 +348,17 @@ class MarketRegimeGate:
                     save_worker_report,
                 )
                 activate_kill_switch(
-                    reason=f"MarketRegimeGate fail-safe: {error_count}/3 fetch 실패",
+                    reason=(
+                        f"MarketRegimeGate fail-safe: 연속 {new_count}회 cron "
+                        f"fetch 실패 ({reason_text})"
+                    ),
                     source="MarketRegimeGate",
                     send_tg=True,
                 )
                 save_worker_report("market_regime_gate", result)
             except Exception as e:
                 logger.error(
-                    "[MarketRegimeGate] fetch 실패 fail-safe 처리 중 활성화 실패: %s",
+                    "[MarketRegimeGate] 연속 실패 fail-safe 처리 중 활성화 실패: %s",
                     e,
                 )
             return result
@@ -226,6 +373,8 @@ class MarketRegimeGate:
         else:
             regime = "NORMAL"
             status = "OK"
+            # 5/22 보강: 성공 시 fail 카운터 자동 리셋
+            _reset_fail_counter()
 
         summary = f"{regime} ({len(triggered)}/3 임계 초과)"
         result = {
