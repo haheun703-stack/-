@@ -48,6 +48,51 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 STATE_PATH = PROJECT_ROOT / "data" / "counter_trade_state.json"
+JGIS_OHLCV_DIR = Path("/home/ubuntu/jgis/stock_data_daily")  # 정보봇 OHLCV (VPS 경로)
+
+
+def fetch_supply_5d_from_jgis(ticker: str) -> dict[str, float]:
+    """jgis OHLCV에서 외인+기관 5일 누적 수급 추출.
+
+    Returns:
+        {
+            "foreign_5d": float,    # 외인 5일 누적 (원, 음수 = 매도)
+            "inst_5d": float,        # 기관 5일 누적
+            "vol_ratio": float,      # 최근 거래량 vs 5일 평균
+            "source": "jgis" | "none",
+        }
+    """
+    import csv
+    if not JGIS_OHLCV_DIR.exists():
+        return {"foreign_5d": 0, "inst_5d": 0, "vol_ratio": 0, "source": "none"}
+
+    # 파일명: "{이름}_{ticker}.csv"
+    matches = list(JGIS_OHLCV_DIR.glob(f"*_{ticker}.csv"))
+    if not matches:
+        return {"foreign_5d": 0, "inst_5d": 0, "vol_ratio": 0, "source": "none"}
+
+    try:
+        with open(matches[0], encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        if len(rows) < 5:
+            return {"foreign_5d": 0, "inst_5d": 0, "vol_ratio": 0, "source": "jgis_short"}
+        recent_5 = rows[-5:]
+        # 외인/기관 누적
+        fg_sum = sum(float(r.get("Foreign_Net", 0) or 0) for r in recent_5)
+        inst_sum = sum(float(r.get("Inst_Net", 0) or 0) for r in recent_5)
+        # 거래량 비율
+        last_vol = float(recent_5[-1].get("Volume", 0) or 0)
+        avg_vol = sum(float(r.get("Volume", 0) or 0) for r in recent_5[:-1]) / 4
+        vol_ratio = last_vol / avg_vol if avg_vol > 0 else 0
+        return {
+            "foreign_5d": fg_sum,
+            "inst_5d": inst_sum,
+            "vol_ratio": round(vol_ratio, 2),
+            "source": "jgis",
+        }
+    except Exception as e:
+        logger.warning("jgis 수급 추출 실패 %s: %s", ticker, e)
+        return {"foreign_5d": 0, "inst_5d": 0, "vol_ratio": 0, "source": "error"}
 
 # 워밍업 모드 — 신호만 발동 (실제 매수 X)
 WARMUP_MODE = os.getenv("COUNTER_TRADE_WARMUP", "1") == "1"
@@ -152,6 +197,14 @@ def evaluate_position(
         }
     """
     already_bought_steps = get_position_steps(ticker)
+
+    # ── jgis 자동 보강 (외인/기관/거래량 데이터 부재 시) ──
+    if foreign_5d == 0 and inst_5d == 0:
+        supply = fetch_supply_5d_from_jgis(ticker)
+        foreign_5d = supply["foreign_5d"]
+        inst_5d = supply["inst_5d"]
+        if vol_ratio is None and supply["vol_ratio"] > 0:
+            vol_ratio = supply["vol_ratio"]
 
     # ── 1. 개미털기 판별 ──
     shake = detect_shake_out(
