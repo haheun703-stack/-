@@ -382,31 +382,43 @@ def main() -> int:
             decision.action = "SKIP"
             decision.reason = f"{vwap_msg}"
 
-        # 진입 점수 시스템 (5/22 신규 — Level 1 필수 + Level 2 가중 점수 + 체결강도 90+ 추세)
-        # 기존 check_all_entry_gates (단순 통과/탈락) → entry_score (정밀 가중 점수)로 교체
-        # Level 1 필수: VWAP × 0.995 + 양봉 50% + 마지막봉 양봉 + 체결강도 70+
-        # Level 2 점수: ≥10 적극, 7~9 신중, <7 차단 (체결강도 90+ 상승추세 +3점, 사용자 인사이트)
+        # 실시간 통합 점수 (5/22 신규 — 우리꺼 + 정보봇 8 시그널)
+        # 기존 entry_score (5 시그널) → realtime_score (8 시그널) 확장
+        #   우리 (5): 분봉/VWAP/거래량/호가/체결강도 90+
+        #   정보봇 (3): smart_money, sniper, sector_fire
+        #   매크로: KOSPI regime
+        # 진입 결정: STRONG_BUY (≥+15) / BUY (+8~+14) / HOLD/WEAK_HOLD/EXIT
         gates_msg = ""
         if decision.action == "BUY":
             try:
-                from src.use_cases.entry_score import calculate_entry_score
-                es = calculate_entry_score(broker, tk, current_price=current_price)
-                gates_msg = f"점수 {es['score']:+d} ({es['reasoning']})"
-                if not es["passed_active"]:
+                from src.use_cases.realtime_score import calculate_realtime_score
+                rt = calculate_realtime_score(broker, tk, current_price=current_price)
+                gates_msg = f"실시간 {rt['total']:+d} ({rt['recommend']})"
+                es = rt["entry_score"]
+
+                # Level 1 필수 조건 (entry_score 내부) — 통과 안 하면 무조건 SKIP
+                if not es["passed_required"]:
                     decision.action = "SKIP"
-                    if not es["passed_required"]:
-                        decision.reason = f"필수조건 차단: {'; '.join(es['blocks'])}"
-                    else:
-                        decision.reason = f"진입점수 {es['score']}/10 미달: {es['reasoning']}"
-                    logger.info("[ENTRY SCORE BLOCK] %s — %s", tk, decision.reason)
+                    decision.reason = f"필수조건 차단: {'; '.join(es['blocks'])}"
+                    logger.info("[필수조건 BLOCK] %s — %s", tk, decision.reason)
+                # 실시간 점수 BUY 또는 STRONG_BUY만 진입
+                elif rt["recommend"] not in ("STRONG_BUY", "BUY"):
+                    decision.action = "SKIP"
+                    decision.reason = f"실시간 점수 {rt['total']:+d} {rt['recommend']} (BUY≥+8)"
+                    logger.info("[실시간 점수 BLOCK] %s — %s", tk, decision.reason)
                 else:
-                    logger.info("[ENTRY SCORE OK] %s — 점수 %+d: %s",
-                                tk, es['score'], es['reasoning'])
-                    if es.get("vp_breakout_90"):
-                        logger.info("[★ 90 돌파] %s 체결강도 %.0f 상승추세 진입", tk, es["vp"])
+                    logger.info("[실시간 점수 OK] %s — 총점 %+d (%s): %s",
+                                tk, rt['total'], rt['recommend'], rt['reasoning'])
+                    # 정보봇 시그널 강세 시 로그 강조
+                    if rt['intel_sniper'].get('raw', 0) >= 80:
+                        logger.info("[★정보봇 sniper] %s — %s (5/21 HPSP +10% 사례)",
+                                    tk, rt['intel_sniper']['reason'])
+                    if rt['intel_smart_money'].get('raw', 0) >= 100:
+                        logger.info("[★정보봇 smart_money] %s — DUAL_FLOW %s",
+                                    tk, rt['intel_smart_money']['reason'])
             except Exception as e:
-                logger.warning("[ENTRY SCORE 평가 예외] %s: %s — BUY 진행", tk, e)
-                gates_msg = f"점수 평가 SKIP (예외: {e})"
+                logger.warning("[실시간 점수 평가 예외] %s: %s — BUY 진행", tk, e)
+                gates_msg = f"실시간 점수 SKIP (예외: {e})"
 
         decisions_log.append((tk, nm, sc.score, decision.action, decision.reason))
         print(
