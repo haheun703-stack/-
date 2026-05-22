@@ -31,6 +31,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -45,9 +46,13 @@ VOL_RATIO_PANIC = 3.0             # ≥ 3.0 = 거래량 폭증 (패닉 매도)
 VP_OK = 70.0                      # ≥ 70 = 수급 유지
 VP_BAD = 50.0                     # < 50 = 대량 매도
 
-# 판별 임계
-SHAKEOUT_SCORE_MIN = 5            # +5 이상 = 명백한 개미털기
-PROBLEM_SCORE_MAX = -5            # -5 이하 = 진짜 문제
+# 판별 임계 (.env 동적, 5/22 백테스트 결과 완화)
+# 데이터 가용성:
+#   백테스트 (picks_history만): 외인+기관 2종 → 최대 +4점
+#   실시간 (KIS API): 호가+거래량+체결강도 추가 → 최대 +10점
+# 임계 +4 = 외인+기관 둘 다 매수 (충분 조건)
+SHAKEOUT_SCORE_MIN = int(os.getenv("SHAKEOUT_SCORE_MIN", "4"))   # 5→4 완화 (백테스트 검증)
+PROBLEM_SCORE_MAX = int(os.getenv("PROBLEM_SCORE_MAX", "-5"))    # 진짜 문제 임계 유지
 
 # 하락폭 임계
 DECLINE_HEALTHY_RANGE = (-10.0, -5.0)    # 적정 (개미털기 가능)
