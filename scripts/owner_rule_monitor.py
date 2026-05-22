@@ -127,9 +127,38 @@ def main() -> int:
 
     now_hhmm = datetime.now().strftime("%H:%M")
 
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
     for h in holdings:
         tk = h["ticker"]
         pos = positions.get(tk, {})
+
+        # ★ 5/22 신규 — 옵션 A: D+1 trailing 지연
+        # 배경: 백테스트 (강력포착 256건) D+1 평균 +20.60% vs trailing 매도 +1.37%
+        # 19%p 손실 = trailing -3%이 D+1에 95% 발동 (평균 보유 1.1일)
+        # → 진입 당일 trailing 발동 X, D+2 이후만 정상 동작
+        # 단 -10% 큰 폭 손실은 즉시 발동 (진짜 문제 종목 차단)
+        entry_date = pos.get("entry_date", "")
+        if entry_date == today_str:
+            # D+1 큰 폭 손실 게이트 — 진입가 대비 -10% 이하면 D+1에도 강제 손절
+            entry_price_check = pos.get("entry_price") or h["avg_price"]
+            if entry_price_check > 0:
+                d1_change = (h["current_price"] - entry_price_check) / entry_price_check * 100
+                if d1_change <= -10.0:
+                    logger.warning(
+                        "[D+1 큰 폭 손실 강제 손절] %s — 진입가 대비 %+.2f%% ≤ -10%%",
+                        tk, d1_change,
+                    )
+                    # SELL 진행 (아래 정상 흐름으로)
+                else:
+                    logger.info(
+                        "[D+1 trailing 지연] %s — 진입 당일 trailing 발동 X "
+                        "(entry_date=%s, 변동 %+.2f%%, -10%% 미만)",
+                        tk, entry_date, d1_change,
+                    )
+                    continue
+            else:
+                continue  # 진입가 0 시 안전 SKIP
 
         entry_price = pos.get("entry_price") or h["avg_price"]
 

@@ -161,16 +161,45 @@ def _fetch_sector_momentum(ticker: str) -> dict[str, Any]:
         ≥ 80: 섹터 강세 → +2
         ≥ 60: 섹터 보통 → +1
         그 외: 0
+
+    Sector 조회 순서 (5/22 보강):
+        1. dashboard_smart_money.sector (1순위 — 정보봇 최신 매핑)
+        2. dashboard_sniper.sector (2순위 — 동일 정보봇 풀)
+        3. quant_company_card.sector (3순위 — fallback)
     """
     try:
-        from src.adapters.quant_supabase_reader import get_sector_fire_today, get_company_card
-        # 종목 → 섹터 (정보봇 company_card)
-        card = get_company_card(str(ticker).zfill(6))
-        if not card:
-            return {"score": 0, "sector": "", "reason": "섹터 정보 없음"}
-        sector = card.get("sector", "")
+        from src.adapters.quant_supabase_reader import (
+            get_sector_fire_today, get_company_card, _get_client
+        )
+
+        # 1+2순위: dashboard_smart_money / dashboard_sniper에서 sector 직접
+        sector = ""
+        client = _get_client()
+        if client:
+            for table in ("dashboard_smart_money", "dashboard_sniper"):
+                try:
+                    res = (
+                        client.table(table)
+                        .select("ticker,sector,date")
+                        .eq("ticker", str(ticker).zfill(6))
+                        .order("date", desc=True)
+                        .limit(1)
+                        .execute()
+                    )
+                    if res.data and res.data[0].get("sector"):
+                        sector = res.data[0]["sector"]
+                        break
+                except Exception:
+                    continue
+
+        # 3순위 fallback: company_card
         if not sector:
-            return {"score": 0, "sector": "", "reason": "섹터 미지정"}
+            card = get_company_card(str(ticker).zfill(6))
+            if card:
+                sector = card.get("sector", "")
+
+        if not sector:
+            return {"score": 0, "sector": "", "reason": "섹터 정보 없음 (3 소스 모두)"}
         # 오늘 sector_fire
         today = datetime.now().strftime("%Y-%m-%d")
         sectors = get_sector_fire_today(today, min_score=0)
