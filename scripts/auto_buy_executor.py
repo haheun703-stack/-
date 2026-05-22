@@ -282,6 +282,29 @@ def main() -> int:
             send_telegram("⛔ [자동매수] 후보 0건 — tomorrow_picks.json 확인 필요")
         return 1
 
+    # ③-1. 안전선 ⑪ — KOSPI 매크로 가드 (5/22 신규, 약세장 자동 차단)
+    # 백테스트 결과: BEARISH (-2%↓) 환경에서 C2 통과 종목도 D+1 -7.35%, 승률 0%
+    from src.use_cases.market_regime_guard import check_market_regime_guard
+    guard = check_market_regime_guard()
+    if not guard["passed"]:
+        msg = (
+            f"⛔ [매크로 가드 차단] {guard['block_reason']}\n"
+            f"  → KOSPI 종가 {guard['kospi_close']:,.2f}, 등락 {guard['kospi_chg_pct']:+.2f}%\n"
+            f"  → 자동매수 전체 차단 (BEARISH 환경)"
+        )
+        print(msg)
+        logger.warning(msg)
+        if not args.no_tg:
+            send_telegram(
+                f"⛔ <b>[자동매수 매크로 차단]</b>\n"
+                f"{guard['block_reason']}\n"
+                f"KOSPI 종가: {guard['kospi_close']:,.2f}\n"
+                f"등락률: {guard['kospi_chg_pct']:+.2f}%\n"
+                f"→ 약세장 자동 차단 (5/22 백테스트 결과)"
+            )
+        return 1
+    print(f"  [매크로 가드 통과] regime={guard['regime']}, KOSPI {guard['kospi_chg_pct']:+.2f}%")
+
     # ④ KIS broker 초기화
     from src.adapters.kis_stock_data_adapter import KisStockDataAdapter
     from src.adapters.kis_order_adapter import KisOrderAdapter
