@@ -507,11 +507,12 @@ async def run_phase3_4(
         logger.info("v9 killed 종목 %d개 복원 (AI가 재판단)", len(killed))
 
     # 2026-05-22 v3_brain 부활: scan_cache.json 생성 코드 archive (4/21~) 이후 stale 상태.
-    # candidates 3건 미만 시 tomorrow_picks 강력 포착으로 fallback (Deep Analyst 정상화).
+    # scan_cache 26건이지만 모두 4월 데이터 → Deep Analyst 통과 0건 (picks_history 404건 0건이 증거).
+    # 항상 tomorrow_picks 강력 포착으로 fallback (중복 ticker 제외).
     # 토큰 비용 가드: 상위 V3_BRAIN_FALLBACK_MAX_PICKS (.env, 기본 20건)만 추가.
     import os
     fallback_max = int(os.environ.get("V3_BRAIN_FALLBACK_MAX_PICKS", "20"))
-    if len(candidates) < 3 and fallback_max > 0:
+    if fallback_max > 0:
         tomorrow_picks_data = _load_json(DATA_DIR / "tomorrow_picks.json")
         picks = tomorrow_picks_data.get("picks", [])
         strong_picks = [p for p in picks if p.get("grade") == "강력 포착"]
