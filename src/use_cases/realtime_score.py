@@ -78,7 +78,7 @@ def _fetch_intel_smart_money(ticker: str) -> dict[str, Any]:
             return {"score": 0, "raw": 0, "reason": "supabase 미연결"}
         res = (
             client.table("dashboard_smart_money")
-            .select("ticker,score,signal,date")
+            .select("ticker,score,signal_type,date")
             .eq("ticker", str(ticker).zfill(6))
             .order("date", desc=True)
             .limit(3)
@@ -89,7 +89,7 @@ def _fetch_intel_smart_money(ticker: str) -> dict[str, Any]:
             return {"score": 0, "raw": 0, "reason": "smart_money 시그널 없음"}
         latest = rows[0]
         raw = float(latest.get("score", 0) or 0)
-        signal = latest.get("signal", "")
+        signal = latest.get("signal_type", "")
 
         if raw >= 100:
             return {"score": 3, "raw": raw, "signal": signal,
@@ -123,7 +123,7 @@ def _fetch_intel_sniper(ticker: str) -> dict[str, Any]:
             return {"score": 0, "raw": 0, "reason": "supabase 미연결"}
         res = (
             client.table("dashboard_sniper")
-            .select("ticker,score,signal,date")
+            .select("ticker,score,signal_type,date")
             .eq("ticker", str(ticker).zfill(6))
             .order("date", desc=True)
             .limit(3)
@@ -134,7 +134,7 @@ def _fetch_intel_sniper(ticker: str) -> dict[str, Any]:
             return {"score": 0, "raw": 0, "reason": "sniper 시그널 없음"}
         latest = rows[0]
         raw = float(latest.get("score", 0) or 0)
-        signal = latest.get("signal", "")
+        signal = latest.get("signal_type", "")
         strong_signals = {"반등임박", "수급반전", "수급 반전", "반등 임박"}
 
         if raw >= 80 and signal in strong_signals:
