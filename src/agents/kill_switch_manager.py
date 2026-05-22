@@ -34,17 +34,62 @@ KILL_SWITCH_LOG = PROJECT_ROOT / "data" / "kill_switch_history.jsonl"
 REPORTS_DIR = PROJECT_ROOT / "data" / "agent_reports"
 
 
-def activate_kill_switch(reason: str, source: str, send_tg: bool = True) -> bool:
+def _check_source_throttle(source: str, throttle_minutes: int = 30) -> bool:
+    """동일 source 중복 활성화 throttle (5/22 보강).
+
+    배경: 5/22 09:00 MarketRegimeGate 1회 실패 → 종일 차단 사고.
+    동일 source가 30분 내 재활성화 시도 시 SKIP (반복 활성화 방지).
+
+    Returns:
+        True if throttled (skip), False if OK to activate
+    """
+    if not KILL_SWITCH_LOG.exists():
+        return False
+    try:
+        from datetime import timedelta
+        cutoff = datetime.now() - timedelta(minutes=throttle_minutes)
+        with KILL_SWITCH_LOG.open("r", encoding="utf-8") as f:
+            for line in reversed(list(f)):
+                try:
+                    rec = json.loads(line.strip())
+                    if rec.get("source") != source:
+                        continue
+                    if rec.get("action") not in ("ACTIVATED", "DUPLICATE"):
+                        continue
+                    ts = datetime.fromisoformat(rec.get("ts", ""))
+                    if ts > cutoff:
+                        return True
+                except Exception:
+                    continue
+    except Exception:
+        pass
+    return False
+
+
+def activate_kill_switch(
+    reason: str,
+    source: str,
+    send_tg: bool = True,
+    expire_minutes: int | None = None,
+) -> bool:
     """KILL_SWITCH 자동 활성화. 5명 워커 어디서든 FAIL 시 호출.
 
     Args:
         reason: 차단 사유 (사장님 카톡에 노출됨)
         source: 호출 워커 이름 (EnvChecker / CodeAuditor / FlowMonitor / DataIntegrity / Reporter)
         send_tg: 텔레그램 알람 발송 여부
+        expire_minutes: 자동 해제 시간 (None = 영구, int = N분 후 자동 만료)
+                        5/22 보강: fail-safe 활성화는 120분 권장 (시장 회복 대기)
 
     Returns:
-        True if newly activated, False if already exists
+        True if newly activated, False if already exists or throttled
     """
+    # 5/22 신규 — 동일 source 30분 throttle (5/22 사고: 1회 실패 → 영구 차단 회피)
+    if _check_source_throttle(source, throttle_minutes=30):
+        logger.info("[KILL_SWITCH] %s throttle 적용 (30분 내 중복 활성화 시도) — SKIP", source)
+        _append_history(reason, source, "THROTTLED")
+        return False
+
     # 이미 존재하면 중복 알람 방지
     if KILL_SWITCH.exists():
         existing = KILL_SWITCH.read_text(encoding="utf-8")
@@ -53,16 +98,27 @@ def activate_kill_switch(reason: str, source: str, send_tg: bool = True) -> bool
             _append_history(reason, source, "DUPLICATE")
             return False
 
-    # 활성화
+    # 활성화 (5/22 보강 — expire_at 추가)
+    from datetime import timedelta
+    expire_str = ""
+    if expire_minutes:
+        expire_at = datetime.now() + timedelta(minutes=expire_minutes)
+        expire_str = f"expire_at={expire_at.isoformat()}\n"
+
     content = (
         f"AUTO ACTIVATED\n"
         f"timestamp={datetime.now().isoformat()}\n"
         f"source={source}\n"
         f"reason={reason}\n"
+        f"{expire_str}"
     )
     KILL_SWITCH.write_text(content, encoding="utf-8")
     _append_history(reason, source, "ACTIVATED")
-    logger.warning("[KILL_SWITCH] 자동 활성화 by %s: %s", source, reason)
+    logger.warning(
+        "[KILL_SWITCH] 자동 활성화 by %s: %s%s",
+        source, reason,
+        f" (expire {expire_minutes}분 후)" if expire_minutes else "",
+    )
 
     if send_tg:
         try:
@@ -84,6 +140,34 @@ def activate_kill_switch(reason: str, source: str, send_tg: bool = True) -> bool
 
 
 def is_kill_switch_active() -> bool:
+    """KILL_SWITCH 활성 여부 (5/22 보강: expire_at 자동 만료 체크).
+
+    expire_at 시간 경과 시 자동 해제 + False 반환.
+    """
+    if not KILL_SWITCH.exists():
+        return False
+    try:
+        content = KILL_SWITCH.read_text(encoding="utf-8")
+        for line in content.split("\n"):
+            if line.startswith("expire_at="):
+                expire_str = line.split("=", 1)[1].strip()
+                try:
+                    expire_dt = datetime.fromisoformat(expire_str)
+                    if datetime.now() >= expire_dt:
+                        # 자동 만료 → 해제
+                        KILL_SWITCH.unlink()
+                        _append_history(
+                            f"auto_expire at {expire_str}",
+                            "kill_switch_manager",
+                            "AUTO_EXPIRED",
+                        )
+                        logger.info("[KILL_SWITCH] 자동 만료 해제 (expire_at=%s)", expire_str)
+                        return False
+                except (ValueError, OSError):
+                    pass
+                break
+    except Exception:
+        pass
     return KILL_SWITCH.exists()
 
 

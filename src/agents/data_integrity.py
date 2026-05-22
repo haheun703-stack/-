@@ -230,8 +230,8 @@ class IntegrityReport:
 class DataIntegrity:
     """시각별 데이터 도착/신선도/사전조건 추적 에이전트."""
 
-    # 기대 시각 ±15분 윈도우
-    FRESH_WINDOW_MIN = 15
+    # 기대 시각 ±30분 윈도우 (5/22 보강 15→30분: 정보봇 cron 지연 대비, Agent C 권장)
+    FRESH_WINDOW_MIN = 30
 
     def __init__(self, now: datetime | None = None):
         self.now = now or datetime.now()
