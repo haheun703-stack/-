@@ -506,8 +506,53 @@ async def run_phase3_4(
                 candidates.append(k)
         logger.info("v9 killed 종목 %d개 복원 (AI가 재판단)", len(killed))
 
+    # 2026-05-22 v3_brain 부활: scan_cache.json 생성 코드 archive (4/21~) 이후 stale 상태.
+    # candidates 3건 미만 시 tomorrow_picks 강력 포착으로 fallback (Deep Analyst 정상화).
+    # 토큰 비용 가드: 상위 V3_BRAIN_FALLBACK_MAX_PICKS (.env, 기본 20건)만 추가.
+    import os
+    fallback_max = int(os.environ.get("V3_BRAIN_FALLBACK_MAX_PICKS", "20"))
+    if len(candidates) < 3 and fallback_max > 0:
+        tomorrow_picks_data = _load_json(DATA_DIR / "tomorrow_picks.json")
+        picks = tomorrow_picks_data.get("picks", [])
+        strong_picks = [p for p in picks if p.get("grade") == "강력 포착"]
+        if strong_picks:
+            existing_tickers = {c.get("ticker") for c in candidates}
+            added = 0
+            for p in strong_picks[:fallback_max]:
+                if p.get("ticker") in existing_tickers:
+                    continue
+                candidates.append({
+                    "ticker": p.get("ticker"),
+                    "name": p.get("name"),
+                    "grade": "A",
+                    "zone_score": p.get("total_score", 0) / 100.0,
+                    "trigger_type": "tomorrow_picks_strong",
+                    "confidence": 1.0,
+                    "entry_price": p.get("entry_price", 0),
+                    "stop_loss": p.get("stop_loss", 0),
+                    "target_price": p.get("target_price", 0),
+                    "risk_reward": 0.0,
+                    "rsi": p.get("rsi", 0),
+                    "adx": p.get("adx", 0),
+                    "vol_surge": 0,
+                    "obv_trend": "up" if p.get("above_ma20") else "flat",
+                    "foreign_streak": 0,
+                    "inst_streak": 0,
+                    "foreign_amount_5d": p.get("foreign_5d", 0),
+                    "inst_amount_5d": p.get("inst_5d", 0),
+                    "sector": "",
+                    "source": "tomorrow_picks_fallback",
+                    "tomorrow_picks_total_score": p.get("total_score", 0),
+                    "tomorrow_picks_n_sources": p.get("n_sources", 0),
+                })
+                added += 1
+            logger.warning(
+                "[v3_brain 부활] scan_cache %d건 stale → tomorrow_picks 강력 포착 %d/%d건 fallback",
+                len(candidates) - added, added, len(strong_picks),
+            )
+
     if not candidates:
-        logger.warning("scan_cache 후보 0 — Phase 3+4 스킵")
+        logger.warning("scan_cache + tomorrow_picks 모두 0 — Phase 3+4 스킵")
         return []
 
     # sector boost/suppress 적용
