@@ -44,7 +44,10 @@ SEVERITY_SCORES = {
     "WARNING": 1,
     "INFO": 0,
 }
-SENTIMENT_BOOST = 0.5         # ± 0.5 임계로 호재/악재 판정
+# sentiment_score 정보봇 scale: -100~+100 (실측 5/22: 50건 표본 -28~-15)
+# 보수적 임계 (대부분 음수라 보너스 효과 작음)
+SENTIMENT_BAD_THRESHOLD = -50   # 명백한 악재
+SENTIMENT_GOOD_THRESHOLD = 10   # 호재 추정 (드물지만 의미)
 
 
 def _fetch_recent_disclosures(ticker: str, days: int = DART_LOOKBACK_DAYS) -> list[dict]:
@@ -145,11 +148,11 @@ def calculate_dart_score(ticker: str) -> dict[str, Any]:
     # severity 기본 점수
     base = SEVERITY_SCORES.get(severity, 0)
 
-    # sentiment 보너스
+    # sentiment 보너스 (정보봇 scale -100~+100, 실측 5/22 대부분 음수)
     sent_bonus = 0
-    if sentiment_score >= SENTIMENT_BOOST:
+    if sentiment_score >= SENTIMENT_GOOD_THRESHOLD:
         sent_bonus = 1
-    elif sentiment_score <= -SENTIMENT_BOOST:
+    elif sentiment_score <= SENTIMENT_BAD_THRESHOLD:
         sent_bonus = -1
 
     # tags 보너스 (PPA수혜주 / 메모리 등)
