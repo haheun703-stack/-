@@ -100,28 +100,42 @@ def load_candidates(top_n: int = DEFAULT_TOP_N, grade: str = DEFAULT_GRADE) -> l
     else:
         logger.info("[v3_brain] ai_v3_picks.json 없음 — tomorrow_picks만 사용")
 
-    # 2) tomorrow_picks 강력포착 (top_n까지)
+    # 2) tomorrow_picks 강력포착 (top_n까지) + C2 필터 (5/22 백테스트 결과 반영)
+    # C2 필터: 4핵심 시그널 2개+ + MA5 위 + score≥80 → D+1 +20.60% (기존 +12.01%)
     tomorrow_count = 0
+    c2_blocked_count = 0
     if not TOMORROW_PICKS.exists():
         logger.warning("tomorrow_picks.json 없음 — v3_brain %d건만", v3_count)
         return candidates
     try:
+        from src.use_cases.signal_filter import passes_c2_filter
+
         data = json.loads(TOMORROW_PICKS.read_text(encoding="utf-8"))
         for p in data.get("picks", []):
             if p.get("grade") != grade:
                 continue
             ticker = p.get("ticker", "")
-            if ticker and ticker not in seen_tickers:
-                candidates.append((ticker, p.get("name", ticker)))
-                seen_tickers.add(ticker)
-                tomorrow_count += 1
-                if tomorrow_count >= top_n:
-                    break
+            if not ticker or ticker in seen_tickers:
+                continue
+
+            # C2 필터 (5/22 신규): 4핵심 시그널 2개+ + MA5 위 + score≥80
+            c2 = passes_c2_filter(p)
+            if not c2["passed"]:
+                c2_blocked_count += 1
+                logger.debug("[C2 차단] %s %s — %s", ticker, p.get("name", ""), c2["reason"])
+                continue
+
+            candidates.append((ticker, p.get("name", ticker)))
+            seen_tickers.add(ticker)
+            tomorrow_count += 1
+            logger.info("[C2 통과] %s %s — %s", ticker, p.get("name", ""), c2["reason"])
+            if tomorrow_count >= top_n:
+                break
     except Exception as e:
         logger.error("tomorrow_picks 로드 실패: %s", e)
 
-    logger.info("[load_candidates] v3_brain %d + tomorrow_picks %d = 총 %d건",
-                v3_count, tomorrow_count, len(candidates))
+    logger.info("[load_candidates] v3_brain %d + tomorrow_picks %d (C2 차단 %d) = 총 %d건",
+                v3_count, tomorrow_count, c2_blocked_count, len(candidates))
     return candidates
 
 
@@ -345,25 +359,31 @@ def main() -> int:
             decision.action = "SKIP"
             decision.reason = f"{vwap_msg}"
 
-        # 진입 게이트 3종 (5/19 사장님 결단 — 분봉/호가창/체결강도, 단타봇 동급)
-        # BUY 결정 + VWAP 통과 시에만 평가 (불필요한 API 호출 방지)
+        # 진입 점수 시스템 (5/22 신규 — Level 1 필수 + Level 2 가중 점수 + 체결강도 90+ 추세)
+        # 기존 check_all_entry_gates (단순 통과/탈락) → entry_score (정밀 가중 점수)로 교체
+        # Level 1 필수: VWAP × 0.995 + 양봉 50% + 마지막봉 양봉 + 체결강도 70+
+        # Level 2 점수: ≥10 적극, 7~9 신중, <7 차단 (체결강도 90+ 상승추세 +3점, 사용자 인사이트)
         gates_msg = ""
         if decision.action == "BUY":
             try:
-                from src.use_cases.entry_gates import check_all_entry_gates
-                gates = check_all_entry_gates(broker, tk, current_price=current_price)
-                gates_msg = gates["summary"]
-                if not gates["all_passed"]:
+                from src.use_cases.entry_score import calculate_entry_score
+                es = calculate_entry_score(broker, tk, current_price=current_price)
+                gates_msg = f"점수 {es['score']:+d} ({es['reasoning']})"
+                if not es["passed_active"]:
                     decision.action = "SKIP"
-                    decision.reason = (
-                        f"진입 게이트 {gates['passed_count']}/3: {gates['summary']}"
-                    )
-                    logger.info("[GATES BLOCK] %s — %s", tk, decision.reason)
+                    if not es["passed_required"]:
+                        decision.reason = f"필수조건 차단: {'; '.join(es['blocks'])}"
+                    else:
+                        decision.reason = f"진입점수 {es['score']}/10 미달: {es['reasoning']}"
+                    logger.info("[ENTRY SCORE BLOCK] %s — %s", tk, decision.reason)
                 else:
-                    logger.info("[GATES OK] %s — %s", tk, gates_msg)
+                    logger.info("[ENTRY SCORE OK] %s — 점수 %+d: %s",
+                                tk, es['score'], es['reasoning'])
+                    if es.get("vp_breakout_90"):
+                        logger.info("[★ 90 돌파] %s 체결강도 %.0f 상승추세 진입", tk, es["vp"])
             except Exception as e:
-                logger.warning("[GATES 평가 예외] %s: %s — BUY 진행", tk, e)
-                gates_msg = f"게이트 SKIP (예외: {e})"
+                logger.warning("[ENTRY SCORE 평가 예외] %s: %s — BUY 진행", tk, e)
+                gates_msg = f"점수 평가 SKIP (예외: {e})"
 
         decisions_log.append((tk, nm, sc.score, decision.action, decision.reason))
         print(

@@ -33,7 +33,8 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # 안전선 임계값 (5/18 사장님 결단, 5/21 .env 동적 로드로 일반화)
-THRESHOLD_INTEGRATED_SCORE = 90.0   # 안전선 ① STRONG 90+
+# 5/22 백테스트 (picks_history 246건): score 90 → 80 완화 (C2 필터 결합 시 D+1 +20.60% 검증)
+THRESHOLD_INTEGRATED_SCORE = float(os.getenv("AUTO_TRADING_MIN_SCORE", "80.0"))  # 안전선 ① 80+ (5/22 완화)
 EARLIEST_BUY_TIME = "14:00"          # 안전선 ③ 14:00 이후
 MAX_DAILY_BUYS = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "15"))  # 안전선 ④ .env 동적
 MAX_QTY = int(os.getenv("AUTO_TRADING_MAX_QTY", "1"))                      # 안전선 ⑤ 1주 (.env)
@@ -142,11 +143,11 @@ def should_auto_buy(
     checks_passed = []
     checks_failed = []
 
-    # 안전선 ① STRONG 90+
+    # 안전선 ① 통합 점수 (5/22 완화: 90 → 80, .env AUTO_TRADING_MIN_SCORE 동적)
     if integrated_score >= THRESHOLD_INTEGRATED_SCORE:
-        checks_passed.append(f"점수 {integrated_score:.0f} ≥ 90")
+        checks_passed.append(f"점수 {integrated_score:.0f} ≥ {THRESHOLD_INTEGRATED_SCORE:.0f}")
     else:
-        checks_failed.append(f"점수 {integrated_score:.0f} < 90")
+        checks_failed.append(f"점수 {integrated_score:.0f} < {THRESHOLD_INTEGRATED_SCORE:.0f}")
 
     # 안전선 ② EYE 필터 통과
     if not eye_should_skip:
