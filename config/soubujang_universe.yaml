@@ -1,0 +1,100 @@
+# 소부장 후보 풀 정의 (퐝가님 5/23 흐름 적용 대상)
+#
+# 배경:
+#   강방천 STEP 5 + 퐝가님 흐름 (천장-3% / 분할매수 / 재진입) +
+#   차트영웅 매매법의 3중 검증을 가장 잘 작동하는 종목 분류.
+#
+# 필터 조건:
+#   1. 시총 1,000억 ~ 10조 (자비스 매수 가능 + 변동성 ↑)
+#   2. 섹터 사이클 살아있음 (5/22 picks_history 246건 분석)
+#   3. 거래량 활성 (20일 평균 거래대금 ≥ 50억)
+#   4. STEP 5 ★★★ 이상 (펀더멘털 검증)
+
+# === 섹터 사이클 살아있는 대표 소부장 (시총 1,000억~10조) ===
+
+semiconductor_back:  # HBM 후공정 / 반도체 장비
+  name: HBM 후공정 / 반도체 장비
+  cycle_status: 🔥 절정 (HBM3E 사이클)
+  tickers:
+    - { ticker: "042700", name: "한미반도체",     reason: "HBM TC 본더 1위" }
+    - { ticker: "110990", name: "디아이티",       reason: "HBM 핸들러" }
+    - { ticker: "058470", name: "리노공업",       reason: "테스트 소켓" }
+    - { ticker: "240810", name: "원익IPS",        reason: "후공정 장비" }
+    - { ticker: "036930", name: "주성엔지니어링", reason: "후공정 설비" }
+    - { ticker: "095340", name: "ISC",            reason: "메모리 테스트" }
+
+power_grid:  # 전력기기 / 변압기 (AI 데이터센터 수혜)
+  name: 전력기기 / 변압기
+  cycle_status: 🔥 슈퍼사이클 (AI 데이터센터)
+  tickers:
+    - { ticker: "298040", name: "효성중공업",     reason: "변압기 글로벌 1위" }
+    - { ticker: "267260", name: "HD현대일렉트릭", reason: "변압기 + 전력기기" }
+    - { ticker: "033100", name: "제룡전기",       reason: "변압기 중견" }
+    - { ticker: "103590", name: "일진전기",       reason: "전선/송배전" }
+    - { ticker: "062040", name: "산일전기",       reason: "변압기 신흥강자" }
+    - { ticker: "009470", name: "삼화전기",       reason: "전력 콘덴서" }
+
+cooling:  # 액침냉각 / AI 데이터센터 냉각
+  name: 액침냉각 / AI 데이터센터 냉각
+  cycle_status: 🔥 신규 진입 (NVDA 직접 수혜)
+  tickers:
+    - { ticker: "083450", name: "GST",            reason: "액침냉각 직접" }
+    - { ticker: "011930", name: "신성이엔지",     reason: "데이터센터 냉각" }
+    - { ticker: "053080", name: "케이엔솔",       reason: "냉각시스템" }
+    - { ticker: "036200", name: "유니셈",         reason: "냉각 장비" }
+
+defense_aerospace:  # K-방산 / 우주항공
+  name: K-방산 / 우주항공
+  cycle_status: 🔥 수출 호황 (수주 누적)
+  tickers:
+    - { ticker: "079550", name: "LIG넥스원",      reason: "유도무기" }
+    - { ticker: "272210", name: "한화시스템",     reason: "방산 시스템" }
+    - { ticker: "047810", name: "한국항공우주",   reason: "항공기" }
+    - { ticker: "012450", name: "한화에어로스페이스", reason: "엔진" }
+    - { ticker: "064350", name: "현대로템",       reason: "K2 전차" }
+
+robotics:  # 휴머노이드 / 로봇
+  name: 휴머노이드 / 로봇
+  cycle_status: 🚀 미래 산업 (변동성 大)
+  tickers:
+    - { ticker: "277810", name: "레인보우로보틱스", reason: "휴머노이드 (삼성 인수)" }
+    - { ticker: "058610", name: "에스피지",       reason: "감속기 (로봇 핵심)" }
+    - { ticker: "108490", name: "로보로보",       reason: "교육 로봇" }
+    - { ticker: "192410", name: "휴림로봇",       reason: "산업용 로봇" }
+
+ppa_chain:  # PPA 전력구매계약 수혜
+  name: PPA 전력구매계약 / 신재생
+  cycle_status: 🔥 정책 수혜
+  tickers:
+    - { ticker: "112610", name: "씨에스윈드",     reason: "풍력 타워" }
+    - { ticker: "058450", name: "씨에스베어링",   reason: "풍력 베어링" }
+    - { ticker: "010120", name: "LS ELECTRIC",    reason: "전력 인프라" }
+
+space_satellite:  # 우주/위성 (스페이스X 상장 효과)
+  name: 우주 / 위성
+  cycle_status: 🚀 6/12 SpaceX 상장 이슈
+  tickers:
+    - { ticker: "454910", name: "쎄트렉아이",     reason: "위성 카메라" }
+    - { ticker: "199820", name: "제이씨현시스템", reason: "위성 통신" }
+    - { ticker: "319400", name: "현대무벡스",     reason: "물류 + 항공" }
+
+# === 화이트리스트 ===
+whitelist:
+  description: |
+    본 풀은 후보 풀 (universe). 실제 매수는:
+      1. 시총 1,000억~10조 검증
+      2. 20일 평균 거래대금 50억+ 검증
+      3. STEP 5 ★★★ 이상 (정보봇 데이터 + 봇 자체 모델)
+      4. 차트영웅 GATE1+GATE2 통과
+      5. 자비스 9 안전선 통과
+    이 5단계 통과한 종목만 적응형 포지션 매매 진입.
+
+# === 메타 ===
+_metadata:
+  version: "1.0"
+  created: "2026-05-23"
+  total_sectors: 7
+  total_tickers: ~33
+  note: |
+    5/27 회고 시 1주차 가동 결과 + 섹터 사이클 진단 후 갱신.
+    섹터가 죽으면 제외, 새 섹터 부상 시 추가.
