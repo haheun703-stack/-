@@ -8,7 +8,7 @@
   답: 우리꺼 (분봉/VWAP/체결강도/호가) + 정보봇 (smart_money/sniper/섹터/시간대별 수급)
   통합 8 시그널 가중 점수 시스템.
 
-8 시그널 통합 (총 -12 ~ +22):
+9 시그널 통합 (총 -15 ~ +25, 5/23 옵션 C 후):
   [우리 시스템]
   1. 분봉 양봉비율 (entry_score 재활용)            0~+2
   2. VWAP 위치 상/중/하                            0~+3
@@ -20,9 +20,12 @@
   6. 정보봇 dashboard_smart_money (외인+기관 동시)  0~+3
   7. 정보봇 dashboard_sniper (반등임박/수급반전)    0~+3
   8. 섹터 sector_fire 모멘텀                       0~+2
+  9. 정보봇 intelligence_macro (Perplexity 매크로) -3~+3
 
   [매크로 — market_regime_guard]
-  9. KOSPI regime                                -3~+2
+  10. KOSPI regime                                -3~+2
+  11. PPA 화이트리스트 + jgis 교차 검증            0~+3
+  12. DART 공시 + 자체 수급 교차 검증              -2~+3
 
 진입/홀드/매도 결정:
   ≥ +15: ★STRONG_BUY (신규 진입 또는 추매)
@@ -54,6 +57,7 @@ from src.use_cases.entry_score import calculate_entry_score
 from src.use_cases.market_regime_guard import get_kospi_regime
 from src.use_cases.ppa_whitelist_scorer import calculate_ppa_score
 from src.use_cases.dart_signal_scorer import calculate_dart_score
+from src.use_cases.macro_signal_scorer import calculate_macro_signal_score
 
 logger = logging.getLogger(__name__)
 
@@ -306,10 +310,14 @@ def calculate_realtime_score(
     dart = calculate_dart_score(ticker)
     breakdown["DART_공시"] = {"score": dart["score"], "reason": dart["reason"]}
 
+    # === 8. 매크로 X Perplexity (intelligence_macro, 5/23 옵션 C) ===
+    macro_x = calculate_macro_signal_score(ticker, sector=sector.get("sector", ""))
+    breakdown["매크로_X"] = {"score": macro_x["score"], "reason": macro_x["reason"]}
+
     # === 합산 ===
     total = (
         es_score + intel_sm["score"] + intel_sn["score"] + sector["score"]
-        + macro["score"] + ppa["score"] + dart["score"]
+        + macro["score"] + ppa["score"] + dart["score"] + macro_x["score"]
     )
 
     # === 진입/홀드/매도 결정 ===
@@ -327,7 +335,8 @@ def calculate_realtime_score(
     reasoning = (
         f"실시간 점수 {total:+d} ({recommend}): "
         f"우리={es_score:+d} / smart_money={intel_sm['score']:+d} / "
-        f"sniper={intel_sn['score']:+d} / 섹터={sector['score']:+d} / 매크로={macro['score']:+d}"
+        f"sniper={intel_sn['score']:+d} / 섹터={sector['score']:+d} / "
+        f"KOSPI={macro['score']:+d} / 매크로X={macro_x['score']:+d}"
     )
 
     return {
@@ -341,6 +350,7 @@ def calculate_realtime_score(
         "macro": macro,
         "ppa_whitelist": ppa,
         "dart_signal": dart,
+        "macro_x": macro_x,
         "reasoning": reasoning,
     }
 
