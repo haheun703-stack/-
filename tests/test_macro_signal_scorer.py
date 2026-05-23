@@ -270,7 +270,8 @@ class TestRealtimeScoreIntegration(unittest.TestCase):
              patch("src.use_cases.realtime_score._score_macro_regime") as mock_mr, \
              patch("src.use_cases.realtime_score.calculate_ppa_score") as mock_ppa, \
              patch("src.use_cases.realtime_score.calculate_dart_score") as mock_dart, \
-             patch("src.use_cases.realtime_score.calculate_macro_signal_score") as mock_mx:
+             patch("src.use_cases.realtime_score.calculate_macro_signal_score") as mock_mx, \
+             patch("src.use_cases.realtime_score.calculate_edgar_score") as mock_edg:
 
             mock_es.return_value = {"score": 5, "reasoning": "es ok"}
             mock_sm.return_value = {"score": 2, "raw": 60, "reason": "sm"}
@@ -288,20 +289,31 @@ class TestRealtimeScoreIntegration(unittest.TestCase):
                 "reason": "매크로 호재 1건 (sector)",
                 "breakdown": ["WARNING AI 호재 +2"],
             }
+            mock_edg.return_value = {
+                "score": 1,
+                "n_signals": 2,
+                "n_effective": 1,
+                "matched_us": ["NVDA"],
+                "breakdown": ["NVDA EARNING_BEAT × 1.0 = +1"],
+                "reason": "EDGAR 1건 영향 +1",
+            }
 
             result = rs.calculate_realtime_score(broker, "005930", current_price=70000)
 
-            # 매크로_X breakdown 키 존재
+            # 매크로_X / EDGAR breakdown 키 존재
             self.assertIn("매크로_X", result["breakdown"])
+            self.assertIn("EDGAR_매핑", result["breakdown"])
             self.assertEqual(result["breakdown"]["매크로_X"]["score"], 2)
+            self.assertEqual(result["breakdown"]["EDGAR_매핑"]["score"], 1)
 
-            # 총점 = 5+2+0+1+1+0+0+2 = 11 → BUY
-            self.assertEqual(result["total"], 11)
+            # 총점 = 5+2+0+1+1+0+0+2+1 = 12 → BUY
+            self.assertEqual(result["total"], 12)
             self.assertEqual(result["recommend"], "BUY")
 
-            # macro_x dict 반환에 포함
+            # macro_x / edgar dict 반환에 포함
             self.assertIn("macro_x", result)
-            self.assertEqual(result["macro_x"]["matched_by"], "sector")
+            self.assertIn("edgar", result)
+            self.assertEqual(result["edgar"]["matched_us"], ["NVDA"])
 
 
 if __name__ == "__main__":

@@ -8,24 +8,21 @@
   답: 우리꺼 (분봉/VWAP/체결강도/호가) + 정보봇 (smart_money/sniper/섹터/시간대별 수급)
   통합 8 시그널 가중 점수 시스템.
 
-9 시그널 통합 (총 -15 ~ +25, 5/23 옵션 C 후):
-  [우리 시스템]
-  1. 분봉 양봉비율 (entry_score 재활용)            0~+2
-  2. VWAP 위치 상/중/하                            0~+3
-  3. 거래량 서지                                  0~+2
-  4. 호가 매수1/매도1                              0~+2
-  5. 체결강도 90+ 추세 (volume_power_tracker)     -1~+3
+10 시그널 통합 (총 -18 ~ +28, 5/23 옵션 C/D 후):
+  [우리 시스템 — entry_score 5종]
+  1~5. 분봉 양봉/VWAP/거래량/호가/체결강도 90+
 
   [정보봇 통합 — quant_supabase_reader]
   6. 정보봇 dashboard_smart_money (외인+기관 동시)  0~+3
   7. 정보봇 dashboard_sniper (반등임박/수급반전)    0~+3
   8. 섹터 sector_fire 모멘텀                       0~+2
-  9. 정보봇 intelligence_macro (Perplexity 매크로) -3~+3
+  9. 정보봇 intelligence_macro (Perplexity 매크로) -3~+3 (5/23 옵션 C)
+ 10. EDGAR 미국 SEC 공시 → 한국 매핑                -3~+3 (5/23 옵션 D)
 
-  [매크로 — market_regime_guard]
-  10. KOSPI regime                                -3~+2
-  11. PPA 화이트리스트 + jgis 교차 검증            0~+3
-  12. DART 공시 + 자체 수급 교차 검증              -2~+3
+  [매크로 / 화이트리스트]
+ 11. KOSPI regime                                  -3~+2
+ 12. PPA 화이트리스트 + jgis 교차 검증              0~+3
+ 13. DART 공시 + 자체 수급 교차 검증                -2~+3
 
 진입/홀드/매도 결정:
   ≥ +15: ★STRONG_BUY (신규 진입 또는 추매)
@@ -58,6 +55,7 @@ from src.use_cases.market_regime_guard import get_kospi_regime
 from src.use_cases.ppa_whitelist_scorer import calculate_ppa_score
 from src.use_cases.dart_signal_scorer import calculate_dart_score
 from src.use_cases.macro_signal_scorer import calculate_macro_signal_score
+from src.use_cases.edgar_signal_scorer import calculate_edgar_score
 
 logger = logging.getLogger(__name__)
 
@@ -314,10 +312,15 @@ def calculate_realtime_score(
     macro_x = calculate_macro_signal_score(ticker, sector=sector.get("sector", ""))
     breakdown["매크로_X"] = {"score": macro_x["score"], "reason": macro_x["reason"]}
 
+    # === 9. EDGAR 미국 SEC 공시 매핑 (5/23 옵션 D) ===
+    edgar = calculate_edgar_score(ticker)
+    breakdown["EDGAR_매핑"] = {"score": edgar["score"], "reason": edgar["reason"]}
+
     # === 합산 ===
     total = (
         es_score + intel_sm["score"] + intel_sn["score"] + sector["score"]
-        + macro["score"] + ppa["score"] + dart["score"] + macro_x["score"]
+        + macro["score"] + ppa["score"] + dart["score"]
+        + macro_x["score"] + edgar["score"]
     )
 
     # === 진입/홀드/매도 결정 ===
@@ -336,7 +339,8 @@ def calculate_realtime_score(
         f"실시간 점수 {total:+d} ({recommend}): "
         f"우리={es_score:+d} / smart_money={intel_sm['score']:+d} / "
         f"sniper={intel_sn['score']:+d} / 섹터={sector['score']:+d} / "
-        f"KOSPI={macro['score']:+d} / 매크로X={macro_x['score']:+d}"
+        f"KOSPI={macro['score']:+d} / 매크로X={macro_x['score']:+d} / "
+        f"EDGAR={edgar['score']:+d}"
     )
 
     return {
@@ -351,6 +355,7 @@ def calculate_realtime_score(
         "ppa_whitelist": ppa,
         "dart_signal": dart,
         "macro_x": macro_x,
+        "edgar": edgar,
         "reasoning": reasoning,
     }
 

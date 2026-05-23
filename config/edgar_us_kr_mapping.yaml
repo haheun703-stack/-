@@ -1,0 +1,156 @@
+# EDGAR 미국 빅테크 → 한국 수혜주 매핑 사전 (5/23 옵션 D)
+#
+# 배경:
+#   정보봇이 EDGAR (미국 SEC 공시) 추적 → Form 4 내부자 거래 / 10-Q 어닝 /
+#   8-K 중대 사건 등. 그러나 미국 ticker (NVDA/TSLA/AMD 등)만 있어
+#   한국 종목 점수 산출 시 매칭 불가. 본 사전으로 자동 변환.
+#
+# 영향 강도 (weight):
+#   primary (1.0):  핵심 공급사 / 직접 협력사
+#   secondary (0.6): 동반 수혜 (HBM 메모리 등)
+#   tertiary (0.3): 약한 동조 (시장 분위기 동조)
+#
+# 시그널 방향:
+#   미국 호재 (어닝 비트 / 임원 대량 매수) → 한국 매핑 종목 호재
+#   미국 악재 (실적 미스 / 임원 대량 매도 / 규제) → 한국 매핑 종목 약한 악재
+#   (한국은 미국 빅테크의 부품/장비 공급자이므로 영향 방향 동일)
+
+# === 반도체 / HBM / AI 인프라 ===
+NVDA:  # NVIDIA — 한국 HBM/패키징 직접 수혜
+  name: NVIDIA
+  primary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "HBM3E 메인 공급사" }
+    - { ticker: "005930", name: "삼성전자",      reason: "HBM3E + 파운드리" }
+  secondary:
+    - { ticker: "042700", name: "한미반도체",    reason: "HBM TC 본더" }
+    - { ticker: "058470", name: "리노공업",      reason: "테스트 소켓" }
+  tertiary:
+    - { ticker: "240810", name: "원익IPS",       reason: "후공정 장비" }
+
+AMD:  # AMD — HBM 두 번째 수혜
+  name: AMD
+  primary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "HBM 공급" }
+  secondary:
+    - { ticker: "005930", name: "삼성전자",      reason: "HBM 공급 협상" }
+    - { ticker: "042700", name: "한미반도체",    reason: "TC 본더" }
+
+INTC:  # Intel — 파운드리 외주 동향
+  name: Intel
+  primary:
+    - { ticker: "005930", name: "삼성전자",      reason: "파운드리 경쟁/협력" }
+  secondary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "메모리 동조" }
+
+TSM:  # TSMC — 파운드리 경쟁/HBM 협업
+  name: TSMC
+  primary:
+    - { ticker: "005930", name: "삼성전자",      reason: "파운드리 직접 경쟁" }
+  secondary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "HBM 패키징 협업" }
+  tertiary:
+    - { ticker: "042700", name: "한미반도체",    reason: "공급사" }
+
+ASML:  # ASML — EUV 노광장비 (한국 반도체 캡엑스 선행지표)
+  name: ASML
+  primary:
+    - { ticker: "005930", name: "삼성전자",      reason: "EUV 주요 고객" }
+    - { ticker: "000660", name: "SK하이닉스",   reason: "EUV 주요 고객" }
+  secondary:
+    - { ticker: "240810", name: "원익IPS",       reason: "공정 장비 동조" }
+
+MU:  # Micron — 메모리 경쟁사 (역상관 또는 동반)
+  name: Micron
+  primary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "메모리 직접 경쟁" }
+    - { ticker: "005930", name: "삼성전자",      reason: "메모리 직접 경쟁" }
+
+AVGO:  # Broadcom — AI 칩 ASIC
+  name: Broadcom
+  primary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "AI 메모리 공급" }
+  secondary:
+    - { ticker: "005930", name: "삼성전자",      reason: "AI 메모리/파운드리" }
+
+# === 전기차 / 배터리 ===
+TSLA:  # Tesla — K-배터리 직접 공급
+  name: Tesla
+  primary:
+    - { ticker: "373220", name: "LG에너지솔루션", reason: "배터리 직접 공급" }
+  secondary:
+    - { ticker: "006400", name: "삼성SDI",       reason: "원통형 배터리" }
+    - { ticker: "247540", name: "에코프로비엠",  reason: "양극재 공급" }
+    - { ticker: "066970", name: "엘앤에프",      reason: "양극재 공급" }
+  tertiary:
+    - { ticker: "020150", name: "롯데에너지머티리얼즈", reason: "동박" }
+
+# === 모바일 / 디스플레이 ===
+AAPL:  # Apple — 디스플레이/카메라 직접 공급
+  name: Apple
+  primary:
+    - { ticker: "005930", name: "삼성전자",      reason: "OLED 디스플레이" }
+    - { ticker: "011070", name: "LG이노텍",      reason: "카메라 모듈" }
+  secondary:
+    - { ticker: "034220", name: "LG디스플레이",  reason: "OLED 공급" }
+  tertiary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "낸드 메모리" }
+
+# === 클라우드 / 빅테크 SW ===
+MSFT:  # Microsoft — Azure / OpenAI / Copilot
+  name: Microsoft
+  primary:
+    - { ticker: "035420", name: "NAVER",         reason: "AI/클라우드 동조" }
+  secondary:
+    - { ticker: "030200", name: "KT",            reason: "AI 협업" }
+    - { ticker: "000660", name: "SK하이닉스",   reason: "Azure HBM 수요" }
+
+AMZN:  # Amazon — AWS / 데이터센터
+  name: Amazon
+  primary:
+    - { ticker: "035420", name: "NAVER",         reason: "클라우드 동조" }
+  secondary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "AWS HBM 수요" }
+    - { ticker: "005930", name: "삼성전자",      reason: "AWS 메모리" }
+
+GOOGL:  # Alphabet/Google — TPU / AI
+  name: Alphabet
+  primary:
+    - { ticker: "035420", name: "NAVER",         reason: "검색/AI 직접 경쟁" }
+  secondary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "TPU HBM 공급" }
+
+META:  # Meta — VR/AR / AI 인프라
+  name: Meta
+  primary:
+    - { ticker: "035420", name: "NAVER",         reason: "SNS/AI" }
+  secondary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "AI 인프라" }
+    - { ticker: "005930", name: "삼성전자",      reason: "VR 디스플레이" }
+
+ORCL:  # Oracle — 엔터프라이즈 SW
+  name: Oracle
+  primary:
+    - { ticker: "035420", name: "NAVER",         reason: "엔터프라이즈 클라우드" }
+  tertiary:
+    - { ticker: "030200", name: "KT",            reason: "기업 SW 동조" }
+
+QCOM:  # Qualcomm — 모바일 AP/모뎀
+  name: Qualcomm
+  primary:
+    - { ticker: "005930", name: "삼성전자",      reason: "모뎀/AP 동조" }
+  secondary:
+    - { ticker: "011070", name: "LG이노텍",      reason: "모바일 부품 공급" }
+  tertiary:
+    - { ticker: "000660", name: "SK하이닉스",   reason: "모바일 메모리" }
+
+# === 메타 정보 ===
+_metadata:
+  version: "1.0"
+  created: "2026-05-23"
+  author: "Quantum Master + 5/22 인사이트"
+  total_us_companies: 15
+  total_kr_mappings: ~30
+  note: |
+    매핑은 정적 사전 (수동 유지보수).
+    EDGAR Form 4 등 미국 SEC 시그널 처리 시 본 사전을 통해
+    미국 ticker → 한국 ticker 변환 후 realtime_score 통합.
