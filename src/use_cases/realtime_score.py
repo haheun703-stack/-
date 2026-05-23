@@ -158,7 +158,7 @@ def _fetch_intel_sniper(ticker: str) -> dict[str, Any]:
 
 
 def _fetch_sector_momentum(ticker: str) -> dict[str, Any]:
-    """정보봇 sector_fire 기반 섹터 모멘텀.
+    """정보봇 sector_fire 기반 섹터 모멘텀 (5/23 sector_alias 정규화 적용).
 
     종목 → 섹터 → sector_fire_score 매핑.
     fire_score 기준:
@@ -170,14 +170,20 @@ def _fetch_sector_momentum(ticker: str) -> dict[str, Any]:
         1. dashboard_smart_money.sector (1순위 — 정보봇 최신 매핑)
         2. dashboard_sniper.sector (2순위 — 동일 정보봇 풀)
         3. quant_company_card.sector (3순위 — fallback)
+
+    Sector 정규화 (5/23 보강 — HPSP 사고 재발 방지):
+        정보봇 KRX/WICS 분류("반도체와반도체장비") → 우리 표준("AI반도체")
+        sector_alias.yaml 사전 기반 normalize_sector() 적용.
     """
     try:
         from src.adapters.quant_supabase_reader import (
             get_sector_fire_today, get_company_card, _get_client
         )
+        from src.use_cases.sector_normalizer import normalize_sector
 
         # 1+2순위: dashboard_smart_money / dashboard_sniper에서 sector 직접
-        sector = ""
+        raw_sector = ""
+        source = ""
         client = _get_client()
         if client:
             for table in ("dashboard_smart_money", "dashboard_sniper"):
@@ -191,37 +197,56 @@ def _fetch_sector_momentum(ticker: str) -> dict[str, Any]:
                         .execute()
                     )
                     if res.data and res.data[0].get("sector"):
-                        sector = res.data[0]["sector"]
+                        raw_sector = res.data[0]["sector"]
+                        source = table
                         break
                 except Exception:
                     continue
 
         # 3순위 fallback: company_card
-        if not sector:
+        if not raw_sector:
             card = get_company_card(str(ticker).zfill(6))
             if card:
-                sector = card.get("sector", "")
+                raw_sector = card.get("sector", "")
+                source = "company_card"
 
-        if not sector:
-            return {"score": 0, "sector": "", "reason": "섹터 정보 없음 (3 소스 모두)"}
+        if not raw_sector:
+            return {"score": 0, "sector": "", "raw_sector": "",
+                    "reason": "섹터 정보 없음 (3 소스 모두)"}
+
+        # 정규화 (5/23 신규 — HPSP 사례 같은 alias 매칭 실패 차단)
+        sector = normalize_sector(raw_sector)
+        normalized = sector != raw_sector
+
         # 오늘 sector_fire
         today = datetime.now().strftime("%Y-%m-%d")
         sectors = get_sector_fire_today(today, min_score=0)
-        match = next((s for s in sectors if s.get("sector") == sector), None)
+        # canonical 비교 + 원본 비교 (둘 중 매칭)
+        match = next(
+            (s for s in sectors if normalize_sector(s.get("sector", "")) == sector),
+            None,
+        )
         if not match:
-            return {"score": 0, "sector": sector, "reason": f"섹터 fire 없음 ({sector})"}
+            return {"score": 0, "sector": sector, "raw_sector": raw_sector,
+                    "source": source,
+                    "reason": f"섹터 fire 없음 ({sector}{' ← ' + raw_sector if normalized else ''})"}
         fire = float(match.get("fire_score", 0) or 0)
+        suffix = f" ← {raw_sector}" if normalized else ""
         if fire >= 80:
-            return {"score": 2, "sector": sector, "fire": fire,
-                    "reason": f"섹터({sector}) fire {fire:.0f} (+2)"}
+            return {"score": 2, "sector": sector, "raw_sector": raw_sector,
+                    "source": source, "fire": fire,
+                    "reason": f"섹터({sector}{suffix}) fire {fire:.0f} (+2)"}
         elif fire >= 60:
-            return {"score": 1, "sector": sector, "fire": fire,
-                    "reason": f"섹터({sector}) fire {fire:.0f} (+1)"}
-        return {"score": 0, "sector": sector, "fire": fire,
-                "reason": f"섹터({sector}) fire 약함 {fire:.0f}"}
+            return {"score": 1, "sector": sector, "raw_sector": raw_sector,
+                    "source": source, "fire": fire,
+                    "reason": f"섹터({sector}{suffix}) fire {fire:.0f} (+1)"}
+        return {"score": 0, "sector": sector, "raw_sector": raw_sector,
+                "source": source, "fire": fire,
+                "reason": f"섹터({sector}{suffix}) fire 약함 {fire:.0f}"}
     except Exception as e:
         logger.debug("sector_momentum 조회 실패 %s: %s", ticker, e)
-        return {"score": 0, "sector": "", "reason": f"조회 예외 {e}"}
+        return {"score": 0, "sector": "", "raw_sector": "",
+                "reason": f"조회 예외 {e}"}
 
 
 def _score_macro_regime() -> dict[str, Any]:

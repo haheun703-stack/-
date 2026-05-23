@@ -1,0 +1,193 @@
+# Sector Alias 사전 — 정보봇/KRX/WICS 분류 → 우리 표준 섹터 정규화
+#
+# 배경 (5/23, 5/22 HPSP 사고):
+#   정보봇 dashboard_smart_money / sniper의 sector 필드는 KRX/WICS 분류 사용
+#   (예: "반도체와반도체장비", "반도체"). 그러나 우리 sector_fire는
+#   sector_fire_map.yaml의 한글 합성어 (예: "AI반도체") 사용.
+#   문자열 직접 비교 시 매칭 실패 → fire_score 0으로 처리되어 시그널 손실.
+#
+# 본 사전으로 alias → canonical 정규화 후 매칭.
+#
+# 사용:
+#   from src.use_cases.sector_normalizer import normalize_sector
+#   normalize_sector("반도체와반도체장비")  → "AI반도체"
+#   normalize_sector("이차전지")           → "2차전지"
+
+canonical_sectors:
+  AI반도체:
+    aliases:
+      - 반도체
+      - 반도체장비
+      - 반도체와반도체장비
+      - 반도체 장비
+      - 반도체및반도체장비
+      - 시스템반도체
+      - 메모리반도체
+      - 메모리
+      - 비메모리
+      - 파운드리
+      - HBM
+      - semiconductor
+      - 전자장비및기기
+
+  2차전지:
+    aliases:
+      - 이차전지
+      - 배터리
+      - 전기차배터리
+      - 양극재
+      - 음극재
+      - 분리막
+      - 전해질
+      - 이차전지소재
+      - battery
+
+  방산:
+    aliases:
+      - 방위산업
+      - 우주항공
+      - 무기
+      - 항공우주
+      - 우주방위
+      - defense
+      - aerospace
+
+  조선해운:
+    aliases:
+      - 조선
+      - 해운
+      - 선박
+      - 조선업
+      - 해운업
+      - 선박부품
+      - shipbuilding
+      - shipping
+
+  전력기기:
+    aliases:
+      - 전력
+      - 송배전
+      - 변압기
+      - 전선
+      - 에너지인프라
+      - 데이터센터전력
+      - 전기장비
+      - 전력기계
+      - power_grid
+      - 전력설비
+
+  액침냉각:
+    aliases:
+      - 냉각
+      - 데이터센터냉각
+      - 액침
+      - 액침냉각시스템
+      - 냉각시스템
+      - cooling
+
+  자동차:
+    aliases:
+      - 완성차
+      - 자동차부품
+      - 자동차및부품
+      - 모빌리티
+      - auto
+      - automotive
+
+  바이오:
+    aliases:
+      - 제약
+      - 헬스케어
+      - 바이오의약품
+      - 의료기기
+      - 제약바이오
+      - bio
+      - healthcare
+      - pharma
+
+  IT플랫폼:
+    aliases:
+      - 인터넷
+      - 플랫폼
+      - 게임
+      - 게임소프트웨어
+      - 엔터테인먼트
+      - 소프트웨어
+      - 미디어및엔터테인먼트
+      - 인터넷서비스
+      - it_platform
+
+  건설인프라:
+    aliases:
+      - 건설
+      - 인프라
+      - 건설업
+      - 시멘트
+      - construction
+      - infrastructure
+
+  화장품소비재:
+    aliases:
+      - 화장품
+      - 소비재
+      - 음식료품
+      - 의류
+      - 유통
+      - 소매유통
+      - consumer
+      - cosmetics
+
+  정유에너지:
+    aliases:
+      - 정유
+      - 에너지
+      - 석유
+      - 가스
+      - 유틸리티
+      - LNG
+      - oil
+      - energy
+
+  철강소재:
+    aliases:
+      - 철강
+      - 소재
+      - 화학
+      - 비철금속
+      - 금속
+      - 비철
+      - steel
+      - materials
+      - chemicals
+
+  로봇자동화:
+    aliases:
+      - 로봇
+      - 자동화
+      - 산업용로봇
+      - 협동로봇
+      - robotics
+      - automation
+
+  금융:
+    aliases:
+      - 은행
+      - 보험
+      - 증권
+      - 카드
+      - 금융업
+      - bank
+      - finance
+      - insurance
+
+# === 메타 정보 ===
+_metadata:
+  version: "1.0"
+  created: "2026-05-23"
+  background: |
+    5/22 HPSP 사례:
+    정보봇 sector="반도체" → 우리 sector_fire "AI반도체" 매칭 실패 → fire_score 0.
+    본 사전 적용 후 normalize("반도체") → "AI반도체" → fire_score 정상 매칭.
+  fallback: |
+    정규화 실패 시 원본 sector 그대로 반환 (보수적).
+    완전 새 sector면 unknown_sectors.log에 기록 (추후 사전 업데이트).
