@@ -260,8 +260,12 @@ def scan_holdings_for_peaks(
 def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
     """자동 매도 실행 (ADAPTIVE_AUTO_SELL=1일 때만).
 
+    매도 성공 시 → MVP-2 분할매수 큐 자동 등록 (peak_price + 가용 현금 기반).
+    AUTO_SELL=0 (1주차)이면 매도 안 됨 → 큐 등록도 자동으로 미발생.
+
     Returns:
-        {"success": bool, "order_id": str, "qty": int, "price": int, "error": str}
+        {"success": bool, "order_id": str, "qty": int, "price": int, "error": str,
+         "queue_registered": bool, "queue_error": str}
     """
     if not sig.auto_sell_eligible:
         return {"success": False, "error": "auto_sell_eligible=False"}
@@ -278,7 +282,7 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
             symbol=sig.ticker,
             quantity=sell_qty,
         )
-        return {
+        result = {
             "success": True,
             "order_id": res.get("output", {}).get("ODNO", ""),
             "qty": sell_qty,
@@ -286,6 +290,37 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
             "peak_price": sig.peak_price,
             "pct_from_peak": sig.pct_from_peak,
         }
+
+        # MVP-2 연동: 매도 후 분할매수 큐 자동 등록
+        try:
+            from src.use_cases.adaptive_buy_queue import register_buy_queue
+
+            cash = 0
+            if hasattr(broker, "get_available_cash"):
+                try:
+                    cash = int(broker.get_available_cash() or 0)
+                except Exception:
+                    cash = 0
+
+            if cash >= 100_000 and sig.peak_price > 0:
+                queue_result = register_buy_queue(
+                    ticker=sig.ticker,
+                    peak_price=sig.peak_price,
+                    available_cash=cash,
+                    name=sig.ticker,
+                )
+                result["queue_registered"] = bool(queue_result.get("success"))
+                if not queue_result.get("success"):
+                    result["queue_error"] = queue_result.get("error", "")
+            else:
+                result["queue_registered"] = False
+                result["queue_error"] = f"가용 현금 {cash:,} 미달 또는 peak 부재"
+        except Exception as e:
+            logger.warning("MVP-2 큐 자동 등록 실패: %s", e)
+            result["queue_registered"] = False
+            result["queue_error"] = str(e)
+
+        return result
     except Exception as e:
         logger.error("auto sell %s 실패: %s", sig.ticker, e)
         return {"success": False, "error": str(e)}
