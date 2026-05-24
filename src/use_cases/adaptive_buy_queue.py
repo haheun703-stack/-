@@ -65,6 +65,7 @@ def _parse_int_list(env_val: str, default: list[int]) -> list[int]:
 SPLIT_LEVELS = _parse_int_list(os.getenv("ADAPTIVE_SPLIT_LEVELS", "10,20,30"), [10, 20, 30])
 SPLIT_RATIOS = _parse_int_list(os.getenv("ADAPTIVE_SPLIT_RATIOS", "30,30,40"), [30, 30, 40])
 SPLIT_MAX_AMOUNT = int(os.getenv("ADAPTIVE_SPLIT_MAX_AMOUNT", "1000000"))     # 1단위 100만
+SPLIT_MAX_QTY = int(os.getenv("ADAPTIVE_SPLIT_MAX_QTY", "0"))                  # 1주차 1주 cap (0=무제한)
 MAX_POSITIONS = int(os.getenv("ADAPTIVE_MAX_POSITIONS", "3"))                  # 3종목 한도
 AUTO_BUY = os.getenv("ADAPTIVE_AUTO_BUY", "0") == "1"                          # 1주차 알림만
 QUEUE_EXPIRY_DAYS = int(os.getenv("ADAPTIVE_QUEUE_EXPIRY_DAYS", "60"))
@@ -147,6 +148,9 @@ def _build_stages(peak_price: int, available_cash: int) -> list[QueueStage]:
         target_price = int(peak_price * target_pct)
         alloc_amount = min(int(available_cash * alloc_pct / 100), SPLIT_MAX_AMOUNT)
         qty = alloc_amount // max(target_price, 1)
+        # 1주차 안전: SPLIT_MAX_QTY > 0이면 수량 cap (차트영웅 max-qty 1 동일 안전망)
+        if SPLIT_MAX_QTY > 0:
+            qty = min(qty, SPLIT_MAX_QTY)
         stages.append(QueueStage(
             level=i,
             target_pct=target_pct,

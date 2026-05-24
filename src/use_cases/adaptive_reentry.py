@@ -46,6 +46,7 @@ KILL_SWITCH_PATH = PROJECT_ROOT / "data" / "kill_switch.flag"
 # === 임계 (.env 동적, 1주차는 보수적) ===
 AUTO_REENTRY = os.getenv("ADAPTIVE_AUTO_REENTRY", "0") == "1"             # 1주차 알림만
 REENTRY_MAX_AMOUNT = int(os.getenv("ADAPTIVE_REENTRY_MAX_AMOUNT", "1000000"))  # 1단위 100만
+REENTRY_MAX_QTY = int(os.getenv("ADAPTIVE_REENTRY_MAX_QTY", "0"))         # 1주차 1주 cap (0=무제한)
 STEP5_MIN_STARS = int(os.getenv("ADAPTIVE_STEP5_MIN_STARS", "3"))         # ★★★ 이상
 
 
@@ -187,7 +188,11 @@ def evaluate_reentry(
             if current_price > 0:
                 dec.target_price = current_price
                 dec.target_amount = REENTRY_MAX_AMOUNT
-                dec.target_qty = REENTRY_MAX_AMOUNT // current_price
+                qty_calc = REENTRY_MAX_AMOUNT // current_price
+                # 1주차 안전: REENTRY_MAX_QTY > 0이면 수량 cap
+                if REENTRY_MAX_QTY > 0:
+                    qty_calc = min(qty_calc, REENTRY_MAX_QTY)
+                dec.target_qty = qty_calc
         except Exception as e:
             dec.error = f"현재가 fetch 오류: {e}"
 
