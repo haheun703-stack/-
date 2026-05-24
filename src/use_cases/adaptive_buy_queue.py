@@ -75,7 +75,8 @@ QUEUE_EXPIRY_DAYS = int(os.getenv("ADAPTIVE_QUEUE_EXPIRY_DAYS", "60"))
 STATUS_PENDING = "PENDING"            # 가격 미도달
 STATUS_TRIGGERED = "TRIGGERED"        # 가격 도달 + 알림 (AUTO_BUY=0)
 STATUS_FILLED = "FILLED"              # 자동매수 성공
-STATUS_QUICK_SOLD = "QUICK_SOLD"      # MVP-2.5 빠른 익절 완료 (+7% 도달)
+STATUS_QUICK_ARMED = "QUICK_ARMED"    # MVP-2.5 +7% 도달 → trailing 시작 (5/24 보강)
+STATUS_QUICK_SOLD = "QUICK_SOLD"      # MVP-2.5 trailing 꺾임 → 매도 완료
 STATUS_EXPIRED = "EXPIRED"            # 만료
 STATUS_FAILED = "FAILED"              # 매수 실패
 
@@ -100,10 +101,14 @@ class QueueStage:
     actual_qty: int = 0
     error: Optional[str] = None
     # === MVP-2.5 빠른 익절 (5/24 추가) ===
-    quick_profit_target: int = 0      # 매수가 × 1.07 = 익절 지정가
+    quick_profit_target: int = 0      # 매수가 × 1.07 = trailing 진입 가격
     quick_profit_order_id: Optional[str] = None
     quick_profit_sold_at: Optional[str] = None
     quick_profit_sold_price: int = 0
+    # === MVP-2.5 Trailing 보강 (5/24 퐝가님 지시: "15%까지 다 먹기") ===
+    trailing_peak: int = 0            # +7% 진입 후 추적 중인 고점
+    trailing_armed_at: Optional[str] = None  # trailing 시작 시각
+    trailing_peak_updated_at: Optional[str] = None
 
 
 def _is_kill_switch_active() -> bool:

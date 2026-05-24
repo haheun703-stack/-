@@ -1,34 +1,43 @@
-"""test_adaptive_quick_profit.py — MVP-2.5 단계별 빠른 익절 단위 테스트.
+"""test_adaptive_quick_profit.py — MVP-2.5 v2 Trailing Quick Profit 단위 테스트.
 
-배경 (퐝가님 5/24 결단):
-  적응형 1~2개월 보유 → 너무 느림. L1/L2/L3 각 단계 매수 후 +7% 도달 시
-  즉시 단계별 독립 익절 → 3~10일 회전 + 단타 복리.
+배경 (퐝가님 5/24 v2 보강):
+  "15%까지 가도 +7%만 먹고 나오는 건 멍청한 룰"
+  → Trailing 보강: +7% 도달 시 ARMED → 고점 추적 → -2% 꺾임 시 매도
 
-5/17 자기반성 #1: import + 함수 호출 + 상태 머신 검증.
+5/17 자기반성 #1: import + 함수 호출 + 상태 머신 흐름 검증.
 
-검증 시나리오:
-  [매수 시 quick_profit_target 자동 계산]
-   1. MVP-2 매수 체결 → quick_profit_target = actual_price × 1.07
+검증 시나리오 (v2):
+  [FILLED → ARMED 전환]
+   1. +7% 도달 → ARMED 상태 + trailing_peak = 현재가 (매도 X)
+   2. +7% 미달 → FILLED 유지 (변동 없음)
+   3. broker.sell_market 호출 안 됨 (ARMED 시 매도 X)
 
-  [+7% 도달 트리거]
-   2. 현재가 ≥ target → status QUICK_SOLD + sold_price 기록
-   3. 현재가 < target → 변동 없음 (FILLED 유지)
-   4. 여러 stage 중 도달한 것만 익절 (L1만 도달 → L2/L3 FILLED 유지)
+  [ARMED → 고점 추적]
+   4. ARMED + 현재가 > trailing_peak → peak 갱신 (매도 X)
+   5. ARMED + 현재가 == trailing_peak → 매도 X
+   6. ARMED + 현재가 ≤ peak × 0.98 → SOLD (시장가 매도)
+
+  [실제 시나리오]
+   7. 매수 22,500 → 24,075(+7%) ARMED → 25,800 peak → 25,284(-2%) SOLD
+       → 최종 +12.4% (단순 +7% 대비 +5.4%p 추가)
+   8. 매수 22,500 → 24,075(+7%) ARMED → 23,593(-2%) 즉시 SOLD (반락)
+       → +4.86% (안전망: 빠르게 꺾이면 손실 적게)
 
   [방어]
-   5. KILL_SWITCH 발동 시 익절 정지
-   6. ENABLED=0 시 익절 비활성
-   7. actual_qty=0 시 익절 거부
+   9. KILL_SWITCH 발동 시 정지
+  10. ENABLED=0 시 비활성
+  11. 여러 단계 독립 (L1 ARMED, L2 FILLED 동시)
 
   [상태 머신]
-   8. QUICK_SOLD stage는 다음 cron에서 재트리거 X (중복 방지)
-   9. reset_quick_sold_for_reentry → PENDING 복원
+  12. QUICK_SOLD 후 중복 트리거 X
+  13. reset_quick_sold_for_reentry → PENDING 복원
 
   [포맷]
-  10. format 메시지 (수익 % + 절대 금액)
+  14. ARMED 이벤트 포맷
+  15. SOLD 이벤트 포맷 (peak/sold/gap 표기)
 
   [import]
-  11. 모듈 + 상수 노출
+  16. v2 모듈 + 신규 상수 노출
 
 실행:
   python -m pytest tests/test_adaptive_quick_profit.py -v
@@ -50,13 +59,13 @@ def _mock_broker(current_price: int, sell_success: bool = True, order_id: str = 
     if sell_success:
         order_obj = MagicMock()
         order_obj.order_id = order_id
-        broker.sell_limit.return_value = order_obj
+        broker.sell_market.return_value = order_obj
     else:
-        broker.sell_limit.side_effect = Exception("KIS 매도 실패")
+        broker.sell_market.side_effect = Exception("KIS 매도 실패")
     return broker
 
 
-class TestAdaptiveQuickProfit(unittest.TestCase):
+class TestTrailingQuickProfit(unittest.TestCase):
 
     def setUp(self):
         for mod_name in (
@@ -83,7 +92,7 @@ class TestAdaptiveQuickProfit(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def _setup_filled_stage(self, ticker: str, peak: int, actual_price: int, qty: int = 1):
-        """MVP-2 큐 등록 + 첫 stage FILLED 상태로 강제 변경."""
+        """MVP-2 큐 등록 + 첫 stage FILLED 상태로 강제."""
         self.mvp2.register_buy_queue(ticker, peak, 3_000_000)
         raw = self.mvp2._load_queues_raw()
         s = raw["queues"][ticker]["stages"][0]
@@ -94,212 +103,295 @@ class TestAdaptiveQuickProfit(unittest.TestCase):
         self.mvp2._save_queues_raw(raw)
         return s
 
-    # ─────────────────────────────────────────────────────────
-    # [매수 시 quick_profit_target 자동 계산]
-    # ─────────────────────────────────────────────────────────
-
-    def test_01_buy_auto_sets_quick_profit_target(self):
-        """MVP-2 매수 체결 → quick_profit_target = actual_price × 1.07."""
-        self.mvp2.AUTO_BUY = True
-        self.mvp2.QUICK_PROFIT_PCT = 7.0
-
-        self.mvp2.register_buy_queue("240810", 25_000, 3_000_000)
-
-        # L1 가격 도달 시뮬 (target=22,500)
-        broker = MagicMock()
-        broker.fetch_price.return_value = {"output": {"stck_prpr": "22000"}}
-        order_obj = MagicMock()
-        order_obj.order_id = "BUY001"
-        broker.buy_limit.return_value = order_obj
-
-        triggers = self.mvp2.check_and_trigger_queues(broker)
-
-        # L1 FILLED + quick_profit_target = 22,500 × 1.07 = 24,075
-        entry = self.mvp2.get_queue_status("240810")
-        s = entry["stages"][0]
-        self.assertEqual(s["status"], "FILLED")
-        expected_target = int(s["actual_price"] * 1.07)
-        self.assertEqual(s["quick_profit_target"], expected_target)
+    def _setup_armed_stage(self, ticker: str, peak: int, actual_price: int,
+                            trailing_peak: int, qty: int = 1):
+        """ARMED 상태로 강제 설정."""
+        self._setup_filled_stage(ticker, peak, actual_price, qty)
+        raw = self.mvp2._load_queues_raw()
+        s = raw["queues"][ticker]["stages"][0]
+        s["status"] = self.mvp2.STATUS_QUICK_ARMED
+        s["trailing_peak"] = trailing_peak
+        self.mvp2._save_queues_raw(raw)
+        return s
 
     # ─────────────────────────────────────────────────────────
-    # [+7% 도달 트리거]
+    # [FILLED → ARMED 전환]
     # ─────────────────────────────────────────────────────────
 
-    def test_02_quick_profit_trigger_at_7pct(self):
-        """현재가 ≥ target → QUICK_SOLD."""
-        self._setup_filled_stage("240810", 25_000, actual_price=22_500, qty=1)
-        # target = 22,500 × 1.07 = 24,075
+    def test_01_filled_to_armed_at_7pct(self):
+        """+7% 도달 → ARMED (매도 X)."""
+        self._setup_filled_stage("240810", 25_000, 22_500, 1)
+        broker = _mock_broker(current_price=24_075)  # 정확히 +7%
 
-        broker = _mock_broker(current_price=24_075)  # 정확히 도달
         triggers = self.mvp25.check_quick_profit_triggers(broker)
 
         self.assertEqual(len(triggers), 1)
-        t = triggers[0]
-        self.assertEqual(t["level"], 1)
-        self.assertEqual(t["actual_buy_price"], 22_500)
-        self.assertEqual(t["sold_price"], 24_075)
-        self.assertAlmostEqual(t["profit_pct"], 7.0, places=1)
+        self.assertEqual(triggers[0]["event"], "ARMED")
+        self.assertEqual(triggers[0]["trailing_peak"], 24_075)
+        # 매도 X
+        broker.sell_market.assert_not_called()
 
-        # 상태 QUICK_SOLD
         entry = self.mvp2.get_queue_status("240810")
-        self.assertEqual(entry["stages"][0]["status"], "QUICK_SOLD")
+        s = entry["stages"][0]
+        self.assertEqual(s["status"], "QUICK_ARMED")
+        self.assertEqual(s["trailing_peak"], 24_075)
+        self.assertIsNotNone(s.get("trailing_armed_at"))
 
-    def test_03_no_trigger_below_target(self):
-        """현재가 < target → 변동 없음 (FILLED 유지)."""
-        self._setup_filled_stage("240810", 25_000, actual_price=22_500, qty=1)
-
+    def test_02_below_7pct_no_change(self):
+        """+7% 미달 → FILLED 유지."""
+        self._setup_filled_stage("240810", 25_000, 22_500, 1)
         broker = _mock_broker(current_price=23_500)  # target 24,075 미달
-        triggers = self.mvp25.check_quick_profit_triggers(broker)
 
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
         self.assertEqual(len(triggers), 0)
         entry = self.mvp2.get_queue_status("240810")
         self.assertEqual(entry["stages"][0]["status"], "FILLED")
 
-    def test_04_only_triggered_stage_sold(self):
-        """L1만 도달 → L1만 익절, L2/L3는 FILLED 유지."""
-        # 3 stage 모두 FILLED 시뮬 (서로 다른 매수가)
-        self.mvp2.register_buy_queue("240810", 25_000, 3_000_000)
-        raw = self.mvp2._load_queues_raw()
-        prices = [22_500, 20_000, 17_500]
-        for i, p in enumerate(prices):
-            s = raw["queues"]["240810"]["stages"][i]
-            s["status"] = "FILLED"
-            s["actual_price"] = p
-            s["actual_qty"] = 1
-            s["quick_profit_target"] = int(p * 1.07)
-        self.mvp2._save_queues_raw(raw)
-        # target: L1=24,075 / L2=21,400 / L3=18,725
+    def test_03_armed_no_sell_call(self):
+        """ARMED 시 broker.sell_market 호출 X (매도 안 함)."""
+        self._setup_filled_stage("240810", 25_000, 22_500, 1)
+        broker = _mock_broker(current_price=25_000)  # +11% (충분히 ARMED)
 
-        # 현재가 21,500 → L2만 도달 (L1 24,075 미달, L3는 이미 도달)
-        # 실제: L2(21,400)와 L3(18,725) 모두 도달
-        broker = _mock_broker(current_price=21_500)
+        self.mvp25.check_quick_profit_triggers(broker)
+        broker.sell_market.assert_not_called()
+
+    # ─────────────────────────────────────────────────────────
+    # [ARMED → 고점 추적]
+    # ─────────────────────────────────────────────────────────
+
+    def test_04_armed_peak_update(self):
+        """현재가 > trailing_peak → peak 갱신."""
+        self._setup_armed_stage("240810", 25_000, 22_500, trailing_peak=24_075, qty=1)
+        broker = _mock_broker(current_price=24_500)  # 더 오름
+
         triggers = self.mvp25.check_quick_profit_triggers(broker)
-
-        # L2, L3 도달, L1 미도달
-        self.assertEqual(len(triggers), 2)
-        sold_levels = sorted([t["level"] for t in triggers])
-        self.assertEqual(sold_levels, [2, 3])
+        # 갱신만 (이벤트 발송 X, 너무 시끄러움)
+        self.assertEqual(len(triggers), 0)
 
         entry = self.mvp2.get_queue_status("240810")
-        self.assertEqual(entry["stages"][0]["status"], "FILLED")       # L1
-        self.assertEqual(entry["stages"][1]["status"], "QUICK_SOLD")   # L2
-        self.assertEqual(entry["stages"][2]["status"], "QUICK_SOLD")   # L3
+        s = entry["stages"][0]
+        self.assertEqual(s["status"], "QUICK_ARMED")
+        self.assertEqual(s["trailing_peak"], 24_500)  # 갱신됨
+
+    def test_05_armed_same_price_no_change(self):
+        """현재가 == trailing_peak → 변동 없음."""
+        self._setup_armed_stage("240810", 25_000, 22_500, trailing_peak=25_000, qty=1)
+        broker = _mock_broker(current_price=25_000)  # 동일
+
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
+        self.assertEqual(len(triggers), 0)
+        entry = self.mvp2.get_queue_status("240810")
+        self.assertEqual(entry["stages"][0]["trailing_peak"], 25_000)
+
+    def test_06_armed_sells_on_2pct_drop(self):
+        """현재가 ≤ peak × 0.98 → SOLD."""
+        self._setup_armed_stage("240810", 25_000, 22_500, trailing_peak=25_000, qty=1)
+        # 25,000 × 0.98 = 24,500 → 24,500 도달 시 매도
+        broker = _mock_broker(current_price=24_500, order_id="TRAIL001")
+
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
+
+        self.assertEqual(len(triggers), 1)
+        t = triggers[0]
+        self.assertEqual(t["event"], "SOLD")
+        self.assertEqual(t["trailing_peak"], 25_000)
+        self.assertEqual(t["sold_price"], 24_500)
+        # 수익 = (24,500 - 22,500) / 22,500 ≈ +8.89%
+        self.assertAlmostEqual(t["profit_pct"], 8.89, places=1)
+        # 고점 대비 = (25,000 - 22,500) / 22,500 = +11.11%
+        self.assertAlmostEqual(t["peak_pct"], 11.11, places=1)
+
+        broker.sell_market.assert_called_once()
+        entry = self.mvp2.get_queue_status("240810")
+        self.assertEqual(entry["stages"][0]["status"], "QUICK_SOLD")
+
+    # ─────────────────────────────────────────────────────────
+    # [실제 시나리오: 다단계 cron 시뮬]
+    # ─────────────────────────────────────────────────────────
+
+    def test_07_full_cycle_15pct_then_drop(self):
+        """매수 22,500 → 25,800 천장 → 25,284 꺾임 = +12.4%."""
+        self._setup_filled_stage("240810", 25_000, 22_500, 1)
+
+        # cron 1: 24,075 (+7%) → ARMED
+        broker = _mock_broker(current_price=24_075)
+        self.mvp25.check_quick_profit_triggers(broker)
+        self.assertEqual(self.mvp2.get_queue_status("240810")["stages"][0]["status"], "QUICK_ARMED")
+
+        # cron 2: 25,000 → peak 갱신
+        broker = _mock_broker(current_price=25_000)
+        self.mvp25.check_quick_profit_triggers(broker)
+        self.assertEqual(self.mvp2.get_queue_status("240810")["stages"][0]["trailing_peak"], 25_000)
+
+        # cron 3: 25,800 → peak 갱신 (천장)
+        broker = _mock_broker(current_price=25_800)
+        self.mvp25.check_quick_profit_triggers(broker)
+        self.assertEqual(self.mvp2.get_queue_status("240810")["stages"][0]["trailing_peak"], 25_800)
+
+        # cron 4: 25,284 (peak × 0.98 = 25,284) → 매도
+        broker = _mock_broker(current_price=25_284, order_id="FINAL001")
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
+
+        self.assertEqual(len(triggers), 1)
+        self.assertEqual(triggers[0]["event"], "SOLD")
+        # 수익 = (25,284 - 22,500) / 22,500 = +12.37%
+        self.assertAlmostEqual(triggers[0]["profit_pct"], 12.37, places=1)
+        # 고점 = (25,800 - 22,500) / 22,500 = +14.67%
+        self.assertAlmostEqual(triggers[0]["peak_pct"], 14.67, places=1)
+
+    def test_08_armed_quick_reversal_safety(self):
+        """매수 22,500 → 24,075 ARMED 직후 23,593 즉시 반락 = +4.86% (안전망)."""
+        self._setup_filled_stage("240810", 25_000, 22_500, 1)
+
+        # cron 1: 24,075 ARMED
+        broker = _mock_broker(current_price=24_075)
+        self.mvp25.check_quick_profit_triggers(broker)
+        self.assertEqual(self.mvp2.get_queue_status("240810")["stages"][0]["trailing_peak"], 24_075)
+
+        # cron 2: 23,593 (24,075 × 0.98) → 즉시 매도
+        broker = _mock_broker(current_price=23_593)
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
+
+        self.assertEqual(len(triggers), 1)
+        self.assertEqual(triggers[0]["event"], "SOLD")
+        # 수익 = (23,593 - 22,500) / 22,500 ≈ +4.86%
+        self.assertAlmostEqual(triggers[0]["profit_pct"], 4.86, places=1)
 
     # ─────────────────────────────────────────────────────────
     # [방어]
     # ─────────────────────────────────────────────────────────
 
-    def test_05_kill_switch_blocks(self):
-        """KILL_SWITCH 발동 시 익절 정지."""
+    def test_09_kill_switch_blocks(self):
+        """KILL_SWITCH 발동 시 정지."""
         self._setup_filled_stage("240810", 25_000, 22_500, 1)
         self.mvp25.KILL_SWITCH_PATH.write_text("active", encoding="utf-8")
 
-        broker = _mock_broker(current_price=30_000)  # 충분히 도달
+        broker = _mock_broker(current_price=30_000)
         triggers = self.mvp25.check_quick_profit_triggers(broker)
-
         self.assertEqual(len(triggers), 0)
         broker.fetch_price.assert_not_called()
 
-    def test_06_disabled_no_trigger(self):
-        """ENABLED=0 시 익절 비활성."""
+    def test_10_disabled_no_trigger(self):
         self._setup_filled_stage("240810", 25_000, 22_500, 1)
         self.mvp25.QUICK_PROFIT_ENABLED = False
 
         broker = _mock_broker(current_price=30_000)
         triggers = self.mvp25.check_quick_profit_triggers(broker)
-
         self.assertEqual(len(triggers), 0)
 
-    def test_07_zero_qty_refused(self):
-        """actual_qty=0 시 익절 거부."""
-        s = self._setup_filled_stage("240810", 25_000, 22_500, 1)
-        # qty 강제로 0
+    def test_11_multi_stage_independent(self):
+        """L1 ARMED + L2 FILLED 동시에 → 각자 독립 처리."""
+        self.mvp2.register_buy_queue("240810", 25_000, 3_000_000)
         raw = self.mvp2._load_queues_raw()
-        raw["queues"]["240810"]["stages"][0]["actual_qty"] = 0
+        # L1: 22,500 매수, ARMED 상태 (trailing_peak 24,500)
+        s1 = raw["queues"]["240810"]["stages"][0]
+        s1["status"] = "QUICK_ARMED"
+        s1["actual_price"] = 22_500
+        s1["actual_qty"] = 1
+        s1["quick_profit_target"] = 24_075
+        s1["trailing_peak"] = 24_500
+        # L2: 20,000 매수, FILLED 상태 (target 21,400)
+        s2 = raw["queues"]["240810"]["stages"][1]
+        s2["status"] = "FILLED"
+        s2["actual_price"] = 20_000
+        s2["actual_qty"] = 1
+        s2["quick_profit_target"] = 21_400
         self.mvp2._save_queues_raw(raw)
 
-        broker = _mock_broker(current_price=30_000)
-        result = self.mvp25.execute_quick_sell(broker, "240810", raw["queues"]["240810"]["stages"][0])
-        self.assertFalse(result["success"])
-        self.assertIn("actual_qty", result["error"])
+        # 현재가 21,800 → L2: +7% 도달 (ARMED 전환), L1: peak 24,500 × 0.98 = 24,010 → 21,800 < 24,010 → SOLD
+        broker = _mock_broker(current_price=21_800)
+        triggers = self.mvp25.check_quick_profit_triggers(broker)
+
+        # L1 SOLD + L2 ARMED = 2 트리거
+        self.assertEqual(len(triggers), 2)
+        events = sorted([(t["level"], t["event"]) for t in triggers])
+        self.assertEqual(events, [(1, "SOLD"), (2, "ARMED")])
 
     # ─────────────────────────────────────────────────────────
     # [상태 머신]
     # ─────────────────────────────────────────────────────────
 
-    def test_08_quick_sold_no_double_trigger(self):
-        """QUICK_SOLD stage는 다음 cron에서 재트리거 X."""
-        self._setup_filled_stage("240810", 25_000, 22_500, 1)
+    def test_12_quick_sold_no_double_trigger(self):
+        """QUICK_SOLD 후 중복 트리거 X."""
+        self._setup_armed_stage("240810", 25_000, 22_500, 25_000, 1)
+        broker = _mock_broker(current_price=24_500)
 
-        # 첫 cron — 익절
-        broker = _mock_broker(current_price=24_075)
+        # 첫 번째 → SOLD
         triggers1 = self.mvp25.check_quick_profit_triggers(broker)
         self.assertEqual(len(triggers1), 1)
 
-        # 다음 cron — 같은 가격 다시 와도 트리거 X
+        # 두 번째 → 변동 없음
         triggers2 = self.mvp25.check_quick_profit_triggers(broker)
         self.assertEqual(len(triggers2), 0)
 
-    def test_09_reset_for_reentry(self):
-        """reset_quick_sold_for_reentry → PENDING 복원 + 재진입 가능."""
-        self._setup_filled_stage("240810", 25_000, 22_500, 1)
-
-        broker = _mock_broker(current_price=24_075)
+    def test_13_reset_for_reentry(self):
+        """reset → PENDING + trailing 필드 초기화."""
+        self._setup_armed_stage("240810", 25_000, 22_500, 25_000, 1)
+        broker = _mock_broker(current_price=24_500)
         self.mvp25.check_quick_profit_triggers(broker)
-        # QUICK_SOLD 상태
-        entry = self.mvp2.get_queue_status("240810")
-        self.assertEqual(entry["stages"][0]["status"], "QUICK_SOLD")
 
-        # reset
         self.assertTrue(self.mvp25.reset_quick_sold_for_reentry("240810"))
         entry = self.mvp2.get_queue_status("240810")
         s = entry["stages"][0]
         self.assertEqual(s["status"], "PENDING")
-        self.assertEqual(s["actual_price"], 0)
-        self.assertEqual(s["quick_profit_target"], 0)
+        self.assertEqual(s["trailing_peak"], 0)
+        self.assertIsNone(s["trailing_armed_at"])
 
     # ─────────────────────────────────────────────────────────
     # [포맷]
     # ─────────────────────────────────────────────────────────
 
-    def test_10_format_telegram(self):
-        """포맷 메시지 — 수익 % + 절대 금액."""
+    def test_14_format_armed(self):
         trigger = {
-            "ticker": "240810",
-            "name": "원익IPS",
-            "level": 1,
-            "actual_buy_price": 22_500,
-            "sold_price": 24_075,
-            "profit_pct": 7.0,
-            "qty": 1,
-            "order_id": "QSELL999",
-            "current_price": 24_080,
+            "ticker": "240810", "name": "원익IPS", "level": 1,
+            "event": "ARMED",
+            "actual_buy_price": 22_500, "current_price": 24_075,
+            "profit_pct_so_far": 7.0, "trailing_peak": 24_075,
         }
         msg = self.mvp25.format_quick_profit_for_telegram(trigger)
         self.assertIn("원익IPS", msg)
-        self.assertIn("L1", msg)
-        self.assertIn("22,500", msg)
+        self.assertIn("추적 시작", msg)
+        self.assertIn("Trailing", msg)
         self.assertIn("24,075", msg)
-        self.assertIn("+7.00%", msg)
-        self.assertIn("1,575", msg)  # 수익 (24,075 - 22,500) × 1
-        self.assertIn("QSELL999", msg)
+
+    def test_15_format_sold(self):
+        trigger = {
+            "ticker": "240810", "name": "원익IPS", "level": 1,
+            "event": "SOLD",
+            "actual_buy_price": 22_500, "trailing_peak": 25_800,
+            "sold_price": 25_284, "profit_pct": 12.37, "peak_pct": 14.67,
+            "qty": 1, "order_id": "TRAIL999",
+        }
+        msg = self.mvp25.format_quick_profit_for_telegram(trigger)
+        self.assertIn("원익IPS", msg)
+        self.assertIn("체결", msg)
+        self.assertIn("22,500", msg)
+        self.assertIn("25,800", msg)
+        self.assertIn("25,284", msg)
+        self.assertIn("+12.37%", msg)
+        self.assertIn("+14.67%", msg)
+        self.assertIn("TRAIL999", msg)
 
     # ─────────────────────────────────────────────────────────
     # [import]
     # ─────────────────────────────────────────────────────────
 
-    def test_11_imports(self):
+    def test_16_imports(self):
         from src.use_cases.adaptive_quick_profit import (
             check_quick_profit_triggers,
-            execute_quick_sell,
+            execute_trailing_sell,
+            execute_quick_sell,  # v1 호환
             format_quick_profit_for_telegram,
             reset_quick_sold_for_reentry,
             QUICK_PROFIT_ENABLED,
             QUICK_PROFIT_PCT,
-            QUICK_PROFIT_RATIO,
+            TRAILING_DROP_PCT,
         )
+        from src.use_cases.adaptive_buy_queue import STATUS_QUICK_ARMED
         self.assertTrue(callable(check_quick_profit_triggers))
         self.assertEqual(QUICK_PROFIT_PCT, 7.0)
+        self.assertEqual(TRAILING_DROP_PCT, 2.0)
+        self.assertEqual(STATUS_QUICK_ARMED, "QUICK_ARMED")
 
 
 if __name__ == "__main__":

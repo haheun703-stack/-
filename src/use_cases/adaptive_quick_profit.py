@@ -1,30 +1,33 @@
-"""적응형 포지션 매매법 MVP-2.5 — 단계별 독립 빠른 익절 (+7%).
+"""적응형 포지션 매매법 MVP-2.5 v2 — Trailing Quick Profit (5/24 보강).
 
-배경 (퐝가님 5/24 결단):
-  "1개 종목 로테이션 3일이야. 적응형은 너무 오래 들고 있는 거 아닌가?"
-  "단기로 벌어서 중장기에 시드를 계속 늘려가는 거지... 복리 타입으로 제격이다"
+배경 (퐝가님 5/24 두 번째 지적):
+  "원익이 그날에 15%까지 올라가도 우린 7%만 먹고 나온다는 거야?"
 
-  순수 적응형(MVP-1 천장 -5% 매도)만으로는 평균 1~2개월 보유 → 회전 느림.
-  보강: L1/L2/L3 각 단계 매수 후 +7% 도달 시 즉시 익절 (단계별 독립).
+  v1 (+7% 고정 익절)의 한계:
+    매수가 +7% 도달 → 즉시 매도 → 그 후 +15%까지 가도 못 먹음
 
-  → 평균 회전 3~10일/단계, 사이클 전체 1~2주에 완성
-  → 단타(차트영웅)와 중기(적응형) 중간 = "준-중기" 매매법
+  v2 Trailing 보강:
+    1. 매수가 +7% 도달 → "QUICK_ARMED" 상태 (안 팔음, 추적 시작)
+    2. 현재가가 trailing_peak를 갱신할 때마다 자동 갱신
+    3. 현재가 ≤ trailing_peak × (1 - TRAILING_DROP_PCT/100) 도달 시 매도
+    4. → 천장 다 먹고 진짜 꺾일 때만 매도
 
-MVP-2.5 작동 흐름:
-  L1 22,500 매수 (체결) → quick_profit_target = 24,075 자동 계산 (×1.07)
-                       ↓
-  매 30분 cron → 현재가 ≥ 24,075 ?
-                       ↓ YES
-  지정가 매도 24,075 × qty=1 → status QUICK_SOLD
-                       ↓
-  +7% 수익 확정, 다음 사이클 (L1 재진입 또는 신규 종목)
+  예시:
+    L1 22,500 매수 → 24,075 (+7%) 도달 → ARMED ★ 안 팔음
+    25,000 → trailing_peak 갱신
+    25,800 → trailing_peak 갱신 (현재 고점)
+    25,284 (고점 -2% 꺾임) → 매도! +12.4% 확정
 
-MVP-1 천장 매도와의 관계:
-  - 단계별 독립: L1 익절 후에도 L2/L3 보유 중이면 MVP-1 천장 매도 그대로 작동
-  - 모든 stage가 QUICK_SOLD 되면 종목 완전 청산 (큐 정리)
-  - 부분 익절 vs 천장 회복 매도 = 둘 다 가능 (단계별로)
+  → 단순 +7% 대비 +5.4%p 추가 수익 (15% 가는 케이스에서)
+  → 진짜 빠르게 떨어지면 +7% 부근에서 매도 (안전망 그대로)
 
-5/17 자기반성 #1 적용: import + 함수 호출 + 상태 머신 흐름 검증.
+룰 요약:
+  매수 → +7%까지 대기 → +7% 도달 = ARMED (trailing 시작)
+  ARMED 상태:
+    현재가 > trailing_peak → trailing_peak 갱신 (계속 추적)
+    현재가 ≤ trailing_peak × 0.98 (-2%) → 매도 ★
+
+핵심: "올라가는 동안 절대 안 팜, 꺾일 때만 팜" — MVP-1과 동일 철학.
 """
 
 from __future__ import annotations
@@ -43,8 +46,10 @@ KILL_SWITCH_PATH = PROJECT_ROOT / "data" / "kill_switch.flag"
 
 # === 임계 (.env 동적) ===
 QUICK_PROFIT_ENABLED = os.getenv("ADAPTIVE_QUICK_PROFIT_ENABLED", "1") == "1"
-QUICK_PROFIT_PCT = float(os.getenv("ADAPTIVE_QUICK_PROFIT_PCT", "7"))      # +7% 익절
+QUICK_PROFIT_PCT = float(os.getenv("ADAPTIVE_QUICK_PROFIT_PCT", "7"))      # +7% trailing 진입
 QUICK_PROFIT_RATIO = float(os.getenv("ADAPTIVE_QUICK_PROFIT_RATIO", "1.0"))  # 1.0=전량
+# v2 신규: trailing 매도 임계
+TRAILING_DROP_PCT = float(os.getenv("ADAPTIVE_TRAILING_DROP_PCT", "2"))    # 고점 -2% 꺾임
 
 
 def _is_kill_switch_active() -> bool:
@@ -61,8 +66,8 @@ def _fetch_current_price(broker, ticker: str) -> int:
         return 0
 
 
-def execute_quick_sell(broker, ticker: str, stage: dict) -> dict:
-    """단계별 빠른 익절 매도 실행 (지정가).
+def execute_trailing_sell(broker, ticker: str, stage: dict, sell_price: int) -> dict:
+    """Trailing 꺾임 시 시장가 매도 (즉시 체결 보장).
 
     Returns:
         {"success": bool, "order_id": str, "price": int, "qty": int, "error": str}
@@ -74,37 +79,36 @@ def execute_quick_sell(broker, ticker: str, stage: dict) -> dict:
     if actual_qty <= 0:
         return {"success": False, "error": f"actual_qty 부적합 ({actual_qty})"}
 
-    target_price = int(stage.get("quick_profit_target", 0))
-    if target_price <= 0:
-        return {"success": False, "error": f"quick_profit_target 부적합 ({target_price})"}
-
     sell_qty = max(1, int(actual_qty * QUICK_PROFIT_RATIO))
 
     try:
-        # 지정가 매도 (target_price) — 즉시 익절 확정
-        if hasattr(broker, "sell_limit"):
-            order = broker.sell_limit(ticker, target_price, sell_qty)
+        # 시장가 매도 (꺾이는 순간이라 즉시 체결 중요, MVP-1과 동일)
+        if hasattr(broker, "sell_market"):
+            order = broker.sell_market(ticker, sell_qty)
             order_id = getattr(order, "order_id", "") or ""
         else:
-            # mojito2 fallback
-            res = broker.create_limit_sell_order(ticker, target_price, sell_qty)
+            res = broker.create_market_sell_order(ticker, sell_qty)
             order_id = res.get("output", {}).get("ODNO", "") if res else ""
 
         return {
             "success": True,
             "order_id": order_id,
-            "price": target_price,
+            "price": sell_price,
             "qty": sell_qty,
         }
     except Exception as e:
-        logger.error("quick sell %s L%s 실패: %s", ticker, stage.get("level"), e)
+        logger.error("trailing sell %s L%s 실패: %s", ticker, stage.get("level"), e)
         return {"success": False, "error": str(e)}
 
 
 def check_quick_profit_triggers(broker) -> list[dict]:
-    """모든 FILLED stage 순회 + 빠른 익절 트리거 평가.
+    """모든 FILLED/QUICK_ARMED stage 순회 + Trailing Quick Profit 평가.
 
-    매 30분 cron 호출 (MVP-2와 동일 주기).
+    v2 흐름:
+      FILLED → 현재가 ≥ +7% target → QUICK_ARMED (trailing 시작)
+      QUICK_ARMED:
+        현재가 > trailing_peak → peak 갱신
+        현재가 ≤ peak × 0.98 → 매도 (QUICK_SOLD)
     """
     triggers: list[dict] = []
 
@@ -113,20 +117,21 @@ def check_quick_profit_triggers(broker) -> list[dict]:
         return triggers
 
     if _is_kill_switch_active():
-        logger.info("KILL_SWITCH 발동 — 빠른 익절 정지")
+        logger.info("KILL_SWITCH 발동 — Trailing Quick Profit 정지")
         return triggers
 
-    # MVP-2 큐 로드
     from src.use_cases.adaptive_buy_queue import (
         _load_queues_raw,
         _save_queues_raw,
         STATUS_FILLED,
+        STATUS_QUICK_ARMED,
         STATUS_QUICK_SOLD,
     )
 
     raw = _load_queues_raw()
     queues = raw.get("queues", {})
     modified = False
+    now_iso = datetime.now().isoformat(timespec="seconds")
 
     for ticker, entry in queues.items():
         current_price = _fetch_current_price(broker, ticker)
@@ -134,41 +139,86 @@ def check_quick_profit_triggers(broker) -> list[dict]:
             continue
 
         for stage in entry.get("stages", []):
-            if stage.get("status") != STATUS_FILLED:
-                continue
+            status = stage.get("status")
 
-            target = int(stage.get("quick_profit_target", 0))
-            if target <= 0:
-                continue
+            # === 케이스 1: FILLED → +7% 도달 시 ARMED 전환 ===
+            if status == STATUS_FILLED:
+                target = int(stage.get("quick_profit_target", 0))
+                if target <= 0:
+                    continue
 
-            # 빠른 익절 트리거: 현재가 ≥ 매수가 × 1.07
-            if current_price >= target:
-                sell_result = execute_quick_sell(broker, ticker, stage)
-
-                if sell_result["success"]:
-                    actual_buy = int(stage.get("actual_price", 0))
-                    profit_pct = (
-                        (target / actual_buy - 1) * 100 if actual_buy > 0 else 0
-                    )
-                    stage["status"] = STATUS_QUICK_SOLD
-                    stage["quick_profit_order_id"] = sell_result.get("order_id", "")
-                    stage["quick_profit_sold_at"] = datetime.now().isoformat(
-                        timespec="seconds"
-                    )
-                    stage["quick_profit_sold_price"] = sell_result.get("price", target)
+                if current_price >= target:
+                    # ARMED 전환 (안 팔음, trailing 시작)
+                    stage["status"] = STATUS_QUICK_ARMED
+                    stage["trailing_peak"] = current_price
+                    stage["trailing_armed_at"] = now_iso
+                    stage["trailing_peak_updated_at"] = now_iso
                     modified = True
 
+                    actual_buy = int(stage.get("actual_price", 0))
+                    pct = (current_price / actual_buy - 1) * 100 if actual_buy else 0
                     triggers.append({
                         "ticker": ticker,
                         "name": entry.get("name", ""),
                         "level": stage.get("level"),
+                        "event": "ARMED",
                         "actual_buy_price": actual_buy,
-                        "sold_price": sell_result.get("price", target),
-                        "profit_pct": round(profit_pct, 2),
-                        "qty": sell_result.get("qty", 0),
-                        "order_id": sell_result.get("order_id", ""),
                         "current_price": current_price,
+                        "profit_pct_so_far": round(pct, 2),
+                        "trailing_peak": current_price,
                     })
+
+            # === 케이스 2: QUICK_ARMED → trailing 업데이트 또는 매도 ===
+            elif status == STATUS_QUICK_ARMED:
+                trailing_peak = int(stage.get("trailing_peak", 0))
+
+                # 고점 갱신
+                if current_price > trailing_peak:
+                    stage["trailing_peak"] = current_price
+                    stage["trailing_peak_updated_at"] = now_iso
+                    modified = True
+                    # 알림 발송 X (너무 시끄러움) — 매도 시에만 알림
+
+                else:
+                    # 꺾임 체크: 현재가 ≤ trailing_peak × (1 - DROP/100)
+                    sell_threshold = trailing_peak * (1 - TRAILING_DROP_PCT / 100)
+
+                    if current_price <= sell_threshold:
+                        # 매도 실행
+                        sell_result = execute_trailing_sell(
+                            broker, ticker, stage, current_price
+                        )
+
+                        if sell_result["success"]:
+                            actual_buy = int(stage.get("actual_price", 0))
+                            sold = sell_result.get("price", current_price)
+                            profit_pct = (
+                                (sold / actual_buy - 1) * 100 if actual_buy else 0
+                            )
+                            peak_pct = (
+                                (trailing_peak / actual_buy - 1) * 100 if actual_buy else 0
+                            )
+
+                            stage["status"] = STATUS_QUICK_SOLD
+                            stage["quick_profit_order_id"] = sell_result.get("order_id", "")
+                            stage["quick_profit_sold_at"] = now_iso
+                            stage["quick_profit_sold_price"] = sold
+                            modified = True
+
+                            triggers.append({
+                                "ticker": ticker,
+                                "name": entry.get("name", ""),
+                                "level": stage.get("level"),
+                                "event": "SOLD",
+                                "actual_buy_price": actual_buy,
+                                "trailing_peak": trailing_peak,
+                                "peak_pct": round(peak_pct, 2),
+                                "sold_price": sold,
+                                "profit_pct": round(profit_pct, 2),
+                                "qty": sell_result.get("qty", 0),
+                                "order_id": sell_result.get("order_id", ""),
+                                "current_price": current_price,
+                            })
 
     if modified:
         _save_queues_raw(raw)
@@ -177,28 +227,45 @@ def check_quick_profit_triggers(broker) -> list[dict]:
 
 
 def format_quick_profit_for_telegram(trigger: dict) -> str:
-    """텔레그램 알림용 포맷."""
+    """텔레그램 알림 — ARMED / SOLD 이벤트 구분."""
     name = trigger.get("name") or trigger.get("ticker", "")
     level = trigger.get("level", "?")
-    buy = int(trigger.get("actual_buy_price", 0))
-    sold = int(trigger.get("sold_price", 0))
-    profit = trigger.get("profit_pct", 0.0)
-    qty = int(trigger.get("qty", 0))
-    profit_amount = (sold - buy) * qty
+    event = trigger.get("event", "UNKNOWN")
 
-    return (
-        f"💰 빠른 익절 L{level} 체결 [{name}]\n"
-        f"  매수: {buy:,} → 매도: {sold:,} ({profit:+.2f}%)\n"
-        f"  수량: {qty}주, 수익: {profit_amount:,}원\n"
-        f"  주문 ID: {trigger.get('order_id', '')}"
-    )
+    if event == "ARMED":
+        buy = int(trigger.get("actual_buy_price", 0))
+        cur = int(trigger.get("current_price", 0))
+        pct = trigger.get("profit_pct_so_far", 0.0)
+        return (
+            f"🎯 빠른 익절 L{level} 추적 시작 [{name}]\n"
+            f"  매수: {buy:,} → 현재: {cur:,} ({pct:+.2f}%)\n"
+            f"  ▶ Trailing 모드 진입 — 천장 다 먹고 -{TRAILING_DROP_PCT:.0f}% 꺾일 때 매도"
+        )
+
+    elif event == "SOLD":
+        buy = int(trigger.get("actual_buy_price", 0))
+        peak = int(trigger.get("trailing_peak", 0))
+        sold = int(trigger.get("sold_price", 0))
+        profit_pct = trigger.get("profit_pct", 0.0)
+        peak_pct = trigger.get("peak_pct", 0.0)
+        qty = int(trigger.get("qty", 0))
+        profit_amount = (sold - buy) * qty
+        gap = peak_pct - profit_pct
+
+        return (
+            f"💰 빠른 익절 L{level} 체결 [{name}]\n"
+            f"  매수: {buy:,} → 고점: {peak:,} ({peak_pct:+.2f}%) → 매도: {sold:,} ({profit_pct:+.2f}%)\n"
+            f"  Trailing 꺾임 -{gap:.2f}%p, 수량 {qty}주, 수익 {profit_amount:,}원\n"
+            f"  주문 ID: {trigger.get('order_id', '')}"
+        )
+
+    return f"❓ 빠른 익절 L{level} 알 수 없는 이벤트 [{name}] {event}"
 
 
 def reset_quick_sold_for_reentry(ticker: str) -> bool:
-    """QUICK_SOLD stage를 PENDING으로 재설정 — 동일 종목 사이클 재시작용.
+    """QUICK_SOLD stage → PENDING 복원 (재진입용).
 
-    사용 예: L1 익절 후 가격 다시 떨어지면 L1 재매수 가능하도록.
-    1주차는 보수적으로 사용 X (수동 호출만).
+    v2: trailing 필드도 함께 초기화.
     """
     from src.use_cases.adaptive_buy_queue import (
         _load_queues_raw,
@@ -223,9 +290,22 @@ def reset_quick_sold_for_reentry(ticker: str) -> bool:
             stage["quick_profit_order_id"] = None
             stage["quick_profit_sold_at"] = None
             stage["quick_profit_sold_price"] = 0
+            # v2 trailing 필드 초기화
+            stage["trailing_peak"] = 0
+            stage["trailing_armed_at"] = None
+            stage["trailing_peak_updated_at"] = None
             modified = True
 
     if modified:
         _save_queues_raw(raw)
 
     return modified
+
+
+# v1 호환성 (단계별 +7% 직접 매도 — 보존)
+def execute_quick_sell(broker, ticker: str, stage: dict) -> dict:
+    """v1 직접 매도 (legacy 호환용)."""
+    target_price = int(stage.get("quick_profit_target", 0))
+    if target_price <= 0:
+        return {"success": False, "error": f"quick_profit_target 부적합 ({target_price})"}
+    return execute_trailing_sell(broker, ticker, stage, target_price)
