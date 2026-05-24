@@ -72,11 +72,15 @@ QUEUE_EXPIRY_DAYS = int(os.getenv("ADAPTIVE_QUEUE_EXPIRY_DAYS", "60"))
 
 
 # === 상태 상수 ===
-STATUS_PENDING = "PENDING"      # 가격 미도달
-STATUS_TRIGGERED = "TRIGGERED"  # 가격 도달 + 알림 (AUTO_BUY=0)
-STATUS_FILLED = "FILLED"        # 자동매수 성공
-STATUS_EXPIRED = "EXPIRED"      # 만료
-STATUS_FAILED = "FAILED"        # 매수 실패
+STATUS_PENDING = "PENDING"            # 가격 미도달
+STATUS_TRIGGERED = "TRIGGERED"        # 가격 도달 + 알림 (AUTO_BUY=0)
+STATUS_FILLED = "FILLED"              # 자동매수 성공
+STATUS_QUICK_SOLD = "QUICK_SOLD"      # MVP-2.5 빠른 익절 완료 (+7% 도달)
+STATUS_EXPIRED = "EXPIRED"            # 만료
+STATUS_FAILED = "FAILED"              # 매수 실패
+
+# === MVP-2.5 빠른 익절 임계 ===
+QUICK_PROFIT_PCT = float(os.getenv("ADAPTIVE_QUICK_PROFIT_PCT", "7"))   # +N% 도달 시 익절
 
 
 @dataclass
@@ -95,6 +99,11 @@ class QueueStage:
     actual_price: int = 0       # 실제 체결가
     actual_qty: int = 0
     error: Optional[str] = None
+    # === MVP-2.5 빠른 익절 (5/24 추가) ===
+    quick_profit_target: int = 0      # 매수가 × 1.07 = 익절 지정가
+    quick_profit_order_id: Optional[str] = None
+    quick_profit_sold_at: Optional[str] = None
+    quick_profit_sold_price: int = 0
 
 
 def _is_kill_switch_active() -> bool:
@@ -327,8 +336,11 @@ def check_and_trigger_queues(broker) -> list[dict]:
                 if buy_result["success"]:
                     stage["status"] = STATUS_FILLED
                     stage["order_id"] = buy_result.get("order_id", "")
-                    stage["actual_price"] = buy_result.get("price", target_price)
+                    actual_price = buy_result.get("price", target_price)
+                    stage["actual_price"] = actual_price
                     stage["actual_qty"] = buy_result.get("qty", stage.get("qty", 0))
+                    # MVP-2.5: 매수 체결 즉시 빠른 익절 목표가 자동 계산
+                    stage["quick_profit_target"] = int(actual_price * (1 + QUICK_PROFIT_PCT / 100))
                 elif buy_result.get("error", "").startswith("ADAPTIVE_AUTO_BUY=0"):
                     # 알림만 모드 — TRIGGERED로 표시 후 추후 수동/자동
                     stage["status"] = STATUS_TRIGGERED

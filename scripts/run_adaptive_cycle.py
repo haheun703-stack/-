@@ -175,6 +175,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "dry_run": dry_run,
         "mvp1": {"executed": False, "triggers": 0, "errors": []},
         "mvp2": {"executed": False, "triggers": 0, "errors": []},
+        "mvp2_5": {"executed": False, "triggers": 0, "errors": []},
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
         "mvp4": {"executed": False, "triggers": 0, "errors": []},
     }
@@ -262,6 +263,24 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary["mvp2"]["errors"].append(str(e))
 
+    # === MVP-2.5: 빠른 익절 (+7%) — FILLED stage 모니터링 ===
+    if "mvp2_5" not in skip:
+        from src.use_cases.adaptive_quick_profit import (
+            check_quick_profit_triggers,
+            format_quick_profit_for_telegram,
+        )
+
+        summary["mvp2_5"]["executed"] = True
+        try:
+            triggers = check_quick_profit_triggers(broker)
+            summary["mvp2_5"]["triggers"] = len(triggers)
+            for t in triggers:
+                msg = format_quick_profit_for_telegram(t)
+                print(msg)
+                send_telegram(msg)
+        except Exception as e:
+            summary["mvp2_5"]["errors"].append(str(e))
+
     # === MVP-3: 받침 패턴 감지 ===
     if "mvp3" not in skip and candidates:
         from src.use_cases.support_pattern_detector import (
@@ -323,6 +342,7 @@ def main():
                         help="MockBroker 사용, KIS 호출 0건")
     parser.add_argument("--skip-mvp1", action="store_true")
     parser.add_argument("--skip-mvp2", action="store_true")
+    parser.add_argument("--skip-mvp2_5", action="store_true")
     parser.add_argument("--skip-mvp3", action="store_true")
     parser.add_argument("--skip-mvp4", action="store_true")
     args = parser.parse_args()
@@ -337,6 +357,7 @@ def main():
     skip: set[str] = set()
     if args.skip_mvp1: skip.add("mvp1")
     if args.skip_mvp2: skip.add("mvp2")
+    if args.skip_mvp2_5: skip.add("mvp2_5")
     if args.skip_mvp3: skip.add("mvp3")
     if args.skip_mvp4: skip.add("mvp4")
 
@@ -351,7 +372,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("📊 사이클 요약:")
-    for mvp in ("mvp1", "mvp2", "mvp3", "mvp4"):
+    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp3", "mvp4"):
         s = summary[mvp]
         status = "✓" if s["executed"] else "⏭ SKIP"
         print(f"  {mvp.upper()}: {status}  트리거 {s['triggers']}건"
