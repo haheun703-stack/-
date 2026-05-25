@@ -166,6 +166,30 @@ def send_telegram(message: str) -> bool:
         return False
 
 
+# === P0-2 (5/25): REAL 모드 3중 안전 게이트 ===
+def validate_real_mode_gate() -> tuple[bool, str]:
+    """REAL 모드 가동 전 3중 안전 게이트 검증.
+
+    게이트:
+      1) AUTO_TRADING_ENABLED=1 환경변수 명시
+      2) KIS_ACC_NO 형식 검증 (- 제거 후 최소 8자 숫자)
+
+    (CLI 인자 --real은 호출 측에서 이미 검증)
+
+    Returns:
+        (passed: bool, fail_reason: str)
+    """
+    auto_trading = os.getenv("AUTO_TRADING_ENABLED", "0")
+    acc_no = os.getenv("KIS_ACC_NO", "")
+    acc_digits = acc_no.replace("-", "")
+
+    if auto_trading != "1":
+        return False, f"AUTO_TRADING_ENABLED={auto_trading!r} (기대 '1')"
+    if not acc_no or len(acc_digits) < 8 or not acc_digits.isdigit():
+        return False, f"KIS_ACC_NO 형식 이상 ({acc_no!r})"
+    return True, ""
+
+
 # === 메인 사이클 ===
 def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
     """4단계 통합 사이클 실행."""
@@ -186,6 +210,29 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         broker = MagicMock(name="MockBroker")
         logger.info("DRY_RUN 모드 — MockBroker 사용")
     else:
+        # P0-2 (5/25): REAL 모드 3중 안전 게이트
+        if not is_paper:
+            passed, gate_fail = validate_real_mode_gate()
+            if not passed:
+                warn = (
+                    f"🛑 P0-2 REAL 모드 차단 → PAPER fallback\n"
+                    f"  사유: {gate_fail}\n"
+                    f"  시각: {dt.datetime.now():%Y-%m-%d %H:%M:%S}"
+                )
+                logger.error(warn)
+                send_telegram(warn)
+                is_paper = True
+                summary["mode"] = "PAPER_FALLBACK"
+                summary["paper_fallback_reason"] = gate_fail
+            else:
+                acc_no = os.getenv("KIS_ACC_NO", "")
+                masked = acc_no[:4] + "***" + acc_no[-2:] if len(acc_no) >= 6 else "***"
+                logger.warning(
+                    "🔴 REAL 모드 가동 (3중 게이트 통과): "
+                    "AUTO_TRADING_ENABLED=1, ACC_NO=%s",
+                    masked,
+                )
+
         try:
             import mojito
             is_mock = is_paper  # paper=mock 모드, real=실거래

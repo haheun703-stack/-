@@ -42,16 +42,41 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 QUEUE_PATH = PROJECT_ROOT / "data" / "adaptive_buy_queue.json"
 KILL_SWITCH_PATH = PROJECT_ROOT / "data" / "kill_switch.flag"
+
+# === P0-1 race condition 방어 (5/25 sub-agent A) ===
+# cron `*/30 9-15 * * 1-5` + MVP-1 자동 매도 + MVP-2 큐 등록 동시 실행 시
+# JSON read-modify-write 충돌 → 데이터 손실 방지.
+# 우선순위: portalocker (cross-platform, VPS Linux + 로컬 Windows 모두 지원)
+#         → fcntl (Linux fallback)
+#         → 단순 .lock 파일 (atomic create) fallback
+# atomic save: tmp 파일 쓰기 → os.replace로 단일 호출 교체 (Windows + Linux 보장)
+
+_LOCK_TIMEOUT_SEC = float(os.getenv("ADAPTIVE_LOCK_TIMEOUT_SEC", "5"))
+_LOCK_POLL_INTERVAL_SEC = 0.05
+
+try:
+    import portalocker  # type: ignore
+    _HAS_PORTALOCKER = True
+except ImportError:
+    _HAS_PORTALOCKER = False
+
+try:
+    import fcntl  # type: ignore  # Linux only
+    _HAS_FCNTL = True
+except ImportError:
+    _HAS_FCNTL = False
 
 
 # === 임계 (.env 동적, 1주차는 보수적) ===
@@ -116,20 +141,197 @@ def _is_kill_switch_active() -> bool:
 
 
 def _load_queues_raw() -> dict[str, Any]:
+    """JSON load. Windows에서 atomic replace와 동시 read 시 짧은 race가 있어
+    OSError 발생 가능 → 짧은 retry로 보호 (writer는 atomic이라 partial JSON
+    노출은 불가).
+    """
     if not QUEUE_PATH.exists():
         return {"queues": {}}
+    last_err: Optional[BaseException] = None
+    for _ in range(5):
+        try:
+            with QUEUE_PATH.open("r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError) as e:
+            last_err = e
+            time.sleep(0.01)
+    logger.warning("queue load 실패: %s — 빈 큐로 시작", last_err)
+    return {"queues": {}}
+
+
+def _atomic_save_json(path: Path, data: dict[str, Any]) -> None:
+    """tmp 파일 쓰기 → os.replace로 원자적 교체 (Windows + Linux 양쪽 보장).
+
+    같은 디렉터리에 tmp 파일을 만들어야 cross-device move 회피.
+    pid + uuid suffix로 동시 호출 시 tmp 파일명 충돌 방지.
+
+    Windows: 동시 read 핸들이 열려있는 짧은 순간 os.replace가 PermissionError를
+    낼 수 있어 짧은 retry로 보호. Linux는 단발 성공.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_name = f".{path.name}.tmp.{os.getpid()}.{uuid.uuid4().hex[:8]}"
+    tmp_path = path.parent / tmp_name
     try:
-        with QUEUE_PATH.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError) as e:
-        logger.warning("queue load 실패: %s — 빈 큐로 시작", e)
-        return {"queues": {}}
+        with tmp_path.open("w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except (OSError, AttributeError):
+                pass  # fsync 미지원 환경 (메모리 fs 등)
+        # os.replace는 POSIX에선 atomic + read-while-replace 무중단.
+        # Windows에선 target이 read 핸들 잡혀있으면 일시 PermissionError → retry.
+        # 총 ~5초 retry (락 타임아웃과 같은 한계).
+        last_err: Optional[BaseException] = None
+        deadline = time.monotonic() + _LOCK_TIMEOUT_SEC
+        while time.monotonic() < deadline:
+            try:
+                os.replace(tmp_path, path)
+                return
+            except PermissionError as e:
+                last_err = e
+                time.sleep(0.005)
+        # 끝까지 실패 — raise
+        raise last_err if last_err else RuntimeError("os.replace 실패")
+    except Exception:
+        # tmp 잔여 정리 (실패 흔적 남기지 않음)
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except OSError:
+            pass
+        raise
 
 
 def _save_queues_raw(data: dict[str, Any]) -> None:
-    QUEUE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with QUEUE_PATH.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    """기존 호출처 보존용 — atomic save 위임."""
+    _atomic_save_json(QUEUE_PATH, data)
+
+
+class _SimpleFileLock:
+    """portalocker/fcntl 둘 다 없을 때 fallback 락 (Windows venv 등).
+
+    .lock 파일을 O_CREAT|O_EXCL로 만들어 mutual exclusion.
+    타임아웃 내 재시도 → 실패 시 TimeoutError.
+    """
+
+    def __init__(self, target: Path, timeout: float):
+        self.lock_path = target.parent / f".{target.name}.lock"
+        self.timeout = timeout
+        self._fd: Optional[int] = None
+
+    def acquire(self) -> None:
+        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        deadline = time.monotonic() + self.timeout
+        last_err: Optional[BaseException] = None
+        while time.monotonic() < deadline:
+            try:
+                self._fd = os.open(
+                    str(self.lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY
+                )
+                # pid 기록 (debug 용)
+                try:
+                    os.write(self._fd, str(os.getpid()).encode("ascii"))
+                except OSError:
+                    pass
+                return
+            except FileExistsError as e:
+                last_err = e
+                time.sleep(_LOCK_POLL_INTERVAL_SEC)
+        raise TimeoutError(
+            f"file lock 획득 실패 ({self.timeout}s): {self.lock_path} ({last_err})"
+        )
+
+    def release(self) -> None:
+        try:
+            if self._fd is not None:
+                os.close(self._fd)
+                self._fd = None
+        except OSError:
+            pass
+        try:
+            if self.lock_path.exists():
+                self.lock_path.unlink()
+        except OSError:
+            pass
+
+
+def _locked_read_modify_write(
+    path: Path,
+    modify_fn: Callable[[dict[str, Any]], Any],
+) -> Any:
+    """파일 락 잡고 load → modify_fn(data) → atomic save 일관 수행.
+
+    Args:
+        path: JSON 경로
+        modify_fn: data (dict)를 받아 in-place 수정 + 반환값을 호출자에게 전달.
+                   반환값 dict에 ``_skip_save=True`` 키가 있으면 save 생략 (검증 실패 등).
+
+    Returns:
+        modify_fn의 반환값 (호출자 컨텍스트별).
+
+    Raises:
+        TimeoutError: 락 획득 5초 타임아웃.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _inner() -> Any:
+        data = _load_queues_raw()
+        result = modify_fn(data)
+        skip_save = isinstance(result, dict) and bool(result.get("_skip_save"))
+        if not skip_save:
+            _atomic_save_json(path, data)
+        return result
+
+    if _HAS_PORTALOCKER:
+        lock_path = path.parent / f".{path.name}.lock"
+        # portalocker.Lock은 with 진입 시 timeout 내 EXCLUSIVE 락 획득
+        try:
+            with portalocker.Lock(
+                str(lock_path),
+                mode="a+",
+                timeout=_LOCK_TIMEOUT_SEC,
+                flags=portalocker.LOCK_EX,
+            ):
+                return _inner()
+        except portalocker.LockException as e:
+            logger.error("portalocker 락 타임아웃 (%ss): %s", _LOCK_TIMEOUT_SEC, e)
+            raise TimeoutError(f"portalocker lock timeout: {e}") from e
+
+    if _HAS_FCNTL:
+        lock_path = path.parent / f".{path.name}.lock"
+        deadline = time.monotonic() + _LOCK_TIMEOUT_SEC
+        fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o644)
+        try:
+            acquired = False
+            while time.monotonic() < deadline:
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    acquired = True
+                    break
+                except BlockingIOError:
+                    time.sleep(_LOCK_POLL_INTERVAL_SEC)
+            if not acquired:
+                logger.error("fcntl 락 타임아웃 (%ss): %s", _LOCK_TIMEOUT_SEC, lock_path)
+                raise TimeoutError(f"fcntl lock timeout: {lock_path}")
+            return _inner()
+        finally:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+    # fallback: 단순 lock 파일
+    lock = _SimpleFileLock(path, _LOCK_TIMEOUT_SEC)
+    lock.acquire()
+    try:
+        return _inner()
+    finally:
+        lock.release()
 
 
 def load_queues() -> dict[str, dict]:
@@ -202,39 +404,47 @@ def register_buy_queue(
     if available_cash < 100_000:
         return {"success": False, "error": f"가용 현금 부족: {available_cash:,}"}
 
-    raw = _load_queues_raw()
-    queues = raw.get("queues", {})
+    stages = _build_stages(peak_price, available_cash)
+    stage_dicts = [stage.__dict__ for stage in stages]
 
-    # 동일 종목 기존 큐 있으면 덮어씀 (천장 갱신 케이스)
-    is_update = ticker in queues
-    if not is_update and _count_active_positions(queues) >= MAX_POSITIONS:
+    # P0-1: 락 잡고 read-modify-write 단일 단위로 처리 (race condition 방지)
+    def _modify(raw: dict[str, Any]) -> dict:
+        queues = raw.setdefault("queues", {})
+        # 동일 종목 기존 큐 있으면 덮어씀 (천장 갱신 케이스)
+        is_update = ticker in queues
+        if not is_update and _count_active_positions(queues) >= MAX_POSITIONS:
+            return {
+                "success": False,
+                "error": f"3종목 한도 도달 ({MAX_POSITIONS}) — 기존 종목 청산 후 재등록",
+                "_skip_save": True,
+            }
+        queues[ticker] = {
+            "ticker": ticker,
+            "name": name,
+            "peak_price": int(peak_price),
+            "available_cash": int(available_cash),
+            "registered_at": datetime.now().isoformat(timespec="seconds"),
+            "stages": stage_dicts,
+        }
         return {
-            "success": False,
-            "error": f"3종목 한도 도달 ({MAX_POSITIONS}) — 기존 종목 청산 후 재등록",
+            "success": True,
+            "ticker": ticker,
+            "name": name,
+            "is_update": is_update,
+            "peak_price": peak_price,
+            "available_cash": available_cash,
+            "stages": stage_dicts,
         }
 
-    stages = _build_stages(peak_price, available_cash)
+    try:
+        result = _locked_read_modify_write(QUEUE_PATH, _modify)
+    except TimeoutError as e:
+        logger.error("register_buy_queue 락 타임아웃: %s", e)
+        return {"success": False, "error": f"락 타임아웃: {e}"}
 
-    queues[ticker] = {
-        "ticker": ticker,
-        "name": name,
-        "peak_price": int(peak_price),
-        "available_cash": int(available_cash),
-        "registered_at": datetime.now().isoformat(timespec="seconds"),
-        "stages": [stage.__dict__ for stage in stages],
-    }
-    raw["queues"] = queues
-    _save_queues_raw(raw)
-
-    return {
-        "success": True,
-        "ticker": ticker,
-        "name": name,
-        "is_update": is_update,
-        "peak_price": peak_price,
-        "available_cash": available_cash,
-        "stages": [stage.__dict__ for stage in stages],
-    }
+    # _skip_save 마커는 호출자에게 노출하지 않음
+    result.pop("_skip_save", None)
+    return result
 
 
 def _fetch_current_price(broker, ticker: str) -> int:
@@ -301,75 +511,84 @@ def check_and_trigger_queues(broker) -> list[dict]:
         logger.info("KILL_SWITCH 발동 — 큐 트리거 정지")
         return triggers
 
-    raw = _load_queues_raw()
-    queues = raw.get("queues", {})
-    modified = False
-
-    for ticker, entry in list(queues.items()):
-        # 만료 체크
-        if _is_expired(entry.get("registered_at", "")):
-            for stage in entry.get("stages", []):
-                if stage.get("status") in (STATUS_PENDING, STATUS_TRIGGERED):
-                    stage["status"] = STATUS_EXPIRED
-                    modified = True
-            triggers.append({
-                "ticker": ticker,
-                "name": entry.get("name", ""),
-                "event": "EXPIRED",
-                "registered_at": entry.get("registered_at", ""),
-            })
-            continue
-
-        current_price = _fetch_current_price(broker, ticker)
-        if current_price <= 0:
-            continue
-
-        for stage in entry.get("stages", []):
-            if stage.get("status") != STATUS_PENDING:
-                continue
-
-            target_price = int(stage.get("target_price", 0))
-            if target_price <= 0:
-                continue
-
-            # 도달: 현재가 ≤ 지정가 (떨어져서 지정가 도달)
-            if current_price <= target_price:
-                stage["triggered_at"] = datetime.now().isoformat(timespec="seconds")
-
-                # 자동 매수 시도
-                buy_result = execute_auto_buy(broker, ticker, stage)
-                if buy_result["success"]:
-                    stage["status"] = STATUS_FILLED
-                    stage["order_id"] = buy_result.get("order_id", "")
-                    actual_price = buy_result.get("price", target_price)
-                    stage["actual_price"] = actual_price
-                    stage["actual_qty"] = buy_result.get("qty", stage.get("qty", 0))
-                    # MVP-2.5: 매수 체결 즉시 빠른 익절 목표가 자동 계산
-                    stage["quick_profit_target"] = int(actual_price * (1 + QUICK_PROFIT_PCT / 100))
-                elif buy_result.get("error", "").startswith("ADAPTIVE_AUTO_BUY=0"):
-                    # 알림만 모드 — TRIGGERED로 표시 후 추후 수동/자동
-                    stage["status"] = STATUS_TRIGGERED
-                else:
-                    stage["status"] = STATUS_FAILED
-                    stage["error"] = buy_result.get("error", "")
-
-                modified = True
+    # P0-1: 락 잡고 read-modify-write 일관 처리.
+    # broker.fetch_price / buy_limit는 외부 I/O라 락 안에서 호출되면 락 보유 시간이
+    # 길어지지만, 5초 타임아웃 + cron 30분 간격이라 실용적으로 안전.
+    def _modify(raw: dict[str, Any]) -> dict:
+        queues = raw.setdefault("queues", {})
+        modified = False
+        for ticker, entry in list(queues.items()):
+            # 만료 체크
+            if _is_expired(entry.get("registered_at", "")):
+                for stage in entry.get("stages", []):
+                    if stage.get("status") in (STATUS_PENDING, STATUS_TRIGGERED):
+                        stage["status"] = STATUS_EXPIRED
+                        modified = True
                 triggers.append({
                     "ticker": ticker,
                     "name": entry.get("name", ""),
-                    "level": stage.get("level"),
-                    "status": stage.get("status"),
-                    "target_price": target_price,
-                    "current_price": current_price,
-                    "peak_price": entry.get("peak_price", 0),
-                    "qty": stage.get("qty", 0),
-                    "alloc_amount": stage.get("alloc_amount", 0),
-                    "order_id": stage.get("order_id"),
-                    "error": stage.get("error"),
+                    "event": "EXPIRED",
+                    "registered_at": entry.get("registered_at", ""),
                 })
+                continue
 
-    if modified:
-        _save_queues_raw(raw)
+            current_price = _fetch_current_price(broker, ticker)
+            if current_price <= 0:
+                continue
+
+            for stage in entry.get("stages", []):
+                if stage.get("status") != STATUS_PENDING:
+                    continue
+
+                target_price = int(stage.get("target_price", 0))
+                if target_price <= 0:
+                    continue
+
+                # 도달: 현재가 ≤ 지정가 (떨어져서 지정가 도달)
+                if current_price <= target_price:
+                    stage["triggered_at"] = datetime.now().isoformat(timespec="seconds")
+
+                    # 자동 매수 시도
+                    buy_result = execute_auto_buy(broker, ticker, stage)
+                    if buy_result["success"]:
+                        stage["status"] = STATUS_FILLED
+                        stage["order_id"] = buy_result.get("order_id", "")
+                        actual_price = buy_result.get("price", target_price)
+                        stage["actual_price"] = actual_price
+                        stage["actual_qty"] = buy_result.get("qty", stage.get("qty", 0))
+                        # MVP-2.5: 매수 체결 즉시 빠른 익절 목표가 자동 계산
+                        stage["quick_profit_target"] = int(actual_price * (1 + QUICK_PROFIT_PCT / 100))
+                    elif buy_result.get("error", "").startswith("ADAPTIVE_AUTO_BUY=0"):
+                        # 알림만 모드 — TRIGGERED로 표시 후 추후 수동/자동
+                        stage["status"] = STATUS_TRIGGERED
+                    else:
+                        stage["status"] = STATUS_FAILED
+                        stage["error"] = buy_result.get("error", "")
+
+                    modified = True
+                    triggers.append({
+                        "ticker": ticker,
+                        "name": entry.get("name", ""),
+                        "level": stage.get("level"),
+                        "status": stage.get("status"),
+                        "target_price": target_price,
+                        "current_price": current_price,
+                        "peak_price": entry.get("peak_price", 0),
+                        "qty": stage.get("qty", 0),
+                        "alloc_amount": stage.get("alloc_amount", 0),
+                        "order_id": stage.get("order_id"),
+                        "error": stage.get("error"),
+                    })
+        # 변경 없으면 save 생략 (불필요 I/O 회피)
+        return {"_skip_save": not modified}
+
+    try:
+        _locked_read_modify_write(QUEUE_PATH, _modify)
+    except TimeoutError as e:
+        logger.error("check_and_trigger_queues 락 타임아웃: %s", e)
+        # triggers는 부분적으로 채워질 수 있으나 save 안 된 상태 — 호출자에게는
+        # 결과 노출 X (다음 cron에서 재시도)
+        return []
 
     return triggers
 
@@ -427,11 +646,17 @@ def format_trigger_for_telegram(trigger: dict) -> str:
 
 def clear_queue(ticker: str) -> bool:
     """특정 종목 큐 삭제 (수동 청산용)."""
-    raw = _load_queues_raw()
-    queues = raw.get("queues", {})
-    if ticker in queues:
-        del queues[ticker]
-        raw["queues"] = queues
-        _save_queues_raw(raw)
-        return True
-    return False
+
+    def _modify(raw: dict[str, Any]) -> dict:
+        queues = raw.setdefault("queues", {})
+        if ticker in queues:
+            del queues[ticker]
+            return {"_removed": True}
+        return {"_removed": False, "_skip_save": True}
+
+    try:
+        result = _locked_read_modify_write(QUEUE_PATH, _modify)
+    except TimeoutError as e:
+        logger.error("clear_queue 락 타임아웃: %s", e)
+        return False
+    return bool(result.get("_removed"))

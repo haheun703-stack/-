@@ -18,7 +18,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -221,55 +220,18 @@ class PortfolioReporter:
     # ──────────────────────────────────────────
 
     def _run_6d_analysis(self, stocks: list[StockReportData]) -> None:
-        """6D 게임 분석을 Claude API로 실행 (deprecated — archive 이동됨)"""
-        try:
-            from scripts.archive.deprecated_agents.game_analyst import GameAnalystAgent
+        """6D 게임 분석 — DEPRECATED.
 
-            agent = GameAnalystAgent()
-            contexts = []
-            for s in stocks:
-                ctx = {
-                    "ticker": s.ticker,
-                    "name": s.name,
-                    "current_price": s.current_price,
-                    "return_pct": s.return_pct,
-                    "hold_days": s.hold_days,
-                    "pct_52w_high": s.dimensions.d1_price_pct if s.dimensions else 50,
-                    "multifactor_score": s.dimensions.d3_multifactor if s.dimensions else 40,
-                    "clock_hour": s.dimensions.d4_clock_hour if s.dimensions else 6,
-                    "timing_score": s.dimensions.d4_timing_score if s.dimensions else 50,
-                    "crowd_pct": s.dimensions.d5_neglect_pct if s.dimensions else 50,
-                    "neglect_score": s.dimensions.d5_metagame_score if s.dimensions else 50,
-                }
-                contexts.append(ctx)
-
-            # asyncio 실행 (기존 이벤트루프 존재 시 안전 처리)
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
-
-            if loop and loop.is_running():
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    results = pool.submit(
-                        asyncio.run, agent.batch_analyze(contexts)
-                    ).result()
-            else:
-                results = asyncio.run(agent.batch_analyze(contexts))
-
-            for stock, game in zip(stocks, results):
-                stock.game_analysis = game
-                if stock.dimensions:
-                    stock.dimensions.d6_game_score = game.game_score
-                    stock.dimensions.d6_trap_pct = game.trap_risk_pct
-        except Exception as e:
-            logger.error("[리포트] 6D 분석 실패: %s", e)
-            # 실패 시 기본값
-            for s in stocks:
-                if s.dimensions:
-                    s.dimensions.d6_game_score = 50.0
-                    s.dimensions.d6_trap_pct = 50.0
+        기존: scripts/archive/deprecated_agents/game_analyst (Claude API 호출)
+        2026-05-25 제거: archive/ import는 CLAUDE.md 금지 규칙 위반 +
+                       deprecated_agents 모듈은 이미 폐기됨.
+        현재: dimensions에 중립 기본값 (50.0) 적용 → 1D~5D 점수 기반 의사결정 유지.
+        향후: 정식 6D 분석 모듈 신설 시 본 메서드 교체.
+        """
+        for s in stocks:
+            if s.dimensions:
+                s.dimensions.d6_game_score = 50.0
+                s.dimensions.d6_trap_pct = 50.0
 
     # ──────────────────────────────────────────
     # 행동 판단

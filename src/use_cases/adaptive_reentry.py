@@ -48,6 +48,8 @@ AUTO_REENTRY = os.getenv("ADAPTIVE_AUTO_REENTRY", "0") == "1"             # 1주
 REENTRY_MAX_AMOUNT = int(os.getenv("ADAPTIVE_REENTRY_MAX_AMOUNT", "1000000"))  # 1단위 100만
 REENTRY_MAX_QTY = int(os.getenv("ADAPTIVE_REENTRY_MAX_QTY", "0"))         # 1주차 1주 cap (0=무제한)
 STEP5_MIN_STARS = int(os.getenv("ADAPTIVE_STEP5_MIN_STARS", "3"))         # ★★★ 이상
+# 3종목 한도 (1주차 안전). MVP-4 매수 실행 직전 재검사용. 미설정 시 기본 3.
+MAX_POSITIONS = int(os.getenv("ADAPTIVE_MAX_POSITIONS", "3"))
 
 
 @dataclass
@@ -99,6 +101,49 @@ def _is_in_buy_queue(ticker: str) -> bool:
         return False
     except Exception:
         return False
+
+
+def _count_active_positions(exclude_ticker: Optional[str] = None) -> int:
+    """현재 활성 포지션 수 (MVP-2 큐 + MVP-4 신규 매수 직전 검사용).
+
+    카운트 소스 선택: **MVP-2 큐 PENDING/TRIGGERED/FILLED 종목 수**.
+    이유:
+      - MVP-2 큐가 6단계 흐름의 단일 진실 원천 (MVP-1 매도 후 자동 등록 + 분할매수 진행)
+      - 실제 잔고 조회는 broker 의존성 + 추가 API 호출 → 매 cron마다 비용 ↑
+      - PENDING도 카운트해야 "큐 등록 완료 + 아직 도달 안 한" 종목까지 한도 보호
+      - MVP-4 재진입은 별도 ticker에 한해서만 발동 (큐에 이미 있으면 _is_in_buy_queue로 위임 처리)
+      - 잔고 조회는 추후 보강 가능 — 1주차는 큐 기반으로 보수적 운영
+
+    Args:
+        exclude_ticker: 카운트 제외 종목 (재진입 평가 대상 본인 — 큐에 있어도 신규 매수 슬롯으로 간주 X)
+
+    Returns:
+        활성 포지션 수
+    """
+    try:
+        from src.use_cases.adaptive_buy_queue import (
+            load_queues,
+            STATUS_PENDING,
+            STATUS_TRIGGERED,
+            STATUS_FILLED,
+            STATUS_QUICK_ARMED,
+        )
+
+        active_statuses = (STATUS_PENDING, STATUS_TRIGGERED, STATUS_FILLED, STATUS_QUICK_ARMED)
+        queues = load_queues()
+        count = 0
+        for ticker, entry in queues.items():
+            if exclude_ticker and ticker == exclude_ticker:
+                continue
+            for stage in entry.get("stages", []):
+                if stage.get("status") in active_statuses:
+                    count += 1
+                    break
+        return count
+    except Exception as e:
+        # 카운트 실패 시 안전하게 한도값 반환 → 매수 차단
+        logger.warning("활성 포지션 카운트 실패: %s — 한도 도달로 간주", e)
+        return MAX_POSITIONS
 
 
 def evaluate_reentry(
@@ -226,6 +271,19 @@ def execute_auto_reentry(broker, decision: ReentryDecision) -> dict:
             "success": False,
             "error": f"target qty/price 부적합 ({decision.target_qty}/{decision.target_price})",
         }
+
+    # ★ P0-3 (5/24): 매수 트리거 직전 한도 재검사.
+    # 큐 등록 시점과 매수 시점 사이에 다른 종목이 추가 매수되어
+    # 한도 초과될 위험을 차단. 본인(decision.ticker)은 제외하고 카운트.
+    active_count = _count_active_positions(exclude_ticker=decision.ticker)
+    if active_count >= MAX_POSITIONS:
+        msg = (
+            f"{MAX_POSITIONS}종목 한도 도달 (현재 {active_count}) — "
+            f"매수 SKIP [{decision.ticker}]"
+        )
+        logger.warning("[MVP-4] %s", msg)
+        decision.error = msg
+        return {"success": False, "error": msg, "max_positions_blocked": True}
 
     try:
         # 시장가 매수 (받침 확인된 종목 → 즉시 진입)

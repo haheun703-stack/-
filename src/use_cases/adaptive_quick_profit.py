@@ -116,9 +116,13 @@ def check_quick_profit_triggers(broker) -> list[dict]:
         logger.info("ADAPTIVE_QUICK_PROFIT_ENABLED=0 — MVP-2.5 비활성")
         return triggers
 
+    # P0-4 (5/25): KILL_SWITCH는 매수만 차단, Trailing Quick Profit 매도는 계속 진행
+    # 빠른 익절은 손실 방지 메커니즘이므로 KILL_SWITCH 무관 (꺾일 때 매도 보장)
     if _is_kill_switch_active():
-        logger.info("KILL_SWITCH 발동 — Trailing Quick Profit 정지")
-        return triggers
+        logger.warning(
+            "KILL_SWITCH 활성 — Trailing Quick Profit 매도는 계속 진행 (P0-4 보장)"
+        )
+        # return 없음 — 매도 평가 계속
 
     from src.use_cases.adaptive_buy_queue import (
         _load_queues_raw,

@@ -173,8 +173,12 @@ class TestPeakFreshness(unittest.TestCase):
 class TestDefenseScenarios(unittest.TestCase):
     """방어 시나리오 (안전선)."""
 
-    def test_9_kill_switch_blocks(self):
-        """[9] KILL_SWITCH 발동 중 → 미트리거"""
+    def test_9_kill_switch_allows_sell_blocks_buy(self):
+        """[9] P0-4 (5/25 보강) — KILL_SWITCH는 매수만 차단, 매도(천장 감지)는 계속.
+
+        검수 P0-4: 기존엔 KILL_SWITCH 시 detect_peak_signal까지 차단되어
+        꺾이는 순간 매도 안 되어 손실 확대 위험. P0-4 수정으로 매도 평가 계속.
+        """
         from src.use_cases.adaptive_position_manager import KILL_SWITCH_PATH
         KILL_SWITCH_PATH.parent.mkdir(parents=True, exist_ok=True)
         KILL_SWITCH_PATH.touch()
@@ -182,8 +186,16 @@ class TestDefenseScenarios(unittest.TestCase):
             rows = _make_ohlcv_rows(peak_price=100000, peak_days_ago=1)
             broker = _mock_broker(99000, rows)
             sig = detect_peak_signal(broker, "TEST")
-            self.assertFalse(sig.trigger, "KILL_SWITCH 시 트리거 발동 금지!")
-            self.assertTrue(any("KILL_SWITCH" in r for r in sig.reasons_fail))
+            # P0-4 보장: KILL_SWITCH 시에도 매도(천장 감지) 계속
+            self.assertTrue(
+                sig.trigger,
+                "P0-4 위반: KILL_SWITCH 시 매도 차단됨 (손실 확대 위험)"
+            )
+            # KILL_SWITCH가 reasons_fail에 들어가지 않아야 함
+            self.assertFalse(
+                any("KILL_SWITCH" in r for r in sig.reasons_fail),
+                "P0-4 위반: KILL_SWITCH가 매도 차단 사유로 추가됨"
+            )
         finally:
             KILL_SWITCH_PATH.unlink()
 

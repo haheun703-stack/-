@@ -120,10 +120,14 @@ def detect_peak_signal(
     """
     sig = PeakSignal(ticker=ticker)
 
-    # KILL_SWITCH 확인
+    # P0-4 (5/25): KILL_SWITCH는 매수만 차단, 매도(천장 감지)는 항상 계속
+    # 천장 -3% 트리거는 손실 차단 목적이므로 KILL_SWITCH 무관하게 진행해야 함
+    # (KILL_SWITCH 발동 시 매도까지 멈추면 꺾이는 순간 손실 확대)
     if _is_kill_switch_active():
-        sig.reasons_fail.append("KILL_SWITCH 발동 중 → 본 흐름 정지")
-        return sig
+        logger.warning(
+            "KILL_SWITCH 활성 — 매도(천장 감지)는 계속 진행 [%s] (P0-4 보장)",
+            ticker,
+        )
 
     # 현재가
     if current_price is None:

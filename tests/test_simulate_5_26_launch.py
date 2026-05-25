@@ -212,29 +212,35 @@ class TestSimulate526Launch(unittest.TestCase):
     # 시나리오 2: 약세장 KILL_SWITCH
     # ─────────────────────────────────────────────────────────
 
-    def test_scenario_2_kill_switch_blocks_all(self):
-        """KILL_SWITCH 발동 시 4단계 모두 정지 (시드 보전)."""
+    def test_scenario_2_kill_switch_blocks_buys_allows_sells(self):
+        """P0-4 (5/25 보강) — KILL_SWITCH 시 매수 3단계 차단, 매도(MVP-1)는 계속.
+
+        검수 P0-4: 기존엔 KILL_SWITCH가 매도까지 정지 → 꺾이는 순간 손실 확대.
+        수정: 매수(MVP-2/3/4)만 차단, 매도(MVP-1 천장 감지)는 손실 차단 목적으로 계속.
+        """
         # KILL_SWITCH 활성화
         self.kill_path.write_text("BEARISH 발동 5/26 시뮬", encoding="utf-8")
 
         broker = _build_mock_broker("normal_bullish")  # 환경은 강세장이지만
 
-        # MVP-1: KILL_SWITCH 차단
+        # MVP-1: P0-4 보장 — 매도(천장 감지) 계속 (KILL_SWITCH 무관)
         sig1 = self.mvp1.detect_peak_signal(broker, "110990")
-        self.assertFalse(sig1.trigger)
-        self.assertTrue(any("KILL_SWITCH" in r for r in sig1.reasons_fail))
+        self.assertFalse(
+            any("KILL_SWITCH" in r for r in sig1.reasons_fail),
+            "P0-4 위반: KILL_SWITCH가 매도 차단 사유로 추가됨"
+        )
 
-        # MVP-2: 큐 등록도 차단
+        # MVP-2: 매수 큐 등록 차단 (정상 — 매수 차단)
         reg = self.mvp2.register_buy_queue("240810", 25_000, 3_000_000)
         self.assertFalse(reg["success"])
         self.assertIn("KILL_SWITCH", reg["error"])
 
-        # MVP-3: 받침 평가 차단
+        # MVP-3: 받침 패턴(매수 시그널) 차단 (정상)
         sig3 = self.mvp3.detect_support_pattern(broker, "103590")
         self.assertFalse(sig3.trigger)
         self.assertTrue(any("KILL_SWITCH" in r for r in sig3.reasons_fail))
 
-        # MVP-4: 재진입 평가 차단
+        # MVP-4: 재진입(매수) 차단 (정상)
         dec = self.mvp4.evaluate_reentry(
             broker, "103590", "일진전기",
             step5_pool={"103590": {"stars": 5, "upside": 7.45}},

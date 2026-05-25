@@ -20,3 +20,4 @@ hmmlearn>=0.3
 lxml>=4.9
 apscheduler>=3.10
 yfinance>=0.2
+portalocker>=2.8  # P0-1: cross-platform JSON 락 (adaptive_buy_queue race condition 방어, 5/25)
