@@ -253,6 +253,29 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
     candidates = passed_candidates(pool)
     logger.info("후보 풀: %d 종목 (통과 %d)", len(pool), len(candidates))
 
+    # === 5/25 학습 모드: 신호 snapshot DB 초기화 + 후보 일괄 저장 ===
+    learning_mode = os.getenv("ADAPTIVE_DAILY_LEARNING_MODE", "0") == "1"
+    if learning_mode:
+        try:
+            from src.use_cases.signal_snapshot import init_db, snapshot_signals
+            from src.use_cases.adaptive_buy_queue import _load_queues_raw
+
+            init_db()
+            queue_tickers = set((_load_queues_raw().get("queues") or {}).keys())
+            snap_candidates = [
+                {
+                    "ticker": t,
+                    "name": n,
+                    "in_queue": int(t in queue_tickers),
+                    "in_holdings": 0,  # broker.fetch_balance 호출 비용 절약
+                }
+                for t, n in candidates
+            ]
+            saved = snapshot_signals(snap_candidates)
+            logger.info("학습 모드 snapshot: %d종목 저장 (큐: %d)", saved, len(queue_tickers))
+        except Exception as e:
+            logger.warning("snapshot 저장 실패: %s", e)
+
     # 자비스 안전선
     jarvis_check = make_jarvis_safety_check(is_real=not is_paper)
 
@@ -273,6 +296,23 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     msg = format_peak_signal_for_telegram(sig, name)
                     print(msg)
                     send_telegram(msg)
+
+                    # 학습 로그: MVP-1 천장 trigger
+                    if learning_mode:
+                        try:
+                            from src.use_cases.decision_logger import log_decision
+                            log_decision(
+                                "SELL" if sig.auto_sell_eligible else "ALERT",
+                                ticker, name=name,
+                                current_price=sig.current_price,
+                                target_price=sig.peak_price,
+                                peak_drop_pct=sig.pct_from_peak,
+                                pass_reasons=sig.reasons_pass,
+                                fail_reasons=sig.reasons_fail,
+                                extra={"mvp": "1", "days_since_peak": sig.days_since_peak},
+                            )
+                        except Exception as _e:
+                            logger.warning("MVP-1 log_decision 실패: %s", _e)
 
                     # AUTO_SELL=1 시 매도 실행 + MVP-2 큐 자동 등록
                     if sig.auto_sell_eligible:
@@ -307,6 +347,29 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 msg = format_trigger_for_telegram(t)
                 print(msg)
                 send_telegram(msg)
+
+                # 학습 로그: MVP-2 큐 trigger (BUY or TRIGGERED or EXPIRED)
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        status = t.get("status", t.get("event", "?"))
+                        log_decision(
+                            "BUY" if status == "FILLED" else "QUEUE_TRIGGER",
+                            t.get("ticker", "?"), name=t.get("name", ""),
+                            current_price=t.get("current_price", 0),
+                            qty=t.get("qty", 0),
+                            amount=t.get("alloc_amount", 0),
+                            target_price=t.get("target_price", 0),
+                            extra={
+                                "mvp": "2",
+                                "level": t.get("level"),
+                                "status": status,
+                                "order_id": t.get("order_id"),
+                                "peak_price": t.get("peak_price", 0),
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-2 log_decision 실패: %s", _e)
         except Exception as e:
             summary["mvp2"]["errors"].append(str(e))
 
@@ -325,6 +388,27 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 msg = format_quick_profit_for_telegram(t)
                 print(msg)
                 send_telegram(msg)
+
+                # 학습 로그: MVP-2.5 Trailing Quick Profit (ARMED or SOLD)
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        status = t.get("status", "?")
+                        log_decision(
+                            "SELL" if status == "QUICK_SOLD" else "ALERT",
+                            t.get("ticker", "?"), name=t.get("name", ""),
+                            current_price=t.get("current_price", 0),
+                            trailing_drop_pct=t.get("trailing_drop_pct", 0.0),
+                            extra={
+                                "mvp": "2_5",
+                                "status": status,
+                                "trailing_peak": t.get("trailing_peak", 0),
+                                "actual_buy": t.get("actual_buy", 0),
+                                "profit_pct": t.get("profit_pct", 0.0),
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-2.5 log_decision 실패: %s", _e)
         except Exception as e:
             summary["mvp2_5"]["errors"].append(str(e))
 
@@ -346,6 +430,21 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     msg = format_support_signal_for_telegram(sig, name)
                     print(msg)
                     send_telegram(msg)
+
+                    # 학습 로그: MVP-3 받침 패턴 (ALERT — 매수는 MVP-4가)
+                    if learning_mode:
+                        try:
+                            from src.use_cases.decision_logger import log_decision
+                            log_decision(
+                                "ALERT", sig.ticker, name=name,
+                                current_price=getattr(sig, "current_price", 0),
+                                volume_ratio=getattr(sig, "volume_ratio", 0.0),
+                                bullish_ratio=getattr(sig, "bullish_ratio", 0.0),
+                                pass_reasons=sig.reasons_pass,
+                                extra={"mvp": "3", "support_type": "받침패턴"},
+                            )
+                        except Exception as _e:
+                            logger.warning("MVP-3 log_decision 실패: %s", _e)
         except Exception as e:
             summary["mvp3"]["errors"].append(str(e))
 
@@ -373,6 +472,31 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     msg = format_reentry_for_telegram(dec)
                     print(msg)
                     send_telegram(msg)
+
+                    # 학습 로그: MVP-4 재진입 3중 검증 통과 (BUY or ALERT)
+                    if learning_mode:
+                        try:
+                            from src.use_cases.decision_logger import log_decision
+                            log_decision(
+                                "BUY" if dec.auto_reentry_eligible else "ALERT",
+                                dec.ticker, name=getattr(dec, "name", ""),
+                                current_price=getattr(dec, "current_price", 0),
+                                qty=getattr(dec, "target_qty", 0),
+                                target_price=getattr(dec, "target_price", 0),
+                                pass_reasons=[
+                                    *(["받침 통과"] if dec.support_pass else []),
+                                    *(["STEP5 통과"] if dec.step5_pass else []),
+                                    *(["자비스 통과"] if dec.jarvis_pass else []),
+                                ],
+                                fail_reasons=getattr(dec, "jarvis_failed_checks", []),
+                                extra={
+                                    "mvp": "4",
+                                    "step5_stars": getattr(dec, "step5_stars", 0),
+                                    "step5_upside": getattr(dec, "step5_upside", 0.0),
+                                },
+                            )
+                        except Exception as _e:
+                            logger.warning("MVP-4 log_decision 실패: %s", _e)
         except Exception as e:
             summary["mvp4"]["errors"].append(str(e))
 
