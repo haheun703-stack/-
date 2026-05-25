@@ -244,16 +244,91 @@ class IntradayEye:
 
     @staticmethod
     def _load_name_map() -> dict[str, str]:
-        """sector_map.json에서 ticker→name 매핑 로드."""
-        p = DATA_DIR / "sector_map.json"
-        if not p.exists():
-            return {}
-        try:
-            with open(p, encoding="utf-8") as f:
-                sm = json.load(f)
-            return {s["ticker"]: s["name"] for s in sm.get("stocks", []) if s.get("ticker") and s.get("name")}
-        except Exception:
-            return {}
+        """ticker→종목명 매핑 로드 (멀티소스 통합).
+
+        우선순위:
+        1. data/universe/name_map.json — 1,008종목 통합 사전 (1차)
+        2. data/sector_rotation/sector_map.json — 21섹터 nested stocks (보강)
+        3. data/sector_map.json — 레거시 호환 (있으면)
+        4. data/killer_picks.json — 킬러픽 종목명 (보강)
+        """
+        name_map: dict[str, str] = {}
+
+        # 1차: universe/name_map.json (flat dict)
+        p1 = DATA_DIR / "universe" / "name_map.json"
+        if p1.exists():
+            try:
+                d = json.loads(p1.read_text(encoding="utf-8"))
+                if isinstance(d, dict):
+                    for k, v in d.items():
+                        if k and v and isinstance(v, str):
+                            name_map[str(k).zfill(6)] = v
+            except Exception as e:
+                logger.warning("[EYE] universe/name_map.json 로드 실패: %s", e)
+
+        # 2차: sector_rotation/sector_map.json (nested 21섹터)
+        p2 = DATA_DIR / "sector_rotation" / "sector_map.json"
+        if p2.exists():
+            try:
+                d = json.loads(p2.read_text(encoding="utf-8"))
+                if isinstance(d, dict):
+                    for _sector, info in d.items():
+                        for s in (info or {}).get("stocks", []):
+                            code = str(s.get("code") or "").zfill(6)
+                            nm = s.get("name") or ""
+                            if code and nm and not nm.startswith("Empty DataFrame"):
+                                name_map.setdefault(code, nm)
+            except Exception as e:
+                logger.warning("[EYE] sector_rotation/sector_map.json 로드 실패: %s", e)
+
+        # 3차: 레거시 sector_map.json (있으면)
+        p3 = DATA_DIR / "sector_map.json"
+        if p3.exists():
+            try:
+                d = json.loads(p3.read_text(encoding="utf-8"))
+                for s in d.get("stocks", []):
+                    t = str(s.get("ticker") or "").zfill(6)
+                    n = s.get("name") or ""
+                    if t and n:
+                        name_map.setdefault(t, n)
+            except Exception:
+                pass
+
+        # 4차: killer_picks.json (워치리스트 보강)
+        p4 = DATA_DIR / "killer_picks.json"
+        if p4.exists():
+            try:
+                kp = json.loads(p4.read_text(encoding="utf-8"))
+                for s in kp.get("cross_validated_top5", []):
+                    t = str(s.get("ticker") or "").zfill(6)
+                    n = s.get("name") or ""
+                    if t and n:
+                        name_map.setdefault(t, n)
+                for e_ in kp.get("etf_top5", []):
+                    t = str(e_.get("ticker") or "").zfill(6)
+                    n = e_.get("name") or ""
+                    if t and n and t != "cash":
+                        name_map.setdefault(t, n)
+            except Exception:
+                pass
+
+        # 5차: sector_rotation/krx_full_sectors.json — KRX 전종목 섹터 매핑 (REIT/희귀종목 보강)
+        p5 = DATA_DIR / "sector_rotation" / "krx_full_sectors.json"
+        if p5.exists():
+            try:
+                d = json.loads(p5.read_text(encoding="utf-8"))
+                if isinstance(d, dict):
+                    for _sector, info in d.items():
+                        for s in (info or {}).get("stocks", []):
+                            t = str(s.get("code") or "").zfill(6)
+                            n = s.get("name") or ""
+                            if t and n and not n.startswith("Empty DataFrame"):
+                                name_map.setdefault(t, n)
+            except Exception as e:
+                logger.warning("[EYE] krx_full_sectors.json 로드 실패: %s", e)
+
+        logger.info("[EYE] 종목명 매핑 로드: %d종목", len(name_map))
+        return name_map
 
     def _load_killer_watchlist(self):
         """킬러픽 종목을 워치리스트에 추가."""
@@ -424,7 +499,11 @@ class IntradayEye:
                     continue
                 change = p.get("change_pct", 0)
                 if change >= threshold:
-                    name = self._name_map.get(ticker) or p.get("name") or ticker
+                    # ticker 정규화 (6자리 zero-padding) 후 매핑 조회
+                    tkey = str(ticker).zfill(6)
+                    name = self._name_map.get(tkey) or self._name_map.get(ticker) or p.get("name") or ticker
+                    if name == ticker:
+                        logger.warning("[EYE-07] 종목명 미매핑: %s (universe/name_map.json 보강 필요)", ticker)
                     self._fire_alert(
                         "EYE-07", ticker, name,
                         p["current_price"], change,
