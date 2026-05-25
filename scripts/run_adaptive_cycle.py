@@ -234,15 +234,18 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     masked,
                 )
 
+        # 5/26 fix: mojito raw 객체에 buy_limit 없음 → KisOrderAdapter로 교체.
+        # adapter는 mojito를 wrapping + buy_limit/sell_limit/가드레일/텔레그램알림 제공.
+        # adapter는 환경변수 MODEL=REAL/PAPER 자동 인식 (paper 모드 시 mock=True).
         try:
-            import mojito
-            is_mock = is_paper  # paper=mock 모드, real=실거래
-            broker = mojito.KoreaInvestment(
-                api_key=os.getenv("KIS_APP_KEY"),
-                api_secret=os.getenv("KIS_APP_SECRET"),
-                acc_no=os.getenv("KIS_ACC_NO"),
-                mock=is_mock,
-            )
+            if is_paper:
+                from src.adapters.paper_order_adapter import PaperOrderAdapter
+                broker = PaperOrderAdapter()
+                logger.info("PAPER 모드 — PaperOrderAdapter 사용 (mojito 미사용)")
+            else:
+                from src.adapters.kis_order_adapter import KisOrderAdapter
+                broker = KisOrderAdapter()
+                logger.warning("🔴 REAL 모드 — KisOrderAdapter 활성 (buy_limit/가드레일 포함)")
         except Exception as e:
             logger.error("broker 초기화 실패: %s", e)
             summary["error"] = f"broker init: {e}"

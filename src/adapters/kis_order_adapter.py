@@ -467,8 +467,18 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     # CurrentPricePort 구현
     # ──────────────────────────────────────────
 
+    def fetch_price(self, ticker: str) -> dict:
+        """현재가 조회 — mojito raw 응답 그대로 반환 (passthrough).
+
+        5/26 자기반성 #4 fix: adaptive_buy_queue 등이 mojito 메서드명
+        (fetch_price) 그대로 호출하는 호환성 보장.
+        반환 구조: {"output": {"stck_prpr": "...", ...}, "rt_cd": "0", ...}
+        가공된 dict를 원하면 fetch_current_price() 사용.
+        """
+        return self.broker.fetch_price(ticker)
+
     def fetch_current_price(self, ticker: str) -> dict:
-        """종목 현재가 + 기본 정보 조회"""
+        """종목 현재가 + 기본 정보 조회 (가공된 dict)"""
         try:
             data = self.broker.fetch_price(ticker)
             output = data.get("output", {})
