@@ -39,18 +39,20 @@ def _learning_mode_on() -> bool:
 
 
 def _time_slot() -> str:
-    """현재 시각 → 매수 시간대 라벨."""
-    h = datetime.now().hour
-    m = datetime.now().minute
+    """현재 시각 → 매수 시간대 라벨.
+
+    P1-4 (5/25): 한국 KOSPI 점심 휴장 없음. 11:30~11:59는 NOON 유지 (정상 거래 시간).
+    LUNCH는 12:00~12:59 (실제 거래량 약한 시간대)로 한정.
+    """
+    now = datetime.now()
+    h, m = now.hour, now.minute
     if h < 9:
         return "PRE_OPEN"
     if h == 9:
         return "MORNING"
-    if h == 10 or (h == 11 and m < 30):
+    if 10 <= h < 12:  # 10:00~11:59 (점심 휴장 없음 — NOON)
         return "NOON"
-    if h == 11:
-        return "LUNCH"
-    if h == 12:
+    if h == 12:  # 12:00~12:59 (실제 점심 시간대, 거래량 약함)
         return "LUNCH"
     if 13 <= h < 15:
         return "AFTERNOON"
