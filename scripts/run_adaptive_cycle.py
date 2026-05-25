@@ -583,7 +583,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("📊 사이클 요약:")
-    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp3", "mvp4"):
+    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp3", "mvp4"):
         s = summary[mvp]
         status = "✓" if s["executed"] else "⏭ SKIP"
         print(f"  {mvp.upper()}: {status}  트리거 {s['triggers']}건"
