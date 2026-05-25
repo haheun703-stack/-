@@ -200,6 +200,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "mvp1": {"executed": False, "triggers": 0, "errors": []},
         "mvp2": {"executed": False, "triggers": 0, "errors": []},
         "mvp2_5": {"executed": False, "triggers": 0, "errors": []},
+        "mvp2_6": {"executed": False, "triggers": 0, "errors": []},  # 자동 손절 -5% (5/25)
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
         "mvp4": {"executed": False, "triggers": 0, "errors": []},
     }
@@ -412,6 +413,44 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary["mvp2_5"]["errors"].append(str(e))
 
+    # === MVP-2.6: 자동 손절 -5% — FILLED stage 모니터링 (5/25 백테스트 R2) ===
+    if "mvp2_6" not in skip:
+        from src.use_cases.adaptive_stop_loss import (
+            check_stop_loss_triggers,
+            format_stop_loss_for_telegram,
+        )
+
+        summary["mvp2_6"]["executed"] = True
+        try:
+            triggers = check_stop_loss_triggers(broker)
+            summary["mvp2_6"]["triggers"] = len(triggers)
+            for t in triggers:
+                msg = format_stop_loss_for_telegram(t)
+                print(msg)
+                send_telegram(msg)
+
+                # 학습 로그: MVP-2.6 손절 매도
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        log_decision(
+                            "SELL", t.get("ticker", "?"), name=t.get("name", ""),
+                            current_price=t.get("current_price", 0),
+                            qty=t.get("qty", 0),
+                            extra={
+                                "mvp": "2_6",
+                                "type": "STOP_LOSS",
+                                "actual_buy": t.get("actual_buy", 0),
+                                "loss_pct": t.get("loss_pct", 0.0),
+                                "level": t.get("level"),
+                                "order_id": t.get("order_id"),
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-2.6 log_decision 실패: %s", _e)
+        except Exception as e:
+            summary["mvp2_6"]["errors"].append(str(e))
+
     # === MVP-3: 받침 패턴 감지 ===
     if "mvp3" not in skip and candidates:
         from src.use_cases.support_pattern_detector import (
@@ -514,6 +553,7 @@ def main():
     parser.add_argument("--skip-mvp1", action="store_true")
     parser.add_argument("--skip-mvp2", action="store_true")
     parser.add_argument("--skip-mvp2_5", action="store_true")
+    parser.add_argument("--skip-mvp2_6", action="store_true")
     parser.add_argument("--skip-mvp3", action="store_true")
     parser.add_argument("--skip-mvp4", action="store_true")
     args = parser.parse_args()
