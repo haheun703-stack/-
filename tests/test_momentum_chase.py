@@ -170,14 +170,28 @@ def test_scan_skips_protected(monkeypatch):
 
 
 def test_scan_fire_detected(monkeypatch):
-    """모멘텀 발화 종목 정상 반환."""
+    """모멘텀 발화 종목 정상 반환 (15분봉 추세 확인 포함)."""
     monkeypatch.setattr("src.use_cases.momentum_chase.ENABLED", True)
-    candles = [{"open": 1000, "close": 1000, "high": 1000, "low": 1000, "volume": 100}
-               for _ in range(20)]
-    candles.append({"open": 1000, "close": 1050, "high": 1050, "low": 1000, "volume": 500})
+    candles_5min = [{"open": 1000, "close": 1000, "high": 1000, "low": 1000, "volume": 100}
+                    for _ in range(20)]
+    candles_5min.append({"open": 1000, "close": 1050, "high": 1050, "low": 1000, "volume": 500})
+
+    # 15분봉: 우상향 양봉 3개 (P0-2 추세 검증 통과)
+    candles_15min = [
+        {"open": 1000, "close": 1020, "high": 1025, "low": 998, "volume": 300},
+        {"open": 1020, "close": 1040, "high": 1045, "low": 1015, "volume": 350},
+        {"open": 1040, "close": 1060, "high": 1065, "low": 1035, "volume": 400},
+    ]
+
+    def fetch_candles(t, period):
+        if period == 5:
+            return candles_5min
+        elif period == 15:
+            return candles_15min
+        return []
 
     adapter = MagicMock()
-    adapter.fetch_minute_candles = lambda t, period: candles
+    adapter.fetch_minute_candles = fetch_candles
     adapter.fetch_tick = lambda t: {"current_price": 1050, "change_pct": 5.0}
 
     sigs = scan_momentum_candidates(adapter, ["067310"])

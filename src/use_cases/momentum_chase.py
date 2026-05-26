@@ -163,6 +163,34 @@ def evaluate_momentum_signal(
     return sig
 
 
+def _verify_15min_trend(intraday_adapter, ticker: str) -> bool:
+    """15분봉 추세 검증 (P0-2, ChatGPT 외부 검증 발견 추가).
+
+    조건: 최근 3개 15분봉 중 2개 이상 양봉 + 평균 가격 우상향
+    → 단기 루머/뉴스 가짜 신호 회피
+
+    Returns:
+        True = 15분봉 추세 확인 (매수 OK)
+        False = 추세 약함 (가짜 신호 의심)
+    """
+    if not hasattr(intraday_adapter, "fetch_minute_candles"):
+        return True  # fail-open (5분봉만 보고 매수)
+    try:
+        candles = intraday_adapter.fetch_minute_candles(ticker, period=15)
+        if not candles or len(candles) < 3:
+            return True  # fail-open
+        recent_3 = candles[-3:]
+        # 양봉 카운트
+        bullish = sum(1 for c in recent_3 if c.get("close", 0) > c.get("open", 0))
+        # 평균 가격 우상향 (첫 평균 < 마지막 close)
+        first_avg = (recent_3[0].get("open", 0) + recent_3[0].get("close", 0)) / 2
+        last_close = recent_3[-1].get("close", 0)
+        return bullish >= 2 and last_close > first_avg
+    except Exception as e:
+        logger.warning("[모멘텀] %s 15분봉 검증 실패: %s — fail-open", ticker, e)
+        return True  # fail-open
+
+
 def scan_momentum_candidates(
     intraday_adapter,
     candidate_tickers: list[str],
@@ -214,10 +242,16 @@ def scan_momentum_candidates(
                 daily_pct=daily_pct, current_price=cur,
             )
             if sig.fire:
-                fired.append(sig)
-                logger.warning(
-                    "[모멘텀 추격] %s 발화 — %s", tkey, sig.reason,
-                )
+                # ★ P0-2 fix (ChatGPT 외부 검증): 15분봉 추세 검증 추가 — 가짜 신호 회피
+                if not _verify_15min_trend(intraday_adapter, tkey):
+                    sig.fire = False
+                    sig.reason = f"{sig.reason} → 15분봉 추세 약함 (가짜 신호 의심)"
+                    logger.warning("[모멘텀 추격] %s 15분봉 추세 검증 실패 — 매수 보류", tkey)
+                else:
+                    fired.append(sig)
+                    logger.warning(
+                        "[모멘텀 추격] %s 발화 + 15분봉 추세 확인 — %s", tkey, sig.reason,
+                    )
         except Exception as e:
             logger.warning("[모멘텀 추격] %s fetch 실패: %s", tkey, e)
 

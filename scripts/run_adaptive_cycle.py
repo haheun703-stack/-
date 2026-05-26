@@ -265,6 +265,29 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as _e:
             logger.warning("[C2 fix] KisIntradayAdapter 초기화 실패: %s — H5/H8/H9 게이트 skip", _e)
 
+        # ★ P0-3 (ChatGPT 외부 검증): 갭 하락 + 변동성 폭증 + 외인 대량 매도 가드
+        # 사이클 시작 시 한 번 평가 → 신규 매수 차단 / 보유 매도 알림
+        market_guard = None
+        try:
+            from src.use_cases.gap_volatility_guard import (
+                evaluate_market_guard, format_guard_for_telegram,
+            )
+            held_positions = []
+            if hasattr(broker, "fetch_balance"):
+                try:
+                    bal = broker.fetch_balance()
+                    held_positions = bal.get("holdings", [])
+                except Exception:
+                    pass
+            market_guard = evaluate_market_guard(broker, intraday_adapter, held_positions)
+            if market_guard.block_new_buy or market_guard.force_sell_held:
+                msg = format_guard_for_telegram(market_guard)
+                print(msg)
+                send_telegram(msg)
+                logger.error("[갭/변동성 가드] 발화: %s", market_guard.reason)
+        except Exception as _e:
+            logger.warning("[갭/변동성 가드] 평가 실패: %s — fail-open", _e)
+
     # 후보 풀 로드
     pool = load_latest_soubujang_pool()
     step5_lookup = build_step5_lookup(pool)
@@ -360,7 +383,12 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         summary["mvp2"]["executed"] = True
         try:
             # ★ C2 fix: intraday_adapter 전달 → H5/동시호가/4수급 게이트 정상 작동
-            triggers = check_and_trigger_queues(broker, intraday_adapter=intraday_adapter)
+            # ★ P0-3: 갭/변동성 가드 발화 시 신규 매수 차단
+            if market_guard and market_guard.block_new_buy:
+                logger.warning("[MVP-2] 시장 가드 차단 — 신규 매수 정지: %s", market_guard.reason)
+                triggers = []
+            else:
+                triggers = check_and_trigger_queues(broker, intraday_adapter=intraday_adapter)
             summary["mvp2"]["triggers"] = len(triggers)
             for t in triggers:
                 msg = format_trigger_for_telegram(t)
@@ -677,6 +705,8 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
     # 4개 AI 세부 섹터 (검사/PCB/소재/산업소재) 동시 폭등 감지
     # 5/26 ISC+16.9%/인텍플러스+18.9%/코리아써키트+12.4%/두산+10.1%/동진쎄미켐+10.2% 사례
     if "mvp5" not in skip:
+        # ★ P0-3: 시장 가드 발화 시 AI 동조 큐 자동 등록 차단 (워치리스트만 추가)
+        mvp5_skip_queue_register = market_guard and market_guard.block_new_buy
         try:
             from src.use_cases.ai_chain_detector import (
                 detect_ai_chain_sync,
@@ -721,6 +751,9 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 # ── 5/27 실매매 진입 핵심: AI 동조 자동 큐 등록 (강세장 적응) ──
                 # 환경변수 AI_CHAIN_QUEUE_AUTO_REGISTER=1일 때만 발동
                 # peak=현재가 / L1 -3% / L2 -7% / L3 -12% / 만료 3일
+                # ★ P0-3: 시장 가드 발화 시 자동 큐 등록 차단
+                if mvp5_skip_queue_register:
+                    logger.warning("[MVP-5] 시장 가드 차단 — AI 동조 큐 자동 등록 정지")
                 try:
                     from src.use_cases.ai_chain_queue_auto_register import (
                         register_ai_chain_queues,
@@ -734,7 +767,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     if queue_path.exists():
                         queue_state = json.loads(queue_path.read_text(encoding="utf-8"))
                     reg_result = register_ai_chain_queues(
-                        ai_sig.surge_stocks,
+                        ai_sig.surge_stocks if not mvp5_skip_queue_register else [],
                         protected_tickers=protected,
                         held_tickers=held,
                         queue_state=queue_state,
@@ -862,8 +895,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                         sig.ticker, sig.reason,
                     )
 
-                    # 매수 실행 (★ M4 fix)
-                    if exec_enabled and os.getenv("AUTO_TRADING_ENABLED", "0") == "1":
+                    # 매수 실행 (★ M4 fix + P0-3 시장 가드)
+                    market_blocked = market_guard and market_guard.block_new_buy
+                    if market_blocked:
+                        logger.warning("[MVP-6] 시장 가드 차단 — %s 매수 정지", sig.ticker)
+                    if exec_enabled and os.getenv("AUTO_TRADING_ENABLED", "0") == "1" and not market_blocked:
                         try:
                             # 8겹 게이트 검사 (★ M5 fix: 모멘텀에도 안전망 적용)
                             gate = check_all_entry_gates(
