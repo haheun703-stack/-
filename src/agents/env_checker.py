@@ -69,14 +69,15 @@ REQUIRED_FILES: list[tuple[str, Path, dict]] = [
 ]
 
 # cron 라인 키워드 (VPS crontab grep 검증)
-# 2026-05-21 일반화: 5/20 단일 일자 정규식 → 5월 일자 범위 [\d,\-]+ 매칭
-#   (실제 등록 cron: "0 6 21,22,26,27,28,29,30 5 *" 등 5/21~30 다중 일자)
-#   5/31+ 또는 6월+ 운영 시 cron 자체를 "* * 1-5"로 재일반화 필요
+# 2026-05-27 영구 일반화: 일자/월 와일드카드 또는 숫자 범위 모두 허용 + 줄 시작 앵커로 주석 라인 제외
+#   배경: 5/21 일자 범위 [\d,\-]+\s+5 정규식 + 5/22 cron 평일 일반화(* * 1-5) 동기화 누락
+#         → 5/27 06:02 KILL_SWITCH 자동 발동 사고 ("구현 있는데 동작 안 함" 4회째)
+#   해결: (?m) multiline + 줄 시작 앵커(^) + \S+ 와일드카드. 주석 라인(#...)은 자동 제외.
 REQUIRED_CRON_LINES: list[tuple[str, str]] = [
-    ("KILL_SWITCH 자동 삭제 06:00", r"0\s+6\s+[\d,\-]+\s+5"),
-    ("KILL_SWITCH 자동 복구 16:00", r"0\s+16\s+[\d,\-]+\s+5"),
-    ("chart_hero close_cycle 14:55", r"55\s+14\s+\*\s+\*\s+1-5"),
-    ("owner_rule_monitor 9-15시", r"\*/5\s+9-15\s+[\d,\-]+\s+5"),
+    ("KILL_SWITCH 자동 삭제 06:00", r"(?m)^\s*0\s+6\s+\S+\s+\S+\s+\S+"),
+    ("KILL_SWITCH 자동 복구 16:00", r"(?m)^\s*0\s+16\s+\S+\s+\S+\s+\S+"),
+    ("chart_hero close_cycle 14:55", r"(?m)^\s*55\s+14\s+\S+\s+\S+\s+\S+"),
+    ("owner_rule_monitor 9-15시", r"(?m)^\s*\*/5\s+9-15\s+\S+\s+\S+\s+\S+"),
 ]
 
 
