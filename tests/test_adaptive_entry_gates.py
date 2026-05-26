@@ -68,6 +68,7 @@ def _make_intraday(orderbook=None):
 def test_all_pass_no_atr(mock_vwap_normal, monkeypatch):
     """모든 게이트 통과 + ATR 비활성 → allow=True."""
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.USE_ATR_STOPS", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     # 매물대용 OHLCV (넓은 가격대 — 목표 25000이 VAH 이내)
     # POC가 25000 근처 + VAH 26000 이상 되도록 분포
     ohlcv = [
@@ -108,6 +109,7 @@ def test_vwap_overheat_blocks(mock_vwap_overheat, monkeypatch):
 def test_orderbook_blocks_slippage(mock_vwap_normal, monkeypatch):
     """호가 슬리피지 +2% → 차단."""
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     ob = {
         "asks": [{"price": 25500, "volume": 100}],  # +2% 슬리피지
         "bids": [{"price": 24800, "volume": 100}],
@@ -124,6 +126,7 @@ def test_orderbook_blocks_slippage(mock_vwap_normal, monkeypatch):
 def test_supply_zone_overheat_blocks(mock_vwap_normal, monkeypatch):
     """매물대 VAH 과열 → 차단."""
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     # 9000~10000 분포에서 11000 매수 시도 → VAH 과열
     ohlcv = [
         {"stck_bsop_date": f"2026020{i%10}", "stck_oprc": 9000 + i*10,
@@ -141,6 +144,7 @@ def test_supply_zone_overheat_blocks(mock_vwap_normal, monkeypatch):
 def test_intraday_adapter_none_skips_orderbook(mock_vwap_normal, monkeypatch):
     """intraday_adapter=None → H5 호가 게이트 skip."""
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.USE_ATR_STOPS", False)
     broker = MagicMock()
     r = check_all_entry_gates("067310", target_price=25000,
@@ -154,6 +158,7 @@ def test_disabled_gates(mock_vwap_normal, monkeypatch):
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VWAP_ENABLED", False)
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     broker = MagicMock()
     r = check_all_entry_gates("067310", target_price=25000,
                                 broker=broker, intraday_adapter=None)
@@ -164,6 +169,7 @@ def test_disabled_gates(mock_vwap_normal, monkeypatch):
 def test_ohlcv_fetch_failure_skips_supply(mock_vwap_normal, monkeypatch):
     """OHLCV 조회 실패 → 매물대 skip (fail-open)."""
     monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_VOLUME_POWER_ENABLED", False)
     broker = MagicMock()
     broker.fetch_ohlcv = MagicMock(side_effect=Exception("API down"))
     r = check_all_entry_gates("067310", target_price=25000,
@@ -177,6 +183,54 @@ def test_fetch_ohlcv_safe_returns_empty_on_no_attr():
     broker = MagicMock(spec=[])  # 메서드 없음
     bars = _fetch_ohlcv_safe(broker, "067310", 60)
     assert bars == []
+
+
+def test_volume_power_weak_blocks(mock_vwap_normal, monkeypatch):
+    """체결강도 100 미만 → WEAK_BUY 차단."""
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
+    # _fetch_volume_power mock: 50 반환
+    monkeypatch.setattr(
+        "src.use_cases.entry_gates._fetch_volume_power",
+        lambda b, t: (50.0, "ccnl_tday_rltv"),
+    )
+    broker = MagicMock()
+    r = check_all_entry_gates("067310", target_price=25000,
+                                broker=broker, intraday_adapter=None)
+    assert r.allow is False
+    assert "VOLUME_POWER" in r.block_reason
+    assert r.volume_power == 50.0
+
+
+def test_volume_power_strong_passes(mock_vwap_normal, monkeypatch):
+    """체결강도 150 → STRONG_BUY 통과."""
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
+    monkeypatch.setattr(
+        "src.use_cases.entry_gates._fetch_volume_power",
+        lambda b, t: (150.0, "ccnl_tday_rltv"),
+    )
+    broker = MagicMock()
+    r = check_all_entry_gates("067310", target_price=25000,
+                                broker=broker, intraday_adapter=None)
+    assert r.allow
+    assert r.volume_power_reason == "STRONG_BUY"
+    assert r.volume_power == 150.0
+
+
+def test_volume_power_fetch_fail_fail_open(mock_vwap_normal, monkeypatch):
+    """체결강도 fetch 실패 (vp=0) → fail-open (allow=True)."""
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_SUPPLY_ZONE_ENABLED", False)
+    monkeypatch.setattr("src.use_cases.adaptive_entry_gates.GATE_ORDERBOOK_ENABLED", False)
+    monkeypatch.setattr(
+        "src.use_cases.entry_gates._fetch_volume_power",
+        lambda b, t: (0.0, "none"),
+    )
+    broker = MagicMock()
+    r = check_all_entry_gates("067310", target_price=25000,
+                                broker=broker, intraday_adapter=None)
+    assert r.allow  # fail-open
+    assert r.volume_power_reason == "FETCH_FAILED"
 
 
 def test_fetch_ohlcv_safe_parses_kis_format():

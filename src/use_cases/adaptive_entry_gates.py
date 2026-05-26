@@ -38,9 +38,13 @@ logger = logging.getLogger(__name__)
 GATE_VWAP_ENABLED = os.getenv("GATE_VWAP_ENABLED", "1") == "1"
 GATE_ORDERBOOK_ENABLED = os.getenv("GATE_ORDERBOOK_ENABLED", "1") == "1"
 GATE_SUPPLY_ZONE_ENABLED = os.getenv("GATE_SUPPLY_ZONE_ENABLED", "1") == "1"
+GATE_VOLUME_POWER_ENABLED = os.getenv("GATE_VOLUME_POWER_ENABLED", "1") == "1"
+GATE_SUPPLY_FLOW_ENABLED = os.getenv("GATE_SUPPLY_FLOW_ENABLED", "1") == "1"
+GATE_OPENING_CALL_ENABLED = os.getenv("GATE_OPENING_CALL_ENABLED", "1") == "1"
 USE_ATR_STOPS = os.getenv("ATR_STOP_ENABLED", "0") == "1"
 
 SUPPLY_ZONE_LOOKBACK = int(os.getenv("SUPPLY_ZONE_LOOKBACK_DAYS", "60"))
+VOLUME_POWER_MIN = float(os.getenv("ADAPTIVE_VOLUME_POWER_MIN", "100"))  # 5/22 C2 임계 100+
 
 
 @dataclass
@@ -56,6 +60,15 @@ class EntryGateResult:
     supply_zone_reason: str = "DISABLED"
     supply_position: str = ""
     is_poc_breakout: bool = False
+    volume_power: float = 0.0                # H8 체결강도 (tday_rltv) — 5/27 신규
+    volume_power_reason: str = "DISABLED"
+    foreign_net: int = 0                     # H9 4수급 외인 당일 누적 — 5/27 신규
+    inst_net: int = 0                        # H9 기관 당일 누적
+    supply_flow_reason: str = "DISABLED"
+    is_dual_buy: bool = False                # 외인+기관 동시 매수 ★
+    opening_call_reason: str = "DISABLED"    # 동시호가 강도 게이트 — 5/27 신규
+    opening_call_ratio: float = 0.0
+    is_strong_open: bool = False
     atr_stop: Optional[StopTarget] = None    # 매수 성공 시 stop/target 산출 결과
     blocked_gates: list[str] = field(default_factory=list)
 
@@ -107,6 +120,67 @@ def check_all_entry_gates(
         except Exception as e:
             logger.warning("[entry gates] %s 호가 조회 실패: %s — skip", ticker, e)
             result.orderbook_reason = "ERROR_SKIP"
+
+    # ─────────────────────────────────────────
+    # H8: 체결강도 (volume_power, tday_rltv) — 5/27 신규 통합
+    # 5/22 C2 백테스트: 100+ 임계 D+1 +20.60% / 적중 84.2%
+    # ─────────────────────────────────────────
+    if GATE_VOLUME_POWER_ENABLED:
+        try:
+            from src.use_cases.entry_gates import _fetch_volume_power
+            # broker는 KisOrderAdapter (mojito wrapping). _fetch_volume_power가
+            # broker.access_token/api_key/api_secret 사용 → mojito raw 객체.
+            # KisOrderAdapter는 self.broker = mojito 라서 access 가능.
+            raw_broker = getattr(broker, "broker", broker)  # adapter면 raw, mojito면 그대로
+            vp, source = _fetch_volume_power(raw_broker, ticker)
+            result.volume_power = vp
+            if vp <= 0:
+                result.volume_power_reason = "FETCH_FAILED"
+                # 체결강도 fetch 실패 → fail-open (장 초반 데이터 부족 케이스 보호)
+                logger.warning("[entry gates] %s 체결강도 fetch 실패 — fail-open", ticker)
+            elif vp < VOLUME_POWER_MIN:
+                result.volume_power_reason = "WEAK_BUY"
+                blocked.append(f"VOLUME_POWER:{vp:.0f}<{VOLUME_POWER_MIN:.0f}")
+            else:
+                result.volume_power_reason = "STRONG_BUY"
+        except Exception as e:
+            logger.warning("[entry gates] %s 체결강도 게이트 실패: %s — skip", ticker, e)
+            result.volume_power_reason = "ERROR_SKIP"
+
+    # ─────────────────────────────────────────
+    # 동시호가 강도 게이트 — 5/27 신규 (08:30~09:00 매수 시도 시만 작동)
+    # ─────────────────────────────────────────
+    if GATE_OPENING_CALL_ENABLED and intraday_adapter is not None:
+        try:
+            from src.use_cases.opening_call_gate import check_opening_call_gate
+            ob = intraday_adapter.fetch_orderbook(ticker) if hasattr(intraday_adapter, "fetch_orderbook") else None
+            oc = check_opening_call_gate(ob)
+            result.opening_call_reason = oc.reason
+            result.opening_call_ratio = oc.ratio
+            result.is_strong_open = oc.is_strong
+            if not oc.allow:
+                blocked.append(f"OPENING_CALL:{oc.reason}")
+        except Exception as e:
+            logger.warning("[entry gates] %s 동시호가 게이트 실패: %s — skip", ticker, e)
+            result.opening_call_reason = "ERROR_SKIP"
+
+    # ─────────────────────────────────────────
+    # H9: 4수급 실시간 게이트 — 5/27 신규
+    # 외인 + 기관 당일 누적으로 DUAL_BUY 우대 / DUAL_SELL 차단
+    # ─────────────────────────────────────────
+    if GATE_SUPPLY_FLOW_ENABLED and intraday_adapter is not None:
+        try:
+            from src.use_cases.supply_flow_gate import check_supply_flow_gate
+            sf = check_supply_flow_gate(intraday_adapter, ticker)
+            result.foreign_net = sf.foreign_net
+            result.inst_net = sf.inst_net
+            result.supply_flow_reason = sf.reason
+            result.is_dual_buy = sf.is_dual_buy
+            if not sf.allow:
+                blocked.append(f"SUPPLY_FLOW:{sf.reason}")
+        except Exception as e:
+            logger.warning("[entry gates] %s 4수급 게이트 실패: %s — skip", ticker, e)
+            result.supply_flow_reason = "ERROR_SKIP"
 
     # ─────────────────────────────────────────
     # H6: 매물대 게이트 (broker.fetch_ohlcv 60일)

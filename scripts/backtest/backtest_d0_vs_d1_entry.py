@@ -74,8 +74,28 @@ class StrategySummary:
     profit_factor: float = 0.0  # 평균 수익 / 평균 손실
 
 
-def load_signal_dates_from_picks_history(lookback_days: int) -> list[tuple[str, str, str]]:
+C2_CORE_SOURCES = {"AI섹터", "밸류체인", "US모멘텀", "인텔리전스"}
+C2_AVOID_SINGLE = {"수급폭발", "매집추적"}  # 단독이면 회피
+
+
+def load_signal_dates_from_picks_history(
+    lookback_days: int,
+    grade_filter: str | None = None,
+    min_score: float = 0,
+    min_sources: int = 0,
+    c2_filter: bool = False,
+) -> list[tuple[str, str, str]]:
     """picks_history.json에서 시그널 일자/종목/유형 추출.
+
+    실제 구조 (5/26 확인):
+        {"records": [{"pick_date": "...", "ticker": "...", "sources": [...],
+                      "grade": "강력 포착", "score": 100, "n_sources": 5, ...}]}
+
+    Args:
+        grade_filter: 'matchcase' 필터 (예: "강력 포착", "적극매수")
+        min_score: 최소 점수 (기본 0 = 미적용)
+        min_sources: 최소 sources 개수 (기본 0)
+        c2_filter: C2 룰 (4핵심 2개+ 포함 + 단독 회피 sources 제외)
 
     Returns:
         [(date_yyyymmdd, ticker, signal_type), ...]
@@ -87,21 +107,49 @@ def load_signal_dates_from_picks_history(lookback_days: int) -> list[tuple[str, 
 
     try:
         d = json.loads(PICKS_HISTORY.read_text(encoding="utf-8"))
-        if not isinstance(d, list):
-            return []
     except Exception as e:
         logger.warning("picks_history 로드 실패: %s", e)
         return []
 
+    if isinstance(d, dict):
+        recs = d.get("records", [])
+    elif isinstance(d, list):
+        recs = d
+    else:
+        return []
+
     cutoff = (date.today() - timedelta(days=lookback_days)).strftime("%Y%m%d")
     results = []
-    for x in d:
-        dt = (x.get("date") or "").replace("-", "")
+    for x in recs:
+        if not isinstance(x, dict):
+            continue
+        dt = (x.get("pick_date") or x.get("date") or x.get("target_date") or "").replace("-", "")
         if not dt or dt < cutoff:
             continue
-        ticker = x.get("ticker", "")
-        sig_type = x.get("source", "?")
-        if ticker:
+        ticker = str(x.get("ticker", "")).zfill(6)
+        srcs = x.get("sources", []) or []
+        score = float(x.get("score", 0) or 0)
+        grade = x.get("grade", "")
+        n_src = int(x.get("n_sources", len(srcs)) or len(srcs))
+
+        # 필터 적용
+        if grade_filter and grade != grade_filter:
+            continue
+        if min_score > 0 and score < min_score:
+            continue
+        if min_sources > 0 and n_src < min_sources:
+            continue
+        if c2_filter:
+            # C2 L1 필수: 4핵심 중 2개 이상
+            core_hits = len(set(srcs) & C2_CORE_SOURCES)
+            if core_hits < 2:
+                continue
+            # 회피: 수급폭발/매집추적 단독
+            if len(srcs) == 1 and srcs[0] in C2_AVOID_SINGLE:
+                continue
+
+        sig_type = "+".join(srcs[:3]) if srcs else "?"
+        if ticker and ticker != "000000":
             results.append((dt, ticker, sig_type))
     return results
 
@@ -206,16 +254,33 @@ def summarize_strategy(trades: list[TradeResult], strategy: str) -> StrategySumm
     return s
 
 
-def run_backtest(lookback_days: int = 90, signal_source: str = "picks_history") -> dict:
+def run_backtest(
+    lookback_days: int = 90,
+    signal_source: str = "picks_history",
+    grade_filter: str | None = None,
+    min_score: float = 0,
+    min_sources: int = 0,
+    c2_filter: bool = False,
+) -> dict:
     """백테스트 실행."""
-    print(f"[백테스트] D+0 vs D+1 진입 비교 (lookback {lookback_days}일, 소스: {signal_source})")
+    filter_desc = []
+    if grade_filter: filter_desc.append(f"grade={grade_filter}")
+    if min_score > 0: filter_desc.append(f"score>={min_score}")
+    if min_sources > 0: filter_desc.append(f"sources>={min_sources}")
+    if c2_filter: filter_desc.append("C2(4핵심 2+)")
+    fd = f" 필터: {', '.join(filter_desc)}" if filter_desc else ""
+    print(f"[백테스트] D+0 vs D+1 진입 비교 (lookback {lookback_days}일, 소스: {signal_source}){fd}")
 
-    # 시그널 일자/종목 로드
     if signal_source == "picks_history":
-        signals = load_signal_dates_from_picks_history(lookback_days)
+        signals = load_signal_dates_from_picks_history(
+            lookback_days, grade_filter=grade_filter,
+            min_score=min_score, min_sources=min_sources, c2_filter=c2_filter,
+        )
     else:
-        logger.warning("signal_source=%s 미지원 — picks_history fallback", signal_source)
-        signals = load_signal_dates_from_picks_history(lookback_days)
+        signals = load_signal_dates_from_picks_history(
+            lookback_days, grade_filter=grade_filter,
+            min_score=min_score, min_sources=min_sources, c2_filter=c2_filter,
+        )
 
     if not signals:
         print("⚠️ 시그널 데이터 0건 — 백테스트 불가")
@@ -291,10 +356,20 @@ def main():
     parser.add_argument("--lookback-days", type=int, default=90)
     parser.add_argument("--signal-source", default="picks_history",
                         choices=["picks_history", "sector_fire", "supabase"])
+    parser.add_argument("--grade", default=None,
+                        help="grade 필터 (예: '강력 포착', '적극매수')")
+    parser.add_argument("--min-score", type=float, default=0)
+    parser.add_argument("--min-sources", type=int, default=0)
+    parser.add_argument("--c2", action="store_true",
+                        help="C2 룰: 4핵심(AI섹터/밸류체인/US모멘텀/인텔리전스) 2개+ 포함")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    run_backtest(lookback_days=args.lookback_days, signal_source=args.signal_source)
+    run_backtest(
+        lookback_days=args.lookback_days, signal_source=args.signal_source,
+        grade_filter=args.grade, min_score=args.min_score,
+        min_sources=args.min_sources, c2_filter=args.c2,
+    )
 
 
 if __name__ == "__main__":
