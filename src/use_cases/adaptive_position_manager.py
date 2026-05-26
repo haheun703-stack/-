@@ -228,6 +228,38 @@ def format_peak_signal_for_telegram(sig: PeakSignal, name: str = "") -> str:
     return "\n".join(lines)
 
 
+def _load_protected_tickers() -> set[str]:
+    """보호 종목 로드 (사용자 중기/장기 수동 매수 종목 자동매도 차단).
+
+    우선순위:
+    1. config/settings.yaml: adaptive.protected_tickers (영구 — git 추적)
+    2. 환경변수 PROTECTED_TICKERS="010120,005930" (즉시 — 임시)
+
+    5/26 10:42 퐝가님 지시: LS ELECTRIC(010120) 중기 보유 → 보호 종목 등록.
+    """
+    protected: set[str] = set()
+    # 1차: settings.yaml
+    try:
+        import yaml
+        from pathlib import Path
+        cfg_path = Path(__file__).resolve().parent.parent.parent / "config" / "settings.yaml"
+        if cfg_path.exists():
+            with open(cfg_path, encoding="utf-8") as f:
+                cfg = yaml.safe_load(f) or {}
+            for t in (cfg.get("adaptive", {}) or {}).get("protected_tickers", []) or []:
+                if t:
+                    protected.add(str(t).zfill(6))
+    except Exception as e:
+        logger.warning("[보호] settings.yaml 로드 실패: %s", e)
+    # 2차: 환경변수 (긴급 추가용)
+    env_val = os.getenv("PROTECTED_TICKERS", "")
+    for t in env_val.split(","):
+        t = t.strip()
+        if t:
+            protected.add(t.zfill(6))
+    return protected
+
+
 def scan_holdings_for_peaks(
     broker,
     holdings: dict[str, dict],
@@ -235,22 +267,38 @@ def scan_holdings_for_peaks(
 ) -> list[PeakSignal]:
     """보유 종목 + 후보 풀 일괄 스캔.
 
+    보호 종목 (settings.yaml adaptive.protected_tickers 또는 PROTECTED_TICKERS env)은
+    자동매도 대상에서 완전 제외 (사용자 수동 보유 보호).
+
     Args:
         broker: KIS broker
         holdings: 보유 종목 dict {ticker: {qty, avg_price, ...}}
         soubujang_pool: 후보 풀 (선택, 통과 종목만 추가 스캔)
 
     Returns:
-        PeakSignal 리스트 (trigger=True인 것 우선)
+        PeakSignal 리스트 (trigger=True인 것 우선, 보호 종목 제외)
     """
     results = []
-    tickers = set(holdings.keys())
+    protected = _load_protected_tickers()
 
-    # 후보 풀의 통과 종목도 포함 (천장 임박 종목 조기 알림)
+    # 보호 종목 격리 (보유 ticker zfill 후 비교)
+    holding_tickers = {str(t).zfill(6) for t in holdings.keys()}
+    intersect = holding_tickers & protected
+    if intersect:
+        logger.warning(
+            "[보호] 자동매매 격리 — %s (보유 중, 천장 매도/큐 등록 모두 차단)",
+            sorted(intersect),
+        )
+
+    # 격리 후 스캔 대상
+    tickers = holding_tickers - protected
+
+    # 후보 풀 통과 종목 추가 (천장 임박 조기 알림)
     if soubujang_pool:
         for t, info in soubujang_pool.items():
-            if info.get("passed"):
-                tickers.add(t)
+            tk = str(t).zfill(6)
+            if info.get("passed") and tk not in protected:
+                tickers.add(tk)
 
     for ticker in tickers:
         sig = detect_peak_signal(broker, ticker)

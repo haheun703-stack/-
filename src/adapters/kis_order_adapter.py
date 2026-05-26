@@ -477,6 +477,26 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         """
         return self.broker.fetch_price(ticker)
 
+    def fetch_ohlcv(self, ticker: str, timeframe: str = "D",
+                     start_day: str = "", end_day: str = "", adj_price: bool = True):
+        """일봉/주봉/월봉 OHLCV 조회 — mojito passthrough.
+
+        5/26 09:30 사이클 fix #2: adaptive_position_manager가 broker.fetch_ohlcv
+        호출하는데 mojito raw → adapter 교체로 메서드 누락 → 시그널 작동 X.
+
+        Args:
+            timeframe: 'D' (일봉) / 'W' (주봉) / 'M' (월봉)
+            start_day/end_day: YYYYMMDD
+        """
+        return self.broker.fetch_ohlcv(
+            ticker, timeframe=timeframe,
+            start_day=start_day, end_day=end_day, adj_price=adj_price,
+        )
+
+    def fetch_today_1m_ohlcv(self, ticker: str):
+        """당일 1분봉 OHLCV — mojito passthrough."""
+        return self.broker.fetch_today_1m_ohlcv(ticker)
+
     def fetch_current_price(self, ticker: str) -> dict:
         """종목 현재가 + 기본 정보 조회 (가공된 dict)"""
         try:
