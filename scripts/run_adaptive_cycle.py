@@ -202,6 +202,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "mvp2_5": {"executed": False, "triggers": 0, "errors": []},
         "mvp2_6": {"executed": False, "triggers": 0, "errors": []},  # 자동 손절 -5% (5/25)
         "mvp2_7": {"executed": False, "triggers": 0, "errors": []},  # H8/H9 시간 매도 (5/26)
+        "mvp2_8": {"executed": False, "triggers": 0, "errors": []},  # 추세 이탈 매도 — MA + RSI (5/26 23:00 옵션 C)
         "mvp5": {"executed": False, "triggers": 0, "errors": []},     # AI 밸류체인 동조 (5/26)
         "mvp6": {"executed": False, "triggers": 0, "errors": []},     # 모멘텀 추격 매수 (5/26 20:30)
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
@@ -522,6 +523,67 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary.setdefault("mvp2_7", {"executed": False, "triggers": 0, "errors": []})
             summary["mvp2_7"]["errors"].append(str(e))
+
+    # === MVP-2.8: 추세 이탈 매도 — MA + RSI (5/26 23:00 옵션 C) ===
+    # 천장까지 따라가되 추세 진짜 끝났을 때만 매도
+    # 룰: MA 역배열 / MA20<MA60 + 수익 / MA5<MA20 + 수익 5%+ / RSI 80+ 과열 / RSI 70+ 후 50 하향
+    if "mvp2_8" not in skip:
+        try:
+            from src.use_cases.adaptive_trend_exit import (
+                scan_queue_for_trend_exit, execute_trend_exit,
+                format_trend_exit_for_telegram,
+            )
+            import json
+            from pathlib import Path
+            queue_path = Path(__file__).resolve().parent.parent / "data" / "adaptive_buy_queue.json"
+            queue_state = {}
+            if queue_path.exists():
+                queue_state = json.loads(queue_path.read_text(encoding="utf-8"))
+
+            trend_sigs = scan_queue_for_trend_exit(queue_state, broker)
+            summary["mvp2_8"]["executed"] = True
+            summary["mvp2_8"]["triggers"] = len(trend_sigs)
+
+            # rsi_peak_reached 갱신을 위해 queue_state 저장 필요
+            if trend_sigs or queue_state.get("queues"):
+                try:
+                    tmp = queue_path.with_suffix(".json.tmp")
+                    tmp.write_text(json.dumps(queue_state, ensure_ascii=False, indent=2), encoding="utf-8")
+                    tmp.replace(queue_path)
+                except Exception as _e:
+                    logger.warning("[MVP-2.8] queue 저장 실패: %s", _e)
+
+            for sig in trend_sigs:
+                msg = format_trend_exit_for_telegram(sig)
+                print(msg)
+                send_telegram(msg)
+                exec_result = execute_trend_exit(broker, sig)
+                logger.warning(
+                    "[MVP-2.8] %s %s 매도 — order_id=%s",
+                    sig.ticker, sig.exit_type, exec_result.get("order_id", ""),
+                )
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        log_decision(
+                            "SELL", sig.ticker, name="",
+                            current_price=sig.current_price,
+                            qty=sig.qty,
+                            extra={
+                                "mvp": "2_8",
+                                "type": sig.exit_type,
+                                "pnl_pct": sig.pnl_pct,
+                                "ma5": sig.ma5, "ma20": sig.ma20, "ma60": sig.ma60,
+                                "rsi": sig.rsi,
+                                "rsi_peak_reached": sig.rsi_peak_reached,
+                                "exec_success": exec_result.get("success", False),
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-2.8 log_decision 실패: %s", _e)
+        except Exception as e:
+            summary.setdefault("mvp2_8", {"executed": False, "triggers": 0, "errors": []})
+            summary["mvp2_8"]["errors"].append(str(e))
 
     # === MVP-3: 받침 패턴 감지 ===
     if "mvp3" not in skip and candidates:
@@ -905,7 +967,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("📊 사이클 요약:")
-    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp2_7", "mvp3", "mvp4", "mvp5", "mvp6"):
+    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp2_7", "mvp2_8", "mvp3", "mvp4", "mvp5", "mvp6"):
         s = summary.get(mvp, {"executed": False, "triggers": 0, "errors": []})
         status = "✓" if s["executed"] else "⏭ SKIP"
         print(f"  {mvp.upper()}: {status}  트리거 {s['triggers']}건"
