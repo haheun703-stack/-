@@ -53,7 +53,15 @@ def send_to_chatgpt(weekly_log: str, system_summary: str) -> str:
 
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            return "OPENAI_API_KEY 없음"
+            # ★ M2 fix (5/27): silent fail 방지 — 텔레그램 경고 발송
+            err_msg = "🚨 OPENAI_API_KEY 누락 — 주간 ChatGPT 검수 실패. .env에 OPENAI_API_KEY=sk-... 추가 필요."
+            try:
+                from src.telegram_sender import send_message
+                send_message(err_msg)
+            except Exception:
+                pass
+            print(err_msg)
+            return err_msg
 
         client = OpenAI(api_key=api_key)
 

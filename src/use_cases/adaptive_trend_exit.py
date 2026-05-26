@@ -172,10 +172,43 @@ def update_rsi_peak_state(rsi: float, current_state: bool,
 def _fetch_daily_indicators(broker, ticker: str) -> Optional[dict]:
     """일봉 60일 OHLCV → MA5/MA20/MA60 + RSI(14) 계산.
 
+    ★ M5 fix (5/27 검수): 정보봇 OHLCV CSV 39컬럼에 RSI/MA 컬럼 있음 (VPS 한정)
+    → 1차 시도 (정보봇 CSV) → 2차 (KIS OHLCV + Wilder smoothing 계산)
+
     Returns:
         {"ma5": float, "ma20": float, "ma60": float, "rsi": float, "close": float}
         실패 시 None.
     """
+    # 1차: 정보봇 OHLCV CSV (RSI/MA 컬럼 직접 사용)
+    try:
+        from pathlib import Path
+        import csv
+        OHLCV_DIR = Path("/home/ubuntu/quantum-master/data/external/jgis_ohlcv")
+        if not OHLCV_DIR.exists():
+            OHLCV_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "external" / "jgis_ohlcv"
+        if OHLCV_DIR.exists():
+            tk6 = str(ticker).zfill(6)
+            candidates = list(OHLCV_DIR.glob(f"*_{tk6}.csv"))
+            if candidates:
+                with candidates[0].open(encoding="utf-8") as f:
+                    rows = list(csv.DictReader(f))
+                if rows:
+                    last = rows[-1]
+                    try:
+                        ma5 = float(last.get("MA5", 0) or 0)
+                        ma20 = float(last.get("MA20", 0) or 0)
+                        ma60 = float(last.get("MA60", 0) or 0)
+                        rsi = float(last.get("RSI", 0) or 0)
+                        close = float(last.get("Close", 0) or 0)
+                        if ma5 > 0 and ma20 > 0 and close > 0:
+                            return {"ma5": ma5, "ma20": ma20, "ma60": ma60,
+                                    "rsi": rsi, "close": close}
+                    except (ValueError, TypeError):
+                        pass
+    except Exception as e:
+        logger.debug("[추세 이탈] 정보봇 CSV 로드 실패 %s: %s — KIS fallback", ticker, e)
+
+    # 2차: KIS OHLCV (Wilder smoothing 적용)
     try:
         if not hasattr(broker, "fetch_ohlcv"):
             return None
@@ -218,10 +251,15 @@ def _fetch_daily_indicators(broker, ticker: str) -> Optional[dict]:
                 gains.append(0)
                 losses.append(-diff)
 
-        recent_14_gain = gains[-14:]
-        recent_14_loss = losses[-14:]
-        avg_gain = sum(recent_14_gain) / max(len(recent_14_gain), 1)
-        avg_loss = sum(recent_14_loss) / max(len(recent_14_loss), 1)
+        # ★ M5 fix: Wilder smoothing (지수 이동 평균) — 표준 RSI 공식
+        if len(gains) < 14:
+            return None
+        avg_gain = sum(gains[:14]) / 14
+        avg_loss = sum(losses[:14]) / 14
+        # Wilder smoothing: 14일 이후는 ((이전 평균 × 13) + 현재) / 14
+        for i in range(14, len(gains)):
+            avg_gain = (avg_gain * 13 + gains[i]) / 14
+            avg_loss = (avg_loss * 13 + losses[i]) / 14
         if avg_loss == 0:
             rsi = 100.0
         else:

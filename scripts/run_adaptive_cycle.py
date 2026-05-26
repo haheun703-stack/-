@@ -464,6 +464,8 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
             summary["mvp2_5"]["errors"].append(str(e))
 
     # === MVP-2.6: 자동 손절 -5% — FILLED stage 모니터링 (5/25 백테스트 R2) ===
+    # ★ M9 fix (5/27 검수): 손절 발화 종목을 sold_tickers set에 추가 → MVP-2.7/2.8 중복 매도 방어
+    sold_tickers_this_cycle: set[str] = set()
     if "mvp2_6" not in skip:
         from src.use_cases.adaptive_stop_loss import (
             check_stop_loss_triggers,
@@ -475,6 +477,8 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
             triggers = check_stop_loss_triggers(broker)
             summary["mvp2_6"]["triggers"] = len(triggers)
             for t in triggers:
+                # ★ M9: 손절 발화 종목 누적
+                sold_tickers_this_cycle.add(str(t.get("ticker", "")).zfill(6))
                 msg = format_stop_loss_for_telegram(t)
                 print(msg)
                 send_telegram(msg)
@@ -523,6 +527,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
             summary["mvp2_7"]["triggers"] = len(time_sigs)
 
             for sig in time_sigs:
+                # ★ M9 fix (5/27): MVP-2.6 손절 이미 발화한 종목 중복 매도 방어
+                if str(sig.ticker).zfill(6) in sold_tickers_this_cycle:
+                    logger.info("[MVP-2.7] %s MVP-2.6 손절 이미 발화 → 중복 매도 skip", sig.ticker)
+                    continue
+                sold_tickers_this_cycle.add(str(sig.ticker).zfill(6))
                 msg = (
                     f"⏰ [시간 매도] {sig.exit_type}\n"
                     f"  {sig.ticker} D+{sig.trade_days_elapsed} {sig.pnl_pct:+.2f}%\n"
@@ -584,6 +593,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
             summary["mvp2_8"]["triggers"] = len(trend_sigs)
 
             for sig in trend_sigs:
+                # ★ M9 fix (5/27): MVP-2.6/2.7 이미 매도한 종목 중복 매도 방어
+                if str(sig.ticker).zfill(6) in sold_tickers_this_cycle:
+                    logger.info("[MVP-2.8] %s 이미 매도 → 중복 skip", sig.ticker)
+                    continue
+                sold_tickers_this_cycle.add(str(sig.ticker).zfill(6))
                 msg = format_trend_exit_for_telegram(sig)
                 print(msg)
                 send_telegram(msg)
@@ -760,8 +774,15 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 # 환경변수 AI_CHAIN_QUEUE_AUTO_REGISTER=1일 때만 발동
                 # peak=현재가 / L1 -3% / L2 -7% / L3 -12% / 만료 3일
                 # ★ P0-3: 시장 가드 발화 시 자동 큐 등록 차단
+                # ★ S14 fix (5/27): 차단 사실 텔레그램 알림 추가
                 if mvp5_skip_queue_register:
-                    logger.warning("[MVP-5] 시장 가드 차단 — AI 동조 큐 자동 등록 정지")
+                    skip_msg = (
+                        f"⚠️ [MVP-5] 시장 가드 발화 — AI 동조 큐 자동 등록 정지\n"
+                        f"  사유: {market_guard.reason if market_guard else '?'}\n"
+                        f"  영향: 폭등 종목 {len(ai_sig.surge_stocks)}건 자동 매수 미진행"
+                    )
+                    logger.warning(skip_msg)
+                    send_telegram(skip_msg)
                 try:
                     from src.use_cases.ai_chain_queue_auto_register import (
                         register_ai_chain_queues,
@@ -881,8 +902,46 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     logger.warning("[MVP-6] KisIntradayAdapter 초기화 실패: %s", _e)
 
             if intraday_for_momentum and cand_set:
-                # 후보 풀이 너무 크면 상위 30개만 (API 호출 제한)
-                cand_list = list(cand_set)[:30]
+                # ★ M7 fix (5/27 검수): 후보 우선순위 명시 (set 변환 X — 비결정적 회피)
+                # 1순위: sector_fire AI 6섹터 (강세 종목) → 2순위: AI 동조 워치리스트 → 3순위: intraday_eye 워치리스트
+                cand_list_ordered = []
+                _seen = set()
+                # 1순위 sector_fire AI
+                try:
+                    import yaml as _yaml
+                    sm_path = Path(__file__).resolve().parent.parent / "config" / "sector_fire_map.yaml"
+                    if sm_path.exists():
+                        _sm = _yaml.safe_load(sm_path.read_text(encoding="utf-8")) or {}
+                        for s_name in ["AI반도체", "AI반도체검사", "AI반도체PCB", "AI반도체장비설계",
+                                        "AI반도체소재", "AI산업소재", "AI보안소프트웨어"]:
+                            for t in _sm.get("sectors", {}).get(s_name, {}).get("tickers", []):
+                                if t not in _seen:
+                                    cand_list_ordered.append(t)
+                                    _seen.add(t)
+                except Exception:
+                    pass
+                # 2순위 AI 동조 워치리스트
+                try:
+                    from src.use_cases.ai_chain_auto_watchlist import get_ai_chain_watchlist_tickers
+                    for t in get_ai_chain_watchlist_tickers():
+                        if t not in _seen:
+                            cand_list_ordered.append(t)
+                            _seen.add(t)
+                except Exception:
+                    pass
+                # 3순위 intraday_eye 워치리스트
+                try:
+                    import yaml as _yaml
+                    cfg_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+                    if cfg_path.exists():
+                        _cfg = _yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+                        for t in _cfg.get("intraday_eye", {}).get("watchlist", []):
+                            if t not in _seen:
+                                cand_list_ordered.append(t)
+                                _seen.add(t)
+                except Exception:
+                    pass
+                cand_list = cand_list_ordered[:30]
                 fires = scan_momentum_candidates(
                     intraday_for_momentum, cand_list,
                     held_tickers=held, protected_tickers=protected,
@@ -982,8 +1041,13 @@ def main():
     parser.add_argument("--skip-mvp2", action="store_true")
     parser.add_argument("--skip-mvp2_5", action="store_true")
     parser.add_argument("--skip-mvp2_6", action="store_true")
+    # ★ M4 fix (5/27 검수): 누락된 4개 신규 MVP skip 인자
+    parser.add_argument("--skip-mvp2_7", action="store_true", help="MVP-2.7 시간 매도 skip")
+    parser.add_argument("--skip-mvp2_8", action="store_true", help="MVP-2.8 추세 이탈 매도 skip")
     parser.add_argument("--skip-mvp3", action="store_true")
     parser.add_argument("--skip-mvp4", action="store_true")
+    parser.add_argument("--skip-mvp5", action="store_true", help="MVP-5 AI 동조 skip")
+    parser.add_argument("--skip-mvp6", action="store_true", help="MVP-6 모멘텀 추격 skip")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -997,8 +1061,13 @@ def main():
     if args.skip_mvp1: skip.add("mvp1")
     if args.skip_mvp2: skip.add("mvp2")
     if args.skip_mvp2_5: skip.add("mvp2_5")
+    if args.skip_mvp2_6: skip.add("mvp2_6")
+    if args.skip_mvp2_7: skip.add("mvp2_7")
+    if args.skip_mvp2_8: skip.add("mvp2_8")
     if args.skip_mvp3: skip.add("mvp3")
     if args.skip_mvp4: skip.add("mvp4")
+    if args.skip_mvp5: skip.add("mvp5")
+    if args.skip_mvp6: skip.add("mvp6")
 
     print("=" * 70)
     print(f"🔁 적응형 포지션 매매법 통합 사이클 ({dt.datetime.now():%Y-%m-%d %H:%M:%S})")

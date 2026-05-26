@@ -458,11 +458,16 @@ def _fetch_current_price(broker, ticker: str) -> int:
         return 0
 
 
-def _is_expired(registered_at: str) -> bool:
-    """등록 후 N일 경과 여부."""
+def _is_expired(registered_at: str, expiry_days: int | None = None) -> bool:
+    """등록 후 만료 여부.
+
+    ★ M6 fix (5/27 검수): expiry_days 인자 지원 (AI 동조 큐 3일 만료 honor).
+    None이면 전역 QUEUE_EXPIRY_DAYS 사용 (기본 60일).
+    """
+    days_limit = expiry_days if expiry_days is not None else QUEUE_EXPIRY_DAYS
     try:
         reg = datetime.fromisoformat(registered_at)
-        return (datetime.now() - reg).days > QUEUE_EXPIRY_DAYS
+        return (datetime.now() - reg).days > days_limit
     except (ValueError, TypeError):
         return False
 
@@ -590,7 +595,8 @@ def check_and_trigger_queues(broker, intraday_adapter=None, regime: str = "NEUTR
         modified = False
         for ticker, entry in list(queues.items()):
             # 만료 체크
-            if _is_expired(entry.get("registered_at", "")):
+            # ★ M6 fix (5/27): AI 동조 큐는 expiry_days=3, 기본은 60일 (entry별)
+            if _is_expired(entry.get("registered_at", ""), entry.get("expiry_days")):
                 for stage in entry.get("stages", []):
                     if stage.get("status") in (STATUS_PENDING, STATUS_TRIGGERED):
                         stage["status"] = STATUS_EXPIRED
