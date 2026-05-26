@@ -202,17 +202,43 @@ def scan_queue_for_time_exits(queue_state: dict, broker, now: Optional[datetime]
 
 
 def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
-    """시간 매도 실행 (시장가).
+    """시간 매도 실행.
+
+    5/26 변경: 시장가 → 지정가 우선 (시장가 슬리피지 회피, 사용자 지시).
+    - D+3 익절: 지정가 -0.3% (체결 우선)
+    - D+5 데드라인: 지정가 -0.5% (강제 매도이지만 슬리피지 최소화)
+    - 환경변수 ADAPTIVE_SELL_USE_LIMIT=0이면 시장가 fallback.
 
     Returns:
-        {"success": bool, "order_id": str, "error": str}
+        {"success": bool, "order_id": str, "error": str, "limit_price": int}
     """
     if not sig.triggered:
         return {"success": False, "error": "trigger=False"}
 
+    use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
+    # D+5 강제는 더 큰 slippage 허용 (체결 우선)
+    if sig.exit_type == "D5_DEADLINE":
+        sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_D5_PCT", "0.5"))
+    else:
+        sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
+
     try:
-        # 시장가 매도 — KisOrderAdapter의 sell_market 또는 직접
-        if hasattr(broker, "sell_market"):
+        if use_limit and hasattr(broker, "sell_limit") and sig.current_price > 0:
+            limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
+            order = broker.sell_limit(sig.ticker, limit_price, sig.qty)
+            logger.info(
+                "[H8/H9] 지정가 매도 %s %s %d주 @ %d (현재 %d, slippage -%.1f%%)",
+                sig.ticker, sig.exit_type, sig.qty, limit_price, sig.current_price, sell_slippage_pct,
+            )
+            return {
+                "success": True,
+                "order_id": getattr(order, "order_id", ""),
+                "qty": sig.qty,
+                "exit_type": sig.exit_type,
+                "limit_price": limit_price,
+                "pnl_pct": sig.pnl_pct,
+            }
+        elif hasattr(broker, "sell_market"):
             order = broker.sell_market(sig.ticker, sig.qty)
             return {
                 "success": True,
@@ -222,8 +248,8 @@ def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
                 "pnl_pct": sig.pnl_pct,
             }
         else:
-            # fallback: 지정가 매도 (현재가 -1%)
-            limit_price = int(sig.current_price * 0.99)
+            # fallback: 지정가 매도
+            limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
             order = broker.sell_limit(sig.ticker, limit_price, sig.qty)
             return {
                 "success": True,

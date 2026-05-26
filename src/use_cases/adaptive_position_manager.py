@@ -328,20 +328,39 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
 
     sell_qty = max(1, int(holdings_qty * SELL_RATIO))
 
+    # 5/26 지정가 매도 우선 (시장가 슬리피지 회피, 사용자 지시)
+    use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
+    sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
+
     try:
-        # 시장가 매도
-        res = broker.create_market_sell_order(
-            symbol=sig.ticker,
-            quantity=sell_qty,
-        )
-        result = {
-            "success": True,
-            "order_id": res.get("output", {}).get("ODNO", ""),
-            "qty": sell_qty,
-            "price": sig.current_price,
-            "peak_price": sig.peak_price,
-            "pct_from_peak": sig.pct_from_peak,
-        }
+        if use_limit and hasattr(broker, "sell_limit") and sig.current_price > 0:
+            limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
+            order = broker.sell_limit(sig.ticker, limit_price, sell_qty)
+            result = {
+                "success": True,
+                "order_id": getattr(order, "order_id", "") or "",
+                "qty": sell_qty,
+                "price": limit_price,
+                "peak_price": sig.peak_price,
+                "pct_from_peak": sig.pct_from_peak,
+            }
+            logger.info(
+                "[MVP-1] 천장 -3% 지정가 매도 %s %d주 @ %d (현재 %d, slippage -%.1f%%)",
+                sig.ticker, sell_qty, limit_price, sig.current_price, sell_slippage_pct,
+            )
+        else:
+            # 시장가 fallback
+            res = broker.create_market_sell_order(
+                symbol=sig.ticker, quantity=sell_qty,
+            )
+            result = {
+                "success": True,
+                "order_id": res.get("output", {}).get("ODNO", ""),
+                "qty": sell_qty,
+                "price": sig.current_price,
+                "peak_price": sig.peak_price,
+                "pct_from_peak": sig.pct_from_peak,
+            }
 
         # MVP-2 연동: 매도 후 분할매수 큐 자동 등록
         try:

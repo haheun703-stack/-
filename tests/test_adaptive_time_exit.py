@@ -241,6 +241,8 @@ def test_scan_fetch_price_failure_skipped(monkeypatch):
 # ─────────────────────────────────────────
 def test_execute_sell_market_success():
     """sell_market 성공 → success=True."""
+    import os
+    os.environ["ADAPTIVE_SELL_USE_LIMIT"] = "0"
     sig = TimeExitSignal(
         ticker="067310", triggered=True, exit_type="D5_DEADLINE",
         trade_days_elapsed=5, entry_price=10000, current_price=9500,
@@ -257,6 +259,8 @@ def test_execute_sell_market_success():
 
 def test_execute_fallback_sell_limit():
     """sell_market 없으면 sell_limit fallback."""
+    import os
+    os.environ["ADAPTIVE_SELL_USE_LIMIT"] = "0"
     sig = TimeExitSignal(
         ticker="067310", triggered=True, exit_type="D3_PROFIT",
         trade_days_elapsed=3, entry_price=10000, current_price=10500,
@@ -268,7 +272,8 @@ def test_execute_fallback_sell_limit():
     broker.sell_limit = lambda t, p, q: mock_order
     r = execute_time_exit(broker, sig)
     assert r["success"] is True
-    assert r["limit_price"] == 10395  # 10500 * 0.99
+    # 5/26: slippage 0.3% 기본 → 10500 × 0.997 = 10468 (D3_PROFIT)
+    assert r["limit_price"] == 10468
 
 
 def test_execute_not_triggered():

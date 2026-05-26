@@ -82,18 +82,34 @@ def execute_trailing_sell(broker, ticker: str, stage: dict, sell_price: int) -> 
     sell_qty = max(1, int(actual_qty * QUICK_PROFIT_RATIO))
 
     try:
-        # 시장가 매도 (꺾이는 순간이라 즉시 체결 중요, MVP-1과 동일)
-        if hasattr(broker, "sell_market"):
+        # 5/26 지정가 매도 (시장가 슬리피지 회피, ADAPTIVE_SELL_USE_LIMIT=1 기본).
+        # trailing은 꺾이는 순간이지만 -0.3% 미세 슬리피지 지정가가 시장가보다 유리.
+        # 시장가 fallback: 환경변수 ADAPTIVE_SELL_USE_LIMIT=0 또는 sell_limit 미지원.
+        use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
+        sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
+
+        if use_limit and hasattr(broker, "sell_limit") and sell_price > 0:
+            # 지정가 = 현재가 - slippage% (체결 우선)
+            limit_price = int(sell_price * (1 - sell_slippage_pct / 100))
+            order = broker.sell_limit(ticker, limit_price, sell_qty)
+            order_id = getattr(order, "order_id", "") or ""
+            logger.info(
+                "[trailing] 지정가 매도 %s %d주 @ %d (현재 %d, slippage -%.1f%%)",
+                ticker, sell_qty, limit_price, sell_price, sell_slippage_pct,
+            )
+        elif hasattr(broker, "sell_market"):
             order = broker.sell_market(ticker, sell_qty)
             order_id = getattr(order, "order_id", "") or ""
+            limit_price = sell_price  # 시장가
         else:
             res = broker.create_market_sell_order(ticker, sell_qty)
             order_id = res.get("output", {}).get("ODNO", "") if res else ""
+            limit_price = sell_price
 
         return {
             "success": True,
             "order_id": order_id,
-            "price": sell_price,
+            "price": limit_price,
             "qty": sell_qty,
         }
     except Exception as e:

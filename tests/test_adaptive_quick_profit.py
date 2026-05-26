@@ -68,6 +68,8 @@ def _mock_broker(current_price: int, sell_success: bool = True, order_id: str = 
 class TestTrailingQuickProfit(unittest.TestCase):
 
     def setUp(self):
+        # 5/26: 기존 sell_market 호출 시나리오 유지 (지정가는 별도 테스트)
+        os.environ["ADAPTIVE_SELL_USE_LIMIT"] = "0"
         for mod_name in (
             "src.use_cases.adaptive_buy_queue",
             "src.use_cases.adaptive_quick_profit",
@@ -318,6 +320,8 @@ class TestTrailingQuickProfit(unittest.TestCase):
 
     def test_12_quick_sold_no_double_trigger(self):
         """QUICK_SOLD 후 중복 트리거 X."""
+        import os
+        os.environ["ADAPTIVE_SELL_USE_LIMIT"] = "0"
         self._setup_armed_stage("240810", 25_000, 22_500, 25_000, 1)
         broker = _mock_broker(current_price=24_500)
 
@@ -331,6 +335,8 @@ class TestTrailingQuickProfit(unittest.TestCase):
 
     def test_13_reset_for_reentry(self):
         """reset → PENDING + trailing 필드 초기화."""
+        import os
+        os.environ["ADAPTIVE_SELL_USE_LIMIT"] = "0"
         self._setup_armed_stage("240810", 25_000, 22_500, 25_000, 1)
         broker = _mock_broker(current_price=24_500)
         self.mvp25.check_quick_profit_triggers(broker)
