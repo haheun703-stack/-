@@ -254,6 +254,16 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
             summary["error"] = f"broker init: {e}"
             return summary
 
+        # ★ C2 fix (5/26 검수): KisIntradayAdapter 인스턴스 — H5 호가/동시호가/4수급 게이트 필수
+        # 모든 MVP에서 공유 (MVP-2/2.5/2.6/2.7/5/6 통합)
+        intraday_adapter = None
+        try:
+            from src.adapters.kis_intraday_adapter import KisIntradayAdapter
+            intraday_adapter = KisIntradayAdapter()
+            logger.info("[C2 fix] KisIntradayAdapter 활성 — 8겹 게이트 모두 정상 작동")
+        except Exception as _e:
+            logger.warning("[C2 fix] KisIntradayAdapter 초기화 실패: %s — H5/H8/H9 게이트 skip", _e)
+
     # 후보 풀 로드
     pool = load_latest_soubujang_pool()
     step5_lookup = build_step5_lookup(pool)
@@ -348,7 +358,8 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
 
         summary["mvp2"]["executed"] = True
         try:
-            triggers = check_and_trigger_queues(broker)
+            # ★ C2 fix: intraday_adapter 전달 → H5/동시호가/4수급 게이트 정상 작동
+            triggers = check_and_trigger_queues(broker, intraday_adapter=intraday_adapter)
             summary["mvp2"]["triggers"] = len(triggers)
             for t in triggers:
                 msg = format_trigger_for_telegram(t)
@@ -775,6 +786,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 )
                 summary["mvp6"]["triggers"] = len(fires)
 
+                # ★ M4 fix (5/26 검수): 시그널 후 실제 buy_limit 실행 (8겹 게이트 통과 시)
+                # MVP-6 자동 매수 이중 가드: AUTO_TRADING_ENABLED=1 + MOMENTUM_CHASE_AUTO_EXECUTE=1
+                exec_enabled = os.getenv("MOMENTUM_CHASE_AUTO_EXECUTE", "1") == "1"
+                from src.use_cases.adaptive_entry_gates import check_all_entry_gates
+
                 for sig in fires:
                     msg = format_momentum_for_telegram(sig)
                     print(msg)
@@ -783,12 +799,50 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                         "[MVP-6] 모멘텀 추격 발화: %s %s",
                         sig.ticker, sig.reason,
                     )
+
+                    # 매수 실행 (★ M4 fix)
+                    if exec_enabled and os.getenv("AUTO_TRADING_ENABLED", "0") == "1":
+                        try:
+                            # 8겹 게이트 검사 (★ M5 fix: 모멘텀에도 안전망 적용)
+                            gate = check_all_entry_gates(
+                                ticker=sig.ticker,
+                                target_price=sig.target_price,
+                                broker=broker,
+                                intraday_adapter=intraday_for_momentum,
+                                regime="BULL",  # 모멘텀 = 강세 가정
+                            )
+                            if not gate.allow:
+                                logger.warning(
+                                    "[MVP-6] %s 8겹 게이트 차단: %s",
+                                    sig.ticker, gate.block_reason,
+                                )
+                                send_telegram(
+                                    f"⚠️ MVP-6 {sig.name}({sig.ticker}) 게이트 차단: {gate.block_reason}"
+                                )
+                            else:
+                                # buy_limit 실행
+                                order = broker.buy_limit(sig.ticker, sig.target_price, 1)
+                                order_id = getattr(order, "order_id", "") or ""
+                                logger.warning(
+                                    "[MVP-6] %s 매수 체결 시도 1주 @ %d (order_id=%s)",
+                                    sig.ticker, sig.target_price, order_id,
+                                )
+                                send_telegram(
+                                    f"⚡ [MVP-6 매수] {sig.name}({sig.ticker}) 1주 @ {sig.target_price:,}원\n"
+                                    f"  target +5%: {sig.profit_target:,} / stop -3%: {sig.stop_price:,}\n"
+                                    f"  order_id: {order_id}"
+                                )
+                        except Exception as _e:
+                            logger.error("[MVP-6] %s 매수 실패: %s", sig.ticker, _e)
+                            send_telegram(f"❌ MVP-6 {sig.ticker} 매수 실패: {_e}")
+
                     # 학습 로그
                     if learning_mode:
                         try:
                             from src.use_cases.decision_logger import log_decision
                             log_decision(
-                                "ALERT", sig.ticker, name=sig.name,
+                                "BUY" if exec_enabled else "ALERT",
+                                sig.ticker, name=sig.name,
                                 current_price=sig.current_price,
                                 qty=1,
                                 extra={

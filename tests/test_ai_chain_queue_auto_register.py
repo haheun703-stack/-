@@ -133,13 +133,16 @@ def test_merge_into_queue_state():
 
 
 def test_qty_calculation():
-    """alloc_amount 100만 / target 30% / target_price = qty 계산."""
+    """alloc_amount 100만 / target 34%/33%/33% (★ C3 fix: 합계 1.0)."""
     surge = [{"ticker": "095340", "current_price": 250000, "change_pct": 16.9}]
     r = register_ai_chain_queues(surge, alloc_amount=1000000)
     stages = r.registered[0]["stages"]
-    # L1: 100만 × 30% = 30만 / 242,500 = 1.23 → 1주
+    # L1: 100만 × 34% = 34만 / 242,500 = 1.4 → 1주
     assert stages[0]["qty"] == 1
-    assert stages[0]["alloc_amount"] == 300000
+    assert stages[0]["alloc_amount"] == 340000  # ★ C3: 34% (이전 30%)
+    # L2, L3 합계 = 33% × 2 = 66%
+    total_alloc = sum(s["alloc_amount"] for s in stages)
+    assert total_alloc == 1000000  # 합계 100만 (사장 0%)
 
 
 def test_full_5_surge_scenario():

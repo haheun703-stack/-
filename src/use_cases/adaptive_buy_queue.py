@@ -563,14 +563,18 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict,
         return {"success": False, "error": str(e), "gate_summary": gate_summary}
 
 
-def check_and_trigger_queues(broker) -> list[dict]:
+def check_and_trigger_queues(broker, intraday_adapter=None, regime: str = "NEUTRAL") -> list[dict]:
     """모든 활성 큐 순회 + 가격 도달 단계 트리거.
 
-    매 30 분 cron에서 호출.
+    매 5분 cron에서 호출.
+
+    Args:
+        broker: KisOrderAdapter (fetch_price + buy_limit)
+        intraday_adapter: KisIntradayAdapter (H5 호가 / 동시호가 / 4수급 게이트 필수) ★ C2 fix
+        regime: 'BULL'/'NEUTRAL'/'BEARISH' — ATR 배수 선택
 
     Returns:
         [{ticker, name, level, status, target_price, current_price, ...}, ...]
-        trigger 발생한 단계만 반환.
     """
     triggers: list[dict] = []
 
@@ -615,8 +619,11 @@ def check_and_trigger_queues(broker) -> list[dict]:
                 if current_price <= target_price:
                     stage["triggered_at"] = datetime.now().isoformat(timespec="seconds")
 
-                    # 자동 매수 시도
-                    buy_result = execute_auto_buy(broker, ticker, stage)
+                    # 자동 매수 시도 (★ C2 fix: intraday_adapter + regime 전달)
+                    buy_result = execute_auto_buy(
+                        broker, ticker, stage,
+                        intraday_adapter=intraday_adapter, regime=regime,
+                    )
                     if buy_result["success"]:
                         stage["status"] = STATUS_FILLED
                         stage["order_id"] = buy_result.get("order_id", "")

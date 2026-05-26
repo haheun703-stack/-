@@ -166,10 +166,36 @@ class PaperOrderAdapter:
             message=f"PAPER_FILLED fee={fee} tax={tax} net={net_proceeds}",
         )
 
-    def buy_market(self, ticker: str, quantity: int, current_price: int, orderbook_available: bool = False) -> Order:
-        """시장가 매수 시뮬 — current_price 필수 (실시점 KIS 현재가)."""
+    def buy_market(self, ticker: str, quantity: int, current_price: int = 0, orderbook_available: bool = False) -> Order:
+        """시장가 매수 시뮬.
+
+        ★ C1 fix (5/26 검수): current_price 옵셔널 (기본 0).
+        호출자가 2인자만 전달 시 (sell_market(ticker, qty)) 내부 fetch_price로 자동 보강.
+        OrderPort 인터페이스 호환성 보장 (KisOrderAdapter와 시그니처 동일).
+        """
+        if current_price <= 0:
+            # KIS 어댑터로 현재가 fetch (이미 시뮬이라 안전)
+            try:
+                from src.adapters.kis_order_adapter import KisOrderAdapter
+                kis = KisOrderAdapter()
+                res = kis.fetch_price(ticker)
+                current_price = int(res.get("output", {}).get("stck_prpr", 0))
+            except Exception:
+                current_price = 1  # 최후 fallback
         return self.buy_limit(ticker, current_price, quantity, orderbook_available)
 
-    def sell_market(self, ticker: str, quantity: int, current_price: int, orderbook_available: bool = False, market: str = "KOSPI") -> Order:
-        """시장가 매도 시뮬 — current_price 필수."""
+    def sell_market(self, ticker: str, quantity: int, current_price: int = 0, orderbook_available: bool = False, market: str = "KOSPI") -> Order:
+        """시장가 매도 시뮬.
+
+        ★ C1 fix (5/26 검수): current_price 옵셔널 (기본 0).
+        2인자 호출 시 자동 fetch_price. trailing/stop_loss/time_exit fallback 호환.
+        """
+        if current_price <= 0:
+            try:
+                from src.adapters.kis_order_adapter import KisOrderAdapter
+                kis = KisOrderAdapter()
+                res = kis.fetch_price(ticker)
+                current_price = int(res.get("output", {}).get("stck_prpr", 0))
+            except Exception:
+                current_price = 1
         return self.sell_limit(ticker, current_price, quantity, orderbook_available, market)

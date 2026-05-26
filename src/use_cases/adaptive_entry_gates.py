@@ -210,11 +210,12 @@ def check_all_entry_gates(
                 entry_price=target_price,
                 atr_value=atr,
                 regime=regime,
+                ticker=ticker,  # ★ C4 fix: 로그 추적용
             )
         except Exception as e:
             logger.warning("[entry gates] %s ATR 계산 실패: %s — fallback", ticker, e)
             result.atr_stop = calc_atr_dynamic_stop(
-                entry_price=target_price, atr_value=None, regime=regime,
+                entry_price=target_price, atr_value=None, regime=regime, ticker=ticker,
             )
 
     # 최종 판정

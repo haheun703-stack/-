@@ -45,10 +45,11 @@ ALLOC_AMOUNT = int(os.getenv("AI_CHAIN_QUEUE_ALLOC_AMOUNT", "1000000"))
 EXPIRY_DAYS = int(os.getenv("AI_CHAIN_QUEUE_EXPIRY_DAYS", "3"))
 
 # 강세장 적응 단계 (기존 -10/-20/-30 → -3/-7/-12)
+# ★ C3 fix (5/26 검수): alloc_ratio 합계 1.00 (이전 0.90 = 10% 사장 문제)
 DEFAULT_STAGES = [
-    {"level": 1, "pullback_pct": 3.0, "alloc_ratio": 0.30},
-    {"level": 2, "pullback_pct": 7.0, "alloc_ratio": 0.30},
-    {"level": 3, "pullback_pct": 12.0, "alloc_ratio": 0.30},
+    {"level": 1, "pullback_pct": 3.0, "alloc_ratio": 0.34},
+    {"level": 2, "pullback_pct": 7.0, "alloc_ratio": 0.33},
+    {"level": 3, "pullback_pct": 12.0, "alloc_ratio": 0.33},
 ]
 
 

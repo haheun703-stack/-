@@ -65,6 +65,7 @@ def calc_atr_dynamic_stop(
     atr_value: float | None,
     regime: str = "NEUTRAL",
     fallback_stop_pct: float = FALLBACK_STOP_PCT,
+    ticker: str = "?",  # ★ C4 fix (5/26 검수): 로그 추적용
 ) -> StopTarget:
     """ATR 기반 동적 손익절 계산.
 
@@ -107,8 +108,8 @@ def calc_atr_dynamic_stop(
         stop_p = int(entry_price * (1 + fallback_stop_pct / 100))
         target_p = int(entry_price * (1 + 7.0 / 100))
         logger.warning(
-            "[ATR stop] %s 이상치 (ATR=%.0f, %.1f%% > %.0f%%) — fallback",
-            entry_price, atr_value, atr_pct, ATR_CAP_PCT,
+            "[ATR stop] %s entry=%d 이상치 (ATR=%.0f, %.1f%% > %.0f%%) — fallback",
+            ticker, entry_price, atr_value, atr_pct, ATR_CAP_PCT,
         )
         return StopTarget(
             stop_price=stop_p, target_price=target_p,
@@ -127,8 +128,8 @@ def calc_atr_dynamic_stop(
     target_pct = (target_p - entry_price) / entry_price * 100
 
     logger.info(
-        "[ATR stop] entry=%d ATR=%.0f regime=%s → stop %d (%+.1f%%) target %d (%+.1f%%)",
-        entry_price, atr_value, regime, stop_p, stop_pct, target_p, target_pct,
+        "[ATR stop] %s entry=%d ATR=%.0f regime=%s → stop %d (%+.1f%%) target %d (%+.1f%%)",
+        ticker, entry_price, atr_value, regime, stop_p, stop_pct, target_p, target_pct,
     )
 
     return StopTarget(
