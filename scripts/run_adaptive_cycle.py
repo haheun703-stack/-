@@ -203,6 +203,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "mvp2_6": {"executed": False, "triggers": 0, "errors": []},  # 자동 손절 -5% (5/25)
         "mvp2_7": {"executed": False, "triggers": 0, "errors": []},  # H8/H9 시간 매도 (5/26)
         "mvp5": {"executed": False, "triggers": 0, "errors": []},     # AI 밸류체인 동조 (5/26)
+        "mvp6": {"executed": False, "triggers": 0, "errors": []},     # 모멘텀 추격 매수 (5/26 20:30)
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
         "mvp4": {"executed": False, "triggers": 0, "errors": []},
     }
@@ -700,6 +701,112 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary["mvp5"]["errors"].append(str(e))
 
+    # === MVP-6: 모멘텀 추격 매수 (5/26 20:30 신규, 불장 추격 매매) ===
+    # 5분봉 +3% + 거래량 평균 3배+ + 양봉 + 종일 1~20% → 즉시 1주 매수
+    # 후보: intraday_eye 워치리스트 + AI 동조 워치리스트 + sector_fire AI 6섹터
+    if "mvp6" not in skip:
+        try:
+            from src.use_cases.momentum_chase import (
+                scan_momentum_candidates, format_momentum_for_telegram,
+            )
+            summary["mvp6"]["executed"] = True
+
+            # 후보 풀 수집
+            cand_set = set()
+            # 1) 워치리스트
+            try:
+                import yaml as _yaml
+                cfg_path = Path(__file__).resolve().parent.parent / "config" / "settings.yaml"
+                if cfg_path.exists():
+                    _cfg = _yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+                    cand_set.update(_cfg.get("intraday_eye", {}).get("watchlist", []))
+            except Exception:
+                pass
+
+            # 2) AI 동조 워치리스트
+            try:
+                from src.use_cases.ai_chain_auto_watchlist import get_ai_chain_watchlist_tickers
+                cand_set.update(get_ai_chain_watchlist_tickers())
+            except Exception:
+                pass
+
+            # 3) sector_fire AI 6섹터 (오늘 5/26 추가)
+            try:
+                import yaml as _yaml
+                sm_path = Path(__file__).resolve().parent.parent / "config" / "sector_fire_map.yaml"
+                if sm_path.exists():
+                    _sm = _yaml.safe_load(sm_path.read_text(encoding="utf-8")) or {}
+                    for s_name in ["AI반도체", "AI반도체검사", "AI반도체PCB", "AI반도체장비설계",
+                                    "AI반도체소재", "AI산업소재", "AI보안소프트웨어"]:
+                        s_info = _sm.get("sectors", {}).get(s_name, {})
+                        cand_set.update(s_info.get("tickers", []))
+            except Exception:
+                pass
+
+            # 보호 + 보유 제외용 정보
+            from src.use_cases.adaptive_position_manager import _load_protected_tickers
+            protected = _load_protected_tickers()
+            held = set()
+            if hasattr(broker, "fetch_balance"):
+                try:
+                    bal = broker.fetch_balance()
+                    for h in bal.get("holdings", []):
+                        t = str(h.get("ticker", "")).zfill(6)
+                        if t:
+                            held.add(t)
+                except Exception:
+                    pass
+
+            # KisIntradayAdapter 인스턴스 (5분봉 + 호가)
+            intraday_for_momentum = intraday_adapter if 'intraday_adapter' in dir() else None
+            if intraday_for_momentum is None:
+                try:
+                    from src.adapters.kis_intraday_adapter import KisIntradayAdapter
+                    intraday_for_momentum = KisIntradayAdapter()
+                except Exception as _e:
+                    logger.warning("[MVP-6] KisIntradayAdapter 초기화 실패: %s", _e)
+
+            if intraday_for_momentum and cand_set:
+                # 후보 풀이 너무 크면 상위 30개만 (API 호출 제한)
+                cand_list = list(cand_set)[:30]
+                fires = scan_momentum_candidates(
+                    intraday_for_momentum, cand_list,
+                    held_tickers=held, protected_tickers=protected,
+                )
+                summary["mvp6"]["triggers"] = len(fires)
+
+                for sig in fires:
+                    msg = format_momentum_for_telegram(sig)
+                    print(msg)
+                    send_telegram(msg)
+                    logger.warning(
+                        "[MVP-6] 모멘텀 추격 발화: %s %s",
+                        sig.ticker, sig.reason,
+                    )
+                    # 학습 로그
+                    if learning_mode:
+                        try:
+                            from src.use_cases.decision_logger import log_decision
+                            log_decision(
+                                "ALERT", sig.ticker, name=sig.name,
+                                current_price=sig.current_price,
+                                qty=1,
+                                extra={
+                                    "mvp": "6",
+                                    "type": "MOMENTUM_CHASE",
+                                    "five_min_pct": sig.five_min_pct,
+                                    "vol_ratio": sig.vol_ratio,
+                                    "daily_pct": sig.daily_pct,
+                                    "target_price": sig.target_price,
+                                    "stop_price": sig.stop_price,
+                                    "profit_target": sig.profit_target,
+                                },
+                            )
+                        except Exception as _e:
+                            logger.warning("MVP-6 log_decision 실패: %s", _e)
+        except Exception as e:
+            summary["mvp6"]["errors"].append(str(e))
+
     summary["ended_at"] = dt.datetime.now().isoformat(timespec="seconds")
     return summary
 
@@ -744,7 +851,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("📊 사이클 요약:")
-    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp2_7", "mvp3", "mvp4", "mvp5"):
+    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp2_7", "mvp3", "mvp4", "mvp5", "mvp6"):
         s = summary.get(mvp, {"executed": False, "triggers": 0, "errors": []})
         status = "✓" if s["executed"] else "⏭ SKIP"
         print(f"  {mvp.upper()}: {status}  트리거 {s['triggers']}건"
