@@ -210,6 +210,10 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
     }
 
     # broker 초기화
+    # ★ C2 fix (5/27 검수): dry_run 분기에도 intraday_adapter/market_guard 기본값 보장
+    intraday_adapter = None
+    market_guard = None
+
     if dry_run:
         from unittest.mock import MagicMock
         broker = MagicMock(name="MockBroker")
@@ -555,31 +559,29 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
     # === MVP-2.8: 추세 이탈 매도 — MA + RSI (5/26 23:00 옵션 C) ===
     # 천장까지 따라가되 추세 진짜 끝났을 때만 매도
     # 룰: MA 역배열 / MA20<MA60 + 수익 / MA5<MA20 + 수익 5%+ / RSI 80+ 과열 / RSI 70+ 후 50 하향
+    # ★ C5 fix (5/27 검수): _locked_read_modify_write 사용 — 외부 동시 수정 방어
     if "mvp2_8" not in skip:
         try:
             from src.use_cases.adaptive_trend_exit import (
                 scan_queue_for_trend_exit, execute_trend_exit,
                 format_trend_exit_for_telegram,
             )
-            import json
-            from pathlib import Path
-            queue_path = Path(__file__).resolve().parent.parent / "data" / "adaptive_buy_queue.json"
-            queue_state = {}
-            if queue_path.exists():
-                queue_state = json.loads(queue_path.read_text(encoding="utf-8"))
+            from src.use_cases.adaptive_buy_queue import (
+                _locked_read_modify_write, QUEUE_PATH,
+            )
 
-            trend_sigs = scan_queue_for_trend_exit(queue_state, broker)
+            trend_sigs_ref = []  # nonlocal-like 변수 (mutate via closure)
+
+            def _modify_for_trend_exit(raw: dict) -> dict:
+                """락 안에서 추세 평가 + stage 상태 갱신 (rsi_peak_reached)."""
+                sigs = scan_queue_for_trend_exit(raw, broker)
+                trend_sigs_ref.extend(sigs)
+                return {"success": True}
+
+            _locked_read_modify_write(QUEUE_PATH, _modify_for_trend_exit)
+            trend_sigs = trend_sigs_ref
             summary["mvp2_8"]["executed"] = True
             summary["mvp2_8"]["triggers"] = len(trend_sigs)
-
-            # rsi_peak_reached 갱신을 위해 queue_state 저장 필요
-            if trend_sigs or queue_state.get("queues"):
-                try:
-                    tmp = queue_path.with_suffix(".json.tmp")
-                    tmp.write_text(json.dumps(queue_state, ensure_ascii=False, indent=2), encoding="utf-8")
-                    tmp.replace(queue_path)
-                except Exception as _e:
-                    logger.warning("[MVP-2.8] queue 저장 실패: %s", _e)
 
             for sig in trend_sigs:
                 msg = format_trend_exit_for_telegram(sig)
@@ -726,16 +728,22 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 print(msg)
                 send_telegram(msg)
 
-                # 워치리스트 자동 추가 (보호 종목 + 보유 종목 제외)
-                try:
-                    protected = _load_protected_tickers()
-                    held = set()
-                    if hasattr(broker, "fetch_balance"):
+                # ★ C3 fix (5/27 검수): protected/held 선제 정의 (try 블록 외부)
+                # 워치리스트/큐 등록 양쪽에서 재사용 — NameError 방지
+                protected = _load_protected_tickers()
+                held: set[str] = set()
+                if hasattr(broker, "fetch_balance"):
+                    try:
                         bal = broker.fetch_balance()
                         for h in bal.get("holdings", []):
                             t = str(h.get("ticker", "")).zfill(6)
                             if t:
                                 held.add(t)
+                    except Exception as _e:
+                        logger.warning("[MVP-5] fetch_balance 실패: %s", _e)
+
+                # 워치리스트 자동 추가
+                try:
                     add_result = add_to_ai_chain_watchlist(
                         ai_sig.surge_stocks,
                         protected_tickers=protected,

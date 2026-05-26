@@ -63,18 +63,8 @@ class MomentumSignal:
     reason: str = ""
 
 
-def _adjust_to_tick(price: int) -> int:
-    """KRX 호가 단위 보정."""
-    if price <= 0:
-        return price
-    if price < 1_000: tick = 1
-    elif price < 5_000: tick = 5
-    elif price < 20_000: tick = 10
-    elif price < 50_000: tick = 50
-    elif price < 200_000: tick = 100
-    elif price < 500_000: tick = 500
-    else: tick = 1_000
-    return (price // tick) * tick
+from src.utils.tick_size import adjust_to_tick as _adjust_to_tick  # noqa: E402
+# ★ 5/27 중복 제거 (DRY): src/utils/tick_size.py로 통합
 
 
 def evaluate_momentum_signal(

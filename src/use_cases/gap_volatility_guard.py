@@ -68,7 +68,9 @@ def check_kospi_volatility_surge(intraday_adapter,
     if intraday_adapter is None or not hasattr(intraday_adapter, "fetch_minute_candles"):
         return False, 0.0
     try:
-        candles = intraday_adapter.fetch_minute_candles("0001", period=5)
+        # ★ C4 fix (5/27 검수): KOSPI 종합지수는 "0001" 6자리로 종목 시세 API 호출 불가
+        # → KODEX 200 (069500) 분봉으로 대체 (이미 외인 흐름도 069500 사용)
+        candles = intraday_adapter.fetch_minute_candles("069500", period=5)
         if not candles:
             return False, 0.0
         last = candles[-1]

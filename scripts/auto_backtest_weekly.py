@@ -21,30 +21,44 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DECISION_LOG = PROJECT_ROOT / "data" / "decision_logs.json"
+# ★ C1 fix (5/27 검수): decision_logger 실제 경로 — data/decision_log/YYYYMMDD.json 일자별 분리
+LOG_DIR = PROJECT_ROOT / "data" / "decision_log"
 
 
 def analyze_decision_logs(days: int = 7) -> dict:
-    """decision_logger.json 1주간 분석.
+    """decision_logger 1주간 분석 (일자별 파일 머지).
+
+    decision_logger.py 실제 스키마:
+      - 경로: data/decision_log/YYYYMMDD.json
+      - 형식: JSON Lines
+      - 키: "type" (BUY/SELL/ALERT/QUEUE_TRIGGER), "timestamp", "extra", ...
 
     Returns:
         {"n_buys": int, "n_sells": int, "avg_pnl_pct": float, "win_rate": float,
          "trigger_counts": {mvp: count}, "stop_loss_hits": int}
     """
-    if not DECISION_LOG.exists():
-        return {"error": "decision_logs.json 없음"}
+    if not LOG_DIR.exists():
+        return {"error": "data/decision_log/ 디렉토리 없음"}
 
-    try:
-        with DECISION_LOG.open(encoding="utf-8") as f:
-            logs = [json.loads(line) for line in f if line.strip()]
-    except Exception as e:
-        return {"error": f"파싱 실패: {e}"}
+    logs = []
+    for i in range(days):
+        d = (datetime.now() - timedelta(days=i)).strftime("%Y%m%d")
+        f = LOG_DIR / f"{d}.json"
+        if f.exists():
+            try:
+                for line in f.read_text(encoding="utf-8").splitlines():
+                    if line.strip():
+                        logs.append(json.loads(line))
+            except Exception as e:
+                print(f"⚠️ {f.name} 파싱 실패: {e}")
 
-    cutoff = (datetime.now() - timedelta(days=days)).isoformat()
-    recent = [l for l in logs if l.get("timestamp", "") >= cutoff]
+    if not logs:
+        return {"error": f"{days}일간 로그 0건"}
 
-    buys = [l for l in recent if l.get("action") == "BUY"]
-    sells = [l for l in recent if l.get("action") == "SELL"]
+    # ★ C1 fix: decision_logger는 "type" 키 사용 (action 아님)
+    buys = [l for l in logs if l.get("type") == "BUY"]
+    sells = [l for l in logs if l.get("type") == "SELL"]
+    recent = logs  # 이미 days 필터링됨
 
     # MVP별 카운트
     trigger_counts = {}

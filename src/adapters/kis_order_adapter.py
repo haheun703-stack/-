@@ -166,20 +166,14 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     @staticmethod
     def _adjust_to_tick(price: int) -> int:
-        """KOSPI/KOSDAQ 호가 단위로 가격 내림 보정 (5/18 자아성찰 #3 해소).
+        """KOSPI/KOSDAQ 호가 단위로 가격 내림 보정.
 
-        호가 단위 표 (2023+):
-          < 1,000원      : 1원
-          1,000~4,999    : 5원
-          5,000~19,999   : 10원
-          20,000~49,999  : 50원
-          50,000~199,999 : 100원
-          200,000~499,999: 500원
-          >= 500,000     : 1,000원
-
-        예: 52,150원 → 52,100원 (100원 단위)
-            644,000원 → 644,000원 (1,000원 단위, 이미 정렬됨)
+        ★ 5/27 슬러지 fix: src/utils/tick_size.adjust_to_tick으로 위임 (DRY).
+        기존 호출자 (paper_order_adapter 등) 호환성 유지.
         """
+        from src.utils.tick_size import adjust_to_tick
+        return adjust_to_tick(price)
+        # ↓ 이전 inline 코드 (참고용 보존, 실행은 위 위임)
         if price <= 0:
             return price
         if price < 1_000:
