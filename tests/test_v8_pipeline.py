@@ -175,8 +175,11 @@ class TestNoTrigger:
         row['trix_signal'] = 0.03
         row['trix_prev'] = 0.02
         row['trix_signal_prev'] = 0.03
-        row['volume'] = 500000  # 거래량 부족
-        row['rsi_prev'] = 46  # RSI 이미 45 위
+        # v8.1 완화 정책 우회: vol 100 < 800k*0.3 + RSI 25 < 30
+        row['volume'] = 100000  # vol < 240k threshold
+        row['volume_ma20'] = 800000
+        row['rsi_14'] = 25  # RSI 30 미만 (out of range)
+        row['rsi_prev'] = 24
         row['ema_curvature'] = -0.001  # 곡률 음수
         row['obv_trend_5d'] = -0.01  # OBV 하락
 

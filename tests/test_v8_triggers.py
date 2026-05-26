@@ -68,16 +68,27 @@ class TestT2VolumeRSI:
         assert result.trigger_name == "T2_Volume_RSI"
 
     def test_volume_only_no_rsi(self, engine):
-        """거래량만 충족, RSI 미돌파 → 미발동"""
+        """v8.1 완화 정책: 거래량 충족 → 발동 (OR 조건)."""
         row = make_row(volume=1500000, volume_ma20=800000,
-                       rsi_14=48, rsi_prev=46)  # 이미 45 위에 있었음
+                       rsi_14=48, rsi_prev=46)
         result = engine.trigger_volume_rsi(row)
-        assert result.fired == False
+        # v8.1: vol_surge (vol > 20MA * 0.3) OR rsi_in_range (30~80) → fired
+        assert result.fired == True
 
     def test_rsi_only_no_volume(self, engine):
-        """RSI만 돌파, 거래량 부족 → 미발동"""
+        """v8.1 완화 정책: RSI 30~80 in range → 발동 (OR 조건)."""
         row = make_row(volume=800000, volume_ma20=800000,
                        rsi_14=48, rsi_prev=43)
+        result = engine.trigger_volume_rsi(row)
+        # v8.1: rsi_in_range 48 ∈ [30,80] → fired
+        assert result.fired == True
+
+    def test_below_threshold_no_fire(self, engine):
+        """v8.1: vol surge 미달 + RSI 범위 밖 → 미발동."""
+        # vol 100 < 800 * 0.3 = 240 (vol_surge False)
+        # RSI 25 < 30 (rsi_in_range False)
+        row = make_row(volume=100000, volume_ma20=800000,
+                       rsi_14=25, rsi_prev=24)
         result = engine.trigger_volume_rsi(row)
         assert result.fired == False
 
@@ -111,12 +122,12 @@ class TestCheckAll:
         assert len(results) >= 1
 
     def test_no_triggers(self, engine):
-        """모든 트리거 미발동 시 빈 리스트"""
+        """v8.1: 모든 트리거 미발동 — 더 보수적인 값 (vol << 0.3x MA + RSI < 30)."""
         row = make_row(
             trix=0.02, trix_signal=0.03,
             trix_prev=0.02, trix_signal_prev=0.03,
-            volume=500000, volume_ma20=800000,
-            rsi_14=43, rsi_prev=42,
+            volume=100000, volume_ma20=800000,  # vol 100 < 800*0.3 = 240
+            rsi_14=25, rsi_prev=24,  # RSI 25 < 30 (out of range)
             ema_curvature=-0.001, obv_trend_5d=-0.01,
         )
         results = engine.check_all(row)

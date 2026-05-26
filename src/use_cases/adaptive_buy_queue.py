@@ -467,11 +467,25 @@ def _is_expired(registered_at: str) -> bool:
         return False
 
 
-def execute_auto_buy(broker, ticker: str, stage_dict: dict) -> dict:
+def execute_auto_buy(broker, ticker: str, stage_dict: dict,
+                       intraday_adapter=None, regime: str = "NEUTRAL") -> dict:
     """단계별 자동 매수 (ADAPTIVE_AUTO_BUY=1일 때만).
 
+    5/26 통합: 매수 직전 adaptive_entry_gates (H4 VWAP + H5 호가 + H6 매물대 + H7 ATR)
+    실행. 모든 게이트 통과 시에만 buy_limit. 환경변수 ADAPTIVE_ENTRY_GATES_ENABLED=0이면
+    게이트 우회 (백업/안전망).
+
+    Args:
+        broker: KisOrderAdapter (fetch_price + fetch_ohlcv + buy_limit)
+        ticker: 종목코드
+        stage_dict: 큐의 단일 stage dict (target_price, qty, level 등 포함)
+        intraday_adapter: KisIntradayAdapter (호가창 — Optional)
+        regime: 시장 레짐 ('BULL'/'NEUTRAL'/'BEARISH') — ATR 배수 선택
+
     Returns:
-        {"success": bool, "order_id": str, "price": int, "qty": int, "error": str}
+        {"success": bool, "order_id": str, "price": int, "qty": int,
+         "error": str, "block_reason": str, "atr_stop": dict | None,
+         "gate_summary": dict}
     """
     if not AUTO_BUY:
         return {"success": False, "error": "ADAPTIVE_AUTO_BUY=0 — 알림만"}
@@ -480,6 +494,58 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict) -> dict:
     qty = int(stage_dict.get("qty", 0))
     if target_price <= 0 or qty <= 0:
         return {"success": False, "error": f"target_price/qty 부적합 ({target_price}/{qty})"}
+
+    # 진입 게이트 (H4/H5/H6/H7) — 환경변수로 ON/OFF
+    gate_summary: dict = {}
+    if os.getenv("ADAPTIVE_ENTRY_GATES_ENABLED", "0") == "1":
+        try:
+            from src.use_cases.adaptive_entry_gates import check_all_entry_gates
+            gate = check_all_entry_gates(
+                ticker=ticker,
+                target_price=target_price,
+                broker=broker,
+                intraday_adapter=intraday_adapter,
+                regime=regime,
+            )
+            gate_summary = {
+                "vwap_reason": gate.vwap_reason,
+                "vwap_dev_pct": gate.vwap_dev_pct,
+                "orderbook_reason": gate.orderbook_reason,
+                "supply_zone_reason": gate.supply_zone_reason,
+                "supply_position": gate.supply_position,
+                "is_vwap_dip": gate.is_vwap_dip,
+                "is_strong_bid": gate.is_strong_bid,
+                "is_poc_breakout": gate.is_poc_breakout,
+            }
+            if not gate.allow:
+                logger.warning(
+                    "[entry gates] %s L%s 차단: %s",
+                    ticker, stage_dict.get("level"), gate.block_reason,
+                )
+                return {
+                    "success": False,
+                    "error": f"entry gate blocked: {gate.block_reason}",
+                    "block_reason": gate.block_reason,
+                    "gate_summary": gate_summary,
+                }
+            # ATR 동적 손익절 결과 (매수 성공 후 stage에 저장됨)
+            atr_stop_dict = None
+            if gate.atr_stop is not None:
+                atr_stop_dict = {
+                    "stop_price": gate.atr_stop.stop_price,
+                    "target_price": gate.atr_stop.target_price,
+                    "stop_pct": gate.atr_stop.stop_pct,
+                    "target_pct": gate.atr_stop.target_pct,
+                    "source": gate.atr_stop.source,
+                    "atr_value": gate.atr_stop.atr_value,
+                }
+                gate_summary["atr_stop"] = atr_stop_dict
+        except Exception as e:
+            logger.warning(
+                "[entry gates] %s 게이트 체크 실패 — fail-open: %s",
+                ticker, e,
+            )
+            gate_summary["error"] = str(e)
 
     try:
         # 지정가 매수 (target_price)
@@ -490,10 +556,11 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict) -> dict:
             "order_id": order_id,
             "price": target_price,
             "qty": qty,
+            "gate_summary": gate_summary,
         }
     except Exception as e:
         logger.error("auto buy %s L%s 실패: %s", ticker, stage_dict.get("level"), e)
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": str(e), "gate_summary": gate_summary}
 
 
 def check_and_trigger_queues(broker) -> list[dict]:

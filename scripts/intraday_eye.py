@@ -221,8 +221,22 @@ class IntradayEye:
 
         # 보유종목 (세션 시작 시 1회 로드, 5분봉마다 갱신하지 않음)
         self.holdings: list[dict] = []
-        # 워치리스트 종목
+        # 워치리스트 종목 (settings.yaml + AI 동조 자동 워치리스트)
         self.watchlist: list[str] = list(self.settings.get("watchlist", []))
+
+        # AI 밸류체인 동조 워치리스트 합치기 (5/26 신규)
+        try:
+            from src.use_cases.ai_chain_auto_watchlist import get_ai_chain_watchlist_tickers
+            ai_chain = get_ai_chain_watchlist_tickers()
+            new_ai = [t for t in ai_chain if t not in self.watchlist]
+            if new_ai:
+                self.watchlist.extend(new_ai)
+                logger.info(
+                    "[EYE] AI 동조 워치리스트 %d종목 추가 (총 %d)",
+                    len(new_ai), len(self.watchlist),
+                )
+        except Exception as e:
+            logger.warning("[EYE] AI 동조 워치리스트 로드 실패: %s", e)
 
         # 킬러픽 종목 워치리스트 자동 추가
         if killer_picks:

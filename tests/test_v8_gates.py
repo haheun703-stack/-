@@ -105,11 +105,15 @@ class TestG3Overheat:
 
 class TestRunAllGates:
     def test_all_pass(self, engine):
-        """모든 게이트 통과"""
+        """모든 게이트 통과 — G1+G2+G3+G4 (5/x ShortPressure 추가)."""
         row = make_row()
         passed, results = engine.run_all_gates(row)
         assert passed == True
-        assert len(results) == 3
+        # G4 ShortPressure 추가됨 (마스터 스위치 OFF면 자동 통과)
+        assert len(results) == 4
+        assert {r.gate_name for r in results} == {
+            "G1_Trend", "G2_Pullback", "G3_Overheat", "G4_ShortPressure",
+        }
 
     def test_early_exit_on_trend_fail(self, engine):
         """G1 실패 시 G2, G3는 평가하지 않음"""

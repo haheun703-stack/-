@@ -201,6 +201,8 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "mvp2": {"executed": False, "triggers": 0, "errors": []},
         "mvp2_5": {"executed": False, "triggers": 0, "errors": []},
         "mvp2_6": {"executed": False, "triggers": 0, "errors": []},  # 자동 손절 -5% (5/25)
+        "mvp2_7": {"executed": False, "triggers": 0, "errors": []},  # H8/H9 시간 매도 (5/26)
+        "mvp5": {"executed": False, "triggers": 0, "errors": []},     # AI 밸류체인 동조 (5/26)
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
         "mvp4": {"executed": False, "triggers": 0, "errors": []},
     }
@@ -454,6 +456,61 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary["mvp2_6"]["errors"].append(str(e))
 
+    # === MVP-2.7: 시간 매도 (H8 D+3 익절 + H9 D+5 데드라인) — 5/26 PDCA ===
+    # 백테스트 기반 (5/14): D+1 +2.02% / D+3 +4.00% peak / D+5 -0.35% 음수 진입
+    # 환경변수 ADAPTIVE_TIME_EXIT_ENABLED=1일 때만 발동.
+    if "mvp2_7" not in skip:
+        try:
+            from src.use_cases.adaptive_time_exit import (
+                scan_queue_for_time_exits, execute_time_exit,
+            )
+            # 큐 상태 로드
+            import json
+            from pathlib import Path
+            queue_path = Path(__file__).resolve().parent.parent / "data" / "adaptive_buy_queue.json"
+            queue_state = {}
+            if queue_path.exists():
+                queue_state = json.loads(queue_path.read_text(encoding="utf-8"))
+
+            time_sigs = scan_queue_for_time_exits(queue_state, broker)
+            summary.setdefault("mvp2_7", {"executed": True, "triggers": 0, "errors": []})
+            summary["mvp2_7"]["executed"] = True
+            summary["mvp2_7"]["triggers"] = len(time_sigs)
+
+            for sig in time_sigs:
+                msg = (
+                    f"⏰ [시간 매도] {sig.exit_type}\n"
+                    f"  {sig.ticker} D+{sig.trade_days_elapsed} {sig.pnl_pct:+.2f}%\n"
+                    f"  매수 {sig.entry_price:,} → 현재 {sig.current_price:,}\n"
+                    f"  사유: {sig.reason}"
+                )
+                print(msg)
+                send_telegram(msg)
+                # 실행
+                exec_result = execute_time_exit(broker, sig)
+                # 학습 로그
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        log_decision(
+                            "SELL", sig.ticker, name="",
+                            current_price=sig.current_price,
+                            qty=sig.qty,
+                            extra={
+                                "mvp": "2_7",
+                                "type": sig.exit_type,
+                                "trade_days_elapsed": sig.trade_days_elapsed,
+                                "pnl_pct": sig.pnl_pct,
+                                "entry_price": sig.entry_price,
+                                "exec_success": exec_result.get("success", False),
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-2.7 log_decision 실패: %s", _e)
+        except Exception as e:
+            summary.setdefault("mvp2_7", {"executed": False, "triggers": 0, "errors": []})
+            summary["mvp2_7"]["errors"].append(str(e))
+
     # === MVP-3: 받침 패턴 감지 ===
     if "mvp3" not in skip and candidates:
         from src.use_cases.support_pattern_detector import (
@@ -542,6 +599,107 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         except Exception as e:
             summary["mvp4"]["errors"].append(str(e))
 
+    # === MVP-5: AI 밸류체인 동조화 검출 (5/26 신규, 서브에이전트 보고 기반) ===
+    # 4개 AI 세부 섹터 (검사/PCB/소재/산업소재) 동시 폭등 감지
+    # 5/26 ISC+16.9%/인텍플러스+18.9%/코리아써키트+12.4%/두산+10.1%/동진쎄미켐+10.2% 사례
+    if "mvp5" not in skip:
+        try:
+            from src.use_cases.ai_chain_detector import (
+                detect_ai_chain_sync,
+                format_ai_chain_signal_for_telegram,
+            )
+            from src.use_cases.ai_chain_auto_watchlist import (
+                add_to_ai_chain_watchlist,
+                format_added_for_telegram,
+            )
+            from src.use_cases.adaptive_position_manager import _load_protected_tickers
+
+            summary["mvp5"]["executed"] = True
+            ai_sig = detect_ai_chain_sync(broker)
+            if ai_sig.triggered:
+                summary["mvp5"]["triggers"] = 1
+                msg = format_ai_chain_signal_for_telegram(ai_sig)
+                print(msg)
+                send_telegram(msg)
+
+                # 워치리스트 자동 추가 (보호 종목 + 보유 종목 제외)
+                try:
+                    protected = _load_protected_tickers()
+                    held = set()
+                    if hasattr(broker, "fetch_balance"):
+                        bal = broker.fetch_balance()
+                        for h in bal.get("holdings", []):
+                            t = str(h.get("ticker", "")).zfill(6)
+                            if t:
+                                held.add(t)
+                    add_result = add_to_ai_chain_watchlist(
+                        ai_sig.surge_stocks,
+                        protected_tickers=protected,
+                        held_tickers=held,
+                    )
+                    if add_result.get("added"):
+                        wl_msg = format_added_for_telegram(add_result)
+                        print(wl_msg)
+                        send_telegram(wl_msg)
+                except Exception as _e:
+                    logger.warning("[MVP-5] 워치리스트 자동 추가 실패: %s", _e)
+
+                # ── 5/27 실매매 진입 핵심: AI 동조 자동 큐 등록 (강세장 적응) ──
+                # 환경변수 AI_CHAIN_QUEUE_AUTO_REGISTER=1일 때만 발동
+                # peak=현재가 / L1 -3% / L2 -7% / L3 -12% / 만료 3일
+                try:
+                    from src.use_cases.ai_chain_queue_auto_register import (
+                        register_ai_chain_queues,
+                        merge_into_queue_state,
+                        format_registration_for_telegram,
+                    )
+                    import json
+                    from pathlib import Path
+                    queue_path = Path(__file__).resolve().parent.parent / "data" / "adaptive_buy_queue.json"
+                    queue_state = {}
+                    if queue_path.exists():
+                        queue_state = json.loads(queue_path.read_text(encoding="utf-8"))
+                    reg_result = register_ai_chain_queues(
+                        ai_sig.surge_stocks,
+                        protected_tickers=protected,
+                        held_tickers=held,
+                        queue_state=queue_state,
+                    )
+                    if reg_result.registered:
+                        merge_into_queue_state(queue_state, reg_result.registered)
+                        tmp = queue_path.with_suffix(".json.tmp")
+                        tmp.write_text(json.dumps(queue_state, ensure_ascii=False, indent=2), encoding="utf-8")
+                        tmp.replace(queue_path)
+                        q_msg = format_registration_for_telegram(reg_result)
+                        print(q_msg)
+                        send_telegram(q_msg)
+                        logger.warning(
+                            "[MVP-5] AI 동조 큐 자동 등록: %d종목", len(reg_result.registered),
+                        )
+                except Exception as _e:
+                    logger.warning("[MVP-5] AI 동조 큐 자동 등록 실패: %s", _e)
+
+                # 학습 로그
+                if learning_mode:
+                    try:
+                        from src.use_cases.decision_logger import log_decision
+                        log_decision(
+                            "ALERT", "AI_CHAIN", name="AI 밸류체인 동조",
+                            current_price=0, qty=0,
+                            extra={
+                                "mvp": "5",
+                                "type": "AI_CHAIN_SYNC",
+                                "fire_sectors": ai_sig.fire_sectors,
+                                "fire_count": ai_sig.fire_sector_count,
+                                "surge_count": len(ai_sig.surge_stocks),
+                                "top_surge": [s["ticker"] for s in ai_sig.surge_stocks[:5]],
+                            },
+                        )
+                    except Exception as _e:
+                        logger.warning("MVP-5 log_decision 실패: %s", _e)
+        except Exception as e:
+            summary["mvp5"]["errors"].append(str(e))
+
     summary["ended_at"] = dt.datetime.now().isoformat(timespec="seconds")
     return summary
 
@@ -586,8 +744,8 @@ def main():
 
     print("\n" + "=" * 70)
     print("📊 사이클 요약:")
-    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp3", "mvp4"):
-        s = summary[mvp]
+    for mvp in ("mvp1", "mvp2", "mvp2_5", "mvp2_6", "mvp2_7", "mvp3", "mvp4", "mvp5"):
+        s = summary.get(mvp, {"executed": False, "triggers": 0, "errors": []})
         status = "✓" if s["executed"] else "⏭ SKIP"
         print(f"  {mvp.upper()}: {status}  트리거 {s['triggers']}건"
               f"{'  오류 ' + str(len(s['errors'])) + '건' if s['errors'] else ''}")

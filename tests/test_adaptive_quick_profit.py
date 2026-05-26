@@ -261,15 +261,20 @@ class TestTrailingQuickProfit(unittest.TestCase):
     # [방어]
     # ─────────────────────────────────────────────────────────
 
-    def test_09_kill_switch_blocks(self):
-        """KILL_SWITCH 발동 시 정지."""
+    def test_09_kill_switch_does_NOT_block_sell(self):
+        """P0-4 정책 (5/25 commit 7af8a17): KILL_SWITCH 활성에도 매도는 계속.
+
+        이유: KILL_SWITCH는 자비스 매수 차단용. 매도(보호)는 항상 진행해야 시드 보호.
+        매도가 차단되면 -5% 손절, +7% trailing 등 보호 안전망 모두 무력화.
+        """
         self._setup_filled_stage("240810", 25_000, 22_500, 1)
         self.mvp25.KILL_SWITCH_PATH.write_text("active", encoding="utf-8")
 
         broker = _mock_broker(current_price=30_000)
         triggers = self.mvp25.check_quick_profit_triggers(broker)
-        self.assertEqual(len(triggers), 0)
-        broker.fetch_price.assert_not_called()
+        # KILL_SWITCH 무관 — 매도 트리거 정상 발화 (보유 보호)
+        self.assertEqual(len(triggers), 1)
+        broker.fetch_price.assert_called()
 
     def test_10_disabled_no_trigger(self):
         self._setup_filled_stage("240810", 25_000, 22_500, 1)
