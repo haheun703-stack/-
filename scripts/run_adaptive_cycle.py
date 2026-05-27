@@ -1054,6 +1054,34 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     print(msg)
                     send_telegram(msg)
 
+                    # ★ paper_orders.jsonl 자동 기록 (run_quant_3day_pilot 통합, 5/27)
+                    # QUANT_3DAY_PILOT_RUN_ID 환경변수가 있을 때만 (pilot 실행 컨텍스트)
+                    pilot_run_id = os.getenv("QUANT_3DAY_PILOT_RUN_ID", "")
+                    if pilot_run_id:
+                        try:
+                            order_log = PROJECT_ROOT / "results" / "quant_3day_pilot" / "paper_orders.jsonl"
+                            order_log.parent.mkdir(parents=True, exist_ok=True)
+                            with order_log.open("a", encoding="utf-8") as f:
+                                f.write(json.dumps({
+                                    "run_id": pilot_run_id,
+                                    "ticker": ticker,
+                                    "name": name,
+                                    "action": "BUY",
+                                    "qty": 1,
+                                    "price": dec.current_price,
+                                    "mvp": "7",
+                                    "pass_count": dec.pass_count,
+                                    "vwap": round(dec.vwap, 2) if dec.vwap else 0,
+                                    "rsi": round(dec.rsi, 2),
+                                    "volume_ratio": round(dec.five_min_volume / dec.avg_volume_prev5, 2) if dec.avg_volume_prev5 else 0,
+                                    "reasons_pass": dec.reasons_pass,
+                                    "reasons_fail": dec.reasons_fail,
+                                    "timestamp": dt.datetime.now().isoformat(timespec="seconds"),
+                                    "mode": "PAPER",
+                                }, ensure_ascii=False) + "\n")
+                        except Exception as _e:
+                            logger.warning("MVP-7 paper_orders 기록 실패: %s", _e)
+
                     # 학습 로그
                     if learning_mode:
                         try:
