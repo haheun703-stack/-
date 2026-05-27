@@ -1054,33 +1054,30 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                     print(msg)
                     send_telegram(msg)
 
-                    # ★ paper_orders.jsonl 자동 기록 (run_quant_3day_pilot 통합, 5/27)
-                    # QUANT_3DAY_PILOT_RUN_ID 환경변수가 있을 때만 (pilot 실행 컨텍스트)
+                    # ★ MVP-7 paper 시뮬 매수 (코덱스 검수 결과 5/27 반영)
+                    # B 옵션: 기존 paper_orders.jsonl 직접 append X
+                    #         → PaperOrderAdapter.buy_limit() canonical paper fill 경로 사용
+                    # 3중 env guard: is_paper + QUANT_3DAY_PILOT + QUANT_3DAY_PILOT_RUN_ID
                     pilot_run_id = os.getenv("QUANT_3DAY_PILOT_RUN_ID", "")
-                    if pilot_run_id:
+                    is_pilot = os.getenv("QUANT_3DAY_PILOT", "0") == "1"
+                    if is_paper and is_pilot and pilot_run_id:
                         try:
-                            order_log = PROJECT_ROOT / "results" / "quant_3day_pilot" / "paper_orders.jsonl"
-                            order_log.parent.mkdir(parents=True, exist_ok=True)
-                            with order_log.open("a", encoding="utf-8") as f:
-                                f.write(json.dumps({
-                                    "run_id": pilot_run_id,
-                                    "ticker": ticker,
-                                    "name": name,
-                                    "action": "BUY",
-                                    "qty": 1,
-                                    "price": dec.current_price,
-                                    "mvp": "7",
-                                    "pass_count": dec.pass_count,
-                                    "vwap": round(dec.vwap, 2) if dec.vwap else 0,
-                                    "rsi": round(dec.rsi, 2),
-                                    "volume_ratio": round(dec.five_min_volume / dec.avg_volume_prev5, 2) if dec.avg_volume_prev5 else 0,
-                                    "reasons_pass": dec.reasons_pass,
-                                    "reasons_fail": dec.reasons_fail,
-                                    "timestamp": dt.datetime.now().isoformat(timespec="seconds"),
-                                    "mode": "PAPER",
-                                }, ensure_ascii=False) + "\n")
+                            from src.adapters.paper_order_adapter import PaperOrderAdapter
+                            paper_broker = PaperOrderAdapter()
+                            paper_order = paper_broker.buy_limit(ticker, dec.current_price, 1)
+                            logger.info(
+                                "[MVP-7] paper 매수 체결: %s %s 1주 @ %d (order_id=%s, pilot_run_id=%s)",
+                                ticker, name, dec.current_price,
+                                getattr(paper_order, "order_id", "?"), pilot_run_id,
+                            )
                         except Exception as _e:
-                            logger.warning("MVP-7 paper_orders 기록 실패: %s", _e)
+                            logger.warning("MVP-7 PaperOrderAdapter.buy_limit 실패: %s", _e)
+                    else:
+                        # debug 로그 (조용한 침묵 X) — 추적 가능성 확보
+                        logger.info(
+                            "[MVP-7] paper 기록 SKIP: %s (is_paper=%s, QUANT_3DAY_PILOT=%s, run_id=%s)",
+                            ticker, is_paper, is_pilot, bool(pilot_run_id),
+                        )
 
                     # 학습 로그
                     if learning_mode:
