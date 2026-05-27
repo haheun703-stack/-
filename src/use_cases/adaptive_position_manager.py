@@ -37,6 +37,8 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # === 임계 (.env 동적, 1주차는 보수적) ===
@@ -350,6 +352,7 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
             )
         else:
             # 시장가 fallback
+            assert_runtime_orders_allowed()
             res = broker.create_market_sell_order(
                 symbol=sig.ticker, quantity=sell_qty,
             )

@@ -33,6 +33,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
+from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
@@ -286,6 +288,7 @@ def execute_sell(
         return {"status": "dry_run", "ticker": ticker, "qty": qty}
 
     try:
+        assert_runtime_orders_allowed()
         if use_limit:
             # 현재가 조회 → +premium% 지정가 매도 ("더 비싸게 매도" 모토)
             price_resp = broker.fetch_price(ticker)

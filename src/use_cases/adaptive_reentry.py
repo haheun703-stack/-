@@ -39,6 +39,8 @@ from typing import Optional, Callable
 
 logger = logging.getLogger(__name__)
 
+from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 KILL_SWITCH_PATH = PROJECT_ROOT / "data" / "kill_switch.flag"
 
@@ -292,6 +294,7 @@ def execute_auto_reentry(broker, decision: ReentryDecision) -> dict:
             order_id = getattr(order, "order_id", "") or ""
         else:
             # mojito2 broker fallback
+            assert_runtime_orders_allowed()
             res = broker.create_market_buy_order(decision.ticker, decision.target_qty)
             order_id = res.get("output", {}).get("ODNO", "") if res else ""
 

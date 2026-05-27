@@ -29,6 +29,8 @@ from dotenv import load_dotenv
 
 load_dotenv(PROJECT_ROOT / ".env")
 
+from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
+
 logger = logging.getLogger(__name__)
 
 POSITIONS_STATE_PATH = PROJECT_ROOT / "data" / "owner_rule_positions.json"
@@ -78,6 +80,7 @@ def fetch_current_balance(broker) -> list[dict]:
 def execute_sell(broker, ticker: str, qty: int, current_price: int) -> tuple[bool, str]:
     """KIS 시장가 매도 주문."""
     try:
+        assert_runtime_orders_allowed()
         resp = broker.create_market_sell_order(symbol=ticker, quantity=qty)
         if resp.get("rt_cd") == "0":
             return True, "OK"
