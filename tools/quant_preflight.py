@@ -97,7 +97,9 @@ def main() -> int:
     checks.append(
         _status(
             "AUTO_TRADING_ENABLED",
-            os.getenv("AUTO_TRADING_ENABLED", "0") == "1",
+            (os.getenv("AUTO_TRADING_ENABLED", "0") != "1")
+            if args.expect == "blocked"
+            else os.getenv("AUTO_TRADING_ENABLED", "0") == "1",
             os.getenv("AUTO_TRADING_ENABLED", "0"),
         )
     )
