@@ -179,6 +179,9 @@ def validate_real_mode_gate() -> tuple[bool, str]:
     Returns:
         (passed: bool, fail_reason: str)
     """
+    if os.getenv("QUANT_3DAY_PILOT", "0") == "1":
+        return False, "QUANT_3DAY_PILOT=1 (2026-05-27~2026-05-29 paper-only pilot)"
+
     auto_trading = os.getenv("AUTO_TRADING_ENABLED", "0")
     acc_no = os.getenv("KIS_ACC_NO", "")
     acc_digits = acc_no.replace("-", "")
@@ -205,6 +208,7 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
         "mvp2_8": {"executed": False, "triggers": 0, "errors": []},  # 추세 이탈 매도 — MA + RSI (5/26 23:00 옵션 C)
         "mvp5": {"executed": False, "triggers": 0, "errors": []},     # AI 밸류체인 동조 (5/26)
         "mvp6": {"executed": False, "triggers": 0, "errors": []},     # 모멘텀 추격 매수 (5/26 20:30)
+        "mvp7": {"executed": False, "triggers": 0, "errors": []},     # 5분봉 진입 트리거 (5/27 신규, 퐝가님 통찰)
         "mvp3": {"executed": False, "triggers": 0, "errors": []},
         "mvp4": {"executed": False, "triggers": 0, "errors": []},
     }
@@ -1025,6 +1029,53 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                             logger.warning("MVP-6 log_decision 실패: %s", _e)
         except Exception as e:
             summary["mvp6"]["errors"].append(str(e))
+
+    # === MVP-7: 5분봉 진입 트리거 (5/27 신규, 퐝가님 통찰 "실전 대비 5분봉 진행") ===
+    # 일봉 후보 자격(step5) × 5분봉 매수 타이밍(4조건 중 3+ 충족)
+    # 4조건: 양봉 + 거래량 1.5x↑ + VWAP 회복 + RSI 30~70
+    # paper 모드 = 트리거 알림만, 실주문 X (KILL_SWITCH/AUTO_TRADING_ENABLED와 무관)
+    if "mvp7" not in skip and candidates:
+        from src.use_cases.intraday_entry_trigger import (
+            evaluate_intraday_entry, format_for_telegram,
+        )
+        from src.use_cases.owner_rule import load_protected_tickers
+
+        summary["mvp7"]["executed"] = True
+        protected = load_protected_tickers()
+        for ticker, name in candidates:
+            # 보호 종목 제외 (commit feb9007 보호 시스템 정합)
+            if str(ticker).zfill(6) in protected:
+                continue
+            try:
+                dec = evaluate_intraday_entry(broker, ticker, name)
+                if dec.trigger:
+                    summary["mvp7"]["triggers"] += 1
+                    msg = format_for_telegram(dec)
+                    print(msg)
+                    send_telegram(msg)
+
+                    # 학습 로그
+                    if learning_mode:
+                        try:
+                            from src.use_cases.decision_logger import log_decision
+                            log_decision(
+                                "BUY_INTRADAY",
+                                ticker, name=name,
+                                current_price=dec.current_price,
+                                pass_reasons=dec.reasons_pass,
+                                fail_reasons=dec.reasons_fail,
+                                extra={
+                                    "mvp": "7",
+                                    "pass_count": dec.pass_count,
+                                    "vwap": dec.vwap,
+                                    "rsi": dec.rsi,
+                                    "volume_ratio": (dec.five_min_volume / dec.avg_volume_prev5) if dec.avg_volume_prev5 else 0,
+                                },
+                            )
+                        except Exception as _e:
+                            logger.warning("MVP-7 log_decision 실패: %s", _e)
+            except Exception as e:
+                summary["mvp7"]["errors"].append(f"{ticker}: {e}")
 
     summary["ended_at"] = dt.datetime.now().isoformat(timespec="seconds")
     return summary
