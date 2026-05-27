@@ -1,0 +1,167 @@
+# 코드 검수 규칙 매트릭스 (5/27 협업 자동화 콤보 4)
+#
+# 배경:
+#   5/27 LS ELECTRIC 사고 등 "사람이 기억해서 막는" 방식 한계
+#   → 파일 패턴별 필수 검수 항목을 시스템에 영구 정의
+#   → codex_lite + pre-commit hook이 이 규칙 자동 참조
+#
+# 사용:
+#   codex_lite.py / self_review_checklist.py에서 로드
+#   pre-commit hook에서 차단 기준으로 사용
+#
+# 카테고리:
+#   mandatory_codex_review  — 코덱스 외부 검수 의무 (자금 직결)
+#   auto_check_only         — codex_lite 자동 점검만 충분
+#   low_risk                — 회귀 테스트만 충분
+
+mandatory_codex_review:
+  # 자동 매매 mutation — 자금 직결, 5/27 사고 직접 영역
+  - id: kis_order_mutation
+    patterns:
+      - "src/adapters/kis_order_adapter.py"
+      - "src/adapters/paper_order_adapter.py"
+    required_checks:
+      - quant_preflight
+      - codex_lite
+      - regression  # tests/test_kis_order_guardrail.py + test_no_raw_mojito_order_bypass.py
+      - external_codex_review
+    reason: "실주문 mutation 직접 영역 (5/27 LS ELECTRIC 사고 영역)"
+    incident_ref:
+      - "5/27 09:10 LS ELECTRIC 자동 매도 (보호 격리 누락)"
+      - "5/27 코덱스 raw mojito bypass 6곳 fix"
+
+  # 보호 종목 시스템 — 영구 규칙 P4-1
+  - id: protected_tickers
+    patterns:
+      - "src/use_cases/owner_rule.py"
+      - "scripts/owner_rule_monitor.py"
+      - "config/protected_tickers.yaml"
+      - "config/soubujang_universe.yaml"
+    required_checks:
+      - codex_lite  # 룰 2: 보호종목-universe 모순
+      - regression
+      - external_codex_review  # 보호 종목 추가/제거 시
+    reason: "영구 보호 종목 정책 (LS ELECTRIC 등)"
+    incident_ref:
+      - "5/27 09:20 원익IPS 정상 매도 + LS ELECTRIC 사고"
+
+  # 안전망 중앙
+  - id: safety_central
+    patterns:
+      - "src/agents/kill_switch_manager.py"
+      - "src/agents/env_checker.py"
+      - "src/utils/trade_runtime_safety.py"
+      - "tools/quant_preflight.py"
+    required_checks:
+      - quant_preflight
+      - codex_lite
+      - cron_regex_sync  # env_checker 변경 시 cron 정규식 동기화
+      - external_codex_review
+    reason: "안전망 중앙, 영향 종속 매우 큼"
+    incident_ref:
+      - "5/27 06:02 EnvChecker 정규식 동기화 누락 사고"
+      - "5/22 KILL_SWITCH 1회 활성 영구 차단 사고"
+
+auto_check_only:
+  # 진입/매도 로직 — codex_lite 자동 점검 후 PASS면 외부 검수 생략 가능
+  - id: entry_exit_logic
+    patterns:
+      - "src/use_cases/intraday_entry_trigger.py"
+      - "src/use_cases/adaptive_reentry.py"
+      - "src/use_cases/adaptive_position_manager.py"
+      - "src/use_cases/adaptive_quick_profit.py"
+      - "src/use_cases/adaptive_stop_loss.py"
+    required_checks:
+      - codex_lite
+      - regression
+    reason: "진입/매도 알고리즘 (자동 점검 신뢰 가능)"
+
+  # 종목 선정 / 후보 풀
+  - id: candidate_selection
+    patterns:
+      - "scripts/step5_soubujang_pool.py"
+      - "scripts/run_quant_3day_pilot.py"
+    required_checks:
+      - codex_lite
+      - regression
+    reason: "종목 선정 로직 (자동 매매 mutation X)"
+
+  # cycle / 통합 스크립트
+  - id: cycle_scripts
+    patterns:
+      - "scripts/run_adaptive_cycle.py"
+      - "scripts/sell_monitor.py"
+    required_checks:
+      - codex_lite
+      - regression
+    reason: "주기 실행 통합 스크립트"
+
+  # 스케줄 BAT
+  - id: schedule_bat
+    patterns:
+      - "scripts/schedule_*.bat"
+    required_checks:
+      - codex_lite  # 룰 1: cron-env_checker 동기화
+      - cron_regex_sync
+    reason: "스케줄 변경 시 EnvChecker 정규식 영향"
+
+low_risk:
+  # 도구/테스트/문서 — 회귀만 충분
+  - id: tools_tests_docs
+    patterns:
+      - "tools/*.py"
+      - "tests/*.py"
+      - "docs/*.md"
+      - "*.yaml"  # config 외 일반 yaml
+    required_checks:
+      - regression
+    reason: "자동 매매 mutation 영향 X (메인 코드 무관)"
+
+  # 메모리/플랜
+  - id: memory_plans
+    patterns:
+      - "memory/*.md"
+      - "docs/01-plan/*.md"
+    required_checks: []
+    reason: "문서, 영향 X"
+
+# ============================================================
+# 점검 도구 정의 (도구별 의도 + 명령)
+# ============================================================
+check_definitions:
+  quant_preflight:
+    command: "python tools/quant_preflight.py --expect blocked"
+    description: "전체 안전 점검 (KILL_SWITCH + AUTO_TRADING_ENABLED + 스케줄)"
+
+  codex_lite:
+    command: "python tools/codex_lite.py"
+    description: "메인 AI 정적 분석 (5/27 사고 4회 패턴 7개 룰)"
+
+  regression:
+    command: "python -m pytest tests/ -q"
+    description: "회귀 테스트"
+
+  cron_regex_sync:
+    description: "env_checker.py REQUIRED_CRON_LINES vs 실제 crontab 정규식 동기화 점검"
+    incident_ref: "5/27 사고 #3"
+
+  external_codex_review:
+    description: "코덱스 외부 검수 요청 (자금 직결 또는 영향 큰 변경)"
+    template_tool: "python tools/codex_review_request.py --clipboard"
+
+# ============================================================
+# 메타
+# ============================================================
+_metadata:
+  version: "1.0"
+  created_at: "2026-05-27"
+  created_by: "메인 AI + 코덱스 협업"
+  incident_basis:
+    - "5/27 09:10 LS ELECTRIC 자동 매도 (보호 격리 코드 누락)"
+    - "5/27 06:02 EnvChecker 정규식 동기화 누락"
+    - "5/27 코덱스 검수 paper_orders 스키마 충돌"
+    - "5/27 코덱스 raw mojito bypass 6곳 발견"
+  related_memory:
+    - "[[feedback-codex-collaboration]]"
+    - "[[feedback-code-review-problem]]"
+    - "[[pending_tasks]] P3-MVP7 잔여 리스크"
