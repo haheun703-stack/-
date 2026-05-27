@@ -68,7 +68,7 @@ ppa_chain:  # PPA 전력구매계약 수혜
   tickers:
     - { ticker: "112610", name: "씨에스윈드",     reason: "풍력 타워" }
     - { ticker: "058450", name: "씨에스베어링",   reason: "풍력 베어링" }
-    - { ticker: "010120", name: "LS ELECTRIC",    reason: "전력 인프라" }
+    # 010120 LS ELECTRIC 제거 (5/27): protected_tickers.yaml 영구 보호 종목과 모순 (매수 후보 X)
 
 space_satellite:  # 우주/위성 (스페이스X 상장 효과)
   name: 우주 / 위성
@@ -77,6 +77,17 @@ space_satellite:  # 우주/위성 (스페이스X 상장 효과)
     - { ticker: "454910", name: "쎄트렉아이",     reason: "위성 카메라" }
     - { ticker: "199820", name: "제이씨현시스템", reason: "위성 통신" }
     - { ticker: "319400", name: "현대무벡스",     reason: "물류 + 항공" }
+
+ai_semiconductor:  # AI 반도체 (5/26 폭등주 신규 섹터 - 메모리 P0-3)
+  name: AI 반도체 후공정 / 디자인
+  cycle_status: 🔥 5/26 폭등 (8종목 +17%~+30%)
+  tickers:
+    - { ticker: "000990", name: "DB하이텍",       reason: "파운드리/반도체 전공정 (5/26 +21.76%, 외인+317억)" }
+    - { ticker: "330860", name: "네패스아크",     reason: "반도체 후공정 테스트 (5/26 +21.35%)" }
+    - { ticker: "490470", name: "세미파이브",     reason: "반도체 디자인하우스 (5/26 +18.34%)" }
+    - { ticker: "295310", name: "에이치브이엠",   reason: "반도체 후공정 (5/26 +17.70%)" }
+    - { ticker: "097800", name: "윈팩",           reason: "반도체 후공정 패키징 (5/26 +17.39%)" }
+    - { ticker: "320000", name: "한울반도체",     reason: "반도체 부품 (5/26 +17.26%)" }
 
 # === 화이트리스트 ===
 whitelist:
