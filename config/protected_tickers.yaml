@@ -1,0 +1,20 @@
+# 영구 보호 종목 리스트 (자동 매도 차단)
+#
+# 작동 방식: B 옵션 (자동 매도만 차단)
+#   - 매수: 시스템 정상 작동
+#   - 자동 매도(손절/익절/trailing): 차단
+#   - 사용자 수동 매도: 가능 (HTS 직접)
+#
+# 추가 방법: 아래 protected 리스트에 ticker + name + reason + registered_at 추가
+# 제거 방법: 해당 항목 삭제 후 commit
+#
+# 참조: src/use_cases/owner_rule.py (보호 체크)
+#       scripts/owner_rule_monitor.py (실행 시 체크)
+
+protected:
+  - ticker: "010120"
+    name: "LS ELECTRIC"
+    reason: "퐝가님 영구 보유 종목 (사장님 룰 -3% 손절 차단)"
+    registered_at: "2026-05-27"
+    registered_by: "퐝가님"
+    incident_ref: "5/27 09:10 owner_rule_monitor 자동 매도 사고 후 영구 등록"

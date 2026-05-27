@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,27 @@ OWNER_FORCE_CLOSE_TIME = "15:20"   # 15:20 강제 청산 (NXT 안전마진)
 OWNER_HOLD_OVERNIGHT_MIN_GAIN_PCT = 0.03   # 종가 +3% 이상 양봉
 OWNER_HOLD_OVERNIGHT_MIN_SUPPLY_EOK = 1.0  # 외인+기관+연기금 매수 +1억 이상
 OWNER_MAX_HOLDING_DAYS = 5                  # 최대 보유 5일 (자비스 기존 패턴)
+
+# 영구 보호 종목 (5/27 신규 — LS ELECTRIC 자동 매도 사고 후 영구 격리)
+_PROTECTED_TICKERS_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "protected_tickers.yaml"
+
+
+def load_protected_tickers() -> set[str]:
+    """config/protected_tickers.yaml에서 영구 보호 종목 ticker set 로드.
+
+    파일 부재 또는 파싱 오류 시 빈 set 반환 (안전 디폴트 = 보호 없음 = 정상 매도).
+    매 호출 시 yaml 재로드 = 운영 중 yaml 수정 즉시 반영.
+    """
+    if not _PROTECTED_TICKERS_PATH.exists():
+        return set()
+    try:
+        import yaml
+        with _PROTECTED_TICKERS_PATH.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        return {str(item["ticker"]).zfill(6) for item in data.get("protected", []) if item.get("ticker")}
+    except Exception as e:
+        logger.warning("[owner_rule] protected_tickers.yaml 로드 실패: %s — 보호 비활성", e)
+        return set()
 
 
 @dataclass
@@ -53,6 +75,7 @@ def evaluate_owner_rule(
     peak_price: int,
     trailing_active: bool = False,
     current_time: str = "",
+    ticker: str = "",
 ) -> OwnerRuleVerdict:
     """사장님 이중 안전망 룰 평가.
 
@@ -62,10 +85,29 @@ def evaluate_owner_rule(
         peak_price: 진입 이후 최고가 (정수)
         trailing_active: 트레일링 활성화 여부 (이전 상태)
         current_time: 현재 시각 "HH:MM" (15:20 강제 청산 체크용)
+        ticker: 종목 코드 (5/27 신규 — 영구 보호 종목 체크)
 
     Returns:
         OwnerRuleVerdict
     """
+    # ★ 영구 보호 종목 체크 (5/27 신규 — LS ELECTRIC 자동 매도 사고 후)
+    # 자동 매도 차단 (수동 매도는 가능). config/protected_tickers.yaml 참조.
+    if ticker:
+        ticker_norm = str(ticker).zfill(6)
+        if ticker_norm in load_protected_tickers():
+            new_peak = max(peak_price, current_price)
+            pnl_pct = (current_price - entry_price) / entry_price if entry_price > 0 else 0
+            return OwnerRuleVerdict(
+                action="HOLD",
+                reason=f"★ 영구 보호 종목 ({ticker_norm}) — 자동 매도 차단 (PnL {pnl_pct*100:+.2f}%)",
+                entry_price=entry_price,
+                current_price=current_price,
+                peak_price=new_peak,
+                pnl_pct=pnl_pct * 100,
+                peak_drop_pct=0,
+                trailing_active=trailing_active,
+            )
+
     if entry_price <= 0:
         return OwnerRuleVerdict(
             action="HOLD",

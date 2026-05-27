@@ -180,13 +180,14 @@ def main() -> int:
         peak_price = max(pos.get("peak_price", 0), h["current_price"], entry_price)
         trailing_active = pos.get("trailing_active", False)
 
-        # 사장님 룰 평가
+        # 사장님 룰 평가 (5/27 ticker 인자 추가 — 영구 보호 종목 체크)
         verdict = evaluate_owner_rule(
             entry_price=entry_price,
             current_price=h["current_price"],
             peak_price=peak_price,
             trailing_active=trailing_active,
             current_time=now_hhmm,
+            ticker=tk,
         )
 
         # 상태 갱신
