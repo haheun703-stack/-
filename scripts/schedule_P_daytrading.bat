@@ -16,11 +16,19 @@ if "%MODE%"=="" set MODE=log
 
 if "%MODE%"=="log" (
     echo [%date% %time%] BAT-P 단타 시그널 기록 시작
-    python -u -X utf8 scripts/signal_logger_daytrading.py >> logs\daytrading.log 2>&1
+    if exist scripts\signal_logger_daytrading.py (
+        python -u -X utf8 scripts/signal_logger_daytrading.py >> logs\daytrading.log 2>&1
+    ) else (
+        echo [%date% %time%] BAT-P skip: scripts\signal_logger_daytrading.py missing >> logs\daytrading.log
+    )
     echo [%date% %time%] BAT-P 단타 시그널 기록 완료
 ) else if "%MODE%"=="close" (
     echo [%date% %time%] BAT-P 단타 일괄 청산 시작
-    python -u -X utf8 scripts/daily_close_daytrading.py >> logs\daytrading.log 2>&1
+    if exist scripts\daily_close_daytrading.py (
+        python -u -X utf8 scripts/daily_close_daytrading.py >> logs\daytrading.log 2>&1
+    ) else (
+        echo [%date% %time%] BAT-P skip: scripts\daily_close_daytrading.py missing >> logs\daytrading.log
+    )
     echo [%date% %time%] BAT-P 단타 일괄 청산 완료
 ) else (
     echo 사용법: schedule_P_daytrading.bat [log^|close]

@@ -21,6 +21,7 @@ from src.entities.trading_models import (
 from src.trading_calendar import is_kr_trading_day
 from src.use_cases.ports import BalancePort, CurrentPricePort, OrderPort
 from src.utils.auto_trading_volume import check_daily_limits, record_buy
+from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +106,8 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             8. 통과 로그
         """
         # 1. 자동매매 활성화 체크
+        assert_runtime_orders_allowed()
+
         if os.getenv("AUTO_TRADING_ENABLED", "0") != "1":
             raise PermissionError(
                 "[GUARD] AUTO_TRADING_ENABLED=1 필수 (기본 비활성, 백테스트 60%+ 검증 후 활성)"
@@ -336,6 +339,9 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             return False
 
     def modify(self, order: Order, new_price: int, new_quantity: int) -> Order:
+        """Modify an open live order."""
+        assert_runtime_orders_allowed()
+
         """주문 정정"""
         logger.info(
             "[주문] 정정: %s (주문번호=%s) → %d원 %d주",

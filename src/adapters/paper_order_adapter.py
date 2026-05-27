@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 from datetime import datetime
@@ -53,10 +54,17 @@ class PaperOrderAdapter:
     def __init__(self):
         self.slippage_base = float(os.getenv("PAPER_MIRROR_SLIPPAGE_BASE_PCT", DEFAULT_SLIPPAGE_BASE_PCT))
         self.slippage_fallback = float(os.getenv("PAPER_MIRROR_SLIPPAGE_FALLBACK_PCT", DEFAULT_SLIPPAGE_FALLBACK_PCT))
+        self._market_data = None
         logger.info(
             "PaperOrderAdapter 초기화 — slippage_base=%.2f%%, fallback=%.2f%%",
             self.slippage_base, self.slippage_fallback,
         )
+
+    def _get_market_data(self):
+        """Lazy read-only KIS adapter for price/OHLCV data in paper mode."""
+        if self._market_data is None:
+            self._market_data = KisOrderAdapter()
+        return self._market_data
 
     # ──────────────────────────────────────────
     # 슬리피지·수수료·거래세 계산
@@ -112,6 +120,37 @@ class PaperOrderAdapter:
     def _make_order_id(ticker: str) -> str:
         return f"PAPER_{datetime.now().strftime('%Y%m%d%H%M%S')}_{ticker}"
 
+    def _record_pilot_order(self, order: Order, *, fee: int = 0, tax: int = 0,
+                            cash_effect: int = 0) -> None:
+        """Append paper fills to the 3-day pilot order journal."""
+        if os.getenv("QUANT_3DAY_PILOT", "0") != "1":
+            return
+        try:
+            root = Path(__file__).resolve().parents[2]
+            out = root / "results" / "quant_3day_pilot" / "paper_orders.jsonl"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            row = {
+                "run_id": os.getenv("QUANT_3DAY_PILOT_RUN_ID", ""),
+                "timestamp": datetime.now().isoformat(timespec="seconds"),
+                "order_id": order.order_id,
+                "ticker": order.ticker,
+                "side": order.side.value,
+                "order_type": order.order_type.value,
+                "price": order.price,
+                "quantity": order.quantity,
+                "status": order.status.value,
+                "filled_quantity": order.filled_quantity,
+                "filled_price": order.filled_price,
+                "fee": fee,
+                "tax": tax,
+                "cash_effect": cash_effect,
+                "message": order.message,
+            }
+            with out.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        except Exception as e:
+            logger.warning("[PAPER] pilot order journal write failed: %s", e)
+
     # ──────────────────────────────────────────
     # 주문 인터페이스 (KisOrderAdapter 미러)
     # ──────────────────────────────────────────
@@ -127,7 +166,7 @@ class PaperOrderAdapter:
             f"{self.slippage_base if orderbook_available else self.slippage_fallback}%",
             fee, total_cost,
         )
-        return Order(
+        order = Order(
             order_id=self._make_order_id(ticker),
             ticker=ticker,
             side=OrderSide.BUY,
@@ -139,6 +178,8 @@ class PaperOrderAdapter:
             filled_price=float(filled_price),
             message=f"PAPER_FILLED fee={fee} total={total_cost}",
         )
+        self._record_pilot_order(order, fee=fee, cash_effect=-total_cost)
+        return order
 
     def sell_limit(self, ticker: str, price: int, quantity: int, orderbook_available: bool = False, market: str = "KOSPI") -> Order:
         """지정가 매도 시뮬."""
@@ -153,7 +194,7 @@ class PaperOrderAdapter:
             f"{self.slippage_base if orderbook_available else self.slippage_fallback}%",
             fee, tax, net_proceeds,
         )
-        return Order(
+        order = Order(
             order_id=self._make_order_id(ticker),
             ticker=ticker,
             side=OrderSide.SELL,
@@ -165,6 +206,8 @@ class PaperOrderAdapter:
             filled_price=float(filled_price),
             message=f"PAPER_FILLED fee={fee} tax={tax} net={net_proceeds}",
         )
+        self._record_pilot_order(order, fee=fee, tax=tax, cash_effect=net_proceeds)
+        return order
 
     def buy_market(self, ticker: str, quantity: int, current_price: int = 0, orderbook_available: bool = False) -> Order:
         """시장가 매수 시뮬.
@@ -176,9 +219,7 @@ class PaperOrderAdapter:
         if current_price <= 0:
             # KIS 어댑터로 현재가 fetch (이미 시뮬이라 안전)
             try:
-                from src.adapters.kis_order_adapter import KisOrderAdapter
-                kis = KisOrderAdapter()
-                res = kis.fetch_price(ticker)
+                res = self.fetch_price(ticker)
                 current_price = int(res.get("output", {}).get("stck_prpr", 0))
             except Exception:
                 current_price = 1  # 최후 fallback
@@ -192,10 +233,41 @@ class PaperOrderAdapter:
         """
         if current_price <= 0:
             try:
-                from src.adapters.kis_order_adapter import KisOrderAdapter
-                kis = KisOrderAdapter()
-                res = kis.fetch_price(ticker)
+                res = self.fetch_price(ticker)
                 current_price = int(res.get("output", {}).get("stck_prpr", 0))
             except Exception:
                 current_price = 1
         return self.sell_limit(ticker, current_price, quantity, orderbook_available, market)
+
+    def fetch_price(self, ticker: str) -> dict:
+        """Read-only market price passthrough for paper-mode gates."""
+        return self._get_market_data().fetch_price(ticker)
+
+    def fetch_current_price(self, ticker: str) -> dict:
+        """Processed current-price passthrough for paper-mode consumers."""
+        return self._get_market_data().fetch_current_price(ticker)
+
+    def fetch_ohlcv(self, ticker: str, timeframe: str = "D",
+                    start_day: str = "", end_day: str = "", adj_price: bool = True):
+        """Read-only OHLCV passthrough for paper-mode entry/exit gates."""
+        return self._get_market_data().fetch_ohlcv(
+            ticker,
+            timeframe=timeframe,
+            start_day=start_day,
+            end_day=end_day,
+            adj_price=adj_price,
+        )
+
+    def fetch_today_1m_ohlcv(self, ticker: str):
+        """Read-only intraday OHLCV passthrough when a gate requests it."""
+        return self._get_market_data().fetch_today_1m_ohlcv(ticker)
+
+    def fetch_balance(self) -> dict:
+        """Paper account snapshot detached from the real KIS account."""
+        return {"holdings": [], "total_eval": 0, "total_pnl": 0, "available_cash": 0}
+
+    def fetch_holdings(self) -> list[dict]:
+        return self.fetch_balance()["holdings"]
+
+    def get_available_cash(self) -> float:
+        return float(self.fetch_balance()["available_cash"])

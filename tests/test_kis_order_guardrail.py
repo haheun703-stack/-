@@ -68,8 +68,12 @@ def trading_hour(monkeypatch):
 
 
 @pytest.fixture
-def adapter(monkeypatch, clean_volume):
+def adapter(monkeypatch, clean_volume, tmp_path):
     """KisOrderAdapter mock (mojito API 호출 차단)."""
+    monkeypatch.setattr(
+        "src.utils.trade_runtime_safety.KILL_SWITCH_PATHS",
+        (tmp_path / "missing_KILL_SWITCH", tmp_path / "missing_kill_switch.flag"),
+    )
     monkeypatch.setattr("mojito.KoreaInvestment", MagicMock())
     monkeypatch.setenv("MODEL", "REAL")
     from src.adapters.kis_order_adapter import KisOrderAdapter
@@ -149,6 +153,7 @@ def test_non_trading_day_blocked(adapter, monkeypatch, test_date, label):
             return test_date
     monkeypatch.setattr("src.adapters.kis_order_adapter.datetime", FakeDateTime)
     monkeypatch.setattr("src.adapters.kis_order_adapter.date", FakeDate)
+    monkeypatch.setattr("src.adapters.kis_order_adapter.is_kr_trading_day", lambda: False)
     with pytest.raises(RuntimeError, match="KRX 휴장일"):
         adapter._guard("487240", 1, price=10000, side="BUY")
 

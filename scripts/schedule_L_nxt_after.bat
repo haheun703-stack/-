@@ -37,7 +37,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 REM ── 2단계: NXT 시그널 분석 ──
 echo [%date% %time%] NXT 시그널 분석 시작 >> logs\schedule.log
-python -u -X utf8 -c "import sys; sys.path.insert(0, 'D:\\sub-agent-project'); from src.use_cases.nxt_signal import NxtSignalAnalyzer; a = NxtSignalAnalyzer(); r = a.generate_signal(); print(f'NXT 시그널: STRONG_BUY={r[\"summary\"][\"after_strong_buy\"]}, BUY={r[\"summary\"][\"after_buy\"]}')" >> logs\schedule.log 2>&1
+python -u -X utf8 -c "from src.use_cases.nxt_signal import NxtSignalAnalyzer; a = NxtSignalAnalyzer(); r = a.generate_signal(); print(f'NXT 시그널: STRONG_BUY={r[\"summary\"][\"after_strong_buy\"]}, BUY={r[\"summary\"][\"after_buy\"]}')" >> logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo [%date% %time%] [FAIL] nxt_signal 분석 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
 )

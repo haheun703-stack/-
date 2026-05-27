@@ -35,8 +35,8 @@ echo   v3: 예수금 x size_pct 동적 사이징
 echo   킬스위치: data/KILL_SWITCH
 echo ========================================
 
-echo [%date% %time%] SmartEntry LIVE 실행 >> logs\schedule.log
-python -u -X utf8 scripts/smart_entry_runner.py --live --force >> logs\schedule.log 2>&1
+echo [%date% %time%] SmartEntry DRY-RUN 실행 >> logs\schedule.log
+python -u -X utf8 scripts/smart_entry_runner.py >> logs\schedule.log 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo [%date% %time%] [FAIL] smart_entry_runner 실패 (code=%ERRORLEVEL%) >> logs\schedule.log
 )
