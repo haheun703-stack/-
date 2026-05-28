@@ -73,9 +73,12 @@
 
 ### 5-2. 신규 산출물 디렉토리
 - `data/candidate_snapshot/swing_YYYYMMDD.json`
-- `data/order_intents/swing_intents_YYYYMMDD.jsonl` (퀀트봇은 paper만, live X)
+- `data/order_intents/quant_intents_YYYYMMDD.jsonl` (퀀트봇은 paper만, live 등록 register 시점 차단)
 - `data/source_performance/rolling.json`
 - `docs/04-report/daily_research_YYYYMMDD.md`
+
+> **파일명 규칙 (5/28 코덱스 3차 정합)**: order_intents 파일명은 `{bot}_intents_YYYYMMDD.jsonl` 패턴.
+> 봇별: `quant_intents_*`, `day_intents_*`. (이전 docs의 `swing_intents_*`는 정정됨)
 
 ### 5-3. selector 후보 엔진 (퀀트봇 보유)
 1. 바닥반등 (`scripts/scan_crash_bounce.py`)

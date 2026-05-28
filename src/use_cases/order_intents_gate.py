@@ -354,6 +354,14 @@ def register_intent(intent: dict, bot: str) -> Path:
             f"[REGISTER] side 잘못: {intent.get('side')} (BUY/SELL만 허용)"
         )
 
+    # Note 1 (5/28 코덱스 3차): quant는 research/selector bot이므로 live intent 등록 금지
+    # quant_intents에는 mode="paper"만 허용. live 매매는 별도 executor (day bot)만.
+    if bot == "quant" and str(intent.get("mode", "")).lower() == "live":
+        raise OrderIntentError(
+            "[REGISTER] quant bot은 live mode intent 등록 금지 — research/selector 역할만 수행. "
+            "live 매매는 day bot 또는 별도 승인된 executor만 가능."
+        )
+
     # P0-4: expires_at 파싱 가능 여부 검증 (등록 시점에)
     _parse_expires_at(intent)
 

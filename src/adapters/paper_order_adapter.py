@@ -154,8 +154,21 @@ class PaperOrderAdapter:
     # ──────────────────────────────────────────
     # 주문 인터페이스 (KisOrderAdapter 미러)
     # ──────────────────────────────────────────
-    def buy_limit(self, ticker: str, price: int, quantity: int, orderbook_available: bool = False) -> Order:
-        """지정가 매수 시뮬."""
+    def buy_limit(
+        self, ticker: str, price: int, quantity: int,
+        orderbook_available: bool = False,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """지정가 매수 시뮬.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
+        # 10번째 가드 — order_intents_gate (mode/executor_bot 명시 시 강제)
+        if mode is not None and executor_bot is not None:
+            from src.use_cases.order_intents_gate import assert_order_intent_exists
+            assert_order_intent_exists(
+                ticker=ticker, side="BUY", mode=mode, executor_bot=executor_bot,
+            )
         adjusted = KisOrderAdapter._adjust_to_tick(price)
         filled_price = self._apply_slippage(adjusted, OrderSide.BUY, orderbook_available)
         fee = self._calc_fee(filled_price, quantity)
@@ -181,8 +194,21 @@ class PaperOrderAdapter:
         self._record_pilot_order(order, fee=fee, cash_effect=-total_cost)
         return order
 
-    def sell_limit(self, ticker: str, price: int, quantity: int, orderbook_available: bool = False, market: str = "KOSPI") -> Order:
-        """지정가 매도 시뮬."""
+    def sell_limit(
+        self, ticker: str, price: int, quantity: int,
+        orderbook_available: bool = False, market: str = "KOSPI",
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """지정가 매도 시뮬.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
+        # 10번째 가드 — order_intents_gate
+        if mode is not None and executor_bot is not None:
+            from src.use_cases.order_intents_gate import assert_order_intent_exists
+            assert_order_intent_exists(
+                ticker=ticker, side="SELL", mode=mode, executor_bot=executor_bot,
+            )
         adjusted = KisOrderAdapter._adjust_to_tick(price)
         filled_price = self._apply_slippage(adjusted, OrderSide.SELL, orderbook_available)
         fee = self._calc_fee(filled_price, quantity)
@@ -209,27 +235,15 @@ class PaperOrderAdapter:
         self._record_pilot_order(order, fee=fee, tax=tax, cash_effect=net_proceeds)
         return order
 
-    def buy_market(self, ticker: str, quantity: int, current_price: int = 0, orderbook_available: bool = False) -> Order:
+    def buy_market(
+        self, ticker: str, quantity: int, current_price: int = 0,
+        orderbook_available: bool = False,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
         """시장가 매수 시뮬.
 
-        ★ C1 fix (5/26 검수): current_price 옵셔널 (기본 0).
-        호출자가 2인자만 전달 시 (sell_market(ticker, qty)) 내부 fetch_price로 자동 보강.
-        OrderPort 인터페이스 호환성 보장 (KisOrderAdapter와 시그니처 동일).
-        """
-        if current_price <= 0:
-            # KIS 어댑터로 현재가 fetch (이미 시뮬이라 안전)
-            try:
-                res = self.fetch_price(ticker)
-                current_price = int(res.get("output", {}).get("stck_prpr", 0))
-            except Exception:
-                current_price = 1  # 최후 fallback
-        return self.buy_limit(ticker, current_price, quantity, orderbook_available)
-
-    def sell_market(self, ticker: str, quantity: int, current_price: int = 0, orderbook_available: bool = False, market: str = "KOSPI") -> Order:
-        """시장가 매도 시뮬.
-
-        ★ C1 fix (5/26 검수): current_price 옵셔널 (기본 0).
-        2인자 호출 시 자동 fetch_price. trailing/stop_loss/time_exit fallback 호환.
+        ★ C1 fix (5/26): current_price 옵셔널.
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제.
         """
         if current_price <= 0:
             try:
@@ -237,7 +251,31 @@ class PaperOrderAdapter:
                 current_price = int(res.get("output", {}).get("stck_prpr", 0))
             except Exception:
                 current_price = 1
-        return self.sell_limit(ticker, current_price, quantity, orderbook_available, market)
+        return self.buy_limit(
+            ticker, current_price, quantity, orderbook_available,
+            mode=mode, executor_bot=executor_bot,
+        )
+
+    def sell_market(
+        self, ticker: str, quantity: int, current_price: int = 0,
+        orderbook_available: bool = False, market: str = "KOSPI",
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """시장가 매도 시뮬.
+
+        ★ C1 fix (5/26): current_price 옵셔널.
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제.
+        """
+        if current_price <= 0:
+            try:
+                res = self.fetch_price(ticker)
+                current_price = int(res.get("output", {}).get("stck_prpr", 0))
+            except Exception:
+                current_price = 1
+        return self.sell_limit(
+            ticker, current_price, quantity, orderbook_available, market,
+            mode=mode, executor_bot=executor_bot,
+        )
 
     def fetch_price(self, ticker: str) -> dict:
         """Read-only market price passthrough for paper-mode gates."""

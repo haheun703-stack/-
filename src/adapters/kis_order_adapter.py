@@ -86,7 +86,16 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     # ──────────────────────────────────────────
     # P0 가드레일 (모든 주문 진입 시 호출)
     # ──────────────────────────────────────────
-    def _guard(self, ticker: str, quantity: int, price: int | None = None, side: str = "BUY"):
+    def _guard(
+        self,
+        ticker: str,
+        quantity: int,
+        price: int | None = None,
+        side: str = "BUY",
+        *,
+        mode: str | None = None,
+        executor_bot: str | None = None,
+    ):
         """주문 차단 가드레일. 실패 시 PermissionError/ValueError/RuntimeError 발생.
 
         Args:
@@ -94,8 +103,10 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             quantity: 수량
             price: 주문 단가 (지정가만, 시장가는 None). 현재가 ±X% 검증에 사용.
             side: BUY / SELL
+            mode: "paper" / "live" (Trading Factory v1 — paper-first). None이면 기존 동작 (backward compat).
+            executor_bot: "quant" / "day" (Trading Factory v1 — intent 매치).
 
-        Checks (9개):
+        Checks (10개):
             1. AUTO_TRADING_ENABLED=1 활성화
             2. AUTO_TRADING_MAX_QTY 수량 한도
             3. AUTO_TRADING_WHITELIST_ONLY 화이트리스트
@@ -103,10 +114,21 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             5. 거래일 (주말 + 공휴일, is_kr_trading_day)
             6. 일일 매수 금액/횟수 한도 (BUY만)
             7. 현재가 ±X% 범위 (지정가, price 전달 시)
-            8. 통과 로그
+            8. assert_runtime_orders_allowed (5/27 추가)
+            9. 통과 로그
+            10. order_intents_gate (5/28 Trading Factory v1) — mode + executor_bot 명시 시
         """
         # 1. 자동매매 활성화 체크
         assert_runtime_orders_allowed()
+
+        # 10번째 가드 (Trading Factory v1, 5/28 코덱스 3차 paper-first 통합):
+        # mode와 executor_bot이 명시되면 order_intents_gate 강제 통과 필수.
+        # backward compat: 둘 다 None이면 기존 _guard 9중만 적용 (점진 마이그레이션).
+        if mode is not None and executor_bot is not None:
+            from src.use_cases.order_intents_gate import assert_order_intent_exists
+            assert_order_intent_exists(
+                ticker=ticker, side=side, mode=mode, executor_bot=executor_bot,
+            )
 
         if os.getenv("AUTO_TRADING_ENABLED", "0") != "1":
             raise PermissionError(
@@ -226,14 +248,21 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     # OrderPort 구현
     # ──────────────────────────────────────────
 
-    def buy_limit(self, ticker: str, price: int, quantity: int) -> Order:
-        """지정가 매수"""
+    def buy_limit(
+        self, ticker: str, price: int, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """지정가 매수.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
         # 호가 단위 자동 보정 (5/18 자아성찰 #3 — KIS 거부 방지)
         adjusted_price = self._adjust_to_tick(price)
         if adjusted_price != price:
             logger.info("[호가보정] %s: %d원 → %d원", ticker, price, adjusted_price)
         price = adjusted_price
-        self._guard(ticker, quantity, price=price, side="BUY")
+        self._guard(ticker, quantity, price=price, side="BUY",
+                    mode=mode, executor_bot=executor_bot)
         logger.info("[주문] 지정가 매수: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_buy_order(ticker, price, quantity)
@@ -252,14 +281,21 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                 message=str(e),
             )
 
-    def sell_limit(self, ticker: str, price: int, quantity: int) -> Order:
-        """지정가 매도"""
+    def sell_limit(
+        self, ticker: str, price: int, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """지정가 매도.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
         # 호가 단위 자동 보정 (5/18 자아성찰 #3)
         adjusted_price = self._adjust_to_tick(price)
         if adjusted_price != price:
             logger.info("[호가보정] %s: %d원 → %d원", ticker, price, adjusted_price)
         price = adjusted_price
-        self._guard(ticker, quantity, price=price, side="SELL")
+        self._guard(ticker, quantity, price=price, side="SELL",
+                    mode=mode, executor_bot=executor_bot)
         logger.info("[주문] 지정가 매도: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_sell_order(ticker, price, quantity)
@@ -277,9 +313,16 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                 message=str(e),
             )
 
-    def buy_market(self, ticker: str, quantity: int) -> Order:
-        """시장가 매수"""
-        self._guard(ticker, quantity, price=None, side="BUY")
+    def buy_market(
+        self, ticker: str, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """시장가 매수.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
+        self._guard(ticker, quantity, price=None, side="BUY",
+                    mode=mode, executor_bot=executor_bot)
         logger.info("[주문] 시장가 매수: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_buy_order(ticker, quantity)
@@ -298,9 +341,16 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                 quantity=quantity, status=OrderStatus.FAILED, message=str(e),
             )
 
-    def sell_market(self, ticker: str, quantity: int) -> Order:
-        """시장가 매도"""
-        self._guard(ticker, quantity, price=None, side="SELL")
+    def sell_market(
+        self, ticker: str, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
+        """시장가 매도.
+
+        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        """
+        self._guard(ticker, quantity, price=None, side="SELL",
+                    mode=mode, executor_bot=executor_bot)
         logger.info("[주문] 시장가 매도: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_sell_order(ticker, quantity)
