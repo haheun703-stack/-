@@ -6,8 +6,14 @@
   D+1 14:55 chart_hero_close_cycle 양봉 확인 + 진입 (D+1 종가 직전)
 
 저장 위치:
-  data/chart_hero_picks_{D+1_date}.json
+  data/chart_hero/picks_d1_{D+1_date}.json
     → 다음날 14:55 close_cycle이 읽음 (D+1 양봉 확인 후 종가 직전 진입)
+
+Trading Factory v1 (5/28 Phase 1 row 3):
+  picker는 selector 역할 — 매매 호출 X.
+  paper 모드 시 picks → register_intent(mode='paper', executor_bot='quant', side='BUY') 등록.
+  real 모드 시 intent 등록 금지 (코덱스 5차: live 호출처 마이그레이션 금지).
+  → D+1 14:55 close_cycle이 PaperOrderAdapter.buy_limit(mode='paper', executor_bot='quant') 호출 시 통과.
 
 cron 등록:
   30 17 * * 1-5 cd ~/quantum-master && ./venv/bin/python3.11 scripts/chart_hero_picker_cycle.py --paper >> /tmp/chart_hero_picker.log 2>&1
@@ -16,12 +22,15 @@ cron 등록:
 import argparse
 import datetime as dt
 import json
+import logging
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scripts.surge_d1_picker import run_picker
+
+logger = logging.getLogger(__name__)
 
 
 def get_next_trading_date(today: dt.date) -> dt.date:
@@ -86,6 +95,53 @@ def main():
     else:
         print(f"\n📭 진입 후보 없음 — {next_day}에는 신규 진입 X")
 
+    # Trading Factory v1 Phase 1 row 3 (5/28):
+    # paper 모드 시 picks → order_intents 등록 (D+1 14:55 close_cycle 매매 시 가드 통과).
+    # real 모드는 intent 등록 금지 (코덱스 5차: live 호출처 마이그레이션 금지).
+    n_intents_registered = 0
+    n_intents_failed = 0
+    if args.paper and result["picks"]:
+        try:
+            from src.use_cases.order_intents_gate import register_intent
+            from datetime import timezone, timedelta as _td
+            seoul = timezone(_td(hours=9))
+            now_kst = dt.datetime.now(tz=seoul)
+            # D+1 14:55 + 30분 (마감 close까지 여유)
+            d1_close_kst = dt.datetime.combine(
+                next_day, dt.time(15, 30), tzinfo=seoul,
+            )
+            for p in result["picks"]:
+                tk = p["ticker"]
+                intent_id = f"q_{tk}_chart_hero_d1_{next_day.isoformat()}"
+                intent = {
+                    "intent_id": intent_id, "bot": "quant",
+                    "engine": "chart_hero_5gate",
+                    "ticker": tk, "name": p.get("name", tk),
+                    "side": "BUY", "mode": "paper",
+                    "score": float(p.get("buy_score", 0.0)),
+                    "confidence": "strong" if p.get("buy_score", 0) >= 80 else "medium",
+                    "created_at": now_kst.isoformat(),
+                    "expires_at": d1_close_kst.isoformat(),
+                    "d0_date": today.isoformat(),
+                    "d1_date": next_day.isoformat(),
+                    "continuity_score": p.get("continuity_score"),
+                    "upside_pct": p.get("upside_pct"),
+                    "weekly_k": p.get("weekly_k"),
+                }
+                try:
+                    register_intent(intent, bot="quant")
+                    n_intents_registered += 1
+                except Exception as e:
+                    logger.warning("[picker] register_intent 실패 %s: %s", tk, e)
+                    n_intents_failed += 1
+            print(f"\n📝 order_intents 등록: {n_intents_registered}건 "
+                  f"(실패 {n_intents_failed}건)")
+        except Exception as e:
+            logger.warning("[picker] order_intents_gate import 실패: %s", e)
+            print(f"\n⚠️ order_intents 등록 스킵: {e}")
+    elif args.real:
+        print("\n⛔ real 모드 — order_intents 등록 금지 (코덱스 5차 지시)")
+
     # 텔레그램 알림
     try:
         from src.telegram_sender import send_message
@@ -101,6 +157,8 @@ def main():
                          f"upside={p.get('upside_pct')}%")
         if not result["picks"]:
             lines.append("  (조건 만족 종목 없음 — 시장 대기)")
+        if args.paper and n_intents_registered > 0:
+            lines.append(f"📝 paper intents: {n_intents_registered}건 등록")
         send_message("\n".join(lines))
     except Exception as e:
         print(f"⚠️ 텔레그램: {e}")
