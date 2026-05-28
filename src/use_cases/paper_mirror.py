@@ -84,7 +84,17 @@ def paper_record_entry(ticker: str, name: str, price: int, score: float, today: 
         return None
 
     adapter = PaperOrderAdapter()
-    order = adapter.buy_limit(ticker, price, 1, orderbook_available=False)
+    # C2-paper_mirror fix (5/28 코덱스 검수): mode/executor_bot 명시 — L10 가드 통과 필수
+    try:
+        order = adapter.buy_limit(
+            ticker, price, 1, orderbook_available=False,
+            mode="paper", executor_bot="quant",
+        )
+    except Exception as e:
+        # NoIntentError / IntentSignatureError / IntentExpiredError / ValueError 모두 명시 로깅
+        logger.error("[PAPER 매수 시뮬 차단] %s(%s) @ %d: %s — %s",
+                     name, ticker, price, type(e).__name__, e)
+        return None
 
     if order.status != OrderStatus.FILLED:
         logger.warning("[PAPER] 매수 시뮬 실패 — status=%s", order.status)
@@ -161,7 +171,17 @@ def paper_record_exit(ticker: str, current_price: int, today: str, reason: str =
         return None
 
     adapter = PaperOrderAdapter()
-    order = adapter.sell_limit(ticker, current_price, pos["qty"], orderbook_available=False, market=market)
+    # C2-paper_mirror fix (5/28): mode/executor_bot 명시 + 예외 명시 로깅 (silent X)
+    try:
+        order = adapter.sell_limit(
+            ticker, current_price, pos["qty"],
+            orderbook_available=False, market=market,
+            mode="paper", executor_bot="quant",
+        )
+    except Exception as e:
+        logger.error("[PAPER 청산 시뮬 차단] %s @ %d: %s — %s",
+                     ticker, current_price, type(e).__name__, e)
+        return None
 
     # 손익 계산
     entry = pos["entry_price"]

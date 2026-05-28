@@ -19,11 +19,14 @@
 import csv
 import datetime as dt
 import json
+import logging
 import os
 from dataclasses import asdict
 from pathlib import Path
 
 from src.adapters.kis_order_adapter import KisOrderAdapter
+
+logger = logging.getLogger(__name__)
 from src.strategies.chart_hero_tension_rule import (
     Position, TradeStage, decide_action, check_entry_gate,
     INIT_WEIGHT_PCT, ADD_WEIGHT_PCT,
@@ -370,7 +373,22 @@ class ChartHeroExecutor:
                     results.append({"ticker": ticker, "action": "ADD_BUY_SKIP",
                                     "reason": f"qty={add_qty} 산출 불가"})
                     continue
-                self._execute_add_buy(d, current_price, add_qty)
+                # C2 fix (5/28): 결과 dict 확인 후 평단/수량 변경
+                add_result = self._execute_add_buy(d, current_price, add_qty)
+                if add_result is not None:
+                    # 추매 차단 — 평단/수량 변경 X
+                    results.append(add_result)
+                    continue
+                # 추매 성공 — 평단가/누적수량 업데이트
+                new_total_qty = d["total_qty"] + add_qty
+                new_total_cost = d["total_cost"] + current_price * add_qty
+                d["avg_price"] = round(new_total_cost / new_total_qty, 2)
+                d["total_qty"] = new_total_qty
+                d["total_cost"] = new_total_cost
+                d.setdefault("entries", []).append({
+                    "stage": "ADD", "price": current_price, "qty": add_qty,
+                    "date": dt.date.today().isoformat(),
+                })
                 results.append({"ticker": ticker, "action": "ADD_BUY",
                                 "qty": add_qty, "price": current_price,
                                 "reason": action["reason"]})
@@ -380,11 +398,27 @@ class ChartHeroExecutor:
                 if protected:
                     results.append({"ticker": ticker, "action": "SELL_BLOCKED_HOLD_LIST",
                                     "reason": protect_msg, "original_action": action["action"]})
-                    # 텔레그램 알림 (실제 발송은 외부에서)
                     print(f"   🛡️ {ticker} 매도 차단 (보호 종목): {protect_msg}")
                     continue
                 sell_qty = int(d["total_qty"] * action["qty_pct"] / 100)
-                self._execute_sell(d, current_price, sell_qty, action)
+                # C2 fix (5/28): 결과 dict 확인 후 PnL/close 변경 (silent-return 폐지)
+                sell_result = self._execute_sell(d, current_price, sell_qty, action)
+                if sell_result is not None:
+                    # 매도 차단 — PnL/수량 변경 X (포지션 유지!)
+                    results.append(sell_result)
+                    continue
+                # 매도 성공 — PnL/수량/close 처리
+                realized = (current_price - d["avg_price"]) * sell_qty
+                d["realized_pl"] = d.get("realized_pl", 0) + int(realized)
+                d["total_qty"] -= sell_qty
+                self._append_pnl_log(
+                    ticker=d["ticker"], name=d.get("name", ""),
+                    qty=sell_qty, price=current_price, avg_price=d["avg_price"],
+                    realized_pl=int(realized), reason=action.get("reason", ""),
+                )
+                if d["total_qty"] <= 0 or action["action"] in ("STOPLOSS", "FORCE_CLOSE"):
+                    d["is_closed"] = True
+                    d["close_reason"] = action["reason"]
                 results.append({"ticker": ticker, "action": action["action"],
                                 "qty": sell_qty, "price": current_price,
                                 "reason": action["reason"]})
@@ -395,12 +429,14 @@ class ChartHeroExecutor:
         self._save_positions()
         return results
 
-    def _execute_add_buy(self, d: dict, price: int, qty: int):
+    def _execute_add_buy(self, d: dict, price: int, qty: int) -> dict | None:
         """추매 실행 (paper or real).
 
-        row 4 (5/28): paper도 PaperOrderAdapter.buy_limit + intent 페어 강제.
-        추매 intent는 D+1 14:55 (초기) 또는 추매 시점 별도 등록 필요.
-        intent 미등록 시 NoIntentError → 추매 실패 (평단/수량 미변경).
+        C2 fix (5/28 코덱스 검수): silent-return 폐지. 결과 dict 반환.
+
+        Returns:
+            None: 주문 성공 (평단/수량 정상 변경)
+            dict: 차단 사유 (caller가 results에 기록 + 텔레그램 알림 가능)
         """
         try:
             self.order.buy_limit(
@@ -408,25 +444,35 @@ class ChartHeroExecutor:
                 mode="paper" if self.paper else "live",
                 executor_bot="quant",
             )
-        except Exception:
-            return  # 추매 차단 — 평단/수량 변경 X
-        # 평단가/누적수량 업데이트
-        new_total_qty = d["total_qty"] + qty
-        new_total_cost = d["total_cost"] + price * qty
-        d["avg_price"] = round(new_total_cost / new_total_qty, 2)
-        d["total_qty"] = new_total_qty
-        d["total_cost"] = new_total_cost
-        d.setdefault("entries", []).append({
-            "stage": "ADD", "price": price, "qty": qty,
-            "date": dt.date.today().isoformat(),
-        })
+        except Exception as e:
+            # intent 누락/서명오류/만료 등 모두 명시 기록 (silent X)
+            err_type = type(e).__name__
+            action = "ADD_BLOCKED_NO_INTENT" if err_type == "NoIntentError" else "ADD_INTENT_ERROR"
+            logger.error("[%s] %s %d주 @ %d: %s", action, d["ticker"], qty, price, e)
+            try:
+                from src.telegram_sender import send_message
+                send_message(
+                    f"🚫 [{action}] {d.get('name', d['ticker'])}({d['ticker']}) "
+                    f"추매 {qty}주 @ {price:,}원 차단\n사유: {e}"
+                )
+            except Exception:
+                pass
+            return {
+                "action": action, "ticker": d["ticker"],
+                "price": price, "qty": qty, "reason": str(e),
+            }
+        # 주문 성공 — 평단/수량 변경은 caller(monitor_positions)에서
+        return None
 
-    def _execute_sell(self, d: dict, price: int, qty: int, action: dict):
+    def _execute_sell(self, d: dict, price: int, qty: int, action: dict) -> dict | None:
         """매도 실행 (paper or real).
 
-        row 4 (5/28): paper도 PaperOrderAdapter.sell_limit + SELL intent 페어 강제.
-        매도 intent는 매도 시점 별도 등록 필요 (close_cycle 외부 또는 별도 selector).
-        intent 미등록 시 NoIntentError → 매도 실패.
+        C2 fix (5/28 코덱스 검수): silent-return 폐지. 매도 실패가 조용히 묻히면
+        5/27 owner_rule_monitor 사고와 동급 위험 — 손절 차단 시 사용자 알림 필수.
+
+        Returns:
+            None: 주문 성공 (호출자가 평단/수량/PnL 변경)
+            dict: 차단 사유 (caller가 results에 기록 + 텔레그램 ALERT)
         """
         try:
             self.order.sell_limit(
@@ -434,20 +480,38 @@ class ChartHeroExecutor:
                 mode="paper" if self.paper else "live",
                 executor_bot="quant",
             )
-        except Exception:
-            return  # 매도 차단
-        realized = (price - d["avg_price"]) * qty
-        d["realized_pl"] = d.get("realized_pl", 0) + int(realized)
-        d["total_qty"] -= qty
-        # C2: PnL 로그 CSV append (주/월 누적 손실 추적용)
-        self._append_pnl_log(
-            ticker=d["ticker"], name=d.get("name", ""),
-            qty=qty, price=price, avg_price=d["avg_price"],
-            realized_pl=int(realized), reason=action.get("reason", ""),
-        )
-        if d["total_qty"] <= 0 or action["action"] in ("STOPLOSS", "FORCE_CLOSE"):
-            d["is_closed"] = True
-            d["close_reason"] = action["reason"]
+        except Exception as e:
+            err_type = type(e).__name__
+            if err_type == "NoIntentError":
+                action_tag = "SELL_BLOCKED_NO_INTENT"
+            elif err_type in ("IntentSignatureError", "IntentExpiredError", "IntentSchemaError"):
+                action_tag = "SELL_INTENT_ERROR"
+            else:
+                action_tag = "SELL_GUARD_ERROR"
+            # 매도 차단은 손실 위험 — ERROR 레벨 + 텔레그램 ALERT
+            logger.error(
+                "[%s] %s %d주 @ %d (사유=%s): %s",
+                action_tag, d["ticker"], qty, price, action.get("reason", ""), e,
+            )
+            try:
+                from src.telegram_sender import send_message
+                send_message(
+                    f"🚨 [{action_tag}] {d.get('name', d['ticker'])}({d['ticker']}) "
+                    f"매도 {qty}주 @ {price:,}원 차단\n"
+                    f"평단 {d.get('avg_price', 0):,}원, 손익 추정 {(price - d.get('avg_price', 0)) * qty:+,}원\n"
+                    f"사유: {e}\n"
+                    f"※ 수동 확인 필요"
+                )
+            except Exception:
+                pass
+            return {
+                "action": action_tag, "ticker": d["ticker"],
+                "price": price, "qty": qty,
+                "trigger_reason": action.get("reason", ""),
+                "block_reason": str(e),
+            }
+        # 주문 성공 — PnL/수량/close 변경은 caller(monitor_positions)에서
+        return None
 
     def get_summary(self) -> dict:
         """현재 포지션 요약."""

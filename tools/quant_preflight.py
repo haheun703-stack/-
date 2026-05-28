@@ -179,6 +179,18 @@ def main() -> int:
             "no raw calls" if not raw_broker_hits else f"{len(raw_broker_hits)} hits: {raw_broker_hits[:5]}",
         )
     )
+    # C3 fix (5/28 코덱스 검수): ORDER_INTENTS_HMAC_KEY 존재 + 길이 fail-fast
+    # 키 부재 시 register_intent 매번 실패 → D+1 매매 0건 → 운영 안정성 위협
+    # 키 값은 로그 출력 금지 (길이/존재만 보고)
+    hmac_key = os.getenv("ORDER_INTENTS_HMAC_KEY", "")
+    hmac_ok = bool(hmac_key) and len(hmac_key) >= 32
+    checks.append(
+        _status(
+            "ORDER_INTENTS_HMAC_KEY (Phase 1 L10 가드)",
+            hmac_ok,
+            f"present (len={len(hmac_key)})" if hmac_key else "MISSING — set 32+ chars in .env",
+        )
+    )
 
     ok_all = all(ok for ok, _ in checks)
     print(f"Quantum preflight expect={args.expect}")

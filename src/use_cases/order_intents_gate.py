@@ -31,7 +31,7 @@ import hmac
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -166,15 +166,52 @@ def _today_date_str() -> str:
     return datetime.now().strftime("%Y%m%d")
 
 
+def _previous_trading_day(today_d: date, max_lookback: int = 7) -> date | None:
+    """KRX 직전 거래일 (주말/공휴일 skip).
+
+    C1 fix (5/28 코덱스 검수): D0 picker intent → D+1 executor 페어 지원.
+    """
+    try:
+        from src.trading_calendar import is_kr_trading_day
+    except ImportError:
+        is_kr_trading_day = lambda d: d.weekday() < 5  # noqa: E731
+
+    d_iter = today_d - timedelta(days=1)
+    for _ in range(max_lookback):
+        if is_kr_trading_day(d_iter):
+            return d_iter
+        d_iter -= timedelta(days=1)
+    return None
+
+
 def _intent_files(date_str: str = None) -> list[Path]:
-    date_str = date_str or _today_date_str()
+    """오늘 + 직전 KRX 거래일 양쪽의 모든 봇 order_intents 파일.
+
+    C1 fix (5/28 코덱스 검수): D0 picker intent와 D+1 executor 페어 검증 지원.
+    - D0 17:30 picker가 quant_intents_{D0}.jsonl에 등록
+    - D+1 14:55 executor가 호출 시 본 함수가 D0 + D+1 양쪽 파일 로드
+    - 최종 통과 여부는 expires_at/ticker/side/mode/executor_bot/HMAC로 판단
+    """
     if not ORDER_INTENTS_DIR.exists():
         return []
+
+    if date_str:
+        base = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
+    else:
+        base = date.today()
+
+    target_dates = [base]
+    prev = _previous_trading_day(base)
+    if prev:
+        target_dates.append(prev)
+
     files = []
-    for bot in ACTIVE_BOTS:
-        f = ORDER_INTENTS_DIR / f"{bot}_intents_{date_str}.jsonl"
-        if f.exists():
-            files.append(f)
+    for d_target in target_dates:
+        ds = d_target.strftime("%Y%m%d")
+        for bot in ACTIVE_BOTS:
+            f = ORDER_INTENTS_DIR / f"{bot}_intents_{ds}.jsonl"
+            if f.exists():
+                files.append(f)
     return files
 
 
