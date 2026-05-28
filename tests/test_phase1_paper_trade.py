@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -531,13 +532,19 @@ class TestC1_D0_D1_IntentPair:
         assert order.status == OrderStatus.FILLED
 
     def test_d0_intent_expired_blocked_from_d_plus_2(self, isolated_env, monkeypatch):
-        """D0 intent의 expires_at이 D+1 마감이라면 D+2에 호출 시 IntentExpiredError."""
+        """D0 intent의 expires_at이 D+1 마감이라면 D+2 영업일에 호출 시 차단.
+
+        Note (코덱스 5/28 16:00 정정): 6/2는 화요일 (5/30 토, 5/31 일 skip → 6/1 월요일이 직전 영업일).
+        2026-05-28(목) intent + expires=5/29(금) 15:30 → 6/2(화) 호출 시:
+        - _previous_trading_day(6/2 화) = 6/1 월
+        - _intent_files()는 6/1 + 6/2 검색 → D0(5/28) 파일은 범위 밖 → NoIntentError
+        """
         from datetime import date as _date
         from src.adapters.paper_order_adapter import PaperOrderAdapter
         from src.use_cases.order_intents_gate import IntentExpiredError
 
         d0 = _date(2026, 5, 28)
-        d_plus_2 = _date(2026, 6, 2)  # 월요일 (5/31 토요일, 6/1 일요일 skip)
+        d_plus_2 = _date(2026, 6, 2)  # 화요일 (5/30 토, 5/31 일 skip → 6/1 월요일이 직전 영업일)
         d1_close = datetime.combine(_date(2026, 5, 29),
                                      datetime.min.time().replace(hour=15, minute=30),
                                      tzinfo=SEOUL)
@@ -572,6 +579,39 @@ class TestC1_D0_D1_IntentPair:
                 ticker="240810", price=121000, quantity=1,
                 mode="paper", executor_bot="quant",
             )
+
+    def test_long_holiday_lookback_covers_5day_gap(self, monkeypatch):
+        """긴 연휴 테스트: _previous_trading_day가 5일+ lookback 지원.
+
+        Note (코덱스 5/28 16:00): max_lookback=7은 단기 OK. 추석/설날 연휴는 5일+ 가능.
+        시나리오: 2026/2/19(목) 호출 시 2/14~2/18 가상 연휴 skip → 2/13(금)이 직전 영업일.
+        """
+        from datetime import date as _date
+        import src.use_cases.order_intents_gate as gate_mod
+
+        # 가상 5일 연휴 (2/14 토 ~ 2/18 수)
+        holidays = {_date(2026, 2, 14), _date(2026, 2, 15),
+                    _date(2026, 2, 16), _date(2026, 2, 17),
+                    _date(2026, 2, 18)}
+
+        def mock_is_trading_day(d):
+            if d in holidays:
+                return False
+            return d.weekday() < 5
+
+        import sys as _sys
+        class FakeTradingCalendar:
+            is_kr_trading_day = staticmethod(mock_is_trading_day)
+        monkeypatch.setitem(_sys.modules, "src.trading_calendar", FakeTradingCalendar)
+
+        # _previous_trading_day(2/19 목) → 2/18(휴) → 2/17(휴) → ... → 2/13(금) 발견
+        d_plus_6 = _date(2026, 2, 19)
+        prev = gate_mod._previous_trading_day(d_plus_6, max_lookback=7)
+        assert prev == _date(2026, 2, 13), f"긴 연휴 직전 거래일 찾기 실패: {prev}"
+
+        # max_lookback=3은 부족 (2/18→2/17→2/16 모두 휴) → None
+        prev_short = gate_mod._previous_trading_day(d_plus_6, max_lookback=3)
+        assert prev_short is None, f"짧은 lookback도 발견됨: {prev_short}"
 
     def test_signature_mismatch_blocks_d0_intent(self, isolated_env, monkeypatch):
         """D0 intent의 HMAC 서명이 위조되면 D+1에서도 IntentSignatureError."""
@@ -713,3 +753,46 @@ class TestC3_HmacKeyFailFast:
         import os
         key = os.getenv("ORDER_INTENTS_HMAC_KEY", "")
         assert bool(key) and len(key) >= 32
+
+    def test_preflight_exit_code_fails_without_hmac_key(self, tmp_path, monkeypatch):
+        """Note 3 (코덱스 5/28 16:00): 실제 preflight 실행 후 exit code 1 검증.
+
+        HMAC 키 없을 때 preflight가 RESULT: FAIL + exit 1 반환해야 함.
+        """
+        import subprocess
+        import sys
+        env = os.environ.copy()
+        env.pop("ORDER_INTENTS_HMAC_KEY", None)
+        env["ORDER_INTENTS_HMAC_KEY"] = ""  # 빈 키도 명시 차단
+        env["PYTHONIOENCODING"] = "utf-8"  # 한글 출력 인코딩 (cp949 회피)
+
+        project_root = Path(__file__).resolve().parents[1]
+        result = subprocess.run(
+            [sys.executable, str(project_root / "tools" / "quant_preflight.py"), "--expect", "blocked"],
+            capture_output=True, text=True, env=env,
+            cwd=str(project_root),
+            encoding="utf-8", errors="replace",
+        )
+        # 키 부재 → preflight FAIL → exit code 1
+        assert result.returncode == 1, f"exit code={result.returncode}, stdout={result.stdout[-500:]}"
+        assert "ORDER_INTENTS_HMAC_KEY" in result.stdout
+        assert "MISSING" in result.stdout or "FAIL" in result.stdout
+
+    def test_preflight_exit_code_passes_with_valid_key(self, tmp_path, monkeypatch):
+        """정상 키 + 다른 가드 통과 시 exit code 0."""
+        import subprocess
+        import sys
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
+        # 실제 .env의 키 사용 (preflight가 .env 로드함)
+
+        project_root = Path(__file__).resolve().parents[1]
+        result = subprocess.run(
+            [sys.executable, str(project_root / "tools" / "quant_preflight.py"), "--expect", "blocked"],
+            capture_output=True, text=True, env=env,
+            cwd=str(project_root),
+            encoding="utf-8", errors="replace",
+        )
+        # 현재 .env에 64-char hex 키 + 다른 가드 모두 PASS → exit 0
+        assert result.returncode == 0, f"exit code={result.returncode}, stdout={result.stdout[-500:]}"
+        assert "RESULT: PASS" in result.stdout

@@ -51,12 +51,27 @@ class SplitOrderExecutor:
     소량 주문은 그대로 1회 실행.
     """
 
-    def __init__(self, order_adapter, config: dict | None = None):
+    def __init__(
+        self, order_adapter, config: dict | None = None,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ):
+        """5/28 코덱스 결정문 (보류 7건 마이그레이션):
+        mode/executor_bot 명시 시 모든 분할 주문에 적용 → L10 가드 강제.
+        backward compat: 둘 다 None → 기존 _guard 9중만.
+        """
         self.adapter = order_adapter
         cfg = config or {}
         self.split_threshold = cfg.get("split_threshold_amount", SPLIT_THRESHOLD_AMOUNT)
         self.default_splits = cfg.get("default_splits", DEFAULT_SPLITS)
         self.interval_sec = cfg.get("split_interval_sec", DEFAULT_INTERVAL_SEC)
+        self.mode = mode
+        self.executor_bot = executor_bot
+
+    def _adapter_kwargs(self) -> dict:
+        """매매 호출 시 mode/executor_bot 명시 인자."""
+        if self.mode is not None or self.executor_bot is not None:
+            return {"mode": self.mode, "executor_bot": self.executor_bot}
+        return {}
 
     def buy_split(
         self,
@@ -94,7 +109,7 @@ class SplitOrderExecutor:
 
         if splits <= 1:
             # 분할 불필요 → 단일 주문
-            order = self.adapter.buy_market(ticker, quantity)
+            order = self.adapter.buy_market(ticker, quantity, **self._adapter_kwargs())
             return SplitResult(
                 ticker=ticker,
                 total_quantity=quantity,
@@ -135,7 +150,7 @@ class SplitOrderExecutor:
             splits = self._calc_splits(estimated_amount)
 
         if splits <= 1:
-            order = self.adapter.sell_market(ticker, quantity)
+            order = self.adapter.sell_market(ticker, quantity, **self._adapter_kwargs())
             return SplitResult(
                 ticker=ticker,
                 total_quantity=quantity,
@@ -201,9 +216,9 @@ class SplitOrderExecutor:
             logger.info("[분할주문] %d/%d 실행: %d주", i + 1, actual_splits, qty)
 
             if side == "buy":
-                order = self.adapter.buy_market(ticker, qty)
+                order = self.adapter.buy_market(ticker, qty, **self._adapter_kwargs())
             else:
-                order = self.adapter.sell_market(ticker, qty)
+                order = self.adapter.sell_market(ticker, qty, **self._adapter_kwargs())
 
             orders.append(order)
 

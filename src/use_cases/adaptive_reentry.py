@@ -246,7 +246,15 @@ def evaluate_reentry(
     return dec
 
 
-def execute_auto_reentry(broker, decision: ReentryDecision) -> dict:
+def execute_auto_reentry(
+    broker, decision: ReentryDecision,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
+    """자동 재진입 — 5/28 코덱스 결정문: mode/executor_bot 명시 강제 가능.
+
+    backward compat: 둘 다 None → 기존 _guard 9중만.
+    명시 시 → L10 (order_intents_gate) 강제.
+    """
     """자동 재진입 매수 (AUTO_REENTRY=1일 때만).
 
     Returns:
@@ -290,10 +298,12 @@ def execute_auto_reentry(broker, decision: ReentryDecision) -> dict:
     try:
         # 시장가 매수 (받침 확인된 종목 → 즉시 진입)
         if hasattr(broker, "buy_market"):
-            order = broker.buy_market(decision.ticker, decision.target_qty)
+            adapter_kwargs = {}
+            if mode is not None or executor_bot is not None:
+                adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+            order = broker.buy_market(decision.ticker, decision.target_qty, **adapter_kwargs)
             order_id = getattr(order, "order_id", "") or ""
         else:
-            # P0-D (5/28 fix): raw mojito broker fallback 차단
             raise RuntimeError(
                 "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
                 "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."

@@ -68,7 +68,15 @@ def _fetch_current_price(broker, ticker: str) -> int:
         return 0
 
 
-def execute_trailing_sell(broker, ticker: str, stage: dict, sell_price: int) -> dict:
+def execute_trailing_sell(
+    broker, ticker: str, stage: dict, sell_price: int,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
+    """Trailing 매도 — 5/28 코덱스 결정문 적용: mode/executor_bot 명시 강제 가능.
+
+    backward compat: mode/executor_bot None → 기존 _guard 9중 가드만 (Phase 2 미마이그레이션 호출자).
+    명시 시 → L10 (order_intents_gate) 강제 통과.
+    """
     """Trailing 꺾임 시 시장가 매도 (즉시 체결 보장).
 
     Returns:
@@ -90,17 +98,21 @@ def execute_trailing_sell(broker, ticker: str, stage: dict, sell_price: int) -> 
         use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
         sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
 
+        # row 7 (5/28 코덱스 결정문): mode/executor_bot 명시 시 L10 강제
+        adapter_kwargs = {}
+        if mode is not None or executor_bot is not None:
+            adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+
         if use_limit and hasattr(broker, "sell_limit") and sell_price > 0:
-            # 지정가 = 현재가 - slippage% (체결 우선)
             limit_price = int(sell_price * (1 - sell_slippage_pct / 100))
-            order = broker.sell_limit(ticker, limit_price, sell_qty)
+            order = broker.sell_limit(ticker, limit_price, sell_qty, **adapter_kwargs)
             order_id = getattr(order, "order_id", "") or ""
             logger.info(
                 "[trailing] 지정가 매도 %s %d주 @ %d (현재 %d, slippage -%.1f%%)",
                 ticker, sell_qty, limit_price, sell_price, sell_slippage_pct,
             )
         elif hasattr(broker, "sell_market"):
-            order = broker.sell_market(ticker, sell_qty)
+            order = broker.sell_market(ticker, sell_qty, **adapter_kwargs)
             order_id = getattr(order, "order_id", "") or ""
             limit_price = sell_price  # 시장가
         else:

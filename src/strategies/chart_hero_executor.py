@@ -455,8 +455,12 @@ class ChartHeroExecutor:
                     f"🚫 [{action}] {d.get('name', d['ticker'])}({d['ticker']}) "
                     f"추매 {qty}주 @ {price:,}원 차단\n사유: {e}"
                 )
-            except Exception:
-                pass
+            except Exception as tg_err:
+                # Note 4 (코덱스 5/28 16:00): Telegram alert 실패 silent pass 금지
+                logger.warning(
+                    "[%s] 텔레그램 알림 발송 실패 (차단은 정상 수행) %s: %s",
+                    action, d["ticker"], tg_err,
+                )
             return {
                 "action": action, "ticker": d["ticker"],
                 "price": price, "qty": qty, "reason": str(e),
@@ -502,8 +506,12 @@ class ChartHeroExecutor:
                     f"사유: {e}\n"
                     f"※ 수동 확인 필요"
                 )
-            except Exception:
-                pass
+            except Exception as tg_err:
+                # Note 4 (코덱스 5/28 16:00): 매도 차단 알림 누락 시 운영자 인지 부재 위험
+                logger.warning(
+                    "[%s] 텔레그램 ALERT 발송 실패 (매도 차단 자체는 정상) %s: %s — 운영자 수동 확인 필요",
+                    action_tag, d["ticker"], tg_err,
+                )
             return {
                 "action": action_tag, "ticker": d["ticker"],
                 "price": price, "qty": qty,

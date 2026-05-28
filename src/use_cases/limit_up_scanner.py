@@ -50,10 +50,16 @@ class LimitUpScanner:
         intraday_adapter=None,
         order_adapter=None,
         config: dict | None = None,
+        *,
+        mode: str | None = None,
+        executor_bot: str | None = None,
     ):
+        """5/28 코덱스 결정문: mode/executor_bot 명시 시 L10 가드 강제."""
         self.intraday = intraday_adapter
         self.order = order_adapter
         self.config = config or {}
+        self.mode = mode
+        self.executor_bot = executor_bot
 
         lu_cfg = self.config.get("limit_up_scanner", {})
         self.scan_interval = lu_cfg.get("scan_interval_sec", 30)
@@ -381,7 +387,12 @@ class LimitUpScanner:
                 self._send_alert(entry)
                 return
             try:
-                order_result = self.order.buy_limit(ticker, unlocked_price, quantity)
+                adapter_kwargs = {}
+                if self.mode is not None or self.executor_bot is not None:
+                    adapter_kwargs = {"mode": self.mode, "executor_bot": self.executor_bot}
+                order_result = self.order.buy_limit(
+                    ticker, unlocked_price, quantity, **adapter_kwargs,
+                )
                 entry["order_id"] = getattr(order_result, "order_id", "N/A")
                 entry["status"] = "ORDERED"
                 logger.info(

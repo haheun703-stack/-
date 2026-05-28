@@ -67,7 +67,15 @@ def _fetch_current_price(broker, ticker: str) -> int:
         return 0
 
 
-def execute_stop_loss_sell(broker, ticker: str, stage: dict) -> dict:
+def execute_stop_loss_sell(
+    broker, ticker: str, stage: dict,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
+    """손절 매도 — 5/28 코덱스 결정문: mode/executor_bot 명시 강제 가능.
+
+    backward compat: 둘 다 None → 기존 _guard 9중만.
+    명시 시 → L10 (order_intents_gate) 강제.
+    """
     """손절 시장가 매도 실행.
 
     Returns:
@@ -83,11 +91,12 @@ def execute_stop_loss_sell(broker, ticker: str, stage: dict) -> dict:
 
     try:
         if hasattr(broker, "sell_market"):
-            order = broker.sell_market(ticker, qty)
+            adapter_kwargs = {}
+            if mode is not None or executor_bot is not None:
+                adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+            order = broker.sell_market(ticker, qty, **adapter_kwargs)
             order_id = getattr(order, "order_id", "") or ""
         else:
-            # P0-D (5/28 fix): raw mojito broker fallback 차단 (5/27 owner_rule 사고 동일 패턴 재발 방지)
-            # broker는 반드시 KisOrderAdapter여야 함 → _guard() 9중 가드 통과 강제
             raise RuntimeError(
                 "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
                 "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."
