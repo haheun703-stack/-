@@ -17,19 +17,28 @@
 
 ### owner_rule_monitor
 
+**올바른 형태** — env 변수를 python 실행 앞에 둘 것 (cd 앞에 두면 별도 셸로 분기되어 python 프로세스에 안 들어감).
+
 ```bash
 */5 9-15 * * 1-5 \
-  OWNER_RULE_MODE=paper \
-  cd /home/ubuntu/quantum-master && ./venv/bin/python3.11 scripts/owner_rule_monitor.py \
+  cd /home/ubuntu/quantum-master && \
+  OWNER_RULE_MODE=paper ./venv/bin/python3.11 scripts/owner_rule_monitor.py \
   >> /tmp/owner_rule_monitor.log 2>&1
+```
+
+**잘못된 형태 (env 전달 안 됨)**:
+
+```bash
+# ❌ OWNER_RULE_MODE=paper cd ... && python ... → env가 cd에만 영향, python 프로세스에 미전달
+OWNER_RULE_MODE=paper cd /home/ubuntu/quantum-master && ./venv/bin/python3.11 ...
 ```
 
 ### auto_buy_executor
 
 ```bash
 */5 14 * * 1-5 \
-  AUTO_BUY_EXECUTOR_MODE=paper \
   cd /home/ubuntu/quantum-master && \
+  AUTO_BUY_EXECUTOR_MODE=paper \
   PYTHONPATH=/home/ubuntu/quantum-master \
   ./venv/bin/python3.11 -u -X utf8 scripts/auto_buy_executor.py \
   >> /home/ubuntu/quantum-master/logs/auto_buy.log 2>&1

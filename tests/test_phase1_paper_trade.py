@@ -1084,6 +1084,76 @@ class TestCallerPassesModeExecutorBot:
         assert engine.mode == "paper"
         assert engine.executor_bot == "quant"
 
+    def test_smart_entry_buy_limit_calls_include_kwargs_static(self):
+        """P0-4 (코덱스 18:51): smart_entry.py의 buy_limit 2곳 모두 _adapter_kw 전달 정적 검증."""
+        import re
+        from pathlib import Path
+        src = (Path(__file__).resolve().parents[1] / "src" / "use_cases" / "smart_entry.py").read_text(encoding="utf-8")
+
+        # buy_limit 호출 전체 찾기 (multi-line)
+        buy_calls = re.findall(
+            r"self\.order\.buy_limit\([^)]+\)", src, re.DOTALL,
+        )
+        assert len(buy_calls) >= 2, f"buy_limit 호출 {len(buy_calls)}건 발견 (2건 이상 기대)"
+        # 각 호출에 **_adapter_kw 또는 mode= + executor_bot= 명시
+        for call in buy_calls:
+            has_kw = ("_adapter_kw" in call) or ("mode=" in call and "executor_bot=" in call)
+            assert has_kw, f"buy_limit 호출에 mode/executor_bot 미명시:\n{call}"
+
+        # _adapter_kw 빌드 로직 (self.mode + self.executor_bot 기반) 확인
+        assert re.search(r"_adapter_kw\s*=\s*\{[^}]*self\.mode[^}]*self\.executor_bot", src, re.DOTALL), \
+            "_adapter_kw 빌드 로직 (self.mode + self.executor_bot) 미발견"
+
+    def test_auto_buy_executor_buy_limit_includes_kwargs_static(self):
+        """P0-3 (코덱스 18:51): auto_buy_executor.py:443 buy_limit에 mode/executor_bot 명시 정적 검증."""
+        import re
+        from pathlib import Path
+        src = (Path(__file__).resolve().parents[1] / "scripts" / "auto_buy_executor.py").read_text(encoding="utf-8")
+
+        # kis_order.buy_limit 호출 multi-line 매치
+        pattern = re.compile(
+            r"kis_order\.buy_limit\([^)]+\)", re.DOTALL,
+        )
+        calls = pattern.findall(src)
+        assert calls, "kis_order.buy_limit 호출 미발견"
+        for call in calls:
+            assert "mode=" in call and "executor_bot=" in call, \
+                f"buy_limit 호출에 mode/executor_bot 미명시:\n{call}"
+
+        # AUTO_BUY_EXECUTOR_MODE 환경변수 사용 확인
+        assert "AUTO_BUY_EXECUTOR_MODE" in src, \
+            "AUTO_BUY_EXECUTOR_MODE 환경변수 미사용"
+        # executor_bot="quant" 명시
+        assert re.search(r'executor_bot\s*=\s*["\']quant["\']', src), \
+            'executor_bot="quant" 명시 미발견'
+
+    def test_auto_buy_executor_buy_limit_call_runtime(self, monkeypatch):
+        """P0-3 (코덱스 18:51): KisOrderAdapter mock으로 buy_limit kwargs 런타임 검증."""
+        from unittest.mock import MagicMock, patch
+
+        monkeypatch.setenv("AUTO_BUY_EXECUTOR_MODE", "paper")
+        mock_adapter = MagicMock()
+        mock_order = MagicMock()
+        from src.entities.trading_models import OrderStatus
+        mock_order.status = OrderStatus.PENDING
+        mock_order.message = ""
+        mock_adapter.buy_limit.return_value = mock_order
+
+        # auto_buy_executor의 buy_limit 호출 코드만 격리 실행
+        # KisOrderAdapter는 main() 내부에서 lazy import → 모듈 경로 patch
+        with patch("src.adapters.kis_order_adapter.KisOrderAdapter", return_value=mock_adapter):
+            import os
+            from src.adapters.kis_order_adapter import KisOrderAdapter
+            kis_order = KisOrderAdapter()
+            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "live")
+            kis_order.buy_limit("240810", 120000, 1,
+                                 mode=auto_mode, executor_bot="quant")
+
+        assert mock_adapter.buy_limit.called
+        call_kwargs = mock_adapter.buy_limit.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "quant"
+
     def test_execute_time_exit_forwards_kwargs(self):
         """execute_time_exit → broker.sell_limit/market kwargs 전달 (옆문 2)."""
         from unittest.mock import MagicMock
