@@ -311,7 +311,10 @@ def scan_holdings_for_peaks(
     return results
 
 
-def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
+def execute_auto_sell(
+    broker, sig: PeakSignal, holdings_qty: int,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
     """자동 매도 실행 (ADAPTIVE_AUTO_SELL=1일 때만).
 
     매도 성공 시 → MVP-2 분할매수 큐 자동 등록 (peak_price + 가용 현금 기반).
@@ -334,10 +337,15 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
     use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
     sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
 
+    # 5/28 P0-5: mode/executor_bot 명시 시 broker 전달
+    adapter_kwargs = {}
+    if mode is not None or executor_bot is not None:
+        adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+
     try:
         if use_limit and hasattr(broker, "sell_limit") and sig.current_price > 0:
             limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
-            order = broker.sell_limit(sig.ticker, limit_price, sell_qty)
+            order = broker.sell_limit(sig.ticker, limit_price, sell_qty, **adapter_kwargs)
             result = {
                 "success": True,
                 "order_id": getattr(order, "order_id", "") or "",

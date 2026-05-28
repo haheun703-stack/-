@@ -333,7 +333,10 @@ def scan_queue_for_trend_exit(queue_state: dict, broker) -> list[TrendExitSignal
     return signals
 
 
-def execute_trend_exit(broker, sig: TrendExitSignal) -> dict:
+def execute_trend_exit(
+    broker, sig: TrendExitSignal,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
     """추세 이탈 매도 실행 (지정가 우선, 시장가 fallback).
 
     ADAPTIVE_SELL_USE_LIMIT=1 시 지정가 매도 (slippage -0.3%).
@@ -344,10 +347,15 @@ def execute_trend_exit(broker, sig: TrendExitSignal) -> dict:
     use_limit = os.getenv("ADAPTIVE_SELL_USE_LIMIT", "1") == "1"
     sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
 
+    # 5/28 P0-5: mode/executor_bot 명시 시 broker에 전달
+    adapter_kwargs = {}
+    if mode is not None or executor_bot is not None:
+        adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+
     try:
         if use_limit and hasattr(broker, "sell_limit") and sig.current_price > 0:
             limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
-            order = broker.sell_limit(sig.ticker, limit_price, sig.qty)
+            order = broker.sell_limit(sig.ticker, limit_price, sig.qty, **adapter_kwargs)
             logger.info(
                 "[추세 이탈] %s 지정가 매도 %d주 @ %d (%s, 평단 %+.1f%%)",
                 sig.ticker, sig.qty, limit_price, sig.exit_type, sig.pnl_pct,
@@ -361,7 +369,7 @@ def execute_trend_exit(broker, sig: TrendExitSignal) -> dict:
                 "pnl_pct": sig.pnl_pct,
             }
         elif hasattr(broker, "sell_market"):
-            order = broker.sell_market(sig.ticker, sig.qty)
+            order = broker.sell_market(sig.ticker, sig.qty, **adapter_kwargs)
             return {
                 "success": True,
                 "order_id": getattr(order, "order_id", "") or "",

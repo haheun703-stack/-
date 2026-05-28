@@ -124,12 +124,14 @@
 | 4 | smart_entry.py | BAT-E 08:50 자동 매수 |
 | 5 | adaptive_trend_exit / adaptive_position_manager | run_adaptive_cycle 매도 경로 |
 
-## 5. P1 (재가동 후 별도)
+## 5. P1 (재가동 후 별도) + P0 승격 조건
 
-- sell_monitor.py (--dry-run 강제라 위험 낮음)
-- smart_sell.py (호출자 검증 후)
-- live_trading.py (호출자 검증 후)
-- split_order.py 호출자 측
+| 호출자 | 현재 | P0 승격 조건 (코덱스 5/28 17:13 보정) |
+|--------|------|--------------------------------------|
+| sell_monitor.py | P1 (--dry-run 강제) | **수동 실행 또는 인자 누락으로 실매도 가능 시 즉시 P0** |
+| smart_sell.py | P1 (호출자 미확정) | **active entrypoint 발견 시 즉시 P0** |
+| live_trading.py | P1 (main.py stock_buy/sell 추정) | **active entrypoint 확인 시 즉시 P0** |
+| split_order.py 호출자 측 | P1 | (SplitOrderExecutor 자체는 b76dc5e 완료) |
 
 ## 6. 정책 리스크 (코덱스 6번)
 

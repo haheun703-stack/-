@@ -537,7 +537,10 @@ class TelegramCommandBot:
             if held:
                 held_qty = held.get("quantity", 0)
                 logger.warning("[수동매수] %s 이미 보유 중 (%d주) — 추가매수 진행", ticker, held_qty)
-            order = adapter.buy_limit(ticker, limit_price, qty)
+            # 5/28 P0-2 (코덱스 17:13): mode/executor_bot 명시 — day bot 수동 매매
+            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+            order = adapter.buy_limit(ticker, limit_price, qty,
+                                       mode=tg_mode, executor_bot="day")
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
                 chat_id, msg_id,
@@ -566,7 +569,10 @@ class TelegramCommandBot:
                 edit_message_text(chat_id, msg_id, f"\u274c 매도 실패: 현재가 조회 불가 ({ticker})")
                 return
             limit_price = _tick_round(int(current * (1 + LIMIT_SELL_PREMIUM)), current)
-            order = adapter.sell_limit(ticker, limit_price, qty)
+            # 5/28 P0-2: mode/executor_bot 명시
+            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+            order = adapter.sell_limit(ticker, limit_price, qty,
+                                        mode=tg_mode, executor_bot="day")
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
                 chat_id, msg_id,
@@ -598,7 +604,10 @@ class TelegramCommandBot:
                 name = h.get("name", ticker)
                 if shares > 0:
                     try:
-                        adapter.sell_market(ticker, shares)
+                        # 5/28 P0-2: mode/executor_bot 명시
+                        tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+                        adapter.sell_market(ticker, shares,
+                                             mode=tg_mode, executor_bot="day")
                         results.append(f"\u2705 {name} {shares}주 매도")
                     except Exception as e:
                         results.append(f"\u274c {name} 실패: {e}")

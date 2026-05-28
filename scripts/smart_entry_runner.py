@@ -81,13 +81,17 @@ def main():
         with open(config_path, encoding="utf-8") as f:
             config = yaml.safe_load(f) or {}
 
-    # SmartEntryEngine 생성
+    # SmartEntryEngine 생성 — 5/28 P0-4 (코덱스 17:13): mode/executor_bot 명시
+    # dry_run=True → mode="paper", live=True → mode="live" (단 quant+live는 차단됨)
     from src.use_cases.smart_entry import SmartEntryEngine
+    smart_mode = "paper" if dry_run else "live"
     engine = SmartEntryEngine(
         intraday_adapter=intraday,
         order_adapter=order_adapter,
         dry_run=dry_run,
         config=config,
+        mode=smart_mode,
+        executor_bot="quant",
     )
 
     # 추천 종목 경로

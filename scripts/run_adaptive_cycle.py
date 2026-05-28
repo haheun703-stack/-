@@ -374,7 +374,12 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                                     qty = int(h.get("hldg_qty", 0))
                                     break
                             if qty > 0:
-                                res = execute_auto_sell(broker, sig, qty)
+                                # 5/28 P0-5 (코덱스 17:13): mode/executor_bot 명시
+                                res = execute_auto_sell(
+                                    broker, sig, qty,
+                                    mode="paper" if is_paper else "live",
+                                    executor_bot="quant",
+                                )
                                 send_telegram(f"✅ 매도 결과: {res}")
                         except Exception as e:
                             summary["mvp1"]["errors"].append(f"{ticker} 매도: {e}")
@@ -616,7 +621,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 msg = format_trend_exit_for_telegram(sig)
                 print(msg)
                 send_telegram(msg)
-                exec_result = execute_trend_exit(broker, sig)
+                # 5/28 P0-5: mode/executor_bot 명시
+                exec_result = execute_trend_exit(
+                    broker, sig,
+                    mode="paper" if is_paper else "live", executor_bot="quant",
+                )
                 logger.warning(
                     "[MVP-2.8] %s %s 매도 — order_id=%s",
                     sig.ticker, sig.exit_type, exec_result.get("order_id", ""),

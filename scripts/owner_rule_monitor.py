@@ -77,13 +77,20 @@ def fetch_current_balance(broker) -> list[dict]:
         return []
 
 
-def execute_sell(broker, ticker: str, qty: int, current_price: int) -> tuple[bool, str]:
-    """KIS 시장가 매도 주문 (5/28 P0-B fix: KisOrderAdapter._guard 9중 가드 강제).
+def execute_sell(
+    broker, ticker: str, qty: int, current_price: int,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> tuple[bool, str]:
+    """KIS 시장가 매도 주문 (5/28 P0-B fix + 5/28 17:13 P0-1 호출자 mode/executor_bot).
 
-    Why: 5/27 09:55 원익IPS 1주 자동매도(-5.12%) 사고의 직접 원인은
-    raw `broker.create_market_sell_order` 호출이 KisOrderAdapter._guard()
-    9중 가드(AUTO_TRADING_ENABLED, MAX_QTY, 거래시간, 일일한도 등)를 전부 우회한 것.
-    이제 KisOrderAdapter.sell_market()을 거쳐 모든 가드 통과 강제.
+    Why: 5/27 09:55 원익IPS 1주 자동매도(-5.12%) 사고 직접 원인 fix 후속.
+    raw broker fallback 제거 + L10 (order_intents_gate) 강제 호출.
+
+    Args:
+        broker: 호환성 유지 (사용 X)
+        ticker/qty/current_price: 매도 정보
+        mode: "paper" / "live" (코덱스 5/28 17:13 P0-1: 명시 강제)
+        executor_bot: "quant" (owner_rule_monitor는 퀀트봇 전용)
 
     NOTE: broker 인자는 호출처 호환성을 위해 시그니처 유지하나 사용되지 않음.
     """
@@ -92,12 +99,16 @@ def execute_sell(broker, ticker: str, qty: int, current_price: int) -> tuple[boo
         from src.entities.trading_models import OrderStatus
 
         adapter = KisOrderAdapter()
-        order = adapter.sell_market(ticker=ticker, quantity=qty)
+        # 5/28 P0-1: mode/executor_bot 명시 시 L10 강제 (백워드 호환: None이면 _guard 9중만)
+        adapter_kwargs = {}
+        if mode is not None or executor_bot is not None:
+            adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+        order = adapter.sell_market(ticker=ticker, quantity=qty, **adapter_kwargs)
         if order.status == OrderStatus.PENDING:
             return True, "OK"
         return False, order.message or "FAILED"
     except (PermissionError, ValueError, RuntimeError) as e:
-        # 가드 차단 — AUTO_TRADING_ENABLED=0, MAX_QTY 초과, 거래시간 외 등
+        # 가드 차단 — AUTO_TRADING_ENABLED=0, MAX_QTY 초과, 거래시간 외, L10 NoIntentError 등
         logger.warning("[execute_sell] 가드 차단: %s — %s", ticker, e)
         return False, f"GUARD_BLOCKED: {e}"
     except Exception as e:
@@ -270,7 +281,15 @@ def main() -> int:
         if verdict.action != "HOLD":
             # 자동 매도
             logger.info("청산 결정 %s: %s", tk, verdict.reason)
-            ok, msg = execute_sell(broker, tk, h["qty"], h["current_price"])
+            # 5/28 P0-1 (코덱스 17:13): mode/executor_bot 명시 — L10 강제
+            # 정책: quant+live 조합은 register 단계 차단 → owner_rule paper 운영 권장
+            # 환경변수 OWNER_RULE_MODE로 결정 (default=live, 단 quant+live는 차단됨 — 정책 결단 대기)
+            owner_mode = os.getenv("OWNER_RULE_MODE", "live")
+            ok, msg = execute_sell(
+                broker, tk, h["qty"], h["current_price"],
+                mode=owner_mode,
+                executor_bot="quant",  # owner_rule_monitor = 퀀트봇 호출자
+            )
             emoji = "✅" if ok else "❌"
 
             # paper mirror 청산 시뮬 (5/18 사장님 결단 옵션 B, §13-2-1)

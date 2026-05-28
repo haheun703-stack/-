@@ -438,9 +438,12 @@ def main() -> int:
             break
 
         # 실제 주문 — 지정가 (사장님 5/18 결단, 안전선 ⑨ 발동)
+        # 5/28 P0-3 (코덱스 17:13): mode/executor_bot 명시 — L10 강제
         try:
             kis_order = KisOrderAdapter()
-            order = kis_order.buy_limit(tk, current_price, 1)
+            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "live")
+            order = kis_order.buy_limit(tk, current_price, 1,
+                                         mode=auto_mode, executor_bot="quant")
             ok = order.status.value == "PENDING" if hasattr(order.status, "value") else str(order.status) == "OrderStatus.PENDING"
 
             if not ok:

@@ -133,10 +133,16 @@ class SmartEntryEngine:
         order_adapter=None,     # KisOrderAdapter (dry_run이면 None 가능)
         dry_run: bool = True,
         config: dict | None = None,
+        *,
+        mode: str | None = None,
+        executor_bot: str | None = None,
     ):
+        """5/28 P0-4 (코덱스 17:13): mode/executor_bot 명시 시 모든 매매에 L10 강제."""
         self.intraday = intraday_adapter
         self.order = order_adapter
         self.config = config or {}
+        self.mode = mode
+        self.executor_bot = executor_bot
 
         # 안전장치: dry_run=False인데 order_adapter 없으면 강제 dry_run
         if not dry_run and order_adapter is None:
@@ -641,7 +647,11 @@ class SmartEntryEngine:
                         c.decision = EntryDecision.SKIP
                         continue
 
-                order = self.order.buy_limit(c.ticker, order_price, c.order_qty)
+                # 5/28 P0-4 (코덱스 17:13): mode/executor_bot 명시
+                _adapter_kw = {}
+                if self.mode is not None or self.executor_bot is not None:
+                    _adapter_kw = {"mode": self.mode, "executor_bot": self.executor_bot}
+                order = self.order.buy_limit(c.ticker, order_price, c.order_qty, **_adapter_kw)
                 if order.status.value != "failed":
                     c.order_id = order.order_id
                     c.org_no = order.org_no
@@ -1693,7 +1703,11 @@ class SmartEntryEngine:
                     )
                 elif self.order:
                     order_price = self._tick_round(c.current_price, c.prev_close)
-                    order = self.order.buy_limit(c.ticker, order_price, add_qty)
+                    # 5/28 P0-4: mode/executor_bot 명시
+                    _adapter_kw = {}
+                    if self.mode is not None or self.executor_bot is not None:
+                        _adapter_kw = {"mode": self.mode, "executor_bot": self.executor_bot}
+                    order = self.order.buy_limit(c.ticker, order_price, add_qty, **_adapter_kw)
                     if order.status.value != "failed":
                         logger.info(
                             "[SW-4] %s %d차 추가매수 접수: %d원 × %d주 (주문=%s)",
