@@ -294,6 +294,129 @@ def cmd_close(send_tg: bool) -> int:
     return 0
 
 
+def cmd_paper_trade_open(top_n: int, send_tg: bool) -> int:
+    """Phase 1 paper 호출처 마이그레이션 (5/28 코덱스 5차 PASS).
+
+    Trading Factory v1: register_intent → PaperOrderAdapter.buy_limit
+    - tomorrow_picks 강력포착 TOP N → mode='paper' + executor_bot='quant' intent 등록
+    - PaperOrderAdapter.buy_limit 호출 → assert_order_intent_exists 통과 검증
+    - 결과를 data/phase1_paper_trades/{date}_open.json에 기록
+
+    추적표: docs/02-design/phase-1-migration-tracking.md
+    """
+    from datetime import timedelta, timezone
+    from src.use_cases.order_intents_gate import register_intent, NoIntentError
+    from src.adapters.paper_order_adapter import PaperOrderAdapter
+    from src.entities.trading_models import OrderStatus
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    picks = fetch_picks(top_n=top_n)
+    if not picks:
+        print(f"[PAPER TRADE OPEN] {today} 강력포착 후보 0건")
+        return 1
+
+    adp = KisStockDataAdapter()
+    broker = adp.broker
+    paper_adapter = PaperOrderAdapter()
+
+    seoul = timezone(timedelta(hours=9))
+    now_kst = datetime.now(tz=seoul)
+    expires = (now_kst + timedelta(hours=8)).isoformat()  # 당일 17:00까지
+
+    budget = int(os.getenv("PAPER_BUDGET_PER_TICKER", "100000"))
+    records = []
+    n_registered = 0
+    n_filled = 0
+    n_blocked = 0
+
+    for p in picks:
+        tk = p.get("ticker", "")
+        nm = p.get("name", tk)
+        rank = picks.index(p) + 1
+        px = fetch_ohlcv(broker, tk)
+        if px is None or px["current"] <= 0:
+            records.append({"ticker": tk, "name": nm, "rank": rank,
+                            "status": "fetch_failed"})
+            continue
+        entry = px["current"]
+        qty = budget // entry
+        if qty <= 0:
+            records.append({"ticker": tk, "name": nm, "rank": rank,
+                            "status": "qty_zero", "entry": entry})
+            continue
+
+        intent_id = f"q_{tk}_{now_kst.strftime('%Y%m%d%H%M%S')}"
+        intent = {
+            "intent_id": intent_id, "bot": "quant",
+            "engine": "phase1_paper_warmup", "ticker": tk, "name": nm,
+            "side": "BUY", "mode": "paper",
+            "score": float(p.get("score", 0.0)),
+            "confidence": p.get("grade", ""),
+            "created_at": now_kst.isoformat(), "expires_at": expires,
+            "budget": budget, "target_qty": qty, "entry_price": entry,
+        }
+        try:
+            register_intent(intent, bot="quant")
+            n_registered += 1
+        except Exception as e:
+            logger.warning("[paper_trade_open] register 실패 %s: %s", tk, e)
+            records.append({"ticker": tk, "name": nm, "rank": rank,
+                            "status": "register_failed", "error": str(e)})
+            continue
+
+        # PaperOrderAdapter — assert_order_intent_exists 자동 호출 (P0-2 검증)
+        try:
+            order = paper_adapter.buy_limit(
+                ticker=tk, price=entry, quantity=qty,
+                mode="paper", executor_bot="quant",
+            )
+            if order.status == OrderStatus.FILLED:
+                n_filled += 1
+                records.append({
+                    "ticker": tk, "name": nm, "rank": rank, "status": "filled",
+                    "intent_id": intent_id, "entry": entry,
+                    "filled_price": int(order.filled_price), "qty": qty,
+                    "order_id": order.order_id,
+                })
+            else:
+                records.append({"ticker": tk, "name": nm, "rank": rank,
+                                "status": "order_not_filled", "intent_id": intent_id})
+        except NoIntentError as e:
+            n_blocked += 1
+            records.append({"ticker": tk, "name": nm, "rank": rank,
+                            "status": "intent_blocked", "intent_id": intent_id,
+                            "error": str(e)})
+
+    # 결과 저장
+    out_dir = PROJECT_ROOT / "data" / "phase1_paper_trades"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{today.replace('-', '')}_open.json"
+    out_data = {
+        "date": today, "mode": "open", "top_n": top_n,
+        "n_registered": n_registered, "n_filled": n_filled, "n_blocked": n_blocked,
+        "records": records, "created_at": now_kst.isoformat(),
+    }
+    out_path.write_text(json.dumps(out_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(
+        f"[PAPER TRADE OPEN] {today} — registered={n_registered}, "
+        f"filled={n_filled}, blocked={n_blocked} → {out_path.name}"
+    )
+
+    if send_tg:
+        try:
+            from src.telegram_sender import send_message
+            msg = (
+                f"[PHASE 1 PAPER TRADE OPEN] {today}\n"
+                f"register: {n_registered}건 / fill: {n_filled}건 / blocked: {n_blocked}건\n"
+                f"종목당 시드: {budget:,}원"
+            )
+            send_message(msg)
+        except Exception as e:
+            logger.warning("텔레그램 발송 실패: %s", e)
+
+    return 0
+
+
 def cmd_label_d1(date: str) -> int:
     """D+1 종가 라벨링 (다음 거래일 16:30 이후 실행)."""
     src_path = reflection_path(date)
@@ -329,6 +452,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="§13 워밍업 일일 추적")
     parser.add_argument("--open", action="store_true", help="09:05 시초가 기록")
     parser.add_argument("--close", action="store_true", help="15:30 종가 + 당일 적중률")
+    parser.add_argument("--paper-trade-open", action="store_true",
+                        help="Phase 1: register_intent + PaperOrderAdapter.buy_limit (5/28)")
     parser.add_argument("--label-d1", action="store_true", help="D+1 라벨링 (다음 거래일)")
     parser.add_argument("--date", help="--label-d1 대상 날짜 (YYYY-MM-DD)")
     parser.add_argument("--top", type=int, default=9, help="강력포착 TOP N (기본 9)")
@@ -347,6 +472,8 @@ def main() -> int:
         return cmd_open(args.top, send_tg)
     if args.close:
         return cmd_close(send_tg)
+    if args.paper_trade_open:
+        return cmd_paper_trade_open(args.top, send_tg)
     if args.label_d1:
         if not args.date:
             print("--label-d1 에는 --date 필수")
