@@ -396,7 +396,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 logger.warning("[MVP-2] 시장 가드 차단 — 신규 매수 정지: %s", market_guard.reason)
                 triggers = []
             else:
-                triggers = check_and_trigger_queues(broker, intraday_adapter=intraday_adapter)
+                # 5/28 코덱스 옆문 fix: mode/executor_bot 전달
+                triggers = check_and_trigger_queues(
+                    broker, intraday_adapter=intraday_adapter,
+                    mode="paper" if is_paper else "live", executor_bot="quant",
+                )
             summary["mvp2"]["triggers"] = len(triggers)
             for t in triggers:
                 msg = format_trigger_for_telegram(t)
@@ -548,8 +552,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 )
                 print(msg)
                 send_telegram(msg)
-                # 실행
-                exec_result = execute_time_exit(broker, sig)
+                # 실행 — 5/28 코덱스 옆문 fix
+                exec_result = execute_time_exit(
+                    broker, sig,
+                    mode="paper" if is_paper else "live", executor_bot="quant",
+                )
                 # 학습 로그
                 if learning_mode:
                     try:
@@ -998,8 +1005,12 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                                     f"⚠️ MVP-6 {sig.name}({sig.ticker}) 게이트 차단: {gate.block_reason}"
                                 )
                             else:
-                                # buy_limit 실행
-                                order = broker.buy_limit(sig.ticker, sig.target_price, 1)
+                                # buy_limit 실행 — 5/28 코덱스 옆문 fix
+                                order = broker.buy_limit(
+                                    sig.ticker, sig.target_price, 1,
+                                    mode="paper" if is_paper else "live",
+                                    executor_bot="quant",
+                                )
                                 order_id = getattr(order, "order_id", "") or ""
                                 logger.warning(
                                     "[MVP-6] %s 매수 체결 시도 1주 @ %d (order_id=%s)",
@@ -1073,7 +1084,11 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                         try:
                             from src.adapters.paper_order_adapter import PaperOrderAdapter
                             paper_broker = PaperOrderAdapter()
-                            paper_order = paper_broker.buy_limit(ticker, dec.current_price, 1)
+                            # 5/28 코덱스 옆문 fix: mode='paper' + executor_bot='quant' 명시
+                            paper_order = paper_broker.buy_limit(
+                                ticker, dec.current_price, 1,
+                                mode="paper", executor_bot="quant",
+                            )
                             logger.info(
                                 "[MVP-7] paper 매수 체결: %s %s 1주 @ %d (order_id=%s, pilot_run_id=%s)",
                                 ticker, name, dec.current_price,

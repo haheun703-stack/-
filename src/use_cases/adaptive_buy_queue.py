@@ -473,7 +473,8 @@ def _is_expired(registered_at: str, expiry_days: int | None = None) -> bool:
 
 
 def execute_auto_buy(broker, ticker: str, stage_dict: dict,
-                       intraday_adapter=None, regime: str = "NEUTRAL") -> dict:
+                       intraday_adapter=None, regime: str = "NEUTRAL",
+                       *, mode: str | None = None, executor_bot: str | None = None) -> dict:
     """단계별 자동 매수 (ADAPTIVE_AUTO_BUY=1일 때만).
 
     5/26 통합: 매수 직전 adaptive_entry_gates (H4 VWAP + H5 호가 + H6 매물대 + H7 ATR)
@@ -553,8 +554,11 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict,
             gate_summary["error"] = str(e)
 
     try:
-        # 지정가 매수 (target_price)
-        order = broker.buy_limit(ticker, target_price, qty)
+        # 지정가 매수 (target_price) — 5/28 코덱스: mode/executor_bot 전달
+        adapter_kwargs = {}
+        if mode is not None or executor_bot is not None:
+            adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+        order = broker.buy_limit(ticker, target_price, qty, **adapter_kwargs)
         order_id = getattr(order, "order_id", "") or ""
         return {
             "success": True,
@@ -568,10 +572,14 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict,
         return {"success": False, "error": str(e), "gate_summary": gate_summary}
 
 
-def check_and_trigger_queues(broker, intraday_adapter=None, regime: str = "NEUTRAL") -> list[dict]:
+def check_and_trigger_queues(
+    broker, intraday_adapter=None, regime: str = "NEUTRAL",
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> list[dict]:
     """모든 활성 큐 순회 + 가격 도달 단계 트리거.
 
     매 5분 cron에서 호출.
+    5/28 코덱스 검수: mode/executor_bot 명시 시 execute_auto_buy 내부 buy_limit에 전달.
 
     Args:
         broker: KisOrderAdapter (fetch_price + buy_limit)
@@ -625,10 +633,11 @@ def check_and_trigger_queues(broker, intraday_adapter=None, regime: str = "NEUTR
                 if current_price <= target_price:
                     stage["triggered_at"] = datetime.now().isoformat(timespec="seconds")
 
-                    # 자동 매수 시도 (★ C2 fix: intraday_adapter + regime 전달)
+                    # 자동 매수 시도 (★ C2 fix + 5/28 코덱스: mode/executor_bot 전달)
                     buy_result = execute_auto_buy(
                         broker, ticker, stage,
                         intraday_adapter=intraday_adapter, regime=regime,
+                        mode=mode, executor_bot=executor_bot,
                     )
                     if buy_result["success"]:
                         stage["status"] = STATUS_FILLED

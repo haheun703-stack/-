@@ -201,8 +201,11 @@ def scan_queue_for_time_exits(queue_state: dict, broker, now: Optional[datetime]
     return signals
 
 
-def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
-    """시간 매도 실행.
+def execute_time_exit(
+    broker, sig: TimeExitSignal,
+    *, mode: str | None = None, executor_bot: str | None = None,
+) -> dict:
+    """시간 매도 실행. 5/28 코덱스: mode/executor_bot 명시 가능.
 
     5/26 변경: 시장가 → 지정가 우선 (시장가 슬리피지 회피, 사용자 지시).
     - D+3 익절: 지정가 -0.3% (체결 우선)
@@ -222,10 +225,15 @@ def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
     else:
         sell_slippage_pct = float(os.getenv("ADAPTIVE_SELL_LIMIT_SLIPPAGE_PCT", "0.3"))
 
+    # 5/28 코덱스: mode/executor_bot 명시 시 broker에 전달
+    adapter_kwargs = {}
+    if mode is not None or executor_bot is not None:
+        adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
+
     try:
         if use_limit and hasattr(broker, "sell_limit") and sig.current_price > 0:
             limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
-            order = broker.sell_limit(sig.ticker, limit_price, sig.qty)
+            order = broker.sell_limit(sig.ticker, limit_price, sig.qty, **adapter_kwargs)
             logger.info(
                 "[H8/H9] 지정가 매도 %s %s %d주 @ %d (현재 %d, slippage -%.1f%%)",
                 sig.ticker, sig.exit_type, sig.qty, limit_price, sig.current_price, sell_slippage_pct,
@@ -239,7 +247,7 @@ def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
                 "pnl_pct": sig.pnl_pct,
             }
         elif hasattr(broker, "sell_market"):
-            order = broker.sell_market(sig.ticker, sig.qty)
+            order = broker.sell_market(sig.ticker, sig.qty, **adapter_kwargs)
             return {
                 "success": True,
                 "order_id": getattr(order, "order_id", ""),
@@ -250,7 +258,7 @@ def execute_time_exit(broker, sig: TimeExitSignal) -> dict:
         else:
             # fallback: 지정가 매도
             limit_price = int(sig.current_price * (1 - sell_slippage_pct / 100))
-            order = broker.sell_limit(sig.ticker, limit_price, sig.qty)
+            order = broker.sell_limit(sig.ticker, limit_price, sig.qty, **adapter_kwargs)
             return {
                 "success": True,
                 "order_id": getattr(order, "order_id", ""),
