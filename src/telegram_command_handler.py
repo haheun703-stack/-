@@ -505,8 +505,11 @@ class TelegramCommandBot:
     def _execute_buy(self, ticker: str, qty: int, chat_id: str, msg_id: int) -> None:
         from src.telegram_sender import edit_message_text
         from src.stock_name_resolver import ticker_to_name
+        from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
         name = ticker_to_name(ticker)
         try:
+            # P0-C (5/28 fix): 텔레그램 수동 매매도 런타임 가드 명시 통과 필수
+            assert_runtime_orders_allowed()
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
             # 현재가 조회 → -0.5% 지정가 매수
@@ -549,8 +552,11 @@ class TelegramCommandBot:
     def _execute_sell(self, ticker: str, qty: int, chat_id: str, msg_id: int) -> None:
         from src.telegram_sender import edit_message_text
         from src.stock_name_resolver import ticker_to_name
+        from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
         name = ticker_to_name(ticker)
         try:
+            # P0-C (5/28 fix): 텔레그램 수동 매매도 런타임 가드 명시 통과 필수
+            assert_runtime_orders_allowed()
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
             # 현재가 조회 → +0.5% 지정가 매도
@@ -574,8 +580,11 @@ class TelegramCommandBot:
 
     def _execute_liquidate(self, chat_id: str, msg_id: int) -> None:
         from src.telegram_sender import edit_message_text
+        from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
         results = []
         try:
+            # P0-C (5/28 fix): 텔레그램 청산도 런타임 가드 명시 통과 필수
+            assert_runtime_orders_allowed()
             from src.adapters.kis_order_adapter import KisOrderAdapter
             adapter = KisOrderAdapter()
             # KIS 실제 잔고 기반으로 청산 (positions.json 대신)

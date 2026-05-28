@@ -288,7 +288,12 @@ def execute_sell(
         return {"status": "dry_run", "ticker": ticker, "qty": qty}
 
     try:
-        assert_runtime_orders_allowed()
+        # P0-D (5/28 fix): raw broker 호출 → KisOrderAdapter 위임으로 _guard 9중 가드 강제
+        from src.adapters.kis_order_adapter import KisOrderAdapter
+        from src.entities.trading_models import OrderStatus
+
+        _adapter = KisOrderAdapter()
+
         if use_limit:
             # 현재가 조회 → +premium% 지정가 매도 ("더 비싸게 매도" 모토)
             price_resp = broker.fetch_price(ticker)
@@ -297,42 +302,41 @@ def execute_sell(
                 limit_price = _tick_round(
                     int(current * (1 + limit_premium_pct / 100)), current,
                 )
-                resp = broker.create_limit_sell_order(ticker, limit_price, qty)
-                rt_cd = resp.get("rt_cd", "?")
-                msg = resp.get("msg1", "")
-                odno = resp.get("output", {}).get("ODNO", "")
-
-                if rt_cd == "0":
+                order = _adapter.sell_limit(ticker, limit_price, qty)
+                if order.status == OrderStatus.PENDING:
                     logger.info(
                         "[지정가 매도] %s %d주 @%d원 (+%.1f%%), 주문번호=%s",
-                        name, qty, limit_price, limit_premium_pct, odno,
+                        name, qty, limit_price, limit_premium_pct, order.order_id,
                     )
                     return {
                         "status": "ok", "ticker": ticker, "qty": qty,
-                        "order_no": odno, "order_type": "limit",
+                        "order_no": order.order_id, "order_type": "limit",
                         "limit_price": limit_price,
                     }
                 else:
-                    logger.warning("[지정가 매도 실패] %s: %s → 시장가 fallback", name, msg)
+                    logger.warning(
+                        "[지정가 매도 실패] %s: %s → 시장가 fallback",
+                        name, order.message or "unknown",
+                    )
                     # 지정가 실패 시 시장가 fallback
             else:
                 logger.warning("[매도] %s 현재가 조회 실패 → 시장가 fallback", name)
 
-        # 시장가 매도 (기본 or fallback)
-        resp = broker.create_market_sell_order(ticker, qty)
-        rt_cd = resp.get("rt_cd", "?")
-        msg = resp.get("msg1", "")
-        odno = resp.get("output", {}).get("ODNO", "")
-
-        if rt_cd == "0":
-            logger.info("[시장가 매도] %s %d주, 주문번호=%s", name, qty, odno)
+        # 시장가 매도 (기본 or fallback) — adapter 위임
+        order = _adapter.sell_market(ticker, qty)
+        if order.status == OrderStatus.PENDING:
+            logger.info("[시장가 매도] %s %d주, 주문번호=%s", name, qty, order.order_id)
             return {
                 "status": "ok", "ticker": ticker, "qty": qty,
-                "order_no": odno, "order_type": "market",
+                "order_no": order.order_id, "order_type": "market",
             }
         else:
-            logger.error("[매도 실패] %s: %s", name, msg)
-            return {"status": "failed", "ticker": ticker, "msg": msg}
+            logger.error("[매도 실패] %s: %s", name, order.message or "unknown")
+            return {"status": "failed", "ticker": ticker, "msg": order.message or "unknown"}
+    except (PermissionError, ValueError, RuntimeError) as e:
+        # 가드 차단 — AUTO_TRADING_ENABLED=0, MAX_QTY 초과, 거래시간 외 등
+        logger.warning("[매도 가드 차단] %s: %s", name, e)
+        return {"status": "blocked", "ticker": ticker, "msg": f"GUARD_BLOCKED: {e}"}
     except Exception as e:
         logger.error("[매도 에러] %s: %s", name, e)
         return {"status": "error", "ticker": ticker, "msg": str(e)}

@@ -86,9 +86,12 @@ def execute_stop_loss_sell(broker, ticker: str, stage: dict) -> dict:
             order = broker.sell_market(ticker, qty)
             order_id = getattr(order, "order_id", "") or ""
         else:
-            assert_runtime_orders_allowed()
-            res = broker.create_market_sell_order(symbol=ticker, quantity=qty)
-            order_id = res.get("output", {}).get("ODNO", "") if res else ""
+            # P0-D (5/28 fix): raw mojito broker fallback 차단 (5/27 owner_rule 사고 동일 패턴 재발 방지)
+            # broker는 반드시 KisOrderAdapter여야 함 → _guard() 9중 가드 통과 강제
+            raise RuntimeError(
+                "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
+                "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."
+            )
 
         loss_pct = (current / actual_buy - 1) * 100 if actual_buy > 0 else 0
 

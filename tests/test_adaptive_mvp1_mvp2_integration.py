@@ -91,6 +91,11 @@ class TestMVP1MVP2Integration(unittest.TestCase):
         broker = MagicMock()
         broker.fetch_price.return_value = {"output": {"stck_prpr": str(current_price)}}
         broker.fetch_ohlcv.return_value = {"output2": rows}
+        # P0-D (5/28): raw broker.create_market_sell_order fallback 차단됨 → adapter 메서드 mock 보강
+        sell_order_mock = MagicMock()
+        sell_order_mock.order_id = "SELL999"
+        broker.sell_limit.return_value = sell_order_mock
+        broker.sell_market.return_value = sell_order_mock
         broker.create_market_sell_order.return_value = {"output": {"ODNO": "SELL999"}}
         broker.get_available_cash.return_value = 3_000_000
 

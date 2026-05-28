@@ -72,6 +72,44 @@ def main() -> int:
     schedule_p_text = _read_batch(schedule_p) if schedule_p.exists() else ""
     smart_entry_command_live = "scripts/smart_entry_runner.py --live" in schedule_e_text
 
+    # P0 (5/28 추가): cron/shell 진입점 live/real 인자 검사 (5/27 사고 후속)
+    # scripts/cron/run_bat.sh 또는 .bat 파일에서 위험 인자 등장 시 BLOCK
+    run_bat_sh = PROJECT_ROOT / "scripts" / "cron" / "run_bat.sh"
+    run_bat_sh_text = _read_batch(run_bat_sh) if run_bat_sh.exists() else ""
+    danger_args = ("--live", "--real", "--force", "--no-dry-run")
+    bat_danger_hits: list[str] = []
+    for ln_no, line in enumerate(run_bat_sh_text.splitlines(), 1):
+        # # 이전 코드 부분만 검사 (라인 중간 코멘트 포함 제외)
+        code_part = line.split("#", 1)[0]
+        for arg in danger_args:
+            if arg in code_part:
+                bat_danger_hits.append(f"run_bat.sh:{ln_no} {arg}")
+
+    # raw mojito broker 호출 정적 검사 (KisOrderAdapter 외부에서)
+    # src/ 와 scripts/ 디렉토리만 검사 (tests/ 제외)
+    raw_broker_hits: list[str] = []
+    for sub in ("src", "scripts"):
+        sub_dir = PROJECT_ROOT / sub
+        if not sub_dir.exists():
+            continue
+        for py_file in sub_dir.rglob("*.py"):
+            # KisOrderAdapter 자체는 raw 호출 허용 (어댑터 내부)
+            if py_file.name == "kis_order_adapter.py":
+                continue
+            try:
+                txt = py_file.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                continue
+            for ln_no, line in enumerate(txt.splitlines(), 1):
+                stripped = line.strip()
+                if stripped.startswith("#") or stripped.startswith('"""') or stripped.startswith("'''"):
+                    continue
+                # broker.create_market_*_order( or broker.create_limit_*_order( 실제 호출 패턴
+                # ( 까지 매치하여 backtick docstring 안의 텍스트는 제외
+                if ("broker.create_market_" in line and "_order(" in line) or \
+                   ("broker.create_limit_" in line and "_order(" in line):
+                    raw_broker_hits.append(f"{py_file.relative_to(PROJECT_ROOT).as_posix()}:{ln_no}")
+
     checks: list[tuple[bool, str]] = []
     checks.append(
         _status(
@@ -123,6 +161,22 @@ def main() -> int:
             "signal_logger_daytrading.py missing" in schedule_p_text
             and "daily_close_daytrading.py missing" in schedule_p_text,
             "guarded" if "missing" in schedule_p_text else "unguarded",
+        )
+    )
+    # P0 신규 (5/28): cron/shell --live/--real/--force 인자 검사
+    checks.append(
+        _status(
+            "cron/shell danger args (run_bat.sh)",
+            len(bat_danger_hits) == 0,
+            "no danger args" if not bat_danger_hits else f"{len(bat_danger_hits)} hits: {bat_danger_hits[:3]}",
+        )
+    )
+    # P0 신규 (5/28): raw mojito broker 호출 정적 검사
+    checks.append(
+        _status(
+            "raw mojito broker calls (use_cases/scripts)",
+            len(raw_broker_hits) == 0,
+            "no raw calls" if not raw_broker_hits else f"{len(raw_broker_hits)} hits: {raw_broker_hits[:5]}",
         )
     )
 

@@ -351,19 +351,12 @@ def execute_auto_sell(broker, sig: PeakSignal, holdings_qty: int) -> dict:
                 sig.ticker, sell_qty, limit_price, sig.current_price, sell_slippage_pct,
             )
         else:
-            # 시장가 fallback
-            assert_runtime_orders_allowed()
-            res = broker.create_market_sell_order(
-                symbol=sig.ticker, quantity=sell_qty,
+            # P0-D (5/28 fix): raw mojito broker 시장가 fallback 차단
+            # broker는 반드시 KisOrderAdapter여야 함 (sell_limit 메서드 보유)
+            raise RuntimeError(
+                "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
+                "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."
             )
-            result = {
-                "success": True,
-                "order_id": res.get("output", {}).get("ODNO", ""),
-                "qty": sell_qty,
-                "price": sig.current_price,
-                "peak_price": sig.peak_price,
-                "pct_from_peak": sig.pct_from_peak,
-            }
 
         # MVP-2 연동: 매도 후 분할매수 큐 자동 등록
         try:

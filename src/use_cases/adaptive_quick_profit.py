@@ -104,10 +104,11 @@ def execute_trailing_sell(broker, ticker: str, stage: dict, sell_price: int) -> 
             order_id = getattr(order, "order_id", "") or ""
             limit_price = sell_price  # 시장가
         else:
-            assert_runtime_orders_allowed()
-            res = broker.create_market_sell_order(ticker, sell_qty)
-            order_id = res.get("output", {}).get("ODNO", "") if res else ""
-            limit_price = sell_price
+            # P0-D (5/28 fix): raw mojito broker fallback 차단
+            raise RuntimeError(
+                "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
+                "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."
+            )
 
         return {
             "success": True,

@@ -320,6 +320,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
 
     def cancel(self, order: Order) -> bool:
         """주문 취소"""
+        assert_runtime_orders_allowed()
         logger.info("[주문] 취소: %s (주문번호=%s)", order.ticker, order.order_id)
         try:
             resp = self.broker.cancel_order(

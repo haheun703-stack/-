@@ -78,13 +78,28 @@ def fetch_current_balance(broker) -> list[dict]:
 
 
 def execute_sell(broker, ticker: str, qty: int, current_price: int) -> tuple[bool, str]:
-    """KIS 시장가 매도 주문."""
+    """KIS 시장가 매도 주문 (5/28 P0-B fix: KisOrderAdapter._guard 9중 가드 강제).
+
+    Why: 5/27 09:55 원익IPS 1주 자동매도(-5.12%) 사고의 직접 원인은
+    raw `broker.create_market_sell_order` 호출이 KisOrderAdapter._guard()
+    9중 가드(AUTO_TRADING_ENABLED, MAX_QTY, 거래시간, 일일한도 등)를 전부 우회한 것.
+    이제 KisOrderAdapter.sell_market()을 거쳐 모든 가드 통과 강제.
+
+    NOTE: broker 인자는 호출처 호환성을 위해 시그니처 유지하나 사용되지 않음.
+    """
     try:
-        assert_runtime_orders_allowed()
-        resp = broker.create_market_sell_order(symbol=ticker, quantity=qty)
-        if resp.get("rt_cd") == "0":
+        from src.adapters.kis_order_adapter import KisOrderAdapter
+        from src.entities.trading_models import OrderStatus
+
+        adapter = KisOrderAdapter()
+        order = adapter.sell_market(ticker=ticker, quantity=qty)
+        if order.status == OrderStatus.PENDING:
             return True, "OK"
-        return False, str(resp.get("msg1", "unknown"))
+        return False, order.message or "FAILED"
+    except (PermissionError, ValueError, RuntimeError) as e:
+        # 가드 차단 — AUTO_TRADING_ENABLED=0, MAX_QTY 초과, 거래시간 외 등
+        logger.warning("[execute_sell] 가드 차단: %s — %s", ticker, e)
+        return False, f"GUARD_BLOCKED: {e}"
     except Exception as e:
         return False, str(e)
 

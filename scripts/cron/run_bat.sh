@@ -122,8 +122,10 @@ case "$BAT" in
   N) # 08:20 KST — 시그널 로그
     run_py scripts/cron_signal_tracker.py --mode log
     ;;
-  E) # 08:50 KST — 스마트 진입
-    run_py scripts/smart_entry_runner.py --live --force
+  E) # 08:50 KST — 스마트 진입 (5/28 P0: --live --force 제거, .env AUTO_TRADING_ENABLED 단일 신뢰)
+    # 5/27 09:55 owner_rule_monitor 사고 후속 — cron 인자가 .env 덮어쓰지 못하도록 인자 폐기
+    # smart_entry 활성화는 .env AUTO_TRADING_ENABLED=1 일 때만 (KisOrderAdapter._guard 통과)
+    run_py scripts/smart_entry_runner.py
     run_py scripts/sell_monitor.py --dry-run
     ;;
   I) # 08:55 KST — VWAP + EYE 킬러픽 모니터 (둘 다 장중 장기 실행)

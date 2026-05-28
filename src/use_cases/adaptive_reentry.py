@@ -293,10 +293,11 @@ def execute_auto_reentry(broker, decision: ReentryDecision) -> dict:
             order = broker.buy_market(decision.ticker, decision.target_qty)
             order_id = getattr(order, "order_id", "") or ""
         else:
-            # mojito2 broker fallback
-            assert_runtime_orders_allowed()
-            res = broker.create_market_buy_order(decision.ticker, decision.target_qty)
-            order_id = res.get("output", {}).get("ODNO", "") if res else ""
+            # P0-D (5/28 fix): raw mojito broker fallback 차단
+            raise RuntimeError(
+                "[P0-D] raw mojito broker 호출 차단 — KisOrderAdapter 인스턴스 필수. "
+                "호출자가 KisOrderAdapter를 broker 인자로 전달해야 함."
+            )
 
         decision.order_id = order_id
         return {
