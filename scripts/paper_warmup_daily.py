@@ -141,7 +141,14 @@ def cmd_open(top_n: int, send_tg: bool) -> int:
 
 
 def cmd_close(send_tg: bool) -> int:
-    """15:30 종가 기록 + 당일 적중률 계산 + reflection 업데이트."""
+    """15:30 종가 기록 + 당일 적중률 계산 + paper P&L 시뮬 + reflection 업데이트.
+
+    5/28 P0 추가: paper trading P&L 시뮬레이션
+      - 종목당 가상 매수 PAPER_BUDGET_PER_TICKER(기본 100,000원)
+      - 시초가 매수 → 종가 매도 (시뮬)
+      - 수수료 0.015% × 2 + 거래세 0.18% (매도 시)
+      - 누적 P&L data/paper_trader_history.json 추적
+    """
     today = datetime.now().strftime("%Y-%m-%d")
     out_path = reflection_path(today)
     if not out_path.exists():
@@ -152,7 +159,17 @@ def cmd_close(send_tg: bool) -> int:
     adp = KisStockDataAdapter()
     broker = adp.broker
 
+    # paper trading 파라미터 (PaperOrderAdapter 가정 동일)
+    import os
+    budget_per_ticker = int(os.getenv("PAPER_BUDGET_PER_TICKER", "100000"))
+    fee_pct = 0.015 / 100   # 매수+매도 각 0.015%
+    tax_pct = 0.18 / 100    # 매도 시 (코스피 디폴트, 보수)
+
     n_hits = 0
+    total_buy_cost = 0
+    total_sell_proceed = 0
+    total_pnl = 0
+    n_paper_records = 0
     for rec in reflection.get("records", []):
         px_close = fetch_ohlcv(broker, rec["ticker"])
         if px_close is None:
@@ -165,30 +182,112 @@ def cmd_close(send_tg: bool) -> int:
         if rec["intraday_hit"]:
             n_hits += 1
 
+        # paper P&L 시뮬: 시초가 매수 → 종가 매도
+        if op > 0 and cl > 0:
+            qty = budget_per_ticker // op
+            if qty > 0:
+                buy_cost = qty * op * (1 + fee_pct)
+                sell_proceed = qty * cl * (1 - fee_pct - tax_pct)
+                pnl = int(sell_proceed - buy_cost)
+                pnl_pct = (pnl / buy_cost * 100) if buy_cost > 0 else 0
+                rec["paper_qty"] = qty
+                rec["paper_buy_cost"] = int(buy_cost)
+                rec["paper_sell_proceed"] = int(sell_proceed)
+                rec["paper_pnl"] = pnl
+                rec["paper_pnl_pct"] = round(pnl_pct, 2)
+                total_buy_cost += buy_cost
+                total_sell_proceed += sell_proceed
+                total_pnl += pnl
+                n_paper_records += 1
+
     n = len(reflection.get("records", []))
     reflection["mode"] = "close"
     reflection["intraday_accuracy"] = (n_hits / n) if n > 0 else 0.0
     reflection["intraday_avg_chg_pct"] = (
         sum(r.get("intraday_chg_pct", 0) for r in reflection["records"]) / n if n > 0 else 0.0
     )
+    # paper P&L 요약
+    paper_pnl_pct = (total_pnl / total_buy_cost * 100) if total_buy_cost > 0 else 0
+    reflection["paper_total_buy_cost"] = int(total_buy_cost)
+    reflection["paper_total_sell_proceed"] = int(total_sell_proceed)
+    reflection["paper_total_pnl"] = int(total_pnl)
+    reflection["paper_total_pnl_pct"] = round(paper_pnl_pct, 2)
+    reflection["paper_n_records"] = n_paper_records
+    reflection["paper_budget_per_ticker"] = budget_per_ticker
     reflection["closed_at"] = datetime.now().isoformat()
 
     out_path.write_text(json.dumps(reflection, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # 누적 P&L history 갱신
+    history_path = PROJECT_ROOT / "data" / "paper_trader_history.json"
+    if history_path.exists():
+        try:
+            history = json.loads(history_path.read_text(encoding="utf-8"))
+        except Exception:
+            history = {"sessions": [], "cumulative_pnl": 0}
+    else:
+        history = {"sessions": [], "cumulative_pnl": 0}
+    history["sessions"].append({
+        "date": today,
+        "n_records": n_paper_records,
+        "buy_cost": int(total_buy_cost),
+        "sell_proceed": int(total_sell_proceed),
+        "pnl": int(total_pnl),
+        "pnl_pct": round(paper_pnl_pct, 2),
+        "intraday_accuracy": reflection["intraday_accuracy"],
+    })
+    history["cumulative_pnl"] = sum(s["pnl"] for s in history["sessions"])
+    history["n_sessions"] = len(history["sessions"])
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    history_path.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding="utf-8")
+
     print(
         f"[CLOSE] {today} — 적중률 {reflection['intraday_accuracy']:.1%} ({n_hits}/{n}), "
         f"평균 {reflection['intraday_avg_chg_pct']:+.2f}%"
+    )
+    print(
+        f"[PAPER P&L] 당일 {total_pnl:+,}원 ({paper_pnl_pct:+.2f}%) | "
+        f"누적 {history['cumulative_pnl']:+,}원 ({history['n_sessions']}일)"
     )
 
     if send_tg:
         try:
             from src.telegram_sender import send_message
 
-            msg = (
-                f"[WARMUP CLOSE] {today}\n"
-                f"적중률 {reflection['intraday_accuracy']:.1%} ({n_hits}/{n})\n"
-                f"평균 변동 {reflection['intraday_avg_chg_pct']:+.2f}%"
+            # paper P&L 종목별 TOP 3
+            sorted_by_pnl = sorted(
+                [r for r in reflection["records"] if "paper_pnl" in r],
+                key=lambda x: x["paper_pnl"], reverse=True,
             )
-            send_message(msg)
+            top_lines = []
+            for r in sorted_by_pnl[:3]:
+                top_lines.append(
+                    f"  {r['name']} {r['paper_pnl']:+,}원 ({r['paper_pnl_pct']:+.2f}%)"
+                )
+            bot_lines = []
+            for r in sorted_by_pnl[-3:]:
+                if r["paper_pnl"] < 0:
+                    bot_lines.append(
+                        f"  {r['name']} {r['paper_pnl']:+,}원 ({r['paper_pnl_pct']:+.2f}%)"
+                    )
+
+            msg_parts = [
+                f"[PAPER TRADING] {today}",
+                f"적중률 {reflection['intraday_accuracy']:.1%} ({n_hits}/{n})",
+                f"평균 변동 {reflection['intraday_avg_chg_pct']:+.2f}%",
+                "",
+                f"💰 당일 P&L: {total_pnl:+,}원 ({paper_pnl_pct:+.2f}%)",
+                f"📊 누적 P&L: {history['cumulative_pnl']:+,}원 ({history['n_sessions']}일)",
+                f"종목당 시드: {budget_per_ticker:,}원 × {n_paper_records}건",
+            ]
+            if top_lines:
+                msg_parts.append("\n🏆 TOP 3:")
+                msg_parts.extend(top_lines)
+            if bot_lines:
+                msg_parts.append("\n📉 손실:")
+                msg_parts.extend(bot_lines)
+
+            send_message("\n".join(msg_parts))
         except Exception as e:
             logger.warning("텔레그램 발송 실패: %s", e)
 
