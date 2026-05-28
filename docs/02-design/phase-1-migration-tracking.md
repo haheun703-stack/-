@@ -11,6 +11,9 @@
 | 1 | `scripts/paper_warmup_daily.py` | `cmd_paper_trade_open` | 297~ | `PaperOrderAdapter.buy_limit` | BUY | paper | quant | 같은 함수 내 직전 (intent dict + register_intent) | `PaperOrderAdapter.buy_limit` 내부에서 자동 호출 (P0-2 검증) | `test_phase1_paper_trade.py::test_paper_trade_open_*` (6 tests) |
 | 2 | `scripts/paper_warmup_daily.py` | `cmd_paper_trade_close` | 405~ | `PaperOrderAdapter.sell_limit` | SELL | paper | quant | open filled records 순회 + 같은 함수 내 직전 | `PaperOrderAdapter.sell_limit` 내부 자동 호출 | `test_phase1_paper_trade.py::test_paper_trade_close_*` (7 tests) |
 | 3 | `scripts/chart_hero_picker_cycle.py` | `main` (selector) | 88~ | (selector — 매매 X) | BUY (intent only) | paper | quant | result["picks"] 순회 + `register_intent` | D+1 14:55 `chart_hero_close_cycle`에서 사용 예정 | `test_phase1_paper_trade.py::test_chart_hero_picker_*` (3 tests) |
+| 4 | `src/strategies/chart_hero_executor.py` | `execute_d1_entry` | 249~ | `PaperOrderAdapter.buy_limit` | BUY | paper | quant | row 3 picker가 D0 17:30 등록 (페어) | 자동 (P0-2) — picker intent 없으면 BLOCKED_NO_INTENT | `test_phase1_paper_trade.py::test_chart_hero_executor_*` (4 tests) |
+| 5 | `src/strategies/chart_hero_executor.py` | `_execute_add_buy` | 398~ | `PaperOrderAdapter.buy_limit` | BUY (추매) | paper | quant | 추매 시점 별도 등록 필요 (현재 미구현) | 자동 (P0-2) — intent 미등록 시 추매 차단 | (TODO: 추매 intent 정책 — 코덱스 검수) |
+| 6 | `src/strategies/chart_hero_executor.py` | `_execute_sell` | 416~ | `PaperOrderAdapter.sell_limit` | SELL | paper | quant | 매도 시점 별도 등록 필요 (현재 미구현) | 자동 (P0-2) — intent 미등록 시 매도 차단 | (TODO: 매도 intent 정책 — 코덱스 검수) |
 
 ## 2. 마이그레이션 패턴
 

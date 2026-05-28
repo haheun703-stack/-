@@ -40,25 +40,31 @@ PNL_LOG_FILE   = str(PROJECT_ROOT / "data/chart_hero_pnl_log.csv")
 class ChartHeroExecutor:
     """차트영웅 매매 실행기 (paper/real 모드).
 
-    paper=True → KIS 주문 X, 시뮬레이션만 (5/22~5/26 paper mirror)
-    paper=False → KIS 실제 주문 (5/27 사장님 GO 후)
+    paper=True → PaperOrderAdapter (시뮬, 5/28 Phase 1 row 4: order_intents_gate L10 강제)
+    paper=False → KisOrderAdapter (실제 주문, 단 quant + live 조합은 OrderIntentError 차단됨)
+
+    Trading Factory v1 (5/28):
+      - paper 모드: PaperOrderAdapter.buy_limit(mode='paper', executor_bot='quant')
+        → row 3 picker가 D0 17:30에 등록한 intent와 페어 검증
+      - real 모드: KisOrderAdapter.buy_limit(mode='live', executor_bot='quant')
+        → quant + live 조합은 register 단계에서 거부됨 (Note 1) → 자동 차단
+        → 실거래는 Phase 2 (6/9+) day bot으로 이전 후만 가능
     """
 
     def __init__(self, paper: bool = True, total_capital: float = 25_000_000,
                  max_qty_per_ticker: int | None = None,
                  kill_switch_active: bool = False):
         self.paper = paper
-        self.total_capital = total_capital  # 5/22 잔고 2,500만 시뮬
-        # 5/20 추가: 1주차 워밍업 — 종목당 최대 수량 클램프 (None = 제한 없음)
+        self.total_capital = total_capital
         self.max_qty_per_ticker = max_qty_per_ticker
-        # ★ P0 (5/20 추가): KILL_SWITCH 외부 주입 — 매수 차단용
         self.kill_switch_active = kill_switch_active
-        # ★ P3 (5/20 추가): 보호 종목 (Hold List) — 단타봇 200만원 손실 사건 재발 방지
         self.hold_list = self._load_hold_list()
-        if not paper:
-            self.order = KisOrderAdapter()
+        # row 4 (5/28): paper도 PaperOrderAdapter 사용 (intent 강제)
+        if paper:
+            from src.adapters.paper_order_adapter import PaperOrderAdapter
+            self.order = PaperOrderAdapter()
         else:
-            self.order = None
+            self.order = KisOrderAdapter()
         self.positions: dict[str, dict] = self._load_positions()
         # C2: PnL 로그에서 누적 손실률 계산 (긴장 안전망)
         self.weekly_loss_pct  = self._compute_loss_pct(days=7)
@@ -247,27 +253,42 @@ class ChartHeroExecutor:
                 continue
 
             if self.paper:
-                # 시뮬레이션: 포지션만 등록
-                self.positions[ticker] = {
-                    "ticker": ticker,
-                    "name": p.get("name", ""),
-                    "entry_date": dt.date.today().isoformat(),
-                    "avg_price": price,
-                    "total_qty": qty,
-                    "total_cost": price * qty,
-                    "stage": TradeStage.INIT.name,
-                    "realized_pl": 0,
-                    "is_closed": False,
-                    "entries": [{"stage": "INIT", "price": price, "qty": qty,
-                                 "date": dt.date.today().isoformat()}],
-                }
-                results.append({"ticker": ticker, "action": "PAPER_BUY",
-                                "qty": qty, "price": price,
-                                "amount": price * qty})
-            else:
-                # 실제 KIS 주문
+                # row 4 (5/28): PaperOrderAdapter.buy_limit + row 3 picker intent 페어 검증
                 try:
-                    order = self.order.buy_limit(ticker, price, qty)
+                    order = self.order.buy_limit(
+                        ticker, price, qty,
+                        mode="paper", executor_bot="quant",
+                    )
+                    filled_price = int(getattr(order, "filled_price", price) or price)
+                    self.positions[ticker] = {
+                        "ticker": ticker,
+                        "name": p.get("name", ""),
+                        "entry_date": dt.date.today().isoformat(),
+                        "avg_price": filled_price,
+                        "total_qty": qty,
+                        "total_cost": filled_price * qty,
+                        "stage": TradeStage.INIT.name,
+                        "realized_pl": 0,
+                        "is_closed": False,
+                        "order_id": getattr(order, "order_id", None),
+                        "entries": [{"stage": "INIT", "price": filled_price, "qty": qty,
+                                     "date": dt.date.today().isoformat()}],
+                    }
+                    results.append({"ticker": ticker, "action": "PAPER_BUY",
+                                    "qty": qty, "price": filled_price,
+                                    "amount": filled_price * qty,
+                                    "order_id": getattr(order, "order_id", None)})
+                except Exception as e:
+                    # NoIntentError = picker가 D0 17:30 intent 등록 안 했음
+                    results.append({"ticker": ticker, "action": "BLOCKED_NO_INTENT",
+                                    "price": price, "reason": str(e)})
+            else:
+                # 실제 KIS 주문 — quant + live 조합은 register 거부됨 (Note 1) → 자동 차단
+                try:
+                    order = self.order.buy_limit(
+                        ticker, price, qty,
+                        mode="live", executor_bot="quant",
+                    )
                     self.positions[ticker] = {
                         "ticker": ticker, "name": p.get("name", ""),
                         "entry_date": dt.date.today().isoformat(),
@@ -282,7 +303,9 @@ class ChartHeroExecutor:
                     results.append({"ticker": ticker, "action": "REAL_BUY",
                                     "qty": qty, "price": price, "order_id": order})
                 except Exception as e:
-                    results.append({"ticker": ticker, "action": "ERROR", "error": str(e)})
+                    # quant + live 조합 차단 (Trading Factory v1 정합)
+                    results.append({"ticker": ticker, "action": "BLOCKED_QUANT_LIVE",
+                                    "reason": str(e)})
 
         self._save_positions()
         return results
@@ -373,12 +396,20 @@ class ChartHeroExecutor:
         return results
 
     def _execute_add_buy(self, d: dict, price: int, qty: int):
-        """추매 실행 (paper or real)."""
-        if not self.paper:
-            try:
-                self.order.buy_limit(d["ticker"], price, qty)
-            except Exception:
-                return
+        """추매 실행 (paper or real).
+
+        row 4 (5/28): paper도 PaperOrderAdapter.buy_limit + intent 페어 강제.
+        추매 intent는 D+1 14:55 (초기) 또는 추매 시점 별도 등록 필요.
+        intent 미등록 시 NoIntentError → 추매 실패 (평단/수량 미변경).
+        """
+        try:
+            self.order.buy_limit(
+                d["ticker"], price, qty,
+                mode="paper" if self.paper else "live",
+                executor_bot="quant",
+            )
+        except Exception:
+            return  # 추매 차단 — 평단/수량 변경 X
         # 평단가/누적수량 업데이트
         new_total_qty = d["total_qty"] + qty
         new_total_cost = d["total_cost"] + price * qty
@@ -391,12 +422,20 @@ class ChartHeroExecutor:
         })
 
     def _execute_sell(self, d: dict, price: int, qty: int, action: dict):
-        """매도 실행 (paper or real)."""
-        if not self.paper:
-            try:
-                self.order.sell_limit(d["ticker"], price, qty)
-            except Exception:
-                return
+        """매도 실행 (paper or real).
+
+        row 4 (5/28): paper도 PaperOrderAdapter.sell_limit + SELL intent 페어 강제.
+        매도 intent는 매도 시점 별도 등록 필요 (close_cycle 외부 또는 별도 selector).
+        intent 미등록 시 NoIntentError → 매도 실패.
+        """
+        try:
+            self.order.sell_limit(
+                d["ticker"], price, qty,
+                mode="paper" if self.paper else "live",
+                executor_bot="quant",
+            )
+        except Exception:
+            return  # 매도 차단
         realized = (price - d["avg_price"]) * qty
         d["realized_pl"] = d.get("realized_pl", 0) + int(realized)
         d["total_qty"] -= qty

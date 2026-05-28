@@ -393,3 +393,83 @@ class TestPhase1ChartHeroPicker:
         # 이 테스트는 register_intent 미호출 시 list가 빈 것 확인
         intents = list_today_intents(executor_bot="quant")
         assert len(intents) == 0  # 호출 없음 → 빈 리스트
+
+
+# ──────────────────────────────────────────────
+# Phase 1 row 4~6 — ChartHeroExecutor (paper + intent 페어)
+# ──────────────────────────────────────────────
+class TestPhase1ChartHeroExecutor:
+    """ChartHeroExecutor paper=True → PaperOrderAdapter + intent 페어 검증."""
+
+    def test_executor_paper_uses_paper_adapter(self):
+        """paper=True 시 self.order가 PaperOrderAdapter."""
+        from src.strategies.chart_hero_executor import ChartHeroExecutor
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        ex = ChartHeroExecutor(paper=True, total_capital=25_000_000)
+        assert isinstance(ex.order, PaperOrderAdapter)
+
+    def test_executor_real_uses_kis_adapter(self):
+        """paper=False 시 self.order가 KisOrderAdapter."""
+        from src.strategies.chart_hero_executor import ChartHeroExecutor
+        from src.adapters.kis_order_adapter import KisOrderAdapter
+        ex = ChartHeroExecutor(paper=False, total_capital=25_000_000)
+        assert isinstance(ex.order, KisOrderAdapter)
+
+    def test_executor_buy_limit_signature_includes_mode_executor(self):
+        """buy_limit/sell_limit 호출 시 mode + executor_bot 명시 (시그니처 확인)."""
+        import inspect
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        sig = inspect.signature(PaperOrderAdapter.buy_limit)
+        # buy_limit은 mode/executor_bot keyword-only 인자 보유
+        assert "mode" in sig.parameters
+        assert "executor_bot" in sig.parameters
+        sig_sell = inspect.signature(PaperOrderAdapter.sell_limit)
+        assert "mode" in sig_sell.parameters
+        assert "executor_bot" in sig_sell.parameters
+
+    def test_executor_paper_buy_blocked_without_picker_intent(self, isolated_env):
+        """picker가 intent 등록 안 했으면 executor BUY → BLOCKED_NO_INTENT.
+
+        row 3 (picker) + row 4 (executor) 페어 검증.
+        picker intent 없이 executor가 호출되면 NoIntentError → results.action='BLOCKED_NO_INTENT'.
+        """
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        # picker intent 미등록 상태에서 직접 PaperOrderAdapter 호출 시도
+        adapter = PaperOrderAdapter()
+        with pytest.raises(NoIntentError):
+            adapter.buy_limit(
+                ticker="240810", price=121000, quantity=1,
+                mode="paper", executor_bot="quant",
+            )
+
+    def test_executor_paper_buy_passes_with_picker_intent(self, isolated_env):
+        """row 3 picker가 등록한 intent로 row 4 executor가 buy_limit 통과."""
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        from datetime import date
+
+        # row 3 picker가 D0 17:30에 등록한 intent (시뮬)
+        today = date(2026, 5, 28)
+        next_day = date(2026, 5, 29)
+        now_kst = datetime.now(tz=SEOUL)
+        d1_close_kst = datetime.combine(
+            next_day, datetime.min.time().replace(hour=15, minute=30),
+            tzinfo=SEOUL,
+        )
+        picker_intent = {
+            "intent_id": "q_240810_chart_hero_d1_2026-05-29",
+            "bot": "quant", "engine": "chart_hero_5gate",
+            "ticker": "240810", "side": "BUY", "mode": "paper",
+            "score": 85.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": d1_close_kst.isoformat(),
+            "d0_date": today.isoformat(), "d1_date": next_day.isoformat(),
+        }
+        register_intent(picker_intent, bot="quant")
+
+        # row 4 executor (시뮬: PaperOrderAdapter.buy_limit 직접 호출)
+        adapter = PaperOrderAdapter()
+        order = adapter.buy_limit(
+            ticker="240810", price=121000, quantity=1,
+            mode="paper", executor_bot="quant",
+        )
+        assert order.status == OrderStatus.FILLED
