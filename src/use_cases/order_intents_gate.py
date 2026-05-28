@@ -242,6 +242,15 @@ def assert_order_intent_exists(
             f"[INPUT] executor_bot 잘못: {executor_bot} ({ACTIVE_BOTS}만 허용)"
         )
 
+    # P0-3 (코덱스 4차 응답 5/28 13:37): quant executor + live mode 조합 직접 차단
+    # quant는 research/selector bot이므로 live 권한 없음 (defense in depth — register에서도 차단)
+    if executor_bot == "quant" and mode == "live":
+        raise OrderIntentError(
+            "[INPUT] quant executor + live mode 조합 금지 — "
+            "quant bot은 research/selector 역할만, live 매매 권한 없음. "
+            "live 매매는 day bot 또는 별도 승인된 executor만 가능."
+        )
+
     # 파일 로드
     files = _intent_files()
     if not files:

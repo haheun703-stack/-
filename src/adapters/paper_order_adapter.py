@@ -161,10 +161,23 @@ class PaperOrderAdapter:
     ) -> Order:
         """지정가 매수 시뮬.
 
-        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        Trading Factory v1 (코덱스 4차 5/28): mode + executor_bot 명시 시 order_intents_gate 강제.
+        P0-2: PaperOrderAdapter는 mode='paper'만 허용 (mode='live' 즉시 차단).
         """
         # 10번째 가드 — order_intents_gate (mode/executor_bot 명시 시 강제)
-        if mode is not None and executor_bot is not None:
+        if mode is not None or executor_bot is not None:
+            # P0-2 (코덱스 4차 응답): PaperOrderAdapter는 mode='live' 거부
+            # paper 시뮬 어댑터 → live 권한 없음
+            if mode != "paper":
+                raise ValueError(
+                    f"[PAPER GUARD] PaperOrderAdapter는 mode='paper'만 허용 (received='{mode}'). "
+                    "live 매매는 KisOrderAdapter 사용. "
+                    "mode/executor_bot 인자는 둘 다 명시 또는 둘 다 생략 (backward compat)."
+                )
+            if executor_bot is None:
+                raise ValueError(
+                    "[PAPER GUARD] PaperOrderAdapter.buy_limit: mode 명시 시 executor_bot도 명시 필수."
+                )
             from src.use_cases.order_intents_gate import assert_order_intent_exists
             assert_order_intent_exists(
                 ticker=ticker, side="BUY", mode=mode, executor_bot=executor_bot,
@@ -201,10 +214,21 @@ class PaperOrderAdapter:
     ) -> Order:
         """지정가 매도 시뮬.
 
-        Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        Trading Factory v1 (코덱스 4차 5/28): mode + executor_bot 명시 시 order_intents_gate 강제.
+        P0-2: PaperOrderAdapter는 mode='paper'만 허용 (mode='live' 즉시 차단).
         """
         # 10번째 가드 — order_intents_gate
-        if mode is not None and executor_bot is not None:
+        if mode is not None or executor_bot is not None:
+            # P0-2 (코덱스 4차 응답): PaperOrderAdapter는 mode='live' 거부
+            if mode != "paper":
+                raise ValueError(
+                    f"[PAPER GUARD] PaperOrderAdapter는 mode='paper'만 허용 (received='{mode}'). "
+                    "live 매매는 KisOrderAdapter 사용."
+                )
+            if executor_bot is None:
+                raise ValueError(
+                    "[PAPER GUARD] PaperOrderAdapter.sell_limit: mode 명시 시 executor_bot도 명시 필수."
+                )
             from src.use_cases.order_intents_gate import assert_order_intent_exists
             assert_order_intent_exists(
                 ticker=ticker, side="SELL", mode=mode, executor_bot=executor_bot,

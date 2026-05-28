@@ -149,9 +149,10 @@ class TestP0_2_ModeExplicit:
             assert_order_intent_exists("240810", "BUY", "", executor_bot="quant")
 
     def test_paper_mode_intent_not_accepted_for_live_call(self, isolated_intents_dir):
-        # paper intent 등록 → live 호출 시 NoIntentError (격리)
+        # paper intent 등록 → live 호출 시 OrderIntentError (P0-3 코덱스 4차: quant+live 직접 차단)
+        # NoIntentError 도달 전에 quant+live 조합 자체가 거부됨 (defense in depth)
         register_intent(_make_intent(mode="paper"), bot="quant")
-        with pytest.raises(NoIntentError):
+        with pytest.raises(OrderIntentError):
             assert_order_intent_exists("240810", "BUY", "live", executor_bot="quant")
 
     def test_register_invalid_mode_rejected(self, isolated_intents_dir):

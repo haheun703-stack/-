@@ -239,9 +239,126 @@ class TestKisGuardIntegration:
     def test_guard_without_mode_executor_bot_skips_intent_check(self, isolated, monkeypatch):
         """mode/executor_bot None → intent 체크 X (backward compat). 다른 가드 통과 필요."""
         from src.adapters.kis_order_adapter import KisOrderAdapter
-        # _guard 직접 호출은 broker 초기화 없이 가능
-        # AUTO_TRADING_ENABLED=1 등 다른 가드 우회 필요 → 단위 테스트 어려움
-        # 시그니처만 확인 — 함수 자체에 mode/executor_bot 기본값 None
         sig = inspect.signature(KisOrderAdapter._guard)
         assert sig.parameters["mode"].default is None
         assert sig.parameters["executor_bot"].default is None
+
+
+# ──────────────────────────────────────────────
+# 코덱스 4차 응답 P0 3건 (5/28 13:37)
+# ──────────────────────────────────────────────
+class TestP0_1_KisRejectsPaperMode:
+    """P0-1: KisOrderAdapter는 mode='live'만 허용. mode='paper' 즉시 차단."""
+
+    def _make_kis_adapter_for_guard_test(self, monkeypatch):
+        """KisOrderAdapter._guard를 직접 호출하기 위한 mock 인스턴스."""
+        from src.adapters.kis_order_adapter import KisOrderAdapter
+        # __init__의 mojito 호출 회피
+        adapter = KisOrderAdapter.__new__(KisOrderAdapter)
+        adapter._is_mock = True
+        return adapter
+
+    def test_kis_guard_rejects_paper_mode(self, isolated, monkeypatch):
+        adapter = self._make_kis_adapter_for_guard_test(monkeypatch)
+        with pytest.raises(ValueError) as exc_info:
+            adapter._guard(
+                ticker="240810", quantity=1, side="BUY",
+                mode="paper", executor_bot="day",
+            )
+        assert "mode='live'만 허용" in str(exc_info.value) or "paper" in str(exc_info.value).lower()
+
+    def test_kis_guard_requires_executor_bot_when_mode_given(self, isolated, monkeypatch):
+        adapter = self._make_kis_adapter_for_guard_test(monkeypatch)
+        with pytest.raises(ValueError):
+            adapter._guard(
+                ticker="240810", quantity=1, side="BUY",
+                mode="live", executor_bot=None,
+            )
+
+    def test_kis_guard_rejects_invalid_mode(self, isolated, monkeypatch):
+        adapter = self._make_kis_adapter_for_guard_test(monkeypatch)
+        with pytest.raises(ValueError):
+            adapter._guard(
+                ticker="240810", quantity=1, side="BUY",
+                mode="dry_run", executor_bot="day",
+            )
+
+
+class TestP0_2_PaperRejectsLiveMode:
+    """P0-2: PaperOrderAdapter는 mode='paper'만 허용. mode='live' 즉시 차단."""
+
+    def test_paper_buy_limit_rejects_live_mode(self, isolated):
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError) as exc_info:
+            adapter.buy_limit(
+                ticker="240810", price=121000, quantity=1,
+                mode="live", executor_bot="day",
+            )
+        assert "mode='paper'만 허용" in str(exc_info.value) or "live" in str(exc_info.value).lower()
+
+    def test_paper_sell_limit_rejects_live_mode(self, isolated):
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError):
+            adapter.sell_limit(
+                ticker="240810", price=121000, quantity=1,
+                mode="live", executor_bot="day",
+            )
+
+    def test_paper_buy_market_rejects_live_mode(self, isolated):
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError):
+            adapter.buy_market(
+                ticker="240810", quantity=1, current_price=121000,
+                mode="live", executor_bot="day",
+            )
+
+    def test_paper_sell_market_rejects_live_mode(self, isolated):
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError):
+            adapter.sell_market(
+                ticker="240810", quantity=1, current_price=121000,
+                mode="live", executor_bot="day",
+            )
+
+    def test_paper_requires_executor_bot_when_mode_given(self, isolated):
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError):
+            adapter.buy_limit(
+                ticker="240810", price=121000, quantity=1,
+                mode="paper", executor_bot=None,
+            )
+
+
+class TestP0_3_AssertQuantLiveBlocked:
+    """P0-3: assert_order_intent_exists 단계에서 quant + live 조합 직접 차단."""
+
+    def test_assert_quant_live_combo_blocked(self, isolated):
+        """register에서 막혔지만, 외부에서 잘못된 intent 주입 시 assert도 차단."""
+        from src.use_cases.order_intents_gate import (
+            assert_order_intent_exists, OrderIntentError,
+        )
+        with pytest.raises(OrderIntentError) as exc_info:
+            assert_order_intent_exists(
+                ticker="240810", side="BUY",
+                mode="live", executor_bot="quant",
+            )
+        assert "quant" in str(exc_info.value).lower()
+        assert "live" in str(exc_info.value).lower()
+
+    def test_assert_day_live_combo_allowed(self, isolated):
+        """day + live는 허용 (intent 등록만 안 됐을 뿐)."""
+        from src.use_cases.order_intents_gate import (
+            assert_order_intent_exists, NoIntentError, OrderIntentError,
+        )
+        # day + live는 P0-3 단계는 통과 (input validation OK)
+        # 다만 intent 등록 X → NoIntentError raise
+        with pytest.raises(NoIntentError):
+            assert_order_intent_exists(
+                ticker="240810", side="BUY",
+                mode="live", executor_bot="day",
+            )

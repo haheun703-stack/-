@@ -118,11 +118,27 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             9. 통과 로그
             10. order_intents_gate (5/28 Trading Factory v1) — mode + executor_bot 명시 시
         """
+        # P0-1 (코덱스 4차 응답 5/28 13:37) — 가드 진입 자격 검증 (최우선):
+        # KisOrderAdapter는 실 KIS 주문 어댑터 → mode="live"만 허용.
+        # mode="paper"가 잘못 전달되면 paper intent로 실주문 경로 열릴 위험 → 즉시 차단.
+        # 인자 정합성은 runtime 가드(KILL_SWITCH 등)보다 먼저 검증.
+        if mode is not None or executor_bot is not None:
+            if mode != "live":
+                raise ValueError(
+                    f"[GUARD] KisOrderAdapter는 mode='live'만 허용 (received='{mode}'). "
+                    "paper 매매는 PaperOrderAdapter 사용. "
+                    "mode/executor_bot 인자는 둘 다 명시 또는 둘 다 생략 (backward compat)."
+                )
+            if executor_bot is None:
+                raise ValueError(
+                    "[GUARD] KisOrderAdapter._guard: mode 명시 시 executor_bot도 명시 필수."
+                )
+
         # 1. 자동매매 활성화 체크
         assert_runtime_orders_allowed()
 
-        # 10번째 가드 (Trading Factory v1, 5/28 코덱스 3차 paper-first 통합):
-        # mode와 executor_bot이 명시되면 order_intents_gate 강제 통과 필수.
+        # 10번째 가드 (Trading Factory v1):
+        # mode + executor_bot 모두 명시 시 order_intents_gate 강제 통과 필수.
         # backward compat: 둘 다 None이면 기존 _guard 9중만 적용 (점진 마이그레이션).
         if mode is not None and executor_bot is not None:
             from src.use_cases.order_intents_gate import assert_order_intent_exists
