@@ -31,7 +31,7 @@ import hmac
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -113,13 +113,20 @@ def _verify_signature(intent: dict) -> bool:
 
 
 # ──────────────────────────────────────────────
-# expires_at 파싱 (P0-4)
+# expires_at 파싱 (P0-4 — 코덱스 2차 응답 5/28 13:10 정합)
+#
+# 코덱스 지시:
+#   - timezone-naive 값 거부
+#   - Asia/Seoul 또는 timezone-aware ISO만 허용
+#   - 모든 비교는 timezone-aware datetime으로 통일
 # ──────────────────────────────────────────────
 def _parse_expires_at(intent: dict) -> datetime:
-    """intent.expires_at → datetime (timezone-aware).
+    """intent.expires_at → timezone-aware datetime.
 
     Raises:
-        IntentSchemaError: 파싱 실패 또는 누락
+        IntentSchemaError:
+            - 파싱 실패 또는 누락
+            - timezone-naive 값 (코덱스 2차 응답 거부)
     """
     raw = intent.get("expires_at", "")
     if not raw:
@@ -127,13 +134,29 @@ def _parse_expires_at(intent: dict) -> datetime:
             f"[SCHEMA] expires_at 누락 — intent_id={intent.get('intent_id', '?')}"
         )
     try:
-        # ISO 8601 (timezone 포함 권장)
+        # ISO 8601 (timezone 필수)
         dt = datetime.fromisoformat(raw)
     except (ValueError, TypeError) as e:
         raise IntentSchemaError(
             f"[SCHEMA] expires_at 파싱 실패 ({raw}) — intent_id={intent.get('intent_id', '?')}: {e}"
         )
+
+    # P0-4 (5/28 코덱스 2차): timezone-naive 거부
+    if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+        raise IntentSchemaError(
+            f"[SCHEMA] expires_at timezone-naive 거부 ({raw}) — "
+            f"intent_id={intent.get('intent_id', '?')}. "
+            f"Asia/Seoul (예: 2026-05-31T15:30:00+09:00) 또는 timezone-aware ISO만 허용."
+        )
     return dt
+
+
+def _now_aware() -> datetime:
+    """현재 시각 — 항상 timezone-aware (UTC 기준, 비교에 사용).
+
+    expires_at도 timezone-aware라 비교 가능. UTC offset 차이 자동 처리.
+    """
+    return datetime.now(tz=timezone.utc)
 
 
 # ──────────────────────────────────────────────
@@ -233,7 +256,8 @@ def assert_order_intent_exists(
             f"[NO_INTENT] order_intents 비어있음 ({len(files)}개 파일)."
         )
 
-    now = datetime.now()
+    # P0-4: 항상 timezone-aware now 사용 (UTC 기준)
+    now = _now_aware()
 
     # 매칭 (P0-3: executor_bot도 매치)
     for intent in intents:
@@ -254,20 +278,17 @@ def assert_order_intent_exists(
                 f"위조 의심. register_intent로 정식 재등록 필요."
             )
 
-        # P0-4: expires_at 엄격 파싱 + 만료 검증
+        # P0-4 (코덱스 2차 정합): expires_at 엄격 파싱 (timezone-aware 강제) + 만료 검증
+        # _parse_expires_at이 timezone-naive 거부 → 양쪽 모두 timezone-aware 비교 보장
         try:
             expires_dt = _parse_expires_at(intent)
         except IntentSchemaError:
             raise  # propagate schema error
 
-        # timezone naive comparison 안전 처리
-        now_aware = now.astimezone() if expires_dt.tzinfo else now
-        if expires_dt.tzinfo is None:
-            now_aware = now
-        if expires_dt < now_aware:
+        if expires_dt < now:
             raise IntentExpiredError(
                 f"[EXPIRED] intent 만료 — intent_id={intent.get('intent_id', '?')} "
-                f"expires_at={expires_dt.isoformat()}, now={now_aware.isoformat()}"
+                f"expires_at={expires_dt.isoformat()}, now={now.isoformat()}"
             )
 
         # 매칭 통과

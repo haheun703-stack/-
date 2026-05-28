@@ -60,14 +60,22 @@ intraday_score =
 ## 5. 핵심 가드 (No Intent, No Order)
 
 ```python
-# 단타봇 매매 호출 함수 진입 시 의무
-from order_intents_gate import assert_order_intent_exists
+# 단타봇 매매 호출 함수 진입 시 의무 (코덱스 2차 응답 반영)
+from src.use_cases.order_intents_gate import assert_order_intent_exists, OrderIntentError
 
 def execute_paper_buy(ticker, qty, price, side="BUY"):
-    intent = assert_order_intent_exists(ticker, side, mode="paper")
-    # intent 없으면 RuntimeError 발생 + 매매 차단
-    # 이후 매매 로직
+    # 모든 인자 명시 필수 (기본값 X)
+    intent = assert_order_intent_exists(
+        ticker=ticker,
+        side=side,                  # "BUY" / "SELL"
+        mode="paper",               # "paper" / "live" (명시 강제)
+        executor_bot="day",         # 단타봇은 항상 "day"
+    )
+    # intent 없으면 NoIntentError / IntentSignatureError / IntentExpiredError raise → 매매 차단
+    # 통과 시 intent dict 반환 (intent_id, engine, score 등 활용)
 ```
+
+`expires_at`은 timezone-aware ISO 필수 (예: `2026-05-28T15:30:00+09:00`). timezone-naive 거부.
 
 ## 6. 5/28 현재 단타봇 진입점 (퀀트봇 측 발견)
 

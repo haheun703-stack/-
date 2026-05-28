@@ -97,14 +97,30 @@
 
 `src/use_cases/order_intents_gate.py`:
 ```python
-def assert_order_intent_exists(ticker: str, side: str, mode: str = "paper") -> dict:
-    """모든 매매 주문 함수 진입 시 호출. order_intents 파일에 해당 intent 없으면 RuntimeError."""
+# 코덱스 2차 응답 반영 (5/28 13:10): 모든 인자 명시 필수, 기본값 없음
+def assert_order_intent_exists(
+    ticker: str,
+    side: str,           # "BUY" / "SELL"
+    mode: str,           # "paper" / "live" (명시 강제, 기본값 X)
+    executor_bot: str,   # "quant" / "day" (intent.bot 매치 검증)
+) -> dict:
+    """모든 매매 주문 함수 진입 시 호출.
+
+    Raises:
+        NoIntentError, IntentSignatureError, IntentExpiredError, IntentSchemaError
+    """
     # data/order_intents/{bot}_intents_YYYYMMDD.jsonl 조회
-    # ticker + side + mode + 유효 시간 매치 시 통과
-    # 매치 없으면 RuntimeError("[NO_INTENT] order_intents 미등록")
+    # ticker + side + mode + executor_bot 매치 + HMAC 서명 검증 + 만료 검증
 ```
 
-`KisOrderAdapter._guard()` 9중 가드에 10번째로 추가.
+가드 강화 (코덱스 1+2차 응답 반영):
+- P0-1: ORDER_INTENTS_GATE_DISABLED 런타임 우회 영구 제거
+- P0-2: mode 인자 명시 강제 (기본값 X)
+- P0-3: executor_bot 인자 추가 (intent.bot 매치 검증)
+- P0-4: expires_at timezone-aware 강제 (naive 거부)
+- P0-5: HMAC-SHA256 서명 (ORDER_INTENTS_HMAC_KEY 32+ chars)
+
+**`KisOrderAdapter._guard()` 통합은 코덱스 승인 대기** (P0-1~5 모두 완료 + pytest 회귀 27/27 PASS 후 검토).
 
 ## 8. 일정
 
