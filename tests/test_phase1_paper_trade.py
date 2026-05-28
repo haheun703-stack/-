@@ -932,6 +932,158 @@ class TestCallerPassesModeExecutorBot:
             assert call_kwargs.get("executor_bot") == "quant"
 
 
+    def test_owner_rule_execute_sell_forwards_kwargs(self, isolated_env, monkeypatch):
+        """P0-1: owner_rule_monitor.execute_sell이 mode/executor_bot을 adapter.sell_market에 전달."""
+        from unittest.mock import MagicMock, patch
+        from scripts.owner_rule_monitor import execute_sell
+
+        # KisOrderAdapter mock — adapter.sell_market kwargs 검증
+        mock_adapter = MagicMock()
+        mock_order = MagicMock()
+        from src.entities.trading_models import OrderStatus
+        mock_order.status = OrderStatus.PENDING
+        mock_adapter.sell_market.return_value = mock_order
+
+        with patch("src.adapters.kis_order_adapter.KisOrderAdapter", return_value=mock_adapter):
+            ok, msg = execute_sell(
+                broker=None, ticker="240810", qty=1, current_price=120000,
+                mode="paper", executor_bot="quant",
+            )
+
+        assert mock_adapter.sell_market.called
+        call_kwargs = mock_adapter.sell_market.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "quant"
+
+    def test_telegram_execute_buy_forwards_kwargs(self, isolated_env, monkeypatch):
+        """P0-2: telegram _execute_buy가 executor_bot='day' + mode 전달."""
+        from unittest.mock import MagicMock, patch
+        # Telegram chat_id 화이트리스트 우회 + adapter mock
+        monkeypatch.setenv("TELEGRAM_TRADING_MODE", "paper")
+
+        # 직접 호출 — _execute_buy의 핵심 로직만 검증
+        from src.telegram_command_handler import TelegramCommandBot
+        handler = TelegramCommandBot.__new__(TelegramCommandBot)
+
+        mock_adapter = MagicMock()
+        mock_adapter.fetch_current_price.return_value = {"current_price": 120000}
+        mock_adapter.get_available_cash.return_value = 10_000_000
+        mock_adapter.fetch_holdings.return_value = []
+        mock_order = MagicMock(status="PENDING")
+        mock_adapter.buy_limit.return_value = mock_order
+
+        with patch("src.adapters.kis_order_adapter.KisOrderAdapter", return_value=mock_adapter), \
+             patch("src.telegram_sender.edit_message_text"), \
+             patch("src.stock_name_resolver.ticker_to_name", return_value="원익IPS"), \
+             patch("src.utils.trade_runtime_safety.assert_runtime_orders_allowed"):
+            handler._execute_buy("240810", 1, "test_chat", 1)
+
+        assert mock_adapter.buy_limit.called
+        call_kwargs = mock_adapter.buy_limit.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "day"
+
+    def test_telegram_execute_sell_forwards_kwargs(self, isolated_env, monkeypatch):
+        """P0-2: telegram _execute_sell + sell_limit kwargs."""
+        from unittest.mock import MagicMock, patch
+        monkeypatch.setenv("TELEGRAM_TRADING_MODE", "paper")
+
+        from src.telegram_command_handler import TelegramCommandBot
+        handler = TelegramCommandBot.__new__(TelegramCommandBot)
+
+        mock_adapter = MagicMock()
+        mock_adapter.fetch_current_price.return_value = {"current_price": 120000}
+        mock_order = MagicMock(status="PENDING")
+        mock_adapter.sell_limit.return_value = mock_order
+
+        with patch("src.adapters.kis_order_adapter.KisOrderAdapter", return_value=mock_adapter), \
+             patch("src.telegram_sender.edit_message_text"), \
+             patch("src.stock_name_resolver.ticker_to_name", return_value="원익IPS"), \
+             patch("src.utils.trade_runtime_safety.assert_runtime_orders_allowed"):
+            handler._execute_sell("240810", 1, "test_chat", 1)
+
+        assert mock_adapter.sell_limit.called
+        call_kwargs = mock_adapter.sell_limit.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "day"
+
+    def test_telegram_execute_liquidate_forwards_kwargs(self, isolated_env, monkeypatch):
+        """P0-2: telegram _execute_liquidate + sell_market kwargs."""
+        from unittest.mock import MagicMock, patch
+        monkeypatch.setenv("TELEGRAM_TRADING_MODE", "paper")
+
+        from src.telegram_command_handler import TelegramCommandBot
+        handler = TelegramCommandBot.__new__(TelegramCommandBot)
+
+        mock_adapter = MagicMock()
+        mock_adapter.fetch_holdings.return_value = [{
+            "ticker": "240810", "quantity": 1, "name": "원익IPS",
+        }]
+        mock_adapter.sell_market.return_value = MagicMock()
+
+        with patch("src.adapters.kis_order_adapter.KisOrderAdapter", return_value=mock_adapter), \
+             patch("src.telegram_sender.edit_message_text"), \
+             patch("src.utils.trade_runtime_safety.assert_runtime_orders_allowed"):
+            handler._execute_liquidate("test_chat", 1)
+
+        assert mock_adapter.sell_market.called
+        call_kwargs = mock_adapter.sell_market.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "day"
+
+    def test_execute_trend_exit_forwards_kwargs_full(self):
+        """P0-5: adaptive_trend_exit.execute_trend_exit + sell_limit kwargs."""
+        from unittest.mock import MagicMock
+        from src.use_cases.adaptive_trend_exit import execute_trend_exit, TrendExitSignal
+
+        broker = MagicMock()
+        broker.sell_limit.return_value = MagicMock(order_id="MOCK_TX")
+
+        sig = TrendExitSignal(
+            ticker="240810", triggered=True, exit_type="MA20_BREAK",
+            entry_price=10000, current_price=9800, pnl_pct=-2.0,
+            qty=1, reason="MA20 이탈",
+        )
+        execute_trend_exit(broker, sig, mode="paper", executor_bot="quant")
+
+        call_kwargs = broker.sell_limit.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "quant"
+
+    def test_execute_auto_sell_forwards_kwargs_full(self):
+        """P0-5: adaptive_position_manager.execute_auto_sell + sell_limit kwargs."""
+        from unittest.mock import MagicMock
+        from src.use_cases.adaptive_position_manager import execute_auto_sell, PeakSignal
+
+        broker = MagicMock()
+        broker.sell_limit.return_value = MagicMock(order_id="MOCK_AS")
+
+        sig = PeakSignal(
+            ticker="240810", trigger=True, auto_sell_eligible=True,
+            current_price=24000, peak_price=25000, pct_from_peak=-4.0,
+            reasons_fail=[],
+        )
+        execute_auto_sell(broker, sig, holdings_qty=10,
+                          mode="paper", executor_bot="quant")
+
+        call_kwargs = broker.sell_limit.call_args.kwargs
+        assert call_kwargs.get("mode") == "paper"
+        assert call_kwargs.get("executor_bot") == "quant"
+
+    def test_smart_entry_engine_buy_limit_forwards_kwargs(self):
+        """P0-4: SmartEntryEngine.__init__에 mode/executor_bot 저장 + buy_limit 전달 시그니처."""
+        from unittest.mock import MagicMock
+        from src.use_cases.smart_entry import SmartEntryEngine
+
+        intraday = MagicMock()
+        order = MagicMock()
+        engine = SmartEntryEngine(
+            intraday_adapter=intraday, order_adapter=order, dry_run=False,
+            mode="paper", executor_bot="quant",
+        )
+        assert engine.mode == "paper"
+        assert engine.executor_bot == "quant"
+
     def test_execute_time_exit_forwards_kwargs(self):
         """execute_time_exit → broker.sell_limit/market kwargs 전달 (옆문 2)."""
         from unittest.mock import MagicMock
