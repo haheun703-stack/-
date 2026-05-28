@@ -417,6 +417,209 @@ def cmd_paper_trade_open(top_n: int, send_tg: bool) -> int:
     return 0
 
 
+def cmd_paper_trade_close(send_tg: bool) -> int:
+    """Phase 1 row 2: BUY→SELL paper 페어 종결 + P&L 계산 (5/28).
+
+    Trading Factory v1: register_intent(SELL) → PaperOrderAdapter.sell_limit
+    - data/phase1_paper_trades/{date}_open.json 로드 (open 결과)
+    - 각 filled 종목별:
+      - mode='paper' + executor_bot='quant' SELL intent 등록
+      - PaperOrderAdapter.sell_limit 호출 (P0-2 + L10 통과)
+      - filled_price 차이 + 수수료 + 거래세 = paper_pnl
+    - 결과를 data/phase1_paper_trades/{date}_close.json에 기록
+    - data/paper_trader_history.json 누적 P&L 갱신 (cmd_close와 별개 — phase1 전용)
+
+    추적표: docs/02-design/phase-1-migration-tracking.md row 2
+    """
+    from datetime import timedelta, timezone
+    from src.use_cases.order_intents_gate import register_intent, NoIntentError
+    from src.adapters.paper_order_adapter import PaperOrderAdapter
+    from src.entities.trading_models import OrderStatus
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    today_yyyymmdd = today.replace("-", "")
+    open_path = PROJECT_ROOT / "data" / "phase1_paper_trades" / f"{today_yyyymmdd}_open.json"
+    if not open_path.exists():
+        print(f"[PAPER TRADE CLOSE] {today} open 파일 없음 — --paper-trade-open 먼저 실행")
+        return 1
+
+    open_data = json.loads(open_path.read_text(encoding="utf-8"))
+    filled_records = [r for r in open_data.get("records", []) if r.get("status") == "filled"]
+    if not filled_records:
+        print(f"[PAPER TRADE CLOSE] {today} filled 종목 0건 — close 스킵")
+        return 0
+
+    adp = KisStockDataAdapter()
+    broker = adp.broker
+    paper_adapter = PaperOrderAdapter()
+
+    seoul = timezone(timedelta(hours=9))
+    now_kst = datetime.now(tz=seoul)
+    expires = (now_kst + timedelta(hours=2)).isoformat()  # 종가 직후 2시간
+
+    close_records = []
+    n_registered = 0
+    n_filled = 0
+    n_blocked = 0
+    total_pnl = 0
+    total_buy_cost = 0
+    total_sell_proceed = 0
+
+    for rec in filled_records:
+        tk = rec["ticker"]
+        nm = rec.get("name", tk)
+        qty = rec["qty"]
+        buy_filled = rec["filled_price"]
+
+        # 현재가 (종가) 조회
+        px = fetch_ohlcv(broker, tk)
+        if px is None or px["current"] <= 0:
+            close_records.append({**rec, "close_status": "fetch_failed"})
+            continue
+        current = px["current"]
+
+        # SELL intent 등록
+        intent_id = f"q_{tk}_SELL_{now_kst.strftime('%Y%m%d%H%M%S')}"
+        intent = {
+            "intent_id": intent_id, "bot": "quant",
+            "engine": "phase1_paper_warmup", "ticker": tk, "name": nm,
+            "side": "SELL", "mode": "paper",
+            "score": float(rec.get("score", 0.0)),
+            "created_at": now_kst.isoformat(), "expires_at": expires,
+            "target_qty": qty, "exit_price": current,
+            "parent_buy_intent_id": rec.get("intent_id", ""),
+        }
+        try:
+            register_intent(intent, bot="quant")
+            n_registered += 1
+        except Exception as e:
+            logger.warning("[paper_trade_close] SELL register 실패 %s: %s", tk, e)
+            close_records.append({**rec, "close_status": "register_failed",
+                                  "close_error": str(e)})
+            continue
+
+        # PaperOrderAdapter.sell_limit (mode='paper' + executor_bot='quant')
+        try:
+            order = paper_adapter.sell_limit(
+                ticker=tk, price=current, quantity=qty,
+                mode="paper", executor_bot="quant",
+            )
+            if order.status == OrderStatus.FILLED:
+                n_filled += 1
+                sell_filled = int(order.filled_price)
+                # P&L 계산 (수수료/세금은 PaperOrderAdapter 내부에서 이미 반영됐으나
+                # 단순 buy/sell 차익 기록은 추적표용 — 정확한 P&L은 sell_limit message 참고)
+                pnl_raw = (sell_filled - buy_filled) * qty
+                # 수수료 0.015% × 2 + 거래세 0.18% (cmd_close 동일 가정 — 추적성)
+                fee = int(buy_filled * qty * 0.015 / 100) + int(sell_filled * qty * 0.015 / 100)
+                tax = int(sell_filled * qty * 0.18 / 100)
+                pnl = pnl_raw - fee - tax
+                buy_cost = buy_filled * qty + int(buy_filled * qty * 0.015 / 100)
+                sell_proceed = sell_filled * qty - int(sell_filled * qty * 0.015 / 100) - tax
+                pnl_pct = (pnl / buy_cost * 100) if buy_cost > 0 else 0
+                total_pnl += pnl
+                total_buy_cost += buy_cost
+                total_sell_proceed += sell_proceed
+
+                close_records.append({
+                    **rec, "close_status": "filled",
+                    "sell_intent_id": intent_id,
+                    "sell_filled_price": sell_filled,
+                    "sell_order_id": order.order_id,
+                    "paper_pnl": pnl, "paper_pnl_pct": round(pnl_pct, 2),
+                    "paper_buy_cost": buy_cost, "paper_sell_proceed": sell_proceed,
+                })
+            else:
+                close_records.append({**rec, "close_status": "order_not_filled",
+                                      "sell_intent_id": intent_id})
+        except NoIntentError as e:
+            n_blocked += 1
+            close_records.append({**rec, "close_status": "intent_blocked",
+                                  "sell_intent_id": intent_id, "close_error": str(e)})
+
+    # 결과 저장
+    out_path = PROJECT_ROOT / "data" / "phase1_paper_trades" / f"{today_yyyymmdd}_close.json"
+    total_pnl_pct = (total_pnl / total_buy_cost * 100) if total_buy_cost > 0 else 0
+    out_data = {
+        "date": today, "mode": "close",
+        "n_open_filled": len(filled_records),
+        "n_sell_registered": n_registered,
+        "n_sell_filled": n_filled,
+        "n_sell_blocked": n_blocked,
+        "total_buy_cost": total_buy_cost,
+        "total_sell_proceed": total_sell_proceed,
+        "total_pnl": total_pnl,
+        "total_pnl_pct": round(total_pnl_pct, 2),
+        "records": close_records,
+        "closed_at": now_kst.isoformat(),
+    }
+    out_path.write_text(json.dumps(out_data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # 누적 history 갱신 (phase1 전용)
+    history_path = PROJECT_ROOT / "data" / "phase1_paper_history.json"
+    if history_path.exists():
+        try:
+            history = json.loads(history_path.read_text(encoding="utf-8"))
+        except Exception:
+            history = {"sessions": [], "cumulative_pnl": 0}
+    else:
+        history = {"sessions": [], "cumulative_pnl": 0}
+    # 같은 날짜 중복 제거
+    history["sessions"] = [s for s in history["sessions"] if s.get("date") != today]
+    history["sessions"].append({
+        "date": today,
+        "n_filled": n_filled, "n_blocked": n_blocked,
+        "buy_cost": total_buy_cost, "sell_proceed": total_sell_proceed,
+        "pnl": total_pnl, "pnl_pct": round(total_pnl_pct, 2),
+    })
+    history["cumulative_pnl"] = sum(s["pnl"] for s in history["sessions"])
+    history["n_sessions"] = len(history["sessions"])
+    history_path.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    print(
+        f"[PAPER TRADE CLOSE] {today} — SELL registered={n_registered}, "
+        f"filled={n_filled}, blocked={n_blocked}"
+    )
+    print(
+        f"[PHASE 1 P&L] 당일 {total_pnl:+,}원 ({total_pnl_pct:+.2f}%) | "
+        f"누적 {history['cumulative_pnl']:+,}원 ({history['n_sessions']}일)"
+    )
+
+    if send_tg:
+        try:
+            from src.telegram_sender import send_message
+            msg_parts = [
+                f"[PHASE 1 PAPER TRADE CLOSE] {today}",
+                f"SELL register: {n_registered} / fill: {n_filled} / blocked: {n_blocked}",
+                "",
+                f"💰 당일 P&L: {total_pnl:+,}원 ({total_pnl_pct:+.2f}%)",
+                f"📊 누적 P&L: {history['cumulative_pnl']:+,}원 ({history['n_sessions']}일)",
+            ]
+            # 종목별 TOP 3 / 손실
+            sorted_pnl = sorted(
+                [r for r in close_records if r.get("close_status") == "filled"],
+                key=lambda x: x.get("paper_pnl", 0), reverse=True,
+            )
+            if sorted_pnl[:3]:
+                msg_parts.append("\n🏆 TOP 3:")
+                for r in sorted_pnl[:3]:
+                    msg_parts.append(
+                        f"  {r['name']} {r.get('paper_pnl', 0):+,}원 ({r.get('paper_pnl_pct', 0):+.2f}%)"
+                    )
+            losses = [r for r in sorted_pnl[-3:] if r.get("paper_pnl", 0) < 0]
+            if losses:
+                msg_parts.append("\n📉 손실:")
+                for r in losses:
+                    msg_parts.append(
+                        f"  {r['name']} {r.get('paper_pnl', 0):+,}원 ({r.get('paper_pnl_pct', 0):+.2f}%)"
+                    )
+            send_message("\n".join(msg_parts))
+        except Exception as e:
+            logger.warning("텔레그램 발송 실패: %s", e)
+
+    return 0
+
+
 def cmd_label_d1(date: str) -> int:
     """D+1 종가 라벨링 (다음 거래일 16:30 이후 실행)."""
     src_path = reflection_path(date)
@@ -454,6 +657,8 @@ def main() -> int:
     parser.add_argument("--close", action="store_true", help="15:30 종가 + 당일 적중률")
     parser.add_argument("--paper-trade-open", action="store_true",
                         help="Phase 1: register_intent + PaperOrderAdapter.buy_limit (5/28)")
+    parser.add_argument("--paper-trade-close", action="store_true",
+                        help="Phase 1 row 2: register_intent(SELL) + PaperOrderAdapter.sell_limit + P&L (5/28)")
     parser.add_argument("--label-d1", action="store_true", help="D+1 라벨링 (다음 거래일)")
     parser.add_argument("--date", help="--label-d1 대상 날짜 (YYYY-MM-DD)")
     parser.add_argument("--top", type=int, default=9, help="강력포착 TOP N (기본 9)")
@@ -474,6 +679,8 @@ def main() -> int:
         return cmd_close(send_tg)
     if args.paper_trade_open:
         return cmd_paper_trade_open(args.top, send_tg)
+    if args.paper_trade_close:
+        return cmd_paper_trade_close(send_tg)
     if args.label_d1:
         if not args.date:
             print("--label-d1 에는 --date 필수")

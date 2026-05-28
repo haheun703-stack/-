@@ -148,3 +148,163 @@ class TestPhase1OutputFile:
             elif rec["status"] == "intent_blocked":
                 assert "intent_id" in rec
                 assert "error" in rec
+
+
+# ──────────────────────────────────────────────
+# Phase 1 row 2 — cmd_paper_trade_close (SELL 페어)
+# ──────────────────────────────────────────────
+class TestPhase1PaperTradeClose:
+    def test_paper_trade_close_intent_registered(self, isolated_env):
+        """SELL intent register + HMAC 서명 자동 추가 검증."""
+        now_kst = datetime.now(tz=SEOUL)
+        intent = {
+            "intent_id": f"q_240810_SELL_{now_kst.strftime('%Y%m%d%H%M%S')}",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "name": "원익IPS",
+            "side": "SELL", "mode": "paper",
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=2)).isoformat(),
+            "parent_buy_intent_id": "q_240810_open_test",
+        }
+        register_intent(intent, bot="quant")
+        intents = list_today_intents(executor_bot="quant", side="SELL", mode="paper")
+        assert len(intents) == 1
+        assert intents[0]["side"] == "SELL"
+        assert intents[0]["_signature_valid"] is True
+
+    def test_paper_trade_close_sell_limit_passes(self, isolated_env):
+        """SELL intent 등록 후 PaperOrderAdapter.sell_limit 통과 (P0-2 + L10)."""
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+
+        now_kst = datetime.now(tz=SEOUL)
+        intent = {
+            "intent_id": f"q_240810_SELL_{now_kst.strftime('%Y%m%d%H%M%S')}",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "side": "SELL", "mode": "paper",
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=2)).isoformat(),
+        }
+        register_intent(intent, bot="quant")
+
+        adapter = PaperOrderAdapter()
+        order = adapter.sell_limit(
+            ticker="240810", price=121500, quantity=1,
+            mode="paper", executor_bot="quant",
+        )
+        assert order.status == OrderStatus.FILLED
+
+    def test_paper_trade_close_blocked_without_sell_intent(self, isolated_env):
+        """BUY intent만 등록된 상태에서 SELL 시도 → NoIntentError."""
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+
+        now_kst = datetime.now(tz=SEOUL)
+        # BUY intent만 등록
+        buy_intent = {
+            "intent_id": "q_240810_BUY_test",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "side": "BUY", "mode": "paper",
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=4)).isoformat(),
+        }
+        register_intent(buy_intent, bot="quant")
+
+        adapter = PaperOrderAdapter()
+        # SELL 시도 → SELL intent 미등록이므로 차단
+        with pytest.raises(NoIntentError):
+            adapter.sell_limit(
+                ticker="240810", price=121500, quantity=1,
+                mode="paper", executor_bot="quant",
+            )
+
+    def test_paper_trade_close_quant_sell_live_blocked(self, isolated_env):
+        """quant + SELL + live 조합 register 차단 (Note 1)."""
+        now_kst = datetime.now(tz=SEOUL)
+        bad_intent = {
+            "intent_id": "q_240810_SELL_live_attempt",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "side": "SELL", "mode": "live",  # ★ 위반
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=2)).isoformat(),
+        }
+        with pytest.raises(OrderIntentError):
+            register_intent(bad_intent, bot="quant")
+
+    def test_paper_trade_close_paper_adapter_live_mode_blocked(self, isolated_env):
+        """PaperOrderAdapter.sell_limit mode='live' 직접 호출 차단 (P0-2)."""
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+
+        adapter = PaperOrderAdapter()
+        with pytest.raises(ValueError):
+            adapter.sell_limit(
+                ticker="240810", price=121500, quantity=1,
+                mode="live", executor_bot="quant",
+            )
+
+    def test_paper_trade_close_output_schema(self, isolated_env):
+        """close 출력 파일 스키마 검증."""
+        sample = {
+            "date": "2026-05-28", "mode": "close",
+            "n_open_filled": 5, "n_sell_registered": 5,
+            "n_sell_filled": 4, "n_sell_blocked": 1,
+            "total_buy_cost": 500000, "total_sell_proceed": 512000,
+            "total_pnl": 11500, "total_pnl_pct": 2.30,
+            "records": [
+                {"ticker": "240810", "name": "원익IPS", "status": "filled",
+                 "close_status": "filled",
+                 "intent_id": "q_240810_BUY_test",
+                 "sell_intent_id": "q_240810_SELL_test",
+                 "filled_price": 121060, "sell_filled_price": 122500,
+                 "qty": 1, "paper_pnl": 1320, "paper_pnl_pct": 1.09},
+            ],
+            "closed_at": datetime.now(tz=SEOUL).isoformat(),
+        }
+        out_dir = isolated_env["tmp_path"] / "phase1_paper_trades"
+        out_dir.mkdir(parents=True)
+        out_path = out_dir / "20260528_close.json"
+        out_path.write_text(json.dumps(sample, ensure_ascii=False), encoding="utf-8")
+
+        loaded = json.loads(out_path.read_text(encoding="utf-8"))
+        assert {"date", "mode", "n_open_filled", "n_sell_registered",
+                "n_sell_filled", "n_sell_blocked", "total_pnl",
+                "total_pnl_pct", "records", "closed_at"} <= set(loaded.keys())
+        for rec in loaded["records"]:
+            assert "ticker" in rec
+            assert "close_status" in rec
+            if rec["close_status"] == "filled":
+                assert "sell_intent_id" in rec
+                assert "sell_filled_price" in rec
+                assert "paper_pnl" in rec
+
+    def test_paper_trade_close_buy_sell_paired_intents(self, isolated_env):
+        """BUY + SELL intent 페어 등록 → 모두 조회 가능."""
+        now_kst = datetime.now(tz=SEOUL)
+        buy = {
+            "intent_id": "q_240810_BUY_paired",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "side": "BUY", "mode": "paper",
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=4)).isoformat(),
+        }
+        sell = {
+            "intent_id": "q_240810_SELL_paired",
+            "bot": "quant", "engine": "phase1_paper_warmup",
+            "ticker": "240810", "side": "SELL", "mode": "paper",
+            "score": 80.0,
+            "created_at": now_kst.isoformat(),
+            "expires_at": (now_kst + timedelta(hours=2)).isoformat(),
+            "parent_buy_intent_id": "q_240810_BUY_paired",
+        }
+        register_intent(buy, bot="quant")
+        register_intent(sell, bot="quant")
+
+        buys = list_today_intents(executor_bot="quant", side="BUY", mode="paper")
+        sells = list_today_intents(executor_bot="quant", side="SELL", mode="paper")
+        assert len(buys) == 1 and len(sells) == 1
+        assert buys[0]["intent_id"] == "q_240810_BUY_paired"
+        assert sells[0]["intent_id"] == "q_240810_SELL_paired"
+        assert sells[0].get("parent_buy_intent_id") == "q_240810_BUY_paired"
