@@ -80,10 +80,14 @@ def create_scanner(config: dict, live: bool = False) -> LimitUpScanner:
         except Exception as e:
             logger.error("✗ KIS Order 어댑터 실패: %s", e)
 
+    # 5/28 코덱스 검수: live 실행 시 quant+live 조합은 register 거부 → 자동 차단
+    # paper 실행은 mode='paper' + executor_bot='quant' 명시 → L10 가드 통과 강제
     return LimitUpScanner(
         intraday_adapter=intraday_adapter,
         order_adapter=order_adapter,
         config=config,
+        mode="live" if live else "paper",
+        executor_bot="quant",
     )
 
 

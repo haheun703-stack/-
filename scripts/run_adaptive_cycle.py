@@ -437,7 +437,9 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
 
         summary["mvp2_5"]["executed"] = True
         try:
-            triggers = check_quick_profit_triggers(broker)
+            # 5/28 코덱스 검수: paper 경로 mode/executor_bot 명시 (L10 강제)
+            exec_kwargs = {"mode": "paper" if is_paper else "live", "executor_bot": "quant"}
+            triggers = check_quick_profit_triggers(broker, **exec_kwargs)
             summary["mvp2_5"]["triggers"] = len(triggers)
             for t in triggers:
                 msg = format_quick_profit_for_telegram(t)
@@ -478,7 +480,9 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
 
         summary["mvp2_6"]["executed"] = True
         try:
-            triggers = check_stop_loss_triggers(broker)
+            # 5/28 코덱스 검수: mode/executor_bot 명시
+            exec_kwargs = {"mode": "paper" if is_paper else "live", "executor_bot": "quant"}
+            triggers = check_stop_loss_triggers(broker, **exec_kwargs)
             summary["mvp2_6"]["triggers"] = len(triggers)
             for t in triggers:
                 # ★ M9: 손절 발화 종목 누적
@@ -688,7 +692,12 @@ def run_cycle(is_paper: bool, skip: set[str], dry_run: bool) -> dict:
                 if dec.trigger:
                     summary["mvp4"]["triggers"] += 1
                     if dec.auto_reentry_eligible:
-                        res = execute_auto_reentry(broker, dec)
+                        # 5/28 코덱스 검수: paper 경로 mode/executor_bot 명시
+                        res = execute_auto_reentry(
+                            broker, dec,
+                            mode="paper" if is_paper else "live",
+                            executor_bot="quant",
+                        )
                         logger.info("재진입 실행: %s → %s", dec.ticker, res)
                     msg = format_reentry_for_telegram(dec)
                     print(msg)

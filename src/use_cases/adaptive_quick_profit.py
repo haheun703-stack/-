@@ -133,8 +133,14 @@ def execute_trailing_sell(
         return {"success": False, "error": str(e)}
 
 
-def check_quick_profit_triggers(broker) -> list[dict]:
+def check_quick_profit_triggers(
+    broker, *, mode: str | None = None, executor_bot: str | None = None,
+) -> list[dict]:
     """모든 FILLED/QUICK_ARMED stage 순회 + Trailing Quick Profit 평가.
+
+    5/28 코덱스 검수 (b76dc5e 부분 PASS) 후속:
+    - mode/executor_bot 명시 시 내부 execute_trailing_sell에 전달 → L10 가드 강제
+    - backward compat: None → 기존 _guard 9중만
 
     v2 흐름:
       FILLED → 현재가 ≥ +7% target → QUICK_ARMED (trailing 시작)
@@ -220,9 +226,10 @@ def check_quick_profit_triggers(broker) -> list[dict]:
                     sell_threshold = trailing_peak * (1 - TRAILING_DROP_PCT / 100)
 
                     if current_price <= sell_threshold:
-                        # 매도 실행
+                        # 매도 실행 — 5/28 코덱스 검수: mode/executor_bot 전달
                         sell_result = execute_trailing_sell(
-                            broker, ticker, stage, current_price
+                            broker, ticker, stage, current_price,
+                            mode=mode, executor_bot=executor_bot,
                         )
 
                         if sell_result["success"]:

@@ -116,10 +116,13 @@ def execute_stop_loss_sell(
         return {"success": False, "error": str(e)}
 
 
-def check_stop_loss_triggers(broker) -> list[dict]:
+def check_stop_loss_triggers(
+    broker, *, mode: str | None = None, executor_bot: str | None = None,
+) -> list[dict]:
     """모든 FILLED stage 순회 + -5% 손절 평가.
 
     매 30분 cron에서 호출. P0-1 락 + P0-4 매도 계속 보장.
+    5/28 코덱스 검수 후속: mode/executor_bot 명시 시 execute_stop_loss_sell에 전달.
 
     Returns:
         손절 매도 발생한 stage 리스트
@@ -165,7 +168,10 @@ def check_stop_loss_triggers(broker) -> list[dict]:
                 # 손절 임계 도달 평가 (백테스트 R2: -5%)
                 stop_threshold = actual_buy * (1 - STOP_LOSS_PCT / 100)
                 if current_price <= stop_threshold:
-                    sell_result = execute_stop_loss_sell(broker, ticker, stage)
+                    sell_result = execute_stop_loss_sell(
+                        broker, ticker, stage,
+                        mode=mode, executor_bot=executor_bot,
+                    )
                     if sell_result["success"]:
                         stage["status"] = STATUS_STOP_LOSS_SOLD
                         stage["stop_loss_sold_at"] = now_iso
