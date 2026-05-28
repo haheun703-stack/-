@@ -81,3 +81,52 @@ OWNER_RULE_MODE=paper cd /home/ubuntu/quantum-master && ./venv/bin/python3.11 ..
 - "Phase 1 paper 재가동 가능" 사용 X
 - 사용 가능: "P0 5건 호출자 mode/executor_bot 전달 완료"
 - 사용 가능: "잔여 P1 호출자 + backward compat 폐지 미진행"
+
+## 7. crontab 등록 — 보기용 vs 실제 (코덱스 5/28 19:11 정정)
+
+위의 multi-line `\` 형식은 **가독성용 표시**일 뿐. 실제 crontab 등록은 **한 줄 엔트리**가 안전.
+
+### 보기용 (docs/PR/리뷰 시 줄바꿈 OK)
+
+```bash
+*/5 9-15 * * 1-5 \
+  cd /home/ubuntu/quantum-master && \
+  OWNER_RULE_MODE=paper ./venv/bin/python3.11 scripts/owner_rule_monitor.py \
+  >> /tmp/owner_rule_monitor.log 2>&1
+```
+
+### 실제 crontab 등록 (single-line)
+
+```bash
+*/5 9-15 * * 1-5 cd /home/ubuntu/quantum-master && OWNER_RULE_MODE=paper ./venv/bin/python3.11 scripts/owner_rule_monitor.py >> /tmp/owner_rule_monitor.log 2>&1
+```
+
+```bash
+*/5 14 * * 1-5 cd /home/ubuntu/quantum-master && AUTO_BUY_EXECUTOR_MODE=paper PYTHONPATH=/home/ubuntu/quantum-master ./venv/bin/python3.11 -u -X utf8 scripts/auto_buy_executor.py >> /home/ubuntu/quantum-master/logs/auto_buy.log 2>&1
+```
+
+```bash
+*/5 9-15 * * 1-5 cd /home/ubuntu/quantum-master && PYTHONPATH=/home/ubuntu/quantum-master ./venv/bin/python3.11 -u -X utf8 scripts/run_adaptive_cycle.py --paper >> /home/ubuntu/quantum-master/logs/adaptive_cycle.log 2>&1
+```
+
+**이유**: crontab은 백슬래시(`\`) 줄바꿈 처리가 일부 환경에서 다름. 한 줄 엔트리가 가장 호환성 높음.
+
+## 8. 테스트 적용 범위 정정 (코덱스 5/28 19:11)
+
+코덱스 검수 결과 표현 정정:
+
+| 테스트 | 실제 범위 | 표현 정정 |
+|--------|----------|----------|
+| `test_smart_entry_buy_limit_calls_include_kwargs_static` | smart_entry.py 정적 regex 매치 (multi-line buy_limit 2곳) | **"실제 buy_limit 호출 2곳에 대한 정적 회귀"** (런타임 실제 매수 플로우 X) |
+| `test_auto_buy_executor_buy_limit_call_runtime` | KisOrderAdapter mock + adapter.buy_limit kwargs 검증 스니펫 | **"env + adapter kwargs 전달 스니펫 검증"** (script main 전체 실행 X) |
+
+## 9. Phase 1 paper cron 재가동 직전 추가 검증 (필수)
+
+코드 회귀와 별도로 cron 재가동 직전:
+
+1. **One-line crontab 등록 후 dry-run** — `bash -c "{crontab line}"` 직접 실행 + 로그 확인
+2. **Smoke test** — register_intent 1건 + 매매 호출 시뮬레이션 → NoIntentError 또는 FILLED 확인
+3. **환경변수 검증** — `env | grep -E "(OWNER_RULE|AUTO_BUY|TELEGRAM_TRADING|ORDER_INTENTS_HMAC)_MODE|_KEY"` 출력
+4. **journalctl 모니터** — 첫 cron 실행 5분간 실시간 모니터 (`journalctl -u cron -f`)
+
+이 4단계 통과 후 코덱스 검수 의뢰. 그 전까지 "Phase 1 paper 재가동 가능" 표현 사용 X.
