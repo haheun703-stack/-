@@ -610,6 +610,8 @@ def cmd_positions(args):
 
 def cmd_emergency_stop(args):
     """v4.0 긴급 전량 청산"""
+    import os
+
     import yaml
     from src.adapters.kis_order_adapter import KisOrderAdapter
     from src.use_cases.position_tracker import PositionTracker
@@ -629,7 +631,13 @@ def cmd_emergency_stop(args):
     logger.critical(
         "[emergency-stop] 긴급 전량 청산: %d종목", len(tracker.positions)
     )
-    results = guard.emergency_liquidate(tracker, adapter)
+    # P2 (5/29): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
+    # LIVE_TRADING_MODE env (default "paper") — env 미설정 시 live 떨어짐 금지
+    em_mode = os.getenv("LIVE_TRADING_MODE", "paper")
+    results = guard.emergency_liquidate(
+        tracker, adapter,
+        mode=em_mode, executor_bot="quant",
+    )
     for r in results:
         if "error" in r:
             logger.error("  %s: 실패 — %s", r["ticker"], r["error"])

@@ -538,7 +538,8 @@ class TelegramCommandBot:
                 held_qty = held.get("quantity", 0)
                 logger.warning("[수동매수] %s 이미 보유 중 (%d주) — 추가매수 진행", ticker, held_qty)
             # 5/28 P0-2 (코덱스 17:13): mode/executor_bot 명시 — day bot 수동 매매
-            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+            # 5/29 P1-A4 (사장님 결단): default "paper" — env 미설정 시 live 떨어짐 금지
+            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "paper")
             order = adapter.buy_limit(ticker, limit_price, qty,
                                        mode=tg_mode, executor_bot="day")
             status = getattr(order, "status", "UNKNOWN")
@@ -570,7 +571,8 @@ class TelegramCommandBot:
                 return
             limit_price = _tick_round(int(current * (1 + LIMIT_SELL_PREMIUM)), current)
             # 5/28 P0-2: mode/executor_bot 명시
-            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+            # 5/29 P1-A4: default "paper" (env 미설정 시 live 떨어짐 금지)
+            tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "paper")
             order = adapter.sell_limit(ticker, limit_price, qty,
                                         mode=tg_mode, executor_bot="day")
             status = getattr(order, "status", "UNKNOWN")
@@ -605,7 +607,8 @@ class TelegramCommandBot:
                 if shares > 0:
                     try:
                         # 5/28 P0-2: mode/executor_bot 명시
-                        tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "live")
+                        # 5/29 P1-A4: default "paper" (env 미설정 시 live 떨어짐 금지)
+                        tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "paper")
                         adapter.sell_market(ticker, shares,
                                              mode=tg_mode, executor_bot="day")
                         results.append(f"\u2705 {name} {shares}주 매도")

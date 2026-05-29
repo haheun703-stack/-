@@ -112,8 +112,15 @@ class SafetyGuard:
     # 긴급 전량 청산
     # ──────────────────────────────────────────
 
-    def emergency_liquidate(self, tracker, order_port) -> list:
-        """전종목 시장가 청산 (최대 3회 재시도)"""
+    def emergency_liquidate(
+        self, tracker, order_port,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> list:
+        """전종목 시장가 청산 (최대 3회 재시도).
+
+        P2 (5/29 사장님 결단, 옵션 A): mode/executor_bot 명시 전달 시
+        order_intents_gate 10중 가드 강제. backward compat default None.
+        """
         import time
 
         from src.entities.trading_models import ExitReason, OrderStatus
@@ -125,7 +132,10 @@ class SafetyGuard:
             success = False
             for attempt in range(3):
                 try:
-                    order = order_port.sell_market(pos.ticker, pos.shares)
+                    order = order_port.sell_market(
+                        pos.ticker, pos.shares,
+                        mode=mode, executor_bot=executor_bot,
+                    )
                     if order.status != OrderStatus.FAILED:
                         results.append({
                             "ticker": pos.ticker,

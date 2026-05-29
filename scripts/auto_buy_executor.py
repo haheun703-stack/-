@@ -441,7 +441,10 @@ def main() -> int:
         # 5/28 P0-3 (코덱스 17:13): mode/executor_bot 명시 — L10 강제
         try:
             kis_order = KisOrderAdapter()
-            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "live")
+            # A-④ (5/29 차단선 A, 코덱스 QA): default "live" → "paper".
+            # env 미설정 시 paper 떨어짐 → KisOrderAdapter(mode!=live 차단)로 fail-closed.
+            # "gate 우회 0" 증명 + paper 단계 실주문 0 보강. live는 명시 env 필요.
+            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "paper")
             order = kis_order.buy_limit(tk, current_price, 1,
                                          mode=auto_mode, executor_bot="quant")
             ok = order.status.value == "PENDING" if hasattr(order.status, "value") else str(order.status) == "OrderStatus.PENDING"

@@ -1145,7 +1145,8 @@ class TestCallerPassesModeExecutorBot:
             import os
             from src.adapters.kis_order_adapter import KisOrderAdapter
             kis_order = KisOrderAdapter()
-            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "live")
+            # A-④ (5/29 차단선 A): default "live" → "paper" (실제 코드 일치)
+            auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "paper")
             kis_order.buy_limit("240810", 120000, 1,
                                  mode=auto_mode, executor_bot="quant")
 
@@ -1153,6 +1154,36 @@ class TestCallerPassesModeExecutorBot:
         call_kwargs = mock_adapter.buy_limit.call_args.kwargs
         assert call_kwargs.get("mode") == "paper"
         assert call_kwargs.get("executor_bot") == "quant"
+
+    def test_auto_buy_executor_env_unset_defaults_paper_static(self):
+        """A-④ (5/29 차단선 A, 코덱스 QA): AUTO_BUY_EXECUTOR_MODE 미설정 시 default 'paper'.
+
+        env 미설정 → paper → KisOrderAdapter(mode!=live 차단)로 fail-closed.
+        실제 소스의 default가 'paper'임을 객관화 (테스트 복제본 우연 통과 갭 차단).
+        """
+        import re
+        from pathlib import Path
+        src = (Path(__file__).resolve().parents[1] / "scripts" / "auto_buy_executor.py").read_text(encoding="utf-8")
+        # default가 "paper"여야 함 (env 미설정 fail-closed)
+        assert re.search(
+            r'getenv\(\s*["\']AUTO_BUY_EXECUTOR_MODE["\']\s*,\s*["\']paper["\']\s*\)', src
+        ), 'AUTO_BUY_EXECUTOR_MODE default "paper" 미발견 — env 미설정 fail-closed 위반'
+        # "live" default 잔존 금지
+        assert not re.search(
+            r'getenv\(\s*["\']AUTO_BUY_EXECUTOR_MODE["\']\s*,\s*["\']live["\']\s*\)', src
+        ), 'AUTO_BUY_EXECUTOR_MODE default "live" 잔존 — fail-closed 위반'
+
+    def test_create_live_engine_rejects_paper_mode(self, monkeypatch):
+        """A-③ (5/29 차단선 A, 코덱스 QA): create_live_engine은 live 전용 factory.
+
+        LIVE_TRADING_MODE != "live" (default paper 포함)면 RuntimeError raise.
+        paper cron이 이 경로(KisOrderAdapter)를 잘못 타면 즉시 오배선 발견.
+        """
+        import pytest
+        monkeypatch.delenv("LIVE_TRADING_MODE", raising=False)  # 미설정 → default paper
+        from src.use_cases.live_trading import create_live_engine
+        with pytest.raises(RuntimeError, match=r"create_live_engine.*거부"):
+            create_live_engine()
 
     def test_execute_time_exit_forwards_kwargs(self):
         """execute_time_exit → broker.sell_limit/market kwargs 전달 (옆문 2)."""

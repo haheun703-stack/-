@@ -22,12 +22,19 @@ logger = logging.getLogger(__name__)
 class SmartSellExecutor:
     """X1~X5 유형별 스마트 매도."""
 
-    def __init__(self, settings: dict, order_adapter=None, intraday_adapter=None):
+    def __init__(
+        self, settings: dict, order_adapter=None, intraday_adapter=None,
+        *, mode: str = "paper", executor_bot: str = "quant",
+    ):
         ea_cfg = settings.get("execution_alpha", {})
         self.sell_cfg = ea_cfg.get("smart_sell", {})
         self.enabled = self.sell_cfg.get("enabled", False)
         self.order = order_adapter
         self.intraday = intraday_adapter
+        # P1-A3 (5/29 사장님 결단): order_intents_gate 10중 가드 강제.
+        # default "paper"/"quant" — env 미설정 시 live 떨어짐 금지.
+        self._mode = mode
+        self._executor_bot = executor_bot
 
     def execute(
         self,
@@ -88,7 +95,11 @@ class SmartSellExecutor:
                 "detail": "X1 하드스톱 → 즉시 시장가",
             }
 
-        result = self.order.sell_market(ticker, qty)
+        # P1-A3: mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
+        result = self.order.sell_market(
+            ticker, qty,
+            mode=self._mode, executor_bot=self._executor_bot,
+        )
         filled = result.status.value != "failed"
         return {
             "method": "market_immediate",
@@ -127,7 +138,11 @@ class SmartSellExecutor:
             }
 
         # 1단계: 지정가 접수
-        order = self.order.sell_limit(ticker, limit_price, qty)
+        # P1-A3: mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
+        order = self.order.sell_limit(
+            ticker, limit_price, qty,
+            mode=self._mode, executor_bot=self._executor_bot,
+        )
         if order.status.value == "failed":
             # 지정가 실패 → 즉시 시장가
             logger.warning("SmartSell: %s 지정가 실패 → 시장가 전환", ticker)
@@ -223,8 +238,12 @@ class SmartSellExecutor:
                 logger.warning("SmartSell X4: VWAP 조회 실패 → 현재가 사용: %s", e)
 
         # VWAP 이상 지정가
+        # P1-A3: mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
         limit_price = max(price, vwap_price)
-        order = self.order.sell_limit(ticker, limit_price, qty)
+        order = self.order.sell_limit(
+            ticker, limit_price, qty,
+            mode=self._mode, executor_bot=self._executor_bot,
+        )
         if order.status.value == "failed":
             return self._market_immediate(ticker, qty, price, dry_run=False)
 

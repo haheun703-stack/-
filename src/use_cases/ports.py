@@ -149,25 +149,42 @@ class NewsSearchPort(ABC):
 # ─── v4.0 라이브 트레이딩 포트 ─────────────────────────
 
 class OrderPort(ABC):
-    """주문 실행 포트 — 매수/매도/정정/취소"""
+    """주문 실행 포트 — 매수/매도/정정/취소
+
+    Trading Factory v1 (5/28): keyword-only mode/executor_bot 인자 추가.
+    명시 전달 시 KisOrderAdapter._guard에서 order_intents_gate 10중 가드 강제.
+    default None은 backward compat (점진 마이그레이션).
+    """
 
     @abstractmethod
-    def buy_limit(self, ticker: str, price: int, quantity: int) -> Order:
+    def buy_limit(
+        self, ticker: str, price: int, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
         """지정가 매수"""
         ...
 
     @abstractmethod
-    def sell_limit(self, ticker: str, price: int, quantity: int) -> Order:
+    def sell_limit(
+        self, ticker: str, price: int, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
         """지정가 매도"""
         ...
 
     @abstractmethod
-    def buy_market(self, ticker: str, quantity: int) -> Order:
+    def buy_market(
+        self, ticker: str, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
         """시장가 매수"""
         ...
 
     @abstractmethod
-    def sell_market(self, ticker: str, quantity: int) -> Order:
+    def sell_market(
+        self, ticker: str, quantity: int,
+        *, mode: str | None = None, executor_bot: str | None = None,
+    ) -> Order:
         """시장가 매도"""
         ...
 

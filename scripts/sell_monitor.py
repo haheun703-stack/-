@@ -259,7 +259,13 @@ def execute_sell(
             ea_cfg = settings.get("execution_alpha", {})
             if ea_cfg.get("enabled") and ea_cfg.get("smart_sell", {}).get("enabled"):
                 from src.use_cases.smart_sell import SmartSellExecutor
-                executor = SmartSellExecutor(settings)
+                # P1-A3 (5/29): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
+                # SELL_MONITOR_MODE env (default "paper") — env 미설정 시 live 떨어짐 금지
+                smart_sell_mode = os.getenv("SELL_MONITOR_MODE", "paper")
+                executor = SmartSellExecutor(
+                    settings,
+                    mode=smart_sell_mode, executor_bot="quant",
+                )
                 # 현재가 조회
                 current = 0
                 try:
@@ -289,10 +295,13 @@ def execute_sell(
 
     try:
         # P0-D (5/28 fix): raw broker 호출 → KisOrderAdapter 위임으로 _guard 9중 가드 강제
+        # P1-A2 (5/29 사장님 결단): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
         from src.adapters.kis_order_adapter import KisOrderAdapter
         from src.entities.trading_models import OrderStatus
 
         _adapter = KisOrderAdapter()
+        # SELL_MONITOR_MODE env (default "paper") — env 미설정 시 live 떨어짐 금지
+        sell_mode = os.getenv("SELL_MONITOR_MODE", "paper")
 
         if use_limit:
             # 현재가 조회 → +premium% 지정가 매도 ("더 비싸게 매도" 모토)
@@ -302,7 +311,8 @@ def execute_sell(
                 limit_price = _tick_round(
                     int(current * (1 + limit_premium_pct / 100)), current,
                 )
-                order = _adapter.sell_limit(ticker, limit_price, qty)
+                order = _adapter.sell_limit(ticker, limit_price, qty,
+                                             mode=sell_mode, executor_bot="quant")
                 if order.status == OrderStatus.PENDING:
                     logger.info(
                         "[지정가 매도] %s %d주 @%d원 (+%.1f%%), 주문번호=%s",
@@ -323,7 +333,8 @@ def execute_sell(
                 logger.warning("[매도] %s 현재가 조회 실패 → 시장가 fallback", name)
 
         # 시장가 매도 (기본 or fallback) — adapter 위임
-        order = _adapter.sell_market(ticker, qty)
+        order = _adapter.sell_market(ticker, qty,
+                                      mode=sell_mode, executor_bot="quant")
         if order.status == OrderStatus.PENDING:
             logger.info("[시장가 매도] %s %d주, 주문번호=%s", name, qty, order.order_id)
             return {

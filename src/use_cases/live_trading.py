@@ -38,12 +38,19 @@ class LiveTradingEngine:
         tracker: PositionTracker,
         guard: SafetyGuard,
         config: dict | None = None,
+        *,
+        mode: str = "paper",
+        executor_bot: str = "quant",
     ):
         self.order_port = order_port
         self.balance_port = balance_port
         self.price_port = price_port
         self.tracker = tracker
         self.guard = guard
+        # P1-A3 (5/29 사장님 결단): order_intents_gate 10중 가드 강제.
+        # default "paper"/"quant" — env 미설정 시 live 떨어짐 금지.
+        self._mode = mode
+        self._executor_bot = executor_bot
 
         self.config = config or {}
         live_cfg = self.config.get("live_trading", {})
@@ -101,7 +108,11 @@ class LiveTradingEngine:
             return results
 
         if state.must_liquidate:
-            self.guard.emergency_liquidate(self.tracker, self.order_port)
+            # P2 (5/29): mode/executor_bot 전파 — 긴급청산 경로도 order_intents_gate 10중 가드 강제
+            self.guard.emergency_liquidate(
+                self.tracker, self.order_port,
+                mode=self._mode, executor_bot=self._executor_bot,
+            )
             return results
 
         # 2. 현금 유보 적용 (서보성 원칙: 20% 유보)
@@ -195,12 +206,19 @@ class LiveTradingEngine:
             order_price = 0
 
         # 주문 실행 (재시도 로직)
+        # P1-A3 (5/29): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
         order = None
         for attempt in range(self.max_retry):
             if self.default_order_type == "limit":
-                order = self.order_port.buy_limit(ticker, order_price, shares)
+                order = self.order_port.buy_limit(
+                    ticker, order_price, shares,
+                    mode=self._mode, executor_bot=self._executor_bot,
+                )
             else:
-                order = self.order_port.buy_market(ticker, shares)
+                order = self.order_port.buy_market(
+                    ticker, shares,
+                    mode=self._mode, executor_bot=self._executor_bot,
+                )
 
             if order.status != OrderStatus.FAILED:
                 self.guard.reset_api_failure()
@@ -300,16 +318,26 @@ class LiveTradingEngine:
         )
 
         # 긴급/손절은 시장가, 나머지는 지정가
+        # P1-A3 (5/29): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
         if reason in (ExitReason.EMERGENCY, ExitReason.STOP_LOSS, ExitReason.PCT_STOP):
-            order = self.order_port.sell_market(ticker, quantity)
+            order = self.order_port.sell_market(
+                ticker, quantity,
+                mode=self._mode, executor_bot=self._executor_bot,
+            )
         else:
             sell_price = int(pos.current_price)
-            order = self.order_port.sell_limit(ticker, sell_price, quantity)
+            order = self.order_port.sell_limit(
+                ticker, sell_price, quantity,
+                mode=self._mode, executor_bot=self._executor_bot,
+            )
 
         if order.status == OrderStatus.FAILED:
             # 실패 시 시장가 재시도
             logger.warning("[매도] %s 지정가 실패 → 시장가 재시도", ticker)
-            order = self.order_port.sell_market(ticker, quantity)
+            order = self.order_port.sell_market(
+                ticker, quantity,
+                mode=self._mode, executor_bot=self._executor_bot,
+            )
 
         if order.status != OrderStatus.FAILED:
             self.tracker.apply_partial_exit(pos, quantity, reason)
@@ -382,7 +410,11 @@ class LiveTradingEngine:
 
                 if state.must_liquidate:
                     logger.critical("[모니터] 총 손실 한도 초과 — 긴급 청산!")
-                    self.guard.emergency_liquidate(self.tracker, self.order_port)
+                    # P2 (5/29): mode/executor_bot 전파 — 긴급청산 경로도 order_intents_gate 10중 가드 강제
+                    self.guard.emergency_liquidate(
+                        self.tracker, self.order_port,
+                        mode=self._mode, executor_bot=self._executor_bot,
+                    )
                     break
 
                 if not state.can_trade:
@@ -578,7 +610,28 @@ class LiveTradingEngine:
 
 
 def create_live_engine(config_path: str = "config/settings.yaml") -> LiveTradingEngine:
-    """설정 파일로부터 LiveTradingEngine 인스턴스 생성"""
+    """설정 파일로부터 LiveTradingEngine 인스턴스 생성.
+
+    P1-A3 (5/29 사장님 결단): LIVE_TRADING_MODE env (default "paper") —
+    env 미설정 시 live 떨어짐 금지.
+    """
+    import os
+
+    # A-③ (5/29 차단선 A, 코덱스 QA 2라운드): create_live_engine은 KisOrderAdapter 전용 (live factory).
+    # warning-only는 운영자 오판 위험(paper 엔진이 돈다고 착각) → hard guard(raise)로 강화.
+    # ★ adapter/config 접촉 전 맨 앞에서 차단 (paper cron 오배선 즉시 발견 + broker 미접촉).
+    # paper 전략검증은 이 경로가 아니라 PaperOrderAdapter 경로를 써야 한다:
+    #   paper_warmup_daily(--paper-trade-open/close) 또는 chart_hero_executor(paper=True).
+    live_mode = os.getenv("LIVE_TRADING_MODE", "paper")
+    if live_mode != "live":
+        raise RuntimeError(
+            f"[create_live_engine] mode={live_mode!r} 거부 — 이 factory는 KisOrderAdapter(live 전용)다. "
+            "paper 전략검증은 PaperOrderAdapter 경로(paper_warmup_daily --paper-trade-open/close "
+            "또는 chart_hero_executor(paper=True))를 사용하라. paper cron으로 이 경로 쓰지 말 것. "
+            "(live 의도면 LIVE_TRADING_MODE=live 명시 — 단 executor_bot=quant라 order_intents_gate가 "
+            "quant+live를 차단하므로 실매수는 별도 execution bot 권한 모델 필요.)"
+        )
+
     from src.adapters.kis_order_adapter import KisOrderAdapter
 
     with open(config_path, encoding="utf-8") as f:
@@ -595,4 +648,6 @@ def create_live_engine(config_path: str = "config/settings.yaml") -> LiveTrading
         tracker=tracker,
         guard=guard,
         config=config,
+        mode=live_mode,
+        executor_bot="quant",
     )
