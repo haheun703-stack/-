@@ -1,0 +1,18 @@
+Quantum preflight expect=blocked
+[PASS] runtime order gate: KILL_SWITCH exists
+[PASS] data/KILL_SWITCH: exists
+[PASS] legacy kill_switch.flag: absent
+[PASS] AUTO_TRADING_ENABLED: 0
+[PASS] MODEL: REAL
+[PASS] QM-E schedule live command: dry-run/no-live
+[PASS] QM-P missing script guard: guarded
+[PASS] cron/shell danger args (run_bat.sh): no danger args
+[PASS] raw mojito broker calls (use_cases/scripts): no raw calls
+[PASS] ORDER_INTENTS_HMAC_KEY (Phase 1 L10 가드): present (len=64)
+[PASS] S1 paper intent dict: 생성 OK (expires 상대 미래)
+[PASS] S2 HMAC 서명+검증: verify OK
+[PASS] S3 intent gate paper+quant: register+assert 통과
+[PASS] S4 KisAdapter mode=paper 차단: ValueError 차단 OK
+[PASS] S5 PaperAdapter mode=live 차단: ValueError 차단 OK
+[PASS] S6 runtime guard 차단: 차단 OK: [RUNTIME-GUARD] live broker order blocked: KILL_SWITCH exists
+RESULT: PASS (16/16)
