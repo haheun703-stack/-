@@ -1123,9 +1123,12 @@ class TestCallerPassesModeExecutorBot:
         # AUTO_BUY_EXECUTOR_MODE 환경변수 사용 확인
         assert "AUTO_BUY_EXECUTOR_MODE" in src, \
             "AUTO_BUY_EXECUTOR_MODE 환경변수 미사용"
-        # executor_bot="quant" 명시
-        assert re.search(r'executor_bot\s*=\s*["\']quant["\']', src), \
-            'executor_bot="quant" 명시 미발견'
+        # B⑤ (5/30): executor_bot env화 — AUTO_BUY_EXECUTOR_BOT default "quant" (fail-closed).
+        # live 실매수는 AUTO_BUY_EXECUTOR_BOT=execution 명시해야만 (quant+live는 gate 차단).
+        assert re.search(r'AUTO_BUY_EXECUTOR_BOT["\']\s*,\s*["\']quant["\']', src), \
+            'AUTO_BUY_EXECUTOR_BOT default "quant"(fail-closed) 미발견'
+        assert re.search(r'executor_bot\s*=\s*auto_bot', src), \
+            'executor_bot=auto_bot env 전달 미발견'
 
     def test_auto_buy_executor_buy_limit_call_runtime(self, monkeypatch):
         """P0-3 (코덱스 18:51): KisOrderAdapter mock으로 buy_limit kwargs 런타임 검증."""

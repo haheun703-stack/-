@@ -339,16 +339,32 @@ class LiveTradingEngine:
                 mode=self._mode, executor_bot=self._executor_bot,
             )
 
+        # B① (5/30 차단선 B): 매도도 매수처럼 체결 확인 후 포지션 감소.
+        # 5/27 사고 본질 = 미체결(PENDING) 상태서 포지션을 줄여 KIS 원장과 불일치.
+        # 매수의 _wait_for_fill 재사용 (동일 order_port — live는 get_order_status 지원,
+        # paper 어댑터는 즉시 FILLED라 대기 불필요).
         if order.status != OrderStatus.FAILED:
-            self.tracker.apply_partial_exit(pos, quantity, reason)
-            self._send_sell_alert(pos, order, reason, quantity)
+            if order.status == OrderStatus.FILLED:
+                filled_order = order  # paper: 즉시 FILLED → 대기 생략
+            else:
+                filled_order = self._wait_for_fill(order)
+
+            if filled_order.status == OrderStatus.FILLED:
+                # B② (5/30): 실제 체결 수량만큼만 감소 (부분체결 과다감소 방지)
+                filled_qty = filled_order.filled_quantity or quantity
+                self.tracker.apply_partial_exit(pos, filled_qty, reason)
+                self._send_sell_alert(pos, filled_order, reason, filled_qty)
+                order = filled_order
+            else:
+                # 미체결/취소 → 포지션 유지 (원장 정합 — 5/27 사고 방지)
+                logger.warning("[매도] %s 미체결/취소 → 포지션 유지 (원장 정합)", ticker)
 
         return {
             "ticker": ticker,
             "shares": quantity,
             "reason": reason.value,
             "order": order,
-            "success": order.status != OrderStatus.FAILED,
+            "success": order.status == OrderStatus.FILLED,
         }
 
     # ──────────────────────────────────────────

@@ -40,7 +40,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ORDER_INTENTS_DIR = PROJECT_ROOT / "data" / "order_intents"
 
 # 활성 봇 목록 (Trading Factory v1)
-ACTIVE_BOTS = ("quant", "day")  # 정보봇/블로그봇은 매매 X
+ACTIVE_BOTS = ("quant", "day")  # selector: intent 등록 가능 봇 (정보봇/블로그봇 매매 X)
+
+# B⑤ (5/30): executor 신원 — intent를 소비(실행)할 수 있는 봇.
+# execution은 selector 아님(intent 등록 불가, 소비만) → quant 선정 / execution 실행 분리.
+ALLOWED_EXECUTORS = ("quant", "day", "execution")
 
 # 허용 mode (P0-2: 명시 강제, 기본값 X)
 ALLOWED_MODES = ("paper", "live")
@@ -274,9 +278,9 @@ def assert_order_intent_exists(
         raise OrderIntentError(f"[INPUT] side 잘못: {side} (BUY/SELL만 허용)")
     if mode not in ALLOWED_MODES:
         raise OrderIntentError(f"[INPUT] mode 잘못: {mode} ({ALLOWED_MODES}만 허용)")
-    if executor_bot not in ACTIVE_BOTS:
+    if executor_bot not in ALLOWED_EXECUTORS:
         raise OrderIntentError(
-            f"[INPUT] executor_bot 잘못: {executor_bot} ({ACTIVE_BOTS}만 허용)"
+            f"[INPUT] executor_bot 잘못: {executor_bot} ({ALLOWED_EXECUTORS}만 허용)"
         )
 
     # P0-3 (코덱스 4차 응답 5/28 13:37): quant executor + live mode 조합 직접 차단
@@ -313,8 +317,14 @@ def assert_order_intent_exists(
             continue
         if str(intent.get("mode", "")).lower() != mode:
             continue
-        # P0-3: intent.bot이 executor_bot과 일치해야 함
-        if str(intent.get("bot", "")).lower() != executor_bot:
+        # B⑤ (5/30): executor_bot이 intent.bot 또는 intent.allowed_executors와 일치.
+        # allowed_executors 필드가 없으면 허용집합 = {intent.bot} → 기존 동작과 100% 동일 (하위호환).
+        # selector(quant)가 allowed_executors=["execution"]를 서명해 넣은 intent만 execution이 실행 가능.
+        # 위조로 이 필드를 추가하면 HMAC 서명이 깨져 아래 _verify_signature에서 차단.
+        intent_bot = str(intent.get("bot", "")).lower()
+        allowed_execs = {intent_bot}
+        allowed_execs.update(str(x).lower() for x in intent.get("allowed_executors", []))
+        if executor_bot not in allowed_execs:
             continue
 
         # P0-5: HMAC 서명 검증 (위조 방지)
@@ -400,13 +410,17 @@ def register_intent(intent: dict, bot: str) -> Path:
             f"[REGISTER] side 잘못: {intent.get('side')} (BUY/SELL만 허용)"
         )
 
-    # Note 1 (5/28 코덱스 3차): quant는 research/selector bot이므로 live intent 등록 금지
-    # quant_intents에는 mode="paper"만 허용. live 매매는 별도 executor (day bot)만.
+    # Note 1 (5/28): quant는 selector → 자기 손으로 live 실행 불가.
+    # B⑤ (5/30): 단 allowed_executors=["execution"] 위임 명시가 있으면 live intent 등록 허용.
+    #   quant가 종목 선정 + "execution에 live 실행 위임"을 서명해 넣는 구조.
+    #   quant 자신은 여전히 live 실행 불가 (assert_order_intent_exists는 executor=quant+live 차단).
     if bot == "quant" and str(intent.get("mode", "")).lower() == "live":
-        raise OrderIntentError(
-            "[REGISTER] quant bot은 live mode intent 등록 금지 — research/selector 역할만 수행. "
-            "live 매매는 day bot 또는 별도 승인된 executor만 가능."
-        )
+        ae = [str(x).lower() for x in intent.get("allowed_executors", [])]
+        if "execution" not in ae:
+            raise OrderIntentError(
+                "[REGISTER] quant bot live intent는 allowed_executors=['execution'] 위임 명시 필수 — "
+                "quant 자신은 live 실행 불가 (execution에 위임만 가능)."
+            )
 
     # P0-4: expires_at 파싱 가능 여부 검증 (등록 시점에)
     _parse_expires_at(intent)

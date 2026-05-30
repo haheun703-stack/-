@@ -445,8 +445,30 @@ def main() -> int:
             # env 미설정 시 paper 떨어짐 → KisOrderAdapter(mode!=live 차단)로 fail-closed.
             # "gate 우회 0" 증명 + paper 단계 실주문 0 보강. live는 명시 env 필요.
             auto_mode = os.getenv("AUTO_BUY_EXECUTOR_MODE", "paper")
+            # B⑤ (5/30): executor 신원 env화. default "quant"=fail-closed
+            # (quant+live는 gate L284 차단 → 실매수 불가). live 실매수는
+            # AUTO_BUY_EXECUTOR_MODE=live + AUTO_BUY_EXECUTOR_BOT=execution 둘 다 명시해야만.
+            auto_bot = os.getenv("AUTO_BUY_EXECUTOR_BOT", "quant")
+            # B⑤ self-register: execution live 실매수는 quant(selector)가 "execution에
+            # 위임"한 live intent 선등록 필수 (No Intent, No Order). 당일 15:40 만료.
+            if auto_mode == "live" and auto_bot == "execution":
+                from datetime import timedelta as _td, timezone as _tz
+                from src.use_cases.order_intents_gate import register_intent
+                _now = datetime.now(_tz(_td(hours=9)))
+                _exp = _now.replace(hour=15, minute=40, second=0, microsecond=0)
+                if _exp <= _now:
+                    _exp = _now + _td(hours=1)
+                register_intent({
+                    "intent_id": f"q_{tk}_autobuy_{_now.strftime('%Y%m%d%H%M%S')}",
+                    "bot": "quant", "engine": "auto_buy_executor",
+                    "ticker": tk, "side": "BUY", "mode": "live",
+                    "score": float(sc.score),
+                    "created_at": _now.isoformat(),
+                    "expires_at": _exp.isoformat(),
+                    "allowed_executors": ["execution"],
+                }, bot="quant")
             order = kis_order.buy_limit(tk, current_price, 1,
-                                         mode=auto_mode, executor_bot="quant")
+                                         mode=auto_mode, executor_bot=auto_bot)
             ok = order.status.value == "PENDING" if hasattr(order.status, "value") else str(order.status) == "OrderStatus.PENDING"
 
             if not ok:
