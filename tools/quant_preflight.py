@@ -47,6 +47,124 @@ def _status(label: str, ok: bool, detail: str) -> tuple[bool, str]:
     return ok, f"[{mark}] {label}: {detail}"
 
 
+def _simulate_paper_checks() -> list[tuple[bool, str]]:
+    """S1~S6 paper-intent 시뮬레이션 가드 (§9 dry-run 단계 3).
+
+    부작용 0 보장:
+      - S3: tempfile로 ORDER_INTENTS_DIR 치환 후 원복 → 운영 jsonl 오염 0
+      - S4: KisOrderAdapter.__new__ 우회 → __init__ mojito 토큰 발급 네트워크 회피
+      - S5: PaperOrderAdapter는 __init__ 부작용 없음 + buy_limit mode 차단이 부작용 전
+    각 가드 독립 try/except — 한 가드 실패가 나머지를 가리지 않음.
+    예외 타입을 좁게 (ValueError/PermissionError) 잡아 "진짜 차단"만 PASS.
+    """
+    import tempfile
+    from datetime import datetime, timedelta, timezone
+
+    results: list[tuple[bool, str]] = []
+    kst = timezone(timedelta(hours=9))
+    now = datetime.now(tz=kst)
+
+    # S1: paper intent dict (필수 9필드, expires_at 상대 미래 — 만료 시한폭탄 회피)
+    intent = {
+        "intent_id": "sim_240810_preflight",
+        "bot": "quant",
+        "engine": "preflight_simulate",
+        "ticker": "240810",
+        "side": "BUY",
+        "mode": "paper",
+        "score": 0.0,
+        "created_at": now.isoformat(),
+        "expires_at": (now + timedelta(hours=4)).isoformat(),
+    }
+    results.append(_status("S1 paper intent dict", True, "생성 OK (expires 상대 미래)"))
+
+    # S2: HMAC 서명 생성 + 검증
+    try:
+        from src.use_cases.order_intents_gate import _compute_signature, _verify_signature
+        intent["hmac_signature"] = _compute_signature(intent)
+        ok_s2 = _verify_signature(intent)
+        results.append(
+            _status("S2 HMAC 서명+검증", ok_s2, "verify OK" if ok_s2 else "verify FAIL")
+        )
+    except Exception as e:
+        results.append(_status("S2 HMAC 서명+검증", False, f"{type(e).__name__}: {e}"))
+
+    # S3: order_intents_gate paper+quant 통과 (tempfile 격리 — 운영 jsonl 오염 0)
+    try:
+        import src.use_cases.order_intents_gate as gate
+        saved_dir = gate.ORDER_INTENTS_DIR
+        with tempfile.TemporaryDirectory() as td:
+            gate.ORDER_INTENTS_DIR = Path(td)
+            try:
+                gate.register_intent(intent, bot="quant")
+                gate.assert_order_intent_exists(
+                    ticker="240810", side="BUY", mode="paper", executor_bot="quant",
+                )
+                results.append(
+                    _status("S3 intent gate paper+quant", True, "register+assert 통과")
+                )
+            finally:
+                gate.ORDER_INTENTS_DIR = saved_dir
+    except Exception as e:
+        results.append(
+            _status("S3 intent gate paper+quant", False, f"{type(e).__name__}: {e}")
+        )
+
+    # S4: KisOrderAdapter mode=paper 차단 (live 전용). __new__ 우회 = 네트워크 0
+    try:
+        from src.adapters.kis_order_adapter import KisOrderAdapter
+        obj = KisOrderAdapter.__new__(KisOrderAdapter)
+        try:
+            obj._guard("240810", 1, side="BUY", mode="paper", executor_bot="quant")
+            results.append(
+                _status("S4 KisAdapter mode=paper 차단", False, "raise 안 됨 (위험)")
+            )
+        except ValueError:
+            results.append(
+                _status("S4 KisAdapter mode=paper 차단", True, "ValueError 차단 OK")
+            )
+    except Exception as e:
+        results.append(
+            _status("S4 KisAdapter mode=paper 차단", False, f"예상밖 {type(e).__name__}: {e}")
+        )
+
+    # S5: PaperOrderAdapter mode=live 차단 (paper 전용)
+    try:
+        from src.adapters.paper_order_adapter import PaperOrderAdapter
+        padapter = PaperOrderAdapter()
+        try:
+            padapter.buy_limit("240810", 1000, 1, mode="live", executor_bot="quant")
+            results.append(
+                _status("S5 PaperAdapter mode=live 차단", False, "raise 안 됨 (위험)")
+            )
+        except ValueError:
+            results.append(
+                _status("S5 PaperAdapter mode=live 차단", True, "ValueError 차단 OK")
+            )
+    except Exception as e:
+        results.append(
+            _status("S5 PaperAdapter mode=live 차단", False, f"예상밖 {type(e).__name__}: {e}")
+        )
+
+    # S6: runtime guard — 차단(PermissionError)=PASS, 비차단=FAIL
+    #     (KILL_SWITCH/PAPER_ONLY 부재 = 안전장치 OFF → FAIL, fail-closed)
+    try:
+        from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
+        try:
+            assert_runtime_orders_allowed()
+            results.append(
+                _status("S6 runtime guard 차단", False, "미차단 — KILL_SWITCH/PAPER_ONLY 부재")
+            )
+        except PermissionError as e:
+            results.append(_status("S6 runtime guard 차단", True, f"차단 OK: {e}"))
+    except Exception as e:
+        results.append(
+            _status("S6 runtime guard 차단", False, f"예상밖 {type(e).__name__}: {e}")
+        )
+
+    return results
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -54,6 +172,11 @@ def main() -> int:
         choices=("blocked", "live"),
         default="blocked",
         help="Expected runtime state.",
+    )
+    parser.add_argument(
+        "--simulate-paper",
+        action="store_true",
+        help="Run S1~S6 paper-intent simulation guards (§9 dry-run step 3).",
     )
     args = parser.parse_args()
 
@@ -192,11 +315,18 @@ def main() -> int:
         )
     )
 
+    if args.simulate_paper:
+        checks.extend(_simulate_paper_checks())
+
     ok_all = all(ok for ok, _ in checks)
     print(f"Quantum preflight expect={args.expect}")
     for _, line in checks:
         print(line)
-    print("RESULT:", "PASS" if ok_all else "FAIL")
+    # 카운트는 simulate 모드에서만 덧붙임 (비-simulate 출력 불변 = 회귀 격리)
+    total = len(checks)
+    passed = sum(1 for ok, _ in checks if ok)
+    tail = f" ({passed}/{total})" if args.simulate_paper else ""
+    print("RESULT:", ("PASS" if ok_all else "FAIL") + tail)
     return 0 if ok_all else 1
 
 
