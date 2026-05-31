@@ -1,10 +1,20 @@
-"""수급 D+20 스윙 selector (백테스트 확정 룰 — 5/30).
+"""수급 D+20 스윙 selector — ⚠️ 실거래 부적합(연구 보류). 5/31 재검증.
 
-확정 룰 (전체3년 PF 1.68/+2.92%, 약세장 PF 1.11, 강세장 PF 2.40 — 비용 0.2% 반영):
+★ 경고: 기존 "확정 룰 PF 1.68/강세장 2.40" 주장은 재현 불가 + 허수였음.
+  supply_d20_backtest.py 재실행(5/31, 단타봇 직접 검증) 결과:
+    - 기본재현(필터X)      전체3년 PF 1.32  (주장된 1.68 아님)
+    - + 거래대금≥10억      전체3년 PF 0.72 / 최근25~26 PF 0.24·평균 -19.83%
+    - + 슬리피지 0.5%      전체3년 PF 0.69
+    - + 손절 -8%          최근25~26 승률 0%
+  → 못 사는 잡주(생존자편향)가 PF를 부풀린 허수. 실거래 가능 종목만 보면 역엣지.
+  실라이브 금지. 룰 재설계(다이버전스 방향) 전까지 후보 산출/기록만(HOLD).
+
+룰(passes 동일):
   foreign_net_5d>0 AND inst_net_5d>0
   AND (foreign_consecutive_buy>=3 OR inst_consecutive_buy>=3)
   AND supply_divergence>0
-  → D+20(약 1개월) 보유 스윙 후보.
+  ⚠️ 죽은 조건: supply_divergence>0 = 당일 외인매도 → 그날 foreign_consecutive_buy가
+     0으로 리셋 → foreign_consec>=3은 영원히 거짓. 실질 OR = inst_consec>=3만 작동.
 
 data/processed/*.parquet 각 종목 최신일을 스캔해 룰 통과 후보를 선정.
 퀀트봇 = 스윙 연구자(청사진). 실매수 HOLD — 후보 산출/기록만.
@@ -41,6 +51,8 @@ def _name_map() -> dict:
 
 
 def passes(r: dict) -> bool:
+    # ⚠️ foreign_consecutive_buy>=3은 죽은 조건(supply_divergence>0=당일 외인매도와
+    #    상호배타 → 영원히 거짓). 실질 OR = inst_consecutive_buy>=3. (5/31 재검증)
     return (
         r.get("foreign_net_5d", 0) > 0
         and r.get("inst_net_5d", 0) > 0
