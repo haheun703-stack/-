@@ -207,6 +207,7 @@ class SplitOrderExecutor:
         orders = []
         total_filled = 0
         total_cost = 0.0
+        priced_filled = 0  # 체결가 확인된 수량만 평균가 분모 (M-2: 0원 희석 방지)
 
         for i, qty in enumerate(quantities):
             if i > 0:
@@ -226,7 +227,11 @@ class SplitOrderExecutor:
                 filled = order.filled_quantity if order.filled_quantity > 0 else qty
                 fill_price = order.filled_price if order.filled_price > 0 else 0
                 total_filled += filled
-                total_cost += filled * fill_price
+                # ★ 5/31 결함수정(M-2): 체결가 미상(PENDING 0원)을 평균가에 섞으면
+                #   avg_price가 0쪽으로 왜곡. 가격 확인된 체결분만 분자/분모에 반영.
+                if fill_price > 0:
+                    total_cost += filled * fill_price
+                    priced_filled += filled
             else:
                 logger.warning(
                     "[분할주문] %d/%d 실패: %s", i + 1, actual_splits, order.message
@@ -234,7 +239,7 @@ class SplitOrderExecutor:
                 # 실패 시 남은 분할 중단
                 break
 
-        avg_price = total_cost / total_filled if total_filled > 0 else 0.0
+        avg_price = total_cost / priced_filled if priced_filled > 0 else 0.0
         success = total_filled > 0
 
         logger.info(
