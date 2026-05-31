@@ -453,23 +453,29 @@ class LiveTradingEngine:
                     )
 
                 # 손실 한도 체크
+                # ★ 5/31 결함수정(M-4): 잔고 조회 실패 시 available_cash=0이 총손실을
+                #   과대계산 → must_liquidate 오발동(전 종목 강제청산) 사고. 조회 성공(ok)일 때만 판정.
                 daily_loss = self._calc_daily_loss_pct()
-                total_loss = self._calc_total_loss_pct(
-                    self.balance_port.get_available_cash()
-                )
-                state = self.guard.check_all(daily_loss, total_loss)
+                bal = self.balance_port.fetch_balance()
+                if bal.get("ok", True):
+                    total_loss = self._calc_total_loss_pct(bal.get("available_cash", 0))
+                    state = self.guard.check_all(daily_loss, total_loss)
 
-                if state.must_liquidate:
-                    logger.critical("[모니터] 총 손실 한도 초과 — 긴급 청산!")
-                    # P2 (5/29): mode/executor_bot 전파 — 긴급청산 경로도 order_intents_gate 10중 가드 강제
-                    self.guard.emergency_liquidate(
-                        self.tracker, self.order_port,
-                        mode=self._mode, executor_bot=self._executor_bot,
+                    if state.must_liquidate:
+                        logger.critical("[모니터] 총 손실 한도 초과 — 긴급 청산!")
+                        # P2 (5/29): mode/executor_bot 전파 — 긴급청산 경로도 order_intents_gate 10중 가드 강제
+                        self.guard.emergency_liquidate(
+                            self.tracker, self.order_port,
+                            mode=self._mode, executor_bot=self._executor_bot,
+                        )
+                        break
+
+                    if not state.can_trade:
+                        logger.warning("[모니터] 안전장치 활성 — 매매 중단 (모니터링은 계속)")
+                else:
+                    logger.error(
+                        "[모니터] 잔고 조회 실패 — 총손실/청산 판정 이번 사이클 건너뜀 (M-4 오청산 방지)"
                     )
-                    break
-
-                if not state.can_trade:
-                    logger.warning("[모니터] 안전장치 활성 — 매매 중단 (모니터링은 계속)")
 
             except Exception as e:
                 logger.error("[모니터] 오류: %s", e)

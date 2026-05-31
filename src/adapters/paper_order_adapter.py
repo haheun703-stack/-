@@ -326,7 +326,7 @@ class PaperOrderAdapter:
 
     def fetch_balance(self) -> dict:
         """Paper account snapshot detached from the real KIS account."""
-        return {"holdings": [], "total_eval": 0, "total_pnl": 0, "available_cash": 0}
+        return {"holdings": [], "total_eval": 0, "total_pnl": 0, "available_cash": 0, "ok": True}
 
     def fetch_holdings(self) -> list[dict]:
         return self.fetch_balance()["holdings"]

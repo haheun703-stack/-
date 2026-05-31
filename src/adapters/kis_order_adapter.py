@@ -173,8 +173,14 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         if side == "BUY":
             max_amount = int(os.getenv("AUTO_TRADING_MAX_AMOUNT", "300000"))
             max_trades = int(os.getenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "5"))
-            # 지정가는 price, 시장가는 현재가 추정 (없으면 0으로 사전 검증만)
+            # 지정가는 price, 시장가는 현재가 추정
             est_price = price if price is not None else self._estimate_price(ticker)
+            # ★ 5/31 결함수정(H-2): 현재가 추정 실패(0)면 est_amount=0 → 금액한도가 항상
+            #   통과돼 시장가 매수에서 일일 금액한도 우회. 검증 불가 시 fail-safe로 거부.
+            if est_price <= 0:
+                raise ValueError(
+                    f"[GUARD] 현재가 추정 실패(={est_price}) — 일일 금액한도 검증 불가, 주문 거부"
+                )
             est_amount = quantity * est_price
             ok, reason = check_daily_limits(est_amount, max_amount, max_trades)
             if not ok:
@@ -515,10 +521,13 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                 "total_eval": int(summary_item.get("tot_evlu_amt", 0)),
                 "total_pnl": int(summary_item.get("evlu_pfls_smtl_amt", 0)),
                 "available_cash": cash,
+                "ok": True,  # 조회 성공 (M-4: 실패와 구분)
             }
         except Exception as e:
             logger.error("[잔고] 조회 실패: %s", e)
-            return {"holdings": [], "total_eval": 0, "total_pnl": 0, "available_cash": 0}
+            # ★ M-4: 조회 실패를 ok=False로 명시 (available_cash=0을 '진짜 0'과 구분).
+            #   호출부가 이 0을 손실로 오판해 긴급청산하는 사고 방지.
+            return {"holdings": [], "total_eval": 0, "total_pnl": 0, "available_cash": 0, "ok": False}
 
     def fetch_holdings(self) -> list[dict]:
         """보유종목 목록만 조회"""
