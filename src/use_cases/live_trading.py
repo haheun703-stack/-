@@ -251,15 +251,30 @@ class LiveTradingEngine:
             return {"ticker": ticker, "success": False, "reason": "체결 실패/취소"}
 
     def _wait_for_fill(self, order: Order, timeout: int | None = None) -> Order:
-        """체결 대기 (timeout초 후 미체결 시 취소, API 오류 시 재시도)"""
+        """체결 대기 (timeout초 후 미체결 시 취소, API 오류 시 재시도).
+
+        ★ 5/31 결함수정(단타봇 직접) — 부분체결/취소 유령 포지션 차단:
+          C-1: 부분체결(PARTIAL)을 일급 추적. 타임아웃에 이미 체결된 수량을 버리지 않고
+               살려서 FILLED(부분)로 반환 → KIS 실보유분이 트래커에 등록됨.
+               기존엔 일부체결 후 타임아웃 시 CANCELLED 반환 → 손절 감시 안 되는 유령 포지션.
+          C-3: cancel() 반환값 확인. 취소 실패 시 CANCELLED로 단정하지 않고 경고
+               (주문이 거래소에 살아있을 수 있음 → reconcile 대상).
+        """
         timeout = timeout or self.cancel_after_sec
         start = time.time()
         api_errors = 0
+        last_filled_qty = 0          # KIS tot_ccld_qty = 단조증가 누계
+        last_filled_price = 0.0
 
         while time.time() - start < timeout:
             try:
                 status = self.order_port.get_order_status(order.order_id)
                 api_errors = 0  # 성공 시 리셋
+
+                # 부분체결 누적 추적 (FILLED 전이라도 체결분 기억)
+                if (status.filled_quantity or 0) > last_filled_qty:
+                    last_filled_qty = status.filled_quantity
+                    last_filled_price = status.filled_price or last_filled_price
 
                 if status.status == OrderStatus.FILLED:
                     order.status = OrderStatus.FILLED
@@ -280,9 +295,29 @@ class LiveTradingEngine:
 
             time.sleep(5)
 
-        # 타임아웃 또는 API 오류 → 취소
-        logger.warning("[매수] %s 미체결 %d초 → 취소", order.ticker, timeout)
-        self.order_port.cancel(order)
+        # 타임아웃 또는 API 오류 → 잔여 취소
+        logger.warning(
+            "[대기] %s 미체결 %d초 → 취소 (현재 체결분 %d/%d주)",
+            order.ticker, timeout, last_filled_qty, order.quantity,
+        )
+        cancelled = self.order_port.cancel(order)
+        if not cancelled:  # C-3: 취소 실패 = 주문 생존 가능 → 단정 금지
+            logger.error(
+                "[대기] %s 취소 실패 — 주문이 거래소에 살아있을 수 있음 (reconcile 필요)",
+                order.ticker,
+            )
+
+        # C-1: 타임아웃 시점 부분체결분이 있으면 실보유분으로 등록 (유령 포지션 방지)
+        if last_filled_qty > 0:
+            order.status = OrderStatus.FILLED
+            order.filled_quantity = last_filled_qty
+            order.filled_price = last_filled_price or order.price
+            logger.warning(
+                "[대기] %s 부분체결 %d/%d주 확정 — 실보유분 포지션 등록 (잔여는 취소)",
+                order.ticker, last_filled_qty, order.quantity,
+            )
+            return order
+
         order.status = OrderStatus.CANCELLED
         return order
 
