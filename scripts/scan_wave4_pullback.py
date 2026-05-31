@@ -81,21 +81,32 @@ def check(df: pd.DataFrame, analyzer: ElliottWaveAnalyzer) -> dict | None:
     w3_len = w3_end - w3_start
     if w3_len <= 0:
         return None
-    retrace = (w3_end - w4_low) / w3_len  # 4파 되돌림 비율
+    retrace = (w3_end - w4_low) / w3_len  # 4파 저점 되돌림(파동 구조 검증용)
     if not (RETRACE_MIN <= retrace <= RETRACE_MAX):
         return None
 
     last = df.iloc[-1]
+    close = float(last["close"])
+
+    # ★ 5/31 결함수정(단타봇 직접): 기존엔 과거 피벗(w4_low)만 검증 → 현재가가
+    #   손절선·4파저점을 이미 뚫고 무너진 '무효 파동'이 100%(136/136) 후보로 올라옴.
+    #   진입 판단은 '지금 현재가'가 4파 눌림 구간에 살아있는지로 해야 정확.
+    retrace_live = (w3_end - close) / w3_len  # 현재가 기준 되돌림(진입 판단 핵심)
+    if not (RETRACE_MIN <= retrace_live <= RETRACE_MAX):
+        return None
+    if close <= w1_high:  # 1파 고점(손절선) 하회 = 파동 무효 (docstring 손절 룰)
+        return None
+
     vma5 = float(last.get("volume_ma5", 0) or 0)
     vma20 = float(last.get("volume_ma20", 0) or 0)
     vol_contract = vma20 > 0 and vma5 < vma20  # 거래량 수축(교대법칙)
-    close = float(last["close"])
     tv = float(last.get("trading_value", 0) or 0)
 
     return {
         "current_wave": wave.current_wave,
         "confidence": round(wave.confidence, 1),
         "retrace_382": round(retrace, 3),
+        "retrace_live": round(retrace_live, 3),  # 현재가 기준 되돌림(진입 판단)
         "vol_contract": bool(vol_contract),
         "w1_high": round(w1_high, 0),
         "w4_low": round(w4_low, 0),
@@ -130,14 +141,14 @@ def main() -> int:
             cands.append(res)
 
     # 거래량 수축 우선 + 38.2% 근접 + 신뢰도
-    cands.sort(key=lambda x: (not x["vol_contract"], abs(x["retrace_382"] - 0.382), -x["confidence"]))
+    cands.sort(key=lambda x: (not x["vol_contract"], abs(x["retrace_live"] - 0.382), -x["confidence"]))
 
     print(f"=== 3파4파 눌림 후보 {len(cands)}건 / 스캔 {scanned}종목 (최신 {latest_seen}) ===")
     print(f"{'종목':<18}{'파동':>8}{'신뢰':>6}{'되돌림':>7}{'거래량↓':>7}{'거래대금억':>9}{'종가':>10}")
     for c in cands[:30]:
         label = f"{c['name']}({c['ticker']})" if c["name"] else c["ticker"]
         print(f"{label:<18}{c['current_wave']:>8}{c['confidence']:>6.0f}"
-              f"{c['retrace_382']:>7.2f}{'O' if c['vol_contract'] else '-':>7}"
+              f"{c['retrace_live']:>7.2f}{'O' if c['vol_contract'] else '-':>7}"
               f"{c['trading_value_eok']:>9.1f}{c['close']:>10,.0f}")
 
     OUT_FILE.write_text(json.dumps({
