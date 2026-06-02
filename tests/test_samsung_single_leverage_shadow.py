@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
 
 from src.etf.samsung_single_leverage_shadow import (
+    build_common_period_comparison,
     build_samsung_single_leverage_report,
     build_samsung_single_leverage_shadow_ledger,
     prepare_shadow_prices,
@@ -43,14 +45,41 @@ def test_samsung_shadow_report_is_shadow_only():
     values = [100.0] * 59 + [101.0, 110.0, 112.0, 80.0, 120.0, 121.0]
     rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
     reference = {"ticker": "488080", "latest_c60_position_state": "HOLD"}
-    report = build_samsung_single_leverage_report(rows, c60_488080_reference=reference)
+    fair_compare = {"status": "FAIR_COMMON_PERIOD"}
+    report = build_samsung_single_leverage_report(
+        rows,
+        c60_488080_reference=reference,
+        common_period_comparison=fair_compare,
+    )
 
     assert report["status"] == "SHADOW_ONLY"
     assert report["order_count"] == 0
     assert report["live_trading_state"] == "HOLD"
     assert report["signal_ticker"] == "005930"
-    assert report["c60_488080_reference"] == reference
-    assert "488080_c60" in report["comparison_basis"]
+    assert report["c60_488080_reference_full_available_period"] == reference
+    assert report["common_period_fair_comparison"] == fair_compare
+    assert "common_period" in report["comparison_basis"]
+
+
+def test_common_period_comparison_normalizes_shared_dates_only():
+    values = [100.0] * 59 + [101.0, 110.0, 112.0, 80.0, 120.0, 121.0, 130.0]
+    samsung_rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
+    semi_rows = [
+        SimpleNamespace(
+            date=row.date,
+            c60_equity_curve=1.0 + idx * 0.01,
+            buyhold_equity_curve=1.0 + idx * 0.02,
+            c60_position_state="HOLD",
+        )
+        for idx, row in enumerate(samsung_rows[1:])
+    ]
+
+    comparison = build_common_period_comparison(samsung_rows, semi_rows)
+
+    assert comparison["status"] == "FAIR_COMMON_PERIOD"
+    assert comparison["trading_days"] < len(samsung_rows)
+    assert "samsung_c60" in comparison["metrics"]
+    assert "etf_488080_c60" in comparison["metrics"]
 
 
 def test_samsung_shadow_modules_do_not_reference_order_paths():

@@ -177,6 +177,37 @@ def _mdd(current: float, peak: float) -> float:
     return current / peak - 1.0
 
 
+def _segment_return(values: list[float]) -> float:
+    if len(values) < 2 or values[0] <= 0:
+        return 0.0
+    return values[-1] / values[0] - 1.0
+
+
+def _segment_mdd(values: list[float]) -> float:
+    if not values:
+        return 0.0
+
+    base = values[0]
+    if base <= 0:
+        return 0.0
+
+    peak = 1.0
+    worst = 0.0
+    for value in values:
+        normalized = value / base
+        peak = max(peak, normalized)
+        worst = min(worst, normalized / peak - 1.0)
+    return worst
+
+
+def _series_metrics(rows: list[object], equity_attr: str) -> dict:
+    values = [float(getattr(row, equity_attr)) for row in rows]
+    return {
+        "return": _round(_segment_return(values)),
+        "mdd": _round(_segment_mdd(values)),
+    }
+
+
 def _next_rule_state(
     rule: str,
     state: str,
@@ -329,9 +360,65 @@ def build_samsung_single_leverage_shadow_ledger(
     return rows
 
 
+def build_common_period_comparison(
+    samsung_rows: Iterable[SamsungLeverageLedgerRow],
+    c60_488080_rows: Iterable[object],
+) -> dict:
+    """Compare Samsung single leverage and 488080 only on shared dates.
+
+    Full-period Samsung history is useful for 2022-style stress validation, but
+    it must not be compared directly with 488080 because 488080 has a much
+    shorter listed history. This block is the fair allocation comparison.
+    """
+    samsung_by_date = {row.date: row for row in samsung_rows}
+    semi_by_date = {str(getattr(row, "date")): row for row in c60_488080_rows}
+    common_dates = sorted(set(samsung_by_date) & set(semi_by_date))
+    if len(common_dates) < 2:
+        return {
+            "status": "NO_COMMON_PERIOD",
+            "note": "Samsung and 488080 ledgers do not have enough shared dates for fair comparison.",
+        }
+
+    samsung_segment = [samsung_by_date[date] for date in common_dates]
+    semi_segment = [semi_by_date[date] for date in common_dates]
+    metrics = {
+        "samsung_c60": _series_metrics(samsung_segment, "c60_equity_curve"),
+        "samsung_sajang": _series_metrics(samsung_segment, "sajang_equity_curve"),
+        "samsung_leverage_buyhold": _series_metrics(samsung_segment, "leverage_buyhold_equity_curve"),
+        "samsung_underlying_buyhold": _series_metrics(samsung_segment, "underlying_buyhold_equity_curve"),
+        "etf_488080_c60": _series_metrics(semi_segment, "c60_equity_curve"),
+        "etf_488080_buyhold": _series_metrics(semi_segment, "buyhold_equity_curve"),
+    }
+    return_winner = max(metrics, key=lambda key: metrics[key]["return"])
+    defensive_winner = max(metrics, key=lambda key: metrics[key]["mdd"])
+    leveraged_keys = [key for key in metrics if key != "samsung_underlying_buyhold"]
+    leveraged_return_winner = max(leveraged_keys, key=lambda key: metrics[key]["return"])
+    leveraged_defensive_winner = max(leveraged_keys, key=lambda key: metrics[key]["mdd"])
+
+    return {
+        "status": "FAIR_COMMON_PERIOD",
+        "period_start": common_dates[0],
+        "period_end": common_dates[-1],
+        "trading_days": len(common_dates),
+        "basis": "All return and MDD values are recomputed from equity curves normalized at the shared start date.",
+        "metrics": metrics,
+        "winner_by_return": return_winner,
+        "winner_by_mdd_defense": defensive_winner,
+        "winner_by_return_leveraged_only": leveraged_return_winner,
+        "winner_by_mdd_defense_leveraged_only": leveraged_defensive_winner,
+        "comparison_warning": "Do not compare full-period Samsung stress metrics directly with 488080. Use this common-period block for allocation decisions.",
+        "latest_states": {
+            "samsung_c60": samsung_segment[-1].c60_state,
+            "samsung_sajang": samsung_segment[-1].sajang_state,
+            "etf_488080_c60": getattr(semi_segment[-1], "c60_position_state", None),
+        },
+    }
+
+
 def build_samsung_single_leverage_report(
     rows: Iterable[SamsungLeverageLedgerRow],
     c60_488080_reference: dict | None = None,
+    common_period_comparison: dict | None = None,
 ) -> dict:
     ledger = list(rows)
     if not ledger:
@@ -346,7 +433,11 @@ def build_samsung_single_leverage_report(
         "status": "SHADOW_ONLY",
         "signal_ticker": last.signal_ticker,
         "leverage_ticker": last.leverage_ticker,
-        "comparison_basis": "samsung_sajang_vs_samsung_c60_vs_488080_c60_vs_samsung_underlying_buyhold",
+        "comparison_basis": "full_period_samsung_validation_plus_common_period_488080_fair_compare",
+        "ledger_start": ledger[0].date,
+        "ledger_end": last.date,
+        "ledger_rows": len(ledger),
+        "full_period_note": "Samsung full-period metrics are stress-validation numbers, not a direct 488080 allocation comparison.",
         "latest_date": last.date,
         "latest_c60_signal": last.c60_signal,
         "latest_c60_state": last.c60_state,
@@ -384,7 +475,9 @@ def build_samsung_single_leverage_report(
         "safety_note": "real orders 0 / HOLD maintained / no broker order functions used",
     }
     if c60_488080_reference:
-        report["c60_488080_reference"] = c60_488080_reference
+        report["c60_488080_reference_full_available_period"] = c60_488080_reference
+    if common_period_comparison:
+        report["common_period_fair_comparison"] = common_period_comparison
     return report
 
 
@@ -393,10 +486,15 @@ def save_samsung_single_leverage_outputs(
     ledger_path: Path = LEDGER_PATH,
     report_path: Path = REPORT_PATH,
     c60_488080_reference: dict | None = None,
+    common_period_comparison: dict | None = None,
 ) -> tuple[Path, Path, dict]:
     SHADOW_DIR.mkdir(parents=True, exist_ok=True)
     payload = [asdict(row) for row in rows]
-    report = build_samsung_single_leverage_report(rows, c60_488080_reference=c60_488080_reference)
+    report = build_samsung_single_leverage_report(
+        rows,
+        c60_488080_reference=c60_488080_reference,
+        common_period_comparison=common_period_comparison,
+    )
     ledger_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return ledger_path, report_path, report

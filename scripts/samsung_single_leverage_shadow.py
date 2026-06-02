@@ -25,6 +25,7 @@ from src.etf.samsung_single_leverage_shadow import (  # noqa: E402
     DEFAULT_LEVERAGE_TICKER,
     SEMI_LEVERAGE_TICKER,
     UNDERLYING_TICKER,
+    build_common_period_comparison,
     build_samsung_single_leverage_shadow_ledger,
     load_daily_ohlcv,
     save_samsung_single_leverage_outputs,
@@ -69,12 +70,17 @@ def main() -> int:
         return 1
 
     c60_488080_reference = {}
+    common_period_comparison = {}
     if not semi_leverage.empty:
         semi_rows = build_c60_shadow_ledger(semi_leverage, ticker=SEMI_LEVERAGE_TICKER)
         if semi_rows:
             semi_report = build_c60_report(semi_rows)
+            common_period_comparison = build_common_period_comparison(rows, semi_rows)
             c60_488080_reference = {
                 "ticker": SEMI_LEVERAGE_TICKER,
+                "period_start": semi_rows[0].date,
+                "period_end": semi_rows[-1].date,
+                "ledger_rows": len(semi_rows),
                 "latest_date": semi_report.get("latest_date"),
                 "latest_signal": semi_report.get("latest_signal"),
                 "latest_c60_position_state": semi_report.get("latest_c60_position_state"),
@@ -91,6 +97,7 @@ def main() -> int:
     ledger_path, report_path, report = save_samsung_single_leverage_outputs(
         rows,
         c60_488080_reference=c60_488080_reference,
+        common_period_comparison=common_period_comparison,
     )
     logger.info("Ledger saved: %s (%d rows)", ledger_path, len(rows))
     logger.info("Report saved: %s", report_path)
