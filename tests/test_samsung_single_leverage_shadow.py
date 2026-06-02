@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pandas as pd
 
 from src.etf.samsung_single_leverage_shadow import (
+    SK_HYNIX_TICKER,
     build_common_period_comparison,
     build_samsung_single_leverage_report,
     build_samsung_single_leverage_shadow_ledger,
@@ -41,6 +42,18 @@ def test_samsung_shadow_tracks_c60_and_sajang_rules_independently():
     assert rows[-1].underlying_buyhold_equity_curve > 0
 
 
+def test_single_stock_shadow_accepts_sk_hynix_signal_ticker():
+    values = [100.0] * 59 + [101.0, 110.0, 112.0, 80.0, 120.0, 121.0]
+    rows = build_samsung_single_leverage_shadow_ledger(
+        _prices(values),
+        signal_ticker=SK_HYNIX_TICKER,
+        leverage_ticker="0193T0",
+    )
+
+    assert rows[-1].signal_ticker == "000660"
+    assert rows[-1].leverage_ticker == "0193T0"
+
+
 def test_samsung_shadow_report_is_shadow_only():
     values = [100.0] * 59 + [101.0, 110.0, 112.0, 80.0, 120.0, 121.0]
     rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
@@ -74,19 +87,21 @@ def test_common_period_comparison_normalizes_shared_dates_only():
         for idx, row in enumerate(samsung_rows[1:])
     ]
 
-    comparison = build_common_period_comparison(samsung_rows, semi_rows)
+    comparison = build_common_period_comparison(samsung_rows, semi_rows, single_label="sk_hynix")
 
     assert comparison["status"] == "FAIR_COMMON_PERIOD"
     assert comparison["trading_days"] < len(samsung_rows)
-    assert "samsung_c60" in comparison["metrics"]
+    assert "sk_hynix_c60" in comparison["metrics"]
     assert "etf_488080_c60" in comparison["metrics"]
+    assert not comparison["winner_by_mdd_defense_leveraged_only"].endswith("_underlying_buyhold")
 
 
 def test_samsung_shadow_modules_do_not_reference_order_paths():
     root = Path(__file__).resolve().parent.parent
     source = (root / "src" / "etf" / "samsung_single_leverage_shadow.py").read_text(encoding="utf-8")
     script = (root / "scripts" / "samsung_single_leverage_shadow.py").read_text(encoding="utf-8")
-    combined = f"{source}\n{script}".lower()
+    sk_script = (root / "scripts" / "sk_hynix_single_leverage_shadow.py").read_text(encoding="utf-8")
+    combined = f"{source}\n{script}\n{sk_script}".lower()
 
     banned = [
         "mojito",

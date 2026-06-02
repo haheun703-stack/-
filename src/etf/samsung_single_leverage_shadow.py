@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 UNDERLYING_TICKER = "005930"
 DEFAULT_LEVERAGE_TICKER = "0193W0"
+SK_HYNIX_TICKER = "000660"
+DEFAULT_SK_HYNIX_LEVERAGE_TICKER = "0193T0"
 SEMI_LEVERAGE_TICKER = "488080"
 DEFAULT_LEVERAGE_MULTIPLIER = 2.0
 DEFAULT_SEED_EQUITY = 1.0
@@ -31,6 +33,8 @@ RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 SHADOW_DIR = PROJECT_ROOT / "data" / "shadow"
 LEDGER_PATH = SHADOW_DIR / f"{DEFAULT_LEVERAGE_TICKER}_samsung_single_lev_shadow_ledger.json"
 REPORT_PATH = SHADOW_DIR / f"{DEFAULT_LEVERAGE_TICKER}_samsung_single_lev_shadow_report.json"
+SK_HYNIX_LEDGER_PATH = SHADOW_DIR / f"{DEFAULT_SK_HYNIX_LEVERAGE_TICKER}_sk_hynix_single_lev_shadow_ledger.json"
+SK_HYNIX_REPORT_PATH = SHADOW_DIR / f"{DEFAULT_SK_HYNIX_LEVERAGE_TICKER}_sk_hynix_single_lev_shadow_report.json"
 
 
 @dataclass(frozen=True)
@@ -236,6 +240,7 @@ def _next_rule_state(
 def build_samsung_single_leverage_shadow_ledger(
     underlying_prices: pd.DataFrame,
     leverage_prices: pd.DataFrame | None = None,
+    signal_ticker: str = UNDERLYING_TICKER,
     leverage_ticker: str = DEFAULT_LEVERAGE_TICKER,
     multiplier: float = DEFAULT_LEVERAGE_MULTIPLIER,
     seed_equity: float = DEFAULT_SEED_EQUITY,
@@ -327,7 +332,7 @@ def build_samsung_single_leverage_shadow_ledger(
         rows.append(
             SamsungLeverageLedgerRow(
                 date=pd.Timestamp(dt).strftime("%Y-%m-%d"),
-                signal_ticker=UNDERLYING_TICKER,
+                signal_ticker=signal_ticker,
                 leverage_ticker=leverage_ticker,
                 underlying_close=_round(row["underlying_close"], 4),
                 leverage_close=_round(row["leverage_close"], 4),
@@ -363,6 +368,7 @@ def build_samsung_single_leverage_shadow_ledger(
 def build_common_period_comparison(
     samsung_rows: Iterable[SamsungLeverageLedgerRow],
     c60_488080_rows: Iterable[object],
+    single_label: str = "samsung",
 ) -> dict:
     """Compare Samsung single leverage and 488080 only on shared dates.
 
@@ -381,17 +387,18 @@ def build_common_period_comparison(
 
     samsung_segment = [samsung_by_date[date] for date in common_dates]
     semi_segment = [semi_by_date[date] for date in common_dates]
+    single_label = single_label.strip().lower() or "single_stock"
     metrics = {
-        "samsung_c60": _series_metrics(samsung_segment, "c60_equity_curve"),
-        "samsung_sajang": _series_metrics(samsung_segment, "sajang_equity_curve"),
-        "samsung_leverage_buyhold": _series_metrics(samsung_segment, "leverage_buyhold_equity_curve"),
-        "samsung_underlying_buyhold": _series_metrics(samsung_segment, "underlying_buyhold_equity_curve"),
+        f"{single_label}_c60": _series_metrics(samsung_segment, "c60_equity_curve"),
+        f"{single_label}_sajang": _series_metrics(samsung_segment, "sajang_equity_curve"),
+        f"{single_label}_leverage_buyhold": _series_metrics(samsung_segment, "leverage_buyhold_equity_curve"),
+        f"{single_label}_underlying_buyhold": _series_metrics(samsung_segment, "underlying_buyhold_equity_curve"),
         "etf_488080_c60": _series_metrics(semi_segment, "c60_equity_curve"),
         "etf_488080_buyhold": _series_metrics(semi_segment, "buyhold_equity_curve"),
     }
     return_winner = max(metrics, key=lambda key: metrics[key]["return"])
     defensive_winner = max(metrics, key=lambda key: metrics[key]["mdd"])
-    leveraged_keys = [key for key in metrics if key != "samsung_underlying_buyhold"]
+    leveraged_keys = [key for key in metrics if not key.endswith("_underlying_buyhold")]
     leveraged_return_winner = max(leveraged_keys, key=lambda key: metrics[key]["return"])
     leveraged_defensive_winner = max(leveraged_keys, key=lambda key: metrics[key]["mdd"])
 
@@ -406,10 +413,10 @@ def build_common_period_comparison(
         "winner_by_mdd_defense": defensive_winner,
         "winner_by_return_leveraged_only": leveraged_return_winner,
         "winner_by_mdd_defense_leveraged_only": leveraged_defensive_winner,
-        "comparison_warning": "Do not compare full-period Samsung stress metrics directly with 488080. Use this common-period block for allocation decisions.",
+        "comparison_warning": "Do not compare full-period single-stock stress metrics directly with 488080. Use this common-period block for allocation decisions.",
         "latest_states": {
-            "samsung_c60": samsung_segment[-1].c60_state,
-            "samsung_sajang": samsung_segment[-1].sajang_state,
+            f"{single_label}_c60": samsung_segment[-1].c60_state,
+            f"{single_label}_sajang": samsung_segment[-1].sajang_state,
             "etf_488080_c60": getattr(semi_segment[-1], "c60_position_state", None),
         },
     }
@@ -433,11 +440,11 @@ def build_samsung_single_leverage_report(
         "status": "SHADOW_ONLY",
         "signal_ticker": last.signal_ticker,
         "leverage_ticker": last.leverage_ticker,
-        "comparison_basis": "full_period_samsung_validation_plus_common_period_488080_fair_compare",
+        "comparison_basis": "full_period_single_stock_validation_plus_common_period_488080_fair_compare",
         "ledger_start": ledger[0].date,
         "ledger_end": last.date,
         "ledger_rows": len(ledger),
-        "full_period_note": "Samsung full-period metrics are stress-validation numbers, not a direct 488080 allocation comparison.",
+        "full_period_note": "Single-stock full-period metrics are stress-validation numbers, not a direct 488080 allocation comparison.",
         "latest_date": last.date,
         "latest_c60_signal": last.c60_signal,
         "latest_c60_state": last.c60_state,
@@ -469,7 +476,7 @@ def build_samsung_single_leverage_report(
                 "underlying_buyhold": last.underlying_buyhold_equity_curve,
             }.get,
         ),
-        "one_line_conclusion": "Samsung single leverage should be tracked as shadow only until live liquidity/spread and rule stability are proven.",
+        "one_line_conclusion": "Single-stock leverage should be tracked as shadow only until live liquidity/spread and rule stability are proven.",
         "order_count": 0,
         "live_trading_state": "HOLD",
         "safety_note": "real orders 0 / HOLD maintained / no broker order functions used",
