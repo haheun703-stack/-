@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_TICKER = "488080"
 C60_MA_PERIOD = 60
+C60_REENTRY_MA_PERIOD = 5
+C60_REENTRY_RETURN_PCT = 0.02
+C60_REENTRY_MA60_SLOPE_DAYS = 5
 DEFAULT_SEED_EQUITY = 1.0
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 SHADOW_DIR = PROJECT_ROOT / "data" / "shadow"
@@ -104,6 +107,34 @@ def _round(value: float, digits: int = 6) -> float:
     return round(float(value), digits)
 
 
+def _sum_completed_or_open_exit_cycles(rows: list[C60LedgerRow]) -> tuple[float, float]:
+    """Sum one missed/avoided value per exit cycle.
+
+    Ledger rows store the current open-cycle missed/avoided value while in cash.
+    For report-level accounting, use the REENTER row as the completed cycle's
+    final value and include the latest row only when the final cycle is still
+    open in cash.
+    """
+    missed_total = 0.0
+    avoided_total = 0.0
+    last_exit_seen = False
+
+    for row in rows:
+        if row.signal == "EXIT":
+            last_exit_seen = True
+        elif row.signal == "REENTER" and last_exit_seen:
+            missed_total += row.missed_upside_after_exit
+            avoided_total += row.avoided_drawdown_after_exit
+            last_exit_seen = False
+
+    last = rows[-1]
+    if last_exit_seen and last.c60_position_state == "CASH":
+        missed_total += last.missed_upside_after_exit
+        avoided_total += last.avoided_drawdown_after_exit
+
+    return missed_total, avoided_total
+
+
 def build_c60_shadow_ledger(
     prices: pd.DataFrame,
     ticker: str = DEFAULT_TICKER,
@@ -112,16 +143,29 @@ def build_c60_shadow_ledger(
 ) -> list[C60LedgerRow]:
     """Build C60 shadow ledger rows from daily close prices.
 
-    C60 uses the close/MA60 decision after market close. EXIT and REENTER are
-    recorded on the observation day, while the state change is applied from the
-    next observed trading day.
+    C60 uses the close/MA60 decision after market close. EXIT and strict
+    REENTER are recorded on the observation day, while the state change is
+    applied from the next observed trading day.
+
+    Strict REENTER:
+    - close > MA5
+    - close > MA60
+    - daily return >= +2%
+    - volume > previous observed volume
+    - MA60 is rising versus five observations ago
     """
     df = normalize_ohlcv(prices)
     if df.empty or len(df) < ma_period + 1:
         return []
 
     df = df.copy()
+    if "volume" not in df.columns:
+        df["volume"] = pd.NA
+    df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+    df["ma5"] = df["close"].rolling(C60_REENTRY_MA_PERIOD).mean()
     df["ma60"] = df["close"].rolling(ma_period).mean()
+    df["prev_volume"] = df["volume"].shift(1)
+    df["ma60_up"] = df["ma60"] > df["ma60"].shift(C60_REENTRY_MA60_SLOPE_DAYS)
     df = df.dropna(subset=["ma60"])
     if len(df) < 2:
         return []
@@ -141,7 +185,11 @@ def build_c60_shadow_ledger(
     for dt, row in df.iterrows():
         close = float(row["close"])
         ma60 = float(row["ma60"])
+        ma5 = float(row["ma5"]) if pd.notna(row["ma5"]) else 0.0
+        volume = float(row["volume"]) if pd.notna(row["volume"]) else 0.0
+        prev_volume = float(row["prev_volume"]) if pd.notna(row["prev_volume"]) else 0.0
 
+        daily_return = 0.0
         if rows:
             daily_return = close / prev_close - 1.0
             if state == "HOLD":
@@ -163,11 +211,19 @@ def build_c60_shadow_ledger(
             next_state = "CASH"
             last_exit_close = close
             exit_equity = c60_equity
-        elif state == "CASH" and close > ma60:
-            signal = "REENTER"
-            next_state = "HOLD"
-            if last_exit_close is not None and close > last_exit_close:
-                whipsaw_count += 1
+        elif state == "CASH":
+            strict_reenter = (
+                close > ma5
+                and close > ma60
+                and daily_return >= C60_REENTRY_RETURN_PCT
+                and volume > prev_volume
+                and bool(row["ma60_up"])
+            )
+            if strict_reenter:
+                signal = "REENTER"
+                next_state = "HOLD"
+                if last_exit_close is not None and close > last_exit_close:
+                    whipsaw_count += 1
 
         if state == "CASH" and last_exit_close and exit_equity is not None:
             missed = max(0.0, close / last_exit_close - 1.0) * exit_equity
@@ -218,8 +274,7 @@ def build_c60_report(rows: Iterable[C60LedgerRow]) -> dict:
     buyhold_final_return = last.buyhold_equity_curve - DEFAULT_SEED_EQUITY
     mdd_c60 = min(r.drawdown_c60 for r in ledger)
     mdd_buyhold = min(r.drawdown_buyhold for r in ledger)
-    total_avoided = max(r.avoided_drawdown_after_exit for r in ledger)
-    total_missed = max(r.missed_upside_after_exit for r in ledger)
+    total_missed, total_avoided = _sum_completed_or_open_exit_cycles(ledger)
     insurance_value = total_avoided - total_missed
     conclusion = (
         "보험료 가치 있음"
