@@ -11,7 +11,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Sequence
 
 import pandas as pd
 
@@ -133,6 +133,121 @@ def _sum_completed_or_open_exit_cycles(rows: list[C60LedgerRow]) -> tuple[float,
         avoided_total += last.avoided_drawdown_after_exit
 
     return missed_total, avoided_total
+
+
+def _equity_mdd(values: Sequence[float]) -> float:
+    """Return max drawdown for a local equity segment."""
+    if not values:
+        return 0.0
+
+    peak = float(values[0])
+    worst = 0.0
+    for value in values:
+        current = float(value)
+        peak = max(peak, current)
+        if peak > 0:
+            worst = min(worst, current / peak - 1.0)
+    return worst
+
+
+def _segment_return(values: Sequence[float]) -> float:
+    if len(values) < 2 or float(values[0]) == 0:
+        return 0.0
+    return float(values[-1]) / float(values[0]) - 1.0
+
+
+def build_accelerated_c60_validation(
+    rows: Iterable[C60LedgerRow],
+    windows: Sequence[int] = (20, 40, 60, 120),
+) -> dict:
+    """Summarize many historical forward-like windows from one C60 ledger.
+
+    This does not replace live forward observation, but it pulls the first
+    decision point forward by replaying the already-known history in rolling
+    windows. It remains shadow-only and does not touch trading paths.
+    """
+    ledger = list(rows)
+    if not ledger:
+        return {
+            "status": "NO_DATA",
+            "order_count": 0,
+            "live_trading_state": "HOLD",
+            "windows": {},
+        }
+
+    report = build_c60_report(ledger)
+    window_summary: dict[str, dict] = {}
+
+    for window in windows:
+        if window <= 1 or len(ledger) < window:
+            continue
+
+        segments = []
+        for start in range(0, len(ledger) - window + 1):
+            segment = ledger[start : start + window]
+            c60_values = [row.c60_equity_curve for row in segment]
+            buyhold_values = [row.buyhold_equity_curve for row in segment]
+            c60_return = _segment_return(c60_values)
+            buyhold_return = _segment_return(buyhold_values)
+            c60_mdd = _equity_mdd(c60_values)
+            buyhold_mdd = _equity_mdd(buyhold_values)
+            mdd_edge = c60_mdd - buyhold_mdd
+            return_delta = c60_return - buyhold_return
+
+            segments.append(
+                {
+                    "start_date": segment[0].date,
+                    "end_date": segment[-1].date,
+                    "c60_return": _round(c60_return),
+                    "buyhold_return": _round(buyhold_return),
+                    "return_delta": _round(return_delta),
+                    "c60_mdd": _round(c60_mdd),
+                    "buyhold_mdd": _round(buyhold_mdd),
+                    "mdd_edge": _round(mdd_edge),
+                    "days_in_cash_delta": segment[-1].days_in_cash - segment[0].days_in_cash,
+                    "whipsaw_delta": segment[-1].whipsaw_count - segment[0].whipsaw_count,
+                    "c60_state_end": segment[-1].c60_position_state,
+                    "signal_end": segment[-1].signal,
+                }
+            )
+
+        c60_mdd_better = [s for s in segments if s["mdd_edge"] > 0]
+        c60_return_better = [s for s in segments if s["return_delta"] > 0]
+        stress_segments = [s for s in segments if s["buyhold_mdd"] <= -0.2]
+        latest = segments[-1]
+        worst_buyhold = min(segments, key=lambda s: s["buyhold_mdd"])
+        worst_c60 = min(segments, key=lambda s: s["c60_mdd"])
+
+        window_summary[str(window)] = {
+            "window_days": window,
+            "segment_count": len(segments),
+            "c60_mdd_better_count": len(c60_mdd_better),
+            "c60_mdd_better_rate": _round(len(c60_mdd_better) / len(segments)),
+            "c60_return_better_count": len(c60_return_better),
+            "c60_return_better_rate": _round(len(c60_return_better) / len(segments)),
+            "stress_segment_count_buyhold_mdd_20pct": len(stress_segments),
+            "avg_return_delta": _round(sum(s["return_delta"] for s in segments) / len(segments)),
+            "avg_mdd_edge": _round(sum(s["mdd_edge"] for s in segments) / len(segments)),
+            "latest_segment": latest,
+            "worst_buyhold_segment": worst_buyhold,
+            "worst_c60_segment": worst_c60,
+        }
+
+    return {
+        "ticker": report.get("ticker", DEFAULT_TICKER),
+        "status": "ACCELERATED_SHADOW_REPLAY",
+        "basis": "historical rolling windows from C60 shadow ledger",
+        "ledger_start": ledger[0].date,
+        "ledger_end": ledger[-1].date,
+        "ledger_rows": len(ledger),
+        "latest_signal": report.get("latest_signal"),
+        "latest_c60_position_state": report.get("latest_c60_position_state"),
+        "base_report": report,
+        "windows": window_summary,
+        "order_count": 0,
+        "live_trading_state": "HOLD",
+        "safety_note": "실주문 0건/HOLD 유지 — accelerated replay is analytics only",
+    }
 
 
 def build_c60_shadow_ledger(
