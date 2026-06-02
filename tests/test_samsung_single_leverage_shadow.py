@@ -28,6 +28,16 @@ def test_prepare_shadow_prices_builds_synthetic_2x_when_product_missing():
     assert df["leverage_close"].iloc[0] > 0
 
 
+def test_prepare_shadow_prices_does_not_splice_actual_product_by_default():
+    values = [100.0] * 59 + [101.0, 110.0, 99.0, 108.9]
+    product_values = [1000.0] * len(values)
+    df = prepare_shadow_prices(_prices(values), leverage_prices=_prices(product_values), multiplier=2.0)
+    pure = prepare_shadow_prices(_prices(values), leverage_prices=None, multiplier=2.0)
+
+    assert df["leverage_close"].tolist() == pure["leverage_close"].tolist()
+    assert "actual_product_close" in df.columns
+
+
 def test_samsung_shadow_tracks_c60_and_sajang_rules_independently():
     values = [100.0] * 59 + [101.0]
     values += [110.0, 112.0, 80.0, 105.0, 108.0, 111.0, 115.0, 120.0, 125.0]

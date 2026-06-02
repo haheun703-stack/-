@@ -140,6 +140,7 @@ def prepare_shadow_prices(
     underlying_prices: pd.DataFrame,
     leverage_prices: pd.DataFrame | None = None,
     multiplier: float = DEFAULT_LEVERAGE_MULTIPLIER,
+    splice_actual_prices: bool = False,
 ) -> pd.DataFrame:
     underlying = normalize_ohlcv(underlying_prices)
     if underlying.empty:
@@ -149,11 +150,11 @@ def prepare_shadow_prices(
     out["underlying_close"] = underlying["close"]
     out["underlying_return"] = out["underlying_close"].pct_change().fillna(0.0)
 
+    synthetic_all = _synthetic_leverage_close(out["underlying_close"], multiplier)
     leverage = normalize_ohlcv(leverage_prices) if leverage_prices is not None else pd.DataFrame()
-    if not leverage.empty:
+    if not leverage.empty and splice_actual_prices:
         lev_close = leverage["close"].reindex(out.index)
         if lev_close.notna().sum() >= 2:
-            synthetic_all = _synthetic_leverage_close(out["underlying_close"], multiplier)
             first_valid = lev_close.dropna().index[0]
             first_actual = float(lev_close.loc[first_valid])
             if first_actual > 0:
@@ -162,9 +163,12 @@ def prepare_shadow_prices(
             lev_close = lev_close.ffill()
             out["leverage_close"] = lev_close
         else:
-            out["leverage_close"] = _synthetic_leverage_close(out["underlying_close"], multiplier)
+            out["leverage_close"] = synthetic_all
     else:
-        out["leverage_close"] = _synthetic_leverage_close(out["underlying_close"], multiplier)
+        out["leverage_close"] = synthetic_all
+
+    if not leverage.empty:
+        out["actual_product_close"] = leverage["close"].reindex(out.index)
 
     out = out.dropna(subset=["underlying_close", "leverage_close"])
     out["leverage_return"] = out["leverage_close"].pct_change().fillna(0.0)
@@ -206,9 +210,23 @@ def _segment_mdd(values: list[float]) -> float:
 
 def _series_metrics(rows: list[object], equity_attr: str) -> dict:
     values = [float(getattr(row, equity_attr)) for row in rows]
+    base = values[0] if values else 0.0
+    peak = 1.0
+    worst = 0.0
+    worst_date = None
+    if base > 0:
+        for row, value in zip(rows, values, strict=False):
+            normalized = value / base
+            peak = max(peak, normalized)
+            drawdown = normalized / peak - 1.0 if peak > 0 else 0.0
+            if drawdown < worst:
+                worst = drawdown
+                worst_date = str(getattr(row, "date"))
+
     return {
         "return": _round(_segment_return(values)),
         "mdd": _round(_segment_mdd(values)),
+        "worst_drawdown_date": worst_date,
     }
 
 
@@ -244,8 +262,14 @@ def build_samsung_single_leverage_shadow_ledger(
     leverage_ticker: str = DEFAULT_LEVERAGE_TICKER,
     multiplier: float = DEFAULT_LEVERAGE_MULTIPLIER,
     seed_equity: float = DEFAULT_SEED_EQUITY,
+    splice_actual_prices: bool = False,
 ) -> list[SamsungLeverageLedgerRow]:
-    df = prepare_shadow_prices(underlying_prices, leverage_prices, multiplier)
+    df = prepare_shadow_prices(
+        underlying_prices,
+        leverage_prices,
+        multiplier,
+        splice_actual_prices=splice_actual_prices,
+    )
     if df.empty or len(df) < 2:
         return []
 
@@ -408,6 +432,7 @@ def build_common_period_comparison(
         "period_end": common_dates[-1],
         "trading_days": len(common_dates),
         "basis": "All return and MDD values are recomputed from equity curves normalized at the shared start date.",
+        "execution_timing": "Signals are evaluated after close and position changes affect the next observed trading day; no same-day close lookahead.",
         "metrics": metrics,
         "winner_by_return": return_winner,
         "winner_by_mdd_defense": defensive_winner,
@@ -441,6 +466,7 @@ def build_samsung_single_leverage_report(
         "signal_ticker": last.signal_ticker,
         "leverage_ticker": last.leverage_ticker,
         "comparison_basis": "full_period_single_stock_validation_plus_common_period_488080_fair_compare",
+        "leverage_price_basis": "synthetic_daily_2x_underlying_return_for_backtest; actual listed product is not spliced into historical equity",
         "ledger_start": ledger[0].date,
         "ledger_end": last.date,
         "ledger_rows": len(ledger),
