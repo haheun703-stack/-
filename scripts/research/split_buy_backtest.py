@@ -50,7 +50,8 @@ def _mdd(curve: list[float]) -> float:
     return worst
 
 
-def sim(lev_price: pd.Series, bull_sig: pd.Series, strategy: str, start, end) -> dict:
+def sim(lev_price: pd.Series, bull_sig: pd.Series, strategy: str, start, end,
+        return_curves: bool = False) -> dict:
     idx = [d for d in lev_price.index if start <= d <= end]
     if not idx:
         return {}
@@ -129,13 +130,17 @@ def sim(lev_price: pd.Series, bull_sig: pd.Series, strategy: str, start, end) ->
 
     final = curve[-1]
     avg_invested = invested_nominal  # 종료 시점 미청산 포지션 명목
-    return {
+    result = {
         "strategy": strategy,
         "final_return_pct": round((final - 1.0) * 100, 1),
         "mdd_pct": round(_mdd(curve) * 100, 1),
         "trades": trades,
         "end_invested_frac": round(min(avg_invested, 1.0), 2),
     }
+    if return_curves:
+        result["dates"] = list(idx)
+        result["equity"] = curve
+    return result
 
 
 STRAT_KR = {
