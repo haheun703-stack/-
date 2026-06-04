@@ -92,6 +92,13 @@ class KRXBulkFetcher:
                 logger.warning("pykrx 일괄 OHLCV %s: 빈 결과", date)
                 return {}
             df = df.rename(columns=self.OHLCV_COL_MAP)
+            # 휴장일 방어: pykrx 일괄조회가 휴장일에 전종목 close=0 행을 반환하는 경우 차단
+            # (2026-06-03 선거 휴장 사고 — 0행이 MA/수익률/C60 지표를 파괴)
+            if "close" in df.columns:
+                df = df[df["close"].astype(float) != 0]
+                if df.empty:
+                    logger.warning("pykrx 일괄 OHLCV %s: 전종목 close=0 (휴장일 추정) → 스킵", date)
+                    return {}
             # 필요한 컬럼만 추출 후 dict 변환
             cols = [c for c in self.OHLCV_COL_MAP.values() if c in df.columns]
             result = df[cols].to_dict(orient="index")
@@ -285,6 +292,13 @@ def extend_single(parquet_path: Path, end_date: str, *,
 
         if new_ohlcv is None or new_ohlcv.empty:
             return result
+
+        # 최종 방어: OHLCV close=0 유령행 차단 (bulk/pykrx/fdr 모든 경로 공통)
+        # update_raw_parquet.py 와 동일한 휴장일/거래정지 가드 (방어 비대칭 해소)
+        if "close" in new_ohlcv.columns:
+            new_ohlcv = new_ohlcv[new_ohlcv["close"].astype(float) != 0]
+            if new_ohlcv.empty:
+                return result
 
         if "trading_value" not in new_ohlcv.columns:
             new_ohlcv["trading_value"] = 0
