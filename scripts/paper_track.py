@@ -375,6 +375,159 @@ def build_floor_quality(df: pd.DataFrame, asof_date: str) -> dict:
     }
 
 
+KOSPI_INDEX_CSV = DATA_DIR / "kospi_index.csv"
+_MARKET_CACHE: dict = {}
+
+
+def load_market_index() -> pd.Series:
+    """KOSPI 지수 종가 시계열 (캐시). KOSDAQ 지수 미보유 → KOSPI 단일 기준."""
+    if "kospi" in _MARKET_CACHE:
+        return _MARKET_CACHE["kospi"]
+    s = pd.Series(dtype=float)
+    if KOSPI_INDEX_CSV.exists():
+        try:
+            k = pd.read_csv(KOSPI_INDEX_CSV)
+            dc = "Date" if "Date" in k.columns else k.columns[0]
+            k[dc] = pd.to_datetime(k[dc])
+            k = k.sort_values(dc)
+            s = pd.Series(pd.to_numeric(k["close"], errors="coerce").values, index=k[dc]).dropna()
+        except Exception:  # noqa
+            pass
+    _MARKET_CACHE["kospi"] = s
+    return s
+
+
+def build_market_context(df: pd.DataFrame, asof_date: str) -> dict:
+    """market_beta_20d, relative_return_5d/20d, drop_context (KOSPI 기준 근사).
+
+    4단 결합 중 '시장 대비 버팀' 축. hard gate 미사용, feature-only.
+    """
+    out = {"data_available": False, "market_beta_20d": None,
+           "relative_return_5d": None, "relative_return_20d": None,
+           "drop_context": "unknown", "hard_gate_used": False}
+    hist = df.loc[df.index <= pd.Timestamp(asof_date)]
+    kospi = load_market_index()
+    if hist.empty or kospi.empty or len(hist) < 22:
+        return out
+    asof = pd.Timestamp(asof_date)
+    k = kospi.loc[kospi.index <= asof]
+    if len(k) < 22:
+        return out
+
+    sc = hist["close"].astype(float)
+    s_ret = sc.pct_change()
+    k_ret = k.pct_change()
+    common = s_ret.index.intersection(k_ret.index)
+    if len(common) >= 21:
+        c = common[-20:]
+        sr = s_ret.loc[c].values
+        kr = k_ret.loc[c].values
+    else:
+        srx = s_ret.dropna().tail(20)
+        krx = k_ret.dropna().tail(20)
+        n = min(len(srx), len(krx))
+        if n < 10:
+            return out
+        sr = srx.tail(n).values
+        kr = krx.tail(n).values
+
+    import numpy as np
+    mask = np.isfinite(sr) & np.isfinite(kr)   # nan + inf(가격0 pct_change) 동시 제거
+    sr, kr = sr[mask], kr[mask]
+    var_m = float(np.var(kr)) if len(kr) >= 10 else 0.0
+    beta = float(np.cov(sr, kr)[0, 1] / var_m) if var_m > 0 and len(sr) >= 10 else None
+
+    def _ret(series: pd.Series, n: int):
+        ss = series.dropna()
+        return float((ss.iloc[-1] / ss.iloc[-1 - n] - 1) * 100) if len(ss) > n else None
+
+    s5, s20 = _ret(sc, 5), _ret(sc, 20)
+    m5, m20 = _ret(k, 5), _ret(k, 20)
+    rr5 = (s5 - m5) if (s5 is not None and m5 is not None) else None
+    rr20 = (s20 - m20) if (s20 is not None and m20 is not None) else None
+
+    # drop_context: 당일(1일) 시장 급락 우선 감지 → 5일 약세 보조
+    m1, s1 = _ret(k, 1), _ret(sc, 1)
+    rel1 = (s1 - m1) if (s1 is not None and m1 is not None) else None
+    ctx = "unknown"
+    if m1 is not None and m1 <= -1.5 and rel1 is not None:    # 당일 시장 급락
+        if rel1 >= 1.5:
+            ctx = "resilient_pullback"   # 시장 폭락에도 버팀
+        elif rel1 <= -3.0:
+            ctx = "stock_specific_drop"  # 시장보다 훨씬 더 빠짐
+        else:
+            ctx = "market_selloff"       # 시장만큼 같이 빠짐
+    elif m5 is not None and m5 <= -3.0 and rr5 is not None:   # 5일 시장 약세
+        if rr5 >= 3.0:
+            ctx = "resilient_pullback"
+        elif rr5 <= -5.0:
+            ctx = "stock_specific_drop"
+        else:
+            ctx = "market_selloff"
+    elif s5 is not None and s5 <= -5.0 and (rr5 is None or rr5 <= -3.0):
+        ctx = "stock_specific_drop"      # 시장 멀쩡한데 종목만 폭락
+    else:
+        ctx = "normal"
+
+    return {"data_available": True,
+            "market_beta_20d": round(beta, 2) if beta is not None else None,
+            "relative_return_5d": round(rr5, 2) if rr5 is not None else None,
+            "relative_return_20d": round(rr20, 2) if rr20 is not None else None,
+            "stock_return_5d": round(s5, 2) if s5 is not None else None,
+            "market_return_5d": round(m5, 2) if m5 is not None else None,
+            "stock_return_1d": round(s1, 2) if s1 is not None else None,
+            "market_return_1d": round(m1, 2) if m1 is not None else None,
+            "drop_context": ctx,
+            "hard_gate_used": False,
+            "_note": "KOSDAQ 지수 미보유 → KOSPI 단일 근사. sector_selloff는 후속(섹터지수 필요)."}
+
+
+def build_supply_confirmation(df: pd.DataFrame, asof_date: str) -> dict:
+    """supply_confirmation_score, supply_state — 외국인/기관 3·5일 누적·전환.
+
+    4단 결합 중 '수급 이탈 멈춤' 축. hard gate 미사용, feature-only.
+    """
+    hist = df.loc[df.index <= pd.Timestamp(asof_date)]
+    cols = {"foreign": "외국인합계", "institution": "기관합계"}
+    if hist.empty or not all(c in hist.columns for c in cols.values()):
+        return {"data_available": False, "supply_state": "unknown",
+                "supply_confirmation_score": 0, "hard_gate_used": False}
+
+    last = hist.iloc[-1]
+    f5 = _float(last.get("foreign_net_5d")) if "foreign_net_5d" in hist.columns else _float(hist["외국인합계"].tail(5).sum())
+    i5 = _float(last.get("inst_net_5d")) if "inst_net_5d" in hist.columns else _float(hist["기관합계"].tail(5).sum())
+    f3 = _float(hist["외국인합계"].tail(3).sum())
+    i3 = _float(hist["기관합계"].tail(3).sum())
+    fcb = _float(last.get("foreign_consecutive_buy", 0))
+    icb = _float(last.get("inst_consecutive_buy", 0))
+
+    if f5 > 0 and i5 > 0:
+        state = "dual_buying"
+    elif f5 > 0:
+        state = "foreign_accumulation"
+    elif i5 > 0:
+        state = "institution_accumulation"
+    elif f5 < 0 and i5 < 0:
+        state = "distribution_warning"
+    else:
+        state = "supply_neutral"
+
+    score = 0
+    score += 2 if f5 > 0 else (-2 if f5 < 0 else 0)
+    score += 2 if i5 > 0 else (-2 if i5 < 0 else 0)
+    score += 1 if (f3 > 0 and f5 > 0) else 0   # 3일도 순매수 = 회복 가속
+    score += 1 if (i3 > 0 and i5 > 0) else 0
+    score += 1 if fcb >= 2 else 0
+    score += 1 if icb >= 2 else 0
+
+    return {"data_available": True, "supply_state": state,
+            "supply_confirmation_score": int(score),
+            "foreign_net_5d": int(f5), "inst_net_5d": int(i5),
+            "foreign_net_3d": int(f3), "inst_net_3d": int(i3),
+            "foreign_consecutive_buy": int(fcb), "inst_consecutive_buy": int(icb),
+            "hard_gate_used": False}
+
+
 def build_candidate(trade: dict, df: pd.DataFrame) -> dict:
     asof_date = trade.get("entry_date") or _date(df.index[-1])
     weekly = build_weekly_gate(df, asof_date)
@@ -382,6 +535,8 @@ def build_candidate(trade: dict, df: pd.DataFrame) -> dict:
     supply = build_supply_4_actor(df, asof_date)
     rr = build_risk_reward(trade, df, asof_date)
     floor = build_floor_quality(df, asof_date)
+    market = build_market_context(df, asof_date)
+    supply_conf = build_supply_confirmation(df, asof_date)
 
     blockers: list[str] = []
     if weekly.get("gate") != "LONG_ALLOWED":
@@ -414,6 +569,8 @@ def build_candidate(trade: dict, df: pd.DataFrame) -> dict:
         "reason": reason,
         "hard_gate_notes": "수급은 feature/log only. hard gate 미사용.",
         "floor_quality": floor,
+        "market_context": market,
+        "supply_confirmation": supply_conf,
     }
 
 
