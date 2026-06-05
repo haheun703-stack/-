@@ -86,3 +86,39 @@ def test_paper_track_enriches_legacy_ledger(tmp_path: Path, monkeypatch):
     assert "MAE_pct" in latest
     assert "exit_check" in latest
 
+
+def test_paper_track_records_candidate_log(tmp_path: Path, monkeypatch):
+    processed = tmp_path / "processed"
+    processed.mkdir()
+    df = _sample_price_df()
+    df["rsi_14"] = 80.0
+    df.to_parquet(processed / "123456.parquet")
+    monkeypatch.setattr(paper_track, "PROCESSED", processed)
+
+    ledger = tmp_path / "paper_ledger.json"
+    ledger.write_text(
+        json.dumps({"_note": "candidate test ledger", "paper_trades": []}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    assert paper_track.run(
+        ledger,
+        write=True,
+        check_only=False,
+        candidate_source="manual",
+        candidate_tickers=["123456"],
+        candidate_label="manual_test",
+        candidate_note="회피 후보 기록 테스트",
+        candidate_asof="2026-05-29",
+    ) == 0
+
+    data = json.loads(ledger.read_text(encoding="utf-8"))
+    log = data["candidate_log"][0]
+    candidate = log["candidates"][0]
+
+    assert log["total"] == 1
+    assert log["avoid_count"] == 1
+    assert candidate["ticker"] == "123456"
+    assert candidate["decision"] == "회피"
+    assert "overheated" in candidate["reason"]
+    assert candidate["real_order"] is False

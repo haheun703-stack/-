@@ -13,6 +13,7 @@ data/paper_ledger.json의 PAPER_OPEN 포지션을 processed parquet 기준으로
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 import warnings
@@ -29,6 +30,8 @@ import pandas as pd
 
 LEDGER = PROJECT_ROOT / "data" / "paper_ledger.json"
 PROCESSED = PROJECT_ROOT / "data" / "processed"
+DATA_DIR = PROJECT_ROOT / "data"
+PULLBACK_SCAN = DATA_DIR / "pullback_scan.json"
 SCHEMA_VERSION = "quant_paper_ledger_v2"
 
 
@@ -266,7 +269,10 @@ def build_risk_reward(trade: dict, df: pd.DataFrame, asof_date: str) -> dict:
         return {"data_available": False, "rr": 0.0}
     if stop <= 0:
         daily = build_daily_setup(df, asof_date)
-        stop = _float(daily.get("support_price")) * 0.97 if daily.get("support_price") else entry * 0.92
+        support_stop = _float(daily.get("support_price")) * 0.97 if daily.get("support_price") else 0.0
+        stop = support_stop if 0 < support_stop < entry else entry * 0.92
+    elif stop >= entry:
+        stop = entry * 0.92
 
     recent_high = _float(hist["high"].tail(60).max()) if not hist.empty else entry
     risk = max(entry - stop, 1.0)
@@ -284,12 +290,98 @@ def build_risk_reward(trade: dict, df: pd.DataFrame, asof_date: str) -> dict:
     }
 
 
+def build_floor_quality(df: pd.DataFrame, asof_date: str) -> dict:
+    """바닥 품질 필터 (floor_quality_score) — 보조 feature, hard gate 미사용.
+
+    공식: 밸류 저점 × 추세 둔화/전환 × 수급 회복 × 하락이유(구조악재 아님).
+    ⚠️ "바닥 판정"이 아니라 "바닥일 가능성 조건"을 점수화한 필터다. 확정 표현 금지.
+    진입 게이트는 차트 4조건(주봉LA·눌림지지·과열아님·RR)이며, 이 점수는 누적·사후비교용.
+    """
+    hist = df.loc[df.index <= pd.Timestamp(asof_date)]
+    if hist.empty or len(hist) < 60:
+        return {"data_available": False, "floor_quality_score": 0,
+                "label": "data_insufficient", "hard_gate_used": False}
+
+    close = _float(hist.iloc[-1]["close"])
+    score = 0
+    comp: dict = {}
+
+    # 1) 밸류 저점 (fund 데이터 있는 종목만 — 대형~중형 한정)
+    value: dict = {"available": False}
+    if "fund_PER" in hist.columns and "fund_PBR" in hist.columns:
+        per = hist["fund_PER"][(hist["fund_PER"] > 0) & (hist["fund_PER"] < 300)]
+        pbr = hist["fund_PBR"][(hist["fund_PBR"] > 0) & (hist["fund_PBR"] < 50)]
+        if len(per) >= 250 and len(pbr) >= 250:
+            per_pct = float((per < per.iloc[-1]).mean() * 100)
+            pbr_pct = float((pbr < pbr.iloc[-1]).mean() * 100)
+            state = ("저평가" if (per_pct <= 30 and pbr_pct <= 30)
+                     else "중립이하" if (per_pct <= 50 or pbr_pct <= 50) else "고평가")
+            value = {"available": True, "per": round(float(per.iloc[-1]), 1),
+                     "per_pctile": round(per_pct), "pbr": round(float(pbr.iloc[-1]), 2),
+                     "pbr_pctile": round(pbr_pct), "state": state}
+            score += 2 if state == "저평가" else 1 if state == "중립이하" else 0
+    comp["value"] = value
+
+    # 2) 추세 둔화/전환
+    ma60 = _float(hist["close"].tail(60).mean())
+    ma120 = _float(hist["close"].tail(120).mean()) if len(hist) >= 120 else 0.0
+    if ma120 and close > ma60:
+        trend = "전환/상향"; score += 2
+    elif ma120 and close < ma60 < ma120:
+        trend = "우하향"; score -= 1
+    else:
+        trend = "횡보"; score += 1
+    high252 = _float(hist["close"].tail(252).max())
+    drawdown = _pct(close, high252) if high252 else 0.0
+    comp["trend"] = {"state": trend, "drawdown_from_52w_high_pct": round(drawdown, 1),
+                     "ma60": round(ma60), "ma120": round(ma120) if ma120 else None}
+
+    # 3) 수급 회복 (4주체 재사용)
+    supply = build_supply_4_actor(df, asof_date)
+    supply_recover = supply.get("score", 0) > 0
+    if supply_recover:
+        score += 1
+    comp["supply_recover"] = {"recovered": supply_recover,
+                              "supply_score": supply.get("score", 0),
+                              "alignment": supply.get("alignment")}
+
+    # 4) 하락 이유 — 구조악재 근사 (저평가인데 우하향 = 가치함정 의심)
+    structural_suspect = (trend == "우하향" and value.get("state") == "저평가")
+    if structural_suspect:
+        score -= 2
+    comp["drop_reason"] = {
+        "structural_suspect": structural_suspect,
+        "note": "저평가인데 우하향=가치함정 의심" if structural_suspect else "구조악재 징후 약함",
+        "_todo": "KOSPI/섹터 대비 상대성과로 시장조정 vs 개별악재 구분(후속)",
+    }
+
+    # 라벨 (확정 아님 — 등급만)
+    if structural_suspect or trend == "우하향":
+        label = "관찰(위험)"
+    elif trend == "전환/상향" and (not value["available"] or value.get("state") in ("저평가", "중립이하")):
+        label = "진짜바닥후보"
+    elif trend == "횡보":
+        label = "바닥다지기후보"
+    else:
+        label = "중립"
+
+    return {
+        "data_available": True,
+        "floor_quality_score": int(score),
+        "label": label,
+        "hard_gate_used": False,
+        "components": comp,
+        "note": "확정 아님 — 바닥 가능성 조건 필터(보조 feature). 진입게이트는 차트 4조건.",
+    }
+
+
 def build_candidate(trade: dict, df: pd.DataFrame) -> dict:
     asof_date = trade.get("entry_date") or _date(df.index[-1])
     weekly = build_weekly_gate(df, asof_date)
     daily = build_daily_setup(df, asof_date)
     supply = build_supply_4_actor(df, asof_date)
     rr = build_risk_reward(trade, df, asof_date)
+    floor = build_floor_quality(df, asof_date)
 
     blockers: list[str] = []
     if weekly.get("gate") != "LONG_ALLOWED":
@@ -321,7 +413,244 @@ def build_candidate(trade: dict, df: pd.DataFrame) -> dict:
         "decision_shadow": decision_shadow,
         "reason": reason,
         "hard_gate_notes": "수급은 feature/log only. hard gate 미사용.",
+        "floor_quality": floor,
     }
+
+
+def _read_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _name_map() -> dict[str, str]:
+    result: dict[str, str] = {}
+
+    name_path = DATA_DIR / "universe" / "name_map.json"
+    data = _read_json(name_path)
+    for ticker, name in data.items():
+        result[str(ticker).zfill(6)] = str(name)
+
+    sector_path = DATA_DIR / "universe" / "sector_map.csv"
+    if sector_path.exists():
+        try:
+            with open(sector_path, encoding="utf-8-sig") as f:
+                for row in csv.DictReader(f):
+                    ticker = str(row.get("ticker", "")).zfill(6)
+                    name = str(row.get("name", "")).strip()
+                    if ticker and name:
+                        result.setdefault(ticker, name)
+        except Exception:
+            pass
+
+    return result
+
+
+def _source_score(item: dict) -> float:
+    for key in ("total_score", "score"):
+        if key in item:
+            return _round(item.get(key), 2)
+    return 0.0
+
+
+def _source_reasons(item: dict) -> list[str]:
+    reasons = item.get("reasons")
+    if isinstance(reasons, list):
+        return [str(x) for x in reasons[:8]]
+    return []
+
+
+def _manual_candidate_items(tickers: list[str]) -> list[dict]:
+    names = _name_map()
+    items: list[dict] = []
+    for idx, ticker in enumerate(tickers, start=1):
+        normalized = str(ticker).strip().zfill(6)
+        if not normalized:
+            continue
+        items.append({
+            "ticker": normalized,
+            "name": names.get(normalized, normalized),
+            "source_rank": idx,
+            "source": "manual",
+        })
+    return items
+
+
+def _load_pullback_items(limit: int) -> list[dict]:
+    data = _read_json(PULLBACK_SCAN)
+    rows = data.get("candidates") or data.get("all_uptrend") or []
+    items: list[dict] = []
+    for idx, row in enumerate(rows[:limit], start=1):
+        if not row.get("ticker"):
+            continue
+        item = dict(row)
+        item["source_rank"] = idx
+        item["source"] = "pullback_scan"
+        items.append(item)
+    return items
+
+
+def _load_tomorrow_pick_items(limit: int) -> list[dict]:
+    paths = [
+        DATA_DIR / "tomorrow_picks.json",
+        DATA_DIR / "tomorrow_picks_flowx.json",
+    ]
+    data = {}
+    for path in paths:
+        data = _read_json(path)
+        if data:
+            break
+    rows = data.get("picks") or []
+    items: list[dict] = []
+    for idx, row in enumerate(rows[:limit], start=1):
+        if not row.get("ticker"):
+            continue
+        item = dict(row)
+        item["source_rank"] = idx
+        item["source"] = "tomorrow_picks"
+        items.append(item)
+    return items
+
+
+def load_candidate_items(source: str, tickers: list[str], limit: int) -> list[dict]:
+    if source == "manual":
+        return _manual_candidate_items(tickers)
+    if source == "pullback":
+        return _load_pullback_items(limit)
+    if source == "tomorrow_picks":
+        return _load_tomorrow_pick_items(limit)
+    raise ValueError(f"unknown candidate source: {source}")
+
+
+def evaluate_candidate_item(item: dict, asof_date: str = "") -> tuple[dict, list[str]]:
+    issues: list[str] = []
+    ticker = str(item.get("ticker", "")).strip().zfill(6)
+    name = str(item.get("name") or ticker)
+    df = load_price_df(ticker)
+    if df is None:
+        return {
+            "ticker": ticker,
+            "name": name,
+            "date": asof_date,
+            "decision": "회피",
+            "decision_shadow": "AVOID",
+            "reason": "price_data_missing",
+            "source": item.get("source", ""),
+            "source_rank": item.get("source_rank"),
+            "real_order": False,
+        }, [f"{ticker}: candidate price_data_missing"]
+
+    eval_date = asof_date or _date(df.index[-1])
+    row_pair = _row_on_or_before(df, eval_date)
+    if row_pair is None:
+        return {
+            "ticker": ticker,
+            "name": name,
+            "date": eval_date,
+            "decision": "회피",
+            "decision_shadow": "AVOID",
+            "reason": "asof_price_missing",
+            "source": item.get("source", ""),
+            "source_rank": item.get("source_rank"),
+            "real_order": False,
+        }, [f"{ticker}: candidate asof_price_missing"]
+
+    row_date, row = row_pair
+    entry_price = _float(item.get("entry_price")) or _float(item.get("close")) or _float(row["close"])
+    stop_price = _float(item.get("stop_loss")) or _float(item.get("stop_loss_price"))
+    trade = {
+        "ticker": ticker,
+        "name": name,
+        "entry_date": _date(row_date),
+        "entry_price": entry_price,
+        "stop_loss_price": stop_price,
+        "qty": 0,
+    }
+    candidate = build_candidate(trade, df)
+    candidate.update({
+        "source": item.get("source", ""),
+        "source_rank": item.get("source_rank"),
+        "source_grade": item.get("grade", ""),
+        "source_score": _source_score(item),
+        "source_strategy": item.get("strategy", ""),
+        "source_reasons": _source_reasons(item),
+        "real_order": False,
+        "evaluated_at": datetime.now().isoformat(timespec="seconds"),
+    })
+    return candidate, issues
+
+
+def build_candidate_log_entry(
+    source: str,
+    source_label: str,
+    source_note: str,
+    candidates: list[dict],
+    asof_date: str,
+) -> dict:
+    enter_count = sum(1 for c in candidates if c.get("decision") == "진입")
+    avoid_count = sum(1 for c in candidates if c.get("decision") == "회피")
+    label = source_label or source
+    date_key = (asof_date or datetime.now().strftime("%Y-%m-%d")).replace("-", "")
+    return {
+        "id": f"CAND-{date_key}-{label}",
+        "schema_version": SCHEMA_VERSION,
+        "evaluated_at": datetime.now().isoformat(timespec="seconds"),
+        "as_of_date": asof_date,
+        "source": source,
+        "source_label": label,
+        "source_note": source_note,
+        "total": len(candidates),
+        "enter_count": enter_count,
+        "avoid_count": avoid_count,
+        "real_order": False,
+        "candidates": candidates,
+    }
+
+
+def upsert_candidate_log(data: dict, entry: dict) -> None:
+    logs = data.get("candidate_log")
+    if not isinstance(logs, list):
+        logs = []
+    logs = [log for log in logs if log.get("id") != entry.get("id")]
+    logs.append(entry)
+    logs.sort(key=lambda x: (x.get("as_of_date", ""), x.get("source_label", "")))
+    data["candidate_log"] = logs
+    data["_candidate_log_last_at"] = entry.get("evaluated_at")
+
+
+def validate_candidate_log(data: dict) -> list[str]:
+    issues: list[str] = []
+    logs = data.get("candidate_log") or []
+    for idx, log in enumerate(logs):
+        for key in ("as_of_date", "source", "total", "enter_count", "avoid_count", "candidates"):
+            if key not in log:
+                issues.append(f"candidate_log[{idx}].{key}")
+        for c_idx, candidate in enumerate(log.get("candidates", [])):
+            for key in ("ticker", "decision", "reason", "weekly_LONG_ALLOWED", "daily_pullback_support", "overheated"):
+                if key not in candidate:
+                    issues.append(f"candidate_log[{idx}].candidates[{c_idx}].{key}")
+    return issues
+
+
+def print_candidate_log(entry: dict) -> None:
+    print(
+        f"[CANDIDATE LOG] {entry.get('source_label')} | 기준일 {entry.get('as_of_date')} "
+        f"| 진입 {entry.get('enter_count')} / 회피 {entry.get('avoid_count')}"
+    )
+    for c in entry.get("candidates", []):
+        rr = c.get("risk_reward", {}).get("rr", 0)
+        weekly = c.get("weekly_gate", {}).get("gate", "?")
+        daily = c.get("daily_setup", {}).get("daily_setup", "?")
+        supply = c.get("supply_4주체점수", 0)
+        print(
+            f"  {c.get('source_rank', '-')}. {c.get('name', c.get('ticker'))}({c.get('ticker')}) "
+            f"{c.get('decision')} | weekly={weekly} daily={daily} "
+            f"RR={rr} 4주체={supply} | {c.get('reason')}"
+        )
+    print()
 
 
 def build_entry(trade: dict, df: pd.DataFrame) -> dict:
@@ -551,7 +880,17 @@ def print_trade(trade: dict) -> None:
     print()
 
 
-def run(path: Path, write: bool, check_only: bool) -> int:
+def run(
+    path: Path,
+    write: bool,
+    check_only: bool,
+    candidate_source: str = "",
+    candidate_tickers: list[str] | None = None,
+    candidate_limit: int = 30,
+    candidate_label: str = "",
+    candidate_note: str = "",
+    candidate_asof: str = "",
+) -> int:
     data = load_ledger(path)
     data["_schema_version"] = SCHEMA_VERSION
     data["_last_tracked_at"] = datetime.now().isoformat(timespec="seconds")
@@ -576,6 +915,26 @@ def run(path: Path, write: bool, check_only: bool) -> int:
             issues.append(f"{trade.get('ticker', '?')}: " + ", ".join(missing))
         print_trade(trade)
 
+    if candidate_source and not check_only:
+        candidate_items = load_candidate_items(candidate_source, candidate_tickers or [], candidate_limit)
+        candidates: list[dict] = []
+        for item in candidate_items:
+            candidate, candidate_issues = evaluate_candidate_item(item, candidate_asof)
+            candidates.append(candidate)
+            issues.extend(candidate_issues)
+        log_asof = candidate_asof or (candidates[0].get("date") if candidates else datetime.now().strftime("%Y-%m-%d"))
+        entry = build_candidate_log_entry(
+            source=candidate_source,
+            source_label=candidate_label,
+            source_note=candidate_note,
+            candidates=candidates,
+            asof_date=log_asof,
+        )
+        upsert_candidate_log(data, entry)
+        print_candidate_log(entry)
+
+    issues.extend(validate_candidate_log(data))
+
     data["paper_trades"] = trades
     if write and not check_only:
         save_ledger(path, data)
@@ -599,9 +958,31 @@ def main() -> int:
     parser.add_argument("--ledger", default=str(LEDGER), help="ledger JSON 경로")
     parser.add_argument("--no-write", action="store_true", help="미리보기만 수행")
     parser.add_argument("--check-only", action="store_true", help="현재 ledger 스키마만 점검")
+    parser.add_argument(
+        "--candidate-source",
+        choices=["manual", "pullback", "tomorrow_picks"],
+        default="",
+        help="후보 평가 로그 소스",
+    )
+    parser.add_argument("--candidate-tickers", default="", help="manual 후보 티커 CSV")
+    parser.add_argument("--candidate-limit", type=int, default=30, help="파일 기반 후보 평가 상위 N개")
+    parser.add_argument("--candidate-label", default="", help="candidate_log id/source_label")
+    parser.add_argument("--candidate-note", default="", help="후보 로그 설명")
+    parser.add_argument("--candidate-asof", default="", help="평가 기준일 YYYY-MM-DD")
     args = parser.parse_args()
 
-    return run(Path(args.ledger), write=not args.no_write, check_only=args.check_only)
+    tickers = [t.strip() for t in args.candidate_tickers.split(",") if t.strip()]
+    return run(
+        Path(args.ledger),
+        write=not args.no_write,
+        check_only=args.check_only,
+        candidate_source=args.candidate_source,
+        candidate_tickers=tickers,
+        candidate_limit=args.candidate_limit,
+        candidate_label=args.candidate_label,
+        candidate_note=args.candidate_note,
+        candidate_asof=args.candidate_asof,
+    )
 
 
 if __name__ == "__main__":
