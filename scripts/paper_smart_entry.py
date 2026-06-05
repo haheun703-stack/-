@@ -62,12 +62,32 @@ def build_picks_from_candidate_log() -> tuple[list, dict]:
     return picks, ledger
 
 
+def _candidate_feature_map(ledger: dict) -> dict:
+    """candidate_log → ticker별 최신 feature(floor/market/supply) 매핑."""
+    out = {}
+    for log in ledger.get("candidate_log", []):
+        for c in log.get("candidates", []):
+            out[c.get("ticker")] = c
+    return out
+
+
 def record_entries(report: dict, ledger: dict) -> int:
-    """SmartEntry 진입(buy) 결과 → paper_ledger paper_trades PAPER_OPEN (실주문 0)."""
+    """SmartEntry 진입(buy) → paper_trades PAPER_OPEN + 4중결합 feature + 장중 기록 (실주문 0).
+
+    사장님 지정 12개 기록 항목: floor_quality / market_beta_20d / relative_return_5d·20d /
+    drop_context / supply_state / supply_confirmation_score / smart_entry_trigger_time /
+    trigger_reason / entry_price / vwap_at_entry / intraday_low_before_entry /
+    market_index_state_at_entry.
+    """
+    cand_map = _candidate_feature_map(ledger)
     opened = 0
     for d in report.get("details", []):
         if d.get("decision") != "buy":
             continue
+        c = cand_map.get(d["ticker"], {})
+        fq = c.get("floor_quality", {})
+        mc = c.get("market_context", {})
+        sc = c.get("supply_confirmation", {})
         trade = {
             "id": f"PAPER-SMART-{datetime.now().strftime('%Y%m%d')}-{d['ticker']}",
             "ticker": d["ticker"],
@@ -75,9 +95,26 @@ def record_entries(report: dict, ledger: dict) -> int:
             "status": "PAPER_OPEN",
             "real_order": False,
             "entry_layer": "L2_smart_entry_intraday",
-            "entry_layer2_smart": {
-                "decision": "buy",
-                "order_price": d.get("order_price"),
+            # ── 레이어1 일봉 4중결합 feature ──
+            "candidate_features": {
+                "floor_quality_score": fq.get("floor_quality_score"),
+                "floor_label": fq.get("label"),
+                "market_beta_20d": mc.get("market_beta_20d"),
+                "relative_return_5d": mc.get("relative_return_5d"),
+                "relative_return_20d": mc.get("relative_return_20d"),
+                "drop_context": mc.get("drop_context"),
+                "supply_state": sc.get("supply_state"),
+                "supply_confirmation_score": sc.get("supply_confirmation_score"),
+            },
+            # ── 레이어2 SmartEntry 장중 기록 (필드명 best-effort, 6/8 실행 시 확정) ──
+            "smart_entry": {
+                "smart_entry_trigger_time": d.get("trigger_time") or d.get("filled_at")
+                or datetime.now().isoformat(timespec="seconds"),
+                "trigger_reason": d.get("decision_reasons") or d.get("reason"),
+                "entry_price": d.get("order_price") or d.get("entry_price"),
+                "vwap_at_entry": d.get("vwap") or d.get("vwap_at_entry"),
+                "intraday_low_before_entry": d.get("intraday_low") or d.get("low"),
+                "market_index_state_at_entry": d.get("market_state") or d.get("market_index_state"),
                 "gap_pct": d.get("gap_pct"),
                 "gap_type": d.get("gap_type"),
             },
