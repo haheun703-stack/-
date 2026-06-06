@@ -21,6 +21,7 @@ HARD_GATE_SOURCE = "src.etf.regime_monitor:C60"
 SELL_AUTOMATION_STATUS = "BLOCKED"
 PAPER_OPEN_DEFAULT = False
 OVERHEAT_DISTANCE_PCT = 50.0
+HYSTERESIS_DAYS = 2  # 설계도 §3: C60 1일 휩쏘(깜빡임) 방지. 전환은 2거래일 연속 확인 후 정책 발동.
 
 REGIME_R1 = "R1_BEAR_RISK"
 REGIME_R4 = "R4_NORMAL_BULL"
@@ -43,6 +44,31 @@ def _distance_pct(close: Any, ma60: Any) -> float | None:
     if close_f is None or ma60_f is None or ma60_f <= 0:
         return None
     return round((close_f / ma60_f - 1) * 100, 2)
+
+
+def _effective_regime(current_regime: Any, days_in_regime: Any) -> tuple[Any, bool]:
+    """히스테리시스 적용 국면. 설계도 §3.
+
+    raw C60(monitor)은 매일 close vs MA60로 즉시 판정하므로 1일 급락 V자 휩쏘에
+    BULL<->BEAR가 깜빡일 수 있다(2026-06-02 C60 휩쏘 리스크 실증). 정책 레이어는
+    전환이 HYSTERESIS_DAYS(2거래일) 연속 확인될 때까지 직전 국면을 유지한다.
+    monitor raw는 손대지 않는다(백테스트/lead-lag 복기 보존).
+
+    반환: (effective_regime, confirmed)
+      - confirmed=True : 현재 국면이 2거래일 이상 지속(확정)
+      - confirmed=False: 전환 첫날(미확정) → 직전 국면 유지
+    """
+    if current_regime is None or days_in_regime is None:
+        return current_regime, False
+    try:
+        days = int(days_in_regime)
+    except (TypeError, ValueError):
+        return current_regime, False
+    if days >= HYSTERESIS_DAYS:
+        return current_regime, True
+    # 전환 첫날(days_in_regime==1): 직전 국면 = 현재의 반대값
+    prev = REGIME_BULL if current_regime == REGIME_BEAR else REGIME_BEAR
+    return prev, False
 
 
 def _shadow_labels(report: dict) -> list[dict]:
@@ -92,7 +118,9 @@ def route_from_report(ticker: str, report: dict) -> dict:
         }
 
     current = report.get("current_regime")
-    is_bull = current == REGIME_BULL
+    days_in_regime = report.get("days_in_current_regime")
+    effective, regime_confirmed = _effective_regime(current, days_in_regime)
+    is_bull = effective == REGIME_BULL
     hard_regime = REGIME_R4 if is_bull else REGIME_R1
 
     return {
@@ -101,13 +129,18 @@ def route_from_report(ticker: str, report: dict) -> dict:
         "as_of_date": report.get("last_date"),
         "data_available": True,
         "hard_gate_source": HARD_GATE_SOURCE,
+        "c60_regime_raw": current,
+        "effective_regime": effective,
+        "regime_confirmed": regime_confirmed,
+        "in_hysteresis_window": not regime_confirmed,
+        "hysteresis_days": HYSTERESIS_DAYS,
         "c60_regime": current,
         "hard_gate_regime": hard_regime,
         "hard_gate_status": "HARD_GATE",
         "current_close": report.get("current_close"),
         "current_ma60": report.get("current_ma60"),
         "close_vs_ma60_pct": _distance_pct(report.get("current_close"), report.get("current_ma60")),
-        "days_in_current_regime": report.get("days_in_current_regime"),
+        "days_in_current_regime": days_in_regime,
         "allow_new_entries": is_bull,
         "allow_hypothesis_c": is_bull,
         "smart_entry_observation": "ALLOWED_SHADOW" if is_bull else "SHADOW_ONLY",
