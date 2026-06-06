@@ -53,17 +53,22 @@ def classify_tier(c: dict) -> str:
     return "CONTROL"
 
 
+def _latest_candidate_logs(ledger: dict) -> list[dict]:
+    """최신 as_of_date의 candidate_log만 반환."""
+    logs = ledger.get("candidate_log", [])
+    if not logs:
+        return []
+    latest = max((l.get("as_of_date", "") for l in logs), default="")
+    return [l for l in logs if l.get("as_of_date") == latest]
+
+
 def build_picks_from_candidate_log() -> tuple[list, list, dict]:
     """candidate_log 진입후보 → C-rule 3-tier 분류.
 
     반환: (picks=CORE+WATCH SmartEntry 관찰대상, control=CONTROL 비교군(진입X), ledger)
     """
     ledger = json.loads(LEDGER.read_text(encoding="utf-8"))
-    logs = ledger.get("candidate_log", [])
-    # 최신 기준일만 사용 (stale 후보 제외)
-    if logs:
-        latest = max((l.get("as_of_date", "") for l in logs), default="")
-        logs = [l for l in logs if l.get("as_of_date") == latest]
+    logs = _latest_candidate_logs(ledger)  # stale 후보 제외
     picks, control, seen = [], [], set()
     for log in logs:
         for c in log.get("candidates", []):
@@ -90,6 +95,7 @@ def build_picks_from_candidate_log() -> tuple[list, list, dict]:
                 "_drop_context": mc.get("drop_context"),
                 "_supply_state": sc.get("supply_state"),
                 "_source": log.get("source", "candidate_log"),
+                "_as_of_date": log.get("as_of_date") or c.get("date"),
             }
             (control if tier == "CONTROL" else picks).append(row)
     picks.sort(key=lambda p: (p["_tier"] != "CORE", -(p["total_score"] or 0)))  # CORE 먼저
@@ -100,15 +106,16 @@ def record_control_pool(control: list, ledger: dict) -> int:
     """CONTROL 비교군(진입X) → ledger shadow_control 기록. 6/12 missed-winner 비교용. 실주문 0."""
     if not control:
         return 0
-    today = datetime.now().strftime("%Y-%m-%d")
     pool = ledger.setdefault("shadow_control", [])
     existing = {(r.get("date"), r.get("ticker")) for r in pool}
     added = 0
     for c in control:
-        if (today, c["ticker"]) in existing:
+        as_of_date = c.get("_as_of_date") or datetime.now().strftime("%Y-%m-%d")
+        if (as_of_date, c["ticker"]) in existing:
             continue
         pool.append({
-            "date": today, "ticker": c["ticker"], "name": c["name"], "tier": "CONTROL",
+            "date": as_of_date, "as_of_date": as_of_date,
+            "ticker": c["ticker"], "name": c["name"], "tier": "CONTROL",
             "reason_excluded": "C-rule 탈락 (차트 4조건은 통과)",
             "floor_label": c["_floor_label"], "drop_context": c["_drop_context"],
             "supply_state": c["_supply_state"], "ref_price": c["close"],
@@ -124,9 +131,11 @@ def record_control_pool(control: list, ledger: dict) -> int:
 def _candidate_feature_map(ledger: dict) -> dict:
     """candidate_log → ticker별 최신 feature(floor/market/supply) 매핑."""
     out = {}
-    for log in ledger.get("candidate_log", []):
+    for log in _latest_candidate_logs(ledger):
         for c in log.get("candidates", []):
-            out[c.get("ticker")] = c
+            ticker = c.get("ticker")
+            if ticker:
+                out[ticker] = {**c, "_log_as_of_date": log.get("as_of_date")}
     return out
 
 
@@ -144,16 +153,28 @@ def record_entries(report: dict, ledger: dict, paper_open: bool = False) -> int:
     status = "PAPER_OPEN" if paper_open else "SHADOW_OPEN"
     key = "paper_trades" if paper_open else "shadow_observations"
     cand_map = _candidate_feature_map(ledger)
+    bucket = ledger.setdefault(key, [])
+    record_date = datetime.now().strftime("%Y-%m-%d")
+    existing = {
+        ((r.get("date") or str(r.get("recorded_at", ""))[:10]), r.get("ticker"), r.get("status"))
+        for r in bucket
+    }
     opened = 0
     for d in report.get("details", []):
         if d.get("decision") != "buy":
             continue
         c = cand_map.get(d["ticker"], {})
+        dedupe_key = (record_date, d["ticker"], status)
+        if dedupe_key in existing:
+            continue
         fq = c.get("floor_quality", {})
         mc = c.get("market_context", {})
         sc = c.get("supply_confirmation", {})
+        candidate_as_of = c.get("date") or c.get("_log_as_of_date")
         trade = {
-            "id": f"PAPER-SMART-{datetime.now().strftime('%Y%m%d')}-{d['ticker']}",
+            "id": f"PAPER-SMART-{record_date.replace('-', '')}-{d['ticker']}",
+            "date": record_date,
+            "candidate_as_of_date": candidate_as_of,
             "ticker": d["ticker"],
             "name": d.get("name", d["ticker"]),
             "status": status,
@@ -186,7 +207,8 @@ def record_entries(report: dict, ledger: dict, paper_open: bool = False) -> int:
             "recorded_at": datetime.now().isoformat(timespec="seconds"),
             "tracking": [],
         }
-        ledger.setdefault(key, []).append(trade)
+        bucket.append(trade)
+        existing.add(dedupe_key)
         opened += 1
     if opened:
         ledger["_last_smart_entry_at"] = datetime.now().isoformat(timespec="seconds")
