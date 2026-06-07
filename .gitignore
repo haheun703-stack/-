@@ -16,6 +16,9 @@ nul
 # data/ — 런타임 생성 데이터 전체 제외 (VPS git pull 덮어쓰기 방지)
 data/
 
+# data_store/ — FLOWX 관측 런타임 산출물 전체 제외 (regime/policies/plans/shadow_entries/exit_observer/reviews/reports)
+data_store/
+
 # 빌드/압축
 *.zip
 *.tar.gz
