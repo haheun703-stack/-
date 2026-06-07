@@ -64,6 +64,8 @@ def _to_payload(row: dict, status: str) -> dict:
         "floor_label": row.get("floor_label"),
         "drop_context": row.get("drop_context"),
         "supply_state": row.get("supply_state"),
+        # 관측 레이어 라벨 pass-through(진입 조건에 일절 쓰지 않음 — 표시·기록용).
+        "shadow_labels": row.get("shadow_labels"),
         "_source": "morning_plan_07",
     }
 

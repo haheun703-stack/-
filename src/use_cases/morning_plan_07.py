@@ -22,6 +22,12 @@ from src.use_cases.engine_policy_map import (
     MODE_PAPER_ONLY,
     run_policy_map,
 )
+from src.use_cases.half_year_leader_scanner import (
+    load_kospi_index,
+    load_sector_map,
+    scan_half_year_leaders,
+)
+from src.use_cases.price_axis_regime import build_price_axis_labels
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PLAN_DIR = PROJECT_ROOT / "data_store" / "plans"
@@ -45,7 +51,7 @@ ENGINE_LABELS = {
 ALLOWED_MODES = {MODE_PAPER_ONLY, MODE_ALLOWED_SHADOW}
 
 
-def _candidate_summary(row: dict, observation: str) -> dict:
+def _candidate_summary(row: dict, observation: str, shadow_labels: dict | None = None) -> dict:
     return {
         "ticker": row.get("ticker"),
         "name": row.get("name", row.get("ticker")),
@@ -57,6 +63,8 @@ def _candidate_summary(row: dict, observation: str) -> dict:
         "drop_context": row.get("_drop_context"),
         "supply_state": row.get("_supply_state"),
         "observation": observation,
+        # ── 관측 레이어 shadow label(매수 신호 아님, hard gate 무관) ──
+        "shadow_labels": shadow_labels,
     }
 
 
@@ -74,21 +82,27 @@ def _candidate_log_meta(logs: list[dict]) -> dict:
     }
 
 
-def build_plan_document(policy: dict, picks: list, control: list, candidate_log_meta: dict) -> dict:
+def build_plan_document(
+    policy: dict, picks: list, control: list, candidate_log_meta: dict,
+    shadow_labels: dict | None = None,
+) -> dict:
     """정책 + 분류된 후보 → plan JSON. 순수 함수(파일/네트워크 없음).
 
     엔진 허용/차단은 policy(2단계)를 그대로 따른다. 여기서 재해석하지 않는다.
+    shadow_labels(선택): {ticker: 관측 라벨 번들}. 주입된 라벨만 후보에 붙인다 —
+    매수 신호가 아니라 관측용이며 hard gate/엔진 결정에 일절 쓰지 않는다.
     """
     market = policy.get("market_regime")
     engines = policy.get("engines", {})
     smart_mode = engines.get("smart_entry")
+    sl = shadow_labels or {}
     # R4(ALLOWED_SHADOW)면 CORE/WATCH는 장중 SmartEntry 관찰, 아니면 shadow만
     obs = OBS_SMARTENTRY if smart_mode == MODE_ALLOWED_SHADOW else OBS_SHADOW
 
-    core = [_candidate_summary(p, obs) for p in picks if p.get("_tier") == "CORE"]
-    watch = [_candidate_summary(p, obs) for p in picks if p.get("_tier") == "WATCH"]
+    core = [_candidate_summary(p, obs, sl.get(p.get("ticker"))) for p in picks if p.get("_tier") == "CORE"]
+    watch = [_candidate_summary(p, obs, sl.get(p.get("ticker"))) for p in picks if p.get("_tier") == "WATCH"]
     # CONTROL은 정책과 무관하게 항상 비교군(진입 대상 아님)
-    ctrl = [_candidate_summary(c, OBS_COMPARISON) for c in control]
+    ctrl = [_candidate_summary(c, OBS_COMPARISON, sl.get(c.get("ticker"))) for c in control]
 
     blocked_or_shadow = []
     for key, mode in engines.items():
@@ -154,6 +168,28 @@ def _one_line_conclusion(plan: dict) -> str:
     return "시장국면 미정 — 보수적 차단."
 
 
+def _label_tag(row: dict) -> str:
+    """관측 라벨을 사람이 읽는 짧은 꼬리표로(매수 신호 아님). 라벨 없으면 빈 문자열."""
+    sl = row.get("shadow_labels") or {}
+    parts: list[str] = []
+    pa = sl.get("price_axis") or {}
+    if pa.get("weekly_open_state"):
+        parts.append(f"주봉시가 {pa['weekly_open_state']}")
+    if pa.get("half_year_open_state"):
+        parts.append(f"반기시가 {pa['half_year_open_state']}")
+    hy = sl.get("half_year_leader") or {}
+    grade = hy.get("half_year_leader_grade")
+    if grade and grade != "HY_NOT_LEADER":
+        parts.append(f"{grade}({hy.get('half_year_leader_score')})")
+    ao = sl.get("annual_overheat") or {}
+    if ao.get("overheat_grade"):
+        parts.append(ao["overheat_grade"])
+    ct = sl.get("candle_turn") or {}
+    if ct.get("label") and ct["label"] != "NO_TURN":
+        parts.append(ct["label"])
+    return (" | " + " · ".join(parts)) if parts else ""
+
+
 def _fmt_candidates(rows: list) -> str:
     if not rows:
         return "- (없음)"
@@ -161,7 +197,8 @@ def _fmt_candidates(rows: list) -> str:
     for r in rows:
         lines.append(
             f"- {r['name']}({r['ticker']}) | {r.get('floor_label') or '-'} | "
-            f"기준가 {r.get('ref_close')} 손절 {r.get('stop_loss')} 목표 {r.get('target')} | {r['observation']}"
+            f"기준가 {r.get('ref_close')} 손절 {r.get('stop_loss')} 목표 {r.get('target')} | "
+            f"{r['observation']}{_label_tag(r)}"
         )
     return "\n".join(lines)
 
@@ -251,12 +288,59 @@ def _load_candidates() -> tuple[list, list, list]:
     return picks, control, logs
 
 
+def _build_shadow_labels(
+    picks: list, control: list, days: int = 400, prefer_remote: bool = True
+) -> dict:
+    """후보별 관측 라벨 번들 {ticker: {price_axis, candle_turn, annual_overheat,
+    ipo_reversion, half_year_leader}}. 실주문/매도/스케줄러와 무관한 읽기·계산만.
+
+    OHLCV 로드 실패 종목은 라벨 없이 degrade(plan 생성은 막지 않는다). C60 hard
+    gate를 바꾸지 않는다 — 라벨은 관측·SHOW ME 용도뿐이다.
+    """
+    from src.etf.c60_shadow import normalize_ohlcv
+    from src.etf.samsung_single_leverage_shadow import load_daily_ohlcv
+
+    rows = list(picks) + list(control)
+    if not rows:
+        return {}
+    sector_map = load_sector_map()
+    kospi_df = load_kospi_index()
+
+    seen: set[str] = set()
+    items: list[dict] = []
+    labels: dict[str, dict] = {}
+    for r in rows:
+        ticker = r.get("ticker")
+        if not ticker or ticker in seen:
+            continue
+        seen.add(ticker)
+        try:
+            df = normalize_ohlcv(load_daily_ohlcv(ticker, days=days, prefer_remote=prefer_remote))
+        except Exception:
+            df = None
+        items.append({"ticker": ticker, "name": r.get("name", ticker), "df": df, "sector": sector_map.get(ticker)})
+        bundle = build_price_axis_labels(df)
+        labels[ticker] = {
+            "price_axis": bundle.get("price_axis"),
+            "candle_turn": bundle.get("candle_turn"),
+            "annual_overheat": bundle.get("annual_overheat"),
+            "ipo_reversion": bundle.get("ipo_reversion"),
+            "half_year_leader": None,
+        }
+
+    for rec in scan_half_year_leaders(items, kospi_df=kospi_df, sector_map=sector_map):
+        if rec.get("ticker") in labels:
+            labels[rec["ticker"]]["half_year_leader"] = rec
+    return labels
+
+
 def run_morning_plan(
     days: int = 1300, prefer_remote: bool = True, write: bool = True
 ) -> tuple[dict, Path | None, Path | None]:
     policy, _ = run_policy_map(days=days, prefer_remote=prefer_remote, write=write)
     picks, control, logs = _load_candidates()
     meta = _candidate_log_meta(logs)
-    plan = build_plan_document(policy, picks, control, meta)
+    shadow_labels = _build_shadow_labels(picks, control, prefer_remote=prefer_remote)
+    plan = build_plan_document(policy, picks, control, meta, shadow_labels=shadow_labels)
     json_path, md_path = save_plan(plan) if write else (None, None)
     return plan, json_path, md_path

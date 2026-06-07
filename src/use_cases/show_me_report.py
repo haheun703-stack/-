@@ -47,6 +47,84 @@ def _c60_panel(route_doc: dict) -> list[dict]:
     return panel
 
 
+OVERHEAT_PANEL_GRADES = {"OVERHEAT_500", "OVERHEAT_1000"}
+IPO_PANEL_STATES = {"IPO_REVERSION_CORE", "IPO_REVERSION_WATCH"}
+
+
+def _slabel(cand: dict, *path):
+    """후보 행 shadow_labels에서 중첩 키 안전 추출."""
+    node = cand.get("shadow_labels") or {}
+    for p in path:
+        node = (node or {}).get(p) if isinstance(node, dict) else None
+    return node
+
+
+def _shadow_label_panels(cp: dict) -> dict:
+    """관측 레이어 5패널(지시서 4단계). candidate_performance.candidates의 shadow_labels로만 구성.
+
+    매수 신호가 아니라 그림·표 관측용. 데이터 소스 없으면 빈 패널(우아한 degrade).
+    """
+    candidates = [c for c in (cp.get("candidates") or []) if c.get("shadow_labels")]
+
+    # 1) 반기 주도주 TOP 20
+    leaders = []
+    for c in candidates:
+        hy = _slabel(c, "half_year_leader")
+        if hy and hy.get("data_available"):
+            leaders.append({
+                "ticker": c.get("ticker"), "name": c.get("name"), "tier": c.get("tier"),
+                "grade": hy.get("half_year_leader_grade"), "score": hy.get("half_year_leader_score"),
+                "sector": hy.get("sector"),
+                "distance_from_half_year_open_pct": hy.get("distance_from_half_year_open_pct"),
+                "above_half_year_open": hy.get("above_half_year_open"),
+            })
+    leaders.sort(key=lambda r: r.get("score") or 0, reverse=True)
+
+    # 2) 주봉 시가 위/아래 후보 비교(라벨 성과는 daily_review label_performance.weekly_open 재사용)
+    weekly_above = [c.get("ticker") for c in candidates if _slabel(c, "price_axis", "weekly_open_state") == "ABOVE"]
+    weekly_below = [c.get("ticker") for c in candidates if _slabel(c, "price_axis", "weekly_open_state") == "BELOW"]
+
+    # 3) 월봉 시가 이탈 위험 후보
+    monthly_broken = [
+        {"ticker": c.get("ticker"), "name": c.get("name"),
+         "monthly_open": _slabel(c, "price_axis", "monthly_open")}
+        for c in candidates if _slabel(c, "price_axis", "monthly_open_broken") is True
+    ]
+
+    # 4) IPO 되돌림 후보(상장일 메타 있을 때만 — 현재 데이터 소스 없으면 빈 목록)
+    ipo = [
+        {"ticker": c.get("ticker"), "name": c.get("name"),
+         "state": _slabel(c, "ipo_reversion", "ipo_reversion_state"),
+         "drawdown_pct": _slabel(c, "ipo_reversion", "drawdown_from_listing_open_pct")}
+        for c in candidates
+        if _slabel(c, "ipo_reversion", "ipo_reversion_state") in IPO_PANEL_STATES
+    ]
+
+    # 5) 연간 +500% 과열 경고 후보
+    overheat = [
+        {"ticker": c.get("ticker"), "name": c.get("name"),
+         "grade": _slabel(c, "annual_overheat", "overheat_grade"),
+         "return_1y_pct": _slabel(c, "annual_overheat", "return_1y_pct")}
+        for c in candidates
+        if _slabel(c, "annual_overheat", "overheat_grade") in OVERHEAT_PANEL_GRADES
+    ]
+
+    return {
+        "labeled_candidate_count": len(candidates),
+        "half_year_leader_top": leaders[:20],
+        "weekly_open_compare": {
+            "above": weekly_above, "below": weekly_below,
+            "performance": (cp.get("label_performance", {}) or {}).get("weekly_open", {}),
+        },
+        "monthly_open_broken": monthly_broken,
+        "ipo_reversion": ipo,
+        "annual_overheat_500": overheat,
+        "ipo_data_source_available": any(
+            _slabel(c, "ipo_reversion", "data_available") for c in candidates
+        ),
+    }
+
+
 def build_show_me_document(review_doc: dict, route_doc: dict) -> dict:
     """7단계 daily_review + 라우터 C60 → SHOW ME 통합 문서. 순수 함수."""
     cp = review_doc.get("candidate_performance", {}) or {}
@@ -77,6 +155,8 @@ def build_show_me_document(review_doc: dict, route_doc: dict) -> dict:
             "missed_winner": cp.get("missed_winner", []),
             "false_positive": cp.get("false_positive", []),
         },
+        # 6.5 관측 레이어 5패널(주봉/반기 시가축 — 지시서 4단계)
+        "shadow_label_panels": _shadow_label_panels(cp),
         "data_warnings": review_doc.get("data_warnings", []),
         # 7. 안전선 패널
         "safety_panel": {
@@ -179,10 +259,75 @@ def build_show_me_markdown(doc: dict) -> str:
         "- 6/8 실관측 데이터 누적 → 6/12 그림·숫자 사후비교(어떤 exit 룰/tier가 좋았나).",
         "- SHOW ME는 관측만. 승격/PAPER_OPEN은 사장님 승인 별도.",
         "",
+    ]
+    md += _shadow_panels_markdown(doc.get("shadow_label_panels", {}) or {})
+    md += [
         "---",
         "**실주문 0 / 매도 자동화 BLOCKED / PAPER_OPEN 금지 / 정책·scheduler·SAJANG 변경 0 (관측 전용)**",
     ]
     return "\n".join(md) + "\n"
+
+
+def _shadow_panels_markdown(panels: dict) -> list[str]:
+    """관측 레이어 5패널 → markdown. 라벨 데이터 없으면 안내만(매수 신호 아님)."""
+    out = [
+        "## 11. 관측 레이어 SHOW ME (주봉/반기 시가축 — 라벨, 진입 신호 아님)",
+        f"- 라벨 부착 후보 {panels.get('labeled_candidate_count', 0)}건",
+        "",
+        "### 11-1. 반기 주도주 TOP 20",
+    ]
+    leaders = panels.get("half_year_leader_top", [])
+    if leaders:
+        out += [
+            "| 종목 | tier | 등급 | 점수 | 섹터 | 반기시가대비% | 반기시가위 |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        out += [
+            f"| {r.get('name')}({r.get('ticker')}) | {r.get('tier')} | {r.get('grade')} | "
+            f"{r.get('score')} | {r.get('sector') or '-'} | "
+            f"{r.get('distance_from_half_year_open_pct')} | {r.get('above_half_year_open')} |"
+            for r in leaders
+        ]
+    else:
+        out.append("- (반기 주도주 라벨 데이터 없음)")
+    out.append("> ※ RS(상대강도)는 data/kospi_index.csv 기준. 이 시계열이 실제 코스피와 다른 "
+               "강세장 가공본일 수 있어, RS_positive를 '실코스피 초과'로 단정하지 말 것(관측·해석 주의).")
+
+    wc = panels.get("weekly_open_compare", {}) or {}
+    perf = wc.get("performance", {}) or {}
+    out += [
+        "",
+        "### 11-2. 주봉 시가 위/아래 후보 비교",
+        f"- 위(ABOVE): {len(wc.get('above', []))}건 / 아래(BELOW): {len(wc.get('below', []))}건",
+    ]
+    for bucket, g in perf.items():
+        out.append(f"  - {bucket}: n={g.get('count')} · D+10 평균 {g.get('mean_d10')}% · MFE {g.get('mean_mfe')}%")
+
+    broken = panels.get("monthly_open_broken", [])
+    out += ["", "### 11-3. 월봉 시가 이탈 위험 후보"]
+    out.append(
+        "\n".join(f"- {r.get('name')}({r.get('ticker')}) 월봉시가 {r.get('monthly_open')} 이탈" for r in broken)
+        or "- (없음)"
+    )
+
+    ipo = panels.get("ipo_reversion", [])
+    out += ["", "### 11-4. IPO 되돌림 후보 (시초가 회복 여력)"]
+    if not panels.get("ipo_data_source_available"):
+        out.append("- (IPO 상장일 데이터 소스 없음 — 메타 주입 시 활성화)")
+    else:
+        out.append(
+            "\n".join(f"- {r.get('name')}({r.get('ticker')}) {r.get('state')} 낙폭 {r.get('drawdown_pct')}%" for r in ipo)
+            or "- (해당 없음)"
+        )
+
+    overheat = panels.get("annual_overheat_500", [])
+    out += ["", "### 11-5. 연간 +500% 과열 경고 후보"]
+    out.append(
+        "\n".join(f"- {r.get('name')}({r.get('ticker')}) {r.get('grade')} (1년 {r.get('return_1y_pct')}%)" for r in overheat)
+        or "- (없음)"
+    )
+    out.append("")
+    return out
 
 
 def render_charts(doc: dict, output_dir: Path = REPORT_DIR) -> list[Path]:

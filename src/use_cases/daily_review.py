@@ -44,6 +44,62 @@ def _fwd_returns(closes, base: float) -> dict:
     return out
 
 
+def _mean(values: list) -> float | None:
+    vals = [v for v in values if v is not None]
+    return round(sum(vals) / len(vals), 2) if vals else None
+
+
+def _label_groups(rows: list[dict], key_fn) -> dict:
+    """후보 행을 라벨로 묶어 D+1/D+3/D+10/MFE 평균·건수 집계(관측 비교용)."""
+    groups: dict = {}
+    for r in rows:
+        if not r.get("data_available"):
+            continue
+        key = key_fn(r)
+        if key is None:
+            continue
+        g = groups.setdefault(key, {"count": 0, "d1": [], "d3": [], "d10": [], "mfe": []})
+        fwd = r.get("raw_fwd_pct") or {}
+        g["count"] += 1
+        g["d1"].append(fwd.get("D+1"))
+        g["d3"].append(fwd.get("D+3"))
+        g["d10"].append(fwd.get("D+10"))
+        g["mfe"].append(r.get("mfe_pct"))
+    return {
+        k: {
+            "count": g["count"],
+            "mean_d1": _mean(g["d1"]), "mean_d3": _mean(g["d3"]),
+            "mean_d10": _mean(g["d10"]), "mean_mfe": _mean(g["mfe"]),
+        }
+        for k, g in groups.items()
+    }
+
+
+def _sl(r: dict, *path):
+    """후보 행의 shadow_labels에서 중첩 키 안전 추출."""
+    node = r.get("shadow_labels") or {}
+    for p in path:
+        node = (node or {}).get(p) if isinstance(node, dict) else None
+    return node
+
+
+def build_label_performance(rows: list[dict]) -> dict:
+    """관측 라벨별 D+N 성과 비교(지시서 §8 검증질문 대응). 순수 함수.
+
+    매수/매도 판단이 아니라 "어떤 라벨이 실제로 성과가 좋았나"를 6/12에 보기 위한
+    누적 집계다. 라벨 없는 후보는 자동 제외(degrade).
+    """
+    return {
+        "weekly_open": _label_groups(rows, lambda r: _sl(r, "price_axis", "weekly_open_state")),
+        "half_year_open": _label_groups(rows, lambda r: _sl(r, "price_axis", "half_year_open_state")),
+        "half_year_leader_grade": _label_groups(rows, lambda r: _sl(r, "half_year_leader", "half_year_leader_grade")),
+        "candle_turn": _label_groups(rows, lambda r: (_sl(r, "candle_turn", "label") or None)),
+        "annual_overheat": _label_groups(rows, lambda r: (_sl(r, "annual_overheat", "overheat_grade") or "NONE")),
+        "ipo_reversion": _label_groups(rows, lambda r: _sl(r, "ipo_reversion", "ipo_reversion_state")),
+        "note": "라벨은 관측용. 좋아도 hard gate 승격은 사장님 승인 별도(즉시 진입룰 승격 금지).",
+    }
+
+
 def build_candidate_review(candidates: list[dict], ohlcv_map: dict) -> dict:
     """A. 후보선정 성능 — as_of 종가 기준. CORE/WATCH/CONTROL 전부(공정 비교).
 
@@ -64,6 +120,7 @@ def build_candidate_review(candidates: list[dict], ohlcv_map: dict) -> dict:
                 "ticker": c.get("ticker"), "name": c.get("name"), "tier": tier,
                 "as_of_close": None, "raw_fwd_pct": {f"D+{h}": None for h in HORIZONS},
                 "mfe_pct": None, "mae_pct": None, "data_available": False,
+                "shadow_labels": c.get("shadow_labels"),
             })
             continue
         closes = df["close"]
@@ -75,6 +132,7 @@ def build_candidate_review(candidates: list[dict], ohlcv_map: dict) -> dict:
             "mfe_pct": _pct(float(df["high"].max()), base),
             "mae_pct": _pct(float(df["low"].min()), base),
             "data_available": True,
+            "shadow_labels": c.get("shadow_labels"),
         })
         d10 = fwd.get("D+10")
         if d10 is not None:
@@ -90,6 +148,7 @@ def build_candidate_review(candidates: list[dict], ohlcv_map: dict) -> dict:
         "candidates": rows,
         "missed_winner": missed_winner,
         "false_positive": false_positive,
+        "label_performance": build_label_performance(rows),
     }
 
 
@@ -166,10 +225,23 @@ def build_review_document(
     }
 
 
+def _fmt_label_groups(title: str, groups: dict) -> str:
+    """라벨 그룹 → '버킷(n=건수, D+10평균 X%, MFE Y%)' 한 줄."""
+    if not groups:
+        return f"- {title}: (라벨 데이터 없음)"
+    parts = []
+    for bucket, g in groups.items():
+        parts.append(
+            f"{bucket}(n={g['count']}, D+10 {g['mean_d10']}%, MFE {g['mean_mfe']}%)"
+        )
+    return f"- {title}: " + " | ".join(parts)
+
+
 def build_review_markdown(doc: dict) -> str:
     cr = doc["candidate_performance"]
     er = doc["execution_performance"]
     ex = doc["exit_observer_summary"]
+    lp = cr.get("label_performance", {}) or {}
     md = [
         f"# FLOWX 일일 복기 — {doc['observation_date']}",
         "",
@@ -217,9 +289,18 @@ def build_review_markdown(doc: dict) -> str:
         "## 5. false_positive (CORE/WATCH D+10 < 0)",
         "\n".join(f"- {m['name']}({m['ticker']}) D+10 {m['d10_pct']}%" for m in cr["false_positive"]) or "- (없음)",
         "",
+        "## 6. 라벨별 성과 비교 (관측 — 지시서 §8 검증질문)",
+        _fmt_label_groups("반기시가 위/아래", lp.get("half_year_open", {})),
+        _fmt_label_groups("주봉시가 위/아래", lp.get("weekly_open", {})),
+        _fmt_label_groups("반기 주도주 등급", lp.get("half_year_leader_grade", {})),
+        _fmt_label_groups("음양/양음 전환", lp.get("candle_turn", {})),
+        _fmt_label_groups("연간 과열등급", lp.get("annual_overheat", {})),
+        _fmt_label_groups("IPO 되돌림", lp.get("ipo_reversion", {})),
+        f"- {lp.get('note', '')}",
+        "",
     ]
     if doc["data_warnings"]:
-        md.append("## 6. 데이터 경고")
+        md.append("## 7. 데이터 경고")
         md.append("\n".join(f"- {w}" for w in doc["data_warnings"]))
         md.append("")
     md.append("---")
