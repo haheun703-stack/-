@@ -129,6 +129,8 @@ def build_show_me_document(review_doc: dict, route_doc: dict) -> dict:
     """7단계 daily_review + 라우터 C60 → SHOW ME 통합 문서. 순수 함수."""
     cp = review_doc.get("candidate_performance", {}) or {}
     ep = review_doc.get("execution_performance", {}) or {}
+    ep_d0 = review_doc.get("execution_performance_d0_close", ep) or ep
+    ep_d1 = review_doc.get("execution_performance_d1_open", {}) or {}
     ex = review_doc.get("exit_observer_summary", {}) or {}
 
     return {
@@ -146,8 +148,12 @@ def build_show_me_document(review_doc: dict, route_doc: dict) -> dict:
         },
         # 3. 후보선정 성능 (basis=as_of_close)
         "candidate_performance": cp,
-        # 4. 실행 성능 (basis=virtual_entry_price)
-        "execution_performance": ep,
+        # 4. 실행 성능 (D0_CLOSE / D1_OPEN 분리 — 6/12 비교용)
+        "execution_performance": ep,                      # 하위호환(=D0_CLOSE)
+        "execution_performance_d0_close": ep_d0,
+        "execution_performance_d1_open": ep_d1,
+        # 4.5 D0 vs D1 비교 패널(4분면 판정)
+        "d0_vs_d1_panel": _d0_vs_d1_panel(ep_d0, ep_d1),
         # 5. exit observer
         "exit_observer_summary": ex,
         # 6. missed/false
@@ -186,6 +192,55 @@ def _perf_table(rows: list[dict], price_key: str) -> list[str]:
             f"{r.get('mfe_pct')} | {r.get('mae_pct')} |"
         )
     return out
+
+
+def _d0d1_verdict(d0: float | None, d1: float | None) -> str:
+    """사장님 4분면 판정 매트릭스(D0_CLOSE × D1_OPEN). 0% 기준 좋음/나쁨."""
+    if d0 is None or d1 is None:
+        return "DATA_PENDING"
+    d0_good, d1_good = d0 >= 0, d1 >= 0
+    if d0_good and d1_good:
+        return "BOTH_GOOD_실전진입검토가능"
+    if d0_good and not d1_good:
+        return "D0GOOD_D1BAD_신호는좋지만다음날따라가면늦다"
+    if not d0_good and not d1_good:
+        return "BOTH_BAD_후보선정자체가약함"
+    return "D0BAD_D1GOOD_익일갭장중수급_별도분석"
+
+
+def _d0_vs_d1_panel(ep_d0: dict, ep_d1: dict, horizon: str = "D+10") -> dict:
+    """D0_CLOSE vs D1_OPEN 실행성과 비교 패널. ticker별 D+N 수익률 + 차이(D1-D0) + 4분면 판정.
+
+    D1 pending(익일 시가 미충전)이면 비교 대기(D1_PENDING). ★관측·비교용, 매도/주문 0.
+    """
+    d1_by_ticker = {e.get("ticker"): e for e in ep_d1.get("entries", [])}
+    pending = {p.get("ticker") for p in ep_d1.get("pending", [])}
+    rows: list[dict] = []
+    for e0 in ep_d0.get("entries", []):
+        t = e0.get("ticker")
+        d0_ret = (e0.get("pnl_pct") or {}).get(horizon)
+        e1 = d1_by_ticker.get(t)
+        if t in pending or e1 is None:
+            rows.append({
+                "ticker": t, "name": e0.get("name"), "tier": e0.get("tier"),
+                "d0_pct": d0_ret, "d1_pct": None, "diff_pct": None, "verdict": "D1_PENDING",
+            })
+            continue
+        d1_ret = (e1.get("pnl_pct") or {}).get(horizon)
+        diff = None if (d0_ret is None or d1_ret is None) else round(d1_ret - d0_ret, 2)
+        rows.append({
+            "ticker": t, "name": e0.get("name"), "tier": e0.get("tier"),
+            "d0_pct": d0_ret, "d1_pct": d1_ret, "diff_pct": diff,
+            "verdict": _d0d1_verdict(d0_ret, d1_ret),
+        })
+    return {
+        "horizon": horizon,
+        "d0_basis": ep_d0.get("basis", "D0_CLOSE"),
+        "d1_basis": ep_d1.get("basis", "D1_OPEN"),
+        "rows": rows,
+        "pending_count": len(pending),
+        "note": "D0좋·D1나쁨=신호좋은데 다음날 늦다 / D0좋·D1좋=실전진입검토가능 / 둘다나쁨=선정자체약함 / D0나쁨·D1좋=익일갭·장중수급 별도분석",
+    }
 
 
 def build_show_me_markdown(doc: dict) -> str:
@@ -231,7 +286,22 @@ def build_show_me_markdown(doc: dict) -> str:
         "",
         "## 5. SmartEntry 실행 성능 SHOW ME (기준: virtual_entry_price)",
     ]
-    md += _perf_table(ep.get("entries", []), "진입가")
+    md += _perf_table(ep.get("entries", []), "진입가(D0종가)")
+    # ── 5-1. D0_CLOSE vs D1_OPEN 비교(4분면 판정) ──
+    panel = doc.get("d0_vs_d1_panel", {}) or {}
+    md += [
+        "",
+        f"## 5-1. D0_CLOSE vs D1_OPEN 비교 SHOW ME (기준 {panel.get('horizon', 'D+10')} · D1대기 {panel.get('pending_count', 0)})",
+        "",
+        "| 종목 | tier | D0수익% | D1수익% | D1-D0 | 판정 |",
+        "|---|---|---|---|---|---|",
+    ]
+    for r in panel.get("rows", []):
+        md.append(
+            f"| {r.get('name')}({r.get('ticker')}) | {r.get('tier')} | "
+            f"{r.get('d0_pct')} | {r.get('d1_pct')} | {r.get('diff_pct')} | {r.get('verdict')} |"
+        )
+    md.append(f"- {panel.get('note', '')}")
     md += [
         "",
         "## 6. Exit observer SHOW ME",

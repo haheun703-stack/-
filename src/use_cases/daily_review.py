@@ -152,29 +152,45 @@ def build_candidate_review(candidates: list[dict], ohlcv_map: dict) -> dict:
     }
 
 
-def build_execution_review(observations: list[dict]) -> dict:
-    """B. 실행 성능 — virtual_entry_price 기준. 6단계 exit observer 산출 재사용."""
+def build_execution_review(
+    observations: list[dict], *, basis: str = "D0_CLOSE",
+    price_key: str = "virtual_entry_price", mfe_key: str = "mfe_pct", mae_key: str = "mae_pct",
+    signals_key: str = "exit_signals_triggered", require_d1_filled: bool = False,
+) -> dict:
+    """B. 실행 성능 — 진입가 기준 D+N pnl. 6단계 exit observer 산출 재사용.
+
+    basis: D0_CLOSE(후보 선정일 종가 진입) / D1_OPEN(익일 시가 진입).
+    require_d1_filled: True면 d1_open_filled=False 후보는 pending으로 분리(집계 제외).
+    ★실행=관찰뿐, 매도/주문 0. 두 기준을 섞지 않는다(6/12 D0 vs D1 비교용).
+    """
     entries: list[dict] = []
+    pending: list[dict] = []
     for o in observations or []:
+        if require_d1_filled and not o.get("d1_open_filled"):
+            pending.append({
+                "ticker": o.get("ticker"), "name": o.get("name"), "tier": o.get("tier"),
+                "reason": "d1_open_pending",
+            })
+            continue
         times = {
             s["horizon"]: s.get("return_pct")
-            for s in o.get("exit_signals_triggered", [])
+            for s in o.get(signals_key, [])
             if s.get("type") == "time"
         }
         entries.append({
             "ticker": o.get("ticker"), "name": o.get("name"), "tier": o.get("tier"),
-            "entry_price": o.get("virtual_entry_price"),
+            "entry_price": o.get(price_key),
             "pnl_pct": {f"D+{h}": times.get(f"D+{h}") for h in HORIZONS},
-            "mfe_pct": o.get("mfe_pct"),
-            "mae_pct": o.get("mae_pct"),
+            "mfe_pct": o.get(mfe_key),
+            "mae_pct": o.get(mae_key),
             "best_exit_candidate": o.get("best_exit_candidate"),
             "worst_exit_candidate": o.get("worst_exit_candidate"),
-            "exit_signal_triggered": o.get("exit_signals_triggered", []),
-            "avoid_loss_pct": o.get("mae_pct"),      # 손절로 회피 가능했던 최대 손실
-            "missed_upside_pct": o.get("mfe_pct"),    # 못 챙긴 최대 수익
+            "exit_signal_triggered": o.get(signals_key, []),
+            "avoid_loss_pct": o.get(mae_key),      # 손절로 회피 가능했던 최대 손실
+            "missed_upside_pct": o.get(mfe_key),    # 못 챙긴 최대 수익
             "hold_status": o.get("hold_status"),
         })
-    return {"basis": "virtual_entry_price", "entry_count": len(entries), "entries": entries}
+    return {"basis": basis, "entry_count": len(entries), "entries": entries, "pending": pending}
 
 
 def build_exit_summary(observations: list[dict]) -> dict:
@@ -194,13 +210,14 @@ def build_exit_summary(observations: list[dict]) -> dict:
 def build_review_document(
     observation_date: str, market_regime: str,
     candidate_review: dict, execution_review: dict, exit_summary: dict,
-    data_warnings: list | None = None,
+    data_warnings: list | None = None, execution_review_d1: dict | None = None,
 ) -> dict:
     cr, er = candidate_review, execution_review
+    er_d1 = execution_review_d1 or {"basis": "D1_OPEN", "entry_count": 0, "entries": [], "pending": []}
     one_line = (
         f"후보 {cr['candidate_count']}(CORE {cr['tier_counts']['CORE']}/WATCH "
         f"{cr['tier_counts']['WATCH']}/CONTROL {cr['tier_counts']['CONTROL']}) · "
-        f"실행관찰 {er['entry_count']} · missed_winner {len(cr['missed_winner'])} · "
+        f"실행관찰 D0 {er['entry_count']}/D1 {er_d1['entry_count']} · missed_winner {len(cr['missed_winner'])} · "
         f"false_positive {len(cr['false_positive'])} (복기 전용, 실주문 0)"
     )
     return {
@@ -210,7 +227,9 @@ def build_review_document(
         "market_regime": market_regime,
         "one_line": one_line,
         "candidate_performance": cr,   # A: as_of 종가 기준
-        "execution_performance": er,   # B: virtual_entry_price 기준
+        "execution_performance": er,   # B: D0_CLOSE 기준(하위호환 키)
+        "execution_performance_d0_close": er,   # B-D0: 후보 선정일 종가 진입
+        "execution_performance_d1_open": er_d1,  # B-D1: 익일 시가 진입(filled만, 나머지 pending)
         "exit_observer_summary": exit_summary,  # C
         "data_warnings": data_warnings or [],
         "safety": {
@@ -240,6 +259,7 @@ def _fmt_label_groups(title: str, groups: dict) -> str:
 def build_review_markdown(doc: dict) -> str:
     cr = doc["candidate_performance"]
     er = doc["execution_performance"]
+    erd1 = doc.get("execution_performance_d1_open", {}) or {}
     ex = doc["exit_observer_summary"]
     lp = cr.get("label_performance", {}) or {}
     md = [
@@ -277,6 +297,21 @@ def build_review_markdown(doc: dict) -> str:
             f"| {e['name']}({e['ticker']}) | {e['tier']} | {e['entry_price']} | "
             f"{p['D+1']} | {p['D+3']} | {p['D+5']} | {p['D+10']} | {e['mfe_pct']} | {e['mae_pct']} |"
         )
+    md += [
+        "",
+        f"## 2-D1. SmartEntry 실행 성능 (기준: D1_OPEN 익일시가 · 채움 {erd1.get('entry_count', 0)} / 대기 {len(erd1.get('pending', []))})",
+        "",
+        "| 종목 | tier | D1진입가 | D+1 | D+3 | D+5 | D+10 | MFE | MAE |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for e in erd1.get("entries", []):
+        p = e["pnl_pct"]
+        md.append(
+            f"| {e['name']}({e['ticker']}) | {e['tier']} | {e['entry_price']} | "
+            f"{p['D+1']} | {p['D+3']} | {p['D+5']} | {p['D+10']} | {e['mfe_pct']} | {e['mae_pct']} |"
+        )
+    if erd1.get("pending"):
+        md.append(f"- D1 대기(익일 시가 미도래): {', '.join(p['ticker'] for p in erd1['pending'])}")
     md += [
         "",
         "## 3. Exit observer 요약",
@@ -340,9 +375,14 @@ def run_daily_review(
     doc = build_review_document(
         as_of_date, market_regime,
         build_candidate_review(candidates, cand_ohlcv),
-        build_execution_review(observations),
+        build_execution_review(observations),  # D0_CLOSE 기준
         build_exit_summary(observations),
         data_warnings=warnings,
+        execution_review_d1=build_execution_review(
+            observations, basis="D1_OPEN", price_key="virtual_entry_price_d1_open",
+            mfe_key="mfe_pct_d1", mae_key="mae_pct_d1",
+            signals_key="exit_signals_triggered_d1", require_d1_filled=True,
+        ),
     )
     if write:
         json_path, md_path = save_review(doc)

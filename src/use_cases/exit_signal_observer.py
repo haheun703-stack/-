@@ -137,6 +137,15 @@ def build_exit_observation(
     signals = calc.get("exit_signals_triggered", [])
     best, worst = _best_worst(signals)
 
+    # ── D+1 시가 기준(시가 진입) 별도 계산 ──
+    # d1_open_filled면 ohlcv를 D+1(인덱스 1)부터 슬라이스해 시가 진입가 기준 재계산.
+    # 미충전(다음날 시가 미도래)이면 pending(None). ★진입가만 다를 뿐 매도/주문 0.
+    d1_filled = bool(entry.get("d1_open_filled"))
+    d1_price = entry.get("virtual_entry_price_d1_open")
+    calc_d1 = None
+    if d1_filled and d1_price and ohlcv_after is not None and len(ohlcv_after) > 1:
+        calc_d1 = compute_exit_signals(float(d1_price), ohlcv_after.iloc[1:])
+
     return {
         "date": observation_date or datetime.now().strftime("%Y-%m-%d"),
         "ticker": entry.get("ticker"),
@@ -144,6 +153,7 @@ def build_exit_observation(
         "source_type": entry.get("source_type", "smart_entry_adapter"),
         "tier": entry.get("tier"),
         "entry_date": entry.get("entry_date"),
+        # ── D0 종가 기준(기존, 하위호환) ──
         "virtual_entry_price": int(entry_price) if entry_price else None,
         "current_close": calc.get("current_close"),
         "mfe_pct": calc.get("mfe_pct"),
@@ -153,6 +163,12 @@ def build_exit_observation(
         "worst_exit_candidate": worst,
         "hold_status": hold_status,
         "blocked_reason": blocked_reason,
+        # ── D+1 시가 기준(시가 진입) 관찰 — pending이면 None/빈배열 ──
+        "virtual_entry_price_d1_open": (int(d1_price) if d1_price else None),
+        "d1_open_filled": d1_filled,
+        "mfe_pct_d1": (calc_d1.get("mfe_pct") if calc_d1 else None),
+        "mae_pct_d1": (calc_d1.get("mae_pct") if calc_d1 else None),
+        "exit_signals_triggered_d1": (calc_d1.get("exit_signals_triggered") if calc_d1 else []),
         # ── 안전 못박기(관찰 전용) ──
         "real_order": False,
         "sell_automation": "BLOCKED",
@@ -251,7 +267,9 @@ def run_exit_observer(
             "ticker": e.get("ticker"),
             "name": e.get("name"),
             "tier": e.get("tier"),
-            "virtual_entry_price": e.get("close"),
+            "virtual_entry_price": e.get("virtual_entry_price_d0_close") or e.get("close"),
+            "virtual_entry_price_d1_open": e.get("virtual_entry_price_d1_open"),
+            "d1_open_filled": e.get("d1_open_filled", False),
             "entry_date": entry_date,
             "source_type": "smart_entry_adapter",
         }

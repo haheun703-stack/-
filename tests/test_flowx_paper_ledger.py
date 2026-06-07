@@ -19,6 +19,9 @@ from src.use_cases.smart_entry_adapter import (
     _to_payload,
     backfill_d1_open,
 )
+from src.use_cases.exit_signal_observer import build_exit_observation
+from src.use_cases.daily_review import build_execution_review
+from src.use_cases.show_me_report import _d0_vs_d1_panel, _d0d1_verdict
 
 
 # ── A. candidate_score + reason (설명 전용, tier 미개입) ──
@@ -142,3 +145,78 @@ def test_backfill_skips_when_d1_data_absent(tmp_path, monkeypatch) -> None:
 def test_backfill_no_ledger_returns_zero(tmp_path) -> None:
     result = backfill_d1_open("2099-01-01", prefer_remote=False, output_dir=tmp_path)
     assert result["filled"] == 0 and result["reason"] == "no_ledger"
+
+
+# ── 실행성과 D0/D1 분리 (검수 P1 갭 보강) ──
+
+def test_exit_observation_computes_d1_from_next_day_when_filled() -> None:
+    idx = pd.date_range("2026-06-05", periods=12, freq="D")
+    df = pd.DataFrame(
+        {"open": [100] * 12, "high": [110] * 12, "low": [95] * 12, "close": [105] * 12, "volume": [1] * 12},
+        index=idx,
+    )
+    entry = {
+        "ticker": "X", "name": "x", "tier": "CORE", "entry_date": "2026-06-05",
+        "virtual_entry_price": 100, "virtual_entry_price_d1_open": 102, "d1_open_filled": True,
+    }
+    obs = build_exit_observation(entry, df, "R4_NORMAL_BULL", "2026-06-05")
+    assert obs["d1_open_filled"] is True
+    assert obs["virtual_entry_price_d1_open"] == 102
+    assert obs["mfe_pct_d1"] is not None and obs["mae_pct_d1"] is not None  # D1 기준 계산됨
+    assert isinstance(obs["exit_signals_triggered_d1"], list)
+    assert obs["real_order"] is False and obs["sell_automation"] == "BLOCKED"
+
+
+def test_exit_observation_d1_pending_when_not_filled() -> None:
+    idx = pd.date_range("2026-06-05", periods=12, freq="D")
+    df = pd.DataFrame(
+        {"open": [100] * 12, "high": [110] * 12, "low": [95] * 12, "close": [105] * 12, "volume": [1] * 12},
+        index=idx,
+    )
+    entry = {"ticker": "Y", "virtual_entry_price": 100, "d1_open_filled": False, "entry_date": "2026-06-05"}
+    obs = build_exit_observation(entry, df, "R4_NORMAL_BULL", "2026-06-05")
+    assert obs["d1_open_filled"] is False
+    assert obs["mfe_pct_d1"] is None and obs["exit_signals_triggered_d1"] == []
+
+
+def test_execution_review_d1_separates_filled_and_pending() -> None:
+    observations = [
+        {"ticker": "A", "name": "a", "tier": "CORE", "d1_open_filled": True,
+         "virtual_entry_price_d1_open": 100, "mfe_pct_d1": 5.0, "mae_pct_d1": -2.0,
+         "exit_signals_triggered_d1": [{"type": "time", "horizon": "D+1", "return_pct": 1.5}]},
+        {"ticker": "B", "name": "b", "tier": "WATCH", "d1_open_filled": False},
+    ]
+    d1 = build_execution_review(
+        observations, basis="D1_OPEN", price_key="virtual_entry_price_d1_open",
+        mfe_key="mfe_pct_d1", mae_key="mae_pct_d1",
+        signals_key="exit_signals_triggered_d1", require_d1_filled=True,
+    )
+    assert d1["basis"] == "D1_OPEN"
+    assert d1["entry_count"] == 1                       # A만 집계
+    assert d1["entries"][0]["entry_price"] == 100
+    assert d1["entries"][0]["pnl_pct"]["D+1"] == 1.5
+    assert len(d1["pending"]) == 1 and d1["pending"][0]["ticker"] == "B"
+
+
+def test_d0d1_verdict_four_quadrants() -> None:
+    assert "실전진입검토가능" in _d0d1_verdict(5, 3)        # D0좋 D1좋
+    assert "늦다" in _d0d1_verdict(5, -2)                  # D0좋 D1나쁨
+    assert "약함" in _d0d1_verdict(-3, -1)                 # 둘다 나쁨
+    assert "별도분석" in _d0d1_verdict(-3, 4)              # D0나쁨 D1좋
+    assert _d0d1_verdict(None, 3) == "DATA_PENDING"
+
+
+def test_d0_vs_d1_panel_matches_tickers_and_marks_pending() -> None:
+    ep_d0 = {"basis": "D0_CLOSE", "entries": [
+        {"ticker": "A", "name": "a", "tier": "CORE", "pnl_pct": {"D+10": 5.0}},
+        {"ticker": "B", "name": "b", "tier": "WATCH", "pnl_pct": {"D+10": -1.0}},
+    ]}
+    ep_d1 = {"basis": "D1_OPEN", "entries": [
+        {"ticker": "A", "pnl_pct": {"D+10": 3.0}},
+    ], "pending": [{"ticker": "B"}]}
+    panel = _d0_vs_d1_panel(ep_d0, ep_d1)
+    rows = {r["ticker"]: r for r in panel["rows"]}
+    assert rows["A"]["d0_pct"] == 5.0 and rows["A"]["d1_pct"] == 3.0 and rows["A"]["diff_pct"] == -2.0
+    assert "실전" in rows["A"]["verdict"]
+    assert rows["B"]["verdict"] == "D1_PENDING"
+    assert panel["pending_count"] == 1

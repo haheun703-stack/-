@@ -75,7 +75,7 @@ def test_candidate_and_execution_use_different_basis() -> None:
     assert er["entries"][0]["entry_price"] == 950
     assert b_d10 == 15.79
     assert cr["basis"] == "as_of_close"
-    assert er["basis"] == "virtual_entry_price"
+    assert er["basis"] == "D0_CLOSE"  # 6/7 보강: virtual_entry_price → D0_CLOSE 명시(의미 동일)
     assert a_d10 != b_d10  # 기준가가 다르므로 성과가 분리됨
 
 
