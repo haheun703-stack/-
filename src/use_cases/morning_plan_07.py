@@ -51,7 +51,49 @@ ENGINE_LABELS = {
 ALLOWED_MODES = {MODE_PAPER_ONLY, MODE_ALLOWED_SHADOW}
 
 
-def _candidate_summary(row: dict, observation: str, shadow_labels: dict | None = None) -> dict:
+def _build_reason(row: dict, market: str | None, shadow_labels: dict | None) -> list[str]:
+    """후보 선정 사유 토큰. ★설명 전용 — tier/engine/regime 결정에 일절 쓰지 않는다.
+
+    전부 '이미 확정된 값'의 재표현이다(새 판단·점수 계산 0). 6/12에 '왜 이 후보를
+    뽑았나'를 사람이 읽기 위한 장부 필드일 뿐이다.
+    """
+    reason: list[str] = []
+    m = str(market or "")
+    if "BULL" in m:
+        reason.append("C60_BULL")
+    elif "BEAR" in m:
+        reason.append("C60_BEAR")
+    tier = row.get("_tier")
+    if tier:
+        reason.append(f"{tier}_TIER")
+    drop = row.get("_drop_context")
+    if drop:
+        reason.append(str(drop).upper())
+    supply = row.get("_supply_state")
+    if supply:
+        reason.append(str(supply).upper())
+    floor = row.get("_floor_label")
+    if floor:
+        reason.append(f"FLOOR:{floor}")
+    sl = shadow_labels or {}
+    pa = sl.get("price_axis") or {}
+    if pa.get("weekly_open_state") == "ABOVE":
+        reason.append("WEEKLY_OPEN_ABOVE")
+    if pa.get("half_year_open_state") == "ABOVE":
+        reason.append("HALF_YEAR_OPEN_ABOVE")
+    hy = sl.get("half_year_leader") or {}
+    grade = hy.get("half_year_leader_grade")
+    if grade and grade != "HY_NOT_LEADER":
+        reason.append(grade)
+    ao = sl.get("annual_overheat") or {}
+    if ao.get("annual_overheat_warning"):
+        reason.append(ao.get("overheat_grade") or "OVERHEAT")
+    return reason
+
+
+def _candidate_summary(
+    row: dict, observation: str, shadow_labels: dict | None = None, market: str | None = None
+) -> dict:
     return {
         "ticker": row.get("ticker"),
         "name": row.get("name", row.get("ticker")),
@@ -63,6 +105,9 @@ def _candidate_summary(row: dict, observation: str, shadow_labels: dict | None =
         "drop_context": row.get("_drop_context"),
         "supply_state": row.get("_supply_state"),
         "observation": observation,
+        # ── 후보 설명 필드(★tier/engine 결정에 미사용, 확정값 재표현뿐) ──
+        "candidate_score": row.get("total_score"),
+        "reason": _build_reason(row, market, shadow_labels),
         # ── 관측 레이어 shadow label(매수 신호 아님, hard gate 무관) ──
         "shadow_labels": shadow_labels,
     }
@@ -99,10 +144,10 @@ def build_plan_document(
     # R4(ALLOWED_SHADOW)면 CORE/WATCH는 장중 SmartEntry 관찰, 아니면 shadow만
     obs = OBS_SMARTENTRY if smart_mode == MODE_ALLOWED_SHADOW else OBS_SHADOW
 
-    core = [_candidate_summary(p, obs, sl.get(p.get("ticker"))) for p in picks if p.get("_tier") == "CORE"]
-    watch = [_candidate_summary(p, obs, sl.get(p.get("ticker"))) for p in picks if p.get("_tier") == "WATCH"]
+    core = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market) for p in picks if p.get("_tier") == "CORE"]
+    watch = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market) for p in picks if p.get("_tier") == "WATCH"]
     # CONTROL은 정책과 무관하게 항상 비교군(진입 대상 아님)
-    ctrl = [_candidate_summary(c, OBS_COMPARISON, sl.get(c.get("ticker"))) for c in control]
+    ctrl = [_candidate_summary(c, OBS_COMPARISON, sl.get(c.get("ticker")), market) for c in control]
 
     blocked_or_shadow = []
     for key, mode in engines.items():

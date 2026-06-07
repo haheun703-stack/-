@@ -40,11 +40,31 @@ STATUS_BLOCKED_REGIME = "BLOCKED_BY_REGIME"
 STATUS_BLOCKED_DATA = "BLOCKED_BY_DATA"
 
 
-def _to_payload(row: dict, status: str) -> dict:
+def _next_kr_trading_day(as_of_date: str | None) -> str | None:
+    """as_of 다음 한국 거래일(YYYY-MM-DD). 가상진입 D+1 시가의 '날짜'만 미리 확정한다
+    (가격은 그날 데이터가 들어와야 backfill_d1_open이 채운다). lazy import로 주문 경로 0."""
+    if not as_of_date:
+        return None
+    from datetime import timedelta
+    from src.trading_calendar import is_kr_trading_day
+    try:
+        d = datetime.strptime(as_of_date, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    d += timedelta(days=1)
+    for _ in range(15):  # 연휴 방어 상한
+        if is_kr_trading_day(d):
+            return d.strftime("%Y-%m-%d")
+        d += timedelta(days=1)
+    return None
+
+
+def _to_payload(row: dict, status: str, as_of_date: str | None = None) -> dict:
     """morning_plan tier row → SmartEntry load_picks 호환 payload + 5단계 메타.
 
     load_picks 요구 필드(ticker/name/grade/close/stop_loss/target_price/total_score/
     paper_mode)를 채우되 실주문 아님(real_order=False, paper_mode=True)을 못박는다.
+    가상진입 장부는 D0 종가(즉시 확정)/D+1 시가(익일 backfill) 두 기준을 모두 남긴다.
     """
     return {
         # ── SmartEntry load_picks 호환 ──
@@ -66,6 +86,17 @@ def _to_payload(row: dict, status: str) -> dict:
         "supply_state": row.get("supply_state"),
         # 관측 레이어 라벨 pass-through(진입 조건에 일절 쓰지 않음 — 표시·기록용).
         "shadow_labels": row.get("shadow_labels"),
+        # ── 가상진입 장부(★실주문 아님). D0 종가=즉시 / D+1 시가=익일 backfill ──
+        "virtual_entry_price_d0_close": row.get("ref_close"),
+        "virtual_entry_date_d0": as_of_date,
+        "entry_basis_d0": "D0_CLOSE",
+        "virtual_entry_price_d1_open": None,
+        "virtual_entry_date_d1": _next_kr_trading_day(as_of_date),
+        "entry_basis_d1": "D1_OPEN",
+        "d1_open_filled": False,
+        # 후보 설명 필드 pass-through(A 장부 → B 장부, 결정 미개입).
+        "candidate_score": row.get("candidate_score"),
+        "reason": row.get("reason"),
         "_source": "morning_plan_07",
     }
 
@@ -80,24 +111,25 @@ def build_shadow_entries(plan: dict, paper_open: bool = False) -> dict:
     market = plan.get("market_regime")
     smart_mode = (plan.get("engines") or {}).get("smart_entry")
     tiers = plan.get("tiers") or {}
+    as_of = plan.get("as_of_date")
     open_status = STATUS_PAPER_OPEN if paper_open else STATUS_SHADOW_OPEN
 
     # CONTROL은 정책 무관 항상 비교군(SmartEntry 진입 후보 아님)
-    control_only = [_to_payload(r, STATUS_CONTROL_ONLY) for r in tiers.get("CONTROL", [])]
+    control_only = [_to_payload(r, STATUS_CONTROL_ONLY, as_of) for r in tiers.get("CONTROL", [])]
     core_watch = list(tiers.get("CORE", [])) + list(tiers.get("WATCH", []))
 
     shadow_entries: list[dict] = []
     blocked: list[dict] = []
 
     if market == MARKET_DATA_UNAVAILABLE:
-        blocked = [_to_payload(r, STATUS_BLOCKED_DATA) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_DATA, as_of) for r in core_watch]
     elif market == MARKET_R1:
-        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of) for r in core_watch]
     elif market == MARKET_R4 and smart_mode == MODE_ALLOWED_SHADOW:
-        shadow_entries = [_to_payload(r, open_status) for r in core_watch]
+        shadow_entries = [_to_payload(r, open_status, as_of) for r in core_watch]
     else:
         # 방어: 알 수 없는 국면/모드 → 보수적 차단
-        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of) for r in core_watch]
 
     return {
         "version": ADAPTER_VERSION,
@@ -134,14 +166,69 @@ def save_shadow_entries(document: dict, output_dir: Path = SHADOW_ENTRY_DIR) -> 
     return path
 
 
+def backfill_d1_open(
+    target_date: str, prefer_remote: bool = True, output_dir: Path = SHADOW_ENTRY_DIR
+) -> dict:
+    """target_date 장부의 SHADOW_OPEN 후보 중 d1_open_filled=False인 것의 D+1 시가를
+    채운다. ★관측 전용 — 주문/매도/tier 변경 0. D+1 OHLCV가 아직 없으면 그대로 둔다
+    (다음 실행 때 다시 시도). lazy import로 주문 경로 0.
+    """
+    path = output_dir / f"shadow_entries_{target_date}.json"
+    if not path.exists():
+        return {"target_date": target_date, "filled": 0, "reason": "no_ledger"}
+    document = json.loads(path.read_text(encoding="utf-8"))
+    import pandas as pd
+    from src.etf.c60_shadow import normalize_ohlcv
+    from src.etf.samsung_single_leverage_shadow import load_daily_ohlcv
+
+    filled = 0
+    for e in document.get("shadow_entries", []):
+        if e.get("d1_open_filled") or e.get("entry_basis_d1") != "D1_OPEN":
+            continue
+        d1_date = e.get("virtual_entry_date_d1")
+        if not d1_date:
+            continue
+        try:
+            df = normalize_ohlcv(load_daily_ohlcv(e.get("ticker"), days=400, prefer_remote=prefer_remote))
+        except Exception:
+            df = None
+        if df is None or df.empty:
+            continue
+        try:
+            ts = pd.Timestamp(d1_date)
+        except (ValueError, TypeError):
+            continue
+        if ts not in df.index:
+            continue  # 아직 D+1 데이터 없음 → 다음 기회
+        e["virtual_entry_price_d1_open"] = int(df.loc[ts, "open"])
+        e["d1_open_filled"] = True
+        filled += 1
+    if filled:
+        document["d1_backfill_at"] = datetime.now().isoformat(timespec="seconds")
+        path.write_text(json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"target_date": target_date, "filled": filled}
+
+
 def run_smart_entry_adapter(
     days: int = 1300, prefer_remote: bool = True, write: bool = True
 ) -> tuple[dict, Path | None]:
     """morning_plan → shadow entry intent. PAPER_OPEN은 여기서 강제 차단(6/8 전 금지).
 
     paper_open 인자를 노출하지 않음 = run/CLI 경로로는 PAPER_OPEN을 켤 수 없다.
+    write=True면 직전 거래일 장부의 D+1 시가를 backfill한다(관측 전용, 주문 0).
     """
     plan, _, _ = run_morning_plan(days=days, prefer_remote=prefer_remote, write=write)
     document = build_shadow_entries(plan, paper_open=False)  # 항상 SHADOW_OPEN
     path = save_shadow_entries(document) if write else None
+    if write:
+        from src.trading_calendar import prev_kr_trading_day
+        as_of = plan.get("as_of_date")
+        if as_of:
+            try:
+                prev = prev_kr_trading_day(
+                    datetime.strptime(as_of, "%Y-%m-%d").date()
+                ).strftime("%Y-%m-%d")
+                document["d1_backfill"] = backfill_d1_open(prev, prefer_remote=prefer_remote)
+            except Exception:
+                document["d1_backfill"] = None
     return document, path
