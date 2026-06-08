@@ -210,7 +210,13 @@ def _fetch_kospi_per() -> dict | None:
                 pykrx_logger.setLevel(logging.CRITICAL)
                 logging.disable(logging.CRITICAL)
                 try:
-                    df = krx.get_index_fundamental(dt_str, dt_str, "1001")
+                    # pykrx 내부 dataframe_empty_handler가 stdout/stderr로 직접
+                    # print("Error occurred in ...") 하는 노이즈를 억제 (logging 우회분).
+                    # KRX 지수펀더멘털 API는 서버 타이밍 의존이라 간헐적 빈 응답 → 7일 루프가 흡수.
+                    import contextlib
+                    import io as _io
+                    with contextlib.redirect_stdout(_io.StringIO()), contextlib.redirect_stderr(_io.StringIO()):
+                        df = krx.get_index_fundamental(dt_str, dt_str, "1001")
                 finally:
                     pykrx_logger.setLevel(old_level)
                     logging.disable(logging.NOTSET)
