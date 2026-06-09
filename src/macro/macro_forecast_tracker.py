@@ -218,3 +218,65 @@ def upsert_forecast_actual(rows: list[dict[str, Any]], *, dry_run: bool = True) 
     finally:
         conn.close()
     return {"dry_run": False, "rows": len(norm), "written": written, "note": "upsert 완료"}
+
+
+# ── 외부 소스 수집 ────────────────────────────────────────────────
+_CLEVELAND_URL = (
+    "https://www.clevelandfed.org/-/media/files/webcharts/"
+    "inflationnowcasting/nowcast_month.json"
+)
+# 클리블랜드 시리즈명 → 우리 indicator_code (MoM % 나우캐스트)
+_CLEVELAND_SERIES = {
+    "CPI Inflation": "CPI_HEAD",
+    "Core CPI Inflation": "CPI_CORE",
+    "PCE Inflation": "PCE",
+}
+
+
+def _cleveland_month_to_date(target: str | None) -> str | None:
+    """'2026-6' → '2026-06-01'(대상월 귀속일). 파싱 실패 시 None."""
+    if not target or "-" not in target:
+        return None
+    try:
+        y, m = target.split("-")[:2]
+        return f"{int(y):04d}-{int(m):02d}-01"
+    except (ValueError, TypeError):
+        return None
+
+
+def fetch_cleveland_nowcast(timeout: int = 25) -> dict[str, Any]:
+    """클리블랜드 연준 인플레이션 나우캐스트 → 최신 MoM consensus(읽기 전용).
+
+    반환: {target_month, target_date, asof, source, values:{CPI_HEAD, CPI_CORE, PCE}}
+    consensus_source='cleveland_nowcast', 단위=MoM %. 매매 무관·write 0.
+    """
+    import json as _json
+
+    import requests
+
+    r = requests.get(_CLEVELAND_URL, timeout=timeout)
+    r.raise_for_status()
+    data = _json.loads(r.content)
+    if not isinstance(data, list) or not data:
+        return {"target_month": None, "target_date": None, "asof": None, "source": "cleveland_nowcast", "values": {}}
+    latest = data[-1]
+    chart = latest.get("chart", {})
+    target = chart.get("subcaption")
+    values: dict[str, float] = {}
+    for series in latest.get("dataset", []):
+        code = _CLEVELAND_SERIES.get(series.get("seriesname"))
+        if not code:
+            continue
+        nums = [x.get("value") for x in series.get("data", []) if x.get("value") not in (None, "")]
+        if nums:
+            try:
+                values[code] = round(float(nums[-1]), 3)
+            except (TypeError, ValueError):
+                continue
+    return {
+        "target_month": target,
+        "target_date": _cleveland_month_to_date(target),
+        "asof": chart.get("_comment"),
+        "source": "cleveland_nowcast",
+        "values": values,
+    }
