@@ -39,6 +39,22 @@ STATUS_OK = "ok"
 
 LEADING_BONUS = 2.0
 AVOID_PENALTY = 2.0
+WEIGHT_ALIGNMENT_MIN = 1.20
+
+THEME_ALIASES: dict[str, tuple[str, ...]] = {
+    "semiconductor": ("semiconductor", "semi", "chip", "hbm", "반도체", "ai반도체"),
+    "battery": ("battery", "2차전지", "2차", "전지", "배터리", "ev"),
+    "bio": ("bio", "health", "pharma", "바이오", "제약"),
+    "it": ("it", "software", "platform", "전기전자", "전자"),
+    "shipbuilding": ("shipbuilding", "ship", "조선", "lng"),
+    "defense": ("defense", "방산", "aero", "항공"),
+    "auto": ("auto", "car", "자동차"),
+    "construction": ("construction", "건설"),
+    "insurance": ("insurance", "보험"),
+    "metals": ("metals", "metal", "steel", "금속", "철강"),
+    "gold": ("gold", "금선물", "금현물", "귀금속"),
+    "oil": ("oil", "energy", "원유", "에너지"),
+}
 
 
 def load_market_regime(path: Path = MARKET_REGIME_PATH) -> dict[str, Any] | None:
@@ -53,7 +69,55 @@ def load_market_regime(path: Path = MARKET_REGIME_PATH) -> dict[str, Any] | None
 
 
 def _norm(s: Any) -> str:
-    return str(s or "").strip().lower()
+    return str(s or "").strip().lower().replace(" ", "").replace("_", "")
+
+
+def _raw_theme_tokens(value: Any) -> list[str]:
+    """Return schema-flexible theme tokens.
+
+    단타봇 산출물은 leading_themes가 문자열 리스트일 수도 있고,
+    {key,label,score,...} dict 리스트일 수도 있다. 둘 다 받는다.
+    """
+    if value is None:
+        return []
+    if isinstance(value, dict):
+        keys = ("key", "label", "theme", "sector", "name", "alias")
+        return [_norm(value.get(k)) for k in keys if value.get(k)]
+    return [_norm(value)]
+
+
+def _expand_aliases(token: str) -> set[str]:
+    if not token:
+        return set()
+    out = {token}
+    for key, aliases in THEME_ALIASES.items():
+        key_n = _norm(key)
+        alias_set = {_norm(a) for a in aliases}
+        # sector='AI반도체'처럼 alias가 포함된 경우도 canonical set으로 확장.
+        if token == key_n or token in alias_set or any(a and a in token for a in alias_set):
+            out.add(key_n)
+            out.update(alias_set)
+    return {x for x in out if x}
+
+
+def _theme_token_set(value: Any) -> set[str]:
+    tokens: set[str] = set()
+    if isinstance(value, (list, tuple, set)):
+        for item in value:
+            tokens.update(_theme_token_set(item))
+        return tokens
+    for raw in _raw_theme_tokens(value):
+        tokens.update(_expand_aliases(raw))
+    return tokens
+
+
+def _token_match(a: str, b: str) -> bool:
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    # Avoid short-token accidents, e.g. "it" inside "battery".
+    return (len(a) >= 3 and a in b) or (len(b) >= 3 and b in a)
 
 
 def _theme_match(sector: Any, themes: Any) -> bool:
@@ -63,16 +127,11 @@ def _theme_match(sector: Any, themes: Any) -> bool:
     """
     if not sector or not themes:
         return False
-    sec = _norm(sector)
-    if not sec:
+    sector_tokens = _theme_token_set(sector)
+    theme_tokens = _theme_token_set(themes)
+    if not sector_tokens or not theme_tokens:
         return False
-    for t in themes:
-        th = _norm(t)
-        if not th:
-            continue
-        if sec == th or th in sec or sec in th:
-            return True
-    return False
+    return any(_token_match(s, t) for s in sector_tokens for t in theme_tokens)
 
 
 def _sector_weight_bonus(sector: Any, weights: Any) -> float:
@@ -86,6 +145,10 @@ def _sector_weight_bonus(sector: Any, weights: Any) -> float:
             except (TypeError, ValueError):
                 return 0.0
     return 0.0
+
+
+def _sector_weight_aligned(sector: Any, weights: Any) -> bool:
+    return _sector_weight_bonus(sector, weights) >= WEIGHT_ALIGNMENT_MIN
 
 
 def assess_alignment(
@@ -124,9 +187,10 @@ def assess_alignment(
 
     in_leading = _theme_match(sector, leading)
     in_avoid = _theme_match(sector, avoid)
+    weight_aligned = _sector_weight_aligned(sector, weights)
 
     score = 0.0
-    if in_leading:
+    if in_leading or weight_aligned:
         score += LEADING_BONUS
     if in_avoid:
         score -= AVOID_PENALTY
@@ -134,9 +198,9 @@ def assess_alignment(
 
     # ★재심사 라벨(tier 변경 아님). ETF/수급 정렬은 '다시 봐라' 신호일 뿐.
     action: str | None = None
-    if tier == "CONTROL" and in_leading and not in_avoid:
+    if tier == "CONTROL" and (in_leading or weight_aligned) and not in_avoid:
         action = ACTION_RECHECK_CONTROL
-    elif tier == "CORE" and (in_avoid or not in_leading):
+    elif tier == "CORE" and (in_avoid or not (in_leading or weight_aligned)):
         action = ACTION_CORE_WEAK
 
     return {
@@ -144,6 +208,7 @@ def assess_alignment(
         "alignment_score": round(score, 2),
         "in_leading": in_leading,
         "in_avoid": in_avoid,
+        "weight_aligned": weight_aligned,
         "market_alignment_action": action,
         "market_bias": market_regime.get("market_bias"),
         "note": None,

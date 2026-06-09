@@ -32,6 +32,21 @@ REGIME = {
     "freshness": {"ok": True},
 }
 
+REAL_SCHEMA_REGIME = {
+    "market_bias": "KOSPI",
+    "etf_dominant": True,
+    "leading_themes": [
+        {"key": "it", "label": "IT", "score": 68.0},
+        {"key": "bio", "label": "BIO", "score": 58.0},
+    ],
+    "avoid_themes": [],
+    "sector_weights": {
+        "semiconductor": 1.315,
+        "battery": 1.121,
+    },
+    "freshness": {"ok": True},
+}
+
 
 # ── 회귀 케이스 (사장님 지시) ──
 def test_hpsp_control_semiconductor_recheck_to_watch():
@@ -100,6 +115,35 @@ def test_no_sector_no_match():
     # 섹터 모르면 leading에도 없음 → CORE 약정렬로 분류(보수적), 단 점수 0
     assert r["in_leading"] is False
     assert r["alignment_score"] == 0.0
+
+
+def test_real_schema_dict_themes_are_supported():
+    r = assess_alignment("CORE", "바이오", REAL_SCHEMA_REGIME)
+    assert r["status"] == STATUS_OK
+    assert r["in_leading"] is True
+    assert r["market_alignment_action"] is None
+
+
+def test_control_recheck_when_sector_weight_strong_even_not_top_leading():
+    # 단타봇 실데이터에서 반도체가 top leading 밖이어도 sector_weights가 강하면 재심사.
+    r = assess_alignment("CONTROL", "semiconductor", REAL_SCHEMA_REGIME)
+    assert r["weight_aligned"] is True
+    assert r["market_alignment_action"] == ACTION_RECHECK_CONTROL
+
+
+def test_core_weak_when_weight_below_alignment_threshold():
+    r = assess_alignment("CORE", "battery", REAL_SCHEMA_REGIME)
+    assert r["weight_aligned"] is False
+    assert r["market_alignment_action"] == ACTION_CORE_WEAK
+
+
+def test_real_schema_dict_avoid_theme_penalizes_core():
+    regime = dict(REAL_SCHEMA_REGIME)
+    regime["avoid_themes"] = [{"key": "battery", "label": "BATTERY", "score": -20.0}]
+    r = assess_alignment("CORE", "battery", regime)
+    assert r["in_avoid"] is True
+    assert r["alignment_score"] < 0
+    assert r["market_alignment_action"] == ACTION_CORE_WEAK
 
 
 # ── graceful 로드 ──
