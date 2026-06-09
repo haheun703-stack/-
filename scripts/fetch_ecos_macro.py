@@ -1,6 +1,6 @@
 """한국은행 ECOS API 매크로 지표 수집 + 히스토리
 
-기준금리, 원/달러, CPI, 국고채3년, 국고채10년 수집.
+기준금리, 원/달러, CPI, 국고채3년, 국고채10년, 경기 순환변동치(선행/동행) 수집.
 KOSPI PER은 pykrx에서 가져와 ERP(주식위험프리미엄) 계산에 사용.
 ECOS 무료: 제한 없음 (일 10만건).
 
@@ -68,6 +68,21 @@ INDICATORS = {
         "item_code": "010200001",
         "freq": "D",
         "label": "국고채10년(%)",
+    },
+    # 경기종합지수 순환변동치 (901Y067) — kr_cycle_valuation_regime 입력.
+    # 적대검증 PASS(docs/02-design/leading-cycle-signal-6_9.md): 맥락 신호,
+    # 단독 hard gate 금지·C60 불변. 발표 약 2개월 지연(월별).
+    "leading_cycle": {
+        "stat_code": "901Y067",
+        "item_code": "I16E",
+        "freq": "M",
+        "label": "선행지수 순환변동치",
+    },
+    "coincident_cycle": {
+        "stat_code": "901Y067",
+        "item_code": "I16D",
+        "freq": "M",
+        "label": "동행지수 순환변동치",
     },
 }
 
