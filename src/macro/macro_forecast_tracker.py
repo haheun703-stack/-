@@ -253,6 +253,40 @@ def upsert_forecast_actual(rows: list[dict[str, Any]], *, dry_run: bool = True) 
     return {"dry_run": False, "rows": len(norm), "written": written, "note": "upsert 완료"}
 
 
+def fetch_existing_rows(codes: list[str], *, dsn: str | None = None,
+                        region: str = "US") -> dict[tuple[str, str], dict[str, Any]]:
+    """기존 macro_forecast_actual 행 조회 {(code,event_date): {consensus, consensus_source, actual}}.
+
+    read-only. actual backfill 시 기존 consensus 보존용. DATABASE_URL 없거나 codes 비면 빈 dict.
+    """
+    from dotenv import load_dotenv
+    load_dotenv(PROJECT_ROOT / ".env")
+    dsn = dsn or os.environ.get("DATABASE_URL", "")
+    if not dsn or not codes:
+        return {}
+    import psycopg2
+
+    out: dict[tuple[str, str], dict[str, Any]] = {}
+    conn = psycopg2.connect(dsn)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "select indicator_code, event_date, consensus, consensus_source, actual "
+                "from macro_forecast_actual where region=%s and indicator_code = any(%s)",
+                (region, list(codes)),
+            )
+            for code, ev, cons, csrc, act in cur.fetchall():
+                ev_s = ev.isoformat() if hasattr(ev, "isoformat") else str(ev)[:10]
+                out[(code, ev_s)] = {
+                    "consensus": float(cons) if cons is not None else None,
+                    "consensus_source": csrc,
+                    "actual": float(act) if act is not None else None,
+                }
+    finally:
+        conn.close()
+    return out
+
+
 # ── 외부 소스 수집 ────────────────────────────────────────────────
 _CLEVELAND_URL = (
     "https://www.clevelandfed.org/-/media/files/webcharts/"
@@ -313,3 +347,85 @@ def fetch_cleveland_nowcast(timeout: int = 25) -> dict[str, Any]:
         "source": "cleveland_nowcast",
         "values": values,
     }
+
+
+# ── FRED actual 수집 (발표 후 실적, read-only) ─────────────────────
+# transform: consensus(나우캐스트)와 단위를 맞추기 위한 변환.
+#   mom_pct   = (당월지수/전월지수 − 1)×100  (CPI/PCE: 나우캐스트가 MoM%)
+#   mom_level = 당월 − 전월                  (NFP: 천명 증감)
+#   level     = 당월 값 그대로               (실업률·기준금리: 직접 %)
+_FRED_SERIES: dict[str, dict[str, str]] = {
+    "CPI_HEAD": {"series_id": "CPIAUCSL",  "transform": "mom_pct"},
+    "CPI_CORE": {"series_id": "CPILFESL",  "transform": "mom_pct"},
+    "PCE":      {"series_id": "PCEPI",     "transform": "mom_pct"},
+    "UNRATE":   {"series_id": "UNRATE",    "transform": "level"},
+    "NFP":      {"series_id": "PAYEMS",    "transform": "mom_level"},
+    "FOMC":     {"series_id": "FEDFUNDS",  "transform": "level"},
+}
+_FRED_URL = "https://api.stlouisfed.org/fred/series/observations"
+
+
+def _fred_date_to_event_date(d: str) -> str | None:
+    """FRED 관측일('YYYY-MM-DD') → 데이터월 event_date('YYYY-MM-01')."""
+    try:
+        dt = datetime.strptime(d[:10], "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return None
+    return month_to_event_date(dt.year, dt.month)
+
+
+def _fred_transform(transform: str, observations: list[tuple[str, float]]) -> dict[str, float]:
+    """FRED 관측치(오름차순 (date,value)) → {데이터월 event_date: actual}. consensus 단위 정합."""
+    out: dict[str, float] = {}
+    for i, (date, val) in enumerate(observations):
+        ev = _fred_date_to_event_date(date)
+        if ev is None:
+            continue
+        if transform == "level":
+            out[ev] = round(val, 4)
+        elif i > 0:
+            prev = observations[i - 1][1]
+            if transform == "mom_pct" and prev:
+                out[ev] = round((val / prev - 1) * 100, 4)
+            elif transform == "mom_level":
+                out[ev] = round(val - prev, 4)
+    return out
+
+
+def fetch_fred_actuals(codes: list[str], *, api_key: str | None = None,
+                       months: int = 6, timeout: int = 25) -> dict[str, dict[str, float]]:
+    """FRED 발표 실적 → {code: {데이터월 event_date: actual}}. read-only·매매무관.
+
+    api_key 없으면 FRED_API_KEY env. mom 계산 위해 months+1개월치를 받는다.
+    """
+    import requests
+    from dotenv import load_dotenv
+
+    load_dotenv(PROJECT_ROOT / ".env")
+    api_key = api_key or os.environ.get("FRED_API_KEY")
+    if not api_key:
+        raise RuntimeError("FRED_API_KEY 없음(.env 또는 인자)")
+
+    result: dict[str, dict[str, float]] = {}
+    for code in codes:
+        spec = _FRED_SERIES.get(code)
+        if not spec:
+            continue
+        r = requests.get(_FRED_URL, params={
+            "series_id": spec["series_id"], "api_key": api_key, "file_type": "json",
+            "sort_order": "desc", "limit": months + 2,
+        }, timeout=timeout)
+        r.raise_for_status()
+        raw = r.json().get("observations", [])
+        obs = []
+        for o in raw:
+            v = o.get("value")
+            if v in (".", "", None):
+                continue
+            try:
+                obs.append((o.get("date"), float(v)))
+            except (TypeError, ValueError):
+                continue
+        obs.sort(key=lambda x: x[0])  # 오름차순(전월 비교용)
+        result[code] = _fred_transform(spec["transform"], obs)
+    return result

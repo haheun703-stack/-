@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
 
+from scripts.macro_forecast_upsert import merge_rows  # noqa: E402
 from src.macro.macro_forecast_tracker import (  # noqa: E402
     IMPACT_BAD,
     IMPACT_GOOD,
@@ -20,6 +21,8 @@ from src.macro.macro_forecast_tracker import (  # noqa: E402
     STANCE_EASE,
     STANCE_NEUTRAL,
     STANCE_TIGHT,
+    _fred_date_to_event_date,
+    _fred_transform,
     build_forecast_row,
     classify_market_impact,
     classify_stance,
@@ -156,3 +159,49 @@ def test_upsert_dry_run_writes_nothing():
 def test_upsert_empty():
     res = upsert_forecast_actual([])
     assert res["written"] == 0
+
+
+# ── FRED actual 변환 (정보봇 P1-②) ──
+def test_fred_transform_mom_pct():
+    # 지수 → 전월대비 % (consensus 나우캐스트 MoM%와 단위 정합)
+    obs = [("2026-04-01", 319.0), ("2026-05-01", 319.8)]
+    out = _fred_transform("mom_pct", obs)
+    assert out["2026-05-01"] == round((319.8 / 319.0 - 1) * 100, 4)
+    assert "2026-04-01" not in out  # 첫 달은 전월 없어 MoM 계산 불가
+
+
+def test_fred_transform_level_and_mom_level():
+    assert _fred_transform("level", [("2026-05-01", 4.2)]) == {"2026-05-01": 4.2}
+    out = _fred_transform("mom_level", [("2026-04-01", 158000.0), ("2026-05-01", 158150.0)])
+    assert out["2026-05-01"] == 150.0  # NFP 증감(천명)
+
+
+def test_fred_date_to_event_date_normalizes_to_data_month():
+    assert _fred_date_to_event_date("2026-05-01") == "2026-05-01"
+    assert _fred_date_to_event_date("2026-05-15") == "2026-05-01"
+    assert _fred_date_to_event_date("garbage") is None
+
+
+# ── 머지: consensus 보존 + actual backfill → surprise 완성 (P1-② 핵심) ──
+def test_merge_preserves_consensus_and_backfills_actual():
+    consensus_doc = {"target_month": "2026-6", "target_date": "2026-06-01",
+                     "source": "cleveland_nowcast", "values": {"CPI_HEAD": 0.124}}
+    fred = {"CPI_HEAD": {"2026-05-01": 0.30, "2026-04-01": 0.20}}
+    existing = {("CPI_HEAD", "2026-05-01"): {
+        "consensus": 0.25, "consensus_source": "cleveland_nowcast", "actual": None}}
+    rows = merge_rows(consensus_doc, fred, existing)
+    by = {(r["indicator_code"], r["event_date"]): r for r in rows}
+
+    # 5월: 기존 consensus 0.25 보존 + FRED actual 0.30 → surprise 완성
+    may = by[("CPI_HEAD", "2026-05-01")]
+    assert may["consensus"] == 0.25 and may["actual"] == 0.30
+    assert may["surprise"] == round(0.30 - 0.25, 4)
+    assert may["stance"] == STANCE_TIGHT  # 상회=긴축
+
+    # 6월: 나우캐스트 consensus만(actual 미발표)
+    jun = by[("CPI_HEAD", "2026-06-01")]
+    assert jun["consensus"] == 0.124 and jun["actual"] is None and jun["surprise"] is None
+
+    # 4월: consensus 없이 actual만(발표 완료 표시, surprise 없음)
+    apr = by[("CPI_HEAD", "2026-04-01")]
+    assert apr["actual"] == 0.20 and apr["consensus"] is None and apr["surprise"] is None
