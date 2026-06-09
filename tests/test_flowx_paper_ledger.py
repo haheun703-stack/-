@@ -167,7 +167,22 @@ def test_exit_observation_computes_d1_from_next_day_when_filled() -> None:
     assert obs["real_order"] is False and obs["sell_automation"] == "BLOCKED"
 
 
-def test_exit_observation_d1_pending_when_not_filled() -> None:
+def test_exit_observation_d1_pending_when_next_day_missing() -> None:
+    # 진입일 하루만 있고 익일 시가 미도래(OHLCV 1행) → D1 진짜 pending.
+    idx = pd.date_range("2026-06-05", periods=1, freq="D")
+    df = pd.DataFrame(
+        {"open": [100], "high": [110], "low": [95], "close": [105], "volume": [1]},
+        index=idx,
+    )
+    entry = {"ticker": "Y", "virtual_entry_price": 100, "d1_open_filled": False, "entry_date": "2026-06-05"}
+    obs = build_exit_observation(entry, df, "R4_NORMAL_BULL", "2026-06-05")
+    assert obs["d1_open_filled"] is False
+    assert obs["mfe_pct_d1"] is None and obs["exit_signals_triggered_d1"] == []
+
+
+def test_exit_observation_d1_autocomputed_from_ohlcv() -> None:
+    # 익일 데이터가 OHLCV에 있으면 backfill 미충전이어도 D1 시가에서 직접 계산(관측 전용).
+    # 진입일 코호트 고정 후 D+N/D1 누적이 살아나는 핵심 동작(주문 0).
     idx = pd.date_range("2026-06-05", periods=12, freq="D")
     df = pd.DataFrame(
         {"open": [100] * 12, "high": [110] * 12, "low": [95] * 12, "close": [105] * 12, "volume": [1] * 12},
@@ -175,8 +190,8 @@ def test_exit_observation_d1_pending_when_not_filled() -> None:
     )
     entry = {"ticker": "Y", "virtual_entry_price": 100, "d1_open_filled": False, "entry_date": "2026-06-05"}
     obs = build_exit_observation(entry, df, "R4_NORMAL_BULL", "2026-06-05")
-    assert obs["d1_open_filled"] is False
-    assert obs["mfe_pct_d1"] is None and obs["exit_signals_triggered_d1"] == []
+    assert obs["d1_open_filled"] is True
+    assert obs["mfe_pct_d1"] is not None
 
 
 def test_execution_review_d1_separates_filled_and_pending() -> None:

@@ -59,13 +59,19 @@ def _next_kr_trading_day(as_of_date: str | None) -> str | None:
     return None
 
 
-def _to_payload(row: dict, status: str, as_of_date: str | None = None) -> dict:
+def _to_payload(row: dict, status: str, as_of_date: str | None = None, cohort_date: str | None = None) -> dict:
     """morning_plan tier row → SmartEntry load_picks 호환 payload + 5단계 메타.
 
     load_picks 요구 필드(ticker/name/grade/close/stop_loss/target_price/total_score/
     paper_mode)를 채우되 실주문 아님(real_order=False, paper_mode=True)을 못박는다.
     가상진입 장부는 D0 종가(즉시 확정)/D+1 시가(익일 backfill) 두 기준을 모두 남긴다.
+
+    ★진입일(virtual_entry_date_d0)은 회전일(as_of_date)이 아니라 **후보가 잡힌
+    코호트 기준일(cohort_date = candidate_log.as_of_date)**로 고정한다. ref_close가
+    코호트 기준일 종가이므로 진입일도 그날이어야 D+N/D1 추적이 누적된다(미고정 시 매
+    회전 리셋되어 D+N이 미래라 비는 버그). cohort_date 없으면 as_of_date로 폴백.
     """
+    entry_date = cohort_date or as_of_date
     return {
         # ── SmartEntry load_picks 호환 ──
         "ticker": row.get("ticker"),
@@ -88,10 +94,10 @@ def _to_payload(row: dict, status: str, as_of_date: str | None = None) -> dict:
         "shadow_labels": row.get("shadow_labels"),
         # ── 가상진입 장부(★실주문 아님). D0 종가=즉시 / D+1 시가=익일 backfill ──
         "virtual_entry_price_d0_close": row.get("ref_close"),
-        "virtual_entry_date_d0": as_of_date,
+        "virtual_entry_date_d0": entry_date,
         "entry_basis_d0": "D0_CLOSE",
         "virtual_entry_price_d1_open": None,
-        "virtual_entry_date_d1": _next_kr_trading_day(as_of_date),
+        "virtual_entry_date_d1": _next_kr_trading_day(entry_date),
         "entry_basis_d1": "D1_OPEN",
         "d1_open_filled": False,
         # 후보 설명 필드 pass-through(A 장부 → B 장부, 결정 미개입).
@@ -112,24 +118,27 @@ def build_shadow_entries(plan: dict, paper_open: bool = False) -> dict:
     smart_mode = (plan.get("engines") or {}).get("smart_entry")
     tiers = plan.get("tiers") or {}
     as_of = plan.get("as_of_date")
+    # 진입일 = 후보 코호트 기준일(candidate_log.as_of_date). ref_close가 그날 종가라
+    # 진입일도 그날로 고정해야 D+N/D1이 누적된다. 없으면 회전일(as_of)로 폴백.
+    cohort = (plan.get("candidate_log") or {}).get("as_of_date") or as_of
     open_status = STATUS_PAPER_OPEN if paper_open else STATUS_SHADOW_OPEN
 
     # CONTROL은 정책 무관 항상 비교군(SmartEntry 진입 후보 아님)
-    control_only = [_to_payload(r, STATUS_CONTROL_ONLY, as_of) for r in tiers.get("CONTROL", [])]
+    control_only = [_to_payload(r, STATUS_CONTROL_ONLY, as_of, cohort) for r in tiers.get("CONTROL", [])]
     core_watch = list(tiers.get("CORE", [])) + list(tiers.get("WATCH", []))
 
     shadow_entries: list[dict] = []
     blocked: list[dict] = []
 
     if market == MARKET_DATA_UNAVAILABLE:
-        blocked = [_to_payload(r, STATUS_BLOCKED_DATA, as_of) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_DATA, as_of, cohort) for r in core_watch]
     elif market == MARKET_R1:
-        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of, cohort) for r in core_watch]
     elif market == MARKET_R4 and smart_mode == MODE_ALLOWED_SHADOW:
-        shadow_entries = [_to_payload(r, open_status, as_of) for r in core_watch]
+        shadow_entries = [_to_payload(r, open_status, as_of, cohort) for r in core_watch]
     else:
         # 방어: 알 수 없는 국면/모드 → 보수적 차단
-        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of) for r in core_watch]
+        blocked = [_to_payload(r, STATUS_BLOCKED_REGIME, as_of, cohort) for r in core_watch]
 
     return {
         "version": ADAPTER_VERSION,

@@ -142,6 +142,11 @@ def build_exit_observation(
     # 미충전(다음날 시가 미도래)이면 pending(None). ★진입가만 다를 뿐 매도/주문 0.
     d1_filled = bool(entry.get("d1_open_filled"))
     d1_price = entry.get("virtual_entry_price_d1_open")
+    # backfill 장부에 D1 시가가 없어도, entry_date 다음 거래일(OHLCV 인덱스 1) 시가를
+    # 직접 진입가로 써서 D1 기준을 계산한다(관측 전용·주문 0). 다음날 미도래면 pending.
+    if not d1_price and ohlcv_after is not None and len(ohlcv_after) > 1:
+        d1_price = float(ohlcv_after["open"].iloc[1])
+        d1_filled = True
     calc_d1 = None
     if d1_filled and d1_price and ohlcv_after is not None and len(ohlcv_after) > 1:
         calc_d1 = compute_exit_signals(float(d1_price), ohlcv_after.iloc[1:])
@@ -261,7 +266,9 @@ def run_exit_observer(
     """5단계 SHADOW_OPEN 후보 → exit 관찰 문서. 매도 실행 없음."""
     doc5, _ = run_smart_entry_adapter(days=days, prefer_remote=prefer_remote, write=False)
     market_regime = doc5.get("market_regime")
-    entry_date = doc5.get("as_of_date")
+    # 관측일=회전일(as_of_date). 진입일(entry_date)=후보 코호트 기준일(virtual_entry_date_d0)로
+    # per-entry 부여 → OHLCV가 진입일 이후로 슬라이스되어 D+N/D1이 누적된다.
+    observation_date = doc5.get("as_of_date")
     entries = [
         {
             "ticker": e.get("ticker"),
@@ -270,13 +277,13 @@ def run_exit_observer(
             "virtual_entry_price": e.get("virtual_entry_price_d0_close") or e.get("close"),
             "virtual_entry_price_d1_open": e.get("virtual_entry_price_d1_open"),
             "d1_open_filled": e.get("d1_open_filled", False),
-            "entry_date": entry_date,
+            "entry_date": e.get("virtual_entry_date_d0") or observation_date,
             "source_type": "smart_entry_adapter",
         }
         for e in doc5.get("shadow_entries", [])
     ]
     ohlcv_map = {e["ticker"]: _slice_after(e["ticker"], e["entry_date"], prefer_remote=prefer_remote) for e in entries}
-    document = build_observer_document(entries, market_regime, ohlcv_map, observation_date=entry_date)
+    document = build_observer_document(entries, market_regime, ohlcv_map, observation_date=observation_date)
     if write:
         json_path, md_path = save_observer(document)
         return document, json_path, md_path
