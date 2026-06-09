@@ -27,6 +27,11 @@ from src.use_cases.half_year_leader_scanner import (
     load_sector_map,
     scan_half_year_leaders,
 )
+from src.use_cases.market_open_alignment import (
+    assess_alignment,
+    load_market_regime,
+    regime_summary,
+)
 from src.use_cases.price_axis_regime import build_price_axis_labels
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -92,8 +97,11 @@ def _build_reason(row: dict, market: str | None, shadow_labels: dict | None) -> 
 
 
 def _candidate_summary(
-    row: dict, observation: str, shadow_labels: dict | None = None, market: str | None = None
+    row: dict, observation: str, shadow_labels: dict | None = None, market: str | None = None,
+    market_regime: dict | None = None,
 ) -> dict:
+    sl = shadow_labels or {}
+    sector = (sl.get("half_year_leader") or {}).get("sector")
     return {
         "ticker": row.get("ticker"),
         "name": row.get("name", row.get("ticker")),
@@ -110,6 +118,11 @@ def _candidate_summary(
         "reason": _build_reason(row, market, shadow_labels),
         # ── 관측 레이어 shadow label(매수 신호 아님, hard gate 무관) ──
         "shadow_labels": shadow_labels,
+        # ── MARKET_OPEN_REGIME 보조 재심사 레이어 ──
+        # ★tier 변경 아님: classify_tier(=tier)는 SSOT 그대로. 시장 주도축 정렬은
+        # alignment_score + market_alignment_action(RECHECK 라벨)으로만 부착한다.
+        # graceful: market_regime None이면 status=unavailable(현행 tier 유지).
+        "market_alignment": assess_alignment(row.get("_tier"), sector, market_regime),
     }
 
 
@@ -129,13 +142,15 @@ def _candidate_log_meta(logs: list[dict]) -> dict:
 
 def build_plan_document(
     policy: dict, picks: list, control: list, candidate_log_meta: dict,
-    shadow_labels: dict | None = None,
+    shadow_labels: dict | None = None, market_regime: dict | None = None,
 ) -> dict:
     """정책 + 분류된 후보 → plan JSON. 순수 함수(파일/네트워크 없음).
 
     엔진 허용/차단은 policy(2단계)를 그대로 따른다. 여기서 재해석하지 않는다.
     shadow_labels(선택): {ticker: 관측 라벨 번들}. 주입된 라벨만 후보에 붙인다 —
     매수 신호가 아니라 관측용이며 hard gate/엔진 결정에 일절 쓰지 않는다.
+    market_regime(선택): 이미 로드된 quant_market_regime dict(또는 None). 후보별
+    market_alignment(재심사 라벨/점수) 부착에만 쓴다 — ★tier 자동변경 없음(SSOT 유지).
     """
     market = policy.get("market_regime")
     engines = policy.get("engines", {})
@@ -144,10 +159,10 @@ def build_plan_document(
     # R4(ALLOWED_SHADOW)면 CORE/WATCH는 장중 SmartEntry 관찰, 아니면 shadow만
     obs = OBS_SMARTENTRY if smart_mode == MODE_ALLOWED_SHADOW else OBS_SHADOW
 
-    core = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market) for p in picks if p.get("_tier") == "CORE"]
-    watch = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market) for p in picks if p.get("_tier") == "WATCH"]
+    core = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market, market_regime) for p in picks if p.get("_tier") == "CORE"]
+    watch = [_candidate_summary(p, obs, sl.get(p.get("ticker")), market, market_regime) for p in picks if p.get("_tier") == "WATCH"]
     # CONTROL은 정책과 무관하게 항상 비교군(진입 대상 아님)
-    ctrl = [_candidate_summary(c, OBS_COMPARISON, sl.get(c.get("ticker")), market) for c in control]
+    ctrl = [_candidate_summary(c, OBS_COMPARISON, sl.get(c.get("ticker")), market, market_regime) for c in control]
 
     blocked_or_shadow = []
     for key, mode in engines.items():
@@ -187,6 +202,8 @@ def build_plan_document(
             "enter_count": candidate_log_meta.get("enter_count", 0),
             "avoid_count": candidate_log_meta.get("avoid_count", 0),
         },
+        # MARKET_OPEN_REGIME 요약(관측 표시용 — tier 결정에 미사용, graceful)
+        "market_open_regime": regime_summary(market_regime),
         "tiers": {"CORE": core, "WATCH": watch, "CONTROL": ctrl},
         "blocked_or_shadow_reason": blocked_or_shadow,
         "data_warnings": data_warnings,
@@ -386,6 +403,10 @@ def run_morning_plan(
     picks, control, logs = _load_candidates()
     meta = _candidate_log_meta(logs)
     shadow_labels = _build_shadow_labels(picks, control, prefer_remote=prefer_remote)
-    plan = build_plan_document(policy, picks, control, meta, shadow_labels=shadow_labels)
+    market_regime = load_market_regime()  # graceful: 없으면 None → 현행 tier 유지
+    plan = build_plan_document(
+        policy, picks, control, meta,
+        shadow_labels=shadow_labels, market_regime=market_regime,
+    )
     json_path, md_path = save_plan(plan) if write else (None, None)
     return plan, json_path, md_path
