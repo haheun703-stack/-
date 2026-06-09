@@ -14,6 +14,12 @@ META의 typical_sigma·hawkish_sign만 교체하면 된다. 웹은 surprise_scor
 
 쓰기 경로: psycopg2 + DATABASE_URL(Supabase). RLS 활성 테이블이라 service_role/owner
 연결이 필요 → anon key(SUPABASE_KEY)가 아닌 DATABASE_URL 직결을 쓴다.
+
+★event_date 규약(정보봇 P1-① 정합): **데이터 귀속 시점**이지 발표일이 아니다.
+  - 월간 지표(CPI/PCE/NFP 등): 데이터 귀속월 1일(YYYY-MM-01). `month_to_event_date` 사용.
+    예) 2026-06 CPI(7월 중순 발표) → event_date='2026-06-01'. 임박 발표(5월 CPI)는
+    '2026-05-01' 행으로 별도 생성해야 정보봇 브리핑에서 "내일 발표분"이 매칭됨(오인 방지).
+  - FOMC(per-meeting): 회의일을 직접 쓴다(데이터 귀속월 개념 없음).
 """
 
 from __future__ import annotations
@@ -53,6 +59,30 @@ IMPACT_GOOD = "호재"
 IMPACT_NEUTRAL = "중립"
 
 _STANCE_THRESHOLD = 0.5  # |hawkish 정규화 점수| 이 값 넘으면 긴축/완화 단정
+
+
+def month_to_event_date(year: int, month: int) -> str:
+    """월간 지표의 데이터 귀속월 → event_date('YYYY-MM-01'). 발표일 아님.
+
+    정보봇 P1-① 정합용 공식 헬퍼. 월간 지표(CPI/PCE/NFP 등)는 이걸로 event_date를 통일해
+    consensus(나우캐스트)와 actual(BLS 발표)이 같은 데이터월 행에 매칭되게 한다.
+    FOMC(per-meeting)는 회의일을 직접 쓰므로 이 함수를 쓰지 않는다.
+    """
+    return f"{int(year):04d}-{int(month):02d}-01"
+
+
+def _validate_event_date(event_date: str) -> str:
+    """event_date 형식 검증('YYYY-MM-DD'). 잘못된 적재 차단(데이터 품질 방어).
+
+    월간 지표는 데이터 귀속월 1일(YYYY-MM-01) 권장 — 발표일이 아님(정보봇 P1-①).
+    """
+    try:
+        datetime.strptime(event_date, "%Y-%m-%d")
+    except (ValueError, TypeError) as e:
+        raise ValueError(
+            f"event_date는 'YYYY-MM-DD' 형식이어야 함(월간=데이터귀속월 YYYY-MM-01, 발표일 아님): {event_date!r}"
+        ) from e
+    return event_date
 
 
 def compute_surprise(actual: float | None, consensus: float | None) -> float | None:
@@ -134,9 +164,12 @@ def build_forecast_row(
 ) -> dict[str, Any]:
     """단일 지표 → macro_forecast_actual 행(18컬럼). 순수 함수(외부호출 없음).
 
+    event_date: 데이터 귀속 시점(발표일 아님). 월간 지표는 데이터월 1일(YYYY-MM-01,
+      `month_to_event_date`), FOMC는 회의일. 형식 위반 시 ValueError(정보봇 P1-①).
     발표 전: actual=None → surprise/score/stance/market_impact=None.
     발표 후: actual 채우면 서프라이즈·점수·스탠스·증시영향 자동 계산.
     """
+    event_date = _validate_event_date(event_date)
     meta = US_INDICATOR_META.get(code, {})
     surprise = compute_surprise(actual, consensus)
     score = compute_surprise_score(code, surprise)
@@ -239,7 +272,7 @@ def _cleveland_month_to_date(target: str | None) -> str | None:
         return None
     try:
         y, m = target.split("-")[:2]
-        return f"{int(y):04d}-{int(m):02d}-01"
+        return month_to_event_date(int(y), int(m))
     except (ValueError, TypeError):
         return None
 

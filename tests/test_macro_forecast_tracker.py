@@ -11,6 +11,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import pytest  # noqa: E402
+
 from src.macro.macro_forecast_tracker import (  # noqa: E402
     IMPACT_BAD,
     IMPACT_GOOD,
@@ -23,6 +25,7 @@ from src.macro.macro_forecast_tracker import (  # noqa: E402
     classify_stance,
     compute_surprise,
     compute_surprise_score,
+    month_to_event_date,
     upsert_forecast_actual,
 )
 
@@ -116,6 +119,29 @@ def test_row_unknown_code_graceful():
     assert row["indicator_name_ko"] == "WEIRD"
     assert row["surprise"] == 0.5
     assert row["surprise_score"] is None  # 메타 없음 → 점수 None
+
+
+# ── event_date 규약 (정보봇 P1-① 정합) ──
+def test_month_to_event_date_is_data_month_first():
+    # 월간 지표는 데이터 귀속월 1일(발표일 아님)
+    assert month_to_event_date(2026, 6) == "2026-06-01"
+    assert month_to_event_date(2026, 12) == "2026-12-01"
+
+
+def test_build_row_rejects_malformed_event_date():
+    # 잘못된 event_date 형식 → 적재 차단(데이터 품질 방어)
+    with pytest.raises(ValueError):
+        build_forecast_row("CPI_HEAD", "2026-6", consensus=3.0)  # 0패딩 없음
+    with pytest.raises(ValueError):
+        build_forecast_row("CPI_HEAD", "내일", consensus=3.0)
+
+
+def test_build_row_accepts_data_month_event_date():
+    # 6월 데이터(7월 발표)와 임박 5월 데이터가 서로 다른 행으로 구분됨
+    jun = build_forecast_row("CPI_HEAD", month_to_event_date(2026, 6), consensus=0.124)
+    may = build_forecast_row("CPI_HEAD", month_to_event_date(2026, 5), consensus=0.20, actual=0.18)
+    assert jun["event_date"] == "2026-06-01" and jun["actual"] is None
+    assert may["event_date"] == "2026-05-01" and may["surprise"] == round(0.18 - 0.20, 4)
 
 
 # ── upsert 안전장치 ──
