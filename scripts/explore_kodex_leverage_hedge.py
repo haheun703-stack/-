@@ -52,20 +52,7 @@ def fixed_hedge(lev: pd.Series, inv: pd.Series, w: float) -> tuple[float, float]
     return round(ret, 1), round(mdd, 1)
 
 
-def dynamic_hedge(lev: pd.Series, inv: pd.Series, w: float) -> tuple[float, float, int]:
-    """C60 동적: 전일 레버 종가 < 전일 ma60 → 당일 인버스 w% on, 아니면 off(레버만)."""
-    ma60 = lev.rolling(60).mean()
-    lev_r = lev.pct_change().fillna(0)
-    inv_r = inv.pct_change().fillna(0)
-    hedge_on = (lev.shift(1) < ma60.shift(1)).astype(float).fillna(0)
-    port = lev_r * 1.0 + inv_r * (w / 100.0) * hedge_on
-    cum = (1 + port).cumprod()
-    ret = (cum.iloc[-1] - 1) * 100
-    mdd = ((cum / cum.cummax() - 1).min()) * 100
-    on = int(hedge_on.sum())
-    print(f"  레버100+인버스{int(w):<3}(C60동적) {ret:+7.1f}% / MDD {mdd:6.1f}% · 헤지 {on}일 on")
-    return round(ret, 1), round(mdd, 1), on
-
+# (C60 동적 헤지는 main [2]에서 워밍업 구간 포함 inline 계산 — 워밍업 분리가 필요해 함수화하지 않음)
 
 TICKERS = {"005930": "삼성전자", "000660": "SK하이닉스", "069500": "KODEX200",
            "122630": "KODEX레버리지", "114800": "KODEX인버스1x"}

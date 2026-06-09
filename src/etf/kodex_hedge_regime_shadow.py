@@ -77,7 +77,9 @@ def classify_regime(index_close: pd.Series) -> tuple[str, str]:
     ma20 = float(index_close.rolling(20).mean().iloc[-1])
     ma60_series = index_close.rolling(60).mean()
     ma60 = float(ma60_series.iloc[-1])
-    ma60_prev = float(ma60_series.iloc[-6]) if len(ma60_series) >= 6 else ma60
+    # 워밍업 부족 시 iloc[-6]이 NaN일 수 있음 → slope=0(보수적 UNKNOWN) 폴백
+    ma60_prev_raw = ma60_series.iloc[-6] if len(ma60_series) >= 6 else ma60
+    ma60_prev = float(ma60_prev_raw) if pd.notna(ma60_prev_raw) else ma60
     slope = ma60 - ma60_prev
     if close > ma60 and ma20 > ma60 and slope > 0:
         return REGIME_BULL, f"정배열(close>{ma60:.0f}>ma60)+60일선 상승"
@@ -136,13 +138,24 @@ def _adaptive_ratio(regime: str, sig: dict[str, bool]) -> float:
 
 
 def build_record(as_of: str, lev: pd.Series, inv: pd.Series, idx: pd.Series, fx: pd.Series | None) -> dict[str, Any]:
-    """당일 shadow 관측 record(16필드 + 7 portfolio). 순수 계산."""
+    """당일 shadow 관측 record(16필드 + 7 portfolio). 순수 계산.
+
+    ★look-ahead 회피: 헤지 비중을 정하는 regime·signals는 모두 **전일 종가까지**로 판정하고,
+    가격·수익률(*_close, *_ret_1d)만 당일 실현분. 전환일에 당일 종가로 헤지를 '미리 켜둔 것'처럼
+    계산하던 낙관 편향을 제거 → 실전 동작(어제 종가로 판단→오늘 보유→오늘 실현)과 동일.
+    """
+    if not (len(lev) and len(inv) and len(idx)):
+        raise RuntimeError("빈 시계열")
+    # 날짜 정합성: 세 ETF 마지막 거래일이 같아야 1일 수익률이 같은 날 기준
+    last_dates = {str(s.index[-1].date()) for s in (lev, inv, idx)}
+    if len(last_dates) != 1:
+        raise RuntimeError(f"ETF 마지막 거래일 불일치: {sorted(last_dates)}")
     lev_r = float(lev.pct_change().iloc[-1])
     inv_r = float(inv.pct_change().iloc[-1])
     idx_r = float(idx.pct_change().iloc[-1])
-    regime, reason = classify_regime(idx)
+    regime, reason = classify_regime(idx.iloc[:-1])  # 전일 종가까지로 국면 판정(look-ahead 회피)
     policy = hedge_policy_for(regime)
-    sig = _signals(lev, fx)
+    sig = _signals(lev, fx)  # 이미 전일(iloc[-2]) 기준 — regime과 시점 일관
     ratio = _adaptive_ratio(regime, sig)
     ports = _portfolios_1d(lev_r, inv_r, sig)
     # 권장(regime-adaptive) 당일 수익
@@ -215,7 +228,11 @@ def save_ledger(records: list[dict]) -> Path:
 
 
 def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bool = True) -> dict[str, Any]:
-    """오늘(또는 as_of) shadow 관측 record 생성 + ledger append. 실매매 0."""
+    """오늘(또는 as_of) shadow 관측 record 생성 + ledger append. 실매매 0.
+
+    prefer_remote: 프로젝트 관례 인자(타 use_case와 시그니처 일관성). shadow는 로컬 parquet
+    stale(3/27 멈춤) 회피를 위해 **항상 pykrx 최신만** 사용 → 현재 분기에 영향 없음(의도적).
+    """
     end = (as_of or datetime.now().strftime("%Y-%m-%d")).replace("-", "")
     # ma60/vol60 워밍업 위해 충분히(약 150거래일)
     start = (pd.Timestamp(end) - pd.Timedelta(days=260)).strftime("%Y%m%d")
@@ -225,13 +242,14 @@ def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bo
     fx = _load_fx()
     actual_date = str(idx.index[-1].date())
     record = build_record(actual_date, lev, inv, idx, fx)
+    # write 여부와 무관하게 누적(cum/mdd/whipsaw)을 채워 반환 — dry(--no-write)도 동일 표시,
+    # CLI가 None을 포맷하다 크래시하던 버그 방지. 저장만 write일 때 수행.
+    records = [r for r in load_ledger() if r.get("date") != actual_date]
+    records.append(record)
+    records = _recompute(records)
+    record = next(r for r in records if r["date"] == actual_date)
     if write:
-        records = [r for r in load_ledger() if r.get("date") != actual_date]
-        records.append(record)
-        records = _recompute(records)
         save_ledger(records)
-        # 갱신된 누적값을 record에 반영해 반환
-        record = next(r for r in records if r["date"] == actual_date)
     return record
 
 

@@ -10,6 +10,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import src.etf.kodex_hedge_regime_shadow as kshadow  # noqa: E402
 from src.etf.kodex_hedge_regime_shadow import (  # noqa: E402
     HEDGE_FIXED_THICK,
     HEDGE_MINIMAL,
@@ -111,3 +112,34 @@ def test_build_record_has_16_core_fields():
         assert f in rec, f"누락 필드: {f}"
     assert rec["regime"] in (REGIME_BULL, REGIME_BEAR, REGIME_UNKNOWN)
     assert len(rec["portfolios_ret_1d"]) == 7
+
+
+def test_build_record_rejects_mismatched_last_date():
+    # 세 ETF 마지막 거래일이 다르면 1일 수익률이 어긋나므로 거부(거래정지 등)
+    idx = _idx(list(range(100, 200)))
+    lev = _idx(list(range(100, 200)))
+    inv = _idx(list(range(200, 100, -1))).iloc[:-2]  # 마지막 2거래일 빠짐 → 종료일 불일치
+    try:
+        build_record("2026-06-09", lev, inv, idx, None)
+        assert False, "마지막 거래일 불일치인데 통과함"
+    except RuntimeError as e:
+        assert "거래일 불일치" in str(e)
+
+
+def test_run_snapshot_no_write_fills_cumulative(tmp_path, monkeypatch):
+    # ★회귀: --no-write(dry)도 cum/mdd/whipsaw를 채워야 CLI 포맷이 크래시하지 않음
+    up = _idx(list(range(100, 200)))
+    down = _idx(list(range(200, 100, -1)))
+
+    def fake_close(ticker, start, end):
+        return down.rename(ticker) if ticker == kshadow.TICKER_INVERSE else up.rename(ticker)
+
+    monkeypatch.setattr(kshadow, "_load_close", fake_close)
+    monkeypatch.setattr(kshadow, "_load_fx", lambda: None)
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(kshadow, "LEDGER_DIR", tmp_path)
+    rec = kshadow.run_snapshot(write=False)
+    assert rec["portfolio_cum_ret"] is not None
+    assert rec["mdd"] is not None
+    assert rec["whipsaw_flag"] is not None
+    assert not (tmp_path / "ledger.json").exists()  # dry는 저장 안 함
