@@ -34,14 +34,17 @@ DEFAULT_CODES = ["CPI_HEAD", "CPI_CORE", "PCE"]
 
 
 def merge_rows(
-    consensus_doc: dict[str, Any],
+    consensus: dict[str, Any] | list[dict[str, Any]],
     fred_actuals: dict[str, dict[str, float]],
     existing: dict[tuple[str, str], dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """기존행(consensus 보존) + 나우캐스트 consensus(현재달) + FRED actual(과거달) → 행 목록.
+    """기존행(consensus 보존) + 나우캐스트 consensus(1개 이상 달) + FRED actual(과거달) → 행 목록.
 
-    같은 (code, event_date)는 한 행으로 합쳐 build_forecast_row가 surprise를 재계산.
+    consensus: 단일 doc(dict) 또는 여러 달 doc 리스트(진행월+임박 발표월). 같은
+      (code, event_date)는 한 행으로 합쳐 build_forecast_row가 surprise를 재계산.
+      서로 다른 event_date(예 5월/6월)는 별 PK라 서로 덮어쓰지 않는다.
     """
+    consensus_docs = consensus if isinstance(consensus, list) else [consensus]
     merged: dict[tuple[str, str], dict[str, Any]] = {}
 
     # 1) 기존 행 시드 — consensus 보존(actual backfill 후에도 안 날아가게)
@@ -52,14 +55,19 @@ def merge_rows(
             "actual": r.get("actual"),
         }
 
-    # 2) 나우캐스트 consensus(현재 진행 달)
-    target_date = consensus_doc.get("target_date")
-    src = consensus_doc.get("source")
-    if target_date:
+    # 2) 나우캐스트 consensus(진행월 + 임박 발표월 등, 데이터월별 별도 event_date)
+    for consensus_doc in consensus_docs:
+        target_date = consensus_doc.get("target_date")
+        src = consensus_doc.get("source")
+        edt = consensus_doc.get("event_datetime_kst")  # 임박월 발표예정일시(KST) 주입용
+        if not target_date:
+            continue
         for code, val in consensus_doc.get("values", {}).items():
             d = merged.setdefault((code, target_date), {})
             d["consensus"] = val
             d["consensus_source"] = src
+            if edt:
+                d["event_datetime_kst"] = edt
             d.setdefault("actual", None)
 
     # 3) FRED actual(과거 발표 달)
@@ -77,6 +85,7 @@ def merge_rows(
             consensus=d.get("consensus"),
             consensus_source=d.get("consensus_source"),
             actual=d.get("actual"),
+            event_datetime_kst=d.get("event_datetime_kst"),
         ))
     return rows
 
@@ -87,28 +96,71 @@ def main() -> None:
     ap.add_argument("--months", type=int, default=6, help="FRED actual 조회 개월수(기본 6)")
     ap.add_argument("--codes", type=str, default=",".join(DEFAULT_CODES),
                     help="대상 indicator_code 콤마구분(기본 CPI_HEAD,CPI_CORE,PCE)")
+    ap.add_argument("--imminent-month", type=str, default=None,
+                    help="임박 발표 데이터월(예: 2026-5) consensus를 별도 event_date 행으로 추가 수집. "
+                         "미지정 시 진행월(data[-1])만. 발표 임박월은 클리블랜드 JSON에서 별 항목이라 콕 집어 뽑음.")
+    ap.add_argument("--imminent-only", action="store_true",
+                    help="B 순수안: 임박월 consensus만 적재(진행월·과거 actual·기존행 전부 제외). "
+                         "--imminent-month 필수.")
+    ap.add_argument("--imminent-datetime-kst", type=str, default=None,
+                    help="임박월 row 발표예정일시(KST ISO8601, 예: 2026-06-10T21:30:00+09:00). "
+                         "웹 D-day 정상화용. actual은 여전히 발표 후 backfill.")
     args = ap.parse_args()
     codes = [c.strip() for c in args.codes.split(",") if c.strip()]
 
     print(f"=== macro_forecast upsert ({'WRITE' if args.write else 'DRY_RUN'}) codes={codes} ===")
 
-    consensus_doc = fetch_cleveland_nowcast()
-    print(f"consensus(나우캐스트): target={consensus_doc.get('target_month')} "
-          f"({consensus_doc.get('target_date')}) values={consensus_doc.get('values')}")
+    if args.imminent_only:
+        # ── B 순수안: 임박월 consensus만 (진행월/과거 actual/기존행 전부 제외) ──
+        if not args.imminent_month:
+            ap.error("--imminent-only 는 --imminent-month 가 필요합니다(예: --imminent-month 2026-5)")
+        imm = fetch_cleveland_nowcast(target_month=args.imminent_month)
+        if args.imminent_datetime_kst:
+            imm["event_datetime_kst"] = args.imminent_datetime_kst
+        print("★ imminent-only(B 순수안): 진행월·과거 actual·기존행 전부 제외 — 임박월 consensus만 적재")
+        print(f"consensus(임박월): target={imm.get('target_month')} ({imm.get('target_date')}) "
+              f"asof={imm.get('asof')} src={imm.get('source')} url={imm.get('source_url')}")
+        print(f"  └ values={imm.get('values')}  event_datetime_kst={imm.get('event_datetime_kst')}  "
+              f"(data_date=event_date={imm.get('target_date')})")
+        if not imm.get("values"):
+            print(f"  ⚠️ 임박월 {args.imminent_month} 항목 없음/값 비어있음 — 적재 대상 0행.")
+        consensus_docs: list[dict[str, Any]] = [imm]
+        fred_actuals: dict[str, dict[str, float]] = {}
+        existing: dict[tuple[str, str], dict[str, Any]] = {}
+    else:
+        # ── 운영 흐름: 진행월 consensus + FRED actual + 기존행 머지 ──
+        consensus_doc = fetch_cleveland_nowcast()
+        consensus_docs = [consensus_doc]
+        print(f"consensus(진행월): target={consensus_doc.get('target_month')} "
+              f"({consensus_doc.get('target_date')}) asof={consensus_doc.get('asof')} "
+              f"src={consensus_doc.get('source')} values={consensus_doc.get('values')}")
 
-    try:
-        fred_actuals = fetch_fred_actuals(codes, months=args.months)
-    except RuntimeError as e:
-        print(f"FRED actual 수집 실패: {e} → actual 없이 consensus만 진행")
-        fred_actuals = {}
-    for code in codes:
-        n = len(fred_actuals.get(code, {}))
-        print(f"  FRED actual {code}: {n}개월")
+        # 임박 발표월 consensus(별도 event_date 행) — 진행월과 혼동 방지 위해 별도 출력
+        if args.imminent_month:
+            imm = fetch_cleveland_nowcast(target_month=args.imminent_month)
+            if args.imminent_datetime_kst:
+                imm["event_datetime_kst"] = args.imminent_datetime_kst
+            consensus_docs.append(imm)
+            print(f"consensus(임박월): target={imm.get('target_month')} ({imm.get('target_date')}) "
+                  f"asof={imm.get('asof')} src={imm.get('source')} url={imm.get('source_url')}")
+            print(f"  └ values={imm.get('values')}  event_datetime_kst={imm.get('event_datetime_kst')}  "
+                  f"(data_date=event_date={imm.get('target_date')})")
+            if not imm.get("values"):
+                print(f"  ⚠️ 임박월 {args.imminent_month} 항목 없음/값 비어있음 — 클리블랜드 JSON 미공개 가능.")
 
-    existing = fetch_existing_rows(codes)
-    print(f"기존 DB 행: {len(existing)}개(consensus 보존)")
+        try:
+            fred_actuals = fetch_fred_actuals(codes, months=args.months)
+        except RuntimeError as e:
+            print(f"FRED actual 수집 실패: {e} → actual 없이 consensus만 진행")
+            fred_actuals = {}
+        for code in codes:
+            n = len(fred_actuals.get(code, {}))
+            print(f"  FRED actual {code}: {n}개월")
 
-    rows = merge_rows(consensus_doc, fred_actuals, existing)
+        existing = fetch_existing_rows(codes)
+        print(f"기존 DB 행: {len(existing)}개(consensus 보존)")
+
+    rows = merge_rows(consensus_docs, fred_actuals, existing)
 
     print(f"--- 머지 결과 {len(rows)}행 (code | event_date | consensus | actual | surprise | stance | impact) ---")
     for r in rows:

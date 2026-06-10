@@ -311,11 +311,27 @@ def _cleveland_month_to_date(target: str | None) -> str | None:
         return None
 
 
-def fetch_cleveland_nowcast(timeout: int = 25) -> dict[str, Any]:
-    """클리블랜드 연준 인플레이션 나우캐스트 → 최신 MoM consensus(읽기 전용).
+def _norm_cleveland_month(s: str | None) -> str | None:
+    """'2026-5' / '2026-05' → '2026-5'(클리블랜드 subcaption 표기로 정규화). 매칭용."""
+    if not s or "-" not in s:
+        return None
+    try:
+        y, m = s.split("-")[:2]
+        return f"{int(y)}-{int(m)}"
+    except (ValueError, TypeError):
+        return None
 
-    반환: {target_month, target_date, asof, source, values:{CPI_HEAD, CPI_CORE, PCE}}
-    consensus_source='cleveland_nowcast', 단위=MoM %. 매매 무관·write 0.
+
+def fetch_cleveland_nowcast(timeout: int = 25, target_month: str | None = None) -> dict[str, Any]:
+    """클리블랜드 연준 인플레이션 나우캐스트 → MoM consensus(읽기 전용).
+
+    nowcast_month.json은 데이터월별 항목의 list(data[0]=과거 … data[-1]=현재 진행월)다.
+      - target_month=None: 최신(현재 진행) 달 = data[-1].
+      - target_month 지정(예 '2026-5'/'2026-05'): 임박 발표 등 특정 데이터월 항목을
+        별도로 추출. 발표 임박월(직전월)은 data[-1]이 아니라 그 앞 항목에 있으므로,
+        '내일 발표분' consensus 행을 만들려면 이 인자로 콕 집어 뽑아야 한다.
+    반환: {target_month, target_date, asof, source, source_url, values:{CPI_HEAD,CPI_CORE,PCE}}
+    consensus_source='cleveland_nowcast', 단위=MoM %. 매매 무관·write 0(SELECT/INSERT 없음).
     """
     import json as _json
 
@@ -324,13 +340,29 @@ def fetch_cleveland_nowcast(timeout: int = 25) -> dict[str, Any]:
     r = requests.get(_CLEVELAND_URL, timeout=timeout)
     r.raise_for_status()
     data = _json.loads(r.content)
+    empty = {
+        "target_month": target_month, "target_date": None, "asof": None,
+        "source": "cleveland_nowcast", "source_url": _CLEVELAND_URL, "values": {},
+    }
     if not isinstance(data, list) or not data:
-        return {"target_month": None, "target_date": None, "asof": None, "source": "cleveland_nowcast", "values": {}}
-    latest = data[-1]
-    chart = latest.get("chart", {})
+        return empty
+
+    if target_month is None:
+        item = data[-1]
+    else:
+        want = _norm_cleveland_month(target_month)
+        item = next(
+            (it for it in data
+             if _norm_cleveland_month(it.get("chart", {}).get("subcaption")) == want),
+            None,
+        )
+        if item is None:  # 지정 월 항목 없음(아직 미공개 등) → 빈 values
+            return empty
+
+    chart = item.get("chart", {})
     target = chart.get("subcaption")
     values: dict[str, float] = {}
-    for series in latest.get("dataset", []):
+    for series in item.get("dataset", []):
         code = _CLEVELAND_SERIES.get(series.get("seriesname"))
         if not code:
             continue
@@ -343,8 +375,9 @@ def fetch_cleveland_nowcast(timeout: int = 25) -> dict[str, Any]:
     return {
         "target_month": target,
         "target_date": _cleveland_month_to_date(target),
-        "asof": chart.get("_comment"),
+        "asof": chart.get("_comment"),  # 나우캐스트 기준일(collected_at 성격)
         "source": "cleveland_nowcast",
+        "source_url": _CLEVELAND_URL,
         "values": values,
     }
 
