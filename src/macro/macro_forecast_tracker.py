@@ -255,9 +255,12 @@ def upsert_forecast_actual(rows: list[dict[str, Any]], *, dry_run: bool = True) 
 
 def fetch_existing_rows(codes: list[str], *, dsn: str | None = None,
                         region: str = "US") -> dict[tuple[str, str], dict[str, Any]]:
-    """기존 macro_forecast_actual 행 조회 {(code,event_date): {consensus, consensus_source, actual}}.
+    """기존 macro_forecast_actual 행 조회
+    {(code,event_date): {consensus, consensus_source, actual, event_datetime_kst, prior, note}}.
 
-    read-only. actual backfill 시 기존 consensus 보존용. DATABASE_URL 없거나 codes 비면 빈 dict.
+    read-only. actual backfill 시 기존 consensus·발표일시(event_datetime_kst)·prior·note
+    보존용 — upsert가 전체 컬럼 덮어쓰기라, backfill 행에 이 값들을 다시 넣지 않으면 null로
+    날아간다. DATABASE_URL 없거나 codes 비면 빈 dict.
     """
     from dotenv import load_dotenv
     load_dotenv(PROJECT_ROOT / ".env")
@@ -271,16 +274,20 @@ def fetch_existing_rows(codes: list[str], *, dsn: str | None = None,
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "select indicator_code, event_date, consensus, consensus_source, actual "
+                "select indicator_code, event_date, consensus, consensus_source, actual, "
+                "event_datetime_kst, prior, note "
                 "from macro_forecast_actual where region=%s and indicator_code = any(%s)",
                 (region, list(codes)),
             )
-            for code, ev, cons, csrc, act in cur.fetchall():
+            for code, ev, cons, csrc, act, edt, prior, note in cur.fetchall():
                 ev_s = ev.isoformat() if hasattr(ev, "isoformat") else str(ev)[:10]
                 out[(code, ev_s)] = {
                     "consensus": float(cons) if cons is not None else None,
                     "consensus_source": csrc,
                     "actual": float(act) if act is not None else None,
+                    "event_datetime_kst": edt.isoformat() if hasattr(edt, "isoformat") else edt,
+                    "prior": float(prior) if prior is not None else None,
+                    "note": note,
                 }
     finally:
         conn.close()

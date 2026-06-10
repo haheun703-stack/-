@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
 
-from scripts.macro_forecast_upsert import merge_rows  # noqa: E402
+from scripts.macro_forecast_upsert import build_backfill_rows, merge_rows  # noqa: E402
 from src.macro.macro_forecast_tracker import (  # noqa: E402
     IMPACT_BAD,
     IMPACT_GOOD,
@@ -205,3 +205,51 @@ def test_merge_preserves_consensus_and_backfills_actual():
     # 4월: consensus 없이 actual만(발표 완료 표시, surprise 없음)
     apr = by[("CPI_HEAD", "2026-04-01")]
     assert apr["actual"] == 0.20 and apr["consensus"] is None and apr["surprise"] is None
+
+
+# ── actual-only backfill: 발표 후 5월만 채우고 consensus/edt/prior/note 보존 (B안 2단계) ──
+def test_backfill_only_target_month_with_preserved_fields():
+    target = "2026-05-01"
+    # FRED에 4월·5월·6월 actual이 다 있어도 target(5월)만 적재돼야 한다(타 월·과거월 미포함)
+    # actual 0.60은 consensus 0.459를 sigma(0.1) 대비 충분히 상회 → 긴축/악재 산출
+    fred = {"CPI_HEAD": {"2026-04-01": 0.20, "2026-05-01": 0.60, "2026-06-01": 0.10}}
+    existing = {("CPI_HEAD", "2026-05-01"): {
+        "consensus": 0.459, "consensus_source": "cleveland_nowcast", "actual": None,
+        "event_datetime_kst": "2026-06-10T21:30:00+09:00", "prior": 0.4, "note": "x"}}
+    rows = build_backfill_rows(["CPI_HEAD"], target, fred, existing)
+
+    assert len(rows) == 1                       # 5월 1행만(4월·6월 미포함)
+    r = rows[0]
+    assert r["event_date"] == "2026-05-01"
+    assert r["consensus"] == 0.459              # 기존 consensus 보존
+    assert r["actual"] == 0.60                  # FRED 5월 actual
+    assert r["surprise"] == round(0.60 - 0.459, 4)  # actual 들어오면 surprise 자동
+    assert r["stance"] == STANCE_TIGHT          # 충분히 상회=긴축(자동 산출)
+    assert r["market_impact"] == IMPACT_BAD     # 긴축=악재(자동 산출)
+    assert r["event_datetime_kst"] == "2026-06-10T21:30:00+09:00"  # 발표일시 보존
+    assert r["prior"] == 0.4 and r["note"] == "x"  # prior·note 보존
+
+
+def test_backfill_no_op_when_fred_unregistered():
+    # FRED에 5월 미등재(발표 전) → 0행(no-op), 예상값 임의 입력 없음
+    fred = {"CPI_HEAD": {"2026-04-01": 0.20}}  # 5월 없음
+    existing = {("CPI_HEAD", "2026-05-01"): {"consensus": 0.459}}
+    rows = build_backfill_rows(["CPI_HEAD"], "2026-05-01", fred, existing)
+    assert rows == []
+
+
+def test_backfill_skips_codes_without_actual():
+    # CPI_HEAD만 5월 등재, PCE는 미등재 → CPI_HEAD 1행만(부분 등재 안전)
+    fred = {"CPI_HEAD": {"2026-05-01": 0.50}, "PCE": {"2026-04-01": 0.30}}
+    rows = build_backfill_rows(["CPI_HEAD", "PCE"], "2026-05-01", fred, {})
+    assert {r["indicator_code"] for r in rows} == {"CPI_HEAD"}
+
+
+def test_backfill_no_consensus_keeps_surprise_none():
+    # 기존 consensus 없으면 actual만 → surprise/stance/market_impact None(강제 생성 안 함)
+    fred = {"CPI_HEAD": {"2026-05-01": 0.50}}
+    rows = build_backfill_rows(["CPI_HEAD"], "2026-05-01", fred, {})
+    assert len(rows) == 1
+    r = rows[0]
+    assert r["actual"] == 0.50 and r["consensus"] is None
+    assert r["surprise"] is None and r["stance"] is None and r["market_impact"] is None
