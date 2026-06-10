@@ -96,6 +96,11 @@ def build_label_performance(rows: list[dict]) -> dict:
         "candle_turn": _label_groups(rows, lambda r: (_sl(r, "candle_turn", "label") or None)),
         "annual_overheat": _label_groups(rows, lambda r: (_sl(r, "annual_overheat", "overheat_grade") or "NONE")),
         "ipo_reversion": _label_groups(rows, lambda r: _sl(r, "ipo_reversion", "ipo_reversion_state")),
+        # ★섹터 모멘텀 라벨별 성과(6/10 추가) — "강세섹터 종목 vs 약세섹터 종목"이 정말
+        # 갈리는지 6/12 사후비교용. best/worst 둘 다 집계(미리 한쪽을 정답으로 안 정함).
+        "sector_strength": _label_groups(rows, lambda r: _sl(r, "sector_momentum", "sector_strength_label")),
+        "sector_best_regime": _label_groups(rows, lambda r: _sl(r, "sector_momentum", "best_regime")),
+        "sector_worst_regime": _label_groups(rows, lambda r: _sl(r, "sector_momentum", "worst_regime")),
         "note": "라벨은 관측용. 좋아도 hard gate 승격은 사장님 승인 별도(즉시 진입룰 승격 금지).",
     }
 
@@ -331,6 +336,9 @@ def build_review_markdown(doc: dict) -> str:
         _fmt_label_groups("음양/양음 전환", lp.get("candle_turn", {})),
         _fmt_label_groups("연간 과열등급", lp.get("annual_overheat", {})),
         _fmt_label_groups("IPO 되돌림", lp.get("ipo_reversion", {})),
+        _fmt_label_groups("섹터 강도(best 기준)", lp.get("sector_strength", {})),
+        _fmt_label_groups("섹터 best regime", lp.get("sector_best_regime", {})),
+        _fmt_label_groups("섹터 worst regime(약세 노출)", lp.get("sector_worst_regime", {})),
         f"- {lp.get('note', '')}",
         "",
     ]

@@ -33,6 +33,12 @@ from src.use_cases.market_open_alignment import (
     regime_summary,
 )
 from src.use_cases.price_axis_regime import build_price_axis_labels
+from src.use_cases.sector_momentum_label import (
+    assess_sector_momentum,
+    load_sector_composite,
+    load_stock_to_sector,
+    sector_momentum_summary,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PLAN_DIR = PROJECT_ROOT / "data_store" / "plans"
@@ -93,6 +99,11 @@ def _build_reason(row: dict, market: str | None, shadow_labels: dict | None) -> 
     ao = sl.get("annual_overheat") or {}
     if ao.get("annual_overheat_warning"):
         reason.append(ao.get("overheat_grade") or "OVERHEAT")
+    sm = sl.get("sector_momentum") or {}
+    if sm.get("status") in ("ok", "stale") and sm.get("sector_strength_label"):
+        reason.append(sm["sector_strength_label"])
+        if sm.get("in_exodus_sector"):
+            reason.append("SECTOR_EXODUS_EXPOSURE")
     return reason
 
 
@@ -143,6 +154,7 @@ def _candidate_log_meta(logs: list[dict]) -> dict:
 def build_plan_document(
     policy: dict, picks: list, control: list, candidate_log_meta: dict,
     shadow_labels: dict | None = None, market_regime: dict | None = None,
+    sector_momentum: dict | None = None,
 ) -> dict:
     """정책 + 분류된 후보 → plan JSON. 순수 함수(파일/네트워크 없음).
 
@@ -151,6 +163,8 @@ def build_plan_document(
     매수 신호가 아니라 관측용이며 hard gate/엔진 결정에 일절 쓰지 않는다.
     market_regime(선택): 이미 로드된 quant_market_regime dict(또는 None). 후보별
     market_alignment(재심사 라벨/점수) 부착에만 쓴다 — ★tier 자동변경 없음(SSOT 유지).
+    sector_momentum(선택): 섹터 모멘텀 요약 메타(plan 표시용). 종목별 라벨은
+    shadow_labels[ticker]["sector_momentum"]에 이미 들어있다 — ★tier 결정에 미사용.
     """
     market = policy.get("market_regime")
     engines = policy.get("engines", {})
@@ -204,6 +218,8 @@ def build_plan_document(
         },
         # MARKET_OPEN_REGIME 요약(관측 표시용 — tier 결정에 미사용, graceful)
         "market_open_regime": regime_summary(market_regime),
+        # 섹터 모멘텀 요약(관측 표시용 — tier 결정에 미사용, graceful)
+        "sector_momentum": sector_momentum or {"available": False},
         "tiers": {"CORE": core, "WATCH": watch, "CONTROL": ctrl},
         "blocked_or_shadow_reason": blocked_or_shadow,
         "data_warnings": data_warnings,
@@ -249,6 +265,12 @@ def _label_tag(row: dict) -> str:
     ct = sl.get("candle_turn") or {}
     if ct.get("label") and ct["label"] != "NO_TURN":
         parts.append(ct["label"])
+    sm = sl.get("sector_momentum") or {}
+    if sm.get("status") in ("ok", "stale") and sm.get("sector_strength_label"):
+        tag = f"섹터:{sm['sector_strength_label']}({sm.get('best_sector')})"
+        if sm.get("in_exodus_sector"):
+            tag += "⚠이탈노출"
+        parts.append(tag)
     return (" | " + " · ".join(parts)) if parts else ""
 
 
@@ -281,6 +303,15 @@ def build_plan_markdown(plan: dict) -> str:
         )
 
     cl = plan["candidate_log"]
+    sm = plan.get("sector_momentum") or {}
+    if sm.get("available"):
+        sector_line = (
+            f"- 섹터 모멘텀({sm.get('momentum_date')}): "
+            f"강세 {sm.get('strong_sectors') or '-'} / 이탈 {sm.get('exodus_sectors') or '-'} "
+            f"(관측 라벨 — tier 결정 미사용)"
+        )
+    else:
+        sector_line = "- 섹터 모멘텀: (데이터 없음)"
     md = [
         f"# FLOWX 아침 작전계획 — {plan['as_of_date']}",
         "",
@@ -289,6 +320,7 @@ def build_plan_markdown(plan: dict) -> str:
         f"- 기준일: {plan['as_of_date']}",
         f"- 시장 종합 정책: **{plan['market_regime']}**",
         f"  - {plan.get('market_regime_rule') or ''}",
+        sector_line,
         "",
         "## 기초자산별 C60 상태",
         "\n".join(per_ticker_lines) if per_ticker_lines else "- (없음)",
@@ -351,13 +383,16 @@ def _load_candidates() -> tuple[list, list, list]:
 
 
 def _build_shadow_labels(
-    picks: list, control: list, days: int = 400, prefer_remote: bool = True
+    picks: list, control: list, days: int = 400, prefer_remote: bool = True,
+    as_of_date: str | None = None,
 ) -> dict:
     """후보별 관측 라벨 번들 {ticker: {price_axis, candle_turn, annual_overheat,
-    ipo_reversion, half_year_leader}}. 실주문/매도/스케줄러와 무관한 읽기·계산만.
+    ipo_reversion, half_year_leader, sector_momentum}}. 실주문/매도/스케줄러와
+    무관한 읽기·계산만.
 
-    OHLCV 로드 실패 종목은 라벨 없이 degrade(plan 생성은 막지 않는다). C60 hard
-    gate를 바꾸지 않는다 — 라벨은 관측·SHOW ME 용도뿐이다.
+    OHLCV 로드 실패 종목은 (price_axis 등) 라벨 없이 degrade(plan 생성은 막지 않는다).
+    sector_momentum은 OHLCV와 무관(json 매핑)하므로 OHLCV 실패와 별개로 부착된다.
+    C60 hard gate를 바꾸지 않는다 — 라벨은 관측·SHOW ME 용도뿐이다.
     """
     from src.etf.c60_shadow import normalize_ohlcv
     from src.etf.samsung_single_leverage_shadow import load_daily_ohlcv
@@ -367,6 +402,9 @@ def _build_shadow_labels(
         return {}
     sector_map = load_sector_map()
     kospi_df = load_kospi_index()
+    # 섹터 모멘텀(관측 라벨) — graceful: 없으면 종목별 status=unavailable
+    sector_composite = load_sector_composite()
+    stock_to_sector = load_stock_to_sector()
 
     seen: set[str] = set()
     items: list[dict] = []
@@ -388,6 +426,10 @@ def _build_shadow_labels(
             "annual_overheat": bundle.get("annual_overheat"),
             "ipo_reversion": bundle.get("ipo_reversion"),
             "half_year_leader": None,
+            # ★섹터 모멘텀 관측 라벨(매수 신호 아님, tier/hard gate 무관)
+            "sector_momentum": assess_sector_momentum(
+                ticker, sector_composite, stock_to_sector, as_of_date=as_of_date
+            ),
         }
 
     for rec in scan_half_year_leaders(items, kospi_df=kospi_df, sector_map=sector_map):
@@ -402,11 +444,16 @@ def run_morning_plan(
     policy, _ = run_policy_map(days=days, prefer_remote=prefer_remote, write=write)
     picks, control, logs = _load_candidates()
     meta = _candidate_log_meta(logs)
-    shadow_labels = _build_shadow_labels(picks, control, prefer_remote=prefer_remote)
+    # build_plan_document의 as_of_date 계산과 동일하게 — sector_momentum stale 판정 일관
+    as_of_date = policy.get("as_of_date") or meta.get("as_of_date")
+    shadow_labels = _build_shadow_labels(
+        picks, control, prefer_remote=prefer_remote, as_of_date=as_of_date
+    )
     market_regime = load_market_regime()  # graceful: 없으면 None → 현행 tier 유지
     plan = build_plan_document(
         policy, picks, control, meta,
         shadow_labels=shadow_labels, market_regime=market_regime,
+        sector_momentum=sector_momentum_summary(load_sector_composite()),
     )
     json_path, md_path = save_plan(plan) if write else (None, None)
     return plan, json_path, md_path
