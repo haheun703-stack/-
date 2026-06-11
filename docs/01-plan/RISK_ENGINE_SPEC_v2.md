@@ -9,6 +9,11 @@
 > ★freeze 주의: Phase 1의 "execution 게이트 토큰 강제 삽입"은 **실주문 경로 수정**이므로,
 > 적대검증·테스트로 "게이트 우회 주문이 코드상 불가능"을 증명한 뒤에만 머지한다.
 > 게이트는 주문을 *더 막는* 방향이라 freeze 정신과 양립하나, 경로 변경 자체는 신중히.
+>
+> **★freeze 해제 룰 (6/11 사장님 확정)**: 이 엔진(Phase 1)이 깔리기 전엔 unfreeze 금지.
+> "급하지 않다. 대신 freeze 해제의 전제조건이다." Phase 1a(킬스위치+sizing+게이트 로직)는 freeze
+> 완전 양립 구간, Phase 1b(execution 배선)는 unfreeze 직전. **체크리스트 = [unfreeze-checklist.md](unfreeze-checklist.md)**.
+> ★킬스위치 모의발동은 freeze 중이 가장 안전(실주문0=부작용 없는 유일 창) → 6/12 직후로 너무 미루지 말 것.
 
 ---
 
