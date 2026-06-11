@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -10,7 +11,9 @@ from src.etf.samsung_single_leverage_shadow import (
     build_common_period_comparison,
     build_samsung_single_leverage_report,
     build_samsung_single_leverage_shadow_ledger,
+    latest_provisional_warning,
     prepare_shadow_prices,
+    save_samsung_single_leverage_outputs,
 )
 
 
@@ -123,3 +126,30 @@ def test_samsung_shadow_modules_do_not_reference_order_paths():
     ]
     for token in banned:
         assert token not in combined
+
+
+# ── dry-run 기본값 + is_final 주입 (kodex와 통일된 안전한 기본값) ──
+def test_save_outputs_default_is_dry(tmp_path):
+    # ★write 생략 = dry: 파일 미기록 (점검 도구가 건드려도 오염 0)
+    values = [100.0] * 59 + [101.0, 110.0, 99.0]
+    rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
+    lp, rp = tmp_path / "l.json", tmp_path / "r.json"
+    save_samsung_single_leverage_outputs(rows, ledger_path=lp, report_path=rp)
+    assert not lp.exists() and not rp.exists()
+
+
+def test_save_outputs_write_injects_finality(tmp_path):
+    values = [100.0] * 59 + [101.0, 110.0, 99.0]
+    rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
+    lp, rp = tmp_path / "l.json", tmp_path / "r.json"
+    save_samsung_single_leverage_outputs(rows, ledger_path=lp, report_path=rp, write=True)
+    assert lp.exists()
+    payload = json.loads(lp.read_text(encoding="utf-8"))
+    assert "is_final" in payload[-1] and "snapshot_time" in payload[-1]
+
+
+def test_latest_provisional_warning_none_for_past_dates():
+    # _prices는 2026-01-01부터 → 마지막 거래일이 과거 → 확정 → 경고 없음
+    values = [100.0] * 59 + [101.0, 110.0, 99.0]
+    rows = build_samsung_single_leverage_shadow_ledger(_prices(values))
+    assert latest_provisional_warning(rows) is None

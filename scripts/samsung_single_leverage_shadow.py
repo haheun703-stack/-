@@ -27,6 +27,7 @@ from src.etf.samsung_single_leverage_shadow import (  # noqa: E402
     UNDERLYING_TICKER,
     build_common_period_comparison,
     build_samsung_single_leverage_shadow_ledger,
+    latest_provisional_warning,
     load_daily_ohlcv,
     save_samsung_single_leverage_outputs,
 )
@@ -46,6 +47,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--leverage-ticker", default=DEFAULT_LEVERAGE_TICKER)
     parser.add_argument("--days", type=int, default=1260)
     parser.add_argument("--print-report", action="store_true")
+    parser.add_argument("--write", action="store_true",
+                        help="ledger/report 기록(기본 dry). 장마감 15:30 KST 후에만.")
     return parser.parse_args()
 
 
@@ -98,9 +101,16 @@ def main() -> int:
         rows,
         c60_488080_reference=c60_488080_reference,
         common_period_comparison=common_period_comparison,
+        write=args.write,
     )
-    logger.info("Ledger saved: %s (%d rows)", ledger_path, len(rows))
-    logger.info("Report saved: %s", report_path)
+    if args.write:
+        logger.info("Ledger saved: %s (%d rows)", ledger_path, len(rows))
+        logger.info("Report saved: %s", report_path)
+    else:
+        logger.info("dry-run (기본) — 파일 미기록. 기록하려면 --write (장마감 후)")
+    warn = latest_provisional_warning(rows)
+    if warn:
+        logger.warning("%s", warn)
     logger.info("Safety proof: real orders 0 / HOLD maintained / scheduler untouched")
 
     if args.print_report:

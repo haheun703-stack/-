@@ -17,6 +17,8 @@ from typing import Iterable
 
 import pandas as pd
 
+from src.etf.kodex_hedge_regime_shadow import finality  # KST 기반 is_final 판정 재사용(로직 1곳)
+
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -514,20 +516,46 @@ def build_samsung_single_leverage_report(
     return report
 
 
+def latest_provisional_warning(rows: list[SamsungLeverageLedgerRow]) -> str | None:
+    """최신 row가 미확정(provisional·장중)이면 경고 메시지(없으면 None).
+
+    저녁 --write 재실행 누락을 호출자가 자가 감지 — 사람 기억 의존을 데이터 선언으로 전환.
+    """
+    if not rows:
+        return None
+    _, is_final = finality(rows[-1].date)
+    if not is_final:
+        return (f"최신 {rows[-1].date} 레코드 미확정(provisional·장중) — "
+                f"장마감 15:30 KST 후 --write 재실행으로 종가 확정 필요.")
+    return None
+
+
 def save_samsung_single_leverage_outputs(
     rows: list[SamsungLeverageLedgerRow],
     ledger_path: Path = LEDGER_PATH,
     report_path: Path = REPORT_PATH,
     c60_488080_reference: dict | None = None,
     common_period_comparison: dict | None = None,
+    write: bool = False,
 ) -> tuple[Path, Path, dict]:
-    SHADOW_DIR.mkdir(parents=True, exist_ok=True)
-    payload = [asdict(row) for row in rows]
+    """ledger/report 산출. ★write 기본 False(dry): 인자 없이 = 계산만, 파일 기록은
+    write=True일 때만(kodex와 통일된 안전한 기본값). 점검 도구가 건드려도 산출물 오염 0.
+
+    각 레코드에 snapshot_time·is_final 주입 — 마지막 거래일이 장중이면 provisional로
+    선언되어, 미래 소비자가 미확정값을 종가인 척 읽는 조용한 오염을 차단.
+    """
+    payload = []
+    for row in rows:
+        d = asdict(row)
+        d["snapshot_time"], d["is_final"] = finality(row.date)
+        payload.append(d)
     report = build_samsung_single_leverage_report(
         rows,
         c60_488080_reference=c60_488080_reference,
         common_period_comparison=common_period_comparison,
     )
-    ledger_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    if write:
+        SHADOW_DIR.mkdir(parents=True, exist_ok=True)
+        ledger_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return ledger_path, report_path, report
