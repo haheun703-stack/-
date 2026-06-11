@@ -322,6 +322,16 @@ def main() -> int:
     print(f"Quantum preflight expect={args.expect}")
     for _, line in checks:
         print(line)
+    # kodex shadow ledger 미확정(provisional) 자가 감지 — 매매 안전 게이트(checks)와 분리된
+    # read-only 경고. shadow는 매매 무관이라 RESULT/카운트에 넣지 않되, 저녁 --write 재실행
+    # 누락 시 어제 레코드가 미확정으로 남은 걸 시스템이 스스로 노출(사람 기억 의존 제거).
+    try:
+        from src.etf.kodex_hedge_regime_shadow import stale_provisional_warning
+        _kodex_warn = stale_provisional_warning()
+        if _kodex_warn:
+            print(f"[WARN] kodex shadow ledger: {_kodex_warn}")
+    except Exception:
+        pass
     # 카운트는 simulate 모드에서만 덧붙임 (비-simulate 출력 불변 = 회귀 격리)
     total = len(checks)
     passed = sum(1 for ok, _ in checks if ok)

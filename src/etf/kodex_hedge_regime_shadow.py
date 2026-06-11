@@ -17,7 +17,7 @@ import contextlib
 import io
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +27,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 LEDGER_DIR = PROJECT_ROOT / "data_store" / "kodex_hedge_shadow"
 LEDGER_PATH = LEDGER_DIR / "ledger.json"
 
-VERSION = "kodex_hedge_regime_shadow_v1"
+VERSION = "kodex_hedge_regime_shadow_v2"  # v2: snapshot_time·is_final 자기상태 선언 필드
+
+KST = timezone(timedelta(hours=9))
+MARKET_CLOSE_HHMM = (15, 30)  # KST 정규장 마감 — 이후 기록만 is_final(종가 확정)
 
 TICKER_CORE = "122630"      # KODEX 레버리지(2x)
 TICKER_INVERSE = "114800"   # KODEX 인버스(1x)
@@ -204,13 +207,63 @@ def _recompute(records: list[dict]) -> list[dict]:
     return records
 
 
-def load_ledger() -> list[dict]:
+def finality(actual_date: str, now_kst: datetime | None = None) -> tuple[str, bool]:
+    """레코드의 기록시각(ISO·KST)과 확정여부(is_final)를 판정.
+
+    레코드가 '자기 상태를 선언'하게 하는 핵심. 사람의 기억(저녁 재실행)에 의존하던 걸
+    데이터 자체가 미확정임을 알리는 구조로 전환.
+      - 과거 거래일(actual_date < 오늘 KST): 종가 확정 → is_final=True
+      - 당일: 15:30 KST 이후 기록만 확정 → True, 장중 기록 → False(provisional)
+      - 미래(방어): False
+    ★KST 고정: VPS가 UTC라도 datetime.now(KST)로 15:30 판정이 9시간 어긋나지 않음.
+    """
+    now = now_kst or datetime.now(KST)
+    snapshot_time = now.isoformat(timespec="seconds")
+    today = now.strftime("%Y-%m-%d")
+    if actual_date < today:
+        is_final = True
+    elif actual_date == today:
+        close_kst = now.replace(hour=MARKET_CLOSE_HHMM[0], minute=MARKET_CLOSE_HHMM[1],
+                                second=0, microsecond=0)
+        is_final = now >= close_kst
+    else:
+        is_final = False
+    return snapshot_time, is_final
+
+
+def load_ledger(include_provisional: bool = False) -> list[dict]:
+    """ledger 레코드 로드. 기본은 **확정(is_final) 레코드만** 반환(소비자 가드).
+
+    미확정(장중) 레코드를 확정인 척 소비하는 조용한 오염을 막는다. 누적·통계를
+    재계산하는 내부 호출만 include_provisional=True로 전체를 사용.
+    레거시 레코드(is_final 키 부재)는 과거 종가로 간주(True) — 단 v2 이후 모든 신규
+    레코드는 is_final을 명시한다.
+    """
     if not LEDGER_PATH.exists():
         return []
     try:
-        return json.loads(LEDGER_PATH.read_text(encoding="utf-8")).get("records", [])
+        recs = json.loads(LEDGER_PATH.read_text(encoding="utf-8")).get("records", [])
     except (json.JSONDecodeError, OSError):
         return []
+    if include_provisional:
+        return recs
+    return [r for r in recs if r.get("is_final", True)]
+
+
+def stale_provisional_warning(now_kst: datetime | None = None) -> str | None:
+    """최신 레코드가 미확정(provisional)이면 경고 메시지 반환(없으면 None).
+
+    장전 점검(preflight)·CLI가 호출 → 저녁 --write 재실행 누락을 시스템이 자가 감지.
+    """
+    recs = load_ledger(include_provisional=True)
+    if not recs:
+        return None
+    last = max(recs, key=lambda r: r.get("date", ""))
+    if not last.get("is_final", True):
+        return (f"KODEX shadow ledger 최신 {last.get('date')} 레코드가 미확정(provisional, "
+                f"snapshot_time={last.get('snapshot_time')}) — 장마감(15:30 KST) 후 "
+                f"`scripts/kodex_hedge_shadow.py --write` 재실행으로 종가 확정 필요.")
+    return None
 
 
 def save_ledger(records: list[dict]) -> Path:
@@ -227,13 +280,17 @@ def save_ledger(records: list[dict]) -> Path:
     return LEDGER_PATH
 
 
-def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bool = True) -> dict[str, Any]:
-    """오늘(또는 as_of) shadow 관측 record 생성 + ledger append. 실매매 0.
+def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bool = False,
+                 now_kst: datetime | None = None) -> dict[str, Any]:
+    """오늘(또는 as_of) shadow 관측 record 생성 + ledger upsert. 실매매 0.
+
+    ★write 기본 False(dry): 인자 없이 실행 = 조회만, 기록은 --write 명시할 때만(macro 패턴).
+    안전한 기본값 — 점검 도구가 건드려도 ledger 오염 0.
 
     prefer_remote: 프로젝트 관례 인자(타 use_case와 시그니처 일관성). shadow는 로컬 parquet
     stale(3/27 멈춤) 회피를 위해 **항상 pykrx 최신만** 사용 → 현재 분기에 영향 없음(의도적).
     """
-    end = (as_of or datetime.now().strftime("%Y-%m-%d")).replace("-", "")
+    end = (as_of or datetime.now(KST).strftime("%Y-%m-%d")).replace("-", "")
     # ma60/vol60 워밍업 위해 충분히(약 150거래일)
     start = (pd.Timestamp(end) - pd.Timedelta(days=260)).strftime("%Y%m%d")
     lev = _load_close(TICKER_CORE, start, end)
@@ -242,9 +299,13 @@ def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bo
     fx = _load_fx()
     actual_date = str(idx.index[-1].date())
     record = build_record(actual_date, lev, inv, idx, fx)
-    # write 여부와 무관하게 누적(cum/mdd/whipsaw)을 채워 반환 — dry(--no-write)도 동일 표시,
+    # ★자기 상태 선언: 기록시각(KST) + 확정여부. 장중 기록이면 is_final=False(provisional)로
+    # 남아, 미래 소비자(백테스트·레짐분석)가 미확정값을 종가인 척 읽는 조용한 오염을 차단.
+    record["snapshot_time"], record["is_final"] = finality(actual_date, now_kst)
+    # write 여부와 무관하게 누적(cum/mdd/whipsaw)을 채워 반환 — dry도 동일 표시,
     # CLI가 None을 포맷하다 크래시하던 버그 방지. 저장만 write일 때 수행.
-    records = [r for r in load_ledger() if r.get("date") != actual_date]
+    # 내부 누적은 provisional 포함 전체로 계산(정확성), 외부 노출은 load_ledger 기본 가드가 거름.
+    records = [r for r in load_ledger(include_provisional=True) if r.get("date") != actual_date]
     records.append(record)
     records = _recompute(records)
     record = next(r for r in records if r["date"] == actual_date)
@@ -255,7 +316,7 @@ def run_snapshot(as_of: str | None = None, prefer_remote: bool = True, write: bo
 
 if __name__ == "__main__":
     import sys
-    rec = run_snapshot(write="--no-write" not in sys.argv)
+    rec = run_snapshot(write="--write" in sys.argv)  # dry 기본, --write로만 기록
     print(json.dumps({k: rec[k] for k in (
         "date", "regime", "hedge_policy", "hedge_ratio", "portfolio_ret_1d",
         "portfolio_cum_ret", "mdd", "realized_vol", "whipsaw_flag")}, ensure_ascii=False, indent=2))

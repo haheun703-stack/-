@@ -3,7 +3,9 @@
 ★검증: regime classifier(BULL/BEAR/UNKNOWN) + 국면별 hedge policy + 7 portfolio +
 누적/MDD/whipsaw 재계산. 합성 데이터(네트워크 없음). 실매매 0.
 """
+import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -15,6 +17,7 @@ from src.etf.kodex_hedge_regime_shadow import (  # noqa: E402
     HEDGE_FIXED_THICK,
     HEDGE_MINIMAL,
     HEDGE_VOL_DYNAMIC,
+    KST,
     REGIME_BEAR,
     REGIME_BULL,
     REGIME_UNKNOWN,
@@ -23,6 +26,7 @@ from src.etf.kodex_hedge_regime_shadow import (  # noqa: E402
     _recompute,
     build_record,
     classify_regime,
+    finality,
     hedge_policy_for,
 )
 
@@ -143,3 +147,103 @@ def test_run_snapshot_no_write_fills_cumulative(tmp_path, monkeypatch):
     assert rec["mdd"] is not None
     assert rec["whipsaw_flag"] is not None
     assert not (tmp_path / "ledger.json").exists()  # dry는 저장 안 함
+
+
+# ── is_final / snapshot_time: 레코드가 자기 상태를 선언 ──
+def test_finality_past_date_is_final():
+    # 과거 거래일 = 종가 확정
+    st, is_final = finality("2026-06-10", datetime(2026, 6, 11, 12, 0, tzinfo=KST))
+    assert is_final is True
+    assert st.startswith("2026-06-11T12:00")
+
+
+def test_finality_today_intraday_is_provisional():
+    # 당일 장중(15:30 전) = 미확정
+    _, is_final = finality("2026-06-11", datetime(2026, 6, 11, 12, 36, tzinfo=KST))
+    assert is_final is False
+
+
+def test_finality_today_after_close_is_final():
+    # 당일 15:30 이후 = 종가 확정
+    _, is_final = finality("2026-06-11", datetime(2026, 6, 11, 15, 31, tzinfo=KST))
+    assert is_final is True
+
+
+def test_finality_close_boundary_inclusive():
+    # 정확히 15:30 = 확정(>=)
+    _, is_final = finality("2026-06-11", datetime(2026, 6, 11, 15, 30, tzinfo=KST))
+    assert is_final is True
+
+
+# ── load_ledger 소비자 가드: 미확정 기본 제외 ──
+def _write_ledger(path, records):
+    path.write_text(json.dumps({"records": records}, ensure_ascii=False), encoding="utf-8")
+
+
+def test_load_ledger_excludes_provisional_by_default(tmp_path, monkeypatch):
+    p = tmp_path / "ledger.json"
+    _write_ledger(p, [{"date": "2026-06-10", "is_final": True},
+                      {"date": "2026-06-11", "is_final": False}])
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", p)
+    assert [r["date"] for r in kshadow.load_ledger()] == ["2026-06-10"]      # 확정만
+    assert len(kshadow.load_ledger(include_provisional=True)) == 2            # 내부 누적은 전체
+
+
+def test_load_ledger_legacy_record_treated_as_final(tmp_path, monkeypatch):
+    # is_final 키 부재(레거시) = 과거 종가로 간주(True)
+    p = tmp_path / "ledger.json"
+    _write_ledger(p, [{"date": "2026-06-09"}])
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", p)
+    assert len(kshadow.load_ledger()) == 1
+
+
+# ── stale_provisional_warning: 저녁 재실행 누락 자가 감지 ──
+def test_stale_warning_detects_provisional(tmp_path, monkeypatch):
+    p = tmp_path / "ledger.json"
+    _write_ledger(p, [{"date": "2026-06-10", "is_final": True},
+                      {"date": "2026-06-11", "is_final": False,
+                       "snapshot_time": "2026-06-11T12:36:00+09:00"}])
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", p)
+    w = kshadow.stale_provisional_warning()
+    assert w is not None and "2026-06-11" in w
+
+
+def test_stale_warning_none_when_all_final(tmp_path, monkeypatch):
+    p = tmp_path / "ledger.json"
+    _write_ledger(p, [{"date": "2026-06-10", "is_final": True}])
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", p)
+    assert kshadow.stale_provisional_warning() is None
+
+
+# ── run_snapshot: finality 주입 + dry 기본값(안전한 기본값) ──
+def _patch_synthetic(tmp_path, monkeypatch):
+    up = _idx(list(range(100, 200)))
+    down = _idx(list(range(200, 100, -1)))
+
+    def fake_close(ticker, start, end):
+        return down.rename(ticker) if ticker == kshadow.TICKER_INVERSE else up.rename(ticker)
+
+    monkeypatch.setattr(kshadow, "_load_close", fake_close)
+    monkeypatch.setattr(kshadow, "_load_fx", lambda: None)
+    monkeypatch.setattr(kshadow, "LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(kshadow, "LEDGER_DIR", tmp_path)
+
+
+def test_run_snapshot_injects_finality_fields(tmp_path, monkeypatch):
+    _patch_synthetic(tmp_path, monkeypatch)
+    rec = kshadow.run_snapshot(write=False)
+    assert "snapshot_time" in rec
+    assert isinstance(rec["is_final"], bool)
+
+
+def test_run_snapshot_default_is_dry(tmp_path, monkeypatch):
+    # ★사장님 ②: 안전한 기본값 — 인자 없이 실행 = dry, ledger 저장 0
+    _patch_synthetic(tmp_path, monkeypatch)
+    kshadow.run_snapshot()  # write 명시 안 함
+    assert not (tmp_path / "ledger.json").exists()
+
+
+def test_run_snapshot_write_true_saves(tmp_path, monkeypatch):
+    _patch_synthetic(tmp_path, monkeypatch)
+    kshadow.run_snapshot(write=True)
+    assert (tmp_path / "ledger.json").exists()
