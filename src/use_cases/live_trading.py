@@ -20,6 +20,7 @@ from src.entities.trading_models import (
     Order,
     OrderStatus,
 )
+from src.use_cases.gate_wiring import build_gate_result
 from src.use_cases.ports import BalancePort, CurrentPricePort, OrderPort
 from src.use_cases.position_tracker import PositionTracker
 from src.use_cases.safety_guard import SafetyGuard
@@ -41,12 +42,18 @@ class LiveTradingEngine:
         *,
         mode: str = "paper",
         executor_bot: str = "quant",
+        gate_ohlcv_loader=None,
+        gate_sector_resolver=None,
     ):
         self.order_port = order_port
         self.balance_port = balance_port
         self.price_port = price_port
         self.tracker = tracker
         self.guard = guard
+        # RISK_ENGINE C-ii: 게이트 통행증 데이터 로더(주입 가능). None이면 gate_wiring 기본 로더
+        # (로컬 parquet OHLCV + stock_to_sector.json). 테스트/특수환경에서 fake 주입용.
+        self._gate_ohlcv_loader = gate_ohlcv_loader
+        self._gate_sector_resolver = gate_sector_resolver
         # P1-A3 (5/29 사장님 결단): order_intents_gate 10중 가드 강제.
         # default "paper"/"quant" — env 미설정 시 live 떨어짐 금지.
         self._mode = mode
@@ -207,17 +214,38 @@ class LiveTradingEngine:
 
         # 주문 실행 (재시도 로직)
         # P1-A3 (5/29): mode/executor_bot 명시 — order_intents_gate 10중 가드 강제
+        # ★RISK_ENGINE C-ii (6/12): 매 시도마다 게이트 통행증 신규 발급(재시도=새 주문=새 토큰,
+        #   nonce 1회성과 충돌 없음). REJECT→매수 중단, RESIZE→승인 사이즈로 수량 축소.
         order = None
         for attempt in range(self.max_retry):
+            unit_price = order_price if order_price > 0 else entry_price
+            gate = build_gate_result(
+                ticker, shares * unit_price,
+                balance_port=self.balance_port,
+                ohlcv_loader=self._gate_ohlcv_loader,
+                sector_resolver=self._gate_sector_resolver,
+            )
+            if gate.verdict == "REJECT":
+                logger.warning("[매수] %s 게이트 거부 — %s", ticker, gate.violations)
+                return {"ticker": ticker, "success": False, "reason": f"게이트 거부: {gate.violations}"}
+            if gate.verdict == "RESIZE":
+                new_shares = int(gate.final_size_krw // unit_price) if unit_price > 0 else 0
+                if new_shares <= 0:
+                    return {"ticker": ticker, "success": False, "reason": "게이트 RESIZE 후 수량 0"}
+                if new_shares != shares:
+                    logger.info("[매수] %s 게이트 RESIZE: %d→%d주 (승인 %.0f원)",
+                                ticker, shares, new_shares, gate.final_size_krw)
+                    shares = new_shares
+
             if self.default_order_type == "limit":
                 order = self.order_port.buy_limit(
                     ticker, order_price, shares,
-                    mode=self._mode, executor_bot=self._executor_bot,
+                    mode=self._mode, executor_bot=self._executor_bot, gate_result=gate,
                 )
             else:
                 order = self.order_port.buy_market(
                     ticker, shares,
-                    mode=self._mode, executor_bot=self._executor_bot,
+                    mode=self._mode, executor_bot=self._executor_bot, gate_result=gate,
                 )
 
             if order.status != OrderStatus.FAILED:

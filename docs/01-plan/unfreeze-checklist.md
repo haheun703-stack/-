@@ -55,11 +55,17 @@
   - 검증: 신규 12 + 가드레일 13 passed, 전체 회귀 **30 failed/1384 passed**(stash 베이스라인
     30 failed/1372 passed 대비 신규 실패 0 = 기존 날짜만료/stash 깨짐과 동일). freeze 무손상
     (REAL+ENABLED 둘 다 OFF라 추가된 raise는 현재 도달 불가 경로 위의 추가 차단).
-  - [ ] **C-ii. Phase 1b-ii: 라이브 호출처 토큰 발급 배선** ⬅ 실제 unfreeze 전 남은 통합
-    — 자물쇠(1b-i)는 완성. 단 **현재 어떤 라이브 호출처도 토큰을 발급·전달하지 않으므로**
-    MODEL=REAL이면 모든 BUY가 fail-closed로 막힌다(안전하나 매수 불능). unfreeze 실작동을
-    위해 live_trading / smart_entry(real) 경로가 `evaluate_pre_trade`로 통행증을 발급해
-    `gate_result`로 넘기도록 배선해야 함. 다음 집중세션.
+  - [x] **C-ii-a. 발급 헬퍼 + live_trading 배선** ✅ (6/12, `src/use_cases/gate_wiring.build_gate_result`):
+    production에서 `evaluate_pre_trade`를 직접 호출하는 **유일 경로**(grep 테스트 강제). 게이트는
+    사이징을 대체하지 않고 검증+발급 층으로 얹음(구 PositionSizer가 shares→헬퍼가 G3~G6 검증+토큰).
+    `live_trading._execute_single_buy` 매수 루프에 배선 — 매 시도마다 신규 발급(재시도=새 주문=새
+    nonce, replay 충돌 없음), REJECT→중단·RESIZE→축소. **보강 3종 구현**: R1 잔고 ok=False→
+    REJECT(balance_unavailable, equity=0 오판 차단) / R2 adv20 없음·**stale(≥3거래일)**→G6 fail-closed
+    REJECT / R3 양 모드 발급(페이퍼 E기간 드라이런 증거). 검증 = `test_gate_wiring.py` 9 +
+    `test_live_trading_gate.py` 3. 전체 30 failed/1405 passed(베이스라인 30/1372 대비 신규실패 0).
+  - [ ] **C-ii-b. 2차 호출처 배선** ⬅ 남음: smart_entry(real)·adaptive_reentry·limit_up_scanner 등
+    나머지 BUY 호출처를 `build_gate_result`(공유 헬퍼)로 배선. 미배선 경로는 REAL에서 fail-closed로
+    막힘(안전하나 매수 불능)이라 안전 문제 아닌 가용성 과제. "로직 1곳=버그 1곳"으로 헬퍼 재사용.
     - [x] **★`_seen_gate_nonces` 영속화** ✅ (6/12, `risk/nonce_store.PersistentNonceSet`):
       인메모리 set(프로세스 생애 한정) → **파일 기반(data/risk/seen_gate_nonces.log) + 인스턴스 간
       공유**로 승격. `__contains__`가 매 검사 전 파일 재읽기 → 재시작/교차 인스턴스에서도 replay
@@ -74,7 +80,7 @@
   - [x] **결론: staleness 복구는 unfreeze blocker 아님**(GIGO 마실 입 닫힘). ⚠️단 향후 chart_hero **재배선 시** Gate 1이 hard gate로 살아나므로 그때 재점검(live API 3종 가용성 + CSV 공백 5/20~). fx-liquidity P0-1(파이프라인 사망원인 규명)은 별도 관측 인프라 과제.
 - [ ] **E. (스펙 §8 공통)** 페이퍼 트레이딩 최소 20거래일 + 게이트/킬스위치 로그가 빠짐없이 남는지 확인 ⬅ 진행 중(FLOWX 관측 누적)
 
-**현재 상태**: A·B·C(1b-i 자물쇠)·D ✅ / **C-ii(라이브 호출처 토큰 발급 배선)·E ⬅ 미완** → **unfreeze 아직 금지**. 게이트 자물쇠는 완성됐고, 남은 건 ① 라이브 매수 경로가 통행증을 발급·전달하도록 배선(C-ii) ② 페이퍼 20일 누적(E). E는 시간 누적.
+**현재 상태**: A·B·C(1b-i 자물쇠)·C-ii-a(nonce 영속화 + 헬퍼 + live_trading 배선)·D ✅ / **C-ii-b(2차 호출처 배선)·E ⬅ 미완** → **unfreeze 아직 금지**. 게이트 자물쇠·발급 헬퍼·정식 라이브 실행기(live_trading) 배선 완성. 남은 건 ① 나머지 BUY 호출처(smart_entry 등)를 같은 헬퍼로 배선(C-ii-b) ② 페이퍼 20일 누적(E). E는 시간 누적.
 
 > 흩어져 있던 미결(fx-liquidity P0, 킬스위치 테스트)이 여기 한 곳에 모인다. 따로 굴러다니다 잊히지 않게.
 
