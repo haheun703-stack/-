@@ -115,6 +115,9 @@ docs/.pdca-status.json
 .coverage
 htmlcov/
 
+# 킬스위치 런타임 상태 (코드만 커밋 — 발동 상태는 로컬 영속)
+kill_switch/state.json
+
 # 임시 폴더
 _tmp_files*/
 
