@@ -30,21 +30,24 @@
 
 ## 2. ★ Unfreeze 체크리스트 (전부 ✅ 되어야 freeze 해제 — 하나라도 ❌면 실탄 장전 금지)
 
-- [ ] **A. Phase 1a 구현 완료**
-  - [ ] `kill_switch/` 별도 프로세스 + `state.json` 영속화 (메인 봇 생사 무관 watchdog)
-  - [ ] `sizing.py` 리스크 예산 사이징 + 한국 갭 보정 + 하한가 생존 조건(max_single_weight ≤ daily_kill_limit/0.30)
-  - [ ] `pre_trade_gate.py` G3~G6 정적 한도 로직 (VaR 게이트 G1/G2는 Phase 2)
-- [ ] **B. 킬스위치 실제 발동 검증** (★freeze 중에 해야 안전 — §3)
-  - [ ] K1 모의발동(전량청산+거래정지) 실제 실행 성공
-  - [ ] `state.json` 영속 + **재부팅 후에도 발동 상태 유지** 확인
-  - [ ] 수동 해제 절차(텔레그램 확인코드) 작동 — 자동 복구 코드 0 확인
-- [ ] **C. Phase 1b: execution 배선**
+- [x] **A. Phase 1a 구현 완료** ✅ (6/12, 커밋 `5fffb4e`, 적대리뷰 14발견 수정·105 passed)
+  - [x] `kill_switch/` 별도 프로세스 + `state.json` 영속화 (메인 봇 생사 무관 watchdog)
+  - [x] `sizing.py` 리스크 예산 사이징 + 한국 갭 보정 + 하한가 생존 조건(`limit_down_survival_ok`)
+  - [x] `pre_trade_gate.py` G3~G6 정적 한도 로직 (VaR 게이트 G1/G2는 Phase 2)
+- [x] **B. 킬스위치 실제 발동 검증** ✅ (6/11~12 격리 경로, pytest + CLI 모의발동)
+  - [x] K1 모의발동(전량청산+거래정지) 실제 실행 성공 — actions LIQUIDATE_ALL/HALT 선언(실행 배선=1b)
+  - [x] `state.json` 영속 + **재부팅 후에도 발동 상태 유지** 확인 (test_full_scenario)
+  - [x] 수동 해제 절차(확인코드) 작동 — 자동 복구 코드 0, ★키 부재 시 fail-closed raise
+- [ ] **C. Phase 1b: execution 배선** ⬅ unfreeze 직전 전용(오늘 미착수)
   - [ ] 주문 함수가 `gate_result` PASS 토큰(서명+타임스탬프) 없이는 호출 불가하도록 구조적 강제
   - [ ] **게이트 우회 주문이 코드상 불가능함을 테스트로 증명** (우회 경로 grep 0 + 우회 시도 테스트가 raise)
-- [ ] **D. fx-liquidity P0 — 썩은 데이터 매매경로 진입 여부 확정**
-  - [ ] `chart_hero_executor.py`가 four_signal을 **hard gate vs advisory** 어느쪽으로 쓰는지 확정
-  - [ ] hard gate면 → **staleness 복구 선행 필수**(GIGO 차단). advisory/관측이면 → unfreeze 차단 사유 아님(기록만)
-- [ ] **E. (스펙 §8 공통)** 페이퍼 트레이딩 최소 20거래일 + 게이트/킬스위치 로그가 빠짐없이 남는지 확인
+  - 비고: 토큰은 이미 ★감사 로그 기록 성공 후에만 발급 + nonce replay 방지(verify에 seen_nonces) 설계 완료 — 1b는 이 토큰을 주문 함수 필수 인자로 강제하면 됨.
+- [x] **D. fx-liquidity P0 — 썩은 데이터 매매경로 진입 여부 확정** ✅ (6/12, 21에이전트 read-only 조사)
+  - [x] `chart_hero_executor.py`가 four_signal을 **어떻게 쓰는지 확정 = unused(휴면)**: stale CSV(`macro_four_signal_daily.csv` 5/19)를 읽는 코드 0개(write-only 로그) + chart_hero 파이프라인이 BAT/cron 어디에도 미배선·산출물 5/20 이후 정지. executor 자체는 four_signal 미참조(docstring만), 게이트는 surge_d1_picker 내부 hard gate지만 파이프라인 미가동.
+  - [x] **결론: staleness 복구는 unfreeze blocker 아님**(GIGO 마실 입 닫힘). ⚠️단 향후 chart_hero **재배선 시** Gate 1이 hard gate로 살아나므로 그때 재점검(live API 3종 가용성 + CSV 공백 5/20~). fx-liquidity P0-1(파이프라인 사망원인 규명)은 별도 관측 인프라 과제.
+- [ ] **E. (스펙 §8 공통)** 페이퍼 트레이딩 최소 20거래일 + 게이트/킬스위치 로그가 빠짐없이 남는지 확인 ⬅ 진행 중(FLOWX 관측 누적)
+
+**현재 상태**: A·B·D ✅ / C·E ⬅ 미완 → **unfreeze 아직 금지**(C 게이트 배선 + E 페이퍼 20일 남음). C는 Phase 1b 집중 세션, E는 시간 누적.
 
 > 흩어져 있던 미결(fx-liquidity P0, 킬스위치 테스트)이 여기 한 곳에 모인다. 따로 굴러다니다 잊히지 않게.
 
