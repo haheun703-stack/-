@@ -38,16 +38,36 @@
   - [x] K1 모의발동(전량청산+거래정지) 실제 실행 성공 — actions LIQUIDATE_ALL/HALT 선언(실행 배선=1b)
   - [x] `state.json` 영속 + **재부팅 후에도 발동 상태 유지** 확인 (test_full_scenario)
   - [x] 수동 해제 절차(확인코드) 작동 — 자동 복구 코드 0, ★키 부재 시 fail-closed raise
-- [ ] **C. Phase 1b: execution 배선** ⬅ unfreeze 직전 전용(오늘 미착수)
-  - [ ] 주문 함수가 `gate_result` PASS 토큰(서명+타임스탬프) 없이는 호출 불가하도록 구조적 강제
-  - [ ] **게이트 우회 주문이 코드상 불가능함을 테스트로 증명** (우회 경로 grep 0 + 우회 시도 테스트가 raise)
-  - 비고: 토큰은 이미 ★감사 로그 기록 성공 후에만 발급 + nonce replay 방지(verify에 seen_nonces) 설계 완료 — 1b는 이 토큰을 주문 함수 필수 인자로 강제하면 됨.
+- [x] **C. Phase 1b-i: execution 배선(강제 자물쇠)** ✅ (6/12, 1안=REAL 라이브 경로만 강제 + mock 경고)
+  - [x] 주문 함수가 `gate_result` PASS 토큰(서명+타임스탬프) 없이는 호출 불가하도록 구조적 강제
+    — `KisOrderAdapter._guard`(4개 주문 진입점의 단일 초크포인트)의 BUY 최종 관문에
+    `_enforce_gate_token` 추가. **REAL(_is_mock=False) BUY**는 검증된 통행증 없으면
+    `PermissionError`. ★우회불가의 코드적 근거 = 실서버/모의서버를 가르는 `self._is_mock`과
+    토큰 강제 여부를 가르는 변수가 **동일**(둘 다 `__init__`의 `MODEL!=REAL`) → '실서버로
+    나가는데 토큰 미검사' 상태가 존재 불가. 검증 = 서명·타임스탬프·만료(300s)·미래발급·
+    nonce replay(인스턴스 `_seen_gate_nonces`)·종목 일치·주문금액 ≤ 승인 사이즈. SELL은 면제
+    (사전 게이트는 신규 리스크용, 매도는 리스크 감소 + 킬스위치 매도 지속 불변식 보존).
+  - [x] **게이트 우회 주문이 코드상 불가능함을 테스트로 증명** — `tests/test_gate_token_enforcement.py`
+    12케이스(무토큰/위조/만료/replay/종목불일치/사이즈초과/REJECT verdict 전부 raise + mock 경고만
+    + SELL 미호출 구조 + `create_*_buy_order`가 `_guard` 경유 진입점에서만 호출되는 우회경로 grep 0).
+    기존 `test_no_raw_mojito_order_bypass`도 무손상. 1안 채택 = mock/paper 경로는 무토큰 BUY 시
+    "REAL이었다면 차단" 경고만 → 페이퍼 20일(E)이 게이트 배선 드라이런 증거가 됨.
+  - 검증: 신규 12 + 가드레일 13 passed, 전체 회귀 **30 failed/1384 passed**(stash 베이스라인
+    30 failed/1372 passed 대비 신규 실패 0 = 기존 날짜만료/stash 깨짐과 동일). freeze 무손상
+    (REAL+ENABLED 둘 다 OFF라 추가된 raise는 현재 도달 불가 경로 위의 추가 차단).
+  - [ ] **C-ii. Phase 1b-ii: 라이브 호출처 토큰 발급 배선** ⬅ 실제 unfreeze 전 남은 통합
+    — 자물쇠(1b-i)는 완성. 단 **현재 어떤 라이브 호출처도 토큰을 발급·전달하지 않으므로**
+    MODEL=REAL이면 모든 BUY가 fail-closed로 막힌다(안전하나 매수 불능). unfreeze 실작동을
+    위해 live_trading / smart_entry(real) 경로가 `evaluate_pre_trade`로 통행증을 발급해
+    `gate_result`로 넘기도록 배선해야 함. 다음 집중세션.
+  - 비고: 토큰은 ★감사 로그 기록 성공 후에만 발급 + nonce replay 방지(verify에 seen_nonces)
+    설계가 Phase 1a에 완료돼 있어 1b-i는 이 토큰을 주문 함수 필수 인자로 강제만 하면 됐음.
 - [x] **D. fx-liquidity P0 — 썩은 데이터 매매경로 진입 여부 확정** ✅ (6/12, 21에이전트 read-only 조사)
   - [x] `chart_hero_executor.py`가 four_signal을 **어떻게 쓰는지 확정 = unused(휴면)**: stale CSV(`macro_four_signal_daily.csv` 5/19)를 읽는 코드 0개(write-only 로그) + chart_hero 파이프라인이 BAT/cron 어디에도 미배선·산출물 5/20 이후 정지. executor 자체는 four_signal 미참조(docstring만), 게이트는 surge_d1_picker 내부 hard gate지만 파이프라인 미가동.
   - [x] **결론: staleness 복구는 unfreeze blocker 아님**(GIGO 마실 입 닫힘). ⚠️단 향후 chart_hero **재배선 시** Gate 1이 hard gate로 살아나므로 그때 재점검(live API 3종 가용성 + CSV 공백 5/20~). fx-liquidity P0-1(파이프라인 사망원인 규명)은 별도 관측 인프라 과제.
 - [ ] **E. (스펙 §8 공통)** 페이퍼 트레이딩 최소 20거래일 + 게이트/킬스위치 로그가 빠짐없이 남는지 확인 ⬅ 진행 중(FLOWX 관측 누적)
 
-**현재 상태**: A·B·D ✅ / C·E ⬅ 미완 → **unfreeze 아직 금지**(C 게이트 배선 + E 페이퍼 20일 남음). C는 Phase 1b 집중 세션, E는 시간 누적.
+**현재 상태**: A·B·C(1b-i 자물쇠)·D ✅ / **C-ii(라이브 호출처 토큰 발급 배선)·E ⬅ 미완** → **unfreeze 아직 금지**. 게이트 자물쇠는 완성됐고, 남은 건 ① 라이브 매수 경로가 통행증을 발급·전달하도록 배선(C-ii) ② 페이퍼 20일 누적(E). E는 시간 누적.
 
 > 흩어져 있던 미결(fx-liquidity P0, 킬스위치 테스트)이 여기 한 곳에 모인다. 따로 굴러다니다 잊히지 않게.
 

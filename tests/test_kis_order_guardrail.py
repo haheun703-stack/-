@@ -200,17 +200,29 @@ def test_price_range_exceeded(adapter, monkeypatch, trading_hour):
 
 
 # ──────────────────────────────────────────
-# 11. 정상 케이스 — 모든 가드 통과
+# 11. 정상 케이스 — 모든 가드 통과 (RISK_ENGINE Phase 1b: REAL BUY는 게이트 통행증 필수)
 # ──────────────────────────────────────────
 
-def test_normal_pass(adapter, monkeypatch, trading_hour, clean_volume):
+def test_normal_pass(adapter, monkeypatch, trading_hour, clean_volume, tmp_path):
     monkeypatch.setenv("AUTO_TRADING_ENABLED", "1")
     monkeypatch.setenv("AUTO_TRADING_MAX_QTY", "1")
     monkeypatch.setenv("AUTO_TRADING_WHITELIST_ONLY", "1")
     monkeypatch.setenv("AUTO_TRADING_MAX_AMOUNT", "300000")
     monkeypatch.setenv("AUTO_TRADING_MAX_TRADES_PER_DAY", "5")
+    # ★Phase 1b(6/12): adapter 픽스처는 MODEL=REAL → BUY에 검증된 게이트 통행증 필수.
+    #   통행증 없이는 차단되는 게 정상(우회불가). 유효 토큰을 발급해 전 가드 통과를 검증.
+    monkeypatch.setenv("ORDER_INTENTS_HMAC_KEY", "guardrail-test-key")
+    from risk.pre_trade_gate import GateRequest, evaluate_pre_trade
+    req = GateRequest(ticker="487240", sector="ETF",
+                      proposed_size_krw=10000, equity_krw=2_000_000, adv20_krw=10_000_000_000)
+    tok = evaluate_pre_trade(req, [], log_dir=tmp_path, hmac_key="guardrail-test-key")
+    assert tok.verdict == "PASS" and tok.signed
     # 화이트리스트 종목 (487240 KODEX AI전력), 수량 1, 가격 10,000 (현재가와 동일)
-    adapter._guard("487240", 1, price=10000, side="BUY")  # 예외 없으면 통과
+    adapter._guard("487240", 1, price=10000, side="BUY", gate_result=tok)  # 예외 없으면 통과
+
+    # ★무토큰 BUY는 같은 조건에서 차단되어야 한다(우회불가 회귀 가드).
+    with pytest.raises(PermissionError, match=r"\[GATE\]"):
+        adapter._guard("487240", 1, price=10000, side="BUY")
 
 
 # ──────────────────────────────────────────

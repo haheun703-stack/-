@@ -158,12 +158,16 @@ class PaperOrderAdapter:
         self, ticker: str, price: int, quantity: int,
         orderbook_available: bool = False,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
         """지정가 매수 시뮬.
 
         Trading Factory v1 (코덱스 4차 5/28): mode + executor_bot 명시 시 order_intents_gate 강제.
         P0-2: PaperOrderAdapter는 mode='paper'만 허용 (mode='live' 즉시 차단).
+        RISK_ENGINE Phase 1b: gate_result는 인터페이스 정합성 위해 수용하나 페이퍼는 실탄이
+            아니므로 강제하지 않는다(실전 강제는 KisOrderAdapter 전담). 무시.
         """
+        _ = gate_result  # 페이퍼는 통행증 강제 안 함(인터페이스 호환만)
         # 10번째 가드 — order_intents_gate (mode/executor_bot 명시 시 강제)
         if mode is not None or executor_bot is not None:
             # P0-2 (코덱스 4차 응답): PaperOrderAdapter는 mode='live' 거부
@@ -263,11 +267,13 @@ class PaperOrderAdapter:
         self, ticker: str, quantity: int, current_price: int = 0,
         orderbook_available: bool = False,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
         """시장가 매수 시뮬.
 
         ★ C1 fix (5/26): current_price 옵셔널.
         Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제.
+        RISK_ENGINE Phase 1b: gate_result 수용하나 페이퍼는 강제 안 함(KisOrderAdapter 전담).
         """
         if current_price <= 0:
             try:
@@ -277,7 +283,7 @@ class PaperOrderAdapter:
                 current_price = 1
         return self.buy_limit(
             ticker, current_price, quantity, orderbook_available,
-            mode=mode, executor_bot=executor_bot,
+            mode=mode, executor_bot=executor_bot, gate_result=gate_result,
         )
 
     def sell_market(

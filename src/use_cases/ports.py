@@ -160,8 +160,13 @@ class OrderPort(ABC):
     def buy_limit(
         self, ticker: str, price: int, quantity: int,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
-        """지정가 매수"""
+        """지정가 매수.
+
+        gate_result: RISK_ENGINE L2 사전 게이트 통행증(risk.pre_trade_gate.GateResult).
+            REAL(실전) 어댑터는 검증된 통행증 없이는 BUY 불가(Phase 1b, fail-closed).
+        """
         ...
 
     @abstractmethod
@@ -176,8 +181,13 @@ class OrderPort(ABC):
     def buy_market(
         self, ticker: str, quantity: int,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
-        """시장가 매수"""
+        """시장가 매수.
+
+        gate_result: RISK_ENGINE L2 사전 게이트 통행증(risk.pre_trade_gate.GateResult).
+            REAL(실전) 어댑터는 검증된 통행증 없이는 BUY 불가(Phase 1b, fail-closed).
+        """
         ...
 
     @abstractmethod

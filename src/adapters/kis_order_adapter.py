@@ -77,6 +77,9 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             mock=is_mock,
         )
         self._is_mock = is_mock
+        # RISK_ENGINE Phase 1b — 게이트 통행증 nonce 1회성(replay 방지) 추적.
+        # 같은 어댑터 인스턴스(= 한 프로세스의 실주문 경로) 생애주기 동안 토큰 재사용 차단.
+        self._seen_gate_nonces: set[str] = set()
         logger.info(
             "KisOrderAdapter 초기화 (모드: %s, 가드레일: %s)",
             "모의투자" if is_mock else "실전",
@@ -95,6 +98,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         *,
         mode: str | None = None,
         executor_bot: str | None = None,
+        gate_result: object | None = None,
     ):
         """주문 차단 가드레일. 실패 시 PermissionError/ValueError/RuntimeError 발생.
 
@@ -105,8 +109,10 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             side: BUY / SELL
             mode: "paper" / "live" (Trading Factory v1 — paper-first). None이면 기존 동작 (backward compat).
             executor_bot: "quant" / "day" (Trading Factory v1 — intent 매치).
+            gate_result: RISK_ENGINE L2 사전 게이트 통행증(risk.pre_trade_gate.GateResult).
+                REAL(실전) BUY는 검증된 통행증 없이는 차단(Phase 1b, fail-closed). SELL은 면제.
 
-        Checks (10개):
+        Checks (11개):
             1. AUTO_TRADING_ENABLED=1 활성화
             2. AUTO_TRADING_MAX_QTY 수량 한도
             3. AUTO_TRADING_WHITELIST_ONLY 화이트리스트
@@ -115,8 +121,10 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             6. 일일 매수 금액/횟수 한도 (BUY만)
             7. 현재가 ±X% 범위 (지정가, price 전달 시)
             8. assert_runtime_orders_allowed (5/27 추가)
-            9. 통과 로그
-            10. order_intents_gate (5/28 Trading Factory v1) — mode + executor_bot 명시 시
+            9. order_intents_gate (5/28 Trading Factory v1) — mode + executor_bot 명시 시
+            10. ★L2 리스크 게이트 통행증 (6/12 RISK_ENGINE Phase 1b) — REAL BUY만, 모든
+                정적 가드 통과 후 최종 관문. 토큰 없으면 raise(우회 불가).
+            11. 통과 로그
         """
         # P0-1 (코덱스 4차 응답 5/28 13:37) — 가드 진입 자격 검증 (최우선):
         # KisOrderAdapter는 실 KIS 주문 어댑터 → mode="live"만 허용.
@@ -196,13 +204,76 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
                         f"[GUARD] 지정가 현재가 ±{range_pct}% 초과: "
                         f"지정 {price:,} vs 현재 {current:,} (편차 {diff_pct:.1f}%)"
                     )
-        # 8. 통과 로그
+        # 10. ★L2 리스크 게이트 통행증 (RISK_ENGINE Phase 1b) — BUY만, 모든 정적 가드 통과 후 최종.
+        #     REAL은 검증된 토큰 없이는 raise(우회 불가). mock은 무토큰이면 경고만(드라이런 증거).
+        if side == "BUY":
+            self._enforce_gate_token(ticker, quantity, price, gate_result)
+        # 11. 통과 로그
         logger.warning(
             "[GUARD PASS] %s %s %d주 @ %s (max_qty=%d, mode=%s)",
             side, ticker, quantity,
             f"{price:,}" if price else "시장가",
             max_qty, "MOCK" if self._is_mock else "REAL"
         )
+
+    def _enforce_gate_token(
+        self, ticker: str, quantity: int, price: int | None, gate_result: object | None,
+    ) -> None:
+        """L2 리스크 게이트 통행증 강제 (RISK_ENGINE Phase 1b, 6/12).
+
+        ★우회불가의 코드적 근거: 실서버/모의서버를 가르는 self._is_mock(=__init__의
+          MODEL!=REAL)과 토큰 강제 여부를 가르는 변수가 동일하다 → '실서버로 주문이
+          나가는데 토큰 검사를 안 거치는' 상태는 존재할 수 없다(fail-closed).
+
+        REAL(실전, _is_mock=False) BUY: 검증된 통행증 없으면 PermissionError(차단).
+          - gate_result가 GateResult이고 / 토큰 종목이 주문 종목과 일치하고 /
+            verify_gate_token(서명·타임스탬프·만료·미래발급·replay·verdict) 통과하고 /
+            주문 금액 ≤ 통행증 승인 사이즈(final_size_krw) — 전부 만족해야 통과.
+          - 하나라도 실패 → 차단(모르면 막는다).
+
+        mock(연습) BUY: 차단하지 않되 무토큰/무효/사이즈초과면 '실전이면 거부됐음' 경고만
+          남긴다(페이퍼 20일=체크리스트 E 동안 게이트 배선 드라이런 증거).
+
+        SELL은 이 메서드를 호출하지 않는다(_guard가 side=='BUY'에서만 호출) — pre_trade_gate는
+          신규 리스크용 사전 게이트이며, 매도는 리스크 감소 + 킬스위치 발동 시에도 지속돼야 한다.
+        """
+        # 지연 import — risk/ 패키지를 모듈 로드시점에 끌어오지 않는다(격리·순환 회피).
+        from risk.pre_trade_gate import GateResult, verify_gate_token
+
+        # 토큰 검증은 정확히 1회만 호출한다(verify는 성공 시에만 nonce를 seen에 소비 →
+        # 중복 호출 시 멀쩡한 토큰이 1회용 소진으로 거짓 실패할 수 있다).
+        token_ok = (
+            isinstance(gate_result, GateResult)
+            and gate_result.ticker == ticker
+            and verify_gate_token(gate_result, seen_nonces=self._seen_gate_nonces)
+        )
+        size_ok = False
+        if token_ok:
+            unit_price = price if price is not None else self._estimate_price(ticker)
+            order_krw = quantity * unit_price
+            # 주문 금액이 통행증 승인 사이즈를 넘지 않아야 한다(작은 토큰으로 큰 주문 차단).
+            size_ok = order_krw > 0 and order_krw <= gate_result.final_size_krw + 1.0
+
+        if self._is_mock:
+            if not (token_ok and size_ok):
+                logger.warning(
+                    "[GATE-DRYRUN] mock BUY %s %d주: 검증된 게이트 통행증 없음/무효/사이즈초과 — "
+                    "REAL이었다면 차단(현재 mock이라 통과). 페이퍼 게이트 배선 확인용.",
+                    ticker, quantity,
+                )
+            return
+
+        # ── 실전 경로: fail-closed 강제 ──
+        if not token_ok:
+            raise PermissionError(
+                f"[GATE] REAL BUY {ticker}: 게이트 통행증 검증 실패 — 토큰 없는 실주문 차단 "
+                "(없음/타입/종목불일치/미서명/위조/만료/미래발급/replay/REJECT 중 하나)."
+            )
+        if not size_ok:
+            raise PermissionError(
+                f"[GATE] REAL BUY {ticker}: 주문 금액이 통행증 승인 사이즈"
+                f"(final_size_krw={gate_result.final_size_krw:,.0f}원)를 초과하거나 산정 불가 — 차단."
+            )
 
     def _estimate_price(self, ticker: str) -> int:
         """현재가 조회 (오류 시 0). 가드레일 검증 전용 (실제 주문에는 영향 없음)."""
@@ -273,10 +344,12 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     def buy_limit(
         self, ticker: str, price: int, quantity: int,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
         """지정가 매수.
 
         Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        RISK_ENGINE Phase 1b: REAL은 gate_result(검증된 통행증) 없이는 차단 (6/12).
         """
         # 호가 단위 자동 보정 (5/18 자아성찰 #3 — KIS 거부 방지)
         adjusted_price = self._adjust_to_tick(price)
@@ -284,7 +357,7 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
             logger.info("[호가보정] %s: %d원 → %d원", ticker, price, adjusted_price)
         price = adjusted_price
         self._guard(ticker, quantity, price=price, side="BUY",
-                    mode=mode, executor_bot=executor_bot)
+                    mode=mode, executor_bot=executor_bot, gate_result=gate_result)
         logger.info("[주문] 지정가 매수: %s %d주 @ %d원", ticker, quantity, price)
         try:
             resp = self.broker.create_limit_buy_order(ticker, price, quantity)
@@ -338,13 +411,15 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
     def buy_market(
         self, ticker: str, quantity: int,
         *, mode: str | None = None, executor_bot: str | None = None,
+        gate_result: object | None = None,
     ) -> Order:
         """시장가 매수.
 
         Trading Factory v1: mode + executor_bot 명시 시 order_intents_gate 강제 통과 (5/28).
+        RISK_ENGINE Phase 1b: REAL은 gate_result(검증된 통행증) 없이는 차단 (6/12).
         """
         self._guard(ticker, quantity, price=None, side="BUY",
-                    mode=mode, executor_bot=executor_bot)
+                    mode=mode, executor_bot=executor_bot, gate_result=gate_result)
         logger.info("[주문] 시장가 매수: %s %d주", ticker, quantity)
         try:
             resp = self.broker.create_market_buy_order(ticker, quantity)
