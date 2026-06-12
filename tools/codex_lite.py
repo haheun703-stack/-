@@ -234,6 +234,15 @@ def main() -> int:
                         help="FAIL/WARN 1건이라도 exit 1")
     args = parser.parse_args()
 
+    # ★ Windows cp949 콘솔에서 em-dash(—) 등 비-cp949 문자 출력 시 UnicodeEncodeError로
+    #   죽던 것 방지. pre-commit 체인이 `-X utf8` 없이 호출 → 이 의무 적대리뷰가 매 커밋
+    #   침묵 스킵되던 버그(6/12 발견). stdout/err을 UTF-8로 강제(커밋 차단 동작은 불변).
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+        except (AttributeError, ValueError):
+            pass
+
     files = get_changed_files(args.commit)
     print(f"=== codex_lite 자동 점검 — 변경 {len(files)}개 파일 ===")
     if files:
