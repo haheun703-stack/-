@@ -78,8 +78,10 @@ class KisOrderAdapter(OrderPort, BalancePort, CurrentPricePort):
         )
         self._is_mock = is_mock
         # RISK_ENGINE Phase 1b — 게이트 통행증 nonce 1회성(replay 방지) 추적.
-        # 같은 어댑터 인스턴스(= 한 프로세스의 실주문 경로) 생애주기 동안 토큰 재사용 차단.
-        self._seen_gate_nonces: set[str] = set()
+        # ★C-ii: 파일 영속(data/risk/seen_gate_nonces.log) — 재시작 후에도 max_age 내 토큰
+        #   replay 차단 + 같은 머신 인스턴스 간 공유(인메모리 set의 재부팅 소실 구멍 해소).
+        from risk.nonce_store import PersistentNonceSet
+        self._seen_gate_nonces = PersistentNonceSet()
         logger.info(
             "KisOrderAdapter 초기화 (모드: %s, 가드레일: %s)",
             "모의투자" if is_mock else "실전",

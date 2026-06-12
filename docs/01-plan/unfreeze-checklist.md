@@ -60,13 +60,13 @@
     MODEL=REAL이면 모든 BUY가 fail-closed로 막힌다(안전하나 매수 불능). unfreeze 실작동을
     위해 live_trading / smart_entry(real) 경로가 `evaluate_pre_trade`로 통행증을 발급해
     `gate_result`로 넘기도록 배선해야 함. 다음 집중세션.
-    - [ ] **★C-ii 필수 포함 — `_seen_gate_nonces` 영속화** (6/12 1b-i 교차검증 발견):
-      현재 어댑터 인스턴스 메모리 set(프로세스 생애 한정)이라 ①재시작 후 max_age(300s) 내
-      토큰 replay 창 존재 ②인스턴스마다 set 분리 = 같은 토큰이 인스턴스 수만큼 재사용 가능.
-      **파일 기반 + 인스턴스 간 공유**로 승격할 것. 근거 = `pre_trade_gate.verify_gate_token`
-      docstring의 "Phase 1b 배선이 **영속 set**을 전달" 약속(Phase 1a 적대리뷰 P1).
-      잔여위험은 현재 좁음(토큰을 디스크에 저장하는 호출처 0 + 300s 만료)이라 1b-i 롤백
-      사유는 아니며, C-ii 배선과 동시 구현이 정위치.
+    - [x] **★`_seen_gate_nonces` 영속화** ✅ (6/12, `risk/nonce_store.PersistentNonceSet`):
+      인메모리 set(프로세스 생애 한정) → **파일 기반(data/risk/seen_gate_nonces.log) + 인스턴스 간
+      공유**로 승격. `__contains__`가 매 검사 전 파일 재읽기 → 재시작/교차 인스턴스에서도 replay
+      차단. retention=max_age+버퍼(360s)로 만료 nonce 자동 제외(만료 토큰은 verify가 이미 거부) +
+      만료행 누적 시 compact. graceful: 파일 글리치 시 전면 차단 대신 인메모리로 계속(서명+만료
+      층 유효, 진짜 fail-closed는 킬스위치). 검증 = `tests/test_nonce_store.py` 7케이스(재시작
+      replay·만료·graceful·verify 통합). 근거 = verify_gate_token docstring의 "영속 set" 약속(P1).
   - 비고: 토큰은 ★감사 로그 기록 성공 후에만 발급 + nonce replay 방지(verify에 seen_nonces)
     설계가 Phase 1a에 완료돼 있어 1b-i는 이 토큰을 주문 함수 필수 인자로 강제만 하면 됐음.
 - [x] **D. fx-liquidity P0 — 썩은 데이터 매매경로 진입 여부 확정** ✅ (6/12, 21에이전트 read-only 조사)

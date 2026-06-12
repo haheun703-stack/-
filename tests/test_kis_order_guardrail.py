@@ -77,7 +77,9 @@ def adapter(monkeypatch, clean_volume, tmp_path):
     monkeypatch.setattr("mojito.KoreaInvestment", MagicMock())
     monkeypatch.setenv("MODEL", "REAL")
     from src.adapters.kis_order_adapter import KisOrderAdapter
+    from risk.nonce_store import PersistentNonceSet
     adp = KisOrderAdapter()
+    adp._seen_gate_nonces = PersistentNonceSet(path=tmp_path / "nonces.log")  # 실파일 격리
     # current_price는 종목 기준 mock (지정가 검증용)
     adp.fetch_current_price = MagicMock(return_value={"current_price": 10000})
     yield adp

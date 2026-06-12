@@ -50,8 +50,10 @@ def real_adapter(monkeypatch, tmp_path):
     monkeypatch.setenv("MODEL", "REAL")
     monkeypatch.setenv("ORDER_INTENTS_HMAC_KEY", _KEY)
     from src.adapters.kis_order_adapter import KisOrderAdapter
+    from risk.nonce_store import PersistentNonceSet
     adp = KisOrderAdapter()
     assert adp._is_mock is False
+    adp._seen_gate_nonces = PersistentNonceSet(path=tmp_path / "nonces.log")  # 실파일 격리
     adp.fetch_current_price = MagicMock(return_value={"current_price": 10000})
     yield adp
 
@@ -67,8 +69,10 @@ def mock_adapter(monkeypatch, tmp_path):
     monkeypatch.setenv("MODEL", "MOCK")
     monkeypatch.setenv("ORDER_INTENTS_HMAC_KEY", _KEY)
     from src.adapters.kis_order_adapter import KisOrderAdapter
+    from risk.nonce_store import PersistentNonceSet
     adp = KisOrderAdapter()
     assert adp._is_mock is True
+    adp._seen_gate_nonces = PersistentNonceSet(path=tmp_path / "nonces.log")  # 실파일 격리
     adp.fetch_current_price = MagicMock(return_value={"current_price": 10000})
     yield adp
 
