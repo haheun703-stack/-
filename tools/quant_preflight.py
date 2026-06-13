@@ -332,6 +332,16 @@ def main() -> int:
             print(f"[WARN] kodex shadow ledger: {_kodex_warn}")
     except Exception:
         pass
+    # four_signal macro CSV staleness 자가 감지 (fx-liquidity P0-1 재발방지) — 생산자
+    # save_daily_record가 BAT/cron 미배선(고아)이라 조용히 멈추는 것을 노출. kodex와 동일하게
+    # 매매 게이트(checks)와 분리된 read-only 경고 → RESULT/카운트 불변(회귀 격리).
+    try:
+        from src.macro.four_signal_gate import stale_warning as _fs_stale_warning
+        _fs_warn = _fs_stale_warning()
+        if _fs_warn:
+            print(f"[WARN] four_signal macro: {_fs_warn}")
+    except Exception:
+        pass
     # 카운트는 simulate 모드에서만 덧붙임 (비-simulate 출력 불변 = 회귀 격리)
     total = len(checks)
     passed = sum(1 for ok, _ in checks if ok)

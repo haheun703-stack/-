@@ -26,8 +26,7 @@ import os
 import requests
 from pathlib import Path
 
-from src.adapters.kis_weekly_kit import get_index_weekly, compute_weekly_stoch_k
-
+# ※ kis_weekly_kit는 compute_four_signal_gate 안에서 lazy import — import 부작용 격리(아래 주석).
 
 _UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36"}
 
@@ -99,6 +98,12 @@ def compute_four_signal_gate(today: str | None = None) -> dict:
     """
     today = today or dt.date.today().isoformat()
 
+    # ★lazy import (테스트 격리·import 부작용 차단): kis_weekly_kit는 하위 체인에서 .env 전체를
+    #   os.environ에 로드하는 부작용이 있어, four_signal_gate를 단순 import하는 것만으로 다른
+    #   모듈의 모듈 레벨 os.getenv 캐시(예: adaptive_buy_queue.SPLIT_MAX_QTY)를 오염시킨다.
+    #   호출 시점으로 가둬 stale_warning 등 순수 헬퍼의 import는 .env를 건드리지 않게 한다.
+    from src.adapters.kis_weekly_kit import get_index_weekly, compute_weekly_stoch_k
+
     # Signal 1: KOSPI 주봉 %K (최근 6개월 데이터로 계산)
     end_dt = dt.date.today()
     start_dt = end_dt - dt.timedelta(days=200)
@@ -163,6 +168,62 @@ def save_daily_record(result: dict, csv_path: str | None = None) -> str:
             result["gate_score"], result["gate_pass"],
         ])
     return csv_path
+
+
+def _last_record_date(csv_path: str) -> dt.date | None:
+    """CSV 마지막 데이터 행의 date 컬럼(YYYY-MM-DD) → date. 실패/빈 파일 → None."""
+    p = Path(csv_path)
+    if not p.exists():
+        return None
+    try:
+        with open(csv_path, "r", encoding="utf-8") as f:
+            rows = [r for r in csv.reader(f) if r and r[0].strip()]
+    except OSError:
+        return None
+    # 헤더(첫 행 date 컬럼) 제외 후 마지막 데이터 행
+    if rows and rows[0] and rows[0][0].strip().lower() == "date":
+        rows = rows[1:]
+    if not rows:
+        return None
+    try:
+        return dt.date.fromisoformat(rows[-1][0].strip())
+    except (ValueError, IndexError):
+        return None
+
+
+def stale_warning(
+    csv_path: str | None = None,
+    max_age_days: int = 5,
+    today: dt.date | None = None,
+) -> str | None:
+    """four_signal 일별 CSV가 max_age_days(달력일) 이상 묵었으면 경고 문자열, 아니면 None.
+
+    ★재발방지 (fx-liquidity P0-1, 6/13): 생산자 save_daily_record는 이 파일 __main__에서만
+      호출 — BAT/cron 어디에도 미배선(고아)이라 5/19 수동 실행 후 조용히 멈췄다. chart_hero
+      파이프라인 휴면(unfreeze-checklist D)이라 의도적 미가동이지만, '조용히 죽은 것'과 '의도적
+      휴면'을 사람이 구분 못 하면 6/8 설계서처럼 stale을 인지하고도 3주 방치된다. preflight가
+      이 경고로 stale을 자가 노출 — 매매 안전 게이트(preflight checks)와 분리된 read-only 경고라
+      RESULT/카운트 불변(회귀 격리, 6/11 finality '게이트 분리 경고' 원칙).
+      ★부활(자동 배선)·backfill·MacroRiskScore 연결은 fx-liquidity P1 별건 승인 — 그 전까진
+      이 경고가 휴면 데이터의 '조용한 죽음'을 막는 안전판이다.
+
+    파일 자체가 없으면 None(생성된 적 없는 상태와 구분 불가 → 휴면 정상으로 간주, 경고 안 함).
+    """
+    csv_path = csv_path or "data/macro_four_signal_daily.csv"
+    today = today or dt.date.today()
+    if not Path(csv_path).exists():
+        return None
+    last = _last_record_date(csv_path)
+    if last is None:
+        return f"{csv_path}: 데이터 행 없음/파싱 불가 (파일은 존재 — 손상 의심)"
+    age = (today - last).days
+    if age >= max_age_days:
+        return (
+            f"{csv_path} {age}일 stale (마지막={last.isoformat()}). 생산자 save_daily_record는 "
+            f"BAT/cron 미배선(수동 전용)이라 조용히 멈춤 — chart_hero 휴면이면 정상 / "
+            f"부활 의도면 일일 배선 필요(fx-liquidity P1)."
+        )
+    return None
 
 
 if __name__ == "__main__":

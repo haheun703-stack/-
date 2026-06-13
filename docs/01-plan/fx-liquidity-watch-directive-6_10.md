@@ -47,6 +47,20 @@
 - 환율 소스 이중화 검증: FDR/yfinance 당일 vs 정보봇 usd_krw 교차 (6/2~6/8 stale 사고 재발 방지) — **당일 환율 실측값 확인도 여기서** (본 지시서의 환율 수치는 6/8 실측이 마지막)
 - 검증 기준: 최신일=직전 거래일 / 결측 0 / **갱신 주체·주기가 문서화됨 / stale 경고 실제 작동 확인**
 
+> **[6/14 진행 — A안 = 휴면 유지 + 가드]** (사장님 "순차 진행" 위임)
+> - ① **사망 원인 규명 완료**: 생산자 `four_signal_gate.save_daily_record`가 그 파일 `__main__`에서만
+>   호출되는 **고아**(BAT 28개 파일명·내용 + `scripts/cron/**` 전수 검사 0). 5/19 수동 1회 실행이 마지막,
+>   소스(Yahoo `^TNX`/`KRW=X`·CNN F&G·KIS 주봉)·스크립트는 정상 = "BAT 미배선"이 정답(스크립트 에러·소스 단절 아님).
+> - ② **staleness 가드 배선**: `four_signal_gate.stale_warning()` + `quant_preflight`가 kodex shadow와 동일하게
+>   매매 안전 게이트(checks)와 분리된 `[WARN]`로 stale 자가 노출(RESULT/카운트 불변 = 회귀 격리, 6/11 finality
+>   '게이트 분리 경고' 원칙). 실측: preflight가 "26일 stale(마지막=2026-05-19)" 노출 + RESULT PASS 유지.
+> - ③ **부수 발견·수정**: `four_signal_gate` import가 `kis_weekly_kit` 하위 체인의 모듈 레벨 `load_dotenv`로
+>   `.env` 76키를 `os.environ`에 로드하는 부작용(테스트 격리 파괴 — `adaptive_buy_queue.SPLIT_MAX_QTY` 등 모듈
+>   레벨 `os.getenv` 캐시 오염) → `kis_weekly_kit`를 `compute_four_signal_gate` 내 lazy import로 격리(매매 동작 불변).
+> - 검증: 신규 test 9 + 전체 회귀 **30 failed/1421 passed**(베이스라인 30/1412, 신규 실패 0). freeze 무손상.
+> - ④ **backfill·생산자 자동 배선·MacroRiskScore 연결은 P1 별건**(부활 시 surge_d1 hard gate 동시 재점검).
+>   다음 = **P0-2 환율 적대검증**(ECOS 장기 시계열, four_signal과 무관).
+
 **P0-2. 환율 신호 적대검증 (read-only 분석)**
 - 질문: `usdkrw_change_pct_1d ≥ +1%` / `20일 신고가` 가 KOSPI·FLOWX 후보군의 익일~5일 하락을 실제로 선행하는가?
 - 방법: 외국인순매도 NOISE 판명(6/3)과 동일 — **base rate(상시점등 체크) / precision / recall / 신호 1~2일 지연 강건성 / 2022 환율위기 vs 2026 구간 분리**
@@ -119,6 +133,6 @@
 
 ## 6. 승인 요청
 
-- [ ] P0-1 (사망 원인 규명+재발방지+복구) 착수 승인 — 착수일 6/11 이후
+- [x] P0-1 (사망 원인 규명+재발방지+가드) — **6/14 완료**(A안=휴면 유지+staleness 가드, backfill·부활은 P1 별건). 착수=사장님 "순차 진행" 위임
 - [ ] P0-2 (환율 적대검증, NOISE도 정상 답 사전 등록) 착수 승인 — 착수일 6/11 이후
 - [ ] P1 항목별 승인은 6/12 후 별건 (모듈별 판정 시한 표 적용)
