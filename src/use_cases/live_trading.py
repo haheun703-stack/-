@@ -20,7 +20,7 @@ from src.entities.trading_models import (
     Order,
     OrderStatus,
 )
-from src.use_cases.gate_wiring import build_gate_result
+from src.use_cases.gate_wiring import gate_check
 from src.use_cases.ports import BalancePort, CurrentPricePort, OrderPort
 from src.use_cases.position_tracker import PositionTracker
 from src.use_cases.safety_guard import SafetyGuard
@@ -219,23 +219,14 @@ class LiveTradingEngine:
         order = None
         for attempt in range(self.max_retry):
             unit_price = order_price if order_price > 0 else entry_price
-            gate = build_gate_result(
-                ticker, shares * unit_price,
-                balance_port=self.balance_port,
+            # ★게이트 통행증(공유 래퍼) — REJECT/사이즈0 → 매수 중단, RESIZE → shares 자동 축소.
+            gate, shares = gate_check(
+                self.balance_port, ticker, unit_price, shares,
                 ohlcv_loader=self._gate_ohlcv_loader,
                 sector_resolver=self._gate_sector_resolver,
             )
-            if gate.verdict == "REJECT":
-                logger.warning("[매수] %s 게이트 거부 — %s", ticker, gate.violations)
-                return {"ticker": ticker, "success": False, "reason": f"게이트 거부: {gate.violations}"}
-            if gate.verdict == "RESIZE":
-                new_shares = int(gate.final_size_krw // unit_price) if unit_price > 0 else 0
-                if new_shares <= 0:
-                    return {"ticker": ticker, "success": False, "reason": "게이트 RESIZE 후 수량 0"}
-                if new_shares != shares:
-                    logger.info("[매수] %s 게이트 RESIZE: %d→%d주 (승인 %.0f원)",
-                                ticker, shares, new_shares, gate.final_size_krw)
-                    shares = new_shares
+            if gate is None:
+                return {"ticker": ticker, "success": False, "reason": "게이트 거부/사이즈 0"}
 
             if self.default_order_type == "limit":
                 order = self.order_port.buy_limit(

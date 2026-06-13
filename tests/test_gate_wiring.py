@@ -12,7 +12,7 @@ import pandas as pd
 import pytest
 
 from risk.config import KST
-from src.use_cases.gate_wiring import build_gate_result
+from src.use_cases.gate_wiring import build_gate_result, gate_check
 
 _KEY = "gate-wiring-test-key"
 _ASOF = date(2026, 6, 10)  # 수요일(거래일)
@@ -121,6 +121,36 @@ def test_issuance_is_mode_agnostic(tmp_path):
     # 같은 입력은 mode와 무관하게 동일 발급(헬퍼는 강제가 아니라 발급만) → PASS 토큰
     r = _build(log_dir=tmp_path)
     assert r.verdict == "PASS" and r.signed
+
+
+# ── gate_check 래퍼: REJECT→(None,0) / RESIZE→축소 / 입력불가→(None,0) ─────
+def test_gate_check_pass(tmp_path):
+    g, q = gate_check(FakeBalance(_ok_balance()), "005930", 10000, 10,
+                      ohlcv_loader=_loader(_fresh_ohlcv()), sector_resolver=_sector(),
+                      hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path,
+                      now_kst=datetime(2026, 6, 10, 10, 0, tzinfo=KST))
+    assert g is not None and g.verdict == "PASS" and q == 10
+
+
+def test_gate_check_reject_returns_none(tmp_path):
+    g, q = gate_check(FakeBalance({"ok": False, "available_cash": 0, "holdings": []}),
+                      "005930", 10000, 10, ohlcv_loader=_loader(_fresh_ohlcv()),
+                      sector_resolver=_sector(), hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path)
+    assert g is None and q == 0
+
+
+def test_gate_check_resize_shrinks_qty(tmp_path):
+    # equity 1,000,000 · 단가 10,000 × 20주 = 200,000 → G3 0.20>0.12 RESIZE→120,000→12주
+    g, q = gate_check(FakeBalance(_ok_balance(cash=1_000_000)), "005930", 10000, 20,
+                      ohlcv_loader=_loader(_fresh_ohlcv(volume=5000)), sector_resolver=_sector(),
+                      hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path,
+                      now_kst=datetime(2026, 6, 10, 10, 0, tzinfo=KST))
+    assert g is not None and g.verdict == "RESIZE" and q == 12
+
+
+def test_gate_check_bad_input_fail_closed(tmp_path):
+    assert gate_check(FakeBalance(_ok_balance()), "005930", 0, 10, log_dir=tmp_path) == (None, 0)
+    assert gate_check(FakeBalance(_ok_balance()), "005930", 10000, 0, log_dir=tmp_path) == (None, 0)
 
 
 # ── ★sole issuance: production에서 evaluate_pre_trade 직접호출은 gate_wiring뿐 ─

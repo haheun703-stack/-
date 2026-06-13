@@ -222,3 +222,49 @@ def build_gate_result(
     return evaluate_pre_trade(
         request, holdings, cfg=cfg, log_dir=log_dir, hmac_key=hmac_key, now_kst=now_kst,
     )
+
+
+def gate_check(
+    balance_port,
+    ticker: str,
+    unit_price: float,
+    qty: int,
+    **build_kwargs,
+) -> tuple[GateResult | None, int]:
+    """호출처용 얇은 래퍼 — REJECT/RESIZE 처리를 1곳에 모은다("로직 1곳=버그 1곳").
+
+    각 BUY 호출처(smart_entry/adaptive_*/limit_up_scanner/live_trading)는 이것만 부르면 된다:
+        gate, qty = gate_check(adapter, ticker, unit_price, qty)
+        if gate is None:        # REJECT/입력불가 → 매수 스킵
+            ...continue/skip
+        order = adapter.buy_limit(ticker, price, qty, gate_result=gate, **kw)
+
+    Args:
+        balance_port: fetch_balance()를 가진 어댑터(KisOrderAdapter는 BalancePort 겸함).
+        unit_price: 사이징 기준 단가 — 지정가는 주문가, 시장가는 현재가 추정. ≤0이면 fail-closed.
+        qty: 주문 수량.
+        build_kwargs: build_gate_result로 전달(ohlcv_loader/sector_resolver/hmac_key/now_kst/log_dir 등).
+
+    Returns:
+        (gate_result, final_qty). REJECT/입력불가 → (None, 0). RESIZE → (gate, 축소된 qty).
+        PASS → (gate, qty). final_qty는 항상 통행증 승인 사이즈 이내.
+    """
+    if not unit_price or unit_price <= 0 or qty <= 0:
+        logger.warning("[gate_check] %s 단가/수량 부적격(price=%s, qty=%s) → fail-closed 스킵",
+                       ticker, unit_price, qty)
+        return None, 0
+    gate = build_gate_result(ticker, float(qty) * float(unit_price),
+                             balance_port=balance_port, **build_kwargs)
+    if gate.verdict == "REJECT":
+        logger.warning("[gate_check] %s 게이트 거부 — %s", ticker, gate.violations)
+        return None, 0
+    if gate.verdict == "RESIZE":
+        new_qty = int(gate.final_size_krw // unit_price)
+        if new_qty <= 0:
+            logger.warning("[gate_check] %s RESIZE 후 수량 0 → 스킵", ticker)
+            return None, 0
+        if new_qty != qty:
+            logger.info("[gate_check] %s 게이트 RESIZE: %d→%d주(승인 %.0f원)",
+                        ticker, qty, new_qty, gate.final_size_krw)
+        return gate, new_qty
+    return gate, qty
