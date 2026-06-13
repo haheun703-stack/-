@@ -6,13 +6,16 @@
 3. 모든 모델은 틀린다 — 마지막 층은 모델이 아니라 하드 룰이다.
 4. 노출(exposure)이 아니라 리스크(risk)를 본다.
 
-Phase 1a 범위 = 정적 한도 G3~G6만 활성:
+게이트 매트릭스 (활성 조건):
   G3 단일 종목 비중 ≤ max_single_weight(12%)   → 위반 시 RESIZE(비례 축소 재검사)
   G4 단일 섹터 비중 ≤ max_sector_weight(30%)   → 위반 시 REJECT
   G5 상관 클러스터(ρ ≥ 0.8 보유 합산 = 유효 단일 포지션, G3 한도 적용) → 위반 시 REJECT
   G6 유동성(주문금액 ≤ ADV20 × 5%, 데이터 없으면 fail-closed REJECT) → 위반 시 REJECT
-  G1/G2(VaR)=Phase 2, G8(드로다운 사다리)=Phase 3, G7(Component VaR)=Phase 4
-  — checks dict에 'not_active'로만 명시(자리 선등록).
+  G1 포트폴리오 1D VaR95 ≤ 2.5% / G2 스트레스 VaR95 ≤ 4% (Phase 2) → RESIZE
+  G7 신규 포지션 Component VaR 기여 ≤ component_var_limit(25%) (Phase 4) → RESIZE
+  G8 드로다운 사다리 노출 한도 (Phase 3) → 사전 REJECT/축소
+  ★G1/G2/G7은 returns_by_ticker 주입 시만 활성(없으면 not_active=Phase 1a 호환), G8은 ladder
+   주입 시만 활성. 미주입 게이트는 checks dict에 'not_active'로 명시(자리 선등록).
 
 쓰기 3원칙 (6/11 레포 표준):
   ① 안전한 기본값 — log_dir=None(기본)이면 순수 평가, 파일쓰기 등 부작용 0.
@@ -198,9 +201,37 @@ def _run_static_checks(
                 resize_specs.append({"gate": "G2", "reason": "stress_var_limit",
                                      "allowed_krw": size_krw * cfg.stress_var_limit / vr.stress_var95,
                                      "stress_var95": vr.stress_var95, "limit": cfg.stress_var_limit})
+
+        # G7 — Component VaR 기여 (같은 FHS 패널 → VaR와 정합, Phase 4). 신규 종목 기여 ≤ 한도.
+        #   ★≥2 리스크 포지션일 때만 활성: 단일 포지션은 기여가 100%일 수밖에 없고(분산 대상 없음),
+        #   절대 리스크는 G1(포트 VaR)·G3(비중)이 이미 한정한다 → 단일이면 pass(부트스트랩 과차단 방지).
+        #   위반 시 RESIZE(스펙 §3.5: G1/G2/G3/G7=비례 축소 계열).
+        from risk.component_var import compute_component_var
+        cv = compute_component_var(returns_by_ticker, weights, cfg=cfg)
+        if not cv.ok:
+            # 데이터 부족/이상/분산0 → fail-closed(보통 같은 패널이라 G1도 동시 차단). 축소 상한 0=REJECT.
+            checks["G7"] = {"status": "violation",
+                            "reason": f"component_data_unavailable:{cv.reason}", "data_ok": False}
+            resize_specs.append({"gate": "G7",
+                                 "reason": f"component_data_unavailable:{cv.reason}", "allowed_krw": 0.0})
+        elif cv.n_positions < 2:
+            checks["G7"] = {"status": "pass", "reason": "single_position_no_basis",
+                            "n_positions": cv.n_positions, "contribution": cv.contribution(request.ticker)}
+        else:
+            frac = cv.contribution(request.ticker)
+            g7_ok = frac <= cfg.component_var_limit + _W_EPS
+            checks["G7"] = {"status": "pass" if g7_ok else "violation",
+                            "contribution": frac, "limit": cfg.component_var_limit,
+                            "n_positions": cv.n_positions}
+            if not g7_ok:
+                # 기여 ∝ 신규 비중 ∝ size(근사) → 한도 비율로 축소, 루프 재검사로 수렴(G1/G2 패턴).
+                resize_specs.append({"gate": "G7", "reason": "component_var_limit",
+                                     "allowed_krw": size_krw * cfg.component_var_limit / frac,
+                                     "contribution": frac, "limit": cfg.component_var_limit})
     else:
         checks["G1"] = {"status": _NOT_ACTIVE_GATES["G1"]}
         checks["G2"] = {"status": _NOT_ACTIVE_GATES["G2"]}
+        checks["G7"] = {"status": _NOT_ACTIVE_GATES["G7"]}
 
     # G3 — 단일 종목 비중 (같은 ticker 기보유분 합산: 가상 포트폴리오 전체 재계산)
     g3_weight = (same_ticker_value + size_krw) / equity
@@ -293,7 +324,6 @@ def _run_static_checks(
                 "adv_cap_krw": adv_cap_krw,
             })
 
-    checks["G7"] = {"status": _NOT_ACTIVE_GATES["G7"]}
     checks["G8"] = {"status": _NOT_ACTIVE_GATES["G8"]}
     return checks, reject_violations, resize_specs
 

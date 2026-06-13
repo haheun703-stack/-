@@ -67,6 +67,79 @@ def _ewma_vol(r: np.ndarray, lam: float) -> np.ndarray:
     return np.sqrt(np.maximum(var, 1e-12))
 
 
+@dataclass(frozen=True)
+class FhsPanel:
+    """FHS 필터링 결과 패널 — compute_portfolio_var(§3.2)와 component_var(§3.3)가 공유한다.
+
+    ★공유 이유: 같은 FHS 분포(필터링·공통 날짜·비중 정렬)에서 VaR와 Component VaR가 나와야
+      둘이 정합한다(로직 1곳=버그 1곳). ok=False면 패널을 신뢰할 수 없어 호출부가 fail-closed한다.
+
+    filtered/stressed: (n_obs, k) 평시/스트레스 FHS 수익률. port/port_stress: 가중합 손익 분포(n,).
+    """
+
+    ok: bool
+    tickers: list[str]
+    w: np.ndarray
+    filtered: np.ndarray
+    stressed: np.ndarray
+    port: np.ndarray
+    port_stress: np.ndarray
+    n_obs: int
+    reason: str = ""
+
+
+def _build_fhs_panel(
+    returns_by_ticker: dict[str, pd.Series],
+    weights_by_ticker: dict[str, float],
+    cfg: RiskConfig,
+    lookback: int,
+    stress_vol_mult: float,
+) -> FhsPanel:
+    """FHS 필터링 패널 생성(평시/스트레스). 표본 부족/데이터 없음 → ok=False(빈 배열).
+
+    절차(§3.2): 비중>0·수익률 존재 종목 선별 → 공통 날짜 inner join(상관 내재) → lookback 절단 →
+    종목별 EWMA σ로 표준화 잔차 z=r/σ → 현재 σ_now로 리스케일(평시 σ_now, 스트레스 σ_now×mult).
+    """
+    _empty = np.empty((0, 0))
+    _empty1 = np.empty(0)
+    # 비중 유효(>0) + 수익률 존재 종목만
+    tickers = [
+        t for t, w in weights_by_ticker.items()
+        if abs(float(w)) > 0 and returns_by_ticker.get(t) is not None and len(returns_by_ticker[t]) > 0
+    ]
+    if not tickers:
+        return FhsPanel(False, [], _empty1, _empty, _empty, _empty1, _empty1, 0, "no_returns_data")
+
+    # 공통 날짜 정렬 (inner join → dropna): 같은 날짜의 동반 수익률이라야 상관이 내재된다.
+    df = pd.DataFrame({t: returns_by_ticker[t] for t in tickers}).dropna()
+    if df.empty:
+        return FhsPanel(False, [], _empty1, _empty, _empty, _empty1, _empty1, 0, "no_common_dates")
+    if len(df) > lookback:
+        df = df.iloc[-lookback:]
+    n = len(df)
+    if n < _MIN_OBS:
+        return FhsPanel(False, [], _empty1, _empty, _empty, _empty1, _empty1, n,
+                        f"insufficient_obs:{n}<{_MIN_OBS}")
+
+    w = np.array([float(weights_by_ticker[t]) for t in tickers], dtype=float)
+
+    # FHS 종목별 필터링: 표준화 잔차 z → 현재 변동성 리스케일(평시 σ_now, 스트레스 σ_now×mult)
+    filtered = np.empty((n, len(tickers)))
+    stressed = np.empty((n, len(tickers)))
+    for j, t in enumerate(tickers):
+        r = df[t].to_numpy(dtype=float)
+        sigma = _ewma_vol(r, cfg.ewma_lambda)
+        sigma_now = float(sigma[-1])
+        z = np.clip(r / np.where(sigma > 0, sigma, 1e-12), -_Z_CLIP, _Z_CLIP)
+        filtered[:, j] = z * sigma_now
+        stressed[:, j] = z * sigma_now * stress_vol_mult
+
+    # 포트폴리오 손익 분포(각 날짜 가중합)
+    port = filtered @ w
+    port_stress = stressed @ w
+    return FhsPanel(True, list(tickers), w, filtered, stressed, port, port_stress, n, "ok")
+
+
 def compute_portfolio_var(
     returns_by_ticker: dict[str, pd.Series],
     weights_by_ticker: dict[str, float],
@@ -87,40 +160,11 @@ def compute_portfolio_var(
     Returns:
         VarResult. 표본 < _MIN_OBS / 데이터 없음 / 비중 합 0 → ok=False + 보수적 VaR(1.0).
     """
-    # 비중 유효(>0) + 수익률 존재 종목만
-    tickers = [
-        t for t, w in weights_by_ticker.items()
-        if abs(float(w)) > 0 and returns_by_ticker.get(t) is not None and len(returns_by_ticker[t]) > 0
-    ]
-    if not tickers:
-        return VarResult(False, 1.0, 1.0, 1.0, 1.0, 0, "no_returns_data")
-
-    # 공통 날짜 정렬 (inner join → dropna): 같은 날짜의 동반 수익률이라야 상관이 내재된다.
-    df = pd.DataFrame({t: returns_by_ticker[t] for t in tickers}).dropna()
-    if df.empty:
-        return VarResult(False, 1.0, 1.0, 1.0, 1.0, 0, "no_common_dates")
-    if len(df) > lookback:
-        df = df.iloc[-lookback:]
-    n = len(df)
-    if n < _MIN_OBS:
-        return VarResult(False, 1.0, 1.0, 1.0, 1.0, n, f"insufficient_obs:{n}<{_MIN_OBS}")
-
-    w = np.array([float(weights_by_ticker[t]) for t in tickers], dtype=float)
-
-    # FHS 종목별 필터링: 표준화 잔차 z → 현재 변동성 리스케일(평시 σ_now, 스트레스 σ_now×mult)
-    filtered = np.empty((n, len(tickers)))
-    stressed = np.empty((n, len(tickers)))
-    for j, t in enumerate(tickers):
-        r = df[t].to_numpy(dtype=float)
-        sigma = _ewma_vol(r, cfg.ewma_lambda)
-        sigma_now = float(sigma[-1])
-        z = np.clip(r / np.where(sigma > 0, sigma, 1e-12), -_Z_CLIP, _Z_CLIP)
-        filtered[:, j] = z * sigma_now
-        stressed[:, j] = z * sigma_now * stress_vol_mult
-
-    # 포트폴리오 손익 분포(각 날짜 가중합)
-    port = filtered @ w
-    port_stress = stressed @ w
+    panel = _build_fhs_panel(returns_by_ticker, weights_by_ticker, cfg, lookback, stress_vol_mult)
+    if not panel.ok:
+        return VarResult(False, 1.0, 1.0, 1.0, 1.0, panel.n_obs, panel.reason)
+    port = panel.port
+    port_stress = panel.port_stress
 
     def _var(dist: np.ndarray, conf: float) -> float:
         # 손실 = -수익. VaR(conf%) = 손익 분포의 (100-conf) 분위수를 손실(양수)로.
@@ -135,4 +179,4 @@ def compute_portfolio_var(
     # 스트레스(변동성↑)는 평시보다 작을 수 없다 — 단조성 강제(수치 안정).
     stress_var95 = max(_var(port_stress, 95.0), var95)
 
-    return VarResult(True, var95, var99, es95, stress_var95, n, "ok")
+    return VarResult(True, var95, var99, es95, stress_var95, panel.n_obs, "ok")
