@@ -90,3 +90,30 @@ def test_var_gate_reject_includes_var_reason_in_audit():
     res = evaluate_pre_trade(req, [], returns_by_ticker={"A": _returns(0.25)})
     # 90% 비중 → G3(12%)부터 위반, var도 위반 — 어느 쪽이든 REJECT/RESIZE
     assert res.verdict in ("RESIZE", "REJECT")
+
+
+# ── Phase 2c: gate_wiring 수익률 배선 헬퍼 ───────────────────────────────────
+def test_returns_from_ohlcv_helper():
+    from src.use_cases.gate_wiring import _returns_from_ohlcv
+    idx = pd.date_range("2023-01-01", periods=100, freq="B")
+    df = pd.DataFrame({"close": np.linspace(10000, 11000, 100)}, index=idx)
+    r = _returns_from_ohlcv(df)
+    assert r is not None and len(r) == 99  # pct_change → n-1
+    assert _returns_from_ohlcv(None) is None
+    assert _returns_from_ohlcv(pd.DataFrame({"x": [1, 2]})) is None  # close 컬럼 없음
+
+
+def test_build_var_returns_min_obs_filter():
+    # VaR 최소표본(60) 미만 종목은 제외 — 짧은 이력 종목은 VaR 입력에서 빠진다
+    from src.use_cases.gate_wiring import _build_var_returns
+    long_df = pd.DataFrame(
+        {"close": np.linspace(10000, 11000, 100)},
+        index=pd.date_range("2023-01-01", periods=100, freq="B"),
+    )
+    short_df = pd.DataFrame(
+        {"close": np.linspace(10000, 10100, 30)},
+        index=pd.date_range("2023-01-01", periods=30, freq="B"),
+    )
+    out = _build_var_returns({"LONG", "SHORT"}, lambda t: long_df if t == "LONG" else short_df)
+    assert "LONG" in out  # 99 >= 60
+    assert "SHORT" not in out  # 29 < 60 → 제외

@@ -45,13 +45,51 @@ _DEFAULT_MAX_STALE_TRADING_DAYS = 3
 
 # ── 기본 데이터 소스(주입 가능 — 테스트는 fake 주입) ────────────────────────
 def _default_ohlcv_loader(ticker: str):
-    """기본 OHLCV 로더 — 로컬 parquet 우선(오프라인 가용). 실패 시 빈 df."""
+    """기본 OHLCV 로더 — 로컬 parquet 우선(오프라인 가용). 실패 시 None.
+
+    days=400: adv20(window=20)에는 60이면 충분하나 VaR(G1/G2, Phase 2c)는 FHS lookback +
+    EWMA 워밍업에 더 긴 이력이 필요하다(_MIN_OBS=60). 로컬 parquet이라 긴 이력 로드 비용은
+    무시 가능. pykrx 폴백은 KRX 로그인 만료로 막혀 있어 로컬 parquet 있는 종목만 VaR 가용.
+    """
     from src.etf.samsung_single_leverage_shadow import load_daily_ohlcv
     try:
-        return load_daily_ohlcv(ticker, days=60)
+        return load_daily_ohlcv(ticker, days=400)
     except Exception as exc:  # noqa: BLE001 — 로드 실패는 '유동성 모름'으로 흘려보낸다(R2)
         logger.warning("[gate_wiring] OHLCV 로드 실패 %s: %s", ticker, exc)
         return None
+
+
+def _returns_from_ohlcv(df):
+    """OHLCV df → 일별 단순수익률 Series(close.pct_change). 데이터 부족/컬럼 부재 → None."""
+    if df is None or len(df) < 2:
+        return None
+    if "close" not in getattr(df, "columns", []):
+        return None
+    r = df["close"].pct_change().dropna()
+    return r if len(r) > 0 else None
+
+
+def _build_var_returns(tickers, ohlcv_loader) -> dict:
+    """보유+신규 종목의 일별 수익률 {ticker: Series} (VaR G1/G2 입력, Phase 2c).
+
+    ★VaR 최소표본(_MIN_OBS) 미만 종목은 제외 — 짧은 이력으로 VaR를 신뢰할 수 없다. 신규 종목이
+    제외되면 호출부가 returns=None으로 넘겨 G1/G2 not_active(G3~G6 폴백, 과차단 방지). 이는
+    Phase 1a 철학(데이터 없으면 기존 정적 게이트로) + graceful degradation과 일관 — VaR는 추가
+    보호 층이며, 데이터 부족으로 모든 매수를 막는 가용성 붕괴가 더 큰 리스크(진짜 백스톱=킬스위치).
+    한 종목 로드 실패가 전체를 막지 않는다(독립 try).
+    """
+    from risk.var_engine import _MIN_OBS
+    out: dict = {}
+    for t in tickers:
+        if not t:
+            continue
+        try:
+            r = _returns_from_ohlcv(ohlcv_loader(t))
+        except Exception:  # noqa: BLE001
+            r = None
+        if r is not None and len(r) >= _MIN_OBS:
+            out[t] = r
+    return out
 
 
 def _default_sector_resolver(ticker: str) -> str | None:
@@ -212,6 +250,14 @@ def build_gate_result(
     # R2 — adv20 없음/stale → None → G6 fail-closed REJECT(게이트가 audit 로그까지 기록)
     adv20 = _adv20_or_none(ticker, ohlcv_loader, as_of, max_stale_trading_days)
 
+    # VaR용 수익률(보유 + 신규) — G1/G2 활성화 (Phase 2c).
+    var_tickers = {ticker} | {h.ticker for h in holdings if h.ticker}
+    returns_by_ticker = _build_var_returns(var_tickers, ohlcv_loader)
+    # ★신규 종목 VaR 데이터(≥_MIN_OBS)가 없으면 G1/G2 not_active(Phase 1a 폴백, 과차단 방지).
+    #   신규 리스크를 못 본 채 VaR를 통과시키는 fail-open을 막기 위해 '전부 끔'(보유분만으론 무의미).
+    if ticker not in returns_by_ticker:
+        returns_by_ticker = None
+
     request = GateRequest(
         ticker=ticker,
         sector=sector_resolver(ticker),
@@ -221,6 +267,7 @@ def build_gate_result(
     )
     return evaluate_pre_trade(
         request, holdings, cfg=cfg, log_dir=log_dir, hmac_key=hmac_key, now_kst=now_kst,
+        returns_by_ticker=returns_by_ticker or None,
     )
 
 
