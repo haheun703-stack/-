@@ -58,5 +58,29 @@
   ★실배선 = live_trading/호출처가 `build_gate_result(equity_peak_store=EquityPeakStore())` 넘기면 끝(아직 호출처는 미주입).
 - Phase 3 나머지(게이트 아닌 노출 조절/모니터): 변동성 타겟팅(§4.3 `vol_targeting.py`)·스트레스 테스트(§4.1
   `stress_test.py` 역사5+가상5)·크라우딩(§4.4 `crowding.py`).
-- Phase 4: Component VaR(G7 §3.3)·이중상관(G5 스트레스 §3.4) — 상관행렬 배선 필요.
 - unfreeze 별트랙: E(페이퍼 20일).
+
+## Phase 4 게이트 G5 + G7 완료 (6/14 이어지는 세션, worktree 커밋) → ★게이트 G1~G8 전부 구현
+- ✅ **G7 Component VaR** (`c6dc909`): 엔진 `risk/component_var.py` 신규 + `pre_trade_gate` 연결.
+  Euler 공분산 분해를 **FHS 필터링 수익률** 위에서(기여율_i = w_i·Cov(r̃_i,r̃_p)/Var(r̃_p), Σ=1 정확).
+  꼬리 조건부 추정 대신 공분산 분해 채택(표본 60~수백일이면 95% 꼬리 표본 부족=노이즈). near-zero
+  분산(완전 헤지) 상대 floor 가드로 기여율 발산 차단. 신규 종목 기여 ≤ component_var_limit(25%) →
+  RESIZE. ★≥2 리스크 포지션 시만 활성(단일=pass, 부트스트랩 과차단 방지). returns 미주입=not_active.
+  ★`var_engine`에서 `_build_fhs_panel/FhsPanel` 추출 → VaR와 Component VaR 동일 패널 공유(로직 1곳),
+  compute_portfolio_var 수식 불변(var_backtest 5.35% 보존). gate_wiring 무변경(기존 returns 배선 자동 활용).
+  test_component_var 10 + test_component_gate 6.
+- ✅ **G5 이중 상관 클러스터 실활성화** (`ee40fd7`): 엔진 `risk/correlation.py` 신규 + `gate_wiring` 배선.
+  ρ_normal(최근 252일 EWMA 가중 피어슨) → ρ_stress = ρ_normal + 0.5(1-ρ_normal) 1방향 슈링크(음의
+  상관도 1쪽으로 당겨 헤지 과신 차단). gate_wiring이 VaR용으로 이미 로드한 returns를 **재사용**해 신규 vs
+  보유 ρ_stress 계산 → `Holding.corr_with_new` 주입 → **G5 실활성화**. 그전엔 corr_with_new=None만 넘겨
+  production에서 G5가 한 번도 군집 안 됨(unknown_corr_count로 노출만). 게이트 로직 무변경(ρ_stress ≥ 0.8
+  보유 합산 = 유효 단일 포지션 → G3 한도 → REJECT). 계산 불가(공통표본<60)는 None 유지(과차단 방지).
+  test_correlation 9(엔진 7 + G5 REJECT/비활성 2).
+- 현재 상태: risk/gate **191 passed** · 전체 **27 failed / 1505 passed**(신규 실패 0; 27=기존 날짜만료/stash).
+  freeze 유지 · 실주문 0 · G5=REJECT만 / G7=RESIZE만.
+- ⚠️ **활성 조건**(G1/G2와 동일 graceful): G5/G7은 returns_by_ticker 가용(로컬 parquet ≥60obs) 종목만 실작동.
+  데이터 부족 시 G7 not_active·G5 군집 제외(unknown_corr_count). pykrx KRX 만료라 로컬 parquet 있는 종목만.
+- 다음 후보(별 세션): Phase 4 **크라우딩**(§4.4 `crowding.py`) / Phase 3 나머지(`stress_test.py` §4.1·
+  `vol_targeting.py` §4.3). ★G5 정밀화 옵션 = ρ_stress 슈링크 대신 **VKOSPI 위기구간 별도 추정**(§3.4
+  "데이터 충분하면 이쪽 우선") — 현재는 슈링크 공식(스펙 1순위 기재) 사용.
+- ★worktree HEAD `ee40fd7` = origin/feature/risk-engine (0/0).
