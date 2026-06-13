@@ -146,23 +146,63 @@ def _run_static_checks(
     request: GateRequest,
     holdings: list[Holding],
     cfg: RiskConfig,
-) -> tuple[dict, list[dict], dict | None]:
-    """현재 평가 사이즈로 가상 포트폴리오(기존+신규)를 재계산해 G3~G6 검사.
+    returns_by_ticker: dict | None = None,
+) -> tuple[dict, list[dict], list[dict]]:
+    """현재 평가 사이즈로 가상 포트폴리오(기존+신규)를 재계산해 G1~G6 검사.
 
-    반환: (checks, reject급 위반 목록[G4/G5/G6], G3 위반 dict 또는 None).
-    G3만 RESIZE 대상이므로 분리해서 돌려준다.
+    반환: (checks, reject급 위반 목록[G4/G5/G6], resize_specs[G1/G2/G3]).
+    resize_specs = 비례 축소 대상. 각 {gate, reason, allowed_krw, ...} — 'allowed_krw'는 그
+    게이트 한도를 만족시키는 신규 사이즈 상한이며, 루프가 전체 min을 취해 축소한다.
+    ★G1/G2(VaR)는 returns_by_ticker 주입 시에만 활성 — 없으면 not_active(Phase 1a 호환,
+    기존 호출은 G3~G6만). VaR 데이터 부족(ok=False) → allowed_krw=0 → min_trade 미만 → REJECT.
     """
     equity = float(request.equity_krw)
     checks: dict = {}
-    # 게이트 번호 순서대로 기록 (감사 로그 가독성)
-    checks["G1"] = {"status": _NOT_ACTIVE_GATES["G1"]}
-    checks["G2"] = {"status": _NOT_ACTIVE_GATES["G2"]}
-
     reject_violations: list[dict] = []
-    g3_violation: dict | None = None
+    resize_specs: list[dict] = []
+
+    # 같은 종목 기보유분 (G1/G2 비중 + G3 공용)
+    same_ticker_value = sum(h.value_krw for h in holdings if h.ticker == request.ticker)
+
+    # G1/G2 — 포트폴리오 VaR (returns 주입 시 활성, 없으면 not_active = Phase 1a 호환)
+    if returns_by_ticker is not None:
+        from risk.var_engine import compute_portfolio_var
+        weights: dict[str, float] = {}
+        for h in holdings:
+            if h.ticker:
+                weights[h.ticker] = weights.get(h.ticker, 0.0) + h.value_krw / equity
+        # 신규 주문 후 해당 종목 비중(같은 종목 기보유분 합산)
+        weights[request.ticker] = (same_ticker_value + size_krw) / equity
+        vr = compute_portfolio_var(returns_by_ticker, weights, cfg=cfg)
+        g1_ok = vr.ok and vr.var95 <= cfg.var_limit + _W_EPS
+        g2_ok = vr.ok and vr.stress_var95 <= cfg.stress_var_limit + _W_EPS
+        checks["G1"] = {
+            "status": "pass" if g1_ok else "violation",
+            "var95": vr.var95, "limit": cfg.var_limit, "n_obs": vr.n_obs, "data_ok": vr.ok,
+        }
+        checks["G2"] = {
+            "status": "pass" if g2_ok else "violation",
+            "stress_var95": vr.stress_var95, "limit": cfg.stress_var_limit, "data_ok": vr.ok,
+        }
+        if not vr.ok:
+            # 데이터 부족/이상 → fail-closed: 축소 상한 0(루프가 min_trade 미만 → REJECT)
+            resize_specs.append({"gate": "G1", "reason": f"var_data_unavailable:{vr.reason}",
+                                 "allowed_krw": 0.0})
+        else:
+            # VaR ∝ 신규 비중 ∝ size (선형 근사) → 한도 비율로 축소, 루프 재검사로 수렴
+            if vr.var95 > cfg.var_limit:
+                resize_specs.append({"gate": "G1", "reason": "var_limit",
+                                     "allowed_krw": size_krw * cfg.var_limit / vr.var95,
+                                     "var95": vr.var95, "limit": cfg.var_limit})
+            if vr.stress_var95 > cfg.stress_var_limit:
+                resize_specs.append({"gate": "G2", "reason": "stress_var_limit",
+                                     "allowed_krw": size_krw * cfg.stress_var_limit / vr.stress_var95,
+                                     "stress_var95": vr.stress_var95, "limit": cfg.stress_var_limit})
+    else:
+        checks["G1"] = {"status": _NOT_ACTIVE_GATES["G1"]}
+        checks["G2"] = {"status": _NOT_ACTIVE_GATES["G2"]}
 
     # G3 — 단일 종목 비중 (같은 ticker 기보유분 합산: 가상 포트폴리오 전체 재계산)
-    same_ticker_value = sum(h.value_krw for h in holdings if h.ticker == request.ticker)
     g3_weight = (same_ticker_value + size_krw) / equity
     g3_ok = g3_weight <= cfg.max_single_weight + _W_EPS
     checks["G3"] = {
@@ -172,12 +212,13 @@ def _run_static_checks(
         "existing_same_ticker_krw": same_ticker_value,
     }
     if not g3_ok:
-        g3_violation = {
+        resize_specs.append({
             "gate": "G3",
             "reason": "single_weight_limit",
+            "allowed_krw": cfg.max_single_weight * equity - same_ticker_value,
             "weight": g3_weight,
             "limit": cfg.max_single_weight,
-        }
+        })
 
     # G4 — 단일 섹터 비중 (sector None → 'UNKNOWN' 버킷으로 fail-closed 합산)
     bucket = request.sector if request.sector else _UNKNOWN_SECTOR
@@ -254,7 +295,7 @@ def _run_static_checks(
 
     checks["G7"] = {"status": _NOT_ACTIVE_GATES["G7"]}
     checks["G8"] = {"status": _NOT_ACTIVE_GATES["G8"]}
-    return checks, reject_violations, g3_violation
+    return checks, reject_violations, resize_specs
 
 
 def _sanitize_json(obj):
@@ -330,6 +371,7 @@ def evaluate_pre_trade(
     log_dir: Path | None = None,
     hmac_key: str | None = None,
     now_kst: datetime | None = None,
+    returns_by_ticker: dict | None = None,
 ) -> GateResult:
     """신규 주문 의도를 가상 포트폴리오(기존+신규) 기준으로 G3~G6 검사해 판정한다.
 
@@ -368,42 +410,40 @@ def evaluate_pre_trade(
         return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
     # 1) G3 RESIZE 루프 (G4/G5/G6 위반은 즉시 REJECT — 축소로 구제하지 않는다, 스펙 §3.5)
-    equity = float(request.equity_krw)
-    same_ticker_value = sum(h.value_krw for h in holdings if h.ticker == request.ticker)
     size = original
     iterations = 0
     resize_trail: list[dict] = []  # 축소 이력 (감사 추적)
 
     while True:
-        checks, reject_viols, g3_viol = _run_static_checks(size, request, holdings, cfg)
+        checks, reject_viols, resize_specs = _run_static_checks(
+            size, request, holdings, cfg, returns_by_ticker
+        )
 
         if reject_viols:
-            violations = resize_trail + reject_viols
-            if g3_viol is not None:
-                violations.append(g3_viol)  # 사유 전부 기록
+            # G4/G5/G6은 축소로 구제하지 않는다 — 즉시 REJECT(resize 사유도 함께 기록)
+            violations = resize_trail + reject_viols + list(resize_specs)
             result = _build_result("REJECT", 0.0, original, violations, iterations,
                                    checks, issued_at, request)
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
-        if g3_viol is None:
+        if not resize_specs:
             verdict = "PASS" if iterations == 0 else "RESIZE"
             result = _build_result(verdict, size, original, list(resize_trail), iterations,
                                    checks, issued_at, request)
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
-        # G3 위반 → 비례 축소 시도
+        # G1/G2/G3 위반 → 가장 강한 제약(min allowed_krw)으로 비례 축소 후 재검사
         if iterations >= cfg.resize_max_iter:
-            violations = resize_trail + [dict(g3_viol, reason="resize_failed")]
+            violations = resize_trail + [dict(s, reason="resize_failed") for s in resize_specs]
             result = _build_result("REJECT", 0.0, original, violations, iterations,
                                    checks, issued_at, request)
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
-        # 한도 내 허용 사이즈 = 한도비중×자본 − 같은 종목 기보유분
-        allowed = cfg.max_single_weight * equity - same_ticker_value
-        new_size = min(size, allowed)
+        binding = min(resize_specs, key=lambda s: float(s["allowed_krw"]))  # 대표(가장 강한 제약)
+        new_size = min([size] + [float(s["allowed_krw"]) for s in resize_specs])
         if new_size < cfg.min_trade_krw:
             violations = resize_trail + [dict(
-                g3_viol,
+                binding,
                 reason="resize_below_min_trade",
                 resized_to_krw=new_size,
                 min_trade_krw=cfg.min_trade_krw,
@@ -413,13 +453,12 @@ def evaluate_pre_trade(
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
         if new_size >= size - _KRW_EPS:
             # 축소가 진행되지 않으면(수치 안정성) 무의미 반복 대신 즉시 실패 — fail-closed
-            violations = resize_trail + [dict(g3_viol, reason="resize_failed")]
+            violations = resize_trail + [dict(s, reason="resize_failed") for s in resize_specs]
             result = _build_result("REJECT", 0.0, original, violations, iterations,
                                    checks, issued_at, request)
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
-        resize_trail.append(dict(g3_viol, action="resized",
-                                 from_krw=size, to_krw=new_size))
+        resize_trail.append(dict(binding, action="resized", from_krw=size, to_krw=new_size))
         size = new_size
         iterations += 1
 

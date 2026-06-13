@@ -723,6 +723,8 @@ def main():
     parser.add_argument("--upload", action="store_true", help="Supabase 업로드")
     parser.add_argument("--telegram", action="store_true", help="텔레그램 보고")
     parser.add_argument("--monthly", action="store_true", help="월별 수익률 계산")
+    parser.add_argument("--months", type=int, default=4,
+                        help="월별 수익률 표시 개월수 (기본 4: 3·4·5·6월 롤링)")
     parser.add_argument("--date", type=str, default=None, help="기준일 (YYYY-MM-DD)")
     args = parser.parse_args()
 
@@ -800,12 +802,14 @@ def main():
     print(f"  저장: {out_path}")
     print(f"{'='*60}\n")
 
-    # 7. 멀티 월별 수익률 비교 (최근 3개월)
+    # 7. 멀티 월별 수익률 비교 (최근 N개월 — 기본 4: 3·4·5·6월 롤링)
+    # ★6/14: num_months 3→4 (6월 추가). 웹 EwyHoldingsPanel은 months[] 동적 렌더라 N개월 자동 표출.
     monthly_data = {}
     if args.monthly:
-        logger.info("[EWY] 멀티월 수익률 계산 시작 (최근 3개월)...")
+        num_months = args.months
+        logger.info("[EWY] 멀티월 수익률 계산 시작 (최근 %d개월)...", num_months)
         monthly_data = calc_multi_month_returns(
-            holdings, date_str, num_months=3, prev_holdings=prev_holdings,
+            holdings, date_str, num_months=num_months, prev_holdings=prev_holdings,
         )
 
         if monthly_data and monthly_data.get("months"):
