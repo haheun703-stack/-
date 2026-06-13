@@ -242,7 +242,7 @@ def build_gate_result(
             ticker=str(h.get("ticker", "")),
             value_krw=float(h.get("eval_amount", 0) or 0),
             sector=sector_resolver(str(h.get("ticker", ""))),
-            corr_with_new=None,  # 상관 미배선 → G5가 unknown_corr_count로 투명 노출(Phase 2 강화)
+            corr_with_new=None,  # 기본 None — 아래 G5 배선(Phase 4)이 returns 가용 시 ρ_stress 주입
         )
         for h in raw_holdings
         if str(h.get("ticker", ""))
@@ -258,6 +258,21 @@ def build_gate_result(
     #   신규 리스크를 못 본 채 VaR를 통과시키는 fail-open을 막기 위해 '전부 끔'(보유분만으론 무의미).
     if ticker not in returns_by_ticker:
         returns_by_ticker = None
+
+    # G5 상관 클러스터 (Phase 4) — returns 가용 시 신규 vs 보유 ρ_stress 주입(없으면 corr_with_new
+    #   =None 유지 → G5 군집 제외 + unknown_corr_count 노출, 기존 계약). ρ_stress=평시 상관을 1
+    #   방향 슈링크(위기 동조화 '둘 중 나쁜 값') → 위기에 함께 무너질 종목을 평시 저상관으로
+    #   따로 세는 분산 착시 차단. 계산 불가(공통표본<60) 종목은 None 유지(과차단 방지).
+    if returns_by_ticker:
+        from risk.correlation import stress_correlation_with
+        other_tickers = [h.ticker for h in holdings if h.ticker]
+        corr_map = stress_correlation_with(ticker, other_tickers, returns_by_ticker, cfg=cfg)
+        if corr_map:
+            holdings = [
+                Holding(ticker=h.ticker, value_krw=h.value_krw, sector=h.sector,
+                        corr_with_new=corr_map.get(h.ticker))
+                for h in holdings
+            ]
 
     # G8 드로다운 사다리 (Phase 3c) — equity_peak_store 주입 시만 활성(없으면 ladder=None=not_active).
     #   계좌 고점 추적 → DD → ladder_state(히스테리시스). 영속/계산 실패는 G8 비활성(graceful).
