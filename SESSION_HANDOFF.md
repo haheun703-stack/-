@@ -3,6 +3,7 @@
 > **이 폴더 `D:\quant-bot-risk`는 `feature/risk-engine` worktree입니다 — 퀀트봇 risk 개발 전용.**
 > 운영·봇 자동화(BAT/scheduler/codex_inbox)·웹봇·ewy는 main(`D:\sub-agent-project_퀀트봇`)에서 돕니다.
 > 새 퀀트봇 세션은 이 HANDOFF를 먼저 읽고 시작하세요.
+> 📄 **오늘 작업 상세 보고서**: `docs/04-report/risk-engine-phase2-3-report-6_14.md`
 
 ## 왜 분리?
 멀티 세션(퀀트봇·웹봇·ewy)이 같은 폴더의 main을 공유 → git staging 섞임 사고(Phase 2b 커밋 e687af3에
