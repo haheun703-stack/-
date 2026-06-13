@@ -372,6 +372,7 @@ def evaluate_pre_trade(
     hmac_key: str | None = None,
     now_kst: datetime | None = None,
     returns_by_ticker: dict | None = None,
+    ladder: object | None = None,
 ) -> GateResult:
     """신규 주문 의도를 가상 포트폴리오(기존+신규) 기준으로 G3~G6 검사해 판정한다.
 
@@ -409,8 +410,36 @@ def evaluate_pre_trade(
         )
         return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
+    # 0-b) G8 드로다운 사다리 (사전, Phase 3) — ladder 주입 시만 활성(없으면 not_active).
+    #   신규 진입 금지(step 2/3) → 즉시 REJECT / 사이즈 축소(step 1) → original 비례 축소 후 G1~G6.
+    #   ★사전 단계: 한도 검증(G1~G6) 전에 드로다운 기반 노출을 먼저 줄인다(RESIZE 루프 반감 회피).
+    g8_check: dict = {"status": _NOT_ACTIVE_GATES["G8"]}
+    g8_resized = False
+    g8_start = original  # G8 조정 시작 사이즈(original=proposed는 감사 로그용 보존)
+    if ladder is not None:
+        if not getattr(ladder, "new_entry_allowed", True):
+            checks = _inactive_checks()
+            checks["G8"] = {"status": "violation", "reason": "drawdown_no_new_entry",
+                            "step": getattr(ladder, "step", None), "dd": getattr(ladder, "dd", None)}
+            result = _build_result(
+                "REJECT", 0.0, original,
+                [{"gate": "G8", "reason": "drawdown_no_new_entry",
+                  "step": getattr(ladder, "step", None), "dd": getattr(ladder, "dd", None)}],
+                0, checks, issued_at, request,
+            )
+            return _finalize(result, request, holdings, log_dir, now, hmac_key)
+        _mult = float(getattr(ladder, "new_size_mult", 1.0))
+        if _mult < 1.0:
+            g8_start = original * _mult
+            g8_resized = True
+            g8_check = {"status": "resize", "step": getattr(ladder, "step", None),
+                        "mult": _mult, "dd": getattr(ladder, "dd", None)}
+        else:
+            g8_check = {"status": "pass", "step": getattr(ladder, "step", None),
+                        "dd": getattr(ladder, "dd", None)}
+
     # 1) G3 RESIZE 루프 (G4/G5/G6 위반은 즉시 REJECT — 축소로 구제하지 않는다, 스펙 §3.5)
-    size = original
+    size = g8_start  # G8 사다리로 조정된 시작 사이즈(미주입 시 original 그대로)
     iterations = 0
     resize_trail: list[dict] = []  # 축소 이력 (감사 추적)
 
@@ -418,6 +447,7 @@ def evaluate_pre_trade(
         checks, reject_viols, resize_specs = _run_static_checks(
             size, request, holdings, cfg, returns_by_ticker
         )
+        checks["G8"] = g8_check  # G8 사전 판정 주입(드로다운 사다리)
 
         if reject_viols:
             # G4/G5/G6은 축소로 구제하지 않는다 — 즉시 REJECT(resize 사유도 함께 기록)
@@ -427,7 +457,7 @@ def evaluate_pre_trade(
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
 
         if not resize_specs:
-            verdict = "PASS" if iterations == 0 else "RESIZE"
+            verdict = "PASS" if (iterations == 0 and not g8_resized) else "RESIZE"
             result = _build_result(verdict, size, original, list(resize_trail), iterations,
                                    checks, issued_at, request)
             return _finalize(result, request, holdings, log_dir, now, hmac_key)
