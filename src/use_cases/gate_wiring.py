@@ -205,6 +205,7 @@ def build_gate_result(
     log_dir: Path | None = None,
     cfg: RiskConfig = RISK_CONFIG,
     max_stale_trading_days: int = _DEFAULT_MAX_STALE_TRADING_DAYS,
+    equity_peak_store=None,
 ) -> GateResult:
     """라이브 매수 직전 게이트 통행증 발급(유일 경로). 항상 GateResult 반환(REJECT는 사유 포함).
 
@@ -258,6 +259,16 @@ def build_gate_result(
     if ticker not in returns_by_ticker:
         returns_by_ticker = None
 
+    # G8 드로다운 사다리 (Phase 3c) — equity_peak_store 주입 시만 활성(없으면 ladder=None=not_active).
+    #   계좌 고점 추적 → DD → ladder_state(히스테리시스). 영속/계산 실패는 G8 비활성(graceful).
+    ladder = None
+    if equity_peak_store is not None:
+        try:
+            ladder = equity_peak_store.update_and_ladder(equity_krw, cfg)
+        except Exception as exc:  # noqa: BLE001 — 영속/계산 실패는 G8 끔(가용성 우선, 백스톱=킬스위치)
+            logger.warning("[gate_wiring] %s equity_peak ladder 실패 → G8 not_active: %s", ticker, exc)
+            ladder = None
+
     request = GateRequest(
         ticker=ticker,
         sector=sector_resolver(ticker),
@@ -267,7 +278,7 @@ def build_gate_result(
     )
     return evaluate_pre_trade(
         request, holdings, cfg=cfg, log_dir=log_dir, hmac_key=hmac_key, now_kst=now_kst,
-        returns_by_ticker=returns_by_ticker or None,
+        returns_by_ticker=returns_by_ticker or None, ladder=ladder,
     )
 
 
