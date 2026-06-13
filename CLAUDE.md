@@ -1,5 +1,12 @@
 # Quantum Master — 한국 주식 자동매매 시스템
 
+> ⚠️ **[feature/risk-engine worktree 전용 — main 머지 시 이 인용블록 제거]**
+> 이 폴더 `D:\quant-bot-risk`는 **퀀트봇 risk 개발 worktree**(브랜치 `feature/risk-engine`).
+> 운영·봇 자동화·웹봇·ewy는 main(`D:\sub-agent-project_퀀트봇`)에서 돕니다. **작업 시작 전 루트의
+> `SESSION_HANDOFF.md`를 먼저 읽으세요** — 6/14 RISK_ENGINE Phase 2(VaR 게이트) 완료 등 직전 세션
+> 컨텍스트가 담겨 있습니다. git: `add`는 명시 파일만 / 신규 파일은 `commit -- <pathspec>` /
+> `push origin feature/risk-engine`. (메모리는 main 세션 쪽: `...\D--sub-agent-project----\memory\`)
+
 ## 언어
 - 모든 응답은 **한국어**
 
