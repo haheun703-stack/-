@@ -41,3 +41,19 @@
 - 상세 컨텍스트 = main 세션 메모리(`C:\Users\ASUS\.claude\projects\D--sub-agent-project----\memory\`:
   MEMORY.md · session_state_6_14_phase2_var · session_state_6_14_fx_liquidity_p0 · feedback_worktree_separation).
   이 worktree 세션이 별도 메모리를 쓰면 이 HANDOFF가 요약본 역할.
+
+---
+
+## Phase 3a/3b 완료 (6/14 같은 세션 연장, worktree 커밋)
+- ✅ **드로다운 사다리 G8** — 엔진 `risk/drawdown_ladder.py`(`497a199`) + 게이트 `pre_trade_gate` 연결(`1a2c4d9`).
+  계좌 고점 대비 DD로 노출 사다리(0/-4/-7/-10%) + 히스테리시스(복귀 +1.5%p, 점진 한 단계). 게이트 G8: `ladder`
+  주입 시 신규 금지(step2/3)→REJECT, 사이즈 축소(step1)→사전 50%(★original=proposed 보존). `ladder=None`이면
+  not_active. test_drawdown_ladder 11 + test_drawdown_gate 6 + 기존 40(pre_trade_gate 31·var_gate 9) 보존, 회귀 신규 0.
+
+## 다음 후보 (Phase 3 나머지 + Phase 4)
+- ⚠️ **3c (G8 실배선)**: ladder의 DD(계좌 고점 추적)가 아직 호출처 미배선 — `gate_wiring`/balance에서 DD 계산
+  → `ladder_state()` → `evaluate_pre_trade(ladder=)` 주입이 G8 실활성화 지점(VaR의 2c와 동일 패턴). 가장 자연스러운 다음.
+- Phase 3 나머지(게이트 아닌 노출 조절/모니터): 변동성 타겟팅(§4.3 `vol_targeting.py`)·스트레스 테스트(§4.1
+  `stress_test.py` 역사5+가상5)·크라우딩(§4.4 `crowding.py`).
+- Phase 4: Component VaR(G7 §3.3)·이중상관(G5 스트레스 §3.4) — 상관행렬 배선 필요.
+- unfreeze 별트랙: E(페이퍼 20일).
