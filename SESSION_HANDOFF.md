@@ -51,8 +51,10 @@
   not_active. test_drawdown_ladder 11 + test_drawdown_gate 6 + 기존 40(pre_trade_gate 31·var_gate 9) 보존, 회귀 신규 0.
 
 ## 다음 후보 (Phase 3 나머지 + Phase 4)
-- ⚠️ **3c (G8 실배선)**: ladder의 DD(계좌 고점 추적)가 아직 호출처 미배선 — `gate_wiring`/balance에서 DD 계산
-  → `ladder_state()` → `evaluate_pre_trade(ladder=)` 주입이 G8 실활성화 지점(VaR의 2c와 동일 패턴). 가장 자연스러운 다음.
+- ✅ **3c 완료** (`dcbb10c`): `risk/account_peak.py` EquityPeakStore(계좌 고점 영속, nonce_store graceful 패턴)
+  + `gate_wiring`에 `equity_peak_store` 주입 → DD → `ladder_state()` → `evaluate(ladder=)`. **G8 완전 활성**(주입 시).
+  `equity_peak_store=None`이면 ladder=None=not_active → gate_wiring 16 보존. test_account_peak 6.
+  ★실배선 = live_trading/호출처가 `build_gate_result(equity_peak_store=EquityPeakStore())` 넘기면 끝(아직 호출처는 미주입).
 - Phase 3 나머지(게이트 아닌 노출 조절/모니터): 변동성 타겟팅(§4.3 `vol_targeting.py`)·스트레스 테스트(§4.1
   `stress_test.py` 역사5+가상5)·크라우딩(§4.4 `crowding.py`).
 - Phase 4: Component VaR(G7 §3.3)·이중상관(G5 스트레스 §3.4) — 상관행렬 배선 필요.
