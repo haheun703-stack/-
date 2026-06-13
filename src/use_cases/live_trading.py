@@ -219,13 +219,14 @@ class LiveTradingEngine:
         order = None
         for attempt in range(self.max_retry):
             unit_price = order_price if order_price > 0 else entry_price
-            # ★게이트 통행증(공유 래퍼) — REJECT/사이즈0 → 매수 중단, RESIZE → shares 자동 축소.
-            gate, shares = gate_check(
+            # ★게이트 통행증(공유 래퍼) — REAL만 차단(REJECT/사이즈0→중단, RESIZE→shares 축소).
+            #   mock/paper(balance_port._is_mock)는 비차단(어댑터가 토큰 무시/경고).
+            proceed, gate, shares = gate_check(
                 self.balance_port, ticker, unit_price, shares,
                 ohlcv_loader=self._gate_ohlcv_loader,
                 sector_resolver=self._gate_sector_resolver,
             )
-            if gate is None:
+            if not proceed:
                 return {"ticker": ticker, "success": False, "reason": "게이트 거부/사이즈 0"}
 
             if self.default_order_type == "limit":

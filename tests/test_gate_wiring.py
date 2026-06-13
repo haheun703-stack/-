@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
@@ -123,34 +124,94 @@ def test_issuance_is_mode_agnostic(tmp_path):
     assert r.verdict == "PASS" and r.signed
 
 
-# ── gate_check 래퍼: REJECT→(None,0) / RESIZE→축소 / 입력불가→(None,0) ─────
+# ── gate_check 래퍼 (REAL enforce=True): proceed/gate/qty 3튜플 ───────────────
+def _gc(balance, ticker, price, qty, **kw):
+    kw.setdefault("hmac_key", _KEY)
+    kw.setdefault("as_of_date", _ASOF)
+    kw.setdefault("now_kst", datetime(2026, 6, 10, 10, 0, tzinfo=KST))
+    return gate_check(balance, ticker, price, qty, **kw)
+
+
 def test_gate_check_pass(tmp_path):
-    g, q = gate_check(FakeBalance(_ok_balance()), "005930", 10000, 10,
-                      ohlcv_loader=_loader(_fresh_ohlcv()), sector_resolver=_sector(),
-                      hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path,
-                      now_kst=datetime(2026, 6, 10, 10, 0, tzinfo=KST))
-    assert g is not None and g.verdict == "PASS" and q == 10
+    proceed, g, q = _gc(FakeBalance(_ok_balance()), "005930", 10000, 10, enforce=True,
+                        ohlcv_loader=_loader(_fresh_ohlcv()), sector_resolver=_sector(), log_dir=tmp_path)
+    assert proceed and g is not None and g.verdict == "PASS" and q == 10
 
 
-def test_gate_check_reject_returns_none(tmp_path):
-    g, q = gate_check(FakeBalance({"ok": False, "available_cash": 0, "holdings": []}),
-                      "005930", 10000, 10, ohlcv_loader=_loader(_fresh_ohlcv()),
-                      sector_resolver=_sector(), hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path)
-    assert g is None and q == 0
+def test_gate_check_reject_blocks_when_enforce(tmp_path):
+    proceed, g, q = _gc(FakeBalance({"ok": False, "available_cash": 0, "holdings": []}),
+                        "005930", 10000, 10, enforce=True,
+                        ohlcv_loader=_loader(_fresh_ohlcv()), sector_resolver=_sector(), log_dir=tmp_path)
+    assert proceed is False and g is None and q == 0
 
 
 def test_gate_check_resize_shrinks_qty(tmp_path):
     # equity 1,000,000 · 단가 10,000 × 20주 = 200,000 → G3 0.20>0.12 RESIZE→120,000→12주
-    g, q = gate_check(FakeBalance(_ok_balance(cash=1_000_000)), "005930", 10000, 20,
-                      ohlcv_loader=_loader(_fresh_ohlcv(volume=5000)), sector_resolver=_sector(),
-                      hmac_key=_KEY, as_of_date=_ASOF, log_dir=tmp_path,
-                      now_kst=datetime(2026, 6, 10, 10, 0, tzinfo=KST))
-    assert g is not None and g.verdict == "RESIZE" and q == 12
+    proceed, g, q = _gc(FakeBalance(_ok_balance(cash=1_000_000)), "005930", 10000, 20, enforce=True,
+                        ohlcv_loader=_loader(_fresh_ohlcv(volume=5000)), sector_resolver=_sector(), log_dir=tmp_path)
+    assert proceed and g is not None and g.verdict == "RESIZE" and q == 12
 
 
-def test_gate_check_bad_input_fail_closed(tmp_path):
-    assert gate_check(FakeBalance(_ok_balance()), "005930", 0, 10, log_dir=tmp_path) == (None, 0)
-    assert gate_check(FakeBalance(_ok_balance()), "005930", 10000, 0, log_dir=tmp_path) == (None, 0)
+def test_gate_check_bad_input_fail_closed_when_enforce(tmp_path):
+    assert _gc(FakeBalance(_ok_balance()), "005930", 0, 10, enforce=True, log_dir=tmp_path) == (False, None, 0)
+    assert _gc(FakeBalance(_ok_balance()), "005930", 10000, 0, enforce=True, log_dir=tmp_path) == (False, None, 0)
+
+
+# ── mock/paper(enforce=False): 절대 차단 안 함 ───────────────────────────────
+def test_gate_check_mock_never_blocks_on_reject(tmp_path):
+    # 잔고 조회 실패라도 enforce=False면 proceed=True(원수량) — 어댑터가 토큰 무시/경고
+    proceed, g, q = _gc(FakeBalance({"ok": False, "available_cash": 0, "holdings": []}),
+                        "005930", 10000, 10, enforce=False, log_dir=tmp_path)
+    assert proceed is True and g is None and q == 10
+
+
+def test_gate_check_enforce_derivation():
+    from src.use_cases.gate_wiring import _derive_enforce
+
+    class RealAdapter:  # KisOrderAdapter REAL 모사
+        _is_mock = False
+
+    class MockAdapter:  # KisOrderAdapter 모의 모사
+        _is_mock = True
+
+    class PaperLike:    # PaperOrderAdapter(_is_mock 없음)
+        pass
+
+    assert _derive_enforce(RealAdapter()) is True     # REAL만 강제
+    assert _derive_enforce(MockAdapter()) is False
+    assert _derive_enforce(PaperLike()) is False
+    assert _derive_enforce(MagicMock()) is False       # 테스트 mock도 비강제
+
+
+# ── ★C-ii-b 커버리지: 모든 REAL BUY 호출처는 gate_check 경유 또는 문서화 예외 ──
+def test_all_real_buy_callers_gated():
+    """src/의 .buy_limit/.buy_market 호출처는 gate_check를 import하거나 문서화된 예외여야 한다.
+
+    새 REAL 매수 호출처가 게이트 없이 추가되면 이 테스트가 실패 → 배선 또는 예외 등록 강제.
+    어댑터 하드 차단(1b-i)이 백스톱이라 미배선도 REAL에선 fail-closed(안전)지만, 이 테스트는
+    가용성 갭(REAL에서 매수 불능)을 조기 검출한다.
+    """
+    exceptions = {
+        "src/adapters/kis_order_adapter.py",      # 어댑터 정의 = 강제 지점(1b-i)
+        "src/adapters/paper_order_adapter.py",    # 페이퍼 시뮬(토큰 무시)
+        "src/use_cases/paper_mirror.py",          # 페이퍼 미러(PaperOrderAdapter)
+        "src/strategies/chart_hero_executor.py",  # 휴면(D확인) — 재배선 시 게이트
+        "src/split_order.py",                     # production 호출처 0(orphaned)
+    }
+    call_re = re.compile(r"\.(buy_limit|buy_market)\s*\(")
+    ungated = []
+    for p in Path("src").rglob("*.py"):
+        text = p.read_text(encoding="utf-8")
+        if not call_re.search(text):
+            continue
+        rel = p.as_posix()
+        if rel in exceptions:
+            continue
+        if "gate_check" not in text:
+            ungated.append(rel)
+    assert not ungated, (
+        f"게이트 미배선 REAL BUY 호출처: {ungated} — gate_check 배선 또는 예외 등록 필요"
+    )
 
 
 # ── ★sole issuance: production에서 evaluate_pre_trade 직접호출은 gate_wiring뿐 ─

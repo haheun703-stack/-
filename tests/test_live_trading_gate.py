@@ -28,9 +28,11 @@ def _make_engine(order_port, balance_payload, ohlcv_df):
     tracker = MagicMock()
     tracker.positions = []
     guard = MagicMock()
+    balance_port = MagicMock(fetch_balance=lambda: balance_payload)
+    balance_port._is_mock = False  # REAL 강제 경로 모사(게이트 enforce=True)
     engine = LiveTradingEngine(
         order_port=order_port,
-        balance_port=MagicMock(fetch_balance=lambda: balance_payload),
+        balance_port=balance_port,
         price_port=MagicMock(),
         tracker=tracker,
         guard=guard,

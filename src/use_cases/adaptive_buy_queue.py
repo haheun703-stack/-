@@ -49,6 +49,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from src.use_cases.gate_wiring import gate_check
+
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -558,7 +560,11 @@ def execute_auto_buy(broker, ticker: str, stage_dict: dict,
         adapter_kwargs = {}
         if mode is not None or executor_bot is not None:
             adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
-        order = broker.buy_limit(ticker, target_price, qty, **adapter_kwargs)
+        # ★RISK_ENGINE C-ii-b: 게이트 통행증(공유 래퍼). REAL만 차단(REJECT→스킵, RESIZE→축소).
+        proceed, risk_gate, qty = gate_check(broker, ticker, target_price, qty)
+        if not proceed:
+            return {"success": False, "error": "risk_gate_reject", "gate_summary": gate_summary}
+        order = broker.buy_limit(ticker, target_price, qty, gate_result=risk_gate, **adapter_kwargs)
         order_id = getattr(order, "order_id", "") or ""
         return {
             "success": True,

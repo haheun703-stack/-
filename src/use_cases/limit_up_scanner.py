@@ -36,6 +36,8 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+from src.use_cases.gate_wiring import gate_check
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CANDIDATES_PATH = PROJECT_ROOT / "data" / "limit_up_candidates.json"
 STATE_PATH = PROJECT_ROOT / "data" / "limit_up_scanner_state.json"
@@ -390,8 +392,17 @@ class LimitUpScanner:
                 adapter_kwargs = {}
                 if self.mode is not None or self.executor_bot is not None:
                     adapter_kwargs = {"mode": self.mode, "executor_bot": self.executor_bot}
+                # ★RISK_ENGINE C-ii-b: 게이트 통행증. REAL만 차단(REJECT→스킵, RESIZE→축소).
+                proceed, risk_gate, quantity = gate_check(self.order, ticker, unlocked_price, quantity)
+                if not proceed:
+                    logger.warning("[LU스캐너] %s 게이트 거부 — 매수 스킵", ticker)
+                    entry["status"] = "GATE_REJECT"
+                    entry["error"] = "risk_gate_reject"
+                    self.filled_today.append(entry)
+                    self._send_alert(entry)
+                    return
                 order_result = self.order.buy_limit(
-                    ticker, unlocked_price, quantity, **adapter_kwargs,
+                    ticker, unlocked_price, quantity, gate_result=risk_gate, **adapter_kwargs,
                 )
                 entry["order_id"] = getattr(order_result, "order_id", "N/A")
                 entry["status"] = "ORDERED"

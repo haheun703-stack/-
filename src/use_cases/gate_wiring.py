@@ -224,47 +224,84 @@ def build_gate_result(
     )
 
 
+def _derive_enforce(balance_port) -> bool:
+    """강제 여부 도출 — ★어댑터의 강제 변수와 동일 신호: `_is_mock is False`(MODEL=REAL)만 True.
+
+    KisOrderAdapter REAL(_is_mock=False) → True(차단). 그 외 전부 False(비차단):
+      KisOrderAdapter mock(_is_mock=True)·PaperOrderAdapter(_is_mock 없음→기본 True)·테스트
+      MagicMock(_is_mock=truthy) → 모두 `... is False`가 False. → paper/mock/테스트는 자동 비차단.
+    REAL만 강제하므로 어댑터 하드 차단(_enforce_gate_token raise)이 일어나는 경우와 정확히 일치한다.
+    """
+    return getattr(balance_port, "_is_mock", True) is False
+
+
 def gate_check(
     balance_port,
     ticker: str,
     unit_price: float,
     qty: int,
+    *,
+    enforce: bool | None = None,
     **build_kwargs,
-) -> tuple[GateResult | None, int]:
-    """호출처용 얇은 래퍼 — REJECT/RESIZE 처리를 1곳에 모은다("로직 1곳=버그 1곳").
+) -> tuple[bool, GateResult | None, int]:
+    """호출처용 얇은 래퍼 — REJECT/RESIZE/모드별 거동을 1곳에 모은다("로직 1곳=버그 1곳").
 
     각 BUY 호출처(smart_entry/adaptive_*/limit_up_scanner/live_trading)는 이것만 부르면 된다:
-        gate, qty = gate_check(adapter, ticker, unit_price, qty)
-        if gate is None:        # REJECT/입력불가 → 매수 스킵
+        proceed, gate, qty = gate_check(adapter, ticker, unit_price, qty)
+        if not proceed:         # REAL에서 REJECT/입력불가 → 매수 스킵
             ...continue/skip
         order = adapter.buy_limit(ticker, price, qty, gate_result=gate, **kw)
 
+    ★강제만 REAL, 발급은 양 모드(보강 R3): enforce는 기본적으로 `_is_mock is False`로 도출되어
+      REAL만 차단한다. mock/paper에선 절대 차단하지 않고(어댑터가 토큰 무시·또는 GATE-DRYRUN 경고),
+      발급된 토큰이 있으면 그대로 전달(audit/E 증거). enforce를 명시 전달해 강제 override 가능.
+
     Args:
         balance_port: fetch_balance()를 가진 어댑터(KisOrderAdapter는 BalancePort 겸함).
-        unit_price: 사이징 기준 단가 — 지정가는 주문가, 시장가는 현재가 추정. ≤0이면 fail-closed.
+        unit_price: 사이징 기준 단가 — 지정가는 주문가, 시장가는 현재가 추정. ≤0이면 입력불가.
         qty: 주문 수량.
+        enforce: None이면 balance_port._is_mock에서 도출(REAL만 True). 명시 시 그 값 사용.
         build_kwargs: build_gate_result로 전달(ohlcv_loader/sector_resolver/hmac_key/now_kst/log_dir 등).
 
     Returns:
-        (gate_result, final_qty). REJECT/입력불가 → (None, 0). RESIZE → (gate, 축소된 qty).
-        PASS → (gate, qty). final_qty는 항상 통행증 승인 사이즈 이내.
+        (proceed, gate_result, final_qty).
+        REAL(enforce=True): REJECT/입력불가 → (False, None, 0) / RESIZE → (True, gate, 축소qty) /
+          PASS → (True, gate, qty).
+        mock·paper(enforce=False): 항상 proceed=True. 발급 토큰(PASS/RESIZE)이면 (True, gate, qty),
+          REJECT/입력불가면 (True, None, qty) — 차단 없이 원수량 그대로(어댑터가 무시 또는 경고).
     """
+    if enforce is None:
+        enforce = _derive_enforce(balance_port)
+
     if not unit_price or unit_price <= 0 or qty <= 0:
-        logger.warning("[gate_check] %s 단가/수량 부적격(price=%s, qty=%s) → fail-closed 스킵",
-                       ticker, unit_price, qty)
-        return None, 0
-    gate = build_gate_result(ticker, float(qty) * float(unit_price),
-                             balance_port=balance_port, **build_kwargs)
+        if enforce:
+            logger.warning("[gate_check] %s 단가/수량 부적격(price=%s, qty=%s) → REAL fail-closed 스킵",
+                           ticker, unit_price, qty)
+            return False, None, 0
+        return True, None, qty  # mock/paper: 차단 안 함(어댑터가 무시/경고)
+
+    try:
+        gate = build_gate_result(ticker, float(qty) * float(unit_price),
+                                 balance_port=balance_port, **build_kwargs)
+    except Exception as exc:  # noqa: BLE001 — 발급 중 예외는 REAL에선 차단, 그 외엔 통과
+        logger.warning("[gate_check] %s 발급 예외: %s", ticker, exc)
+        return (False, None, 0) if enforce else (True, None, qty)
+
+    if not enforce:
+        # mock/paper: 절대 차단 안 함. 발급된 토큰이면 전달(audit), REJECT면 None(어댑터 무시).
+        return True, (gate if gate.verdict in ("PASS", "RESIZE") else None), qty
+
+    # ── REAL 강제 ──
     if gate.verdict == "REJECT":
-        logger.warning("[gate_check] %s 게이트 거부 — %s", ticker, gate.violations)
-        return None, 0
+        logger.warning("[gate_check] %s REAL 게이트 거부 — %s", ticker, gate.violations)
+        return False, None, 0
     if gate.verdict == "RESIZE":
         new_qty = int(gate.final_size_krw // unit_price)
         if new_qty <= 0:
             logger.warning("[gate_check] %s RESIZE 후 수량 0 → 스킵", ticker)
-            return None, 0
+            return False, None, 0
         if new_qty != qty:
             logger.info("[gate_check] %s 게이트 RESIZE: %d→%d주(승인 %.0f원)",
                         ticker, qty, new_qty, gate.final_size_krw)
-        return gate, new_qty
-    return gate, qty
+        return True, gate, new_qty
+    return True, gate, qty

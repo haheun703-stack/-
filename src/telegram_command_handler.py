@@ -540,8 +540,14 @@ class TelegramCommandBot:
             # 5/28 P0-2 (코덱스 17:13): mode/executor_bot 명시 — day bot 수동 매매
             # 5/29 P1-A4 (사장님 결단): default "paper" — env 미설정 시 live 떨어짐 금지
             tg_mode = os.getenv("TELEGRAM_TRADING_MODE", "paper")
+            # ★RISK_ENGINE C-ii-b: 게이트 통행증(수동 매수도 리스크 한도 적용). REAL만 차단.
+            from src.use_cases.gate_wiring import gate_check
+            proceed, risk_gate, qty = gate_check(adapter, ticker, limit_price, qty)
+            if not proceed:
+                edit_message_text(chat_id, msg_id, f"❌ 매수 차단: 리스크 게이트 거부 ({ticker})")
+                return
             order = adapter.buy_limit(ticker, limit_price, qty,
-                                       mode=tg_mode, executor_bot="day")
+                                       mode=tg_mode, executor_bot="day", gate_result=risk_gate)
             status = getattr(order, "status", "UNKNOWN")
             edit_message_text(
                 chat_id, msg_id,

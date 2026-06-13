@@ -39,6 +39,7 @@ from typing import Optional, Callable
 
 logger = logging.getLogger(__name__)
 
+from src.use_cases.gate_wiring import gate_check
 from src.utils.trade_runtime_safety import assert_runtime_orders_allowed
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -301,7 +302,13 @@ def execute_auto_reentry(
             adapter_kwargs = {}
             if mode is not None or executor_bot is not None:
                 adapter_kwargs = {"mode": mode, "executor_bot": executor_bot}
-            order = broker.buy_market(decision.ticker, decision.target_qty, **adapter_kwargs)
+            # ★RISK_ENGINE C-ii-b: 게이트 통행증(시장가라 사이징 단가=target_price). REAL만 차단.
+            proceed, risk_gate, qty = gate_check(
+                broker, decision.ticker, decision.target_price, decision.target_qty,
+            )
+            if not proceed:
+                return {"success": False, "error": "risk_gate_reject"}
+            order = broker.buy_market(decision.ticker, qty, gate_result=risk_gate, **adapter_kwargs)
             order_id = getattr(order, "order_id", "") or ""
         else:
             raise RuntimeError(
@@ -314,7 +321,7 @@ def execute_auto_reentry(
             "success": True,
             "order_id": order_id,
             "price": decision.target_price,
-            "qty": decision.target_qty,
+            "qty": qty,
         }
     except Exception as e:
         logger.error("auto reentry %s 실패: %s", decision.ticker, e)

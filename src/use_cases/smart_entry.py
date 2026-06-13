@@ -26,6 +26,8 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 
+from src.use_cases.gate_wiring import gate_check
+
 logger = logging.getLogger(__name__)
 
 
@@ -651,7 +653,14 @@ class SmartEntryEngine:
                 _adapter_kw = {}
                 if self.mode is not None or self.executor_bot is not None:
                     _adapter_kw = {"mode": self.mode, "executor_bot": self.executor_bot}
-                order = self.order.buy_limit(c.ticker, order_price, c.order_qty, **_adapter_kw)
+                # ★RISK_ENGINE C-ii-b: 게이트 통행증. REAL만 차단(REJECT→스킵, RESIZE→축소).
+                proceed, risk_gate, c.order_qty = gate_check(self.order, c.ticker, order_price, c.order_qty)
+                if not proceed:
+                    logger.warning("[주문] %s 게이트 거부 — 초기 매수 스킵", c.name)
+                    c.decision = EntryDecision.SKIP
+                    continue
+                order = self.order.buy_limit(c.ticker, order_price, c.order_qty,
+                                             gate_result=risk_gate, **_adapter_kw)
                 if order.status.value != "failed":
                     c.order_id = order.order_id
                     c.org_no = order.org_no
@@ -1707,7 +1716,13 @@ class SmartEntryEngine:
                     _adapter_kw = {}
                     if self.mode is not None or self.executor_bot is not None:
                         _adapter_kw = {"mode": self.mode, "executor_bot": self.executor_bot}
-                    order = self.order.buy_limit(c.ticker, order_price, add_qty, **_adapter_kw)
+                    # ★RISK_ENGINE C-ii-b: 게이트 통행증. REAL만 차단(REJECT→스킵, RESIZE→축소).
+                    proceed, risk_gate, add_qty = gate_check(self.order, c.ticker, order_price, add_qty)
+                    if not proceed:
+                        logger.warning("[SW-4] %s %d차 추가매수 게이트 거부 — 스킵", c.name, c.entry_stage)
+                        continue
+                    order = self.order.buy_limit(c.ticker, order_price, add_qty,
+                                                 gate_result=risk_gate, **_adapter_kw)
                     if order.status.value != "failed":
                         logger.info(
                             "[SW-4] %s %d차 추가매수 접수: %d원 × %d주 (주문=%s)",
