@@ -73,6 +73,16 @@
     chart_hero=휴면(D)·split_order=미사용·어댑터 정의) — 미래 미배선 REAL 호출처 자동 검출. 검증 =
     gate_wiring 16 + caller 회귀 63 + 전체 30 failed/1412 passed(베이스라인 30/1372 신규실패 0).
     ⚠️ chart_hero 재배선 시 게이트 추가 필요(D의 fx-liquidity 재점검과 동시).
+    - ⚠️ **[6/13 적대 자기검증 발견] 시장가 사이즈 바인딩 — P2 안전측 갭(실탄 시장가 켜기 전 완화)**:
+      시장가 경로(`adaptive_reentry`·`live_trading` market)는 게이트 발급가(`qty×사이징단가`)와
+      어댑터 검증가(`qty×_estimate_price` 주문시점 현재가)가 독립적으로 움직여, 발급~주문 사이
+      가격 상승 시 유효 토큰도 `_enforce_gate_token`의 `order_krw ≤ final_size_krw + 1.0` 실패로
+      거부될 수 있음(+1.0원 절대여유가 시장가엔 비현실적으로 빡빡). **단 fail-closed(매수 차단
+      방향)라 리스크 한도는 지켜짐 = P0 아님·freeze blocker 아님**(통과분은 실체결액 ≤ 승인 한도).
+      지정가 4호출처(telegram·adaptive_buy_queue·limit_up_scanner·smart_entry)는 발급가==주문가라
+      무관. **테스트 사각지대 확인**: enforce 12케이스 전부 `price` 명시+`fetch_current_price` 10000
+      고정 → 시장가 `price=None` 불일치 미재현. 완화는 리스크한도 vs 가용성 트레이드오프(슬리피지
+      허용비율 등)라 사장님 승인 후 — **시장가 실탄 켜기 직전 처리**. 코드 수정 0(freeze 유지).
     - [x] **★`_seen_gate_nonces` 영속화** ✅ (6/12, `risk/nonce_store.PersistentNonceSet`):
       인메모리 set(프로세스 생애 한정) → **파일 기반(data/risk/seen_gate_nonces.log) + 인스턴스 간
       공유**로 승격. `__contains__`가 매 검사 전 파일 재읽기 → 재시작/교차 인스턴스에서도 replay
@@ -87,7 +97,7 @@
   - [x] **결론: staleness 복구는 unfreeze blocker 아님**(GIGO 마실 입 닫힘). ⚠️단 향후 chart_hero **재배선 시** Gate 1이 hard gate로 살아나므로 그때 재점검(live API 3종 가용성 + CSV 공백 5/20~). fx-liquidity P0-1(파이프라인 사망원인 규명)은 별도 관측 인프라 과제.
 - [ ] **E. (스펙 §8 공통)** 페이퍼 트레이딩 최소 20거래일 + 게이트/킬스위치 로그가 빠짐없이 남는지 확인 ⬅ 진행 중(FLOWX 관측 누적)
 
-**현재 상태**: A·B·C(1b-i 자물쇠)·C-ii-a·**C-ii-b(2차 호출처 6개 + 커버리지 테스트)**·D ✅ / **E ⬅ 미완(유일)** → **unfreeze는 이제 E(페이퍼 20일 + 게이트/킬스위치 로그 누적) 하나만 남음**. 리스크 엔진 코드 측 잠금·발급·배선·우회커버리지 전부 완료. E는 시간 누적이므로 추가 코드 작업 없이 관측만 쌓으면 됨. ⚠️실제 unfreeze 전 별도 확인: chart_hero 재배선 시 게이트 추가(D 재점검과 동시).
+**현재 상태**: A·B·C(1b-i 자물쇠)·C-ii-a·**C-ii-b(2차 호출처 6개 + 커버리지 테스트)**·D ✅ / **E ⬅ 미완(유일)** → **unfreeze는 이제 E(페이퍼 20일 + 게이트/킬스위치 로그 누적) 하나만 남음**. 리스크 엔진 코드 측 잠금·발급·배선·우회커버리지 전부 완료. E는 시간 누적이므로 추가 코드 작업 없이 관측만 쌓으면 됨. ⚠️실제 unfreeze 전 별도 확인: ①chart_hero 재배선 시 게이트 추가(D 재점검과 동시) ②시장가 사이즈 바인딩 완화(6/13 적대검증, 실탄 시장가 켜기 전, P2 안전측·fail-closed).
 
 > 흩어져 있던 미결(fx-liquidity P0, 킬스위치 테스트)이 여기 한 곳에 모인다. 따로 굴러다니다 잊히지 않게.
 
