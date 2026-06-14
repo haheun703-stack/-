@@ -84,3 +84,23 @@
   `vol_targeting.py` §4.3). ★G5 정밀화 옵션 = ρ_stress 슈링크 대신 **VKOSPI 위기구간 별도 추정**(§3.4
   "데이터 충분하면 이쪽 우선") — 현재는 슈링크 공식(스펙 1순위 기재) 사용.
 - ★worktree HEAD `ee40fd7` = origin/feature/risk-engine (0/0).
+
+## Phase 4 크라우딩 모니터 완료 (6/14 순차 트랙 ①, worktree 커밋 `1c923ac`)
+- ✅ **크라우딩/동질화 모니터** `risk/crowding.py` 신규 (스펙 §4.4). ★게이트(G1~G8)가 아니라 **L3 노출 조절
+  모니터** — pre_trade_gate의 PASS/RESIZE/REJECT가 아니라 `gross_exposure_mult`를 낸다(호출처가 사다리·
+  변동성 타겟팅 계수와 곱). drawdown_ladder와 동형(순수 계산, 데이터는 호출처 주입).
+  - C1 보유 평균 쌍상관(60일) > crowding_corr(0.70) / C2 VKOSPI 20초과 **AND** 5일 30%급등(동시) / C3 외인선물
+    2년 분위수 상·하위 5%. 경고 **2개 이상** → `gross_exposure_mult` 0.80(-20%p, 사다리와 별도). 3개여도 -20%p 고정.
+  - ★**C1 vs G5 구분**(혼동 주의): C1=평시 동질성(균등가중 60일 피어슨), G5=위기 보수화 ρ_stress(1방향 슈링크).
+    목적이 달라 C1은 슈링크 미적용(평시 측정에 위기 가정 주입 = 이중 보수 방지). 주석에 박제.
+  - C2/C3 시계열은 호출처 주입(VKOSPI·외인선물 미배선) → 미주입=미평가(graceful, 과경고 차단). 평가 가능 경고만
+    카운트(evaluable=False는 '위험 없음'이 아니라 '판단 불가' = warning_count 제외). **G8과 동일 production 휴면 = freeze 유지**.
+  - 견고성(component_var 자가검출 교훈 적용): C1 상수→corr NaN→미평가, C3 상수→`nunique` 가드(`(s<=cur).mean()`이
+    1.0 반환해 거짓 경고 되는 것 차단), C2 past≤0/표본<6 가드. **config 무변경**(crowding_corr 선등록 활용, C2/C3
+    세부 임계는 모듈 상수+스펙 §4.4 수치 박제 = 분기1회 변경 규칙 존중).
+  - test_crowding **20 passed** + risk 핵심 **222 passed**(신규 실패 0). 격리: risk.config만 import, write 0, 실주문 0.
+- 다음 후보(순차 ②③, 별 세션): **② Phase 3 나머지** — `stress_test.py`(§4.1 역사 H1~H5 + 가상 S1~S5)·
+  `vol_targeting.py`(§4.3 EWMA 실현변동성 타겟 15% → scale). **③ G5 정밀화** — ρ_stress 슈링크 대신 VKOSPI
+  위기구간 별도 추정(§3.4 "데이터 충분하면 이쪽 우선"). unfreeze 별트랙: E(페이퍼 20일).
+- ⚠️ **Phase 4 크라우딩 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
+- ★worktree HEAD `1c923ac` = origin/feature/risk-engine (push 후 0/0).
