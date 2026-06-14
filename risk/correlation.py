@@ -26,6 +26,10 @@ from risk.config import RISK_CONFIG, RiskConfig
 # 상관 추정 최소 공통 표본. VaR(_MIN_OBS=60)과 동일 보수 기준 — 짧은 공통구간 상관은 신뢰 불가.
 _MIN_PAIR_OBS = 60
 
+# ── ρ_crisis 정밀화(§3.4 "데이터 충분하면 이쪽 우선") 파라미터 ──
+_VKOSPI_TOP_PCT = 0.10   # VKOSPI 상위 10% 일자 = 위기 구간
+_MIN_CRISIS_OBS = 30     # 위기 공통표본 최소(위기일은 희소 → _MIN_PAIR_OBS보다 완화, 부족 시 슈링크 폴백)
+
 
 def _ewma_weights(n: int, lam: float) -> np.ndarray:
     """최근 관측에 큰 가중을 주는 정규화 EWMA 가중치(합=1). w_t ∝ λ^(거리)."""
@@ -102,4 +106,69 @@ def stress_correlation_with(
         if rho_n is None:
             continue
         out[t] = stress_shrink(rho_n)
+    return out
+
+
+def _pearson(x: np.ndarray, y: np.ndarray) -> float | None:
+    """단순(균등가중) 피어슨 상관. 표본<2 / 분산 0 → None. [-1,1] 클립."""
+    if len(x) < 2:
+        return None
+    dx = x - float(np.mean(x))
+    dy = y - float(np.mean(y))
+    vx = float(np.sum(dx * dx))
+    vy = float(np.sum(dy * dy))
+    if vx <= 0.0 or vy <= 0.0:
+        return None
+    return float(np.clip(float(np.sum(dx * dy)) / np.sqrt(vx * vy), -1.0, 1.0))
+
+
+def crisis_correlation_with(
+    new_ticker: str,
+    other_tickers: list[str],
+    returns_by_ticker: dict[str, pd.Series],
+    vkospi_series: pd.Series | None,
+    *,
+    cfg: RiskConfig = RISK_CONFIG,
+) -> dict[str, float]:
+    """신규 vs 보유의 **위기 구간 실측 상관 ρ_crisis** 맵 (§3.4 정밀화 — 슈링크 공식의 대안).
+
+    스펙 §3.4: "과거 위기 구간(VKOSPI 상위 10% 일자)만 모아서 별도 추정 — 데이터 충분하면 이쪽
+    우선." stress_correlation_with의 ρ_stress가 "위기 동조화"를 *가정*(슈링크 공식)한다면, 이 함수는
+    VKOSPI가 실제로 높았던 날의 종목 수익률만 모아 동조화를 *실측*한다.
+
+    절차: VKOSPI 상위 _VKOSPI_TOP_PCT(10%) 임계 → 위기일 인덱스 → 신규·보유 공통 위기일 수익률 →
+    균등가중 피어슨(위기일은 모두 동등 중요 — EWMA 미적용). ρ_crisis는 이미 위기 구간이므로 슈링크
+    하지 않는다(실측값 그대로).
+
+    ★graceful: VKOSPI 미주입 / VKOSPI 표본<30 / 위기 공통표본<_MIN_CRISIS_OBS / 분산0 → 해당 종목
+    **생략**. 호출부(gate_wiring)는 생략된 종목을 ρ_stress 슈링크로 폴백한다(데이터 부족 시 보수 유지).
+
+    Returns:
+        {other_ticker: ρ_crisis}. 위기 표본이 충분한 종목만 포함.
+    """
+    out: dict[str, float] = {}
+    if vkospi_series is None:
+        return out
+    new_r = returns_by_ticker.get(new_ticker)
+    if new_r is None or len(new_r) == 0:
+        return out
+    vk = vkospi_series.dropna()
+    if len(vk) < _MIN_CRISIS_OBS:
+        return out
+    threshold = float(vk.quantile(1.0 - _VKOSPI_TOP_PCT))
+    crisis_idx = vk.index[vk >= threshold]
+    for t in other_tickers:
+        if not t or t == new_ticker:
+            continue
+        other_r = returns_by_ticker.get(t)
+        if other_r is None or len(other_r) == 0:
+            continue
+        df = pd.DataFrame({"a": new_r, "b": other_r}).dropna()
+        df = df[df.index.isin(crisis_idx)]      # 위기일만 필터
+        if len(df) < _MIN_CRISIS_OBS:
+            continue
+        rho = _pearson(df["a"].to_numpy(dtype=float), df["b"].to_numpy(dtype=float))
+        if rho is None:
+            continue
+        out[t] = rho
     return out

@@ -206,6 +206,7 @@ def build_gate_result(
     cfg: RiskConfig = RISK_CONFIG,
     max_stale_trading_days: int = _DEFAULT_MAX_STALE_TRADING_DAYS,
     equity_peak_store=None,
+    vkospi_series=None,
 ) -> GateResult:
     """라이브 매수 직전 게이트 통행증 발급(유일 경로). 항상 GateResult 반환(REJECT는 사유 포함).
 
@@ -267,6 +268,17 @@ def build_gate_result(
         from risk.correlation import stress_correlation_with
         other_tickers = [h.ticker for h in holdings if h.ticker]
         corr_map = stress_correlation_with(ticker, other_tickers, returns_by_ticker, cfg=cfg)
+        # ③ G5 정밀화(§3.4): VKOSPI 주입 시 위기 구간 실측 상관 ρ_crisis로 보수화.
+        #   ρ_effective = max(ρ_stress 슈링크, ρ_crisis 실측) = "둘 중 나쁜 값"(§3.4 line 181). 정밀화는
+        #   G5를 절대 약화시키지 않는다(REJECT→PASS 불가). VKOSPI 미주입이면 crisis_map 비어 슈링크만
+        #   = 동작 불변(현재 production은 VKOSPI 미배선 → 기존 G5 그대로 = calibrated 보존).
+        if vkospi_series is not None:
+            from risk.correlation import crisis_correlation_with
+            crisis_map = crisis_correlation_with(
+                ticker, other_tickers, returns_by_ticker, vkospi_series, cfg=cfg)
+            for t, rho_c in crisis_map.items():
+                prev = corr_map.get(t)
+                corr_map[t] = rho_c if prev is None else max(prev, rho_c)
         if corr_map:
             holdings = [
                 Holding(ticker=h.ticker, value_krw=h.value_krw, sector=h.sector,

@@ -17,7 +17,11 @@ import numpy as np
 import pandas as pd
 
 from risk.config import KST
-from risk.correlation import stress_correlation_with, stress_shrink
+from risk.correlation import (
+    crisis_correlation_with,
+    stress_correlation_with,
+    stress_shrink,
+)
 from src.use_cases.gate_wiring import build_gate_result
 
 _KEY = "corr-test-key"
@@ -143,3 +147,97 @@ def test_g5_inactive_without_returns():
     # corr 미계산 → 클러스터 비어있음, unknown_corr_count로 투명 노출
     assert r.checks["G5"]["cluster_tickers"] == []
     assert r.checks["G5"]["unknown_corr_count"] == 1
+
+
+# ── ③ G5 정밀화: ρ_crisis(위기 구간 실측) — §3.4 ────────────────────────────
+def _crisis_returns_and_vkospi(n=300, seed=0):
+    """평시 독립 + 위기일(VKOSPI 상위 40일)만 동조 → ρ_crisis ≫ ρ_stress 구조."""
+    rng = np.random.default_rng(seed)
+    idx = pd.bdate_range(end=pd.Timestamp(_ASOF), periods=n)
+    vk = np.full(n, 15.0)
+    crisis_pos = rng.choice(n, size=40, replace=False)
+    vk[crisis_pos] = 40.0
+    shock = rng.normal(0.0, 0.04, n)
+    a = rng.normal(0.0, 0.02, n)
+    b = rng.normal(0.0, 0.02, n)
+    a[crisis_pos] = shock[crisis_pos]                              # 위기일 동조
+    b[crisis_pos] = shock[crisis_pos] + rng.normal(0.0, 0.002, len(crisis_pos))
+    return ({"NEW": pd.Series(a, index=idx), "H1": pd.Series(b, index=idx)},
+            pd.Series(vk, index=idx))
+
+
+def test_crisis_correlation_measures_crisis_days():
+    rets, vk = _crisis_returns_and_vkospi()
+    out = crisis_correlation_with("NEW", ["H1"], rets, vk)
+    assert "H1" in out
+    assert out["H1"] > 0.9  # 위기일 실측 동조 ≈ 1
+
+
+def test_crisis_higher_than_stress_when_crisis_only_corr():
+    # 평시 독립이라 ρ_stress(슈링크)는 ~0.5대인데 위기 실측 ρ_crisis는 ~1 → 정밀화가 위기 동조를 잡음
+    rets, vk = _crisis_returns_and_vkospi()
+    stress = stress_correlation_with("NEW", ["H1"], rets)
+    crisis = crisis_correlation_with("NEW", ["H1"], rets, vk)
+    assert crisis["H1"] > stress["H1"]
+
+
+def test_crisis_none_vkospi_empty():
+    rets, _ = _crisis_returns_and_vkospi()
+    assert crisis_correlation_with("NEW", ["H1"], rets, None) == {}
+
+
+def test_crisis_insufficient_vkospi_empty():
+    rets, _ = _crisis_returns_and_vkospi()
+    short_vk = pd.Series([20.0] * 10, index=pd.bdate_range(end=pd.Timestamp(_ASOF), periods=10))
+    assert crisis_correlation_with("NEW", ["H1"], rets, short_vk) == {}
+
+
+def test_crisis_insufficient_crisis_obs_omitted():
+    # 위기일이 적으면(상위10% < _MIN_CRISIS_OBS=30) 생략 → 슈링크 폴백 대상
+    rng = np.random.default_rng(1)
+    n = 100  # 상위 10% = 10일 < 30
+    idx = pd.bdate_range(end=pd.Timestamp(_ASOF), periods=n)
+    vk = pd.Series(np.linspace(10.0, 30.0, n), index=idx)
+    rets = {"NEW": pd.Series(rng.normal(0, 0.02, n), index=idx),
+            "H1": pd.Series(rng.normal(0, 0.02, n), index=idx)}
+    assert crisis_correlation_with("NEW", ["H1"], rets, vk) == {}
+
+
+def _crisis_ohlcv_and_vkospi(n=300, seed=0, volume=80000):
+    rng = np.random.default_rng(seed)
+    idx = pd.bdate_range(end=pd.Timestamp(_ASOF), periods=n)
+    vk = np.full(n, 15.0)
+    crisis_pos = rng.choice(n, size=40, replace=False)
+    vk[crisis_pos] = 40.0
+    shock = rng.normal(0.0, 0.04, n)
+    ra = rng.normal(0.0, 0.02, n)
+    rb = rng.normal(0.0, 0.02, n)
+    ra[crisis_pos] = shock[crisis_pos]
+    rb[crisis_pos] = shock[crisis_pos] + rng.normal(0.0, 0.002, len(crisis_pos))
+
+    def _df(r):
+        close = 10000.0 * np.cumprod(1.0 + r)
+        return pd.DataFrame({"close": close, "volume": [volume] * n}, index=idx)
+
+    return {"NEW": _df(ra), "H1": _df(rb)}, pd.Series(vk, index=idx)
+
+
+def test_g5_precision_crisis_tightens_cluster():
+    # 평시 저상관(슈링크 ρ_stress<0.8 → 클러스터 안 됨)이지만 위기일 동조 →
+    # VKOSPI 주입 시 ρ_crisis로 보수화 → 클러스터 편입 → G5 강화. 미주입은 슈링크만(약화 아님).
+    dfs, vk = _crisis_ohlcv_and_vkospi()
+    balance = _FakeBalance({
+        "ok": True, "available_cash": 91_000_000,
+        "holdings": [{"ticker": "H1", "eval_amount": 9_000_000}],
+    })
+    kwargs = dict(
+        balance_port=balance, ohlcv_loader=lambda t: dfs.get(t),
+        sector_resolver=lambda t: {"NEW": "B", "H1": "A"}.get(t),  # 다른 섹터 → G4 회피
+        hmac_key=_KEY, as_of_date=_ASOF,
+        now_kst=datetime(2026, 6, 10, 10, 0, tzinfo=KST),
+    )
+    r_no = build_gate_result("NEW", 8_000_000, **kwargs)               # VKOSPI 미주입 = 슈링크만
+    r_vk = build_gate_result("NEW", 8_000_000, vkospi_series=vk, **kwargs)  # 위기 실측 보수화
+    # 정밀화 효과 격리(verdict는 VaR 등에 영향받으니 G5 클러스터로 직접 비교):
+    assert "H1" in r_vk.checks["G5"]["cluster_tickers"]   # ρ_crisis ≥ 0.8 → 클러스터
+    assert r_no.checks["G5"]["cluster_tickers"] == []     # 슈링크만으론 클러스터 안 됨(약화 아님 입증)
