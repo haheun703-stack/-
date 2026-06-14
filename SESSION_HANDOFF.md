@@ -104,3 +104,23 @@
   위기구간 별도 추정(§3.4 "데이터 충분하면 이쪽 우선"). unfreeze 별트랙: E(페이퍼 20일).
 - ⚠️ **Phase 4 크라우딩 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
 - ★worktree HEAD `1c923ac` = origin/feature/risk-engine (push 후 0/0).
+
+## Phase 3 나머지 완료 (6/14 순차 트랙 ②, worktree 커밋 `347a27b`·`b1a3b7d`)
+- ✅ **변동성 타겟팅** `risk/vol_targeting.py` (`347a27b`, 스펙 §4.3). EWMA halflife 20일 실현변동성 ×√252 →
+  scale = min(1.0, target_vol 15% / realized). ★scale ≤ 1.0(변동성 높으면 축소, 낮아도 **레버리지 확대 금지**).
+  총노출 = 기본 × scale × 사다리(§4.2) × 크라우딩(§4.4). 미주입/표본<20/변동성0 → 중립 1.0. test 7.
+- ✅ **스트레스 시나리오** `risk/stress_test.py` (`b1a3b7d`, 스펙 §4.1). ★사장님 승인 = **순수 집계 엔진**(시나리오
+  충격을 호출처 주입). 역사 H1~H5(2008/2011/2020/2022/2024) + 가상 S1~S5. S3(KOSPI -8% 갭, 시장 베타 1 폴백)·
+  S4(최대비중 하한가 -30%) = 포트 비중만으로 **항상 평가**. S1(FX)·S2(반도체)·S5(복합)·H1~H5 = 팩터 베타/역사
+  충격 주입 시 평가, 미주입=미평가(과소평가 방지). `report.worst` = 최악 시나리오. test 18.
+- ★**발견(중요)**: `factor_exposure.py`(§3.1 팩터 노출 EWMA 회귀)가 **미구현**(게이트 G1~G8엔 안 쓰여 빠져 있음).
+  stress_test의 H1~H5 역사재생·S1/S2 팩터 시나리오가 여기 의존 → production 휴면. **factor_exposure가
+  stress_test 완전 활성의 선행 트랙**(스펙 §4.1 "팩터 노출 × 당시 팩터 충격으로 근사").
+- 세 L3 모니터(crowding·vol_targeting·stress_test) 전부 격리 순수계산 · production 배선 0(src import grep 0,
+  매칭은 risk_models.stress_tests 필드·ports.stress_test 메서드 이름 겹침뿐) = freeze 유지 · 실주문 0.
+- 전체 회귀 **27 failed / 1556 passed / 7 skipped**(신규 실패 0; 27=기존 backtest_mechanics·phase1_paper_trade·
+  protected_tickers·simulate_5_26 = 날짜만료/stash, 신규 모듈 미import).
+- 다음 후보: **③ G5 정밀화**(ρ_stress 슈링크 대신 VKOSPI 위기구간 별도 추정, §3.4) / **factor_exposure §3.1**
+  (stress_test 완전체 선행) / **세 L3 모니터 실배선**(노출 관리 계층 = 사다리·vol·크라우딩 계수 곱, unfreeze 직전).
+- ⚠️ **Phase 3 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
+- ★worktree HEAD `b1a3b7d` = origin/feature/risk-engine (push 후 0/0).
