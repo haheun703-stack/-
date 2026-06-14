@@ -43,6 +43,11 @@ class RiskConfig:
     component_var_limit: float = 0.25    # G7
     ewma_lambda: float = 0.94            # RiskMetrics 표준
     t_dist_df: int = 6                   # Kupiec 실패 시 4로
+    # ── L2 팩터 노출 (§3.1, factor_exposure) ──
+    factor_ewma_halflife: int = 60       # EWMA 가중 회귀 반감기(일) — 최근성 반영
+    factor_lookback: int = 252           # 회귀 표본 상한(일)
+    factor_min_obs: int = 60             # 회귀 최소 표본 — 미만이면 베타 추정 생략(VaR/상관과 동일 보수 기준)
+    factor_beta_instability: float = 0.5  # EWMA 베타 vs 252일 단순 베타 괴리 ≥50% = "베타 불안정" 경고(§3.1-2)
     # ── L3 (Phase 3 — 정의만 선등록) ──
     target_vol_annual: float = 0.15
     ladder_steps: tuple = ((-0.04, 1.0), (-0.07, 0.7), (-0.10, 0.4))
