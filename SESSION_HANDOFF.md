@@ -124,3 +124,22 @@
   (stress_test 완전체 선행) / **세 L3 모니터 실배선**(노출 관리 계층 = 사다리·vol·크라우딩 계수 곱, unfreeze 직전).
 - ⚠️ **Phase 3 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
 - ★worktree HEAD `b1a3b7d` = origin/feature/risk-engine (push 후 0/0).
+
+## ③ G5 정밀화 완료 (6/14 순차 트랙 ③ = ★①②③ 전부 완료, worktree 커밋 `2a6d8a4`)
+- ✅ **ρ_crisis 위기구간 실측** `risk/correlation.py` + `gate_wiring` 배선 (스펙 §3.4 "데이터 충분하면 이쪽
+  우선"). 슈링크 공식(ρ_stress)의 대안 — VKOSPI 상위 10% 위기일만 모아 종목 간 동조화를 *실측*(가정 아님).
+  - correlation.py: `crisis_correlation_with` + `_pearson` 추가. ★기존 stress_shrink/stress_correlation_with **무변경**.
+  - gate_wiring: `vkospi_series`(graceful, equity_peak_store 패턴) 주입 시 ρ_effective = **max(ρ_stress, ρ_crisis)**
+    = "둘 중 나쁜 값"(§3.4 line 181). ★정밀화는 G5를 **절대 약화 안 함**(REJECT→PASS 불가, 강화만 가능).
+  - ★**동작 불변 입증**: VKOSPI 미주입(현 production 미배선) → crisis_map 비어 슈링크만 = G5 calibrated 보존.
+    `test_g5_precision_crisis_tightens_cluster`가 r_no(미주입) cluster==[] / r_vk(주입) cluster=[H1]로 격리 입증.
+  - graceful 폴백: VKOSPI 표본<30 / 위기 공통표본<_MIN_CRISIS_OBS(30) → 슈링크 유지. test_correlation 9→15.
+- ⚠️ pre-commit hook의 영향모듈 자동회귀가 **시스템 python(pytest 미설치)** 사용해 실질 스킵(`[OK]`만 찍힘) —
+  worktree 회귀는 반드시 `PYTHONPATH=D:/quant-bot-risk venv/Scripts/python.exe -m pytest`로 수동 실행(activate 안 먹힘).
+  이번엔 수동으로 게이트 98 + 전체 1562 passed 검증함.
+- ★**①②③ 순차 트랙 전부 완료**: ① 크라우딩(crowding) / ② Phase 3 나머지(vol_targeting·stress_test) / ③ G5 정밀화(ρ_crisis).
+- 다음 후보: **factor_exposure §3.1**(stress_test 완전체 선행 + 게이트 G1~G8의 빠진 퍼즐 = EWMA 팩터 회귀) /
+  **L3 모니터 실배선**(crowding·vol_targeting·stress_test → 노출 관리 계층, unfreeze 직전) /
+  **VKOSPI·외인선물 데이터 파이프라인**(crowding C2/C3 + ρ_crisis 정밀화 활성화 전제).
+- ⚠️ **①②③ 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
+- ★worktree HEAD `2a6d8a4` = origin/feature/risk-engine (push 후 0/0).
