@@ -2025,7 +2025,7 @@ def build_etf_signals_rows(date_str: str = "") -> list[dict]:
             "date": date_str,
             "ticker": code,
             "name": s.get("sector", ""),
-            "sector": s.get("category", ""),
+            "sector": s.get("sector", ""),  # 실제 섹터명(과거 category 스왑 버그 교정, 정보봇 6/11 공유)
             "close": 0,  # 섹터 ETF 종가 데이터 미보유
             "change_pct": round(s.get("ret_5", 0) / 5, 2) if s.get("ret_5") else 0,
             "aum": 0,
