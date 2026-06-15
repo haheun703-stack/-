@@ -70,17 +70,21 @@ def load_checkup_pos(date_str: str) -> dict[str, float]:
     return pos
 
 
-def collect_rows(top_n: int, use_checkup: bool) -> tuple[list[dict], str]:
-    """미국·한국 스냅샷 수집 → 데이터계약 행 리스트 + 적재일(KST)."""
+def collect_rows(top_n: int, use_checkup: bool, market: str = "ALL") -> tuple[list[dict], str]:
+    """미국·한국 스냅샷 수집 → 데이터계약 행 리스트 + 적재일(KST).
+
+    market: US/KR/ALL. UPSERT 키가 (date,market,ticker)라 시장별 분리 적재해도 충돌 없음
+    (미국=전일 마감 finality OK → 먼저 적재 / 한국=장마감 후 추가 가능).
+    """
     now = datetime.now(KST)
     date_str = now.strftime("%Y-%m-%d")
     snapshot_iso = now.isoformat()
 
-    print(f"[밸류밴드 적재] 미국·한국 시총 top{top_n} 수집 중...")
-    us = _top_by_cap(fetch_us(US_POOL), top_n)
-    kr = _top_by_cap(fetch_kr(KR_POOL), top_n)
+    print(f"[밸류밴드 적재] 시장={market} 시총 top{top_n} 수집 중...")
+    us = _top_by_cap(fetch_us(US_POOL), top_n) if market in ("US", "ALL") else []
+    kr = _top_by_cap(fetch_kr(KR_POOL), top_n) if market in ("KR", "ALL") else []
 
-    if use_checkup:
+    if kr and use_checkup:
         kr = apply_checkup_pos(kr, load_checkup_pos(date_str))
 
     snaps = us + kr
@@ -126,6 +130,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description="dashboard_valuation_band 적재")
     p.add_argument("--write", action="store_true", help="Supabase UPSERT (기본: dry-run)")
     p.add_argument("--top", type=int, default=TOP_N, help=f"시장별 top N (기본 {TOP_N})")
+    p.add_argument("--market", choices=["US", "KR", "ALL"], default="ALL",
+                   help="적재 시장 (기본 ALL — 미국 finality 먼저면 US)")
     p.add_argument("--no-checkup", action="store_true", help="checkup pos 폴백 생략")
     args = p.parse_args()
 
@@ -133,7 +139,7 @@ def main() -> None:
         level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
     )
 
-    rows, date_str = collect_rows(args.top, not args.no_checkup)
+    rows, date_str = collect_rows(args.top, not args.no_checkup, args.market)
     print_summary(rows)
 
     if args.write:
