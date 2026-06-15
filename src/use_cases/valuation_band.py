@@ -20,9 +20,13 @@ from __future__ import annotations
 
 import os
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 TOP_N = 30
+
+# 데이터계약 §1 표준 verdict 5종(정보봇 검증 대상). 내부 상세 라벨은 verdict()가 보유하되
+# 대시보드 적재는 이 5종으로 정규화한다(웹 렌더 분기 단순화).
+STANDARD_VERDICTS = ("저점후보", "가치함정", "이미오름", "관망", "데이터부족")
 
 # 시총 상위 후보 풀(marketCap으로 정렬해 top 30 추림 — 순위 변동 흡수)
 US_POOL = [
@@ -109,6 +113,75 @@ class ValuationSnapshot:
         if self.earnings_up is True:
             return "저점후보·이익↑"
         return "저점관찰"
+
+
+# ═══════════════════════════════════════════════════
+# 대시보드 적재 헬퍼 (순수 함수 — I/O 없음, freeze 무손상)
+#   dashboard_valuation_band 테이블(정보봇 데이터계약 §1) 행 변환.
+# ═══════════════════════════════════════════════════
+
+def verdict_category(detail: str) -> str:
+    """내부 상세 verdict → 데이터계약 표준 5종 정규화.
+
+    상세: 데이터부족 / 가치함정·FCF음수 / 가치함정·이익↓ / 고ROE·이미오름 /
+          저점후보·이익↑ / 저점관찰 / 관망
+    """
+    if detail.startswith("데이터부족"):
+        return "데이터부족"
+    if detail.startswith("가치함정"):
+        return "가치함정"
+    if "이미오름" in detail:
+        return "이미오름"
+    if detail.startswith("저점후보") or detail.startswith("저점관찰"):
+        return "저점후보"
+    return "관망"
+
+
+def source_of(snap: ValuationSnapshot) -> str:
+    """데이터 출처 표기(데이터계약 §1 source). US=yfinance, KR=네이버(PER/PBR 주소스)."""
+    return "yfinance" if snap.market == "US" else "naver"
+
+
+def apply_checkup_pos(
+    snaps: list[ValuationSnapshot], pos_by_code: dict[str, float]
+) -> list[ValuationSnapshot]:
+    """checkup 재활용(데이터계약 하이브리드): pos_52w가 비어있을 때만 checkup position_pct로 보완.
+
+    ★checkup의 per/pbr은 실측상 0(fib_scanner에 fundamental 없음)이라 재활용 대상에서 제외하고,
+      신뢰 가능한 position_pct만 폴백으로 쓴다. 호출처가 stale 가드 후 pos_by_code를 넘긴다.
+    """
+    if not pos_by_code:
+        return snaps
+    out: list[ValuationSnapshot] = []
+    for s in snaps:
+        pos = pos_by_code.get(s.ticker)
+        if s.pos_52w is None and pos is not None:
+            out.append(replace(s, pos_52w=round(float(pos), 1)))
+        else:
+            out.append(s)
+    return out
+
+
+def to_dashboard_row(snap: ValuationSnapshot, date_str: str, snapshot_iso: str) -> dict:
+    """ValuationSnapshot → dashboard_valuation_band 행(데이터계약 §1 컬럼)."""
+    return {
+        "date": date_str,
+        "market": snap.market,
+        "ticker": snap.ticker,
+        "name": snap.name,
+        "price": snap.price,
+        "per": snap.per,
+        "fwd_per": snap.fwd_per,
+        "pbr": snap.pbr,
+        "roe": snap.roe,
+        "pos_52w": snap.pos_52w,
+        "fcf_yield": snap.fcf_yield,
+        "debt_to_equity": snap.debt_to_equity,
+        "verdict": verdict_category(snap.verdict()),
+        "earnings_up": snap.earnings_up,
+        "source": source_of(snap),
+        "snapshot_time": snapshot_iso,
+    }
 
 
 def fetch_us(symbols: list[str]) -> list[ValuationSnapshot]:
