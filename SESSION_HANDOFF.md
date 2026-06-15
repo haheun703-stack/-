@@ -143,3 +143,21 @@
   **VKOSPI·외인선물 데이터 파이프라인**(crowding C2/C3 + ρ_crisis 정밀화 활성화 전제).
 - ⚠️ **①②③ 완료 ≠ unfreeze**. 여전히 E(페이퍼 20일)만 남음(시간 누적, 코드 0).
 - ★worktree HEAD `2a6d8a4` = origin/feature/risk-engine (push 후 0/0).
+
+## 6/15 factor_exposure §3.1 + factor_stress 오케스트레이터 (커밋 `645563a`·`8caf832`)
+- ✅ **factor_exposure §3.1** (`645563a`, 6/15 1세션): EWMA 가중 다변량 팩터 회귀. 팩터 5종
+  (market/smallcap/fx/semi/rate, smallcap·semi 시장잔차화로 공선성 제거). `betas_for(fx/semi/market)`
+  → stress_test 주입용 연료. (6/14 "factor_exposure 미구현 발견" 해소.) test 13.
+- ✅ **factor_stress 오케스트레이터** (`8caf832`, 6/15 2세션 = 순차 ①): factor_exposure ↔ stress_test
+  연결 = 빠진 호출처. `run_factor_stress_test`가 베타 자동주입 → 휴면이던 S1(FX)/S2(반도체)/S5(복합)
+  + 역사 H1~H5를 실평가. `factor_historical_shocks` = 스펙 §4.1 line230 "팩터노출 × 당시 팩터충격"
+  근사 구현(역사 일자 팩터충격을 `build_factor_panel` 잔차화+센터링 패널에서 실측 → 종목 베타와
+  단위 정합 = raw 충격을 잔차 베타에 곱하는 시장성분 이중계산 회피; 상장돼 그날 실제 종목수익률
+  있으면 우선=스펙 1순위). ★factor_exposure·stress_test 자체 무변경(이 모듈만 둘을 import=격리).
+  graceful: factor_returns가 H 일자 미포함(시계열 짧음)이면 그 H 생략. test 10(잔차화 정합·실측우선·graceful).
+- 현재: freeze 유지·실주문0·write0·production 미배선(factor_returns 데이터 파이프라인은 별 트랙).
+  전체 **28 failed/1588 passed/7 skipped**(신규 실패0; 28=베이스라인 645563a 측정과 동일 = 무관 입증).
+- 다음 후보(순차 ②③): **② L3 실배선**(crowding·vol_targeting·stress_test/factor_stress →
+  gross_exposure 노출관리 계층 = 사다리·vol·크라우딩 계수 곱, unfreeze 직전) / **③ VKOSPI·외인선물
+  데이터 파이프라인**(crowding C2/C3 + ρ_crisis + factor_returns 일부의 공통 연료) / E(페이퍼 20일).
+- ★worktree HEAD `8caf832` = origin/feature/risk-engine (push 후 0/0).
