@@ -183,6 +183,9 @@ case "$BAT" in
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
+    # KIS 종목별 투자자 수급 자급 (외국인/기관계/개인 3주체) → investor_daily.db
+    # KRX 계정잠금/만료 독립 정공경로 (2026-06-16 배선, 고정IP 13.209.153.221 화이트리스트)
+    run_py_xlong scripts/collect_investor_kis.py --days 2
     # 3-봇 분업 (5/14): sync 성공 시 퀀트봇 영역(연기금+금융투자)만 추가 수집
     # sync 실패 시 6유형 풀 수집 fallback (안전망)
     if [ "$SYNC_OK" = "1" ]; then
