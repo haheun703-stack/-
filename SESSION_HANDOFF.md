@@ -174,6 +174,17 @@
   게이트 아닌 L3 합성기, 세 모니터 자체 무변경(이 모듈만 셋 import=격리), 실주문0·write0,
   **production 미배선**(src/ import grep 0). 실제 사이징 곱셈 연결은 unfreeze 직전(별 트랙).
   test_exposure_manager 12 + 전체 28 failed/1602 passed(신규 실패0; 28=베이스라인 동일).
-- 다음 후보(순차 ③): **VKOSPI·외인선물 데이터 파이프라인**(crowding C2/C3 + ρ_crisis + factor_returns의
-  공통 연료 — ⚠️데이터 소스 불확실=pykrx KRX만료, main 운영 인프라 연관 가능 = 착수 전 범위·소스 정렬 필요) / E(페이퍼 20일).
 - ★worktree HEAD `1d30fa3` = origin/feature/risk-engine (push 후 0/0).
+
+## 6/15 ③ 데이터 소스 타진 = 전부 막힘 → 보류 (코드 0, read-only 조사)
+사장님 "데이터 소스 타진부터" 지시로 VKOSPI·외인선물 실데이터 가용성 조사 → **현재 어느 경로로도 불가**:
+- **fdr**: VKOSPI = Yahoo 미지원(404)·"not supported".
+- **pykrx**: KRX 로그인 거부 — `.env`에 KRX_ID/KRX_PW/KRX_DATA_ID/KRX_DATA_PW 다 설정됐는데(사장님 비번
+  재설정) KRX 서버가 "자격 증명을 확인하세요"로 PW 거부(비번 불일치/미반영 → ★KRX 사이트 직접 확인 필요).
+  +**선물 투자자별 순포지션 API 자체 없음**(pykrx는 현물/공매도 투자자별만).
+- **derivatives_collector**(scripts/, ETF 역산 대리변수): 미실행 → data/derivatives에 signal/history **없음**
+  (3/25 백테스트 json만) → 시계열 0일. C2(5일)·C3(2년 분위수) 불가.
+- ★결론 = ③는 코딩이 아니라 **데이터 인프라 문제**. crowding/exposure_manager는 데이터 받을 준비 됐으나
+  줄 시계열이 없음. 선행 = ㉠KRX 비번 정정(VKOSPI 지수 가능할 수도, 외인선물 순포지션은 별도) 또는
+  ㉡derivatives_collector 가동 + 2년 축적(C3 분위수). **사장님 결정 = ③ 보류, ①②로 마무리**.
+- 다음 후보: ③ 데이터 인프라 선행(㉠㉡) / E(페이퍼 20일). ★①②③ ≠ unfreeze(여전히 E만).
