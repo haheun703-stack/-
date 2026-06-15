@@ -161,3 +161,19 @@
   gross_exposure 노출관리 계층 = 사다리·vol·크라우딩 계수 곱, unfreeze 직전) / **③ VKOSPI·외인선물
   데이터 파이프라인**(crowding C2/C3 + ρ_crisis + factor_returns 일부의 공통 연료) / E(페이퍼 20일).
 - ★worktree HEAD `8caf832` = origin/feature/risk-engine (push 후 0/0).
+
+## 6/15 exposure_manager — L3 노출 관리 계층 (커밋 `1d30fa3`, 순차 ②)
+- ✅ **노출 관리 계층(계수 합성)** `risk/exposure_manager.py` 신규 (스펙 §4.2·§4.3·§4.4 합성).
+  drawdown_ladder(gross_exposure)·vol_targeting(scale)·crowding(gross_exposure_mult)이 각자 내던
+  총노출 계수를 한 곳에서 곱한다(최종 = base × 세 계수). 세 모니터는 격리(config만)라 "호출처가
+  곱한다"고만 명시됐던 것을 이 모듈이 묶음(factor_stress와 동형 오케스트레이터). 컴포넌트 None=중립
+  1.0(과조절 방지), 각 ≤1.0 → 곱 ≤1.0(축소 전용=레버리지 금지). 사다리 step3(DD -10%초과)→0.0+킬스위치 신호.
+- ★사다리 이중적용 방지: 노출관리는 `ladder.gross_exposure`(총노출 한도), 게이트 G8(pre_trade_gate)은
+  `new_size_mult`(개별 신규매수) — 적용대상이 달라 이중 아님(§4.2 "노출70% AND 신규50%축소" 그대로). test 분리입증.
+- ★사장님 승인 = "노출관리 엔진만 신규(미배선)"(freeze 중 ②는 unfreeze 직전 작업이라 엔진만). freeze 유지:
+  게이트 아닌 L3 합성기, 세 모니터 자체 무변경(이 모듈만 셋 import=격리), 실주문0·write0,
+  **production 미배선**(src/ import grep 0). 실제 사이징 곱셈 연결은 unfreeze 직전(별 트랙).
+  test_exposure_manager 12 + 전체 28 failed/1602 passed(신규 실패0; 28=베이스라인 동일).
+- 다음 후보(순차 ③): **VKOSPI·외인선물 데이터 파이프라인**(crowding C2/C3 + ρ_crisis + factor_returns의
+  공통 연료 — ⚠️데이터 소스 불확실=pykrx KRX만료, main 운영 인프라 연관 가능 = 착수 전 범위·소스 정렬 필요) / E(페이퍼 20일).
+- ★worktree HEAD `1d30fa3` = origin/feature/risk-engine (push 후 0/0).
