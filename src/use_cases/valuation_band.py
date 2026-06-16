@@ -142,23 +142,37 @@ def source_of(snap: ValuationSnapshot) -> str:
     return "yfinance" if snap.market == "US" else "naver"
 
 
-def apply_checkup_pos(
-    snaps: list[ValuationSnapshot], pos_by_code: dict[str, float]
+def apply_checkup(
+    snaps: list[ValuationSnapshot], checkup_by_code: dict[str, dict]
 ) -> list[ValuationSnapshot]:
-    """checkup 재활용(데이터계약 하이브리드): pos_52w가 비어있을 때만 checkup position_pct로 보완.
+    """checkup(quant_bluechip_checkup LIVE) 재활용 — 데이터계약 §1 하이브리드.
 
-    ★checkup의 per/pbr은 실측상 0(fib_scanner에 fundamental 없음)이라 재활용 대상에서 제외하고,
-      신뢰 가능한 position_pct만 폴백으로 쓴다. 호출처가 stale 가드 후 pos_by_code를 넘긴다.
+    per/pbr/pos_52w/price가 비어있을 때 checkup 값으로 보완(중복 수집 회피). per/pbr이 채워지면
+    roe도 None일 때 pbr/per로 근사(fetch_kr 동일 규칙).
+
+    ★6/16 교정: checkup은 매일 09:3X LIVE 적재(stale 아님, per/pbr 22/30 유효 — 정보봇 검증).
+      한국 종목은 yfinance.KS rate-limit으로 per/pbr/pos가 비기 쉬운데 checkup(네이버 기반)이
+      이를 보완 → 데이터부족 탈출. 호출처가 stale 가드 후 {code: {per,pbr,position_pct,price}}를 넘긴다.
     """
-    if not pos_by_code:
+    if not checkup_by_code:
         return snaps
     out: list[ValuationSnapshot] = []
     for s in snaps:
-        pos = pos_by_code.get(s.ticker)
-        if s.pos_52w is None and pos is not None:
-            out.append(replace(s, pos_52w=round(float(pos), 1)))
-        else:
+        ck = checkup_by_code.get(s.ticker)
+        if not ck:
             out.append(s)
+            continue
+        per = s.per or ck.get("per")          # 0/None이면 checkup으로 보완
+        pbr = s.pbr or ck.get("pbr")
+        price = s.price or ck.get("price")
+        pos = s.pos_52w if s.pos_52w is not None else ck.get("position_pct")
+        roe = s.roe
+        if roe is None and per and pbr and per > 0:
+            roe = round(pbr / per * 100, 1)   # fetch_kr 동일 근사
+        out.append(replace(
+            s, per=per, pbr=pbr, price=price, roe=roe,
+            pos_52w=round(float(pos), 1) if pos is not None else None,
+        ))
     return out
 
 

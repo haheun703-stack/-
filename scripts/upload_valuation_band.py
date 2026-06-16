@@ -18,11 +18,10 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -37,7 +36,7 @@ from src.use_cases.valuation_band import (  # noqa: E402
     TOP_N,
     US_POOL,
     _top_by_cap,
-    apply_checkup_pos,
+    apply_checkup,
     fetch_kr,
     fetch_us,
     to_dashboard_row,
@@ -45,29 +44,48 @@ from src.use_cases.valuation_band import (  # noqa: E402
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
-CHECKUP_JSON = PROJECT_ROOT / "data" / "bluechip_checkup.json"
+CHECKUP_MAX_GAP_DAYS = 3  # checkup 최신행 허용 신선도(주말/공휴일 고려)
 
 
-def load_checkup_pos(date_str: str) -> dict[str, float]:
-    """checkup 로컬 JSON에서 한국 종목 position_pct 재활용 — 당일 데이터만(stale 가드)."""
-    if not CHECKUP_JSON.exists():
+def load_checkup(date_str: str) -> dict[str, dict]:
+    """Supabase quant_bluechip_checkup 최신행에서 한국 종목 per/pbr/pos/price 재활용.
+
+    ★6/16 교정: 정렬 없는 limit(1)은 최古행(4/12)을 줘 stale 오판을 낳았다 → date desc 최신행으로.
+      checkup은 매일 09:3X LIVE 적재(per/pbr 22/30 유효). 최신행이 적재일 기준 ≤3일이면 사용.
+    """
+    from src.adapters.flowx_uploader import FlowxUploader
+
+    up = FlowxUploader()
+    if not up.is_active:
         return {}
     try:
-        with open(CHECKUP_JSON, encoding="utf-8") as f:
-            data = json.load(f)
+        r = (
+            up.client.table("quant_bluechip_checkup")
+            .select("date,data")
+            .order("date", desc=True)
+            .limit(1)
+            .execute()
+        )
     except Exception as e:  # noqa: BLE001
-        logger.warning("checkup JSON 로드 실패: %s", e)
+        logger.warning("checkup 조회 실패: %s", e)
         return {}
-    if data.get("date") != date_str:
-        logger.info("checkup stale(%s != %s) — pos 폴백 생략", data.get("date"), date_str)
+    if not r.data:
         return {}
-    pos: dict[str, float] = {}
-    for b in data.get("bluechips", []):
-        code, p = b.get("code"), b.get("position_pct")
-        if code and isinstance(p, (int, float)) and p > 0:
-            pos[code] = float(p)
-    logger.info("checkup pos 재활용: %d종목", len(pos))
-    return pos
+    cdate = r.data[0].get("date", "")
+    try:
+        gap = (date.fromisoformat(date_str) - date.fromisoformat(cdate[:10])).days
+    except (ValueError, TypeError):
+        return {}
+    if gap < 0 or gap > CHECKUP_MAX_GAP_DAYS:
+        logger.info("checkup 최신행 stale(%s, gap=%s) — 재활용 생략", cdate, gap)
+        return {}
+    out: dict[str, dict] = {}
+    for b in r.data[0].get("data", {}).get("bluechips", []):
+        code = b.get("code")
+        if code:
+            out[code] = {k: b.get(k) for k in ("per", "pbr", "position_pct", "price", "name")}
+    logger.info("checkup 재활용: %d종목 (최신행 %s, gap=%s일)", len(out), cdate, gap)
+    return out
 
 
 def collect_rows(top_n: int, use_checkup: bool, market: str = "ALL") -> tuple[list[dict], str]:
@@ -85,7 +103,7 @@ def collect_rows(top_n: int, use_checkup: bool, market: str = "ALL") -> tuple[li
     kr = _top_by_cap(fetch_kr(KR_POOL), top_n) if market in ("KR", "ALL") else []
 
     if kr and use_checkup:
-        kr = apply_checkup_pos(kr, load_checkup_pos(date_str))
+        kr = apply_checkup(kr, load_checkup(date_str))
 
     snaps = us + kr
     rows = [to_dashboard_row(s, date_str, snapshot_iso) for s in snaps]

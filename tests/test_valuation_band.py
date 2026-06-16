@@ -8,7 +8,7 @@ from __future__ import annotations
 from src.use_cases.valuation_band import (
     STANDARD_VERDICTS,
     ValuationSnapshot,
-    apply_checkup_pos,
+    apply_checkup,
     source_of,
     to_dashboard_row,
     verdict_category,
@@ -62,30 +62,57 @@ def test_source_of_kr_is_naver():
     assert source_of(_snap(market="KR", ticker="005930", name="삼성전자")) == "naver"
 
 
-# ── apply_checkup_pos: pos_52w 폴백 ───────────────────────────────
+# ── apply_checkup: per/pbr/pos/price 재활용 (데이터계약 하이브리드) ──
 
-def test_checkup_pos_fills_only_when_missing():
+def _ck(per=None, pbr=None, position_pct=None, price=None):
+    return {"per": per, "pbr": pbr, "position_pct": position_pct, "price": price}
+
+
+def test_checkup_fills_pos_when_missing():
     snaps = [_snap(market="KR", ticker="005930", pos_52w=None)]
-    out = apply_checkup_pos(snaps, {"005930": 42.3})
+    out = apply_checkup(snaps, {"005930": _ck(position_pct=42.3)})
     assert out[0].pos_52w == 42.3
 
 
-def test_checkup_pos_does_not_override_existing():
+def test_checkup_does_not_override_existing_pos():
     snaps = [_snap(market="KR", ticker="005930", pos_52w=55.0)]
-    out = apply_checkup_pos(snaps, {"005930": 42.3})
+    out = apply_checkup(snaps, {"005930": _ck(position_pct=42.3)})
     assert out[0].pos_52w == 55.0  # 기존값 보존
 
 
-def test_checkup_pos_empty_map_noop():
+def test_checkup_empty_map_noop():
     snaps = [_snap(pos_52w=None)]
-    out = apply_checkup_pos(snaps, {})
+    out = apply_checkup(snaps, {})
     assert out is snaps  # 빈 맵이면 그대로 반환
 
 
-def test_checkup_pos_missing_code_unchanged():
-    snaps = [_snap(market="KR", ticker="000660", pos_52w=None)]
-    out = apply_checkup_pos(snaps, {"005930": 42.3})
-    assert out[0].pos_52w is None
+def test_checkup_missing_code_unchanged():
+    snaps = [_snap(market="KR", ticker="000660", pos_52w=None, per=None, pbr=None)]
+    out = apply_checkup(snaps, {"005930": _ck(per=7.0, pbr=1.0)})
+    assert out[0].per is None and out[0].pbr is None
+
+
+def test_checkup_fills_per_pbr_when_missing():
+    # 한국 종목 데이터부족(per/pbr None) → checkup으로 보완
+    snaps = [_snap(market="KR", ticker="005930", per=None, pbr=None, roe=None, pos_52w=None)]
+    out = apply_checkup(snaps, {"005930": _ck(per=8.0, pbr=1.2, position_pct=30.0)})
+    assert out[0].per == 8.0 and out[0].pbr == 1.2
+    assert out[0].pos_52w == 30.0
+    # per/pbr 채워지면 roe도 pbr/per 근사 (1.2/8.0*100=15.0)
+    assert out[0].roe == 15.0
+
+
+def test_checkup_does_not_override_existing_per():
+    snaps = [_snap(market="KR", ticker="005930", per=10.0, pbr=2.0, roe=20.0)]
+    out = apply_checkup(snaps, {"005930": _ck(per=8.0, pbr=1.2)})
+    assert out[0].per == 10.0 and out[0].pbr == 2.0 and out[0].roe == 20.0  # 전부 보존
+
+
+def test_checkup_zero_per_is_treated_as_missing():
+    # checkup의 per/pbr이 0인 종목(8/30)은 무효 → snapshot 값 유지
+    snaps = [_snap(market="KR", ticker="005930", per=12.0, pbr=1.5)]
+    out = apply_checkup(snaps, {"005930": _ck(per=0, pbr=0)})
+    assert out[0].per == 12.0 and out[0].pbr == 1.5
 
 
 # ── to_dashboard_row: 데이터계약 §1 컬럼 ──────────────────────────
