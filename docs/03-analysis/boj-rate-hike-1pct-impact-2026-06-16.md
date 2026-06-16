@@ -45,6 +45,27 @@ deep-research가 **검증 통과 못 한 것**(추측 금지):
 
 → **우리가 자급 가능한 것**: ①은 오늘 배선한 `collect_investor_kis`(외국인 수급) + 환율 데이터로, ④는 VKOSPI/매크로로 **내일 실측 가능**. 거시 추측 대신 우리 데이터로 메움.
 
+## 7. 시스템 인식 패치 (관측 전용·미발동)
+BOJ 엔캐리 경로를 거시 체인 맵이 인식하도록 `data/macro_chain_map.json`에 체인 1개 추가(13→14).
+⚠️ `data/`는 gitignore(`3d0417f` — VPS 런타임 보호)라 **git 미추적·로컬만 반영**. 영구 정의는 아래에 박제(detector 부활/서버 배포 시 이 정의를 맵에 반영).
+★`macro_chain_detector`는 BAT 미배선 + `usdjpy` 입력 부재라 **현재 미발동(매매영향 0)**. detect() 스모크 통과.
+
+```json
+{
+  "id": "JPY_CARRY_UNWIND",
+  "name": "엔캐리 청산 (BOJ 금리인상→엔강세)",
+  "trigger": {"indicator": "usdjpy", "condition": "ret_5d <= -3"},
+  "beneficiaries": [
+    {"type": "sector", "sector": "방어주", "reason": "위험회피 자금 방어주/내수 이동", "impact": "POSITIVE"}
+  ],
+  "victims": [
+    {"type": "stock", "tickers": ["005930:삼성전자", "000660:SK하이닉스"],
+     "reason": "외국인 비중 높은 대형주 — 캐리청산 시 외인 이탈 직격", "impact": "STRONG_NEGATIVE"},
+    {"type": "sector", "sector": "수출주", "reason": "글로벌 위험회피 + 원/엔 동조 변동성", "impact": "NEGATIVE"}
+  ]
+}
+```
+
 ## 출처 (1차 우선)
 - [BIS Bulletin No.90 — 2024.8 캐리 청산](https://www.bis.org/publ/bisbull90.htm) (1차)
 - [UBS: $500B 캐리 50%만 청산](https://www.investing.com/news/economy-news/unwind-of-500-billion-yenfunded-carry-trade-only-50-done-ubs-says-3556990)
