@@ -50,6 +50,15 @@ KR_POOL = [
     ("316140", "우리금융지주"), ("024110", "기업은행"),
 ]
 
+# 보험·은행·금융지주 — FCF 개념이 일반기업과 달라(보험영업현금흐름·예대 구조) yfinance
+# freeCashflow가 무의미/왜곡됨(예: 삼성생명 fcf_yield −57.8 / 삼성화재 −26.3). 웹 오노출 방지로
+# fcf=None 처리(→ fcf_yield None → 웹 graceful "—"). verdict 무영향(전부 ROE<15 → 관망).
+# 6/17 정보봇 FCF 주의 인계(§3) 반영.
+FCF_NA_TICKERS = {
+    "105560", "055550", "086790", "138040", "316140", "024110",  # 은행·금융지주
+    "000810", "032830",                                          # 보험(삼성화재·삼성생명)
+}
+
 
 def _setup_ssl() -> None:
     """yfinance/requests curl SSL — 한글 경로 cacert를 ASCII 임시경로로 복사해 우회(error 77)."""
@@ -253,10 +262,11 @@ def fetch_kr(codes: list[tuple[str, str]]) -> list[ValuationSnapshot]:
             pos = (px - lo) / (hi - lo) * 100 if (px and hi and lo and hi > lo) else None
             debt, cash = yi.get("totalDebt"), yi.get("totalCash")
             nd = (debt - cash) if (debt is not None and cash is not None) else None
+            fcf_val = None if code in FCF_NA_TICKERS else yi.get("freeCashflow")  # 보험·금융 FCF 무의미
             out.append(ValuationSnapshot(
                 "KR", code, name, px, per, cns, pbr,
                 roe_pct, round(pos, 1) if pos is not None else None,
-                None, yi.get("freeCashflow"), nd, yi.get("marketCap")))
+                None, fcf_val, nd, yi.get("marketCap")))
         except Exception:  # noqa: BLE001
             out.append(ValuationSnapshot("KR", code, name, *([None] * 10)))
     return out

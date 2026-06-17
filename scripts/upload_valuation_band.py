@@ -6,8 +6,8 @@
 
 ★관측 적재 전용 — 매매로직0, freeze 무손상. 6/11 finality 교훈: 기본 dry, --write로만 기록.
 하이브리드(데이터계약): PER/PBR/추정/52주/ROE는 valuation_band 1차 소스 + FCF·verdict 신규.
-  checkup(quant_bluechip_checkup) 재활용은 pos_52w 폴백만(per/pbr는 실측상 0이라 제외),
-  checkup이 당일 신선할 때만 적용(stale 가드).
+  checkup(quant_bluechip_checkup) 재활용은 per/pbr/price/pos_52w 폴백 보완(288be99로 확대 —
+  snap 값이 0/None일 때만 채움), checkup이 당일 신선할 때만 적용(stale 가드).
 
 Usage:
     python -u -X utf8 scripts/upload_valuation_band.py            # dry-run (적재 안 함)
