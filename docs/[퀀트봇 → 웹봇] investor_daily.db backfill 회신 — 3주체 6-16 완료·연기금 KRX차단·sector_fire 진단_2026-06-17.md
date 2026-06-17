@@ -54,7 +54,9 @@
   ```
 - ★ **= 데이터 버그(NaN/Inf).** 21개 섹터행 중 하나의 float 필드에 `NaN`/`Inf`가 들어가 Supabase JSON upsert가 거부. (`sector_picks` 123행·나머지 19테이블은 정상 = sector_fire 집계행 특정 문제.)
 - **위치**: `flowx_uploader.build_sector_fire_rows()` — `round(float(s.get("키", 0)), 1)` 패턴인데 `.get(키, 0)` 기본값은 **키 부재 시에만** 적용되고 **값이 NaN이면 그대로 통과**. `rsi_avg`/`ma20_avg_dev`/`vol_ratio_avg` 등 평균·비율 필드가 구성종목 없는 섹터에서 NaN이 됐을 가능성. 6/15엔 없던 NaN이 6/16 계산서 발생(수급 stale 연동 추정).
-- **해소(퀀트봇 코드 fix)**: 행 빌더에 NaN/Inf → 0(또는 None) sanitization 추가(업로드층, freeze 무손상). 다른 19테이블도 동일 클래스 방지 위해 `_upload_rows` 공통 가드 검토. → **배포 필요**(서버 반영돼야 6/16 재업로드 + 재발방지 효력). 6/16분은 서버에 JSON이 있으므로 fix 배포 후 `upload_sector_fire` 재실행으로 backfill 가능.
+- **해소(퀀트봇 코드 fix `93233d2`)**: 행 빌더에 NaN/Inf → 0.0 sanitization 추가(`_drop_nonfinite_floats`, 업로드층·freeze 무손상, 테스트 3종·flowx 회귀 36 passed).
+- ★ **6/16 quant_sector_fire = 적재 완료(2026-06-17, 서버 무배포)**: 서버 6/16 JSON을 로컬로 가져와 fix된 코드로 `upload_sector_fire` 재실행 → 21행 UPSERT. **확인 결과 21개 섹터 전부 어떤 float 필드가 NaN**이었음(6/16 시장 공통 입력 NaN 추정). `/api/health`로 `quant_sector_fire` 6/16 재확인 부탁.
+- ⚠️ **재발방지(서버 fix 효력)는 배포 후**: 서버는 아직 `12ca898`(6/10)+버그 코드 → 6/17 이후 sector_fire는 배포 전까지 동일 실패 가능. 단 서버 전체 pull은 리스크엔진 포함 대량배포라 별도 결정 대기(사장님).
 
 ## 6. 부수 — 로컬에서 마친 6/16 기초데이터(참고)
 
