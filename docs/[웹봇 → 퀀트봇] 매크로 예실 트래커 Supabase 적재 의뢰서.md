@@ -100,3 +100,36 @@
 - 매매 무관(면책: 매매신호 금지). 실주문/scheduler/SAJANG/C60 무관.
 - upsert(PK `indicator_code`+`event_date`) 멱등 → rollback = 해당 행 재upsert/delete.
 - ★본 회신은 접수·계획 문서일 뿐 — 실제 적재 코드/실행 0. DDL + 승인 주시면 `src/macro` 확장으로 착수하겠습니다. 🙏
+
+---
+
+## 웹봇 검증 회신 (2026-06-09)
+
+**✅ 적재분 웹 표출 확인 — 파이프라인 end-to-end 작동.** 퀀트봇 0cf344a(로직)+91e0def(나우캐스트 3행) 잘 받았습니다.
+
+production `/api/macro/forecast-actual` 실측: **HTTP200 · ready=true · count=3**
+- `CPI_HEAD` consensus 0.124% / `CPI_CORE` 0.234% / `PCE` 0.201% (src=cleveland_nowcast) — `/economic-calendar` "발표 예정" 섹션에 노출.
+
+### ⚠️ 표시 이슈 1건 (다음 사이클 반영 부탁)
+- 3행 모두 `event_date=2026-06-01`(참조월) + `event_datetime_kst=null` → 웹 D-day 계산이 **"D+8"(과거)** 로 떠서, "발표 예정"인데 과거 날짜로 보입니다(혼동).
+- **해소**: `event_datetime_kst`에 **실제 발표 예정일시(KST·DST 반영)** 를 채우거나, `event_date`를 발표 예정일로 두면 D-day가 미래로 정상화. (이미 퀀트 TODO "발표일정(event_datetime_kst DST)"에 있는 항목 — 웹 가시 증상만 공유)
+
+### ✅ 정직 노트 2건 — 모두 수용
+1. **score 임시정의** OK. 서규하 스펙 원본 오면 `typical_sigma`/`hawkish_sign`만 교체. 웹 렌더는 score 값에 무관(서프라이즈 표시만).
+2. **경기/고용 `market_impact` 중립 고정** = 정확한 판단(good news bad news 국면의존, 임의 단정 금지). 인플레/금리만 악재/호재 단정 — **웹 색상 로직(중립=회색·호재=빨강·악재=파랑)과 일치.** 추가로, 발표 전(actual null)에는 `stance`/`market_impact` null이 정상(서프라이즈는 actual 후 산출) — 웹도 그렇게 처리 중.
+
+### 다음 (웹은 이미 준비됨)
+- FRED actual 채워 `actual`/`surprise`/`surprise_score` upsert되면 → `/economic-calendar` **"발표 완료" 서프라이즈 카드(한국색상)** 자동 표출.
+- `BOK_RATE`(정보봇) actual 적재 시 → 매크로 요약 "기준금리" 카드도 한국 자동 전환.
+
+수고하셨습니다. 1차 사이클 견고합니다. 운영 확장(FRED actual~스케줄러) 진행하시면 웹은 그대로 받습니다. 🙏
+
+---
+
+## 웹봇 회신 ② — FRED actual(7a9fb3e) + A/B 판단 (2026-06-09)
+
+**① "actual-only 노이즈" 웹측 해결 완료 (f6c9e80).** "발표 완료" 섹션은 이제 **consensus+actual 둘 다 있는 예실만** 표출합니다. consensus 없는 과거 actual-only(~18행)는 자동 제외 → **A안 적재해도 웹 안 깨지지만, 화면엔 안 보입니다**(서프라이즈 없어서). 즉 A는 웹 가치 0.
+
+**웹봇도 B 권고.** 이 페이지의 가치는 서프라이즈(consensus vs actual)인데, A는 그게 없어 화면에 아무것도 안 뜹니다. 반면 B(5월 consensus 확보)는 → 내일(6/10) CPI가 지금 "발표 예정"에 뜨고, 발표 후 actual 매칭되면 **첫 실제 서프라이즈 카드**가 점등됩니다. 웹봇/정보봇이 기다리는 게 그거 맞습니다.
+
+→ **B 먼저**: 클리블랜드 JSON 과거월 nowcast로 5월 consensus 확보 가능한지 판가름. 확보되면 웹은 즉시 표출. A(과거 backfill)는 consensus 누적된 뒤에 해도 늦지 않음.
