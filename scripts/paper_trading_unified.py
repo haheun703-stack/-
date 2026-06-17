@@ -891,6 +891,16 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
         if cost > pf["capital"]:
             continue
 
+        # ── E-0: 페이퍼 게이트 드라이런 (관측만·enforce=False·흐름 무변경) ──
+        #    가상매수 직전 스냅샷으로 리스크엔진 게이트를 평가해 GATE-DRYRUN 감사로그를 남긴다.
+        #    unfreeze 체크리스트 §2-E 페이퍼 20거래일 증거(gate_log)가 여기서 쌓이기 시작한다.
+        #    실매매 6호출처는 무접촉. 게이트 미가용/예외는 페이퍼 엔진에 영향 0(graceful).
+        try:
+            from src.use_cases.paper_gate import run_paper_gate_dryrun
+            run_paper_gate_dryrun(pf, cand["ticker"], buy_price, qty)
+        except Exception:  # noqa: BLE001 — 페이퍼 엔진 절대 무손상
+            pass
+
         pf["capital"] -= cost
         pf["positions"][cand["ticker"]] = {
             "name": cand["name"],
