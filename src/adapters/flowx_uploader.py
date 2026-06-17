@@ -17,6 +17,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import math
 import os
 from datetime import datetime
 from pathlib import Path
@@ -2622,6 +2623,18 @@ def build_etf_strategy_row(date_str: str = "") -> dict | None:
 # ── 섹터 발화 (FIRE) ─────────────────────────────
 
 
+def _drop_nonfinite_floats(row: dict) -> dict:
+    """행의 NaN/Inf float → 0.0 치환 (Supabase JSON upsert 'Out of range float' 방지).
+
+    None·문자열·정수는 불변. 값이 NaN이면 `.get(키, 0)` 기본값을 통과하므로
+    (키는 존재) 행 빌드 마지막에 거는 안전망. 정상(유한) 값은 변경 없음.
+    """
+    return {
+        k: (0.0 if isinstance(v, float) and not math.isfinite(v) else v)
+        for k, v in row.items()
+    }
+
+
 def build_sector_fire_rows(date_str: str = "") -> list[dict]:
     """scan_sector_fire 결과 JSON → quant_sector_fire 테이블 포맷.
 
@@ -2641,7 +2654,7 @@ def build_sector_fire_rows(date_str: str = "") -> list[dict]:
 
     rows = []
     for s in data.get("sectors", []):
-        rows.append({
+        row = {
             "date": date_str,
             "sector": s.get("sector", ""),
             "fire_score": round(float(s.get("fire_score", 0)), 1),
@@ -2677,7 +2690,8 @@ def build_sector_fire_rows(date_str: str = "") -> list[dict]:
             "market_kospi_stoch_k": round(float(s.get("market_kospi_stoch_k") or 0), 1) if s.get("market_kospi_stoch_k") is not None else None,
             "market_vix": round(float(s.get("market_vix") or 0), 1) if s.get("market_vix") is not None else None,
             "market_disparity": round(float(s.get("market_disparity") or 0), 1) if s.get("market_disparity") is not None else None,
-        })
+        }
+        rows.append(_drop_nonfinite_floats(row))
 
     logger.info("[FIRE] 섹터발화 Row: %d행", len(rows))
     return rows
