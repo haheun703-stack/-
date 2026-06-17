@@ -42,11 +42,19 @@
 
 ➡ **권고: (A) 서버 경로.** export 출력이 `/home/ubuntu/.../scalper-agent/data_store/`로 하드코딩돼 있어 단타봇은 서버 파일만 읽음. 로컬 backfill해도 단타봇엔 안 닿음.
 
-## 5. `quant_sector_fire` 6/16 미적재 — 진단(스케줄 누락 아님)
+## 5. `quant_sector_fire` 6/16 미적재 — ★정확한 원인 확정(서버 로그 실측)
 
-- 의뢰서 #3 가설 "G4.5/BAT-D 스케줄 누락?" → **아님.** `scan_sector_fire.py`는 run_bat.sh **D그룹 G4.2에 정상 배선**(`run_py scripts/scan_sector_fire.py`), 업로드는 G4.9 `upload_flowx`(`upload_sector_fire → quant_sector_fire`).
-- 6/15까지 정상·**6/16만 누락** = 서버 BAT-D 6/16 런 **단발 실패** 추정. scan_sector_fire는 수급/Structure 입력 의존 → 같은 KRX 수급 stale에 연동됐을 가능성.
-- ⚠️ 정확한 원인은 **서버 BAT-D 6/16 로그**(`journalctl -u quantum-scheduler` / cron 로그) 확인 필요 = read-only SSH. 서버 배포 결정과 함께 점검하겠습니다.
+서버 `logs/cron_20260616.log` 직접 확인 결과:
+
+- 의뢰서 #3 가설 "G4.5/BAT-D 스케줄 누락?" → **아님.** `scan_sector_fire.py`는 G4.2 정상 실행, **JSON도 정상 생성**(`data/sector_fire_20260616.json` 18:32:04, 83KB).
+- **실패 지점 = 업로드.** G4.9 FLOWX 업로드에서 **`sector_fire`만 FAIL**(19/20 성공). 로그 실측:
+  ```
+  18:36:40 [INFO]  [FIRE] 섹터발화 Row: 21행
+  18:36:40 [ERROR] [FLOWX] 섹터발화 업로드 실패: Out of range float values are not JSON compliant
+  ```
+- ★ **= 데이터 버그(NaN/Inf).** 21개 섹터행 중 하나의 float 필드에 `NaN`/`Inf`가 들어가 Supabase JSON upsert가 거부. (`sector_picks` 123행·나머지 19테이블은 정상 = sector_fire 집계행 특정 문제.)
+- **위치**: `flowx_uploader.build_sector_fire_rows()` — `round(float(s.get("키", 0)), 1)` 패턴인데 `.get(키, 0)` 기본값은 **키 부재 시에만** 적용되고 **값이 NaN이면 그대로 통과**. `rsi_avg`/`ma20_avg_dev`/`vol_ratio_avg` 등 평균·비율 필드가 구성종목 없는 섹터에서 NaN이 됐을 가능성. 6/15엔 없던 NaN이 6/16 계산서 발생(수급 stale 연동 추정).
+- **해소(퀀트봇 코드 fix)**: 행 빌더에 NaN/Inf → 0(또는 None) sanitization 추가(업로드층, freeze 무손상). 다른 19테이블도 동일 클래스 방지 위해 `_upload_rows` 공통 가드 검토. → **배포 필요**(서버 반영돼야 6/16 재업로드 + 재발방지 효력). 6/16분은 서버에 JSON이 있으므로 fix 배포 후 `upload_sector_fire` 재실행으로 backfill 가능.
 
 ## 6. 부수 — 로컬에서 마친 6/16 기초데이터(참고)
 
