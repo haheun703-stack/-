@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -35,11 +36,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ★2026-06-18: 로컬 IP가 KRX 과다 크롤링으로 차단됨(124.52.138.181).
+# pykrx 직접호출(전종목 bulk + 종목별 폴백)을 전면 비활성 → OHLCV=FDR, 수급=KIS로 자립.
+# 차단 노크 0 = 차단 악화 정지 + 고객센터 소명 근거. KIS는 고정IP 화이트리스트라 KRX 무관.
+# 부활: KRX 차단 해제 + 레이트리밋 재설계 확인 후 KRX_DIRECT_ENABLED=1 (기본 비활성).
+KRX_DIRECT_ENABLED = os.getenv("KRX_DIRECT_ENABLED", "0") == "1"
 try:
     from pykrx import stock as krx
-    PYKRX_AVAILABLE = True
+    PYKRX_AVAILABLE = KRX_DIRECT_ENABLED
 except ImportError:
     PYKRX_AVAILABLE = False
+if not KRX_DIRECT_ENABLED:
+    logger.info("[KRX-OFF] pykrx 직접호출 비활성 (IP 차단 대응) → OHLCV=FDR / 수급=KIS")
 
 # KIS API (수급 primary)
 try:
