@@ -19,9 +19,9 @@
 - **SSH 키**: `D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem` (단타봇 프로젝트에 위치, 복사 불필요)
 - **SSH 접속**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221`
 - **서버 경로**: `/home/ubuntu/quantum-master/`
-- **서비스**: `quantum-scheduler.service` (systemd)
-- **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull && sudo systemctl restart quantum-scheduler"`
-- **로그**: `sudo journalctl -u quantum-scheduler --no-pager -n 50`
+- **자동화 정본 = cron** (`scripts/cron/run_bat.sh`, ubuntu crontab). 평일 06:10~18:45 단계별(A~HEALTH) 직접 호출. ★`quantum-scheduler.service`는 5/27부터 **의도적 비활성(inactive)** — 살리지 말 것(cron 이중실행·freeze 위반).
+- **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull origin main"` — **`git pull`만**. 다음 cron 실행부터 새 코드 적용. ★`systemctl restart` 치지 말 것(무의미+위험). ⚠️장중(09:00~15:30) 금지, 페이퍼 cron(16:30 D·17:00 J) 전 권장.
+- **로그**: cron 로그 `~/quantum-master/logs/cron_*.log` (scheduler journalctl 아님)
 
 ## 금지 경로 (LOCK)
 - **`scripts/archive/`** — 폐기/백테스트 스크립트 보관소. **절대 참조·실행·import 금지**
