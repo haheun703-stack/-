@@ -176,7 +176,9 @@ case "$BAT" in
     fi
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
-    run_py_xlong scripts/scan_nationality.py
+    # [KRX잠금 6/22 사장님지시] scan_nationality.py 비활성 — KRXSession ID/PW 로그인이 매 실행(gap-fill 최대 7회) CD007 계정잠금 유발(6/12~ 결측). KRX 일절 미접근.
+    #   재가동은 KRX 사이트에서 잠금해제+비번 재설정 후 별도 결정. (3주체 수급은 아래 collect_investor_kis=KIS 화이트리스트로 정상 수집됨)
+    # run_py_xlong scripts/scan_nationality.py
     run_py_xlong scripts/collect_foreign_exhaustion.py
     # collect_short_selling.py 제거 — KRX 공매도 데이터 제공 중단 (2026-04)
     run_py_long scripts/institutional_flow_collector.py
@@ -186,15 +188,15 @@ case "$BAT" in
     # KIS 종목별 투자자 수급 자급 (외국인/기관계/개인 3주체) → investor_daily.db
     # KRX 계정잠금/만료 독립 정공경로 (2026-06-16 배선, 고정IP 13.209.153.221 화이트리스트)
     run_py_xlong scripts/collect_investor_kis.py --days 2
-    # 3-봇 분업 (5/14): sync 성공 시 퀀트봇 영역(연기금+금융투자)만 추가 수집
-    # sync 실패 시 6유형 풀 수집 fallback (안전망)
-    if [ "$SYNC_OK" = "1" ]; then
-        echo "[$(date +%H:%M:%S)] [INFO] 단타봇 sync 성공 → 퀀트봇 부분 수집 (연기금+금융투자)" >> "$LOG"
-        run_py_long scripts/collect_investor_bulk.py --investors 연기금,금융투자
-    else
-        echo "[$(date +%H:%M:%S)] [WARN] 단타봇 sync 실패 → 6유형 풀 수집 fallback" >> "$LOG"
-        run_py_long scripts/collect_investor_bulk.py --core-only
-    fi
+    # [KRX잠금 6/22 사장님지시] collect_investor_bulk 비활성 — pykrx KRX STAT가 KRX_ID/PW 로그인 사용(코드 주석 명시) → CD007 잠금 기여. KRX 일절 미접근.
+    #   연기금/금융투자 세분은 KRX 잠금 해제 후 별도 결정. 3주체(외인/기관/개인)는 위 collect_investor_kis.py(KIS 화이트리스트)로 정상 수집 유지.
+    # if [ "$SYNC_OK" = "1" ]; then
+    #     echo "[$(date +%H:%M:%S)] [INFO] 단타봇 sync 성공 → 퀀트봇 부분 수집 (연기금+금융투자)" >> "$LOG"
+    #     run_py_long scripts/collect_investor_bulk.py --investors 연기금,금융투자
+    # else
+    #     echo "[$(date +%H:%M:%S)] [WARN] 단타봇 sync 실패 → 6유형 풀 수집 fallback" >> "$LOG"
+    #     run_py_long scripts/collect_investor_bulk.py --core-only
+    # fi
     run_py scripts/export_investor_for_scalper.py
     # sync_investor_to_csv → G1 상단으로 이동 (단타봇 데이터 선행 활용)
     run_py scripts/fetch_ecos_macro.py
