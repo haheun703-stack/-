@@ -78,8 +78,18 @@ ssh ... "cd ~/quantum-master && ./venv/bin/python3.11 -c 'import risk; from risk
 
 ## 4. 배포 후 검증 (3종 — 하나라도 빠지면 재발견 함정)
 
-- [ ] **(1) gate_log 적재 시작** — 페이퍼 엔진 다음 실행 후 서버 `gate_log_*.jsonl` 생성·GATE-DRYRUN 행 누적 확인. **= E 20일 카운트 시작점.**
-- [ ] **(2) 서버 배포 효력** — `git rev-parse HEAD`=`b90ae07`(+E-0). `import risk.*` 성공.
+> ★**[6/22 재검증 — KRX 사태로 묻혔던 §4를 사무실에서 추적]**: 6/18 계획서가 "저녁 배포"로 짰으나
+> 실제 배포는 6/19 18:58(`5cfb45b`). 그런데 **6/19 페이퍼 cron이 18:38:52에 먼저 실행**(reflog 대조)
+> → 그날 페이퍼는 E-0 없는 옛 코드(`12ca898`)로 돌아 gate_log 0. 이후 KRX 차단 사태(6/19~22)로
+> §4 검증을 아무도 안 봐서 "E-0=완료"라 착각된 채 묻혔음. 6/22 08:11 `de03137`(E-0 포함) 재배포됨.
+
+- [ ] **(1) gate_log 적재 시작** — ⏳ **오늘(6/22) 16:30 D cron 페이퍼 후 확인 예정**. ★배선 코드 자체는
+  6/22 서버 격리 재현으로 **정상 확증**(`run_paper_gate_dryrun`→verdict=PASS·`/tmp/gate_test`에
+  `gate_log_20260622.jsonl` 1182B 생성, 실카운트 경로 무접촉). 단 실카운트 경로
+  `data/risk/gate_logs_paper`는 6/19 타이밍 누락 이후 **아직 빈 디렉토리 미생성** → 오늘 16:30 페이퍼가
+  신규매수 1건 이상 하면 첫 줄 적재 = **E 20거래일 카운트 D-day**. (매수 0인 날은 line 899 미도달 → 그날 미카운트.)
+- [x] **(2) 서버 배포 효력** ✅ (6/22) — `git rev-parse HEAD`=`de03137`(⊃ E-0 `617fcf0`, merge-base 조상 확인).
+  서버 venv `import risk; from src.use_cases import paper_gate, gate_wiring` **전부 성공**.
 - [ ] **(3) sector_fire 6/16 재업로드** — fix `93233d2`(_drop_nonfinite_floats) 효력으로 6/16 NaN FAIL 해소되는지(서버 재실행).
 - [ ] 부가: KILL_SWITCH 여전히 active(실주문 0 불변)·quantum-scheduler 정상·기존 BAT-D 9테이블 무손상.
 
