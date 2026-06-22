@@ -941,6 +941,17 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
         logger.info("[ALPHA] 보유 %d / 한도 %d → 신규 진입 불가",
                      len(pf["positions"]), shield_max)
 
+    # ── 추세추종 슬롯 보장 (B안) — 알파 부스트(score 100+)에 밀려 추세주가 진입 못 하는 것 방지.
+    #    최상위 추세주 1종을 후보 맨 앞으로 = 하루 신규 중 1슬롯 우선(나머지는 기존 score 순).
+    #    A안 무손상. 강제 진입이 아니라 '공정 기회' — A/B 비교로 효과 검증.
+    if CONVICTION_MODE == "B":
+        _trend = [c for c in candidates if c.get("strategy") == "TREND_FOLLOW"
+                  and c["ticker"] not in pf["positions"]]
+        if _trend:
+            _top = max(_trend, key=lambda x: x["score"])
+            candidates = [_top] + [c for c in candidates if c is not _top]
+            logger.info("[TREND] %s 추세추종 1슬롯 우선(B안)", _top["name"])
+
     for cand in candidates:
         if new_today >= MAX_NEW_PER_DAY:
             break
