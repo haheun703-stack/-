@@ -65,6 +65,12 @@ DATA_DIR = PROJECT_ROOT / "data"
 CONVICTION_MODE = os.environ.get("PAPER_CONVICTION_MODE", "A").upper()
 _PF_FILE = "paper_portfolio_b.json" if CONVICTION_MODE == "B" else "paper_portfolio.json"
 PORTFOLIO_PATH = DATA_DIR / _PF_FILE
+# 매도경로 변형(6/23 검증 기반) — 독립 플래그. 기본 OFF → A안 동작 100% 불변.
+#   근거: parquet 200만+ 관측 백테스트. 손실구간(-4~-7%) 쌍끌이는 forward 최저(+0.106%
+#         vs 중립 +0.480%) + 추가하락 위험 최고(57%). "매집 지속에도 주가 밀림=약세".
+#   변경 ①매수신호 보유일 연장 제거(hold_adj=min(score,0)) ②손실구간 쌍끌이 조기탈출.
+#   run_bat.sh B안 블록에서 PAPER_CONVICTION_MODE=B와 함께 ON → B안 = 진입역전+매도변형.
+SELL_REVISION = os.environ.get("PAPER_SELL_REVISION", "0") == "1"
 PICKS_PATH = DATA_DIR / "tomorrow_picks.json"
 JARVIS_PATH = DATA_DIR / "jarvis_direction.json"
 PROCESSED_DIR = DATA_DIR / "processed"
@@ -663,13 +669,17 @@ def get_supply_demand_signal(ticker: str) -> dict:
             who.append(f"외인{foreign_streak}연속")
         reasons.append("+".join(who))
 
-    # 보정값 계산
-    # score +2: 손절 2%p 완화, 보유일 +2
-    # score +1: 손절 1%p 완화, 보유일 +1
-    # score -1: 손절 1%p 강화, 보유일 -1
-    # score -2: 손절 2%p 강화, 보유일 -2
-    stop_adj = score * 0.01   # ±1~2%p
+    # 보정값 계산 (★주석 정정 6/23: 실제 동작은 손절'선' 이동 — 구주석의 완화/강화 표기가
+    #   동작과 반대로 기재돼 있었음. adj_stop = STOP_LOSS_PCT + stop_adj.)
+    #   score +2(쌍끌이): -7% + 2% = -5% → 손절선 상향 = 더 빨리 손절(=실제로는 강화).
+    #   score -2(쌍매도): -7% - 2% = -9% → 손절선 하향 = 늦게 손절(=실제로는 완화).
+    #   백테스트(200만+ 관측): 손실구간 쌍끌이는 forward 최저 → 빨리 자르는 현 동작이 데이터 부합.
+    stop_adj = score * 0.01   # ±1~2%p (A안 동작 불변)
     hold_adj = score           # ±1~2일
+    if SELL_REVISION:
+        # 매수신호(score>0)의 보유일 연장은 데이터와 반대(쌍끌이 forward 최저) → 제거.
+        #   매도신호(score<0)의 보유일 단축은 그대로 유지.
+        hold_adj = min(score, 0)
 
     detail = " / ".join(reasons) if reasons else "중립"
     return {"score": score, "detail": detail, "stop_adj": stop_adj, "hold_adj": hold_adj}
@@ -770,6 +780,12 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         # 7. 수급 이탈 경고: 수익 중인데 쌍매도 → 조기 매도
         elif sd["score"] <= -2 and pnl_pct > 0 and days_held >= 2:
             exit_reason = "SUPPLY_EXIT"
+
+        # 8. [매도변형] 손실 구간 쌍끌이 = 매집 지속에도 주가 밀림(약세 확정) → 조기 손절.
+        #    근거(6/23 백테스트): 손실 -4~-7% 구간 쌍끌이 forward 최저(+0.106%) + 추가하락
+        #    위험 최고(57%). 손절선(-5%) 도달 전 -3%에서 탈출. SELL_REVISION에서만 활성.
+        elif SELL_REVISION and sd["score"] >= 2 and pnl_pct <= -0.03 and days_held >= 2:
+            exit_reason = "SUPPLY_TRAP_EXIT"
 
         # 전량 매도 처리
         if exit_reason:

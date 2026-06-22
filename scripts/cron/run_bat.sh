@@ -302,10 +302,13 @@ case "$BAT" in
     run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
     run_py scripts/paper_trading_unified.py
     # 확신모델 B안 병렬 페이퍼 (과매집 감점 — conviction-reversal §6 사장님 승인 6/22).
+    #   + 매도경로 변형 (6/23 검증 승인 — 보유일 연장 제거 + 손실구간 쌍끌이 조기탈출).
     #   관측·격리: 실주문 무접촉 · paper_portfolio_b.json만 누적 · 텔레그램/FLOWX 미발신.
     export PAPER_CONVICTION_MODE=B
+    export PAPER_SELL_REVISION=1
     run_py scripts/paper_trading_unified.py
     unset PAPER_CONVICTION_MODE
+    unset PAPER_SELL_REVISION
     run_py scripts/data_health_check.py
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
     # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
