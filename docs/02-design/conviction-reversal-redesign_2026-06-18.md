@@ -1,6 +1,6 @@
 # 진입 "확신 모델" 반전 재설계안 — 2026-06-18
 
-> **상태**: 설계서 (코드변경 0 · freeze 무손상). 사장님 승인 후 구현 → 페이퍼 A/B 검증.
+> **상태**: ✅ **B안 구현 완료 (2026-06-22, §6 사장님 승인 ①)** · freeze·실주문0 무손상 · 페이퍼 A/B 20거래일 누적 대기(서버 배포 후 시작). 상세 §7.
 > **근거 데이터**: 서버 `paper_portfolio.json` `closed_trades` 63건 해부 (6/18, read-only 정본 조회).
 > **불변식 검토 필요**: "매매로직0 변경" freeze 베이스라인과 충돌 — §6 참조.
 
@@ -129,7 +129,18 @@ def conviction_score(pick):
 ---
 
 ## 7. 다음 액션
-- [ ] 사장님: §6 불변식 판단 (페이퍼 전략 개선 허용 여부)
-- [ ] 승인 시: `crowding_penalty` 파서 + conviction_score 구현 (관측 라벨 우선 → 게이트는 페이퍼 검증 후)
-- [ ] 페이퍼 A/B 배선 + 20거래일 누적
-- [ ] 연결: crowding.py · sector_momentum_label · 밸류밴드 교차
+- [x] 사장님: §6 불변식 판단 — **① 페이퍼 A/B 구현 채택** (2026-06-22)
+- [x] crowding 게이트 구현 (2026-06-22, `paper_trading_unified.py`): `crowding_streak` + `demote_if_crowded`
+  — STRONG_ALPHA의 AA 강제승격(L334·L428)을 과매집(연속 ≥`STRONG_CROWDING_DAYS`=6) 차단으로 게이트화.
+  `PAPER_CONVICTION_MODE`(A/B) + `paper_portfolio_b.json` 격리. **A안 no-op = 현행 100% 무손상.**
+  테스트 `tests/test_conviction_crowding.py` 7케이스 passed.
+  - ★**입력 정정(중요)**: 설계 §4.1의 `pick.dual_days`/`supply_demand`는 tomorrow_picks에 **부재(dead path)**.
+    → §3 해부와 동일 출처인 parquet `inst/foreign_consecutive_buy` 직접 조회로 구현. 실데이터 발동 확인
+    (STRONG 후보 8 중 1=085620 streak=17 강등 / 표본 120 중 98이 streak>0).
+- [x] cron 배선 (BAT-D G5 `PAPER_CONVICTION_MODE=B` 병렬 1줄) — ★효력은 **서버 배포 후**(E-0와 동일).
+- [ ] 페이퍼 A/B 20거래일 누적 (서버 배포 후 시작) → **B안이 A안 못 이기면 기각**(§5 과최적화 방지).
+- [ ] ★**매도 경로 역전 후속(신규 발견)**: `get_supply_demand_signal`(L556–583)도 쌍끌이(+2)·연속매수(+1)를
+  손절 완화·보유 연장으로 처리 = 같은 병의 두 번째 갈래. 진입효과 격리 위해 1차 B안 범위 밖 →
+  진입 A/B 검증 후 매도경로 포함 재설계.
+- [ ] (확대 후보) AA 승격 전 경로(classify_pick score≥70 · AI confidence≥0.85)도 §3.1대로 crowding 적용 검토.
+- [ ] 연결: crowding.py · sector_momentum_label · 밸류밴드 교차 (확장 시)

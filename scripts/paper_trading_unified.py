@@ -57,7 +57,14 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════
 
 DATA_DIR = PROJECT_ROOT / "data"
-PORTFOLIO_PATH = DATA_DIR / "paper_portfolio.json"
+
+# ── 확신모델 A/B 페이퍼 (conviction-reversal-redesign 6/18 · §6 사장님 승인 6/22) ──
+# A = 현행 baseline(무손상) / B = 과매집(crowding) 감점 적용.
+# 환경변수로 포트폴리오 파일을 격리 → A안은 손도 안 댐, B안만 별도 누적.
+# 실주문 경로(KisOrderAdapter·리스크게이트 6호출처) 무접촉 — 페이퍼 SCAN 한정.
+CONVICTION_MODE = os.environ.get("PAPER_CONVICTION_MODE", "A").upper()
+_PF_FILE = "paper_portfolio_b.json" if CONVICTION_MODE == "B" else "paper_portfolio.json"
+PORTFOLIO_PATH = DATA_DIR / _PF_FILE
 PICKS_PATH = DATA_DIR / "tomorrow_picks.json"
 JARVIS_PATH = DATA_DIR / "jarvis_direction.json"
 PROCESSED_DIR = DATA_DIR / "processed"
@@ -133,6 +140,43 @@ MODERATE_BOOST = 30  # MODERATE_ALPHA → +30점 부스트 (80점 = A급)
 PULLBACK_BOOST = 20 # pullback_scan 등재 → +20점 부스트
 SHIELD_PATH = DATA_DIR / "shield_report.json"
 PULLBACK_PATH = DATA_DIR / "pullback_scan.json"
+
+# ── 과매집(crowding) 감점 — 확신모델 역전 재설계 B안 (conviction-reversal-redesign §3·§4.1) ──
+# 진범: 외인/기관 "연속 매수(과매집)"가 길수록 천장 진입 → 손실 (paper 63건 해부 §3).
+#   STRONG_ALPHA의 쌍끌이 2종(PULLBACK15_DUAL·BREAKOUT60_VOL3x_DUAL)이 연속길이를 무시하고
+#   AA를 강제 → 과매집을 최고확신·최대비중으로 천장에서 진입하는 구조였음.
+# 입력: §3 해부와 동일 출처 = parquet inst/foreign_consecutive_buy (pick.dual_days는 picks에 부재).
+# 계수 고정 — 백테스트 튜닝 금지(§5 과최적화 방지). 페이퍼 A/B 실측으로만 검증.
+STRONG_CROWDING_DAYS = 6   # 외인/기관 연속매수 ≥6일 = 과매집 천장 → AA 승격 차단(→A)
+_CROWD_COLS = ["inst_consecutive_buy", "foreign_consecutive_buy"]
+
+
+def crowding_streak(ticker: str) -> int:
+    """parquet 최신 행의 외인/기관 연속매수일 중 최대값(과매집 지표). graceful=0."""
+    pq = PROCESSED_DIR / f"{ticker}.parquet"
+    if not pq.exists():
+        return 0
+    try:
+        df = pd.read_parquet(pq, columns=_CROWD_COLS)
+        if df.empty:
+            return 0
+        row = df.iloc[-1]
+        return max(int(row.get("inst_consecutive_buy", 0) or 0),
+                   int(row.get("foreign_consecutive_buy", 0) or 0))
+    except Exception:  # noqa: BLE001 — 데이터 결손은 감점 미적용(보수적, A안과 동일 거동)
+        return 0
+
+
+def demote_if_crowded(grade: str, ticker: str) -> str:
+    """B안 전용: AA가 과매집(연속 ≥STRONG_CROWDING_DAYS) 천장이면 A로 강등.
+    A안(CONVICTION_MODE != 'B')에선 무조건 no-op → 현행 거동 100% 보존."""
+    if CONVICTION_MODE != "B" or grade != "AA":
+        return grade
+    days = crowding_streak(ticker)
+    if days >= STRONG_CROWDING_DAYS:
+        logger.info("[CONVICTION-B] %s 과매집 %d연속 → AA 차단(→A)", ticker, days)
+        return "A"
+    return grade
 
 
 def get_shield_max_positions() -> int:
@@ -332,9 +376,9 @@ def collect_candidates() -> list[dict]:
 
         grade_kr = pick.get("grade", "")
         if has_strong:
-            grade = "AA"  # STRONG_ALPHA → AA 강제
-            logger.info("[ALPHA-BYPASS] %s grade=%s → AA (STRONG: %s)",
-                        pick.get("name", ticker), grade_kr,
+            grade = demote_if_crowded("AA", ticker)  # STRONG_ALPHA → AA (B안: 과매집 천장이면 차단)
+            logger.info("[ALPHA-BYPASS] %s grade=%s → %s (STRONG: %s)",
+                        pick.get("name", ticker), grade_kr, grade,
                         ",".join(alpha_sigs & STRONG_ALPHA_SIGNALS))
         elif (has_moderate or has_multi) and score >= 75:
             grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
@@ -424,8 +468,8 @@ def collect_candidates() -> list[dict]:
             base_score += PULLBACK_BOOST  # +20
             alpha_tags.append("PULLBACK_SCAN")
 
-        # 등급: STRONG → AA, MODERATE/풀백 → A
-        alpha_grade = "AA" if strong_match else "A"
+        # 등급: STRONG → AA(B안: 과매집 천장이면 차단), MODERATE/풀백 → A
+        alpha_grade = demote_if_crowded("AA", ticker) if strong_match else "A"
 
         seen.add(ticker)
         candidates.append({
@@ -1777,15 +1821,19 @@ def run_daily(force_rebalance: bool = False) -> dict:
     # 6. 저장
     save_portfolio(pf)
 
-    # 7. 텔레그램 리포트
-    send_daily_report(today_str, entries, exits, pf, stats, len(candidates), etf_result)
-
-    # 7-1. 리밸런싱일 → 주간 리포트도 자동 전송
-    if do_rebalance:
-        send_weekly_report(pf, stats)
-
-    # 8. FLOWX 업로드 (Paper + ETF + 위험감지 메타)
-    upload_to_flowx(entries, exits, stats, etf_result=etf_result)
+    # 7~8. 외부 발신(텔레그램·FLOWX 업로드) — A안(현행)만 수행.
+    #   B안은 관측·격리: 중복 알림 + 대시보드 A·B 혼선 방지 (paper_portfolio_b.json만 누적).
+    if CONVICTION_MODE != "B":
+        # 7. 텔레그램 리포트
+        send_daily_report(today_str, entries, exits, pf, stats, len(candidates), etf_result)
+        # 7-1. 리밸런싱일 → 주간 리포트도 자동 전송
+        if do_rebalance:
+            send_weekly_report(pf, stats)
+        # 8. FLOWX 업로드 (Paper + ETF + 위험감지 메타)
+        upload_to_flowx(entries, exits, stats, etf_result=etf_result)
+    else:
+        logger.info("[CONVICTION-B] 외부 발신 스킵 (관측·격리) — entries=%d exits=%d",
+                    len(entries), len(exits))
 
     # 9. 콘솔 요약
     print(f"\n  {'='*40}")
