@@ -316,6 +316,8 @@ case "$BAT" in
     # G8: 자비스 시그널 엔진 (5/16, Phase 1) — 검증된 8개 시그널 통합 점수 + 상위 5종목
     # 매일 BAT-D 후반부 자동 실행 → 텔레그램 알림 (자동매매 OFF, Phase 5 이후 활성화)
     run_py scripts/signal_engine.py --top 5 --notify
+    # G8.5: 추세추종 스캐너 (6/22, 풀백 스캐너의 빈칸=강추세주 발굴) — 신호 생성/관측만, 자동매매 OFF
+    run_py scripts/trend_follow_scanner.py
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
