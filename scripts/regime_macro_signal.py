@@ -332,6 +332,11 @@ def main():
         recommendation = f"{current_regime}→{prev_regime} 전환 우려. 현금비중 확대 권장."
 
     # ── 8. 출력 ──
+    # 정보봇 거시 국면 fact shadow 관측 (매매 미반영, freeze — 회신서 §C)
+    # ★macro_score/position_multiplier 에 절대 반영 안 함. 정보봇 적재 전엔 graceful(loaded=False).
+    from src.adapters.jgis_regime_fact_adapter import load_regime_fact_shadow
+    jgis_regime_fact_shadow = load_regime_fact_shadow()
+
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -344,6 +349,7 @@ def main():
         "signals": scores,
         "recommendation": recommendation,
         "regime_history_5d": recent_5,
+        "jgis_regime_fact_shadow": jgis_regime_fact_shadow,
     }
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
