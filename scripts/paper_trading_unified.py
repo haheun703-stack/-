@@ -554,6 +554,43 @@ def collect_candidates() -> list[dict]:
                         cand["name"], ticker, boost, cand["score"],
                         ",".join(alpha_tags))
 
+    # 3) 추세추종 (B안 전용 — 강추세주 발굴, 풀백 스캐너의 빈칸 보완)
+    #    진입 확신모델은 과매집(천장) 감점이 핵심이나, 그것만으론 '안 떨어지고 오르는'
+    #    강추세주를 통째로 놓침(6/22 발견 — 하이닉스·스퀘어). trend_follow_scanner 로직
+    #    재사용해 후보 가세. A안(현행)은 무손상 → A/B 페이퍼로 추세 가세 효과 검증.
+    if CONVICTION_MODE == "B":
+        try:
+            import os as _os
+            import sys as _sys
+            _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+            from trend_follow_scanner import scan as _trend_scan
+
+            _, _trend_hits = _trend_scan()
+            _added = 0
+            for h in _trend_hits:
+                if h.get("grade") == "과열":          # 과열 이상치 제외(추격 위험)
+                    continue
+                tk = h["ticker"]
+                if tk in seen:
+                    continue
+                seen.add(tk)
+                candidates.append({
+                    "ticker": tk,
+                    "name": h["name"],
+                    "grade": "A",                      # 검증 전 보수적 A급(쌍끌이 AA보다 아래)
+                    "score": round(80 + min(h["mom5_pct"] / 5.0, 15.0), 1),
+                    "price": h["close"],
+                    "strategy": "TREND_FOLLOW",
+                    "reason": f"추세추종 5일{h['mom5_pct']:+.0f}%·신고가·정배열"
+                              f"(손절=5일선 {h['stop_price']:,})",
+                    "stop_price": h["stop_price"],     # 5일선 = 손절 기준(매도경로 후속)
+                })
+                _added += 1
+            if _added:
+                logger.info("[TREND] 추세추종 후보 %d종 추가(B안)", _added)
+        except Exception as exc:  # noqa: BLE001 — 페이퍼 절대 무손상
+            logger.warning("[TREND] 추세추종 통합 스킵: %s", exc)
+
     # score(부스트 포함) 내림차순 정렬
     candidates.sort(key=lambda x: x["score"], reverse=True)
     return candidates
