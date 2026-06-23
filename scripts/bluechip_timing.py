@@ -233,7 +233,14 @@ def enter_new_positions(
         if qty < 1:
             continue
         cost = buy_price * qty * (1 + COMMISSION_PCT)
-        pf["capital"] = pf.get("capital", INITIAL_CAPITAL) - cost
+        # 현금 잔고 체크 — 부족 시 매수 스킵(현금 음수 방지). 6/23 -827만 버그:
+        #   size_per가 INITIAL_CAPITAL 고정이라 손실 누적 시 실현금 초과 매수 발생.
+        avail = pf.get("capital", INITIAL_CAPITAL)
+        if cost > avail:
+            logger.info("현금 부족 — %s 매수 스킵 (필요 %d > 보유 %d)",
+                        cand["name"], round(cost), round(avail))
+            continue
+        pf["capital"] = avail - cost
 
         pf["positions"][ticker] = {
             "name": cand["name"],

@@ -550,6 +550,11 @@ def phase4_cumulative_update(
         "signals": {},
         "daily_log": [],
     }
+    # 구버전/부분 스키마 안전장치 — signal_accuracy.json이 daily_log 없는 구버전이면
+    #   위 `or` 폴백이 안 걸려(파일 truthy) line 560에서 KeyError(6/23 BAT-D 실패 원인). 필수 키 보장.
+    cum.setdefault("daily_log", [])
+    cum.setdefault("signals", {})
+    cum.setdefault("window_days", window)
 
     # 오늘 로그 추가 (중복 방지: 같은 날짜 덮어쓰기)
     day_entry = {"date": today_date}
