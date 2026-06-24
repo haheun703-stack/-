@@ -300,6 +300,9 @@ case "$BAT" in
     # --- G5: 기록 + Paper ---
     run_py scripts/market_journal.py
     run_py_long scripts/daily_market_learner.py  # v2 패턴학습: parquet 2회 풀스캔
+    # 상한가 사후학습 트랙 (6/24 신규) — 전종목 상한가 D-1 수급선행 태깅 → 학습DB(limit_up.db) 축적.
+    #   FDR StockListing snapshot 사용(KRX 로그인 無 = CD007 잠금 무관). "수급선행했는데 놓친 상한가"=개선 금맥.
+    run_py scripts/scan_limit_up_postmortem.py --date $(date +%Y-%m-%d)
     run_py scripts/paper_trading_unified.py
     # 확신모델 B안 병렬 페이퍼 (과매집 감점 — conviction-reversal §6 사장님 승인 6/22).
     #   + 매도경로 변형 (6/23 검증 승인 — 보유일 연장 제거 + 손실구간 쌍끌이 조기탈출).
@@ -309,6 +312,10 @@ case "$BAT" in
     run_py scripts/paper_trading_unified.py
     unset PAPER_CONVICTION_MODE
     unset PAPER_SELL_REVISION
+    # 밸류-피보나치 페이퍼 (4번째 독립포트, 6/24 백테스트 확정: 승률77%·+33%/년·MDD-9%).
+    #   진입=60일고점-10%+RSI<40+반등확인+수급 / 청산=전고점or+25%/-20% / 회전금지(보유).
+    #   관측·격리: 실주문 무접촉 · data/paper_portfolio_vf.json만 누적.
+    run_py scripts/paper_value_fib.py
     run_py scripts/data_health_check.py
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
     # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
