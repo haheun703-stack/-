@@ -144,6 +144,26 @@ def get_catalyst(date: str, ticker: str) -> Optional[dict]:
         return None
 
 
+def get_us_peer(ticker: str) -> Optional[dict]:
+    """미국 동종업체(peer) 비교 카드 — quant_us_peer (정보봇 적재, 대표 ~10종목).
+
+    저평가/성장우위 판정. 테이블 미생성·미적재 시 None 반환
+    → 페이퍼는 '가점'만 생략하고 정상 동작(폴백). 6/24 밸류-피보나치 코워크.
+    """
+    client = _get_client()
+    if not client:
+        return None
+    try:
+        res = (client.table("quant_us_peer")
+               .select("*")
+               .eq("ticker", ticker)
+               .limit(1)
+               .execute())
+        return res.data[0] if res.data else None
+    except Exception:
+        return None
+
+
 def get_chart_hero_d1_candidates(date: str, min_continuity: int = 40) -> list[dict]:
     """정보봇 권장 쿼리 — 차트영웅 D+1 매매 후보 자동 추출.
 
