@@ -19,6 +19,9 @@ data/
 # data_store/ — FLOWX 관측 런타임 산출물 전체 제외 (regime/policies/plans/shadow_entries/exit_observer/reviews/reports)
 data_store/
 
+# website/data/brain_data_upload.json — BAT-D 런타임 산출물(매일 M 오염 방지). 나머지 website/data는 의도적 tracked 유지.
+website/data/brain_data_upload.json
+
 # 빌드/압축
 *.zip
 *.tar.gz
