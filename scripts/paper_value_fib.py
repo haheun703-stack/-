@@ -128,7 +128,11 @@ def run():
         if not os.path.exists(pq):
             continue
         df = pd.read_parquet(pq)
+        if not {"high", "low", "close"}.issubset(df.columns):
+            continue
         r = df.iloc[-1]
+        if pd.isna(r["high"]) or pd.isna(r["low"]) or pd.isna(r["close"]):
+            continue  # 데이터 공백일 — 청산 오판/누락 방지(스킵)
         today = df.index[-1].strftime("%Y-%m-%d")
         P = pf["positions"][code]
         hi, lo, cl = float(r["high"]), float(r["low"]), float(r["close"])
@@ -153,7 +157,7 @@ def run():
             exit_px, reason = min(hi, max(P["high60"], avg * (1 + TAKE_TARGET / 100))), "TARGET"
         if exit_px:
             pf["capital"] += P["qty"] * exit_px * (1 - COST)
-            pnl = (exit_px / avg - 1) * 100
+            pnl = (exit_px / avg - 1) * 100 - COST * 100  # 거래비용 반영(백테스트 v6 승패정의와 일치)
             pf["closed_trades"].append({
                 "ticker": code, "name": P.get("name"), "strategy": "VALUE_FIB",
                 "entry_date": P["entry_date"], "exit_date": today,
@@ -196,8 +200,8 @@ def run():
             if not ok:
                 continue
             cands.append((drop, code, cl, h60, src, us_peer_bonus(code)))
-        # 미국peer 가점 우선 → drop 깊은(싼) 순
-        cands.sort(key=lambda x: (not x[5], x[0]))
+        # drop 깊은(싼) 순 — 백테스트(v6)와 동일 정렬. US-peer는 기록만(정렬 미반영, 미검증).
+        cands.sort(key=lambda x: x[0])
         for drop, code, cl, h60, src, bonus in cands[:slots]:
             first = SLOT * F1
             q = int(first / cl)
@@ -214,9 +218,12 @@ def run():
     for code, P in pf["positions"].items():
         pq = os.path.join(PROCESSED, f"{code}.parquet")
         try:
-            eq += P["qty"] * float(pd.read_parquet(pq)["close"].iloc[-1])
+            px = float(pd.read_parquet(pq)["close"].iloc[-1])
+            eq += P["qty"] * px if not pd.isna(px) else P["cost"]  # NaN close → 원가 폴백(equity/mdd 오염 방지)
         except Exception:
             eq += P["cost"]
+    if not today:  # 보유0+후보0 등으로 미설정 시 빈 날짜 방지
+        today = datetime.now().strftime("%Y-%m-%d")
     pf["daily_equity"].append({"date": today, "equity": round(eq),
                                "capital": round(pf["capital"]), "positions": len(pf["positions"])})
     pf["stats"]["max_equity"] = max(pf["stats"]["max_equity"], eq)
@@ -233,4 +240,7 @@ def run():
 
 
 if __name__ == "__main__":
+    if datetime.now().weekday() >= 5:  # 주말 실행 금지(MEMORY 교훈). cron은 평일만이나 ad-hoc 방어
+        print("주말 — 밸류-피보나치 페이퍼 실행 skip")
+        sys.exit(0)
     run()

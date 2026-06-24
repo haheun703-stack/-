@@ -37,6 +37,7 @@ except Exception:
 import json
 import sqlite3
 import argparse
+import datetime as dt
 from collections import Counter
 
 import pandas as pd
@@ -81,8 +82,12 @@ def fetch_surges():
     return lst.loc[m, cols].sort_values("ChagesRatio", ascending=False).reset_index(drop=True)
 
 
-def d1_signal(code):
-    """유니버스 내 종목의 상한가 직전일(D-1) 선행지표. 유니버스 밖이면 None."""
+def d1_signal(code, target_date=None):
+    """유니버스 내 종목의 상한가 직전일(D-1) 선행지표. 유니버스 밖이면 None.
+
+    target_date(상한가 발생일) 지정 시 parquet에서 그 행을 찾아 직전 거래일을 D-1로.
+    parquet에 발생일 미반영(stale)이면 {"stale":1}만 반환 → 수급분류 '미확정'.
+    """
     p = os.path.join(PROCESSED, f"{code}.parquet")
     if not os.path.exists(p):
         return None
@@ -90,7 +95,16 @@ def d1_signal(code):
         df = pd.read_parquet(p)
         if len(df) < 2:
             return None
-        d1 = df.iloc[-2]  # 마지막행=상한가일 가정 → 직전행=D-1
+        if target_date:
+            try:
+                loc = int(df.index.get_indexer([pd.Timestamp(target_date)])[0])
+            except Exception:
+                loc = -1
+            if loc <= 0:  # 발생일 미반영(stale) 또는 첫행 → D-1 확정 불가
+                return {"stale": 1, "parquet_last": str(df.index[-1])[:10]}
+            d1 = df.iloc[loc - 1]
+        else:
+            d1 = df.iloc[-2]  # 폴백(--date 없을 때): 마지막행=상한가일 가정
         return {
             "rsi": _f(d1.get("rsi_14")),
             "adx": _f(d1.get("adx_14")),
@@ -99,6 +113,7 @@ def d1_signal(code):
             "foreign_streak": _i(d1.get("foreign_consecutive_buy")),
             "inst_streak": _i(d1.get("inst_consecutive_buy")),
             "parquet_last": str(df.index[-1])[:10],
+            "stale": 0,
         }
     except Exception:
         return None
@@ -107,6 +122,8 @@ def d1_signal(code):
 def classify(sig):
     if sig is None:
         return "유니버스밖(미추적)"
+    if sig.get("stale"):
+        return "유니버스내(parquet미반영)"
     f = sig.get("foreign_streak", 0) or 0
     i = sig.get("inst_streak", 0) or 0
     if f > 0 and i > 0:
@@ -148,20 +165,27 @@ def ensure_db():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--date", default=None, help="기록용 날짜 라벨 (기본: parquet 최신일)")
+    ap.add_argument("--date", default=None, help="상한가 발생일 (기본: 오늘). D-1 정합성 기준")
     args = ap.parse_args()
 
-    surges = fetch_surges()
+    # 상한가 snapshot은 '오늘'이 기본 — 날짜 라벨/PK 결정적(종목순서·parquet신선도 비종속)
+    run_date = args.date or dt.date.today().isoformat()
+
+    try:
+        surges = fetch_surges()
+    except Exception as e:
+        print(f"[fetch_surges] FDR 수집 실패 — 그날 skip: {e}")
+        return
     theme_codes = load_theme_codes()
 
     recs, rows = [], []
     for _, r in surges.iterrows():
         code = r["Code"]
-        sig = d1_signal(code)
+        sig = d1_signal(code, run_date)
         in_uni = 1 if sig is not None else 0
         sc = classify(sig)
         theme = 1 if code in theme_codes else 0
-        date = args.date or (sig["parquet_last"] if sig else "snapshot")
+        date = run_date
         recs.append({
             "date": date, "code": code, "name": r.get("Name"), "market": r.get("Market"),
             "change_pct": _f(r.get("ChagesRatio"), 2), "close": _f(r.get("Close")),
@@ -183,7 +207,7 @@ def main():
     con.commit()
     con.close()
 
-    rundate = args.date or (recs[0]["date"] if recs else "snapshot")
+    rundate = run_date
     os.makedirs(OUTDIR, exist_ok=True)
     jpath = os.path.join(OUTDIR, f"{rundate}.json")
     with open(jpath, "w", encoding="utf-8") as f:
