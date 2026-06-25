@@ -144,3 +144,54 @@ holdings:
     net_debt_eok: 15000
     as_of: 2026-Q1
     source: 지분율·NAV 추정 — 표본확대 검증용
+  '032830':
+    name: 삼성생명
+    kind: operating_holding
+    listed_stakes:
+    - ticker: '029780'
+      name: 삼성카드
+      pct: 71.86
+    - ticker: '016360'
+      name: 삼성증권
+      pct: 29.39
+    - ticker: '000810'
+      name: 삼성화재
+      pct: 15.43
+    - ticker: '005930'
+      name: 삼성전자
+      pct: 8.51
+    - ticker: '008770'
+      name: 호텔신라
+      pct: 7.30
+    - ticker: '012750'
+      name: 에스원
+      pct: 5.34
+    - ticker: '010140'
+      name: 삼성중공업
+      pct: 2.92
+    other_nav_eok: 0
+    own_business_eok: 0
+    net_debt_eok: 0
+    as_of: 2026-Q1
+    source: DART 실측 — 보험사(NAV 단순지분 합산, 보험부채/책임준비금 미반영 → NAV 과대 주의). 삼성전자 8.51% 반사이익 대상
+  '012330':
+    name: 현대모비스
+    kind: operating_holding
+    listed_stakes:
+    - ticker: '005380'
+      name: 현대차
+      pct: 22.0
+    - ticker: '307950'
+      name: 현대오토에버
+      pct: 20.0
+    - ticker: '001500'
+      name: 현대차증권
+      pct: 14.0
+    - ticker: '000720'
+      name: 현대건설
+      pct: 9.0
+    other_nav_eok: 0
+    own_business_eok: 36000
+    net_debt_eok: -20000
+    as_of: 2026-Q1
+    source: DART 실측 지분 — 순환출자 사업지주(부품 자체사업 own_business=별도OI 4536억×8 추정). 현대차 22% 반사이익
