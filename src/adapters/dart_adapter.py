@@ -458,6 +458,73 @@ class DartAdapter:
             return []
 
     # ──────────────────────────────────────────────
+    # 타법인 출자현황 (지주사 NAV — 자회사 지분율)
+    # ──────────────────────────────────────────────
+
+    def fetch_other_corp_investments(
+        self,
+        ticker: str,
+        year: int | None = None,
+        reprt_code: str = "11011",
+    ) -> list[dict]:
+        """타법인 출자현황(otrCprStkInvstmtSttus) 조회 — 지주사의 자회사별 기말 지분율.
+
+        사업보고서(11011)에만 기재되는 항목. 비상장 포함 전 출자 법인이 나오므로
+        호출측에서 inv_name → stock_code 매핑으로 상장사만 필터한다.
+
+        Args:
+            ticker: 지주사 종목코드(6자리)
+            year: 사업연도. None이면 직전 연도(최근 사업보고서).
+            reprt_code: 보고서코드(기본 11011=사업보고서)
+
+        Returns:
+            [{"inv_name": 법인명, "stake_pct": 기말지분율(%), "book_value": 장부가(원),
+              "net_income": 당기순이익(원), "total_assets": 총자산(원)}, ...]
+        """
+        if not self.is_available:
+            return []
+        corp_code = self.get_corp_code(ticker)
+        if not corp_code:
+            return []
+        if year is None:
+            from datetime import date
+            year = date.today().year - 1  # 최근 사업보고서 = 직전 사업연도
+
+        url = f"{DART_BASE_URL}/otrCprInvstmntSttus.json"
+        params = {
+            "crtfc_key": self.api_key,
+            "corp_code": corp_code,
+            "bsns_year": str(year),
+            "reprt_code": reprt_code,
+        }
+        try:
+            time.sleep(0.1)
+            resp = requests.get(url, params=params, timeout=15)
+            self._api_calls += 1
+            data = resp.json()
+            if data.get("status") != "000":
+                logger.debug(
+                    f"DART 타법인 출자현황: {data.get('status')} {data.get('message')} "
+                    f"(ticker={ticker}, year={year})"
+                )
+                return []
+            out: list[dict] = []
+            for item in data.get("list", []):
+                out.append({
+                    "inv_name": (item.get("inv_prm") or "").strip(),
+                    "stake_pct": self._parse_amount(item.get("trmend_blce_qota_rt")),
+                    "book_value": self._parse_amount(item.get("trmend_blce_acntbk_amount")),
+                    "net_income": self._parse_amount(
+                        item.get("recent_bsns_year_fnnr_sttus_thstrm_ntincm")),
+                    "total_assets": self._parse_amount(
+                        item.get("recent_bsns_year_fnnr_sttus_tot_assets")),
+                })
+            return out
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"DART 타법인 출자현황 조회 오류: {ticker} - {e}")
+            return []
+
+    # ──────────────────────────────────────────────
     # 다중회사 일괄 조회 (스캐너용)
     # ──────────────────────────────────────────────
 

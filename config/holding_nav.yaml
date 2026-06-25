@@ -1,0 +1,146 @@
+holdings:
+  '402340':
+    name: SK스퀘어
+    kind: pure_holding
+    listed_stakes:
+    - ticker: '000660'
+      name: SK하이닉스
+      pct: 20.1
+    - ticker: '060570'
+      name: 드림어스컴퍼니
+      pct: 22.2
+    - ticker: '216050'
+      name: 인크로스
+      pct: 36.1
+    other_nav_eok: 30000
+    own_business_eok: 0
+    net_debt_eok: 5000
+    as_of: 2026-Q1
+    source: 추정값 — DART 사업보고서 대조 필요(특히 비상장 NAV·순부채)
+  028260:
+    name: 삼성물산
+    kind: operating_holding
+    listed_stakes:
+    - ticker: '207940'
+      name: 삼성바이오로직스
+      pct: 43.1
+    - ticker: 032830
+      name: 삼성생명
+      pct: 19.3
+    - ticker: 018260
+      name: 삼성에스디에스
+      pct: 17.1
+    - ticker: 005930
+      name: 삼성전자
+      pct: 4.4
+    - ticker: 028050
+      name: 삼성E&A
+      pct: 7.0
+    - ticker: '030000'
+      name: 제일기획
+      pct: 12.64
+    other_nav_eok: 0
+    own_business_eok: 80000
+    net_debt_eok: -20000
+    as_of: 2026-Q1
+    source: 추정값 — DART 사업보고서 대조 필요(특히 자체사업가치·지분율 정밀화)
+  '003550':
+    name: ㈜LG
+    kind: pure_holding
+    listed_stakes:
+    - ticker: 051910
+      name: LG화학
+      pct: 35.0
+    - ticker: '066570'
+      name: LG전자
+      pct: 35.0
+    - ticker: 051900
+      name: LG생활건강
+      pct: 35.0
+    - ticker: '032640'
+      name: LG유플러스
+      pct: 38.0
+    other_nav_eok: 50000
+    net_debt_eok: -10000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
+  '034730':
+    name: SK
+    kind: pure_holding
+    listed_stakes:
+    - ticker: '402340'
+      name: SK스퀘어
+      pct: 32.14
+    - ticker: 096770
+      name: SK이노베이션
+      pct: 51.7
+    - ticker: '017670'
+      name: SK텔레콤
+      pct: 30.57
+    - ticker: '326030'
+      name: SK바이오팜
+      pct: 64.02
+    other_nav_eok: 60000
+    net_debt_eok: 50000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
+  000880:
+    name: 한화
+    kind: operating_holding
+    listed_stakes:
+    - ticker: '012450'
+      name: 한화에어로스페이스
+      pct: 32.18
+    - ticker: 009830
+      name: 한화솔루션
+      pct: 36.15
+    - ticker: 088350
+      name: 한화생명
+      pct: 43.24
+    other_nav_eok: 0
+    own_business_eok: 40000
+    net_debt_eok: 30000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
+  '267250':
+    name: HD현대
+    kind: operating_holding
+    listed_stakes:
+    - ticker: 009540
+      name: HD한국조선해양
+      pct: 35.05
+    - ticker: '267260'
+      name: HD현대일렉트릭
+      pct: 35.74
+    other_nav_eok: 70000
+    own_business_eok: 0
+    net_debt_eok: 20000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
+  '000150':
+    name: 두산
+    kind: operating_holding
+    listed_stakes:
+    - ticker: '034020'
+      name: 두산에너빌리티
+      pct: 30.39
+    other_nav_eok: 30000
+    own_business_eok: 30000
+    net_debt_eok: 10000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
+  '001040':
+    name: CJ
+    kind: operating_holding
+    listed_stakes:
+    - ticker: 097950
+      name: CJ제일제당
+      pct: 45.6
+    - ticker: '035760'
+      name: CJ ENM
+      pct: 42.4
+    other_nav_eok: 20000
+    own_business_eok: 5000
+    net_debt_eok: 15000
+    as_of: 2026-Q1
+    source: 지분율·NAV 추정 — 표본확대 검증용
