@@ -316,6 +316,10 @@ case "$BAT" in
     #   진입=60일고점-10%+RSI<40+반등확인+수급 / 청산=전고점or+25%/-20% / 회전금지(보유).
     #   관측·격리: 실주문 무접촉 · data/paper_portfolio_vf.json만 누적.
     run_py scripts/paper_value_fib.py
+    # 지주사 NAV 디스카운트 페이퍼 (5번째 독립포트, 6/25 백테스트+정련: z[1,2]밴드 승률81%·+23%/D+60·최악-37%→손절-15%).
+    #   신호=할인축소z∈[1,2]+NAVmom5d>0·할인거래 / 청산=D+60보유 or -15%손절 / 검증4종목(㈜LG·SK·두산·삼성물산)·쿨다운20일.
+    #   관측·격리: 실주문 무접촉 · data/paper_portfolio_holdnav.json만 누적. 사업지주(한화)·단일베타(SK스퀘어)·CJ버그 제외.
+    run_py scripts/paper_holding_nav.py
     run_py scripts/data_health_check.py
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
     # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
