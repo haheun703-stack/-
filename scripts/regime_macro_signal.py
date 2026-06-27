@@ -336,6 +336,10 @@ def main():
     # ★macro_score/position_multiplier 에 절대 반영 안 함. 정보봇 적재 전엔 graceful(loaded=False).
     from src.adapters.jgis_regime_fact_adapter import load_regime_fact_shadow
     jgis_regime_fact_shadow = load_regime_fact_shadow()
+    # 정보봇 한미충격(kr_us_shock_summary) shadow 관측 (매매 미반영, freeze)
+    # ★레짐/macro_score/SHIELD 미반영. 정보봇 daily_intelligence 적재(평일 08:00) 전엔 graceful(no_field).
+    from src.adapters.jgis_kr_us_shock_adapter import load_kr_us_shock_shadow
+    jgis_kr_us_shock_shadow = load_kr_us_shock_shadow()
 
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
@@ -350,6 +354,7 @@ def main():
         "recommendation": recommendation,
         "regime_history_5d": recent_5,
         "jgis_regime_fact_shadow": jgis_regime_fact_shadow,
+        "jgis_kr_us_shock_shadow": jgis_kr_us_shock_shadow,
     }
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
