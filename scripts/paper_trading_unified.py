@@ -966,13 +966,20 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
     from src.adapters.jgis_kr_us_shock_adapter import load_kr_us_shock_shadow
     _shock = load_kr_us_shock_shadow()
     shock_mult = 1.0
-    if _shock.get("loaded") and _shock.get("verdict") == "한국 더 취약":
-        _diff = _shock.get("diff") or 0
-        if _diff >= 20:
+    if _shock.get("loaded"):
+        # 검수 🟡-1/🔵-2: verdict 문자열("한국 더 취약") 의존 제거 — 정보봇 표기변경 시
+        #   침묵무력화 방지 위해 수치로 판정 + diff 타입 방어.
+        try:
+            _kr = float(_shock.get("kr_shock") or 0)
+            _us = float(_shock.get("us_shock") or 0)
+            _diff = float(_shock.get("diff") or 0) or (_kr - _us)  # diff 누락 시 kr-us 직접
+        except (TypeError, ValueError):
+            _kr = _us = _diff = 0.0
+        # "한국 더 취약" = KR 취약도 > US, 격차(diff)가 클수록 신규 매수금액 축소.
+        if _kr > _us and _diff >= 20:
             shock_mult = max(0.5, 1.0 - (_diff - 20) / 60.0)
             logger.info(
-                f"[한미충격] KR 더 취약 (kr={_shock.get('kr_shock')} us={_shock.get('us_shock')} "
-                f"diff={_diff}) — 신규 매수금액 ×{shock_mult:.2f}"
+                f"[한미충격] KR 더 취약 (kr={_kr} us={_us} diff={_diff}) — 신규 매수금액 ×{shock_mult:.2f}"
             )
 
     # Shield 기반 동적 최대 보유 수
