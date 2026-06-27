@@ -169,11 +169,8 @@ case "$BAT" in
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
-    # 3-봇 분업 (5/14): sync 성공 시 퀀트봇은 연기금+금융투자만 추가 수집 (~30-40분 단축)
-    SYNC_OK=0
-    if run_py_long_check scripts/sync_investor_to_csv.py; then
-        SYNC_OK=1
-    fi
+    # (구 SYNC_OK 분기는 collect_investor_bulk 폐기로 제거 — 단타봇 sync 자체는 유지)
+    run_py_long_check scripts/sync_investor_to_csv.py || true
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py  # 장마감 후 2차 수집 (BAT-A 06:10 시점 KR 미반영분 보충)
     # [KRX잠금 6/22 사장님지시] scan_nationality.py 비활성 — KRXSession ID/PW 로그인이 매 실행(gap-fill 최대 7회) CD007 계정잠금 유발(6/12~ 결측). KRX 일절 미접근.
@@ -185,18 +182,11 @@ case "$BAT" in
     run_py scripts/scan_volume_spike.py
     run_py scripts/sector_etf_builder.py --daily
     run_py scripts/collect_investor_flow.py
-    # KIS 종목별 투자자 수급 자급 (외국인/기관계/개인 3주체) → investor_daily.db
-    # KRX 계정잠금/만료 독립 정공경로 (2026-06-16 배선, 고정IP 13.209.153.221 화이트리스트)
-    run_py_xlong scripts/collect_investor_kis.py --days 2
-    # [KRX잠금 6/22 사장님지시] collect_investor_bulk 비활성 — pykrx KRX STAT가 KRX_ID/PW 로그인 사용(코드 주석 명시) → CD007 잠금 기여. KRX 일절 미접근.
-    #   연기금/금융투자 세분은 KRX 잠금 해제 후 별도 결정. 3주체(외인/기관/개인)는 위 collect_investor_kis.py(KIS 화이트리스트)로 정상 수집 유지.
-    # if [ "$SYNC_OK" = "1" ]; then
-    #     echo "[$(date +%H:%M:%S)] [INFO] 단타봇 sync 성공 → 퀀트봇 부분 수집 (연기금+금융투자)" >> "$LOG"
-    #     run_py_long scripts/collect_investor_bulk.py --investors 연기금,금융투자
-    # else
-    #     echo "[$(date +%H:%M:%S)] [WARN] 단타봇 sync 실패 → 6유형 풀 수집 fallback" >> "$LOG"
-    #     run_py_long scripts/collect_investor_bulk.py --core-only
-    # fi
+    # KIS 종목별 투자자 '세분' 수급 (11주체: 외인/기관계/개인 + 금융투자/연기금/투신/사모/은행/보험/기타금융/기타법인)
+    # → investor_daily.db. TR=FHPTJ04160001(investor-trade-by-stock-daily): 한 호출에 30거래일치, 고정IP 13.209.153.221 화이트리스트.
+    # [2026-06-27 사장님지시] KRX 영구 포기 → KIS 자급. 구 collect_investor_bulk(pykrx/KRX 로그인=CD007 잠금 원인) 폐기.
+    #   이 수집으로 signal_engine 금투/연기금 신호(PHASE5_STAGE3) + export_investor_for_scalper(단타봇 공유) 정상 복원.
+    run_py_xlong scripts/collect_investor_kis.py --days 5
     run_py scripts/export_investor_for_scalper.py
     # sync_investor_to_csv → G1 상단으로 이동 (단타봇 데이터 선행 활용)
     run_py scripts/fetch_ecos_macro.py
