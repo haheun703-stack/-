@@ -382,15 +382,26 @@ def collect_candidates() -> list[dict]:
 
         grade_kr = pick.get("grade", "")
         if has_strong:
-            grade = demote_if_crowded("AA", ticker)  # STRONG_ALPHA → AA (B안: 과매집 천장이면 차단)
-            logger.info("[ALPHA-BYPASS] %s grade=%s → %s (STRONG: %s)",
-                        pick.get("name", ticker), grade_kr, grade,
+            # 부검(메인A 73건: SCAN/AA -458만원 = 전체 손실의 원흉, 2026-06-27) — B안: SCAN/AA 전면 차단.
+            #   기존 demote(과매집 6일 강등)는 너무 약해 비과매집 AA가 새어나감 → 전면 차단으로 강화.
+            #   A안(baseline)은 무손상 대조군 → forward A/B로 부검(in-sample) 재확인.
+            if CONVICTION_MODE == "B":
+                logger.info("[CONVICTION-B] SCAN/AA(STRONG) 차단(부검 -458만): %s",
+                            pick.get("name", ticker))
+                continue
+            grade = "AA"
+            logger.info("[ALPHA-BYPASS] %s grade=%s → AA (STRONG: %s)",
+                        pick.get("name", ticker), grade_kr,
                         ",".join(alpha_sigs & STRONG_ALPHA_SIGNALS))
         elif (has_moderate or has_multi) and score >= 75:
             grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
             logger.info("[MULTI-SIG] %s grade=%s → A 승격 (시그널 %d개, score=%.1f)",
                         pick.get("name", ticker), grade_kr, len(alpha_sigs), score)
         elif grade_kr in ("강력 포착", "적극매수"):
+            if CONVICTION_MODE == "B":  # 부검: SCAN/AA 전면 차단(-458만)
+                logger.info("[CONVICTION-B] SCAN/AA(강력포착) 차단(부검 -458만): %s",
+                            pick.get("name", ticker))
+                continue
             grade = "AA"
         elif grade_kr in ("포착", "매수"):
             grade = "A"
