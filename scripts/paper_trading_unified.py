@@ -948,6 +948,22 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
             f"[위험감지] {risk_level} ({risk_score}점) — 매수금액 ×{risk_mult}"
         )
 
+    # ── 한미충격 게이트 (정보봇 kr_us_shock, 페이퍼 실반영) ──
+    #   "한국 더 취약"이고 취약도差(diff=kr-us)가 클수록 신규 매수금액 축소(방어).
+    #   risk_gate(위 risk_mult)와 동일 패턴. graceful: 데이터 없으면(loaded=False) ×1.0(중립).
+    #   페이퍼라 곧장 실반영 — diff20→×1.0, diff50+→×0.5 선형. 강도/임계는 forward로 조정.
+    from src.adapters.jgis_kr_us_shock_adapter import load_kr_us_shock_shadow
+    _shock = load_kr_us_shock_shadow()
+    shock_mult = 1.0
+    if _shock.get("loaded") and _shock.get("verdict") == "한국 더 취약":
+        _diff = _shock.get("diff") or 0
+        if _diff >= 20:
+            shock_mult = max(0.5, 1.0 - (_diff - 20) / 60.0)
+            logger.info(
+                f"[한미충격] KR 더 취약 (kr={_shock.get('kr_shock')} us={_shock.get('us_shock')} "
+                f"diff={_diff}) — 신규 매수금액 ×{shock_mult:.2f}"
+            )
+
     # Shield 기반 동적 최대 보유 수
     shield_max = get_shield_max_positions()
     slots_available = shield_max - len(pf["positions"])
@@ -985,7 +1001,7 @@ def enter_new_positions(pf: dict, candidates: list[dict], today_str: str) -> lis
         # 사이징 (P0-7: 위험감지 multiplier 적용)
         size_pct = SIZING.get(grade, SIZING["A"])  # B 없으므로 A를 기본값으로
         buy_amount = min(
-            pf["initial_capital"] * size_pct * risk_mult,
+            pf["initial_capital"] * size_pct * risk_mult * shock_mult,
             pf["capital"] * 0.90,  # 현금의 90%까지만
         )
 
