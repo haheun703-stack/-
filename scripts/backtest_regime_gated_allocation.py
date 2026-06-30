@@ -48,23 +48,25 @@ def load_kospi() -> pd.DataFrame:
 
 
 def classify_regime(d: pd.DataFrame) -> pd.Series:
-    """가격기반 레짐(과거데이터만). 반환: 일별 레짐 라벨."""
+    """★시스템 실제 레짐 분류기 1:1 재현 (regime_macro_signal.classify_regime + calc_rv_percentile).
+
+    if close>ma20:  BULL(rv_pct<50) / CAUTION(rv_pct>=50)
+    elif close>ma60: BEAR
+    else: CRISIS
+    rv_pct = RV20의 252일 롤링 백분위 순위(과거만, lookahead無).
+    """
     close = d["close"]
     ma20 = close.rolling(20).mean()
     ma60 = close.rolling(60).mean()
     ret = close.pct_change()
-    rv20 = ret.rolling(20).std()
-    rv_med = rv20.rolling(252, min_periods=60).median()   # 1년 롤링 중앙값(과거만)
-    ma20_up = ma20 > ma20.shift(5)       # MA20 상승(BULL 조건)
-    ma60_down = ma60 < ma60.shift(20)    # ★MA60↓ = CRISIS (SYSTEM_MAP 정의, 가격<MA60 아님)
+    rv = ret.rolling(20).std() * np.sqrt(252) * 100
+    rv_pct = (rv.rolling(252, min_periods=60).rank(pct=True) * 100).fillna(50)
 
-    align = (close > ma20) & (ma20 > ma60)
-    reg = pd.Series("NEUTRAL", index=d.index)            # NEUTRAL=BEAR존(MA20~MA60)
-    reg[align & ~ma20_up] = "CAUTION"                    # 정배열이나 MA20 횡보
-    reg[align & ma20_up & (rv20 >= rv_med)] = "CAUTION"  # 정배열+상승+고변동
-    reg[align & ma20_up & (rv20 < rv_med)] = "BULL"      # 정배열+상승+저변동 → 레버
-    reg[ma60_down] = "CRISIS"                            # MA60 하락(최우선) → 현금/인버스
-    reg[ma60.isna() | rv_med.isna()] = "NEUTRAL"
+    reg = pd.Series("CRISIS", index=d.index)                 # else: close<=ma60
+    reg[(close <= ma20) & (close > ma60)] = "BEAR"           # elif: ma60<close<=ma20
+    reg[(close > ma20) & (rv_pct >= 50)] = "CAUTION"         # if: close>ma20 고변동
+    reg[(close > ma20) & (rv_pct < 50)] = "BULL"             # if: close>ma20 저변동
+    reg[ma60.isna()] = "NEUTRAL"                             # warmup
     return reg
 
 
@@ -113,10 +115,11 @@ def main() -> int:
     reg = classify_regime(d)
 
     # 비교 정책들
+    _crisis = "INV" if args.inverse else "CASH"
     policies = {
-        "Buy&Hold 지수(1x)": {"BULL": "INDEX", "CAUTION": "INDEX", "NEUTRAL": "INDEX", "CRISIS": "INDEX"},
-        "무지성 레버(2x 상시)": {"BULL": "LEV", "CAUTION": "LEV", "NEUTRAL": "LEV", "CRISIS": "LEV"},
-        "★레짐게이트": {"BULL": "LEV", "CAUTION": "INDEX", "NEUTRAL": "CASH", "CRISIS": "INV" if args.inverse else "CASH"},
+        "Buy&Hold 지수(1x)": {"BULL": "INDEX", "CAUTION": "INDEX", "BEAR": "INDEX", "NEUTRAL": "INDEX", "CRISIS": "INDEX"},
+        "무지성 레버(2x 상시)": {"BULL": "LEV", "CAUTION": "LEV", "BEAR": "LEV", "NEUTRAL": "LEV", "CRISIS": "LEV"},
+        "★레짐게이트": {"BULL": "LEV", "CAUTION": "INDEX", "BEAR": "CASH", "NEUTRAL": "CASH", "CRISIS": _crisis},
     }
 
     print(f"=== 레짐-게이트 배분 백테스트 (KOSPI {d.index[0].date()}~{d.index[-1].date()}, "
