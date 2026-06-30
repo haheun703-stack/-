@@ -280,6 +280,9 @@ def build_regime_macro():
         "position_multiplier": raw.get("position_multiplier", 1.0),
         "signals": raw.get("signals", {}),
         "recommendation": raw.get("recommendation", ""),
+        # 정보봇(jgis) 한미충격 + 레짐fact — SHADOW 관측(매매/macro_score 미반영, freeze). FLOWX 노출용.
+        "kr_us_shock": raw.get("jgis_kr_us_shock_shadow", {}),
+        "regime_fact": raw.get("jgis_regime_fact_shadow", {}),
     }
 
 
