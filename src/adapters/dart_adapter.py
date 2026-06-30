@@ -390,6 +390,107 @@ class DartAdapter:
         return result
 
     # ──────────────────────────────────────────────
+    # 분기 영업이익 TTM-YoY 시계열 (주도주 사이클 델타 게이트)
+    # ──────────────────────────────────────────────
+
+    # 보고서코드 → (분기키, 인덱스, 분기말 월일)
+    _REPRT_QMAP = {
+        "11013": ("Q1", 1, (3, 31)),
+        "11012": ("H1", 2, (6, 30)),   # 반기 누적
+        "11014": ("9M", 3, (9, 30)),   # 3분기 누적
+        "11011": ("FY", 4, (12, 31)),  # 사업보고서(연간 누적)
+    }
+    # 분기말 → 실제 공시(가용)일 추정 지연(일). 한국 공시기한: 분기/반기 45일, 사업보고서 90일.
+    # 시계열을 '공시가용일'로 색인해야 백테스트(as_of) 시 미래실적 누설(lookahead)을 막는다.
+    _AVAIL_LAG_DAYS = {1: 45, 2: 45, 3: 45, 4: 90}
+
+    def get_op_growth_series(
+        self,
+        ticker: str,
+        *,
+        years_back: int = 4,
+        end_year: int | None = None,
+    ) -> pd.Series | None:
+        """분기 영업이익 TTM(최근 12개월) YoY 성장률 시계열.
+
+        주도주 사이클 진단(leader_cycle_diagnosis)의 델타 게이트 입력.
+        DART 분기보고서는 '누적값'(Q1→반기→3분기→연간)이므로 단일분기로 환산한 뒤
+        TTM(직전 4분기 합) YoY를 계산한다.
+
+        TTM을 쓰는 이유:
+          - 한국 분기 실적의 계절성·일회성 노이즈를 흡수(단일분기 YoY는 부호폭발·결측 다발).
+          - 같은 12개월 창끼리 비교 → 델타(=YoY의 1차 차분 = 영업이익 성장의 2차 미분)가
+            진짜 '성장 둔화/가속'을 의미하게 됨.
+
+        Args:
+            ticker: 종목코드(6자리).
+            years_back: 조회 시작 연도 오프셋(end_year - years_back ~ end_year). TTM-YoY는
+                과거 2년 단일분기가 필요하므로 기본 4(=5개년)면 최근 수분기 YoY 산출 가능.
+            end_year: 마지막 조회 연도(기본=올해). 백테스트 시 과거연도 지정 가능.
+
+        Returns:
+            pd.Series(index=분기말 Timestamp, value=TTM YoY %), 오름차순.
+            데이터 부족(< 2점)이거나 DART 미사용 시 None.
+        """
+        if not self.is_available:
+            return None
+
+        from datetime import datetime
+
+        if end_year is None:
+            end_year = datetime.now().year
+        start_year = end_year - years_back
+
+        # 1) 누적 영업이익 수집: cum[(year, qidx)] = 영업이익(원)
+        cum: dict[tuple[int, int], float] = {}
+        for year in range(start_year, end_year + 1):
+            for reprt_code, (_qkey, qidx, _md) in self._REPRT_QMAP.items():
+                df = self.fetch_financial_statement(ticker, year, reprt_code)
+                oi = self._extract_account(df, "영업이익") if df is not None else None
+                if oi is not None:
+                    cum[(year, qidx)] = float(oi)
+
+        if len(cum) < 6:  # 단일분기→TTM→YoY 최소 데이터 가드
+            return None
+
+        # 2) 단일분기 환산 (연내 누적 차감). 연중 결측이 끼면 그 이후 분기는 환산 불가 → 중단.
+        single: dict[int, float] = {}   # 절대분기인덱스(year*4 + (q-1)) → 단일분기 영업이익
+        for year in range(start_year, end_year + 1):
+            prev_cum = 0.0
+            ok_prev = True   # 직전 누적(Q0=0)이 신뢰 가능한가
+            for qidx in (1, 2, 3, 4):
+                key = (year, qidx)
+                if key in cum and ok_prev:
+                    abs_q = year * 4 + (qidx - 1)
+                    single[abs_q] = cum[key] - prev_cum
+                    prev_cum = cum[key]
+                    ok_prev = True
+                else:
+                    ok_prev = False   # 연내 구멍 → 잔여 분기 환산 포기(차감 오염 방지)
+
+        # 3) TTM(직전 4분기 합) → 4분기 전(전년 동분기) 대비 YoY%
+        out: dict[pd.Timestamp, float] = {}
+        for abs_q in single:
+            window = [single.get(abs_q - k) for k in range(4)]      # 현재 포함 직전 4분기
+            prev_window = [single.get(abs_q - 4 - k) for k in range(4)]  # 1년 전 같은 4분기
+            if any(v is None for v in window) or any(v is None for v in prev_window):
+                continue
+            ttm = sum(window)
+            ttm_prev = sum(prev_window)
+            if ttm_prev <= 0:   # 전년 TTM 적자/0 → YoY 무의미(부호폭발) → 스킵
+                continue
+            year, q = divmod(abs_q, 4)
+            qnum = q + 1
+            mm, dd = self._REPRT_QMAP[{1: "11013", 2: "11012", 3: "11014", 4: "11011"}[qnum]][2]
+            # 분기말 + 공시지연 = 가용일로 색인(point-in-time). 엔진의 as_of 필터가 미공시분 자동 제외.
+            avail = pd.Timestamp(year=year, month=mm, day=dd) + pd.Timedelta(days=self._AVAIL_LAG_DAYS[qnum])
+            out[avail] = round((ttm - ttm_prev) / ttm_prev * 100, 1)
+
+        if len(out) < 2:
+            return None
+        return pd.Series(out).sort_index()
+
+    # ──────────────────────────────────────────────
     # 공시 목록 조회 (촉매 분류용)
     # ──────────────────────────────────────────────
 

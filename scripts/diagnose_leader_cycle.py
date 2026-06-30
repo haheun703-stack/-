@@ -20,14 +20,51 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from dotenv import load_dotenv  # noqa: E402
+
+load_dotenv(PROJECT_ROOT / ".env")   # DART_API_KEY 주입 (없으면 parquet 폴백)
+
 import pandas as pd  # noqa: E402
 
+from src.adapters.dart_adapter import DartAdapter  # noqa: E402
 from src.use_cases.leader_cycle_diagnosis import diagnose_leader_cycle  # noqa: E402
 
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 UNIVERSE = PROJECT_ROOT / "data" / "universe.csv"
 
 _NAME_CACHE: dict | None = None
+_DART: DartAdapter | None = None
+
+
+def _get_dart() -> DartAdapter | None:
+    """DartAdapter 지연 싱글턴 (CLI 1회 실행 내 캐시·corp_code 재사용)."""
+    global _DART
+    if _DART is None:
+        try:
+            _DART = DartAdapter()
+        except Exception:   # noqa: BLE001
+            _DART = None
+    return _DART
+
+
+def op_growth_from_dart(code: str, *, as_of: str | None = None) -> pd.Series | None:
+    """DART 분기 영업이익 TTM-YoY 시계열 (KR 델타 게이트 1순위 소스).
+
+    as_of(백테스트)면 그 연도까지만 조회해 미래 실적 누설 방지.
+    """
+    dart = _get_dart()
+    if dart is None or not dart.is_available:
+        return None
+    end_year = None
+    if as_of:
+        try:
+            end_year = pd.to_datetime(as_of).year
+        except (ValueError, TypeError):
+            end_year = None
+    try:
+        return dart.get_op_growth_series(code, end_year=end_year)
+    except Exception:   # noqa: BLE001
+        return None
 
 
 def _name_of(code: str) -> str:
@@ -77,11 +114,27 @@ def load_and_diagnose(code: str, *, market: str, as_of: str | None,
         return {"ticker": code, "data_available": False, "error": f"parquet 없음: {path.name}"}
     daily = pd.read_parquet(path)
     weekly = resample_weekly(daily)
-    op_growth = extract_op_growth(daily) if use_delta else None
-    return diagnose_leader_cycle(
+
+    op_growth = None
+    delta_source = "off"
+    if use_delta:
+        if market == "KR":
+            op_growth = op_growth_from_dart(code, as_of=as_of)   # DART TTM-YoY 우선
+            if op_growth is not None:
+                delta_source = "DART"
+        if op_growth is None:
+            op_growth = extract_op_growth(daily)                 # parquet 폴백(현 죽은 컬럼→None)
+            if op_growth is not None:
+                delta_source = "parquet"
+        if op_growth is None:
+            delta_source = "none"
+
+    res = diagnose_leader_cycle(
         weekly, market=market, op_growth=op_growth, as_of=as_of,
         params=params, ticker=code, name=_name_of(code),
     )
+    res["delta_source"] = delta_source
+    return res
 
 
 def _fmt(res: dict) -> str:
@@ -96,7 +149,9 @@ def _fmt(res: dict) -> str:
     surv = res.get("survival_pct")
     surv_s = f"{surv*100:>3.0f}%" if surv is not None else " - "
     delta = res.get("delta_value")
-    delta_s = f"Δ{delta:+.1f}" if delta is not None else "Δ없음"
+    src = res.get("delta_source", "")
+    src_tag = {"DART": "ᴰ", "parquet": "ᴾ", "none": "·", "off": ""}.get(src, "")
+    delta_s = f"Δ{delta:+.1f}{src_tag}" if delta is not None else f"Δ없음{src_tag}"
     head = (f"  {res['ticker']} {res.get('name',''):14} {icon}{res['clock']:5} "
             f"age={age_s} 생존={surv_s} {delta_s:>8} → {sig_icon}{sig}")
     lines = [head]
