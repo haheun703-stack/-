@@ -310,6 +310,12 @@ case "$BAT" in
     #   신호=할인축소z∈[1,2]+NAVmom5d>0·할인거래 / 청산=D+60보유 or -15%손절 / 검증4종목(㈜LG·SK·두산·삼성물산)·쿨다운20일.
     #   관측·격리: 실주문 무접촉 · data/paper_portfolio_holdnav.json만 누적. 사업지주(한화)·단일베타(SK스퀘어)·CJ버그 제외.
     run_py scripts/paper_holding_nav.py
+    # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
+    #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
+    #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.
+    #   대시보드 노출은 정보봇(FLOWX UI)이 이 JSON 소비(global_leaders.yaml 규약).
+    run_py_long scripts/fetch_us_leader_data.py
+    run_py_long scripts/run_leader_cycle.py --quiet
     run_py scripts/data_health_check.py
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
     # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지

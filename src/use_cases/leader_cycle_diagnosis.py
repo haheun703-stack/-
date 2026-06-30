@@ -235,6 +235,7 @@ def _delta_negative(op_growth: pd.Series | None, as_of: pd.Timestamp | None) -> 
     if len(g) < 2:
         return None, None
     delta = float(g.iloc[-1]) - float(g.iloc[-2])
+    delta = max(-999.0, min(999.0, delta))   # 적자/턴어라운드주 YoY 폭발 정화(부호 보존, 게이트 무영향)
     return (delta < 0), round(delta, 2)
 
 

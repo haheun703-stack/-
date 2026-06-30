@@ -90,7 +90,8 @@ def op_growth_from_us(code: str) -> pd.Series | None:
     prev_val: float | None = None
     for dt, val in s.items():
         if prev_val is not None and prev_val > 0:
-            yoy[dt + pd.Timedelta(days=60)] = round((val - prev_val) / prev_val * 100, 1)
+            g = (val - prev_val) / prev_val * 100
+            yoy[dt + pd.Timedelta(days=60)] = round(max(-999.0, min(999.0, g)), 1)   # 노이즈 클램프
         prev_val = val
     return pd.Series(yoy).sort_index() if len(yoy) >= 2 else None
 

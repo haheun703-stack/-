@@ -484,7 +484,10 @@ class DartAdapter:
             mm, dd = self._REPRT_QMAP[{1: "11013", 2: "11012", 3: "11014", 4: "11011"}[qnum]][2]
             # 분기말 + 공시지연 = 가용일로 색인(point-in-time). 엔진의 as_of 필터가 미공시분 자동 제외.
             avail = pd.Timestamp(year=year, month=mm, day=dd) + pd.Timedelta(days=self._AVAIL_LAG_DAYS[qnum])
-            out[avail] = round((ttm - ttm_prev) / ttm_prev * 100, 1)
+            # TTM이 0 근처(적자 턴어라운드)를 지나면 YoY가 폭발 → ±999%로 클램프(노이즈 정화,
+            # 델타 게이트는 부호만 사용하므로 무영향. 실 성장률은 이 범위 내).
+            yoy = (ttm - ttm_prev) / ttm_prev * 100
+            out[avail] = round(max(-999.0, min(999.0, yoy)), 1)
 
         if len(out) < 2:
             return None
