@@ -30,6 +30,7 @@ from src.adapters.dart_adapter import DartAdapter  # noqa: E402
 from src.use_cases.leader_cycle_diagnosis import diagnose_leader_cycle  # noqa: E402
 
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
+US_DIR = PROJECT_ROOT / "data" / "us_market" / "leader_cycle"   # fetch_us_leader_data.py 산출
 UNIVERSE = PROJECT_ROOT / "data" / "universe.csv"
 
 _NAME_CACHE: dict | None = None
@@ -65,6 +66,33 @@ def op_growth_from_dart(code: str, *, as_of: str | None = None) -> pd.Series | N
         return dart.get_op_growth_series(code, end_year=end_year)
     except Exception:   # noqa: BLE001
         return None
+
+
+def op_growth_from_us(code: str) -> pd.Series | None:
+    """US 연간 영업이익 YoY 성장률 시계열 (US 델타 게이트 소스).
+
+    yfinance 분기는 ~5개뿐이라 단일분기 YoY 델타 불가 → 연간 영업이익(4년) YoY 사용.
+    다년 성장둔화가 '주도주 기간 가설'의 핵심이라 연간 granularity도 의미 있음.
+    10-K 공시지연 +60일로 가용일 색인(백테스트 누설 차단).
+    """
+    p = US_DIR / f"{code}_opinc.json"
+    if not p.exists():
+        return None
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    annual = data.get("annual", {})
+    if len(annual) < 3:   # YoY 2점(델타 1점) 위해 연간 3개 필요
+        return None
+    s = pd.Series({pd.Timestamp(k): float(v) for k, v in annual.items()}).sort_index()
+    yoy: dict[pd.Timestamp, float] = {}
+    prev_val: float | None = None
+    for dt, val in s.items():
+        if prev_val is not None and prev_val > 0:
+            yoy[dt + pd.Timedelta(days=60)] = round((val - prev_val) / prev_val * 100, 1)
+        prev_val = val
+    return pd.Series(yoy).sort_index() if len(yoy) >= 2 else None
 
 
 def _name_of(code: str) -> str:
@@ -109,6 +137,25 @@ def extract_op_growth(daily: pd.DataFrame) -> pd.Series | None:
 
 def load_and_diagnose(code: str, *, market: str, as_of: str | None,
                       use_delta: bool, params: dict | None) -> dict:
+    # ── US: data/us_market/leader_cycle/{code}.parquet (이미 주봉) + 연간 영업이익 YoY ──
+    if market == "US":
+        path = US_DIR / f"{code}.parquet"
+        if not path.exists():
+            return {"ticker": code, "data_available": False,
+                    "error": f"US 주봉 없음(먼저 fetch_us_leader_data.py 실행): {path.name}"}
+        weekly = pd.read_parquet(path)   # 이미 주봉 OHLCV
+        op_growth, delta_source = None, "off"
+        if use_delta:
+            op_growth = op_growth_from_us(code)
+            delta_source = "US-annual" if op_growth is not None else "none"
+        res = diagnose_leader_cycle(
+            weekly, market="US", op_growth=op_growth, as_of=as_of,
+            params=params, ticker=code, name=code,
+        )
+        res["delta_source"] = delta_source
+        return res
+
+    # ── KR: data/raw/{code}.parquet (일봉) → 주봉 리샘플 + DART TTM-YoY ──
     path = RAW_DIR / f"{code}.parquet"
     if not path.exists():
         return {"ticker": code, "data_available": False, "error": f"parquet 없음: {path.name}"}
@@ -118,10 +165,9 @@ def load_and_diagnose(code: str, *, market: str, as_of: str | None,
     op_growth = None
     delta_source = "off"
     if use_delta:
-        if market == "KR":
-            op_growth = op_growth_from_dart(code, as_of=as_of)   # DART TTM-YoY 우선
-            if op_growth is not None:
-                delta_source = "DART"
+        op_growth = op_growth_from_dart(code, as_of=as_of)       # DART TTM-YoY 우선
+        if op_growth is not None:
+            delta_source = "DART"
         if op_growth is None:
             op_growth = extract_op_growth(daily)                 # parquet 폴백(현 죽은 컬럼→None)
             if op_growth is not None:
@@ -150,7 +196,7 @@ def _fmt(res: dict) -> str:
     surv_s = f"{surv*100:>3.0f}%" if surv is not None else " - "
     delta = res.get("delta_value")
     src = res.get("delta_source", "")
-    src_tag = {"DART": "ᴰ", "parquet": "ᴾ", "none": "·", "off": ""}.get(src, "")
+    src_tag = {"DART": "ᴰ", "parquet": "ᴾ", "US-annual": "ᵁ", "none": "·", "off": ""}.get(src, "")
     delta_s = f"Δ{delta:+.1f}{src_tag}" if delta is not None else f"Δ없음{src_tag}"
     head = (f"  {res['ticker']} {res.get('name',''):14} {icon}{res['clock']:5} "
             f"age={age_s} 생존={surv_s} {delta_s:>8} → {sig_icon}{sig}")
@@ -173,6 +219,10 @@ def main() -> int:
     params = {}
     if args.tolerance is not None:
         params["tolerance_weeks"] = args.tolerance
+    elif args.market == "US":
+        # US 캘리브레이션(backtest_leader_cycle_us): 메가캡은 리딩 중 깊은조정(NVDA 2025 -37%)이
+        # 잦아 KR=6주로는 사이클이 파편화("방금 시작" 오독)됨. 10주가 파편화/과병합 절충.
+        params["tolerance_weeks"] = 10
 
     results = [
         load_and_diagnose(c, market=args.market, as_of=args.as_of,
