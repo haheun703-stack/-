@@ -382,27 +382,21 @@ def collect_candidates() -> list[dict]:
 
         grade_kr = pick.get("grade", "")
         if has_strong:
-            # 부검(메인A 73건: SCAN/AA -458만원 = 전체 손실의 원흉, 2026-06-27) — B안: SCAN/AA 전면 차단.
-            #   기존 demote(과매집 6일 강등)는 너무 약해 비과매집 AA가 새어나감 → 전면 차단으로 강화.
-            #   A안(baseline)은 무손상 대조군 → forward A/B로 부검(in-sample) 재확인.
-            if CONVICTION_MODE == "B":
-                logger.info("[CONVICTION-B] SCAN/AA(STRONG) 차단(부검 -458만): %s",
-                            pick.get("name", ticker))
-                continue
-            grade = "AA"
-            logger.info("[ALPHA-BYPASS] %s grade=%s → AA (STRONG: %s)",
-                        pick.get("name", ticker), grade_kr,
-                        ",".join(alpha_sigs & STRONG_ALPHA_SIGNALS))
+            # 부검(메인A 73건: SCAN/AA -458만원 = 전체 손실의 원흉, 2026-06-27) → SCAN/AA(STRONG) 전면 차단.
+            #   ★6/30 forward A/B 확정(메인A -2.7%[SCAN활성] vs 메인B +0.5%[SCAN차단]) → 메인A에도 확대.
+            #   대조군 종료(SCAN/AA가 손실 원흉으로 forward 검증됨). CONVICTION_MODE는 이제 과매집감점·매도변형 분기에만.
+            logger.info("[SCAN-BLOCK] SCAN/AA(STRONG) 차단(부검 -458만·6/30 메인A 확대): %s",
+                        pick.get("name", ticker))
+            continue
         elif (has_moderate or has_multi) and score >= 75:
             grade = "A"   # 멀티시그널(3+) + 고점수 → A 승격
             logger.info("[MULTI-SIG] %s grade=%s → A 승격 (시그널 %d개, score=%.1f)",
                         pick.get("name", ticker), grade_kr, len(alpha_sigs), score)
         elif grade_kr in ("강력 포착", "적극매수"):
-            if CONVICTION_MODE == "B":  # 부검: SCAN/AA 전면 차단(-458만)
-                logger.info("[CONVICTION-B] SCAN/AA(강력포착) 차단(부검 -458만): %s",
-                            pick.get("name", ticker))
-                continue
-            grade = "AA"
+            # SCAN/AA 전면 차단(부검 -458만 · 6/30 forward A/B 확정 → 메인A 확대)
+            logger.info("[SCAN-BLOCK] SCAN/AA(강력포착) 차단(부검 -458만·6/30 메인A 확대): %s",
+                        pick.get("name", ticker))
+            continue
         elif grade_kr in ("포착", "매수"):
             grade = "A"
         else:
