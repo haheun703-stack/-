@@ -33,6 +33,21 @@ logger = logging.getLogger("daily_updater")
 DATA_DIR = Path(__file__).resolve().parent.parent / "stock_data_daily"
 LOG_FILE = DATA_DIR / "_update_log.txt"
 
+# 빈/손상 CSV 자가복구(전체 재다운로드) 시작일 — 기존 CSV 히스토리(~7.5년)와 정합
+REBUILD_START = "2018-01-01"
+
+# 저장 컬럼 순서 (원본 CSV와 동일) — update_single_csv/backfill/재구축 공용
+EXPECTED_COLS = [
+    "Date", "Open", "High", "Low", "Close", "Volume",
+    "MA5", "MA20", "MA60", "MA120", "RSI", "MACD", "MACD_Signal",
+    "Upper_Band", "Lower_Band", "ATR", "Stoch_K", "Stoch_D", "OBV",
+    "Next_Close", "Target", "MarketCap",
+    "EMA1", "EMA2", "EMA3", "TRIX", "TRIX_Signal",
+    "Plus_DM", "Minus_DM", "Plus_DM_14", "Minus_DM_14",
+    "Plus_DI", "Minus_DI", "DX", "ADX",
+    "Foreign_Net", "Inst_Net",
+]
+
 # ── FinanceDataReader import ──
 try:
     import FinanceDataReader as fdr
@@ -290,6 +305,54 @@ def verify_data_integrity(df: pd.DataFrame) -> dict:
 # 핵심: 단일 CSV 파일 업데이트
 # ============================================================
 
+def _rebuild_full_csv(csv_path: Path, ticker: str, target_date: str, result: dict) -> dict:
+    """빈/손상 CSV를 FDR 전체기간(REBUILD_START~target) 재다운로드로 자가복구.
+
+    incremental 경로(update_single_csv)는 '기존 마지막 날짜' 기준이라
+    0-byte/손상 CSV는 read_csv가 실패해 영원히 못 고친다(매일 errors 누적의 원인).
+    이 함수가 그 자가복구 경로 — 복구 성공 시 status='ok'(rebuilt=True).
+    """
+    try:
+        full = fdr.DataReader(ticker, REBUILD_START, target_date)
+    except Exception as e:
+        result["status"] = "error"
+        result["error"] = f"재구축 FDR 조회 실패: {e}"
+        return result
+
+    if full is None or full.empty:
+        result["status"] = "error"
+        result["error"] = "재구축 데이터 없음(상장폐지/거래정지 의심)"
+        return result
+
+    combined = pd.DataFrame({
+        "Date": full.index.strftime("%Y-%m-%d"),
+        "Open": full["Open"].values,
+        "High": full["High"].values,
+        "Low": full["Low"].values,
+        "Close": full["Close"].values,
+        "Volume": full["Volume"].values,
+    })
+    for col in ["Foreign_Net", "Inst_Net", "MarketCap"]:
+        combined[col] = 0.0
+
+    combined = combined.sort_values("Date").reset_index(drop=True)
+    combined = recalc_all_indicators(combined)
+    for col in EXPECTED_COLS:
+        if col not in combined.columns:
+            combined[col] = 0.0
+    combined = combined[EXPECTED_COLS]
+
+    integrity = verify_data_integrity(combined)
+    combined.to_csv(csv_path, index=False, encoding="utf-8-sig")
+
+    result["last_date"] = str(combined["Date"].iloc[-1])[:10]
+    result["new_rows"] = len(combined)
+    result["integrity"] = integrity
+    result["status"] = "ok"
+    result["rebuilt"] = True
+    return result
+
+
 def update_single_csv(csv_path: Path, target_date: str) -> dict:
     """
     단일 CSV 파일을 target_date까지 업데이트.
@@ -312,17 +375,15 @@ def update_single_csv(csv_path: Path, target_date: str) -> dict:
     ticker = parts[1]
     result["ticker"] = ticker
 
+    # 빈/손상 CSV(0 bytes 등)는 마지막 날짜를 알 수 없으므로 전체 재다운로드로 자가복구
     try:
         df = pd.read_csv(csv_path)
-    except Exception as e:
-        result["status"] = "error"
-        result["error"] = f"CSV 읽기 실패: {e}"
-        return result
+        broken = ("Date" not in df.columns) or len(df) == 0
+    except Exception:
+        broken = True
 
-    if "Date" not in df.columns or len(df) == 0:
-        result["status"] = "error"
-        result["error"] = "Date 컬럼 없음 또는 빈 파일"
-        return result
+    if broken:
+        return _rebuild_full_csv(csv_path, ticker, target_date, result)
 
     last_date = str(df["Date"].iloc[-1])[:10]
     result["last_date"] = last_date

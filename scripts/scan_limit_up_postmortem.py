@@ -227,8 +227,14 @@ def main():
     print("--- 상위 15 ---")
     for r in recs[:15]:
         d1 = r["d1"]
-        sig = (f"RSI{d1['rsi']} ADX{d1['adx']} 외인{d1['foreign_streak']} 기관{d1['inst_streak']}"
-               if d1 else "유니버스밖")
+        if not d1:
+            sig = "유니버스밖"
+        elif d1.get("stale"):
+            # d1_signal()이 stale일 때 {"stale":1,"parquet_last":...}만 반환(rsi 키 없음)
+            sig = f"parquet미반영(last={d1.get('parquet_last')})"
+        else:
+            sig = (f"RSI{d1.get('rsi')} ADX{d1.get('adx')} "
+                   f"외인{d1.get('foreign_streak')} 기관{d1.get('inst_streak')}")
         print(f"  {r['code']} {str(r['name'])[:11]:<11} +{r['change_pct']}% [{r['supply_class']}] {sig}")
 
 
