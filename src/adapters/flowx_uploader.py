@@ -422,6 +422,18 @@ class FlowxUploader:
         with open(p, encoding="utf-8") as f:
             return self._upsert_date_data("quant_etf_recommendation", json.load(f), date_str, "ETF추천")
 
+    def upload_leader_cycle(self, date_str: str) -> bool:
+        """data/shadow/leader_cycle.json → quant_leader_cycle (주도주 사이클 진단, 관측 전용).
+
+        run_leader_cycle.py가 global_leaders.yaml(US 대장주+KR) 전수 진단한 결과(90종목).
+        매매 미반영(shadow). 테이블 미생성 시 graceful 실패(정보봇 quant_leader_cycle DDL 대기).
+        """
+        p = DATA_DIR / "shadow" / "leader_cycle.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("quant_leader_cycle", json.load(f), date_str, "주도주사이클")
+
     def upload_all_quant_tables(self, date_str: str) -> dict[str, bool]:
         """퀀트 JSONB + Row + 메인화면 테이블 일괄 업로드."""
         results = {

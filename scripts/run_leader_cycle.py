@@ -71,6 +71,7 @@ def _slim(res: dict, meta: dict) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description="주도주 사이클 shadow 관측 러너")
     ap.add_argument("--quiet", action="store_true", help="요약 출력 생략")
+    ap.add_argument("--no-upload", action="store_true", help="FLOWX Supabase 업로드 생략")
     args = ap.parse_args()
 
     us_list, kr_list = _load_watchlist()
@@ -115,8 +116,22 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # FLOWX(Supabase) 관측 업로드 — 생성 직후 자기 결과 전송(순서 무관·타이밍 정확).
+    #   quant_leader_cycle 테이블 미생성 시 graceful 실패(정보봇 DDL 대기). 매매 미반영.
+    uploaded = "off"
+    if not args.no_upload:
+        try:
+            from src.adapters.flowx_uploader import FlowxUploader
+            up = FlowxUploader()
+            if up.is_active:
+                uploaded = "OK" if up.upload_leader_cycle(datetime.now().strftime("%Y-%m-%d")) else "FAIL(테이블 대기?)"
+            else:
+                uploaded = "Supabase미연결"
+        except Exception as e:  # noqa: BLE001
+            uploaded = f"ERR:{type(e).__name__}"
+
     if not args.quiet:
-        print(f"=== 주도주 사이클 shadow 관측 ({len(leaders)}종목) → {OUT.relative_to(PROJECT_ROOT)} ===")
+        print(f"=== 주도주 사이클 shadow 관측 ({len(leaders)}종목) → {OUT.relative_to(PROJECT_ROOT)} | FLOWX={uploaded} ===")
         order = ["청산", "경계", "매수적기", "보유", "해당없음", "데이터없음", "?"]
         print("  신호분포:", " · ".join(f"{k} {by_signal[k]}" for k in order if k in by_signal))
         # 주목 신호(청산/경계/매수적기)만 사이클 활성 종목 노출
