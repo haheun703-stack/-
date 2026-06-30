@@ -174,7 +174,7 @@ PIPELINE_GROUPS = [
         "steps": [
             {"name": "일일 아카이브", "cmd": "src/daily_archive.py"},
             {"name": "v3 일일 리뷰", "cmd": "scripts/run_v3_brain.py --review"},
-            {"name": "JARVIS 업로드", "cmd": "-c \"from src.adapters.jarvis_uploader import main; main()\""},
+            # JARVIS 업로드(ppwangga.com) 제거 — 2026-06-30 폐기(FLOWX만 사용, jarvis_uploader 삭제).
             {"name": "Brain 대시보드 빌드", "cmd": "scripts/build_brain_upload.py"},
             {"name": "FLOWX Supabase 업로드", "cmd": "scripts/upload_flowx.py"},
             {"name": "Market Journal", "cmd": "scripts/market_journal.py"},
