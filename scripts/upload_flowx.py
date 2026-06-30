@@ -32,7 +32,6 @@ from src.adapters.flowx_uploader import (
     build_sniper_rows,
     build_sector_rotation_rows,
     build_crash_bounce_rows,
-    build_nxt_picks_rows,
     build_supply_surge_rows,
     build_supply_chain_rows,
     build_bottom_picks_rows,

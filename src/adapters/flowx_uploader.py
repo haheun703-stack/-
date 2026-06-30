@@ -744,6 +744,19 @@ def build_foreign_flow_rows(date_str: str = "") -> list[dict]:
     with open(sig_path, encoding="utf-8") as f:
         data = json.load(f)
 
+    # 신선도 가드: 출처(nationality_signal.json)가 stale이면 업로드 스킵.
+    #   scan_nationality가 KRX잠금(6/12~)으로 비활성 → 파일 미갱신. stale(예: 6/09)을 오늘 날짜로
+    #   찍어 올리면 외국인자금 섹션이 "현재"로 오인됨 → 빈 데이터가 차라리 낫다.
+    #   근본해결 = 단타봇 외인 수급 소스 재연결(별도 과제, 3봇 분업상 외인=단타봇 담당).
+    analyzed = str(data.get("analyzed_at", ""))[:10]
+    try:
+        if analyzed and (datetime.strptime(date_str, "%Y-%m-%d")
+                         - datetime.strptime(analyzed, "%Y-%m-%d")).days > 4:
+            logger.warning("[FLOWX] 외국인자금(china_flow) 출처 stale(%s, 기준 %s) → 업로드 스킵", analyzed, date_str)
+            return []
+    except ValueError:
+        pass
+
     rows = []
     seen_codes: set[str] = set()
     for sig in data.get("signals", []):
@@ -2250,55 +2263,8 @@ def build_crash_bounce_rows(date_str: str = "") -> list[dict]:
 
 # ── NXT 주목 종목 (타입 1: 수급 릴레이) ───────────────
 
-def build_nxt_picks_rows(date_str: str = "") -> list[dict]:
-    """scan_type1_relay 결과 JSON → quant_nxt_picks 테이블 포맷.
-
-    소스: data/type1_relay_{YYYYMMDD}.json
-    """
-    if not date_str:
-        date_str = datetime.now().strftime("%Y-%m-%d")
-
-    date_compact = date_str.replace("-", "")
-    json_path = DATA_DIR / f"type1_relay_{date_compact}.json"
-    if not json_path.exists():
-        logger.info("[NXT] 타입1 결과 없음: %s", json_path)
-        return []
-
-    with open(json_path, encoding="utf-8") as f:
-        data = json.load(f)
-
-    rows = []
-    for c in data.get("candidates", []):
-        rows.append({
-            "date": date_str,
-            "ticker": c.get("ticker", ""),
-            "name": c.get("name", ""),
-            "close": int(c.get("close", 0)),
-            "ret_d0": round(float(c.get("ret_d0", 0)), 2),
-            "vol_ratio": round(float(c.get("vol_ratio", 0)), 2),
-            "ma20_dev": round(float(c.get("ma20_dev", 0)), 2),
-            "rsi": round(float(c.get("rsi", 0)), 1),
-            "tv": round(float(c.get("tv", 0)), 1),
-            "foreign_net": round(float(c.get("foreign_net", 0)), 1),
-            "inst_net": round(float(c.get("inst_net", 0)), 1),
-            "foreign_streak": int(c.get("foreign_streak", 0)),
-            "inst_streak": int(c.get("inst_streak", 0)),
-            "dual_streak": int(c.get("dual_streak", 0)),
-            "foreign_cum": round(float(c.get("foreign_cum", 0)), 1),
-            "inst_cum": round(float(c.get("inst_cum", 0)), 1),
-            "pension_net": round(float(c.get("pension_net", 0)), 1),
-            "finance_net": round(float(c.get("finance_net", 0)), 1),
-            "pension_5d": round(float(c.get("pension_5d", 0)), 1),
-            "finance_5d": round(float(c.get("finance_5d", 0)), 1),
-            "accum_score": round(float(c.get("accum_score", 0)), 1),
-            "final_score": round(float(c.get("final_score", 0)), 1),
-        })
-
-    _fix_pick_names(rows)
-    rows.sort(key=lambda x: -x["final_score"])
-    logger.info("[NXT] 타입1 빌드: %d건 (%s)", len(rows), date_str)
-    return rows
-
+# build_nxt_picks_rows 제거(2026-06-30) — quant_nxt_picks는 supply_surge로 교체된 레거시.
+# upload_flowx에서 import만 되고 미호출이던 죽은 빌더(scan_type1_relay 자체도 미가동).
 
 # ── 수급 급변 종목 (scan_supply_surge) ────────────────
 
