@@ -33,10 +33,11 @@ logger = logging.getLogger("daily_updater")
 DATA_DIR = Path(__file__).resolve().parent.parent / "stock_data_daily"
 LOG_FILE = DATA_DIR / "_update_log.txt"
 
-# 빈/손상 CSV 자가복구(전체 재다운로드) 시작일 — 기존 CSV 히스토리(~7.5년)와 정합
-REBUILD_START = "2018-01-01"
+# 빈/손상 CSV 자가복구(전체 재다운로드) 시작일 — 형제 CSV(실측 2015-12-24~)와 정합
+REBUILD_START = "2015-01-01"
 
-# 저장 컬럼 순서 (원본 CSV와 동일) — update_single_csv/backfill/재구축 공용
+# 저장 컬럼 순서 — update_single_csv 정상경로와 동일(37컬럼, Foreign_Net/Inst_Net까지).
+# Corp_Net 및 수급 실값은 sync_investor_to_csv가 후행으로 채움(→38컬럼).
 EXPECTED_COLS = [
     "Date", "Open", "High", "Low", "Close", "Volume",
     "MA5", "MA20", "MA60", "MA120", "RSI", "MACD", "MACD_Signal",
