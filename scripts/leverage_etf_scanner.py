@@ -40,6 +40,11 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
 )
+
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 1.2.7 로깅 버그 노이즈 억제 (KRX 잠금 대응)
+
 logger = logging.getLogger(__name__)
 
 DATA_DIR = PROJECT_ROOT / "data"
