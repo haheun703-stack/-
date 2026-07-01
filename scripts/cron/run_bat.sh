@@ -323,6 +323,11 @@ case "$BAT" in
     #   대시보드 노출은 정보봇(FLOWX UI)이 이 JSON 소비(global_leaders.yaml 규약).
     run_py_long scripts/fetch_us_leader_data.py
     run_py_long scripts/run_leader_cycle.py --quiet
+    # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
+    #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
+    #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
+    run_py_long scripts/upload_valuation_band.py --write
+    run_py scripts/upload_two_layer.py --write
     run_py scripts/data_health_check.py
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
     # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
