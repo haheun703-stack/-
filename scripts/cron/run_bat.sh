@@ -168,6 +168,8 @@ case "$BAT" in
     run_py_long scripts/update_raw_parquet.py
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
+    # 지수 Buy&Hold 벤치마크 17종(국내외 지수·ETF·레버리지 1x/2x/3x) yfinance 증분 수집 → data/benchmark/
+    run_py_long scripts/update_benchmarks.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
     # (구 SYNC_OK 분기는 collect_investor_bulk 폐기로 제거 — 단타봇 sync 자체는 유지)
     run_py_long_check scripts/sync_investor_to_csv.py || true
@@ -310,6 +312,11 @@ case "$BAT" in
     #   신호=할인축소z∈[1,2]+NAVmom5d>0·할인거래 / 청산=D+60보유 or -15%손절 / 검증4종목(㈜LG·SK·두산·삼성물산)·쿨다운20일.
     #   관측·격리: 실주문 무접촉 · data/paper_portfolio_holdnav.json만 누적. 사업지주(한화)·단일베타(SK스퀘어)·CJ버그 제외.
     run_py scripts/paper_holding_nav.py
+    # 지수 Buy&Hold 페이퍼 (6번째 독립포트, 영구 벤치마크 기준선 — 7/1 배선).
+    #   17종 국내외 지수·ETF·레버리지(1x/2x/3x)를 baseline 6/22 정규화 수익률 시계열 추적.
+    #   "게임1(타이밍) 폐기→지수보유 기준선" 확정 반영. 5개 전략 페이퍼 공통 벤치마크.
+    #   관측·매매무관 · data/paper_portfolio_indexbh.json. 데이터=update_benchmarks(G1).
+    run_py scripts/paper_index_buyhold.py
     # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
     #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
     #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.
