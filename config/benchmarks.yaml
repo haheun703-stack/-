@@ -1,0 +1,28 @@
+# 지수 Buy&Hold 벤치마크 바스켓 (6번째 페이퍼 트랙 = 영구 기준선)
+# 국내외 지수·ETF·레버리지 17종. 6/22 소급 매수 후 영구보유.
+# 수집: scripts/update_benchmarks.py (yfinance) → data/benchmark/{key}.csv
+# 평가: scripts/paper_index_buyhold.py → data/paper_portfolio_indexbh.json
+#
+# key: 파일/식별용 안전키 (특수문자 없음)
+# symbol: yfinance 심볼 / name: 표시명 / mult: 레버리지 배율 / market: KR|US / group: 기초지수군
+benchmarks:
+  KODEX200:       {symbol: "069500.KS", name: "KODEX200",           mult: 1, market: KR, group: KOSPI200}
+  KODEX_LEV:      {symbol: "122630.KS", name: "KODEX레버리지",         mult: 2, market: KR, group: KOSPI200}
+  KODEX_KQ150LEV: {symbol: "233740.KS", name: "KODEX코스닥150레버리지",  mult: 2, market: KR, group: KOSDAQ150}
+  KODEX_SEMI:     {symbol: "091160.KS", name: "KODEX반도체",           mult: 1, market: KR, group: SEMI_KR}
+  SP500_IDX:      {symbol: "^GSPC",     name: "S&P500지수",           mult: 1, market: US, group: SP500}
+  NDX_IDX:        {symbol: "^NDX",      name: "나스닥100지수",          mult: 1, market: US, group: NASDAQ}
+  IXIC_IDX:       {symbol: "^IXIC",     name: "나스닥종합지수",          mult: 1, market: US, group: NASDAQ}
+  SOX_IDX:        {symbol: "^SOX",      name: "필라델피아반도체지수",       mult: 1, market: US, group: SEMI_US}
+  SPY:            {symbol: "SPY",       name: "SPY S&P500",          mult: 1, market: US, group: SP500}
+  SSO:            {symbol: "SSO",       name: "SSO S&P500",          mult: 2, market: US, group: SP500}
+  UPRO:           {symbol: "UPRO",      name: "UPRO S&P500",         mult: 3, market: US, group: SP500}
+  QQQ:            {symbol: "QQQ",       name: "QQQ 나스닥100",         mult: 1, market: US, group: NASDAQ}
+  QLD:            {symbol: "QLD",       name: "QLD 나스닥100",         mult: 2, market: US, group: NASDAQ}
+  TQQQ:           {symbol: "TQQQ",      name: "TQQQ 나스닥100",        mult: 3, market: US, group: NASDAQ}
+  SOXX:           {symbol: "SOXX",      name: "SOXX 반도체",           mult: 1, market: US, group: SEMI_US}
+  SMH:            {symbol: "SMH",       name: "SMH 반도체",            mult: 1, market: US, group: SEMI_US}
+  SOXL:           {symbol: "SOXL",      name: "SOXL 반도체",           mult: 3, market: US, group: SEMI_US}
+
+# 기준선 시작일 (모든 벤치마크 공통 소급 시작 = 메인A 페이퍼 시작일)
+baseline_start: "2026-06-22"
