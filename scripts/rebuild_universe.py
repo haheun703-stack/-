@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 UNIVERSE_PATH = PROJECT_ROOT / "data" / "universe.csv"
+WHITELIST_PATH = PROJECT_ROOT / "config" / "universe_whitelist.yaml"
 
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
@@ -150,6 +151,8 @@ def select_universe(
         "name": [names.get(t, t) for t in qualified.index],
         "market_cap": qualified["시가총액"].values,
     })
+    result["ticker"] = result["ticker"].astype(str).str.zfill(6)
+    result = _merge_whitelist(result)
 
     logger.info(
         "유니버스 선정: %d종목 (시총 %.1f조 이상, 우선주 %s, %d종목 제외)",
@@ -220,6 +223,9 @@ def _select_universe_fdr(
         })
 
     result = pd.DataFrame(rows)
+    if len(result) > 0:
+        result["ticker"] = result["ticker"].astype(str).str.zfill(6)
+    result = _merge_whitelist(result)
     logger.info("[fdr] 유니버스 선정: %d종목 (시총 %.1f조 이상)", len(result), min_cap_trillion)
     return result
 
@@ -237,6 +243,91 @@ def _is_excluded(name: str, ticker: str, include_preferred: bool = False) -> boo
         if ticker[-1] in "56789" and ticker[-2] == "0":
             return True
     return False
+
+
+# ─────────────────────────────────────────────
+# 화이트리스트: 시총 하한 미달 정책/테마 순수주 강제 편입
+# ─────────────────────────────────────────────
+
+def _load_whitelist() -> list[dict]:
+    """config/universe_whitelist.yaml 로드 (없으면 빈 리스트, graceful)."""
+    if not WHITELIST_PATH.exists():
+        return []
+    try:
+        import yaml
+        with open(WHITELIST_PATH, encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        items = data.get("tickers", []) or []
+        result = []
+        for it in items:
+            t = str(it.get("ticker", "")).zfill(6)
+            if len(t) == 6 and t.isdigit():
+                result.append({"ticker": t, "name": it.get("name", t)})
+        return result
+    except Exception as e:
+        logger.warning("화이트리스트 로드 실패: %s — 스킵", e)
+        return []
+
+
+def _fetch_whitelist_caps(tickers: list[str]) -> dict:
+    """화이트리스트 신규 종목의 시가총액 조회 (FDR, 실패 시 0)."""
+    caps = {t: 0 for t in tickers}
+    if not tickers:
+        return caps
+    try:
+        import FinanceDataReader as fdr
+        listing = pd.concat(
+            [fdr.StockListing("KOSPI"), fdr.StockListing("KOSDAQ")],
+            ignore_index=True,
+        )
+        code_col = "Code" if "Code" in listing.columns else "Symbol"
+        cap_col = "Marcap" if "Marcap" in listing.columns else "시가총액"
+        want = set(tickers)
+        for _, r in listing.iterrows():
+            code = str(r[code_col]).zfill(6)
+            if code in want and caps.get(code, 0) == 0:
+                try:
+                    caps[code] = int(pd.to_numeric(r.get(cap_col, 0), errors="coerce"))
+                except Exception:
+                    caps[code] = 0
+    except Exception as e:
+        logger.warning("화이트리스트 시총 조회 실패: %s — market_cap=0으로 편입", e)
+    return caps
+
+
+def _merge_whitelist(universe: pd.DataFrame) -> pd.DataFrame:
+    """화이트리스트 종목을 유니버스에 병합 (미등재분만 추가).
+
+    universe: DataFrame(ticker, name, market_cap).
+    이미 유니버스에 있으면(시총 상승으로 하한 통과) 스킵.
+    신규 추가가 없으면 원본 그대로 반환.
+    """
+    whitelist = _load_whitelist()
+    if not whitelist:
+        return universe
+
+    if "ticker" in universe.columns and len(universe) > 0:
+        existing = set(universe["ticker"].astype(str).str.zfill(6))
+    else:
+        existing = set()
+
+    missing = [w for w in whitelist if w["ticker"] not in existing]
+    if not missing:
+        return universe
+
+    caps = _fetch_whitelist_caps([w["ticker"] for w in missing])
+    add_rows = [
+        {"ticker": w["ticker"], "name": w["name"], "market_cap": caps.get(w["ticker"], 0)}
+        for w in missing
+    ]
+    logger.info(
+        "화이트리스트 강제 편입: %d종목 추가 (%s)",
+        len(add_rows), ", ".join(w["name"] for w in missing),
+    )
+    merged = pd.concat([universe, pd.DataFrame(add_rows)], ignore_index=True)
+    merged["ticker"] = merged["ticker"].astype(str).str.zfill(6)
+    merged = merged.drop_duplicates(subset="ticker", keep="first").reset_index(drop=True)
+    return merged
 
 
 # ─────────────────────────────────────────────
@@ -407,8 +498,17 @@ def incremental_sync() -> dict:
         logger.warning("universe.csv 없음 — incremental 불가, 전체 재구성 필요")
         return {"raw_downloaded": 0, "processed": 0, "total_universe": 0}
 
-    universe = pd.read_csv(UNIVERSE_PATH)
-    tickers = universe["ticker"].astype(str).str.zfill(6).tolist()
+    # dtype=str로 읽어 leading-zero 보존 + NaN/빈칸/float(.0) 티커 방어 (되쓰기 파손 방지)
+    universe = pd.read_csv(UNIVERSE_PATH, dtype={"ticker": str})
+    universe["ticker"] = universe["ticker"].astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+    universe = universe[universe["ticker"].str.fullmatch(r"\d{1,6}")].copy()
+    universe["ticker"] = universe["ticker"].str.zfill(6)
+    before_n = len(universe)
+    universe = _merge_whitelist(universe)
+    if len(universe) > before_n:
+        universe.to_csv(UNIVERSE_PATH, index=False)
+        logger.info("universe.csv 갱신: %d → %d종목 (화이트리스트 편입)", before_n, len(universe))
+    tickers = universe["ticker"].tolist()
     logger.info("유니버스: %d종목", len(tickers))
 
     # 1) raw/ 누락분 다운로드
