@@ -860,6 +860,37 @@ def _load_stock_to_sector() -> dict:
     return _STOCK_SECTOR_CACHE
 
 
+_ACTIVE_THEME_CACHE = None
+
+
+def _load_active_theme_map() -> dict:
+    """theme_dictionary.yaml의 active:true 테마 → {ticker: [(theme, order), ...]}.
+
+    정책 지속 테마(풍력·신재생 등)를 뉴스 발화 없이도 상시 가점 후보로 쓴다.
+    (7/1 퐝가님 지적: SK이터닉스=풍력주인데 정책 촉매 미반영으로 후보 보류)
+    """
+    global _ACTIVE_THEME_CACHE
+    if _ACTIVE_THEME_CACHE is None:
+        _ACTIVE_THEME_CACHE = {}
+        fp = DATA_DIR.parent / "config" / "theme_dictionary.yaml"
+        try:
+            import yaml
+            with open(fp, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            for tname, tdata in (data.get("themes", {}) or {}).items():
+                if not (isinstance(tdata, dict) and tdata.get("active")):
+                    continue
+                for s in tdata.get("stocks", []):
+                    tk = s.get("ticker", "")
+                    if tk:
+                        _ACTIVE_THEME_CACHE.setdefault(tk, []).append(
+                            (tname, s.get("order", 1))
+                        )
+        except Exception:
+            _ACTIVE_THEME_CACHE = {}
+    return _ACTIVE_THEME_CACHE
+
+
 # AI Brain 섹터명 → stock_to_sector 섹터명 브릿지
 AI_SECTOR_BRIDGE = {
     "반도체": ["반도체", "IT"],
@@ -2536,6 +2567,22 @@ def main():
             score_detail["total"] = round(boosted, 1)
             source_names.append("v3Brain")
 
+        # 전략 T: 정책 지속 테마 정적 가점 (theme_dictionary active:true)
+        # 국가정책 지속 테마(풍력·신재생 등) 관련주에 상시 가점. order별 차등.
+        # 뉴스 발화 기반(정보봇 intel_bonus)과 독립 — 정책이 몇 달 지속되는 특성 반영.
+        theme_bonus = 0.0
+        theme_tag = ""
+        _atm = _load_active_theme_map().get(ticker, [])
+        if _atm:
+            best_theme, best_order = min(_atm, key=lambda x: x[1])
+            theme_bonus = {1: 8.0, 2: 5.0, 3: 3.0}.get(best_order, 3.0)
+            theme_tag = f"정책테마:{best_theme}"
+        theme_bonus = round(max(min(theme_bonus, 8), 0), 1)
+        if theme_bonus > 0:
+            boosted = max(min(score_detail["total"] + theme_bonus, 100), 0)
+            score_detail["total"] = round(boosted, 1)
+            source_names.append("정책테마")
+
         # 전략 J: 컨센서스 풀 보너스 (최대 +10점)
         consensus_bonus = 0.0
         consensus_tag = ""
@@ -2900,6 +2947,8 @@ def main():
             "accum_return": src10.get(ticker, {}).get("return_since_spike", 0),
             "intel_bonus": intel_bonus,
             "intel_tag": intel_tag,
+            "theme_bonus": theme_bonus,
+            "theme_tag": theme_tag,
             "report_bonus": report_bonus,
             "report_tag": report_tag,
             "ai_bonus": ai_bonus,
