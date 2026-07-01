@@ -114,7 +114,7 @@ themes:
   원전:
     keywords: ["원전", "원자력", "SMR", "소형모듈원자로", "핵융합", "원전수출", "원전해체", "원전르네상스"]
     stocks:
-      - {ticker: "009540", name: "한국전력", order: 1}
+      - {ticker: "015760", name: "한국전력", order: 1}
       - {ticker: "034020", name: "두산에너빌리티", order: 1}
       - {ticker: "267260", name: "HD현대일렉트릭", order: 2}
       - {ticker: "092200", name: "디아이씨", order: 2}
@@ -193,9 +193,9 @@ themes:
   조선:
     keywords: ["조선", "수주", "LNG선", "LNG운반선", "컨테이너선", "해군", "잠수함", "친환경선박", "메탄올추진"]
     stocks:
-      - {ticker: "009540", name: "한국전력", order: 3}
+      - {ticker: "009540", name: "HD한국조선해양", order: 1}
       - {ticker: "329180", name: "HD현대중공업", order: 1}
-      - {ticker: "267250", name: "HD현대에너지솔루션", order: 2}
+      - {ticker: "267250", name: "HD현대", order: 2}
 
   전력기기:
     keywords: ["전력기기", "변압기", "차단기", "송배전", "전력망", "그리드", "초고압", "HVDC", "전력인프라"]
@@ -407,7 +407,7 @@ themes:
       - {ticker: "010140", name: "삼성중공업", order: 2}
       # 원전 대안 부각
       - {ticker: "034020", name: "두산에너빌리티", order: 2}
-      - {ticker: "009540", name: "한국전력", order: 2}
+      - {ticker: "015760", name: "한국전력", order: 2}
 
   유가상승_피해:
     keywords: ["항공유", "연료비", "항공 유가", "물류비", "유류비"]

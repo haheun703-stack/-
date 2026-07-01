@@ -31,10 +31,16 @@ _AUTH_FLAG = "_pykrx_auth_print_silenced"
 
 
 class PykrxNoiseFilter(logging.Filter):
-    """pykrx ``logging.info(args, kwargs)`` 버그 레코드(msg가 튜플)를 차단."""
+    """pykrx의 root 직접 로깅 노이즈를 차단.
+
+    - util.py:19 ``logging.info(args, kwargs)`` → msg가 튜플(TypeError 유발)
+    - util.py:20 ``logging.info(e)`` → msg가 예외 객체
+    둘 다 root logger 직접 호출이라, 자식 logger(getLogger(__name__))로 남기는
+    우리 정상 로그(exception 포함)에는 영향이 없다.
+    """
 
     def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
-        return not isinstance(record.msg, tuple)
+        return not isinstance(record.msg, (tuple, BaseException))
 
 
 def _silence_logging() -> None:
