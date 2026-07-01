@@ -434,6 +434,18 @@ class FlowxUploader:
         with open(p, encoding="utf-8") as f:
             return self._upsert_date_data("quant_leader_cycle", json.load(f), date_str, "주도주사이클")
 
+    def upload_index_benchmark(self, date_str: str) -> bool:
+        """data/paper_portfolio_indexbh.json → paper_index_benchmark (지수 Buy&Hold 벤치마크, 관측 전용).
+
+        paper_index_buyhold.py가 17종 국내외 지수·ETF·레버리지를 6/22 정규화한 수익률 시계열.
+        5개 전략 페이퍼 공통 기준선. 매매 미반영(shadow). 테이블 미생성 시 graceful(정보봇 DDL 대기).
+        """
+        p = DATA_DIR / "paper_portfolio_indexbh.json"
+        if not p.exists():
+            return False
+        with open(p, encoding="utf-8") as f:
+            return self._upsert_date_data("paper_index_benchmark", json.load(f), date_str, "지수벤치마크")
+
     def upload_all_quant_tables(self, date_str: str) -> dict[str, bool]:
         """퀀트 JSONB + Row + 메인화면 테이블 일괄 업로드."""
         results = {

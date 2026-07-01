@@ -129,6 +129,19 @@ def run():
               f"MDD{v['mdd_pct']:>+6.1f}%  ({v['days']}일)")
     print(f"[저장] {PF_PATH}")
 
+    # FLOWX(Supabase) 관측 업로드 — leader_cycle 패턴(산출 직후 자기결과 전송).
+    #   paper_index_benchmark 테이블 미생성 시 graceful(정보봇 DDL 대기). 매매 미반영.
+    try:
+        from src.adapters.flowx_uploader import FlowxUploader
+        up = FlowxUploader()
+        if up.is_active:
+            ok = up.upload_index_benchmark(datetime.now().strftime("%Y-%m-%d"))
+            print(f"[FLOWX] 지수벤치마크 업로드: {'OK' if ok else 'FAIL(테이블 대기?)'}")
+        else:
+            print("[FLOWX] Supabase 미연결 — 업로드 skip")
+    except Exception as e:  # noqa: BLE001
+        print(f"[FLOWX] 업로드 skip: {type(e).__name__}: {e}")
+
 
 if __name__ == "__main__":
     run()
