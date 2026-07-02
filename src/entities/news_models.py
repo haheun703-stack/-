@@ -196,6 +196,7 @@ class ThemeAlert:
     related_stocks: list = field(default_factory=list)  # ThemeStock 리스트
     grok_expanded: bool = False  # Grok 확장 완료 여부
     timestamp: str = ""
+    hit_count: int = 0           # 매칭 기사 수 (빈도 판별용, 1=단발 노이즈)
 
 
 class SignalImportance(Enum):

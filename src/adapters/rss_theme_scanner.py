@@ -38,12 +38,14 @@ class RssThemeScanner:
         dedup_hours: int = 24,
         max_articles: int = 50,
         max_age_hours: int = 48,
+        min_hits: int = 1,
     ):
         self.theme_dict_path = Path(theme_dict_path) if theme_dict_path else THEME_DICT_PATH
         self.rss_feeds = rss_feeds or []
         self.dedup_hours = dedup_hours
         self.max_articles = max_articles
         self.max_age_hours = max_age_hours
+        self.min_hits = max(1, int(min_hits))  # 테마 발화 인정 최소 기사 수 (1=단발도 인정)
         self.theme_dict: dict = {}
 
     def scan(self) -> list[ThemeAlert]:
@@ -61,44 +63,50 @@ class RssThemeScanner:
         articles = self._fetch_all_feeds()
         logger.info("RSS 총 %d건 수집", len(articles))
 
-        # 테마 키워드 매칭
-        alerts: list[ThemeAlert] = []
-        matched_themes: set[str] = set()
-
+        # 1차: 테마별 매칭 기사 수 집계 + 최초 매칭 기사/키워드 기록
+        #  (광역 피드에서 단발 언급 노이즈를 min_hits로 걸러 판별력 확보)
+        hit_count: dict[str, int] = {}
+        first_hit: dict[str, tuple] = {}
         for article in articles:
             text = f"{article.get('title', '')} {article.get('summary', '')}"
             for theme_name, theme_data in self.theme_dict.items():
-                if theme_name in matched_themes:
-                    continue  # 이미 매칭된 테마는 건너뜀 (중복 방지)
-
-                keywords = theme_data.get("keywords", [])
-                matched_kw = self._match_keywords(text, keywords)
+                matched_kw = self._match_keywords(text, theme_data.get("keywords", []))
                 if matched_kw:
-                    # 중복 체크 (최근 dedup_hours 내 같은 테마)
-                    if self._is_recent_duplicate(theme_name):
-                        logger.debug("테마 '%s' 최근 %dh 내 중복 — 건너뜀",
-                                     theme_name, self.dedup_hours)
-                        matched_themes.add(theme_name)
-                        continue
+                    hit_count[theme_name] = hit_count.get(theme_name, 0) + 1
+                    if theme_name not in first_hit:
+                        first_hit[theme_name] = (article, matched_kw)
 
-                    # 관련주 로드
-                    stocks = self._load_theme_stocks(theme_data)
+        # 2차: min_hits 이상 + 최근 중복 아닌 테마만 알림 생성
+        alerts: list[ThemeAlert] = []
+        for theme_name, cnt in hit_count.items():
+            if cnt < self.min_hits:
+                continue
+            if self._is_recent_duplicate(theme_name):
+                logger.debug("테마 '%s' 최근 %dh 내 중복 — 건너뜀", theme_name, self.dedup_hours)
+                continue
 
-                    alert = ThemeAlert(
-                        theme_name=theme_name,
-                        matched_keyword=matched_kw,
-                        news_title=article.get("title", ""),
-                        news_url=article.get("link", ""),
-                        news_source=article.get("source", ""),
-                        published=article.get("published", ""),
-                        related_stocks=stocks,
-                        grok_expanded=False,
-                        timestamp=datetime.now().isoformat(),
-                    )
-                    alerts.append(alert)
-                    matched_themes.add(theme_name)
-                    logger.info("테마 감지: '%s' (키워드: %s) — 관련주 %d개",
-                                theme_name, matched_kw, len(stocks))
+            fh = first_hit.get(theme_name)
+            if not fh:
+                continue  # 불변식상 도달 불가하나 방어 (hit_count/first_hit 동조 깨짐 대비)
+            article, matched_kw = fh
+            theme_data = self.theme_dict[theme_name]
+            stocks = self._load_theme_stocks(theme_data)
+
+            alert = ThemeAlert(
+                theme_name=theme_name,
+                matched_keyword=matched_kw,
+                news_title=article.get("title", ""),
+                news_url=article.get("link", ""),
+                news_source=article.get("source", ""),
+                published=article.get("published", ""),
+                related_stocks=stocks,
+                grok_expanded=False,
+                timestamp=datetime.now().isoformat(),
+                hit_count=cnt,
+            )
+            alerts.append(alert)
+            logger.info("테마 감지: '%s' (키워드: %s, 기사 %d건) — 관련주 %d개",
+                        theme_name, matched_kw, cnt, len(stocks))
 
         # 히스토리 업데이트
         if alerts:

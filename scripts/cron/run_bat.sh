@@ -255,6 +255,8 @@ case "$BAT" in
     run_py scripts/scan_turnaround.py &
     TA_PID=$!
     wait $EA_PID $TA_PID
+    # RSS 뉴스 테마 스냅샷 (scan_tomorrow_picks 전략T 동적 가점 입력). graceful=실패해도 exit0
+    run_py scripts/run_rss_theme_scan.py
     run_py_long scripts/scan_tomorrow_picks.py
     run_py_long scripts/scan_tomorrow_picks.py --flowx --no-send
     run_py scripts/build_killer_picks.py

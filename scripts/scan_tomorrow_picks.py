@@ -891,6 +891,39 @@ def _load_active_theme_map() -> dict:
     return _ACTIVE_THEME_CACHE
 
 
+_NEWS_THEME_CACHE = None
+
+
+def _load_news_theme_map() -> dict:
+    """RSS 러너 스냅샷(data/theme_alerts_today.json) → {ticker: [(theme, order), ...]}.
+
+    당일 뉴스에 발화 중인 테마의 관련주에 동적 가점(전략 T)을 준다.
+    정적 정책테마(_load_active_theme_map)와 독립 — 뉴스 촉매 반영.
+    ★freshness 가드: 스냅샷 date가 오늘~어제(1일 이내)일 때만 유효. stale이면 무시.
+    """
+    global _NEWS_THEME_CACHE
+    if _NEWS_THEME_CACHE is None:
+        _NEWS_THEME_CACHE = {}
+        try:
+            data = load_json("theme_alerts_today.json")
+            if isinstance(data, dict) and data.get("date"):
+                snap = datetime.strptime(data["date"], "%Y-%m-%d").date()
+                _age = (datetime.now().date() - snap).days
+                if 0 <= _age <= 1:  # 오늘~어제만 유효 (미래날짜=시계오류/오염 배제)
+                    for tk, pairs in (data.get("ticker_map", {}) or {}).items():
+                        valid = []
+                        for p in pairs:
+                            try:
+                                valid.append((p[0], int(p[1])))
+                            except (IndexError, ValueError, TypeError):
+                                continue
+                        if valid:
+                            _NEWS_THEME_CACHE[str(tk)] = valid
+        except Exception:
+            _NEWS_THEME_CACHE = {}
+    return _NEWS_THEME_CACHE
+
+
 # AI Brain 섹터명 → stock_to_sector 섹터명 브릿지
 AI_SECTOR_BRIDGE = {
     "반도체": ["반도체", "IT"],
@@ -2567,21 +2600,29 @@ def main():
             score_detail["total"] = round(boosted, 1)
             source_names.append("v3Brain")
 
-        # 전략 T: 정책 지속 테마 정적 가점 (theme_dictionary active:true)
-        # 국가정책 지속 테마(풍력·신재생 등) 관련주에 상시 가점. order별 차등.
-        # 뉴스 발화 기반(정보봇 intel_bonus)과 독립 — 정책이 몇 달 지속되는 특성 반영.
-        theme_bonus = 0.0
-        theme_tag = ""
-        _atm = _load_active_theme_map().get(ticker, [])
+        # 전략 T: 테마 가점 — 정적(정책 지속) + 동적(RSS 뉴스 발화) 중 큰 쪽 반영
+        #  · 정적: theme_dictionary active:true (풍력·신재생 등, 정책 상시 가점) — 고확신 {1:8·2:5·3:3}
+        #  · 동적: RSS 러너 스냅샷(theme_alerts_today.json) — 오늘 뉴스 발화 테마, 광역이라 저확신 {1:5·2:3·3:2}
+        #  두 경로 독립 계산 후 max (중복가산 없음). 동의어 tie는 정적 우선(고확신). 상한 +8.
+        static_bonus, news_bonus = 0.0, 0.0
+        static_theme, news_theme = "", ""
+        _atm = _load_active_theme_map().get(ticker, [])   # 정책 지속테마
+        _ntm = _load_news_theme_map().get(ticker, [])     # RSS 뉴스 발화테마
         if _atm:
-            best_theme, best_order = min(_atm, key=lambda x: x[1])
-            theme_bonus = {1: 8.0, 2: 5.0, 3: 3.0}.get(best_order, 3.0)
-            theme_tag = f"정책테마:{best_theme}"
+            static_theme, _o = min(_atm, key=lambda x: x[1])
+            static_bonus = {1: 8.0, 2: 5.0, 3: 3.0}.get(_o, 3.0)
+        if _ntm:
+            news_theme, _o = min(_ntm, key=lambda x: x[1])
+            news_bonus = {1: 5.0, 2: 3.0, 3: 2.0}.get(_o, 2.0)
+        if static_bonus >= news_bonus:
+            theme_bonus, theme_tag = static_bonus, (f"정책테마:{static_theme}" if static_theme else "")
+        else:
+            theme_bonus, theme_tag = news_bonus, f"뉴스테마:{news_theme}"
         theme_bonus = round(max(min(theme_bonus, 8), 0), 1)
         if theme_bonus > 0:
             boosted = max(min(score_detail["total"] + theme_bonus, 100), 0)
             score_detail["total"] = round(boosted, 1)
-            source_names.append("정책테마")
+            source_names.append(theme_tag.split(":")[0] if theme_tag else "정책테마")
 
         # 전략 J: 컨센서스 풀 보너스 (최대 +10점)
         consensus_bonus = 0.0
