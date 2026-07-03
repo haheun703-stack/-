@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 DB_PATH = PROJECT_ROOT / "data" / "investor_flow" / "investor_daily.db"
+UNIVERSE_PATH = PROJECT_ROOT / "data" / "universe.csv"
 
 # 단타봇 수급 데이터 경로 (같은 VPS)
 SCALPER_FLOW_DIR = Path("/home/ubuntu/bodyhunter/scalper-agent/data_store/flow")
@@ -203,12 +204,29 @@ def sync_csv(csv_path: Path, investor_df: pd.DataFrame, dry_run: bool = False) -
     return {"status": "OK", "updated": updated}
 
 
+def _load_universe_tickers() -> set[str]:
+    """universe.csv 티커 집합 (스캔 대상 한정용). 없으면 빈 집합=전체 처리 폴백."""
+    if not UNIVERSE_PATH.exists():
+        return set()
+    try:
+        u = pd.read_csv(UNIVERSE_PATH, dtype={"ticker": str})
+        t = (u["ticker"].astype(str).str.strip()
+             .str.replace(r"\.0$", "", regex=True))
+        t = t[t.str.fullmatch(r"\d{1,6}")].str.zfill(6)  # NaN/불량 티커 배제
+        return set(t)
+    except Exception as e:
+        logger.warning("universe.csv 로드 실패: %s — 전체 CSV 처리", e)
+        return set()
+
+
 def main():
     parser = argparse.ArgumentParser(description="투자자별 순매수 → CSV 동기화")
     parser.add_argument("--dry-run", action="store_true", help="변경 미적용")
     parser.add_argument("--ticker", type=str, default=None, help="특정 종목만")
     parser.add_argument("--source", choices=["auto", "scalper", "db"], default="auto",
                         help="수급 소스 (auto=자동감지, scalper=단타봇, db=investor_daily.db)")
+    parser.add_argument("--all", action="store_true",
+                        help="유니버스 외 종목까지 전체 동기화 (기본: 유니버스 한정=타임아웃 방지)")
     args = parser.parse_args()
 
     # 소스 결정
@@ -243,11 +261,17 @@ def main():
         sys.exit(1)
 
     csv_files = sorted(CSV_DIR.glob("*.csv"))
-    logger.info("CSV 파일: %d개", len(csv_files))
+
+    # 스캔 대상(유니버스) 한정 — 전체 2800+ CSV 풀리라이트 방지 (900초 타임아웃 픽스).
+    # 비유니버스 종목 수급컬럼은 어떤 스캐너도 소비 안 함(스캔 후보=유니버스). --all로 전체 처리.
+    universe = set() if (args.all or args.ticker) else _load_universe_tickers()
+    logger.info("CSV 파일: %d개%s", len(csv_files),
+                f" → 유니버스 {len(universe)}종 한정" if universe else " (전체)")
 
     total_updated = 0
     total_files = 0
     processed = 0
+    skipped_univ = 0
 
     for path in csv_files:
         stem = path.stem
@@ -262,6 +286,10 @@ def main():
         if ticker not in investor_data:
             continue
 
+        if universe and ticker not in universe:
+            skipped_univ += 1
+            continue
+
         result = sync_csv(path, investor_data[ticker], dry_run=args.dry_run)
         if result["status"] == "OK" and result["updated"] > 0:
             total_files += 1
@@ -272,7 +300,8 @@ def main():
             logger.info("  %d종목 처리... (%d파일 업데이트)", processed, total_files)
 
     action = "시뮬레이션" if args.dry_run else "동기화"
-    logger.info("%s 완료: [%s] %d파일 / %d행 업데이트", action, source, total_files, total_updated)
+    logger.info("%s 완료: [%s] %d파일 / %d행 업데이트 (유니버스밖 %d스킵)",
+                action, source, total_files, total_updated, skipped_univ)
 
 
 if __name__ == "__main__":
