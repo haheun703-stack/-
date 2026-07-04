@@ -15,7 +15,9 @@
   V 밸류에이션 갭(장기) : 컨센서스 목표가 괴리(upside_pct) + forward_per 분위
   E 실적 가속(중기)    : leader_cycle delta_value(TTM-YoY 델타) 재사용
   L 사이클 위치(중기)   : leader_cycle signal — 후기(경계/청산)는 중기 차단
-  O 수주 모멘텀(중·장기): dart_event_signals 공급계약체결 (v1: 계약금액 파싱)
+  O 수주 모멘텀(단기)   : contract_history.jsonl 매출대비 50%+ 계약만 단기 +10
+                        ★7/4 이벤트 스터디(607건 3개월·KOSPI 보정): 50%+만
+                        D+1 +2.94%p·승률 50%, 그 외 구간·중장기는 무효(기각)
   S 스마트머니(단기)    : investor_daily.db 금투+연기금 5D 순매수 (5/14 우선순위)
   T 테마 촉매(단기)     : theme_alerts_today.json 뉴스 발화
 
@@ -28,7 +30,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -39,7 +41,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 CONSENSUS_PATH = DATA_DIR / "consensus_screening.json"
 VALGAP_GLOB = "valuation_gap_*.json"
 LEADER_PATH = DATA_DIR / "shadow" / "leader_cycle.json"
-EVENT_PATH = DATA_DIR / "dart_event_signals.json"
+CONTRACT_PATH = DATA_DIR / "contract_history.jsonl"
 THEME_PATH = DATA_DIR / "theme_alerts_today.json"
 BRAIN_PATH = DATA_DIR / "brain_history.json"
 INVESTOR_DB = DATA_DIR / "investor_flow" / "investor_daily.db"
@@ -75,10 +77,29 @@ def _leader_map() -> dict[str, dict]:
     return {l["ticker"]: l for l in d.get("leaders", []) if l.get("market") == "KR"}
 
 
-def _supply_contract_tickers() -> set[str]:
-    d = _load_json(EVENT_PATH) or {}
-    return {s["ticker"] for s in d.get("signals", [])
-            if "공급계약" in str(s.get("event", "")) or "수주" in str(s.get("event", ""))}
+def _big_contract_tickers(days: int = 30, min_ratio: float = 50.0) -> set[str]:
+    """최근 N일 내 매출대비 min_ratio%+ 공급계약 보유 종목.
+
+    근거(7/4 이벤트 스터디, 원공시 607건·KOSPI 보정): 매출대비 50%+만
+    D+1 +2.94%p·승률 50% 단기 팝. 그 외 구간·중장기 효과는 기각 → 가점 없음.
+    """
+    out: set[str] = set()
+    try:
+        cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y%m%d")
+        with open(CONTRACT_PATH, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    r = json.loads(line)
+                except Exception:
+                    continue
+                if (str(r.get("date", "")) >= cutoff
+                        and (r.get("revenue_ratio_pct") or 0) >= min_ratio):
+                    out.add(r.get("ticker"))
+    except FileNotFoundError:
+        pass
+    except Exception as e:  # noqa: BLE001
+        logger.warning("[FV] 계약이력 로드 실패(축 0점 처리): %s", e)
+    return out
 
 
 def _theme_tickers() -> set[str]:
@@ -137,7 +158,7 @@ def build_scorecards() -> dict:
 
     valgap = _latest_valgap()
     leaders = _leader_map()
-    contracts = _supply_contract_tickers()
+    contracts = _big_contract_tickers()  # 매출대비 50%+ / 최근 30일만 (이벤트 스터디 근거)
     themes = _theme_tickers()
     regime = _current_regime()
     smart = _smart_money_5d([p["ticker"] for p in picks])
@@ -183,8 +204,6 @@ def build_scorecards() -> dict:
         if (p.get("dividend_yield") or 0) >= 4:
             fv_long += 5
             tags.append("배당4%+")
-        if has_contract:
-            fv_long += 10
 
         # ── E+L 중기: 실적 가속 × 사이클 게이트 ──
         fv_mid = 50.0
@@ -204,9 +223,6 @@ def build_scorecards() -> dict:
                     and cyc_signal not in CYCLE_EARLY_SIGNALS):
                 fv_mid -= 15
                 tags.append("모멘텀피크주의")
-            if has_contract:
-                fv_mid += 10
-                tags.append("공급계약")
 
         # ── S+T 단기: 스마트머니 + 테마 ──
         fv_short = 50.0
@@ -218,6 +234,10 @@ def build_scorecards() -> dict:
         if has_theme:
             fv_short += 10
             tags.append("테마발화")
+        if has_contract:
+            # 이벤트 스터디(7/4): 매출대비 50%+만 D+1 +2.94%p — 복권형이라 낮은 가점
+            fv_short += 10
+            tags.append("대형수주(매출50%+)")
 
         # ── 층3 국면 스위치: 권장 타임프레임 ──
         if regime in ("BEAR", "PRE_BEAR"):

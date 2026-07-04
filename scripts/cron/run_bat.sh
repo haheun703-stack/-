@@ -328,6 +328,8 @@ case "$BAT" in
     # G5.6: 미래가치 통합 엔진 shadow (7/4) — 6축(밸류갭·실적가속·사이클·수주·수급·테마) 결합.
     #   입력 전부 위 단계 산출물(consensus G3.9·valuation_gap G4.2·leader_cycle G5.5·수급DB).
     #   관측 전용 data/shadow/future_value.json — 매매 미배선·graceful exit0. 설계=docs/02-design/future-value-engine_2026-07-04.md
+    #   수주이력: 공급계약 공시 본문(계약금액/매출대비) 파싱 누적 → O축 입력(50%+만 단기가점, 7/4 이벤트스터디 607건 근거)
+    run_py scripts/collect_contract_history.py
     run_py scripts/run_future_value.py
     # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
     #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
