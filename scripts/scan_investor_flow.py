@@ -38,6 +38,10 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
+
 from src.adapters.jgis_short_adapter import (
     load_investor_flow,
     load_investor_flow_history,

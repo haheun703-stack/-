@@ -42,6 +42,10 @@ def _sf(val, default=0):
     return default if (np.isnan(v) or np.isinf(v)) else v
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
+
 logger = logging.getLogger(__name__)
 
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"

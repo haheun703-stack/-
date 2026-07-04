@@ -103,6 +103,9 @@ def normalize_ohlcv(df: pd.DataFrame) -> pd.DataFrame:
 
 def _load_pykrx_daily_ohlcv(ticker: str, days: int) -> pd.DataFrame:
     try:
+        from src.utils.pykrx_quiet import silence_pykrx_logging
+
+        silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
         from pykrx import stock as pykrx_stock
 
         end = datetime.now().strftime("%Y%m%d")

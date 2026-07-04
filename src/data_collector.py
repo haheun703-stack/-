@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 # ── pykrx import (로컬 실행 시 사용) ──
 try:
+    from src.utils.pykrx_quiet import silence_pykrx_logging
+
+    silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
     from pykrx import stock as krx
     PYKRX_AVAILABLE = True
 except ImportError:

@@ -958,6 +958,9 @@ def _fix_pick_names(picks: list[dict]) -> None:
 
     # 2) pykrx 폴백 (장중에만 안정적)
     try:
+        from src.utils.pykrx_quiet import silence_pykrx_logging
+
+        silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
         from pykrx import stock as krx
         for p in still_bad:
             ticker = p.get("ticker", p.get("code", ""))

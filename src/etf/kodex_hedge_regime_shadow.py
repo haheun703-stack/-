@@ -49,6 +49,9 @@ THICK_RATIO = 0.8  # 약세장 고정 헤지 비중
 
 def _load_close(ticker: str, start: str, end: str) -> pd.Series:
     """pykrx ETF 종가(읽기 전용, KRX 로그 억제)."""
+    from src.utils.pykrx_quiet import silence_pykrx_logging
+
+    silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
     from pykrx import stock as krx
     logging.disable(logging.CRITICAL)
     try:

@@ -584,6 +584,9 @@ def detect_and_fill_gaps(
     # 실거래일 캘린더 조회 (공휴일 자동 제외, 실패/빈응답 시 평일 fallback)
     trading_days: set[str] | None = None
     try:
+        from src.utils.pykrx_quiet import silence_pykrx_logging
+
+        silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
         from pykrx import stock as pykrx_stock
         biz_days = pykrx_stock.get_previous_business_days(
             fromdate=start.strftime("%Y%m%d"),

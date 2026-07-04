@@ -62,6 +62,9 @@ class PykrxSupplyAdapter:
         """pykrx 지연 임포트 (설치 안 된 환경 대응)"""
         if self._pykrx is None:
             try:
+                from src.utils.pykrx_quiet import silence_pykrx_logging
+
+                silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
                 from pykrx import stock
                 self._pykrx = stock
             except ImportError:

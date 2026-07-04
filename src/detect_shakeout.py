@@ -91,6 +91,9 @@ def _load_parquet_data(ticker: str) -> pd.DataFrame | None:
 def _load_pykrx_data(ticker: str, days: int = 400) -> pd.DataFrame | None:
     """pykrx에서 종목 데이터 수집 (parquet 없을 때 fallback)."""
     try:
+        from src.utils.pykrx_quiet import silence_pykrx_logging
+
+        silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
         from pykrx import stock as pykrx_stock
         from datetime import datetime, timedelta
 

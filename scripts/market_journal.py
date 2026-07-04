@@ -25,6 +25,10 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
+
 import pandas as pd
 import yaml
 

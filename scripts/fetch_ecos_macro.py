@@ -23,6 +23,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",

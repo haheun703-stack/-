@@ -29,6 +29,10 @@ import requests
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
+from src.utils.pykrx_quiet import silence_pykrx_logging
+
+silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",

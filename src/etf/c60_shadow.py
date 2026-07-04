@@ -92,6 +92,9 @@ def load_daily_close(ticker: str = DEFAULT_TICKER, days: int = 260) -> pd.DataFr
             logger.warning("local parquet load failed for %s: %s", ticker, exc)
 
     try:
+        from src.utils.pykrx_quiet import silence_pykrx_logging
+
+        silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
         from pykrx import stock as pykrx_stock
 
         end = datetime.now().strftime("%Y%m%d")

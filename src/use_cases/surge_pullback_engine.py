@@ -1011,6 +1011,9 @@ class SurgePullbackEngine:
     def _fill_names(self, surges: list[dict], cache: dict) -> list[dict]:
         """이름이 없는 종목에 pykrx로 이름 보강"""
         try:
+            from src.utils.pykrx_quiet import silence_pykrx_logging
+
+            silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제
             from pykrx import stock as pykrx_stock
         except ImportError:
             return surges
