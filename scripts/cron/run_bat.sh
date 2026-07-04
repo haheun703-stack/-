@@ -325,6 +325,10 @@ case "$BAT" in
     #   대시보드 노출은 정보봇(FLOWX UI)이 이 JSON 소비(global_leaders.yaml 규약).
     run_py_long scripts/fetch_us_leader_data.py
     run_py_long scripts/run_leader_cycle.py --quiet
+    # G5.6: 미래가치 통합 엔진 shadow (7/4) — 6축(밸류갭·실적가속·사이클·수주·수급·테마) 결합.
+    #   입력 전부 위 단계 산출물(consensus G3.9·valuation_gap G4.2·leader_cycle G5.5·수급DB).
+    #   관측 전용 data/shadow/future_value.json — 매매 미배선·graceful exit0. 설계=docs/02-design/future-value-engine_2026-07-04.md
+    run_py scripts/run_future_value.py
     # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
     #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
     #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
