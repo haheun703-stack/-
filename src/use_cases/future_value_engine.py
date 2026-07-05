@@ -15,9 +15,12 @@
   V 밸류에이션 갭(장기) : 컨센서스 목표가 괴리(upside_pct) + forward_per 분위
   E 실적 가속(중기)    : leader_cycle delta_value(TTM-YoY 델타) 재사용
   L 사이클 위치(중기)   : leader_cycle signal — 후기(경계/청산)는 중기 차단
-  O 수주 모멘텀(단기)   : contract_history.jsonl 매출대비 50%+ 계약만 단기 +10
-                        ★7/4 이벤트 스터디(607건 3개월·KOSPI 보정): 50%+만
-                        D+1 +2.94%p·승률 50%, 그 외 구간·중장기는 무효(기각)
+  O 수주 정보태그(무가점): contract_history.jsonl 매출대비 50%+ 계약 → 태그만.
+                        ★7/5 이벤트 스터디 v2(576건·3지표): raw D+1 +5.34%는
+                        전부 체결불가 오버나이트 갭 — 실행가능(D+1 시가 진입)은
+                        D+1 -2.98%·승률 19%로 오히려 손실 → 가점 제거,
+                        '수주팝직후(추격주의)' 정보 태그만 유지. 이력은
+                        v2 '수주잔고 누적/시총' 가설 검증용으로 계속 축적.
   S 스마트머니(단기)    : investor_daily.db 금투+연기금 5D 순매수 (5/14 우선순위)
   T 테마 촉매(단기)     : theme_alerts_today.json 뉴스 발화
 
@@ -78,11 +81,11 @@ def _leader_map() -> dict[str, dict]:
 
 
 def _big_contract_tickers(days: int = 3, min_ratio: float = 50.0) -> set[str]:
-    """최근 N일 내 매출대비 min_ratio%+ 공급계약 보유 종목.
+    """최근 N일(달력, 주말 커버) 내 매출대비 min_ratio%+ 공급계약 종목 — 정보 태그용.
 
-    ★창=달력 3일(주말 커버): 근거가 'D+1 팝, 이후 소멸'이므로 공시 직후만
-    태그해야 근거와 정합(7/4 적대검수 — 30일 창은 stale 신호 29일 유지 모순).
-    가점 유지/제거는 실행가능(exec, D+1시가 진입) 재검증 결과를 따른다.
+    ★스코어 가점 없음: 이벤트 스터디 v2(7/5, 576건) 실행가능 지표(D+1 시가 진입)가
+    D+1 -2.98%·승률 19% — 팝은 체결불가 갭이고 추격은 손실. 태그는 '이 종목이
+    수주 팝 직후 구간(추격주의)'이라는 경고 정보로만 쓴다.
     """
     out: set[str] = set()
     try:
@@ -159,7 +162,7 @@ def build_scorecards() -> dict:
 
     valgap = _latest_valgap()
     leaders = _leader_map()
-    contracts = _big_contract_tickers()  # 매출대비 50%+ / 최근 30일만 (이벤트 스터디 근거)
+    contracts = _big_contract_tickers()  # 50%+/최근 3일 — 정보 태그 전용(가점 0, 스터디 v2)
     themes = _theme_tickers()
     regime = _current_regime()
     smart = _smart_money_5d([p["ticker"] for p in picks])
@@ -236,9 +239,8 @@ def build_scorecards() -> dict:
             fv_short += 10
             tags.append("테마발화")
         if has_contract:
-            # 이벤트 스터디(7/4): 매출대비 50%+만 D+1 +2.94%p — 복권형이라 낮은 가점
-            fv_short += 10
-            tags.append("대형수주(매출50%+)")
+            # 가점 없음 — 스터디 v2(7/5): 팝=체결불가 갭, D+1 시가 추격은 -2.98%(승률 19%)
+            tags.append("수주팝직후(추격주의)")
 
         # ── 층3 국면 스위치: 권장 타임프레임 ──
         if regime in ("BEAR", "PRE_BEAR"):

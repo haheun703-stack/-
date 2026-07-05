@@ -32,7 +32,7 @@
 | V 밸류에이션 갭 | 현재 PER/PBR vs 자기 역사 밴드 → 적정가·괴리% | valuation_gap 일별(129종) + parquet | 장기 |
 | E 실적 가속 | 영업이익 TTM-YoY의 **델타**(가속/둔화) — 수준(oi_yoy) 아님 | DartAdapter.get_op_growth_series (leader_cycle 재사용) | 중기 |
 | L 사이클 위치 | 주도주 사이클 초입/중기/후기 — 초입 가점·후기(경계) 감점 | data/shadow/leader_cycle.json (KR+US 90종) | 중기 |
-| O 수주 모멘텀 | 단일판매·공급계약 공시 — 계약금액/시총 비율·빈도 | dart_event_signals.json (공급계약 이미 수집, 금액 파싱은 v1) | 중·장기 |
+| O 수주 정보태그 | 공급계약 공시 본문 파싱(계약금액/매출대비%) — **가점 0, 태그만** | dart_contract_parser + contract_history.jsonl (★7/5 스터디 v2 576건: raw D+1 팝 +5.34%는 전부 체결불가 갭, 실행가능(D+1 시가) -2.98%·승률 19% → 가점 기각. 이력은 v2 '수주잔고 누적/시총' 가설용 축적) | 태그 |
 | S 스마트머니 | 금투+연기금+기타법인 5D/20D (5/14 검증 우선순위) | investor_daily.db 11세분 | 단기 |
 | T 테마 촉매 | RSS 발화 + 정책테마 | theme_alerts_today.json | 단기 |
 
