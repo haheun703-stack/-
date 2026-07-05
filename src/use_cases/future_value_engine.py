@@ -122,6 +122,25 @@ def _current_regime() -> str:
     return "CAUTION"
 
 
+def _market_map() -> dict[str, str]:
+    """ticker → KOSPI/KOSDAQ (v1-3번). 부재 시 빈 dict(전부 KOSPI 취급)."""
+    return _load_json(DATA_DIR / "market_map.json") or {}
+
+
+def _regime_to_horizon(regime: str) -> str:
+    """레짐(BRAIN PRE_BULL/… 또는 지수 BULL/CRISIS) → 권장 타임프레임.
+
+    7/4 검증: 레짐=방어 유능. 하락 국면일수록 단기 공세 비권장·장기 가치 위주.
+    """
+    if regime in ("CRISIS",):
+        return "장기(가치·방어)"
+    if regime in ("BEAR", "PRE_BEAR"):
+        return "장기(가치적립)"
+    if regime in ("BULL", "PRE_BULL"):
+        return "단기+중기(공세)"
+    return "중기+장기(선별)"  # CAUTION 등
+
+
 def _smart_money_5d(tickers: list[str]) -> dict[str, dict]:
     """금투/연기금 최근 5거래일 순매수(원). 퀀트봇 담당 수급 = 스마트머니 1단계."""
     out: dict[str, dict] = {}
@@ -186,9 +205,15 @@ def build_scorecards() -> dict:
     leaders = _leader_map()
     contracts = _big_contract_tickers()  # 50%+/최근 3일 — 정보 태그 전용(가점 0, 스터디 v2)
     themes = _theme_tickers()
-    regime = _current_regime()
+    regime = _current_regime()  # BRAIN(KOSPI) 헤드라인 레짐
     smart = _smart_money_5d([p["ticker"] for p in picks])
     bands = _per_bands([p["ticker"] for p in picks])  # 역사 PER 밴드 (v1-2번)
+    mkt_map = _market_map()  # v1-3번: 종목별 시장(KOSPI/KOSDAQ)
+    try:
+        from src.use_cases.index_regime import kosdaq_regime
+        kosdaq_reg = kosdaq_regime().get("regime", "CAUTION")
+    except Exception:  # noqa: BLE001
+        kosdaq_reg = "CAUTION"
 
     # 분위 경계 (유니버스 내 상대 — 계수 튜닝 없음)
     fwd_pers = [p["forward_per"] for p in picks if p.get("forward_per") and p["forward_per"] > 0]
@@ -275,13 +300,11 @@ def build_scorecards() -> dict:
             # 가점 없음 — 스터디 v2(7/5): 팝=체결불가 갭, D+1 시가 추격은 -2.98%(승률 19%)
             tags.append("수주팝직후(추격주의)")
 
-        # ── 층3 국면 스위치: 권장 타임프레임 ──
-        if regime in ("BEAR", "PRE_BEAR"):
-            horizon = "장기(가치적립)"  # 방어 국면 — 단·중기 비권장
-        elif regime in ("PRE_BULL", "BULL"):
-            horizon = "단기+중기(공세)"
-        else:  # CAUTION
-            horizon = "중기+장기(선별)"
+        # ── 층3 국면 스위치(시장인지 v1-3번): KOSPI 종목=BRAIN 레짐(검증),
+        #    KOSDAQ 종목=KOSDAQ 지수 레짐(BRAIN은 KOSPI 전용이라 오배정 방지) ──
+        market = mkt_map.get(tk, "KOSPI")
+        mkt_regime = kosdaq_reg if market == "KOSDAQ" else regime
+        horizon = _regime_to_horizon(mkt_regime)
 
         best = max(("short", fv_short), ("mid", fv_mid), ("long", fv_long), key=lambda x: x[1])
         cards.append({
@@ -291,6 +314,7 @@ def build_scorecards() -> dict:
             "fv_short": round(fv_short, 1), "fv_mid": round(fv_mid, 1),
             "fv_long": round(fv_long, 1), "fv_best": best[0],
             "cycle_signal": cyc_signal or None,
+            "market": market, "market_regime": mkt_regime, "horizon": horizon,
             "finance_5d_억": round(fin5 / 1e8, 1), "pension_5d_억": round(pen5 / 1e8, 1),
             "per_band": ({"pct_rank": band["pct_rank"], "median": band["band_median"],
                           "current": band["current_per"], "signal": band["signal"],
@@ -299,20 +323,20 @@ def build_scorecards() -> dict:
         })
 
     cards.sort(key=lambda c: max(c["fv_short"], c["fv_mid"], c["fv_long"]), reverse=True)
+    n_kosdaq = sum(1 for c in cards if c["market"] == "KOSDAQ")
     return {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
-        "regime": regime,
-        "recommended_horizon": (
-            "장기(가치적립)" if regime in ("BEAR", "PRE_BEAR")
-            else "단기+중기(공세)" if regime in ("PRE_BULL", "BULL")
-            else "중기+장기(선별)"
-        ),
+        "regime": regime,                       # BRAIN(KOSPI) 헤드라인
+        "kospi_regime": regime, "kosdaq_regime": kosdaq_reg,
+        "recommended_horizon": _regime_to_horizon(regime),  # KOSPI 기준
         "universe_size": len(cards),
+        "market_split": {"KOSPI": len(cards) - n_kosdaq, "KOSDAQ": n_kosdaq},
         "axes_coverage": {
             "valuation_gap": len(valgap), "leader_cycle": len(leaders),
             "supply_contract": len(contracts), "theme": len(themes),
             "smart_money": len(smart),
             "per_band": sum(1 for b in bands.values() if b.get("reliable")),
+            "market_map": len(mkt_map),
         },
         "scorecards": cards,
     }

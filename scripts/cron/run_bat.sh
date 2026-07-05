@@ -168,6 +168,8 @@ case "$BAT" in
     run_py_long scripts/update_raw_parquet.py
     run_py scripts/rebuild_universe.py --incremental
     run_py scripts/update_kospi_index.py
+    run_py scripts/update_kosdaq_index.py     # v1-3번: KOSDAQ 지수(^KQ11) → 시장별 국면
+    run_py scripts/update_market_map.py       # v1-3번: FDR 시장구분(KOSPI/KOSDAQ) 맵
     # 지수 Buy&Hold 벤치마크 17종(국내외 지수·ETF·레버리지 1x/2x/3x) yfinance 증분 수집 → data/benchmark/
     run_py_long scripts/update_benchmarks.py
     # 수급 동기화: 단타봇 flow CSV(16:00 수집완료) → stock_data_daily (DB 폴백 자동)
