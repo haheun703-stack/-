@@ -13,6 +13,10 @@
 
 6축 스코어카드 (유니버스 = consensus_screening.all_picks: forward 데이터 보유 종목):
   V 밸류에이션 갭(장기) : 컨센서스 목표가 괴리(upside_pct) + forward_per 분위
+                        + ★역사 PER 밴드(자기 5년 대비 위치, v1-2번). 근거=7/5
+                        백테스트(안정흑자주 14k관측): 밴드 하위40%(-0.3%p) vs
+                        상위40%(-1.23%p) 스프레드 +0.82%p·횡단면PER과 상관 +0.24
+                        (독립). 밸류트랩(자기역사상 비쌈=이익둔화) 회피가 핵심.
   E 실적 가속(중기)    : leader_cycle delta_value(TTM-YoY 델타) 재사용
   L 사이클 위치(중기)   : leader_cycle signal — 후기(경계/청산)는 중기 차단
   O 수주 정보태그(무가점): contract_history.jsonl 매출대비 50%+ 계약 → 태그만.
@@ -144,6 +148,24 @@ def _smart_money_5d(tickers: list[str]) -> dict[str, dict]:
     return out
 
 
+def _per_bands(tickers: list[str]) -> dict[str, dict]:
+    """종목별 역사 PER 밴드 (v1-2번). 모듈/데이터 부재 시 빈 dict(graceful)."""
+    out: dict[str, dict] = {}
+    try:
+        from src.use_cases.valuation_band_history import compute_per_band
+    except Exception as e:  # noqa: BLE001
+        logger.warning("[FV] PER 밴드 모듈 로드 실패(V축 밴드 생략): %s", e)
+        return out
+    for tk in tickers:
+        try:
+            b = compute_per_band(tk)
+            if b:
+                out[tk] = b
+        except Exception:  # noqa: BLE001 — 개별 종목 실패는 스킵
+            continue
+    return out
+
+
 def _tercile_bounds(values: list[float]) -> tuple[float, float]:
     """(하위 경계, 상위 경계) — 33/67 분위."""
     s = sorted(values)
@@ -166,6 +188,7 @@ def build_scorecards() -> dict:
     themes = _theme_tickers()
     regime = _current_regime()
     smart = _smart_money_5d([p["ticker"] for p in picks])
+    bands = _per_bands([p["ticker"] for p in picks])  # 역사 PER 밴드 (v1-2번)
 
     # 분위 경계 (유니버스 내 상대 — 계수 튜닝 없음)
     fwd_pers = [p["forward_per"] for p in picks if p.get("forward_per") and p["forward_per"] > 0]
@@ -191,6 +214,7 @@ def build_scorecards() -> dict:
         has_theme = tk in themes
         fin5 = sm.get("finance_5d", 0)
         pen5 = sm.get("pension_5d", 0)
+        band = bands.get(tk)
 
         # ── V 장기: 컨센서스 괴리 + 저PER 분위 (백테스트: 저PER 승률 67%) ──
         fv_long = 50.0
@@ -208,6 +232,15 @@ def build_scorecards() -> dict:
         if (p.get("dividend_yield") or 0) >= 4:
             fv_long += 5
             tags.append("배당4%+")
+        # 역사 PER 밴드 (안정흑자주만·reliable) — 7/5 백테스트: 밴드 상단=밸류트랩 회피
+        if band and band.get("reliable"):
+            pr = band["pct_rank"]
+            if pr <= 0.25:
+                fv_long += 8
+                tags.append(f"역사적저평가(PER밴드 {pr*100:.0f}%ile)")
+            elif pr >= 0.75:
+                fv_long -= 10
+                tags.append(f"밸류트랩주의(PER밴드 {pr*100:.0f}%ile)")
 
         # ── E+L 중기: 실적 가속 × 사이클 게이트 ──
         fv_mid = 50.0
@@ -259,6 +292,9 @@ def build_scorecards() -> dict:
             "fv_long": round(fv_long, 1), "fv_best": best[0],
             "cycle_signal": cyc_signal or None,
             "finance_5d_억": round(fin5 / 1e8, 1), "pension_5d_억": round(pen5 / 1e8, 1),
+            "per_band": ({"pct_rank": band["pct_rank"], "median": band["band_median"],
+                          "current": band["current_per"], "signal": band["signal"],
+                          "reliable": band["reliable"]} if band else None),
             "tags": tags,
         })
 
@@ -276,6 +312,7 @@ def build_scorecards() -> dict:
             "valuation_gap": len(valgap), "leader_cycle": len(leaders),
             "supply_contract": len(contracts), "theme": len(themes),
             "smart_money": len(smart),
+            "per_band": sum(1 for b in bands.values() if b.get("reliable")),
         },
         "scorecards": cards,
     }
