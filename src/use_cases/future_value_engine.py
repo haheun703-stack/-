@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -194,6 +195,11 @@ def _tercile_bounds(values: list[float]) -> tuple[float, float]:
     return s[int(len(s) * 0.33)], s[min(int(len(s) * 0.67), len(s) - 1)]
 
 
+def _is_preferred(name: str, ticker: str) -> bool:
+    """KRX 우선주 판별(이름 끝 '우'[+등급자]·티커 비-0). 성우·에코글로우 등 보존."""
+    return bool(re.search(r"우[A-Z]?$", name or "")) and not ticker.endswith("0")
+
+
 def build_scorecards() -> dict:
     """6축 결합 → 종목별 단/중/장기 FV 스코어. 반환: 산출물 dict(JSON 직렬화 가능)."""
     cons = _load_json(CONSENSUS_PATH) or {}
@@ -201,6 +207,13 @@ def build_scorecards() -> dict:
     if not picks:
         return {"generated_at": datetime.now().isoformat(timespec="seconds"),
                 "error": "consensus_screening 없음", "scorecards": []}
+    # 우선주 방어 제거(v1-4번): 우선주가 보통주 목표가/forward_eps를 복사받아 가짜
+    #   상승여력 발생(현대차우 +283%). scan_consensus 생산자 픽스의 이중방어이자
+    #   consensus_screening 재생성(BAT-D) 전까지 shadow 즉시 정확성 보장.
+    n_before = len(picks)
+    picks = [p for p in picks if not _is_preferred(p.get("name", ""), p.get("ticker", ""))]
+    if n_before != len(picks):
+        logger.info("[FV] 우선주 %d종 제외(보통주 목표가 복사 왜곡 방지)", n_before - len(picks))
 
     valgap = _latest_valgap()
     leaders = _leader_map()

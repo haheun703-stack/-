@@ -20,6 +20,7 @@ import io
 import json
 import logging
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -71,10 +72,12 @@ def build_universe(min_turnover: float = 100, min_price: int = 5000) -> list[dic
                 continue
             name, ticker = parts
 
-            # 우선주/스팩/ETF 제외
-            if ticker.endswith(("5", "7", "8", "9")) and len(ticker) == 6:
-                # 일반 종목도 5/7로 끝날 수 있으므로 이름 기반 필터
-                pass
+            # 우선주 제외 (7/5 버그픽스: 기존 no-op `pass`라 우선주가 보통주 목표가·
+            #   forward_eps를 복사받아 가짜 상승여력 발생 — 현대차우 005385 close 214k에
+            #   보통주 목표가 819k=+283%). KRX 우선주=이름 끝 '우'[+등급자B/C]·티커 비-0.
+            #   ★티커 0끝 조건으로 성우·에코글로우·이오플로우 등 이름 끝'우' 보통주는 보존.
+            if re.search(r"우[A-Z]?$", name) and not ticker.endswith("0"):
+                continue
             if any(kw in name for kw in ["스팩", "SPAC", "ETN"]):
                 continue
 
