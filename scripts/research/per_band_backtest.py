@@ -86,6 +86,13 @@ def main() -> int:
     rebal_dates = pd.date_range(START, END, freq="MS")
     window = pd.Timedelta(days=int(BAND_WINDOW_YEARS * 365.25))
 
+    # 벤치마크 커버리지 진단(7/5 적대검수): 지수 CSV가 짧으면 관측이 조용히 드롭됨
+    bench_start = {"KOSPI": kospi.index[0], "KOSDAQ": kosdaq.index[0] if kosdaq is not None else None}
+    logger.info("벤치마크 커버리지 시작: KOSPI %s, KOSDAQ %s",
+                bench_start["KOSPI"].date(),
+                bench_start["KOSDAQ"].date() if bench_start["KOSDAQ"] is not None else "없음")
+    dropped_bench = 0
+
     rows = []
     for d in rebal_dates:
         for tk, per in per_all.items():
@@ -109,6 +116,7 @@ def main() -> int:
             bench = bench_for(tk)  # 자기시장 지수 (KOSDAQ 종목=KOSDAQ, 그 외=KOSPI)
             ki = bench.index.searchsorted(d, side="right") - 1
             if ki < 0 or ki + FWD_DAYS >= len(bench):
+                dropped_bench += 1
                 continue
             kfwd = (bench.iloc[ki + FWD_DAYS] / bench.iloc[ki] - 1) * 100
             # 흑자 안정성(point-in-time): d까지 공시된 TTM EPS 양수 비율
@@ -123,7 +131,10 @@ def main() -> int:
                          "pos_ratio": pos_ratio})
 
     df = pd.DataFrame(rows)
-    logger.info("관측 %d (종목-월). 분석 시작.\n", len(df))
+    logger.info("관측 %d (종목-월) | 벤치마크 커버리지 부족 드롭 %d건 (%.0f%%)",
+                len(df), dropped_bench, dropped_bench / max(len(df) + dropped_bench, 1) * 100)
+    if len(df):
+        logger.info("실제 관측 기간: %s ~ %s", df["date"].min().date(), df["date"].max().date())
     print(f"══ PER 밴드 백테스트 ({START[:7]}~{END[:7]}, D+{FWD_DAYS} KOSPI초과, "
           f"{df['ticker'].nunique()}종·{len(df)}관측) ══")
 
