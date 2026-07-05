@@ -40,8 +40,11 @@ BAND_WINDOW_YEARS = 5         # 밴드 기준 트레일링 기간
 MIN_BAND_DAYS = 250           # 밴드 신뢰 최소 표본(≈1년)
 LOW_PCT, HIGH_PCT = 0.25, 0.75  # 저평가/고평가 밴드 경계
 
+RECENCY_MAX_DAYS = 20         # 현재 PER이 기준일 대비 이만큼 stale이면 신호 없음
+
 _fund_cache: pd.DataFrame | None = None
 _ttm_cache: dict[str, pd.Series | None] = {}
+_close_cache: dict[str, pd.Series | None] = {}
 
 
 def _load_fundamentals() -> pd.DataFrame:
@@ -58,31 +61,51 @@ def _load_fundamentals() -> pd.DataFrame:
 
 
 def _ttm_eps_series(ticker: str) -> pd.Series | None:
-    """공시 가용일 색인 TTM EPS 시계열 (최근 4분기 합, 4분기 미만은 제외)."""
+    """공시 가용일 색인 TTM EPS 시계열.
+
+    ★4분기가 '캘린더 연속'일 때만 TTM 산출(7/5 적대검수): 분기 결측이 있으면
+    존재하는 행 4개를 합쳐 최대 3년치 EPS가 TTM으로 오염된다(예: CJ대한통운
+    8분기 공백). period=year*4+(quarter-1)로 연속성(간격 정확히 3) 검사.
+    """
     if ticker in _ttm_cache:
         return _ttm_cache[ticker]
     df = _load_fundamentals()
-    s = df[df["ticker"] == ticker]
+    s = df[df["ticker"] == ticker].sort_values("settle")
     if len(s) < 4:
         _ttm_cache[ticker] = None
         return None
-    ttm = s["eps"].rolling(4).sum()
-    out = pd.Series(ttm.values, index=s["avail"].values).dropna()
+    period = (s["year"].astype(int) * 4 + (s["quarter"].astype(int) - 1)).values
+    eps = s["eps"].values
+    avail = s["avail"].values
+    idx, val = [], []
+    for i in range(3, len(s)):
+        if period[i] - period[i - 3] == 3:  # 4개 분기가 정확히 연속
+            val.append(float(eps[i - 3:i + 1].sum()))
+            idx.append(avail[i])
+    if not idx:
+        _ttm_cache[ticker] = None
+        return None
+    out = pd.Series(val, index=pd.to_datetime(idx))
     out = out[~out.index.duplicated(keep="last")].sort_index()
     _ttm_cache[ticker] = out if len(out) else None
     return _ttm_cache[ticker]
 
 
 def _load_close(ticker: str) -> pd.Series | None:
+    if ticker in _close_cache:
+        return _close_cache[ticker]
     try:
         df = pd.read_parquet(PROCESSED_DIR / f"{ticker}.parquet")
     except Exception:
+        _close_cache[ticker] = None
         return None
     idx = df.index if isinstance(df.index, pd.DatetimeIndex) else pd.to_datetime(df.index)
     col = "Close" if "Close" in df.columns else "close"
     if col not in df.columns:
+        _close_cache[ticker] = None
         return None
-    return pd.Series(df[col].values, index=idx).sort_index()
+    _close_cache[ticker] = pd.Series(df[col].values, index=idx).sort_index()
+    return _close_cache[ticker]
 
 
 def _per_series(ticker: str, as_of: pd.Timestamp | None = None) -> pd.Series | None:
@@ -114,6 +137,14 @@ def compute_per_band(ticker: str, as_of: pd.Timestamp | str | None = None) -> di
         as_of = pd.Timestamp(as_of)
     per = _per_series(ticker, as_of)
     if per is None:
+        return None
+    # recency 가드(7/5 적대검수): 현재 PER이 기준일 대비 stale(최근 적자로 PER 끊김·
+    # 거래정지)이면 옛 PER을 '현재'로 오인하지 않도록 신호 없음. 백테스트 가드와 정합.
+    close = _load_close(ticker)
+    ref_date = close.index[-1] if close is not None and len(close) else per.index[-1]
+    if as_of is not None:
+        ref_date = min(ref_date, as_of)
+    if (ref_date - per.index[-1]).days > RECENCY_MAX_DAYS:
         return None
     window_start = per.index[-1] - pd.Timedelta(days=int(BAND_WINDOW_YEARS * 365.25))
     band = per[per.index >= window_start]
