@@ -41,9 +41,30 @@ FWD_DAYS = 20
 START, END = "2021-01-01", "2025-12-01"
 
 
+def _index_close(name: str) -> pd.Series:
+    df = pd.read_csv(PROJECT_ROOT / "data" / f"{name}.csv",
+                     parse_dates=["Date"]).sort_values("Date").set_index("Date")
+    col = "close" if "close" in df.columns else "Close"
+    return df[col]
+
+
 def main() -> int:
-    kospi = pd.read_csv(PROJECT_ROOT / "data" / "kospi_index.csv",
-                        parse_dates=["Date"]).sort_values("Date").set_index("Date")["close"]
+    import json
+    kospi = _index_close("kospi_index")
+    try:
+        kosdaq = _index_close("kosdaq_index")
+    except Exception:
+        kosdaq = None
+    try:
+        market_map = json.load(open(PROJECT_ROOT / "data" / "market_map.json", encoding="utf-8"))
+    except Exception:
+        market_map = {}
+
+    def bench_for(ticker: str) -> pd.Series:
+        # 종목 자기시장 벤치마크 (KOSDAQ 종목은 KOSDAQ, 그 외 KOSPI) — 7/5 v1-3 정확성
+        if kosdaq is not None and market_map.get(ticker) == "KOSDAQ":
+            return kosdaq
+        return kospi
 
     tickers = [Path(p).stem for p in glob.glob(str(PROJECT_ROOT / "data" / "processed" / "*.parquet"))]
     logger.info("유니버스 후보 %d종 — PER 시계열 구축 중...", len(tickers))
@@ -85,10 +106,11 @@ def main() -> int:
             if base <= 0:
                 continue
             fwd = (close.iloc[ci + FWD_DAYS] / base - 1) * 100
-            ki = kospi.index.searchsorted(d, side="right") - 1
-            if ki < 0 or ki + FWD_DAYS >= len(kospi):
+            bench = bench_for(tk)  # 자기시장 지수 (KOSDAQ 종목=KOSDAQ, 그 외=KOSPI)
+            ki = bench.index.searchsorted(d, side="right") - 1
+            if ki < 0 or ki + FWD_DAYS >= len(bench):
                 continue
-            kfwd = (kospi.iloc[ki + FWD_DAYS] / kospi.iloc[ki] - 1) * 100
+            kfwd = (bench.iloc[ki + FWD_DAYS] / bench.iloc[ki] - 1) * 100
             # 흑자 안정성(point-in-time): d까지 공시된 TTM EPS 양수 비율
             ttm = _ttm_eps_series(tk)
             pos_ratio = 0.0
