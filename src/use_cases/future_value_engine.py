@@ -77,11 +77,12 @@ def _leader_map() -> dict[str, dict]:
     return {l["ticker"]: l for l in d.get("leaders", []) if l.get("market") == "KR"}
 
 
-def _big_contract_tickers(days: int = 30, min_ratio: float = 50.0) -> set[str]:
+def _big_contract_tickers(days: int = 3, min_ratio: float = 50.0) -> set[str]:
     """최근 N일 내 매출대비 min_ratio%+ 공급계약 보유 종목.
 
-    근거(7/4 이벤트 스터디, 원공시 607건·KOSPI 보정): 매출대비 50%+만
-    D+1 +2.94%p·승률 50% 단기 팝. 그 외 구간·중장기 효과는 기각 → 가점 없음.
+    ★창=달력 3일(주말 커버): 근거가 'D+1 팝, 이후 소멸'이므로 공시 직후만
+    태그해야 근거와 정합(7/4 적대검수 — 30일 창은 stale 신호 29일 유지 모순).
+    가점 유지/제거는 실행가능(exec, D+1시가 진입) 재검증 결과를 따른다.
     """
     out: set[str] = set()
     try:

@@ -1,10 +1,14 @@
 """공급계약 공시 이벤트 스터디 — 매출대비(%) 구간별 forward 수익률.
 
 미래가치 엔진 v1 O축(수주 모멘텀) 가점 규칙의 백테스트 근거 산출.
-- DART list API로 기간 내 '단일판매ㆍ공급계약체결' 원공시(정정 제외) 전수 수집
+- DART list API로 기간 내 '단일판매ㆍ공급계약체결' 원공시(정정·해지 제외) 전수 수집
 - dart_contract_parser로 계약금액/매출대비 파싱
-- 공시일 종가 기준 D+1/D+5/D+20 forward (stock_data_daily CSV, 전종목 커버)
-- 결과: 매출대비 구간별 평균/승률 → 가점 규칙 결정
+- 지표 3종 (7/4 적대검수 반영):
+  raw    : 공시일 종가 → D+N 종가 (참고용 — 시장 드리프트 포함)
+  excess : raw − 동일창 KOSPI (시장 보정 — 코드 내장 = 재현성)
+  exec   : D+1 시가 매수 → D+N 종가 (★실행가능 수익 — 공시 시각 미상이라
+           당일 종가 체결은 낙관 편향. BAT-D 16:35 태그 → 익일 시가가 실제 최선)
+- 호라이즌별 유효 표본 n 별도 기록(창 끝 D+20 절단로 인한 표본 불일치 명시)
 
 사용: ./venv/bin/python3.11 scripts/research/contract_event_study.py --months 3
 """
@@ -57,13 +61,18 @@ def collect_contract_events(api_key: str, bgn: str, end: str) -> list[dict]:
             logger.warning("list p%d 실패: %s", page, e)
             break
         if d.get("status") != "000":
+            if d.get("status") != "013":  # 013=조회 결과 없음(정상)
+                logger.warning("list API 비정상 status=%s msg=%s (p%d)",
+                               d.get("status"), d.get("message"), page)
             break
         for x in d.get("list", []):
             nm = x.get("report_nm", "")
-            if "공급계약" in nm and "기재정정" not in nm and x.get("stock_code"):
+            if ("공급계약" in nm and "기재정정" not in nm and "해지" not in nm
+                    and x.get("stock_code")):
                 events.append({"ticker": x["stock_code"], "name": x["corp_name"],
                                "date": x["rcept_dt"], "rcept_no": x["rcept_no"],
-                               "market": x.get("corp_cls", "")})
+                               "market": x.get("corp_cls", ""),
+                               "subsidiary": "종속회사" in nm})
         total_page = int(d.get("total_page", 1))
         if page >= total_page:
             break
@@ -72,38 +81,74 @@ def collect_contract_events(api_key: str, bgn: str, end: str) -> list[dict]:
     return events
 
 
-_price_cache: dict[str, pd.Series | None] = {}
+_price_cache: dict[str, pd.DataFrame | None] = {}
+_kospi_close: pd.Series | None = None
 
 
-def _load_close(ticker: str) -> pd.Series | None:
+def _load_prices(ticker: str) -> pd.DataFrame | None:
+    """종목 close(+open) — 인덱스 date. open 없으면 컬럼 미포함."""
     if ticker in _price_cache:
         return _price_cache[ticker]
-    ser = None
+    df = None
     try:
         hits = globmod.glob(str(CSV_DIR / f"*_{ticker}.csv"))
         if hits:
-            df = pd.read_csv(hits[0], parse_dates=[0])
-            df = df.sort_values(df.columns[0])
-            col = "Close" if "Close" in df.columns else "close"
-            ser = pd.Series(df[col].values, index=df[df.columns[0]])
+            raw = pd.read_csv(hits[0], parse_dates=[0])
+            date_col = raw.columns[0]
+            raw = raw.sort_values(date_col)
+            cols = {c.lower(): c for c in raw.columns}
+            data = {"close": raw[cols.get("close", raw.columns[1])].values}
+            if "open" in cols:
+                data["open"] = raw[cols["open"]].values
+            df = pd.DataFrame(data, index=raw[date_col])
     except Exception:
-        ser = None
-    _price_cache[ticker] = ser
-    return ser
+        df = None
+    _price_cache[ticker] = df
+    return df
 
 
-def fwd_return(ticker: str, date_compact: str, n: int) -> float | None:
-    close = _load_close(ticker)
-    if close is None or close.empty:
-        return None
+def _kospi() -> pd.Series | None:
+    global _kospi_close
+    if _kospi_close is None:
+        try:
+            k = pd.read_csv(PROJECT_ROOT / "data" / "kospi_index.csv",
+                            parse_dates=["Date"]).sort_values("Date")
+            _kospi_close = k.set_index("Date")["close"]
+        except Exception:
+            _kospi_close = pd.Series(dtype=float)
+    return _kospi_close if len(_kospi_close) else None
+
+
+def _anchor_idx(index: pd.Index, date_compact: str) -> int:
     d = pd.Timestamp(f"{date_compact[:4]}-{date_compact[4:6]}-{date_compact[6:]}")
-    i = close.index.searchsorted(d, side="right") - 1
-    if i < 0 or i + n >= len(close):
-        return None
-    base = close.iloc[i]
+    return index.searchsorted(d, side="right") - 1
+
+
+def fwd_metrics(ticker: str, date_compact: str, n: int) -> dict[str, float | None]:
+    """raw(공시일 종가→D+N 종가) / excess(raw−KOSPI) / exec(D+1 시가→D+N 종가)."""
+    out: dict[str, float | None] = {"raw": None, "excess": None, "exec": None}
+    px = _load_prices(ticker)
+    if px is None or px.empty:
+        return out
+    i = _anchor_idx(px.index, date_compact)
+    if i < 0 or i + n >= len(px):
+        return out
+    base = px["close"].iloc[i]
     if not base or base <= 0:
-        return None
-    return float((close.iloc[i + n] / base - 1) * 100)
+        return out
+    out["raw"] = float((px["close"].iloc[i + n] / base - 1) * 100)
+    kospi = _kospi()
+    if kospi is not None:
+        ki = _anchor_idx(kospi.index, date_compact)
+        if ki >= 0 and ki + n < len(kospi):
+            out["excess"] = out["raw"] - float(
+                (kospi.iloc[ki + n] / kospi.iloc[ki] - 1) * 100)
+    # 실행가능: D+1 시가 진입 (BAT-D 16:35 태그 → 익일 시가가 실제 최선)
+    if "open" in px.columns and i + 1 < len(px) and i + n < len(px):
+        entry = px["open"].iloc[i + 1]
+        if entry and entry > 0:
+            out["exec"] = float((px["close"].iloc[i + n] / entry - 1) * 100)
+    return out
 
 
 def main() -> int:
@@ -143,34 +188,40 @@ def main() -> int:
         time.sleep(0.12)
     logger.info("파싱 완료: %d/%d 유효(매출대비 확보)", len(parsed), len(events))
 
-    # forward 수익률 결합
+    # forward 수익률 결합 (raw / excess=KOSPI보정 / exec=D+1시가 진입)
     rows = []
     for p in parsed:
         row = dict(p)
         for n in (1, 5, 20):
-            row[f"fwd{n}"] = fwd_return(p["ticker"], p["date"], n)
+            m = fwd_metrics(p["ticker"], p["date"], n)
+            row[f"raw{n}"], row[f"ex{n}"], row[f"exec{n}"] = m["raw"], m["excess"], m["exec"]
         rows.append(row)
 
-    # 구간별 통계
+    # 구간별 × 지표별 통계 (호라이즌별 유효 n 명시 — D+20은 창 끝 절단으로 표본 다름)
     report = {"generated_at": datetime.now().isoformat(timespec="seconds"),
               "period": f"{bgn.date()}~{end.date()}", "n_events": len(events),
               "n_parsed": len(parsed), "buckets": []}
     print(f"\n══ 공급계약 이벤트 스터디 ({bgn.date()}~{end.date()}, "
           f"원공시 {len(events)}건 · 매출대비 파싱 {len(parsed)}건) ══")
+    METRICS = [("raw", "raw(공시일종가)"), ("ex", "KOSPI보정"), ("exec", "★실행가능(D+1시가진입)")]
     for lo, hi, label in RATIO_BUCKETS:
         grp = [r for r in rows if lo <= (r.get("revenue_ratio_pct") or 0) < hi]
         stat = {"bucket": label, "n": len(grp)}
-        line = f"  매출대비 {label:<7} n={len(grp):<4}"
-        for n in (1, 5, 20):
-            vals = pd.Series([r[f"fwd{n}"] for r in grp if r.get(f"fwd{n}") is not None])
-            if len(vals):
-                stat[f"d{n}_mean"] = round(float(vals.mean()), 2)
-                stat[f"d{n}_win"] = round(float((vals > 0).mean() * 100), 1)
-                stat[f"d{n}_median"] = round(float(vals.median()), 2)
-                line += (f" | D+{n} {vals.mean():+.2f}% 승률{(vals > 0).mean()*100:.0f}%"
-                         f" 중앙{vals.median():+.2f}%")
+        print(f"  매출대비 {label:<7} 이벤트 {len(grp)}건")
+        for mkey, mlabel in METRICS:
+            line = f"    {mlabel:<22}"
+            for n in (1, 5, 20):
+                vals = pd.Series([r[f"{mkey}{n}"] for r in grp
+                                  if r.get(f"{mkey}{n}") is not None])
+                stat[f"{mkey}_d{n}_n"] = len(vals)
+                if len(vals):
+                    stat[f"{mkey}_d{n}_mean"] = round(float(vals.mean()), 2)
+                    stat[f"{mkey}_d{n}_win"] = round(float((vals > 0).mean() * 100), 1)
+                    stat[f"{mkey}_d{n}_median"] = round(float(vals.median()), 2)
+                    line += (f"| D+{n} {vals.mean():+.2f}% 승{(vals > 0).mean()*100:.0f}%"
+                             f" (n={len(vals)}) ")
+            print(line)
         report["buckets"].append(stat)
-        print(line)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     report["events"] = rows  # 원자료 보존(재현성)

@@ -96,15 +96,17 @@ def _last_label_value(cells: list[str], label_pat: str, kind: str):
     """라벨 정확매칭의 '마지막' 발생 위치 → 바로 다음 셀 값.
 
     정정공시 = 앞(요약)+뒤(정정반영 본문) 2부 구성이라 마지막 발생이 최종값.
+    ★마지막 발생의 값이 '-'(해지 등 공란화)면 None을 그대로 반환 — 앞쪽(정정전)
+    발생으로 후퇴하면 취소된 값이 부활한다(7/4 적대검수 확정 발견).
     """
     pat = re.compile(label_pat)
     idxs = [i for i, c in enumerate(cells) if pat.match(c)]
-    for i in reversed(idxs):
-        if i + 1 < len(cells):
-            v = _parse_value(cells[i + 1], kind)
-            if v is not None:
-                return v
-    return None
+    if not idxs:
+        return None
+    i = idxs[-1]
+    if i + 1 >= len(cells):
+        return None
+    return _parse_value(cells[i + 1], kind)
 
 
 def parse_contract_xml(xml_text: str) -> dict:
