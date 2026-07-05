@@ -30,7 +30,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from src.use_cases.valuation_band_history import (  # noqa: E402
-    BAND_WINDOW_YEARS, MIN_BAND_DAYS, _load_close, _per_series,
+    BAND_WINDOW_YEARS, MIN_BAND_DAYS, _load_close, _per_series, _ttm_eps_series,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s",
@@ -89,8 +89,16 @@ def main() -> int:
             if ki < 0 or ki + FWD_DAYS >= len(kospi):
                 continue
             kfwd = (kospi.iloc[ki + FWD_DAYS] / kospi.iloc[ki] - 1) * 100
+            # 흑자 안정성(point-in-time): d까지 공시된 TTM EPS 양수 비율
+            ttm = _ttm_eps_series(tk)
+            pos_ratio = 0.0
+            if ttm is not None:
+                ttm_d = ttm[ttm.index <= d]
+                if len(ttm_d):
+                    pos_ratio = float((ttm_d > 0).mean())
             rows.append({"date": d, "ticker": tk, "pct_rank": pct_rank,
-                         "current_per": current, "excess": fwd - kfwd})
+                         "current_per": current, "excess": fwd - kfwd,
+                         "pos_ratio": pos_ratio})
 
     df = pd.DataFrame(rows)
     logger.info("관측 %d (종목-월). 분석 시작.\n", len(df))
@@ -122,6 +130,20 @@ def main() -> int:
         g = sub[sub["band_q"] == q]["excess"]
         if len(g) >= 30:
             print(f"  저PER∩band Q{q} n={len(g):<5} 초과 {g.mean():+.2f}%p 승률 {(g>0).mean()*100:.0f}%")
+
+    # Q3: 안정 흑자주(reliable, 흑자비율 80%+) 서브셋에서 밴드 신호가 강해지는가
+    rel = df[df["pos_ratio"] >= 0.8].copy()
+    print(f"\n[Q3] 안정흑자주(흑자비율 80%+, n={len(rel)}={len(rel)/len(df)*100:.0f}%) 내 밴드 분위")
+    if len(rel) >= 500:
+        rel["band_q"] = rel.groupby("date")["pct_rank"].transform(
+            lambda s: pd.qcut(s.rank(method="first"), 5, labels=[1, 2, 3, 4, 5])
+            if s.nunique() >= 5 else np.nan)
+        for q in [1, 2, 3, 4, 5]:
+            g = rel[rel["band_q"] == q]["excess"]
+            if len(g) >= 30:
+                print(f"  안정∩band Q{q} n={len(g):<5} 초과 {g.mean():+.2f}%p 승률 {(g>0).mean()*100:.0f}%")
+        rq1, rq5 = rel[rel.band_q == 1]["excess"], rel[rel.band_q == 5]["excess"]
+        print(f"  → 안정흑자주 저평가−고평가 스프레드: {rq1.mean()-rq5.mean():+.2f}%p")
 
     # 상관: 두 신호 독립성
     corr = df[["pct_rank", "current_per"]].corr().iloc[0, 1]
