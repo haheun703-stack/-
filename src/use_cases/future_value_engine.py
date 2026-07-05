@@ -196,8 +196,14 @@ def _tercile_bounds(values: list[float]) -> tuple[float, float]:
 
 
 def _is_preferred(name: str, ticker: str) -> bool:
-    """KRX 우선주 판별(이름 끝 '우'[+등급자]·티커 비-0). 성우·에코글로우 등 보존."""
-    return bool(re.search(r"우[A-Z]?$", name or "")) and not ticker.endswith("0")
+    """FV-side 우선주 판별 = 티커 비-0.
+
+    ★consensus_screening.json은 우선주에도 name을 보통주("삼성전자")로 저장하므로
+    이름 기반 판별 불가 → 티커로 판별. 컨센서스 유니버스=애널리스트 커버=보통주는
+    전부 티커 0끝(KRX 규약)이라, 비-0 = 우선주(보통주 목표가/EPS 복사=왜곡).
+    생산자(scan_consensus)는 파일명에 '우' 있어 이름 기반, 여기는 티커 기반(이중방어).
+    """
+    return not ticker.endswith("0")
 
 
 def build_scorecards() -> dict:
