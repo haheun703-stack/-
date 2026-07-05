@@ -29,7 +29,7 @@
 
 | 축 | 내용 | 데이터 소스 (기존 자산) | 타임프레임 |
 |---|---|---|---|
-| V 밸류에이션 갭 | 현재 PER/PBR vs 자기 역사 밴드 → 적정가·괴리% | valuation_gap 일별(129종) + parquet | 장기 |
+| V 밸류에이션 갭 | 컨센서스 목표가 괴리 + forward_per 분위 + **역사 PER 밴드(자기 5년, ✅v1-2 완료)** | valuation_gap + consensus + fundamentals_historical + parquet | 장기 |
 | E 실적 가속 | 영업이익 TTM-YoY의 **델타**(가속/둔화) — 수준(oi_yoy) 아님 | DartAdapter.get_op_growth_series (leader_cycle 재사용) | 중기 |
 | L 사이클 위치 | 주도주 사이클 초입/중기/후기 — 초입 가점·후기(경계) 감점 | data/shadow/leader_cycle.json (KR+US 90종) | 중기 |
 | O 수주 정보태그 | 공급계약 공시 본문 파싱(계약금액/매출대비%) — **가점 0, 태그만** | dart_contract_parser + contract_history.jsonl (★7/5 스터디 v2 576건: raw D+1 팝 +5.34%는 전부 체결불가 갭, 실행가능(D+1 시가) -2.98%·승률 19% → 가점 기각. 이력은 v2 '수주잔고 누적/시총' 가설용 축적) | 태그 |
@@ -48,7 +48,9 @@
   - BEAR/PRE_BEAR(방어, 적중 81%) → 단기·중기 비중 축소, **장기(가치) 적립만** 허용
   - CAUTION → 중기+장기, 저PER 가중 ↑
   - PRE_BULL/BULL(향후 "추세+모멘텀" 완화 조건 별도 백테스트) → 단기+중기 공세, E/L 가중 ↑
-- KOSDAQ 별도 국면은 v1 (kosdaq 지수 시계열 수집부터).
+- **✅ KOSDAQ 별도 국면(v1-3 완료)**: KOSPI 종목=BRAIN 레짐, KOSDAQ 종목=KOSDAQ
+  지수 레짐(index_regime.py, ^KQ11 수집·FDR 시장맵). 근거=레짐 divergence 46%
+  (2021~25)·자기시장 벤치마크로 밴드 스프레드 +0.95→+1.01%p·Q1 양전환.
 
 ## 3. 산출물
 
