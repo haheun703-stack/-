@@ -35,6 +35,23 @@ US_POOL = [
     "JNJ", "NFLX", "ABBV", "BAC", "KO", "CVX", "CRM", "AMD", "TMUS", "WFC",
     "PEP", "LIN", "MRK", "ACN", "MCD",
 ]
+# 미래가치 US 유니버스 리더(US_POOL 미포함 반도체·제약·에너지·산업재 — 애널리스트 커버 우량
+#   ADR 포함). scan_consensus_us·valuation_band_history_us 공용(클린아키텍처: use_cases 소유,
+#   scripts 역참조 금지). basis 가드가 해외통화 ADR(TSM=TWD·NVO=DKK·TM=JPY) PER밴드는 제외.
+US_FV_LEADERS = ["TSM", "ASML", "MU", "QCOM", "PFE", "LMT", "RTX", "GM", "FCX", "SHEL", "TM", "NVO"]
+
+
+def us_fv_universe() -> list[str]:
+    """US 미래가치 유니버스(US_POOL 시총상위 + 리더, 중복제거·순서보존)."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for tk in list(US_POOL) + US_FV_LEADERS:
+        if tk not in seen:
+            seen.add(tk)
+            out.append(tk)
+    return out
+
+
 KR_POOL = [
     ("005930", "삼성전자"), ("000660", "SK하이닉스"), ("373220", "LG에너지솔루션"),
     ("207940", "삼성바이오로직스"), ("005380", "현대차"), ("000270", "기아"),

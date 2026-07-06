@@ -25,23 +25,12 @@ _DEFAULT = {"regime": "CAUTION", "close": 0.0, "ma20": 0.0, "ma60": 0.0,
             "rv_pct": 0.5, "ma20_above": False, "ma60_above": False}
 
 
-def calc_index_regime(index_csv: str | Path) -> dict:
-    """지수 CSV(Date,close,...) → 레짐 dict. calc_kospi_regime와 동일 규칙."""
-    path = Path(index_csv)
-    if not path.exists():
+def _regime_from_close(close_s: pd.Series) -> dict:
+    """종가 시계열(시간순 정렬) → 레짐 dict. CSV/parquet 공용 코어(위치기반 rolling)."""
+    close_s = pd.to_numeric(close_s, errors="coerce").dropna()
+    if len(close_s) < 60:
         return dict(_DEFAULT)
     try:
-        df = pd.read_csv(path)
-        date_col = next((c for c in df.columns if c.lower() == "date"), df.columns[0])
-        close_col = next((c for c in df.columns if c.lower() == "close"), None)
-        if close_col is None:
-            return dict(_DEFAULT)
-        df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
-        df = df.dropna(subset=[date_col]).set_index(date_col).sort_index()
-        if len(df) < 60:
-            return dict(_DEFAULT)
-
-        close_s = pd.to_numeric(df[close_col], errors="coerce")
         ma20 = float(close_s.rolling(20).mean().iloc[-1])
         ma60 = float(close_s.rolling(60).mean().iloc[-1])
         close = float(close_s.iloc[-1])
@@ -66,6 +55,25 @@ def calc_index_regime(index_csv: str | Path) -> dict:
                 "rv_pct": round(rv_pct, 2),
                 "ma20_above": close > ma20, "ma60_above": close > ma60}
     except Exception as e:  # noqa: BLE001
+        logger.warning("[index_regime] 시계열 계산 실패: %s", e)
+        return dict(_DEFAULT)
+
+
+def calc_index_regime(index_csv: str | Path) -> dict:
+    """지수 CSV(Date,close,...) → 레짐 dict. calc_kospi_regime와 동일 규칙."""
+    path = Path(index_csv)
+    if not path.exists():
+        return dict(_DEFAULT)
+    try:
+        df = pd.read_csv(path)
+        date_col = next((c for c in df.columns if c.lower() == "date"), df.columns[0])
+        close_col = next((c for c in df.columns if c.lower() == "close"), None)
+        if close_col is None:
+            return dict(_DEFAULT)
+        df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+        df = df.dropna(subset=[date_col]).set_index(date_col).sort_index()
+        return _regime_from_close(df[close_col])
+    except Exception as e:  # noqa: BLE001
         logger.warning("[index_regime] %s 계산 실패: %s", path.name, e)
         return dict(_DEFAULT)
 
@@ -76,3 +84,38 @@ def kospi_regime() -> dict:
 
 def kosdaq_regime() -> dict:
     return calc_index_regime(DATA_DIR / "kosdaq_index.csv")
+
+
+# ─────────────────────────────────────────────────────────
+# US 지수 레짐 (FV 미국판) — us_daily.parquet의 spy_close(S&P500 프록시)·
+#   qqq_close(나스닥100 프록시) 재사용(신규 fetch 불필요). 동일 MA20/MA60+RV 규칙.
+# ─────────────────────────────────────────────────────────
+US_DAILY_PARQUET = DATA_DIR / "us_market" / "us_daily.parquet"
+
+
+def _us_index_close(col: str) -> pd.Series | None:
+    try:
+        df = pd.read_parquet(US_DAILY_PARQUET)
+        if isinstance(df.index, pd.DatetimeIndex):
+            df = df.sort_index()
+        else:
+            # 방어(렌즈1 #3): writer가 RangeIndex+date컬럼으로 바뀌어도 시간순 보장
+            date_col = next((c for c in df.columns if "date" in c.lower()), None)
+            if date_col is not None:
+                df = df.assign(_d=pd.to_datetime(df[date_col], errors="coerce")).sort_values("_d")
+        if col not in df.columns:
+            return None
+        return pd.to_numeric(df[col], errors="coerce").dropna()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("[index_regime] us_daily 로드 실패: %s", e)
+        return None
+
+
+def sp500_regime() -> dict:
+    s = _us_index_close("spy_close")
+    return _regime_from_close(s) if s is not None else dict(_DEFAULT)
+
+
+def nasdaq_regime() -> dict:
+    s = _us_index_close("qqq_close")
+    return _regime_from_close(s) if s is not None else dict(_DEFAULT)
