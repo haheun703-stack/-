@@ -34,6 +34,11 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+try:  # 프로젝트 규칙(새 스크립트 load_dotenv 필수) — yfinance 비밀키 불필요하나 관례 준수
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:  # noqa: BLE001
+    pass
 DATA_DIR = PROJECT_ROOT / "data"
 CACHE_DIR = DATA_DIR / "us_market" / "per_band"
 

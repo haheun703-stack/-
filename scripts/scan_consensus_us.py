@@ -43,6 +43,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
+# 프로젝트 규칙(새 스크립트 load_dotenv 필수). yfinance는 비밀키 불필요하나 관례 준수·향후 안전.
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:  # noqa: BLE001
+    pass
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
