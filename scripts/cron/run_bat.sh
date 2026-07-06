@@ -333,6 +333,12 @@ case "$BAT" in
     #   수주이력: 공급계약 공시 본문(계약금액/매출대비) 파싱 누적 → O축 입력(50%+만 단기가점, 7/4 이벤트스터디 607건 근거)
     run_py scripts/collect_contract_history.py
     run_py scripts/run_future_value.py
+    # G5.7: 미국판 미래가치 엔진 shadow (7/6, 퐝가님 배선결정) — 컨센서스(yfinance)+역사PER밴드+
+    #   leader_cycle(G5.5 US) 사이클. ★④ 백테스트 밴드 무효(t=0.61·reliable -0.61%p 역전)→밴드·저PER
+    #   무가점(관측태그), 실점수=사이클. 컨센서스 괴리축은 역사목표가 부재로 백테스트 불가 →
+    #   러너가 매일 목표가 스냅샷 축적(consensus_us_history.jsonl) → 20거래일 forward 검증.
+    #   관측 전용 data/shadow/future_value_us.json — 매매 미배선·shadow_unvalidated·graceful exit0. VPS venv.
+    run_py_long scripts/run_future_value_us.py
     # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
     #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
     #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
