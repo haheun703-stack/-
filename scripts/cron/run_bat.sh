@@ -321,6 +321,10 @@ case "$BAT" in
     #   "게임1(타이밍) 폐기→지수보유 기준선" 확정 반영. 5개 전략 페이퍼 공통 벤치마크.
     #   관측·매매무관 · data/paper_portfolio_indexbh.json. 데이터=update_benchmarks(G1).
     run_py scripts/paper_index_buyhold.py
+    # 파도타기 페이퍼 (7번째 트랙, 7/7 퐝가님 비전 "오르면 레버리지") — V3b 레짐 방향성 KR+US.
+    #   BULL=레버2x/CAUTION=지수/BEAR·CRISIS=현금. 인버스는 phase12 기각으로 미포함(지수BH 관측만).
+    #   V3b 실전검증 겸용 · 관측 전용 · 실주문 0 · data/paper_portfolio_wave_{kr,us}.json
+    run_py scripts/paper_wave_rider.py
     # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
     #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
     #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.
