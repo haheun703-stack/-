@@ -727,6 +727,14 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         except Exception:
             days_held = 0
 
+        # MAX_HOLD는 원진입일 기준 — 리밸런스 유지가 entry_date를 리셋해도 영구회피 불가
+        # (7/4 발견 정책구멍 픽스: 메인A SK네트웍스가 유지 리셋으로 MAX_HOLD 회피하다 -6.7% 손절)
+        try:
+            orig_days_held = (pd.Timestamp(today_str)
+                              - pd.Timestamp(pos.get("orig_entry_date", entry_date))).days
+        except Exception:
+            orig_days_held = days_held
+
         # 수급 시그널 → 손절선/보유일 동적 조정
         sd = get_supply_demand_signal(ticker)
         adj_stop = STOP_LOSS_PCT + sd["stop_adj"]       # 예: -7% + 2% = -5% (완화)
@@ -782,8 +790,8 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         elif pnl_pct >= TRAILING_ACTIVATE_PCT:
             pos["trailing_active"] = True
 
-        # 6. 최대 보유일 초과 (수급 보정 적용)
-        elif days_held >= adj_max_hold:
+        # 6. 최대 보유일 초과 (수급 보정 적용 · 원진입일 기준)
+        elif orig_days_held >= adj_max_hold:
             exit_reason = "MAX_HOLD"
 
         # 7. 수급 이탈 경고: 수익 중인데 쌍매도 → 조기 매도
@@ -861,13 +869,19 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
 
     for ticker, pos in list(pf["positions"].items()):
         if ticker in recommended_tickers:
-            # 이번 주도 추천 → 유지, 보유일 리셋
-            logger.info("[REBALANCE] %s 유지 (이번 주 추천 포함)", pos["name"])
-            pos["entry_date"] = today_str
-            pos["trailing_active"] = False
-            pos["t1_sold"] = False
-            pos["peak_price"] = pos["avg_price"]
-            continue
+            # 차단 전략(SCAN/AA) 잔존 포지션은 유지 대상에서 제외 → 아래 청산 경로로
+            if pos.get("strategy") == "SCAN" or pos.get("grade") == "AA":
+                logger.info("[REBALANCE] %s 유지 거부 — 차단 전략 잔존분(%s/%s)",
+                            pos["name"], pos.get("strategy", ""), pos.get("grade", ""))
+            else:
+                # 이번 주도 추천 → 유지, 보유일 리셋 (MAX_HOLD는 orig_entry_date 원천 계산)
+                logger.info("[REBALANCE] %s 유지 (이번 주 추천 포함)", pos["name"])
+                pos.setdefault("orig_entry_date", pos.get("entry_date", today_str))
+                pos["entry_date"] = today_str
+                pos["trailing_active"] = False
+                pos["t1_sold"] = False
+                pos["peak_price"] = pos["avg_price"]
+                continue
 
         # 미추천 → 전량 청산
         price, _ = get_latest_price(ticker)
