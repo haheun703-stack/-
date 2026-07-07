@@ -339,6 +339,11 @@ case "$BAT" in
     #   러너가 매일 목표가 스냅샷 축적(consensus_us_history.jsonl) → 20거래일 forward 검증.
     #   관측 전용 data/shadow/future_value_us.json — 매매 미배선·shadow_unvalidated·graceful exit0. VPS venv.
     run_py_long scripts/run_future_value_us.py
+    # G5.8: 시나리오 v1 러너 (7/7, 퐝가님 "우리만의 시나리오" 지시) — 레짐(V0+V3b 섀도)·모드·
+    #   FV 워치리스트를 data/shadow/scenario_v1.json 기록. 행동표=docs/scenario_v1.md.
+    #   ★약세장 수급 팔로우 기각(bear_accumulation -2.22%p t=-9.6)·수급=BULL 확인지표로 재정의.
+    #   관측 전용·실주문 0·graceful exit0. V3b divergence 축적 → 레짐 교체 결정 근거(퐝가님).
+    run_py scripts/run_scenario_v1.py
     # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
     #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
     #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
