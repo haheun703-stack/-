@@ -1,5 +1,5 @@
 # 지수 Buy&Hold 벤치마크 바스켓 (6번째 페이퍼 트랙 = 영구 기준선)
-# 국내외 지수·ETF·레버리지 17종. 6/22 소급 매수 후 영구보유.
+# 국내외 지수·ETF·레버리지·인버스 20종. 6/22 소급 매수 후 영구보유.
 # 수집: scripts/update_benchmarks.py (yfinance) → data/benchmark/{key}.csv
 # 평가: scripts/paper_index_buyhold.py → data/paper_portfolio_indexbh.json
 #
@@ -23,6 +23,11 @@ benchmarks:
   SOXX:           {symbol: "SOXX",      name: "SOXX 반도체",           mult: 1, market: US, group: SEMI_US}
   SMH:            {symbol: "SMH",       name: "SMH 반도체",            mult: 1, market: US, group: SEMI_US}
   SOXL:           {symbol: "SOXL",      name: "SOXL 반도체",           mult: 3, market: US, group: SEMI_US}
+  # 인버스 관측 3종 (7/7 퐝가님 결정) — phase12 백테스트 기각 후 "만약 샀다면" 실측 기록용.
+  # ★관측 전용: 음의 복리·저가 슬리피지(252670 현가 60~80원대) 실증 데이터 축적이 목적.
+  KODEX_INV:      {symbol: "114800.KS", name: "KODEX인버스",           mult: -1, market: KR, group: KOSPI200}
+  KODEX_INV2X:    {symbol: "252670.KS", name: "KODEX200선물인버스2X",    mult: -2, market: KR, group: KOSPI200}
+  KODEX_KQINV:    {symbol: "251340.KS", name: "KODEX코스닥150선물인버스", mult: -1, market: KR, group: KOSDAQ150}
 
 # 기준선 시작일 (모든 벤치마크 공통 소급 시작 = 메인A 페이퍼 시작일)
 baseline_start: "2026-06-22"

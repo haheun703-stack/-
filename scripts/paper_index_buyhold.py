@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """지수 Buy&Hold 페이퍼 (6번째 트랙) — 영구 벤치마크 기준선
 
-config/benchmarks.yaml의 17종(국내외 지수·ETF·레버리지)을 baseline_start(6/22)에
+config/benchmarks.yaml의 20종(국내외 지수·ETF·레버리지·인버스)을 baseline_start(6/22)에
 매수 후 영구보유했다고 가정 → 각 지수의 정규화(6/22=자본금) 수익률 시계열 계산.
 5개 전략 페이퍼의 공통 벤치마크("시장/레버리지를 그냥 들고 있었다면").
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """벤치마크 지수/ETF 시계열 수집 — 지수 Buy&Hold 페이퍼(6번째)용
 
-config/benchmarks.yaml의 17종(국내외 지수·ETF·레버리지)을 yfinance로 증분 수집
+config/benchmarks.yaml의 20종(국내외 지수·ETF·레버리지·인버스)을 yfinance로 증분 수집
 → data/benchmark/{key}.csv (Date, close). BAT-D에서 update_kospi_index.py 옆에 배선.
 
 사용:
