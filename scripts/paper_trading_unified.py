@@ -790,8 +790,9 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         elif pnl_pct >= TRAILING_ACTIVATE_PCT:
             pos["trailing_active"] = True
 
-        # 6. 최대 보유일 초과 (수급 보정 적용 · 원진입일 기준)
-        elif orig_days_held >= adj_max_hold:
+        # 6. 최대 보유일 초과 — 통상은 entry_date(유지 리셋 반영), 단 원진입일 기준
+        #    절대상한(4x)으로 리밸런스 유지의 무한 연장 차단 (유지 자체는 정상 동작 보존)
+        elif days_held >= adj_max_hold or orig_days_held >= MAX_HOLDING_DAYS * 4:
             exit_reason = "MAX_HOLD"
 
         # 7. 수급 이탈 경고: 수익 중인데 쌍매도 → 조기 매도
@@ -818,6 +819,7 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "strategy": pos.get("strategy", ""),
                 "grade": pos.get("grade", ""),
                 "entry_date": pos.get("entry_date", ""),
+                "orig_entry_date": pos.get("orig_entry_date", pos.get("entry_date", "")),
                 "exit_date": today_str,
                 "avg_price": round(avg_price),
                 "exit_price": round(sell_price),
@@ -869,8 +871,9 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
 
     for ticker, pos in list(pf["positions"].items()):
         if ticker in recommended_tickers:
-            # 차단 전략(SCAN/AA) 잔존 포지션은 유지 대상에서 제외 → 아래 청산 경로로
-            if pos.get("strategy") == "SCAN" or pos.get("grade") == "AA":
+            # 차단 전략 잔존분만 유지 제외 — 진입차단 집합(SCAN AND AA)과 동일하게.
+            # (OR로 넓히면 진입 허용되는 SCAN/A·AI_BRAIN/AA가 금요일 청산→같은날 재매수 공회전)
+            if pos.get("strategy") == "SCAN" and pos.get("grade") == "AA":
                 logger.info("[REBALANCE] %s 유지 거부 — 차단 전략 잔존분(%s/%s)",
                             pos["name"], pos.get("strategy", ""), pos.get("grade", ""))
             else:
@@ -905,6 +908,7 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
             "strategy": pos.get("strategy", ""),
             "grade": pos.get("grade", ""),
             "entry_date": pos.get("entry_date", ""),
+            "orig_entry_date": pos.get("orig_entry_date", pos.get("entry_date", "")),
             "exit_date": today_str,
             "avg_price": round(pos["avg_price"]),
             "exit_price": round(sell_price),

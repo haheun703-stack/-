@@ -118,11 +118,22 @@ def main() -> int:
         "validation": "shadow_observation_only",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
-    with open(HIST, "a", encoding="utf-8") as f:
-        f.write(json.dumps({k: out[k] for k in
-                            ("asof", "kospi_close", "regime_v0", "regime_v3b", "mode",
-                             "v3b_divergence")}, ensure_ascii=False) + "\n")
+    tmp = OUT.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(OUT)
+    # history: 같은 asof 재실행 시 append 스킵 (divergence 빈도 통계 오염 방지)
+    dup = False
+    if HIST.exists():
+        try:
+            last = HIST.read_text(encoding="utf-8").strip().rsplit("\n", 1)[-1]
+            dup = last and json.loads(last).get("asof") == reg["asof"]
+        except Exception:  # noqa: BLE001
+            dup = False
+    if not dup:
+        with open(HIST, "a", encoding="utf-8") as f:
+            f.write(json.dumps({k: out[k] for k in
+                                ("asof", "kospi_close", "regime_v0", "regime_v3b", "mode",
+                                 "v3b_divergence")}, ensure_ascii=False) + "\n")
     logger.info("[시나리오v1] %s | V0=%s V3b=%s%s | 모드=%s — %s",
                 reg["asof"], reg["regime_v0"], reg["regime_v3b"],
                 " ★divergence" if out["v3b_divergence"] else "", mode, action)

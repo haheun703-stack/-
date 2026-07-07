@@ -121,9 +121,12 @@ def _load_book(market: str) -> dict:
 
 
 def _save_book(market: str, book: dict) -> None:
+    """원자적 저장 — 중도 kill 시 JSON 파손으로 이후 실행이 조용히 죽는 것 방지."""
     path = os.path.join(DATA, f"paper_portfolio_wave_{market}.json")
-    with open(path, "w", encoding="utf-8") as f:
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(book, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
 
 
 def run_market(market: str, today: str) -> None:
@@ -133,7 +136,16 @@ def run_market(market: str, today: str) -> None:
         print(f"[wave:{market}] 오늘({today}) 이미 기록 — 스킵")
         return
     reg, asof = v3b_regime(_index_series(market))
-    target = POLICY.get(reg, "CASH")
+    pos = book.get("position")
+    cur = pos["target"] if pos else "CASH"
+
+    # ★fail-safe: 지수 데이터 실패(asof='?') 시 CAUTION 폴백으로 매수하지 않도록 현상 유지
+    data_ok = asof != "?"
+    if data_ok:
+        target = POLICY.get(reg, "CASH")
+    else:
+        reg, target = "DATA_FAIL", cur
+        print(f"[wave:{market}] 지수 데이터 실패 — 매매 스킵(현상 유지)")
 
     # 체결가 준비 (stale 가드)
     prices = {}
@@ -145,10 +157,7 @@ def run_market(market: str, today: str) -> None:
             fresh = False
         prices[tkey] = pr
 
-    pos = book.get("position")
-    cur = pos["target"] if pos else "CASH"
-
-    if fresh and target != cur:
+    if fresh and data_ok and target != cur:
         # 청산
         if pos:
             px = prices[pos["target"]][0]
@@ -174,10 +183,15 @@ def run_market(market: str, today: str) -> None:
     elif not fresh:
         print(f"[wave:{market}] 가격 stale(>{STALE_DAYS}일) — 매매 스킵, 평가만")
 
-    # 일일 평가
+    # 일일 평가 — 보유 자산 가격이 없으면 왜곡값(현금만) 기록 대신 오늘 기록 스킵
     pos = book.get("position")
+    if pos and not prices.get(pos["target"]):
+        print(f"[wave:{market}] 보유 {pos['name']} 가격 없음 — 오늘 평가 기록 스킵")
+        book["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        _save_book(market, book)
+        return
     equity = book["cash"]
-    if pos and prices.get(pos["target"]):
+    if pos:
         equity += pos["qty"] * prices[pos["target"]][0]
     book["daily_equity"].append({"date": today, "equity": round(equity),
                                  "regime": reg, "asof": asof,
