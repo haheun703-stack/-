@@ -879,6 +879,13 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
             else:
                 # 이번 주도 추천 → 유지, 보유일 리셋 (MAX_HOLD는 orig_entry_date 원천 계산)
                 logger.info("[REBALANCE] %s 유지 (이번 주 추천 포함)", pos["name"])
+                # 규칙D-a 관찰 (TRADING_PRINCIPLES 7/9): 유지 포지션의 손익을 기록해
+                # "손실 먼저 잘라라" 우선순위와 현행(추천목록 기준)의 성과 비교 데이터 축적.
+                # 청산측 손익은 closed_trades에 이미 기록됨 — 유지측만 여기서 보강. 로그만.
+                _p, _ = get_latest_price(ticker)
+                if _p > 0:
+                    logger.info("[규칙D-a 관찰] 유지 %s pnl %+.2f%%",
+                                pos["name"], (_p / pos["avg_price"] - 1) * 100)
                 pos.setdefault("orig_entry_date", pos.get("entry_date", today_str))
                 pos["entry_date"] = today_str
                 pos["trailing_active"] = False
@@ -1106,6 +1113,14 @@ def update_equity(pf: dict, today_str: str) -> float:
         else:
             equity += pos["avg_price"] * pos["qty"]
 
+    # ── 규칙A 관찰 (TRADING_PRINCIPLES 7/9 — 주식:현금 7:3, 매매 무개입·기록만) ──
+    #    "이 규칙이 있었다면 오늘 주문이 어떻게 조정됐을지"의 판단 데이터 축적.
+    stock_ratio = round((equity - pf["capital"]) / equity * 100, 1) if equity > 0 else 0.0
+    if stock_ratio > 75:
+        logger.info("[규칙A 관찰] 주식비중 %.1f%% > 75%% — 규칙 있었다면 리밸런싱 후보 리포트", stock_ratio)
+    elif stock_ratio > 70:
+        logger.info("[규칙A 관찰] 주식비중 %.1f%% > 70%% — 규칙 있었다면 신규매수 축소/거부", stock_ratio)
+
     # 중복 날짜 방지
     pf["daily_equity"] = [e for e in pf["daily_equity"] if e["date"] != today_str]
     pf["daily_equity"].append({
@@ -1113,6 +1128,7 @@ def update_equity(pf: dict, today_str: str) -> float:
         "equity": round(equity),
         "capital": round(pf["capital"]),
         "positions": len(pf["positions"]),
+        "stock_ratio": stock_ratio,  # 규칙A 관찰 필드 (7/9 추가, 소비자 없음·순수 기록)
     })
 
     # MDD
