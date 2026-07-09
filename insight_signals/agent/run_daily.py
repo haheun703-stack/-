@@ -128,6 +128,13 @@ def main() -> int:
         top_n=int(pcfg["top_n"]),
         min_score=float(pcfg["min_score"]),
     )
+
+    # dry-run은 저장하지 않는다 (7/9 검수 픽스: picks_log는 승격 판단 데이터셋 —
+    # 수동 dry-run 픽이 섞이면 forward 성과 통계가 오염됨. 실측 사례로 픽스.)
+    if args.dry_run:
+        log.info("dry-run 완료 — 시그널 %d건, 픽 %d건 (저장 생략)", len(signals), len(picks))
+        return 0
+
     for p in picks:
         p.price_at_pick = price_client.get_price(p.stock_code, kis_client=kis)
 
