@@ -1,0 +1,68 @@
+# 인사이트 시그널 (소수의견 관찰 모듈) 설정
+# 값을 지우면 코드 내 기본값 사용. 이 파일은 config/ 폴더에 위치.
+
+# ── 뉴스 키워드 (인터뷰: "사상 최대" + "게임 체인저"가 핵심) ─────────
+keywords:
+  - "사상 최대"
+  - "역대 최대"
+  - "사상 최고"
+  - "최대 실적"
+  - "게임 체인저"
+  - "게임체인저"
+  - "사상 첫"
+
+negative_keywords:      # 제목에 있으면 제외 (악재성 '사상 최대' 필터)
+  - "적자"
+  - "급락"
+  - "하한가"
+  - "리콜"
+  - "소송"
+
+rss_feeds:              # [이름, URL]
+  # ★7/9 검수 픽스: 한경 피드 3종은 WAF 403 (헤더 무관 전 조합 차단 실측) → 교체.
+  #   구글뉴스 검색형은 키워드를 검색 단계에서 선필터링 (이 모듈 설계와 최적 궁합).
+  - ["구글뉴스_사상최대", "https://news.google.com/rss/search?q=%22%EC%82%AC%EC%83%81%20%EC%B5%9C%EB%8C%80%22%20%EC%8B%A4%EC%A0%81&hl=ko&gl=KR&ceid=KR:ko"]
+  - ["구글뉴스_게임체인저", "https://news.google.com/rss/search?q=%22%EA%B2%8C%EC%9E%84%EC%B2%B4%EC%9D%B8%EC%A0%80%22%20OR%20%22%EA%B2%8C%EC%9E%84%20%EC%B2%B4%EC%9D%B8%EC%A0%80%22&hl=ko&gl=KR&ceid=KR:ko"]
+  - ["동아경제", "https://rss.donga.com/economy.xml"]
+  - ["연합경제", "https://www.yna.co.kr/rss/economy.xml"]
+
+use_naver_mainnews: true
+naver_pages: 2
+
+# 일반명사와 겹쳐 오탐이 잦은 상장사명 (필요 시 추가)
+# 7/9 dry-run 실측 오탐 추가: YTN(자사보도)·NEW(일반단어)·라임(무관기사)·카스(인명)·다린(일반명사)
+name_blacklist: ["한국", "서울", "대상", "동양", "한일", "경남", "무학", "금강", "전방", "선진", "화성", "국보", "신원", "YTN", "NEW", "라임", "카스", "다린"]
+min_name_len: 2
+
+# ── DART 임원·주요주주 매수 ────────────────────────────────────────
+dart:
+  days_back: 3          # 최근 N일 공시 조회
+
+# ── 역발상 수급 (KIS) ──────────────────────────────────────────────
+flow:
+  days: 3               # 최근 N영업일 순매수 합산
+  kis_base_url: "https://openapi.koreainvestment.com:9443"  # 모의: openapivts...:29443
+  # ★ 검수 결론(7/9): 기존 봇(kis_investor_adapter._issue_token)은 파일 캐시 없이
+  #   프로세스 내 메모리 캐시만 사용 → 공유할 파일 캐시가 존재하지 않음.
+  #   따라서 빈값(자체 캐시 data/insight_signals/kis_token.json 사용)이 정답.
+  #   cron 19:10 실행은 BAT-D(16:30~18:53) 토큰 발급 시간대와 겹치지 않아 충돌 없음.
+  kis_token_cache: ""
+
+# ── .env 변수명 매핑 (기존 프로젝트 변수명이 다르면 여기만 수정) ────
+env_names:
+  dart_key: "DART_API_KEY"
+  kis_app_key: "KIS_APP_KEY"
+  kis_app_secret: "KIS_APP_SECRET"
+
+# ── 합산 픽 ────────────────────────────────────────────────────────
+picks:
+  top_n: 5
+  min_score: 0.25
+  weights:              # 소스별 가중치 (합 1.0 권장)
+    news_keyword: 0.30
+    dart_insider: 0.45  # 인터뷰: "가장 확실한 전통 시그널"
+    flow_contrarian: 0.25
+
+paths:
+  data_dir: "data/insight_signals"
+  log_dir: "logs"
