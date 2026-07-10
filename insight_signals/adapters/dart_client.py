@@ -57,8 +57,14 @@ class DartClient:
         """{corp_code: {"name": 회사명, "stock_code": 6자리 or ""}} (상장사 위주 사용)"""
         cache = os.path.join(self.cache_dir, "corp_map.json")
         if os.path.exists(cache) and time.time() - os.path.getmtime(cache) < CORP_CACHE_TTL_SEC:
-            with open(cache, encoding="utf-8") as f:
-                return json.load(f)
+            try:
+                with open(cache, encoding="utf-8") as f:
+                    return json.load(f)
+            except ValueError:
+                # 손상 캐시 자가치유 (7/10 검수 픽스: 잘린 JSON이 fresh mtime으로
+                # 남으면 TTL 7일간 DART+뉴스매핑 전멸) — 삭제 후 재다운로드
+                log.warning("corp_map.json 손상 — 캐시 폐기 후 재다운로드")
+                os.remove(cache)
 
         log.info("DART corpCode.xml 다운로드 (회사 목록 갱신)")
         r = self._session.get(
@@ -77,8 +83,11 @@ class DartClient:
             if corp_code:
                 out[corp_code] = {"name": name, "stock_code": stock}
 
-        with open(cache, "w", encoding="utf-8") as f:
+        # 원자 쓰기 (7/10 검수 픽스: dump 도중 kill/디스크풀 → 잘린 캐시 방지)
+        tmp = cache + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False)
+        os.replace(tmp, cache)
         log.info("회사 목록 %d건 캐시 저장", len(out))
         return out
 
@@ -177,7 +186,7 @@ class DartClient:
                     reporter=row.get("repror", ""),
                     position=(row.get("isu_exctv_ofcps") or row.get("isu_main_shrholdr") or "").strip(),
                     change_qty=qty,
-                    change_reason=(row.get("sp_stock_lmp_irds_rate") or ""),
+                    change_rate=(row.get("sp_stock_lmp_irds_rate") or ""),
                 )
             )
         return out

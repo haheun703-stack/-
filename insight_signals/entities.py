@@ -31,7 +31,9 @@ class InsiderFiling:
     reporter: str           # 보고자 (임원명 등)
     position: str           # 직위/구분
     change_qty: int         # 특정증권 증감 수량 (+매수 / -매도)
-    change_reason: str      # 증감 사유 (장내매수 등)
+    change_rate: str        # 증감 비율 문자열 (7/10 검수: 구명 change_reason엔
+                            # '사유'가 아니라 rate가 저장되고 있어 실명으로 정정.
+                            # 취득 '사유' 필드는 v2에서 별도 확보 예정)
 
 
 @dataclass

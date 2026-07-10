@@ -106,12 +106,39 @@ def match_keywords(articles, keywords, negative_keywords=None) -> list:
     return out
 
 
+def _is_word_char(ch: str) -> bool:
+    return ch.isalnum() or ("가" <= ch <= "힣")
+
+
+def _name_in_text(name: str, text: str) -> bool:
+    """종목명 매칭. 3글자 이하 이름은 단어 경계 필수 (7/10 검수 픽스).
+
+    구버전 부분일치는 '레이저→레이', '송호성→호성', '태양광→태양' 류의
+    체계적 오탐을 만들었음 (7/9 실측 5건+).
+    """
+    if len(name) >= 4:
+        return name in text
+    start = 0
+    while True:
+        i = text.find(name, start)
+        if i < 0:
+            return False
+        before = text[i - 1] if i > 0 else " "
+        after_i = i + len(name)
+        after = text[after_i] if after_i < len(text) else " "
+        if not _is_word_char(before) and not _is_word_char(after):
+            return True
+        start = i + 1
+
+
 def map_stocks(articles, name_to_code: dict, blacklist=None, min_name_len: int = 2) -> list:
     """기사 제목에 등장하는 상장사명을 찾아 (code, name) 매핑.
 
     - 긴 이름 우선 매칭 ("LG에너지솔루션"이 "LG"보다 먼저)
     - 겹치는 짧은 이름은 긴 이름에 포함되면 제외
     - blacklist: 일반명사와 겹치는 회사명 제외 목록
+    - 매칭 전에 제목 꼬리의 매체명(" - 매체")을 절단 (구글뉴스 형식,
+      매체명이 상장사명과 겹치는 오탐 방지 — 7/10 검수 픽스)
     """
     blacklist = set(blacklist or [])
     names = sorted(
@@ -121,9 +148,10 @@ def map_stocks(articles, name_to_code: dict, blacklist=None, min_name_len: int =
     )
     out = []
     for a in articles:
+        body = a.title.rsplit(" - ", 1)[0] if " - " in a.title else a.title
         found, consumed = [], []
         for n in names:
-            if n in a.title and not any(n in c for c in consumed):
+            if _name_in_text(n, body) and not any(n in c for c in consumed):
                 found.append((name_to_code[n], n))
                 consumed.append(n)
             if len(found) >= 3:  # 제목 하나에서 과도한 매핑 방지

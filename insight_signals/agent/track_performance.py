@@ -20,8 +20,7 @@ _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from insight_signals.adapters import price_client                  # noqa: E402
-from insight_signals.adapters.kis_flow_client import KisFlowClient  # noqa: E402
+from insight_signals.adapters import history_client                # noqa: E402
 from insight_signals.agent import _env                              # noqa: E402
 from insight_signals.use_cases import evaluate                      # noqa: E402
 
@@ -36,21 +35,13 @@ def main() -> int:
 
     data_dir = os.path.join(root, cfg["paths"]["data_dir"])
     picks_log = os.path.join(data_dir, "picks_log.csv")
-    env_names = cfg["env_names"]
-    kis = KisFlowClient(
-        app_key=os.environ.get(env_names["kis_app_key"], ""),
-        app_secret=os.environ.get(env_names["kis_app_secret"], ""),
-        cache_dir=data_dir,
-        base_url=cfg["flow"]["kis_base_url"],
-        token_cache_path=cfg["flow"].get("kis_token_cache", ""),
-    )
+    perf_ledger = os.path.join(data_dir, "perf_ledger.csv")
 
-    result = evaluate.evaluate(
-        picks_log, price_fn=lambda c: price_client.get_price(c, kis_client=kis)
-    )
+    # v0.2.1: horizon 도달일 종가 고정 방식 (일봉 히스토리 사용, KIS 불필요)
+    result = evaluate.evaluate(picks_log, perf_ledger, closes_fn=history_client.daily_closes)
     rows = result["rows"]
-    if not rows:
-        log.info("평가할 픽이 아직 없습니다 (최소 +5일 경과 필요)")
+    if not rows and not result["summary"]:
+        log.info("평가할 픽이 아직 없습니다 (최소 +5거래일 경과 필요)")
         return 0
 
     today = dt.date.today().isoformat()
