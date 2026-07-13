@@ -35,6 +35,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import csv
 import logging
 import sqlite3
 import sys
@@ -60,6 +61,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("collect_investor_kis")
 
 DB_PATH = PROJECT_ROOT / "data" / "investor_flow" / "investor_daily.db"
+UNIVERSE_PATH = PROJECT_ROOT / "data" / "universe.csv"  # 신규상장 편입 사각지대 해소용 (A-1)
 
 # 한글 라벨 → (KIS raw 필드 접두사, 순매수 수량 필드 suffix)
 # 대부분 {p}_ntby_qty 이나 사모/기타법인은 {p}_ntby_vol — KIS 명세 차이 (실측 2026-06-27)
@@ -195,12 +197,40 @@ def upsert(conn: sqlite3.Connection, ticker: str, target: set[str], recs: list[t
     conn.commit()
 
 
+def load_target_tickers(conn: sqlite3.Connection, uni_path: Path) -> list[tuple]:
+    """수집 대상 종목 = DB 기존 종목 ∪ 유니버스 (A-1: 신규상장 사각지대 해소).
+
+    기존엔 `distinct ticker from investor_daily`(=과거 수집된 종목)만 대상이라,
+    유니버스에 새로 편입된 신규상장주가 영구 누락됐다. 유니버스를 합집합해 편입한다.
+    DB에 이미 있으면 DB 종목명 우선(정확), 유니버스에만 있으면 신규 편입.
+    """
+    rows = {t: n for t, n in
+            conn.execute("select distinct ticker, name from investor_daily").fetchall()}
+    added = 0
+    if uni_path.exists():
+        with open(uni_path, encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                tk = (row.get("ticker") or "").strip()
+                if tk.isdigit():
+                    tk = tk.zfill(6)
+                if tk and tk not in rows:
+                    rows[tk] = (row.get("name") or "").strip()
+                    added += 1
+        if added:
+            logger.info("유니버스 신규 편입: %d종목 (DB 미존재분 수집대상 추가) — A-1", added)
+    else:
+        logger.warning("유니버스 파일 없음 (%s) — DB 종목만 수집", uni_path)
+    return sorted(rows.items())
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="KIS 종목별 투자자 세분(11주체) 수급 → investor_daily.db")
     ap.add_argument("--days", type=int, default=3, help="최근 N거래일 (기본 3, 최대 30, --dates 없을 때)")
     ap.add_argument("--dates", nargs="*", default=None, help="대상 거래일 명시 (YYYYMMDD ...)")
     ap.add_argument("--limit", type=int, default=0, help="앞 N종목만 (테스트용, 0=전체)")
     ap.add_argument("--db", type=str, default=str(DB_PATH), help="investor_daily.db 경로")
+    ap.add_argument("--universe", type=str, default=str(UNIVERSE_PATH),
+                    help="유니버스 CSV 경로 (신규상장 편입용, A-1)")
     args = ap.parse_args()
 
     db_path = Path(args.db)
@@ -232,8 +262,7 @@ def main() -> int:
     matched_dates: set[str] = set()  # 실제 적재된 거래일 (M-2 검증용)
     aborted = False
     try:
-        tickers = [(t, n) for t, n in
-                   conn.execute("select distinct ticker, name from investor_daily").fetchall()]
+        tickers = load_target_tickers(conn, Path(args.universe))
         if args.limit:
             tickers = tickers[:args.limit]
         logger.info("대상 %d종목 — KIS 11주체 세분 수급 수집 (TR=%s)", len(tickers), TR_ID)
