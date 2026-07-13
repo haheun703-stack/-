@@ -104,7 +104,8 @@ class DataHealthCheck:
             self._check_pipeline_errors,    # 15. 파이프라인 에러율
             self._check_kospi_index,        # 16. KOSPI 인덱스
             self._check_investor_flow,      # 17. 투자자수급
-            # 18, 19 폐기: supply_demand/snapshots는 BAT에서 제거됨 (2026-04-06)
+            self._check_supply_coverage,    # 18. 수급 커버리지 급감 (대량 수집장애 방어)
+            # 구 18/19(supply_demand/snapshots) 폐기: BAT에서 제거됨 (2026-04-06)
         ]
 
         results = []
@@ -652,7 +653,49 @@ class DataHealthCheck:
         except Exception as e:
             return CheckResult("투자자수급", False, f"파싱 오류: {e}")
 
-    # ─── 18. 수급이면분석 (supply_demand/) 신선도 ───
+    # ─── 18. 투자자수급 커버리지 급감 감지 ───
+
+    def _check_supply_coverage(self) -> CheckResult:
+        """investor_daily.db 최신 거래일 종목수 vs 직전 거래일 — 대량 급감 감지.
+
+        _check_supply_stocks(샘플30·임계80)가 못 잡는 KIS 대량 수집장애를 방어한다.
+        일상 변동(거래정지 등락 ±수%)은 통과, 15%p 초과 급감만 경고(오탐 최소).
+        신선도는 _check_investor_flow가 별도로 보므로 여기선 커버리지 급락만 본다.
+        """
+        db = self.data_dir / "investor_flow" / "investor_daily.db"
+        if not db.exists():
+            return CheckResult("수급커버리지", False, "investor_daily.db 없음")
+        try:
+            con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=30)
+            try:
+                dates = [r[0] for r in con.execute(
+                    "SELECT DISTINCT date FROM investor_daily ORDER BY date DESC LIMIT 2")]
+                if not dates:
+                    return CheckResult("수급커버리지", False, "데이터 없음")
+                today_n = con.execute(
+                    "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?",
+                    (dates[0],)).fetchone()[0]
+                if len(dates) < 2:
+                    return CheckResult("수급커버리지", True,
+                                       f"{dates[0]} {today_n}종목 (직전일 없음)",
+                                       count=today_n)
+                prev_n = con.execute(
+                    "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?",
+                    (dates[1],)).fetchone()[0]
+            finally:
+                con.close()
+        except Exception as e:  # noqa: BLE001
+            return CheckResult("수급커버리지", False, f"DB 조회 오류: {e}")
+
+        drop = (prev_n - today_n) / prev_n if prev_n else 0.0
+        passed = drop <= 0.15
+        state = "정상" if passed else f"급감 {drop * 100:.1f}% — KIS 수집장애 의심!"
+        return CheckResult(
+            "수급커버리지", passed,
+            f"{dates[0]} {today_n}종목 (직전 {dates[1]} {prev_n}) {state}",
+            count=today_n, total=prev_n)
+
+    # ─── (폐기) 수급이면분석 (supply_demand/) 신선도 ───
 
     def _check_supply_demand(self) -> CheckResult:
         """supply_demand/ JSON의 최신 날짜가 3영업일(≈5달력일) 이내인지.
