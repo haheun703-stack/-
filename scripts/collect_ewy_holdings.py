@@ -119,7 +119,9 @@ def parse_ewy_csv(raw_csv: str, name_map: dict[str, str]) -> dict:
             parts = line.split(",", 1)
             if len(parts) >= 2:
                 as_of = parts[1].strip().strip('"')
-        if line.startswith("Ticker,Name"):
+        # 헤더 검출 완화 (7/14 검수): 따옴표 래핑("Ticker","Name")·BOM·앞뒤 공백 허용
+        norm = line.replace('"', "").lstrip("﻿").strip()
+        if norm.startswith("Ticker,Name"):
             header_idx = i
             break
 
@@ -745,8 +747,10 @@ def main():
     as_of = parsed["as_of"]
 
     if not holdings:
-        logger.error("[EWY] 파싱 결과 0종목 — 중단")
-        return
+        # 조용한 실패 방지 (7/14 검수): exit 1로 FAIL_COUNT 반영 → 헬스체크/텔레그램 가시화.
+        # (기존 return은 exit 0이라 run_bat.sh가 실패로 못 셈 → prev 미보존·업로드 누락이 무신호)
+        logger.error("[EWY] 파싱 결과 0종목 — 중단 (exit 1)")
+        sys.exit(1)
 
     # 3. 전일 비교
     prev_data = load_previous(DATA_DIR)
