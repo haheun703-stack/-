@@ -1,5 +1,0 @@
-=== [단계4 Step1] paper_warmup_daily --open --top 9 (LIVE_TRADING_MODE=paper) 1회 수동 트리거 ===
-실행 종료 RC=0
---- 마지막 25줄 ---
-[OPEN] 2026-05-30 시초가 기록 — 6건 → warmup_20260530.json
-2026-05-30 17:51:50,830 [INFO] 텔레그램 메시지 전송 완료 (1건)
