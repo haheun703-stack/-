@@ -114,9 +114,14 @@ def parse_log(date_str: str) -> dict | None:
     m = re.search(rf"target={date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}.*errors=(\d+)", update_log)
     metrics["update_daily_errors"] = int(m.group(1)) if m else None
 
-    # FAIL_COUNT 추출 (BAT-D 완료 라인에서)
-    m = re.search(r"=== BAT-D 완료 \(실패: (\d+)건\)", content)
-    metrics["bat_d_fails"] = int(m.group(1)) if m else None
+    # FAIL_COUNT: run_bat.sh가 env(BAT_D_FAIL_COUNT)로 전달 (헬스체크는 완료 echo보다 먼저
+    # 실행돼 로그의 "=== BAT-D 완료 (실패:N건) ===" 를 못 읽으므로 env 우선, 없으면 로그 폴백).
+    env_fails = os.getenv("BAT_D_FAIL_COUNT")
+    if env_fails is not None and env_fails.strip().isdigit():
+        metrics["bat_d_fails"] = int(env_fails.strip())
+    else:
+        m = re.search(r"=== BAT-D 완료 \(실패: (\d+)건\)", content)
+        metrics["bat_d_fails"] = int(m.group(1)) if m else None
 
     return metrics
 
@@ -208,8 +213,10 @@ def format_report(today: dict, alerts: list[tuple[str, str]]) -> str:
     dt = today["date"]
     bat_min = today.get("bat_d_min", "?")
     kis_err = today.get("kis_errors", 0)
-    upd_err = today.get("update_daily_errors", "?")
-    fails = today.get("bat_d_fails", "?")
+    upd_err = today.get("update_daily_errors")
+    upd_err = "?" if upd_err is None else upd_err
+    fails = today.get("bat_d_fails")
+    fails = "?" if fails is None else fails
 
     lines = [
         f"🤖 *BAT-D 자동 건강 점검 ({dt})*",

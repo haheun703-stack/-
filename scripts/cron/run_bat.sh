@@ -354,9 +354,6 @@ case "$BAT" in
     run_py_long scripts/upload_valuation_band.py --write
     run_py scripts/upload_two_layer.py --write
     run_py scripts/data_health_check.py
-    # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 알림 (5/16 추가)
-    # 평균 +15%/+30% 또는 절대값 140분+, KIS 에러 5건+, 등 자동 감지
-    run_py scripts/bat_d_health_check.py
     # G7: 약세장 알파 학습 + 인버스 시그널 (5/16 추가, 5/12~15 약세장 검증 기반)
     # KOSPI MA20 -2%↓ 시 알파 종목 자동 추출 + 외인 5일 매도 -3조+ 시 인버스 알림
     run_py scripts/bear_market_alpha_runner.py
@@ -366,6 +363,10 @@ case "$BAT" in
     # G8.5: 추세추종 스캐너 (6/22, 풀백 스캐너의 빈칸=강추세주 발굴) — 신호 생성/관측만, 자동매매 OFF
     run_py scripts/trend_follow_scanner.py
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
+    # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 (5/16) — ★BAT-D 마지막 스텝으로 이동(7/14 검수).
+    #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
+    #   (소요시간 이상감지는 임계값 재보정 필요로 별도 트랙). KIS 에러 5건+ 등 자동 감지.
+    BAT_D_FAIL_COUNT="$FAIL_COUNT" run_py scripts/bat_d_health_check.py
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
     run_py scripts/fetch_theme_intel.py

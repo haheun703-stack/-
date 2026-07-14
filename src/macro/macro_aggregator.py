@@ -785,6 +785,10 @@ class MacroAggregator:
     def _summarize_positions(self, d) -> str:
         if isinstance(d, dict):
             positions = d.get("positions", [])
+            # paper_portfolio.json의 positions는 ticker를 키로 하는 dict → 리스트로 정규화.
+            # (dict를 슬라이스하면 unhashable type: 'slice'로 매 실행 포트폴리오 섹션이 통째 누락)
+            if isinstance(positions, dict):
+                positions = list(positions.values())
             capital = d.get("capital", "?")
         elif isinstance(d, list):
             positions = d
