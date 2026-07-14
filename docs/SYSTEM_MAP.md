@@ -1,6 +1,22 @@
 # Quantum Master v13.3 — 시스템 전체 맵
 
-> 최종 업데이트: 2026-03-07 (v13.3-arm-expansion)
+> 최종 업데이트: 2026-07-14 (부분 갱신) · 원 작성 2026-03-07 (v13.3-arm-expansion)
+>
+> ⚠️ **부분 스테일 문서**: 아래 아키텍처·레짐 개념은 대체로 유효하나, **자동화 스케줄의 정본은
+> `CLAUDE.md` + `scripts/cron/run_bat.sh`**(AWS Lightsail VPS cron, 단계 A~HEALTH, 평일 06:10~18:45)입니다.
+> "Windows Task Scheduler / .bat"는 로컬 개발 잔재입니다. 3/7 이후 대변경은 아래 "최근 대변경" 참조.
+
+---
+
+## 최근 대변경 (2026-03-07 이후 — 본문 미반영분)
+
+- **수급 소스 전환 (6/22~27)**: KRX → **KIS 종목별 11세분**(`FHPTJ04160001`; 금투·연기금·외인·기관합계·개인·기타 등) → `data/investor_flow/investor_daily.db`. 국적별(차이나머니) 피드는 별도·비핵심.
+- **future_value 엔진 (7/4~6)**: 컨센서스+역사PER밴드+수주파서 통합 밸류(KR G5.6 / US shadow). 저PER축만 견고.
+- **insight_signals v0.2.x (7/9)**: 임원매수·사상최대 실적 등 인사이트 시그널(관찰 전용, cron 19:10 별도 엔트리).
+- **scenario_v1 (7/7)**: 우리만의 레짐·모드·워치리스트 러너(관측). 수급=BULL 확인지표로 재정의(약세장 선행 기각).
+- **페이퍼 7트랙 + 벤치**: 메인A·블루칩·B·NAV·밸류피보·파도타기KR(V3b)·파도타기US + 지수 Buy&Hold 20종.
+- **자동화 = VPS cron**(`scripts/cron/run_bat.sh`). `quantum-scheduler.service`는 5/27 의도적 비활성. 대시보드 = **flowx.kr**(ppwangga 폐기).
+- BAT-D 실제 스텝 수는 아래 "29단계" 표기보다 큼(~100 run_py). 정확한 실행 순서는 항상 `run_bat.sh`가 정본.
 
 ---
 
@@ -37,7 +53,7 @@
                      ▼                              ▼
               ┌─────────────┐              ┌──────────────┐
               │  텔레그램    │              │ JARVIS 대시보드│
-              │  알림/승인   │              │ ppwangga.com │
+              │  알림/승인   │              │ flowx.kr │
               └─────────────┘              └──────────────┘
 ```
 
@@ -212,7 +228,7 @@
 
 ---
 
-## 11. JARVIS 대시보드 — ppwangga.com
+## 11. JARVIS 대시보드 — flowx.kr
 
 - **Flask 앱**: `website/flask_app.py`
 - **템플릿**: `website/templates/dashboard.html` (~1,300줄)
@@ -241,7 +257,7 @@
 
 ---
 
-## BAT 스케줄 (Windows Task Scheduler)
+## BAT 스케줄 (⚠️ 아래 .bat 표는 로컬 개발용 레거시 — 운영 정본은 VPS cron `scripts/cron/run_bat.sh`)
 
 | BAT | 시간 | 역할 | 단계 수 |
 |-----|------|------|--------|
@@ -378,7 +394,7 @@ src/
 - Anthropic Claude API (claude-sonnet-4-5 / claude-haiku-4-5)
 - 한국투자증권 API (mojito2) — REAL 모드
 - yfinance (US 시장 데이터)
-- Flask (ppwangga.com 대시보드)
+- Flask (flowx.kr 대시보드)
 - Playwright (HTML→PNG 변환)
 - SQLite (US-KR 패턴DB, 일일 아카이브)
 
