@@ -365,7 +365,7 @@ case "$BAT" in
     # 유니버스 전체 재구성은 BAT-H(11:30 장중)로 이동 — pykrx 장후 불안정 해결
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 (5/16) — ★BAT-D 마지막 스텝으로 이동(7/14 검수).
     #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
-    #   (소요시간 이상감지는 임계값 재보정 필요로 별도 트랙). KIS 에러 5건+ 등 자동 감지.
+    #   소요시간: 당일이면 현재시각 폴백으로 계산 복원 + 절대임계 175분 재보정(7/16 실측 133~150분 기반).
     BAT_D_FAIL_COUNT="$FAIL_COUNT" run_py scripts/bat_d_health_check.py
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)

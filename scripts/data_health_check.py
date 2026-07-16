@@ -309,8 +309,25 @@ class DataHealthCheck:
 
     # ─── 5. 원자재 가격 ───
 
+    COMMODITY_STALE_DAYS = 7  # 원자재는 일일 시세 — 7일 넘으면 STALE
+
+    def _days_old(self, date_str: str) -> int | None:
+        """YYYY-MM-DD(또는 YYYYMMDD) 문자열 → 오늘 대비 경과일. 파싱 불가면 None."""
+        s = str(date_str)[:10].strip()
+        if not s:
+            return None
+        fmt = "%Y%m%d" if "-" not in s else "%Y-%m-%d"
+        try:
+            return (self.today - datetime.strptime(s, fmt).date()).days
+        except ValueError:
+            return None
+
     def _check_commodities(self) -> CheckResult:
-        """liquidity_signal 또는 commodity_prices.json에서 원자재 확인."""
+        """liquidity_signal 또는 commodity_prices.json에서 원자재 확인.
+
+        신선도 게이트 (7/16): 날짜가 7일 초과 과거면 FAIL —
+        기존엔 3/31 유물(commodity_prices.json, 수집기 아카이브됨)이 ✅ 통과했음.
+        """
         # 1차: liquidity_signal.json
         signal_path = self.data_dir / "liquidity_cycle" / "liquidity_signal.json"
         if signal_path.exists():
@@ -318,10 +335,14 @@ class DataHealthCheck:
                 data = json.loads(signal_path.read_text(encoding="utf-8"))
                 commodities = data.get("commodities", data.get("asset_prices", {}))
                 if commodities and len(commodities) > 0:
-                    d = str(data.get("date", ""))
+                    d = str(data.get("date", ""))[:10]
+                    gap = self._days_old(d)
+                    if gap is not None and gap > self.COMMODITY_STALE_DAYS:
+                        return CheckResult("원자재", False,
+                                           f"{len(commodities)}종 STALE({d}, {gap}일전)")
                     return CheckResult("원자재", True,
-                                       f"{len(commodities)}종 (날짜: {d[:10]})")
-                # wti/gold 등 직접 키로 있는 경우
+                                       f"{len(commodities)}종 (날짜: {d})")
+                # wti/gold 등 직접 키로 있는 경우 (날짜 없음 — 판정 불가, 통과 유지)
                 details = []
                 for key in ["wti", "gold", "copper", "dxy"]:
                     val = data.get(key)
@@ -332,7 +353,7 @@ class DataHealthCheck:
             except Exception:
                 pass  # fallthrough to commodity_prices.json
 
-        # 2차: commodity_prices.json (Alpha Vantage)
+        # 2차: commodity_prices.json (Alpha Vantage — 수집기 3/31 아카이브, 유물 가능성 높음)
         commodity_path = self.data_dir / "commodity_prices.json"
         if commodity_path.exists():
             try:
@@ -341,6 +362,11 @@ class DataHealthCheck:
                 d = data.get("date", "")
                 if commodities:
                     names = [f"{k}={v.get('price', '?')}" for k, v in commodities.items()]
+                    gap = self._days_old(d)
+                    if gap is not None and gap > self.COMMODITY_STALE_DAYS:
+                        return CheckResult("원자재", False,
+                                           f"STALE({d}, {gap}일전): {', '.join(names[:4])}"
+                                           " — 수집기 아카이브 유물, 파이프라인 결정 필요")
                     return CheckResult("원자재", True,
                                        f"{', '.join(names[:4])} ({d})")
             except Exception:

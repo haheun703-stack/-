@@ -379,6 +379,23 @@ FLOWX_TABLES = [
     ("dashboard_relay", "date"),
 ]
 
+# 헬스체크(18:45:01)가 BAT-D 후반 업로드(18:45:30~18:46:16)보다 먼저 도는 4종 —
+# 당일 미갱신이 정상 순서라 직전 거래일(주말 포함 3일 내)까지 신선 인정 (7/16 순서 오탐 제거).
+LATE_UPLOAD_TABLES = {
+    "quant_fib_scanner",
+    "quant_alpha_scanner",
+    "quant_market_ranking",
+    "quant_bluechip_checkup",
+}
+
+
+def _days_behind(date_iso: str) -> int:
+    """TODAY 대비 며칠 뒤처졌는지. 파싱 실패 시 큰 값(=stale 취급)."""
+    try:
+        return (date.today() - date.fromisoformat(date_iso)).days
+    except ValueError:
+        return 999
+
 
 def check_flowx_all_tables() -> tuple:
     """14개 FLOWX 테이블 전수 검증. (fresh_list, stale_list) 반환."""
@@ -404,6 +421,8 @@ def check_flowx_all_tables() -> tuple:
                 latest = str(result.data[0][date_col])[:10]
                 if latest == TODAY:
                     fresh.append(table)
+                elif table in LATE_UPLOAD_TABLES and _days_behind(latest) <= 3:
+                    fresh.append(table)  # 업로드가 체크보다 늦는 정상 순서 — D-1(주말 3일) 허용
                 else:
                     stale.append(f"{table}({latest})")
             else:

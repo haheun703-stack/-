@@ -91,6 +91,13 @@ def download_ewy_csv() -> str:
     }
     resp = requests.get(EWY_URL, headers=headers, timeout=30)
     resp.raise_for_status()
+    # 봇차단 감지 (7/16): iShares US가 비브라우저 다운로드를 전역 차단(5/15 마지막 성공) —
+    # UA·쿠키·TLS(Chrome 위장) 전부 무효, CSV 대신 상품페이지 HTML(200)을 반환.
+    # 이 경우 "헤더를 찾을 수 없음"으로 오진되지 않게 진짜 원인을 남기고 중단.
+    head = resp.text[:512].lstrip("﻿ \r\n\t").lower()
+    if head.startswith("<!doctype") or head.startswith("<html"):
+        logger.error("[EWY] 소스 차단: CSV 대신 HTML 반환 (iShares 봇차단) — 대체소스 결정 대기")
+        sys.exit(1)
     logger.info("[EWY] CSV 다운로드 완료: %d chars", len(resp.text))
     return resp.text
 

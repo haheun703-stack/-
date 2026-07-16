@@ -250,7 +250,12 @@ def main():
 
     print(f"\n[FLOWX] 업로드 완료:")
     print(f"  ETF={'OK' if ok1 else 'FAIL'} ({len(etf_rows)}건)")
-    print(f"  외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
+    # 외국인 0건 = 소스(nationality_signal) stale 가드의 의도된 스킵 (flowx_uploader.py 신선도 가드)
+    # — FAIL로 찍으면 매일 오해 유발 (7/16). 진짜 실패(업로드 에러)만 FAIL.
+    if not foreign_filtered:
+        print("  외국인=SKIP (소스 stale — 단타봇 외인 소스 재연결 대기)")
+    else:
+        print(f"  외국인={'OK' if ok2 else 'FAIL'} ({len(foreign_filtered)}건)")
     print(f"  AI추천={'OK' if ok3 else 'FAIL'} ({len(ai_rows)}건)")
     print(f"  시나리오={'OK' if ok4 else 'FAIL'} ({sc_count}개 시나리오)")
     print(f"  자비스={'OK' if ok5 else 'FAIL'} ({n_picks}종목)")

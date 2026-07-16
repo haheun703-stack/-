@@ -54,7 +54,10 @@ MARKERS = [
 THRESHOLDS = {
     "bat_d_duration_pct": 1.15,         # 평균 +15% 이상 → WARN
     "bat_d_duration_pct_crit": 1.30,    # 평균 +30% 이상 → CRIT
-    "bat_d_duration_abs_crit": 140,     # 절대값 140분 이상 → CRIT (history 부족 시 fallback)
+    # 절대값 CRIT (history 부족 시 fallback) — 7/16 실측 재보정:
+    # 6/23~7/15 17일 실소요 133.5~150.5분(평균 140.4) → 기존 140은 절반의 날 오경보.
+    # 최대치 +16% 여유 = 175분 (행 같은 진짜 폭주만 감지).
+    "bat_d_duration_abs_crit": 175,
     "kis_errors_critical": 5,            # 5건 이상
     "update_daily_errors_warn": 5,       # 5건 이상
 }
@@ -98,10 +101,16 @@ def parse_log(date_str: str) -> dict | None:
     }
 
     # 단계별 소요 시간 (분)
-    if "bat_d_start" in found and "bat_d_done" in found:
-        metrics["bat_d_min"] = round(
-            (_to_sec(found["bat_d_done"]) - _to_sec(found["bat_d_start"])) / 60, 1
-        )
+    # 완료마커 폴백 (7/16): 본 스크립트는 BAT-D 마지막 스텝이라 "=== BAT-D 완료" echo가
+    # 아직 로그에 없음 → 당일 실행이면 현재시각 ≈ 완료시각으로 대체 (그간 "?분"의 원인).
+    if "bat_d_start" in found:
+        end_ts = found.get("bat_d_done")
+        if not end_ts and date_str == date.today().strftime("%Y%m%d"):
+            end_ts = datetime.now().strftime("%H:%M:%S")
+        if end_ts:
+            metrics["bat_d_min"] = round(
+                (_to_sec(end_ts) - _to_sec(found["bat_d_start"])) / 60, 1
+            )
 
     # 에러 카운트
     metrics["kis_errors"] = (
