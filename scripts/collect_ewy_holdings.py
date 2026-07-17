@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
-"""EWY(iShares MSCI South Korea ETF) 보유종목 수집 + 비중 변화 분석.
+"""MSCI Korea 지수 구성종목 수집 + 비중 변화 분석.
 
-외인 패시브 자금 흐름 선행 감지:
-- 비중 증가 종목 = 패시브 외인 매수 유입 → 선취매 후보
-- 비중 감소 종목 = 패시브 외인 매도 압력 → 매수 회피
+★소스 전환 (7/17, B-11): iShares EWY CSV → KIS ETF 구성종목시세(FHKST121600C0).
+  - iShares US가 5/15부터 비브라우저 다운로드 전역 차단(봇차단) → 두 달 조용히 사망.
+  - 대체 = TIGER MSCI Korea TR(310970) 구성종목 상위 30 + 비중(etf_cnfg_issu_rlim).
+  - 시그널 의미 변경: "EWY 패시브 외인 자금" → "MSCI Korea 지수 구성 추종".
+    비중 변동·편입/편출은 동일 지수 계열이라 유효, 단 상위 30종목 한정(기존 ~90).
+  - 파일명·테이블(quant_ewy_holdings)·출력 스키마는 유지 (웹/FLOWX 재배선 불필요).
+
+패시브 자금 흐름 선행 감지:
+- 비중 증가 종목 = 패시브 매수 유입 → 선취매 후보
+- 비중 감소 종목 = 패시브 매도 압력 → 매수 회피
 - 신규 편입 = 강제 매수 발생 → 단기 수급 폭탄
 - 편출 = 강제 매도 → 급락 리스크
 
@@ -16,7 +23,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import io
 import json
 import logging
 import os
@@ -46,13 +52,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-EWY_URL = (
-    "https://www.ishares.com/us/products/239681/"
-    "ishares-msci-south-korea-etf/1467271812596.ajax"
-    "?fileType=csv&fileName=EWY_holdings&dataType=fund"
-)
+# KIS ETF 구성종목시세 소스 (7/17 전환 — 상단 모듈 docstring 참조)
+SOURCE_ID = "TIGER_MSCI_KR_TR_310970"
+SOURCE_LABEL = "TIGER MSCI Korea TR(310970)"
+KIS_ETF_TICKER = "310970"
 DATA_DIR = PROJECT_ROOT / "data" / "ewy"
 UNIVERSE_CSV = PROJECT_ROOT / "data" / "universe.csv"
+SECTOR_MAP_CSV = PROJECT_ROOT / "data" / "universe" / "sector_map.csv"
 
 # 비중 변동 분류 기준
 LARGE_THRESHOLD = 0.30   # 0.3%p 이상
@@ -77,115 +83,90 @@ def load_name_map() -> dict[str, str]:
 
 
 # ─────────────────────────────────────────────
-# 2. CSV 다운로드 + 파싱
+# 2. KIS ETF 구성종목 조회 (구 iShares CSV 다운로드 대체 — 7/17 B-11)
 # ─────────────────────────────────────────────
 
-def download_ewy_csv() -> str:
-    """iShares 공식 CSV 다운로드."""
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
-        )
-    }
-    resp = requests.get(EWY_URL, headers=headers, timeout=30)
-    resp.raise_for_status()
-    # 봇차단 감지 (7/16): iShares US가 비브라우저 다운로드를 전역 차단(5/15 마지막 성공) —
-    # UA·쿠키·TLS(Chrome 위장) 전부 무효, CSV 대신 상품페이지 HTML(200)을 반환.
-    # 이 경우 "헤더를 찾을 수 없음"으로 오진되지 않게 진짜 원인을 남기고 중단.
-    head = resp.text[:512].lstrip("﻿ \r\n\t").lower()
-    if head.startswith("<!doctype") or head.startswith("<html"):
-        logger.error("[EWY] 소스 차단: CSV 대신 HTML 반환 (iShares 봇차단) — 대체소스 결정 대기")
-        sys.exit(1)
-    logger.info("[EWY] CSV 다운로드 완료: %d chars", len(resp.text))
-    return resp.text
+def load_sector_map() -> dict[str, str]:
+    """data/universe/sector_map.csv → ticker→업종 매핑 (portfolio_cfo와 동일 소스)."""
+    sector_map: dict[str, str] = {}
+    if SECTOR_MAP_CSV.exists():
+        try:
+            with open(SECTOR_MAP_CSV, encoding="utf-8-sig") as f:
+                for row in csv.DictReader(f):
+                    ticker = row.get("ticker", row.get("종목코드", "")).strip()
+                    sector = row.get("sector", row.get("업종", "")).strip()
+                    if ticker:
+                        sector_map[ticker] = sector
+        except Exception as e:
+            logger.warning("[EWY] sector_map 로드 실패: %s", e)
+    return sector_map
 
 
-def parse_ewy_csv(raw_csv: str, name_map: dict[str, str]) -> dict:
-    """CSV 파싱 → 구조화된 dict 반환.
+def _to_float(val, default: float = 0.0) -> float:
+    try:
+        return float(str(val).replace(",", ""))
+    except (ValueError, TypeError):
+        return default
 
-    Returns:
-        {
-            "as_of": "May 01, 2026",
-            "holdings": [
-                {"code": "000660", "name": "SK하이닉스", "name_en": "SK HYNIX INC",
-                 "weight": 22.78, "sector": "Information Technology",
-                 "quantity": 5382737, "market_value": 4667071050.43},
-                ...
-            ]
-        }
+
+def fetch_kis_holdings(name_map: dict[str, str], date_str: str) -> dict:
+    """KIS ETF 구성종목시세(FHKST121600C0)로 MSCI Korea 구성종목 조회.
+
+    TIGER MSCI Korea TR(310970) 상위 30종목 + 비중(etf_cnfg_issu_rlim).
+    반환 스키마는 구 parse_ewy_csv와 동일 (다운스트림 무변경).
     """
-    lines = raw_csv.strip().split("\n")
+    from src.adapters.kis_investor_adapter import (
+        _issue_token, KIS_BASE_URL, KIS_APP_KEY, KIS_APP_SECRET,
+    )
 
-    # 메타데이터에서 기준일 추출
-    as_of = ""
-    header_idx = -1
-    for i, line in enumerate(lines):
-        if line.startswith("Fund Holdings as of"):
-            parts = line.split(",", 1)
-            if len(parts) >= 2:
-                as_of = parts[1].strip().strip('"')
-        # 헤더 검출 완화 (7/14 검수): 따옴표 래핑("Ticker","Name")·BOM·앞뒤 공백 허용
-        norm = line.replace('"', "").lstrip("﻿").strip()
-        if norm.startswith("Ticker,Name"):
-            header_idx = i
-            break
+    token = _issue_token()
+    url = f"{KIS_BASE_URL}/uapi/etfetn/v1/quotations/inquire-component-stock-price"
+    headers = {
+        "content-type": "application/json; charset=utf-8",
+        "authorization": f"Bearer {token}",
+        "appkey": KIS_APP_KEY,
+        "appsecret": KIS_APP_SECRET,
+        "tr_id": "FHKST121600C0",
+    }
+    params = {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": KIS_ETF_TICKER,
+        "FID_COND_SCR_DIV_CODE": "11216",
+    }
+    resp = requests.get(url, headers=headers, params=params, timeout=15)
+    data = resp.json()
 
-    if header_idx < 0:
-        logger.error("[EWY] CSV 헤더를 찾을 수 없음")
-        return {"as_of": as_of, "holdings": []}
+    if data.get("rt_cd") != "0":
+        logger.error("[EWY] KIS 구성종목 조회 실패: %s", data.get("msg1", ""))
+        return {"as_of": date_str, "holdings": []}
 
-    # 데이터 행 파싱
-    data_text = "\n".join(lines[header_idx:])
-    reader = csv.DictReader(io.StringIO(data_text))
-
+    sector_map = load_sector_map()
     holdings = []
-    for row in reader:
-        ticker = (row.get("Ticker") or "").strip().strip('"')
-        asset_class = (row.get("Asset Class") or "").strip().strip('"')
-
-        # 주식만 필터 (현금, 선물, 기타 제외)
-        if asset_class != "Equity":
-            continue
-        # 6자리 숫자 종목코드만
+    for r in data.get("output2", []):
+        ticker = (r.get("stck_shrn_iscd") or "").strip()
         if not ticker or not ticker.isdigit() or len(ticker) != 6:
             continue
-
-        weight_str = (row.get("Weight (%)") or "0").strip().strip('"')
-        quantity_str = (row.get("Quantity") or "0").strip().strip('"').replace(",", "")
-        mv_str = (row.get("Market Value") or "0").strip().strip('"').replace(",", "")
-
-        try:
-            weight = float(weight_str)
-            quantity = int(float(quantity_str))
-            market_value = float(mv_str)
-        except (ValueError, TypeError):
+        weight = _to_float(r.get("etf_cnfg_issu_rlim"))
+        if weight <= 0:
             continue
-
-        name_en = (row.get("Name") or "").strip().strip('"')
-        name_kr = name_map.get(ticker, name_en)
-        sector = (row.get("Sector") or "").strip().strip('"')
-
+        name_kis = (r.get("hts_kor_isnm") or "").strip()
         holdings.append({
             "code": ticker,
-            "name": name_kr,
-            "name_en": name_en,
+            "name": name_map.get(ticker, name_kis),  # 종목명=universe.csv 최우선
+            "name_en": name_kis,
             "weight": round(weight, 2),
-            "sector": sector,
-            "quantity": quantity,
-            "market_value": round(market_value, 2),
+            "sector": sector_map.get(ticker, ""),
+            "quantity": 0,  # KIS 구성종목시세는 수량 미제공
+            "market_value": _to_float(r.get("etf_cnfg_issu_avls")),
         })
 
-    # 비중 내림차순 정렬
     holdings.sort(key=lambda x: x["weight"], reverse=True)
-
-    # 순위 부여
     for rank, h in enumerate(holdings, 1):
         h["rank"] = rank
 
-    logger.info("[EWY] 파싱 완료: %d종목 (기준일: %s)", len(holdings), as_of)
-    return {"as_of": as_of, "holdings": holdings}
+    logger.info("[EWY] KIS 구성종목 조회 완료: %d종목 (%s, 기준 %s)",
+                len(holdings), SOURCE_LABEL, date_str)
+    return {"as_of": date_str, "holdings": holdings}
 
 
 # ─────────────────────────────────────────────
@@ -193,11 +174,20 @@ def parse_ewy_csv(raw_csv: str, name_map: dict[str, str]) -> dict:
 # ─────────────────────────────────────────────
 
 def load_previous(data_dir: Path) -> dict | None:
-    """가장 최근 저장 데이터 로드 (비교용)."""
+    """가장 최근 저장 데이터 로드 (비교용).
+
+    소스 전환 가드 (7/17): prev가 다른 소스(구 iShares EWY, 5/15 유물)면 None —
+    소스가 다른 비중끼리 비교하면 가짜 변동/편입편출이 대량 발생.
+    """
     prev_path = data_dir / "ewy_holdings_prev.json"
     if prev_path.exists():
         with open(prev_path, encoding="utf-8") as f:
-            return json.load(f)
+            prev = json.load(f)
+        if prev.get("source") != SOURCE_ID:
+            logger.info("[EWY] prev 소스 상이(%s) — 첫 실행으로 간주, 비교 스킵",
+                        prev.get("source", "구 iShares EWY"))
+            return None
+        return prev
     return None
 
 
@@ -396,11 +386,12 @@ def save_results(
         json.dump(result, f, ensure_ascii=False, indent=2)
     logger.info("[EWY] 저장: %s", out_path)
 
-    # prev 파일 갱신 (다음 비교용)
+    # prev 파일 갱신 (다음 비교용) — source 필드로 소스 전환 가드 지원
     prev_path = data_dir / "ewy_holdings_prev.json"
     prev_save = {
         "date": date_str,
         "as_of": as_of,
+        "source": SOURCE_ID,
         "holdings": holdings,
     }
     with open(prev_path, "w", encoding="utf-8") as f:
@@ -682,7 +673,7 @@ def send_telegram_report(date_str: str, as_of: str, holdings: list[dict],
     if not token or not chat_id:
         return
 
-    lines = [f"[EWY] MSCI Korea 보유종목 ({as_of})"]
+    lines = [f"[MSCI KR] 지수 구성종목 — {SOURCE_LABEL} ({as_of})"]
     lines.append(f"보유 {len(holdings)}종목\n")
 
     # TOP 10
@@ -747,16 +738,15 @@ def main():
     # 1. 종목명 매핑 로드
     name_map = load_name_map()
 
-    # 2. CSV 다운로드 + 파싱
-    raw_csv = download_ewy_csv()
-    parsed = parse_ewy_csv(raw_csv, name_map)
+    # 2. KIS 구성종목 조회 (7/17 소스 전환 — 구 iShares CSV는 봇차단으로 사망)
+    parsed = fetch_kis_holdings(name_map, date_str)
     holdings = parsed["holdings"]
     as_of = parsed["as_of"]
 
     if not holdings:
         # 조용한 실패 방지 (7/14 검수): exit 1로 FAIL_COUNT 반영 → 헬스체크/텔레그램 가시화.
         # (기존 return은 exit 0이라 run_bat.sh가 실패로 못 셈 → prev 미보존·업로드 누락이 무신호)
-        logger.error("[EWY] 파싱 결과 0종목 — 중단 (exit 1)")
+        logger.error("[EWY] 구성종목 0종목 — 중단 (exit 1)")
         sys.exit(1)
 
     # 3. 전일 비교
