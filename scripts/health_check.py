@@ -305,12 +305,18 @@ def check_investor_db() -> bool:
 
 
 def rerun_investor_collect() -> bool:
-    """collect_investor_bulk --core-only + sync_investor_to_csv 재실행."""
-    log("[INVESTOR-RERUN] collect_investor_bulk --core-only 시작")
+    """수급 재수집 + sync_investor_to_csv 재실행.
+
+    7/17 (B-8): 복구 경로가 폐기된 collect_investor_bulk(pykrx/KRX 로그인 —
+    CD007 계정잠금 원인, 6/27 KIS 자급 전환으로 폐기)를 그대로 부르고 있었음.
+    수급 0행인 날 헬스체크가 계정잠금을 유발할 수 있는 라이브 리스크 →
+    현행 정본 collect_investor_kis.py(--days 1)로 재배선.
+    """
+    log("[INVESTOR-RERUN] collect_investor_kis --days 1 시작")
     try:
         r1 = subprocess.run(
-            [str(PY), "scripts/collect_investor_bulk.py", "--core-only"],
-            capture_output=True, text=True, timeout=600, cwd=str(QM),
+            [str(PY), "scripts/collect_investor_kis.py", "--days", "1"],
+            capture_output=True, text=True, timeout=3600, cwd=str(QM),
         )
         if r1.returncode != 0:
             log(f"[INVESTOR-RERUN] collect 실패 (exit={r1.returncode})")
