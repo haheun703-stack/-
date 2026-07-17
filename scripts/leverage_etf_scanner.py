@@ -107,37 +107,27 @@ def fetch_etf_ohlcv(etf_code: str, days: int = 120) -> pd.DataFrame | None:
 
 
 def get_etf_flow(etf_code: str, df: pd.DataFrame, days: int = 5) -> tuple[float, float, float, float]:
-    """pykrx ETF 수급 조회 (5일 누적 + 당일)."""
-    try:
-        from pykrx import stock as pykrx_stock
+    """ETF 수급 조회 (5일 누적 + 당일) — KIS 재배선 (7/17 B-6).
 
-        trading_dates = [d.strftime("%Y%m%d") for d in df.index[-max(days + 2, 7):]]
-        if len(trading_dates) < 2:
+    구 pykrx get_etf_trading_volume_and_value는 KRX 응답 변경으로 ETF 티커
+    해석('isin')부터 실패 — 매일 21건 경고 + 수급축 0점 고정이던 축 부활.
+    KIS FHKST01010900은 ETF 코드 지원 실측 (122630 외인5일 +1,635.8억).
+    df 인자는 시그니처 호환용으로 유지 (KIS가 거래일 30일치를 직접 반환).
+    """
+    try:
+        from src.adapters.kis_investor_adapter import fetch_investor_by_ticker
+
+        flow = fetch_investor_by_ticker(etf_code)
+        if flow.empty:
             return 0, 0, 0, 0
 
-        recent = trading_dates[-days:]
-        fromdate = recent[0]
-        todate = recent[-1]
-        col = ("거래대금", "순매수")
+        f5 = float(flow["외국인합계"].tail(days).sum()) / 1e8
+        i5 = float(flow["기관합계"].tail(days).sum()) / 1e8
+        last = flow.iloc[-1]
+        ft = float(last["외국인합계"]) / 1e8
+        it = float(last["기관합계"]) / 1e8
 
-        df5 = pykrx_stock.get_etf_trading_volume_and_value(fromdate, todate, etf_code)
-        f5, i5 = 0.0, 0.0
-        if df5 is not None and not df5.empty and len(df5) >= 13:
-            seg = df5.iloc[:13]
-            if "외국인" in seg.index and col in seg.columns:
-                f5 = float(seg.loc["외국인", col]) / 1e8
-                i5 = float(seg.loc["기관합계", col]) / 1e8
-
-        time.sleep(0.2)
-
-        df1 = pykrx_stock.get_etf_trading_volume_and_value(todate, todate, etf_code)
-        ft, it = 0.0, 0.0
-        if df1 is not None and not df1.empty and len(df1) >= 13:
-            seg = df1.iloc[:13]
-            if "외국인" in seg.index and col in seg.columns:
-                ft = float(seg.loc["외국인", col]) / 1e8
-                it = float(seg.loc["기관합계", col]) / 1e8
-
+        time.sleep(0.2)  # KIS rate limit 완충 (기존 호출 간격 유지)
         return round(f5, 1), round(i5, 1), round(ft, 1), round(it, 1)
     except Exception as e:
         logger.warning("수급 조회 실패 (%s): %s", etf_code, e)

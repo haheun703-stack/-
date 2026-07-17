@@ -170,52 +170,34 @@ def calc_returns(close: pd.Series) -> tuple[float, float, float]:
 
 
 # ─────────────────────────────────────────────
-# 수급 조회 (pykrx)
+# 수급 조회 (KIS — 7/17 B-6 재배선)
 # ─────────────────────────────────────────────
 
 def get_etf_investor_flow(
     etf_code: str, trading_dates: list[str], days: int = 5
 ) -> tuple[float, float, float, float]:
-    """pykrx get_etf_trading_volume_and_value(from, to, ticker)로 ETF 수급 조회.
+    """KIS FHKST01010900으로 ETF 수급 조회 (7/17 B-6 재배선).
 
-    Args:
-        etf_code: ETF 종목코드 (6자리)
-        trading_dates: parquet에서 추출한 최근 거래일 리스트 (YYYYMMDD)
-        days: 누적 일수
+    구 pykrx get_etf_trading_volume_and_value는 KRX 응답 변경으로 ETF 티커
+    해석('isin')부터 실패 — 매일 경고 + 수급 0 고정. KIS는 ETF 코드 지원 실측.
+    trading_dates 인자는 시그니처 호환용 유지 (KIS가 거래일 30일치 직접 반환).
 
     Returns: (foreign_5d_억, inst_5d_억, foreign_today_억, inst_today_억)
     """
     try:
-        from pykrx import stock as pykrx_stock
+        from src.adapters.kis_investor_adapter import fetch_investor_by_ticker
 
-        recent = trading_dates[-days:]
-        if not recent:
+        flow = fetch_investor_by_ticker(etf_code)
+        if flow.empty:
             return 0, 0, 0, 0
 
-        fromdate = recent[0]
-        todate = recent[-1]
-        col = ("거래대금", "순매수")
+        f5 = float(flow["외국인합계"].tail(days).sum()) / 1e8
+        i5 = float(flow["기관합계"].tail(days).sum()) / 1e8
+        last = flow.iloc[-1]
+        ft = float(last["외국인합계"]) / 1e8
+        it = float(last["기관합계"]) / 1e8
 
-        # 5일 합산 (기간 합계)
-        df5 = pykrx_stock.get_etf_trading_volume_and_value(fromdate, todate, etf_code)
-        f5, i5 = 0.0, 0.0
-        if df5 is not None and not df5.empty and len(df5) >= 13:
-            seg = df5.iloc[:13]
-            if "외국인" in seg.index and col in seg.columns:
-                f5 = float(seg.loc["외국인", col]) / 1e8
-                i5 = float(seg.loc["기관합계", col]) / 1e8
-
-        time.sleep(0.2)
-
-        # 당일 (마지막 거래일)
-        df1 = pykrx_stock.get_etf_trading_volume_and_value(todate, todate, etf_code)
-        ft, it = 0.0, 0.0
-        if df1 is not None and not df1.empty and len(df1) >= 13:
-            seg = df1.iloc[:13]
-            if "외국인" in seg.index and col in seg.columns:
-                ft = float(seg.loc["외국인", col]) / 1e8
-                it = float(seg.loc["기관합계", col]) / 1e8
-
+        time.sleep(0.2)  # KIS rate limit 완충 (기존 호출 간격 유지)
         return round(f5, 1), round(i5, 1), round(ft, 1), round(it, 1)
     except Exception as e:
         logger.warning("수급 조회 실패 (%s): %s", etf_code, e)
