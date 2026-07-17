@@ -133,8 +133,19 @@ def fetch_kis_holdings(name_map: dict[str, str], date_str: str) -> dict:
         "FID_INPUT_ISCD": KIS_ETF_TICKER,
         "FID_COND_SCR_DIV_CODE": "11216",
     }
-    resp = requests.get(url, headers=headers, params=params, timeout=15)
-    data = resp.json()
+
+    # 재시도 (7/17 실측): rt_cd=0인데 output2가 빈 응답이 간헐 발생 (같은 날 10:35 30종목
+    # → 10:41 0종목). 제공 시간창 의존으로 추정 — 30초 간격 3회 재시도로 견고화.
+    data = {}
+    for attempt in range(3):
+        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        data = resp.json()
+        if data.get("rt_cd") == "0" and data.get("output2"):
+            break
+        logger.warning("[EWY] KIS 구성종목 빈 응답 (시도 %d/3, rt_cd=%s) — 30초 후 재시도",
+                       attempt + 1, data.get("rt_cd"))
+        if attempt < 2:
+            time.sleep(30)
 
     if data.get("rt_cd") != "0":
         logger.error("[EWY] KIS 구성종목 조회 실패: %s", data.get("msg1", ""))
