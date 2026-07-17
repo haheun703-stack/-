@@ -94,6 +94,9 @@ case "$BAT" in
   A) # 06:10 KST — 미장 마감
     run_py scripts/us_overnight_signal.py --update
     run_py scripts/update_us_kr_daily.py
+    # B-12 (7/17): 원자재 시세 v2 (yfinance) — 4/21 수집기 아카이브 후 유물 방치 → 부활.
+    #   scan_tomorrow_picks(전략 M)가 같은 A단계 후속에서 소비하므로 이 위치(앞쪽) 고정.
+    run_py scripts/collect_commodity_prices.py
     run_py scripts/fetch_cot_weekly.py
     run_py scripts/run_cot_tracker.py
     run_py scripts/fetch_liquidity_data.py
