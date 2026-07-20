@@ -351,6 +351,11 @@ case "$BAT" in
     #   ★약세장 수급 팔로우 기각(bear_accumulation -2.22%p t=-9.6)·수급=BULL 확인지표로 재정의.
     #   관측 전용·실주문 0·graceful exit0. V3b divergence 축적 → 레짐 교체 결정 근거(퐝가님).
     run_py scripts/run_scenario_v1.py
+    # B-15 (7/20): BULL 전환 감시 + 진입 후보 즉시 제시. run_scenario_v1 직후 고정(입력 의존).
+    #   ★타이밍 예측이 아니라 반응 속도 — 지수 타이밍 축은 전부 기각됐고(7/7·7/9·7/20 검증),
+    #   생존한 종목축(저PER D+20 +0.90%p t=3.13)을 전환 즉시 제시하는 게 목적.
+    #   레짐 전환이 JSON에만 기록되고 통보되지 않던 구멍을 메움. 관측 전용·실주문 0.
+    run_py scripts/bull_entry_gate.py
     # 포트 3테이블 대시보드 적재 재개 (7/1, unfreeze와 분리 — 정보봇 aec1043 회신·사장님 결정).
     #   valuation_band(밸류밴드 verdict 60행)·two_layer(82/18 골격)·drawdown_alert(level=normal).
     #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
