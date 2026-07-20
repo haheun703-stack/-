@@ -55,15 +55,18 @@ class CheckResult:
     """단일 체크 결과."""
 
     def __init__(self, name: str, passed: bool, detail: str,
-                 count: int = 0, total: int = 0):
+                 count: int = 0, total: int = 0, skipped: bool = False):
         self.name = name
         self.passed = passed
         self.detail = detail
         self.count = count
         self.total = total
+        self.skipped = skipped  # 휴장일 등 판정 대상이 아님 → 등급 계산 제외
 
     @property
     def icon(self) -> str:
+        if self.skipped:
+            return "⏸️"
         return "✅" if self.passed else "❌"
 
     def __str__(self) -> str:
@@ -83,6 +86,21 @@ class DataHealthCheck:
         self.today_compact = self.today.strftime("%Y%m%d")
         self.data_dir = PROJECT_ROOT / "data"
         self.is_weekday = self.today.weekday() < 5
+        # 휴장일 판정 (7/20 B-13): 평일 공휴일에도 cron이 도는데 국내시장 데이터가
+        # 없는 걸 "장 운영일 비정상"으로 오판해 가짜 경보를 보냈다(7/17 D등급 13/18).
+        # 판정 불가 시 True(장날)로 폴백 — 경보를 잠재우는 쪽이 더 위험하기 때문.
+        try:
+            from src.adapters.kis_holiday_adapter import is_trading_day
+            self.is_trading_day = is_trading_day(self.today)
+        except Exception as e:
+            logger.warning("휴장일 판정 실패 — 장날로 간주: %s", e)
+            self.is_trading_day = True
+
+    # 휴장일에 판정 대상에서 제외할 체크 (국내 장중 거래 산출물에 의존)
+    MARKET_DEPENDENT = {
+        "종가", "수급(종목)", "수급(섹터)", "DART",
+        "KOSPI인덱스", "투자자수급", "수급커버리지",
+    }
 
     def run_full_check(self) -> list[CheckResult]:
         """전체 19개 항목 점검."""
@@ -112,11 +130,18 @@ class DataHealthCheck:
         for check_fn in checks:
             try:
                 result = check_fn()
-                results.append(result)
             except Exception as e:
                 name = check_fn.__name__.replace("_check_", "")
-                results.append(CheckResult(name, False, f"체크 오류: {e}"))
+                result = CheckResult(name, False, f"체크 오류: {e}")
                 logger.exception("체크 실패: %s", name)
+
+            # 휴장일: 국내시장 의존 체크는 실패로 세지 않고 SKIP (7/20 B-13)
+            if not self.is_trading_day and result.name in self.MARKET_DEPENDENT:
+                result.skipped = True
+                result.passed = True  # 등급 계산 오염 방지
+                result.detail = f"휴장일 SKIP — {result.detail}"
+
+            results.append(result)
 
         return results
 
@@ -860,9 +885,15 @@ class DataHealthCheck:
 # ──────────────────────────────────────────────
 
 def generate_health_report(results: list[CheckResult], check_date: date) -> str:
-    """체크 결과 → 등급 + 텔레그램 메시지."""
-    passed = sum(1 for r in results if r.passed)
-    total = len(results)
+    """체크 결과 → 등급 + 텔레그램 메시지.
+
+    휴장일 SKIP 항목(7/20 B-13)은 분모·분자 모두에서 제외 — 판정 대상이 아닌 것을
+    '통과'로 세면 등급이 부풀고, '실패'로 세면 가짜 경보가 된다.
+    """
+    skipped = [r for r in results if r.skipped]
+    judged = [r for r in results if not r.skipped]
+    passed = sum(1 for r in judged if r.passed)
+    total = len(judged)
 
     if passed == total:
         grade, icon = "A", "🟢"
@@ -875,20 +906,27 @@ def generate_health_report(results: list[CheckResult], check_date: date) -> str:
 
     lines = [
         f"{icon} 데이터 건강검진 [{grade}등급] ({check_date})",
-        f"합계: {passed}/{total} 통과",
+        f"합계: {passed}/{total} 통과"
+        + (f" (휴장일 SKIP {len(skipped)}건 제외)" if skipped else ""),
         "",
     ]
 
     # 실패 항목 먼저
-    failed = [r for r in results if not r.passed]
+    failed = [r for r in judged if not r.passed]
     if failed:
         lines.append("── 실패 항목 ──")
         for r in failed:
             lines.append(f"  {r}")
         lines.append("")
 
+    if skipped:
+        lines.append("── 휴장일 SKIP (판정 제외) ──")
+        for r in skipped:
+            lines.append(f"  {r}")
+        lines.append("")
+
     # 성공 항목
-    passed_items = [r for r in results if r.passed]
+    passed_items = [r for r in judged if r.passed]
     if passed_items:
         lines.append("── 정상 항목 ──")
         for r in passed_items:
