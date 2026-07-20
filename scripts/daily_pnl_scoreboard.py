@@ -173,7 +173,8 @@ def format_report(sb: dict) -> str:
 def send_telegram(text: str) -> bool:
     import requests
 
-    token = os.environ.get("TELEGRAM_TOKEN", "")
+    # .env 정본 키명은 TELEGRAM_BOT_TOKEN (7/20 실측: TELEGRAM_TOKEN은 미정의라 조용히 SKIP됨).
+    token = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_TOKEN", "")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
     if not token or not chat_id:
         return False

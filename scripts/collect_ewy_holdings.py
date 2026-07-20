@@ -679,7 +679,8 @@ def calc_multi_month_returns(
 def send_telegram_report(date_str: str, as_of: str, holdings: list[dict],
                          analysis: dict) -> None:
     """EWY 비중 변동 텔레그램 보고."""
-    token = os.environ.get("TELEGRAM_TOKEN", "")
+    # .env 정본 키명은 TELEGRAM_BOT_TOKEN (7/20 실측: TELEGRAM_TOKEN 미정의 → 조용한 미발송)
+    token = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_TOKEN", "")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
     if not token or not chat_id:
         return
