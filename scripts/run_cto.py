@@ -434,7 +434,7 @@ def main():
     # 텔레그램
     if args.send:
         try:
-            from src.adapters.telegram_adapter import send_message
+            from src.telegram_sender import send_message  # 7/21 검수: telegram_adapter 팬텀 모듈
             msg = _format_telegram(report)
             send_message(msg)
             print("\n[텔레그램] 발송 완료")

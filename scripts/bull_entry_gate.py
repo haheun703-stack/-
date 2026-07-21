@@ -166,16 +166,23 @@ def send_telegram(text: str) -> bool:
     if not token or not chat_id:
         logger.warning("[BULL] 텔레그램 미설정")
         return False
-    try:
-        requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
-            timeout=10,
-        )
-        return True
-    except Exception as e:
-        logger.warning("[BULL] 텔레그램 실패: %s", e)
-        return False
+    # 7/21 검수: 응답 미검증 + Markdown 파싱 400 시 BULL 전환일(희소 발동) 알림이
+    # 조용히 유실됐다. 응답 ok를 확인하고, Markdown 거부 시 plain으로 재발송한다.
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    for parse_mode in ("Markdown", None):
+        payload = {"chat_id": chat_id, "text": text}
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            data = r.json()
+            if data.get("ok"):
+                return True
+            logger.warning("[BULL] 텔레그램 거부(pm=%s): HTTP %s %s",
+                           parse_mode, r.status_code, data.get("description", ""))
+        except Exception as e:
+            logger.warning("[BULL] 텔레그램 실패(pm=%s): %s", parse_mode, e)
+    return False
 
 
 def main():

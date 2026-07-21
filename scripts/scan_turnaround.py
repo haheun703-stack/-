@@ -259,7 +259,7 @@ def main():
     # 텔레그램
     if args.send:
         try:
-            from src.adapters.telegram_adapter import send_message
+            from src.telegram_sender import send_message  # 7/21 검수: telegram_adapter 팬텀 모듈
             lines = [f"🔄 턴어라운드 스크리닝 — {output['date']}"]
             lines.append(f"후보: {output['candidates_found']}종목 (STRONG {len(strong)} / EARLY {len(early)})")
             for c in strong[:5]:

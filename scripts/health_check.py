@@ -558,9 +558,17 @@ def main():
 
     log(f"=== Health Check 시작 ({TODAY}) ===")
 
-    # 주말이면 스킵
-    if datetime.now().weekday() >= 5:
-        log("주말 — 스킵")
+    # 휴장일(주말·공휴일) 스킵 — 7/21 검수: B-13이 data_health_check.py만 고쳐
+    # 이 자매 파일엔 주말 가드만 남아, 평일 공휴일에 오늘분 0행 → 가짜경보 + 무의미
+    # 재수집이 발생했다. 판정 소스는 KIS 공식 API(수집 파이프라인과 독립).
+    try:
+        from src.adapters.kis_holiday_adapter import is_trading_day
+        trading = is_trading_day()
+    except Exception as e:
+        log(f"휴장일 판정 불가 — 요일 기준 폴백(안전측): {e}")
+        trading = datetime.now().weekday() < 5
+    if not trading:
+        log("휴장일(주말·공휴일) — 스킵")
         return
 
     # 특정 BAT 강제 재실행

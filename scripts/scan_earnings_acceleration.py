@@ -331,7 +331,7 @@ def main():
     # 텔레그램
     if args.send:
         try:
-            from src.adapters.telegram_adapter import send_message
+            from src.telegram_sender import send_message  # 7/21 검수: telegram_adapter 팬텀 모듈
             lines = [f"📊 실적 가속도 분석 — {summary['date']}"]
             lines.append(f"분석: {summary['total_analyzed']}종목")
 

@@ -179,11 +179,18 @@ def send_telegram(text: str) -> bool:
     if not token or not chat_id:
         return False
     try:
-        requests.post(
+        # 7/21 검수: 응답 미검증 시 401/400/429가 예외 없이 통과해 "발송 OK" 오보.
+        # A-0(1번 지표)라 실물 발송 여부를 응답 ok로 확정한다.
+        r = requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
             json={"chat_id": chat_id, "text": text},
             timeout=10,
         )
+        data = r.json()
+        if not data.get("ok"):
+            logger.warning("[PNL] 텔레그램 거부: HTTP %s %s",
+                           r.status_code, data.get("description", ""))
+            return False
         return True
     except Exception as e:
         logger.warning("[PNL] 텔레그램 실패: %s", e)
@@ -203,8 +210,11 @@ def main():
     METRICS_DIR.mkdir(parents=True, exist_ok=True)
     with open(METRICS_DIR / "pnl_scoreboard.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(sb, ensure_ascii=False) + "\n")
-    with open(METRICS_DIR / "pnl_scoreboard_latest.json", "w", encoding="utf-8") as f:
+    latest = METRICS_DIR / "pnl_scoreboard_latest.json"
+    tmp_latest = latest.with_suffix(".json.tmp")
+    with open(tmp_latest, "w", encoding="utf-8") as f:
         json.dump(sb, f, ensure_ascii=False, indent=2)
+    tmp_latest.replace(latest)  # 7/21 검수: 원자적 쓰기(중단 시 손상 방지)
 
     report = format_report(sb)
     print(report)
