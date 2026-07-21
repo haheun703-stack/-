@@ -12,7 +12,7 @@
   6. FLOWX Supabase paper_trades 업로드
 
 Rolling 규칙:
-  - 최대 보유일 5영업일 (MAX_HOLDING_DAYS=5)
+  - 최대 보유일 5일 (MAX_HOLDING_DAYS=5, 캘린더 기준 — days_held=pd.Timestamp 차이, 주말 포함)
   - 매주 금요일(또는 --rebalance) 리밸런싱 강제 실행
   - 리밸런싱: 이번 주 추천에 없는 보유종목 → 전량 청산
   - 이번 주 추천에 있는 기존 보유 → 유지 (보유일 리셋)
@@ -766,6 +766,7 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
             sell_price = price * (1 - SLIPPAGE_PCT)
             proceeds = sell_price * exit_qty * (1 - TAX_PCT)
             pf["capital"] += proceeds
+            t1_pnl = sell_price / avg_price - 1
             exits.append({
                 "ticker": ticker,
                 "name": pos["name"],
@@ -776,6 +777,29 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "partial": True,
                 "supply_demand": sd["detail"],
             })
+            # 7/21 검수(#4): T1 부분익절도 closed_trades·stats에 기록해야 전략 승률·PF가
+            # 승자를 누락하지 않는다 (기존엔 continue로 통계 미반영 → 전략 저평가).
+            pf["closed_trades"].append({
+                "ticker": ticker,
+                "name": pos["name"],
+                "strategy": pos.get("strategy", ""),
+                "grade": pos.get("grade", ""),
+                "entry_date": pos.get("entry_date", ""),
+                "orig_entry_date": pos.get("orig_entry_date", pos.get("entry_date", "")),
+                "exit_date": today_str,
+                "avg_price": round(avg_price),
+                "exit_price": round(sell_price),
+                "qty": exit_qty,
+                "pnl_pct": round(t1_pnl * 100, 2),
+                "exit_reason": "TAKE_PROFIT_T1",
+                "days_held": days_held,
+                "supply_demand": sd["detail"],
+            })
+            pf["stats"]["total_trades"] += 1
+            if t1_pnl > 0:
+                pf["stats"]["wins"] += 1
+            else:
+                pf["stats"]["losses"] += 1
             # 트레일링 활성화
             pos["trailing_active"] = True
             continue
@@ -888,9 +912,10 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
                                 pos["name"], (_p / pos["avg_price"] - 1) * 100)
                 pos.setdefault("orig_entry_date", pos.get("entry_date", today_str))
                 pos["entry_date"] = today_str
-                pos["trailing_active"] = False
-                pos["t1_sold"] = False
-                pos["peak_price"] = pos["avg_price"]
+                # 7/21 검수(#3): trailing_active·t1_sold·peak_price를 리셋하면 이미 +10%
+                # 익절한 승자가 다음 평일 T1을 재발동해 반복 절단되고 트레일링 고점이
+                # 소실된다(B-18 상승장 미참여 악화). 보유일(entry_date)만 리셋하고
+                # 익절/트레일링 상태(t1_sold·peak_price·trailing_active)는 보존한다.
                 continue
 
         # 미추천 → 전량 청산
