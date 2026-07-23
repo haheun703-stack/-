@@ -159,34 +159,44 @@ class DataHealthCheck:
         if total == 0:
             return CheckResult("종가", False, "parquet 파일 없음")
 
-        # 샘플링: 전체 중 50개만 체크 (속도)
-        import random
-        samples = random.sample(parquets, min(50, total))
-
-        has_today = 0
+        # 전수 검사 (7/23 전환). 구 50개 샘플링은 비율을 전체에 곱해
+        #   "1,180/1,180 (100.0%)"처럼 **추정치를 실측처럼** 표기했다.
+        #   실측은 1,174/1,180(99.49%)이고 차이 6종목은 전부 상폐/거래정지였으나,
+        #   샘플링으로는 그것과 진짜 수집 실패를 구분할 수 없다(임계 95% 경계에서 오판 위험).
+        #   비용 실측 15.5초(샘플 0.6초의 26배)로 BAT-D 143분 대비 무시 가능.
         try:
             import pandas as pd
-            target_ts = pd.Timestamp(self.today)
-            for pf in samples:
-                try:
-                    df = pd.read_parquet(pf, columns=["close"])
-                    # 인덱스가 datetime64 타입
-                    if target_ts in df.index:
-                        has_today += 1
-                except Exception:
-                    continue
         except ImportError:
             return CheckResult("종가", False, "pandas 없음")
 
-        ratio = has_today / len(samples) if samples else 0
-        estimated_total = int(ratio * total)
-        pct = ratio * 100
+        target_ts = pd.Timestamp(self.today)
+        has_today = 0
+        missing: list[str] = []
+        for pf in parquets:
+            try:
+                df = pd.read_parquet(pf, columns=["close"])
+                # 인덱스가 datetime64 타입
+                if target_ts in df.index:
+                    has_today += 1
+                else:
+                    missing.append(pf.stem)
+            except Exception:
+                missing.append(pf.stem)
 
+        pct = has_today / total * 100 if total else 0.0
         passed = pct >= 95
+
+        detail = f"{has_today:,}/{total:,} ({pct:.1f}%)"
+        if missing:
+            # ★미달 종목 코드를 남긴다 — 거래정지/상폐인지 진짜 실패인지 즉시 판별하기 위함
+            shown = sorted(missing)[:10]
+            detail += " | 미달: " + ",".join(shown)
+            if len(missing) > 10:
+                detail += f" 외 {len(missing) - 10}건"
+
         return CheckResult(
-            "종가", passed,
-            f"{estimated_total:,}/{total:,} ({pct:.1f}%)",
-            count=estimated_total, total=total,
+            "종가", passed, detail,
+            count=has_today, total=total,
         )
 
     # ─── 2. 수급 데이터 (종목별) ───
