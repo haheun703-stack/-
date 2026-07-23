@@ -56,6 +56,9 @@ logger = logging.getLogger(__name__)
 SOURCE_ID = "TIGER_MSCI_KR_TR_310970"
 SOURCE_LABEL = "TIGER MSCI Korea TR(310970)"
 KIS_ETF_TICKER = "310970"
+# 빈 응답 재시도 (7/23 실측 빈응답률 58% 근거 — fetch_kis_holdings 주석 참조)
+KIS_RETRY_MAX = 8
+KIS_RETRY_WAITS = [3, 3, 5, 5, 10, 10, 15]  # len == KIS_RETRY_MAX - 1
 DATA_DIR = PROJECT_ROOT / "data" / "ewy"
 UNIVERSE_CSV = PROJECT_ROOT / "data" / "universe.csv"
 SECTOR_MAP_CSV = PROJECT_ROOT / "data" / "universe" / "sector_map.csv"
@@ -134,18 +137,29 @@ def fetch_kis_holdings(name_map: dict[str, str], date_str: str) -> dict:
         "FID_COND_SCR_DIV_CODE": "11216",
     }
 
-    # 재시도 (7/17 실측): rt_cd=0인데 output2가 빈 응답이 간헐 발생 (같은 날 10:35 30종목
-    # → 10:41 0종목). 제공 시간창 의존으로 추정 — 30초 간격 3회 재시도로 견고화.
+    # 재시도 (7/23 실측): rt_cd=0·msg1="정상처리"인데 output2만 빈 응답이 나오는 서버측
+    # 간헐 실패. 12회 연속 프로브 결과 **빈 응답률 58%**(7/12) — 당초 추정한 '제공 시간창
+    # 의존'이 아니라 시각과 무관한 상시 랜덤이다(장중 14시대 측정, 3초 간격에도 EMPTY↔OK 혼재).
+    #   · 구 설정(30초 간격 3회): 전부 실패 확률 0.58^3 = 19.9% ≈ 5일에 1일 실패
+    #     → 실제로 7/20 3회차 성공·7/21 2회차 성공·7/22 3회 전부 실패로 관측됨
+    #   · 신 설정(8회): 0.58^8 = 1.3% ≈ 75일에 1일. 간격은 자기상관 회피를 위해 점증시키되
+    #     총 대기 51초로 구 설정(60초)보다 오히려 짧다.
     data = {}
-    for attempt in range(3):
+    for attempt in range(KIS_RETRY_MAX):
         resp = requests.get(url, headers=headers, params=params, timeout=15)
         data = resp.json()
         if data.get("rt_cd") == "0" and data.get("output2"):
+            if attempt:
+                logger.info("[EWY] KIS 구성종목 %d회차 시도에서 성공", attempt + 1)
             break
-        logger.warning("[EWY] KIS 구성종목 빈 응답 (시도 %d/3, rt_cd=%s) — 30초 후 재시도",
-                       attempt + 1, data.get("rt_cd"))
-        if attempt < 2:
-            time.sleep(30)
+        if attempt < KIS_RETRY_MAX - 1:
+            wait = KIS_RETRY_WAITS[attempt]
+            logger.warning("[EWY] KIS 구성종목 빈 응답 (시도 %d/%d, rt_cd=%s) — %d초 후 재시도",
+                           attempt + 1, KIS_RETRY_MAX, data.get("rt_cd"), wait)
+            time.sleep(wait)
+        else:
+            logger.warning("[EWY] KIS 구성종목 빈 응답 (시도 %d/%d, rt_cd=%s) — 재시도 소진",
+                           attempt + 1, KIS_RETRY_MAX, data.get("rt_cd"))
 
     if data.get("rt_cd") != "0":
         logger.error("[EWY] KIS 구성종목 조회 실패: %s", data.get("msg1", ""))
