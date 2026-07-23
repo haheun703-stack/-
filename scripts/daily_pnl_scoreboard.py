@@ -86,8 +86,69 @@ def kospi_at_or_before(closes: dict[str, float], date_str: str) -> float | None:
     return closes[max(prior)] if prior else None
 
 
+def load_universe_prices() -> dict:
+    """data/raw/*.parquet 종가 — 동일가중 벤치마크용.
+
+    실패해도 빈 dict를 돌려 동일가중 알파만 n/a가 되게 한다.
+    (7/20 교훈: 신설 기능이 스코어보드 본체 발송을 막으면 안 된다)
+    """
+    prices: dict = {}
+    try:
+        import pandas as pd
+    except ImportError:
+        logger.warning("[PNL] pandas 없음 — 동일가중 벤치마크 생략")
+        return prices
+    raw = DATA_DIR / "raw"
+    if not raw.exists():
+        return prices
+    for f in raw.glob("*.parquet"):
+        try:
+            s = pd.read_parquet(f, columns=["close"])["close"]
+            s.index = pd.to_datetime(s.index)
+            prices[f.stem] = s.sort_index()
+        except Exception:
+            continue
+    return prices
+
+
+def equal_weight_return(prices: dict, d0: str, d1: str):
+    """d0 종가에 전 종목 동일금액 매수 → d1 보유 시 평균 수익률(%).
+
+    ★왜 필요한가 (7/23): KOSPI는 시총가중이라 최상위 주도장에서는 개별종목
+      포트폴리오가 종목을 아무리 잘 골라도 구조적으로 뒤진다. 실측 3/24~7/22에
+      KOSPI +22.4% vs 유니버스 동일가중 -17.4% = **격차 39.8%p**.
+      이 격차 탓에 메인A 알파가 -34.1%p로 찍혔지만, 동일가중 대비로는 **+5.7%p**다.
+      KOSPI 알파만 보면 "종목 선택 실패"로 오독하게 되므로 둘을 병기한다.
+    표본 100종목 미만이면 None(무의미한 비교 방지).
+    """
+    if not prices:
+        return None
+    try:
+        import pandas as pd
+        t0, t1 = pd.Timestamp(d0), pd.Timestamp(d1)
+    except Exception:
+        return None
+    rets = []
+    for s in prices.values():
+        if len(s) == 0 or s.index[-1] < t0:
+            continue  # 구간 시작 전에 데이터가 끊긴 종목(상폐 등) 제외
+        i0 = s.index.searchsorted(t0, side="right") - 1
+        i1 = s.index.searchsorted(t1, side="right") - 1
+        if i0 < 0 or i1 < 0:
+            continue
+        p0, p1 = float(s.iloc[i0]), float(s.iloc[i1])
+        if p0 > 0:
+            rets.append((p1 / p0 - 1) * 100)
+    return sum(rets) / len(rets) if len(rets) >= 100 else None
+
+
 def build_scoreboard() -> dict:
     closes = load_kospi_closes()
+    try:
+        uni_prices = load_universe_prices()
+    except Exception as e:  # noqa: BLE001 — 본체 발송 보호
+        logger.warning("[PNL] 유니버스 로드 실패: %s — 동일가중 생략", e)
+        uni_prices = {}
     accounts = []
     for label, fname in LEDGERS:
         path = DATA_DIR / fname
@@ -118,6 +179,16 @@ def build_scoreboard() -> dict:
         kospi_cum = (k1 / k0 - 1) * 100 if (k0 and k1) else None
         alpha = cum_pct - kospi_cum if kospi_cum is not None else None
 
+        # 동일가중 벤치마크 (7/23 신설) — 종목 선택의 순수 성과
+        try:
+            ew_cum = equal_weight_return(uni_prices, d0, d1)
+        except Exception as e:  # noqa: BLE001 — 본체 발송 보호
+            logger.warning("[PNL] %s 동일가중 계산 실패: %s", label, e)
+            ew_cum = None
+        alpha_ew = cum_pct - ew_cum if ew_cum is not None else None
+        # 구조적 격차 = 개별주를 들고 있다는 사실만으로 생기는 지수 대비 손실
+        struct_gap = (kospi_cum - ew_cum) if (kospi_cum is not None and ew_cum is not None) else None
+
         accounts.append({
             "account": label,
             "date": d1,
@@ -127,6 +198,9 @@ def build_scoreboard() -> dict:
             "cum_pct": round(cum_pct, 2),
             "kospi_cum_pct": round(kospi_cum, 2) if kospi_cum is not None else None,
             "alpha_pct": round(alpha, 2) if alpha is not None else None,
+            "ew_cum_pct": round(ew_cum, 2) if ew_cum is not None else None,
+            "alpha_ew_pct": round(alpha_ew, 2) if alpha_ew is not None else None,
+            "struct_gap_pct": round(struct_gap, 2) if struct_gap is not None else None,
             "positions": last.get("positions"),
             "stock_ratio": last.get("stock_ratio"),
         })
@@ -155,15 +229,24 @@ def build_scoreboard() -> dict:
 def format_report(sb: dict) -> str:
     lines = [f"💰 수익 스코어보드 ({sb['date']})"]
     for a in sb["accounts"]:
-        alpha = f"α{a['alpha_pct']:+.1f}%p" if a["alpha_pct"] is not None else "α n/a"
+        alpha = f"αK{a['alpha_pct']:+.1f}" if a["alpha_pct"] is not None else "αK n/a"
+        # αEW = 동일가중 대비 = 종목 선택의 순수 성과 (7/23 신설)
+        alpha_ew = f"αEW{a['alpha_ew_pct']:+.1f}" if a.get("alpha_ew_pct") is not None else "αEW n/a"
         lines.append(
-            f"{a['account']}: 누적 {a['cum_pct']:+.1f}% ({alpha}) | 오늘 {a['day_pct']:+.2f}%"
+            f"{a['account']}: 누적 {a['cum_pct']:+.1f}% ({alpha} / {alpha_ew}) | 오늘 {a['day_pct']:+.2f}%"
         )
     if sb["accounts"]:
-        best = max(sb["accounts"], key=lambda x: (x["alpha_pct"] if x["alpha_pct"] is not None else -1e9))
-        k = next((a["kospi_cum_pct"] for a in sb["accounts"] if a["kospi_cum_pct"] is not None), None)
-        if k is not None:
-            lines.append(f"(동일구간 KOSPI {k:+.1f}% | 알파 1위: {best['account']})")
+        head = sb["accounts"][0]  # 구간 기준 계좌(메인A) — 계좌마다 가동일이 달라 대표 1개만 표기
+        k, ew = head.get("kospi_cum_pct"), head.get("ew_cum_pct")
+        if k is not None and ew is not None:
+            lines.append(
+                f"({head['account']} 구간 KOSPI {k:+.1f}% / 동일가중 {ew:+.1f}% "
+                f"→ 구조격차 {head['struct_gap_pct']:+.1f}%p)")
+        elif k is not None:
+            lines.append(f"({head['account']} 구간 KOSPI {k:+.1f}%)")
+        best_k = max(sb["accounts"], key=lambda x: (x["alpha_pct"] if x["alpha_pct"] is not None else -1e9))
+        best_ew = max(sb["accounts"], key=lambda x: (x.get("alpha_ew_pct") if x.get("alpha_ew_pct") is not None else -1e9))
+        lines.append(f"알파 1위: KOSPI기준 {best_k['account']} / 동일가중기준 {best_ew['account']}")
     if sb["indexbh_top3"]:
         top = " / ".join(f"{t['name']} {t['return_pct']:+.1f}%" for t in sb["indexbh_top3"])
         lines.append(f"지수BH Top3: {top}")
