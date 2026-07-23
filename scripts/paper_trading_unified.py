@@ -1901,6 +1901,20 @@ def run_daily(force_rebalance: bool = False) -> dict:
         print(f"  [PAPER] 주말({['월','화','수','목','금','토','일'][weekday]}) — Paper Trading 스킵")
         return {"status": "skip", "reason": "weekend", "date": today_str}
 
+    # 휴장일 가드 (7/23 발견): 주말 가드만 있어 **평일 공휴일에 페이퍼가 그대로 돌았다**.
+    #   실측 피해 4건 — 5/1(근로자의날) 003410 / 7/17(제헌절) 삼표시멘트·현대건설·HLB제약.
+    #   시장이 열리지 않은 날의 진입이므로 체결 자체가 성립하지 않는 '존재할 수 없는 거래'이고,
+    #   전일 종가로 기록돼 원장 신뢰성을 깬다(7/17 3건은 전부 다음 장날 손절로 이어짐).
+    #   B-13(휴장 가드)이 data_health_check·health_check만 덮고 매매 본체를 빠뜨린 나머지 절반.
+    #   ★판정 불가 시 장날 폴백 — B-13 설계 원칙(가드가 조용히 매매를 막는 쪽이 더 위험).
+    try:
+        from src.adapters.kis_holiday_adapter import is_trading_day
+        if is_trading_day() is False:
+            print(f"  [PAPER] 휴장일({today_str}) — Paper Trading 스킵")
+            return {"status": "skip", "reason": "holiday", "date": today_str}
+    except Exception as exc:  # noqa: BLE001 — 페이퍼 절대 무손상
+        print(f"  [PAPER] 휴장 판정 실패({exc}) — 장날로 간주하고 계속")
+
     do_rebalance = force_rebalance or is_rebalance_day()
     mode_tag = "리밸런싱" if do_rebalance else "일일"
 
