@@ -117,8 +117,14 @@ def equal_weight_return(prices: dict, d0: str, d1: str):
     ★왜 필요한가 (7/23): KOSPI는 시총가중이라 최상위 주도장에서는 개별종목
       포트폴리오가 종목을 아무리 잘 골라도 구조적으로 뒤진다. 실측 3/24~7/22에
       KOSPI +22.4% vs 유니버스 동일가중 -17.4% = **격차 39.8%p**.
-      이 격차 탓에 메인A 알파가 -34.1%p로 찍혔지만, 동일가중 대비로는 **+5.7%p**다.
-      KOSPI 알파만 보면 "종목 선택 실패"로 오독하게 되므로 둘을 병기한다.
+      이 격차 탓에 메인A 알파가 -34.1%p로 찍힌다. KOSPI 알파만 보면
+      "종목 선택 실패"로 오독하게 되므로 둘을 병기한다.
+
+    ⚠️★7/24 정정 — 이 값 단독으로 "종목 선택이 좋다"고 읽으면 안 된다:
+      계좌는 주식비중 30%인데 이 벤치마크는 **100% 투자**다. 하락장에서는
+      현금이 많을수록 αEW가 좋게 나온다 = "덜 투자했다"가 능력으로 둔갑한다.
+      (검산: 계좌가 100% 현금이면 αEW가 +9.8%p로 '시장을 이긴다'고 나온다)
+      → 종목 선택의 순수 성과는 **αADJ**(exposure_matched_return 기반)로 본다.
     표본 100종목 미만이면 None(무의미한 비교 방지).
     """
     if not prices:
@@ -140,6 +146,67 @@ def equal_weight_return(prices: dict, d0: str, d1: str):
         if p0 > 0:
             rets.append((p1 / p0 - 1) * 100)
     return sum(rets) / len(rets) if len(rets) >= 100 else None
+
+
+def exposure_matched_return(prices: dict, daily_equity: list):
+    """노출도를 맞춘 동일가중 벤치마크 누적수익률(%) — 종목 선택의 순수 성과 측정용.
+
+    매일 그날의 주식비중(stock_ratio)만큼만 동일가중 바스켓에 투자하고
+    나머지는 현금(수익률 0%)으로 두었을 때의 누적수익률.
+
+    ★왜 필요한가 (7/24): αEW는 30% 투자 계좌를 100% 투자 벤치마크와 비교한다.
+      실측 3/24~7/23 — αEW -0.18%p(중립처럼 보임) vs **αADJ -7.78%p(실제로는 열위)**.
+      편향 +7.6%p가 전부 "덜 투자했다"에서 나왔다. 이 구분이 없으면
+      "종목 선택은 문제 없고 자산배분이 문제"라는 **정반대 처방**으로 간다.
+
+    stock_ratio가 없는 날은 직전 값으로 채우고, 전부 없으면 None을 돌려
+    αADJ만 n/a가 되게 한다(본체 발송 보호).
+    """
+    if not prices or len(daily_equity) < 2:
+        return None
+    try:
+        import numpy as np
+        import pandas as pd
+    except ImportError:
+        return None
+
+    # 주식비중: stock_ratio 필드는 7/10부터만 존재(10일치)하므로
+    # equity·capital(현금)로 역산해 전 구간을 채운다.
+    # ★검증: 두 값이 모두 있는 10일 전부 소수점까지 일치(2026-07-10~07-23).
+    ratios = {}
+    for x in daily_equity:
+        try:
+            d = pd.Timestamp(_norm_date(x.get("date", "")))
+        except Exception:
+            continue
+        eq, cap = x.get("equity"), x.get("capital")
+        if eq and cap is not None:
+            ratios[d] = (float(eq) - float(cap)) / float(eq)
+        elif x.get("stock_ratio") is not None:
+            try:
+                ratios[d] = float(x["stock_ratio"]) / 100.0
+            except (TypeError, ValueError):
+                continue
+    if not ratios:
+        return None
+
+    # 종목별 일별 수익률 → 횡단면 평균(동일가중, 매일 리밸런스)
+    dates = pd.DatetimeIndex(sorted(pd.Timestamp(_norm_date(x.get("date", "")))
+                                    for x in daily_equity))
+    frames = []
+    for s in prices.values():
+        if len(s) < 2 or s.index[-1] < dates[0]:
+            continue
+        frames.append(s.reindex(dates, method="ffill").pct_change())
+    if len(frames) < 100:
+        return None
+    ew_daily = pd.concat(frames, axis=1).mean(axis=1, skipna=True)
+
+    ratio_s = pd.Series(ratios).reindex(dates).ffill().bfill()
+    matched = (ratio_s * ew_daily).dropna()
+    if matched.empty:
+        return None
+    return float(((1 + matched).prod() - 1) * 100)
 
 
 def build_scoreboard() -> dict:
@@ -189,6 +256,19 @@ def build_scoreboard() -> dict:
         # 구조적 격차 = 개별주를 들고 있다는 사실만으로 생기는 지수 대비 손실
         struct_gap = (kospi_cum - ew_cum) if (kospi_cum is not None and ew_cum is not None) else None
 
+        # ★노출도 보정 알파 (7/24) — 종목 선택의 순수 성과. αEW의 현금비중 편향 제거
+        try:
+            ewm_cum = exposure_matched_return(uni_prices, de)
+        except Exception as e:  # noqa: BLE001 — 본체 발송 보호
+            logger.warning("[PNL] %s 노출도매칭 계산 실패: %s", label, e)
+            ewm_cum = None
+        alpha_adj = cum_pct - ewm_cum if ewm_cum is not None else None
+        # 주식비중 평균 — stock_ratio 필드(7/10~ 한정) 대신 equity·capital 역산 우선
+        _ratios = [
+            (float(x["equity"]) - float(x["capital"])) / float(x["equity"]) * 100
+            for x in de if x.get("equity") and x.get("capital") is not None
+        ] or [float(x["stock_ratio"]) for x in de if x.get("stock_ratio") is not None]
+
         accounts.append({
             "account": label,
             "date": d1,
@@ -201,6 +281,9 @@ def build_scoreboard() -> dict:
             "ew_cum_pct": round(ew_cum, 2) if ew_cum is not None else None,
             "alpha_ew_pct": round(alpha_ew, 2) if alpha_ew is not None else None,
             "struct_gap_pct": round(struct_gap, 2) if struct_gap is not None else None,
+            "ew_matched_pct": round(ewm_cum, 2) if ewm_cum is not None else None,
+            "alpha_adj_pct": round(alpha_adj, 2) if alpha_adj is not None else None,
+            "stock_ratio_avg": round(sum(_ratios) / len(_ratios), 1) if _ratios else None,
             "positions": last.get("positions"),
             "stock_ratio": last.get("stock_ratio"),
         })
@@ -230,10 +313,14 @@ def format_report(sb: dict) -> str:
     lines = [f"💰 수익 스코어보드 ({sb['date']})"]
     for a in sb["accounts"]:
         alpha = f"αK{a['alpha_pct']:+.1f}" if a["alpha_pct"] is not None else "αK n/a"
-        # αEW = 동일가중 대비 = 종목 선택의 순수 성과 (7/23 신설)
+        # ★αADJ = 노출도 매칭 동일가중 대비 = 종목 선택의 순수 성과 (7/24 신설, 주 지표)
+        #   αEW는 현금비중 편향이 있어 참고용으로만 병기한다.
+        alpha_adj = f"αADJ{a['alpha_adj_pct']:+.1f}" if a.get("alpha_adj_pct") is not None else "αADJ n/a"
         alpha_ew = f"αEW{a['alpha_ew_pct']:+.1f}" if a.get("alpha_ew_pct") is not None else "αEW n/a"
+        ratio = f" 주식{a['stock_ratio_avg']:.0f}%" if a.get("stock_ratio_avg") is not None else ""
         lines.append(
-            f"{a['account']}: 누적 {a['cum_pct']:+.1f}% ({alpha} / {alpha_ew}) | 오늘 {a['day_pct']:+.2f}%"
+            f"{a['account']}: 누적 {a['cum_pct']:+.1f}% ({alpha_adj} | {alpha} {alpha_ew}){ratio}"
+            f" | 오늘 {a['day_pct']:+.2f}%"
         )
     if sb["accounts"]:
         head = sb["accounts"][0]  # 구간 기준 계좌(메인A) — 계좌마다 가동일이 달라 대표 1개만 표기
@@ -244,9 +331,11 @@ def format_report(sb: dict) -> str:
                 f"→ 구조격차 {head['struct_gap_pct']:+.1f}%p)")
         elif k is not None:
             lines.append(f"({head['account']} 구간 KOSPI {k:+.1f}%)")
-        best_k = max(sb["accounts"], key=lambda x: (x["alpha_pct"] if x["alpha_pct"] is not None else -1e9))
-        best_ew = max(sb["accounts"], key=lambda x: (x.get("alpha_ew_pct") if x.get("alpha_ew_pct") is not None else -1e9))
-        lines.append(f"알파 1위: KOSPI기준 {best_k['account']} / 동일가중기준 {best_ew['account']}")
+        best_adj = max(sb["accounts"],
+                       key=lambda x: (x.get("alpha_adj_pct") if x.get("alpha_adj_pct") is not None else -1e9))
+        if best_adj.get("alpha_adj_pct") is not None:
+            lines.append(f"★종목선택 1위(αADJ): {best_adj['account']} {best_adj['alpha_adj_pct']:+.1f}%p")
+        lines.append("※αADJ=노출도 맞춘 동일가중 대비(종목선택 순수성과) / αEW는 현금비중 편향 있음")
     if sb["indexbh_top3"]:
         top = " / ".join(f"{t['name']} {t['return_pct']:+.1f}%" for t in sb["indexbh_top3"])
         lines.append(f"지수BH Top3: {top}")
