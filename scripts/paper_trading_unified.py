@@ -129,9 +129,17 @@ KOSPI_CSV_PATH = DATA_DIR / "kospi_index.csv"
 # Shield 레벨별 최대 보유 수
 SHIELD_MAX_POSITIONS = {
     "RED": 3,       # CRISIS/위기 → 3종목 집중
+    "ORANGE": 4,    # 위험(danger 1건) → 4종목  ★7/24 추가
     "YELLOW": 5,    # 경계 → 5종목
     "GREEN": 8,     # 정상 → 기존 8종목
 }
+# ★7/24 버그 수정: SHIELD는 GREEN/YELLOW/ORANGE/RED 4단계를 반환하는데
+#   (src/shield.py:_determine_overall_level) 여기 ORANGE 키가 없어
+#   .get(level, MAX_POSITIONS) 폴백으로 **8종목 = GREEN과 동일**이 됐다.
+#   즉 danger 1건인 '위험' 상태가 '정상'보다 느슨해지는 역전이었다.
+#   RED(3) < ORANGE(4) < YELLOW(5) < GREEN(8)로 단조성 복구.
+#   킬스위치 회복 시 overall_level이 ORANGE로 고정되는 경로(shield.py:307)가
+#   있어 실제로 밟히는 값이다.
 # STRONG_ALPHA 시그널 (PF>=1.8, 백테스트 검증 → AA 승격 + 50점 부스트)
 STRONG_ALPHA_SIGNALS = {
     "PULLBACK15_VOL3x",          # PF=2.58 (급락15%+거래량3배+수급)
