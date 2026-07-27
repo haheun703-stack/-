@@ -26,6 +26,24 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
+# ── FLOWX 데이터계약 변경 — 매매판단 산출물 Supabase 적재 중단 (2026-07-24) ──
+# 근거: docs "[운영자→정보봇·퀀트봇] 데이터계약변경_매매판단필드_중단_지시서_260724.md"
+#   개정 자본시장법(유사투자자문 규제) 대응. 시그널/픽/추천/성과 = 매매판단 → 적재 중단.
+#   생성 로직·내부 파일(백테스트·연구용)은 보존하고 "Supabase 적재만" 차단한다.
+# 웹 소비 0 전수 대조 완료: 웹봇 커밋 d727478 / docs/guard-words-snapshot-260727.json.
+#   ★유지(중단 금지): quant_scenario_dashboard(/scenario)·quant_leader_cycle(/leader-cycle)
+#     — 공개 페이지 직결이므로 아래 목록에 절대 넣지 말 것.
+SUSPENDED_TABLES = frozenset({
+    # 대시보드 시그널 (Row)
+    "dashboard_sniper", "dashboard_relay", "dashboard_crash_bounce", "dashboard_etf_signals",
+    "etf_signals",
+    # 시그널·성과 로깅
+    "signals", "short_signals", "scoreboard", "paper_trades",
+    # 퀀트 픽·매매판단
+    "quant_sector_picks", "quant_surge_pullback", "quant_surge_pullback_summary",
+    "quant_bottom_picks", "quant_jarvis", "quant_etf_strategy", "quant_etf_recommendation",
+})
+
 
 class FlowxUploader:
     """FLOWX Supabase 업로드 클라이언트."""
@@ -54,12 +72,23 @@ class FlowxUploader:
     def is_active(self) -> bool:
         return self.client is not None
 
+    def _suspended(self, table: str, label: str = "") -> bool:
+        """데이터계약 변경(260724): 매매판단 테이블이면 Supabase 적재를 건너뛴다.
+        생성 로직은 그대로 두고 적재만 막는다. True=중단(호출측은 skip 처리)."""
+        if table in SUSPENDED_TABLES:
+            logger.info("[FLOWX] SUSPENDED 적재중단(계약260724): %s%s",
+                        table, f" [{label}]" if label else "")
+            return True
+        return False
+
     # ── ETF 시그널 ─────────────────────────────────
 
     def upload_etf_signals(self, rows: list[dict]) -> bool:
         """ETF 시그널 업로드 (UPSERT on date+code)."""
         if not self.is_active or not rows:
             return False
+        if self._suspended("etf_signals", "ETF시그널"):
+            return True
         try:
             result = self.client.table("etf_signals").upsert(
                 rows, on_conflict="date,code"
@@ -110,6 +139,8 @@ class FlowxUploader:
         """AI 추천 종목 업로드 (UPSERT on date+code)."""
         if not self.is_active or not rows:
             return False
+        if self._suspended("short_signals", "AI추천"):
+            return True
         # Supabase 스키마에 없는 컬럼 제거
         clean_rows = [
             {k: v for k, v in row.items() if k not in self._EXTRA_COLS}
@@ -163,6 +194,8 @@ class FlowxUploader:
         """시그널 UPSERT (STEP 2/3용). BAT-F 재시도 시 중복 안전."""
         if not self.is_active or not signal:
             return False
+        if self._suspended("signals", "시그널기록"):
+            return True
         try:
             result = (
                 self.client.table("signals")
@@ -185,6 +218,8 @@ class FlowxUploader:
         """시그널 수익률/상태 업데이트 (STEP 2용)."""
         if not self.is_active or not signal_id:
             return False
+        if self._suspended("signals", "시그널업데이트"):
+            return True
         try:
             result = self.client.table("signals").update(updates).eq(
                 "id", signal_id
@@ -201,6 +236,8 @@ class FlowxUploader:
         """성적표 집계 UPSERT (STEP 2용)."""
         if not self.is_active or not rows:
             return False
+        if self._suspended("scoreboard", "성적표"):
+            return True
         try:
             result = self.client.table("scoreboard").upsert(
                 rows, on_conflict="bot_type,period"
@@ -255,6 +292,8 @@ class FlowxUploader:
         """시그널 종료 (CLOSED/STOPPED)."""
         if not self.is_active or not signal_id:
             return False
+        if self._suspended("signals", "시그널종료"):
+            return True
         try:
             result = self.client.table("signals").update(close_data).eq(
                 "id", signal_id
@@ -305,6 +344,8 @@ class FlowxUploader:
         """
         if not self.is_active or not jarvis_data:
             return False
+        if self._suspended("quant_jarvis", "자비스"):
+            return True
         try:
             row = {
                 "date": date_str,
@@ -329,6 +370,8 @@ class FlowxUploader:
         """공통 date+data UPSERT 패턴."""
         if not self.is_active or not data:
             return False
+        if self._suspended(table, label):
+            return True
         try:
             row = {"date": date_str, "data": data}
             result = self.client.table(table).upsert(row, on_conflict="date").execute()
@@ -485,6 +528,8 @@ class FlowxUploader:
         """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도."""
         if not self.is_active:
             return False
+        if self._suspended(table, label):
+            return True
         if not rows:
             logger.info("[FLOWX] %s: 데이터 0건 (정상 스킵)", label)
             return True
@@ -629,6 +674,8 @@ class FlowxUploader:
         row = build_etf_strategy_row(date_str)
         if not row or not self.is_active:
             return False
+        if self._suspended("quant_etf_strategy", "ETF전략"):
+            return True
         try:
             result = self.client.table("quant_etf_strategy").upsert(
                 [row], on_conflict="date"
@@ -645,9 +692,14 @@ class FlowxUploader:
     # ── 페이퍼 트레이딩 ──────────────────────────────
 
     def upload_paper_trade(self, trade: dict) -> bool:
-        """페이퍼 매매 기록 업로드 (INSERT, UPSERT 아님)."""
+        """페이퍼 매매 기록 업로드 (INSERT, UPSERT 아님).
+
+        ★적재만 차단(계약260724) — 내부 페이퍼 운영(freeze·실주문0)은 그대로 유지.
+        """
         if not self.is_active or not trade:
             return False
+        if self._suspended("paper_trades", "페이퍼매매기록"):
+            return True
         try:
             result = self.client.table("paper_trades").insert(trade).execute()
             if not result.data:
