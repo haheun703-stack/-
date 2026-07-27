@@ -42,6 +42,8 @@ SUSPENDED_TABLES = frozenset({
     # 퀀트 픽·매매판단
     "quant_sector_picks", "quant_surge_pullback", "quant_surge_pullback_summary",
     "quant_bottom_picks", "quant_jarvis", "quant_etf_strategy", "quant_etf_recommendation",
+    # uploader 우회 직접 적재분 (검수 후속 — scan_fibonacci·scan_nugget이 client.table을 직접 호출)
+    "quant_fib_scanner", "quant_alpha_scanner",
 })
 
 

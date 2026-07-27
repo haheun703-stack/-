@@ -35,7 +35,7 @@ from dotenv import load_dotenv
 load_dotenv(QM / ".env")
 
 from src.telegram_sender import send_message
-from src.adapters.flowx_uploader import FlowxUploader
+from src.adapters.flowx_uploader import FlowxUploader, SUSPENDED_TABLES
 
 TODAY = date.today().isoformat()  # "2026-03-31"
 TODAY_COMPACT = date.today().strftime("%Y%m%d")  # "20260331"
@@ -158,6 +158,8 @@ def is_bat_fresh(bat_id: str) -> bool:
 
 def check_flowx_uploaded() -> bool:
     """Supabase quant_jarvis 테이블에 오늘 날짜 데이터 존재 여부 확인."""
+    if "quant_jarvis" in SUSPENDED_TABLES:
+        return True  # 데이터계약 260724 — 적재 중단 테이블은 검증 제외(가짜경보 방지)
     try:
         uploader = FlowxUploader()
         if not uploader.is_active:
@@ -173,6 +175,8 @@ def check_flowx_uploaded() -> bool:
 
 def check_signals_uploaded() -> bool:
     """Supabase signals 테이블에 오늘 created_at 존재 여부 확인."""
+    if "signals" in SUSPENDED_TABLES:
+        return True  # 데이터계약 260724 — 적재 중단 테이블은 검증 제외(가짜경보 방지)
     try:
         uploader = FlowxUploader()
         if not uploader.is_active:
@@ -199,6 +203,8 @@ def check_relay_uploaded() -> bool:
     relay_trading_signal.json이 아직 없어 relay=False 순서 문제 발생.
     HEALTH는 18:00에 실행되므로 파일이 이미 있어 재업로드 성공 가능.
     """
+    if "dashboard_relay" in SUSPENDED_TABLES:
+        return True  # 데이터계약 260724 — 적재 중단 테이블은 검증 제외(가짜경보 방지)
     try:
         uploader = FlowxUploader()
         if not uploader.is_active:
@@ -415,6 +421,8 @@ def check_flowx_all_tables() -> tuple:
 
     fresh, stale = [], []
     for table, date_col in FLOWX_TABLES:
+        if table in SUSPENDED_TABLES:
+            continue  # 데이터계약 260724 — 적재 중단 테이블은 신선도 검증 제외
         try:
             result = (
                 uploader.client.table(table)

@@ -1072,6 +1072,8 @@ def upload_alpha_scanner(nuggets: list[dict], date_str: str = ""):
     try:
         from src.adapters.flowx_uploader import FlowxUploader
         uploader = FlowxUploader()
+        if uploader._suspended("quant_alpha_scanner", "알파스캐너"):
+            return True  # 데이터계약 260724 — 적재만 차단, 생성 로직은 보존
         row = {"date": date_str, "data": payload}
         uploader.client.table("quant_alpha_scanner").upsert(
             row, on_conflict="date"
