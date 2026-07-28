@@ -284,6 +284,9 @@ def build_scoreboard() -> dict:
             "ew_matched_pct": round(ewm_cum, 2) if ewm_cum is not None else None,
             "alpha_adj_pct": round(alpha_adj, 2) if alpha_adj is not None else None,
             "stock_ratio_avg": round(sum(_ratios) / len(_ratios), 1) if _ratios else None,
+            # 당일 주식비중 — 평균만 찍으면 그날 손익과 산술이 안 맞아 오독을 부른다.
+            # (7/28 실례: 현금방어NAV 당일 22.7%인데 평균 6.2%만 표시 → "주식6%인데 -3.33%?")
+            "stock_ratio_today": round(_ratios[-1], 1) if _ratios else None,
             "positions": last.get("positions"),
             "stock_ratio": last.get("stock_ratio"),
         })
@@ -317,7 +320,14 @@ def format_report(sb: dict) -> str:
         #   αEW는 현금비중 편향이 있어 참고용으로만 병기한다.
         alpha_adj = f"αADJ{a['alpha_adj_pct']:+.1f}" if a.get("alpha_adj_pct") is not None else "αADJ n/a"
         alpha_ew = f"αEW{a['alpha_ew_pct']:+.1f}" if a.get("alpha_ew_pct") is not None else "αEW n/a"
-        ratio = f" 주식{a['stock_ratio_avg']:.0f}%" if a.get("stock_ratio_avg") is not None else ""
+        if a.get("stock_ratio_today") is not None:
+            ratio = f" 주식{a['stock_ratio_today']:.0f}%"
+            if a.get("stock_ratio_avg") is not None:
+                ratio += f"(평균{a['stock_ratio_avg']:.0f}%)"
+        elif a.get("stock_ratio_avg") is not None:
+            ratio = f" 주식평균{a['stock_ratio_avg']:.0f}%"
+        else:
+            ratio = ""
         lines.append(
             f"{a['account']}: 누적 {a['cum_pct']:+.1f}% ({alpha_adj} | {alpha} {alpha_ew}){ratio}"
             f" | 오늘 {a['day_pct']:+.2f}%"
