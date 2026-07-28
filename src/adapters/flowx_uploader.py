@@ -51,6 +51,58 @@ SUSPENDED_TABLES = frozenset({
 })
 
 
+# ── 유지 테이블 내부의 매매판단 필드 제거 (계약260724 §1 "가격 지시·등급/의견") ──
+# 테이블은 유지하되(공개 페이지 직결) 필드만 비운다. 지시서 §2-1 "null 또는 미기록,
+# 스키마 변경은 하지 않는다"에 따라 컬럼 drop이 아니라 payload에서 키를 제거한다.
+# 근거: 운영자 지시서 260724 / 웹봇 요청 260728("적재는 계속하시고 필드만 비워주세요").
+# ★이 목록에서 항목을 빼려면 운영자 승인이 필요하다.
+SUSPENDED_FIELDS: dict[str, frozenset[str]] = {
+    # /scenario 첫 탭 유일 소스. scenario_stocks[] 안에 가격지시 4종 + 등급 1종이 있었다.
+    #   grade 실측값 = "강력 포착"/"관심"/"관찰"/"보류" → 등급·포착 표현이라 제거 대상.
+    "quant_scenario_dashboard": frozenset({
+        "entry_price", "stop_loss", "target_price", "scenario_risk_reward", "grade",
+    }),
+    # ⏸️ quant_leader_cycle — 등재 보류(웹봇 판단 대기, 260728 통보함).
+    #   data.leaders[].signal 실측값 = "매수적기"(7) / "청산"(28) / "보유"(2) / "경계"(10)
+    #   → 지시서 §1 "매수/매도 의견"에 정면 해당하나, /leader-cycle이 이 필드를
+    #     렌더하는지 확인 전이라 임의 제거 시 공개 페이지가 깨질 수 있다.
+    #   웹봇이 렌더 제외를 확인하는 즉시 아래 줄의 주석을 풀 것:
+    #   "quant_leader_cycle": frozenset({"signal", "by_signal"}),
+}
+
+
+def _scrub_suspended_fields(obj, fields: frozenset[str]):
+    """중첩 dict/list를 재귀 순회하며 금지 필드 키를 통째로 제거한다.
+
+    값을 None으로 두지 않고 키 자체를 없앤다 — 웹봇 검사 도구가
+    "경로가 살아 있으면 위험"으로 판정하기 때문(260728 회신).
+    """
+    if isinstance(obj, dict):
+        return {k: _scrub_suspended_fields(v, fields)
+                for k, v in obj.items() if k not in fields}
+    if isinstance(obj, list):
+        return [_scrub_suspended_fields(x, fields) for x in obj]
+    return obj
+
+
+def _count_suspended_fields(obj, fields: frozenset[str]) -> dict[str, int]:
+    """자가검사용 — 제거 전 payload에 금지 필드가 몇 개 있었는지 센다(지시서 §2-3)."""
+    found: dict[str, int] = {}
+
+    def walk(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k in fields:
+                    found[k] = found.get(k, 0) + 1
+                walk(v)
+        elif isinstance(o, list):
+            for x in o:
+                walk(x)
+
+    walk(obj)
+    return found
+
+
 class FlowxUploader:
     """FLOWX Supabase 업로드 클라이언트."""
 
@@ -320,6 +372,18 @@ class FlowxUploader:
         if not self.is_active or not scenario_data:
             return False
         try:
+            # 적재 직전 금지 필드 제거 + 자가검사 로그 (계약260724 §2-1·§2-3)
+            fields = SUSPENDED_FIELDS.get("quant_scenario_dashboard", frozenset())
+            if fields:
+                found = _count_suspended_fields(scenario_data, fields)
+                scenario_data = _scrub_suspended_fields(scenario_data, fields)
+                if found:
+                    logger.info("[FLOWX] SCRUB 금지필드 제거(계약260724): quant_scenario_dashboard %s",
+                                ", ".join(f"{k}×{v}" for k, v in sorted(found.items())))
+                left = _count_suspended_fields(scenario_data, fields)
+                if left:
+                    logger.error("[FLOWX] SCRUB 검증 실패 — 잔존 금지필드 %s", left)
+                    return False
             row = {
                 "date": date_str,
                 "data": scenario_data,
