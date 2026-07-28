@@ -19,12 +19,16 @@ import json
 import logging
 import math
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+
+# 스키마에 없는 컬럼을 제거하며 재시도하는 최대 횟수 (B-24 ② 무한재귀 방지)
+_MAX_COLUMN_RETRY = 5
 
 # ── FLOWX 데이터계약 변경 — 매매판단 산출물 Supabase 적재 중단 (2026-07-24) ──
 # 근거: docs "[운영자→정보봇·퀀트봇] 데이터계약변경_매매판단필드_중단_지시서_260724.md"
@@ -526,8 +530,15 @@ class FlowxUploader:
     # ── Row 테이블 4개 (대시보드 시그널) ──────────────
 
     def _upload_rows(self, table: str, date_str: str, rows: list[dict],
-                     conflict_cols: str, label: str) -> bool:
-        """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도."""
+                     conflict_cols: str, label: str, _depth: int = 0) -> bool:
+        """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도.
+
+        재시도는 3중으로 제한한다 (B-24 ②):
+          1. `date`·conflict 컬럼은 제거 대상에서 제외 — 제거해도 곧바로 다시
+             주입되거나(540행) UPSERT가 성립하지 않아 무한재귀가 된다.
+          2. 실제로 제거된 컬럼이 0개면 재시도해도 같은 에러다 — 즉시 중단.
+          3. 그래도 남는 경우를 대비해 깊이 상한(_MAX_COLUMN_RETRY).
+        """
         if not self.is_active:
             return False
         if self._suspended(table, label):
@@ -550,14 +561,31 @@ class FlowxUploader:
             err_str = str(e)
             # 컬럼 미존재 에러 → 해당 컬럼 제거 후 재시도
             if "PGRST204" in err_str and "column" in err_str:
-                import re
                 m = re.search(r"the '(\w+)' column", err_str)
                 if m:
                     bad_col = m.group(1)
-                    logger.warning("[FLOWX] %s: '%s' 컬럼 미존재 → 제거 후 재시도", label, bad_col)
+                    protected = {"date"} | {c.strip() for c in conflict_cols.split(",") if c.strip()}
+                    if bad_col in protected:
+                        logger.error("[FLOWX] %s: 필수 컬럼 '%s' 이(가) 스키마에 없음 — "
+                                     "테이블 정의 불일치. 재시도 중단", label, bad_col)
+                        return False
+                    if _depth >= _MAX_COLUMN_RETRY:
+                        logger.error("[FLOWX] %s: 컬럼 제거 재시도 %d회 초과 — 중단 (마지막: '%s')",
+                                     label, _MAX_COLUMN_RETRY, bad_col)
+                        return False
+                    removed = 0
                     for row in rows:
-                        row.pop(bad_col, None)
-                    return self._upload_rows(table, date_str, rows, conflict_cols, label)
+                        if bad_col in row:
+                            del row[bad_col]
+                            removed += 1
+                    if removed == 0:
+                        logger.error("[FLOWX] %s: '%s' 컬럼이 업로드 데이터에 없음 — "
+                                     "제거해도 동일 에러. 재시도 중단", label, bad_col)
+                        return False
+                    logger.warning("[FLOWX] %s: '%s' 컬럼 미존재 → %d행에서 제거 후 재시도 (%d/%d)",
+                                   label, bad_col, removed, _depth + 1, _MAX_COLUMN_RETRY)
+                    return self._upload_rows(table, date_str, rows, conflict_cols, label,
+                                             _depth + 1)
             logger.error("[FLOWX] %s 업로드 실패: %s", label, e)
             return False
 
@@ -596,10 +624,6 @@ class FlowxUploader:
                                  "date,ticker", "급락반등")
 
     # ── 퀀트시스템 메인: NXT + 바닥반등 + ETF전략 ──────
-
-    def upload_nxt_picks(self, date_str: str) -> bool:
-        """scan_type1_relay → quant_nxt_picks. (레거시 — supply_surge로 교체됨)"""
-        return True  # 더 이상 사용하지 않음
 
     def upload_supply_surge(self, date_str: str) -> bool:
         """scan_supply_surge → quant_supply_surge."""
