@@ -38,6 +38,29 @@ def _load(rel_path: str, default=None):
         return default if default is not None else {}
 
 
+def _load_fresh(rel_path: str, max_age_days: int = 7, default=None):
+    """신선한 JSON만 로드 — 파일 mtime이 max_age_days를 넘으면 default.
+
+    ★7/30 검수: `etf_recommendations.json`의 생성기(src/alpha/etf_engine.py)가
+    죽은 coo_orchestrator에서만 호출돼 파일이 4월 8일에 정지했는데, build_etf_top5가
+    매일 이를 읽어 방어형 ETF를 킬러픽에 등재하고 있었다(실측: 인버스2X·골드·달러 3건이
+    "VIX 25.3 (공포)" 근거로 재유입 — 당일 실측 VIX 18.2). 낡은 근거로 만든 산출물은
+    빈 값보다 나쁘다(B-14 "출처 없으면 빈 상태가 정직" 전례와 동일 철학).
+    """
+    fp = DATA_DIR / rel_path
+    empty = default if default is not None else {}
+    if not fp.exists():
+        return empty
+    try:
+        age_days = (datetime.now() - datetime.fromtimestamp(fp.stat().st_mtime)).days
+    except OSError:
+        return empty
+    if age_days > max_age_days:
+        print(f"[SKIP] {rel_path} {age_days}일 낡음(임계 {max_age_days}일) — 생성기 사망 여부 확인 필요")
+        return empty
+    return _load(rel_path, default)
+
+
 def _bil(val) -> float:
     """원 → 억 변환 (이미 억이면 그대로)."""
     if val is None:
@@ -241,7 +264,7 @@ def build_institutional_picks() -> list[dict]:
 
 
 def build_retail_support() -> list[dict]:
-    nat = _load("krx_nationality/nationality_signal.json")
+    nat = _load_fresh("krx_nationality/nationality_signal.json")  # 7/30: 51일 낡음 실측
     signals = nat.get("signals", [])
 
     result = []
@@ -300,7 +323,7 @@ def build_cross_validated_top5() -> list[dict]:
     consensus = _load("consensus_screening.json")
     pullback = _load("pullback_scan.json")
     sector_comp = _load("sector_rotation/sector_composite.json")
-    nat = _load("krx_nationality/nationality_signal.json")
+    nat = _load_fresh("krx_nationality/nationality_signal.json")  # 7/30: 51일 낡음 실측
     tomorrow = _load("tomorrow_picks.json")
 
     # 각 소스별 ticker set 구성
@@ -454,7 +477,7 @@ def build_cross_validated_top5() -> list[dict]:
 
 def build_etf_top5() -> list[dict]:
     etf_sig = _load("sector_rotation/etf_trading_signal.json")
-    etf_rec = _load("etf_recommendations.json")
+    etf_rec = _load_fresh("etf_recommendations.json")   # 7/30 검수: 4월 사장 파일 유입 차단
     sector_comp = _load("sector_rotation/sector_composite.json")
 
     result = []
