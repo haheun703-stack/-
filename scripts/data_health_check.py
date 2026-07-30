@@ -717,11 +717,18 @@ class DataHealthCheck:
     # ─── 18. 투자자수급 커버리지 급감 감지 ───
 
     def _check_supply_coverage(self) -> CheckResult:
-        """investor_daily.db 최신 거래일 종목수 vs 직전 거래일 — 대량 급감 감지.
+        """investor_daily.db 종목수 커버리지 — 당일 급감 + D-1 익일채움 검증.
 
         _check_supply_stocks(샘플30·임계80)가 못 잡는 KIS 대량 수집장애를 방어한다.
         일상 변동(거래정지 등락 ±수%)은 통과, 15%p 초과 급감만 경고(오탐 최소).
-        신선도는 _check_investor_flow가 별도로 보므로 여기선 커버리지 급락만 본다.
+        신선도는 _check_investor_flow가 별도로 보므로 여기선 커버리지만 본다.
+
+        ★7/30 확정 규칙(껍데기 가설, 7/27 발견→7/28 반증→7/30 확정): 껍데기(실거래0)
+        종목은 당일 BAT-D 안이 아니라 **익일 수집(KIS 30일 재조회)에서 채워진다**.
+        당일 종목수 ~2,64x는 정상(부분)이고 종목수 정본은 D+1. 따라서
+        ① 당일 급감 15% 임계는 유지(부분수집끼리 비교라 여전히 유효)
+        ② D-1이 완전판으로 채워졌는지를 D-2 대비 95%로 검증 — 채움 실패는
+           "익일이면 채워진다" 전제가 깨진 것이므로 경보.
         """
         db = self.data_dir / "investor_flow" / "investor_daily.db"
         if not db.exists():
@@ -730,30 +737,47 @@ class DataHealthCheck:
             con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=30)
             try:
                 dates = [r[0] for r in con.execute(
-                    "SELECT DISTINCT date FROM investor_daily ORDER BY date DESC LIMIT 2")]
+                    "SELECT DISTINCT date FROM investor_daily ORDER BY date DESC LIMIT 3")]
                 if not dates:
                     return CheckResult("수급커버리지", False, "데이터 없음")
-                today_n = con.execute(
+                counts = [con.execute(
                     "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?",
-                    (dates[0],)).fetchone()[0]
-                if len(dates) < 2:
-                    return CheckResult("수급커버리지", True,
-                                       f"{dates[0]} {today_n}종목 (직전일 없음)",
-                                       count=today_n)
-                prev_n = con.execute(
-                    "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?",
-                    (dates[1],)).fetchone()[0]
+                    (d,)).fetchone()[0] for d in dates]
             finally:
                 con.close()
         except Exception as e:  # noqa: BLE001
             return CheckResult("수급커버리지", False, f"DB 조회 오류: {e}")
 
+        today_n = counts[0]
+        if len(dates) < 2:
+            return CheckResult("수급커버리지", True,
+                               f"{dates[0]} {today_n}종목 (직전일 없음)",
+                               count=today_n)
+        prev_n = counts[1]
+
+        # ① 당일 급감 (부분수집끼리 비교)
         drop = (prev_n - today_n) / prev_n if prev_n else 0.0
-        passed = drop <= 0.15
-        state = "정상" if passed else f"급감 {drop * 100:.1f}% — KIS 수집장애 의심!"
+        drop_ok = drop <= 0.15
+
+        # ② D-1 익일채움 (D-2 대비 — 둘 다 완전판이어야 정상)
+        fill_note = ""
+        fill_ok = True
+        if len(dates) >= 3 and counts[2]:
+            fill_ratio = prev_n / counts[2]
+            fill_ok = fill_ratio >= 0.95
+            fill_note = "·채움OK" if fill_ok else (
+                f"·채움미달 {fill_ratio * 100:.1f}% (D-2 {dates[2]} {counts[2]})")
+
+        passed = drop_ok and fill_ok
+        if not drop_ok:
+            state = f"급감 {drop * 100:.1f}% — KIS 수집장애 의심!"
+        elif not fill_ok:
+            state = "D-1 익일채움 실패 — KIS 30일 재조회 확인!"
+        else:
+            state = "정상"
         return CheckResult(
             "수급커버리지", passed,
-            f"{dates[0]} {today_n}종목 (직전 {dates[1]} {prev_n}) {state}",
+            f"{dates[0]} {today_n}종목 (직전 {dates[1]} {prev_n}{fill_note}) {state}",
             count=today_n, total=prev_n)
 
     # ─── (폐기) 수급이면분석 (supply_demand/) 신선도 ───
