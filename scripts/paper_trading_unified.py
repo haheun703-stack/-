@@ -810,6 +810,12 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 pf["stats"]["losses"] += 1
             # 트레일링 활성화
             pos["trailing_active"] = True
+            # ★잔량 0이면 포지션 제거(7/30 검수 F4). qty=1일 때 max(1, 1//2)=1로 전량이
+            # 팔리는데 포지션 dict가 남아 ⑴SHIELD RED 3슬롯 중 1개를 유령이 점유하고
+            # ⑵다음 청산조건에서 qty=0·proceeds=0 트레이드가 통계에 이중 집계됐다.
+            # CRISIS의 risk_mult 0.2~0.4로 매수금액이 작아 qty=1 진입이 흔한 국면이다.
+            if pos["qty"] <= 0:
+                codes_to_remove.append(ticker)
             continue
 
         # 4. 트레일링 스탑 (수급 보정 적용)
@@ -1947,12 +1953,24 @@ def run_daily(force_rebalance: bool = False) -> dict:
     # 3. 리밸런싱 또는 일반 매도 체크
     exits = []
     if do_rebalance:
-        # 금요일: 미추천 종목 강제 청산 + 추천 유지
-        exits = weekly_rebalance(pf, candidates, today_str)
-        if exits:
-            print(f"\n  리밸런싱 청산: {len(exits)}건")
-            for x in exits:
+        # ★손절·익절·트레일링은 리밸런스일에도 먼저 평가한다(7/30 검수 F5).
+        #   기존엔 금요일에 check_exits를 아예 호출하지 않아, 이번 주 추천에 포함돼
+        #   "유지"되는 종목은 -13% 폭락해도 그날 손절이 없고 월요일에야 평가됐다
+        #   (청산통계에 "금요일 발동 0건"이라는 구조적 구멍). 손절 정당성은 7/21 실측
+        #   확인됨(STOP_LOSS 35건: 손절 후 D+10 -4.77% = 손절이 추가손실 방어).
+        #   순서: 청산조건 평가 → 남은 포지션에 리밸런스(보유일 리셋은 그 뒤)
+        pre_exits = check_exits(pf, today_str)
+        if pre_exits:
+            print(f"\n  매도 시그널(리밸런스일 선평가): {len(pre_exits)}건")
+            for x in pre_exits:
                 print(f"    {x['name']} {x['pnl_pct']:+.1f}% [{x['reason']}]")
+        # 금요일: 미추천 종목 강제 청산 + 추천 유지
+        rb_exits = weekly_rebalance(pf, candidates, today_str)
+        if rb_exits:
+            print(f"\n  리밸런싱 청산: {len(rb_exits)}건")
+            for x in rb_exits:
+                print(f"    {x['name']} {x['pnl_pct']:+.1f}% [{x['reason']}]")
+        exits = pre_exits + rb_exits
         kept = len(pf["positions"])
         if kept > 0:
             print(f"  유지: {kept}종목 (이번 주 추천 포함)")

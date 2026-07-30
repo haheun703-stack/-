@@ -59,19 +59,23 @@ def _default_pf():
 
 
 def load_pf():
+    # ★파손 시 예외를 삼키지 않는다(7/30 검수 F2) — 초기자본 새 원장으로 조용히
+    # 리셋되며 이력이 영구 소실되던 경로. 파도VF와 동일 정책(시끄러운 실패).
     if os.path.exists(PF_PATH):
-        try:
-            pf = json.load(open(PF_PATH, encoding="utf-8"))
-            pf.setdefault("cooldown", {})
-            return pf
-        except Exception:
-            pass
+        with open(PF_PATH, encoding="utf-8") as f:
+            pf = json.load(f)
+        pf.setdefault("cooldown", {})
+        return pf
     return _default_pf()
 
 
 def save_pf(pf):
+    """원자적 저장 — 중도 kill(timeout·OOM) 시 부분 기록 JSON이 남는 것 방지."""
     pf["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    json.dump(pf, open(PF_PATH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    tmp = PF_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(pf, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, PF_PATH)
 
 
 def _load_caps():

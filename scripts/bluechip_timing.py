@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sqlite3
 import sys
 from datetime import datetime
@@ -451,20 +452,19 @@ def _default_portfolio() -> dict:
 
 
 def load_portfolio() -> dict:
+    # ★파손 시 예외를 삼키지 않는다(7/30 검수 F2) — 초기자본 새 원장으로 조용히
+    # 리셋되며 이력이 영구 소실되던 경로. 파도VF와 동일 정책(시끄러운 실패).
     if PORTFOLIO_PATH.exists():
-        try:
-            return json.loads(PORTFOLIO_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        return json.loads(PORTFOLIO_PATH.read_text(encoding="utf-8"))
     return _default_portfolio()
 
 
 def save_portfolio(pf: dict) -> None:
+    """원자적 저장 — 중도 kill(timeout·OOM) 시 부분 기록 JSON이 남는 것 방지."""
     pf["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    PORTFOLIO_PATH.write_text(
-        json.dumps(pf, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    tmp = PORTFOLIO_PATH.with_suffix(PORTFOLIO_PATH.suffix + ".tmp")
+    tmp.write_text(json.dumps(pf, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, PORTFOLIO_PATH)
     logger.info("포트폴리오 저장: %s", PORTFOLIO_PATH.name)
 
 

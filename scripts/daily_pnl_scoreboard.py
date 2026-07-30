@@ -202,7 +202,13 @@ def exposure_matched_return(prices: dict, daily_equity: list):
         return None
     ew_daily = pd.concat(frames, axis=1).mean(axis=1, skipna=True)
 
-    ratio_s = pd.Series(ratios).reindex(dates).ffill().bfill()
+    # ★노출도는 하루 시차를 둔다(7/30 검수 F3). ew_daily[t]는 t-1→t 구간 수익률인데
+    # ratios[t]는 **그날 매매까지 끝난 뒤** 기록된 종가 시점 비중이다(run_daily 순서:
+    # 청산 → 진입 → update_equity). 그 구간을 실제로 보유한 비중은 t-1 종가 시점 것이므로
+    # shift(1)이 맞다. 보정 전에는 폭락일 종가에 손절해 비중이 줄면 벤치마크 손실도 같이
+    # 줄어 계좌가 부당하게 나쁘게 나왔다(메인A 실측 -9.14 → -5.72%p).
+    # 검산(7/24 교훈): 100% 현금 계좌는 ratio가 항상 0이라 보정 전후 동일 — 편향 없음.
+    ratio_s = pd.Series(ratios).reindex(dates).ffill().bfill().shift(1)
     matched = (ratio_s * ew_daily).dropna()
     if matched.empty:
         return None

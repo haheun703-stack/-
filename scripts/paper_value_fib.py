@@ -51,17 +51,22 @@ def _default_pf():
 
 
 def load_pf():
+    # ★파손 시 예외를 삼키지 않는다(7/30 검수 F2). 기존엔 except:pass 후 초기자본
+    # 새 원장을 반환하고 곧바로 덮어써서 포지션·거래이력·daily_equity가 영구 소실됐다
+    # (에러 0·알림 0). 시끄러운 실패가 조용한 소실보다 낫다 — 파도VF와 동일 정책.
     if os.path.exists(PF_PATH):
-        try:
-            return json.load(open(PF_PATH, encoding="utf-8"))
-        except Exception:
-            pass
+        with open(PF_PATH, encoding="utf-8") as f:
+            return json.load(f)
     return _default_pf()
 
 
 def save_pf(pf):
+    """원자적 저장 — 중도 kill(timeout·OOM) 시 부분 기록 JSON이 남는 것 방지."""
     pf["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    json.dump(pf, open(PF_PATH, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    tmp = PF_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(pf, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, PF_PATH)
 
 
 def top_codes(n=100):
@@ -152,7 +157,10 @@ def run():
         avg = P["avg_price"]
         exit_px, reason = None, None
         if (lo / avg - 1) * 100 <= STOP:
-            exit_px, reason = avg * (1 + STOP / 100), "STOP"
+            # ★체결가를 당일 고가로 캡(7/30 검수 F6). 손절선을 고정가로만 쓰면 시가부터
+            # 손절선 아래로 갭하락한 날(폭락장 하한가류) 당일 고가보다 높은 가격에
+            # "체결"한 셈이 되어 손실을 과소평가한다. TARGET쪽은 이미 min(hi,...)로 캡됨.
+            exit_px, reason = min(hi, avg * (1 + STOP / 100)), "STOP"
         elif hi >= P["high60"] or (hi / avg - 1) * 100 >= TAKE_TARGET:
             exit_px, reason = min(hi, max(P["high60"], avg * (1 + TAKE_TARGET / 100))), "TARGET"
         if exit_px:
