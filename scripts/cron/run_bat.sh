@@ -374,6 +374,10 @@ case "$BAT" in
     # 수익 스코어보드 (7/17): 페이퍼 5원장 daily_equity → 계좌별 누적/전일/KOSPI 알파 텔레그램.
     #   "매일의 작업이 수익과 연결되나"를 매일 숫자로 답하는 데일리 루프 A-0 정본.
     run_py scripts/daily_pnl_scoreboard.py
+    # B-23 상시화 (7/30): 데이터계약 자가검사 — 중단 18종 퀀트봇 적재 0건 + 유지 5종 당일 적재.
+    #   읽기전용(SELECT). 위반·유지누락 시에만 [HEALTH] 텔레그램, 평시 무음.
+    #   위치: FLOWX 업로드(18:40)·BAT-F 재시도(18:51) 이후인 BAT-D 종반이라 당일 적재 판정 가능.
+    run_py scripts/verify_contract_suspension.py --alert
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 (5/16) — ★BAT-D 마지막 스텝으로 이동(7/14 검수).
     #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
     #   소요시간: 당일이면 현재시각 폴백으로 계산 복원 + 절대임계 175분 재보정(7/16 실측 133~150분 기반).

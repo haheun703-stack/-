@@ -7,6 +7,8 @@
 
 실행:
     python -u -X utf8 scripts/verify_contract_suspension.py [--asof 20260728]
+    python -u -X utf8 scripts/verify_contract_suspension.py --alert   # cron 상시화(B-23)
+                                                                      # 위반·유지누락 시에만 텔레그램, 평시 무음
 """
 from __future__ import annotations
 
@@ -164,10 +166,51 @@ def probe(client, table: str, asof: str) -> dict:
     return out
 
 
+def _is_trading_day(asof: str) -> bool:
+    """휴장일 판정 (B-13 어댑터 재사용). 판정 불가 시 장날로 폴백 — 경보를 잠재우는 쪽이 더 위험."""
+    try:
+        from src.adapters.kis_holiday_adapter import is_trading_day
+        return is_trading_day(datetime.strptime(asof, "%Y%m%d").date())
+    except Exception as e:  # noqa: BLE001
+        print(f"[WARN] 휴장일 판정 실패 — 장날로 간주: {e}")
+        return True
+
+
+def _send_alert(violations: list[dict], keep_missing: list[str], asof: str) -> None:
+    """위반·유지누락 시에만 텔레그램 발송. 평시 무음(로그만).
+
+    - 위반(퀀트봇 시각대 적재)은 휴장 여부와 무관하게 알람 — 있어선 안 되는 레코드다.
+    - 유지 테이블 당일 누락은 장날에만 알람 — 휴장일엔 업로드가 없는 게 정상.
+    - "[HEALTH]" 선두 태그: 텔레그램 QUIET 모드 허용 목록 통과용.
+    """
+    lines: list[str] = []
+    if violations:
+        lines.append(f"[HEALTH] 🔴 데이터계약 자가검사 — 퀀트봇 위반 {len(violations)}건 ({asof})")
+        lines += [f"• {v['table']}: {v['today_rows']}건, KST {','.join(v['times'])}"
+                  for v in violations]
+    if keep_missing:
+        if _is_trading_day(asof):
+            lines.append(f"[HEALTH] 🟡 계약 유지 테이블 당일({asof}) 적재 누락: "
+                         + ", ".join(keep_missing))
+        else:
+            print("[INFO] 휴장일 — 유지 테이블 당일 없음은 정상, 알람 생략")
+    if not lines:
+        print("[alert] 위반·누락 없음 — 발송 생략(무음)")
+        return
+    try:
+        from src.telegram_sender import send_message
+        ok = send_message("\n".join(lines))
+        print(f"[alert] 텔레그램 발송 {'OK' if ok else '실패'}")
+    except Exception as e:  # noqa: BLE001
+        print(f"[WARN] 텔레그램 발송 실패: {e}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--asof", default=date.today().strftime("%Y%m%d"),
                     help="검사 기준일 YYYYMMDD (기본: 오늘)")
+    ap.add_argument("--alert", action="store_true",
+                    help="위반·유지누락 시 텔레그램 [HEALTH] 알람 (cron 상시화용, 평시 무음)")
     args = ap.parse_args()
     asof = args.asof
 
@@ -272,6 +315,10 @@ def main() -> int:
         print(f"- ⚠️ 조회 실패 {len(errors)}건: "
               + ", ".join(f"`{e['table']}`" for e in errors))
     print()
+
+    if args.alert:
+        _send_alert(violations, keep_missing, asof)
+
     return 1 if violations else 0
 
 
