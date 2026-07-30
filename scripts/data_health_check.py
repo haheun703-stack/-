@@ -199,6 +199,30 @@ class DataHealthCheck:
             count=has_today, total=total,
         )
 
+    def _price_has_today(self, sample: int = 20) -> bool:
+        """종가 parquet에 당일 데이터가 있는지 (수급 당일결손 판정의 독립 소스).
+
+        전수 검사(_check_price_data)와 달리 표본 20개로 "당일 수집이 돌았는가"만 본다.
+        시각 조건 하드코딩 대신 이 판정을 쓰는 이유는 _check_supply_coverage 주석 참조.
+        """
+        processed = self.data_dir / "processed"
+        if not processed.exists():
+            return False
+        try:
+            import pandas as pd
+        except ImportError:
+            return False
+        target_ts = pd.Timestamp(self.today)
+        hit = 0
+        for pf in sorted(processed.glob("*.parquet"))[:sample]:
+            try:
+                if target_ts in pd.read_parquet(pf, columns=["close"]).index:
+                    hit += 1
+            except Exception:  # noqa: BLE001  (개별 파일 파손은 무시 — 표본 판정)
+                continue
+        # 표본 과반이면 당일 수집이 돈 것으로 본다(상폐·거래정지 소수 혼입 방어)
+        return hit >= max(1, sample // 2)
+
     # ─── 2. 수급 데이터 (종목별) ───
 
     def _check_supply_stocks(self) -> CheckResult:
@@ -749,6 +773,23 @@ class DataHealthCheck:
             return CheckResult("수급커버리지", False, f"DB 조회 오류: {e}")
 
         today_n = counts[0]
+
+        # ★당일 결손 감지(7/30 검수 F2): DB에 존재하는 날짜들끼리만 비교하면, 당일 수집이
+        # 0행으로 끝날 때(collect_investor_kis가 거래일 확정 실패 시 조용히 종료하는 경로
+        # 실재) 어제↔그제를 비교해 "정상"을 찍고, 결손일은 다음날 DISTINCT 목록에서 사라져
+        # 영구 불가시였다.
+        # ★판정 소스는 시각이 아니라 **종가 parquet**(B-19 ① 교훈: 당일검증을 시각 조건으로
+        # 넣으면 아침 수동 실행에서 오탐이고 시각 하드코딩은 더 나쁘다). 종가가 이미 당일치인데
+        # 수급만 없으면 시각과 무관하게 진짜 이상 — 두 파이프라인은 서로 독립이다(B-13 원칙).
+        if self.is_trading_day and dates[0] != self.today_compact:
+            if self._price_has_today():
+                return CheckResult(
+                    "수급커버리지", False,
+                    f"당일({self.today_compact}) 수급 없음 — DB 최신 {dates[0]} {today_n}종목"
+                    f" (종가는 당일 존재) KIS 수급 수집 전면 실패 의심!",
+                    count=today_n)
+            # 종가도 아직 없음 = 수집 전 시각(아침 수동 실행 등) → 당일 결손 판정 보류
+
         if len(dates) < 2:
             return CheckResult("수급커버리지", True,
                                f"{dates[0]} {today_n}종목 (직전일 없음)",

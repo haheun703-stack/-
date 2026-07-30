@@ -377,7 +377,9 @@ case "$BAT" in
     # B-23 상시화 (7/30): 데이터계약 자가검사 — 중단 18종 퀀트봇 적재 0건 + 유지 5종 당일 적재.
     #   읽기전용(SELECT). 위반·유지누락 시에만 [HEALTH] 텔레그램, 평시 무음.
     #   위치: FLOWX 업로드(18:40)·BAT-F 재시도(18:51) 이후인 BAT-D 종반이라 당일 적재 판정 가능.
-    run_py scripts/verify_contract_suspension.py --alert
+    #   run_py_long(900초): 26테이블×3~5 REST 호출인데 postgrest 개별 타임아웃이 120초라
+    #   느린 호출 3건이면 300초 예산이 소진된다(7/30 검수 F7). --sweep-prev = 전일 소급검사(F8).
+    run_py_long scripts/verify_contract_suspension.py --alert --sweep-prev
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 (5/16) — ★BAT-D 마지막 스텝으로 이동(7/14 검수).
     #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
     #   소요시간: 당일이면 현재시각 폴백으로 계산 복원 + 절대임계 175분 재보정(7/16 실측 133~150분 기반).
