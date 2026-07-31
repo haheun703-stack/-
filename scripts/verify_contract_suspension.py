@@ -192,6 +192,75 @@ def count_on(client, table: str, date_col: str, day: str) -> int:
         return -1
 
 
+# 값 정합성 검사에서 제외할 컬럼(식별자·메타) — 나머지 수치 컬럼만 본다.
+_SANITY_SKIP_COLS = {
+    "id", "date", "ticker", "code", "name", "sector", "signal_type", "grade",
+    "created_at", "updated_at", "inserted_at", "trade_date", "signal_date",
+}
+# 이 행수 미만이면 판정하지 않는다 — 1~2행이 우연히 0인 건 흔하다(오탐 억제).
+_SANITY_MIN_ROWS = 5
+
+
+def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str], str]:
+    """유지 테이블의 당일 값이 **거짓 상수**(수치 컬럼이 통째로 0/null)인지 본다. (B-26 ①)
+
+    ★왜 필요한가(7\31 실사건): `dashboard_smart_money.price/change_pct`가 0으로
+    하드코딩돼 6주간 매일 적재됐고, 웹 `/smart-money`가 score 상위 50을 읽는 구조라
+    화면이 4거래일 내내 공란이었다. 기존 자가검사는 **"적재됐는가"만 보고 "값이
+    맞는가"를 안 봐서** 전혀 못 잡았고, 웹봇이 화면을 보고 알려줘서 알았다.
+
+    ★공동적재 테이블은 퀀트봇 행만 걸러야 한다. 그날 실측이 정확히 그랬다 —
+    60행 중 퀀트봇 50행만 price=0이고 정보봇 10행은 실값이라, 전체를 보면
+    "전 행 0"이 성립하지 않아 미탐된다. 생산자 판별(적재 시각대)을 재사용한다.
+
+    반환: (의심 컬럼 설명 목록, 판정 근거 메모)
+    """
+    try:
+        d = datetime.strptime(asof, "%Y%m%d").date()
+        q = client.table(table).select("*")
+        if date_col in ("created_at", "updated_at", "inserted_at"):
+            q = q.gte(date_col, d.isoformat()).lt(date_col, (d + timedelta(days=1)).isoformat())
+        else:
+            q = q.eq(date_col, d.isoformat())
+        rows = (q.limit(1000).execute().data) or []
+    except Exception as e:  # noqa: BLE001
+        return [], f"조회실패({str(e)[:40]})"
+
+    if not rows:
+        return [], "당일 0행"
+
+    # 퀀트봇 적재분만 — ts 컬럼이 없으면 전체를 보되 그 사실을 근거에 남긴다.
+    ts_col = next((c for c in ("created_at", "updated_at", "inserted_at")
+                   if c in rows[0]), None)
+    scope = "전체"
+    if ts_col:
+        mine = [r for r in rows
+                if r.get(ts_col) and _kst(str(r[ts_col])) != "?"
+                and int(_kst(str(r[ts_col]))[:2]) in QUANT_UPLOAD_KST_HOURS]
+        if mine:
+            rows, scope = mine, "퀀트봇분"
+        else:
+            return [], f"퀀트봇 적재분 없음(전체 {len(rows)}행)"
+
+    if len(rows) < _SANITY_MIN_ROWS:
+        return [], f"{scope} {len(rows)}행 — 판정 최소행수({_SANITY_MIN_ROWS}) 미만"
+
+    findings: list[str] = []
+    for col in rows[0]:
+        if col in _SANITY_SKIP_COLS or col == date_col:
+            continue
+        vals = [r.get(col) for r in rows]
+        # 수치 컬럼만 대상(bool 제외). 하나라도 수치가 아니면 건너뛴다.
+        if not all(v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
+                   for v in vals):
+            continue
+        if all(v is None for v in vals):
+            findings.append(f"{col}=전량 null")
+        elif all((v or 0) == 0 for v in vals):
+            findings.append(f"{col}=전량 0")
+    return findings, f"{scope} {len(rows)}행"
+
+
 def _is_trading_day(asof: str) -> bool:
     """휴장일 판정 (B-13 어댑터 재사용). 판정 불가 시 장날로 폴백 — 경보를 잠재우는 쪽이 더 위험."""
     try:
@@ -207,7 +276,8 @@ def _send_alert(violations: list[dict], keep_missing: list[str], asof: str,
                 keep_unknown: list[str] | None = None,
                 errors: list[dict] | None = None,
                 prev_violations: list[dict] | None = None,
-                prev_asof: str = "") -> None:
+                prev_asof: str = "",
+                stale_values: list[str] | None = None) -> None:
     """위반·유지누락·판별불가·검사불능 시에만 텔레그램 발송. 평시 무음(로그만).
 
     - 위반(퀀트봇 시각대 적재)은 휴장 여부와 무관하게 알람 — 있어선 안 되는 레코드다.
@@ -220,6 +290,7 @@ def _send_alert(violations: list[dict], keep_missing: list[str], asof: str,
     keep_unknown = keep_unknown or []
     errors = errors or []
     prev_violations = prev_violations or []
+    stale_values = stale_values or []
 
     lines: list[str] = []
     if violations:
@@ -245,6 +316,10 @@ def _send_alert(violations: list[dict], keep_missing: list[str], asof: str,
             print("[INFO] 휴장일 — 유지 테이블 당일 없음은 정상, 알람 생략")
     if keep_unknown and trading:
         lines.append(f"[HEALTH] 🟠 유지 테이블 적재 확인불가({asof}): " + ", ".join(keep_unknown))
+    if stale_values:
+        # 휴장 게이트 불필요 — 당일 행이 없으면 애초에 findings가 안 나온다.
+        lines.append(f"[HEALTH] 🟡 유지 테이블 값 거짓 상수 의심 {len(stale_values)}건 ({asof}): "
+                     + ", ".join(stale_values))
     if len(errors) >= 2:
         lines.append(f"[HEALTH] ⚠️ 자가검사 조회실패 {len(errors)}건 — 검사 불완전: "
                      + ", ".join(f"`{e['table']}`" for e in errors[:8]))
@@ -344,8 +419,11 @@ def main() -> int:
     print("|---|---|---|---|---|")
     keep_missing: list[str] = []
     keep_unknown: list[str] = []
+    keep_date_cols: dict[str, str] = {}
     for t in KEEP_TABLES:
         r = probe(client, t, asof)
+        if r["date_col"]:
+            keep_date_cols[t] = r["date_col"]
         if r["status"] == "ERROR":
             verdict = "⚠️ 조회불가"
             errors.append(r)
@@ -362,6 +440,32 @@ def main() -> int:
             keep_missing.append(t)
         print(f"| `{t}` | {r['date_col'] or '-'} | {r['latest'] or '-'} | "
               f"{r['today_rows'] if r['today_rows'] is not None else '-'} | {verdict} |")
+    print()
+
+    # ── 2.5) 유지 테이블 값 정합성 — 거짓 상수 탐지 (B-26 ①) ──────────
+    print("## 2.5 유지 테이블 값 정합성 — 수치 컬럼이 통째로 0/null인가")
+    print()
+    print("> 적재 여부만 보면 `price=0`을 6주간 매일 내보내도 ✅로 보인다"
+          "(7\\31 dashboard_smart_money 실사건). 공동적재 테이블은 **퀀트봇 적재분만**"
+          " 걸러서 본다 — 타 봇 실값이 섞이면 '전량 0'이 성립하지 않아 미탐된다.")
+    print()
+    print("| 테이블 | 검사범위 | 의심 컬럼 | 판정 |")
+    print("|---|---|---|---|")
+    stale_values: list[str] = []
+    for t in KEEP_TABLES:
+        dc = keep_date_cols.get(t)
+        if not dc:
+            print(f"| `{t}` | - | - | ⚠️ 날짜컬럼없음 |")
+            continue
+        findings, note = value_sanity(client, t, dc, asof)
+        if findings:
+            stale_values.append(f"{t}({', '.join(findings)})")
+            verdict = "🟡 **거짓 상수 의심**"
+        elif note.startswith("조회실패"):
+            verdict = "⚠️ 조회불가"
+        else:
+            verdict = "✅ 정상"
+        print(f"| `{t}` | {note} | {', '.join(findings) or '-'} | {verdict} |")
     print()
 
     # ── 3) 회색지대: 실측만(판단 대기) ──────────────────────────────
@@ -433,6 +537,9 @@ def main() -> int:
         print("- ✅ 유지 확정 테이블 전부 당일 적재 정상")
     if keep_unknown:
         print(f"- 🟠 유지 테이블 적재 확인불가: {', '.join(f'`{t}`' for t in keep_unknown)}")
+    if stale_values:
+        print(f"- 🟡 **유지 테이블 값 거짓 상수 의심 {len(stale_values)}건** — 적재는 됐으나 "
+              f"수치가 통째로 0/null: {', '.join(f'`{s}`' for s in stale_values)}")
     if errors:
         print(f"- ⚠️ 조회 실패 {len(errors)}건 — **검사 불완전**: "
               + ", ".join(f"`{e['table']}`" for e in errors))
@@ -441,7 +548,8 @@ def main() -> int:
     if args.alert:
         _send_alert(violations, keep_missing, asof,
                     unknowns=unknowns, keep_unknown=keep_unknown, errors=errors,
-                    prev_violations=prev_violations, prev_asof=prev_asof)
+                    prev_violations=prev_violations, prev_asof=prev_asof,
+                    stale_values=stale_values)
 
     # exit 1 조건: 퀀트봇 위반(당일·소급) 또는 판별불가 또는 검사 불완전(2건+)
     # — 침묵하며 exit 0 하던 F1·F3 구멍 봉쇄

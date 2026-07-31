@@ -1706,6 +1706,50 @@ def _get_close(ticker: str) -> int:
     return 0
 
 
+def _load_close_change(ticker: str, date_str: str) -> tuple[int | None, float | None]:
+    """지정 거래일의 (종가, 등락률%) 조회. 구할 수 없으면 (None, None).
+
+    ★7\30 검수 후속(7\31): dashboard_smart_money가 price/change_pct를 0으로
+    하드코딩해 적재하고 있었다. 웹 `/smart-money`는 `score DESC LIMIT 50`을 읽는데
+    퀀트봇 행이 score 107~110으로 상위를 독점해 **7\27~7\30 4거래일 동안 화면
+    50칸이 전부 공란**이었고, conflict=(date,ticker)라 정보봇이 넣은 실값 price까지
+    0으로 덮어썼다(7\30 실물: 한국가스공사 created 08:05=정보봇인데 price=0).
+
+    두 가지를 지킨다.
+      1. **날짜를 맞춰 조회**한다 — 기존 `_get_close`는 무조건 마지막 행을 읽어,
+         수집이 밀린 날 전일 종가를 당일 값으로 내보낸다(7\30 낡은소스 교훈).
+      2. 못 구하면 **0이 아니라 None**. 웹봇 6\14 답신: 컬럼 nullable이고 0은 거짓
+         보합 + 등락색 오적용을 부른다. 단 **키를 생략하면 DEFAULT 0이 박히므로**
+         반드시 명시적 None을 보내야 한다.
+    """
+    pq = DATA_DIR / "processed" / f"{ticker}.parquet"
+    if not pq.exists():
+        return None, None
+    try:
+        import numpy as np
+        import pandas as pd
+
+        df = pd.read_parquet(pq, columns=["close"])  # 132컬럼 중 1개만 읽는다
+        if df.empty:
+            return None, None
+        pos_arr = np.flatnonzero(df.index.normalize() == pd.Timestamp(date_str))
+        if len(pos_arr) == 0:
+            return None, None  # 해당 거래일 미수집 — 전일값으로 때우지 않는다
+        pos = int(pos_arr[-1])
+        close = float(df["close"].iloc[pos])
+        if not close or close != close:  # 0 또는 NaN
+            return None, None
+        chg = None
+        if pos >= 1:
+            prev = float(df["close"].iloc[pos - 1])
+            if prev and prev == prev:
+                chg = round((close / prev - 1) * 100, 2)
+        return int(close), chg
+    except Exception as e:  # noqa: BLE001
+        logger.debug("[FLOWX] 종가 조회 실패 %s %s: %s", ticker, date_str, e)
+        return None, None
+
+
 def _build_cfo_data() -> dict:
     """CFO 포트폴리오 건강 리포트 → FLOWX payload."""
     p = DATA_DIR / "cfo_report.json"
@@ -2141,14 +2185,26 @@ def build_smart_money_rows(date_str: str = "") -> list[dict]:
             "foreign_net_5d": round(f_net, 1),
             "inst_net_5d": round(i_net, 1),
             "signal_type": signal_type,
-            "price": 0,  # accumulation_alert에 가격 없음
-            "change_pct": 0,
+            "price": None,      # accumulation_alert엔 가격이 없다 → 아래에서 종가 채움
+            "change_pct": None,
             "score": round(score, 1),
         })
 
     # score 기준 내림차순 정렬, 상위 50개
     rows.sort(key=lambda x: -x["score"])
-    return rows[:50]
+    rows = rows[:50]
+
+    # 시세 채움 — 정렬·절단 **뒤에** 한다(656건 전부 parquet을 읽을 이유가 없다).
+    # 미확보분은 null 그대로 두는 게 정직하다(웹이 '—'로 렌더).
+    filled = 0
+    for r in rows:
+        r["price"], r["change_pct"] = _load_close_change(r["ticker"], date_str)
+        if r["price"] is not None:
+            filled += 1
+    if rows:
+        logger.info("[FLOWX] 스마트머니 시세 채움 %d/%d행 (미확보 %d행은 null 적재)",
+                    filled, len(rows), len(rows) - filled)
+    return rows
 
 
 def build_etf_signals_rows(date_str: str = "") -> list[dict]:
