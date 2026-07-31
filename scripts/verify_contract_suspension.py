@@ -201,6 +201,65 @@ _SANITY_SKIP_COLS = {
 _SANITY_MIN_ROWS = 5
 
 
+def _const_numeric_fields(rows: list[dict], date_col: str | None = None) -> list[str]:
+    """행 묶음에서 수치 필드가 통째로 0/null인 것을 찾는다.
+
+    수치가 아닌 값이 하나라도 섞이면 그 필드는 건너뛴다(문자열 상수는 정상일 수
+    있다). bool은 수치로 보지 않는다 — False가 전부인 플래그는 흔하고 정상이다.
+    """
+    out: list[str] = []
+    for col in rows[0]:
+        if col in _SANITY_SKIP_COLS or (date_col and col == date_col):
+            continue
+        vals = [r.get(col) for r in rows]
+        if not all(v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
+                   for v in vals):
+            continue
+        if all(v is None for v in vals):
+            out.append(f"{col}=전량 null")
+        elif all((v or 0) == 0 for v in vals):
+            out.append(f"{col}=전량 0")
+    return out
+
+
+def _batch_groups(rows: list[dict], ts_col: str) -> list[tuple[str, list[dict]]]:
+    """적재 시각(분 단위)으로 배치를 가른다.
+
+    ★왜 배치인가(7\31 실측): "전 행 0" 규칙은 **같은 날 같은 테이블에 여러 봇이
+    쓰면 서로의 실값에 가려 미탐된다**. 7/30 `dashboard_smart_money`는 18시대에
+    퀀트봇 42행만 있어서 잡혔지만, 7/29는 정보봇이 19시대에 193행(실값)을 넣어
+    퀀트봇 38행의 전량 0이 묻혔다 — **7/30에 잡힌 건 운이었다.**
+    같은 cron 실행은 created_at이 초 단위로 뭉치므로 분 단위로 가르면
+    생산자별 배치가 자연히 분리되고, upsert가 created_at을 갱신하지 않는
+    문제와도 무관해진다(배치가 나뉘어 보일 뿐이다).
+    """
+    from collections import defaultdict
+    g: dict[str, list[dict]] = defaultdict(list)
+    for r in rows:
+        ts = r.get(ts_col)
+        g[_kst(str(ts)) if ts else "?"].append(r)
+    return sorted(g.items())
+
+
+def _record_groups(payload) -> list[tuple[str, list[dict]]]:
+    """JSON payload에서 '행 묶음'을 뽑는다 — `list[dict]` 또는 `dict[str, dict]`.
+
+    ★B-26 ②: 유지 3종(scenario_dashboard·leader_cycle·sector_flow)은 하루 **1행**이고
+    실제 값이 `data` JSON 안에 배열/맵으로 들어 있다. 행 단위 상수 판정이 성립하지
+    않아 §2.5 1차에서는 통째로 미검사였다 — 유지 5종 중 2종만 보고 있었다는 뜻이다.
+    배열을 펼쳐 같은 판정을 걸면 나머지 3종도 사각에서 나온다.
+    """
+    groups: list[tuple[str, list[dict]]] = []
+    if not isinstance(payload, dict):
+        return groups
+    for k, v in payload.items():
+        if isinstance(v, list) and v and all(isinstance(x, dict) for x in v):
+            groups.append((k, v))
+        elif isinstance(v, dict) and v and all(isinstance(x, dict) for x in v.values()):
+            groups.append((k, list(v.values())))
+    return groups
+
+
 def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str], str]:
     """유지 테이블의 당일 값이 **거짓 상수**(수치 컬럼이 통째로 0/null)인지 본다. (B-26 ①)
 
@@ -224,41 +283,67 @@ def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str
             q = q.eq(date_col, d.isoformat())
         rows = (q.limit(1000).execute().data) or []
     except Exception as e:  # noqa: BLE001
-        return [], f"조회실패({str(e)[:40]})"
+        return [], f"조회실패({str(e)[:40]})", False
 
     if not rows:
-        return [], "당일 0행"
+        return [], "당일 0행", False
 
-    # 퀀트봇 적재분만 — ts 컬럼이 없으면 전체를 보되 그 사실을 근거에 남긴다.
     ts_col = next((c for c in ("created_at", "updated_at", "inserted_at")
                    if c in rows[0]), None)
-    scope = "전체"
-    if ts_col:
-        mine = [r for r in rows
-                if r.get(ts_col) and _kst(str(r[ts_col])) != "?"
-                and int(_kst(str(r[ts_col]))[:2]) in QUANT_UPLOAD_KST_HOURS]
-        if mine:
-            rows, scope = mine, "퀀트봇분"
-        else:
-            return [], f"퀀트봇 적재분 없음(전체 {len(rows)}행)"
-
-    if len(rows) < _SANITY_MIN_ROWS:
-        return [], f"{scope} {len(rows)}행 — 판정 최소행수({_SANITY_MIN_ROWS}) 미만"
 
     findings: list[str] = []
-    for col in rows[0]:
-        if col in _SANITY_SKIP_COLS or col == date_col:
-            continue
-        vals = [r.get(col) for r in rows]
-        # 수치 컬럼만 대상(bool 제외). 하나라도 수치가 아니면 건너뛴다.
-        if not all(v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
-                   for v in vals):
-            continue
-        if all(v is None for v in vals):
-            findings.append(f"{col}=전량 null")
-        elif all((v or 0) == 0 for v in vals):
-            findings.append(f"{col}=전량 0")
-    return findings, f"{scope} {len(rows)}행"
+    notes: list[str] = []
+    checked = False
+
+    # (A) 행 단위 — **적재 배치별로** 본다(플랫 컬럼 테이블: smart_money·valuation_gap).
+    #
+    # ★생산자 시각대로 거르지 않는 이유(7\31 실측 2건):
+    #   ⑴ `created_at`은 행이 **처음 만들어진** 시각이라 `on_conflict` upsert로
+    #      우리가 덮어써도 갱신되지 않는다. `quant_sector_flow`는 퀀트봇이 18:40:33·
+    #      18:50:55에 POST 200을 받았는데 created_at은 4일 내내 16:56이다 —
+    #      "퀀트봇 시각대 행 0"이 "우리가 안 썼다"를 뜻하지 않는다.
+    #   ⑵ 시각대로 거르고 남은 것을 한 덩어리로 보면, 같은 시간대에 타 봇 실값이
+    #      섞였을 때 우리 배치의 전량 0이 묻힌다(7/29 정보봇 19시 193행이
+    #      퀀트봇 38행을 덮어 미탐. 7/30에 잡힌 건 우연히 우리만 있었기 때문).
+    # 분 단위 배치로 가르면 둘 다 해소되고, 어느 배치가 문제인지 시각으로 지목된다.
+    if ts_col:
+        batches = [(bt, br) for bt, br in _batch_groups(rows, ts_col)
+                   if len(br) >= _SANITY_MIN_ROWS]
+        if batches:
+            for bt, br in batches:
+                findings += [f"[{bt}] {f}" for f in _const_numeric_fields(br, date_col)]
+            notes.append(f"{len(rows)}행/배치 {len(batches)}개("
+                         + ",".join(f"{bt}×{len(br)}" for bt, br in batches) + ")")
+            checked = True
+        else:
+            notes.append(f"{len(rows)}행 — 배치별 최소 {_SANITY_MIN_ROWS}행 미만")
+    elif len(rows) >= _SANITY_MIN_ROWS:
+        findings += _const_numeric_fields(rows, date_col)
+        notes.append(f"전체 {len(rows)}행(적재시각 컬럼 없음)")
+        checked = True
+    else:
+        notes.append(f"전체 {len(rows)}행(행단위 판정 최소 {_SANITY_MIN_ROWS} 미만)")
+
+    # (B) JSON `data` 내부 행 묶음 — 하루 1행 3종(B-26 ②)
+    import json as _json
+    checked_groups = 0
+    for r in rows:
+        payload = r.get("data")
+        if isinstance(payload, str):
+            try:
+                payload = _json.loads(payload)
+            except Exception:  # noqa: BLE001
+                continue
+        for gname, grows in _record_groups(payload):
+            if len(grows) < _SANITY_MIN_ROWS:
+                continue  # 표본 부족 — 조용히 넘기되 아래 집계에서 빠진다
+            checked_groups += 1
+            findings += [f"data.{gname}.{f}" for f in _const_numeric_fields(grows)]
+    if checked_groups:
+        notes.append(f"data 배열 {checked_groups}묶음")
+        checked = True
+
+    return findings, " / ".join(notes), checked
 
 
 def _is_trading_day(asof: str) -> bool:
@@ -447,7 +532,8 @@ def main() -> int:
     print()
     print("> 적재 여부만 보면 `price=0`을 6주간 매일 내보내도 ✅로 보인다"
           "(7\\31 dashboard_smart_money 실사건). 공동적재 테이블은 **퀀트봇 적재분만**"
-          " 걸러서 본다 — 타 봇 실값이 섞이면 '전량 0'이 성립하지 않아 미탐된다.")
+          " 걸러서 본다 — 타 봇 실값이 섞이면 '전량 0'이 성립하지 않아 미탐된다."
+          " 하루 1행 JSON 테이블은 `data` 안의 배열/맵을 펼쳐서 같은 판정을 건다(B-26 ②).")
     print()
     print("| 테이블 | 검사범위 | 의심 컬럼 | 판정 |")
     print("|---|---|---|---|")
@@ -459,14 +545,14 @@ def main() -> int:
             print(f"| `{t}` | - | - | ⚠️ 날짜컬럼없음 |")
             sanity_unchecked.append(t)
             continue
-        findings, note = value_sanity(client, t, dc, asof)
+        findings, note, checked = value_sanity(client, t, dc, asof)
         if findings:
             stale_values.append(f"{t}({', '.join(findings)})")
             verdict = "🟡 **거짓 상수 의심**"
         elif note.startswith("조회실패"):
             verdict = "⚠️ 조회불가"
             sanity_unchecked.append(t)
-        elif "미만" in note or "없음" in note or "0행" in note:
+        elif not checked:
             # ★"검사하지 않았다"를 ✅로 찍으면 안 된다 — 유지 5종을 매일 값까지 본다는
             # 착각을 주고, 영구 미검사가 조용히 굳는다(7\30 F4와 같은 실패 모드).
             verdict = "➖ 미검사"
@@ -478,8 +564,7 @@ def main() -> int:
     if sanity_unchecked:
         print(f"> ➖ 값 검사 미적용 {len(sanity_unchecked)}종: "
               + ", ".join(f"`{t}`" for t in sanity_unchecked)
-              + " — JSON `data` 단일행 구조라 행 단위 상수 판정이 성립하지 않는다."
-                " 내부 필드 교차검증은 B-26 ②로 남긴다(현 커버리지는 row형 2종).")
+              + " — 표본이 최소행수 미만이거나 조회 불가. 검사한 종수는 아래 요약 참조.")
         print()
 
     # ── 3) 회색지대: 실측만(판단 대기) ──────────────────────────────

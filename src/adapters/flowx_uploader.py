@@ -593,6 +593,42 @@ class FlowxUploader:
 
     # ── Row 테이블 4개 (대시보드 시그널) ──────────────
 
+    # 적재 직전 자기검사에서 제외할 식별자·메타 컬럼
+    _CONST_SKIP = {"id", "date", "ticker", "code", "name", "sector",
+                   "signal_type", "grade", "created_at", "updated_at"}
+
+    def _warn_constant_numeric(self, table: str, rows: list[dict], label: str) -> None:
+        """보내려는 페이로드의 수치 필드가 통째로 0/null이면 경고 로그를 남긴다.
+
+        ★왜 여기인가(7\31): 같은 검사를 Supabase 쪽에서 하려 했더니 생산자를
+        확정할 수 없었다 — `created_at`은 행이 처음 만들어진 시각이라 `on_conflict`
+        upsert로 덮어써도 갱신되지 않고, 같은 날 여러 봇이 쓰면 타 봇 실값에 가려
+        우리 배치의 전량 0이 묻힌다(7/29 실측). **우리가 무엇을 보냈는지는 우리가
+        안다** — 추정하지 말고 페이로드 자체를 보는 것이 유일하게 확실한 판정이다.
+        `price=0` 6주 방치가 이 한 줄이 없어서 생겼다.
+
+        업로드를 막지 않는다(경고만). 전체를 try로 감싸 이 검사가 실패해도
+        적재 경로에는 영향이 없다 — 감시가 대상을 죽이면 안 된다.
+        """
+        try:
+            if len(rows) < 5:
+                return
+            for col in rows[0]:
+                if col in self._CONST_SKIP:
+                    continue
+                vals = [r.get(col) for r in rows]
+                if not all(v is None or (isinstance(v, (int, float))
+                                         and not isinstance(v, bool)) for v in vals):
+                    continue
+                if all(v is None for v in vals):
+                    logger.warning("[FLOWX] ⚠️ %s(%s): '%s' 전량 null (%d행) — 채움 실패 의심",
+                                   label, table, col, len(rows))
+                elif all((v or 0) == 0 for v in vals):
+                    logger.warning("[FLOWX] ⚠️ %s(%s): '%s' 전량 0 (%d행) — 거짓 상수 의심",
+                                   label, table, col, len(rows))
+        except Exception as e:  # noqa: BLE001
+            logger.debug("[FLOWX] 상수 자기검사 실패(무시) %s: %s", table, e)
+
     def _upload_rows(self, table: str, date_str: str, rows: list[dict],
                      conflict_cols: str, label: str, _depth: int = 0) -> bool:
         """Row 테이블 공통 UPSERT 패턴. 스키마에 없는 컬럼은 자동 제거 후 재시도.
@@ -613,6 +649,8 @@ class FlowxUploader:
         try:
             for row in rows:
                 row["date"] = date_str
+            if _depth == 0:  # 재귀 재시도에서 중복 경고하지 않는다
+                self._warn_constant_numeric(table, rows, label)
             result = self.client.table(table).upsert(
                 rows, on_conflict=conflict_cols
             ).execute()
