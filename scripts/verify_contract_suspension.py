@@ -452,10 +452,12 @@ def main() -> int:
     print("| 테이블 | 검사범위 | 의심 컬럼 | 판정 |")
     print("|---|---|---|---|")
     stale_values: list[str] = []
+    sanity_unchecked: list[str] = []
     for t in KEEP_TABLES:
         dc = keep_date_cols.get(t)
         if not dc:
             print(f"| `{t}` | - | - | ⚠️ 날짜컬럼없음 |")
+            sanity_unchecked.append(t)
             continue
         findings, note = value_sanity(client, t, dc, asof)
         if findings:
@@ -463,10 +465,22 @@ def main() -> int:
             verdict = "🟡 **거짓 상수 의심**"
         elif note.startswith("조회실패"):
             verdict = "⚠️ 조회불가"
+            sanity_unchecked.append(t)
+        elif "미만" in note or "없음" in note or "0행" in note:
+            # ★"검사하지 않았다"를 ✅로 찍으면 안 된다 — 유지 5종을 매일 값까지 본다는
+            # 착각을 주고, 영구 미검사가 조용히 굳는다(7\30 F4와 같은 실패 모드).
+            verdict = "➖ 미검사"
+            sanity_unchecked.append(t)
         else:
             verdict = "✅ 정상"
         print(f"| `{t}` | {note} | {', '.join(findings) or '-'} | {verdict} |")
     print()
+    if sanity_unchecked:
+        print(f"> ➖ 값 검사 미적용 {len(sanity_unchecked)}종: "
+              + ", ".join(f"`{t}`" for t in sanity_unchecked)
+              + " — JSON `data` 단일행 구조라 행 단위 상수 판정이 성립하지 않는다."
+                " 내부 필드 교차검증은 B-26 ②로 남긴다(현 커버리지는 row형 2종).")
+        print()
 
     # ── 3) 회색지대: 실측만(판단 대기) ──────────────────────────────
     print(f"## 3. 회색지대 {len(GRAY_TABLES)}종 — 운영자 판단 대기(B-24 ①), 현황 실측만")
@@ -540,6 +554,11 @@ def main() -> int:
     if stale_values:
         print(f"- 🟡 **유지 테이블 값 거짓 상수 의심 {len(stale_values)}건** — 적재는 됐으나 "
               f"수치가 통째로 0/null: {', '.join(f'`{s}`' for s in stale_values)}")
+    elif len(sanity_unchecked) < len(KEEP_TABLES):
+        print(f"- ✅ 값 정합성 검사한 {len(KEEP_TABLES) - len(sanity_unchecked)}종에서 거짓 상수 없음"
+              + (f" (미검사 {len(sanity_unchecked)}종)" if sanity_unchecked else ""))
+    else:
+        print(f"- ➖ 값 정합성: 유지 {len(KEEP_TABLES)}종 **전부 미검사** — 검사가 아무것도 보지 않았다")
     if errors:
         print(f"- ⚠️ 조회 실패 {len(errors)}건 — **검사 불완전**: "
               + ", ".join(f"`{e['table']}`" for e in errors))
