@@ -2194,6 +2194,19 @@ def build_sector_rotation_rows(date_str: str = "") -> list[dict]:
     return rows
 
 
+# dashboard_smart_money.signal_type 계약 (웹봇 8\1 요청 ②).
+# 공유 테이블이라 정보봇 계보와 라벨 체계가 같아야 화면에서 한 줄로 설 수 있다.
+# 앞 3종은 정보봇이 쓰는 표기 그대로다. `관찰`만 정보봇에 대응이 없는 우리 고유
+# 라벨이라 웹봇에 사전 통보했다(실측상 상위 50 진입 사례는 아직 없다).
+# ★이 목록을 바꾸면 웹 렌더가 사각에 빠진다 — 추가·변경 시 웹봇·정보봇에 먼저 알린다.
+SMART_MONEY_SIGNAL_TYPES = {
+    "DUAL_FLOW": "외국인+기관 동시유입",
+    "FOREIGN_BUY": "외국인 연속유입",
+    "INST_BUY": "기관 연속유입",
+    "WATCH": "관찰",
+}
+
+
 def build_smart_money_rows(date_str: str = "") -> list[dict]:
     """accumulation_alert.json → dashboard_smart_money Row 테이블.
 
@@ -2216,22 +2229,35 @@ def build_smart_money_rows(date_str: str = "") -> list[dict]:
         f_net = alert.get("foreign_5d_억", 0)
         i_net = alert.get("inst_5d_억", 0)
 
-        # signal_type 결정
+        # signal_type — 정보봇 계보와 같은 한글 라벨을 쓴다(웹봇 8/1 요청 ②).
+        # 영문 enum(DUAL_FLOW 등)은 웹이 flowKind()로 흡수 중이었으나, 그건 웹 쪽
+        # 임시 방어이고 새 enum이 생기면 다시 사각이 된다. 아래 4종을 계약으로
+        # 고정하고, 추가·변경 시 웹봇·정보봇에 사전 통보한다.
         if alert.get("dual_buying"):
-            signal_type = "DUAL_FLOW"
+            signal_type = SMART_MONEY_SIGNAL_TYPES["DUAL_FLOW"]
         elif f_consec >= 3 or f_net > 0:
-            signal_type = "FOREIGN_BUY"
+            signal_type = SMART_MONEY_SIGNAL_TYPES["FOREIGN_BUY"]
         elif i_consec >= 3 or i_net > 0:
-            signal_type = "INST_BUY"
+            signal_type = SMART_MONEY_SIGNAL_TYPES["INST_BUY"]
         else:
-            signal_type = "WATCH"
+            signal_type = SMART_MONEY_SIGNAL_TYPES["WATCH"]
 
-        # score: grade 기반
+        # score: grade 기반. **상한 100** — 공유 테이블이라 정보봇 계보(0~100)와
+        # 척도가 같아야 한다(웹봇 8/1 요청 ①). 기존은 90+10+10=110까지 나가
+        # 웹 `/smart-money`가 score 내림차순 상위 50을 뽑을 때 척도 자체가 달라
+        # 비교가 성립하지 않았다.
+        # ★단순 클리핑(min(score,100))이 아니라 **기준점을 10 내려** 재배분한다.
+        #   클리핑하면 실측 50행 중 29행이 110이라 전부 100으로 뭉개져 순위 정보가
+        #   사라진다. 보너스를 절반으로 줄이는 안도 검증에서 기각했다 — 실제 연속일수가
+        #   7~10이라 상한 5에 전부 포화돼 50행 **전부** 100이 됐다(클리핑보다 나쁘다).
+        #   기준점만 내리면 등급 간격(20)과 종목 간 구분이 모두 살아남는다:
+        #     STRONG 80~100 / MODERATE 60~80 / NOTABLE 40~60 / WATCH 20~40
         grade = alert.get("grade", "WATCH")
-        score_map = {"STRONG": 90, "MODERATE": 70, "NOTABLE": 50, "WATCH": 30}
-        base_score = score_map.get(grade, 30)
-        # 쌍끌이 보너스 + 연속일수 보너스
+        score_map = {"STRONG": 80, "MODERATE": 60, "NOTABLE": 40, "WATCH": 20}
+        base_score = score_map.get(grade, 20)
+        # 쌍끌이 보너스(10) + 연속일수 보너스(0~10) → 등급별 최대 +20
         score = base_score + (10 if alert.get("dual_buying") else 0) + min(f_consec + i_consec, 10)
+        score = min(score, 100)  # 방어선 — score_map이 바뀌어도 계약을 깨지 않는다
 
         rows.append({
             "date": date_str,
