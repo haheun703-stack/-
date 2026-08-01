@@ -25,6 +25,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 LEDGER_DIR = PROJECT_ROOT / "data" / "signal_ledger"
 PICKS_FILE = PROJECT_ROOT / "data" / "tomorrow_picks.json"
+# ★이 파일이 **전방 평가 정본**이다(8\1 B-35에서 생산자 분리).
+# 신호 원장을 남겨 두고 **다음 영업일 시가 진입 → D+3 종가**로 채점한다
+# = 신호가 나온 뒤의 성과만 본다. 소비자 6곳이 이 파일을 읽는다
+# (dashboard_data · build_killer_picks · source_weight_learner · market_journal ·
+#  run_v3_brain · flowx_uploader).
+# ⚠️`daily_market_learner.py`는 **당일 종가/전일 종가**라 평가 성격이 다르다.
+#   예전엔 둘이 이 파일을 같이 써서 ⑴여기 결과가 매일 18:53에 덮어써지고
+#   ⑵`daily_log`가 초기화돼 "20일 누적"이 하루치가 됐다(days_tracked=1 실측).
+#   그쪽은 이제 `signal_accuracy_daily.json`을 쓴다 — **다시 합치지 말 것.**
 ACCURACY_FILE = PROJECT_ROOT / "data" / "market_learning" / "signal_accuracy.json"
 WINDOW_DAYS = 60  # 성과 집계 롤링 윈도우
 EVAL_DAYS = (1, 3, 5)

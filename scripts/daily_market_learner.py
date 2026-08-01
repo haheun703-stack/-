@@ -44,7 +44,16 @@ DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
 CSV_DIR = PROJECT_ROOT / "stock_data_daily"
 LEARNING_DIR = DATA_DIR / "market_learning"
-ACCURACY_PATH = LEARNING_DIR / "signal_accuracy.json"
+# ★★생산자 분리(8\1, B-35): 예전엔 `signal_accuracy.json`을 썼는데, 그 파일은
+# `signal_performance_refresh.py`(cron 16:50)가 **전방 평가**(신호 다음 영업일 시가 진입
+# → D+3 종가)로 쓰는 정본이다. 둘이 같은 파일·같은 `signals` 키를 쓰면서 두 가지가 깨졌다:
+#   ⑴ 여기(BAT-D 18:53)가 나중에 돌아 **전방 평가 결과를 매일 덮어썼다**
+#      (7/31 실측: 16:50 로그는 "엔진 22개 갱신"인데 파일엔 10개만 남음)
+#   ⑵ 전방 평가는 `daily_log`가 없는 새 dict를 통째로 쓰므로, 여기서 읽을 때마다
+#      `daily_log`가 빈 배열로 초기화됐다 → **"20일 누적"이 실제로는 하루치**
+#      (7/31 실측: daily_log 1건 · 전 엔진 days_tracked=1)
+# 이 파일은 **당일 종가/전일 종가**라 평가 성격도 다르다(전방 아님). 다시 합치지 말 것.
+DAILY_ACCURACY_PATH = LEARNING_DIR / "signal_accuracy_daily.json"
 WEIGHTS_PATH = LEARNING_DIR / "learning_weights.json"
 INDEX_PATH = LEARNING_DIR / "_index.json"
 SETTINGS_PATH = PROJECT_ROOT / "config" / "settings.yaml"
@@ -544,7 +553,7 @@ def phase4_cumulative_update(
     window = cfg.get("rolling_window_days", 20)
 
     # 기존 누적 데이터 로드
-    cum = _load_json(ACCURACY_PATH) or {
+    cum = _load_json(DAILY_ACCURACY_PATH) or {
         "updated_at": "",
         "window_days": window,
         "signals": {},
@@ -593,7 +602,7 @@ def phase4_cumulative_update(
         }
     cum["signals"] = signals_cum
 
-    _save_json(ACCURACY_PATH, cum)
+    _save_json(DAILY_ACCURACY_PATH, cum)
 
     # ── learning_weights.json 생성 (피드백 루프 핵심) ──
     _compute_learning_weights(cum)
