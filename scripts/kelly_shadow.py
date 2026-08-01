@@ -11,11 +11,17 @@
 그 7파일은 커밋 보류 상태(의미론·집계 편향 미해소)라 코드 상태에 의존하면
 섀도가 같이 멈춘다. 여기서는 **관측만** 하므로 독립이 맞다.
 
-★★핵심 산출 = 같은 신호에 대해 두 가지 켈리를 나란히 낸다.
-  ⑴ 절대 승률 기반 — 지금 파일에 저장된 hit_rate를 그대로 쓴 값(코덱스 코드가 쓸 값)
-  ⑵ 기저선 보정 승률 기반 — 같은 날 시장 전체 상승비율을 뺀 초과분만 실력으로 본 값
-둘의 격차가 **B-35(승률이 시장 베타를 실력으로 기록하고 있다)의 크기**다.
-7/31 실측 예: 시장 상승비율 89.7%인 날 신호 승률 92.8% → 초과 +3.1%p.
+★★두 값을 나란히 낸다 — **하나만 켈리다.**
+  ⑴ `mult_abs` = 절대 승률 기반 켈리(코덱스 코드가 실제로 쓸 값)
+  ⑵ `selection_edge_proxy` = 시장 대비 초과분을 같은 식에 넣어본 **진단용 대리지표**
+     ★켈리가 아니다(코덱스 8\1 판정): 롱온리 켈리의 p는 "현금 기준으로 이겼을 확률"인데
+     초과 승률은 "시장보다 나았을 확률"이라 둘 사이에 변환식이 없다. 종목이 늘 -1%,
+     시장이 늘 -2%면 초과 승률은 100%지만 계좌는 손실이라 켈리 비중은 0이다.
+     **주문 수량·성과 감산의 근거로 쓰지 않는다.**
+
+p·b는 **엄격한 승/패 표본**에서 온 값을 쓴다(B-35 ③) — flat(정확히 0)과
+invalid(평가 불가)를 패배로 세면 승률도 손익비도 왜곡된다.
+손익비가 없으면 1:1 같은 가정을 넣지 않고 **켈리 계산 자체를 건너뛴다**.
 
 실행:
     python -u -X utf8 scripts/kelly_shadow.py              # 관측 1회 + 기록
@@ -127,32 +133,56 @@ def observe() -> dict:
             rows.append({"engine": eng, "total": total, "verdict": "단위 계약 위반 — 미판정"})
             continue
 
-        avg_win = abs(float(acc.get("avg_win", 0) or 0))
-        avg_loss = abs(float(acc.get("avg_loss", 0) or 0))
-        b = avg_win / avg_loss if (avg_win > 0 and avg_loss > 0) else KELLY_FALLBACK_ODDS
-        has_odds = avg_win > 0 and avg_loss > 0
+        # p·b는 **엄격한 승/패 표본**에서 온 값을 우선한다(B-35 ③).
+        # flat(정확히 0)과 invalid(평가 불가)를 패배로 세면 둘 다 왜곡된다.
+        p_strict = _p_from(acc.get("hit_rate_strict"))
+        if p_strict is not None:
+            p = p_strict
+        wl_n = acc.get("win_loss_n")
+        n_for_sample = int(wl_n) if wl_n is not None else total
 
-        # 기저선 보정: 시장 중립을 0.5로 놓고 초과 승률만 실력으로 본다.
-        # 성과파일이 엔진별 초과분을 이미 계산해 뒀으면 그것을 쓴다 — 엔진마다
-        # 신호일 분포가 달라 전체 평균으로 빼면 어긋나기 때문(B-35 ②).
+        b = acc.get("odds_b")
+        if b is None:
+            aw, al = acc.get("avg_win"), acc.get("avg_loss")
+            if aw and al:
+                b = abs(float(aw)) / abs(float(al))
+        # ★손익비가 없으면 **가정하지 않는다**(코덱스 권고). 1:1을 값으로 박으면
+        #   실측으로 오인된다 — 이 엔진은 켈리 계산 자체를 하지 않는다.
+        has_odds = b is not None and float(b) > 0
+
+        # 시장 대비 선택력 — ★켈리 확률이 아니다(코덱스 8/1 후속 판정).
+        # 롱온리 켈리의 p는 "현금 기준으로 이겼을 확률"인데 초과 승률은
+        # "시장보다 나았을 확률"이라 변환식이 없다. 종목이 늘 -1%, 시장이 늘 -2%면
+        # 초과 승률은 100%지만 계좌는 손실이라 켈리 비중은 0이다.
+        # 따라서 아래 값은 **진단·시각화 전용**이며 주문 수량 근거로 쓰지 않는다.
         exc = acc.get("hit_rate_excess")
         if exc is not None:
             p_adj = max(0.0, min(1.0, 0.5 + float(exc) / 100.0))
         else:
             p_adj = max(0.0, min(1.0, 0.5 + (p - mkt_p)))
 
-        enough = total >= KELLY_MIN_SAMPLES
-        rows.append({
+        enough = n_for_sample >= KELLY_MIN_SAMPLES
+        row = {
             "engine": eng,
             "total": total,
+            "win_loss_n": n_for_sample,
+            "flat": acc.get("flat"),
+            "invalid": acc.get("invalid"),
             "sample_ok": enough,
             "p_abs": round(p, 4),
             "p_excess": round(p_adj, 4),
-            "b": round(b, 3),
-            "b_measured": has_odds,          # False = 손익비 실측 없음(1:1 가정)
-            "mult_abs": round(_kelly(p, b) if enough else KELLY_DEFAULT, 4),
-            "mult_excess": round(_kelly(p_adj, b) if enough else KELLY_DEFAULT, 4),
-        })
+            "b": round(float(b), 3) if has_odds else None,
+            "b_measured": has_odds,
+        }
+        if has_odds:
+            row["mult_abs"] = round(_kelly(p, float(b)) if enough else KELLY_DEFAULT, 4)
+            # 이름에서 Kelly를 뺀다 — 켈리가 아니기 때문(코덱스 권고).
+            row["selection_edge_proxy"] = round(
+                _kelly(p_adj, float(b)) if enough else KELLY_DEFAULT, 4)
+        else:
+            row["mult_abs"] = None
+            row["selection_edge_proxy"] = None
+        rows.append(row)
 
     return {
         "date": datetime.now().strftime("%Y-%m-%d"),
@@ -180,32 +210,29 @@ def main() -> int:
     print(f"성과파일 updated_at={r['source_updated_at']} window_days={r['source_window_days']}")
     print(f"기저선 {r['market_win_rate'] * 100:.1f}%  (n={r['market_n']:,})  {r.get('baseline_rule', '')}")
     print()
-    print(f"{'엔진':<22}{'표본':>6}{'승률':>8}{'초과승률':>9}{'손익비':>8}"
-          f"{'배수(절대)':>11}{'배수(보정)':>11}  비고")
+    print(f"{'엔진':<22}{'승패표본':>9}{'flat':>6}{'무효':>6}{'승률':>8}"
+          f"{'손익비':>8}{'켈리배수':>10}{'선택력':>9}  비고")
     for e in r["engines"]:
         if "verdict" in e:
-            print(f"{e['engine']:<22}{e['total']:>6}  {e['verdict']}")
+            print(f"{e['engine']:<22}{e['total']:>9}  {e['verdict']}")
             continue
         note = []
         if not e["sample_ok"]:
-            note.append(f"표본<{KELLY_MIN_SAMPLES}→기본값")
+            note.append(f"승패표본<{KELLY_MIN_SAMPLES}")
         if not e["b_measured"]:
-            note.append("손익비 미실측(1:1 가정)")
-        print(f"{e['engine']:<22}{e['total']:>6}{e['p_abs'] * 100:>7.1f}%"
-              f"{e['p_excess'] * 100:>8.1f}%{e['b']:>8.2f}"
-              f"{e['mult_abs']:>11.3f}{e['mult_excess']:>11.3f}  {' / '.join(note)}")
+            note.append("손익비 미실측 → 켈리 미산출")
+        km = f"{e['mult_abs']:.3f}" if e.get("mult_abs") is not None else "—"
+        se = f"{e['selection_edge_proxy']:.3f}" if e.get("selection_edge_proxy") is not None else "—"
+        bs = f"{e['b']:.2f}" if e.get("b") is not None else "—"
+        print(f"{e['engine']:<22}{e['win_loss_n']:>9}{e.get('flat') or 0:>6}"
+              f"{e.get('invalid') or 0:>6}{e['p_abs'] * 100:>7.1f}%"
+              f"{bs:>8}{km:>10}{se:>9}  {' / '.join(note)}")
 
-    # 격차 요약 — B-35(승률이 시장 베타를 실력으로 기록)의 크기
-    graded = [e for e in r["engines"] if e.get("sample_ok") and "verdict" not in e]
-    if graded:
-        print()
-        print("★ 절대 vs 보정 격차 (= 시장 베타를 실력으로 적은 몫)")
-        for e in sorted(graded, key=lambda x: -(x["mult_abs"] - x["mult_excess"]))[:5]:
-            gap = e["mult_abs"] - e["mult_excess"]
-            ratio = (e["mult_abs"] / e["mult_excess"]) if e["mult_excess"] > 0 else float("inf")
-            rs = f"{ratio:.1f}배" if ratio != float("inf") else "∞(보정 시 0)"
-            print(f"  {e['engine']:<22} {e['mult_abs']:.3f} → {e['mult_excess']:.3f}"
-                  f"  (차 {gap:+.3f}, {rs})")
+    print()
+    print("※ '켈리배수' = 절대 승률 기반. '선택력' = 시장 대비 초과분 기반으로 같은 식에")
+    print("   넣어본 **진단용 대리지표**이며 켈리 확률이 아니다 — 롱온리 계좌의 p는")
+    print("   '현금 기준으로 이겼을 확률'인데 초과 승률은 '시장보다 나았을 확률'이라")
+    print("   변환식이 없다(코덱스 8/1 판정). 주문 수량 근거로 쓰지 않는다.")
 
     if not args.no_save:
         OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
