@@ -79,6 +79,23 @@ def snapshot_today() -> int:
     return len(items)
 
 
+def _new_stat() -> dict:
+    """엔진별 집계 그릇. win/loss/flat/invalid를 **분리**해서 센다(B-35 ③).
+
+    ★왜 분리인가: 예전엔 `d3 <= 0`을 전부 패배로 세면서 손실 크기는 `abs(0)=0`을
+    더했다. 그러면 `avg_loss = loss_ret / loss`에서 분모만 늘어 평균 손실이 과소
+    평가되고, 손익비 `b = avg_win / avg_loss`가 부풀려진다 —
+    실증: 승6(+5%)·무변동3·패1(-5%)일 때 b가 1.00 → 4.00으로 **4배 과대**,
+    켈리가 0.200 → 0.500으로 뛴다(위험한 방향).
+    `invalid`(조회 실패·봉 부족)는 애초에 평가가 성립하지 않은 건이라
+    승/패/무변동 어디에도 넣으면 안 되고, 사유별로 세어 진단에 남긴다.
+    """
+    return {"total": 0, "hit": 0, "loss": 0, "flat": 0, "ret": 0.0,
+            "win_ret": 0.0, "loss_ret": 0.0,
+            "invalid": 0, "invalid_reasons": {},
+            "base_n": 0, "base_hit": 0.0, "base_ret": 0.0}
+
+
 def _baseline_by_date(dates: list[str]) -> dict[str, dict]:
     """신호일별 유니버스 기저선 — 신호와 **완전히 같은 규칙**으로 잰다. (B-35 ②)
 
@@ -174,24 +191,48 @@ def refresh_performance() -> dict:
         for p in data.get("picks", []):
             tk = str(p.get("ticker", "")).zfill(6)
             srcs = p.get("sources", []) or ["unknown"]
+            # ★invalid는 "평가 불가"이지 "패배"가 아니다 — 사유별로 세어 진단에 남긴다(B-35 ③).
+            #   예전엔 조용히 `continue`라 얼마나 빠졌는지 알 수 없었다.
+            reason = ""
+            df = None
             try:
                 df = fdr.DataReader(tk, data["date"],
                                     (sig_date + timedelta(days=15)).strftime("%Y-%m-%d"))
-            except Exception:
+            except Exception:  # noqa: BLE001
+                reason = "fetch_error"
+            if not reason and (df is None or len(df) < 5):
+                reason = "insufficient_bars"   # entry(다음날 시가) + D+3 종가 필요
+            entry = 0.0
+            if not reason:
+                entry = float(df["Open"].iloc[1])  # 신호 다음 영업일 시가 (가짜 진입 방지)
+                if entry <= 0:
+                    reason = "bad_entry_price"
+            if reason:
+                for src in srcs:
+                    eng = _map_engine(src)
+                    st = stats.setdefault(eng, _new_stat())
+                    st["invalid"] += 1
+                    st["invalid_reasons"][reason] = st["invalid_reasons"].get(reason, 0) + 1
                 continue
-            if df is None or len(df) < 5:  # entry(다음날 시가) + D+3 종가 필요
-                continue
-            entry = float(df["Open"].iloc[1])  # 신호 다음 영업일 시가 (가짜 진입 방지, 백테스트 동일 기준)
-            if entry <= 0:
-                continue
+
             d3 = df["Close"].iloc[3] / entry - 1  # D+3 종가 대표 보유
             for src in srcs:
                 eng = _map_engine(src)
-                st = stats.setdefault(eng, {"total": 0, "hit": 0, "ret": 0.0,
-                                            "base_n": 0, "base_hit": 0.0, "base_ret": 0.0})
+                st = stats.setdefault(eng, _new_stat())
                 st["total"] += 1
-                st["hit"] += int(d3 > 0)
                 st["ret"] += d3
+                # ★win/loss/flat 3분 (B-35 ③, 코덱스 Q3 권고 ③):
+                #   예전엔 `d3 <= 0`을 전부 loss로 세면서 손실 크기는 0을 더해
+                #   avg_loss가 과소평가되고 손익비 b가 부풀었다(실증 4배).
+                #   p와 b는 **엄격한 win/loss 표본에서만** 계산한다.
+                if d3 > 0:
+                    st["hit"] += 1
+                    st["win_ret"] += d3
+                elif d3 < 0:
+                    st["loss"] += 1
+                    st["loss_ret"] += -d3      # 양수 크기로 누적
+                else:
+                    st["flat"] += 1            # 정확히 0 — 승도 패도 아니다
                 # 기저선은 **그 신호가 난 날**의 것을 쌓는다 — 엔진마다 신호일 분포가
                 # 다르므로 전체 평균을 쓰면 비교가 어긋난다.
                 if base:
@@ -218,6 +259,26 @@ def refresh_performance() -> dict:
             "avg_ret": round(st["ret"] / st["total"] * 100, 2),
             "days_tracked": len(ledger_files),
         }
+        # ★win/loss/flat/invalid 분리 결과 (B-35 ③). 기존 두 필드는 그대로 두므로
+        #   소비자 6곳은 영향 없다 — 아래는 전부 신규 필드다.
+        #   단위는 **백분율 계약**으로 고정한다(소비자가 값 크기로 추측하지 않도록).
+        wl = st["hit"] + st["loss"]
+        row.update({
+            "loss": st["loss"],
+            "flat": st["flat"],          # 정확히 0 — 승도 패도 아님
+            "invalid": st["invalid"],    # 평가 불가(조회 실패·봉 부족) — 패배가 아님
+            "win_loss_n": wl,            # 켈리 최소표본은 total이 아니라 이 값에 건다
+            # p·b는 **엄격한 승/패 표본에서만** 계산한다(코덱스 Q3·Q4)
+            "hit_rate_strict": round(st["hit"] / wl * 100, 1) if wl else None,
+            "avg_win": round(st["win_ret"] / st["hit"] * 100, 2) if st["hit"] else None,
+            "avg_loss": round(st["loss_ret"] / st["loss"] * 100, 2) if st["loss"] else None,
+        })
+        if st["invalid_reasons"]:
+            row["invalid_reasons"] = st["invalid_reasons"]
+        # 손익비 b — 양쪽 표본이 다 있을 때만. 없으면 **가정하지 않고 null**
+        # (1:1 같은 임의 가정을 값으로 박으면 소비자가 실측으로 오인한다).
+        if row["avg_win"] and row["avg_loss"]:
+            row["odds_b"] = round(row["avg_win"] / row["avg_loss"], 3)
         # ★기저선 대비(B-35 ②) — 절대 승률만으로는 "신호가 나쁜지 시장이 나빴는지"를
         #   가릴 수 없다. 같은 날·같은 규칙의 유니버스 평균을 빼서 **실력분만** 남긴다.
         #   기존 필드는 그대로 두므로 소비자 6곳은 영향 없다(신규 필드 추가만).
