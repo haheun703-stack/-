@@ -61,11 +61,13 @@ def _kelly(p: float, b: float) -> float:
 
 
 def _market_win_rate() -> tuple[float, int]:
-    """당일 유니버스 동일가중 상승 비율 — 승률의 기저선.
+    """폴백 전용 — 당일 유니버스 상승 비율.
 
-    ★7/24 교훈("비교 대상의 기저선을 맞춰라")을 승률에 적용한다. 그때 αEW가
-    노출도를 안 맞춰 "덜 투자한 것"을 능력으로 둔갑시켰던 것과 같은 구조로,
-    절대 승률은 **시장이 좋았던 날을 신호 실력으로 기록**한다.
+    ⚠️**이건 D+1 기준이라 성과파일(D+3)과 잣대가 다르다.** 1차 구현에서 이걸
+    기저선으로 썼다가 "D+3 승률을 D+1 기저선과 비교"하는 오류를 냈다 —
+    7/31(KOSPI +17.91%)에 89.7%가 나와 모든 보정값이 0으로 눌렸다.
+    지금은 성과파일이 같은 규칙(next_open → D+3_close)의 기저선을 직접 주므로
+    그 값을 쓴다. 이 함수는 구버전 파일을 만났을 때의 참고값일 뿐이다.
     """
     import pandas as pd
 
@@ -107,7 +109,16 @@ def observe() -> dict:
     data = json.loads(ACCURACY_FILE.read_text(encoding="utf-8"))
     signals = data.get("signals") or {}
 
-    mkt_p, mkt_n = _market_win_rate()
+    # 기저선: 성과파일이 **같은 규칙**(next_open → D+3_close)으로 계산해 둔 것을 쓴다(B-35 ②).
+    # 없으면(구버전 파일) 당일 기준 폴백 — 잣대가 달라 참고용임을 표기한다.
+    base = data.get("baseline") or {}
+    if base.get("hit_rate") is not None:
+        mkt_p, mkt_n = base["hit_rate"] / 100.0, base.get("samples", 0)
+        base_rule = base.get("rule", "")
+    else:
+        mkt_p, mkt_n = _market_win_rate()
+        base_rule = "⚠️당일 D+1 폴백 — 성과파일(D+3)과 잣대 불일치"
+
     rows = []
     for eng, acc in sorted(signals.items(), key=lambda x: -x[1].get("total", 0)):
         total = int(acc.get("total", 0) or 0)
@@ -122,7 +133,13 @@ def observe() -> dict:
         has_odds = avg_win > 0 and avg_loss > 0
 
         # 기저선 보정: 시장 중립을 0.5로 놓고 초과 승률만 실력으로 본다.
-        p_adj = max(0.0, min(1.0, 0.5 + (p - mkt_p)))
+        # 성과파일이 엔진별 초과분을 이미 계산해 뒀으면 그것을 쓴다 — 엔진마다
+        # 신호일 분포가 달라 전체 평균으로 빼면 어긋나기 때문(B-35 ②).
+        exc = acc.get("hit_rate_excess")
+        if exc is not None:
+            p_adj = max(0.0, min(1.0, 0.5 + float(exc) / 100.0))
+        else:
+            p_adj = max(0.0, min(1.0, 0.5 + (p - mkt_p)))
 
         enough = total >= KELLY_MIN_SAMPLES
         rows.append({
@@ -144,6 +161,7 @@ def observe() -> dict:
         "source_window_days": data.get("window_days"),
         "market_win_rate": round(mkt_p, 4),
         "market_n": mkt_n,
+        "baseline_rule": base_rule,
         "engines": rows,
     }
 
@@ -160,7 +178,7 @@ def main() -> int:
 
     print(f"=== 켈리 섀도 관측 {r['observed_at']} ===")
     print(f"성과파일 updated_at={r['source_updated_at']} window_days={r['source_window_days']}")
-    print(f"시장 기저선(당일 상승비율) {r['market_win_rate'] * 100:.1f}%  (n={r['market_n']})")
+    print(f"기저선 {r['market_win_rate'] * 100:.1f}%  (n={r['market_n']:,})  {r.get('baseline_rule', '')}")
     print()
     print(f"{'엔진':<22}{'표본':>6}{'승률':>8}{'초과승률':>9}{'손익비':>8}"
           f"{'배수(절대)':>11}{'배수(보정)':>11}  비고")
