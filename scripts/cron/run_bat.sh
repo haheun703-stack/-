@@ -379,6 +379,11 @@ case "$BAT" in
     #   위치: FLOWX 업로드(18:40)·BAT-F 재시도(18:51) 이후인 BAT-D 종반이라 당일 적재 판정 가능.
     #   run_py_long(900초): 26테이블×3~5 REST 호출인데 postgrest 개별 타임아웃이 120초라
     #   느린 호출 3건이면 300초 예산이 소진된다(7/30 검수 F7). --sweep-prev = 전일 소급검사(F8).
+    # 켈리 섀도 관측(8\1) — 매매 경로 무접촉, "켈리라면 얼마로 줄였을까"만 누적 기록.
+    #   daily_market_learner(위)가 signal_accuracy를 갱신한 **뒤에** 읽어야 당일 값이 잡힌다.
+    #   B-34(켈리)는 커밋 보류 상태라 실제 사이징은 그대로다 — 관측만 쌓아 재료가
+    #   고쳐진 뒤 비교에 쓴다. 실패해도 BAT-D를 막지 않는다.
+    run_py_long scripts/kelly_shadow.py
     run_py_long scripts/verify_contract_suspension.py --alert --sweep-prev
     # G6: BAT-D 자동 메트릭 수집 + 이상 감지 + 텔레그램 (5/16) — ★BAT-D 마지막 스텝으로 이동(7/14 검수).
     #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
