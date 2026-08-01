@@ -25,6 +25,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 LEDGER_DIR = PROJECT_ROOT / "data" / "signal_ledger"
 PICKS_FILE = PROJECT_ROOT / "data" / "tomorrow_picks.json"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"   # 기저선 계산용(B-35 ②)
 # ★이 파일이 **전방 평가 정본**이다(8\1 B-35에서 생산자 분리).
 # 신호 원장을 남겨 두고 **다음 영업일 시가 진입 → D+3 종가**로 채점한다
 # = 신호가 나온 뒤의 성과만 본다. 소비자 6곳이 이 파일을 읽는다
@@ -78,14 +79,87 @@ def snapshot_today() -> int:
     return len(items)
 
 
+def _baseline_by_date(dates: list[str]) -> dict[str, dict]:
+    """신호일별 유니버스 기저선 — 신호와 **완전히 같은 규칙**으로 잰다. (B-35 ②)
+
+    ★왜 필요한가(8\1): 전방 평가로 뽑은 승률 40.7%·평균 -1~-3%가 **"신호가 나쁘다"인지
+    "그 46일이 나빴다"인지 절대값만으로는 구분되지 않는다.** 실제로 이 구간엔
+    7/28 -10.84%, 7/29 -5.98% 같은 날이 끼어 있다.
+    7/23에 "KOSPI 차감 알파는 이 국면에서 판별력 0"(유니버스 동일가중조차 KOSPI 대비
+    D+20 -9.9%p)임을 확인하고 기저선을 동일가중으로 바꿨는데, 그 잣대가 승률에도
+    그대로 필요하다.
+
+    ★잣대를 맞추는 것이 핵심이다 — 진입도 청산도 신호와 동일하게 **다음 거래일 시가
+    진입 → 3거래일 뒤 종가**로 계산한다. 기저선을 당일 등락률 같은 다른 기준으로 재면
+    비교 자체가 성립하지 않는다(그 함정에 이미 한 번 빠졌다: kelly_shadow 1차).
+
+    로컬 parquet을 쓴다 — FDR로 유니버스×기간을 다시 조회하면 5만 건이 넘는다.
+    반환: {신호일: {"win_rate": 0~1, "avg_ret": 소수, "n": 종목수}}
+    """
+    import pandas as pd
+
+    want = sorted(set(dates))
+    if not want:
+        return {}
+    agg: dict[str, list[float]] = {d: [] for d in want}
+    for pq in PROCESSED_DIR.glob("*.parquet"):
+        try:
+            df = pd.read_parquet(pq, columns=["open", "close"])
+        except Exception:  # noqa: BLE001
+            continue
+        if df.empty:
+            continue
+        idx = df.index
+        for d in want:
+            try:
+                # 신호일 위치 → +1 시가 진입, +3 종가 청산 (신호 평가와 동일)
+                pos = idx.searchsorted(pd.Timestamp(d))
+                if pos >= len(idx) or idx[pos] != pd.Timestamp(d):
+                    continue  # 그날 거래 없음(정지·상장전) → 기저선에서 제외
+                if pos + 3 >= len(idx):
+                    continue
+                entry = float(df["open"].iloc[pos + 1])
+                if entry <= 0:
+                    continue
+                agg[d].append(float(df["close"].iloc[pos + 3]) / entry - 1)
+            except Exception:  # noqa: BLE001
+                continue
+
+    out: dict[str, dict] = {}
+    for d, rets in agg.items():
+        if not rets:
+            continue
+        out[d] = {
+            "win_rate": sum(1 for r in rets if r > 0) / len(rets),
+            "avg_ret": sum(rets) / len(rets),
+            "n": len(rets),
+        }
+    return out
+
+
 def refresh_performance() -> dict:
     import FinanceDataReader as fdr
 
     today = datetime.now(tz=KST).date()
     cutoff = today - timedelta(days=WINDOW_DAYS)
-    # engine -> {total, hit(d1>0), ret_sum(d1)}
+    # engine -> {total, hit(d3>0), ret_sum(d3), 기저선 누적}
     stats: dict[str, dict] = {}
     ledger_files = sorted(glob.glob(str(LEDGER_DIR / "*.json")))
+
+    # 평가 대상 신호일을 먼저 모아 기저선을 한 번에 계산한다 (B-35 ②).
+    eval_dates: list[str] = []
+    for lf in ledger_files:
+        try:
+            d = json.loads(Path(lf).read_text(encoding="utf-8"))["date"]
+        except Exception:  # noqa: BLE001
+            continue
+        sd = datetime.strptime(d, "%Y-%m-%d").date()
+        if sd >= cutoff and (today - sd).days >= max(EVAL_DAYS) + 1:
+            eval_dates.append(d)
+    baseline = _baseline_by_date(eval_dates)
+    print(f"[baseline] {len(baseline)}일 유니버스 기저선 산출 "
+          f"(동일 규칙: next_open → D+3_close)")
+
     evaluated = 0
     for lf in ledger_files:
         try:
@@ -96,6 +170,7 @@ def refresh_performance() -> dict:
         # 평가 가능: 신호일 + 최대 EVAL_DAYS 영업일 경과 + 윈도우 내
         if sig_date < cutoff or (today - sig_date).days < max(EVAL_DAYS) + 1:
             continue
+        base = baseline.get(data["date"])
         for p in data.get("picks", []):
             tk = str(p.get("ticker", "")).zfill(6)
             srcs = p.get("sources", []) or ["unknown"]
@@ -112,10 +187,17 @@ def refresh_performance() -> dict:
             d3 = df["Close"].iloc[3] / entry - 1  # D+3 종가 대표 보유
             for src in srcs:
                 eng = _map_engine(src)
-                st = stats.setdefault(eng, {"total": 0, "hit": 0, "ret": 0.0})
+                st = stats.setdefault(eng, {"total": 0, "hit": 0, "ret": 0.0,
+                                            "base_n": 0, "base_hit": 0.0, "base_ret": 0.0})
                 st["total"] += 1
                 st["hit"] += int(d3 > 0)
                 st["ret"] += d3
+                # 기저선은 **그 신호가 난 날**의 것을 쌓는다 — 엔진마다 신호일 분포가
+                # 다르므로 전체 평균을 쓰면 비교가 어긋난다.
+                if base:
+                    st["base_n"] += 1
+                    st["base_hit"] += base["win_rate"]
+                    st["base_ret"] += base["avg_ret"]
             evaluated += 1
     # signal_accuracy 신규 누적 (★ 기존 병합 제거 — 3/27 데이터 실측 불일치 오염 차단)
     acc = {
@@ -129,12 +211,36 @@ def refresh_performance() -> dict:
     for eng, st in stats.items():
         if st["total"] == 0:
             continue
-        signals[eng] = {
+        row = {
             "total": st["total"],
             "hit": st["hit"],
             "hit_rate": round(st["hit"] / st["total"] * 100, 1),
             "avg_ret": round(st["ret"] / st["total"] * 100, 2),
             "days_tracked": len(ledger_files),
+        }
+        # ★기저선 대비(B-35 ②) — 절대 승률만으로는 "신호가 나쁜지 시장이 나빴는지"를
+        #   가릴 수 없다. 같은 날·같은 규칙의 유니버스 평균을 빼서 **실력분만** 남긴다.
+        #   기존 필드는 그대로 두므로 소비자 6곳은 영향 없다(신규 필드 추가만).
+        if st["base_n"] > 0:
+            b_hit = st["base_hit"] / st["base_n"] * 100
+            b_ret = st["base_ret"] / st["base_n"] * 100
+            row["baseline_hit_rate"] = round(b_hit, 1)
+            row["baseline_avg_ret"] = round(b_ret, 2)
+            row["hit_rate_excess"] = round(row["hit_rate"] - b_hit, 1)
+            row["avg_ret_excess"] = round(row["avg_ret"] - b_ret, 2)
+        signals[eng] = row
+
+    # 전체 기저선 요약 — 그 기간 시장이 어땠는지 한 줄로 남긴다.
+    if baseline:
+        tot_n = sum(v["n"] for v in baseline.values())
+        acc["baseline"] = {
+            "rule": "universe equal-weight, next_open → D+3_close",
+            "days": len(baseline),
+            "samples": tot_n,
+            "hit_rate": round(sum(v["win_rate"] * v["n"] for v in baseline.values())
+                              / tot_n * 100, 1),
+            "avg_ret": round(sum(v["avg_ret"] * v["n"] for v in baseline.values())
+                             / tot_n * 100, 2),
         }
     ACCURACY_FILE.parent.mkdir(parents=True, exist_ok=True)
     ACCURACY_FILE.write_text(
