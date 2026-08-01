@@ -2197,7 +2197,7 @@ def build_sector_rotation_rows(date_str: str = "") -> list[dict]:
 # dashboard_smart_money.signal_type 계약 (웹봇 8\1 요청 ②).
 # 공유 테이블이라 정보봇 계보와 라벨 체계가 같아야 화면에서 한 줄로 설 수 있다.
 # 앞 3종은 정보봇이 쓰는 표기 그대로다. `관찰`만 정보봇에 대응이 없는 우리 고유
-# 라벨이라 웹봇에 사전 통보했다(실측상 상위 50 진입 사례는 아직 없다).
+# 라벨이라 웹봇에 사전 통보했다(웹봇 `c06b3d7`로 렌더 대응 완료).
 # ★이 목록을 바꾸면 웹 렌더가 사각에 빠진다 — 추가·변경 시 웹봇·정보봇에 먼저 알린다.
 SMART_MONEY_SIGNAL_TYPES = {
     "DUAL_FLOW": "외국인+기관 동시유입",
@@ -2205,6 +2205,21 @@ SMART_MONEY_SIGNAL_TYPES = {
     "INST_BUY": "기관 연속유입",
     "WATCH": "관찰",
 }
+
+# ★★적용은 B-33(`source` 컬럼) 컷오버와 **같은 배포**에서 켠다 (웹봇 8\1 순서 리스크 지적).
+#
+# 왜 지금 켜면 안 되는가: 이 공유 테이블에서 두 계보를 가르는 **유일하게 남은 실마리가
+# `signal_type`의 영문/한글 차이**다. `created_at`은 UPSERT UPDATE에서 갱신되지 않아
+# 못 쓰고(B-32), `source` 컬럼은 아직 없다. 지금 한글로 통일하면 계약은 맞아지지만
+# **그 구간 동안 아무도 생산자를 판별할 수 없다.**
+#
+# 이건 가정이 아니다 — 7/31 `price=0` 6주 사고를 웹봇이 잡아낸 근거가 정확히
+# "`DUAL_FLOW`인 행과 `price=0`인 행이 1:1"이었다. 라벨을 통일했다면 그 사고는
+# 더 오래 살아남았을 것이다. **계약 준수가 감시 능력을 잡아먹으면 안 된다.**
+#
+# 그때까지의 대체 판별 수단 = score 범위(퀀트봇 97~100 vs 정보봇 10~70). 다만 이건
+# 암묵 규칙이라 정보봇이 90점대를 내는 날 깨진다 → 웹봇 회신에 **계약으로 명시**했다.
+SMART_MONEY_KOREAN_LABELS = False
 
 
 def build_smart_money_rows(date_str: str = "") -> list[dict]:
@@ -2234,13 +2249,14 @@ def build_smart_money_rows(date_str: str = "") -> list[dict]:
         # 임시 방어이고 새 enum이 생기면 다시 사각이 된다. 아래 4종을 계약으로
         # 고정하고, 추가·변경 시 웹봇·정보봇에 사전 통보한다.
         if alert.get("dual_buying"):
-            signal_type = SMART_MONEY_SIGNAL_TYPES["DUAL_FLOW"]
+            key = "DUAL_FLOW"
         elif f_consec >= 3 or f_net > 0:
-            signal_type = SMART_MONEY_SIGNAL_TYPES["FOREIGN_BUY"]
+            key = "FOREIGN_BUY"
         elif i_consec >= 3 or i_net > 0:
-            signal_type = SMART_MONEY_SIGNAL_TYPES["INST_BUY"]
+            key = "INST_BUY"
         else:
-            signal_type = SMART_MONEY_SIGNAL_TYPES["WATCH"]
+            key = "WATCH"
+        signal_type = SMART_MONEY_SIGNAL_TYPES[key] if SMART_MONEY_KOREAN_LABELS else key
 
         # score: grade 기반. **상한 100** — 공유 테이블이라 정보봇 계보(0~100)와
         # 척도가 같아야 한다(웹봇 8/1 요청 ①). 기존은 90+10+10=110까지 나가
