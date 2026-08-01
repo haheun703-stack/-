@@ -597,7 +597,8 @@ class FlowxUploader:
     _CONST_SKIP = {"id", "date", "ticker", "code", "name", "sector",
                    "signal_type", "grade", "created_at", "updated_at"}
 
-    def _warn_constant_numeric(self, table: str, rows: list[dict], label: str) -> None:
+    def _warn_constant_numeric(self, table: str, rows: list[dict], label: str,
+                               date_str: str = "") -> None:
         """보내려는 페이로드의 수치 필드가 통째로 0/null이면 경고 로그를 남긴다.
 
         ★왜 여기인가(7\31): 같은 검사를 Supabase 쪽에서 하려 했더니 생산자를
@@ -609,10 +610,20 @@ class FlowxUploader:
 
         업로드를 막지 않는다(경고만). 전체를 try로 감싸 이 검사가 실패해도
         적재 경로에는 영향이 없다 — 감시가 대상을 죽이면 안 된다.
+
+        ★오탐 억제(8\1): 첫 실행에서 경고 2건이 나왔는데 둘 다 오탐이었다
+        (`overheat_penalty`=감산 전용 지표, `market_kospi_stoch_k`=범위 지표 바닥).
+        "전량 0"만으로는 **0이 정당한 값**과 **채우지 못한 0**이 구분되지 않는다.
+        그래서 관측을 이력에 남기고(`const_sanity`), 우리가 과거에 실값을 보낸 적
+        있는 컬럼은 조용히 넘긴다. 이력 소스는 DB가 아니라 **우리 페이로드**다 —
+        DB로 했다면 정보봇 실값에 가려 `price=0` 6주를 여전히 못 잡는다.
         """
         try:
             if len(rows) < 5:
                 return
+            from src.adapters import const_sanity
+
+            observations: dict[str, bool] = {}
             for col in rows[0]:
                 if col in self._CONST_SKIP:
                     continue
@@ -620,12 +631,21 @@ class FlowxUploader:
                 if not all(v is None or (isinstance(v, (int, float))
                                          and not isinstance(v, bool)) for v in vals):
                     continue
-                if all(v is None for v in vals):
-                    logger.warning("[FLOWX] ⚠️ %s(%s): '%s' 전량 null (%d행) — 채움 실패 의심",
-                                   label, table, col, len(rows))
-                elif all((v or 0) == 0 for v in vals):
-                    logger.warning("[FLOWX] ⚠️ %s(%s): '%s' 전량 0 (%d행) — 거짓 상수 의심",
-                                   label, table, col, len(rows))
+                all_null = all(v is None for v in vals)
+                all_zero = all((v or 0) == 0 for v in vals)
+                # 0이 아닌 값을 보낸 컬럼도 함께 기록해야 이력이 성립한다.
+                observations[col] = all_null or all_zero
+                if not (all_null or all_zero):
+                    continue
+                warn, why = const_sanity.should_warn(table, col)
+                if not warn:
+                    logger.debug("[FLOWX] %s(%s): '%s' 전량 %s — 억제(%s)",
+                                 label, table, col, "null" if all_null else "0", why)
+                    continue
+                logger.warning("[FLOWX] ⚠️ %s(%s): '%s' 전량 %s (%d행) — %s [%s]",
+                               label, table, col, "null" if all_null else "0", len(rows),
+                               "채움 실패 의심" if all_null else "거짓 상수 의심", why)
+            const_sanity.observe(table, observations, date_str or "")
         except Exception as e:  # noqa: BLE001
             logger.debug("[FLOWX] 상수 자기검사 실패(무시) %s: %s", table, e)
 
@@ -650,7 +670,7 @@ class FlowxUploader:
             for row in rows:
                 row["date"] = date_str
             if _depth == 0:  # 재귀 재시도에서 중복 경고하지 않는다
-                self._warn_constant_numeric(table, rows, label)
+                self._warn_constant_numeric(table, rows, label, date_str)
             result = self.client.table(table).upsert(
                 rows, on_conflict=conflict_cols
             ).execute()

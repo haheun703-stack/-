@@ -201,13 +201,24 @@ _SANITY_SKIP_COLS = {
 _SANITY_MIN_ROWS = 5
 
 
-def _const_numeric_fields(rows: list[dict], date_col: str | None = None) -> list[str]:
+def _const_numeric_fields(rows: list[dict], date_col: str | None = None,
+                          table: str = "", prefix: str = "") -> tuple[list[str], list[str]]:
     """행 묶음에서 수치 필드가 통째로 0/null인 것을 찾는다.
 
     수치가 아닌 값이 하나라도 섞이면 그 필드는 건너뛴다(문자열 상수는 정상일 수
     있다). bool은 수치로 보지 않는다 — False가 전부인 플래그는 흔하고 정상이다.
+
+    ★오탐 억제(8\1): '전량 0'은 **0이 정당한 값**과 **채우지 못한 0**을 구분하지
+    못한다(7/31 첫 실행 경고 3건이 전부 오탐). `const_sanity`가 우리 페이로드
+    이력·사람 판정으로 걸러낸다. 억제된 것은 버리지 않고 함께 반환해 리포트에
+    드러낸다 — 7/30에 봉쇄한 "확인불가를 정상으로 접던" 실패와 같은 부류이기 때문.
+
+    반환: (경고할 항목, 억제된 항목)
     """
+    from src.adapters import const_sanity
+
     out: list[str] = []
+    suppressed: list[str] = []
     for col in rows[0]:
         if col in _SANITY_SKIP_COLS or (date_col and col == date_col):
             continue
@@ -216,10 +227,18 @@ def _const_numeric_fields(rows: list[dict], date_col: str | None = None) -> list
                    for v in vals):
             continue
         if all(v is None for v in vals):
-            out.append(f"{col}=전량 null")
+            desc = f"{col}=전량 null"
         elif all((v or 0) == 0 for v in vals):
-            out.append(f"{col}=전량 0")
-    return out
+            desc = f"{col}=전량 0"
+        else:
+            continue
+        if table:
+            warn, why = const_sanity.should_warn(table, prefix + col)
+            if not warn:
+                suppressed.append(f"{prefix}{col}({why})")
+                continue
+        out.append(desc)
+    return out, suppressed
 
 
 def _batch_groups(rows: list[dict], ts_col: str) -> list[tuple[str, list[dict]]]:
@@ -293,6 +312,7 @@ def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str
 
     findings: list[str] = []
     notes: list[str] = []
+    suppressed: list[str] = []
     checked = False
 
     # (A) 행 단위 — **적재 배치별로** 본다(플랫 컬럼 테이블: smart_money·valuation_gap).
@@ -311,14 +331,18 @@ def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str
                    if len(br) >= _SANITY_MIN_ROWS]
         if batches:
             for bt, br in batches:
-                findings += [f"[{bt}] {f}" for f in _const_numeric_fields(br, date_col)]
+                f_out, f_sup = _const_numeric_fields(br, date_col, table)
+                findings += [f"[{bt}] {f}" for f in f_out]
+                suppressed += f_sup
             notes.append(f"{len(rows)}행/배치 {len(batches)}개("
                          + ",".join(f"{bt}×{len(br)}" for bt, br in batches) + ")")
             checked = True
         else:
             notes.append(f"{len(rows)}행 — 배치별 최소 {_SANITY_MIN_ROWS}행 미만")
     elif len(rows) >= _SANITY_MIN_ROWS:
-        findings += _const_numeric_fields(rows, date_col)
+        f_out, f_sup = _const_numeric_fields(rows, date_col, table)
+        findings += f_out
+        suppressed += f_sup
         notes.append(f"전체 {len(rows)}행(적재시각 컬럼 없음)")
         checked = True
     else:
@@ -338,10 +362,17 @@ def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str
             if len(grows) < _SANITY_MIN_ROWS:
                 continue  # 표본 부족 — 조용히 넘기되 아래 집계에서 빠진다
             checked_groups += 1
-            findings += [f"data.{gname}.{f}" for f in _const_numeric_fields(grows)]
+            f_out, f_sup = _const_numeric_fields(grows, None, table, f"data.{gname}.")
+            findings += [f"data.{gname}.{f}" for f in f_out]
+            suppressed += f_sup
     if checked_groups:
         notes.append(f"data 배열 {checked_groups}묶음")
         checked = True
+
+    # 억제분은 감추지 않는다 — 무엇을 왜 넘겼는지가 리포트에 남아야 한다.
+    if suppressed:
+        notes.append(f"억제 {len(suppressed)}건: " + ", ".join(suppressed[:4])
+                     + (" 외" if len(suppressed) > 4 else ""))
 
     return findings, " / ".join(notes), checked
 

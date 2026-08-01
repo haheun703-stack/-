@@ -1,0 +1,32 @@
+{
+  "_readme": [
+    "값 정합성 검사(B-26)에서 '전량 0'이 정상인 컬럼을 사람이 근거와 함께 확정한 목록.",
+    "여기 등록되면 경고가 조용해진다 — 대신 왜 정상인지가 이 파일에 영구히 남는다.",
+    "★등재 원칙: 코드를 직접 읽고 '0이 될 수 있는 값'임을 확인한 뒤에만 넣는다.",
+    "  추측으로 넣으면 이 파일이 곧 감시 구멍이 된다(7/31 price=0 6주 방치와 동류).",
+    "★반대로 0이 물리적으로 불가능한 값(가격·수량·시총 등)은 절대 등재 금지.",
+    "이력 기반 자동 억제(src/adapters/const_sanity.py)로 걸러지는 건 넣을 필요 없다 —",
+    "  '과거에 실값을 보낸 적 있는' 컬럼은 자동으로 조용해진다. 이 파일은",
+    "  '태생적으로 늘 0일 수 있는' 컬럼만 담는다."
+  ],
+  "verdicts": {
+    "quant_sector_fire.overheat_penalty": {
+      "why": "감산 전용 지표 — 0이 하한이자 기본값",
+      "evidence": "scan_sector_fire.py:225 `overheat = 0`에서 시작해 과열 조건(ma20_avg>20, rsi_avg>75, 외인·기관 동시 대량매도)마다 빼기만 한다. 조건 미충족이면 0이 정답. 7/31 실측 ma20_avg_dev=-6.8·rsi_avg=41.4로 어느 조건도 성립 불가. 6~7월 두 달 내내 0인 것도 계속 하락장이었기 때문",
+      "verdict_at": "2026-08-01",
+      "verdict_by": "claude"
+    },
+    "quant_sector_fire.market_kospi_stoch_k": {
+      "why": "0~100 범위 지표가 폭락장에서 바닥에 붙음 — 0이 유효한 관측값",
+      "evidence": "스토캐스틱 %K는 하한 0. 일별 최대값 궤적이 시장을 그대로 따라감: 6월 77~87 → 7/7 22.0 → 7/14 7.7 → 7/22부터 0. 계산이 죽은 게 아니라 KOSPI가 신저가권이라 %K가 0에 수렴한 것. 같은 행의 market_vix=17.1·market_disparity=95.5는 실값이라 산출 경로 자체는 살아 있음",
+      "verdict_at": "2026-08-01",
+      "verdict_by": "claude"
+    },
+    "dashboard_smart_money.exec_strength": {
+      "why": "정보봇 산출 컬럼 — 퀀트봇 페이로드에 존재하지 않음(우리가 채울 수 없는 값)",
+      "evidence": "7/31 업로드 실측 컬럼 목록: change_pct,ticker,price,score,foreign_net_5d,sector,inst_net_5d,inst_consec_days,signal_type,date,foreign_consec_days,name — exec_strength 없음. 우리가 신규 행을 만들 때 이 컬럼이 DEFAULT 0으로 박히는 것이라 '우리가 0을 채웠다'가 아니다. 체결강도는 정보봇 소관(7/31 웹봇 회신에 명시). ※flowx_uploader.py:2451의 exec_strength는 crash_bounce 테이블용이라 별건",
+      "verdict_at": "2026-08-01",
+      "verdict_by": "claude"
+    }
+  }
+}
