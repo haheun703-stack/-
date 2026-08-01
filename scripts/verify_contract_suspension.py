@@ -196,6 +196,7 @@ def count_on(client, table: str, date_col: str, day: str) -> int:
 _SANITY_SKIP_COLS = {
     "id", "date", "ticker", "code", "name", "sector", "signal_type", "grade",
     "created_at", "updated_at", "inserted_at", "trade_date", "signal_date",
+    "xmin",  # 배치 판별용 시스템 컬럼 — 값 검사 대상이 아니다
 }
 # 이 행수 미만이면 판정하지 않는다 — 1~2행이 우연히 0인 건 흔하다(오탐 억제).
 _SANITY_MIN_ROWS = 5
@@ -242,22 +243,46 @@ def _const_numeric_fields(rows: list[dict], date_col: str | None = None,
 
 
 def _batch_groups(rows: list[dict], ts_col: str) -> list[tuple[str, list[dict]]]:
-    """적재 시각(분 단위)으로 배치를 가른다.
+    """적재 배치를 가른다 — **`xmin` 우선**, 없으면 적재 시각(분 단위) 폴백.
 
     ★왜 배치인가(7\31 실측): "전 행 0" 규칙은 **같은 날 같은 테이블에 여러 봇이
     쓰면 서로의 실값에 가려 미탐된다**. 7/30 `dashboard_smart_money`는 18시대에
     퀀트봇 42행만 있어서 잡혔지만, 7/29는 정보봇이 19시대에 193행(실값)을 넣어
     퀀트봇 38행의 전량 0이 묻혔다 — **7/30에 잡힌 건 운이었다.**
-    같은 cron 실행은 created_at이 초 단위로 뭉치므로 분 단위로 가르면
-    생산자별 배치가 자연히 분리되고, upsert가 created_at을 갱신하지 않는
-    문제와도 무관해진다(배치가 나뉘어 보일 뿐이다).
+
+    ★★왜 `xmin`인가(8\1, B-32 해소): 분 단위 시각으로 가르는 것도 부족했다.
+    `created_at`은 `DEFAULT now()`라 INSERT 때만 찍히고 **UPSERT의 UPDATE 경로에서는
+    갱신되지 않는다** — 우리가 덮어쓴 행은 타 봇 배치의 신분증을 그대로 단 채 내용만
+    바뀐다. 7/31 실측: 우리가 업로드 로그상 50행을 올렸는데 `created_at` 기준으로는
+    18:40에 33행뿐이고 나머지 17행이 17:05(정보봇) 배치에 묻혔다 — **34% 미탐**.
+
+    `xmin`은 그 행을 **마지막으로 쓴 트랜잭션 ID**라 UPDATE 때 갱신된다. 한 번의
+    upsert가 정확히 한 배치가 된다(7/31 실측 50/50, 7/30 49행 price 전량 0 정확 탐지).
+    단서는 정보봇이 냈고 웹봇 8/1 회신으로 전달받았다.
+
+    ※`xmin`은 내부 구현이라 계약으로 삼기엔 약하다(32비트 순환·FREEZE 시 변경).
+      항구적 해법은 `source` 컬럼 + `(date,ticker,source)` 유니크이며 3봇 합의됨.
+      그 컷오버 전까지의 임시 판정 소스다.
     """
     from collections import defaultdict
+    use_xmin = bool(rows) and rows[0].get("xmin") is not None
     g: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
-        ts = r.get(ts_col)
-        g[_kst(str(ts)) if ts else "?"].append(r)
-    return sorted(g.items())
+        if use_xmin:
+            g[str(r.get("xmin"))].append(r)
+        else:
+            ts = r.get(ts_col)
+            g[_kst(str(ts)) if ts else "?"].append(r)
+    if not use_xmin:
+        return sorted(g.items())
+    # 사람이 읽을 라벨로 바꾼다 — xmin 숫자만으로는 어느 배치인지 알 수 없다.
+    # 한 배치가 여러 시각에 걸치면(=덮어쓰기가 있었으면) 그 사실이 드러나게 적는다.
+    out: list[tuple[str, list[dict]]] = []
+    for xm, br in g.items():
+        ts = sorted({_kst(str(r[ts_col])) for r in br if r.get(ts_col)})
+        label = "+".join(ts) if ts else "?"
+        out.append((f"{label}#{xm}", br))
+    return sorted(out, key=lambda kv: kv[0])
 
 
 def _record_groups(payload) -> list[tuple[str, list[dict]]]:
@@ -293,16 +318,24 @@ def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str
 
     반환: (의심 컬럼 설명 목록, 판정 근거 메모)
     """
-    try:
+    def _fetch(select_expr: str) -> list[dict]:
         d = datetime.strptime(asof, "%Y%m%d").date()
-        q = client.table(table).select("*")
+        q = client.table(table).select(select_expr)
         if date_col in ("created_at", "updated_at", "inserted_at"):
             q = q.gte(date_col, d.isoformat()).lt(date_col, (d + timedelta(days=1)).isoformat())
         else:
             q = q.eq(date_col, d.isoformat())
-        rows = (q.limit(1000).execute().data) or []
-    except Exception as e:  # noqa: BLE001
-        return [], f"조회실패({str(e)[:40]})", False
+        return (q.limit(1000).execute().data) or []
+
+    # `xmin`은 시스템 컬럼이라 `select(*)`에 안 딸려온다 — 명시해야 온다.
+    # 못 받는 환경(권한·PostgREST 설정)에서는 시각 기준으로 조용히 폴백한다.
+    try:
+        rows = _fetch("*,xmin")
+    except Exception:  # noqa: BLE001
+        try:
+            rows = _fetch("*")
+        except Exception as e:  # noqa: BLE001
+            return [], f"조회실패({str(e)[:40]})", False
 
     if not rows:
         return [], "당일 0행", False
