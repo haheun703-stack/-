@@ -21,6 +21,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+try:
+    from src.utils.krx_guard import krx_access_allowed as _krx_access_allowed
+except Exception:  # noqa: BLE001  ★fail-closed — 가드를 못 불러오면 차단한다
+    def _krx_access_allowed(name: str = "") -> bool:
+        print(f"[KRX-GUARD] 가드 모듈 로드 실패 — 안전측으로 차단: {name}")
+        return False
+
 from src.adapters.krx_nationality_collector import collect_and_store, backfill, detect_and_fill_gaps, DB_PATH
 from src.use_cases.nationality_signal import run_analysis, format_telegram
 
@@ -45,6 +52,9 @@ def send_telegram(message: str) -> bool:
 
 
 def main():
+    if not _krx_access_allowed("scan_nationality"):
+        return 0
+
     parser = argparse.ArgumentParser(description="KRX 국적별 외국인 수급 스캔")
     parser.add_argument("--backfill", type=int, default=0,
                         help="최근 N거래일 백필")

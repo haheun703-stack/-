@@ -529,6 +529,14 @@ def _save_history(signal: dict) -> None:
 
 
 def main():
+    try:
+        from src.utils.krx_guard import krx_access_allowed
+    except Exception:  # noqa: BLE001  ★fail-closed — 가드를 못 불러오면 차단한다
+        print("[KRX-GUARD] 가드 모듈 로드 실패 — 안전측으로 차단: collect_short_selling")
+        return 0
+    if not krx_access_allowed("collect_short_selling"):
+        return 0
+
     signal = collect_short_selling_signal()
 
     print(f"\n=== 공매도 시그널 ===")
