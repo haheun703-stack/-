@@ -182,51 +182,67 @@ class DataHealthCheck:
         target_ts = pd.Timestamp(self.today)
         has_today = 0
         missing: list[str] = []
-        halted: list[str] = []
-        reused: list[str] = []
+        buckets: dict[str, list[str]] = {
+            "halted": [], "reused": [], "corrupt": [], "short": [], "unjudged": [],
+        }
         for pf in parquets:
+            # ★판정까지 파일별 try 안에 둔다 — 판정을 밖에 두면 파일 하나의 예외가
+            #   1,182개 전체를 날려 검사 결과가 통째로 소실된다(구 코드는 파일 단위
+            #   격리였는데 정체 검사를 넣으며 예외 표면을 넓혔다).
             try:
                 df = self._read_close_volume(pf)
-            except Exception:
-                missing.append(pf.stem)
-                continue
-            # 인덱스가 datetime64 타입
-            if target_ts not in df.index:
+                if target_ts not in df.index:  # 인덱스가 datetime64 타입
+                    missing.append(pf.stem)
+                    continue
+                kind = self._frozen_kind(df, target_ts, lookback)
+            except Exception:  # noqa: BLE001  (개별 파일 파손 — 미달로 격리)
                 missing.append(pf.stem)
                 continue
             has_today += 1
-            kind = self._frozen_kind(df, target_ts, lookback)
-            if kind == "halted":
-                halted.append(pf.stem)
-            elif kind == "reused":
-                reused.append(pf.stem)
+            if kind:
+                buckets[kind].append(pf.stem)
 
+        halted, reused = buckets["halted"], buckets["reused"]
+        corrupt, short, unjudged = buckets["corrupt"], buckets["short"], buckets["unjudged"]
         pct = has_today / total * 100 if total else 0.0
-        live = has_today - len(halted) - len(reused)
+        # ★live는 "판정했는데 정상"만 센다. 판정 불가(unjudged/short/corrupt)를
+        #   여기 합산하면 검사가 실명했을 때 오히려 가장 건강한 숫자가 나온다.
+        live = has_today - sum(len(v) for v in buckets.values())
         halted_pct = len(halted) / total * 100 if total else 0.0
 
         # ★passed 기준은 "당일 행이 있는가"를 유지한다 — 거래정지는 종목의 정상
         #   상태이므로 실패로 세면 매일 오탐이 된다(8/1 const_sanity와 같은 원칙:
         #   알려진 지속 상태는 억제, 급변만 경고).
-        #   두 가지만 실패로 본다:
+        #   실패로 보는 것은 넷이고, 셋은 기저선이 0이라 1건도 급변이다:
         #   ⑴ 거래정지 추정이 임계 초과 → 개별 종목 사정이 아니라 수집 이상
-        #      (실측 기저 1.3% = 15/1182)
-        #   ⑵ 값 재사용 의심이 1건이라도 발생 → 기저선이 0이라 곧 급변
+        #      (실측: VPS 8/4 1.27%, 로컬 전 이력 최대 1.54% → 임계 3%면 2배 여유)
+        #   ⑵ 값 재사용 의심(기저 0 — 103만 stock-day 전수에서 0건)
+        #   ⑶ 값 파손: 종가가 0/NaN 고정(기저 0)
+        #   ⑷ 판정 불가: 거래량을 못 읽음(기저 0) — 검사 실명을 침묵시키지 않는다
+        #   `short`(이력 부족)만 정상 사유라 실패에서 뺀다.
         passed = (
             pct >= 95
-            and halted_pct <= frozen_alert_pct
+            and halted_pct < frozen_alert_pct
             and not reused
+            and not corrupt
+            and not unjudged
         )
 
         detail = f"{has_today:,}/{total:,} ({pct:.1f}%)"
-        detail += f" | 실동 {live:,}·정지 {len(halted):,}({halted_pct:.1f}%)·재사용의심 {len(reused):,}"
-        if reused:
-            # 기저선 0에서의 발생이라 종목코드를 아끼지 않고 남긴다
-            detail += " 🚨재사용: " + ",".join(sorted(reused)[:12])
-            if len(reused) > 12:
-                detail += f" 외 {len(reused) - 12}건"
-        if halted_pct > frozen_alert_pct:
-            detail += f" ⚠️정지 급증(임계 {frozen_alert_pct:.0f}%) — 수집 이상 의심"
+        detail += f" | 실동 {live:,}·정지 {len(halted):,}({halted_pct:.1f}%)·재사용 {len(reused):,}"
+        for label, items in (("🚨파손", corrupt), ("🚨판정불가", unjudged)):
+            if items:
+                detail += f"·{label} {len(items):,}"
+        if short:
+            detail += f"·이력부족 {len(short):,}"
+        for label, items in (("재사용", reused), ("파손", corrupt), ("판정불가", unjudged)):
+            if items:
+                # 기저선 0에서의 발생이라 종목코드를 아끼지 않고 남긴다
+                detail += f" | 🚨{label}: " + ",".join(sorted(items)[:12])
+                if len(items) > 12:
+                    detail += f" 외 {len(items) - 12}건"
+        if halted_pct >= frozen_alert_pct:
+            detail += f" ⚠️정지 급증(임계 {frozen_alert_pct:g}%) — 수집 이상 의심"
         if halted:
             detail += " | 정지: " + ",".join(sorted(halted)[:8])
             if len(halted) > 8:
@@ -253,35 +269,59 @@ class DataHealthCheck:
             return pd.read_parquet(pf, columns=["close"])
 
     @staticmethod
-    def _frozen_kind(df, target_ts, lookback: int = 5):
-        """종가 정체 유형 — None(정상) / "halted"(거래정지 추정) / "reused"(값 재사용 의심).
+    def _frozen_kind(df, target_ts, lookback: int = 3):
+        """종가 정체 유형 판정. 반환값:
 
-        ★유형을 나누는 이유(설계 자기수정): 처음엔 "종가 고정 AND 거래량 0"
-          하나만 봤다. 그런데 **수집기가 전일 행을 통째로 복사하면 거래량도 함께
-          고정되면서 0이 아니게 되어 그 조건에 안 걸린다** — 정작 잡아야 할
-          고장 모드를 놓치는 설계였다. 8/1에 "과거 실값이 있으면 억제"가 회귀
-          결함을 영구 침묵시키던 것과 같은 부류다.
-        - halted : 종가 고정 + 당일 거래량 0/결측 → 종목의 정상 상태. 표기만 한다.
-        - reused : 종가 고정 + 거래량까지 고정인데 0이 아님 → 값 재사용 지문. 경고.
-        ★거래량 컬럼이 없으면 판정하지 않는다 — 근거가 반쪽이면 경보를 내지 않되,
-          detail에 실동/정지를 항상 병기해 침묵으로 감추지는 않는다(7/30 F4 교훈).
-        ★기저선 실측(8/5, 1,182종목): halted 15 · reused 0 · 종가만 고정 0.
-          reused 기저선이 0이라 1건이라도 나오면 급변이므로 즉시 실패로 본다.
+        - `None`      : 값이 살아있다(정상)
+        - `"halted"`  : 종가 고정 + 당일 거래량 0/결측 → 거래정지 추정(종목의 정상 상태)
+        - `"reused"`  : 종가 고정 + 거래량까지 고정인데 0이 아님 → 값 재사용 지문
+        - `"corrupt"` : 고정된 종가가 0/NaN → 값 자체가 파손
+        - `"short"`   : 이력이 lookback 미만 → 판정 불가하나 신규상장 등 정상 사유
+        - `"unjudged"`: 거래량을 못 읽음(컬럼 부재·형변환 실패·인덱스 이상) → 판정 불가
+
+        ★설계 자기수정 2회 (같은 실수를 두 번 했다):
+          ⑴ 1차 = "종가 고정 AND 거래량 0" 하나뿐이었다. 그런데 **수집기가 전일 행을
+             통째로 복사하면 거래량도 함께 고정되면서 0이 아니게 되어 안 걸린다** →
+             `reused` 신설.
+          ⑵ 2차 = 판정 불가를 전부 `None`으로 돌려보냈다. 호출부는 `None`을 "실동"으로
+             세므로 **거래량 컬럼이 통째로 사라지면 전 종목이 '실동'으로 집계되어
+             가장 건강한 표기와 함께 통과**한다(합성 실증: 전 종목 close 고정인데
+             `실동 200·정지 0` PASS). 또 종가가 0/NaN으로 고정돼도 `halted`
+             = 종목의 정상 상태로 접혔다 — **7/31 `price=0`을 "거래정지"라 부르는 꼴**.
+             → `unjudged`/`short`/`corrupt`를 분리해 "판정했는데 정상"과
+               "판정을 못 했다"를 다른 값으로 만든다.
+          7/30 F1(판별실패를 '타봇'으로 접어 미탐)·F4(확인불가를 정상으로 접음)와
+          정확히 같은 형태가 새 코드에 다시 들어왔던 것이다.
+
+        ★lookback 기본값 5→3: 로컬 전 이력 1,904거래일 × 1,166종목(약 103만 stock-day)
+          전수에서 `reused` 후보가 lookback 3·4·5 모두 **0건**이고, 2에서만 6건
+          (거래량 2~1,009주 초저유동주)이 나온다. 즉 3이면 역사적 오탐 증가 없이
+          탐지 지연만 4거래일 → 2거래일로 줄어든다.
         """
         import pandas as pd
         try:
             tail = df.loc[:target_ts].tail(lookback)
-        except Exception:  # noqa: BLE001  (인덱스 비정렬 등 — 판정 보류)
+        except Exception:  # noqa: BLE001  (인덱스 비정렬·중복 등)
+            return "unjudged"
+        if len(tail) < lookback:
+            return "short"
+        if tail["close"].nunique(dropna=False) != 1:
             return None
-        if len(tail) < 3 or tail["close"].nunique(dropna=False) != 1:
-            return None
+        # ★고정값이 0/NaN이면 거래정지가 아니라 값 파손이다. 이걸 halted로 접으면
+        #   임계(수 %) 안에서 영구 침묵한다 — 이 검사가 막으려던 바로 그 사고다.
+        close_v = tail["close"].iloc[-1]
+        try:
+            if pd.isna(close_v) or float(close_v) == 0:
+                return "corrupt"
+        except (TypeError, ValueError):
+            return "corrupt"
         if "volume" not in df.columns:
-            return None
+            return "unjudged"
         vol = tail["volume"].iloc[-1]
         try:
             is_zero = bool(pd.isna(vol) or float(vol) == 0)
-        except (TypeError, ValueError):  # 파손된 거래량 — 판정 보류
-            return None
+        except (TypeError, ValueError):  # 거래량 파손 — 판정 불가
+            return "unjudged"
         if is_zero:
             return "halted"
         return "reused" if tail["volume"].nunique(dropna=False) == 1 else None
