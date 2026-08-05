@@ -147,9 +147,19 @@ class DataHealthCheck:
 
     # ─── 1. 종가 데이터 (Parquet) ───
 
-    def _check_price_data(self) -> CheckResult:
-        """processed/ parquet에서 오늘 종가 존재 여부.
-        인덱스가 datetime64 타입이므로 Timestamp로 비교."""
+    def _check_price_data(
+        self, frozen_alert_pct: float = 10.0, lookback: int = 5
+    ) -> CheckResult:
+        """processed/ parquet에서 오늘 종가 존재 여부 + 값이 살아있는지.
+        인덱스가 datetime64 타입이므로 Timestamp로 비교.
+
+        ★2026-08-05 정체 검사 추가. 이 검사는 오래 "당일 행이 있는가"만 봤다.
+          그래서 거래정지로 종가가 멈춘 종목과, **수집기가 고장나 전일 값을
+          그대로 재사용하는 상태를 구분하지 못했다** — 화면상 둘 다 ✅다.
+          7/31 `dashboard_smart_money price=0`이 6주간 ✅로 보였던 것과 같은 구조
+          ("적재됐는가"만 보는 감시는 값 오류를 영원히 못 잡는다).
+          실측(8/5): 1,182종목 중 15종목이 5일 고정 + 거래량 0 + 수급 DB 부재로
+          3중 일치 = 거래정지 확실, 정상 변동 1,161종목."""
         processed = self.data_dir / "processed"
         if not processed.exists():
             return CheckResult("종가", False, "processed/ 폴더 없음")
@@ -172,21 +182,55 @@ class DataHealthCheck:
         target_ts = pd.Timestamp(self.today)
         has_today = 0
         missing: list[str] = []
+        halted: list[str] = []
+        reused: list[str] = []
         for pf in parquets:
             try:
-                df = pd.read_parquet(pf, columns=["close"])
-                # 인덱스가 datetime64 타입
-                if target_ts in df.index:
-                    has_today += 1
-                else:
-                    missing.append(pf.stem)
+                df = self._read_close_volume(pf)
             except Exception:
                 missing.append(pf.stem)
+                continue
+            # 인덱스가 datetime64 타입
+            if target_ts not in df.index:
+                missing.append(pf.stem)
+                continue
+            has_today += 1
+            kind = self._frozen_kind(df, target_ts, lookback)
+            if kind == "halted":
+                halted.append(pf.stem)
+            elif kind == "reused":
+                reused.append(pf.stem)
 
         pct = has_today / total * 100 if total else 0.0
-        passed = pct >= 95
+        live = has_today - len(halted) - len(reused)
+        halted_pct = len(halted) / total * 100 if total else 0.0
+
+        # ★passed 기준은 "당일 행이 있는가"를 유지한다 — 거래정지는 종목의 정상
+        #   상태이므로 실패로 세면 매일 오탐이 된다(8/1 const_sanity와 같은 원칙:
+        #   알려진 지속 상태는 억제, 급변만 경고).
+        #   두 가지만 실패로 본다:
+        #   ⑴ 거래정지 추정이 임계 초과 → 개별 종목 사정이 아니라 수집 이상
+        #      (실측 기저 1.3% = 15/1182)
+        #   ⑵ 값 재사용 의심이 1건이라도 발생 → 기저선이 0이라 곧 급변
+        passed = (
+            pct >= 95
+            and halted_pct <= frozen_alert_pct
+            and not reused
+        )
 
         detail = f"{has_today:,}/{total:,} ({pct:.1f}%)"
+        detail += f" | 실동 {live:,}·정지 {len(halted):,}({halted_pct:.1f}%)·재사용의심 {len(reused):,}"
+        if reused:
+            # 기저선 0에서의 발생이라 종목코드를 아끼지 않고 남긴다
+            detail += " 🚨재사용: " + ",".join(sorted(reused)[:12])
+            if len(reused) > 12:
+                detail += f" 외 {len(reused) - 12}건"
+        if halted_pct > frozen_alert_pct:
+            detail += f" ⚠️정지 급증(임계 {frozen_alert_pct:.0f}%) — 수집 이상 의심"
+        if halted:
+            detail += " | 정지: " + ",".join(sorted(halted)[:8])
+            if len(halted) > 8:
+                detail += f" 외 {len(halted) - 8}건"
         if missing:
             # ★미달 종목 코드를 남긴다 — 거래정지/상폐인지 진짜 실패인지 즉시 판별하기 위함
             shown = sorted(missing)[:10]
@@ -198,6 +242,49 @@ class DataHealthCheck:
             "종가", passed, detail,
             count=has_today, total=total,
         )
+
+    @staticmethod
+    def _read_close_volume(pf):
+        """close + volume을 읽되, volume이 없는 스키마는 close만으로 폴백."""
+        import pandas as pd
+        try:
+            return pd.read_parquet(pf, columns=["close", "volume"])
+        except Exception:  # noqa: BLE001  (컬럼 부재 — close만으로 재시도)
+            return pd.read_parquet(pf, columns=["close"])
+
+    @staticmethod
+    def _frozen_kind(df, target_ts, lookback: int = 5):
+        """종가 정체 유형 — None(정상) / "halted"(거래정지 추정) / "reused"(값 재사용 의심).
+
+        ★유형을 나누는 이유(설계 자기수정): 처음엔 "종가 고정 AND 거래량 0"
+          하나만 봤다. 그런데 **수집기가 전일 행을 통째로 복사하면 거래량도 함께
+          고정되면서 0이 아니게 되어 그 조건에 안 걸린다** — 정작 잡아야 할
+          고장 모드를 놓치는 설계였다. 8/1에 "과거 실값이 있으면 억제"가 회귀
+          결함을 영구 침묵시키던 것과 같은 부류다.
+        - halted : 종가 고정 + 당일 거래량 0/결측 → 종목의 정상 상태. 표기만 한다.
+        - reused : 종가 고정 + 거래량까지 고정인데 0이 아님 → 값 재사용 지문. 경고.
+        ★거래량 컬럼이 없으면 판정하지 않는다 — 근거가 반쪽이면 경보를 내지 않되,
+          detail에 실동/정지를 항상 병기해 침묵으로 감추지는 않는다(7/30 F4 교훈).
+        ★기저선 실측(8/5, 1,182종목): halted 15 · reused 0 · 종가만 고정 0.
+          reused 기저선이 0이라 1건이라도 나오면 급변이므로 즉시 실패로 본다.
+        """
+        import pandas as pd
+        try:
+            tail = df.loc[:target_ts].tail(lookback)
+        except Exception:  # noqa: BLE001  (인덱스 비정렬 등 — 판정 보류)
+            return None
+        if len(tail) < 3 or tail["close"].nunique(dropna=False) != 1:
+            return None
+        if "volume" not in df.columns:
+            return None
+        vol = tail["volume"].iloc[-1]
+        try:
+            is_zero = bool(pd.isna(vol) or float(vol) == 0)
+        except (TypeError, ValueError):  # 파손된 거래량 — 판정 보류
+            return None
+        if is_zero:
+            return "halted"
+        return "reused" if tail["volume"].nunique(dropna=False) == 1 else None
 
     def _price_has_today(self, sample: int = 20) -> bool:
         """종가 parquet에 당일 데이터가 있는지 (수급 당일결손 판정의 독립 소스).
