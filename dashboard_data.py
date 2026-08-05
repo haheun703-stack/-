@@ -42,6 +42,48 @@ def _load_json(path: str | Path, default=None):
     return default if default is not None else {}
 
 
+def _source_age_days(path: str | Path) -> int | None:
+    """소스 파일이 며칠 지났는지. 없으면 None.
+
+    ★`_load_json`에는 신선도 개념이 없다. 그래서 생성기가 죽은 소스도
+      매일 조용히 실려 나간다(8/5 실측: scenarios/active_scenarios.json이
+      2026-03-31자인데 upload_flowx가 date=오늘로 upsert). 값을 비우는 것은
+      공개 페이지 파손 위험이 있어 하지 않고, 나이를 드러내기만 한다.
+    """
+    p = Path(path) if not isinstance(path, Path) else path
+    if not p.is_absolute():
+        p = DATA_DIR / p
+    if not p.exists():
+        return None
+    mtime = datetime.fromtimestamp(p.stat().st_mtime)
+    return (datetime.now() - mtime).days
+
+
+def _load_kospi_snapshot() -> tuple[float, float, str]:
+    """KOSPI (종가, 전일대비 %, 날짜). 실패 시 (0.0, 0.0, "").
+
+    ★`regime_macro_signal.json`에 `kospi_close`/`kospi_change_pct` 키가
+      있다고 가정한 코드가 두 곳(build_zone1·build_zone_scenario)에 있었으나
+      그 키는 존재한 적이 없다 — 실제 소스는 이 CSV뿐이다. 그래서 공개
+      페이지의 KOSPI가 오랫동안 0이었다.
+    """
+    p = DATA_DIR / "kospi_index.csv"
+    if not p.exists():
+        return 0.0, 0.0, ""
+    try:
+        import csv
+        with open(p, encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        if len(rows) < 2:
+            return 0.0, 0.0, ""
+        cur, prev = float(rows[-1]["close"]), float(rows[-2]["close"])
+        chg = round((cur / prev - 1) * 100, 2) if prev else 0.0
+        return round(cur, 2), chg, str(rows[-1].get("Date", ""))
+    except Exception as e:  # noqa: BLE001  (지수 CSV 파손 — 0으로 폴백하되 알린다)
+        print(f"[dashboard_data] KOSPI 스냅샷 로드 실패: {e}")
+        return 0.0, 0.0, ""
+
+
 # ──────────────────────────────────────────────
 # FLOWX 상황별 메시지 생성기
 # ──────────────────────────────────────────────
@@ -165,9 +207,9 @@ def build_zone1() -> dict:
     arms = brain.get("arms", [])
     arm_total = sum(a.get("adjusted_pct", 0) for a in arms) if isinstance(arms, list) else 0
 
-    # KOSPI 데이터 (regime에서)
-    kospi_close = regime.get("kospi_close", 0)
-    kospi_chg = regime.get("kospi_change_pct", 0)
+    # KOSPI 데이터 — ★regime_macro_signal.json에 없는 키였다(8/5 수정).
+    #   `kospi_close`/`kospi_change_pct`는 그 파일에 존재하지 않아 계속 0이었다.
+    kospi_close, kospi_chg, _ = _load_kospi_snapshot()
 
     # ── FLOWX 상황별 메시지 생성 ──
     flowx_message = _build_flowx_message(
@@ -837,16 +879,46 @@ def build_zone_scenario() -> dict:
     lens = _load_json("lens_context.json")
 
     # ── 1) market_status ──
+    # ★2026-08-05 수정. 8필드 중 7개가 **존재하지 않는 키**를 읽고 있었다.
+    #   8/4 실적재분 실측: vix=0 · kospi=0 · kospi_chg=0 · regime="N/A" ·
+    #   verdict="N/A" · shield="N/A" — 맞은 것은 cash_pct 하나뿐이었고,
+    #   실제 그날은 VIX 15.9 · KOSPI 6,358.95 · CRISIS · SHIELD RED였다.
+    #   ★자가검사 §2.5가 이걸 매일 "정상"으로 통과시킨 이유: market_status는
+    #     스칼라 dict인데 값 정합성 검사가 list[dict]/dict[str,dict]만 펼친다.
+    #     "적재됐는가"만 보는 감시의 사각 — 7/31 price=0과 같은 구조다.
+    kospi_close, kospi_chg, _kospi_date = _load_kospi_snapshot()
     market_status = {
-        "verdict": brain.get("verdict", "N/A"),
-        "regime": regime.get("regime", "N/A"),
-        "kospi": regime.get("kospi_close", 0),
-        "kospi_chg": regime.get("kospi_change_pct", 0),
-        "vix": regime.get("vix", 0),
+        # ⏸️verdict — 소스를 붙이지 않는다. build_zone1의 verdict는
+        #   effective_regime → "매수"/"관망"/"회피" 매핑이라 계약260724 §1
+        #   "매수/매도 의견"에 정면 해당한다. 이 필드가 "N/A"인 것은 결함이
+        #   아니라 계약상 옳은 상태이며, 실값을 채우면 위반이 새로 생긴다.
+        "verdict": "N/A",
+        "regime": brain.get("effective_regime", "N/A"),
+        "kospi": kospi_close,
+        "kospi_chg": kospi_chg,
+        "vix": brain.get("vix_level", 0),
         "cash_pct": brain.get("cash_pct", 0),
-        "shield_status": lens.get("shield", {}).get("status", "N/A"),
+        # ⏸️shield_status — 실소스는 shield_report.json의 overall_level
+        #   (RED/ORANGE/NORMAL)이나 등급 표현이라 계약 판단 대기(B-27 계열).
+        #   임의로 채우지 않는다 — 7/27 "확인 전 변경 금지" 원칙.
+        "shield_status": "N/A",
         "updated_at": active_raw.get("updated", ""),
     }
+
+    # ── 1-b) 소스 신선도 — 낡은 시나리오가 오늘 날짜로 나가는 것을 드러낸다 ──
+    #   실측(8/5): active_scenarios.json이 2026-03-31자(127일 전)인데
+    #   upload_flowx가 date=오늘로 upsert해, 공개 /scenario가 4개월째
+    #   "이란-미국 전쟁(호르무즈 위기)"를 현재 시나리오로 서비스하고 있었다.
+    #   생성기(src/alpha/scenario_detector.py)는 죽은 경로에서만 호출된다.
+    #   ★값을 비우지 않는다 — /scenario 유일 소스라 파손 위험(7/27 교훈).
+    #     나이를 실어 보내고 로그로 경고해 "모르고 지나가는 것"만 막는다.
+    scen_age = _source_age_days("scenarios/active_scenarios.json")
+    if scen_age is not None:
+        market_status["scenario_source_age_days"] = scen_age
+        if scen_age > 14:
+            print(f"[dashboard_data] ⚠️ 시나리오 소스가 {scen_age}일 낡음 "
+                  f"(updated={active_raw.get('updated', '?')}) — "
+                  f"생성기 미배선 상태로 공개 /scenario에 계속 발행 중")
 
     # ── 2) active_scenarios — 체인 타임라인 포함 ──
     scenarios_dict = active_raw.get("scenarios", {})
