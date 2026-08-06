@@ -17,6 +17,7 @@ import argparse
 import json
 import logging
 import os
+import sqlite3
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -66,6 +67,93 @@ try:
     FDR_AVAILABLE = True
 except ImportError:
     FDR_AVAILABLE = False
+
+# ── 기타법인 소스: investor_daily.db (B-39) ──
+# KIS 종목별 수급 API(FHKST01010900)는 외국인/기관/개인만 반환하고 기타법인이 없어
+# 2026-04-17(KIS 전환일)부터 parquet 기타법인이 전량 0으로 남았다. 11세분 수집기
+# (FHPTJ04160001)가 매일 적재하는 investor_daily.db의 net_val(순매수 대금·원)을
+# 소스로 쓴다. 값 의미는 pykrx 시절 컬럼과 동일 — 2026-04-10~16 겹침 구간 대조로
+# 소수점까지 일치 실측(2026-08-06, 005930·000660).
+INVESTOR_DB_PATH = project_root / "data" / "investor_flow" / "investor_daily.db"
+ETC_CORP_FILL_DAYS = 14  # 일일 증분 충전 창 — 수집기(16:35~)가 본 스크립트(16:57)보다 늦게 끝나 당일분은 D+1에 채워진다
+
+
+def _etc_corp_start(end_date: str, days: int = ETC_CORP_FILL_DAYS) -> str:
+    return (datetime.strptime(end_date, "%Y%m%d") - timedelta(days=days)).strftime("%Y%m%d")
+
+
+def _fetch_etc_corp_db(ticker: str, start_date: str | None) -> pd.Series | None:
+    """investor_daily.db에서 기타법인 순매수 금액(원) 시계열. start_date=None이면 전 구간(백필용)."""
+    if not INVESTOR_DB_PATH.exists():
+        return None
+    try:
+        con = sqlite3.connect(f"file:{INVESTOR_DB_PATH}?mode=ro", uri=True, timeout=5)
+        try:
+            sql = ("select date, net_val from investor_daily "
+                   "where ticker=? and investor='기타법인'")
+            params: tuple = (ticker,)
+            if start_date:
+                sql += " and date>=?"
+                params = (ticker, start_date)
+            rows = con.execute(sql, params).fetchall()
+        finally:
+            con.close()
+    except Exception as e:
+        logger.debug("[%s] 기타법인 DB 조회 실패: %s", ticker, e)
+        return None
+    if not rows:
+        return None
+    return pd.Series({
+        pd.Timestamp(datetime.strptime(d, "%Y%m%d")): float(v)
+        for d, v in rows if v is not None
+    })
+
+
+def _fill_etc_corp(df: pd.DataFrame, ticker: str, start_date: str | None) -> int:
+    """parquet 기타법인의 0/NaN 칸을 DB 실값으로 채운다. 채운 칸 수 반환.
+
+    0/NaN만 대상이라 pykrx 시절 실값(~2026-04-16)은 불변이고,
+    실제 순매수 0인 날은 DB도 0이라 결과가 같다.
+    """
+    if "기타법인" not in df.columns:
+        return 0
+    s = _fetch_etc_corp_db(ticker, start_date)
+    if s is None or s.empty:
+        return 0
+    common = df.index.intersection(s.index)
+    if len(common) == 0:
+        return 0
+    cur = df.loc[common, "기타법인"]
+    tgt = s.loc[common]
+    idx = cur.index[((cur == 0) | cur.isna()) & (tgt != 0)]
+    if len(idx):
+        df.loc[idx, "기타법인"] = tgt.loc[idx].astype(float)
+    return len(idx)
+
+
+def _run_etc_corp_backfill(parquets: list[Path]) -> None:
+    """B-39 일회성 복구: 전 parquet의 기타법인 0 구간을 DB 전 구간(2025-04-21~)으로 채운다.
+
+    주의: 1,000+ 파일을 재작성하므로 parquet 소비 파이프라인(BAT-D 16:30~18:56 등)이
+    도는 동안 실행 금지 — 저녁 배치 종료 후 조용한 창에서 돌릴 것.
+    """
+    t0 = time.time()
+    files = cells = errs = 0
+    for i, p in enumerate(parquets, 1):
+        try:
+            df = pd.read_parquet(p)
+            n = _fill_etc_corp(df, p.stem, None)
+            if n:
+                df.to_parquet(p)
+                files += 1
+                cells += n
+        except Exception as e:
+            errs += 1
+            logger.warning("[%s] 기타법인 백필 실패: %s", p.stem, e)
+        if i % 200 == 0:
+            logger.info("  --- 백필 진행 %d/%d | 수정 %d파일 %d칸", i, len(parquets), files, cells)
+    logger.info("기타법인 백필 완료: %d/%d파일 수정, %d칸 채움, 실패 %d, %.1f초",
+                files, len(parquets), cells, errs, time.time() - t0)
 
 
 # ════════════════════════════════════════════════════
@@ -165,52 +253,54 @@ def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
     zero_mask = (recent[supply_cols].abs().sum(axis=1) == 0)
     zero_dates = recent[zero_mask].index
 
-    if len(zero_dates) == 0:
-        return result
-
-    inv_df = None
-
-    # 1차: KIS API (안정적, 30일치 반환)
-    if KIS_INVESTOR_AVAILABLE:
-        try:
-            kis_df = kis_fetch_investor(ticker)
-            if kis_df is not None and not kis_df.empty:
-                kis_df.index.name = "date"
-                inv_df = kis_df
-        except Exception:
-            pass
-
-    # 2차: pykrx fallback
-    if inv_df is None and PYKRX_AVAILABLE:
-        fetch_start = zero_dates.min().strftime("%Y%m%d")
-        fetch_end = zero_dates.max().strftime("%Y%m%d")
-        try:
-            inv_df = krx.get_market_trading_value_by_date(fetch_start, fetch_end, ticker)
-            if inv_df is not None and not inv_df.empty:
-                inv_df.index.name = "date"
-            else:
-                inv_df = None
-            time.sleep(0.3)
-        except Exception:
-            inv_df = None
-
-    if inv_df is None:
-        return result
-
     filled = 0
-    for col in supply_cols:
-        if col in inv_df.columns:
-            if col not in df.columns:
-                df[col] = 0.0
-            common_idx = inv_df.index.intersection(zero_dates)
-            if len(common_idx) > 0:
-                df.loc[common_idx, col] = inv_df.loc[common_idx, col]
-                filled = len(common_idx)
+    if len(zero_dates) > 0:
+        inv_df = None
 
-    if filled > 0:
+        # 1차: KIS API (안정적, 30일치 반환)
+        if KIS_INVESTOR_AVAILABLE:
+            try:
+                kis_df = kis_fetch_investor(ticker)
+                if kis_df is not None and not kis_df.empty:
+                    kis_df.index.name = "date"
+                    inv_df = kis_df
+            except Exception:
+                pass
+
+        # 2차: pykrx fallback
+        if inv_df is None and PYKRX_AVAILABLE:
+            fetch_start = zero_dates.min().strftime("%Y%m%d")
+            fetch_end = zero_dates.max().strftime("%Y%m%d")
+            try:
+                inv_df = krx.get_market_trading_value_by_date(fetch_start, fetch_end, ticker)
+                if inv_df is not None and not inv_df.empty:
+                    inv_df.index.name = "date"
+                else:
+                    inv_df = None
+                time.sleep(0.3)
+            except Exception:
+                inv_df = None
+
+        if inv_df is not None:
+            for col in supply_cols:
+                if col in inv_df.columns:
+                    if col not in df.columns:
+                        df[col] = 0.0
+                    common_idx = inv_df.index.intersection(zero_dates)
+                    if len(common_idx) > 0:
+                        df.loc[common_idx, col] = inv_df.loc[common_idx, col]
+                        filled = len(common_idx)
+
+    # B-39: 기타법인은 KIS 응답에 없어 위 경로로는 안 채워지고, 외/기/개가 채워진
+    # 행은 zero_mask(4컬럼 합=0)에 다시 안 걸려 영구 0이 된다 — DB에서 별도 충전
+    etc_filled = _fill_etc_corp(df, ticker, _etc_corp_start(end_date))
+
+    if filled > 0 or etc_filled > 0:
         df.to_parquet(parquet_path)
         result["status"] = "ok"
         result["new_rows"] = filled
+        if etc_filled:
+            result["etc_corp"] = etc_filled
 
     return result
 
@@ -417,10 +507,18 @@ def extend_single(parquet_path: Path, end_date: str, *,
         combined = pd.concat([df, new_rows])
         combined = combined.sort_index()
         combined = combined[~combined.index.duplicated(keep="last")]
+
+        # B-39: KIS 수급 경로가 못 채우는 기타법인을 DB에서 충전 (최근 창만)
+        etc_filled = 0
+        if not skip_supply:
+            etc_filled = _fill_etc_corp(combined, ticker, _etc_corp_start(end_date))
+
         combined.to_parquet(parquet_path)
 
         result["status"] = "ok"
         result["new_rows"] = len(new_rows)
+        if etc_filled:
+            result["etc_corp"] = etc_filled
         result["new_end"] = combined.index.max().strftime("%Y-%m-%d")
         if ohlcv_source != "krx_bulk":
             result["ohlcv_source"] = ohlcv_source
@@ -478,6 +576,8 @@ def main():
                         help="테스트용: N종목만 샘플 실행")
     parser.add_argument("--workers", type=int, default=5,
                         help="병렬 워커 수 (기본 5, 최대 5)")
+    parser.add_argument("--backfill-etc-corp", action="store_true",
+                        help="기타법인 전구간 백필 — parquet의 0을 investor_daily.db 실값으로 복구 (B-39 일회성)")
     args = parser.parse_args()
 
     max_workers = min(args.workers, 5)
@@ -488,6 +588,10 @@ def main():
     if args.sample > 0:
         parquets = parquets[:args.sample]
         logger.info("샘플 모드: %d종목만 실행", args.sample)
+
+    if args.backfill_etc_corp:
+        _run_etc_corp_backfill(parquets)
+        return
 
     mode = "supply-only" if args.supply_only else ("ohlcv-only" if args.skip_supply else "full")
     logger.info(
