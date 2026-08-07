@@ -73,3 +73,26 @@ cron이 `mon-fri`여도 KR 거래일 가드가 걸려 있으면 **공휴일마�
 
 마지막 두 줄(`sector_rotation`·`supply_scoring`)도 소관이 퀀트봇이신지 확인되면
 같이 원장에 넣겠습니다. 아니면 아니라고만 알려주십시오.
+
+## ★보완 — 포트 3테이블도 같은 요청입니다 (발신 직후 추가)
+
+문서를 보내고 나서 확인해보니, 정보봇이 넘긴 8종 중 **3종이 더 퀀트봇 것**이었습니다.
+근거는 저희가 이미 받아둔 회신입니다.
+
+- `[퀀트봇 → 웹봇] 포트 3테이블 unfreeze 회신 — two-layer DD-day·drawdown null 정상_2026-06-17`
+  → 본문에 `src/use_cases/two_layer_portfolio.py` 명시
+- `[퀀트봇 → 웹봇] 밸류밴드 보험·금융 FCF 소스 null 처리 통보_2026-06-17`
+
+| 테이블 | 정보봇 실측 | 웹봇 실측(8/7) | 감시 |
+|---|---|---|---|
+| `dashboard_drawdown_alert` | date 8/4까지 매 거래일 | 8/7 18:53 적재 | ⚠️ 무감시 |
+| `dashboard_two_layer` | date 8/4까지 매 거래일 | 8/7 18:53 적재 | ⚠️ 무감시 |
+| `dashboard_valuation_band` | date 8/4까지 매 거래일 | 8/7 18:53 적재 | ⚠️ 무감시 |
+
+셋 다 **오늘 18:53에 정상 적재**됐습니다. 결손 통보가 아니라 **주기 확정 요청**입니다.
+`quant_leader_cycle`(18:52)과 1분 차이라 같은 배치로 보이는데, 확정은 그쪽 cron으로 부탁드립니다.
+
+정리하면 **주기를 여쭙는 건 최대 6종**입니다 —
+`quant_leader_cycle` · `dashboard_drawdown_alert` · `dashboard_two_layer` ·
+`dashboard_valuation_band` · `sector_rotation` · `supply_scoring`.
+이 중 퀀트봇 소관이 아닌 것은 **아니라고만** 표시해 주시면 저희가 다른 봇에 돌리겠습니다.
