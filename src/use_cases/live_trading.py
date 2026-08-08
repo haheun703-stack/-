@@ -83,9 +83,17 @@ class LiveTradingEngine:
 
         self.monitor_interval = monitor_cfg.get("interval_sec", 60)
 
-        # 포지션 사이저 초기화
-        from src.position_sizer import PositionSizer
-        self.sizer = PositionSizer(self.config)
+        # 포지션 사이저 초기화. alpha_v2 sizing은 기본 비활성이라 기존 동작은 유지된다.
+        alpha_sizing_cfg = self.config.get("alpha_v2", {}).get("sizing", {})
+        self._uses_v2_sizer = bool(
+            alpha_sizing_cfg.get("use_kelly") or alpha_sizing_cfg.get("use_correlation")
+        )
+        if self._uses_v2_sizer:
+            from src.alpha.position_sizer_v2 import PositionSizerV2
+            self.sizer = PositionSizerV2(self.config)
+        else:
+            from src.position_sizer import PositionSizer
+            self.sizer = PositionSizer(self.config)
 
     # ──────────────────────────────────────────
     # 매수 실행
@@ -192,14 +200,17 @@ class LiveTradingEngine:
             if p.stop_loss < p.entry_price
         )
 
-        sizing = self.sizer.calculate(
-            account_balance=available_cash,
-            entry_price=entry_price,
-            atr_value=signal.get("atr_value", entry_price * 0.02),
-            grade_ratio=grade_ratio,
-            current_portfolio_risk=portfolio_risk,
-            stage_pct=stage_pct,
-        )
+        sizing_kwargs = {
+            "account_balance": available_cash,
+            "entry_price": entry_price,
+            "atr_value": signal.get("atr_value", entry_price * 0.02),
+            "grade_ratio": grade_ratio,
+            "current_portfolio_risk": portfolio_risk,
+            "stage_pct": stage_pct,
+        }
+        if self._uses_v2_sizer:
+            sizing_kwargs["signal_source"] = self._resolve_signal_source(signal)
+        sizing = self.sizer.calculate(**sizing_kwargs)
 
         shares = sizing["shares"]
         if shares <= 0:
@@ -537,6 +548,20 @@ class LiveTradingEngine:
             return 500
         else:
             return 1000
+
+    @staticmethod
+    def _resolve_signal_source(signal: dict) -> str:
+        """Kelly 성과 파일의 엔진명으로 매칭 가능한 시그널 소스명을 추출."""
+        for key in ("signal_source", "source", "engine", "strategy"):
+            value = signal.get(key)
+            if value:
+                return str(value)
+        sources = signal.get("sources")
+        if isinstance(sources, str) and sources:
+            return sources
+        if isinstance(sources, list) and sources:
+            return str(sources[0])
+        return str(signal.get("trigger_type", "") or "")
 
     def _calc_daily_loss_pct(self) -> float:
         """당일 손실률 계산"""

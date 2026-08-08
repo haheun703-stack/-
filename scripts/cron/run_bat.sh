@@ -328,6 +328,9 @@ case "$BAT" in
     #   BULL=레버2x/CAUTION=지수/BEAR·CRISIS=현금. 인버스는 phase12 기각으로 미포함(지수BH 관측만).
     #   V3b 실전검증 겸용 · 관측 전용 · 실주문 0 · data/paper_portfolio_wave_{kr,us}.json
     run_py scripts/paper_wave_rider.py
+    # FLOWX 공통 전방 원장 미러 — 모든 KR/US 페이퍼 산출 이후 실행, 실주문 0, 중복 이벤트 멱등.
+    # 비용이 불완전한 성과는 cost_complete=false로 기록해 인증 순성과에서 제외 가능.
+    run_py scripts/mirror_forward_paper_ledger.py --profile all
     # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
     #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
     #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.

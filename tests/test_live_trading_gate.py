@@ -5,23 +5,29 @@
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
-from risk.config import KST
 from src.entities.trading_models import Order, OrderSide, OrderStatus, OrderType
+from src.trading_calendar import last_kr_trading_day, prev_kr_trading_day
 from src.use_cases.live_trading import LiveTradingEngine
 
 _KEY = "live-gate-test-key"
-_ASOF = date(2026, 6, 10)
 
 
 def _fresh_ohlcv(close=10000, volume=5000, rows=30):
-    idx = pd.bdate_range(end=pd.Timestamp(_ASOF), periods=rows)
+    idx = pd.bdate_range(end=pd.Timestamp(last_kr_trading_day(date.today())), periods=rows)
     return pd.DataFrame({"close": [close] * rows, "volume": [volume] * rows}, index=idx)
+
+
+def _trading_days_ago(days: int) -> date:
+    cur = last_kr_trading_day(date.today())
+    for _ in range(days):
+        cur = prev_kr_trading_day(cur)
+    return cur
 
 
 def _make_engine(order_port, balance_payload, ohlcv_df):
@@ -112,7 +118,7 @@ def test_gate_reject_blocks_order():
 def test_gate_reject_on_stale_data_blocks_order():
     order_port = MagicMock()
     stale = _fresh_ohlcv()
-    stale.index = pd.bdate_range(end=pd.Timestamp(date(2026, 5, 20)), periods=len(stale))  # 오래된 봉
+    stale.index = pd.bdate_range(end=pd.Timestamp(_trading_days_ago(10)), periods=len(stale))  # 오래된 봉
     engine = _make_engine(order_port, _ok_balance(), stale)
 
     signal = {"ticker": "005930", "entry_price": 10000, "grade": "A", "atr_value": 200}

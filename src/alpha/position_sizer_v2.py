@@ -1,8 +1,8 @@
-"""V2 포지션 사이저 — Half Kelly + 상관관계 감산 (STEP 5-2/5-3)
+"""V2 포지션 사이저 — Fractional Kelly + 상관관계 감산 (STEP 5-2/5-3)
 
 기존 PositionSizer를 래핑하여 두 가지 추가 조정:
 1. 상관관계 감산: 기존 포트폴리오와 고상관(>0.7) 시 사이즈 감축
-2. Half Kelly: 시그널 적중률 기반 최적 베팅 비율
+2. Fractional Kelly: 시그널 성과 기반 최적 베팅 비율
 
 final_shares = min(기존_shares × corr_penalty × kelly_mult, 기존_shares)
 """
@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 class PositionSizerV2:
-    """V2 사이징: 기존 ATR + 상관관계 감산 + Half Kelly"""
+    """V2 사이징: 기존 ATR + 상관관계 감산 + Fractional Kelly"""
 
     def __init__(self, config: dict):
         self._base_sizer = PositionSizer(config)
@@ -32,6 +32,11 @@ class PositionSizerV2:
         self._sector_max_pct = v2_cfg.get("sector_max_pct", 0.30)
         self._use_kelly = v2_cfg.get("use_kelly", False)
         self._kelly_default = v2_cfg.get("kelly_default", 0.5)
+        self._kelly_fraction = v2_cfg.get("kelly_fraction", 0.5)
+        self._kelly_min_samples = v2_cfg.get("kelly_min_samples", 30)
+        self._kelly_floor = v2_cfg.get("kelly_floor", 0.0)
+        self._kelly_cap = v2_cfg.get("kelly_cap", 1.0)
+        self._kelly_fallback_odds = v2_cfg.get("kelly_fallback_odds", 1.0)
 
         # 적중률 데이터 로드
         self._accuracy = self._load_accuracy()
@@ -80,14 +85,16 @@ class PositionSizerV2:
         if corr_penalty < 1.0:
             multiplier *= corr_penalty
 
-        # 3. Half Kelly
+        kelly_mult = 1.0
+
+        # 3. Fractional Kelly
         if self._use_kelly and signal_source:
             kelly_mult = self._calc_half_kelly(signal_source)
             multiplier *= kelly_mult
 
         # 적용
         if multiplier < 1.0:
-            adjusted = max(1, int(base_shares * multiplier))
+            adjusted = 0 if multiplier <= 0 else max(1, int(base_shares * multiplier))
             result["shares"] = adjusted
             result["investment"] = int(adjusted * entry_price)
             result["risk_amount"] = int(adjusted * result["stop_distance"])
@@ -95,6 +102,8 @@ class PositionSizerV2:
                 result["investment"] / account_balance * 100, 1
             ) if account_balance > 0 else 0.0
             result["v2_multiplier"] = round(multiplier, 3)
+            if self._use_kelly and signal_source:
+                result["kelly_multiplier"] = round(kelly_mult, 3)
 
         return result
 
@@ -127,42 +136,49 @@ class PositionSizerV2:
         return 1.0
 
     def _calc_half_kelly(self, signal_source: str) -> float:
-        """시그널 소스의 Half Kelly 비율 계산.
+        """시그널 소스의 Fractional Kelly 비율 계산.
 
         Kelly% = (p × b - q) / b
-        Half Kelly = Kelly% / 2, clamped to [0.1, 1.0]
+        Fractional Kelly = Kelly% × kelly_fraction, clamped to [kelly_floor, kelly_cap]
 
         Args:
             signal_source: 시그널 소스명
 
         Returns:
-            0.1~1.0 Kelly 배수
+            0.0~1.0 Kelly 배수
         """
         acc = self._accuracy.get(signal_source)
         if acc is None:
             return self._kelly_default
 
         hit_rate = acc.get("hit_rate", 0)
-        avg_ret = acc.get("avg_ret", 0)
         total = acc.get("total", 0)
 
         # 샘플 부족
-        if total < 10 or hit_rate <= 0:
+        if total < self._kelly_min_samples or hit_rate <= 0:
             return self._kelly_default
 
-        p = hit_rate / 100.0
+        p = hit_rate / 100.0 if hit_rate > 1 else float(hit_rate)
+        p = max(0.0, min(1.0, p))
         q = 1.0 - p
 
-        # avg_ret이 전체 평균이므로, 수익/손실 비율 추정
-        # 수익 시 평균 ≈ avg_ret / p, 손실 시 평균 ≈ avg_ret * (p-1) / q
-        # 간소화: b = |avg_ret_win / avg_ret_loss| ≈ 1.5 (보수적 가정)
-        b = 1.5
+        avg_win = abs(float(acc.get("avg_win", 0) or 0))
+        avg_loss = abs(float(acc.get("avg_loss", 0) or 0))
+        if avg_win > 0 and avg_loss > 0:
+            b = avg_win / avg_loss
+        else:
+            b = float(self._kelly_fallback_odds)
+
+        if b <= 0:
+            return self._kelly_default
 
         kelly = (p * b - q) / b
-        half_kelly = kelly / 2.0
+        if kelly <= 0:
+            return self._kelly_floor
 
-        # 0.1~1.0 범위로 클램핑
-        return max(0.1, min(1.0, half_kelly))
+        fractional_kelly = kelly * self._kelly_fraction
+
+        return max(self._kelly_floor, min(self._kelly_cap, fractional_kelly))
 
     def _load_accuracy(self) -> dict:
         """signal_accuracy.json에서 적중률 로드."""
@@ -172,6 +188,6 @@ class PositionSizerV2:
         try:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
-            return data.get("cumulative", {})
+            return data.get("signals") or data.get("cumulative", {})
         except Exception:
             return {}

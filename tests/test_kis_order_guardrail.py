@@ -70,6 +70,11 @@ def trading_hour(monkeypatch):
 @pytest.fixture
 def adapter(monkeypatch, clean_volume, tmp_path):
     """KisOrderAdapter mock (mojito API 호출 차단)."""
+    # 이 파일은 소유자 승인 이후의 하위 11개 가드를 독립 검증한다.
+    monkeypatch.setattr(
+        "src.utils.trade_runtime_safety.OWNER_LIVE_TRADING_APPROVED",
+        True,
+    )
     monkeypatch.setattr(
         "src.utils.trade_runtime_safety.KILL_SWITCH_PATHS",
         (tmp_path / "missing_KILL_SWITCH", tmp_path / "missing_kill_switch.flag"),

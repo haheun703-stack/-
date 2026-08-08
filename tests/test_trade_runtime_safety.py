@@ -6,6 +6,7 @@ import pytest
 def test_runtime_guard_blocks_when_kill_switch_file_exists(tmp_path, monkeypatch):
     from src.utils import trade_runtime_safety as safety
 
+    monkeypatch.setattr(safety, "OWNER_LIVE_TRADING_APPROVED", True)
     kill_switch = tmp_path / "KILL_SWITCH"
     kill_switch.write_text("test", encoding="utf-8")
     monkeypatch.setattr(safety, "KILL_SWITCH_PATHS", (kill_switch,))
@@ -20,6 +21,7 @@ def test_runtime_guard_blocks_when_kill_switch_file_exists(tmp_path, monkeypatch
 def test_runtime_guard_blocks_when_paper_only_env_is_true(tmp_path, monkeypatch):
     from src.utils import trade_runtime_safety as safety
 
+    monkeypatch.setattr(safety, "OWNER_LIVE_TRADING_APPROVED", True)
     monkeypatch.setattr(safety, "KILL_SWITCH_PATHS", (tmp_path / "missing",))
     monkeypatch.setenv("PAPER_ONLY", "true")
 
@@ -30,6 +32,7 @@ def test_runtime_guard_blocks_when_paper_only_env_is_true(tmp_path, monkeypatch)
 def test_kis_order_guard_uses_runtime_gate(tmp_path, monkeypatch):
     from src.utils import trade_runtime_safety as safety
 
+    monkeypatch.setattr(safety, "OWNER_LIVE_TRADING_APPROVED", True)
     kill_switch = tmp_path / "KILL_SWITCH"
     kill_switch.write_text("test", encoding="utf-8")
     monkeypatch.setattr(safety, "KILL_SWITCH_PATHS", (kill_switch,))
@@ -47,6 +50,7 @@ def test_kis_order_guard_uses_runtime_gate(tmp_path, monkeypatch):
 def test_runtime_guard_allows_when_no_blocker(tmp_path, monkeypatch):
     from src.utils import trade_runtime_safety as safety
 
+    monkeypatch.setattr(safety, "OWNER_LIVE_TRADING_APPROVED", True)
     monkeypatch.setattr(safety, "KILL_SWITCH_PATHS", (tmp_path / "missing",))
     for name in (
         "QUANT_AUTO_TRADE_DISABLED",
@@ -59,3 +63,16 @@ def test_runtime_guard_allows_when_no_blocker(tmp_path, monkeypatch):
 
     assert safety.runtime_order_block_reasons() == []
     safety.assert_runtime_orders_allowed()
+
+
+def test_runtime_guard_is_fail_closed_without_owner_approval(tmp_path, monkeypatch):
+    from src.utils import trade_runtime_safety as safety
+
+    monkeypatch.setattr(safety, "KILL_SWITCH_PATHS", (tmp_path / "missing",))
+    monkeypatch.setattr(safety, "OWNER_LIVE_TRADING_APPROVED", False)
+
+    reasons = safety.runtime_order_block_reasons()
+    assert "owner live-trading approval absent" in reasons
+
+    with pytest.raises(PermissionError, match="owner live-trading approval absent"):
+        safety.assert_runtime_orders_allowed()

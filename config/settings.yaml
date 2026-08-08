@@ -523,8 +523,8 @@ daily_hold_scorer:
 # v4.0 라이브 트레이딩 설정
 # ============================================================
 live_trading:
-  enabled: true                     # 2026-03-02 활성화 — 텔레그램 "정지"로 OFF
-  mode: "real"                      # "paper" (모의) / "real" (실전)
+  enabled: false                    # 2026-08-08 owner 결정 — 전방 페이퍼 검증만 허용
+  mode: "paper"                     # 실전 전환은 owner 명시 승인 + 코드 검수 전까지 금지
 
   # v5.0 일일 스케줄 (KST) — 한국장 준비 ~ 미장 마감
   schedule:
@@ -2290,6 +2290,11 @@ alpha_v2:
     corr_penalty: 0.70                # 고상관 시 사이즈 × 0.7 (30% 감축)
     sector_max_pct: 0.30              # 동일 섹터 합산 비중 상한 30%
     kelly_default: 0.50               # 데이터 부족 시 기본 Kelly 배수
+    kelly_fraction: 0.50              # 실측 Kelly의 1/2만 사용 (주식 확률 추정 오차 방어)
+    kelly_min_samples: 30             # 이 표본 미만은 kelly_default 사용
+    kelly_floor: 0.00                 # 음수 기대값이면 신규 비중 0
+    kelly_cap: 1.00                   # 기존 ATR 사이즈 이상으로 증액 금지
+    kelly_fallback_odds: 1.00         # avg_win/loss 없을 때 보수적 1:1 손익비 가정
   # STEP 7: LENS LAYER
   lens_enabled: true                    # LENS 활성화 (2026-03-25, 비파괴 PASS 확인)
   lens:
