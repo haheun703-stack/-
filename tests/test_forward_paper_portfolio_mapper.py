@@ -74,3 +74,29 @@ def test_mapper_rejects_invalid_trade_identity() -> None:
         assert "invalid legacy paper trade identity" in str(exc)
     else:
         raise AssertionError("invalid position must be rejected")
+
+
+def test_mapper_accepts_holdnav_entry_px_contract() -> None:
+    snapshot = {
+        "positions": {
+            "003550": {
+                "name": "LG",
+                "ticker": "003550",
+                "entry_date": "2026-08-06",
+                "entry_px": 104500,
+                "qty": 239,
+                "strategy": "HOLDING_NAV",
+            }
+        }
+    }
+
+    events = map_legacy_portfolio(
+        snapshot,
+        portfolio_id="paper_holding_nav",
+        strategy_version="test",
+        source_name="paper_portfolio_holdnav.json",
+    )
+
+    assert len(events) == 1
+    assert events[0].fill_price == 104500
+    assert events[0].filled_quantity == 239

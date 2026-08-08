@@ -44,7 +44,9 @@ def _float(value: object) -> float | None:
 def _trade_identity(portfolio_id: str, row: dict[str, Any]) -> tuple[str, str, str, float, float]:
     ticker = str(row.get("ticker") or row.get("code") or "").strip()
     entry_date = str(row.get("orig_entry_date") or row.get("entry_date") or "").strip()
-    entry_price = _float(row.get("avg_price") or row.get("entry_price")) or 0.0
+    entry_price = _float(
+        row.get("avg_price") or row.get("entry_price") or row.get("entry_px")
+    ) or 0.0
     quantity = _float(row.get("qty") or row.get("quantity")) or 0.0
     if not ticker or not entry_date or entry_price <= 0 or quantity <= 0:
         raise ValueError(f"invalid legacy paper trade identity: {row!r}")
