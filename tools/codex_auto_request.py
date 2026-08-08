@@ -161,13 +161,19 @@ def diff_stat(staged: bool) -> str:
 
 
 def available_checks() -> list[tuple[str, list[str]]]:
+    # -X utf8 필수 — 없으면 Windows 기본 cp949 stdout에서 한글·em-dash 출력이
+    # UnicodeEncodeError로 죽는다. self_review_checklist가 6/10~8/9 검수요청
+    # 277건 전부 EXIT 1이었고 PASS가 0건이었던 원인이 이것이라, 8개 영구
+    # 정합성 룰이 두 달간 한 번도 실행되지 않았다. (CLAUDE.md "한글 출력 시
+    # python -u -X utf8" 규칙이 이 호출부에만 빠져 있었다.)
+    py = [sys.executable, "-X", "utf8"]
     checks: list[tuple[str, list[str]]] = []
     if (PROJECT_ROOT / "tools" / "codex_lite.py").exists():
-        checks.append(("codex_lite", [sys.executable, "tools/codex_lite.py"]))
+        checks.append(("codex_lite", [*py, "tools/codex_lite.py"]))
     if (PROJECT_ROOT / "tools" / "self_review_checklist.py").exists():
-        checks.append(("self_review_checklist", [sys.executable, "tools/self_review_checklist.py"]))
+        checks.append(("self_review_checklist", [*py, "tools/self_review_checklist.py"]))
     if (PROJECT_ROOT / "tools" / "quant_preflight.py").exists():
-        checks.append(("quant_preflight_blocked", [sys.executable, "tools/quant_preflight.py", "--expect", "blocked"]))
+        checks.append(("quant_preflight_blocked", [*py, "tools/quant_preflight.py", "--expect", "blocked"]))
     return checks
 
 
