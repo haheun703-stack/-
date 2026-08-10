@@ -352,9 +352,35 @@ class DataHealthCheck:
 
     # ─── 2. 수급 데이터 (종목별) ───
 
+    #: parquet 경유 소비처(v8 스코어러 등)가 실제로 읽는 핵심 수급 컬럼.
+    #: ★8/10 교정 전에는 {"외국인합계","기관합계","체결강도"}였는데 **`체결강도`는
+    #: parquet에 존재하지 않는 컬럼**이었다(실측 확인). 3개 중 1개가 헛다리였고,
+    #: 기타법인·연기금은 애초에 검사 대상이 아니었다.
+    SUPPLY_VALUE_COLS = ("기관합계", "외국인합계", "기타법인", "pension_net_5d")
+
+    #: 이미 등재된 미해결 결손 — 새로 생긴 결손과 구분한다.
+    #: ★매일 ❌로 세면 B-44에서 막 걷어낸 "등급 영구 고착"이 그대로 재현된다.
+    #: 8/1에 채택한 판별 기준("이미 알려진 지속 상태인가")을 그대로 적용한다.
+    KNOWN_ZERO_COLS = {
+        "pension_net_5d": "B-46",  # 401일 전구간 0. supply_cols 미포함이 원인
+    }
+
+    #: 전량 0 판정 관측 창(거래일).
+    SUPPLY_ZERO_WINDOW = 20
+
     def _check_supply_stocks(self) -> CheckResult:
-        """processed/ parquet에서 수급 컬럼 존재 여부.
-        인덱스가 datetime64 타입."""
+        """processed/ parquet 수급 컬럼 — 존재 + **값이 살아 있는지**.
+
+        ★★8/10 교정(B-53 ①). 구 로직은 `not pd.isna(row.get(c))`로 **NaN만**
+        보고 0을 통과시켰다. 그래서 B-39(기타법인 3.5개월 0)·B-46(연기금 401일
+        0)·B-47(공매도 4컬럼 5.5개월 0)이 **전부 이 검사를 통과**했다. 같은
+        검사가 세 번 뚫린 것이라 "존재하는가"에 "값이 0으로 죽어 있지 않은가"를
+        더한다.
+
+        판정 단위는 **컬럼 × 표본 전체**다. 개별 종목의 특정일 0은 거래가 없었을
+        뿐이라 정상이고, **표본 전 종목이 관측창 내내 0인 컬럼**만 결손으로 본다
+        (8/1 `overheat_penalty` 오탐 교훈 — 0이 정상 하한인 지표를 잡지 않도록).
+        """
         processed = self.data_dir / "processed"
         parquets = list(processed.glob("*.parquet"))
         if not parquets:
@@ -364,7 +390,9 @@ class DataHealthCheck:
         samples = random.sample(parquets, min(30, len(parquets)))
 
         has_supply = 0
-        supply_cols = {"외국인합계", "기관합계", "체결강도"}
+        # 컬럼별 비영값 누적 — 표본 전체를 합산해 "통째로 0인가"를 본다.
+        nonzero: dict[str, int] = {c: 0 for c in self.SUPPLY_VALUE_COLS}
+        present: dict[str, int] = {c: 0 for c in self.SUPPLY_VALUE_COLS}
 
         try:
             import pandas as pd
@@ -373,12 +401,20 @@ class DataHealthCheck:
                 try:
                     df = pd.read_parquet(pf)
                     cols = set(df.columns)
-                    if supply_cols & cols:
-                        if target_ts in df.index:
-                            row = df.loc[target_ts]
-                            if any(not pd.isna(row.get(c))
-                                   for c in supply_cols if c in df.columns):
-                                has_supply += 1
+                    if not (set(self.SUPPLY_VALUE_COLS) & cols):
+                        continue
+
+                    if target_ts in df.index:
+                        row = df.loc[target_ts]
+                        if any(not pd.isna(row.get(c))
+                               for c in self.SUPPLY_VALUE_COLS if c in cols):
+                            has_supply += 1
+
+                    tail = df.tail(self.SUPPLY_ZERO_WINDOW)
+                    for c in self.SUPPLY_VALUE_COLS:
+                        if c in cols:
+                            present[c] += 1
+                            nonzero[c] += int((tail[c].fillna(0) != 0).sum())
                 except Exception:
                     continue
         except ImportError:
@@ -387,11 +423,36 @@ class DataHealthCheck:
         ratio = has_supply / len(samples) if samples else 0
         estimated = int(ratio * len(parquets))
 
-        # 수급 데이터는 유니버스 종목(~100개)에만 있으므로 10% 이상이면 정상
-        passed = estimated >= 80
+        # ① 커버리지 — 수급 데이터는 유니버스 종목에만 있으므로 80종목 이상이면 정상
+        coverage_ok = estimated >= 80
+
+        # ② 값 생존 — 표본 어디에도 비영값이 없는 컬럼 = 통째로 죽은 컬럼
+        dead_new, dead_known, missing = [], [], []
+        for c in self.SUPPLY_VALUE_COLS:
+            if present[c] == 0:
+                missing.append(c)          # 컬럼 자체가 표본에 없음
+            elif nonzero[c] == 0:
+                (dead_known if c in self.KNOWN_ZERO_COLS else dead_new).append(c)
+
+        passed = coverage_ok and not dead_new and not missing
+
+        parts = [f"~{estimated}/{len(parquets)}종목"]
+        if dead_new:
+            parts.append("🚨전량0(신규): " + ", ".join(dead_new))
+        if missing:
+            parts.append("🚨컬럼없음: " + ", ".join(missing))
+        if dead_known:
+            parts.append("알려진결손 "
+                         + ", ".join(f"{c}({self.KNOWN_ZERO_COLS[c]})"
+                                     for c in dead_known))
+        live = [c for c in self.SUPPLY_VALUE_COLS if nonzero[c] > 0]
+        if live:
+            parts.append("실값 " + "·".join(live))
+        if not coverage_ok:
+            parts.append("커버리지 미달!")
+
         return CheckResult(
-            "수급(종목)", passed,
-            f"~{estimated}/{len(parquets)} (유니버스 {estimated}종목 확인)",
+            "수급(종목)", passed, " | ".join(parts),
             count=estimated, total=len(parquets),
         )
 
