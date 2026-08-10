@@ -469,8 +469,34 @@ class DataHealthCheck:
 
     # ─── 3. 수급 데이터 (섹터별) ───
 
+    @staticmethod
+    def _json_asof(data: dict) -> str:
+        """산출물 JSON의 기준일 추출 — 최상위 → 항목 레벨 순으로 본다.
+
+        ★8/10 실측(B-53 ②): `investor_flow.json`은 최상위에 날짜가 없고
+        `sectors[].date`에 항목마다 들어 있다. 구 검사는 최상위만 봐서 **매일
+        `⚠️(날짜없음)`**이었는데, `found>=2` 임계에 가려 3/3이 아니어도 통과라
+        아무도 보지 않았다. 파일은 매일 17:57에 정상 생성되고 있었고 19개 항목
+        전부 당일자였다 — **데이터가 아니라 검사가 틀린 것**이었다.
+        """
+        d = data.get("date") or data.get("generated_at") or ""
+        if d:
+            return str(d)
+        items = data.get("sectors") or data.get("items") or []
+        if isinstance(items, dict):
+            items = list(items.values())
+        dates = {str(it.get("date")) for it in items
+                 if isinstance(it, dict) and it.get("date")}
+        # 항목마다 날짜가 갈리면 기준일을 특정할 수 없으므로 판정하지 않는다.
+        return dates.pop() if len(dates) == 1 else ""
+
     def _check_supply_sectors(self) -> CheckResult:
-        """섹터 수급 JSON 존재 + 오늘 날짜."""
+        """섹터 수급 JSON 존재 + 오늘 날짜.
+
+        ★8/10 교정 2건(B-53 ②): ⑴기준일 추출을 항목 레벨까지 폴백 ⑵임계
+        `found>=2` → **전량 요구**. 3개 중 1개가 죽어도 통과하던 것은 감시
+        구멍이고, 실제로 investor_flow가 매일 ⚠️인 채 통과하고 있었다.
+        """
         files = [
             ("sector_momentum", self.data_dir / "sector_rotation" / "sector_momentum.json"),
             ("sector_zscore", self.data_dir / "sector_rotation" / "sector_zscore.json"),
@@ -483,8 +509,7 @@ class DataHealthCheck:
             if path.exists():
                 try:
                     data = json.loads(path.read_text(encoding="utf-8"))
-                    # 날짜 필드 확인
-                    d = data.get("date", data.get("generated_at", ""))
+                    d = self._json_asof(data)
                     if self.today_str in str(d) or self.today_compact in str(d):
                         found += 1
                         details.append(f"{name}✅")
@@ -495,7 +520,18 @@ class DataHealthCheck:
             else:
                 details.append(f"{name}❌(없음)")
 
-        passed = found >= 2
+        # ★당일 산출물이 아직 하나도 없으면 BAT-D 전 실행 — 판정 보류.
+        #   판단 소스는 종가 존재(#18·#2와 동일 원칙). 섹터 JSON은 BAT-D 안에서
+        #   종가 재계산(17:43~17:56) 다음에 생성되므로, 종가가 당일치인데 섹터만
+        #   비어 있으면 시각과 무관하게 진짜 이상이다.
+        if found == 0 and not self._price_has_today():
+            return CheckResult(
+                "수급(섹터)", True,
+                f"당일 미생성 — 판정 보류(BAT-D 전) | {', '.join(details)}",
+                count=0, total=len(files),
+            )
+
+        passed = found == len(files)
         return CheckResult(
             "수급(섹터)", passed,
             f"{found}/{len(files)} — {', '.join(details)}",
