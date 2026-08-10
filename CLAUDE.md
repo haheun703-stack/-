@@ -20,7 +20,7 @@
 - **SSH 접속**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221`
 - **서버 경로**: `/home/ubuntu/quantum-master/`
 - **자동화 정본 = cron** (`scripts/cron/run_bat.sh`, ubuntu crontab). 평일 06:10~18:45 단계별(A~HEALTH) 직접 호출. ★`quantum-scheduler.service`는 5/27부터 **의도적 비활성(inactive)** — 살리지 말 것(cron 이중실행·freeze 위반).
-- **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull origin main"` — **`git pull`만**. 다음 cron 실행부터 새 코드 적용. ★`systemctl restart` 치지 말 것(무의미+위험). ⚠️장중(09:00~15:30) 금지, 페이퍼 cron(16:30 D·17:00 J) 전 권장.
+- **배포**: `ssh -i "D:/Prophet_Agent_System_예언자/_tmp_zips/lightsail_60gb.pem" -o ConnectTimeout=10 ubuntu@13.209.153.221 "cd ~/quantum-master && git pull origin main"` — **`git pull`만**. 다음 cron 실행부터 새 코드 적용. ★`systemctl restart` 치지 말 것(무의미+위험). ★**장중 배포 허용**(8/10 퐝가님 지시) — 실주문 0(페이퍼 전용) 유지 동안은 장중(09:00~15:30)에도 배포한다. 근거: 실주문이 삼중잠금(`data/KILL_SWITCH` 파일·`AUTO_TRADING_ENABLED=0`·`OWNER_LIVE_TRADING_APPROVED=False`)이라 장중 코드 교체로 체결이 틀어질 경로가 없다. **실주문 재개 시 이 예외는 자동 소멸** — 그때 장중 금지로 복원할 것. 단 배포 전 diff로 코드 변경 유무를 확인하고, BAT-D(16:30~19:00) **실행 중** 배포는 여전히 피한다(bash가 시작 시 스크립트를 메모리 로드해 옛 코드가 도는 별개 사유).
 - **로그**: cron 로그 `~/quantum-master/logs/cron_*.log` (scheduler journalctl 아님)
 
 ## 금지 경로 (LOCK)
