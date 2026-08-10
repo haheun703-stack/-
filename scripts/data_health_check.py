@@ -876,10 +876,25 @@ class DataHealthCheck:
 
         ★7/30 확정 규칙(껍데기 가설, 7/27 발견→7/28 반증→7/30 확정): 껍데기(실거래0)
         종목은 당일 BAT-D 안이 아니라 **익일 수집(KIS 30일 재조회)에서 채워진다**.
-        당일 종목수 ~2,64x는 정상(부분)이고 종목수 정본은 D+1. 따라서
-        ① 당일 급감 15% 임계는 유지(부분수집끼리 비교라 여전히 유효)
-        ② D-1이 완전판으로 채워졌는지를 D-2 대비 95%로 검증 — 채움 실패는
-           "익일이면 채워진다" 전제가 깨진 것이므로 경보.
+        당일 종목수 ~2,64x는 정상(부분)이고 종목수 정본은 D+1.
+
+        ★★8/10 교정 — 총 종목수는 완전성 지표가 아니다. 7/30 규칙은 "채워진다"는
+        사실만 맞았고 **무엇이 채워지는지**를 안 봤다. 8/6↔8/7 실측: D+1 추가분
+        204종목 중 **197종목(96.6%)이 직전일에도 실거래값 0**인 무거래 종목
+        (우선주·거래정지주)이고, 종가 parquet이 있는 나머지 3종도 당일 거래량이
+        실제 0이었다. 즉 **D+1에 채워지는 것은 실값이 아니라 무거래 0행이며,
+        실질 데이터는 당일 수집에서 이미 완비된다.**
+
+        그래서 구 ①은 성격이 다른 둘을 비교하고 있었다 — today는 실거래 종목만
+        (~2,62x), prev는 0행 포함 완전판(~2,827). **상시 7.2%의 가짜 감소가 깔려
+        임계 15% 중 실질 여유가 7.8%뿐이었고, 실값 종목 200개가 통째로 누락돼도
+        통과했다.** 이제 급감 판정을 **실거래값 있는 종목수끼리**(동종 비교)로
+        바꾼다. 직전 12거래일 실측 변동폭이 1.3%(2,608~2,641)라 임계 5%는 4배
+        여유이면서 130종목 누락부터 잡는다.
+
+        ① 실값 급감 5% — 주 판정. baseline drift 0.
+        ② D-1 총 종목수 채움 95% — 보조. 실값과 무관하나 0행 충전 파이프라인
+           (KIS 30일 재조회) 자체의 고장 신호라 유지한다.
         """
         db = self.data_dir / "investor_flow" / "investor_daily.db"
         if not db.exists():
@@ -893,6 +908,12 @@ class DataHealthCheck:
                     return CheckResult("수급커버리지", False, "데이터 없음")
                 counts = [con.execute(
                     "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?",
+                    (d,)).fetchone()[0] for d in dates]
+                # ★8/10 신설: 실거래값 있는 종목수 — 급감 판정의 주 소스.
+                # 총 종목수와 달리 무거래 0행에 영향받지 않아 당일↔전일이 동종 비교가 된다.
+                real_counts = [con.execute(
+                    "SELECT COUNT(DISTINCT ticker) FROM investor_daily WHERE date=?"
+                    " AND (COALESCE(buy_val,0)>0 OR COALESCE(sell_val,0)>0)",
                     (d,)).fetchone()[0] for d in dates]
             finally:
                 con.close()
@@ -922,10 +943,12 @@ class DataHealthCheck:
                                f"{dates[0]} {today_n}종목 (직전일 없음)",
                                count=today_n)
         prev_n = counts[1]
+        real_today, real_prev = real_counts[0], real_counts[1]
 
-        # ① 당일 급감 (부분수집끼리 비교)
-        drop = (prev_n - today_n) / prev_n if prev_n else 0.0
-        drop_ok = drop <= 0.15
+        # ① 당일 급감 — ★8/10부터 실거래값 있는 종목수끼리 비교(동종). 총 종목수 비교는
+        #   무거래 0행 때문에 상시 7.2% 가짜 감소가 깔려 200종목 누락을 못 잡았다.
+        drop = (real_prev - real_today) / real_prev if real_prev else 0.0
+        drop_ok = drop <= 0.05
 
         # ② D-1 익일채움 (D-2 대비 — 둘 다 완전판이어야 정상)
         fill_note = ""
@@ -938,15 +961,17 @@ class DataHealthCheck:
 
         passed = drop_ok and fill_ok
         if not drop_ok:
-            state = f"급감 {drop * 100:.1f}% — KIS 수집장애 의심!"
+            state = (f"실값 급감 {drop * 100:.1f}%"
+                     f" ({real_prev}→{real_today}) — KIS 수집장애 의심!")
         elif not fill_ok:
             state = "D-1 익일채움 실패 — KIS 30일 재조회 확인!"
         else:
             state = "정상"
         return CheckResult(
             "수급커버리지", passed,
-            f"{dates[0]} {today_n}종목 (직전 {dates[1]} {prev_n}{fill_note}) {state}",
-            count=today_n, total=prev_n)
+            f"{dates[0]} 실값 {real_today}종목/총 {today_n}"
+            f" (직전 {dates[1]} 실값 {real_prev}/총 {prev_n}{fill_note}) {state}",
+            count=real_today, total=real_prev)
 
     # ─── (폐기) 수급이면분석 (supply_demand/) 신선도 ───
 
