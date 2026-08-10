@@ -617,56 +617,73 @@ class DataHealthCheck:
             return None
 
     def _check_commodities(self) -> CheckResult:
-        """liquidity_signal 또는 commodity_prices.json에서 원자재 확인.
+        """원자재 가격 — 소스 + 신선도 + **값 생존**.
 
-        신선도 게이트 (7/16): 날짜가 7일 초과 과거면 FAIL —
-        기존엔 3/31 유물(commodity_prices.json, 수집기 아카이브됨)이 ✅ 통과했음.
+        신선도 게이트 (7/16): 날짜가 7일 초과 과거면 FAIL.
+
+        ★★8/10 실측 정정(B-53 ④) — 1·2차 순서가 사실과 반대였다. 구 로직은
+        `liquidity_signal.json`을 1차로 보고 `commodity_prices.json`을
+        "Alpha Vantage, 수집기 3/31 아카이브, 유물 가능성 높음"으로 취급해
+        폴백에 두었다. 실측하니 정반대다:
+          - `liquidity_signal.json`에는 원자재 키가 **아예 없다**
+            (date·data_date·stale_days·indicators·regime·signals·composite_*).
+            유동성 지표 파일이지 원자재 파일이 아니다.
+          - `commodity_prices.json`은 **오늘 06:10 갱신**, `source`가
+            `"yfinance futures (v2, 7/17 재구축)"` — 7/17 B-12로 부활한 정본이다.
+        즉 검사는 매번 1차에서 헛돈 뒤 폴백으로 통과하고 있었고, **주석만 낡은
+        채 남아 있었다.** 틀린 주석을 방치하면 언젠가 "유물이니 지우자"는 판단으로
+        진짜 소스가 사라진다 — 순서를 사실에 맞추고 근거를 실측으로 갱신한다.
         """
-        # 1차: liquidity_signal.json
+        # 1차: commodity_prices.json (정본 — yfinance futures v2, 7/17 재구축)
+        commodity_path = self.data_dir / "commodity_prices.json"
+        if commodity_path.exists():
+            try:
+                data = json.loads(commodity_path.read_text(encoding="utf-8"))
+                commodities = data.get("commodities", {})
+                d = str(data.get("date", ""))[:10]
+                if commodities:
+                    # ★값 생존 — 파일이 있고 날짜가 최신이어도 가격이 0이면 죽은 것.
+                    #   구 로직은 `v.get('price','?')`로 표시만 하고 판정엔 안 썼다.
+                    prices = {k: (v.get("price") if isinstance(v, dict) else v)
+                              for k, v in commodities.items()}
+                    live = {k: p for k, p in prices.items()
+                            if isinstance(p, (int, float)) and p > 0}
+                    dead = [k for k in prices if k not in live]
+                    names = [f"{k}={prices[k]}" for k in list(commodities)[:4]]
+
+                    gap = self._days_old(d)
+                    if gap is not None and gap > self.COMMODITY_STALE_DAYS:
+                        return CheckResult("원자재", False,
+                                           f"STALE({d}, {gap}일전): {', '.join(names)}")
+                    if not live:
+                        return CheckResult("원자재", False,
+                                           f"🚨{len(prices)}종 전량 0/결측 ({d})")
+                    detail = f"{', '.join(names)} ({d})"
+                    if dead:
+                        detail += f" | 🚨값없음: {', '.join(dead)}"
+                    return CheckResult("원자재", not dead, detail,
+                                       count=len(live), total=len(prices))
+            except Exception:
+                pass  # fallthrough
+
+        # 2차: liquidity_signal.json — 현재는 원자재 키가 없으나 부활 대비로 남긴다
         signal_path = self.data_dir / "liquidity_cycle" / "liquidity_signal.json"
         if signal_path.exists():
             try:
                 data = json.loads(signal_path.read_text(encoding="utf-8"))
                 commodities = data.get("commodities", data.get("asset_prices", {}))
-                if commodities and len(commodities) > 0:
+                if commodities:
                     d = str(data.get("date", ""))[:10]
                     gap = self._days_old(d)
                     if gap is not None and gap > self.COMMODITY_STALE_DAYS:
                         return CheckResult("원자재", False,
                                            f"{len(commodities)}종 STALE({d}, {gap}일전)")
                     return CheckResult("원자재", True,
-                                       f"{len(commodities)}종 (날짜: {d})")
-                # wti/gold 등 직접 키로 있는 경우 (날짜 없음 — 판정 불가, 통과 유지)
-                details = []
-                for key in ["wti", "gold", "copper", "dxy"]:
-                    val = data.get(key)
-                    if val is not None:
-                        details.append(f"{key}={val}")
-                if details:
-                    return CheckResult("원자재", True, f"{', '.join(details[:4])}")
-            except Exception:
-                pass  # fallthrough to commodity_prices.json
-
-        # 2차: commodity_prices.json (Alpha Vantage — 수집기 3/31 아카이브, 유물 가능성 높음)
-        commodity_path = self.data_dir / "commodity_prices.json"
-        if commodity_path.exists():
-            try:
-                data = json.loads(commodity_path.read_text(encoding="utf-8"))
-                commodities = data.get("commodities", {})
-                d = data.get("date", "")
-                if commodities:
-                    names = [f"{k}={v.get('price', '?')}" for k, v in commodities.items()]
-                    gap = self._days_old(d)
-                    if gap is not None and gap > self.COMMODITY_STALE_DAYS:
-                        return CheckResult("원자재", False,
-                                           f"STALE({d}, {gap}일전): {', '.join(names[:4])}"
-                                           " — 수집기 아카이브 유물, 파이프라인 결정 필요")
-                    return CheckResult("원자재", True,
-                                       f"{', '.join(names[:4])} ({d})")
+                                       f"{len(commodities)}종 (날짜: {d}, 폴백소스)")
             except Exception:
                 pass
 
-        return CheckResult("원자재", False, "liquidity/commodity 데이터 없음")
+        return CheckResult("원자재", False, "commodity/liquidity 데이터 없음")
 
     # ─── 6. FRED 매크로 ───
 
