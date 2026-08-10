@@ -840,15 +840,35 @@ class DataHealthCheck:
         has_daily = today_file.exists()
         has_index = index_file.exists()
 
+        # ★당일 파일이 없고 종가도 당일치가 없으면 BAT-D 전 실행 — 판정 보류
+        #   (#2·#3·#18과 동일 원칙). 학습기록은 BAT-D 후반(≈18:49)에 생성된다.
+        if not has_daily and not self._price_has_today():
+            return CheckResult("학습기록", True,
+                               "당일 미생성 — 판정 보류(BAT-D 전)")
+
         if has_daily and has_index:
             try:
                 data = json.loads(today_file.read_text(encoding="utf-8"))
-                signals = data.get("signal_count", data.get("total_signals", "?"))
-                return CheckResult("학습기록", True,
-                                   f"daily({self.today_str}) + index 있음 (시그널: {signals})")
-            except Exception:
-                return CheckResult("학습기록", True,
-                                   f"daily({self.today_str}) + index 있음")
+                # ★8/10 교정(B-53 ③): 구 검사는 `signal_count`/`total_signals`를
+                #   찾았으나 **둘 다 존재하지 않는 키**라 매일 `(시그널: ?)`를
+                #   찍고 있었다. 게다가 파일 존재만으로 통과시켜 **내용이 비어도
+                #   ✅**였다. 실제 산출물 키는 summary.total(분석 종목 수)과
+                #   signal_accuracy(평가 엔진 dict)다.
+                summary = data.get("summary") or {}
+                total = summary.get("total", 0)
+                engines = len(data.get("signal_accuracy") or {})
+                ok = total > 0 and engines > 0
+                detail = (f"daily({self.today_str}) + index"
+                          f" | 분석 {total}종목 · 평가엔진 {engines}개")
+                if not ok:
+                    detail += " — 🚨내용 비어 있음(학습이 헛돌았다)"
+                return CheckResult("학습기록", ok, detail,
+                                   count=total, total=engines)
+            except Exception as e:  # noqa: BLE001
+                # 파싱 실패를 통과로 세지 않는다 — 구 로직은 except에서 True를
+                # 반환해 파손 파일도 ✅였다.
+                return CheckResult("학습기록", False,
+                                   f"daily({self.today_str}) 파싱 오류: {e}")
 
         parts = []
         if has_daily:
