@@ -423,8 +423,17 @@ class DataHealthCheck:
         ratio = has_supply / len(samples) if samples else 0
         estimated = int(ratio * len(parquets))
 
-        # ① 커버리지 — 수급 데이터는 유니버스 종목에만 있으므로 80종목 이상이면 정상
-        coverage_ok = estimated >= 80
+        # ① 커버리지 — 수급 데이터는 유니버스 종목에만 있으므로 80종목 이상이면 정상.
+        #   ★당일 행 자체가 없으면(BAT-D·rebuild_indicators 전 실행) 판정을 보류한다.
+        #   구 로직은 이 경우에도 estimated=0으로 FAIL이었다 — HEALTH가 18:45 cron
+        #   으로만 돌아 드러나지 않았을 뿐이고, 장중 수동 실행은 늘 가짜 실패였다.
+        #   ★시각 하드코딩 대신 종가 존재를 독립 소스로 쓴다(#18과 동일 원칙, B-19①
+        #   교훈). 종가가 당일치인데 수급만 비었으면 시각과 무관하게 진짜 이상이다.
+        coverage_hold = False
+        if has_supply == 0 and not self._price_has_today():
+            coverage_ok, coverage_hold = True, True
+        else:
+            coverage_ok = estimated >= 80
 
         # ② 값 생존 — 표본 어디에도 비영값이 없는 컬럼 = 통째로 죽은 컬럼
         dead_new, dead_known, missing = [], [], []
@@ -448,7 +457,9 @@ class DataHealthCheck:
         live = [c for c in self.SUPPLY_VALUE_COLS if nonzero[c] > 0]
         if live:
             parts.append("실값 " + "·".join(live))
-        if not coverage_ok:
+        if coverage_hold:
+            parts[0] = f"당일 미수집 — 커버리지 판정 보류 (종가도 당일 없음, BAT-D 전)"
+        elif not coverage_ok:
             parts.append("커버리지 미달!")
 
         return CheckResult(
