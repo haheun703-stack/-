@@ -350,6 +350,38 @@ class DataHealthCheck:
         # 표본 과반이면 당일 수집이 돈 것으로 본다(상폐·거래정지 소수 혼입 방어)
         return hit >= max(1, sample // 2)
 
+    @staticmethod
+    def _dead_row_cols(df, date_col: str) -> bool:
+        """마지막 행의 숫자 컬럼이 **전량** 0/결측인가 (B-53 ⑤, 8/10).
+
+        "수집은 됐는데 값이 안 들어왔다"를 잡는다 — 날짜·행수만 보는 신선도
+        검사는 7/31 `price=0`형 사고를 통과시킨다.
+
+        ★개별 컬럼의 0은 정상일 수 있다(순매수가 정확히 0인 주체, 거래정지주의
+        거래량 0). 전량 0일 때만 결손으로 본다 — 8/1 `overheat_penalty`
+        오탐 교훈("0이 정상 하한인 지표를 잡지 않는다")을 그대로 적용.
+
+        ※numpy 스칼라는 `isinstance(v, int)`로 안 걸리는 경우가 있어
+        `float()` 변환 성공 여부로 숫자를 판별한다.
+        """
+        try:
+            last = df.iloc[-1]
+        except Exception:  # noqa: BLE001
+            return False  # 판정 불가는 결손으로 세지 않는다
+        numeric = []
+        for c in df.columns:
+            if c == date_col:
+                continue
+            try:
+                v = float(last[c])
+            except (TypeError, ValueError):
+                continue
+            if v == v:  # NaN 제외 (NaN != NaN)
+                numeric.append(v)
+        if not numeric:
+            return True
+        return all(v == 0 for v in numeric)
+
     # ─── 2. 수급 데이터 (종목별) ───
 
     #: parquet 경유 소비처(v8 스코어러 등)가 실제로 읽는 핵심 수급 컬럼.
@@ -975,9 +1007,21 @@ class DataHealthCheck:
             last_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
             gap = (self.today - last_date).days
 
+            # ★8/10(B-53 ⑤): 날짜·행수만 보던 것에 **마지막 행 값 생존**을 더한다.
+            #   지수가 최신 날짜로 들어와도 close가 0이면 레짐·알파 계산이 통째로
+            #   무너지는데 구 검사는 ✅였다(7/31 `price=0` 6주와 같은 형태).
+            #   개별 컬럼 0은 정상일 수 있으므로 **전량 0/NaN**만 잡는다.
+            dead = self._dead_row_cols(df, date_col)
+            if dead is True:
+                return CheckResult("KOSPI인덱스", False,
+                                   f"🚨{last_date_str} 마지막 행 값 전량 0/결측"
+                                   f" — 지수 계산 붕괴 위험!")
+
             if gap <= 5:
+                close = df["close"].iloc[-1] if "close" in df.columns else "?"
                 return CheckResult("KOSPI인덱스", True,
-                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행)")
+                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행,"
+                                   f" close={close})")
             return CheckResult("KOSPI인덱스", False,
                                f"STALE: {last_date_str} ({gap}일 전) — 갱신 필요!")
         except Exception as e:
@@ -1002,9 +1046,19 @@ class DataHealthCheck:
             last_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
             gap = (self.today - last_date).days
 
+            # ★8/10(B-53 ⑤): 값 생존 추가. 순매수가 정확히 0인 주체는 드물게
+            #   있을 수 있으므로 개별 0은 통과시키고 **전량 0/NaN**만 잡는다.
+            dead = self._dead_row_cols(df, date_col)
+            if dead is True:
+                return CheckResult("투자자수급", False,
+                                   f"🚨{last_date_str} 마지막 행 값 전량 0/결측"
+                                   f" — 수집은 됐으나 값이 비었다!")
+
             if gap <= 5:
+                fn = df["foreign_net"].iloc[-1] if "foreign_net" in df.columns else "?"
                 return CheckResult("투자자수급", True,
-                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행)")
+                                   f"최신: {last_date_str} ({gap}일 전, {len(df)}행,"
+                                   f" 외인 {fn})")
             return CheckResult("투자자수급", False,
                                f"STALE: {last_date_str} ({gap}일 전) — 수집 파이프라인 확인!")
         except Exception as e:
