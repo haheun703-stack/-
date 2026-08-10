@@ -1,5 +1,7 @@
 .env
-.env.bak.*
+# ★8/10: `.env.bak.*`(점)이라 `.env.bak_20260703_krx`(밑줄) 하나가 untracked로
+# 노출돼 있었다. `git add -A` 한 번이면 실크레덴셜이 커밋되는 경로였다.
+.env.bak*
 .kis_token.json
 venv/
 __pycache__/
