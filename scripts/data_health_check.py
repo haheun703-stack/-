@@ -1111,14 +1111,31 @@ class DataHealthCheck:
 # 보고서 생성
 # ──────────────────────────────────────────────
 
+#: 의도적으로 중단한 소스 — 실패해도 등급 계산에서 제외한다(B-44, 8/10).
+#: ★반드시 명시적 등재로만 동작한다. "실패하면 자동 retired"로 만들면 일시적
+#: 장애까지 등급에서 빠져 진짜 고장을 숨긴다(8/1 "억제 설계가 뚫림"과 같은 계열).
+#: ★감시를 끄는 것이 아니다 — 데이터가 다시 오면 passed=True가 되어 아래 조건
+#: (not r.passed)에서 자동으로 빠져 정상 판정 대상으로 복귀한다.
+RETIRED_CHECKS = {
+    "국적별수급",  # 단타봇 재연결 대기. 8/5 `2ddf8332`로 부활 경로까지 차단된 상태
+}
+
+
 def generate_health_report(results: list[CheckResult], check_date: date) -> str:
     """체크 결과 → 등급 + 텔레그램 메시지.
 
     휴장일 SKIP 항목(7/20 B-13)은 분모·분자 모두에서 제외 — 판정 대상이 아닌 것을
     '통과'로 세면 등급이 부풀고, '실패'로 세면 가짜 경보가 된다.
+
+    ★8/10 B-44: 의도적 중단 소스(RETIRED_CHECKS)도 같은 이유로 분모에서 뺀다.
+    국적별수급이 매일 ❌로 세어져 **17/18 = B등급이 영구 고정**돼 있었고, 그러면
+    진짜 이상이 생겨도 "B등급이 늘 그렇지"로 무뎌진다. 리포트엔 경과일수와 함께
+    남겨 방치도 함께 막는다.
     """
     skipped = [r for r in results if r.skipped]
-    judged = [r for r in results if not r.skipped]
+    retired = [r for r in results
+               if not r.skipped and not r.passed and r.name in RETIRED_CHECKS]
+    judged = [r for r in results if not r.skipped and r not in retired]
     passed = sum(1 for r in judged if r.passed)
     total = len(judged)
 
@@ -1134,7 +1151,8 @@ def generate_health_report(results: list[CheckResult], check_date: date) -> str:
     lines = [
         f"{icon} 데이터 건강검진 [{grade}등급] ({check_date})",
         f"합계: {passed}/{total} 통과"
-        + (f" (휴장일 SKIP {len(skipped)}건 제외)" if skipped else ""),
+        + (f" (휴장일 SKIP {len(skipped)}건 제외)" if skipped else "")
+        + (f" (의도적 중단 {len(retired)}건 제외)" if retired else ""),
         "",
     ]
 
@@ -1150,6 +1168,14 @@ def generate_health_report(results: list[CheckResult], check_date: date) -> str:
         lines.append("── 휴장일 SKIP (판정 제외) ──")
         for r in skipped:
             lines.append(f"  {r}")
+        lines.append("")
+
+    if retired:
+        # 존재는 남긴다 — 등급에서 뺐다고 잊히면 복구해야 할 것이 방치된다.
+        # detail에 경과일수가 들어 있어 숫자가 커지면 눈에 띈다.
+        lines.append("── 의도적 중단 (판정 제외 · 복구 시 자동 복귀) ──")
+        for r in retired:
+            lines.append(f"  ⏸️ {r.name}: {r.detail}")
         lines.append("")
 
     # 성공 항목
