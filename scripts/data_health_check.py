@@ -102,11 +102,35 @@ class DataHealthCheck:
         "KOSPI인덱스", "투자자수급", "수급커버리지",
     }
 
+    #: 예외 발생 시 쓸 한글 체크명 — 위 집합들이 전부 한글명이라 함수명을 그대로
+    #: 쓰면 휴장일·BAT-D 전 보류·의도적 중단 어디에도 안 걸린다(8/10 검수 발견).
+    CHECK_KO_NAMES = {
+        "_check_price_data": "종가",
+        "_check_supply_stocks": "수급(종목)",
+        "_check_supply_sectors": "수급(섹터)",
+        "_check_nationality": "국적별수급",
+        "_check_commodities": "원자재",
+        "_check_fred": "FRED/매크로",
+        "_check_cot": "COT",
+        "_check_dart": "DART",
+        "_check_regime": "레짐",
+        "_check_brain": "BRAIN",
+        "_check_shield": "SHIELD",
+        "_check_learning": "학습기록",
+        "_check_uploads": "업로드",
+        "_check_scheduler": "스케줄러",
+        "_check_pipeline_errors": "파이프라인",
+        "_check_kospi_index": "KOSPI인덱스",
+        "_check_investor_flow": "투자자수급",
+        "_check_supply_coverage": "수급커버리지",
+    }
+
     #: BAT-D(16:30~19:00) 산출물에 의존하는 체크 — 종가보다 늦게 생성된다.
     #: 장중 수동 실행에서 판정을 보류할 대상(B-53 ⑥, 8/10). 실측 생성 시각:
     #: regime_macro_signal 17:57 · brain_data_upload 18:47 · 학습기록 18:49.
     BATD_DEPENDENT = {
-        "FRED/매크로", "레짐", "BRAIN", "SHIELD", "업로드", "학습기록",
+        "FRED", "FRED/매크로", "레짐", "BRAIN", "SHIELD", "업로드", "학습기록",
+        "수급(섹터)",
     }
 
     def run_full_check(self) -> list[CheckResult]:
@@ -149,7 +173,12 @@ class DataHealthCheck:
             try:
                 result = check_fn()
             except Exception as e:
-                name = check_fn.__name__.replace("_check_", "")
+                # ★8/10 검수 교정: 함수명(`supply_stocks`)을 그대로 쓰면 영문이라
+                #   MARKET_DEPENDENT·BATD_DEPENDENT·RETIRED_CHECKS(전부 한글명)
+                #   어디에도 안 걸려, **검사가 크래시하면 휴장일에도 BAT-D 전에도
+                #   그대로 ❌로 등급에 계상**된다.
+                name = self.CHECK_KO_NAMES.get(
+                    check_fn.__name__, check_fn.__name__.replace("_check_", ""))
                 result = CheckResult(name, False, f"체크 오류: {e}")
                 logger.exception("체크 실패: %s", name)
 
@@ -374,7 +403,7 @@ class DataHealthCheck:
         return hit >= max(1, sample // 2)
 
     @staticmethod
-    def _dead_row_cols(df, date_col: str) -> bool:
+    def _dead_row_cols(df, date_col: str, critical: tuple = ()) -> bool:
         """마지막 행의 숫자 컬럼이 **전량** 0/결측인가 (B-53 ⑤, 8/10).
 
         "수집은 됐는데 값이 안 들어왔다"를 잡는다 — 날짜·행수만 보는 신선도
@@ -390,7 +419,24 @@ class DataHealthCheck:
         try:
             last = df.iloc[-1]
         except Exception:  # noqa: BLE001
-            return False  # 판정 불가는 결손으로 세지 않는다
+            # ★8/10 검수 교정: 구현은 `return False`(결손 아님)였는데, 이 함수가
+            #   잡으려던 것이 바로 "파일은 있는데 값이 없는" 상태다. **가장 심하게
+            #   깨진 파일에서만 침묵**하는 자기모순이라 결손으로 센다.
+            return True
+
+        # ★핵심 컬럼은 단독 판정. 전량 0만 보면 `volume` 하나가 살아 있을 때
+        #   OHLC 전부 0이 통과한다 — 이 함수의 목적(close=0 탐지) 자체가 사라진다.
+        #   (8/10 검수 재현: close/high/low/open=0 + volume=442430 → False)
+        for c in critical:
+            if c not in df.columns:
+                continue
+            try:
+                v = float(last[c])
+            except (TypeError, ValueError):
+                return True
+            if v != v or v == 0:  # NaN 또는 0
+                return True
+
         numeric = []
         for c in df.columns:
             if c == date_col:
@@ -575,17 +621,12 @@ class DataHealthCheck:
             else:
                 details.append(f"{name}❌(없음)")
 
-        # ★당일 산출물이 아직 하나도 없으면 BAT-D 전 실행 — 판정 보류.
-        #   판단 소스는 종가 존재(#18·#2와 동일 원칙). 섹터 JSON은 BAT-D 안에서
-        #   종가 재계산(17:43~17:56) 다음에 생성되므로, 종가가 당일치인데 섹터만
-        #   비어 있으면 시각과 무관하게 진짜 이상이다.
-        if found == 0 and not self._price_has_today():
-            return CheckResult(
-                "수급(섹터)", True,
-                f"당일 미생성 — 판정 보류(BAT-D 전) | {', '.join(details)}",
-                count=0, total=len(files),
-            )
-
+        # ※BAT-D 전 판정 보류는 run_full_check의 일괄 처리(BATD_DEPENDENT)에
+        #   위임한다. 여기서 개별로 `passed=True`를 반환하면 `skipped`가 안 붙어
+        #   **등급 분모·분자에 통과로 계상**되고("판정 대상이 아닌 것을 통과로 세면
+        #   등급이 부푼다"는 generate_health_report 독스트링과 정면 충돌), 게다가
+        #   일괄 보류가 `not result.passed`에서만 발동하므로 그것마저 우회한다.
+        #   (8/10 검수 발견 — 내가 같은 날 만든 두 장치가 서로를 무력화하고 있었다.)
         passed = found == len(files)
         return CheckResult(
             "수급(섹터)", passed,
@@ -746,7 +787,7 @@ class DataHealthCheck:
         """regime_macro_signal에서 FRED 관련 데이터 확인."""
         path = self.data_dir / "regime_macro_signal.json"
         if not path.exists():
-            return CheckResult("FRED", False, "regime_macro_signal.json 없음")
+            return CheckResult("FRED/매크로", False, "regime_macro_signal.json 없음")
 
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -956,12 +997,9 @@ class DataHealthCheck:
         has_daily = today_file.exists()
         has_index = index_file.exists()
 
-        # ★당일 파일이 없고 종가도 당일치가 없으면 BAT-D 전 실행 — 판정 보류
-        #   (#2·#3·#18과 동일 원칙). 학습기록은 BAT-D 후반(≈18:49)에 생성된다.
-        if not has_daily and not self._price_has_today():
-            return CheckResult("학습기록", True,
-                               "당일 미생성 — 판정 보류(BAT-D 전)")
-
+        # ※BAT-D 전 판정 보류는 run_full_check의 일괄 처리에 위임한다(수급(섹터)와
+        #   같은 이유 — 개별 `passed=True` 반환은 skipped가 안 붙어 등급을 부풀리고,
+        #   일괄 보류가 `not result.passed`에서만 발동하므로 그것마저 우회한다).
         if has_daily and has_index:
             try:
                 data = json.loads(today_file.read_text(encoding="utf-8"))
@@ -1065,7 +1103,10 @@ class DataHealthCheck:
                     count=errors, total=stats["total_runs"],
                 )
         except Exception as e:
-            return CheckResult("파이프라인", True, f"체크 불가: {e}")
+            # ★8/10 검수 교정: 두 번째 인자가 passed다. 구현은 True(통과)라
+            #   `src.pipeline_alert` import 실패나 로그 파손이면 에러율 50%여도
+            #   PASS로 집계됐다. 판정 불가는 통과가 아니므로 등급에서 제외한다.
+            return CheckResult("파이프라인", True, f"체크 불가: {e}", skipped=True)
 
     # ─── 16. KOSPI 인덱스 신선도 ───
 
@@ -1090,10 +1131,10 @@ class DataHealthCheck:
             #   지수가 최신 날짜로 들어와도 close가 0이면 레짐·알파 계산이 통째로
             #   무너지는데 구 검사는 ✅였다(7/31 `price=0` 6주와 같은 형태).
             #   개별 컬럼 0은 정상일 수 있으므로 **전량 0/NaN**만 잡는다.
-            dead = self._dead_row_cols(df, date_col)
-            if dead is True:
+            # close는 단독 결손도 치명적이라 critical 지정(volume만 살아 있어도 FAIL).
+            if self._dead_row_cols(df, date_col, critical=("close",)):
                 return CheckResult("KOSPI인덱스", False,
-                                   f"🚨{last_date_str} 마지막 행 값 전량 0/결측"
+                                   f"🚨{last_date_str} 마지막 행 값 결손(close 포함)"
                                    f" — 지수 계산 붕괴 위험!")
 
             if gap <= 5:
@@ -1127,8 +1168,9 @@ class DataHealthCheck:
 
             # ★8/10(B-53 ⑤): 값 생존 추가. 순매수가 정확히 0인 주체는 드물게
             #   있을 수 있으므로 개별 0은 통과시키고 **전량 0/NaN**만 잡는다.
-            dead = self._dead_row_cols(df, date_col)
-            if dead is True:
+            # ※여기선 critical을 두지 않는다 — 특정 주체의 순매수가 정확히 0인 날은
+            #   실재하므로 단독 판정은 오탐이 된다. 전량 0만 결손으로 본다.
+            if self._dead_row_cols(df, date_col):
                 return CheckResult("투자자수급", False,
                                    f"🚨{last_date_str} 마지막 행 값 전량 0/결측"
                                    f" — 수집은 됐으나 값이 비었다!")
