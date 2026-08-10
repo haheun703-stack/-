@@ -102,6 +102,13 @@ class DataHealthCheck:
         "KOSPI인덱스", "투자자수급", "수급커버리지",
     }
 
+    #: BAT-D(16:30~19:00) 산출물에 의존하는 체크 — 종가보다 늦게 생성된다.
+    #: 장중 수동 실행에서 판정을 보류할 대상(B-53 ⑥, 8/10). 실측 생성 시각:
+    #: regime_macro_signal 17:57 · brain_data_upload 18:47 · 학습기록 18:49.
+    BATD_DEPENDENT = {
+        "FRED/매크로", "레짐", "BRAIN", "SHIELD", "업로드", "학습기록",
+    }
+
     def run_full_check(self) -> list[CheckResult]:
         """전체 19개 항목 점검."""
         checks = [
@@ -126,6 +133,17 @@ class DataHealthCheck:
             # 구 18/19(supply_demand/snapshots) 폐기: BAT에서 제거됨 (2026-04-06)
         ]
 
+        # ★8/10(B-53 ⑥): BAT-D 전 실행 판정 보류를 일괄 처리한다.
+        #   HEALTH는 18:45 cron으로만 돌아 드러나지 않았을 뿐, 장중 수동 실행은
+        #   BAT-D 산출물 의존 검사들이 **늘 가짜 실패**였다. 오늘부터 장중
+        #   배포·점검이 늘어나므로 막는다.
+        #   ★판단 소스는 시각이 아니라 **종가 존재**(#18·B-19① 원칙). 아래 검사들의
+        #   산출물은 전부 종가 재계산(17:43~17:56)보다 늦게 생성되므로(실측:
+        #   regime_macro_signal 17:57 · brain_data_upload 18:47 · 학습기록 18:49),
+        #   종가가 당일치인데 이것들만 비어 있으면 시각과 무관하게 진짜 이상이다.
+        #   그 경우는 보류하지 않고 그대로 실패로 남긴다.
+        batd_pending = self.is_trading_day and not self._price_has_today()
+
         results = []
         for check_fn in checks:
             try:
@@ -140,6 +158,11 @@ class DataHealthCheck:
                 result.skipped = True
                 result.passed = True  # 등급 계산 오염 방지
                 result.detail = f"휴장일 SKIP — {result.detail}"
+            elif (batd_pending and not result.passed
+                    and result.name in self.BATD_DEPENDENT):
+                result.skipped = True
+                result.passed = True
+                result.detail = f"BAT-D 전 SKIP — {result.detail}"
 
             results.append(result)
 
@@ -1406,7 +1429,7 @@ def generate_health_report(results: list[CheckResult], check_date: date) -> str:
     lines = [
         f"{icon} 데이터 건강검진 [{grade}등급] ({check_date})",
         f"합계: {passed}/{total} 통과"
-        + (f" (휴장일 SKIP {len(skipped)}건 제외)" if skipped else "")
+        + (f" (판정 보류 {len(skipped)}건 제외)" if skipped else "")
         + (f" (의도적 중단 {len(retired)}건 제외)" if retired else ""),
         "",
     ]
@@ -1420,7 +1443,7 @@ def generate_health_report(results: list[CheckResult], check_date: date) -> str:
         lines.append("")
 
     if skipped:
-        lines.append("── 휴장일 SKIP (판정 제외) ──")
+        lines.append("── 판정 보류 (휴장일 · BAT-D 전 — 등급 제외) ──")
         for r in skipped:
             lines.append(f"  {r}")
         lines.append("")
