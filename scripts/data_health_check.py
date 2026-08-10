@@ -734,15 +734,36 @@ class DataHealthCheck:
                 self.today - timedelta(days=2)
             ).strftime("%Y-%m-%d") <= d[:10]
 
-            # FRED 관련 시그널 확인
+            # ★8/10(B-53 ⑥): 구 로직은 `k in signals`로 **키 존재만** 봤다.
+            #   키가 남아 있고 값만 0/빈값으로 죽으면 그대로 ✅였다 — 오늘 ①~④와
+            #   같은 형태다. 키가 아니라 **값이 유효한지**를 센다.
             fred_keys = ["vix_level", "us_grade", "rv_current"]
-            found = sum(1 for k in fred_keys if k in signals)
+
+            def _valid(key: str) -> bool:
+                v = signals.get(key)
+                if v is None:
+                    return False
+                if isinstance(v, str):
+                    return bool(v.strip()) and v not in ("?", "N/A")
+                try:
+                    return float(v) != 0  # VIX·RV가 0인 상태는 실재하지 않는다
+                except (TypeError, ValueError):
+                    return False
+
+            found = sum(1 for k in fred_keys if _valid(k))
+            dead = [k for k in fred_keys if k in signals and not _valid(k)]
 
             if recent and found >= 2:
                 vix = signals.get("vix_level", "?")
                 us = signals.get("us_grade", "?")
-                return CheckResult("FRED/매크로", True,
-                                   f"VIX={vix}, US={us} ({d})")
+                detail = f"VIX={vix}, US={us} ({d})"
+                if dead:
+                    detail += f" | 🚨값죽음: {', '.join(dead)}"
+                return CheckResult("FRED/매크로", not dead, detail)
+            if recent:
+                return CheckResult("FRED/매크로", False,
+                                   f"🚨유효 신호 {found}/3 ({d})"
+                                   + (f" — 값죽음: {', '.join(dead)}" if dead else ""))
             return CheckResult("FRED/매크로", False,
                                f"오래된 데이터: {d}")
         except Exception as e:
@@ -771,8 +792,31 @@ class DataHealthCheck:
             if count >= 3:
                 stale_str = f", {stale}일 전" if stale else ""
                 passed = stale <= 14 if stale else True
+                # ★8/10(B-53 ⑥): 구 로직은 계약 **개수만** 셌다. 4개가 들어와도
+                #   net/long/short가 전부 0이면 죽은 데이터인데 ✅였다.
+                #   계약 단위로 하나라도 비영값이 있으면 살아 있는 것으로 본다
+                #   (특정 계약의 net이 0인 것은 실재하므로 전량 0만 잡는다).
+                live = 0
+                for v in contracts.values():
+                    if not isinstance(v, dict):
+                        live += 1 if v else 0
+                        continue
+                    nums = []
+                    for f in ("net", "long", "short"):
+                        try:
+                            nums.append(float(v.get(f)))
+                        except (TypeError, ValueError):
+                            pass
+                    if any(n != 0 for n in nums):
+                        live += 1
+                if live == 0:
+                    return CheckResult("COT", False,
+                                       f"🚨{count}개 계약 전량 0 — 수집은 됐으나"
+                                       f" 값이 비었다 ({report_date}{stale_str})")
                 return CheckResult("COT", passed,
-                                   f"{count}개 포지션 ({report_date}{stale_str})")
+                                   f"{live}/{count}개 포지션 실값"
+                                   f" ({report_date}{stale_str})",
+                                   count=live, total=count)
             return CheckResult("COT", False,
                                f"불충분: {count}개 (최소 3개 필요)")
         except Exception as e:
@@ -945,11 +989,23 @@ class DataHealthCheck:
         for name, path in upload_files.items():
             if path.exists():
                 mtime = datetime.fromtimestamp(path.stat().st_mtime)
-                if mtime.date() == self.today:
-                    found += 1
-                    details.append(f"{name}✅")
-                else:
+                # ★8/10(B-53 ⑥): 구 로직은 **mtime만** 봤다. 업로드 스크립트가
+                #   빈 JSON을 매일 새로 쓰면 mtime은 갱신되므로 영원히 ✅다 —
+                #   7/31 "적재는 됐는데 값이 0"과 정확히 같은 형태.
+                #   내용이 실제로 들어 있는지(파싱 성공 + 비어 있지 않음)를 본다.
+                size = path.stat().st_size
+                try:
+                    body = json.loads(path.read_text(encoding="utf-8"))
+                    empty = not body or (isinstance(body, (dict, list)) and len(body) == 0)
+                except Exception:  # noqa: BLE001
+                    body, empty = None, True
+                if mtime.date() != self.today:
                     details.append(f"{name}⚠️({mtime.date()})")
+                elif empty:
+                    details.append(f"{name}🚨빈내용({size}B)")
+                else:
+                    found += 1
+                    details.append(f"{name}✅({size // 1024}KB)")
             else:
                 details.append(f"{name}❌")
 
