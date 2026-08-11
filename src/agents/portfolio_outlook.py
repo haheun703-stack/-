@@ -332,14 +332,27 @@ JSON으로 응답:
             return None
 
     def _get_ai_brain(self, ticker: str) -> dict | None:
-        """ai_brain_judgment.json에서 기존 판정."""
+        """ai_brain_judgment.json에서 기존 판정.
+
+        ★8/11 교정(B-60 ⑶): `buys` 키는 이 JSON에 없다 — 정본은
+        `stock_judgments`(8/11 실측 44건). 없는 키를 돌아 **매 종목 None**을
+        반환했고, `.get(키, [])`가 그 실패를 빈 루프로 위장해 조용했다.
+        """
         path = DATA_DIR / "ai_brain_judgment.json"
         if not path.exists():
             return None
         try:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
-            for buy in data.get("buys", []):
+            rows = next(
+                (data[k] for k in ("stock_judgments", "buys", "judgments")
+                 if isinstance(data.get(k), list)), None,
+            )
+            if rows is None:
+                logger.warning(
+                    "[AI Brain] 판정 리스트를 못 찾음 — 실제 키 %s", list(data)[:8])
+                return None
+            for buy in rows:
                 if buy.get("ticker") == ticker:
                     return {
                         "action": buy.get("action"),
@@ -427,7 +440,16 @@ JSON으로 응답:
                     "vix_level": us.get("vix", {}).get("level", 0),
                     "vix_status": us.get("vix", {}).get("status", ""),
                     "ewy_5d": us.get("index_direction", {}).get("EWY", {}).get("ret_5d", 0),
-                    "special_rules": [r.get("rule") for r in us.get("special_rules_triggered", [])],
+                    # ★8/11 교정(B-60 ⑶): 컨테이너 키와 원소 키가 **둘 다** 틀렸다.
+                    # 정본은 `special_rules`이고 원소의 이름 필드는 `name`(구 `rule`).
+                    # 그래서 실제로 규칙이 발동 중인 날에도 항상 빈 리스트였다
+                    # (8/11 실측: LIT_SURGE·URA_SURGE 2건 발동 중).
+                    "special_rules": [
+                        r.get("name", r.get("rule"))
+                        for r in (us.get("special_rules")
+                                  or us.get("special_rules_triggered") or [])
+                        if isinstance(r, dict)
+                    ],
                 }
                 # 섹터별 시그널
                 sector_signals = {}
@@ -444,7 +466,18 @@ JSON으로 응답:
             if path.exists():
                 with open(path, encoding="utf-8") as f:
                     regime = json.load(f)
-                ctx["kospi_regime"] = regime.get("regime", "UNKNOWN")
+                # ★8/11 교정(B-60 ⑴ 4번째 위치): `regime` 키는 이 JSON에 없다.
+                # 정본은 `current_regime`. 어제 검수가 3곳으로 봤으나 여기가
+                # 네 번째였고, 실제 CRISIS인 날 매일 "UNKNOWN"을 담고 있었다.
+                ctx["kospi_regime"] = next(
+                    (str(regime[k]) for k in
+                     ("current_regime", "kospi_regime", "regime")
+                     if regime.get(k)), "UNKNOWN",
+                )
+                if ctx["kospi_regime"] == "UNKNOWN":
+                    logger.warning(
+                        "[Market] regime_macro_signal.json에 레짐 키 없음 — 실제 키 %s",
+                        list(regime)[:8])
                 ctx["kospi_regime_detail"] = regime.get("detail", "")
         except Exception:
             pass
