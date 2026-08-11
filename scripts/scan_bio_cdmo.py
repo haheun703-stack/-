@@ -127,6 +127,35 @@ def _calc_change_from_high(close: pd.Series, lookback: int = 20) -> float:
     return float((close.iloc[-1] / high.iloc[-1] - 1) * 100)
 
 
+#: accumulation_alert.json의 종목 리스트 키 — 정본이 앞, 뒤는 구/호환 표기.
+_ACC_LIST_KEYS = ("stock_alerts", "alerts", "items")
+#: dual_buying_watch.json은 등급별로 리스트가 나뉜다. 전 등급을 순회한다.
+_DUAL_LIST_KEYS = ("s_grade", "a_grade", "b_grade", "core_watch", "items", "stocks")
+
+
+def _pick_rows(data: dict, keys: tuple[str, ...], src: str) -> list[dict]:
+    """dict에서 종목 리스트를 모아 반환. 하나도 못 찾으면 경고.
+
+    ★8/11 신설(B-60 ⑵) — 여기서 참조 키가 실제 산출물과 어긋나 있었고,
+    `.get(키, [])`가 그 실패를 **빈 리스트라는 정상값으로 위장**해 로그도
+    알람도 없었다. 실측: accumulation_alert는 `alerts`를 찾는데 실제는
+    `stock_alerts`(516건), dual_buying_watch는 `items`/`stocks`를 찾는데
+    실제는 `s_grade`/`a_grade`/`b_grade`/`core_watch`(52건). **두 소스의
+    수급 보강값이 통째로 0이었다.**
+    """
+    rows: list[dict] = []
+    for k in keys:
+        v = data.get(k)
+        if isinstance(v, list):
+            rows.extend(r for r in v if isinstance(r, dict))
+    if not rows:
+        logger.warning(
+            "%s: 종목 리스트를 못 찾음(찾은 키 %s / 실제 키 %s) — 수급 보강 생략",
+            src, "/".join(keys), list(data)[:8],
+        )
+    return rows
+
+
 def _load_supply_data(ticker: str) -> dict:
     """수급 데이터 로드 (institutional_flow 등)."""
     result = {"foreign_5d": 0, "inst_5d": 0, "foreign_today": 0, "inst_today": 0,
@@ -137,7 +166,7 @@ def _load_supply_data(ticker: str) -> dict:
     if acc_path.exists():
         try:
             acc = json.loads(acc_path.read_text(encoding="utf-8"))
-            for item in acc.get("alerts", []):
+            for item in _pick_rows(acc, _ACC_LIST_KEYS, acc_path.name):
                 if item.get("ticker") == ticker:
                     result["foreign_5d"] = item.get("foreign_5d_억", 0)
                     result["inst_5d"] = item.get("inst_5d_억", 0)
@@ -152,11 +181,18 @@ def _load_supply_data(ticker: str) -> dict:
     if dual_path.exists():
         try:
             dual = json.loads(dual_path.read_text(encoding="utf-8"))
-            for item in dual.get("items", dual.get("stocks", [])):
+            for item in _pick_rows(dual, _DUAL_LIST_KEYS, dual_path.name):
                 if item.get("ticker") == ticker:
                     result["dual_buy"] = True
-                    result["foreign_today"] = item.get("foreign_net", 0)
-                    result["inst_today"] = item.get("inst_net", 0)
+                    # ★foreign_today/inst_today는 **이 소스에서 채우지 않는다.**
+                    # 현재 스키마에 당일 수급 컬럼이 없고 있는 것은 foreign_5d·
+                    # inst_5d(5일 누적)뿐이라, 그것을 today에 넣으면 5일치를
+                    # 하루로 쓰는 의미론 오류가 된다(8/1 켈리 f*를 수량 배수로
+                    # 쓴 것과 같은 계열). 구 표기 net이 되살아나면 그때만 채운다.
+                    if item.get("foreign_net") is not None:
+                        result["foreign_today"] = item["foreign_net"]
+                    if item.get("inst_net") is not None:
+                        result["inst_today"] = item["inst_net"]
                     break
         except Exception:
             pass
