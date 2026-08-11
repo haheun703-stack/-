@@ -737,8 +737,12 @@ def _load_investor_flow_signal() -> dict:
 # 전략 L: 국적별 수급 7 Secrets (nationality_signal.json)
 # ──────────────────────────────────────────
 
+#: 국적별 수급 시그널 신선도 임계(일) — build_killer_picks._load_fresh와 동일 기준.
+NAT_SIGNAL_MAX_AGE_DAYS = 7
+
+
 def load_nationality_signals() -> dict:
-    """국적별 수급 시그널 로드 → {ticker: signal_dict}.
+    """국적별 수급 시그널 로드 → {ticker: signal_dict}. **신선한 경우에만.**
 
     Returns:
         {
@@ -752,10 +756,56 @@ def load_nationality_signals() -> dict:
                 "name": str,
             }
         }
+
+    ★★8/11 신설 — 이 로더에 신선도 가드가 없어 **63일 묵은 시그널이 매일 픽을
+    좌우하고 있었다.** 생성기(국적별 수집기)가 6/9에 멈춰 파일이 그대로 굳었는데,
+    헬스체크는 이를 "⏸️ 의도적 중단(판정 제외)"으로 접어 A등급을 찍고 있었고,
+    정작 이 함수는 같은 파일을 매일 읽어 ⑴ SELL 종목을 후보에서 킬하고
+    ⑵ 픽 524개 중 289개(55.2%)의 점수를 ±12점까지 흔들었다(8/11 실측).
+    **"중단됐다"고 표시한 데이터가 실은 매일 계산에 쓰이고 있었다** — 7/30
+    `etf_recommendations.json` 113일치 유입과 같은 계열인데, 그때 넣은 가드가
+    이 경로엔 안 들어왔다. 낡은 근거로 만든 산출물은 빈 값보다 나쁘다(B-14).
+
+    판정 소스는 **내용 날짜(analyzed_at)를 우선**하고 mtime은 폴백으로만 쓴다.
+    mtime은 git pull·rsync 한 번에 갱신돼 낡은 내용을 신선으로 보이게 하기
+    때문이다(CLAUDE.md "git pull이 런타임 JSON 덮어씀" 교훈). 날짜를 **판별하지
+    못하면 통과가 아니라 스킵**한다 — 판별실패를 정상으로 접으면 미탐이 된다
+    (7/30 검수 F1과 같은 함정).
     """
     data = load_json("krx_nationality/nationality_signal.json")
     if not data:
         return {}
+
+    # ── 신선도 게이트 ──
+    raw = str(data.get("analyzed_at", data.get("date", data.get("trade_date", ""))))
+    age_days = None
+    src = "analyzed_at"
+    s = raw[:10].strip()
+    if s:
+        for fmt in ("%Y-%m-%d", "%Y%m%d"):
+            try:
+                age_days = (datetime.now().date()
+                            - datetime.strptime(s, fmt).date()).days
+                break
+            except ValueError:
+                continue
+    if age_days is None:  # 내용 날짜 없음/파싱 실패 → mtime 폴백
+        src = "mtime"
+        fp = DATA_DIR / "krx_nationality" / "nationality_signal.json"
+        try:
+            age_days = (datetime.now()
+                        - datetime.fromtimestamp(fp.stat().st_mtime)).days
+        except OSError:
+            age_days = None
+    if age_days is None:
+        print("[국적수급 7S] 날짜 판별 실패 — 신선도 미검증이라 사용 안 함(전략L 스킵)")
+        return {}
+    if age_days > NAT_SIGNAL_MAX_AGE_DAYS:
+        print(f"[국적수급 7S] SKIP — 시그널 {age_days}일 낡음"
+              f"({s or '?'}, 임계 {NAT_SIGNAL_MAX_AGE_DAYS}일, 기준={src})"
+              " · 생성기 정지 여부 확인 필요")
+        return {}
+
     result = {}
     for sig in data.get("signals", []):
         ticker = sig.get("ticker", "")
