@@ -487,46 +487,83 @@ def _load_json_path(path) -> dict:
 
 
 def _section_us_overnight() -> list[str]:
-    """US Overnight 시그널 요약 (아침 리포트용)."""
-    sig = _load("overnight_signal.json")
+    """US Overnight 시그널 요약 (아침 리포트용).
+
+    ★★8/11 전면 교정(B-60 ⑷) — 이 섹션은 **아침 리포트에서 통째로 무음**이었다.
+    `data/overnight_signal.json`을 읽는데 정본은 `data/us_market/` 아래라
+    `_load`가 매일 `{}`를 반환하고 `if not sig: return []`로 조용히 빠졌다.
+
+    그런데 경로만 고치면 더 나빴다 — 참조 키가 실제 산출물과 6군데 어긋나 있어
+    두 곳은 **예외로 리포트 전체를 깨뜨렸다**(8/11 실측 스키마 대조):
+      · `summary`는 dict가 아니라 **문자열** → `.get()` AttributeError
+      · `sector_kills`는 list가 아니라 **dict**(섹터→상세) → `join` TypeError
+      · `total_score` 없음(실제 score·ensemble_score·l1_score_100)
+      · `commodity` 없음(실제 `commodities`, 하위 구조도 gld_ret→gold.ret_1d)
+      · `special_rules_triggered` 없음(실제 `special_rules`, 원소는 dict)
+    그래서 경로·키·타입을 함께 맞췄다. 점수는 **표시하지 않는다** — 실제 키
+    중 어느 것이 구 `total_score`와 같은 척도인지 확정할 수 없어(score 0.131 /
+    l1_score_100 13.1 / ensemble -0.174) 추측해 숫자를 쓰느니 생산자가 이미
+    완성해 둔 `summary` 한 줄을 그대로 싣는 편이 정직하다.
+    """
+    sig = _load("us_market/overnight_signal.json") or _load("overnight_signal.json")
     if not sig:
         return []
 
     lines = ["\n📡 US Overnight Signal"]
     grade = sig.get("grade", "?")
-    score = sig.get("total_score", 0)
     grade_emoji = {
         "STRONG_BULL": "🟢🟢", "MILD_BULL": "🟢", "NEUTRAL": "⚪",
         "MILD_BEAR": "🟡", "STRONG_BEAR": "🔴",
     }.get(grade, "❓")
+    lines.append(f"  {grade_emoji} {grade}")
 
-    lines.append(f"  {grade_emoji} {grade} (점수: {score:.1f})")
-
-    # 주요 지수
-    summary = sig.get("summary", {})
-    if summary:
+    # 요약 — 생산자가 만든 한 줄(지수·VIX·원자재 포함). 구 스키마는 dict였다.
+    summary = sig.get("summary")
+    if isinstance(summary, str) and summary.strip():
+        lines.append(f"  {summary.strip()}")
+    elif isinstance(summary, dict) and summary:
         spy = summary.get("spy_ret", 0)
         qqq = summary.get("qqq_ret", 0)
         vix = summary.get("vix_close", 0)
         lines.append(f"  SPY {spy:+.1%} | QQQ {qqq:+.1%} | VIX {vix:.1f}")
+    else:
+        # summary가 없을 때만 원시 값으로 조립(중복 출력 방지)
+        idx = sig.get("index_direction") or {}
+        vix = sig.get("vix") or {}
+        if idx or vix:
+            parts = [f"{k} {idx[k].get('ret_1d', 0):+.1f}%"
+                     for k in ("SPY", "QQQ", "EWY")
+                     if isinstance(idx.get(k), dict)]
+            if isinstance(vix, dict) and vix.get("level") is not None:
+                parts.append(f"VIX {vix['level']:.1f}")
+            if parts:
+                lines.append("  " + " | ".join(parts))
+        com = sig.get("commodities") or sig.get("commodity") or {}
+        if isinstance(com, dict) and com:
+            cparts = [f"{label} {com[key].get('ret_1d', 0):+.1f}%"
+                      for key, label in (("gold", "Au"), ("oil", "Oil"),
+                                         ("copper", "Cu"))
+                      if isinstance(com.get(key), dict)]
+            if cparts:
+                lines.append("  " + " | ".join(cparts))
 
-    # 원자재
-    commodity = sig.get("commodity", {})
-    if commodity:
-        au = commodity.get("gld_ret", 0)
-        oil = commodity.get("uso_ret", 0)
-        cu = commodity.get("copx_ret", 0)
-        lines.append(f"  Au {au:+.1%} | Oil {oil:+.1%} | Cu {cu:+.1%}")
+    # 특수 룰 발동 — 원소가 dict(name/desc)라 그대로 join하면 TypeError
+    rules = sig.get("special_rules") or sig.get("special_rules_triggered") or []
+    names = [r.get("name", r.get("rule")) if isinstance(r, dict) else str(r)
+             for r in rules]
+    names = [n for n in names if n]
+    if names:
+        lines.append(f"  ⚠️ 특수룰: {', '.join(names)}")
 
-    # 특수 룰 발동
-    rules = sig.get("special_rules_triggered", [])
-    if rules:
-        lines.append(f"  ⚠️ 특수룰: {', '.join(rules)}")
-
-    # 킬 섹터
-    kills = sig.get("sector_kills", [])
-    if kills:
-        lines.append(f"  🚫 킬섹터: {', '.join(kills[:5])}")
+    # 킬 섹터 — dict(섹터→{killed:bool,...}). 실제 killed=True인 것만 싣는다.
+    kills = sig.get("sector_kills") or {}
+    if isinstance(kills, dict):
+        killed = [s for s, v in kills.items()
+                  if (v.get("killed") if isinstance(v, dict) else bool(v))]
+    else:
+        killed = [str(s) for s in kills]
+    if killed:
+        lines.append(f"  🚫 킬섹터: {', '.join(killed[:5])}")
 
     return lines
 
