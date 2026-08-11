@@ -61,16 +61,85 @@ def get_risk_gate() -> Optional[RiskGateClient]:
         return None
 
 
-def get_position_multiplier_safe() -> float:
-    """매수금액 곱하기 계수. SDK 실패 시 1.0 (NORMAL)."""
-    rg = get_risk_gate()
-    if rg is None:
-        return 1.0
+#: 두 리스크 체계의 보수성 비교용 순위. 자체 레짐(BULL/CAUTION/BEAR/CRISIS)과
+#: 정보봇 등급(NORMAL/CAUTION/WARNING/DANGER/CRISIS)을 한 축에 세운다.
+_SEVERITY_RANK = {
+    "BULL": 0, "NORMAL": 0,
+    "CAUTION": 1,
+    "BEAR": 2, "WARNING": 2,
+    "DANGER": 3,
+    "CRISIS": 4,
+}
+
+
+def _local_regime_view() -> tuple[Optional[str], Optional[float]]:
+    """자체 레짐 파일에서 (레짐, **그 체계가 스스로 낸** 포지션 배수).
+
+    ★임의 매핑을 만들지 않는다 — 자체 레짐을 정보봇 등급표(CRISIS=0.2 등)에
+    끼워 넣으면 근거 없는 숫자가 사이징에 들어간다. 각 체계가 이미 산출한
+    값만 쓰고, 비교는 아래 교차검증에서 한다.
+    """
     try:
-        return rg.get_position_multiplier()
-    except Exception as e:
-        logger.warning(f"[risk_gate] multiplier 조회 실패 → 1.0: {e}")
-        return 1.0
+        path = PROJECT_ROOT / "data" / "regime_macro_signal.json"
+        if not path.exists():
+            return None, None
+        import json
+        d = json.loads(path.read_text(encoding="utf-8"))
+        regime = next(
+            (str(d[k]) for k in ("current_regime", "kospi_regime", "regime")
+             if d.get(k)), None,
+        )
+        mult = d.get("position_multiplier")
+        return regime, (float(mult) if isinstance(mult, (int, float)) else None)
+    except Exception as e:  # noqa: BLE001
+        logger.debug(f"[risk_gate] 자체 레짐 조회 실패(무시): {e}")
+        return None, None
+
+
+def get_position_multiplier_safe() -> float:
+    """매수금액 곱하기 계수. SDK 실패 시 1.0 (NORMAL).
+
+    ★★8/11 신설 — **보수적 우선 교차검증**(퐝가님 승인). 사이징을 지배하는
+    `macro_risk_daily`는 정보봇 산출물인데, 그 점수 체계에 **국내 시장의
+    실현변동성 항목이 없다**(구성: MSCI 이벤트·DXY·US 2Y·미국 VIX·외인 플로우·
+    디커플링). 그래서 8/11 실측에서 국내 20일 실현변동성이 **96.8% = 과거 3년
+    99.9퍼센타일**(중앙값 17.9%)인데도 등급은 `NORMAL`, 배수 1.0, 신규진입
+    차단 없음이었다. 같은 날 우리 자체 레짐은 **CRISIS 5일 연속**이었다.
+    **두 체계가 정반대 답을 내는데 집행은 느슨한 쪽을 따르고 있었다.**
+
+    조치: 두 체계가 **각자 산출한 배수 중 낮은 쪽**을 쓴다. 자체 레짐을
+    정보봇 등급표에 임의로 매핑하지 않는 이유는 그 숫자에 근거가 없기
+    때문이다(국내 RV를 반영한 새 배수 체계는 백테스트 선행 — 별건).
+    등급 차가 2단계 이상 벌어지면 경고를 남겨 불일치가 보이게 한다.
+    """
+    rg = get_risk_gate()
+    base = 1.0
+    if rg is not None:
+        try:
+            base = rg.get_position_multiplier()
+        except Exception as e:
+            logger.warning(f"[risk_gate] multiplier 조회 실패 → 1.0: {e}")
+            base = 1.0
+
+    regime, local_mult = _local_regime_view()
+    if local_mult is None:
+        return base
+
+    # 등급 축 불일치 감지 — 판단 자체가 갈리는 날을 보이게 한다.
+    try:
+        gate_level = rg.get_current_level() if rg is not None else "NORMAL"
+    except Exception:  # noqa: BLE001
+        gate_level = "NORMAL"
+    gap = (_SEVERITY_RANK.get(str(regime).upper(), 0)
+           - _SEVERITY_RANK.get(str(gate_level).upper(), 0))
+    if gap >= 2:
+        logger.warning(
+            "[risk_gate] 리스크 판정 불일치 — 자체 레짐 %s vs 정보봇 등급 %s "
+            "(%d단계). 배수는 보수적 쪽 채택: %.2f vs %.2f",
+            regime, gate_level, gap, base, local_mult,
+        )
+
+    return min(base, local_mult)
 
 
 def should_block_new_entry_safe() -> bool:
