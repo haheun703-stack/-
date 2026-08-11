@@ -554,13 +554,26 @@ def _load_sector_map() -> dict[str, str]:
 
 
 def _load_regime() -> str:
-    """brain_decision.json에서 현재 레짐 로드"""
+    """brain_decision.json에서 현재 레짐 로드.
+
+    ★8/11 교정(B-60 ⑴): `regime` 키는 이 JSON에 존재하지 않는다. 정본은
+    `effective_regime`이고 차선이 `kospi_regime`. 없는 키를 읽는 바람에
+    실제 CRISIS인 날에도 매일 조용히 "CAUTION"을 반환하고 있었다.
+    """
     brain_path = DATA_DIR / "brain_decision.json"
     if brain_path.exists():
         try:
             with open(brain_path, encoding="utf-8") as f:
                 brain = json.load(f)
-            return brain.get("regime", "CAUTION")
+            regime = next(
+                (str(brain[k]) for k in ("effective_regime", "kospi_regime", "regime")
+                 if brain.get(k)), None,
+            )
+            if regime is None:
+                logger.warning(
+                    "brain_decision.json에 레짐 키 없음 — CAUTION으로 대체")
+                return "CAUTION"
+            return regime
         except Exception:
             pass
     return "CAUTION"

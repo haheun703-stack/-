@@ -476,7 +476,17 @@ def get_regime() -> str:
         try:
             with open(brain_path, encoding="utf-8") as f:
                 data = json.load(f)
-            regime = data.get("regime", "CAUTION")
+            # ★8/11 교정(B-60 ⑴): `regime` 키는 brain_decision.json에 없다.
+            # 정본은 `effective_regime`(브레인 실효 판단), 차선이 `kospi_regime`.
+            # 없는 키를 읽어 매일 조용히 "CAUTION"을 반환했고, 실제로는 CRISIS였다.
+            regime = next(
+                (str(data[k]) for k in ("effective_regime", "kospi_regime", "regime")
+                 if data.get(k)), None,
+            )
+            if regime is None:
+                logger.warning(
+                    "brain_decision.json에 레짐 키 없음 — CAUTION으로 대체")
+                return "CAUTION"
             logger.info("현재 레짐: %s", regime)
             return regime
         except Exception:
