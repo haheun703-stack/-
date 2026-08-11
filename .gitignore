@@ -1,7 +1,19 @@
-.env
-# ★8/10: `.env.bak.*`(점)이라 `.env.bak_20260703_krx`(밑줄) 하나가 untracked로
-# 노출돼 있었다. `git add -A` 한 번이면 실크레덴셜이 커밋되는 경로였다.
-.env.bak*
+# ── 자격증명 (★8/11 전면 보강, 검수 3팀) ──────────────────────────
+# 8/10에 `.env.bak.*`(점) → `.env.bak*`(밑줄 포함)로 한 글자를 막았는데,
+# 같은 부류의 구멍이 8개 더 열려 있었다. 실판정(`git check-ignore`) 결과
+# `.env.local`·`.env.production`·`.env.prod`·`.env.new`·`my.pem`·`id_rsa`·
+# `credentials.json`·`service_account.json`·**`lightsail.pem`**이 전부
+# NOT-IGNORED였다. 특히 pem은 VPS SSH 키라, 작업 편의로 프로젝트에 한 번
+# 복사하면 `git add -A` 한 번에 실키가 커밋된다.
+# ★같은 저장소의 `flowx-web/.gitignore:34`는 이미 `.env*`로 막혀 있었다 —
+#   대조군이 안에 있는데 루트만 뚫려 있었던 것.
+.env*
+!.env.SAFE_FOR_AI.txt   # 유일한 추적 대상(값 전부 ***MASKED***, 7/14 오탐 판정 확정)
+*.pem
+*.key
+id_rsa*
+*credential*
+*service_account*
 .kis_token.json
 venv/
 __pycache__/
