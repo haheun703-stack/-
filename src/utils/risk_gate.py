@@ -90,7 +90,11 @@ def _local_regime_view() -> tuple[Optional[str], Optional[float]]:
              if d.get(k)), None,
         )
         mult = d.get("position_multiplier")
-        return regime, (float(mult) if isinstance(mult, (int, float)) else None)
+        # ★bool 배제: 파이썬에서 `isinstance(False, int)`는 True다. 채택을 철회한
+        # 지금은 로그 표기용이지만, 되살릴 때 `float(False)=0.0`이 사이징 0으로
+        # 새는 경로라 여기서 막아둔다(검수 재현 확인).
+        ok = isinstance(mult, (int, float)) and not isinstance(mult, bool)
+        return regime, (float(mult) if ok else None)
     except Exception as e:  # noqa: BLE001
         logger.debug(f"[risk_gate] 자체 레짐 조회 실패(무시): {e}")
         return None, None
@@ -121,11 +125,22 @@ def get_position_multiplier_safe() -> float:
             logger.warning(f"[risk_gate] multiplier 조회 실패 → 1.0: {e}")
             base = 1.0
 
+    # ── 불일치 감지만 한다(채택은 하지 않는다) ──
+    # ★★8/11 저녁 철회: 최초 구현은 자체 레짐의 `position_multiplier`와
+    # `min()`을 취해 "보수적 쪽 채택"을 했는데, **두 값은 서로 다른 축이었다.**
+    #   · 이 함수의 반환값 = 정보봇 등급 기반 **매수금액 계수**(0.2~1.0)
+    #   · regime_macro_signal.position_multiplier = **최종 점수 배수**
+    #     (`scan_tomorrow_picks.py:24` "최종 점수 × position_multiplier", 0.5~**1.3**)
+    # 축이 다르므로 min()은 의미가 없고, 실제로 `macro_score>=45`인 날은 그 값이
+    # 1.0~1.3이라 **보호가 0인데도 "보수적 쪽 채택" 로그만 남는다**(검수 재현).
+    # 게다가 그 값은 레짐이 아니라 macro_score만으로 정해져(`regime_macro_signal.py`
+    # GRADE_MAP) CRISIS에 반응하지도 않는다 — 5일 연속 CRISIS인데 0.9였던 이유다.
+    # 8/1 켈리 `f*`를 수량배수로 쓴 것과 같은 계열의 의미론 오류라 채택을 철회한다.
+    # **판정이 갈리는 날을 드러내는 경고는 유지**한다 — 그건 사실이고 유용하다.
+    # 국내 실현변동성을 반영한 사이징은 백테스트 선행(B-63 근본).
     regime, local_mult = _local_regime_view()
-    if local_mult is None:
+    if regime is None:
         return base
-
-    # 등급 축 불일치 감지 — 판단 자체가 갈리는 날을 보이게 한다.
     try:
         gate_level = rg.get_current_level() if rg is not None else "NORMAL"
     except Exception:  # noqa: BLE001
@@ -135,11 +150,13 @@ def get_position_multiplier_safe() -> float:
     if gap >= 2:
         logger.warning(
             "[risk_gate] 리스크 판정 불일치 — 자체 레짐 %s vs 정보봇 등급 %s "
-            "(%d단계). 배수는 보수적 쪽 채택: %.2f vs %.2f",
-            regime, gate_level, gap, base, local_mult,
+            "(%d단계). 사이징은 정보봇 계수 %.2f를 그대로 쓴다"
+            "(자체 배수 %s는 점수 축이라 혼용 불가 — B-63 근본 조치 대기)",
+            regime, gate_level, gap, base,
+            f"{local_mult:.2f}" if local_mult is not None else "n/a",
         )
 
-    return min(base, local_mult)
+    return base
 
 
 def should_block_new_entry_safe() -> bool:
