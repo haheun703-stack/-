@@ -123,6 +123,7 @@ class DataHealthCheck:
         "_check_kospi_index": "KOSPI인덱스",
         "_check_investor_flow": "투자자수급",
         "_check_supply_coverage": "수급커버리지",
+        "_check_stale_consumption": "낡은종가소비",
     }
 
     #: BAT-D(16:30~19:00) 산출물에 의존하는 체크 — 종가보다 늦게 생성된다.
@@ -154,6 +155,7 @@ class DataHealthCheck:
             self._check_kospi_index,        # 16. KOSPI 인덱스
             self._check_investor_flow,      # 17. 투자자수급
             self._check_supply_coverage,    # 18. 수급 커버리지 급감 (대량 수집장애 방어)
+            self._check_stale_consumption,  # 19. 낡은 종가 종목의 소비 추적 (B-65)
             # 구 18/19(supply_demand/snapshots) 폐기: BAT에서 제거됨 (2026-04-06)
         ]
 
@@ -306,10 +308,88 @@ class DataHealthCheck:
             if len(missing) > 10:
                 detail += f" 외 {len(missing) - 10}건"
 
+        # 19번 검사(_check_stale_consumption)가 재사용한다 — 1,182개 재읽기 회피.
+        self._stale_tickers = sorted(missing)
+
         return CheckResult(
             "종가", passed, detail,
             count=has_today, total=total,
         )
+
+    # ─── 19. 낡은 종가 종목의 소비 추적 (B-65, 8/13) ───
+
+    #: stale 종목이 흘러드는 소비 산출물. (파일, 라벨, 실패로 볼 것인가)
+    #: 보유만 실패다 — 손절 불능이 **실재**한다는 뜻이므로.
+    STALE_CONSUMERS = (
+        ("paper_portfolio.json", "보유", True),
+        ("tomorrow_picks.json", "내일픽", False),
+        ("institutional_targets.json", "기관목표가", False),
+    )
+
+    def _check_stale_consumption(self) -> CheckResult:
+        """당일 종가가 없는 종목이 매매·추천 산출물에 여전히 유입되는가.
+
+        ★없던 것이 무엇인지 정확히 적는다. **신선도 검사는 이미 있었다** —
+          _check_price_data가 stale 종목을 `missing`으로 잡아 코드까지 출력했고,
+          운영 기록에도 "미달 6종목 = 기확인 거래정지/상폐"로 매일 남아 있었다.
+          빠진 것은 **그 종목이 계속 소비되는가**다. 003410은 종가가 589일 멈춘
+          채 페이퍼 진입에 쓰였고, 진입가·청산가가 같은 옛 종가에서 파생돼
+          손익률이 상수가 되면서 손절·익절·트레일링이 발동할 수 없었다.
+          B-61⑴(수집이 멈춘 것만 봤지 소비가 계속되는 건 아무도 안 봄)과 같은 구조.
+
+        판정: 보유 유입만 실패. 픽 유입은 경고 — paper 진입 차단(B-65)이 매매는
+              막지만 픽 생성기는 여전히 싣고 있어 정보 오염이 남는다(근본은 백로그).
+        """
+        stale = getattr(self, "_stale_tickers", None)
+        if stale is None:
+            # price_data가 먼저 안 돌았을 때만 자체 계산(단독 실행 대비).
+            return CheckResult("낡은종가소비", True, "종가 검사 미실행 — 판정 보류",
+                               skipped=True)
+        if not stale:
+            return CheckResult("낡은종가소비", True, "당일 종가 미달 종목 없음")
+
+        stale_set = set(stale)
+        found: dict[str, list[str]] = {}
+        fail = False
+        for fname, label, is_fail in self.STALE_CONSUMERS:
+            path = self.data_dir / fname
+            if not path.exists():
+                continue
+            try:
+                raw = path.read_text(encoding="utf-8")
+            except Exception:  # noqa: BLE001
+                continue
+            if label == "보유":
+                # 보유는 positions 키만 본다 — closed_trades(과거 이력)까지 세면
+                # 이미 청산된 옛 거래가 매일 재경보돼 신호가 죽는다.
+                try:
+                    positions = json.loads(raw).get("positions", {})
+                except Exception:  # noqa: BLE001
+                    continue
+                hit = sorted(stale_set & set(positions))
+            else:
+                # ★따옴표 경계를 씌운다 — 맨 부분문자열 매칭은 티커가 가격·수량
+                #   같은 다른 숫자열 안에 우연히 포함돼도 걸린다(오탐 경로).
+                #   JSON이라 티커는 항상 "003410" 형태의 키/값으로만 등장한다.
+                hit = sorted(t for t in stale_set if f'"{t}"' in raw)
+            if hit:
+                found[label] = hit
+                if is_fail:
+                    fail = True
+
+        if not found:
+            return CheckResult(
+                "낡은종가소비", True,
+                f"미달 {len(stale_set)}종목 — 소비처 유입 0건",
+            )
+
+        parts = [f"{lb} {len(v)}건({','.join(v[:6])})" for lb, v in found.items()]
+        detail = f"미달 {len(stale_set)}종목 | " + " · ".join(parts)
+        if fail:
+            detail += " 🚨보유 중 = 손절 발동 불가 상태"
+        else:
+            detail += " ⚠️매매는 B-65 가드로 차단됨(정보 오염만 잔존)"
+        return CheckResult("낡은종가소비", not fail, detail)
 
     @staticmethod
     def _read_close_volume(pf):
