@@ -81,19 +81,53 @@ def stale_lag_days(ticker: str) -> int | None:
     return int((market_reference_date() - pd.Timestamp(d)).days)
 
 
-def is_ticker_stale(ticker: str) -> bool:
-    """봉이 멈춘 종목인가. 판정 불가(parquet 없음)는 False.
+#: 값 정지 판정에 쓸 최근 봉 수.
+FROZEN_LOOKBACK = 5
 
-    ★판정 불가를 True로 만들지 않는 이유: 호출부들은 이미 그 앞에서
-      `price <= 0`으로 걸러낸다. 여기서까지 막으면 원인이 두 겹이 돼
-      어느 가드가 걸렀는지 로그로 구분되지 않는다.
+
+def is_ticker_frozen(ticker: str) -> bool:
+    """마지막 봉 **날짜는 최신인데 값이 멈춘** 종목인가(거래정지).
+
+    ★8/13 검수에서 드러난 구멍이다. 날짜만 보는 판정은 003410(마지막 봉
+      2024-12-30)은 잡지만 001570처럼 **매일 행은 들어오는데 종가가 고정된**
+      종목은 통과시킨다. 손절·트레일링이 발동할 수 없다는 실제 피해는 양쪽이
+      완전히 같다 — 손익률이 상수가 되기 때문이다.
+
+    판정: 최근 FROZEN_LOOKBACK봉의 종가 고유값이 1이고 거래량 합이 0.
+    8/13 실측으로 16종목이 **3중 일치**(종가 고정 + 거래량 0 + 당일 수급 DB
+    0행)해 거래정지가 확실했다. 헬스체크 `_check_price_data`의 `halted`
+    버킷과 같은 개념이며, 그쪽은 8/5부터 이 기준을 프로덕션에서 써 왔다.
+    """
+    pq = PROCESSED_DIR / f"{ticker}.parquet"
+    if not pq.exists():
+        return False
+    try:
+        df = pd.read_parquet(pq, columns=["close", "volume"]).tail(FROZEN_LOOKBACK)
+    except Exception:  # noqa: BLE001
+        return False
+    if len(df) < FROZEN_LOOKBACK:
+        return False   # 이력 부족은 판정하지 않는다(신규 상장 오탐 방지)
+    return bool(df["close"].nunique() == 1 and df["volume"].sum() == 0)
+
+
+def is_ticker_stale(ticker: str) -> bool:
+    """**가격을 쓸 수 없는 상태**인가 — 날짜 정지 또는 값 정지.
+
+    이름은 진입 차단 호출부(6곳)와의 호환을 위해 유지하되, 의미는 "봉 날짜가
+    낡음"이 아니라 **"이 종가로 손익을 계산하면 안 되는 상태"**다. 두 경우 모두
+    가격이 고정돼 손절·익절·트레일링이 구조적으로 발동할 수 없다.
+      ⑴ 날짜 정지: 마지막 봉이 기준일보다 STALE_PRICE_MAX_DAYS 초과로 뒤처짐
+      ⑵ 값 정지: 날짜는 최신이나 최근 봉의 종가가 고정 + 거래량 0(거래정지)
+
+    ★판정 불가(parquet 없음)는 False. 호출부들이 이미 그 앞에서 `price <= 0`으로
+      걸러내며, 여기서까지 막으면 어느 가드가 걸렀는지 로그로 구분되지 않는다.
     """
     if ticker in _stale_cache:
         return _stale_cache[ticker]
     lag = stale_lag_days(ticker)
-    stale = lag is not None and lag > STALE_PRICE_MAX_DAYS
-    _stale_cache[ticker] = stale
-    return stale
+    unusable = (lag is not None and lag > STALE_PRICE_MAX_DAYS) or is_ticker_frozen(ticker)
+    _stale_cache[ticker] = unusable
+    return unusable
 
 
 def reset_cache() -> None:
