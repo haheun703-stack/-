@@ -1,4 +1,17 @@
 @echo off
+REM ==== B-69 GUARD (2026-08-13) - BLOCKED, DO NOT RUN ON LOCAL PC ====
+REM  The scheduled task could NOT be disabled via schtasks (Access denied,
+REM  needs an elevated shell). This guard makes the shot harmless meanwhile.
+REM  WHY: VPS cron is the single source of truth. This local task collides
+REM   with the VPS schedule at the SAME MINUTE, the local IP is OUTSIDE the
+REM   KIS API whitelist, and local .env holds live credentials.
+REM   Fixing this file to 'make it work locally' = double execution.
+REM  TO DISABLE PROPERLY (admin PowerShell):
+REM     schtasks /change /tn "QM_M_NXTPre" /disable
+REM  TO REVIVE INTENTIONALLY: remove this block AND verify VPS cron overlap.
+echo [%date% %time%] BLOCKED by B-69 guard (VPS cron is canonical) >> "%~dp0..\logs\schedule.log"
+exit /b 0
+REM ---- original body kept below for reference ----
 REM ============================================================
 REM  Quantum Master - BAT-M: NXT 프리마켓 데이터 수집
 REM  스케줄: 매일 07:55 (월~금, 프리마켓 시작 직전)

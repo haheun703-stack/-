@@ -758,6 +758,28 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
         if price <= 0:
             continue
 
+        # ★B-73(8/13) 보유 중 봉 정지 — **강제 청산하지 않고 상태만 드러낸다.**
+        #   가격이 고정되면 손익률이 상수가 돼 손절·익절·트레일링이 발동할 수
+        #   없고 MAX_HOLD로만 빠진다. 그렇다고 장부상 임의 청산하면 **실제로는
+        #   체결될 수 없는 매도를 성과로 기록**하게 된다 — 거래정지 종목은
+        #   시장에서 팔리지 않는다. 측정이 현실과 어긋나면 성과가 달성 불가능한
+        #   값이 된다(7/24 노출도 편향과 같은 계열: 비교 기준이 어긋나면
+        #   못한 것이 능력으로 둔갑한다).
+        #   그래서 청산 로직은 그대로 두고 원장에 사실만 남긴다. 이 플래그로
+        #   리포트·사후분석에서 "이 손익은 고정가 구간이었다"를 식별할 수 있다.
+        if is_ticker_stale(ticker):
+            if not pos.get("price_stale"):
+                logger.warning("[STALE-HOLD] %s 보유 중 봉 정지(마지막 %s) — 손절 발동 "
+                               "불가 상태. 강제청산 없이 MAX_HOLD까지 유지한다.",
+                               ticker, price_date or "?")
+            pos["price_stale"] = True
+            pos["price_stale_since"] = pos.get("price_stale_since") or today_str
+            pos["price_stale_last_bar"] = price_date
+        elif pos.get("price_stale"):
+            logger.info("[STALE-HOLD] %s 봉 재개 — 정상 판정으로 복귀", ticker)
+            for _k in ("price_stale", "price_stale_since", "price_stale_last_bar"):
+                pos.pop(_k, None)
+
         avg_price = pos["avg_price"]
         if avg_price <= 0:
             logger.warning("[check_exits] %s avg_price=0, 스킵", ticker)
