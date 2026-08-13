@@ -280,42 +280,28 @@ def save_portfolio(pf: dict) -> None:
 # 그보다 STALE_PRICE_MAX_DAYS(달력일)를 초과해 뒤처지면 진입 후보에서 제외한다.
 # ★청산 경로에는 적용하지 않는다 — 청산부(check_exits)는 price<=0이면 skip이라
 #   여기서 stale을 0으로 만들면 보유 종목이 영원히 안 팔린다(진입 차단과 상쇄).
-STALE_PRICE_MAX_DAYS = 7
+# ★판정 기준은 src/utils/price_freshness.py 한 곳에만 둔다(B-73, 8/13).
+#   픽 생성기(scan_tomorrow_picks)도 같은 모듈을 쓴다. 기준을 복제하면
+#   한쪽만 고쳐져도 에러 없이 어긋난다 — 오늘 B-67이 정확히 그 실패였다.
+from src.utils.price_freshness import (  # noqa: E402
+    STALE_PRICE_MAX_DAYS,  # noqa: F401  (설정 가시성 유지)
+    is_ticker_stale as _is_ticker_stale_shared,
+    stale_lag_days,
+)
 
-_stale_cache: dict[str, bool] = {}
-_market_ref_date: list = []   # [pd.Timestamp] 1회 계산 캐시
-
-
-def _market_reference_date() -> pd.Timestamp:
-    """시장 최신 거래일. kospi_index.csv 실패 시 오늘로 폴백."""
-    if _market_ref_date:
-        return _market_ref_date[0]
-    ref = None
-    try:
-        df = pd.read_csv(KOSPI_CSV_PATH, usecols=["Date"])
-        if len(df) > 0:
-            ref = pd.Timestamp(df["Date"].iloc[-1])
-    except Exception as e:
-        logger.warning("[STALE] 시장 기준일 조회 실패(%s) — 오늘로 폴백", e)
-    if ref is None or pd.isna(ref):
-        ref = pd.Timestamp(datetime.now().date())
-    _market_ref_date.append(ref)
-    return ref
+_stale_logged: set = set()
 
 
 def is_ticker_stale(ticker: str) -> bool:
-    """종목 parquet의 마지막 봉이 시장 기준일보다 크게 뒤처졌는가."""
-    if ticker in _stale_cache:
-        return _stale_cache[ticker]
-    _, last_date = get_latest_price(ticker)
-    stale = False
-    if last_date:
-        lag = (_market_reference_date() - pd.Timestamp(last_date)).days
-        stale = lag > STALE_PRICE_MAX_DAYS
-        if stale:
-            logger.warning("[STALE] %s 마지막 봉 %s (%d일 지연) — 진입 후보 제외",
-                           ticker, last_date, lag)
-    _stale_cache[ticker] = stale
+    """종목 parquet의 마지막 봉이 시장 기준일보다 크게 뒤처졌는가.
+
+    판정은 공용 모듈에 위임하고, 여기서는 진입 차단 사유만 1회 로그로 남긴다.
+    """
+    stale = _is_ticker_stale_shared(ticker)
+    if stale and ticker not in _stale_logged:
+        _stale_logged.add(ticker)
+        logger.warning("[STALE] %s 마지막 봉이 %d일 지연 — 진입 후보 제외",
+                       ticker, stale_lag_days(ticker) or -1)
     return stale
 
 

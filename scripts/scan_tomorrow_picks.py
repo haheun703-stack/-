@@ -53,6 +53,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.utils.pykrx_quiet import silence_pykrx_logging
+# ★B-73(8/13): 봉 정지 종목 판정. 기준은 공용 모듈 한 곳에만 둔다 —
+#   페이퍼 진입 차단(B-65)과 같은 함수를 써야 두 경로가 어긋나지 않는다.
+from src.utils.price_freshness import is_ticker_stale
 
 silence_pykrx_logging()  # pykrx 로그인/로깅 노이즈 억제 (진입부 1회)
 
@@ -3176,6 +3179,22 @@ def main():
     # 정렬: 등급 → 점수
     grade_order = {"강력 포착": 0, "포착": 1, "관심": 2, "관찰": 3, "보류": 4, "데이터부족": 5}
     results.sort(key=lambda x: (grade_order.get(x["grade"], 9), -x["total_score"]))
+
+    # ★B-73(8/13): 봉이 멈춘 종목을 픽에서 제외한다.
+    #   B-65에서 페이퍼 "진입"은 막았지만 픽 자체에는 계속 실려 나갔다
+    #   (8/13 실측: tomorrow_picks.json에 003410·012510·057050 3종 유입).
+    #   픽은 공개 산출물이자 다른 소비처의 입력이라 여기서 끊지 않으면
+    #   매매 외 경로로 589일 묵은 가격이 계속 퍼진다.
+    #   ★TOP 선별(top5/watchlist5) 앞에 두어야 파생 목록까지 함께 걸러진다.
+    _stale_hits = [r["ticker"] for r in results if is_ticker_stale(r["ticker"])]
+    if _stale_hits:
+        _before = len(results)
+        _stale_set = set(_stale_hits)
+        results = [r for r in results if r["ticker"] not in _stale_set]
+        msg = (f"[STALE] 봉 정지 {len(_stale_hits)}종목 픽 제외 "
+               f"({_before}→{len(results)}): {','.join(_stale_hits[:10])}")
+        logger.warning(msg)
+        print(msg)
 
     # ── TOP 선별: 전략 그룹별 슬롯 분리 ──
     buyable_grades = {"강력 포착", "포착", "관심"}
