@@ -562,6 +562,35 @@ def build_unified_morning() -> str:
     if killed:
         L.append(f"  \U0001f6a8 Kill: {', '.join(killed)}")
 
+    # ── 2-b. US 상세 이식 (B-66, 8/13) ──
+    # `send_evening_summary._section_us_overnight()`는 8/11에 경로·키·타입까지
+    # 전면 교정됐지만, 그 함수를 호출하는 `--morning` 경로가 **프로덕션에서
+    # 0회 실행**이라(플래그가 argparse 정의에만 존재) 교정 내용이 아무 데도
+    # 닿지 않았다. ★아침 알림을 하나 더 만드는 대신 실제로 발송되는 이 브리핑에
+    #   옮긴다 — 발송은 1건으로 유지된다.
+    # ※use_cases가 scripts를 import하면 클린 아키텍처 위반이므로 값만 읽는다.
+    # ※단위: commodities.ret_1d는 **퍼센트**다(실측 gold 0.99 ↔ summary "Au+1.0%").
+    #   비율로 오해해 ×100 하면 8/1 켈리·8/13 risk_gate와 같은 의미론 오류가 된다.
+    comm = sig.get("commodities", {})
+    if isinstance(comm, dict) and comm:
+        parts = []
+        for key, label in (("gold", "금"), ("oil", "유가"),
+                           ("copper", "구리"), ("natgas", "가스")):
+            v = comm.get(key)
+            if isinstance(v, dict) and isinstance(v.get("ret_1d"), (int, float)):
+                parts.append(f"{label}{v['ret_1d']:+.1f}%")
+        if parts:
+            L.append("  " + " ".join(parts))
+
+    # 특수룰 — 원소는 dict이고 키는 `name`이다(8/11 실측). 구 코드가 기대한
+    # `rule`은 존재하지 않는 키였다. 양쪽을 모두 받아 생산자 변경에 견디게 한다.
+    rules = sig.get("special_rules") or []
+    if isinstance(rules, list):
+        names = [r.get("name") or r.get("rule") for r in rules
+                 if isinstance(r, dict) and (r.get("name") or r.get("rule"))]
+        if names:
+            L.append(f"  ⚡ {', '.join(str(n) for n in names[:3])}")
+
     # ── 3. 증권사 리포트 ──
     morning = _load_json(MORNING_REPORTS_PATH)
     reports = morning.get("reports", [])

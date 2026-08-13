@@ -489,6 +489,17 @@ def _load_json_path(path) -> dict:
 def _section_us_overnight() -> list[str]:
     """US Overnight 시그널 요약 (아침 리포트용).
 
+    ★★8/13(B-66) — **이 함수는 프로덕션에서 실행되지 않는다.**
+    호출 경로는 `build_evening_summary(morning=True)` 하나뿐이고, 그 인자를
+    켜는 `--morning`은 **argparse 정의에만 존재**한다(VPS/BAT 전수 확인:
+    `run_bat.sh`는 `--send`만 호출). 즉 8/11의 전면 교정(아래 주석)은
+    옳았지만 **아무 데도 닿지 않았다** — 무음 원인이 ㈎경로 + ㈏스케줄 부재
+    둘인데 ㈎만 고치고 "복구"라 보고했던 건이다.
+    조치: US 상세(원자재·특수룰)를 실제로 매일 발송되는
+    `src/use_cases/morning_briefing.build_unified_morning()`으로 옮겼다.
+    아침 알림을 하나 더 만들지 않기 위해 그쪽을 보강하는 방식을 택했다.
+    이 함수는 참조용으로 남긴다 — **되살리려면 스케줄 배선부터 확인할 것.**
+
     ★★8/11 전면 교정(B-60 ⑷) — 이 섹션은 **아침 리포트에서 통째로 무음**이었다.
     `data/overnight_signal.json`을 읽는데 정본은 `data/us_market/` 아래라
     `_load`가 매일 `{}`를 반환하고 `if not sig: return []`로 조용히 빠졌다.
