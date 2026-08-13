@@ -33,6 +33,16 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
                     datefmt="%H:%M:%S", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger("scenario_v1")
 
+# ★B-67(8/13): 사이클 후기 어휘를 하드코딩하지 않고 **생산자와 상수를 공유**한다.
+#   구 코드는 `not in ("late", "over")`였는데 실제 산출 어휘는 한국어다
+#   (`future_value_engine.CYCLE_LATE_SIGNALS = {"경계", "청산"}`).
+#   영문 리터럴은 0건 매칭이라 **배포 이래 이 필터가 한 번도 동작하지 않았고**,
+#   `사이클후기차단(청산)` 태그를 단 종목이 워치리스트에 그대로 올라가
+#   bull_entry_gate(BAT-D G5.8)로 넘어가 진입 후보로 정렬됐다(005380 실측).
+#   ★리터럴을 한국어로 바꾸는 대신 상수를 import한다 — 생산자가 어휘를 바꾸면
+#     여기도 자동으로 따라가고, 같은 종류의 무성 실패가 재발하지 않는다.
+from src.use_cases.future_value_engine import CYCLE_LATE_SIGNALS
+
 DATA = PROJECT_ROOT / "data"
 OUT = DATA / "shadow" / "scenario_v1.json"
 HIST = DATA / "shadow" / "scenario_v1_history.jsonl"
@@ -89,7 +99,7 @@ def _watchlist(top_n: int = 10) -> list[dict]:
     try:
         fv = json.loads(fv_path.read_text(encoding="utf-8"))
         cards = fv.get("scorecards", [])
-        cards = [c for c in cards if c.get("cycle_signal") not in ("late", "over")]
+        cards = [c for c in cards if c.get("cycle_signal") not in CYCLE_LATE_SIGNALS]
         cards.sort(key=lambda c: c.get("fv_long") or 0, reverse=True)
         return [{"ticker": c["ticker"], "name": c.get("name"),
                  "fv_long": c.get("fv_long"), "tags": (c.get("tags") or [])[:4]}
