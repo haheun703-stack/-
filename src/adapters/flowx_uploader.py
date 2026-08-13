@@ -1220,7 +1220,13 @@ def _check_data_stale(brain: dict) -> dict | None:
 def _build_market_guide(brain: dict, shield: dict, sector_momentum: dict) -> dict:
     """시장 맥락 가이드 자동 생성 — 구독자에게 '지금 왜 이걸 사야 하는지' 안내."""
     regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
-    shield_status = shield.get("status", "YELLOW")
+    # ★8/13 검수: 구 코드는 `shield.get("status", "YELLOW")`였다. 생산자
+    #   `src/shield.py`의 ShieldReport.to_dict()는 `overall_level`만 내보내고
+    #   **`status` 키를 만들지 않는다**(:165). 실제 등급과 무관하게 항상 기본값
+    #   YELLOW가 쓰였다 — 8/13 실제 등급은 RED였다. 같은 파일을
+    #   `build_killer_picks.py:86`은 overall_level 우선으로 정확히 읽고 있어
+    #   한 저장소 안에 정답과 오답이 공존했다(B-67 "소비자가 없는 키를 기대"와 동형).
+    shield_status = shield.get("overall_level") or shield.get("status") or "UNKNOWN"
     vix = brain.get("vix") or brain.get("vix_level") or 0
     cash_ratio = brain.get("cash_ratio") or brain.get("cash_pct") or 0
 
@@ -1580,7 +1586,9 @@ def build_jarvis_payload() -> dict:
     # 위험 모드 결정
     regime = brain.get("regime") or brain.get("effective_regime") or brain.get("direction") or "NEUTRAL"
     vix = brain.get("vix") or brain.get("vix_level") or 0
-    shield_status = shield.get("status", "YELLOW")
+    # ★8/13 검수: 위 _build_market_guide와 같은 결함(생산자는 overall_level).
+    #   이쪽은 공개 `quant_jarvis`에 적재되므로 매일 YELLOW가 송출됐다.
+    shield_status = shield.get("overall_level") or shield.get("status") or "UNKNOWN"
     danger_mode = _get_danger_mode(regime, vix, shield_status)
 
     # picks 요약 (전체 picks는 너무 크므로 관찰 이상만)

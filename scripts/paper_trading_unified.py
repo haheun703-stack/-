@@ -930,6 +930,12 @@ def check_exits(pf: dict, today_str: str) -> list[dict]:
                 "exit_reason": exit_reason,
                 "days_held": days_held,
                 "supply_demand": sd["detail"],
+                # ★8/13 검수: 봉 정지 상태의 청산이면 원장에 남긴다. 구 코드는
+                #   포지션 dict의 price_stale 플래그가 청산과 함께 소멸해
+                #   "사후분석에서 식별 가능하게 한다"던 목적이 달성되지 않았다.
+                **({"price_stale": True,
+                    "price_stale_last_bar": pos.get("price_stale_last_bar", price_date or "")}
+                   if pos.get("price_stale") else {}),
             })
 
             pf["stats"]["total_trades"] += 1
@@ -997,9 +1003,23 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
                 continue
 
         # 미추천 → 전량 청산
-        price, _ = get_latest_price(ticker)
+        price, _price_date = get_latest_price(ticker)
         if price <= 0:
             price = pos["avg_price"]
+
+        # ★8/13 검수: 픽 필터(B-73)가 stale 종목을 후보에서 빼면 그 종목은
+        #   "미추천"이 되어 이 경로로 들어오고, **고정 종가로 매도가 기록**된다.
+        #   같은 날 check_exits에서 "체결 불가능한 매도를 성과로 남기지 않겠다"고
+        #   강제청산을 피한 결정이 이 우회로로 무력화됐다(두 커밋이 서로 상충 —
+        #   8/10 "그날 만든 두 장치가 서로를 무력화"의 재현).
+        #   ★청산 자체는 막지 않는다 — 막으면 슬롯·자본이 무기한 묶이고, 어차피
+        #     MAX_HOLD로도 같은 고정가 청산이 일어난다. 대신 **원장에 사실을 남겨**
+        #     성과 집계에서 식별·제외할 수 있게 한다(플래그가 청산 시 소멸하던 문제도 해소).
+        _stale_exit = bool(pos.get("price_stale")) or is_ticker_stale(ticker)
+        if _stale_exit:
+            logger.warning("[STALE-EXIT] %s REBALANCE 청산 — 봉 정지(마지막 %s) "
+                           "고정가 %s 기준이라 실현 불가능한 손익이다",
+                           ticker, _price_date or "?", f"{price:,.0f}")
 
         sell_price = price * (1 - SLIPPAGE_PCT)
         proceeds = sell_price * pos["qty"] * (1 - TAX_PCT)
@@ -1026,6 +1046,10 @@ def weekly_rebalance(pf: dict, candidates: list[dict], today_str: str) -> list[d
             "pnl_pct": round(final_pnl * 100, 2),
             "exit_reason": "REBALANCE",
             "days_held": days_held,
+            # 봉 정지 상태의 청산임을 원장에 남긴다(위 주석 참조).
+            **({"price_stale": True,
+                "price_stale_last_bar": _price_date or pos.get("price_stale_last_bar", "")}
+               if _stale_exit else {}),
         })
 
         pf["stats"]["total_trades"] += 1

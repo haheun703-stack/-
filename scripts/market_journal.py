@@ -462,7 +462,12 @@ def _collect_trades(today_str: str) -> dict:
                 "price": rec.get("entry_price", 0),
                 "reason": rec.get("grade", ""),
             })
-        if settled_date == today_str and rec.get("status") in ("settled", "stopped"):
+        # ★8/13 검수: 구 코드는 ("settled","stopped")를 찾았는데 생산자
+        #   `track_pick_results.py`가 쓰는 어휘는 hit_stop/hit_target/expired/
+        #   holding/pending뿐이다(:146,150,154,184,188). 매칭 0건이라 sells가
+        #   영구 빈 배열, total_realized_pnl이 영구 0으로 매일 텔레그램 발송됐다.
+        #   생산자 자신의 종료 판정(:205)과 같은 집합을 쓴다.
+        if settled_date == today_str and rec.get("status") in ("hit_target", "hit_stop", "expired"):
             pnl_pct = rec.get("settled_return", 0)
             sells.append({
                 "ticker": rec.get("ticker", ""),

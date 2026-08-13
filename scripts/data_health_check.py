@@ -100,6 +100,11 @@ class DataHealthCheck:
     MARKET_DEPENDENT = {
         "종가", "수급(종목)", "수급(섹터)", "DART",
         "KOSPI인덱스", "투자자수급", "수급커버리지",
+        # ★8/13 검수: 19번을 여기 빠뜨려 휴장일·장중 실행에 잠기지 않았다.
+        #   종가가 아직 안 들어온 시각에는 전 종목(1,166)이 missing이 되어
+        #   "🚨보유 중 = 손절 발동 불가"라는 최고 강도 경보를 오탐으로 냈다.
+        #   19번은 종가 검사 산출물에 전적으로 의존하므로 함께 잠겨야 한다.
+        "낡은종가소비",
     }
 
     #: 예외 발생 시 쓸 한글 체크명 — 위 집합들이 전부 한글명이라 함수명을 그대로
@@ -309,7 +314,16 @@ class DataHealthCheck:
                 detail += f" 외 {len(missing) - 10}건"
 
         # 19번 검사(_check_stale_consumption)가 재사용한다 — 1,182개 재읽기 회피.
-        self._stale_tickers = sorted(missing)
+        # ★8/13 검수: 구 코드는 `missing`만 넘겼다. 그래서 19번이 **정작 겨냥한
+        #   대상을 놓쳤다** — 마지막 봉 날짜는 최신인데 값이 멈춘 종목(halted,
+        #   실측 8종: 001570·006380·020760 등 최근 20봉 close 고유값 1·거래량 0)은
+        #   이 검사에도, `is_ticker_stale()`(날짜만 봄)에도 걸리지 않는다.
+        #   003410(날짜 정지)은 잡고 001570(값 정지)은 못 잡았다 — 손절·트레일링
+        #   무력화라는 실제 피해는 양쪽이 동일하다.
+        #   `_check_price_data`는 이미 halted를 정확히 식별하고 있었으므로 합류시킨다.
+        self._stale_tickers = sorted(set(missing) | set(halted))
+        self._stale_missing = sorted(missing)   # 날짜 정지
+        self._stale_halted = sorted(halted)     # 값 정지(날짜는 최신)
 
         return CheckResult(
             "종가", passed, detail,
@@ -388,7 +402,21 @@ class DataHealthCheck:
         if fail:
             detail += " 🚨보유 중 = 손절 발동 불가 상태"
         else:
-            detail += " ⚠️매매는 B-65 가드로 차단됨(정보 오염만 잔존)"
+            # ★8/13 검수: 구 문구는 "매매는 B-65 가드로 차단됨"이라 **단언**했다.
+            #   그러나 B-65(price_freshness)는 `lag > 7일`만 차단하고, 19번이 잡는
+            #   "당일 봉 없음"(lag>=1)·"값 정지(halted)"는 그 조건에 안 걸린다.
+            #   **있지도 않은 보호를 있다고 보고**해 틀린 안심을 줬다. 실측해서 쓴다.
+            try:
+                from src.utils.price_freshness import is_ticker_stale
+                unguarded = sorted(t for t in stale_set if not is_ticker_stale(t))
+            except Exception:  # noqa: BLE001
+                unguarded = []
+                detail += " ⚠️B-65 차단여부 확인불가"
+            if unguarded:
+                detail += (f" 🚨B-65 미차단 {len(unguarded)}종목("
+                           f"{','.join(unguarded[:6])}) — 진입 가능 상태")
+            else:
+                detail += " ⚠️매매는 B-65 가드로 차단됨(정보 오염만 잔존)"
         return CheckResult("낡은종가소비", not fail, detail)
 
     @staticmethod
