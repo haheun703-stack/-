@@ -245,7 +245,12 @@ def main():
     results = asyncio.run(outlook.analyze_all())
 
     if not results:
-        logger.warning("[Outlook] 보유 종목 없음 — 종료")
+        # ★8/14 검수 1팀 🟡5: 여기서 그냥 return하면 파일이 **전날 것 그대로** 남는다.
+        # AI 실패는 이제 analyze_all이 UNAVAILABLE로 채우므로 빈 결과는 "보유 0"만 의미하는데,
+        # 그 정상 상태에서 파일이 안 갱신되면 HEALTH 신선도 검사가 매일 ❌로 고착된다
+        # (B-44에서 실제로 겪은 등급 고착). 보유 0도 사실이므로 사실대로 기록한다.
+        logger.warning("[Outlook] 보유 종목 없음 — 빈 결과로 기록")
+        save_results([])
         return
 
     # 저장

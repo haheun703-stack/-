@@ -469,9 +469,13 @@ def check_ai_model_errors() -> tuple:
         content = log_path.read_text(encoding="utf-8", errors="ignore")
         fallback = content.count("Haiku 폴백") + content.count("haiku fallback")
         err_404 = content.count("model_not_found") + content.lower().count("404 not found")
-        # 크레딧 소진·인증 오류·요청 거부 — 폴백으로 회복 불가능한 계정 단위 실패
+        # 크레딧 소진·인증 오류 — 폴백으로 회복 불가능한 계정 단위 실패
+        # ★검수 1팀 🟡6: 초안은 invalid_request_error를 함께 셌으나 제거했다.
+        # 그 타입은 프롬프트 초과·max_tokens 초과 등 범용 400이고 **OpenAI도 같은 문자열**을
+        # 쓴다(gpt_catalyst가 예외 본문을 그대로 로그에 흘림). 임계가 1건이라 GPT 쪽
+        # 컨텍스트 초과 한 건이 "Anthropic 크레딧 확인 필요"로 둔갑한다.
+        # 계정 단위 실패만 남긴다 — 결과 쪽은 check_ai_outputs가 따로 본다(이중 방어).
         api_fail = (content.count("credit balance is too low")
-                    + content.count("invalid_request_error")
                     + content.count("authentication_error")
                     + content.count("permission_error"))
         return fallback, err_404, api_fail
@@ -509,24 +513,44 @@ def check_ai_outputs() -> list:
     ★8/14 B-83: portfolio_outlook이 크레딧 소진 때 10종목 전부 action=HOLD로 저장됐다.
     파일은 존재하고 신선했으므로 기존 검사는 전부 통과했다. 실제 판단은 SELL 2·TRIM 2였다.
     존재·신선도가 아니라 내용의 실패 표지를 본다.
+
+    ★검수 1팀 🔴3 반영: 초안은 `if not path.exists(): continue`로 **부재를 조용히 통과**시켰고
+    날짜도 안 봤다. 이 3파일은 CHECKS(6종)에 없어 **어떤 검사도 존재·신선도를 안 본다** —
+    "존재는 다른 검사가 본다"는 내 전제가 사실이 아니었다. 파일이 없거나 63일 묵어도
+    통과했다(B-61⑴과 같은 형태). 부재·낡음·내용 세 가지를 여기서 함께 본다.
+
+    ★검수 1팀 🟡4 반영: master_brain은 실패 시 파일을 아예 안 쓰고(성공 경로에서만 저장),
+    폴백이 쓰는 키도 `error`가 아니라 `parse_error`다. 그래서 error 키 검사는 발화 불가능한
+    죽은 코드였다 — 이 파일은 **신선도**로 잡는 게 맞다.
     """
     bad = []
+    # (파일, 실패표지 키들, 날짜 키들)
     checks = [
-        ("ai_brain_judgment.json", "error"),
-        ("master_brain_judgment.json", "error"),
-        ("portfolio_outlook.json", None),
+        ("ai_brain_judgment.json", ("error",), ("date", "generated_at", "analyzed_at")),
+        ("master_brain_judgment.json", ("error", "parse_error"), ("date", "generated_at")),
+        ("portfolio_outlook.json", ("error",), ("analyzed_at", "date", "generated_at")),
     ]
-    for fname, err_key in checks:
+    for fname, err_keys, date_keys in checks:
         path = QM / "data" / fname
         if not path.exists():
+            bad.append(f"{fname}: 파일 없음")
             continue
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except Exception as e:
             bad.append(f"{fname}: 파싱 실패({e})")
             continue
-        if err_key and data.get(err_key):
-            bad.append(f"{fname}: error 필드 존재")
+        # ── 신선도: 내용의 날짜가 오늘인가 (파일 mtime이 아니라 값으로 판단) ──
+        stamp = next((str(data[k]) for k in date_keys if data.get(k)), "")
+        if not stamp:
+            bad.append(f"{fname}: 날짜 필드 없음({'/'.join(date_keys)})")
+        elif TODAY not in stamp:
+            bad.append(f"{fname}: 낡음(내용 기준일 {stamp[:16]}, 오늘 {TODAY})")
+        # ── 내용: 실패 표지 ──
+        for k in err_keys:
+            if data.get(k):
+                bad.append(f"{fname}: {k} 필드 존재")
+                break
         results = data.get("results") or data.get("stock_judgments") or []
         if isinstance(results, list) and results:
             failed_n = sum(1 for r in results
@@ -936,7 +960,13 @@ def main():
         f"📈 수급DB: {'✅' if investor_ok else '❌'}",
         f"📊 수급CSV: {'✅' if csv_ok else '❌'}",
         f"🌐 FLOWX: {flowx_ok_count}/{flowx_total}" + (f" ⚠️STALE {len(stale_tables)}" if stale_tables else " ✅"),
-        f"🤖 AI모델: {'✅' if (fallback_cnt < 3 and err_404_cnt == 0) else '⚠️'}" + (f" (폴백{fallback_cnt})" if fallback_cnt else ""),
+        # ★8/14 검수 1팀 🔴1: L9 분기만 고치고 이 요약줄을 안 고쳐서, 8/14를 그대로 재현해도
+        # (fallback=2·404=0·api_fail=35) 여기엔 여전히 "✅ (폴백2)"가 찍혔다. 사람을 오도한
+        # 표시가 바로 이것이므로 계정오류를 최우선으로 반영한다.
+        f"🤖 AI모델: {'❌' if api_fail_cnt else ('✅' if (fallback_cnt < 3 and err_404_cnt == 0) else '⚠️')}"
+        + (f" (계정오류{api_fail_cnt})" if api_fail_cnt else (f" (폴백{fallback_cnt})" if fallback_cnt else "")),
+        f"🧠 AI산출물: {'❌ ' + str(len(ai_bad)) + '건' if ai_bad else '✅'}",
+        f"🏁 BAT-D 종료: {'✅ 실패0' if (d_done and d_fail_n == 0) else ('❌ 실패' + str(d_fail_n) + '건' if d_done else '❌ ' + d_memo)}",
     ]
 
     if recovered:

@@ -162,7 +162,12 @@ def main():
 
     # 3-5. US Overnight 시그널
     us_signal = load_json(US_SIGNAL_JSON)
-    us_grade = us_signal.get("final_grade", "NEUTRAL")
+    # ★8/14 B-86: 생산자(us_overnight_signal.py)가 쓰는 키는 "grade" 하나뿐이고
+    # "final_grade"는 이 저장소 어디에서도 생성되지 않는다(대입 0건). 따라서 축4(15점)가
+    # 매일 NEUTRAL 분기 +7로 고정돼 왔다 — 8/14 실제 등급은 MILD_BULL(+10~15)이었다.
+    # daily_market_learner:387·jarvis_direction_engine:651·market_sense_engine:148은
+    # 이미 같은 폴백을 쓰고 있었다(방어 3곳 / 미방어 2곳 공존 = 계약 표류 미전파).
+    us_grade = us_signal.get("grade", us_signal.get("final_grade", "NEUTRAL"))
     vix_level = us_signal.get("vix", {}).get("level", 20)
     ewy_data = us_signal.get("index_direction", {}).get("EWY", {})
     ewy_5d = ewy_data.get("ret_5d", 0)

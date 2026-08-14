@@ -159,6 +159,13 @@ class PortfolioOutlook(BaseAgent):
         try:
             text = await self._ask_claude(SYSTEM_PROMPT, prompt, max_tokens=8000)
             results = self._parse_results(text)
+            # ★8/14 B-83 후속(검수 1팀 🔴2): _parse_results는 예외를 던지지 않고 []를 반환한다.
+            # API가 200을 주고 JSON이 깨지거나 max_tokens=8000에 잘리면 여기로 온다.
+            # []를 그대로 넘기면 러너가 "보유 종목 없음"으로 오인해 저장 없이 종료 →
+            # portfolio_outlook.json이 **전날 파일 그대로** 남고, etf_engine이 그걸 읽어
+            # 어제의 SELL/TRIM을 오늘 액션 플랜으로 내보낸다. 아래 except와 같은 취급을 한다.
+            if not results:
+                raise ValueError("응답 파싱 실패 — 결과 0건 (JSON 깨짐/토큰 절단 의심)")
         except Exception as e:
             logger.error("[Outlook] Claude 분석 실패: %s", e)
             # 실패를 판단값으로 승격시키지 않는다 (8/14 B-83).
