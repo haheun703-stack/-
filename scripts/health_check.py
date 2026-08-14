@@ -20,6 +20,7 @@ cron 등록 (KST):
 
 import json
 import os
+import re
 import subprocess
 import sys
 import argparse
@@ -478,6 +479,30 @@ def check_ai_model_errors() -> tuple:
         return 0, 0, 0
 
 
+def check_bat_d_completion() -> tuple:
+    """오늘 로그에서 BAT-D의 실제 종료와 실패 건수를 읽는다. (완료여부, 실패건수, 메모)
+
+    ★8/14 B-85: HEALTH(18:45 완료)가 BAT-D(18:56~19:10 완료)보다 **매일 먼저 끝난다**
+    — 10거래일 전수 확인. 즉 HEALTH는 BAT-D가 아직 도는 중에 검사하고
+    "내일 BAT 준비 완료"를 찍어 왔다. 8/14에 BAT-D가 실패 2건으로 끝났을 때도
+    HEALTH는 이미 "전체 정상"으로 종료한 뒤였다. 파일 신선도(is_bat_fresh)는
+    "그 시점까지 만들어진 파일"만 보므로 이 구멍을 메우지 못한다.
+    """
+    log_path = QM / "logs" / f"cron_{datetime.now():%Y%m%d}.log"
+    if not log_path.exists():
+        return False, 0, "오늘 cron 로그 없음"
+    try:
+        content = log_path.read_text(encoding="utf-8", errors="ignore")
+    except Exception as e:
+        return False, 0, f"로그 읽기 실패: {e}"
+    if "=== BAT-D 시작" not in content:
+        return False, 0, "BAT-D 미시작"
+    m = re.findall(r"=== BAT-D 완료 \(실패: (\d+)건\)", content)
+    if not m:
+        return False, 0, "BAT-D 실행 중 — 완료 전에 검사함"
+    return True, int(m[-1]), ""
+
+
 def check_ai_outputs() -> list:
     """AI 산출물이 '실패를 정상값으로 저장'하지 않았는지 값으로 확인. 이상 목록 반환.
 
@@ -874,6 +899,19 @@ def main():
         log(f"[AI-MODEL] 폴백={fallback_cnt}, 404={err_404_cnt} — 모델 설정 확인 필요")
     elif fallback_cnt > 0:
         log(f"[AI-MODEL] 폴백 {fallback_cnt}회 (정상 범위)")
+
+    # ── L9c: BAT-D가 실제로 끝났는가 (파일 신선도가 아니라 종료 기록) ──
+    d_done, d_fail_n, d_memo = check_bat_d_completion()
+    if not d_done:
+        all_ok = False
+        failed.append(f"BAT-D: {d_memo}")
+        log(f"[BAT-D] ❌ {d_memo} — 이 시점 판정은 미완료 상태 기준")
+    elif d_fail_n > 0:
+        all_ok = False
+        failed.append(f"BAT-D: 내부 실패 {d_fail_n}건")
+        log(f"[BAT-D] ❌ 완료했으나 내부 실패 {d_fail_n}건")
+    else:
+        log("[BAT-D] 완료·내부 실패 0건 — 정상")
 
     # ── L9b: AI 산출물 값 검사 (존재·신선도가 아니라 내용) ──
     ai_bad = check_ai_outputs()

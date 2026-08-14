@@ -202,7 +202,11 @@ case "$BAT" in
     run_py scripts/collect_etf_investor_flow.py
     run_py_long scripts/crawl_china_money.py --no-telegram
     # --- G2: 지표 + 릴레이 ---
-    run_py_long scripts/rebuild_indicators.py
+    # ★8/14 B-85: run_py_long(900초)에서 xlong(1800초)으로 상향. 8/14 처음으로 900초를
+    # 넘겨 잘렸고 processed 1,182종목 중 757개(64.0%)만 갱신, 418종목이 하루 낡은 지표로
+    # 남았다. data/processed는 raw가 아니라 실제 소비처다(B-39에서 확인). 잘려도 스크립트는
+    # 부분 성공으로 끝나 산출물이 "존재"하므로 신선도 검사에 안 걸린다.
+    run_py_xlong scripts/rebuild_indicators.py
     run_py scripts/run_ict_levels.py
     run_py scripts/run_relay_engine.py --update --signal
     run_py scripts/relay_report.py
