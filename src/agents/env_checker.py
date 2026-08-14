@@ -81,16 +81,19 @@ REQUIRED_FILES: list[tuple[str, Path, dict]] = [
 #   각 항목이 확인하려는 **명령 자체**를 패턴에 포함한다.
 REQUIRED_CRON_LINES: list[tuple[str, str]] = [
     ("KILL_SWITCH 자동 복구 16:00", r"(?m)^\s*0\s+16\s+\S+\s+\S+\s+\S+.*KILL_SWITCH"),
-    ("owner_rule_monitor 9-15시", r"(?m)^\s*\*/5\s+9-15\s+\S+\s+\S+\s+\S+.*owner_rule"),
 ]
 
-# freeze(실주문 0) 중에는 아래 두 항목이 **없는 것이 정상**이므로 검사에서 제외한다.
+# freeze(실주문 0) 중에는 아래 항목들이 **없는 것이 정상**이므로 검사에서 제외한다.
 #   · "KILL_SWITCH 자동 삭제 06:00" — freeze 중엔 스위치를 내리지 않는다(실제로 cron 없음)
-#   · "chart_hero close_cycle 14:55" — 5/28 긴급정지로 주석 처리된 라인이라 매일 ❌였다
-# 실주문 재개 시 FROZEN_EXEMPT_CRON_LINES를 REQUIRED_CRON_LINES로 되돌릴 것.
+#   · "chart_hero close_cycle 14:55" — 5/28 긴급정지로 주석 처리
+#   · "owner_rule_monitor 9-15시"  — 5/28 긴급정지로 주석 처리
+# ★셋 다 구 패턴에서는 **거짓 ✅**였다. 대상을 특정하지 않아 06:00은 deploy_pull.sh가,
+#   9-15시는 run_market_scan·counter_trade_monitor가 대신 매칭시켰다.
+# 실주문 재개 시 _required_cron_lines()가 자동으로 다시 검사한다(수동 복원 불필요).
 FROZEN_EXEMPT_CRON_LINES: list[tuple[str, str]] = [
     ("KILL_SWITCH 자동 삭제 06:00", r"(?m)^\s*0\s+6\s+\S+\s+\S+\s+\S+.*KILL_SWITCH"),
     ("chart_hero close_cycle 14:55", r"(?m)^\s*55\s+14\s+\S+\s+\S+\s+\S+.*chart_hero"),
+    ("owner_rule_monitor 9-15시", r"(?m)^\s*\*/5\s+9-15\s+\S+\s+\S+\s+\S+.*owner_rule"),
 ]
 
 
