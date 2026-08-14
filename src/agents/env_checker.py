@@ -44,9 +44,14 @@ DATA_DIR = PROJECT_ROOT / "data"
 
 # 점검 대상 환경변수 — (키, 기대값 또는 검증함수, 설명)
 # 2026-05-21 일반화: 5/20 일회성 토글(AUTO_TRADE_5_20) 제거, AMOUNT/TRADES 메모리(.env) 값으로 통일
+# ★8/14 B-87: AUTO_TRADING_ENABLED 기대값이 "1"로 박혀 있어 **freeze 정책 자체를
+#   매일 실패로 판정**했다(KILL_SWITCH 건과 같은 계열). 기대값을 정책에 따라 정한다 —
+#   freeze 중이면 "0"이 정상이고, 실주문 재개(=1로 전환) 시 원래 기대값이 자동 복원된다.
+#   ※ 이 목록은 모듈 로드 시 확정되므로 _is_frozen()이 .env 로드 이후에 평가되도록
+#     아래 _expected_auto_trading()을 검증 시점에 호출한다(리스트에는 함수명을 넣음).
 REQUIRED_ENV_VARS: list[tuple[str, object, str]] = [
     ("MODEL", "REAL", "실계좌 모드 (모의투자 차단)"),
-    ("AUTO_TRADING_ENABLED", "1", "KIS 어댑터 가드"),
+    ("AUTO_TRADING_ENABLED", "_auto_trading_policy", "KIS 어댑터 가드 (freeze 중 0이 정상)"),
     ("PAPER_MIRROR_MODE", "true", "paper 시뮬 병행"),
     ("AUTO_TRADING_MAX_QTY", "1", "1주 한도 (워밍업)"),
     ("AUTO_TRADING_MAX_AMOUNT", "3000000", "300만원 한도 (퐝가님 5/14 결단)"),
@@ -138,6 +143,20 @@ def _validate_env_value(key: str, expected, actual: str) -> tuple[bool, str]:
         if not re.match(r"^\d{8}-\d{2}$", actual.strip()):
             return False, f"{key} = {actual} (기대 형식: NNNNNNNN-NN)"
         return True, f"{key} = {actual}"
+
+    if expected == "_auto_trading_policy":
+        # ★8/14 B-87: 기대값을 정책에서 끌어온다.
+        # 판정 기준은 **소유자 승인 플래그 하나**다 — _is_frozen()을 쓰면
+        # 그 함수가 AUTO_TRADING_ENABLED를 보므로 "0이면 frozen이라 0이 정상"이 되어
+        # 항상 통과하는 순환 검사가 된다. 승인 플래그를 단일 출처로 삼으면
+        # **freeze 중인데 자동매매가 켜진 상태**를 실제로 잡아낸다.
+        approved = os.getenv("OWNER_LIVE_TRADING_APPROVED", "False").strip().lower() \
+            in ("true", "1", "yes")
+        want = "1" if approved else "0"
+        if actual.strip() != want:
+            state = "실주문 승인됨" if approved else "freeze(실주문 0)"
+            return False, f"{key} = {actual} (기대: {want} — 현재 정책 {state})"
+        return True, f"{key} = {actual} ({'실주문 승인' if approved else 'freeze 정책상 정상'})"
 
     # 정확 일치 (대소문자 무시 일부 키)
     if key in ("AUTO_TRADE_5_20", "PAPER_MIRROR_MODE"):
