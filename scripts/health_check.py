@@ -452,17 +452,65 @@ def check_flowx_all_tables() -> tuple:
 # ══════════════════════════════════════════
 
 def check_ai_model_errors() -> tuple:
-    """오늘 cron 로그에서 AI 폴백/404 횟수 카운트. (fallback_count, error_404_count)"""
+    """오늘 cron 로그에서 AI 폴백/404/호출실패 카운트.
+
+    (fallback_count, error_404_count, api_fail_count)
+
+    ★8/14 B-83: 구 버전은 "Haiku 폴백" 문자열 횟수만 셌다. 폴백이 *일어났는지*만 보고
+    그 폴백이 *성공했는지*는 안 봤다. 크레딧 소진으로 Opus→Sonnet→Haiku 3단이 전부
+    400을 맞은 날, 검사는 "폴백 2회 (정상 범위)"를 찍고 A등급을 통과시켰다.
+    폴백은 결과가 아니라 시도의 흔적이므로, 호출 실패 자체를 따로 센다.
+    """
     log_path = QM / "logs" / f"cron_{datetime.now():%Y%m%d}.log"
     if not log_path.exists():
-        return 0, 0
+        return 0, 0, 0
     try:
         content = log_path.read_text(encoding="utf-8", errors="ignore")
         fallback = content.count("Haiku 폴백") + content.count("haiku fallback")
         err_404 = content.count("model_not_found") + content.lower().count("404 not found")
-        return fallback, err_404
+        # 크레딧 소진·인증 오류·요청 거부 — 폴백으로 회복 불가능한 계정 단위 실패
+        api_fail = (content.count("credit balance is too low")
+                    + content.count("invalid_request_error")
+                    + content.count("authentication_error")
+                    + content.count("permission_error"))
+        return fallback, err_404, api_fail
     except Exception:
-        return 0, 0
+        return 0, 0, 0
+
+
+def check_ai_outputs() -> list:
+    """AI 산출물이 '실패를 정상값으로 저장'하지 않았는지 값으로 확인. 이상 목록 반환.
+
+    ★8/14 B-83: portfolio_outlook이 크레딧 소진 때 10종목 전부 action=HOLD로 저장됐다.
+    파일은 존재하고 신선했으므로 기존 검사는 전부 통과했다. 실제 판단은 SELL 2·TRIM 2였다.
+    존재·신선도가 아니라 내용의 실패 표지를 본다.
+    """
+    bad = []
+    checks = [
+        ("ai_brain_judgment.json", "error"),
+        ("master_brain_judgment.json", "error"),
+        ("portfolio_outlook.json", None),
+    ]
+    for fname, err_key in checks:
+        path = QM / "data" / fname
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as e:
+            bad.append(f"{fname}: 파싱 실패({e})")
+            continue
+        if err_key and data.get(err_key):
+            bad.append(f"{fname}: error 필드 존재")
+        results = data.get("results") or data.get("stock_judgments") or []
+        if isinstance(results, list) and results:
+            failed_n = sum(1 for r in results
+                           if isinstance(r, dict)
+                           and (r.get("analysis_failed")
+                                or "AI 분석 실패" in str(r.get("reason", ""))))
+            if failed_n:
+                bad.append(f"{fname}: {failed_n}/{len(results)}종목 AI 실패")
+    return bad
 
 
 # ══════════════════════════════════════════
@@ -814,13 +862,27 @@ def main():
         log("[FLOWX-ALL] 14테이블 전체 신선 — 정상")
 
     # ── L9: AI 모델 에러 ──
-    fallback_cnt, err_404_cnt = check_ai_model_errors()
-    if fallback_cnt >= 3 or err_404_cnt >= 1:
+    fallback_cnt, err_404_cnt, api_fail_cnt = check_ai_model_errors()
+    if api_fail_cnt >= 1:
+        # 크레딧·인증 계열은 폴백으로 회복되지 않는다 — 모델을 낮춰도 같은 계정이라 전부 실패
+        all_ok = False
+        failed.append(f"AI호출: 계정오류 {api_fail_cnt}건 (크레딧/인증) — 폴백 무의미")
+        log(f"[AI-MODEL] ❌ 호출실패 {api_fail_cnt}건 — 크레딧 잔액/키 확인 필요")
+    elif fallback_cnt >= 3 or err_404_cnt >= 1:
         all_ok = False
         failed.append(f"AI모델: 폴백 {fallback_cnt}회, 404 {err_404_cnt}회")
         log(f"[AI-MODEL] 폴백={fallback_cnt}, 404={err_404_cnt} — 모델 설정 확인 필요")
     elif fallback_cnt > 0:
         log(f"[AI-MODEL] 폴백 {fallback_cnt}회 (정상 범위)")
+
+    # ── L9b: AI 산출물 값 검사 (존재·신선도가 아니라 내용) ──
+    ai_bad = check_ai_outputs()
+    if ai_bad:
+        all_ok = False
+        failed.append(f"AI산출물: {'; '.join(ai_bad[:3])}")
+        log(f"[AI-OUTPUT] ❌ {'; '.join(ai_bad)}")
+    else:
+        log("[AI-OUTPUT] 산출물 실패표지 없음 — 정상")
 
     # ══════════════════════════════════════════
     # 종합 리포트 (항상 발송 — 정상/이상 무관)

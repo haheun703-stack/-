@@ -161,10 +161,15 @@ class PortfolioOutlook(BaseAgent):
             results = self._parse_results(text)
         except Exception as e:
             logger.error("[Outlook] Claude 분석 실패: %s", e)
+            # 실패를 판단값으로 승격시키지 않는다 (8/14 B-83).
+            # 구: action="HOLD"/direction="→" → 소비자에게 "전 종목 횡보·보유 유지"라는
+            # 정상 신호로 읽혔다. 8/14 크레딧 소진 때 실제 판단은 SELL 2·TRIM 2였는데
+            # HOLD 10으로 묻혔다. UNAVAILABLE/"?"는 SELL·TRIM·ADD 목록과 up/side/down
+            # 집계 어디에도 안 잡혀 실패가 그대로 드러난다.
             results = [{"ticker": h["ticker"], "name": h["name"],
-                         "direction": "→", "action": "HOLD",
+                         "direction": "?", "action": "UNAVAILABLE",
                          "reason": f"AI 분석 실패: {e}",
-                         "confidence": 0} for h in holdings]
+                         "confidence": 0, "analysis_failed": True} for h in holdings]
 
         # 보유 정보 + SD V2 병합
         sd_map = {s["ticker"]: s.get("sd_v2") for s in stock_data}
