@@ -73,12 +73,48 @@ REQUIRED_FILES: list[tuple[str, Path, dict]] = [
 #   배경: 5/21 일자 범위 [\d,\-]+\s+5 정규식 + 5/22 cron 평일 일반화(* * 1-5) 동기화 누락
 #         → 5/27 06:02 KILL_SWITCH 자동 발동 사고 ("구현 있는데 동작 안 함" 4회째)
 #   해결: (?m) multiline + 줄 시작 앵커(^) + \S+ 와일드카드. 주석 라인(#...)은 자동 제외.
+# ★2026-08-14 B-87: 시각만 보고 **명령 내용을 안 봤다**.
+#   구 `^\s*0\s+6\s+\S+\s+\S+\s+\S+`는 "06:00에 뭐라도 있으면 통과"라
+#   실제로는 `0 6 * * * deploy_pull.sh`(배포 스크립트)가 매칭돼
+#   **존재하지도 않는 "KILL_SWITCH 자동 삭제 06:00"에 매일 ✅**를 찍고 있었다.
+#   B-53 "값을 안 보는 감시" 계열의 변종 — 대상을 특정하지 않는 패턴은 아무거나 통과시킨다.
+#   각 항목이 확인하려는 **명령 자체**를 패턴에 포함한다.
 REQUIRED_CRON_LINES: list[tuple[str, str]] = [
-    ("KILL_SWITCH 자동 삭제 06:00", r"(?m)^\s*0\s+6\s+\S+\s+\S+\s+\S+"),
-    ("KILL_SWITCH 자동 복구 16:00", r"(?m)^\s*0\s+16\s+\S+\s+\S+\s+\S+"),
-    ("chart_hero close_cycle 14:55", r"(?m)^\s*55\s+14\s+\S+\s+\S+\s+\S+"),
-    ("owner_rule_monitor 9-15시", r"(?m)^\s*\*/5\s+9-15\s+\S+\s+\S+\s+\S+"),
+    ("KILL_SWITCH 자동 복구 16:00", r"(?m)^\s*0\s+16\s+\S+\s+\S+\s+\S+.*KILL_SWITCH"),
+    ("owner_rule_monitor 9-15시", r"(?m)^\s*\*/5\s+9-15\s+\S+\s+\S+\s+\S+.*owner_rule"),
 ]
+
+# freeze(실주문 0) 중에는 아래 두 항목이 **없는 것이 정상**이므로 검사에서 제외한다.
+#   · "KILL_SWITCH 자동 삭제 06:00" — freeze 중엔 스위치를 내리지 않는다(실제로 cron 없음)
+#   · "chart_hero close_cycle 14:55" — 5/28 긴급정지로 주석 처리된 라인이라 매일 ❌였다
+# 실주문 재개 시 FROZEN_EXEMPT_CRON_LINES를 REQUIRED_CRON_LINES로 되돌릴 것.
+FROZEN_EXEMPT_CRON_LINES: list[tuple[str, str]] = [
+    ("KILL_SWITCH 자동 삭제 06:00", r"(?m)^\s*0\s+6\s+\S+\s+\S+\s+\S+.*KILL_SWITCH"),
+    ("chart_hero close_cycle 14:55", r"(?m)^\s*55\s+14\s+\S+\s+\S+\s+\S+.*chart_hero"),
+]
+
+
+def _required_cron_lines() -> list[tuple[str, str]]:
+    """현재 정책에 맞는 cron 검사 목록. freeze 해제 시 면제 항목이 자동 복원된다.
+
+    ★상수를 정의만 해두고 안 쓰면 그 자체가 슬러지가 되므로(8/14 검수 4팀 지적 유형)
+    배선해 둔다. 실주문 재개 = AUTO_TRADING_ENABLED=1 이면 자동으로 다시 검사한다.
+    """
+    if _is_frozen():
+        return REQUIRED_CRON_LINES
+    return REQUIRED_CRON_LINES + FROZEN_EXEMPT_CRON_LINES
+
+
+def _is_frozen() -> bool:
+    """실주문이 정책적으로 정지된 상태인가 (freeze).
+
+    ★8/14 B-87: KILL_SWITCH 판정이 **자동매매가 활성이던 시대의 전제**로 만들어져,
+    freeze가 정책인 지금 `가동 시간에 차단됨! 즉시 rm 필요`를 **매일** 출력했다.
+    감시가 안전장치 해제를 지시하는 상태였고, 매일 ❌라 진짜 경보도 함께 묻혔다.
+    """
+    return (os.getenv("AUTO_TRADING_ENABLED", "0").strip() == "0"
+            or os.getenv("OWNER_LIVE_TRADING_APPROVED", "False").strip().lower()
+            in ("false", "0", "no"))
 
 
 def _validate_env_value(key: str, expected, actual: str) -> tuple[bool, str]:
@@ -140,6 +176,15 @@ def _check_kill_switch_with_grace(
     if is_grace_start or is_grace_end:
         return True, "유예 구간 (06:00/16:00 ±10분, KILL_SWITCH 상태 검증 SKIP)"
 
+    # ★8/14 B-87: freeze 중에는 KILL_SWITCH가 **항상 존재하는 것이 정상**이다.
+    # 아래 is_active_hours 분기는 자동매매 활성기의 전제라, freeze가 정책인 지금
+    # 매일 "즉시 rm 필요"를 출력해 왔다 — 감시가 안전장치 해제를 지시한 셈이고
+    # 매일 ❌라 다른 진짜 경보도 함께 묻혔다. 판정을 정책에 맞춘다.
+    if _is_frozen():
+        if exists:
+            return True, "KILL_SWITCH 존재 — freeze 정책상 정상 (실주문 0 유지)"
+        return False, "KILL_SWITCH 부재 — freeze 중인데 가드가 풀렸다! 즉시 touch 필요"
+
     if is_active_hours:
         if exists:
             return False, "KILL_SWITCH 존재 — 가동 시간에 차단됨! 즉시 rm 필요"
@@ -186,7 +231,7 @@ def _check_vps_cron() -> list[tuple[str, bool, str]]:
 
     # 로컬 Windows에서는 SKIP (정보용 경고만)
     if sys.platform.startswith("win"):
-        for name, _pat in REQUIRED_CRON_LINES:
+        for name, _pat in _required_cron_lines():
             results.append((name, True, "Windows 로컬 — VPS cron 검증 SKIP (warning)"))
         return results
 
@@ -196,11 +241,11 @@ def _check_vps_cron() -> list[tuple[str, bool, str]]:
             ["crontab", "-l"], stderr=subprocess.STDOUT, timeout=5
         ).decode("utf-8", errors="replace")
     except Exception as e:
-        for name, _pat in REQUIRED_CRON_LINES:
+        for name, _pat in _required_cron_lines():
             results.append((name, False, f"crontab -l 실패: {e}"))
         return results
 
-    for name, pat in REQUIRED_CRON_LINES:
+    for name, pat in _required_cron_lines():
         if re.search(pat, out):
             results.append((name, True, f"crontab 매칭 OK"))
         else:
