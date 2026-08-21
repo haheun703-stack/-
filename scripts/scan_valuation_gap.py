@@ -405,22 +405,55 @@ def load_parquet_data(ticker: str) -> dict:
                     return round((current / past - 1) * 100, 2)
             return None
 
-        # trailing PER/EPS (마지막 비영값)
+        # trailing PER/EPS (마지막 비영값 + 신선도 가드)
+        #
+        # ★★8/21 교정(B-93). 구 코드는 **"마지막 비영값"을 무조건** 썼다.
+        #   `fund_*`는 pykrx `get_market_fundamental` 경로라 6/18 `5cfb45b4`로
+        #   직접호출이 꺼진 뒤 갱신이 멈췄고, 실측하니 1,183종목 중 **101종목
+        #   (8.5%)에만 컬럼이 있고** 그 마지막 실값 날짜가
+        #   **2024-12-30 19종목 · 2026-04-30 6종목 · 2026-06-09 76종목**이었다.
+        #   즉 **최대 600일 묵은 PER이 "오늘 PER"로** 표시(`:753` HTML)되고
+        #   `flowx_uploader.py:3094`를 통해 **Supabase 공개 발행**되고 있었다.
+        #   기준일 표기가 없으니 보는 쪽은 낡았다는 걸 알 방법이 없다 —
+        #   7/31 smart_money `price=0`("우리 산출물이 화면에 어떻게 보이는지를
+        #   안 본다")과 같은 계열이고 B-45 ⑵(기준일·출처 표시) 위반이다.
+        #
+        #   조치는 둘. ⑴**기준일을 함께 반환**해 소비자가 판단할 수 있게 한다.
+        #   ⑵임계를 넘겨 낡은 값은 **쓰지 않는다**(0.0 → 소비처에서 None 처리).
+        #   임계 근거: `fund_*`는 분기 실적 기반이라 EPS가 한 번 바뀌는 주기가
+        #   약 1분기다. 그보다 오래되면 분모가 이미 갱신됐을 값이므로 버린다.
+        #   ※이 가드로 2024-12-30자 19종목은 제외되고, 6/9자 76종목은 남는다.
+        FUND_MAX_AGE_DAYS = 100  # ≈1분기 + 공시 지연 여유
+
         trailing_per = 0.0
         trailing_eps = 0.0
         trailing_pbr = 0.0
-        if "fund_PER" in df.columns:
-            per_valid = df[df["fund_PER"] > 0]["fund_PER"]
-            if len(per_valid) > 0:
-                trailing_per = float(per_valid.iloc[-1])
-        if "fund_EPS" in df.columns:
-            eps_valid = df[df["fund_EPS"] > 0]["fund_EPS"]
-            if len(eps_valid) > 0:
-                trailing_eps = float(eps_valid.iloc[-1])
-        if "fund_PBR" in df.columns:
-            pbr_valid = df[df["fund_PBR"] > 0]["fund_PBR"]
-            if len(pbr_valid) > 0:
-                trailing_pbr = float(pbr_valid.iloc[-1])
+        fund_asof = None
+        last_idx = df.index[-1]
+
+        def _fresh_last(col: str) -> float:
+            """col의 마지막 비영값 — 단 기준일이 임계 이내일 때만."""
+            nonlocal fund_asof
+            if col not in df.columns:
+                return 0.0
+            valid = df[df[col] > 0][col]
+            if len(valid) == 0:
+                return 0.0
+            asof = valid.index[-1]
+            try:
+                age = (last_idx - asof).days
+            except Exception:  # noqa: BLE001
+                return 0.0
+            if age > FUND_MAX_AGE_DAYS:
+                logger.debug("%s %s: 기준일 %s (%d일 경과) — 신선도 초과로 제외",
+                             ticker, col, str(asof)[:10], age)
+                return 0.0
+            fund_asof = str(asof)[:10]
+            return float(valid.iloc[-1])
+
+        trailing_per = _fresh_last("fund_PER")
+        trailing_eps = _fresh_last("fund_EPS")
+        trailing_pbr = _fresh_last("fund_PBR")
 
         return {
             "close": current,
@@ -430,6 +463,9 @@ def load_parquet_data(ticker: str) -> dict:
             "trailing_per": trailing_per,
             "trailing_eps": trailing_eps,
             "trailing_pbr": trailing_pbr,
+            # ★B-93: 기준일 동반 발행 (B-45 ⑵ "데이터별 기준일·출처 표시").
+            #   신선도 가드를 통과한 값의 기준일. 값이 없으면 None.
+            "fund_asof": fund_asof,
         }
     except Exception as e:
         logger.debug("parquet 로드 실패 %s: %s", ticker, e)
