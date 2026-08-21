@@ -690,14 +690,29 @@ class IndicatorEngine:
         # ──────────────────────────────────────────────
 
         if "short_ratio" in result.columns:
-            sr = result["short_ratio"].fillna(0)
+            # ★★8/21 교정(B-47 배선 후 발견) — B-91과 **정확히 같은 결함**이었다.
+            #   구 코드는 `.fillna(0)` 후 40일 평균을 냈다. `short_ratio`는
+            #   수집이 끊긴 구간이 0/결측인데 그 0이 평균에 섞여 MA를 끌어내린다.
+            #   실측(삼성전자, B-47 배선 직후): 당일 `short_ratio` 5.29%인데
+            #   `short_ratio_ma40`은 **1.92** — 40일 창의 대부분이 결측 0이라
+            #   실제의 1/3 수준으로 눌렸다.
+            #   그 왜곡된 MA로 `short_spike = sr / ma40`을 나누므로 **스파이크가
+            #   전 종목에서 과대**해진다. `short_spike`는 죽은 컬럼 목록에도
+            #   안 잡혔다 — 값이 0이 아니라 "살아 있는 것처럼 보였기" 때문이다.
+            #   → 결측(0)을 평균에서 **제외**한다. `min_periods=10`은 유지하므로
+            #     40일 창에 실값이 10개 미만이면 NaN(판정 보류)이 된다.
+            sr_raw = pd.to_numeric(result["short_ratio"], errors="coerce")
+            sr_valid = sr_raw.where(sr_raw > 0)
 
-            # 63. 공매도 비중 40일 이동평균
-            result["short_ratio_ma40"] = sr.rolling(40, min_periods=10).mean()
+            # 63. 공매도 비중 40일 이동평균 (결측 제외)
+            result["short_ratio_ma40"] = sr_valid.rolling(40, min_periods=10).mean()
 
             # 64. 공매도 스파이크 (현재 / 40일 평균, 1.0=정상, 2.0=스파이크)
+            #   ※당일 비중이 결측이면 스파이크를 계산하지 않는다. 구 코드는
+            #     `0 / ma40 = 0`이 되어 **미수집이 "공매도가 평균보다 극단적으로
+            #     적다"는 신호로 승격**됐다(B-45 §1).
             sr_ma40 = result["short_ratio_ma40"].replace(0, np.nan)
-            result["short_spike"] = sr / sr_ma40
+            result["short_spike"] = sr_valid / sr_ma40
             result["short_spike"] = result["short_spike"].fillna(1.0)
         else:
             result["short_ratio_ma40"] = 0.0
