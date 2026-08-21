@@ -65,7 +65,21 @@ def collect(dfs, s, e, keys, hold, combine="single"):
         fwd = exitclose / nextopen - 1 - COST
         fwd = fwd.where((nextopen > 0) & (exitclose > 0))  # 거래정지/0가 제거
         fwd = fwd.replace([np.inf, -np.inf], np.nan)
-        tvok = d["trading_value"] >= MIN_TV if "trading_value" in d.columns else pd.Series(True, index=d.index)
+        # ★8/21 교정(B-93 잔여): `trading_value`는 결측이 0으로 채워져 있어
+        #   (B-91) 이 필터가 표본을 **3.7배 축소**시켰다. 실측: 1,161종목
+        #   105만 셀 중 구 기준 통과 186,917 → 근사 기준 689,349.
+        #   더 심각한 건 **표본 편향**이다 — 같은 D+20 기저선이
+        #   구 표본 **-1.25%** vs 신 표본 **+1.23%**로 부호가 뒤집힌다.
+        #   즉 구 표본은 하락 편향된 종목군이었고, 그 위에서 낸 판정은
+        #   기저선부터 신뢰할 수 없었다.
+        #   → 실값이 있으면 실값, 0/결측이면 close×volume 근사(B-91과 동일 규칙).
+        if "trading_value" in d.columns:
+            _tv = pd.to_numeric(d["trading_value"], errors="coerce").fillna(0)
+            _ap = (pd.to_numeric(d["close"], errors="coerce")
+                   * pd.to_numeric(d["volume"], errors="coerce")).fillna(0)
+            tvok = _tv.where(_tv > 0, _ap) >= MIN_TV
+        else:
+            tvok = pd.Series(True, index=d.index)
         masks = []
         ok = True
         for k in keys:

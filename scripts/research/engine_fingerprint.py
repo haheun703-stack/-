@@ -51,6 +51,7 @@ def main() -> int:
     files = glob.glob(str(PROJECT_ROOT / "data" / "processed" / "*.parquet"))
     files += glob.glob(str(PROJECT_ROOT / "data" / "delisted" / "*.parquet"))
     acc = {k: {"pre": [], "p5": [], "p20": []} for k in SIGNALS}
+    baseline: list[float] = []   # ★B-93: 비이벤트 기저선 (7/9 교훈)
     nfiles = 0
     for f in files:
         try:
@@ -63,7 +64,24 @@ def main() -> int:
         nfiles += 1
         c = df["close"].values
         n = len(c)
-        tvok = (df["trading_value"].values >= MIN_TV)
+        # ★8/21 교정(B-93 잔여): B-91로 `trading_value` 결측이 0으로 채워져
+        #   있었음이 확인됐고, 이 필터가 표본을 **3.7배 축소**시켰다
+        #   (1,161종목 105만 셀 중 186,917 → 689,349).
+        #   ★더 심각한 건 표본 편향 — 같은 D+20 기저선이 구 **-1.25%** vs
+        #   신 **+1.23%**로 부호가 뒤집힌다. 하락 편향 표본 위에서 판정해 온 것.
+        _tv = pd.to_numeric(df["trading_value"], errors="coerce").fillna(0).values
+        _ap = (pd.to_numeric(df["close"], errors="coerce")
+               * pd.to_numeric(df["volume"], errors="coerce")).fillna(0).values
+        tvok = (np.where(_tv > 0, _tv, _ap) >= MIN_TV)
+        # 기저선(비이벤트) — 같은 tvok 표본의 전체 D+20.
+        # ★7/9·7/7 교훈 "비이벤트 기저선 없이 규칙화 금지". 구 코드는 절대
+        #   D+20만 보고 성격을 붙였는데, 기저선이 -1.25%인 표본에서 +1%는
+        #   초과 +2.25%p지만 기저선이 +1.23%면 초과는 -0.23%p다 — 부호가 뒤집힌다.
+        _vi = np.arange(n)
+        _vi = _vi[(_vi - PRE >= 0) & (_vi + P20 < n)]
+        _vi = _vi[tvok[_vi]]
+        if len(_vi):
+            baseline.extend((c[_vi + P20] / c[_vi] - 1).tolist())
         for k, fn in SIGNALS.items():
             try:
                 mask = fn(df).fillna(False).values & tvok
@@ -76,8 +94,15 @@ def main() -> int:
                 acc[k]["p5"].append(c[i + P5] / c[i] - 1)
                 acc[k]["p20"].append(c[i + P20] / c[i] - 1)
 
-    print(f"종목 {nfiles}개 (생존+상폐) / 거래대금≥10억 / 앞=신호전10일, 뒤=신호후5·20일\n")
-    print(f'{"엔진":<16}{"신호수":>8}{"앞(전10일)":>11}{"뒤(D+5)":>9}{"뒤(D+20)":>9}{"성격":>14}')
+    base20 = float(np.mean(baseline) * 100) if baseline else 0.0
+    print(f"종목 {nfiles}개 (생존+상폐) / 거래대금>=10억(결측은 close×volume 근사)"
+          f" / 앞=신호전10일, 뒤=신호후5·20일")
+    print(f"기저선(비이벤트 D+20, 같은 표본): {base20:+.2f}%  n={len(baseline):,}")
+    print("★성격은 절대수익이 아니라 **기저선 초과**로 판정한다 — 기저선이 -1.25%인"
+          " 표본에서 절대 +1%는 초과 +2.25%p지만, 기저선이 +1.23%면 초과 -0.23%p로"
+          " 부호가 뒤집힌다 — 7/9 비이벤트 기저선 없이 규칙화 금지.")
+    print("")
+    print(f'{"엔진":<16}{"신호수":>8}{"앞(전10일)":>11}{"뒤(D+5)":>9}{"뒤(D+20)":>9}{"초과":>9}{"성격":>14}')
     rows = []
     for k in SIGNALS:
         a = acc[k]
@@ -89,17 +114,19 @@ def main() -> int:
         rows.append((k, len(a["p20"]), pre, p5, p20))
     rows.sort(key=lambda x: -x[4])  # 뒤 D+20 순
     for k, n, pre, p5, p20 in rows:
-        if pre < -1 and p20 > 1:
+        exc = p20 - base20          # ★기저선 초과 (판정 기준)
+        if pre < -1 and exc > 1:
             char = "바닥반등 선행★"
-        elif pre > 3 and p20 < 0:
+        elif pre > 3 and exc < 0:
             char = "추격 상투⚠"
-        elif pre > 1 and p20 > 1:
+        elif pre > 1 and exc > 1:
             char = "추세지속"
-        elif abs(p20) < 1:
+        elif abs(exc) < 1:
             char = "무의미"
         else:
             char = "혼조"
-        print(f'{k:<16}{n:>8}{pre:>+10.1f}%{p5:>+8.1f}%{p20:>+8.1f}%{char:>14}')
+        print(f'{k:<16}{n:>8}{pre:>+10.1f}%{p5:>+8.1f}%{p20:>+8.1f}%'
+              f'{exc:>+8.2f}p{char:>14}')
     print("\n★ 앞- 뒤+ = 바닥에서 잡아 오르는 선행(진짜 알파) / 앞+ 뒤- = 오른 뒤 잡는 추격(상투).")
     print("  생존편향 보정(상폐 포함). 전기간 평균이라 레짐 혼재 — 구간별은 후속.")
     return 0
