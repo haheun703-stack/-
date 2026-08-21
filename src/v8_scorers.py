@@ -460,16 +460,35 @@ class ScoringEngine:
             bd['etf_distortion_pct'] = round(etf_distortion, 1)
 
         # (d) DRS (0.15)
-        drs = row.get('distribution_risk_score', row.get('smart_z', 0.5))
-        drs_safe = cfg.get('drs_safe_threshold', 0.3)
-        drs_neutral = cfg.get('drs_neutral_threshold', 0.5)
-
-        if drs < drs_safe:
-            drs_score = 0.15
-        elif drs <= drs_neutral:
-            drs_score = 0.08
+        #
+        # ★★8/21(B-92 후속): 구 코드는 `row.get('distribution_risk_score',
+        #   row.get('smart_z', 0.5))`였다. 두 가지가 겹쳐 있다.
+        #   ⑴`distribution_risk_score`는 **이 저장소에 생산자가 없다**(이 줄이
+        #     유일한 참조). 즉 폴백이 항상 발동해 실제로는 smart_z를 써 왔다.
+        #   ⑵그런데 **의미론이 반대다.** DRS는 분산(distribution) 위험이라
+        #     높을수록 나쁘고(그래서 `drs < 0.3`이 최고점), smart_z는 스마트머니
+        #     유입이라 **높을수록 좋다**. 지금까지는 smart_z가 컬럼명 불일치로
+        #     전량 0이라 `0 < 0.3`으로 전 종목이 0.15 만점을 받아 이 뒤집힘이
+        #     드러나지 않았다. smart_z를 복구하는 순간(B-92) **스마트머니가
+        #     유입된 좋은 종목이 0점을 받고 유출된 종목이 만점을 받는다.**
+        #     8/1 켈리 사건("f*를 수량 배수로 씀")과 같은 의미론 결함이다.
+        #   → **폴백을 끊는다.** 값을 만들어 낼 근거가 없으므로 결측이면 현행과
+        #     동일한 결과(0.15)를 유지해 이번 변경의 동작을 완전히 불변으로 둔다.
+        #     ⚠️"결측에 만점을 준다"는 것 자체가 B-45 §1 위반이지만, 그 교정은
+        #       점수 체계 변경이라 백테스트가 선행돼야 한다 → B-92 백로그 잔여분.
+        drs = row.get('distribution_risk_score')
+        if drs is None:
+            drs_score = 0.15          # 현행 동작 유지 (변경 격리)
+            bd['drs_source'] = 'missing_producer'
         else:
-            drs_score = 0.0
+            drs_safe = cfg.get('drs_safe_threshold', 0.3)
+            drs_neutral = cfg.get('drs_neutral_threshold', 0.5)
+            if drs < drs_safe:
+                drs_score = 0.15
+            elif drs <= drs_neutral:
+                drs_score = 0.08
+            else:
+                drs_score = 0.0
         score += drs_score
         bd['drs'] = round(drs_score, 3)
 
