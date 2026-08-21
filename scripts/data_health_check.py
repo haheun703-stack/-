@@ -137,6 +137,13 @@ class DataHealthCheck:
     BATD_DEPENDENT = {
         "FRED", "FRED/매크로", "레짐", "BRAIN", "SHIELD", "업로드", "학습기록",
         "수급(섹터)",
+        # ★8/21(B-53): "스케줄러"를 여기 추가한다. 이 검사가 이제 **BAT-D 완료
+        #   로그 부재를 실패로 잡기 때문**이다(구 로직은 미완료를 "정상 완료"로
+        #   통과시켰다). 장중 수동 실행은 당연히 미완료이므로 보류하지 않으면
+        #   매번 가짜 실패가 된다. 보류 조건이 시각이 아니라 **종가 존재**라
+        #   (`batd_pending`), 종가가 들어온 뒤에도 BAT-D가 안 끝났으면 보류되지
+        #   않고 그대로 실패로 남는다 — 숨기는 게 아니라 판정 시점을 맞추는 것.
+        "스케줄러",
     }
 
     # ──────────────────────────────────────────
@@ -737,24 +744,42 @@ class DataHealthCheck:
         `found>=2` → **전량 요구**. 3개 중 1개가 죽어도 통과하던 것은 감시
         구멍이고, 실제로 investor_flow가 매일 ⚠️인 채 통과하고 있었다.
         """
+        # ★8/21 교정(B-53): 구 로직은 **날짜만** 봤다. `sectors`가 빈 리스트여도
+        #   기준일만 오늘이면 ✅였다 — "적재됐는가만 보고 값을 안 본다"의 전형.
+        #   ※단 세 파일의 성격이 다르므로 일괄 임계를 쓰지 않는다(임의 임계 금지).
+        #     - sector_momentum : 전 섹터 순위. 로그상 매일 "섹터: 21개" → 0은 실패
+        #     - investor_flow   : 전 섹터 수급. 실측 19개 → 0은 실패
+        #     - sector_zscore   : `z < -0.8` **후보 선별**이라 0건이 정상일 수 있다.
+        #       6거래일(8/13~8/20) 전부 후보가 나왔으나 강세장에서 공집합이
+        #       가능한 구조이고 6일은 근거로 얇다 → 항목 수를 세되 판정엔 쓰지
+        #       않고 표시만 한다. 근거가 쌓이면 그때 임계를 건다.
         files = [
-            ("sector_momentum", self.data_dir / "sector_rotation" / "sector_momentum.json"),
-            ("sector_zscore", self.data_dir / "sector_rotation" / "sector_zscore.json"),
-            ("investor_flow", self.data_dir / "sector_rotation" / "investor_flow.json"),
+            ("sector_momentum",
+             self.data_dir / "sector_rotation" / "sector_momentum.json", True),
+            ("sector_zscore",
+             self.data_dir / "sector_rotation" / "sector_zscore.json", False),
+            ("investor_flow",
+             self.data_dir / "sector_rotation" / "investor_flow.json", True),
         ]
 
         found = 0
         details = []
-        for name, path in files:
+        for name, path, require_items in files:
             if path.exists():
                 try:
                     data = json.loads(path.read_text(encoding="utf-8"))
                     d = self._json_asof(data)
-                    if self.today_str in str(d) or self.today_compact in str(d):
-                        found += 1
-                        details.append(f"{name}✅")
-                    else:
+                    items = data.get("sectors") or data.get("items") or []
+                    if isinstance(items, dict):
+                        items = list(items.values())
+                    n = len(items)
+                    if not (self.today_str in str(d) or self.today_compact in str(d)):
                         details.append(f"{name}⚠️({d[:10] if d else '날짜없음'})")
+                    elif require_items and n == 0:
+                        details.append(f"{name}🚨빈산출(날짜는 당일)")
+                    else:
+                        found += 1
+                        details.append(f"{name}✅({n})")
                 except Exception:
                     details.append(f"{name}❌")
             else:
@@ -1631,22 +1656,40 @@ class DataHealthCheck:
             if not bat_d_start:
                 return CheckResult("스케줄러", False, "BAT-D 시작 로그 없음")
 
-            # 실패 건수 (WARN 라인)
-            warn_lines = [l for l in lines if "[WARN]" in l]
-            fail_count = len(warn_lines)
+            # ★8/21 교정(B-53) — 구멍 둘.
+            #  ⑴ **완료를 확인하지 않고 "정상 완료"라고 썼다.** 구 로직은
+            #     `fail_count`를 WARN 줄 수로 먼저 채운 뒤 `if bat_d_end:`일 때만
+            #     실제 건수로 덮어썼다. 그래서 BAT-D가 중간에 죽어 완료 로그가
+            #     없고 WARN도 0이면 `✅ BAT-D 정상 완료, 실패 0건`이 나왔다 —
+            #     완주한 날과 죽은 날이 검사에서 같은 모양이었다.
+            #  ⑵ **임계 `<=3`이 실제 실패를 전부 통과시켰다.** VPS cron 로그
+            #     23거래일 실측 분포는 0건 20일 · 1건 1일 · 2건 2일로 **관측
+            #     최대가 2**다. 즉 `<=3`은 있으나 마나였고, 8/18 내부 실패 2건이
+            #     실제로 ✅로 통과했다(재현 확인). B-53 진단 "느슨한 임계가 값
+            #     오류를 가린다"의 사례라 임계를 없애고 0건만 통과시킨다.
+            #     ※BAT-D 실패는 그날 산출물이 빠졌다는 뜻이므로 1건도 정상이 아니다.
+            if not bat_d_end:
+                return CheckResult("스케줄러", False,
+                                   "🚨BAT-D 시작 후 완료 로그 없음 —"
+                                   " 미완료/중단 (진행 중이면 완료 후 재판정)")
 
-            if bat_d_end:
-                # "=== BAT-D 완료 (실패: 2건) ===" 파싱
-                m = re.search(r"실패:\s*(\d+)건", bat_d_end[-1])
-                if m:
-                    fail_count = int(m.group(1))
+            # "=== BAT-D 완료 (실패: 2건) ===" 파싱
+            m = re.search(r"실패:\s*(\d+)건", bat_d_end[-1])
+            if not m:
+                # 판정 불가를 통과로 세지 않는다(파이프라인 검사와 같은 원칙).
+                return CheckResult("스케줄러", False,
+                                   "완료 로그에서 실패 건수를 못 읽었다: "
+                                   + bat_d_end[-1].strip()[:80])
+            fail_count = int(m.group(1))
 
             if fail_count == 0:
                 return CheckResult("스케줄러", True,
-                                   f"BAT-D 정상 완료, 실패 0건")
-            else:
-                return CheckResult("스케줄러", fail_count <= 3,
-                                   f"BAT-D 완료, 실패 {fail_count}건")
+                                   "BAT-D 정상 완료, 실패 0건",
+                                   count=0, total=0)
+            return CheckResult("스케줄러", False,
+                               f"🚨BAT-D 완료했으나 내부 실패 {fail_count}건"
+                               f" — 그날 산출물이 빠졌다",
+                               count=fail_count, total=fail_count)
         except Exception as e:
             return CheckResult("스케줄러", False, f"로그 파싱 오류: {e}")
 
