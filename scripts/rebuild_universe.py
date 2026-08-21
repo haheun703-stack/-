@@ -366,7 +366,17 @@ def download_raw(tickers: list[str], years: int = 3) -> dict:
             }
             ohlcv = ohlcv.rename(columns=col_map)
             if "trading_value" not in ohlcv.columns:
-                ohlcv["trading_value"] = 0
+                # ★8/21 교정(B-91): 구 코드는 `= 0`이었다. 소스(FDR)가 거래대금을
+                #   주지 않는데 0을 넣으면 **결측이 "거래대금 0원"이라는 실값으로
+                #   승격**된다(FLOWX §1 "결측을 0으로 채우지 않는다" 위반).
+                #   그 0이 `trading_value_ma60`을 끌어내려 screener가 종목을
+                #   부당 탈락시켰다(실측 371종목/32.0%).
+                #   근사 근거: 실값 구간 1,121종목 194,459셀 대조에서
+                #   `close×volume`/실값 중앙값 1.00000 · ±5% 이내 99.7%.
+                ohlcv["trading_value"] = ohlcv["close"] * ohlcv["volume"]
+                logger.warning(
+                    "[B-91] %s: 소스에 거래대금 없음 → close×volume 근사로 대체"
+                    " (소스가 복구되면 이 경고가 사라진다)", ticker)
 
             ohlcv.to_parquet(raw_path)
             stats["success"] += 1

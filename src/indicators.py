@@ -307,8 +307,39 @@ class IndicatorEngine:
         result["pullback_atr"] = (result["high_60"] - df["close"]) / result["atr_14"].replace(0, np.nan)
 
         # 10. 거래대금 이동평균 (Pre-screening용)
+        #
+        # ★★8/21 교정(B-91). 구 코드는 `trading_value`를 그대로 60일 평균했다.
+        #   그런데 그 컬럼은 **결측이 0으로 채워진다**(`extend_parquet_data.py`·
+        #   `rebuild_universe.py`가 소스에 거래대금이 없으면 `= 0`). 2026-06-09
+        #   이후로는 전 종목이 0이고, 그 전에도 실값 보유일이 종목당 중앙값
+        #   32일뿐이었다. 0이 평균에 섞이면 ma60이 실제보다 **낮게** 나오고,
+        #   이 값을 `screener.pre_screen`이 `< 5억` 탈락 기준으로 쓴다.
+        #   VPS 1,161종목 실측 결과 **371종목(32.0%)이 부당 탈락** 중이었고,
+        #   6/9 이후 0이 창을 채워가는 중이라 **전량 탈락이 예약**돼 있었다
+        #   (최악 002990: 저장 0.97억 vs 실제 946억).
+        #
+        #   보완은 `close × volume` 근사를 쓴다. 임의 대체가 아니라 실측 근거가 있다 —
+        #   실값이 있던 구간 **1,121종목 194,459셀** 대조에서 근사/실값 비율
+        #   중앙값 **1.00000**, ±5% 이내 **99.7%**이고 거래대금 규모 5구간
+        #   (<1억 ~ 1조+) 전부 ±5% 이내가 99.5% 이상이라 **소형주 편향도 없다**.
+        #   5억 임계 판정 일치율은 101/101 = 100%였다.
+        #
+        #   ※실값이 있으면 실값을 쓰고 **0/결측일 때만** 근사로 메운다. 원본
+        #     `trading_value` 컬럼은 건드리지 않아 "실값이 왔는가"는 그대로 관측된다
+        #     (근사로 덮어쓰면 소스 복구 여부를 영영 못 보게 된다 — B-45 §1의 취지).
         if "trading_value" in df.columns:
-            result["trading_value_ma60"] = df["trading_value"].rolling(60).mean()
+            tv = pd.to_numeric(df["trading_value"], errors="coerce")
+            approx = (pd.to_numeric(df["close"], errors="coerce")
+                      * pd.to_numeric(df["volume"], errors="coerce"))
+            tv_filled = tv.where(tv > 0, approx)
+            result["trading_value_ma60"] = tv_filled.rolling(60).mean()
+        else:
+            # 컬럼 자체가 없으면 근사만으로 계산한다(구 코드는 지표를 아예 안 만들어
+            # screener가 `elif "trading_value"` 분기로 떨어졌고 거기도 같은 0을 봤다).
+            result["trading_value_ma60"] = (
+                pd.to_numeric(df["close"], errors="coerce")
+                * pd.to_numeric(df["volume"], errors="coerce")
+            ).rolling(60).mean()
 
         # ──────────────────────────────────────────────
         # v2.5 듀얼 트리거 전용 지표

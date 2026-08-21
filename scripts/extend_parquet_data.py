@@ -403,7 +403,20 @@ def extend_single(parquet_path: Path, end_date: str, *,
                 return result
 
         if "trading_value" not in new_ohlcv.columns:
-            new_ohlcv["trading_value"] = 0
+            # ★8/21 교정(B-91): 구 코드는 `= 0`이었다. 6/18 `5cfb45b4`로 pykrx
+            #   직접호출(거래대금 제공)이 꺼진 뒤 FDR 경로만 남았는데 FDR은
+            #   거래대금을 주지 않아, **2026-06-09부터 전 종목이 0**으로 저장됐다.
+            #   0은 결측이 아니라 "거래대금 0원"이라는 실값으로 읽히므로
+            #   `trading_value_ma60`을 끌어내렸고, `screener.pre_screen`의
+            #   `< 5억` 탈락 기준에 걸려 **371종목(32.0%)이 부당 탈락**했다.
+            #   창이 60거래일이라 그대로 두면 전량 탈락이 예약된 상태였다.
+            #   근사 근거: 실값 구간 1,121종목 194,459셀 대조에서
+            #   `close×volume`/실값 중앙값 1.00000 · ±5% 이내 99.7% ·
+            #   규모 5구간(<1억~1조+) 전부 99.5%+ (소형주 편향 없음).
+            new_ohlcv["trading_value"] = new_ohlcv["close"] * new_ohlcv["volume"]
+            logger.warning(
+                "[B-91] 소스에 거래대금 컬럼 없음 → close×volume 근사로 대체"
+                " (%d행). 소스가 복구되면 이 경고가 사라진다", len(new_ohlcv))
 
         # 중복 제거
         existing_dates = set(df.index)
