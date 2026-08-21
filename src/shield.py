@@ -145,11 +145,22 @@ class CorrelationBreakdown:
         }
 
 
+#: SHIELD 종합 등급의 유효값 전체. `_determine_overall_level()`이 반환할 수 있는
+#: 문자열과 정확히 일치해야 한다(실측 전수: RED/ORANGE/YELLOW/GREEN).
+#:
+#: ★8/21(B-53) 신설. 소비자가 등급을 검증하려면 어휘를 알아야 하는데, 지금까지
+#: 이 목록은 **주석에만** 있었다. 그래서 `data_health_check._check_shield`는
+#: 등급을 표시만 하고 판정에 못 썼고, 값이 `"?"`로 죽어도 날짜만 맞으면 ✅였다.
+#: B-67(사이클 후기 필터가 영문 리터럴을 하드코딩해 배포 이래 0건 동작)과 같은
+#: 구조이므로 같은 해법을 쓴다 — **소비자가 리터럴을 베끼지 않고 이 상수를 import**한다.
+SHIELD_LEVELS: tuple[str, ...] = ("GREEN", "YELLOW", "ORANGE", "RED")
+
+
 @dataclass
 class ShieldReport:
     """SHIELD 전체 리포트."""
     timestamp: str
-    overall_level: str                  # GREEN / YELLOW / ORANGE / RED
+    overall_level: str                  # SHIELD_LEVELS 참조
     sector_overlaps: list[SectorOverlap]
     mdd_status: MddStatus
     stock_alerts: list[StockAlert]

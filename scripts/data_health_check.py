@@ -139,6 +139,37 @@ class DataHealthCheck:
         "수급(섹터)",
     }
 
+    # ──────────────────────────────────────────
+    # 어휘 로더 (B-53, 8/21) — 판정에 쓸 유효값은 생산자에서 가져온다
+    # ──────────────────────────────────────────
+    #
+    # ★왜 리터럴로 안 쓰는가: B-67에서 소비자가 `("late","over")`를 하드코딩해
+    #   배포 이래 한 번도 동작하지 않았다(실제 어휘는 한국어였다). 감시가 어휘를
+    #   베끼면 생산자가 어휘를 바꾸는 순간 감시는 조용히 전부 통과시킨다.
+    #   → 생산자의 상수를 import하고, 못 가져오면 **값 검사를 건너뛰되 그 사실을
+    #     detail에 남긴다**(조용한 폴백 금지 — B-84 "fallback이 조용히 다른
+    #     유니버스로 갈아탄다"와 같은 함정을 만들지 않기 위해).
+
+    @staticmethod
+    def _regime_vocab() -> tuple[str, ...]:
+        """레짐 유효값 — 생산자 `scripts/regime_macro_signal.py`의 REGIME_NAMES."""
+        try:
+            from scripts.regime_macro_signal import REGIME_NAMES
+            return tuple(REGIME_NAMES.values())
+        except Exception as e:  # noqa: BLE001
+            logger.warning("레짐 어휘 로드 실패 — 값 검사 생략: %s", e)
+            return ()
+
+    @staticmethod
+    def _shield_vocab() -> tuple[str, ...]:
+        """SHIELD 유효 등급 — 생산자 `src/shield.py`의 SHIELD_LEVELS."""
+        try:
+            from src.shield import SHIELD_LEVELS
+            return tuple(SHIELD_LEVELS)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("SHIELD 어휘 로드 실패 — 값 검사 생략: %s", e)
+            return ()
+
     def run_full_check(self) -> list[CheckResult]:
         """전체 19개 항목 점검."""
         checks = [
@@ -1011,8 +1042,23 @@ class DataHealthCheck:
             recent = self.today_str in crawled_at or self.today_compact in crawled_at
 
             if recent and total > 0:
+                # ★8/21 교정(B-53): 구 로직은 `total`만 판정하고 `tier1`은
+                #   **표시만** 했다. 전체 공시가 수백 건 들어와도 중요도 분류가
+                #   통째로 0이면 악재필터·이벤트 소비자는 매일 공집합을 받는데
+                #   검사는 ✅였다 — "건수만 보고 값을 안 본다"의 전형이고,
+                #   B-88 "DART 악재필터 영구 공집합"이 이 사각에서 자랐다.
+                #   임계 근거(임의 아님): VPS cron 로그 8거래일(8/11~8/20)
+                #   실측 tier1 = 94·67·63·76·76·62·76 — **0인 날이 없다**.
+                if not isinstance(tier1, (int, float)) or isinstance(tier1, bool) \
+                        or tier1 <= 0:
+                    return CheckResult("DART", False,
+                                       f"🚨{total}건 수집됐으나 Tier1 분류가"
+                                       f" {tier1}건 — 중요도 필터 공집합"
+                                       f"(소비자는 악재 0건을 받는다)",
+                                       count=0, total=total)
                 return CheckResult("DART", True,
-                                   f"{total}건 (Tier1: {tier1}건)")
+                                   f"{total}건 (Tier1: {tier1}건)",
+                                   count=int(tier1), total=total)
             elif recent and total == 0 and self.is_weekday:
                 return CheckResult("DART", False,
                                    "0건 수집 — 비정상 (장 운영일)")
@@ -1038,10 +1084,27 @@ class DataHealthCheck:
             score = data.get("macro_score", "?")
 
             recent = self.today_str in d
-            if recent:
-                return CheckResult("레짐", True,
-                                   f"{regime} (점수:{score}, {d})")
-            return CheckResult("레짐", False, f"오래된: {d}")
+            if not recent:
+                return CheckResult("레짐", False, f"오래된: {d}")
+
+            # ★8/21 교정(B-53): 구 로직은 날짜만 보고 regime·score는 **표시만**
+            #   했다. 그래서 8/11 B-60에서 소비자 4곳이 **없는 키를 읽어 매일
+            #   CAUTION**을 쓰고 있을 때(실제 레짐은 CRISIS) 이 검사는 ✅였다.
+            #   같은 파일에서 실증된 실패라 값 판정을 넣는다.
+            vocab = self._regime_vocab()
+            problems = []
+            if vocab and regime not in vocab:
+                problems.append(f"레짐값 '{regime}'이 어휘 밖({'/'.join(vocab)})")
+            if not isinstance(score, (int, float)) or isinstance(score, bool):
+                problems.append(f"macro_score 비수치({score!r})")
+
+            detail = f"{regime} (점수:{score}, {d})"
+            if not vocab:
+                detail += " | ⚠️어휘 로드 실패 — 레짐값 검사 생략"
+            if problems:
+                return CheckResult("레짐", False,
+                                   f"🚨{' · '.join(problems)} ({d})")
+            return CheckResult("레짐", True, detail)
         except Exception as e:
             return CheckResult("레짐", False, f"오류: {e}")
 
@@ -1061,10 +1124,43 @@ class DataHealthCheck:
             arms = data.get("arms", [])
 
             recent = self.today_str in ts
-            if recent:
-                return CheckResult("BRAIN", True,
-                                   f"{regime}({confidence:.0%}), ARM {len(arms)}개")
-            return CheckResult("BRAIN", False, f"오래된: {ts[:10]}")
+            if not recent:
+                return CheckResult("BRAIN", False, f"오래된: {ts[:10]}")
+
+            # ★8/21 교정(B-53): 구 로직은 날짜만 보고 regime·confidence·arms를
+            #   **표시만** 했다. 자본배분 결과인 `arms`가 빈 리스트여도, 신뢰도가
+            #   0이어도 ✅였다 — BRAIN이 아무 배분도 못 낸 날과 정상인 날이
+            #   검사에서 같은 모양이었다.
+            #   ※`confidence`는 `.get(..., 0)`이라 **키 부재와 실제 0이 구분되지
+            #     않는다**. 결측을 0으로 채우지 않는다는 원칙(B-45 §1)에 따라
+            #     키 존재 여부로 판정한다.
+            problems = []
+            if not isinstance(arms, list) or not arms:
+                problems.append(f"arms 비어 있음({arms!r}) — 자본배분 결과 없음")
+            if "confidence" not in data:
+                problems.append("confidence 키 부재")
+            elif not isinstance(confidence, (int, float)) or isinstance(confidence, bool):
+                problems.append(f"confidence 비수치({confidence!r})")
+
+            # 레짐값: 어휘를 가져왔으면 어휘로, 못 가져왔어도 명백한 실패 표지는 잡는다.
+            vocab = self._regime_vocab()
+            regime_s = str(regime).strip()
+            if vocab and regime_s not in vocab:
+                problems.append(f"레짐값 '{regime}'이 어휘 밖({'/'.join(vocab)})")
+            elif not vocab and regime_s in ("", "?", "N/A", "UNKNOWN", "None"):
+                problems.append(f"레짐값 실패 표지({regime!r})")
+
+            if problems:
+                return CheckResult("BRAIN", False,
+                                   f"🚨{' · '.join(problems)} ({ts[:10]})")
+
+            conf_s = (f"{confidence:.0%}" if isinstance(confidence, (int, float))
+                      else str(confidence))
+            detail = f"{regime}({conf_s}), ARM {len(arms)}개"
+            if not vocab:
+                detail += " | ⚠️어휘 로드 실패 — 레짐값 대조 생략"
+            return CheckResult("BRAIN", True, detail,
+                               count=len(arms), total=len(arms))
         except Exception as e:
             return CheckResult("BRAIN", False, f"오류: {e}")
 
@@ -1084,9 +1180,29 @@ class DataHealthCheck:
                      data.get("defense_level", "?")))
 
             recent = self.today_str in d
-            if recent:
-                return CheckResult("SHIELD", True, f"{status} ({d[:10]})")
-            return CheckResult("SHIELD", False, f"오래된: {d[:10]}")
+            if not recent:
+                return CheckResult("SHIELD", False, f"오래된: {d[:10]}")
+
+            # ★8/21 교정(B-53): 구 로직은 날짜만 보고 등급은 **표시만** 했다.
+            #   세 겹 폴백(`overall_level`→`overall_status`→`defense_level`)이
+            #   전부 빗나가 `"?"`가 되어도 날짜만 맞으면 ✅였다. SHIELD는 7/24에
+            #   "4개월 고착 — 기능은 이미 있고 고장나 있었다"가 실증된 산출물이라
+            #   등급 자체를 판정한다. 어휘는 생산자 `src/shield.py`에서 가져온다.
+            vocab = self._shield_vocab()
+            status_s = str(status).strip()
+            if vocab and status_s not in vocab:
+                return CheckResult("SHIELD", False,
+                                   f"🚨등급 '{status}'이 어휘 밖"
+                                   f"({'/'.join(vocab)}) — 폴백 3겹이 모두"
+                                   f" 빗나갔거나 값이 죽었다 ({d[:10]})")
+            if not vocab and status_s in ("", "?", "N/A", "UNKNOWN", "None"):
+                return CheckResult("SHIELD", False,
+                                   f"🚨등급 실패 표지({status!r}) ({d[:10]})")
+
+            detail = f"{status} ({d[:10]})"
+            if not vocab:
+                detail += " | ⚠️어휘 로드 실패 — 등급 대조 생략"
+            return CheckResult("SHIELD", True, detail)
         except Exception as e:
             return CheckResult("SHIELD", False, f"오류: {e}")
 
