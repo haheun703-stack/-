@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
@@ -127,3 +128,20 @@ def test_export_refuses_to_overwrite_source_ledger(tmp_path) -> None:
     source.write_text("", encoding="utf-8")
     with pytest.raises(ValueError, match="must not overwrite"):
         export_batch(source, tmp_path, AS_OF)
+
+
+def test_cron_exports_scoreboard_immediately_after_paper_ledger_mirror() -> None:
+    cron = (Path(__file__).parents[1] / "scripts" / "cron" / "run_bat.sh").read_text(
+        encoding="utf-8"
+    )
+    mirror = "run_py scripts/mirror_forward_paper_ledger.py --profile all"
+    export = (
+        'run_py scripts/export_forward_paper_scoreboard.py '
+        '--as-of "$(date --iso-8601=seconds)"'
+    )
+
+    assert cron.count(mirror) == 1
+    assert cron.count(export) == 1
+    assert cron.index(mirror) < cron.index(export)
+    assert "--live" not in export
+    assert "--real" not in export

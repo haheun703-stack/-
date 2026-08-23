@@ -335,6 +335,9 @@ case "$BAT" in
     # FLOWX 공통 전방 원장 미러 — 모든 KR/US 페이퍼 산출 이후 실행, 실주문 0, 중복 이벤트 멱등.
     # 비용이 불완전한 성과는 cost_complete=false로 기록해 인증 순성과에서 제외 가능.
     run_py scripts/mirror_forward_paper_ledger.py --profile all
+    # 검증 원장을 FLOWX 점수판 계약으로 내보낸다. v1 웹은 독립 비용·노출 증거가 없어
+    # 모든 결과를 reference_only로 표시하며, 이 단계는 주문 경로를 호출하지 않는다.
+    run_py scripts/export_forward_paper_scoreboard.py --as-of "$(date --iso-8601=seconds)"
     # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
     #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
     #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.
