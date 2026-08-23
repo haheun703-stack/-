@@ -78,8 +78,8 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
         raise ValueError("as_of must be timezone-aware")
     cutoff = as_of.astimezone(UTC)
 
-    groups: dict[tuple[str, str, str, str, str], list[ForwardPaperEvent]] = defaultdict(list)
-    trade_identity: dict[str, tuple[str, str, str, str, str, str]] = {}
+    groups: dict[tuple[str, str, str, str], list[ForwardPaperEvent]] = defaultdict(list)
+    trade_identity: dict[str, tuple[str, str, str, str, str]] = {}
     trade_quantities: dict[str, dict[str, object]] = {}
 
     for event in events:
@@ -90,7 +90,6 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
         identity = (
             event.producer_bot,
             event.strategy_id,
-            event.strategy_version,
             event.market.value,
             event.currency,
             event.ticker,
@@ -98,7 +97,7 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
         previous = trade_identity.setdefault(event.trade_id, identity)
         if previous != identity:
             raise ValueError(f"trade_id crosses strategy or market identity: {event.trade_id}")
-        group_key = identity[:5]
+        group_key = identity[:4]
         if event.event_type in {PaperEventType.FILL, PaperEventType.EXIT}:
             quantity = float(event.filled_quantity or 0.0)
             if quantity <= 0:
@@ -108,7 +107,7 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
             totals[bucket] = float(totals[bucket]) + quantity
         groups[group_key].append(event)
 
-    closed_trades: dict[tuple[str, str, str, str, str], set[str]] = defaultdict(set)
+    closed_trades: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
     for trade_id, totals in trade_quantities.items():
         filled = float(totals["fill"])
         exited = float(totals["exit"])
@@ -127,8 +126,11 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
 
     results = []
     for key in sorted(groups):
-        producer, strategy_id, strategy_version, market, _currency = key
+        producer, strategy_id, market, _currency = key
         strategy_events = groups[key]
+        ordered_events = sorted(strategy_events, key=lambda event: _instant(event.event_at))
+        strategy_version = ordered_events[-1].strategy_version
+        version_count = len({event.strategy_version for event in strategy_events})
         strategy_return, mdd, mark_count = _return_and_mdd(strategy_events)
         cost_complete, costs = _cost_evidence(strategy_events)
         closed_trade_count = len(closed_trades[key])
@@ -158,7 +160,8 @@ def build_strategy_validation_batch(events: Iterable[ForwardPaperEvent], *, as_o
                 "source_label": "quant forward paper ledger (hash-chain verified)",
                 "methodology_note": (
                     f"paper-only; events={len(strategy_events)}; closed={closed_trade_count}; "
-                    f"equity_marks={mark_count}; unmatched-exposure benchmark not claimed"
+                    f"equity_marks={mark_count}; versions={version_count}; "
+                    f"latest_version={strategy_version}; unmatched-exposure benchmark not claimed"
                 ),
             }
         )

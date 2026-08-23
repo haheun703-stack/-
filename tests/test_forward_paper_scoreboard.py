@@ -111,6 +111,42 @@ def test_partial_exits_are_allowed_but_over_exit_fails_closed() -> None:
         )
 
 
+def test_continuous_trade_allows_version_changes_but_keeps_identity_guards() -> None:
+    batch = build_strategy_validation_batch(
+        [
+            _event("fill-v1", PaperEventType.FILL, strategy_version="v1"),
+            _event(
+                "mark-v1",
+                PaperEventType.MARK,
+                strategy_version="v1",
+                event_at="2026-08-07T15:30:00+09:00",
+                metadata={"equity": 1000, "cost_complete": False},
+            ),
+            _event(
+                "mark-v2",
+                PaperEventType.MARK,
+                strategy_version="v2",
+                event_at="2026-08-08T15:30:00+09:00",
+                metadata={"equity": 1100, "cost_complete": False},
+            ),
+            _event(
+                "exit-v2",
+                PaperEventType.EXIT,
+                strategy_version="v2",
+                event_at="2026-08-08T15:31:00+09:00",
+            ),
+        ],
+        as_of=AS_OF,
+    )
+
+    assert len(batch["results"]) == 1
+    result = batch["results"][0]
+    assert result["strategy_version"] == "v2"
+    assert result["strategy_return_pct"] == 10.0
+    assert result["trade_count"] == 1
+    assert "versions=2" in result["methodology_note"]
+
+
 def test_export_verifies_ledger_and_writes_dated_and_latest(tmp_path) -> None:
     ledger_path = tmp_path / "events.jsonl"
     ledger = ForwardPaperLedger(ledger_path)
