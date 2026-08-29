@@ -180,7 +180,20 @@ def get_sector_today_return(sector: str) -> tuple[float, float]:
             df = df.dropna().sort_values("Date")
             if len(df) < 2:
                 continue
-            ret = (df["Close"].iloc[-1] - df["Close"].iloc[-2]) / df["Close"].iloc[-2] * 100
+            # ★8/29 검수: `relay_report.py:190`과 **같은 결함**이 여기 남아 있었다.
+            #   오늘 복원 직후 report 쪽에서 직전 종가 0 → `inf` → 섹터 평균이 inf가 되어
+            #   `화장품 +inf% EXTREME`으로 잘못 발화한 것을 잡았는데,
+            #   옆 모듈은 안 봤다. 이 함수는 `relay_positions.py:38`이 import해 쓰므로
+            #   inf가 섞이면 **청산 판정(follow_sector_return)이 오염**된다.
+            #   0/음수/비유한 직전가는 수익률을 정의할 수 없으므로 종목을 제외한다
+            #   (0으로 채우거나 클리핑하지 않는다 — B-45 §1).
+            prev_close = float(df["Close"].iloc[-2])
+            last_close = float(df["Close"].iloc[-1])
+            if prev_close <= 0 or not np.isfinite(prev_close) or not np.isfinite(last_close):
+                continue
+            ret = (last_close - prev_close) / prev_close * 100
+            if not np.isfinite(ret):
+                continue
             returns.append(ret)
         except Exception:
             continue

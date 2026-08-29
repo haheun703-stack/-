@@ -139,7 +139,15 @@ def main() -> int:
     print()
 
     if new_orphans:
-        print(f"🚨 NEW-ORPHAN {len(new_orphans)}건 — **최근에 만들었는데 아무 데서도 안 부른다**")
+        # ★8/29 자기검수에서 잡은 것: 처음엔 여기서 exit 1을 냈다.
+        #   그런데 `run_bat.sh`의 `run_py`는 exit≠0이면 FAIL_COUNT를 올리고,
+        #   같은 날 내가 고친 스케줄러 검사는 "BAT-D 내부 실패 0건"만 통과시킨다.
+        #   → NEW-ORPHAN 1건이 곧 BAT-D 실패·HEALTH D등급이 된다.
+        #   **배선 누락은 "내일부터의 문제"이지 "오늘 산출물 결손"이 아니다.**
+        #   둘을 같은 카운터에 넣으면 스케줄러 검사가 뜻하는 바가 흐려진다
+        #   (8/10 "그날 만든 두 장치가 서로 물린다"의 재현).
+        #   → 종료코드는 0으로 두고, 로그에 [WARN] 마커를 찍어 눈에 띄게 한다.
+        print(f"[WARN] 🚨 NEW-ORPHAN {len(new_orphans)}건 — **최근에 만들었는데 아무 데서도 안 부른다**")
         print("   이게 B-47(공매도 6거래일 0)·스코어보드(182일 묵은 화면)를 만든 형태다.")
         for n in new_orphans:
             print(f"     - {n}")
@@ -162,7 +170,9 @@ def main() -> int:
               "python -u -X utf8 scripts/check_script_wiring.py --crontab /tmp/crontab.txt")
         print("   ★crontab을 빼고 낸 '고아' 판정은 B-29에서 이미 한 번 틀렸다.")
 
-    return 1 if new_orphans else 0
+    # ★종료코드는 항상 0 — 위 주석 참조. 발견은 [WARN] 로그로 남긴다.
+    #   (그래도 놓치면 HEALTH 항목으로 승격할 것 — 백로그)
+    return 0
 
 
 if __name__ == "__main__":
