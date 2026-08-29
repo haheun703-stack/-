@@ -187,7 +187,20 @@ def get_sector_today_stats(sector: str) -> dict:
             df = df.dropna().sort_values("Date")
             if len(df) < 2:
                 continue
-            ret = (df["Close"].iloc[-1] - df["Close"].iloc[-2]) / df["Close"].iloc[-2] * 100
+            # ★★8/29(B-88 ⑴ 복원 직후 발견): 직전 종가가 0이면 `ret`이 **inf**가 되고,
+            #   그 inf가 섹터 평균에 섞여 `avg_return >= 7`을 **무조건** 통과시킨다.
+            #   복원 첫 실행에서 실제로 `화장품 +inf% EXTREME`이 나왔다 —
+            #   즉 잘못된 섹터가 발화하고 그 릴레이로 종목까지 선정된다.
+            #   (`relay_report.py:190 RuntimeWarning: divide by zero`의 실체)
+            #   0/음수/결측 직전가는 수익률을 정의할 수 없으므로 **종목을 제외**한다.
+            #   0으로 채우거나 클리핑하지 않는다 — 결측을 값으로 승격시키지 않기 위해서다.
+            prev_close = float(df["Close"].iloc[-2])
+            last_close = float(df["Close"].iloc[-1])
+            if prev_close <= 0 or not np.isfinite(prev_close) or not np.isfinite(last_close):
+                continue
+            ret = (last_close - prev_close) / prev_close * 100
+            if not np.isfinite(ret):
+                continue
             returns_list.append(ret)
             stock_details.append({
                 "name": row["name"],
