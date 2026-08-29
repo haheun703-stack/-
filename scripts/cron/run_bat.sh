@@ -202,6 +202,15 @@ case "$BAT" in
     run_py scripts/collect_etf_investor_flow.py
     run_py_long scripts/crawl_china_money.py --no-telegram
     # --- G2: 지표 + 릴레이 ---
+    # ★★8/29 B-47 배선 누락 교정: 8/21에 `fill_short_from_jgis.py`를 만들고 **수동 1회만**
+    #   돌린 채 여기 걸지 않았다. 그래서 정보봇 원천은 매일 정상 도착하는데(2,521/2,539 갱신)
+    #   우리 raw parquet의 공매도·대차는 **8/21 이후 6거래일 전량 0**이었다.
+    #   "배선 완료"라고 보고했으나 매일 갱신 경로가 없어 영영 쌓이지 않는 상태였다.
+    #   ★위치 근거(B-88 "소비자가 생산자보다 먼저 돈다"를 반복하지 않기 위해 실측):
+    #     정보봇 원천 CSV mtime = **17:06~17:07** / rebuild_indicators 실행 = **17:55~17:58**.
+    #     따라서 이 줄은 원천 갱신 뒤·지표 재계산 앞에 놓여야 파생(short_ratio_ma40 등)이
+    #     같은 날 반영된다. 순서를 바꾸면 하루 늦은 값으로 계산된다.
+    run_py scripts/fill_short_from_jgis.py
     # ★8/14 B-85: run_py_long(900초)에서 xlong(1800초)으로 상향. 8/14 처음으로 900초를
     # 넘겨 잘렸고 processed 1,182종목 중 757개(64.0%)만 갱신, 418종목이 하루 낡은 지표로
     # 남았다. data/processed는 raw가 아니라 실제 소비처다(B-39에서 확인). 잘려도 스크립트는
