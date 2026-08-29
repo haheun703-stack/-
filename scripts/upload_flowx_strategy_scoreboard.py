@@ -26,7 +26,9 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(ROOT / ".env")
 
 DEFAULT_BATCH = ROOT / "data" / "flowx_public" / "strategy_validation_latest.json"
-DEFAULT_ENDPOINT = "https://flowx.kr/api/strategy-scoreboard"
+# ★8/29: apex(flowx.kr)는 307로 www에 리다이렉트되고 그 과정에서 Authorization이
+#   소실된다(정보봇 실측). Vercel Domains 실물도 www.flowx.kr만 Production이다.
+DEFAULT_ENDPOINT = "https://www.flowx.kr/api/strategy-scoreboard"
 MAX_BODY_BYTES = 256 * 1024
 
 
@@ -53,6 +55,12 @@ def upload_batch(
     if len(body) > MAX_BODY_BYTES:
         raise ValueError("FLOWX strategy scoreboard batch exceeds 256KiB")
 
+    # ★★8/29(정보봇 제보): apex(`flowx.kr`)로 보내면 **307로 www에 리다이렉트**되고
+    #   `requests`가 그것을 따라갈 때 **Authorization 헤더가 떨어진다**(정보봇 실측 재현).
+    #   토큰도 서버도 맞는데 영원히 401이고, 로그에는 원인이 안 보인다.
+    #   정보봇도 `upload_flowx_stock_evidence.py`에서 같은 자리에 걸려 있었다.
+    #   → ⑴엔드포인트를 www로 고정 ⑵리다이렉트를 **따라가지 않고 실패로 끊는다**.
+    #     따라가면 헤더를 잃고 401로 위장되는데, 그건 이 스크립트의 fail-closed 원칙에 어긋난다.
     response = post(
         endpoint,
         data=body,
@@ -61,7 +69,19 @@ def upload_batch(
             "Content-Type": "application/json",
         },
         timeout=30,
+        allow_redirects=False,
     )
+    if 300 <= getattr(response, "status_code", 0) < 400:
+        loc = ""
+        try:
+            loc = response.headers.get("Location", "")
+        except Exception:  # noqa: BLE001
+            pass
+        raise RuntimeError(
+            f"FLOWX scoreboard endpoint redirected ({response.status_code} → {loc}). "
+            "리다이렉트를 따라가면 Authorization 헤더가 소실돼 401로 위장된다. "
+            f"엔드포인트를 리다이렉트 없는 주소로 지정할 것 (현재: {endpoint})"
+        )
     response.raise_for_status()
     payload = response.json()
     accepted = payload.get("data", {}).get("accepted")
