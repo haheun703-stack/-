@@ -415,6 +415,12 @@ case "$BAT" in
     #   완료 echo는 esac 밖이라 이 지점에선 로그 완료마커를 못 읽음 → FAIL_COUNT를 env로 전달.
     #   소요시간: 당일이면 현재시각 폴백으로 계산 복원 + 절대임계 175분 재보정(7/16 실측 133~150분 기반).
     BAT_D_FAIL_COUNT="$FAIL_COUNT" run_py scripts/bat_d_health_check.py
+    # ★8/29 신설: "만들어놓고 안 거는" 실패를 매일 잡는다.
+    #   B-47(공매도 6거래일 0)·스코어보드(182일 묵은 화면)가 같은 형태였고,
+    #   둘 다 사람이 "배선했다"고 보고한 뒤에도 몇 주씩 안 잡혔다.
+    #   ★crontab을 함께 넘긴다 — run_bat.sh만 보고 낸 고아 판정은 B-29에서 이미 틀렸다.
+    crontab -l > /tmp/crontab_snapshot.txt 2>/dev/null || true
+    run_py scripts/check_script_wiring.py --crontab /tmp/crontab_snapshot.txt --days 30
     ;;
   F) # 18:35 KST — FLOWX 업로드 보장 (BAT-D 완료 후 재시도, upsert이라 중복 안전)
     run_py scripts/fetch_theme_intel.py
