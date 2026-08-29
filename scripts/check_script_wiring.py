@@ -80,17 +80,24 @@ def gather_references(crontab_path: Path | None) -> tuple[str, list[str]]:
         # ★없는 것을 조용히 넘기지 않는다 — B-29가 바로 그래서 났다.
         sources.append("crontab(미확인 ★)")
 
+    # ★8/29 자기검증에서 뚫렸다: 처음엔 tests/를 포함해서 훑었더니
+    #   `upload_flowx_strategy_scoreboard.py`가 미배선인데도 "참조 있음"으로 통과했다.
+    #   `tests/test_upload_flowx_strategy_scoreboard.py`가 import하고 있었기 때문이다.
+    #   **테스트 참조는 배선이 아니다.** 테스트가 있다는 것과 매일 도는 것은 다르다.
+    #   (7/30 "감시 도구는 자기 실패 모드로 검증해야 한다"를 이 도구에 적용한 결과)
+    EXCLUDE_PARTS = {"archive", "venv", "node_modules", "tests", "test",
+                     ".next", "__pycache__", "flowx-web"}
     for pat in ("*.py", "*.sh", "*.bat"):
         for f in PROJECT_ROOT.rglob(pat):
-            if "archive" in f.parts or "venv" in f.parts or "node_modules" in f.parts:
+            if EXCLUDE_PARTS & set(f.parts):
                 continue
-            if f.name == "check_script_wiring.py":
+            if f.name.startswith("test_") or f.name == "check_script_wiring.py":
                 continue
             try:
                 blobs.append(f.read_text(encoding="utf-8", errors="ignore"))
             except Exception:  # noqa: BLE001
                 continue
-    sources.append("코드 전체(.py/.sh/.bat)")
+    sources.append("코드(.py/.sh/.bat, ★tests 제외)")
     return "\n".join(blobs), sources
 
 
