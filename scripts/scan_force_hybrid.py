@@ -50,6 +50,40 @@ THEME_DICT_PATH = PROJECT_ROOT / "config" / "theme_dictionary.yaml"
 OUTPUT_PATH = PROJECT_ROOT / "data" / "force_hybrid.json"
 
 
+def _news_cutoff_date(now: datetime | None = None) -> str:
+    """뉴스 수집 하한일 — **직전 거래일** 기준 (B-88 ⑶, 8/29).
+
+    ★왜 캘린더일이면 안 되는가: 구 코드는 `datetime.now() - timedelta(days=1)`을
+      하한으로 썼다. 월요일에는 그 값이 **일요일**이 되어 **금요일 뉴스가 전부 탈락**한다.
+      cron 로그 24거래일 전수에서 **월요일 4/4일(100%) 이벤트 0건**, 화~금은 0/20일이었다.
+      연휴 뒤 첫 장에도 같은 공백이 생긴다 — 그래서 `run_bat.sh` 실행 순서만
+      고쳐서는 해결되지 않는다(백로그가 경고한 지점).
+
+    → 직전 **거래일**을 하한으로 삼는다. 월요일이면 금요일, 연휴 뒤면 연휴 전 장이 잡힌다.
+    ※판정 모듈을 못 불러오면 **조용히 넘어가지 않고 경고를 남긴 뒤** 구 동작(1일 전)으로
+      떨어진다. 나빠지지는 않되 사각이 생겼다는 사실은 로그에 남는다(B-84).
+    """
+    now = now or datetime.now()
+    try:
+        from src.adapters.kis_holiday_adapter import is_trading_day
+    except Exception as e:  # noqa: BLE001
+        logger.warning("[B-88] 거래일 판정 모듈 로드 실패 — 캘린더 1일 전으로 폴백: %s", e)
+        return (now - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    d = now.date()
+    for _ in range(10):          # 최장 10일 역행(장기 연휴 대비)
+        d -= timedelta(days=1)
+        try:
+            if is_trading_day(d):
+                return d.strftime("%Y-%m-%d")
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[B-88] 거래일 판정 실패(%s) — 캘린더 1일 전으로 폴백: %s", d, e)
+            return (now - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    logger.warning("[B-88] 10일 내 거래일을 못 찾았다 — 캘린더 1일 전으로 폴백")
+    return (now - timedelta(days=1)).strftime("%Y-%m-%d")
+
+
 # ══════════════════════════════════════════
 # 유틸리티
 # ══════════════════════════════════════════
@@ -574,7 +608,9 @@ def scan_event_radar(surging_stocks: list[dict] | None = None) -> dict:
                 news_data = json.load(f)
             articles = news_data.get("articles", [])
             today = datetime.now().strftime("%Y-%m-%d")
-            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            # ★8/29(B-88 ⑶): 캘린더 1일 전 → **직전 거래일**.
+            #   월요일에 금요일 뉴스가 전부 탈락하던 원인이다(월 4/4일 이벤트 0건).
+            yesterday = _news_cutoff_date()
 
             for art in articles:
                 if art.get("impact") in ("high", "medium"):

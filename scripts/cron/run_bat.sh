@@ -248,12 +248,19 @@ case "$BAT" in
     run_py scripts/scan_accumulation_tracker.py
     run_py scripts/calc_institutional_targets.py
     # COO 복원: 세력/밸류체인/공시/뉴스 스캔
-    run_py_long scripts/scan_whale_detect.py
-    run_py_long scripts/scan_force_hybrid.py
-    run_py scripts/scan_value_chain.py
+    # ★★8/29 순서 교정(B-88 ⑶): 구 배치는 **소비자가 생산자보다 먼저**였다.
+    #   VPS mtime 실측(8/14 검수): 소비 18:26 → 생산 18:27~18:28.
+    #   즉 `scan_force_hybrid`·`scan_value_chain`이 **매일 D-1 공시·뉴스로** 계산했다.
+    #   생산자 3종을 앞으로 올린다. 생산자 내부 순서는 유지 —
+    #   `crawl_dart_disclosure`(수집) → `dart_event_signal`(그 결과를 시그널화) 의존이 있다.
+    #   ※순서만으로는 부족하다. 월요일·연휴 뒤 공백은 `scan_force_hybrid`의 뉴스 하한이
+    #     캘린더일이었던 탓이라 거기도 거래일 기준으로 함께 고쳤다(_news_cutoff_date).
     run_py scripts/crawl_dart_disclosure.py
     run_py scripts/dart_event_signal.py
     run_py scripts/crawl_market_news.py
+    run_py_long scripts/scan_whale_detect.py
+    run_py_long scripts/scan_force_hybrid.py
+    run_py scripts/scan_value_chain.py
     run_py_long scripts/perplexity_market_intel.py
     run_py_long scripts/ai_news_brain.py
     # COO 복원: 컨센서스 스크리너 (wisereport 목표가 + 기술적 분석)

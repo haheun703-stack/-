@@ -67,15 +67,58 @@ def load_targets() -> dict:
 
 
 def load_dart_avoid() -> set[str]:
-    """DART 이벤트 AVOID 종목 로드"""
+    """DART 이벤트 AVOID 종목 로드.
+
+    ★★8/29 교정(B-88 ⑵) — 이 필터는 배포 이래 **영구 공집합**이었다.
+      구 코드는 `signals`에서 `action == "AVOID"`를 찾았는데, 생산자
+      `dart_event_signal.py:283`은 **`signals = buy + watch`로 AVOID를 빼서** 저장하고
+      제외 대상은 별도 `avoid_list`에 담는다. 즉 찾는 곳에 값이 있을 수가 없었다.
+      8/29 실측: `signals` 91건 중 AVOID **0건** vs `avoid_list` **40건**
+      (관리종목·유상증자·회생절차 등). `:443` 가드가 한 번도 발동한 적이 없다.
+
+      ★같은 파일을 읽는 `scan_tomorrow_picks.py:879`는 `avoid_list`를 올바로 읽는다 —
+      3곳 중 1곳만 어긋난 B-67·B-86과 같은 "한쪽만 고쳐진" 형태다. 그래서 어휘를
+      추측하지 않고 **정답 소비자와 같은 키**를 쓴다.
+
+      다만 `signals`의 AVOID도 합집합으로 받는다. 생산자가 나중에 어느 쪽에 넣든
+      놓치지 않기 위해서다(한쪽만 보는 구조가 이 결함의 원인이었다).
+
+      ※결과가 비면 **경고를 남긴다** — 조용한 공집합이 은폐의 원인이었다(B-84
+        "조용한 폴백 금지"). 0건이 정상인 날도 있으므로 실패로 만들지는 않는다.
+    """
     if not DART_PATH.exists():
+        logger.warning("[B-88] DART 시그널 파일 없음 — 악재 제외 필터 비활성: %s", DART_PATH)
         return set()
+
     with open(DART_PATH, encoding="utf-8") as f:
         data = json.load(f)
-    avoid = set()
-    for item in data if isinstance(data, list) else data.get("signals", []):
+
+    if isinstance(data, list):
+        signal_items, avoid_items = data, []
+    else:
+        signal_items = data.get("signals") or []
+        avoid_items = data.get("avoid_list") or []
+
+    avoid: set[str] = set()
+    for item in signal_items:
         if isinstance(item, dict) and item.get("action") == "AVOID":
-            avoid.add(item.get("ticker", ""))
+            ticker = item.get("ticker", "")
+            if ticker:
+                avoid.add(ticker)
+    for item in avoid_items:
+        if isinstance(item, dict):
+            ticker = item.get("ticker", "")
+            if ticker:
+                avoid.add(ticker)
+
+    if avoid:
+        logger.info("[B-88] DART 악재 제외 %d종목 적용 "
+                    "(signals %d건 · avoid_list %d건)",
+                    len(avoid), len(signal_items), len(avoid_items))
+    else:
+        logger.warning("[B-88] DART 악재 제외 목록이 비었다 — "
+                       "signals %d건 · avoid_list %d건 (생산자 확인 필요)",
+                       len(signal_items), len(avoid_items))
     return avoid
 
 
