@@ -354,6 +354,12 @@ case "$BAT" in
     # 검증 원장을 FLOWX 점수판 계약으로 내보낸다. v1 웹은 독립 비용·노출 증거가 없어
     # 모든 결과를 reference_only로 표시하며, 이 단계는 주문 경로를 호출하지 않는다.
     run_py scripts/export_forward_paper_scoreboard.py --as-of "$(date --iso-8601=seconds)"
+    # ★8/29 배선: export 직후 FLOWX 업로드. 성공 1회를 확인하고 나서 걸었다
+    #   (accepted 36 · run_id 일치 · GET meta.source가 repository_snapshot → supabase_live).
+    #   8/23에 업로더가 만들어졌으나 어디에도 안 걸려 있어, 매일 만든 36건이
+    #   나가지 못하고 화면에는 182일 묵은 스냅샷이 표시되고 있었다.
+    #   ※upsert(on_conflict: strategy_id,run_id)라 재실행 안전.
+    run_py scripts/upload_flowx_strategy_scoreboard.py
     # G5.5: 주도주 사이클 진단 shadow 관측 (6/30, 한규범 절대법칙) — 매매 미반영·관측 JSON만.
     #   global_leaders.yaml(US 대장주30 + KR60) 사이클 진단 → data/shadow/leader_cycle.json.
     #   US 가격/재무 yfinance(고정IP 화이트리스트) 선행 갱신 + KR DART TTM-YoY 델타. freeze 무관.

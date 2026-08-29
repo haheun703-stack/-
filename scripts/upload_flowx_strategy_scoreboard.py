@@ -91,14 +91,49 @@ def upload_batch(
     return {"accepted": accepted, "run_id": run_id, "producer": "quant-bot"}
 
 
+def verify_live(endpoint: str = DEFAULT_ENDPOINT,
+                get: Callable[..., object] = requests.get) -> dict:
+    """업로드 후 GET으로 **실제 화면 값**을 확인한다.
+
+    ★★8/29: 이 검사가 없어서 하루를 썼다. GET 응답에는 처음부터
+      `meta.fallbackReason: "table_unavailable"` · `liveRowCount: 0`이 들어 있었는데,
+      우리는 `rows`만 파싱하고 `meta`를 읽지 않았다. 그래서
+      "테이블이 없어 스냅샷으로 폴백 중"이라는 답을 눈앞에 두고
+      "전달 경로가 없다"로 진단했다(웹봇이 서버 로그 없이 잡아 알려줬다).
+
+      → POST가 200이어도 **화면이 스냅샷이면 성공이 아니다**. 그것까지 확인한다.
+        `fallbackReason`이 있거나 `source`가 live가 아니면 실패로 끊는다.
+    """
+    r = get(endpoint, timeout=30, allow_redirects=False)
+    r.raise_for_status()
+    payload = r.json()
+    meta = payload.get("meta") or {}
+    reason = meta.get("fallbackReason")
+    source = meta.get("source")
+    live = meta.get("liveRowCount")
+    if reason:
+        raise RuntimeError(
+            f"업로드는 200이지만 화면은 폴백 상태다 — fallbackReason={reason!r} "
+            f"source={source!r} liveRowCount={live!r}. 서버가 실제 테이블을 못 읽고 있다."
+        )
+    if source != "supabase_live":
+        raise RuntimeError(f"화면 소스가 live가 아니다 — source={source!r} liveRowCount={live!r}")
+    return {"source": source, "liveRowCount": live,
+            "latestDataAsOf": meta.get("latestDataAsOf")}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Upload FLOWX paper strategy scoreboard batch")
     parser.add_argument("--batch", type=Path, default=DEFAULT_BATCH)
+    parser.add_argument("--no-verify", action="store_true",
+                        help="업로드 후 GET 확인 생략(디버깅용)")
     args = parser.parse_args()
     receipt = upload_batch(
         args.batch,
         token=os.getenv("FLOWX_SCOREBOARD_TOKEN", ""),
     )
+    if not args.no_verify:
+        receipt["live"] = verify_live()
     print(json.dumps(receipt, ensure_ascii=False))
     return 0
 
