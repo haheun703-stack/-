@@ -27,9 +27,28 @@ DATA_DIR = PROJECT_ROOT / "data" / "sector_rotation"
 DAILY_DIR = PROJECT_ROOT / "stock_data_daily"
 
 # 릴레이 헬퍼 모듈 (미구현 시 인라인 fallback)
+#
+# ★★8/29(B-88 ⑴) — 이 폴백들이 **3개월 은폐의 원인**이었다.
+#   4개 모듈이 전부 없는데 `except ImportError`가 조용히 빈 값을 돌려주어,
+#   릴레이는 5/13부터 **0종목**인 채 매일 "정상 종료"했다.
+#   8/29 실측: `tomorrow_picks` 597픽 중 소스 `릴레이` **0건**.
+#   git 이력상 `7fcf3488`(3/25) "릴레이 복구"로 살린 것을
+#   `d88d131c`(5/13) "미사용 스크립트 archive 이동"이 다시 죽였다 = 같은 파손 2회차.
+#
+#   ★되살릴 수 없다(그래서 리터럴 복구를 하지 않는다):
+#     - `relay_stock_picker`·`relay_sizer` → `scripts/archive/`에만 존재.
+#       CLAUDE.md가 **참조·실행·import를 금지**한 LOCK 경로다.
+#     - `relay_exit`·`relay_positions` → 저장소에 **아예 없다**.
+#   → 지금 할 수 있는 것은 **조용한 실패를 드러내는 것**이다. 폴백이 걸리면
+#     아래 `RELAY_DEGRADED`에 기록하고 실행 시 경고하며, 산출물에도 표시한다.
+#     기능 존폐(복구 재작성 / 릴레이 제거)는 별도 판단 사항이다.
+RELAY_DEGRADED: list[str] = []
+
 try:
     from relay_stock_picker import pick_relay_stocks, load_stock_latest
 except ImportError:
+    RELAY_DEGRADED.append("relay_stock_picker(종목선정)")
+
     def pick_relay_stocks(sector, top_n=3):
         return []
     def load_stock_latest(ticker):
@@ -38,19 +57,30 @@ except ImportError:
 try:
     from relay_sizer import calc_full_sizing, grade_fire_intensity
 except ImportError:
+    RELAY_DEGRADED.append("relay_sizer(사이징)")
+
     def grade_fire_intensity(avg_return):
         if avg_return >= 7: return ("EXTREME", 1.5)
         if avg_return >= 5: return ("STRONG", 1.2)
         if avg_return >= 3.5: return ("MODERATE", 1.0)
         return ("WEAK", 0.7)
     def calc_full_sizing(win_rate, lead_return, confidence, total_portfolio):
+        # ★8/29(B-88 ⑴ 부수): 이 폴백은 `win_rate`·`lead_return`을 **인자로 받고
+        #   전부 버린다**. 즉 `weight_pct`는 백테스트와 무관한 상수(5.0/3.0)인데
+        #   호출부는 "승률·선행수익 기반 사이징"으로 읽는다. 값이 그럴듯해서
+        #   상수라는 사실이 드러나지 않는 형태다(8/21 short_spike와 같은 계열 —
+        #   0으로 죽은 값보다 왜곡된 값이 찾기 어렵다).
+        #   산출물에 `sizing_source`를 실어 소비자가 구분할 수 있게 한다.
         base = 5.0 if confidence == "HIGH" else 3.0
         return {"weight_pct": base, "grade": confidence,
-                "multiplier": 1.0, "invest_amount": int(total_portfolio * base / 100)}
+                "multiplier": 1.0, "invest_amount": int(total_portfolio * base / 100),
+                "sizing_source": "fallback_constant"}
 
 try:
     from relay_exit import check_exit_conditions, get_profit_target
 except ImportError:
+    RELAY_DEGRADED.append("relay_exit(청산)")
+
     def get_profit_target(win_rate):
         return 5.0 if win_rate >= 60 else 3.0
     def check_exit_conditions(*a, **kw):
@@ -60,6 +90,8 @@ try:
     from relay_positions import (load_positions, check_all_positions,
                                  get_current_price, print_check_results)
 except ImportError:
+    RELAY_DEGRADED.append("relay_positions(포지션)")
+
     def load_positions():
         return []
     def check_all_positions(*a, **kw):
@@ -416,6 +448,11 @@ def print_relay_report(report: dict):
     payload = {
         "date": today,
         "portfolio": portfolio,
+        # ★8/29(B-88 ⑴): 헬퍼 모듈이 없어 폴백으로 돈 경우를 산출물에 남긴다.
+        #   비어 있지 않으면 이 리포트의 종목선정·사이징·청산은 **실제 로직이 아니다**.
+        #   소비자가 "0종목"을 정상으로 오해하지 않도록 하는 표시다.
+        "degraded_modules": list(RELAY_DEGRADED),
+        "degraded": bool(RELAY_DEGRADED),
         "fired_count": len(fired),
         "signal_count": len(signals),
         "signals": [
@@ -448,6 +485,16 @@ def print_relay_report(report: dict):
 
 
 def main():
+    # ★8/29(B-88 ⑴): 조용한 폴백을 드러낸다. 3개월간 릴레이가 0종목이었는데
+    #   아무 신호도 없었던 이유가 이 침묵이었다.
+    if RELAY_DEGRADED:
+        print("=" * 60)
+        print("[B-88] ⚠️ 릴레이 헬퍼 모듈 부재 — 아래 기능은 폴백(빈 값/상수)으로 돕니다:")
+        for m in RELAY_DEGRADED:
+            print(f"    - {m}")
+        print("    → 종목선정 0건·사이징 상수는 '정상'이 아니라 '미구현'입니다.")
+        print("=" * 60)
+
     parser = argparse.ArgumentParser(description="릴레이 트레이딩 통합 리포트")
     parser.add_argument("--portfolio", type=int, default=30_000_000,
                         help="총 포트폴리오 (기본 3000만원)")
