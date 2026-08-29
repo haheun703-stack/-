@@ -17,6 +17,14 @@ if TYPE_CHECKING:
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+# ★8/29: `load_dotenv()` 누락으로 첫 업로드가 `FLOWX_SCOREBOARD_TOKEN is required`로
+#   죽었다. `.env`에는 값이 있었는데 스크립트가 읽지 않았다.
+#   CLAUDE.md가 명시한 함정이다 — "새 스크립트 load_dotenv 필수(누락=수급 0행)".
+#   cron은 셸 환경변수를 물려주지 않으므로 `.env`를 직접 읽어야 한다.
+from dotenv import load_dotenv  # noqa: E402
+
+load_dotenv(ROOT / ".env")
+
 DEFAULT_BATCH = ROOT / "data" / "flowx_public" / "strategy_validation_latest.json"
 DEFAULT_ENDPOINT = "https://flowx.kr/api/strategy-scoreboard"
 MAX_BODY_BYTES = 256 * 1024
