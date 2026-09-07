@@ -145,14 +145,18 @@ def _load_financial() -> dict:
 
 
 def _load_market_cap() -> dict:
-    """market_cap_cache.json 로드."""
-    path = PROJECT_ROOT / "data" / "market_cap_cache.json"
-    if not path.exists():
-        logger.warning("market_cap_cache.json 없음")
-        return {}
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+    """시총 로드 — **살아 있는 소스(`universe.csv`)에서** 가져온다.
 
+    ★9/7(B-77 ⑵): 이전에는 `data/market_cap_cache.json`을 읽었는데 그 파일의 생성기가
+    저장소에 없어 **`hts_avls`가 2026-03-04에 굳어** 있었고, 그 값이 EV/EBITDA·FCF의 분모로
+    매일 쓰였다(표본 495종목 중 21.6%가 ±50% 이상 이동, 최대 7.26배).
+    교체 근거는 `src/utils/market_cap.py` 독스트링 참조 — 캐시와의 교집합 830종목에서
+    비율 중앙값 0.8609가 같은 기간 주가배수 중앙값 0.858과 일치해 단위·규모를 확인했다.
+    낡은 캐시로 **폴백하지 않는다**(폴백을 두면 이 결함이 그대로 돌아온다).
+    """
+    from src.utils.market_cap import load_market_cap_legacy_shape
+
+    return load_market_cap_legacy_shape()
 
 def _zscore_normalize(raw_scores: dict[str, float]) -> dict[str, float]:
     """cross-sectional Z-Score → 0.0~1.0 정규화."""
