@@ -243,7 +243,11 @@ case "$BAT" in
     # --- G3.9: 종목 스캔 (scan_tomorrow_picks 입력 데이터) ---
     run_py scripts/scan_pullback.py
     run_py scripts/scan_surge_pullback.py --telegram
-    run_py scripts/scan_crash_bounce.py
+    # ★9/7(B-23 ③) 중단 — 산출물 `crash_bounce_scan.json`의 소비처가 **차단된 `dashboard_crash_bounce`뿐**이다.
+    #   tomorrow_picks 소스 13종에 없고(수집 함수 전수 확인), 텔레그램도 보내지 않는다.
+    #   7/27 계약 전환으로 업로드가 끊긴 뒤 6주간 아무 데도 닿지 않는 계산을 매일 해 왔다.
+    #   파일은 남긴다 — 되살릴 때 이 줄의 주석만 풀면 된다.
+    # run_py scripts/scan_crash_bounce.py
     run_py scripts/scan_dual_buying.py
     run_py scripts/scan_accumulation_tracker.py
     run_py scripts/calc_institutional_targets.py
@@ -299,7 +303,11 @@ case "$BAT" in
     run_py src/use_cases/nxt_signal.py
     run_py scripts/nxt_recommend.py --no-telegram
     run_py scripts/nxt_track_results.py
-    run_py scripts/scan_nugget.py
+    # ★9/7(B-23 ③) 중단 — `nugget_report.json`을 읽는 코드가 **자기 자신뿐**이고 업로드처는
+    #   차단된 `quant_alpha_scanner`다. 게다가 계산의 축인 내재가치 엔진이 입력 부재로
+    #   6개월째 0건이라(B-97) 산출의 절반이 이미 의미가 없었다. `--telegram` 플래그도 없어
+    #   알림조차 나가지 않는다. 파일은 남긴다.
+    # run_py scripts/scan_nugget.py
     run_py scripts/scan_fibonacci.py
     run_py scripts/scan_market_ranking.py
     run_py scripts/scan_bio_cdmo.py
