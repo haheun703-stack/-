@@ -160,6 +160,22 @@ class ValueIntrinsic:
         self._rim = IntrinsicRIM()
         self._details: dict[str, dict] = {}
 
+        # ★9/7(B-97): 이 엔진은 입력이 없어도 예외 없이 생성돼, 호출부가
+        #   "초기화 완료"를 찍고 실제로는 **전 종목 None**을 받고 있었다.
+        #   `_fund_daily`(BPS·PBR)가 비면 `_get_current_price`(=BPS×PBR)와
+        #   `_get_shares`가 모두 None이라 DCF·RIM 양쪽이 불가능하다 —
+        #   즉 산출은 구조적으로 0건이다. 생성 시점에 그 사실을 드러낸다.
+        #   (성공처럼 보이는 로그가 무동작을 6개월 가린 게 오늘 B-94와 같은 계열)
+        self.is_operational = bool(self._fund_daily) and bool(self._quality)
+        if not self.is_operational:
+            logger.warning(
+                "[B-97] ValueIntrinsic 산출 불가 — fundamentals %d종목 · quality %d종목. "
+                "원인: data/fundamental_cache/fundamental_daily.parquet 부재"
+                "(생성기가 저장소에 없음) + processed parquet의 fund_BPS/PBR 전량 0. "
+                "복구 조건은 fundamental 수집 파이프라인 재건이며 그때까지 이 엔진은 0건이다.",
+                len(self._fund_daily), len(self._quality),
+            )
+
     # ── 데이터 접근 헬퍼 ──
 
     def _get_fund(self, ticker: str) -> dict:

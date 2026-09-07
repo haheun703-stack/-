@@ -541,7 +541,14 @@ def scan_nuggets(top_n: int = 20) -> list[dict]:
     try:
         from src.alpha.factors.value_intrinsic import ValueIntrinsic
         intrinsic_engine = ValueIntrinsic()
-        logger.info("ValueIntrinsic 엔진 초기화 완료")
+        # ★9/7(B-97): "초기화 완료"만 찍으면 입력이 비어 산출이 0건이어도 성공으로 보인다.
+        #   생성 성공과 가동 가능은 다르다 — 실제 상태를 로그에 남긴다.
+        if getattr(intrinsic_engine, "is_operational", True):
+            logger.info("ValueIntrinsic 엔진 가동 (역산 가격 사용)")
+        else:
+            logger.warning("[B-97] ValueIntrinsic 초기화는 됐으나 입력 부재로 산출 0건 "
+                           "— 역산 가격 없이 진행")
+            intrinsic_engine = None
     except Exception as e:
         logger.warning("ValueIntrinsic 초기화 실패 (폴백 사용): %s", e)
 
