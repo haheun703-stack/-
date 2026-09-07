@@ -18,11 +18,12 @@
   · `title`·`body` → **금지 어휘가 있는 것만** 최소 문구로 교체
 
 안전장치
-  · 실행 전 전량을 `data/advisory_backfill_backup_20260907.json`에 백업
+  · `--apply`일 때만 전량을 `data/advisory_backfill_backup_<타임스탬프>.json`에 백업(덮어쓰기 없음)
   · 단일 트랜잭션. 실패 시 롤백
   · 종료 전 같은 판정으로 사후 검증(잔존 위반 0을 확인)
 """
 import os, sys, json, argparse
+from datetime import datetime
 import psycopg2
 from psycopg2.extras import Json
 from dotenv import load_dotenv
@@ -70,10 +71,19 @@ for rid, d, mt, title, body, rt, rs in rows:
         plan.append((rid, new_title, new_body, new_rt, new_rs))
 
 print(f"변경 예정 {len(plan)}행 / 무변경 {len(rows) - len(plan)}행")
-bp = str(ROOT / "data" / "advisory_backfill_backup_20260907.json")
-with open(bp, "w", encoding="utf-8") as f:
-    json.dump(backup, f, ensure_ascii=False, default=str)
-print(f"백업 저장: {bp} ({len(backup)}행)")
+# ★9/7 오후(검수 1팀 F-4): 백업을 **--apply일 때만, 타임스탬프 파일명으로** 쓴다.
+#   구 코드는 dry-run에서도 고정 파일명으로 덮어썼다. --apply 뒤에 확인차 dry-run을
+#   한 번 더 돌리면 WHERE가 같은 행을 잡으므로 **백업이 「정리된 값」으로 덮어써져
+#   롤백 근거가 소멸**한다. 대상 0행이면 `[]`로 덮어쓴다.
+#   "--apply 없으면 쓰지 않는다"는 아래 출력이 사실이 아니었다.
+if args.apply:
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    bp = str(ROOT / "data" / f"advisory_backfill_backup_{stamp}.json")
+    with open(bp, "w", encoding="utf-8") as f:
+        json.dump(backup, f, ensure_ascii=False, default=str)
+    print(f"백업 저장: {bp} ({len(backup)}행)")
+else:
+    print(f"백업 대상 {len(backup)}행 (dry-run이라 파일로 쓰지 않는다)")
 
 if plan[:1]:
     rid, t, b, rt, rs = plan[0]
