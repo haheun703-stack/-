@@ -396,7 +396,10 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         f"자동 스냅샷 #{snap['time']}. "
         f"표본 {n_total}종 장중 평균 {avg_chg:+.2f}% (양봉 {n_pos}/{n_total}). "
         f"시장 매크로: 강도 평균 {market_str}, 중앙 {intra.get('strength_median')}, "
-        f"인버스ETF 252670 강도 {inverse_str} (체결 매수비율 {inverse_buy_ratio}%). "
+        # ★9/7 오후: 종목코드 탐지를 넣고 보니 우리 문구에 `252670`이 박혀 있었다.
+        #   인버스 ETF는 시장 지표로 쓰는 것이지 종목 추천이 아니지만, 계약 원칙이
+        #   "종목 코드는 어떤 컬럼에도 싣지 않는다"이므로 코드를 뺀다(정보 손실 0).
+        f"인버스ETF 강도 {inverse_str} (체결 매수비율 {inverse_buy_ratio}%). "
         f"regime={regime} risk={risk_level} — 계산 산출물이며 매매 판단이 아니다."
     )
 
