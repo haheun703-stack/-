@@ -78,10 +78,26 @@ def insert_morning_briefing_advisory(msg: str) -> int | None:
     else:
         regime, risk = "NEUTRAL", "MED"
 
-    title = (
-        f"[장전 브리핑 07:00] KOSPI 상승 {kospi_up}% / VIX {vix} / "
-        f"Signal {meta.get('signal', 'NEUTRAL')} → {meta.get('conclusion', '관망')}"
+    # ★9/7(B-74): title의 "Signal → 결론(관망/분할매도…)"·body의 텔레그램 전문·
+    #   reasoning의 signal/conclusion 키를 뺐다 — 브리핑 전문에는 ETF 추천·매매 결론이
+    #   들어 있어 데이터계약(260724) §1 어휘가 psycopg2 직결로 매일 나갔다.
+    #   단타봇은 컬럼 market_regime·risk_level만 읽는다(9/7 실측). 허용 키는
+    #   src/adapters/advisory_contract.py 한 곳.
+    from src.adapters.advisory_contract import check_text, scrub_reasoning
+
+    title = f"[장전 브리핑 07:00] KOSPI 상승확률 {kospi_up}% / VIX {vix} / regime {regime}"
+    body = (
+        f"장전 시장 진단 {today}: KOSPI 상승확률 {kospi_up}%, VIX {vix}, "
+        f"regime={regime} risk={risk} — 계산 산출물이며 매매 판단이 아니다."
     )
+    meta_clean, removed = scrub_reasoning(meta)
+    if removed:
+        print(f"[CONTRACT] morning advisory reasoning 금지키 제거: {removed}")
+    bad = check_text(title, body)
+    if bad:
+        print(f"[CONTRACT] morning advisory 텍스트 금지 어휘 {bad} — 최소 문구로 교체")
+        title = f"[장전 브리핑 07:00] regime {regime}"
+        body = f"장전 시장 진단 {today} regime={regime} risk={risk}"
 
     try:
         con = psycopg2.connect(url, connect_timeout=10)
@@ -104,9 +120,9 @@ def insert_morning_briefing_advisory(msg: str) -> int | None:
                 regime,
                 risk,
                 title,
-                msg,
+                body,
                 ["MORNING-BRIEFING", "BAT-B-AUTO"],
-                Json(meta),
+                Json(meta_clean),
             ),
         )
         new_id = cur.fetchone()[0]

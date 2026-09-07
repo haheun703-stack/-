@@ -536,14 +536,13 @@ def recommend_etf(sector_cfg: dict, fire_grade: str) -> dict:
         rec["leverage_etf_code"] = leverage["code"]
         rec["leverage_etf_name"] = leverage["name"]
 
+    # ★9/7(B-75): "강력 추천·적극 매수·관심" 등급별 추천 문구 → 섹터↔ETF 매핑 정보만.
+    #   데이터계약(260724) §1 매수 의견 어휘가 quant_sector_fire.etf_recommend로 매일
+    #   나갔다(8/13 실물 확인). 등급은 fire_grade 컬럼에 그대로 있으니 정보 손실 없음.
     if fire_grade == "S" and leverage:
-        rec["etf_recommend"] = f"레버리지 강력 추천: {leverage['name']}"
-    elif fire_grade == "S" and etf:
-        rec["etf_recommend"] = f"ETF 강력 추천: {etf['name']}"
-    elif fire_grade == "A" and etf:
-        rec["etf_recommend"] = f"ETF 적극 매수: {etf['name']}"
-    elif fire_grade == "B" and etf:
-        rec["etf_recommend"] = f"ETF 관심: {etf['name']}"
+        rec["etf_recommend"] = f"관련 레버리지 ETF: {leverage['name']}"
+    elif fire_grade in ("S", "A", "B") and etf:
+        rec["etf_recommend"] = f"관련 ETF: {etf['name']}"
     else:
         rec["etf_recommend"] = ""
 

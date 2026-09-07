@@ -2633,10 +2633,13 @@ def build_supply_surge_rows(date_str: str = "") -> list[dict]:
             "rsi": round(float(c.get("rsi", 0)), 1),
             "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
             "tech_flags": c.get("tech_flags", "-"),
-            "signal": "BUY",
+            # ★9/7(B-75): "BUY" 리터럴 → 관측 라벨. 이 표는 수급 급변 **관측**이지
+            #   매매 의견이 아니다(데이터계약 260724 §1). 웹은 이 표를 은퇴(auditLedger
+            #   RETIRED)해 렌더하지 않는다 — 값 어휘만 바꾸고 컬럼은 유지.
+            "signal": "INFLOW",
         })
 
-    # 매도 시그널 (개인추격)
+    # 개인 추격 (기관·외인 이탈 + 개인 유입) — 관측 라벨
     for c in data.get("sell_signals", []):
         rows.append({
             "date": date_str,
@@ -2662,7 +2665,7 @@ def build_supply_surge_rows(date_str: str = "") -> list[dict]:
             "rsi": round(float(c.get("rsi", 0)), 1),
             "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
             "tech_flags": "-",
-            "signal": "SELL",
+            "signal": "RETAIL_CHASE",   # ★9/7(B-75): "SELL" → 관측 라벨
         })
 
     _fix_pick_names(rows)
@@ -2719,7 +2722,7 @@ def build_supply_chain_rows(date_str: str = "") -> list[dict]:
             "rsi": round(float(c.get("rsi", 0)), 1),
             "vol_ratio": round(float(c.get("vol_ratio", 0)), 1),
             "tech_flags": c.get("tech_flags", "-"),
-            "signal": "BUY",
+            "signal": "BATON",   # ★9/7(B-75): "BUY" 리터럴 → 관측 라벨(수급 바톤터치)
         })
 
     _fix_pick_names(rows)

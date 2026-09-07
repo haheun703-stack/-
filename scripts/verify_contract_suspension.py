@@ -21,8 +21,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.adapters.flowx_uploader import SUSPENDED_TABLES  # noqa: E402
+from src.adapters.advisory_contract import audit_row  # noqa: E402
 
 # 유지 확정 테이블 — 차단되면 안 되는 것들(역방향 검증: 오늘자가 있어야 정상)
+#: ★9/7(B-74) 봇간 advisory 스크럽 배포 시각. 이전 행(7/27~9/7 오전 1,351행)은 소급 정리
+#:   대상(운영자 결정 대기)이라 §2.6 판정에서 제외하고 건수만 참고로 찍는다.
+ADVISORY_SCRUB_SINCE = "2026-09-07T12:15:00+09:00"
+ADVISORY_PRODUCER_CODES = ("SNAPSHOT-AUTO", "MORNING-BRIEFING")
+
 KEEP_TABLES = [
     "quant_scenario_dashboard",   # /scenario 유일 소스
     "quant_leader_cycle",         # /leader-cycle
@@ -304,6 +310,53 @@ def _record_groups(payload) -> list[tuple[str, list[dict]]]:
     return groups
 
 
+def advisory_audit(asof: str) -> tuple[list[str], int, int, str]:
+    """§2.6 quant_bot_advisory — reasoning 허용키 밖·related_tickers·금지 어휘 (B-74).
+
+    psycopg2 직결(DATABASE_URL)로 읽는다 — 생산자도 같은 경로라 REST 키·RLS와 무관.
+    생산자 판별은 시각대가 아니라 **alert_codes**(SNAPSHOT-AUTO·MORNING-BRIEFING)다:
+    이 테이블은 07·09~15시에 적재돼 시각대 규칙으로는 전부 '타봇'으로 오분류된다.
+    반환: (위반 목록, 검사 행수, 배포 이전 잔존 행수, 비고)
+    """
+    import os
+    url = os.environ.get("DATABASE_URL", "")
+    if not url:
+        return [], 0, 0, "검사불능: DATABASE_URL 미설정"
+    try:
+        import psycopg2
+    except ImportError:
+        return [], 0, 0, "검사불능: psycopg2 미설치"
+    day = f"{asof[:4]}-{asof[4:6]}-{asof[6:8]}"
+    try:
+        con = psycopg2.connect(url, connect_timeout=10)
+        cur = con.cursor()
+        cur.execute(
+            """SELECT id, advisory_time, alert_codes, title, body, related_tickers, reasoning,
+                      (created_at >= %s::timestamptz) AS after_deploy
+               FROM quant_bot_advisory
+               WHERE advisory_date = %s AND alert_codes && %s::text[]
+               ORDER BY advisory_time""",
+            (ADVISORY_SCRUB_SINCE, day, list(ADVISORY_PRODUCER_CODES)),
+        )
+        rows = cur.fetchall()
+        con.close()
+    except Exception as e:  # noqa: BLE001
+        return [], 0, 0, f"조회실패: {str(e)[:80]}"
+    findings: list[str] = []
+    checked = 0
+    legacy = 0
+    for rid, t, codes, title, body, rt, reasoning, after in rows:
+        if not after:
+            legacy += 1
+            continue
+        checked += 1
+        probs = audit_row({"title": title, "body": body,
+                           "related_tickers": rt, "reasoning": reasoning})
+        if probs:
+            findings.append(f"#{rid} {t} " + "; ".join(probs))
+    return findings, checked, legacy, "정상"
+
+
 def value_sanity(client, table: str, date_col: str, asof: str) -> tuple[list[str], str]:
     """유지 테이블의 당일 값이 **거짓 상수**(수치 컬럼이 통째로 0/null)인지 본다. (B-26 ①)
 
@@ -426,7 +479,8 @@ def _send_alert(violations: list[dict], keep_missing: list[str], asof: str,
                 errors: list[dict] | None = None,
                 prev_violations: list[dict] | None = None,
                 prev_asof: str = "",
-                stale_values: list[str] | None = None) -> None:
+                stale_values: list[str] | None = None,
+                advisory_bad: list[str] | None = None) -> None:
     """위반·유지누락·판별불가·검사불능 시에만 텔레그램 발송. 평시 무음(로그만).
 
     - 위반(퀀트봇 시각대 적재)은 휴장 여부와 무관하게 알람 — 있어선 안 되는 레코드다.
@@ -440,8 +494,12 @@ def _send_alert(violations: list[dict], keep_missing: list[str], asof: str,
     errors = errors or []
     prev_violations = prev_violations or []
     stale_values = stale_values or []
+    advisory_bad = advisory_bad or []
 
     lines: list[str] = []
+    if advisory_bad:
+        lines.append(f"[HEALTH] 🔴 봇간 advisory 매매판단 필드 잔존 {len(advisory_bad)}건 ({asof}, B-74)")
+        lines += [f"• {f[:90]}" for f in advisory_bad[:5]]
     if violations:
         lines.append(f"[HEALTH] 🔴 데이터계약 자가검사 — 퀀트봇 위반 {len(violations)}건 ({asof})")
         lines += [f"• {v['table']}: {v['today_rows']}건, KST {','.join(v['times'])}"
@@ -631,6 +689,26 @@ def main() -> int:
               + " — 표본이 최소행수 미만이거나 조회 불가. 검사한 종수는 아래 요약 참조.")
         print()
 
+    # ── 2.6) 봇간 advisory 필드 계약 (B-74, 9/7) ─────────────────────
+    print("## 2.6 봇간 advisory(`quant_bot_advisory`) — 매매판단 필드가 비어 있는가")
+    print()
+    print("> 이 테이블은 중단 목록에 없고 psycopg2 직결이라 §1·§2가 못 본다. 8/13 실측: "
+          "`reasoning`에 차단 테이블 내용물(ETF action=BUY_LONG·픽 9종·top5 6종)이 하루 45건씩 "
+          "7/27부터 나갔다. 9/7 스크럽 배포 이후 행만 판정한다(이전 행은 소급 정리 대기).")
+    print()
+    advisory_bad, adv_checked, adv_legacy, adv_note = advisory_audit(asof)
+    if adv_note != "정상":
+        print(f"- ⚠️ {adv_note} — **검사 불완전**")
+        errors.append({"table": "quant_bot_advisory", "status": "ERROR", "note": adv_note})
+    elif advisory_bad:
+        print(f"- 🔴 **위반 {len(advisory_bad)}건 / 검사 {adv_checked}행** (배포 이전 잔존 {adv_legacy}행 제외)")
+        for f in advisory_bad[:10]:
+            print(f"  - {f}")
+    else:
+        print(f"- ✅ 검사 {adv_checked}행 전부 허용 키·빈 related_tickers·금지 어휘 없음"
+              f" (배포 이전 잔존 {adv_legacy}행 제외)")
+    print()
+
     # ── 3) 회색지대: 실측만(판단 대기) ──────────────────────────────
     print(f"## 3. 회색지대 {len(GRAY_TABLES)}종 — 운영자 판단 대기(B-24 ①), 현황 실측만")
     print()
@@ -708,6 +786,9 @@ def main() -> int:
               + (f" (미검사 {len(sanity_unchecked)}종)" if sanity_unchecked else ""))
     else:
         print(f"- ➖ 값 정합성: 유지 {len(KEEP_TABLES)}종 **전부 미검사** — 검사가 아무것도 보지 않았다")
+    if advisory_bad:
+        print(f"- 🔴 **봇간 advisory 매매판단 필드 잔존 {len(advisory_bad)}건** (B-74): "
+              + "; ".join(advisory_bad[:3]))
     if errors:
         print(f"- ⚠️ 조회 실패 {len(errors)}건 — **검사 불완전**: "
               + ", ".join(f"`{e['table']}`" for e in errors))
@@ -717,7 +798,7 @@ def main() -> int:
         _send_alert(violations, keep_missing, asof,
                     unknowns=unknowns, keep_unknown=keep_unknown, errors=errors,
                     prev_violations=prev_violations, prev_asof=prev_asof,
-                    stale_values=stale_values)
+                    stale_values=stale_values, advisory_bad=advisory_bad)
 
     # exit 1 조건: 퀀트봇 위반(당일·소급) 또는 판별불가 또는 검사 불완전(2건+)
     # — 침묵하며 exit 0 하던 F1·F3 구멍 봉쇄

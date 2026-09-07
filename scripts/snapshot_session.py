@@ -382,52 +382,44 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
         else 0
     )
 
-    top_pos_tickers = [
-        p["ticker"] for p in sorted(picks, key=lambda x: x["current"] - x["open"], reverse=True)[:5]
-    ]
+    # ★9/7(B-74): related_tickers·reasoning의 종목/판단 정보를 전부 뺐다.
+    #   7/27 데이터계약 이후에도 이 INSERT가 psycopg2 직결이라 guard 밖이었고,
+    #   reasoning에 차단 테이블 내용물(etf_recommendation action=BUY_LONG·픽 9종·
+    #   fibonacci/crash_bounce/valuation_gap top5)이 하루 45건씩 나갔다(9/7 실측 1,351행).
+    #   단타봇이 기능적으로 읽는 것은 컬럼 market_regime·market_strength_avg·
+    #   inverse_etf_strength뿐(9/7 단타봇 코드 실측)이라 비워도 게이트는 그대로다.
+    #   허용 목록은 src/adapters/advisory_contract.py 한 곳 — 자가검사 §2.6과 공유.
+    from src.adapters.advisory_contract import check_text, scrub_reasoning
 
     title = f"[자동 advisory] {snap['time']} 시장 강도 {market_str} / 인버스 {inverse_str} ({regime})"
     body = (
-        f"5/18 자동 스냅샷 #{snap['time']}. "
-        f"강력포착 TOP {n_total}: 평균 {avg_chg:+.2f}% (양봉 {n_pos}/{n_total}). "
+        f"자동 스냅샷 #{snap['time']}. "
+        f"표본 {n_total}종 장중 평균 {avg_chg:+.2f}% (양봉 {n_pos}/{n_total}). "
         f"시장 매크로: 강도 평균 {market_str}, 중앙 {intra.get('strength_median')}, "
-        f"인버스ETF 252670 강도 {inverse_str} (매수비율 {inverse_buy_ratio}%). "
-        f"동생 단타봇: regime={regime} risk={risk_level} 참고하여 진입 결정."
+        f"인버스ETF 252670 강도 {inverse_str} (체결 매수비율 {inverse_buy_ratio}%). "
+        f"regime={regime} risk={risk_level} — 계산 산출물이며 매매 판단이 아니다."
     )
 
-    reasoning = {
+    reasoning, removed = scrub_reasoning({
         "market_strength_mean": market_str,
         "market_strength_median": intra.get("strength_median"),
         "inverse_etf_strength": inverse_str,
         "inverse_etf_buy_ratio": inverse_buy_ratio,
-        "etf_recommendation": snap.get("etf_recommendation"),  # 1번 작업: ETF 추천 통합
-        "supply_surge_top5": snap.get("supply_surge_top5", []),  # 3번 작업: 외인+기관 동반 매수
-        "vwap_dips_top3": snap.get("vwap_dips_top3", []),  # 4번 작업: VWAP 눌림
-        "vwap_overheats_top3": snap.get("vwap_overheats_top3", []),  # 4번 작업: VWAP 과열
-        "eye_event_counts": snap.get("eye_event_counts", {}),  # 4번 작업: EYE 알림 횟수
-        "eye_top_ticker": snap.get("eye_top_ticker"),  # 4번 작업: EYE 황금 표준
-        "intraday_signals_count": len(snap.get("intraday_signals", [])),  # 5번
-        "blocked_tickers": snap.get("blocked_tickers", []),  # 5번
-        "sector_fire_top5": snap.get("sector_fire_top5", []),  # 6번
-        "theme_momentum_top5": snap.get("theme_momentum_top5", []),  # 7번
-        "surge_pullback_top5": snap.get("surge_pullback_top5", []),  # 8번
-        "crash_bounce_top5": snap.get("crash_bounce_top5", []),  # 9번
-        "fibonacci_top5": snap.get("fibonacci_top5", []),  # 10번
-        "valuation_gap_top5": snap.get("valuation_gap_top5", []),  # 11번
-        "top9_avg_chg_pct": round(avg_chg, 2),
-        "top9_positive_count": n_pos,
-        "top9_total": n_total,
-        "top9_records": [
-            {
-                "ticker": p["ticker"],
-                "name": p["name"],
-                "chg_pct": round((p["current"] - p["open"]) / p["open"] * 100, 2) if p["open"] > 0 else 0,
-                "program_ntby": p["program_ntby"],
-                "vol_ratio_pct": p["vol_ratio_pct"],
-            }
-            for p in picks
-        ],
-    }
+        "eye_event_counts": snap.get("eye_event_counts", {}),
+        "intraday_signals_count": len(snap.get("intraday_signals", [])),
+        "sample_avg_chg_pct": round(avg_chg, 2),
+        "sample_positive_count": n_pos,
+        "sample_total": n_total,
+    })
+    if removed:
+        logger.warning("[CONTRACT] advisory reasoning 금지키 제거: %s", removed)
+    bad = check_text(title, body)
+    if bad:
+        # 생성 문구는 고정이라 여기 걸리면 코드 회귀다 — 그래도 내보내지 않는다.
+        logger.error("[CONTRACT] advisory 텍스트 금지 어휘 %s — body를 최소 문구로 교체", bad)
+        body = f"자동 스냅샷 #{snap['time']} regime={regime} risk={risk_level}"
+        title = f"[자동 advisory] {snap['time']} ({regime})"
+    related_tickers: list[str] = []   # 종목 코드는 싣지 않는다(계약 §1)
 
     try:
         con = psycopg2.connect(url, connect_timeout=10)
@@ -456,7 +448,7 @@ def insert_advisory_to_supabase(snap: dict) -> int | None:
                 risk_level,
                 title,
                 body,
-                top_pos_tickers,
+                related_tickers,
                 ["SNAPSHOT-AUTO"],
                 Json(reasoning),
             ),
