@@ -140,8 +140,12 @@ def main():
 
     # ── 퀀트시스템 메인: 수급 급변 미리보기 ──
     surge_rows = build_supply_surge_rows(date_str_preview)
-    buy_rows = [r for r in surge_rows if r.get("signal") == "BUY"]
-    sell_rows = [r for r in surge_rows if r.get("signal") == "SELL"]
+    # ★9/7(B-75 후속): 생산자 라벨을 INFLOW/RETAIL_CHASE로 바꿨는데 이 소비자만
+    #   옛 값("BUY"/"SELL")으로 비교해 **행이 50건이어도 「매수 0건 / 매도 0건」**이
+    #   찍히고 있었다(검수 3팀 실측). 생산자를 바꾸면 소비자를 같은 커밋에서 찾는다는
+    #   원칙(B-67·B-86 "한쪽만 고쳐진 구조")을 오늘 스스로 어겼다.
+    buy_rows = [r for r in surge_rows if r.get("signal") == "INFLOW"]
+    sell_rows = [r for r in surge_rows if r.get("signal") == "RETAIL_CHASE"]
     print(f"\n[FLOWX] 수급 급변: 매수 {len(buy_rows)}건 / 매도 {len(sell_rows)}건")
     for r in buy_rows[:10]:
         print(f"  {r['name']:12s} {r['close']:>8,}원 {r['ret_d0']:>+5.1f}% "

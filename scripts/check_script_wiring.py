@@ -49,6 +49,24 @@ EXEMPT_NAMES = {
 }
 
 
+def _strip_comments(text: str) -> str:
+    """cron/스크립트 텍스트에서 **주석 줄을 제거**한다.
+
+    ★9/7 오후(검수 2·3팀): 이 도구는 원문 텍스트에 파일명이 있으면 "배선됨"으로 봤다.
+    그래서 오늘 `run_bat.sh`에서 `# run_py scripts/scan_nugget.py`로 **의도적으로 중단**한
+    2건이 여전히 배선으로 판정됐다. 즉 "중단한 것"과 "도는 것"을 구분하지 못했다.
+    같은 파일이 이미 `tests/`를 "테스트 참조는 배선이 아니다"라며 제외하는데,
+    주석은 그 목록에 없었다 — 판정 근거에서 **실행되지 않는 텍스트**를 빼는 같은 원칙이다.
+    """
+    out = []
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("#"):
+            continue
+        out.append(line)
+    return chr(10).join(out)
+
+
 def git_added_within(days: int) -> set[str]:
     """최근 N일 내 git에 추가된 scripts/*.py 파일명 집합."""
     try:
@@ -70,11 +88,11 @@ def gather_references(crontab_path: Path | None) -> tuple[str, list[str]]:
     sources: list[str] = []
 
     if RUN_BAT.exists():
-        blobs.append(RUN_BAT.read_text(encoding="utf-8", errors="ignore"))
+        blobs.append(_strip_comments(RUN_BAT.read_text(encoding="utf-8", errors="ignore")))
         sources.append("run_bat.sh")
 
     if crontab_path and crontab_path.exists():
-        blobs.append(crontab_path.read_text(encoding="utf-8", errors="ignore"))
+        blobs.append(_strip_comments(crontab_path.read_text(encoding="utf-8", errors="ignore")))
         sources.append(f"crontab({crontab_path})")
     else:
         # ★없는 것을 조용히 넘기지 않는다 — B-29가 바로 그래서 났다.

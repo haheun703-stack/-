@@ -718,21 +718,38 @@ class IndicatorEngine:
             result["short_ratio_ma40"] = 0.0
             result["short_spike"] = 1.0
 
+        # ★★9/7 교정 — **결측이 「-100% 감소」로 승격돼 숏커버 신호가 되던 것**.
+        #   구 코드는 `fillna(0)` 후 `(sb - sb_5d) / sb_5d`를 계산했다. 분모(5일 전)는
+        #   `replace(0, np.nan)`으로 보호했지만 **분자(당일)의 0은 보호하지 않아**,
+        #   당일이 미수집(0)이고 5일 전에 값이 있으면 `(0 - X)/X × 100 = -100%`가 나온다.
+        #   그러면 바로 아래 `short_cover_signal = (chg_5d < -20)`이 **1로 켜진다** —
+        #   즉 「데이터가 없다」가 「공매도가 급감했다」는 강한 매수 신호로 뒤집힌다.
+        #   어제까지는 이 컬럼이 전 종목 0이라 잠자고 있었는데, **오늘(9/7) B-47 배선으로
+        #   값이 들어오기 시작하면서 실재 위험이 됐다.** 8/21 `short_spike`가 같은 함정이었고
+        #   (`short_ratio_ma40` 1.92 vs 6.97 → 신호가 정반대), 바로 위 블록이 그 교정판이다.
+        #   같은 파일 안에 교정된 것과 안 된 것이 나란히 있었다.
+        #   ⇒ 0을 **값이 아니라 미수집**으로 보고 NaN으로 접는다(B-45 §1 "결측을 0으로 채우지 않는다").
         if "short_balance" in result.columns:
-            sb = result["short_balance"].fillna(0)
+            sb_raw = pd.to_numeric(result["short_balance"], errors="coerce")
+            sb_valid = sb_raw.where(sb_raw > 0)          # 0·결측 = 미수집
+            sb_5d = sb_valid.shift(5)
 
-            # 65. 공매도 잔고 5일 변화율 (%)
-            sb_5d = sb.shift(5).replace(0, np.nan)
-            result["short_balance_chg_5d"] = ((sb - sb_5d) / sb_5d * 100).fillna(0)
+            # 65. 공매도 잔고 5일 변화율 (%) — 양쪽 다 실값일 때만 산출
+            result["short_balance_chg_5d"] = (
+                (sb_valid - sb_5d) / sb_5d * 100
+            ).fillna(0)
         else:
             result["short_balance_chg_5d"] = 0.0
 
         if "lending_balance" in result.columns:
-            lb = result["lending_balance"].fillna(0)
+            lb_raw = pd.to_numeric(result["lending_balance"], errors="coerce")
+            lb_valid = lb_raw.where(lb_raw > 0)          # 위와 같은 이유
+            lb_5d = lb_valid.shift(5)
 
             # 66. 대차잔고 5일 변화율 (%)
-            lb_5d = lb.shift(5).replace(0, np.nan)
-            result["lending_balance_chg_5d"] = ((lb - lb_5d) / lb_5d * 100).fillna(0)
+            result["lending_balance_chg_5d"] = (
+                (lb_valid - lb_5d) / lb_5d * 100
+            ).fillna(0)
         else:
             result["lending_balance_chg_5d"] = 0.0
 

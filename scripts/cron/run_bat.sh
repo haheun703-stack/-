@@ -450,6 +450,13 @@ case "$BAT" in
     ;;
   HEALTH) # 19:20 KST(8/14 B-85로 18:45→19:20) — 자동 복구: BAT-D 완료(18:56~19:10) 후 신선도 확인 → 낡은 파일만 재실행
     # run_py_xlong(1800초): 선택적 복구 최악 케이스(5개 파일 stale = 2400초) 대비 마진 확보
+    # ★9/7 오후(검수 2팀): 판정을 **복구보다 먼저** 한다.
+    #   `health_check.py`는 stale 산출물 5종(institutional_flow·volume_spike·shield·brain·
+    #   tomorrow_picks)을 자동 재실행해 당일치로 되살린다. 그 뒤에 `data_health_check`가
+    #   돌면 **복구된 상태**를 보게 되어 "BAT-D에서 실패했다"는 사실이 등급에서 사라진다.
+    #   오전에 이 스크립트를 BAT-D 밖으로 옮긴 목적(자기 BAT을 검사하지 않기)은
+    #   순서를 앞당겨도 그대로 지켜진다 — 스케줄러 검사는 BAT-D 완료 로그만 보기 때문이다.
+    run_py scripts/data_health_check.py
     run_py_xlong scripts/health_check.py
     # ★9/7(B-94): 데이터 건강검진을 BAT-D 안(구 396행 부근)에서 여기로 옮겼다.
     #   8/21(B-53)에 스케줄러 검사를 "BAT-D 완료 로그가 있고 실패 0건일 때만 통과"로 바꿨는데,
@@ -457,7 +464,7 @@ case "$BAT" in
     #   ❌ 스케줄러·B등급(거짓 실패). BAT-D의 완주를 판정하는 검사는 BAT-D 밖에 있어야 한다
     #   (안에 있으면 BAT-D가 중간에 죽은 날엔 검사 자체가 안 돌아 그 실패도 못 본다).
     #   9/4 완료 로그로 재현: 18/18 A등급·스케줄러 ✅ — 검사 로직이 아니라 판정 시점이 문제였다.
-    run_py scripts/data_health_check.py
+    #   ★같은 날 오후(검수 2팀) 재조정: 위치를 `health_check.py` **앞**으로 옮겼다 — 사유는 위 주석.
     ;;
   *)
     echo "[$(date +%H:%M:%S)] 알 수 없는 BAT: $BAT" >> "$LOG"

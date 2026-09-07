@@ -704,6 +704,12 @@ def main() -> int:
         print(f"- 🔴 **위반 {len(advisory_bad)}건 / 검사 {adv_checked}행** (배포 이전 잔존 {adv_legacy}행 제외)")
         for f in advisory_bad[:10]:
             print(f"  - {f}")
+    elif adv_checked == 0:
+        # ★9/7 오후(검수 3팀): 0행을 ✅로 찍으면 "검사가 아무것도 안 봤다"가
+        #   "정상"으로 둔갑한다(8/21 B-53 「거짓 ✅ 15건」과 같은 형태).
+        #   휴장일·스냅샷 미실행은 정상이므로 실패로도 세지 않고, ➖로 구분해 남긴다.
+        print(f"- ➖ 검사 대상 0행 — 판정 없음 (배포 이전 잔존 {adv_legacy}행 제외)."
+              f" 장날인데 0이면 스냅샷 미실행이거나 alert_codes가 바뀐 것이다")
     else:
         print(f"- ✅ 검사 {adv_checked}행 전부 허용 키·빈 related_tickers·금지 어휘 없음"
               f" (배포 이전 잔존 {adv_legacy}행 제외)")
@@ -802,7 +808,9 @@ def main() -> int:
 
     # exit 1 조건: 퀀트봇 위반(당일·소급) 또는 판별불가 또는 검사 불완전(2건+)
     # — 침묵하며 exit 0 하던 F1·F3 구멍 봉쇄
-    if violations or prev_violations or unknowns or len(errors) >= 2:
+    # ★9/7 오후(검수 3팀): `advisory_bad`가 빠져 있어 계약 위반이 검출돼도 exit 0이었다.
+    #   그러면 run_bat.sh의 FAIL_COUNT가 안 올라가 그날이 「실패 0건」으로 집계된다.
+    if violations or prev_violations or unknowns or advisory_bad or len(errors) >= 2:
         return 1
     return 0
 
