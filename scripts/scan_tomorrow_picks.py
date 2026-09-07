@@ -206,6 +206,70 @@ def load_json(rel_path: str) -> dict | list:
         return {}
 
 
+#: 낡은 소스 임계(일). build_killer_picks._load_fresh·NAT_SIGNAL_MAX_AGE_DAYS와 같은 기준.
+STALE_SOURCE_MAX_AGE_DAYS = 7
+
+
+def load_json_fresh(rel_path: str, date_keys: tuple[str, ...], label: str,
+                    max_age_days: int = STALE_SOURCE_MAX_AGE_DAYS) -> dict | list:
+    """**신선한 경우에만** JSON을 돌려준다. 낡거나 날짜 판별 실패면 빈 값.
+
+    ★★9/7 신설(B-77) — 이 파일의 소스 로더 대부분에 신선도 개념이 없어서, 생성기가
+    죽은 캐시가 매일 픽 계산에 들어가고 있었다. 실측:
+      · `scan_cache.json` **`cached_at` 2026-03-04**(6개월 전)인데 `collect_quantum`이
+        매일 읽어 26종목을 소스 "퀀텀"으로 등재 — 9/7 `tomorrow_picks` 485픽 중 **25픽**이
+        여기서 왔고 그중엔 총점 100(1위)도 있었다. 생산자는 `run_bat.sh`에 **0건**.
+      · `scenarios/active_scenarios.json` **`updated` 2026-03-31**(5개월 전) — 생성기
+        호출처가 `run_bat.sh`에 0건인데 시나리오 매핑에 매일 쓰인다.
+    같은 계열이 이번이 네 번째다: 7/30 `etf_recommendations.json` 113일치 → 8/11
+    `nationality_signal.json` 63일치(B-61) → 9/7 단타봇 `nationality_flows` 재탕(정보봇
+    통보) → 여기. **그때마다 가드는 발견된 경로 한 곳에만 붙었다.** 그래서 이번엔
+    로더를 만들어 소스별로 붙인다.
+
+    판정 소스는 **내용 날짜를 우선**하고 mtime은 폴백으로만 쓴다 — mtime은 git pull
+    한 번에 갱신돼 낡은 내용을 신선으로 보이게 한다(CLAUDE.md "git pull이 런타임 JSON
+    덮어씀"). 날짜를 **판별하지 못하면 통과가 아니라 스킵**한다(판별실패를 정상으로
+    접으면 미탐 — 7/30 검수 F1).
+    """
+    data = load_json(rel_path)
+    if not data:
+        return {}
+
+    raw = ""
+    if isinstance(data, dict):
+        for k in date_keys:
+            v = data.get(k)
+            if v:
+                raw = str(v)
+                break
+    age_days = None
+    src = "내용날짜"
+    token = raw[:10].strip()
+    if token:
+        for fmt in ("%Y-%m-%d", "%Y%m%d"):
+            try:
+                age_days = (datetime.now().date()
+                            - datetime.strptime(token, fmt).date()).days
+                break
+            except ValueError:
+                continue
+    if age_days is None:
+        src = "mtime"
+        try:
+            age_days = (datetime.now()
+                        - datetime.fromtimestamp((DATA_DIR / rel_path).stat().st_mtime)).days
+        except OSError:
+            age_days = None
+    if age_days is None:
+        print(f"[{label}] 날짜 판별 실패 — 신선도 미검증이라 사용 안 함 ({rel_path})")
+        return {}
+    if age_days > max_age_days:
+        print(f"[{label}] SKIP — {rel_path} {age_days}일 낡음"
+              f"({token or '?'}, 임계 {max_age_days}일, 기준={src}) · 생성기 정지 여부 확인 필요")
+        return {}
+    return data
+
+
 def build_name_map() -> dict[str, str]:
     """종목코드 → 종목명 매핑 (universe.csv 최우선 → CSV 폴백 → pykrx 폴백)."""
     name_map = {}
@@ -325,8 +389,13 @@ def collect_pullback() -> dict[str, dict]:
 
 
 def collect_quantum() -> dict[str, dict]:
-    """소스4: 퀀텀시그널 (survivors + killed 중 유망)"""
-    q = load_json("scan_cache.json")
+    """소스4: 퀀텀시그널 (survivors + killed 중 유망)
+
+    ★9/7(B-77): 신선도 가드 추가. `scan_cache.json`은 생성기가 `run_bat.sh`에 없어
+    `cached_at` 2026-03-04에 굳어 있었고, 그 26종목이 매일 소스 "퀀텀"으로 픽에
+    들어갔다(9/7 실측 485픽 중 25픽). 생성기가 살아나기 전까지는 0건이 정직하다.
+    """
+    q = load_json_fresh("scan_cache.json", ("cached_at", "date", "generated_at"), "퀀텀")
     result = {}
 
     # 최종 통과
@@ -1107,8 +1176,15 @@ _SCENARIO_COMMODITY_MAP = {
 
 
 def load_scenario_data() -> dict:
-    """활성 시나리오 + 원자재 원가 갭 + 시나리오 체인 로드."""
-    scenarios = load_json("scenarios/active_scenarios.json")
+    """활성 시나리오 + 원자재 원가 갭 + 시나리오 체인 로드.
+
+    ★9/7(B-77): `active_scenarios.json`에 신선도 가드. 생성기 호출처가 `run_bat.sh`에
+    0건이라 `updated` 2026-03-31에 멈춰 있었는데, 활성 시나리오 목록이 티커 매핑의
+    게이트(`sc_id not in active` → 스킵)라 **5개월 전 국면이 오늘 픽을 좌우**했다.
+    체인·원자재는 정적 정의/일별 갱신이라 가드 대상이 아니다.
+    """
+    scenarios = load_json_fresh("scenarios/active_scenarios.json",
+                                ("updated", "date", "generated_at"), "시나리오")
     commodities = load_json("commodity_prices.json")
     chains = load_json("scenarios/scenario_chains.json")
     return {

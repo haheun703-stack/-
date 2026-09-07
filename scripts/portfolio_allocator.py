@@ -65,7 +65,19 @@ def load_json(rel_path: str) -> dict | list:
 
 def collect_momentum_stocks() -> list[dict]:
     """모멘텀 전략: 퀀텀 시그널 통과 종목"""
+    # ★9/7(B-77): scan_cache는 생성기 사망으로 3/4에 굳어 있다.
+    #   이 스크립트는 현재 cron 미등록이라 라이브 영향은 없으나,
+    #   되살릴 때 낡은 캐시를 그대로 먹지 않도록 같은 판정을 남긴다.
     q = load_json("scan_cache.json")
+    _cached_at = str(q.get("cached_at", ""))[:10] if isinstance(q, dict) else ""
+    if _cached_at:
+        try:
+            from datetime import datetime as _dt
+            if (_dt.now().date() - _dt.strptime(_cached_at, "%Y-%m-%d").date()).days > 7:
+                print(f"[SKIP] scan_cache.json {_cached_at} 낡음 — 퀀텀 소스 제외")
+                q = {}
+        except ValueError:
+            pass
     results = []
     for c in q.get("candidates", []):
         ticker = c.get("ticker", "")
