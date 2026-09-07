@@ -393,7 +393,7 @@ case "$BAT" in
     #   관측·매매무관. Q2 foreign_outflow=시장전체·Q3 키명(port_exposure·recommended_actions)은 alert(-15%) 시 실값.
     run_py_long scripts/upload_valuation_band.py --write
     run_py scripts/upload_two_layer.py --write
-    run_py scripts/data_health_check.py
+    # ★9/7(B-94): data_health_check.py는 여기(BAT-D 안)에서 HEALTH 단계(19:20)로 옮겼다 — 사유는 HEALTH 블록 주석.
     # G7: 약세장 알파 학습 + 인버스 시그널 (5/16 추가, 5/12~15 약세장 검증 기반)
     # KOSPI MA20 -2%↓ 시 알파 종목 자동 추출 + 외인 5일 매도 -3조+ 시 인버스 알림
     run_py scripts/bear_market_alpha_runner.py
@@ -440,9 +440,16 @@ case "$BAT" in
   PICKV2) # 17:45 KST - daily_pick_v2 (Silent Bet + 메인 스코어링)
     run_py scripts/daily_pick_v2.py
     ;;
-  HEALTH) # 18:45 KST — 자동 복구: BAT-D 완료(~18:30) 후 신선도 확인 → 낡은 파일만 재실행
+  HEALTH) # 19:20 KST(8/14 B-85로 18:45→19:20) — 자동 복구: BAT-D 완료(18:56~19:10) 후 신선도 확인 → 낡은 파일만 재실행
     # run_py_xlong(1800초): 선택적 복구 최악 케이스(5개 파일 stale = 2400초) 대비 마진 확보
     run_py_xlong scripts/health_check.py
+    # ★9/7(B-94): 데이터 건강검진을 BAT-D 안(구 396행 부근)에서 여기로 옮겼다.
+    #   8/21(B-53)에 스케줄러 검사를 "BAT-D 완료 로그가 있고 실패 0건일 때만 통과"로 바꿨는데,
+    #   그 검사가 BAT-D **안에서** 돌아 완료 로그를 볼 수 없었다 → 8/21~9/4 11거래일 매일
+    #   ❌ 스케줄러·B등급(거짓 실패). BAT-D의 완주를 판정하는 검사는 BAT-D 밖에 있어야 한다
+    #   (안에 있으면 BAT-D가 중간에 죽은 날엔 검사 자체가 안 돌아 그 실패도 못 본다).
+    #   9/4 완료 로그로 재현: 18/18 A등급·스케줄러 ✅ — 검사 로직이 아니라 판정 시점이 문제였다.
+    run_py scripts/data_health_check.py
     ;;
   *)
     echo "[$(date +%H:%M:%S)] 알 수 없는 BAT: $BAT" >> "$LOG"
