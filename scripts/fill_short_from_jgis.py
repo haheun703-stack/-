@@ -11,10 +11,12 @@
   short_volume    ← short_selling_qty          ✅
   lending_balance ← loan_balance_qty           ✅
   short_ratio     ← short_selling_qty / volume × 100   ✅ (정의: 공매도 비중 %)
-  short_balance   ← ❌ **원천에 공매도 잔고 필드가 없다.**
-                    `loan_balance_qty`(대차잔고)는 정의가 다르므로 대체하지 않는다
-                    (8/11 "죽은 값에 키만 맞추면 낡은 값이 정상값으로 승격" 교훈).
-                    → 이 컬럼에 의존하는 `short_cover_signal`도 복구 불가.
+  short_balance   ← short_balance_qty  ✅ **2026-09-07 배선**
+                    8/21에는 원천에 이 필드가 없어 비워 뒀다. `loan_balance_qty`(대차잔고)로
+                    대체하지 않은 판단이 맞았고(정의가 다르다), 퀀트봇 요청으로 정보봇이
+                    CSV에 컬럼을 추가하자(`f62790e`, 9/7 16:50 실행분부터) 그대로 배선됐다.
+                    ⚠️대상은 아직 **시총 상위 30종목**이다 — 확대(300→889)는 정보봇 실측·결재 중.
+                    `short_cover_signal`은 그 커버리지 위에서만 유효하므로 확대 전까지 신호로 쓰지 않는다.
 
 ★가장 중요한 규칙 — 0을 채우지 않는다
   원천 CSV의 공매도/대차 필드는 빈칸이 아니라 **명시적 `0`**으로 들어온다.
@@ -63,14 +65,18 @@ logger = logging.getLogger("fill_short")
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 
 #: 원천에 대응 필드가 없어 복구할 수 없는 컬럼 — 명시적으로 남긴다.
-UNMAPPABLE = {
-    "short_balance": "원천(supply_tracker)에 공매도 잔고 필드 없음 — 대차잔고로 대체 금지",
+UNMAPPABLE: dict[str, str] = {
+    # ★9/7 해소: 정보봇이 `short_balance_qty`·`short_balance_ratio` 컬럼을 supply_tracker
+    #   CSV에 추가(`f62790e`, 2026-09-07 16:50 실행분부터). 8/21에는 "원천에 필드 없음"이라
+    #   비워 뒀던 자리다 — 대차잔고로 대체하지 않은 판단이 맞았고, 원천이 생기자 그대로 배선된다.
+    #   ※대상은 아직 시총 상위 30종목이다(확대는 정보봇 실측·결재 진행 중).
 }
 
 
 def fill_one(ticker: str, rows: list[dict], dry: bool) -> dict:
     """단일 종목 raw parquet에 공매도·대차 채움. 0은 채우지 않는다."""
-    out = {"ticker": ticker, "status": "skip", "short": 0, "lend": 0, "ratio": 0}
+    out = {"ticker": ticker, "status": "skip", "short": 0, "lend": 0,
+           "ratio": 0, "sbal": 0}
     path = RAW_DIR / f"{ticker}.parquet"
     if not path.exists():
         out["status"] = "no_parquet"
@@ -97,7 +103,12 @@ def fill_one(ticker: str, rows: list[dict], dry: bool) -> dict:
 
     changed = False
     for col, field in (("short_volume", "short_selling_qty"),
-                       ("lending_balance", "loan_balance_qty")):
+                       ("lending_balance", "loan_balance_qty"),
+                       # ★9/7: 정보봇 CSV에 추가된 공매도 잔고(수량). 원천에 컬럼이 없으면
+                       #   아래 존재 검사에서 걸러진다 — 없는 날에도 안전하다.
+                       ("short_balance", "short_balance_qty")):
+        if field not in src.columns:
+            continue
         if col not in df.columns:
             df[col] = pd.NA
         vals = pd.to_numeric(src.loc[common, field], errors="coerce")
@@ -108,7 +119,9 @@ def fill_one(ticker: str, rows: list[dict], dry: bool) -> dict:
         target = vals.index[cur.values == 0]       # 기존 실값은 보존
         if len(target):
             df.loc[target, col] = vals.loc[target].values
-            out["short" if col == "short_volume" else "lend"] = len(target)
+            out[{"short_volume": "short",
+                 "lending_balance": "lend",
+                 "short_balance": "sbal"}[col]] = len(target)
             changed = True
 
     # short_ratio = 공매도 비중(%) — 공매도량과 거래량이 **둘 다 비0**일 때만
@@ -160,7 +173,7 @@ def main() -> int:
 
     agg = {"filled": 0, "nothing_to_fill": 0, "no_overlap": 0,
            "no_parquet": 0, "no_src": 0, "err": 0}
-    tot = {"short": 0, "lend": 0, "ratio": 0}
+    tot = {"short": 0, "lend": 0, "ratio": 0, "sbal": 0}
     for i, t in enumerate(targets, 1):
         rows = adapter.load_ticker_csv(t, lookback_days=args.lookback)
         if not rows:
@@ -175,8 +188,9 @@ def main() -> int:
             logger.info("  진행 %d/%d — 채움 %d종목", i, len(targets), agg["filled"])
 
     logger.info("완료: %s", agg)
-    logger.info("채운 셀 — short_volume %d · lending_balance %d · short_ratio %d",
-                tot["short"], tot["lend"], tot["ratio"])
+    logger.info("채운 셀 — short_volume %d · lending_balance %d · short_ratio %d"
+                " · short_balance %d",
+                tot["short"], tot["lend"], tot["ratio"], tot.get("sbal", 0))
     if args.dry_run:
         logger.info("DRY-RUN이라 저장하지 않았다. 실제 반영은 --dry-run 없이 실행.")
     else:
