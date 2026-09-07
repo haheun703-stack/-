@@ -26,7 +26,7 @@ from src.adapters.advisory_contract import audit_row  # noqa: E402
 # 유지 확정 테이블 — 차단되면 안 되는 것들(역방향 검증: 오늘자가 있어야 정상)
 #: ★9/7(B-74) 봇간 advisory 스크럽 배포 시각. 이전 행(7/27~9/7 오전 1,351행)은 소급 정리
 #:   대상(운영자 결정 대기)이라 §2.6 판정에서 제외하고 건수만 참고로 찍는다.
-ADVISORY_SCRUB_SINCE = "2026-09-07T12:15:00+09:00"
+ADVISORY_SCRUB_SINCE = "2026-09-07T11:25:00+09:00"
 ADVISORY_PRODUCER_CODES = ("SNAPSHOT-AUTO", "MORNING-BRIEFING")
 
 KEEP_TABLES = [
