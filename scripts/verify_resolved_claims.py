@@ -207,29 +207,45 @@ def _check_b47() -> Result:
     return Result(True, f"최근 10거래일 비영 {nz}/{have}종목")
 
 
-@claim("B-104", "기타법인 수급이 당일 단절 없이 들어온다",
-       kind="불변식")
+@claim("B-104", "기타법인 수급이 D+1 지연 범위를 넘지 않는다", kind="불변식")
 def _check_other_corp_acute() -> Result:
-    """②급성 검사. 기존 `_check_supply_stocks`는 tail(20) 전량 0만 봐서
-    9/18 전 종목 0을 ✅로 통과시켰다. 전일 대비로 본다."""
-    days = _recent_trading_dates(2)
-    if len(days) < 2:
-        return Result(True, "", skipped=True, reason="거래일 2일치를 데이터에서 못 얻음")
-    prev, today = days
-    nz_t, rows_t = _nonzero_count("기타법인", today)
-    nz_p, _ = _nonzero_count("기타법인", prev)
-    if rows_t == 0:
-        return Result(True, "", skipped=True,
-                      reason=f"{today} 행이 아직 없음 (BAT-D 전)")
-    if nz_p == 0:
-        return Result(True, f"{today} {nz_t}종목 (전일도 0이라 급락 판정 보류)",
-                      skipped=True, reason="전일 기준값이 0")
-    drop = 1.0 - (nz_t / nz_p)
-    if nz_t == 0:
-        return Result(False, f"{today} 기타법인 **전 종목 0** (전일 {nz_p}종목) — 당일 수집 단절")
+    """②급성 검사 — 단 **마지막 거래일은 원래 비어 있다.**
+
+    ★9/19에 이 검사를 처음 만들 때 나는 「9/18 기타법인 전 종목 0 = 당일 수집
+      단절」이라고 판정했다. 틀렸다. 추적 결과:
+        · `investor_daily.db`에 9/18 기타법인 **1,188종목 실값**이 있었고
+        · 단타봇 flow CSV에도 **1,312종목** 있었다
+        · 끊긴 자리는 `extend_parquet_data`(**16:51~16:59**)가
+          `collect_investor_kis`(**17:11~17:30**)보다 **40분 먼저 도는 것**이었다.
+      즉 기타법인은 **매일 D+1로 채워지는 구조**다(B-88·B-102와 같은 순서 역전,
+      세 번째). 9/18이 비어 보인 것은 다음 실행(9/19)이 토요일이라 없었기 때문이다.
+
+    ★그래서 **마지막 거래일을 검사하면 매일 오탐**이 된다. 하루 앞을 본다.
+      오늘 내내 비판한 「그날 만든 코드가 그날 뚫린다」를 배포 전에 잡은 자리다.
+
+    검사 대상: D-1(직전 거래일)이 D-2 대비 급락했는가.
+    D(최신)는 지연이 정상이므로 **검사하지 않고 detail에만 적는다.**
+    """
+    days = _recent_trading_dates(3)
+    if len(days) < 3:
+        return Result(True, "", skipped=True, reason="거래일 3일치를 데이터에서 못 얻음")
+    d2, d1, d0 = days                      # D-2, D-1, D(최신)
+    nz1, rows1 = _nonzero_count("기타법인", d1)
+    nz2, _ = _nonzero_count("기타법인", d2)
+    nz0, _ = _nonzero_count("기타법인", d0)
+    tail = f" · 최신 {d0} {nz0}종목(D+1 지연이 정상)"
+    if rows1 == 0:
+        return Result(True, "", skipped=True, reason=f"{d1} 행이 없음")
+    if nz2 == 0:
+        return Result(True, f"{d1} {nz1}종목{tail}", skipped=True,
+                      reason=f"{d2} 기준값이 0이라 급락 판정 불가")
+    drop = 1.0 - (nz1 / nz2)
+    if nz1 == 0:
+        return Result(False, f"{d1} 기타법인 **전 종목 0** (D-2 {nz2}종목) — "
+                             f"D+1 지연으로도 설명되지 않는다{tail}")
     if drop >= 0.80:
-        return Result(False, f"{today} {nz_t}종목 (전일 {nz_p}) — 전일 대비 {drop*100:.0f}% 급락")
-    return Result(True, f"{today} {nz_t}종목 (전일 {nz_p}, 변화 {-drop*100:+.0f}%)")
+        return Result(False, f"{d1} {nz1}종목 (D-2 {nz2}) — {drop*100:.0f}% 급락{tail}")
+    return Result(True, f"{d1} {nz1}종목 (D-2 {nz2}, {-drop*100:+.0f}%){tail}")
 
 
 @claim("B-94", "BAT-D 완주 판정이 BAT-D 밖에서 돈다",
