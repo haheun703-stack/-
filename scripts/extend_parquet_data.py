@@ -82,6 +82,65 @@ def _etc_corp_start(end_date: str, days: int = ETC_CORP_FILL_DAYS) -> str:
     return (datetime.strptime(end_date, "%Y%m%d") - timedelta(days=days)).strftime("%Y%m%d")
 
 
+def _fetch_investor_db(ticker: str, investor: str,
+                       start_date: str | None) -> pd.Series | None:
+    """investor_daily.db에서 특정 주체 순매수 금액(원) 시계열.
+
+    ★9/19(B-46): 기타법인 전용이던 조회를 주체 인자로 일반화했다. 연기금도
+      같은 테이블·같은 형태로 들어오는데 **parquet 경로에만 배선되지 않아**
+      `pension_net_5d`가 400일 넘게 전량 0이었다(`indicators.py:831`이
+      `pension_net` 컬럼을 못 찾아 else 분기로 0을 넣는다).
+      3봇 분업상 **연기금은 우리 담당**인데, 남의 데이터(단타봇 외/기/개)는
+      매일 쓰면서 우리 몫은 비워 두고 있었다.
+    """
+    if not INVESTOR_DB_PATH.exists():
+        return None
+    try:
+        con = sqlite3.connect(f"file:{INVESTOR_DB_PATH}?mode=ro", uri=True, timeout=5)
+        try:
+            sql = ("select date, net_val from investor_daily "
+                   "where ticker=? and investor=?")
+            params: tuple = (ticker, investor)
+            if start_date:
+                sql += " and date>=?"
+                params = (ticker, investor, start_date)
+            rows = con.execute(sql, params).fetchall()
+        finally:
+            con.close()
+    except Exception as e:
+        logger.debug("[%s] %s DB 조회 실패: %s", ticker, investor, e)
+        return None
+    if not rows:
+        return None
+    return pd.Series({
+        pd.Timestamp(datetime.strptime(d, "%Y%m%d")): float(v)
+        for d, v in rows if v is not None
+    })
+
+
+def _fill_from_db(df: pd.DataFrame, ticker: str, investor: str, col: str,
+                  start_date: str | None) -> int:
+    """parquet `col`의 0/NaN 칸을 DB 실값으로 채운다. 채운 칸 수 반환.
+
+    0/NaN만 대상이라 기존 실값은 불변이고, 실제 순매수 0인 날은 DB도 0이라 같다.
+    ★컬럼이 없으면 만든다 — 연기금은 raw에 컬럼 자체가 없었다.
+    """
+    s = _fetch_investor_db(ticker, investor, start_date)
+    if s is None or s.empty:
+        return 0
+    if col not in df.columns:
+        df[col] = 0.0
+    common = df.index.intersection(s.index)
+    if len(common) == 0:
+        return 0
+    cur = df.loc[common, col]
+    tgt = s.loc[common]
+    idx = cur.index[((cur == 0) | cur.isna()) & (tgt != 0)]
+    if len(idx):
+        df.loc[idx, col] = tgt.loc[idx].astype(float)
+    return len(idx)
+
+
 def _fetch_etc_corp_db(ticker: str, start_date: str | None) -> pd.Series | None:
     """investor_daily.db에서 기타법인 순매수 금액(원) 시계열. start_date=None이면 전 구간(백필용)."""
     if not INVESTOR_DB_PATH.exists():
@@ -294,6 +353,9 @@ def _fill_supply_only(df: pd.DataFrame, parquet_path: Path,
     # B-39: 기타법인은 KIS 응답에 없어 위 경로로는 안 채워지고, 외/기/개가 채워진
     # 행은 zero_mask(4컬럼 합=0)에 다시 안 걸려 영구 0이 된다 — DB에서 별도 충전
     etc_filled = _fill_etc_corp(df, ticker, _etc_corp_start(end_date))
+    # ★B-46(9/19): 연기금도 KIS 종목별 응답에 없어 DB 경유가 유일한 경로다.
+    etc_filled += _fill_from_db(df, ticker, "연기금", "pension_net",
+                                _etc_corp_start(end_date))
 
     if filled > 0 or etc_filled > 0:
         df.to_parquet(parquet_path)
@@ -525,6 +587,9 @@ def extend_single(parquet_path: Path, end_date: str, *,
         etc_filled = 0
         if not skip_supply:
             etc_filled = _fill_etc_corp(combined, ticker, _etc_corp_start(end_date))
+            # ★B-46(9/19): 연기금 — 기타법인과 같은 D+1 충전 창을 쓴다.
+            etc_filled += _fill_from_db(combined, ticker, "연기금", "pension_net",
+                                        _etc_corp_start(end_date))
 
         combined.to_parquet(parquet_path)
 
