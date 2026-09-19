@@ -248,6 +248,32 @@ def _check_other_corp_acute() -> Result:
     return Result(True, f"{d1} {nz1}종목 (D-2 {nz2}, {-drop*100:+.0f}%){tail}")
 
 
+@claim("B-46", "우리 담당 연기금이 parquet에 채워진다",
+       resolved_on="2026-09-19")
+def _check_pension() -> Result:
+    """9/19 배선. **우리가 맡은 수급인데 400일 넘게 0이었다.**
+
+    3봇 분업상 금투·연기금은 퀀트봇 몫인데, `investor_daily.db`에 매일
+    400~575종목 실값이 들어오고 `daily_pick_v2`는 「연기금매집」 태그로 쓰는데도
+    parquet 경로에만 `pension_net` 컬럼이 없어 `indicators.py:837`이 0을 넣었다.
+    남의 데이터(단타봇 외/기/개)는 매일 쓰면서 우리 몫은 비워 둔 상태였다.
+
+    ★D+1 지연이 정상이므로(B-104와 같은 충전 창) **D-1을 본다.**
+    """
+    days = _recent_trading_dates(2)
+    if len(days) < 2:
+        return Result(True, "", skipped=True, reason="거래일 2일치를 못 얻음")
+    d1 = days[0]
+    nz, rows = _nonzero_count("pension_net", d1)
+    if rows == 0:
+        return Result(False, f"{d1} — raw/processed에 `pension_net` 컬럼이 없다 "
+                             f"(배선 후 `extend_parquet_data`가 아직 안 돌았거나 실패)")
+    if nz == 0:
+        return Result(False, f"{d1} 연기금 전 종목 0 / 행보유 {rows} — "
+                             f"컬럼은 생겼으나 채워지지 않는다")
+    return Result(True, f"{d1} 비영 {nz}/{rows}종목")
+
+
 @claim("B-94", "BAT-D 완주 판정이 BAT-D 밖에서 돈다",
        resolved_on="2026-09-07", missed_days=0)
 def _check_b94_outside(sh: Path | None = None) -> Result:
