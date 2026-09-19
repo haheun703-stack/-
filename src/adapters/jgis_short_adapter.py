@@ -52,6 +52,29 @@ def _safe_float(val, default: float = 0.0) -> float:
         return default
 
 
+
+def _opt_int(val):
+    """결측을 **0이 아니라 None**으로 남긴다 — 미수집과 진짜 0을 구분한다."""
+    if val in (None, "", "nan", "NaN"):
+        return None
+    try:
+        v = float(val)
+        return None if v != v else int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _opt_float(val):
+    """결측을 **0이 아니라 None**으로 남긴다."""
+    if val in (None, "", "nan", "NaN"):
+        return None
+    try:
+        v = float(val)
+        return None if v != v else v
+    except (TypeError, ValueError):
+        return None
+
+
 def _safe_int(val, default: int = 0) -> int:
     """정수 안전 변환."""
     try:
@@ -120,6 +143,15 @@ class JgisShortAdapter:
                 "loan_new_qty": _safe_int(row.get("loan_new_qty")),
                 "loan_repay_qty": _safe_int(row.get("loan_repay_qty")),
                 "loan_balance_qty": _safe_int(row.get("loan_balance_qty")),
+                # ★9/19(B-105): 9/7에 `fill_short_from_jgis`의 매핑 튜플에만
+                #   `short_balance_qty`를 추가하고 **이 화이트리스트는 고치지 않았다.**
+                #   그래서 원천 CSV에 값이 있어도 여기서 떨어져 나갔고, 소비 측
+                #   `if field not in src.columns: continue`가 **경고 없이 삼켜**
+                #   12거래일 동안 한 셀도 채워지지 않았다. 「배선 완료」 보고의 실체.
+                #   ★`_safe_int`(결측→0)를 쓰지 않는다 — 9/15 이후 원천이 빈 칸인데
+                #   0으로 만들면 «미수집을 0으로 승격»이 된다(8/21 계열 결함).
+                "short_balance_qty": _opt_int(row.get("short_balance_qty")),
+                "short_balance_ratio": _opt_float(row.get("short_balance_ratio")),
                 "exec_strength": _safe_float(row.get("exec_strength")),
                 "foreign_net_amt": _safe_float(row.get("foreign_net_amt")),
                 "inst_net_amt": _safe_float(row.get("inst_net_amt")),

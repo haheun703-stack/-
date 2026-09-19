@@ -73,6 +73,76 @@ UNMAPPABLE: dict[str, str] = {
 }
 
 
+
+# ──────────────────────────────────────────────
+# 정의 검산 게이트 (B-105, 2026-09-19 신설)
+# ──────────────────────────────────────────────
+#
+# 왜 필요한가
+#   9/7에 정보봇이 `short_balance_qty`를 추가해 주자 이름만 보고 `short_balance`에
+#   배선했다. 9/19 실측에서 그 값이 **전일 `short_selling_qty`와 완전일치**함이
+#   드러났다 — 표본 300종목 중 값이 있는 48종목의 **43개(89.6%)**, 005930은
+#   9/8~9/14 7거래일 전부. 이름은 「잔고」인데 내용은 **한 칸 밀린 거래량**이다.
+#
+#   배선이 동작하지 않아 오염은 없었지만, 동작했다면 「잔고」라는 이름으로 거래량이
+#   들어가 `short_balance_chg_5d`·`short_cover_signal`을 **정반대로** 흔들었을 것이다.
+#   8/21 `short_spike`가 정확히 그 형태였다 — **0으로 죽은 컬럼보다 왜곡된 컬럼이
+#   훨씬 찾기 어렵다**(살아 있는 것처럼 보이기 때문이다).
+#
+# 규칙
+#   **남이 준 컬럼은 이름이 아니라 분포로 받는다.** 채우기 **전에** 검산하고,
+#   실패하면 그 컬럼만 건너뛴다(다른 컬럼은 정상 진행한다).
+#
+#   ※ 9/7에 나는 정보봇 `nationality_flow`를 «필드명이 `nation`이니 국적»이라
+#     단정했다가 정정받았다. 같은 오류를 **주는 쪽·받는 쪽 양쪽에서** 했다.
+
+#: 컬럼별 정의 검산. (검사명, 판정함수) — True면 위반.
+#  판정함수는 (src_df) -> bool.
+def _violates_shift(src: pd.DataFrame, field: str, other: str,
+                    min_pairs: int = 3, thresh: float = 0.7) -> bool:
+    """field[t] 가 other[t-1] 과 사실상 같은가 — 「한 칸 밀린 다른 지표」 탐지."""
+    if field not in src.columns or other not in src.columns:
+        return False
+    a = pd.to_numeric(src[field], errors="coerce").to_numpy()
+    b = pd.to_numeric(src[other], errors="coerce").to_numpy()
+    pairs = [(a[i], b[i - 1]) for i in range(1, len(a))
+             if pd.notna(a[i]) and a[i] > 0 and pd.notna(b[i - 1])]
+    if len(pairs) < min_pairs:
+        return False                      # 표본 부족 — 판정하지 않는다
+    same = sum(1 for x, y in pairs if abs(x - y) < 1)
+    return (same / len(pairs)) >= thresh
+
+
+def _violates_constant(src: pd.DataFrame, field: str, min_n: int = 5) -> bool:
+    """전 기간 한 값으로 고정 — 갱신이 멈춘 컬럼."""
+    if field not in src.columns:
+        return False
+    v = pd.to_numeric(src[field], errors="coerce").dropna()
+    v = v[v != 0]
+    return len(v) >= min_n and v.nunique() == 1
+
+
+#: {대상 parquet 컬럼: [(검사명, 검사함수)]}
+DEFINITION_GATES: dict[str, list] = {
+    "short_balance": [
+        ("전일 공매도량과 shift 일치",
+         lambda s: _violates_shift(s, "short_balance_qty", "short_selling_qty")),
+        ("전 기간 상수", lambda s: _violates_constant(s, "short_balance_qty")),
+    ],
+}
+
+
+def check_definition(col: str, src: pd.DataFrame) -> str | None:
+    """위반 시 사유 문자열, 통과 시 None."""
+    for name, fn in DEFINITION_GATES.get(col, []):
+        try:
+            if fn(src):
+                return name
+        except Exception:                 # 검산 자체의 고장을 통과로 위장하지 않는다
+            return f"{name}(검산 실패)"
+    return None
+
+
 def fill_one(ticker: str, rows: list[dict], dry: bool) -> dict:
     """단일 종목 raw parquet에 공매도·대차 채움. 0은 채우지 않는다."""
     out = {"ticker": ticker, "status": "skip", "short": 0, "lend": 0,
@@ -108,6 +178,15 @@ def fill_one(ticker: str, rows: list[dict], dry: bool) -> dict:
                        #   아래 존재 검사에서 걸러진다 — 없는 날에도 안전하다.
                        ("short_balance", "short_balance_qty")):
         if field not in src.columns:
+            # ★B-105: 여기서 조용히 넘어간 것이 12거래일 무동작의 원인이었다.
+            #   매핑에 적어 둔 필드가 원천에 없으면 «배선했다»는 선언이 사실과
+            #   어긋난 상태다. 침묵하지 않고 남긴다.
+            out.setdefault("missing_field", []).append(f"{col}←{field}")
+            continue
+        # ★B-105 정의 검산 — 이름이 맞아도 내용이 다르면 채우지 않는다.
+        bad = check_definition(col, src)
+        if bad:
+            out.setdefault("gated", []).append(f"{col}:{bad}")
             continue
         if col not in df.columns:
             df[col] = pd.NA
@@ -174,6 +253,8 @@ def main() -> int:
     agg = {"filled": 0, "nothing_to_fill": 0, "no_overlap": 0,
            "no_parquet": 0, "no_src": 0, "err": 0}
     tot = {"short": 0, "lend": 0, "ratio": 0, "sbal": 0}
+    gated: dict[str, int] = {}          # B-105 정의 검산에 걸린 컬럼별 종목 수
+    missing: dict[str, int] = {}        # 매핑에 있으나 원천에 없는 필드
     for i, t in enumerate(targets, 1):
         rows = adapter.load_ticker_csv(t, lookback_days=args.lookback)
         if not rows:
@@ -184,6 +265,10 @@ def main() -> int:
         agg[st] = agg.get(st, 0) + 1 if st in agg else agg.setdefault("err", 0) + 1
         for k in tot:
             tot[k] += r[k]
+        for g in r.get("gated", []):
+            gated[g] = gated.get(g, 0) + 1
+        for m in r.get("missing_field", []):
+            missing[m] = missing.get(m, 0) + 1
         if i % 200 == 0:
             logger.info("  진행 %d/%d — 채움 %d종목", i, len(targets), agg["filled"])
 
@@ -191,6 +276,15 @@ def main() -> int:
     logger.info("채운 셀 — short_volume %d · lending_balance %d · short_ratio %d"
                 " · short_balance %d",
                 tot["short"], tot["lend"], tot["ratio"], tot.get("sbal", 0))
+    if missing:
+        for m, n in sorted(missing.items(), key=lambda x: -x[1]):
+            logger.warning("⚠️ 매핑 필드가 원천에 없다 — %s (%d종목). "
+                           "「배선 완료」 선언과 실제가 어긋난 상태다.", m, n)
+    if gated:
+        # ★스킵을 조용히 넘기지 않는다 — 「성공 위장」 차단(단타봇 9/7 설계).
+        for g, n in sorted(gated.items(), key=lambda x: -x[1]):
+            logger.warning("🚧 정의 검산 차단 — %s (%d종목). 원천 정의가 확정될 "
+                           "때까지 채우지 않는다.", g, n)
     if args.dry_run:
         logger.info("DRY-RUN이라 저장하지 않았다. 실제 반영은 --dry-run 없이 실행.")
     else:
